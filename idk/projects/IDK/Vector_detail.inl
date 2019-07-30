@@ -207,7 +207,7 @@ namespace idk::detail
 	template<typename T, unsigned D, unsigned ... Indexes>
 	auto VectorToTuple(const Vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>)
 	{
-		return std::make_tuple(vec[Indexes]...);
+		return std::forward_as_tuple(vec[Indexes]...);
 	}
 
 	template<typename T>
@@ -220,16 +220,16 @@ namespace idk::detail
 	auto VectorsToTuple(const Vector<T, FrontD>& front_vec, const Tail& ... tail)
 	{
 		return std::tuple_cat(
-			VectorToTuple(front_vec, std::make_index_sequence<FrontD>{}),
+			VectorToTuple<T>(front_vec, std::make_index_sequence<FrontD>{}),
 			VectorsToTuple<T>(tail...)
 		);
 	}
 
-	template<typename T, typename U, typename ... Tail>
-	auto VectorsToTuple(const U& front_vec, const Tail& ... tail)
+	template<typename T, typename ... Tail>
+	auto VectorsToTuple(const T& front_vec, const Tail& ... tail)
 	{
 		return std::tuple_cat(
-			VectorToTuple(Vector<T, 1>{front_vec}, std::make_index_sequence<1>{}),
+			std::tuple<T>(front_vec),
 			VectorsToTuple<T>(tail...)
 		);
 	}

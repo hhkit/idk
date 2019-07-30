@@ -1,6 +1,5 @@
 #pragma once
 #include <utility>
-#include <compare>
 
 #include "Vector_detail.h"
 #include "Vector_Dim.h"
@@ -55,6 +54,10 @@ namespace idk
 		T&       operator[](unsigned i);
 		const T& operator[](unsigned i) const;
 	};
+
+	extern template struct Vector<float, 2>;
+	extern template struct Vector<float, 3>;
+	extern template struct Vector<float, 4>;
 }
 
 #include "Vector.inl"

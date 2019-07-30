@@ -55,5 +55,8 @@
     <ClCompile Include="test.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
