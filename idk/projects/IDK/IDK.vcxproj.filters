@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="math">
+      <UniqueIdentifier>{53e7f8f8-6df9-4b02-a9e3-304987e31f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx">
+      <UniqueIdentifier>{80273e76-a09c-4086-9f9f-99345a0eed46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="phys">
+      <UniqueIdentifier>{34a13a27-ba70-439e-aaf7-b6bf4f887d62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{3e80c68e-7de8-4d50-b93b-73b2f086139f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="event">
+      <UniqueIdentifier>{6dce53f3-2c69-45f3-bd07-fd318b7b7fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\detail">
+      <UniqueIdentifier>{5af6f78e-707b-4276-a9a0-e716d6f48fd9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Vector.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="idk.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector_Dim.h">
+      <Filter>math\detail</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Vector_detail.h">
+      <Filter>math\detail</Filter>
+    </None>
+    <None Include="Vector.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="Vector_detail.inl">
+      <Filter>math\detail</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
