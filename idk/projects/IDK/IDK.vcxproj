@@ -39,6 +39,10 @@
     <None Include="math\vector.inl" />
     <None Include="math\vector_detail.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="_natvis\matrix.natvis" />
+    <Natvis Include="_natvis\vector.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}</ProjectGuid>

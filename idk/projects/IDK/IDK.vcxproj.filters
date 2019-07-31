@@ -16,11 +16,15 @@
     <Filter Include="event">
       <UniqueIdentifier>{6dce53f3-2c69-45f3-bd07-fd318b7b7fa4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="utils">
-      <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="math\detail">
       <UniqueIdentifier>{5af6f78e-707b-4276-a9a0-e716d6f48fd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_natvis">
+      <UniqueIdentifier>{96518433-03f0-4cae-b02e-a7ee5d114378}</UniqueIdentifier>
+      <Extensions>.natvis</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -64,5 +68,13 @@
     <None Include="math\vector_detail.inl">
       <Filter>math\detail</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="_natvis\matrix.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\vector.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>
