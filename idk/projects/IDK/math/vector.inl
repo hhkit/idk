@@ -2,6 +2,7 @@
 #include <utility>
 #include <numeric>
 #include <tuple>
+
 #include "Vector_detail.h"
 #include "Vector.h"
 

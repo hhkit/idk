@@ -2,8 +2,8 @@
 #include <array>
 #include <unordered_map>
 
-#include "Vector.h"
-#include "Matrix.h"
+#include "math/vector.h"
+#include "math/matrix.h"
 
 
 namespace idk

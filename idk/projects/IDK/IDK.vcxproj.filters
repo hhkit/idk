@@ -24,48 +24,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vector.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="idk.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="Vector_Dim.h">
-      <Filter>math\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix.h">
+    <ClInclude Include="math\matrix.h">
       <Filter>math</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Vector_detail.h">
-      <Filter>math\detail</Filter>
-    </None>
-    <None Include="Vector.inl">
+    <ClInclude Include="math\vector.h">
       <Filter>math</Filter>
-    </None>
-    <None Include="Vector_detail.inl">
+    </ClInclude>
+    <ClInclude Include="math\vector_dim.h">
       <Filter>math\detail</Filter>
-    </None>
-    <None Include="Matrix.inl">
-      <Filter>math</Filter>
-    </None>
+    </ClInclude>
+    <ClInclude Include="math\vector_detail.h">
+      <Filter>math\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="test.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector.cpp">
+    <ClCompile Include="math\matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix.cpp">
+    <ClCompile Include="math\vector.cpp">
       <Filter>math</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="math\matrix.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\vector.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\vector_detail.inl">
+      <Filter>math\detail</Filter>
+    </None>
   </ItemGroup>
 </Project>
