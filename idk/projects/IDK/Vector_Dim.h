@@ -1,6 +1,6 @@
 #pragma once
 
-template<typename T, unsigned D> struct Vector;
+template<typename T, unsigned D> struct vector;
 
 namespace idk
 {
@@ -13,7 +13,7 @@ namespace idk
 		static constexpr unsigned Dim_v = Dim<T>::value;
 
 		template <typename T, unsigned D>
-		struct Dim < Vector<T, D>>
+		struct Dim < vector<T, D>>
 		{
 			static constexpr unsigned value = Dim_v<T> * D;
 		};

@@ -1,14 +1,14 @@
 #pragma once
 namespace idk
 {
-	template<typename T, unsigned D> struct Vector;
+	template<typename T, unsigned D> struct vector;
 
 	namespace detail
 	{
 		template<typename T, unsigned D>
 		struct Vector_base
 		{
-			T arr[D];
+			T data[D];
 			Vector_base();
 
 			// iterator
@@ -59,7 +59,7 @@ namespace idk
 			Vector_base();
 			Vector_base(T x, T y, T z);
 
-			Vector<T, 3> cross(const Vector_base&) const;
+			vector<T, 3> cross(const Vector_base&) const;
 
 			// iteration
 			T* begin();
@@ -87,13 +87,13 @@ namespace idk
 		};
 
 		template<typename T, unsigned D, unsigned ... Indexes>
-		auto VectorToTuple(const Vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>);
+		auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>);
 
 		template<typename T>
 		auto VectorsToTuple();
 
 		template<typename T, unsigned FrontD, typename ... Tail>
-		auto VectorsToTuple(const Vector<T, FrontD>& front_vec, const Tail& ... tail);
+		auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail);
 
 		template<typename T, typename ... Tail>
 		auto VectorsToTuple(const T& front_vec, const Tail& ... tail);

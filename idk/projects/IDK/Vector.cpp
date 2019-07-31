@@ -3,7 +3,7 @@
 
 namespace idk
 {
-	template struct Vector<float, 2>;
-	template struct Vector<float, 3>;
-	template struct Vector<float, 4>;
+	template struct vector<float, 2>;
+	template struct vector<float, 3>;
+	template struct vector<float, 4>;
 }

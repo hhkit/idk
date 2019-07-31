@@ -3,8 +3,8 @@
 
 namespace idk
 {
-	using Real = float;
-	using Vec2 = Vector<Real, 2>;
-	using Vec3 = Vector<Real, 3>;
-	using Vec4 = Vector<Real, 4>;
+	using real = float;
+	using vec2 = vector<real, 2>;
+	using vec3 = vector<real, 3>;
+	using vec4 = vector<real, 4>;
 }

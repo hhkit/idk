@@ -9,25 +9,25 @@ namespace idk::detail
 	template<typename T, unsigned D>
 	T* Vector_base<T, D>::begin()
 	{
-		return std::begin(arr);
+		return std::begin(data);
 	}
 
 	template<typename T, unsigned D>
 	const T* Vector_base<T, D>::begin() const
 	{
-		return std::begin(arr);
+		return std::begin(data);
 	}
 
 	template<typename T, unsigned D>
 	T* Vector_base<T, D>::end()
 	{
-		return std::end(arr);
+		return std::end(data);
 	}
 
 	template<typename T, unsigned D>
 	const T* Vector_base<T, D>::end() const
 	{
-		return std::end(arr);
+		return std::end(data);
 	}
 
 	template<typename T>
@@ -181,9 +181,9 @@ namespace idk::detail
 	}
 
 	template<typename T>
-	Vector<T, 3> Vector_base<T, 3>::cross(const Vector_base & rhs) const
+	vector<T, 3> Vector_base<T, 3>::cross(const Vector_base & rhs) const
 	{
-		return Vector<T, 3>
+		return vector<T, 3>
 		{
 			y * rhs.z - z * rhs.y,
 			z * rhs.x - x * rhs.z,
@@ -205,7 +205,7 @@ namespace idk::detail
 	}
 
 	template<typename T, unsigned D, unsigned ... Indexes>
-	auto VectorToTuple(const Vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>)
+	auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>)
 	{
 		return std::forward_as_tuple(vec[Indexes]...);
 	}
@@ -217,7 +217,7 @@ namespace idk::detail
 	}
 
 	template<typename T, unsigned FrontD, typename ... Tail>
-	auto VectorsToTuple(const Vector<T, FrontD>& front_vec, const Tail& ... tail)
+	auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail)
 	{
 		return std::tuple_cat(
 			VectorToTuple<T>(front_vec, std::make_index_sequence<FrontD>{}),
@@ -237,7 +237,7 @@ namespace idk::detail
 	template <typename T, typename Tuple, unsigned ... Indexes>
 	auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>)
 	{
-		return Vector<T, sizeof...(Indexes)>{std::get<Indexes>(tup)...};
+		return vector<T, sizeof...(Indexes)>{std::get<Indexes>(tup)...};
 	}
 
 	template<typename T, typename ... Args>
