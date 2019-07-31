@@ -2,9 +2,10 @@
 #include <array>
 #include <unordered_map>
 
+#include "math/constants.h"
+#include "math/angle.h"
 #include "math/vector.h"
 #include "math/matrix.h"
-
 
 namespace idk
 {
@@ -16,6 +17,9 @@ namespace idk
 	using mat2 = matrix<real, 2, 2>;
 	using mat3 = matrix<real, 3, 3>;
 	using mat4 = matrix<real, 4, 4>;
+
+	using rad = radian<real>;
+	using deg = degree<real>;
 
 	template<typename T, size_t N>
 	using array = std::array<T, N>;

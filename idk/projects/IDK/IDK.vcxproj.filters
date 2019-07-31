@@ -46,6 +46,12 @@
     <ClInclude Include="math\vector_detail.h">
       <Filter>math\detail</Filter>
     </ClInclude>
+    <ClInclude Include="math\angle.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\constants.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -67,6 +73,12 @@
     </None>
     <None Include="math\vector_detail.inl">
       <Filter>math\detail</Filter>
+    </None>
+    <None Include="math\angle.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\constants.inl">
+      <Filter>math</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
