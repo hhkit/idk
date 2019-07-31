@@ -5,6 +5,9 @@
     <ClCompile Include="TestVector.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="TestMatrix.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

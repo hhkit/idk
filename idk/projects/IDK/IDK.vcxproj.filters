@@ -36,6 +36,9 @@
     <ClInclude Include="Vector_Dim.h">
       <Filter>math\detail</Filter>
     </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Vector_detail.h">
@@ -47,6 +50,9 @@
     <None Include="Vector_detail.inl">
       <Filter>math\detail</Filter>
     </None>
+    <None Include="Matrix.inl">
+      <Filter>math</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -56,6 +62,9 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="Vector.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
