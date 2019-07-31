@@ -7,18 +7,18 @@
 namespace idk
 {
 	template<typename T, unsigned D>
-	struct vector : detail::Vector_base<T, D>
+	struct vector : detail::vector_base<T, D>
 	{
-		using Base = typename detail::Vector_base<T, D>;
+		using Base = typename detail::vector_base<T, D>;
 		using Base::Base;
 		using Base::begin;
 		using Base::end;
 
 		template<typename ... Args,
-			typename = std::enable_if_t<(detail::Dim_v<Args> + ...) == 4>,
+			typename = std::enable_if_t<(detail::Dim_v<Args> + ...) == D>,
 			typename = std::enable_if_t<(!std::is_same_v<vector, Args> && ...)>
 		>
-		vector(Args ...);
+		constexpr vector(Args ...);
 
 		// vector functions
 		T        magnitude_sq() const;
@@ -52,6 +52,7 @@ namespace idk
 		// accessors
 		T&       operator[](unsigned i);
 		const T& operator[](unsigned i) const;
+
 	};
 
 	extern template struct vector<float, 2>;

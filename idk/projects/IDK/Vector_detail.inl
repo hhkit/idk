@@ -7,153 +7,153 @@
 namespace idk::detail
 {
 	template<typename T, unsigned D>
-	T* Vector_base<T, D>::begin()
+	T* vector_base<T, D>::begin()
 	{
 		return std::begin(data);
 	}
 
 	template<typename T, unsigned D>
-	const T* Vector_base<T, D>::begin() const
+	const T* vector_base<T, D>::begin() const
 	{
 		return std::begin(data);
 	}
 
 	template<typename T, unsigned D>
-	T* Vector_base<T, D>::end()
+	T* vector_base<T, D>::end()
 	{
 		return std::end(data);
 	}
 
 	template<typename T, unsigned D>
-	const T* Vector_base<T, D>::end() const
+	const T* vector_base<T, D>::end() const
 	{
 		return std::end(data);
 	}
 
 	template<typename T>
-	T* Vector_base<T, 1>::begin()
+	T* vector_base<T, 1>::begin()
 	{
 		return &x;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 1>::begin() const
+	const T* vector_base<T, 1>::begin() const
 	{
 		return &x;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 1>::end()
+	T* vector_base<T, 1>::end()
 	{
 		return &x + 1;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 1>::end() const
+	const T* vector_base<T, 1>::end() const
 	{
 		return &x + 1;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 2>::begin()
+	T* vector_base<T, 2>::begin()
 	{
 		return &x;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 2>::begin() const
+	const T* vector_base<T, 2>::begin() const
 	{
 		return &x;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 2>::end()
+	T* vector_base<T, 2>::end()
 	{
 		return &x + 2;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 2>::end() const
+	const T* vector_base<T, 2>::end() const
 	{
 		return &x + 2;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 3>::begin()
+	T* vector_base<T, 3>::begin()
 	{
 		return &x;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 3>::begin() const
+	const T* vector_base<T, 3>::begin() const
 	{
 		return &x;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 3>::end()
+	T* vector_base<T, 3>::end()
 	{
 		return &x + 3;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 3>::end() const
+	const T* vector_base<T, 3>::end() const
 	{
 		return &x + 3;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 4>::begin()
+	T* vector_base<T, 4>::begin()
 	{
 		return &x;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 4>::begin() const
+	const T* vector_base<T, 4>::begin() const
 	{
 		return &x;
 	}
 
 	template<typename T>
-	T* Vector_base<T, 4>::end()
+	T* vector_base<T, 4>::end()
 	{
 		return &x + 4;
 	}
 
 	template<typename T>
-	const T* Vector_base<T, 4>::end() const
+	const T* vector_base<T, 4>::end() const
 	{
 		return &x + 4;
 	}
 
 
 	template<typename T>
-	Vector_base<T, 1>::Vector_base()
+	constexpr vector_base<T, 1>::vector_base()
 		: x{}
 	{
 	}
 
 	template<typename T>
-	Vector_base<T, 1>::Vector_base(T x)
+	constexpr vector_base<T, 1>::vector_base(T x)
 		: x{ x }
 	{
 	}
 
 	template<typename T>
-	Vector_base<T, 2>::Vector_base()
+	constexpr vector_base<T, 2>::vector_base()
 		: x{}, y{}
 	{
 	}
 
 
 	template<typename T>
-	Vector_base<T, 2>::Vector_base(T x, T y)
+	constexpr vector_base<T, 2>::vector_base(T x, T y)
 		: x{ x }, y{ y }
 	{
 	}
 
 	template<typename T>
-	T Vector_base<T, 2>::angle() const
+	T vector_base<T, 2>::angle() const
 	{
 		if constexpr (std::is_same_v<T, float>)
 			return atan2f(y, x);
@@ -162,26 +162,26 @@ namespace idk::detail
 	}
 
 	template<typename T>
-	T Vector_base<T, 2>::cross(const Vector_base& rhs) const
+	T vector_base<T, 2>::cross(const vector_base& rhs) const
 	{
 		return x * rhs.y - y * rhs.x;
 	}
 
 	template<typename T>
-	Vector_base<T, 3>::Vector_base()
+	constexpr vector_base<T, 3>::vector_base()
 		: x{}, y{}, z{}
 	{
 	}
 
 
 	template<typename T>
-	Vector_base<T, 3>::Vector_base(T x, T y, T z)
+	constexpr vector_base<T, 3>::vector_base(T x, T y, T z)
 		: x{ x }, y{ y }, z{ z }
 	{
 	}
 
 	template<typename T>
-	vector<T, 3> Vector_base<T, 3>::cross(const Vector_base & rhs) const
+	vector<T, 3> vector_base<T, 3>::cross(const vector_base & rhs) const
 	{
 		return vector<T, 3>
 		{
@@ -192,32 +192,32 @@ namespace idk::detail
 	}
 
 	template<typename T>
-	Vector_base<T, 4>::Vector_base()
+	constexpr vector_base<T, 4>::vector_base()
 		: x{}, y{}, z{}, w{}
 	{
 	}
 
 
 	template<typename T>
-	Vector_base<T, 4>::Vector_base(T x, T y, T z, T w)
+	constexpr vector_base<T, 4>::vector_base(T x, T y, T z, T w)
 		: x{ x }, y{ y }, z{ z }, w{ w }
 	{
 	}
 
 	template<typename T, unsigned D, unsigned ... Indexes>
-	auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>)
+	constexpr auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>)
 	{
 		return std::forward_as_tuple(vec[Indexes]...);
 	}
 
 	template<typename T>
-	auto VectorsToTuple()
+	constexpr auto VectorsToTuple()
 	{
 		return std::tuple<>{};
 	}
 
 	template<typename T, unsigned FrontD, typename ... Tail>
-	auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail)
+	constexpr auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail)
 	{
 		return std::tuple_cat(
 			VectorToTuple<T>(front_vec, std::make_index_sequence<FrontD>{}),
@@ -226,7 +226,7 @@ namespace idk::detail
 	}
 
 	template<typename T, typename ... Tail>
-	auto VectorsToTuple(const T& front_vec, const Tail& ... tail)
+	constexpr auto VectorsToTuple(const T& front_vec, const Tail& ... tail)
 	{
 		return std::tuple_cat(
 			std::tuple<T>(front_vec),
@@ -235,13 +235,13 @@ namespace idk::detail
 	}
 
 	template <typename T, typename Tuple, unsigned ... Indexes>
-	auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>)
+	constexpr auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>)
 	{
 		return vector<T, sizeof...(Indexes)>{std::get<Indexes>(tup)...};
 	}
 
 	template<typename T, typename ... Args>
-	auto VectorConcat(const Args& ... vecs)
+	constexpr auto VectorConcat(const Args& ... vecs)
 	{
 		auto arg_tup = detail::VectorsToTuple<T>(vecs...);
 		auto index = std::make_index_sequence <std::tuple_size_v<decltype(arg_tup)>>{};

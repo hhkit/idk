@@ -9,7 +9,7 @@ namespace idk
 {
 	template<typename T, unsigned D>
 	template<typename ...Args, typename, typename>
-	inline vector<T, D>::vector(Args ... args)
+	constexpr vector<T, D>::vector(Args ... args)
 		: vector{ detail::VectorConcat<T>(args...) }
 	{
 	}
@@ -200,5 +200,4 @@ namespace idk
 	{
 		return data()[i];
 	}
-
 }

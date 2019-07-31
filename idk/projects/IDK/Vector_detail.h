@@ -6,10 +6,10 @@ namespace idk
 	namespace detail
 	{
 		template<typename T, unsigned D>
-		struct Vector_base
+		struct vector_base
 		{
 			T data[D];
-			Vector_base();
+			constexpr vector_base();
 
 			// iterator
 			T* begin();
@@ -19,11 +19,11 @@ namespace idk
 		};
 
 		template<typename T>
-		struct Vector_base<T, 1>
+		struct vector_base<T, 1>
 		{
 			T x;
-			Vector_base();
-			explicit Vector_base(T x);
+			constexpr vector_base();
+			constexpr explicit vector_base(T x);
 
 			// iteration
 			T* begin();
@@ -33,15 +33,15 @@ namespace idk
 		};
 
 		template<typename T>
-		struct Vector_base<T, 2>
+		struct vector_base<T, 2>
 		{
 			T x;
 			T y;
-			Vector_base();
-			Vector_base(T x, T y);
+			constexpr vector_base();
+			constexpr vector_base(T x, T y);
 
 			T angle() const;
-			T cross(const Vector_base&) const;
+			T cross(const vector_base&) const;
 
 			// iteration
 			T* begin();
@@ -51,15 +51,15 @@ namespace idk
 		};
 
 		template<typename T>
-		struct Vector_base<T, 3>
+		struct vector_base<T, 3>
 		{
 			T x;
 			T y;
 			T z;
-			Vector_base();
-			Vector_base(T x, T y, T z);
+			constexpr vector_base();
+			constexpr vector_base(T x, T y, T z);
 
-			vector<T, 3> cross(const Vector_base&) const;
+			vector<T, 3> cross(const vector_base&) const;
 
 			// iteration
 			T* begin();
@@ -69,15 +69,15 @@ namespace idk
 		};
 
 		template<typename T>
-		struct Vector_base<T, 4>
+		struct vector_base<T, 4>
 		{
 			T x;
 			T y;
 			T z;
 			T w;
 
-			Vector_base();
-			Vector_base(T x, T y, T z, T w);
+			constexpr vector_base();
+			constexpr vector_base(T x, T y, T z, T w);
 
 			// iteration
 			T* begin();
@@ -87,22 +87,22 @@ namespace idk
 		};
 
 		template<typename T, unsigned D, unsigned ... Indexes>
-		auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>);
+		constexpr auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>);
 
 		template<typename T>
-		auto VectorsToTuple();
+		constexpr auto VectorsToTuple();
 
 		template<typename T, unsigned FrontD, typename ... Tail>
-		auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail);
+		constexpr auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail);
 
 		template<typename T, typename ... Tail>
-		auto VectorsToTuple(const T& front_vec, const Tail& ... tail);
+		constexpr auto VectorsToTuple(const T& front_vec, const Tail& ... tail);
 
 		template <typename T, typename Tuple, unsigned ... Indexes>
-		auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>);
+		constexpr auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>);
 
 		template<typename T, typename ... Args>
-		auto VectorConcat(const Args& ... vecs);
+		constexpr auto VectorConcat(const Args& ... vecs);
 	}
 }
 
