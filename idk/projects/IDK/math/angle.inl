@@ -12,14 +12,14 @@ namespace idk
 	}
 	template<typename T>
 	inline radian<T>::radian(const degree<T>& rhs)
-		: angle{ rhs.angle / 180 * pi()}
+		: angle{ rhs.angle / static_cast<T>(180) * pi()}
 	{
 	}
 
 	template<typename T>
 	radian<T>::operator degree<T>() const
 	{
-		return angle / pi() * 180;
+		return angle / pi() * static_cast<T>(180);
 	}
 
 	template<typename T>
@@ -28,12 +28,12 @@ namespace idk
 	}
 	template<typename T>
 	inline degree<T>::degree(const radian<T>& rhs)
-		: angle{ rhs.angle / pi() * 180 }
+		: angle{ rhs.angle / pi() * static_cast<T>(180) }
 	{
 	}
 	template<typename T>
 	inline degree<T>::operator radian<T>() const
 	{
-		return angle * pi() / 180;
+		return angle * pi() / static_cast<T>(180);
 	}
 }
