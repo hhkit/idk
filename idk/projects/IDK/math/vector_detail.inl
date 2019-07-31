@@ -1,7 +1,8 @@
 #include <cmath>
 #include <tuple>
 
-#include "Vector_detail.h"
+#include "vector_detail.h"
+#include "angle.h"
 #pragma once
 
 namespace idk::detail
@@ -153,12 +154,12 @@ namespace idk::detail
 	}
 
 	template<typename T>
-	T vector_base<T, 2>::angle() const
+	radian<T> vector_base<T, 2>::angle() const
 	{
 		if constexpr (std::is_same_v<T, float>)
-			return atan2f(y, x);
+			return radian<T>{atan2f(y, x)};
 		else
-			return atan2(y, x);
+			return radian<T>{atan2(y, x)};
 	}
 
 	template<typename T>

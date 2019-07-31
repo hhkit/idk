@@ -1,4 +1,6 @@
 #pragma once
+#include "angle.h"
+
 namespace idk
 {
 	template<typename T, unsigned D> struct vector;
@@ -40,7 +42,7 @@ namespace idk
 			constexpr vector_base();
 			constexpr vector_base(T x, T y);
 
-			T angle() const;
+			radian<T> angle() const;
 			T cross(const vector_base&) const;
 
 			// iteration
