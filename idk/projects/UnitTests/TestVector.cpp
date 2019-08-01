@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "../IDK/idk.h"
+#include <random>
 
 TEST(Math, VectorConstruction) {
 	EXPECT_EQ(idk::vec2(), idk::vec2( 0.f, 0.f )) << "Default constructor should initialize to zero.";
@@ -19,11 +20,28 @@ TEST(Math, VectorAccess) {
 	EXPECT_TRUE((idk::vec2{ 1.f, 2.f }.y == idk::vec2{ 4.f, 2.f } [1] ));
 }
 
-TEST(Math, VectorNormalize)
+TEST(Math, VectorMagnitudeNormalize)
 {
 	EXPECT_TRUE(
 		(idk::vec2{ 3.f,4.f }.magnitude() == 5.f)
 	) << "Test for pythagorean triplet failed";
+
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> dist(-100.f, 100.f);
+
+	for (int i = 0; i < 1000; ++i)
+	{
+		auto f = dist(generator);
+		EXPECT_LT(
+			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().magnitude() - 1.f), idk::math::constants::epsilon<float>()
+		);
+		EXPECT_LT(
+			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().magnitude() - 1.f), idk::math::constants::epsilon<float>()
+		);
+		EXPECT_LT(
+			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().magnitude() - 1.f), idk::math::constants::epsilon<float>()
+		);
+	}
 }
 
 TEST(Math, VectorDotPdt)
