@@ -140,6 +140,25 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
+	vector<T,D>& vector<T, D>::operator*=(const vector& rhs)
+	{
+		auto ltr = this->begin();
+		auto rtr = rhs.begin();
+		auto etr = this->end();
+
+		while (ltr != etr)
+			*ltr++ *= *rtr++;
+		return *this;
+	}
+
+	template<typename T, unsigned D>
+	vector<T,D> vector<T, D>::operator*(const vector& rhs) const
+	{
+		auto copy = *this;
+		return copy *= rhs;
+	}
+
+	template<typename T, unsigned D>
 	vector<T, D>& vector<T, D>::operator *= (const T& coeff)
 	{
 		for (auto& elem : *this)
@@ -153,6 +172,26 @@ namespace idk
 		auto copy = *this;
 		return copy *= coeff;
 	}
+
+	template<typename T, unsigned D>
+	vector<T, D>& vector<T, D>::operator/=(const vector& rhs)
+	{
+		auto ltr = this->begin();
+		auto rtr = rhs.begin();
+		auto etr = this->end();
+
+		while (ltr != etr)
+			* ltr++ /= *rtr++;
+		return *this;
+	}
+
+	template<typename T, unsigned D>
+	vector<T, D> vector<T, D>::operator/(const vector& rhs) const
+	{
+		auto copy = *this;
+		return copy /= rhs;
+	}
+
 
 	template<typename T, unsigned D>
 	vector<T, D>& vector<T, D>::operator /= (const T& coeff)

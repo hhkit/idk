@@ -36,13 +36,17 @@ namespace idk
 		vector&  operator+=(const vector&);	
 		vector   operator+(const vector&) const;
 
-		vector&  operator-=(const vector&);
 		vector   operator-() const;
+		vector&  operator-=(const vector&);
 		vector   operator-(const vector&) const;
 
+		vector&  operator*=(const vector&);
+		vector   operator*(const vector&) const;
 		vector&  operator*=(const T&);
 		vector   operator*(const T&) const;
 
+		vector&  operator/=(const vector&);
+		vector   operator/(const vector&) const;
 		vector&  operator/=(const T&);
 		vector   operator/(const T&) const;
 
