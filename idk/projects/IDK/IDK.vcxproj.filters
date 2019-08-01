@@ -52,6 +52,9 @@
     <ClInclude Include="math\constants.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="math\arith.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -80,12 +83,18 @@
     <None Include="math\constants.inl">
       <Filter>math</Filter>
     </None>
+    <None Include="math\arith.inl">
+      <Filter>math</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
     <Natvis Include="_natvis\vector.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="math\angle.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

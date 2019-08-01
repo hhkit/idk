@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="idk::radian&lt;*&gt;">
+    <DisplayString>{value} rad</DisplayString>
+  </Type>
+  <Type Name="idk::degree&lt;*&gt;">
+    <DisplayString>{value, g} deg</DisplayString>
+  </Type>
+</AutoVisualizer>

@@ -2,6 +2,7 @@
 
 #include "constants.h"
 #include "angle.h"
+#include "arith.h"
 
 namespace idk
 {
@@ -14,6 +15,12 @@ namespace idk
 	inline radian<T>::radian(const degree<T>& rhs)
 		: value{ rhs.value / static_cast<T>(180) * constants::pi<T>()}
 	{
+	}
+
+	template<typename T>
+	inline bool radian<T>::abs_comp(const radian& rhs) const
+	{
+		return abs(fmod(value, constants::tau<T>()) - fmod(rhs.value, constants::tau<T>())) < constants::epsilon<T>();
 	}
 
 	template<typename T>
@@ -101,6 +108,13 @@ namespace idk
 	inline degree<T>::degree(const radian<T>& rhs)
 		: value{ rhs.value / constants::pi<T>() * static_cast<T>(180) }
 	{
+	}
+
+
+	template<typename T>
+	bool degree<T>::abs_comp(const degree& rhs) const
+	{
+		return abs(fmod(value, static_cast<T>(360)) - fmod(rhs.value, static_cast<T>(360))) < constants::epsilon<T>();
 	}
 
 

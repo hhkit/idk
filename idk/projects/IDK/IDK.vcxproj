@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="math\angle.h" />
     <ClInclude Include="idk.h" />
+    <ClInclude Include="math\arith.h" />
     <ClInclude Include="math\constants.h" />
     <ClInclude Include="math\matrix.h" />
     <ClInclude Include="math\vector.h" />
@@ -38,12 +39,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="math\angle.inl" />
+    <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
     <None Include="math\matrix.inl" />
     <None Include="math\vector.inl" />
     <None Include="math\vector_detail.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="math\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />
     <Natvis Include="_natvis\vector.natvis" />
   </ItemGroup>

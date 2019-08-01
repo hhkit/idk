@@ -15,6 +15,8 @@ namespace idk
 		explicit radian(const degree<T>&);
 		explicit operator degree<T>() const;
 
+		bool abs_comp(const radian&) const;
+
 		// operator overloads
 		radian& operator+=(const radian&);
 		radian& operator-=(const radian&);
@@ -38,6 +40,8 @@ namespace idk
 		explicit degree(T val = T{});
 		explicit degree(const radian<T>&);
 		explicit operator radian<T>() const;
+
+		bool abs_comp(const degree&) const;
 
 		degree& operator+=(const degree&);
 		degree& operator-=(const degree&);

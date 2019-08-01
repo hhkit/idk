@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "math/constants.h"
+#include "math/arith.h"
 #include "math/angle.h"
 #include "math/vector.h"
 #include "math/matrix.h"
@@ -23,7 +24,7 @@ namespace idk
 
 	constexpr auto pi = constants::pi<real>();
 	constexpr auto half_pi = pi / 2;
-	constexpr auto two_pi = pi * 2;
+	constexpr auto two_pi = constants::tau<real>();
 
 	template<typename T, size_t N>
 	using array = std::array<T, N>;
