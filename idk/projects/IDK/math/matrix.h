@@ -1,7 +1,7 @@
 #pragma once
 #include "Vector.h"
 
-namespace idk
+namespace idk::math
 {
 	// matrix is column order
 	template<typename T, unsigned R, unsigned C>

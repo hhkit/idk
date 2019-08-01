@@ -5,7 +5,7 @@
 #include "angle.h"
 #pragma once
 
-namespace idk::detail
+namespace idk::math::detail
 {
 	template<typename T, unsigned D>
 	T* vector_base<T, D>::begin()

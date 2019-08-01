@@ -6,7 +6,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 
-namespace idk
+namespace idk::math
 {
 	namespace detail
 	{

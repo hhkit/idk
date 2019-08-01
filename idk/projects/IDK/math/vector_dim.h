@@ -2,7 +2,7 @@
 
 template<typename T, unsigned D> struct vector;
 
-namespace idk
+namespace idk::math
 {
 	namespace detail
 	{

@@ -4,7 +4,7 @@
 #include "Vector_detail.h"
 #include "Vector_Dim.h"
 
-namespace idk
+namespace idk::math
 {
 	template<typename T, unsigned D>
 	struct vector : detail::vector_base<T, D>

@@ -3,7 +3,7 @@
 
 #include "constants.h"
 
-namespace idk::constants
+namespace idk::math::constants
 {
 	template<>
 	constexpr float pi<float>()

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace idk::constants
+namespace idk::math::constants
 {
 	template<typename T>
 	constexpr T pi();

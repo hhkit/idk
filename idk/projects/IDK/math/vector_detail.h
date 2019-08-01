@@ -1,7 +1,7 @@
 #pragma once
 #include "angle.h"
 
-namespace idk
+namespace idk::math
 {
 	template<typename T, unsigned D> struct vector;
 

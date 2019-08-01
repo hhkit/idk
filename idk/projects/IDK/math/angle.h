@@ -1,6 +1,6 @@
 #pragma once
 
-namespace idk
+namespace idk::math
 {
 	// forward declaration
 	template <typename T> struct radian;

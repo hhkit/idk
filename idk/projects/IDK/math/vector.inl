@@ -1,12 +1,11 @@
 #pragma once
 #include <utility>
-#include <numeric>
 #include <tuple>
 
 #include "Vector_detail.h"
 #include "Vector.h"
 
-namespace idk
+namespace idk::math
 {
 	template<typename T, unsigned D>
 	template<typename ...Args, typename, typename>

@@ -4,7 +4,7 @@
 #include "angle.h"
 #include "arith.h"
 
-namespace idk
+namespace idk::math
 {
 	template<typename T>
 	inline radian<T>::radian(T val)

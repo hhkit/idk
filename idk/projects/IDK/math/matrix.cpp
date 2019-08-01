@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Matrix.h"
 
-namespace idk
+namespace idk::math
 {
 	template struct matrix<float, 3, 3>;
 	template struct matrix<float, 4, 4>;
