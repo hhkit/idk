@@ -1,6 +1,6 @@
 #pragma once
 
-namespace idk
+namespace idk::constants
 {
 	template<>
 	constexpr float pi<float>()
@@ -11,6 +11,6 @@ namespace idk
 	template<>
 	constexpr double pi<double>()
 	{
-		return 3.14159265357989;
+		return 3.141592653589793;
 	}
 }

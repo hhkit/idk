@@ -21,9 +21,14 @@ namespace idk
 	using rad = radian<real>;
 	using deg = degree<real>;
 
+	constexpr auto pi = constants::pi<real>();
+	constexpr auto half_pi = pi / 2;
+	constexpr auto two_pi = pi * 2;
+
 	template<typename T, size_t N>
 	using array = std::array<T, N>;
 
 	template<typename T1, typename T2>
 	using hash_table = std::unordered_map<T1, T2>;
+
 }
