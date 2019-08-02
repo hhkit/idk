@@ -27,11 +27,14 @@ namespace idk::math
 		template<typename T>
 		struct vector_base<T, 1>
 		{
-			T x;
-			swizzle<vector, T, 0> x;
-			swizzle<vector, T, 0, 0> xx;
-			swizzle<vector, T, 0, 0, 0> xxx;
-			swizzle<vector, T, 0, 0, 0, 0> xxxx;
+			union
+			{
+				T x;
+				swizzle<vector, T, 0> x;
+				swizzle<vector, T, 0, 0> xx;
+				swizzle<vector, T, 0, 0, 0> xxx;
+				swizzle<vector, T, 0, 0, 0, 0> xxxx;
+			};
 			constexpr vector_base();
 			constexpr explicit vector_base(T x);
 
