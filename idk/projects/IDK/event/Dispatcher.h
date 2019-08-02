@@ -8,11 +8,11 @@
 
 namespace idk
 {
-	template<typename Signature>
+	template<typename Signature, typename Functor = function<Signature>>
 	class Dispatcher;
 
-	template<typename Ret, typename ... Params>
-	class Dispatcher<Ret(Params...)>
+	template<typename Ret, typename ... Params, typename Functor>
+	class Dispatcher<Ret(Params...), Functor>
 	{
 	public:
 		template<typename Fwd, typename = std::enable_if_t<!std::is_same_v<Dispatcher, Fwd>>>
@@ -27,7 +27,7 @@ namespace idk
 	private:
 		using ParamTuple = tuple<detail::storage_type_t<Params>...>;
 
-		function<Ret(Params...)> f;
+		Functor f;
 		vector<ParamTuple> stored_parameters;
 	};
 }
