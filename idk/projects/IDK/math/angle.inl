@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "angle.h"
 #include "arith.h"
+#include "../util/casts.h"
 
 namespace idk::math
 {
@@ -13,7 +14,7 @@ namespace idk::math
 	}
 	template<typename T>
 	inline radian<T>::radian(const degree<T>& rhs)
-		: value{ rhs.value / static_cast<T>(180) * constants::pi<T>()}
+		: value{ rhs.value / s_cast<T>(180) * constants::pi<T>()}
 	{
 	}
 
@@ -95,7 +96,7 @@ namespace idk::math
 	template<typename T>
 	radian<T>::operator degree<T>() const
 	{
-		return value / constants::pi<T>() * static_cast<T>(180);
+		return value / constants::pi<T>() * s_cast<T>(180);
 	}
 
 
@@ -106,7 +107,7 @@ namespace idk::math
 	}
 	template<typename T>
 	inline degree<T>::degree(const radian<T>& rhs)
-		: value{ rhs.value / constants::pi<T>() * static_cast<T>(180) }
+		: value{ rhs.value / constants::pi<T>() * s_cast<T>(180) }
 	{
 	}
 
@@ -114,7 +115,7 @@ namespace idk::math
 	template<typename T>
 	bool degree<T>::abs_comp(const degree& rhs) const
 	{
-		return abs(fmod(value, static_cast<T>(360)) - fmod(rhs.value, static_cast<T>(360))) < constants::epsilon<T>();
+		return abs(fmod(value, s_cast<T>(360)) - fmod(rhs.value, s_cast<T>(360))) < constants::epsilon<T>();
 	}
 
 
@@ -189,6 +190,6 @@ namespace idk::math
 	template<typename T>
 	inline degree<T>::operator radian<T>() const
 	{
-		return value * constants::pi<T>() / static_cast<T>(180);
+		return value * constants::pi<T>() / s_cast<T>(180);
 	}
 }

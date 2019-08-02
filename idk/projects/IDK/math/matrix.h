@@ -8,7 +8,7 @@ namespace idk::math
 	struct matrix
 	{
 		using column_t = vector<T, R>;
-		column_t intern[C];
+		column_t intern[C]{};
 
 		// constructors
 		matrix();
