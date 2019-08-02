@@ -56,3 +56,16 @@ TEST(Math, VectorCrossPdt)
 {
 	EXPECT_EQ(idk::vec3(1.f, 0.f, 0.f).cross(idk::vec3(0.f, 1.f, 0.f)), idk::vec3(0.f, 0.f, 1.f));
 }
+
+TEST(Math, VectorSwizzle)
+{
+	using namespace idk;
+	vec2 v{ 1.f, 2.f };
+	vec2 v2{ 2.f, 1.f };
+	vec3 v3{ 1.f, 2.f, 3.f };
+	vec4 v4{ 1.f, 2.f, 4.f, 5.f };
+	EXPECT_EQ(v, v2.yx);
+	EXPECT_EQ(v2, v3.yx);
+	v2.yx = v3.zz;
+	EXPECT_EQ(v2, (vec2{ 3.f, 3.f }));
+}

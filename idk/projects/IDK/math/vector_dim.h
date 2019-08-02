@@ -7,7 +7,10 @@ namespace idk::math
 	namespace detail
 	{
 		template <typename T>
-		struct Dim;
+		struct Dim
+		{
+			static constexpr unsigned value = 0;
+		};
 
 		template<typename T>
 		static constexpr unsigned Dim_v = Dim<T>::value;

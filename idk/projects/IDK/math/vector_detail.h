@@ -1,5 +1,9 @@
 #pragma once
 #include "angle.h"
+#include "vector_swizzle.h"
+
+#pragma warning(disable:4201)
+
 
 namespace idk::math
 {
@@ -24,6 +28,10 @@ namespace idk::math
 		struct vector_base<T, 1>
 		{
 			T x;
+			swizzle<vector, T, 0> x;
+			swizzle<vector, T, 0, 0> xx;
+			swizzle<vector, T, 0, 0, 0> xxx;
+			swizzle<vector, T, 0, 0, 0, 0> xxxx;
 			constexpr vector_base();
 			constexpr explicit vector_base(T x);
 
@@ -37,8 +45,11 @@ namespace idk::math
 		template<typename T>
 		struct vector_base<T, 2>
 		{
-			T x;
-			T y;
+			union
+			{
+				struct { T x; T y; };
+				#include "swizzle2"
+			};
 			constexpr vector_base();
 			constexpr vector_base(T x, T y);
 
@@ -55,9 +66,11 @@ namespace idk::math
 		template<typename T>
 		struct vector_base<T, 3>
 		{
-			T x;
-			T y;
-			T z;
+			union
+			{
+				struct { T x; T y; T z; };
+				#include "swizzle3"
+			};
 			constexpr vector_base();
 			constexpr vector_base(T x, T y, T z);
 
@@ -73,10 +86,11 @@ namespace idk::math
 		template<typename T>
 		struct vector_base<T, 4>
 		{
-			T x;
-			T y;
-			T z;
-			T w;
+			union
+			{
+				struct { T x; T y; T z; T w; };
+				#include "swizzle4"
+			};
 
 			constexpr vector_base();
 			constexpr vector_base(T x, T y, T z, T w);
