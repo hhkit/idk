@@ -15,6 +15,7 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="TestDispatcher.cpp" />
+    <ClCompile Include="TestObjectPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

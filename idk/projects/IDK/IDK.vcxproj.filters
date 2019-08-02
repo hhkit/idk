@@ -61,6 +61,16 @@
     <ClInclude Include="event\Dispatcher_detail.h">
       <Filter>event</Filter>
     </ClInclude>
+    <ClInclude Include="util\casts.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ObjectPool.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ObjectHandle.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ObjectHandle_detail.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -72,6 +82,7 @@
     <ClCompile Include="math\vector.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="core\ObjectHandle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -98,6 +109,13 @@
     <None Include="event\Dispatcher_detail.inl">
       <Filter>event</Filter>
     </None>
+    <None Include="util\casts.inl">
+      <Filter>util</Filter>
+    </None>
+    <None Include="core\ObjectPool.inl">
+      <Filter>core</Filter>
+    </None>
+    <None Include="core\ObjectHandle.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

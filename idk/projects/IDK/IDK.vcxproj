@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\ObjectHandle_detail.h" />
+    <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="event\Dispatcher.h" />
     <ClInclude Include="event\Dispatcher_detail.h" />
     <ClInclude Include="math\angle.h" />
@@ -30,8 +32,11 @@
     <ClInclude Include="math\vector_detail.h" />
     <ClInclude Include="math\vector_dim.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="util\casts.h" />
+    <ClInclude Include="core\ObjectHandle.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\ObjectHandle.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
     <ClCompile Include="pch.cpp">
@@ -40,6 +45,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="core\ObjectHandle.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />
     <None Include="math\angle.inl" />
@@ -48,6 +54,8 @@
     <None Include="math\matrix.inl" />
     <None Include="math\vector.inl" />
     <None Include="math\vector_detail.inl" />
+    <None Include="util\casts.inl" />
+    <None Include="core\ObjectPool.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="math\angle.natvis" />
