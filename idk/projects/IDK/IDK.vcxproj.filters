@@ -70,7 +70,15 @@
     <ClInclude Include="core\ObjectHandle.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\ObjectHandle_detail.h" />
+    <ClInclude Include="core\ObjectHandle_detail.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Handleable.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Entity.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -82,7 +90,9 @@
     <ClCompile Include="math\vector.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="core\ObjectHandle.cpp" />
+    <ClCompile Include="core\ObjectHandle.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -115,7 +125,9 @@
     <None Include="core\ObjectPool.inl">
       <Filter>core</Filter>
     </None>
-    <None Include="core\ObjectHandle.inl" />
+    <None Include="core\ObjectHandle.inl">
+      <Filter>core</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
@@ -124,7 +136,10 @@
     <Natvis Include="_natvis\vector.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
-    <Natvis Include="math\angle.natvis">
+    <Natvis Include="_natvis\angle.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="core\objectpool.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

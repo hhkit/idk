@@ -1,5 +1,6 @@
 #pragma once
 #include <tuple>
+#include <string>
 
 #include "../idk.h"
 #include "ObjectHandle_detail.h"
@@ -21,10 +22,6 @@ namespace idk
 			uint64_t id = 0;
 		};
 
-		using Handleables = std::tuple<
-			int
-		>;
-
 		GenericHandle() = default;
 		explicit GenericHandle(uint64_t id);
 		GenericHandle(
@@ -40,7 +37,7 @@ namespace idk
 		: public GenericHandle
 	{
 	public:
-		static constexpr auto type_id = detail::index_in_tuple_v<T, GenericHandle::Handleables>;
+		static constexpr auto type_id = detail::index_in_tuple_v<T, idk::Handleables>;
 
 		ObjectHandle() = default;
 		explicit ObjectHandle(const GenericHandle&);

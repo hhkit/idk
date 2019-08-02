@@ -14,16 +14,18 @@ namespace idk
 		static constexpr auto type_id = Handle::type_id;
 
 		ObjectPool(size_t reserve = 8192);
+		~ObjectPool();
 
 		// accessors
-		T* at(const Handle&) const;
-		T* data() const;
+		T*   at(const Handle&) const;
+		T*   data() const;
+		bool validate(const Handle&) const;
 
 		// modifiers
 		Handle emplace();
 		Handle emplace_at(const Handle&);
 		bool   remove(const Handle&);
-		//bool   remove(T& removeme);
+		bool   remove(T& removeme);
 
 		// operator overloads
 		T&     operator[](const Handle&) const;
@@ -40,12 +42,18 @@ namespace idk
 		vector<HandleInflect> lookup;
 		vector<byte>          intern;
 
-		index_t first_free = 0;
-		index_t in_use     = 0;
-		index_t freelist   = invalid;
+		index_t first_free_handle  = 0;
+		index_t pool_size          = 0;
 
 		void shift_first_free();
 		void grow();
+		tuple<T&, index_t> create();
+
+		// non-copiable non-movable
+		ObjectPool(const ObjectPool&) = delete;
+		ObjectPool(ObjectPool&&) = delete;
+		ObjectPool& operator=(const ObjectPool&) = delete;
+		ObjectPool& operator=(ObjectPool&&) = delete;
 	};
 }
 
