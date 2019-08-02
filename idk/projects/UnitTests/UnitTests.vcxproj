@@ -47,6 +47,7 @@
   <ItemGroup>
     <ClCompile Include="TestAngle.cpp" />
     <ClCompile Include="TestArith.cpp" />
+    <ClCompile Include="TestDispatcher.cpp" />
     <ClCompile Include="TestMatrix.cpp" />
     <ClCompile Include="TestVector.cpp" />
     <ClCompile Include="pch.cpp">

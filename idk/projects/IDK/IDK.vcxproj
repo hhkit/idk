@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="event\Dispatcher.h" />
+    <ClInclude Include="event\Dispatcher_detail.h" />
     <ClInclude Include="math\angle.h" />
     <ClInclude Include="idk.h" />
     <ClInclude Include="math\arith.h" />
@@ -38,6 +40,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="event\Dispatcher.inl" />
+    <None Include="event\Dispatcher_detail.inl" />
     <None Include="math\angle.inl" />
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />

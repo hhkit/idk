@@ -55,6 +55,12 @@
     <ClInclude Include="math\arith.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="event\Dispatcher.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="event\Dispatcher_detail.h">
+      <Filter>event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -85,6 +91,12 @@
     </None>
     <None Include="math\arith.inl">
       <Filter>math</Filter>
+    </None>
+    <None Include="event\Dispatcher.inl">
+      <Filter>event</Filter>
+    </None>
+    <None Include="event\Dispatcher_detail.inl">
+      <Filter>event</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -8,8 +8,13 @@
     <ClCompile Include="TestMatrix.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="TestAngle.cpp" />
-    <ClCompile Include="TestArith.cpp" />
+    <ClCompile Include="TestAngle.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="TestArith.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="TestDispatcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
