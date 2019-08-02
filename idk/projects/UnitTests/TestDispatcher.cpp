@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "../IDK/idk.h"
 #include "../IDK/event/Dispatcher.h"
-#include <iostream>
+
+static int yolo = 0;
 
 int my_test(const int& i )
 {
-	std::cout << i << ",";
+	yolo += i;
 	return i;
 }
 
@@ -18,4 +19,5 @@ TEST(Dispatcher, TestDispatcher)
 		dispatcher.enqueue(i);
 	EXPECT_EQ(dispatcher.invoke(25), 25);
 	EXPECT_EQ(dispatcher.invoke(), 25);
+	EXPECT_EQ(yolo, 50 * 49 / 2);
 }
