@@ -6,7 +6,7 @@
       <Item Name="[size]">pool_size</Item>
       <ArrayItems>
         <Size>pool_size</Size>
-        <ValuePointer>reinterpret_cast&lt;$T1*&gt;(intern._Mypair._Myval2._Myfirst)</ValuePointer>
+        <ValuePointer>reinterpret_cast&lt;$T1*&gt;(&amp;intern[0])</ValuePointer>
       </ArrayItems>
     </Expand>
   </Type>
