@@ -27,7 +27,7 @@ TEST(Math, VectorAccess) {
 TEST(Math, VectorMagnitudeNormalize)
 {
 	EXPECT_TRUE(
-		(idk::vec2{ 3.f,4.f }.magnitude() == 5.f)
+		(idk::vec2{ 3.f,4.f }.length() == 5.f)
 	) << "Test for pythagorean triplet failed";
 
 	std::default_random_engine generator;
@@ -37,13 +37,13 @@ TEST(Math, VectorMagnitudeNormalize)
 	{
 		auto f = dist(generator);
 		EXPECT_LT(
-			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().magnitude() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
 		);
 		EXPECT_LT(
-			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().magnitude() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
 		);
 		EXPECT_LT(
-			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().magnitude() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
 		);
 	}
 }

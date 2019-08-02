@@ -27,8 +27,8 @@ namespace idk::math
 		constexpr vector(const vector<T, D2>&);
 
 		// vector functions
-		T        magnitude_sq() const;
-		T        magnitude() const;
+		T        length_sq() const;
+		T        length() const;
 		T        distance_sq(const vector&) const;
 		T        distance(const vector&) const;
 

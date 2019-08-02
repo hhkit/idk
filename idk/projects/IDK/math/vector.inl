@@ -22,27 +22,24 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	T vector<T, D>::magnitude_sq() const
+	T vector<T, D>::length_sq() const
 	{
-		T accum{};
-		for (auto& elem : *this)
-			accum += elem * elem;
-		return accum;
+		return dot(*this);
 	}
 
 	template<typename T, unsigned D>
-	T vector<T, D>::magnitude() const
+	T vector<T, D>::length() const
 	{
 		if constexpr (std::is_same_v<float, T>)
-			return sqrtf(magnitude_sq());
+			return sqrtf(length_sq());
 		else
-			return sqrt(static_cast<double>(magnitude_sq()));
+			return sqrt(static_cast<double>(length_sq()));
 	}
 
 	template<typename T, unsigned D>
 	T vector<T, D>::distance_sq(const vector& rhs) const
 	{
-		return (rhs - *this).magnitude_sq();
+		return (rhs - *this).length_sq();
 	}
 
 	template<typename T, unsigned D>
@@ -57,20 +54,16 @@ namespace idk::math
 	template<typename T, unsigned D>
 	T vector<T, D>::dot(const vector& rhs) const
 	{
-		auto ltr = this->begin();
-		auto rtr = rhs.begin();
-		auto etr = this->end();
-
 		T accum{};
-		while (ltr != etr)
-			accum += *ltr++ * *rtr++;
+		for (auto& elem : *this * rhs)
+			accum += elem;
 		return accum;
 	}
 
 	template<typename T, unsigned D>
 	vector<T, D>& vector<T, D>::normalize()
 	{
-		auto mag = magnitude();
+		auto mag = length();
 
 		for (auto& elem : *this)
 			elem /= mag;
