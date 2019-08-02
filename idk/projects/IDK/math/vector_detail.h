@@ -30,7 +30,6 @@ namespace idk::math
 			union
 			{
 				T x;
-				swizzle<vector, T, 0> x;
 				swizzle<vector, T, 0, 0> xx;
 				swizzle<vector, T, 0, 0, 0> xxx;
 				swizzle<vector, T, 0, 0, 0, 0> xxxx;

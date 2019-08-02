@@ -22,7 +22,7 @@ namespace idk::math::detail
 			return return_t{ values[Indexes]... };
 		}
 	private:
-		T values[D];
+		T values[1];
 
 		template<unsigned ThisFirst, unsigned ... ThisIndexes, unsigned RhsFirst, unsigned ... RhsIndexes>
 		void assign(const return_t& rhs, std::index_sequence<ThisFirst, ThisIndexes...>, std::index_sequence<RhsFirst, RhsIndexes...>)
