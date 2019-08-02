@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="idk::vector&lt;*, 2&gt;">
+  <Type Name="idk::math::vector&lt;*, 2&gt;">
     <DisplayString>[{x}, {y}]</DisplayString>
     <Expand>
       <Item Name="x">x</Item>
@@ -8,7 +8,7 @@
     </Expand>
   </Type>
 
-  <Type Name="idk::vectorc&lt;*, 3&gt;">
+  <Type Name="idk::math::vector&lt;*, 3&gt;">
     <DisplayString>[{x}, {y}, {z}]</DisplayString>
     <Expand>
       <Item Name="x">x</Item>
@@ -17,7 +17,7 @@
     </Expand>
   </Type>
 
-  <Type Name="idk::vector&lt;*, 4&gt;">
+  <Type Name="idk::math::vector&lt;*, 4&gt;">
     <DisplayString>[{x}, {y}, {z}, {w}]</DisplayString>
     <Expand>
       <Item Name="x">x</Item>
