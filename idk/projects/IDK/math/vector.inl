@@ -8,9 +8,16 @@
 namespace idk::math
 {
 	template<typename T, unsigned D>
-	template<typename ...Args, typename, typename>
+	template<typename ...Args, typename, typename, typename>
 	constexpr vector<T, D>::vector(Args ... args)
 		: vector{ detail::VectorConcat<T>(args...) }
+	{
+	}
+
+	template<typename T, unsigned D>
+	template<unsigned D2, typename>
+	constexpr vector<T, D>::vector(const vector<T, D2>& rhs)
+		: vector{ detail::TupleToVector<T>(detail::VectorToTuple<T>(rhs, std::make_index_sequence<D>{}), std::make_index_sequence<D>{}) }
 	{
 	}
 

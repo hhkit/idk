@@ -11,6 +11,10 @@ TEST(Math, VectorConstruction) {
 	EXPECT_TRUE(
 		(idk::vec4(idk::vec3(2.f, 3.f, 1.f), 1.f)) == idk::vec4(2.f, 3.f, 1.f, 1.f)
 	);
+
+	EXPECT_TRUE(
+		(idk::vec3(idk::vec4(2.f, 3.f, 1.f, 1.f))) == idk::vec3(2.f, 3.f, 1.f)
+	);
 }
 
 TEST(Math, VectorAccess) {

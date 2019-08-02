@@ -16,9 +16,15 @@ namespace idk::math
 
 		template<typename ... Args,
 			typename = std::enable_if_t<(detail::Dim_v<Args> + ...) == D>,
+			typename = std::enable_if_t<((detail::Dim_v<Args> > 0) && ...)>,
 			typename = std::enable_if_t<(!std::is_same_v<vector, Args> && ...)>
 		>
 		constexpr vector(Args ...);
+
+		template<unsigned D2,
+			typename = std::enable_if_t<(D2 > D)>
+		>
+		constexpr vector(const vector<T, D2>&);
 
 		// vector functions
 		T        magnitude_sq() const;

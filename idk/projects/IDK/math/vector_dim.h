@@ -9,7 +9,7 @@ namespace idk::math
 		template <typename T>
 		struct Dim
 		{
-			static constexpr unsigned value = 0;
+			static constexpr unsigned value = -1;
 		};
 
 		template<typename T>
