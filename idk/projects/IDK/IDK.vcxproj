@@ -49,6 +49,7 @@
   <ItemGroup>
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
+    <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\ObjectHandle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="math\matrix.cpp" />
@@ -59,6 +60,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="core\GameObject.inl" />
     <None Include="core\ObjectHandle.inl" />
     <None Include="core\Scene.inl" />
     <None Include="event\Dispatcher.inl" />

@@ -23,8 +23,10 @@ namespace idk
 		bool validate(const Handle&) const;
 
 		// modifiers
-		Handle emplace();
-		Handle emplace_at(const Handle&);
+		template<typename ... Args>
+		Handle emplace(Args&& ...);
+		template<typename ... Args>
+		Handle emplace_at(const Handle&, Args&& ...);
 		bool   remove(const Handle&);
 		bool   remove(T& removeme);
 
@@ -51,7 +53,8 @@ namespace idk
 
 		void shift_first_free();
 		void grow();
-		tuple<T&, index_t> create();
+		template<typename ... Args>
+		tuple<T&, index_t> create(Args&&...);
 
 		// non-copiable non-movable
 		ObjectPool(const ObjectPool&) = delete;

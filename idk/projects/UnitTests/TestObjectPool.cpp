@@ -45,17 +45,17 @@ TEST(ObjectPool, TestObjectPooling)
 	using namespace idk;
 
 	ObjectPool<GameObject> entities{5};
-	auto h = entities.emplace();
-	auto h2 = entities.emplace();
+	auto h = entities.emplace(nullptr);
+	auto h2 = entities.emplace(nullptr);
 	for (int i = 0; i < 10; ++i)
 	{
-		entities.emplace();
+		entities.emplace(nullptr);
 	}
-	*entities.at(h) = GameObject{};
+	*entities.at(h) = GameObject{nullptr};
 	entities.remove(h);
 	EXPECT_EQ(entities.at(h), nullptr);
 	EXPECT_NE(entities.at(h2), nullptr);
-	entities.emplace();
+	entities.emplace(nullptr);
 
 	TestComponent t;
 	t.GetHandle();

@@ -27,15 +27,15 @@ namespace idk
 			return {};
 		return GetObject(handle_cast<T>(handle));
 	}
-	template<typename T>
-	inline ObjectHandle<T> Scene::CreateObject()
+	template<typename T, typename ... Args>
+	inline ObjectHandle<T> Scene::CreateObject(Args&& ... args)
 	{
-		return GetPool<T>().emplace();
+		return GetPool<T>().emplace(std::forward<Args>(args)...);
 	}
-	template<typename T>
-	inline ObjectHandle<T> Scene::CreateObjectAt(const ObjectHandle<T>& handle)
+	template<typename T, typename ... Args>
+	inline ObjectHandle<T> Scene::CreateObjectAt(const ObjectHandle<T>& handle, Args&& ... args)
 	{
-		return GetPool<T>().emplace_at(handle);
+		return GetPool<T>().emplace_at(handle, std::forward<Args>(args)...);
 	}
 	template<typename T>
 	inline bool Scene::DestroyObject(const ObjectHandle<T>& handle)
@@ -61,7 +61,10 @@ namespace idk
 		{
 			([](Scene& scene) -> GenericHandle
 				{
-					return scene.CreateObject < std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>()))> > ();
+					if constexpr(Indexes == 0)
+						return scene.CreateObject < std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>()))> > (&scene);
+					else
+						return scene.CreateObject < std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>()))> >();
 				})...
 		};
 	}
@@ -72,7 +75,11 @@ namespace idk
 		{
 			([](Scene& scene, const GenericHandle& handle) -> GenericHandle
 				{
-					return scene.CreateObjectAt(handle_cast<std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>())) > > (handle));
+					using type = std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>())) > ;
+					if constexpr (std::is_same_v<GameObject, type>)
+						return scene.CreateGameObjectAt(handle_cast<type> (handle));
+					else
+						return scene.CreateObjectAt(handle_cast<type > (handle));
 				})...
 		};
 	}

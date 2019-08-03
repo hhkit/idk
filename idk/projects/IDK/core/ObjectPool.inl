@@ -45,7 +45,8 @@ namespace idk
 	}
 
 	template<typename T>
-	typename ObjectPool<T>::Handle ObjectPool<T>::emplace()
+	template<typename ... Args>
+	typename ObjectPool<T>::Handle ObjectPool<T>::emplace(Args&& ... args)
 	{
 		if (first_free_handle == lookup.size())
 			grow();
@@ -54,7 +55,7 @@ namespace idk
 
 		auto index = first_free_handle;
 
-		auto res = create();
+		auto res = create(std::forward<Args>(args)...);
 		create_inflect.intern_index = std::get<index_t>(res);
 		
 		++create_inflect.uses;
@@ -66,10 +67,11 @@ namespace idk
 	}
 
 	template<typename T>
-	typename ObjectPool<T>::Handle ObjectPool<T>::emplace_at(const Handle& handle)
+	template<typename ... Args>
+	typename ObjectPool<T>::Handle ObjectPool<T>::emplace_at(const Handle& handle, Args&& ... args)
 	{
 		if (handle.index == first_free_handle)
-			return emplace();
+			return emplace(std::forward<Args>(args)...);
 
 		if (handle.index > lookup.size())
 			grow();
@@ -77,9 +79,9 @@ namespace idk
 		auto& create_inflect = lookup[handle.index];
 
 		// ensure that the slot is unused
-		assert(lookup[handle.index].intern_index != invalid);
+		assert(lookup[handle.index].intern_index == invalid);
 
-		auto res = create();
+		auto res = create(std::forward<Args>(args)...);
 		create_inflect.intern_index = std::get<index_t>(res);
 		create_inflect.uses         = handle.uses;
 
@@ -143,9 +145,10 @@ namespace idk
 		intern = std::move(new_intern);
 	}
 	template<typename T>
-	tuple<T&, typename ObjectPool<T>::index_t> ObjectPool<T>::create()
+	template<typename ... Args>
+	tuple<T&, typename ObjectPool<T>::index_t> ObjectPool<T>::create(Args&& ... args)
 	{
 		index_t retval = pool_size++;
-		return tuple<T&, index_t>{ *new (&data()[retval]) T{}, retval};
+		return tuple<T&, index_t>{ *new (&data()[retval]) T{std::forward<Args>(args)...}, retval};
 	}
 }

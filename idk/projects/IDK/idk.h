@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <memory>
+#include <optional>
 
 #include <stddef.h>
 #include <functional>
@@ -59,6 +60,9 @@ namespace idk
 
 	template<typename ... Ts>
 	using tuple = std::tuple<Ts...>;
+
+	template<typename T>
+	using opt = std::optional<T>;
 
 	// smart pointers
 	template<typename T>

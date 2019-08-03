@@ -26,8 +26,8 @@ namespace idk
 		// modifiers
 		template <typename T> RetType<T>      GetObject(const ObjectHandle<T>& handle);
 		template <typename T> RetType<T>      GetObject(const GenericHandle& handle);
-		template <typename T> ObjectHandle<T> CreateObject();
-		template <typename T> ObjectHandle<T> CreateObjectAt(const ObjectHandle<T>& handle);
+		template <typename T, typename ... Args> ObjectHandle<T> CreateObject(Args&&...);
+		template <typename T, typename ... Args> ObjectHandle<T> CreateObjectAt(const ObjectHandle<T>& handle, Args&& ...);
 		template <typename T> bool            DestroyObject(const ObjectHandle<T>& handle);
 
 		// reflected variant
@@ -38,6 +38,7 @@ namespace idk
 
 		// type specific
 		ObjectHandle<GameObject> CreateGameObject();
+		ObjectHandle<GameObject> CreateGameObjectAt(const ObjectHandle<GameObject>&);
 	private:
 		const uint8_t build_index;
 		detail::ScenePool_t _pools;

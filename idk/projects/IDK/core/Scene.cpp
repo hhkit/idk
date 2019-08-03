@@ -43,6 +43,10 @@ namespace idk
 
 	ObjectHandle<GameObject> Scene::CreateGameObject()
 	{
-		return CreateObject<GameObject>();
+		return CreateObject<GameObject>(this);
+	}
+	ObjectHandle<GameObject> Scene::CreateGameObjectAt(const ObjectHandle<GameObject>& handle)
+	{
+		return CreateObjectAt(handle, this);
 	}
 }
