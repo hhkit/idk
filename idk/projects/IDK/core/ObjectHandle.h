@@ -3,6 +3,7 @@
 #include <string>
 
 #include <idk.h>
+#include "Handleables.h"
 #include "ObjectHandle_detail.h"
 
 #pragma warning(disable:4201)
@@ -44,6 +45,19 @@ namespace idk
 		operator bool() const;
 		T& operator*() const;
 		T* operator->() const;
+	};
+
+	template <typename T>
+	class ObjectPool;
+
+	template<typename T>
+	class Handleable
+	{
+	public:
+		const ObjectHandle<T>& GetHandle() { return handle; }
+	private:
+		ObjectHandle<T> handle;
+		friend class ObjectPool<T>;
 	};
 
 	template <typename T>

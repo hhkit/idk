@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClInclude Include="core\Component.h" />
     <ClInclude Include="core\GameObject.h" />
-    <ClInclude Include="core\Handleable.h" />
+    <ClInclude Include="core\Handleables.h" />
     <ClInclude Include="core\ObjectHandle_detail.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
@@ -61,6 +61,7 @@
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
     <None Include="math\matrix.inl" />
+    <None Include="math\quaternion.inl" />
     <None Include="math\vector.inl" />
     <None Include="math\vector_detail.inl" />
     <None Include="util\meta.inl" />

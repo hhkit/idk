@@ -76,9 +76,6 @@
     <ClInclude Include="core\ObjectHandle_detail.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\Handleable.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="math\vector_swizzle.h">
       <Filter>math\detail</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
     <ClInclude Include="math\quaternion.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="core\Handleables.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -114,7 +114,9 @@
     <ClCompile Include="core\Component.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="common\Transform.cpp" />
+    <ClCompile Include="common\Transform.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -152,6 +154,9 @@
     </None>
     <None Include="util\meta.inl">
       <Filter>util</Filter>
+    </None>
+    <None Include="math\quaternion.inl">
+      <Filter>math</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,7 @@ struct StrangeObject
 };
 
 using myclock = std::chrono::high_resolution_clock;
-
+#ifdef RUNSPEEDTEST
 TEST(SpeedTest, ActivesTogether)
 {
 	std::vector<StrangeObject> v;
@@ -62,3 +62,4 @@ TEST(SpeedTest, ActivesApart)
 	}
 	std::cout << (dur / iters).count() << std::endl;
 }
+#endif
