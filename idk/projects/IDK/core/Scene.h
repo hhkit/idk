@@ -26,9 +26,9 @@ namespace idk
 		// modifiers
 		template <typename T> RetType<T>      GetObject(const ObjectHandle<T>& handle);
 		template <typename T> RetType<T>      GetObject(const GenericHandle& handle);
-		template <typename T, typename ... Args> ObjectHandle<T> CreateObject(Args&&...);
-		template <typename T, typename ... Args> ObjectHandle<T> CreateObjectAt(const ObjectHandle<T>& handle, Args&& ...);
 		template <typename T> bool            DestroyObject(const ObjectHandle<T>& handle);
+		template <typename T, typename ... Args> ObjectHandle<T> CreateObject(Args&& ...);
+		template <typename T, typename ... Args> ObjectHandle<T> CreateObjectAt(const ObjectHandle<T>& handle, Args&& ...);
 
 		// reflected variant
 		bool            Validate(const GenericHandle& handle);
