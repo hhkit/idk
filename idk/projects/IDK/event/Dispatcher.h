@@ -3,7 +3,7 @@
 #include <tuple>
 #include <string_view>
 
-#include "../idk.h"
+#include <idk.h>
 #include "Dispatcher_detail.h"
 
 namespace idk
