@@ -44,11 +44,11 @@ namespace idk
 
 		// jump tables
 		template<typename Fn>
-		using JumpTable = std::array<Fn, Count>;
+		using JumpTable  = std::array<Fn, Count>;
 		using ValidateFn = bool(*)(Scene&, const GenericHandle&);
-		using CreateFn = GenericHandle(*)(Scene&);
+		using CreateFn   = GenericHandle(*)(Scene&);
 		using CreateAtFn = GenericHandle(*)(Scene&, const GenericHandle&);
-		using DestroyFn = bool(*)(Scene&, const GenericHandle&);
+		using DestroyFn  = bool(*)(Scene&, const GenericHandle&);
 
 		static inline bool jump_tables_initialized = false;
 		static inline JumpTable<ValidateFn> validate_jt;
