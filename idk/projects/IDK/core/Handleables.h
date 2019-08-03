@@ -8,6 +8,25 @@ namespace idk
 	using Handleables = tuple<
 		class GameObject,
 		class Transform,
-		class Parent
+		class Parent,
+
+	/// EDITOR
+	// class Prefab,
+
+	/// PHYSICS
+	//	class RigidBody,
+	//	class Collider,
+
+	/// GRAPHICS
+	//	class MeshRenderer,
+
+	/// ANIMATION
+	//	class Animator,
+
+	/// SCRIPTING
+	//	class MonoBehavior,
+
+	/// AUDIO
+	//	class AudioSource
 	>;
 }
