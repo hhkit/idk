@@ -10,5 +10,5 @@ TEST(Scene, SceneSpecifiedType)
 	auto h = entities.emplace();
 
 	Scene s;
-	EXPECT_FALSE(s.CheckHandle(h));
+	EXPECT_FALSE(s.Validate(h));
 }

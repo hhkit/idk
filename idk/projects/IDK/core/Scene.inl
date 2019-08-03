@@ -6,11 +6,11 @@ namespace idk
 	template<typename T>
 	inline ObjectPool<T>& Scene::GetPool()
 	{
-		return *std::get<unique_ptr<ObjectPool<T>>>(pools);
+		return *std::get<unique_ptr<ObjectPool<T>>>(_pools);
 	}
 	
 	template <typename T>
-	bool Scene::CheckHandle(const ObjectHandle<T>& handle)
+	bool Scene::Validate(const ObjectHandle<T>& handle)
 	{
 		return GetPool<T>().validate(handle);
 	}
@@ -19,6 +19,13 @@ namespace idk
 	Scene::RetType<T> Scene::GetObject(const ObjectHandle<T>& handle)
 	{
 		return GetPool<T>().at(handle);
+	}
+	template<typename T>
+	Scene::RetType<T> Scene::GetObject(const GenericHandle& handle)
+	{
+		if (handle.type != ObjectHandle<T>::type_id)
+			return {};
+		return GetObject(handle_cast<T>(handle));
 	}
 	template<typename T>
 	inline ObjectHandle<T> Scene::CreateObject()
@@ -34,5 +41,50 @@ namespace idk
 	inline bool Scene::DestroyObject(const ObjectHandle<T>& handle)
 	{
 		return GetPool<T>().remove(handle);
+	}
+
+	template<unsigned ...Indexes>
+	inline auto Scene::GenValidateTable(std::index_sequence<Indexes...>)
+	{
+		return JumpTable<ValidateFn>
+		{
+			([](Scene& scene, const GenericHandle& handle)
+				{
+					return scene.Validate(handle_cast<std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>())) > > (handle));
+				})...
+		};
+	}
+	template<unsigned ...Indexes>
+	inline auto Scene::GenCreateTable(std::index_sequence<Indexes...>)
+	{
+		return JumpTable<CreateFn>
+		{
+			([](Scene& scene) -> GenericHandle
+				{
+					return scene.CreateObject < std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>()))> > ();
+				})...
+		};
+	}
+	template<unsigned ...Indexes>
+	inline auto Scene::GenCreateAtTable(std::index_sequence<Indexes...>)
+	{
+		return JumpTable<CreateAtFn>
+		{
+			([](Scene& scene, const GenericHandle& handle) -> GenericHandle
+				{
+					return scene.CreateObjectAt(handle_cast<std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>())) > > (handle));
+				})...
+		};
+	}
+	template<unsigned ...Indexes>
+	inline auto Scene::GenDestroyTable(std::index_sequence<Indexes...>)
+	{
+		return JumpTable<DestroyFn>
+		{
+			([](Scene& scene, const GenericHandle& handle) 
+				{
+					return scene.DestroyObject(handle_cast<std::decay_t<decltype(std::get<Indexes>(std::declval<Handleables>())) > > (handle));
+				})...
+		};
 	}
 }
