@@ -15,14 +15,13 @@ namespace idk::math
 		
 		// column-major constructor
 		template<typename ... U,
-			typename = std::enable_if<(std::is_same_v<U, T> && ...)>
+			typename = std::enable_if_t<(std::is_same_v<U, T> && ...)>
 		>
-		explicit matrix(vector<U, R> ... vectors);
+		explicit matrix(const vector<U, R>& ... vectors);
 
 		// row-major constructor
 		template<typename ... U,
-			typename = std::enable_if<(std::is_same_v<U, T> && ...)>,
-			typename = std::enable_if<sizeof...(U) == R * C>
+			typename = std::enable_if_t<(sizeof...(U) == R * C) && ((std::is_same_v<U, T>) && ...)>
 		>
 		explicit matrix(U ... values);
 

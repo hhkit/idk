@@ -67,13 +67,13 @@ namespace idk::math
 	
 	template<typename T, unsigned R, unsigned C>
 	template<typename ...U, typename>
-	matrix<T, R, C>::matrix(vector<U, R> ...vectors)
+	matrix<T, R, C>::matrix(const vector<U, R>& ...vectors)
 		: intern{vectors...}
 	{
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	template<typename ...U, typename, typename>
+	template<typename ...U, typename>
 	matrix<T, R, C>::matrix(U ... values)
 		: matrix{ detail::MatrixFromRowMajor<T,R,C>(std::array<T, R*C>{values...}, std::make_index_sequence<C>{}) }
 	{
