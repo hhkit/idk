@@ -43,6 +43,7 @@
     <ClInclude Include="core\ObjectHandle.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\ObjectHandle.cpp" />
     <ClCompile Include="math\matrix.cpp" />

@@ -114,6 +114,7 @@
     <ClCompile Include="core\Component.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="common\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
