@@ -19,7 +19,7 @@ namespace idk::math
 			typename = std::enable_if_t<((detail::Dim_v<Args> > 0) && ...)>,
 			typename = std::enable_if_t<(!std::is_same_v<vector, Args> && ...)>
 		>
-		constexpr vector(Args ...);
+		constexpr vector(const Args& ...);
 
 		template<unsigned D2,
 			typename = std::enable_if_t<(D2 > D)>
@@ -64,6 +64,12 @@ namespace idk::math
 		const T& operator[](unsigned i) const;
 
 	};
+
+	template<typename T, unsigned D>
+	auto dot(const vector<T, D>& lhs, const vector<T, D>& rhs) 
+	{
+		return lhs.dot(rhs);
+	}
 
 	extern template struct vector<float, 2>;
 	extern template struct vector<float, 3>;

@@ -9,7 +9,7 @@ namespace idk::math
 {
 	template<typename T, unsigned D>
 	template<typename ...Args, typename, typename, typename>
-	constexpr vector<T, D>::vector(Args ... args)
+	constexpr vector<T, D>::vector(const Args& ... args)
 		: vector{ detail::VectorConcat<T>(args...) }
 	{
 	}

@@ -5,15 +5,15 @@
 TEST(Math, VectorConstruction) {
 	EXPECT_EQ(idk::vec2(), idk::vec2( 0.f, 0.f )) << "Default constructor should initialize to zero.";
 	EXPECT_TRUE(
-		(idk::vec4( idk::vec2(0.f, 1.f), idk::vec2(2.f,3.f) )) == idk::vec4( 0.f, 1.f, 2.f, 3.f )
+		idk::vec4( idk::vec2(0.f, 1.f), idk::vec2(2.f,3.f) ) == idk::vec4( 0.f, 1.f, 2.f, 3.f )
 	);
 
 	EXPECT_TRUE(
-		(idk::vec4(idk::vec3(2.f, 3.f, 1.f), 1.f)) == idk::vec4(2.f, 3.f, 1.f, 1.f)
+		idk::vec4(idk::vec3(2.f, 3.f, 1.f), 1.f) == idk::vec4(2.f, 3.f, 1.f, 1.f)
 	);
 
 	EXPECT_TRUE(
-		(idk::vec3(idk::vec4(2.f, 3.f, 1.f, 1.f))) == idk::vec3(2.f, 3.f, 1.f)
+		idk::vec3(idk::vec4(2.f, 3.f, 1.f, 1.f)) == idk::vec3(2.f, 3.f, 1.f)
 	);
 }
 
