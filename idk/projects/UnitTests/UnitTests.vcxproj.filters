@@ -16,6 +16,10 @@
     </ClCompile>
     <ClCompile Include="TestDispatcher.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
+    <ClCompile Include="SpeedTest.cpp" />
+    <ClCompile Include="TestQuaternion.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

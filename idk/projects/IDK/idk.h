@@ -12,6 +12,7 @@
 #include "math/angle.h"
 #include "math/vector.h"
 #include "math/matrix.h"
+#include "math/quaternion.h"
 
 namespace idk
 {
@@ -20,6 +21,8 @@ namespace idk
 	using vec2 = math::vector<real, 2>;
 	using vec3 = math::vector<real, 3>;
 	using vec4 = math::vector<real, 4>;
+
+	using quat = math::quaternion<real>;
 	
 	using mat2 = math::matrix<real, 2, 2>;
 	using mat3 = math::matrix<real, 3, 3>;

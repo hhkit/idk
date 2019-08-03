@@ -26,6 +26,9 @@
       <UniqueIdentifier>{96518433-03f0-4cae-b02e-a7ee5d114378}</UniqueIdentifier>
       <Extensions>.natvis</Extensions>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{3826792b-f531-4783-8d98-3701dfbfed9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -76,11 +79,23 @@
     <ClInclude Include="core\Handleable.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\Entity.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="math\vector_swizzle.h">
       <Filter>math\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="util\meta.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GameObject.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Component.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Transform.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="math\quaternion.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +109,9 @@
       <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="core\ObjectHandle.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Component.cpp">
       <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,6 +149,9 @@
     <None Include="core\ObjectHandle.inl">
       <Filter>core</Filter>
     </None>
+    <None Include="util\meta.inl">
+      <Filter>util</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
@@ -142,7 +163,7 @@
     <Natvis Include="_natvis\angle.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
-    <Natvis Include="core\objectpool.natvis">
+    <Natvis Include="_natvis\objectpool.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

@@ -350,3 +350,4 @@ MigrationBackup/
 /idk/engine
 /idk/testbin
 /idk/testbuild
+/idk/build/tests

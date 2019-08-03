@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\Entity.h" />
+    <ClInclude Include="core\Component.h" />
+    <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="core\Handleable.h" />
     <ClInclude Include="core\ObjectHandle_detail.h" />
     <ClInclude Include="core\ObjectPool.h" />
+    <ClInclude Include="common\Transform.h" />
+    <ClInclude Include="math\quaternion.h" />
     <ClInclude Include="event\Dispatcher.h" />
     <ClInclude Include="event\Dispatcher_detail.h" />
     <ClInclude Include="math\angle.h" />
@@ -35,10 +38,12 @@
     <ClInclude Include="math\vector_dim.h" />
     <ClInclude Include="math\vector_swizzle.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="util\meta.h" />
     <ClInclude Include="util\casts.h" />
     <ClInclude Include="core\ObjectHandle.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\ObjectHandle.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -57,11 +62,12 @@
     <None Include="math\matrix.inl" />
     <None Include="math\vector.inl" />
     <None Include="math\vector_detail.inl" />
+    <None Include="util\meta.inl" />
     <None Include="util\casts.inl" />
     <None Include="core\ObjectPool.inl" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="core\objectpool.natvis" />
+    <Natvis Include="_natvis\objectpool.natvis" />
     <Natvis Include="_natvis\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />
     <Natvis Include="_natvis\vector.natvis" />
@@ -129,9 +135,10 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)D</TargetName>
+    <TargetName>coreD</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -143,7 +150,9 @@
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <TargetName>core</TargetName>
+    <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -171,6 +180,8 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,6 +223,8 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
