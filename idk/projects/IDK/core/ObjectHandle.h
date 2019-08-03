@@ -2,7 +2,7 @@
 #include <tuple>
 #include <string>
 
-#include "../idk.h"
+#include <idk.h>
 #include "ObjectHandle_detail.h"
 
 #pragma warning(disable:4201)
@@ -24,12 +24,10 @@ namespace idk
 
 		GenericHandle() = default;
 		explicit GenericHandle(uint64_t id);
-		GenericHandle(
-			uint8_t  type,
-			uint8_t  scene,
-			uint16_t uses,
-			uint32_t index
-		);
+		GenericHandle(uint8_t  type, uint8_t  scene, uint16_t uses, uint32_t index);
+
+		template<typename T> 
+		bool is_type() const;
 	};
 
 	template<typename T>

@@ -1,7 +1,7 @@
 #pragma once
 #include <tuple>
 
-#include "../idk.h"
+#include <idk.h>
 
 namespace idk::detail
 {

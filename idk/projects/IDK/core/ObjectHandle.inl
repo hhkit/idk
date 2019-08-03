@@ -3,11 +3,19 @@
 
 namespace idk
 {
+
+
+	template<typename T>
+	bool GenericHandle::is_type() const
+	{
+		return ObjectHandle<T>::type_id == type;
+	}
+
 	template<typename T>
 	inline ObjectHandle<T>::ObjectHandle(const GenericHandle& handle)
 		: GenericHandle{handle.id}
 	{
-		assert(ObjectHandle<T>::type_id == handle.type);
+		assert(handle.is_type<T>());
 	}
 
 	template<typename T>

@@ -1,8 +1,15 @@
 #include "pch.h"
 #include "../IDK/idk.h"
 #include "../IDK/core/ObjectPool.h"
-#include "../IDK/core/Entity.h"
+#include "../IDK/core/GameObject.h"
+#include "../IDK/core/Component.h"
 #include <iostream>
+
+class TestComponent : public idk::Component<TestComponent>
+{
+
+};
+
 
 TEST(ObjectPool, TestIndexInTuple)
 {
@@ -36,16 +43,19 @@ TEST(ObjectPool, TestObjectPooling)
 {
 	using namespace idk;
 
-	ObjectPool<Entity> entities{5};
+	ObjectPool<GameObject> entities{5};
 	auto h = entities.emplace();
 	auto h2 = entities.emplace();
 	for (int i = 0; i < 10; ++i)
 	{
 		entities.emplace();
 	}
-	*entities.at(h) = Entity{};
+	*entities.at(h) = GameObject{};
 	entities.remove(h);
 	EXPECT_EQ(entities.at(h), nullptr);
 	EXPECT_NE(entities.at(h2), nullptr);
 	entities.emplace();
+
+	TestComponent t;
+	t.GetHandle();
 }

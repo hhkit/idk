@@ -1,5 +1,6 @@
 #pragma once
-#include "../idk.h"
+#include <idk.h>
+#include <util/meta.h>
 
 namespace idk
 {
@@ -54,6 +55,8 @@ namespace idk
 		ObjectPool(ObjectPool&&) = delete;
 		ObjectPool& operator=(const ObjectPool&) = delete;
 		ObjectPool& operator=(ObjectPool&&) = delete;
+
+		static_assert(std::is_base_of_v<Handleable<T>, T>, "Object must be Handleable");
 	};
 }
 
