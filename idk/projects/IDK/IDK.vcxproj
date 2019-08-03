@@ -80,6 +80,7 @@
     <Natvis Include="_natvis\objectpool.natvis" />
     <Natvis Include="_natvis\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />
+    <Natvis Include="_natvis\scene.natvis" />
     <Natvis Include="_natvis\vector.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

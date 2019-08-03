@@ -193,5 +193,6 @@
     <Natvis Include="_natvis\objectpool.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
+    <Natvis Include="_natvis\scene.natvis" />
   </ItemGroup>
 </Project>
