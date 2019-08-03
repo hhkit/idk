@@ -29,14 +29,11 @@
     <Filter Include="common">
       <UniqueIdentifier>{3826792b-f531-4783-8d98-3701dfbfed9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\handles">
+      <UniqueIdentifier>{d846b40e-7906-4078-8b7f-8d84c275fb09}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="idk.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="math\matrix.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -67,15 +64,6 @@
     <ClInclude Include="util\casts.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="core\ObjectPool.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\ObjectHandle.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\ObjectHandle_detail.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="math\vector_swizzle.h">
       <Filter>math\detail</Filter>
     </ClInclude>
@@ -97,25 +85,49 @@
     <ClInclude Include="core\Handleables.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="core\ObjectHandle.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ObjectHandle_detail.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ObjectPool.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="idk.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="core\Scene.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Scene_detail.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Parent.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ComponentIncludes.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="math\matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="math\vector.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="core\ObjectHandle.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="core\Component.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="common\Transform.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ObjectHandle.cpp">
+      <Filter>core\handles</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="core\Scene.cpp">
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,17 +158,20 @@
     <None Include="util\casts.inl">
       <Filter>util</Filter>
     </None>
-    <None Include="core\ObjectPool.inl">
-      <Filter>core</Filter>
-    </None>
-    <None Include="core\ObjectHandle.inl">
-      <Filter>core</Filter>
-    </None>
     <None Include="util\meta.inl">
       <Filter>util</Filter>
     </None>
     <None Include="math\quaternion.inl">
       <Filter>math</Filter>
+    </None>
+    <None Include="core\ObjectHandle.inl">
+      <Filter>core\handles</Filter>
+    </None>
+    <None Include="core\ObjectPool.inl">
+      <Filter>core\handles</Filter>
+    </None>
+    <None Include="core\Scene.inl">
+      <Filter>core</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

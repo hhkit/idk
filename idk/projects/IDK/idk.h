@@ -4,15 +4,17 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <memory>
+
 #include <stddef.h>
 #include <functional>
 
-#include "math/constants.h"
-#include "math/arith.h"
-#include "math/angle.h"
-#include "math/vector.h"
-#include "math/matrix.h"
-#include "math/quaternion.h"
+#include <math/constants.h>
+#include <math/arith.h>
+#include <math/angle.h>
+#include <math/vector.h>
+#include <math/matrix.h>
+#include <math/quaternion.h>
 
 namespace idk
 {
@@ -57,4 +59,11 @@ namespace idk
 
 	template<typename ... Ts>
 	using tuple = std::tuple<Ts...>;
+
+	// smart pointers
+	template<typename T>
+	using unique_ptr = std::unique_ptr<T>;
+
+	template<typename T>
+	using shared_ptr = std::shared_ptr<T>;
 }

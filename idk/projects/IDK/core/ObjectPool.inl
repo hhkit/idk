@@ -7,9 +7,10 @@
 namespace idk
 {
 	template<typename T>
-	ObjectPool<T>::ObjectPool(size_t reserve)
-		: lookup(reserve), intern(reserve*sizeof(T))
+	ObjectPool<T>::ObjectPool(uint8_t scene_index)
+		: lookup(reserve), intern(reserve*sizeof(T)), scene_index{scene_index}
 	{
+		static_assert(std::is_base_of_v<Handleable<T>, T>, "Object must be Handleable");
 	}
 
 	template<typename T>
@@ -40,7 +41,7 @@ namespace idk
 		if (handle.index > lookup.size())
 			return false;
 
-		return lookup[handle.index].intern_index != invalid && lookup[handle.index].uses == handle.uses;
+		return handle.scene == scene_index && lookup[handle.index].intern_index != invalid && lookup[handle.index].uses == handle.uses;
 	}
 
 	template<typename T>
@@ -61,7 +62,7 @@ namespace idk
 		// first_free is now invalid
 		shift_first_free();
 		
-		return std::get<T&>(res).handle = Handle{ index, create_inflect.uses };
+		return std::get<T&>(res).handle = Handle{ index, create_inflect.uses, scene_index };
 	}
 
 	template<typename T>
@@ -82,7 +83,7 @@ namespace idk
 		create_inflect.intern_index = std::get<index_t>(res);
 		create_inflect.uses         = handle.uses;
 
-		return std::get<T&>(res).handle = Handle{ index, create_inflect.uses };
+		return std::get<T&>(res).handle = Handle{ handle.index, create_inflect.uses, scene_index };
 	}
 
 	template<typename T>

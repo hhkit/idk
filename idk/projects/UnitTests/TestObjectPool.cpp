@@ -3,6 +3,7 @@
 #include "../IDK/core/ObjectPool.h"
 #include "../IDK/core/GameObject.h"
 #include "../IDK/core/Component.h"
+#include <core/Scene.h>
 #include <iostream>
 
 class TestComponent : public idk::Component<TestComponent>
@@ -58,4 +59,6 @@ TEST(ObjectPool, TestObjectPooling)
 
 	TestComponent t;
 	t.GetHandle();
+
+
 }

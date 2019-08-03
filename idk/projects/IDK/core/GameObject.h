@@ -4,7 +4,8 @@
 
 namespace idk
 {
-	class GameObject : public Handleable<GameObject>
+	class GameObject 
+		: public Handleable<GameObject>
 	{
 	public:
 		GameObject() = default;

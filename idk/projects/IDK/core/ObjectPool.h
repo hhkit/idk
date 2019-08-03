@@ -14,7 +14,7 @@ namespace idk
 		using Handle = idk::ObjectHandle<T>;
 		static constexpr auto type_id = Handle::type_id;
 
-		ObjectPool(size_t reserve = 8192);
+		ObjectPool(uint8_t scene_index = 0);
 		~ObjectPool();
 
 		// accessors
@@ -32,6 +32,7 @@ namespace idk
 		T&     operator[](const Handle&) const;
 	private:
 		using index_t = unsigned;
+		static constexpr auto reserve = 8192;
 		static constexpr auto invalid = index_t{ 0xFFFFFFFF };
 
 		struct HandleInflect
@@ -46,6 +47,8 @@ namespace idk
 		index_t first_free_handle  = 0;
 		index_t pool_size          = 0;
 
+		const uint8_t scene_index;
+
 		void shift_first_free();
 		void grow();
 		tuple<T&, index_t> create();
@@ -55,8 +58,6 @@ namespace idk
 		ObjectPool(ObjectPool&&) = delete;
 		ObjectPool& operator=(const ObjectPool&) = delete;
 		ObjectPool& operator=(ObjectPool&&) = delete;
-
-		static_assert(std::is_base_of_v<Handleable<T>, T>, "Object must be Handleable");
 	};
 }
 
