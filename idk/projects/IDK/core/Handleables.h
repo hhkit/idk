@@ -7,6 +7,7 @@ namespace idk
 	/// YOU WILL BREAK ALL SERIALIZATION
 	using Handleables = tuple<
 		class GameObject,
-		class Transform
+		class Transform,
+		class Parent
 	>;
 }
