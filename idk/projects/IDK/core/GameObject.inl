@@ -23,6 +23,15 @@ namespace idk
 		return {};
 	}
 	template<typename T>
+	inline bool GameObject::HasComponent()
+	{
+		for (auto& elem : _components)
+			if (elem.type == ObjectHandle<T>::type_id)
+				return true;
+
+		return {};
+	}
+	template<typename T>
 	bool GameObject::RemoveComponent(const ObjectHandle<T>& handle)
 	{
 		for (auto& elem : _components)

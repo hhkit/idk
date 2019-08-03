@@ -18,6 +18,7 @@ namespace idk
 		// components
 		template<typename T> ObjectHandle<T>      AddComponent();
 		template<typename T> opt<ObjectHandle<T>> GetComponent();
+		template<typename T> bool                 HasComponent();
 		template<typename T> bool                 RemoveComponent(const ObjectHandle<T>&);
 
 		// active flags
