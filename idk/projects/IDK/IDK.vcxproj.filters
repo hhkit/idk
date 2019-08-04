@@ -108,6 +108,7 @@
     <ClInclude Include="core\Handle_detail.h">
       <Filter>core\handles</Filter>
     </ClInclude>
+    <ClInclude Include="util\span.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -179,6 +180,7 @@
     <None Include="core\Handle.inl">
       <Filter>core\handles</Filter>
     </None>
+    <None Include="util\span.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

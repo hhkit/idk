@@ -45,6 +45,7 @@
     <ClInclude Include="util\meta.h" />
     <ClInclude Include="util\casts.h" />
     <ClInclude Include="core\Handle.h" />
+    <ClInclude Include="util\span.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\Transform.cpp" />
@@ -75,6 +76,7 @@
     <None Include="util\meta.inl" />
     <None Include="util\casts.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="util\span.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\objectpool.natvis" />
