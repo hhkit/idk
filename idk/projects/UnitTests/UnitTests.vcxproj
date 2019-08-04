@@ -51,6 +51,7 @@
     <ClCompile Include="TestAngle.cpp" />
     <ClCompile Include="TestArith.cpp" />
     <ClCompile Include="TestDispatcher.cpp" />
+    <ClCompile Include="TestGameState.cpp" />
     <ClCompile Include="TestMatrix.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
     <ClCompile Include="TestQuaternion.cpp" />

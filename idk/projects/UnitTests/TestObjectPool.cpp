@@ -50,7 +50,7 @@ TEST(ObjectPool, TestObjectPooling)
 	auto h = op.Create(0);
 	auto h_fail = op.Create(1);
 	auto h2 = op.Create(0);
-
+		
 	EXPECT_TRUE(op.Validate(h));
 	EXPECT_TRUE(op.Validate(h2));
 	EXPECT_FALSE(op.Validate(Handle<GameObject>{}));

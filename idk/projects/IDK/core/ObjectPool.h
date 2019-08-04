@@ -11,7 +11,7 @@ namespace idk
 	public:
 		using Handle = Handle<T>;
 		using index_t = GenericHandle::index_t;
-		using uses_t  = GenericHandle::uses_t;
+		using gen_t  = GenericHandle::gen_t;
 		using scene_t = GenericHandle::scene_t;
 		
 		ObjectPool();
@@ -37,7 +37,7 @@ namespace idk
 		struct Inflect
 		{
 			index_t index = invalid;
-			uses_t  uses  = 0;
+			gen_t  gen  = 0;
 		};
 
 		struct Map

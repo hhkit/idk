@@ -1,9 +1,10 @@
+
 #pragma once
+#include "Handle.h"
+#include "GameState.h"
 
 namespace idk
 {
-
-
 	template<typename T>
 	bool GenericHandle::is_type() const
 	{
@@ -18,9 +19,27 @@ namespace idk
 	}
 
 	template<typename T>
-	Handle<T>::Handle(uint32_t index, uint16_t uses, uint8_t scene)
-		: GenericHandle{ type_id, scene, uses, index }
+	Handle<T>::Handle(uint32_t index, uint16_t gen, uint8_t scene)
+		: GenericHandle{ type_id, scene, gen, index }
 	{
+	}
+
+	template<typename T>
+	Handle<T>::operator bool() const
+	{
+		return GameState::GetGameState().ValidateHandle(*this);
+	}
+
+	template<typename T>
+	T& Handle<T>::operator*() const
+	{
+		return *this->operator->();
+	}
+
+	template<typename T>
+	T* Handle<T>::operator->() const
+	{
+		return GameState::GetGameState().GetObject(*this);
 	}
 
 	template <typename T>

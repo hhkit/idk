@@ -28,14 +28,29 @@
   <Type Name="idk::Handle&lt; * &gt;">
     <DisplayString>[id={id, h}]</DisplayString>
     <Expand>
-      <Item Name="type"> static_cast&lt;int&gt;(type )</Item>
-      <Item Name="scene">static_cast&lt;int&gt;(scene)</Item>
-      <Item Name="uses"> static_cast&lt;int&gt;(uses )</Item>
-      <Item Name="index">static_cast&lt;int&gt;(index)</Item>
+      <CustomListItems MaxItemsPerView="16">
+        <Variable Name="_index" InitialValue="-1"/>
+        <If Condition="
+                       id != 0
+            &amp;&amp; type_id == type
+            &amp;&amp; ((ObjectPool&lt;$T1&gt;*) GameState::_instance-&gt;_objects[type]._Ptr)->_scenes[scene].slots.size()
+            &amp;&amp; ((ObjectPool&lt;$T1&gt;*) GameState::_instance-&gt;_objects[type]._Ptr)->_scenes[scene].slots[index].index != ObjectPool&lt;$T1&gt;::invalid
+            &amp;&amp; ((ObjectPool&lt;$T1&gt;*) GameState::_instance-&gt;_objects[type]._Ptr)->_scenes[scene].slots[index].gen == gen
+            ">
+          <Item Name="[value]">
+            ((ObjectPool&lt;$T1&gt;*) GameState::_instance-&gt;_objects[type]._Ptr)->_pool[
+            ((ObjectPool&lt;$T1&gt;*) GameState::_instance-&gt;_objects[type]._Ptr)->_scenes[scene].slots[index].index
+            ]</Item>
+        </If>
+        <Else>
+          <Item Name="[value]">($T1*)0</Item>
+        </Else>
+        
+      </CustomListItems>
     </Expand>
   </Type>
 
-  <Type Name="idk::Handleable&lt; * &gt;">
+  <Type Name="idk::Handleable&lt; * &gt;" Inheritable="false">
     <DisplayString>{{id={handle.id, h}}}</DisplayString>
   </Type>
 </AutoVisualizer>

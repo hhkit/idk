@@ -1,9 +1,17 @@
 #pragma once
 
 #include "GameObject.h"
-
+#include "GameState.h"
 namespace idk
 {
+	template<typename T>
+	inline Handle<T> GameObject::AddComponent()
+	{
+		auto comp = GameState::GetGameState().CreateObject<T>(GetHandle().scene);
+		comp->_gameObject = GetHandle();
+		_components.emplace_back(comp);
+		return comp;
+	}
 	template<typename T>
 	Handle<T> GameObject::GetComponent()
 	{

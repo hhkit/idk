@@ -7,8 +7,8 @@ namespace idk
 		: id{id}
 	{
 	}
-	GenericHandle::GenericHandle(uint8_t type, uint8_t scene, uint16_t uses, uint32_t index)
-		: type{ type }, scene{ scene }, uses{uses}, index{index}
+	GenericHandle::GenericHandle(uint8_t type, uint8_t scene, uint16_t gen, uint32_t index)
+		: type{ type }, scene{ scene }, gen{gen}, index{index}
 	{
 	}
 }

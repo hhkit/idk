@@ -28,6 +28,7 @@
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
+    <ClInclude Include="math\matrix_transforms.h" />
     <ClInclude Include="math\quaternion.h" />
     <ClInclude Include="event\Dispatcher.h" />
     <ClInclude Include="event\Dispatcher_detail.h" />
@@ -42,6 +43,7 @@
     <ClInclude Include="math\vector_swizzle.h" />
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
+    <ClInclude Include="core\Scene.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util\meta.h" />
     <ClInclude Include="util\casts.h" />
@@ -55,6 +57,7 @@
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />
     <ClCompile Include="core\Handle.cpp" />
+    <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
     <ClCompile Include="pch.cpp">
@@ -64,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="core\GameObject.inl" />
+    <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
     <None Include="core\Scene.inl" />

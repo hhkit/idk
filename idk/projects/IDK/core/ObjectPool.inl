@@ -32,7 +32,7 @@ namespace idk
 
 		auto& inflect = scene.slots[handle.index];
 
-		return inflect.index != invalid && inflect.uses == handle.uses;
+		return inflect.index != invalid && inflect.gen == handle.gen;
 	}
 	template<typename T>
 	inline T* ObjectPool<T>::Get(const Handle& handle)
@@ -56,7 +56,7 @@ namespace idk
 
 		// generate handle
 		auto& slot = scene.slots[scene.first_free];
-		auto handle = Handle{ scene.first_free, ++slot.uses, scene_id };
+		auto handle = Handle{ scene.first_free, ++slot.gen, scene_id };
 		slot.index = s_cast<index_t>(_pool.emplace_back());
 		scene.shift();
 		
@@ -148,8 +148,8 @@ namespace idk
 				auto& pool_end = _pool.back();
 				auto  end_handle = pool_end.handle;
 				auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
-
 				auto& destroyme = _pool[elem.index];
+				end_slot.index = elem.index;
 
 				// prepare for destruction
 				std::swap(destroyme, pool_end);

@@ -14,14 +14,14 @@ namespace idk
 	{
 		using type_t  = uint8_t;
 		using scene_t = uint8_t;
-		using uses_t  = uint16_t;
+		using gen_t  = uint16_t;
 		using index_t = uint32_t;
 
 		union {
 			struct {
 				type_t  type;
 				scene_t scene;
-				uses_t  uses;
+				gen_t   gen;
 				index_t index;
 			};
 
@@ -30,7 +30,7 @@ namespace idk
 
 		GenericHandle() = default;
 		explicit GenericHandle(uint64_t id);
-		GenericHandle(uint8_t  type, uint8_t  scene, uint16_t uses, uint32_t index);
+		GenericHandle(uint8_t  type, uint8_t  scene, uint16_t gen, uint32_t index);
 
 		template<typename T> 
 		bool is_type() const;
@@ -45,7 +45,7 @@ namespace idk
 
 		Handle() = default;
 		explicit Handle(const GenericHandle&);
-		Handle(uint32_t index, uint16_t uses, uint8_t scene = 0);
+		Handle(uint32_t index, uint16_t gen, uint8_t scene = 0);
 
 		explicit operator bool() const;
 		T& operator*() const;

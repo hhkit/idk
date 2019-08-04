@@ -115,6 +115,10 @@
     <ClInclude Include="core\Components.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="core\Scene.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix_transforms.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -139,6 +143,7 @@
     <ClCompile Include="core\GameState.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="core\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -192,6 +197,7 @@
     <None Include="core\ObjectPool.inl">
       <Filter>core\handles</Filter>
     </None>
+    <None Include="core\GameState.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
