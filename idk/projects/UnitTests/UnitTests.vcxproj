@@ -47,7 +47,6 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TestScene.cpp" />
     <ClCompile Include="SpeedTest.cpp" />
     <ClCompile Include="TestAngle.cpp" />
     <ClCompile Include="TestArith.cpp" />

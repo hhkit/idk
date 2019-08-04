@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="idk::ObjectPool&lt; * &gt;">
-    <DisplayString>{{size={pool_size}}}</DisplayString>
+  <Type Name="idk::pool&lt; * &gt;">
+    <DisplayString>[size={_size}]</DisplayString>
     <Expand>
-      <Item Name="[size]">pool_size</Item>
       <ArrayItems>
-        <Size>pool_size</Size>
-        <ValuePointer>reinterpret_cast&lt;$T1*&gt;(&amp;intern[0])</ValuePointer>
+        <Size>_size</Size>
+        <ValuePointer>($T1*)(&amp;_intern[0])</ValuePointer>
       </ArrayItems>
     </Expand>
   </Type>
 
-  <Type Name="idk::ObjectHandle&lt; * &gt;">
+  <Type Name="idk::ObjectPool&lt; * &gt;">
+    <Expand>
+      <Item Name="[size]">sceneCounter</Item>
+      <CustomListItems MaxItemsPerView="16">
+        <Variable Name="sceneCounter" InitialValue="0"/>
+        <Loop>
+          <If Condition="_scenes[sceneCounter].slots.size() != 0">
+            <Item Name="[{sceneCounter}]">_scenes[sceneCounter]</Item>
+          </If>
+          <Exec>sceneCounter += 1</Exec>  
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+  
+  <Type Name="idk::Handle&lt; * &gt;">
     <DisplayString>[id={id, h}]</DisplayString>
     <Expand>
       <Item Name="type"> static_cast&lt;int&gt;(type )</Item>

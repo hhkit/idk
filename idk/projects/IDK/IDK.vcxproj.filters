@@ -85,14 +85,8 @@
     <ClInclude Include="core\Handleables.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\ObjectPool.h">
-      <Filter>core\handles</Filter>
-    </ClInclude>
     <ClInclude Include="idk.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="core\Scene.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="core\Scene_detail.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -108,7 +102,16 @@
     <ClInclude Include="core\Handle_detail.h">
       <Filter>core\handles</Filter>
     </ClInclude>
-    <ClInclude Include="util\span.h" />
+    <ClInclude Include="util\pool.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\span.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="idk_config.h" />
+    <ClInclude Include="core\ObjectPool.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -124,9 +127,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="core\Scene.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="core\GameObject.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -168,9 +168,6 @@
     <None Include="math\quaternion.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="core\ObjectPool.inl">
-      <Filter>core\handles</Filter>
-    </None>
     <None Include="core\Scene.inl">
       <Filter>core</Filter>
     </None>
@@ -180,7 +177,15 @@
     <None Include="core\Handle.inl">
       <Filter>core\handles</Filter>
     </None>
-    <None Include="util\span.inl" />
+    <None Include="util\pool.inl">
+      <Filter>util</Filter>
+    </None>
+    <None Include="util\span.inl">
+      <Filter>util</Filter>
+    </None>
+    <None Include="core\ObjectPool.inl">
+      <Filter>core\handles</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

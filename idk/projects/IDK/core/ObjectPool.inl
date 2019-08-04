@@ -1,154 +1,162 @@
-#pragma once
 #include "ObjectPool.h"
-#include "Handle.h"
-#include <memory>
-#include <cmath>
-
+#pragma once
 namespace idk
 {
-	template<typename T>
-	ObjectPool<T>::ObjectPool(uint8_t scene_index)
-		: lookup(reserve), intern(reserve*sizeof(T)), scene_index{scene_index}
+	template <typename T>
+	ObjectPool<T>::ObjectPool()
 	{
-		static_assert(std::is_base_of_v<Handleable<T>, T>, "Object must be Handleable");
 	}
 
 	template<typename T>
 	inline ObjectPool<T>::~ObjectPool()
 	{
-		std::destroy(data(), data() + pool_size);
+	}
+	template<typename T>
+	inline span<T> ObjectPool<T>::GetSpan()
+	{
+		return _pool.span();
+	}
+
+	template<typename T>
+	inline bool ObjectPool<T>::Validate(const Handle& handle)
+	{
+		if (handle.id == 0)
+			return false;
+
+		if (handle.type != Handle::type_id)
+			return false;
+
+		auto& scene = _scenes[handle.scene];
+		if (handle.index >= scene.slots.size())
+			return false;
+
+		auto& inflect = scene.slots[handle.index];
+
+		return inflect.index != invalid && inflect.uses == handle.uses;
+	}
+	template<typename T>
+	inline T* ObjectPool<T>::Get(const Handle& handle)
+	{
+		if (Validate(handle) == false)
+			return nullptr;
+
+		auto& scene = _scenes[handle.scene];
+		return &_pool[scene.slots[handle.index].index];
+	}
+
+	template<typename T>
+	typename ObjectPool<T>::Handle ObjectPool<T>::Create(scene_t scene_id)
+	{
+		auto& scene = _scenes[scene_id];
+		if (scene.slots.empty())
+			return {};
+
+		if (scene.slots.size() == scene.first_free)
+			scene.grow();
+
+		// generate handle
+		auto& slot = scene.slots[scene.first_free];
+		auto handle = Handle{ scene.first_free, ++slot.uses, scene_id };
+		slot.index = s_cast<index_t>(_pool.emplace_back());
+		scene.shift();
+		
+		return _pool[slot.index].handle = handle;
 	}
 	
 	template<typename T>
-	T* ObjectPool<T>::at(const Handle& handle) const
+	typename ObjectPool<T>::Handle ObjectPool<T>::Create(const Handle& handle)
 	{
-		if (validate(handle) == false)
-			return nullptr;
+		if (handle.id == 0)
+			return handle;
 
-		auto& lookup_inflect = lookup[handle.index];
-		return &data()[lookup_inflect.intern_index];
+		auto& scene = _scenes[handle.scene];
+		if (scene.slots.empty())
+			return Handle{};
+
+		while (scene.slots.size() < handle.index)
+			scene.grow();
+
+		auto& slot = scene.slots[handle.index];
+
+		if (slot.index != invalid)
+			return Handle{};
+
+		slot.index = _pool.emplace_back();
+
+		if (handle.index < scene.first_free)
+			scene.first_free = handle.index;
+
+		if (handle.index == scene.first_free)
+			scene.shift();
+
+		return  _pool[slot.index].handle = handle;
 	}
 
 	template<typename T>
-	T* ObjectPool<T>::data() const
+	inline bool ObjectPool<T>::Destroy(const Handle& handle)
 	{
-		return r_cast<T*>(c_cast<byte*>(intern.data()));
-	}
-
-	template<typename T>
-	inline bool ObjectPool<T>::validate(const Handle& handle) const
-	{
-		if (handle.index > lookup.size())
+		if (Validate(handle) == false)
 			return false;
 
-		return handle.scene == scene_index && lookup[handle.index].intern_index != invalid && lookup[handle.index].uses == handle.uses;
+		auto& scene = _scenes[handle.scene];
+
+		auto& pool_end = _pool.back();
+		auto  end_handle = pool_end.handle;
+		auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
+		auto& destroy_slot = scene.slots[handle.index];
+
+		auto& destroyme = _pool[destroy_slot.index];
+
+		// prepare for destruction
+		std::swap(destroyme, pool_end);
+		_pool.pop_back();
+
+		// cleanup
+		std::swap(end_slot.index, destroy_slot.index);
+		destroy_slot.index = invalid;
+
+		if (handle.index < scene.first_free)
+			scene.first_free = handle.index;
+
+		return true;
 	}
-
+	
 	template<typename T>
-	template<typename ... Args>
-	typename ObjectPool<T>::Handle ObjectPool<T>::emplace(Args&& ... args)
+	bool ObjectPool<T>::ActivateScene(scene_t scene_id, size_t reserve)
 	{
-		if (first_free_handle == lookup.size())
-			grow();
-
-		auto& create_inflect = lookup[first_free_handle];
-
-		auto index = first_free_handle;
-
-		auto res = create(std::forward<Args>(args)...);
-		create_inflect.intern_index = std::get<index_t>(res);
-		
-		++create_inflect.uses;
-
-		// first_free is now invalid
-		shift_first_free();
-		
-		return std::get<T&>(res).handle = Handle{ index, create_inflect.uses, scene_index };
-	}
-
-	template<typename T>
-	template<typename ... Args>
-	typename ObjectPool<T>::Handle ObjectPool<T>::emplace_at(const Handle& handle, Args&& ... args)
-	{
-		if (handle.index == first_free_handle)
-			return emplace(std::forward<Args>(args)...);
-
-		if (handle.index > lookup.size())
-			grow();
-
-		auto& create_inflect = lookup[handle.index];
-
-		// ensure that the slot is unused
-		assert(lookup[handle.index].intern_index == invalid);
-
-		auto res = create(std::forward<Args>(args)...);
-		create_inflect.intern_index = std::get<index_t>(res);
-		create_inflect.uses         = handle.uses;
-
-		return std::get<T&>(res).handle = Handle{ handle.index, create_inflect.uses, scene_index };
-	}
-
-	template<typename T>
-	inline bool ObjectPool<T>::remove(const Handle& deleteHandle)
-	{
-		if (validate(deleteHandle) == false)
+		auto& scene = _scenes[scene_id];
+		if (scene.slots.size())
 			return false;
 
-		auto& deleteme = data()[lookup[deleteHandle.index].intern_index];
-		auto& end = data()[--pool_size];
-
-		auto endHandle = end.GetHandle();
-
-		std::swap(lookup[deleteHandle.index], lookup[endHandle.index]);
-		std::swap(deleteme, end);
-
-		lookup[deleteHandle.index].intern_index = invalid;
-		std::destroy_at(&end);
-
-		if (deleteHandle.index < first_free_handle)
-			first_free_handle = deleteHandle.index;
-
+		scene.slots.resize(reserve);
+		scene.first_free = 0;
 		return true;
 	}
 
 	template<typename T>
-	inline bool ObjectPool<T>::remove(T& removeme)
+	inline bool ObjectPool<T>::DeactivateScene(scene_t scene_id)
 	{
-		return remove(removeme.GetHandle());
-	}
+		auto& scene = _scenes[scene_id];
 
-	template<typename T>
-	T& ObjectPool<T>::operator[](const Handle& handle) const
-	{
-		return *at(handle);
-	}
+		if (scene.slots.empty())
+			return false;
 
-	template<typename T>
-	void ObjectPool<T>::shift_first_free()
-	{
-		while (first_free_handle != lookup.size() && lookup[first_free_handle].intern_index != invalid)
-			++first_free_handle;
-	}
-	template<typename T>
-	void ObjectPool<T>::grow()
-	{
-		lookup.resize(lookup.size() * 2);
+		for (auto& elem : scene.slots)
+			if (elem.index != invalid)
+			{
+				// destroy
+				auto& pool_end = _pool.back();
+				auto  end_handle = pool_end.handle;
+				auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
 
-		auto new_intern = vector<byte>(intern.size() * 2);
-		
-		auto internal_start = r_cast<T*>(intern.data());
-		auto internal_end   = internal_start + pool_size;
-		auto dest           = r_cast<T*>(new_intern.data());
-		std::uninitialized_move(internal_start, internal_end, dest);
-		std::destroy(internal_start, internal_end);
+				auto& destroyme = _pool[elem.index];
 
-		intern = std::move(new_intern);
-	}
-	template<typename T>
-	template<typename ... Args>
-	tuple<T&, typename ObjectPool<T>::index_t> ObjectPool<T>::create(Args&& ... args)
-	{
-		index_t retval = pool_size++;
-		return tuple<T&, index_t>{ *new (&data()[retval]) T{std::forward<Args>(args)...}, retval};
+				// prepare for destruction
+				std::swap(destroyme, pool_end);
+				_pool.pop_back();
+			}
+
+		scene.slots.clear();
+		return true;
 	}
 }

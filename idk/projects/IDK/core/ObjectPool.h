@@ -1,66 +1,55 @@
 #pragma once
 #include <idk.h>
-#include <util/meta.h>
+#include <core/Handle.h>
+#include <util/pool.h>
 
 namespace idk
 {
-	template <typename T>
-	class Handle;
-
-	template <typename T>
+	template<typename T>
 	class ObjectPool
 	{
 	public:
-		using Handle = idk::Handle<T>;
-		static constexpr auto type_id = Handle::type_id;
-
-		ObjectPool(uint8_t scene_index = 0);
+		using Handle = Handle<T>;
+		using index_t = GenericHandle::index_t;
+		using uses_t  = GenericHandle::uses_t;
+		using scene_t = GenericHandle::scene_t;
+		
+		ObjectPool();
 		~ObjectPool();
 
+		// iterators
+		span<T> GetSpan();
+
 		// accessors
-		T*   at(const Handle&) const;
-		T*   data() const;
-		bool validate(const Handle&) const;
+		bool   Validate(const Handle&);
+		T*     Get(const Handle&);
 
 		// modifiers
-		template<typename ... Args>
-		Handle emplace(Args&& ...);
-		template<typename ... Args>
-		Handle emplace_at(const Handle&, Args&& ...);
-		bool   remove(const Handle&);
-		bool   remove(T& removeme);
+		Handle Create(scene_t scene_id);
+		Handle Create(const Handle&);
+		bool   Destroy(const Handle&);
 
-		// operator overloads
-		T&     operator[](const Handle&) const;
+		bool ActivateScene(scene_t scene_id, size_t reserve = 8192);
+		bool DeactivateScene(scene_t scene_id);
+
 	private:
-		using index_t = unsigned;
-		static constexpr auto reserve = 8192;
-		static constexpr auto invalid = index_t{ 0xFFFFFFFF };
-
-		struct HandleInflect
+		static constexpr index_t invalid = index_t{ 0xFFFFFFFF };
+		struct Inflect
 		{
-			index_t  intern_index = invalid;
-			uint16_t uses         = index_t{};
+			index_t index = invalid;
+			uses_t  uses  = 0;
 		};
 
-		vector<HandleInflect> lookup;
-		vector<byte>          intern;
+		struct Map
+		{
+			vector<Inflect> slots;
+			unsigned first_free = 0;
+			void shift() { while (first_free != slots.size() && slots[first_free].index != invalid) ++first_free; }
+			void grow() { slots.resize(slots.size() * 3 / 2); }
+		};
 
-		index_t first_free_handle  = 0;
-		index_t pool_size          = 0;
-
-		const uint8_t scene_index;
-
-		void shift_first_free();
-		void grow();
-		template<typename ... Args>
-		tuple<T&, index_t> create(Args&&...);
-
-		// non-copiable non-movable
-		ObjectPool(const ObjectPool&) = delete;
-		ObjectPool(ObjectPool&&) = delete;
-		ObjectPool& operator=(const ObjectPool&) = delete;
-		ObjectPool& operator=(ObjectPool&&) = delete;
+		array<Map, MaxScene> _scenes;
+		pool<T> _pool;
 	};
 }
 

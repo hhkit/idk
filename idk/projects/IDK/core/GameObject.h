@@ -4,22 +4,20 @@
 
 namespace idk
 {
-	class Scene;
-
 	class GameObject 
 		: public Handleable<GameObject>
 	{
 	public:
-		GameObject(Scene* scene);
+		GameObject() = default;
 		GameObject(GameObject&&) = default;
 		GameObject& operator=(GameObject&&) = default;
 		~GameObject() = default;
 
 		// components
-		template<typename T> Handle<T>      AddComponent();
-		template<typename T> opt<Handle<T>> GetComponent();
-		template<typename T> bool                 HasComponent();
-		template<typename T> bool                 RemoveComponent(const Handle<T>&);
+		template<typename T> Handle<T> AddComponent();
+		template<typename T> Handle<T> GetComponent();
+		template<typename T> bool      HasComponent();
+		template<typename T> bool      RemoveComponent(const Handle<T>&);
 
 		// active flags
 		void SetActive(bool);
@@ -27,11 +25,6 @@ namespace idk
 		bool GetActiveInHierarchy() const;
 	private:
 		vector<GenericHandle> _components;
-		Scene* _scene = nullptr; // alternatively use handle to get scene
-
-		// helper functions
-		void SetScene(Scene* _scene);
-		friend class Scene;
 
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;

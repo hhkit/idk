@@ -1,9 +1,8 @@
 #include "pch.h"
-#include "../IDK/idk.h"
-#include "../IDK/core/ObjectPool.h"
-#include "../IDK/core/GameObject.h"
-#include "../IDK/core/Component.h"
-#include <core/Scene.h>
+#include <idk.h>
+#include <core/GameObject.h>
+#include <core/Component.h>
+#include <core/ObjectPool.h>
 #include <iostream>
 
 class TestComponent : public idk::Component<TestComponent>
@@ -43,22 +42,23 @@ TEST(ObjectPool, TestIndexInTuple)
 TEST(ObjectPool, TestObjectPooling)
 {
 	using namespace idk;
+	pool<int> p;
+	ObjectPool<class GameObject> op;
+	op.ActivateScene(0);
+	op.ActivateScene(2);
+	op.Create(2);
+	auto h = op.Create(0);
+	auto h_fail = op.Create(1);
+	auto h2 = op.Create(0);
 
-	ObjectPool<GameObject> entities{5};
-	auto h = entities.emplace(nullptr);
-	auto h2 = entities.emplace(nullptr);
-	for (int i = 0; i < 10; ++i)
-	{
-		entities.emplace(nullptr);
-	}
-	*entities.at(h) = GameObject{nullptr};
-	entities.remove(h);
-	EXPECT_EQ(entities.at(h), nullptr);
-	EXPECT_NE(entities.at(h2), nullptr);
-	entities.emplace(nullptr);
+	EXPECT_TRUE(op.Validate(h));
+	EXPECT_TRUE(op.Validate(h2));
+	EXPECT_FALSE(op.Validate(Handle<GameObject>{}));
 
-	TestComponent t;
-	t.GetHandle();
+	auto& go = *op.Get(h);
+	op.Destroy(h);
+	EXPECT_FALSE(op.Validate(h));
+	EXPECT_TRUE(op.Validate(h2));
 
-
+	op.DeactivateScene(0);
 }

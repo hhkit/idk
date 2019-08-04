@@ -12,12 +12,17 @@ namespace idk
 {
 	struct GenericHandle
 	{
+		using type_t  = uint8_t;
+		using scene_t = uint8_t;
+		using uses_t  = uint16_t;
+		using index_t = uint32_t;
+
 		union {
 			struct {
-				uint8_t  type;
-				uint8_t  scene;
-				uint16_t uses;
-				uint32_t index;
+				type_t  type;
+				scene_t scene;
+				uses_t  uses;
+				index_t index;
 			};
 
 			uint64_t id = 0;

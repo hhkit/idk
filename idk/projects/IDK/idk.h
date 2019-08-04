@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <functional>
 
+#include <idk_config.h>
 #include <math/constants.h>
 #include <math/arith.h>
 #include <math/angle.h>

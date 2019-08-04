@@ -20,7 +20,6 @@
     <ClCompile Include="TestQuaternion.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
