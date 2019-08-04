@@ -25,6 +25,9 @@ namespace idk::math
 		>
 		explicit matrix(U ... values);
 
+		// upcast constructor
+		explicit matrix(const matrix<T, R - 1, C - 1>&);
+
 		// common functions
 		T               determinant() const;
 		matrix<T, C, R> transpose() const;
