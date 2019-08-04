@@ -85,12 +85,6 @@
     <ClInclude Include="core\Handleables.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\ObjectHandle.h">
-      <Filter>core\handles</Filter>
-    </ClInclude>
-    <ClInclude Include="core\ObjectHandle_detail.h">
-      <Filter>core\handles</Filter>
-    </ClInclude>
     <ClInclude Include="core\ObjectPool.h">
       <Filter>core\handles</Filter>
     </ClInclude>
@@ -108,6 +102,12 @@
     <ClInclude Include="core\ComponentIncludes.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="core\Handle.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Handle_detail.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -122,15 +122,15 @@
     <ClCompile Include="common\Transform.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="core\ObjectHandle.cpp">
-      <Filter>core\handles</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="core\Scene.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="core\GameObject.cpp">
       <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Handle.cpp">
+      <Filter>core\handles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +167,6 @@
     <None Include="math\quaternion.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="core\ObjectHandle.inl">
-      <Filter>core\handles</Filter>
-    </None>
     <None Include="core\ObjectPool.inl">
       <Filter>core\handles</Filter>
     </None>
@@ -178,6 +175,9 @@
     </None>
     <None Include="core\GameObject.inl">
       <Filter>core</Filter>
+    </None>
+    <None Include="core\Handle.inl">
+      <Filter>core\handles</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +193,8 @@
     <Natvis Include="_natvis\objectpool.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
-    <Natvis Include="_natvis\scene.natvis" />
+    <Natvis Include="_natvis\scene.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

@@ -41,11 +41,11 @@ namespace idk
 		return destroy_jt[handle.type](*this, handle);
 	}
 
-	ObjectHandle<GameObject> Scene::CreateGameObject()
+	Handle<GameObject> Scene::CreateGameObject()
 	{
 		return CreateObject<GameObject>(this);
 	}
-	ObjectHandle<GameObject> Scene::CreateGameObjectAt(const ObjectHandle<GameObject>& handle)
+	Handle<GameObject> Scene::CreateGameObjectAt(const Handle<GameObject>& handle)
 	{
 		return CreateObjectAt(handle, this);
 	}

@@ -8,7 +8,7 @@ namespace idk
 	using Handleables = tuple<
 		class GameObject,
 		class Transform,
-		class Parent,
+		class Parent
 
 	/// EDITOR
 	// class Prefab,

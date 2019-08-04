@@ -5,13 +5,13 @@
 namespace idk
 {
 	template <typename T>
-	class ObjectHandle;
+	class Handle;
 
 	template <typename T>
 	class ObjectPool
 	{
 	public:
-		using Handle = idk::ObjectHandle<T>;
+		using Handle = idk::Handle<T>;
 		static constexpr auto type_id = Handle::type_id;
 
 		ObjectPool(uint8_t scene_index = 0);

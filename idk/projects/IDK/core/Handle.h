@@ -4,7 +4,7 @@
 
 #include <idk.h>
 #include "Handleables.h"
-#include "ObjectHandle_detail.h"
+#include "Handle_detail.h"
 
 #pragma warning(disable:4201)
 
@@ -32,15 +32,15 @@ namespace idk
 	};
 
 	template<typename T>
-	class ObjectHandle 
+	class Handle 
 		: public GenericHandle
 	{
 	public:
 		static constexpr auto type_id = detail::index_in_tuple_v<T, idk::Handleables>;
 
-		ObjectHandle() = default;
-		explicit ObjectHandle(const GenericHandle&);
-		ObjectHandle(uint32_t index, uint16_t uses, uint8_t scene = 0);
+		Handle() = default;
+		explicit Handle(const GenericHandle&);
+		Handle(uint32_t index, uint16_t uses, uint8_t scene = 0);
 
 		operator bool() const;
 		T& operator*() const;
@@ -54,14 +54,14 @@ namespace idk
 	class Handleable
 	{
 	public:
-		const ObjectHandle<T>& GetHandle() { return handle; }
+		const Handle<T>& GetHandle() { return handle; }
 	private:
-		ObjectHandle<T> handle;
+		Handle<T> handle;
 		friend class ObjectPool<T>;
 	};
 
 	template <typename T>
-	ObjectHandle<T> handle_cast(const GenericHandle&);
+	Handle<T> handle_cast(const GenericHandle&);
 }
 
-#include "ObjectHandle.inl"
+#include "Handle.inl"

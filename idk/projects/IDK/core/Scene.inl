@@ -10,35 +10,35 @@ namespace idk
 	}
 	
 	template <typename T>
-	bool Scene::Validate(const ObjectHandle<T>& handle)
+	bool Scene::Validate(const Handle<T>& handle)
 	{
 		return GetPool<T>().validate(handle);
 	}
 
 	template<typename T>
-	Scene::RetType<T> Scene::GetObject(const ObjectHandle<T>& handle)
+	Scene::RetType<T> Scene::GetObject(const Handle<T>& handle)
 	{
 		return GetPool<T>().at(handle);
 	}
 	template<typename T>
 	Scene::RetType<T> Scene::GetObject(const GenericHandle& handle)
 	{
-		if (handle.type != ObjectHandle<T>::type_id)
+		if (handle.type != Handle<T>::type_id)
 			return {};
 		return GetObject(handle_cast<T>(handle));
 	}
 	template<typename T, typename ... Args>
-	inline ObjectHandle<T> Scene::CreateObject(Args&& ... args)
+	inline Handle<T> Scene::CreateObject(Args&& ... args)
 	{
 		return GetPool<T>().emplace(std::forward<Args>(args)...);
 	}
 	template<typename T, typename ... Args>
-	inline ObjectHandle<T> Scene::CreateObjectAt(const ObjectHandle<T>& handle, Args&& ... args)
+	inline Handle<T> Scene::CreateObjectAt(const Handle<T>& handle, Args&& ... args)
 	{
 		return GetPool<T>().emplace_at(handle, std::forward<Args>(args)...);
 	}
 	template<typename T>
-	inline bool Scene::DestroyObject(const ObjectHandle<T>& handle)
+	inline bool Scene::DestroyObject(const Handle<T>& handle)
 	{
 		return GetPool<T>().remove(handle);
 	}

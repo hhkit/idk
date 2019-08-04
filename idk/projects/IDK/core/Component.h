@@ -1,7 +1,7 @@
 #pragma once
 
 #include <idk.h>
-#include "ObjectHandle.h"
+#include "Handle.h"
 
 namespace idk
 {
@@ -13,7 +13,7 @@ namespace idk
 	class GenericComponent
 	{
 	public:
-		ObjectHandle<GameObject> GetGameObject();
+		Handle<GameObject> GetGameObject();
 		virtual const GenericHandle& GetHandle() = 0;
 
 		GenericComponent(const GenericComponent&) = default;
@@ -22,7 +22,7 @@ namespace idk
 		GenericComponent& operator=(GenericComponent&&) noexcept = default;
 		virtual ~GenericComponent() = default;
 	private:
-		ObjectHandle<GameObject> _gameObject;
+		Handle<GameObject> _gameObject;
 		friend class GameObject;
 		GenericComponent() = default;
 		template<typename T> friend class Component;
@@ -33,7 +33,7 @@ namespace idk
 		: public GenericComponent, public Handleable<T>
 	{
 	public:
-		const ObjectHandle<T>& GetHandle() override
+		const Handle<T>& GetHandle() override
 		{
 			return Handleable<T>::GetHandle();
 		}

@@ -7,17 +7,17 @@ namespace idk
 {
 
 	template<typename T> 
-	ObjectHandle<T> GameObject::AddComponent()
+	Handle<T> GameObject::AddComponent()
 	{
 		auto h = _scene->CreateObject<T>();
 		_components.emplace_back(h);
 		return h;
 	}
 	template<typename T>
-	opt<ObjectHandle<T>> GameObject::GetComponent()
+	opt<Handle<T>> GameObject::GetComponent()
 	{
 		for (auto& elem : _components)
-			if (elem.type == ObjectHandle<T>::type_id)
+			if (elem.type == Handle<T>::type_id)
 				return handle_cast<T>(elem);
 
 		return {};
@@ -26,13 +26,13 @@ namespace idk
 	inline bool GameObject::HasComponent()
 	{
 		for (auto& elem : _components)
-			if (elem.type == ObjectHandle<T>::type_id)
+			if (elem.type == Handle<T>::type_id)
 				return true;
 
 		return {};
 	}
 	template<typename T>
-	bool GameObject::RemoveComponent(const ObjectHandle<T>& handle)
+	bool GameObject::RemoveComponent(const Handle<T>& handle)
 	{
 		for (auto& elem : _components)
 		{

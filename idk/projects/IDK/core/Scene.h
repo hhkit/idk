@@ -21,14 +21,14 @@ namespace idk
 
 		// accessors
 		template <typename T> ObjectPool<T>&  GetPool();
-		template <typename T> bool            Validate(const ObjectHandle<T>& handle);
+		template <typename T> bool            Validate(const Handle<T>& handle);
 
 		// modifiers
-		template <typename T> RetType<T>      GetObject(const ObjectHandle<T>& handle);
+		template <typename T> RetType<T>      GetObject(const Handle<T>& handle);
 		template <typename T> RetType<T>      GetObject(const GenericHandle& handle);
-		template <typename T> bool            DestroyObject(const ObjectHandle<T>& handle);
-		template <typename T, typename ... Args> ObjectHandle<T> CreateObject(Args&& ...);
-		template <typename T, typename ... Args> ObjectHandle<T> CreateObjectAt(const ObjectHandle<T>& handle, Args&& ...);
+		template <typename T> bool            DestroyObject(const Handle<T>& handle);
+		template <typename T, typename ... Args> Handle<T> CreateObject(Args&& ...);
+		template <typename T, typename ... Args> Handle<T> CreateObjectAt(const Handle<T>& handle, Args&& ...);
 
 		// reflected variant
 		bool            Validate(const GenericHandle& handle);
@@ -37,8 +37,8 @@ namespace idk
 		bool            DestroyObject(const GenericHandle& handle);
 
 		// type specific
-		ObjectHandle<GameObject> CreateGameObject();
-		ObjectHandle<GameObject> CreateGameObjectAt(const ObjectHandle<GameObject>&);
+		Handle<GameObject> CreateGameObject();
+		Handle<GameObject> CreateGameObjectAt(const Handle<GameObject>&);
 	private:
 		const uint8_t build_index;
 		detail::ScenePool_t _pools;

@@ -3,7 +3,7 @@
 
 namespace idk
 {
-	ObjectHandle<GameObject> GenericComponent::GetGameObject()
+	Handle<GameObject> GenericComponent::GetGameObject()
 	{
 		return _gameObject;
 	}

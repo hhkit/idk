@@ -23,7 +23,7 @@
     <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="core\Handleables.h" />
     <ClInclude Include="core\ComponentIncludes.h" />
-    <ClInclude Include="core\ObjectHandle_detail.h" />
+    <ClInclude Include="core\Handle_detail.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
     <ClInclude Include="math\quaternion.h" />
@@ -44,13 +44,13 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util\meta.h" />
     <ClInclude Include="util\casts.h" />
-    <ClInclude Include="core\ObjectHandle.h" />
+    <ClInclude Include="core\Handle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
-    <ClCompile Include="core\ObjectHandle.cpp" />
+    <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="core\GameObject.inl" />
-    <None Include="core\ObjectHandle.inl" />
+    <None Include="core\Handle.inl" />
     <None Include="core\Scene.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />

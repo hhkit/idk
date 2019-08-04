@@ -7,7 +7,7 @@ namespace idk
 		: public Component<Parent>
 	{
 	public:
-		ObjectHandle<GameObject> parent;
+		Handle<GameObject> parent;
 		Parent() = default;
 	};
 }

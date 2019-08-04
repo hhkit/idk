@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-#include "ObjectHandle.h"
+#include "Handle.h"
 
 namespace idk
 {
@@ -16,10 +16,10 @@ namespace idk
 		~GameObject() = default;
 
 		// components
-		template<typename T> ObjectHandle<T>      AddComponent();
-		template<typename T> opt<ObjectHandle<T>> GetComponent();
+		template<typename T> Handle<T>      AddComponent();
+		template<typename T> opt<Handle<T>> GetComponent();
 		template<typename T> bool                 HasComponent();
-		template<typename T> bool                 RemoveComponent(const ObjectHandle<T>&);
+		template<typename T> bool                 RemoveComponent(const Handle<T>&);
 
 		// active flags
 		void SetActive(bool);
