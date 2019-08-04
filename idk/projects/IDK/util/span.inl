@@ -10,7 +10,7 @@ namespace idk
 	template<typename T>
 	template<typename Container>
 	span<T>::span(Container& c)
-		: _begin{ c.begin() }, _ed{ c.end() }
+		: _begin{ c.begin() }, _end{ c.end() }
 	{
 	}
 

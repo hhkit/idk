@@ -3,7 +3,7 @@
 #include <string>
 
 #include <idk.h>
-#include "Handleables.h"
+#include "Components.h"
 #include "Handle_detail.h"
 
 #pragma warning(disable:4201)
@@ -47,10 +47,13 @@ namespace idk
 		explicit Handle(const GenericHandle&);
 		Handle(uint32_t index, uint16_t uses, uint8_t scene = 0);
 
-		operator bool() const;
+		explicit operator bool() const;
 		T& operator*() const;
 		T* operator->() const;
 	};
+
+	template <typename T>
+	Handle<T> handle_cast(const GenericHandle&);
 
 	template <typename T>
 	class ObjectPool;
@@ -65,8 +68,6 @@ namespace idk
 		friend class ObjectPool<T>;
 	};
 
-	template <typename T>
-	Handle<T> handle_cast(const GenericHandle&);
 }
 
 #include "Handle.inl"

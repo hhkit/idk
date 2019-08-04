@@ -82,14 +82,8 @@
     <ClInclude Include="math\quaternion.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="core\Handleables.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="idk.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="core\Scene_detail.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="common\Parent.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -112,6 +106,15 @@
     <ClInclude Include="core\ObjectPool.h">
       <Filter>core\handles</Filter>
     </ClInclude>
+    <ClInclude Include="core\GameState_detail.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GameState.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Components.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -132,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="core\Handle.cpp">
       <Filter>core\handles</Filter>
+    </ClCompile>
+    <ClCompile Include="core\GameState.cpp">
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

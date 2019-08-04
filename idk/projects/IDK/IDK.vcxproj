@@ -21,9 +21,10 @@
   <ItemGroup>
     <ClInclude Include="core\Component.h" />
     <ClInclude Include="core\GameObject.h" />
-    <ClInclude Include="core\Handleables.h" />
+    <ClInclude Include="core\Components.h" />
     <ClInclude Include="core\ComponentIncludes.h" />
     <ClInclude Include="core\Handle_detail.h" />
+    <ClInclude Include="core\GameState.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
@@ -40,7 +41,7 @@
     <ClInclude Include="math\vector_dim.h" />
     <ClInclude Include="math\vector_swizzle.h" />
     <ClInclude Include="common\Parent.h" />
-    <ClInclude Include="core\Scene_detail.h" />
+    <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util\meta.h" />
     <ClInclude Include="util\casts.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
+    <ClCompile Include="core\GameState.cpp" />
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
