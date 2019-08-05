@@ -130,6 +130,12 @@
     <ClInclude Include="util\range.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="core\Systems.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ISystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

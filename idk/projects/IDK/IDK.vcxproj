@@ -25,6 +25,7 @@
     <ClInclude Include="core\ComponentIncludes.h" />
     <ClInclude Include="core\Handle_detail.h" />
     <ClInclude Include="core\GameState.h" />
+    <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
@@ -37,6 +38,7 @@
     <ClInclude Include="math\arith.h" />
     <ClInclude Include="math\constants.h" />
     <ClInclude Include="math\matrix.h" />
+    <ClInclude Include="core\Systems.h" />
     <ClInclude Include="math\vector.h" />
     <ClInclude Include="math\vector_detail.h" />
     <ClInclude Include="math\vector_dim.h" />
