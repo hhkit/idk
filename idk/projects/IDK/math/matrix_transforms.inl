@@ -66,7 +66,7 @@ namespace idk
 		};
 	}
 	template<typename T>
-	math::matrix<T, 4, 4> orthogonal(T l, T r, T b, T t, T n, T f)
+	math::matrix<T, 4, 4> ortho(T l, T r, T b, T t, T n, T f)
 	{
 		constexpr auto _2 = s_cast<T>(2);
 		constexpr auto _1 = s_cast<T>(1);
