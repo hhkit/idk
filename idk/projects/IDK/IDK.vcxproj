@@ -22,7 +22,7 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
-    <ClInclude Include="core\EditorSystem.h" />
+    <ClInclude Include="editor\IEditor.h" />
     <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="core\Components.h" />
     <ClInclude Include="core\ComponentIncludes.h" />

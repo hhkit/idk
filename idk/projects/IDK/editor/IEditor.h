@@ -4,7 +4,7 @@
 
 namespace idk
 {
-	class EditorSystem
+	class IEditor
 		: public ISystem
 	{
 	public:

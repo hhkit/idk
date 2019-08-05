@@ -9,7 +9,7 @@ namespace idk
 	class SystemManager
 	{
 	public:
-		SystemManager(shared_ptr<Application>&& application, shared_ptr<EditorSystem>&& ptr);
+		SystemManager(shared_ptr<Application>&& application, shared_ptr<IEditor>&& ptr);
 		~SystemManager();
 
 		template<typename T>

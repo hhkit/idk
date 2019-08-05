@@ -18,7 +18,7 @@ TEST(System, TestSystemManager)
 	using namespace idk;
 
 	auto app = std::make_shared<TestApplication>();
-	idk::SystemManager sysman(app, std::shared_ptr<EditorSystem>());
+	idk::SystemManager sysman(app, std::shared_ptr<IEditor>());
 
 	sysman.GetSystem<Application>();
 

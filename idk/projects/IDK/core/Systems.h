@@ -4,7 +4,7 @@
 #include <util/meta.h>
 namespace idk
 {
-	class EditorSystem;
+	class IEditor;
 
 	using EngineSystems = std::tuple<
 		class TestSystem
@@ -13,13 +13,13 @@ namespace idk
 	//,	class PhysicsSystem
 	//,	class GraphicsSystem
 	//,	class AudioSystem
-	//,	class EditorSystem
+	//,	class IEditor
 	>;
 
 	using Systems = decltype(std::tuple_cat(
 		std::declval<std::tuple<class Application>>(),
 		std::declval<EngineSystems>(),
-		std::declval<std::tuple<EditorSystem>>()
+		std::declval<std::tuple<IEditor>>()
 	));
 
 	constexpr auto SystemCount = std::tuple_size_v<Systems>;
@@ -32,7 +32,7 @@ namespace idk
 		template<typename ...Ts>
 		struct SystemHelper<std::tuple<Ts...>>
 		{
-			static auto InstantiateEngineSystems(shared_ptr<Application>&& app_system, shared_ptr<EditorSystem>&& editor_system)
+			static auto InstantiateEngineSystems(shared_ptr<Application>&& app_system, shared_ptr<IEditor>&& editor_system)
 			{
 				return std::array<shared_ptr<ISystem>, SystemCount>{
 					std::move(app_system),

@@ -5,7 +5,7 @@
 
 namespace idk
 {
-	SystemManager::SystemManager(shared_ptr<Application>&& application, shared_ptr<EditorSystem>&& editor)
+	SystemManager::SystemManager(shared_ptr<Application>&& application, shared_ptr<IEditor>&& editor)
 		: _list{Helper::InstantiateEngineSystems(std::move(application), std::move(editor))}
 	{
 	}
