@@ -1,9 +1,12 @@
 
 #include "pch.h"
+
+#include <random>
+
 #include <idk.h>
 #include <math/matrix_transforms.h>
 
-TEST(Matrix, MatrixIdentity)
+TEST(Math, MatrixIdentity)
 {
 	using namespace idk;
 	mat2 expected2
@@ -32,23 +35,52 @@ TEST(Matrix, MatrixIdentity)
 	EXPECT_EQ(expected4, mat4{});
 }
 
-TEST(Matrix, MatrixScale)
+TEST(Math, MatrixScale)
 {
-	using namespace idk;
-	mat3 expected
-	{
-		3.f, 0.f, 0.f,
-		0.f, 5.f, 0.f,
-		0.f, 0.f, 7.f
-	};
-	vec3 scale_vec{ 3.f, 5.f, 7.f };
+	using namespace idk; 
+	std::default_random_engine gen;
+	std::uniform_real_distribution<float> dist(0.f, 100.f);
 
-	EXPECT_EQ(scale(scale_vec), expected);
+	for (int i = 0; i < 100; ++i)
+	{
+		vec3 scale_vec{ dist(gen), dist(gen), dist(gen) };
+		
+		mat3 expected
+		{
+			scale_vec.x, 0.f, 0.f,
+			0.f, scale_vec.y, 0.f,
+			0.f, 0.f, scale_vec.z
+		};
+
+		EXPECT_EQ(scale(scale_vec), expected);
+	}
 }
-TEST(Matrix, MatrixRotate)
+TEST(Math, MatrixRotate)
 {
 	using namespace idk;
 
 	auto rot = rotate(vec3{ 1.f, 0.f, 0.f }, rad{ 1.57f });
 
+}
+TEST(Math, MatrixTranslate)
+{
+	using namespace idk;
+
+	std::default_random_engine gen;
+	std::uniform_real_distribution<float> dist(0.f, 100.f);
+
+	for (int i = 0; i < 100; ++i)
+	{
+		vec3 trans_vec{ dist(gen), dist(gen), dist(gen) };
+
+		mat4 expected
+		{
+			1.f, 0.f, 0.f, trans_vec.x,
+			0.f, 1.f, 0.f, trans_vec.y,
+			0.f, 0.f, 1.f, trans_vec.z,
+			0.f, 0.f, 0.f, 1.f
+		};
+
+		EXPECT_EQ(translate(trans_vec), expected);
+	}
 }
