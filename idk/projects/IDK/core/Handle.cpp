@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Handle.h"
-#include "ComponentIncludes.h"
+#include <core/IncludeComponents.h>
 
 namespace idk
 {

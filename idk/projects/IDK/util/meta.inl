@@ -22,21 +22,21 @@ namespace idk
 	};
 
 	template<typename FindMe>
-	struct index_in_tuple < FindMe, tuple<>>
+	struct index_in_tuple < FindMe, std::tuple<>>
 	{
 		static constexpr uint8_t value = 0;
 	};
 
 	template<typename FindMe, typename ... Ts>
-	struct index_in_tuple < FindMe, tuple<FindMe, Ts...>>
+	struct index_in_tuple < FindMe, std::tuple<FindMe, Ts...>>
 	{
 		static constexpr uint8_t value = 0;
 	};
 
 	template<typename FindMe, typename First, typename ... Ts>
-	struct index_in_tuple < FindMe, tuple<First, Ts...>>
+	struct index_in_tuple < FindMe, std::tuple<First, Ts...>>
 	{
-		static constexpr uint8_t value = index_in_tuple<FindMe, tuple<Ts...>>::value + 1;
+		static constexpr uint8_t value = index_in_tuple<FindMe, std::tuple<Ts...>>::value + 1;
 	};
 
 	template<typename T, T ... Indexes1, T ... Indexes2>

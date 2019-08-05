@@ -67,9 +67,6 @@ namespace idk
 	template<typename Signature>
 	using function = std::function<Signature>;
 
-	template<typename ... Ts>
-	using tuple = std::tuple<Ts...>;
-
 	template<typename T>
 	using opt = std::optional<T>;
 

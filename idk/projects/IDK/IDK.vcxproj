@@ -25,8 +25,8 @@
     <ClInclude Include="core\Component.h" />
     <ClInclude Include="editor\IEditor.h" />
     <ClInclude Include="core\GameObject.h" />
-    <ClInclude Include="core\Components.h" />
-    <ClInclude Include="core\ComponentIncludes.h" />
+    <ClInclude Include="core\Handleables.h" />
+    <ClInclude Include="core\IncludeComponents.h" />
     <ClInclude Include="core\GameState.h" />
     <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="util\ranged_for.h" />
@@ -43,7 +43,7 @@
     <ClInclude Include="math\arith.h" />
     <ClInclude Include="math\constants.h" />
     <ClInclude Include="math\matrix.h" />
-    <ClInclude Include="core\Systems.h" />
+    <ClInclude Include="core\SystemManager_detail.h" />
     <ClInclude Include="math\vector.h" />
     <ClInclude Include="math\vector_detail.h" />
     <ClInclude Include="math\vector_dim.h" />
@@ -51,7 +51,7 @@
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="core\Scene.h" />
-    <ClInclude Include="core\SystemIncludes.h" />
+    <ClInclude Include="core\IncludeSystems.h" />
     <ClInclude Include="app\TestSystem.h" />
     <ClInclude Include="util\range.h" />
     <ClInclude Include="util\zip.h" />

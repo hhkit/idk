@@ -15,6 +15,7 @@ namespace idk
 	private:
 		SystemManager _system_manager;
 		//ResourceManager _resource_manager; // let's try not to overengineer this one
+		//Scheduler   _scheduler;            // or this one
 		GameState     _game_state;
 		static inline Core* _instance = nullptr;
 	};

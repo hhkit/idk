@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
-#include <core/Systems.h>
 #include <core/ISystem.h>
+#include <core/SystemManager_detail.h>
 #include <util/meta.h>
 
 namespace idk

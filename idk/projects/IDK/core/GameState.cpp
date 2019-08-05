@@ -1,9 +1,8 @@
 #include "stdafx.h"
-#include <core/ComponentIncludes.h>
 #include <core/GameObject.h>
-#include <common/Transform.h>
-
+#include <core/IncludeComponents.h>
 #include "GameState.h"
+
 namespace idk
 {
 	template Handle<class GameObject> GameState::CreateObject<class GameObject>(uint8_t);

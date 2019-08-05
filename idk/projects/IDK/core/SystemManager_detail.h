@@ -7,7 +7,6 @@ namespace idk
 {
 	class IEditor;
 
-
 	namespace detail
 	{
 		template<typename T>

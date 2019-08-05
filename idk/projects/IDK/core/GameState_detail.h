@@ -3,7 +3,6 @@
 
 #include <idk.h>
 #include <core/ObjectPool.h>
-#include <core/Components.h>
 
 namespace idk
 {
@@ -15,9 +14,9 @@ namespace idk::detail
 	struct ObjectPoolHelper;
 
 	template<typename ... Ts>
-	struct ObjectPoolHelper<tuple<Ts...>>
+	struct ObjectPoolHelper<std::tuple<Ts...>>
 	{
-		using Tuple = tuple<Ts...>;
+		using Tuple = std::tuple<Ts...>;
 
 		template<typename T>
 		using storage = shared_ptr<idk::ObjectPool<T>>;
