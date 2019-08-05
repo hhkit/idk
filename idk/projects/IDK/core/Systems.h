@@ -1,28 +1,12 @@
 #pragma once
 #include <tuple>
+#include <idk_config.h>
 #include <core/ISystem.h>
 #include <util/meta.h>
 namespace idk
 {
 	class IEditor;
 
-	using EngineSystems = std::tuple<
-		class TestSystem
-	//,	class InputSystem
-	//,	class ScriptSystem
-	//,	class PhysicsSystem
-	//,	class GraphicsSystem
-	//,	class AudioSystem
-	//,	class IEditor
-	>;
-
-	using Systems = decltype(std::tuple_cat(
-		std::declval<std::tuple<class Application>>(),
-		std::declval<EngineSystems>(),
-		std::declval<std::tuple<IEditor>>()
-	));
-
-	constexpr auto SystemCount = std::tuple_size_v<Systems>;
 
 	namespace detail
 	{

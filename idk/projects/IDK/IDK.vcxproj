@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\Application.h" />
+    <ClInclude Include="app\Keys.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
     <ClInclude Include="editor\IEditor.h" />
@@ -65,6 +66,7 @@
     <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
+    <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />
     <ClCompile Include="core\Handle.cpp" />
@@ -79,6 +81,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="core\Core.inl" />
     <None Include="core\GameObject.inl" />
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />

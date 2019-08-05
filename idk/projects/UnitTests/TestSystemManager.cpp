@@ -1,8 +1,7 @@
 #include "pch.h"
 #include <idk.h>
-#include <core/SystemManager.h>
+#include <core/Core.h>
 #include <app/Application.h>
-
 class TestApplication : 
 	public idk::Application
 {
@@ -12,9 +11,9 @@ public:
 	void PollEvents() override { ++i; }
 	idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; };
 	idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; };
-	bool GetKeyDown() override { return false; };
-	bool GetKey() override { return false; };
-	bool GetKeyUp() override { return false; };
+	bool GetKeyDown(idk::Key) override { return false; };
+	bool GetKey(idk::Key) override { return false; };
+	bool GetKeyUp(idk::Key) override { return false; };
 
 	// windows
 	bool SetFullscreen(bool ) override { return false; };
@@ -37,4 +36,14 @@ TEST(System, TestSystemManager)
 	EXPECT_EQ(app-> i, 1);
 	sysman.ShutdownSystems();
 	EXPECT_EQ(app->i, 2);
+}
+
+TEST(System, TestCore)
+{
+	using namespace idk;
+
+	auto core = idk::Core::MakeCore<TestApplication>();
+
+	Core::GetSystem<Application>();
+	core.Run();
 }

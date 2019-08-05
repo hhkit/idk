@@ -163,6 +163,7 @@
     <ClInclude Include="editor\IEditor.h">
       <Filter>editor</Filter>
     </ClInclude>
+    <ClInclude Include="app\Keys.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -199,6 +200,7 @@
     <ClCompile Include="core\Scene.cpp">
       <Filter>core\data</Filter>
     </ClCompile>
+    <ClCompile Include="core\Core.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -267,6 +269,7 @@
     <None Include="core\Scene.inl">
       <Filter>core\data</Filter>
     </None>
+    <None Include="core\Core.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

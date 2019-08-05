@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/ISystem.h>
+#include <app/Keys.h>
 
 namespace idk
 {
@@ -14,9 +15,9 @@ namespace idk
 		// movement
 		virtual vec2 GetMouseScreenPos() = 0;
 		virtual vec2 GetMouseScreenDel() = 0;
-		virtual bool GetKeyDown() = 0;
-		virtual bool GetKey() = 0;
-		virtual bool GetKeyUp() = 0;
+		virtual bool GetKeyDown(Key) = 0;
+		virtual bool GetKey(Key) = 0;
+		virtual bool GetKeyUp(Key) = 0;
 
 		// windows
 		virtual bool SetFullscreen(bool enable_fullscreen) = 0;
