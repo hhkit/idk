@@ -67,6 +67,9 @@ namespace idk::math
 
 	};
 
+	template <typename T, unsigned D>
+	vector<T,D> operator*(const T&, const vector<T, D>&);
+
 	template<typename T, unsigned D>
 	auto dot(const vector<T, D>& lhs, const vector<T, D>& rhs) 
 	{

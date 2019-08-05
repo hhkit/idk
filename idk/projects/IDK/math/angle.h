@@ -58,4 +58,18 @@ namespace idk::math
 	};
 }
 
+namespace idk
+{
+	template<typename T> auto cos(const math::radian<T>& r);
+	template<typename T> auto sin(const math::radian<T>& r);
+	template<typename T> auto tan(const math::radian<T>& r);
+	template<typename T> auto cos(const math::degree<T>& d);
+	template<typename T> auto sin(const math::degree<T>& d);
+	template<typename T> auto tan(const math::degree<T>& d);
+	template<typename T> math::radian<T> acos(const T& frac);
+	template<typename T> math::radian<T> asin(const T& frac);
+	template<typename T> math::radian<T> atan(const T& frac);
+	template<typename T> math::radian<T> atan(const T& y, const T& x);
+}
+
 #include "angle.inl"

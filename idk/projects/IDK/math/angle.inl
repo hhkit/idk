@@ -4,7 +4,7 @@
 #include "angle.h"
 #include "arith.h"
 #include "../util/casts.h"
-
+#include <cmath>
 namespace idk::math
 {
 	template<typename T>
@@ -191,5 +191,59 @@ namespace idk::math
 	inline degree<T>::operator radian<T>() const
 	{
 		return value * constants::pi<T>() / s_cast<T>(180);
+	}
+}
+
+namespace idk
+{
+	template<typename T>
+	auto cos(const math::radian<T>& r)
+	{
+		return std::cos(r.value);
+	}
+	template<typename T>
+	auto sin(const math::radian<T>& r)
+	{
+		return std::sin(r.value);
+	}
+	template<typename T>
+	auto tan(const math::radian<T>& r)
+	{
+		return std::tan(r.value);
+	}
+	template<typename T>
+	auto cos(const math::degree<T>& d)
+	{
+		return cos(math::radian<T>{ d });
+	}
+	template<typename T>
+	auto sin(const math::degree<T>& d)
+	{
+		return sin(math::radian<T>{ d });
+	}
+	template<typename T>
+	auto tan(const math::degree<T>& d)
+	{
+		return tan(math::radian<T>{ d });
+	}
+	template<typename T>
+	math::radian<T> acos(const T& frac)
+	{
+		return math::radian<T>(std::acos(frac));
+	}
+	template<typename T>
+	math::radian<T> asin(const T& frac)
+	{
+		return math::radian<T>(std::acos(frac));
+	}
+	template<typename T>
+	math::radian<T> atan(const T& frac)
+	{
+		return math::radian<T>(std::atan(frac));
+	}
+	template<typename T>
+	math::radian<T> atan(const T& y, const T& x)
+	{
+		return math::radian<T>(std::atan2(y, x));
 	}
 }

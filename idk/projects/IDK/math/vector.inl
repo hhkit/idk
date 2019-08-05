@@ -239,4 +239,10 @@ namespace idk::math
 	{
 		return data()[i];
 	}
+
+	template<typename T, unsigned D>
+	vector<T, D> operator*(const T& coeff, const vector<T, D>& v)
+	{
+		return v * coeff;
+	}
 }

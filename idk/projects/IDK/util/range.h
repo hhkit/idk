@@ -11,7 +11,7 @@ namespace idk
 	constexpr auto range(T start, T stop, T step = 1);
 
 	// compile time
-	template<size_t stop> 
+	template<size_t stop, typename T = size_t> 
 	constexpr auto range();
 	
 	template<size_t start, size_t stop, size_t step = 1> 

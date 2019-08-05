@@ -156,10 +156,7 @@ namespace idk::math::detail
 	template<typename T>
 	radian<T> vector_base<T, 2>::angle() const
 	{
-		if constexpr (std::is_same_v<T, float>)
-			return radian<T>{atan2f(y, x)};
-		else
-			return radian<T>{atan2(y, x)};
+		atan(y, x);
 	}
 
 	template<typename T>

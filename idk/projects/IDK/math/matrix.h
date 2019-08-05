@@ -61,6 +61,9 @@ namespace idk::math
 	};
 
 	template<typename T, unsigned R, unsigned C>
+	matrix<T,R,C> operator*(const T& coeff, const matrix<T, R, C>&);
+
+	template<typename T, unsigned R, unsigned C>
 	vector<T, R> operator*(const matrix<T, R, C>& lhs, const vector<T, C>& rhs);
 
 	template<typename T, unsigned O, unsigned M, unsigned I>

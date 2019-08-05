@@ -49,6 +49,7 @@ namespace idk::math
 		{
 			union
 			{
+				T data[2];
 				struct { T x; T y; };
 				#include "swizzles/swizzle2"
 			};

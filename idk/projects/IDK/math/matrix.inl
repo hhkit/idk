@@ -328,6 +328,12 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
+	matrix<T, R, C> operator*(const T& coeff, const matrix<T, R, C>& m)
+	{
+		return m * coeff;
+	}
+
+	template<typename T, unsigned R, unsigned C>
 	vector<T, R> operator*(const matrix<T, R, C>& lhs, const vector<T, C>& rhs)
 	{
 		return detail::MatrixVectorMult(lhs, rhs, std::make_index_sequence<C>{});
