@@ -3,8 +3,8 @@
 #include <string>
 
 #include <idk.h>
+#include <util/meta.h>
 #include "Components.h"
-#include "Handle_detail.h"
 
 #pragma warning(disable:4201)
 
@@ -45,7 +45,7 @@ namespace idk
 		: public GenericHandle
 	{
 	public:
-		static constexpr auto type_id = detail::index_in_tuple_v<T, idk::Handleables>;
+		static constexpr auto type_id = index_in_tuple_v<T, idk::Handleables>;
 
 		Handle() = default;
 		explicit Handle(const GenericHandle&);

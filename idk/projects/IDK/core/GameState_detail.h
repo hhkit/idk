@@ -34,18 +34,18 @@ namespace idk::detail
 
 		static bool ActivateScene(type& pools, uint8_t index)
 		{
-			return ((s_cast<idk::ObjectPool<Ts>*>(pools[detail::index_in_tuple_v<Ts, Tuple>].get())->ActivateScene(index)) && ...);
+			return ((s_cast<idk::ObjectPool<Ts>*>(pools[index_in_tuple_v<Ts, Tuple>].get())->ActivateScene(index)) && ...);
 		}
 
 		static bool DeactivateScene(type& pools, uint8_t index)
 		{
-			return ((s_cast<idk::ObjectPool<Ts>*>(pools[detail::index_in_tuple_v<Ts, Tuple>].get())->DeactivateScene(index)) && ...);
+			return ((s_cast<idk::ObjectPool<Ts>*>(pools[index_in_tuple_v<Ts, Tuple>].get())->DeactivateScene(index)) && ...);
 		}
 
 		template<typename T>
 		static ObjectPool<T>& GetPool(type& pools)
 		{
-			return *s_cast<ObjectPool<T>*>(pools[detail::index_in_tuple_v<T, Tuple>].get());
+			return *s_cast<ObjectPool<T>*>(pools[index_in_tuple_v<T, Tuple>].get());
 		}
 
 		static auto GenValidateJt()
@@ -64,14 +64,14 @@ namespace idk::detail
 				[](GameState& gs, const GenericHandle& handle)
 				{
 					if constexpr(std::is_same_v<Ts, GameObject>)
-						gs.DestroyObjectImmediate(handle_cast<Ts>(handle));
+						gs.DestroyObjectNow(handle_cast<Ts>(handle));
 					else
 					{
 						auto real_handle = handle_cast<Ts>(handle);
 						if (real_handle)
 						{
 							auto entity = real_handle->GetGameObject();
-							gs.DestroyObjectImmediate(real_handle);
+							gs.DestroyObjectNow(real_handle);
 							assert(entity);
 							auto realent = std::addressof(*entity);
 							auto itr = std::find(realent->_components.begin(), realent->_components.end(), handle);

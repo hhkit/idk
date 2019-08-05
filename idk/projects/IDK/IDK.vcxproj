@@ -19,13 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="app\Application.h" />
+    <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
+    <ClInclude Include="core\EditorSystem.h" />
     <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="core\Components.h" />
     <ClInclude Include="core\ComponentIncludes.h" />
-    <ClInclude Include="core\Handle_detail.h" />
     <ClInclude Include="core\GameState.h" />
     <ClInclude Include="core\ISystem.h" />
+    <ClInclude Include="util\ranged_for.h" />
+    <ClInclude Include="core\SystemManager.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
@@ -46,6 +50,8 @@
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="core\Scene.h" />
+    <ClInclude Include="core\SystemIncludes.h" />
+    <ClInclude Include="app\TestSystem.h" />
     <ClInclude Include="util\range.h" />
     <ClInclude Include="util\zip.h" />
     <ClInclude Include="stdafx.h" />
@@ -56,12 +62,14 @@
     <ClInclude Include="util\span.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
+    <ClCompile Include="core\SystemManager.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -75,7 +83,9 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="util\ranged_for.inl" />
     <None Include="core\Scene.inl" />
+    <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />
     <None Include="math\angle.inl" />

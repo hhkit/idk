@@ -23,6 +23,7 @@
     <ClCompile Include="TestGameState.cpp" />
     <ClCompile Include="TestZip.cpp" />
     <ClCompile Include="TestMatrixTransforms.cpp" />
+    <ClCompile Include="TestSystemManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

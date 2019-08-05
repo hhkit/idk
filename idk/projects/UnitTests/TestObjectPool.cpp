@@ -15,7 +15,7 @@ TEST(ObjectPool, TestIndexInTuple)
 {
 	EXPECT_EQ(
 		(
-			idk::detail::index_in_tuple<
+			idk::index_in_tuple<
 			float,
 			std::tuple<float, float, int, short, short, int, char>
 			>::value
@@ -23,7 +23,7 @@ TEST(ObjectPool, TestIndexInTuple)
 		, 0);
 	EXPECT_EQ(
 		(
-			idk::detail::index_in_tuple<
+			idk::index_in_tuple<
 				int, 
 				std::tuple<float, float, int, short, short, int, char>
 			>::value
@@ -31,7 +31,7 @@ TEST(ObjectPool, TestIndexInTuple)
 		, 2);
 	EXPECT_EQ(
 		(
-			idk::detail::index_in_tuple<
+			idk::index_in_tuple<
 			double,
 			std::tuple<float, float, int, short, short>
 			>::value

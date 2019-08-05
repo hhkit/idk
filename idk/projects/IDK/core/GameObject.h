@@ -16,8 +16,8 @@ namespace idk
 
 		// components
 		template<typename T> Handle<T> AddComponent();
-		template<typename T> Handle<T> GetComponent();
-		template<typename T> bool      HasComponent();
+		template<typename T> Handle<T> GetComponent() const;
+		template<typename T> bool      HasComponent() const;
 		template<typename T> bool      RemoveComponent(const Handle<T>&);
 
 		span<GenericHandle> GetComponents();
@@ -27,6 +27,7 @@ namespace idk
 		bool GetActiveInHierarchy() const;
 	private:
 		vector<GenericHandle> _components;
+		bool _active = true;
 
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;

@@ -13,7 +13,7 @@ namespace idk
 		return comp;
 	}
 	template<typename T>
-	Handle<T> GameObject::GetComponent()
+	Handle<T> GameObject::GetComponent() const
 	{
 		for (auto& elem : _components)
 			if (elem.type == Handle<T>::type_id)
@@ -22,7 +22,7 @@ namespace idk
 		return {};
 	}
 	template<typename T>
-	inline bool GameObject::HasComponent()
+	inline bool GameObject::HasComponent() const
 	{
 		for (auto& elem : _components)
 			if (elem.type == Handle<T>::type_id)

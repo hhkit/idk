@@ -29,7 +29,7 @@ namespace idk
 		template<typename T>  Handle<T> CreateObject(uint8_t scene);
 		template<typename T>  Handle<T> CreateObject(const Handle<T>& handle);
 		template<typename T>  bool      ValidateHandle(const Handle<T>& handle);
-		template<typename T>  bool      DestroyObjectImmediate(const Handle<T>& handle);
+		template<typename T>  bool      DestroyObjectNow(const Handle<T>& handle);
 
 		static GameState& GetGameState();
 	private:

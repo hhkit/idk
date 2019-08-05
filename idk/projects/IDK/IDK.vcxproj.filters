@@ -35,6 +35,9 @@
     <Filter Include="core\systems">
       <UniqueIdentifier>{e9ec1801-713d-4a1e-aad5-cd280a9475b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{5d473ef9-9c8f-4c26-b00a-c8cae94ebafc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -96,9 +99,6 @@
     <ClInclude Include="core\Handle.h">
       <Filter>core\handles</Filter>
     </ClInclude>
-    <ClInclude Include="core\Handle_detail.h">
-      <Filter>core\handles</Filter>
-    </ClInclude>
     <ClInclude Include="util\pool.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -136,6 +136,25 @@
     <ClInclude Include="core\ISystem.h">
       <Filter>core\systems</Filter>
     </ClInclude>
+    <ClInclude Include="app\Application.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="app\TestSystem.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="core\SystemManager.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="core\SystemIncludes.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="core\EditorSystem.h" />
+    <ClInclude Include="util\ranged_for.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Core.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -165,6 +184,12 @@
     </ClCompile>
     <ClCompile Include="math\quaternion.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="app\TestSystem.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="core\SystemManager.cpp">
+      <Filter>core\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +251,12 @@
       <Filter>util</Filter>
     </None>
     <None Include="util\range.inl">
+      <Filter>util</Filter>
+    </None>
+    <None Include="core\SystemManager.inl">
+      <Filter>core\systems</Filter>
+    </None>
+    <None Include="util\ranged_for.inl">
       <Filter>util</Filter>
     </None>
   </ItemGroup>
