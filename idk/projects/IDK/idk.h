@@ -26,6 +26,14 @@ namespace idk
 	using vec3 = math::vector<real, 3>;
 	using vec4 = math::vector<real, 4>;
 
+	using ivec2 = math::vector<int, 2>;
+	using ivec3 = math::vector<int, 3>;
+	using ivec4 = math::vector<int, 4>;
+
+	using bvec2 = math::vector<bool, 2>;
+	using bvec3 = math::vector<bool, 3>;
+	using bvec4 = math::vector<bool, 4>;
+
 	using quat = math::quaternion<real>;
 	
 	using mat2 = math::matrix<real, 2, 2>;
