@@ -5,6 +5,8 @@
 
 #include "Vector.h"
 #include "Matrix.h"
+#include <util/range.h>
+#include <util/zip.h>
 
 namespace idk::math
 {
@@ -63,6 +65,13 @@ namespace idk::math
 	matrix<T, R, C>::matrix()
 		: intern{}
 	{
+		if constexpr (R <= C)
+			for (auto& i : range<R>())
+				intern[i][i] = T{ 1 };
+		else
+			for (auto& i : range<C>())
+				intern[i][i] = T{ 1 };
+
 	}
 	
 	template<typename T, unsigned R, unsigned C>
@@ -77,6 +86,14 @@ namespace idk::math
 	matrix<T, R, C>::matrix(U ... values)
 		: matrix{ detail::MatrixFromRowMajor<T,R,C>(std::array<T, R*C>{values...}, std::make_index_sequence<C>{}) }
 	{
+	}
+
+	template<typename T, unsigned R, unsigned C>
+	inline matrix<T, R, C>::matrix(const matrix<T, R - 1, C - 1>& mtx)
+		: matrix{}
+	{
+		for (auto& elem : range<C - 1>())
+			intern[elem] = column_t{ mtx[elem], 0.f };
 	}
 
 	template<typename T, unsigned R, unsigned C>
@@ -206,13 +223,13 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	typename matrix<T, R, C>::column_t& matrix<T,R,C>::operator[](unsigned index)
+	typename matrix<T, R, C>::column_t& matrix<T,R,C>::operator[](size_t index)
 	{
 		return intern[index];
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	const typename matrix<T, R, C>::column_t& matrix<T, R, C>::operator[](unsigned index) const
+	const typename matrix<T, R, C>::column_t& matrix<T, R, C>::operator[](size_t index) const
 	{
 		return intern[index];
 	}

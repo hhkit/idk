@@ -62,8 +62,8 @@ namespace idk::math
 		bool     operator!=(const vector&) const;
 
 		// accessors
-		T&       operator[](unsigned i);
-		const T& operator[](unsigned i) const;
+		T&       operator[](size_t i);
+		const T& operator[](size_t i) const;
 
 	};
 

@@ -5,6 +5,9 @@
 
 namespace idk::math
 {
+	template<typename T>
+	T identity();
+	
 	template<typename T, unsigned D>
 	matrix<T, D, D> scale(const vector<T, D>&);
 
@@ -14,3 +17,4 @@ namespace idk::math
 	template<typename T, unsigned D>
 	matrix<T, D + 1, D + 1> trans(const vector<T, D> & trans);
 }
+#include "matrix_transforms.inl"

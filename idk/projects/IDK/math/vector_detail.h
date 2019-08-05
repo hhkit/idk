@@ -50,7 +50,7 @@ namespace idk::math
 			union
 			{
 				struct { T x; T y; };
-				#include "swizzle2"
+				#include "swizzles/swizzle2"
 			};
 			constexpr vector_base();
 			constexpr vector_base(T x, T y);
@@ -71,7 +71,7 @@ namespace idk::math
 			union
 			{
 				struct { T x; T y; T z; };
-				#include "swizzle3"
+				#include "swizzles/swizzle3"
 			};
 			constexpr vector_base();
 			constexpr vector_base(T x, T y, T z);
@@ -91,7 +91,7 @@ namespace idk::math
 			union
 			{
 				struct { T x; T y; T z; T w; };
-				#include "swizzle4"
+				#include "swizzles/swizzle4"
 			};
 
 			constexpr vector_base();

@@ -44,8 +44,8 @@ namespace idk::math
 		const column_t* end() const;
 		T*              data();
 		const T*        data() const;
-		column_t&       operator[](unsigned index);
-		const column_t& operator[](unsigned index) const;
+		column_t&       operator[](size_t index);
+		const column_t& operator[](size_t index) const;
 
 		// operator overloads
 		matrix&         operator+=(const matrix& rhs);

@@ -229,13 +229,13 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	T& vector<T, D>::operator[](unsigned i)
+	T& vector<T, D>::operator[](size_t i)
 	{
 		return data()[i];
 	}
 
 	template<typename T, unsigned D>
-	const T& vector<T, D>::operator[](unsigned i) const
+	const T& vector<T, D>::operator[](size_t i) const
 	{
 		return data()[i];
 	}
