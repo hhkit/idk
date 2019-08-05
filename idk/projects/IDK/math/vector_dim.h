@@ -1,5 +1,5 @@
 #pragma once
-
+#include <type_traits>
 template<typename T, unsigned D> struct vector;
 
 namespace idk::math
@@ -9,7 +9,7 @@ namespace idk::math
 		template <typename T>
 		struct Dim
 		{
-			static constexpr unsigned value = -1;
+			static constexpr unsigned value = std::is_arithmetic_v<T> ? 1 : 16;
 		};
 
 		template<typename T>
@@ -19,24 +19,6 @@ namespace idk::math
 		struct Dim < vector<T, D>>
 		{
 			static constexpr unsigned value = Dim_v<T> * D;
-		};
-
-		template <>
-		struct Dim<float>
-		{
-			static constexpr unsigned value = 1;
-		};
-
-		template <>
-		struct Dim<double>
-		{
-			static constexpr unsigned value = 1;
-		};
-
-		template <>
-		struct Dim<int>
-		{
-			static constexpr unsigned value = 1;
 		};
 	}
 }

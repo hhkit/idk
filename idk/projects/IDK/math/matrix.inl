@@ -84,7 +84,7 @@ namespace idk::math
 	template<typename T, unsigned R, unsigned C>
 	template<typename ...U, typename>
 	matrix<T, R, C>::matrix(U ... values)
-		: matrix{ detail::MatrixFromRowMajor<T,R,C>(std::array<T, R*C>{values...}, std::make_index_sequence<C>{}) }
+		: matrix{ detail::MatrixFromRowMajor<T,R,C>(std::array<T, R*C>{static_cast<T>(values)...}, std::make_index_sequence<C>{}) }
 	{
 	}
 

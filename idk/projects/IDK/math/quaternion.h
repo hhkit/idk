@@ -1,4 +1,5 @@
 #pragma once
+#include "angle.h"
 #include "vector.h"
 #include "matrix.h"
 
@@ -9,11 +10,14 @@ namespace idk::math
 		: vector<T, 4>
 	{
 		using Base = vector<T, 4>;
-		using Base::Base;
 		using Base::x;
 		using Base::y;
 		using Base::z;
 		using Base::w;
+
+		quaternion();
+		quaternion(T x, T y, T z, T w);
+		quaternion(const vector<T, 3> & axis, radian<T> angle);
 
 		quaternion inverse() const;
 
@@ -31,6 +35,9 @@ namespace idk::math
 	template<typename M, typename T> auto quat_cast(quaternion<T>& q);
 	template<typename M, typename T> auto quat_cast(quaternion<T>&& q);
 	template<typename M, typename T> auto quat_cast(const quaternion<T>& q);
+
+
+	extern template struct quaternion<float>;
 }
 
 #include "quaternion.inl"

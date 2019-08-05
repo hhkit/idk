@@ -9,7 +9,7 @@ namespace idk
 		: public Component<Transform>
 	{
 	public:
-		vec3 scale;
+		vec3 scale{ 1.f };
 		quat rotation;
 		vec3 position;
 

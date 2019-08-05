@@ -8,6 +8,13 @@
 namespace idk::math
 {
 	template<typename T, unsigned D>
+	inline constexpr vector<T, D>::vector(const T& fill)
+	{
+		for (auto& elem : *this)
+			elem = fill;
+	}
+
+	template<typename T, unsigned D>
 	template<typename ...Args, typename>
 	constexpr vector<T, D>::vector(const Args& ... args)
 		: vector{ detail::VectorConcat<T>(args...) }

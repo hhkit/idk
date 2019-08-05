@@ -13,11 +13,13 @@ namespace idk::math
 		using Base::Base;
 		using Base::values;
 
+		constexpr explicit vector(const T& fill);
+
 		template<typename ... Args,
 			typename = std::enable_if_t<
 				(detail::Dim_v<Args> + ...) == D &&
 			    ((detail::Dim_v<Args> > 0) && ...) &&
-			    (!std::is_same_v<vector, Args> && ...)
+			    ((!std::is_same_v<vector, Args>) && ...)
 			>
 		>
 		constexpr vector(const Args& ...);

@@ -5,6 +5,29 @@
 namespace idk::math
 {
 	template<typename T>
+	inline quaternion<T>::quaternion()
+		: Base{0, 0, 0, 1}
+	{
+	}
+	template<typename T>
+	inline quaternion<T>::quaternion(T x, T y, T z, T w)
+		: Base{x, y, z, w}
+	{
+	}
+	template<typename T>
+	inline quaternion<T>::quaternion(const vector<T, 3> & axis, radian<T> angle)
+	{
+		auto h = angle / 2;
+
+		auto s = sin(h);
+		auto c = cos(h);
+
+		auto n = s * axis.get_normalized();
+		
+		this->xyz = n;
+		w = c;
+	}
+	template<typename T>
 	quaternion<T> quaternion<T>::inverse() const
 	{
 		return quaternion{-x, -y, -z, w};
@@ -25,6 +48,18 @@ namespace idk::math
 		copy.z = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
 		copy.w = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
 		return copy;
+	}
+
+	template<typename T>
+	inline quaternion<T>::operator matrix<T, 4, 4>() const
+	{
+		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+	}
+
+	template<typename T>
+	inline quaternion<T>::operator matrix<T, 4, 4>()
+	{
+		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
 	}
 	
 	template<typename T>

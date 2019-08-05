@@ -17,6 +17,13 @@ namespace idk::math::detail
 			return *r_cast<return_t*>(this);
 		}
 
+		#define lazy_op(OP) return_t operator##OP(const return_t& rhs) const { return return_t{ *this } OP rhs; }
+		lazy_op(+);
+		lazy_op(-);
+		lazy_op(*);
+		lazy_op(/);
+		#undef lazy_op
+		
 		operator return_t() const
 		{
 			return return_t{ values[Indexes]... };
@@ -32,7 +39,7 @@ namespace idk::math::detail
 		}
 
 		template<unsigned ... ThisIndexes, unsigned ... RhsIndexes>
-		void assign(const return_t& rhs, std::index_sequence<ThisIndexes...>, std::index_sequence<RhsIndexes...>)
+		void assign(const return_t&, std::index_sequence<ThisIndexes...>, std::index_sequence<RhsIndexes...>)
 		{
 		}
 	};

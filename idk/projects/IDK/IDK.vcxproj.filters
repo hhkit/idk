@@ -157,6 +157,9 @@
     <ClCompile Include="core\Scene.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="math\quaternion.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

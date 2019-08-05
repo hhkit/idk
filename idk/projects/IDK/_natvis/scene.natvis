@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010"> 
-  <Type Name="idk::Scene">
-    <DisplayString>{{index={static_cast&lt;int&gt;(build_index)}, objects={_pools._Myfirst._Val->pool_size}}}
-    </DisplayString>
+  <Type Name="idk::GameObject">
     <Expand>
-      <Item Name="GameObject">*_pools._Myfirst._Val</Item>
-      <Item Name="Transform">*((idk::detail::ScenePool_t::_Mybase&amp;) _pools)._Myfirst._Val</Item>
-      <Item Name="Parent">*((idk::detail::ScenePool_t::_Mybase::_Mybase&amp;) _pools)._Myfirst._Val</Item>
+      <Item Name="handle">handle</Item>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <Break Condition="i == _components.size()"/>
+          <Item Name="[{i}]">_components[i]</Item>
+          <Exec>++i</Exec>
+        </Loop>
+      </CustomListItems>
     </Expand>
   </Type>
 </AutoVisualizer>

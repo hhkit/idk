@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "Vector.h"
 
 namespace idk::math
@@ -21,7 +23,7 @@ namespace idk::math
 
 		// row-major constructor
 		template<typename ... U,
-			typename = std::enable_if_t<(sizeof...(U) == R * C) && ((std::is_same_v<U, T>) && ...)>
+			typename = std::enable_if_t<(sizeof...(U) == R * C) && ((std::is_arithmetic_v<U>) && ...)>
 		>
 		explicit matrix(U ... values);
 

@@ -61,6 +61,7 @@
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="math\matrix.cpp" />
+    <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

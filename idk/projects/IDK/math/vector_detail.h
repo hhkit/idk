@@ -142,15 +142,15 @@ namespace idk::math
 		template <typename T, typename Tuple, unsigned ... Indexes>
 		constexpr auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>)
 		{
-			return vector<T, sizeof...(Indexes)>{std::get<Indexes>(tup)...};
+			return vector<T, sizeof...(Indexes)>{static_cast<T>(std::get<Indexes>(tup))...};
 		}
 
 		template<typename T, typename ... Args>
 		constexpr auto VectorConcat(const Args& ... vecs)
 		{
-			auto arg_tup = detail::VectorsToTuple<T>(vecs...);
+			auto arg_tup = detail::VectorsToTuple(vecs...);
 			auto index = std::make_index_sequence <std::tuple_size_v<decltype(arg_tup)>>{};
-			return detail::TupleToVector<float>(arg_tup, index);
+			return detail::TupleToVector<T>(arg_tup, index);
 		}
 	}
 }
