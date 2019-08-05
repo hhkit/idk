@@ -13,7 +13,6 @@ namespace idk
 		auto end() { return _end; }
 	};
 
-	template<typename Container> auto make_range(Container&& cont);
 	template<typename Container> auto reverse(Container&& cont);
 }
 #include "ranged_for.inl"
