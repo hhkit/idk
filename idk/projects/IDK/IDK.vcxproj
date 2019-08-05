@@ -44,6 +44,8 @@
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="core\Scene.h" />
+    <ClInclude Include="util\range.h" />
+    <ClInclude Include="util\zip.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util\meta.h" />
     <ClInclude Include="util\casts.h" />
@@ -77,13 +79,16 @@
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
     <None Include="math\matrix.inl" />
+    <None Include="math\matrix_transforms.inl" />
     <None Include="math\quaternion.inl" />
     <None Include="math\vector.inl" />
     <None Include="math\vector_detail.inl" />
     <None Include="util\meta.inl" />
     <None Include="util\casts.inl" />
     <None Include="util\pool.inl" />
+    <None Include="util\range.inl" />
     <None Include="util\span.inl" />
+    <None Include="util\zip.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\objectpool.natvis" />

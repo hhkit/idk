@@ -53,6 +53,7 @@
     <ClCompile Include="TestDispatcher.cpp" />
     <ClCompile Include="TestGameState.cpp" />
     <ClCompile Include="TestMatrix.cpp" />
+    <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
     <ClCompile Include="TestQuaternion.cpp" />
     <ClCompile Include="TestVector.cpp" />
@@ -62,6 +63,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestZip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IDK\IDK.vcxproj">

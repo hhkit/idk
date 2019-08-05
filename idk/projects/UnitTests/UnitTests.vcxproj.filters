@@ -21,6 +21,8 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="TestGameState.cpp" />
+    <ClCompile Include="TestZip.cpp" />
+    <ClCompile Include="TestMatrixTransforms.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

@@ -32,6 +32,9 @@
     <Filter Include="core\handles">
       <UniqueIdentifier>{d846b40e-7906-4078-8b7f-8d84c275fb09}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\systems">
+      <UniqueIdentifier>{e9ec1801-713d-4a1e-aad5-cd280a9475b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -121,6 +124,12 @@
     <ClInclude Include="math\matrix_transforms.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="util\zip.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\range.h">
+      <Filter>util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -145,7 +154,9 @@
     <ClCompile Include="core\GameState.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="core\Scene.cpp" />
+    <ClCompile Include="core\Scene.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -201,6 +212,15 @@
     </None>
     <None Include="core\GameState.inl">
       <Filter>core</Filter>
+    </None>
+    <None Include="math\matrix_transforms.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="util\zip.inl">
+      <Filter>util</Filter>
+    </None>
+    <None Include="util\range.inl">
+      <Filter>util</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

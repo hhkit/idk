@@ -29,7 +29,7 @@ namespace idk
 	template<typename T>
 	span<T> pool<T>::span()
 	{
-		return span<T>(*this);
+		return idk::span<T>(*this);
 	}
 	template<typename T>
 	inline T& pool<T>::front()
