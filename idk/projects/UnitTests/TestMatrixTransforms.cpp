@@ -88,6 +88,6 @@ TEST(Math, MatrixProject)
 {
 	using namespace idk;
 
-	auto pm = perspective(rad{ half_pi }, 1.f, 0.1f, 100.f);
+	auto pm = perspective(deg{ 90 }, 1.f, 0.1f, 100.f);
 	auto om = ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
 }

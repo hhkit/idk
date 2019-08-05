@@ -188,7 +188,7 @@ namespace idk::math
 	}
 
 	template<typename T>
-	inline degree<T>::operator radian<T>() const
+	degree<T>::operator radian<T>() const
 	{
 		return value * constants::pi<T>() / s_cast<T>(180);
 	}

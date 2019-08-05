@@ -21,6 +21,9 @@ namespace idk
 	math::matrix<T, 4, 4> perspective(math::radian<T> fov, T aspect_ratio, T near, T far);
 
 	template<typename T>
+	math::matrix<T, 4, 4> perspective(math::degree<T> fov, T aspect_ratio, T near, T far);
+
+	template<typename T>
 	math::matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T near, T far);
 }
 #include "matrix_transforms.inl"
