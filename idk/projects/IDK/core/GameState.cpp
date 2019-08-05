@@ -62,6 +62,7 @@ namespace idk
 	{
 		for (auto& elem : _destruction_queue)
 			destroy_handles_jt[elem.type](*this, elem);
+		_destruction_queue.clear();
 	}
 	GameState& GameState::GetGameState()
 	{
