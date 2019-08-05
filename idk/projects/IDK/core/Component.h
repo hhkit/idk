@@ -7,9 +7,11 @@ namespace idk
 {
 	class GameObject;
 
+	// all components must derive from this template
 	template<typename T> 
 	class Component;
 
+	// don't derive from this
 	class GenericComponent
 	{
 	public:

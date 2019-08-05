@@ -50,6 +50,16 @@
     </Expand>
   </Type>
 
+  <Type Name="idk::GenericHandle">
+    <Expand>
+      <CustomListItems MaxItemsPerView="16">
+        <If Condition="type == 0"><Item Name="[GameObject]">*(idk::Handle&lt;idk::GameObject&gt;*)(&amp;id)</Item></If>
+        <If Condition="type == 1"><Item Name="[Transform]" >*(idk::Handle&lt;idk::Transform &gt;*)(&amp;id)</Item></If>
+        <If Condition="type == 2"><Item Name="[Parent]"    >*(idk::Handle&lt;idk::Parent    &gt;*)(&amp;id)</Item></If>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
   <Type Name="idk::Handleable&lt; * &gt;" Inheritable="false">
     <DisplayString>{{id={handle.id, h}}}</DisplayString>
   </Type>

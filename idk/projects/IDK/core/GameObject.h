@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include "Handle.h"
+#include "Scene.h"
 
 namespace idk
 {
@@ -19,6 +20,7 @@ namespace idk
 		template<typename T> bool      HasComponent();
 		template<typename T> bool      RemoveComponent(const Handle<T>&);
 
+		span<GenericHandle> GetComponents();
 		// active flags
 		void SetActive(bool);
 		bool GetActiveSelf() const;
@@ -28,6 +30,11 @@ namespace idk
 
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;
+
+		friend class GameState;
+
+		template<typename T>
+		friend struct detail::ObjectPoolHelper;
 	};
 }
 

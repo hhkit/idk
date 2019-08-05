@@ -14,8 +14,6 @@ TEST(GameState, TestGameState)
 	EXPECT_TRUE(gs.GetObject(h));
 	gs.DestroyObject(h);
 	(*hTransform).position = vec3{0.f, 0.f, 5.f};
-	EXPECT_FALSE(gs.GetObject(h));
-	EXPECT_FALSE(gs.GetObject(hTransform));
 }
 
 TEST(GameState, TestHandles)
@@ -25,10 +23,15 @@ TEST(GameState, TestHandles)
 	gs.ActivateScene(0);
 	auto h = gs.CreateObject<GameObject>(0);
 	auto hTransform = h->AddComponent<Transform>();
+	auto gh = GenericHandle{ h };
 	EXPECT_TRUE(h);
 	EXPECT_TRUE(&*h);
 	gs.DestroyObject(h);
 	(*hTransform).position = vec3{ 0.f, 0.f, 5.f };
+	EXPECT_TRUE(&*h);
+	EXPECT_TRUE(&*hTransform);
+
+	gs.DestroyQueue();
 	EXPECT_FALSE(&*h);
 	EXPECT_FALSE(&*hTransform);
 }

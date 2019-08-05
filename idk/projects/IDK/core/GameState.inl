@@ -28,7 +28,7 @@ namespace idk
 		return detail::ObjectPools::GetPool<T>(_objects).Validate(handle);
 	}
 	template<typename T>
-	inline bool GameState::DestroyObject(const Handle<T>& handle)
+	inline bool GameState::DestroyObjectImmediate(const Handle<T>& handle)
 	{
 		return detail::ObjectPools::GetPool<T>(_objects).Destroy(handle);
 	}

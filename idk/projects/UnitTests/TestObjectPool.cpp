@@ -43,6 +43,13 @@ TEST(ObjectPool, TestObjectPooling)
 {
 	using namespace idk;
 	pool<int> p;
+
+	for (int i = 0; i < 1000; ++i)
+		p.emplace_back();
+
+	for (int i = 0; i < 1000; ++i)
+		p.pop_back();
+
 	ObjectPool<class GameObject> op;
 	op.ActivateScene(0);
 	op.ActivateScene(2);

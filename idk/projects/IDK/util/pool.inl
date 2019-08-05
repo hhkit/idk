@@ -91,6 +91,6 @@ namespace idk
 	{
 		assert(_size != 0);
 
-		std::destroy_at(&data()[_size--]);
+		std::destroy_at(&data()[--_size]);
 	}
 }

@@ -11,4 +11,16 @@ namespace idk
 		: type{ type }, scene{ scene }, gen{gen}, index{index}
 	{
 	}
+	GenericHandle::operator bool() const
+	{
+		return GameState::GetGameState().ValidateHandle(*this);
+	}
+	bool GenericHandle::operator==(const GenericHandle& rhs)
+	{
+		return id == rhs.id;
+	}
+	bool GenericHandle::operator!=(const GenericHandle& rhs)
+	{
+		return id != rhs.id;
+	}
 }

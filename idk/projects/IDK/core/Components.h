@@ -37,4 +37,7 @@ namespace idk
 		std::declval<std::tuple<class GameObject>>(),
 		std::declval<Components>()
 	))>;
+
+	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
+	static constexpr auto HandleableCount = std::tuple_size_v<Handleables>;
 }

@@ -5,6 +5,10 @@
 #include <core/ObjectPool.h>
 #include <core/Components.h>
 
+namespace idk
+{
+	class GameState;
+}
 namespace idk::detail
 {
 	template<typename T>
@@ -18,12 +22,13 @@ namespace idk::detail
 		template<typename T>
 		using storage = shared_ptr<idk::ObjectPool<T>>;
 
+		static constexpr auto TypeCount = sizeof...(Ts);
 		using type = array<shared_ptr<void>, sizeof...(Ts)>;
 
 		static auto Instantiate()
 		{
 			return type{
-				std::make_shared< idk::ObjectPool<Ts>>()...
+				std::allocate_shared< idk::ObjectPool<Ts>>(std::allocator<idk::ObjectPool<Ts>>{})...
 			};
 		}
 
@@ -41,6 +46,41 @@ namespace idk::detail
 		static ObjectPool<T>& GetPool(type& pools)
 		{
 			return *s_cast<ObjectPool<T>*>(pools[detail::index_in_tuple_v<T, Tuple>].get());
+		}
+
+		static auto GenValidateJt()
+		{
+			return GameState::ValidateJT{
+				[](GameState& gs, const GenericHandle& handle) -> bool
+				{
+					return gs.ValidateHandle(handle_cast<Ts>(handle));
+				} ...
+			};
+		}
+
+		static auto GenDestructionJt()
+		{
+			return GameState::DestroyJT{
+				[](GameState& gs, const GenericHandle& handle)
+				{
+					if constexpr(std::is_same_v<Ts, GameObject>)
+						gs.DestroyObjectImmediate(handle_cast<Ts>(handle));
+					else
+					{
+						auto real_handle = handle_cast<Ts>(handle);
+						if (real_handle)
+						{
+							auto entity = real_handle->GetGameObject();
+							gs.DestroyObjectImmediate(real_handle);
+							assert(entity);
+							auto realent = std::addressof(*entity);
+							auto itr = std::find(realent->_components.begin(), realent->_components.end(), handle);
+							if (itr != realent->_components.end())
+								entity->_components.erase(itr);
+						}
+					}
+				} ...
+			};
 		}
 	};
 

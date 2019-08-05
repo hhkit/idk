@@ -34,6 +34,10 @@ namespace idk
 
 		template<typename T> 
 		bool is_type() const;
+
+		operator bool() const;
+		bool operator==(const GenericHandle&);
+		bool operator!=(const GenericHandle&);
 	};
 
 	template<typename T>
