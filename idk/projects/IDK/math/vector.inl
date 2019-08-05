@@ -79,6 +79,28 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
+	T* vector<T, D>::begin()
+	{
+		return std::begin(values);
+	}
+	template<typename T, unsigned D>
+	T* vector<T, D>::end()
+	{
+		return std::end(values);
+	}
+	template<typename T, unsigned D>
+	const T* vector<T, D>::begin() const
+	{
+		return std::begin(values);
+	}
+
+	template<typename T, unsigned D>
+	const T* vector<T, D>::end() const
+	{
+		return std::end(values);
+	}
+
+	template<typename T, unsigned D>
 	inline T* vector<T, D>::data()
 	{
 		return begin();

@@ -11,8 +11,7 @@ namespace idk::math
 	{
 		using Base = typename detail::vector_base<T, D>;
 		using Base::Base;
-		using Base::begin;
-		using Base::end;
+		using Base::values;
 
 		template<typename ... Args,
 			typename = std::enable_if_t<
@@ -37,6 +36,12 @@ namespace idk::math
 		T        dot(const vector&) const;
 		vector&  normalize();
 		vector   get_normalized() const;
+
+		// iteration
+		T*       begin();
+		T*       end();
+		const T* begin() const;
+		const T* end() const;
 		T*       data();
 		const T* data() const;
 

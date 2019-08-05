@@ -165,9 +165,6 @@
     <None Include="math\vector.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="math\vector_detail.inl">
-      <Filter>math\detail</Filter>
-    </None>
     <None Include="math\angle.inl">
       <Filter>math</Filter>
     </None>

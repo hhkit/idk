@@ -82,7 +82,6 @@
     <None Include="math\matrix_transforms.inl" />
     <None Include="math\quaternion.inl" />
     <None Include="math\vector.inl" />
-    <None Include="math\vector_detail.inl" />
     <None Include="util\meta.inl" />
     <None Include="util\casts.inl" />
     <None Include="util\pool.inl" />
