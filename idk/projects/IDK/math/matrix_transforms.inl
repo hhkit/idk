@@ -48,4 +48,38 @@ namespace idk
 		retval[D] = math::vector<T, D + 1>{ translate_vec, 1.f };
 		return retval;
 	}
+
+	template<typename T>
+	math::matrix<T, 4, 4> perspective(math::radian<T> fov, T a, T n, T f)
+	{
+		auto t = tan(fov / 2);
+
+		constexpr auto _2 = s_cast<T>(2);
+		constexpr auto _1 = s_cast<T>(1);
+		constexpr auto _0 = s_cast<T>(0);
+
+		return math::matrix<T, 4, 4>{
+			_1 / (t*a), _0  , _0                , _0                     ,
+			_0        , _1/t, _0                , _0                     ,
+			_0        , _0  , -(f + n) / (f - n), - (_2 * f  * n) / (f-n),
+			_0        , _0  , -_1               , _0
+		};
+	}
+	template<typename T>
+	math::matrix<T, 4, 4> orthogonal(T l, T r, T b, T t, T n, T f)
+	{
+		constexpr auto _2 = s_cast<T>(2);
+		constexpr auto _1 = s_cast<T>(1);
+		constexpr auto _0 = s_cast<T>(0);
+
+		using vec_t = math::vector<T, 4>;
+		const vec_t tvec = {-(r+l)/(r-l), -(t + b) / (t - b), -(f + n) / (f - n), _1 };
+
+		return math::matrix<T, 4, 4>(
+			vec_t{_2 / (r-l), _0, _0, _0},
+			vec_t{_0, 2 / (t-b), _0, _0},
+			vec_t{_0, _0, 2 / (f-n), _0},
+			tvec
+		);
+	}
 }
