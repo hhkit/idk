@@ -151,7 +151,6 @@
     <ClInclude Include="editor\IEditor.h">
       <Filter>editor</Filter>
     </ClInclude>
-    <ClInclude Include="app\Keys.h" />
     <ClInclude Include="core\Handleables.h">
       <Filter>core\handles</Filter>
     </ClInclude>
@@ -163,6 +162,9 @@
     </ClInclude>
     <ClInclude Include="core\IncludeComponents.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Keys.h">
+      <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

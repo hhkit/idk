@@ -6,7 +6,7 @@ namespace idk
 {
 	mat4 Transform::GetMatrix() const
 	{
-		return math::translate(position) * mat4 { s_cast<mat3>(rotation)* math::scale(scale) };
+		return translate(position) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
 	}
 	void Transform::CleanRotation()
 	{

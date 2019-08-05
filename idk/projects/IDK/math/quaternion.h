@@ -6,7 +6,7 @@
 namespace idk::math
 {
 	template <typename T>
-	struct quaternion 
+	struct quaternion
 		: vector<T, 4>
 	{
 		using Base = vector<T, 4>;
@@ -31,13 +31,16 @@ namespace idk::math
 		explicit operator matrix<T, 4, 4>();
 		explicit operator matrix<T, 4, 4>() const;
 	};
+}
 
-	template<typename M, typename T> auto quat_cast(quaternion<T>& q);
-	template<typename M, typename T> auto quat_cast(quaternion<T>&& q);
-	template<typename M, typename T> auto quat_cast(const quaternion<T>& q);
+namespace idk
+{
+	template<typename M, typename T> auto quat_cast(math::quaternion<T>& q);
+	template<typename M, typename T> auto quat_cast(math::quaternion<T>&& q);
+	template<typename M, typename T> auto quat_cast(const math::quaternion<T>& q);
 
 
-	extern template struct quaternion<float>;
+	extern template struct math::quaternion<float>;
 }
 
 #include "quaternion.inl"

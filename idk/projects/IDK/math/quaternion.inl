@@ -6,12 +6,12 @@ namespace idk::math
 {
 	template<typename T>
 	inline quaternion<T>::quaternion()
-		: Base{0, 0, 0, 1}
+		: Base{ 0, 0, 0, 1 }
 	{
 	}
 	template<typename T>
 	inline quaternion<T>::quaternion(T x, T y, T z, T w)
-		: Base{x, y, z, w}
+		: Base{ x, y, z, w }
 	{
 	}
 	template<typename T>
@@ -23,14 +23,14 @@ namespace idk::math
 		auto c = cos(h);
 
 		auto n = s * axis.get_normalized();
-		
+
 		this->xyz = n;
 		w = c;
 	}
 	template<typename T>
 	quaternion<T> quaternion<T>::inverse() const
 	{
-		return quaternion{-x, -y, -z, w};
+		return quaternion{ -x, -y, -z, w };
 	}
 	template<typename T>
 	quaternion<T>& quaternion<T>::operator*=(const quaternion& rhs)
@@ -61,7 +61,7 @@ namespace idk::math
 	{
 		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
 	}
-	
+
 	template<typename T>
 	quaternion<T>::operator matrix<T, 3, 3>() const
 	{
@@ -75,26 +75,28 @@ namespace idk::math
 		this->normalize();
 		return matrix<T, 3, 3>
 		{
-			1 - 2 * (y * y + z * z),	2 * (x * y - z * w),		2 * (x * z + y * w),
-			2 * (x * y + z * w),		1 - 2 * (x * x + z * z),	2 * (y * z - x * w),
-			2 * (x * z - y * w),		2 * (y * z + x * w),		1 - 2 * (y * y + z * z)	
+			1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
+				2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
+				2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (y * y + z * z)
 		};
 	}
-
+}
+namespace idk
+{
 	template<typename M, typename T>
-	auto quat_cast(quaternion<T>& q)
+	auto quat_cast(math::quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(quaternion<T>&& q)
+	auto quat_cast(math::quaternion<T>&& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(const quaternion<T>& q)
+	auto quat_cast(const math::quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}
