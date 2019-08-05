@@ -49,6 +49,9 @@ namespace idk
 
 		friend detail::ObjectPools;
 	};
+
+	extern template Handle<class GameObject> GameState::CreateObject<class GameObject>(uint8_t);
+	extern template Handle<class GameObject> GameState::CreateObject<class GameObject>(const Handle<class GameObject>&);
 }
 
 #include "GameState.inl"

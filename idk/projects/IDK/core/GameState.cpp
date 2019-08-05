@@ -1,9 +1,14 @@
 #include "stdafx.h"
-#include "GameState.h"
 #include <core/ComponentIncludes.h>
+#include <core/GameObject.h>
+#include <common/Transform.h>
 
+#include "GameState.h"
 namespace idk
 {
+	template Handle<class GameObject> GameState::CreateObject<class GameObject>(uint8_t);
+	template Handle<class GameObject> GameState::CreateObject<class GameObject>(const Handle<class GameObject>&);
+
 	GameState::GameState()
 		: _objects{detail::ObjectPools::Instantiate()}
 	{
