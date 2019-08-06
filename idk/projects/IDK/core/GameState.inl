@@ -5,7 +5,13 @@ namespace idk
 	template<typename T>
 	span<T> GameState::GetObjectsOfType()
 	{
-		return detail::ObjectPools::GetPool<T>(_objects).GetSpan();
+		if constexpr (std::is_const_v<T>)
+		{
+			auto span = detail::ObjectPools::GetPool<std::decay_t<T>>(_objects).GetSpan();
+			return span<T>(span.begin(), span.end());
+		}
+		else
+			return detail::ObjectPools::GetPool<std::decay_t<T>>(_objects).GetSpan();
 	}
 	template<typename T>
 	inline T* GameState::GetObject(const Handle<T>& handle)

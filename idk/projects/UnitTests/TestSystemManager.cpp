@@ -18,7 +18,7 @@ public:
 	// windows
 	bool SetFullscreen(bool ) override { return false; };
 	bool SetScreenSize(idk::ivec2 ) override { return false; };
-	void SwapBuffers() override {};
+	void SwapBuffers() override { if (i == 50) idk::Core::Shutdown(); std::cout << "swap buffer" << i << '\n'; };
 
 	void Shutdown() override { i++;  std::cout << "application shutdown\n"; }
 };
@@ -44,6 +44,6 @@ TEST(System, TestCore)
 
 	auto core = idk::Core::MakeCore<TestApplication>();
 
-	Core::GetSystem<Application>().Init();
+	//Core::GetSystem<Application>().Init();
 	core.Run();
 }

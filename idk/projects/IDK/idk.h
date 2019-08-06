@@ -3,6 +3,8 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <string>
+#include <string_view>
 
 #include <atomic>
 #include <chrono>
@@ -14,6 +16,7 @@
 #include <functional>
 
 #include <idk_config.h>
+#include <util/span.h>
 #include <math/constants.h>
 #include <math/arith.h>
 #include <math/angle.h>
@@ -50,7 +53,9 @@ namespace idk
 	using Clock = std::chrono::high_resolution_clock;
 
 	using seconds = std::chrono::duration<real>;
-	using time_point = Clock::duration;
+	using time_point = Clock::time_point;
+	template<typename T, typename U>
+	auto duration_cast(U&& time) {	return std::chrono::duration_cast<T>(std::forward<U>(time));	};
 
 	// math constants
 	constexpr auto pi = math::constants::pi<real>();
@@ -71,6 +76,10 @@ namespace idk
 
 	template<typename T>
 	using hash_set = std::unordered_set<T>;
+
+	using string = std::string;
+
+	using string_view = std::string_view;
 
 	template<typename T>
 	using atomic = std::atomic<T>;
