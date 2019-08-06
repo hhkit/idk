@@ -27,7 +27,10 @@ namespace idk
 				elem.call();
 		}
 
-		for (auto& elem : _draw_update)
+		for (auto& elem : _prerender_update)
+			elem.call();
+
+		for (auto& elem : _postrender_update)
 			elem.call();
 	}
 	seconds Scheduler::GetDeltaTime()

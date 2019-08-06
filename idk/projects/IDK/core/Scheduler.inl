@@ -35,12 +35,26 @@ namespace idk
 			std::invoke(mem_fn, Core::GetSystem<System>(), GameState::GetGameState().GetObjectsOfType<Cs>()...);
 		};
 
-		if constexpr (phase == UpdatePhase::Update)
-			_always_update.emplace_back(Pass{ read_bitset, write_bitset, call, name });
-		if constexpr (phase == UpdatePhase::Fixed)
-			_fixed_update.emplace_back(Pass{ read_bitset, write_bitset, call, name });
-		if constexpr (phase == UpdatePhase::PreRender)
-			_draw_update.emplace_back(Pass{ read_bitset, write_bitset, call, name });
+		SchedulePass<phase>(Pass{ read_bitset, write_bitset, call, name });
+	}
+
+	template<UpdatePhase phase>
+	inline void Scheduler::SchedulePass(Pass p)
+	{
+		switch (phase)
+		{
+		case UpdatePhase::Update:
+			_always_update.emplace_back(p);
+			break;
+		case UpdatePhase::Fixed:
+			_fixed_update.emplace_back(p);
+			break;
+		case UpdatePhase::PreRender:
+			_prerender_update.emplace_back(p);
+			break;
+		case UpdatePhase::PostRender:
+			_postrender_update.emplace_back(p);
+		};
 	}
 
 	template<UpdatePhase phase, typename System, typename ...Cs>
@@ -54,11 +68,6 @@ namespace idk
 			std::invoke(mem_fn, Core::GetSystem<System>(), GameState::GetGameState().GetObjectsOfType<Cs>()...);
 		};
 
-		if constexpr (phase == UpdatePhase::Update)
-			_always_update.emplace_back(Pass{ all_true, all_true, call, name });
-		if constexpr (phase == UpdatePhase::Fixed)
-			_fixed_update.emplace_back(Pass{ all_true, all_true, call, name });
-		if constexpr (phase == UpdatePhase::PreRender)
-			_draw_update.emplace_back(Pass{ all_true, all_true, call, name });
+		SchedulePass<phase>(Pass{ all_true, all_true, call, name });
 	}
 }

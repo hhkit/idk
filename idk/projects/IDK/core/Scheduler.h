@@ -12,6 +12,7 @@ namespace idk
 		Update,
 		Fixed,
 		PreRender,
+		PostRender,
 	};
 
 	class Scheduler
@@ -38,8 +39,7 @@ namespace idk
 		time_point _this_frame;
 		seconds    _real_dt;
 		seconds    _accumulated_dt;
-		seconds    _fixed_dt = seconds{ 0.016 };
-
+		seconds    _fixed_dt = seconds{ 1.0 / 60 };
 
 		struct Pass {
 			Lock read_components;
@@ -48,9 +48,12 @@ namespace idk
 			string_view update_name;
 		};
 
+		template<UpdatePhase phase> void SchedulePass(Pass p);
+
 		vector<Pass> _always_update;
 		vector<Pass> _fixed_update;
-		vector<Pass> _draw_update;
+		vector<Pass> _prerender_update;
+		vector<Pass> _postrender_update;
 
 		template<typename ... Ts>
 		friend struct detail::SchedulerHelper;
