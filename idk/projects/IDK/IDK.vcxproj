@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="core\Scheduler.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
     <ClInclude Include="editor\IEditor.h" />
@@ -63,6 +64,7 @@
     <ClInclude Include="util\span.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
@@ -81,6 +83,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />
     <None Include="core\GameObject.inl" />
     <None Include="core\GameState.inl" />

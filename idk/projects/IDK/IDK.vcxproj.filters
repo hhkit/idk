@@ -44,6 +44,9 @@
     <Filter Include="editor">
       <UniqueIdentifier>{57b8eb10-df35-46c8-a29b-102a5407f9ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\scheduler">
+      <UniqueIdentifier>{82227ccb-af0a-4741-9672-d6d2d40250ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -166,6 +169,9 @@
     <ClInclude Include="app\Keys.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="core\Scheduler.h">
+      <Filter>core\scheduler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -204,6 +210,9 @@
     </ClCompile>
     <ClCompile Include="core\Core.cpp">
       <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Scheduler.cpp">
+      <Filter>core\scheduler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -275,6 +284,9 @@
     </None>
     <None Include="core\Core.inl">
       <Filter>core</Filter>
+    </None>
+    <None Include="core\Scheduler.inl">
+      <Filter>core\scheduler</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

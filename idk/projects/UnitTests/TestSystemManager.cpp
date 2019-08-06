@@ -44,6 +44,6 @@ TEST(System, TestCore)
 
 	auto core = idk::Core::MakeCore<TestApplication>();
 
-	Core::GetSystem<Application>();
+	Core::GetSystem<Application>().Init();
 	core.Run();
 }

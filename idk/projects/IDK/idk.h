@@ -4,6 +4,9 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <atomic>
+#include <chrono>
+
 #include <memory>
 #include <optional>
 
@@ -43,6 +46,12 @@ namespace idk
 	using rad = math::radian<real>;
 	using deg = math::degree<real>;
 
+	// time
+	using Clock = std::chrono::high_resolution_clock;
+
+	using seconds = std::chrono::duration<real>;
+	using time_point = Clock::duration;
+
 	// math constants
 	constexpr auto pi = math::constants::pi<real>();
 	constexpr auto half_pi = pi / 2;
@@ -62,6 +71,9 @@ namespace idk
 
 	template<typename T>
 	using hash_set = std::unordered_set<T>;
+
+	template<typename T>
+	using atomic = std::atomic<T>;
 
 	// utility
 	template<typename Signature>
