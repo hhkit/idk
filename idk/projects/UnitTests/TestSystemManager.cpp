@@ -45,5 +45,9 @@ TEST(System, TestCore)
 	auto core = idk::Core::MakeCore<TestApplication>();
 
 	//Core::GetSystem<Application>().Init();
+	auto scene = GameState::GetGameState().ActivateScene(0);
+	scene->CreateGameObject();
+	scene->CreateGameObject();
+	scene->CreateGameObject();
 	core.Run();
 }

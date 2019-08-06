@@ -9,10 +9,17 @@ namespace idk
 		{
 			using lock_t = Scheduler::Lock;
 
-			static lock_t GetLock()
+			static lock_t GetReadLock()
 			{
 				lock_t retval{};
-				auto v = ((retval[index_in_tuple_v<Cs, Components>] = true) && ...); (v);
+				auto v = ((retval[index_in_tuple_v<std::decay_t<Cs>, Components>] = true) && ...); (v);
+				return retval;
+			}
+
+			static lock_t GetWriteLock()
+			{
+				lock_t retval{};
+				auto v = ((retval[index_in_tuple_v<std::decay_t<Cs>, Components>] = !std::is_const_v<Cs>) && ...); (v);
 				return retval;
 			}
 		};
@@ -21,8 +28,8 @@ namespace idk
 	template<UpdatePhase phase, typename System, typename ... Cs>
 	void Scheduler::SchedulePass(void(System::*mem_fn)(span<Cs>...), const char* name)
 	{
-		Scheduler::Lock read_bitset = detail::SchedulerHelper<Cs...>::GetLock();
-		Scheduler::Lock write_bitset = detail::SchedulerHelper<Cs...>::GetLock();
+		Scheduler::Lock read_bitset = detail::SchedulerHelper<Cs...>::GetReadLock();
+		Scheduler::Lock write_bitset = detail::SchedulerHelper<Cs...>::GetWriteLock();
 		auto call = [mem_fn]()
 		{
 			std::invoke(mem_fn, Core::GetSystem<System>(), GameState::GetGameState().GetObjectsOfType<Cs>()...);

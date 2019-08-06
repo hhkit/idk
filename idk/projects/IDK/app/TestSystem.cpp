@@ -11,10 +11,13 @@ namespace idk
 		std::cout << "Init System\n";
 	}
 
-	void TestSystem::TestSpan(span<class Transform> transforms)
+	void TestSystem::TestSpan(span<const Transform> transforms)
 	{
-		for (auto& elem : transforms)
-			elem.GetMatrix();
+		auto index = 0;
+		std::cout << "tfm update: ";
+		for (auto& tfm : transforms)
+			std::cout << (tfm,index++) << ',';
+		std::cout << '\n';
 	}
 
 	void TestSystem::Shutdown()
