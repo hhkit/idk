@@ -66,6 +66,11 @@ namespace idk
 		};
 	}
 	template<typename T>
+	math::matrix<T, 4, 4> perspective(math::degree<T> fov, T aspect_ratio, T n, T f)
+	{
+		return perspective(math::radian<T>{fov}, aspect_ratio, n, f);
+	}
+	template<typename T>
 	math::matrix<T, 4, 4> ortho(T l, T r, T b, T t, T n, T f)
 	{
 		constexpr auto _2 = s_cast<T>(2);

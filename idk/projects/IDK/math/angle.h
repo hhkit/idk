@@ -39,7 +39,7 @@ namespace idk::math
 
 		explicit degree(T val = T{});
 		explicit degree(const radian<T>&);
-		explicit operator radian<T>() const;
+		operator radian<T>() const;
 
 		bool abs_comp(const degree&) const;
 

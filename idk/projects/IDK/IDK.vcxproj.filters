@@ -202,7 +202,9 @@
     <ClCompile Include="core\Scene.cpp">
       <Filter>core\data</Filter>
     </ClCompile>
-    <ClCompile Include="core\Core.cpp" />
+    <ClCompile Include="core\Core.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -271,7 +273,9 @@
     <None Include="core\Scene.inl">
       <Filter>core\data</Filter>
     </None>
-    <None Include="core\Core.inl" />
+    <None Include="core\Core.inl">
+      <Filter>core</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
