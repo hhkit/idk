@@ -42,7 +42,6 @@ namespace idk
 		}
 
 		retval = (int)msg.wParam;
-		return;
 	}
 	int Windows::GetReturnVal()
 	{
