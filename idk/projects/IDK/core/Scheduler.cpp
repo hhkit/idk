@@ -32,6 +32,8 @@ namespace idk
 
 		for (auto& elem : _postrender_update)
 			elem.call();
+
+		_last_frame = _this_frame;
 	}
 	seconds Scheduler::GetDeltaTime()
 	{

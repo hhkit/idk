@@ -7,9 +7,9 @@ namespace idk
 		return Core::_instance->_system_manager.GetSystem<T>();
 	}
 
-	template<typename Application>
-	inline Core Core::MakeCore()
+	template<typename Application, typename ... Args>
+	inline Core Core::MakeCore(Args&& ... args)
 	{
-		return Core{ std::make_shared<Application>() };
+		return Core{ std::make_shared<Application>(std::forward<Args>(args)...) };
 	}
 }

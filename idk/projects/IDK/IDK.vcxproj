@@ -177,7 +177,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\core\$(Configuration)\</IntDir>
     <TargetName>coreD</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(ProjectDir);$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -191,7 +191,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\core\$(Configuration)\</IntDir>
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(ProjectDir);$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <TargetName>core</TargetName>

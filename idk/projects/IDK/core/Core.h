@@ -8,7 +8,7 @@ namespace idk
 	{
 	public:
 		template<typename T>   static T& GetSystem();
-		template<typename App> static Core MakeCore();
+		template<typename App, typename...Args> static Core MakeCore(Args&&...);
 		static seconds GetDT();
 		static seconds GetRealDT();
 		static void    Shutdown();
