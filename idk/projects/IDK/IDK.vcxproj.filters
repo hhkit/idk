@@ -172,6 +172,9 @@
     <ClInclude Include="core\Scheduler.h">
       <Filter>core\scheduler</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\GraphicsSystem.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -214,6 +217,7 @@
     <ClCompile Include="core\Scheduler.cpp">
       <Filter>core\scheduler</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

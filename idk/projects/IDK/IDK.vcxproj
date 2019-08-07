@@ -30,6 +30,7 @@
     <ClInclude Include="core\IncludeComponents.h" />
     <ClInclude Include="core\GameState.h" />
     <ClInclude Include="core\ISystem.h" />
+    <ClInclude Include="gfx\GraphicsSystem.h" />
     <ClInclude Include="util\ranged_for.h" />
     <ClInclude Include="core\SystemManager.h" />
     <ClInclude Include="idk_config.h" />
@@ -74,6 +75,7 @@
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="core\SystemManager.cpp" />
+    <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -180,7 +182,6 @@
     <IntDir>$(SolutionDir)build\core\$(Configuration)\</IntDir>
     <TargetName>coreD</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(ProjectDir);$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -193,7 +194,6 @@
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\core\$(Configuration)\</IntDir>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(ProjectDir);$(SolutionDir)dep\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <TargetName>core</TargetName>
     <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
@@ -223,15 +223,15 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -266,8 +266,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -276,10 +275,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <PropertyGroup Condition="'$(Language)'=='C++'">
+    <CAExcludePath>$(ThirdPartyDirectory);$(CAExcludePath)</CAExcludePath>
+  </PropertyGroup>
 </Project>

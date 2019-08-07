@@ -3,15 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IDK Launcher", "projects\game\game.vcxproj", "{BEB4C429-0F39-4239-81C1-DECCCE8BC252}"
+	ProjectSection(ProjectDependencies) = postProject
+		{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1} = {05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "projects\UnitTests\UnitTests.vcxproj", "{8DD30D1D-92B8-4986-9327-365E684B89A7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IDK Core Library", "projects\IDK\IDK.vcxproj", "{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D} = {075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor Static Dependencies", "projects\editorstatic\editorstatic.vcxproj", "{AF8E182B-2C39-4ADF-9BC1-C72C76F80823}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine Static Dependencies", "projects\enginestatic\enginestatic.vcxproj", "{075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "projects\game\game.vcxproj", "{BEB4C429-0F39-4239-81C1-DECCCE8BC252}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

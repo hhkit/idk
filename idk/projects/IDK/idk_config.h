@@ -39,7 +39,7 @@ namespace idk
 		//,	class InputSystem
 		//,	class ScriptSystem
 		//,	class PhysicsSystem
-		//,	class GraphicsSystem
+		,	class GraphicsSystem
 		//,	class AudioSystem
 		//,	class IEditor
 	>;
