@@ -26,7 +26,7 @@
   </Type>
   
   <Type Name="idk::Handle&lt; * &gt;">
-    <DisplayString>[id={id, h}]</DisplayString>
+    <DisplayString>[{"$T1"} id={id, h}]</DisplayString>
     <Expand>
       <CustomListItems MaxItemsPerView="16">
         <Variable Name="_index" InitialValue="-1"/>
@@ -54,8 +54,8 @@
     <Expand>
       <CustomListItems MaxItemsPerView="16">
         <If Condition="type == 0"><Item Name="[GameObject]">*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item></If>
-        <If Condition="type == 1"><Item Name="[Transform]" >*((idk::Handle&lt;idk::Transform &gt;*)(&amp;id))</Item></If>
-        <If Condition="type == 2"><Item Name="[Parent]"    >*((idk::Handle&lt;idk::Parent    &gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 1"><Item Name="[Transform]" >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 2"><Item Name="[Parent]"    >*((idk::Handle&lt;idk::Parent&gt;*)(&amp;id))</Item></If>
       </CustomListItems>
     </Expand>
   </Type>
