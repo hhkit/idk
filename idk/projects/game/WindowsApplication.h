@@ -23,9 +23,12 @@ namespace idk
 		void Init() override {}
 		vec2 GetMouseScreenPos() override { return vec2{}; }
 		vec2 GetMouseScreenDel() override { return vec2{}; }
-		bool GetKeyDown(Key) override { return false; }
-		bool GetKey(Key) override { return false; }
-		bool GetKeyUp(Key) override { return false; }
+		bool GetKeyDown(CharKey) override { return false; }
+		bool GetKey(CharKey) override { return false; }
+		bool GetKeyUp(CharKey) override { return false; }
+		bool GetKeyDown(SysKey) override { return false; }
+		bool GetKey(SysKey) override { return false; }
+		bool GetKeyUp(SysKey) override { return false; }
 		// windows
 		bool SetFullscreen(bool) override { return false; }
 		bool SetScreenSize(ivec2) override { return false; }

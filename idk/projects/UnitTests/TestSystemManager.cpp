@@ -9,11 +9,15 @@ public:
 	int i = 0;
 	void Init() override { i++;  std::cout << "application init\n"; }
 	void PollEvents() override { ++i; }
+	int GetReturnVal() override { return 0; };
 	idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; };
 	idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; };
-	bool GetKeyDown(idk::Key) override { return false; };
-	bool GetKey(idk::Key) override { return false; };
-	bool GetKeyUp(idk::Key) override { return false; };
+	bool GetKeyDown(idk::CharKey) override { return false; };
+	bool GetKey(idk::CharKey) override { return false; };
+	bool GetKeyUp(idk::CharKey) override { return false; };
+	bool GetKeyDown(idk::SysKey) override { return false; };
+	bool GetKey(idk::SysKey) override { return false; };
+	bool GetKeyUp(idk::SysKey) override { return false; };
 
 	// windows
 	bool SetFullscreen(bool ) override { return false; };
