@@ -13,8 +13,8 @@ namespace idk
 	{
 		return _instance->_scheduler->GetRealDeltaTime();
 	}
-	Core::Core(std::shared_ptr<Application>&& app, std::shared_ptr<IEditor>&& editor)
-		: _system_manager(std::move(app), std::move(editor)), _scheduler(std::make_unique<Scheduler>()), _running{true}
+	Core::Core()
+		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{true}
 	{
 		_instance = this;
 	}

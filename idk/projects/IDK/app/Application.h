@@ -11,7 +11,6 @@ namespace idk
 	public:
 		// app
 		virtual void PollEvents() = 0;
-		virtual int GetReturnVal() = 0;
 
 		// movement
 		virtual vec2 GetMouseScreenPos() = 0;

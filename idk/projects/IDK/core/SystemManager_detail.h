@@ -15,12 +15,16 @@ namespace idk
 		template<typename ...Ts>
 		struct SystemHelper<std::tuple<Ts...>>
 		{
-			static auto InstantiateEngineSystems(shared_ptr<Application>&& app_system, shared_ptr<IEditor>&& editor_system)
+			static auto InstantiateEngineSystems()
 			{
 				return std::array<shared_ptr<ISystem>, SystemCount>{
-					std::move(app_system),
-					std::make_shared<Ts>()...,
-					std::move(editor_system)
+					[]()
+					{
+						if constexpr (std::is_abstract_v<Ts>)
+							return std::shared_ptr<Ts>();
+						else
+							return std::make_shared<Ts>();
+					}()...
 				};
 			}
 

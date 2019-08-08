@@ -1,5 +1,10 @@
-#include "WindowsApplication.h"
+#include "pch.h"
+
+#include <iostream>
+
 #include <core/Core.h>
+
+#include "WindowsApplication.h"
 
 namespace idk
 {
@@ -8,8 +13,8 @@ namespace idk
 	{
 		instance = this;
 		// Initialize global strings
-		LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-		LoadStringW(hInstance, IDC_GAME, szWindowClass, MAX_LOADSTRING);
+		//LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+		//LoadStringW(hInstance, IDC_GAME, szWindowClass, MAX_LOADSTRING);
 
 		#ifdef _DEBUG
 		{
@@ -18,19 +23,20 @@ namespace idk
 			FILE* pCout;
 			freopen_s(&pCout, "conout$", "w", stdout); //returns 0
 			freopen_s(&pCout, "conout$", "w", stderr); //returns 0
-			SetConsoleTitle(szTitle);
+			SetConsoleTitle(L"IDK 0.1a");
 		}
 		#endif
 
 		MyRegisterClass();
 
 		InitInstance(nCmdShow);
-		hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAME));
+		//hAccelTable = LoadAccelerators(hInstance, 0);
 
 	}
 
 	void Windows::PollEvents()
 	{
+		std::cout << "polling windows\n";
 		MSG msg;
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
@@ -54,20 +60,6 @@ namespace idk
 
 		switch (message)
 		{
-		case WM_COMMAND:
-		{
-			int wmId = LOWORD(wParam);
-			// Parse the menu selections:
-			switch (wmId)
-			{
-			case IDM_EXIT:
-				DestroyWindow(hWnd);
-				break;
-			default:
-				return DefWindowProc(hWnd, message, wParam, lParam);
-			}
-		}
-		break;
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
 			break;
@@ -83,6 +75,16 @@ namespace idk
 		return 0;
 	}
 
+	HINSTANCE Windows::GetInstance()
+	{
+		return hInstance;
+	}
+
+	HWND Windows::GetWindowHandle()
+	{
+		return hWnd;
+	}
+
 	ATOM Windows::MyRegisterClass()
 	{
 		WNDCLASSEXW wcex;
@@ -94,19 +96,19 @@ namespace idk
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 0;
 		wcex.hInstance = hInstance;
-		wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME));
+		wcex.hIcon = 0;  
 		wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-		wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_GAME);
+		wcex.lpszMenuName = 0;  
 		wcex.lpszClassName = szWindowClass;
-		wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+		wcex.hIconSm = 0;
 
 		return RegisterClassExW(&wcex);
 	}
 
 	BOOL Windows::InitInstance(int nCmdShow)
 	{
-		hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+		hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)

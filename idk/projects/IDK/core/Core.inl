@@ -6,10 +6,9 @@ namespace idk
 	{
 		return Core::_instance->_system_manager.GetSystem<T>();
 	}
-
-	template<typename Application, typename ... Args>
-	inline Core Core::MakeCore(Args&& ... args)
+	template<typename T, typename ...Args>
+	inline T& Core::AddSystem(Args&& ...args)
 	{
-		return Core{ std::make_shared<Application>(std::forward<Args>(args)...) };
+		return _system_manager.AddSystem<T>(std::forward<Args>(args)...);
 	}
 }

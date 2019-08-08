@@ -9,11 +9,14 @@ namespace idk
 	class SystemManager
 	{
 	public:
-		SystemManager(shared_ptr<Application>&& application, shared_ptr<IEditor>&& ptr);
+		SystemManager();
 		~SystemManager();
 
 		template<typename T>
 		T& GetSystem();
+
+		template<typename T, typename ...Args>
+		T& AddSystem(Args&& ... args);
 
 		void InitSystems();
 		void ShutdownSystems();

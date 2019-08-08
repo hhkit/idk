@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-#include "resource.h"
-
-#include "WindowsApplication.h"
 #include <core/Core.h>
+#include <vulkan/VulkanWin32GraphicsSystem.h>
+#include <win32/WindowsApplication.h>
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -18,8 +17,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
     
 	using namespace idk;
-	auto c = Core::MakeCore<Windows>(hInstance, nCmdShow);
+	auto c = Core{};
+	c.AddSystem<Windows>(hInstance, nCmdShow);
+	c.AddSystem<idk::VulkanWin32GraphicsSystem>();
 	c.Run();
 	
-	return c.GetSystem<Application>().GetReturnVal();
+	return c.GetSystem<Windows>().GetReturnVal();
 }

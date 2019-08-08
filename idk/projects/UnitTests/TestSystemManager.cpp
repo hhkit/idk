@@ -10,7 +10,6 @@ public:
 	int i = 0;
 	void Init() override { i++;  std::cout << "application init\n"; }
 	void PollEvents() override { ++i; }
-	int GetReturnVal() override { return 0; };
 	idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; };
 	idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; };
 	bool GetKeyDown(idk::CharKey) override { return false; };
@@ -32,26 +31,24 @@ TEST(System, TestSystemManager)
 {
 	using namespace idk;
 
-	auto app = std::make_shared<TestApplication>();
-	idk::SystemManager sysman(app, std::shared_ptr<IEditor>());
-
+	idk::SystemManager sysman;
+	auto app = &sysman.AddSystem<TestApplication>();
 	sysman.GetSystem<Application>();
+	sysman.GetSystem<TestApplication>();
+	sysman.GetSystem<IEditor>();
 
 	sysman.InitSystems();
 	EXPECT_EQ(app-> i, 1);
 	sysman.ShutdownSystems();
 	EXPECT_EQ(app->i, 2);
-	sysman.GetSystem<TestApplication>();
-	sysman.GetSystem<IEditor>();
 }
 
 TEST(System, TestCore)
 {
 	using namespace idk;
 
-	auto core = idk::Core::MakeCore<TestApplication>();
-
-	//Core::GetSystem<Application>().Init();
+	auto core = Core{};
+	core.AddSystem<TestApplication>();
 	auto scene = GameState::GetGameState().ActivateScene(0);
 	scene->CreateGameObject();
 	scene->CreateGameObject();

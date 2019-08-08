@@ -8,12 +8,12 @@ namespace idk
 	{
 	public:
 		template<typename T>   static T& GetSystem();
-		template<typename App, typename...Args> static Core MakeCore(Args&&...);
+		template<typename T, typename ... Args> T& AddSystem(Args&& ... args);
 		static seconds GetDT();
 		static seconds GetRealDT();
 		static void    Shutdown();
 
-		Core(std::shared_ptr<Application>&& app, std::shared_ptr<IEditor>&& editor = std::shared_ptr<IEditor>{});
+		Core();
 		~Core();
 		void Run();
 	private:

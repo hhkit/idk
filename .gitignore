@@ -351,3 +351,4 @@ MigrationBackup/
 /idk/testbin
 /idk/testbuild
 /idk/build/tests
+/idk/build/win32

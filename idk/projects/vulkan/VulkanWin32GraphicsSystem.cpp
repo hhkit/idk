@@ -1,10 +1,8 @@
-#include <stdafx.h>
+#include <pch.h>
 #include <iostream>
-#define VK_USE_PLATFORM_WIN32_KHR
-#include "GraphicsSystem.h"
-#include <vulkan/vulkan_win32.h>
-#define VK_KHR_OS_SURFACE_EXTENSION_NAME VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 
+#include <VulkanWin32GraphicsSystem.h>
+#include <WindowsApplication.h>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -29,18 +27,17 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMes
 
 namespace idk
 {
-	void GraphicsSystem::Init()
+	void VulkanWin32GraphicsSystem::Init()
 	{
 		createInstance();
 	}
-
-	void GraphicsSystem::Shutdown()
+	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 	}
-	void GraphicsSystem::createInstance()
+	void VulkanWin32GraphicsSystem::createInstance()
 	{
 		const char* extensions[] = {
-			VK_KHR_OS_SURFACE_EXTENSION_NAME,
+			VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 			VK_KHR_SURFACE_EXTENSION_NAME,
 			VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
 			VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
@@ -68,7 +65,7 @@ namespace idk
 		instance = vk::createInstanceUnique(createInfo);
 	}
 
-	void GraphicsSystem::setupDebugMessenger()
+	void VulkanWin32GraphicsSystem::setupDebugMessenger()
 	{
 		vk::DebugUtilsMessengerCreateInfoEXT createInfo;
 		createInfo.setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);

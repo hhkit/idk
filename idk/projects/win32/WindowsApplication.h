@@ -1,8 +1,8 @@
 #pragma once
 
 #include "framework.h"
-#include "resource.h"
 
+#include <Windows.h>
 #include <idk.h>
 #include <app/Application.h>
 
@@ -19,7 +19,7 @@ namespace idk
 	public:
 		Windows(HINSTANCE hInstance, int nCmdShow);
 		void PollEvents() override;
-		int GetReturnVal() override;
+		int GetReturnVal();
 		void Init() override {}
 		vec2 GetMouseScreenPos() override { return vec2{}; }
 		vec2 GetMouseScreenDel() override { return vec2{}; }
@@ -35,12 +35,13 @@ namespace idk
 		void SwapBuffers() override {}
 		void Shutdown() override {}
 
+		HINSTANCE GetInstance();
+		HWND      GetWindowHandle();
 	private:
 		HINSTANCE hInstance;
 		HWND      hWnd;
 		HACCEL    hAccelTable;
-		WCHAR     szTitle[MAX_LOADSTRING];
-		WCHAR     szWindowClass[MAX_LOADSTRING];
+		WCHAR     szWindowClass[MAX_LOADSTRING]{L"idk"};
 		int       retval;
 		static inline Windows* instance = nullptr;
 
