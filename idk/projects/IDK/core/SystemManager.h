@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <core/ISystem.h>
 #include <core/SystemManager_detail.h>
-#include <util/meta.h>
+#include <meta/meta.h>
 
 namespace idk
 {

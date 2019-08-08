@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
-#include <util/meta.h>
-#include <util/span.h>
+#include <meta/meta.h>
+#include <ds/span.h>
 
 namespace idk
 {

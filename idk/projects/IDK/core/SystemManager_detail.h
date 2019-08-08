@@ -2,7 +2,7 @@
 #include <tuple>
 #include <idk_config.h>
 #include <core/ISystem.h>
-#include <util/meta.h>
+#include <meta/meta.h>
 namespace idk
 {
 	class IEditor;

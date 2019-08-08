@@ -1,6 +1,6 @@
 #include "pch.h"
 #include <idk.h>
-#include <util/zip.h>
+#include <ds/zip.h>
 
 TEST(Zip, ZipTest)
 {

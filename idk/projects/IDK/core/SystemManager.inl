@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-#include <util/meta.h>
+#include <meta/meta.h>
 
 namespace idk
 {

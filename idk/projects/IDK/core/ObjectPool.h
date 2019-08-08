@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/Handle.h>
-#include <util/pool.h>
+#include <ds/pool.h>
 
 namespace idk
 {

@@ -3,6 +3,6 @@
 namespace idk
 {
 	template<typename ... Containers>
-	auto zip(Containers&&...);
+	constexpr auto zip(Containers&&...);
 }
 #include "zip.inl"

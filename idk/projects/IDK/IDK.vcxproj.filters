@@ -19,9 +19,6 @@
     <Filter Include="math\detail">
       <UniqueIdentifier>{5af6f78e-707b-4276-a9a0-e716d6f48fd9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="util">
-      <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="_natvis">
       <UniqueIdentifier>{96518433-03f0-4cae-b02e-a7ee5d114378}</UniqueIdentifier>
       <Extensions>.natvis</Extensions>
@@ -46,6 +43,12 @@
     </Filter>
     <Filter Include="core\scheduler">
       <UniqueIdentifier>{82227ccb-af0a-4741-9672-d6d2d40250ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ds">
+      <UniqueIdentifier>{acb92b6f-fb51-44a4-9ad4-27dff0238f24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="meta">
+      <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -76,14 +79,8 @@
     <ClInclude Include="event\Dispatcher_detail.h">
       <Filter>event</Filter>
     </ClInclude>
-    <ClInclude Include="util\casts.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="math\vector_swizzle.h">
       <Filter>math\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="util\meta.h">
-      <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="common\Transform.h">
       <Filter>common</Filter>
@@ -99,24 +96,12 @@
     <ClInclude Include="core\Handle.h">
       <Filter>core\handles</Filter>
     </ClInclude>
-    <ClInclude Include="util\pool.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\span.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h">
       <Filter>core\handles</Filter>
     </ClInclude>
     <ClInclude Include="math\matrix_transforms.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="util\zip.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\range.h">
-      <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="core\ISystem.h">
       <Filter>core\systems</Filter>
@@ -129,9 +114,6 @@
     </ClInclude>
     <ClInclude Include="core\SystemManager.h">
       <Filter>core\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="util\ranged_for.h">
-      <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="core\Core.h">
       <Filter>core</Filter>
@@ -175,6 +157,27 @@
     <ClInclude Include="gfx\GraphicsSystem.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="meta\casts.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\meta.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\pool.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\range.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\ranged_for.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\span.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\zip.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -217,7 +220,9 @@
     <ClCompile Include="core\Scheduler.cpp">
       <Filter>core\scheduler</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\GraphicsSystem.cpp" />
+    <ClCompile Include="gfx\GraphicsSystem.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -241,23 +246,11 @@
     <None Include="event\Dispatcher_detail.inl">
       <Filter>event</Filter>
     </None>
-    <None Include="util\casts.inl">
-      <Filter>util</Filter>
-    </None>
-    <None Include="util\meta.inl">
-      <Filter>util</Filter>
-    </None>
     <None Include="math\quaternion.inl">
       <Filter>math</Filter>
     </None>
     <None Include="core\Handle.inl">
       <Filter>core\handles</Filter>
-    </None>
-    <None Include="util\pool.inl">
-      <Filter>util</Filter>
-    </None>
-    <None Include="util\span.inl">
-      <Filter>util</Filter>
     </None>
     <None Include="core\ObjectPool.inl">
       <Filter>core\handles</Filter>
@@ -265,17 +258,8 @@
     <None Include="math\matrix_transforms.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="util\zip.inl">
-      <Filter>util</Filter>
-    </None>
-    <None Include="util\range.inl">
-      <Filter>util</Filter>
-    </None>
     <None Include="core\SystemManager.inl">
       <Filter>core\systems</Filter>
-    </None>
-    <None Include="util\ranged_for.inl">
-      <Filter>util</Filter>
     </None>
     <None Include="core\GameObject.inl">
       <Filter>core\data</Filter>
@@ -291,6 +275,27 @@
     </None>
     <None Include="core\Scheduler.inl">
       <Filter>core\scheduler</Filter>
+    </None>
+    <None Include="meta\casts.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="meta\meta.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="ds\pool.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\range.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\ranged_for.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\span.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\zip.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

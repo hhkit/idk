@@ -31,7 +31,7 @@
     <ClInclude Include="core\GameState.h" />
     <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="gfx\GraphicsSystem.h" />
-    <ClInclude Include="util\ranged_for.h" />
+    <ClInclude Include="ds\ranged_for.h" />
     <ClInclude Include="core\SystemManager.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
@@ -55,14 +55,14 @@
     <ClInclude Include="core\Scene.h" />
     <ClInclude Include="core\IncludeSystems.h" />
     <ClInclude Include="app\TestSystem.h" />
-    <ClInclude Include="util\range.h" />
-    <ClInclude Include="util\zip.h" />
+    <ClInclude Include="ds\range.h" />
+    <ClInclude Include="ds\zip.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="util\meta.h" />
-    <ClInclude Include="util\casts.h" />
+    <ClInclude Include="meta\meta.h" />
+    <ClInclude Include="meta\casts.h" />
     <ClInclude Include="core\Handle.h" />
-    <ClInclude Include="util\pool.h" />
-    <ClInclude Include="util\span.h" />
+    <ClInclude Include="ds\pool.h" />
+    <ClInclude Include="ds\span.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Scheduler.cpp" />
@@ -91,7 +91,7 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
-    <None Include="util\ranged_for.inl" />
+    <None Include="ds\ranged_for.inl" />
     <None Include="core\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
@@ -103,12 +103,12 @@
     <None Include="math\matrix_transforms.inl" />
     <None Include="math\quaternion.inl" />
     <None Include="math\vector.inl" />
-    <None Include="util\meta.inl" />
-    <None Include="util\casts.inl" />
-    <None Include="util\pool.inl" />
-    <None Include="util\range.inl" />
-    <None Include="util\span.inl" />
-    <None Include="util\zip.inl" />
+    <None Include="meta\meta.inl" />
+    <None Include="meta\casts.inl" />
+    <None Include="ds\pool.inl" />
+    <None Include="ds\range.inl" />
+    <None Include="ds\span.inl" />
+    <None Include="ds\zip.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\objectpool.natvis" />

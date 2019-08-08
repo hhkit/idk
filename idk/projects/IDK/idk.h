@@ -16,7 +16,7 @@
 #include <functional>
 
 #include <idk_config.h>
-#include <util/span.h>
+#include <ds/span.h>
 #include <math/constants.h>
 #include <math/arith.h>
 #include <math/angle.h>

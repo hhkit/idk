@@ -1,6 +1,6 @@
 #pragma once
-#include <util/range.h>
-#include <util/zip.h>
+#include <ds/range.h>
+#include <ds/zip.h>
 #include "matrix_transforms.h"
 
 namespace idk

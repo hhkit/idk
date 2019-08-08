@@ -1,6 +1,6 @@
 #pragma once
 #include "vector.h"
-#include "../util/casts.h"
+#include "../meta/casts.h"
 
 namespace idk::math::detail
 {

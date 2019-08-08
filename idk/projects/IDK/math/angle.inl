@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "angle.h"
 #include "arith.h"
-#include "../util/casts.h"
+#include "../meta/casts.h"
 #include <cmath>
 namespace idk::math
 {
