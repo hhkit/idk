@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <core/Core.h>
 #include <app/Application.h>
+#include <editor/IEditor.h>
 class TestApplication : 
 	public idk::Application
 {
@@ -40,6 +41,8 @@ TEST(System, TestSystemManager)
 	EXPECT_EQ(app-> i, 1);
 	sysman.ShutdownSystems();
 	EXPECT_EQ(app->i, 2);
+	sysman.GetSystem<TestApplication>();
+	sysman.GetSystem<IEditor>();
 }
 
 TEST(System, TestCore)

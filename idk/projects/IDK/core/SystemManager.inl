@@ -8,6 +8,6 @@ namespace idk
 	template<typename T>
 	T& SystemManager::GetSystem()
 	{
-		return *s_cast<T*>(std::get<index_in_tuple_v<T, Systems>>(_list).get());
+		return *s_cast<T*>(std::get<Helper::GetSystemImpl<T>()>(_list).get());
 	}
 }

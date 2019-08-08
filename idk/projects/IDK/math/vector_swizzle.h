@@ -1,6 +1,8 @@
 #pragma once
 #include "vector.h"
-#include "../meta/casts.h"
+#include <meta/casts.h>
+#include <ds/range.h>
+#include <ds/zip.h>
 
 namespace idk::math::detail
 {
@@ -13,7 +15,11 @@ namespace idk::math::detail
 
 		return_t& operator=(const return_t& rhs)
 		{
-			assign(rhs, std::index_sequence<Indexes...>{}, std::make_index_sequence<D>{});
+			//assign(rhs, std::index_sequence<Indexes...>{}, std::make_index_sequence<D>{});
+
+			for (auto [lind, rind] : zip(std::array<unsigned, sizeof...(Indexes)>{ Indexes... }, range<sizeof...(Indexes)>()))
+				values[lind] = rhs[rind];
+
 			return *r_cast<return_t*>(this);
 		}
 

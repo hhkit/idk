@@ -23,6 +23,21 @@ namespace idk
 					std::move(editor_system)
 				};
 			}
+
+			template<typename T, unsigned N, typename Query, typename ... Tail>
+			static constexpr auto GetSystemIndex()
+			{
+				if constexpr (std::is_base_of_v<Query, T>)
+					return N;
+				else
+					return GetSystemIndex<T, N + 1, Tail...>();
+			}
+
+			template<typename T>
+			static constexpr auto GetSystemImpl()
+			{
+				return GetSystemIndex<T, 0, Application, Ts..., IEditor>();
+			}
 		};
 	}
 }
