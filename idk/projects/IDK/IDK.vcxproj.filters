@@ -178,6 +178,8 @@
     <ClInclude Include="gfx\GraphicsSystem.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="reflect\reflect.h" />
+    <ClInclude Include="reflect\macro_utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

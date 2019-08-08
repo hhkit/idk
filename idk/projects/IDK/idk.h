@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <optional>
+#include <variant>
 
 #include <stddef.h>
 #include <functional>
@@ -90,6 +91,9 @@ namespace idk
 
 	template<typename T>
 	using opt = std::optional<T>;
+
+	template<typename ... Ts>
+	using variant = std::variant<Ts...>;
 
 	// smart pointers
 	template<typename T>
