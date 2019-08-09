@@ -13,11 +13,13 @@ namespace idk::math::detail
 		static constexpr auto D = sizeof...(Indexes);
 		using return_t = tvector<T, D>;
 
-		return_t& operator=(const return_t& rhs)
+		return_t& operator=(return_t rhs) // forced copy so that self assignment works
 		{
 			//assign(rhs, std::index_sequence<Indexes...>{}, std::make_index_sequence<D>{});
-
-			for (auto [lind, rind] : zip(std::array<unsigned, sizeof...(Indexes)>{ Indexes... }, range<sizeof...(Indexes)>()))
+			constexpr unsigned linds[] = { Indexes... };
+			constexpr auto rinds = range<sizeof...(Indexes)>();
+			//auto indexes = zip(std::array<unsigned, sizeof...(Indexes)>{ Indexes... }, range<sizeof...(Indexes)>());
+			for (const auto [lind, rind] : zip(linds, rinds))
 				values[lind] = rhs[rind];
 
 			return *r_cast<return_t*>(this);

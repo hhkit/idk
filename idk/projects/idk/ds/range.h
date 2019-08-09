@@ -12,7 +12,7 @@ namespace idk
 
 	// compile time
 	template<size_t stop, typename T = size_t> 
-	constexpr auto range();
+	constexpr auto range() noexcept;
 	
 	template<size_t start, size_t stop, size_t step = 1> 
 	constexpr auto range();

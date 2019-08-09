@@ -77,6 +77,12 @@ TEST(Math, MatrixDeterminant)
 	std::default_random_engine generator;
 	std::uniform_real_distribution<float> dist(0.f, 100.f);
 
+	mat3 myolo;
+	vec3 yolo;
+	auto inds = range<3>();
+	for (auto [row, val, n] : zip(myolo, yolo, inds))
+		row[n] = val;
+
 	for (int i = 0; i < 1000; ++i)
 	{
 		auto f = dist(generator);
