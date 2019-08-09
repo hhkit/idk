@@ -14,8 +14,7 @@ namespace idk
 	math::matrix<T, D, D> scale(const math::vector<T, D>& rhs)
 	{
 		math::matrix<T, D, D> retval;
-		constexpr auto inds = range<D>();
-		for (auto [row, scale, n] : zip(retval, rhs, inds))
+		for (auto [row, scale, n] : zip(retval, rhs, range<D>()))
 			row[n] = scale;
 		return retval;
 	}

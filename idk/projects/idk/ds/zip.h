@@ -2,8 +2,7 @@
 
 namespace idk
 {
-	// note : zip can never store rvalue containers
 	template<typename ... Containers>
-	constexpr auto zip(Containers&...) noexcept;
+	constexpr auto zip(Containers&&...);
 }
 #include "zip.inl"

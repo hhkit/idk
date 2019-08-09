@@ -37,8 +37,8 @@ namespace idk
 		Lock       _access{};
 		time_point _last_frame;
 		time_point _this_frame;
-		seconds    _real_dt{};
-		seconds    _accumulated_dt{};
+		seconds    _real_dt;
+		seconds    _accumulated_dt;
 		seconds    _fixed_dt = seconds{ 1.0 / 60 };
 
 		struct Pass {

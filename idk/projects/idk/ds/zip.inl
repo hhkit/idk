@@ -9,7 +9,7 @@ namespace idk
 	{
 		struct iterator_t
 		{
-			using intern_t = std::tuple<decltype(std::begin(std::declval<Ts&>()))...>;
+			using intern_t = std::tuple<decltype(std::declval<Ts>().begin())...>;
 			intern_t track;
 			static constexpr auto indexes = std::make_index_sequence < std::tuple_size_v<intern_t>>{};
 
@@ -59,30 +59,22 @@ namespace idk
 				return _equal(rhs, indexes);
 			}
 		};
+		std::tuple<Ts...> containers;
 		iterator_t _begin;
 		iterator_t _end;
 
-		constexpr zipped(Ts& ... containers) noexcept
-			: _begin {std::make_tuple(std::begin(containers)...)},
-			_end{std::make_tuple(std::end(containers)...)}
+		constexpr zipped(Ts&& ... containers)
+			: containers{ std::forward<Ts>(containers)... }, 
+			_begin {std::make_tuple(containers.begin()...)},
+			_end{std::make_tuple(containers.end()...)}
 		{}
-
-		constexpr iterator_t begin() noexcept
+		
+		constexpr iterator_t begin()
 		{
 			return _begin;
 		}
 
-		constexpr iterator_t end() noexcept
-		{
-			return _end;
-		}
-
-		constexpr iterator_t begin() const noexcept
-		{
-			return _begin;
-		}
-
-		constexpr iterator_t end() const noexcept
+		constexpr iterator_t end()
 		{
 			return _end;
 		}
@@ -90,8 +82,8 @@ namespace idk
 
 
 	template<typename ... Containers>
-	constexpr auto zip(Containers& ... containers) noexcept
+	constexpr auto zip(Containers&& ... containers)
 	{
-		return zipped<Containers...>{ containers ...};
+		return zipped<Containers...>{ std::forward<Containers>(containers) ...};
 	}
 }
