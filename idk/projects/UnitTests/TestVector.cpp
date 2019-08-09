@@ -70,6 +70,8 @@ TEST(Math, VectorSwizzle)
 	vec4 v4{ 1.f, 2.f, 4.f, 5.f };
 	EXPECT_EQ(v, v2.yx);
 	EXPECT_EQ(v2, v3.yx);
+	v2.yx = v2;
+	EXPECT_EQ(v2, (vec2{ 1.f, 2.f }));
 	v2.yx = v3.zz;
 	EXPECT_EQ(v2, (vec2{ 3.f, 3.f }));
 }
