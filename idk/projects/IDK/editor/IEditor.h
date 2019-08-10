@@ -9,5 +9,6 @@ namespace idk
 	{
 	public:
 		virtual void EditorUpdate() = 0;
+		virtual void EditorDraw() = 0;
 	};
 }

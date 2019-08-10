@@ -17,6 +17,9 @@ namespace idk::math
 
 		bool abs_comp(const radian&) const;
 
+		T*       data();
+		const T* data() const;
+
 		// operator overloads
 		radian& operator+=(const radian&);
 		radian& operator-=(const radian&);
@@ -27,6 +30,7 @@ namespace idk::math
 		radian operator-(const radian&) const;
 		radian operator*(const T&) const;
 		radian operator/(const T&) const;
+		T      operator/(const radian&) const;
 
 		bool operator==(const radian&) const;
 		bool operator!=(const radian&) const;
@@ -43,6 +47,9 @@ namespace idk::math
 
 		bool abs_comp(const degree&) const;
 
+		T*       data();
+		const T* data() const;
+
 		degree& operator+=(const degree&);
 		degree& operator-=(const degree&);
 		degree& operator*=(const T&);
@@ -52,6 +59,7 @@ namespace idk::math
 		degree operator-(const degree&) const;
 		degree operator*(const T&) const;
 		degree operator/(const T&) const;
+		T      operator/(const degree&) const;
 
 		bool operator==(const degree&) const;
 		bool operator!=(const degree&) const;
