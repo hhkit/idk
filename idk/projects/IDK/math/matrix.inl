@@ -159,6 +159,67 @@ namespace idk::math
 			} / determinant();
 		}
 		else
+		if constexpr(R == 4)
+		{
+			// This is adapted from the glm library. It uses Laplace Computation but made more efficient. 
+			auto& m = *this;
+			T s00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+			T s01 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+			T s02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+			T s03 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+			T s04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+			T s05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+			T s06 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
+			T s07 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+			T s08 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+			T s09 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+			T s10 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+			T s11 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+			T s12 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+			T s13 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
+			T s14 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+			T s15 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+			T s16 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+			T s17 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+			T s18 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+			matrix<T, C, R> inverse;
+			inverse[0][0] = +(m[1][1] * s00 - m[1][2] * s01 + m[1][3] * s02);
+			inverse[0][1] = -(m[1][0] * s00 - m[1][2] * s03 + m[1][3] * s04);
+			inverse[0][2] = +(m[1][0] * s01 - m[1][1] * s03 + m[1][3] * s05);
+			inverse[0][3] = -(m[1][0] * s02 - m[1][1] * s04 + m[1][2] * s05);
+
+			inverse[1][0] = -(m[0][1] * s00 - m[0][2] * s01 + m[0][3] * s02);
+			inverse[1][1] = +(m[0][0] * s00 - m[0][2] * s03 + m[0][3] * s04);
+			inverse[1][2] = -(m[0][0] * s01 - m[0][1] * s03 + m[0][3] * s05);
+			inverse[1][3] = +(m[0][0] * s02 - m[0][1] * s04 + m[0][2] * s05);
+
+			inverse[2][0] = +(m[0][1] * s06 - m[0][2] * s07 + m[0][3] * s08);
+			inverse[2][1] = -(m[0][0] * s06 - m[0][2] * s09 + m[0][3] * s10);
+			inverse[2][2] = +(m[0][0] * s11 - m[0][1] * s09 + m[0][3] * s12);
+			inverse[2][3] = -(m[0][0] * s08 - m[0][1] * s10 + m[0][2] * s12);
+
+			inverse[3][0] = -(m[0][1] * s13 - m[0][2] * s14 + m[0][3] * s15);
+			inverse[3][1] = +(m[0][0] * s13 - m[0][2] * s16 + m[0][3] * s17);
+			inverse[3][2] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
+			inverse[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
+
+			float det =   m[0][0] * inverse[0][0]
+						+ m[0][1] * inverse[0][1]
+						+ m[0][2] * inverse[0][2]
+						+ m[0][3] * inverse[0][3];
+
+			// not invertible
+			if (fabs(det) <= constants::epsilon<float>())
+				return matrix<T, C, R>();
+
+			for (int i = 0; i < R; ++i)
+				for(int k = 0; k < C; ++k)
+					inverse[i][k] /= det;
+
+			return inverse;
+		}
+		else
 		return matrix<T, C, R>();
 	}
 

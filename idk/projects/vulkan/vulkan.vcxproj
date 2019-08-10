@@ -76,6 +76,7 @@
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\vulkan\$(Configuration)\</IntDir>
     <TargetName>vulkanD</TargetName>
+    <LibraryPath>$(SolutionDir)engine\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
