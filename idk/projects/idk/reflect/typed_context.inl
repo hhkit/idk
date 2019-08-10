@@ -86,39 +86,6 @@ namespace idk::reflect::detail
 	{
 		void copy_assign(void* lhs, const void* rhs) const override
 		{
-			static_assert(!is_pair_v<T> || is_pair_assignable_v<T>);
-			static_assert(std::is_copy_assignable_v<T>);
-
-			*static_cast<T*>(lhs) = *static_cast<const T*>(rhs);
-		}
-
-		dynamic default_construct() const override
-		{
-			static_assert(std::is_default_constructible_v<T>);
-			return T{};
-		}
-
-		dynamic copy_construct(void* obj) const override
-		{
-			static_assert(std::is_copy_constructible_v<T>);
-			return T{ *static_cast<const T*>(obj) };
-		}
-
-		typed_context()
-			: typed_context_base(
-				type_definition<T>::m_Name
-				, type_definition<T>::m_Table
-				, span<constructor_entry_base* const>{ type_definition<T>::m_Storage.ctors.data(), type_definition<T>::m_Storage.ctors.data() + type_definition<T>::m_Storage.ctors.size() }
-				, typehash<T>()
-			)
-		{}
-	};
-
-	template<typename T>
-	struct typed_context_nodef : typed_context_base
-	{
-		void copy_assign(void* lhs, const void* rhs) const override
-		{
 			lhs; rhs;
 			if constexpr (is_pair_v<T> && !is_pair_assignable_v<T> || !std::is_copy_assignable_v<T>)
 				throw "Cannot copy assign";
@@ -143,9 +110,26 @@ namespace idk::reflect::detail
 				return T{ *static_cast<const T*>(obj) };
 		}
 
+		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash)
+			: typed_context_base(name, table, ctors, hash)
+		{}
+
+		typed_context()
+			: typed_context_base(
+				type_definition<T>::m_Name
+				, type_definition<T>::m_Table
+				, span<constructor_entry_base* const>{ type_definition<T>::m_Storage.ctors.data(), type_definition<T>::m_Storage.ctors.data() + type_definition<T>::m_Storage.ctors.size() }
+				, typehash<T>()
+			)
+		{}
+	};
+
+	template<typename T>
+	struct typed_context_nodef : typed_context<T>
+	{
 		detail::table empty_table{ 0, nullptr, nullptr, nullptr };
 		typed_context_nodef()
-			: typed_context_base(
+			: typed_context<T>(
 				""
 				, empty_table
 				, span<constructor_entry_base* const>{ nullptr, nullptr }
