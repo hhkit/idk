@@ -4,6 +4,20 @@
 
 namespace idk::reflect
 {
+
+	struct dynamic::property_iterator
+	{
+		property_iterator(const dynamic& obj, size_t index = 0);
+		property_iterator& operator++(); //prefix increment
+		bool operator==(const property_iterator&);
+		bool operator!=(const property_iterator&);
+		property operator*() const;
+
+	private:
+		const dynamic& obj;
+		size_t index;
+	};
+
 	template<typename T, typename>
 	dynamic::dynamic(T&& obj)
 		: type{ get_type<T>() }, _ptr{ std::make_shared<detail::dynamic_derived<T>>(std::forward<T>(obj)) }
@@ -12,7 +26,7 @@ namespace idk::reflect
 	template<typename T, typename>
 	dynamic& dynamic::operator=(const T& rhs)
 	{
-		assert(this->type.is<std::decay_t<T>>());
+		assert(is<std::decay_t<T>>());
 		type._context->copy_assign(_ptr->get(), &rhs);
 		return *this;
 	}
@@ -24,7 +38,7 @@ namespace idk::reflect
 	}
 
 	template<typename T>
-	T& dynamic::get()
+	T& dynamic::get() const
 	{
 		return *static_cast<T*>(_ptr->get());
 	}

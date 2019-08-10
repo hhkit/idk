@@ -20,8 +20,8 @@ namespace idk::reflect
 
 	namespace detail
 	{
-		using table = property::table;
-		template<typename T> using type_definition = property::opin::def<T>;
+		using table = ::property::table;
+		template<typename T> using type_definition = ::property::opin::def<T>;
 		template<typename T> constexpr size_t typehash() { return typeid(T).hash_code(); }
 
 		struct meta
@@ -71,11 +71,15 @@ namespace idk::reflect
 
 
 
+	struct property;
+
 	// reflected object. contains type-erased object with type information.
 	class dynamic
 	{
 		shared_ptr<detail::dynamic_base> _ptr;
 		dynamic(reflect::type type, void* obj);
+
+		struct property_iterator;
 
 	public:
 		type type;
@@ -92,7 +96,7 @@ namespace idk::reflect
 		dynamic& operator=(const T& rhs);
 
 		template<typename T> bool is() const;
-		template<typename T> T& get();
+		template<typename T> T& get() const;
 
 		bool valid() const;
 
@@ -102,6 +106,19 @@ namespace idk::reflect
 		// return false to stop recursion. if function doesn't return, it always recurses
 		template<typename Visitor>
 		void visit(Visitor&& visitor);
+
+		property_iterator begin() const;
+		property_iterator end() const;
+		property get_property(string_view name) const;
+		property get_property(size_t index) const;
+	};
+
+
+
+	struct property
+	{
+		const string_view name;
+		const dynamic value;
 	};
 
 

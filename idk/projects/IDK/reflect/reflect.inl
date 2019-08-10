@@ -39,8 +39,8 @@ namespace idk::reflect
 			constexpr static auto entry_count_v =
 				std::tuple_size_v<tuple_cat_t<std::conditional_t<is_template_v<Ts, constructor_entry>, std::tuple<>, std::tuple<Ts>>...>>;
 
-			std::array<property::table_action_entry, entry_count_v> m_ActionEntry;
-			std::array<property::table_entry, entry_count_v> m_UserEntry;
+			std::array<::property::table_action_entry, entry_count_v> m_ActionEntry;
+			std::array<::property::table_entry, entry_count_v> m_UserEntry;
 
 			std::array<constructor_entry_base*, sizeof...(Ts) - entry_count_v + std::is_default_constructible_v<ClassT>> ctors;
 			int i = 0;
@@ -111,14 +111,14 @@ namespace idk::reflect
 				std::visit([&](auto&& FunctionGetSet) {
 
 					using fn_getsettype = std::decay_t<decltype(FunctionGetSet)>;
-					if constexpr (std::is_same_v<fn_getsettype, std::optional<std::tuple< const property::table&, void*>>(*)(void*, std::uint64_t) noexcept>)
+					if constexpr (std::is_same_v<fn_getsettype, std::optional<std::tuple<const detail::table&, void*>>(*)(void*, std::uint64_t) noexcept>)
 					{
 						throw; // uhhh, this branch means you're at a structure not part of idk::ReflectedTypes
 					}
 					else
 					{
-						using T = property::vartype_from_functiongetset<fn_getsettype>;
-						void* offsetted = property::details::HandleBasePointer(obj, Entry.m_Offset);
+						using T = ::property::vartype_from_functiongetset<fn_getsettype>;
+						void* offsetted = ::property::details::HandleBasePointer(obj, Entry.m_Offset);
 						T& value = *reinterpret_cast<T*>(offsetted);
 
 						if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(const char*, T&)>, bool>)

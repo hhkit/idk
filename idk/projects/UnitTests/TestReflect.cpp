@@ -91,5 +91,39 @@ TEST(Reflect, TestReflectVisit)
 			mem *= 2.0f;
 	});
 
-	EXPECT_EQ(visited_values[0].get<vec4>(), vec4(2.0f, 4.0f, 6.0f, 8.0f));
+	EXPECT_EQ(obj.vec, vec4(2.0f, 4.0f, 6.0f, 8.0f));
+}
+
+TEST(Reflect, TestReflectRangeFor)
+{
+	reflect_this obj;
+	obj.vec = { 1.0f, 2.0f, 3.0f, 4.0f };
+
+	reflect::dynamic dyn{ obj };
+
+	std::vector<string_view> names;
+	std::vector<reflect::dynamic> values;
+
+	for (auto& [name, val] : dyn.get_property("vec").value)
+	{
+		names.push_back(name);
+		values.emplace_back(val);
+	}
+
+	EXPECT_STREQ(names[0].data(), "x");
+	EXPECT_STREQ(names[1].data(), "y");
+	EXPECT_STREQ(names[2].data(), "z");
+	EXPECT_STREQ(names[3].data(), "w");
+
+	EXPECT_EQ(values[0].get<float>(), 1.0f);
+	EXPECT_EQ(values[1].get<float>(), 2.0f);
+	EXPECT_EQ(values[2].get<float>(), 3.0f);
+	EXPECT_EQ(values[3].get<float>(), 4.0f);
+
+	for (auto& [name, val] : dyn.get_property("vec").value)
+	{
+		val.get<float>() *= 2.0f;
+	}
+
+	EXPECT_EQ(obj.vec, vec4(2.0f, 4.0f, 6.0f, 8.0f));
 }
