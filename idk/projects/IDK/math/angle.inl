@@ -25,6 +25,18 @@ namespace idk::math
 	}
 
 	template<typename T>
+	T* radian<T>::data()
+	{
+		return &value;
+	}
+
+	template<typename T>
+	const T* radian<T>::data() const
+	{
+		return &value;
+	}
+
+	template<typename T>
 	radian<T>& radian<T>::operator+=(const radian& rhs)
 	{
 		value += rhs.value;
@@ -81,6 +93,12 @@ namespace idk::math
 	}
 
 	template<typename T>
+	inline T radian<T>::operator/(const radian& rhs) const
+	{
+		return value / rhs.value;
+	}
+
+	template<typename T>
 	inline bool radian<T>::operator==(const radian& rhs) const
 	{
 		return value == rhs.value;
@@ -116,6 +134,18 @@ namespace idk::math
 	bool degree<T>::abs_comp(const degree& rhs) const
 	{
 		return abs(fmod(value, s_cast<T>(360)) - fmod(rhs.value, s_cast<T>(360))) < constants::epsilon<T>();
+	}
+
+	template<typename T>
+	inline T* degree<T>::data()
+	{
+		return &value;
+	}
+
+	template<typename T>
+	inline const T* degree<T>::data() const
+	{
+		return &value;
 	}
 
 
@@ -173,6 +203,12 @@ namespace idk::math
 	{
 		auto copy = *this;
 		return copy /= rhs;
+	}
+
+	template<typename T>
+	inline T degree<T>::operator/(const degree& rhs) const
+	{
+		return value / rhs.value;
 	}
 
 	template<typename T>
