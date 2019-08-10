@@ -38,16 +38,22 @@ namespace idk::reflect
 
 		struct typed_context_base;
 		template<typename T> struct typed_context;
+
+		template<typename Visitor>
+		void visit(void* obj, const detail::table& table, Visitor&& visitor);
 	}
 
 
 
+	// type class, contains info about reflected type.
+	// use idk::reflect::get_type to obtain type.
 	class type
 	{
 		friend class dynamic;
 		friend struct detail::typed_context_base;
 		friend type get_type(string_view name);
 		template<typename T> friend type get_type();
+		template<typename T, typename Visitor> friend void visit(T& obj, Visitor&& visitor);
 
 		const detail::typed_context_base* _context;
 		type(const detail::typed_context_base* context = nullptr);
@@ -65,6 +71,7 @@ namespace idk::reflect
 
 
 
+	// reflected object. contains type-erased object with type information.
 	class dynamic
 	{
 		shared_ptr<detail::dynamic_base> _ptr;
@@ -89,13 +96,27 @@ namespace idk::reflect
 
 		bool valid() const;
 
-		// visit
+		// recursively visit all members
+		// visitor must be a function with signature:
+		//    (const char* name, auto&& data) -> bool/void
+		// return false to stop recursion. if function doesn't return, it always recurses
+		template<typename Visitor>
+		void visit(Visitor&& visitor);
 	};
 
 
 
+	// get type info with name
 	type get_type(string_view name);
+	// get type info of T
 	template<typename T> type get_type();
+
+	// recursively visit all members of an object
+	// visitor must be a function with signature:
+	//    (const char* name, auto&& data) -> bool/void
+	// return false to stop recursion. if function doesn't return, it always recurses
+	template<typename T, typename Visitor>
+	void visit(T& obj, Visitor&& visitor);
 
 };
 

@@ -7,6 +7,8 @@
 #include "type.inl"
 #include "dynamic.inl"
 
+#pragma warning (disable: 4996) // deprecation warning for std::result_of
+
 namespace idk::reflect
 {
 
@@ -83,6 +85,57 @@ namespace idk::reflect
 			return get_type<T>();
 		}
 		return type{ iter->second };
+	}
+
+
+
+	template<typename T, typename Visitor>
+	void visit(T& obj, Visitor&& visitor)
+	{
+		detail::visit(&obj, get_type<T>()._context->table, std::forward<Visitor>(visitor));
+	}
+
+	namespace detail
+	{
+		template<typename Visitor>
+		void visit(void* obj, const detail::table& table, Visitor&& visitor)
+		{
+			if (table.m_Count == 0)
+				return;
+
+			// adapted from EnumRecursive in properties.h#820
+			for (size_t i = 0; i < table.m_Count; ++i)
+			{
+				auto& Entry = table.m_pActionEntries[i];
+
+				std::visit([&](auto&& FunctionGetSet) {
+
+					using fn_getsettype = std::decay_t<decltype(FunctionGetSet)>;
+					if constexpr (std::is_same_v<fn_getsettype, std::optional<std::tuple< const property::table&, void*>>(*)(void*, std::uint64_t) noexcept>)
+					{
+						throw; // uhhh, this branch means you're at a structure not part of idk::ReflectedTypes
+					}
+					else
+					{
+						using T = property::vartype_from_functiongetset<fn_getsettype>;
+						void* offsetted = property::details::HandleBasePointer(obj, Entry.m_Offset);
+						T& value = *reinterpret_cast<T*>(offsetted);
+
+						if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(const char*, T&)>, bool>)
+						{
+							if (visitor(table.m_pEntry[i].m_pName, value)) // if false, stop recursive
+								reflect::visit(value, std::forward<Visitor>(visitor));
+						}
+						else // function has no return
+						{
+							visitor(table.m_pEntry[i].m_pName, value);
+							reflect::visit(value, std::forward<Visitor>(visitor));
+						}
+					}
+
+				}, table.m_pActionEntries[i].m_FunctionTypeGetSet);
+			}
+		}
 	}
 
 }

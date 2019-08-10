@@ -12,7 +12,7 @@ namespace idk::reflect
 	template<typename T, typename>
 	dynamic& dynamic::operator=(const T& rhs)
 	{
-		assert(type.is<std::decay_t<T>>());
+		assert(this->type.is<std::decay_t<T>>());
 		type._context->copy_assign(_ptr->get(), &rhs);
 		return *this;
 	}
@@ -27,5 +27,11 @@ namespace idk::reflect
 	T& dynamic::get()
 	{
 		return *static_cast<T*>(_ptr->get());
+	}
+
+	template<typename Visitor>
+	void dynamic::visit(Visitor&& visitor)
+	{
+		detail::visit(_ptr->get(), type._context->table, std::forward<Visitor>(visitor));
 	}
 }

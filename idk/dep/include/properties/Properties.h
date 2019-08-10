@@ -770,7 +770,9 @@ namespace property
 
     // deal with atomic but property::table base properties
     template< typename T_VAR, std::size_t N > constexpr
-    std::enable_if_t< isValidTable<std::decay_t<T_VAR>>(), property::setup_entry >
+    std::enable_if_t< isValidTable<std::decay_t<T_VAR>>() &&
+		!std::is_same_v< decltype(data().emplace<std::decay_t<T_VAR>>()), decltype(data().emplace<std::decay_t<T_VAR>>())> // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		, property::setup_entry >
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {
         using var = std::decay_t<T_VAR>;

@@ -1,10 +1,10 @@
 #include "pch.h"
 #include <reflect/reflect.h>
 
+using namespace idk;
+
 TEST(Reflect, TestReflect)
 {
-	using namespace idk;
-
 	auto t = reflect::get_type("vec3");
 	EXPECT_STREQ(t.name().data(), "vec3");
 	
@@ -26,4 +26,70 @@ TEST(Reflect, TestReflect)
 
 	v2.get<vec3>() *= 2;
 	EXPECT_NE(v.get<vec3>(), v2.get<vec3>());
+}
+
+struct reflect_this
+{
+	vec4 vec;
+};
+REFLECT_BEGIN(reflect_this)
+	REFLECT_VAR(vec)
+REFLECT_END()
+
+TEST(Reflect, TestReflectVisit)
+{
+	reflect_this obj;
+	obj.vec = { 1.0f, 2.0f, 3.0f, 4.0f };
+
+
+	int counter = 0;
+	reflect::dynamic dyn{ obj };
+	dyn.visit([&](const char* name, auto&& mem) {
+		using T = std::decay_t<decltype(mem)>;
+		auto val = mem;
+		++counter;
+		return false; // false should stop recursive
+	});
+
+	EXPECT_EQ(counter, 1);
+
+
+	std::vector<const char*> visited_names;
+	std::vector<reflect::dynamic> visited_values;
+	std::vector<reflect::type> visited_types;
+	dyn.visit([&](const char* name, auto&& mem) {
+		using T = std::decay_t<decltype(mem)>;
+
+		visited_names.push_back(name);
+		visited_values.emplace_back(mem);
+		visited_types.emplace_back(reflect::get_type<T>());
+	});
+
+	EXPECT_STREQ(visited_names[0], "vec");
+	EXPECT_STREQ(visited_names[1], "x");
+	EXPECT_STREQ(visited_names[2], "y");
+	EXPECT_STREQ(visited_names[3], "z");
+	EXPECT_STREQ(visited_names[4], "w");
+
+	EXPECT_EQ(visited_values[0].get<vec4>(), vec4(1.0f, 2.0f, 3.0f, 4.0f));
+	EXPECT_EQ(visited_values[1].get<float>(), 1.0f);
+	EXPECT_EQ(visited_values[2].get<float>(), 2.0f);
+	EXPECT_EQ(visited_values[3].get<float>(), 3.0f);
+	EXPECT_EQ(visited_values[4].get<float>(), 4.0f);
+
+	EXPECT_STREQ(visited_types[0].name().data(), "vec4");
+	EXPECT_EQ(visited_types[1].hash(), reflect::detail::typehash<float>());
+	EXPECT_EQ(visited_types[2].hash(), reflect::detail::typehash<float>());
+	EXPECT_EQ(visited_types[3].hash(), reflect::detail::typehash<float>());
+	EXPECT_EQ(visited_types[4].hash(), reflect::detail::typehash<float>());
+
+
+	dyn.visit([&](const char* name, auto&& mem) {
+		using T = std::decay_t<decltype(mem)>;
+
+		if constexpr (std::is_same_v<T, float>)
+			mem *= 2.0f;
+	});
+
+	EXPECT_EQ(visited_values[0].get<vec4>(), vec4(2.0f, 4.0f, 6.0f, 8.0f));
 }
