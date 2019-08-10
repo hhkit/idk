@@ -1,0 +1,328 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="math">
+      <UniqueIdentifier>{53e7f8f8-6df9-4b02-a9e3-304987e31f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx">
+      <UniqueIdentifier>{80273e76-a09c-4086-9f9f-99345a0eed46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="phys">
+      <UniqueIdentifier>{34a13a27-ba70-439e-aaf7-b6bf4f887d62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{3e80c68e-7de8-4d50-b93b-73b2f086139f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="event">
+      <UniqueIdentifier>{6dce53f3-2c69-45f3-bd07-fd318b7b7fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\detail">
+      <UniqueIdentifier>{5af6f78e-707b-4276-a9a0-e716d6f48fd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_natvis">
+      <UniqueIdentifier>{96518433-03f0-4cae-b02e-a7ee5d114378}</UniqueIdentifier>
+      <Extensions>.natvis</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{3826792b-f531-4783-8d98-3701dfbfed9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\handles">
+      <UniqueIdentifier>{d846b40e-7906-4078-8b7f-8d84c275fb09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\systems">
+      <UniqueIdentifier>{e9ec1801-713d-4a1e-aad5-cd280a9475b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{5d473ef9-9c8f-4c26-b00a-c8cae94ebafc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\data">
+      <UniqueIdentifier>{b9353ace-94fa-482f-9bd7-4d80ad8a72b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor">
+      <UniqueIdentifier>{57b8eb10-df35-46c8-a29b-102a5407f9ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\scheduler">
+      <UniqueIdentifier>{82227ccb-af0a-4741-9672-d6d2d40250ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ds">
+      <UniqueIdentifier>{acb92b6f-fb51-44a4-9ad4-27dff0238f24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="meta">
+      <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="math\matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector_dim.h">
+      <Filter>math\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector_detail.h">
+      <Filter>math\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="math\angle.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\constants.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\arith.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="event\Dispatcher.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="event\Dispatcher_detail.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector_swizzle.h">
+      <Filter>math\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Transform.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="math\quaternion.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="idk.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="common\Parent.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Handle.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="idk_config.h" />
+    <ClInclude Include="core\ObjectPool.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix_transforms.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ISystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Application.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="app\TestSystem.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="core\SystemManager.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Core.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Component.h">
+      <Filter>core\data</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GameObject.h">
+      <Filter>core\data</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GameState.h">
+      <Filter>core\data</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GameState_detail.h">
+      <Filter>core\data</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Scene.h">
+      <Filter>core\data</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\IEditor.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Handleables.h">
+      <Filter>core\handles</Filter>
+    </ClInclude>
+    <ClInclude Include="core\SystemManager_detail.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="core\IncludeSystems.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\IncludeComponents.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Keys.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Scheduler.h">
+      <Filter>core\scheduler</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\casts.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\meta.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\pool.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\range.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\ranged_for.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\span.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\zip.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\GraphicsSystem.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\reflect.h" />
+    <ClInclude Include="reflect\macro_utils.h" />
+    <ClInclude Include="reflect\typed_context.inl" />
+    <ClInclude Include="reflect\dynamic_detail.h" />
+    <ClInclude Include="reflect\constructor_entry.h" />
+    <ClInclude Include="idk_reflect_types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="math\matrix.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\vector.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Transform.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="core\Handle.cpp">
+      <Filter>core\handles</Filter>
+    </ClCompile>
+    <ClCompile Include="math\quaternion.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="app\TestSystem.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="core\SystemManager.cpp">
+      <Filter>core\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Component.cpp">
+      <Filter>core\data</Filter>
+    </ClCompile>
+    <ClCompile Include="core\GameObject.cpp">
+      <Filter>core\data</Filter>
+    </ClCompile>
+    <ClCompile Include="core\GameState.cpp">
+      <Filter>core\data</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Scene.cpp">
+      <Filter>core\data</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Core.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Scheduler.cpp">
+      <Filter>core\scheduler</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\reflect.cpp" />
+    <ClCompile Include="reflect\type.cpp" />
+    <ClCompile Include="reflect\dynamic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="math\matrix.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\vector.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\angle.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\constants.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\arith.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="event\Dispatcher.inl">
+      <Filter>event</Filter>
+    </None>
+    <None Include="event\Dispatcher_detail.inl">
+      <Filter>event</Filter>
+    </None>
+    <None Include="math\quaternion.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="core\Handle.inl">
+      <Filter>core\handles</Filter>
+    </None>
+    <None Include="core\ObjectPool.inl">
+      <Filter>core\handles</Filter>
+    </None>
+    <None Include="math\matrix_transforms.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="core\SystemManager.inl">
+      <Filter>core\systems</Filter>
+    </None>
+    <None Include="core\GameObject.inl">
+      <Filter>core\data</Filter>
+    </None>
+    <None Include="core\GameState.inl">
+      <Filter>core\data</Filter>
+    </None>
+    <None Include="core\Scene.inl">
+      <Filter>core\data</Filter>
+    </None>
+    <None Include="core\Core.inl">
+      <Filter>core</Filter>
+    </None>
+    <None Include="core\Scheduler.inl">
+      <Filter>core\scheduler</Filter>
+    </None>
+    <None Include="meta\casts.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="meta\meta.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="ds\pool.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\range.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\ranged_for.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\span.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\zip.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="reflect\reflect.inl" />
+    <None Include="reflect\type.inl" />
+    <None Include="reflect\dynamic.inl" />
+    <None Include="reflect\constructor_entry.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="_natvis\matrix.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\vector.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\angle.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\objectpool.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\scene.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+  </ItemGroup>
+</Project>
