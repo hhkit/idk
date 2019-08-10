@@ -52,11 +52,4 @@ namespace idk
 
 	constexpr auto SystemCount = std::tuple_size_v<Systems>;
 
-	using ReflectedTypes = std::variant<
-		int
-        , bool
-        , float
-		, std::string
-	>;
-
 }

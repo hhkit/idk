@@ -24,6 +24,7 @@
     <ClCompile Include="TestZip.cpp" />
     <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestSystemManager.cpp" />
+    <ClCompile Include="TestReflect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

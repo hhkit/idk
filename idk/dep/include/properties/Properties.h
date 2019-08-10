@@ -386,6 +386,11 @@ namespace property
         function_variant_getset             m_FunctionTypeGetSet;                           // Defines the type of the property and it contains a function pointer to get or set the property
         function_ptr_lists                  m_FunctionLists;                                // Function lists
         std::size_t                         m_Offset;                                       // Offset to the actual data when we deal with non virtual properties
+
+		// !!!
+		// !!! MODIFIED BY MAL TO ADD DEFAULT CTOR
+		constexpr table_action_entry() : m_Flags{}, m_FunctionLists{ nullptr }, m_Offset{ 0 } {}
+
     };
 
     //--------------------------------------------------------------------------------------------

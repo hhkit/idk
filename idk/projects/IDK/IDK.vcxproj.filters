@@ -180,6 +180,10 @@
     </ClInclude>
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\macro_utils.h" />
+    <ClInclude Include="reflect\typed_context.inl" />
+    <ClInclude Include="reflect\dynamic_detail.h" />
+    <ClInclude Include="reflect\constructor_entry.h" />
+    <ClInclude Include="idk_reflect_types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -222,6 +226,9 @@
     <ClCompile Include="core\Scheduler.cpp">
       <Filter>core\scheduler</Filter>
     </ClCompile>
+    <ClCompile Include="reflect\reflect.cpp" />
+    <ClCompile Include="reflect\type.cpp" />
+    <ClCompile Include="reflect\dynamic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -296,6 +303,10 @@
     <None Include="ds\zip.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="reflect\reflect.inl" />
+    <None Include="reflect\type.inl" />
+    <None Include="reflect\dynamic.inl" />
+    <None Include="reflect\constructor_entry.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

@@ -15,6 +15,9 @@ namespace idk
 	template<typename Tuple, template<typename ...> typename Wrap>
 	using tuple_wrap_t = typename tuple_wrap<Tuple, Wrap>::type;
 
+	template<typename...Ts>
+	using tuple_cat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
+
 	template<typename FindMe, typename Tuple>
 	struct index_in_tuple;
 
