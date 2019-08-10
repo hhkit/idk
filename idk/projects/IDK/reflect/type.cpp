@@ -25,7 +25,7 @@ namespace idk::reflect
 
 	bool type::operator==(type other) const
 	{
-		return _context == other._context;
+		return hash() == other.hash();
 	}
 
 }
