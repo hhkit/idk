@@ -50,6 +50,9 @@
     <Filter Include="meta">
       <UniqueIdentifier>{b971d9c9-d118-4c1c-b5f6-e5cd1e1d892c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="reflect">
+      <UniqueIdentifier>{ce3af906-101e-456b-861e-f589d72ec66c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -178,12 +181,22 @@
     <ClInclude Include="gfx\GraphicsSystem.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="reflect\reflect.h" />
-    <ClInclude Include="reflect\macro_utils.h" />
-    <ClInclude Include="reflect\typed_context.inl" />
-    <ClInclude Include="reflect\dynamic_detail.h" />
-    <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="idk_reflect_types.h" />
+    <ClInclude Include="reflect\constructor_entry.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\dynamic_detail.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\macro_utils.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\reflect.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\typed_context.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -226,9 +239,15 @@
     <ClCompile Include="core\Scheduler.cpp">
       <Filter>core\scheduler</Filter>
     </ClCompile>
-    <ClCompile Include="reflect\reflect.cpp" />
-    <ClCompile Include="reflect\type.cpp" />
-    <ClCompile Include="reflect\dynamic.cpp" />
+    <ClCompile Include="reflect\dynamic.cpp">
+      <Filter>reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\reflect.cpp">
+      <Filter>reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\type.cpp">
+      <Filter>reflect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -303,10 +322,18 @@
     <None Include="ds\zip.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="reflect\reflect.inl" />
-    <None Include="reflect\type.inl" />
-    <None Include="reflect\dynamic.inl" />
-    <None Include="reflect\constructor_entry.inl" />
+    <None Include="reflect\constructor_entry.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="reflect\dynamic.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="reflect\reflect.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="reflect\type.inl">
+      <Filter>reflect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
