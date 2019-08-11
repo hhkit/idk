@@ -16,14 +16,14 @@ namespace idk
 	{
 		return lhs * (LerpFactor(1) - lerp) + rhs * lerp;
 	}
-	template<typename T, typename LerpFactor>
-	T slerp(T lhs, T rhs, LerpFactor lerp, const math::radians<T>& ohm, T sin_ohm)
+	template<typename Vec, typename LerpFactor>
+	Vec slerp(const Vec& lhs, const Vec& rhs, LerpFactor lerp, const math::radians<LerpFactor>& ohm, LerpFactor sin_ohm)
 	{
 		constexpr auto _1 = T{ 1 };
 		return sin(ohm * (_1 - lerp)) / sin_ohm * lhs + sin(ohm * lerp) / sin_ohm * rhs;
 	}
-	template<typename T, typename LerpFactor>
-	T slerp(T lhs, T rhs, LerpFactor lerp)
+	template<typename Vec, typename LerpFactor>
+	Vec slerp(const Vec& lhs, const Vec& rhs, LerpFactor lerp)
 	{
 		auto ohm = acos(lhs.dot(rhs));
 		return slerp(lhs, rhs, ohm, sin(ohm));
