@@ -48,6 +48,7 @@
     <ClInclude Include="pch.h" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestReflect.cpp" />
+    <ClCompile Include="TestString.cpp" />
     <ClCompile Include="TestSystemManager.cpp">
       <FileType>CppCode</FileType>
     </ClCompile>
