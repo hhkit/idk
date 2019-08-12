@@ -34,7 +34,7 @@ namespace idk::reflect
 	template<typename T>
 	bool dynamic::is() const
 	{
-		return type.hash() == detail::typehash<T>();
+		return type.hash() == typehash<T>();
 	}
 
 	template<typename T>

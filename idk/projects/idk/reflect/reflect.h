@@ -2,8 +2,10 @@
 
 #include <idk_reflect_types.h>
 #include <meta/meta.h>
+#include <reflect/pretty_function.h>
 #include <reflect/constructor_entry.h>
 #include <reflect/dynamic_detail.h>
+#include <util/string_hash.h>
 
 // required settings for LIONant/properties
 namespace property::settings
@@ -13,16 +15,20 @@ namespace property::settings
 }
 #include <properties/Properties.h>
 
-#include <typeinfo> // for hashing (for now at least)
-
 namespace idk::reflect
 {
+	// get full qualified type name of T (decayed).
+	// eg. vec3& => idk::math::vec3
+	template<typename T> constexpr string_view nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
+
+	// gets hash of type T (decayed).
+	// use this against type.hash()
+	template<typename T> constexpr size_t typehash() { return idk::string_hash(nameof<T>()); }
 
 	namespace detail
 	{
 		using table = ::property::table;
 		template<typename T> using type_definition = ::property::opin::def<T>;
-		template<typename T> constexpr size_t typehash() { return typeid(T).hash_code(); }
 
 		struct meta
 		{
@@ -59,8 +65,13 @@ namespace idk::reflect
 		template<typename... Ts>
 		dynamic create(Ts&& ... args) const;
 
+		// gets the alias if reflected, otherwise full qualified type name ( nameof<T>() )
 		string_view name() const;
+
+		// gets the hash of the type ( check against typehash<T>() )
 		size_t hash() const;
+
+		// should always be true for now (since get_type has assert)
 		bool valid() const;
 
 		bool operator==(type other) const;
@@ -80,7 +91,7 @@ namespace idk::reflect
 		struct property_iterator;
 
 	public:
-		type type;
+		const type type;
 
 		template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, dynamic>>>
 		dynamic(T&& obj);

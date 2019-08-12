@@ -132,7 +132,7 @@ namespace idk::reflect::detail
 		detail::table empty_table{ 0, nullptr, nullptr, nullptr };
 		typed_context_nodef()
 			: typed_context<T>(
-				""
+				nameof<T>()
 				, empty_table
 				, span<constructor_entry_base* const>{ nullptr, nullptr }
 			)

@@ -3,7 +3,7 @@
 
 using namespace idk;
 
-TEST(Reflect, TestReflect)
+TEST(Reflect, TestReflectBasic)
 {
 	auto t = reflect::get_type("vec3");
 	EXPECT_STREQ(t.name().data(), "vec3");
@@ -35,6 +35,30 @@ struct reflect_this
 REFLECT_BEGIN(reflect_this)
 	REFLECT_VAR(vec)
 REFLECT_END()
+
+TEST(Reflect, TestReflectConstexpr)
+{
+	auto t = reflect::get_type("vec3");
+	EXPECT_EQ(t.hash(), reflect::typehash<vec3>());
+	EXPECT_EQ(t.name(), "vec3");
+
+	t = reflect::get_type<span<int>>();
+	EXPECT_EQ(t.hash(), reflect::typehash<span<int>>());
+	EXPECT_STREQ(string{ t.name() }.c_str(), "idk::span<int>");
+
+	EXPECT_STREQ(string{ reflect::nameof<float>() }.c_str(), "float");
+	EXPECT_STREQ(string{ reflect::nameof<vec4>() }.c_str(), "idk::math::vector<float,4>");
+	EXPECT_STREQ(string{ reflect::nameof<reflect_this>() }.c_str(), "reflect_this");
+
+	int switch_case = 0;
+	switch (t.hash())
+	{
+		case reflect::typehash<float>(): switch_case = 1; break;
+		case reflect::typehash<span<int>>(): switch_case = 2; break;
+		default: switch_case = 3; break;
+	}
+	EXPECT_EQ(switch_case, 2);
+}
 
 TEST(Reflect, TestReflectVisit)
 {
@@ -78,10 +102,10 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_EQ(visited_values[4].get<float>(), 4.0f);
 
 	EXPECT_STREQ(visited_types[0].name().data(), "vec4");
-	EXPECT_EQ(visited_types[1].hash(), reflect::detail::typehash<float>());
-	EXPECT_EQ(visited_types[2].hash(), reflect::detail::typehash<float>());
-	EXPECT_EQ(visited_types[3].hash(), reflect::detail::typehash<float>());
-	EXPECT_EQ(visited_types[4].hash(), reflect::detail::typehash<float>());
+	EXPECT_EQ(visited_types[1].hash(), reflect::typehash<float>());
+	EXPECT_EQ(visited_types[2].hash(), reflect::typehash<float>());
+	EXPECT_EQ(visited_types[3].hash(), reflect::typehash<float>());
+	EXPECT_EQ(visited_types[4].hash(), reflect::typehash<float>());
 
 
 	dyn.visit([&](const char* name, auto&& mem) {

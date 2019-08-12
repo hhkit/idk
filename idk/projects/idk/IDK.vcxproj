@@ -61,6 +61,7 @@
     <ClInclude Include="app\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
+    <ClInclude Include="reflect\pretty_function.h" />
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="reflect\dynamic_detail.h" />
     <ClInclude Include="reflect\macro_utils.h" />
