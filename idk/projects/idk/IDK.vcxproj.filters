@@ -218,6 +218,7 @@
     <ClInclude Include="res\Guid.h">
       <Filter>res</Filter>
     </ClInclude>
+    <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -364,6 +365,7 @@
     <None Include="res\ResourceManager.inl">
       <Filter>res</Filter>
     </None>
+    <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

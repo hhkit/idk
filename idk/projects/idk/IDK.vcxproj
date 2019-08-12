@@ -75,6 +75,7 @@
     <ClInclude Include="core\Handle.h" />
     <ClInclude Include="ds\pool.h" />
     <ClInclude Include="ds\span.h" />
+    <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Scheduler.cpp" />
@@ -130,6 +131,7 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
+    <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\objectpool.natvis" />
