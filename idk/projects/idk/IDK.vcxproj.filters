@@ -53,6 +53,9 @@
     <Filter Include="reflect">
       <UniqueIdentifier>{ce3af906-101e-456b-861e-f589d72ec66c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="audio">
+      <UniqueIdentifier>{6ff4483c-a1e1-4b5c-a9ee-6ad66c7a3c89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -197,6 +200,15 @@
     <ClInclude Include="reflect\typed_context.inl">
       <Filter>reflect</Filter>
     </ClInclude>
+    <ClInclude Include="audio\AudioSystem.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioClip.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioClipInfo.h">
+      <Filter>audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -247,6 +259,12 @@
     </ClCompile>
     <ClCompile Include="reflect\type.cpp">
       <Filter>reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioSystem.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioClip.cpp">
+      <Filter>audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
