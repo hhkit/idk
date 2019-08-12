@@ -21,6 +21,9 @@
   <ItemGroup>
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="audio\AudioClip.h" />
+    <ClInclude Include="audio\AudioClipInfo.h" />
+    <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="core\Scheduler.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
@@ -78,6 +81,8 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="audio\AudioClip.cpp" />
+    <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />

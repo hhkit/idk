@@ -55,9 +55,6 @@ namespace idk::reflect
 		template<typename T> friend type get_type();
 		template<typename T, typename Visitor> friend void visit(T& obj, Visitor&& visitor);
 
-		const detail::typed_context_base* _context;
-		type(const detail::typed_context_base* context = nullptr);
-
 	public:
 		template<typename... Ts>
 		dynamic create(Ts&& ... args) const;
@@ -67,6 +64,10 @@ namespace idk::reflect
 		bool valid() const;
 
 		bool operator==(type other) const;
+
+	private:
+		const detail::typed_context_base* _context;
+		type(const detail::typed_context_base* context = nullptr);
 	};
 
 
@@ -76,9 +77,6 @@ namespace idk::reflect
 	// reflected object. contains type-erased object with type information.
 	class dynamic
 	{
-		shared_ptr<detail::dynamic_base> _ptr;
-		dynamic(reflect::type type, void* obj);
-
 		struct property_iterator;
 
 	public:
@@ -111,6 +109,10 @@ namespace idk::reflect
 		property_iterator end() const;
 		property get_property(string_view name) const;
 		property get_property(size_t index) const;
+
+	private:
+		shared_ptr<detail::dynamic_base> _ptr;
+		dynamic(reflect::type type, void* obj);
 	};
 
 

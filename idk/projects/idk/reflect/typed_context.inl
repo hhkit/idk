@@ -38,6 +38,17 @@ namespace idk::reflect::detail
 
 	struct typed_context_base
 	{
+		const string_view name;
+		const detail::table& table;
+		const span<constructor_entry_base* const> ctors;
+		const size_t hash;
+
+		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash)
+			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }
+		{}
+		virtual ~typed_context_base() = default;
+
+
 		virtual void copy_assign(void* lhs, const void* rhs) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
@@ -69,21 +80,25 @@ namespace idk::reflect::detail
 				return o;
 			}
 		}
-
-		const string_view name;
-		const detail::table& table;
-		const span<constructor_entry_base* const> ctors;
-		const size_t hash;
-
-		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash)
-			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }
-		{}
-		virtual ~typed_context_base() = default;
 	};
 
 	template<typename T>
 	struct typed_context : typed_context_base
 	{
+		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors)
+			: typed_context_base(name, table, ctors, typehash<T>())
+		{}
+		typed_context()
+			: typed_context(
+				type_definition<T>::m_Name
+				, type_definition<T>::m_Table
+				, span<constructor_entry_base* const>{
+						type_definition<T>::m_Storage.ctors.data(),
+						type_definition<T>::m_Storage.ctors.data() + type_definition<T>::m_Storage.ctors.size() }
+			)
+		{}
+
+
 		void copy_assign(void* lhs, const void* rhs) const override
 		{
 			lhs; rhs;
@@ -109,19 +124,6 @@ namespace idk::reflect::detail
 			else
 				return T{ *static_cast<const T*>(obj) };
 		}
-
-		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash)
-			: typed_context_base(name, table, ctors, hash)
-		{}
-
-		typed_context()
-			: typed_context_base(
-				type_definition<T>::m_Name
-				, type_definition<T>::m_Table
-				, span<constructor_entry_base* const>{ type_definition<T>::m_Storage.ctors.data(), type_definition<T>::m_Storage.ctors.data() + type_definition<T>::m_Storage.ctors.size() }
-				, typehash<T>()
-			)
-		{}
 	};
 
 	template<typename T>
@@ -133,7 +135,6 @@ namespace idk::reflect::detail
 				""
 				, empty_table
 				, span<constructor_entry_base* const>{ nullptr, nullptr }
-				, typehash<T>()
 			)
 		{}
 	};
