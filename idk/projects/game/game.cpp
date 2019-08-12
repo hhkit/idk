@@ -5,6 +5,7 @@
 #include <core/Core.h>
 #include <vulkan/VulkanWin32GraphicsSystem.h>
 #include <win32/WindowsApplication.h>
+#include <reflect/ReflectRegistration.h>
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
