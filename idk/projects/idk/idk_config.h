@@ -40,7 +40,7 @@ namespace idk
 		//,	class ScriptSystem
 		//,	class PhysicsSystem
 		,	class GraphicsSystem
-		//,	class AudioSystem
+		,	class AudioSystem
 		,	class ResourceManager
 		//,	class IEditor
 	>;
