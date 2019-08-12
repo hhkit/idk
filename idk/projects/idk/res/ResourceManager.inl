@@ -15,13 +15,13 @@ namespace idk
 	{
 		auto& table = *r_cast<Storage<Resource>*>(resource_tables_[resource_ind<Resource>].get());
 		auto itr = table.find(handle.guid); 
-		return itr != table.end();
+		return itr != table.end() && itr->loaded;
 	}
 	template<typename Resource>
 	inline Resource& ResourceManager::Get(const RscHandle<Resource>& handle)
 	{
 		auto& table = *r_cast<Storage<Resource>*>(resource_tables_[resource_ind<Resource>].get());
-		if (auto itr = table.find(handle.guid); itr != table.end())
+		if (auto itr = table.find(handle.guid); itr != table.end() && itr->loaded)
 			return *itr->second;
 		else
 			return *r_cast<Resource*>(default_resources_[resource_ind<Resource>].get());
