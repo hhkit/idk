@@ -25,6 +25,7 @@
     <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestSystemManager.cpp" />
     <ClCompile Include="TestReflect.cpp" />
+    <ClCompile Include="TestAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
