@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <reflect/reflect.h>
+#include <reflect/ReflectRegistration.h>
 
 using namespace idk;
 
@@ -32,7 +33,7 @@ struct reflect_this
 {
 	vec4 vec;
 };
-REFLECT_BEGIN(reflect_this)
+REFLECT_BEGIN(reflect_this, "reflect_this")
 	REFLECT_VAR(vec)
 REFLECT_END()
 

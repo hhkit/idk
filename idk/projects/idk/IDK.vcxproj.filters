@@ -200,9 +200,6 @@
     <ClInclude Include="reflect\dynamic_detail.h">
       <Filter>reflect</Filter>
     </ClInclude>
-    <ClInclude Include="reflect\macro_utils.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="reflect\reflect.h">
       <Filter>reflect</Filter>
     </ClInclude>
@@ -242,11 +239,17 @@
     <ClInclude Include="reflect\pretty_function.h">
       <Filter>reflect</Filter>
     </ClInclude>
-    <ClInclude Include="core\FileSystem.h">
+	<ClInclude Include="core\FileSystem.h">
       <Filter>core\file</Filter>
     </ClInclude>
     <ClInclude Include="core\FileSystemInternal.h">
       <Filter>core\file</Filter>
+    </ClInclude>
+	<ClInclude Include="util\macro_utils.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\ReflectRegistration.h">
+      <Filter>reflect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

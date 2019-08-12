@@ -161,15 +161,18 @@ namespace idk::reflect
 //#define REFLECT_LIST_FNEND()					property_list_fnend()
 //#define REFLECT_SCOPE_BEGIN(NAME)				property_scope_begin(NAME)
 //#define REFLECT_SCOPE_END()					property_scope_end()
-#define REFLECT_BEGIN_ALIAS(CLASS_TYPE, ALIAS)	template<> struct property::opin::def<CLASS_TYPE>{ using t_self = CLASS_TYPE; constexpr static char m_Name[] = ALIAS; inline static const idk::reflect::detail::table_storage m_Storage { idk::reflect::detail::class_holder<t_self>{},
-#define REFLECT_BEGIN(CLASS_TYPE)				REFLECT_BEGIN_ALIAS(CLASS_TYPE, #CLASS_TYPE)
+//#define REFLECT_BEGIN_ALIAS(CLASS_TYPE, ALIAS)	template<> struct property::opin::def<CLASS_TYPE>{ using t_self = CLASS_TYPE; constexpr static char m_Name[] = ALIAS; inline static const idk::reflect::detail::table_storage m_Storage { idk::reflect::detail::class_holder<t_self>{},
+//#define REFLECT_BEGIN(CLASS_TYPE)				REFLECT_BEGIN_ALIAS(CLASS_TYPE, #CLASS_TYPE)
+
+//
+#define REFLECT_BEGIN(CLASS_TYPE, ALIAS)		template<> struct property::opin::def<CLASS_TYPE>{ using t_self = CLASS_TYPE; constexpr static char m_Name[] = ALIAS; inline static const idk::reflect::detail::table_storage m_Storage { idk::reflect::detail::class_holder<t_self>{},
 #define REFLECT_END()							}; inline static const property::table_hash<m_Storage.entry_count_v> m_Table{ m_Storage, m_Name }; inline static const idk::reflect::detail::register_type<t_self> __reg{}; };
 #define REFLECT_VAR(VAR)						property::PropertyVar<decltype(std::declval<t_self>().VAR)>( #VAR, offsetof( t_self, VAR ) )
 #define REFLECT_PARENT(PARENT_TYPE)				property::PropertyParent<t_self::PARENT_TYPE, const t_self*>(),
 #define REFLECT_CTOR(...)						idk::reflect::detail::constructor_entry<t_self, __VA_ARGS__>{},
 #define REFLECT_FRIEND							template<typename> friend struct idk::reflect::detail::type_definition;
 
-#include <reflect/macro_utils.h>
+#include <util/macro_utils.h>
 #define X_REFLECT_VARS_SINGLE(VAR) REFLECT_VAR(VAR),
 #define REFLECT_VARS(...) IDENTITY(FOREACH(X_REFLECT_VARS_SINGLE, __VA_ARGS__))
 
@@ -189,20 +192,3 @@ namespace idk::reflect
 #undef property_vend_cpp
 #undef property_friend
 #undef property_vtable
-
-
-
-REFLECT_BEGIN_ALIAS(idk::vec2, "vec2")
-	REFLECT_CTOR(float, float)
-	REFLECT_VARS(x, y)
-REFLECT_END()
-
-REFLECT_BEGIN_ALIAS(idk::vec3, "vec3")
-	REFLECT_CTOR(float, float, float)
-	REFLECT_VARS(x, y, z)
-REFLECT_END()
-
-REFLECT_BEGIN_ALIAS(idk::vec4, "vec4")
-	REFLECT_CTOR(float, float, float, float)
-	REFLECT_VARS(x, y, z, w)
-REFLECT_END()
