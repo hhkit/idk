@@ -252,7 +252,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;fmodL_vc.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -297,7 +297,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;fmod_vc.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
