@@ -3,7 +3,7 @@
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		12 AUG 2019
-//@brief	
+//@brief	A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource, which is a component
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -13,15 +13,15 @@
 #include "audio/AudioClipInfo.h"
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
 
+
+//External Forward Declarations
+namespace FMOD {
+	class Sound;  //Sound
+}
+//END Forward Declarations
+
 namespace idk
 {
-	//Forward Declarations
-	namespace FMOD {
-		class Sound;  //Sound
-	}
-	//END Forward Declarations
-
-
 	class AudioClip { //A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource
 	public:
 		AudioClip();

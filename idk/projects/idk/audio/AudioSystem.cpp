@@ -116,16 +116,15 @@ Variables:
 #pragma once
 #include "stdafx.h" //Needed for every CPP. Precompiler
 
-#include "audio/AudioSystem.h" //AudioSystem
-#include "audio/AudioClip.h" //AudioClip
+#include <audio/AudioSystem.h> //AudioSystem
+#include <audio/AudioClip.h> //AudioClip
 
 //Dependency includes
-#include "FMOD/core/fmod.hpp" //FMOD Core
-#include "FMOD/core/fmod_errors.h" //ErrorString
+#include <FMOD/core/fmod.hpp> //FMOD Core
+#include <FMOD/core/fmod_errors.h> //ErrorString
 
 #include <iostream> //cout
 #include <iomanip> //put_time
-//#include <conio.h> //getch todo
 #include <ctime> //
 #include <sstream> //ostringstream
 #include <filesystem> //filesystem
@@ -134,10 +133,11 @@ Variables:
 namespace idk
 {
 	AudioSystem::AudioSystem()
-		: CoreSystem{ nullptr }
-		, result{ FMOD_OK }
-		, timeItWasInitialized{}
-		, numberOfDrivers{ 0 }
+		: CoreSystem			{ nullptr }
+		, result				{ FMOD_OK }
+		, timeItWasInitialized	{}
+		, numberOfDrivers		{ 0 }
+		, currentDriver			{ 0 }
 	{
 	}
 
@@ -148,7 +148,9 @@ namespace idk
 	void AudioSystem::Init()
 	{
 	}
-
+	void AudioSystem::Run()
+	{
+	}
 	void AudioSystem::Shutdown()
 	{
 	}

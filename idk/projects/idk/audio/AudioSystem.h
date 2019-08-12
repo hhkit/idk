@@ -11,6 +11,7 @@
 #pragma once
 
 #include <core/ISystem.h>
+#include <idk.h>
 
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
 #include <chrono> //Time
@@ -18,16 +19,17 @@
 #include <map> //map
 #include <list> //list. TEMPORARY TODO. Will switch to a faster container.
 
-
+//External Forward Declarations
+namespace FMOD {
+	class System; //CoreSystem
+	class Sound;  //Sound
+}
+//END Forward Declarations
 
 namespace idk
 {
 
-	//Forward Declarations
-	namespace FMOD {
-		class System; //CoreSystem
-		class Sound;  //Sound
-	}
+	//Additional Forward Declarations
 	class AudioClip;
 	struct EXCEPTION_AudioSystem;
 	struct AUDIOSYSTEM_CPUDATA;
@@ -78,11 +80,11 @@ namespace idk
 		float GetCPUPercentUsage();
 		AUDIOSYSTEM_CPUDATA GetDetailedCPUPercentUsage();
 
-		std::tm GetTimeElapsedSinceInitialize() const;
+		seconds GetTimeElapsedSinceInitialize() const;
 
 		//std::cout function calls.
-		std::string PrintTimeInitialized() const;
-		std::string PrintTimeElapsed() const;
+		string PrintTimeInitialized() const;
+		string PrintTimeElapsed() const;
 		void PrintMemoryStats(bool precise = true);		  //Todo, change to return a string instead
 
 		//Helper functions
@@ -97,7 +99,7 @@ namespace idk
 
 		std::list<AudioClip*> AudioClipList; //Will be switched to a more faster container TODO
 
-		std::chrono::time_point<std::chrono::system_clock> timeItWasInitialized;
+		time_point timeItWasInitialized;
 
 		void ParseFMOD_RESULT(FMOD_RESULT); //All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 
