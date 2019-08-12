@@ -2,6 +2,7 @@
 #include <core/Scheduler.h>
 #include <core/IncludeSystems.h>
 #include <core/IncludeComponents.h>
+#include <res/ResourceManager.h>
 
 namespace idk
 {
@@ -13,6 +14,12 @@ namespace idk
 	{
 		return _instance->_scheduler->GetRealDeltaTime();
 	}
+	
+	ResourceManager& Core::GetResourceManager()
+	{
+		return GetSystem<ResourceManager>();
+	}
+
 	Core::Core()
 		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{true}
 	{

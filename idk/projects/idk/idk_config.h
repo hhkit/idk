@@ -41,6 +41,7 @@ namespace idk
 		//,	class PhysicsSystem
 		,	class GraphicsSystem
 		//,	class AudioSystem
+		,	class ResourceManager
 		//,	class IEditor
 	>;
 
@@ -50,6 +51,16 @@ namespace idk
 		std::declval<std::tuple<class IEditor>>()
 	));
 
+	using Resources = std::tuple<
+		class TestResource
+		//,	class Texture
+		//,	class Font
+		//,	class Mesh
+		//,	class Animation
+		//,	class Level
+	>;
+
 	constexpr auto SystemCount = std::tuple_size_v<Systems>;
+	constexpr auto ResourceCount = std::tuple_size_v<Resources>;
 
 }

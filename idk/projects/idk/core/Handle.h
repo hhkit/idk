@@ -71,7 +71,6 @@ namespace idk
 		Handle<T> handle;
 		friend class ObjectPool<T>;
 	};
-
 }
 
 #include "Handle.inl"

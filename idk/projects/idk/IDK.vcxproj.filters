@@ -53,6 +53,9 @@
     <Filter Include="reflect">
       <UniqueIdentifier>{ce3af906-101e-456b-861e-f589d72ec66c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{0bd97395-0815-4a82-a32b-3f8047af46ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -197,6 +200,24 @@
     <ClInclude Include="reflect\typed_context.inl">
       <Filter>reflect</Filter>
     </ClInclude>
+    <ClInclude Include="res\Resource.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceFactory.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceHandle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceIncludes.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceManager.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\Guid.h">
+      <Filter>res</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -247,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="reflect\type.cpp">
       <Filter>reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="res\ResourceManager.cpp">
+      <Filter>res</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -333,6 +357,12 @@
     </None>
     <None Include="reflect\type.inl">
       <Filter>reflect</Filter>
+    </None>
+    <None Include="res\ResourceHandle.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceManager.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

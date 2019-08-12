@@ -3,5 +3,6 @@
 #include <editor/IEditor.h>
 
 #include <gfx/GraphicsSystem.h>
+#include <res/ResourceManager.h>
 
 #include <app/TestSystem.h>

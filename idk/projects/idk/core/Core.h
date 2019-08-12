@@ -4,6 +4,8 @@
 
 namespace idk
 {
+	class ResourceManager;
+
 	class Core
 	{
 	public:
@@ -11,6 +13,7 @@ namespace idk
 		template<typename T, typename ... Args> T& AddSystem(Args&& ... args);
 		static seconds GetDT();
 		static seconds GetRealDT();
+		static ResourceManager& GetResourceManager();
 		static void    Shutdown();
 
 		Core();
@@ -18,7 +21,6 @@ namespace idk
 		void Run();
 	private:
 		SystemManager               _system_manager;
-		//ResourceManager             _resource_manager; // let's try not to overengineer this one
 		unique_ptr<class Scheduler> _scheduler;
 		GameState                   _game_state;
 		atomic<bool>                _running;

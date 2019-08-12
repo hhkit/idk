@@ -63,6 +63,12 @@
     <ClInclude Include="reflect\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\typed_context.inl" />
+    <ClInclude Include="res\Guid.h" />
+    <ClInclude Include="res\Resource.h" />
+    <ClInclude Include="res\ResourceFactory.h" />
+    <ClInclude Include="res\ResourceHandle.h" />
+    <ClInclude Include="res\ResourceIncludes.h" />
+    <ClInclude Include="res\ResourceManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="meta\meta.h" />
     <ClInclude Include="meta\casts.h" />
@@ -91,6 +97,7 @@
     <ClCompile Include="reflect\dynamic.cpp" />
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
+    <ClCompile Include="res\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -121,6 +128,8 @@
     <None Include="reflect\dynamic.inl" />
     <None Include="reflect\reflect.inl" />
     <None Include="reflect\type.inl" />
+    <None Include="res\ResourceHandle.inl" />
+    <None Include="res\ResourceManager.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\objectpool.natvis" />
