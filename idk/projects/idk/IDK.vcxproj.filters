@@ -65,6 +65,9 @@
     <Filter Include="core\file">
       <UniqueIdentifier>{30b0e940-6700-4e2a-b89d-07b6e572bee0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="serialize">
+      <UniqueIdentifier>{1edb08ba-9e8a-420f-aa06-8800e1ee860c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -239,19 +242,21 @@
     <ClInclude Include="reflect\pretty_function.h">
       <Filter>reflect</Filter>
     </ClInclude>
-	<ClInclude Include="core\FileSystem.h">
+    <ClInclude Include="core\FileSystem.h">
       <Filter>core\file</Filter>
     </ClInclude>
     <ClInclude Include="core\FileSystemInternal.h">
       <Filter>core\file</Filter>
     </ClInclude>
-	<ClInclude Include="util\macro_utils.h">
+    <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="reflect\ReflectRegistration.h">
       <Filter>reflect</Filter>
     </ClInclude>
-    <ClInclude Include="serialize\serialize.h" />
+    <ClInclude Include="serialize\serialize.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -312,12 +317,14 @@
     <ClCompile Include="res\ResourceManager.cpp">
       <Filter>res</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\serialize.cpp" />
     <ClCompile Include="core\FileSystem.cpp">
       <Filter>core\file</Filter>
     </ClCompile>
     <ClCompile Include="core\FileSystemInternal.cpp">
       <Filter>core\file</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\serialize.cpp">
+      <Filter>serialize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
