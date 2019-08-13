@@ -38,7 +38,9 @@ namespace idk
 			if (depth_change == -1)
 				stack.pop_back();
 
-			if constexpr (is_basic_serializable<T>::value)
+			if constexpr (std::is_arithmetic_v<T>)
+				(*stack.back())[name] = arg;
+			else if constexpr (is_basic_serializable<T>::value)
 				(*stack.back())[name] = serialize_text(arg);
 			else
 				stack.push_back(&((*stack.back())[name] = json::object()));

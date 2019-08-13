@@ -24,15 +24,15 @@ TEST(Serialize, TestSerializeBasic)
 	vec3 v{ 1.0f, 2.0f, 3.0f };
 	auto str = idk::serialize_text(v);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), "{\n  \"x\": \"1.000000\",\n  \"y\": \"2.000000\",\n  \"z\": \"3.000000\"\n}");
+	EXPECT_STREQ(str.c_str(), "{\n  \"x\": 1.0,\n  \"y\": 2.0,\n  \"z\": 3.0\n}");
 
 	serialize_this obj = {
 		Guid{"e82bf459-faca-4c70-a8e9-dd35597575ef"},
 		vec4{5.0f, 6.0f, 7.0f, 8.0f}
 	};
-	auto x = "{\n  \"f\": \"69\",\n  "
+	auto x = "{\n  \"f\": 69,\n  "
 		"\"guid\": \"e82bf459-faca-4c70-a8e9-dd35597575ef\",\n  "
-		"\"vec\": {\n    \"w\": \"8.000000\",\n    \"x\": \"5.000000\",\n    \"y\": \"6.000000\",\n    \"z\": \"7.000000\"\n  }\n}";
+		"\"vec\": {\n    \"w\": 8.0,\n    \"x\": 5.0,\n    \"y\": 6.0,\n    \"z\": 7.0\n  }\n}";
 	str = idk::serialize_text(obj);
 	std::cout << str;
 	EXPECT_STREQ(str.c_str(), x);
