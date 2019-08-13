@@ -36,3 +36,37 @@ TEST(GameState, TestHandles)
 	EXPECT_FALSE(&*h);
 	EXPECT_FALSE(&*hTransform);
 }
+
+TEST(GameState, TestScene)
+{
+	using namespace idk;
+	GameState gs;
+	auto scene0 = gs.ActivateScene(0);
+	auto scene1 = gs.ActivateScene(1);
+	EXPECT_TRUE(scene0);
+	EXPECT_TRUE(scene1);
+	
+	const auto create_in_scene0 = 10;
+	for (int i = 0; i < create_in_scene0; ++i)
+		scene0->CreateGameObject();
+
+	const auto create_in_scene1 = 5;
+	for (int i = 0; i < create_in_scene1; ++i)
+		scene1->CreateGameObject();
+
+	int count = 0;
+	for (auto& elem : *scene0)
+		++count;
+
+	EXPECT_EQ(count, create_in_scene0);
+
+	count = 0;
+	for (auto& elem : Scene{ 1 })
+		++count;
+	EXPECT_EQ(count, create_in_scene1);
+
+	count = 0;
+	for (auto& elem : Scene{ 2 })
+		++count;
+	EXPECT_EQ(count, 0);
+}
