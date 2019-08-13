@@ -1,60 +1,70 @@
 #pragma once
 
-namespace idk
+namespace idk::file_system_internal
 {
-	namespace filesystem_internal
+	struct node_t
 	{
-		struct node_t
-		{
-			int8_t depth = -1;
-			int8_t index = -1;
-		};
+		node_t() = default;
+		node_t(int8_t d, int8_t i);
+		int8_t depth = -1;
+		int8_t index = -1;
+	};
 
-		struct file_t
-		{
-			string full_path;
-			string filename;
-			string extension;
+	struct file_t
+	{
+		string full_path;
+		string filename;
+		string extension;
 
-			node_t parent;
-			node_t tree_index;
-		};
+		size_t handle_index;
 
-		struct dir_t
-		{
-			string full_path;
-			string filename;
+		node_t parent;
+		node_t tree_index;
+	};
 
-			vector<node_t> sub_dirs;
-			vector<node_t> files;
+	struct dir_t
+	{
+		string full_path;
+		string filename;
 
-			node_t parent;
-			node_t tree_index;
-		};
+		vector<node_t> sub_dirs;
+		vector<node_t> files;
 
-		struct collated_t
-		{
-			vector<file_t> files;
-			vector<dir_t> dirs;
+		node_t parent;
+		node_t tree_index;
+	};
 
-			int8_t depth;
-		};
+	struct collated_t
+	{
+		vector<file_t> files;
+		vector<dir_t> dirs;
 
-		struct mount_t
-		{
-			size_t Init(const string& fullPath, const string& mountPath);
-			size_t AddDepth();
-		
-			// Each index signifies the depth of the tree
-			vector<collated_t> path_tree;
+		int8_t depth;
+	};
 
-			string full_path;
-			string mount_path;
+	struct mount_t
+	{
+		size_t AddDepth();
 
-		private:
-			void recurseDir(int8_t depth, dir_t& dir);
-		};
-	}
+		// Each index signifies the depth of the tree
+		vector<collated_t> path_tree;
+
+		string full_path;
+		string mount_path;
+
+		size_t num_files;
+	};
+
+	struct file_handle_t
+	{
+		file_handle_t(int8_t mount, int8_t depth, int8_t index);
+		file_handle_t(int8_t mount, node_t node);
+		bool is_open = false;
+		byte open_type = byte{0x0};
+
+		int8_t mount_id;
+		node_t internal_id;
+	};
 
 	
 }
