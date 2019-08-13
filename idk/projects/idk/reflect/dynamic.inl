@@ -45,11 +45,16 @@ namespace idk::reflect
 
 	// recursively visit all members
 	// visitor must be a function with signature:
-	//    (const char* name, auto&& data) -> bool/void
+	//  (const char* name, auto&& data, int depth_change) -> bool/void
+	// name: name of property
+	// data: the value, use T = std::decay_t<decltype(data)> to get the type
+	// depth_change: the change in depth; -1, 0, or 1. (1 means down a level)
 	// return false to stop recursion. if function doesn't return, it always recurses
 	template<typename Visitor>
 	void dynamic::visit(Visitor&& visitor) const
 	{
-		detail::visit(_ptr->get(), type._context->table, std::forward<Visitor>(visitor));
+		int depth = 0;
+		detail::visit(_ptr->get(), type, std::forward<Visitor>(visitor), depth);
 	}
+
 }
