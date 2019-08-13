@@ -27,6 +27,7 @@ namespace idk::reflect
 			else
 			{
 				static typed_context_nodef<T> context{};
+				meta::instance().names_to_contexts.emplace(context.name, &context);
 				meta::instance().hashes_to_contexts.emplace(typehash<T>(), &context);
 			}
 		}
@@ -89,24 +90,36 @@ namespace idk::reflect
 
 
 
+	// recursively visit all members of an object
+	// visitor must be a function with signature:
+	//  (const char* name, auto&& data, int depth_change) -> bool/void
+	// name: name of property
+	// data: the value, use T = std::decay_t<decltype(data)> to get the type
+	// depth_change: the change in depth; -1, 0, or 1. (1 means down a level)
+	// return false to stop recursion. if function doesn't return, it always recurses
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor)
 	{
-		detail::visit(&obj, get_type<T>()._context->table, std::forward<Visitor>(visitor));
+		int depth = 0;
+		detail::visit(&obj, get_type<T>(), std::forward<Visitor>(visitor), depth);
 	}
 
 	namespace detail
 	{
 		template<typename Visitor>
-		void visit(void* obj, const detail::table& table, Visitor&& visitor)
+		void visit(void* obj, type type, Visitor&& visitor, int& depth)
 		{
+			const table& table = type._context->table;
 			if (table.m_Count == 0)
 				return;
+
+			int curr_depth = depth;
+			++depth;
 
 			// adapted from EnumRecursive in properties.h#820
 			for (size_t i = 0; i < table.m_Count; ++i)
 			{
-				auto& Entry = table.m_pActionEntries[i];
+				auto& entry = table.m_pActionEntries[i];
 
 				std::visit([&](auto&& FunctionGetSet) {
 
@@ -118,22 +131,29 @@ namespace idk::reflect
 					else
 					{
 						using T = ::property::vartype_from_functiongetset<fn_getsettype>;
-						void* offsetted = ::property::details::HandleBasePointer(obj, Entry.m_Offset);
+						void* offsetted = ::property::details::HandleBasePointer(obj, entry.m_Offset);
 						T& value = *reinterpret_cast<T*>(offsetted);
 
-						if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(const char*, T&)>, bool>)
+						int depth_change = depth - curr_depth;
+						curr_depth = depth;
+
+						if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(const char*, T&, int&)>, bool>)
 						{
-							if (visitor(table.m_pEntry[i].m_pName, value)) // if false, stop recursive
-								reflect::visit(value, std::forward<Visitor>(visitor));
+							if (visitor(table.m_pEntry[i].m_pName, value, depth_change)) // if false, stop recursive
+							{
+								visit(offsetted, get_type<T>(), std::forward<Visitor>(visitor), depth);
+								std::swap(depth, curr_depth);
+							}
 						}
 						else // function has no return
 						{
-							visitor(table.m_pEntry[i].m_pName, value);
-							reflect::visit(value, std::forward<Visitor>(visitor));
+							visitor(table.m_pEntry[i].m_pName, value, depth_change);
+							visit(offsetted, get_type<T>(), std::forward<Visitor>(visitor), depth);
+							std::swap(depth, curr_depth);
 						}
 					}
 
-				}, table.m_pActionEntries[i].m_FunctionTypeGetSet);
+				}, entry.m_FunctionTypeGetSet);
 			}
 		}
 	}

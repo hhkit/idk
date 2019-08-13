@@ -66,6 +66,7 @@
     <ClInclude Include="reflect\pretty_function.h" />
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="reflect\dynamic_detail.h" />
+    <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
@@ -110,6 +111,7 @@
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
+    <ClCompile Include="serialize\serialize.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />

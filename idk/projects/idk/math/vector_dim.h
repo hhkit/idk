@@ -1,9 +1,10 @@
 #pragma once
 #include <type_traits>
-template<typename T, unsigned D> struct vector;
 
 namespace idk::math
 {
+	template<typename T, unsigned D> struct vector;
+
 	namespace detail
 	{
 		template <typename T>

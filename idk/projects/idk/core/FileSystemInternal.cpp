@@ -12,52 +12,7 @@ namespace FS = std::filesystem;
 
 namespace idk{
 
-	size_t filesystem_internal::mount_t::Init(const string& fullPath, const string& mountPath)
-	{
-		full_path = fullPath;
-		mount_path = mountPath;
-
-		FS::path currPath{ fullPath };
-		FS::directory_iterator dir{ currPath };
-		
-		AddDepth();
-		// collated_t& collated = path_tree[0];
-		
-		// initializing all the paths from this path
-		for (auto& elem : dir)
-		{
-			FS::path tmp{ elem.path() };
-			if (FS::is_regular_file(tmp))
-			{
-				filesystem_internal::file_t f;
-				
-				f.full_path = tmp.string();
-				f.filename	= tmp.filename().string();
-				f.extension = tmp.extension().string();
-
-				f.tree_index.depth = 0;
-				f.tree_index.index = static_cast<int8_t>(path_tree[0].files.size());
-
-				path_tree[0].files.push_back(f);
-			}
-			else
-			{
-				filesystem_internal::dir_t d;
-
-				d.full_path = tmp.string();
-				d.filename = tmp.filename().string();
-
-				d.tree_index.depth = 0;
-				d.tree_index.index = static_cast<int8_t>(path_tree[0].dirs.size());
-				
-				recurseDir(0, d);
-				path_tree[0].dirs.push_back(d);
-			}
-		}
-		return path_tree.size() - 1;
-	}
-
-	size_t filesystem_internal::mount_t::AddDepth()
+	size_t file_system_internal::mount_t::AddDepth()
 	{
 		path_tree.emplace_back(collated_t{});
 		path_tree.back().depth = static_cast<int8_t>(path_tree.size() - 1);
@@ -65,57 +20,20 @@ namespace idk{
 		return path_tree.size() - 1;
 	}
 
-	void filesystem_internal::mount_t::recurseDir(int8_t currDepth, dir_t& mountSubDir)
+	file_system_internal::file_handle_t::file_handle_t(int8_t mount, int8_t depth, int8_t index)
+		:mount_id{ mount }, internal_id{ depth, index }, is_open{ false }, open_type{ 0x0 }
 	{
-		// Increase the depth if this expands the tree
-		++currDepth;
-		if (currDepth >= path_tree.size() - 1)
-			AddDepth();
+	}
 
-		FS::path currPath{ mountSubDir.full_path };
-		FS::directory_iterator dir{ currPath };
+	file_system_internal::file_handle_t::file_handle_t(int8_t mount, node_t node)
+		: mount_id{ mount }, internal_id{ node }, is_open{ false }, open_type{ 0x0 }
+	{
+	}
 
-		// initializing all the paths from this path
-		for (auto& elem : dir)
-		{
-			FS::path tmp{ elem.path() };
-			if (FS::is_regular_file(tmp))
-			{
-				filesystem_internal::file_t f;
-
-				f.full_path = tmp.string();
-				f.filename = tmp.filename().string();
-				f.extension = tmp.extension().string();
-
-				node_t node;
-				node.depth = currDepth;
-				node.index = static_cast<int8_t>(path_tree[currDepth].files.size());
-
-				f.tree_index = node;
-
-				mountSubDir.files.push_back(node);
-
-				path_tree[currDepth].files.push_back(f);
-			}
-			else
-			{
-				filesystem_internal::dir_t d;
-
-				d.full_path = tmp.string();
-				d.filename = tmp.filename().string();
-
-				node_t node;
-				node.depth = currDepth;
-				node.index = static_cast<int8_t>(path_tree[currDepth].dirs.size());
-
-				d.tree_index = node;
-
-				mountSubDir.sub_dirs.push_back(node);
-
-				recurseDir(currDepth, d);
-				path_tree[currDepth].dirs.push_back(d);
-			}
-		}
-
+	file_system_internal::node_t::node_t(int8_t d, int8_t i)
+		: depth{ d }, index{ i }
+	{
 	}
 }
+
+

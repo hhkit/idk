@@ -25,6 +25,8 @@ namespace idk::reflect
 	// use this against type.hash()
 	template<typename T> constexpr size_t typehash() { return idk::string_hash(nameof<T>()); }
 
+	class type;
+
 	namespace detail
 	{
 		using table = ::property::table;
@@ -46,7 +48,7 @@ namespace idk::reflect
 		template<typename T> struct typed_context;
 
 		template<typename Visitor>
-		void visit(void* obj, const detail::table& table, Visitor&& visitor);
+		void visit(void* obj, type type, Visitor&& visitor, int& depth);
 	}
 
 
@@ -59,7 +61,7 @@ namespace idk::reflect
 		friend struct detail::typed_context_base;
 		friend type get_type(string_view name);
 		template<typename T> friend type get_type();
-		template<typename T, typename Visitor> friend void visit(T& obj, Visitor&& visitor);
+		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth);
 
 	public:
 		template<typename... Ts>
@@ -73,6 +75,9 @@ namespace idk::reflect
 
 		// should always be true for now (since get_type has assert)
 		bool valid() const;
+
+		// number of properties
+		size_t count() const;
 
 		bool operator==(type other) const;
 
@@ -111,10 +116,13 @@ namespace idk::reflect
 
 		// recursively visit all members
 		// visitor must be a function with signature:
-		//    (const char* name, auto&& data) -> bool/void
+		//  (const char* name, auto&& data, int depth_change) -> bool/void
+		// name: name of property
+		// data: the value, use T = std::decay_t<decltype(data)> to get the type
+		// depth_change: the change in depth; -1, 0, or 1. (1 means down a level)
 		// return false to stop recursion. if function doesn't return, it always recurses
 		template<typename Visitor>
-		void visit(Visitor&& visitor);
+		void visit(Visitor&& visitor) const;
 
 		property_iterator begin() const;
 		property_iterator end() const;
@@ -143,7 +151,10 @@ namespace idk::reflect
 
 	// recursively visit all members of an object
 	// visitor must be a function with signature:
-	//    (const char* name, auto&& data) -> bool/void
+	//  (const char* name, auto&& data, int depth_change) -> bool/void
+	// name: name of property
+	// data: the value, use T = std::decay_t<decltype(data)> to get the type
+	// depth_change: the change in depth; -1, 0, or 1. (1 means down a level)
 	// return false to stop recursion. if function doesn't return, it always recurses
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor);

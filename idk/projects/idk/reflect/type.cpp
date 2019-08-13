@@ -23,6 +23,11 @@ namespace idk::reflect
 		return _context->hash;
 	}
 
+	size_t type::count() const
+	{
+		return _context->table.m_Count;
+	}
+
 	bool type::operator==(type other) const
 	{
 		return hash() == other.hash();
