@@ -2,6 +2,7 @@
 
 #include "idk.h"
 #include <core/Handle.h>
+#include <res/Guid.h>
 
 namespace idk
 {
@@ -17,13 +18,16 @@ namespace idk::reflect
 	using ReflectedTypes = std::variant<
 		int
 		, bool
-		, float
-		, std::string
+		, char
 		, uint64_t
+		, float
+		, double
+		, std::string
 		, vec2
 		, vec3
 		, vec4
 		, quat
 		, Handle<GameObject>
+		, Guid
 	>;
 }

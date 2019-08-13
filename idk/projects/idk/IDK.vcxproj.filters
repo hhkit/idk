@@ -242,6 +242,7 @@
     <ClInclude Include="reflect\ReflectRegistration.h">
       <Filter>reflect</Filter>
     </ClInclude>
+    <ClInclude Include="serialize\serialize.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -302,6 +303,7 @@
     <ClCompile Include="res\ResourceManager.cpp">
       <Filter>res</Filter>
     </ClCompile>
+    <ClCompile Include="serialize\serialize.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
