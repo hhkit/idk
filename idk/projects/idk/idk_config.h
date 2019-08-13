@@ -36,6 +36,7 @@ namespace idk
 
 	using EngineSystems = std::tuple<
 		class TestSystem
+		, class FileSystem
 		//,	class InputSystem
 		//,	class ScriptSystem
 		//,	class PhysicsSystem

@@ -1,7 +1,7 @@
 #pragma once
 #include <core/GameState.h>
 #include <core/SystemManager.h>
-
+#include <core/FileSystem.h>
 namespace idk
 {
 	class ResourceManager;

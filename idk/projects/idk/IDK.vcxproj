@@ -24,6 +24,8 @@
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="core\FileSystem.h" />
+    <ClInclude Include="core\FileSystemInternal.h" />
     <ClInclude Include="core\Scheduler.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
@@ -86,6 +88,8 @@
   <ItemGroup>
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="core\FileSystem.cpp" />
+    <ClCompile Include="core\FileSystemInternal.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
