@@ -6,7 +6,8 @@ namespace idk
 {
 	// true if is integral/floating point, or is convertible to string
 	template<typename T, typename = void>
-	struct is_basic_serializable { static constexpr bool value = std::is_arithmetic_v<T>; };
+	struct is_basic_serializable : std::is_arithmetic<T> {};
+	// true if is integral/floating point, or is convertible to string
 	template<typename T>
 	struct is_basic_serializable<T, std::void_t<decltype(string(std::declval<T>()))>> : std::true_type {};
 
