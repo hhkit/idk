@@ -25,7 +25,7 @@ namespace idk {
 		}
 		base_dir = base_dir_c;
 
-		Mount("C:\\Users\\Joseph\\Desktop\\GIT\\idk_legacy\\Koboru\\Koboru\\resource\\editor", "/test");
+		// Mount("C:\\Users\\Joseph\\Desktop\\GIT\\idk_legacy\\Koboru\\Koboru\\resource\\editor", "/test");
 	}
 
 	void FileSystem::Run(float dt)
