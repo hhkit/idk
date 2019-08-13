@@ -27,6 +27,7 @@ namespace idk::reflect
 			else
 			{
 				static typed_context_nodef<T> context{};
+				meta::instance().names_to_contexts.emplace(context.name, &context);
 				meta::instance().hashes_to_contexts.emplace(typehash<T>(), &context);
 			}
 		}
@@ -89,6 +90,10 @@ namespace idk::reflect
 
 
 
+	// recursively visit all members of an object
+	// visitor must be a function with signature:
+	//    (const char* name, auto&& data) -> bool/void
+	// return false to stop recursion. if function doesn't return, it always recurses
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor)
 	{

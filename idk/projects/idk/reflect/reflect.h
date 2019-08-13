@@ -74,6 +74,9 @@ namespace idk::reflect
 		// should always be true for now (since get_type has assert)
 		bool valid() const;
 
+		// number of properties
+		size_t count() const;
+
 		bool operator==(type other) const;
 
 	private:
@@ -114,7 +117,7 @@ namespace idk::reflect
 		//    (const char* name, auto&& data) -> bool/void
 		// return false to stop recursion. if function doesn't return, it always recurses
 		template<typename Visitor>
-		void visit(Visitor&& visitor);
+		void visit(Visitor&& visitor) const;
 
 		property_iterator begin() const;
 		property_iterator end() const;

@@ -43,8 +43,12 @@ namespace idk::reflect
 		return *static_cast<T*>(_ptr->get());
 	}
 
+	// recursively visit all members
+	// visitor must be a function with signature:
+	//    (const char* name, auto&& data) -> bool/void
+	// return false to stop recursion. if function doesn't return, it always recurses
 	template<typename Visitor>
-	void dynamic::visit(Visitor&& visitor)
+	void dynamic::visit(Visitor&& visitor) const
 	{
 		detail::visit(_ptr->get(), type._context->table, std::forward<Visitor>(visitor));
 	}
