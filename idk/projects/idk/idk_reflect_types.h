@@ -19,6 +19,7 @@ namespace idk::reflect
 		int
 		, bool
 		, char
+		, int64_t
 		, uint64_t
 		, float
 		, double

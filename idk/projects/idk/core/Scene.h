@@ -15,8 +15,8 @@ namespace idk
 		Handle<GameObject> CreateGameObject();
 		void               DestroyGameObject(const Handle<GameObject>&);
 
-		iterator begin();
-		iterator end();
+		iterator begin() const;
+		iterator end() const;
 	private:
 		uint8_t scene_id;
 		friend class GameState;

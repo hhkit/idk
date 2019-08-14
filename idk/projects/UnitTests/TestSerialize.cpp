@@ -17,12 +17,12 @@ REFLECT_END()
 
 TEST(Serialize, TestSerializeBasic)
 {
-	EXPECT_TRUE(idk::is_basic_serializable<float>::value);
-	EXPECT_FALSE(idk::is_basic_serializable<vec3>::value);
-	EXPECT_TRUE(idk::is_basic_serializable<Guid>::value);
+	EXPECT_TRUE(is_basic_serializable<float>::value);
+	EXPECT_FALSE(is_basic_serializable<vec3>::value);
+	EXPECT_TRUE(is_basic_serializable<Guid>::value);
 
 	vec3 v{ 1.0f, 2.0f, 3.0f };
-	auto str = idk::serialize_text(v);
+	auto str = serialize_text(v);
 	std::cout << str;
 	EXPECT_STREQ(str.c_str(), "{\n  \"x\": 1.0,\n  \"y\": 2.0,\n  \"z\": 3.0\n}");
 
@@ -33,7 +33,38 @@ TEST(Serialize, TestSerializeBasic)
 	auto x = "{\n  \"f\": 69,\n  "
 		"\"guid\": \"e82bf459-faca-4c70-a8e9-dd35597575ef\",\n  "
 		"\"vec\": {\n    \"w\": 8.0,\n    \"x\": 5.0,\n    \"y\": 6.0,\n    \"z\": 7.0\n  }\n}";
-	str = idk::serialize_text(obj);
+	str = serialize_text(obj);
 	std::cout << str;
 	EXPECT_STREQ(str.c_str(), x);
+
+	// roundtrip
+	auto obj2 = parse_text<serialize_this>(str);
+	EXPECT_EQ(obj.f, obj2.f);
+	EXPECT_EQ(obj.guid, obj2.guid);
+	EXPECT_EQ(obj.vec, obj2.vec);
+}
+
+string serialized_scene_0 = "";
+
+TEST(Serialize, TestSerializeScene)
+{
+	GameState gs;
+	auto scene = gs.ActivateScene(0);
+
+	auto o1 = scene->CreateGameObject();
+	auto t1 = o1->GetComponent<Transform>();
+	t1->position = vec3{ 1.0f, 2.0f, 3.0f };
+	t1->scale = vec3{ 4.0f };
+	t1->rotation = quat{ 5.0f, 6.0f, 7.0f, 8.0f };
+
+	serialized_scene_0 = serialize_text(*scene);
+	std::cout << serialized_scene_0;
+}
+
+TEST(Serialize, TestParseScene)
+{
+	GameState gs;
+	auto scene = gs.ActivateScene(0);
+
+
 }
