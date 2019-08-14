@@ -3,7 +3,10 @@
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		12 AUG 2019
-//@brief	A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource, which is a component
+//@brief	A class that contains the data holding FMOD sounds. This interacts 
+//			with the AudioSystem directly. Not to be confused with AudioSource, 
+//			which is a component.
+
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -13,6 +16,17 @@
 
 namespace idk
 {
-
-
+	AudioClip::AudioClip()
+		: soundHandle	{nullptr}
+		, volume		{ 1.0f }
+		, pitch			{ 1.0f }
+	{
+	}
+	AudioClip::~AudioClip()
+	{
+	}
+	AudioClipInfo AudioClip::GetAudioClipInfo()
+	{
+		return soundInfo;
+	}
 }

@@ -36,7 +36,6 @@ namespace idk
 
 	void Windows::PollEvents()
 	{
-		std::cout << "polling windows\n";
 		MSG msg;
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{

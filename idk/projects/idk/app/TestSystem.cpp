@@ -13,11 +13,6 @@ namespace idk
 
 	void TestSystem::TestSpan(span<const Transform> transforms)
 	{
-		auto index = 0;
-		std::cout << "tfm update: ";
-		for (auto& tfm : transforms)
-			std::cout << (tfm,index++) << ',';
-		std::cout << '\n';
 	}
 
 	void TestSystem::Shutdown()

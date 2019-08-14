@@ -12,6 +12,12 @@ namespace idk
 	}
 
 	template<typename T>
+	inline Handle<T>::Handle(uint64_t id)
+		: GenericHandle{id}
+	{
+	}
+
+	template<typename T>
 	inline Handle<T>::Handle(const GenericHandle& handle)
 		: GenericHandle{handle.id}
 	{

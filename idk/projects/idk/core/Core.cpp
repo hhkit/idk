@@ -34,11 +34,13 @@ namespace idk
 		auto editor = &GetSystem<IEditor>();
 		// setup loop
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,  "Poll OS Events");
+		_scheduler->SchedulePass      <UpdatePhase::Update>(&FileSystem::Update, "File System Update");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Run,  "FMOD Update");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>(&TestSystem::TestSpan, "Test updates");
 		if (editor) _scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
 		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&Application::SwapBuffers, "Swap buffers");
 
+		Core::GetSystem<FileSystem>();
 		// main loop
 		_scheduler->Setup();
 		if (editor)

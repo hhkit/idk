@@ -6,11 +6,6 @@
 #include <reflect/reflect.h>
 #include <iostream>
 
-class TestComponent : public idk::Component<TestComponent>
-{
-
-};
-
 
 TEST(ObjectPool, TestIndexInTuple)
 {

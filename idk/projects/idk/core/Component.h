@@ -3,6 +3,12 @@
 #include <idk.h>
 #include "Handle.h"
 
+namespace idk::detail
+{
+	template<typename T>
+	struct TableGenerator;
+}
+
 namespace idk
 {
 	class GameObject;
@@ -26,6 +32,8 @@ namespace idk
 	private:
 		Handle<GameObject> _gameObject;
 		friend class GameObject;
+		template<typename>
+		friend struct detail::TableGenerator;
 		GenericComponent() = default;
 		template<typename T> friend class Component;
 	};
@@ -39,5 +47,7 @@ namespace idk
 		{
 			return Handleable<T>::GetHandle();
 		}
+
+		static_assert(index_in_tuple_v<T, Components> != std::tuple_size_v<Components>, "T must be a Component in idk_config.h/Components");
 	};
 }

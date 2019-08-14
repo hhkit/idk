@@ -55,6 +55,7 @@ namespace idk
 		static constexpr auto type_id = index_in_tuple_v<T, idk::Handleables>;
 
 		Handle() = default;
+		explicit Handle(uint64_t id);
 		explicit Handle(const GenericHandle&);
 		Handle(uint32_t index, uint16_t gen, uint8_t scene = 0);
 

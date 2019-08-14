@@ -24,8 +24,6 @@
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSystem.h" />
-    <ClInclude Include="core\FileSystem.h" />
-    <ClInclude Include="core\FileSystemInternal.h" />
     <ClInclude Include="core\Scheduler.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
@@ -37,11 +35,14 @@
     <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="ds\ranged_for.h" />
     <ClInclude Include="core\SystemManager.h" />
+    <ClInclude Include="file\FileSystem.h" />
+    <ClInclude Include="file\FileSystemInternal.h" />
     <ClInclude Include="gfx\GraphicsSystem.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
     <ClInclude Include="idk_reflect_types.h" />
+    <ClInclude Include="math\color.h" />
     <ClInclude Include="math\matrix_transforms.h" />
     <ClInclude Include="math\quaternion.h" />
     <ClInclude Include="event\Dispatcher.h" />
@@ -67,6 +68,7 @@
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="reflect\dynamic_detail.h" />
     <ClInclude Include="serialize\serialize.h" />
+    <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
@@ -88,8 +90,6 @@
   <ItemGroup>
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
-    <ClCompile Include="core\FileSystem.cpp" />
-    <ClCompile Include="core\FileSystemInternal.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
@@ -100,6 +100,9 @@
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="core\SystemManager.cpp" />
+    <ClCompile Include="file\FileSystem.cpp" />
+    <ClCompile Include="file\FileSystemInternal.cpp" />
+    <ClCompile Include="math\color.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -112,6 +115,7 @@
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\serialize.cpp" />
+    <ClCompile Include="shape\aabb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />

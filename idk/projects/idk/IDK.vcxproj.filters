@@ -62,11 +62,11 @@
     <Filter Include="util">
       <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\file">
-      <UniqueIdentifier>{30b0e940-6700-4e2a-b89d-07b6e572bee0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="serialize">
       <UniqueIdentifier>{1edb08ba-9e8a-420f-aa06-8800e1ee860c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file">
+      <UniqueIdentifier>{f2473f67-3de9-4860-9834-dbb2b1f6c894}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -242,12 +242,6 @@
     <ClInclude Include="reflect\pretty_function.h">
       <Filter>reflect</Filter>
     </ClInclude>
-    <ClInclude Include="core\FileSystem.h">
-      <Filter>core\file</Filter>
-    </ClInclude>
-    <ClInclude Include="core\FileSystemInternal.h">
-      <Filter>core\file</Filter>
-    </ClInclude>
     <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -256,6 +250,14 @@
     </ClInclude>
     <ClInclude Include="serialize\serialize.h">
       <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\aabb.h" />
+    <ClInclude Include="math\color.h" />
+    <ClInclude Include="file\FileSystem.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="file\FileSystemInternal.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -317,14 +319,16 @@
     <ClCompile Include="res\ResourceManager.cpp">
       <Filter>res</Filter>
     </ClCompile>
-    <ClCompile Include="core\FileSystem.cpp">
-      <Filter>core\file</Filter>
-    </ClCompile>
-    <ClCompile Include="core\FileSystemInternal.cpp">
-      <Filter>core\file</Filter>
-    </ClCompile>
     <ClCompile Include="serialize\serialize.cpp">
       <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="math\color.cpp" />
+    <ClCompile Include="file\FileSystemInternal.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="file\FileSystem.cpp">
+      <Filter>file</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

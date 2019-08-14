@@ -28,7 +28,7 @@ namespace idk
 
 		template<typename T>
 		friend struct detail::SystemHelper;
-		using Helper = detail::SystemHelper<EngineSystems>;
+		using Helper = detail::SystemHelper<Systems>;
 	};
 }
 

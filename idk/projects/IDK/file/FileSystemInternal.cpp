@@ -20,6 +20,11 @@ namespace idk{
 		return path_tree.size() - 1;
 	}
 
+	file_system_internal::file_t& file_system_internal::mount_t::GetFile(node_t node)
+	{
+		return path_tree[node.depth].files[node.index];
+	}
+
 	file_system_internal::file_handle_t::file_handle_t(int8_t mount, int8_t depth, int8_t index)
 		:mount_id{ mount }, internal_id{ depth, index }, is_open{ false }, open_type{ 0x0 }
 	{

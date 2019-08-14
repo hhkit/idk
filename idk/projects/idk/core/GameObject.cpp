@@ -4,6 +4,12 @@
 
 namespace idk
 {
+	GenericHandle GameObject::AddComponent(reflect::type type)
+	{
+		auto comphandle = GameState::GetGameState().CreateComponent(GetHandle(), type);
+		_components.emplace_back(comphandle);
+		return comphandle;
+	}
 	span<GenericHandle> GameObject::GetComponents()
 	{
 		return span<GenericHandle>(_components.begin()._Ptr, _components.end()._Ptr);

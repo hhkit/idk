@@ -40,7 +40,7 @@ namespace idk
 			template<typename T>
 			static constexpr auto GetSystemImpl()
 			{
-				return GetSystemIndex<T, 0, Application, Ts..., IEditor>();
+				return GetSystemIndex<T, 0, Ts...>();
 			}
 		};
 	}
