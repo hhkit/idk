@@ -69,6 +69,7 @@ TEST(ObjectPool, TestObjectPooling)
 	EXPECT_TRUE(op.Validate(h2));
 
 	op.DeactivateScene(0);
+	GameState gs;
 
 	GenericHandle generich;
 	*generich;
