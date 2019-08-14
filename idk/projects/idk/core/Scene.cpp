@@ -9,6 +9,11 @@ namespace idk
 	{
 	}
 
+	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)
+	{
+		return GameState::GetGameState().CreateObject<GameObject>(handle);
+	}
+
 	Handle<GameObject> Scene::CreateGameObject()
 	{
 		return GameState::GetGameState().CreateObject<GameObject>(scene_id);
