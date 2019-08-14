@@ -21,7 +21,7 @@ namespace idk
 		{
 			return std::memcmp(this, &other, sizeof(GUID)) == 0;
 		}
-		operator string() const
+		explicit operator string() const
 		{
 			char guid_cstr[39];
 			snprintf(guid_cstr, sizeof(guid_cstr),
@@ -33,7 +33,7 @@ namespace idk
 		}
 
 		// is valid?
-		operator bool() const
+		explicit operator bool() const
 		{
 			return *reinterpret_cast<const GUID*>(this) != GUID_NULL;
 		}

@@ -257,6 +257,8 @@
     <ClInclude Include="serialize\serialize.h">
       <Filter>serialize</Filter>
     </ClInclude>
+    <ClInclude Include="shape\aabb.h" />
+    <ClInclude Include="math\color.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -326,6 +328,8 @@
     <ClCompile Include="serialize\serialize.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
+    <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="math\color.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

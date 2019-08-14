@@ -42,6 +42,7 @@
     <ClInclude Include="core\ObjectPool.h" />
     <ClInclude Include="common\Transform.h" />
     <ClInclude Include="idk_reflect_types.h" />
+    <ClInclude Include="math\color.h" />
     <ClInclude Include="math\matrix_transforms.h" />
     <ClInclude Include="math\quaternion.h" />
     <ClInclude Include="event\Dispatcher.h" />
@@ -67,6 +68,7 @@
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="reflect\dynamic_detail.h" />
     <ClInclude Include="serialize\serialize.h" />
+    <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
@@ -100,6 +102,7 @@
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="core\SystemManager.cpp" />
+    <ClCompile Include="math\color.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -112,6 +115,7 @@
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\serialize.cpp" />
+    <ClCompile Include="shape\aabb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
