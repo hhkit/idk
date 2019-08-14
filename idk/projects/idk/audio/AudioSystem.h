@@ -4,6 +4,13 @@
 //@param	Email : izha95\@hotmail.com
 //@date		12 AUG 2019
 //@brief	
+/*
+
+ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual channel equals to 0.25.
+
+*/
+
+
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -23,6 +30,7 @@
 namespace FMOD {
 	class System; //CoreSystem
 	class Sound;  //Sound
+	class ChannelGroup;  //ChannelGroup
 }
 //END Forward Declarations
 
@@ -82,11 +90,11 @@ namespace idk
 
 
 		//Get Data Functions
-		float GetCPUPercentUsage();	//Gets the CPU usage in that tick.
-		AUDIOSYSTEM_CPUDATA GetDetailedCPUPercentUsage(); //Gets the CPU usage in that tick.
-		vector<AUDIOSYSTEM_DRIVERDATA> GetAllSoundDriverData();
-		int GetCurrentSoundDriverIndex();
-		time_point GetTimeInitialized() const;
+		float GetCPUPercentUsage();								//Gets the CPU usage in that tick.
+		AUDIOSYSTEM_CPUDATA GetDetailedCPUPercentUsage();			//Gets the CPU usage in that tick.
+		vector<AUDIOSYSTEM_DRIVERDATA> GetAllSoundDriverData() const;	//Gets Sound Drivers in the computer. This is empty if there are no available sound drivers!
+		int GetCurrentSoundDriverIndex() const;							//Because it is in index form, this returns the index of the sound driver that is running. If there is no available, -1 is returned.
+		time_point GetTimeInitialized() const;							//Time 
 
 		//The pointer ints are modified to give the new byte number at point of call.
 		void GetMemoryStats(int* currentBytesAllocated, int* maxBytesAllocated, bool precise = true);	
@@ -97,14 +105,22 @@ namespace idk
 		static const char* FMOD_SPEAKERMODE_TO_C_STR(FMOD_SPEAKERMODE);
 
 	private:
-		FMOD::System* CoreSystem; //Is updated on init, destroyed and nulled on shutdown.
-		FMOD_RESULT result;		//Most recent result by the most recent FMOD function call.
-		int numberOfDrivers;	//Updated on init. Describes the number of available sound driver that can play audio.
-		int currentDriver;		//Updated on init. Describes the current running sound driver.
+		FMOD::System* CoreSystem;	//Is updated on init, destroyed and nulled on shutdown.
+		FMOD_RESULT result;			//Most recent result by the most recent FMOD function call.
+		int numberOfDrivers;		//Updated on init. Describes the number of available sound driver that can play audio.
+		int currentDriver;			//Updated on init. Describes the current running sound driver.
 
 		vector<AudioClip*> AudioClipList; //Will be switched to a more faster container TODO
 		vector<AUDIOSYSTEM_DRIVERDATA> driverDetails; //Describes each driver.
+
 		time_point timeItWasInitialized;
+
+		//Useable after calling Init().
+		FMOD::ChannelGroup* channelGroup_MASTER;	//All group channels link back to MASTER
+		FMOD::ChannelGroup* channelGroup_MUSIC;		//Music, by default is looped.
+		FMOD::ChannelGroup* channelGroup_SFX;		//Sound Effects
+		FMOD::ChannelGroup* channelGroup_AMBIENT;	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
+		FMOD::ChannelGroup* channelGroup_DIALOGUE;	//Dialogue/Voice Overs. This is OPTIONAL.
 
 		void ParseFMOD_RESULT(FMOD_RESULT); //All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 
