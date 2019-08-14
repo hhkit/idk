@@ -3,6 +3,12 @@
 #include <idk.h>
 #include "Handle.h"
 
+namespace idk::detail
+{
+	template<typename T>
+	struct TableGenerator;
+}
+
 namespace idk
 {
 	class GameObject;
@@ -26,6 +32,8 @@ namespace idk
 	private:
 		Handle<GameObject> _gameObject;
 		friend class GameObject;
+		template<typename>
+		friend struct detail::TableGenerator;
 		GenericComponent() = default;
 		template<typename T> friend class Component;
 	};
