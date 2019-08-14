@@ -39,5 +39,7 @@ namespace idk
 		{
 			return Handleable<T>::GetHandle();
 		}
+
+		static_assert(index_in_tuple_v<T, Components> != std::tuple_size_v<Components>, "T must be a Component in idk_config.h/Components");
 	};
 }
