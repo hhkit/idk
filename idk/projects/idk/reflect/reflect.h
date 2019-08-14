@@ -39,7 +39,7 @@ namespace idk::reflect
 			static meta& instance() { static meta s; return s; }
 		};
 
-		template<typename T> struct register_type { register_type(); };
+		template<typename T, bool HasTypeDefinition> struct register_type { register_type(); };
 
 		template<typename T> struct class_holder {};
 		template<typename ClassT, typename... Ts> struct table_storage;
@@ -177,7 +177,7 @@ namespace idk::reflect
 
 //
 #define REFLECT_BEGIN(CLASS_TYPE, ALIAS)		template<> struct property::opin::def<CLASS_TYPE>{ using t_self = CLASS_TYPE; constexpr static char m_Name[] = ALIAS; inline static const idk::reflect::detail::table_storage m_Storage { idk::reflect::detail::class_holder<t_self>{},
-#define REFLECT_END()							}; inline static const property::table_hash<m_Storage.entry_count_v> m_Table{ m_Storage, m_Name }; inline static const idk::reflect::detail::register_type<t_self> __reg{}; };
+#define REFLECT_END()							}; inline static const property::table_hash<m_Storage.entry_count_v> m_Table{ m_Storage, m_Name }; inline static const idk::reflect::detail::register_type<t_self, true> __reg{}; };
 #define REFLECT_VAR(VAR)						property::PropertyVar<decltype(std::declval<t_self>().VAR)>( #VAR, offsetof( t_self, VAR ) )
 #define REFLECT_PARENT(PARENT_TYPE)				property::PropertyParent<t_self::PARENT_TYPE, const t_self*>(),
 #define REFLECT_CTOR(...)						idk::reflect::detail::constructor_entry<t_self, __VA_ARGS__>{},

@@ -16,9 +16,12 @@ namespace idk::reflect
 	{
 
 		template<typename T>
-		register_type<T>::register_type()
+		struct has_type_definition : std::false_type {};
+
+		template<typename T, bool HasTypeDefinition>
+		register_type<T, HasTypeDefinition>::register_type()
 		{
-			if constexpr (is_defined_v<type_definition<T>>)
+			if constexpr (HasTypeDefinition)
 			{
 				static typed_context<T> context{};
 				meta::instance().names_to_contexts.emplace(type_definition<T>::m_Name, &context);
@@ -82,7 +85,7 @@ namespace idk::reflect
 		auto iter = detail::meta::instance().hashes_to_contexts.find(typehash<T>());
 		if (iter == detail::meta::instance().hashes_to_contexts.end()) // type not registered?
 		{
-			static detail::register_type<std::decay_t<T>> __reg;
+			detail::register_type<std::decay_t<T>, false> __reg;
 			return get_type<T>();
 		}
 		return type{ iter->second };
