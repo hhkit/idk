@@ -24,7 +24,7 @@ namespace idk
 		GameState::GetGameState().DestroyObject(go);
 	}
 
-	Scene::iterator Scene::begin()
+	Scene::iterator Scene::begin() const
 	{
 		auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		auto beg = span.begin();
@@ -36,7 +36,7 @@ namespace idk
 		return iterator{scene_id, beg, etr};
 	}
 
-	Scene::iterator Scene::end()
+	Scene::iterator Scene::end() const
 	{
 		auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		return iterator{scene_id, span.end(), span.end() };

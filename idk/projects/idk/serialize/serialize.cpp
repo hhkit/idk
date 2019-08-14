@@ -2,33 +2,16 @@
 #include "serialize.h"
 #include <reflect/reflect.h>
 #include <res/Guid.h>
+#include <core/GameObject.h>
+#include <core/Scene.h>
 
 #include <json/json.hpp>
 using json = nlohmann::json;
 
 namespace idk
 {
-	template<>
-	string serialize_text(const reflect::dynamic& obj)
+	static json serialize_json(const reflect::dynamic& obj)
 	{
-		if (obj.type.count() == 0)
-		{
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : return serialize_text(obj.get<TYPE>())
-			switch (obj.type.hash())
-			{
-			SERIALIZE_CASE(int);
-			SERIALIZE_CASE(bool);
-			SERIALIZE_CASE(char);
-			SERIALIZE_CASE(uint64_t);
-			SERIALIZE_CASE(float);
-			SERIALIZE_CASE(double);
-			SERIALIZE_CASE(std::string);
-			SERIALIZE_CASE(Guid);
-			default: throw "Unhandled case?";
-			}
-#undef SERIALIZE_CASE
-		}
-
 		json j;
 		vector<json*> stack{ &j };
 
@@ -46,6 +29,97 @@ namespace idk
 				stack.push_back(&((*stack.back())[name] = json::object()));
 		});
 
+		return j;
+	}
+
+	template<>
+	string serialize_text(const reflect::dynamic& obj)
+	{
+		if (obj.type.count() == 0)
+		{
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : return serialize_text(obj.get<TYPE>())
+			switch (obj.type.hash())
+			{
+			SERIALIZE_CASE(int);
+			SERIALIZE_CASE(bool);
+			SERIALIZE_CASE(char);
+			SERIALIZE_CASE(int64_t);
+			SERIALIZE_CASE(uint64_t);
+			SERIALIZE_CASE(float);
+			SERIALIZE_CASE(double);
+			SERIALIZE_CASE(std::string);
+			SERIALIZE_CASE(Guid);
+			default: throw "Unhandled case?";
+			}
+#undef SERIALIZE_CASE
+		}
+
+		return serialize_json(obj).dump(2);
+	}
+
+	template<>
+	string serialize_text(const Scene& scene)
+	{
+		json j = json::array();
+		for (auto& obj : scene)
+		{
+			json& elem = j.emplace_back(json::object());
+			elem["id"] = obj.GetHandle().id;
+			for (auto& handle : obj.GetComponents())
+			{
+				elem[string{ (*handle).type.name() }] = serialize_json(*handle);
+			}
+		}
+
 		return j.dump(2);
+	}
+
+
+
+	reflect::dynamic parse_text(const string& str, reflect::type type)
+	{
+		json j = json::parse(str);
+		vector<json*> stack{ &j };
+
+		auto obj = type.create();
+		
+		obj.visit([&](const char* name, auto&& arg, int depth_change)
+		{
+			using T = std::decay_t<decltype(arg)>;
+			if (depth_change == -1)
+				stack.pop_back();
+
+			auto& curr_j = *stack.back();
+			auto iter = curr_j.find(name);
+			if (iter == curr_j.end())
+				return false;
+
+			if constexpr (!is_basic_serializable<T>::value)
+			{
+				stack.push_back(&*iter);
+				return true;
+			}
+			else if constexpr (std::is_arithmetic_v<T>)
+			{
+				arg = iter->get<T>();
+				return false;
+			}
+			else
+			{
+				arg = parse_text<T>(iter->get<string>());
+				return false;
+			}
+		});
+
+		return obj;
+	}
+
+	template<>
+	void parse_text(const string& str, Scene& scene)
+	{
+		//json j = json::parse(str);
+		//for (auto elem : j)
+		//{
+		//}
 	}
 }

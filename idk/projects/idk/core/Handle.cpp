@@ -46,7 +46,7 @@ namespace idk
 	reflect::dynamic GenericHandle::operator*() const
 	{
 		if (operator bool())
-			return detail::GenericHandleHelper::lut[type];
+			return detail::GenericHandleHelper::lut[type](*this);
 		else
 			return reflect::dynamic();
 	}

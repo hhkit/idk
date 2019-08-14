@@ -147,12 +147,86 @@ namespace idk
 
 	void AudioSystem::Init()
 	{
+
+		// Create the FMOD Core System object.
+		ParseFMOD_RESULT(FMOD::System_Create(&CoreSystem));
+
+		// Initializes FMOD Core
+		ParseFMOD_RESULT(CoreSystem->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
+
+		//Get Number of Drivers available
+		ParseFMOD_RESULT(CoreSystem->getNumDrivers(&numberOfDrivers));
+
+
+		driverDetails.clear(); //In the event that audio engine is reinitialized
+		if (numberOfDrivers != 0) {
+			//std::cout << "Number of Drivers found: " << numberOfDrivers << std::endl;
+			
+			for (int i = 0; i < numberOfDrivers; ++i) {
+				driverDetails.push_back(AUDIOSYSTEM_DRIVERDATA{});
+
+				driverDetails[i].driverIndex = i;
+				////Retrieve data
+				//driverDetails[i].driverName[512];
+				//driverDetails[i].fmodID;
+				//driverDetails[i].systemRate;
+				//driverDetails[i].speakerMode;
+				//driverDetails[i].speakerModeChannels;
+
+				//Get driver info
+				ParseFMOD_RESULT(CoreSystem->getDriverInfo(i, driverDetails[i].driverName, 512, &driverDetails[i].fmodID, &driverDetails[i].systemRate, &driverDetails[i].speakerMode, &driverDetails[i].speakerModeChannels));
+
+				//DRIVER NAME
+				//std::cout << "Sound Driver (" << i << "): \t";
+				//std::cout << driverName << std::endl;
+				//GUID
+				//std::cout << "    GUID: \t\t" << std::hex;
+				//std::cout << fmodID.Data1 << "-" << fmodID.Data2 << "-" << fmodID.Data3 << "-";
+				//for (int j = 0; j < 8; ++j) {
+				//	std::cout << static_cast<int>(fmodID.Data4[j]);
+				//}
+				//std::cout << std::dec << std::endl;
+
+				//SPEAKER RATE
+				//std::cout << "    Sample Rate: \t" << systemRate << " kHz" << std::endl;
+				//NUMBER OF CHANNELS
+				//std::cout << "    Number of Channels: " << speakerModeChannels << std::endl;
+
+
+			}
+		}
+		else {
+			//If no sound driver, set output to no sound
+			ParseFMOD_RESULT(CoreSystem->setOutput(FMOD_OUTPUTTYPE_NOSOUND));
+			//std::cout << "No sound drivers found! Audio will set to NOSOUND." << std::endl;
+
+		}
+
+
+		ParseFMOD_RESULT(CoreSystem->getDriver(&currentDriver));
+		//std::cout << "Current driver index in use:" << currentDriver << std::endl;
+
+		timeItWasInitialized = time_point::clock::now();
+
 	}
+
 	void AudioSystem::Run()
 	{
+		// Get Updates the core system by a tick
+		ParseFMOD_RESULT(CoreSystem->update());
 	}
 	void AudioSystem::Shutdown()
 	{
+		//Closes and releases memory.
+		ParseFMOD_RESULT(CoreSystem->release());
+
+		// Cleanup
+		CoreSystem = nullptr;
+	}
+
+	void AudioSystem::SetMemoryAllocators(FMOD_MEMORY_ALLOC_CALLBACK useralloc, FMOD_MEMORY_REALLOC_CALLBACK userrealloc, FMOD_MEMORY_FREE_CALLBACK userfree)
+	{
+		FMOD::Memory_Initialize(NULL, 0, useralloc, userrealloc, userfree);
 	}
 
 	void AudioSystem::ParseFMOD_RESULT(FMOD_RESULT e)
@@ -166,6 +240,163 @@ namespace idk
 			exception.exceptionDetails = stringStream.str();
 			throw exception;
 		}
+	}
+
+	float AudioSystem::GetCPUPercentUsage()
+	{
+		return GetDetailedCPUPercentUsage().total;
+	}
+
+	AUDIOSYSTEM_CPUDATA AudioSystem::GetDetailedCPUPercentUsage()
+	{
+		AUDIOSYSTEM_CPUDATA i{};
+		ParseFMOD_RESULT(CoreSystem->getCPUUsage(&i.dsp, &i.stream, &i.geometry, &i.update, &i.total));
+		return i;
+	}
+
+	vector<AUDIOSYSTEM_DRIVERDATA> AudioSystem::GetAllSoundDriverData()
+	{
+		return driverDetails;
+	}
+
+	int AudioSystem::GetCurrentSoundDriverIndex()
+	{
+		return currentDriver;
+	}
+
+	time_point AudioSystem::GetTimeInitialized() const
+	{
+		return timeItWasInitialized;
+	}
+
+	void AudioSystem::GetMemoryStats(int* currentBytesAllocated, int* maxBytesAllocated, bool precise)
+	{
+		ParseFMOD_RESULT(FMOD_Memory_GetStats(currentBytesAllocated, maxBytesAllocated, precise));
+
+		//std::cout << "Current Allocated Memory: " << *currentBytesAllocated << " bytes" << std::endl;
+		//std::cout << "Maximum Allocated Memory: " << *maxBytesAllocated << " bytes" << std::endl;
+	}
+
+	const char* AudioSystem::FMOD_SOUND_TYPE_TO_C_STR(FMOD_SOUND_TYPE i)
+	{
+		switch (i) {
+		default:
+			return "FMOD_SOUND_TYPE Error! Enum not valid!";
+		case FMOD_SOUND_TYPE_UNKNOWN:
+			return "FMOD_SOUND_TYPE_UNKNOWN";
+		case FMOD_SOUND_TYPE_AIFF:
+			return "FMOD_SOUND_TYPE_AIFF";
+		case FMOD_SOUND_TYPE_ASF:
+			return "FMOD_SOUND_TYPE_ASF";
+		case FMOD_SOUND_TYPE_DLS:
+			return "FMOD_SOUND_TYPE_DLS";
+		case FMOD_SOUND_TYPE_FLAC:
+			return "FMOD_SOUND_TYPE_FLAC";
+		case FMOD_SOUND_TYPE_FSB:
+			return "FMOD_SOUND_TYPE_FSB";
+		case FMOD_SOUND_TYPE_IT:
+			return "FMOD_SOUND_TYPE_IT";
+		case FMOD_SOUND_TYPE_MIDI:
+			return "FMOD_SOUND_TYPE_MIDI";
+		case FMOD_SOUND_TYPE_MOD:
+			return "FMOD_SOUND_TYPE_MOD";
+		case FMOD_SOUND_TYPE_MPEG:
+			return "FMOD_SOUND_TYPE_MPEG";
+		case FMOD_SOUND_TYPE_OGGVORBIS:
+			return "FMOD_SOUND_TYPE_OGGVORBIS";
+		case FMOD_SOUND_TYPE_PLAYLIST:
+			return "FMOD_SOUND_TYPE_PLAYLIST";
+		case FMOD_SOUND_TYPE_RAW:
+			return "FMOD_SOUND_TYPE_RAW";
+		case FMOD_SOUND_TYPE_S3M:
+			return "FMOD_SOUND_TYPE_S3M";
+		case FMOD_SOUND_TYPE_USER:
+			return "FMOD_SOUND_TYPE_USER";
+		case FMOD_SOUND_TYPE_WAV:
+			return "FMOD_SOUND_TYPE_WAV";
+		case FMOD_SOUND_TYPE_XM:
+			return "FMOD_SOUND_TYPE_XM";
+		case FMOD_SOUND_TYPE_XMA:
+			return "FMOD_SOUND_TYPE_XMA";
+		case FMOD_SOUND_TYPE_AUDIOQUEUE:
+			return "FMOD_SOUND_TYPE_AUDIOQUEUE";
+		case FMOD_SOUND_TYPE_AT9:
+			return "FMOD_SOUND_TYPE_AT9";
+		case FMOD_SOUND_TYPE_VORBIS:
+			return "FMOD_SOUND_TYPE_VORBIS";
+		case FMOD_SOUND_TYPE_MEDIA_FOUNDATION:
+			return "FMOD_SOUND_TYPE_MEDIA_FOUNDATION";
+		case FMOD_SOUND_TYPE_MEDIACODEC:
+			return "FMOD_SOUND_TYPE_MEDIACODEC";
+		case FMOD_SOUND_TYPE_FADPCM:
+			return "FMOD_SOUND_TYPE_FADPCM";
+		case FMOD_SOUND_TYPE_MAX:
+			return "FMOD_SOUND_TYPE_MAX";
+		case FMOD_SOUND_TYPE_FORCEINT:
+			return "FMOD_SOUND_TYPE_FORCEINT";
+		}
+
+		return nullptr;
+
+	}
+
+	const char* AudioSystem::FMOD_SOUND_FORMAT_TO_C_STR(FMOD_SOUND_FORMAT i)
+	{
+		switch (i) {
+		default:
+			return "FMOD_SOUND_FORMAT Error! Enum not valid!";
+		case FMOD_SOUND_FORMAT_NONE:
+			return "FMOD_SOUND_FORMAT_NONE";
+		case FMOD_SOUND_FORMAT_PCM8:
+			return "FMOD_SOUND_FORMAT_PCM8";
+		case FMOD_SOUND_FORMAT_PCM16:
+			return "FMOD_SOUND_FORMAT_PCM16";
+		case FMOD_SOUND_FORMAT_PCM24:
+			return "FMOD_SOUND_FORMAT_PCM24";
+		case FMOD_SOUND_FORMAT_PCM32:
+			return	"FMOD_SOUND_FORMAT_PCM32";
+		case FMOD_SOUND_FORMAT_PCMFLOAT:
+			return	"FMOD_SOUND_FORMAT_PCMFLOAT";
+		case FMOD_SOUND_FORMAT_BITSTREAM:
+			return	"FMOD_SOUND_FORMAT_BITSTREAM";
+		case FMOD_SOUND_FORMAT_MAX:
+			return	"FMOD_SOUND_FORMAT_MAX";
+		case FMOD_SOUND_FORMAT_FORCEINT:
+			return	"FMOD_SOUND_FORMAT_FORCEINT";
+
+		}
+
+		return nullptr;
+	}
+
+	const char* AudioSystem::FMOD_SPEAKERMODE_TO_C_STR(FMOD_SPEAKERMODE i)
+	{
+		switch (i) {
+		default:
+			return "FMOD_SPEAKERMODE Error! Enum not valid!";
+		case FMOD_SPEAKERMODE_DEFAULT:
+			return "FMOD_SPEAKERMODE_DEFAULT";
+		case FMOD_SPEAKERMODE_RAW:
+			return "FMOD_SPEAKERMODE_RAW";
+		case FMOD_SPEAKERMODE_MONO:
+			return "FMOD_SPEAKERMODE_MONO";
+		case FMOD_SPEAKERMODE_STEREO:
+			return "FMOD_SPEAKERMODE_STEREO";
+		case FMOD_SPEAKERMODE_QUAD:
+			return "FMOD_SPEAKERMODE_QUAD";
+		case FMOD_SPEAKERMODE_SURROUND:
+			return "FMOD_SPEAKERMODE_SURROUND";
+		case FMOD_SPEAKERMODE_5POINT1:
+			return "FMOD_SPEAKERMODE_5POINT1";
+		case FMOD_SPEAKERMODE_7POINT1:
+			return "FMOD_SPEAKERMODE_7POINT1";
+		case FMOD_SPEAKERMODE_7POINT1POINT4:
+			return "FMOD_SPEAKERMODE_7POINT1POINT4";
+		case FMOD_SPEAKERMODE_MAX:
+			return "FMOD_SPEAKERMODE_MAX";
+		}
+
+		return nullptr;
 	}
 
 }
