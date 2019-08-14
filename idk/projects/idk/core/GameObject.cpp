@@ -10,9 +10,11 @@ namespace idk
 		_components.emplace_back(comphandle);
 		return comphandle;
 	}
-	GenericHandle GameObject::AddComponent(reflect::dynamic)
+	GenericHandle GameObject::AddComponent(reflect::dynamic dyn)
 	{
-		return GenericHandle();
+		auto comph = GameState::GetGameState().CreateComponent(GetHandle(), dyn);
+		_components.emplace_back(comph);
+		return comph;
 	}
 	span<GenericHandle> GameObject::GetComponents()
 	{
