@@ -10,6 +10,10 @@ namespace idk
 		_components.emplace_back(comphandle);
 		return comphandle;
 	}
+	GenericHandle GameObject::AddComponent(reflect::dynamic)
+	{
+		return GenericHandle();
+	}
 	span<GenericHandle> GameObject::GetComponents()
 	{
 		return span<GenericHandle>(_components.begin()._Ptr, _components.end()._Ptr);

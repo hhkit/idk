@@ -77,8 +77,6 @@ namespace idk
 		const Handle<T>& GetHandle() { return handle; }
 	protected:
 		Handleable() = default;
-		Handleable(const Handleable&) : Handleable{} {};
-		Handleable& operator=(const Handleable&) { return *this; }
 	private:
 		Handle<T> handle;
 		friend class ObjectPool<T>;
