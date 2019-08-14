@@ -26,17 +26,17 @@ namespace idk{
 	}
 
 	file_system_internal::file_handle_t::file_handle_t(int8_t mount, int8_t depth, int8_t index)
-		:mount_id{ mount }, internal_id{ depth, index }, is_open{ false }, open_type{ 0x0 }
+		: internal_id{ mount, depth, index }, is_open{ false }, open_type{ 0x0 }
 	{
 	}
 
-	file_system_internal::file_handle_t::file_handle_t(int8_t mount, node_t node)
-		: mount_id{ mount }, internal_id{ node }, is_open{ false }, open_type{ 0x0 }
+	file_system_internal::file_handle_t::file_handle_t(node_t node)
+		: internal_id{ node }, is_open{ false }, open_type{ 0x0 }
 	{
 	}
 
-	file_system_internal::node_t::node_t(int8_t d, int8_t i)
-		: depth{ d }, index{ i }
+	file_system_internal::node_t::node_t(int8_t m, int8_t d, int8_t i)
+		: mount_id{ m }, depth{ d }, index{ i }
 	{
 	}
 }
