@@ -64,6 +64,26 @@ namespace idk::detail
 			};
 		}
 
+		static auto GenCreateDynamicJt()
+		{
+			return GameState::CreateDynamicJT{
+				[](GameState& gs, const Handle<GameObject>& go, const reflect::dynamic& dyn) -> GenericHandle
+				{
+					if constexpr (std::is_same_v<Ts, GameObject>)
+					{
+						(gs); (go); (dyn);
+						return GenericHandle{};
+					}
+					else
+					{
+						auto handle = gs.CreateObject<Ts>(go.scene, dyn.get<Ts>());
+						handle->_gameObject = go;
+						return handle;
+					}
+				} ...
+			};
+		}
+
 		static auto GenCreateJt()
 		{
 			return GameState::CreateJT{
@@ -121,7 +141,8 @@ namespace idk
 		: _objects{detail::TableGen::Instantiate()}
 	{
 		assert(_instance == nullptr);
-		name_to_type_id     = detail::TableGen::GenTypeLUT();
+		name_to_id_map      = detail::TableGen::GenTypeLUT();
+		create_dynamic_jt   = detail::TableGen::GenCreateDynamicJt();
 		create_type_jt      = detail::TableGen::GenCreateTypeJt();
 		create_handles_jt   = detail::TableGen::GenCreateJt();
 		destroy_handles_jt  = detail::TableGen::GenDestructionJt();
@@ -156,7 +177,13 @@ namespace idk
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::type type)
 	{
-		return create_type_jt[GetTypeID(type)](*this, handle);
+		auto id = GetTypeID(type);
+		return id < ComponentCount ? create_type_jt[id](*this, handle) : GenericHandle{};
+	}
+	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::dynamic dyn)
+	{
+		auto id = GetTypeID(dyn.type);
+		return id < ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
 	}
 	bool GameState::ValidateHandle(const GenericHandle& handle)
 	{
@@ -185,9 +212,8 @@ namespace idk
 	}
 	uint8_t GameState::GetTypeID(const reflect::type& type)
 	{
-		auto itr = name_to_type_id.find(type.name());
-		assert(itr != name_to_type_id.end());
-		return itr->second;
+		auto itr = name_to_id_map.find(type.name());
+		return itr != name_to_id_map.end() ? itr->second : std::numeric_limits<uint8_t>::max();
 	}
 	GameState& GameState::GetGameState()
 	{

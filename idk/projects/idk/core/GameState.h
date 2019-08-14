@@ -26,6 +26,7 @@ namespace idk
 
 		bool CreateObject(const GenericHandle& handle);
 		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::type);
+		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::dynamic);
 		bool ValidateHandle(const GenericHandle& handle);
 		void DestroyObject(const GenericHandle&);
 		void DestroyObject(const Handle<GameObject>&);
@@ -36,32 +37,35 @@ namespace idk
 		template<typename T>  span<T>   GetObjectsOfType();
 
 		template<typename T>  T*        GetObject(const Handle<T>& handle);
-		template<typename T>  Handle<T> CreateObject(uint8_t scene);
-		template<typename T>  Handle<T> CreateObject(const Handle<T>& handle);
+		template<typename T, typename ... Args>  Handle<T> CreateObject(uint8_t scene, Args&& ... args);
+		template<typename T, typename ... Args>  Handle<T> CreateObject(const Handle<T>& handle, Args&& ... args);
 		template<typename T>  bool      ValidateHandle(const Handle<T>& handle);
 		template<typename T>  bool      DestroyObjectNow(const Handle<T>& handle);
 
 		static GameState& GetGameState();
 	private:
+		template<typename Fn>
+		using JumpTable = array<Fn, detail::ObjectPools::TypeCount>;
+
+		using CreateTypeJT    = JumpTable<GenericHandle(*)(GameState&, const Handle<GameObject>&)>;
+		using CreateDynamicJT = JumpTable<GenericHandle(*)(GameState&, const Handle<GameObject>&, const reflect::dynamic&)>;
+		using CreateJT        = JumpTable<GenericHandle(*)(GameState&, const GenericHandle&)>;
+		using DestroyJT       = JumpTable<void(*)(GameState&, const GenericHandle&)>;
+		using ValidateJT      = JumpTable<bool(*)(GameState&, const GenericHandle&)>;
+		using TypeIDLUT       = hash_table<string_view, uint8_t>;
+
 		static inline GameState* _instance = nullptr;
 	
 		detail::ObjectPools_t _objects;
 		vector<GenericHandle> _destruction_queue;
 
-		template<typename Fn>
-		using JumpTable = array<Fn, detail::ObjectPools::TypeCount>;
+		static inline CreateTypeJT    create_type_jt;
+		static inline CreateDynamicJT create_dynamic_jt;
+		static inline CreateJT        create_handles_jt;
+		static inline DestroyJT       destroy_handles_jt;
+		static inline ValidateJT      validate_handles_jt;
 
-		using CreateTypeJT = JumpTable<GenericHandle(*)(GameState&, const Handle<GameObject>&)>;
-		using CreateJT = JumpTable<GenericHandle(*)(GameState&, const GenericHandle&)>;
-		using DestroyJT = JumpTable<void(*)(GameState&, const GenericHandle&)>;
-		using ValidateJT = JumpTable<bool(*)(GameState&, const GenericHandle&)>;
-		static inline CreateTypeJT create_type_jt;
-		static inline CreateJT     create_handles_jt;
-		static inline DestroyJT    destroy_handles_jt;
-		static inline ValidateJT   validate_handles_jt;
-
-		using TypeIDLUT = hash_table<string_view, uint8_t>;
-		static inline TypeIDLUT name_to_type_id;
+		static inline TypeIDLUT name_to_id_map;
 
 		friend detail::ObjectPools;
 		template<typename T>

@@ -29,6 +29,7 @@ namespace idk
 
 		// generic
 		GenericHandle AddComponent(reflect::type);
+		GenericHandle AddComponent(reflect::dynamic);
 
 		span<GenericHandle> GetComponents();
 		// active flags

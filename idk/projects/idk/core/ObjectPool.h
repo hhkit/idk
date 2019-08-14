@@ -25,8 +25,10 @@ namespace idk
 		T*     Get(const Handle&);
 
 		// modifiers
-		Handle Create(scene_t scene_id);
-		Handle Create(const Handle&);
+		template<typename ... Args>
+		Handle Create(scene_t scene_id, Args&& ...);
+		template<typename ... Args>
+		Handle Create(const Handle&, Args&& ...);
 		bool   Destroy(const Handle&);
 
 		bool ActivateScene(scene_t scene_id, size_t reserve = 8192);

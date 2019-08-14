@@ -45,7 +45,8 @@ namespace idk
 	}
 
 	template<typename T>
-	typename ObjectPool<T>::Handle ObjectPool<T>::Create(scene_t scene_id)
+	template<typename ... Args>
+	typename ObjectPool<T>::Handle ObjectPool<T>::Create(scene_t scene_id, Args&& ... args)
 	{
 		auto& scene = _scenes[scene_id];
 		if (scene.slots.empty())
@@ -57,14 +58,15 @@ namespace idk
 		// generate handle
 		auto& slot = scene.slots[scene.first_free];
 		auto handle = Handle{ scene.first_free, ++slot.gen, scene_id };
-		slot.index = s_cast<index_t>(_pool.emplace_back());
+		slot.index = s_cast<index_t>(_pool.emplace_back(std::forward<Args>(args)...));
 		scene.shift();
 		
 		return _pool[slot.index].handle = handle;
 	}
 	
 	template<typename T>
-	typename ObjectPool<T>::Handle ObjectPool<T>::Create(const Handle& handle)
+	template<typename ... Args>
+	typename ObjectPool<T>::Handle ObjectPool<T>::Create(const Handle& handle, Args&& ... args)
 	{
 		if (handle.id == 0)
 			return handle;
@@ -82,7 +84,7 @@ namespace idk
 			return Handle{};
 
 		slot.gen = handle.gen;
-		slot.index = static_cast<index_t>(_pool.emplace_back());
+		slot.index = static_cast<index_t>(_pool.emplace_back(std::forward<Args>(args)...));
 
 		if (handle.index < scene.first_free)
 			scene.first_free = handle.index;

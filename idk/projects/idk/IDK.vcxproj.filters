@@ -68,6 +68,9 @@
     <Filter Include="file">
       <UniqueIdentifier>{f2473f67-3de9-4860-9834-dbb2b1f6c894}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shapes">
+      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -252,7 +255,6 @@
       <Filter>serialize</Filter>
     </ClInclude>
     <ClInclude Include="shape\aabb.h" />
-    <ClInclude Include="math\color.h" />
     <ClInclude Include="file\FileSystem.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -261,6 +263,9 @@
     </ClInclude>
     <ClInclude Include="file\DirectoryWatcher.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="math\color.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -325,8 +330,6 @@
     <ClCompile Include="serialize\serialize.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="shape\aabb.cpp" />
-    <ClCompile Include="math\color.cpp" />
     <ClCompile Include="file\FileSystemInternal.cpp">
       <Filter>file</Filter>
     </ClCompile>
@@ -335,6 +338,12 @@
     </ClCompile>
     <ClCompile Include="file\DirectoryWatcher.cpp">
       <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="shape\aabb.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\color.cpp">
+      <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
