@@ -66,5 +66,10 @@ TEST(Serialize, TestParseScene)
 	GameState gs;
 	auto scene = gs.ActivateScene(0);
 
-
+	parse_text(serialized_scene_0, *scene);
+	auto& o1 = *scene->begin();
+	auto t1 = o1.GetComponent<Transform>();
+	EXPECT_EQ(t1->position, vec3(1.0f, 2.0f, 3.0f));
+	EXPECT_EQ(t1->scale, vec3{ 4.0f });
+	EXPECT_EQ(t1->rotation, quat( 5.0f, 6.0f, 7.0f, 8.0f ));
 }

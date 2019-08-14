@@ -186,7 +186,8 @@ namespace idk
 	uint8_t GameState::GetTypeID(const reflect::type& type)
 	{
 		auto itr = name_to_type_id.find(type.name());
-		return itr != name_to_type_id.end() ? itr->second : std::numeric_limits<uint8_t>::max();
+		assert(itr != name_to_type_id.end());
+		return itr->second;
 	}
 	GameState& GameState::GetGameState()
 	{

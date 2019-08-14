@@ -4,6 +4,7 @@
 #include <res/Guid.h>
 #include <core/GameObject.h>
 #include <core/Scene.h>
+#include <common/Transform.h>
 
 #include <json/json.hpp>
 using json = nlohmann::json;
@@ -76,13 +77,12 @@ namespace idk
 
 
 
-	reflect::dynamic parse_text(const string& str, reflect::type type)
+	reflect::dynamic parse_json(const json& j, reflect::type type)
 	{
-		json j = json::parse(str);
-		vector<json*> stack{ &j };
+		vector<const json*> stack{ &j };
 
 		auto obj = type.create();
-		
+
 		obj.visit([&](const char* name, auto&& arg, int depth_change)
 		{
 			using T = std::decay_t<decltype(arg)>;
@@ -114,12 +114,32 @@ namespace idk
 		return obj;
 	}
 
+	reflect::dynamic parse_text(const string& str, reflect::type type)
+	{
+		const json j = json::parse(str);
+		return parse_json(j, type);
+	}
+
 	template<>
 	void parse_text(const string& str, Scene& scene)
 	{
-		//json j = json::parse(str);
-		//for (auto elem : j)
-		//{
-		//}
+		const json j = json::parse(str);
+		for (auto elem : j)
+		{
+			Handle<GameObject> handle{ elem["id"].get<uint64_t>() };
+			scene.CreateGameObject(handle);
+
+			for (auto& component : elem.items())
+			{
+				if (component.key() == "id")
+					continue;
+
+				auto type = reflect::get_type(component.key());
+				if(type.hash() == reflect::typehash<Transform>())
+					reflect::dynamic{ *handle->GetComponent<Transform>() } = parse_json(component.value(), type);
+				else
+					*handle->AddComponent(type) = parse_json(component.value(), type);
+			}
+		}
 	}
 }

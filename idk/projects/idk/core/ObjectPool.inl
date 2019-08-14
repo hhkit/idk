@@ -81,6 +81,7 @@ namespace idk
 		if (slot.index != invalid)
 			return Handle{};
 
+		slot.gen = handle.gen;
 		slot.index = static_cast<index_t>(_pool.emplace_back());
 
 		if (handle.index < scene.first_free)
