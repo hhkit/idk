@@ -10,28 +10,56 @@
 #include "pch.h" // gtest.h
 #include "FMOD/core/fmod.hpp" //FMOD Core
 #include "FMOD/core/fmod_errors.h" //ErrorString
+#include <audio/AudioSystem.h>	
+#include <iostream>	
 
-TEST(Audio, AudioBasicSystemInitializations)
+
+TEST(Audio, AudioSystemClassTest)
 {
-	FMOD_RESULT result; //Most recent result by the most recent FMOD function call.
-	FMOD::System* CoreSystem;
+	using namespace idk;
+	AudioSystem test{};
+	try { 
+		test.Init(); 
+	}
+	catch (EXCEPTION_AudioSystem i) {
+		std::cout << i.exceptionDetails << std::endl;
+		EXPECT_TRUE(false);
+	}
+	std::cout << "Getting all available sound drivers... "<< std::endl;
 
-	// Create the FMOD Core System object.
-	result = FMOD::System_Create(&CoreSystem);
-	EXPECT_TRUE(result == FMOD_OK);
+	auto i = test.GetAllSoundDriverData();
+	for(auto & j : i) {
+		std::cout << "  INDEX: " << j.driverIndex << std::endl;
+		std::cout << "  NAME: "<< j.driverName << std::endl;
+		std::cout << "  ID: " << std::hex << j.fmodID.Data1 << "-"
+			<< std::hex << j.fmodID.Data2 << "-"
+			<< std::hex << j.fmodID.Data3 << "-";
+		for (int k = 0; k < 8; ++k) {
+			std::cout << static_cast<int>(j.fmodID.Data4[k]);
+		}
+		std::cout << std::dec << std::endl ;
 
-	// Initializes FMOD Core
-	result = CoreSystem->init(512, FMOD_INIT_NORMAL, 0);
-	EXPECT_TRUE(result == FMOD_OK);
+		std::cout << "  SPEAKERMODE: " << test.FMOD_SPEAKERMODE_TO_C_STR(j.speakerMode) << std::endl;
+		std::cout << "  SPEAKERMODECHANNELS: " << j.speakerModeChannels << std::endl;
+		std::cout << "  SYSTEMRATE: " << j.systemRate << std::endl << std::endl;
 
-	// Get Updates the core system by a tick
-	result = CoreSystem->update();
-	EXPECT_TRUE(result == FMOD_OK);
+	}
 
-	result = CoreSystem->release(); //Closes and releases memory.
-	EXPECT_TRUE(result == FMOD_OK);
 
+	try {
+		test.Run();
+	}
+	catch (EXCEPTION_AudioSystem i) {
+		std::cout << i.exceptionDetails << std::endl;
+		EXPECT_TRUE(false);
+	}
+	try {
+		test.Shutdown();
+	}
+	catch (EXCEPTION_AudioSystem i) {
+		std::cout << i.exceptionDetails << std::endl;
+		EXPECT_TRUE(false);
+	}
 	// Cleanup
-	CoreSystem = nullptr;
 }
 
