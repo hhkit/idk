@@ -34,23 +34,18 @@ namespace idk
 	>;
 	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
 
-	using EngineSystems = std::tuple<
-		class TestSystem
-		, class FileSystem
+	using Systems = std::tuple<
+		class Application
+		,	class TestSystem
+		,	class FileSystem
 		//,	class InputSystem
 		//,	class ScriptSystem
 		//,	class PhysicsSystem
 		,	class GraphicsSystem
 		,	class AudioSystem
 		,	class ResourceManager
-		//,	class IEditor
+		,	class IEditor
 	>;
-
-	using Systems = decltype(std::tuple_cat(
-		std::declval<std::tuple<class Application>>(),
-		std::declval<EngineSystems>(),
-		std::declval<std::tuple<class IEditor>>()
-	));
 
 	using Resources = std::tuple<
 		class TestResource

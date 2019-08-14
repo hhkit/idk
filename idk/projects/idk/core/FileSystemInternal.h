@@ -1,7 +1,17 @@
 #pragma once
-
+#include <Windows.h>
+#include <filesystem>
 namespace idk::file_system_internal
 {
+	enum CHANGE_STATUS
+	{
+		NO_CHANGE,
+		CREATED,
+		DELETED,
+		RENAMED,
+		WRITTEN
+	};
+
 	struct node_t
 	{
 		node_t() = default;
@@ -20,6 +30,10 @@ namespace idk::file_system_internal
 
 		node_t parent;
 		node_t tree_index;
+
+		// For file watching
+		CHANGE_STATUS change_status = NO_CHANGE;
+		std::filesystem::file_time_type time;
 	};
 
 	struct dir_t
@@ -28,14 +42,22 @@ namespace idk::file_system_internal
 		string filename;
 
 		vector<node_t> sub_dirs;
-		vector<node_t> files;
-
+		hash_table<string, node_t> files_map;
+		
 		node_t parent;
 		node_t tree_index;
+
+		// For file watching
+		HANDLE dir_handle;
+		HANDLE watch_handle[3];
+		DWORD status;
+
+		CHANGE_STATUS change_status = NO_CHANGE;
 	};
 
 	struct collated_t
 	{
+		// hash_table<string, uint64_t> files_map;
 		vector<file_t> files;
 		vector<dir_t> dirs;
 
@@ -44,8 +66,6 @@ namespace idk::file_system_internal
 
 	struct mount_t
 	{
-		size_t AddDepth();
-
 		// Each index signifies the depth of the tree
 		vector<collated_t> path_tree;
 
@@ -53,6 +73,10 @@ namespace idk::file_system_internal
 		string mount_path;
 
 		size_t num_files;
+		bool watching = true;
+
+		size_t AddDepth();
+		file_t& GetFile(node_t node);
 	};
 
 	struct file_handle_t
