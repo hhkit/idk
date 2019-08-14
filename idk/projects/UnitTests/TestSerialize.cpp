@@ -45,6 +45,7 @@ TEST(Serialize, TestSerializeBasic)
 }
 
 string serialized_scene_0 = "";
+uint64_t transform_0_id = 0;
 
 TEST(Serialize, TestSerializeScene)
 {
@@ -56,6 +57,7 @@ TEST(Serialize, TestSerializeScene)
 	t1->position = vec3{ 1.0f, 2.0f, 3.0f };
 	t1->scale = vec3{ 4.0f };
 	t1->rotation = quat{ 5.0f, 6.0f, 7.0f, 8.0f };
+	transform_0_id = t1.id;
 
 	serialized_scene_0 = serialize_text(*scene);
 	std::cout << serialized_scene_0;
@@ -71,5 +73,6 @@ TEST(Serialize, TestParseScene)
 	auto t1 = o1.GetComponent<Transform>();
 	EXPECT_EQ(t1->position, vec3(1.0f, 2.0f, 3.0f));
 	EXPECT_EQ(t1->scale, vec3{ 4.0f });
-	EXPECT_EQ(t1->rotation, quat( 5.0f, 6.0f, 7.0f, 8.0f ));
+	EXPECT_EQ(t1->rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
+	EXPECT_EQ(t1.id, transform_0_id);
 }

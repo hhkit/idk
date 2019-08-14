@@ -79,6 +79,9 @@ namespace idk::reflect
 		// number of properties
 		size_t count() const;
 
+		template<typename T>
+		bool is() const;
+
 		bool operator==(type other) const;
 
 	private:

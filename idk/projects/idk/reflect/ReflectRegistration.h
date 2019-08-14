@@ -56,6 +56,10 @@ REFLECT_BEGIN(idk::Handle<idk::GameObject>, "Handle<GameObject>")
 REFLECT_VAR(id)
 REFLECT_END()
 
+/*==========================================================================
+ * components
+ *========================================================================*/
+
 REFLECT_BEGIN(idk::Parent, "Parent")
 REFLECT_VAR(parent)
 REFLECT_END()

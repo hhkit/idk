@@ -77,11 +77,9 @@ namespace idk
 
 
 
-	reflect::dynamic parse_json(const json& j, reflect::type type)
+	void parse_json(const json& j, reflect::dynamic& obj)
 	{
 		vector<const json*> stack{ &j };
-
-		auto obj = type.create();
 
 		obj.visit([&](const char* name, auto&& arg, int depth_change)
 		{
@@ -110,14 +108,14 @@ namespace idk
 				return false;
 			}
 		});
-
-		return obj;
 	}
 
 	reflect::dynamic parse_text(const string& str, reflect::type type)
 	{
 		const json j = json::parse(str);
-		return parse_json(j, type);
+		auto obj = type.create();
+		parse_json(j, obj);
+		return obj;
 	}
 
 	template<>
@@ -129,16 +127,22 @@ namespace idk
 			Handle<GameObject> handle{ elem["id"].get<uint64_t>() };
 			scene.CreateGameObject(handle);
 
-			for (auto& component : elem.items())
+			for (auto& component_j : elem.items())
 			{
-				if (component.key() == "id")
+				if (component_j.key() == "id")
 					continue;
 
-				auto type = reflect::get_type(component.key());
-				if(type.hash() == reflect::typehash<Transform>())
-					reflect::dynamic{ *handle->GetComponent<Transform>() } = parse_json(component.value(), type);
+				auto type = reflect::get_type(component_j.key());
+				if (type.is<Transform>())
+				{
+					reflect::dynamic obj{ *handle->GetComponent<Transform>() };
+					parse_json(component_j.value(), obj);
+				}
 				else
-					*handle->AddComponent(type) = parse_json(component.value(), type);
+				{
+					reflect::dynamic obj{ *handle->AddComponent(type) };
+					parse_json(component_j.value(), obj);
+				}
 			}
 		}
 	}

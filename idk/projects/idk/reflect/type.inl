@@ -11,4 +11,10 @@ namespace idk::reflect
 		return _context->construct(dynamic{ std::forward<Ts>(args) }...);
 	}
 
+	template<typename T>
+	bool type::is() const
+	{
+		return hash() == typehash<T>();
+	}
+
 }
