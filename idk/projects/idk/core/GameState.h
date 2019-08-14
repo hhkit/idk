@@ -2,6 +2,7 @@
 #include <core/Component.h>
 #include <core/Scene.h>
 #include "GameState_detail.h"
+#undef GetObject
 
 namespace idk
 {

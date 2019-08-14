@@ -55,7 +55,7 @@ namespace idk
 		bool Exists(const string& mountPath) const;
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
-		FileSystem_ErrorCode Mount(const string& fullPath, const string& mountPath);
+		FileSystem_ErrorCode Mount(const string& fullPath, const string& mountPath); // Mount("yolo");
 		FileSystem_ErrorCode Dismount(const string& mountPath);
 
 		// Open/closing files

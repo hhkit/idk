@@ -6,6 +6,12 @@
 #include <meta/meta.h>
 #include "Handleables.h"
 
+namespace idk::reflect
+{
+	class dynamic;
+}
+
+
 #pragma warning(disable:4201)
 
 namespace idk
@@ -35,6 +41,7 @@ namespace idk
 		template<typename T> 
 		bool is_type() const;
 
+		reflect::dynamic operator*() const;
 		operator bool() const;
 		bool operator==(const GenericHandle&);
 		bool operator!=(const GenericHandle&);
