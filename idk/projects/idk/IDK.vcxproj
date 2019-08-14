@@ -35,6 +35,7 @@
     <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="ds\ranged_for.h" />
     <ClInclude Include="core\SystemManager.h" />
+    <ClInclude Include="file\DirectoryWatcher.h" />
     <ClInclude Include="file\FileSystem.h" />
     <ClInclude Include="file\FileSystemInternal.h" />
     <ClInclude Include="gfx\GraphicsSystem.h" />
@@ -100,6 +101,7 @@
     <ClCompile Include="core\Handle.cpp" />
     <ClCompile Include="core\Scene.cpp" />
     <ClCompile Include="core\SystemManager.cpp" />
+    <ClCompile Include="file\DirectoryWatcher.cpp" />
     <ClCompile Include="file\FileSystem.cpp" />
     <ClCompile Include="file\FileSystemInternal.cpp" />
     <ClCompile Include="math\color.cpp" />

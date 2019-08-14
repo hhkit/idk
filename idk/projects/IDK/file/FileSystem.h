@@ -1,6 +1,6 @@
 #pragma once
 #include <core/ISystem.h>
-#include "FileSystemInternal.h"
+#include "DirectoryWatcher.h"
 
 namespace idk
 {
@@ -74,10 +74,12 @@ namespace idk
 
 		// This functions affect the actual files outside of the system.
 		FileSystem_ErrorCode Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
-		FileSystem_ErrorCode DeleteFile(string_view mountPath);
+		FileSystem_ErrorCode DelFile(string_view mountPath);
 		
 		FileSystem_ErrorCode GetLastError() const;
 
+
+		friend class file_system_internal::DirectoryWatcher;
 	private:
 		hash_table<string, int> mount_table;
 		vector<file_system_internal::mount_t> mounts;
@@ -89,16 +91,17 @@ namespace idk
 
 		FileSystem_ErrorCode last_error;
 
+		file_system_internal::DirectoryWatcher directory_watcher;
+
 		// initializtion
 		void initMount(size_t index, const string& fullPath, const string& mountPath, bool watch);
 		void recurseSubDir(size_t index, int8_t depth, file_system_internal::dir_t& mountSubDir, bool watch);
 
 		// File watching
-		void watchDir(file_system_internal::dir_t& mountSubDir);
-		void updateWatchedDir(file_system_internal::mount_t& mount, file_system_internal::dir_t& dir);
-
+		
 		// Helper Getters
-		file_system_internal::file_t& getFile(int8_t mount_index, file_system_internal::node_t& node);
+		file_system_internal::file_t& getFile(file_system_internal::node_t& node);
+		
 
 		void RefreshDir(file_system_internal::dir_t& dir);
 		void RefreshTree(file_system_internal::dir_t& dir);

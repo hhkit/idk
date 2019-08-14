@@ -15,7 +15,9 @@ namespace idk::file_system_internal
 	struct node_t
 	{
 		node_t() = default;
-		node_t(int8_t d, int8_t i);
+		node_t(int8_t m, int8_t d, int8_t i);
+
+		int8_t mount_id = -1;
 		int8_t depth = -1;
 		int8_t index = -1;
 	};
@@ -26,7 +28,7 @@ namespace idk::file_system_internal
 		string filename;
 		string extension;
 
-		size_t handle_index;
+		int64_t handle_index;
 
 		node_t parent;
 		node_t tree_index;
@@ -82,11 +84,10 @@ namespace idk::file_system_internal
 	struct file_handle_t
 	{
 		file_handle_t(int8_t mount, int8_t depth, int8_t index);
-		file_handle_t(int8_t mount, node_t node);
+		file_handle_t(node_t node);
 		bool is_open = false;
 		byte open_type = byte{0x0};
 
-		int8_t mount_id;
 		node_t internal_id;
 	};
 
