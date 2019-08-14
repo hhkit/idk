@@ -1,5 +1,5 @@
 #pragma once
-#include "ISystem.h"
+#include <core/ISystem.h>
 #include "FileSystemInternal.h"
 
 namespace idk

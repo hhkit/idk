@@ -241,7 +241,7 @@ namespace idk {
 					continue;
 
 				string filename = tmp.filename().string();
-				// size_t dir_files_index = static_cast<size_t>(dir.tree_index.depth + 1);
+				
 				auto result = dir.files_map.find(filename);
 				if (result == dir.files_map.end())
 				{
