@@ -42,7 +42,7 @@ namespace idk {
 					// For every dir in the current depth
 					for (auto& dir : collated.dirs)
 					{
-						updateWatchedDir(mount, dir);
+						directory_watcher.UpdateWatchedDir(mount, dir);
 					}
 					
 				}
@@ -57,6 +57,7 @@ namespace idk {
 
 	bool FileSystem::Exists(string_view mountPath) const
 	{
+		UNREFERENCED_PARAMETER(mountPath);
 		return false;
 	}
 
@@ -92,10 +93,11 @@ namespace idk {
 		d.full_path = fullPath;
 		d.filename = currPath.filename().string();
 
+		d.tree_index.mount_id = static_cast<int8_t>(index);
 		d.tree_index.depth = 0;
 		d.tree_index.index = static_cast<int8_t>(mount.path_tree[0].dirs.size());
 		if (watch)
-			watchDir(d);
+			directory_watcher.WatchDirectory(d);
 
 		recurseSubDir(index, 0, d, watch);
 		mount.path_tree[0].dirs.push_back(d);
@@ -127,11 +129,12 @@ namespace idk {
 				f.extension = tmp.extension().string();
 
 				file_system_internal::node_t node;
+				node.mount_id = static_cast<int8_t>(index);
 				node.depth = currDepth;
 				node.index = static_cast<int8_t>(mount.path_tree[currDepth].files.size());
 
 				f.handle_index = curr_handle_index++;
-				file_handles.emplace_back(static_cast<int8_t>(index), node);
+				file_handles.emplace_back(node);
 
 				f.tree_index = node;
 
@@ -151,6 +154,7 @@ namespace idk {
 				d.filename = tmp.filename().string();
 
 				file_system_internal::node_t node;
+				node.mount_id = static_cast<int8_t>(index);
 				node.depth = currDepth;
 				node.index = static_cast<int8_t>(mount.path_tree[currDepth].dirs.size());
 
@@ -158,131 +162,26 @@ namespace idk {
 
 				mountSubDir.sub_dirs.push_back(node);
 				if (watch)
-					watchDir(d);
+					directory_watcher.WatchDirectory(d);
 
 				recurseSubDir(index, currDepth, d, watch);
 				mount.path_tree[currDepth].dirs.push_back(d);
 			}
 		}
 	}
-	void FileSystem::watchDir(file_system_internal::dir_t& mountSubDir)
+
+	file_system_internal::file_t& FileSystem::getFile(file_system_internal::node_t& node)
 	{
-		// start watching this folder
-		mountSubDir.watch_handle[0] = FindFirstChangeNotificationA(
-											mountSubDir.full_path.c_str(),
-											FALSE,
-											FILE_NOTIFY_CHANGE_DIR_NAME);
-
-		if (mountSubDir.watch_handle[0] == INVALID_HANDLE_VALUE)
-		{
-			std::cout << "\n ERROR: FindFirstChangeNotification FOLDER failed.\n"
-				<< mountSubDir.full_path << std::endl;
-		}
-
-		mountSubDir.watch_handle[1] = FindFirstChangeNotificationA(
-											mountSubDir.full_path.c_str(),
-											FALSE,
-											FILE_NOTIFY_CHANGE_FILE_NAME);
-
-		if (mountSubDir.watch_handle[1] == INVALID_HANDLE_VALUE)
-		{
-			std::cout << "\n ERROR: FindFirstChangeNotification FILE failed.\n"
-				<< mountSubDir.full_path << std::endl;
-		}
-
-		mountSubDir.watch_handle[2] = FindFirstChangeNotificationA(
-											mountSubDir.full_path.c_str(),
-											FALSE,
-											FILE_NOTIFY_CHANGE_LAST_WRITE);
-
-		if (mountSubDir.watch_handle[2] == INVALID_HANDLE_VALUE)
-		{
-			std::cout << "\n ERROR: FindFirstChangeNotification FILE failed.\n"
-				<< mountSubDir.full_path << std::endl;
-		}
-	}
-
-	void FileSystem::updateWatchedDir(file_system_internal::mount_t& mount, file_system_internal::dir_t& dir)
-	{
-		dir.status = WaitForMultipleObjects(3, dir.watch_handle, false, 0);
-
-		switch (dir.status)
-		{
-		case WAIT_OBJECT_0:
-		{
-			// DIRECTORY WAS CREATED OR RENAMED
-			std::cout << "[FILE SYSTEM] Directory change detected in: " << dir.full_path << std::endl;
-
-			if (FindNextChangeNotification(dir.watch_handle[0]) == FALSE) {
-				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
-			}
-			break;
-		}
-		case WAIT_OBJECT_0 + 1:
-		{
-			// FILE WAS CREATED OR RENAMED
-			std::cout << "[FILE SYSTEM] File change detected in: " << dir.full_path << std::endl;
-
-			if (FindNextChangeNotification(dir.watch_handle[1]) == FALSE) {
-				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
-			}
-			break;
-		}
-		case WAIT_OBJECT_0 + 2:
-		{
-			// File was written to recently
-			for (auto& file : FS::directory_iterator(dir.full_path))
-			{
-				auto current_file_last_write_time = FS::last_write_time(file);
-				FS::path tmp{ file.path() };
-
-				// We only check if it is a regular file
-				if (!FS::is_regular_file(tmp))
-					continue;
-
-				string filename = tmp.filename().string();
-				
-				auto result = dir.files_map.find(filename);
-				if (result == dir.files_map.end())
-				{
-					// This means that we either entered into here erronously or some other bug.
-					std::cout << "[FILE SYSTEM] FILE_NOTIFY_CHANGE_LAST_WRITTEN WAS IGNORED." << std::endl;
-					break;
-				}
-
-				auto& internal_file = mount.GetFile(result->second);
-				if (current_file_last_write_time != internal_file.time)
-				{
-					std::cout << "[FILE SYSTEM] File written detected in: " << internal_file.full_path << std::endl;
-					internal_file.time = current_file_last_write_time;
-				}
-			}
-
-			if (FindNextChangeNotification(dir.watch_handle[2]) == FALSE) {
-				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
-			}
-			break;
-		}
-		case WAIT_TIMEOUT:
-			break;
-		default:
-		{
-			assert(false);
-			break;
-		}
-		}
-	}
-
-	file_system_internal::file_t& FileSystem::getFile(int8_t mount_index, file_system_internal::node_t& node)
-	{
-		return mounts[mount_index].GetFile(node);
+		return mounts[node.mount_id].GetFile(node);
 	}
 
 	void FileSystem::RefreshDir(file_system_internal::dir_t& dir)
 	{
+		UNREFERENCED_PARAMETER(dir);
 	}
 
 	void FileSystem::RefreshTree(file_system_internal::dir_t& dir)
 	{
+		UNREFERENCED_PARAMETER(dir);
 	}
 }

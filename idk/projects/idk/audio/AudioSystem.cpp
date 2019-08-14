@@ -129,7 +129,6 @@ Variables:
 #include <sstream> //ostringstream
 #include <filesystem> //filesystem
 
-
 namespace idk
 {
 	AudioSystem::AudioSystem()
@@ -138,6 +137,11 @@ namespace idk
 		, timeItWasInitialized	{}
 		, numberOfDrivers		{ 0 }
 		, currentDriver			{ 0 }
+		, channelGroup_MASTER	{ nullptr }
+		, channelGroup_MUSIC	{ nullptr }
+		, channelGroup_SFX		{ nullptr }
+		, channelGroup_AMBIENT	{ nullptr }
+		, channelGroup_DIALOGUE	{ nullptr }
 	{
 	}
 
@@ -153,11 +157,18 @@ namespace idk
 
 		// Initializes FMOD Core
 		ParseFMOD_RESULT(CoreSystem->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
+		
+		//Channel Group Setup
+		ParseFMOD_RESULT(CoreSystem->createChannelGroup("MUSIC", &channelGroup_MUSIC));
+		ParseFMOD_RESULT(CoreSystem->createChannelGroup("SFX", &channelGroup_SFX));
+		ParseFMOD_RESULT(CoreSystem->createChannelGroup("AMBIENT", &channelGroup_AMBIENT));
+		ParseFMOD_RESULT(CoreSystem->createChannelGroup("DIALOGUE", &channelGroup_DIALOGUE));
+		ParseFMOD_RESULT(CoreSystem->getMasterChannelGroup(&channelGroup_MASTER));
 
 		//Get Number of Drivers available
 		ParseFMOD_RESULT(CoreSystem->getNumDrivers(&numberOfDrivers));
 
-
+		//Driver info setup
 		driverDetails.clear(); //In the event that audio engine is reinitialized
 		if (numberOfDrivers != 0) {
 			//std::cout << "Number of Drivers found: " << numberOfDrivers << std::endl;
@@ -199,7 +210,7 @@ namespace idk
 			//If no sound driver, set output to no sound
 			ParseFMOD_RESULT(CoreSystem->setOutput(FMOD_OUTPUTTYPE_NOSOUND));
 			//std::cout << "No sound drivers found! Audio will set to NOSOUND." << std::endl;
-
+			currentDriver = -1;
 		}
 
 
@@ -242,24 +253,24 @@ namespace idk
 		}
 	}
 
-	float AudioSystem::GetCPUPercentUsage()
+	float AudioSystem::GetCPUPercentUsage() 
 	{
 		return GetDetailedCPUPercentUsage().total;
 	}
 
-	AUDIOSYSTEM_CPUDATA AudioSystem::GetDetailedCPUPercentUsage()
+	AUDIOSYSTEM_CPUDATA AudioSystem::GetDetailedCPUPercentUsage() 
 	{
 		AUDIOSYSTEM_CPUDATA i{};
 		ParseFMOD_RESULT(CoreSystem->getCPUUsage(&i.dsp, &i.stream, &i.geometry, &i.update, &i.total));
 		return i;
 	}
 
-	vector<AUDIOSYSTEM_DRIVERDATA> AudioSystem::GetAllSoundDriverData()
+	vector<AUDIOSYSTEM_DRIVERDATA> AudioSystem::GetAllSoundDriverData() const
 	{
 		return driverDetails;
 	}
 
-	int AudioSystem::GetCurrentSoundDriverIndex()
+	int AudioSystem::GetCurrentSoundDriverIndex() const
 	{
 		return currentDriver;
 	}
@@ -336,8 +347,6 @@ namespace idk
 			return "FMOD_SOUND_TYPE_FORCEINT";
 		}
 
-		return nullptr;
-
 	}
 
 	const char* AudioSystem::FMOD_SOUND_FORMAT_TO_C_STR(FMOD_SOUND_FORMAT i)
@@ -366,7 +375,6 @@ namespace idk
 
 		}
 
-		return nullptr;
 	}
 
 	const char* AudioSystem::FMOD_SPEAKERMODE_TO_C_STR(FMOD_SPEAKERMODE i)
@@ -396,7 +404,6 @@ namespace idk
 			return "FMOD_SPEAKERMODE_MAX";
 		}
 
-		return nullptr;
 	}
 
 }

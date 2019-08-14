@@ -259,6 +259,9 @@
     <ClInclude Include="file\FileSystemInternal.h">
       <Filter>file</Filter>
     </ClInclude>
+    <ClInclude Include="file\DirectoryWatcher.h">
+      <Filter>file</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -328,6 +331,9 @@
       <Filter>file</Filter>
     </ClCompile>
     <ClCompile Include="file\FileSystem.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="file\DirectoryWatcher.cpp">
       <Filter>file</Filter>
     </ClCompile>
   </ItemGroup>
