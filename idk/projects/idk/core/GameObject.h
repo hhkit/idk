@@ -3,6 +3,12 @@
 #include "Handle.h"
 #include "Scene.h"
 
+namespace idk::reflect
+{
+	class type;
+}
+
+
 namespace idk
 {
 	class GameObject 
@@ -15,10 +21,14 @@ namespace idk
 		~GameObject() = default;
 
 		// components
+		// exact
 		template<typename T> Handle<T> AddComponent();
 		template<typename T> Handle<T> GetComponent() const;
 		template<typename T> bool      HasComponent() const;
 		template<typename T> bool      RemoveComponent(const Handle<T>&);
+
+		// generic
+		GenericHandle AddComponent(reflect::type);
 
 		span<GenericHandle> GetComponents();
 		// active flags
@@ -36,6 +46,9 @@ namespace idk
 
 		template<typename T>
 		friend struct detail::ObjectPoolHelper;
+
+		template<typename T>
+		friend struct detail::TableGenerator;
 	};
 }
 

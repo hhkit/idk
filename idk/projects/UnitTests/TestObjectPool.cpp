@@ -3,12 +3,8 @@
 #include <core/GameObject.h>
 #include <core/Component.h>
 #include <core/ObjectPool.h>
+#include <reflect/reflect.h>
 #include <iostream>
-
-class TestComponent : public idk::Component<TestComponent>
-{
-
-};
 
 
 TEST(ObjectPool, TestIndexInTuple)
@@ -68,4 +64,8 @@ TEST(ObjectPool, TestObjectPooling)
 	EXPECT_TRUE(op.Validate(h2));
 
 	op.DeactivateScene(0);
+	GameState gs;
+
+	GenericHandle generich;
+	*generich;
 }

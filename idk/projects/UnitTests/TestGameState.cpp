@@ -35,6 +35,9 @@ TEST(GameState, TestHandles)
 	gs.DestroyQueue();
 	EXPECT_FALSE(&*h);
 	EXPECT_FALSE(&*hTransform);
+
+	gs.CreateObject(h);
+	EXPECT_TRUE(h);
 }
 
 TEST(GameState, TestScene)

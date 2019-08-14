@@ -6,6 +6,12 @@
 #include <meta/meta.h>
 #include "Handleables.h"
 
+namespace idk::reflect
+{
+	class dynamic;
+}
+
+
 #pragma warning(disable:4201)
 
 namespace idk
@@ -35,6 +41,7 @@ namespace idk
 		template<typename T> 
 		bool is_type() const;
 
+		reflect::dynamic operator*() const;
 		operator bool() const;
 		bool operator==(const GenericHandle&);
 		bool operator!=(const GenericHandle&);
@@ -48,6 +55,7 @@ namespace idk
 		static constexpr auto type_id = index_in_tuple_v<T, idk::Handleables>;
 
 		Handle() = default;
+		explicit Handle(uint64_t id);
 		explicit Handle(const GenericHandle&);
 		Handle(uint32_t index, uint16_t gen, uint8_t scene = 0);
 
