@@ -15,9 +15,6 @@ namespace idk::reflect
 	namespace detail
 	{
 
-		template<typename T>
-		struct has_type_definition : std::false_type {};
-
 		template<typename T, bool HasTypeDefinition>
 		register_type<T, HasTypeDefinition>::register_type()
 		{
