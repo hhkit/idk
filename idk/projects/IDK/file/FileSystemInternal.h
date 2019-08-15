@@ -30,10 +30,12 @@ namespace idk::file_system_internal
 		string filename;
 		string extension;
 
-		int64_t handle_index;
+		int64_t handle_index = -1;
 
 		node_t parent;
 		node_t tree_index;
+
+		bool valid = true;
 
 		// For file watching
 		CHANGE_STATUS change_status = NO_CHANGE;
@@ -56,6 +58,8 @@ namespace idk::file_system_internal
 		HANDLE watch_handle[3];
 		DWORD status;
 
+		bool valid = true;
+
 		CHANGE_STATUS change_status = NO_CHANGE;
 	};
 
@@ -76,10 +80,12 @@ namespace idk::file_system_internal
 		string full_path;
 		string mount_path;
 
-		size_t num_files;
+		int8_t mount_index;
 		bool watching = true;
 
 		size_t AddDepth();
+		node_t RequestFileSlot(int8_t depth);
+		void AddFile(file_t& file);
 		file_t& GetFile(node_t node);
 	};
 
@@ -87,10 +93,16 @@ namespace idk::file_system_internal
 	{
 		file_handle_t(int8_t mount, int8_t depth, int8_t index);
 		file_handle_t(node_t node);
-		bool is_open = false;
-		byte open_type = byte{0x0};
+
+		void Invalidate();
+		
+		// First bit = valid?
+		// Second bit = open?
+		// Others = open type?
+		byte mask = byte{0x01};
 
 		node_t internal_id;
+		size_t ref_count = 0;
 	};
 
 	

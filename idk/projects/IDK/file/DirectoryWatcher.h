@@ -13,7 +13,8 @@ namespace idk::file_system_internal
 		void RefreshDir(file_system_internal::dir_t& dir);
 		void RefreshTree(file_system_internal::dir_t& dir);
 
-		
+		// Calling this will also clear all the changed files.
+		void ResolveAllChanges();
 
 	private:
 		void CheckFilesCreated(file_system_internal::dir_t& dir);
@@ -22,6 +23,9 @@ namespace idk::file_system_internal
 		void CheckFilesWrittenTo(file_system_internal::dir_t& dir);
 
 		file_t& addInternalFile(string_view full_path);
+
+		vector<node_t> changed_files;
+		vector<node_t> changed_dirs;
 	};
 	
 }

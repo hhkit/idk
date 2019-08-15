@@ -18,19 +18,25 @@ namespace idk {
 	void FileSystem::Init()
 	{
 		// Get the base directory. This is where the prog is run from.
-		char base_dir_c[MAX_PATH];
-		if (!_getcwd(base_dir_c, sizeof(base_dir_c)))
+		char base_dir_c[MAX_PATH] = { 0 };
+		int bytes = GetModuleFileNameA(NULL, base_dir_c, MAX_PATH);
+		// if (!_getcwd(base_dir_c, sizeof(base_dir_c)))
+		if(bytes == 0)
 		{
 			std::cout << "[File System] Unable to get base directory." << std::endl;
 		}
 		base_dir = base_dir_c;
+		auto pos = base_dir.find_last_of("\\");
+		base_dir = base_dir.substr(0, pos + 1);
 
-		// Mount("C:/Users/HP/Desktop/idk_legacy-master/Koboru/Koboru/resource/editor", "/test");
-		// Mount("C:/Users/Joseph/Desktop/GIT/idk_legacy/Koboru/Koboru/resource/editor", "/test_home");
+		// Mount(base_dir + "resource/", "/test_mount");
 	}
 
 	void FileSystem::Update()
 	{
+		// Clear all changed files here
+		directory_watcher.ResolveAllChanges();
+
 		// For every mount that is watched
 		for (auto& mount : mounts)
 		{
@@ -49,34 +55,70 @@ namespace idk {
 				
 			}
 		}
-		
 	}
 
 	void FileSystem::Shutdown()
 	{
 	}
 
+	string FileSystem::GetFullPath(string_view mountPath) const
+	{
+		string mount_path{ mountPath.data() };
+
+		if (mount_path[0] != '/')
+			return string{};
+
+		auto end_pos = mount_path.find_first_of('/', 1);
+		if (end_pos == string::npos)
+		{
+			return string{};
+		}
+
+		string mount_key = mount_path.substr(0, end_pos);
+		auto mount_index = mount_table.find(mount_key);
+		if (mount_index != mount_table.end())
+		{
+			return mounts[mount_index->second].full_path + mount_path.substr(end_pos + 1);
+		}
+		else
+		{
+			return string{};
+		}
+	}
+
 	bool FileSystem::Exists(string_view mountPath) const
 	{
-		UNREFERENCED_PARAMETER(mountPath);
-		return false;
+		return ExistsFull(GetFullPath(mountPath));
 	}
 
 	bool FileSystem::ExistsFull(string_view fullPath) const
 	{
-		return GetFileAttributesA(fullPath.data()) != INVALID_FILE_ATTRIBUTES;;
+		return GetFileAttributesA(fullPath.data()) != INVALID_FILE_ATTRIBUTES;
 	}
 
-	FileSystem_ErrorCode FileSystem::Mount(const string& fullPath, const string& mountPath, bool watch)
+	FileSystem_ErrorCode FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)
 	{
 		size_t curr_mount_index = mounts.size();
+		
+		string full_path{ fullPath.data() };
+		string mount_path{ mountPath.data() };
+
+		// All mountPaths must begin with '/'
+		if (mountPath[0] != '/')
+			return FILESYSTEM_BAD_ARGUMENT;
+
+		if (full_path.back() != '/')
+			full_path += '/';
+
+		mount_table.emplace(mount_path, mounts.size());
 		mounts.push_back(file_system_internal::mount_t{});
-		initMount(curr_mount_index, fullPath, mountPath, watch);
+
+		initMount(curr_mount_index, full_path, mount_path, watch);
 		
 		return FILESYSTEM_NOT_FOUND;
 	}
 
-	void FileSystem::initMount(size_t index, const string& fullPath, const string& mountPath, bool watch)
+	void FileSystem::initMount(size_t index, string_view fullPath, string_view mountPath, bool watch)
 	{
 		if (!ExistsFull(fullPath))
 		{
@@ -92,6 +134,7 @@ namespace idk {
 		mount.full_path = fullPath;
 		mount.mount_path = mountPath;
 		mount.watching = watch;
+		mount.mount_index = static_cast<int8_t>(index);
 		mount.AddDepth();
 
 		// The root of this mount is depth 0
@@ -107,6 +150,7 @@ namespace idk {
 			directory_watcher.WatchDirectory(d);
 
 		recurseSubDir(index, 0, d, watch);
+
 		mount.path_tree[0].dirs.push_back(d);
 	}
 
@@ -140,18 +184,17 @@ namespace idk {
 				node.depth = currDepth;
 				node.index = static_cast<int8_t>(mount.path_tree[currDepth].files.size());
 
+				f.tree_index = node;
+				f.parent = mountSubDir.tree_index;
+
 				f.handle_index = curr_handle_index++;
 				file_handles.emplace_back(node);
-
-				f.tree_index = node;
 
 				f.time = FS::last_write_time(tmp);
 
 				mountSubDir.files_map.emplace(f.filename, node);
 
-				// mount.path_tree[currDepth].files_map.emplace(f.filename, mount.path_tree[currDepth].files.size());
 				mount.path_tree[currDepth].files.emplace_back(f);
-				++mount.num_files;
 			}
 			else
 			{
@@ -182,20 +225,22 @@ namespace idk {
 		return mounts[node.mount_id].GetFile(node);
 	}
 
+	file_system_internal::dir_t& FileSystem::getDir(file_system_internal::node_t& node)
+	{
+		return mounts[node.mount_id].path_tree[node.depth].dirs[node.index];
+	}
+
 	bool FileSystem::isOpen(const file_system_internal::node_t& n)
 	{
 		return std::find(open_files.begin(), open_files.end(), n) != open_files.end();
 	}
 
-	void FileSystem::RefreshDir(file_system_internal::dir_t& dir)
+	size_t FileSystem::addFileHandle(const file_system_internal::node_t& node)
 	{
-		UNREFERENCED_PARAMETER(dir);
+		file_handles.emplace_back(node);
+		return file_handles.size() - 1;
 	}
 
-	void FileSystem::RefreshTree(file_system_internal::dir_t& dir)
-	{
-		UNREFERENCED_PARAMETER(dir);
-	}
 	FileSystem_ErrorCode FileSystem::Mkdir(string_view mountPath)
 	{
 		UNREFERENCED_PARAMETER(mountPath);

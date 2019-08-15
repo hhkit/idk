@@ -51,6 +51,8 @@ namespace idk
 	{
 		UNREFERENCED_PARAMETER(mount);
 
+		// false = returns when any one of the handles signal
+		// 0     = No waiting, function immediately returns
 		dir.status = WaitForMultipleObjects(3, dir.watch_handle, false, 0);
 
 		switch (dir.status)
@@ -112,7 +114,7 @@ namespace idk
 		{
 			CheckFilesDeleted(mountDir);
 		}
-		//If neither, it means that files were renamed/replaced
+		//If number of files are the same, it means that files were renamed/replaced
 		else
 		{
 			// In the case of replacement of files, we actually want to send a file written to notification
@@ -152,6 +154,55 @@ namespace idk
 		}
 	}
 
+	void file_system_internal::DirectoryWatcher::ResolveAllChanges()
+	{
+		auto& vfs = Core::GetSystem<FileSystem>();
+
+		// Resolve changed files
+		for (auto& file_index : changed_files)
+		{
+			auto& internal_file = vfs.getFile(file_index);
+			auto& internal_collated = vfs.mounts[internal_file.tree_index.mount_id].path_tree[internal_file.tree_index.depth];
+			auto& parent_dir = vfs.getDir(internal_file.parent);
+			
+			switch (internal_file.change_status)
+			{
+			case CREATED:
+				// If a file was created, we need to create a suitable handle for it.
+				// Since this was already when it was actually checked, we dont need to do it here.
+				break;
+			case DELETED:
+			{
+				// Most troublesome one. 
+				// Need to invalidate the file_handle_t and all FileHandles pointing to it.
+
+				// First we remove this file from the parent dir.
+				auto result = parent_dir.files_map.find(internal_file.filename);
+				parent_dir.files_map.erase(result);
+
+				// Next, invalidate it from path_tree. Should be a better way to do this. Not sure yet.
+				// When we create files in run-time, we will loop through all the file_t and find the first valid one if available. Linear time POG.
+				internal_collated.files[internal_file.tree_index.index].valid = false;
+
+				// Lastly, we invalidate the file handle that this file was using.
+				// Remember that we DO NOT erase the file_handle_t in FileSyste::file_handles. We simply invalidate it.
+				vfs.file_handles[internal_file.handle_index].Invalidate();
+				break;
+			}
+			case RENAMED:
+				// Very straightforward. Since only the name was changed, don't have to do anything here I think.
+				break;
+			default:
+				break;
+			}
+
+			internal_file.change_status = NO_CHANGE;
+		}
+
+		changed_files.clear();
+		changed_dirs.clear();
+	}
+
 	void file_system_internal::DirectoryWatcher::CheckFilesCreated(file_system_internal::dir_t& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
@@ -168,27 +219,22 @@ namespace idk
 			auto result = mountDir.files_map.find(filename);
 			if (result == mountDir.files_map.end())
 			{
-				file_system_internal::file_t f;
+				// Request a slot from mounts
+				node_t slot = vfs.mounts[mountDir.tree_index.mount_id].RequestFileSlot(mountDir.tree_index.depth + 1);
+				file_t& f = vfs.getFile(slot);
 
 				f.full_path = tmp.string();
 				f.filename = tmp.filename().string();
 				f.extension = tmp.extension().string();
 
-				file_system_internal::node_t node;
-				node.mount_id = static_cast<int8_t>(mountDir.tree_index.mount_id);
-				node.depth = mountDir.tree_index.depth + 1;
-				node.index = static_cast<int8_t>(vfs.mounts[node.mount_id].path_tree[node.depth].files.size());
-
-				f.handle_index = vfs.file_handles.size();
-				vfs.file_handles.emplace_back(node);
-
-				f.tree_index = node;
+				f.parent = mountDir.tree_index;
 
 				f.time = FS::last_write_time(tmp);
 
-				mountDir.files_map.emplace(f.filename, node);
-
-				vfs.mounts[node.mount_id].path_tree[node.depth].files.emplace_back(f);
+				// Adding the new file to all relevant data structures
+				mountDir.files_map.emplace(f.filename, f.tree_index);
+				f.handle_index = vfs.addFileHandle(f.tree_index);
+				changed_files.push_back(f.tree_index);
 
 				auto& test = vfs.getFile(f.tree_index);
 				std::cout << "[FILE SYSTEM] File Created: " << "\n"
@@ -207,9 +253,13 @@ namespace idk
 			auto& internal_file = vfs.getFile(file.second);
 			if (!vfs.ExistsFull(internal_file.full_path))
 			{
+				// Might need to do more here depending on what we need.
 				internal_file.change_status = DELETED;
+				
 				// internal_file.handle_index = -1;
 				// internal_file.full_path.clear();
+
+				changed_files.push_back(internal_file.tree_index);
 
 				std::cout << "[FILE SYSTEM] File Deleted: " << "\n"
 					"\t Path: " << internal_file.full_path << "\n" << std::endl;
@@ -253,8 +303,7 @@ namespace idk
 						internal_file.extension = tmp.extension().string();
 						internal_file.change_status = RENAMED;
 
-						
-
+						changed_files.push_back(internal_file.tree_index);
 						return;
 					}
 				}
@@ -295,6 +344,8 @@ namespace idk
 					"\t Path: " << internal_file.full_path << "\n";
 
 				internal_file.time = current_file_last_write_time;
+
+				changed_files.push_back(internal_file.tree_index);
 			}
 		}
 	}

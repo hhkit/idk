@@ -22,7 +22,8 @@ namespace idk
 		FILESYSTEM_NOT_OPEN,
 		FILESYSTEM_DUPLICATE,
 		FILESYSTEM_FILE_CHANGED,
-		FILESYSTEM_BAD_FILENAME
+		FILESYSTEM_BAD_FILENAME,
+		FILESYSTEM_BAD_ARGUMENT
 	};
 
 	// Opaque type. Do not touch internals
@@ -56,16 +57,18 @@ namespace idk
 		string_view GetRootDir() const { return root_dir; }
 		string_view GetBaseDir() const { return base_dir; }
 		string_view GetResourceDir() const { return resource_dir; }
+		string GetFullPath(string_view mountPath) const;
 
 		bool Exists(string_view fullPath) const;
 		bool ExistsFull(string_view fullPath) const;
+
 		// Setters
 		void SetRootDir(string_view dir) { root_dir = dir; }
 		void SetBaseDir(string_view dir) { base_dir = dir; }
 		void SetResourceDir(string_view dir) { resource_dir = dir; }
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
-		FileSystem_ErrorCode Mount(const string& fullPath, const string& mountPath, bool watch = true);
+		FileSystem_ErrorCode Mount(string_view fullPath, string_view mountPath, bool watch = true);
 		FileSystem_ErrorCode Dismount(const string& mountPath);
 
 		// Open/closing files
@@ -87,7 +90,7 @@ namespace idk
 
 		friend class file_system_internal::DirectoryWatcher;
 	private:
-		hash_table<string, int> mount_table;
+		hash_table<string, size_t> mount_table;
 		vector<file_system_internal::mount_t> mounts;
 		vector<file_system_internal::file_handle_t> file_handles;
 		vector<file_system_internal::node_t> open_files;
@@ -101,18 +104,20 @@ namespace idk
 		file_system_internal::DirectoryWatcher directory_watcher;
 
 		// initializtion
-		void initMount(size_t index, const string& fullPath, const string& mountPath, bool watch);
+		void initMount(size_t index, string_view fullPath, string_view mountPath, bool watch);
 		void recurseSubDir(size_t index, int8_t depth, file_system_internal::dir_t& mountSubDir, bool watch);
 
 		// File watching
 		
 		// Helper Getters
 		file_system_internal::file_t& getFile(file_system_internal::node_t& node);
+		file_system_internal::dir_t& getDir(file_system_internal::node_t& node);
+
 		bool isOpen(const file_system_internal::node_t& n);
 
-		void RefreshDir(file_system_internal::dir_t& dir);
-		void RefreshTree(file_system_internal::dir_t& dir);
-		
+		// Other auxiliary helpers
+		size_t addFileHandle(const file_system_internal::node_t& handle);
+
 		string getMountToken(const string& mountPath) const;
 		bool validateHandle(FileHandle* handle) const;
 	};
