@@ -1,5 +1,7 @@
 #pragma once
 #include <core/ISystem.h>
+#include <fstream>
+
 #include "DirectoryWatcher.h"
 
 namespace idk
@@ -37,6 +39,10 @@ namespace idk
 		explicit operator std::fstream();
 
 		string_view GetParentDir() const;
+
+	private:
+		FILE* fp = nullptr;
+		std::fstream stream;
 	};
 
 	class FileSystem : public ISystem
@@ -84,6 +90,7 @@ namespace idk
 		hash_table<string, int> mount_table;
 		vector<file_system_internal::mount_t> mounts;
 		vector<file_system_internal::file_handle_t> file_handles;
+		vector<file_system_internal::node_t> open_files;
 
 		string root_dir;
 		string base_dir;
@@ -101,7 +108,7 @@ namespace idk
 		
 		// Helper Getters
 		file_system_internal::file_t& getFile(file_system_internal::node_t& node);
-		
+		bool isOpen(const file_system_internal::node_t& n);
 
 		void RefreshDir(file_system_internal::dir_t& dir);
 		void RefreshTree(file_system_internal::dir_t& dir);

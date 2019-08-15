@@ -13,9 +13,14 @@ namespace idk::file_system_internal
 		void RefreshDir(file_system_internal::dir_t& dir);
 		void RefreshTree(file_system_internal::dir_t& dir);
 
-		void CheckFilesDeleted(file_system_internal::dir_t& dir);
+		
 
 	private:
+		void CheckFilesCreated(file_system_internal::dir_t& dir);
+		void CheckFilesDeleted(file_system_internal::dir_t& dir);
+		void CheckFilesRenamed(file_system_internal::dir_t& dir);
+		void CheckFilesWrittenTo(file_system_internal::dir_t& dir);
+
 		file_t& addInternalFile(string_view full_path);
 	};
 	

@@ -39,6 +39,10 @@ namespace idk{
 		: mount_id{ m }, depth{ d }, index{ i }
 	{
 	}
+	bool file_system_internal::node_t::operator==(const node_t& rhs) const
+	{
+		return (mount_id == rhs.mount_id && depth == rhs.depth && index == rhs.index);
+	}
 }
 
 

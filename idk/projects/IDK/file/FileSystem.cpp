@@ -25,12 +25,12 @@ namespace idk {
 		}
 		base_dir = base_dir_c;
 
-		//Mount("C:/Users/HP/Desktop/idk_legacy-master/Koboru/Koboru/resource/editor", "/test");
+		// Mount("C:/Users/HP/Desktop/idk_legacy-master/Koboru/Koboru/resource/editor", "/test");
+		// Mount("C:/Users/Joseph/Desktop/GIT/idk_legacy/Koboru/Koboru/resource/editor", "/test_home");
 	}
 
 	void FileSystem::Update()
 	{
-		mounts;
 		// For every mount that is watched
 		for (auto& mount : mounts)
 		{
@@ -49,6 +49,7 @@ namespace idk {
 				
 			}
 		}
+		
 	}
 
 	void FileSystem::Shutdown()
@@ -77,6 +78,12 @@ namespace idk {
 
 	void FileSystem::initMount(size_t index, const string& fullPath, const string& mountPath, bool watch)
 	{
+		if (!ExistsFull(fullPath))
+		{
+			std::cout << "[FILE SYSTEM] Bad path given to Mount function" << std::endl;
+			return;
+		}
+
 		FS::path currPath{ fullPath };
 		FS::directory_iterator dir{ currPath };
 
@@ -175,6 +182,11 @@ namespace idk {
 		return mounts[node.mount_id].GetFile(node);
 	}
 
+	bool FileSystem::isOpen(const file_system_internal::node_t& n)
+	{
+		return std::find(open_files.begin(), open_files.end(), n) != open_files.end();
+	}
+
 	void FileSystem::RefreshDir(file_system_internal::dir_t& dir)
 	{
 		UNREFERENCED_PARAMETER(dir);
@@ -183,5 +195,12 @@ namespace idk {
 	void FileSystem::RefreshTree(file_system_internal::dir_t& dir)
 	{
 		UNREFERENCED_PARAMETER(dir);
+	}
+	FileSystem_ErrorCode FileSystem::Mkdir(string_view mountPath)
+	{
+		UNREFERENCED_PARAMETER(mountPath);
+		// Testing for now.
+		// FS::create_directories(FS::path{ "C:/Users/Joseph/Desktop/GIT/idk_legacy/Koboru/Koboru/resource/editor/test" });
+		return FILESYSTEM_OK;
 	}
 }

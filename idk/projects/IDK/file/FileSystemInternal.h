@@ -17,6 +17,8 @@ namespace idk::file_system_internal
 		node_t() = default;
 		node_t(int8_t m, int8_t d, int8_t i);
 
+		bool operator == (const node_t& rhs) const;
+
 		int8_t mount_id = -1;
 		int8_t depth = -1;
 		int8_t index = -1;
