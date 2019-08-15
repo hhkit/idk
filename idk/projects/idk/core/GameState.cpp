@@ -178,12 +178,12 @@ namespace idk
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::type type)
 	{
 		auto id = GetTypeID(type);
-		return id < ComponentCount ? create_type_jt[id](*this, handle) : GenericHandle{};
+		return id <= ComponentCount ? create_type_jt[id](*this, handle) : GenericHandle{};
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::dynamic dyn)
 	{
 		auto id = GetTypeID(dyn.type);
-		return id < ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
+		return id <= ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
 	}
 	bool GameState::ValidateHandle(const GenericHandle& handle)
 	{

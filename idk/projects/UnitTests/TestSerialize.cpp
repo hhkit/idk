@@ -44,20 +44,31 @@ TEST(Serialize, TestSerializeBasic)
 	EXPECT_EQ(obj.vec, obj2.vec);
 }
 
-string serialized_scene_0 = "";
-uint64_t transform_0_id = 0;
+static string serialized_scene_0 = "";
+static uint64_t transform_0_id = 0;
+static uint64_t transform_1_id = 0;
+static uint64_t parent_1_id = 0;
 
 TEST(Serialize, TestSerializeScene)
 {
 	GameState gs;
 	auto scene = gs.ActivateScene(0);
 
+	auto o0 = scene->CreateGameObject();
+	auto t0 = o0->GetComponent<Transform>();
+	t0->position = vec3{ 1.0f, 2.0f, 3.0f };
+	t0->scale = vec3{ 4.0f };
+	t0->rotation = quat{ 5.0f, 6.0f, 7.0f, 8.0f };
+	transform_0_id = t0.id;
+
 	auto o1 = scene->CreateGameObject();
 	auto t1 = o1->GetComponent<Transform>();
-	t1->position = vec3{ 1.0f, 2.0f, 3.0f };
-	t1->scale = vec3{ 4.0f };
-	t1->rotation = quat{ 5.0f, 6.0f, 7.0f, 8.0f };
-	transform_0_id = t1.id;
+	t1->position = vec3{ 9.0f, 10.0f, 11.0f };
+	t1->scale = vec3{ 12.0f };
+	t1->rotation = quat{ 13.0f, 14.0f, 15.0f, 16.0f };
+	transform_1_id = t1.id;
+	auto p1 = o1->AddComponent<Parent>();
+	p1->parent = o0;
 
 	serialized_scene_0 = serialize_text(*scene);
 	std::cout << serialized_scene_0;
@@ -69,10 +80,20 @@ TEST(Serialize, TestParseScene)
 	auto scene = gs.ActivateScene(0);
 
 	parse_text(serialized_scene_0, *scene);
-	auto& o1 = *scene->begin();
+
+	auto& o0 = *scene->begin();
+	auto t0 = o0.GetComponent<Transform>();
+	EXPECT_EQ(t0->position, vec3(1.0f, 2.0f, 3.0f));
+	EXPECT_EQ(t0->scale, vec3{ 4.0f });
+	EXPECT_EQ(t0->rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
+	EXPECT_EQ(t0.id, transform_0_id);
+
+	auto& o1 = *++scene->begin();
 	auto t1 = o1.GetComponent<Transform>();
-	EXPECT_EQ(t1->position, vec3(1.0f, 2.0f, 3.0f));
-	EXPECT_EQ(t1->scale, vec3{ 4.0f });
-	EXPECT_EQ(t1->rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
-	EXPECT_EQ(t1.id, transform_0_id);
+	EXPECT_EQ(t1->position, vec3(9.0f, 10.0f, 11.0f));
+	EXPECT_EQ(t1->scale, vec3{ 12.0f });
+	EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
+	EXPECT_EQ(t1.id, transform_1_id);
+	auto p1 = o1.GetComponent<Parent>();
+	EXPECT_EQ(p1->parent.id, o0.GetHandle().id);
 }
