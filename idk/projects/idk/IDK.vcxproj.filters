@@ -254,7 +254,6 @@
     <ClInclude Include="serialize\serialize.h">
       <Filter>serialize</Filter>
     </ClInclude>
-    <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="file\FileSystem.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -266,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="math\color.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\aabb.h">
+      <Filter>shapes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
