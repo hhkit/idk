@@ -16,7 +16,7 @@ namespace idk
 		json j;
 		vector<json*> stack{ &j };
 
-		obj.visit([&](const char* name, auto&& arg, int depth_change)
+		obj.visit([&](auto name, auto&& arg, int depth_change)
 		{
 			using T = std::decay_t<decltype(arg)>;
 			if (depth_change == -1)
@@ -81,31 +81,41 @@ namespace idk
 	{
 		vector<const json*> stack{ &j };
 
-		obj.visit([&](const char* name, auto&& arg, int depth_change)
+		obj.visit([&](auto name, auto&& arg, int depth_change)
 		{
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
-				stack.pop_back();
+			using K = std::decay_t<decltype(name)>;
 
-			auto& curr_j = *stack.back();
-			auto iter = curr_j.find(name);
-			if (iter == curr_j.end())
-				return false;
+			if constexpr (std::is_same_v<K, const char*>)
+			{
+				if (depth_change == -1)
+					stack.pop_back();
 
-			if constexpr (!is_basic_serializable<T>::value)
-			{
-				stack.push_back(&*iter);
-				return true;
-			}
-			else if constexpr (std::is_arithmetic_v<T>)
-			{
-				arg = iter->get<T>();
-				return false;
+				auto& curr_j = *stack.back();
+				auto iter = curr_j.find(name);
+				if (iter == curr_j.end())
+					return false;
+
+				if constexpr (!is_basic_serializable<T>::value)
+				{
+					stack.push_back(&*iter);
+					return true;
+				}
+				else if constexpr (std::is_arithmetic_v<T>)
+				{
+					arg = iter->get<T>();
+					return false;
+				}
+				else
+				{
+					arg = parse_text<T>(iter->get<string>());
+					return false;
+				}
 			}
 			else
 			{
-				arg = parse_text<T>(iter->get<string>());
-				return false;
+				depth_change;
+				throw; // handle containers
 			}
 		});
 	}

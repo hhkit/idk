@@ -30,5 +30,6 @@ namespace idk::reflect
 		, quat
 		, Handle<GameObject>
 		, Guid
+		, vector<string>
 	>;
 }

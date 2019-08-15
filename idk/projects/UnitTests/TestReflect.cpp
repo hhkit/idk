@@ -33,9 +33,10 @@ struct reflect_this
 {
 	vec4 vec;
 	int f = 69;
+	vector<string> container;
 };
 REFLECT_BEGIN(reflect_this, "reflect_this")
-REFLECT_VARS(vec, f)
+REFLECT_VARS(vec, f, container)
 REFLECT_END()
 
 TEST(Reflect, TestReflectConstexpr)
@@ -66,39 +67,43 @@ TEST(Reflect, TestReflectVisit)
 {
 	reflect_this obj;
 	obj.vec = { 1.0f, 2.0f, 3.0f, 4.0f };
-
+	obj.container.push_back("ivan");
+	obj.container.push_back("is");
+	obj.container.push_back("a");
+	obj.container.push_back("weeb");
 
 	int counter = 0;
 	reflect::dynamic dyn{ obj };
-	dyn.visit([&](const char* name, auto&& mem, int) {
+	dyn.visit([&](auto name, auto&& mem, int) {
 		using T = std::decay_t<decltype(mem)>;
 		auto val = mem;
 		++counter;
 		return false; // false should stop recursive
 	});
 
-	EXPECT_EQ(counter, 2);
+	EXPECT_EQ(counter, 3);
 
 
-	std::vector<const char*> visited_names;
+	std::vector<reflect::dynamic> visited_keys;
 	std::vector<reflect::dynamic> visited_values;
-	std::vector<reflect::type> visited_types;
 	std::vector<int> depth_changes;
-	dyn.visit([&](const char* name, auto&& mem, int depth_change) {
-		using T = std::decay_t<decltype(mem)>;
-
-		visited_names.push_back(name);
-		visited_values.emplace_back(mem);
-		visited_types.emplace_back(reflect::get_type<T>());
+	dyn.visit([&](auto key, auto&& val, int depth_change) {
+		visited_keys.emplace_back(std::forward<decltype(key)>(key));
+		visited_values.emplace_back(val);
 		depth_changes.push_back(depth_change);
 	});
 
-	EXPECT_STREQ(visited_names[0], "vec");
-	EXPECT_STREQ(visited_names[1], "x");
-	EXPECT_STREQ(visited_names[2], "y");
-	EXPECT_STREQ(visited_names[3], "z");
-	EXPECT_STREQ(visited_names[4], "w");
-	EXPECT_STREQ(visited_names[5], "f");
+	EXPECT_STREQ(visited_keys[0].get<const char*>(), "vec");
+	EXPECT_STREQ(visited_keys[1].get<const char*>(), "x");
+	EXPECT_STREQ(visited_keys[2].get<const char*>(), "y");
+	EXPECT_STREQ(visited_keys[3].get<const char*>(), "z");
+	EXPECT_STREQ(visited_keys[4].get<const char*>(), "w");
+	EXPECT_STREQ(visited_keys[5].get<const char*>(), "f");
+	EXPECT_STREQ(visited_keys[6].get<const char*>(), "container");
+	EXPECT_EQ(visited_keys[7].get<size_t>(), 0);
+	EXPECT_EQ(visited_keys[8].get<size_t>(), 1);
+	EXPECT_EQ(visited_keys[9].get<size_t>(), 2);
+	EXPECT_EQ(visited_keys[10].get<size_t>(), 3);
 
 	EXPECT_EQ(visited_values[0].get<vec4>(), vec4(1.0f, 2.0f, 3.0f, 4.0f));
 	EXPECT_EQ(visited_values[1].get<float>(), 1.0f);
@@ -106,13 +111,11 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_EQ(visited_values[3].get<float>(), 3.0f);
 	EXPECT_EQ(visited_values[4].get<float>(), 4.0f);
 	EXPECT_EQ(visited_values[5].get<int>(), 69);
-
-	EXPECT_STREQ(visited_types[0].name().data(), "vec4");
-	EXPECT_EQ(visited_types[1].hash(), reflect::typehash<float>());
-	EXPECT_EQ(visited_types[2].hash(), reflect::typehash<float>());
-	EXPECT_EQ(visited_types[3].hash(), reflect::typehash<float>());
-	EXPECT_EQ(visited_types[4].hash(), reflect::typehash<float>());
-	EXPECT_EQ(visited_types[5].hash(), reflect::typehash<int>());
+	//EXPECT_EQ(visited_values[6], );
+	EXPECT_STREQ(visited_values[7].get<string>().c_str(), "ivan");
+	EXPECT_STREQ(visited_values[8].get<string>().c_str(), "is");
+	EXPECT_STREQ(visited_values[9].get<string>().c_str(), "a");
+	EXPECT_STREQ(visited_values[10].get<string>().c_str(), "weeb");
 
 	EXPECT_EQ(depth_changes[0], 1);
 	EXPECT_EQ(depth_changes[1], 1);
@@ -120,13 +123,18 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_EQ(depth_changes[3], 0);
 	EXPECT_EQ(depth_changes[4], 0);
 	EXPECT_EQ(depth_changes[5], -1);
+	EXPECT_EQ(depth_changes[6], 0);
+	EXPECT_EQ(depth_changes[7], 1);
+	EXPECT_EQ(depth_changes[8], 0);
+	EXPECT_EQ(depth_changes[9], 0);
+	EXPECT_EQ(depth_changes[10], 0);
 
 
-	dyn.visit([&](const char* name, auto&& mem, int) {
-		using T = std::decay_t<decltype(mem)>;
+	dyn.visit([&](auto key, auto&& val, int) {
+		using T = std::decay_t<decltype(val)>;
 
 		if constexpr (std::is_same_v<T, float>)
-			mem *= 2.0f;
+			val *= 2.0f;
 	});
 
 	EXPECT_EQ(obj.vec, vec4(2.0f, 4.0f, 6.0f, 8.0f));
