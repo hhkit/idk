@@ -162,4 +162,9 @@ namespace idk
 		scene.slots.clear();
 		return true;
 	}
+	template<typename T>
+	inline bool ObjectPool<T>::ValidateScene(scene_t scene_id)
+	{
+		return _scenes[scene_id].slots.size();
+	}
 }

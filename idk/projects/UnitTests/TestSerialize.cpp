@@ -2,6 +2,7 @@
 #include <serialize/serialize.h>
 #include <reflect/ReflectRegistration.h>
 #include <res/Guid.h>
+#include <scene/SceneFactory.h>
 
 using namespace idk;
 
@@ -52,7 +53,8 @@ static uint64_t parent_1_id = 0;
 TEST(Serialize, TestSerializeScene)
 {
 	GameState gs;
-	auto scene = gs.ActivateScene(0);
+	SceneFactory sf;
+	auto scene = sf.Create();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();
@@ -77,7 +79,8 @@ TEST(Serialize, TestSerializeScene)
 TEST(Serialize, TestParseScene)
 {
 	GameState gs;
-	auto scene = gs.ActivateScene(0);
+	SceneFactory sf;
+	auto scene = sf.Create();
 
 	parse_text(serialized_scene_0, *scene);
 

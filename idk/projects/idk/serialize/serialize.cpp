@@ -3,7 +3,7 @@
 #include <reflect/reflect.h>
 #include <res/Guid.h>
 #include <core/GameObject.h>
-#include <core/Scene.h>
+#include <scene/Scene.h>
 #include <common/Transform.h>
 
 #include <json/json.hpp>

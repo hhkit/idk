@@ -8,11 +8,11 @@ namespace idk
 	class Resource
 	{
 	public:
-		RscHandle<Res> GetHandle() const { return handle_; }
+		RscHandle<Res> GetHandle() const { return _handle; }
 	private:
-		RscHandle<Res> handle_;
-		atomic<bool>   loaded_    { false };
-		bool           must_load_ { false };
+		RscHandle<Res> _handle;
+		atomic<bool>   _loaded    { false };
+		bool           _must_load { false };
 		friend class ResourceManager;
 	};
 }

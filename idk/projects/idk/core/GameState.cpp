@@ -156,12 +156,9 @@ namespace idk
 		_instance = nullptr;
 	}
 
-	opt<Scene> GameState::ActivateScene(uint8_t scene)
+	bool GameState::ActivateScene(uint8_t scene)
 	{
-		if (detail::TableGen::ActivateScene(_objects, scene))
-			return Scene{ scene };
-		else
-			return {};
+		return detail::TableGen::ActivateScene(_objects, scene);
 	}
 	bool GameState::DectivateScene(uint8_t scene)
 	{
@@ -170,6 +167,10 @@ namespace idk
 	bool GameState::DectivateScene(Scene scene)
 	{
 		return DectivateScene(scene.scene_id);
+	}
+	bool GameState::ValidateScene(Scene scene)
+	{
+		return static_cast<ObjectPool<GameObject>*>(std::get<0>(_objects).get())->ValidateScene(scene.scene_id);
 	}
 	bool GameState::CreateObject(const GenericHandle& handle)
 	{
