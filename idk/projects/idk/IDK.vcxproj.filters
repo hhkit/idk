@@ -278,7 +278,9 @@
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="audio\AudioClipFactory.h" />
+    <ClInclude Include="audio\AudioClipFactory.h">
+      <Filter>audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -363,8 +365,12 @@
     <ClCompile Include="scene\Scene.cpp">
       <Filter>scene</Filter>
     </ClCompile>
-    <ClCompile Include="audio\AudioClipFactory.cpp" />
-    <ClCompile Include="reflect\uni_container.cpp" />
+    <ClCompile Include="reflect\uni_container.cpp">
+      <Filter>reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioClipFactory.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -460,9 +466,15 @@
     <None Include="scene\Scene.inl">
       <Filter>scene</Filter>
     </None>
-    <None Include="serialize\serialize.inl" />
-    <None Include="file\FileSystem.inl" />
-    <None Include="reflect\uni_container.inl" />
+    <None Include="reflect\uni_container.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="serialize\serialize.inl">
+      <Filter>serialize</Filter>
+    </None>
+    <None Include="file\FileSystem.inl">
+      <Filter>audio</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
