@@ -137,7 +137,7 @@
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />
-    <None Include="file\FIleSystem.inl" />
+    <None Include="file\FileSystem.inl" />
     <None Include="math\angle.inl" />
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
@@ -157,6 +157,7 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
+    <None Include="serialize\serialize.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>

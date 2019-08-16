@@ -462,6 +462,8 @@
     <None Include="scene\Scene.inl">
       <Filter>scene</Filter>
     </None>
+    <None Include="serialize\serialize.inl" />
+    <None Include="file\FileSystem.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

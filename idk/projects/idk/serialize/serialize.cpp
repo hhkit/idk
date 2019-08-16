@@ -27,18 +27,18 @@ namespace idk
 			{
 				if constexpr (std::is_arithmetic_v<T>)
 					(*stack.back())[key] = arg;
-				else if constexpr (is_basic_serializable<T>::value)
+				else if constexpr (is_basic_serializable_v<T>)
 					(*stack.back())[key] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[key] = json::array()));
 				else // associative container
 					stack.push_back(&((*stack.back())[key] = json::object()));
 			}
-			else if constexpr (is_basic_serializable<K>::value)
+			else if constexpr (is_basic_serializable_v<K>)
 			{
 				if constexpr (std::is_arithmetic_v<T>)
 					(*stack.back())[serialize_text(key)] = arg;
-				else if constexpr (is_basic_serializable<T>::value)
+				else if constexpr (is_basic_serializable_v<T>)
 					(*stack.back())[serialize_text(key)] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
@@ -121,7 +121,7 @@ namespace idk
 					arg = iter->get<T>();
 					return false;
 				}
-				else if constexpr (is_basic_serializable<T>::value)
+				else if constexpr (is_basic_serializable_v<T>)
 				{
 					parse_text(iter->get<string>(), arg);
 					return false;
@@ -133,7 +133,7 @@ namespace idk
 					int i = 0;
 					for (auto& elem : *iter)
 					{
-						if constexpr (is_basic_serializable<decltype(*arg.begin())>::value)
+						if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
 							parse_text(elem.get<string>(), arg[i]);
 						else
 						{
@@ -153,7 +153,7 @@ namespace idk
 						{
 							using ElemK = std::decay_t<decltype(arg.begin()->first)>;
 							using ElemV = std::decay_t<decltype(arg.begin()->second)>;
-							if constexpr(is_basic_serializable<ElemV>::value)
+							if constexpr(is_basic_serializable_v<ElemV>)
 								arg.emplace(parse_text<ElemK>(elem_name), parse_text<ElemV>(elem_val.get<string>()));
 							else
 								parse_json(elem_val, arg.emplace(parse_text<ElemK>(elem_name), ElemV{}).second);
@@ -161,7 +161,7 @@ namespace idk
 						else
 						{
 							using ElemV = std::decay_t<decltype(*arg.begin())>;
-							if constexpr (is_basic_serializable<decltype(arg.begin()->second)>::value)
+							if constexpr (is_basic_serializable_v<decltype(arg.begin()->second)>)
 								arg.emplace(parse_text<ElemV>(elem_val.get<string>()));
 							else
 							{
