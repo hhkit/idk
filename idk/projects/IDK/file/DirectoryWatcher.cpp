@@ -238,7 +238,7 @@ namespace idk
 				auto& test = vfs.getFile(f.tree_index);
 				std::cout << "[FILE SYSTEM] File Created: " << "\n"
 					"\t Path: " << f.full_path << "\n" <<
-					"\t Test: " << test.full_path << "\n" << std::endl;
+					"\t Test: " << test.full_path << "\n" <<  std::endl;
 				break;
 			}
 		}
@@ -293,7 +293,7 @@ namespace idk
 					{
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 							"\t Prev Path: " << internal_file.full_path << "\n"
-							"\t Curr Path: " << tmp.string() << "\n";
+							"\t Curr Path: " << tmp.string() << "\n" << std::endl;
 
 						// This is the file that was renamed.
 						internal_file.full_path = tmp.string();
@@ -339,7 +339,7 @@ namespace idk
 			if (current_file_last_write_time != internal_file.time)
 			{
 				std::cout << "[FILE SYSTEM] File Written To: " << "\n"
-					"\t Path: " << internal_file.full_path << "\n";
+					"\t Path: " << internal_file.full_path << "\n" << std::endl;
 
 				internal_file.time = current_file_last_write_time;
 
