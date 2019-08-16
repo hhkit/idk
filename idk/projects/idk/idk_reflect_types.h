@@ -31,5 +31,6 @@ namespace idk::reflect
 		, Handle<GameObject>
 		, Guid
 		, vector<string>
+		, hash_table<Guid, string>
 	>;
 }

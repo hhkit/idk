@@ -34,9 +34,11 @@ struct reflect_this
 	vec4 vec;
 	int f = 69;
 	vector<string> container;
+	double blaze_it = 420.0;
+	hash_table<Guid, string> hashtable;
 };
 REFLECT_BEGIN(reflect_this, "reflect_this")
-REFLECT_VARS(vec, f, container)
+REFLECT_VARS(vec, f, container, blaze_it, hashtable)
 REFLECT_END()
 
 TEST(Reflect, TestReflectConstexpr)
@@ -71,23 +73,25 @@ TEST(Reflect, TestReflectVisit)
 	obj.container.push_back("is");
 	obj.container.push_back("a");
 	obj.container.push_back("weeb");
+	obj.hashtable.emplace(Guid::Make(), "test0");
+	obj.hashtable.emplace(Guid::Make(), "test1");
 
 	int counter = 0;
 	reflect::dynamic dyn{ obj };
-	dyn.visit([&](auto name, auto&& mem, int) {
+	dyn.visit([&](auto&& name, auto&& mem, int) {
 		using T = std::decay_t<decltype(mem)>;
 		auto val = mem;
 		++counter;
 		return false; // false should stop recursive
 	});
 
-	EXPECT_EQ(counter, 3);
+	EXPECT_EQ(counter, 5);
 
 
 	std::vector<reflect::dynamic> visited_keys;
 	std::vector<reflect::dynamic> visited_values;
 	std::vector<int> depth_changes;
-	dyn.visit([&](auto key, auto&& val, int depth_change) {
+	dyn.visit([&](auto&& key, auto&& val, int depth_change) {
 		visited_keys.emplace_back(std::forward<decltype(key)>(key));
 		visited_values.emplace_back(val);
 		depth_changes.push_back(depth_change);
@@ -104,6 +108,10 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_EQ(visited_keys[8].get<size_t>(), 1);
 	EXPECT_EQ(visited_keys[9].get<size_t>(), 2);
 	EXPECT_EQ(visited_keys[10].get<size_t>(), 3);
+	EXPECT_STREQ(visited_keys[11].get<const char*>(), "blaze_it");
+	EXPECT_STREQ(visited_keys[12].get<const char*>(), "hashtable");
+	EXPECT_EQ(visited_keys[13].get<Guid>(), obj.hashtable.begin()->first);
+	EXPECT_EQ(visited_keys[14].get<Guid>(), (++obj.hashtable.begin())->first);
 
 	EXPECT_EQ(visited_values[0].get<vec4>(), vec4(1.0f, 2.0f, 3.0f, 4.0f));
 	EXPECT_EQ(visited_values[1].get<float>(), 1.0f);
@@ -116,6 +124,10 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_STREQ(visited_values[8].get<string>().c_str(), "is");
 	EXPECT_STREQ(visited_values[9].get<string>().c_str(), "a");
 	EXPECT_STREQ(visited_values[10].get<string>().c_str(), "weeb");
+	EXPECT_EQ(visited_values[11].get<double>(), 420.0);
+	//EXPECT_EQ(visited_values[12], );
+	EXPECT_STREQ(visited_values[13].get<string>().c_str(), "test0");
+	EXPECT_STREQ(visited_values[14].get<string>().c_str(), "test1");
 
 	EXPECT_EQ(depth_changes[0], 1);
 	EXPECT_EQ(depth_changes[1], 1);
@@ -128,9 +140,13 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_EQ(depth_changes[8], 0);
 	EXPECT_EQ(depth_changes[9], 0);
 	EXPECT_EQ(depth_changes[10], 0);
+	EXPECT_EQ(depth_changes[11], -1);
+	EXPECT_EQ(depth_changes[12], 0);
+	EXPECT_EQ(depth_changes[13], 1);
+	EXPECT_EQ(depth_changes[14], 0);
 
 
-	dyn.visit([&](auto key, auto&& val, int) {
+	dyn.visit([&](auto&& key, auto&& val, int) {
 		using T = std::decay_t<decltype(val)>;
 
 		if constexpr (std::is_same_v<T, float>)

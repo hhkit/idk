@@ -106,48 +106,8 @@ namespace idk::reflect
 
 	namespace detail
 	{
-		template<typename Container, typename Visitor>
-		void visit_container(Container& container, Visitor&& visitor, int& depth)
-		{
-			if (container.size() == 0)
-				return;
-
-			int curr_depth = depth;
-			++depth;
-
-			if constexpr (is_sequential_container_v<Container>)
-			{
-				size_t i = 0;
-				for (auto& elem : container)
-				{
-					int depth_change = depth - curr_depth;
-					curr_depth = depth;
-
-					if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(size_t, decltype(elem), int&)>, bool>) // does it return bool?
-					{
-						if (visitor(i, elem, depth_change)) // if false, stop recursive
-						{
-							if constexpr (is_iterable_v<decltype(elem)>)
-								visit_container(elem, std::forward<Visitor>(visitor), depth);
-							else
-								visit(&elem, get_type<decltype(elem)>(), std::forward<Visitor>(visitor), depth);
-							std::swap(depth, curr_depth);
-						}
-					}
-					else
-					{
-						visitor(i, elem, depth_change);
-						if constexpr (is_iterable_v<decltype(elem)> && !std::is_same_v<std::decay_t<decltype(elem)>, string>)
-							visit_container(elem, std::forward<Visitor>(visitor), depth);
-						else
-							visit(&elem, get_type<decltype(elem)>(), std::forward<Visitor>(visitor), depth);
-						std::swap(depth, curr_depth);
-					}
-
-					++i;
-				}
-			}
-		}
+		template<typename K, typename V, typename Visitor>
+		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
 
 		template<typename Visitor>
 		void visit(void* obj, type type, Visitor&& visitor, int& depth)
@@ -179,32 +139,73 @@ namespace idk::reflect
 						void* offsetted = ::property::details::HandleBasePointer(obj, entry.m_Offset);
 						T& value = *reinterpret_cast<T*>(offsetted);
 
-						int depth_change = depth - curr_depth;
-						curr_depth = depth;
-
-						if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(const char*, T&, int&)>, bool>)
-						{
-							if (visitor(table.m_pEntry[i].m_pName, value, depth_change)) // if false, stop recursive
-							{
-								if constexpr (is_sequential_container_v<DecayedT>)
-									visit_container(value, std::forward<Visitor>(visitor), depth);
-								else
-									visit(offsetted, get_type<T>(), std::forward<Visitor>(visitor), depth);
-								std::swap(depth, curr_depth);
-							}
-						}
-						else // function has no return
-						{
-							visitor(table.m_pEntry[i].m_pName, value, depth_change);
-							if constexpr (is_sequential_container_v<DecayedT>)
-								visit_container(value, std::forward<Visitor>(visitor), depth);
-							else
-								visit(offsetted, get_type<T>(), std::forward<Visitor>(visitor), depth);
-							std::swap(depth, curr_depth);
-						}
+						visit_key_value(std::move(table.m_pEntry[i].m_pName), value, std::forward<Visitor>(visitor), depth, curr_depth);
 					}
 
 				}, entry.m_FunctionTypeGetSet);
+			}
+		}
+
+		template<typename Container, typename Visitor>
+		void visit_container(Container& container, Visitor&& visitor, int& depth)
+		{
+			if (container.size() == 0)
+				return;
+
+			int curr_depth = depth;
+			++depth;
+
+			if constexpr (is_sequential_container_v<Container>)
+			{
+				size_t i = 0;
+				for (auto& elem : container)
+				{
+					// key should be rvalue, so move it
+					visit_key_value(std::move(i), elem, std::forward<Visitor>(visitor), depth, curr_depth);
+					++i;
+				}
+			}
+			else if constexpr (is_associative_container_v<Container>)
+			{
+				using V = decltype(*container.begin());
+
+				for (auto& elem : container)
+				{
+					if constexpr (is_template_v<std::decay_t<V>, std::pair>)
+						visit_key_value(elem.first, elem.second, std::forward<Visitor>(visitor), depth, curr_depth);
+					else
+						visit_key_value(elem, elem, std::forward<Visitor>(visitor), depth, curr_depth);
+				}
+			}
+		}
+
+		template<typename K, typename V, typename Visitor>
+		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth)
+		{
+			constexpr bool ValIsContainer =
+				(is_associative_container_v<V> || is_sequential_container_v<V>) && !std::is_same_v<std::decay_t<V>, string>;
+			int depth_change = depth - curr_depth;
+			curr_depth = depth;
+
+			if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(K, V, int&)>, bool>) // does it return bool?
+			{
+				if (visitor(std::forward<K>(key), std::forward<V>(val), depth_change)) // if false, stop recursive
+				{
+					if constexpr (ValIsContainer)
+						visit_container(val, std::forward<Visitor>(visitor), depth);
+					else
+						visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth);
+					std::swap(depth, curr_depth);
+				}
+			}
+			else
+			{
+				visitor(std::forward<K>(key), std::forward<V>(val), depth_change);
+				if constexpr (ValIsContainer)
+					visit_container(val, std::forward<Visitor>(visitor), depth);
+				else
+					visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth);
+				std::swap(depth, curr_depth);
 			}
 		}
 	}

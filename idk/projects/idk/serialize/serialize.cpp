@@ -16,18 +16,35 @@ namespace idk
 		json j;
 		vector<json*> stack{ &j };
 
-		obj.visit([&](auto name, auto&& arg, int depth_change)
+		obj.visit([&](auto&& key, auto&& arg, int depth_change)
 		{
+			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
 			if (depth_change == -1)
 				stack.pop_back();
 
-			if constexpr (std::is_arithmetic_v<T>)
-				(*stack.back())[name] = arg;
-			else if constexpr (is_basic_serializable<T>::value)
-				(*stack.back())[name] = serialize_text(arg);
+			if constexpr (std::is_arithmetic_v<K>)
+			{
+				if constexpr (std::is_arithmetic_v<T>)
+					(*stack.back())[key] = arg;
+				else if constexpr (is_basic_serializable<T>::value)
+					(*stack.back())[key] = serialize_text(arg);
+				else
+					stack.push_back(&((*stack.back())[key] = json::object()));
+			}
+			else if constexpr (is_basic_serializable<K>::value)
+			{
+				if constexpr (std::is_arithmetic_v<T>)
+					(*stack.back())[serialize_text(key)] = arg;
+				else if constexpr (is_basic_serializable<T>::value)
+					(*stack.back())[serialize_text(key)] = serialize_text(arg);
+				else
+					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
+			}
 			else
-				stack.push_back(&((*stack.back())[name] = json::object()));
+			{
+				throw "wtf is this key??";
+			}
 		});
 
 		return j;
@@ -81,7 +98,7 @@ namespace idk
 	{
 		vector<const json*> stack{ &j };
 
-		obj.visit([&](auto name, auto&& arg, int depth_change)
+		obj.visit([&](auto&& name, auto&& arg, int depth_change)
 		{
 			using T = std::decay_t<decltype(arg)>;
 			using K = std::decay_t<decltype(name)>;
