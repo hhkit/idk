@@ -281,6 +281,9 @@
     <ClInclude Include="audio\AudioClipFactory.h">
       <Filter>audio</Filter>
     </ClInclude>
+    <ClInclude Include="util\enum.h">
+      <Filter>util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

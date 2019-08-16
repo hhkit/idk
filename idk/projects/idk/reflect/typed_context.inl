@@ -66,7 +66,7 @@ namespace idk::reflect::detail
 			{
 				if constexpr (sizeof...(Ts) == 1)
 				{
-					if (((args.type._context == *this) && ...))
+					if (((args.type._context == this) && ...))
 						return copy_construct((args._ptr->get())...);
 				}
 

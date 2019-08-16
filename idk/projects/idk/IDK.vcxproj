@@ -72,6 +72,7 @@
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
+    <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />

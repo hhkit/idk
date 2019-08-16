@@ -114,6 +114,7 @@ namespace idk::reflect
 	// reflected object. contains type-erased object with type information.
 	class dynamic
 	{
+		friend struct detail::typed_context_base;
 		class property_iterator;
 
 	public:
@@ -202,7 +203,7 @@ namespace idk::reflect
 #define REFLECT_VAR(VAR)						property::PropertyVar<decltype(std::declval<t_self>().VAR)>( #VAR, offsetof( t_self, VAR ) )
 #define REFLECT_PARENT(PARENT_TYPE)				property::PropertyParent<t_self::PARENT_TYPE, const t_self*>(),
 #define REFLECT_CTOR(...)						idk::reflect::detail::constructor_entry<t_self, __VA_ARGS__>{},
-#define REFLECT_FRIEND							template<typename> friend struct idk::reflect::detail::type_definition;
+#define REFLECT_FRIEND							template<typename> friend struct property::opin::def;
 
 #include <util/macro_utils.h>
 #define X_REFLECT_VARS_SINGLE(VAR) REFLECT_VAR(VAR),

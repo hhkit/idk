@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <reflect/reflect.h>
+#include <util/enum.h>
 #include <reflect/ReflectRegistration.h>
 
 using namespace idk;
@@ -255,4 +256,17 @@ TEST(Reflect, TestReflectUniContainer)
 		container.clear();
 		EXPECT_EQ(container.size(), 0);
 	}
+}
+
+ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
+
+TEST(Reflect, TestReflectEnum)
+{
+	auto x = testenum::IVAN;
+
+	auto t = reflect::get_type<testenum>();
+
+	auto ivan = t.create(8);
+
+	EXPECT_EQ(ivan.get_property("value").value.get<char>(), testenum::WEEB);
 }
