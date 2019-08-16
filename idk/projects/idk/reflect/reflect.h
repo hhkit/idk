@@ -18,7 +18,7 @@ namespace property::settings
 namespace idk::reflect
 {
 	// get full qualified type name of T (decayed).
-	// eg. vec3& => idk::math::vec3
+	// eg. vec3& => idk::math::vector<float, 3>
 	// NOTE: if comparing types, use typehash<T>() !!!
 	template<typename T> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
 
@@ -118,13 +118,7 @@ namespace idk::reflect
 
 		bool valid() const;
 
-		// recursively visit all members
-		// visitor must be a function with signature:
-		//  (const char* name, auto&& data, int depth_change) -> bool/void
-		// name: name of property
-		// data: the value, use T = std::decay_t<decltype(data)> to get the type
-		// depth_change: the change in depth; -1, 0, or 1. (1 means down a level)
-		// return false to stop recursion. if function doesn't return, it always recurses
+		// see reflect.inl for detailed comments
 		template<typename Visitor>
 		void visit(Visitor&& visitor) const;
 
@@ -153,13 +147,7 @@ namespace idk::reflect
 	// get type info of T
 	template<typename T> type get_type();
 
-	// recursively visit all members of an object
-	// visitor must be a function with signature:
-	//  (const char* name, auto&& data, int depth_change) -> bool/void
-	// name: name of property
-	// data: the value, use T = std::decay_t<decltype(data)> to get the type
-	// depth_change: the change in depth; -1, 0, or 1. (1 means down a level)
-	// return false to stop recursion. if function doesn't return, it always recurses
+	// see reflect.inl for detailed comments
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor);
 
