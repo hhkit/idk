@@ -24,6 +24,8 @@
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="scene\SceneFactory.h" />
+    <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="core\Component.h" />
@@ -60,7 +62,7 @@
     <ClInclude Include="math\vector_swizzle.h" />
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
-    <ClInclude Include="core\Scene.h" />
+    <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="core\IncludeSystems.h" />
     <ClInclude Include="app\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
@@ -91,6 +93,8 @@
   <ItemGroup>
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="scene\SceneFactory.cpp" />
+    <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="app\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
@@ -99,7 +103,7 @@
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />
     <ClCompile Include="core\Handle.cpp" />
-    <ClCompile Include="core\Scene.cpp" />
+    <ClCompile Include="scene\Scene.cpp" />
     <ClCompile Include="core\SystemManager.cpp" />
     <ClCompile Include="file\DirectoryWatcher.cpp" />
     <ClCompile Include="file\FileSystem.cpp" />
@@ -127,7 +131,7 @@
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
     <None Include="ds\ranged_for.inl" />
-    <None Include="core\Scene.inl" />
+    <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />

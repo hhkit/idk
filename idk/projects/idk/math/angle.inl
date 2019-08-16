@@ -228,6 +228,18 @@ namespace idk::math
 	{
 		return value * constants::pi<T>() / s_cast<T>(180);
 	}
+
+	template<typename T>
+	radian<T> operator*(const T& coeff, const radian<T>& r)
+	{
+		return r * coeff;
+	}
+
+	template<typename T>
+	degree<T> operator*(const T& coeff, const degree<T>& d)
+	{
+		return d * coeff;
+	}
 }
 
 namespace idk

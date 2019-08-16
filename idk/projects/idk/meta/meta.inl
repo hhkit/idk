@@ -15,6 +15,8 @@ namespace idk
 	{
 	};
 
+
+
 	template<typename ... Ts, template<typename ...> typename Wrap>
 	struct tuple_wrap<std::tuple<Ts...>, Wrap>
 	{
@@ -56,4 +58,34 @@ namespace idk
 	{
 		using type = index_sequence_cat_t<std::index_sequence<Last>, index_sequence_rev_t<std::index_sequence<Indexes...>>>;
 	};
+
+
+
+	template<typename T, typename = void>
+	struct is_iterable : std::false_type {};
+
+	template<typename T>
+	struct is_iterable<T, std::void_t<decltype(
+		std::begin(std::declval<T&>()) != std::end(std::declval<T&>()), // begin/end and operator !=
+		void(), // Handle evil operator ,
+		++std::declval<decltype(std::begin(std::declval<T&>()))&>(), // operator ++
+		void(*std::begin(std::declval<T&>())) // operator*
+	)>> : std::true_type {};
+
+	template<typename T, typename = void>
+	struct is_sequential_container : std::false_type {};
+
+	template<typename T>
+	struct is_sequential_container<T, std::void_t<decltype(
+		std::declval<T&>().resize(0)
+	)>> : is_iterable<T> {};
+
+	template<typename T, typename = void>
+	struct is_associative_container : std::false_type {};
+
+	template<typename T>
+	struct is_associative_container<T, std::void_t<decltype(
+		std::declval<T&>().insert(std::declval<std::decay_t<T>::value_type>())
+		)>> : is_iterable<T> {};
+
 }

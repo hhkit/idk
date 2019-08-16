@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include "Handle.h"
-#include "Scene.h"
+#include <scene/Scene.h>
 
 namespace idk::reflect
 {

@@ -6,5 +6,6 @@
 
 #include <gfx/GraphicsSystem.h>
 #include <res/ResourceManager.h>
+#include <scene/SceneManager.h>
 
 #include <app/TestSystem.h>
