@@ -31,7 +31,7 @@ namespace idk
 					(*stack.back())[key] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[key] = json::array()));
-				else
+				else // associative container
 					stack.push_back(&((*stack.back())[key] = json::object()));
 			}
 			else if constexpr (is_basic_serializable<K>::value)
@@ -42,7 +42,7 @@ namespace idk
 					(*stack.back())[serialize_text(key)] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
-				else
+				else // associative container
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
 			}
 			else
@@ -102,35 +102,78 @@ namespace idk
 	{
 		vector<const json*> stack{ &j };
 
-		obj.visit([&](auto&& name, auto&& arg, int depth_change)
+		obj.visit([&](auto&& key, auto&& arg, int depth_change)
 		{
+			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			using K = std::decay_t<decltype(name)>;
+			if (depth_change == -1)
+				stack.pop_back();
 
 			if constexpr (std::is_same_v<K, const char*>)
 			{
-				if (depth_change == -1)
-					stack.pop_back();
-
 				auto& curr_j = *stack.back();
-				auto iter = curr_j.find(name);
+				auto iter = curr_j.find(key);
 				if (iter == curr_j.end())
 					return false;
 
-				if constexpr (!is_basic_serializable<T>::value)
-				{
-					stack.push_back(&*iter);
-					return true;
-				}
-				else if constexpr (std::is_arithmetic_v<T>)
+				if constexpr (std::is_arithmetic_v<T>)
 				{
 					arg = iter->get<T>();
 					return false;
 				}
+				else if constexpr (is_basic_serializable<T>::value)
+				{
+					parse_text(iter->get<string>(), arg);
+					return false;
+				}
+				else if constexpr (is_sequential_container_v<T>)
+				{
+					arg.clear();
+					arg.resize(iter->size());
+					int i = 0;
+					for (auto& elem : *iter)
+					{
+						if constexpr (is_basic_serializable<decltype(arg[0])>::value)
+							parse_text(elem.get<string>(), arg[i]);
+						else
+							parse_json(elem, arg[i]);
+						++i;
+					}
+					return false;
+				}
+				else if constexpr (is_associative_container_v<T>)
+				{
+					arg.clear();
+					for (auto &[elem_name, elem_val] : iter->items())
+					{
+						if constexpr (is_template_v<std::decay_t<decltype(*arg.begin())>, std::pair>) // map / unordered_map
+						{
+							using ElemK = std::decay_t<decltype(arg.begin()->first)>;
+							using ElemV = std::decay_t<decltype(arg.begin()->second)>;
+							if constexpr(is_basic_serializable<ElemV>::value)
+								arg.emplace(parse_text<ElemK>(elem_name), parse_text<ElemV>(elem_val.get<string>()));
+							else
+								parse_json(elem_val, arg.emplace(parse_text<ElemK>(elem_name), ElemV{}).second);
+						}
+						else
+						{
+							using ElemV = std::decay_t<decltype(*arg.begin())>;
+							if constexpr (is_basic_serializable<decltype(arg.begin()->second)>::value)
+								arg.emplace(parse_text<ElemV>(elem_val.get<string>()));
+							else
+							{
+								ElemV elem_to_emplace{};
+								parse_json(elem_val, elem_to_emplace);
+								arg.emplace(std::move(elem_to_emplace));
+							}
+						}
+					}
+					return false;
+				}
 				else
 				{
-					arg = parse_text<T>(iter->get<string>());
-					return false;
+					stack.push_back(&*iter);
+					return true;
 				}
 			}
 			else

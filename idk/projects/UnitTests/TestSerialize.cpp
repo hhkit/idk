@@ -47,7 +47,7 @@ TEST(Serialize, TestSerializeBasic)
 struct serialize_this_bs
 {
 	int start = 0;
-	vector<string> string_vec = { "ivan", "is", "a", "weeb" };
+	vector<string> string_vec;
 	float mid = 1.0f;
 	hash_table<Guid, string> hashtable;
 	char end = '2';
@@ -59,6 +59,7 @@ REFLECT_END()
 TEST(Serialize, TestSerializeComplex)
 {
 	serialize_this_bs bs;
+	bs.string_vec = { "ivan", "is", "a", "weeb" };
 	bs.hashtable.emplace(Guid::Make(), "test0");
 	bs.hashtable.emplace(Guid::Make(), "test1");
 
@@ -67,6 +68,15 @@ TEST(Serialize, TestSerializeComplex)
 	
 	// roundtrip
 	serialize_this_bs bs2 = parse_text<serialize_this_bs>(str);
+	EXPECT_EQ(bs2.start, bs.start);
+	EXPECT_EQ(bs2.mid, bs.mid);
+	EXPECT_EQ(bs2.end, bs.end);
+	EXPECT_EQ(bs2.string_vec[0], bs.string_vec[0]);
+	EXPECT_EQ(bs2.string_vec[1], bs.string_vec[1]);
+	EXPECT_EQ(bs2.string_vec[2], bs.string_vec[2]);
+	EXPECT_EQ(bs2.string_vec[3], bs.string_vec[3]);
+	EXPECT_EQ(*bs2.hashtable.begin(), *bs.hashtable.begin());
+	EXPECT_EQ(*++bs2.hashtable.begin(), *++bs.hashtable.begin());
 }
 
 static string serialized_scene_0 = "";
