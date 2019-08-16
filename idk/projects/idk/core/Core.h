@@ -21,9 +21,9 @@ namespace idk
 		void Setup();
 		void Run();
 	private:
+		GameState                   _game_state;
 		SystemManager               _system_manager;
 		unique_ptr<class Scheduler> _scheduler;
-		GameState                   _game_state;
 		atomic<bool>                _running;
 		static inline Core*         _instance = nullptr;
 		bool                        _setup = false;

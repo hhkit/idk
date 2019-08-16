@@ -10,6 +10,7 @@
 #include "pch.h" // gtest.h
 #include "FMOD/core/fmod.hpp" //FMOD Core
 #include "FMOD/core/fmod_errors.h" //ErrorString
+#include <core/Core.h>
 #include <audio/AudioSystem.h>	
 #include <iostream>	
 
@@ -17,7 +18,9 @@
 TEST(Audio, AudioSystemClassTest)
 {
 	using namespace idk;
-	AudioSystem test{};
+	Core c;
+	AudioSystem& test = Core::GetSystem<AudioSystem>();
+	c.Setup();
 	try { 
 		test.Init(); 
 	}
