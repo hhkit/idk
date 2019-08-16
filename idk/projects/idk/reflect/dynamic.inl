@@ -5,8 +5,9 @@
 namespace idk::reflect
 {
 
-	struct dynamic::property_iterator
+	class dynamic::property_iterator
 	{
+	public:
 		property_iterator(const dynamic& obj, size_t index = 0);
 		property_iterator& operator++(); //prefix increment
 		bool operator==(const property_iterator&);
@@ -23,7 +24,7 @@ namespace idk::reflect
 		: type{ get_type<T>() }, _ptr{ std::make_shared<detail::dynamic_derived<T>>(std::forward<T>(obj)) }
 	{}
 
-	template<typename T, typename>
+	template<typename T>
 	dynamic& dynamic::operator=(const T& rhs)
 	{
 		assert(is<std::decay_t<T>>());

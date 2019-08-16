@@ -97,7 +97,7 @@ namespace idk::reflect
 	// reflected object. contains type-erased object with type information.
 	class dynamic
 	{
-		struct property_iterator;
+		class property_iterator;
 
 	public:
 		const type type;
@@ -108,24 +108,23 @@ namespace idk::reflect
 		// invalid dynamic
 		dynamic();
 
-		dynamic& operator=(const dynamic& rhs);
-
-		template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, dynamic>>>
-		dynamic& operator=(const T& rhs);
-
 		template<typename T> bool is() const;
 		template<typename T> T& get() const;
-
 		bool valid() const;
 
 		// see reflect.inl for detailed comments
 		template<typename Visitor>
 		void visit(Visitor&& visitor) const;
 
+		// iterate properties. to iterate container types, use to_container()
 		property_iterator begin() const;
 		property_iterator end() const;
 		property get_property(string_view name) const;
 		property get_property(size_t index) const;
+
+		template<typename T>
+		dynamic& operator=(const T& rhs);
+		dynamic& operator=(const dynamic& rhs);
 
 	private:
 		shared_ptr<detail::dynamic_base> _ptr;
