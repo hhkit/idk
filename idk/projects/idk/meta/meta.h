@@ -35,6 +35,24 @@ namespace idk
 
 	template<typename T>
 	using index_sequence_rev_t = typename index_sequence_rev<T>::type;
+
+	template<typename T, typename>
+	struct is_iterable;
+
+	template<typename T>
+	constexpr auto is_iterable_v = is_iterable<T>::value;
+
+	template<typename T, typename>
+	struct is_sequential_container;
+
+	template<typename T>
+	constexpr auto is_sequential_container_v = is_sequential_container<T>::value;
+
+	template<typename T, typename>
+	struct is_associative_container;
+
+	template<typename T>
+	constexpr auto is_associative_container_v = is_associative_container<T>::value;
 }
 
 #include "meta.inl"
