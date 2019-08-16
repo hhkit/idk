@@ -44,11 +44,14 @@ namespace idk
 		,	class GraphicsSystem
 		,	class AudioSystem
 		,	class ResourceManager
+		,	class SceneManager
 		,	class IEditor
 	>;
 
 	using Resources = std::tuple<
-		class TestResource
+		class Scene
+		,	class TestResource
+		,   class AudioClip
 		//,	class Texture
 		//,	class Font
 		//,	class Mesh

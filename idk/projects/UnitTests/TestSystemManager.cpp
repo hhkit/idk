@@ -3,6 +3,8 @@
 #include <core/Core.h>
 #include <app/Application.h>
 #include <editor/IEditor.h>
+#include <scene/SceneFactory.h>
+#include <res/ResourceManager.h>
 class TestApplication : 
 	public idk::Application
 {
@@ -26,7 +28,7 @@ public:
 
 	void Shutdown() override { i++;  std::cout << "application shutdown\n"; }
 };
-
+/*
 TEST(System, TestSystemManager)
 {
 	using namespace idk;
@@ -41,7 +43,7 @@ TEST(System, TestSystemManager)
 	EXPECT_EQ(app-> i, 1);
 	sysman.ShutdownSystems();
 	EXPECT_EQ(app->i, 2);
-}
+}*/
 
 TEST(System, TestCore)
 {
@@ -49,9 +51,5 @@ TEST(System, TestCore)
 
 	auto core = Core{};
 	core.AddSystem<TestApplication>();
-	auto scene = GameState::GetGameState().ActivateScene(0);
-	scene->CreateGameObject();
-	scene->CreateGameObject();
-	scene->CreateGameObject();
 	core.Run();
 }

@@ -11,7 +11,8 @@ namespace idk
 	public:
 		using Resource = Res;
 		virtual unique_ptr<Resource> Create() = 0;
-		virtual unique_ptr<Resource> Create(const ResourceMeta&) = 0;
+		virtual unique_ptr<Resource> Create(string_view filepath) { return unique_ptr<Resource>(); };
+		virtual unique_ptr<Resource> Create(string_view filepath, const ResourceMeta&) = 0;
 		virtual ~ResourceFactory() = default;
 	};
 }

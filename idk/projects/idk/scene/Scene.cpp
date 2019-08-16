@@ -1,12 +1,28 @@
 #include "stdafx.h"
 #include "Scene.h"
-#include "GameObject.h"
+#include <core/GameObject.h>
 
 namespace idk
 {
-	Scene::Scene(uint8_t scene_id)
-		: scene_id{ scene_id }
+	Scene::Scene(uint8_t scene_id_)
+		: scene_id{ scene_id_ }
 	{
+		if (scene_id == MaxScene)
+		{
+			for (uint8_t i = 0; i < MaxScene; ++i)
+			{
+				if (GameState::GetGameState().ActivateScene(i))
+				{
+					scene_id = i;
+					break;
+				}
+			}
+		}
+	}
+
+	Scene::~Scene()
+	{
+		GameState::GetGameState().DectivateScene(scene_id);
 	}
 
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)

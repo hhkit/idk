@@ -2,6 +2,7 @@
 #include <serialize/serialize.h>
 #include <reflect/ReflectRegistration.h>
 #include <res/Guid.h>
+#include <scene/SceneFactory.h>
 
 using namespace idk;
 
@@ -44,6 +45,41 @@ TEST(Serialize, TestSerializeBasic)
 	EXPECT_EQ(obj.vec, obj2.vec);
 }
 
+struct serialize_this_bs
+{
+	int start = 0;
+	vector<string> string_vec;
+	float mid = 1.0f;
+	hash_table<Guid, string> hashtable;
+	char end = '2';
+};
+REFLECT_BEGIN(serialize_this_bs, "serialize_this_bs")
+REFLECT_VARS(start, string_vec, mid, hashtable, end)
+REFLECT_END()
+
+TEST(Serialize, TestSerializeComplex)
+{
+	serialize_this_bs bs;
+	bs.string_vec = { "ivan", "is", "a", "weeb" };
+	bs.hashtable.emplace(Guid::Make(), "test0");
+	bs.hashtable.emplace(Guid::Make(), "test1");
+
+	auto str = serialize_text(bs);
+	std::cout << str;
+	
+	// roundtrip
+	serialize_this_bs bs2 = parse_text<serialize_this_bs>(str);
+	EXPECT_EQ(bs2.start, bs.start);
+	EXPECT_EQ(bs2.mid, bs.mid);
+	EXPECT_EQ(bs2.end, bs.end);
+	EXPECT_EQ(bs2.string_vec[0], bs.string_vec[0]);
+	EXPECT_EQ(bs2.string_vec[1], bs.string_vec[1]);
+	EXPECT_EQ(bs2.string_vec[2], bs.string_vec[2]);
+	EXPECT_EQ(bs2.string_vec[3], bs.string_vec[3]);
+	EXPECT_EQ(bs2.hashtable[bs.hashtable.begin()->first], bs.hashtable.begin()->second);
+	EXPECT_EQ(bs2.hashtable[(++bs.hashtable.begin())->first], (++bs.hashtable.begin())->second);
+}
+
 static string serialized_scene_0 = "";
 static uint64_t transform_0_id = 0;
 static uint64_t transform_1_id = 0;
@@ -52,7 +88,8 @@ static uint64_t parent_1_id = 0;
 TEST(Serialize, TestSerializeScene)
 {
 	GameState gs;
-	auto scene = gs.ActivateScene(0);
+	SceneFactory sf;
+	auto scene = sf.Create();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();
@@ -77,7 +114,8 @@ TEST(Serialize, TestSerializeScene)
 TEST(Serialize, TestParseScene)
 {
 	GameState gs;
-	auto scene = gs.ActivateScene(0);
+	SceneFactory sf;
+	auto scene = sf.Create();
 
 	parse_text(serialized_scene_0, *scene);
 

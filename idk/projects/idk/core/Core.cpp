@@ -28,9 +28,17 @@ namespace idk
 
 	Core::~Core() = default;
 
-	void Core::Run()
+	void Core::Setup()
 	{
 		_system_manager.InitSystems();
+		_setup = true;
+	}
+
+	void Core::Run()
+	{
+		if (_setup == false)
+			Setup();
+
 		auto editor = &GetSystem<IEditor>();
 		// setup loop
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,  "Poll OS Events");

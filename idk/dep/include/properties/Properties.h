@@ -749,15 +749,15 @@ namespace property
     // PropertyVar / PropertyParent These are the generic functions when defining properties
     //--------------------------------------------------------------------------------------------
 
-    // Deal with std::arrays
-    template< typename T_VAR, std::size_t N > constexpr
-    std::enable_if_t< std::is_same_v<decltype(details::is_stdarray(std::decay_t<T_VAR>{})), bool>, property::setup_entry >
-    PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept { return details::HandleListsPropertyVar<T_VAR>( pName, Offset ); }
+    //// Deal with std::arrays
+    //template< typename T_VAR, std::size_t N > constexpr
+    //std::enable_if_t< std::is_same_v<decltype(details::is_stdarray(std::decay_t<T_VAR>{})), bool>, property::setup_entry >
+    //PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept { return details::HandleListsPropertyVar<T_VAR>( pName, Offset ); }
 
-    // deal with std::vectors
-    template< typename T_VAR, std::size_t N > constexpr
-    std::enable_if_t< is_specialized_v<std::vector, std::decay_t<T_VAR>>, property::setup_entry >
-    PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept { return details::HandleListsPropertyVar<T_VAR>( pName, Offset ); }
+    //// deal with std::vectors
+    //template< typename T_VAR, std::size_t N > constexpr
+    //std::enable_if_t< is_specialized_v<std::vector, std::decay_t<T_VAR>>, property::setup_entry >
+    //PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept { return details::HandleListsPropertyVar<T_VAR>( pName, Offset ); }
 
     // deal with regular properties such int and such
     template< typename T_VAR, std::size_t N > constexpr

@@ -1,6 +1,6 @@
 #pragma once
 #include <core/Component.h>
-#include <core/Scene.h>
+#include <scene/Scene.h>
 #include "GameState_detail.h"
 #undef GetObject
 
@@ -20,9 +20,10 @@ namespace idk
 		GameState();
 		~GameState();
 
-		opt<Scene> ActivateScene(uint8_t scene);
+		bool       ActivateScene(uint8_t scene);
 		bool       DectivateScene(uint8_t scene);
 		bool       DectivateScene(Scene scene);
+		bool       ValidateScene(Scene scene);
 
 		bool CreateObject(const GenericHandle& handle);
 		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::type);

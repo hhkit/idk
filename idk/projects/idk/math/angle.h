@@ -37,6 +37,9 @@ namespace idk::math
 	};
 
 	template<typename T>
+	radian<T> operator*(const T&, const radian<T>&);
+
+	template<typename T>
 	struct degree
 	{
 		T value;
@@ -64,6 +67,9 @@ namespace idk::math
 		bool operator==(const degree&) const;
 		bool operator!=(const degree&) const;
 	};
+
+	template<typename T>
+	degree<T> operator*(const T&, const degree<T>&);
 }
 
 namespace idk

@@ -33,6 +33,7 @@ namespace idk
 
 		bool ActivateScene(scene_t scene_id, size_t reserve = 8192);
 		bool DeactivateScene(scene_t scene_id);
+		bool ValidateScene(scene_t scene_id);
 
 	private:
 		static constexpr index_t invalid = index_t{ 0xFFFFFFFF };

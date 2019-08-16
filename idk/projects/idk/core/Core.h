@@ -18,6 +18,7 @@ namespace idk
 
 		Core();
 		~Core();
+		void Setup();
 		void Run();
 	private:
 		SystemManager               _system_manager;
@@ -25,6 +26,7 @@ namespace idk
 		GameState                   _game_state;
 		atomic<bool>                _running;
 		static inline Core*         _instance = nullptr;
+		bool                        _setup = false;
 	};
 }
 #include "Core.inl"

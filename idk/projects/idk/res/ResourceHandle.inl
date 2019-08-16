@@ -12,12 +12,12 @@ namespace idk
 	template<typename Res>
 	inline Res& RscHandle<Res>::operator*() const
 	{
-		return ResourceManager::instance->Get(*this);
+		return Core::template GetSystem<ResourceManager>().Get(*this);
 	}
 	template<typename Res>
 	inline Res* RscHandle<Res>::operator->() const
 	{
-		return &ResourceManager::instance->Get(*this);
+		return &Core::template GetSystem<ResourceManager>().Get(*this);
 	}
 	template<typename Res>
 	inline void RscHandle<Res>::Set(const Resource<Res>& g)

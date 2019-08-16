@@ -2,6 +2,7 @@
 #include <core/GameState.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <scene/SceneFactory.h>
 
 TEST(GameState, TestGameState)
 {
@@ -20,7 +21,7 @@ TEST(GameState, TestHandles)
 {
 	using namespace idk;
 	GameState gs;
-	gs.ActivateScene(0);
+	EXPECT_TRUE(gs.ActivateScene(0));
 	auto h = gs.CreateObject<GameObject>(0);
 	auto hTransform = h->AddComponent<Transform>();
 	auto gh = GenericHandle{ h };
@@ -44,8 +45,9 @@ TEST(GameState, TestScene)
 {
 	using namespace idk;
 	GameState gs;
-	auto scene0 = gs.ActivateScene(0);
-	auto scene1 = gs.ActivateScene(1);
+	SceneFactory sf;
+	auto scene0 = sf.Create();
+	auto scene1 = sf.Create();
 	EXPECT_TRUE(scene0);
 	EXPECT_TRUE(scene1);
 	

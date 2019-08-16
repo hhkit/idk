@@ -71,6 +71,12 @@
     <Filter Include="shapes">
       <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\scene">
+      <UniqueIdentifier>{ef6ed219-6b06-437d-bf5f-a85f74a19f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene">
+      <UniqueIdentifier>{08f522a2-1b53-4a51-a302-0433f32e7f80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -149,9 +155,6 @@
       <Filter>core\data</Filter>
     </ClInclude>
     <ClInclude Include="core\GameState_detail.h">
-      <Filter>core\data</Filter>
-    </ClInclude>
-    <ClInclude Include="core\Scene.h">
       <Filter>core\data</Filter>
     </ClInclude>
     <ClInclude Include="editor\IEditor.h">
@@ -270,6 +273,16 @@
       <Filter>shapes</Filter>
     </ClInclude>
     <ClInclude Include="gfx\gfx_data.h" />
+    <ClInclude Include="scene\SceneFactory.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneManager.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\Scene.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioClipFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -301,9 +314,6 @@
       <Filter>core\data</Filter>
     </ClCompile>
     <ClCompile Include="core\GameState.cpp">
-      <Filter>core\data</Filter>
-    </ClCompile>
-    <ClCompile Include="core\Scene.cpp">
       <Filter>core\data</Filter>
     </ClCompile>
     <ClCompile Include="core\Core.cpp">
@@ -348,6 +358,16 @@
     <ClCompile Include="math\color.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="scene\SceneFactory.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneManager.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\Scene.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioClipFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -390,9 +410,6 @@
       <Filter>core\data</Filter>
     </None>
     <None Include="core\GameState.inl">
-      <Filter>core\data</Filter>
-    </None>
-    <None Include="core\Scene.inl">
       <Filter>core\data</Filter>
     </None>
     <None Include="core\Core.inl">
@@ -442,6 +459,9 @@
     </None>
     <None Include="util\string_hash.inl">
       <Filter>util</Filter>
+    </None>
+    <None Include="scene\Scene.inl">
+      <Filter>scene</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

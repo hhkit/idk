@@ -2,16 +2,19 @@
 #include <idk.h>
 #include <core/Handle.h>
 #include <ds/span.h>
+#include <res/Resource.h>
 
 namespace idk
 {
 	class GameObject;
 
-	class Scene
+	class Scene final
+		: public Resource<Scene>
 	{
 	public:
 		class iterator;
-		explicit Scene(uint8_t scene_id = 0);
+		explicit Scene(uint8_t scene_id = MaxScene);
+		~Scene();
 		Handle<GameObject> CreateGameObject(const Handle<GameObject>&);
 		Handle<GameObject> CreateGameObject();
 		void               DestroyGameObject(const Handle<GameObject>&);
