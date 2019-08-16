@@ -28,6 +28,11 @@ namespace idk::reflect
 		return _context->table.m_Count;
 	}
 
+	bool type::is_container() const
+	{
+		return _context->is_container;
+	}
+
 	bool type::operator==(type other) const
 	{
 		return hash() == other.hash();

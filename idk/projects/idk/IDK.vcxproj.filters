@@ -206,9 +206,6 @@
     <ClInclude Include="reflect\constructor_entry.h">
       <Filter>reflect</Filter>
     </ClInclude>
-    <ClInclude Include="reflect\dynamic_detail.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="reflect\reflect.h">
       <Filter>reflect</Filter>
     </ClInclude>
@@ -367,6 +364,7 @@
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="audio\AudioClipFactory.cpp" />
+    <ClCompile Include="reflect\uni_container.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -464,6 +462,7 @@
     </None>
     <None Include="serialize\serialize.inl" />
     <None Include="file\FileSystem.inl" />
+    <None Include="reflect\uni_container.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

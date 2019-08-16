@@ -126,8 +126,8 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_STREQ(visited_values[10].get<string>().c_str(), "weeb");
 	EXPECT_EQ(visited_values[11].get<double>(), 420.0);
 	//EXPECT_EQ(visited_values[12], );
-	EXPECT_STREQ(visited_values[13].get<string>().c_str(), "test0");
-	EXPECT_STREQ(visited_values[14].get<string>().c_str(), "test1");
+	EXPECT_STREQ(visited_values[13].get<string>().c_str(), obj.hashtable.begin()->second.c_str());
+	EXPECT_STREQ(visited_values[14].get<string>().c_str(), (++obj.hashtable.begin())->second.c_str());
 
 	EXPECT_EQ(depth_changes[0], 1);
 	EXPECT_EQ(depth_changes[1], 1);
@@ -189,4 +189,70 @@ TEST(Reflect, TestReflectRangeFor)
 	}
 
 	EXPECT_EQ(obj.vec, vec4(2.0f, 4.0f, 6.0f, 8.0f));
+}
+
+TEST(Reflect, TestReflectUniContainer)
+{
+	{
+		array<int, 4> arr{ 1, 2, 3, 4 };
+		auto container = reflect::dynamic{ arr }.to_container();
+
+		std::vector<reflect::dynamic> values;
+		for (auto& elem : container)
+		{
+			values.push_back(elem);
+		}
+
+		EXPECT_EQ(values[0].get<int>(), 1);
+		EXPECT_EQ(values[1].get<int>(), 2);
+		EXPECT_EQ(values[2].get<int>(), 3);
+		EXPECT_EQ(values[3].get<int>(), 4);
+		EXPECT_EQ(container.size(), 4);
+		EXPECT_THROW(container.add(5), const char*);
+		EXPECT_THROW(container.clear(), const char*);
+	}
+
+	{
+		vector<float> vec{ 1.0f, 2.0f, 3.0f, 4.0f };
+		reflect::uni_container container{ vec };
+
+		container.add(5.0f);
+
+		std::vector<reflect::dynamic> values;
+		for (auto& elem : container)
+		{
+			values.push_back(elem);
+		}
+
+		EXPECT_EQ(values[0].get<float>(), 1.0f);
+		EXPECT_EQ(values[1].get<float>(), 2.0f);
+		EXPECT_EQ(values[2].get<float>(), 3.0f);
+		EXPECT_EQ(values[3].get<float>(), 4.0f);
+		EXPECT_EQ(values[4].get<float>(), 5.0f);
+		EXPECT_EQ(container.size(), 5);
+
+		container.clear();
+		EXPECT_EQ(container.size(), 0);
+	}
+
+	{
+		hash_table<char, double> map{ { 'a', 1.0 }, { 'b', 2.0 }, { 'c', 3.0 }, { 'd', 4.0 } };
+		reflect::uni_container container{ map };
+
+		container.add(std::pair<const char, double>{ 'e', 5.0f });
+
+		std::vector<reflect::dynamic> values;
+		for (auto& elem : container)
+		{
+			values.push_back(elem);
+		}
+		
+		auto eq0 = values[0].get<std::pair<const char, double>>() == std::pair<const char, double>{ 'a', 1.0 };
+		EXPECT_TRUE(eq0);
+
+		EXPECT_EQ(container.size(), 5);
+
+		container.clear();
+		EXPECT_EQ(container.size(), 0);
+	}
 }

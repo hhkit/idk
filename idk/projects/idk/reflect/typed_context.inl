@@ -42,9 +42,10 @@ namespace idk::reflect::detail
 		const detail::table& table;
 		const span<constructor_entry_base* const> ctors;
 		const size_t hash;
+		const bool is_container;
 
-		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash)
-			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }
+		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash, bool is_container)
+			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }, is_container{ is_container }
 		{}
 		virtual ~typed_context_base() = default;
 
@@ -86,7 +87,7 @@ namespace idk::reflect::detail
 	struct typed_context : typed_context_base
 	{
 		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors)
-			: typed_context_base(name, table, ctors, typehash<T>())
+			: typed_context_base(name, table, ctors, typehash<T>(), is_sequential_container_v<T> || is_associative_container_v<T>)
 		{}
 		typed_context()
 			: typed_context(

@@ -66,6 +66,11 @@ namespace idk::reflect
 		return { name, val };
 	}
 
+	uni_container dynamic::to_container() const
+	{
+		return _ptr->to_container();
+	}
+
 
 
 	dynamic::property_iterator::property_iterator(const dynamic& obj, size_t index)

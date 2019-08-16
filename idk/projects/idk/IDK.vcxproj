@@ -70,7 +70,6 @@
     <ClInclude Include="ds\zip.h" />
     <ClInclude Include="reflect\pretty_function.h" />
     <ClInclude Include="reflect\constructor_entry.h" />
-    <ClInclude Include="reflect\dynamic_detail.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="util\macro_utils.h" />
@@ -95,6 +94,7 @@
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
@@ -133,6 +133,7 @@
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
