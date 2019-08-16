@@ -29,6 +29,8 @@ namespace idk
 					(*stack.back())[key] = arg;
 				else if constexpr (is_basic_serializable<T>::value)
 					(*stack.back())[key] = serialize_text(arg);
+				else if constexpr (is_sequential_container_v<T>)
+					stack.push_back(&((*stack.back())[key] = json::array()));
 				else
 					stack.push_back(&((*stack.back())[key] = json::object()));
 			}
@@ -38,6 +40,8 @@ namespace idk
 					(*stack.back())[serialize_text(key)] = arg;
 				else if constexpr (is_basic_serializable<T>::value)
 					(*stack.back())[serialize_text(key)] = serialize_text(arg);
+				else if constexpr (is_sequential_container_v<T>)
+					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
 				else
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
 			}

@@ -44,6 +44,31 @@ TEST(Serialize, TestSerializeBasic)
 	EXPECT_EQ(obj.vec, obj2.vec);
 }
 
+struct serialize_this_bs
+{
+	int start = 0;
+	vector<string> string_vec = { "ivan", "is", "a", "weeb" };
+	float mid = 1.0f;
+	hash_table<Guid, string> hashtable;
+	char end = '2';
+};
+REFLECT_BEGIN(serialize_this_bs, "serialize_this_bs")
+REFLECT_VARS(start, string_vec, mid, hashtable, end)
+REFLECT_END()
+
+TEST(Serialize, TestSerializeComplex)
+{
+	serialize_this_bs bs;
+	bs.hashtable.emplace(Guid::Make(), "test0");
+	bs.hashtable.emplace(Guid::Make(), "test1");
+
+	auto str = serialize_text(bs);
+	std::cout << str;
+	
+	// roundtrip
+	serialize_this_bs bs2 = parse_text<serialize_this_bs>(str);
+}
+
 static string serialized_scene_0 = "";
 static uint64_t transform_0_id = 0;
 static uint64_t transform_1_id = 0;
