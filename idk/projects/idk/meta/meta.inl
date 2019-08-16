@@ -77,7 +77,7 @@ namespace idk
 
 	template<typename T>
 	struct is_sequential_container<T, std::void_t<decltype(
-		std::declval<T&>().resize(0)
+		std::declval<T&>().front()
 	)>> : is_iterable<T> {};
 
 	template<typename T, typename = void>

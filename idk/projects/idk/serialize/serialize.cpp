@@ -98,6 +98,11 @@ namespace idk
 
 
 
+	template <typename T, typename = void>
+	struct has_resize : std::false_type {};
+	template <typename T>
+	struct has_resize<T, std::void_t<decltype(std::declval<T>().clear())>> : std::true_type {};
+
 	void parse_json(const json& j, reflect::dynamic& obj)
 	{
 		vector<const json*> stack{ &j };
@@ -128,8 +133,14 @@ namespace idk
 				}
 				else if constexpr (is_sequential_container_v<T>)
 				{
-					arg.clear();
-					arg.resize(iter->size());
+					if constexpr (has_resize<T>::value)
+					{
+						arg.clear();
+						arg.resize(iter->size());
+					}
+					else
+						assert(arg.size() >= iter->size());
+
 					int i = 0;
 					for (auto& elem : *iter)
 					{
