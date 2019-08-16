@@ -138,6 +138,7 @@
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />
+    <None Include="file\FIleSystem.inl" />
     <None Include="math\angle.inl" />
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
