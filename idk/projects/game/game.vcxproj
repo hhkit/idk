@@ -110,6 +110,13 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>call $(SolutionDir)tools\compile.bat
+if %errorlevel% NEQ 0 exit /b %errorlevel%
+call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
+</Command>
+      <Outputs>$(OutDir)shaders\changed.chg</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -168,6 +175,13 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>call $(SolutionDir)tools\compile.bat
+if %errorlevel% NEQ 0 exit /b %errorlevel%
+call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
+</Command>
+      <Outputs>$(OutDir)shaders\changed.chg</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />

@@ -46,12 +46,18 @@ namespace idk
 		if (editor)
 		{
 			while (_running)
+			{
 				_scheduler->SequentialUpdate();
+				Core::GetSystem<GraphicsSystem>().Draw();
+			}
 		}
 		else
 		{
 			while (_running)
+			{
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
+				Core::GetSystem<GraphicsSystem>().Draw();
+			}
 		}
 
 		_system_manager.ShutdownSystems();

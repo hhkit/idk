@@ -269,6 +269,7 @@
     <ClInclude Include="shape\aabb.h">
       <Filter>shapes</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\gfx_data.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

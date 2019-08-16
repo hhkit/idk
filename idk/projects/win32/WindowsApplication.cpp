@@ -52,6 +52,13 @@ namespace idk
 	{
 		return retval;
 	}
+	ivec2 Windows::GetScreenSize() const
+	{
+		RECT rect;
+		if (!GetClientRect(hWnd, &rect))
+			return ivec2{};
+		return ivec2((rect.right - rect.left), (rect.bottom - rect.top));
+	}
 	LRESULT Windows::WndProc(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (_hWnd != hWnd)

@@ -1,8 +1,9 @@
 #include <pch.h>
 #include <iostream>
-
 #include <VulkanWin32GraphicsSystem.h>
 #include <WindowsApplication.h>
+
+#include "Vulkan.h"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -27,14 +28,24 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMes
 
 namespace idk
 {
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }
+	{
+	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
-		createInstance();
+		instance_ = std::make_unique<Vulkan>();
+		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
+		
+	}
+	void VulkanWin32GraphicsSystem::Draw()
+	{
+		instance_->DrawFrame();
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		instance_.reset();
 	}
-	void VulkanWin32GraphicsSystem::createInstance()
+	/*void VulkanWin32GraphicsSystem::createInstance()
 	{
 		const char* extensions[] = {
 			VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
@@ -63,8 +74,8 @@ namespace idk
 		createInfo.setEnabledLayerCount(0);
 
 		instance = vk::createInstanceUnique(createInfo);
-	}
-
+	}*/
+	/*
 	void VulkanWin32GraphicsSystem::setupDebugMessenger()
 	{
 		vk::DebugUtilsMessengerCreateInfoEXT createInfo;
@@ -76,4 +87,5 @@ namespace idk
 		CreateDebugUtilsMessengerEXT(*instance, createInfo, 0, &tmp);
 		debugMessenger = VkHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>{ tmp };
 	}
+	*/
 }

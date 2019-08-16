@@ -38,6 +38,7 @@
     <ClInclude Include="file\DirectoryWatcher.h" />
     <ClInclude Include="file\FileSystem.h" />
     <ClInclude Include="file\FileSystemInternal.h" />
+    <ClInclude Include="gfx\gfx_data.h" />
     <ClInclude Include="gfx\GraphicsSystem.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />

@@ -6,6 +6,8 @@
 #include <idk.h>
 #include <app/Application.h>
 
+
+
 #define MAX_LOADSTRING 100
 
 // Forward declarations of functions included in this code module:
@@ -21,6 +23,7 @@ namespace idk
 		void PollEvents() override;
 		int GetReturnVal();
 		void Init() override {}
+		ivec2 GetScreenSize()const;
 		vec2 GetMouseScreenPos() override { return vec2{}; }
 		vec2 GetMouseScreenDel() override { return vec2{}; }
 		bool GetKeyDown(CharKey) override { return false; }
