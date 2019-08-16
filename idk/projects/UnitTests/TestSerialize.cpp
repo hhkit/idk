@@ -76,8 +76,8 @@ TEST(Serialize, TestSerializeComplex)
 	EXPECT_EQ(bs2.string_vec[1], bs.string_vec[1]);
 	EXPECT_EQ(bs2.string_vec[2], bs.string_vec[2]);
 	EXPECT_EQ(bs2.string_vec[3], bs.string_vec[3]);
-	EXPECT_EQ(*bs2.hashtable.begin(), *bs.hashtable.begin());
-	EXPECT_EQ(*++bs2.hashtable.begin(), *++bs.hashtable.begin());
+	EXPECT_EQ(bs2.hashtable[bs.hashtable.begin()->first], bs.hashtable.begin()->second);
+	EXPECT_EQ(bs2.hashtable[(++bs.hashtable.begin())->first], (++bs.hashtable.begin())->second);
 }
 
 static string serialized_scene_0 = "";
@@ -121,7 +121,7 @@ TEST(Serialize, TestParseScene)
 
 	auto& o0 = *scene->begin();
 	auto t0 = o0.GetComponent<Transform>();
-	EXPECT_EQ(t0->position, 4.f * vec3(1.0f, 2.0f, 3.0f));
+	EXPECT_EQ(t0->position, vec3(1.0f, 2.0f, 3.0f));
 	EXPECT_EQ(t0->scale, vec3{ 4.0f });
 	EXPECT_EQ(t0->rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
 	EXPECT_EQ(t0.id, transform_0_id);
