@@ -19,11 +19,12 @@ namespace idk::reflect
 {
 	// get full qualified type name of T (decayed).
 	// eg. vec3& => idk::math::vec3
-	template<typename T> constexpr string_view nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
+	// NOTE: if comparing types, use typehash<T>() !!!
+	template<typename T> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
 
 	// gets hash of type T (decayed).
 	// use this against type.hash()
-	template<typename T> constexpr size_t typehash() { return idk::string_hash(nameof<T>()); }
+	template<typename T> constexpr size_t typehash() { return idk::string_hash(fully_qualified_nameof<T>()); }
 
 	class type;
 
@@ -67,7 +68,7 @@ namespace idk::reflect
 		template<typename... Ts>
 		dynamic create(Ts&& ... args) const;
 
-		// gets the alias if reflected, otherwise full qualified type name ( nameof<T>() )
+		// gets the alias if reflected, otherwise fully qualified type name ( fully_qualified_nameof<T>() )
 		string_view name() const;
 
 		// gets the hash of the type ( check against typehash<T>() )
