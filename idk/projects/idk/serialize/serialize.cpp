@@ -133,10 +133,13 @@ namespace idk
 					int i = 0;
 					for (auto& elem : *iter)
 					{
-						if constexpr (is_basic_serializable<decltype(arg[0])>::value)
+						if constexpr (is_basic_serializable<decltype(*arg.begin())>::value)
 							parse_text(elem.get<string>(), arg[i]);
 						else
-							parse_json(elem, arg[i]);
+						{
+							reflect::dynamic d{ arg[i] };
+							parse_json(elem, d);
+						}
 						++i;
 					}
 					return false;
