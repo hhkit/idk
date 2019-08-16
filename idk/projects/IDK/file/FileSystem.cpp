@@ -30,7 +30,7 @@ namespace idk {
 		auto pos = base_dir.find_last_of("\\");
 		base_dir = base_dir.substr(0, pos + 1);
 
-		Mount(base_dir + "resource/", "/test_mount");
+		// Mount(base_dir + "resource/", "/test_mount");
 	}
 
 	void FileSystem::Update()
@@ -56,12 +56,17 @@ namespace idk {
 				
 			}
 		}
+		// static bool first = true;
+		// if (first)
+		// {
+		// 	auto handle = OpenWrite("/test_mount/test/depth_test.txt");
+		// 	if (static_cast<bool> (handle))
+		// 	{
+		// 		handle.Write("Write 14 bytes");
+		// 	}
+		// 	first = false;
+		// }
 		
-		auto handle = OpenWrite("/test_mount/test/depth_test.txt");
-		if (static_cast<bool> (handle))
-		{
-			auto bytes_written = handle.Write("Write 14 bytes");
-		}
 	}
 
 	void FileSystem::Shutdown()
@@ -215,7 +220,6 @@ namespace idk {
 
 			return handle;
 		}
-		return FileHandle();
 	}
 
 	void FileSystem::initMount(size_t index, string_view fullPath, string_view mountPath, bool watch)
@@ -372,7 +376,7 @@ namespace idk {
 		return empty_node;
 	}
 
-	file_system_internal::node_t& FileSystem::getDir(string_view mountPath)
+	file_system_internal::node_t FileSystem::getDir(string_view mountPath)
 	{
 		file_system_internal::node_t empty_node;
 		// First check if the path exists

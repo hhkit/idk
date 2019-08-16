@@ -137,7 +137,7 @@ namespace idk
 		file_system_internal::dir_t& getDir(file_system_internal::node_t& node);
 
 		file_system_internal::node_t getFile(string_view mountPath);
-		file_system_internal::node_t& getDir(string_view mountPath);
+		file_system_internal::node_t getDir(string_view mountPath);
 
 		bool isOpen(const file_system_internal::node_t& n);
 
