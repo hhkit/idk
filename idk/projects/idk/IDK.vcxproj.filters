@@ -281,6 +281,7 @@
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="audio\AudioClipFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -365,6 +366,7 @@
     <ClCompile Include="scene\Scene.cpp">
       <Filter>scene</Filter>
     </ClCompile>
+    <ClCompile Include="audio\AudioClipFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

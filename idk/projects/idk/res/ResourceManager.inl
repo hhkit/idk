@@ -21,6 +21,16 @@ namespace idk
 		return handle;
 	}
 	template<typename Resource>
+	inline RscHandle<Resource> ResourceManager::Create(string_view filepath)
+	{
+		auto& table = *r_cast<Storage<Resource>*>(resource_tables_[resource_ind<Resource>].get());
+		auto ptr = r_cast<ResourceFactory<Resource>*>(plaintext_loaders_[resource_ind<Resource>].get())->Create(filepath);
+		auto handle = RscHandle<Resource>{ Guid::Make() };
+		ptr->_handle = handle;
+		table.emplace(handle.guid, std::move(ptr));
+		return handle;
+	}
+	template<typename Resource>
 	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)
 	{
 		auto& table = *r_cast<Storage<Resource>*>(resource_tables_[resource_ind<Resource>].get());
