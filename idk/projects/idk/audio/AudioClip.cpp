@@ -28,7 +28,8 @@ namespace idk
 	}
 	AudioClip::~AudioClip()
 	{
-		AudioSystem::ParseFMOD_RESULT(soundHandle->release());
+		if (soundHandle)
+			AudioSystem::ParseFMOD_RESULT(soundHandle->release());
 		soundHandle = nullptr;
 	}
 	void AudioClip::Play()
