@@ -118,6 +118,7 @@ Variables:
 
 #include <audio/AudioSystem.h> //AudioSystem
 #include <audio/AudioClip.h> //AudioClip
+#include <audio/AudioClipFactory.h> //AudioClipFactory
 
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
@@ -131,17 +132,18 @@ Variables:
 
 namespace idk
 {
+	FMOD_RESULT AudioSystem::result = FMOD_OK; //Static var
+
 	AudioSystem::AudioSystem()
 		: CoreSystem			{ nullptr }
-		, result				{ FMOD_OK }
 		, timeItWasInitialized	{}
 		, numberOfDrivers		{ 0 }
 		, currentDriver			{ 0 }
-		, channelGroup_MASTER	{ nullptr }
-		, channelGroup_MUSIC	{ nullptr }
-		, channelGroup_SFX		{ nullptr }
-		, channelGroup_AMBIENT	{ nullptr }
-		, channelGroup_DIALOGUE	{ nullptr }
+		, soundGroup_MASTER	{ nullptr }
+		, soundGroup_MUSIC	{ nullptr }
+		, soundGroup_SFX		{ nullptr }
+		, soundGroup_AMBIENT	{ nullptr }
+		, soundGroup_DIALOGUE	{ nullptr }
 	{
 	}
 
@@ -151,6 +153,7 @@ namespace idk
 
 	void AudioSystem::Init()
 	{
+		Core::GetResourceManager().RegisterFactory<AudioClipFactory>();
 
 		// Create the FMOD Core System object.
 		ParseFMOD_RESULT(FMOD::System_Create(&CoreSystem));
@@ -159,11 +162,11 @@ namespace idk
 		ParseFMOD_RESULT(CoreSystem->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
 		
 		//Channel Group Setup
-		ParseFMOD_RESULT(CoreSystem->createChannelGroup("MUSIC", &channelGroup_MUSIC));
-		ParseFMOD_RESULT(CoreSystem->createChannelGroup("SFX", &channelGroup_SFX));
-		ParseFMOD_RESULT(CoreSystem->createChannelGroup("AMBIENT", &channelGroup_AMBIENT));
-		ParseFMOD_RESULT(CoreSystem->createChannelGroup("DIALOGUE", &channelGroup_DIALOGUE));
-		ParseFMOD_RESULT(CoreSystem->getMasterChannelGroup(&channelGroup_MASTER));
+		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_MUSIC", &soundGroup_MUSIC));
+		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_SFX", &soundGroup_SFX));
+		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_AMBIENT", &soundGroup_AMBIENT));
+		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_DIALOGUE", &soundGroup_DIALOGUE));
+		ParseFMOD_RESULT(CoreSystem->getMasterSoundGroup(&soundGroup_MASTER));
 
 		//Get Number of Drivers available
 		ParseFMOD_RESULT(CoreSystem->getNumDrivers(&numberOfDrivers));
@@ -228,7 +231,18 @@ namespace idk
 	}
 	void AudioSystem::Shutdown()
 	{
-		//Closes and releases memory.
+		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
+		ParseFMOD_RESULT(soundGroup_MUSIC	 ->release()); 
+		ParseFMOD_RESULT(soundGroup_SFX		 ->release()); 
+		ParseFMOD_RESULT(soundGroup_AMBIENT	 ->release()); 
+		ParseFMOD_RESULT(soundGroup_DIALOGUE ->release());
+		soundGroup_MUSIC	 = nullptr;
+		soundGroup_SFX		 = nullptr;
+		soundGroup_AMBIENT	 = nullptr;
+		soundGroup_DIALOGUE	 = nullptr;
+
+
+		//System close
 		ParseFMOD_RESULT(CoreSystem->release());
 
 		// Cleanup
@@ -239,14 +253,80 @@ namespace idk
 	{
 		FMOD::Memory_Initialize(NULL, 0, useralloc, userrealloc, userfree);
 	}
+	/*
+	unique_ptr<AudioClip> AudioSystem::CreateAudioClip(string filePath, SubSoundGroup sndGrp)
+	{
+		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 
+		try {
+			switch (sndGrp) {
+			default:
+			case SubSoundGroup_SFX:
+				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->soundHandle)));		//
+				newSound->soundHandle->setSoundGroup(soundGroup_SFX);
+
+				break;
+			case SubSoundGroup_MUSIC:
+				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_NORMAL | FMOD_2D | FMOD_CREATESTREAM, NULL, &(newSound->soundHandle)));	//
+				newSound->soundHandle->setSoundGroup(soundGroup_MUSIC);
+
+				break;
+			case SubSoundGroup_AMBIENT:
+				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_NORMAL | FMOD_3D, NULL, &(newSound->soundHandle)));	//
+				newSound->soundHandle->setSoundGroup(soundGroup_AMBIENT);
+
+				break;
+			case SubSoundGroup_DIALOGUE:
+				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->soundHandle)));		//
+				newSound->soundHandle->setSoundGroup(soundGroup_DIALOGUE);
+
+				break;
+
+			}
+		}
+		catch (EXCEPTION_AudioSystem i) { //If an error occurs here, delete newSound and return nullptr
+			std::cout << i.exceptionDetails << "Returning nullptr.\n";
+			delete newSound;
+			return nullptr;
+		}
+		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
+		newSound->soundInfo.filePath = filePath;
+		char name[512];
+		ParseFMOD_RESULT(newSound->soundHandle->getName(name, 512));
+		newSound->soundInfo.name = name;
+		ParseFMOD_RESULT(newSound->soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
+
+		//Push to list for management.
+		//SoundList.push_back(newSound);
+
+		return newSound;
+	}
+
+	void AudioSystem::DeleteAudioClip(AudioClip*& soundPointer)
+	{
+		if (soundPointer == nullptr) {
+			return; //If nothing is given, return.
+		}
+
+		//delete soundPointer;
+		//Remove from list for management.
+		//SoundList.remove(*soundPointer);
+		soundPointer = nullptr;
+	}
+
+	//void AudioSystem::PlayAudioClip(AudioClip*& soundPointer)
+	//{
+	//	FMOD::Channel* channel;
+	//	ParseFMOD_RESULT(CoreSystem->playSound(soundPointer->soundHandle, nullptr, false, &channel));
+	//}
+	*/
 	void AudioSystem::ParseFMOD_RESULT(FMOD_RESULT e)
 	{
 		result = e;
 		if (result != FMOD_OK)
 		{
 			std::ostringstream stringStream;
-			stringStream << "FMOD error! (" << result << ") " << FMOD_ErrorString(result) << std::endl; //Puts string into stream
+			stringStream << "FMOD error! (" << result << ") " << FMOD_ErrorString(result) << "/n"; //Puts string into stream
 			EXCEPTION_AudioSystem exception;
 			exception.exceptionDetails = stringStream.str();
 			throw exception;

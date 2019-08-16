@@ -5,9 +5,9 @@
 //@date		12 AUG 2019
 //@brief	
 /*
-
-ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual channel equals to 0.25.
-
+	NOTES TO ME:
+	ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual channel equals to 0.25.
+	You'd want to create all the audio for playing first before starting the level.
 */
 
 
@@ -21,8 +21,6 @@ ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual
 #include <idk.h>
 
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
-#include <chrono> //Time
-#include <string> //string
 #include <map> //map
 #include <list> //list. TEMPORARY TODO. Will switch to a faster container.
 
@@ -30,14 +28,15 @@ ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual
 namespace FMOD {
 	class System; //CoreSystem
 	class Sound;  //Sound
-	class ChannelGroup;  //ChannelGroup
+	class ChannelGroup;  //ChannelGroup (Sounds are played into a channel when play is called.)
+	class SoundGroup;	 //SoundGroup	(Different from ChannelGroup, this is where the sound resides when create_sound is called.)
 }
 //END Forward Declarations
 
 namespace idk
 {
 
-	//Additional Forward Declarations
+	//Forward Declarations
 	class AudioClip;
 	struct EXCEPTION_AudioSystem;
 	struct AUDIOSYSTEM_CPUDATA;
@@ -49,16 +48,12 @@ namespace idk
 	class AudioSystem : public ISystem
 	{
 	public:
-		enum SubChannelGroup {
-			SubChannelGroup_MUSIC,		//By default is looped
-			SubChannelGroup_SFX,	
-			SubChannelGroup_AMBIENT,	//By default is looped
-			SubChannelGroup_DIALOGUE
-		};
 
+
+		//SYSTEM CALLS
+		///////////////////////////////////////////////
 		AudioSystem(); //Constructor
 		~AudioSystem();//Destructor
-
 
 		virtual void Init() override; //Initializes the FMOD Core System
 		void Run();
@@ -68,11 +63,13 @@ namespace idk
 		void SetMemoryAllocators(FMOD_MEMORY_ALLOC_CALLBACK useralloc, FMOD_MEMORY_REALLOC_CALLBACK userrealloc, FMOD_MEMORY_FREE_CALLBACK userfree); 
 
 		///////////////////////////////////////////////
-		//Sound Functions
-		AudioClip* CreateSound(string filePath, SubChannelGroup chnGrp = SubChannelGroup_SFX); //Creates a sound and returns a handle to the Sound. Do not handle deletion of KSound outside of KAudioEngine
-		void DeleteSound(AudioClip** soundPointer); //Destroys sound, removes from map and nulls the soundpointer
-		void AssignSoundToChannelGroup(); //Assigns sound to a channelgroup.
-		void GetNumberOfSounds(int* i); //Gets number of sounds.
+
+
+
+		//Sound Functions used by AudioSource
+		//AudioClip* CreateAudioClip(string filePath, AudioClip::SubSoundGroup sndGrp = SubSoundGroup_SFX); //Creates a sound and returns a handle to the Sound. Do not handle deletion of KSound outside of KAudioEngine
+		//void DeleteAudioClip(AudioClip*& soundPointerRef);			//Destroys sound, removes from map and nulls the soundpointer
+		//void PlayAudioClip(AudioClip*& soundPointerRef);			//Plays a sound of an audioclip
 
 
 		//Project Functions (Currently UNUSED)
@@ -88,42 +85,46 @@ namespace idk
 		//void SaveProjectData(); //Saves/Load audio settings and preference of the project to file. 
 		//void LoadProjectData(); //It loads channelsgroups, number of max channels.
 
-
 		//Get Data Functions
-		float GetCPUPercentUsage();								//Gets the CPU usage in that tick.
-		AUDIOSYSTEM_CPUDATA GetDetailedCPUPercentUsage();			//Gets the CPU usage in that tick.
-		vector<AUDIOSYSTEM_DRIVERDATA> GetAllSoundDriverData() const;	//Gets Sound Drivers in the computer. This is empty if there are no available sound drivers!
-		int GetCurrentSoundDriverIndex() const;							//Because it is in index form, this returns the index of the sound driver that is running. If there is no available, -1 is returned.
-		time_point GetTimeInitialized() const;							//Time 
+		///////////////////////////////////////////////
+		float							GetCPUPercentUsage();					//Gets the CPU usage in that tick.
+		AUDIOSYSTEM_CPUDATA				GetDetailedCPUPercentUsage();			//Gets the CPU usage in that tick.
+		vector<AUDIOSYSTEM_DRIVERDATA>	GetAllSoundDriverData() const;			//Gets Sound Drivers in the computer. This is empty if there are no available sound drivers!
+		int								GetCurrentSoundDriverIndex() const;		//Because it is in index form, this returns the index of the sound driver that is running. If there is no available, -1 is returned.
+		time_point						GetTimeInitialized() const;				//GetTime 
+		void							GetMemoryStats(int* currentBytesAllocated, int* maxBytesAllocated, bool precise = true); //The pointer ints are modified to give the new byte number at point of call.
+		///////////////////////////////////////////////
 
-		//The pointer ints are modified to give the new byte number at point of call.
-		void GetMemoryStats(int* currentBytesAllocated, int* maxBytesAllocated, bool precise = true);	
 
 		//Helper functions
+		///////////////////////////////////////////////
 		static const char* FMOD_SOUND_TYPE_TO_C_STR(FMOD_SOUND_TYPE);
 		static const char* FMOD_SOUND_FORMAT_TO_C_STR(FMOD_SOUND_FORMAT);
 		static const char* FMOD_SPEAKERMODE_TO_C_STR(FMOD_SPEAKERMODE);
+		///////////////////////////////////////////////
 
 	private:
+		friend class AudioClip;
+		friend class AudioClipFactory;
 		FMOD::System* CoreSystem;	//Is updated on init, destroyed and nulled on shutdown.
-		FMOD_RESULT result;			//Most recent result by the most recent FMOD function call.
+		static FMOD_RESULT result;			//Most recent result by the most recent FMOD function call.
+
 		int numberOfDrivers;		//Updated on init. Describes the number of available sound driver that can play audio.
 		int currentDriver;			//Updated on init. Describes the current running sound driver.
 
-		vector<AudioClip*> AudioClipList; //Will be switched to a more faster container TODO
-		vector<AUDIOSYSTEM_DRIVERDATA> driverDetails; //Describes each driver.
+		vector<AudioClip*> AudioClipList;				//
+		vector<AUDIOSYSTEM_DRIVERDATA> driverDetails;	//Describes each driver.
 
-		time_point timeItWasInitialized;
+		time_point timeItWasInitialized;				//Updated on Init()
 
 		//Useable after calling Init().
-		FMOD::ChannelGroup* channelGroup_MASTER;	//All group channels link back to MASTER
-		FMOD::ChannelGroup* channelGroup_MUSIC;		//Music, by default is looped.
-		FMOD::ChannelGroup* channelGroup_SFX;		//Sound Effects
-		FMOD::ChannelGroup* channelGroup_AMBIENT;	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
-		FMOD::ChannelGroup* channelGroup_DIALOGUE;	//Dialogue/Voice Overs. This is OPTIONAL.
+		FMOD::SoundGroup* soundGroup_MASTER;	//All sounds when created start at MASTER
+		FMOD::SoundGroup* soundGroup_MUSIC;		//Music, by default is looped.
+		FMOD::SoundGroup* soundGroup_SFX;		//Sound Effects
+		FMOD::SoundGroup* soundGroup_AMBIENT;	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
+		FMOD::SoundGroup* soundGroup_DIALOGUE;	//Dialogue/Voice Overs. This is OPTIONAL.
 
-		void ParseFMOD_RESULT(FMOD_RESULT); //All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
-
+		static void ParseFMOD_RESULT(FMOD_RESULT); //All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 
 	};
 

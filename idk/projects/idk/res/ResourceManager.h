@@ -29,6 +29,7 @@ namespace idk
 
 		// resource creation
 		template<typename Resource> RscHandle<Resource> Create(/* filesystem */);
+		template<typename Resource> RscHandle<Resource> Create(string_view);
 		//template<typename Resource> RscHandle<Resource> Create(/* filesystem, meta */);
 
 		// handle ops

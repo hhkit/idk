@@ -51,6 +51,7 @@ namespace idk
 	using Resources = std::tuple<
 		class Scene
 		,	class TestResource
+		,   class AudioClip
 		//,	class Texture
 		//,	class Font
 		//,	class Mesh
