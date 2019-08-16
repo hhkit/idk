@@ -12,6 +12,13 @@ namespace idk::file_system_internal
 		WRITTEN
 	};
 
+	enum OPEN_FORMAT
+	{
+		READ_ONLY	= 0x02,
+		WRITE_ONLY	= 0x04,
+		READ_WRITE	= 0x08,
+	};			  
+				  
 	struct node_t
 	{
 		node_t() = default;
@@ -47,7 +54,7 @@ namespace idk::file_system_internal
 		string full_path;
 		string filename;
 
-		vector<node_t> sub_dirs;
+		hash_table<string, node_t> sub_dirs;
 		hash_table<string, node_t> files_map;
 		
 		node_t parent;
@@ -85,8 +92,6 @@ namespace idk::file_system_internal
 
 		size_t AddDepth();
 		node_t RequestFileSlot(int8_t depth);
-		void AddFile(file_t& file);
-		file_t& GetFile(node_t node);
 	};
 
 	struct file_handle_t
@@ -94,15 +99,18 @@ namespace idk::file_system_internal
 		file_handle_t(int8_t mount, int8_t depth, int8_t index);
 		file_handle_t(node_t node);
 
+		void Reset();
 		void Invalidate();
+		bool IsOpenAndValid() const;
+		void SetOpenFormat(OPEN_FORMAT format);
 		
 		// First bit = valid?
-		// Second bit = open?
 		// Others = open type?
-		byte mask = byte{0x01};
+		byte mask = byte{0x00};
 
 		node_t internal_id;
-		size_t ref_count = 0;
+		int64_t ref_count = 0;
+		bool allow_write = false;
 	};
 
 	

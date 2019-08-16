@@ -233,7 +233,6 @@ namespace idk
 
 				// Adding the new file to all relevant data structures
 				mountDir.files_map.emplace(f.filename, f.tree_index);
-				f.handle_index = vfs.addFileHandle(f.tree_index);
 				changed_files.push_back(f.tree_index);
 
 				auto& test = vfs.getFile(f.tree_index);
@@ -272,7 +271,6 @@ namespace idk
 	{
 		for (auto& file : FS::directory_iterator(mountDir.full_path))
 		{
-			auto current_file_last_write_time = FS::last_write_time(file);
 			FS::path tmp{ file.path() };
 
 			// We only check if it is a regular file

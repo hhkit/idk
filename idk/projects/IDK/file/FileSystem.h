@@ -29,21 +29,38 @@ namespace idk
 	// Opaque type. Do not touch internals
 	struct FileHandle
 	{
-		void* handle = nullptr;
-
 		FileHandle() = default;
 		FileHandle(FileHandle&& rhs);
 		~FileHandle();
 
 		FileHandle operator=(FileHandle&& rhs);
-		explicit operator FILE* ();
-		explicit operator std::fstream();
+		explicit operator bool();
+
+		std::fstream& GetStream() { return stream; }
+		FILE* GetFilePtr() { return fp; }
+		
+		template<typename T>
+		size_t Write(const T& data)
+		{
+			size_t before = stream.tellp(); //current pos
+
+			stream << data;
+			
+			return static_cast<size_t>(stream.tellp()) - before;
+			
+		}
 
 		string_view GetParentDir() const;
-
+		
+		friend class FileSystem;
 	private:
 		FILE* fp = nullptr;
 		std::fstream stream;
+
+		int64_t handle_index = -1;
+		int64_t ref_count = -1;
+
+		FileSystem_ErrorCode error;
 	};
 
 	class FileSystem : public ISystem
@@ -72,9 +89,13 @@ namespace idk
 		FileSystem_ErrorCode Dismount(const string& mountPath);
 
 		// Open/closing files
-		FileHandle OpenRead(string_view mountPath) const;
-		FileHandle OpenAppend(string_view mountPath) const;
-		FileHandle OpenWrite(string_view mountPath) const;
+		FileHandle OpenRead(string_view mountPath, bool binary_stream = false);
+		FileHandle OpenAppend(string_view mountPath);
+		FileHandle OpenWrite(string_view mountPath);
+
+		FileHandle OpenReadC(string_view mountPath);
+		FileHandle OpenAppendC(string_view mountPath);
+		FileHandle OpenWriteC(string_view mountPath);
 
 		uint64_t Read(const FileHandle& handle, void* buffer, uint64_t len);
 		uint64_t Write(const FileHandle& handle, const void* buffer, uint64_t len);
@@ -89,6 +110,8 @@ namespace idk
 
 
 		friend class file_system_internal::DirectoryWatcher;
+		friend struct file_system_internal::mount_t;
+		friend struct FileHandle;
 	private:
 		hash_table<string, size_t> mount_table;
 		vector<file_system_internal::mount_t> mounts;
@@ -113,10 +136,16 @@ namespace idk
 		file_system_internal::file_t& getFile(file_system_internal::node_t& node);
 		file_system_internal::dir_t& getDir(file_system_internal::node_t& node);
 
+		file_system_internal::node_t getFile(string_view mountPath);
+		file_system_internal::node_t& getDir(string_view mountPath);
+
 		bool isOpen(const file_system_internal::node_t& n);
 
 		// Other auxiliary helpers
 		size_t addFileHandle(const file_system_internal::node_t& handle);
+		vector<string> tokenizePath(string_view fullPath) const;
+		int validateFileMountPath(string_view mountPath) const;
+		int validateDirMountPath(string_view mountPath) const;
 
 		string getMountToken(const string& mountPath) const;
 		bool validateHandle(FileHandle* handle) const;
