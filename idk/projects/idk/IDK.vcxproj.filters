@@ -74,6 +74,9 @@
     <Filter Include="core\scene">
       <UniqueIdentifier>{ef6ed219-6b06-437d-bf5f-a85f74a19f89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="scene">
+      <UniqueIdentifier>{08f522a2-1b53-4a51-a302-0433f32e7f80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -269,11 +272,15 @@
     <ClInclude Include="shape\aabb.h">
       <Filter>shapes</Filter>
     </ClInclude>
-    <ClInclude Include="scene\Scene.h">
-      <Filter>core\data</Filter>
+    <ClInclude Include="scene\SceneFactory.h">
+      <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="scene\SceneManager.h" />
-    <ClInclude Include="scene\SceneFactory.h" />
+    <ClInclude Include="scene\SceneManager.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\Scene.h">
+      <Filter>scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -349,11 +356,15 @@
     <ClCompile Include="math\color.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="scene\Scene.cpp">
-      <Filter>core\data</Filter>
+    <ClCompile Include="scene\SceneFactory.cpp">
+      <Filter>scene</Filter>
     </ClCompile>
-    <ClCompile Include="scene\SceneManager.cpp" />
-    <ClCompile Include="scene\SceneFactory.cpp" />
+    <ClCompile Include="scene\SceneManager.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\Scene.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -447,7 +458,7 @@
       <Filter>util</Filter>
     </None>
     <None Include="scene\Scene.inl">
-      <Filter>core\data</Filter>
+      <Filter>scene</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
