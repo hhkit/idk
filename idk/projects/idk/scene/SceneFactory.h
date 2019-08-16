@@ -9,7 +9,7 @@ namespace idk
 	{
 	public:
 		unique_ptr<Scene> Create();
-		unique_ptr<Scene> Create(const ResourceMeta&);
+		unique_ptr<Scene> Create(string_view filepath, const ResourceMeta&);
 	private:
 	};
 }
