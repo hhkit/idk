@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <filesystem>
-namespace idk::file_system_internal
+namespace idk::file_system_detail
 {
 	enum CHANGE_STATUS
 	{
@@ -19,19 +19,19 @@ namespace idk::file_system_internal
 		READ_WRITE	= 0x08,
 	};			  
 				  
-	struct node_t
+	struct fs_key
 	{
-		node_t() = default;
-		node_t(int8_t m, int8_t d, int8_t i);
+		fs_key() = default;
+		fs_key(int8_t m, int8_t d, int8_t i);
 
-		bool operator == (const node_t& rhs) const;
+		bool operator == (const fs_key& rhs) const;
 
 		int8_t mount_id = -1;
 		int8_t depth = -1;
 		int8_t index = -1;
 	};
 
-	struct file_t
+	struct fs_file
 	{
 		string full_path;
 		string filename;
@@ -39,8 +39,8 @@ namespace idk::file_system_internal
 
 		int64_t handle_index = -1;
 
-		node_t parent;
-		node_t tree_index;
+		fs_key parent;
+		fs_key tree_index;
 
 		bool valid = true;
 
@@ -49,16 +49,16 @@ namespace idk::file_system_internal
 		std::filesystem::file_time_type time;
 	};
 
-	struct dir_t
+	struct fs_dir
 	{
 		string full_path;
 		string filename;
 
-		hash_table<string, node_t> sub_dirs;
-		hash_table<string, node_t> files_map;
+		hash_table<string, fs_key> sub_dirs;
+		hash_table<string, fs_key> files_map;
 		
-		node_t parent;
-		node_t tree_index;
+		fs_key parent;
+		fs_key tree_index;
 
 		// For file watching
 		HANDLE dir_handle;
@@ -70,19 +70,19 @@ namespace idk::file_system_internal
 		CHANGE_STATUS change_status = NO_CHANGE;
 	};
 
-	struct collated_t
+	struct fs_collated
 	{
 		// hash_table<string, uint64_t> files_map;
-		vector<file_t> files;
-		vector<dir_t> dirs;
+		vector<fs_file> files;
+		vector<fs_dir> dirs;
 
 		int8_t depth;
 	};
 
-	struct mount_t
+	struct fs_mount
 	{
 		// Each index signifies the depth of the tree
-		vector<collated_t> path_tree;
+		vector<fs_collated> path_tree;
 
 		string full_path;
 		string mount_path;
@@ -91,13 +91,13 @@ namespace idk::file_system_internal
 		bool watching = true;
 
 		size_t AddDepth();
-		node_t RequestFileSlot(int8_t depth);
+		fs_key RequestFileSlot(int8_t depth);
 	};
 
-	struct file_handle_t
+	struct fs_file_handle
 	{
-		file_handle_t(int8_t mount, int8_t depth, int8_t index);
-		file_handle_t(node_t node);
+		fs_file_handle(int8_t mount, int8_t depth, int8_t index);
+		fs_file_handle(fs_key node);
 
 		void Reset();
 		void Invalidate();
@@ -108,7 +108,7 @@ namespace idk::file_system_internal
 		// Others = open type?
 		byte mask = byte{0x00};
 
-		node_t internal_id;
+		fs_key internal_id;
 		int64_t ref_count = 0;
 		bool allow_write = false;
 	};
