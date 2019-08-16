@@ -10,7 +10,7 @@ namespace FS = std::filesystem;
 
 namespace idk
 {
-	void file_system_internal::DirectoryWatcher::WatchDirectory(dir_t& mountSubDir)
+	void file_system_detail::DirectoryWatcher::WatchDirectory(fs_dir& mountSubDir)
 	{
 		// Initialize watch handles
 		mountSubDir.watch_handle[0] = FindFirstChangeNotificationA(
@@ -47,7 +47,7 @@ namespace idk
 		}
 	}
 
-	void file_system_internal::DirectoryWatcher::UpdateWatchedDir(mount_t& mount, dir_t& dir)
+	void file_system_detail::DirectoryWatcher::UpdateWatchedDir(fs_mount& mount, fs_dir& dir)
 	{
 		UNREFERENCED_PARAMETER(mount);
 
@@ -97,7 +97,7 @@ namespace idk
 		}
 	}
 
-	void file_system_internal::DirectoryWatcher::RefreshDir(file_system_internal::dir_t& mountDir)
+	void file_system_detail::DirectoryWatcher::RefreshDir(file_system_detail::fs_dir& mountDir)
 	{
 		FS::path path{ mountDir.full_path };
 		
@@ -123,7 +123,7 @@ namespace idk
 
 	}
 
-	void file_system_internal::DirectoryWatcher::RefreshTree(file_system_internal::dir_t& mountDir)
+	void file_system_detail::DirectoryWatcher::RefreshTree(file_system_detail::fs_dir& mountDir)
 	{
 		FS::path path{ mountDir.full_path };
 		FS::directory_iterator dir{ path };
@@ -154,7 +154,7 @@ namespace idk
 		}
 	}
 
-	void file_system_internal::DirectoryWatcher::ResolveAllChanges()
+	void file_system_detail::DirectoryWatcher::ResolveAllChanges()
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 
@@ -174,18 +174,18 @@ namespace idk
 			case DELETED:
 			{
 				// Most troublesome one. 
-				// Need to invalidate the file_handle_t and all FileHandles pointing to it.
+				// Need to invalidate the fs_file_handle and all FileHandles pointing to it.
 
 				// First we remove this file from the parent dir.
 				auto result = parent_dir.files_map.find(internal_file.filename);
 				parent_dir.files_map.erase(result);
 
 				// Next, invalidate it from path_tree. Should be a better way to do this. Not sure yet.
-				// When we create files in run-time, we will loop through all the file_t and find the first valid one if available. Linear time POG.
+				// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
 				internal_collated.files[internal_file.tree_index.index].valid = false;
 
 				// Lastly, we invalidate the file handle that this file was using.
-				// Remember that we DO NOT erase the file_handle_t in FileSyste::file_handles. We simply invalidate it.
+				// Remember that we DO NOT erase the fs_file_handle in FileSyste::file_handles. We simply invalidate it.
 				vfs.file_handles[internal_file.handle_index].Invalidate();
 				break;
 			}
@@ -203,7 +203,7 @@ namespace idk
 		changed_dirs.clear();
 	}
 
-	void file_system_internal::DirectoryWatcher::CheckFilesCreated(file_system_internal::dir_t& mountDir)
+	void file_system_detail::DirectoryWatcher::CheckFilesCreated(file_system_detail::fs_dir& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		for (auto& file : FS::directory_iterator(mountDir.full_path))
@@ -220,8 +220,8 @@ namespace idk
 			if (result == mountDir.files_map.end())
 			{
 				// Request a slot from mounts
-				node_t slot = vfs.mounts[mountDir.tree_index.mount_id].RequestFileSlot(mountDir.tree_index.depth + 1);
-				file_t& f = vfs.getFile(slot);
+				fs_key slot = vfs.mounts[mountDir.tree_index.mount_id].RequestFileSlot(mountDir.tree_index.depth + 1);
+				fs_file& f = vfs.getFile(slot);
 
 				f.full_path = tmp.string();
 				f.filename = tmp.filename().string();
@@ -244,7 +244,7 @@ namespace idk
 		}
 	}
 
-	void file_system_internal::DirectoryWatcher::CheckFilesDeleted(file_system_internal::dir_t& dir)
+	void file_system_detail::DirectoryWatcher::CheckFilesDeleted(file_system_detail::fs_dir& dir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		for (auto& file : dir.files_map)
@@ -267,7 +267,7 @@ namespace idk
 
 	}
 
-	void file_system_internal::DirectoryWatcher::CheckFilesRenamed(file_system_internal::dir_t& mountDir)
+	void file_system_detail::DirectoryWatcher::CheckFilesRenamed(file_system_detail::fs_dir& mountDir)
 	{
 		for (auto& file : FS::directory_iterator(mountDir.full_path))
 		{
@@ -283,8 +283,8 @@ namespace idk
 			if (result == mountDir.files_map.end())
 			{
 				// File was really renamed.
-				// Now we need to find the corresponding internal file_t that was renamed
-				// One of the file_t inside the dir does not exists anymore due to being renamed.
+				// Now we need to find the corresponding internal fs_file that was renamed
+				// One of the fs_file inside the dir does not exists anymore due to being renamed.
 				auto& vfs = Core::GetSystem<FileSystem>();
 				for (auto& internal_file_index : mountDir.files_map)
 				{
@@ -314,7 +314,7 @@ namespace idk
 		CheckFilesWrittenTo(mountDir);
 	}
 
-	void file_system_internal::DirectoryWatcher::CheckFilesWrittenTo(file_system_internal::dir_t& dir)
+	void file_system_detail::DirectoryWatcher::CheckFilesWrittenTo(file_system_detail::fs_dir& dir)
 	{
 		for (auto& file : FS::directory_iterator(dir.full_path))
 		{

@@ -109,14 +109,14 @@ namespace idk
 		FileSystem_ErrorCode GetLastError() const;
 
 
-		friend class file_system_internal::DirectoryWatcher;
-		friend struct file_system_internal::mount_t;
+		friend class file_system_detail::DirectoryWatcher;
+		friend struct file_system_detail::fs_mount;
 		friend struct FileHandle;
 	private:
 		hash_table<string, size_t> mount_table;
-		vector<file_system_internal::mount_t> mounts;
-		vector<file_system_internal::file_handle_t> file_handles;
-		vector<file_system_internal::node_t> open_files;
+		vector<file_system_detail::fs_mount> mounts;
+		vector<file_system_detail::fs_file_handle> file_handles;
+		vector<file_system_detail::fs_key> open_files;
 
 		string root_dir;
 		string base_dir;
@@ -124,25 +124,25 @@ namespace idk
 
 		FileSystem_ErrorCode last_error;
 
-		file_system_internal::DirectoryWatcher directory_watcher;
+		file_system_detail::DirectoryWatcher directory_watcher;
 
 		// initializtion
 		void initMount(size_t index, string_view fullPath, string_view mountPath, bool watch);
-		void recurseSubDir(size_t index, int8_t depth, file_system_internal::dir_t& mountSubDir, bool watch);
+		void recurseSubDir(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
 
 		// File watching
 		
 		// Helper Getters
-		file_system_internal::file_t& getFile(file_system_internal::node_t& node);
-		file_system_internal::dir_t& getDir(file_system_internal::node_t& node);
+		file_system_detail::fs_file& getFile(file_system_detail::fs_key& node);
+		file_system_detail::fs_dir& getDir(file_system_detail::fs_key& node);
 
-		file_system_internal::node_t getFile(string_view mountPath);
-		file_system_internal::node_t getDir(string_view mountPath);
+		file_system_detail::fs_key getFile(string_view mountPath);
+		file_system_detail::fs_key getDir(string_view mountPath);
 
-		bool isOpen(const file_system_internal::node_t& n);
+		bool isOpen(const file_system_detail::fs_key& n);
 
 		// Other auxiliary helpers
-		size_t addFileHandle(const file_system_internal::node_t& handle);
+		size_t addFileHandle(const file_system_detail::fs_key& handle);
 		vector<string> tokenizePath(string_view fullPath) const;
 		int validateFileMountPath(string_view mountPath) const;
 		int validateDirMountPath(string_view mountPath) const;

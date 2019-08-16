@@ -123,7 +123,7 @@ namespace idk {
 			full_path += '/';
 
 		mount_table.emplace(mount_path, mounts.size());
-		mounts.push_back(file_system_internal::mount_t{});
+		mounts.push_back(file_system_detail::fs_mount{});
 
 		initMount(curr_mount_index, full_path, mount_path, watch);
 		
@@ -150,7 +150,7 @@ namespace idk {
 		if (!handle.stream.is_open())
 			return FileHandle();
 
-		file_handle.SetOpenFormat(file_system_internal::OPEN_FORMAT::READ_ONLY);
+		file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::READ_ONLY);
 
 		return handle;
 	}
@@ -199,7 +199,7 @@ namespace idk {
 			if (!handle.stream.is_open())
 				return FileHandle();
 
-			file_handle.SetOpenFormat(file_system_internal::OPEN_FORMAT::WRITE_ONLY);
+			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
 			return handle;
 		}
 		else
@@ -216,7 +216,7 @@ namespace idk {
 			if (!handle.stream.is_open())
 				return FileHandle();
 
-			file_handle.SetOpenFormat(file_system_internal::OPEN_FORMAT::WRITE_ONLY);
+			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
 
 			return handle;
 		}
@@ -234,7 +234,7 @@ namespace idk {
 		FS::directory_iterator dir{ currPath };
 
 		// Initializing base variables of the mount
-		file_system_internal::mount_t& mount = mounts[index];
+		file_system_detail::fs_mount& mount = mounts[index];
 		mount.full_path = fullPath;
 		mount.mount_path = mountPath;
 		mount.watching = watch;
@@ -242,7 +242,7 @@ namespace idk {
 		mount.AddDepth();
 
 		// The root of this mount is depth 0
-		file_system_internal::dir_t d;
+		file_system_detail::fs_dir d;
 
 		d.full_path = fullPath;
 		d.filename = currPath.filename().string();
@@ -258,9 +258,9 @@ namespace idk {
 		mount.path_tree[0].dirs.push_back(d);
 	}
 
-	void FileSystem::recurseSubDir(size_t index, int8_t currDepth, file_system_internal::dir_t& mountSubDir, bool watch)
+	void FileSystem::recurseSubDir(size_t index, int8_t currDepth, file_system_detail::fs_dir& mountSubDir, bool watch)
 	{
-		file_system_internal::mount_t& mount = mounts[index];
+		file_system_detail::fs_mount& mount = mounts[index];
 		size_t curr_handle_index = file_handles.size();
 
 		// Increase the depth if this expands the tree
@@ -277,13 +277,13 @@ namespace idk {
 			FS::path tmp{ elem.path() };
 			if (FS::is_regular_file(tmp))
 			{
-				file_system_internal::file_t f;
+				file_system_detail::fs_file f;
 
 				f.full_path = tmp.string();
 				f.filename = tmp.filename().string();
 				f.extension = tmp.extension().string();
 
-				file_system_internal::node_t node;
+				file_system_detail::fs_key node;
 				node.mount_id = static_cast<int8_t>(index);
 				node.depth = currDepth;
 				node.index = static_cast<int8_t>(mount.path_tree[currDepth].files.size());
@@ -302,12 +302,12 @@ namespace idk {
 			}
 			else
 			{
-				file_system_internal::dir_t d;
+				file_system_detail::fs_dir d;
 
 				d.full_path = tmp.string() + '/';
 				d.filename = tmp.filename().string();
 
-				file_system_internal::node_t node;
+				file_system_detail::fs_key node;
 				node.mount_id = static_cast<int8_t>(index);
 				node.depth = currDepth;
 				node.index = static_cast<int8_t>(mount.path_tree[currDepth].dirs.size());
@@ -324,19 +324,19 @@ namespace idk {
 		}
 	}
 
-	file_system_internal::file_t& FileSystem::getFile(file_system_internal::node_t& node)
+	file_system_detail::fs_file& FileSystem::getFile(file_system_detail::fs_key& node)
 	{
 		return mounts[node.mount_id].path_tree[node.depth].files[node.index];
 	}
 
-	file_system_internal::dir_t& FileSystem::getDir(file_system_internal::node_t& node)
+	file_system_detail::fs_dir& FileSystem::getDir(file_system_detail::fs_key& node)
 	{
 		return mounts[node.mount_id].path_tree[node.depth].dirs[node.index];
 	}
 
-	file_system_internal::node_t FileSystem::getFile(string_view mountPath)
+	file_system_detail::fs_key FileSystem::getFile(string_view mountPath)
 	{
-		file_system_internal::node_t empty_node;
+		file_system_detail::fs_key empty_node;
 		// First check if the path exists
 		if (!Exists(mountPath))
 			return empty_node;
@@ -376,9 +376,9 @@ namespace idk {
 		return empty_node;
 	}
 
-	file_system_internal::node_t FileSystem::getDir(string_view mountPath)
+	file_system_detail::fs_key FileSystem::getDir(string_view mountPath)
 	{
-		file_system_internal::node_t empty_node;
+		file_system_detail::fs_key empty_node;
 		// First check if the path exists
 		if (!Exists(mountPath))
 			return empty_node;
@@ -415,12 +415,12 @@ namespace idk {
 		return empty_node;
 	}
 
-	bool FileSystem::isOpen(const file_system_internal::node_t& n)
+	bool FileSystem::isOpen(const file_system_detail::fs_key& n)
 	{
 		return std::find(open_files.begin(), open_files.end(), n) != open_files.end();
 	}
 
-	size_t FileSystem::addFileHandle(const file_system_internal::node_t& node)
+	size_t FileSystem::addFileHandle(const file_system_detail::fs_key& node)
 	{
 		file_handles.emplace_back(node);
 		return file_handles.size() - 1;
