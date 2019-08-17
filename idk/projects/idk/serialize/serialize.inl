@@ -41,6 +41,8 @@ namespace idk
 			obj = std::stof(str);
 		else if constexpr (std::is_same_v<std::decay_t<T>, double>)
 			obj = std::stod(str);
+		else if constexpr (is_macro_enum_v<T>)
+			obj = std::decay_t<T>::from_string(str);
 		else if constexpr (is_basic_serializable_v<T>)
 			obj = T(str);
 		else

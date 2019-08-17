@@ -3,8 +3,12 @@
 #include <reflect/ReflectRegistration.h>
 #include <res/Guid.h>
 #include <scene/SceneFactory.h>
+#include <util/enum.h>
 
 using namespace idk;
+
+ENUM(testserialize_enum, int, PI, TAU)
+//REFLECT_ENUM(testserialize_enum, "testserialize_enum")
 
 struct serialize_this
 {
@@ -21,6 +25,10 @@ TEST(Serialize, TestSerializeBasic)
 	EXPECT_TRUE(is_basic_serializable<float>::value);
 	EXPECT_FALSE(is_basic_serializable<vec3>::value);
 	EXPECT_TRUE(is_basic_serializable<Guid>::value);
+	EXPECT_TRUE(is_basic_serializable<testserialize_enum>::value);
+
+	testserialize_enum e = testserialize_enum::PI;
+	EXPECT_STREQ(serialize_text(e).c_str(), "PI");
 
 	vec3 v{ 1.0f, 2.0f, 3.0f };
 	auto str = serialize_text(v);

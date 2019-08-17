@@ -50,6 +50,7 @@ struct name																							\
 		static_assert(std::is_integral_v<IntegralT>);												\
 	}																								\
 	constexpr operator _enum() const { return (_enum)value; }										\
+	explicit operator string() const { return idk::string(to_string()); }							\
 																									\
 	constexpr idk::string_view to_string() const													\
 	{																								\

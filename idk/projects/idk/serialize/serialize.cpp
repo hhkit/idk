@@ -71,9 +71,14 @@ namespace idk
 			SERIALIZE_CASE(double);
 			SERIALIZE_CASE(std::string);
 			SERIALIZE_CASE(Guid);
-			default: throw "Unhandled case?";
+			default: break;
 			}
 #undef SERIALIZE_CASE
+
+			if (obj.type.is_enum_type())
+				return serialize_text(obj.to_enum_value().name());
+			else
+				throw "unhandled case?";
 		}
 
 		return serialize_json(obj).dump(2);
@@ -184,7 +189,7 @@ namespace idk
 					}
 					return false;
 				}
-				else
+				else // not basic serializable and not container; go deeper!
 				{
 					stack.push_back(&*iter);
 					return true;
@@ -192,8 +197,7 @@ namespace idk
 			}
 			else
 			{
-				depth_change;
-				throw; // handle containers
+				throw "how did we get here?";
 			}
 		});
 	}
