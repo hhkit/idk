@@ -209,7 +209,9 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Utils.h" />
     <ClInclude Include="Vulkan.h" />
+    <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
+    <ClInclude Include="VulkanDetail.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugRenderer.cpp" />
@@ -222,6 +224,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp" />
     <ClCompile Include="Vulkan.cpp" />
+    <ClCompile Include="VulkanDetail.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>

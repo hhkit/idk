@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "Vulkan.h"
 #include <math/matrix_transforms.h>
+#include <idk.h>
+#include <VulkanDetail.h>
 
+//Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
-
+//Temporary, should move elsewhere
 namespace glm
 {
 	using namespace idk;
@@ -31,18 +34,6 @@ namespace glm
 	}
 }
 
-struct IPipeline
-{
-	virtual void Create() =0;
-	virtual void RegisterCommands() = 0;
-	void Draw() {}
-};
-
-//template<typename RT = size_t, typename T = int>
-//RT buffer_size(std::vector<T> const& vertices)
-//{
-//	return static_cast<RT>(sizeof(vertices[0]) * vertices.size());
-//}
 template<typename RT = size_t, typename T = std::vector<int>>
 RT buffer_size(T const& vertices)
 {
@@ -55,6 +46,97 @@ RT buffer_size(T * begin, T * end)
 	return static_cast<RT>(sizeof(T) * (end - begin));
 }
 
+
+namespace idk
+{
+	enum   BufferType
+	{
+		eVertexBuffer
+		,eIndexBuffer
+	};
+	struct buffer_data
+	{
+		using num_obj_t = size_t;
+		using num_bytes_t = size_t;
+		const void*    buffer = nullptr;
+		num_bytes_t    len    = 0      ;
+		template<typename T>
+		buffer_data(const T& container)
+			: buffer{ s_cast<const void*>(ArrData(container)) }, len{ buffer_size(container) }{}
+		template<typename T>
+		buffer_data(const T& container, num_obj_t offset, num_obj_t length)
+			: buffer{ s_cast<const void*>(ArrData(container) + offset) }, len{ buffer_size(ArrData(container)+offset,ArrData(container) + length) }{}
+
+	};
+	struct buffer_desc
+	{
+		struct binding_info
+		{
+
+		};
+		struct attribute_info
+		{
+
+		};
+		binding_info           binding = {};
+		vector<attribute_info> attributes = {};
+	};
+	enum ShaderStage
+	{
+		eVert,
+		eFrag,
+		eGeom,//unused for now
+		eTess,//unused for now
+		eComp,//unused for now
+		eNone
+	};
+	struct shader_info
+	{
+		string_view byte_code{     };
+		ShaderStage stage    {eNone};
+	};
+
+	struct IPipeline;
+
+	enum RenderType
+	{
+		 eDraw
+		,eIndexed
+	};
+	struct render_info
+	{
+		vector<buffer_data>* vertex_buffers   = nullptr;
+		RenderType           render_type      = eDraw;
+		uint32_t             inst_count       = 1;
+	};
+
+
+	class GfxInterface
+	{
+	public:
+		using pipeline_handle = std::weak_ptr<IPipeline>;
+		//Basic version, probably change this later on to use a single config struct instead.
+		pipeline_handle RegisterPipeline(const std::vector<buffer_desc>& descriptors,std::vector<shader_info> shaders);
+		void QueueForRendering(pipeline_handle pipeline, const render_info& info);
+
+	};
+
+
+
+
+	struct IPipeline
+	{
+		virtual void Create() = 0;
+		virtual void RegisterCommands() = 0;
+		void Draw() {}
+	};
+}
+
+//template<typename RT = size_t, typename T = int>
+//RT buffer_size(std::vector<T> const& vertices)
+//{
+//	return static_cast<RT>(sizeof(vertices[0]) * vertices.size());
+//}
 class DbgVertexBuffer
 {
 public:
@@ -1493,6 +1575,11 @@ void Vulkan::InitVulkanEnvironment(window_info info)
 void Vulkan::NextFrame()
 {
 	current_frame = (current_frame + 1) % max_frames_in_flight;
+}
+
+vgfx::VulkanDetail&& Vulkan::GetDetail()
+{
+	return vgfx::VulkanDetail{*this};
 }
 
 std::unique_ptr<Vulkan::vbo> Vulkan::CreateVbo(void const* buffer_start, void const* buffer_end)

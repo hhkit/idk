@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include "Vulkan.h"
+#include <VulkanPipeline.h>
 
 using Hvbo = uint32_t;
 
@@ -29,6 +30,9 @@ struct vbo
 struct DebugRenderer::pimpl
 {
 	std::map<DbgShape, vbo> shape_buffers;
+	idk::VulkGfxPipeline pipeline;
+	vgfx::VulkanDetail detail;
+	idk::VulkGfxPipeline::uniform_info uniforms;
 };
 
 struct DebugRenderer::Pipeline
@@ -37,9 +41,10 @@ struct DebugRenderer::Pipeline
 };
 
 
-void DebugRenderer::Init(GfxSystem& )
+void DebugRenderer::Init(GfxSystem& gfx_sys)
 {
 	impl = std::make_unique<pimpl>();
+	impl->detail = gfx_sys.GetDetail();
 	impl->shape_buffers = std::map<DbgShape, vbo>
 	{
 		{DbgShape::eCube   , 
@@ -61,7 +66,8 @@ void DebugRenderer::Init(GfxSystem& )
 			}
 	    }
 	};
-
+	idk::VulkGfxPipeline::config_t config;
+	impl->pipeline.Create(config, impl->detail);
 	
 
 
@@ -73,6 +79,12 @@ void DebugRenderer::DrawShape(DbgShape , vec3 , vec3 , quat )
 
 void DebugRenderer::Render()
 {
+	auto& cmd_buffer = *impl->detail.CurrCommandbuffer();
+	impl->pipeline.Bind(cmd_buffer, impl->detail);
+	impl->pipeline.BindUniformDescriptions(cmd_buffer, impl->detail,impl->uniforms);
+	//Bind vtx buffers
+	//Bind idx buffers
+	//Draw
 }
 
 void DebugRenderer::RegisterShaders(GfxSystem& )

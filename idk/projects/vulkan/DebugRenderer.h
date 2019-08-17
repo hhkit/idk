@@ -5,7 +5,6 @@ class debug_info;
 class Vulkan;
 
 using GfxSystem = Vulkan;
-
 enum DbgShape
 {
 	eziPreBegin,

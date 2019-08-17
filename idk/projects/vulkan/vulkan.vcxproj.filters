@@ -22,8 +22,10 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="utils\Utils.h">
-      <Filter>system</Filter>
+      <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanDetail.h" />
+    <ClInclude Include="VulkanPipeline.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -40,12 +42,16 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp">
-      <Filter>system</Filter>
+      <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanDetail.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
       <UniqueIdentifier>{ae16a2ac-34ab-44fe-88cf-fbbb70a7cb46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -53,7 +59,7 @@
       <Filter>system</Filter>
     </None>
     <None Include="utils\Utils.inl">
-      <Filter>system</Filter>
+      <Filter>utils</Filter>
     </None>
   </ItemGroup>
 </Project>
