@@ -5,39 +5,36 @@
 namespace idk::reflect
 {
 
-	namespace detail
+	struct dynamic::base
 	{
-		struct dynamic_base
+		virtual void* get() const = 0;
+		virtual uni_container to_container() const = 0;
+		virtual ~base() {}
+	};
+
+	template<typename T>
+	struct dynamic::derived : dynamic::base
+	{
+		T obj;
+
+		template<typename U>
+		derived(U&& obj)
+			: obj{ std::forward<U>(obj) }
+		{}
+
+		void* get() const override
 		{
-			virtual void* get() const = 0;
-			virtual uni_container to_container() const = 0;
-			virtual ~dynamic_base() {}
-		};
+			return const_cast<void*>(static_cast<const void*>(&obj));
+		}
 
-		template<typename T>
-		struct dynamic_derived : dynamic_base
+		uni_container to_container() const
 		{
-			T obj;
-
-			template<typename U>
-			dynamic_derived(U&& obj)
-				: obj{ std::forward<U>(obj) }
-			{}
-
-			void* get() const override
-			{
-				return const_cast<void*>(static_cast<const void*>(&obj));
-			}
-
-			uni_container to_container() const
-			{
-				if constexpr (is_sequential_container_v<T> || is_associative_container_v<T>)
-					return uni_container{ const_cast<T&>(obj) };
-				else
-					throw "not a container!";
-			}
-		};
-	}
+			if constexpr (is_sequential_container_v<T> || is_associative_container_v<T>)
+				return uni_container{ const_cast<T&>(obj) };
+			else
+				throw "not a container!";
+		}
+	};
 
 	class dynamic::property_iterator
 	{
@@ -55,7 +52,7 @@ namespace idk::reflect
 
 	template<typename T, typename>
 	dynamic::dynamic(T&& obj)
-		: type{ get_type<T>() }, _ptr{ std::make_shared<detail::dynamic_derived<T>>(std::forward<T>(obj)) }
+		: type{ get_type<T>() }, _ptr{ std::make_shared<derived<T>>(std::forward<T>(obj)) }
 	{}
 
 	template<typename T>

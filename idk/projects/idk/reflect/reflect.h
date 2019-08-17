@@ -60,8 +60,6 @@ namespace idk::reflect
 		struct typed_context_base;
 		template<typename T> struct typed_context;
 
-		struct dynamic_base;
-
 		template<typename Visitor>
 		void visit(void* obj, type type, Visitor&& visitor, int& depth);
 	}
@@ -116,6 +114,8 @@ namespace idk::reflect
 	{
 		friend struct detail::typed_context_base;
 		class property_iterator;
+		struct base;
+		template<typename T> struct derived;
 
 	public:
 		const type type;
@@ -151,7 +151,7 @@ namespace idk::reflect
 		dynamic& operator=(const dynamic& rhs);
 
 	private:
-		shared_ptr<detail::dynamic_base> _ptr;
+		shared_ptr<base> _ptr;
 		dynamic(reflect::type type, void* obj);
 	};
 

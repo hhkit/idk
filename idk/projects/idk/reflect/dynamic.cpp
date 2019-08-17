@@ -4,7 +4,7 @@
 namespace idk::reflect
 {
 	dynamic::dynamic(reflect::type type, void* obj)
-		: type{ type }, _ptr{ new detail::dynamic_derived<void*>(obj) }
+		: type{ type }, _ptr{ std::make_shared<derived<void*>>(std::forward<void*>(obj)) }
 	{}
 
 	dynamic::dynamic()

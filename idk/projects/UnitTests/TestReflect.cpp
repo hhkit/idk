@@ -262,7 +262,7 @@ ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
 
 TEST(Reflect, TestReflectEnum)
 {
-	auto x = testenum::IVAN;
+	testenum x = testenum::IVAN;
 
 	auto t = reflect::get_type<testenum>();
 
