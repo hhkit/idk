@@ -9,6 +9,7 @@ namespace idk::reflect
 	{
 		virtual void* get() const = 0;
 		virtual uni_container to_container() const = 0;
+		virtual enum_value to_enum_value() const = 0;
 		virtual vector<dynamic> unpack() const = 0;
 		virtual ~base() {}
 	};
@@ -35,6 +36,14 @@ namespace idk::reflect
 				return uni_container{ const_cast<T&>(obj) };
 			else
 				throw "not a container!";
+		}
+
+		enum_value to_enum_value() const override
+		{
+			if constexpr (is_macro_enum_v<T>)
+				return get_type<T>().as_enum_type().from_value(DecayedT::_enum(obj));
+			else
+				throw "not an enum!";
 		}
 
 		vector<dynamic> unpack() const override

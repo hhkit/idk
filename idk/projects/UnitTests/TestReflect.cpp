@@ -265,15 +265,39 @@ TEST(Reflect, TestReflectUniContainer)
 	}
 }
 
-ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
+namespace idk
+{
+	ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
+}
+REFLECT_ENUM(idk::testenum, "testenum")
 
 TEST(Reflect, TestReflectEnum)
 {
+	EXPECT_TRUE(is_macro_enum<testenum>::value);
+	EXPECT_FALSE(is_macro_enum<vec3>::value);
+
+	auto t = reflect::get_type<testenum>().as_enum_type();
+
+	std::vector<string_view> names;
+	std::vector<int64_t> values;
+	for (auto [name, value] : t)
+	{
+		names.push_back(name);
+		values.push_back(value);
+	}
+
+	EXPECT_EQ(names[0], "IVAN");
+	EXPECT_EQ(names[1], "IS");
+	EXPECT_EQ(names[2], "A");
+	EXPECT_EQ(names[3], "WEEB");
+	EXPECT_EQ(values[0], 5);
+	EXPECT_EQ(values[1], 6);
+	EXPECT_EQ(values[2], 7);
+	EXPECT_EQ(values[3], 8);
+
 	testenum x = testenum::IVAN;
+	EXPECT_EQ(x, 5);
 
-	auto t = reflect::get_type<testenum>();
-
-	auto ivan = t.create(8);
-
-	EXPECT_EQ(ivan.get_property("value").value.get<char>(), testenum::WEEB);
+	auto ivan = t.from_string("WEEB");
+	EXPECT_EQ(ivan, testenum(testenum::WEEB));
 }

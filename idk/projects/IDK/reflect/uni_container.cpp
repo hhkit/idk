@@ -43,26 +43,26 @@ namespace idk::reflect
 
 	size_t uni_container::size() const
 	{
-		return ptr_->size();
+		return _ptr->size();
 	}
 
 	uni_container::iterator uni_container::begin() const
 	{
-		return ptr_->begin();
+		return _ptr->begin();
 	}
 
 	uni_container::iterator uni_container::end() const
 	{
-		return ptr_->end();
+		return _ptr->end();
 	}
 
 	void uni_container::add(const dynamic& elem)
 	{
-		return ptr_->add(elem);
+		return _ptr->add(elem);
 	}
 
 	void uni_container::clear()
 	{
-		return ptr_->clear();
+		return _ptr->clear();
 	}
 }

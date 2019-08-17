@@ -7,6 +7,7 @@
 #include "type.inl"
 #include "dynamic.inl"
 #include "uni_container.inl"
+#include "enum_type.inl"
 
 #pragma warning (disable: 4996) // deprecation warning for std::result_of
 

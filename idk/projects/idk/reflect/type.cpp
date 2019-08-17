@@ -33,6 +33,16 @@ namespace idk::reflect
 		return _context->is_container;
 	}
 
+	bool type::is_enum_type() const
+	{
+		return _context->is_enum_type;
+	}
+
+	enum_type type::as_enum_type() const
+	{
+		return enum_type{ _context->get_enum_data() };
+	}
+
 	bool type::operator==(type other) const
 	{
 		return hash() == other.hash();

@@ -18,6 +18,13 @@ namespace idk::reflect
 {
 
 	class type;
+	class dynamic;
+	struct property;
+	class uni_container;
+	class enum_type;
+	class enum_value;
+	//    ^^^ forward decls, but also bookmarks
+
 
 	// get full qualified type name of T (decayed).
 	// eg. vec3& => idk::math::vector<float, 3>
@@ -73,12 +80,6 @@ namespace idk::reflect
 	// use idk::reflect::get_type to obtain type.
 	class type
 	{
-		friend class dynamic;
-		friend struct detail::typed_context_base;
-		friend type get_type(string_view name);
-		template<typename T> friend type get_type();
-		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth);
-
 	public:
 		// construct an instance of this type
 		template<typename... Ts>
@@ -102,36 +103,38 @@ namespace idk::reflect
 		// is it a container type?
 		bool is_container() const;
 
+		// is it a smart enum type defined with the macro ENUM?
+		bool is_enum_type() const;
+
 		// Checks if this type is a template type Tpl<typename...>
 		template<template<typename...> typename Tpl> bool is_template() const;
-
 		// Checks if this type is a template type Tpl<typename, auto>
 		template<template<typename, auto> typename Tpl> bool is_template() const;
-
 		// Checks if this type is a template type Tpl<auto...>
 		template<template<auto...> typename Tpl> bool is_template() const;
+
+		enum_type as_enum_type() const;
 
 		bool operator==(type other) const;
 
 	private:
 		const detail::typed_context_base* _context;
 		explicit type(detail::typed_context_base* context = nullptr);
+
+		friend class dynamic;
+		friend struct detail::typed_context_base;
+		friend type get_type(string_view name);
+		template<typename T> friend type get_type();
+		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth);
 	};
 
 
 
-	struct property;
-	class uni_container;
-
 	// reflected object. contains type-erased object with type information.
 	class dynamic
 	{
-		friend struct detail::typed_context_base;
-		class property_iterator;
-		struct base;
-		template<typename T> struct derived;
-
 	public:
+		class property_iterator;
 		const type type;
 
 		template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, dynamic>>>
@@ -160,6 +163,9 @@ namespace idk::reflect
 		// convert to unified container. check using type.is_container()
 		uni_container to_container() const;
 
+		// convert to a smart enum value. check using type.is_enum_type()
+		enum_value to_enum_value() const;
+
 		// unpacks a tuple
 		vector<dynamic> unpack() const;
 
@@ -168,12 +174,18 @@ namespace idk::reflect
 		dynamic& operator=(const dynamic& rhs);
 
 	private:
+		struct base;
+		template<typename T> struct derived;
+
 		shared_ptr<base> _ptr;
 		dynamic(reflect::type type, void* obj);
+
+		friend struct detail::typed_context_base;
 	};
 
 
 
+	// represents a reflected type property.
 	struct property
 	{
 		const string_view name;
@@ -185,11 +197,8 @@ namespace idk::reflect
 	// a unified container class. type-erases container and gives a generic interface for containers.
 	class uni_container
 	{
-		class iterator;
-		struct base;
-		template<typename T> struct derived;
-
 	public:
+		class iterator;
 		const type value_type;
 		const type type;
 
@@ -199,14 +208,96 @@ namespace idk::reflect
 
 		size_t size() const;
 
+		// generic iterators which dereferences into value_type as a dynamic
 		iterator begin() const;
 		iterator end() const;
 
+		// push_back for sequential containers, insert for associative,
+		// throws if container supports neither
 		void add(const dynamic& elem);
+
+		// clears the container. throws if container doesn't support clear.
 		void clear();
 
 	private:
-		std::shared_ptr<base> ptr_;
+		struct base;
+		template<typename T> struct derived;
+
+		std::shared_ptr<base> _ptr;
+	};
+
+
+
+	// represents a smart enum built using the macro ENUM
+	class enum_type
+	{
+	public:
+		class iterator;
+
+		type underlying_type() const;
+
+		// constructs an enum_value from name. if invalid name, uses the first enumerator.
+		enum_value from_string(string_view name) const;
+
+		// constructs an enum_value from value. the value may be invalid.
+		enum_value from_value(int64_t value) const;
+
+		// the number of enumerators.
+		size_t count() const;
+
+		// iterate name-value pairs.
+		iterator begin() const;
+		iterator end() const;
+
+		bool operator==(const enum_type& other) const;
+
+	private:
+		struct data { const size_t value_sizeof; const size_t count; const void* values; const string_view* names; };
+
+		const data* _data;
+		explicit enum_type(const data* data);
+		int64_t at(size_t index) const;
+
+		friend struct detail::typed_context_base;
+		template<typename T> friend struct detail::typed_context;
+		friend class type;
+		friend class enum_value;
+	};
+
+	// represents a smart enum value, see enum_type
+	class enum_value
+	{
+	public:
+		constexpr static size_t npos = static_cast<size_t>(-1);
+		const enum_type enum_type;
+
+		template<typename T, typename = std::enable_if_t<is_macro_enum_v<T>>>
+		enum_value(T t) : enum_value(get_type<T>().as_enum_type(), t) {}
+
+		// get the name. if invalid value, returns empty string ""
+		string_view name() const;
+		// get the value casted to long long.
+		int64_t value() const;
+		// get the index of the value, ie position declared in the enum.
+		// if invalid value, returns enum_value::npos
+		size_t index() const;
+
+		// assigns value if name exists, does nothing otherwise.
+		enum_value& try_assign(string_view name);
+		// assigns value if index exists, does nothing otherwise.
+		enum_value& try_assign(size_t index);
+		// assigns value if it is valid, does nothing otherwise.
+		enum_value& try_assign(int64_t val);
+		// unsafe assignment, works even if value is invalid
+		enum_value& assign(int64_t val);
+
+		bool operator==(const enum_value& other) const;
+
+	private:
+		int64_t _value;
+		explicit enum_value(const reflect::enum_type type, int64_t val);
+
+		friend class enum_type;
 	};
 
 };
@@ -223,8 +314,10 @@ namespace idk::reflect
 #define REFLECT_FRIEND							template<typename> friend struct property::opin::def;
 
 #include <util/macro_utils.h>
-#define X_REFLECT_VARS_SINGLE(VAR) REFLECT_VAR(VAR),
-#define REFLECT_VARS(...) IDENTITY(FOREACH(X_REFLECT_VARS_SINGLE, __VA_ARGS__))
+#define X_REFLECT_VARS_SINGLE(VAR)				REFLECT_VAR(VAR),
+#define REFLECT_VARS(...)						IDENTITY(FOREACH(X_REFLECT_VARS_SINGLE, __VA_ARGS__))
+
+#define REFLECT_ENUM(ENUM_TYPE, ALIAS)			REFLECT_BEGIN(ENUM_TYPE, ALIAS) REFLECT_VARS(value) REFLECT_CTOR(ENUM_TYPE::_enum) REFLECT_CTOR(int8_t) REFLECT_CTOR(int16_t) REFLECT_CTOR(int32_t) REFLECT_CTOR(int64_t) REFLECT_END()
 
 #undef property_var
 #undef property_var_fnbegin

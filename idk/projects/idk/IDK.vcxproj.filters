@@ -374,6 +374,12 @@
     <ClCompile Include="audio\AudioClipFactory.cpp">
       <Filter>audio</Filter>
     </ClCompile>
+    <ClCompile Include="reflect\enum_type.cpp">
+      <Filter>reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\enum_value.cpp">
+      <Filter>reflect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -477,6 +483,9 @@
     </None>
     <None Include="file\FileSystem.inl">
       <Filter>audio</Filter>
+    </None>
+    <None Include="reflect\enum_type.inl">
+      <Filter>reflect</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

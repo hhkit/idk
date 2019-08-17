@@ -95,6 +95,7 @@
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
@@ -125,6 +126,7 @@
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\serialize.cpp" />
     <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="reflect\enum_type.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -134,6 +136,7 @@
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />

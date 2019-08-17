@@ -9,7 +9,7 @@ namespace idk::reflect
 	uni_container::uni_container(T&& obj)
 		: type{ get_type<T>() }
 		, value_type{ get_type<std::decay_t<T>::value_type>() }
-		, ptr_{ std::make_shared<derived<T>>(std::forward<T>(obj)) }
+		, _ptr{ std::make_shared<derived<T>>(std::forward<T>(obj)) }
 	{}
 
 

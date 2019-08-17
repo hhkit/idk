@@ -71,6 +71,11 @@ namespace idk::reflect
 		return _ptr->to_container();
 	}
 
+	enum_value dynamic::to_enum_value() const
+	{
+		return _ptr->to_enum_value();
+	}
+
 	vector<dynamic> dynamic::unpack() const
 	{
 		return _ptr->unpack();
@@ -90,7 +95,7 @@ namespace idk::reflect
 
 	bool dynamic::property_iterator::operator==(const property_iterator& other)
 	{
-		return obj._ptr == other.obj._ptr && index == other.index;
+		return index == other.index && obj._ptr == other.obj._ptr;
 	}
 
 	bool dynamic::property_iterator::operator!=(const property_iterator& other)
