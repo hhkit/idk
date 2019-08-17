@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="idk::Guid::Natvis::x4hi">
+    <AlternativeType Name="idk::Guid::Natvis::x4lo" />
+    <DisplayString Condition="v==0">0</DisplayString>
+    <DisplayString Condition="v==1">1</DisplayString>
+    <DisplayString Condition="v==2">2</DisplayString>
+    <DisplayString Condition="v==3">3</DisplayString>
+    <DisplayString Condition="v==4">4</DisplayString>
+    <DisplayString Condition="v==5">5</DisplayString>
+    <DisplayString Condition="v==6">6</DisplayString>
+    <DisplayString Condition="v==7">7</DisplayString>
+    <DisplayString Condition="v==8">8</DisplayString>
+    <DisplayString Condition="v==9">9</DisplayString>
+    <DisplayString Condition="v==10">a</DisplayString>
+    <DisplayString Condition="v==11">b</DisplayString>
+    <DisplayString Condition="v==12">c</DisplayString>
+    <DisplayString Condition="v==13">d</DisplayString>
+    <DisplayString Condition="v==14">e</DisplayString>
+    <DisplayString Condition="v==15">f</DisplayString>
+  </Type>
+  
+  <Type Name="idk::Guid::Natvis::x8">
+    <DisplayString>{*(x4hi*)(this)}{*(x4lo*)(this)}</DisplayString>
+  </Type>
+  
+  <Type Name="idk::Guid::Natvis::x32">
+    <DisplayString>{((Natvis::x8*)this)[3]}{((Natvis::x8*)this)[2]}{((Natvis::x8*)this)[1]}{((Natvis::x8*)this)[0]}</DisplayString>
+  </Type>
+  
+  <Type Name="idk::Guid">
+    <DisplayString>{{{*((Natvis::x32*)this)}-{((Natvis::x8*)this)[5]}{((Natvis::x8*)this)[4]}-{((Natvis::x8*)this)[7]}{((Natvis::x8*)this)[6]}-{((Natvis::x8*)this)[8]}{((Natvis::x8*)this)[9]}-{((Natvis::x8*)this)[10]}{((Natvis::x8*)this)[11]}{((Natvis::x8*)this)[12]}{((Natvis::x8*)this)[13]}{((Natvis::x8*)this)[14]}{((Natvis::x8*)this)[15]}}}</DisplayString>
+  </Type>
+  
+</AutoVisualizer>

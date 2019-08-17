@@ -495,5 +495,8 @@
     <Natvis Include="_natvis\scene.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
+    <Natvis Include="_natvis\guid.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

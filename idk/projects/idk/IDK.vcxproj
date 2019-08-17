@@ -163,6 +163,7 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\guid.natvis" />
     <Natvis Include="_natvis\objectpool.natvis" />
     <Natvis Include="_natvis\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />
