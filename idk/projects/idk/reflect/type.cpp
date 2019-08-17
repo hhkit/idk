@@ -4,7 +4,7 @@
 namespace idk::reflect
 {
 
-	type::type(const detail::typed_context_base* context)
+	type::type(detail::typed_context_base* context)
 		: _context{ context }
 	{}
 

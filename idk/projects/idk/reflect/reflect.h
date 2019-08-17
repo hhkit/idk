@@ -23,6 +23,9 @@ namespace idk::reflect
 	// eg. vec3& => idk::math::vector<float, 3>
 	// NOTE: if comparing types, use typehash<T>() !!!
 	template<typename T> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
+	template<template<typename... > typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
+	template<template<typename, auto> typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
+	template<template<auto... > typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
 
 	// gets hash of type T (decayed).
 	// use this against type.hash()
@@ -77,6 +80,7 @@ namespace idk::reflect
 		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth);
 
 	public:
+		// construct an instance of this type
 		template<typename... Ts>
 		dynamic create(Ts&& ... args) const;
 
@@ -95,13 +99,23 @@ namespace idk::reflect
 		template<typename T>
 		bool is() const;
 
+		// is it a container type?
 		bool is_container() const;
+
+		// Checks if this type is a template type Tpl<typename...>
+		template<template<typename...> typename Tpl> bool is_template() const;
+
+		// Checks if this type is a template type Tpl<typename, auto>
+		template<template<typename, auto> typename Tpl> bool is_template() const;
+
+		// Checks if this type is a template type Tpl<auto...>
+		template<template<auto...> typename Tpl> bool is_template() const;
 
 		bool operator==(type other) const;
 
 	private:
 		const detail::typed_context_base* _context;
-		type(const detail::typed_context_base* context = nullptr);
+		explicit type(detail::typed_context_base* context = nullptr);
 	};
 
 
@@ -145,6 +159,9 @@ namespace idk::reflect
 
 		// convert to unified container. check using type.is_container()
 		uni_container to_container() const;
+
+		// unpacks a tuple
+		vector<dynamic> unpack() const;
 
 		template<typename T>
 		dynamic& operator=(const T& rhs);

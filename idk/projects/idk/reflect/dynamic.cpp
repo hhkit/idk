@@ -71,6 +71,11 @@ namespace idk::reflect
 		return _ptr->to_container();
 	}
 
+	vector<dynamic> dynamic::unpack() const
+	{
+		return _ptr->unpack();
+	}
+
 
 
 	dynamic::property_iterator::property_iterator(const dynamic& obj, size_t index)

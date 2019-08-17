@@ -55,6 +55,7 @@ TEST(Reflect, TestReflectConstexpr)
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<float>() }.c_str(), "float");
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<vec4>() }.c_str(), "idk::math::vector<float,4>");
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<reflect_this>() }.c_str(), "reflect_this");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<array>() }.c_str(), "idk::array");
 
 	int switch_case = 0;
 	switch (t.hash())
@@ -198,6 +199,8 @@ TEST(Reflect, TestReflectUniContainer)
 		array<int, 4> arr{ 1, 2, 3, 4 };
 		auto container = reflect::dynamic{ arr }.to_container();
 
+		EXPECT_TRUE(container.type.is_template<std::array>());
+
 		std::vector<reflect::dynamic> values;
 		for (auto& elem : container)
 		{
@@ -216,6 +219,8 @@ TEST(Reflect, TestReflectUniContainer)
 	{
 		vector<float> vec{ 1.0f, 2.0f, 3.0f, 4.0f };
 		reflect::uni_container container{ vec };
+
+		EXPECT_TRUE(container.type.is_template<std::vector>());
 
 		container.add(5.0f);
 
@@ -240,6 +245,8 @@ TEST(Reflect, TestReflectUniContainer)
 		hash_table<char, double> map{ { 'a', 1.0 }, { 'b', 2.0 }, { 'c', 3.0 }, { 'd', 4.0 } };
 		reflect::uni_container container{ map };
 
+		EXPECT_TRUE(container.type.is_template<std::unordered_map>());
+
 		container.add(std::pair<const char, double>{ 'e', 5.0f });
 
 		std::vector<reflect::dynamic> values;
@@ -247,9 +254,9 @@ TEST(Reflect, TestReflectUniContainer)
 		{
 			values.push_back(elem);
 		}
-		
-		auto eq0 = values[0].get<std::pair<const char, double>>() == std::pair<const char, double>{ 'a', 1.0 };
-		EXPECT_TRUE(eq0);
+
+		EXPECT_EQ(values[4].unpack()[0].get<char>(), 'e');
+		EXPECT_EQ(values[4].unpack()[1].get<double>(), 5.0);
 
 		EXPECT_EQ(container.size(), 5);
 

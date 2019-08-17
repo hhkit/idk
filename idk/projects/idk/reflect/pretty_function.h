@@ -1,17 +1,19 @@
 #pragma once
-#include <string_view>
 
 namespace idk::reflect::detail
 {
 
-	template<typename T>
-	constexpr std::string_view pretty_function() { return __FUNCSIG__; }
+	template<typename>
+	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	template<template<typename...> typename>
+	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	template<template<typename, auto> typename>
+	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	template<template<auto...> typename>
+	constexpr string_view pretty_function() { return __FUNCSIG__; }
 
-	template<typename T>
-	constexpr std::string_view pretty_function_name()
+	constexpr string_view extract_name_from_pretty_function(string_view sv)
 	{
-		std::string_view sv{ pretty_function<T>() };
-
 #if _MSC_VER >= 1920
 		sv.remove_prefix(sv.find("pretty_function<") + sizeof("pretty_function<") - 1);
 		if (sv.find("class") != std::string_view::npos)
@@ -32,7 +34,32 @@ namespace idk::reflect::detail
 			sv.size() - off - sizeof(">(void)") + 1
 		};
 #endif
+
 		return sv;
+	}
+
+	template<typename T>
+	constexpr string_view pretty_function_name()
+	{
+		return extract_name_from_pretty_function(pretty_function<T>());
+	}
+
+	template<template<typename...> typename Tpl>
+	constexpr string_view pretty_function_name()
+	{
+		return extract_name_from_pretty_function(pretty_function<Tpl>());
+	}
+
+	template<template<typename, auto> typename Tpl>
+	constexpr string_view pretty_function_name()
+	{
+		return extract_name_from_pretty_function(pretty_function<Tpl>());
+	}
+
+	template<template<auto...> typename Tpl>
+	constexpr string_view pretty_function_name()
+	{
+		return extract_name_from_pretty_function(pretty_function<Tpl>());
 	}
 
 }
