@@ -4,6 +4,7 @@
 
 #include <core/Core.h>
 #include <vulkan/VulkanWin32GraphicsSystem.h>
+#include <vulkan/VulkanDebugRenderer.h>
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 
@@ -20,7 +21,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 	auto c = Core{};
 	auto& wind = c.AddSystem<Windows>(hInstance, nCmdShow);
-	c.AddSystem<idk::VulkanWin32GraphicsSystem>(wind);
+	auto& gfx_sys = c.AddSystem<idk::VulkanWin32GraphicsSystem>(wind);
+	c.AddSystem<idk::VulkanDebugRenderer>(gfx_sys.Instance());
 	c.Run();
 	
 	return c.GetSystem<Windows>().GetReturnVal();

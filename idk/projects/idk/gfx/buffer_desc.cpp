@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "stdafx.h"
 #include "buffer_desc.h"
 namespace idk
 {
@@ -40,7 +40,7 @@ buffer_desc buffer_desc::Process(uint32_t location_offset) const
 			}
 		}
 		transformed.attributes.emplace_back(attrib);
-		return transformed;
 	}
+	return transformed;
 }
 }

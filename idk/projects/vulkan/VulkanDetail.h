@@ -3,6 +3,7 @@
 #include "Vulkan.h"
 namespace vgfx
 {
+	struct RenderState;
 	//Interface for the vulkan details. 
 	//Ideally we should move all of the vk:: related data and into VulkanDetail
 	//Effectively PIMPLing the vk stuff
@@ -26,6 +27,7 @@ namespace vgfx
 		std::vector<vk::UniqueCommandBuffer> &Commandbuffers     ()const;
 
 		//Render State info
+		RenderState             &RenderState        ()const;
 		vk::UniqueRenderPass    &Renderpass         ()const;
 		vk::UniqueCommandBuffer &CurrCommandbuffer  ()const;
 		vk::Buffer              &CurrMasterVtxBuffer()const;

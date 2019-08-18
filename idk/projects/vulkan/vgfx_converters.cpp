@@ -36,6 +36,17 @@ namespace vgfx
 		};
 	}
 
+	vk::VertexInputAttributeDescription ConvertVtxAttrib(const buffer_desc::attribute_info& attrib, uint32_t binding_index)
+	{
+		return vk::VertexInputAttributeDescription
+		{
+			attrib.location
+			,binding_index
+			,MapVtxFormat(attrib.format)
+			,attrib.offset
+		};
+	}
+
 	std::pair<idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription>> vgfx::ConvertVtxDesc(const vector<buffer_desc>& descs)
 	{
 		std::pair < idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription >>
@@ -67,6 +78,7 @@ namespace vgfx
 			++binding;
 			++loc;
 		}
+		return result;
 	}
 
 }

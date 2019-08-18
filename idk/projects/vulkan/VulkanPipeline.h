@@ -48,7 +48,7 @@ struct VulkGfxPipeline
 
 		//VkPipelineDepthStencilStateCreateInfo //For depth/stencil buffers; ignored for now
 
-		auto colorBlending = GetColorBlendConfig(config);
+		auto [colorBlending,cb_rsc] = GetColorBlendConfig(config);
 
 
 		//auto dynamicStates = GetDynamicStates(config);
@@ -133,7 +133,7 @@ private:
 
 		auto vert = config.vert_shader;//GetBinaryFile("shaders/vertex.vert.spv");
 		auto frag = config.frag_shader;//GetBinaryFile("shaders/fragment.frag.spv");
-
+		rsc.reserve(2);
 		auto& fragModule = rsc.emplace_back(vulkan.CreateShaderModule(frag));
 		auto& vertModule = rsc.emplace_back(vulkan.CreateShaderModule(vert));
 
@@ -240,11 +240,11 @@ private:
 		finalColor = finalColor & colorWriteMask;
 		*/
 	}
-	vk::PipelineColorBlendStateCreateInfo GetColorBlendConfig(const config_t& config)const
+	std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const
 	{
 		//Per frame buffer
 		auto colorBlendAttachments = GetColorBlendAttachments(config);
-		return vk::PipelineColorBlendStateCreateInfo
+		return std::make_pair(vk::PipelineColorBlendStateCreateInfo
 		{
 			vk::PipelineColorBlendStateCreateFlags{}
 			,VK_FALSE                           //logicOpEnable   
@@ -252,7 +252,7 @@ private:
 			,ArrCount(colorBlendAttachments)    //attachmentCount 
 			,ArrData(colorBlendAttachments)     //pAttachments   
 			,{ 0.0,0.0f,0.0f,0.0f }
-		};
+		},std::move(colorBlendAttachments));
 	}
 	vector<vk::DynamicState> GetDynamicStates(const config_t& config)const
 	{

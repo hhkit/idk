@@ -28,18 +28,25 @@
 
 namespace idk
 {
-	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<Vulkan>() }
 	{
 	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
-		instance_ = std::make_unique<Vulkan>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 		
 	}
 	void VulkanWin32GraphicsSystem::Draw()
 	{
 		instance_->DrawFrame();
+	}
+	void VulkanWin32GraphicsSystem::BeginFrame()
+	{
+		instance_->BeginFrame();
+	}
+	void VulkanWin32GraphicsSystem::EndFrame()
+	{
+		instance_->EndFrame();
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{

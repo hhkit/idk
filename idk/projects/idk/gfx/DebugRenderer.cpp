@@ -1,49 +1,38 @@
-#include "pch.h"
+#include "stdafx.h"
 #include "DebugRenderer.h"
-#include "math2.h"
 #include <map>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
-#include <utils/Utils.h>
+#include <math/matrix_transforms.h>
 
-using Hvbo = uint32_t;
-
-struct debug_vertex
+namespace idk
 {
-	vec3 vertex;
-	debug_vertex() = default;
-	debug_vertex(vec3 const& v) :vertex{ v }{}
-	~debug_vertex(){}
-	//glm::vec4 color;
-};
+	//Temporary, need to use resource manager later
+	std::string GetBinaryFile(const std::string& filepath)
+	{
+		std::ifstream file{ filepath,std::ios::binary };
+		std::stringstream data;
+		data << file.rdbuf();
+		file.close();
+		return data.str();
+	}
 
-struct vbo
+//struct DebugRenderer::pimpl
+//{
+//	std::map<DbgShape, vbo> shape_buffers;
+//};
+
+
+
+void DebugRenderer::Init()
 {
-	Hvbo handle = {};
-	std::vector< debug_vertex> vertices;
-
-	vbo(std::initializer_list<debug_vertex>&& il) :vertices{ il } {}
-	vbo(std::vector<debug_vertex>const& verts) :vertices{ verts } {}
-	void SetHandle(Hvbo handle);
-};
-
-struct DebugRenderer::pimpl
-{
-	std::map<DbgShape, vbo> shape_buffers;
-};
-
-struct DebugRenderer::Pipeline
-{
-
-};
-
-
-void DebugRenderer::Init(GfxSystem& gfx_sys)
-{
+	info = std::make_shared<debug_info>();
 	using buffer_desc  = idk::buffer_desc;
 	using binding_info = idk::buffer_desc::binding_info;
 	using attribute_info = idk::buffer_desc::attribute_info;
-	impl = std::make_unique<pimpl>();
+	//impl = std::make_unique<pimpl>();
 
 	idk::pipeline_config config;
 	auto vert_data = GetBinaryFile("shaders/dbgvertex.vert.spv");
@@ -68,29 +57,24 @@ void DebugRenderer::Init(GfxSystem& gfx_sys)
 		});
 
 	idk::uniform_info uniform_info;
-	Init(gfx_sys, config, uniform_info);
+	Init(config, uniform_info);
 
 
 }
 
 
-void DebugRenderer::DrawShape(DbgShape , vec3 , vec3 , quat )
+void DebugRenderer::DrawShape(DbgShape shape, vec3 pos, vec3 scale, vec3 axis, idk::rad angle, vec4 color)
 {
+	this->info->render_info[shape].emplace_back(debug_info::inst_data{color, idk::translate(pos)*mat4(idk::rotate(axis,angle)*idk::scale(scale))});
 }
 
 void DebugRenderer::Render()
 {
 }
 
-void DebugRenderer::RegisterShaders(GfxSystem& )
-{
-}
 
-void DebugRenderer::RegisterShapes(GfxSystem& )
+DebugRenderer::~DebugRenderer()
 {
-}
 
-std::unique_ptr<DebugRenderer::Pipeline> DebugRenderer::CreateRenderPipeline(GfxSystem& )
-{
-	return std::unique_ptr<Pipeline>();
+}
 }

@@ -47,10 +47,10 @@ void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcB
 template<typename T>
 vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr);
 
-template<typename RT = size_t, typename T = std::vector<int>>
+template<typename RT ,typename T>
 RT buffer_size(T const& vertices);
 
-template<typename RT = size_t, typename T = int>
+template<typename RT, typename T >
 RT buffer_size(T * begin, T * end);
 ///////
 #include <VulkanHelpers.inl>

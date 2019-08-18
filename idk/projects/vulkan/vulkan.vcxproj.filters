@@ -23,14 +23,11 @@
     <ClInclude Include="VulkanDetail.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="gfx\DebugRenderer.h" />
-    <ClInclude Include="gfx\pipeline_config.h" />
-    <ClInclude Include="gfx\uniform_info.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="VulkanHelpers.h" />
-    <ClInclude Include="gfx\buffer_desc.h" />
     <ClInclude Include="vgfx_converters.h" />
-    <ClInclude Include="gfx\debug_vtx_layout.h" />
+    <ClInclude Include="VectorBuffer.h" />
+    <ClInclude Include="RenderState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -47,12 +44,12 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="VulkanDetail.cpp" />
-    <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="VulkanHelpers.cpp" />
-    <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="vgfx_converters.cpp" />
     <ClCompile Include="VulkanPipeline.cpp" />
+    <ClCompile Include="VectorBuffer.cpp" />
+    <ClCompile Include="RenderState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

@@ -5,6 +5,7 @@
 #include <VulkanDetail.h>
 #include <VulkanHelpers.h>
 #include <gfx/buffer_desc.h>
+#include <RenderState.h>
 using namespace vhlp;
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
@@ -801,6 +802,10 @@ void Vulkan::createRenderPass()
 
 	m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 
+	//Temporary For RenderState
+	auto& rs = detail_->RenderState();
+
+	rs.render_pass = *m_renderpass;
 }
 
 void Vulkan::createDescriptorSetLayout()
@@ -1097,6 +1102,7 @@ void Vulkan::createVertexBuffers()
 	////This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
 	//m_device->flushMappedMemoryRanges(memory_ranges, dispatcher);
 	//m_device->unmapMemory(*m_device_memory);
+
 }
 
 void Vulkan::createIndexBuffers()
@@ -1251,6 +1257,18 @@ void Vulkan::createCommandBuffers()
 		commandBuffer->end(dispatcher);
 		++i;
 	}
+
+	//For RenderState
+	auto& rs = detail_->RenderState();
+	vk::CommandBufferAllocateInfo rs_alloc_info
+	{
+		*m_commandpool
+		,vk::CommandBufferLevel::ePrimary
+		,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+	};
+	auto cmd_buffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
+	rs.transfer_buffer = std::move(cmd_buffers[0]);
+	rs.command_buffer  = std::move(cmd_buffers[1]);
 }
 
 void Vulkan::createSemaphores()
@@ -1401,9 +1419,9 @@ void Vulkan::NextFrame()
 	current_frame = (current_frame + 1) % max_frames_in_flight;
 }
 
-vgfx::VulkanDetail&& Vulkan::GetDetail()
+vgfx::VulkanDetail& Vulkan::GetDetail()
 {
-	return vgfx::VulkanDetail{*this};
+	return *detail_;
 }
 
 std::unique_ptr<Vulkan::vbo> Vulkan::CreateVbo(void const* buffer_start, void const* buffer_end)
@@ -1434,6 +1452,53 @@ std::unique_ptr<Vulkan::vbo> Vulkan::CreateVbo(void const* buffer_start, void co
 
 void Vulkan::Draw(unique_vbo const& , unique_ubo const& , unique_pipeline const& )
 {
+}
+
+void Vulkan::BeginFrame()
+{
+	auto& rs = detail_->RenderState();
+	auto& command_buffer = rs.CommandBuffer();
+	auto& trf_buffer     = rs.TransferBuffer();
+	detail_->ResetMasterBuffer();
+	command_buffer.reset(vk::CommandBufferResetFlags{},detail_->Dispatcher());
+
+	vk::CommandBufferBeginInfo beginInfo
+	{
+		vk::CommandBufferUsageFlags{}
+		,nullptr
+	};
+	command_buffer.begin(beginInfo);
+
+	vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
+	vk::RenderPassBeginInfo renderPassInfo
+	{
+		rs.RenderPass()
+		,*m_swapchain.frame_buffers[current_frame]
+		,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
+		,1
+		,&clearcolor
+	};
+	command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+}
+
+void Vulkan::EndFrame()
+{
+	auto& rs = detail_->RenderState();
+	auto& dispatcher = detail_->Dispatcher();
+	auto& command_buffer = rs.CommandBuffer();
+	auto& trf_buffer = rs.TransferBuffer();
+	for (auto& dc : rs.draw_calls)
+	{
+		dc.pipeline->Bind(command_buffer, *detail_);
+		dc.pipeline->BindUniformDescriptions(command_buffer, *detail_,dc.uniform_info);
+		for (auto& [first_binding, offset] : dc.vtx_binding)
+		{
+			command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
+		}
+		command_buffer.draw(dc.vertex_count, dc.instance_count, 0, 0, dispatcher);
+	}
+	command_buffer.endRenderPass(dispatcher);
+	command_buffer.end(dispatcher);
 }
 
 void Vulkan::DrawFrame()
@@ -1468,9 +1533,36 @@ void Vulkan::DrawFrame()
 		,1,readySemaphores
 	};
 	m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
+	
+	{
+		auto& render_state = detail_->RenderState();
+		vk::CommandBufferBeginInfo beginInfo
+		{
+			vk::CommandBufferUsageFlags{}
+			,nullptr
+		};
+		render_state.transfer_buffer->begin(beginInfo);
+		render_state.UpdateMasterBuffer(*detail_);
+		render_state.transfer_buffer->end();
+		vk::CommandBuffer cmds[] =
+		{
+			*m_commandbuffers[imageIndex]
+			,render_state.TransferBuffer()
+			,render_state.CommandBuffer()
+		};
+		vk::SubmitInfo render_state_submit_info
+		{
+			1
+			,waitSemaphores
+			,waitStages
+			,ArrCount(cmds),ArrData(cmds)
+			,1,readySemaphores
+		};
+		vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-	if (m_graphics_queue.submit(1, &submitInfo, *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
-		throw std::runtime_error("failed to submit draw command buffer!");
+		if (m_graphics_queue.submit(ArrCount(frame_submit), ArrData(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
+			throw std::runtime_error("failed to submit draw command buffer!");
+	}
 
 	vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 
@@ -1515,6 +1607,12 @@ void Vulkan::Cleanup()
 	m_device->waitIdle();
 	//instance.release();
 }
+
+Vulkan::Vulkan() : detail_{std::make_unique<vgfx::VulkanDetail>(*this)}
+{
+}
+
+Vulkan::~Vulkan() = default;
 
 DbgVertexBuffer::DbgVertexBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 {

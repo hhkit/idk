@@ -90,15 +90,20 @@ public:
 
 
 #pragma region ("Potentially main thing")
-	vgfx::VulkanDetail&& GetDetail();
+	vgfx::VulkanDetail& GetDetail();
 	unique_vbo      CreateVbo     (void const* buffer_start, void const* buffer_end);
 	unique_ubo      CreateUbo     (void const* buffer_start, void const* buffer_end);
 	unique_pipeline CreatePipeline(pipeline_config const& config);
 	void Draw(unique_vbo const& vbo, unique_ubo const& uniforms, unique_pipeline const& pipeline);
 #pragma endregion
+	void BeginFrame();
+	void EndFrame();
+
 	void DrawFrame();
 	void OnResize();
 	void Cleanup();
+	Vulkan();
+	~Vulkan();
 private:
 	void createInstance();
 	void createSurface(HINSTANCE winstance, HWND wnd);
@@ -130,6 +135,7 @@ private:
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 	void updateUniformBuffer(uint32_t image_index);
 
+	//Temporary, should move all the data/states into VulkanDetail
 	friend vgfx::VulkanDetail;
 
 	vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo(ValHandler* userData = nullptr);
@@ -139,6 +145,7 @@ private:
 	uint32_t WIDTH = 1280, HEIGHT = 720;
 	uint32_t current_frame = 0, max_frames_in_flight = 2;
 
+	std::unique_ptr<vgfx::VulkanDetail> detail_;
 
 	vk::DispatchLoaderDefault        dispatcher = {};
 	vk::UniqueInstance               instance;

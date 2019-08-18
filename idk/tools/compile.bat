@@ -34,6 +34,7 @@ rem setlocal disableDelayedExpansion
 call :FileModTime %1 A
 call :FileModTime %2 B
 set "diff=0"
+if defined A if not defined B exit /b 1
 if defined A if defined B set /a diff=B-A
 rem endlocal
 if %A% gtr %B% if %diff% lss -2 exit /b 1

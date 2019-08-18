@@ -100,7 +100,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\vulkan\;$(SolutionDir)projects\win32\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\vulkan\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,7 +172,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\vulkan\;$(SolutionDir)projects\win32\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\vulkan\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -204,11 +204,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="color.h" />
     <ClInclude Include="debug_info.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="gfx\buffer_desc.h" />
-    <ClInclude Include="gfx\DebugRenderer.h" />
-    <ClInclude Include="gfx\debug_vtx_layout.h" />
-    <ClInclude Include="gfx\pipeline_config.h" />
-    <ClInclude Include="gfx\uniform_info.h" />
+    <ClInclude Include="RenderState.h" />
+    <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="vgfx_converters.h" />
     <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
@@ -222,8 +219,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug_info.cpp" />
-    <ClCompile Include="gfx\buffer_desc.cpp" />
-    <ClCompile Include="gfx\DebugRenderer.cpp" />
+    <ClCompile Include="RenderState.cpp" />
+    <ClCompile Include="VectorBuffer.cpp" />
     <ClCompile Include="vgfx_converters.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">

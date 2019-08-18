@@ -96,3 +96,22 @@ void MapMemory(vk::Device& device, vk::DeviceMemory& memory, vk::DeviceSize dest
 	device.flushMappedMemoryRanges(memory_ranges, dispatcher);
 	device.unmapMemory(memory);
 }
+
+template<typename T>
+vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr)
+{
+	return vk::ArrayProxy<const T>{sz, arr};
+}
+
+template<typename RT = size_t, typename T = std::vector<int>>
+RT buffer_size(T const& vertices)
+{
+	return static_cast<RT>(sizeof(*ArrData(vertices)) * ArrCount(vertices));
+}
+
+template<typename RT = size_t, typename T = int>
+RT buffer_size(T * begin, T * end)
+{
+	return static_cast<RT>(sizeof(T) * (end - begin));
+}
+
