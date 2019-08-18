@@ -132,20 +132,9 @@ Variables:
 
 namespace idk
 {
-	FMOD_RESULT AudioSystem::result = FMOD_OK; //Static var
+	//FMOD_RESULT AudioSystem::_result = FMOD_OK; //Static var
 
-	AudioSystem::AudioSystem()
-		: CoreSystem			{ nullptr }
-		, timeItWasInitialized	{}
-		, numberOfDrivers		{ 0 }
-		, currentDriver			{ 0 }
-		, soundGroup_MASTER	{ nullptr }
-		, soundGroup_MUSIC	{ nullptr }
-		, soundGroup_SFX		{ nullptr }
-		, soundGroup_AMBIENT	{ nullptr }
-		, soundGroup_DIALOGUE	{ nullptr }
-	{
-	}
+	AudioSystem::AudioSystem() {}
 
 	AudioSystem::~AudioSystem()
 	{
@@ -156,30 +145,30 @@ namespace idk
 		Core::GetResourceManager().RegisterFactory<AudioClipFactory>();
 
 		// Create the FMOD Core System object.
-		ParseFMOD_RESULT(FMOD::System_Create(&CoreSystem));
+		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));
 
 		// Initializes FMOD Core
-		ParseFMOD_RESULT(CoreSystem->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
+		ParseFMOD_RESULT(_Core_System->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
 		
 		//Channel Group Setup
-		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_MUSIC", &soundGroup_MUSIC));
-		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_SFX", &soundGroup_SFX));
-		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_AMBIENT", &soundGroup_AMBIENT));
-		ParseFMOD_RESULT(CoreSystem->createSoundGroup("soundGroup_DIALOGUE", &soundGroup_DIALOGUE));
-		ParseFMOD_RESULT(CoreSystem->getMasterSoundGroup(&soundGroup_MASTER));
+		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_MUSIC",		&_soundGroup_MUSIC		));
+		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_SFX",		&_soundGroup_SFX		));
+		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_AMBIENT",	&_soundGroup_AMBIENT	));
+		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_DIALOGUE",	&_soundGroup_DIALOGUE	));
+		ParseFMOD_RESULT(_Core_System->getMasterSoundGroup(&_soundGroup_MASTER));
 
 		//Get Number of Drivers available
-		ParseFMOD_RESULT(CoreSystem->getNumDrivers(&numberOfDrivers));
+		ParseFMOD_RESULT(_Core_System->getNumDrivers(&_number_of_drivers));
 
 		//Driver info setup
-		driverDetails.clear(); //In the event that audio engine is reinitialized
-		if (numberOfDrivers != 0) {
+		_driver_details.clear(); //In the event that audio engine is reinitialized
+		if (_number_of_drivers != 0) {
 			//std::cout << "Number of Drivers found: " << numberOfDrivers << std::endl;
 			
-			for (int i = 0; i < numberOfDrivers; ++i) {
-				driverDetails.push_back(AUDIOSYSTEM_DRIVERDATA{});
+			for (int i = 0; i < _number_of_drivers; ++i) {
+				_driver_details.push_back(AUDIOSYSTEM_DRIVERDATA{});
 
-				driverDetails[i].driverIndex = i;
+				_driver_details[i].driverIndex = i;
 				////Retrieve data
 				//driverDetails[i].driverName[512];
 				//driverDetails[i].fmodID;
@@ -188,7 +177,7 @@ namespace idk
 				//driverDetails[i].speakerModeChannels;
 
 				//Get driver info
-				ParseFMOD_RESULT(CoreSystem->getDriverInfo(i, driverDetails[i].driverName, 512, &driverDetails[i].fmodID, &driverDetails[i].systemRate, &driverDetails[i].speakerMode, &driverDetails[i].speakerModeChannels));
+				ParseFMOD_RESULT(_Core_System->getDriverInfo(i, _driver_details[i].driverName, 512, &_driver_details[i].fmodID, &_driver_details[i].systemRate, &_driver_details[i].speakerMode, &_driver_details[i].speakerModeChannels));
 
 				//DRIVER NAME
 				//std::cout << "Sound Driver (" << i << "): \t";
@@ -211,122 +200,56 @@ namespace idk
 		}
 		else {
 			//If no sound driver, set output to no sound
-			ParseFMOD_RESULT(CoreSystem->setOutput(FMOD_OUTPUTTYPE_NOSOUND));
+			ParseFMOD_RESULT(_Core_System->setOutput(FMOD_OUTPUTTYPE_NOSOUND));
 			//std::cout << "No sound drivers found! Audio will set to NOSOUND." << std::endl;
-			currentDriver = -1;
+			_current_driver = -1;
 		}
 
 
-		ParseFMOD_RESULT(CoreSystem->getDriver(&currentDriver));
+		ParseFMOD_RESULT(_Core_System->getDriver(&_current_driver));
 		//std::cout << "Current driver index in use:" << currentDriver << std::endl;
 
-		timeItWasInitialized = time_point::clock::now();
+		_time_it_was_initialized = time_point::clock::now();
 
 	}
 
 	void AudioSystem::Run()
 	{
 		// Get Updates the core system by a tick
-		ParseFMOD_RESULT(CoreSystem->update());
+		ParseFMOD_RESULT(_Core_System->update());
 	}
 	void AudioSystem::Shutdown()
 	{
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
-		ParseFMOD_RESULT(soundGroup_MUSIC	 ->release()); 
-		ParseFMOD_RESULT(soundGroup_SFX		 ->release()); 
-		ParseFMOD_RESULT(soundGroup_AMBIENT	 ->release()); 
-		ParseFMOD_RESULT(soundGroup_DIALOGUE ->release());
-		soundGroup_MUSIC	 = nullptr;
-		soundGroup_SFX		 = nullptr;
-		soundGroup_AMBIENT	 = nullptr;
-		soundGroup_DIALOGUE	 = nullptr;
+		ParseFMOD_RESULT(_soundGroup_MUSIC	  ->release()); 
+		ParseFMOD_RESULT(_soundGroup_SFX	  ->release()); 
+		ParseFMOD_RESULT(_soundGroup_AMBIENT  ->release()); 
+		ParseFMOD_RESULT(_soundGroup_DIALOGUE ->release());
+		_soundGroup_MUSIC	= nullptr;
+		_soundGroup_SFX		= nullptr;
+		_soundGroup_AMBIENT = nullptr;
+		_soundGroup_DIALOGUE= nullptr;
 
 
 		//System close
-		ParseFMOD_RESULT(CoreSystem->release());
+		ParseFMOD_RESULT(_Core_System->release());
 
 		// Cleanup
-		CoreSystem = nullptr;
+		_Core_System = nullptr;
 	}
 
 	void AudioSystem::SetMemoryAllocators(FMOD_MEMORY_ALLOC_CALLBACK useralloc, FMOD_MEMORY_REALLOC_CALLBACK userrealloc, FMOD_MEMORY_FREE_CALLBACK userfree)
 	{
 		FMOD::Memory_Initialize(NULL, 0, useralloc, userrealloc, userfree);
 	}
-	/*
-	unique_ptr<AudioClip> AudioSystem::CreateAudioClip(string filePath, SubSoundGroup sndGrp)
-	{
-		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 
-		try {
-			switch (sndGrp) {
-			default:
-			case SubSoundGroup_SFX:
-				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->soundHandle)));		//
-				newSound->soundHandle->setSoundGroup(soundGroup_SFX);
-
-				break;
-			case SubSoundGroup_MUSIC:
-				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_NORMAL | FMOD_2D | FMOD_CREATESTREAM, NULL, &(newSound->soundHandle)));	//
-				newSound->soundHandle->setSoundGroup(soundGroup_MUSIC);
-
-				break;
-			case SubSoundGroup_AMBIENT:
-				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_NORMAL | FMOD_3D, NULL, &(newSound->soundHandle)));	//
-				newSound->soundHandle->setSoundGroup(soundGroup_AMBIENT);
-
-				break;
-			case SubSoundGroup_DIALOGUE:
-				ParseFMOD_RESULT(CoreSystem->createSound(filePath.c_str(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->soundHandle)));		//
-				newSound->soundHandle->setSoundGroup(soundGroup_DIALOGUE);
-
-				break;
-
-			}
-		}
-		catch (EXCEPTION_AudioSystem i) { //If an error occurs here, delete newSound and return nullptr
-			std::cout << i.exceptionDetails << "Returning nullptr.\n";
-			delete newSound;
-			return nullptr;
-		}
-		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
-		newSound->soundInfo.filePath = filePath;
-		char name[512];
-		ParseFMOD_RESULT(newSound->soundHandle->getName(name, 512));
-		newSound->soundInfo.name = name;
-		ParseFMOD_RESULT(newSound->soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
-
-		//Push to list for management.
-		//SoundList.push_back(newSound);
-
-		return newSound;
-	}
-
-	void AudioSystem::DeleteAudioClip(AudioClip*& soundPointer)
-	{
-		if (soundPointer == nullptr) {
-			return; //If nothing is given, return.
-		}
-
-		//delete soundPointer;
-		//Remove from list for management.
-		//SoundList.remove(*soundPointer);
-		soundPointer = nullptr;
-	}
-
-	//void AudioSystem::PlayAudioClip(AudioClip*& soundPointer)
-	//{
-	//	FMOD::Channel* channel;
-	//	ParseFMOD_RESULT(CoreSystem->playSound(soundPointer->soundHandle, nullptr, false, &channel));
-	//}
-	*/
 	void AudioSystem::ParseFMOD_RESULT(FMOD_RESULT e)
 	{
-		result = e;
-		if (result != FMOD_OK)
+		_result = e;
+		if (_result != FMOD_OK)
 		{
 			std::ostringstream stringStream;
-			stringStream << "FMOD error! (" << result << ") " << FMOD_ErrorString(result) << "/n"; //Puts string into stream
+			stringStream << "FMOD error! (" << _result << ") " << FMOD_ErrorString(_result) << "/n"; //Puts string into stream
 			EXCEPTION_AudioSystem exception;
 			exception.exceptionDetails = stringStream.str();
 			throw exception;
@@ -341,23 +264,23 @@ namespace idk
 	AUDIOSYSTEM_CPUDATA AudioSystem::GetDetailedCPUPercentUsage() 
 	{
 		AUDIOSYSTEM_CPUDATA i{};
-		ParseFMOD_RESULT(CoreSystem->getCPUUsage(&i.dsp, &i.stream, &i.geometry, &i.update, &i.total));
+		ParseFMOD_RESULT(_Core_System->getCPUUsage(&i.dsp, &i.stream, &i.geometry, &i.update, &i.total));
 		return i;
 	}
 
 	vector<AUDIOSYSTEM_DRIVERDATA> AudioSystem::GetAllSoundDriverData() const
 	{
-		return driverDetails;
+		return _driver_details;
 	}
 
 	int AudioSystem::GetCurrentSoundDriverIndex() const
 	{
-		return currentDriver;
+		return _current_driver;
 	}
 
 	time_point AudioSystem::GetTimeInitialized() const
 	{
-		return timeItWasInitialized;
+		return _time_it_was_initialized;
 	}
 
 	void AudioSystem::GetMemoryStats(int* currentBytesAllocated, int* maxBytesAllocated, bool precise)
