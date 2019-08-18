@@ -1,7 +1,9 @@
 #pragma once
 #include <memory>
 #include "math2.h"
-class debug_info;
+#include <gfx/pipeline_config.h>
+#include <gfx/uniform_info.h>
+#include <gfx/debug_vtx_layout.h>
 class Vulkan;
 
 using GfxSystem = Vulkan;
@@ -12,6 +14,15 @@ enum DbgShape
 	eSquare,
 	eziCount
 };
+struct debug_info
+{
+	struct inst_data
+	{
+		vec4 col;
+		mat4 transform;
+	};
+	idk::hash_table<DbgShape, idk::vector<inst_data>> render_info;
+};
 
 
 class DebugRenderer
@@ -20,10 +31,10 @@ public:
 	void Init(GfxSystem& system);
 	void DrawShape(DbgShape shape, vec3 pos, vec3 scale, quat rotation);
 
-	void Render();
-private:
+	virtual void Render();
+protected:
+	virtual void Init(GfxSystem& system,const idk::pipeline_config& pipeline_config, const idk::uniform_info& uniform_info)=0;
 	std::shared_ptr<debug_info> info;
-
 	struct pimpl;
 	
 	std::unique_ptr<pimpl> impl;

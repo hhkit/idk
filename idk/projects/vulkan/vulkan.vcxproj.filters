@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h">
       <Filter>system</Filter>
@@ -10,9 +9,6 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="debug_info.h">
-      <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugRenderer.h">
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan.h">
@@ -26,6 +22,15 @@
     </ClInclude>
     <ClInclude Include="VulkanDetail.h" />
     <ClInclude Include="VulkanPipeline.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="gfx\DebugRenderer.h" />
+    <ClInclude Include="gfx\pipeline_config.h" />
+    <ClInclude Include="gfx\uniform_info.h" />
+    <ClInclude Include="VulkanDebugRenderer.h" />
+    <ClInclude Include="VulkanHelpers.h" />
+    <ClInclude Include="gfx\buffer_desc.h" />
+    <ClInclude Include="vgfx_converters.h" />
+    <ClInclude Include="gfx\debug_vtx_layout.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -35,9 +40,6 @@
     <ClCompile Include="debug_info.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="DebugRenderer.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="Vulkan.cpp">
       <Filter>system</Filter>
     </ClCompile>
@@ -45,6 +47,12 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="VulkanDetail.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp" />
+    <ClCompile Include="VulkanDebugRenderer.cpp" />
+    <ClCompile Include="VulkanHelpers.cpp" />
+    <ClCompile Include="gfx\buffer_desc.cpp" />
+    <ClCompile Include="vgfx_converters.cpp" />
+    <ClCompile Include="VulkanPipeline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -61,5 +69,6 @@
     <None Include="utils\Utils.inl">
       <Filter>utils</Filter>
     </None>
+    <None Include="VulkanHelpers.inl" />
   </ItemGroup>
 </Project>

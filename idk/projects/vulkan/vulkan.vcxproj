@@ -202,9 +202,16 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="color.h" />
-    <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="debug_info.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="gfx\buffer_desc.h" />
+    <ClInclude Include="gfx\DebugRenderer.h" />
+    <ClInclude Include="gfx\debug_vtx_layout.h" />
+    <ClInclude Include="gfx\pipeline_config.h" />
+    <ClInclude Include="gfx\uniform_info.h" />
+    <ClInclude Include="vgfx_converters.h" />
+    <ClInclude Include="VulkanHelpers.h" />
+    <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="math2.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Utils.h" />
@@ -214,8 +221,11 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VulkanDetail.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DebugRenderer.cpp" />
     <ClCompile Include="debug_info.cpp" />
+    <ClCompile Include="gfx\buffer_desc.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp" />
+    <ClCompile Include="vgfx_converters.cpp" />
+    <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -225,11 +235,14 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="utils\Utils.cpp" />
     <ClCompile Include="Vulkan.cpp" />
     <ClCompile Include="VulkanDetail.cpp" />
+    <ClCompile Include="VulkanHelpers.cpp" />
+    <ClCompile Include="VulkanPipeline.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="utils\Utils.inl" />
     <None Include="vulkan.inl" />
+    <None Include="VulkanHelpers.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,8 +3,8 @@
 #include "math2.h"
 #include <map>
 #include <vector>
-#include "Vulkan.h"
-#include <VulkanPipeline.h>
+
+#include <utils/Utils.h>
 
 using Hvbo = uint32_t;
 
@@ -30,9 +30,6 @@ struct vbo
 struct DebugRenderer::pimpl
 {
 	std::map<DbgShape, vbo> shape_buffers;
-	idk::VulkGfxPipeline pipeline;
-	vgfx::VulkanDetail detail;
-	idk::VulkGfxPipeline::uniform_info uniforms;
 };
 
 struct DebugRenderer::Pipeline
@@ -43,35 +40,39 @@ struct DebugRenderer::Pipeline
 
 void DebugRenderer::Init(GfxSystem& gfx_sys)
 {
+	using buffer_desc  = idk::buffer_desc;
+	using binding_info = idk::buffer_desc::binding_info;
+	using attribute_info = idk::buffer_desc::attribute_info;
 	impl = std::make_unique<pimpl>();
-	impl->detail = gfx_sys.GetDetail();
-	impl->shape_buffers = std::map<DbgShape, vbo>
-	{
-		{DbgShape::eCube   , 
+
+	idk::pipeline_config config;
+	auto vert_data = GetBinaryFile("shaders/dbgvertex.vert.spv");
+	auto frag_data = GetBinaryFile("shaders/dbgfragment.frag.spv");
+	config.frag_shader = frag_data;
+	config.vert_shader = vert_data;
+	config.fill_type = idk::FillType::eLine;
+	config.buffer_descriptions.emplace_back(
+		buffer_desc{
+			binding_info{0,sizeof(idk::debug_vertex),idk::VertexRate::eVertex},
 			{
-				vec3{-0.5f,-0.5f,0.0f},
-				vec3{ 0.5f, 0.5f,0.0f},
-				vec3{-0.5f, 0.5f,0.0f},
+				attribute_info{ idk::AttribFormat::eSVec3,0,0 }
 			}
-		}
-		,
-	    {DbgShape::eSquare,
+		});
+	config.buffer_descriptions.emplace_back(
+		buffer_desc{
+			binding_info{1,sizeof(idk::debug_instance),idk::VertexRate::eInstance},
 			{
-				vec3{-0.5f,-0.5f,0.0f},
-				vec3{ 0.5f, 0.5f,0.0f},
-				vec3{-0.5f, 0.5f,0.0f},
-				vec3{ 0.0f,-0.5f,0.0f},
-				vec3{-0.5f,-0.5f,0.0f},
-				vec3{ 0.5f, 0.5f,0.0f},
+				 attribute_info{ idk::AttribFormat::eSVec4,0, offsetof(idk::debug_instance,color) }
+				,attribute_info{ idk::AttribFormat::eMat4,1, offsetof(idk::debug_instance,model) }
 			}
-	    }
-	};
-	idk::VulkGfxPipeline::config_t config;
-	impl->pipeline.Create(config, impl->detail);
-	
+		});
+
+	idk::uniform_info uniform_info;
+	Init(gfx_sys, config, uniform_info);
 
 
 }
+
 
 void DebugRenderer::DrawShape(DbgShape , vec3 , vec3 , quat )
 {
@@ -79,12 +80,6 @@ void DebugRenderer::DrawShape(DbgShape , vec3 , vec3 , quat )
 
 void DebugRenderer::Render()
 {
-	auto& cmd_buffer = *impl->detail.CurrCommandbuffer();
-	impl->pipeline.Bind(cmd_buffer, impl->detail);
-	impl->pipeline.BindUniformDescriptions(cmd_buffer, impl->detail,impl->uniforms);
-	//Bind vtx buffers
-	//Bind idx buffers
-	//Draw
 }
 
 void DebugRenderer::RegisterShaders(GfxSystem& )

@@ -21,7 +21,7 @@ struct window_info
 
 class Vulkan;
 
-class debug_info;
+struct debug_info;
 namespace vgfx
 {
 	struct QueueFamilyIndices

@@ -21,12 +21,17 @@ namespace vgfx
 		//vk::Queue          m_transfer_queue = {};
 		SwapChainInfo                    &Swapchain()const;
 
-		vk::UniqueRenderPass                 &Renderpass         ()const;
 		vk::UniquePipeline                   &Pipeline           ()const;
 		vk::UniqueCommandPool                &Commandpool        ()const;
-
-		vk::UniqueCommandBuffer              &CurrCommandbuffer  ()const;
 		std::vector<vk::UniqueCommandBuffer> &Commandbuffers     ()const;
+
+		//Render State info
+		vk::UniqueRenderPass    &Renderpass         ()const;
+		vk::UniqueCommandBuffer &CurrCommandbuffer  ()const;
+		vk::Buffer              &CurrMasterVtxBuffer()const;
+		//Copies the data into the master buffer and returns the offset to start from.
+		uint32_t                AddToMasterBuffer  (const void* data, uint32_t len)const;
+		void                     ResetMasterBuffer  ()const;
 
 
 
@@ -34,9 +39,15 @@ namespace vgfx
 
 
 		VulkanDetail(::Vulkan& vulkan);
-		VulkanDetail(VulkanDetail&&) = default;
-		VulkanDetail& operator=(VulkanDetail&&) = default;
+		VulkanDetail(VulkanDetail&&) noexcept;
+		VulkanDetail& operator=(VulkanDetail&&) noexcept;
+		//VulkanDetail(const VulkanDetail&)  = default;
+		//VulkanDetail& operator=(const VulkanDetail&)  = default;
+		~VulkanDetail();
 	private:
-		::Vulkan& vulkan_;
+		struct pimpl;
+		std::unique_ptr<pimpl> impl_;
+		::Vulkan& vulkan()const;
+		::Vulkan* vulkan_;
 	};
 }

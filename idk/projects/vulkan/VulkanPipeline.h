@@ -1,35 +1,18 @@
 #pragma once
 #include <Vulkan.h>
 #include <VulkanDetail.h>
+#include <gfx/pipeline_config.h>
+#include <gfx/uniform_info.h>
 namespace idk
 {
 
 struct VulkGfxPipeline
 {
 	using Vulkan_t = vgfx::VulkanDetail;
-	vk::UniquePipelineLayout m_pipelinelayout;
-	vk::UniquePipeline       m_pipeline;
-	enum FillType
-	{
-		eFill
-		,eLine
-	};
-	struct config_t
-	{
-		string_view frag_shader{};
-		string_view vert_shader{};
-		std::optional<ivec2> screen_size{};
-		FillType fill_type = eFill;
-	};
-	struct uniform_info
-	{
-		struct layout
-		{
-
-		};
-		vector<layout> layouts;
-		
-	};
+	vk::UniquePipelineLayout m_pipelinelayout{};
+	vk::UniquePipeline       m_pipeline{};
+	using config_t     = pipeline_config;
+	using uniform_info = uniform_info;
 	void Create(config_t const& config, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
@@ -68,14 +51,14 @@ struct VulkGfxPipeline
 		auto colorBlending = GetColorBlendConfig(config);
 
 
-		auto dynamicStates = GetDynamicStates(config);
-
-		vk::PipelineDynamicStateCreateInfo dynamicState
-		{
-			vk::PipelineDynamicStateCreateFlags{}
-			,ArrCount(dynamicStates)            //dynamicStateCount 
-			,ArrData (dynamicStates)//pDynamicStates    
-		};
+		//auto dynamicStates = GetDynamicStates(config);
+		//
+		//vk::PipelineDynamicStateCreateInfo dynamicState
+		//{
+		//	vk::PipelineDynamicStateCreateFlags{}
+		//	,ArrCount(dynamicStates)            //dynamicStateCount 
+		//	,ArrData (dynamicStates)//pDynamicStates    
+		//};
 		//For uniforms
 		auto pipelineLayoutInfo = GetLayoutInfo(config);;
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
@@ -281,11 +264,11 @@ private:
 	vk::PipelineLayoutCreateInfo GetLayoutInfo(const config_t& config)const
 	{
 
-		vk::PipelineLayoutCreateInfo pipelineLayoutInfo =
+		return vk::PipelineLayoutCreateInfo 
 		{
 			vk::PipelineLayoutCreateFlags{}
-			, 1		  //setLayoutCount         
-			, &*m_descriptorsetlayout //pSetLayouts            
+			, 0		  //setLayoutCount         
+			, nullptr //pSetLayouts            
 			, 0		  //pushConstantRangeCount 
 			, nullptr //pPushConstantRanges    
 		};
@@ -302,6 +285,6 @@ private:
 	}
 	//AllocUniformBuffers is meant to write to a host master(non-vulkan) uniform buffer and get the offset.
 	//The non-vulkan buffer will be transfered after the commands are done queueing.
-	uint32_t AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform);
+	uint32_t AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform) { return 0; }
 }; 
 }

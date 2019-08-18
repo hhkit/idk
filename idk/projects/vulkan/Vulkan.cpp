@@ -3,7 +3,9 @@
 #include <math/matrix_transforms.h>
 #include <idk.h>
 #include <VulkanDetail.h>
-
+#include <VulkanHelpers.h>
+#include <gfx/buffer_desc.h>
+using namespace vhlp;
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
 //Temporary, should move elsewhere
@@ -34,19 +36,6 @@ namespace glm
 	}
 }
 
-template<typename RT = size_t, typename T = std::vector<int>>
-RT buffer_size(T const& vertices)
-{
-	return static_cast<RT>(sizeof(*ArrData(vertices)) * ArrCount(vertices));
-}
-
-template<typename RT = size_t, typename T = int>
-RT buffer_size(T * begin, T * end)
-{
-	return static_cast<RT>(sizeof(T) * (end - begin));
-}
-
-
 namespace idk
 {
 	enum   BufferType
@@ -68,129 +57,6 @@ namespace idk
 			: buffer{ s_cast<const void*>(ArrData(container) + offset) }, len{ buffer_size(ArrData(container)+offset,ArrData(container) + length) }{}
 
 	};
-	enum VertexRate
-	{
-		eVertex
-		,eInstance
-	};
-	vk::VertexInputRate MapVtxRate(VertexRate rate)
-	{
-		static const idk::hash_table<VertexRate, vk::VertexInputRate> map
-		{
-			{VertexRate::eVertex,vk::VertexInputRate::eVertex}
-			,{VertexRate::eInstance,vk::VertexInputRate::eInstance}
-		};
-		return map.find(rate)->second;
-	}
-	enum AttribFormat
-	{
-		eSVec2,//Single Precision Floats
-		eSVec3,//Single Precision Floats
-		eSVec4,//Single Precision Floats
-		eMat3,
-		eMat4
-	};
-	vk::Format MapVtxFormat(AttribFormat rate)
-	{
-		static const idk::hash_table<AttribFormat, vk::Format> map
-		{
-			{AttribFormat::eSVec2,vk::Format::eR32G32Sfloat}
-			,{AttribFormat::eSVec3,vk::Format::eR32G32B32Sfloat}
-			,{AttribFormat::eSVec4,vk::Format::eR32G32B32A32Sfloat}
-		};
-		return map.find(rate)->second;
-	}
-	struct buffer_desc
-	{
-		struct binding_info
-		{
-			std::optional<uint32_t> binding_index{};
-			uint32_t stride{};
-			VertexRate vertex_rate{};
-		};
-		struct attribute_info
-		{
-			AttribFormat format{};
-			//Must offset the next location by 3/4 when AttribFormat is Mat3/4
-			uint32_t     location{};
-			uint32_t     offset{};
-		};
-		binding_info           binding = {};
-		vector<attribute_info> attributes = {};
-		buffer_desc Process(uint32_t location_offset)const
-		{
-			buffer_desc transformed;
-			transformed.binding = binding;
-			for (auto attrib : attributes)
-			{
-				attrib.location += location_offset;
-				if (attrib.format == eMat3 || attrib.format == eMat4)
-				{
-					int count = ((attrib.format == eMat3) ? 3 : 4)-1;
-					attrib.format = (attrib.format == eMat3) ? eSVec3 : eSVec4;
-					while(count-->0)
-					{
-						transformed.attributes.emplace_back(attrib);
-						attrib.location++;
-						attrib.offset += (attrib.format == eSVec3) ? sizeof(vec3) : sizeof(vec4);
-					}
-				}
-				transformed.attributes.emplace_back(attrib);
-			}
-		}
-	};
-	vk::VertexInputBindingDescription ConvertVtxBinding(const buffer_desc::binding_info& binding)
-	{
-		return vk::VertexInputBindingDescription 
-		{
-			*binding.binding_index
-			,binding.stride
-			,MapVtxRate(binding.vertex_rate)
-		};
-	}
-	vk::VertexInputAttributeDescription ConvertVtxAttrib(const  buffer_desc::attribute_info& attrib, uint32_t binding_index)
-	{
-		return vk::VertexInputAttributeDescription
-		{
-			attrib.location
-			,binding_index
-			,MapVtxFormat(attrib.format)
-			,attrib.offset
-		};
-	}
-	std::pair < idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription >>
-		ConvertVtxDesc(const vector<buffer_desc>& descs)
-	{
-		std::pair < idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription >>
-			result;
-		uint32_t loc = 0;
-		uint32_t binding = 0;
-		bool optional_was_set = false;
-		for (auto& pdesc : descs)
-		{
-			auto desc = pdesc.Process(loc);
-			auto actual_binding = binding;
-			if (!desc.binding.binding_index)
-			{
-				if (optional_was_set)
-					throw std::runtime_error("ConvertVtxDesc: descriptors with unset locations were queued after descriptors with set locations.");
-				desc.binding.binding_index = binding;
-			}
-			else
-			{
-				optional_was_set = true;
-				actual_binding = *desc.binding.binding_index;
-			}
-			result.first.emplace_back(ConvertVtxBinding(desc.binding));
-			for(auto& attrib : desc.attributes)
-			{
-				result.second.emplace_back(ConvertVtxAttrib(attrib, actual_binding));
-				loc = std::max(loc, attrib.location);
-			}
-			++binding;
-			++loc;
-		}
-	}
 	enum ShaderStage
 	{
 		eVert,
@@ -1165,103 +1031,6 @@ void Vulkan::createCommandPool()
 	m_commandpool = m_device->createCommandPoolUnique(info, nullptr, dispatcher);
 
 }
-uint32_t findMemoryType(vk::PhysicalDevice const& physical_device,uint32_t typeFilter, vk::MemoryPropertyFlags properties) 
-{
-	vk::PhysicalDeviceMemoryProperties mem_properties = physical_device.getMemoryProperties();
-	std::optional<uint32_t> result{};
-	for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
-		if (typeFilter & (1 << i) 
-			&&
-			//All required properties must be present.
-			(mem_properties.memoryTypes[i].propertyFlags & properties) == properties
-			) {
-			result = i;
-			break;
-		}
-	}
-	if(!result)
-		throw std::runtime_error("failed to find suitable memory type!");
-	return *result;
-}
-
-template<typename Dispatcher>
-vk::UniqueBuffer CreateBuffer(vk::Device device, vk::DeviceSize size, vk::BufferUsageFlags usage,Dispatcher const& dispatcher)
-{
-
-	vk::BufferCreateInfo bufferInfo
-	{
-		 vk::BufferCreateFlags{}
-		,size
-		,usage
-		,vk::SharingMode::eExclusive             //Exclusive to the graphics queue family
-	};
-	return device.createBufferUnique(bufferInfo, nullptr, dispatcher);
-}
-
-template<typename T, typename Dispatcher>
-vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, T* const begin, T* const end, const Dispatcher& dispatcher)
-{
-	return CreateBuffer(device, buffer_size(begin, end), vk::BufferUsageFlagBits::eVertexBuffer, dispatcher);
-}
-
-
-
-template<typename T, typename Dispatcher>
-vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher)
-{
-	return CreateVertexBuffer(device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
-}
-template<typename Dispatcher>
-vk::UniqueDeviceMemory AllocateBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device,vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags,Dispatcher const& dispatcher)
-{
-	vk::MemoryRequirements req = device.getBufferMemoryRequirements(buffer,dispatcher);
-
-	vk::MemoryAllocateInfo allocInfo
-	{
-		 req.size
-		,findMemoryType(pdevice,req.memoryTypeBits, memory_flags)
-	};
-	return device.allocateMemoryUnique(allocInfo, nullptr, dispatcher);
-}
-template<typename Dispatcher>
-void BindBufferMemory(vk::Device& device, vk::Buffer& buffer, vk::DeviceMemory& memory, uint32_t offset, Dispatcher const&  dispatcher)
-{
-	device.bindBufferMemory(buffer, memory, offset, dispatcher);
-}
-template<typename Dispatcher>
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device, 
-	vk::DeviceSize buffer_size, 
-	vk::BufferUsageFlags buffer_usage, 
-	vk::MemoryPropertyFlags memory_flags,
-	const Dispatcher& dispatcher
-)
-{
-	auto buffer = CreateBuffer(device, buffer_size, buffer_usage, dispatcher);
-	auto memory = AllocateBuffer(pdevice, device, *buffer,memory_flags, dispatcher);
-	BindBufferMemory(device, *buffer, *memory, 0, dispatcher);
-	return std::make_pair(std::move(buffer), std::move(memory));
-}
-template<typename T, typename Dispatcher>
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device, T const* vertices, T const* vertices_end, const Dispatcher& dispatcher
-	)
-{
-
-	return CreateAllocBindBuffer(pdevice, device, buffer_size(vertices, vertices_end), vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, dispatcher);
-}
-template<typename T, typename Dispatcher>
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher
-)
-{
-	return CreateAllocBindVertexBuffer(pdevice, device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
-}
-
-
-
-
 
 struct Vulkan::vbo
 {
@@ -1276,26 +1045,6 @@ struct Vulkan::vbo
 	}
 };
 
-template<typename T, typename Dispatcher>
-void MapMemory(vk::Device& device,vk::DeviceMemory& memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size,Dispatcher const& dispatcher)
-{
-	vk::MappedMemoryRange mmr
-	{
-		 memory
-		,dest_offset
-		,trf_size
-	};
-	auto handle = device.mapMemory(memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
-	memcpy_s(handle, mmr.size, src_start, mmr.size);
-	std::vector<decltype(mmr)> memory_ranges
-	{
-		mmr
-	};
-	//Not necessary rn since we set the HostCoherent bit 
-	//This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
-	device.flushMappedMemoryRanges(memory_ranges, dispatcher);
-	device.unmapMemory(memory);
-}
 
 void Vulkan::createVertexBuffers()
 {
@@ -1452,11 +1201,6 @@ void Vulkan::createDescriptorSet()
 	}
 
 }
-template<typename T>
-vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr)
-{
-	return vk::ArrayProxy<const T>{sz, arr};
-}
 
 void Vulkan::createCommandBuffers()
 {
@@ -1521,36 +1265,6 @@ void Vulkan::createSemaphores()
 		signal.render_finished = m_device->createSemaphoreUnique(info, nullptr, dispatcher);
 		signal.inflight_fence = m_device->createFenceUnique(fenceInfo, nullptr, dispatcher);
 	}
-}
-
-void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
-{
-	vk::DispatchLoaderDefault dispatcher{};
-	cmd_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
-	//Setup copy command buffer/pool
-	vk::CommandBufferBeginInfo beginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
-	//Add the commands
-	cmd_buffer.begin(beginInfo, dispatcher);
-	vk::BufferCopy copyRegion
-	{
-		0,0,size
-	};
-	cmd_buffer.copyBuffer(srcBuffer, dstBuffer, copyRegion, dispatcher);
-	cmd_buffer.end(dispatcher);
-
-	//Submit commands to queue
-	vk::SubmitInfo submitInfo
-	{
-		 0
-		,nullptr
-		,nullptr
-		,1
-		,&cmd_buffer
-	};
-	queue.submit(submitInfo, vk::Fence{}, dispatcher);
-	//Not very efficient, would be better to use fences instead.
-	queue.waitIdle(dispatcher);
-
 }
 
 void Vulkan::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
