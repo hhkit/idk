@@ -24,5 +24,14 @@ namespace vgfx
 	vk::UniqueCommandBuffer              &VulkanDetail::CurrCommandbuffer  ()const  { return vulkan_.m_commandbuffers[vulkan_.current_frame];}
 	std::vector<vk::UniqueCommandBuffer> &VulkanDetail::Commandbuffers     ()const  { return vulkan_.m_commandbuffers;}
 
+	inline vk::UniqueShaderModule VulkanDetail::CreateShaderModule(const idk::string_view& code)
+	{
+		vk::ShaderModuleCreateInfo mod{
+			vk::ShaderModuleCreateFlags{},
+			code.length(),reinterpret_cast<uint32_t const*>(code.data())
+		};
+		return Device()->createShaderModuleUnique(mod);
+	}
+
 	VulkanDetail::VulkanDetail(::Vulkan& vulkan) :vulkan_{ vulkan } {}
 }

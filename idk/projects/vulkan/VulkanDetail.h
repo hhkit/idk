@@ -30,6 +30,7 @@ namespace vgfx
 
 
 
+		vk::UniqueShaderModule  CreateShaderModule(const idk::string_view& code);
 
 
 		VulkanDetail(::Vulkan& vulkan);

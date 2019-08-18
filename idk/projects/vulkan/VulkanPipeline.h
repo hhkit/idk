@@ -35,7 +35,7 @@ struct VulkGfxPipeline
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
 		auto& m_renderpass = GetRenderpass(config, vulkan);
-		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config);
+		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config,vulkan);
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
@@ -107,14 +107,6 @@ struct VulkGfxPipeline
 	{
 		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, vulkan.Dispatcher());
 	}
-	//Vulkan_t is necessary cause it needs to get the descriptors from the pool
-	vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan,const uniform_info& uniform)
-	{
-		return {};
-	}
-	//AllocUniformBuffers is meant to write to a host master(non-vulkan) uniform buffer and get the offset.
-	//The non-vulkan buffer will be transfered after the commands are done queueing.
-	uint32_t AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform);
 	void BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform)
 	{
 		//AllocUniformBuffers is meant to write to a host master uniform buffer and get the offset.
@@ -143,12 +135,12 @@ private:
 		};
 	}
 	vector<vk::VertexInputAttributeDescription> GetVtxAttribInfo(const config_t& config)const;
-	vector<vk::VertexInputBindingDescription> GetVtxBindingInfo(const config_t& config)const;
+	vector<vk::VertexInputBindingDescription>   GetVtxBindingInfo(const config_t& config)const;
 	std::pair<
 		vector<vk::PipelineShaderStageCreateInfo>,
 		vector<vk::UniqueShaderModule>
 	>
-		GetShaderStageInfo(const config_t& config)const
+		GetShaderStageInfo(const config_t& config, Vulkan_t& vulkan)const
 	{
 		std::pair<
 			vector<vk::PipelineShaderStageCreateInfo>,
@@ -159,8 +151,8 @@ private:
 		auto vert = config.vert_shader;//GetBinaryFile("shaders/vertex.vert.spv");
 		auto frag = config.frag_shader;//GetBinaryFile("shaders/fragment.frag.spv");
 
-		auto& fragModule = rsc.emplace_back(createShaderModule(frag));
-		auto& vertModule = rsc.emplace_back(createShaderModule(vert));
+		auto& fragModule = rsc.emplace_back(vulkan.CreateShaderModule(frag));
+		auto& vertModule = rsc.emplace_back(vulkan.CreateShaderModule(vert));
 
 		const char* entryPoint = "main";
 
@@ -302,5 +294,14 @@ private:
 	{
 		return vulkan.Renderpass();
 	}
+
+	//Vulkan_t is necessary cause it needs to get the descriptors from the pool
+	vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform)
+	{
+		return {};
+	}
+	//AllocUniformBuffers is meant to write to a host master(non-vulkan) uniform buffer and get the offset.
+	//The non-vulkan buffer will be transfered after the commands are done queueing.
+	uint32_t AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform);
 }; 
 }
