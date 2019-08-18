@@ -60,6 +60,12 @@ TEST(Math, MatrixRotate)
 	using namespace idk;
 
 	auto rot = rotate(vec3{ 1.f, 0.f, 0.f }, rad{ 1.57f });
+	auto zrot = rotate(vec3{ 0.f, 0.f, 0.f }, rad{ 1.57f });
+	auto rotz = rotate(vec3{ 1.f, 0.f, 0.f }, rad{ 0 });
+	auto zrotz = rotate(vec3{ 0.f, 0.f, 0.f }, rad{ 0 });
+	EXPECT_EQ(zrot, mat3{});
+	EXPECT_EQ(rotz, mat3{});
+	EXPECT_EQ(zrotz, mat3{});
 
 }
 TEST(Math, MatrixTranslate)
