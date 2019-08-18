@@ -75,7 +75,7 @@ namespace idk{
 
 	bool file_system_detail::fs_file_handle::IsOpenAndValid() const
 	{
-		return (mask & byte{ 0x00 }) == byte{ 0x00 };
+		return mask == byte{ 0x00 };
 	}
 
 	void file_system_detail::fs_file_handle::SetOpenFormat(OPEN_FORMAT format)

@@ -56,17 +56,6 @@ namespace idk {
 				
 			}
 		}
-		// static bool first = true;
-		// if (first)
-		// {
-		// 	auto handle = OpenWrite("/test_mount/test/depth_test.txt");
-		// 	if (static_cast<bool> (handle))
-		// 	{
-		// 		handle.Write("Write 14 bytes");
-		// 	}
-		// 	first = false;
-		// }
-		
 	}
 
 	void FileSystem::Shutdown()
@@ -81,16 +70,20 @@ namespace idk {
 			return string{};
 
 		auto end_pos = mount_path.find_first_of('/', 1);
-		if (end_pos == string::npos)
-		{
-			return string{};
-		}
-
+		
 		string mount_key = mount_path.substr(0, end_pos);
-		auto mount_index = validateFileMountPath(mountPath);
+		auto mount_index = validateMountPath(mountPath);
 		if (mount_index >= 0)
 		{
-			return mounts[mount_index].full_path + mount_path.substr(end_pos + 1);
+			// Check if there are even mounts. If this hits, something is terribly wrong...
+			if (mounts.empty())
+				throw("Something is terribly wrong. No mounts found.");
+
+			// If the end_pos is the end of the string, it means there is only one dir and that is the mount dir
+			if (end_pos == string::npos)
+				return mounts[mount_index].full_path;
+			else
+				return mounts[mount_index].full_path + mount_path.substr(end_pos + 1);
 		}
 		else
 		{
@@ -155,6 +148,78 @@ namespace idk {
 		return handle;
 	}
 
+	FileHandle FileSystem::OpenAppend(string_view mountPath, bool binary_stream)
+	{
+		UNREFERENCED_PARAMETER(binary_stream);
+		auto file_index = getFile(mountPath);
+		if (file_index.mount_id < 0)
+		{
+			// Means we need to create the file...
+			string mount_path{ mountPath.data() };
+			auto end_pos = mount_path.find_last_of('/');
+			auto dir_index = getDir(mount_path.substr(0, end_pos));
+
+			if (dir_index.mount_id < 0)
+				return FileHandle();
+
+			auto& dir = getDir(dir_index);
+			string full_path = dir.full_path + mount_path.substr(end_pos + 1);
+
+			std::ofstream{ full_path };
+
+			FS::path p{ full_path };
+
+			// Request a slot from mounts
+			// Check if there are even mounts. If this hits, something is terribly wrong...
+			if (mounts.empty())
+				throw("Something is terribly wrong. No mounts found.");
+
+			auto slot = mounts[dir.tree_index.mount_id].RequestFileSlot(dir.tree_index.depth + 1);
+			auto& f = getFile(slot);
+
+			f.full_path = p.string();
+			f.filename = p.filename().string();
+			f.extension = p.extension().string();
+
+			f.parent = dir.tree_index;
+
+			f.time = FS::last_write_time(p);
+
+			// Adding the new file to all relevant data structures
+			dir.files_map.emplace(f.filename, f.tree_index);
+
+			auto& file_handle = file_handles[f.handle_index];
+
+			FileHandle handle;
+			handle.ref_count = file_handle.ref_count;
+			handle.handle_index = f.handle_index;
+			handle.stream.open(f.full_path, std::ios::app);
+			if (!handle.stream.is_open())
+				return FileHandle();
+
+			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
+			return handle;
+		}
+		else
+		{
+			auto& internal_file = getFile(file_index);
+			auto& file_handle = file_handles[internal_file.handle_index];
+			if (file_handle.IsOpenAndValid() == false)
+				return FileHandle();
+
+			FileHandle handle;
+			handle.ref_count = file_handle.ref_count;
+			handle.handle_index = internal_file.handle_index;
+			handle.stream.open(internal_file.full_path, std::ios::app);
+			if (!handle.stream.is_open())
+				return FileHandle();
+
+			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
+
+			return handle;
+		}
+	}
+
 	FileHandle FileSystem::OpenWrite(string_view mountPath)
 	{
 		auto file_index = getFile(mountPath);
@@ -176,6 +241,10 @@ namespace idk {
 			FS::path p{ full_path };
 
 			// Request a slot from mounts
+			// Check if there are even mounts. If this hits, something is terribly wrong...
+			if (mounts.empty())
+				throw("Something is terribly wrong. No mounts found.");
+
 			auto slot = mounts[dir.tree_index.mount_id].RequestFileSlot(dir.tree_index.depth + 1);
 			auto& f = getFile(slot);
 
@@ -245,6 +314,7 @@ namespace idk {
 		file_system_detail::fs_dir d;
 
 		d.full_path = fullPath;
+		d.mount_path = mountPath;
 		d.filename = currPath.filename().string();
 
 		d.tree_index.mount_id = static_cast<int8_t>(index);
@@ -281,6 +351,7 @@ namespace idk {
 
 				f.full_path = tmp.string();
 				f.filename = tmp.filename().string();
+				f.mount_path = mountSubDir.mount_path + "/" + f.filename;
 				f.extension = tmp.extension().string();
 
 				file_system_detail::fs_key node;
@@ -306,6 +377,7 @@ namespace idk {
 
 				d.full_path = tmp.string() + '/';
 				d.filename = tmp.filename().string();
+				d.mount_path = mountSubDir.mount_path + "/" + d.filename;
 
 				file_system_detail::fs_key node;
 				node.mount_id = static_cast<int8_t>(index);
@@ -326,11 +398,33 @@ namespace idk {
 
 	file_system_detail::fs_file& FileSystem::getFile(file_system_detail::fs_key& node)
 	{
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
 		return mounts[node.mount_id].path_tree[node.depth].files[node.index];
 	}
 
 	file_system_detail::fs_dir& FileSystem::getDir(file_system_detail::fs_key& node)
 	{
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
+		return mounts[node.mount_id].path_tree[node.depth].dirs[node.index];
+	}
+
+	const file_system_detail::fs_file& FileSystem::getFile(const file_system_detail::fs_key& node) const
+	{
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
+		return mounts[node.mount_id].path_tree[node.depth].files[node.index];
+	}
+
+	const file_system_detail::fs_dir& FileSystem::getDir(const file_system_detail::fs_key& node) const
+	{
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
 		return mounts[node.mount_id].path_tree[node.depth].dirs[node.index];
 	}
 
@@ -344,6 +438,10 @@ namespace idk {
 		int mount_index = validateFileMountPath(mountPath);
 		if (mount_index < 0)
 			return empty_node;
+
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
 
 		auto& mount = mounts[mount_index];
 		auto tokenized_path = tokenizePath(mountPath);
@@ -387,6 +485,10 @@ namespace idk {
 		if (mount_index < 0)
 			return empty_node;
 
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
+
 		auto& mount = mounts[mount_index];
 		auto tokenized_path = tokenizePath(mountPath);
 
@@ -397,7 +499,7 @@ namespace idk {
 		if (dir_depth < 0)
 		{
 			// Special case. If depth is 0, that means we are looking for the mount dir
-			auto& sub_dir = mount.path_tree[dir_depth].dirs[0];
+			auto& sub_dir = mount.path_tree[0].dirs[0];
 
 			return sub_dir.tree_index;
 		}
@@ -413,11 +515,6 @@ namespace idk {
 		}
 
 		return empty_node;
-	}
-
-	bool FileSystem::isOpen(const file_system_detail::fs_key& n)
-	{
-		return std::find(open_files.begin(), open_files.end(), n) != open_files.end();
 	}
 
 	size_t FileSystem::addFileHandle(const file_system_detail::fs_key& node)
@@ -444,6 +541,23 @@ namespace idk {
 			if (start == string::npos) end = string::npos;
 		}
 		return output;
+	}
+
+	int FileSystem::validateMountPath(string_view mountPath) const
+	{
+		string mount_path{ mountPath.data() };
+
+		if (mount_path[0] != '/')
+			return -1;
+
+		auto end_pos = mount_path.find_first_of('/', 1);
+		
+		string mount_key = mount_path.substr(0, end_pos);
+		auto mount_index = mount_table.find(mount_key);
+		if (mount_index != mount_table.end())
+			return static_cast<int>(mount_index->second);
+		else
+			return -1;
 	}
 
 	int FileSystem::validateFileMountPath(string_view mountPath) const
@@ -482,6 +596,16 @@ namespace idk {
 			return -1;
 	}
 
+	bool FileSystem::validateHandle(const FileHandle& handle) const
+	{
+		if(handle.handle_index < 0)
+			return false;
+
+		auto& internal_handle = file_handles[handle.handle_index];
+		return handle.ref_count == internal_handle.ref_count;
+	}
+
+	
 	FileSystem_ErrorCode FileSystem::Mkdir(string_view mountPath)
 	{
 		UNREFERENCED_PARAMETER(mountPath);
@@ -490,33 +614,52 @@ namespace idk {
 		return FILESYSTEM_OK;
 	}
 
-	FileHandle::FileHandle(FileHandle&& rhs)
+	void FileSystem::DumpMounts() const
 	{
-		std::swap(stream, rhs.stream);
-		std::swap(fp, rhs.fp);
-		std::swap(ref_count, rhs.ref_count);
-		std::swap(handle_index, rhs.handle_index);
+		for (auto& mount_index : mount_table)
+		{
+			std::cout << "Total mounts: " << mounts.size() << std::endl;
+			std::cout << "Dumping mounts..." << std::endl;
+			
+			auto& mount = mounts[mount_index.second];
+			std::cout << "Mount: " << mount_index.first << "\n";
+			dumpMount(mount);
+		}
 	}
 
-	FileHandle::~FileHandle()
+	void FileSystem::dumpMount(const file_system_detail::fs_mount& mount) const
 	{
-		if (handle_index < 0)
-			return;
-		stream.flush();
-
-		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file_handle = vfs.file_handles[handle_index];
-		auto& file = vfs.getFile(file_handle.internal_id);
-
-		file_handle.Reset();
-		file.time = FS::last_write_time(FS::path{ file.full_path });
+		std::cout << "Mount: " << mount.mount_path << "\n";
+		for (auto& depth : mount.path_tree)
+		{
+			std::cout << "Current Depth: " << depth.depth << "\n";
+			for (auto& dir : depth.dirs)
+			{
+				dumpDir(dir, "\t");
+			}
+		}
 	}
 
-	FileHandle::operator bool()
+	void FileSystem::dumpDir(const file_system_detail::fs_dir& sub_dir, string prefix) const
 	{
-		if (fp == nullptr)
-			return stream.is_open();
-		return false;
+		
+		std::cout << "Directory: " << sub_dir.filename << "\n"
+					<< prefix << "Full Path: "			<< sub_dir.full_path << "\n"
+					<< prefix << "Mount Path: "			<< sub_dir.mount_path << "\n"
+					<< prefix << "Parent Full Path: "	<< getDir(sub_dir.parent).full_path << "\n"
+					<< prefix << "Parent Mount Path: "	<< getDir(sub_dir.parent).mount_path << "\n"
+					<< prefix << "Num Files: "			<< sub_dir.files_map.size() << "\n"
+					<< prefix << "Num Sub-Dirs: "		<< sub_dir.sub_dirs.size() << "\n"
+					<< prefix << "Files: "				<< "\n";
+
+		string_view file_prefix = prefix + " ";
+		for (auto& file_index : sub_dir.files_map)
+		{
+			auto& file = getFile(file_index.second);
+			std::cout << file_prefix << "Filename: " << file.filename << "\n";
+			// std::cout << file_prefix << "Full Path: " << 
+
+		}
 	}
 
 }

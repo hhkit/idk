@@ -162,6 +162,11 @@ namespace idk
 		for (auto& file_index : changed_files)
 		{
 			auto& internal_file = vfs.getFile(file_index);
+
+			// Check if there are even mounts. If this hits, something is terribly wrong...
+			if (vfs.mounts.empty())
+				throw("Something is terribly wrong. No mounts found.");
+
 			auto& internal_collated = vfs.mounts[internal_file.tree_index.mount_id].path_tree[internal_file.tree_index.depth];
 			auto& parent_dir = vfs.getDir(internal_file.parent);
 			
@@ -220,6 +225,11 @@ namespace idk
 			if (result == mountDir.files_map.end())
 			{
 				// Request a slot from mounts
+
+				// Check if there are even mounts. If this hits, something is terribly wrong...
+				if (vfs.mounts.empty())
+					throw("Something is terribly wrong. No mounts found.");
+
 				fs_key slot = vfs.mounts[mountDir.tree_index.mount_id].RequestFileSlot(mountDir.tree_index.depth + 1);
 				fs_file& f = vfs.getFile(slot);
 

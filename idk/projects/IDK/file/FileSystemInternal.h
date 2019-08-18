@@ -34,6 +34,7 @@ namespace idk::file_system_detail
 	struct fs_file
 	{
 		string full_path;
+		string mount_path;
 		string filename;
 		string extension;
 
@@ -52,6 +53,7 @@ namespace idk::file_system_detail
 	struct fs_dir
 	{
 		string full_path;
+		string mount_path;
 		string filename;
 
 		hash_table<string, fs_key> sub_dirs;
