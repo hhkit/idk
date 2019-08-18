@@ -26,12 +26,13 @@ namespace idk
 		std::fstream&	GetStream() { return stream; }
 		FILE*			GetFilePtr() { return fp; }
 
-		// len is the number of bytes to read
-		size_t Read(void* buffer, size_t len);
+		// Returns the number of bytes 
+		int Read(void* buffer, size_t len);
 		// len here is the size of the buffer
-		size_t GetLine(void* buffer, size_t len, const char delim = '\n');
+		int GetLine(void* buffer, size_t len, const char delim = '\n');
 		// len is number of bytes to write
-		size_t Write(const void* data, size_t len);
+		int Write(const void* data, size_t len);
+		void Flush();
 
 		friend class FileSystem;
 	private:

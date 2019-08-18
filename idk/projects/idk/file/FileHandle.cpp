@@ -49,40 +49,62 @@ namespace idk
 		return false;
 	}
 
-	size_t FileHandle::Read(void* buffer, size_t len)
+	int FileHandle::Read(void* buffer, size_t len)
 	{
 		// Check Handle
 		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
+			return -1;
+
+		if (buffer == nullptr || len == 0)
 			return 0;
+		
+		if (!stream.read(static_cast<char*>(buffer), len))
+		{
+			if (stream.eofbit == true && stream.gcount() == 0)
+				return -1;
+		}
+
+		return static_cast<int>(stream.gcount());
+	}
+
+	int FileHandle::GetLine(void* buffer, size_t len, const char delim)
+	{
+		// Check Handle
+		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
+			return -1;
 
 		if (buffer == nullptr || len == 0)
 			return 0;
 
-		size_t before = stream.tellp(); //current pos
-		stream.read(static_cast<char*>(buffer), len);
-		return static_cast<size_t>(stream.tellp()) - before;
+		if (!stream.getline(static_cast<char*>(buffer), len, delim))
+			if (stream.eofbit == true && stream.gcount() == 0)
+				return -1;
+
+		return static_cast<int>(stream.gcount());
 	}
 
-	size_t FileHandle::GetLine(void* buffer, size_t len, const char delim)
+	int FileHandle::Write(const void* data, size_t len)
 	{
 		// Check Handle
 		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
+			return -1;
+
+		if (data == nullptr || len == 0)
 			return 0;
 
-		size_t before = stream.tellp(); //current pos
-		stream.getline(static_cast<char*>(buffer), len, delim);
-		return static_cast<size_t>(stream.tellp()) - before;
+		if (!stream.write(static_cast<const char*>(data), len))
+			return -1;
+
+		return static_cast<int>(len);
 	}
 
-	size_t FileHandle::Write(const void* data, size_t len)
+	void FileHandle::Flush()
 	{
 		// Check Handle
 		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
-			return 0;
+			return;
 
-		size_t before = stream.tellp(); //current pos
-		stream.write(static_cast<const char*>(data), len);
-		return static_cast<size_t>(stream.tellp()) - before;
+		stream.flush();
 	}
 
 	string_view FileHandle::GetMountPath() const

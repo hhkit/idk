@@ -224,25 +224,15 @@ namespace idk
 			auto result = mountDir.files_map.find(filename);
 			if (result == mountDir.files_map.end())
 			{
-				// Request a slot from mounts
-
 				// Check if there are even mounts. If this hits, something is terribly wrong...
 				if (vfs.mounts.empty())
 					throw("Something is terribly wrong. No mounts found.");
 
+				// Request a slot from mounts
 				fs_key slot = vfs.mounts[mountDir.tree_index.mount_id].RequestFileSlot(mountDir.tree_index.depth + 1);
 				fs_file& f = vfs.getFile(slot);
+				vfs.initFile(f, mountDir, tmp);
 
-				f.full_path = tmp.string();
-				f.filename = tmp.filename().string();
-				f.extension = tmp.extension().string();
-
-				f.parent = mountDir.tree_index;
-
-				f.time = FS::last_write_time(tmp);
-
-				// Adding the new file to all relevant data structures
-				mountDir.files_map.emplace(f.filename, f.tree_index);
 				changed_files.push_back(f.tree_index);
 
 				auto& test = vfs.getFile(f.tree_index);

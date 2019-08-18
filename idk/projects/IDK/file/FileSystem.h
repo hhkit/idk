@@ -55,7 +55,7 @@ namespace idk
 		// Open/closing files
 		FileHandle OpenRead(string_view mountPath, bool binary_stream = false);
 		FileHandle OpenAppend(string_view mountPath, bool binary_stream = false);
-		FileHandle OpenWrite(string_view mountPath);
+		FileHandle OpenWrite(string_view mountPath, bool binary_stream = false);
 
 		FileHandle OpenReadC(string_view mountPath);
 		FileHandle OpenAppendC(string_view mountPath);
@@ -84,6 +84,8 @@ namespace idk
 		string root_dir;
 		string base_dir;
 		string resource_dir;
+		file_system_detail::fs_file empty_file;
+		file_system_detail::fs_dir empty_dir;
 
 		FileSystem_ErrorCode last_error;
 
@@ -91,6 +93,8 @@ namespace idk
 
 		// initializtion
 		void initMount(size_t index, string_view fullPath, string_view mountPath, bool watch);
+		void initFile(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
+		void initDir(file_system_detail::fs_dir& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
 		void recurseSubDir(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
 
 		// File watching
@@ -108,7 +112,9 @@ namespace idk
 
 		// Other auxiliary helpers
 		size_t addFileHandle(const file_system_detail::fs_key& handle);
+		file_system_detail::fs_key RequestFileSlot(file_system_detail::fs_mount& mount, int8_t depth);
 		vector<string> tokenizePath(string_view fullPath) const;
+		bool validateKey(const file_system_detail::fs_key& key) const;
 		int validateMountPath(string_view mountPath) const;
 		int validateFileMountPath(string_view mountPath) const;
 		int validateDirMountPath(string_view mountPath) const;
