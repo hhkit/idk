@@ -23,7 +23,7 @@ namespace idk
 	math::matrix<T, 3, 3> rotate(const math::vector<T, 3> & axis, math::radian<T> angle)
 	{
 		using ret_t = math::matrix<T, 3, 3>;
-		const auto n = axis.get_normalized();
+		const auto n = (axis.length_sq() > 0) ? axis.get_normalized() : math::vector<T, 3>{ 0 };
 		const auto c = cos(angle);
 		const auto s = sin(angle);
 

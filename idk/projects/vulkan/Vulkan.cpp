@@ -369,6 +369,12 @@ float Vulkan::deviceSuitability(vk::PhysicalDevice const& pd)
 		//throw if this is a deal breaker.
 		return (features.geometryShader) ? 1.0f : 0.0f;
 	},
+		[](vk::PhysicalDeviceProperties const& , vk::PhysicalDeviceFeatures const& features)->float
+	{
+		//throw if this is a deal breaker.
+		if (!features.fillModeNonSolid) throw "unable to support fillmode non-solid";
+		return (features.fillModeNonSolid) ? 1.0f : 0.0f;
+	},
 	};
 	float total = 0.0f;
 	try
@@ -657,13 +663,14 @@ void Vulkan::createLogicalDevice()
 	//	,&queuePriority
 	//};
 	vk::PhysicalDeviceFeatures pdevFeatures{};
-
+	pdevFeatures.fillModeNonSolid = VK_TRUE;
 	auto valLayers = GetValidationLayers();
 
 	vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
 		ArrCount(info), info.data(),
 		ArrCount(valLayers), valLayers.data(),
-		ArrCount(extensions), extensions.data());
+		ArrCount(extensions), extensions.data(),&pdevFeatures
+	);
 	//m_device.~UniqueHandle();
 	m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
 	m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
