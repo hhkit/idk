@@ -28,7 +28,7 @@
 
 namespace idk
 {
-	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<Vulkan>() }
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<idk::Vulkan>() }
 	{
 	}
 	void VulkanWin32GraphicsSystem::Init()
@@ -51,6 +51,11 @@ namespace idk
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 		instance_.reset();
+	}
+	Vulkan& VulkanWin32GraphicsSystem::GetVulkanHandle()
+	{
+		// TODO: insert return statement here
+		return *(instance_.get());
 	}
 	/*void VulkanWin32GraphicsSystem::createInstance()
 	{

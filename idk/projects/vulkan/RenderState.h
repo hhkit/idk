@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <VectorBuffer.h>
 #include <VulkanPipeline.h>
-namespace vgfx
+namespace idk::vgfx
 {
 	struct DrawCall
 	{

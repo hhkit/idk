@@ -1,8 +1,9 @@
 #pragma once
 #include <gfx/DebugRenderer.h>
-class Vulkan;
 namespace idk
 {
+	class Vulkan;
+
 	class VulkanDebugRenderer :
 		public DebugRenderer
 	{

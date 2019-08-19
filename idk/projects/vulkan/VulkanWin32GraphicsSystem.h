@@ -7,11 +7,12 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
 
-class Vulkan;
 
 namespace idk
 {
+	class Vulkan;
 	class Windows;
+
 	class VulkanWin32GraphicsSystem
 		: public GraphicsSystem
 	{
@@ -24,6 +25,8 @@ namespace idk
 		void EndFrame() override;
 		void Shutdown() override;
 		Vulkan& Instance() { return *instance_; }
+
+		Vulkan& GetVulkanHandle();
 	private:
 		std::unique_ptr<Vulkan> instance_;
 		Windows* windows_;

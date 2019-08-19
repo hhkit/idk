@@ -9,6 +9,7 @@ namespace idk
 	void IDE::Init()
 	{
 		// do imgui stuff
+
 	}
 
 	void IDE::Shutdown()

@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "VectorBuffer.h"
 #include <VulkanHelpers.h>
-namespace vgfx
+
+namespace idk::vgfx
 {
 	VectorBuffer::VectorBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 	{

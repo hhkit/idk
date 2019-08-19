@@ -4,18 +4,20 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-namespace utl
-{
-	std::ostream& cerr()
+namespace idk {
+	namespace utl
 	{
-		return std::cerr;
+		std::ostream& cerr()
+		{
+			return std::cerr;
+		}
 	}
-}
-std::string GetBinaryFile(const std::string& filepath)
-{
-	std::ifstream file{ filepath,std::ios::binary };
-	std::stringstream data;
-	data << file.rdbuf();
-	file.close();
-	return data.str();
+	std::string GetBinaryFile(const std::string& filepath)
+	{
+		std::ifstream file{ filepath,std::ios::binary };
+		std::stringstream data;
+		data << file.rdbuf();
+		file.close();
+		return data.str();
+	}
 }
