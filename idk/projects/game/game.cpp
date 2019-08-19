@@ -13,7 +13,7 @@ enum class GraphicsLibrary
 {
 	OpenGL,
 	Vulkan,
-	Default = OpenGL
+	Default = Vulkan
 };
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,

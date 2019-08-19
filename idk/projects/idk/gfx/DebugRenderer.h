@@ -31,7 +31,6 @@ public:
 	void Init() override;
 	void DrawShape(DbgShape shape, vec3 pos, vec3 scale, vec3 axis, idk::rad angle, vec4 color);
 
-	void Shutdown() override {}
 	virtual void Render();
 	~DebugRenderer()override;
 protected:

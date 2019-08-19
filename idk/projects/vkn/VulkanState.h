@@ -119,7 +119,6 @@ namespace idk::vkn
 
 		// variables
 
-		std::unique_ptr<VulkanView> view_;
 
 		// init info
 		vk::UniqueInstance               instance;
@@ -156,6 +155,7 @@ namespace idk::vkn
 		vk::UniqueDeviceMemory               m_ib_memory;
 		vk::UniqueBuffer                     m_index_buffer;
 
+		std::unique_ptr<VulkanView> view_;
 
 
 		void createInstance();

@@ -1573,6 +1573,7 @@ namespace idk::vkn
 
 		{
 			auto& render_state = view_->CurrRenderState();
+			EndFrame();
 			vk::CommandBuffer cmds[] =
 			{
 				//render_state.TransferBuffer(),
@@ -1591,6 +1592,7 @@ namespace idk::vkn
 
 			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
 				throw std::runtime_error("failed to submit draw command buffer!");
+			BeginFrame();
 		}
 
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
@@ -1634,6 +1636,7 @@ namespace idk::vkn
 	void VulkanState::Cleanup()
 	{
 		m_device->waitIdle();
+		dbg_vertex_buffer.reset();
 		//instance.release();
 	}
 
@@ -1641,7 +1644,10 @@ namespace idk::vkn
 	{
 	}
 
-	VulkanState::~VulkanState() = default;
+	VulkanState::~VulkanState()
+	{
+		dbg_vertex_buffer.reset();
+	}
 
 	DbgVertexBuffer::DbgVertexBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 	{

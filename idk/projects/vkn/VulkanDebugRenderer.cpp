@@ -71,6 +71,12 @@ namespace idk::vkn
 		};
 	}
 
+	void VulkanDebugRenderer::Shutdown() 
+	{
+		this->info.reset();
+		this->impl.reset();
+	}
+
 	void VulkanDebugRenderer::Render()
 	{
 		auto& cmd_buffer = *impl->detail.CurrCommandbuffer();
