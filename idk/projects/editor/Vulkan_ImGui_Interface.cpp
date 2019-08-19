@@ -24,7 +24,7 @@ namespace idk
 
 		Vulkan* v = vkObj;
 		ImGui_ImplVulkan_InitInfo info{};
-		info.Instance =
+		//info.Instance =
 			//ImGui_ImplVulkan_Init();
 	}
 }
