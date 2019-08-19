@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h">
       <Filter>system</Filter>
@@ -12,16 +11,21 @@
     <ClInclude Include="debug_info.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="DebugRenderer.h">
-      <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="Vulkan.h">
-      <Filter>system</Filter>
-    </ClInclude>
     <ClInclude Include="math2.h">
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="utils\Utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDetail.h" />
+    <ClInclude Include="VulkanPipeline.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="VulkanDebugRenderer.h" />
+    <ClInclude Include="VulkanHelpers.h" />
+    <ClInclude Include="vgfx_converters.h" />
+    <ClInclude Include="RenderState.h" />
+    <ClInclude Include="VectorBuffer.h" />
+    <ClInclude Include="vkn.h">
       <Filter>system</Filter>
     </ClInclude>
   </ItemGroup>
@@ -33,13 +37,17 @@
     <ClCompile Include="debug_info.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="DebugRenderer.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="Vulkan.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="utils\Utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDetail.cpp" />
+    <ClCompile Include="VulkanDebugRenderer.cpp" />
+    <ClCompile Include="VulkanHelpers.cpp" />
+    <ClCompile Include="vgfx_converters.cpp" />
+    <ClCompile Include="VulkanPipeline.cpp" />
+    <ClCompile Include="VectorBuffer.cpp" />
+    <ClCompile Include="RenderState.cpp" />
+    <ClCompile Include="vkn.cpp">
       <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,12 +55,16 @@
     <Filter Include="system">
       <UniqueIdentifier>{ae16a2ac-34ab-44fe-88cf-fbbb70a7cb46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vulkan.inl">
-      <Filter>system</Filter>
-    </None>
     <None Include="utils\Utils.inl">
+      <Filter>utils</Filter>
+    </None>
+    <None Include="VulkanHelpers.inl" />
+    <None Include="vkn.inl">
       <Filter>system</Filter>
     </None>
   </ItemGroup>

@@ -3,43 +3,50 @@
 #include <VulkanWin32GraphicsSystem.h>
 #include <WindowsApplication.h>
 
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-	[[maybe_unused]] void* pUserData) {
-
-	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
-	return VK_FALSE;
-}
-
-VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT& pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
-	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-	if (func != nullptr) {
-		return func(instance, &pCreateInfo, pAllocator, pDebugMessenger);
-	}
-	else {
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-}
+//static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+//	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+//	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
+//	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+//	[[maybe_unused]] void* pUserData) {
+//
+//	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+//
+//	return VK_FALSE;
+//}
+//
+//VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT& pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+//	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+//	if (func != nullptr) {
+//		return func(instance, &pCreateInfo, pAllocator, pDebugMessenger);
+//	}
+//	else {
+//		return VK_ERROR_EXTENSION_NOT_PRESENT;
+//	}
+//}
 
 namespace idk
 {
-	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<Vulkan>() }
 	{
 	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
-		instance_ = std::make_unique<Vulkan>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 		
 	}
 	void VulkanWin32GraphicsSystem::Draw()
 	{
 		instance_->DrawFrame();
+	}
+	void VulkanWin32GraphicsSystem::BeginFrame()
+	{
+		instance_->BeginFrame();
+	}
+	void VulkanWin32GraphicsSystem::EndFrame()
+	{
+		instance_->EndFrame();
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{

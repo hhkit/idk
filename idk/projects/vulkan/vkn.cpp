@@ -1,9 +1,15 @@
 #include "pch.h"
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 #include <math/matrix_transforms.h>
-
+#include <idk.h>
+#include <VulkanDetail.h>
+#include <VulkanHelpers.h>
+#include <gfx/buffer_desc.h>
+#include <RenderState.h>
+using namespace vhlp;
+//Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
-
+//Temporary, should move elsewhere
 namespace glm
 {
 	using namespace idk;
@@ -31,30 +37,83 @@ namespace glm
 	}
 }
 
-struct IPipeline
+namespace idk
 {
-	virtual void Create() =0;
-	virtual void RegisterCommands() = 0;
-	void Draw() {}
-};
+	enum   BufferType
+	{
+		eVertexBuffer
+		,eIndexBuffer
+	};
+	struct buffer_data
+	{
+		using num_obj_t = size_t;
+		using num_bytes_t = size_t;
+		const void*    buffer = nullptr;
+		num_bytes_t    len    = 0      ;
+		template<typename T>
+		buffer_data(const T& container)
+			: buffer{ s_cast<const void*>(ArrData(container)) }, len{ buffer_size(container) }{}
+		template<typename T>
+		buffer_data(const T& container, num_obj_t offset, num_obj_t length)
+			: buffer{ s_cast<const void*>(ArrData(container) + offset) }, len{ buffer_size(ArrData(container)+offset,ArrData(container) + length) }{}
+
+	};
+	enum ShaderStage
+	{
+		eVert,
+		eFrag,
+		eGeom,//unused for now
+		eTess,//unused for now
+		eComp,//unused for now
+		eNone
+	};
+	struct shader_info
+	{
+		string_view byte_code{     };
+		ShaderStage stage    {eNone};
+	};
+
+	struct IPipeline;
+
+	enum RenderType
+	{
+		 eDraw
+		,eIndexed
+	};
+	struct render_info
+	{
+		vector<buffer_data>* vertex_buffers   = nullptr;
+		RenderType           render_type      = eDraw;
+		uint32_t             inst_count       = 1;
+	};
+
+
+	class GfxInterface
+	{
+	public:
+		using pipeline_handle = std::weak_ptr<IPipeline>;
+		//Basic version, probably change this later on to use a single config struct instead.
+		pipeline_handle RegisterPipeline(const std::vector<buffer_desc>& descriptors,std::vector<shader_info> shaders);
+		void QueueForRendering(pipeline_handle pipeline, const render_info& info);
+
+	};
+
+
+
+
+	struct IPipeline
+	{
+		virtual void Create() = 0;
+		virtual void RegisterCommands() = 0;
+		void Draw() {}
+	};
+}
 
 //template<typename RT = size_t, typename T = int>
 //RT buffer_size(std::vector<T> const& vertices)
 //{
 //	return static_cast<RT>(sizeof(vertices[0]) * vertices.size());
 //}
-template<typename RT = size_t, typename T = std::vector<int>>
-RT buffer_size(T const& vertices)
-{
-	return static_cast<RT>(sizeof(*ArrData(vertices)) * ArrCount(vertices));
-}
-
-template<typename RT = size_t, typename T = int>
-RT buffer_size(T * begin, T * end)
-{
-	return static_cast<RT>(sizeof(T) * (end - begin));
-}
-
 class DbgVertexBuffer
 {
 public:
@@ -309,6 +368,12 @@ float Vulkan::deviceSuitability(vk::PhysicalDevice const& pd)
 	{
 		//throw if this is a deal breaker.
 		return (features.geometryShader) ? 1.0f : 0.0f;
+	},
+		[](vk::PhysicalDeviceProperties const& , vk::PhysicalDeviceFeatures const& features)->float
+	{
+		//throw if this is a deal breaker.
+		if (!features.fillModeNonSolid) throw "unable to support fillmode non-solid";
+		return (features.fillModeNonSolid) ? 1.0f : 0.0f;
 	},
 	};
 	float total = 0.0f;
@@ -598,13 +663,14 @@ void Vulkan::createLogicalDevice()
 	//	,&queuePriority
 	//};
 	vk::PhysicalDeviceFeatures pdevFeatures{};
-
+	pdevFeatures.fillModeNonSolid = VK_TRUE;
 	auto valLayers = GetValidationLayers();
 
 	vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
 		ArrCount(info), info.data(),
 		ArrCount(valLayers), valLayers.data(),
-		ArrCount(extensions), extensions.data());
+		ArrCount(extensions), extensions.data(),&pdevFeatures
+	);
 	//m_device.~UniqueHandle();
 	m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
 	m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
@@ -743,6 +809,10 @@ void Vulkan::createRenderPass()
 
 	m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 
+	//Temporary For RenderState
+	auto& rss = detail_->RenderStates();
+	for(auto& rs: rss )
+		rs.render_pass = *m_renderpass;
 }
 
 void Vulkan::createDescriptorSetLayout()
@@ -973,103 +1043,6 @@ void Vulkan::createCommandPool()
 	m_commandpool = m_device->createCommandPoolUnique(info, nullptr, dispatcher);
 
 }
-uint32_t findMemoryType(vk::PhysicalDevice const& physical_device,uint32_t typeFilter, vk::MemoryPropertyFlags properties) 
-{
-	vk::PhysicalDeviceMemoryProperties mem_properties = physical_device.getMemoryProperties();
-	std::optional<uint32_t> result{};
-	for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
-		if (typeFilter & (1 << i) 
-			&&
-			//All required properties must be present.
-			(mem_properties.memoryTypes[i].propertyFlags & properties) == properties
-			) {
-			result = i;
-			break;
-		}
-	}
-	if(!result)
-		throw std::runtime_error("failed to find suitable memory type!");
-	return *result;
-}
-
-template<typename Dispatcher>
-vk::UniqueBuffer CreateBuffer(vk::Device device, vk::DeviceSize size, vk::BufferUsageFlags usage,Dispatcher const& dispatcher)
-{
-
-	vk::BufferCreateInfo bufferInfo
-	{
-		 vk::BufferCreateFlags{}
-		,size
-		,usage
-		,vk::SharingMode::eExclusive             //Exclusive to the graphics queue family
-	};
-	return device.createBufferUnique(bufferInfo, nullptr, dispatcher);
-}
-
-template<typename T, typename Dispatcher>
-vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, T* const begin, T* const end, const Dispatcher& dispatcher)
-{
-	return CreateBuffer(device, buffer_size(begin, end), vk::BufferUsageFlagBits::eVertexBuffer, dispatcher);
-}
-
-
-
-template<typename T, typename Dispatcher>
-vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher)
-{
-	return CreateVertexBuffer(device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
-}
-template<typename Dispatcher>
-vk::UniqueDeviceMemory AllocateBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device,vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags,Dispatcher const& dispatcher)
-{
-	vk::MemoryRequirements req = device.getBufferMemoryRequirements(buffer,dispatcher);
-
-	vk::MemoryAllocateInfo allocInfo
-	{
-		 req.size
-		,findMemoryType(pdevice,req.memoryTypeBits, memory_flags)
-	};
-	return device.allocateMemoryUnique(allocInfo, nullptr, dispatcher);
-}
-template<typename Dispatcher>
-void BindBufferMemory(vk::Device& device, vk::Buffer& buffer, vk::DeviceMemory& memory, uint32_t offset, Dispatcher const&  dispatcher)
-{
-	device.bindBufferMemory(buffer, memory, offset, dispatcher);
-}
-template<typename Dispatcher>
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device, 
-	vk::DeviceSize buffer_size, 
-	vk::BufferUsageFlags buffer_usage, 
-	vk::MemoryPropertyFlags memory_flags,
-	const Dispatcher& dispatcher
-)
-{
-	auto buffer = CreateBuffer(device, buffer_size, buffer_usage, dispatcher);
-	auto memory = AllocateBuffer(pdevice, device, *buffer,memory_flags, dispatcher);
-	BindBufferMemory(device, *buffer, *memory, 0, dispatcher);
-	return std::make_pair(std::move(buffer), std::move(memory));
-}
-template<typename T, typename Dispatcher>
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device, T const* vertices, T const* vertices_end, const Dispatcher& dispatcher
-	)
-{
-
-	return CreateAllocBindBuffer(pdevice, device, buffer_size(vertices, vertices_end), vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, dispatcher);
-}
-template<typename T, typename Dispatcher>
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-	vk::PhysicalDevice& pdevice, vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher
-)
-{
-	return CreateAllocBindVertexBuffer(pdevice, device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
-}
-
-
-
-
 
 struct Vulkan::vbo
 {
@@ -1084,26 +1057,6 @@ struct Vulkan::vbo
 	}
 };
 
-template<typename T, typename Dispatcher>
-void MapMemory(vk::Device& device,vk::DeviceMemory& memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size,Dispatcher const& dispatcher)
-{
-	vk::MappedMemoryRange mmr
-	{
-		 memory
-		,dest_offset
-		,trf_size
-	};
-	auto handle = device.mapMemory(memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
-	memcpy_s(handle, mmr.size, src_start, mmr.size);
-	std::vector<decltype(mmr)> memory_ranges
-	{
-		mmr
-	};
-	//Not necessary rn since we set the HostCoherent bit 
-	//This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
-	device.flushMappedMemoryRanges(memory_ranges, dispatcher);
-	device.unmapMemory(memory);
-}
 
 void Vulkan::createVertexBuffers()
 {
@@ -1156,6 +1109,7 @@ void Vulkan::createVertexBuffers()
 	////This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
 	//m_device->flushMappedMemoryRanges(memory_ranges, dispatcher);
 	//m_device->unmapMemory(*m_device_memory);
+
 }
 
 void Vulkan::createIndexBuffers()
@@ -1260,11 +1214,6 @@ void Vulkan::createDescriptorSet()
 	}
 
 }
-template<typename T>
-vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr)
-{
-	return vk::ArrayProxy<const T>{sz, arr};
-}
 
 void Vulkan::createCommandBuffers()
 {
@@ -1315,6 +1264,22 @@ void Vulkan::createCommandBuffers()
 		commandBuffer->end(dispatcher);
 		++i;
 	}
+
+	//For RenderState
+	auto& rss = detail_->RenderStates();
+	//rss.resize(max_frames_in_flight);
+	for (auto& rs : rss)
+	{
+		vk::CommandBufferAllocateInfo rs_alloc_info
+		{
+			*m_commandpool
+			,vk::CommandBufferLevel::ePrimary
+			,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+		};
+		auto cmd_buffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
+		rs.transfer_buffer = std::move(cmd_buffers[0]);
+		rs.command_buffer = std::move(cmd_buffers[1]);
+	}
 }
 
 void Vulkan::createSemaphores()
@@ -1329,36 +1294,6 @@ void Vulkan::createSemaphores()
 		signal.render_finished = m_device->createSemaphoreUnique(info, nullptr, dispatcher);
 		signal.inflight_fence = m_device->createFenceUnique(fenceInfo, nullptr, dispatcher);
 	}
-}
-
-void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
-{
-	vk::DispatchLoaderDefault dispatcher{};
-	cmd_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
-	//Setup copy command buffer/pool
-	vk::CommandBufferBeginInfo beginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
-	//Add the commands
-	cmd_buffer.begin(beginInfo, dispatcher);
-	vk::BufferCopy copyRegion
-	{
-		0,0,size
-	};
-	cmd_buffer.copyBuffer(srcBuffer, dstBuffer, copyRegion, dispatcher);
-	cmd_buffer.end(dispatcher);
-
-	//Submit commands to queue
-	vk::SubmitInfo submitInfo
-	{
-		 0
-		,nullptr
-		,nullptr
-		,1
-		,&cmd_buffer
-	};
-	queue.submit(submitInfo, vk::Fence{}, dispatcher);
-	//Not very efficient, would be better to use fences instead.
-	queue.waitIdle(dispatcher);
-
 }
 
 void Vulkan::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
@@ -1403,6 +1338,8 @@ VkBool32 Vulkan::ValHandler::processMsg(
 	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
 	[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 {
+	if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+		utl::cerr() << "Err: " ;
 	utl::cerr() << "validation layer: " << pCallbackData->pMessage << std::endl;
 	return VK_FALSE;
 }
@@ -1470,6 +1407,7 @@ void Vulkan::RecreateSwapChain()
 void Vulkan::InitVulkanEnvironment(window_info info)
 {
 	m_window = info;
+	detail_->RenderStates().resize(3);
 	createInstance();
 	createSurface(info.winstance, info.wnd);
 	pickPhysicalDevice();
@@ -1493,6 +1431,11 @@ void Vulkan::InitVulkanEnvironment(window_info info)
 void Vulkan::NextFrame()
 {
 	current_frame = (current_frame + 1) % max_frames_in_flight;
+}
+
+vgfx::VulkanDetail& Vulkan::GetDetail()
+{
+	return *detail_;
 }
 
 std::unique_ptr<Vulkan::vbo> Vulkan::CreateVbo(void const* buffer_start, void const* buffer_end)
@@ -1525,6 +1468,69 @@ void Vulkan::Draw(unique_vbo const& , unique_ubo const& , unique_pipeline const&
 {
 }
 
+void Vulkan::BeginFrame()
+{
+	detail_->SwapRenderState();
+	{
+		auto& rs2 = detail_->CurrRenderState();
+		auto& command_buffer2 = rs2.CommandBuffer();
+		auto& trf_buffer2 = rs2.TransferBuffer();
+		detail_->ResetMasterBuffer();
+		command_buffer2.reset(vk::CommandBufferResetFlags{}, detail_->Dispatcher());
+	}
+
+	//vk::CommandBufferBeginInfo beginInfo
+	//{
+	//	vk::CommandBufferUsageFlags{}
+	//	,nullptr
+	//};
+	//command_buffer.begin(beginInfo);
+
+}
+
+void Vulkan::EndFrame()
+{
+	auto& rs = detail_->CurrRenderState();
+	auto& dispatcher = detail_->Dispatcher();
+	auto& command_buffer = rs.CommandBuffer();
+	auto& trf_buffer = rs.TransferBuffer();
+	vk::CommandBufferBeginInfo begin_info
+	{
+		vk::CommandBufferUsageFlags{}
+		,nullptr
+	};
+	vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
+	vk::RenderPassBeginInfo renderPassInfo
+	{
+		rs.RenderPass()
+		,*m_swapchain.frame_buffers[m_swapchain.curr_index]
+		,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
+		,1
+		,&clearcolor
+	};
+	//rs.transfer_buffer->begin(beginInfo);
+	rs.CommandBuffer().begin(begin_info);
+	rs.UpdateMasterBuffer(*detail_);
+	command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+	//rs.transfer_buffer->end();
+	for (auto& dc : rs.draw_calls)
+	{
+		dc.pipeline->Bind(command_buffer, *detail_);
+		dc.pipeline->BindUniformDescriptions(command_buffer, *detail_,dc.uniform_info);
+		for (auto& [first_binding, offset] : dc.vtx_binding)
+		{
+			command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
+		}
+		command_buffer.draw(dc.vertex_count, dc.instance_count, 0, 0, dispatcher);
+	}
+	command_buffer.endRenderPass(dispatcher);
+	command_buffer.end(dispatcher);
+	
+	
+	
+	
+}
+
 void Vulkan::DrawFrame()
 {
 	auto& current_signal = m_pres_signals[current_frame];
@@ -1541,6 +1547,7 @@ void Vulkan::DrawFrame()
 		throw std::runtime_error("Failed to acquire next image.");
 	}
 	imageIndex = rv.value;
+	m_swapchain.curr_index = rv.value;
 
 	vk::Semaphore waitSemaphores[] = { *current_signal.image_available };
 	vk::Semaphore readySemaphores[] = { *current_signal.render_finished };
@@ -1557,9 +1564,28 @@ void Vulkan::DrawFrame()
 		,1,readySemaphores
 	};
 	m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
+	
+	{
+		auto& render_state = detail_->CurrRenderState();
+		vk::CommandBuffer cmds[] =
+		{
+			//render_state.TransferBuffer(),
+			//*m_commandbuffers[imageIndex],
+			render_state.CommandBuffer(),
+		};
+		vk::SubmitInfo render_state_submit_info
+		{
+			1
+			,waitSemaphores
+			,waitStages
+			,ArrCount(cmds),ArrData(cmds)
+			,1,readySemaphores
+		};
+		vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-	if (m_graphics_queue.submit(1, &submitInfo, *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
-		throw std::runtime_error("failed to submit draw command buffer!");
+		if (m_graphics_queue.submit(ArrCount(frame_submit), ArrData(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
+			throw std::runtime_error("failed to submit draw command buffer!");
+	}
 
 	vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 
@@ -1604,6 +1630,12 @@ void Vulkan::Cleanup()
 	m_device->waitIdle();
 	//instance.release();
 }
+
+Vulkan::Vulkan() : detail_{std::make_unique<vgfx::VulkanDetail>(*this)}
+{
+}
+
+Vulkan::~Vulkan() = default;
 
 DbgVertexBuffer::DbgVertexBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 {

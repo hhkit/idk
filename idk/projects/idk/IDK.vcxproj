@@ -25,6 +25,11 @@
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="gfx\buffer_desc.h" />
+    <ClInclude Include="gfx\DebugRenderer.h" />
+    <ClInclude Include="gfx\debug_vtx_layout.h" />
+    <ClInclude Include="gfx\pipeline_config.h" />
+    <ClInclude Include="gfx\uniform_info.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
@@ -96,6 +101,8 @@
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\buffer_desc.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />

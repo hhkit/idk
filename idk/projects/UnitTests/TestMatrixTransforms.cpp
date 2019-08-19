@@ -59,7 +59,7 @@ TEST(Math, MatrixRotate)
 {
 	using namespace idk;
 
-	auto rot = rotate(vec3{ 1.f, 0.f, 0.f }, rad{ 1.57f });
+	auto rot = rotate(vec3{ 1.f, 0.f, 0.f }, rad{ 1.57f });;
 
 }
 TEST(Math, MatrixTranslate)

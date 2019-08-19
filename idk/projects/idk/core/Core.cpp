@@ -41,12 +41,12 @@ namespace idk
 
 		auto editor = &GetSystem<IEditor>();
 		// setup loop
-		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,  "Poll OS Events");
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&FileSystem::Update, "File System Update");
-		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Run,  "FMOD Update");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed>(&TestSystem::TestSpan, "Test updates");
-		if (editor) _scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&Application::SwapBuffers, "Swap buffers");
+		_scheduler->SchedulePass      <UpdatePhase::Update>           (&Application::PollEvents , "Poll OS Events"    );
+		_scheduler->SchedulePass      <UpdatePhase::Update>           (&FileSystem::Update      , "File System Update");
+		_scheduler->SchedulePass      <UpdatePhase::Update>           (&AudioSystem::Run        , "FMOD Update"       );
+		_scheduler->SchedulePass      <UpdatePhase::Fixed>            (&TestSystem::TestSpan    , "Test updates"      );
+		if (editor) _scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate   , "Editor Update"     );
+		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>       (&Application::SwapBuffers, "Swap buffers"      );
 
 		Core::GetSystem<FileSystem>();
 		// main loop
@@ -64,6 +64,10 @@ namespace idk
 			while (_running)
 			{
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
+				Core::GetSystem<GraphicsSystem>().BeginFrame();
+				Core::GetSystem<DebugRenderer>().DrawShape(DbgShape::eSquare, vec3{ 0,0,0 }, vec3{ 1,1,1 }, vec3{ 1,0,0 }, rad{ 0 }, vec4{ 0,1,0,1 });
+				Core::GetSystem<DebugRenderer>().Render();
+				Core::GetSystem<GraphicsSystem>().EndFrame();
 				Core::GetSystem<GraphicsSystem>().Draw();
 			}
 		}

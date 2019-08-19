@@ -283,6 +283,11 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioClipFactory.h" />
+    <ClInclude Include="gfx\buffer_desc.h" />
+    <ClInclude Include="gfx\debug_vtx_layout.h" />
+    <ClInclude Include="gfx\DebugRenderer.h" />
+    <ClInclude Include="gfx\pipeline_config.h" />
+    <ClInclude Include="gfx\uniform_info.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -368,6 +373,8 @@
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="audio\AudioClipFactory.cpp" />
+    <ClCompile Include="gfx\buffer_desc.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -463,6 +470,7 @@
     <None Include="scene\Scene.inl">
       <Filter>scene</Filter>
     </None>
+    <None Include="file\FIleSystem.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

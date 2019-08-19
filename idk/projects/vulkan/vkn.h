@@ -21,12 +21,44 @@ struct window_info
 
 class Vulkan;
 
-class debug_info;
+struct debug_info;
+namespace vgfx
+{
+	struct QueueFamilyIndices
+	{
+		std::optional<uint32_t>      graphics_family;
+		std::optional<uint32_t>      present_family;
+		std::optional<uint32_t>      transfer_family;
+		std::unordered_set<uint32_t> unique_queues()const;
+		bool isComplete()const;
+	};
+	struct SwapChainSupportDetails {
+		vk::SurfaceCapabilitiesKHR capabilities;
+		std::vector<vk::SurfaceFormatKHR> formats;
+		std::vector<vk::PresentModeKHR> presentModes;
+	};
+	struct SwapChainInfo
+	{
+		uint32_t curr_index{};
+		vk::UniqueSwapchainKHR           swap_chain;
+		vk::Format format;
+		vk::Extent2D extent;
+		std::vector<vk::Image            > images;
+		std::vector<vk::UniqueImageView  > image_views;
+		std::vector<vk::UniqueFramebuffer> frame_buffers;
+
+		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
+		std::vector<vk::DescriptorSet    > descriptor_sets;
+	};
+	class VulkanDetail;
+}
 
 class Vulkan
 {
 public:
-
+	using QueueFamilyIndices     =vgfx::QueueFamilyIndices;
+	using SwapChainInfo          =vgfx::SwapChainInfo;
+	using SwapChainSupportDetails=vgfx::SwapChainSupportDetails;
 	struct vbo     ;//vertex buffer object
 	struct ubo     ;//uniform buffer object
 	struct pipeline;
@@ -59,14 +91,20 @@ public:
 
 
 #pragma region ("Potentially main thing")
+	vgfx::VulkanDetail& GetDetail();
 	unique_vbo      CreateVbo     (void const* buffer_start, void const* buffer_end);
 	unique_ubo      CreateUbo     (void const* buffer_start, void const* buffer_end);
 	unique_pipeline CreatePipeline(pipeline_config const& config);
 	void Draw(unique_vbo const& vbo, unique_ubo const& uniforms, unique_pipeline const& pipeline);
 #pragma endregion
+	void BeginFrame();
+	void EndFrame();
+
 	void DrawFrame();
 	void OnResize();
 	void Cleanup();
+	Vulkan();
+	~Vulkan();
 private:
 	void createInstance();
 	void createSurface(HINSTANCE winstance, HWND wnd);
@@ -98,38 +136,17 @@ private:
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 	void updateUniformBuffer(uint32_t image_index);
 
+	//Temporary, should move all the data/states into VulkanDetail
+	friend vgfx::VulkanDetail;
+
 	vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo(ValHandler* userData = nullptr);
 
 	window_info m_window;
 	bool m_ScreenResized = false;
 	uint32_t WIDTH = 1280, HEIGHT = 720;
 	uint32_t current_frame = 0, max_frames_in_flight = 2;
-	struct QueueFamilyIndices
-	{
-		std::optional<uint32_t>      graphics_family;
-		std::optional<uint32_t>      present_family ;
-		std::optional<uint32_t>      transfer_family;
-		std::unordered_set<uint32_t> unique_queues()const;
-		bool isComplete()const;
-	};
-	struct SwapChainSupportDetails {
-		vk::SurfaceCapabilitiesKHR capabilities;
-		std::vector<vk::SurfaceFormatKHR> formats;
-		std::vector<vk::PresentModeKHR> presentModes;
-	};
-	struct SwapChainInfo
-	{
-		vk::UniqueSwapchainKHR           swap_chain;
-		vk::Format format;
-		vk::Extent2D extent;
-		std::vector<vk::Image            > images;
-		std::vector<vk::UniqueImageView  > image_views;
-		std::vector<vk::UniqueFramebuffer> frame_buffers;
 
-		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
-		std::vector<vk::DescriptorSet    > descriptor_sets;
-	};
-
+	std::unique_ptr<vgfx::VulkanDetail> detail_;
 
 	vk::DispatchLoaderDefault        dispatcher = {};
 	vk::UniqueInstance               instance;
@@ -191,4 +208,4 @@ private:
 	SwapChainSupportDetails querySwapChainSupport(const vk::PhysicalDevice& device);
 };
 
-#include "Vulkan.inl"
+#include <vulkan/vkn.inl>

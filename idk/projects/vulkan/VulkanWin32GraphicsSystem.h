@@ -19,7 +19,11 @@ namespace idk
 		VulkanWin32GraphicsSystem(Windows& windows_app);
 		void Init() override ;
 		void Draw() override ;
+
+		void BeginFrame() override;
+		void EndFrame() override;
 		void Shutdown() override;
+		Vulkan& Instance() { return *instance_; }
 
 		Vulkan& GetVulkanHandle();
 	private:
