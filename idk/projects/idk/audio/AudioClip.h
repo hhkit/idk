@@ -43,11 +43,17 @@ namespace idk
 		void Pause();
 		void Unpause();
 
-		void Update(); //Updates volume, pitch etc.
+		void	SetVolume(float i);
+		float	GetVolume();
+		void	SetPitch(float i);
+		float	GetPitch();
+		void	SetPriority(int i);
+		int		GetPriority();
 
 		void ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
 
 		AudioClipInfo GetAudioClipInfo();	//Returns a readonly information of the sound.
+		void UpdateChannel(); //Updates the channel to null if it is not playing. It's important to update the channel before doing anything to it.
 
 	private:
 		friend class AudioSystem;			//The AudioSystem will have access to AudioClip's variables
@@ -58,16 +64,18 @@ namespace idk
 
 		AudioClipInfo soundInfo  {};
 
+		float	volume		{ 1.0f		};	//Default = 1 Range: [0,1]
+		float	pitch		{ 1.0f		};	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
+		float	minDistance	{ 100.0f	};	//Minimum distance where volume is at max					 
+		float	frequency	{ 48000.0f	};	//Playback frequency. default = 48000 	 
+		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 
+		bool	isPlaying	{ false		};	//Is the audio currently playing? If the audio is paused, it is still considered playing!
+		bool	is3Dsound	{ true		};	//Does this sound follow the the gameobject position?
+		bool	isUnique	{ false		};	//When I call play, does it duplicate? Or replay the sound again?
+		bool	loop		{ false		};	//Does this audio loop?
 
-		float	volume		{ 1.0f   };
-		float	pitch		{ 1.0f   };	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
-		float	minDistance	{ 100.0f };	//Minimum distance where volume is at max
-		int		priority	{ 128    };	//0 (most important) to 256 (least important) default = 128
-		bool	playOnStart	{ false  };	//Does this sound play on start of load?
-		bool	isPlaying	{ false  };	//Is the audio currently playing?
-		bool	is3Dsound	{ true   };	//Does this sound follow the the gameobject position?
-		bool	loop		{ false  };	//Does this audio loop?
 
+		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode
 	};
 
 }

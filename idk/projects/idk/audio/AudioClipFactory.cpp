@@ -1,4 +1,14 @@
+//////////////////////////////////////////////////////////////////////////////////
+//@file		AudioClipFactory.cpp
+//@author	Muhammad Izha B Rahim
+//@param	Email : izha95\@hotmail.com
+//@date		18 AUG 2019
+//@brief	A factory class that creates AudioClip resources.
+/*
+	FileHandle.CanOpen() first before getting full path.
 
+*/
+//////////////////////////////////////////////////////////////////////////////////
 
 #include <stdafx.h>
 #include "AudioClipFactory.h"
@@ -24,6 +34,7 @@ namespace idk {
 		try {
 			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
 			newSound->is3Dsound = true;
+			newSound->isUnique = false;
 			newSound->loop = false;
 			newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_SFX);
 

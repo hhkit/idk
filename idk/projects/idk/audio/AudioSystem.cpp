@@ -285,6 +285,19 @@ namespace idk
 		ParseFMOD_RESULT(_soundGroup_DIALOGUE->setVolume(newVolume));
 	}
 
+	void AudioSystem::SetCurrentSoundDriver(int index)
+	{
+		try {
+			ParseFMOD_RESULT(_Core_System->setDriver(index));
+			ParseFMOD_RESULT(_Core_System->getDriver(&_current_driver));
+
+		}
+		catch (EXCEPTION_AudioSystem i) { //Catch out of bounds index.
+			//Do nothing if out of bounds
+			return;
+		}
+	}
+
 	float AudioSystem::GetCPUPercentUsage()
 	{
 		return GetDetailedCPUPercentUsage().total;

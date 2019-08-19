@@ -79,6 +79,8 @@ namespace idk
 		void SetChannel_AMBIENT_Volume(const float& newVolume);
 		void SetChannel_DIALOGUE_Volume(const float& newVolume);
 
+		//Sound Driver Control
+		void SetCurrentSoundDriver(int index);									//Use GetAllSoundDriverData() to pick the available SoundDriver.
 
 		//Get Data Functions
 		///////////////////////////////////////////////
