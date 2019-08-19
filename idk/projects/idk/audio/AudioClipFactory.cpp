@@ -21,32 +21,12 @@ namespace idk {
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 
-		AudioClip::SubSoundGroup sndGrp = AudioClip::SubSoundGroup_SFX;
 		try {
-			switch (sndGrp) {
-			default:
-			case AudioClip::SubSoundGroup_SFX:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
-				newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_SFX);
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
+			newSound->is3Dsound = true;
+			newSound->loop = false;
+			newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_SFX);
 
-				break;
-			case AudioClip::SubSoundGroup_MUSIC:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_NORMAL | FMOD_2D | FMOD_CREATESTREAM, NULL, &(newSound->_soundHandle)));	//
-				newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_MUSIC);
-
-				break;
-			case AudioClip::SubSoundGroup_AMBIENT:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_NORMAL | FMOD_3D, NULL, &(newSound->_soundHandle)));	//
-				newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_AMBIENT);
-
-				break;
-			case AudioClip::SubSoundGroup_DIALOGUE:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
-				newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_DIALOGUE);
-
-				break;
-
-			}
 		}
 		catch (EXCEPTION_AudioSystem i) { //If an error occurs here, delete newSound and return nullptr
 			//std::cout << i.exceptionDetails << "Returning nullptr.\n";
