@@ -20,6 +20,16 @@ namespace idk
 		return &Core::template GetSystem<ResourceManager>().Get(*this);
 	}
 	template<typename Res>
+	inline bool RscHandle<Res>::operator==(const RscHandle& rhs) const
+	{
+		return guid == rhs.guid;
+	}
+	template<typename Res>
+	inline bool RscHandle<Res>::operator!=(const RscHandle& rhs) const
+	{
+		return guid != rhs.guid;
+	}
+	template<typename Res>
 	inline void RscHandle<Res>::Set(const Resource<Res>& g)
 	{
 		*this = g.GetHandle();
