@@ -21,7 +21,7 @@ namespace idk
 	class GenericComponent
 	{
 	public:
-		Handle<GameObject> GetGameObject();
+		Handle<GameObject> GetGameObject() const;
 		virtual const GenericHandle& GetHandle() = 0;
 
 		GenericComponent(const GenericComponent&) = default;

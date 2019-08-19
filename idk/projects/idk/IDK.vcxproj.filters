@@ -166,12 +166,6 @@
     <ClInclude Include="core\SystemManager_detail.h">
       <Filter>core\systems</Filter>
     </ClInclude>
-    <ClInclude Include="core\IncludeSystems.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\IncludeComponents.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="app\Keys.h">
       <Filter>app</Filter>
     </ClInclude>
@@ -228,9 +222,6 @@
       <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="res\ResourceHandle.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ResourceIncludes.h">
       <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="res\ResourceManager.h">
@@ -296,9 +287,25 @@
     <ClInclude Include="audio\AudioSource.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\VertexDescriptor.h">
+    <ClInclude Include="gfx\vertex_descriptor.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\Material.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\BoneRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeResources.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeComponents.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeSystems.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -404,6 +411,7 @@
     <ClCompile Include="audio\AudioSource.cpp">
       <Filter>audio</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

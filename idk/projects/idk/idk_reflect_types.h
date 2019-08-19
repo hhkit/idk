@@ -7,6 +7,7 @@
 namespace idk
 {
 	class GameObject;
+	class Mesh;
 }
 
 namespace idk::reflect
@@ -30,6 +31,7 @@ namespace idk::reflect
 		, quat
 		, Handle<GameObject>
 		, Guid
+		, idk::RscHandle<Mesh>
 		, vector<string>
 		, hash_table<Guid, string>
 	>;

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ResourceManager.h"
-#include <res/ResourceIncludes.h>
+#include <IncludeResources.h>
 
 namespace idk
 {

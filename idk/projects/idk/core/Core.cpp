@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <core/Scheduler.h>
-#include <core/IncludeSystems.h>
-#include <core/IncludeComponents.h>
+#include <IncludeSystems.h>
+#include <IncludeComponents.h>
 #include <res/ResourceManager.h>
 
 namespace idk

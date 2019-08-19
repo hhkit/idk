@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Handle.h"
-#include <core/IncludeComponents.h>
+#include <IncludeComponents.h>
 #include <reflect/reflect.h>
 
 #undef GetObject

@@ -27,9 +27,12 @@
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="anim\BoneRenderer.h" />
     <ClInclude Include="file\FileHandle.h" />
-    <ClInclude Include="gfx\VertexDescriptor.h" />
+    <ClInclude Include="gfx\MeshRenderer.h" />
+    <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
+    <ClInclude Include="gfx\Material.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
@@ -38,7 +41,7 @@
     <ClInclude Include="editor\IEditor.h" />
     <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="core\Handleables.h" />
-    <ClInclude Include="core\IncludeComponents.h" />
+    <ClInclude Include="IncludeComponents.h" />
     <ClInclude Include="core\GameState.h" />
     <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="ds\ranged_for.h" />
@@ -69,7 +72,7 @@
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
-    <ClInclude Include="core\IncludeSystems.h" />
+    <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="app\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
@@ -86,7 +89,7 @@
     <ClInclude Include="res\Resource.h" />
     <ClInclude Include="res\ResourceFactory.h" />
     <ClInclude Include="res\ResourceHandle.h" />
-    <ClInclude Include="res\ResourceIncludes.h" />
+    <ClInclude Include="IncludeResources.h" />
     <ClInclude Include="res\ResourceManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="meta\meta.h" />
@@ -103,6 +106,7 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
+    <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
