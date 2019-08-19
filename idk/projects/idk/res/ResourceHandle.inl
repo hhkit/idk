@@ -7,17 +7,17 @@ namespace idk
 	template<typename Res>
 	inline RscHandle<Res>::operator bool() const
 	{
-		return ResourceManager::instance->Validate(*this);
+		return Core::GetResourceManager().Validate(*this);
 	}
 	template<typename Res>
 	inline Res& RscHandle<Res>::operator*() const
 	{
-		return Core::template GetSystem<ResourceManager>().Get(*this);
+		return Core::GetResourceManager().Get(*this);
 	}
 	template<typename Res>
 	inline Res* RscHandle<Res>::operator->() const
 	{
-		return &Core::template GetSystem<ResourceManager>().Get(*this);
+		return &Core::GetResourceManager().Get(*this);
 	}
 	template<typename Res>
 	inline void RscHandle<Res>::Set(const Resource<Res>& g)
