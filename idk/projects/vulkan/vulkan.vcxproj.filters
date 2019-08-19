@@ -28,6 +28,7 @@
     <ClInclude Include="vgfx_converters.h" />
     <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="RenderState.h" />
+    <ClInclude Include="Testr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
