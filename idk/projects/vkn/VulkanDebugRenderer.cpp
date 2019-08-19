@@ -111,6 +111,7 @@ namespace idk::vkn
 			//cmd_buffer.draw(ArrCount(shape_buffer), ArrCount(buffer), 0, 0, detail.Dispatcher());
 			detail.CurrRenderState().AddDrawCall(dc);
 		}	
+		info->render_info.clear();
 	}
 
 	VulkanDebugRenderer::~VulkanDebugRenderer() = default;

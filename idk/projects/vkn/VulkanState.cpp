@@ -1223,22 +1223,49 @@ namespace idk::vkn
 
 	void VulkanState::createCommandBuffers()
 	{
+		auto& rss = view_->RenderStates();
+		{
+			//For RenderState
+			//rss.resize(max_frames_in_flight);
+			for (auto& rs : rss)
+			{
+				vk::CommandBufferAllocateInfo rs_alloc_info
+				{
+					*m_commandpool
+					,vk::CommandBufferLevel::ePrimary
+					,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+				};
+				auto cmd_buffers = m_device->allocateCommandBuffersUnique(rs_alloc_info, dispatcher);
+				rs.TransferBuffer(std::move(cmd_buffers[0]));
+				rs.CommandBuffer(std::move(cmd_buffers[1]));
+			}
+		}
 		vk::CommandBufferAllocateInfo allocInfo
 		{
 			*m_commandpool
-			,vk::CommandBufferLevel::ePrimary
+			,vk::CommandBufferLevel::eSecondary
 			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 		};
 		m_commandbuffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
 
 		size_t i = 0;
 		for (auto& commandBuffer : m_commandbuffers) {
-			vk::CommandBufferBeginInfo beginInfo
+
+			vk::CommandBufferInheritanceInfo inherit_info;
+			inherit_info.renderPass = *m_renderpass;
+			inherit_info.framebuffer = *m_swapchain.frame_buffers[i];
+
+			vk::CommandBufferBeginInfo begin_info
 			{
-				vk::CommandBufferUsageFlags{}
-				,nullptr
+				vk::CommandBufferUsageFlagBits::eRenderPassContinue
+				,&inherit_info
 			};
-			commandBuffer->begin(beginInfo);
+			//vk::CommandBufferBeginInfo beginInfo
+			//{
+			//	vk::CommandBufferUsageFlags{}
+			//	,nullptr
+			//};
+			commandBuffer->begin(begin_info);
 
 			vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
 			vk::RenderPassBeginInfo renderPassInfo
@@ -1250,7 +1277,7 @@ namespace idk::vkn
 				,&clearcolor
 			};
 			dbg_vertex_buffer->Update<decltype(g_vinstanced)::value_type>(0, g_vinstanced, *commandBuffer);
-			commandBuffer->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+			//commandBuffer->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
 			commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, dispatcher);
 			std::vector<vk::Buffer> vertex_buffers
 			{
@@ -1266,26 +1293,12 @@ namespace idk::vkn
 			commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
 			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
 			commandBuffer->drawIndexed(hlp::arr_count(g_indices), 2, 0, 0, 0, dispatcher);
-			commandBuffer->endRenderPass(dispatcher);
+			commandBuffer->executeCommands(rss[(i+1)%rss.size()].CommandBuffer(), dispatcher);
+			//commandBuffer->endRenderPass(dispatcher);
 			commandBuffer->end(dispatcher);
 			++i;
 		}
 
-		//For RenderState
-		auto& rss = view_->RenderStates();
-		//rss.resize(max_frames_in_flight);
-		for (auto& rs : rss)
-		{
-			vk::CommandBufferAllocateInfo rs_alloc_info
-			{
-				*m_commandpool
-				,vk::CommandBufferLevel::ePrimary
-				,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
-			};
-			auto cmd_buffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
-			rs.TransferBuffer(std::move(cmd_buffers[0]));
-			rs.CommandBuffer(std::move(cmd_buffers[1]));
-		}
 	}
 
 	void VulkanState::createSemaphores()
@@ -1501,10 +1514,14 @@ namespace idk::vkn
 		auto& rs = view_->CurrRenderState();
 		auto& dispatcher = view_->Dispatcher();
 		auto& command_buffer = rs.CommandBuffer();
+		vk::CommandBufferInheritanceInfo inherit_info{};
+		inherit_info.renderPass = rs.RenderPass();
+		inherit_info.framebuffer = *m_swapchain.frame_buffers[m_swapchain.curr_index];
+
 		vk::CommandBufferBeginInfo begin_info
 		{
-			vk::CommandBufferUsageFlags{}
-			,nullptr
+			vk::CommandBufferUsageFlags{}//::eRenderPassContinue
+			,nullptr//&inherit_info
 		};
 		vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
 		vk::RenderPassBeginInfo renderPassInfo
@@ -1518,7 +1535,8 @@ namespace idk::vkn
 		//rs.transfer_buffer->begin(beginInfo);
 		rs.CommandBuffer().begin(begin_info);
 		rs.UpdateMasterBuffer(*view_);
-		command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+		command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
+		command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index],dispatcher);
 		//rs.transfer_buffer->end();
 		for (auto& dc : rs.DrawCalls())
 		{
