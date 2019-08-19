@@ -290,8 +290,15 @@
     <ClInclude Include="audio\AudioListener.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="audio\AudioSource.h" />
-    <ClInclude Include="gfx\VertexDescriptor.h" />
+    <ClInclude Include="gfx\Mesh.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioSource.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\VertexDescriptor.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -391,8 +398,12 @@
     <ClCompile Include="file\FileHandle.cpp">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="audio\AudioSource.cpp" />
-    <ClCompile Include="audio\AudioListener.cpp" />
+    <ClCompile Include="audio\AudioListener.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioSource.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -494,11 +505,11 @@
     <None Include="serialize\serialize.inl">
       <Filter>serialize</Filter>
     </None>
-    <None Include="file\FileSystem.inl">
-      <Filter>audio</Filter>
-    </None>
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
+    </None>
+    <None Include="file\FileSystem.inl">
+      <Filter>file</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -29,6 +29,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="gfx\VertexDescriptor.h" />
+    <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
