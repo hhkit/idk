@@ -2,7 +2,7 @@
 #include "RenderState.h"
 #include <VulkanDetail.h>
 #include <VulkanHelpers.h>
-namespace vgfx
+namespace idk::vgfx
 {
 	uint32_t RenderState::MasterBuffer::Add(const void* data, size_t len)
 	{

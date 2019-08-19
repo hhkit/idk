@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <VulkanHelpers.h>
 #include <optional>
-namespace vhlp
+namespace  idk::vhlp
 {
 uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {

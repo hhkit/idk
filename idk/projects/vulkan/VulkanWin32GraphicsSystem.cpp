@@ -28,7 +28,7 @@
 
 namespace idk
 {
-	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<Vulkan>() }
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<idk::Vulkan>() }
 	{
 	}
 	void VulkanWin32GraphicsSystem::Init()

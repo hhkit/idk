@@ -1,9 +1,7 @@
 #pragma once
 
-class Vulkan;
 
 namespace idk {
-
+	class Vulkan;
 	void VIInterface_Init(Vulkan*);
-
 };

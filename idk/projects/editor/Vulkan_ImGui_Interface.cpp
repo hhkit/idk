@@ -8,23 +8,23 @@
 //Helper header from imgui for vulkan implementation
 #include <editorstatic/imgui/Imgui_impl_vulkan.h>
 
-#include <vulkan/Vulkan.h>
+#include <vulkan/Vkn.h>
 
-void idk::VIInterface_Init(Vulkan* vkObj)
+namespace idk
 {
-	//IMGUI setup
-	IMGUI_CHECKVERSION();
+	void VIInterface_Init(Vulkan* vkObj)
+	{
+		//IMGUI setup
+		IMGUI_CHECKVERSION();
 
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
 
-	ImGui::StyleColorsClassic();
+		ImGui::StyleColorsClassic();
 
-	Vulkan* v = vkObj;
-	ImGui_ImplVulkan_InitInfo info{};
-	
-	
-	//v->NextFrame();
-
-	//ImGui_ImplVulkan_Init();
+		Vulkan* v = vkObj;
+		ImGui_ImplVulkan_InitInfo info{};
+		info.Instance =
+			//ImGui_ImplVulkan_Init();
+	}
 }
