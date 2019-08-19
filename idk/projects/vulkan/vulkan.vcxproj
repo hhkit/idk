@@ -205,7 +205,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="debug_info.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="RenderState.h" />
-    <ClInclude Include="Testr.h" />
+    <ClInclude Include="TestRenamed.h" />
     <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="vgfx_converters.h" />
     <ClInclude Include="VulkanHelpers.h" />
