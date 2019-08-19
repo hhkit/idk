@@ -12,7 +12,7 @@ namespace idk
 		Guid guid{};
 
 		RscHandle() = default;
-		RscHandle(const Guid&) : guid{ guid } {}
+		RscHandle(const Guid& guid) : guid{ guid } {}
 
 		void Set(const Resource<Res>& g);
 
