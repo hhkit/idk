@@ -21,10 +21,15 @@
   <ItemGroup>
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipFactory.h" />
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
+    <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="file\FileHandle.h" />
+    <ClInclude Include="gfx\VertexDescriptor.h" />
+    <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\buffer_desc.h" />
     <ClInclude Include="gfx\DebugRenderer.h" />
     <ClInclude Include="gfx\debug_vtx_layout.h" />
@@ -76,9 +81,9 @@
     <ClInclude Include="ds\zip.h" />
     <ClInclude Include="reflect\pretty_function.h" />
     <ClInclude Include="reflect\constructor_entry.h" />
-    <ClInclude Include="reflect\dynamic_detail.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
+    <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
@@ -100,9 +105,14 @@
   <ItemGroup>
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
+    <ClCompile Include="audio\AudioListener.cpp" />
+    <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp" />
+    <ClCompile Include="file\FileHandle.cpp" />
+    <ClCompile Include="reflect\enum_value.cpp" />
+    <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
@@ -132,6 +142,7 @@
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\serialize.cpp" />
     <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="reflect\enum_type.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -141,11 +152,13 @@
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="reflect\enum_type.inl" />
+    <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />
-    <None Include="file\FIleSystem.inl" />
+    <None Include="file\FileSystem.inl" />
     <None Include="math\angle.inl" />
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
@@ -165,9 +178,11 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
+    <None Include="serialize\serialize.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\guid.natvis" />
     <Natvis Include="_natvis\objectpool.natvis" />
     <Natvis Include="_natvis\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />

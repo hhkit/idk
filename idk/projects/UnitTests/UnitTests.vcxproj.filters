@@ -28,6 +28,7 @@
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestString.cpp" />
     <ClCompile Include="TestSerialize.cpp" />
+    <ClCompile Include="TestFileSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

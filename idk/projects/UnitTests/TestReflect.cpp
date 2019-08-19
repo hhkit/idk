@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <reflect/reflect.h>
+#include <util/enum.h>
 #include <reflect/ReflectRegistration.h>
 
 using namespace idk;
@@ -51,9 +52,10 @@ TEST(Reflect, TestReflectConstexpr)
 	EXPECT_EQ(t.hash(), reflect::typehash<span<int>>());
 	EXPECT_STREQ(string{ t.name() }.c_str(), "idk::span<int>");
 
-	EXPECT_STREQ(string{ reflect::nameof<float>() }.c_str(), "float");
-	EXPECT_STREQ(string{ reflect::nameof<vec4>() }.c_str(), "idk::math::vector<float,4>");
-	EXPECT_STREQ(string{ reflect::nameof<reflect_this>() }.c_str(), "reflect_this");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<float>() }.c_str(), "float");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<vec4>() }.c_str(), "idk::math::vector<float,4>");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<reflect_this>() }.c_str(), "reflect_this");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<array>() }.c_str(), "idk::array");
 
 	int switch_case = 0;
 	switch (t.hash())
@@ -126,8 +128,8 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_STREQ(visited_values[10].get<string>().c_str(), "weeb");
 	EXPECT_EQ(visited_values[11].get<double>(), 420.0);
 	//EXPECT_EQ(visited_values[12], );
-	EXPECT_STREQ(visited_values[13].get<string>().c_str(), "test0");
-	EXPECT_STREQ(visited_values[14].get<string>().c_str(), "test1");
+	EXPECT_STREQ(visited_values[13].get<string>().c_str(), obj.hashtable.begin()->second.c_str());
+	EXPECT_STREQ(visited_values[14].get<string>().c_str(), (++obj.hashtable.begin())->second.c_str());
 
 	EXPECT_EQ(depth_changes[0], 1);
 	EXPECT_EQ(depth_changes[1], 1);
@@ -189,4 +191,118 @@ TEST(Reflect, TestReflectRangeFor)
 	}
 
 	EXPECT_EQ(obj.vec, vec4(2.0f, 4.0f, 6.0f, 8.0f));
+}
+
+TEST(Reflect, TestReflectUniContainer)
+{
+	{
+		array<int, 4> arr{ 1, 2, 3, 4 };
+		auto container = reflect::dynamic{ arr }.to_container();
+
+		EXPECT_TRUE(container.type.is_template<std::array>());
+
+		std::vector<reflect::dynamic> values;
+		for (auto& elem : container)
+		{
+			values.push_back(elem);
+		}
+
+		EXPECT_EQ(values[0].get<int>(), 1);
+		EXPECT_EQ(values[1].get<int>(), 2);
+		EXPECT_EQ(values[2].get<int>(), 3);
+		EXPECT_EQ(values[3].get<int>(), 4);
+		EXPECT_EQ(container.size(), 4);
+		EXPECT_THROW(container.add(5), const char*);
+		EXPECT_THROW(container.clear(), const char*);
+	}
+
+	{
+		vector<float> vec{ 1.0f, 2.0f, 3.0f, 4.0f };
+		reflect::uni_container container{ vec };
+
+		EXPECT_TRUE(container.type.is_template<std::vector>());
+
+		container.add(5.0f);
+
+		std::vector<reflect::dynamic> values;
+		for (auto& elem : container)
+		{
+			values.push_back(elem);
+		}
+
+		EXPECT_EQ(values[0].get<float>(), 1.0f);
+		EXPECT_EQ(values[1].get<float>(), 2.0f);
+		EXPECT_EQ(values[2].get<float>(), 3.0f);
+		EXPECT_EQ(values[3].get<float>(), 4.0f);
+		EXPECT_EQ(values[4].get<float>(), 5.0f);
+		EXPECT_EQ(container.size(), 5);
+
+		container.clear();
+		EXPECT_EQ(container.size(), 0);
+	}
+
+	{
+		hash_table<char, double> map{ { 'a', 1.0 }, { 'b', 2.0 }, { 'c', 3.0 }, { 'd', 4.0 } };
+		reflect::uni_container container{ map };
+
+		EXPECT_TRUE(container.type.is_template<std::unordered_map>());
+
+		container.add(std::pair<const char, double>{ 'e', 5.0f });
+
+		std::vector<reflect::dynamic> values;
+		for (auto& elem : container)
+		{
+			values.push_back(elem);
+		}
+
+		EXPECT_EQ(values[4].unpack()[0].get<char>(), 'e');
+		EXPECT_EQ(values[4].unpack()[1].get<double>(), 5.0);
+
+		EXPECT_EQ(container.size(), 5);
+
+		container.clear();
+		EXPECT_EQ(container.size(), 0);
+	}
+}
+
+namespace idk
+{
+	ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
+}
+/*
+REFLECT_ENUM(idk::testenum, "testenum")
+
+*/
+TEST(Reflect, TestReflectEnum)
+{
+	//Added to fail this test case since the above REFLECT_ENUM has been disabled since it generated a compile error for HC.
+	EXPECT_TRUE(false);
+
+	EXPECT_TRUE(is_macro_enum<testenum>::value);
+	EXPECT_FALSE(is_macro_enum<vec3>::value);
+
+	auto t = reflect::get_type<testenum>().as_enum_type();
+
+	std::vector<string_view> names;
+	std::vector<int64_t> values;
+	for (auto [name, value] : t)
+	{
+		names.push_back(name);
+		values.push_back(value);
+	}
+
+	EXPECT_EQ(names[0], "IVAN");
+	EXPECT_EQ(names[1], "IS");
+	EXPECT_EQ(names[2], "A");
+	EXPECT_EQ(names[3], "WEEB");
+	EXPECT_EQ(values[0], 5);
+	EXPECT_EQ(values[1], 6);
+	EXPECT_EQ(values[2], 7);
+	EXPECT_EQ(values[3], 8);
+
+	testenum x = testenum::IVAN;
+	EXPECT_EQ(x, 5);
+
+	auto ivan = t.from_string("WEEB");
+	EXPECT_EQ(ivan, testenum(testenum::WEEB));
 }

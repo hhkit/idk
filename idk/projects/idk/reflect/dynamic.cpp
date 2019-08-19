@@ -4,7 +4,7 @@
 namespace idk::reflect
 {
 	dynamic::dynamic(reflect::type type, void* obj)
-		: type{ type }, _ptr{ new detail::dynamic_derived<void*>(obj) }
+		: type{ type }, _ptr{ std::make_shared<derived<void*>>(std::forward<void*>(obj)) }
 	{}
 
 	dynamic::dynamic()
@@ -66,6 +66,21 @@ namespace idk::reflect
 		return { name, val };
 	}
 
+	uni_container dynamic::to_container() const
+	{
+		return _ptr->to_container();
+	}
+
+	enum_value dynamic::to_enum_value() const
+	{
+		return _ptr->to_enum_value();
+	}
+
+	vector<dynamic> dynamic::unpack() const
+	{
+		return _ptr->unpack();
+	}
+
 
 
 	dynamic::property_iterator::property_iterator(const dynamic& obj, size_t index)
@@ -80,7 +95,7 @@ namespace idk::reflect
 
 	bool dynamic::property_iterator::operator==(const property_iterator& other)
 	{
-		return obj._ptr == other.obj._ptr && index == other.index;
+		return index == other.index && obj._ptr == other.obj._ptr;
 	}
 
 	bool dynamic::property_iterator::operator!=(const property_iterator& other)

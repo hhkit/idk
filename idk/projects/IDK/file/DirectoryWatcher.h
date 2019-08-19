@@ -2,30 +2,30 @@
 #include "FileSystemInternal.h"
 
 
-namespace idk::file_system_internal
+namespace idk::file_system_detail
 {
 	class DirectoryWatcher
 	{
 	public:
-		void WatchDirectory(dir_t& dir);
-		void UpdateWatchedDir(mount_t& mount, dir_t& dir);
+		void WatchDirectory(fs_dir& dir);
+		void UpdateWatchedDir(fs_mount& mount, fs_dir& dir);
 
-		void RefreshDir(file_system_internal::dir_t& dir);
-		void RefreshTree(file_system_internal::dir_t& dir);
+		void RefreshDir(file_system_detail::fs_dir& dir);
+		void RefreshTree(file_system_detail::fs_dir& dir);
 
 		// Calling this will also clear all the changed files.
 		void ResolveAllChanges();
 
 	private:
-		void CheckFilesCreated(file_system_internal::dir_t& dir);
-		void CheckFilesDeleted(file_system_internal::dir_t& dir);
-		void CheckFilesRenamed(file_system_internal::dir_t& dir);
-		void CheckFilesWrittenTo(file_system_internal::dir_t& dir);
+		vector<fs_key> changed_files;
+		vector<fs_key> changed_dirs;
 
-		file_t& addInternalFile(string_view full_path);
+		void checkFilesCreated(file_system_detail::fs_dir& dir);
+		void checkFilesDeleted(file_system_detail::fs_dir& dir);
+		void checkFilesRenamed(file_system_detail::fs_dir& dir);
+		void checkFilesWrittenTo(file_system_detail::fs_dir& dir);
 
-		vector<node_t> changed_files;
-		vector<node_t> changed_dirs;
+		// fs_file& addInternalFile(string_view full_path);
 	};
 	
 }

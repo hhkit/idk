@@ -42,11 +42,16 @@ namespace idk::reflect::detail
 		const detail::table& table;
 		const span<constructor_entry_base* const> ctors;
 		const size_t hash;
+		const bool is_container;
+		const bool is_enum_type;
 
-		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash)
-			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }
+		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash, bool is_container, bool is_enum_type)
+			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }, is_container{ is_container }, is_enum_type{ is_enum_type }
 		{}
 		virtual ~typed_context_base() = default;
+
+
+		virtual const enum_type::data* get_enum_data() const = 0;
 
 
 		virtual void copy_assign(void* lhs, const void* rhs) const = 0;
@@ -65,7 +70,7 @@ namespace idk::reflect::detail
 			{
 				if constexpr (sizeof...(Ts) == 1)
 				{
-					if (((args.type._context == *this) && ...))
+					if (((args.type._context == this) && ...))
 						return copy_construct((args._ptr->get())...);
 				}
 
@@ -86,7 +91,7 @@ namespace idk::reflect::detail
 	struct typed_context : typed_context_base
 	{
 		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors)
-			: typed_context_base(name, table, ctors, typehash<T>())
+			: typed_context_base(name, table, ctors, typehash<T>(), is_sequential_container_v<T> || is_associative_container_v<T>, is_macro_enum_v<T>)
 		{}
 		typed_context()
 			: typed_context(
@@ -97,6 +102,18 @@ namespace idk::reflect::detail
 						type_definition<T>::m_Storage.ctors.data() + type_definition<T>::m_Storage.ctors.size() }
 			)
 		{}
+
+
+		virtual const enum_type::data* get_enum_data() const override
+		{
+			if constexpr (is_macro_enum<T>::value)
+			{
+				constexpr static enum_type::data e{ sizeof(T::UnderlyingType), T::count, T::values, T::names };
+				return &e;
+			}
+			else
+				throw;
+		}
 
 
 		void copy_assign(void* lhs, const void* rhs) const override
@@ -132,7 +149,7 @@ namespace idk::reflect::detail
 		detail::table empty_table{ 0, nullptr, nullptr, nullptr };
 		typed_context_nodef()
 			: typed_context<T>(
-				nameof<T>()
+				fully_qualified_nameof<T>()
 				, empty_table
 				, span<constructor_entry_base* const>{ nullptr, nullptr }
 			)

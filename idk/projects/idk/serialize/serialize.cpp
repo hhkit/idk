@@ -27,18 +27,18 @@ namespace idk
 			{
 				if constexpr (std::is_arithmetic_v<T>)
 					(*stack.back())[key] = arg;
-				else if constexpr (is_basic_serializable<T>::value)
+				else if constexpr (is_basic_serializable_v<T>)
 					(*stack.back())[key] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[key] = json::array()));
 				else // associative container
 					stack.push_back(&((*stack.back())[key] = json::object()));
 			}
-			else if constexpr (is_basic_serializable<K>::value)
+			else if constexpr (is_basic_serializable_v<K>)
 			{
 				if constexpr (std::is_arithmetic_v<T>)
 					(*stack.back())[serialize_text(key)] = arg;
-				else if constexpr (is_basic_serializable<T>::value)
+				else if constexpr (is_basic_serializable_v<T>)
 					(*stack.back())[serialize_text(key)] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
@@ -71,9 +71,14 @@ namespace idk
 			SERIALIZE_CASE(double);
 			SERIALIZE_CASE(std::string);
 			SERIALIZE_CASE(Guid);
-			default: throw "Unhandled case?";
+			default: break;
 			}
 #undef SERIALIZE_CASE
+
+			if (obj.type.is_enum_type())
+				return serialize_text(obj.to_enum_value().name());
+			else
+				throw "unhandled case?";
 		}
 
 		return serialize_json(obj).dump(2);
@@ -98,6 +103,11 @@ namespace idk
 
 
 
+	template <typename T, typename = void>
+	struct has_resize : std::false_type {};
+	template <typename T>
+	struct has_resize<T, std::void_t<decltype(std::declval<T>().clear())>> : std::true_type {};
+
 	void parse_json(const json& j, reflect::dynamic& obj)
 	{
 		vector<const json*> stack{ &j };
@@ -121,19 +131,25 @@ namespace idk
 					arg = iter->get<T>();
 					return false;
 				}
-				else if constexpr (is_basic_serializable<T>::value)
+				else if constexpr (is_basic_serializable_v<T>)
 				{
 					parse_text(iter->get<string>(), arg);
 					return false;
 				}
 				else if constexpr (is_sequential_container_v<T>)
 				{
-					arg.clear();
-					arg.resize(iter->size());
+					if constexpr (has_resize<T>::value)
+					{
+						arg.clear();
+						arg.resize(iter->size());
+					}
+					else
+						assert(arg.size() >= iter->size());
+
 					int i = 0;
 					for (auto& elem : *iter)
 					{
-						if constexpr (is_basic_serializable<decltype(*arg.begin())>::value)
+						if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
 							parse_text(elem.get<string>(), arg[i]);
 						else
 						{
@@ -153,7 +169,7 @@ namespace idk
 						{
 							using ElemK = std::decay_t<decltype(arg.begin()->first)>;
 							using ElemV = std::decay_t<decltype(arg.begin()->second)>;
-							if constexpr(is_basic_serializable<ElemV>::value)
+							if constexpr(is_basic_serializable_v<ElemV>)
 								arg.emplace(parse_text<ElemK>(elem_name), parse_text<ElemV>(elem_val.get<string>()));
 							else
 								parse_json(elem_val, arg.emplace(parse_text<ElemK>(elem_name), ElemV{}).second);
@@ -161,7 +177,7 @@ namespace idk
 						else
 						{
 							using ElemV = std::decay_t<decltype(*arg.begin())>;
-							if constexpr (is_basic_serializable<decltype(arg.begin()->second)>::value)
+							if constexpr (is_basic_serializable_v<decltype(arg.begin()->second)>)
 								arg.emplace(parse_text<ElemV>(elem_val.get<string>()));
 							else
 							{
@@ -173,7 +189,7 @@ namespace idk
 					}
 					return false;
 				}
-				else
+				else // not basic serializable and not container; go deeper!
 				{
 					stack.push_back(&*iter);
 					return true;
@@ -181,8 +197,7 @@ namespace idk
 			}
 			else
 			{
-				depth_change;
-				throw; // handle containers
+				throw "how did we get here?";
 			}
 		});
 	}

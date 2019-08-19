@@ -77,7 +77,7 @@ namespace idk
 
 	template<typename T>
 	struct is_sequential_container<T, std::void_t<decltype(
-		std::declval<T&>().resize(0)
+		std::declval<T&>().front()
 	)>> : is_iterable<T> {};
 
 	template<typename T, typename = void>
@@ -86,6 +86,15 @@ namespace idk
 	template<typename T>
 	struct is_associative_container<T, std::void_t<decltype(
 		std::declval<T&>().insert(std::declval<std::decay_t<T>::value_type>())
-		)>> : is_iterable<T> {};
+	)>> : is_iterable<T> {};
 
+	template<typename T, typename = void>
+	struct is_macro_enum : std::false_type {};
+
+	template<typename T>
+	struct is_macro_enum<T, std::void_t<decltype(
+		std::decay_t<T>::count,
+		std::decay_t<T>::names[0],
+		std::decay_t<T>::values[0]
+	)>> : std::is_enum<typename std::decay_t<T>::_enum> {};
 }

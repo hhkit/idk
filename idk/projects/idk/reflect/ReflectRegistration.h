@@ -18,6 +18,7 @@
  *	  REFLECT_PARENT(PARENT_TYPE)
  *	  REFLECT_CTOR(ARG_TYPE_0, ARG_TYPE_1 , ... , ARG_TYPE_N) // max n = 6
  *	  REFLECT_FRIEND
+ *    REFLECT_ENUM(ENUM_TYPE, ALIAS) // only for macro-based enum using ENUM
  *
  *	notes:
  *	  - if REFLECT_VARS has errors, it might be due to

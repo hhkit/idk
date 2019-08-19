@@ -4,7 +4,7 @@
 namespace idk::reflect
 {
 
-	type::type(const detail::typed_context_base* context)
+	type::type(detail::typed_context_base* context)
 		: _context{ context }
 	{}
 
@@ -26,6 +26,21 @@ namespace idk::reflect
 	size_t type::count() const
 	{
 		return _context->table.m_Count;
+	}
+
+	bool type::is_container() const
+	{
+		return _context->is_container;
+	}
+
+	bool type::is_enum_type() const
+	{
+		return _context->is_enum_type;
+	}
+
+	enum_type type::as_enum_type() const
+	{
+		return enum_type{ _context->get_enum_data() };
 	}
 
 	bool type::operator==(type other) const

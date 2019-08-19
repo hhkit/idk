@@ -1,9 +1,9 @@
 #pragma once
 #include <Windows.h>
 #include <filesystem>
-namespace idk::file_system_internal
+namespace idk::file_system_detail
 {
-	enum CHANGE_STATUS
+	enum class CHANGE_STATUS
 	{
 		NO_CHANGE,
 		CREATED,
@@ -12,105 +12,109 @@ namespace idk::file_system_internal
 		WRITTEN
 	};
 
-	enum OPEN_FORMAT
+	enum class OPEN_FORMAT
 	{
 		READ_ONLY	= 0x02,
 		WRITE_ONLY	= 0x04,
 		READ_WRITE	= 0x08,
 	};			  
 				  
-	struct node_t
+	struct fs_key
 	{
-		node_t() = default;
-		node_t(int8_t m, int8_t d, int8_t i);
+		fs_key() = default;
+		fs_key(int8_t m, int8_t d, int8_t i);
 
-		bool operator == (const node_t& rhs) const;
+		bool operator == (const fs_key& rhs) const;
 
-		int8_t mount_id = -1;
-		int8_t depth = -1;
-		int8_t index = -1;
+		int8_t _mount_id = -1;
+		int8_t _depth = -1;
+		int8_t _index = -1;
 	};
 
-	struct file_t
+	struct fs_file
 	{
-		string full_path;
-		string filename;
-		string extension;
+		string _full_path;
+		string _rel_path;
+		string _mount_path;
+		string _filename;
+		string _extension;
 
-		int64_t handle_index = -1;
+		int64_t _handle_index = -1;
 
-		node_t parent;
-		node_t tree_index;
+		fs_key _parent;
+		fs_key _tree_index;
 
-		bool valid = true;
+		bool _valid = true;
 
 		// For file watching
-		CHANGE_STATUS change_status = NO_CHANGE;
-		std::filesystem::file_time_type time;
+		CHANGE_STATUS _change_status = CHANGE_STATUS::NO_CHANGE;
+		std::filesystem::file_time_type _time;
 	};
 
-	struct dir_t
+	struct fs_dir
 	{
-		string full_path;
-		string filename;
+		string _full_path;
+		string _mount_path;
+		string _rel_path;
+		string _filename;
 
-		hash_table<string, node_t> sub_dirs;
-		hash_table<string, node_t> files_map;
+		hash_table<string, fs_key> _sub_dirs;
+		hash_table<string, fs_key> _files_map;
 		
-		node_t parent;
-		node_t tree_index;
+		fs_key _parent;
+		fs_key _tree_index;
 
 		// For file watching
-		HANDLE dir_handle;
-		HANDLE watch_handle[3];
-		DWORD status;
+		HANDLE	_dir_handle;
+		HANDLE	_watch_handle[3];
+		DWORD	_status;
 
-		bool valid = true;
+		bool _valid = true;
 
-		CHANGE_STATUS change_status = NO_CHANGE;
+		CHANGE_STATUS _change_status = CHANGE_STATUS::NO_CHANGE;
 	};
 
-	struct collated_t
+	struct fs_collated
 	{
 		// hash_table<string, uint64_t> files_map;
-		vector<file_t> files;
-		vector<dir_t> dirs;
+		vector<fs_file> _files;
+		vector<fs_dir>	_dirs;
 
-		int8_t depth;
+		int8_t			_depth;
 	};
 
-	struct mount_t
+	struct fs_mount
 	{
 		// Each index signifies the depth of the tree
-		vector<collated_t> path_tree;
+		vector<fs_collated> _path_tree;
 
-		string full_path;
-		string mount_path;
+		string				_full_path;
+		string				_mount_path;
 
-		int8_t mount_index;
-		bool watching = true;
+		int8_t				_mount_index;
+		bool				_watching = true;
 
 		size_t AddDepth();
-		node_t RequestFileSlot(int8_t depth);
+		// fs_key RequestFileSlot(int8_t depth);
 	};
 
-	struct file_handle_t
+	struct fs_file_handle
 	{
-		file_handle_t(int8_t mount, int8_t depth, int8_t index);
-		file_handle_t(node_t node);
+		fs_file_handle(int8_t mount, int8_t depth, int8_t index);
+		fs_file_handle(const fs_key& node);
+
+		// First bit = valid?
+		// Others = open type?
+		byte	_mask = byte{0x00};
+
+		fs_key	_internal_id;
+		int64_t _ref_count = 0;
+		bool	_allow_write = false;
 
 		void Reset();
 		void Invalidate();
 		bool IsOpenAndValid() const;
 		void SetOpenFormat(OPEN_FORMAT format);
-		
-		// First bit = valid?
-		// Others = open type?
-		byte mask = byte{0x00};
-
-		node_t internal_id;
-		int64_t ref_count = 0;
-		bool allow_write = false;
 	};
 
 	

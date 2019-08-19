@@ -21,11 +21,11 @@ namespace idk::vkn
 	public:
 		VulkanWin32GraphicsSystem(Windows& windows_app);
 		void Init() override ;
-		void Draw() override ;
 
-		void BeginFrame() override;
-		void EndFrame() override;
+		void BeginFrame() ;
+		void EndFrame() ;
 		void Shutdown() override;
+		void RenderBuffer() override;
 		VulkanState& Instance() { return *instance_; }
 
 		VulkanState& GetVulkanHandle();

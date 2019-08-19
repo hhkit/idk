@@ -12,13 +12,16 @@ namespace idk
 		Guid guid{};
 
 		RscHandle() = default;
-		RscHandle(const Guid&) : guid{ guid } {}
+		RscHandle(const Guid& guid) : guid{ guid } {}
+
+		void Set(const Resource<Res>& g);
 
 		explicit operator bool() const;
 		Res& operator*() const;
 		Res* operator->() const;
 
-		void Set(const Resource<Res>& g);
+		bool operator==(const RscHandle& rhs) const;
+		bool operator!=(const RscHandle& rhs) const;
 	};
 }
 
