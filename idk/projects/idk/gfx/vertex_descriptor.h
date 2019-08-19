@@ -1,19 +1,19 @@
 #pragma once
 #include <idk.h>
 #include <res/Resource.h>
+#include <util/enum.h>
 
 namespace idk
 {
 	namespace vtx
 	{
-		enum Attrib
-		{
+		ENUM(Attrib, char,
 			Position,
 			Normal,
 			Tangent,
 			UV,
-			BoneWeight,
-		};
+			BoneWeight
+		);
 
 		enum Flags
 		{
