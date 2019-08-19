@@ -34,6 +34,9 @@ namespace idk
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 	}
+	void VulkanWin32GraphicsSystem::RenderBuffer()
+	{
+	}
 	void VulkanWin32GraphicsSystem::createInstance()
 	{
 		const char* extensions[] = {

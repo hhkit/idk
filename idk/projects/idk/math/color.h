@@ -1,5 +1,5 @@
 #pragma once
-#include <idk.h>
+#include <math/vector.h>
 
 namespace idk
 {
@@ -7,35 +7,35 @@ namespace idk
 	{
 		union
 		{
-			struct { real r, g, b, a; };
-			vec3 as_vec3;
-			vec4 as_vec4;
+			struct { float r, g, b, a; };
+			math::vector<float, 3> as_vec3;
+			math::vector<float, 4> as_vec4;
 		};
 
-		constexpr color() noexcept;
-		constexpr color(real r, real g, real b, real a = real{ 1 }) noexcept;
-		constexpr explicit color(const vec3&) noexcept;
-		constexpr explicit color(const vec4&) noexcept;
+		constexpr color(void) noexcept : r{}, g{}, b{}, a{ 1.f } {}
+		constexpr color(float r, float g, float b, float a = float{ 1 }) noexcept;
+		constexpr explicit color(const math::vector<float, 3>&) noexcept;
+		constexpr explicit color(const math::vector<float, 4>&) noexcept;
 
 		// accessors
-		real& operator[](size_t);
-		const real& operator[](size_t) const;
+		float& operator[](size_t);
+		const float& operator[](size_t) const;
 
 		// iterator
-		real*       begin();
-		const real* begin() const;
-		real*       end();
-		const real* end() const;
-		real*       data();
-		const real* data() const;
+		float*       begin();
+		const float* begin() const;
+		float*       end();
+		const float* end() const;
+		float*       data();
+		const float* data() const;
 
 		// operator overloads
 		color& operator+=(const color&);
 		color& operator*=(const color&);
-		color& operator*=(real);
+		color& operator*=(float);
 
 		// conversion operators
-		constexpr explicit operator vec3() const noexcept;
-		constexpr explicit operator vec4() const noexcept;
+		constexpr explicit operator math::vector<float,3>() const noexcept;
+		constexpr explicit operator math::vector<float,4>() const noexcept;
 	};
 }
