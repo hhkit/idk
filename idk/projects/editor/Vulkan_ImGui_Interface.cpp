@@ -12,7 +12,7 @@
 
 namespace idk
 {
-	void VIInterface_Init(Vulkan* vkObj)
+	void VIInterface_Init(VulkanState* vkObj)
 	{
 		//IMGUI setup
 		IMGUI_CHECKVERSION();
@@ -22,7 +22,7 @@ namespace idk
 
 		ImGui::StyleColorsClassic();
 
-		Vulkan* v = vkObj;
+		VulkanState* v = vkObj;
 		ImGui_ImplVulkan_InitInfo info{};
 		//info.Instance =
 			//ImGui_ImplVulkan_Init();

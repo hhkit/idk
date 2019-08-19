@@ -10,7 +10,7 @@
 
 namespace idk
 {
-	class Vulkan;
+	class VulkanState;
 	class Windows;
 
 	class VulkanWin32GraphicsSystem
@@ -24,19 +24,13 @@ namespace idk
 		void BeginFrame() override;
 		void EndFrame() override;
 		void Shutdown() override;
-		Vulkan& Instance() { return *instance_; }
+		VulkanState& Instance() { return *instance_; }
 
-		Vulkan& GetVulkanHandle();
+		VulkanState& GetVulkanHandle();
 	private:
-		std::unique_ptr<Vulkan> instance_;
+		std::unique_ptr<VulkanState> instance_;
 		Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;
-
-		VkHandle<vk::Instance> instance;
-		VkHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> debugMessenger;
-
-		//void createInstance();
-		//void setupDebugMessenger();
 	};
 }

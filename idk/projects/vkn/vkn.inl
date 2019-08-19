@@ -1,9 +1,9 @@
 #pragma once
-#include <vkn/vkn.h>
+#include <vkn/VulkanState.h>
 
 namespace idk {
 	template<typename T, typename F>
-	bool Vulkan::CheckProperties(std::vector<T> const& properties, std::vector<const char*> const& desired, const F& func)
+	bool VulkanState::CheckProperties(std::vector<T> const& properties, std::vector<const char*> const& desired, const F& func)
 	{
 		bool result = true;
 		std::unordered_set<std::string> mprop;

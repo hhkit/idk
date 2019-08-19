@@ -100,7 +100,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\vkn\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,7 +172,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\vkn\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -201,24 +201,20 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="color.h" />
-    <ClInclude Include="debug_info.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="vgfx_converters.h" />
     <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
-    <ClInclude Include="math2.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Utils.h" />
-    <ClInclude Include="vkn.h" />
+    <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
     <ClInclude Include="VulkanDetail.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="debug_info.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="VectorBuffer.cpp" />
     <ClCompile Include="vgfx_converters.cpp" />

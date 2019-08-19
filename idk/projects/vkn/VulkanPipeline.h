@@ -1,6 +1,6 @@
 #pragma once
-#include <vkn.h>
-#include <VulkanDetail.h>
+#include <vkn/VulkanState.h>
+#include <vkn/VulkanDetail.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/uniform_info.h>
 namespace idk

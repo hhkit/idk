@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
-#include <VectorBuffer.h>
-#include <VulkanPipeline.h>
+#include <vkn/VectorBuffer.h>
+#include <vkn/VulkanPipeline.h>
 namespace idk::vgfx
 {
 	struct DrawCall

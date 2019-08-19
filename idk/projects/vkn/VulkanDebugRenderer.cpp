@@ -1,11 +1,13 @@
 #include "pch.h"
-#include "VulkanDebugRenderer.h"
-#include <vkn/vkn.h>
-#include <VulkanPipeline.h>
 #include <vulkan/vulkan.hpp>
-#include <VulkanDetail.h>
-#include <VulkanHelpers.h>
-#include <RenderState.h>
+
+#include <vkn/VulkanState.h>
+#include <vkn/VulkanPipeline.h>
+#include <vkn/VulkanDetail.h>
+#include <vkn/VulkanHelpers.h>
+#include <vkn/RenderState.h>
+
+#include "VulkanDebugRenderer.h"
 namespace idk
 {
 	struct vbo
@@ -36,7 +38,7 @@ namespace idk
 	};
 
 	
-	VulkanDebugRenderer::VulkanDebugRenderer(Vulkan& vulkan):vulkan_{&vulkan}
+	VulkanDebugRenderer::VulkanDebugRenderer(VulkanState& vulkan):vulkan_{&vulkan}
 	{
 	}
 

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "RenderState.h"
-#include <VulkanDetail.h>
-#include <VulkanHelpers.h>
+#include <vkn/VulkanDetail.h>
+#include <vkn/VulkanHelpers.h>
 namespace idk::vgfx
 {
 	uint32_t RenderState::MasterBuffer::Add(const void* data, size_t len)

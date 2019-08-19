@@ -84,10 +84,10 @@ namespace idk
 			return Device()->createShaderModuleUnique(mod);
 		}
 
-		VulkanDetail::VulkanDetail(idk::Vulkan& vulkan) :vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } {}
+		VulkanDetail::VulkanDetail(idk::VulkanState& vulkan) :vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } {}
 		VulkanDetail::VulkanDetail(VulkanDetail&&) noexcept = default;
 		VulkanDetail& VulkanDetail::operator=(VulkanDetail&&) noexcept = default;
-		idk::Vulkan& VulkanDetail::vulkan()const
+		idk::VulkanState& VulkanDetail::vulkan()const
 		{
 			return *vulkan_;
 		}

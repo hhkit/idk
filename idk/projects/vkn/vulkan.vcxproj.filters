@@ -5,15 +5,6 @@
     <ClInclude Include="VulkanWin32GraphicsSystem.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="color.h">
-      <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="debug_info.h">
-      <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="math2.h">
-      <Filter>system</Filter>
-    </ClInclude>
     <ClInclude Include="utils\Utils.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -25,16 +16,13 @@
     <ClInclude Include="vgfx_converters.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="VectorBuffer.h" />
-    <ClInclude Include="vkn.h">
+    <ClInclude Include="VulkanState.h">
       <Filter>system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="debug_info.cpp">
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp">

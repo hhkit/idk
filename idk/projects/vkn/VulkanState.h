@@ -21,7 +21,7 @@ namespace idk {
 		HINSTANCE winstance;
 	};
 
-	class Vulkan;
+	class VulkanState;
 
 	struct debug_info;
 	namespace vgfx
@@ -55,7 +55,7 @@ namespace idk {
 		class VulkanDetail;
 	}
 
-	class Vulkan
+	class VulkanState
 	{
 	public:
 		using QueueFamilyIndices     =vgfx::QueueFamilyIndices;
@@ -105,8 +105,8 @@ namespace idk {
 		void DrawFrame();
 		void OnResize();
 		void Cleanup();
-		Vulkan();
-		~Vulkan();
+		VulkanState();
+		~VulkanState();
 
 
 	private:

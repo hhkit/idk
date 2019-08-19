@@ -1,9 +1,9 @@
 #include <pch.h>
 #include <iostream>
-#include <VulkanWin32GraphicsSystem.h>
+#include <vkn/VulkanWin32GraphicsSystem.h>
 #include <WindowsApplication.h>
 
-#include <vkn/vkn.h>
+#include <vkn/VulkanState.h>
 
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -28,7 +28,7 @@
 
 namespace idk
 {
-	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<idk::Vulkan>() }
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<idk::VulkanState>() }
 	{
 	}
 	void VulkanWin32GraphicsSystem::Init()
@@ -52,7 +52,7 @@ namespace idk
 	{
 		instance_.reset();
 	}
-	Vulkan& VulkanWin32GraphicsSystem::GetVulkanHandle()
+	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{
 		// TODO: insert return statement here
 		return *(instance_.get());

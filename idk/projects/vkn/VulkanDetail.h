@@ -1,6 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
-#include <vkn/vkn.h>
+#include <vkn/VulkanState.h>
 namespace idk {
 	namespace vgfx
 	{
@@ -44,7 +44,7 @@ namespace idk {
 			vk::UniqueShaderModule  CreateShaderModule(const idk::string_view& code);
 
 
-			VulkanDetail(idk::Vulkan& vulkan);
+			VulkanDetail(idk::VulkanState& vulkan);
 			VulkanDetail(VulkanDetail&&) noexcept;
 			VulkanDetail& operator=(VulkanDetail&&) noexcept;
 			//VulkanDetail(const VulkanDetail&)  = default;
@@ -53,8 +53,8 @@ namespace idk {
 		private:
 			struct pimpl;
 			std::unique_ptr<pimpl> impl_;
-			idk::Vulkan& vulkan()const;
-			idk::Vulkan* vulkan_;
+			idk::VulkanState& vulkan()const;
+			idk::VulkanState* vulkan_;
 		};
 	}
 }

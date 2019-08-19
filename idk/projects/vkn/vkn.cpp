@@ -1,11 +1,13 @@
 #include "pch.h"
-#include <vkn/vkn.h>
-#include <math/matrix_transforms.h>
+
 #include <idk.h>
-#include <VulkanDetail.h>
-#include <VulkanHelpers.h>
+#include <math/matrix_transforms.h>
 #include <gfx/buffer_desc.h>
-#include <RenderState.h>
+
+#include <vkn/VulkanState.h>
+#include <vkn/VulkanDetail.h>
+#include <vkn/VulkanHelpers.h>
+#include <vkn/RenderState.h>
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
 //Temporary, should move elsewhere
@@ -146,7 +148,7 @@ namespace idk {
 		mat4 model, view, projection;
 	};
 
-	std::unordered_set<uint32_t> Vulkan::QueueFamilyIndices::unique_queues()const
+	std::unordered_set<uint32_t> VulkanState::QueueFamilyIndices::unique_queues()const
 	{
 		return
 		{
@@ -343,12 +345,12 @@ namespace idk {
 	};
 
 
-	bool Vulkan::QueueFamilyIndices::isComplete() const
+	bool VulkanState::QueueFamilyIndices::isComplete() const
 	{
 		return graphics_family && present_family;
 	}
 
-	float Vulkan::deviceSuitability(vk::PhysicalDevice const& pd)
+	float VulkanState::deviceSuitability(vk::PhysicalDevice const& pd)
 	{
 		auto properties = pd.getProperties(dispatcher);
 		auto features = pd.getFeatures(dispatcher);
@@ -415,7 +417,7 @@ namespace idk {
 		return total;
 	}
 
-	vk::PhysicalDevice Vulkan::SelectDevice(std::vector<vk::PhysicalDevice> const& devices)
+	vk::PhysicalDevice VulkanState::SelectDevice(std::vector<vk::PhysicalDevice> const& devices)
 	{
 		float most_suitable = 0;
 		vk::PhysicalDevice pd = {};
@@ -435,7 +437,7 @@ namespace idk {
 		return pd;
 	}
 
-	std::vector<const char*> Vulkan::GetValidationLayers()
+	std::vector<const char*> VulkanState::GetValidationLayers()
 	{
 		std::vector<const char*> layers
 		{
@@ -444,7 +446,7 @@ namespace idk {
 		return layers;
 	}
 
-	std::vector<const char*> Vulkan::GetExtensions(vk::Optional<const std::string>)
+	std::vector<const char*> VulkanState::GetExtensions(vk::Optional<const std::string>)
 	{
 		std::vector<const char*> ext
 		{
@@ -459,7 +461,7 @@ namespace idk {
 		return ext;
 	}
 
-	std::vector<const char*> Vulkan::GetDeviceExtensions()
+	std::vector<const char*> VulkanState::GetDeviceExtensions()
 	{
 		std::vector<const char*> ext
 		{
@@ -469,19 +471,19 @@ namespace idk {
 		return ext;
 	}
 
-	std::vector<vk::LayerProperties> Vulkan::GetAllValidationLayers()
+	std::vector<vk::LayerProperties> VulkanState::GetAllValidationLayers()
 	{
 		auto result = vk::enumerateInstanceLayerProperties(dispatcher);
 		return result;
 	}
 
-	std::vector<vk::ExtensionProperties> Vulkan::GetAllExtensions(vk::Optional<const std::string> layer)
+	std::vector<vk::ExtensionProperties> VulkanState::GetAllExtensions(vk::Optional<const std::string> layer)
 	{
 		auto result = vk::enumerateInstanceExtensionProperties(layer, dispatcher);
 		return result;
 	}
 
-	vk::SurfaceFormatKHR Vulkan::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
+	vk::SurfaceFormatKHR VulkanState::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
 	{
 		std::optional<vk::SurfaceFormatKHR> result;
 		for (const auto& availableFormat : availableFormats) {
@@ -501,7 +503,7 @@ namespace idk {
 		return *result;
 	}
 
-	vk::PresentModeKHR Vulkan::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
+	vk::PresentModeKHR VulkanState::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
 	{
 		vk::PresentModeKHR result = vk::PresentModeKHR::eFifo;
 		for (const auto& availablePresentMode : availablePresentModes) {
@@ -513,7 +515,7 @@ namespace idk {
 		return result;
 	}
 
-	vk::Extent2D Vulkan::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities)
+	vk::Extent2D VulkanState::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities)
 	{
 		vk::Extent2D result;
 
@@ -536,7 +538,7 @@ namespace idk {
 		return result;
 	}
 
-	Vulkan::QueueFamilyIndices Vulkan::findQueueFamilies(vk::PhysicalDevice const& device)
+	VulkanState::QueueFamilyIndices VulkanState::findQueueFamilies(vk::PhysicalDevice const& device)
 	{
 		QueueFamilyIndices result;
 		auto families = device.getQueueFamilyProperties();
@@ -568,7 +570,7 @@ namespace idk {
 		return result;
 	}
 
-	Vulkan::SwapChainSupportDetails Vulkan::querySwapChainSupport(const vk::PhysicalDevice& device) {
+	VulkanState::SwapChainSupportDetails VulkanState::querySwapChainSupport(const vk::PhysicalDevice& device) {
 		SwapChainSupportDetails details;
 		details.capabilities = device.getSurfaceCapabilitiesKHR(*m_surface, dispatcher);
 		details.formats = device.getSurfaceFormatsKHR(*m_surface, dispatcher);
@@ -576,7 +578,7 @@ namespace idk {
 		return details;
 	}
 
-	void Vulkan::createInstance()
+	void VulkanState::createInstance()
 	{
 
 		vk::ApplicationInfo appInfo = {
@@ -631,19 +633,19 @@ namespace idk {
 		}
 	}
 
-	void Vulkan::createSurface(HINSTANCE winstance, HWND wnd)
+	void VulkanState::createSurface(HINSTANCE winstance, HWND wnd)
 	{
 		vk::Win32SurfaceCreateInfoKHR w32createInfo{ vk::Win32SurfaceCreateFlagsKHR{},winstance,wnd };
 		m_surface = instance->createWin32SurfaceKHRUnique(w32createInfo, nullptr, dispatcher);
 	}
 
-	void Vulkan::pickPhysicalDevice()
+	void VulkanState::pickPhysicalDevice()
 	{
 		auto physical_devices = instance->enumeratePhysicalDevices(dispatcher);
 		pdevice = SelectDevice(physical_devices);
 	}
 
-	void Vulkan::createLogicalDevice()
+	void VulkanState::createLogicalDevice()
 	{
 		QueueFamilyIndices indices = findQueueFamilies(pdevice);
 		m_queue_family = indices;
@@ -682,7 +684,7 @@ namespace idk {
 		//m_transfer_queue = m_device->getQueue(*m_queue_family.transfer_family, 0, dispatcher);
 	}
 
-	void Vulkan::createSwapChain() {
+	void VulkanState::createSwapChain() {
 		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(pdevice);
 
 		vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -736,7 +738,7 @@ namespace idk {
 
 	}
 
-	void Vulkan::createImageViews()
+	void VulkanState::createImageViews()
 	{
 		auto& images = m_swapchain.images;
 		auto& image_views = m_swapchain.image_views;
@@ -756,7 +758,7 @@ namespace idk {
 		}
 	}
 
-	vk::UniqueShaderModule Vulkan::createShaderModule(const std::string& code)
+	vk::UniqueShaderModule VulkanState::createShaderModule(const std::string& code)
 	{
 		vk::ShaderModuleCreateInfo mod{
 			vk::ShaderModuleCreateFlags{},
@@ -765,7 +767,7 @@ namespace idk {
 		return m_device->createShaderModuleUnique(mod);
 	}
 
-	void Vulkan::createRenderPass()
+	void VulkanState::createRenderPass()
 	{
 		vk::AttachmentDescription colorAttachment
 		{
@@ -819,7 +821,7 @@ namespace idk {
 			rs.render_pass = *m_renderpass;
 	}
 
-	void Vulkan::createDescriptorSetLayout()
+	void VulkanState::createDescriptorSetLayout()
 	{
 		vk::DescriptorSetLayoutBinding uboLayoutBinding[]
 		{
@@ -841,7 +843,7 @@ namespace idk {
 		m_descriptorsetlayout = m_device->createDescriptorSetLayoutUnique(uboLayoutCreateInfo, nullptr, dispatcher);
 	}
 
-	void Vulkan::createGraphicsPipeline()
+	void VulkanState::createGraphicsPipeline()
 	{
 		auto vert = GetBinaryFile("shaders/vertex.vert.spv");
 		auto frag = GetBinaryFile("shaders/fragment.frag.spv");
@@ -1013,7 +1015,7 @@ namespace idk {
 		m_pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
 	}
 
-	void Vulkan::createFramebuffers()
+	void VulkanState::createFramebuffers()
 	{
 		auto& image_views = m_swapchain.image_views;
 		auto& extent = m_swapchain.extent;
@@ -1037,7 +1039,7 @@ namespace idk {
 		}
 	}
 
-	void Vulkan::createCommandPool()
+	void VulkanState::createCommandPool()
 	{
 		vk::CommandPoolCreateInfo info
 		{
@@ -1048,7 +1050,7 @@ namespace idk {
 
 	}
 
-	struct Vulkan::vbo
+	struct VulkanState::vbo
 	{
 		vk::UniqueBuffer gpu_buffer;
 		vk::UniqueDeviceMemory gpu_memory;
@@ -1063,7 +1065,7 @@ namespace idk {
 
 	using namespace vhlp;
 
-	void Vulkan::createVertexBuffers()
+	void VulkanState::createVertexBuffers()
 	{
 		vk::DeviceSize bufferSize = buffer_size(g_vertices);
 
@@ -1117,7 +1119,7 @@ namespace idk {
 
 	}
 
-	void Vulkan::createIndexBuffers()
+	void VulkanState::createIndexBuffers()
 	{
 		vk::DeviceSize bufferSize = buffer_size(g_indices);
 
@@ -1140,7 +1142,7 @@ namespace idk {
 		copyBuffer(*stagingBuffer, *m_index_buffer, bufferSize);
 	}
 
-	void Vulkan::createUniformBuffers()
+	void VulkanState::createUniformBuffers()
 	{
 
 		vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
@@ -1159,7 +1161,7 @@ namespace idk {
 
 	}
 
-	void Vulkan::createDescriptorPool()
+	void VulkanState::createDescriptorPool()
 	{
 		vk::DescriptorPoolSize pool_size[]
 		{
@@ -1178,7 +1180,7 @@ namespace idk {
 		m_descriptorpool = m_device->createDescriptorPoolUnique(create_info, nullptr, dispatcher);
 	}
 
-	void Vulkan::createDescriptorSet()
+	void VulkanState::createDescriptorSet()
 	{
 		std::vector<vk::DescriptorSetLayout> layouts{ m_swapchain.images.size(), *m_descriptorsetlayout };
 		vk::DescriptorSetAllocateInfo allocInfo
@@ -1220,7 +1222,7 @@ namespace idk {
 
 	}
 
-	void Vulkan::createCommandBuffers()
+	void VulkanState::createCommandBuffers()
 	{
 		vk::CommandBufferAllocateInfo allocInfo
 		{
@@ -1287,7 +1289,7 @@ namespace idk {
 		}
 	}
 
-	void Vulkan::createSemaphores()
+	void VulkanState::createSemaphores()
 	{
 		vk::SemaphoreCreateInfo info{};
 		vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
@@ -1301,7 +1303,7 @@ namespace idk {
 		}
 	}
 
-	void Vulkan::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
+	void VulkanState::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
 	{
 		//Setup copy command buffer/pool
 		vk::CommandBufferAllocateInfo allocInfo
@@ -1314,7 +1316,7 @@ namespace idk {
 		auto& cmd_buffer = *commandBuffer[0];
 		CopyBuffer(cmd_buffer, m_graphics_queue, srcBuffer, dstBuffer, size);
 	}
-	void Vulkan::updateUniformBuffer(uint32_t image_index)
+	void VulkanState::updateUniformBuffer(uint32_t image_index)
 	{
 		UniformBufferObject ubo = {};
 		ubo.model = mat4{ idk::rotate(vec3(0.0f, 0.0f, 1.0f), idk::rad{ idk::deg(90.0f) } *0) };
@@ -1324,7 +1326,7 @@ namespace idk {
 		ubo.projection[1][1] *= -1;
 		MapMemory(*m_device, *m_swapchain.uniform_buffers[image_index].second, 0, &ubo, static_cast<vk::DeviceSize>(sizeof(ubo)), dispatcher);
 	}
-	vk::DebugUtilsMessengerCreateInfoEXT Vulkan::populateDebugMessengerCreateInfo(ValHandler* userData) {
+	vk::DebugUtilsMessengerCreateInfoEXT VulkanState::populateDebugMessengerCreateInfo(ValHandler* userData) {
 		vk::DebugUtilsMessageSeverityFlagsEXT severity_flags;
 
 		//severity_flags |= ;// VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;// | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -1338,7 +1340,7 @@ namespace idk {
 		return createInfo;
 	}
 
-	VkBool32 Vulkan::ValHandler::processMsg(
+	VkBool32 VulkanState::ValHandler::processMsg(
 		[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
 		[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
@@ -1349,18 +1351,18 @@ namespace idk {
 		return VK_FALSE;
 	}
 
-	void Vulkan::UpdateWindowSize(vec2 size)
+	void VulkanState::UpdateWindowSize(vec2 size)
 	{
 		m_window.size = size;
 		m_ScreenResized = true;
 	}
 
-	VKAPI_ATTR VkBool32 VKAPI_CALL Vulkan::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanState::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 		static ValHandler def;
 		return static_cast<ValHandler*>((pUserData) ? pUserData : &def)->processMsg(messageSeverity, messageType, pCallbackData);
 	}
 
-	void Vulkan::CleanupSwapChain() {
+	void VulkanState::CleanupSwapChain() {
 		m_swapchain.frame_buffers.clear();
 
 		//m_commandbuffers.clear();
@@ -1392,7 +1394,7 @@ namespace idk {
 		//vkDestroySwapchainKHR(device, swapChain, nullptr);
 	}
 
-	void Vulkan::RecreateSwapChain()
+	void VulkanState::RecreateSwapChain()
 	{
 		m_device->waitIdle(dispatcher);
 		CleanupSwapChain();
@@ -1409,7 +1411,7 @@ namespace idk {
 		createCommandBuffers();
 	}
 
-	void Vulkan::InitVulkanEnvironment(window_info info)
+	void VulkanState::InitVulkanEnvironment(window_info info)
 	{
 		m_window = info;
 		detail_->RenderStates().resize(3);
@@ -1433,17 +1435,17 @@ namespace idk {
 		createSemaphores();
 	}
 
-	void Vulkan::NextFrame()
+	void VulkanState::NextFrame()
 	{
 		current_frame = (current_frame + 1) % max_frames_in_flight;
 	}
 
-	vgfx::VulkanDetail& Vulkan::GetDetail()
+	vgfx::VulkanDetail& VulkanState::GetDetail()
 	{
 		return *detail_;
 	}
 
-	std::unique_ptr<Vulkan::vbo> Vulkan::CreateVbo(void const* buffer_start, void const* buffer_end)
+	std::unique_ptr<VulkanState::vbo> VulkanState::CreateVbo(void const* buffer_start, void const* buffer_end)
 	{
 		uint8_t const* bstart = static_cast<uint8_t const*>(buffer_start);
 		uint8_t const* bend = static_cast<uint8_t const*>(buffer_end);
@@ -1469,11 +1471,11 @@ namespace idk {
 		return std::make_unique<vbo>(std::move(vertex_buffer), std::move(device_memory));
 	}
 
-	void Vulkan::Draw(unique_vbo const&, unique_ubo const&, unique_pipeline const&)
+	void VulkanState::Draw(unique_vbo const&, unique_ubo const&, unique_pipeline const&)
 	{
 	}
 
-	void Vulkan::BeginFrame()
+	void VulkanState::BeginFrame()
 	{
 		detail_->SwapRenderState();
 		{
@@ -1493,7 +1495,7 @@ namespace idk {
 
 	}
 
-	void Vulkan::EndFrame()
+	void VulkanState::EndFrame()
 	{
 		auto& rs = detail_->CurrRenderState();
 		auto& dispatcher = detail_->Dispatcher();
@@ -1536,7 +1538,7 @@ namespace idk {
 
 	}
 
-	void Vulkan::DrawFrame()
+	void VulkanState::DrawFrame()
 	{
 		auto& current_signal = m_pres_signals[current_frame];
 		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
@@ -1625,22 +1627,22 @@ namespace idk {
 
 	}
 
-	void Vulkan::OnResize()
+	void VulkanState::OnResize()
 	{
 		m_ScreenResized = true;
 	}
 
-	void Vulkan::Cleanup()
+	void VulkanState::Cleanup()
 	{
 		m_device->waitIdle();
 		//instance.release();
 	}
 
-	Vulkan::Vulkan() : detail_{ std::make_unique<vgfx::VulkanDetail>(*this) }
+	VulkanState::VulkanState() : detail_{ std::make_unique<vgfx::VulkanDetail>(*this) }
 	{
 	}
 
-	Vulkan::~Vulkan() = default;
+	VulkanState::~VulkanState() = default;
 
 	DbgVertexBuffer::DbgVertexBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 	{
