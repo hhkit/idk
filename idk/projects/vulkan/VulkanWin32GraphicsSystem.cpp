@@ -45,6 +45,11 @@ namespace idk
 	{
 		instance_.reset();
 	}
+	Vulkan& VulkanWin32GraphicsSystem::GetVulkanHandle()
+	{
+		// TODO: insert return statement here
+		return *(instance_.get());
+	}
 	/*void VulkanWin32GraphicsSystem::createInstance()
 	{
 		const char* extensions[] = {

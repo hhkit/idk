@@ -4,9 +4,11 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
+    <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
   </ItemGroup>
 </Project>

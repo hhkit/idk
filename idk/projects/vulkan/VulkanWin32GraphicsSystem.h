@@ -20,6 +20,8 @@ namespace idk
 		void Init() override ;
 		void Draw() override ;
 		void Shutdown() override;
+
+		Vulkan& GetVulkanHandle();
 	private:
 		std::unique_ptr<Vulkan> instance_;
 		Windows* windows_;
