@@ -29,8 +29,8 @@ namespace idk::vkn
 	struct VulkanDebugRenderer::pimpl
 	{
 		VulkanView& detail;
-		VulkGfxPipeline pipeline{};
-		VulkGfxPipeline::uniform_info uniforms{};
+		VulkanPipeline pipeline{};
+		uniform_info uniforms{};
 		hash_table<DbgShape, vbo> shape_buffers{};
 		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
 
@@ -45,7 +45,7 @@ namespace idk::vkn
 	void VulkanDebugRenderer::Init(const idk::pipeline_config& config, const idk::uniform_info& uniform_info)
 	{
 		auto& system = *vulkan_;
-		impl = std::make_unique<pimpl>(system.GetDetail());
+		impl = std::make_unique<pimpl>(system.View());
 		impl->pipeline.Create(config, impl->detail);
 
 		impl->shape_buffers = idk::hash_table<DbgShape, vbo>
@@ -55,9 +55,6 @@ namespace idk::vkn
 					vec3{-0.5f,-0.5f,1.0f},
 					vec3{ 0.5f, 0.5f,1.0f},
 					vec3{-0.5f, 0.5f,1.0f},
-					//vec3{ 0.5f, 0.5f,1.0f},
-					//vec3{-0.5f,-0.5f,1.0f},
-					//vec3{-0.5f, 0.5f,1.0f},
 				}
 			}
 			,
@@ -80,15 +77,15 @@ namespace idk::vkn
 		auto& detail   = impl->detail  ;
 		auto& pipeline = impl->pipeline;
 		auto& uniforms = impl->uniforms;
-		DrawCall dc;
+		draw_call dc;
 		dc.pipeline = &pipeline;
 		dc.uniform_info = uniforms;
-		//pipeline.Bind(cmd_buffer, detail);
-		//pipeline.BindUniformDescriptions(cmd_buffer, detail, uniforms);
+
 		for (auto& [shape, buffer] : info->render_info)
 		{
 			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
 			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
+
 			//Bind vtx buffers
 			auto instance_buffer = detail.AddToMasterBuffer(std::data(buffer), hlp::buffer_size<uint32_t>(buffer));
 			auto vertex_buffer   = detail.AddToMasterBuffer(idk::s_cast<const void*>(std::data(shape_buffer_proxy)), hlp::buffer_size<uint32_t>(shape_buffer_proxy));
@@ -96,8 +93,6 @@ namespace idk::vkn
 			dc.vertex_count   = hlp::arr_count(shape_buffer);
 			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, vertex_buffer);
 			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, instance_buffer);
-			//cmd_buffer.bindVertexBuffers(dbg_vert_layout::instance_binding, detail.CurrMasterVtxBuffer(), instance_buffer, detail.Dispatcher());
-			//cmd_buffer.bindVertexBuffers(dbg_vert_layout::vertex_binding  , detail.CurrMasterVtxBuffer(), vertex_buffer  , detail.Dispatcher());
 
 			//Bind idx buffers
 			//auto  index_buffer = detail.AddToMasterBuffer();
@@ -108,11 +103,8 @@ namespace idk::vkn
 			//Draw
 			//cmd_buffer.draw(ArrCount(shape_buffer), ArrCount(buffer), 0, 0, detail.Dispatcher());
 			detail.CurrRenderState().AddDrawCall(dc);
-		}
-		
+		}	
 	}
-	VulkanDebugRenderer::~VulkanDebugRenderer()
-	{
 
-	}
+	VulkanDebugRenderer::~VulkanDebugRenderer() = default;
 }

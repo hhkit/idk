@@ -4,7 +4,7 @@
 #include <vkn/BufferHelpers.h>
 namespace idk::vkn
 {
-	void VulkGfxPipeline::Create(config_t const& config, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
@@ -70,22 +70,22 @@ namespace idk::vkn
 			,*m_renderpass
 			,0
 		};
-		m_pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
+		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
 	}
-	void VulkGfxPipeline::Reset()
+	void VulkanPipeline::Reset()
 	{
-		m_pipelinelayout.reset();
-		m_pipeline.reset();
+		pipelinelayout.reset();
+		pipeline.reset();
 	}
-	void VulkGfxPipeline::Bind(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan) const
+	void VulkanPipeline::Bind(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan) const
 	{
-		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, vulkan.Dispatcher());
+		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline, vulkan.Dispatcher());
 	}
-	bool VulkGfxPipeline::HasUniforms(const uniform_info& uni) const
+	bool VulkanPipeline::HasUniforms(const uniform_info& uni) const
 	{
 		return uni.layouts.size() > 0;
 	}
-	void VulkGfxPipeline::BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform)
+	void VulkanPipeline::BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform)
 	{
 		if (HasUniforms(uniform))
 		{
@@ -94,10 +94,10 @@ namespace idk::vkn
 			uint32_t start = AllocUniformBuffers(vulkan, uniform);
 			//We can update the buffer and immediately queue a transfer command because we are expecting
 			//the command submit order to be (Send Host Uniform Buffer to Device Uniform Buffer) -> (The render pass commands)
-			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, start, GetUniformDescriptors(vulkan, uniform), nullptr, vulkan.Dispatcher());
+			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelinelayout, start, GetUniformDescriptors(vulkan, uniform), nullptr, vulkan.Dispatcher());
 		}
 	}
-	vk::PolygonMode VulkGfxPipeline::GetPolygonMode(const config_t& config) const
+	vk::PolygonMode VulkanPipeline::GetPolygonMode(const config_t& config) const
 	{
 		static const hash_table<FillType, vk::PolygonMode> lookup
 		{
@@ -106,7 +106,7 @@ namespace idk::vkn
 		};
 		return lookup.find(config.fill_type)->second;
 	}
-	vk::PipelineInputAssemblyStateCreateInfo VulkGfxPipeline::GetAssemblyInfo(const config_t& config) const
+	vk::PipelineInputAssemblyStateCreateInfo VulkanPipeline::GetAssemblyInfo(const config_t& config) const
 	{
 		return vk::PipelineInputAssemblyStateCreateInfo{
 			vk::PipelineInputAssemblyStateCreateFlags{}
@@ -114,18 +114,18 @@ namespace idk::vkn
 			,VK_FALSE                              //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
 		};
 	}
-	vector<vk::VertexInputAttributeDescription> VulkGfxPipeline::GetVtxAttribInfo(const config_t& config) const
+	vector<vk::VertexInputAttributeDescription> VulkanPipeline::GetVtxAttribInfo(const config_t& config) const
 	{
 		[[maybe_unused]] auto [binding, attrib] = hlp::ConvertVtxDesc(config.buffer_descriptions);
 
 		return attrib;
 	}
-	vector<vk::VertexInputBindingDescription> VulkGfxPipeline::GetVtxBindingInfo(const config_t& config) const
+	vector<vk::VertexInputBindingDescription> VulkanPipeline::GetVtxBindingInfo(const config_t& config) const
 	{
 		[[maybe_unused]] auto [binding, attrib] = hlp::ConvertVtxDesc(config.buffer_descriptions);
 		return binding;
 	}
-	std::pair<vector<vk::PipelineShaderStageCreateInfo>, vector<vk::UniqueShaderModule>> VulkGfxPipeline::GetShaderStageInfo(const config_t& config, Vulkan_t& vulkan) const
+	std::pair<vector<vk::PipelineShaderStageCreateInfo>, vector<vk::UniqueShaderModule>> VulkanPipeline::GetShaderStageInfo(const config_t& config, Vulkan_t& vulkan) const
 	{
 		std::pair<
 			vector<vk::PipelineShaderStageCreateInfo>,
@@ -170,7 +170,7 @@ namespace idk::vkn
 
 	//Vulkan_t is necessary cause it needs to get the descriptors from the pool
 
-	vk::Viewport VulkGfxPipeline::GetViewport(const config_t& config, Vulkan_t& vulkan) const
+	vk::Viewport VulkanPipeline::GetViewport(const config_t& config, Vulkan_t& vulkan) const
 	{
 		auto sc = vulkan.Swapchain().extent;
 		ivec2 screen_size = (config.screen_size) ? *config.screen_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
@@ -182,7 +182,7 @@ namespace idk::vkn
 		};
 	}
 
-	vk::Rect2D VulkGfxPipeline::GetScissor(const config_t& config, Vulkan_t& vulkan) const
+	vk::Rect2D VulkanPipeline::GetScissor(const config_t& config, Vulkan_t& vulkan) const
 	{
 		auto sc = vulkan.Swapchain().extent;
 		ivec2 screen_size = (config.screen_size) ? *config.screen_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
@@ -192,7 +192,7 @@ namespace idk::vkn
 		};
 	}
 
-	vk::PipelineRasterizationStateCreateInfo VulkGfxPipeline::GetRasterizerInfo(const config_t& config) const
+	vk::PipelineRasterizationStateCreateInfo VulkanPipeline::GetRasterizerInfo(const config_t& config) const
 	{
 		return vk::PipelineRasterizationStateCreateInfo
 		{
@@ -210,7 +210,7 @@ namespace idk::vkn
 		};
 	}
 
-	vk::PipelineMultisampleStateCreateInfo VulkGfxPipeline::GetMultisampleInfo(const config_t& config) const
+	vk::PipelineMultisampleStateCreateInfo VulkanPipeline::GetMultisampleInfo(const config_t& config) const
 	{
 
 		return vk::PipelineMultisampleStateCreateInfo{
@@ -224,7 +224,7 @@ namespace idk::vkn
 		};
 	}
 
-	vector<vk::PipelineColorBlendAttachmentState> VulkGfxPipeline::GetColorBlendAttachments(const config_t& config) const
+	vector<vk::PipelineColorBlendAttachmentState> VulkanPipeline::GetColorBlendAttachments(const config_t& config) const
 	{
 		return {
 			vk::PipelineColorBlendAttachmentState
@@ -253,7 +253,7 @@ namespace idk::vkn
 		*/
 	}
 
-	std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState>> VulkGfxPipeline::GetColorBlendConfig(const config_t& config) const
+	std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState>> VulkanPipeline::GetColorBlendConfig(const config_t& config) const
 	{
 		//Per frame buffer
 		auto colorBlendAttachments = GetColorBlendAttachments(config);
@@ -268,7 +268,7 @@ namespace idk::vkn
 			}, std::move(colorBlendAttachments));
 	}
 
-	vector<vk::DynamicState> VulkGfxPipeline::GetDynamicStates(const config_t& config) const
+	vector<vk::DynamicState> VulkanPipeline::GetDynamicStates(const config_t& config) const
 	{
 		return{
 			vk::DynamicState::eViewport,
@@ -276,7 +276,7 @@ namespace idk::vkn
 		};
 	}
 
-	vk::PipelineLayoutCreateInfo VulkGfxPipeline::GetLayoutInfo(const config_t& config) const
+	vk::PipelineLayoutCreateInfo VulkanPipeline::GetLayoutInfo(const config_t& config) const
 	{
 
 		return vk::PipelineLayoutCreateInfo
@@ -289,15 +289,15 @@ namespace idk::vkn
 		};
 	}
 
-	vk::UniqueRenderPass& VulkGfxPipeline::GetRenderpass(const config_t& config, VulkanView& vulkan)
+	vk::UniqueRenderPass& VulkanPipeline::GetRenderpass(const config_t& config, VulkanView& vulkan)
 	{
 		return vulkan.Renderpass();
 	}
 
-	vector<vk::DescriptorSet> VulkGfxPipeline::GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform)
+	vector<vk::DescriptorSet> VulkanPipeline::GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform)
 	{
 		return {};
 	}
 
-	uint32_t VulkGfxPipeline::AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform) { return 0; }
+	uint32_t VulkanPipeline::AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform) { return 0; }
 }

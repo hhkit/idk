@@ -12,9 +12,6 @@
     <ClInclude Include="GfxConverters.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="VectorBuffer.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="RenderState.h">
       <Filter>render</Filter>
     </ClInclude>
@@ -33,6 +30,12 @@
     <ClInclude Include="utils\utils.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="vector_buffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="draw_call.h">
+      <Filter>render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -41,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="GfxConverters.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="VectorBuffer.cpp">
-      <Filter>buffer</Filter>
     </ClCompile>
     <ClCompile Include="RenderState.cpp">
       <Filter>render</Filter>
@@ -65,6 +65,9 @@
     </ClCompile>
     <ClCompile Include="utils\utils.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_buffer.cpp">
+      <Filter>buffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

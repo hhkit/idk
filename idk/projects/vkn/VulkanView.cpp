@@ -2,7 +2,7 @@
 #include "VulkanView.h"
 #include <vkn/VulkanState.h>
 #include <vkn/BufferHelpers.h>
-#include <vkn/VectorBuffer.h>
+#include <vkn/vector_buffer.h>
 #include <vkn/RenderState.h>
 
 namespace idk::vkn
@@ -61,15 +61,15 @@ namespace idk::vkn
 		vk::UniqueCommandBuffer& VulkanView::CurrCommandbuffer()const { return vulkan().m_commandbuffers[vulkan().current_frame]; }
 		vk::Buffer& VulkanView::CurrMasterVtxBuffer() const
 		{
-			return impl_->CurrentRenderState().MasterBuffer().host_buffer.Buffer();
+			return impl_->CurrentRenderState().MasterBuffer().host_buffer.buffer();
 		}
 		uint32_t VulkanView::AddToMasterBuffer(const void* data, uint32_t len) const
 		{
-			return impl_->CurrentRenderState().MasterBuffer().Add(data, len);
+			return impl_->CurrentRenderState().MasterBuffer().add(data, len);
 		}
 		void VulkanView::ResetMasterBuffer() const
 		{
-			impl_->CurrentRenderState().MasterBuffer().Reset();
+			impl_->CurrentRenderState().MasterBuffer().reset();
 		}
 		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
 
@@ -82,9 +82,10 @@ namespace idk::vkn
 			return Device()->createShaderModuleUnique(mod);
 		}
 
-		VulkanView::VulkanView(VulkanState& vulkan) :vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } {}
-		VulkanView::VulkanView(VulkanView&&) noexcept = default;
-		VulkanView& VulkanView::operator=(VulkanView&&) noexcept = default;
+		VulkanView::VulkanView(VulkanState& vulkan) 
+			: vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } 
+		{}
+
 		VulkanState& VulkanView::vulkan()const
 		{
 			return *vulkan_;

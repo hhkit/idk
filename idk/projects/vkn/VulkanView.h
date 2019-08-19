@@ -21,37 +21,35 @@ namespace idk::vkn
 		vk::Queue&                 PresentQueue()const;
 		SwapChainInfo&             Swapchain()const;
 
-		vk::UniquePipeline& Pipeline()const;
-		vk::UniqueCommandPool& Commandpool()const;
+		vk::UniquePipeline&        Pipeline()const;
+		vk::UniqueCommandPool&     Commandpool()const;
 		vector<vk::UniqueCommandBuffer>& Commandbuffers()const;
 
 		//Render State info
-		void                     SwapRenderState()const;//Probably a bad decision to const this shit.
-		vector<RenderState>& RenderStates()const;
-		RenderState& PrevRenderState()const;
-		RenderState& CurrRenderState()const;
-		vk::UniqueRenderPass& Renderpass()const;
-		vk::UniqueCommandBuffer& CurrCommandbuffer()const;
-		vk::Buffer& CurrMasterVtxBuffer()const;
+		void                       SwapRenderState()const;//Probably a bad decision to const this shit.
+		vector<RenderState>&       RenderStates()const;
+		RenderState&               PrevRenderState()const;
+		RenderState&               CurrRenderState()const;
+		vk::UniqueRenderPass&      Renderpass()const;
+		vk::UniqueCommandBuffer&   CurrCommandbuffer()const;
+		vk::Buffer&                CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.
-		uint32_t                 AddToMasterBuffer(const void* data, uint32_t len)const;
-		void                     ResetMasterBuffer()const;
+		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
+		void                       ResetMasterBuffer()const;
 
 
 
-		vk::UniqueShaderModule  CreateShaderModule(const string_view& code);
+		vk::UniqueShaderModule     CreateShaderModule(const string_view& code);
 
 
 		VulkanView(VulkanState& vulkan);
-		VulkanView(VulkanView&&) noexcept;
-		VulkanView& operator=(VulkanView&&) noexcept;
-		//VulkanDetail(const VulkanDetail&)  = default;
-		//VulkanDetail& operator=(const VulkanDetail&)  = default;
+		VulkanView(VulkanView&&) noexcept = default;
+		VulkanView& operator=(VulkanView&&) noexcept = default;
 		~VulkanView();
 	private:
 		struct pimpl;
 		std::unique_ptr<pimpl> impl_;
-		VulkanState& vulkan()const;
+		VulkanState& vulkan() const;
 		VulkanState* vulkan_;
 	};
 }

@@ -817,9 +817,9 @@ namespace idk::vkn
 		m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 
 		//Temporary For RenderState
-		auto& rss = detail_->RenderStates();
+		auto& rss = view_->RenderStates();
 		for (auto& rs : rss)
-			rs.render_pass = *m_renderpass;
+			rs.RenderPass() = *m_renderpass;
 	}
 
 	void VulkanState::createDescriptorSetLayout()
@@ -1272,7 +1272,7 @@ namespace idk::vkn
 		}
 
 		//For RenderState
-		auto& rss = detail_->RenderStates();
+		auto& rss = view_->RenderStates();
 		//rss.resize(max_frames_in_flight);
 		for (auto& rs : rss)
 		{
@@ -1283,8 +1283,8 @@ namespace idk::vkn
 				,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 			};
 			auto cmd_buffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
-			rs.transfer_buffer = std::move(cmd_buffers[0]);
-			rs.command_buffer = std::move(cmd_buffers[1]);
+			rs.TransferBuffer(std::move(cmd_buffers[0]));
+			rs.CommandBuffer(std::move(cmd_buffers[1]));
 		}
 	}
 
@@ -1413,7 +1413,7 @@ namespace idk::vkn
 	void VulkanState::InitVulkanEnvironment(window_info info)
 	{
 		m_window = info;
-		detail_->RenderStates().resize(3);
+		view_->RenderStates().resize(3);
 		createInstance();
 		createSurface(info.winstance, info.wnd);
 		pickPhysicalDevice();
@@ -1439,9 +1439,9 @@ namespace idk::vkn
 		current_frame = (current_frame + 1) % max_frames_in_flight;
 	}
 
-	VulkanView& VulkanState::GetDetail()
+	VulkanView& VulkanState::View()
 	{
-		return *detail_;
+		return *view_;
 	}
 
 	std::unique_ptr<VulkanState::vbo> VulkanState::CreateVbo(void const* buffer_start, void const* buffer_end)
@@ -1476,13 +1476,13 @@ namespace idk::vkn
 
 	void VulkanState::BeginFrame()
 	{
-		detail_->SwapRenderState();
+		view_->SwapRenderState();
 		{
-			auto& rs2 = detail_->CurrRenderState();
+			auto& rs2 = view_->CurrRenderState();
 			auto& command_buffer2 = rs2.CommandBuffer();
 			auto& trf_buffer2 = rs2.TransferBuffer();
-			detail_->ResetMasterBuffer();
-			command_buffer2.reset(vk::CommandBufferResetFlags{}, detail_->Dispatcher());
+			view_->ResetMasterBuffer();
+			command_buffer2.reset(vk::CommandBufferResetFlags{}, view_->Dispatcher());
 		}
 
 		//vk::CommandBufferBeginInfo beginInfo
@@ -1496,8 +1496,8 @@ namespace idk::vkn
 
 	void VulkanState::EndFrame()
 	{
-		auto& rs = detail_->CurrRenderState();
-		auto& dispatcher = detail_->Dispatcher();
+		auto& rs = view_->CurrRenderState();
+		auto& dispatcher = view_->Dispatcher();
 		auto& command_buffer = rs.CommandBuffer();
 		auto& trf_buffer = rs.TransferBuffer();
 		vk::CommandBufferBeginInfo begin_info
@@ -1516,13 +1516,13 @@ namespace idk::vkn
 		};
 		//rs.transfer_buffer->begin(beginInfo);
 		rs.CommandBuffer().begin(begin_info);
-		rs.UpdateMasterBuffer(*detail_);
+		rs.UpdateMasterBuffer(*view_);
 		command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
 		//rs.transfer_buffer->end();
-		for (auto& dc : rs.draw_calls)
+		for (auto& dc : rs.DrawCalls())
 		{
-			dc.pipeline->Bind(command_buffer, *detail_);
-			dc.pipeline->BindUniformDescriptions(command_buffer, *detail_, dc.uniform_info);
+			dc.pipeline->Bind(command_buffer, *view_);
+			dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
 			for (auto& [first_binding, offset] : dc.vtx_binding)
 			{
 				command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
@@ -1572,7 +1572,7 @@ namespace idk::vkn
 		m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
 
 		{
-			auto& render_state = detail_->CurrRenderState();
+			auto& render_state = view_->CurrRenderState();
 			vk::CommandBuffer cmds[] =
 			{
 				//render_state.TransferBuffer(),
@@ -1637,7 +1637,7 @@ namespace idk::vkn
 		//instance.release();
 	}
 
-	VulkanState::VulkanState() : detail_{ std::make_unique<VulkanView>(*this) }
+	VulkanState::VulkanState() : view_{ std::make_unique<VulkanView>(*this) }
 	{
 	}
 

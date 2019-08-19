@@ -201,9 +201,10 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="RenderState.h" />
-    <ClInclude Include="VectorBuffer.h" />
+    <ClInclude Include="vector_buffer.h" />
     <ClInclude Include="GfxConverters.h" />
     <ClInclude Include="BufferHelpers.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
@@ -216,7 +217,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderState.cpp" />
-    <ClCompile Include="VectorBuffer.cpp" />
+    <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">

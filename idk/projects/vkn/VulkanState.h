@@ -15,14 +15,13 @@ namespace idk::vkn
 {
 	struct window_info
 	{
-		ivec2 size;
-		HWND wnd;
+		ivec2     size;
+		HWND      wnd;
 		HINSTANCE winstance;
 	};
 
 	class VulkanState;
 
-	struct debug_info;
 	struct QueueFamilyIndices
 	{
 		std::optional<uint32_t>      graphics_family;
@@ -60,15 +59,12 @@ namespace idk::vkn
 		struct vbo;//vertex buffer object
 		struct ubo;//uniform buffer object
 		struct pipeline;
-
 		struct pipeline_config;
 
 		using unique_vbo      = unique_ptr<vbo     >;
 		using unique_ubo      = unique_ptr<ubo     >;
 		using unique_pipeline = unique_ptr<pipeline>;
 
-		struct ValHandler;
-		void UpdateWindowSize(vec2 size);
 		struct ValHandler
 		{
 			virtual VkBool32 processMsg(
@@ -76,36 +72,92 @@ namespace idk::vkn
 				[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
 				[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData);
 		};
-		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-			VkDebugUtilsMessageTypeFlagsEXT messageType,
-			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-			void* pUserData);
+
+		VulkanState();
+		~VulkanState();
+
+		void UpdateWindowSize(vec2 size);
 		void CleanupSwapChain();
 		void RecreateSwapChain();
 
-		void InitVulkanEnvironment(window_info info);// [[maybe_unused]] WindowsProgram& wp, [[maybe_unused]] std::shared_ptr<WindowsWindow> window);
+		void InitVulkanEnvironment(window_info info);
 		void NextFrame();
 
 
 #pragma region ("Potentially main thing")
-		VulkanView& GetDetail();
+		VulkanView& View();
 		unique_vbo      CreateVbo(void const* buffer_start, void const* buffer_end);
 		unique_ubo      CreateUbo(void const* buffer_start, void const* buffer_end);
 		unique_pipeline CreatePipeline(pipeline_config const& config);
 		void Draw(unique_vbo const& vbo, unique_ubo const& uniforms, unique_pipeline const& pipeline);
 #pragma endregion
+
 		void BeginFrame();
 		void EndFrame();
 
 		void DrawFrame();
 		void OnResize();
 		void Cleanup();
-		VulkanState();
-		~VulkanState();
 
+		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+			VkDebugUtilsMessageTypeFlagsEXT messageType,
+			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+			void* pUserData);
 
 	private:
+		// type aliases
+		friend class VulkanView;
+		template<typename T>
+		using DynamicHandle = vk::UniqueHandle<T, vk::DispatchLoaderDynamic>;
+		struct PresentationSignals
+		{
+			vk::UniqueSemaphore image_available;
+			vk::UniqueSemaphore render_finished;
+			vk::UniqueFence     inflight_fence;
+		};
+
+		// variables
+
+		std::unique_ptr<VulkanView> view_;
+
+		// init info
+		vk::UniqueInstance               instance;
+		vk::PhysicalDevice               pdevice = {};
+		vk::UniqueDevice                 m_device;
+		QueueFamilyIndices               m_queue_family = {};
+		vk::Queue                        m_graphics_queue = {};
+		vk::Queue                        m_present_queue = {};
+		vk::UniqueDescriptorPool         m_descriptorpool;
+
+		vk::DispatchLoaderDefault        dispatcher = {};
+		vk::DispatchLoaderDynamic        dyn_dispatcher = {};
+		DynamicHandle<vk::DebugUtilsMessengerEXT> m_debug_messenger;
+
+
+		vk::UniqueCommandPool                m_commandpool;
+		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
+		std::vector<PresentationSignals>     m_pres_signals;
+		SwapChainInfo                        m_swapchain;
+
+		window_info m_window;
+		bool m_ScreenResized = false;
+		uint32_t WIDTH = 1280, HEIGHT = 720;
+		uint32_t current_frame = 0, max_frames_in_flight = 2;
+		vk::UniqueSurfaceKHR             m_surface;
+
+		vk::UniqueRenderPass                 m_renderpass;
+		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;
+		vk::UniquePipelineLayout             m_pipelinelayout;
+		vk::UniquePipeline                   m_pipeline;
+
+		std::vector<vk::UniqueDeviceMemory>  m_vertex_memories;
+		std::vector<vk::UniqueBuffer      >  m_vertex_buffers;
+		vk::UniqueDeviceMemory               m_ib_memory;
+		vk::UniqueBuffer                     m_index_buffer;
+
+
+
 		void createInstance();
 		void createSurface(HINSTANCE winstance, HWND wnd);
 		void pickPhysicalDevice();
@@ -115,7 +167,7 @@ namespace idk::vkn
 
 		void createImageViews();
 
-		vk::UniqueShaderModule createShaderModule(const std::string& code);
+		auto createShaderModule(const std::string& code) -> vk::UniqueShaderModule;
 
 		void createRenderPass();
 
@@ -136,107 +188,25 @@ namespace idk::vkn
 		void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 		void updateUniformBuffer(uint32_t image_index);
 
-		//Temporary, should move all the data/states into VulkanDetail
-		friend class VulkanView;
+		auto populateDebugMessengerCreateInfo(ValHandler* userData = nullptr) -> vk::DebugUtilsMessengerCreateInfoEXT;
 
-		vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo(ValHandler* userData = nullptr);
-
-		window_info m_window;
-		bool m_ScreenResized = false;
-		uint32_t WIDTH = 1280, HEIGHT = 720;
-		uint32_t current_frame = 0, max_frames_in_flight = 2;
-
-		std::unique_ptr<VulkanView> detail_;
-
-		vk::DispatchLoaderDefault        dispatcher = {};
-		vk::UniqueInstance               instance;
-		vk::DispatchLoaderDynamic        dyn_dispatcher = {};
-		vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>/*
-		vk::DebugUtilsMessengerEXT//*/
-			m_debug_messenger;
-		vk::UniqueSurfaceKHR             m_surface;
-		vk::PhysicalDevice               pdevice = {};
-		vk::UniqueDevice                 m_device;
-		QueueFamilyIndices m_queue_family = {};
-		vk::Queue          m_graphics_queue = {};
-		vk::Queue          m_present_queue = {};
-		//vk::Queue          m_transfer_queue = {};
-		SwapChainInfo                    m_swapchain;
-
-		vk::UniqueRenderPass                 m_renderpass;
-		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;
-		vk::UniquePipelineLayout             m_pipelinelayout;
-		vk::UniquePipeline                   m_pipeline;
-		vk::UniqueCommandPool                m_commandpool;
-		vk::UniqueDescriptorPool             m_descriptorpool;
-
-		//vk::UniqueDeviceMemory               m_device_memory;
-		//vk::UniqueBuffer                     m_vertex_buffer;
-		std::vector<vk::UniqueDeviceMemory>  m_vertex_memories;
-		std::vector<vk::UniqueBuffer      >  m_vertex_buffers;
-		vk::UniqueDeviceMemory               m_ib_memory;
-		vk::UniqueBuffer                     m_index_buffer;
-
-		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
-
-		struct PresentationSignals
-		{
-			vk::UniqueSemaphore image_available;
-			vk::UniqueSemaphore render_finished;
-			vk::UniqueFence     inflight_fence;
-		};
-
-		std::vector<PresentationSignals> m_pres_signals;
-
-		float deviceSuitability(vk::PhysicalDevice const& pd);
-		vk::PhysicalDevice SelectDevice(std::vector<vk::PhysicalDevice> const& devices);
-
+		auto deviceSuitability(vk::PhysicalDevice const& pd) -> float;
+		auto SelectDevice(std::vector<vk::PhysicalDevice> const& devices) -> vk::PhysicalDevice;
 
 		std::vector<const char*>             GetValidationLayers();
-		std::vector<const char*> GetExtensions(vk::Optional<const std::string> = nullptr);
-		std::vector<const char*> GetDeviceExtensions();
+		std::vector<const char*>             GetExtensions(vk::Optional<const std::string> = nullptr);
+		std::vector<const char*>             GetDeviceExtensions();
 		std::vector<vk::LayerProperties>     GetAllValidationLayers();
 		std::vector<vk::ExtensionProperties> GetAllExtensions(vk::Optional<const std::string> layer = nullptr);
 		template<typename T, typename F>
-		bool CheckProperties(std::vector<T>const& properties, std::vector<const char*> const& desired, const F& func);
-		vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
-		vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
+		bool CheckProperties (std::vector<T>const& properties, std::vector<const char*> const& desired, const F& func);
+		vk::SurfaceFormatKHR                 chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+		vk::PresentModeKHR                   chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
 
-		vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
+		vk::Extent2D                         chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
 
-		QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice const& device);
-		SwapChainSupportDetails querySwapChainSupport(const vk::PhysicalDevice& device);
-
-	public:
-		struct FrameInfo
-		{
-			vk::UniqueCommandPool* exposed_commandPool;
-			std::vector<vk::UniqueCommandBuffer>* exposed_commandBuffer;
-		};
-
-		struct WindowInfo
-		{
-		public:
-			uint32_t* width, * height;
-			SwapChainInfo* exposed_swapChainInfo;
-			SwapChainSupportDetails* exposed_swapChainSupportDetails;
-			vk::UniqueSurfaceKHR* exposed_uniqueSurface;
-			vk::UniqueRenderPass* exposed_renderpass;
-			bool clearEnable;
-			vk::ClearValue clearValue;
-
-			uint32_t frameIndex;
-			uint32_t imageCount;
-			uint32_t semaphoreIndex;
-
-			FrameInfo* exposed_FrameInfo;
-			std::vector<PresentationSignals>* exposed_signal;
-		};
-
-		vk::UniqueInstance& GetVknInstance();
-
-
-
+		QueueFamilyIndices                   findQueueFamilies(vk::PhysicalDevice const& device);
+		SwapChainSupportDetails              querySwapChainSupport(const vk::PhysicalDevice& device);
 	};
 }
 
