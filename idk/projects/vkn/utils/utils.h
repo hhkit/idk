@@ -2,12 +2,9 @@
 #pragma once
 #include <iosfwd>
 
-namespace idk::vkn {
+namespace idk::vkn::hlp {
 
-	namespace utl
-	{
-		std::ostream& cerr();
-	}
+	std::ostream& cerr();
 
 	std::string GetBinaryFile(const std::string& filepath);
 }

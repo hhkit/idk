@@ -30,16 +30,13 @@
     <ClInclude Include="BufferHelpers.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="utils\Log.h">
+    <ClInclude Include="utils\utils.h">
       <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="vkn.cpp">
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="GfxConverters.cpp">
@@ -63,7 +60,10 @@
     <ClCompile Include="BufferHelpers.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="utils\Log.cpp">
+    <ClCompile Include="VulkanState.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\utils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -82,11 +82,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vkn.inl">
-      <Filter>system</Filter>
-    </None>
     <None Include="BufferHelpers.inl">
       <Filter>utils</Filter>
+    </None>
+    <None Include="VulkanState.inl">
+      <Filter>system</Filter>
     </None>
   </ItemGroup>
 </Project>

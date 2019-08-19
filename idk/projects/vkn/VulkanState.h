@@ -8,15 +8,14 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
-#include <vkn/utils/Utils.h>
 #undef max
 #undef min
 
-namespace idk::vkn {
-
+namespace idk::vkn 
+{
 	struct window_info
 	{
-		idk::ivec2 size;
+		ivec2 size;
 		HWND wnd;
 		HINSTANCE winstance;
 	};
@@ -241,4 +240,4 @@ namespace idk::vkn {
 	};
 }
 
-#include <vkn/vkn.inl>
+#include <vkn/VulkanState.inl>

@@ -8,6 +8,7 @@
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
+#include <vkn/utils/utils.h>
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
 //Temporary, should move elsewhere
@@ -606,9 +607,9 @@ namespace idk::vkn
 		vk::InstanceCreateInfo instInfo(
 			vk::InstanceCreateFlags{},
 			&appInfo,
-			arr_count(layers),
+			hlp::arr_count(layers),
 			layers.data(),
-			arr_count(extensions),
+			hlp::arr_count(extensions),
 			extensions.data()
 		);
 		//auto debugInfo = populateDebugMessengerCreateInfo();
@@ -629,7 +630,7 @@ namespace idk::vkn
 		{
 			std::string msg = err.what();
 			msg.append("");
-			utl::cerr() << msg << std::endl;
+			hlp::cerr() << msg << std::endl;
 		}
 	}
 
@@ -673,9 +674,9 @@ namespace idk::vkn
 		auto valLayers = GetValidationLayers();
 
 		vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
-			arr_count(info), info.data(),
-			arr_count(valLayers), valLayers.data(),
-			arr_count(extensions), extensions.data(), &pdevFeatures
+			hlp::arr_count(info), info.data(),
+			hlp::arr_count(valLayers), valLayers.data(),
+			hlp::arr_count(extensions), extensions.data(), &pdevFeatures
 		);
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
@@ -705,7 +706,7 @@ namespace idk::vkn
 		//For ease of tutorial RN, exclusive is more efficient, but requires explicit transfers across queue families.
 		if (queueFamilyIndices[0] != queueFamilyIndices[1]) {
 			imageSharingMode = vk::SharingMode::eConcurrent;
-			queueFamilyIndexCount = arr_count(queueFamilyIndices);
+			queueFamilyIndexCount = hlp::arr_count(queueFamilyIndices);
 			pQueueFamilyIndices = queueFamilyIndices;
 		}
 		vk::SwapchainCreateInfoKHR createInfo
@@ -837,7 +838,7 @@ namespace idk::vkn
 		vk::DescriptorSetLayoutCreateInfo uboLayoutCreateInfo
 		{
 			 vk::DescriptorSetLayoutCreateFlags{}
-			,arr_count(uboLayoutBinding)
+			,hlp::arr_count(uboLayoutBinding)
 			,std::data(uboLayoutBinding)
 		};
 		m_descriptorsetlayout = m_device->createDescriptorSetLayoutUnique(uboLayoutCreateInfo, nullptr, dispatcher);
@@ -845,8 +846,8 @@ namespace idk::vkn
 
 	void VulkanState::createGraphicsPipeline()
 	{
-		auto vert = GetBinaryFile("shaders/vertex.vert.spv");
-		auto frag = GetBinaryFile("shaders/fragment.frag.spv");
+		auto vert = hlp::GetBinaryFile("shaders/vertex.vert.spv");
+		auto frag = hlp::GetBinaryFile("shaders/fragment.frag.spv");
 
 		auto fragModule = createShaderModule(frag);
 		auto vertModule = createShaderModule(vert);
@@ -883,9 +884,9 @@ namespace idk::vkn
 
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
 			vk::PipelineVertexInputStateCreateFlags{}
-			,arr_count(binding_desc)                         //vertexBindingDescriptionCount   
+			,hlp::arr_count(binding_desc)                         //vertexBindingDescriptionCount   
 			,std::data(binding_desc)                          //pVertexBindingDescriptions      
-			,arr_count(attr_desc)                            //vertexAttributeDescriptionCount 
+			,hlp::arr_count(attr_desc)                            //vertexAttributeDescriptionCount 
 			,std::data(attr_desc)                             //pVertexAttributeDescriptions
 		};
 		vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
@@ -998,7 +999,7 @@ namespace idk::vkn
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
 			vk::PipelineCreateFlags{}
-			,arr_count(stageCreateInfo),stageCreateInfo
+			,hlp::arr_count(stageCreateInfo),stageCreateInfo
 			,&vertexInputInfo
 			,&inputAssembly
 			,nullptr
@@ -1165,14 +1166,14 @@ namespace idk::vkn
 		{
 			{
 				vk::DescriptorType::eUniformBuffer,
-				arr_count(m_swapchain.images)
+				hlp::arr_count(m_swapchain.images)
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
 			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
-			,arr_count(m_swapchain.images)
-			,arr_count(pool_size)
+			,hlp::arr_count(m_swapchain.images)
+			,hlp::arr_count(pool_size)
 			,std::data(pool_size)
 		};
 		m_descriptorpool = m_device->createDescriptorPoolUnique(create_info, nullptr, dispatcher);
@@ -1184,7 +1185,7 @@ namespace idk::vkn
 		vk::DescriptorSetAllocateInfo allocInfo
 		{
 			*m_descriptorpool
-			,arr_count(layouts)
+			,hlp::arr_count(layouts)
 			,std::data(layouts)
 		};
 		m_swapchain.descriptor_sets = m_device->allocateDescriptorSets(allocInfo, dispatcher);
@@ -1208,7 +1209,7 @@ namespace idk::vkn
 				dset
 				,0
 				,0
-				,arr_count(bufferInfo)
+				,hlp::arr_count(bufferInfo)
 				,vk::DescriptorType::eUniformBuffer
 				,nullptr
 				,std::data(bufferInfo)
@@ -1264,7 +1265,7 @@ namespace idk::vkn
 			commandBuffer->bindVertexBuffers(0, vertex_buffers, offsets, dispatcher);
 			commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
 			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
-			commandBuffer->drawIndexed(arr_count(g_indices), 2, 0, 0, 0, dispatcher);
+			commandBuffer->drawIndexed(hlp::arr_count(g_indices), 2, 0, 0, 0, dispatcher);
 			commandBuffer->endRenderPass(dispatcher);
 			commandBuffer->end(dispatcher);
 			++i;
@@ -1344,8 +1345,8 @@ namespace idk::vkn
 		[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 	{
 		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-			utl::cerr() << "Err: ";
-		utl::cerr() << "validation layer: " << pCallbackData->pMessage << std::endl;
+			hlp::cerr() << "Err: ";
+		hlp::cerr() << "validation layer: " << pCallbackData->pMessage << std::endl;
 		return VK_FALSE;
 	}
 
@@ -1583,12 +1584,12 @@ namespace idk::vkn
 				1
 				,waitSemaphores
 				,waitStages
-				,arr_count(cmds),std::data(cmds)
+				,hlp::arr_count(cmds),std::data(cmds)
 				,1,readySemaphores
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-			if (m_graphics_queue.submit(arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
+			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
 				throw std::runtime_error("failed to submit draw command buffer!");
 		}
 

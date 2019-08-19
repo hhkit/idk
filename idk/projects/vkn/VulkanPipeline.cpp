@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VulkanPipeline.h"
 #include <vkn/GfxConverters.h>
+#include <vkn/BufferHelpers.h>
 namespace idk::vkn
 {
 	void VulkGfxPipeline::Create(config_t const& config, Vulkan_t& vulkan)
@@ -15,9 +16,9 @@ namespace idk::vkn
 
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
 			vk::PipelineVertexInputStateCreateFlags{}
-			,arr_count(binding_desc)                         //vertexBindingDescriptionCount   
+			,hlp::arr_count(binding_desc)                         //vertexBindingDescriptionCount   
 			,std::data(binding_desc)                          //pVertexBindingDescriptions      
-			,arr_count(attr_desc)                            //vertexAttributeDescriptionCount 
+			,hlp::arr_count(attr_desc)                            //vertexAttributeDescriptionCount 
 			,std::data(attr_desc)                             //pVertexAttributeDescriptions
 		};
 		auto inputAssembly = GetAssemblyInfo(config);
@@ -55,7 +56,7 @@ namespace idk::vkn
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
 			vk::PipelineCreateFlags{}
-			,arr_count(stageCreateInfo),std::data(stageCreateInfo)
+			,hlp::arr_count(stageCreateInfo),std::data(stageCreateInfo)
 			,&vertexInputInfo
 			,&inputAssembly
 			,nullptr
@@ -261,7 +262,7 @@ namespace idk::vkn
 				vk::PipelineColorBlendStateCreateFlags{}
 				,VK_FALSE                           //logicOpEnable   
 			,vk::LogicOp::eCopy	                //logicOp         
-			,arr_count(colorBlendAttachments)    //attachmentCount 
+			,hlp::arr_count(colorBlendAttachments)    //attachmentCount 
 			,std::data(colorBlendAttachments)     //pAttachments   
 			,{ 0.0,0.0f,0.0f,0.0f }
 			}, std::move(colorBlendAttachments));

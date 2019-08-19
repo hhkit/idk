@@ -92,8 +92,8 @@ namespace idk::vkn
 			//Bind vtx buffers
 			auto instance_buffer = detail.AddToMasterBuffer(std::data(buffer), hlp::buffer_size<uint32_t>(buffer));
 			auto vertex_buffer   = detail.AddToMasterBuffer(idk::s_cast<const void*>(std::data(shape_buffer_proxy)), hlp::buffer_size<uint32_t>(shape_buffer_proxy));
-			dc.instance_count = arr_count(buffer);
-			dc.vertex_count   = arr_count(shape_buffer);
+			dc.instance_count = hlp::arr_count(buffer);
+			dc.vertex_count   = hlp::arr_count(shape_buffer);
 			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, vertex_buffer);
 			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, instance_buffer);
 			//cmd_buffer.bindVertexBuffers(dbg_vert_layout::instance_binding, detail.CurrMasterVtxBuffer(), instance_buffer, detail.Dispatcher());
