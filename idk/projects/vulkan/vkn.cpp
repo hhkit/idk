@@ -439,7 +439,7 @@ namespace idk {
 	{
 		std::vector<const char*> layers
 		{
-			"VK_LAYER_KHRONOS_validation"
+			//"VK_LAYER_KHRONOS_validation"
 		};
 		return layers;
 	}
@@ -609,13 +609,15 @@ namespace idk {
 			ArrCount(extensions),
 			extensions.data()
 		);
-		auto debugInfo = populateDebugMessengerCreateInfo();
-		instInfo.pNext = &debugInfo;
+		//auto debugInfo = populateDebugMessengerCreateInfo();
+		//instInfo.pNext = &debugInfo;
+
+		instInfo.pNext = nullptr;
 		try
 		{
 			*instance = vk::createInstance(instInfo, nullptr, dispatcher);
 			dyn_dispatcher.init(*instance, vkGetInstanceProcAddr);
-			m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
+			//m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
 			//if (result != vk::Result::eSuccess)
 			//{
 			//	std::cout << "FAILED TO CREATE" << std::endl;
