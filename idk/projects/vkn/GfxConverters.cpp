@@ -1,14 +1,12 @@
 #include "pch.h"
-#include "vgfx_converters.h"
+#include "GfxConverters.h"
 #undef max
 #undef min
 
-namespace idk
+namespace idk::vkn::hlp
 {
-	namespace vgfx
-	{
 
-		vk::VertexInputRate vgfx::MapVtxRate(VertexRate rate)
+		vk::VertexInputRate MapVtxRate(VertexRate rate)
 		{
 			static const idk::hash_table<VertexRate, vk::VertexInputRate> map
 			{
@@ -18,7 +16,7 @@ namespace idk
 			return map.find(rate)->second;
 		}
 
-		vk::Format vgfx::MapVtxFormat(AttribFormat rate)
+		vk::Format MapVtxFormat(AttribFormat rate)
 		{
 			static const idk::hash_table<AttribFormat, vk::Format> map
 			{
@@ -29,7 +27,7 @@ namespace idk
 			return map.find(rate)->second;
 		}
 
-		vk::VertexInputBindingDescription vgfx::ConvertVtxBinding(const buffer_desc::binding_info& binding)
+		vk::VertexInputBindingDescription ConvertVtxBinding(const buffer_desc::binding_info& binding)
 		{
 			return vk::VertexInputBindingDescription
 			{
@@ -50,7 +48,7 @@ namespace idk
 			};
 		}
 
-		std::pair<idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription>> vgfx::ConvertVtxDesc(const vector<buffer_desc>& descs)
+		std::pair<idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription>> ConvertVtxDesc(const vector<buffer_desc>& descs)
 		{
 			std::pair < idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription >>
 				result;
@@ -83,6 +81,4 @@ namespace idk
 			}
 			return result;
 		}
-
-	}
 }

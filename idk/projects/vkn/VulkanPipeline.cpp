@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VulkanPipeline.h"
-#include <vgfx_converters.h>
+#include <vkn/GfxConverters.h>
 namespace idk
 {
 	void VulkGfxPipeline::Create(config_t const& config, Vulkan_t& vulkan)
@@ -288,7 +288,7 @@ namespace idk
 		};
 	}
 
-	vk::UniqueRenderPass& VulkGfxPipeline::GetRenderpass(const config_t& config, vgfx::VulkanDetail& vulkan)
+	vk::UniqueRenderPass& VulkGfxPipeline::GetRenderpass(const config_t& config, vgfx::VulkanView& vulkan)
 	{
 		return vulkan.Renderpass();
 	}

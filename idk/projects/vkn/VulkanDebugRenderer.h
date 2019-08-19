@@ -9,7 +9,7 @@ namespace idk
 	{
 	public:
 		VulkanDebugRenderer(VulkanState& vulkan);
-		void Init( const idk::pipeline_config& pipeline_config, const idk::uniform_info& uniform_info) override;
+		void Init( const pipeline_config& pipeline_config, const uniform_info& uniform_info) override;
 		void Render() override;
 		~VulkanDebugRenderer() override;
 	private:

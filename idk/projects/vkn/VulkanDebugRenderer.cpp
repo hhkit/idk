@@ -28,13 +28,13 @@ namespace idk
 
 	struct VulkanDebugRenderer::pimpl
 	{
-		vgfx::VulkanDetail& detail;
+		vgfx::VulkanView& detail;
 		idk::VulkGfxPipeline pipeline{};
 		idk::VulkGfxPipeline::uniform_info uniforms{};
 		idk::hash_table<DbgShape, vbo> shape_buffers{};
 		idk::hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
 
-		pimpl(vgfx::VulkanDetail& deets) :detail{ deets } {};
+		pimpl(vgfx::VulkanView& deets) :detail{ deets } {};
 	};
 
 	

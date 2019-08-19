@@ -15,7 +15,7 @@ namespace idk::vgfx
 	{
 		buffer.resize(0);
 	}
-	void RenderState::MasterBuffer::UpdateBuffer(VulkanDetail& detail, RenderState& state)
+	void RenderState::MasterBuffer::UpdateBuffer(VulkanView& detail, RenderState& state)
 	{
 		host_buffer.Resize(detail.PDevice(), *detail.Device(), buffer.size());
 		auto sz = std::size(buffer);

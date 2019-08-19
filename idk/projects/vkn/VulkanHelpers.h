@@ -1,10 +1,8 @@
 #pragma once
 #include<vulkan/vulkan.hpp>
 
-namespace idk
+namespace idk::hlp
 {
-	namespace vhlp
-	{
 		uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 
 		template<typename Dispatcher>
@@ -56,7 +54,6 @@ namespace idk
 		template<typename RT, typename T >
 		RT buffer_size(T* begin, T* end);
 		///////
-	}
 }
 
-#include <VulkanHelpers.inl>
+#include "VulkanHelpers.inl"

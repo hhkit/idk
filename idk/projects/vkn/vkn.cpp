@@ -5,15 +5,15 @@
 #include <gfx/buffer_desc.h>
 
 #include <vkn/VulkanState.h>
-#include <vkn/VulkanDetail.h>
+#include <vkn/VulkanView.h>
 #include <vkn/VulkanHelpers.h>
 #include <vkn/RenderState.h>
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
 //Temporary, should move elsewhere
 
-namespace idk {
-	using namespace vhlp;
+namespace idk::vkn
+{
 
 	namespace glm
 	{
@@ -1067,7 +1067,7 @@ namespace idk {
 
 	void VulkanState::createVertexBuffers()
 	{
-		vk::DeviceSize bufferSize = buffer_size(g_vertices);
+		vk::DeviceSize bufferSize = hlp::buffer_size(g_vertices);
 
 		auto [stagingBuffer, stagingBufferMemory] = CreateAllocBindBuffer(
 			pdevice, *m_device, bufferSize,
@@ -1440,7 +1440,7 @@ namespace idk {
 		current_frame = (current_frame + 1) % max_frames_in_flight;
 	}
 
-	vgfx::VulkanDetail& VulkanState::GetDetail()
+	vgfx::VulkanView& VulkanState::GetDetail()
 	{
 		return *detail_;
 	}
@@ -1638,7 +1638,7 @@ namespace idk {
 		//instance.release();
 	}
 
-	VulkanState::VulkanState() : detail_{ std::make_unique<vgfx::VulkanDetail>(*this) }
+	VulkanState::VulkanState() : detail_{ std::make_unique<vgfx::VulkanView>(*this) }
 	{
 	}
 

@@ -8,17 +8,25 @@
     <ClInclude Include="utils\Utils.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanDetail.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="VulkanHelpers.h" />
-    <ClInclude Include="vgfx_converters.h" />
-    <ClInclude Include="RenderState.h" />
-    <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="VulkanState.h">
       <Filter>system</Filter>
     </ClInclude>
+    <ClInclude Include="GfxConverters.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorBuffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderState.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDebugRenderer.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -28,16 +36,24 @@
     <ClCompile Include="utils\Utils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanDetail.cpp" />
-    <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="VulkanHelpers.cpp" />
-    <ClCompile Include="vgfx_converters.cpp" />
     <ClCompile Include="VulkanPipeline.cpp" />
-    <ClCompile Include="VectorBuffer.cpp" />
-    <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="vkn.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="GfxConverters.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VectorBuffer.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderState.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDebugRenderer.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -45,6 +61,12 @@
     </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="buffer">
+      <UniqueIdentifier>{93364066-fc1f-4a19-8df1-752682cc0020}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render">
+      <UniqueIdentifier>{388fea0d-f4b9-4998-af46-7eb7b5cc96ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

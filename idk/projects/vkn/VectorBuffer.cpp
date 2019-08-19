@@ -2,7 +2,7 @@
 #include "VectorBuffer.h"
 #include <vkn/VulkanHelpers.h>
 
-namespace idk::vgfx
+namespace idk::vkn::hlp
 {
 	VectorBuffer::VectorBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 	{

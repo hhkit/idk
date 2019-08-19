@@ -1,14 +1,14 @@
 #pragma once
 #include <vkn/VulkanState.h>
-#include <vkn/VulkanDetail.h>
+#include <vkn/VulkanView.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/uniform_info.h>
-namespace idk
+namespace idk::vkn
 {
 
 struct VulkGfxPipeline
 {
-	using Vulkan_t = vgfx::VulkanDetail;
+	using Vulkan_t = VulkanView;
 	vk::UniquePipelineLayout m_pipelinelayout{};
 	vk::UniquePipeline       m_pipeline{};
 	using config_t     = pipeline_config;
@@ -37,7 +37,7 @@ private:
 	std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
 	vector<vk::DynamicState> GetDynamicStates(const config_t& config)const;
 	vk::PipelineLayoutCreateInfo GetLayoutInfo(const config_t& config)const;
-	vk::UniqueRenderPass& GetRenderpass(const config_t& config, vgfx::VulkanDetail& vulkan);
+	vk::UniqueRenderPass& GetRenderpass(const config_t& config, vgfx::VulkanView& vulkan);
 
 	//Vulkan_t is necessary cause it needs to get the descriptors from the pool
 	vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform);

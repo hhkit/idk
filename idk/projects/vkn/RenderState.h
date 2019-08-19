@@ -16,7 +16,7 @@ namespace idk::vgfx
 		idk::VulkGfxPipeline* pipeline;
 		idk::uniform_info     uniform_info;
 	};
-	class VulkanDetail;
+	class VulkanView;
 	struct RenderState
 	{
 		struct MasterBuffer
@@ -27,7 +27,7 @@ namespace idk::vgfx
 
 			uint32_t Add(const void* data, size_t len);
 			void Reset();
-			void UpdateBuffer(VulkanDetail& detail, RenderState& state);
+			void UpdateBuffer(VulkanView& detail, RenderState& state);
 		};
 		MasterBuffer            master_buffer{};
 		vk::RenderPass          render_pass{};
@@ -35,7 +35,7 @@ namespace idk::vgfx
 		vk::UniqueCommandBuffer	transfer_buffer{};
 		idk::vector<DrawCall>   draw_calls{};
 
-		void UpdateMasterBuffer(VulkanDetail& detail) { MasterBuffer().UpdateBuffer(detail, *this); }
+		void UpdateMasterBuffer(VulkanView& detail) { MasterBuffer().UpdateBuffer(detail, *this); }
 		void AddDrawCall(DrawCall call);
 		MasterBuffer& MasterBuffer() { return master_buffer; }
 		vk::Buffer& Buffer() { return master_buffer.host_buffer.Buffer(); }

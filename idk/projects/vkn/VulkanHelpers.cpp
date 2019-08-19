@@ -1,8 +1,8 @@
 #include "pch.h"
-#include <
-#include "VulkanDebugRenderer.h"VulkanHelpers.h>
+#include <vkn/VulkanHelpers.h>
+#include "VulkanDebugRenderer.h"
 #include <optional>
-namespace  idk::vhlp
+namespace  idk::hlp
 {
 uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -204,7 +204,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="framework.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="VectorBuffer.h" />
-    <ClInclude Include="vgfx_converters.h" />
+    <ClInclude Include="GfxConverters.h" />
     <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="pch.h" />
@@ -212,12 +212,12 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
-    <ClInclude Include="VulkanDetail.h" />
+    <ClInclude Include="VulkanView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="VectorBuffer.cpp" />
-    <ClCompile Include="vgfx_converters.cpp" />
+    <ClCompile Include="GfxConverters.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -227,7 +227,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp" />
     <ClCompile Include="vkn.cpp" />
-    <ClCompile Include="VulkanDetail.cpp" />
+    <ClCompile Include="VulkanView.cpp" />
     <ClCompile Include="VulkanHelpers.cpp" />
     <ClCompile Include="VulkanPipeline.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
