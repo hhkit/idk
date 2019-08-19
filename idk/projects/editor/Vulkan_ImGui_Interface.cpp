@@ -4,7 +4,7 @@
 //#include <vulkan/VulkanWin32GraphicsSystem.h>
 
 //Imgui
-#include <vulkan/Vkn.h>
+#include <vkn/Vkn.h>
 #include <imgui/imgui.h>
 //Helper header from imgui for vulkan implementation
 #include <editorstatic/imgui/Imgui_impl_vulkan.h>

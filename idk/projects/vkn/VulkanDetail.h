@@ -1,6 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
-#include <vulkan/vkn.h>
+#include <vkn/vkn.h>
 namespace idk {
 	namespace vgfx
 	{

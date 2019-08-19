@@ -1,5 +1,5 @@
 #pragma once
-#include <vulkan/vkn.h>
+#include <vkn/vkn.h>
 
 namespace idk {
 	template<typename T, typename F>

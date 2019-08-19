@@ -8,7 +8,7 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
-#include <vulkan/utils/Utils.h>
+#include <vkn/utils/Utils.h>
 #undef max
 #undef min
 
@@ -244,4 +244,4 @@ namespace idk {
 	};
 }
 
-#include <vulkan/vkn.inl>
+#include <vkn/vkn.inl>

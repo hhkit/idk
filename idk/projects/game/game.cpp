@@ -3,8 +3,8 @@
 #include <crtdbg.h>
 
 #include <core/Core.h>
-#include <vulkan/VulkanWin32GraphicsSystem.h>
-#include <vulkan/VulkanDebugRenderer.h>
+#include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/VulkanDebugRenderer.h>
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 

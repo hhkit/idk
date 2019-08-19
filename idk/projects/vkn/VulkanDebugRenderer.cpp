@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VulkanDebugRenderer.h"
-#include <vulkan/vkn.h>
+#include <vkn/vkn.h>
 #include <VulkanPipeline.h>
 #include <vulkan/vulkan.hpp>
 #include <VulkanDetail.h>

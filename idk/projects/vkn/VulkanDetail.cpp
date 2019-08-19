@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VulkanDetail.h"
-#include <vulkan/vkn.h>
+#include <vkn/vkn.h>
 #include <VulkanHelpers.h>
 #include <VectorBuffer.h>
 #include <RenderState.h>

@@ -21,7 +21,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01 Editor Static Dep", "pro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "00 Engine Static Dep", "projects\enginestatic\enginestatic.vcxproj", "{075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "21 Vulkan Module", "projects\vulkan\vulkan.vcxproj", "{7F6FB710-D130-4AAF-B855-D32E3FE96D1D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "21 Vulkan Module", "projects\vkn\vulkan.vcxproj", "{7F6FB710-D130-4AAF-B855-D32E3FE96D1D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1} = {05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}
 		{F75C42DC-B24A-4529-97F4-86A7009E6833} = {F75C42DC-B24A-4529-97F4-86A7009E6833}
