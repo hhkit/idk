@@ -208,7 +208,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="BufferHelpers.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="utils\Utils.h" />
+    <ClInclude Include="utils\Log.h" />
     <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
@@ -225,7 +225,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="utils\Utils.cpp" />
+    <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="vkn.cpp" />
     <ClCompile Include="VulkanView.cpp" />
     <ClCompile Include="BufferHelpers.cpp" />
@@ -233,7 +233,6 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="utils\Utils.inl" />
     <None Include="vkn.inl" />
     <None Include="BufferHelpers.inl" />
   </ItemGroup>

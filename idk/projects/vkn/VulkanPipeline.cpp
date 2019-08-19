@@ -15,10 +15,10 @@ namespace idk::vkn
 
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
 			vk::PipelineVertexInputStateCreateFlags{}
-			,ArrCount(binding_desc)                         //vertexBindingDescriptionCount   
-			,ArrData(binding_desc)                          //pVertexBindingDescriptions      
-			,ArrCount(attr_desc)                            //vertexAttributeDescriptionCount 
-			,ArrData(attr_desc)                             //pVertexAttributeDescriptions
+			,arr_count(binding_desc)                         //vertexBindingDescriptionCount   
+			,std::data(binding_desc)                          //pVertexBindingDescriptions      
+			,arr_count(attr_desc)                            //vertexAttributeDescriptionCount 
+			,std::data(attr_desc)                             //pVertexAttributeDescriptions
 		};
 		auto inputAssembly = GetAssemblyInfo(config);
 
@@ -47,7 +47,7 @@ namespace idk::vkn
 		//{
 		//	vk::PipelineDynamicStateCreateFlags{}
 		//	,ArrCount(dynamicStates)            //dynamicStateCount 
-		//	,ArrData (dynamicStates)//pDynamicStates    
+		//	,std::data (dynamicStates)//pDynamicStates    
 		//};
 		//For uniforms
 		auto pipelineLayoutInfo = GetLayoutInfo(config);;
@@ -55,7 +55,7 @@ namespace idk::vkn
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
 			vk::PipelineCreateFlags{}
-			,ArrCount(stageCreateInfo),ArrData(stageCreateInfo)
+			,arr_count(stageCreateInfo),std::data(stageCreateInfo)
 			,&vertexInputInfo
 			,&inputAssembly
 			,nullptr
@@ -261,8 +261,8 @@ namespace idk::vkn
 				vk::PipelineColorBlendStateCreateFlags{}
 				,VK_FALSE                           //logicOpEnable   
 			,vk::LogicOp::eCopy	                //logicOp         
-			,ArrCount(colorBlendAttachments)    //attachmentCount 
-			,ArrData(colorBlendAttachments)     //pAttachments   
+			,arr_count(colorBlendAttachments)    //attachmentCount 
+			,std::data(colorBlendAttachments)     //pAttachments   
 			,{ 0.0,0.0f,0.0f,0.0f }
 			}, std::move(colorBlendAttachments));
 	}

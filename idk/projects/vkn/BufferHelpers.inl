@@ -108,7 +108,7 @@ namespace idk::vkn::hlp
 	template<typename RT = size_t, typename T>
 	RT buffer_size(T const& vertices)
 	{
-		return static_cast<RT>(sizeof(*ArrData(vertices)) * ArrCount(vertices));
+		return static_cast<RT>(sizeof(*std::data(vertices)) * arr_count(vertices));
 	}
 
 	template<typename RT = size_t, typename T = int>

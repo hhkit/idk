@@ -5,9 +5,6 @@
     <ClInclude Include="VulkanWin32GraphicsSystem.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="utils\Utils.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="framework.h" />
     <ClInclude Include="VulkanState.h">
       <Filter>system</Filter>
@@ -33,14 +30,14 @@
     <ClInclude Include="BufferHelpers.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="utils\Log.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp">
       <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\Utils.cpp">
-      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="vkn.cpp">
       <Filter>system</Filter>
@@ -66,6 +63,9 @@
     <ClCompile Include="BufferHelpers.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="utils\Log.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -82,9 +82,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="utils\Utils.inl">
-      <Filter>utils</Filter>
-    </None>
     <None Include="vkn.inl">
       <Filter>system</Filter>
     </None>

@@ -56,10 +56,10 @@ namespace idk::vkn
 		num_bytes_t    len = 0;
 		template<typename T>
 		buffer_data(const T& container)
-			: buffer{ s_cast<const void*>(ArrData(container)) }, len{ buffer_size(container) }{}
+			: buffer{ s_cast<const void*>(std::data(container)) }, len{ buffer_size(container) }{}
 		template<typename T>
 		buffer_data(const T& container, num_obj_t offset, num_obj_t length)
-			: buffer{ s_cast<const void*>(ArrData(container) + offset) }, len{ vhlp::buffer_size(ArrData(container) + offset,ArrData(container) + length) }{}
+			: buffer{ s_cast<const void*>(std::data(container) + offset) }, len{ vhlp::buffer_size(std::data(container) + offset,std::data(container) + length) }{}
 
 	};
 	enum ShaderStage
@@ -606,9 +606,9 @@ namespace idk::vkn
 		vk::InstanceCreateInfo instInfo(
 			vk::InstanceCreateFlags{},
 			&appInfo,
-			ArrCount(layers),
+			arr_count(layers),
 			layers.data(),
-			ArrCount(extensions),
+			arr_count(extensions),
 			extensions.data()
 		);
 		//auto debugInfo = populateDebugMessengerCreateInfo();
@@ -673,9 +673,9 @@ namespace idk::vkn
 		auto valLayers = GetValidationLayers();
 
 		vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
-			ArrCount(info), info.data(),
-			ArrCount(valLayers), valLayers.data(),
-			ArrCount(extensions), extensions.data(), &pdevFeatures
+			arr_count(info), info.data(),
+			arr_count(valLayers), valLayers.data(),
+			arr_count(extensions), extensions.data(), &pdevFeatures
 		);
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
@@ -705,7 +705,7 @@ namespace idk::vkn
 		//For ease of tutorial RN, exclusive is more efficient, but requires explicit transfers across queue families.
 		if (queueFamilyIndices[0] != queueFamilyIndices[1]) {
 			imageSharingMode = vk::SharingMode::eConcurrent;
-			queueFamilyIndexCount = ArrCount(queueFamilyIndices);
+			queueFamilyIndexCount = arr_count(queueFamilyIndices);
 			pQueueFamilyIndices = queueFamilyIndices;
 		}
 		vk::SwapchainCreateInfoKHR createInfo
@@ -837,8 +837,8 @@ namespace idk::vkn
 		vk::DescriptorSetLayoutCreateInfo uboLayoutCreateInfo
 		{
 			 vk::DescriptorSetLayoutCreateFlags{}
-			,ArrCount(uboLayoutBinding)
-			,ArrData(uboLayoutBinding)
+			,arr_count(uboLayoutBinding)
+			,std::data(uboLayoutBinding)
 		};
 		m_descriptorsetlayout = m_device->createDescriptorSetLayoutUnique(uboLayoutCreateInfo, nullptr, dispatcher);
 	}
@@ -883,10 +883,10 @@ namespace idk::vkn
 
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
 			vk::PipelineVertexInputStateCreateFlags{}
-			,ArrCount(binding_desc)                         //vertexBindingDescriptionCount   
-			,ArrData(binding_desc)                          //pVertexBindingDescriptions      
-			,ArrCount(attr_desc)                            //vertexAttributeDescriptionCount 
-			,ArrData(attr_desc)                             //pVertexAttributeDescriptions
+			,arr_count(binding_desc)                         //vertexBindingDescriptionCount   
+			,std::data(binding_desc)                          //pVertexBindingDescriptions      
+			,arr_count(attr_desc)                            //vertexAttributeDescriptionCount 
+			,std::data(attr_desc)                             //pVertexAttributeDescriptions
 		};
 		vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
 			vk::PipelineInputAssemblyStateCreateFlags{}
@@ -998,7 +998,7 @@ namespace idk::vkn
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
 			vk::PipelineCreateFlags{}
-			,ArrCount(stageCreateInfo),stageCreateInfo
+			,arr_count(stageCreateInfo),stageCreateInfo
 			,&vertexInputInfo
 			,&inputAssembly
 			,nullptr
@@ -1074,7 +1074,7 @@ namespace idk::vkn
 			dispatcher);
 
 		{
-			hlp::MapMemory(*m_device, *stagingBufferMemory, 0, ArrData(g_vertices), bufferSize, dispatcher);
+			hlp::MapMemory(*m_device, *stagingBufferMemory, 0, std::data(g_vertices), bufferSize, dispatcher);
 		}
 
 
@@ -1105,7 +1105,7 @@ namespace idk::vkn
 		//	,buffer_size(vertices)
 		//};
 		//auto handle = m_device->mapMemory(*m_device_memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
-		//memcpy_s(handle, mmr.size, ArrData(vertices), buffer_size(vertices));
+		//memcpy_s(handle, mmr.size, std::data(vertices), buffer_size(vertices));
 		//std::vector<decltype(mmr)> memory_ranges
 		//{
 		//	mmr
@@ -1127,7 +1127,7 @@ namespace idk::vkn
 			vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible,
 			dispatcher
 		);
-		hlp::MapMemory(*m_device, *stagingMemory, 0, ArrData(g_indices), bufferSize, dispatcher);
+		hlp::MapMemory(*m_device, *stagingMemory, 0, std::data(g_indices), bufferSize, dispatcher);
 
 		auto [index_buffer, ib_memory] = hlp::CreateAllocBindBuffer(
 			pdevice, *m_device, bufferSize,
@@ -1165,15 +1165,15 @@ namespace idk::vkn
 		{
 			{
 				vk::DescriptorType::eUniformBuffer,
-				ArrCount(m_swapchain.images)
+				arr_count(m_swapchain.images)
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
 			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
-			,ArrCount(m_swapchain.images)
-			,ArrCount(pool_size)
-			,ArrData(pool_size)
+			,arr_count(m_swapchain.images)
+			,arr_count(pool_size)
+			,std::data(pool_size)
 		};
 		m_descriptorpool = m_device->createDescriptorPoolUnique(create_info, nullptr, dispatcher);
 	}
@@ -1184,8 +1184,8 @@ namespace idk::vkn
 		vk::DescriptorSetAllocateInfo allocInfo
 		{
 			*m_descriptorpool
-			,ArrCount(layouts)
-			,ArrData(layouts)
+			,arr_count(layouts)
+			,std::data(layouts)
 		};
 		m_swapchain.descriptor_sets = m_device->allocateDescriptorSets(allocInfo, dispatcher);
 		int i = 0;
@@ -1208,10 +1208,10 @@ namespace idk::vkn
 				dset
 				,0
 				,0
-				,ArrCount(bufferInfo)
+				,arr_count(bufferInfo)
 				,vk::DescriptorType::eUniformBuffer
 				,nullptr
-				,ArrData(bufferInfo)
+				,std::data(bufferInfo)
 				,nullptr
 			};
 			m_device->updateDescriptorSets(descriptorWrite, nullptr, dispatcher);
@@ -1264,7 +1264,7 @@ namespace idk::vkn
 			commandBuffer->bindVertexBuffers(0, vertex_buffers, offsets, dispatcher);
 			commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
 			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
-			commandBuffer->drawIndexed(ArrCount(g_indices), 2, 0, 0, 0, dispatcher);
+			commandBuffer->drawIndexed(arr_count(g_indices), 2, 0, 0, 0, dispatcher);
 			commandBuffer->endRenderPass(dispatcher);
 			commandBuffer->end(dispatcher);
 			++i;
@@ -1457,7 +1457,7 @@ namespace idk::vkn
 			,hlp::buffer_size(g_vertices)
 		};
 		auto handle = m_device->mapMemory(*device_memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
-		memcpy_s(handle, mmr.size, ArrData(g_vertices), hlp::buffer_size(g_vertices));
+		memcpy_s(handle, mmr.size, std::data(g_vertices), hlp::buffer_size(g_vertices));
 		std::vector<decltype(mmr)> memory_ranges
 		{
 			mmr
@@ -1583,12 +1583,12 @@ namespace idk::vkn
 				1
 				,waitSemaphores
 				,waitStages
-				,ArrCount(cmds),ArrData(cmds)
+				,arr_count(cmds),std::data(cmds)
 				,1,readySemaphores
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-			if (m_graphics_queue.submit(ArrCount(frame_submit), ArrData(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
+			if (m_graphics_queue.submit(arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
 				throw std::runtime_error("failed to submit draw command buffer!");
 		}
 
