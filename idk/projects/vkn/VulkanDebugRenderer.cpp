@@ -3,12 +3,12 @@
 
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanPipeline.h>
-#include <vkn/VulkanDetail.h>
-#include <vkn/VulkanHelpers.h>
+#include <vkn/VulkanView.h>
+#include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
 
 #include "VulkanDebugRenderer.h"
-namespace idk
+namespace idk::vkn
 {
 	struct vbo
 	{
@@ -20,7 +20,7 @@ namespace idk
 		void SetHandle(uint32_t handle) { offset = handle; }
 		vk::ArrayProxy<const unsigned char> ToProxy()const
 		{
-			return vhlp::make_array_proxy(vhlp::buffer_size<uint32_t>(vertices),
+			return hlp::make_array_proxy(hlp::buffer_size<uint32_t>(vertices),
 				idk::r_cast<const unsigned char*>(std::data(vertices))
 			);
 		}
@@ -28,13 +28,13 @@ namespace idk
 
 	struct VulkanDebugRenderer::pimpl
 	{
-		vgfx::VulkanView& detail;
-		idk::VulkGfxPipeline pipeline{};
-		idk::VulkGfxPipeline::uniform_info uniforms{};
-		idk::hash_table<DbgShape, vbo> shape_buffers{};
-		idk::hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
+		VulkanView& detail;
+		VulkGfxPipeline pipeline{};
+		VulkGfxPipeline::uniform_info uniforms{};
+		hash_table<DbgShape, vbo> shape_buffers{};
+		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
 
-		pimpl(vgfx::VulkanView& deets) :detail{ deets } {};
+		pimpl(VulkanView& deets) :detail{ deets } {};
 	};
 
 	
@@ -74,13 +74,13 @@ namespace idk
 		};
 	}
 
-	void idk::VulkanDebugRenderer::Render()
+	void VulkanDebugRenderer::Render()
 	{
 		auto& cmd_buffer = *impl->detail.CurrCommandbuffer();
 		auto& detail   = impl->detail  ;
 		auto& pipeline = impl->pipeline;
 		auto& uniforms = impl->uniforms;
-		vgfx::DrawCall dc;
+		DrawCall dc;
 		dc.pipeline = &pipeline;
 		dc.uniform_info = uniforms;
 		//pipeline.Bind(cmd_buffer, detail);
@@ -90,8 +90,8 @@ namespace idk
 			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
 			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 			//Bind vtx buffers
-			auto instance_buffer = detail.AddToMasterBuffer(ArrData(buffer), vhlp::buffer_size<uint32_t>(buffer));
-			auto vertex_buffer   = detail.AddToMasterBuffer(idk::s_cast<const void*>(ArrData(shape_buffer_proxy)), vhlp::buffer_size<uint32_t>(shape_buffer_proxy));
+			auto instance_buffer = detail.AddToMasterBuffer(ArrData(buffer), hlp::buffer_size<uint32_t>(buffer));
+			auto vertex_buffer   = detail.AddToMasterBuffer(idk::s_cast<const void*>(ArrData(shape_buffer_proxy)), hlp::buffer_size<uint32_t>(shape_buffer_proxy));
 			dc.instance_count = ArrCount(buffer);
 			dc.vertex_count   = ArrCount(shape_buffer);
 			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, vertex_buffer);

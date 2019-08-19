@@ -8,9 +8,7 @@
     <ClInclude Include="utils\Utils.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanState.h">
       <Filter>system</Filter>
     </ClInclude>
@@ -26,7 +24,15 @@
     <ClInclude Include="VulkanDebugRenderer.h">
       <Filter>render</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanView.h" />
+    <ClInclude Include="VulkanView.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanPipeline.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferHelpers.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -36,8 +42,6 @@
     <ClCompile Include="utils\Utils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanHelpers.cpp" />
-    <ClCompile Include="VulkanPipeline.cpp" />
     <ClCompile Include="vkn.cpp">
       <Filter>system</Filter>
     </ClCompile>
@@ -53,7 +57,15 @@
     <ClCompile Include="VulkanDebugRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanView.cpp" />
+    <ClCompile Include="VulkanView.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanPipeline.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferHelpers.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -73,9 +85,11 @@
     <None Include="utils\Utils.inl">
       <Filter>utils</Filter>
     </None>
-    <None Include="VulkanHelpers.inl" />
     <None Include="vkn.inl">
       <Filter>system</Filter>
+    </None>
+    <None Include="BufferHelpers.inl">
+      <Filter>utils</Filter>
     </None>
   </ItemGroup>
 </Project>

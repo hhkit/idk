@@ -205,7 +205,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="GfxConverters.h" />
-    <ClInclude Include="VulkanHelpers.h" />
+    <ClInclude Include="BufferHelpers.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Utils.h" />
@@ -228,14 +228,14 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="utils\Utils.cpp" />
     <ClCompile Include="vkn.cpp" />
     <ClCompile Include="VulkanView.cpp" />
-    <ClCompile Include="VulkanHelpers.cpp" />
+    <ClCompile Include="BufferHelpers.cpp" />
     <ClCompile Include="VulkanPipeline.cpp" />
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="utils\Utils.inl" />
     <None Include="vkn.inl" />
-    <None Include="VulkanHelpers.inl" />
+    <None Include="BufferHelpers.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

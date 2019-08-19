@@ -37,7 +37,7 @@ private:
 	std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
 	vector<vk::DynamicState> GetDynamicStates(const config_t& config)const;
 	vk::PipelineLayoutCreateInfo GetLayoutInfo(const config_t& config)const;
-	vk::UniqueRenderPass& GetRenderpass(const config_t& config, vgfx::VulkanView& vulkan);
+	vk::UniqueRenderPass& GetRenderpass(const config_t& config, VulkanView& vulkan);
 
 	//Vulkan_t is necessary cause it needs to get the descriptors from the pool
 	vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform);

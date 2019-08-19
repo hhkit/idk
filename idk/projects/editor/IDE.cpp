@@ -25,6 +25,6 @@ namespace idk
 	void IDE::EditorDraw()
 	{
 		// call imgui draw,
-		Core::GetSystem<VulkanWin32GraphicsSystem>(); // get command buffer from vulkan
+		Core::GetSystem<vkn::VulkanWin32GraphicsSystem>(); // get command buffer from vulkan
 	}
 }

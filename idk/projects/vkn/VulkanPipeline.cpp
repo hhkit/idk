@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanPipeline.h"
 #include <vkn/GfxConverters.h>
-namespace idk
+namespace idk::vkn
 {
 	void VulkGfxPipeline::Create(config_t const& config, Vulkan_t& vulkan)
 	{
@@ -115,13 +115,13 @@ namespace idk
 	}
 	vector<vk::VertexInputAttributeDescription> VulkGfxPipeline::GetVtxAttribInfo(const config_t& config) const
 	{
-		[[maybe_unused]] auto [binding, attrib] = idk::vgfx::ConvertVtxDesc(config.buffer_descriptions);
+		[[maybe_unused]] auto [binding, attrib] = hlp::ConvertVtxDesc(config.buffer_descriptions);
 
 		return attrib;
 	}
 	vector<vk::VertexInputBindingDescription> VulkGfxPipeline::GetVtxBindingInfo(const config_t& config) const
 	{
-		[[maybe_unused]] auto [binding, attrib] = idk::vgfx::ConvertVtxDesc(config.buffer_descriptions);
+		[[maybe_unused]] auto [binding, attrib] = hlp::ConvertVtxDesc(config.buffer_descriptions);
 		return binding;
 	}
 	std::pair<vector<vk::PipelineShaderStageCreateInfo>, vector<vk::UniqueShaderModule>> VulkGfxPipeline::GetShaderStageInfo(const config_t& config, Vulkan_t& vulkan) const
@@ -288,7 +288,7 @@ namespace idk
 		};
 	}
 
-	vk::UniqueRenderPass& VulkGfxPipeline::GetRenderpass(const config_t& config, vgfx::VulkanView& vulkan)
+	vk::UniqueRenderPass& VulkGfxPipeline::GetRenderpass(const config_t& config, VulkanView& vulkan)
 	{
 		return vulkan.Renderpass();
 	}

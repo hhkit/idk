@@ -90,7 +90,7 @@ namespace idk::vkn {
 
 
 #pragma region ("Potentially main thing")
-		vgfx::VulkanView& GetDetail();
+		VulkanView& GetDetail();
 		unique_vbo      CreateVbo(void const* buffer_start, void const* buffer_end);
 		unique_ubo      CreateUbo(void const* buffer_start, void const* buffer_end);
 		unique_pipeline CreatePipeline(pipeline_config const& config);
@@ -138,7 +138,7 @@ namespace idk::vkn {
 		void updateUniformBuffer(uint32_t image_index);
 
 		//Temporary, should move all the data/states into VulkanDetail
-		friend vgfx::VulkanView;
+		friend class VulkanView;
 
 		vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo(ValHandler* userData = nullptr);
 
@@ -147,7 +147,7 @@ namespace idk::vkn {
 		uint32_t WIDTH = 1280, HEIGHT = 720;
 		uint32_t current_frame = 0, max_frames_in_flight = 2;
 
-		std::unique_ptr<idk::vgfx::VulkanView> detail_;
+		std::unique_ptr<VulkanView> detail_;
 
 		vk::DispatchLoaderDefault        dispatcher = {};
 		vk::UniqueInstance               instance;

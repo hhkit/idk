@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
 
-namespace idk::hlp
+namespace idk::vkn::hlp
 {
 	template<typename Dispatcher>
 	vk::UniqueBuffer CreateBuffer(vk::Device device, vk::DeviceSize size, vk::BufferUsageFlags usage, Dispatcher const& dispatcher)
@@ -105,7 +105,7 @@ namespace idk::hlp
 		return vk::ArrayProxy<const T>{sz, arr};
 	}
 
-	template<typename RT = size_t, typename T = std::vector<int>>
+	template<typename RT = size_t, typename T>
 	RT buffer_size(T const& vertices)
 	{
 		return static_cast<RT>(sizeof(*ArrData(vertices)) * ArrCount(vertices));

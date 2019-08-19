@@ -7,11 +7,13 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
 
-
 namespace idk
 {
-	class VulkanState;
 	class Windows;
+}
+namespace idk::vkn
+{
+	class VulkanState;
 
 	class VulkanWin32GraphicsSystem
 		: public GraphicsSystem

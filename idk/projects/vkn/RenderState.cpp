@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "RenderState.h"
-#include <vkn/VulkanDetail.h>
-#include <vkn/VulkanHelpers.h>
-namespace idk::vgfx
+#include <vkn/VulkanView.h>
+#include <vkn/BufferHelpers.h>
+namespace idk::vkn
 {
 	uint32_t RenderState::MasterBuffer::Add(const void* data, size_t len)
 	{
@@ -20,7 +20,7 @@ namespace idk::vgfx
 		host_buffer.Resize(detail.PDevice(), *detail.Device(), buffer.size());
 		auto sz = std::size(buffer);
 		auto dat = std::data(buffer);
-		host_buffer.Update(0, vhlp::make_array_proxy(idk::s_cast<uint32_t>(sz), dat), state.TransferBuffer());
+		host_buffer.Update(0, hlp::make_array_proxy(idk::s_cast<uint32_t>(sz), dat), state.TransferBuffer());
 	}
 
 	void RenderState::AddDrawCall(DrawCall call)

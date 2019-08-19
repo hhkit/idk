@@ -6,7 +6,7 @@
 
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
-#include <vkn/VulkanHelpers.h>
+#include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
@@ -126,7 +126,7 @@ namespace idk::vkn
 		template<typename T>
 		void Update(vk::DeviceSize offset, vk::ArrayProxy<T> arr, vk::CommandBuffer& buffer)
 		{
-			Update(offset, buffer_size(arr), buffer, reinterpret_cast<unsigned char const*>(arr.data()));
+			Update(offset, hlp::buffer_size(arr), buffer, reinterpret_cast<unsigned char const*>(arr.data()));
 		}
 		void Update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& buffer, unsigned char const* data);
 		vk::Buffer       Buffer() const { return *buffer; }
@@ -1063,30 +1063,28 @@ namespace idk::vkn
 		}
 	};
 
-	using namespace vhlp;
-
 	void VulkanState::createVertexBuffers()
 	{
 		vk::DeviceSize bufferSize = hlp::buffer_size(g_vertices);
 
-		auto [stagingBuffer, stagingBufferMemory] = CreateAllocBindBuffer(
+		auto [stagingBuffer, stagingBufferMemory] = hlp::CreateAllocBindBuffer(
 			pdevice, *m_device, bufferSize,
 			vk::BufferUsageFlagBits::eTransferSrc,
 			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
 			dispatcher);
 
 		{
-			MapMemory(*m_device, *stagingBufferMemory, 0, ArrData(g_vertices), bufferSize, dispatcher);
+			hlp::MapMemory(*m_device, *stagingBufferMemory, 0, ArrData(g_vertices), bufferSize, dispatcher);
 		}
 
 
-		auto [vertex_buffer, device_memory] = CreateAllocBindBuffer(
-			pdevice, *m_device, static_cast<vk::DeviceSize>(buffer_size(g_vertices)),
+		auto [vertex_buffer, device_memory] = hlp::CreateAllocBindBuffer(
+			pdevice, *m_device, static_cast<vk::DeviceSize>(hlp::buffer_size(g_vertices)),
 			vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
 			vk::MemoryPropertyFlagBits::eDeviceLocal,
 			dispatcher);
 
-		dbg_vertex_buffer = std::make_unique<DbgVertexBuffer>(pdevice, *m_device, buffer_size(g_vinstanced));
+		dbg_vertex_buffer = std::make_unique<DbgVertexBuffer>(pdevice, *m_device, hlp::buffer_size(g_vinstanced));
 		//auto [instance_buffer, instance_memory] = CreateAllocBindBuffer(
 		//	pdevice, *m_device, static_cast<vk::DeviceSize>(buffer_size(g_vertices)),
 		//	vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
@@ -1121,17 +1119,17 @@ namespace idk::vkn
 
 	void VulkanState::createIndexBuffers()
 	{
-		vk::DeviceSize bufferSize = buffer_size(g_indices);
+		vk::DeviceSize bufferSize = hlp::buffer_size(g_indices);
 
-		auto [stagingBuffer, stagingMemory] = CreateAllocBindBuffer(
+		auto [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(
 			pdevice, *m_device, bufferSize,
 			vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eIndexBuffer,
 			vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible,
 			dispatcher
 		);
-		MapMemory(*m_device, *stagingMemory, 0, ArrData(g_indices), bufferSize, dispatcher);
+		hlp::MapMemory(*m_device, *stagingMemory, 0, ArrData(g_indices), bufferSize, dispatcher);
 
-		auto [index_buffer, ib_memory] = CreateAllocBindBuffer(
+		auto [index_buffer, ib_memory] = hlp::CreateAllocBindBuffer(
 			pdevice, *m_device, bufferSize,
 			vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
 			vk::MemoryPropertyFlagBits::eDeviceLocal,
@@ -1151,7 +1149,7 @@ namespace idk::vkn
 
 		for (auto& uniform : m_swapchain.uniform_buffers)
 		{
-			auto pair = CreateAllocBindBuffer(
+			auto pair = hlp::CreateAllocBindBuffer(
 				pdevice, *m_device, bufferSize,
 				vk::BufferUsageFlagBits::eUniformBuffer,
 				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
@@ -1265,7 +1263,7 @@ namespace idk::vkn
 			};
 			commandBuffer->bindVertexBuffers(0, vertex_buffers, offsets, dispatcher);
 			commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
-			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
+			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
 			commandBuffer->drawIndexed(ArrCount(g_indices), 2, 0, 0, 0, dispatcher);
 			commandBuffer->endRenderPass(dispatcher);
 			commandBuffer->end(dispatcher);
@@ -1314,7 +1312,7 @@ namespace idk::vkn
 		};
 		auto commandBuffer = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
 		auto& cmd_buffer = *commandBuffer[0];
-		CopyBuffer(cmd_buffer, m_graphics_queue, srcBuffer, dstBuffer, size);
+		hlp::CopyBuffer(cmd_buffer, m_graphics_queue, srcBuffer, dstBuffer, size);
 	}
 	void VulkanState::updateUniformBuffer(uint32_t image_index)
 	{
@@ -1324,7 +1322,7 @@ namespace idk::vkn
 		ubo.projection = glm::perspective(idk::rad(45.0f), m_swapchain.extent.width / (float)m_swapchain.extent.height, 0.1f, 10.0f);
 		//OpenGL's Y Clip coords is inverted compared to vulkan.
 		ubo.projection[1][1] *= -1;
-		MapMemory(*m_device, *m_swapchain.uniform_buffers[image_index].second, 0, &ubo, static_cast<vk::DeviceSize>(sizeof(ubo)), dispatcher);
+		hlp::MapMemory(*m_device, *m_swapchain.uniform_buffers[image_index].second, 0, &ubo, static_cast<vk::DeviceSize>(sizeof(ubo)), dispatcher);
 	}
 	vk::DebugUtilsMessengerCreateInfoEXT VulkanState::populateDebugMessengerCreateInfo(ValHandler* userData) {
 		vk::DebugUtilsMessageSeverityFlagsEXT severity_flags;
@@ -1440,7 +1438,7 @@ namespace idk::vkn
 		current_frame = (current_frame + 1) % max_frames_in_flight;
 	}
 
-	vgfx::VulkanView& VulkanState::GetDetail()
+	VulkanView& VulkanState::GetDetail()
 	{
 		return *detail_;
 	}
@@ -1449,17 +1447,17 @@ namespace idk::vkn
 	{
 		uint8_t const* bstart = static_cast<uint8_t const*>(buffer_start);
 		uint8_t const* bend = static_cast<uint8_t const*>(buffer_end);
-		auto [vertex_buffer, device_memory] = CreateAllocBindVertexBuffer(pdevice, *m_device, bstart, bend, dispatcher);
+		auto [vertex_buffer, device_memory] = hlp::CreateAllocBindVertexBuffer(pdevice, *m_device, bstart, bend, dispatcher);
 		//m_vertex_buffer = std::move(vertex_buffer);
 		//m_device_memory = std::move(device_memory);
 		vk::MappedMemoryRange mmr
 		{
 			 *device_memory
 			,0
-			,buffer_size(g_vertices)
+			,hlp::buffer_size(g_vertices)
 		};
 		auto handle = m_device->mapMemory(*device_memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
-		memcpy_s(handle, mmr.size, ArrData(g_vertices), buffer_size(g_vertices));
+		memcpy_s(handle, mmr.size, ArrData(g_vertices), hlp::buffer_size(g_vertices));
 		std::vector<decltype(mmr)> memory_ranges
 		{
 			mmr
@@ -1638,7 +1636,7 @@ namespace idk::vkn
 		//instance.release();
 	}
 
-	VulkanState::VulkanState() : detail_{ std::make_unique<vgfx::VulkanView>(*this) }
+	VulkanState::VulkanState() : detail_{ std::make_unique<VulkanView>(*this) }
 	{
 	}
 
@@ -1665,7 +1663,7 @@ namespace idk::vkn
 		{
 			capacity = grow_size(num_bytes);
 
-			auto [buf, mem] = CreateAllocBindBuffer(
+			auto [buf, mem] = hlp::CreateAllocBindBuffer(
 				pdevice, device, num_bytes,
 				vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
 				vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible,
@@ -1677,6 +1675,6 @@ namespace idk::vkn
 	}
 	void DbgVertexBuffer::Update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& cmd_buffer, unsigned char const* data)
 	{
-		cmd_buffer.updateBuffer(*buffer, offset, make_array_proxy(static_cast<uint32_t>(len), data), vk::DispatchLoaderDefault{});
+		cmd_buffer.updateBuffer(*buffer, offset, hlp::make_array_proxy(static_cast<uint32_t>(len), data), vk::DispatchLoaderDefault{});
 	}
 }

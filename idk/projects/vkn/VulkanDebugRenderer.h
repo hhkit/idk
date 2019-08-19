@@ -1,6 +1,6 @@
 #pragma once
 #include <gfx/DebugRenderer.h>
-namespace idk
+namespace idk::vkn
 {
 	class VulkanState;
 

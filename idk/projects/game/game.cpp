@@ -21,8 +21,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 	auto c = Core{};
 	auto& wind = c.AddSystem<Windows>(hInstance, nCmdShow);
-	auto& gfx_sys = c.AddSystem<idk::VulkanWin32GraphicsSystem>(wind);
-	c.AddSystem<idk::VulkanDebugRenderer>(gfx_sys.Instance());
+	auto& gfx_sys = c.AddSystem<vkn::VulkanWin32GraphicsSystem>(wind);
+	c.AddSystem<vkn::VulkanDebugRenderer>(gfx_sys.Instance());
 	c.Run();
 	
 	return c.GetSystem<Windows>().GetReturnVal();

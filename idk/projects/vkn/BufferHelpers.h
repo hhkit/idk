@@ -1,7 +1,7 @@
 #pragma once
 #include<vulkan/vulkan.hpp>
 
-namespace idk::hlp
+namespace idk::vkn::hlp
 {
 		uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 
@@ -56,4 +56,4 @@ namespace idk::hlp
 		///////
 }
 
-#include "VulkanHelpers.inl"
+#include "BufferHelpers.inl"

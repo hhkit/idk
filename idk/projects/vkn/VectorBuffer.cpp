@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VectorBuffer.h"
-#include <vkn/VulkanHelpers.h>
+#include <vkn/BufferHelpers.h>
 
 namespace idk::vkn::hlp
 {
@@ -34,7 +34,7 @@ namespace idk::vkn::hlp
 			//}
 			//else
 			//{
-				auto [buf, mem] = vhlp::CreateAllocBindBuffer(
+				auto [buf, mem] = hlp::CreateAllocBindBuffer(
 					pdevice, device, capacity,
 					vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
 					vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible,
@@ -47,7 +47,7 @@ namespace idk::vkn::hlp
 	}
 	void VectorBuffer::Update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& cmd_buffer, unsigned char const* data)
 	{
-		cmd_buffer.updateBuffer(*buffer, offset, vhlp::make_array_proxy(static_cast<uint32_t>(len), data), vk::DispatchLoaderDefault{});
+		cmd_buffer.updateBuffer(*buffer, offset, hlp::make_array_proxy(static_cast<uint32_t>(len), data), vk::DispatchLoaderDefault{});
 	}
 
 }

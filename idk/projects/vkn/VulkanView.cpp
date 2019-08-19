@@ -1,23 +1,21 @@
 #include "pch.h"
 #include "VulkanView.h"
 #include <vkn/VulkanState.h>
-#include <vkn/VulkanHelpers.h>
+#include <vkn/BufferHelpers.h>
 #include <vkn/VectorBuffer.h>
 #include <vkn/RenderState.h>
 
-namespace idk
+namespace idk::vkn
 {
-	namespace vgfx
-	{
 		struct VulkanView::pimpl
 		{
-			vgfx::RenderState& PrevRenderState() { return render_state_[(index_ + max() - 1) % max()]; }
-			vgfx::RenderState& CurrentRenderState() { return render_state_[index_]; }
-			vector<vgfx::RenderState>& RenderStates() { return render_state_; };
+			RenderState& PrevRenderState() { return render_state_[(index_ + max() - 1) % max()]; }
+			RenderState& CurrentRenderState() { return render_state_[index_]; }
+			vector<RenderState>& RenderStates() { return render_state_; };
 			void SwapRenderState() { index_ = s_cast<uint32_t>((index_ + 1) % max()); }
 		private:
 			uint32_t max()const { return s_cast<uint32_t>(render_state_.size()); }
-			vector<vgfx::RenderState> render_state_{};
+			vector<RenderState> render_state_{};
 			uint32_t index_{};
 		};
 		vk::DispatchLoaderDefault& VulkanView::Dispatcher() const { return vulkan().dispatcher; }
@@ -84,10 +82,10 @@ namespace idk
 			return Device()->createShaderModuleUnique(mod);
 		}
 
-		VulkanView::VulkanView(idk::VulkanState& vulkan) :vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } {}
+		VulkanView::VulkanView(VulkanState& vulkan) :vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } {}
 		VulkanView::VulkanView(VulkanView&&) noexcept = default;
 		VulkanView& VulkanView::operator=(VulkanView&&) noexcept = default;
-		idk::VulkanState& VulkanView::vulkan()const
+		VulkanState& VulkanView::vulkan()const
 		{
 			return *vulkan_;
 		}
@@ -97,4 +95,3 @@ namespace idk
 			impl_.reset();
 		}
 	}
-}

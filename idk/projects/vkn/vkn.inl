@@ -1,7 +1,8 @@
 #pragma once
 #include <vkn/VulkanState.h>
 
-namespace idk {
+namespace idk::vkn
+{
 	template<typename T, typename F>
 	bool VulkanState::CheckProperties(std::vector<T> const& properties, std::vector<const char*> const& desired, const F& func)
 	{
