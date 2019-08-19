@@ -10,9 +10,11 @@
 #include "pch.h" // gtest.h
 #include "FMOD/core/fmod.hpp" //FMOD Core
 #include "FMOD/core/fmod_errors.h" //ErrorString
-#include <core/Core.h>
 #include <audio/AudioSystem.h>	
+#include <audio/AudioClip.h>	
+#include <core/Core.h>
 #include <iostream>	
+#include <filesystem> //Using this until our filesystem is up	
 
 
 TEST(Audio, AudioSystemClassTest)
@@ -48,13 +50,62 @@ TEST(Audio, AudioSystemClassTest)
 
 	}
 
+	
+	std::cout << "Creating Test audio in SFX Channel:\n";
+	std::string path = std::filesystem::current_path().string();
+	std::cout << "Current Working Directory: " << path;
+	std::cout << "\n";
 
-	try {
-		test.Run();
+	path.append("\\SampleSounds\\25secClosing_IZHA.wav"); 
+
+
+	RscHandle<AudioClip> audioPtr = Core::GetResourceManager().Create<AudioClip>(path);
+
+	if (!audioPtr) { //Check if null is given
+		std::cout << "Audio path not found, skipping test...\n";
+
+		try {
+			test.Shutdown();
+		}
+		catch (EXCEPTION_AudioSystem i) {
+			std::cout << i.exceptionDetails << std::endl;
+			EXPECT_TRUE(false);
+		}
+
+		return;
+
 	}
-	catch (EXCEPTION_AudioSystem i) {
-		std::cout << i.exceptionDetails << std::endl;
-		EXPECT_TRUE(false);
+	audioPtr->Play();
+	time_point timeStartTest = Clock::now();
+	seconds elapsed = time_point::clock::now() - timeStartTest;
+
+	bool testCase1 = false;
+	bool testCase2 = false;
+
+
+
+
+
+	while (elapsed.count() < 30) { //Once 3 seconds have passed, exit
+		try {
+			test.Update();
+			elapsed = time_point::clock::now() - timeStartTest;
+			if (elapsed.count() > 5 && !testCase1) {
+				std::cout << "Setting SFX group to volume 0.5\n";
+				test.SetChannel_SFX_Volume(0.5f);
+				testCase1 = true;
+			}
+			if (elapsed.count() > 8 && !testCase2) {
+				std::cout << "Setting Master group to volume 0.5\n";
+				test.SetChannel_MASTER_Volume(0.5f);
+				testCase2 = true;
+			}
+		}
+		catch (EXCEPTION_AudioSystem i) {
+			std::cout << i.exceptionDetails << std::endl;
+			EXPECT_TRUE(false);
+			break;
+		}
 	}
 	try {
 		test.Shutdown();
