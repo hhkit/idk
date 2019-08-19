@@ -287,6 +287,10 @@
     <ClInclude Include="file\FileHandle.h">
       <Filter>file</Filter>
     </ClInclude>
+    <ClInclude Include="audio\AudioListener.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="gfx\VertexDescriptor.h" />
   </ItemGroup>
   <ItemGroup>
@@ -387,6 +391,8 @@
     <ClCompile Include="file\FileHandle.cpp">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="audio\AudioSource.cpp" />
+    <ClCompile Include="audio\AudioListener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
