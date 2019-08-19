@@ -7,7 +7,7 @@
 
 namespace idk
 {
-	enum FileSystem_ErrorCode
+	enum class FileSystem_ErrorCode
 	{
 		FILESYSTEM_OK,
 		FILESYSTEM_OTHER,
@@ -35,36 +35,29 @@ namespace idk
 		void Shutdown() override;
 
 		// Getters
-		string_view GetRootDir() const { return root_dir; }
-		string_view GetBaseDir() const { return base_dir; }
-		string_view GetResourceDir() const { return resource_dir; }
-		string		GetFullPath(string_view mountPath) const;
+		
+		FileHandle	GetFile		(string_view mountPath) const;
+		string		GetFullPath	(string_view mountPath) const;
 
-		bool		Exists(string_view fullPath) const;
+		string_view GetSolutionDir	()	const { return _sol_dir; }
+		string_view GetExeDir		()	const { return _exe_dir; }
+		string_view GetAssetDir		()	const { return _asset_dir; }
+
+		bool		Exists(string_view mountPath) const;
 		bool		ExistsFull(string_view fullPath) const;
 
 		// Setters
-		void		SetRootDir(string_view dir) { root_dir = dir; }
-		void		SetBaseDir(string_view dir) { base_dir = dir; }
-		void		SetResourceDir(string_view dir) { resource_dir = dir; }
+		void		SetAssetDir(string_view dir) { _asset_dir = dir; }
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
-		FileSystem_ErrorCode Mount(string_view fullPath, string_view mountPath, bool watch = true);
-		FileSystem_ErrorCode Dismount(const string& mountPath);
+		void Mount(string_view fullPath, string_view mountPath, bool watch = true);
+		void Dismount(const string& mountPath);
 
 		// Open/closing files
-		FileHandle OpenRead(string_view mountPath, bool binary_stream = false);
-		FileHandle OpenAppend(string_view mountPath, bool binary_stream = false);
-		FileHandle OpenWrite(string_view mountPath, bool binary_stream = false);
-
-		FileHandle OpenReadC(string_view mountPath);
-		FileHandle OpenAppendC(string_view mountPath);
-		FileHandle OpenWriteC(string_view mountPath);
-		 
-		FileSystem_ErrorCode Close(FileHandle& handle) const;
+		FStreamWrapper Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream = false);
 
 		// This functions affect the actual files outside of the system.
-		FileSystem_ErrorCode Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
+		int Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
 		FileSystem_ErrorCode DelFile(string_view mountPath);
 		
 		FileSystem_ErrorCode GetLastError() const;
@@ -75,21 +68,24 @@ namespace idk
 		friend class	file_system_detail::DirectoryWatcher;
 		friend struct	file_system_detail::fs_mount;
 		friend struct	FileHandle;
+		friend struct	FileHandleC;
+		friend class	FStreamWrapper;
 	private:
-		hash_table<string, size_t> mount_table;
-		vector<file_system_detail::fs_mount> mounts;
-		vector<file_system_detail::fs_file_handle> file_handles;
-		vector<file_system_detail::fs_key> open_files;
+		hash_table<string, size_t>					_mount_table;
+		vector<file_system_detail::fs_mount>		_mounts;
+		vector<file_system_detail::fs_file_handle>	_file_handles;
+		// vector<file_system_detail::fs_key>			_open_files;
 
-		string root_dir;
-		string base_dir;
-		string resource_dir;
-		file_system_detail::fs_file empty_file;
-		file_system_detail::fs_dir empty_dir;
+		string _sol_dir;
+		string _exe_dir;
+		string _asset_dir;
 
-		FileSystem_ErrorCode last_error;
+		file_system_detail::fs_file		_empty_file;
+		file_system_detail::fs_dir		_empty_dir;
 
-		file_system_detail::DirectoryWatcher directory_watcher;
+		FileSystem_ErrorCode _last_error;
+
+		file_system_detail::DirectoryWatcher _directory_watcher;
 
 		// initializtion
 		void initMount(size_t index, string_view fullPath, string_view mountPath, bool watch);
@@ -97,31 +93,32 @@ namespace idk
 		void initDir(file_system_detail::fs_dir& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
 		void recurseSubDir(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
 
-		// File watching
-		
 		// Helper Getters
-		file_system_detail::fs_file& getFile(file_system_detail::fs_key& node);
-		file_system_detail::fs_dir& getDir(file_system_detail::fs_key& node);
+		file_system_detail::fs_file&		getFile(file_system_detail::fs_key& node);
+		file_system_detail::fs_dir&			getDir(file_system_detail::fs_key& node);
 
-		const file_system_detail::fs_file& getFile(const file_system_detail::fs_key& node) const;
-		const file_system_detail::fs_dir& getDir(const file_system_detail::fs_key& node) const;
+		const file_system_detail::fs_file&	getFile(const file_system_detail::fs_key& node) const;
+		const file_system_detail::fs_dir&	getDir(const file_system_detail::fs_key& node) const;
 
-		file_system_detail::fs_key getFile(string_view mountPath);
-		file_system_detail::fs_key getDir(string_view mountPath);
+		file_system_detail::fs_key			getFile(string_view mountPath) const;
+		file_system_detail::fs_key			getDir(string_view mountPath) const;
 
 
 		// Other auxiliary helpers
-		size_t addFileHandle(const file_system_detail::fs_key& handle);
-		file_system_detail::fs_key RequestFileSlot(file_system_detail::fs_mount& mount, int8_t depth);
-		vector<string> tokenizePath(string_view fullPath) const;
-		bool validateKey(const file_system_detail::fs_key& key) const;
-		int validateMountPath(string_view mountPath) const;
-		int validateFileMountPath(string_view mountPath) const;
-		int validateDirMountPath(string_view mountPath) const;
-		bool validateHandle(const FileHandle& handle) const;
+		size_t							addFileHandle			(const file_system_detail::fs_key& handle);
+		file_system_detail::fs_key		requestFileSlot			(file_system_detail::fs_mount& mount, int8_t depth);
+		file_system_detail::fs_file&	createAndGetFile		(string_view mountPath);
 
-		void dumpMount(const file_system_detail::fs_mount& mount) const;
-		void dumpDir(const file_system_detail::fs_dir& mount, string prefix) const;
+		vector<string>					tokenizePath			(string_view fullPath)					const;
+		bool							validateKey				(const file_system_detail::fs_key& key) const;
+		int								validateMountPath		(string_view mountPath)					const;
+		int								validateFileMountPath	(string_view mountPath)					const;
+		int								validateDirMountPath	(string_view mountPath)					const;
+		bool							validateHandle			(const FileHandle& handle)				const;
+		// bool							validateHandle			(const FileHandleC& handle)				const;
+
+		void							dumpMount				(const file_system_detail::fs_mount& mount)					const;
+		void							dumpDir					(const file_system_detail::fs_dir& mount, string prefix)	const;
 
 		string getMountToken(const string& mountPath) const;
 		

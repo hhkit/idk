@@ -1,47 +1,59 @@
 #pragma once
 
-
-#include <iostream>
 #include <fstream>
 
 namespace idk
 {
-	// Opaque type. Do not touch internals
+	class FStreamWrapper : public std::fstream
+	{
+	public:
+		FStreamWrapper(FStreamWrapper&& rhs);
+		FStreamWrapper& operator=(FStreamWrapper&& rhs);
+		~FStreamWrapper();
+
+		friend class FileSystem;
+		friend struct FileHandle;
+	private:
+		FStreamWrapper() = default;
+
+		int64_t _handle_index = -1;
+	};
+
+	class FILEWrapper
+	{
+	public:
+		FILE* data() { return _fp; }
+
+		friend struct FileHandle;
+	private:
+		FILE* _fp = nullptr;
+	};
+
+	enum class FS_PERMISSIONS
+	{
+		READ,
+		WRITE,
+		APPEND
+	};
+
+
 	struct FileHandle
 	{
-		FileHandle() = default;
-		FileHandle(const FileHandle& rhs) = delete;
-		FileHandle(FileHandle&& rhs);
-		~FileHandle();
-
-		FileHandle& operator=(const FileHandle& rhs) = delete;
-		FileHandle& operator=(FileHandle&& rhs);
-		explicit	operator bool();
-
-		string_view		GetMountPath() const;
 		string_view		GetFullPath() const;
-		string_view		GetParentMountPath() const;
+		string_view		GetMountPath() const;
+		
 		string_view		GetParentFullPath() const;
+		string_view		GetParentMountPath() const;
 
-		std::fstream&	GetStream() { return stream; }
-		FILE*			GetFilePtr() { return fp; }
+		bool			CanOpen() const;
+		FStreamWrapper	Open(FS_PERMISSIONS perms, bool binary_stream = false);
+		FILEWrapper		OpenC(FS_PERMISSIONS perm, bool binary_stream);
 
-		// Returns the number of bytes 
-		int Read(void* buffer, size_t len);
-		// len here is the size of the buffer
-		int GetLine(void* buffer, size_t len, const char delim = '\n');
-		// len is number of bytes to write
-		int Write(const void* data, size_t len);
-		void Flush();
+		explicit	operator bool();
 
 		friend class FileSystem;
 	private:
-		FILE* fp = nullptr;
-		std::fstream stream;
-
-		int64_t handle_index = -1;
-		int64_t ref_count = -1;
-
-		// FileSystem_ErrorCode error;
+		int64_t _handle_index	= -1;
+		int64_t _ref_count		= -1;
 	};
 }
