@@ -1476,6 +1476,7 @@ void Vulkan::BeginFrame()
 		auto& command_buffer2 = rs2.CommandBuffer();
 		auto& trf_buffer2 = rs2.TransferBuffer();
 		detail_->ResetMasterBuffer();
+		rs2.draw_calls.resize(0);
 		command_buffer2.reset(vk::CommandBufferResetFlags{}, detail_->Dispatcher());
 	}
 
@@ -1499,7 +1500,7 @@ void Vulkan::EndFrame()
 		vk::CommandBufferUsageFlags{}
 		,nullptr
 	};
-	vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
+	vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
 	vk::RenderPassBeginInfo renderPassInfo
 	{
 		rs.RenderPass()
@@ -1517,6 +1518,9 @@ void Vulkan::EndFrame()
 	{
 		dc.pipeline->Bind(command_buffer, *detail_);
 		dc.pipeline->BindUniformDescriptions(command_buffer, *detail_,dc.uniform_info);
+		vec4(&tmp)[5] = *idk::r_cast<vec4(*)[5]>(rs.master_buffer.buffer.data());
+		vec3(&tmp2)[6] = *idk::r_cast<vec3(*)[6]>(rs.master_buffer.buffer.data()+80);
+
 		for (auto& [first_binding, offset] : dc.vtx_binding)
 		{
 			command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
@@ -1566,6 +1570,7 @@ void Vulkan::DrawFrame()
 	m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
 	
 	{
+		EndFrame();
 		auto& render_state = detail_->CurrRenderState();
 		vk::CommandBuffer cmds[] =
 		{
