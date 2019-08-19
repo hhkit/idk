@@ -17,15 +17,15 @@ namespace idk::file_system_detail
 		void ResolveAllChanges();
 
 	private:
-		void CheckFilesCreated(file_system_detail::fs_dir& dir);
-		void CheckFilesDeleted(file_system_detail::fs_dir& dir);
-		void CheckFilesRenamed(file_system_detail::fs_dir& dir);
-		void CheckFilesWrittenTo(file_system_detail::fs_dir& dir);
-
-		fs_file& addInternalFile(string_view full_path);
-
 		vector<fs_key> changed_files;
 		vector<fs_key> changed_dirs;
+
+		void checkFilesCreated(file_system_detail::fs_dir& dir);
+		void checkFilesDeleted(file_system_detail::fs_dir& dir);
+		void checkFilesRenamed(file_system_detail::fs_dir& dir);
+		void checkFilesWrittenTo(file_system_detail::fs_dir& dir);
+
+		// fs_file& addInternalFile(string_view full_path);
 	};
 	
 }

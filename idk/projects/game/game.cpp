@@ -4,8 +4,16 @@
 
 #include <core/Core.h>
 #include <vulkan/VulkanWin32GraphicsSystem.h>
+#include <idk_opengl/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
+
+enum class GraphicsLibrary
+{
+	OpenGL,
+	Vulkan,
+	Default = OpenGL
+};
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -18,9 +26,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
     
 	using namespace idk;
+	
 	auto c = Core{};
 	c.AddSystem<Windows>(hInstance, nCmdShow);
-	c.AddSystem<idk::VulkanWin32GraphicsSystem>();
+
+	switch (GraphicsLibrary::Default)
+	{
+		case GraphicsLibrary::Vulkan:
+			c.AddSystem<VulkanWin32GraphicsSystem>();
+			break;
+		case GraphicsLibrary::OpenGL:
+			c.AddSystem<ogl::Win32GraphicsSystem>();
+			break;
+		default:
+			break;
+	}
 	c.Run();
 	
 	return c.GetSystem<Windows>().GetReturnVal();

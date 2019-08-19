@@ -18,6 +18,7 @@
 
 #include <idk_config.h>
 #include <ds/span.h>
+#include <math/color.h>
 #include <math/constants.h>
 #include <math/arith.h>
 #include <math/angle.h>

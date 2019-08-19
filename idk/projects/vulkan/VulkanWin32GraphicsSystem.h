@@ -15,6 +15,7 @@ namespace idk
 	public:
 		void Init() override ;
 		void Shutdown() override;
+		void RenderBuffer() override;
 	private:
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;

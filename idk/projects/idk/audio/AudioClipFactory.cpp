@@ -1,4 +1,14 @@
+//////////////////////////////////////////////////////////////////////////////////
+//@file		AudioClipFactory.cpp
+//@author	Muhammad Izha B Rahim
+//@param	Email : izha95\@hotmail.com
+//@date		18 AUG 2019
+//@brief	A factory class that creates AudioClip resources.
+/*
+	FileHandle.CanOpen() first before getting full path.
 
+*/
+//////////////////////////////////////////////////////////////////////////////////
 
 #include <stdafx.h>
 #include "AudioClipFactory.h"
@@ -19,34 +29,15 @@ namespace idk {
 	{
 		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
-		auto* CoreSystem = audioSystem.CoreSystem;
+		auto* CoreSystem = audioSystem._Core_System;
 
-		AudioClip::SubSoundGroup sndGrp = AudioClip::SubSoundGroup_SFX;
 		try {
-			switch (sndGrp) {
-			default:
-			case AudioClip::SubSoundGroup_SFX:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->soundHandle)));		//
-				newSound->soundHandle->setSoundGroup(audioSystem.soundGroup_SFX);
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
+			newSound->is3Dsound = true;
+			newSound->isUnique = false;
+			newSound->loop = false;
+			newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_SFX);
 
-				break;
-			case AudioClip::SubSoundGroup_MUSIC:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_NORMAL | FMOD_2D | FMOD_CREATESTREAM, NULL, &(newSound->soundHandle)));	//
-				newSound->soundHandle->setSoundGroup(audioSystem.soundGroup_MUSIC);
-
-				break;
-			case AudioClip::SubSoundGroup_AMBIENT:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_NORMAL | FMOD_3D, NULL, &(newSound->soundHandle)));	//
-				newSound->soundHandle->setSoundGroup(audioSystem.soundGroup_AMBIENT);
-
-				break;
-			case AudioClip::SubSoundGroup_DIALOGUE:
-				audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->soundHandle)));		//
-				newSound->soundHandle->setSoundGroup(audioSystem.soundGroup_DIALOGUE);
-
-				break;
-
-			}
 		}
 		catch (EXCEPTION_AudioSystem i) { //If an error occurs here, delete newSound and return nullptr
 			//std::cout << i.exceptionDetails << "Returning nullptr.\n";
@@ -55,9 +46,9 @@ namespace idk {
 		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
 		newSound->soundInfo.filePath = filePath;
 		char name[512];
-		audioSystem.ParseFMOD_RESULT(newSound->soundHandle->getName(name, 512));
+		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getName(name, 512));
 		newSound->soundInfo.name = name;
-		audioSystem.ParseFMOD_RESULT(newSound->soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
+		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
 		
 		//Push to list for management.
 		//SoundList.push_back(newSound);

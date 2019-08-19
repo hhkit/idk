@@ -3,57 +3,53 @@
 
 namespace idk
 {
-	constexpr color::color() noexcept
-		: as_vec4{}
-	{
-	}
-	constexpr color::color(real r, real g, real b, real a) noexcept
+	constexpr color::color(float r, float g, float b, float a) noexcept
 		: as_vec4{r, g, b, a}
 	{
 	}
-	constexpr color::color(const vec3& vec) noexcept
-		: as_vec3{vec}
+	constexpr color::color(const math::vector<float,3>& vec) noexcept
+		: as_vec4{vec[0], vec[1], vec[2], 1.f}
 	{
 	}
-	constexpr color::color(const vec4& vec) noexcept
+	constexpr color::color(const math::vector<float,4>& vec) noexcept
 		: as_vec4{vec}
 	{
 	}
-	real& color::operator[](size_t index)
+	float& color::operator[](size_t index)
 	{
 		return as_vec4[index];
 	}
-	const real& color::operator[](size_t index) const
+	const float& color::operator[](size_t index) const
 	{
 		return as_vec4[index];
 	}
 
-	real* color::begin()
+	float* color::begin()
 	{
 		return as_vec4.begin();
 	}
 
-	const real* color::begin() const
+	const float* color::begin() const
 	{
 		return as_vec4.begin();
 	}
 
-	real* color::end()
+	float* color::end()
 	{
 		return as_vec4.end();
 	}
 
-	const real* color::end() const
+	const float* color::end() const
 	{
 		return as_vec4.end();
 	}
 
-	real* color::data()
+	float* color::data()
 	{
 		return as_vec4.data();
 	}
 
-	const real* color::data() const
+	const float* color::data() const
 	{
 		return as_vec4.data();
 	}
@@ -72,19 +68,19 @@ namespace idk
 		return *this;
 	}
 
-	color& color::operator*=(real rhs)
+	color& color::operator*=(float rhs)
 	{
 		for (auto& e : *this)
 			e *= rhs;
 		return *this;
 	}
 
-	constexpr color::operator vec3() const noexcept
+	constexpr color::operator math::vector<float,3>() const noexcept
 	{
 		return as_vec3;
 	}
 
-	constexpr color::operator vec4() const noexcept
+	constexpr color::operator math::vector<float,4>() const noexcept
 	{
 		return as_vec4;
 	}

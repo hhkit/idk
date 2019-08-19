@@ -2,12 +2,14 @@
 //@file		AudioSystem.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		12 AUG 2019
+//@date		18 AUG 2019
 //@brief	
 /*
 	NOTES TO ME:
 	ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual channel equals to 0.25.
 	You'd want to create all the audio for playing first before starting the level.
+	For simplicity sake, the mixes (MASTER, SFX, MUSIC etc) are called Channels. 
+	(They are not the same as FMOD::Channel, but you don't need to know that.)
 */
 
 
@@ -56,7 +58,7 @@ namespace idk
 		~AudioSystem();//Destructor
 
 		virtual void Init() override; //Initializes the FMOD Core System
-		void Run();
+		void Update();
 		virtual void Shutdown() override;
 
 		//Optional. Must be called before Init()
@@ -64,26 +66,21 @@ namespace idk
 
 		///////////////////////////////////////////////
 
-
-
 		//Sound Functions used by AudioSource
 		//AudioClip* CreateAudioClip(string filePath, AudioClip::SubSoundGroup sndGrp = SubSoundGroup_SFX); //Creates a sound and returns a handle to the Sound. Do not handle deletion of KSound outside of KAudioEngine
-		//void DeleteAudioClip(AudioClip*& soundPointerRef);			//Destroys sound, removes from map and nulls the soundpointer
+		//void DeleteAudioClip(AudioClip*& soundPointerRef);		//Destroys sound, removes from map and nulls the soundpointer
 		//void PlayAudioClip(AudioClip*& soundPointerRef);			//Plays a sound of an audioclip
 
+		//Channel Controls
+		///////////////////////////////////////////////
+		void SetChannel_MASTER_Volume(const float& newVolume);
+		void SetChannel_SFX_Volume(const float& newVolume);
+		void SetChannel_MUSIC_Volume(const float& newVolume);
+		void SetChannel_AMBIENT_Volume(const float& newVolume);
+		void SetChannel_DIALOGUE_Volume(const float& newVolume);
 
-		//Project Functions (Currently UNUSED)
-		//void CreateChannelGroup(); //Creates a channel for a Sound to be in. Returns a pointer to the channel. This will be visible in the Project Settings
-		//void DeleteChannelGroup(); //Deletes a channel by pointer.
-		//void GetNumberOfChannelGroups(int* i); //Gets the number of channels in the Project
-
-
-		//Serialization Functions (Currently UNUSED)
-		//void SaveLevelData(); //Saves/Load audio settings and preference of the level to file
-		//void LoadLevelData(); //Loads sounds, then assigns to channelgroup, and updates volume, pitch etc.
-		//
-		//void SaveProjectData(); //Saves/Load audio settings and preference of the project to file. 
-		//void LoadProjectData(); //It loads channelsgroups, number of max channels.
+		//Sound Driver Control
+		void SetCurrentSoundDriver(int index);									//Use GetAllSoundDriverData() to pick the available SoundDriver.
 
 		//Get Data Functions
 		///////////////////////////////////////////////
@@ -106,62 +103,53 @@ namespace idk
 	private:
 		friend class AudioClip;
 		friend class AudioClipFactory;
-		FMOD::System* CoreSystem;	//Is updated on init, destroyed and nulled on shutdown.
-		static FMOD_RESULT result;			//Most recent result by the most recent FMOD function call.
 
-		int numberOfDrivers;		//Updated on init. Describes the number of available sound driver that can play audio.
-		int currentDriver;			//Updated on init. Describes the current running sound driver.
 
-		vector<AudioClip*> AudioClipList;				//
-		vector<AUDIOSYSTEM_DRIVERDATA> driverDetails;	//Describes each driver.
+		FMOD::System*		_Core_System		{ nullptr };	//Is updated on init, destroyed and nulled on shutdown.
+		FMOD_RESULT			_result				{ FMOD_OK };	//Most recent result by the most recent FMOD function call.
 
-		time_point timeItWasInitialized;				//Updated on Init()
+		int			_number_of_drivers			{ 0 };		//Updated on init. Describes the number of available sound driver that can play audio.
+		int			_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
+		time_point	_time_it_was_initialized	{};			//Updated on Init()
+
+		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};	//Describes each driver.
 
 		//Useable after calling Init().
-		FMOD::SoundGroup* soundGroup_MASTER;	//All sounds when created start at MASTER
-		FMOD::SoundGroup* soundGroup_MUSIC;		//Music, by default is looped.
-		FMOD::SoundGroup* soundGroup_SFX;		//Sound Effects
-		FMOD::SoundGroup* soundGroup_AMBIENT;	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
-		FMOD::SoundGroup* soundGroup_DIALOGUE;	//Dialogue/Voice Overs. This is OPTIONAL.
+		FMOD::ChannelGroup* _channelGroup_MASTER	{ nullptr };	//All sounds are routed to MASTER.
+		FMOD::SoundGroup*	_soundGroup_MUSIC		{ nullptr };	//Music, by default is looped.
+		FMOD::SoundGroup*	_soundGroup_SFX			{ nullptr };	//Sound Effects
+		FMOD::SoundGroup*	_soundGroup_AMBIENT		{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
+		FMOD::SoundGroup*	_soundGroup_DIALOGUE	{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
 
-		static void ParseFMOD_RESULT(FMOD_RESULT); //All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
+		void ParseFMOD_RESULT(FMOD_RESULT);			//All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 
 	};
 
 
 	//Exception Handler
 	struct EXCEPTION_AudioSystem {
-		string exceptionDetails;
+		string exceptionDetails {};
 	};
 
 	//Miscellaneous Data
 	//These floats range from 0 to 100 (percent)
 	struct AUDIOSYSTEM_CPUDATA {
-		AUDIOSYSTEM_CPUDATA() 
-			:dsp{ 0 }, stream{ 0 }, geometry{ 0 }, update{ 0 }, total{ 0 }
-		{}
-		float dsp;		//DSP Mixing engine CPU usage
-		float stream;	//Streaming engine CPU usage
-		float geometry; //Geometry engine CPU usage
-		float update;	//System::update CPU usage
-		float total;	//Total CPU usage
+
+		float dsp		{};	//DSP Mixing engine CPU usage
+		float stream	{};	//Streaming engine CPU usage
+		float geometry	{};	//Geometry engine CPU usage
+		float update	{};	//System::update CPU usage
+		float total		{};	//Total CPU usage
 	};
 
 	struct AUDIOSYSTEM_DRIVERDATA {
-		AUDIOSYSTEM_DRIVERDATA() 
-			: driverIndex{ -1 }
-			, driverName{ }
-			, fmodID{}
-			, systemRate{}
-			, speakerMode{}
-			, speakerModeChannels{}
-		{}
-		int driverIndex;
-		char driverName[512];
-		FMOD_GUID fmodID;
-		int systemRate;
-		FMOD_SPEAKERMODE speakerMode; //Use FMOD_SPEAKERMODE
-		int speakerModeChannels;
+
+		int driverIndex					{ -1 };
+		char driverName[512]			{};
+		FMOD_GUID fmodID				{};
+		int systemRate					{};
+		FMOD_SPEAKERMODE speakerMode	{}; //Use FMOD_SPEAKERMODE
+		int speakerModeChannels			{};
 	};
 
 }

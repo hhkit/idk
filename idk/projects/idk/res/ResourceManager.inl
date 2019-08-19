@@ -25,10 +25,17 @@ namespace idk
 	{
 		auto& table = *r_cast<Storage<Resource>*>(resource_tables_[resource_ind<Resource>].get());
 		auto ptr = r_cast<ResourceFactory<Resource>*>(plaintext_loaders_[resource_ind<Resource>].get())->Create(filepath);
-		auto handle = RscHandle<Resource>{ Guid::Make() };
-		ptr->_handle = handle;
-		table.emplace(handle.guid, std::move(ptr));
-		return handle;
+		if (ptr)
+		{
+			auto handle = RscHandle<Resource>{ Guid::Make() };
+			ptr->_handle = handle;
+			table.emplace(handle.guid, std::move(ptr));
+			return handle;
+		}
+		else
+		{
+			return RscHandle<Resource>{};
+		}
 	}
 	template<typename Resource>
 	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)

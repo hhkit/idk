@@ -284,6 +284,14 @@
     <ClInclude Include="util\enum.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="file\FileHandle.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioListener.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioSource.h" />
+    <ClInclude Include="gfx\VertexDescriptor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -380,6 +388,11 @@
     <ClCompile Include="reflect\enum_value.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
+    <ClCompile Include="file\FileHandle.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioSource.cpp" />
+    <ClCompile Include="audio\AudioListener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

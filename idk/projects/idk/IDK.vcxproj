@@ -21,10 +21,14 @@
   <ItemGroup>
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipFactory.h" />
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
+    <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="file\FileHandle.h" />
+    <ClInclude Include="gfx\VertexDescriptor.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
@@ -94,7 +98,10 @@
   <ItemGroup>
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
+    <ClCompile Include="audio\AudioListener.cpp" />
+    <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="file\FileHandle.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
