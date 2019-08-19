@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VulkanDebugRenderer.h"
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 #include <VulkanPipeline.h>
 #include <vulkan/vulkan.hpp>
 #include <VulkanDetail.h>
@@ -50,9 +50,12 @@ namespace idk
 		{
 			{DbgShape::eCube   ,
 				{
-					vec3{-0.5f,-0.5f,0.0f},
-					vec3{ 0.5f, 0.5f,0.0f},
-					vec3{-0.5f, 0.5f,0.0f},
+					vec3{-0.5f,-0.5f,1.0f},
+					vec3{ 0.5f, 0.5f,1.0f},
+					vec3{-0.5f, 0.5f,1.0f},
+					//vec3{ 0.5f, 0.5f,1.0f},
+					//vec3{-0.5f,-0.5f,1.0f},
+					//vec3{-0.5f, 0.5f,1.0f},
 				}
 			}
 			,
@@ -82,14 +85,15 @@ namespace idk
 		//pipeline.BindUniformDescriptions(cmd_buffer, detail, uniforms);
 		for (auto& [shape, buffer] : info->render_info)
 		{
-			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.ToProxy();
+			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
+			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 			//Bind vtx buffers
 			auto instance_buffer = detail.AddToMasterBuffer(ArrData(buffer), vhlp::buffer_size<uint32_t>(buffer));
-			auto vertex_buffer   = detail.AddToMasterBuffer(idk::s_cast<const void*>(ArrData(shape_buffer)), vhlp::buffer_size<uint32_t>(shape_buffer));
+			auto vertex_buffer   = detail.AddToMasterBuffer(idk::s_cast<const void*>(ArrData(shape_buffer_proxy)), vhlp::buffer_size<uint32_t>(shape_buffer_proxy));
 			dc.instance_count = ArrCount(buffer);
-			dc.vertex_count = ArrCount(shape_buffer);
-			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, instance_buffer);
+			dc.vertex_count   = ArrCount(shape_buffer);
 			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, vertex_buffer);
+			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, instance_buffer);
 			//cmd_buffer.bindVertexBuffers(dbg_vert_layout::instance_binding, detail.CurrMasterVtxBuffer(), instance_buffer, detail.Dispatcher());
 			//cmd_buffer.bindVertexBuffers(dbg_vert_layout::vertex_binding  , detail.CurrMasterVtxBuffer(), vertex_buffer  , detail.Dispatcher());
 
@@ -101,7 +105,7 @@ namespace idk
 
 			//Draw
 			//cmd_buffer.draw(ArrCount(shape_buffer), ArrCount(buffer), 0, 0, detail.Dispatcher());
-			detail.RenderState().AddDrawCall(dc);
+			detail.CurrRenderState().AddDrawCall(dc);
 		}
 		
 	}

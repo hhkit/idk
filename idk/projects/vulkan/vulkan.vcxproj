@@ -212,7 +212,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="math2.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Utils.h" />
-    <ClInclude Include="Vulkan.h" />
+    <ClInclude Include="vkn.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
     <ClInclude Include="VulkanDetail.h" />
@@ -230,7 +230,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp" />
-    <ClCompile Include="Vulkan.cpp" />
+    <ClCompile Include="vkn.cpp" />
     <ClCompile Include="VulkanDetail.cpp" />
     <ClCompile Include="VulkanHelpers.cpp" />
     <ClCompile Include="VulkanPipeline.cpp" />
@@ -238,7 +238,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
   </ItemGroup>
   <ItemGroup>
     <None Include="utils\Utils.inl" />
-    <None Include="vulkan.inl" />
+    <None Include="vkn.inl" />
     <None Include="VulkanHelpers.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

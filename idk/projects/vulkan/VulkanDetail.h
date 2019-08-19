@@ -1,6 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 namespace vgfx
 {
 	struct RenderState;
@@ -27,12 +27,15 @@ namespace vgfx
 		std::vector<vk::UniqueCommandBuffer> &Commandbuffers     ()const;
 
 		//Render State info
-		RenderState             &RenderState        ()const;
-		vk::UniqueRenderPass    &Renderpass         ()const;
-		vk::UniqueCommandBuffer &CurrCommandbuffer  ()const;
-		vk::Buffer              &CurrMasterVtxBuffer()const;
+		void                     SwapRenderState     ()const;//Probably a bad decision to const this shit.
+		idk::vector<RenderState> &RenderStates       ()const;
+		RenderState              &PrevRenderState    ()const;
+		RenderState              &CurrRenderState    ()const;
+		vk::UniqueRenderPass     &Renderpass         ()const;
+		vk::UniqueCommandBuffer  &CurrCommandbuffer  ()const;
+		vk::Buffer               &CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.
-		uint32_t                AddToMasterBuffer  (const void* data, uint32_t len)const;
+		uint32_t                 AddToMasterBuffer  (const void* data, uint32_t len)const;
 		void                     ResetMasterBuffer  ()const;
 
 

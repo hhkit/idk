@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 #include <math/matrix_transforms.h>
 #include <idk.h>
 #include <VulkanDetail.h>
@@ -810,9 +810,9 @@ void Vulkan::createRenderPass()
 	m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 
 	//Temporary For RenderState
-	auto& rs = detail_->RenderState();
-
-	rs.render_pass = *m_renderpass;
+	auto& rss = detail_->RenderStates();
+	for(auto& rs: rss )
+		rs.render_pass = *m_renderpass;
 }
 
 void Vulkan::createDescriptorSetLayout()
@@ -1266,16 +1266,20 @@ void Vulkan::createCommandBuffers()
 	}
 
 	//For RenderState
-	auto& rs = detail_->RenderState();
-	vk::CommandBufferAllocateInfo rs_alloc_info
+	auto& rss = detail_->RenderStates();
+	//rss.resize(max_frames_in_flight);
+	for (auto& rs : rss)
 	{
-		*m_commandpool
-		,vk::CommandBufferLevel::ePrimary
-		,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
-	};
-	auto cmd_buffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
-	rs.transfer_buffer = std::move(cmd_buffers[0]);
-	rs.command_buffer  = std::move(cmd_buffers[1]);
+		vk::CommandBufferAllocateInfo rs_alloc_info
+		{
+			*m_commandpool
+			,vk::CommandBufferLevel::ePrimary
+			,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+		};
+		auto cmd_buffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
+		rs.transfer_buffer = std::move(cmd_buffers[0]);
+		rs.command_buffer = std::move(cmd_buffers[1]);
+	}
 }
 
 void Vulkan::createSemaphores()
@@ -1334,6 +1338,8 @@ VkBool32 Vulkan::ValHandler::processMsg(
 	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
 	[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 {
+	if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+		utl::cerr() << "Err: " ;
 	utl::cerr() << "validation layer: " << pCallbackData->pMessage << std::endl;
 	return VK_FALSE;
 }
@@ -1401,6 +1407,7 @@ void Vulkan::RecreateSwapChain()
 void Vulkan::InitVulkanEnvironment(window_info info)
 {
 	m_window = info;
+	detail_->RenderStates().resize(3);
 	createInstance();
 	createSurface(info.winstance, info.wnd);
 	pickPhysicalDevice();
@@ -1463,37 +1470,49 @@ void Vulkan::Draw(unique_vbo const& , unique_ubo const& , unique_pipeline const&
 
 void Vulkan::BeginFrame()
 {
-	auto& rs = detail_->RenderState();
-	auto& command_buffer = rs.CommandBuffer();
-	auto& trf_buffer     = rs.TransferBuffer();
-	detail_->ResetMasterBuffer();
-	command_buffer.reset(vk::CommandBufferResetFlags{},detail_->Dispatcher());
-
-	vk::CommandBufferBeginInfo beginInfo
+	detail_->SwapRenderState();
 	{
-		vk::CommandBufferUsageFlags{}
-		,nullptr
-	};
-	command_buffer.begin(beginInfo);
+		auto& rs2 = detail_->CurrRenderState();
+		auto& command_buffer2 = rs2.CommandBuffer();
+		auto& trf_buffer2 = rs2.TransferBuffer();
+		detail_->ResetMasterBuffer();
+		command_buffer2.reset(vk::CommandBufferResetFlags{}, detail_->Dispatcher());
+	}
 
-	vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
-	vk::RenderPassBeginInfo renderPassInfo
-	{
-		rs.RenderPass()
-		,*m_swapchain.frame_buffers[current_frame]
-		,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
-		,1
-		,&clearcolor
-	};
-	command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+	//vk::CommandBufferBeginInfo beginInfo
+	//{
+	//	vk::CommandBufferUsageFlags{}
+	//	,nullptr
+	//};
+	//command_buffer.begin(beginInfo);
+
 }
 
 void Vulkan::EndFrame()
 {
-	auto& rs = detail_->RenderState();
+	auto& rs = detail_->CurrRenderState();
 	auto& dispatcher = detail_->Dispatcher();
 	auto& command_buffer = rs.CommandBuffer();
 	auto& trf_buffer = rs.TransferBuffer();
+	vk::CommandBufferBeginInfo begin_info
+	{
+		vk::CommandBufferUsageFlags{}
+		,nullptr
+	};
+	vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
+	vk::RenderPassBeginInfo renderPassInfo
+	{
+		rs.RenderPass()
+		,*m_swapchain.frame_buffers[m_swapchain.curr_index]
+		,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
+		,1
+		,&clearcolor
+	};
+	//rs.transfer_buffer->begin(beginInfo);
+	rs.CommandBuffer().begin(begin_info);
+	rs.UpdateMasterBuffer(*detail_);
+	command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+	//rs.transfer_buffer->end();
 	for (auto& dc : rs.draw_calls)
 	{
 		dc.pipeline->Bind(command_buffer, *detail_);
@@ -1506,6 +1525,10 @@ void Vulkan::EndFrame()
 	}
 	command_buffer.endRenderPass(dispatcher);
 	command_buffer.end(dispatcher);
+	
+	
+	
+	
 }
 
 void Vulkan::DrawFrame()
@@ -1524,6 +1547,7 @@ void Vulkan::DrawFrame()
 		throw std::runtime_error("Failed to acquire next image.");
 	}
 	imageIndex = rv.value;
+	m_swapchain.curr_index = rv.value;
 
 	vk::Semaphore waitSemaphores[] = { *current_signal.image_available };
 	vk::Semaphore readySemaphores[] = { *current_signal.render_finished };
@@ -1542,20 +1566,12 @@ void Vulkan::DrawFrame()
 	m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
 	
 	{
-		auto& render_state = detail_->RenderState();
-		vk::CommandBufferBeginInfo beginInfo
-		{
-			vk::CommandBufferUsageFlags{}
-			,nullptr
-		};
-		render_state.transfer_buffer->begin(beginInfo);
-		render_state.UpdateMasterBuffer(*detail_);
-		render_state.transfer_buffer->end();
+		auto& render_state = detail_->CurrRenderState();
 		vk::CommandBuffer cmds[] =
 		{
-			*m_commandbuffers[imageIndex]
-			,render_state.TransferBuffer()
-			,render_state.CommandBuffer()
+			//render_state.TransferBuffer(),
+			//*m_commandbuffers[imageIndex],
+			render_state.CommandBuffer(),
 		};
 		vk::SubmitInfo render_state_submit_info
 		{

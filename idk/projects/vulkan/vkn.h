@@ -39,6 +39,7 @@ namespace vgfx
 	};
 	struct SwapChainInfo
 	{
+		uint32_t curr_index{};
 		vk::UniqueSwapchainKHR           swap_chain;
 		vk::Format format;
 		vk::Extent2D extent;
@@ -207,4 +208,4 @@ private:
 	SwapChainSupportDetails querySwapChainSupport(const vk::PhysicalDevice& device);
 };
 
-#include "Vulkan.inl"
+#include <vulkan/vkn.inl>

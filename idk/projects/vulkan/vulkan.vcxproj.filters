@@ -11,9 +11,6 @@
     <ClInclude Include="debug_info.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan.h">
-      <Filter>system</Filter>
-    </ClInclude>
     <ClInclude Include="math2.h">
       <Filter>system</Filter>
     </ClInclude>
@@ -26,8 +23,11 @@
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="vgfx_converters.h" />
-    <ClInclude Include="VectorBuffer.h" />
     <ClInclude Include="RenderState.h" />
+    <ClInclude Include="VectorBuffer.h" />
+    <ClInclude Include="vkn.h">
+      <Filter>system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -35,9 +35,6 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="debug_info.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="Vulkan.cpp">
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp">
@@ -50,6 +47,9 @@
     <ClCompile Include="VulkanPipeline.cpp" />
     <ClCompile Include="VectorBuffer.cpp" />
     <ClCompile Include="RenderState.cpp" />
+    <ClCompile Include="vkn.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -60,12 +60,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vulkan.inl">
-      <Filter>system</Filter>
-    </None>
     <None Include="utils\Utils.inl">
       <Filter>utils</Filter>
     </None>
     <None Include="VulkanHelpers.inl" />
+    <None Include="vkn.inl">
+      <Filter>system</Filter>
+    </None>
   </ItemGroup>
 </Project>

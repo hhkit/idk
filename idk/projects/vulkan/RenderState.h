@@ -40,7 +40,7 @@ namespace vgfx
 		MasterBuffer& MasterBuffer() { return master_buffer; }
 		vk::Buffer& Buffer() { return master_buffer.host_buffer.Buffer(); }
 		vk::RenderPass& RenderPass() { return render_pass; }
-		vk::CommandBuffer& TransferBuffer() { return *transfer_buffer; }
+		vk::CommandBuffer& TransferBuffer() { return *command_buffer; }// transfer_buffer; }
 		vk::CommandBuffer& CommandBuffer() { return *command_buffer; }
 
 	};

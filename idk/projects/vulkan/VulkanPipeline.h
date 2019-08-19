@@ -1,5 +1,5 @@
 #pragma once
-#include <Vulkan.h>
+#include <vkn.h>
 #include <VulkanDetail.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/uniform_info.h>
@@ -90,14 +90,21 @@ struct VulkGfxPipeline
 	{
 		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, vulkan.Dispatcher());
 	}
+	bool HasUniforms(const uniform_info& uni)const
+	{
+		return uni.layouts.size() > 0;
+	}
 	void BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform)
 	{
-		//AllocUniformBuffers is meant to write to a host master uniform buffer and get the offset.
-		//device master uniform buffer will be updated once all draw calls are queued.
-		uint32_t start = AllocUniformBuffers(vulkan, uniform);
-		//We can update the buffer and immediately queue a transfer command because we are expecting
-		//the command submit order to be (Send Host Uniform Buffer to Device Uniform Buffer) -> (The render pass commands)
-		cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, start, GetUniformDescriptors(vulkan,uniform), nullptr, vulkan.Dispatcher());
+		if(HasUniforms(uniform))
+		{
+			//AllocUniformBuffers is meant to write to a host master uniform buffer and get the offset.
+			//device master uniform buffer will be updated once all draw calls are queued.
+			uint32_t start = AllocUniformBuffers(vulkan, uniform);
+			//We can update the buffer and immediately queue a transfer command because we are expecting
+			//the command submit order to be (Send Host Uniform Buffer to Device Uniform Buffer) -> (The render pass commands)
+			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, start, GetUniformDescriptors(vulkan,uniform), nullptr, vulkan.Dispatcher());
+		}
 	}
 private:
 	vk::PolygonMode GetPolygonMode(const config_t& config)const

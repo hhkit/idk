@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VulkanDetail.h"
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 #include <VulkanHelpers.h>
 #include <VectorBuffer.h>
 #include <RenderState.h>
@@ -9,9 +9,14 @@ namespace vgfx
 {
 	struct VulkanDetail::pimpl
 	{
-		vgfx::RenderState& CurrentRenderState() { return render_state_; }
+		vgfx::RenderState& PrevRenderState() { return render_state_[(index_+max()-1)%max()]; }
+		vgfx::RenderState& CurrentRenderState() { return render_state_[index_]; }
+		idk::vector<vgfx::RenderState> &RenderStates() { return render_state_; };
+		void SwapRenderState() { index_ = idk::s_cast<uint32_t>((index_ + 1) % max()); }
 	private:
-		vgfx::RenderState render_state_{};
+		uint32_t max()const { return idk::s_cast<uint32_t>(render_state_.size()); }
+		idk::vector<vgfx::RenderState> render_state_{};
+		uint32_t index_{};
 	};
     vk::DispatchLoaderDefault& VulkanDetail::Dispatcher() const                     { return vulkan().dispatcher      ;}
 																												     
@@ -26,7 +31,24 @@ namespace vgfx
 	//vk::Queue          m_transfer_queue = {}{}					                  				 ;
 	SwapChainInfo                    & VulkanDetail::Swapchain()const               { return vulkan().m_swapchain     ;}
 																				      				 			     
-	RenderState& VulkanDetail::RenderState() const
+	void VulkanDetail::SwapRenderState() const
+	{
+		return impl_->SwapRenderState();
+	}
+
+	idk::vector<RenderState>& VulkanDetail::RenderStates() const
+	{
+		// TODO: insert return statement here
+		return impl_->RenderStates();
+	}
+
+	RenderState& VulkanDetail::PrevRenderState() const
+	{
+		// TODO: insert return statement here
+		return impl_->PrevRenderState();
+	}
+
+	RenderState& VulkanDetail::CurrRenderState() const
 	{
 		// TODO: insert return statement here
 		return impl_->CurrentRenderState();

@@ -25,6 +25,7 @@ namespace vgfx
 
 	void RenderState::AddDrawCall(DrawCall call)
 	{
+		draw_calls.emplace_back(std::move(call));
 	}
 
 }

@@ -3,7 +3,7 @@
 #include <VulkanWin32GraphicsSystem.h>
 #include <WindowsApplication.h>
 
-#include "Vulkan.h"
+#include <vulkan/vkn.h>
 
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

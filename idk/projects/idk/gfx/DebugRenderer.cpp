@@ -51,8 +51,8 @@ void DebugRenderer::Init()
 		buffer_desc{
 			binding_info{1,sizeof(idk::debug_instance),idk::VertexRate::eInstance},
 			{
-				 attribute_info{ idk::AttribFormat::eSVec4,0, offsetof(idk::debug_instance,color) }
-				,attribute_info{ idk::AttribFormat::eMat4,1, offsetof(idk::debug_instance,model) }
+				 attribute_info{ idk::AttribFormat::eSVec3,0, offsetof(idk::debug_instance,color) }
+				,attribute_info{ idk::AttribFormat::eMat4 ,1, offsetof(idk::debug_instance,model) }
 			}
 		});
 

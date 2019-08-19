@@ -65,7 +65,7 @@ namespace idk
 			{
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
 				Core::GetSystem<GraphicsSystem>().BeginFrame();
-				Core::GetSystem<DebugRenderer>().DrawShape(DbgShape::eCube, vec3{ 0,0,0 }, vec3{ 1,1,1 }, vec3{ 0,0,0 }, rad{ 0 }, vec4{ 0,1,0,1 });
+				Core::GetSystem<DebugRenderer>().DrawShape(DbgShape::eSquare, vec3{ 0,0,0 }, vec3{ 1,1,1 }, vec3{ 1,0,0 }, rad{ 0 }, vec4{ 0,1,0,1 });
 				Core::GetSystem<DebugRenderer>().Render();
 				Core::GetSystem<GraphicsSystem>().EndFrame();
 				Core::GetSystem<GraphicsSystem>().Draw();
