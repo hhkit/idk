@@ -8,6 +8,8 @@
 	NOTES TO ME:
 	ChannelGroups are multiplicative; A volume of 0.5 in group and 0.5 in individual channel equals to 0.25.
 	You'd want to create all the audio for playing first before starting the level.
+	For simplicity sake, the mixes (MASTER, SFX, MUSIC etc) are called Channels. 
+	(They are not the same as FMOD::Channel, but you don't need to know that.)
 */
 
 
@@ -56,7 +58,7 @@ namespace idk
 		~AudioSystem();//Destructor
 
 		virtual void Init() override; //Initializes the FMOD Core System
-		void Run();
+		void Update();
 		virtual void Shutdown() override;
 
 		//Optional. Must be called before Init()
@@ -68,6 +70,15 @@ namespace idk
 		//AudioClip* CreateAudioClip(string filePath, AudioClip::SubSoundGroup sndGrp = SubSoundGroup_SFX); //Creates a sound and returns a handle to the Sound. Do not handle deletion of KSound outside of KAudioEngine
 		//void DeleteAudioClip(AudioClip*& soundPointerRef);		//Destroys sound, removes from map and nulls the soundpointer
 		//void PlayAudioClip(AudioClip*& soundPointerRef);			//Plays a sound of an audioclip
+
+		//Channel Controls
+		///////////////////////////////////////////////
+		void SetChannel_MASTER_Volume(const float& newVolume);
+		void SetChannel_SFX_Volume(const float& newVolume);
+		void SetChannel_MUSIC_Volume(const float& newVolume);
+		void SetChannel_AMBIENT_Volume(const float& newVolume);
+		void SetChannel_DIALOGUE_Volume(const float& newVolume);
+
 
 		//Get Data Functions
 		///////////////////////////////////////////////
@@ -102,11 +113,11 @@ namespace idk
 		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};	//Describes each driver.
 
 		//Useable after calling Init().
-		FMOD::SoundGroup* _soundGroup_MASTER	{ nullptr };	//All sounds when created start at MASTER
-		FMOD::SoundGroup* _soundGroup_MUSIC		{ nullptr };	//Music, by default is looped.
-		FMOD::SoundGroup* _soundGroup_SFX		{ nullptr };	//Sound Effects
-		FMOD::SoundGroup* _soundGroup_AMBIENT	{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
-		FMOD::SoundGroup* _soundGroup_DIALOGUE	{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
+		FMOD::ChannelGroup* _channelGroup_MASTER	{ nullptr };	//All sounds are routed to MASTER.
+		FMOD::SoundGroup*	_soundGroup_MUSIC		{ nullptr };	//Music, by default is looped.
+		FMOD::SoundGroup*	_soundGroup_SFX			{ nullptr };	//Sound Effects
+		FMOD::SoundGroup*	_soundGroup_AMBIENT		{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
+		FMOD::SoundGroup*	_soundGroup_DIALOGUE	{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
 
 		void ParseFMOD_RESULT(FMOD_RESULT);			//All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 

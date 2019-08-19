@@ -155,7 +155,7 @@ namespace idk
 		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_SFX",		&_soundGroup_SFX		));
 		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_AMBIENT",	&_soundGroup_AMBIENT	));
 		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_DIALOGUE",	&_soundGroup_DIALOGUE	));
-		ParseFMOD_RESULT(_Core_System->getMasterSoundGroup(&_soundGroup_MASTER));
+		ParseFMOD_RESULT(_Core_System->getMasterChannelGroup(&_channelGroup_MASTER));
 
 		//Get Number of Drivers available
 		ParseFMOD_RESULT(_Core_System->getNumDrivers(&_number_of_drivers));
@@ -213,8 +213,11 @@ namespace idk
 
 	}
 
-	void AudioSystem::Run()
+	void AudioSystem::Update()
 	{
+		//Update all the audioClips here too!
+
+
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
 	}
@@ -225,11 +228,11 @@ namespace idk
 		ParseFMOD_RESULT(_soundGroup_SFX	  ->release()); 
 		ParseFMOD_RESULT(_soundGroup_AMBIENT  ->release()); 
 		ParseFMOD_RESULT(_soundGroup_DIALOGUE ->release());
-		_soundGroup_MUSIC	= nullptr;
-		_soundGroup_SFX		= nullptr;
-		_soundGroup_AMBIENT = nullptr;
-		_soundGroup_DIALOGUE= nullptr;
-
+		_soundGroup_MUSIC	 = nullptr;
+		_soundGroup_SFX		 = nullptr;
+		_soundGroup_AMBIENT  = nullptr;
+		_soundGroup_DIALOGUE = nullptr;
+		_channelGroup_MASTER = nullptr;
 
 		//System close
 		ParseFMOD_RESULT(_Core_System->release());
@@ -249,14 +252,40 @@ namespace idk
 		if (_result != FMOD_OK)
 		{
 			std::ostringstream stringStream;
-			stringStream << "FMOD error! (" << _result << ") " << FMOD_ErrorString(_result) << "/n"; //Puts string into stream
+			stringStream << "FMOD error! (" << _result << ") " << FMOD_ErrorString(_result) << std::endl; //Puts string into stream
 			EXCEPTION_AudioSystem exception;
 			exception.exceptionDetails = stringStream.str();
 			throw exception;
 		}
 	}
 
-	float AudioSystem::GetCPUPercentUsage() 
+	void AudioSystem::SetChannel_MASTER_Volume(const float& newVolume)
+	{
+
+		ParseFMOD_RESULT(_channelGroup_MASTER->setVolume(0.5f));
+	}
+
+	void AudioSystem::SetChannel_SFX_Volume(const float& newVolume)
+	{
+		ParseFMOD_RESULT(_soundGroup_SFX->setVolume(newVolume));
+	}
+
+	void AudioSystem::SetChannel_MUSIC_Volume(const float& newVolume)
+	{
+		ParseFMOD_RESULT(_soundGroup_MUSIC->setVolume(newVolume));
+	}
+
+	void AudioSystem::SetChannel_AMBIENT_Volume(const float& newVolume)
+	{
+		ParseFMOD_RESULT(_soundGroup_AMBIENT->setVolume(newVolume));
+	}
+
+	void AudioSystem::SetChannel_DIALOGUE_Volume(const float& newVolume)
+	{
+		ParseFMOD_RESULT(_soundGroup_DIALOGUE->setVolume(newVolume));
+	}
+
+	float AudioSystem::GetCPUPercentUsage()
 	{
 		return GetDetailedCPUPercentUsage().total;
 	}
