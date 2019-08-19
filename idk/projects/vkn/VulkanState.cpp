@@ -1482,7 +1482,9 @@ namespace idk::vkn
 			auto& command_buffer2 = rs2.CommandBuffer();
 			auto& trf_buffer2 = rs2.TransferBuffer();
 			view_->ResetMasterBuffer();
+			rs2.DrawCalls().resize(0);
 			command_buffer2.reset(vk::CommandBufferResetFlags{}, view_->Dispatcher());
+			trf_buffer2.reset(vk::CommandBufferResetFlags{}, view_->Dispatcher());
 		}
 
 		//vk::CommandBufferBeginInfo beginInfo
@@ -1499,7 +1501,6 @@ namespace idk::vkn
 		auto& rs = view_->CurrRenderState();
 		auto& dispatcher = view_->Dispatcher();
 		auto& command_buffer = rs.CommandBuffer();
-		auto& trf_buffer = rs.TransferBuffer();
 		vk::CommandBufferBeginInfo begin_info
 		{
 			vk::CommandBufferUsageFlags{}

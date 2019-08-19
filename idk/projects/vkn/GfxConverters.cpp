@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GfxConverters.h"
+#include <idk.h>
 #undef max
 #undef min
 
@@ -24,6 +25,22 @@ namespace idk::vkn::hlp
 			,{ AttribFormat::eSVec4,vk::Format::eR32G32B32A32Sfloat }
 		};
 		auto itr = map.find(rate);
+		assert(itr != map.end());
+		return itr->second;
+	}
+
+	auto MapPrimTopology(PrimitiveTopology topology) -> vk::PrimitiveTopology
+	{
+		static const hash_table<PrimitiveTopology, vk::PrimitiveTopology> map
+		{
+			{PrimitiveTopology::eTriangleStrip,vk::PrimitiveTopology::eTriangleStrip},
+			{PrimitiveTopology::eTriangleList ,vk::PrimitiveTopology::eTriangleList },
+		 	{PrimitiveTopology::ePatchList    ,vk::PrimitiveTopology::ePatchList    },
+			{PrimitiveTopology::eLineStrip    ,vk::PrimitiveTopology::eLineStrip    },
+			{PrimitiveTopology::ePointList    ,vk::PrimitiveTopology::ePointList    },
+			{PrimitiveTopology::eLineList     ,vk::PrimitiveTopology::eLineList     },
+		};
+		auto itr = map.find(topology);
 		assert(itr != map.end());
 		return itr->second;
 	}

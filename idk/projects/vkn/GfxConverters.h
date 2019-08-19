@@ -2,11 +2,13 @@
 #include <idk.h>
 #include <gfx/buffer_desc.h>
 #include <vulkan/vulkan.hpp>
+#include <idk/gfx/pipeline_config.h>   //PrimitiveTopology
 
 namespace idk::vkn::hlp
 {
-	auto MapVtxRate       (VertexRate rate) -> vk::VertexInputRate;
-	auto MapVtxFormat     (AttribFormat rate) -> vk::Format;
+	auto MapVtxRate       (VertexRate   rate         ) -> vk::VertexInputRate;
+	auto MapVtxFormat     (AttribFormat rate         ) -> vk::Format;
+	auto MapPrimTopology  (PrimitiveTopology topology) -> vk::PrimitiveTopology;
 	auto ConvertVtxBinding(const buffer_desc::binding_info& binding) -> vk::VertexInputBindingDescription;
 	auto ConvertVtxAttrib (const buffer_desc::attribute_info& attrib, uint32_t binding_index)->vk::VertexInputAttributeDescription;
 

@@ -269,7 +269,6 @@
     <ClInclude Include="shape\aabb.h">
       <Filter>shapes</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\gfx_data.h" />
     <ClInclude Include="scene\SceneFactory.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -300,11 +299,24 @@
     <ClInclude Include="gfx\VertexDescriptor.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\buffer_desc.h" />
-    <ClInclude Include="gfx\debug_vtx_layout.h" />
-    <ClInclude Include="gfx\DebugRenderer.h" />
-    <ClInclude Include="gfx\pipeline_config.h" />
-    <ClInclude Include="gfx\uniform_info.h" />
+    <ClInclude Include="gfx\gfx_data.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\DebugRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\debug_vtx_layout.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\buffer_desc.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\pipeline_config.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\uniform_info.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -410,8 +422,12 @@
     <ClCompile Include="audio\AudioSource.cpp">
       <Filter>audio</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\buffer_desc.cpp" />
-    <ClCompile Include="gfx\DebugRenderer.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\buffer_desc.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -61,11 +61,12 @@ namespace idk::vkn
 			{DbgShape::eSquare,
 				{
 					vec3{-0.5f,-0.5f,0.0f},
-					vec3{ 0.5f, 0.5f,0.0f},
 					vec3{-0.5f, 0.5f,0.0f},
-					vec3{ 0.0f,-0.5f,0.0f},
-					vec3{-0.5f,-0.5f,0.0f},
 					vec3{ 0.5f, 0.5f,0.0f},
+
+					vec3{ 0.5f, 0.5f,0.0f},
+					vec3{ 0.5f,-0.5f,0.0f},
+					vec3{-0.5f,-0.5f,0.0f},
 				}
 			}
 		};

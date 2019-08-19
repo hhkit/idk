@@ -110,8 +110,8 @@ namespace idk::vkn
 	{
 		return vk::PipelineInputAssemblyStateCreateInfo{
 			vk::PipelineInputAssemblyStateCreateFlags{}
-			,vk::PrimitiveTopology::eTriangleList
-			,VK_FALSE                              //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
+			,hlp::MapPrimTopology(config.prim_top)
+			,config.restart_on_special_idx             //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
 		};
 	}
 	vector<vk::VertexInputAttributeDescription> VulkanPipeline::GetVtxAttribInfo(const config_t& config) const
