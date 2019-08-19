@@ -297,9 +297,7 @@ namespace idk
 							"\t Curr Path: " << tmp.string() << "\n" << std::endl;
 
 						// This is the file that was renamed.
-						internal_file._full_path = tmp.string();
-						internal_file._filename = filename;
-						internal_file._extension = tmp.extension().string();
+						vfs.initFile(internal_file, mountDir, tmp);
 						internal_file._change_status = CHANGE_STATUS::RENAMED;
 
 						changed_files.push_back(internal_file._tree_index);

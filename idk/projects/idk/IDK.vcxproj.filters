@@ -516,9 +516,6 @@
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
     </None>
-    <None Include="file\FileSystem.inl">
-      <Filter>file</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
