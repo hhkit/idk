@@ -1,2 +1,5 @@
 #pragma once
-inline int square(int n) { return n * n; }
+inline int square(int n) 
+{ 
+	return n * n; 
+}
