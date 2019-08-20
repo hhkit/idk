@@ -24,8 +24,9 @@ namespace idk::file_system_detail
 		fs_key() = default;
 		fs_key(int8_t m, int8_t d, int8_t i);
 
+		bool IsValid() const;
 		bool operator == (const fs_key& rhs) const;
-
+		
 		int8_t _mount_id = -1;
 		int8_t _depth = -1;
 		int8_t _index = -1;

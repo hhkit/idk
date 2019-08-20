@@ -20,21 +20,28 @@ namespace idk {
 	{
 		// Get the base directory. This is where the prog is run from.
 		char buffer[MAX_PATH] = { 0 };
+
+		// Get the program directory
 		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-		// if (!_getcwd(base_dir_c, sizeof(base_dir_c)))
 		if(bytes == 0)
-		{
 			std::cout << "[File System] Unable to get program directory." << std::endl;
-		}
 		_exe_dir = buffer;
 		auto pos = _exe_dir.find_last_of("\\");
 		_exe_dir = _exe_dir.substr(0, pos);
 
+		// Get the solution directory
 		if (!_getcwd(buffer, sizeof(buffer)))
-		{
 			std::cout << "[File System] Unable to get solution directory." << std::endl;
-		}
 		_sol_dir = buffer;
+
+		// Get App Data directory
+		char* env_buff;
+		size_t len;
+		auto err = _dupenv_s(&env_buff, &len, "appdata");
+		if (err)
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		_app_data_dir = env_buff;
+		free(env_buff);
 	}
 
 	void FileSystem::Update()
@@ -91,6 +98,30 @@ namespace idk {
 		{
 			return string{};
 		}
+	}
+
+	
+	vector<FileHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
+	{
+		vector<FileHandle> vec_handles;
+		auto dir_index = getDir(mountPath);
+		if (!dir_index.IsValid())
+			return vec_handles;
+
+		auto& dir = getDir(dir_index);
+		if (recurse_sub_trees)
+		{
+			recurseSubDirExtensions(vec_handles, dir, extension);
+			return vec_handles;
+		}
+		
+		for (auto& file_index : dir._files_map)
+		{
+			auto& internal_file = getFile(file_index.second);
+			if (internal_file._extension == extension)
+				vec_handles.emplace_back(internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count);
+		}
+		return vec_handles;
 	}
 
 	FileHandle FileSystem::GetFile(string_view mountPath) const
@@ -232,6 +263,22 @@ namespace idk {
 		d._filename = p.filename().string();
 		d._mount_path = p_dir._mount_path + "/" + d._filename;
 		d._parent = p_dir._tree_index;
+	}
+
+	void FileSystem::recurseSubDirExtensions(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
+	{
+		for (auto& file_index : subDir._files_map)
+		{
+			auto& internal_file = getFile(file_index.second);
+			if(internal_file._extension == extension)
+				vec_handles.emplace_back(internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count);
+		}
+
+		for (auto& dir_index : subDir._sub_dirs)
+		{
+			auto& internal_dir = getDir(dir_index.second);
+			recurseSubDirExtensions(vec_handles, internal_dir, extension);
+		}
 	}
 
 	void FileSystem::recurseSubDir(size_t index, int8_t currDepth, file_system_detail::fs_dir& mountSubDir, bool watch)
@@ -631,7 +678,6 @@ namespace idk {
 		auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
 		auto& f = getFile(slot);
 		initFile(f, dir, p);
-
 
 		return f;
 	}
