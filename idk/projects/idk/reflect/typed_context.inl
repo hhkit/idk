@@ -57,6 +57,9 @@ namespace idk::reflect::detail
 		virtual void copy_assign(void* lhs, const void* rhs) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
+		virtual uni_container to_container(void* obj) const = 0;
+		virtual enum_value to_enum_value(void* obj) const = 0;
+		virtual vector<dynamic> unpack(void* obj) const = 0;
 
 		template<typename... Ts>
 		dynamic construct(Ts&& ... args) const
@@ -140,6 +143,43 @@ namespace idk::reflect::detail
 				throw "Cannot copy construct";
 			else
 				return T{ *static_cast<const T*>(obj) };
+		}
+
+		uni_container to_container(void* obj) const override
+		{
+			obj;
+			if constexpr (is_sequential_container_v<T> || is_associative_container_v<T>)
+				return uni_container{ *static_cast<T*>(obj) };
+			else
+				throw "not a container!";
+		}
+
+		enum_value to_enum_value(void* obj) const override
+		{
+			obj;
+			if constexpr (is_macro_enum_v<T>)
+				return get_type<T>().as_enum_type().from_value(T::_enum(*static_cast<T*>(obj)));
+			else
+				throw "not an enum!";
+		}
+
+		vector<dynamic> unpack(void* obj) const override
+		{
+			obj;
+			if constexpr (is_template_v<T, std::pair> || is_template_v<T, std::tuple>)
+			{
+				vector<dynamic> vec;
+				unpack_helper(vec, obj, std::make_index_sequence<std::tuple_size<T>::value>());
+				return vec;
+			}
+			else
+				throw "not a tuple!";
+		}
+
+		template<size_t... Is>
+		void unpack_helper(vector<dynamic>& vec, void* obj, std::index_sequence<Is...>) const
+		{
+			(vec.push_back(std::get<Is>(*static_cast<T*>(obj))), ...);
 		}
 	};
 

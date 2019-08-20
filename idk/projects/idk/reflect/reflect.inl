@@ -138,7 +138,15 @@ namespace idk::reflect
 					using fn_getsettype = std::decay_t<decltype(FunctionGetSet)>;
 					if constexpr (std::is_same_v<fn_getsettype, std::optional<std::tuple<const detail::table&, void*>>(*)(void*, std::uint64_t) noexcept>)
 					{
-						throw; // uhhh, this branch means you're at a structure not part of idk::ReflectedTypes
+						void* offsetted = ::property::details::HandleBasePointer(obj, entry.m_Offset);
+						std::tuple<const detail::table&, void*> tup = FunctionGetSet(offsetted, 0).value();
+						auto name = std::get<0>(tup).m_pName;
+						void* value = std::get<1>(tup);
+						visit_key_value(std::move(table.m_pEntry[i].m_pName),
+							dynamic{ get_type(name), value },
+							std::forward<Visitor>(visitor), depth, curr_depth);
+						// uhhh, this branch means you're at a structure not part of idk::ReflectedTypes
+						// it could also mean base class if you used REFLECT_PARENT
 					}
 					else
 					{
@@ -194,6 +202,8 @@ namespace idk::reflect
 		{
 			constexpr bool ValIsContainer =
 				(is_associative_container_v<V> || is_sequential_container_v<V>) && !std::is_same_v<std::decay_t<V>, string>;
+			constexpr bool ValIsDynamic =
+				std::is_same_v<std::decay_t<V>, dynamic>;
 			int depth_change = depth - curr_depth;
 			curr_depth = depth;
 
@@ -201,7 +211,9 @@ namespace idk::reflect
 			{
 				if (visitor(std::forward<K>(key), std::forward<V>(val), depth_change)) // if false, stop recursive
 				{
-					if constexpr (ValIsContainer)
+					if constexpr (ValIsDynamic)
+						visit(*static_cast<void**>(val._ptr->get()), val.type, std::forward<Visitor>(visitor), depth);
+					else if constexpr (ValIsContainer)
 						visit_container(val, std::forward<Visitor>(visitor), depth);
 					else
 						visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth);
@@ -211,7 +223,9 @@ namespace idk::reflect
 			else
 			{
 				visitor(std::forward<K>(key), std::forward<V>(val), depth_change);
-				if constexpr (ValIsContainer)
+				if constexpr (ValIsDynamic)
+					visit(*static_cast<void**>(val._ptr->get()), val.type, std::forward<Visitor>(visitor), depth);
+				else if constexpr (ValIsContainer)
 					visit_container(val, std::forward<Visitor>(visitor), depth);
 				else
 					visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth);

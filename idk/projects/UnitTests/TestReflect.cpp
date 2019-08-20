@@ -301,3 +301,21 @@ TEST(Reflect, TestReflectEnum)
 	auto ivan = t.from_string("WEEB");
 	EXPECT_EQ(ivan, testenum(testenum::WEEB));
 }
+
+struct unknowntest : reflect_this
+{
+	idk::testenum t = idk::testenum::A;
+};
+REFLECT_BEGIN(unknowntest, "unknowntest")
+REFLECT_PARENT(reflect_this)
+REFLECT_VARS(t)
+REFLECT_END()
+
+TEST(Reflect, TestParentAndUnknownVisit)
+{
+	unknowntest v;
+	reflect::visit(v, [&](auto&& key, auto&& val, int depth_change)
+	{
+		std::cout << "hi";
+	});
+}
