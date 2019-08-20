@@ -759,9 +759,15 @@ namespace property
     //std::enable_if_t< is_specialized_v<std::vector, std::decay_t<T_VAR>>, property::setup_entry >
     //PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept { return details::HandleListsPropertyVar<T_VAR>( pName, Offset ); }
 
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! added by mal
+	template<typename T, typename VariantT>
+	struct is_variant_member;
+	template<typename T, typename... Ts>
+	struct is_variant_member<T, std::variant<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
+
     // deal with regular properties such int and such
     template< typename T_VAR, std::size_t N > constexpr
-    std::enable_if_t< std::is_same_v< decltype( data().emplace<std::decay_t<T_VAR>>() ), decltype( data().emplace<std::decay_t<T_VAR>>() )>, property::setup_entry>
+    std::enable_if_t<is_variant_member<T_VAR, data>::value, property::setup_entry>
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {
         using var = std::decay_t<T_VAR>;
@@ -771,7 +777,7 @@ namespace property
     // deal with atomic but property::table base properties
     template< typename T_VAR, std::size_t N > constexpr
     std::enable_if_t< isValidTable<std::decay_t<T_VAR>>() &&
-		!std::is_same_v< decltype(data().emplace<std::decay_t<T_VAR>>()), decltype(data().emplace<std::decay_t<T_VAR>>())> // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		!is_variant_member<T_VAR, data>::value // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		, property::setup_entry >
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {

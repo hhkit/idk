@@ -72,6 +72,8 @@ namespace idk::reflect
 
 		template<typename Visitor>
 		void visit(void* obj, type type, Visitor&& visitor, int& depth);
+		template<typename K, typename V, typename Visitor>
+		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
 	}
 
 
@@ -181,6 +183,8 @@ namespace idk::reflect
 		dynamic(reflect::type type, void* obj);
 
 		friend struct detail::typed_context_base;
+		template<typename Visitor> friend void detail::visit(void* obj, reflect::type type, Visitor&& visitor, int& depth);
+		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
 	};
 
 
@@ -203,7 +207,9 @@ namespace idk::reflect
 		const type type;
 
 		template<typename T, typename = std::enable_if_t<
-			!std::is_same_v<std::decay_t<T>, uni_container>&& is_iterable_v<std::decay_t<T>>>>
+			!std::is_same_v<std::decay_t<T>, uni_container> &&
+			!std::is_same_v<std::decay_t<T>, dynamic> &&
+			is_iterable_v<std::decay_t<T>>>>
 		uni_container(T&& obj);
 
 		size_t size() const;

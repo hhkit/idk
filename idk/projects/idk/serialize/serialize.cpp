@@ -11,8 +11,57 @@ using json = nlohmann::json;
 
 namespace idk
 {
+	static json serialize_json(const reflect::dynamic& obj); // forward decl
+
+	static json serialize_json(const reflect::uni_container& container)
+	{
+		json j;
+		for (auto elem : container)
+		{
+			if (elem.type.is_template<std::pair>()) // maps
+			{
+				auto pair = elem.unpack();
+				j.emplace(serialize_text(pair[0]), serialize_json(pair[1]));
+			}
+			else
+			{
+				j.push_back(serialize_json(elem));
+			}
+		}
+		return j;
+	}
+
 	static json serialize_json(const reflect::dynamic& obj)
 	{
+		if (obj.type.count() == 0)
+		{
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : return json(obj.get<TYPE>());
+			switch (obj.type.hash())
+			{
+				SERIALIZE_CASE(int);
+				SERIALIZE_CASE(bool);
+				SERIALIZE_CASE(char);
+				SERIALIZE_CASE(int64_t);
+				SERIALIZE_CASE(uint64_t);
+				SERIALIZE_CASE(float);
+				SERIALIZE_CASE(double);
+				case reflect::typehash<string>(): return json(serialize_text(obj.get<string>()));
+				case reflect::typehash<Guid>(): return json(serialize_text(obj.get<Guid>()));
+			default: break;
+			}
+#undef SERIALIZE_CASE
+
+			if (obj.type.is_container())
+			{
+				auto cont = obj.to_container();
+				return serialize_json(cont);
+			}
+			else if (obj.type.is_enum_type())
+				return json(obj.to_enum_value().name());
+			else
+				throw "unhandled case?";
+		}
+
 		json j;
 		vector<json*> stack{ &j };
 
@@ -77,6 +126,8 @@ namespace idk
 
 			if (obj.type.is_enum_type())
 				return serialize_text(obj.to_enum_value().name());
+			else if (obj.type.is_container())
+				return serialize_json(obj.to_container()).dump(2);
 			else
 				throw "unhandled case?";
 		}
@@ -108,8 +159,88 @@ namespace idk
 	template <typename T>
 	struct has_resize<T, std::void_t<decltype(std::declval<T>().clear())>> : std::true_type {};
 
-	void parse_json(const json& j, reflect::dynamic& obj)
+	static void parse_json(const json& j, reflect::dynamic& obj); // forward decl
+
+	static void parse_json(const json& j, reflect::uni_container& container)
 	{
+		if (container.type.is_template<std::array>())
+		{
+			auto container_iter = container.begin();
+			auto sz = container.size();
+			size_t i = 0;
+			for (auto iter = j.begin(); iter != j.end() && i < sz; ++iter, ++i)
+			{
+				auto elem = *container_iter;
+				parse_json(iter.value(), elem);
+				++container_iter;
+			}
+		}
+		else
+		{
+			container.clear();
+
+			if (j.is_array())
+			{
+				for (auto& elem : j)
+				{
+					auto dyn = container.value_type.create();
+					parse_json(elem, dyn);
+					container.add(dyn);
+				}
+			}
+			else if(j.is_object())
+			{
+				if (container.value_type.is_template<std::pair>())
+				{
+					for (auto& elem : j.items())
+					{
+						auto pair = container.value_type.create();
+						auto unpacked = pair.unpack();
+						parse_text(elem.key(), unpacked[0]);
+						parse_json(elem.value(), unpacked[1]);
+						container.add(pair);
+					}
+				}
+				else
+					throw "set???";
+			}
+		}
+
+	}
+
+	static void parse_json(const json& j, reflect::dynamic& obj)
+	{
+		if (obj.type.count() == 0)
+		{
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = j.get<TYPE>();
+			switch (obj.type.hash())
+			{
+				SERIALIZE_CASE(int);
+				SERIALIZE_CASE(bool);
+				SERIALIZE_CASE(char);
+				SERIALIZE_CASE(int64_t);
+				SERIALIZE_CASE(uint64_t);
+				SERIALIZE_CASE(float);
+				SERIALIZE_CASE(double);
+#undef SERIALIZE_CASE
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : parse_text(j.get<string>(), obj); break;
+				SERIALIZE_CASE(string);
+				SERIALIZE_CASE(Guid);
+				default: break;
+			}
+#undef SERIALIZE_CASE
+
+			if (obj.type.is_container())
+			{
+				auto cont = obj.to_container();
+				parse_json(j, cont);
+			}
+			else if (obj.type.is_enum_type())
+				obj.to_enum_value().try_assign(j.get<string>());
+			else
+				throw "unhandled case?";
+		}
+
 		vector<const json*> stack{ &j };
 
 		obj.visit([&](auto&& key, auto&& arg, int depth_change)
