@@ -8,9 +8,6 @@ namespace idk::reflect
 	struct dynamic::base
 	{
 		virtual void* get() const = 0;
-		virtual uni_container to_container() const = 0;
-		virtual enum_value to_enum_value() const = 0;
-		virtual vector<dynamic> unpack() const = 0;
 		virtual ~base() {}
 	};
 
@@ -28,40 +25,6 @@ namespace idk::reflect
 		void* get() const override
 		{
 			return const_cast<void*>(static_cast<const void*>(&obj));
-		}
-
-		uni_container to_container() const override
-		{
-			if constexpr (is_sequential_container_v<T> || is_associative_container_v<T>)
-				return uni_container{ const_cast<T&>(obj) };
-			else
-				throw "not a container!";
-		}
-
-		enum_value to_enum_value() const override
-		{
-			if constexpr (is_macro_enum_v<T>)
-				return get_type<T>().as_enum_type().from_value(DecayedT::_enum(obj));
-			else
-				throw "not an enum!";
-		}
-
-		vector<dynamic> unpack() const override
-		{
-			if constexpr (is_template_v<DecayedT, std::pair> || is_template_v<DecayedT, std::tuple>)
-			{
-				vector<dynamic> vec;
-				unpack_helper(vec, std::make_index_sequence<std::tuple_size<DecayedT>::value>());
-				return vec;
-			}
-			else
-				throw "not a tuple!";
-		}
-
-		template<size_t... Is>
-		void unpack_helper(vector<dynamic>& vec, std::index_sequence<Is...>) const
-		{
-			(vec.push_back(const_cast<std::tuple_element_t<Is, DecayedT>&>(std::get<Is>(obj))), ...);
 		}
 	};
 
