@@ -60,6 +60,7 @@ TEST(Math, MatrixRotate)
 	using namespace idk;
 
 	auto rot = rotate(vec3{ 1.f, 0.f, 0.f }, rad{ 1.57f });
+	auto r2 = rotate(vec3{ 0,1,0 }, rad{ half_pi });
 
 }
 TEST(Math, MatrixTranslate)
