@@ -87,6 +87,11 @@ namespace idk{
 		: _mount_id{ m }, _depth{ d }, _index{ i }
 	{
 	}
+	bool file_system_detail::fs_key::IsValid() const
+	{
+		return (_mount_id >= 0 && _depth >= 0 && _index >= 0);
+	}
+
 	bool file_system_detail::fs_key::operator==(const fs_key& rhs) const
 	{
 		return (_mount_id == rhs._mount_id && _depth == rhs._depth && _index == rhs._index);

@@ -22,7 +22,7 @@ namespace idk::math
 			    ((!std::is_same_v<vector, Args>) && ...)
 			>
 		>
-		constexpr vector(const Args& ...);
+		constexpr explicit vector(const Args& ...);
 
 		template<unsigned D2,
 			typename = std::enable_if_t<(D2 > D)>

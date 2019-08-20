@@ -11,7 +11,7 @@ namespace idk
 		std::cout << "Init System\n";
 	}
 
-	void TestSystem::TestSpan(span<const Transform> transforms)
+	void TestSystem::TestSpan(span<const Transform>)
 	{
 	}
 

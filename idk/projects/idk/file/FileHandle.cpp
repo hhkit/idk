@@ -61,6 +61,24 @@ namespace idk
 		return file._mount_path;
 	}
 
+	string_view FileHandle::GetExtension() const
+	{
+		// Check Handle
+		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
+			return string_view{};
+
+		auto& vfs = Core::GetSystem<FileSystem>();
+		auto& file_handle = vfs._file_handles[_handle_index];
+		auto& file = vfs.getFile(file_handle._internal_id);
+
+		return file._extension;
+	}
+
+	FileHandle::FileHandle(int64_t hIndex, int64_t ref)
+		:_handle_index{ hIndex }, _ref_count{ ref }
+	{
+	}
+
 	string_view FileHandle::GetFullPath() const
 	{
 		// Check Handle
@@ -72,6 +90,19 @@ namespace idk
 		auto& file = vfs.getFile(file_handle._internal_id);
 
 		return file._full_path;
+	}
+
+	string_view FileHandle::GetRelPath() const
+	{
+		// Check Handle
+		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
+			return string_view{};
+
+		auto& vfs = Core::GetSystem<FileSystem>();
+		auto& file_handle = vfs._file_handles[_handle_index];
+		auto& file = vfs.getFile(file_handle._internal_id);
+
+		return file._rel_path;
 	}
 
 	string_view FileHandle::GetParentMountPath() const
@@ -157,6 +188,20 @@ namespace idk
 		auto& parent = vfs.getFile(file._parent);
 
 		return parent._full_path;
+	}
+
+	string_view FileHandle::GetParentRelPath() const
+	{
+		// Check Handle
+		if (Core::GetSystem<FileSystem>().validateHandle(*this) == false)
+			return string_view{};
+
+		auto& vfs = Core::GetSystem<FileSystem>();
+		auto& file_handle = vfs._file_handles[_handle_index];
+		auto& file = vfs.getFile(file_handle._internal_id);
+		auto& parent = vfs.getFile(file._parent);
+
+		return parent._rel_path;
 	}
 
 	

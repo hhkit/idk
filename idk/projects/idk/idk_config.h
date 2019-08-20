@@ -19,7 +19,8 @@ namespace idk
 		//, class Constraint
 
 		/// GRAPHICS
-		//,	class MeshRenderer
+		,	class MeshRenderer
+		//,   class BoneRenderer
 		//, class Light
 
 		/// ANIMATION

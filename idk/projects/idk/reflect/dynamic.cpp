@@ -68,17 +68,17 @@ namespace idk::reflect
 
 	uni_container dynamic::to_container() const
 	{
-		return _ptr->to_container();
+		return type._context->to_container(_ptr->get());
 	}
 
 	enum_value dynamic::to_enum_value() const
 	{
-		return _ptr->to_enum_value();
+		return type._context->to_enum_value(_ptr->get());
 	}
 
 	vector<dynamic> dynamic::unpack() const
 	{
-		return _ptr->unpack();
+		return type._context->unpack(_ptr->get());
 	}
 
 

@@ -27,14 +27,17 @@
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
+    <ClInclude Include="anim\BoneRenderer.h" />
     <ClInclude Include="file\FileHandle.h" />
-    <ClInclude Include="gfx\VertexDescriptor.h" />
+    <ClInclude Include="gfx\MeshRenderer.h" />
+    <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\buffer_desc.h" />
     <ClInclude Include="gfx\DebugRenderer.h" />
     <ClInclude Include="gfx\debug_vtx_layout.h" />
     <ClInclude Include="gfx\pipeline_config.h" />
     <ClInclude Include="gfx\uniform_info.h" />
+    <ClInclude Include="gfx\Material.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
@@ -43,7 +46,7 @@
     <ClInclude Include="editor\IEditor.h" />
     <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="core\Handleables.h" />
-    <ClInclude Include="core\IncludeComponents.h" />
+    <ClInclude Include="IncludeComponents.h" />
     <ClInclude Include="core\GameState.h" />
     <ClInclude Include="core\ISystem.h" />
     <ClInclude Include="ds\ranged_for.h" />
@@ -75,7 +78,7 @@
     <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
-    <ClInclude Include="core\IncludeSystems.h" />
+    <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="app\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
@@ -92,7 +95,7 @@
     <ClInclude Include="res\Resource.h" />
     <ClInclude Include="res\ResourceFactory.h" />
     <ClInclude Include="res\ResourceHandle.h" />
-    <ClInclude Include="res\ResourceIncludes.h" />
+    <ClInclude Include="IncludeResources.h" />
     <ClInclude Include="res\ResourceManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="meta\meta.h" />
@@ -111,6 +114,7 @@
     <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
+    <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
@@ -158,7 +162,6 @@
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
     <None Include="event\Dispatcher_detail.inl" />
-    <None Include="file\FileSystem.inl" />
     <None Include="math\angle.inl" />
     <None Include="math\arith.inl" />
     <None Include="math\constants.inl" />
@@ -294,7 +297,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4201</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -337,7 +340,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4201</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

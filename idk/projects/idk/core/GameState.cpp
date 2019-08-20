@@ -1,8 +1,10 @@
 #include "stdafx.h"
+
+#include <IncludeComponents.h>
 #include <core/GameObject.h>
-#include <core/IncludeComponents.h>
-#include "GameState.h"
 #include <reflect/reflect.h>
+
+#include "GameState.h"
 
 namespace idk::detail
 {

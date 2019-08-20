@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "SystemManager.h"
-#include <core/IncludeSystems.h>
+#include <IncludeSystems.h>
 #include <ds/ranged_for.h>
 
 namespace idk

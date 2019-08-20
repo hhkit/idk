@@ -39,10 +39,17 @@ namespace idk
 
 	struct FileHandle
 	{
+		FileHandle() = default;
+		FileHandle(int64_t hIndex, int64_t ref);
+
 		string_view		GetFullPath() const;
+		string_view		GetRelPath() const;
 		string_view		GetMountPath() const;
+
+		string_view		GetExtension() const;
 		
 		string_view		GetParentFullPath() const;
+		string_view		GetParentRelPath() const;
 		string_view		GetParentMountPath() const;
 
 		bool			CanOpen() const;
