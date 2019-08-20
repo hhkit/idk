@@ -1,6 +1,8 @@
 #include "pch.h"
 #include <vulkan/vulkan.hpp>
 
+#include <math/matrix_transforms.h>
+
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanPipeline.h>
 #include <vkn/VulkanView.h>
@@ -10,6 +12,25 @@
 #include "VulkanDebugRenderer.h"
 namespace idk::vkn
 {
+
+	const std::vector<vec3>& GetSquareFace(bool is_line_list = false);
+	template<typename V, typename F>
+	V Transform(const V& v, F func);
+	template<typename U, typename V, typename F>
+	U Transform(const V& v, F func);
+
+
+	template<typename T, typename ... Args>
+	T concat(const T& t, const Args& ... args);
+
+
+	const vector<vec3>& GetUnitCube();
+
+	static vector<debug_vertex> ConvertVecToVert(const vector<vec3>& vec);
+	const vector<debug_vertex>& GetDebugCube();
+
+
+
 	struct vbo
 	{
 		uint32_t offset{};
@@ -42,6 +63,8 @@ namespace idk::vkn
 	{
 	}
 
+
+
 	void VulkanDebugRenderer::Init(const idk::pipeline_config& config, const idk::uniform_info& uniform_info)
 	{
 		auto& system = *vulkan_;
@@ -52,21 +75,42 @@ namespace idk::vkn
 		{
 			{DbgShape::eCube   ,
 				{
-					vec3{-0.5f,-0.5f,1.0f},
-					vec3{ 0.5f, 0.5f,1.0f},
-					vec3{-0.5f, 0.5f,1.0f},
+					GetDebugCube()
 				}
 			}
 			,
 			{DbgShape::eSquare,
 				{
+					ConvertVecToVert(GetSquareFace())
+					//vec3{-0.5f,-0.5f,0.0f},
+					//vec3{-0.5f, 0.5f,0.0f},
+					//vec3{ 0.5f, 0.5f,0.0f},
+					//
+					//vec3{ 0.5f, 0.5f,0.0f},
+					//vec3{ 0.5f,-0.5f,0.0f},
+					//vec3{-0.5f,-0.5f,0.0f},
+				}
+			}
+			,
+			{DbgShape::eEqTriangle,
+				{
+					/* //Line List
 					vec3{-0.5f,-0.5f,0.0f},
-					vec3{-0.5f, 0.5f,0.0f},
+					vec3{-0.0f, 0.5f,0.0f},
+
+					vec3{-0.0f, 0.5f,0.0f},
 					vec3{ 0.5f, 0.5f,0.0f},
 
 					vec3{ 0.5f, 0.5f,0.0f},
-					vec3{ 0.5f,-0.5f,0.0f},
 					vec3{-0.5f,-0.5f,0.0f},
+					/*/ //TriangleList         
+					vec3{-0.5f, 0.5f,0.0f},
+					vec3{ 0.0f, 0.5f-(sqrt(3.0f/2.0f)),0.0f},
+					vec3{ 0.5f, 0.5f,0.0f},
+					//  */
+					//vec3{ 0.5f, 0.5f,0.0f},
+					//vec3{ 0.5f,-0.5f,0.0f},
+					//vec3{-0.5f,-0.5f,0.0f},
 				}
 			}
 		};
@@ -115,4 +159,115 @@ namespace idk::vkn
 	}
 
 	VulkanDebugRenderer::~VulkanDebugRenderer() = default;
+
+
+
+
+	const std::vector<vec3>& GetSquareFace(bool is_line_list )
+	{
+		//vec3{-0.5f,-0.5f,0.0f},
+		//vec3{-0.5f, 0.5f,0.0f},
+		//vec3{ 0.5f, 0.5f,0.0f},
+		//
+		//vec3{ 0.5f, 0.5f,0.0f},
+		//vec3{ 0.5f,-0.5f,0.0f},
+		//vec3{-0.5f,-0.5f,0.0f},
+		static std::vector<vec3> triangle_list{
+			vec3{ -0.5f,-0.5f,0.0f },
+			vec3{ -0.5f, 0.5f,0.0f },
+			vec3{  0.5f, 0.5f,0.0f },
+			vec3{  0.5f, 0.5f,0.0f },
+			vec3{  0.5f,-0.5f,0.0f },
+			vec3{ -0.5f,-0.5f,0.0f },
+		};
+		static std::vector<vec3> line_list{
+			//line list
+
+				vec3{ -0.5f,-0.5f,0.0f },
+				vec3{ -0.5f, 0.5f,0.0f },
+				vec3{ -0.5f, 0.5f,0.0f },
+				vec3{  0.5f, 0.5f,0.0f },
+
+				vec3{  0.5f, 0.5f,0.0f },
+				vec3{  0.5f,-0.5f,0.0f },
+				vec3{  0.5f,-0.5f,0.0f },
+				vec3{ -0.5f,-0.5f,0.0f },
+				//*/
+		};
+		return (is_line_list) ? line_list : triangle_list;
+	}
+	template<typename V, typename F>
+	V Transform(const V& v, F func)
+	{
+		V result{ v };
+		for (auto& r : result)
+		{
+			r = func(r);
+		}
+		return result;
+	}
+	template<typename U, typename V, typename F>
+	U Transform(const V& v, F func)
+	{
+		U result{};
+		std::transform(std::begin(v), std::end(v), std::inserter(result, std::end(result)), func);
+		return result;
+	}
+
+	namespace detail
+	{
+		//Base case 
+		template<typename T, typename ... Args>
+		void concat(T&, const Args& ...) {}
+		//General case
+		template<typename T, typename U, typename ... Args>
+		void concat(T& result, const U& t, const Args& ... args)
+		{
+			std::copy(t.begin(), t.end(), std::back_inserter(result));
+			concat(result, args...);
+		}
+	}
+
+	template<typename T, typename ... Args>
+	T concat(const T& t, const Args& ... args)
+	{
+		T result;
+		detail::concat(result, t, args...);
+		return result;
+	}
+
+
+	const vector<vec3>& GetUnitCube()
+	{
+		static vector<vec3> vertices
+		{
+			concat(
+			Transform(GetSquareFace(),[](const vec3& v) {
+					mat3 r3 = rotate(vec3{0,1.0f,0},rad{pi * 0.0f   });
+					mat4 r{r3};
+					return r * (translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
+			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{0,1.0f,0},rad{pi * 0.5f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
+			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{0,1.0f,0},rad{pi * 1.0f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
+			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{0,1.0f,0},rad{pi * 1.5f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
+			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{1.0f,0,0},rad{pi * 0.5f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
+			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{1.0f,0,0},rad{pi * 1.5f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); })
+			)
+		};
+		return vertices;
+	}
+
+	static vector<debug_vertex> ConvertVecToVert(const vector<vec3>& vec)
+	{
+		vector<debug_vertex> result;
+		for (auto& v : vec)
+		{
+			result.emplace_back(v);
+		}
+		return result;
+	}
+	const vector<debug_vertex>& GetDebugCube()
+	{
+		static const auto data = ConvertVecToVert(GetUnitCube());
+		return data;
+	}
 }

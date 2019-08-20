@@ -1365,7 +1365,7 @@ namespace idk::vkn
 
 	void VulkanState::UpdateWindowSize(vec2 size)
 	{
-		m_window.size = size;
+		m_window.size = ivec2{ size };
 		m_ScreenResized = true;
 	}
 
@@ -1542,6 +1542,8 @@ namespace idk::vkn
 		{
 			dc.pipeline->Bind(command_buffer, *view_);
 			dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
+			vec3(&tmp)[36] = *r_cast<vec3(*)[36]>(rs.MasterBuffer().buffer.data() + 80);
+			vec4(&tmp2)[5] = *r_cast<vec4(*)[5]>(rs.MasterBuffer().buffer.data());
 			for (auto& [first_binding, offset] : dc.vtx_binding)
 			{
 				command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);

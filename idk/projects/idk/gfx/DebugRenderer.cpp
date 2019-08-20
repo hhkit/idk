@@ -40,7 +40,7 @@ namespace idk
 		config.frag_shader = frag_data;
 		config.vert_shader = vert_data;
 		config.fill_type = idk::FillType::eLine;
-		config.prim_top = idk::PrimitiveTopology::eLineStrip;
+		config.prim_top = idk::PrimitiveTopology::eTriangleList;
 		config.buffer_descriptions.emplace_back(
 			buffer_desc{
 				binding_info{0,sizeof(idk::debug_vertex),idk::VertexRate::eVertex},

@@ -12,6 +12,7 @@ enum DbgShape
 	eziPreBegin,
 	eCube,
 	eSquare,
+	eEqTriangle,
 	eziCount
 };
 struct debug_info
