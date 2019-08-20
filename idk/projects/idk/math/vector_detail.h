@@ -92,17 +92,22 @@ namespace idk::math
 			constexpr vector_base(T x, T y, T z, T w) : values{ x, y, z, w } {}
 		};
 
+		template<typename T>
+		struct is_vector : std::false_type {};
+
+		template<typename T, unsigned D>
+		struct is_vector<vector<T, D>> : std::true_type {};
+
 		template<typename T, unsigned D, unsigned ... Indexes>
 		constexpr auto VectorToTuple(const vector<T, D>& vec, std::integer_sequence<size_t, Indexes...>);
 
-		template<typename T>
 		constexpr auto VectorsToTuple();
+
+		template<typename T, typename ... Tail>
+		constexpr auto VectorsToTuple(T&& front_vec, const Tail& ... tail);
 
 		template<typename T, unsigned FrontD, typename ... Tail>
 		constexpr auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail);
-
-		template<typename T, typename ... Tail>
-		constexpr auto VectorsToTuple(const T& front_vec, const Tail& ... tail);
 
 		template <typename T, typename Tuple, unsigned ... Indexes>
 		constexpr auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>);
@@ -115,29 +120,35 @@ namespace idk::math
 			return std::forward_as_tuple(vec[Indexes]...);
 		}
 
-		template<typename T>
-		constexpr auto VectorsToTuple()
+		constexpr inline auto VectorsToTuple()
 		{
 			return std::tuple<>{};
+		}
+
+		template<typename T, typename ... Tail>
+		constexpr auto VectorsToTuple(T&& front_vec, const Tail& ... tail);
+
+		template<typename T, unsigned FrontD, typename ... Tail>
+		constexpr auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail);
+
+		template<typename T, typename ... Tail>
+		constexpr auto VectorsToTuple(T&& front_vec, const Tail& ... tail)
+		{
+			return std::tuple_cat(
+				std::tuple<T>(front_vec),
+				VectorsToTuple(tail...)
+			);
 		}
 
 		template<typename T, unsigned FrontD, typename ... Tail>
 		constexpr auto VectorsToTuple(const vector<T, FrontD>& front_vec, const Tail& ... tail)
 		{
 			return std::tuple_cat(
-				VectorToTuple<T>(front_vec, std::make_index_sequence<FrontD>{}),
-				VectorsToTuple<T>(tail...)
+				VectorToTuple(front_vec, std::make_index_sequence<FrontD>{}),
+				VectorsToTuple(tail...)
 			);
 		}
 
-		template<typename T, typename ... Tail>
-		constexpr auto VectorsToTuple(const T& front_vec, const Tail& ... tail)
-		{
-			return std::tuple_cat(
-				std::tuple<T>(front_vec),
-				VectorsToTuple<T>(tail...)
-			);
-		}
 
 		template <typename T, typename Tuple, unsigned ... Indexes>
 		constexpr auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>)
@@ -148,9 +159,8 @@ namespace idk::math
 		template<typename T, typename ... Args>
 		constexpr auto VectorConcat(const Args& ... vecs)
 		{
-			auto arg_tup = detail::VectorsToTuple(vecs...);
-			auto index = std::make_index_sequence <std::tuple_size_v<decltype(arg_tup)>>{};
-			return detail::TupleToVector<T>(arg_tup, index);
+			auto arg_tup = VectorsToTuple(vecs...);
+			return TupleToVector<T>(arg_tup, std::make_index_sequence <std::tuple_size_v<decltype(arg_tup)>>{});
 		}
 	}
 }

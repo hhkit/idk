@@ -55,7 +55,7 @@ namespace idk
 		static inline Guid Make()
 		{
 			Guid guid;
-			(CoCreateGuid((GUID*)& guid));
+			auto res = CoCreateGuid((GUID*)& guid); (res);
 			return guid;
 		}
 

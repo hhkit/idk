@@ -23,6 +23,7 @@ namespace idk
 
 	bool SceneManager::SetActiveScene(RscHandle<Scene> s)
 	{
+		_active_scene = s;
 		return true;
 	}
 
