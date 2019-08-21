@@ -50,13 +50,14 @@ namespace idk::ogl
 		glDeleteProgram(_program_id);
 	}
 
-	void Program::Attach(Shader&& shader)
+	Program& Program::Attach(Shader&& shader)
 	{
 		_shader_flags |= shader._shader_flags;
 		_shaders.emplace_back(std::move(shader));
+		return *this;
 	}
 
-	void Program::Link()
+	Program& Program::Link()
 	{
 		_program_id = glCreateProgram();
 		glProgramParameteri(_program_id, GL_PROGRAM_SEPARABLE, GL_TRUE);
@@ -65,6 +66,8 @@ namespace idk::ogl
 		for (auto& elem : _shaders)
 			glDetachShader(_program_id, elem._shader_id);
 		_shaders.clear();
+
+		return *this;
 	}
 
 	Program::Program(Program&& rhs) noexcept

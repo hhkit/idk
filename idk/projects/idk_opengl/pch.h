@@ -10,5 +10,6 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 #include <idk.h>
+#include <core/Core.h>
 #include <reflect/reflect.h>
 #endif //PCH_H

@@ -20,21 +20,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     
 	using namespace idk;
 	
-	auto c = Core{};
-	c.AddSystem<Windows>(hInstance, nCmdShow);
+	auto c = std::make_unique<Core>();
+	c->AddSystem<Windows>(hInstance, nCmdShow);
 
 	switch (GraphicsAPI::Default)
 	{
 		case GraphicsAPI::Vulkan:
-			c.AddSystem<VulkanWin32GraphicsSystem>();
+			c->AddSystem<VulkanWin32GraphicsSystem>();
 			break;
 		case GraphicsAPI::OpenGL:
-			c.AddSystem<ogl::Win32GraphicsSystem>();
+			c->AddSystem<ogl::Win32GraphicsSystem>();
 			break;
 		default:
 			break;
 	}
-	c.Run();
+	c->Run();
 	
-	return c.GetSystem<Windows>().GetReturnVal();
+	auto retval = c->GetSystem<Windows>().GetReturnVal();
+	c.reset();
+	return retval;
 }

@@ -1,9 +1,13 @@
 #include "pch.h"
 
-#include <core/Core.h>
 #include <glad/glad.h>
+
+#include <core/Core.h>
+#include <gfx/MeshRenderer.h>
+
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include <idk_opengl/system/OpenGLState.h>
+
 #include "OpenGLGraphicsSystem.h"
 
 namespace idk::ogl
@@ -16,10 +20,13 @@ namespace idk::ogl
 		CreateContext();
 		InitOpenGL();
 		InitResourceLoader();
+
+		_opengl = std::make_unique<OpenGLState>();
 	}
 
 	void Win32GraphicsSystem::Shutdown()
 	{
+		_opengl.reset();
 		DestroyContext();
 	}
 
@@ -28,7 +35,13 @@ namespace idk::ogl
 		span<const Transform> transforms, 
 		span<const Parent>    parents)
 	{
+		// todo: scenegraph traversal
+		std::vector<RenderObject> objects;
+		for (auto& elem : mesh_renderers)
+			if (elem.IsActiveAndEnabled())
+				objects.emplace_back(elem.GenerateRenderObject());
 
+		_opengl->SubmitBuffers(std::move(objects), {});
 	}
 
 	GraphicsAPI Win32GraphicsSystem::GetAPI()
@@ -41,6 +54,8 @@ namespace idk::ogl
 		glViewport(0, 0, 800, 600);
 		glClearColor(_clear_color.r, _clear_color.g, _clear_color.b, _clear_color.a);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		_opengl->RenderDrawBuffer();
 
 		::SwapBuffers(_windows_context);
 	}

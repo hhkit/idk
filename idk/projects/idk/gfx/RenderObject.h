@@ -1,18 +1,17 @@
 #pragma once
 #include <idk.h>
 #include <res/Resource.h>
+#include <gfx/MaterialInstance.h>
 
 namespace idk
 {
 	class Mesh;
-	class Material;
-	class MaterialInstance;
 
 	struct RenderObject
 	{
 		// resources
-		RscHandle<Mesh>             mesh;
-		RscHandle<MaterialInstance> material_instance;
+		RscHandle<Mesh>  mesh;
+		MaterialInstance material_instance;
 
 		// transform
 		vec3 velocity;
@@ -26,5 +25,5 @@ namespace idk
 		//sphere bounding_volume;
 	};
 
-	static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
+	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 }

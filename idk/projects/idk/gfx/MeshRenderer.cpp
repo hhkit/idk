@@ -1,12 +1,27 @@
 #include "stdafx.h"
 #include "MeshRenderer.h"
 #include <core/GameObject.h>
+#include <common/Transform.h>
 
 namespace idk
 {
 	bool MeshRenderer::IsActiveAndEnabled() const
 	{
 		return GetGameObject()->GetActiveInHierarchy() && enabled;
+	}
+
+	RenderObject MeshRenderer::GenerateRenderObject() const
+	{
+		return RenderObject{
+			mesh,
+			material_instance,
+
+			vec3{},
+			GetGameObject()->GetComponent<Transform>()->GetMatrix(),
+
+			cast_shadows,
+			receive_shadows
+		};
 	}
 
 	const renderer_reqs& MeshRenderer::GetRequiredAttributes()

@@ -11,7 +11,7 @@ namespace idk::ogl
 		void Set(string_view fragment_code);
 		void Set(const ShaderGraph&) {};
 
-		const Program& GetShaderProgram();
+		const Program& GetShaderProgram() const;
 	private:
 		Program program;
 	};

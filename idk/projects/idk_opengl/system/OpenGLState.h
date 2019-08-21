@@ -9,7 +9,10 @@ namespace idk::ogl
 	class OpenGLState
 	{
 	public:
+		void Setup();
 
+		void SubmitBuffers(vector<RenderObject>&& mesh_render, vector<RenderObject>&& skinned_mesh_render);
+		void RenderDrawBuffer();
 		void SwapWritingBuffer();
 		void SwapDrawingBuffer();
 
@@ -29,9 +32,13 @@ namespace idk::ogl
 
 		// variables
 		PipelineProgram        pipeline;
-		vector<RendererInfo>   vertex;
+		vector<RendererInfo>   renderer_vertex_shaders;
+		GLuint                 vao_id = 0;
+
+		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
-		unsigned               next_write_buffer;
-		unsigned               next_draw_buffer;
+		unsigned               curr_write_buffer  = 0;
+		unsigned               curr_draw_buffer   = 1;
+		bool                   write_buffer_dirty = false;
 	};
 }

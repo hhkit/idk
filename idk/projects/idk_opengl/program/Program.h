@@ -28,8 +28,8 @@ namespace idk::ogl
 		Program() = default;
 		~Program();
 
-		void Attach(Shader&& shader);
-		void Link();
+		Program& Attach(Shader&& shader);
+		Program& Link();
 
 		Program(Program&&) noexcept;
 		Program& operator=(Program&&) noexcept;

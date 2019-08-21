@@ -10,5 +10,6 @@ namespace idk
 	{
 	public:
 		virtual int GetAttribs() const = 0;
+		virtual ~Mesh() = default;
 	};
 }

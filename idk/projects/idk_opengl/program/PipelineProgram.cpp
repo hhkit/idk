@@ -52,7 +52,7 @@ namespace idk::ogl
 	}
 	void PipelineProgram::Use()
 	{
-		glUseProgram(_pipeline);
+		glBindProgramPipeline(_pipeline);
 	}
 	PipelineProgram::PipelineProgram(PipelineProgram&& rhs) noexcept
 		: _pipeline{rhs._pipeline}, _programs{std::move(rhs._programs)}
