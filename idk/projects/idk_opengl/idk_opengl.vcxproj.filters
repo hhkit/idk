@@ -40,8 +40,10 @@
     <ClCompile Include="OpenGLMeshFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="Program.cpp" />
     <ClCompile Include="PipelineProgram.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
       <Filter>program</Filter>
     </ClCompile>
   </ItemGroup>
