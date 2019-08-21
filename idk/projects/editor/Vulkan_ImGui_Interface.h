@@ -2,6 +2,8 @@
 
 
 namespace idk {
-	class VulkanState;
-	void VIInterface_Init(VulkanState*);
+	namespace vkn {
+		class VulkanState;
+	};
+	void VIInterface_Init(vkn::VulkanState*);
 };
