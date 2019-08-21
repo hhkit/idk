@@ -55,7 +55,8 @@ namespace idk
 		,   class AudioClip
 		//,	class Texture
 		//,	class Font
-		//,	class Mesh
+		//, class Skeleton
+		,	class Mesh
 		//,	class Animation
 		//,	class Level
 	>;

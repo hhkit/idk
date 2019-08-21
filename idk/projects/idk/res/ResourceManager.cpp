@@ -23,7 +23,7 @@ namespace idk
 			static array<shared_ptr<void>, sizeof...(Rs)> GenDefaults()
 			{
 				return array<shared_ptr<void>, sizeof...(Rs)>{
-					std::make_shared<Rs>()...
+					std::shared_ptr<Rs>()...
 				};
 			}
 		};

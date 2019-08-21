@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="system\OpenGLState.h" />
     <ClInclude Include="resource\OpenGLBuffer.h" />
     <ClInclude Include="system\OpenGLGraphicsSystem.h" />
     <ClInclude Include="resource\OpenGLMaterial.h" />

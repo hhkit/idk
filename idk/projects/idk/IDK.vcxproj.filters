@@ -308,6 +308,8 @@
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="math\interp\Spline.h" />
+    <ClInclude Include="gfx\RenderObject.h" />
+    <ClInclude Include="gfx\MaterialInstance.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

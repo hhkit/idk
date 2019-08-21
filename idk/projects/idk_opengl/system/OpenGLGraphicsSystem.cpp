@@ -3,10 +3,14 @@
 #include <core/Core.h>
 #include <glad/glad.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
+#include <idk_opengl/system/OpenGLState.h>
 #include "OpenGLGraphicsSystem.h"
 
 namespace idk::ogl
 {
+	Win32GraphicsSystem::Win32GraphicsSystem() = default;
+	Win32GraphicsSystem::~Win32GraphicsSystem() = default;
+
 	void Win32GraphicsSystem::Init()
 	{
 		CreateContext();

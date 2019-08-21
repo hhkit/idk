@@ -5,10 +5,14 @@
 
 namespace idk::ogl
 {
+	class OpenGLState;
+
 	class Win32GraphicsSystem
 		: public GraphicsSystem
 	{
 	public:
+		Win32GraphicsSystem();
+		~Win32GraphicsSystem();
 		void Init()         override;
 		void Shutdown()     override;
 		void BufferGraphicsState(span<MeshRenderer>, span<const Transform>, span<const Parent>) override;
@@ -18,6 +22,7 @@ namespace idk::ogl
 		HDC   _windows_context;
 		HGLRC _opengl_context;
 		color _clear_color;
+		unique_ptr<OpenGLState> _opengl;
 
 		void CreateContext();
 		void InitOpenGL();

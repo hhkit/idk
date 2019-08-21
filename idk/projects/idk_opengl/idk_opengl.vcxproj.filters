@@ -27,6 +27,9 @@
     <ClInclude Include="program\Program.h">
       <Filter>program</Filter>
     </ClInclude>
+    <ClInclude Include="system\OpenGLState.h">
+      <Filter>system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
