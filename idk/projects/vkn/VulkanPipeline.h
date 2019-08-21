@@ -12,6 +12,9 @@ namespace idk::vkn
 
 		vk::UniquePipelineLayout pipelinelayout{};
 		vk::UniquePipeline       pipeline{};
+
+		vk::UniqueDescriptorSetLayout uniform_layout{};
+
 	
 		void Create(config_t const& config, Vulkan_t& vulkan);
 		void Reset();
@@ -37,6 +40,7 @@ namespace idk::vkn
 		std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
 		vector<vk::DynamicState> GetDynamicStates(const config_t& config)const;
 		vk::PipelineLayoutCreateInfo GetLayoutInfo(const config_t& config)const;
+		void CreateUniformDescriptors(Vulkan_t& vulkan, const config_t& config);
 		vk::UniqueRenderPass& GetRenderpass(const config_t& config, VulkanView& vulkan);
 
 		// Vulkan_t is necessary cause it needs to get the descriptors from the pool

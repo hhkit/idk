@@ -14,4 +14,8 @@ namespace idk::vkn::hlp
 
 	using VertexInputDescriptions = std::pair < vector<vk::VertexInputBindingDescription>, vector<vk::VertexInputAttributeDescription >>;
 	auto ConvertVtxDesc   (const vector<buffer_desc>& descs) -> VertexInputDescriptions;
+
+	vk::ShaderStageFlagBits MapStage(uniform_layout_t::UniformStage stage);
+	vk::ShaderStageFlags MapStages(
+		const decltype(decltype(decltype(pipeline_config::uniform_layout)::bindings)::value_type::stages)& stages);
 }

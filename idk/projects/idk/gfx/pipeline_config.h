@@ -18,6 +18,23 @@ namespace idk
 		ePointList,
 		eLineList ,
 	};
+
+	struct uniform_layout_t
+	{
+		enum UniformStage
+		{
+			eVertex  ,
+			eFragment,
+		};
+		struct bindings_t
+		{
+			uint32_t binding;               //Can probably force it to be 1 binding
+			uint32_t descriptor_count;      //
+			hash_set<UniformStage> stages;  //Can probably force it to be both?
+		};
+		std::vector<bindings_t> bindings;
+	};
+
 	struct pipeline_config
 	{
 		string_view frag_shader{};
@@ -26,6 +43,7 @@ namespace idk
 		vector<buffer_desc> buffer_descriptions;
 		FillType fill_type = eFill;
 		PrimitiveTopology prim_top = eTriangleList;
+		uniform_layout_t uniform_layout;
 		bool restart_on_special_idx = false; //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
 	};
 }

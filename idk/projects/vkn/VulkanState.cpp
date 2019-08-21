@@ -1210,7 +1210,7 @@ namespace idk::vkn
 		{
 			vk::DescriptorPoolSize{
 				vk::DescriptorType::eUniformBuffer,
-				hlp::arr_count(m_swapchain.images)*2
+				hlp::arr_count(m_swapchain.images)*3
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
@@ -1442,6 +1442,13 @@ namespace idk::vkn
 		//OpenGL's Y Clip coords is inverted compared to vulkan.
 		ubo.projection[1][1] *= -1;
 		hlp::MapMemory(*m_device, *m_swapchain.uniform_buffers[image_index].second, 0, &ubo, static_cast<vk::DeviceSize>(sizeof(ubo)), dispatcher);
+
+		mat4 vp[]
+		{
+			ubo.view,
+			ubo.projection
+		};
+		hlp::MapMemory(*m_device, *m_swapchain.uniforms2.uniform_buffer(image_index).second, 0, vp, hlp::buffer_size(vp), dispatcher);
 	}
 	vk::DebugUtilsMessengerCreateInfoEXT VulkanState::populateDebugMessengerCreateInfo(ValHandler* userData) {
 		vk::DebugUtilsMessageSeverityFlagsEXT severity_flags;

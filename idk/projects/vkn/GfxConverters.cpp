@@ -99,4 +99,24 @@ namespace idk::vkn::hlp
 		}
 		return result;
 	}
+	vk::ShaderStageFlagBits MapStage(uniform_layout_t::UniformStage stage)
+	{
+		const static hash_table< uniform_layout_t::UniformStage, vk::ShaderStageFlagBits> map
+		{
+			{ uniform_layout_t::eFragment,vk::ShaderStageFlagBits::eFragment },
+		{ uniform_layout_t::eVertex,vk::ShaderStageFlagBits::eVertex },
+		};
+		auto itr = map.find(stage);
+		assert(itr != map.end());
+		return itr->second;
+	}
+	vk::ShaderStageFlags MapStages(const decltype(decltype(decltype(pipeline_config::uniform_layout)::bindings)::value_type::stages)& stages)
+	{
+		vk::ShaderStageFlags result{};
+		for (auto& stage : stages)
+		{
+			result |= MapStage(stage);
+		}
+		return result;
+	}
 }

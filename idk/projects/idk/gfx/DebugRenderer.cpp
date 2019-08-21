@@ -41,6 +41,7 @@ namespace idk
 		config.vert_shader = vert_data;
 		config.fill_type = idk::FillType::eLine;
 		config.prim_top = idk::PrimitiveTopology::eTriangleList;
+		config.uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 0,2,{uniform_layout_t::eVertex} });
 		config.buffer_descriptions.emplace_back(
 			buffer_desc{
 				binding_info{0,sizeof(idk::debug_vertex),idk::VertexRate::eVertex},
