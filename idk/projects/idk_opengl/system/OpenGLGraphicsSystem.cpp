@@ -22,6 +22,7 @@ namespace idk::ogl
 		InitResourceLoader();
 
 		_opengl = std::make_unique<OpenGLState>();
+		_opengl->Setup();
 	}
 
 	void Win32GraphicsSystem::Shutdown()

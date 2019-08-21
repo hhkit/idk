@@ -45,16 +45,17 @@ namespace idk::ogl
 		for (auto& elem : object_buffer[curr_draw_buffer].skinned_mesh_render)
 		{
 			// bind shader
-			auto& material = static_cast<const OpenGLMaterial&>(*elem.material_instance.material);
+			auto& material = s_cast<const OpenGLMaterial&>(*elem.material_instance.material);
 			pipeline.PushProgram(material.GetShaderProgram());
 
 			// bind attribs
-			s_cast<OpenGLMesh&>(*elem.mesh).Bind(MeshRenderer::GetRequiredAttributes());
+			auto& mesh = s_cast<OpenGLMesh&>(*elem.mesh);
+			mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 			// set uniforms
 
 			// draw
-			s_cast<OpenGLMesh&>(*elem.mesh).Draw();
+			mesh.Draw();
 		}
 	}
 
