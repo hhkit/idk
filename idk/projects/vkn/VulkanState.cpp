@@ -442,7 +442,9 @@ namespace idk::vkn
 	{
 		std::vector<const char*> layers
 		{
-			//"VK_LAYER_KHRONOS_validation"
+#ifndef WX_VAL_VULK
+			"VK_LAYER_KHRONOS_validation"
+#endif
 		};
 		return layers;
 	}
@@ -612,15 +614,19 @@ namespace idk::vkn
 			hlp::arr_count(extensions),
 			extensions.data()
 		);
-		//auto debugInfo = populateDebugMessengerCreateInfo();
-		//instInfo.pNext = &debugInfo;
-
+#ifndef WX_VAL_VULK
+		auto debugInfo = populateDebugMessengerCreateInfo();
+		instInfo.pNext = &debugInfo;
+#endif
 		instInfo.pNext = nullptr;
 		try
 		{
 			*instance = vk::createInstance(instInfo, nullptr, dispatcher);
 			dyn_dispatcher.init(*instance, vkGetInstanceProcAddr);
-			//m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
+#ifndef WX_VAL_VULK
+
+			m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
+#endif
 			//if (result != vk::Result::eSuccess)
 			//{
 			//	std::cout << "FAILED TO CREATE" << std::endl;
@@ -1232,7 +1238,7 @@ namespace idk::vkn
 				vk::CommandBufferAllocateInfo rs_alloc_info
 				{
 					*m_commandpool
-					,vk::CommandBufferLevel::ePrimary
+					,vk::CommandBufferLevel::eSecondary
 					,2//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 				};
 				auto cmd_buffers = m_device->allocateCommandBuffersUnique(rs_alloc_info, dispatcher);
@@ -1247,6 +1253,14 @@ namespace idk::vkn
 			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 		};
 		m_commandbuffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
+
+		vk::CommandBufferAllocateInfo allocPriInfo
+		{
+			*m_commandpool
+			,vk::CommandBufferLevel::ePrimary
+			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+		};
+		m_pri_commandbuffers = m_device->allocateCommandBuffersUnique(allocPriInfo, dispatcher);
 
 		size_t i = 0;
 		for (auto& commandBuffer : m_commandbuffers) {
@@ -1276,8 +1290,8 @@ namespace idk::vkn
 				,1
 				,&clearcolor
 			};
-			dbg_vertex_buffer->Update<decltype(g_vinstanced)::value_type>(0, g_vinstanced, *commandBuffer);
 			//commandBuffer->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
+
 			commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, dispatcher);
 			std::vector<vk::Buffer> vertex_buffers
 			{
@@ -1293,7 +1307,7 @@ namespace idk::vkn
 			commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
 			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
 			commandBuffer->drawIndexed(hlp::arr_count(g_indices), 2, 0, 0, 0, dispatcher);
-			commandBuffer->executeCommands(rss[(i+1)%rss.size()].CommandBuffer(), dispatcher);
+			//commandBuffer->executeCommands(rss[(i+1)%rss.size()].CommandBuffer(), dispatcher);
 			//commandBuffer->endRenderPass(dispatcher);
 			commandBuffer->end(dispatcher);
 			++i;
@@ -1520,23 +1534,27 @@ namespace idk::vkn
 
 		vk::CommandBufferBeginInfo begin_info
 		{
-			vk::CommandBufferUsageFlags{}//::eRenderPassContinue
-			,nullptr//&inherit_info
+			vk::CommandBufferUsageFlagBits::eRenderPassContinue
+			,&inherit_info//&inherit_info
 		};
-		vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
-		vk::RenderPassBeginInfo renderPassInfo
+
+		vk::CommandBufferInheritanceInfo trf_inherit{};
+		vk::CommandBufferBeginInfo trf_begin_info
 		{
-			rs.RenderPass()
-			,*m_swapchain.frame_buffers[m_swapchain.curr_index]
-			,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
-			,1
-			,&clearcolor
+			vk::CommandBufferUsageFlags{},
+			&trf_inherit
 		};
-		//rs.transfer_buffer->begin(beginInfo);
-		rs.CommandBuffer().begin(begin_info);
+
+
+		rs.TransferBuffer().reset(vk::CommandBufferResetFlags{}, dispatcher);
+		rs.TransferBuffer().begin(trf_begin_info, dispatcher);
+		dbg_vertex_buffer->Update<decltype(g_vinstanced)::value_type>(0, g_vinstanced, rs.TransferBuffer());
 		rs.UpdateMasterBuffer(*view_);
-		command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
-		command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index],dispatcher);
+		rs.TransferBuffer().end();
+
+
+		//rs.transfer_buffer->begin(beginInfo);
+		command_buffer.begin(begin_info);
 		//rs.transfer_buffer->end();
 		for (auto& dc : rs.DrawCalls())
 		{
@@ -1550,7 +1568,6 @@ namespace idk::vkn
 			}
 			command_buffer.draw(dc.vertex_count, dc.instance_count, 0, 0, dispatcher);
 		}
-		command_buffer.endRenderPass(dispatcher);
 		command_buffer.end(dispatcher);
 
 
@@ -1594,12 +1611,41 @@ namespace idk::vkn
 
 		{
 			auto& render_state = view_->CurrRenderState();
+			auto& command_buffer = *m_pri_commandbuffers[m_swapchain.curr_index];
 			EndFrame();
+
+			vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
+			vk::RenderPassBeginInfo renderPassInfo
+			{
+				render_state.RenderPass()
+				,*m_swapchain.frame_buffers[m_swapchain.curr_index]
+				,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
+				,1
+				,&clearcolor
+			};
+vk::CommandBufferBeginInfo begin_info
+			{
+				vk::CommandBufferUsageFlags{}
+				,nullptr//&inherit_info
+			};
+			command_buffer.reset(vk::CommandBufferResetFlags{},dispatcher);
+			command_buffer.begin(begin_info);
+			
+			command_buffer.executeCommands(render_state.TransferBuffer(), dispatcher);
+			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
+
+
+			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
+
+			command_buffer.executeCommands(render_state.CommandBuffer(), dispatcher);
+			command_buffer.endRenderPass(dispatcher);
+			command_buffer.end();
+
 			vk::CommandBuffer cmds[] =
 			{
 				//render_state.TransferBuffer(),
 				//*m_commandbuffers[imageIndex],
-				render_state.CommandBuffer(),
+				command_buffer,
 			};
 			vk::SubmitInfo render_state_submit_info
 			{

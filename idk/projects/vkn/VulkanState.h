@@ -136,6 +136,7 @@ namespace idk::vkn
 
 		vk::UniqueCommandPool                m_commandpool;
 		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
+		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
 		std::vector<PresentationSignals>     m_pres_signals;
 		SwapChainInfo                        m_swapchain;
 

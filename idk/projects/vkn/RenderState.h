@@ -23,7 +23,7 @@ namespace idk::vkn
 		master_buffer&     MasterBuffer() { return _master_buffer; }
 		vk::Buffer&        Buffer() { return _master_buffer.host_buffer.buffer(); }
 		vk::RenderPass&    RenderPass() { return _render_pass; }
-		vk::CommandBuffer& TransferBuffer() { return *_command_buffer; }
+		vk::CommandBuffer& TransferBuffer() { return *_transfer_buffer; }
 		vk::CommandBuffer& CommandBuffer() { return *_command_buffer; }
 		vector<draw_call>& DrawCalls() { return _draw_calls; };
 
