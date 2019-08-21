@@ -306,8 +306,12 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="gfx\MeshRenderer.h" />
-    <ClInclude Include="ds\small_string.h" />
-    <ClInclude Include="ds\compressed_pair.h" />
+    <ClInclude Include="ds\compressed_pair.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\small_string.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -518,8 +522,12 @@
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
     </None>
-    <None Include="ds\compressed_pair.inl" />
-    <None Include="ds\small_string.inl" />
+    <None Include="ds\compressed_pair.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\small_string.inl">
+      <Filter>ds</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
