@@ -318,6 +318,8 @@
     <ClInclude Include="shape\capsule.h" />
     <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="shape\ray.h" />
+    <ClInclude Include="phys\Collider.h" />
+    <ClInclude Include="shape\obb.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
