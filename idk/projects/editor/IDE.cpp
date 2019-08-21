@@ -9,7 +9,10 @@ namespace idk
 	void IDE::Init()
 	{
 		// do imgui stuff
-
+		vkn::VulkanWin32GraphicsSystem * vksys = &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>();
+		vkn::VulkanState* inst = &vksys->Instance();
+		
+		VIInterface_Init(inst);
 	}
 
 	void IDE::Shutdown()
