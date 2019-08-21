@@ -32,11 +32,8 @@ namespace idk {
 		auto* CoreSystem = audioSystem._Core_System;
 
 		try {
-			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), FMOD_LOOP_OFF | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
-			newSound->is3Dsound = true;
-			newSound->isUnique = false;
-			newSound->loop = false;
-			newSound->_soundHandle->setSoundGroup(audioSystem._soundGroup_SFX);
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
+			newSound->ReassignSoundGroup(AudioClip::SubSoundGroup_SFX);
 
 		}
 		catch (EXCEPTION_AudioSystem i) { //If an error occurs here, delete newSound and return nullptr
