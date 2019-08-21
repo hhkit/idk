@@ -853,6 +853,26 @@ namespace idk::vkn
 			,std::data(uboLayoutBinding)
 		};
 		m_descriptorsetlayout = m_device->createDescriptorSetLayoutUnique(uboLayoutCreateInfo, nullptr, dispatcher);
+
+		vk::DescriptorSetLayoutBinding uboLayoutBinding2[]
+		{
+			vk::DescriptorSetLayoutBinding{
+			 0
+			,vk::DescriptorType::eUniformBuffer
+			,2
+			,vk::ShaderStageFlagBits::eVertex
+			, nullptr //pImmutableSamplers
+			}
+		};
+		vk::DescriptorSetLayoutCreateInfo uboLayoutCreateInfo2
+		{
+			 vk::DescriptorSetLayoutCreateFlags{}
+			,hlp::arr_count(uboLayoutBinding2)
+			,std::data(uboLayoutBinding2)
+		};
+		;
+		m_swapchain.uniforms2.layout = m_device->createDescriptorSetLayoutUnique(uboLayoutCreateInfo2, nullptr, dispatcher);
+
 	}
 
 	void VulkanState::createGraphicsPipeline()
@@ -1169,21 +1189,34 @@ namespace idk::vkn
 			uniform = std::move(pair);
 		}
 
+		vk::DeviceSize bufferSize2 = sizeof(mat4)*2;
+		m_swapchain.uniforms2.Init(size);
+
+		for (auto& p : m_swapchain.uniforms2)
+		{
+			auto& uniform = p.uniform_buffer;
+			auto pair = hlp::CreateAllocBindBuffer(
+				pdevice, *m_device, bufferSize2,
+				vk::BufferUsageFlagBits::eUniformBuffer,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+				dispatcher);
+			uniform = std::move(pair);
+		}
 	}
 
 	void VulkanState::createDescriptorPool()
 	{
 		vk::DescriptorPoolSize pool_size[]
 		{
-			{
+			vk::DescriptorPoolSize{
 				vk::DescriptorType::eUniformBuffer,
-				hlp::arr_count(m_swapchain.images)
+				hlp::arr_count(m_swapchain.images)*2
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
 			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
-			,hlp::arr_count(m_swapchain.images)
+			,hlp::arr_count(m_swapchain.images)*2
 			,hlp::arr_count(pool_size)
 			,std::data(pool_size)
 		};
@@ -1225,6 +1258,59 @@ namespace idk::vkn
 				,nullptr
 				,std::data(bufferInfo)
 				,nullptr
+			};
+			m_device->updateDescriptorSets(descriptorWrite, nullptr, dispatcher);
+
+		}
+
+		//For new stuff
+
+		std::vector<vk::DescriptorSetLayout> layouts2{ m_swapchain.uniforms2.size(), *m_swapchain.uniforms2.layout };
+		vk::DescriptorSetAllocateInfo allocInfo2
+		{
+			*m_descriptorpool
+			,hlp::arr_count(layouts2)
+			,std::data(layouts2)
+		};
+		auto ds2 = m_device->allocateDescriptorSets(allocInfo2, dispatcher);
+		for (uint32_t i = 0; i < m_swapchain.uniforms2.size(); ++i)
+		{
+			m_swapchain.uniforms2.descriptor_set(i) = ds2[i];
+		}
+		i = 0;
+		for ([[maybe_unused]] auto& [buffer,dset] : m_swapchain.uniforms2)
+		{
+			auto& [ubuffer, memory] = buffer;
+			//auto& dset = ds2[i++];
+			vk::DescriptorBufferInfo bufferInfo[] =
+			{
+				vk::DescriptorBufferInfo
+				{
+					*ubuffer
+					, 0
+					,sizeof(mat4)
+				},
+				vk::DescriptorBufferInfo
+				{
+					*ubuffer
+					, sizeof(mat4)
+					,sizeof(mat4)
+				}
+			};
+			;
+
+			vector<vk::WriteDescriptorSet> descriptorWrite
+			{
+				vk::WriteDescriptorSet{
+					dset
+					,0
+					,0
+					,hlp::arr_count(bufferInfo)
+					,vk::DescriptorType::eUniformBuffer
+					,nullptr
+					,std::data(bufferInfo)
+					,nullptr
+				}
 			};
 			m_device->updateDescriptorSets(descriptorWrite, nullptr, dispatcher);
 

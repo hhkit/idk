@@ -47,6 +47,38 @@ namespace idk::vkn
 
 		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
 		std::vector<vk::DescriptorSet    > descriptor_sets;
+
+		struct UniformStuff
+		{
+			std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> uniform_buffer;
+			vk::DescriptorSet descriptor_set;
+
+		};
+		struct Uniforms
+		{
+			vk::UniqueDescriptorSetLayout        layout;
+
+			vector<UniformStuff> frame;
+			void Init(size_t num) { frame.resize(num); }
+			auto& uniform_buffer(size_t index) { return frame[index].uniform_buffer; }
+			auto& descriptor_set(size_t index) { return frame[index].descriptor_set; }
+
+			decltype(frame)::iterator begin() { return frame.begin(); }
+			decltype(frame)::iterator end  () { return frame.end  (); }
+			uint32_t size() { return s_cast<uint32_t>(frame.size()); }
+		};
+		//struct UniformManager
+		//{
+		//	struct BindingInfo
+		//	{
+		//		uint32_t offset;
+		//		uint32_t size;
+		//	};
+		//	hlp::vector_buffer master_bo;
+		//	string             local_buffer;
+		//	vector<BindingInfo> bindings;
+		//};
+		Uniforms uniforms2;
 	};
 	class VulkanView;
 
