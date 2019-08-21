@@ -36,6 +36,7 @@
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\Material.h" />
     <ClInclude Include="math\interp\Spline.h" />
+    <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -84,6 +85,9 @@
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
+    <ClInclude Include="shape\capsule.h" />
+    <ClInclude Include="shape\ray.h" />
+    <ClInclude Include="shape\sphere.h" />
     <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
@@ -143,6 +147,8 @@
     <ClCompile Include="serialize\serialize.cpp" />
     <ClCompile Include="shape\aabb.cpp" />
     <ClCompile Include="reflect\enum_type.cpp" />
+    <ClCompile Include="shape\ray.cpp" />
+    <ClCompile Include="shape\sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />

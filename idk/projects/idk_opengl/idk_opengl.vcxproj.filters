@@ -55,7 +55,9 @@
     <ClCompile Include="program\Program.cpp">
       <Filter>program</Filter>
     </ClCompile>
-    <ClCompile Include="system\OpenGLState.cpp" />
+    <ClCompile Include="system\OpenGLState.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

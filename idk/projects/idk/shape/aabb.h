@@ -11,6 +11,7 @@ namespace idk
 		// accessors
 		vec3  center() const;
 		vec3  size()   const;
+		vec3  extents() const;
 
 		// modifiers
 		aabb& translate(const vec3& trans);
@@ -21,7 +22,7 @@ namespace idk
 
 		// collision
 		bool contains(const vec3& point) const;
-		bool contains(const aabb& box) const;
-		bool overlaps(const aabb& box) const;
+		bool contains(const aabb& box)   const;
+		bool overlaps(const aabb& box)   const;
 	};
 }

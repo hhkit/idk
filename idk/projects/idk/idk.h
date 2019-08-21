@@ -60,9 +60,10 @@ namespace idk
 	auto duration_cast(U&& time) {	return std::chrono::duration_cast<T>(std::forward<U>(time));	};
 
 	// math constants
-	constexpr auto pi = math::constants::pi<real>();
+	constexpr auto pi      = math::constants::pi<real>();
 	constexpr auto half_pi = pi / 2;
-	constexpr auto two_pi = math::constants::tau<real>();
+	constexpr auto two_pi  = math::constants::tau<real>();
+	constexpr auto epsilon = math::constants::epsilon<real>();
 
 	// containers
 	using byte = std::byte;

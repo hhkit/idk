@@ -13,6 +13,11 @@ namespace idk
 	{
 		return max - min;
 	}
+
+	vec3 aabb::extents() const
+	{
+		return size() / 2;
+	}
 	
 	aabb& aabb::translate(const vec3& trans)
 	{
@@ -50,7 +55,7 @@ namespace idk
 	aabb& aabb::grow(const vec3& rhs)
 	{
 		for (auto [elem, emin, emax] : zip(rhs, min, max))
-			(elem < 0 ? emin : emax) += elem;
+			(elem < -epsilon ? emin : emax) += elem;
 		return *this;
 	}
 	
