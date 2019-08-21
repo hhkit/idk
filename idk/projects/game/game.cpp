@@ -8,13 +8,6 @@
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 
-enum class GraphicsLibrary
-{
-	OpenGL,
-	Vulkan,
-	Default = OpenGL
-};
-
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -30,12 +23,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = Core{};
 	c.AddSystem<Windows>(hInstance, nCmdShow);
 
-	switch (GraphicsLibrary::Default)
+	switch (GraphicsAPI::Default)
 	{
-		case GraphicsLibrary::Vulkan:
+		case GraphicsAPI::Vulkan:
 			c.AddSystem<VulkanWin32GraphicsSystem>();
 			break;
-		case GraphicsLibrary::OpenGL:
+		case GraphicsAPI::OpenGL:
 			c.AddSystem<ogl::Win32GraphicsSystem>();
 			break;
 		default:

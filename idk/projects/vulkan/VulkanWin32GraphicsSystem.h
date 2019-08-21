@@ -16,6 +16,7 @@ namespace idk
 		void Init() override ;
 		void Shutdown() override;
 		void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
+		GraphicsAPI GetAPI() override;
 		void RenderBuffer() override;
 	private:
 		template<typename T, typename D = vk::DispatchLoaderStatic>

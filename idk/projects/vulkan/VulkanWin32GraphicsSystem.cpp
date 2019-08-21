@@ -34,6 +34,10 @@ namespace idk
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 	}
+	GraphicsAPI VulkanWin32GraphicsSystem::GetAPI()
+	{
+		return GraphicsAPI::Vulkan;
+	}
 	void VulkanWin32GraphicsSystem::RenderBuffer()
 	{
 	}

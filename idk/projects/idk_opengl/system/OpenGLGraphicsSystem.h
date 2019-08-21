@@ -12,6 +12,7 @@ namespace idk::ogl
 		void Init()         override;
 		void Shutdown()     override;
 		void BufferGraphicsState(span<MeshRenderer>, span<const Transform>, span<const Parent>) override;
+		GraphicsAPI GetAPI() override;
 		void RenderBuffer() override;
 	private:
 		HDC   _windows_context;

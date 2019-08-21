@@ -27,6 +27,11 @@ namespace idk::ogl
 
 	}
 
+	GraphicsAPI Win32GraphicsSystem::GetAPI()
+	{
+		return GraphicsAPI::OpenGL;
+	}
+
 	void Win32GraphicsSystem::RenderBuffer()
 	{
 		glViewport(0, 0, 800, 600);
