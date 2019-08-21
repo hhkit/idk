@@ -9,6 +9,11 @@
 #include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
 #include <vkn/utils/utils.h>
+
+
+//Uncomment to disable validation
+//#define WX_VAL_VULK
+
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
 //Temporary, should move elsewhere
