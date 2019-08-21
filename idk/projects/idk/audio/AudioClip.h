@@ -55,6 +55,10 @@ namespace idk
 		bool	GetIsUnique() const;
 		void	SetIs3DSound(bool i);
 		bool	GetIs3DSound() const;
+		void	SetMinDistance(float i);
+		float	GetMinDistance() const;
+		void	SetMaxDistance(float i);
+		float	GetMaxDistance() const;
 
 		void ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
 
@@ -71,8 +75,8 @@ namespace idk
 
 		float	volume		{ 1.0f		};	//Default = 1 Range: [0,1]
 		float	pitch		{ 1.0f		};	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
-		float	minDistance	{ 100.0f	};	//Minimum distance where volume is at max					 
-		float	maxDistance	{ 10000.0f	};	//Maximum distance where i can hear the sound					 
+		float	minDistance	{ 1.0f		};	//Minimum distance where volume is at max. This is in meters					 
+		float	maxDistance	{ 100.0f	};	//Maximum distance where i can hear the sound. This is in meters					 
 		float	frequency	{ 44100.0f	};	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
 		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 //These are not saved, rather it is controlled by which SoundGroup it is at. 
 		bool	isPlaying	{ false		};	//Is the audio currently playing? If the audio is paused, it is still considered playing!
@@ -84,6 +88,7 @@ namespace idk
 		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
 		void UpdateChannel(); //Updates the channel to null if it is not playing. It's important to update the channel before doing anything to it.
 		void UpdateFmodMode(); //A wrapper.
+		void UpdateMinMaxDistance(); //A wrapper.
 	};
 
 }

@@ -153,6 +153,29 @@ namespace idk
 		return is3Dsound;
 	}
 
+	void AudioClip::SetMinDistance(float i)
+	{
+		minDistance = i;
+		UpdateMinMaxDistance();
+		
+	}
+
+	float AudioClip::GetMinDistance() const
+	{
+		return minDistance;
+	}
+
+	void AudioClip::SetMaxDistance(float i)
+	{
+		maxDistance = i;
+		UpdateMinMaxDistance();
+	}
+
+	float AudioClip::GetMaxDistance() const
+	{
+		return maxDistance;
+	}
+
 	void AudioClip::UpdateChannel()
 	{
 		if (_soundChannel) { //check if it is a nullptr or not
@@ -194,7 +217,19 @@ namespace idk
 
 		UpdateChannel();
 		if (_soundChannel) {
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setMode(fmodMode));
+			audioSystem.ParseFMOD_RESULT(_soundChannel->setMode(fmodMode));
+		}
+	}
+
+	void AudioClip::UpdateMinMaxDistance()
+	{
+		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+		audioSystem.ParseFMOD_RESULT(_soundHandle->set3DMinMaxDistance(minDistance, maxDistance));
+
+		UpdateChannel();
+		if (_soundChannel) {
+			audioSystem.ParseFMOD_RESULT(_soundChannel->set3DMinMaxDistance(minDistance, maxDistance));
+
 		}
 	}
 
