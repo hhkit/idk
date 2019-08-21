@@ -262,7 +262,7 @@ namespace idk
 	void AudioSystem::SetChannel_MASTER_Volume(const float& newVolume)
 	{
 
-		ParseFMOD_RESULT(_channelGroup_MASTER->setVolume(0.5f));
+		ParseFMOD_RESULT(_channelGroup_MASTER->setVolume(newVolume));
 	}
 
 	void AudioSystem::SetChannel_SFX_Volume(const float& newVolume)

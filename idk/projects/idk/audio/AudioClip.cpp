@@ -26,7 +26,7 @@ namespace idk
 	AudioClip::~AudioClip()
 	{
 		if (_soundHandle) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundHandle->release());
 		}
 		_soundHandle = nullptr;
@@ -46,26 +46,30 @@ namespace idk
 	void AudioClip::Stop()
 	{
 		if (_soundChannel) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->stop()); //Stop and forget.
 			_soundChannel = nullptr;
 		}
 	}
 
-	void AudioClip::Pause()
+	void AudioClip::SetIsPaused(bool i)
 	{
+		UpdateChannel();
 		if (_soundChannel) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setPaused(true));
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+			audioSystem.ParseFMOD_RESULT(_soundChannel->setPaused(i));
 		}
 	}
 
-	void AudioClip::Unpause()
+	bool AudioClip::GetIsPaused()
 	{
+		bool returnVal = false;
+		UpdateChannel();
 		if (_soundChannel) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setPaused(false));
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+			audioSystem.ParseFMOD_RESULT(_soundChannel->getPaused(&returnVal));
 		}
+		return returnVal;
 	}
 
 	void AudioClip::SetVolume(float i)
@@ -73,9 +77,14 @@ namespace idk
 		volume = i;
 		UpdateChannel();
 		if (_soundChannel) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setVolume(volume));
 		}
+	}
+
+	float AudioClip::GetVolume() const
+	{
+		return volume;
 	}
 
 	void AudioClip::SetPitch(float i)
@@ -83,9 +92,14 @@ namespace idk
 		pitch = i;
 		UpdateChannel();
 		if (_soundChannel) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setPitch(pitch));
 		}
+	}
+
+	float AudioClip::GetPitch() const
+	{
+		return pitch;
 	}
 
 	void AudioClip::SetPriority(int i)
@@ -93,40 +107,128 @@ namespace idk
 		priority = i;
 		UpdateChannel();
 		if (_soundChannel) {
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setPriority(priority));
 		}
+	}
+
+	int AudioClip::GetPriority() const
+	{
+		return priority;
+	}
+
+	void AudioClip::SetIsLoop(bool i)
+	{
+		isLoop = i;
+		UpdateFmodMode();
+
+	}
+
+	bool AudioClip::GetIsLoop() const
+	{
+		return isLoop;
+	}
+
+	void AudioClip::SetIsUnique(bool i)
+	{
+		isUnique = i;
+		UpdateFmodMode();
+
+	}
+
+	bool AudioClip::GetIsUnique() const
+	{
+		return isUnique;
+	}
+
+	void AudioClip::SetIs3DSound(bool i)
+	{
+		is3Dsound = i;
+		UpdateFmodMode();
+
+	}
+
+	bool AudioClip::GetIs3DSound() const
+	{
+		return is3Dsound;
+	}
+
+	void AudioClip::SetMinDistance(float i)
+	{
+		minDistance = i;
+		UpdateMinMaxDistance();
+		
+	}
+
+	float AudioClip::GetMinDistance() const
+	{
+		return minDistance;
+	}
+
+	void AudioClip::SetMaxDistance(float i)
+	{
+		maxDistance = i;
+		UpdateMinMaxDistance();
+	}
+
+	float AudioClip::GetMaxDistance() const
+	{
+		return maxDistance;
 	}
 
 	void AudioClip::UpdateChannel()
 	{
 		if (_soundChannel) { //check if it is a nullptr or not
-			auto& audioSystem = Core::GetSystem<AudioSystem>();
+			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			FMOD::Sound* check;
 			//In the event that there is a LOT of sounds and channels are stolen, this checks if the channel is still its own.
 			audioSystem.ParseFMOD_RESULT(_soundChannel->getCurrentSound(&check));
 			char name[512];
 			check->getName(name,512);
-			printf(name,"%s\n");
+			//printf(name,"%s\n");
 			if (check == _soundHandle) { //check returns null if no sound in that channel is playing.
 				audioSystem.ParseFMOD_RESULT(_soundChannel->isPlaying(&isPlaying));
 				if (isPlaying == false) {
 					_soundChannel = nullptr; //Forget the channel once it is done playing
-					printf("Channel finished playing\n");
+					//printf("Channel finished playing\n");
 
 				}
-				printf("Channel still playing\n");
+				//printf("Channel still playing\n");
 
 			}
 			else {
 				isPlaying = false;
 				_soundChannel = nullptr; //Forget the channel if it is not playing anymore
-				printf("Channel stolen! Nulling Sound Channel\n");
+				//printf("Channel stolen! Nulling Sound Channel\n");
 			}
 		}
 		else {
 			isPlaying = false;
-			printf("Channel is null\n");
+			//printf("Channel is null\n");
+
+		}
+	}
+
+	void AudioClip::UpdateFmodMode()
+	{
+		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+		FMOD_MODE fmodMode = ConvertSettingToFMOD_MODE();
+		audioSystem.ParseFMOD_RESULT(_soundHandle->setMode(fmodMode));
+
+		UpdateChannel();
+		if (_soundChannel) {
+			audioSystem.ParseFMOD_RESULT(_soundChannel->setMode(fmodMode));
+		}
+	}
+
+	void AudioClip::UpdateMinMaxDistance()
+	{
+		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+		audioSystem.ParseFMOD_RESULT(_soundHandle->set3DMinMaxDistance(minDistance, maxDistance));
+
+		UpdateChannel();
+		if (_soundChannel) {
+			audioSystem.ParseFMOD_RESULT(_soundChannel->set3DMinMaxDistance(minDistance, maxDistance));
 
 		}
 	}
@@ -172,7 +274,7 @@ namespace idk
 	FMOD_MODE AudioClip::ConvertSettingToFMOD_MODE()
 	{
 		FMOD_MODE output = FMOD_DEFAULT;
-		output |= loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
+		output |= isLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
 		output |= is3Dsound ? FMOD_3D : FMOD_2D;
 		if (isUnique) {
 			output |= FMOD_UNIQUE;
