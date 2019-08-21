@@ -25,4 +25,19 @@ namespace idk
 	};
 }
 
+// hashtable support
+namespace std
+{
+	template<typename Res>
+	struct hash <idk::Resource<Res>>
+	{
+		size_t operator()(const idk::Resource<Res>& res) const noexcept
+		{
+			const idk::u64* p = reinterpret_cast<const idk::u64*>(&res.guid);
+			std::hash<idk::u64> hash;
+			return hash(p[0]) ^ hash(p[1]);
+		}
+	};
+}
+
 #include "ResourceHandle.inl"
