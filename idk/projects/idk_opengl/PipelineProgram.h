@@ -13,6 +13,7 @@ namespace idk::ogl
 
 		void PushProgram(const Program&);
 		void PopProgram(GLenum shader_flags);
+		void PopAllPrograms();
 
 		void Use();
 

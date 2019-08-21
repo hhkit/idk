@@ -45,6 +45,11 @@ namespace idk::ogl
 
 		}), _programs.end());
 	}
+	void PipelineProgram::PopAllPrograms()
+	{
+		_programs.clear();
+		glUseProgramStages(_pipeline, GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, 0);
+	}
 	void PipelineProgram::Use()
 	{
 		glUseProgram(_pipeline);
