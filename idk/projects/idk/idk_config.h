@@ -14,8 +14,8 @@ namespace idk
 		//, class Prefab
 
 		/// PHYSICS
-		//,	class RigidBody
-		//,	class Collider
+		,	class RigidBody
+		,	class Collider
 		//, class Constraint
 
 		/// GRAPHICS

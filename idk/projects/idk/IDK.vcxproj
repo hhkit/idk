@@ -87,7 +87,7 @@
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="shape\capsule.h" />
-    <ClInclude Include="shape\obb.h" />
+    <ClInclude Include="shape\box.h" />
     <ClInclude Include="shape\ray.h" />
     <ClInclude Include="shape\sphere.h" />
     <ClInclude Include="util\enum.h" />

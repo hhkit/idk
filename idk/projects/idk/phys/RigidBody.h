@@ -5,7 +5,7 @@
 namespace idk
 {
 	class RigidBody
-		: Component<RigidBody>
+		: public Component<RigidBody>
 	{
 	public:
 		vec3 velocity = vec3{};
