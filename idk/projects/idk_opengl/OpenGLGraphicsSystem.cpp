@@ -2,12 +2,33 @@
 
 #include <core/Core.h>
 #include <glad/glad.h>
-
+#include <idk_opengl/OpenGLMeshFactory.h>
 #include "OpenGLGraphicsSystem.h"
 
 namespace idk::ogl
 {
 	void Win32GraphicsSystem::Init()
+	{
+		
+
+		
+
+		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
+	}
+
+	void Win32GraphicsSystem::Shutdown()
+	{
+		
+	}
+	void Win32GraphicsSystem::RenderBuffer()
+	{
+		glViewport(0, 0, 800, 600);
+		glClearColor(_clear_color.r, _clear_color.g, _clear_color.b, _clear_color.a);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		::SwapBuffers(_windows_context);
+	}
+	void Win32GraphicsSystem::CreateContext()
 	{
 		_windows_context = GetDC(Core::GetSystem<Windows>().GetWindowHandle());
 
@@ -43,7 +64,6 @@ namespace idk::ogl
 			ReleaseDC(Core::GetSystem<Windows>().GetWindowHandle(), _windows_context);
 			throw;
 		}
-
 		//set the OpenGL context
 		_opengl_context = wglCreateContext(_windows_context);
 		if (!_opengl_context)
@@ -60,11 +80,16 @@ namespace idk::ogl
 			ReleaseDC(Core::GetSystem<Windows>().GetWindowHandle(), _windows_context);
 			throw;
 		}
-
+	}
+	void Win32GraphicsSystem::InitOpenGL()
+	{
 		gladLoadGL();
 	}
+	void Win32GraphicsSystem::InitResourceLoader()
+	{
+	}
 
-	void Win32GraphicsSystem::Shutdown()
+	void Win32GraphicsSystem::DestroyContext()
 	{
 		if (_opengl_context)
 		{
@@ -84,13 +109,5 @@ namespace idk::ogl
 		{
 			_windows_context = NULL;
 		}
-	}
-	void Win32GraphicsSystem::RenderBuffer()
-	{
-		glViewport(0, 0, 800, 600);
-		glClearColor(_clear_color.r, _clear_color.g, _clear_color.b, _clear_color.a);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		::SwapBuffers(_windows_context);
 	}
 }

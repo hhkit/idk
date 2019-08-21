@@ -33,6 +33,7 @@
     <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\Material.h" />
+    <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />

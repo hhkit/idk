@@ -16,5 +16,10 @@ namespace idk::ogl
 		HDC   _windows_context;
 		HGLRC _opengl_context;
 		color _clear_color;
+
+		void CreateContext();
+		void InitOpenGL();
+		void InitResourceLoader();
+		void DestroyContext();
 	};
 }

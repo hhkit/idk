@@ -3,11 +3,44 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="OpenGLGraphicsSystem.h" />
+    <ClInclude Include="OpenGLGraphicsSystem.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLMesh.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLMeshFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="OpenGLGraphicsSystem.cpp" />
+    <ClCompile Include="OpenGLGraphicsSystem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLMesh.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLMeshFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="system">
+      <UniqueIdentifier>{57144429-01c8-4ed9-b697-1de21d2c0305}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{f023b664-fbb6-4998-8a1f-53fd96fa029b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

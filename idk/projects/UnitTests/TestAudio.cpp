@@ -13,6 +13,7 @@
 #include <audio/AudioSystem.h>	
 #include <audio/AudioClip.h>	
 #include <core/Core.h>
+#include <scene/Scene.h>
 #include <iostream>	
 #include <filesystem> //Using this until our filesystem is up	
 
