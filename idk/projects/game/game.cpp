@@ -4,7 +4,7 @@
 
 #include <core/Core.h>
 #include <vulkan/VulkanWin32GraphicsSystem.h>
-#include <idk_opengl/OpenGLGraphicsSystem.h>
+#include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 

@@ -2,24 +2,31 @@
 
 #include <core/Core.h>
 #include <glad/glad.h>
-#include <idk_opengl/OpenGLMeshFactory.h>
+#include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include "OpenGLGraphicsSystem.h"
 
 namespace idk::ogl
 {
 	void Win32GraphicsSystem::Init()
 	{
-		
-
-		
-
-		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
+		CreateContext();
+		InitOpenGL();
+		InitResourceLoader();
 	}
 
 	void Win32GraphicsSystem::Shutdown()
 	{
-		
+		DestroyContext();
 	}
+
+	void Win32GraphicsSystem::BufferGraphicsState(
+		span<MeshRenderer>    mesh_renderers, 
+		span<const Transform> transforms, 
+		span<const Parent>    parents)
+	{
+
+	}
+
 	void Win32GraphicsSystem::RenderBuffer()
 	{
 		glViewport(0, 0, 800, 600);
@@ -85,8 +92,10 @@ namespace idk::ogl
 	{
 		gladLoadGL();
 	}
+
 	void Win32GraphicsSystem::InitResourceLoader()
 	{
+		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

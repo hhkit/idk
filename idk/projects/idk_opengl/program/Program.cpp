@@ -45,12 +45,6 @@ namespace idk::ogl
 		return *this;
 	}
 
-	Program::Program()
-	{
-		_program_id = glCreateProgram();
-		glProgramParameteri(_program_id, GL_PROGRAM_SEPARABLE, GL_TRUE);
-	}
-
 	Program::~Program()
 	{
 		glDeleteProgram(_program_id);
@@ -64,6 +58,9 @@ namespace idk::ogl
 
 	void Program::Link()
 	{
+		_program_id = glCreateProgram();
+		glProgramParameteri(_program_id, GL_PROGRAM_SEPARABLE, GL_TRUE);
+
 		glLinkProgram(_program_id);
 		for (auto& elem : _shaders)
 			glDetachShader(_program_id, elem._shader_id);

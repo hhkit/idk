@@ -3,47 +3,53 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="OpenGLGraphicsSystem.h">
+    <ClInclude Include="resource\OpenGLBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="system\OpenGLGraphicsSystem.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLMesh.h">
+    <ClInclude Include="resource\OpenGLMaterial.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLBuffer.h">
+    <ClInclude Include="resource\OpenGLMesh.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLTypeDescriptors.h">
+    <ClInclude Include="resource\OpenGLMeshFactory.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLMeshFactory.h">
+    <ClInclude Include="resource\OpenGLTypeDescriptors.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="Program.h">
+    <ClInclude Include="program\PipelineProgram.h">
       <Filter>program</Filter>
     </ClInclude>
-    <ClInclude Include="PipelineProgram.h">
+    <ClInclude Include="program\Program.h">
       <Filter>program</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="OpenGLGraphicsSystem.cpp">
+    <ClCompile Include="resource\OpenGLBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="system\OpenGLGraphicsSystem.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLMesh.cpp">
+    <ClCompile Include="resource\OpenGLMaterial.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLBuffer.cpp">
+    <ClCompile Include="resource\OpenGLMesh.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLMeshFactory.cpp">
+    <ClCompile Include="resource\OpenGLMeshFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="PipelineProgram.cpp">
+    <ClCompile Include="program\PipelineProgram.cpp">
       <Filter>program</Filter>
     </ClCompile>
-    <ClCompile Include="Program.cpp">
+    <ClCompile Include="program\Program.cpp">
       <Filter>program</Filter>
     </ClCompile>
   </ItemGroup>

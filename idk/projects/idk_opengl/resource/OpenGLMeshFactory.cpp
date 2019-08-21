@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "OpenGLMeshFactory.h"
-#include <idk_opengl/OpenGLMesh.h>
+#include <idk_opengl/resource/OpenGLMesh.h>
 
 namespace idk::ogl
 {

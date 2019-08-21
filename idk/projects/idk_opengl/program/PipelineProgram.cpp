@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PipelineProgram.h"
-#include <idk_opengl/Program.h>
+#include <idk_opengl/program/Program.h>
 
 namespace idk::ogl
 {

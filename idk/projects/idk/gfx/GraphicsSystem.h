@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ISystem.h>
+#include <ds/span.h>
 
 namespace idk
 {
@@ -10,7 +11,7 @@ namespace idk
 	public:
 		void Init() override = 0;
 		void Shutdown() override = 0;
-		//virtual void SubmitDrawObjects(span<const class Renderer>) = 0;
+		virtual void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) = 0;
 		virtual void RenderBuffer() = 0;
 	};
 }

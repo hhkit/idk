@@ -25,7 +25,7 @@ namespace idk::ogl
 	class Program
 	{
 	public:
-		Program();
+		Program() = default;
 		~Program();
 
 		void Attach(Shader&& shader);
