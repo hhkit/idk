@@ -67,8 +67,8 @@ namespace idk
 		float	volume		{ 1.0f		};	//Default = 1 Range: [0,1]
 		float	pitch		{ 1.0f		};	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
 		float	minDistance	{ 100.0f	};	//Minimum distance where volume is at max					 
-		float	frequency	{ 48000.0f	};	//Playback frequency. default = 48000 	 
-		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 
+		float	frequency	{ 44100.0f	};	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
+		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 //These are not saved, rather it is controlled by which SoundGroup it is at. 
 		bool	isPlaying	{ false		};	//Is the audio currently playing? If the audio is paused, it is still considered playing!
 		bool	is3Dsound	{ true		};	//Does this sound follow the the gameobject position?
 		bool	isUnique	{ false		};	//When I call play, does it duplicate? Or replay the sound again?

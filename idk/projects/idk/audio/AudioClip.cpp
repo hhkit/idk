@@ -54,6 +54,7 @@ namespace idk
 
 	void AudioClip::Pause()
 	{
+		UpdateChannel();
 		if (_soundChannel) {
 			auto& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setPaused(true));
@@ -62,6 +63,7 @@ namespace idk
 
 	void AudioClip::Unpause()
 	{
+		UpdateChannel();
 		if (_soundChannel) {
 			auto& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setPaused(false));
@@ -107,26 +109,26 @@ namespace idk
 			audioSystem.ParseFMOD_RESULT(_soundChannel->getCurrentSound(&check));
 			char name[512];
 			check->getName(name,512);
-			printf(name,"%s\n");
+			//printf(name,"%s\n");
 			if (check == _soundHandle) { //check returns null if no sound in that channel is playing.
 				audioSystem.ParseFMOD_RESULT(_soundChannel->isPlaying(&isPlaying));
 				if (isPlaying == false) {
 					_soundChannel = nullptr; //Forget the channel once it is done playing
-					printf("Channel finished playing\n");
+					//printf("Channel finished playing\n");
 
 				}
-				printf("Channel still playing\n");
+				//printf("Channel still playing\n");
 
 			}
 			else {
 				isPlaying = false;
 				_soundChannel = nullptr; //Forget the channel if it is not playing anymore
-				printf("Channel stolen! Nulling Sound Channel\n");
+				//printf("Channel stolen! Nulling Sound Channel\n");
 			}
 		}
 		else {
 			isPlaying = false;
-			printf("Channel is null\n");
+			//printf("Channel is null\n");
 
 		}
 	}
