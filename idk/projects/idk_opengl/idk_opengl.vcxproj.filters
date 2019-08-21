@@ -18,6 +18,12 @@
     <ClInclude Include="OpenGLMeshFactory.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="Program.h">
+      <Filter>program</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineProgram.h">
+      <Filter>program</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -34,6 +40,10 @@
     <ClCompile Include="OpenGLMeshFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
+    <ClCompile Include="Program.cpp" />
+    <ClCompile Include="PipelineProgram.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -41,6 +51,9 @@
     </Filter>
     <Filter Include="resource">
       <UniqueIdentifier>{f023b664-fbb6-4998-8a1f-53fd96fa029b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="program">
+      <UniqueIdentifier>{22d6d055-167f-4e75-8ed2-a5b318137154}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
