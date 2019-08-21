@@ -134,17 +134,19 @@ namespace idk::vkn
 		DynamicHandle<vk::DebugUtilsMessengerEXT> m_debug_messenger;
 
 
+		window_info m_window;
+		bool m_ScreenResized = false;
+		uint32_t WIDTH = 1280, HEIGHT = 720;
+		uint32_t current_frame = 0, max_frames_in_flight = 2;
+		vk::UniqueSurfaceKHR                 m_surface;
+
+
+
 		vk::UniqueCommandPool                m_commandpool;
 		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
 		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
 		std::vector<PresentationSignals>     m_pres_signals;
 		SwapChainInfo                        m_swapchain;
-
-		window_info m_window;
-		bool m_ScreenResized = false;
-		uint32_t WIDTH = 1280, HEIGHT = 720;
-		uint32_t current_frame = 0, max_frames_in_flight = 2;
-		vk::UniqueSurfaceKHR             m_surface;
 
 		vk::UniqueRenderPass                 m_renderpass;
 		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;

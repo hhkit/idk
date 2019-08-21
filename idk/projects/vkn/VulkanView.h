@@ -41,6 +41,7 @@ namespace idk::vkn
 
 		vk::UniqueShaderModule     CreateShaderModule(const string_view& code);
 
+		void WaitDeviceIdle() const;
 
 		VulkanView(VulkanState& vulkan);
 		VulkanView(VulkanView&&) noexcept = default;

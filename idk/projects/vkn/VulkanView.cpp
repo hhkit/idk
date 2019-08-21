@@ -82,6 +82,11 @@ namespace idk::vkn
 			return Device()->createShaderModuleUnique(mod);
 		}
 
+		void VulkanView::WaitDeviceIdle() const
+		{
+			Device()->waitIdle();
+		}
+
 		VulkanView::VulkanView(VulkanState& vulkan) 
 			: vulkan_{ &vulkan }, impl_{ std::make_unique<pimpl>() } 
 		{}

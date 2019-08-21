@@ -118,6 +118,8 @@ namespace idk::vkn
 
 	void VulkanDebugRenderer::Shutdown() 
 	{
+		//Wait for the current instructions to be completed. (Makes sure that all our rscs are no longer in use
+		impl->detail.WaitDeviceIdle();
 		this->info.reset();
 		this->impl.reset();
 	}

@@ -1718,6 +1718,7 @@ vk::CommandBufferBeginInfo begin_info
 
 	VulkanState::~VulkanState()
 	{
+		m_device->waitIdle();
 		dbg_vertex_buffer.reset();
 	}
 
