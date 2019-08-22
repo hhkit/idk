@@ -39,6 +39,7 @@ namespace idk
 		struct compressed_pair_elem<T, I, true> : private T // base class empty
 		{
 			constexpr compressed_pair_elem() noexcept(std::is_nothrow_default_constructible<T>::value)
+				: T()
 			{
 			}
 
