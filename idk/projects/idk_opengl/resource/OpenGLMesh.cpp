@@ -40,6 +40,13 @@ namespace idk::ogl
 
 	void OpenGLMesh::AddBuffer(OpenGLBuffer& buf)
 	{
-		_buffers.emplace_back(std::move(buf));
+		switch(buf.type())
+		{
+		case GL_ELEMENT_ARRAY_BUFFER:
+			_element_array_object = std::move(buf);
+		case GL_ARRAY_BUFFER:
+		default:
+			_buffers.emplace_back(std::move(buf));
+		}
 	}
 }

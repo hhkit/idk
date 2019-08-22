@@ -21,6 +21,11 @@ namespace idk::ogl
 		glDeleteBuffers(1, &_id);
 	}
 
+	GLuint OpenGLBuffer::type() const
+	{
+		return _type;
+	}
+
 	GLsizei OpenGLBuffer::count() const
 	{
 		return _size;

@@ -18,7 +18,8 @@ namespace idk::ogl
 		OpenGLBuffer(GLuint type, const vector<OpenGLDescriptor>& desc);
 		OpenGLBuffer(OpenGLBuffer&& buf);
 		~OpenGLBuffer();
-
+		
+		GLuint  type() const;
 		GLsizei count() const;
 
 		OpenGLBuffer& Bind();
