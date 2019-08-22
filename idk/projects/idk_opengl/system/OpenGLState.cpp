@@ -69,7 +69,9 @@ namespace idk::ogl
 			mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 			// set uniforms
-
+			for (auto& [id, uniform] : elem.material_instance.uniforms)
+			{
+			}
 			// draw
 			mesh.Draw();
 		}

@@ -41,7 +41,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	c->Setup();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
-	auto go = scene->CreateGameObject();
+	auto go = scene->CreateGameObject();	
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	
 	mesh_rend->material_instance.material = Core::GetResourceManager().Create<Material>("/assets/shader/flat_color.frag");

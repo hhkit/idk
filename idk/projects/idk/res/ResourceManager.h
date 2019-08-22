@@ -39,9 +39,9 @@ namespace idk
 		using GenPtr = shared_ptr<void>;
 		template<typename R>
 		using Storage = hash_table<Guid, std::shared_ptr<R>>;
-		array<GenPtr, ResourceCount> plaintext_loaders_{};
-		array<GenPtr, ResourceCount> resource_tables_  {};
-		array<GenPtr, ResourceCount> default_resources_{};
+		array<GenPtr, ResourceCount> plaintext_loaders_{}; // std::shared_ptr<ResourceFactory<Resource>>
+		array<GenPtr, ResourceCount> resource_tables_  {}; // std::shared_ptr<Storage<Resource>>
+		array<GenPtr, ResourceCount> default_resources_{}; // std::shared_ptr<Resource>
 
 		static ResourceManager* instance;
 
