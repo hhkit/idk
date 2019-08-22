@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -30,6 +30,7 @@
     <ClInclude Include="anim\BoneRenderer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\small_string.h" />
+    <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
@@ -164,6 +165,7 @@
     <None Include="ds\compressed_pair.inl" />
     <None Include="ds\ranged_for.inl" />
     <None Include="ds\small_string.inl" />
+    <None Include="event\Signal.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />

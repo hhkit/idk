@@ -71,6 +71,7 @@ namespace idk::ogl
 			// set uniforms
 			for (auto& [id, uniform] : elem.material_instance.uniforms)
 			{
+
 			}
 			// draw
 			mesh.Draw();
