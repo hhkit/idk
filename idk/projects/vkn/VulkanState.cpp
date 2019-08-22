@@ -1,5 +1,8 @@
 #include "pch.h"
 
+#include <set>
+#include <map>
+
 #include <idk.h>
 #include <math/matrix_transforms.h>
 #include <gfx/buffer_desc.h>
@@ -10,6 +13,13 @@
 #include <vkn/RenderState.h>
 #include <vkn/utils/utils.h>
 
+namespace idk
+{
+	template<typename T>
+	using set = std::set<T>;
+	template<typename Key,typename Val>
+	using map = std::map<Key,Val>;
+}
 
 //Uncomment to disable validation
 //#define WX_VAL_VULK
@@ -20,6 +30,88 @@
 
 namespace idk::vkn
 {
+	struct DescriptorPoolManager
+	{
+
+	};
+	struct DescriptorSetManager
+	{
+		using layout_handle_t = vk::DescriptorSetLayout;
+		vk::DescriptorPool pool;
+		struct DescriptorSets
+		{
+			vector<vk::DescriptorSet> sets;
+			uint32_t curr_index{};
+
+			vector<vk::DescriptorSet>& operator=(vector<vk::DescriptorSet>&& rhs)
+			{
+				curr_index = 0;
+				return sets = std::move(rhs);
+			}
+			vector<vk::DescriptorSet>& operator=(const vector<vk::DescriptorSet>& rhs)
+			{
+				curr_index = 0;
+				return sets = rhs;
+			}
+			vk::DescriptorSet& Get() 
+			{
+				return sets[curr_index++];
+			}
+		};
+
+		layout_handle_t layout_handle{};
+		DescriptorSets sets{};
+		
+		;
+		VulkanView& view;
+		vk::DescriptorPool& Pool() { return pool; }
+
+		vk::DescriptorSetLayout GetLayout(layout_handle_t handle)
+		{
+			return handle;//Modify this when handle type changes
+		}
+
+		void Init(vk::DescriptorPool& dpool) { pool = dpool; }
+
+		void AllocateSets(uint32_t max_sets,layout_handle_t layout)
+		{
+			auto& dispatcher = view.Dispatcher();
+			auto& m_device = view.Device();
+			std::vector<vk::DescriptorSetLayout> layouts{ max_sets, GetLayout(layout) };
+			vk::DescriptorSetAllocateInfo allocInfo
+			{
+				Pool()
+				,hlp::arr_count(layouts)
+				,std::data(layouts)
+			};
+			if (sets.sets.size())
+			{
+				Clear();
+			}
+			sets = m_device->allocateDescriptorSets(allocInfo, dispatcher);
+		}
+
+		vk::DescriptorSet New(layout_handle_t layout)
+		{
+			return sets.Get();
+		}
+		void ClearSets()
+		{
+			sets.curr_index = 0;
+		}
+		//Clears everything
+		void Clear()
+		{
+			if (sets.sets.size())
+			{
+				auto& dispatcher = view.Dispatcher();
+				auto& m_device = view.Device();
+				m_device->freeDescriptorSets(pool, sets.sets, dispatcher);
+				sets.sets.clear();
+			}
+		}
+
+	};
 
 	namespace glm
 	{
@@ -1178,6 +1270,16 @@ namespace idk::vkn
 		vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 		auto size = m_swapchain.images.size();
 		m_swapchain.uniform_buffers.resize(size);
+		m_swapchain.uniform_buffers2.resize(size);
+		for (auto& uniform : m_swapchain.uniform_buffers2)
+		{
+			auto pair = hlp::CreateAllocBindBuffer(
+				pdevice, *m_device, bufferSize,
+				vk::BufferUsageFlagBits::eUniformBuffer,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+				dispatcher);
+			uniform = std::move(pair);
+		}
 
 		for (auto& uniform : m_swapchain.uniform_buffers)
 		{
@@ -1210,13 +1312,13 @@ namespace idk::vkn
 		{
 			vk::DescriptorPoolSize{
 				vk::DescriptorType::eUniformBuffer,
-				hlp::arr_count(m_swapchain.images)*3
+				hlp::arr_count(m_swapchain.images)*6
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
 			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
-			,hlp::arr_count(m_swapchain.images)*2
+			,hlp::arr_count(m_swapchain.images)*6
 			,hlp::arr_count(pool_size)
 			,std::data(pool_size)
 		};
@@ -1233,7 +1335,8 @@ namespace idk::vkn
 			,std::data(layouts)
 		};
 		m_swapchain.descriptor_sets = m_device->allocateDescriptorSets(allocInfo, dispatcher);
-		int i = 0;
+		{
+			int i = 0;
 		for ([[maybe_unused]] auto& [ubuffer, umemory] : m_swapchain.uniform_buffers)
 		{
 			auto& dset = m_swapchain.descriptor_sets[i++];
@@ -1262,8 +1365,42 @@ namespace idk::vkn
 			m_device->updateDescriptorSets(descriptorWrite, nullptr, dispatcher);
 
 		}
+		}
+		//Dupe
 
-		//For new stuff
+		m_swapchain.descriptor_sets2 = m_device->allocateDescriptorSets(allocInfo, dispatcher);
+		{
+			int i = 0;
+			for ([[maybe_unused]] auto& [ubuffer, umemory] : m_swapchain.uniform_buffers2)
+			{
+				auto& dset = m_swapchain.descriptor_sets2[i++];
+				vk::DescriptorBufferInfo bufferInfo[] =
+				{
+					vk::DescriptorBufferInfo
+					{
+						*ubuffer
+						, 0
+						,sizeof(UniformBufferObject)
+					}
+				};
+				;
+
+				vk::WriteDescriptorSet descriptorWrite
+				{
+					dset
+					,0
+					,0
+					,hlp::arr_count(bufferInfo)
+					,vk::DescriptorType::eUniformBuffer
+					,nullptr
+					,std::data(bufferInfo)
+					,nullptr
+				};
+				m_device->updateDescriptorSets(descriptorWrite, nullptr, dispatcher);
+
+			}
+
+		}//For new stuff
 
 		std::vector<vk::DescriptorSetLayout> layouts2{ m_swapchain.uniforms2.size(), *m_swapchain.uniforms2.layout };
 		vk::DescriptorSetAllocateInfo allocInfo2
@@ -1277,7 +1414,7 @@ namespace idk::vkn
 		{
 			m_swapchain.uniforms2.descriptor_set(i) = ds2[i];
 		}
-		i = 0;
+		int i = 0;
 		for ([[maybe_unused]] auto& [buffer,dset] : m_swapchain.uniforms2)
 		{
 			auto& [ubuffer, memory] = buffer;
@@ -1344,6 +1481,7 @@ namespace idk::vkn
 			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 		};
 		m_commandbuffers = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
+		m_commandbuffers2 = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
 
 		vk::CommandBufferAllocateInfo allocPriInfo
 		{
@@ -1352,56 +1490,57 @@ namespace idk::vkn
 			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 		};
 		m_pri_commandbuffers = m_device->allocateCommandBuffersUnique(allocPriInfo, dispatcher);
+		{
+			size_t i = 0;
+			for (auto& commandBuffer : m_commandbuffers) {
 
-		size_t i = 0;
-		for (auto& commandBuffer : m_commandbuffers) {
+				vk::CommandBufferInheritanceInfo inherit_info;
+				inherit_info.renderPass = *m_renderpass;
+				inherit_info.framebuffer = *m_swapchain.frame_buffers[i];
 
-			vk::CommandBufferInheritanceInfo inherit_info;
-			inherit_info.renderPass = *m_renderpass;
-			inherit_info.framebuffer = *m_swapchain.frame_buffers[i];
+				vk::CommandBufferBeginInfo begin_info
+				{
+					vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eSimultaneousUse
+					,&inherit_info
+				};
+				//vk::CommandBufferBeginInfo beginInfo
+				//{
+				//	vk::CommandBufferUsageFlags{}
+				//	,nullptr
+				//};
+				commandBuffer->begin(begin_info);
 
-			vk::CommandBufferBeginInfo begin_info
-			{
-				vk::CommandBufferUsageFlagBits::eRenderPassContinue
-				,&inherit_info
-			};
-			//vk::CommandBufferBeginInfo beginInfo
-			//{
-			//	vk::CommandBufferUsageFlags{}
-			//	,nullptr
-			//};
-			commandBuffer->begin(begin_info);
+				vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
+				vk::RenderPassBeginInfo renderPassInfo
+				{
+					*m_renderpass
+					,*m_swapchain.frame_buffers[i]
+					,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
+					,1
+					,&clearcolor
+				};
+				//commandBuffer->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
 
-			vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
-			vk::RenderPassBeginInfo renderPassInfo
-			{
-				*m_renderpass
-				,*m_swapchain.frame_buffers[i]
-				,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
-				,1
-				,&clearcolor
-			};
-			//commandBuffer->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline, dispatcher);
-
-			commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, dispatcher);
-			std::vector<vk::Buffer> vertex_buffers
-			{
-				*m_vertex_buffers[0],
-				dbg_vertex_buffer->Buffer()
-			};
-			std::vector<vk::DeviceSize> offsets
-			{
-				0,
-				sizeof(vertex_instanced)
-			};
-			commandBuffer->bindVertexBuffers(0, vertex_buffers, offsets, dispatcher);
-			commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
-			commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
-			commandBuffer->drawIndexed(hlp::arr_count(g_indices), 2, 0, 0, 0, dispatcher);
-			//commandBuffer->executeCommands(rss[(i+1)%rss.size()].CommandBuffer(), dispatcher);
-			//commandBuffer->endRenderPass(dispatcher);
-			commandBuffer->end(dispatcher);
-			++i;
+				commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline, dispatcher);
+				std::vector<vk::Buffer> vertex_buffers
+				{
+					*m_vertex_buffers[0],
+					dbg_vertex_buffer->Buffer()
+				};
+				std::vector<vk::DeviceSize> offsets
+				{
+					0,
+					sizeof(vertex_instanced)
+				};
+				commandBuffer->bindVertexBuffers(0, vertex_buffers, offsets, dispatcher);
+				commandBuffer->bindIndexBuffer(*m_index_buffer, 0, vk::IndexType::eUint16, dispatcher);
+				commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_pipelinelayout, 0, hlp::make_array_proxy(1, &m_swapchain.descriptor_sets[i]), nullptr, dispatcher);
+				commandBuffer->drawIndexed(hlp::arr_count(g_indices), 2, 0, 0, 0, dispatcher);
+				//commandBuffer->executeCommands(rss[(i+1)%rss.size()].CommandBuffer(), dispatcher);
+				//commandBuffer->endRenderPass(dispatcher);
+				commandBuffer->end(dispatcher);
+				++i;
+			}
 		}
 
 	}
@@ -1435,14 +1574,19 @@ namespace idk::vkn
 	}
 	void VulkanState::updateUniformBuffer(uint32_t image_index)
 	{
+		static int curr = 0;
+		static float counter = 0;
 		UniformBufferObject ubo = {};
-		ubo.model = mat4{ idk::rotate(vec3(0.0f, 0.0f, 1.0f), idk::rad{ idk::deg(90.0f) } *0) };
-		ubo.view = glm::lookAt(vec3(2.0f, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+		ubo.model = mat4{ idk::rotate(vec3(0.0f, 0.0f, 1.0f), idk::rad{ idk::deg(90.0f) } *counter) };
+		ubo.view = glm::lookAt(vec3(2.0f+counter, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
 		ubo.projection = glm::perspective(idk::rad(45.0f), m_swapchain.extent.width / (float)m_swapchain.extent.height, 0.1f, 10.0f);
 		//OpenGL's Y Clip coords is inverted compared to vulkan.
 		ubo.projection[1][1] *= -1;
-		hlp::MapMemory(*m_device, *m_swapchain.uniform_buffers[image_index].second, 0, &ubo, static_cast<vk::DeviceSize>(sizeof(ubo)), dispatcher);
+		auto& unbuffer = m_swapchain.uniform_buffers[image_index];// (curr++ % 2) ? m_swapchain.uniform_buffers[image_index] : m_swapchain.uniform_buffers2[image_index];
+		auto& ubuffer_mem = *unbuffer.second;
 
+		hlp::MapMemory(*m_device, ubuffer_mem, 0, &ubo, static_cast<vk::DeviceSize>(sizeof(ubo)), dispatcher);
+		counter += 0.01f;
 		mat4 vp[]
 		{
 			ubo.view,
@@ -1733,6 +1877,8 @@ vk::CommandBufferBeginInfo begin_info
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
 
 
+			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
+			updateUniformBuffer(imageIndex);
 			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 
 			command_buffer.executeCommands(render_state.CommandBuffer(), dispatcher);

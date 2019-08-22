@@ -4,6 +4,103 @@
 #include <vkn/BufferHelpers.h>
 namespace idk::vkn
 {
+	template<typename T, typename = void>
+	struct is_container : std::false_type {};
+	template<typename T>
+	struct is_container <T, std::void_t<decltype(std::begin(std::declval<T>()))>> : std::true_type {};
+	template<typename T>
+	inline constexpr bool is_container_v = is_container<T>::value;
+
+	//To be able to queue multiple generations.
+	//Call lock_in when submitting the draw call to advance the set
+	struct UboData2
+	{
+		struct UniformEntry
+		{
+			alignas(sizeof(vec4)) unsigned char data[sizeof(vec4)];
+		};
+		void SetLocation(const vec4& val, uint32_t loc)
+		{
+			if (locations.size() <= loc) locations.resize(s_cast<size_t>(loc) + 1);
+			std::memcpy(locations.back()[loc].data, &val, sizeof(val));
+		}
+		void SetLocation(const vec3& val, uint32_t loc)
+		{
+			if (locations.size() <= loc) locations.resize(s_cast<size_t>(loc) + 1);
+			std::memcpy(locations.back()[loc].data, &val, sizeof(val));
+		}
+		void SetLocation(const vec2& val, uint32_t loc)
+		{
+			if (locations.size() <= loc) locations.resize(s_cast<size_t>(loc) + 1);
+			std::memcpy(locations.back()[loc].data, &val, sizeof(val));
+		}
+		vector<hash_table<uint32_t, UniformEntry>> locations{ 1 };
+		size_t lock_in()
+		{
+			locations.emplace_back();
+			return locations.size() - 1;
+		}
+		void clear()
+		{
+			locations.resize(1);
+			locations.back().clear();
+		}
+		decltype(locations)::const_iterator begin()const { return locations.begin(); }
+		decltype(locations)::const_iterator end  ()const { return locations.end  (); }
+
+		//Does not except containers
+		//template<typename T, typename = std::enable_if_t<!is_container_v<T>,void>>
+		void SetLocation(const mat3& val, uint32_t loc)
+		{
+			for (auto& v : val)
+			{
+				SetLocation(v, loc++);
+			}
+		}
+		void SetLocation(const mat4& val, uint32_t loc)
+		{
+			for (auto& v : val)
+			{
+				SetLocation(v, loc++);
+			}
+		}
+	};
+
+	struct UboData
+	{
+		struct UniformEntry
+		{
+			alignas(sizeof(vec4)) unsigned char data[sizeof(vec4)];
+		};
+		void SetLocation(const vec4& val, size_t loc)
+		{
+			if (locations.size() <= loc) locations.resize(loc + 1);
+			std::memcpy(locations[loc].data, &val, sizeof(val));
+		}
+		void SetLocation(const vec3& val, size_t loc)
+		{
+			if (locations.size() <= loc) locations.resize(loc + 1);
+			std::memcpy(locations[loc].data, &val, sizeof(val));
+		}
+		vector<UniformEntry> locations;
+
+		//Does not except containers
+		//template<typename T, typename = std::enable_if_t<!is_container_v<T>,void>>
+		void SetLocation(const mat3& val, size_t loc)
+		{
+			for (auto& v : val)
+			{
+				SetLocation(v, loc++);
+			}
+		}
+		void SetLocation(const mat4& val, size_t loc)
+		{
+			for (auto& v : val)
+			{
+				SetLocation(v, loc++);
+			}
+		}
+	};
 	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
@@ -95,7 +192,7 @@ namespace idk::vkn
 			uint32_t start = AllocUniformBuffers(vulkan, uniform);
 			//We can update the buffer and immediately queue a transfer command because we are expecting
 			//the command submit order to be (Send Host Uniform Buffer to Device Uniform Buffer) -> (The render pass commands)
-			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelinelayout, start, GetUniformDescriptors(vulkan, uniform), nullptr, vulkan.Dispatcher());
+			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelinelayout, start, GetUniformDescriptors(vulkan), nullptr, vulkan.Dispatcher());
 		}
 	}
 	vk::PolygonMode VulkanPipeline::GetPolygonMode(const config_t& config) const
@@ -326,7 +423,7 @@ namespace idk::vkn
 		return vulkan.Renderpass();
 	}
 
-	vector<vk::DescriptorSet> VulkanPipeline::GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform)
+	vector<vk::DescriptorSet> VulkanPipeline::GetUniformDescriptors(Vulkan_t& vulkan)
 	{
 		return {};
 	}

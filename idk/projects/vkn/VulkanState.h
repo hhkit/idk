@@ -46,7 +46,9 @@ namespace idk::vkn
 		std::vector<vk::UniqueFramebuffer> frame_buffers;
 
 		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
+		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers2;
 		std::vector<vk::DescriptorSet    > descriptor_sets;
+		std::vector<vk::DescriptorSet    > descriptor_sets2;
 
 		struct UniformStuff
 		{
@@ -176,6 +178,7 @@ namespace idk::vkn
 
 		vk::UniqueCommandPool                m_commandpool;
 		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
+		std::vector<vk::UniqueCommandBuffer> m_commandbuffers2;
 		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
 		std::vector<PresentationSignals>     m_pres_signals;
 		SwapChainInfo                        m_swapchain;

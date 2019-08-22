@@ -44,7 +44,7 @@ namespace idk::vkn
 		vk::UniqueRenderPass& GetRenderpass(const config_t& config, VulkanView& vulkan);
 
 		// Vulkan_t is necessary cause it needs to get the descriptors from the pool
-		vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan, const uniform_info& uniform);
+		vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan);
 
 		// AllocUniformBuffers is meant to write to a host master(non-vulkan) uniform buffer and get the offset.
 		// The non-vulkan buffer will be transfered after the commands are done queueing.

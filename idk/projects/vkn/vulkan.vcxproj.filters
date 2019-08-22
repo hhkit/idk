@@ -36,6 +36,9 @@
     <ClInclude Include="draw_call.h">
       <Filter>render</Filter>
     </ClInclude>
+    <ClInclude Include="UboManager.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -69,6 +72,7 @@
     <ClCompile Include="vector_buffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
+    <ClCompile Include="UboManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -90,6 +94,9 @@
     </None>
     <None Include="VulkanState.inl">
       <Filter>system</Filter>
+    </None>
+    <None Include="UboManager.inl">
+      <Filter>buffer</Filter>
     </None>
   </ItemGroup>
 </Project>
