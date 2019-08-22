@@ -10,6 +10,7 @@ namespace idk::ogl
 	{
 	public:
 		void Setup();
+		void GenResources();
 
 		void SubmitBuffers(vector<RenderObject>&& mesh_render, vector<RenderObject>&& skinned_mesh_render);
 		void RenderDrawBuffer();

@@ -110,6 +110,12 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>x</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -168,6 +174,12 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>x</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />

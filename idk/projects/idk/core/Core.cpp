@@ -31,6 +31,7 @@ namespace idk
 	void Core::Setup()
 	{
 		_system_manager.InitSystems();
+		_system_manager.LateInitSystems();
 		_setup = true;
 	}
 

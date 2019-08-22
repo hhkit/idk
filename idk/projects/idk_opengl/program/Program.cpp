@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Program.h"
 
+#include <iostream>
+
 namespace idk::ogl
 {
 	Shader::Shader(GLenum shader_type, string_view shader_code)
@@ -9,7 +11,33 @@ namespace idk::ogl
 		const char* arr[] = { shader_code.data() } ;
 		glShaderSource(_shader_id, 1, arr, 0);
 		glCompileShader(_shader_id);
+		
+		{
+			int success = 0;
+			char infoLog[512];
+			glGetShaderiv(_shader_id, GL_COMPILE_STATUS, &success);
 
+			if (!success)
+			{
+				glGetShaderInfoLog(_shader_id, 512, NULL, infoLog);
+				auto get_shader = [](GLenum shader_t) ->std::string_view
+				{
+					switch (shader_t)
+					{
+					case GL_VERTEX_SHADER:          return "Vertex Shader";
+					case GL_TESS_CONTROL_SHADER:    return "Tesselation Control Shader";
+					case GL_TESS_EVALUATION_SHADER: return "Tesselation Evaluation Shader";
+					case GL_GEOMETRY_SHADER:        return "Geometry Shader";
+					case GL_FRAGMENT_SHADER:        return "Fragment Shader";
+					case GL_COMPUTE_SHADER:         return "Compute Shader";
+					default:                        return "Non-Existent Shader";
+					}
+				};
+
+				std::cout << get_shader(shader_type) << " compilation failed!\n";
+				std::cout << infoLog << "\n";
+			}
+		}
 		_shader_flags |= [](GLenum shader_t)
 		{
 			switch (shader_t)
@@ -19,6 +47,7 @@ namespace idk::ogl
 			case GL_TESS_EVALUATION_SHADER: return GL_TESS_EVALUATION_SHADER_BIT;
 			case GL_GEOMETRY_SHADER:        return GL_GEOMETRY_SHADER_BIT;
 			case GL_FRAGMENT_SHADER:        return GL_FRAGMENT_SHADER_BIT;
+			case GL_COMPUTE_SHADER:         return GL_COMPUTE_SHADER_BIT;
 			default: return 0;
 			};
 		}(shader_type);

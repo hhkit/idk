@@ -8,6 +8,9 @@
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 
+#include <gfx/MeshRenderer.h>
+#include <scene/SceneManager.h>
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -34,6 +37,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		default:
 			break;
 	}
+
+	c->Setup();
+
+	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
+	auto go = scene->CreateGameObject();
+	auto mesh_rend = go->AddComponent<MeshRenderer>();
+	
+	mesh_rend->material_instance.material = Core::GetResourceManager().Create<Material>("/assets/shader/flat_color.frag");
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

@@ -1,6 +1,9 @@
 #include "stdafx.h"
-#include "ResourceManager.h"
+
+#include <file/FileSystem.h>
 #include <IncludeResources.h>
+#include "ResourceManager.h"
+
 
 namespace idk
 {
@@ -36,6 +39,10 @@ namespace idk
 		instance = this;
 		resource_tables_   = detail::ResourceHelper::GenResourceTables();
 		LoadDefaultResources();
+
+		auto& fs = Core::GetSystem<FileSystem>();
+		auto exe_dir = std::string{ fs.GetExeDir() };
+		fs.Mount(exe_dir + "/assets", "/assets");
 	}
 
 	void ResourceManager::Shutdown()
@@ -48,6 +55,6 @@ namespace idk
 	}
 	void ResourceManager::LoadDefaultResources()
 	{
-		default_resources_ = detail::ResourceHelper::GenDefaults();
+		//default_resources_ = detail::ResourceHelper::GenDefaults();
 	}
 }

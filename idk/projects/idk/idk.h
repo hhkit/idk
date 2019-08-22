@@ -42,6 +42,8 @@ namespace idk
 	using bvec3 = math::vector<bool, 3>;
 	using bvec4 = math::vector<bool, 4>;
 
+	using idk::color;
+
 	using quat = math::quaternion<real>;
 	
 	using mat2 = math::matrix<real, 2, 2>;

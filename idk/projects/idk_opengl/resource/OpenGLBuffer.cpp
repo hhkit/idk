@@ -10,10 +10,11 @@ namespace idk::ogl
 	}
 
 	OpenGLBuffer::OpenGLBuffer(OpenGLBuffer&& buf)
-		: _type{ buf._type }, _id{ buf._id }, descriptor{ std::move(buf.descriptor) }
+		: _type{ buf._type }, _id{ buf._id }, _size{ buf._size }, descriptor{ std::move(buf.descriptor) }
 	{
 		buf._type = 0;
 		buf._id = 0;
+		buf._size = 0;
 	}
 
 	OpenGLBuffer::~OpenGLBuffer()
@@ -73,6 +74,7 @@ namespace idk::ogl
 	{
 		std::swap(_type, buf._type);
 		std::swap(_id, buf._id);
+		std::swap(_size, buf._size);
 		std::swap(descriptor, buf.descriptor);
 		return *this;
 	}

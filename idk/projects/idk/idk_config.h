@@ -57,6 +57,7 @@ namespace idk
 		//,	class Font
 		//, class Skeleton
 		,	class Mesh
+		,   class Material
 		//,	class Animation
 		//,	class Level
 	>;

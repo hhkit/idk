@@ -30,10 +30,10 @@
     <ClInclude Include="system\OpenGLState.h">
       <Filter>system</Filter>
     </ClInclude>
+    <ClInclude Include="resource\OpenGLMaterialFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="glad.c" />
     <ClCompile Include="resource\OpenGLBuffer.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -58,6 +58,9 @@
     <ClCompile Include="system\OpenGLState.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
+    <ClCompile Include="glad_wgl.c" />
+    <ClCompile Include="glad.c" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

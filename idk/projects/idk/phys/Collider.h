@@ -21,7 +21,7 @@ namespace idk
 
 		aabb bounds() const;
 	private:
-		Handle<class RigidBody> rigid_body;
+		Handle<class RigidBody> _rigid_body;
 		friend class CollisionSystem;
 	};
 }

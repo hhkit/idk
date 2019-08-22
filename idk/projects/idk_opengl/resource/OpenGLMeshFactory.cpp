@@ -21,7 +21,9 @@ namespace idk::ogl
 
 		vector<Vertex> vertexes
 		{
-			
+			Vertex{vec3{0,    +0.5, 0}},
+			Vertex{vec3{-0.5, -0.5, 0}},
+			Vertex{vec3{+0.5, -0.5, 0}}
 		};
 
 		retval->AddBuffer( 
@@ -32,7 +34,7 @@ namespace idk::ogl
 
 		vector<int> indices
 		{
-
+			0, 2, 1
 		};
 
 		retval->AddBuffer(

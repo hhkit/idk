@@ -14,6 +14,7 @@ namespace idk::ogl
 		Win32GraphicsSystem();
 		~Win32GraphicsSystem();
 		void Init()         override;
+		void LateInit()     override;
 		void Shutdown()     override;
 		void BufferGraphicsState(span<MeshRenderer>, span<const Transform>, span<const Parent>) override;
 		GraphicsAPI GetAPI() override;
@@ -21,7 +22,6 @@ namespace idk::ogl
 	private:
 		HDC   _windows_context;
 		HGLRC _opengl_context;
-		color _clear_color;
 		unique_ptr<OpenGLState> _opengl;
 
 		void CreateContext();

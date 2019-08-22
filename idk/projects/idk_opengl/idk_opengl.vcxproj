@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="resource\OpenGLMaterialFactory.h" />
     <ClInclude Include="system\OpenGLState.h" />
     <ClInclude Include="resource\OpenGLBuffer.h" />
     <ClInclude Include="system\OpenGLGraphicsSystem.h" />
@@ -187,7 +188,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="glad_wgl.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="resource\OpenGLBuffer.cpp" />
+    <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
     <ClCompile Include="system\OpenGLGraphicsSystem.cpp" />
     <ClCompile Include="resource\OpenGLMaterial.cpp" />
     <ClCompile Include="resource\OpenGLMesh.cpp" />

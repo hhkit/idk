@@ -19,6 +19,7 @@ namespace idk
 		T& AddSystem(Args&& ... args);
 
 		void InitSystems();
+		void LateInitSystems();
 		void ShutdownSystems();
 	private:
 		using SystemPtr = shared_ptr<ISystem>;

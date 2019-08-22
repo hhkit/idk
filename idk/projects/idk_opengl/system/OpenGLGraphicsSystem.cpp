@@ -1,14 +1,17 @@
 #include "pch.h"
 
 #include <glad/glad.h>
-
+#include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <gfx/MeshRenderer.h>
 
+#include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include <idk_opengl/system/OpenGLState.h>
 
 #include "OpenGLGraphicsSystem.h"
+
+#include <iostream>
 
 namespace idk::ogl
 {
@@ -23,6 +26,11 @@ namespace idk::ogl
 
 		_opengl = std::make_unique<OpenGLState>();
 		_opengl->Setup();
+	}
+
+	void Win32GraphicsSystem::LateInit()
+	{
+		_opengl->GenResources();
 	}
 
 	void Win32GraphicsSystem::Shutdown()
@@ -53,7 +61,7 @@ namespace idk::ogl
 	void Win32GraphicsSystem::RenderBuffer()
 	{
 		glViewport(0, 0, 800, 600);
-		glClearColor(_clear_color.r, _clear_color.g, _clear_color.b, _clear_color.a);
+		glClearColor(1.f, 0.f, 0.f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		_opengl->RenderDrawBuffer();
@@ -97,7 +105,9 @@ namespace idk::ogl
 			throw;
 		}
 		//set the OpenGL context
+		
 		_opengl_context = wglCreateContext(_windows_context);
+
 		if (!_opengl_context)
 		{
 			ReleaseDC(Core::GetSystem<Windows>().GetWindowHandle(), _windows_context);
@@ -112,15 +122,37 @@ namespace idk::ogl
 			ReleaseDC(Core::GetSystem<Windows>().GetWindowHandle(), _windows_context);
 			throw;
 		}
+
 	}
 	void Win32GraphicsSystem::InitOpenGL()
 	{
 		gladLoadGL();
+		int attribs[] =
+		{
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 1,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+			WGL_CONTEXT_FLAGS_ARB, 0,
+			0
+		};
+		gladLoadWGL(_windows_context);
+		auto new_context = wglCreateContextAttribsARB(_windows_context, _opengl_context, attribs);
+		
+		if (new_context)
+		{
+			wglMakeCurrent(NULL, NULL);
+			wglDeleteContext(_opengl_context);
+			_opengl_context = new_context;
+			wglMakeCurrent(_windows_context, _opengl_context);
+		}
+		else
+			throw;
+		std::cout << (char*)glGetString(GL_VERSION);
 	}
 
 	void Win32GraphicsSystem::InitResourceLoader()
-	{
+	{	
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
 	}
 
 	void Win32GraphicsSystem::DestroyContext()
