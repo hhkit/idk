@@ -306,7 +306,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="res\ResourceMeta.h" />
-    <ClInclude Include="math\interp\Spline.h" />
     <ClInclude Include="gfx\RenderObject.h" />
     <ClInclude Include="gfx\MeshRenderer.h">
       <Filter>gfx</Filter>
@@ -314,12 +313,27 @@
     <ClInclude Include="gfx\MaterialInstance.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="shape\sphere.h" />
-    <ClInclude Include="shape\capsule.h" />
-    <ClInclude Include="phys\RigidBody.h" />
-    <ClInclude Include="shape\ray.h" />
-    <ClInclude Include="phys\Collider.h" />
-    <ClInclude Include="shape\box.h" />
+    <ClInclude Include="phys\RigidBody.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\Collider.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\sphere.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\ray.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\capsule.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\box.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\interp\Spline.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -428,8 +442,12 @@
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="shape\sphere.cpp" />
-    <ClCompile Include="shape\ray.cpp" />
+    <ClCompile Include="shape\sphere.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shape\ray.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
