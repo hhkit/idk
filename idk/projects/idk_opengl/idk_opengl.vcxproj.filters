@@ -73,4 +73,7 @@
       <UniqueIdentifier>{22d6d055-167f-4e75-8ed2-a5b318137154}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="program\PipelineProgram.inl" />
+  </ItemGroup>
 </Project>

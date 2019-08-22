@@ -15,6 +15,9 @@ End Header --------------------------------------------------------*/
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 
+uniform mat4 object_transform;
+uniform mat4 normal_transform;
+
 out VS_OUT
 {
   vec3 position;
@@ -23,7 +26,7 @@ out VS_OUT
 
 void main()
 {
-	vs_out.position = position;
-	vs_out.normal   = normal;
+	vs_out.position = vec3(object_transform * vec4(position, 1.0));
+	vs_out.normal   = vec3(normal_transform * vec4(normal, 1.0));
     gl_Position     = vec4(vs_out.position, 1.0);
 }

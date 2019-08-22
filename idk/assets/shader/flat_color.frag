@@ -12,9 +12,15 @@ Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 uniform vec3 color;
 
+in VS_OUT
+{
+  vec3 position;
+  vec3 normal;
+} fs_in;
+
 out vec4 FragColor;
 
 void main()
 {
-	FragColor = vec4(1.0);
+	FragColor = vec4(fs_in.position, 1.0);
 } 

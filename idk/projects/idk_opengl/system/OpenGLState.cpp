@@ -69,10 +69,18 @@ namespace idk::ogl
 			mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 			// set uniforms
+			// object uniforms
+			pipeline.SetUniform("object_transform", elem.transform);
+			pipeline.SetUniform("normal_transform", elem.transform.inverse().transpose());
+
+			// material uniforms
 			for (auto& [id, uniform] : elem.material_instance.uniforms)
 			{
-
+				std::visit([this, &id](auto& elem) {
+					pipeline.SetUniform(id, elem);
+				}, uniform);
 			}
+
 			// draw
 			mesh.Draw();
 		}

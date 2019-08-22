@@ -90,7 +90,8 @@ namespace idk::ogl
 	{
 		_program_id = glCreateProgram();
 		glProgramParameteri(_program_id, GL_PROGRAM_SEPARABLE, GL_TRUE);
-
+		for (auto& elem : _shaders)
+			glAttachShader(_program_id, elem._shader_id);
 		glLinkProgram(_program_id);
 		for (auto& elem : _shaders)
 			glDetachShader(_program_id, elem._shader_id);

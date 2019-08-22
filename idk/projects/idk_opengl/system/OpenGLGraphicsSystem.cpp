@@ -61,7 +61,7 @@ namespace idk::ogl
 	void Win32GraphicsSystem::RenderBuffer()
 	{
 		glViewport(0, 0, 800, 600);
-		glClearColor(1.f, 0.f, 0.f, 1.f);
+		glClearColor(0.f, 0.f, 0.25f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		_opengl->RenderDrawBuffer();

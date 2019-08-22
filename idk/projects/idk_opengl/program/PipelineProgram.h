@@ -16,6 +16,8 @@ namespace idk::ogl
 		void PopAllPrograms();
 
 		void Use();
+		template<typename T>
+		void SetUniform(std::string_view uniform, const T& obj);
 
 		PipelineProgram(PipelineProgram&&) noexcept;
 		PipelineProgram& operator=(PipelineProgram&&) noexcept;
@@ -24,3 +26,4 @@ namespace idk::ogl
 		vector<const Program*> _programs;
 	};
 }
+#include "PipelineProgram.inl"
