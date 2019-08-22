@@ -14,25 +14,30 @@ TEST(SmallString, TestSmallString)
 	EXPECT_EQ(str.capacity(), 31);
 	EXPECT_STREQ(str.c_str(), "a");
 
-	str.append("ivan is a weeb ivan is a weeb");
+	str.append("ivan is a weeb");
+	EXPECT_EQ(str.size(), 15);
+	EXPECT_EQ(str.capacity(), 31);
+	EXPECT_STREQ(str.c_str(), "aivan is a weeb");
+
+	str += str;
 	EXPECT_EQ(str.size(), 30);
 	EXPECT_EQ(str.capacity(), 31);
-	EXPECT_STREQ(str.c_str(), "aivan is a weeb ivan is a weeb");
+	EXPECT_STREQ(str.c_str(), "aivan is a weebaivan is a weeb");
 
-	str.append("x");
+	str += 'x';
 	EXPECT_EQ(str.size(), 31);
 	EXPECT_EQ(str.capacity(), 31);
-	EXPECT_STREQ(str.c_str(), "aivan is a weeb ivan is a weebx");
+	EXPECT_STREQ(str.c_str(), "aivan is a weebaivan is a weebx");
 
-	str.append("x");
+	str += "x";
 	EXPECT_EQ(str.size(), 32);
 	EXPECT_EQ(str.capacity(), 63);
-	EXPECT_STREQ(str.c_str(), "aivan is a weeb ivan is a weebxx");
+	EXPECT_STREQ(str.c_str(), "aivan is a weebaivan is a weebxx");
 
 	str.erase(0, 1);
 	EXPECT_EQ(str.size(), 31);
 	EXPECT_EQ(str.capacity(), 63);
-	EXPECT_STREQ(str.c_str(), "ivan is a weeb ivan is a weebxx");
+	EXPECT_STREQ(str.c_str(), "ivan is a weebaivan is a weebxx");
 
 	str.resize(14);
 	EXPECT_EQ(str.size(), 14);
@@ -52,6 +57,10 @@ TEST(SmallString, TestSmallString)
 	EXPECT_EQ(i, 0);
 
 	EXPECT_EQ(str[4], ' ');
+	EXPECT_EQ(str, idk::small_string<char>(str));
+	EXPECT_NE(str, str + str);
+	EXPECT_LT(str, "j");
+	EXPECT_LT("h", str);
 
 	str.clear();
 	EXPECT_EQ(str.size(), 0);

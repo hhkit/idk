@@ -2,6 +2,7 @@
 
 #include "small_string.h"
 #include <string>
+#include <limits>
 
 namespace idk
 {
@@ -36,6 +37,33 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>::small_string(size_type count, CharT c, const Allocator& alloc)
+		: small_string(alloc)
+	{
+		auto& rep = _rep.first();
+
+		if (count > _sso_buffer_size)
+		{
+			const auto cap = _calc_capacity(count);
+			auto* buf = _rep.second().allocate(cap);
+			rep.longer = _longer{ buf, count, cap };
+			rep.sso.size_diff = _use_longer_mask;
+			for (size_type i = 0; i < count; ++i, ++buf)
+				traits_type::assign(*buf, c);
+			*buf = '\0';
+		}
+		else
+		{
+			// mul by 2, so LSB is always 0
+			rep.sso.size_diff = (_sso_buffer_size - static_cast<CharT>(count)) << 1;
+			auto* p = rep.sso.buffer;
+			for (size_type i = 0; i < count; ++i, ++p)
+				traits_type::assign(*p, c);
+			*p = '\0';
+		}
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator>::small_string(const CharT* cstr, const Allocator& alloc)
 		: small_string(alloc)
 	{
@@ -44,7 +72,7 @@ namespace idk
 
 		if (len > _sso_buffer_size)
 		{
-			const auto cap = _calc_capacity(len + 1);
+			const auto cap = _calc_capacity(len);
 			auto* buf = _rep.second().allocate(cap);
 			rep.longer = _longer{ buf, len, cap };
 			rep.sso.size_diff = _use_longer_mask;
@@ -63,18 +91,18 @@ namespace idk
 	small_string<CharT, Traits, Allocator>::small_string(
 		InputIt first, InputIt last, const Allocator& alloc)
 	{
-		const auto len = last - first;
+		const size_type len = last - first;
 		auto& rep = _rep.first();
 
 		if (len > _sso_buffer_size)
 		{
-			const auto cap = _calc_capacity(len + 1);
+			const auto cap = _calc_capacity(len);
 			auto* buf = _rep.second().allocate(cap + 1);
-			rep.alloc = _longer{ buf, len, cap };
-			rep.sso.size_diff = _sso_mask;
+			rep.longer = _longer{ buf, len, cap };
+			rep.sso.size_diff = _use_longer_mask;
 
 			for (auto iter = first; iter != last; ++iter, ++buf)
-				traits_type::assign(buf, iter);
+				traits_type::assign(*buf, *iter);
 			*buf = '\0';
 		}
 		else
@@ -84,7 +112,7 @@ namespace idk
 
 			auto* buf = rep.sso.buffer;
 			for (auto iter = first; iter != last; ++iter, ++buf)
-				traits_type::assign(buf, iter);
+				traits_type::assign(*buf, *iter);
 			*buf = '\0';
 		}
 	}
@@ -225,13 +253,26 @@ namespace idk
 
 
 
+	template<typename DifferenceType, typename ValueType>
+	static int _compare_sizes(ValueType a, ValueType b)
+	{
+		const DifferenceType d = DifferenceType(a - b);
+
+		if (d > std::numeric_limits<int>::max())
+			return std::numeric_limits<int>::max();
+		else if (d < std::numeric_limits<int>::min())
+			return std::numeric_limits<int>::min();
+		else
+			return int(d);
+	}
+
 	template<typename CharT, typename Traits, typename Allocator>
 	int small_string<CharT, Traits, Allocator>::compare(const small_string& str) const
 	{
 		const auto s1 = size();
 		const auto s2 = str.size();
 		const auto cmp = traits_type::compare(data(), str.data(), std::min(s1, s2));
-		return cmp == 0 ? s1 - s2 : cmp;
+		return cmp == 0 ? _compare_sizes<difference_type>(s1, s2) : cmp;
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
@@ -240,7 +281,7 @@ namespace idk
 		const auto s1 = size();
 		const auto s2 = traits_type::length(str);
 		const auto cmp = traits_type::compare(data(), str, std::min(s1, s2));
-		return cmp == 0 ? s1 - s2 : cmp;
+		return cmp == 0 ? _compare_sizes<difference_type>(s1, s2) : cmp;
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
@@ -249,7 +290,7 @@ namespace idk
 		const auto s1 = size();
 		const auto s2 = sv.size();
 		const auto cmp = traits_type::compare(data(), sv.data(), std::min(s1, s2));
-		return cmp == 0 ? s1 - s2 : cmp;
+		return cmp == 0 ? _compare_sizes<difference_type>(s1, s2) : cmp;
 	}
 
 
@@ -631,6 +672,31 @@ namespace idk
 		return at(pos);
 	}
 
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator+=(const small_string& str)
+	{
+		return append(str);
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator+=(const CharT* cstr)
+	{
+		return append(cstr);
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator+=(const std::basic_string_view<CharT, Traits>& sv)
+	{
+		return append(sv);
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator+=(CharT c)
+	{
+		push_back(c);
+		return *this;
+	}
+
 
 
 	template<typename CharT, typename Traits, typename Allocator>
@@ -642,7 +708,6 @@ namespace idk
 	template<typename CharT, typename Traits, typename Allocator>
 	auto small_string<CharT, Traits, Allocator>::_calc_capacity(size_type len) const -> size_type
 	{
-		--len;
 		len |= len >> 1;
 		len |= len >> 2;
 		len |= len >> 4;
@@ -659,10 +724,157 @@ namespace idk
 		{
 			auto size_diff = rep.sso.size_diff >> 1;
 			if (size_diff < added_len) // not enough space in sso
-				reserve(_calc_capacity(_sso_buffer_size - size_diff + added_len + 1));
+				reserve(_calc_capacity(_sso_buffer_size - size_diff + added_len));
 		}
 		else if(rep.longer.capacity < rep.longer.size + added_len)
-			reserve(_calc_capacity(rep.longer.size + added_len + 1));
+			reserve(_calc_capacity(rep.longer.size + added_len));
 	}
 
+
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator==(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return lhs.compare(rhs) == 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator< (const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return lhs.compare(rhs) < 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator<=(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return lhs.compare(rhs) <= 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator> (const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return lhs.compare(rhs) > 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator>=(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return lhs.compare(rhs) >= 0;
+	}
+
+
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator==(const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return rhs.compare(lhs) == 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator==(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+	{
+		return lhs.compare(rhs) == 0;
+	}
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator< (const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return rhs.compare(lhs) > 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator< (const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+	{
+		return lhs.compare(rhs) < 0;
+	}
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator<=(const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return rhs.compare(lhs) >= 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator<=(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+	{
+		return lhs.compare(rhs) <= 0;
+	}
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator> (const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return rhs.compare(lhs) < 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator> (const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+	{
+		return lhs.compare(rhs) > 0;
+	}
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator>=(const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return rhs.compare(lhs) <= 0;
+	}
+	template<class CharT, class Traits, class Alloc>
+	bool operator>=(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+	{
+		return lhs.compare(rhs) >= 0;
+	}
+	
+
+
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return small_string(lhs).append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+	{
+		return small_string(lhs).append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs,	CharT rhs)
+	{
+		return small_string(lhs).push_back(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const CharT* lhs,                              const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return small_string(lhs).append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(CharT lhs,                                     const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return small_string(1, lhs).append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      small_string<CharT, Traits, Alloc>&& rhs)
+	{
+		return lhs.append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      const small_string<CharT, Traits, Alloc>& rhs)
+	{
+		return lhs.append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      const CharT* rhs)
+	{
+		return lhs.append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      CharT rhs)
+	{
+		return lhs.push_back(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, small_string<CharT, Traits, Alloc>&& rhs)
+	{
+		return small_string(lhs).append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const CharT* lhs,                              small_string<CharT, Traits, Alloc>&& rhs)
+	{
+		return small_string(lhs).append(rhs);
+	}
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(CharT lhs,                                     small_string<CharT, Traits, Alloc>&& rhs)
+	{
+		return small_string(1, lhs).append(rhs);
+	}
 }

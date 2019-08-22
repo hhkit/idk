@@ -2,8 +2,9 @@
 
 #include <memory>
 #include <ds/compressed_pair.h>
+#include <util/string_hash.h>
 
-namespace std
+namespace std // forward decl
 {
 	template<typename CharT, typename Traits = std::char_traits<CharT>>
 	class basic_string_view;
@@ -33,6 +34,7 @@ namespace idk
 
 		explicit small_string(const Allocator& alloc) noexcept;
 		small_string() noexcept(noexcept(Allocator));
+		small_string(size_type count, CharT c, const Allocator& alloc = Allocator{});
 		small_string(const CharT* cstr, const Allocator& alloc = Allocator{});
 		template<typename InputIt> small_string(InputIt first, InputIt last, const Allocator& alloc = Allocator());
 
@@ -108,6 +110,10 @@ namespace idk
 		// operators
 		reference       operator[](size_type pos);
 		const_reference operator[](size_type pos) const;
+		small_string&   operator+=(const small_string& str);
+		small_string&   operator+=(const CharT* cstr);
+		small_string&   operator+=(const std::basic_string_view<CharT, Traits>& sv);
+		small_string&   operator+=(CharT c);
 
 	private:
 		constexpr static CharT _sso_buffer_size = (31 / sizeof(CharT));
@@ -123,6 +129,76 @@ namespace idk
 
 		// compress allocator, since it's most likely size 0
 		compressed_pair<_rep, allocator_type> _rep;
+	};
+
+	// non-member operators
+	template<class CharT, class Traits, class Alloc>
+	bool operator==(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator< (const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator<=(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator> (const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator>=(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs);
+
+	template<class CharT, class Traits, class Alloc>
+	bool operator==(const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator==(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator< (const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator< (const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator<=(const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator<=(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator> (const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator> (const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator>=(const CharT* lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	bool operator>=(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs);
+
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, const CharT* rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs,	CharT rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const CharT* lhs,                              const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(CharT lhs,                                     const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      small_string<CharT, Traits, Alloc>&& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      const small_string<CharT, Traits, Alloc>& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      const CharT* rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      CharT rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, small_string<CharT, Traits, Alloc>&& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(const CharT* lhs,                              small_string<CharT, Traits, Alloc>&& rhs);
+	template<class CharT, class Traits, class Alloc>
+	small_string<CharT, Traits, Alloc> operator+(CharT lhs,                                     small_string<CharT, Traits, Alloc>&& rhs);
+}
+
+// std hash overload
+namespace std
+{
+	template<typename CharT> struct hash<idk::small_string<CharT>>
+	{
+		size_t operator()(const idk::small_string<CharT>& str) const noexcept
+		{
+			return idk::string_hash(str);
+		}
 	};
 }
 
