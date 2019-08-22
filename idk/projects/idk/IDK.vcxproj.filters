@@ -334,6 +334,12 @@
     <ClInclude Include="math\interp\Spline.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="ds\compressed_pair.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\small_string.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -551,6 +557,12 @@
     </None>
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
+    </None>
+    <None Include="ds\compressed_pair.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\small_string.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

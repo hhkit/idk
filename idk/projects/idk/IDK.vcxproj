@@ -28,6 +28,8 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\BoneRenderer.h" />
+    <ClInclude Include="ds\compressed_pair.h" />
+    <ClInclude Include="ds\small_string.h" />
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
@@ -159,7 +161,9 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="ds\compressed_pair.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="ds\small_string.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />

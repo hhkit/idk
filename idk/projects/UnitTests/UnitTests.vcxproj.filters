@@ -29,6 +29,7 @@
     <ClCompile Include="TestString.cpp" />
     <ClCompile Include="TestSerialize.cpp" />
     <ClCompile Include="TestFileSystem.cpp" />
+    <ClCompile Include="TestSmallString.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
