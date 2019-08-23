@@ -30,6 +30,8 @@
     <ClInclude Include="anim\BoneRenderer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\small_string.h" />
+    <ClInclude Include="editor\commands\CommandController.h" />
+    <ClInclude Include="editor\commands\ICommand.h" />
     <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
@@ -118,6 +120,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="editor\commands\CommandController.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
