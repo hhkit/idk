@@ -54,6 +54,13 @@ namespace idk
 	template<typename T>
 	constexpr auto is_associative_container_v = is_associative_container<T>::value;
 
+	template<typename T>
+	struct is_container;
+
+	template<typename T>
+	constexpr auto is_container_v = is_container<T>::value;
+
+
 	template<typename T, typename>
 	struct is_macro_enum;
 

@@ -18,6 +18,9 @@
 //    mat4 proj;
 //} ubo;
 
+layout(binding = 0, set = 0) uniform View{mat4 in_view;}view;
+layout(binding = 1, set = 0) uniform Proj{mat4 in_proj;}proj;
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 
@@ -28,6 +31,6 @@ layout(location = 2) out vec4 fragColor;
 //layout(location = 1) out vec4 color;
 void main() {
 //+ 1.0z to put the object back within vulkan's clipping range: 0-1 (as opposed to -1 - 1)
-    gl_Position =  (vec4(0,0,0.5,0.0))+model* vec4(inPosition, 1.0);
+    gl_Position =  proj.in_proj * view.in_view *model* vec4(inPosition, 1.0);
 	fragColor = vec4(inColor,1.0);
 }

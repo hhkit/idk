@@ -56,7 +56,9 @@ namespace idk::vkn
 		if (buffers.size() <= curr_buffer_idx)
 		{
 			auto&& [buffer, offset] = make_buffer();
-			buffers.emplace_back(DataPair{ std::move(buffer),string(chunk_size,'\0'),offset });
+			string buf{};
+			buf.reserve(chunk_size);
+			buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset });
 			allocation_table.emplace(buffers.size() - 1,memory_blocks.size() - 1);
 		}
 		else if (!buffers[curr_buffer_idx].CanAdd(size))
@@ -65,6 +67,11 @@ namespace idk::vkn
 		}
 		return buffers[curr_buffer_idx];
 	}
+
+	UboManager::UboManager(VulkanView& view_) : view{view_}
+	{
+	}
+
 
 	void UboManager::UpdateAllBuffers()
 	{

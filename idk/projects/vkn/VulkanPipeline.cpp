@@ -149,7 +149,7 @@ namespace idk::vkn
 		//};
 		//For uniforms
 		CreateUniformDescriptors(vulkan, config);//Should probably also allocate the UBO and Descriptors on the View/Data side.
-		auto pipelineLayoutInfo = GetLayoutInfo(config);;
+		auto&& [pipelineLayoutInfo,pli_rsc] = GetLayoutInfo(config);;
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
@@ -169,6 +169,7 @@ namespace idk::vkn
 			,0
 		};
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
+		pipelinelayout = std::move(m_pipelinelayout);
 	}
 	void VulkanPipeline::Reset()
 	{
@@ -374,20 +375,21 @@ namespace idk::vkn
 		};
 	}
 
-	vk::PipelineLayoutCreateInfo VulkanPipeline::GetLayoutInfo(const config_t& config) const
+	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo(const config_t& config) const
 	{
-		return vk::PipelineLayoutCreateInfo
+		vector<vk::DescriptorSetLayout> layouts;
+		std::transform(uniform_layout.begin(), uniform_layout.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
+		return make_pair(vk::PipelineLayoutCreateInfo
 		{
 			vk::PipelineLayoutCreateFlags{}
-			, (uniform_layout)?1u:0u		  //setLayoutCount         
-			, (uniform_layout)?&*uniform_layout:nullptr //pSetLayouts            
+			, s_cast<uint32_t>(layouts.size())		  //setLayoutCount         
+			, (layouts.size()) ? std::data(layouts) : nullptr //pSetLayouts            
 			, 0		  //pushConstantRangeCount 
 			, nullptr //pPushConstantRanges    
-		};
+		},std::move(layouts));
 	}
-	vector<vk::DescriptorSetLayoutBinding> GetDescriptorBindings(const pipeline_config& config)
+	vector<vk::DescriptorSetLayoutBinding> GetDescriptorBindings(const uniform_layout_t& ulayout_config)
 	{
-		auto& ulayout_config = config.uniform_layout;
 		vector<vk::DescriptorSetLayoutBinding> result;
 		for (auto& binding : ulayout_config.bindings)
 		{
@@ -398,23 +400,26 @@ namespace idk::vkn
 				hlp::MapStages(binding.stages)
 				,nullptr
 			};
-
+			result.emplace_back(a);
 		}
 		return result;
 	}
 
 	void VulkanPipeline::CreateUniformDescriptors(Vulkan_t& vulkan, const config_t& config)
 	{
-		auto bindings = GetDescriptorBindings(config);
-		if (bindings.size())
+		for (auto& [set_idx, set] : config.uniform_layouts)
 		{
-			vk::DescriptorSetLayoutCreateInfo layout_info
+			auto bindings = GetDescriptorBindings(set);
+			if (bindings.size())
 			{
-				vk::DescriptorSetLayoutCreateFlags{}
-				,hlp::arr_count(bindings)
-				,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
-			};
-			uniform_layout = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
+				vk::DescriptorSetLayoutCreateInfo layout_info
+				{
+					vk::DescriptorSetLayoutCreateFlags{}
+					,hlp::arr_count(bindings)
+					,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
+				};
+				uniform_layout[set_idx] = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
+			}
 		}
 	}
 

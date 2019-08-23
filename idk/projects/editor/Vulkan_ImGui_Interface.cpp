@@ -26,7 +26,7 @@ namespace idk
 		ImGui::StyleColorsClassic();
 
 		vkn::VulkanState* v = vkObj;
-		ImGui_ImplVulkan_InitInfo info{};
+		//ImGui_ImplVulkan_InitInfo info{};
 		//info.Instance =
 			//ImGui_ImplVulkan_Init();
 
@@ -37,7 +37,7 @@ namespace idk
 		info.PhysicalDevice = vknViews.PDevice();
 		info.Device = *vknViews.Device();
 		
-		info.QueueFamily = *vknViews.QueueFamily().unique_queues;
+		info.QueueFamily = *vknViews.QueueFamily().graphics_family;
 		info.Queue = vknViews.GraphicsQueue();
 
 		info.PipelineCache = VK_NULL_HANDLE;
@@ -63,10 +63,10 @@ namespace idk
 			vkn::hlp::arr_count(pSizes),
 			pSizes
 		};
-		vknViews.Device()->createDescriptorPoolUnique()
-
-		info.DescriptorPool = VK_NULL_HANDLE;
-		info.Allocator = vknViews.
+		//vknViews.Device()->createDescriptorPoolUnique()
+		//
+		//info.DescriptorPool = VK_NULL_HANDLE;
+		//info.Allocator = vknViews.
 
 	}
 }

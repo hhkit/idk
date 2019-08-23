@@ -17,5 +17,5 @@ namespace idk::vkn::hlp
 
 	vk::ShaderStageFlagBits MapStage(uniform_layout_t::UniformStage stage);
 	vk::ShaderStageFlags MapStages(
-		const decltype(decltype(decltype(pipeline_config::uniform_layout)::bindings)::value_type::stages)& stages);
+		const decltype(decltype(decltype(pipeline_config::uniform_layouts)::mapped_type::bindings)::value_type::stages)& stages);
 }

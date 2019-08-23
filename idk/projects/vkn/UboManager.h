@@ -11,6 +11,7 @@ namespace idk::vkn
 		using buffer_idx_t = size_t;
 
 
+		UboManager(VulkanView& view);
 
 		template<typename T>
 		std::pair<vk::Buffer, uint32_t> Add(const T& data);
@@ -39,6 +40,7 @@ namespace idk::vkn
 			//Returns the offset to start from
 			std::optional<size_t> allocate(size_t chunk);
 		};
+		VulkanView& view;
 		constexpr static uint32_t              chunk_size = 1 << 16;
 		size_t                                 memory_chunk_size = 1 << 20; //Replace this with the limit obtained from device.
 		//Maybe replace with allocator
@@ -48,7 +50,6 @@ namespace idk::vkn
 		vector<DataPair>                       buffers;
 		size_t                                 curr_buffer_idx{};
 
-		VulkanView& view;
 
 
 		size_t AllocateAndBind(vk::Buffer& buffer);

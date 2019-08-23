@@ -3,6 +3,7 @@
 #include <vkn/VulkanView.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/uniform_info.h>
+
 namespace idk::vkn
 {
 	struct VulkanPipeline
@@ -13,7 +14,7 @@ namespace idk::vkn
 		vk::UniquePipelineLayout pipelinelayout{};
 		vk::UniquePipeline       pipeline{};
 
-		vk::UniqueDescriptorSetLayout uniform_layout{};
+	   hash_table<uint32_t,vk::UniqueDescriptorSetLayout> uniform_layout{};
 
 	
 		void Create(config_t const& config, Vulkan_t& vulkan);
@@ -39,7 +40,7 @@ namespace idk::vkn
 		vector<vk::PipelineColorBlendAttachmentState > GetColorBlendAttachments(const config_t& config)const;
 		std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
 		vector<vk::DynamicState> GetDynamicStates(const config_t& config)const;
-		vk::PipelineLayoutCreateInfo GetLayoutInfo(const config_t& config)const;
+		std::pair<vk::PipelineLayoutCreateInfo,vector< vk::DescriptorSetLayout>> GetLayoutInfo(const config_t& config)const;
 		void CreateUniformDescriptors(Vulkan_t& vulkan, const config_t& config);
 		vk::UniqueRenderPass& GetRenderpass(const config_t& config, VulkanView& vulkan);
 

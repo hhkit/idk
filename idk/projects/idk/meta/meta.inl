@@ -88,6 +88,11 @@ namespace idk
 		std::declval<T&>().insert(std::declval<std::decay_t<T>::value_type>())
 	)>> : is_iterable<T> {};
 
+
+	template<typename T>
+	struct is_container : std::conjunction<is_associative_container<T>,is_sequential_container<T>> {};
+
+
 	template<typename T, typename = void>
 	struct is_macro_enum : std::false_type {};
 

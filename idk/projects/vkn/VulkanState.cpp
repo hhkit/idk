@@ -12,6 +12,7 @@
 #include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
 #include <vkn/utils/utils.h>
+#include <vkn/UboManager.h>
 
 namespace idk
 {
@@ -36,6 +37,7 @@ namespace idk::vkn
 	};
 	struct DescriptorSetManager
 	{
+		VulkanView& view;
 		using layout_handle_t = vk::DescriptorSetLayout;
 		vk::DescriptorPool pool;
 		struct DescriptorSets
@@ -63,7 +65,6 @@ namespace idk::vkn
 		DescriptorSets sets{};
 		
 		;
-		VulkanView& view;
 		vk::DescriptorPool& Pool() { return pool; }
 
 		vk::DescriptorSetLayout GetLayout(layout_handle_t handle)
@@ -1308,17 +1309,18 @@ namespace idk::vkn
 
 	void VulkanState::createDescriptorPool()
 	{
+		//TODO establish a manager for the pools so that the descriptor sets manager can pull as necessary.
 		vk::DescriptorPoolSize pool_size[]
 		{
 			vk::DescriptorPoolSize{
 				vk::DescriptorType::eUniformBuffer,
-				hlp::arr_count(m_swapchain.images)*6
+				hlp::arr_count(m_swapchain.images)*1006
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
 			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
-			,hlp::arr_count(m_swapchain.images)*6
+			,hlp::arr_count(m_swapchain.images)*1006
 			,hlp::arr_count(pool_size)
 			,std::data(pool_size)
 		};
@@ -1764,7 +1766,95 @@ namespace idk::vkn
 		//command_buffer.begin(beginInfo);
 
 	}
+	void UpdateUniformDS(
+		vk::Device& device, 
+		vk::DescriptorSet& dset, 
+		uint32_t binding, 
+		vk::Buffer& ubuffer, 
+		uint32_t buffer_offset, 
+		uint32_t arr_index, 
+		size_t size)
+	{
+		//auto& dset = ds2[i++];
+		vk::DescriptorBufferInfo bufferInfo[] =
+		{
+			vk::DescriptorBufferInfo
+			{
+				ubuffer
+				, buffer_offset
+				, size
+			}
+		};
+		;
 
+		vector<vk::WriteDescriptorSet> descriptorWrite
+		{
+			vk::WriteDescriptorSet{
+				dset
+				,binding
+				,arr_index
+				,hlp::arr_count(bufferInfo)
+				,vk::DescriptorType::eUniformBuffer
+				,nullptr
+				,std::data(bufferInfo)
+				,nullptr
+			}
+		};
+		device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
+	}
+
+	struct TmpBinding
+	{
+		uint32_t binding;
+		vk::Buffer& ubuffer;
+		uint32_t buffer_offset;
+		uint32_t arr_index;
+		size_t size;
+	};
+
+	void UpdateUniformDS(
+		vk::Device& device,
+		vk::DescriptorSet& dset,
+		vector<TmpBinding> bindings
+		)
+	{
+		for (auto& binding : bindings)
+		{
+		//auto& dset = ds2[i++];
+		vk::DescriptorBufferInfo bufferInfo[]
+		{
+			vk::DescriptorBufferInfo{
+			binding.ubuffer
+			, binding.buffer_offset
+			, binding.size
+			}
+		};
+		;
+
+		vector<vk::WriteDescriptorSet> descriptorWrite
+		{
+			vk::WriteDescriptorSet{
+				dset
+				,binding.binding
+				,binding.arr_index
+				,hlp::arr_count(bufferInfo)
+				,vk::DescriptorType::eUniformBuffer
+				,nullptr
+				,std::data(bufferInfo)
+				,nullptr
+			}
+		};
+		device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
+		}
+	}
+
+	vk::DescriptorSetLayout GetUniformLayout(VulkanPipeline& pipeline, uint32_t set, uint32_t binding)
+	{
+		auto itr = pipeline.uniform_layout.find(set);
+		assert(itr != pipeline.uniform_layout.end());
+			//throw std::runtime_error("Received incorre")
+		return *itr->second;
+	}
 	void VulkanState::EndFrame()
 	{
 		auto& rs = view_->CurrRenderState();
@@ -1794,25 +1884,59 @@ namespace idk::vkn
 		rs.UpdateMasterBuffer(*view_);
 		rs.TransferBuffer().end();
 
-
 		//rs.transfer_buffer->begin(beginInfo);
 		command_buffer.begin(begin_info);
+		//TODO move this to smth per frame/render state
+		static hash_table<intptr_t,DescriptorSetManager> dsms{};
+		
+		for(auto& dsm : dsms)
+			dsm.second.ClearSets();
+		//TODO move this to smth per renderstate/frame
+		static UboManager ubo_manager{*view_};
 		//rs.transfer_buffer->end();
 		for (auto& dc : rs.DrawCalls())
 		{
 			dc.pipeline->Bind(command_buffer, *view_);
 			dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
+			//set, dss
+			hash_table<uint32_t, std::pair<vk::DescriptorSetLayout,vector<TmpBinding>>> collated;
+			for (auto& uniform : dc.uniforms)
+			{
+				vk::DescriptorSetLayout layout = GetUniformLayout(*dc.pipeline, uniform.set, uniform.binding);
+				if (dsms.find(r_cast<intptr_t>(layout.operator VkDescriptorSetLayout())) == dsms.end())
+				{
+					//TODO establish a better way to manage and allocate the descriptor sets manager
+					auto itr = dsms.emplace(r_cast<intptr_t>(layout.operator VkDescriptorSetLayout()), DescriptorSetManager{ *view_ });
+					auto& dsm = itr.first->second;
+					dsm.pool =* m_descriptorpool;
+					dsm.AllocateSets(200, layout);
+				}
+				auto&& [ubo, offset] = ubo_manager.Add(uniform.data);
+				collated[uniform.set].first = layout;
+				collated[uniform.set].second.emplace_back(TmpBinding{ uniform.binding,ubo,offset,0,uniform.data.size() });
+			}
+			for (auto& [set, dss] : collated)
+			{
+				auto& dsm = dsms.find(r_cast<intptr_t>(dss.first.operator VkDescriptorSetLayout()))->second;
+				auto ds = dsm.New(dss.first);
+				UpdateUniformDS(*m_device, ds,
+					dss.second
+					);
+				command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *dc.pipeline->pipelinelayout, set, ds, nullptr, dispatcher);
+
+			}
 			vec3(&tmp)[36] = *r_cast<vec3(*)[36]>(rs.MasterBuffer().buffer.data() + 80);
 			vec4(&tmp2)[5] = *r_cast<vec4(*)[5]>(rs.MasterBuffer().buffer.data());
 			for (auto& [first_binding, offset] : dc.vtx_binding)
 			{
 				command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
 			}
+			
 			command_buffer.draw(dc.vertex_count, dc.instance_count, 0, 0, dispatcher);
 		}
 		command_buffer.end(dispatcher);
 
-
+		ubo_manager.UpdateAllBuffers();
 
 
 	}

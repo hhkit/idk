@@ -43,7 +43,7 @@ namespace idk
 		vector<buffer_desc> buffer_descriptions;
 		FillType fill_type = eFill;
 		PrimitiveTopology prim_top = eTriangleList;
-		uniform_layout_t uniform_layout;
+		hash_table<uint32_t,uniform_layout_t> uniform_layouts;
 		bool restart_on_special_idx = false; //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
 	};
 }

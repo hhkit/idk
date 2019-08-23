@@ -72,7 +72,10 @@
     <ClCompile Include="vector_buffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="UboManager.cpp" />
+    <ClCompile Include="UboManager.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_call.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

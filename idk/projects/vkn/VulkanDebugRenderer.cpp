@@ -12,6 +12,10 @@
 #include "VulkanDebugRenderer.h"
 namespace idk::vkn
 {
+	namespace glm
+	{
+		mat4 lookAt(vec3 const& eye, vec3 const& center, vec3 const& up);
+	}
 
 	const std::vector<vec3>& GetSquareFace(bool is_line_list = false);
 	template<typename V, typename F>
@@ -133,7 +137,11 @@ namespace idk::vkn
 		draw_call dc;
 		dc.pipeline = &pipeline;
 		dc.uniform_info = uniforms;
-
+		mat4 view = glm::lookAt(vec3{ 0,2,2 }, vec3{ 0,0,0 }, vec3{ 0,1,0 });
+		auto extent = detail.Swapchain().extent;
+		mat4 proj = perspective(idk::rad(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+		dc.uniforms.emplace_back(0, 0, view);
+		dc.uniforms.emplace_back(0, 1, proj);
 		for (auto& [shape, buffer] : info->render_info)
 		{
 			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;

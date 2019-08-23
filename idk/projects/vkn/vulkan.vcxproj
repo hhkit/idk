@@ -217,6 +217,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VulkanView.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
