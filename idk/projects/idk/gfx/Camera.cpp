@@ -16,7 +16,10 @@ namespace idk
 
 	mat4 Camera::ViewMatrix() const
 	{
-		return orthonormalize(GetGameObject()->Transform()->GlobalMatrix().inverse());
+		auto mat = GetGameObject()->Transform()->GlobalMatrix();
+		auto retval = orthonormalize(mat);
+		retval[3] = mat[3];
+		return retval;
 	}
 
 	mat4 Camera::ProjectionMatrix() const
