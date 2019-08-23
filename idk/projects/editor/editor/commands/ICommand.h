@@ -28,5 +28,6 @@ namespace idk {
 		virtual bool execute() = 0;						//Return true if the command works. When it is true, it will add to the undo stack
 
 		virtual bool undo() = 0;						//Return true if the command works. When it is true, it will add to the redo stack
+		virtual ~ICommand() = default;					// virtual needs default destructor
 	};
 }

@@ -100,7 +100,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\editor\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>vulkan.lib;win32.lib;core.lib</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -138,7 +138,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\editor\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>vulkanD.lib;win32D.lib;coreD.lib</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>

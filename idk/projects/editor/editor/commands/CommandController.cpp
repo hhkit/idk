@@ -15,8 +15,8 @@ Takes in a NEW Commands and handles its delete internally
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include "stdafx.h"
-#include <editor/commands/CommandController.h>
+#include "pch.h"
+#include "CommandController.h"
 
 namespace idk {
 	CommandController::CommandController()
