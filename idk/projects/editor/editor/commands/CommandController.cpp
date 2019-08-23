@@ -20,8 +20,6 @@ Takes in a NEW Commands and handles its delete internally
 
 namespace idk {
 	CommandController::CommandController()
-
-		:undoLimit{ DEFAULT_UNDOLIMIT }, redoStack{}, undoStack{}
 	{
 	}
 

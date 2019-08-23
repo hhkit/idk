@@ -4,9 +4,26 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
+    <ClInclude Include="editor\commands\CommandController.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\ICommand.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
+    <ClCompile Include="editor\commands\CommandController.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="editor">
+      <UniqueIdentifier>{15e5ab8b-1ae5-478d-8810-84f9c5347669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor\commands">
+      <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
