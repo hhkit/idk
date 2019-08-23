@@ -19,29 +19,10 @@ Takes in a NEW Commands and handles its delete internally
 #include <list>
 #include <editor/commands/ICommand.h>
 
-#define DEFAULT_UNDOLIMIT 512 //Similarly, redo can go up to 512
-
 
 namespace idk {
 
 	class CommandController {
-	private:
-
-		//A vector of past commands that have been executed. 
-		//When ExecuteCommand or RedoCommand is called, this is added to stack. 
-		//When UndoCommand is called, this stack is popped off.
-		//This stack is cleared when changing scenes.
-		std::list<ICommand*> undoStack;
-
-
-		//A vector of past commands that have been undone. 
-		//When ExecuteCommand is called, this stack is cleared. 
-		//When UndoCommand is called, this is added to stack.
-		//This stack is cleared when changing scenes.
-		std::list<ICommand*> redoStack;
-
-
-		size_t undoLimit; //By default it is 512
 	public:
 		CommandController();
 		~CommandController();
@@ -54,6 +35,25 @@ namespace idk {
 		void RedoCommand();
 		//Clears the stack
 		void ClearUndoRedoStack();
+
+	private:
+
+		//A vector of past commands that have been executed. 
+		//When ExecuteCommand or RedoCommand is called, this is added to stack. 
+		//When UndoCommand is called, this stack is popped off.
+		//This stack is cleared when changing scenes.
+		std::list<ICommand*> undoStack{};
+
+
+		//A vector of past commands that have been undone. 
+		//When ExecuteCommand is called, this stack is cleared. 
+		//When UndoCommand is called, this is added to stack.
+		//This stack is cleared when changing scenes.
+		std::list<ICommand*> redoStack{};
+
+
+		size_t undoLimit			{ 512 }; //By default it is 512
+
 	};
 
 }
