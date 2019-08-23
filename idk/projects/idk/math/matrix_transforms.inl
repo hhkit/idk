@@ -90,4 +90,34 @@ namespace idk
 			tvec
 		);
 	}
+	template<typename T>
+	math::matrix<T, 4, 4> look_at(const math::vector<T, 3> & eye, const math::vector<T, 3> & object, const math::vector<T, 3> & global_up)
+	{
+		auto target = (eye - object).normalize();
+		auto right  = global_up.cross(target).normalize();
+		auto up     = target.cross(global_up);
+
+		return math::matrix<T, 4, 4>{
+			vec4{ right,  0 }, 
+			vec4{ up,     0 }, 
+			vec4{ target, 0 }, 
+			vec4{ eye,    1 }
+		};
+	}
+
+	template<typename T, unsigned D>
+	math::matrix<T, D, D> orthonormalize(const math::matrix<T, D, D>& m)
+	{
+		auto retval = m;
+		for (auto i : range<D>())
+		{
+			for (auto j = 0; j < i; ++j)
+			{
+				const auto v = i + j;
+				retval[i] -= retval[i].dot(retval[v]) * retval[v];
+			}
+			retval[i].normalize();
+		}
+		return retval;
+	}
 }

@@ -351,6 +351,8 @@
       <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="test\TestComponent.h" />
+    <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="math\matrix_decomposition.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -468,6 +470,7 @@
     <ClCompile Include="test\TestSystem.cpp">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -579,6 +582,7 @@
       <Filter>ds</Filter>
     </None>
     <None Include="event\Signal.inl" />
+    <None Include="math\matrix_decomposition.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

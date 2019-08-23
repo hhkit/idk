@@ -32,7 +32,7 @@ TEST(GameState, TestHandles)
 	hTransform->rotation = quat{ vec3{0.f, 1.f, 0.f}, rad{pi} };
 	EXPECT_TRUE(&*h);
 	EXPECT_TRUE(&*hTransform);
-	auto tfm = hTransform->GetMatrix();
+	auto tfm = hTransform->LocalMatrix();
 	gs.DestroyQueue();
 	EXPECT_FALSE(&*h);
 	EXPECT_FALSE(&*hTransform);

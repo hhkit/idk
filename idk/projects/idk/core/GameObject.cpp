@@ -24,14 +24,24 @@ namespace idk
 	{
 		_active = active;
 	}
-	bool GameObject::GetActiveSelf() const
+	bool GameObject::ActiveSelf() const
 	{
 		return _active;
 	}
-	bool GameObject::GetActiveInHierarchy() const
+	bool GameObject::ActiveInHierarchy() const
 	{
-		auto hParentComponent = GetComponent<Parent>();
+		auto hParentComponent = GetComponent<class Parent>();
 		auto hParent = hParentComponent ? hParentComponent->parent : Handle<GameObject>{};
-		return GetActiveSelf() && (hParent ? hParent->GetActiveInHierarchy() : true);
+		return ActiveSelf() && (hParent ? hParent->ActiveInHierarchy() : true);
+	}
+
+	Handle<class Transform> GameObject::Transform()
+	{
+		return GetComponent<class Transform>();
+	}
+	Handle<class GameObject> GameObject::ParentObject()
+	{
+		auto hParentComponent = GetComponent<class Parent>();
+		return hParentComponent ? hParentComponent->parent : Handle<class GameObject>{};
 	}
 }

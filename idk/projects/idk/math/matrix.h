@@ -31,9 +31,9 @@ namespace idk::math
 		explicit matrix(const matrix<T, R - 1, C - 1>&);
 
 		// common functions
-		T               determinant() const;
-		matrix<T, C, R> transpose() const;
-		matrix<T, C, R> inverse() const;
+		T                determinant() const;
+		matrix<T, C, R>  transpose() const;
+		matrix<T, C, R>  inverse() const;
 
 		// utility
 		matrix<T, C-1, R-1> cofactor(unsigned r, unsigned c) const;

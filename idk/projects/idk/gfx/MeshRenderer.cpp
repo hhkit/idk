@@ -7,7 +7,7 @@ namespace idk
 {
 	bool MeshRenderer::IsActiveAndEnabled() const
 	{
-		return GetGameObject()->GetActiveInHierarchy() && enabled;
+		return GetGameObject()->ActiveInHierarchy() && enabled;
 	}
 
 	RenderObject MeshRenderer::GenerateRenderObject() const
@@ -17,7 +17,7 @@ namespace idk
 			material_instance,
 
 			vec3{},
-			GetGameObject()->GetComponent<Transform>()->GetMatrix(),
+			GetGameObject()->GetComponent<Transform>()->LocalMatrix(),
 
 			cast_shadows,
 			receive_shadows

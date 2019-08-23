@@ -13,7 +13,19 @@ namespace idk
 		quat rotation;
 		vec3 position;
 
-		mat4 GetMatrix() const;
+		mat4 LocalMatrix() const;
+		mat4 GlobalMatrix() const;
+
+		void GlobalMatrix(const mat4&);
+
+		vec3 GlobalPosition() const;
+		quat GlobalRotation() const;
+		vec3 GlobalScale() const;
+
+		void GlobalPosition(vec3);
+		void GlobalRotation(quat);
+		void GlobalScale(vec3);
+
 		void CleanRotation();
 	};
 }

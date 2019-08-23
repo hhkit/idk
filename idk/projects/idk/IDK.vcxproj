@@ -34,6 +34,7 @@
     <ClInclude Include="editor\commands\ICommand.h" />
     <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileHandle.h" />
+    <ClInclude Include="gfx\Camera.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\RenderObject.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\Material.h" />
     <ClInclude Include="math\interp\Spline.h" />
+    <ClInclude Include="math\matrix_decomposition.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="res\ResourceMeta.h" />
@@ -123,6 +125,7 @@
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="editor\commands\CommandController.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
+    <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
@@ -170,6 +173,7 @@
     <None Include="ds\ranged_for.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
+    <None Include="math\matrix_decomposition.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />

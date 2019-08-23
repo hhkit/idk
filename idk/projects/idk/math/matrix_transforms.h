@@ -3,6 +3,9 @@
 #include "vector.h"
 #include "angle.h"
 
+#undef near
+#undef far
+
 namespace idk
 {
 	template<typename T>
@@ -25,5 +28,12 @@ namespace idk
 
 	template<typename T>
 	math::matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T near, T far);
+
+	template<typename T>
+	math::matrix<T, 4, 4> look_at(const math::vector<T, 3>& eye, const math::vector<T, 3>& object, const math::vector<T, 3>& up);
+
+	// convert a basis to an orthonormal basis using gramm-schidt
+	template<typename T, unsigned D>
+	math::matrix<T, D, D> orthonormalize(const math::matrix<T, D, D>&);
 }
 #include "matrix_transforms.inl"

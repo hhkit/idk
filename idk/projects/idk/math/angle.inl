@@ -114,7 +114,7 @@ namespace idk::math
 	template<typename T>
 	radian<T>::operator degree<T>() const
 	{
-		return value / constants::pi<T>() * s_cast<T>(180);
+		return degree<T>{value / constants::pi<T>() * s_cast<T>(180)};
 	}
 
 
@@ -226,7 +226,7 @@ namespace idk::math
 	template<typename T>
 	degree<T>::operator radian<T>() const
 	{
-		return value * constants::pi<T>() / s_cast<T>(180);
+		return radian<T>(value * constants::pi<T>() / s_cast<T>(180));
 	}
 
 	template<typename T>

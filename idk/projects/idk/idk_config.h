@@ -20,7 +20,8 @@ namespace idk
 
 		/// GRAPHICS
 		,	class MeshRenderer
-		//,   class BoneRenderer
+		,   class Camera
+		//,   class SkinnedMeshRenderer
 		//, class Light
 
 		/// ANIMATION

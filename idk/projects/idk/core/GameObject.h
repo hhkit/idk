@@ -34,8 +34,12 @@ namespace idk
 		span<GenericHandle> GetComponents();
 		// active flags
 		void SetActive(bool);
-		bool GetActiveSelf() const;
-		bool GetActiveInHierarchy() const;
+		bool ActiveSelf() const;
+		bool ActiveInHierarchy() const;
+
+		// components
+		Handle<class Transform> Transform();
+		Handle<class GameObject> ParentObject();
 	private:
 		vector<GenericHandle> _components;
 		bool _active = true;
