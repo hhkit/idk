@@ -30,8 +30,8 @@ namespace idk
 		//,	class MonoBehavior
 
 		/// AUDIO
-		//,	class AudioSource
-		//, class AudioListener
+		,	class AudioSource
+		,	class AudioListener
 	>;
 	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
 

@@ -7,14 +7,14 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-
 #pragma once
+
+#include <core/Component.h>
 
 
 namespace idk
 {
-	class AudioSource {
+	class AudioSource :public Component<AudioSource> {
 
 	};
 

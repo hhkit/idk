@@ -5,3 +5,5 @@
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
 #include <gfx/MeshRenderer.h>
+#include <audio/AudioSource.h>
+#include <audio/AudioListener.h>

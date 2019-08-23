@@ -273,7 +273,7 @@ namespace idk
 	}
 	FMOD_MODE AudioClip::ConvertSettingToFMOD_MODE()
 	{
-		FMOD_MODE output = FMOD_DEFAULT;
+		FMOD_MODE output = FMOD_DEFAULT | FMOD_3D_LINEARROLLOFF;
 		output |= isLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
 		output |= is3Dsound ? FMOD_3D : FMOD_2D;
 		if (isUnique) {

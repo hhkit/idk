@@ -9,11 +9,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
+#include <core/Component.h>
 
 namespace idk
 {
-	class AudioListener {
+	class AudioListener : public Component<AudioListener> {
+
+
+	public:
+		bool enabled { true };
 
 	};
 
