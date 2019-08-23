@@ -8,4 +8,4 @@
 #include <res/ResourceManager.h>
 #include <scene/SceneManager.h>
 
-#include <app/TestSystem.h>
+#include <test/TestSystem.h>

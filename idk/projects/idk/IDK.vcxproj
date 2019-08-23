@@ -82,7 +82,8 @@
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
-    <ClInclude Include="app\TestSystem.h" />
+    <ClInclude Include="test\TestComponent.h" />
+    <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
     <ClInclude Include="reflect\pretty_function.h" />
@@ -125,7 +126,7 @@
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
-    <ClCompile Include="app\TestSystem.cpp" />
+    <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\Core.cpp" />

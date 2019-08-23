@@ -7,7 +7,7 @@ namespace idk
 	{
 	public:
 		void Init() override;
-		void TestSpan(span<const class Transform>);
+		void TestSpan(span<class TestComponent>);
 		void Shutdown() override;
 	};
 }

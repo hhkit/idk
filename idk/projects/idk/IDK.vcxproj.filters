@@ -136,9 +136,6 @@
     <ClInclude Include="app\Application.h">
       <Filter>app</Filter>
     </ClInclude>
-    <ClInclude Include="app\TestSystem.h">
-      <Filter>app</Filter>
-    </ClInclude>
     <ClInclude Include="core\SystemManager.h">
       <Filter>core\systems</Filter>
     </ClInclude>
@@ -340,6 +337,11 @@
     <ClInclude Include="ds\small_string.h">
       <Filter>ds</Filter>
     </ClInclude>
+    <ClInclude Include="event\Signal.h" />
+    <ClInclude Include="test\TestSystem.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -357,9 +359,6 @@
     </ClCompile>
     <ClCompile Include="math\quaternion.cpp">
       <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="app\TestSystem.cpp">
-      <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="core\SystemManager.cpp">
       <Filter>core\systems</Filter>
@@ -453,6 +452,9 @@
     </ClCompile>
     <ClCompile Include="shape\ray.cpp">
       <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TestSystem.cpp">
+      <Filter>app</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -564,6 +566,7 @@
     <None Include="ds\small_string.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="event\Signal.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

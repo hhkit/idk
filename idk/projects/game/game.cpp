@@ -10,6 +10,7 @@
 
 #include <gfx/MeshRenderer.h>
 #include <scene/SceneManager.h>
+#include <test/TestComponent.h>
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -42,6 +43,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	auto go = scene->CreateGameObject();	
+	go->AddComponent<TestComponent>();
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	

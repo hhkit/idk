@@ -32,12 +32,13 @@ namespace idk
 		/// AUDIO
 		//,	class AudioSource
 		//, class AudioListener
+
+		, class TestComponent
 	>;
 	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
 
 	using Systems = std::tuple<
 		class Application
-		,	class TestSystem
 		,	class FileSystem
 		//,	class InputSystem
 		//,	class ScriptSystem
@@ -47,6 +48,7 @@ namespace idk
 		,	class ResourceManager
 		,	class SceneManager
 		,	class IEditor
+		,   class TestSystem
 	>;
 
 	using Resources = std::tuple<

@@ -11,24 +11,25 @@
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-namespace idk
+namespace idk::win
 {
+	class InputManager;
+
 	class Windows 
 		: public Application
 	{
 	public:
 		Windows(HINSTANCE hInstance, int nCmdShow);
+		~Windows();
 		void PollEvents() override;
 		int GetReturnVal();
 		void Init() override {}
 		vec2 GetMouseScreenPos() override { return vec2{}; }
 		vec2 GetMouseScreenDel() override { return vec2{}; }
-		bool GetKeyDown(CharKey) override { return false; }
-		bool GetKey(CharKey) override { return false; }
-		bool GetKeyUp(CharKey) override { return false; }
-		bool GetKeyDown(SysKey) override { return false; }
-		bool GetKey(SysKey) override { return false; }
-		bool GetKeyUp(SysKey) override { return false; }
+		bool GetKeyDown(Key) override;
+		bool GetKey(Key) override;
+		bool GetKeyUp(Key) override;
+		char GetChar() override;
 		// windows
 		bool SetFullscreen(bool) override { return false; }
 		bool SetScreenSize(ivec2) override { return false; }
@@ -45,10 +46,17 @@ namespace idk
 		int       retval;
 		static inline Windows* instance = nullptr;
 
+		unique_ptr<InputManager> _input_manager;
+
 		ATOM MyRegisterClass();
 		BOOL InitInstance(int nCmdShow);
 		LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
 	};
+}
+
+namespace idk
+{
+	using win::Windows;
 }
