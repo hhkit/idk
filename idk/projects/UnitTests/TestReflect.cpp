@@ -269,10 +269,10 @@ namespace idk
 {
 	ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
 }
-/*
+
 REFLECT_ENUM(idk::testenum, "testenum")
 
-*/
+
 TEST(Reflect, TestReflectEnum)
 {
 	//Added to fail this test case since the above REFLECT_ENUM has been disabled since it generated a compile error for HC.

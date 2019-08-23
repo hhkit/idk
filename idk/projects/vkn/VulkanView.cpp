@@ -71,6 +71,11 @@ namespace idk::vkn
 		{
 			impl_->CurrentRenderState().MasterBuffer().reset();
 		}
+		bool& VulkanView::ImguiResize() const
+		{
+			// TODO: insert return statement here
+			return vulkan().m_ScreenResizedForImGui;
+		}
 		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
 
 		vk::UniqueShaderModule VulkanView::CreateShaderModule(const idk::string_view& code)

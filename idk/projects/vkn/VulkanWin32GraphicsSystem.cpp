@@ -39,6 +39,7 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::RenderBuffer()
 	{
 		instance_->DrawFrame();
+
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()
 	{
