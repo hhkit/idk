@@ -113,7 +113,7 @@ namespace idk
 		{
 			for (auto j = 0; j < i; ++j)
 			{
-				const auto v = i + j;
+				const auto v = j;
 				retval[i] -= retval[i].dot(retval[v]) * retval[v];
 			}
 			retval[i].normalize();
