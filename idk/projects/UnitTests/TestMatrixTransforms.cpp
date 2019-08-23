@@ -92,3 +92,28 @@ TEST(Math, MatrixProject)
 	auto pm = perspective(deg{ 90 }, 1.f, 0.1f, 100.f);
 	auto om = ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
 }
+
+TEST(Math, MatrixOrthonormalize)
+{
+	using namespace idk;
+
+	EXPECT_EQ(
+		orthonormalize(
+		mat3(
+			1, 2, 3,
+			0, 1, 2,
+			0, 0, 1
+		)), 
+		mat3()
+	);
+
+	EXPECT_EQ(
+		orthonormalize(
+			mat3(
+				3, 2, 3,
+				0, 5, 6,
+				0, 0, 7
+			)),
+		mat3()
+	);
+}
