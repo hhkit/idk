@@ -76,9 +76,8 @@ namespace idk
 				vkn::hlp::arr_count(pSizes),
 				pSizes
 			};
-
 			//info.DescriptorPool = *(vknViews.Device()->createDescriptorPoolUnique(pInfo, nullptr, vknViews.Dispatcher()));
-			VkResult res = vkCreateDescriptorPool(*vknViews.Device(),&VkDescriptorPoolCreateInfo(pInfo),nullptr,&info.DescriptorPool);
+			VkResult res = vkCreateDescriptorPool(*vknViews.Device(),&s_cast<VkDescriptorPoolCreateInfo&>(pInfo),nullptr,&info.DescriptorPool);
 			res;
 			info.Allocator = nullptr;
 			info.MinImageCount = editorInit.edt_min_imageCount;
@@ -125,7 +124,7 @@ namespace idk
 
 				//err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
 				//check_vk_result(err);
-				vknViews.GraphicsQueue().submit(1, &end_info, *editorControls.edt_frames[editorControls.edt_frameIndex].edt_fence, vknViews.Dispatcher());
+				vknViews.GraphicsQueue().submit(1, &end_info, vk::Fence{}, vknViews.Dispatcher());
 
 				//err = vkDeviceWaitIdle(g_Device);
 				//check_vk_result(err);
@@ -192,7 +191,8 @@ namespace idk
 			vk::Semaphore image_acquired_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_imageAvailable;
 			vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
 			
-			vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
+			auto result = vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
+			editorControls.edt_frameIndex = result.value;
 			//err = vkAcquireNextImageKHR(g_Device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &wd->FrameIndex);
 			//check_vk_result(err);
 
@@ -324,19 +324,19 @@ namespace idk
 			editorControls.edt_renderPass = vknViews.Device()->createRenderPassUnique(info, nullptr, vknViews.Dispatcher());
 
 			vk::ImageView att[1];
-			vk::FramebufferCreateInfo fbInfo{
-				vk::FramebufferCreateFlags{},
-				*editorControls.edt_renderPass,
-				1,
-				att,
-				vknViews.Swapchain().extent.width,
-				vknViews.Swapchain().extent.height,
-				1
-			};
 			for (uint32_t i = 0; i < editorControls.edt_imageCount; i++)
 			{
 				EditorFrame* fd = &editorControls.edt_frames[i];
-				att[0] = *fd->edt_backbufferView;
+				att[0] = fd->edt_backbufferView = *vknViews.Swapchain().image_views[i];
+				vk::FramebufferCreateInfo fbInfo{
+					vk::FramebufferCreateFlags{},
+					*editorControls.edt_renderPass,
+					1,
+					att,
+					vknViews.Swapchain().extent.width,
+					vknViews.Swapchain().extent.height,
+					1
+				};
 				fd->edt_framebuffer = vknViews.Device()->createFramebufferUnique(fbInfo, nullptr, vknViews.Dispatcher());
 			}
 

@@ -56,7 +56,8 @@ namespace idk
 			while (_running)
 			{
 				_scheduler->SequentialUpdate();
-				Core::GetSystem<GraphicsSystem>().RenderBuffer();
+				Core::GetSystem<IEditor>().EditorUpdate();
+				Core::GetSystem<IEditor>().EditorDraw();
 			}
 		}
 		else

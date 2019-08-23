@@ -14,7 +14,7 @@ namespace idk {
 			vk::UniqueCommandBuffer				edt_cBuffer{};
 			vk::UniqueFence						edt_fence{};
 			vk::UniqueImage						edt_backbuffer{};
-			vk::UniqueImageView					edt_backbufferView{};
+			vk::ImageView					    edt_backbufferView{};
 			vk::UniqueFramebuffer				edt_framebuffer{};
 		};
 		struct EditorPresentationSignal
@@ -24,6 +24,23 @@ namespace idk {
 			vk::UniqueFence						edt_inflight_fence{};
 		};
 		class VI_Interface {
+		public:
+			VI_Interface(vkn::VulkanState*);
+
+			void Init();
+
+			void ImGuiFrameBegin();
+			void ImGuiFrameUpdate();
+			void ImGuiFrameEnd();
+
+			void ImGuiFrameRender();
+			void ImGuiFramePresent();
+
+			void ImGuiRecreateSwapChain();
+			void ImGuiRecreateCommandBuffer();
+
+		private:
+
 			struct EditorInitInfo
 			{
 				vk::UniquePipelineCache				edt_pipeCache{};
@@ -46,22 +63,6 @@ namespace idk {
 				vector<EditorFrame>					edt_frames{};
 				vector<EditorPresentationSignal>	edt_frameSemophores{};
 			};
-		public:
-			VI_Interface(vkn::VulkanState*);
-
-			void Init();
-
-			void ImGuiFrameBegin();
-			void ImGuiFrameUpdate();
-			void ImGuiFrameEnd();
-
-			void ImGuiFrameRender();
-			void ImGuiFramePresent();
-
-			void ImGuiRecreateSwapChain();
-			void ImGuiRecreateCommandBuffer();
-
-		private:
 
 			EditorParameter				editorControls;
 			EditorInitInfo				editorInit;
