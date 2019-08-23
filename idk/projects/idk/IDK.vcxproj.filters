@@ -77,6 +77,9 @@
     <Filter Include="scene">
       <UniqueIdentifier>{08f522a2-1b53-4a51-a302-0433f32e7f80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="editor\commands">
+      <UniqueIdentifier>{2fe24db9-85ce-4f86-896c-d47cc6d22ab4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -338,6 +341,12 @@
       <Filter>ds</Filter>
     </ClInclude>
     <ClInclude Include="event\Signal.h" />
+    <ClInclude Include="editor\commands\ICommand.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CommandController.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
     <ClInclude Include="test\TestSystem.h">
       <Filter>app</Filter>
     </ClInclude>
@@ -452,6 +461,9 @@
     </ClCompile>
     <ClCompile Include="shape\ray.cpp">
       <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CommandController.cpp">
+      <Filter>editor\commands</Filter>
     </ClCompile>
     <ClCompile Include="test\TestSystem.cpp">
       <Filter>app</Filter>

@@ -9,11 +9,20 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
+#include <core/Component.h>
 
 namespace idk
 {
-	class AudioListener {
+	class AudioListener : public Component<AudioListener> {
+
+
+	public:
+
+		void SetAsActive();
+
+		void UpdateListenerPosition(const vec3& pos, const vec3& forwardVector, const vec3& upVector);
+
+		bool isActive { false };
 
 	};
 

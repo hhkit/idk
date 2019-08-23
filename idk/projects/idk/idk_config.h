@@ -30,6 +30,8 @@ namespace idk
 		//,	class MonoBehavior
 
 		/// AUDIO
+		,	class AudioSource
+		,	class AudioListener
 		//,	class AudioSource
 		//, class AudioListener
 
