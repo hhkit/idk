@@ -183,41 +183,39 @@ namespace idk::math
 			T s17 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
 			T s18 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
 
-			matrix<T, C, R> inverse;
-			inverse[0][0] = +(m[1][1] * s00 - m[1][2] * s01 + m[1][3] * s02);
-			inverse[0][1] = -(m[1][0] * s00 - m[1][2] * s03 + m[1][3] * s04);
-			inverse[0][2] = +(m[1][0] * s01 - m[1][1] * s03 + m[1][3] * s05);
-			inverse[0][3] = -(m[1][0] * s02 - m[1][1] * s04 + m[1][2] * s05);
+			matrix<T, C, R> retval;
+			retval[0][0] = +(m[1][1] * s00 - m[1][2] * s01 + m[1][3] * s02);
+			retval[0][1] = -(m[1][0] * s00 - m[1][2] * s03 + m[1][3] * s04);
+			retval[0][2] = +(m[1][0] * s01 - m[1][1] * s03 + m[1][3] * s05);
+			retval[0][3] = -(m[1][0] * s02 - m[1][1] * s04 + m[1][2] * s05);
 
-			inverse[1][0] = -(m[0][1] * s00 - m[0][2] * s01 + m[0][3] * s02);
-			inverse[1][1] = +(m[0][0] * s00 - m[0][2] * s03 + m[0][3] * s04);
-			inverse[1][2] = -(m[0][0] * s01 - m[0][1] * s03 + m[0][3] * s05);
-			inverse[1][3] = +(m[0][0] * s02 - m[0][1] * s04 + m[0][2] * s05);
+			retval[1][0] = -(m[0][1] * s00 - m[0][2] * s01 + m[0][3] * s02);
+			retval[1][1] = +(m[0][0] * s00 - m[0][2] * s03 + m[0][3] * s04);
+			retval[1][2] = -(m[0][0] * s01 - m[0][1] * s03 + m[0][3] * s05);
+			retval[1][3] = +(m[0][0] * s02 - m[0][1] * s04 + m[0][2] * s05);
 
-			inverse[2][0] = +(m[0][1] * s06 - m[0][2] * s07 + m[0][3] * s08);
-			inverse[2][1] = -(m[0][0] * s06 - m[0][2] * s09 + m[0][3] * s10);
-			inverse[2][2] = +(m[0][0] * s11 - m[0][1] * s09 + m[0][3] * s12);
-			inverse[2][3] = -(m[0][0] * s08 - m[0][1] * s10 + m[0][2] * s12);
+			retval[2][0] = +(m[0][1] * s06 - m[0][2] * s07 + m[0][3] * s08);
+			retval[2][1] = -(m[0][0] * s06 - m[0][2] * s09 + m[0][3] * s10);
+			retval[2][2] = +(m[0][0] * s11 - m[0][1] * s09 + m[0][3] * s12);
+			retval[2][3] = -(m[0][0] * s08 - m[0][1] * s10 + m[0][2] * s12);
 
-			inverse[3][0] = -(m[0][1] * s13 - m[0][2] * s14 + m[0][3] * s15);
-			inverse[3][1] = +(m[0][0] * s13 - m[0][2] * s16 + m[0][3] * s17);
-			inverse[3][2] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
-			inverse[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
+			retval[3][0] = -(m[0][1] * s13 - m[0][2] * s14 + m[0][3] * s15);
+			retval[3][1] = +(m[0][0] * s13 - m[0][2] * s16 + m[0][3] * s17);
+			retval[3][2] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
+			retval[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
 
-			float det =   m[0][0] * inverse[0][0]
-						+ m[0][1] * inverse[0][1]
-						+ m[0][2] * inverse[0][2]
-						+ m[0][3] * inverse[0][3];
+			float det =   m[0][0] * retval[0][0]
+						+ m[0][1] * retval[0][1]
+						+ m[0][2] * retval[0][2]
+						+ m[0][3] * retval[0][3];
 
 			// not invertible
 			if (fabs(det) <= constants::epsilon<float>())
 				return matrix<T, C, R>();
 
-			for (int i = 0; i < R; ++i)
-				for(int k = 0; k < C; ++k)
-					inverse[i][k] /= det;
+			retval /= det;
 
-			return inverse;
+			return retval;
 		}
 		else
 		return matrix<T, C, R>();
@@ -250,37 +248,37 @@ namespace idk::math
 	template<typename T, unsigned R, unsigned C>
 	typename matrix<T, R, C>::column_t* matrix<T, R, C>::begin()
 	{
-		return std::begin(intern);
+		return std::data(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
 	const typename matrix<T, R, C>::column_t* matrix<T, R, C>::begin() const
 	{
-		return std::begin(intern);
+		return std::data(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
 	typename matrix<T, R, C>::column_t* matrix<T, R, C>::end()
 	{
-		return std::end(intern);
+		return std::data(intern) + std::size(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
 	const typename matrix<T, R, C>::column_t* matrix<T, R, C>::end() const
 	{
-		return std::end(intern);
+		return std::data(intern) + std::size(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
 	T* matrix<T, R, C>::data()
 	{
-		return intern->data();
+		return intern[0].data();
 	}
 
 	template<typename T, unsigned R, unsigned C>
 	const T* matrix<T, R, C>::data() const
 	{
-		return intern->data();
+		return intern[0].data();
 	}
 
 	template<typename T, unsigned R, unsigned C>
