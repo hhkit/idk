@@ -1979,9 +1979,8 @@ namespace idk::vkn
 		//rs.transfer_buffer->begin(beginInfo);
 		command_buffer.begin(begin_info);
 		//FrameObjects fo{ *view_ ,*view_ };
-
+		fo.FrameReset();
 		auto [pdcs,layout_count] = ProcessDcUniforms(rs.DrawCalls(), fo.ubo_manager);
-
 		auto descriptor_sets = fo.pools.Allocate(layout_count);
 		PdcToCmdBuffer(pdcs, command_buffer, rs, descriptor_sets, &*view_);
 
@@ -2170,5 +2169,10 @@ vk::CommandBufferBeginInfo begin_info
 	void DbgVertexBuffer::Update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& cmd_buffer, unsigned char const* data)
 	{
 		cmd_buffer.updateBuffer(*buffer, offset, hlp::make_array_proxy(static_cast<uint32_t>(len), data), vk::DispatchLoaderDefault{});
+	}
+	void FrameObjects::FrameReset()
+	{
+		ubo_manager.clear(); //Clear the previous frame's UBOs
+		pools.Reset(); //Reset the previous frame's descriptors
 	}
 }

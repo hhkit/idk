@@ -42,6 +42,7 @@ namespace idk::vkn
 		UboManager ubo_manager;
 		FrameObjects() = default;
 		FrameObjects(FrameObjects&&) = default;
+		void FrameReset();
 	};
 
 	struct QueueFamilyIndices
