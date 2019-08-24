@@ -69,7 +69,7 @@ namespace idk
 		{
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
+			while (++depth_change <= 0)
 				stack.pop_back();
 
 			if constexpr (std::is_arithmetic_v<K>)
@@ -264,7 +264,7 @@ namespace idk
 		{
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
+			while (++depth_change <= 0)
 				stack.pop_back();
 
 			if constexpr (std::is_same_v<K, const char*>)
@@ -337,7 +337,7 @@ namespace idk
 					}
 					return false;
 				}
-				else if (is_template_v<T, std::variant>)
+				else if constexpr (is_template_v<T, std::variant>)
 				{
 					auto alt_type_name = iter->begin().key();
 					auto type = reflect::get_type(alt_type_name);

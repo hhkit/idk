@@ -72,7 +72,7 @@ namespace idk::reflect
 		template<typename T> struct typed_context;
 
 		template<typename Visitor>
-		void visit(void* obj, type type, Visitor&& visitor, int& depth);
+		void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_visit_depth);
 		template<typename K, typename V, typename Visitor>
 		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
 	}
@@ -128,7 +128,7 @@ namespace idk::reflect
 		friend struct detail::typed_context_base;
 		friend type get_type(string_view name);
 		template<typename T> friend type get_type();
-		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth);
+		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_visit_depth);
 	};
 
 
@@ -172,8 +172,8 @@ namespace idk::reflect
 		// unpacks a tuple
 		vector<dynamic> unpack() const;
 
-		template<typename T>
-		dynamic& operator=(const T& rhs);
+		template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, dynamic>>>
+		dynamic& operator=(T&& rhs);
 		dynamic& operator=(const dynamic& rhs);
 
 	private:
@@ -184,9 +184,10 @@ namespace idk::reflect
 		dynamic(reflect::type type, void* obj);
 
 		friend struct detail::typed_context_base;
-		template<typename Visitor> friend void detail::visit(void* obj, reflect::type type, Visitor&& visitor, int& depth);
-		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
+		template<typename Visitor> friend void detail::visit(void* obj, reflect::type type, Visitor&& visitor, int& depth, int& last_visit_depth);
+		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_visit_depth);
 	};
+
 
 
 

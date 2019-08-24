@@ -97,4 +97,12 @@ namespace idk
 		std::decay_t<T>::names[0],
 		std::decay_t<T>::values[0]
 	)>> : std::is_enum<typename std::decay_t<T>::_enum> {};
+
+
+
+	template<typename T, typename VariantT>
+	struct is_variant_member;
+
+	template<typename T, typename... Ts>
+	struct is_variant_member<T, std::variant<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
 }

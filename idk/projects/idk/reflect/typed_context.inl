@@ -55,6 +55,8 @@ namespace idk::reflect::detail
 
 
 		virtual void copy_assign(void* lhs, const void* rhs) const = 0;
+		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const = 0;
+		virtual ReflectedTypes get_mega_variant(void* obj) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
 		virtual uni_container to_container(void* obj) const = 0;
@@ -126,6 +128,31 @@ namespace idk::reflect::detail
 				throw "Cannot copy assign";
 			else
 				*static_cast<T*>(lhs) = *static_cast<const T*>(rhs);
+		}
+
+		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const override
+		{
+			std::visit([lhs](auto&& arg)
+			{
+				if constexpr (std::is_convertible_v<decltype(arg), T>)
+				{
+					if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
+						*static_cast<T*>(lhs) = static_cast<T>(arg);
+					else
+						*static_cast<T*>(lhs) = arg;
+				}
+				else
+					throw "Cannot assign rhs to lhs";
+			}, rhs);
+		}
+
+		virtual ReflectedTypes get_mega_variant(void* obj) const override
+		{
+			obj;
+			if constexpr (is_variant_member_v<std::decay_t<T>, ReflectedTypes>)
+				return *static_cast<T*>(obj);
+			else
+				throw "Not part of idk::reflect::ReflectedTypes!";
 		}
 
 		dynamic default_construct() const override

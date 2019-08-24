@@ -47,11 +47,18 @@ namespace idk::reflect
 		: type{ get_type<T>() }, _ptr{ std::make_shared<derived<T>>(std::forward<T>(obj)) }
 	{}
 
-	template<typename T>
-	dynamic& dynamic::operator=(const T& rhs)
+	template<typename T, typename>
+	dynamic& dynamic::operator=(T&& rhs)
 	{
-		assert(is<std::decay_t<T>>());
-		type._context->copy_assign(_ptr->get(), &rhs);
+		if constexpr (is_variant_member_v<T, ReflectedTypes>)
+		{
+			type._context->variant_assign(_ptr->get(), rhs);
+		}
+		else
+		{
+			assert(is<std::decay_t<T>>());
+			type._context->copy_assign(_ptr->get(), &rhs);
+		}
 		return *this;
 	}
 
@@ -85,7 +92,8 @@ namespace idk::reflect
 	void dynamic::visit(Visitor&& visitor) const
 	{
 		int depth = 0;
-		detail::visit(_ptr->get(), type, std::forward<Visitor>(visitor), depth);
+		int last_visit_depth = 0;
+		detail::visit(_ptr->get(), type, std::forward<Visitor>(visitor), depth, last_visit_depth);
 	}
 
 }

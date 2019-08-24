@@ -8,7 +8,7 @@
 using namespace idk;
 
 ENUM(testserialize_enum, int, PI, TAU)
-//REFLECT_ENUM(testserialize_enum, "testserialize_enum")
+REFLECT_ENUM(testserialize_enum, "testserialize_enum")
 
 struct serialize_this
 {
@@ -86,6 +86,39 @@ TEST(Serialize, TestSerializeComplex)
 	EXPECT_EQ(bs2.string_vec[3], bs.string_vec[3]);
 	EXPECT_EQ(bs2.hashtable[bs.hashtable.begin()->first], bs.hashtable.begin()->second);
 	EXPECT_EQ(bs2.hashtable[(++bs.hashtable.begin())->first], (++bs.hashtable.begin())->second);
+}
+
+struct serialass : serialize_this
+{
+	variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> var;
+	testserialize_enum x = testserialize_enum::TAU;
+};
+REFLECT_BEGIN(serialass, "serialass")
+REFLECT_PARENT(serialize_this)
+REFLECT_VARS(var, x)
+REFLECT_END()
+
+TEST(Serialize, TestSerializeUnknownAndParentAndVariant)
+{
+	serialass s;
+	s.var = mat4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+	s.guid = Guid::Make();
+	s.vec = vec4{ 100, 200, 300, 400 };
+
+	auto str = serialize_text(s);
+
+	// roundtrip
+	auto s2 = parse_text<serialass>(str);
+
+	EXPECT_EQ(s.f, s2.f);
+	EXPECT_EQ(s.guid, s2.guid);
+	EXPECT_EQ(s.vec, s2.vec);
+	EXPECT_EQ(s.var, s2.var);
+	EXPECT_EQ(s.x, s2.x);
+
+	auto str2 = serialize_text(s2);
+
+	EXPECT_EQ(str, str2);
 }
 
 static string serialized_scene_0 = "";
