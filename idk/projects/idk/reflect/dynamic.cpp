@@ -13,7 +13,10 @@ namespace idk::reflect
 
 	dynamic& dynamic::operator=(const dynamic& rhs)
 	{
-		type._context->variant_assign(_ptr->get(), rhs.type._context->get_mega_variant(rhs._ptr->get()));
+		if (type == rhs.type)
+			type._context->copy_assign(_ptr->get(), rhs._ptr->get());
+		else
+			type._context->variant_assign(_ptr->get(), rhs.type._context->get_mega_variant(rhs._ptr->get()));
 		return *this;
 	}
 

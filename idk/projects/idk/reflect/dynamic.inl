@@ -56,7 +56,7 @@ namespace idk::reflect
 		}
 		else
 		{
-			assert(is<std::decay_t<T>>());
+			assert(is<T>());
 			type._context->copy_assign(_ptr->get(), &rhs);
 		}
 		return *this;
