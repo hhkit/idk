@@ -202,7 +202,7 @@ namespace idk::reflect
 			int curr_depth = depth;
 			++depth;
 
-#define VISIT_INDEX(I) case I: visit_key_value(I, std::get<I>(var), std::forward<Visitor>(visitor), depth, curr_depth); return;
+#define VISIT_INDEX(I) case I: visit_key_value(get_type<std::variant_alternative_t<I, variant<Ts...>>>(), std::get<I>(var), std::forward<Visitor>(visitor), depth, curr_depth); return;
 #define VARIANT_CASE(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VISIT_INDEX, __VA_ARGS__)) } }
 			VARIANT_CASE(1, 0)
 			else VARIANT_CASE(1, 0)
@@ -217,6 +217,7 @@ namespace idk::reflect
 			else VARIANT_CASE(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 #undef VISIT_INDEX
 #undef VARIANT_CASE
+			throw "Unhandled case?";
 		}
 
 		// where visitor is actually called
