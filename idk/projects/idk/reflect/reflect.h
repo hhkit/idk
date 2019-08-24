@@ -5,6 +5,7 @@
 #include <reflect/pretty_function.h>
 #include <reflect/constructor_entry.h>
 #include <util/string_hash.h>
+#include <util/macro_utils.h>
 
 // required settings for LIONant/properties
 namespace property::settings
@@ -319,7 +320,6 @@ namespace idk::reflect
 #define REFLECT_CTOR(...)						idk::reflect::detail::constructor_entry<t_self, __VA_ARGS__>{},
 #define REFLECT_FRIEND							template<typename> friend struct property::opin::def;
 
-#include <util/macro_utils.h>
 #define X_REFLECT_VARS_SINGLE(VAR)				REFLECT_VAR(VAR),
 #define REFLECT_VARS(...)						IDENTITY(FOREACH(X_REFLECT_VARS_SINGLE, __VA_ARGS__))
 

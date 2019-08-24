@@ -73,7 +73,7 @@ namespace idk
 	)>> : std::true_type {};
 
 	template<typename T, typename = void>
-	struct is_sequential_container : std::false_type {};
+	struct is_sequential_container : std::is_array<std::decay_t<T>> {};
 
 	template<typename T>
 	struct is_sequential_container<T, std::void_t<decltype(

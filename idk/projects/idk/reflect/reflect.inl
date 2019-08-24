@@ -196,12 +196,37 @@ namespace idk::reflect
 			}
 		}
 
+		template<typename Visitor, typename... Ts>
+		void visit_variant(variant<Ts...>& var, Visitor&& visitor, int& depth)
+		{
+			int curr_depth = depth;
+			++depth;
+
+#define VISIT_INDEX(I) case I: visit_key_value(I, std::get<I>(var), std::forward<Visitor>(visitor), depth, curr_depth); return;
+#define VARIANT_CASE(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VISIT_INDEX, __VA_ARGS__)) } }
+			VARIANT_CASE(1, 0)
+			else VARIANT_CASE(1, 0)
+			else VARIANT_CASE(2, 1, 0)
+			else VARIANT_CASE(3, 2, 1, 0)
+			else VARIANT_CASE(4, 3, 2, 1, 0)
+			else VARIANT_CASE(5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+#undef VISIT_INDEX
+#undef VARIANT_CASE
+		}
+
 		// where visitor is actually called
 		template<typename K, typename V, typename Visitor>
 		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth)
 		{
 			constexpr bool ValIsContainer =
 				(is_associative_container_v<V> || is_sequential_container_v<V>) && !std::is_same_v<std::decay_t<V>, string>;
+			constexpr bool ValIsVariant =
+				is_template_v<std::decay_t<V>, std::variant>;
 			constexpr bool ValIsDynamic =
 				std::is_same_v<std::decay_t<V>, dynamic>;
 			int depth_change = depth - curr_depth;
@@ -215,6 +240,8 @@ namespace idk::reflect
 						visit(*static_cast<void**>(val._ptr->get()), val.type, std::forward<Visitor>(visitor), depth);
 					else if constexpr (ValIsContainer)
 						visit_container(val, std::forward<Visitor>(visitor), depth);
+					else if constexpr(ValIsVariant)
+						visit_variant(val, std::forward<Visitor>(visitor), depth);
 					else
 						visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth);
 					std::swap(depth, curr_depth);
@@ -227,6 +254,8 @@ namespace idk::reflect
 					visit(*static_cast<void**>(val._ptr->get()), val.type, std::forward<Visitor>(visitor), depth);
 				else if constexpr (ValIsContainer)
 					visit_container(val, std::forward<Visitor>(visitor), depth);
+				else if constexpr (ValIsVariant)
+					visit_variant(val, std::forward<Visitor>(visitor), depth);
 				else
 					visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth);
 				std::swap(depth, curr_depth);
