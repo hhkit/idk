@@ -290,9 +290,6 @@
     <ClInclude Include="gfx\Material.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="anim\BoneRenderer.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
     <ClInclude Include="IncludeResources.h">
       <Filter>res</Filter>
     </ClInclude>
@@ -344,6 +341,9 @@
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="gfx\Camera.h" />
     <ClInclude Include="math\matrix_decomposition.h" />
+    <ClInclude Include="anim\SkinnedMeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

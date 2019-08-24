@@ -27,7 +27,7 @@
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
-    <ClInclude Include="anim\BoneRenderer.h" />
+    <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\small_string.h" />
     <ClInclude Include="event\Signal.h" />
