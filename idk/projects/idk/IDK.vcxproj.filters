@@ -344,6 +344,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="util\align.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
