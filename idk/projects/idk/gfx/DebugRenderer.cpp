@@ -73,6 +73,11 @@ namespace idk
 		this->info->render_info[shape].emplace_back(debug_info::inst_data{ color, idk::translate(pos) * mat4(idk::rotate(axis,angle) * idk::scale(scale)) });
 	}
 
+	void DebugRenderer::DrawShape(const DebugObject& obj)
+	{
+		DrawShape(obj.shape, obj.pos, obj.scale, obj.axis, obj.angle, obj.color);
+	}
+
 	void DebugRenderer::Render()
 	{
 	}
