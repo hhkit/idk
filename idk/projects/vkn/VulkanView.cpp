@@ -38,19 +38,16 @@ namespace idk::vkn
 
 		idk::vector<RenderState>& VulkanView::RenderStates() const
 		{
-			// TODO: insert return statement here
 			return impl_->RenderStates();
 		}
 
 		RenderState& VulkanView::PrevRenderState() const
 		{
-			// TODO: insert return statement here
 			return impl_->PrevRenderState();
 		}
 
 		RenderState& VulkanView::CurrRenderState() const
 		{
-			// TODO: insert return statement here
 			return impl_->CurrentRenderState();
 		}
 

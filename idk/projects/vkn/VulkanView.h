@@ -1,8 +1,10 @@
 #pragma once
+#include <idk.h>
 #include <vulkan/vulkan.hpp>
-#include <vkn/VulkanState.h>
+#include <vkn/vulkan_state_fwd.h>
 namespace idk::vkn
 {
+	class VulkanState;
 	struct RenderState;
 	//Interface for the vulkan details. 
 	//Ideally we should move all of the vk:: related data and into VulkanDetail

@@ -39,6 +39,15 @@
     <ClInclude Include="UboManager.h">
       <Filter>buffer</Filter>
     </ClInclude>
+    <ClInclude Include="DescriptorPoolsManager.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorsManager.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_state_fwd.h">
+      <Filter>fwd</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -76,6 +85,12 @@
       <Filter>buffer</Filter>
     </ClCompile>
     <ClCompile Include="draw_call.cpp" />
+    <ClCompile Include="DescriptorPoolsManager.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorsManager.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -90,6 +105,12 @@
     <Filter Include="render">
       <UniqueIdentifier>{388fea0d-f4b9-4998-af46-7eb7b5cc96ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="descriptor_sets">
+      <UniqueIdentifier>{6fd09be6-26fb-4c35-91ec-c05d9b99c0c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fwd">
+      <UniqueIdentifier>{855c816b-63e0-4efa-9da1-75521cd0c075}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="BufferHelpers.inl">
@@ -100,6 +121,9 @@
     </None>
     <None Include="UboManager.inl">
       <Filter>buffer</Filter>
+    </None>
+    <None Include="DescriptorPoolsManager.inl">
+      <Filter>descriptor_sets</Filter>
     </None>
   </ItemGroup>
 </Project>

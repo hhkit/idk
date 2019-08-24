@@ -201,6 +201,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DescriptorPoolsManager.h" />
+    <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="RenderState.h" />
@@ -215,8 +217,11 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
     <ClInclude Include="VulkanView.h" />
+    <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DescriptorPoolsManager.cpp" />
+    <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="UboManager.cpp" />
@@ -237,6 +242,9 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DescriptorPoolsManager.inl">
+      <FileType>CppHeader</FileType>
+    </None>
     <None Include="UboManager.inl" />
     <None Include="VulkanState.inl" />
     <None Include="BufferHelpers.inl" />

@@ -28,90 +28,56 @@ namespace idk
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
 //Temporary, should move elsewhere
+#include <cstdint>
+#include <map>
+
+
 
 namespace idk::vkn
 {
-	struct DescriptorPoolManager
+	struct ProcessedDrawCalls
 	{
-
-	};
-	struct DescriptorSetManager
-	{
-		VulkanView& view;
-		using layout_handle_t = vk::DescriptorSetLayout;
-		vk::DescriptorPool pool;
-		struct DescriptorSets
+		struct BindingInfo
 		{
-			vector<vk::DescriptorSet> sets;
-			uint32_t curr_index{};
-
-			vector<vk::DescriptorSet>& operator=(vector<vk::DescriptorSet>&& rhs)
+			uint32_t binding;
+			vk::Buffer ubuffer;
+			uint32_t buffer_offset;
+			uint32_t arr_index;
+			size_t size;
+			BindingInfo(
+				uint32_t binding_,
+				vk::Buffer& ubuffer_,
+				uint32_t buffer_offset_,
+				uint32_t arr_index_,
+				size_t size_
+			) :
+				binding{ binding_ },
+				ubuffer{ ubuffer_ },
+				buffer_offset{ buffer_offset_ },
+				arr_index{ arr_index_ },
+				size{ size_ }
 			{
-				curr_index = 0;
-				return sets = std::move(rhs);
-			}
-			vector<vk::DescriptorSet>& operator=(const vector<vk::DescriptorSet>& rhs)
-			{
-				curr_index = 0;
-				return sets = rhs;
-			}
-			vk::DescriptorSet& Get() 
-			{
-				return sets[curr_index++];
 			}
 		};
-
-		layout_handle_t layout_handle{};
-		DescriptorSets sets{};
-		
-		;
-		vk::DescriptorPool& Pool() { return pool; }
-
-		vk::DescriptorSetLayout GetLayout(layout_handle_t handle)
+		struct DrawCall
 		{
-			return handle;//Modify this when handle type changes
-		}
-
-		void Init(vk::DescriptorPool& dpool) { pool = dpool; }
-
-		void AllocateSets(uint32_t max_sets,layout_handle_t layout)
+			const draw_call* p_dc;
+			//set, update_instr
+			hash_table<uint32_t, vector<BindingInfo>> bindings;
+		};
+		vector<DrawCall> draw_calls;
+		void Add(DrawCall&& pdc)
 		{
-			auto& dispatcher = view.Dispatcher();
-			auto& m_device = view.Device();
-			std::vector<vk::DescriptorSetLayout> layouts{ max_sets, GetLayout(layout) };
-			vk::DescriptorSetAllocateInfo allocInfo
-			{
-				Pool()
-				,hlp::arr_count(layouts)
-				,std::data(layouts)
-			};
-			if (sets.sets.size())
-			{
-				Clear();
-			}
-			sets = m_device->allocateDescriptorSets(allocInfo, dispatcher);
+			draw_calls.emplace_back(std::move(pdc));
 		}
-
-		vk::DescriptorSet New(layout_handle_t layout)
+		decltype(draw_calls)::const_iterator begin()const
 		{
-			return sets.Get();
+			return draw_calls.cbegin();
 		}
-		void ClearSets()
+		decltype(draw_calls)::const_iterator end()const
 		{
-			sets.curr_index = 0;
+			return draw_calls.cend();
 		}
-		//Clears everything
-		void Clear()
-		{
-			if (sets.sets.size())
-			{
-				auto& dispatcher = view.Dispatcher();
-				auto& m_device = view.Device();
-				m_device->freeDescriptorSets(pool, sets.sets, dispatcher);
-				sets.sets.clear();
-			}
-		}
-
 	};
 
 	namespace glm
@@ -841,6 +807,16 @@ namespace idk::vkn
 		m_swapchain.extent = extent;
 		m_swapchain.format = surfaceFormat.format;
 
+	}
+
+	void VulkanState::createFrameObjects()
+	{
+		for ([[maybe_unused]]auto& image : m_swapchain.images)
+		{
+			FrameObjects fo { *view_,*view_ };
+			//FrameObjects fo2 = std::move(fo);
+			m_swapchain.frame_objects.emplace_back(std::move(fo));
+		}
 	}
 
 	void VulkanState::createImageViews()
@@ -1690,6 +1666,7 @@ namespace idk::vkn
 		pickPhysicalDevice();
 		createLogicalDevice();
 		createSwapChain();
+		createFrameObjects();
 		createImageViews();
 		createRenderPass();
 		createDescriptorSetLayout();
@@ -1848,6 +1825,43 @@ namespace idk::vkn
 		}
 	}
 
+
+	void UpdateUniformDS(
+		vk::Device& device,
+		vk::DescriptorSet& dset,
+		vector<ProcessedDrawCalls::BindingInfo> bindings
+	)
+	{
+		for (auto& binding : bindings)
+		{
+			//auto& dset = ds2[i++];
+			vk::DescriptorBufferInfo bufferInfo[]
+			{
+				vk::DescriptorBufferInfo{
+				binding.ubuffer
+				, binding.buffer_offset
+				, binding.size
+				}
+			};
+			;
+
+			vector<vk::WriteDescriptorSet> descriptorWrite
+			{
+				vk::WriteDescriptorSet{
+					dset
+					,binding.binding
+					,binding.arr_index
+					,hlp::arr_count(bufferInfo)
+					,vk::DescriptorType::eUniformBuffer
+					,nullptr
+					,std::data(bufferInfo)
+					,nullptr
+				}
+			};
+			device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
+		}
+	}
+
 	vk::DescriptorSetLayout GetUniformLayout(VulkanPipeline& pipeline, uint32_t set, uint32_t binding)
 	{
 		auto itr = pipeline.uniform_layout.find(set);
@@ -1855,11 +1869,89 @@ namespace idk::vkn
 			//throw std::runtime_error("Received incorre")
 		return *itr->second;
 	}
+	intptr_t HashDsLayout(const vk::DescriptorSetLayout& layout)
+	{
+		return r_cast<intptr_t>(layout.operator VkDescriptorSetLayout());
+	}
+	;
+	using DsBindingCount =hash_table<vk::DescriptorSetLayout, uint32_t>;
+	std::pair<ProcessedDrawCalls,DsBindingCount> ProcessDcUniforms(vector<draw_call>& draw_calls, UboManager& ubo_manager)
+	{
+		std::pair<ProcessedDrawCalls, DsBindingCount> result{};
+		DsBindingCount& collated_layouts = result.second;
+		for (auto& dc : draw_calls)
+		{
+			auto& layouts = dc.pipeline->uniform_layout;
+			//set, bindings
+			hash_table < uint32_t, vector<ProcessedDrawCalls::BindingInfo>> collated_bindings;
+			for (auto& uniform : dc.uniforms)
+			{
+				auto itr = layouts.find(uniform.set);
+				if (itr != layouts.end())
+				{
+					collated_layouts[(*itr->second)]++;
+					auto&& [buffer,offset] = ubo_manager.Add(uniform.data);
+					collated_bindings[uniform.set].emplace_back(
+						ProcessedDrawCalls::BindingInfo
+						{
+							uniform.binding,
+							buffer,
+							offset,
+							0,
+							uniform.data.size()
+						}
+					);
+				}
+			}
+			result.first.Add(ProcessedDrawCalls::DrawCall{&dc,std::move(collated_bindings)});
+		}
+		return result;
+	}
+	void PdcToCmdBuffer(const ProcessedDrawCalls& pdcs, vk::CommandBuffer& command_buffer, RenderState& rs,DescriptorSetLookup& dssm, VulkanView* view_)
+	{
+		auto& m_device = view_->Device();
+		auto& dispatcher = view_->Dispatcher();
+		auto& dsms = dssm;
+		VulkanPipeline* prev_pipeline = nullptr;
+		for (auto& pdc : pdcs.draw_calls)
+		{
+			auto& dc = *pdc.p_dc;
+			if (dc.pipeline != prev_pipeline)
+			{
+				dc.pipeline->Bind(command_buffer, *view_);
+				prev_pipeline = dc.pipeline;
+			}
+			dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
+			auto& layouts = dc.pipeline->uniform_layout;
+			for (auto& binding : pdc.bindings)
+			{
+				auto itr = layouts.find(binding.first);
+				if (itr != layouts.end())
+				{
+					auto dsm_itr = dsms.find(*itr->second);
+					if (dsm_itr != dsms.end())
+					{
+						auto ds = dsm_itr->second.Get();
+						UpdateUniformDS(*m_device,ds,binding.second);
+						command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *dc.pipeline->pipelinelayout, binding.first, ds, nullptr, dispatcher);
+					}
+				}
+			}
+			//set, dss
+			for (auto& [first_binding, offset] : dc.vtx_binding)
+			{
+				command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
+			}
+			command_buffer.draw(dc.vertex_count, dc.instance_count, 0, 0, dispatcher);
+		}
+	}
+
 	void VulkanState::EndFrame()
 	{
 		auto& rs = view_->CurrRenderState();
 		auto& dispatcher = view_->Dispatcher();
 		auto& command_buffer = rs.CommandBuffer();
+		auto& fo = m_swapchain.frame_objects[m_swapchain.curr_index];
 		vk::CommandBufferInheritanceInfo inherit_info{};
 		inherit_info.renderPass = rs.RenderPass();
 		inherit_info.framebuffer = *m_swapchain.frame_buffers[m_swapchain.curr_index];
@@ -1886,57 +1978,16 @@ namespace idk::vkn
 
 		//rs.transfer_buffer->begin(beginInfo);
 		command_buffer.begin(begin_info);
-		//TODO move this to smth per frame/render state
-		static hash_table<intptr_t,DescriptorSetManager> dsms{};
-		
-		for(auto& dsm : dsms)
-			dsm.second.ClearSets();
-		//TODO move this to smth per renderstate/frame
-		static UboManager ubo_manager{*view_};
-		//rs.transfer_buffer->end();
-		for (auto& dc : rs.DrawCalls())
-		{
-			dc.pipeline->Bind(command_buffer, *view_);
-			dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
-			//set, dss
-			hash_table<uint32_t, std::pair<vk::DescriptorSetLayout,vector<TmpBinding>>> collated;
-			for (auto& uniform : dc.uniforms)
-			{
-				vk::DescriptorSetLayout layout = GetUniformLayout(*dc.pipeline, uniform.set, uniform.binding);
-				if (dsms.find(r_cast<intptr_t>(layout.operator VkDescriptorSetLayout())) == dsms.end())
-				{
-					//TODO establish a better way to manage and allocate the descriptor sets manager
-					auto itr = dsms.emplace(r_cast<intptr_t>(layout.operator VkDescriptorSetLayout()), DescriptorSetManager{ *view_ });
-					auto& dsm = itr.first->second;
-					dsm.pool =* m_descriptorpool;
-					dsm.AllocateSets(200, layout);
-				}
-				auto&& [ubo, offset] = ubo_manager.Add(uniform.data);
-				collated[uniform.set].first = layout;
-				collated[uniform.set].second.emplace_back(TmpBinding{ uniform.binding,ubo,offset,0,uniform.data.size() });
-			}
-			for (auto& [set, dss] : collated)
-			{
-				auto& dsm = dsms.find(r_cast<intptr_t>(dss.first.operator VkDescriptorSetLayout()))->second;
-				auto ds = dsm.New(dss.first);
-				UpdateUniformDS(*m_device, ds,
-					dss.second
-					);
-				command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *dc.pipeline->pipelinelayout, set, ds, nullptr, dispatcher);
+		//FrameObjects fo{ *view_ ,*view_ };
 
-			}
-			vec3(&tmp)[36] = *r_cast<vec3(*)[36]>(rs.MasterBuffer().buffer.data() + 80);
-			vec4(&tmp2)[5] = *r_cast<vec4(*)[5]>(rs.MasterBuffer().buffer.data());
-			for (auto& [first_binding, offset] : dc.vtx_binding)
-			{
-				command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
-			}
-			
-			command_buffer.draw(dc.vertex_count, dc.instance_count, 0, 0, dispatcher);
-		}
+		auto [pdcs,layout_count] = ProcessDcUniforms(rs.DrawCalls(), fo.ubo_manager);
+
+		auto descriptor_sets = fo.pools.Allocate(layout_count);
+		PdcToCmdBuffer(pdcs, command_buffer, rs, descriptor_sets, &*view_);
+
 		command_buffer.end(dispatcher);
 
-		ubo_manager.UpdateAllBuffers();
+		fo.ubo_manager.UpdateAllBuffers();
 
 
 	}

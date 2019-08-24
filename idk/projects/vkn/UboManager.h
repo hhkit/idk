@@ -21,9 +21,11 @@ namespace idk::vkn
 	private:
 		struct DataPair
 		{
-			vk::UniqueBuffer buffer;
-			string data;
+			vk::UniqueBuffer buffer{};
+			string data{};
 			size_t offset{};
+			DataPair() = default;
+			DataPair(DataPair&&) = default;
 			bool CanAdd(size_t len)const;
 			size_t AlignmentOffset()const;
 			void Align();

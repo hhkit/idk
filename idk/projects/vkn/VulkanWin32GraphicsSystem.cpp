@@ -54,7 +54,6 @@ namespace idk::vkn
 	}
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{
-		// TODO: insert return statement here
 		return *(instance_.get());
 	}
 	/*void VulkanWin32GraphicsSystem::createInstance()

@@ -33,7 +33,10 @@ namespace idk::vkn
 		uint32_t         instance_count{};
 		uint32_t         vertex_count  {};
 		VulkanPipeline* pipeline      {};
+
 		vector<uniform_binding> uniforms{};
+		vector<uint32_t> uniform_proc_idx{};
+
 		void SetBinding (const uniform_binding& uniform);
 		void SetBindings(const vector<uniform_binding>& uniform);
 		void SetBinding(uniform_binding&& uniform);

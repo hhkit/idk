@@ -8,8 +8,22 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
+#include <vkn/DescriptorsManager.h>
+#include <vkn/UboManager.h>
 #undef max
 #undef min
+
+namespace std
+{
+	template<>
+	struct hash<vk::DescriptorSetLayout>
+	{
+		size_t operator()(const vk::DescriptorSetLayout& dsl)const
+		{
+			return idk::r_cast<intptr_t>(dsl.operator VkDescriptorSetLayout());
+		}
+	};
+}
 
 namespace idk::vkn 
 {
@@ -21,6 +35,14 @@ namespace idk::vkn
 	};
 
 	class VulkanState;
+
+	struct FrameObjects
+	{
+		DescriptorsManager pools;
+		UboManager ubo_manager;
+		FrameObjects() = default;
+		FrameObjects(FrameObjects&&) = default;
+	};
 
 	struct QueueFamilyIndices
 	{
@@ -49,6 +71,8 @@ namespace idk::vkn
 		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers2;
 		std::vector<vk::DescriptorSet    > descriptor_sets;
 		std::vector<vk::DescriptorSet    > descriptor_sets2;
+
+		vector<FrameObjects> frame_objects;
 
 		struct UniformStuff
 		{
@@ -202,7 +226,7 @@ namespace idk::vkn
 		void createLogicalDevice();
 
 		void createSwapChain();
-
+		void createFrameObjects();
 		void createImageViews();
 
 		auto createShaderModule(const std::string& code) -> vk::UniqueShaderModule;
