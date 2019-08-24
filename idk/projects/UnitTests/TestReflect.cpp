@@ -304,7 +304,7 @@ TEST(Reflect, TestReflectEnum)
 
 struct unknowntest : reflect_this
 {
-	idk::testenum t = idk::testenum::A;
+	testenum t = testenum::A;
 };
 REFLECT_BEGIN(unknowntest, "unknowntest")
 REFLECT_PARENT(reflect_this)
@@ -315,6 +315,22 @@ TEST(Reflect, TestParentAndUnknownVisit)
 {
 	unknowntest v;
 	reflect::visit(v, [&](auto&& key, auto&& val, int depth_change)
+	{
+		std::cout << "hi";
+	});
+}
+
+struct varianttest
+{
+	variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> uniform;
+};
+REFLECT_BEGIN(varianttest, "varianttest")
+REFLECT_VARS(uniform)
+REFLECT_END()
+TEST(Reflect, TestVisitVariant)
+{
+	varianttest test{ mat4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 } };
+	reflect::visit(test, [&](auto&& key, auto&& val, int depth_change)
 	{
 		std::cout << "hi";
 	});

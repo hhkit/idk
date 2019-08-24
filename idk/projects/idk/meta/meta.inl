@@ -73,7 +73,7 @@ namespace idk
 	)>> : std::true_type {};
 
 	template<typename T, typename = void>
-	struct is_sequential_container : std::false_type {};
+	struct is_sequential_container : std::is_array<std::decay_t<T>> {};
 
 	template<typename T>
 	struct is_sequential_container<T, std::void_t<decltype(
@@ -97,4 +97,12 @@ namespace idk
 		std::decay_t<T>::names[0],
 		std::decay_t<T>::values[0]
 	)>> : std::is_enum<typename std::decay_t<T>::_enum> {};
+
+
+
+	template<typename T, typename VariantT>
+	struct is_variant_member;
+
+	template<typename T, typename... Ts>
+	struct is_variant_member<T, std::variant<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
 }

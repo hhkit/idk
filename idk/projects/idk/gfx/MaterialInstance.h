@@ -3,7 +3,7 @@
 
 namespace idk
 {
-	using UniformInstance = std::variant<bool, float, int, vec2, vec3, vec4, mat3, mat4>;
+	using UniformInstance = variant<bool, float, int, vec2, vec3, vec4, mat3, mat4>;
 
 	class MaterialInstance
 	{

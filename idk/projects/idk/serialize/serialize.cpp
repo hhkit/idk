@@ -69,7 +69,7 @@ namespace idk
 		{
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
+			while (++depth_change <= 0)
 				stack.pop_back();
 
 			if constexpr (std::is_arithmetic_v<K>)
@@ -80,7 +80,9 @@ namespace idk
 					(*stack.back())[key] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[key] = json::array()));
-				else // associative container
+				else if constexpr (is_associative_container_v<T>)
+					stack.push_back(&((*stack.back())[key] = json::object()));
+				else
 					stack.push_back(&((*stack.back())[key] = json::object()));
 			}
 			else if constexpr (is_basic_serializable_v<K>)
@@ -91,8 +93,23 @@ namespace idk
 					(*stack.back())[serialize_text(key)] = serialize_text(arg);
 				else if constexpr (is_sequential_container_v<T>)
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
-				else // associative container
+				else if constexpr (is_associative_container_v<T>)
 					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
+				else
+					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
+			}
+			else if constexpr (std::is_same_v<K, reflect::type>) // variant element
+			{
+				if constexpr (std::is_arithmetic_v<T>)
+					(*stack.back())[string{ key.name() }] = arg;
+				else if constexpr (is_basic_serializable_v<T>)
+					(*stack.back())[string{ key.name() }] = serialize_text(arg);
+				else if constexpr (is_sequential_container_v<T>)
+					stack.push_back(&((*stack.back())[string{ key.name() }] = json::array()));
+				else if constexpr (is_associative_container_v<T>)
+					stack.push_back(&((*stack.back())[string{ key.name() }] = json::object()));
+				else
+					stack.push_back(&((*stack.back())[string{ key.name() }] = json::object()));
 			}
 			else
 			{
@@ -247,7 +264,7 @@ namespace idk
 		{
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
+			while (++depth_change <= 0)
 				stack.pop_back();
 
 			if constexpr (std::is_same_v<K, const char*>)
@@ -320,7 +337,16 @@ namespace idk
 					}
 					return false;
 				}
-				else // not basic serializable and not container; go deeper!
+				else if constexpr (is_template_v<T, std::variant>)
+				{
+					auto alt_type_name = iter->begin().key();
+					auto type = reflect::get_type(alt_type_name);
+					auto dyn = type.create();
+					parse_json(iter->begin().value(), dyn);
+					reflect::dynamic{ arg } = dyn;
+					return false;
+				}
+				else // not basic serializable and not container and not variant; go deeper!
 				{
 					stack.push_back(&*iter);
 					return true;

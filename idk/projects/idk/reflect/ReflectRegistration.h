@@ -49,9 +49,20 @@ REFLECT_CTOR(float, float, float, float)
 REFLECT_VARS(x, y, z, w)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::mat3, "mat3")
+REFLECT_CTOR(float, float, float, float, float, float, float, float, float)
+REFLECT_VARS(intern[0], intern[1], intern[2])
+REFLECT_END()
+
+REFLECT_BEGIN(idk::mat4, "mat4")
+REFLECT_CTOR(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float)
+REFLECT_VARS(intern[0], intern[1], intern[2], intern[3])
+REFLECT_END()
+
 /*==========================================================================
  * resources
  *========================================================================*/
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VAR(guid)
 REFLECT_END()

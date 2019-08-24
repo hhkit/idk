@@ -11,7 +11,7 @@ namespace idk
 		: public Component<Collider>
 	{
 	public:
-		using Shapes = std::variant<sphere, capsule>;
+		using Shapes = variant<sphere, capsule>;
 
 		Shapes shape;
 

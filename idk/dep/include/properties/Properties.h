@@ -767,7 +767,7 @@ namespace property
 
     // deal with regular properties such int and such
     template< typename T_VAR, std::size_t N > constexpr
-    std::enable_if_t<is_variant_member<T_VAR, data>::value, property::setup_entry>
+    std::enable_if_t<is_variant_member<std::decay_t<T_VAR>, data>::value, property::setup_entry>
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {
         using var = std::decay_t<T_VAR>;
@@ -777,7 +777,7 @@ namespace property
     // deal with atomic but property::table base properties
     template< typename T_VAR, std::size_t N > constexpr
     std::enable_if_t< isValidTable<std::decay_t<T_VAR>>() &&
-		!is_variant_member<T_VAR, data>::value // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		!is_variant_member<std::decay_t<T_VAR>, data>::value // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		, property::setup_entry >
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {

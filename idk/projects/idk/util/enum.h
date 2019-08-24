@@ -43,11 +43,10 @@ struct name																							\
 	{																								\
 		static_assert(std::is_integral_v<UnderlyingType> && !std::is_unsigned_v<UnderlyingType>);	\
 	}																								\
-	template<typename IntegralT>																	\
+	template<typename IntegralT, typename = std::enable_if_t<std::is_integral_v<IntegralT>>>		\
 	constexpr name(IntegralT val)																	\
 		: value { static_cast<UnderlyingType>(val) }												\
 	{																								\
-		static_assert(std::is_integral_v<IntegralT>);												\
 	}																								\
 	constexpr operator _enum() const { return (_enum)value; }										\
 	explicit operator string() const { return idk::string(to_string()); }							\
@@ -75,4 +74,4 @@ struct name																							\
 private:																							\
 	UnderlyingType value;																			\
 	template<typename> friend struct ::property::opin::def;											\
-};																									\
+};
