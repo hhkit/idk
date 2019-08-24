@@ -35,5 +35,8 @@ namespace idk
 	// convert a basis to an orthonormal basis using gramm-schidt
 	template<typename T, unsigned D>
 	math::matrix<T, D, D> orthonormalize(const math::matrix<T, D, D>&);
+
+	template<typename T>
+	math::matrix<T, 4, 4> invert_rotation(const math::matrix<T, 4, 4>&);
 }
 #include "matrix_transforms.inl"

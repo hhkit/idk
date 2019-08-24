@@ -1,4 +1,5 @@
 #pragma once
+#include <compare>
 
 namespace idk::math
 {
@@ -13,14 +14,17 @@ namespace idk::math
 
 		explicit radian(T val = T{});
 		explicit radian(const degree<T>&);
-		explicit operator degree<T>() const;
 
-		bool abs_comp(const radian&) const;
+		radian& normalize();        // normalize to (-pi, pi]
+		radian  normalized() const; // normalize to (-pi, pi]
 
 		T*       data();
 		const T* data() const;
 
 		// operator overloads
+		explicit operator degree<T>() const;
+		explicit operator T() const;
+
 		radian& operator+=(const radian&);
 		radian& operator-=(const radian&);
 		radian& operator*=(const T&);
@@ -46,12 +50,15 @@ namespace idk::math
 
 		explicit degree(T val = T{});
 		explicit degree(const radian<T>&);
-		operator radian<T>() const;
 
-		bool abs_comp(const degree&) const;
+		degree& normalize();        // normalize to (-180, 180]
+		degree  normalized() const; // normalize to (-180, 180]
 
 		T*       data();
 		const T* data() const;
+
+		operator radian<T>() const;
+		explicit operator T() const;
 
 		degree& operator+=(const degree&);
 		degree& operator-=(const degree&);

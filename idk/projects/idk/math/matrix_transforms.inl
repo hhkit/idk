@@ -120,4 +120,12 @@ namespace idk
 		}
 		return retval;
 	}
+	template<typename T>
+	math::matrix<T, 4, 4> invert_rotation(const math::matrix<T, 4, 4>& m)
+	{
+		auto retval = m.transpose();
+		retval[0][3] = retval[1][3] = retval[2][3] = 0;
+		retval[3] = vec4{-m[0].dot(m[3]), -m[1].dot(m[3]), -m[2].dot(m[3]), 1};
+		return retval;
+	}
 }
