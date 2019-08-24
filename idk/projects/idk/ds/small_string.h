@@ -1,26 +1,22 @@
 #pragma once
 
-#include <memory>
+#include <memory> // allocator
+#include <string>
 #include <ds/compressed_pair.h>
 #include <util/string_hash.h>
-
-namespace std // forward decl
-{
-	template<typename CharT, typename Traits = std::char_traits<CharT>>
-	class basic_string_view;
-}
 
 namespace idk
 {
 	template<typename CharT,
 		     typename Traits = std::char_traits<CharT>,
 		     typename Allocator = std::allocator<CharT>>
-	class alignas(32) small_string
+	class /*alignas(32)*/ small_string
 	{
 	public:
 		using traits_type = Traits;
 		using value_type = CharT;
 		using allocator_type = Allocator;
+		using view_type = std::basic_string_view<CharT, Traits>;
 		using size_type = typename std::allocator_traits<Allocator>::size_type;
 		using difference_type = typename std::allocator_traits<Allocator>::difference_type;
 		using reference	= value_type&;
@@ -35,7 +31,10 @@ namespace idk
 		explicit small_string(const Allocator& alloc) noexcept;
 		small_string() noexcept(noexcept(Allocator));
 		small_string(size_type count, CharT c, const Allocator& alloc = Allocator{});
+		small_string(const CharT* cstr, size_type count, const Allocator& alloc = Allocator{});
 		small_string(const CharT* cstr, const Allocator& alloc = Allocator{});
+		small_string(const view_type& sv, const Allocator& alloc = Allocator{});
+		small_string(const std::basic_string<CharT, Traits, Allocator>& str, const Allocator& alloc = Allocator{});
 		template<typename InputIt> small_string(InputIt first, InputIt last, const Allocator& alloc = Allocator());
 
 		~small_string();
@@ -63,24 +62,37 @@ namespace idk
 		const_pointer   data() const;
 		pointer         data();
 		const_pointer   c_str() const;
+		view_type		sv() const;
 		small_string    substr(size_type pos, size_type count = npos) const;
 
 		// comparators
 		int compare(const small_string& str) const;
 		int compare(const CharT* str) const;
-		int compare(const std::basic_string_view<CharT, Traits>& sv) const;
+		int compare(const view_type& sv) const;
 
 		// searchers
 		size_type find(CharT c, size_type pos = 0) const;
 		size_type find(const CharT* cstr, size_type pos, size_type count) const;
 		size_type find(const CharT* cstr, size_type pos = 0) const;
 		size_type find(const small_string& str, size_type pos = 0) const;
-		size_type find(const std::basic_string_view<CharT, Traits>& sv, size_type pos = 0) const;
+		size_type find(const view_type& sv, size_type pos = 0) const;
 		size_type rfind(CharT c, size_type pos = npos) const;
-		size_type rfind(const CharT * cstr, size_type pos, size_type count) const;
-		size_type rfind(const CharT * cstr, size_type pos = npos) const;
-		size_type rfind(const small_string & str, size_type pos = npos) const;
-		size_type rfind(const std::basic_string_view<CharT, Traits> & sv, size_type pos = npos) const;
+		size_type rfind(const CharT* cstr, size_type pos, size_type count) const;
+		size_type rfind(const CharT* cstr, size_type pos = npos) const;
+		size_type rfind(const small_string& str, size_type pos = npos) const;
+		size_type rfind(const view_type& sv, size_type pos = npos) const;
+		size_type find_first_of(const CharT* cstr, size_type pos, size_type count) const;
+		size_type find_first_of(const CharT* cstr, size_type pos = 0) const;
+		size_type find_first_of(CharT c, size_type pos = 0) const;
+		size_type find_first_not_of(const CharT* cstr, size_type pos, size_type count) const;
+		size_type find_first_not_of(const CharT* cstr, size_type pos = 0) const;
+		size_type find_first_not_of(CharT c, size_type pos = 0) const;
+		size_type find_last_of(const CharT* cstr, size_type pos, size_type count) const;
+		size_type find_last_of(const CharT* cstr, size_type pos = 0) const;
+		size_type find_last_of(CharT c, size_type pos = 0) const;
+		size_type find_last_not_of(const CharT* cstr, size_type pos, size_type count) const;
+		size_type find_last_not_of(const CharT* cstr, size_type pos = 0) const;
+		size_type find_last_not_of(CharT c, size_type pos = 0) const;
 
 		// iterators
 		iterator       begin();
@@ -105,7 +117,8 @@ namespace idk
 		void resize(size_type count, CharT c = CharT{});
 
 		// conversions
-		operator std::basic_string_view<CharT, Traits>() const noexcept;
+		operator view_type() const noexcept;
+		operator std::basic_string<CharT, Traits, Allocator>() const;
 
 		// operators
 		reference       operator[](size_type pos);
@@ -188,6 +201,11 @@ namespace idk
 	small_string<CharT, Traits, Alloc> operator+(const CharT* lhs,                              small_string<CharT, Traits, Alloc>&& rhs);
 	template<class CharT, class Traits, class Alloc>
 	small_string<CharT, Traits, Alloc> operator+(CharT lhs,                                     small_string<CharT, Traits, Alloc>&& rhs);
+
+	template <class CharT, class Traits, class Allocator>
+	std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os, const small_string<CharT, Traits, Allocator>& str);
+	template <class CharT, class Traits, class Allocator>
+	std::basic_istream<CharT, Traits>& operator>>(std::basic_istream<CharT, Traits>& is, small_string<CharT, Traits, Allocator>& str);
 }
 
 // std hash overload

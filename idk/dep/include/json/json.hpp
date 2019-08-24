@@ -3257,7 +3257,10 @@ template <typename IteratorType> class iteration_proxy_value
 
             // use key from the object
             case value_t::object:
-                return anchor.key();
+				if constexpr (!std::is_same_v<std::decay_t<decltype(anchor.key())>, std::string>)
+					return array_index_str = anchor.key();
+				else
+					return anchor.key();
 
             // use an empty key for all primitive types
             default:

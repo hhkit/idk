@@ -291,7 +291,7 @@ namespace idk {
 		if (currDepth >= mount._path_tree.size() - 1)
 			mount.AddDepth();
 
-		FS::path currPath{ mountSubDir._full_path };
+		FS::path currPath{ mountSubDir._full_path.sv() };
 		FS::directory_iterator dir{ currPath };
 
 		// initializing all the paths from this path
@@ -665,9 +665,9 @@ namespace idk {
 		auto& dir = getDir(dir_index);
 		string full_path = dir._full_path + "/" + mount_path.substr(end_pos);
 
-		std::ofstream{ full_path };
+		std::ofstream{ full_path.sv() };
 
-		FS::path p{ full_path };
+		FS::path p{ full_path.sv() };
 
 		// Request a slot from mounts
 		// Check if there are even mounts. If this hits, something is terribly wrong...

@@ -16,28 +16,28 @@
 
 namespace FS = std::filesystem;
 
-#define INIT_FILESYSTEM_UNIT_TEST()\
-			using namespace idk;\
-			Core c;\
-			FileSystem& vfs = Core::GetSystem<FileSystem>();\
-			vfs.Init();\
-			string exe_dir = string{ vfs.GetExeDir().data() };\
-			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir");\
-			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir2/recurse_dir");\
-			{	std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_sub_dir1/test_sub_file.txt" }; \
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_read.txt"};\
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt"};\
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir2/recurse_dir/recurse_sub_file.txt"};}\
-			remove(string {exe_dir + "/resource/FS_UnitTests/test_watch.txt"	}.c_str());\
-			remove(string {exe_dir + "/resource/FS_UnitTests/test_write.txt"	}.c_str());\
-			vfs.Mount( exe_dir + "/resource/FS_UnitTests/", "/FS_UnitTests");
-
+#define INIT_FILESYSTEM_UNIT_TEST()																			\
+	using namespace idk;																					\
+	Core c;																									\
+	FileSystem& vfs = Core::GetSystem<FileSystem>();														\
+	vfs.Init();																								\
+	FS::path exe_dir = vfs.GetExeDir().data();																\
+	FS::create_directories(exe_dir / "resource/FS_UnitTests/test_sub_dir1/recurse_dir");					\
+	FS::create_directories(exe_dir / "resource/FS_UnitTests/test_sub_dir2/recurse_dir");					\
+	{																										\
+		std::ofstream{ exe_dir / "resource/FS_UnitTests/test_sub_dir1/test_sub_file.txt" };					\
+		std::ofstream{ exe_dir / "resource/FS_UnitTests/test_read.txt" };									\
+		std::ofstream{ exe_dir / "resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt" };	\
+		std::ofstream{ exe_dir / "resource/FS_UnitTests/test_sub_dir2/recurse_dir/recurse_sub_file.txt" };	\
+	}																										\
+	remove((exe_dir / "resource/FS_UnitTests/test_watch.txt").string().c_str());							\
+	remove((exe_dir / "resource/FS_UnitTests/test_write.txt").string().c_str());							\
+	vfs.Mount((exe_dir / "resource/FS_UnitTests/").string(), "/FS_UnitTests");
 
 TEST(FileSystem, TestMount)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 
-	vfs.Mount(exe_dir + "resource/FS_UnitTests/", "/FS_UnitTests");
 	vfs.DumpMounts();
 	vfs.Update();
 }
@@ -54,20 +54,20 @@ TEST(FileSystem, TestFileWatchBasic)
 
 	// Test create:
 	{
-		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
+		std::ofstream{ exe_dir / "resource/FS_UnitTests/test_watch.txt", std::ios::out };
 	}
 	vfs.Update();
 	
 	// Test Write
 	{
-		std::ofstream of{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
+		std::ofstream of{ exe_dir / "resource/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test_Watch" << std::endl;
 	}
 	vfs.Update();
 
 	// Test Delete
 	{
-		string remove_file = exe_dir + "/resource/FS_UnitTests/test_watch.txt";
+		string remove_file = (exe_dir / "resource/FS_UnitTests/test_watch.txt").string();
 		EXPECT_TRUE(remove(remove_file.c_str()) == 0);
 	}
 	vfs.Update();

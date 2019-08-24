@@ -38,7 +38,7 @@ namespace idk
 		{
 			flush();
 			file_handle.Reset();
-			file._time = FS::last_write_time(FS::path{ file._full_path });
+			file._time = FS::last_write_time(FS::path{ file._full_path.sv() });
 		}
 	}
 
@@ -150,21 +150,21 @@ namespace idk
 		switch (perms)
 		{
 		case FS_PERMISSIONS::READ:
-			fs.open(internal_file._full_path, 
+			fs.open(internal_file._full_path.sv(), 
 				binary_stream ? std::ios::in | std::ios::binary : std::ios::in);
 			fs._handle_index = _handle_index;
 
 			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::READ_ONLY);
 			break;
 		case FS_PERMISSIONS::WRITE:
-			fs.open(internal_file._full_path, 
+			fs.open(internal_file._full_path.sv(),
 				binary_stream ? std::ios::out | std::ios::binary : std::ios::out);
 			fs._handle_index = _handle_index;
 
 			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
 			break;
 		case FS_PERMISSIONS::APPEND:
-			fs.open(internal_file._full_path, 
+			fs.open(internal_file._full_path.sv(),
 				binary_stream ? std::ios::app | std::ios::binary : std::ios::app);
 			fs._handle_index = _handle_index;
 

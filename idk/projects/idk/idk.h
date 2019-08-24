@@ -4,7 +4,6 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
-#include <string>
 #include <string_view>
 
 #include <atomic>
@@ -19,6 +18,7 @@
 
 #include <idk_config.h>
 #include <ds/span.h>
+#include <ds/small_string.h>
 #include <math/color.h>
 #include <math/constants.h>
 #include <math/arith.h>
@@ -83,7 +83,7 @@ namespace idk
 	template<typename T>
 	using hash_set = std::unordered_set<T>;
 
-	using string = std::string;
+	using string = idk::small_string<char>;
 
 	using string_view = std::string_view;
 

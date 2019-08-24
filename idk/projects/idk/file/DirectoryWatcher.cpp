@@ -99,7 +99,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::RefreshDir(file_system_detail::fs_dir& mountDir)
 	{
-		FS::path path{ mountDir._full_path };
+		FS::path path{ mountDir._full_path.sv() };
 		
 		auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
 			static_cast<bool (*)(const FS::path&)>(FS::is_regular_file)));
@@ -125,7 +125,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::RefreshTree(file_system_detail::fs_dir& mountDir)
 	{
-		FS::path path{ mountDir._full_path };
+		FS::path path{ mountDir._full_path.sv() };
 		FS::directory_iterator dir{ path };
 
 		auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
@@ -211,7 +211,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::checkFilesCreated(file_system_detail::fs_dir& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 
@@ -270,7 +270,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::checkFilesRenamed(file_system_detail::fs_dir& mountDir)
 	{
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 
@@ -315,7 +315,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::checkFilesWrittenTo(file_system_detail::fs_dir& dir)
 	{
-		for (auto& file : FS::directory_iterator(dir._full_path))
+		for (auto& file : FS::directory_iterator(dir._full_path.sv()))
 		{
 			auto current_file_last_write_time = FS::last_write_time(file);
 			FS::path tmp{ file.path() };

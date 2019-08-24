@@ -7,7 +7,7 @@
 #include <common/Transform.h>
 
 #include <json/json.hpp>
-using json = nlohmann::json;
+using json = nlohmann::basic_json<std::map, std::vector, idk::string>;
 
 namespace idk
 {
