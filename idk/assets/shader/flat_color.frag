@@ -10,6 +10,7 @@ Project: ivan.ho_CS300_2
 Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
+#version 450
 uniform vec3 color;
 
 in VS_OUT

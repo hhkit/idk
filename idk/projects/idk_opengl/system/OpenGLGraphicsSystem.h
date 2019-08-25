@@ -23,6 +23,7 @@ namespace idk::ogl
 		HDC   _windows_context;
 		HGLRC _opengl_context;
 		unique_ptr<OpenGLState> _opengl;
+		color _clear_color;
 
 		void CreateContext();
 		void InitOpenGL();
