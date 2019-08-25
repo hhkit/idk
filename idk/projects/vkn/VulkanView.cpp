@@ -24,9 +24,13 @@ namespace idk::vkn
 		vk::UniqueInstance& VulkanView::Instance()const { return vulkan().instance; }
 		vk::UniqueSurfaceKHR& VulkanView::Surface()const { return vulkan().m_surface; }
 		vk::PhysicalDevice& VulkanView::PDevice()const { return vulkan().pdevice; }
-		uint32_t VulkanView::BufferAlignment() const
+		uint32_t VulkanView::BufferOffsetAlignment() const
 		{
-			return vulkan_->buffer_alignment;
+			return vulkan_->buffer_offset_alignment;
+		}
+		uint32_t VulkanView::BufferSizeAlignment() const
+		{
+			return vulkan_->buffer_size_alignment;
 		}
 		vk::UniqueDevice& VulkanView::Device()const { return vulkan().m_device; }
 		QueueFamilyIndices& VulkanView::QueueFamily()const { return vulkan().m_queue_family; }

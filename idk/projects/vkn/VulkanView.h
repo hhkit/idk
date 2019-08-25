@@ -17,7 +17,8 @@ namespace idk::vkn
 		vk::UniqueInstance&        Instance()const;
 		vk::UniqueSurfaceKHR&      Surface()const;
 		vk::PhysicalDevice&        PDevice()const;
-		uint32_t                   BufferAlignment()const;
+		uint32_t                   BufferOffsetAlignment()const;
+		uint32_t                   BufferSizeAlignment()const;
 		vk::UniqueDevice&          Device()const;
 		QueueFamilyIndices&        QueueFamily()const;
 		vk::Queue&                 GraphicsQueue()const;

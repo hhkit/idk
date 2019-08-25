@@ -58,7 +58,9 @@ namespace idk::vkn
 			auto&& [buffer, offset] = make_buffer();
 			string buf{};
 			buf.reserve(chunk_size);
-			buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset }).alignment = alignment();
+			auto& tmp = buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset });
+			tmp.alignment = offset_alignment();
+			tmp.sz_alignment = size_alignment();
 			allocation_table.emplace(buffers.size() - 1,memory_blocks.size() - 1);
 		}
 		else if (!buffers[curr_buffer_idx].CanAdd(size))
@@ -70,8 +72,12 @@ namespace idk::vkn
 
 	UboManager::UboManager(VulkanView& view_) : view{view_}
 	{
-		_alignment = view.BufferAlignment();
+		_alignment = view.BufferOffsetAlignment();
 	}
+
+	inline uint32_t UboManager::offset_alignment() { return view.BufferOffsetAlignment(); }
+
+	inline uint32_t UboManager::size_alignment() { return view.BufferSizeAlignment(); }
 
 
 	void UboManager::UpdateAllBuffers()
@@ -92,15 +98,19 @@ namespace idk::vkn
 		}
 		curr_buffer_idx = 0;
 	}
-
+	uint32_t SizeAlignmentOffset(size_t sz, size_t alignment)
+	{
+		return s_cast<uint32_t>(sz + ((sz % alignment) ? alignment - (sz % alignment) : 0));
+	}
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{
-		return data.capacity() >= len + data.size() + AlignmentOffset();
+		return data.capacity() >= len + data.size() + AlignmentOffset() + SizeAlignmentOffset(data.size(),sz_alignment);
 	}
 
 	size_t UboManager::DataPair::AlignmentOffset() const
 	{
-		return (data.size() % alignment) ? alignment - (data.size() % alignment) : 0;
+		auto mod = (r_cast<intptr_t>(data.data()) + data.size()) % alignment;
+		return (mod) ? alignment - (mod) : 0;
 	}
 
 	void UboManager::DataPair::Align()
@@ -109,8 +119,9 @@ namespace idk::vkn
 	}
 
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) {
-		uint32_t result = s_cast<uint32_t>(data.size());
 		Align();
+		uint32_t result = s_cast<uint32_t>(data.size());
+		len = SizeAlignmentOffset(len, sz_alignment);
 		data.append(r_cast<const char*>(data_), len);
 		return result;
 	}

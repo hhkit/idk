@@ -13,7 +13,8 @@ namespace idk::vkn
 
 		UboManager(VulkanView& view);
 
-		uint32_t& alignment() { return _alignment; }
+		uint32_t offset_alignment();
+		uint32_t size_alignment();
 
 		template<typename T>
 		std::pair<vk::Buffer, uint32_t> Add(const T& data);
@@ -27,6 +28,7 @@ namespace idk::vkn
 			string data{};
 			size_t offset{};
 			uint32_t alignment{};
+			uint32_t sz_alignment{};
 			DataPair() = default;
 			DataPair(DataPair&&) = default;
 			bool CanAdd(size_t len)const;
@@ -34,6 +36,7 @@ namespace idk::vkn
 			void Align();
 			uint32_t Add(size_t len, const void* data_);
 			vk::Buffer& Buffer() { return *buffer; }
+
 			void Reset() { data.resize(0); }
 		};
 		struct Memory

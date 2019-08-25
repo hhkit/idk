@@ -714,7 +714,8 @@ namespace idk::vkn
 	{
 		auto physical_devices = instance->enumeratePhysicalDevices(dispatcher);
 		pdevice = SelectDevice(physical_devices);
-		buffer_alignment = pdevice.getProperties().limits.minUniformBufferOffsetAlignment;
+		buffer_offset_alignment = pdevice.getProperties().limits.minUniformBufferOffsetAlignment;
+		buffer_size_alignment = s_cast<decltype(buffer_size_alignment)>(pdevice.getProperties().limits.nonCoherentAtomSize);
 	}
 
 	void VulkanState::createLogicalDevice()
