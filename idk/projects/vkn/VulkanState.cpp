@@ -1347,7 +1347,7 @@ namespace idk::vkn
 		}
 		}
 		//Dupe
-
+		/*
 		m_swapchain.descriptor_sets2 = m_device->allocateDescriptorSets(allocInfo, dispatcher);
 		{
 			int i = 0;
@@ -1432,7 +1432,7 @@ namespace idk::vkn
 			m_device->updateDescriptorSets(descriptorWrite, nullptr, dispatcher);
 
 		}
-
+		*/
 	}
 
 	void VulkanState::createCommandBuffers()
