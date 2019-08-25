@@ -6,6 +6,9 @@ namespace idk
 	}
 
 	template<typename T>
+	T frem(T numerator, T denominator);
+
+	template<typename T>
 	T fmod(T numerator, T denominator);
 
 	template<typename T, typename LerpFactor>
