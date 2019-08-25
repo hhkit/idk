@@ -115,6 +115,12 @@ namespace idk::math
 	}
 
 	template<typename T>
+	inline bool radian<T>::operator<(const radian& rhs) const
+	{
+		return value < rhs.value;
+	}
+
+	template<typename T>
 	inline bool radian<T>::operator==(const radian& rhs) const
 	{
 		return value == rhs.value;
@@ -242,6 +248,12 @@ namespace idk::math
 	inline T degree<T>::operator/(const degree& rhs) const
 	{
 		return value / rhs.value;
+	}
+
+	template<typename T>
+	inline bool degree<T>::operator<(const degree& rhs) const
+	{
+		return value < rhs.value;
 	}
 
 	template<typename T>

@@ -1,5 +1,5 @@
 #pragma once
-#include <compare>
+#include <math/comparable.h>
 
 namespace idk::math
 {
@@ -8,7 +8,7 @@ namespace idk::math
 	template <typename T> struct degree;
 
 	template <typename T>
-	struct radian
+	struct radian : comparable<radian<T>>
 	{
 		T value;
 
@@ -36,6 +36,8 @@ namespace idk::math
 		radian operator/(const T&) const;
 		T      operator/(const radian&) const;
 
+		bool operator<(const radian&) const;
+
 		bool operator==(const radian&) const;
 		bool operator!=(const radian&) const;
 	};
@@ -44,7 +46,7 @@ namespace idk::math
 	radian<T> operator*(const T&, const radian<T>&);
 
 	template<typename T>
-	struct degree
+	struct degree : comparable<degree<T>>
 	{
 		T value;
 
@@ -70,6 +72,8 @@ namespace idk::math
 		degree operator*(const T&) const;
 		degree operator/(const T&) const;
 		T      operator/(const degree&) const;
+
+		bool operator<(const degree&) const;
 
 		bool operator==(const degree&) const;
 		bool operator!=(const degree&) const;

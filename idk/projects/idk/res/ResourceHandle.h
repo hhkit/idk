@@ -15,6 +15,8 @@ namespace idk
 		RscHandle(const Guid& guid) : guid{ guid } {}
 
 		void Set(const Resource<Res>& g);
+		template<typename T>
+		T& as() const;
 
 		explicit operator bool() const;
 		Res& operator*() const;
