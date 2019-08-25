@@ -111,7 +111,8 @@
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
+      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y </Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>x</Outputs>
@@ -175,7 +176,8 @@
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
+      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y </Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>x</Outputs>
