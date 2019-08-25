@@ -95,7 +95,7 @@ namespace idk::vkn::hlp
 		};
 		//Not necessary rn since we set the HostCoherent bit 
 		//This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
-		device.flushMappedMemoryRanges(memory_ranges, dispatcher);
+		//device.flushMappedMemoryRanges(memory_ranges, dispatcher);
 		device.unmapMemory(memory);
 	}
 

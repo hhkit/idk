@@ -4,7 +4,7 @@
 #include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-
+	/*
 	template<typename T>
 	struct test_allocator
 	{
@@ -33,7 +33,9 @@ namespace idk::vkn
 		{
 			delete[](ptr - 11);
 		}
-	};
+	};*/
+	template<typename T>
+	using tallocator = std::allocator<T>;
 	struct UboManager
 	{
 		using memory_idx_t = size_t;
@@ -54,7 +56,7 @@ namespace idk::vkn
 		struct DataPair
 		{
 			vk::UniqueBuffer buffer{};
-			std::basic_string<char,std::char_traits<char>,test_allocator<char>> data{};
+			std::basic_string<char,std::char_traits<char>,tallocator<char>> data{};
 			size_t offset{};
 			uint32_t alignment{};
 			uint32_t sz_alignment{};

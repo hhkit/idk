@@ -1715,7 +1715,7 @@ namespace idk::vkn
 		};
 		//Not necessary rn since we set the HostCoherent bit 
 		//This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
-		m_device->flushMappedMemoryRanges(memory_ranges, dispatcher);
+		//m_device->flushMappedMemoryRanges(memory_ranges, dispatcher);
 		m_device->unmapMemory(*device_memory);
 		return std::make_unique<vbo>(std::move(vertex_buffer), std::move(device_memory));
 	}
