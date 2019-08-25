@@ -50,7 +50,6 @@ namespace idk::win
 			}
 		}
 
-		retval = (int)msg.wParam;
 	}
 	int Windows::GetReturnVal()
 	{
@@ -98,6 +97,9 @@ namespace idk::win
 			break;
 		case WM_NCDESTROY:
 			Core::Shutdown();
+			break;
+		case WM_QUIT:
+			retval = (int)wParam;
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
