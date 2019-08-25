@@ -57,7 +57,14 @@ namespace idk
 				return serialize_json(cont);
 			}
 			else if (obj.type.is_enum_type())
+			{
 				return json(obj.to_enum_value().name());
+			}
+			else if (obj.type.is_template<std::variant>())
+			{
+				auto held = obj.get_variant_value();
+				return json::object({ held.type.name(), serialize_json(held) });
+			}
 			else
 				throw "unhandled case?";
 		}
@@ -123,32 +130,6 @@ namespace idk
 	template<>
 	string serialize_text(const reflect::dynamic& obj)
 	{
-		if (obj.type.count() == 0)
-		{
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : return serialize_text(obj.get<TYPE>())
-			switch (obj.type.hash())
-			{
-			SERIALIZE_CASE(int);
-			SERIALIZE_CASE(bool);
-			SERIALIZE_CASE(char);
-			SERIALIZE_CASE(int64_t);
-			SERIALIZE_CASE(uint64_t);
-			SERIALIZE_CASE(float);
-			SERIALIZE_CASE(double);
-			SERIALIZE_CASE(std::string);
-			SERIALIZE_CASE(Guid);
-			default: break;
-			}
-#undef SERIALIZE_CASE
-
-			if (obj.type.is_enum_type())
-				return serialize_text(obj.to_enum_value().name());
-			else if (obj.type.is_container())
-				return serialize_json(obj.to_container()).dump(2);
-			else
-				throw "unhandled case?";
-		}
-
 		return serialize_json(obj).dump(2);
 	}
 

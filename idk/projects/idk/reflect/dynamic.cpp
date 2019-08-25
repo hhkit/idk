@@ -83,6 +83,11 @@ namespace idk::reflect
 		return type._context->unpack(_ptr->get());
 	}
 
+	dynamic dynamic::get_variant_value() const
+	{
+		return type._context->get_variant_value(_ptr->get());
+	}
+
 
 
 	dynamic::property_iterator::property_iterator(const dynamic& obj, size_t index)

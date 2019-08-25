@@ -62,6 +62,7 @@ namespace idk::reflect::detail
 		virtual uni_container to_container(void* obj) const = 0;
 		virtual enum_value to_enum_value(void* obj) const = 0;
 		virtual vector<dynamic> unpack(void* obj) const = 0;
+		virtual dynamic get_variant_value(void* obj) const = 0;
 
 		template<typename... Ts>
 		dynamic construct(Ts&& ... args) const
@@ -190,6 +191,12 @@ namespace idk::reflect::detail
 				throw "not an enum!";
 		}
 
+		template<size_t... Is>
+		void unpack_helper(vector<dynamic>& vec, void* obj, std::index_sequence<Is...>) const
+		{
+			(vec.push_back(std::get<Is>(*static_cast<T*>(obj))), ...);
+		}
+
 		vector<dynamic> unpack(void* obj) const override
 		{
 			obj;
@@ -203,10 +210,33 @@ namespace idk::reflect::detail
 				throw "not a tuple!";
 		}
 
-		template<size_t... Is>
-		void unpack_helper(vector<dynamic>& vec, void* obj, std::index_sequence<Is...>) const
+		template<typename... Ts>
+		dynamic get_variant_value(variant<Ts...>& var) const
 		{
-			(vec.push_back(std::get<Is>(*static_cast<T*>(obj))), ...);
+#define VARIANT_INDEX(I) case I: return std::get<I>(var);
+#define VARIANT_CASE(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VARIANT_INDEX, __VA_ARGS__)) default: throw "Unhandled case?"; } }
+					 VARIANT_CASE(1, 0)
+				else VARIANT_CASE(2, 1, 0)
+				else VARIANT_CASE(3, 2, 1, 0)
+				else VARIANT_CASE(4, 3, 2, 1, 0)
+				else VARIANT_CASE(5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(7, 6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(8, 7, 6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+				else throw "Unhandled case?";
+#undef VISIT_INDEX
+#undef VARIANT_CASE
+		}
+
+		virtual dynamic get_variant_value(void* obj) const override
+		{
+			obj;
+			if constexpr (is_template_v<T, std::variant>)
+				return get_variant_value(*static_cast<T*>(obj));
+			else
+				throw "not a variant!";
 		}
 	};
 
