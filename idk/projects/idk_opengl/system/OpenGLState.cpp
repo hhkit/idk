@@ -61,11 +61,11 @@ namespace idk::ogl
 		for (auto& elem : object_buffer[curr_draw_buffer].mesh_render)
 		{
 			// bind shader
-			auto& material = s_cast<const OpenGLMaterial&>(*elem.material_instance.material);
+			auto& material = elem.material_instance.material.as<OpenGLMaterial>();
 			pipeline.PushProgram(material.GetShaderProgram());
 
 			// bind attribs
-			auto& mesh = s_cast<OpenGLMesh&>(*elem.mesh);
+			auto& mesh = elem.mesh.as<OpenGLMesh>();
 			mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 			// set uniforms
