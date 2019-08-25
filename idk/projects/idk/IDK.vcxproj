@@ -42,6 +42,7 @@
     <ClInclude Include="math\comparable.h" />
     <ClInclude Include="math\interp\Spline.h" />
     <ClInclude Include="math\matrix_decomposition.h" />
+    <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="res\ResourceMeta.h" />
@@ -143,7 +144,6 @@
     <ClCompile Include="file\DirectoryWatcher.cpp" />
     <ClCompile Include="file\FileSystem.cpp" />
     <ClCompile Include="file\FileSystemInternal.cpp" />
-    <ClCompile Include="math\color.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -172,8 +172,10 @@
     <None Include="ds\ranged_for.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
+    <None Include="math\color.inl" />
     <None Include="math\comparable.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="meta\tuple.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="scene\Scene.inl" />

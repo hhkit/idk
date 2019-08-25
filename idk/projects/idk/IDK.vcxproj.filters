@@ -369,6 +369,9 @@
     <ClInclude Include="gfx\vertex_descriptor.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="meta\tuple.h">
+      <Filter>meta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -437,9 +440,6 @@
     </ClCompile>
     <ClCompile Include="shape\aabb.cpp">
       <Filter>shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="math\color.cpp">
-      <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="scene\SceneFactory.cpp">
       <Filter>scene</Filter>
@@ -604,6 +604,12 @@
     </None>
     <None Include="event\Signal.inl">
       <Filter>event</Filter>
+    </None>
+    <None Include="meta\tuple.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="math\color.inl">
+      <Filter>math</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

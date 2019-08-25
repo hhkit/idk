@@ -40,12 +40,12 @@ namespace idk::math
 		vector   get_normalized() const;
 
 		// iteration
-		T*       begin();
-		T*       end();
-		const T* begin() const;
-		const T* end() const;
-		T*       data();
-		const T* data() const;
+		constexpr T*       begin() noexcept;
+		constexpr T*       end() noexcept;
+		constexpr const T* begin() const noexcept;
+		constexpr const T* end() const noexcept;
+		constexpr T*       data() noexcept;
+		constexpr const T* data() const noexcept;
 
 		// member functions
 		vector&  operator+=(const vector&);	
@@ -69,8 +69,8 @@ namespace idk::math
 		bool     operator!=(const vector&) const;
 
 		// accessors
-		T&       operator[](size_t i);
-		const T& operator[](size_t i) const;
+		constexpr T&       operator[](size_t i) noexcept;
+		constexpr const T& operator[](size_t i) const noexcept;
 
 	};
 
