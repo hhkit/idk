@@ -5,6 +5,35 @@
 namespace idk::vkn
 {
 
+	template<typename T>
+	struct test_allocator
+	{
+		using const_pointer = const T*;
+		using difference_type = ptrdiff_t;
+		using pointer = T *;
+		using size_type = size_t;
+		using value_type = T;
+
+		template<typename U>
+		struct rebind
+		{
+			using other = test_allocator<U>;
+		};
+		template<typename ...Args>
+		test_allocator(Args&& ...) noexcept {}
+
+		static 	T* allocate(size_t sz)
+		{
+			return new T[sz + 32] + 11;
+
+		}
+		//const test_allocator& allocator()const { return *this; }
+
+		static void deallocate(T* ptr, size_t)
+		{
+			delete[](ptr - 11);
+		}
+	};
 	struct UboManager
 	{
 		using memory_idx_t = size_t;
@@ -25,7 +54,7 @@ namespace idk::vkn
 		struct DataPair
 		{
 			vk::UniqueBuffer buffer{};
-			string data{};
+			std::basic_string<char,std::char_traits<char>,test_allocator<char>> data{};
 			size_t offset{};
 			uint32_t alignment{};
 			uint32_t sz_alignment{};

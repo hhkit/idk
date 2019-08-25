@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "UboManager.h"
 #include "BufferHelpers.h"
+#include <string>
 
 namespace idk::vkn
 {
-
 	UboManager::Memory::Memory(VulkanView& view, vk::Buffer& buffer, size_t capacity_) :capacity{ capacity_ }
 	{
 		auto req = view.Device()->getBufferMemoryRequirements(buffer, view.Dispatcher());
@@ -56,7 +56,7 @@ namespace idk::vkn
 		if (buffers.size() <= curr_buffer_idx)
 		{
 			auto&& [buffer, offset] = make_buffer();
-			string buf{};
+			decltype(DataPair::data) buf{};
 			buf.reserve(chunk_size);
 			auto& tmp = buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset });
 			tmp.alignment = offset_alignment();
@@ -80,13 +80,19 @@ namespace idk::vkn
 	inline uint32_t UboManager::size_alignment() { return view.BufferSizeAlignment(); }
 
 
+	uint32_t InitialOffset(const void* ptr, uint32_t alignment)
+	{
+		uint32_t mod = s_cast<uint32_t>((r_cast<intptr_t>(ptr) % alignment));
+		return (mod) ? alignment - mod : 0;
+	}
 	void UboManager::UpdateAllBuffers()
 	{
 		for (auto& [buffer_idx,memory_idx] : allocation_table)
 		{
 			auto& memory = memory_blocks[memory_idx].memory;
 			auto& buffer = buffers[buffer_idx];
-			hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data),buffer.data.size(),view.Dispatcher() );
+			auto initial_offset = InitialOffset(buffer.data.data(), _alignment);
+			hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data)+initial_offset,buffer.data.size()-initial_offset,view.Dispatcher() );
 		}
 	}
 
@@ -117,10 +123,9 @@ namespace idk::vkn
 	{
 		data.append(AlignmentOffset(), 0);
 	}
-
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) {
 		Align();
-		uint32_t result = s_cast<uint32_t>(data.size());
+		uint32_t result = s_cast<uint32_t>(data.size()) - InitialOffset(data.data(),alignment);
 		len = SizeAlignmentOffset(len, sz_alignment);
 		data.append(r_cast<const char*>(data_), len);
 		return result;
