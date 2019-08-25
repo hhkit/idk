@@ -345,6 +345,7 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="util\align.h" />
+    <ClInclude Include="math\comparable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -572,6 +573,7 @@
     </None>
     <None Include="event\Signal.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="math\comparable.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
