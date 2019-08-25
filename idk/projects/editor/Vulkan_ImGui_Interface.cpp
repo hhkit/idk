@@ -24,6 +24,14 @@ namespace idk
 			abort();
 	}
 
+	static void check_vk_result(vk::Result err)
+	{
+		if (err == vk::Result::eSuccess) return;
+		printf("VkResult %d\n", err);
+		if (err != vk::Result::eSuccess)
+			abort();
+	}
+
 	namespace edt {
 		VI_Interface::VI_Interface(vkn::VulkanState* v)
 			:vkObj{v}
@@ -89,7 +97,7 @@ namespace idk
 
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
-			io.DisplaySize = ImVec2(700,900);
+			io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
 
 			//Imgui Style
 			ImGui::StyleColorsClassic();
@@ -142,6 +150,8 @@ namespace idk
 
 		void VI_Interface::ImGuiFrameUpdate()
 		{
+			vkn::VulkanView& vknViews = vkObj->View();
+
 			bool& resize = vkObj->View().ImguiResize();
 			if (resize)
 			{
@@ -149,6 +159,10 @@ namespace idk
 				ImGui_ImplVulkan_SetMinImageCount(editorInit.edt_min_imageCount);
 				ImGuiRecreateSwapChain();
 				ImGuiRecreateCommandBuffer();
+
+				ImGuiIO& io = ImGui::GetIO();
+				io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
+
 			}
 
 			ImGuiFrameBegin();
@@ -269,8 +283,8 @@ namespace idk
 			info.pSwapchains = &*vknViews.Swapchain().swap_chain;
 			info.pImageIndices = &editorControls.edt_frameIndex;
 			//VkResult err = vkQueuePresentKHR(vknViews.GraphicsQueue(), &info);
-			vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
-			//check_vk_result(err);
+			vk::Result err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
+			check_vk_result(err);
 			editorControls.edt_semaphoreIndex = (editorControls.edt_semaphoreIndex + 1) % editorControls.edt_imageCount; // Now we can use the next set of semaphores
 
 		}
