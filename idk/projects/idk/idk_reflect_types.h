@@ -32,6 +32,7 @@ namespace idk::reflect
 		, quat
 		, mat3
 		, mat4
+		, color
 
 		, Handle<GameObject>
 		, Guid

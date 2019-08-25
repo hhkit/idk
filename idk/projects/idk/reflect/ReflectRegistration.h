@@ -3,7 +3,6 @@
 #include <reflect/reflect.h>
 #include <core/Core.h>
 #include <IncludeComponents.h>
-#include <idk.h>
 
 /* 
  * !!! NOTE !!!
@@ -57,6 +56,12 @@ REFLECT_END()
 REFLECT_BEGIN(idk::mat4, "mat4")
 REFLECT_CTOR(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float)
 REFLECT_VARS(intern[0], intern[1], intern[2], intern[3])
+REFLECT_END()
+
+REFLECT_BEGIN(idk::color, "color")
+REFLECT_CTOR(float, float, float, float)
+REFLECT_CTOR(float, float, float)
+REFLECT_VARS(r, g, b, a)
 REFLECT_END()
 
 /*==========================================================================
