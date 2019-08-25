@@ -39,7 +39,7 @@ namespace idk::vkn
 			memory_blocks.emplace_back(view, buffer, memory_chunk_size);
 		}
 		auto& memory = memory_blocks.back();
-		size_t offset = *memory.allocate(chunk_size);
+		uint32_t offset = s_cast<uint32_t>(*memory.allocate(chunk_size));
 		hlp::BindBufferMemory(*view.Device(), buffer, *memory.memory, offset, view.Dispatcher());
 		return offset;
 	}
@@ -58,7 +58,7 @@ namespace idk::vkn
 			auto&& [buffer, offset] = make_buffer();
 			string buf{};
 			buf.reserve(chunk_size);
-			buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset });
+			buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset }).alignment = alignment();
 			allocation_table.emplace(buffers.size() - 1,memory_blocks.size() - 1);
 		}
 		else if (!buffers[curr_buffer_idx].CanAdd(size))
@@ -70,6 +70,7 @@ namespace idk::vkn
 
 	UboManager::UboManager(VulkanView& view_) : view{view_}
 	{
+		_alignment = view.BufferAlignment();
 	}
 
 
@@ -99,7 +100,7 @@ namespace idk::vkn
 
 	size_t UboManager::DataPair::AlignmentOffset() const
 	{
-		return (data.size() % 16) ? 16 - (data.size() % 16) : 0;
+		return (data.size() % alignment) ? alignment - (data.size() % alignment) : 0;
 	}
 
 	void UboManager::DataPair::Align()

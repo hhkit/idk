@@ -182,6 +182,7 @@ namespace idk::vkn
 		// init info
 		vk::UniqueInstance               instance;
 		vk::PhysicalDevice               pdevice = {};
+		uint32_t                         buffer_alignment = {};
 		vk::UniqueDevice                 m_device;
 		QueueFamilyIndices               m_queue_family = {};
 		vk::Queue                        m_graphics_queue = {};

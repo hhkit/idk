@@ -13,6 +13,8 @@ namespace idk::vkn
 
 		UboManager(VulkanView& view);
 
+		uint32_t& alignment() { return _alignment; }
+
 		template<typename T>
 		std::pair<vk::Buffer, uint32_t> Add(const T& data);
 		void UpdateAllBuffers();
@@ -24,6 +26,7 @@ namespace idk::vkn
 			vk::UniqueBuffer buffer{};
 			string data{};
 			size_t offset{};
+			uint32_t alignment{};
 			DataPair() = default;
 			DataPair(DataPair&&) = default;
 			bool CanAdd(size_t len)const;
@@ -43,6 +46,7 @@ namespace idk::vkn
 			std::optional<size_t> allocate(size_t chunk);
 		};
 		VulkanView& view;
+		uint32_t                               _alignment = 0x10;
 		constexpr static uint32_t              chunk_size = 1 << 16;
 		size_t                                 memory_chunk_size = 1 << 20; //Replace this with the limit obtained from device.
 		//Maybe replace with allocator
