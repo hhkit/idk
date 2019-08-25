@@ -52,7 +52,7 @@ public:
 	virtual void Render();
 	~DebugRenderer()override;
 protected:
-	virtual void Init(const idk::pipeline_config& pipeline_config, const idk::uniform_info& uniform_info)=0;
+	virtual void Init(const idk::pipeline_config& pipeline_config)=0;
 	std::shared_ptr<debug_info> info;
 
 };

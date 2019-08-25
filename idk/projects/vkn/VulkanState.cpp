@@ -714,7 +714,7 @@ namespace idk::vkn
 	{
 		auto physical_devices = instance->enumeratePhysicalDevices(dispatcher);
 		pdevice = SelectDevice(physical_devices);
-		buffer_offset_alignment = pdevice.getProperties().limits.minUniformBufferOffsetAlignment;
+		buffer_offset_alignment = s_cast<decltype(buffer_offset_alignment )>(pdevice.getProperties().limits.minUniformBufferOffsetAlignment);
 		buffer_size_alignment = s_cast<decltype(buffer_size_alignment)>(pdevice.getProperties().limits.nonCoherentAtomSize);
 	}
 
@@ -1864,10 +1864,10 @@ namespace idk::vkn
 		}
 	}
 
-	vk::DescriptorSetLayout GetUniformLayout(VulkanPipeline& pipeline, uint32_t set, uint32_t binding)
+	vk::DescriptorSetLayout GetUniformLayout(VulkanPipeline& pipeline, uint32_t set)
 	{
-		auto itr = pipeline.uniform_layout.find(set);
-		assert(itr != pipeline.uniform_layout.end());
+		auto itr = pipeline.uniform_layouts.find(set);
+		assert(itr != pipeline.uniform_layouts.end());
 			//throw std::runtime_error("Received incorre")
 		return *itr->second;
 	}
@@ -1883,7 +1883,7 @@ namespace idk::vkn
 		DsBindingCount& collated_layouts = result.second;
 		for (auto& dc : draw_calls)
 		{
-			auto& layouts = dc.pipeline->uniform_layout;
+			auto& layouts = dc.pipeline->uniform_layouts;
 			//set, bindings
 			hash_table < uint32_t, vector<ProcessedDrawCalls::BindingInfo>> collated_bindings;
 			for (auto& uniform : dc.uniforms)
@@ -1909,37 +1909,43 @@ namespace idk::vkn
 		}
 		return result;
 	}
-	void PdcToCmdBuffer(const ProcessedDrawCalls& pdcs, vk::CommandBuffer& command_buffer, RenderState& rs,DescriptorSetLookup& dssm, VulkanView* view_)
+	void PdcToCmdBuffer(const ProcessedDrawCalls& pdcs, vk::CommandBuffer& command_buffer, RenderState& rs,DescriptorSetLookup& alloced_dsets, VulkanView* view_)
 	{
 		auto& m_device = view_->Device();
 		auto& dispatcher = view_->Dispatcher();
-		auto& dsms = dssm;
 		VulkanPipeline* prev_pipeline = nullptr;
+		//convert the processed draw calls into instructions
 		for (auto& pdc : pdcs.draw_calls)
 		{
 			auto& dc = *pdc.p_dc;
+			//Don't rebind the pipeline if it was already bound.
 			if (dc.pipeline != prev_pipeline)
 			{
 				dc.pipeline->Bind(command_buffer, *view_);
 				prev_pipeline = dc.pipeline;
 			}
-			dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
-			auto& layouts = dc.pipeline->uniform_layout;
+			//Obsolete for now, may be useful to move the uniform stuff into a clean line like this
+			//dc.pipeline->BindUniformDescriptions(command_buffer, *view_, dc.uniform_info);
+			auto& layouts = dc.pipeline->uniform_layouts;
 			for (auto& binding : pdc.bindings)
 			{
-				auto itr = layouts.find(binding.first);
-				if (itr != layouts.end())
+				auto set_index = binding.first;
+				//Get the descriptor set layout for the current set
+				auto layout_itr = layouts.find(set_index);
+				if (layout_itr != layouts.end())
 				{
-					auto dsm_itr = dsms.find(*itr->second);
-					if (dsm_itr != dsms.end())
+					//Find the allocated pool of descriptor sets that matches the descriptor set layout
+					auto ds_itr = alloced_dsets.find(*layout_itr->second);
+					if (ds_itr != alloced_dsets.end())
 					{
-						auto ds = dsm_itr->second.Get();
+						//Get a descriptor set from the allocated pool
+						auto ds = ds_itr->second.GetNext();
+						//Update the descriptor set
 						UpdateUniformDS(*m_device,ds,binding.second);
-						command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *dc.pipeline->pipelinelayout, binding.first, ds, nullptr, dispatcher);
+						command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *dc.pipeline->pipelinelayout, set_index, ds, nullptr, dispatcher);
 					}
 				}
 			}
-			//set, dss
 			for (auto& [first_binding, offset] : dc.vtx_binding)
 			{
 				command_buffer.bindVertexBuffers(first_binding, rs.Buffer(), offset, dispatcher);
@@ -1951,7 +1957,7 @@ namespace idk::vkn
 	void VulkanState::EndFrame()
 	{
 		auto& rs = view_->CurrRenderState();
-		auto& dispatcher = view_->Dispatcher();
+		//auto& dispatcher = view_->Dispatcher();
 		auto& command_buffer = rs.CommandBuffer();
 		auto& fo = m_swapchain.frame_objects[m_swapchain.curr_index];
 		vk::CommandBufferInheritanceInfo inherit_info{};

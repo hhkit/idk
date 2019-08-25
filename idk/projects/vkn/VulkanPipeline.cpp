@@ -309,9 +309,9 @@ namespace idk::vkn
 		};
 	}
 
-	vk::PipelineMultisampleStateCreateInfo VulkanPipeline::GetMultisampleInfo(const config_t& config) const
+	vk::PipelineMultisampleStateCreateInfo VulkanPipeline::GetMultisampleInfo([[maybe_unused]] const config_t& config) const
 	{
-
+		//TODO GFX PIPELINE: add multisample config into pipeline_config_t
 		return vk::PipelineMultisampleStateCreateInfo{
 			vk::PipelineMultisampleStateCreateFlags{}
 			,vk::SampleCountFlagBits::e1 //rasterizationSamples  
@@ -323,8 +323,9 @@ namespace idk::vkn
 		};
 	}
 
-	vector<vk::PipelineColorBlendAttachmentState> VulkanPipeline::GetColorBlendAttachments(const config_t& config) const
+	vector<vk::PipelineColorBlendAttachmentState> VulkanPipeline::GetColorBlendAttachments([[maybe_unused]] const config_t& config) const
 	{
+		//TODO GFX PIPELINE: add colorblending config into pipeline_config_t
 		return {
 			vk::PipelineColorBlendAttachmentState
 		{
@@ -367,18 +368,19 @@ namespace idk::vkn
 			}, std::move(colorBlendAttachments));
 	}
 
-	vector<vk::DynamicState> VulkanPipeline::GetDynamicStates(const config_t& config) const
+	vector<vk::DynamicState> VulkanPipeline::GetDynamicStates([[maybe_unused]] const config_t& config) const
 	{
+		//TODO GFX PIPELINE: add dynamic state config into pipeline_config_t
 		return{
 			vk::DynamicState::eViewport,
 			vk::DynamicState::eLineWidth
 		};
 	}
-
-	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo(const config_t& config) const
+	//TODO GFX PIPELINE: remove the config argument or add push constant configs into config
+	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo([[maybe_unused]] const config_t& config) const
 	{
 		vector<vk::DescriptorSetLayout> layouts;
-		std::transform(uniform_layout.begin(), uniform_layout.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
+		std::transform(uniform_layouts.begin(), uniform_layouts.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
 		return make_pair(vk::PipelineLayoutCreateInfo
 		{
 			vk::PipelineLayoutCreateFlags{}
@@ -418,20 +420,25 @@ namespace idk::vkn
 					,hlp::arr_count(bindings)
 					,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
 				};
-				uniform_layout[set_idx] = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
+				uniform_layouts[set_idx] = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
 			}
 		}
 	}
 
-	vk::UniqueRenderPass& VulkanPipeline::GetRenderpass(const config_t& config, VulkanView& vulkan)
+	vk::UniqueRenderPass& VulkanPipeline::GetRenderpass([[maybe_unused]]const config_t& config, [[maybe_unused]] VulkanView& vulkan)
 	{
+
+		//TODO GFX PIPELINE:  add renderpass id into pipeline_config_t
+		//TODO GFX PIPELINE:  get renderpass using renderpass id in pipeline_config_t
 		return vulkan.Renderpass();
 	}
+	//may be deprecated
 
-	vector<vk::DescriptorSet> VulkanPipeline::GetUniformDescriptors(Vulkan_t& vulkan)
+	vector<vk::DescriptorSet> VulkanPipeline::GetUniformDescriptors([[maybe_unused]]Vulkan_t& vulkan)
 	{
 		return {};
 	}
 
-	uint32_t VulkanPipeline::AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform) { return 0; }
+	//may be deprecated
+	uint32_t VulkanPipeline::AllocUniformBuffers([[maybe_unused]]Vulkan_t& vulkan, [[maybe_unused]] const uniform_info& uniform) { return 0; }
 }

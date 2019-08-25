@@ -75,7 +75,7 @@ namespace idk::vkn
 		return s_cast<uint32_t>(sets.size());
 	}
 
-	vk::DescriptorSet& DescriptorSets::Get()
+	vk::DescriptorSet& DescriptorSets::GetNext()
 	{
 		return sets[curr_index++];
 	}

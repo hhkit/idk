@@ -14,7 +14,7 @@ namespace idk::vkn
 		vk::UniquePipelineLayout pipelinelayout{};
 		vk::UniquePipeline       pipeline{};
 
-	   hash_table<uint32_t,vk::UniqueDescriptorSetLayout> uniform_layout{};
+	   hash_table<uint32_t,vk::UniqueDescriptorSetLayout> uniform_layouts{};
 
 	
 		void Create(config_t const& config, Vulkan_t& vulkan);

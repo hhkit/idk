@@ -11,7 +11,7 @@ namespace idk::vkn
 		VulkanDebugRenderer(VulkanState& vulkan);
 		~VulkanDebugRenderer() override;
 
-		void Init( const pipeline_config& pipeline_config, const uniform_info& uniform_info) override;
+		void Init( const pipeline_config& pipeline_config) override;
 		void Shutdown() override;
 		void Render() override;
 	private:

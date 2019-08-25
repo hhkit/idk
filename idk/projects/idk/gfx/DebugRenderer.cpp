@@ -61,8 +61,7 @@ namespace idk
 				}
 			});
 
-		idk::uniform_info uniform_info;
-		Init(config, uniform_info);
+		Init(config);
 
 
 	}

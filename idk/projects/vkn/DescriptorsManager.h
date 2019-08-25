@@ -13,7 +13,7 @@ struct DescriptorSets
 
 	vector<vk::DescriptorSet>& operator=(vector<vk::DescriptorSet>&& rhs);
 	vector<vk::DescriptorSet>& operator=(const vector<vk::DescriptorSet>& rhs);
-	vk::DescriptorSet& Get();
+	vk::DescriptorSet& GetNext();
 };
 using DescriptorSetLookup = hash_table<vk::DescriptorSetLayout, DescriptorSets>;
 struct DescriptorsManager

@@ -69,7 +69,7 @@ namespace idk::vkn
 
 
 
-	void VulkanDebugRenderer::Init(const idk::pipeline_config& config, const idk::uniform_info& uniform_info)
+	void VulkanDebugRenderer::Init(const idk::pipeline_config& config)//, const idk::uniform_info& uniform_info)
 	{
 		auto& system = *vulkan_;
 		impl = std::make_unique<pimpl>(system.View());
@@ -130,7 +130,6 @@ namespace idk::vkn
 
 	void VulkanDebugRenderer::Render()
 	{
-		auto& cmd_buffer = *impl->detail.CurrCommandbuffer();
 		auto& detail   = impl->detail  ;
 		auto& pipeline = impl->pipeline;
 		auto& uniforms = impl->uniforms;
