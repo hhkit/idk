@@ -2047,7 +2047,7 @@ namespace idk::vkn
 				,1
 				,&clearcolor
 			};
-vk::CommandBufferBeginInfo begin_info
+			vk::CommandBufferBeginInfo begin_info
 			{
 				vk::CommandBufferUsageFlags{}
 				,nullptr//&inherit_info
@@ -2097,23 +2097,38 @@ vk::CommandBufferBeginInfo begin_info
 			,&imageIndex
 			,nullptr
 		};
+		try
+		{
+			rv.result = m_present_queue.presentKHR(presentInfo, dispatcher);
 		if (
-			m_present_queue.presentKHR(presentInfo, dispatcher)
+			rv.result
 			!= vk::Result::eSuccess || m_ScreenResized)
 		{
 			if (m_ScreenResized)
 				rv.result = vk::Result::eSuboptimalKHR;
-			switch (rv.result)
-			{
-			case vk::Result::eErrorOutOfDateKHR:
-			case vk::Result::eSuboptimalKHR:
-				m_ScreenResized = false;
-				RecreateSwapChain();
-				break;
-			default:
-				throw std::runtime_error("Failed to present");
-				break;
-			}
+		}
+		}
+		catch (const vk::OutOfDateKHRError& err)
+		{
+			rv.result = vk::Result::eErrorOutOfDateKHR;
+		}catch (const vk::Error& err)
+		{
+			hlp::cerr() << "Error presenting: " << err.what() << "\n";
+			return;
+		}
+
+		switch (rv.result)
+		{
+		case vk::Result::eErrorOutOfDateKHR:
+		case vk::Result::eSuboptimalKHR:
+			m_ScreenResized = false;
+			RecreateSwapChain();
+			break;
+		case vk::Result::eSuccess:
+			break;
+		default:
+			throw std::runtime_error("Failed to present");
+			break;
 		}
 		;
 		NextFrame();
