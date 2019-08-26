@@ -1,4 +1,7 @@
 #include "pch.h"
+
+#include <iostream>//std::cerr
+
 #include "Vulkan_ImGui_Interface.h"
 
 //#include <vulkan/VulkanWin32GraphicsSystem.h>
@@ -300,16 +303,24 @@ namespace idk
 			info.swapchainCount = 1;
 			info.pSwapchains = &*vknViews.Swapchain().swap_chain;
 			info.pImageIndices = &editorControls.edt_frameIndex;
+			try
+			{
 
-			try {
-				err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
-				check_vk_result(err);
-			}
-			catch (const vk::OutOfDateKHRError& e) {
+				try {
+					err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
+					check_vk_result(err);
+				}
+				catch (const vk::OutOfDateKHRError& e) {
 				
-				vkObj->RecreateSwapChain();
-				ImGuiRecreateSwapChain();
-				ImGuiRecreateCommandBuffer();
+					vkObj->RecreateSwapChain();
+					ImGuiRecreateSwapChain();
+					ImGuiRecreateCommandBuffer();
+				}
+			}
+			catch (const vk::Error& err)
+			{
+				std::cerr << "Err imgui failed to present: " << err.what() << std::endl;
+				return;
 			}
 
 			//Next frame

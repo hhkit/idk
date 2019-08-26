@@ -2104,6 +2104,9 @@ namespace idk::vkn
 		};
 		try
 		{
+
+		try
+		{
 			rv.result = m_present_queue.presentKHR(presentInfo, dispatcher);
 		if (
 			rv.result
@@ -2116,12 +2119,7 @@ namespace idk::vkn
 		catch (const vk::OutOfDateKHRError& )
 		{
 			rv.result = vk::Result::eErrorOutOfDateKHR;
-		}catch (const vk::Error& err)
-		{
-			hlp::cerr() << "Error presenting: " << err.what() << "\n";
-			return;
 		}
-
 		switch (rv.result)
 		{
 		case vk::Result::eErrorOutOfDateKHR:
@@ -2135,6 +2133,13 @@ namespace idk::vkn
 			throw std::runtime_error("Failed to present");
 			break;
 		}
+		}
+		catch (const vk::Error& err)
+		{
+			hlp::cerr() << "Error presenting: " << err.what() << "\n";
+			return;
+		}
+
 		;
 		NextFrame();
 		//m_present_queue.waitIdle(dispatcher);
