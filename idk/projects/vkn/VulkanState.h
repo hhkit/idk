@@ -247,6 +247,9 @@ namespace idk::vkn
 		void createGraphicsPipeline();
 
 		void createFramebuffers();
+		void createTextureImage();
+		void createTextureImage(const string& imgPath);
+		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
 
 		void createCommandPool();
 		void createVertexBuffers();

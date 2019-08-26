@@ -14,6 +14,8 @@
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
 
+#include <stb/stb_image.h>
+
 
 namespace idk
 {
@@ -1143,6 +1145,25 @@ namespace idk::vkn
 			};
 			m_swapchain.frame_buffers.emplace_back(m_device->createFramebufferUnique(framebufferInfo, nullptr, dispatcher));
 		}
+	}
+
+	void VulkanState::createTextureImage()
+	{
+		//int texWidth, texHeight, texChannels;
+		//stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		//vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
+
+		//if (!pixels) {
+		//	throw std::runtime_error("failed to load texture image!");
+		//}
+
+		//vk::Buffer stagingBuffer;
+		//vk::DeviceMemory stagingBufferMemory;
+		
+	}
+
+	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
+	{
 	}
 
 	void VulkanState::createCommandPool()
