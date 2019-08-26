@@ -28,6 +28,20 @@ namespace idk::reflect
 		}
 	};
 
+	struct dynamic::voidptr : dynamic::base
+	{
+		void* obj;
+
+		voidptr(void* obj)
+			: obj{ obj }
+		{}
+
+		void* get() const override
+		{
+			return obj;
+		}
+	};
+
 	class dynamic::property_iterator
 	{
 	public:

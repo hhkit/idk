@@ -182,6 +182,7 @@ namespace idk::reflect
 	private:
 		struct base;
 		template<typename T> struct derived;
+		struct voidptr;
 
 		shared_ptr<base> _ptr;
 		dynamic(reflect::type type, void* obj);
