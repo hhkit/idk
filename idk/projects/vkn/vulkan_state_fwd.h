@@ -8,4 +8,5 @@ namespace idk::vkn
 	class VulkanState;
 	struct FrameObjects;
 	class VulkanView;
+	struct window_info;
 }
