@@ -47,10 +47,12 @@ namespace idk::vkn
 
 	struct QueueFamilyIndices
 	{
+		uint32_t					 queueFamilyIndexCount;
 		std::optional<uint32_t>      graphics_family;
 		std::optional<uint32_t>      present_family;
 		std::optional<uint32_t>      transfer_family;
 		std::unordered_set<uint32_t> unique_queues()const;
+		uint32_t*					 pQueueFamilyIndices;
 		bool isComplete()const;
 	};
 	struct SwapChainSupportDetails {
@@ -61,9 +63,11 @@ namespace idk::vkn
 	struct SwapChainInfo
 	{
 		uint32_t curr_index{};
-		vk::UniqueSwapchainKHR           swap_chain;
-		vk::Format format;
-		vk::Extent2D extent;
+		vk::UniqueSwapchainKHR             swap_chain;
+		vk::PresentModeKHR				   present_mode;
+		vk::SurfaceFormatKHR			   surface_format;
+		//vk::Format                         format;
+		vk::Extent2D                       extent;
 		std::vector<vk::Image            > images;
 		std::vector<vk::UniqueImageView  > image_views;
 		std::vector<vk::UniqueFramebuffer> frame_buffers;
@@ -197,6 +201,7 @@ namespace idk::vkn
 
 		window_info m_window;
 		bool m_ScreenResized = false;
+		bool m_ScreenResizedForImGui = false;
 		uint32_t WIDTH = 1280, HEIGHT = 720;
 		uint32_t current_frame = 0, max_frames_in_flight = 2;
 		vk::UniqueSurfaceKHR                 m_surface;
@@ -209,6 +214,8 @@ namespace idk::vkn
 		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
 		std::vector<PresentationSignals>     m_pres_signals;
 		SwapChainInfo                        m_swapchain;
+
+
 
 		vk::UniqueRenderPass                 m_renderpass;
 		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;

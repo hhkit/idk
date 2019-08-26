@@ -23,7 +23,7 @@ namespace idk
 }
 
 //Uncomment to disable validation
-//#define WX_VAL_VULK
+#define WX_VAL_VULK
 
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
@@ -807,7 +807,9 @@ namespace idk::vkn
 
 		m_swapchain.images = m_device->getSwapchainImagesKHR(*m_swapchain.swap_chain, dispatcher);
 		m_swapchain.extent = extent;
-		m_swapchain.format = surfaceFormat.format;
+		//m_swapchain.format = surfaceFormat.format;
+		m_swapchain.surface_format = surfaceFormat;
+		m_swapchain.present_mode = presentMode;
 
 	}
 
@@ -833,7 +835,7 @@ namespace idk::vkn
 				vk::ImageViewCreateFlags{},
 				image,
 				vk::ImageViewType::e2D,
-				m_swapchain.format,
+				m_swapchain.surface_format.format,
 				vk::ComponentMapping{},
 				vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
 			};
@@ -855,7 +857,7 @@ namespace idk::vkn
 		vk::AttachmentDescription colorAttachment
 		{
 			vk::AttachmentDescriptionFlags{}
-			,m_swapchain.format
+			,m_swapchain.surface_format.format
 			,vk::SampleCountFlagBits::e1
 			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eStore
@@ -1603,6 +1605,7 @@ namespace idk::vkn
 	{
 		m_window.size = ivec2{ size };
 		m_ScreenResized = true;
+		m_ScreenResizedForImGui = true;
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanState::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
@@ -2124,6 +2127,7 @@ vk::CommandBufferBeginInfo begin_info
 	void VulkanState::OnResize()
 	{
 		m_ScreenResized = true;
+		m_ScreenResizedForImGui = true;
 	}
 
 	void VulkanState::Cleanup()

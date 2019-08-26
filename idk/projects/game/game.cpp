@@ -8,6 +8,7 @@
 #include <idk_opengl/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
+#include <editor/IDE.h>
 
 enum class GraphicsLibrary
 {
@@ -37,6 +38,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			auto& gfx_sys = c.AddSystem<vkn::VulkanWin32GraphicsSystem>(wind);
 			c.AddSystem<vkn::VulkanDebugRenderer>(gfx_sys.Instance());
+			c.AddSystem<IDE>(gfx_sys.Instance());
 		}
 			break;
 		case GraphicsLibrary::OpenGL:

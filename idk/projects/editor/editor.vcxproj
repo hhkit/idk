@@ -112,6 +112,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>editorstatic.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -148,6 +149,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>editorstaticD.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -59,10 +59,18 @@ namespace idk
 			return ivec2{};
 		return ivec2((rect.right - rect.left), (rect.bottom - rect.top));
 	}
+	void Windows::PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func)
+	{
+		winProcList.push_back(func); 
+	}
+
 	LRESULT Windows::WndProc(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (_hWnd != hWnd)
 			return DefWindowProc(_hWnd, message, wParam, lParam);
+
+		for (auto& elem : winProcList)
+			elem(_hWnd, message, wParam, lParam);
 
 		switch (message)
 		{
