@@ -383,6 +383,15 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="res\ResourceFile.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceFile_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ExtensionLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
