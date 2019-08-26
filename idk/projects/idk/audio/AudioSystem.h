@@ -58,7 +58,11 @@ namespace idk
 		~AudioSystem();//Destructor
 
 		virtual void Init() override; //Initializes the FMOD Core System
-		void Update();
+		void Update(span<AudioSource>, span<AudioListener>);
+		void UpdateEngineOnly(); //Remove after test!
+
+		void Set3DListenerAttributes(const vec3& position, const vec3& velocity, const vec3& forwardVec, const vec3& upVec); //forwardVec and upVec has to be unit vectors!
+
 		virtual void Shutdown() override;
 
 		//Optional. Must be called before Init()
