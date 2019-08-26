@@ -2,6 +2,7 @@
 #include <ds/range.h>
 #include <ds/zip.h>
 #include "matrix_transforms.h"
+#include <idk.h>
 
 namespace idk
 {

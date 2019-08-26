@@ -11,4 +11,5 @@
 #include "framework.h"
 #include <idk.h>
 #include <core/Core.h>
+#include <editor/Vulkan_ImGui_Interface.h>
 #endif //PCH_H

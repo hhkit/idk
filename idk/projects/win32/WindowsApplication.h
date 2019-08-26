@@ -6,6 +6,8 @@
 #include <idk.h>
 #include <app/Application.h>
 
+
+
 #define MAX_LOADSTRING 100
 
 // Forward declarations of functions included in this code module:
@@ -24,6 +26,7 @@ namespace idk::win
 		void PollEvents() override;
 		int GetReturnVal();
 		void Init() override {}
+		ivec2 GetScreenSize()const;
 		vec2 GetMouseScreenPos() override { return vec2{}; }
 		vec2 GetMouseScreenDel() override { return vec2{}; }
 		bool GetKeyDown(Key) override;
@@ -35,6 +38,7 @@ namespace idk::win
 		bool SetScreenSize(ivec2) override { return false; }
 		void SwapBuffers() override {}
 		void Shutdown() override {}
+		void PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func);
 
 		HINSTANCE GetInstance();
 		HWND      GetWindowHandle();
@@ -53,6 +57,8 @@ namespace idk::win
 		LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
+
+		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
 	};
 }
 

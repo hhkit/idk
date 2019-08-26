@@ -35,10 +35,16 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="gfx\Camera.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
+    <ClInclude Include="gfx\GfxDbgTest.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\RenderObject.h" />
     <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
+    <ClInclude Include="gfx\buffer_desc.h" />
+    <ClInclude Include="gfx\DebugRenderer.h" />
+    <ClInclude Include="gfx\debug_vtx_layout.h" />
+    <ClInclude Include="gfx\pipeline_config.h" />
+    <ClInclude Include="gfx\uniform_info.h" />
     <ClInclude Include="gfx\Material.h" />
     <ClInclude Include="math\comparable.h" />
     <ClInclude Include="math\euler_angles.h" />
@@ -48,6 +54,9 @@
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="res\ExtensionLoader.h" />
+    <ClInclude Include="res\ResourceFile.h" />
+    <ClInclude Include="res\ResourceFile_detail.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -65,6 +74,7 @@
     <ClInclude Include="file\DirectoryWatcher.h" />
     <ClInclude Include="file\FileSystem.h" />
     <ClInclude Include="file\FileSystemInternal.h" />
+    <ClInclude Include="gfx\gfx_data.h" />
     <ClInclude Include="gfx\GraphicsSystem.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
@@ -127,6 +137,9 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\GfxDbgTest.cpp" />
+    <ClCompile Include="gfx\buffer_desc.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
     <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />

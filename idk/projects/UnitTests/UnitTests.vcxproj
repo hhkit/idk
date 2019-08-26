@@ -48,6 +48,7 @@
     <ClInclude Include="pch.h" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />
+    <ClCompile Include="TestEditorCommands.cpp" />
     <ClCompile Include="TestSmallString.cpp" />
     <ClCompile Include="TestFileSystem.cpp" />
     <ClCompile Include="TestReflect.cpp" />

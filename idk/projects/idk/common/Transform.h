@@ -13,6 +13,9 @@ namespace idk
 		quat rotation;
 		vec3 position;
 
+		vec3 Forward() const;
+		vec3 Up() const;
+
 		mat4 LocalMatrix() const;
 		mat4 GlobalMatrix() const;
 

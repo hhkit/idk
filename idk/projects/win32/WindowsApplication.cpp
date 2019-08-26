@@ -55,6 +55,18 @@ namespace idk::win
 	{
 		return retval;
 	}
+	ivec2 Windows::GetScreenSize() const
+	{
+		RECT rect;
+		if (!GetClientRect(hWnd, &rect))
+			return ivec2{};
+		return ivec2((rect.right - rect.left), (rect.bottom - rect.top));
+	}
+	void Windows::PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func)
+	{
+		winProcList.push_back(func); 
+	}
+
 	bool Windows::GetKeyDown(Key key)
 	{
 		return _input_manager->GetKeyDown(static_cast<int>(key));
@@ -75,6 +87,9 @@ namespace idk::win
 	{
 		if (_hWnd != hWnd)
 			return DefWindowProc(_hWnd, message, wParam, lParam);
+
+		for (auto& elem : winProcList)
+			elem(_hWnd, message, wParam, lParam);
 
 		switch (message)
 		{
