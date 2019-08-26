@@ -44,6 +44,7 @@
     <ClInclude Include="math\euler_angles.h" />
     <ClInclude Include="math\interp\Spline.h" />
     <ClInclude Include="math\matrix_decomposition.h" />
+    <ClInclude Include="math\random.h" />
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
@@ -130,6 +131,7 @@
     <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
+    <ClCompile Include="math\random.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />

@@ -76,7 +76,7 @@ namespace idk
 		json j;
 		vector<json*> stack{ &j };
 
-		static auto f = [](auto&& k, auto&& arg, vector<json*>& stack)
+		constexpr static auto f = [](auto&& k, auto&& arg, vector<json*>& stack)
 		{
 			using T = std::decay_t<decltype(arg)>;
 

@@ -383,6 +383,9 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="math\random.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -498,6 +501,9 @@
       <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="math\euler_angles.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\random.cpp">
       <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
