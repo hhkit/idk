@@ -12,7 +12,7 @@ namespace idk {
 			vk::UniqueCommandPool				edt_cPool{};
 			vk::UniqueCommandBuffer				edt_cBuffer{};
 			vk::UniqueFence						edt_fence{};
-			vk::UniqueImage						edt_backbuffer{};
+			vk::Image						    edt_backbuffer{};
 			vk::ImageView					    edt_backbufferView{};
 			vk::UniqueFramebuffer				edt_framebuffer{};
 		};
