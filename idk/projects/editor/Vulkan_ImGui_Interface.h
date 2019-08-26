@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.hpp>
 
-
 namespace idk {
 	namespace vkn {
 		class VulkanState;
@@ -52,7 +51,8 @@ namespace idk {
 			struct EditorParameter
 			{
 				//ImGui
-				bool								demoWindow{ true };
+				bool								im_demoWindow{ true };
+				vec4                                im_clearColor{};
 
 				//Vulkan
 				vk::UniqueRenderPass				edt_renderPass{};

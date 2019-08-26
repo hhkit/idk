@@ -2,6 +2,7 @@
 #include "Vulkan_ImGui_Interface.h"
 
 //#include <vulkan/VulkanWin32GraphicsSystem.h>
+#include <win32/WindowsApplication.h>
 
 //Imgui
 #include <vkn/VulkanState.h>
@@ -39,7 +40,6 @@ namespace idk
 
 		void VI_Interface::Init()
 		{
-
 			//Creation
 			vkn::VulkanView& vknViews = vkObj->View();
 
@@ -97,14 +97,18 @@ namespace idk
 
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
-			io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
 
 			//Imgui Style
 			ImGui::StyleColorsClassic();
 
 			//Platform/renderer bindings
 			ImGui_ImplWin32_Init(vknViews.GetWindowsInfo().wnd);
+
+			Core::GetSystem<Windows>().PushWinProcEvent(ImGui_ImplWin32_WndProcHandler);
+
 			ImGui_ImplVulkan_Init(&info, *(vknViews.Renderpass()));
+
+			editorControls.im_clearColor = vec4{0,0,0,1};
 
 			//Upload fonts leave it to later
 			// Upload Fonts
@@ -172,20 +176,21 @@ namespace idk
 
 			ImGuiFrameBegin();
 
-			if (editorControls.demoWindow)
-				ImGui::ShowDemoWindow(&editorControls.demoWindow);
-
 			//////////////////////////IMGUI DATA HANDLING//////////////////////
+			if (editorControls.im_demoWindow)
+				ImGui::ShowDemoWindow(&editorControls.im_demoWindow);
+
 			static float f = 0.0f;
 			static int counter = 0;
+
 
 			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
 			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-			ImGui::Checkbox("Demo Window", &editorControls.demoWindow);      // Edit bools storing our window open/close state
+			ImGui::Checkbox("Demo Window", &editorControls.im_demoWindow);      // Edit bools storing our window open/close state
 
 			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			//ImGui::ColorEdit3("clear color", (float*)& clear_color); // Edit 3 floats representing a color
+			ImGui::ColorEdit3("clear color", (float*)& editorControls.im_clearColor); // Edit 3 floats representing a color
 
 			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
 				counter++;
@@ -202,44 +207,44 @@ namespace idk
 		void VI_Interface::ImGuiFrameEnd()
 		{
 			ImGui::Render();
+			memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
 			ImGuiFrameRender();
 			ImGuiFramePresent();
 		}
 
 		void VI_Interface::ImGuiFrameRender()
 		{
+			//Vulk interface params
 			vkn::VulkanView& vknViews = vkObj->View();
+			
+			//To get result of certain vulk operation
+			vk::Result err;
 
+
+			//Retrieving the semaphore info for the current imgui frame 
 			vk::Semaphore image_acquired_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_imageAvailable;
 			vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
 			
 			auto result = vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
 			editorControls.edt_frameIndex = result.value;
-			//err = vkAcquireNextImageKHR(g_Device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &wd->FrameIndex);
-			//check_vk_result(err);
 
 			EditorFrame* fd = &(editorControls.edt_frames[editorControls.edt_frameIndex]);
 			{
-				//err = vkWaitForFences(g_Device, 1, &fd->Fence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
-				//check_vk_result(err);
-				vknViews.Device()->waitForFences(1, &*fd->edt_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
-
-				//err = vkResetFences(g_Device, 1, &fd->Fence);
-				//check_vk_result(err);
-				vknViews.Device()->resetFences(1, &*fd->edt_fence, vknViews.Dispatcher());
-
+				err = vknViews.Device()->waitForFences(1, &*fd->edt_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
+				check_vk_result(err);
+				
+				err = vknViews.Device()->resetFences(1, &*fd->edt_fence, vknViews.Dispatcher());
+				check_vk_result(err);
 			}
+			//Reset command pool for imgui's own cPool
 			{
-				//err = vkResetCommandPool(g_Device, fd->CommandPool, 0);
-				//check_vk_result(err);
 				vknViews.Device()->resetCommandPool(*fd->edt_cPool,vk::CommandPoolResetFlags::Flags(),vknViews.Dispatcher());
+				
 				vk::CommandBufferBeginInfo info = {};
-				//info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 				info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-				//err = vkBeginCommandBuffer(fd->CommandBuffer, &info);
-				//check_vk_result(err);
 				fd->edt_cBuffer->begin(info, vknViews.Dispatcher());
 			}
+			//Begin renderpass for imgui cbuffer
 			{
 				vk::RenderPassBeginInfo info{};
 				info.renderPass = *editorControls.edt_renderPass;
@@ -248,7 +253,6 @@ namespace idk
 				info.renderArea.extent.height = vknViews.Swapchain().extent.height;
 				info.clearValueCount = 1;
 				info.pClearValues = &editorControls.edt_clearValue;
-				//vkCmdBeginRenderPass(*fd->edt_cBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 				fd->edt_cBuffer->beginRenderPass(info,vk::SubpassContents::eInline,vknViews.Dispatcher());
 			}
 
@@ -256,7 +260,6 @@ namespace idk
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *fd->edt_cBuffer);
 
 			// Submit command buffer
-			//vkCmdEndRenderPass(fd->CommandBuffer);
 			fd->edt_cBuffer->endRenderPass(vknViews.Dispatcher());
 			{
 				vk::PipelineStageFlags wait_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
@@ -269,20 +272,23 @@ namespace idk
 				info.signalSemaphoreCount = 1;
 				info.pSignalSemaphores = &render_complete_semaphore;
 
-				//err = vkEndCommandBuffer(fd->CommandBuffer);
-				//check_vk_result(err);
 				fd->edt_cBuffer->end(vknViews.Dispatcher());
 				
-				//err = vkQueueSubmit(g_Queue, 1, &info, fd->Fence);
-				vknViews.GraphicsQueue().submit(1,&info,*fd->edt_fence,vknViews.Dispatcher());
-				//check_vk_result(err);
+				//Submit to queue
+				err = vknViews.GraphicsQueue().submit(1,&info,*fd->edt_fence,vknViews.Dispatcher());
+				check_vk_result(err);
 			}
 		}
 
 		void VI_Interface::ImGuiFramePresent()
 		{
+			//Vulk interface params
 			vkn::VulkanView& vknViews = vkObj->View();
 
+			//To get result of certain vulk operation
+			vk::Result err;
+
+			//Fencing semophore after rendering is completed
 			vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
 			vk::PresentInfoKHR info = {};
 			info.waitSemaphoreCount = 1;
@@ -290,9 +296,10 @@ namespace idk
 			info.swapchainCount = 1;
 			info.pSwapchains = &*vknViews.Swapchain().swap_chain;
 			info.pImageIndices = &editorControls.edt_frameIndex;
-			//VkResult err = vkQueuePresentKHR(vknViews.GraphicsQueue(), &info);
-			vk::Result err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
+
+			err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
 			check_vk_result(err);
+
 			editorControls.edt_semaphoreIndex = (editorControls.edt_semaphoreIndex + 1) % editorControls.edt_imageCount; // Now we can use the next set of semaphores
 
 		}
