@@ -16,6 +16,24 @@ namespace idk
 		_components.emplace_back(comph);
 		return comph;
 	}
+	GenericHandle GameObject::GetComponent(reflect::type type)
+	{
+		auto tid = GameState::GetGameState().GetTypeID(type);
+
+		for (auto& elem : _components)
+			if (elem.type == tid)
+				return elem;
+
+		return GenericHandle{};
+	}
+	GenericHandle GameObject::GetComponent(string_view sv)
+	{
+		return GetComponent(reflect::get_type(sv));
+	}
+	void GameObject::RemoveComponent(GenericHandle h)
+	{
+		GameState::GetGameState().DestroyObject(h);
+	}
 	span<GenericHandle> GameObject::GetComponents()
 	{
 		return span<GenericHandle>(_components.begin()._Ptr, _components.end()._Ptr);
