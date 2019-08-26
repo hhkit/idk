@@ -6,6 +6,7 @@ namespace idk
 {
 	class ExtensionLoader
 	{
+	public:
 		virtual ResourceFile Create(string_view filename) = 0;
 		virtual ~ExtensionLoader() = default;
 	};
