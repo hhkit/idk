@@ -148,6 +148,10 @@ namespace idk
 
 		void VI_Interface::Shutdown()
 		{
+			ImGuiCleanUpSwapChain();
+
+			editorInit.edt_pipeCache.reset();
+
 			ImGui_ImplWin32_Shutdown();
 			ImGui::DestroyContext();
 		}
@@ -428,6 +432,7 @@ namespace idk
 		void VI_Interface::ImGuiCleanUpSwapChain()
 		{
 			editorControls.edt_frames.clear();
+			editorControls.edt_frameSemophores.clear();
 			editorControls.edt_renderPass.reset();
 		}
 	};
