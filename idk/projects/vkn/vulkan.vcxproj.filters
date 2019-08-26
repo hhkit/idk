@@ -84,12 +84,14 @@
     <ClCompile Include="UboManager.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp">
       <Filter>descriptor_sets</Filter>
     </ClCompile>
     <ClCompile Include="DescriptorsManager.cpp">
       <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_call.cpp">
+      <Filter>render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

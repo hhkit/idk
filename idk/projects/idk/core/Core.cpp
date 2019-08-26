@@ -4,6 +4,8 @@
 #include <IncludeComponents.h>
 #include <res/ResourceManager.h>
 
+#include <gfx/GfxDbgTest.h>
+
 namespace idk
 {
 	seconds Core::GetDT()
@@ -64,24 +66,8 @@ namespace idk
 			while (_running)
 			{
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
-				auto &dbg_renderer = Core::GetSystem<DebugRenderer>();
-				if (&dbg_renderer)
-				{
-					int max_count = 10;
-					for (int i = 0; i < max_count; ++i)
-					{
-						float chunk = 2.0f / max_count;
-						dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ -1.0f+chunk*i,0,0 }, vec3{ chunk,chunk,chunk}, vec3{ 0,0,1 }, rad{ pi *chunk*i }, vec4{ 0,1,0,1 });
-
-					}
-					//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ 0.2f,0.4f,0 }, vec3{ 0.2f,0.2f,1 }, vec3{ 0,0,1 }, rad{ pi / 6 }, vec4{ 0,1,0,1 });
-					//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ 0.1f,0,0 }, vec3{ 1,1,1 }, vec3{ 0,0,1 }, rad{ pi / 2 }, vec4{ 0,1,0,1 });
-					//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ 0.3f,-0.3f,0 }, vec3{ 1,1,1 }, vec3{ 0,0,1 }, rad{ pi / 5 }, vec4{ 0,1,0,1 });
-					//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ -0.3f,0.2f,0 }, vec3{ 1,1,1 }, vec3{ 0,0,1 }, rad{ pi / 4 }, vec4{ 0,1,0,1 });
-					dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ -0.3f,0,0 }, vec3{ 1.0f,0.5f,1.0f }, vec3{ 0,0,1 }, rad{ pi/3 }, vec4{ 0,1,0,1 });
-					dbg_renderer.Render();
-				}
 				//Core::GetSystem<GraphicsSystem>().EndFrame();
+				GfxDebugTest();
 				Core::GetSystem<GraphicsSystem>().RenderBuffer();
 			}
 		}

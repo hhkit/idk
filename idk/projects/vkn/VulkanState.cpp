@@ -2180,7 +2180,7 @@ vk::CommandBufferBeginInfo begin_info
 	}
 	void FrameObjects::FrameReset()
 	{
-		ubo_manager.clear(); //Clear the previous frame's UBOs
+		ubo_manager.Clear(); //Clear the previous frame's UBOs
 		pools.Reset(); //Reset the previous frame's descriptors
 	}
 }

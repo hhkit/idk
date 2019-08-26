@@ -55,7 +55,7 @@ namespace idk::vkn
 	{
 		VulkanView& detail;
 		VulkanPipeline pipeline{};
-		uniform_info uniforms{};
+		//uniform_info uniforms{};
 		hash_table<DbgShape, vbo> shape_buffers{};
 		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
 
@@ -128,17 +128,17 @@ namespace idk::vkn
 		this->impl.reset();
 	}
 
-	void VulkanDebugRenderer::Render()
+	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj)
 	{
 		auto& detail   = impl->detail  ;
 		auto& pipeline = impl->pipeline;
-		auto& uniforms = impl->uniforms;
+		//auto& uniforms = impl->uniforms;
 		draw_call dc;
 		dc.pipeline = &pipeline;
-		dc.uniform_info = uniforms;
-		mat4 view = glm::lookAt(vec3{ 0,2,2 }, vec3{ 0,0,0 }, vec3{ 0,1,0 });
+		//dc.uniform_info = uniforms;
+		//mat4 view = glm::lookAt(vec3{ 0,2,2 }, vec3{ 0,0,0 }, vec3{ 0,1,0 });
 		auto extent = detail.Swapchain().extent;
-		mat4 proj = perspective(idk::rad(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+		//mat4 proj = perspective(idk::rad(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 		dc.uniforms.emplace_back(0, 0, view);
 		dc.uniforms.emplace_back(0, 1, proj);
 		for (auto& [shape, buffer] : info->render_info)

@@ -180,10 +180,12 @@ namespace idk::vkn
 	{
 		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline, vulkan.Dispatcher());
 	}
-	bool VulkanPipeline::HasUniforms(const uniform_info& uni) const
+	//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.
+	/*bool VulkanPipeline::HasUniforms(const uniform_info& uni) const
 	{
 		return uni.layouts.size() > 0;
 	}
+	//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.
 	void VulkanPipeline::BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform)
 	{
 		if (HasUniforms(uniform))
@@ -196,6 +198,9 @@ namespace idk::vkn
 			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelinelayout, start, GetUniformDescriptors(vulkan), nullptr, vulkan.Dispatcher());
 		}
 	}
+	//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.
+	uint32_t VulkanPipeline::AllocUniformBuffers([[maybe_unused]]Vulkan_t& vulkan, [[maybe_unused]] const uniform_info& uniform) { return 0; }
+	*/
 	vk::PolygonMode VulkanPipeline::GetPolygonMode(const config_t& config) const
 	{
 		static const hash_table<FillType, vk::PolygonMode> lookup
@@ -439,6 +444,4 @@ namespace idk::vkn
 		return {};
 	}
 
-	//may be deprecated
-	uint32_t VulkanPipeline::AllocUniformBuffers([[maybe_unused]]Vulkan_t& vulkan, [[maybe_unused]] const uniform_info& uniform) { return 0; }
 }

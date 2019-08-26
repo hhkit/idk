@@ -3,6 +3,7 @@
 
 namespace idk
 {
+	//This is currently unused for now, remove if unused by milestone 1.
 	struct uniform_info
 	{
 		enum UniformType

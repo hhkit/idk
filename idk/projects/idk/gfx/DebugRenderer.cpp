@@ -77,7 +77,7 @@ namespace idk
 		DrawShape(obj.shape, obj.pos, obj.scale, obj.axis, obj.angle, obj.color);
 	}
 
-	void DebugRenderer::Render()
+	void DebugRenderer::Render(const mat4& , const mat4& )
 	{
 	}
 

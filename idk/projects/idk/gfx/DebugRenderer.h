@@ -49,7 +49,7 @@ public:
 	void DrawShape(DbgShape shape, vec3 pos, vec3 scale, vec3 axis, idk::rad angle, vec4 color);
 	void DrawShape(const DebugObject& obj);
 
-	virtual void Render();
+	virtual void Render(const mat4& view,const mat4& projection );
 	~DebugRenderer()override;
 protected:
 	virtual void Init(const idk::pipeline_config& pipeline_config)=0;

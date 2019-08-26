@@ -20,12 +20,12 @@ namespace idk::vkn
 		};
 
 		// getters
-		master_buffer&     MasterBuffer() { return _master_buffer; }
-		vk::Buffer&        Buffer() { return _master_buffer.host_buffer.buffer(); }
-		vk::RenderPass&    RenderPass() { return _render_pass; }
+		master_buffer&     MasterBuffer  () { return _master_buffer; }
+		vk::Buffer&        Buffer        () { return _master_buffer.host_buffer.buffer(); }
+		vk::RenderPass&    RenderPass    () { return _render_pass; }
 		vk::CommandBuffer& TransferBuffer() { return *_transfer_buffer; }
-		vk::CommandBuffer& CommandBuffer() { return *_command_buffer; }
-		vector<draw_call>& DrawCalls() { return _draw_calls; };
+		vk::CommandBuffer& CommandBuffer () { return *_command_buffer; }
+		vector<draw_call>& DrawCalls     () { return _draw_calls; };
 
 		// setters
 		void TransferBuffer(vk::UniqueCommandBuffer&& val) { _transfer_buffer = std::move(val); }

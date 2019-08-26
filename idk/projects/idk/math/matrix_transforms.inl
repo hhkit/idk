@@ -28,11 +28,11 @@ namespace idk
 		const auto s = sin(angle);
 
 
-		return ret_t{}
+		return c* ret_t{}
 		+ s * ret_t{
-			 0.f, -n.z,  n.x,
-			 n.z,  0.f, -n.y,
-			-n.x,  n.y,  0.f
+			 0.f, -n.z,  n.y,
+			 n.z,  0.f, -n.x,
+			-n.y,  n.x,  0.f
 		}
 		+ (1 - c) * ret_t {
 			n.x * n.x,  n.x * n.y, n.x * n.z,

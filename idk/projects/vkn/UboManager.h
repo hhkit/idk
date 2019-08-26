@@ -4,36 +4,6 @@
 #include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-	/*
-	template<typename T>
-	struct test_allocator
-	{
-		using const_pointer = const T*;
-		using difference_type = ptrdiff_t;
-		using pointer = T *;
-		using size_type = size_t;
-		using value_type = T;
-
-		template<typename U>
-		struct rebind
-		{
-			using other = test_allocator<U>;
-		};
-		template<typename ...Args>
-		test_allocator(Args&& ...) noexcept {}
-
-		static 	T* allocate(size_t sz)
-		{
-			return new T[sz + 32] + 11;
-
-		}
-		//const test_allocator& allocator()const { return *this; }
-
-		static void deallocate(T* ptr, size_t)
-		{
-			delete[](ptr - 11);
-		}
-	};*/
 	template<typename T>
 	using tallocator = std::allocator<T>;
 	struct UboManager
@@ -44,13 +14,13 @@ namespace idk::vkn
 
 		UboManager(VulkanView& view);
 
-		uint32_t offset_alignment();
-		uint32_t size_alignment();
+		uint32_t OffsetAlignment()const;
+		uint32_t SizeAlignment()  const;
 
 		template<typename T>
 		std::pair<vk::Buffer, uint32_t> Add(const T& data);
 		void UpdateAllBuffers();
-		void clear();
+		void Clear();
 
 	private:
 		struct DataPair
@@ -81,22 +51,52 @@ namespace idk::vkn
 		};
 		VulkanView& view;
 		uint32_t                               _alignment = 0x10;
-		constexpr static uint32_t              chunk_size = 1 << 16;
-		size_t                                 memory_chunk_size = 1 << 20; //Replace this with the limit obtained from device.
+		constexpr static uint32_t              _chunk_size = 1 << 16;
+		size_t                                 _memory_chunk_size = 1 << 20; //Replace this with the limit obtained from device.
 		//Maybe replace with allocator
-		vector<Memory>                         memory_blocks;
+		vector<Memory>                         _memory_blocks;
 
-		hash_table<buffer_idx_t, memory_idx_t> allocation_table;
-		vector<DataPair>                       buffers;
-		size_t                                 curr_buffer_idx{};
+		hash_table<buffer_idx_t, memory_idx_t> _allocation_table;
+		vector<DataPair>                       _buffers;
+		size_t                                 _curr_buffer_idx{};
 
 
 
 		size_t AllocateAndBind(vk::Buffer& buffer);
 
-		std::pair<vk::UniqueBuffer,size_t> make_buffer();
+		std::pair<vk::UniqueBuffer,size_t> MakeBuffer();
 
-		DataPair& find_pair(size_t size);
+		DataPair& FindPair(size_t size);
 	};
+	/*
+	template<typename T>
+	struct test_allocator
+	{
+		using const_pointer = const T*;
+		using difference_type = ptrdiff_t;
+		using pointer = T *;
+		using size_type = size_t;
+		using value_type = T;
+
+		template<typename U>
+		struct rebind
+		{
+			using other = test_allocator<U>;
+		};
+		template<typename ...Args>
+		test_allocator(Args&& ...) noexcept {}
+
+		static 	T* allocate(size_t sz)
+		{
+			return new T[sz + 32] + 11;
+
+		}
+		//const test_allocator& allocator()const { return *this; }
+
+		static void deallocate(T* ptr, size_t)
+		{
+			delete[](ptr - 11);
+		}
+	};*/
 }
 #include "UboManager.inl"

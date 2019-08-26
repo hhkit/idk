@@ -20,8 +20,9 @@ namespace idk::vkn
 		void Create(config_t const& config, Vulkan_t& vulkan);
 		void Reset();
 		void Bind(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan)const;
-		bool HasUniforms(const uniform_info& uni)const;
-		void BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform);
+		//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.
+		//bool HasUniforms(const uniform_info& uni)const;
+		//void BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform);
 	private:
 		vk::PolygonMode GetPolygonMode(const config_t& config)const;
 		vk::PipelineInputAssemblyStateCreateInfo    GetAssemblyInfo(const config_t& config)const;
@@ -47,8 +48,9 @@ namespace idk::vkn
 		// Vulkan_t is necessary cause it needs to get the descriptors from the pool
 		vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan);
 
+		//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.
 		// AllocUniformBuffers is meant to write to a host master(non-vulkan) uniform buffer and get the offset.
 		// The non-vulkan buffer will be transfered after the commands are done queueing.
-		uint32_t AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform);
+		//uint32_t AllocUniformBuffers(Vulkan_t& vulkan, const uniform_info& uniform);
 	}; 
 }

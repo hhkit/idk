@@ -13,7 +13,7 @@ namespace idk::vkn
 
 		void Init( const pipeline_config& pipeline_config) override;
 		void Shutdown() override;
-		void Render() override;
+		void Render(const mat4& view, const mat4& projection) override;
 	private:
 		struct pimpl;
 		VulkanState* vulkan_{};

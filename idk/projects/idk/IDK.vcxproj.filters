@@ -324,6 +324,9 @@
     <ClInclude Include="gfx\uniform_info.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\GfxDbgTest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -436,6 +439,7 @@
     <ClCompile Include="gfx\buffer_desc.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\GfxDbgTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -110,7 +110,7 @@ namespace idk::vkn::hlp
 		assert(itr != map.end());
 		return itr->second;
 	}
-	vk::ShaderStageFlags MapStages(const decltype(decltype(decltype(pipeline_config::uniform_layouts)::mapped_type::bindings)::value_type::stages)& stages)
+	vk::ShaderStageFlags MapStages(const decltype(uniform_layout_t::bindings_t::stages)& stages)
 	{
 		vk::ShaderStageFlags result{};
 		for (auto& stage : stages)
