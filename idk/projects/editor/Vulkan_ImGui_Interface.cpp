@@ -119,14 +119,10 @@ namespace idk
 				// Use any command queue
 				vk::CommandBuffer& command_buffer = *editorControls.edt_frames[editorControls.edt_frameIndex].edt_cBuffer;
 
-				//err = vkResetCommandPool(g_Device, command_pool, 0);
-				//check_vk_result(err);
 				vknViews.Device()->resetCommandPool(*editorControls.edt_frames[editorControls.edt_frameIndex].edt_cPool,vk::CommandPoolResetFlags::Flags(),vknViews.Dispatcher());
 				vk::CommandBufferBeginInfo begin_info = {};
 				begin_info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-				//err = vkBeginCommandBuffer(command_buffer, &begin_info);
-				//check_vk_result(err);
-				//editorControls.edt_frames[editorControls.edt_frameIndex].edt_cBuffer->begin(begin_info,vknViews.Dispatcher());
+				
 				command_buffer.begin(begin_info, vknViews.Dispatcher());
 
 				ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
@@ -251,6 +247,13 @@ namespace idk
 				vk::CommandBufferBeginInfo info = {};
 				info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 				fd->edt_cBuffer->begin(info, vknViews.Dispatcher());
+
+				vk::ImageSubresourceRange imgRange = {};
+				imgRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+				imgRange.levelCount = 1;
+				imgRange.layerCount = 1;
+
+				fd->edt_cBuffer->clearColorImage(fd->edt_backbuffer, vk::ImageLayout::eGeneral, editorControls.edt_clearValue.color, imgRange, vknViews.Dispatcher());	
 			}
 			//Begin renderpass for imgui cbuffer
 			{
@@ -385,6 +388,7 @@ namespace idk
 			{
 				EditorFrame* fd = &editorControls.edt_frames[i];
 				att[0] = fd->edt_backbufferView = *vknViews.Swapchain().image_views[i];
+				fd->edt_backbuffer = vknViews.Swapchain().images[i];
 				vk::FramebufferCreateInfo fbInfo{
 					vk::FramebufferCreateFlags{},
 					*editorControls.edt_renderPass,
