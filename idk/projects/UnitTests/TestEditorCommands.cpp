@@ -9,6 +9,7 @@
 
 #include "pch.h" // gtest.h
 #include <core/Handle.h>
+#include <reflect/reflect.h>
 #include <IncludeComponents.h> //Gameobject, transform
 
 namespace idk {
