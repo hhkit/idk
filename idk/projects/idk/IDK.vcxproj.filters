@@ -372,6 +372,9 @@
     <ClInclude Include="meta\tuple.h">
       <Filter>meta</Filter>
     </ClInclude>
+    <ClInclude Include="ds\dual_set.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -610,6 +613,9 @@
     </None>
     <None Include="math\color.inl">
       <Filter>math</Filter>
+    </None>
+    <None Include="ds\dual_set.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
