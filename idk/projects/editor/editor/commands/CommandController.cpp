@@ -28,22 +28,18 @@ namespace idk {
 		ClearUndoRedoStack();
 	}
 
-	void CommandController::ExecuteCommand(ICommand* command) {
+	void CommandController::ExecuteCommand(unique_ptr<ICommand> command) {
 
 		bool isSuccess = command->execute();
 
 		if (isSuccess) {
 			if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one
-				delete undoStack.front();
 				undoStack.pop_front();
 			}
-			undoStack.push_back(command);
+			undoStack.push_back(std::move(command));
 
 
 			if (redoStack.size() != NULL) {     //Clear the redo stack after execution
-				for (ICommand* i : redoStack) {
-					delete i;
-				}
 				redoStack.clear();
 			}
 		}
@@ -54,7 +50,7 @@ namespace idk {
 			return;
 
 		if (undoStack.back()->undo())  //If execute is a success, add to the redo stack
-			redoStack.push_back(undoStack.back());
+			redoStack.push_back(std::move(undoStack.back()));
 
 		undoStack.pop_back();
 	}
@@ -64,7 +60,7 @@ namespace idk {
 			return;
 
 		if (redoStack.back()->execute())  //If execute is a success, add to the undo stack
-			undoStack.push_back(redoStack.back());
+			undoStack.push_back(std::move(redoStack.back()));
 
 
 		redoStack.pop_back();
@@ -74,16 +70,10 @@ namespace idk {
 	void CommandController::ClearUndoRedoStack()
 	{
 		if (undoStack.size() != NULL) {     //Clear the redo stack after execution
-			for (ICommand* i : undoStack) {
-				delete i;
-			}
 			undoStack.clear();
 		}
 
 		if (redoStack.size() != NULL) {     //Clear the redo stack after execution
-			for (ICommand* i : redoStack) {
-				delete i;
-			}
 			redoStack.clear();
 		}
 	}
