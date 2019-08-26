@@ -155,6 +155,7 @@ namespace idk
 
 			editorInit.edt_pipeCache.reset();
 
+			ImGui_ImplVulkan_Shutdown();
 			ImGui_ImplWin32_Shutdown();
 			ImGui::DestroyContext();
 		}

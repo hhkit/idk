@@ -37,7 +37,7 @@ namespace idk
 	void IDE::EditorDraw()
 	{
 		// call imgui draw,
-		edtInterface.ImGuiFrameEnd();
+		//edtInterface.ImGuiFrameEnd();
 		Core::GetSystem<vkn::VulkanWin32GraphicsSystem>(); // get command buffer from vulkan
 	}
 }
