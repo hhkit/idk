@@ -7,8 +7,7 @@
 
 namespace idk
 {
-	IDE::IDE(vkn::VulkanState& v)
-		:edtInterface{&v}
+	IDE::IDE():edtInterface{nullptr}
 	{
 	}
 

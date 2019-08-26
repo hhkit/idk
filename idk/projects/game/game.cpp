@@ -32,8 +32,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	switch (GraphicsAPI::Default)
 	{
 		case GraphicsAPI::Vulkan:
-			c->AddSystem<VulkanWin32GraphicsSystem>();
-			c.AddSystem<IDE>();
+			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+			c->AddSystem<IDE>();
 			break;
 		case GraphicsAPI::OpenGL:
 			c->AddSystem<ogl::Win32GraphicsSystem>();
@@ -50,7 +50,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	
-	mesh_rend->material_instance.material = Core::GetResourceManager().Create<Material>("/assets/shader/flat_color.frag");
+	//mesh_rend->material_instance.material = Core::GetResourceManager().Create<Material>("/assets/shader/flat_color.frag");
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

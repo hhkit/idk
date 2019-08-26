@@ -20,7 +20,7 @@ namespace idk::vkn
 		: public GraphicsSystem
 	{
 	public:
-		VulkanWin32GraphicsSystem(Windows& windows_app);
+		VulkanWin32GraphicsSystem();
 		void Init() override ;
 
 		void BeginFrame() ;

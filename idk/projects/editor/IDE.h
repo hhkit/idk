@@ -10,7 +10,7 @@ namespace idk
 	class IDE : public IEditor
 	{
 	public:
-		IDE(vkn::VulkanState&);
+		IDE();
 
 		void Init() override;
 		void Shutdown() override;
