@@ -236,7 +236,7 @@ namespace idk
 	{
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
-		Set3DListenerAttributes();
+		//Set3DListenerAttributes();
 	}
 	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
 	{
