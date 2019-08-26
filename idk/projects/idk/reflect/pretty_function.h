@@ -1,20 +1,30 @@
 #pragma once
 
+#if defined(__clang__)
+	#define _IDK_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#elif defined(__GNUC__)
+	#define _IDK_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#elif defined(_MSC_VER)
+	#define _IDK_PRETTY_FUNCTION __FUNCSIG__
+#else
+	#error "No support for this compiler."
+#endif
+
 namespace idk::reflect::detail
 {
 
 	template<typename>
-	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	constexpr string_view pretty_function() { return _IDK_PRETTY_FUNCTION; }
 	template<template<typename...> typename>
-	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	constexpr string_view pretty_function() { return _IDK_PRETTY_FUNCTION; }
 	template<template<typename, auto> typename>
-	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	constexpr string_view pretty_function() { return _IDK_PRETTY_FUNCTION; }
 	template<template<auto...> typename>
-	constexpr string_view pretty_function() { return __FUNCSIG__; }
+	constexpr string_view pretty_function() { return _IDK_PRETTY_FUNCTION; }
 
 	constexpr string_view extract_name_from_pretty_function(string_view sv)
 	{
-#if _MSC_VER >= 1920
+#if !defined(_MSC_VER) || _MSC_VER >= 1920
 		sv.remove_prefix(sv.find("pretty_function<") + sizeof("pretty_function<") - 1);
 		if (sv.find("class") != std::string_view::npos)
 			sv.remove_prefix(sv.find("class") + sizeof("class"));

@@ -243,7 +243,7 @@ namespace idk::reflect
 				if (visitor(std::forward<K>(key), std::forward<V>(val), depth_change)) // if false, stop recursive
 				{
 					if constexpr (ValIsDynamic)
-						visit(*static_cast<void**>(val._ptr->get()), val.type, std::forward<Visitor>(visitor), depth, last_visit_depth);
+						visit(val._ptr->get(), val.type, std::forward<Visitor>(visitor), depth, last_visit_depth);
 					else if constexpr (ValIsContainer)
 						visit_container(val, std::forward<Visitor>(visitor), depth, last_visit_depth);
 					else if constexpr(ValIsVariant)
@@ -256,7 +256,7 @@ namespace idk::reflect
 			{
 				visitor(std::forward<K>(key), std::forward<V>(val), depth_change);
 				if constexpr (ValIsDynamic)
-					visit(*static_cast<void**>(val._ptr->get()), val.type, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit(val._ptr->get(), val.type, std::forward<Visitor>(visitor), depth, last_visit_depth);
 				else if constexpr (ValIsContainer)
 					visit_container(val, std::forward<Visitor>(visitor), depth, last_visit_depth);
 				else if constexpr (ValIsVariant)

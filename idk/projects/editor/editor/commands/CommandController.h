@@ -26,9 +26,9 @@ namespace idk {
 	public:
 		CommandController();
 		~CommandController();
-
-		//Executes given ICommand Object. USAGE: ExecuteCommand(new MoveObject{params}); DO NOT SEND IN LOCAL VARIABLES
-		void ExecuteCommand(ICommand* command);
+		
+		//Executes given ICommand Object. USAGE: ExecuteCommand(std::make_unique<CommandName>(parameters)); DO NOT SEND IN LOCAL VARIABLES
+		void ExecuteCommand(unique_ptr<ICommand> command);
 		//Executes the undo function of previous ICommand Object.
 		void UndoCommand();
 		//Exectues function of an undone ICommand Object.
@@ -42,14 +42,14 @@ namespace idk {
 		//When ExecuteCommand or RedoCommand is called, this is added to stack. 
 		//When UndoCommand is called, this stack is popped off.
 		//This stack is cleared when changing scenes.
-		std::list<ICommand*> undoStack{};
+		std::list<unique_ptr<ICommand>> undoStack{};
 
 
 		//A vector of past commands that have been undone. 
 		//When ExecuteCommand is called, this stack is cleared. 
 		//When UndoCommand is called, this is added to stack.
 		//This stack is cleared when changing scenes.
-		std::list<ICommand*> redoStack{};
+		std::list<unique_ptr<ICommand>> redoStack{};
 
 
 		size_t undoLimit			{ 512 }; //By default it is 512

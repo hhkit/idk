@@ -186,7 +186,7 @@ namespace idk::reflect::detail
 		{
 			obj;
 			if constexpr (is_macro_enum_v<T>)
-				return get_type<T>().as_enum_type().from_value(T::_enum(*static_cast<T*>(obj)));
+				return get_type<T>().as_enum_type().from_value(*static_cast<T*>(obj));
 			else
 				throw "not an enum!";
 		}
