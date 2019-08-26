@@ -7,6 +7,16 @@
 
 namespace idk
 {
+	vec3 Transform::Forward() const
+	{
+		return GlobalMatrix()[2].get_normalized();
+	}
+	
+	vec3 Transform::Up() const
+	{
+		return GlobalMatrix()[1].get_normalized();
+	}
+
 	mat4 Transform::LocalMatrix() const
 	{
 		return translate(position) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
