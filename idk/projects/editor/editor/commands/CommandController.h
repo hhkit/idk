@@ -11,6 +11,9 @@ The purpose of this class is to NOT know what type of command it is or does.
 It is to only handle the interface given.
 Takes in a NEW Commands and handles its delete internally
 
+NOTES:
+To change list to circular buffer soon-ish.
+
 */
 //////////////////////////////////////////////////////////////////////////////////
 

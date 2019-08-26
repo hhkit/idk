@@ -119,6 +119,8 @@ Variables:
 #include <audio/AudioSystem.h> //AudioSystem
 #include <audio/AudioClip.h> //AudioClip
 #include <audio/AudioClipFactory.h> //AudioClipFactory
+#include <audio/AudioSource.h> //AudioClipFactory
+#include <audio/AudioListener.h> //AudioClipFactory
 
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
@@ -213,14 +215,36 @@ namespace idk
 
 	}
 
-	void AudioSystem::Update()
+	void AudioSystem::Update(span<AudioSource> audio_sources, span<AudioListener> audio_listeners)
 	{
-		//Update all the audioClips here too!
+		//Update all the audio source here too!
+		for (auto& elem : audio_sources)
+		{
+			//Do something	
+		}
 
+		//Update all the sources here too!
+		for (auto& elem : audio_listeners)
+		{
+			//Do something
+		}
 
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
 	}
+	void AudioSystem::UpdateEngineOnly()
+	{
+		// Get Updates the core system by a tick
+		ParseFMOD_RESULT(_Core_System->update());
+		//Set3DListenerAttributes();
+	}
+	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
+	{
+		////Zero denotes the listener id. Since there is only one listener, this is always zero.
+		//FMOD_VECTOR fmodPos{ pos.x,pos.y,pos.z };
+		//ParseFMOD_RESULT(_Core_System->set3DListenerAttributes(0, &fmodPos, &vel, &forward, &up));
+	}
+
 	void AudioSystem::Shutdown()
 	{
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
