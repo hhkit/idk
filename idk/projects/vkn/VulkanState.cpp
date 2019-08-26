@@ -1660,6 +1660,7 @@ namespace idk::vkn
 		createDescriptorPool();
 		createDescriptorSet();
 		createCommandBuffers();
+		createSemaphores();
 	}
 
 	void VulkanState::InitVulkanEnvironment(window_info info)
@@ -2111,7 +2112,7 @@ namespace idk::vkn
 				rv.result = vk::Result::eSuboptimalKHR;
 		}
 		}
-		catch (const vk::OutOfDateKHRError& err)
+		catch (const vk::OutOfDateKHRError& )
 		{
 			rv.result = vk::Result::eErrorOutOfDateKHR;
 		}catch (const vk::Error& err)
