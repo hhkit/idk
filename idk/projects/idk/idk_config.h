@@ -47,6 +47,7 @@ namespace idk
 		//,	class ScriptSystem
 		//,	class PhysicsSystem
 		,	class GraphicsSystem
+		,   class DebugRenderer
 		,	class AudioSystem
 		,	class ResourceManager
 		,	class SceneManager

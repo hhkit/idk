@@ -21,8 +21,9 @@ namespace idk
 		virtual char GetChar() = 0;
 
 		// windows
-		virtual bool SetFullscreen(bool enable_fullscreen) = 0;
-		virtual bool SetScreenSize(ivec2 target_size) = 0;
-		virtual void SwapBuffers() = 0;
+		virtual bool  SetFullscreen(bool enable_fullscreen) = 0;
+		virtual bool  SetScreenSize(ivec2 target_size) = 0;
+		virtual ivec2 GetScreenSize() { return ivec2{}; };
+		virtual void  SwapBuffers() = 0;
 	};
 }

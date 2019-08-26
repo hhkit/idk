@@ -10,6 +10,7 @@
     <ClInclude Include="editor\commands\ICommand.h">
       <Filter>editor\commands</Filter>
     </ClInclude>
+    <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -25,5 +26,6 @@
     <Filter Include="editor\commands">
       <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>
     </Filter>
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
   </ItemGroup>
 </Project>

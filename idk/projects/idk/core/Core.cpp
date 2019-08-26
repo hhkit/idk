@@ -4,6 +4,8 @@
 #include <IncludeComponents.h>
 #include <res/ResourceManager.h>
 
+#include <gfx/GfxDbgTest.h>
+
 namespace idk
 {
 	seconds Core::GetDT()
@@ -57,12 +59,24 @@ namespace idk
 		if (editor)
 		{
 			while (_running)
+			{
 				_scheduler->SequentialUpdate();
+				//Core::GetSystem<IEditor>().EditorUpdate();
+				//Core::GetSystem<IEditor>().EditorDraw();
+				//GfxDebugTest();
+				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
+			}
 		}
 		else
 		{
 			while (_running)
+			{
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
+				//Core::GetSystem<GraphicsSystem>().EndFrame();
+				GfxDebugTest();
+				Core::GetSystem<GraphicsSystem>().RenderBuffer();
+				
+			}
 		}
 
 		_system_manager.ShutdownSystems();

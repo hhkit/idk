@@ -106,15 +106,18 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);coreD.lib;win32D.lib;vulkanD.lib;idk_openglD.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);coreD.lib;win32D.lib;vulkanD.lib;idk_openglD.lib;editorD.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>x</Outputs>
+      <Command>
+if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+call $(SolutionDir)tools\compile.bat
+if %errorlevel% NEQ 0 exit /b %errorlevel%
+call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
+</Command>
+      <Outputs>$(OutDir)shaders\changed.chg</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -170,15 +173,18 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);core.lib;win32.lib;vulkan.lib;idk_opengl.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);core.lib;win32.lib;vulkan.lib;idk_opengl.lib;editor.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>x</Outputs>
+      <Command>
+if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+call $(SolutionDir)tools\compile.bat
+if %errorlevel% NEQ 0 exit /b %errorlevel%
+call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
+</Command>
+      <Outputs>$(OutDir)shaders\changed.chg</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>

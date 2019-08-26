@@ -273,6 +273,7 @@ REFLECT_ENUM(idk::testenum, "testenum")
 
 TEST(Reflect, TestReflectEnum)
 {
+
 	EXPECT_TRUE(is_macro_enum<testenum>::value);
 	EXPECT_FALSE(is_macro_enum<vec3>::value);
 
@@ -308,7 +309,7 @@ struct unknowntest : reflect_this
 };
 REFLECT_BEGIN(unknowntest, "unknowntest")
 REFLECT_PARENT(reflect_this)
-REFLECT_VARS(t)
+REFLECT_VARS(t)			    
 REFLECT_END()
 
 TEST(Reflect, TestParentAndUnknownVisit)

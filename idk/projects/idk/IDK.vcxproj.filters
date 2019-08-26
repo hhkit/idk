@@ -383,6 +383,28 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h" />
+    <ClInclude Include="gfx\gfx_data.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\DebugRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\debug_vtx_layout.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\buffer_desc.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\pipeline_config.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\uniform_info.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\GfxDbgTest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -500,6 +522,14 @@
     <ClCompile Include="math\euler_angles.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\buffer_desc.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\GfxDbgTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
