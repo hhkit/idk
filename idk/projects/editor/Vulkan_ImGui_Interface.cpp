@@ -173,9 +173,6 @@ namespace idk
 				ImGui_ImplVulkan_SetMinImageCount(editorInit.edt_min_imageCount);
 				ImGuiRecreateSwapChain();
 				ImGuiRecreateCommandBuffer();
-
-				//ImGuiIO& io = ImGui::GetIO();
-				//io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
 			}
 
 			ImGuiFrameBegin();
