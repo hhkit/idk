@@ -37,6 +37,7 @@ namespace idk
 		bool SetScreenSize(ivec2) override { return false; }
 		void SwapBuffers() override {}
 		void Shutdown() override {}
+		void PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func);
 
 		HINSTANCE GetInstance();
 		HWND      GetWindowHandle();
@@ -53,5 +54,7 @@ namespace idk
 		LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
+
+		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
 	};
 }

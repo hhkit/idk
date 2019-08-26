@@ -40,6 +40,8 @@ namespace idk::vkn
 		//Copies the data into the master buffer and returns the offset to start from.
 		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
 		void                       ResetMasterBuffer()const;
+		bool&					   ImguiResize()const;
+		window_info&			   GetWindowsInfo()const;
 
 
 
