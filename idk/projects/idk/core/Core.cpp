@@ -58,8 +58,10 @@ namespace idk
 			while (_running)
 			{
 				_scheduler->SequentialUpdate();
-				Core::GetSystem<IEditor>().EditorUpdate();
-				Core::GetSystem<IEditor>().EditorDraw();
+				//Core::GetSystem<IEditor>().EditorUpdate();
+				//Core::GetSystem<IEditor>().EditorDraw();
+				//GfxDebugTest();
+				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
 			}
 		}
 		else
@@ -70,6 +72,7 @@ namespace idk
 				//Core::GetSystem<GraphicsSystem>().EndFrame();
 				GfxDebugTest();
 				Core::GetSystem<GraphicsSystem>().RenderBuffer();
+				
 			}
 		}
 
