@@ -269,14 +269,10 @@ namespace idk
 {
 	ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
 }
-/*
 REFLECT_ENUM(idk::testenum, "testenum")
 
-*/
 TEST(Reflect, TestReflectEnum)
 {
-	//Added to fail this test case since the above REFLECT_ENUM has been disabled since it generated a compile error for HC.
-	EXPECT_TRUE(false);
 
 	EXPECT_TRUE(is_macro_enum<testenum>::value);
 	EXPECT_FALSE(is_macro_enum<vec3>::value);
@@ -313,7 +309,7 @@ struct unknowntest : reflect_this
 };
 REFLECT_BEGIN(unknowntest, "unknowntest")
 REFLECT_PARENT(reflect_this)
-REFLECT_VARS(t)
+REFLECT_VARS(t)			    
 REFLECT_END()
 
 TEST(Reflect, TestParentAndUnknownVisit)
