@@ -86,6 +86,9 @@
     <Filter Include="gfx\object">
       <UniqueIdentifier>{d25200eb-6b2c-4974-ab2d-f1f2adee7057}</UniqueIdentifier>
     </Filter>
+    <Filter Include="math\interp">
+      <UniqueIdentifier>{c78cfeac-2107-48ce-841f-4eabae9d7857}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -317,16 +320,12 @@
     <ClInclude Include="shape\box.h">
       <Filter>shapes</Filter>
     </ClInclude>
-    <ClInclude Include="math\interp\Spline.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="ds\compressed_pair.h">
       <Filter>ds</Filter>
     </ClInclude>
     <ClInclude Include="ds\small_string.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="util\align.h" />
     <ClInclude Include="test\TestSystem.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -374,6 +373,15 @@
     </ClInclude>
     <ClInclude Include="ds\dual_set.h">
       <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="math\euler_angles.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\interp\Spline.h">
+      <Filter>math\interp</Filter>
+    </ClInclude>
+    <ClInclude Include="util\align.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -488,6 +496,9 @@
     </ClCompile>
     <ClCompile Include="gfx\Camera.cpp">
       <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="math\euler_angles.cpp">
+      <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
