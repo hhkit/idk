@@ -4,6 +4,8 @@
 #include <core/ISystem.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
+#include <res/ResourceFile.h>
+#include <res/ExtensionLoader.h>
 #include <meta/meta.h>
 
 namespace idk
@@ -42,6 +44,9 @@ namespace idk
 		array<GenPtr, ResourceCount> plaintext_loaders_{}; // std::shared_ptr<ResourceFactory<Resource>>
 		array<GenPtr, ResourceCount> resource_tables_  {}; // std::shared_ptr<Storage<Resource>>
 		array<GenPtr, ResourceCount> default_resources_{}; // std::shared_ptr<Resource>
+
+		hash_table<string, unique_ptr<ExtensionLoader>> _extension_loaders;
+		hash_table<string, ResourceFile>                _loaded_files;
 
 		static ResourceManager* instance;
 

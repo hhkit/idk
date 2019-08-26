@@ -1,9 +1,13 @@
 #pragma once
 #include <res/Guid.h>
-#include <reflect/reflect.h>
 
 namespace idk
 {
+	namespace reflect
+	{
+		class dynamic;
+	}
+
 	class ResourceMeta
 	{
 	public:

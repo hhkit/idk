@@ -375,6 +375,15 @@
     <ClInclude Include="ds\dual_set.h">
       <Filter>ds</Filter>
     </ClInclude>
+    <ClInclude Include="res\ResourceFile.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceFile_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ExtensionLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

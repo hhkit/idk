@@ -46,6 +46,9 @@
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="res\ExtensionLoader.h" />
+    <ClInclude Include="res\ResourceFile.h" />
+    <ClInclude Include="res\ResourceFile_detail.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
