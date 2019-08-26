@@ -8,11 +8,15 @@
 
 
 #include "pch.h" // gtest.h
+#include <reflect/reflect.h>
 #include "FMOD/core/fmod.hpp" //FMOD Core
 #include "FMOD/core/fmod_errors.h" //ErrorString
 #include <scene/Scene.h>
+#include <core/GameObject.h>	
 #include <audio/AudioSystem.h>	
 #include <audio/AudioClip.h>	
+#include <audio/AudioListener.h>
+#include <common/Transform.h>	
 #include <core/Core.h>
 #include <iostream>	
 #include <filesystem> //Using this until our filesystem is up	
@@ -106,9 +110,9 @@ TEST(Audio, AudioSystemClassTest)
 
 
 
-	while (elapsed.count() < 60) { //
+	while (elapsed.count() < 10) { //
 		try {
-			test.UpdateEngineOnly();
+			test.UpdateTestCaseOnly();
 			elapsed = time_point::clock::now() - timeStartTest;
 			
 
@@ -171,4 +175,3 @@ TEST(Audio, AudioSystemClassTest)
 	}
 	// Cleanup
 }
-

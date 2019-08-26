@@ -92,6 +92,9 @@ REFLECT_BEGIN(idk::Transform, "Transform")
 REFLECT_VARS(scale, rotation, position)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::AudioListener, "AudioListener")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
 REFLECT_END()

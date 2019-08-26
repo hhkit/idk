@@ -215,34 +215,51 @@ namespace idk
 
 	}
 
-	void AudioSystem::Update(span<AudioSource> audio_sources, span<AudioListener> audio_listeners)
+	void AudioSystem::Update(span<AudioSource> audio_sources)
 	{
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
 		{
-			//Do something	
-		}
-
-		//Update all the sources here too!
-		for (auto& elem : audio_listeners)
-		{
 			//Do something
 		}
 
+		//Only one listener component will update FMODs listener
+		//THIS is also important when in editor mode! Listener should be at the editor camera's view
+		if (_mainListener) {
+			_mainListener->UpdateListenerPosition();
+		}
+		else {
+			//Do nothing or set Listener to 0,0,0
+		}
+
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
 	}
-	void AudioSystem::UpdateEngineOnly()
+	void AudioSystem::UpdateTestCaseOnly()
 	{
+		//Only one listener component will update FMODs listener
+		//THIS is also important when in editor mode! Listener should be at the editor camera's view
+		if (_mainListener) {
+			_mainListener->UpdateListenerPosition();
+		}
+		else {
+			//Do nothing or set Listener to 0,0,0
+		}
+
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
-		//Set3DListenerAttributes();
+
 	}
 	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
 	{
-		////Zero denotes the listener id. Since there is only one listener, this is always zero.
-		//FMOD_VECTOR fmodPos{ pos.x,pos.y,pos.z };
-		//ParseFMOD_RESULT(_Core_System->set3DListenerAttributes(0, &fmodPos, &vel, &forward, &up));
+		//Zero denotes the listener id. Since there is only one listener, this is always zero.
+		FMOD_VECTOR fmodPos			{ pos.x,pos.y,pos.z };
+		FMOD_VECTOR fmodVel			{ vel.x,vel.y,vel.z };
+		FMOD_VECTOR fmodForwardVec	{ forwardVec.x,forwardVec.y,forwardVec.z };
+		FMOD_VECTOR fmodUpVec		{ upVec.x,upVec.y,upVec.z };
+
+		//NOTES: Forward is axisZ+, Up is axisY+
+		ParseFMOD_RESULT(_Core_System->set3DListenerAttributes(0, &fmodPos, &fmodVel, &fmodForwardVec, &fmodUpVec));
 	}
 
 	void AudioSystem::Shutdown()
@@ -320,6 +337,11 @@ namespace idk
 			//Do nothing if out of bounds
 			return;
 		}
+	}
+
+	void AudioSystem::SetMainAudioListener(Handle<AudioListener> listenerComponent)
+	{
+		_mainListener = listenerComponent;
 	}
 
 	float AudioSystem::GetCPUPercentUsage()
