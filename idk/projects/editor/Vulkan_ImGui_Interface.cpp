@@ -170,8 +170,8 @@ namespace idk
 				ImGuiRecreateSwapChain();
 				ImGuiRecreateCommandBuffer();
 
-				ImGuiIO& io = ImGui::GetIO();
-				io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
+				//ImGuiIO& io = ImGui::GetIO();
+				//io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
 			}
 
 			ImGuiFrameBegin();
@@ -297,9 +297,18 @@ namespace idk
 			info.pSwapchains = &*vknViews.Swapchain().swap_chain;
 			info.pImageIndices = &editorControls.edt_frameIndex;
 
-			err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
-			check_vk_result(err);
+			try {
+				err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
+				check_vk_result(err);
+			}
+			catch (const vk::OutOfDateKHRError& e) {
+				
+				vkObj->RecreateSwapChain();
+				ImGuiRecreateSwapChain();
+				ImGuiRecreateCommandBuffer();
+			}
 
+			//Next frame
 			editorControls.edt_semaphoreIndex = (editorControls.edt_semaphoreIndex + 1) % editorControls.edt_imageCount; // Now we can use the next set of semaphores
 
 		}
@@ -307,6 +316,9 @@ namespace idk
 		void VI_Interface::ImGuiRecreateSwapChain()
 		{
 			//Recreation of swapchain is already done in the vulkan state recreation
+
+			//Clean up before recreation
+			ImGuiCleanUpSwapChain();
 
 			//What is required to be recreated for imGui swapchain will be done here
 			idk::vkn::VulkanView& vknViews = vkObj->View();
@@ -412,6 +424,11 @@ namespace idk
 					//check_vk_result(err);
 				}
 			}
+		}
+		void VI_Interface::ImGuiCleanUpSwapChain()
+		{
+			editorControls.edt_frames.clear();
+			editorControls.edt_renderPass.reset();
 		}
 	};
 };

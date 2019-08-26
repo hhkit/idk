@@ -39,6 +39,8 @@ namespace idk {
 			void ImGuiRecreateSwapChain();
 			void ImGuiRecreateCommandBuffer();
 
+			void ImGuiCleanUpSwapChain();
+
 		private:
 
 			struct EditorInitInfo
