@@ -37,6 +37,7 @@ namespace idk::vkn
 		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
 		void                       ResetMasterBuffer()const;
 		bool&					   ImguiResize()const;
+		window_info&			   GetWindowsInfo()const;
 
 
 

@@ -12,7 +12,7 @@
 
 //Helper header from imgui for vulkan implementation
 #include <editorstatic/imgui/Imgui_impl_vulkan.h>
-
+#include <editorstatic/imgui/ImGUIImpl_Win32.h>
 
 namespace idk
 {
@@ -103,6 +103,7 @@ namespace idk
 			ImGui::StyleColorsClassic();
 
 			//Platform/renderer bindings
+			ImGui_ImplWin32_Init(vknViews.GetWindowsInfo().wnd);
 			ImGui_ImplVulkan_Init(&info, *(vknViews.Renderpass()));
 
 			//Upload fonts leave it to later
@@ -141,11 +142,16 @@ namespace idk
 			}
 		}
 
+		void VI_Interface::Shutdown()
+		{
+			ImGui_ImplWin32_Shutdown();
+			ImGui::DestroyContext();
+		}
+
 		void VI_Interface::ImGuiFrameBegin()
 		{
+			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-
-			ImGui::ShowDemoWindow(&editorControls.demoWindow);
 		}
 
 		void VI_Interface::ImGuiFrameUpdate()
@@ -162,10 +168,12 @@ namespace idk
 
 				ImGuiIO& io = ImGui::GetIO();
 				io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
-
 			}
 
 			ImGuiFrameBegin();
+
+			if (editorControls.demoWindow)
+				ImGui::ShowDemoWindow(&editorControls.demoWindow);
 
 			//////////////////////////IMGUI DATA HANDLING//////////////////////
 			static float f = 0.0f;

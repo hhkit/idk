@@ -76,6 +76,11 @@ namespace idk::vkn
 			// TODO: insert return statement here
 			return vulkan().m_ScreenResizedForImGui;
 		}
+		window_info& VulkanView::GetWindowsInfo() const
+		{
+			// TODO: insert return statement here
+			return vulkan().m_window;
+		}
 		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
 
 		vk::UniqueShaderModule VulkanView::CreateShaderModule(const idk::string_view& code)

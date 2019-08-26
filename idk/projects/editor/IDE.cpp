@@ -25,6 +25,7 @@ namespace idk
 	void IDE::Shutdown()
 	{
 		// close imgui stuff
+		edtInterface.Shutdown();
 	}
 
 	void IDE::EditorUpdate()

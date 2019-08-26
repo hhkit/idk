@@ -28,6 +28,7 @@ namespace idk {
 			VI_Interface(vkn::VulkanState*);
 
 			void Init();
+			void Shutdown();
 
 			void ImGuiFrameBegin();
 			void ImGuiFrameUpdate();
