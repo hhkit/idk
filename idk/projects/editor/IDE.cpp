@@ -16,8 +16,7 @@ namespace idk
 		// do imgui stuff
 		vkn::VulkanWin32GraphicsSystem * vksys = &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>();
 		vkn::VulkanState* inst = &vksys->Instance();
-		
-		edtInterface = edt::VI_Interface(inst);
+		edtInterface = edt::VI_Interface{ inst };
 		edtInterface.Init();
 	}
 

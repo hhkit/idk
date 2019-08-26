@@ -14,6 +14,8 @@
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
 
+#include <stb/stb_image.h>
+
 
 namespace idk
 {
@@ -24,7 +26,7 @@ namespace idk
 }
 
 //Uncomment to disable validation
-#define WX_VAL_VULK
+//#define WX_VAL_VULK
 
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
@@ -793,7 +795,7 @@ namespace idk::vkn
 				   vk::Extent2D{0,0},//*/
 				   //Always 1 unless developing stereoscopic 3d images
 				   1,
-				   vk::ImageUsageFlagBits::eColorAttachment,
+				   vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
 				   imageSharingMode,
 				   queueFamilyIndexCount,
 				   pQueueFamilyIndices,
@@ -818,7 +820,7 @@ namespace idk::vkn
 	{
 		for ([[maybe_unused]]auto& image : m_swapchain.images)
 		{
-			FrameObjects fo { *view_,*view_ };
+			FrameObjects fo{ *view_,*view_ };
 			//FrameObjects fo2 = std::move(fo);
 			m_swapchain.frame_objects.emplace_back(std::move(fo));
 		}
@@ -1145,6 +1147,25 @@ namespace idk::vkn
 		}
 	}
 
+	void VulkanState::createTextureImage()
+	{
+		//int texWidth, texHeight, texChannels;
+		//stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		//vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
+
+		//if (!pixels) {
+		//	throw std::runtime_error("failed to load texture image!");
+		//}
+
+		//vk::Buffer stagingBuffer;
+		//vk::DeviceMemory stagingBufferMemory;
+		
+	}
+
+	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
+	{
+	}
+
 	void VulkanState::createCommandPool()
 	{
 		vk::CommandPoolCreateInfo info
@@ -1441,6 +1462,21 @@ namespace idk::vkn
 	void VulkanState::createCommandBuffers()
 	{
 		auto& rss = view_->RenderStates();
+		//{
+		//	//rss.resize(max_frames_in_flight);
+		//	m_swapchain.frame_objects.resize(m_swapchain.images.size());
+		//	for (auto& frame_object : m_swapchain.frame_objects)
+		//	{
+		//		vk::CommandBufferAllocateInfo rs_alloc_info
+		//		{
+		//			*m_present_commandpool
+		//			,vk::CommandBufferLevel::ePrimary
+		//			,1//static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+		//		};
+		//		auto cmd_buffers = m_device->allocateCommandBuffersUnique(rs_alloc_info, dispatcher);
+		//		frame_object.present_buffer = std::move(cmd_buffers[0]);
+		//	}
+		//}
 		{
 			//For RenderState
 			//rss.resize(max_frames_in_flight);
@@ -1493,7 +1529,7 @@ namespace idk::vkn
 				//};
 				commandBuffer->begin(begin_info);
 
-				vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,1.0f} } };
+				vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.005f,0.1f,0.2f,1.0f} } };
 				vk::RenderPassBeginInfo renderPassInfo
 				{
 					*m_renderpass

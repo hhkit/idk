@@ -173,9 +173,6 @@ namespace idk
 				ImGui_ImplVulkan_SetMinImageCount(editorInit.edt_min_imageCount);
 				ImGuiRecreateSwapChain();
 				ImGuiRecreateCommandBuffer();
-
-				//ImGuiIO& io = ImGui::GetIO();
-				//io.DisplaySize = ImVec2(vknViews.Swapchain().extent.width, vknViews.Swapchain().extent.height);
 			}
 
 			ImGuiFrameBegin();
@@ -252,8 +249,31 @@ namespace idk
 				imgRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 				imgRange.levelCount = 1;
 				imgRange.layerCount = 1;
+				// Note: previous layout doesn't matter, which will likely cause contents to be discarded
+				vk::ImageMemoryBarrier presentToClearBarrier = {};
+				presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eMemoryRead;
+				presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+				presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
+				presentToClearBarrier.newLayout = vk::ImageLayout::eTransferDstOptimal;
+				presentToClearBarrier.srcQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+				presentToClearBarrier.dstQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+				presentToClearBarrier.image = fd->edt_backbuffer;
+				presentToClearBarrier.subresourceRange = imgRange;
 
-				fd->edt_cBuffer->clearColorImage(fd->edt_backbuffer, vk::ImageLayout::eGeneral, editorControls.edt_clearValue.color, imgRange, vknViews.Dispatcher());	
+				// Change layout of image to be optimal for presenting
+				vk::ImageMemoryBarrier clearToPresentBarrier = {};
+				clearToPresentBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+				clearToPresentBarrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+				clearToPresentBarrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+				clearToPresentBarrier.newLayout = vk::ImageLayout::eColorAttachmentOptimal;
+				clearToPresentBarrier.srcQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+				clearToPresentBarrier.dstQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+				clearToPresentBarrier.image = fd->edt_backbuffer;
+				clearToPresentBarrier.subresourceRange = imgRange;
+
+				fd->edt_cBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vknViews.Dispatcher());
+				fd->edt_cBuffer->clearColorImage(fd->edt_backbuffer, vk::ImageLayout::eTransferDstOptimal, editorControls.edt_clearValue.color, imgRange, vknViews.Dispatcher());
+				fd->edt_cBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags{}, nullptr, nullptr, clearToPresentBarrier, vknViews.Dispatcher());
 			}
 			//Begin renderpass for imgui cbuffer
 			{

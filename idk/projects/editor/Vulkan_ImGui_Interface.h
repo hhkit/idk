@@ -58,7 +58,7 @@ namespace idk {
 
 				//Vulkan
 				vk::UniqueRenderPass				edt_renderPass{};
-				bool								edt_clearEnable{};
+				bool								edt_clearEnable{true};
 				vk::ClearValue						edt_clearValue{};
 				uint32_t							edt_frameIndex{};
 				uint32_t							edt_imageCount{};
