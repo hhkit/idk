@@ -131,6 +131,19 @@ namespace idk
 		return file_handle.IsOpenAndValid();
 	}
 
+	FS_CHANGE_STATUS FileHandle::GetStatus() const
+	{
+		auto& vfs = Core::GetSystem<FileSystem>();
+		// Checking if handle is valid
+		if (vfs.validateHandle(*this) == false)
+			return FS_CHANGE_STATUS::INVALID;
+
+		auto& file_handle = vfs._file_handles[_handle_index];
+		auto& file = vfs.getFile(file_handle._internal_id);
+
+		return file._change_status;
+	}
+
 	FStreamWrapper FileHandle::Open(FS_PERMISSIONS perms, bool binary_stream)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();

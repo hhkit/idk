@@ -425,6 +425,9 @@
     <ClInclude Include="IncludeComponents.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="IncludeResources.h" />
+    <ClInclude Include="file\FileSystemIncludes.h">
+      <Filter>file</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

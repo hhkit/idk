@@ -1,16 +1,12 @@
 #pragma once
 #include <Windows.h>
 #include <filesystem>
+
+#include "FileSystemIncludes.h"
+
 namespace idk::file_system_detail
 {
-	enum class CHANGE_STATUS
-	{
-		NO_CHANGE,
-		CREATED,
-		DELETED,
-		RENAMED,
-		WRITTEN
-	};
+	
 
 	enum class OPEN_FORMAT
 	{
@@ -48,7 +44,7 @@ namespace idk::file_system_detail
 		bool _valid = true;
 
 		// For file watching
-		CHANGE_STATUS _change_status = CHANGE_STATUS::NO_CHANGE;
+		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 		std::filesystem::file_time_type _time;
 	};
 
@@ -72,7 +68,7 @@ namespace idk::file_system_detail
 
 		bool _valid = true;
 
-		CHANGE_STATUS _change_status = CHANGE_STATUS::NO_CHANGE;
+		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 	};
 
 	struct fs_collated

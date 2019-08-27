@@ -100,7 +100,6 @@ namespace idk {
 		}
 	}
 
-	
 	vector<FileHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
 	{
 		vector<FileHandle> vec_handles;
@@ -119,9 +118,59 @@ namespace idk {
 		{
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
-				vec_handles.emplace_back(internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count);
+			{
+				FileHandle h{ internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count };
+				vec_handles.emplace_back(h);
+			}
 		}
 		return vec_handles;
+	}
+
+	vector<FileHandle> FileSystem::QueryFileChangesAll() const
+	{
+		vector<FileHandle> handles;
+		for (auto& key : _directory_watcher.changed_files)
+		{
+			auto& file = getFile(key);
+			
+			FileHandle h{ file._handle_index, _file_handles[file._handle_index]._ref_count };
+			 handles.emplace_back(h);
+		}
+
+		return handles;
+	}
+
+	vector<FileHandle> FileSystem::QueryFileChangesByExt(string_view ext) const
+	{
+		vector<FileHandle> handles;
+		for (auto& key : _directory_watcher.changed_files)
+		{
+			auto& file = getFile(key);
+
+			if (file._extension == ext)
+			{
+				FileHandle h{ file._handle_index, _file_handles[file._handle_index]._ref_count };
+				handles.emplace_back(h);
+			}
+		}
+
+		return handles;
+	}
+
+	vector<FileHandle> FileSystem::QueryFileChangesByChange(FS_CHANGE_STATUS change) const
+	{
+		vector<FileHandle> handles;
+		for (auto& key : _directory_watcher.changed_files)
+		{
+			auto& file = getFile(key);
+			if (file._change_status == change)
+			{
+				FileHandle h{ file._handle_index, _file_handles[file._handle_index]._ref_count };
+				handles.emplace_back(h);
+			}
+		}
+
+		return handles;
 	}
 
 	FileHandle FileSystem::GetFile(string_view mountPath) const
@@ -159,10 +208,10 @@ namespace idk {
 
 		// All mountPaths must begin with '/'
 		if (mountPath[0] != '/')
-			throw(FileSystem_ErrorCode::FILESYSTEM_BAD_ARGUMENT, "Mount Path needs to start with '/'.");
+			throw(FS_ERROR_CODE::FILESYSTEM_BAD_ARGUMENT, "Mount Path needs to start with '/'.");
 
 		if(mountPath.back() == '/' || mountPath.back() == '\\')
-			throw(FileSystem_ErrorCode::FILESYSTEM_BAD_ARGUMENT, "Mount Path must only contain one '/' or '\\'");
+			throw(FS_ERROR_CODE::FILESYSTEM_BAD_ARGUMENT, "Mount Path must only contain one '/' or '\\'");
 
 		if (full_path.back() == '/' || full_path.back() == '\\')
 			full_path.pop_back();
@@ -263,6 +312,8 @@ namespace idk {
 		d._filename = p.filename().string();
 		d._mount_path = p_dir._mount_path + "/" + d._filename;
 		d._parent = p_dir._tree_index;
+
+		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
 
 	void FileSystem::recurseSubDirExtensions(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
@@ -270,8 +321,11 @@ namespace idk {
 		for (auto& file_index : subDir._files_map)
 		{
 			auto& internal_file = getFile(file_index.second);
-			if(internal_file._extension == extension)
-				vec_handles.emplace_back(internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count);
+			if (internal_file._extension == extension)
+			{
+				FileHandle h{ internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count };
+				vec_handles.emplace_back(h);
+			}
 		}
 
 		for (auto& dir_index : subDir._sub_dirs)
@@ -652,6 +706,30 @@ namespace idk {
 			return file._tree_index;
 		}
 	}
+
+	file_system_detail::fs_key FileSystem::requestDirSlot(file_system_detail::fs_mount& mount, int8_t depth)
+	{
+		auto check_free_index = std::find_if( mount._path_tree[depth]._dirs.begin(),
+											  mount._path_tree[depth]._dirs.end(),
+											  [](const file_system_detail::fs_dir& f) { return !f._valid; });
+
+		if (check_free_index != mount._path_tree[depth]._dirs.end())
+		{
+			return check_free_index->_tree_index;
+		}
+		else
+		{
+			mount._path_tree[depth]._dirs.push_back(file_system_detail::fs_dir{});
+			auto& dir = mount._path_tree[depth]._dirs.back();
+
+			dir._tree_index._mount_id = mount._mount_index;
+			dir._tree_index._depth = depth;
+			dir._tree_index._index = static_cast<int8_t>(mount._path_tree[depth]._dirs.size() - 1);
+
+			return dir._tree_index;
+		}
+	}
+
 	file_system_detail::fs_file& FileSystem::createAndGetFile(string_view mountPath)
 	{
 		// Means we need to create the file...
