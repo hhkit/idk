@@ -293,15 +293,6 @@
     <ClInclude Include="audio\AudioSource.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="IncludeResources.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="IncludeComponents.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="IncludeSystems.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="phys\RigidBody.h">
       <Filter>phys</Filter>
     </ClInclude>
@@ -347,9 +338,6 @@
     <ClInclude Include="gfx\RenderObject.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MeshRenderer.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Material.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -383,16 +371,9 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="res\ResourceFile.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ResourceFile_detail.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\ExtensionLoader.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -417,6 +398,33 @@
     <ClInclude Include="math\random.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\tag.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ForwardingExtensionLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestResource.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ComponentTags.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeComponents.h" />
+    <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="IncludeResources.h" />
     <ClInclude Include="file\FileSystemIncludes.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -528,25 +536,32 @@
     <ClCompile Include="test\TestSystem.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\MeshRenderer.cpp">
-      <Filter>gfx\object</Filter>
-    </ClCompile>
     <ClCompile Include="gfx\Camera.cpp">
       <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="math\euler_angles.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\buffer_desc.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\GfxDbgTest.cpp" />
     <ClCompile Include="math\random.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="res\FileResources.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\GfxDbgTest.cpp">
+      <Filter>gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -675,6 +690,18 @@
     </None>
     <None Include="ds\dual_set.inl">
       <Filter>ds</Filter>
+    </None>
+    <None Include="meta\tag.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="res\FileResources.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ForwardingExtensionLoader.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceMeta.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

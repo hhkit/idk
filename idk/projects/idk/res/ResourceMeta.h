@@ -1,19 +1,21 @@
 #pragma once
-#include <res/Guid.h>
 
 namespace idk
 {
-	namespace reflect
+	// tags a resource with metadata of the type Meta
+	// when SetMeta is called, OnMetaUpdate is called first before the meta is set.
+	//   override for custom behavior
+	// the Meta is the data that will be serialized when the resource is saved
+	template<typename Meta>
+	struct MetaTag
 	{
-		class dynamic;
-	}
-
-	class ResourceMeta
-	{
-	public:
-		Guid guid;
-
-		virtual reflect::dynamic reflect() = 0;
-		virtual ~ResourceMeta() = default;
+		using Metadata = Meta;
+		void SetMeta(const Meta& inmeta);
+		const Meta& GetMeta();
+	protected:
+		Meta meta;
+		virtual void OnMetaUpdate(const Meta& newmeta) { (newmeta); };
 	};
 }
+
+#include "ResourceMeta.inl"

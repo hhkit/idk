@@ -28,6 +28,7 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\dual_set.h" />
     <ClInclude Include="ds\small_string.h" />
@@ -52,12 +53,14 @@
     <ClInclude Include="math\interp\Spline.h" />
     <ClInclude Include="math\matrix_decomposition.h" />
     <ClInclude Include="math\random.h" />
+    <ClInclude Include="meta\tag.h" />
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="res\ExtensionLoader.h" />
-    <ClInclude Include="res\ResourceFile.h" />
-    <ClInclude Include="res\ResourceFile_detail.h" />
+    <ClInclude Include="res\FileResources.h" />
+    <ClInclude Include="res\FileResources_detail.h" />
+    <ClInclude Include="res\ForwardingExtensionLoader.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -101,6 +104,7 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="test\TestComponent.h" />
+    <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
@@ -148,6 +152,7 @@
     <ClCompile Include="math\random.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
+    <ClCompile Include="res\FileResources.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
@@ -195,9 +200,13 @@
     <None Include="math\color.inl" />
     <None Include="math\comparable.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
+    <None Include="res\FileResources.inl" />
+    <None Include="res\ForwardingExtensionLoader.inl" />
+    <None Include="res\ResourceMeta.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

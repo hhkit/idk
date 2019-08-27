@@ -23,8 +23,4 @@ namespace idk::ogl
 
 		return std::move(mat);
 	}
-	unique_ptr<Material> OpenGLMaterialFactory::Create(string_view, const ResourceMeta&)
-	{
-		return unique_ptr<Material>();
-	}
 }

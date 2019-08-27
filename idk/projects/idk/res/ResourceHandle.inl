@@ -32,7 +32,7 @@ namespace idk
 		return guid != rhs.guid;
 	}
 	template<typename Res>
-	inline void RscHandle<Res>::Set(const Resource<Res>& g)
+	inline void RscHandle<Res>::Set(const idk::Resource<Res>& g)
 	{
 		*this = g.GetHandle();
 	}
