@@ -416,6 +416,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::checkDirRenamed(file_system_detail::fs_dir& dir)
 	{
+		UNREFERENCED_PARAMETER(dir);
 	}
 
 	void file_system_detail::DirectoryWatcher::recurseAndAdd(file_system_detail::fs_dir& mountDir)
@@ -533,6 +534,8 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& dir, std::filesystem::path& p)
 	{
+		UNREFERENCED_PARAMETER(dir);
+		UNREFERENCED_PARAMETER(p);
 	}
 	
 }
