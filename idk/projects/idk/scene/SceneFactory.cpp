@@ -12,9 +12,4 @@ namespace idk
 	{
 		return unique_ptr<Scene>();
 	}
-
-	unique_ptr<Scene> SceneFactory::Create(string_view, const ResourceMeta&)
-	{
-		return unique_ptr<Scene>();
-	}
 }

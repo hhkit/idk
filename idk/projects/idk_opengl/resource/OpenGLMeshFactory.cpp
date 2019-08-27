@@ -50,9 +50,4 @@ namespace idk::ogl
 	{
 		return unique_ptr<Mesh>();
 	}
-
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(string_view, const ResourceMeta&)
-	{
-		return unique_ptr<Mesh>();
-	}
 }

@@ -37,24 +37,68 @@ namespace idk
 	void ResourceManager::Init()
 	{
 		instance = this;
-		resource_tables_   = detail::ResourceHelper::GenResourceTables();
+		_resource_tables   = detail::ResourceHelper::GenResourceTables();
 		LoadDefaultResources();
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = std::string{ fs.GetExeDir() };
 		fs.Mount(exe_dir + "/assets", "/assets");
+		fs.SetAssetDir(exe_dir + "/assets");
 	}
 
 	void ResourceManager::Shutdown()
 	{
-		for (auto& elem : resource_tables_)
+		for (auto& elem : _resource_tables)
 			elem.reset();
 
-		for (auto& elem : default_resources_)
+		for (auto& elem : _default_resources)
 			elem.reset();
 	}
 	void ResourceManager::LoadDefaultResources()
 	{
 		//default_resources_ = detail::ResourceHelper::GenDefaults();
+	}
+	FileResources ResourceManager::LoadFile(string_view path_to_file)
+	{
+		auto find_file = _loaded_files.find(string{ path_to_file });
+		if (find_file != _loaded_files.end())
+			return find_file->second;
+
+		auto path_to_meta = string{ path_to_file } + ".meta";
+
+		auto& fs = Core::GetSystem<FileSystem>();
+		auto file = fs.GetFile(path_to_file);
+		auto meta_file = fs.GetFile(path_to_meta);
+
+		if (!file)
+			return FileResources{};
+
+		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
+
+		if (loader_itr == _extension_loaders.end())
+			return FileResources{};
+
+		auto resources = [&]()
+		{
+			if (meta_file)
+				return loader_itr->second->Create(path_to_file, path_to_meta);
+			else
+				return loader_itr->second->Create(path_to_file);
+		}();
+
+		_loaded_files.emplace_hint(find_file, path_to_file, resources);
+		return resources;
+	}
+	FileResources ResourceManager::ReloadFile(std::string_view path_to_file)
+	{
+		return FileResources();
+	}
+	FileResources ResourceManager::GetFileResources(string_view path_to_file)
+	{
+		auto find_file = _loaded_files.find(string{ path_to_file });
+		if (find_file != _loaded_files.end())
+			return find_file->second;
+		else
+			return FileResources();
 	}
 }

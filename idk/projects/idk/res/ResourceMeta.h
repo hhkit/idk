@@ -1,19 +1,18 @@
 #pragma once
-#include <res/Guid.h>
 
 namespace idk
 {
-	namespace reflect
+	template<typename Meta>
+	struct MetaTag
 	{
-		class dynamic;
-	}
-
-	class ResourceMeta
-	{
-	public:
-		Guid guid;
-
-		virtual reflect::dynamic reflect() = 0;
-		virtual ~ResourceMeta() = default;
+		using Metadata = Meta;
+		Meta meta;
+		void SetMeta(const Meta& inmeta)
+		{
+			meta = inmeta;
+			OnMetaUpdate();
+		}
+	protected:
+		virtual void OnMetaUpdate() {};
 	};
 }

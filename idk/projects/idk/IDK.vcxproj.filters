@@ -347,9 +347,6 @@
     <ClInclude Include="gfx\RenderObject.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MeshRenderer.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Material.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -383,12 +380,6 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="res\ResourceFile.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ResourceFile_detail.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\ExtensionLoader.h">
       <Filter>res</Filter>
     </ClInclude>
@@ -417,6 +408,20 @@
     <ClInclude Include="math\random.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\tag.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ComponentTags.h" />
+    <ClInclude Include="test\TestResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -525,9 +530,6 @@
     <ClCompile Include="test\TestSystem.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\MeshRenderer.cpp">
-      <Filter>gfx\object</Filter>
-    </ClCompile>
     <ClCompile Include="gfx\Camera.cpp">
       <Filter>gfx\camera</Filter>
     </ClCompile>
@@ -545,6 +547,10 @@
     <ClCompile Include="math\random.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="res\FileResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -673,6 +679,10 @@
     <None Include="ds\dual_set.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="meta\tag.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="res\FileResources.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

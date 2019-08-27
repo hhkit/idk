@@ -62,6 +62,7 @@ namespace idk
 		//,	class Texture
 		//,	class Font
 		//, class Skeleton
+		//,   class ShaderModel
 		,	class Mesh
 		,   class Material
 		//,	class Animation
