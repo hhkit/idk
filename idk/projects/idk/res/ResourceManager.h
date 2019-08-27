@@ -69,9 +69,6 @@ namespace idk
 
 		template<typename T>
 		friend struct detail::ResourceManager_detail;
-
-		template<typename Resource>
-		constexpr static auto resource_ind = index_in_tuple_v<Resource, Resources>;
 	};
 }
 #include "ResourceManager.inl"

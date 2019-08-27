@@ -96,7 +96,7 @@ namespace idk
 			return FileResources();
 
 		// save old meta
-		auto saved_metas = find_file->second;
+		// NEED SOME WAY TO SAVE OLD METAS
 
 		// unload resources
 		UnloadFile(path_to_file);

@@ -59,6 +59,7 @@
     <ClInclude Include="res\ExtensionLoader.h" />
     <ClInclude Include="res\FileResources.h" />
     <ClInclude Include="res\FileResources_detail.h" />
+    <ClInclude Include="res\ForwardingExtensionLoader.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -203,6 +204,7 @@
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="res\FileResources.inl" />
+    <None Include="res\ForwardingExtensionLoader.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />

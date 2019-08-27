@@ -1,5 +1,5 @@
 #pragma once
-
+#include <meta/tuple.h>
 namespace idk
 {
 	constexpr auto MaxScene = 8;
@@ -38,8 +38,7 @@ namespace idk
 
 		, class TestComponent
 	>;
-	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
-
+	
 	using Systems = std::tuple<
 		class Application
 		,	class FileSystem
@@ -69,7 +68,12 @@ namespace idk
 		//,	class Level
 	>;
 
-	constexpr auto SystemCount = std::tuple_size_v<Systems>;
-	constexpr auto ResourceCount = std::tuple_size_v<Resources>;
+	template<typename Component> constexpr auto ComponentID = index_in_tuple_v<Component, Components>;
+	template<typename System>    constexpr auto SystemID    = index_in_tuple_v<System, Systems>;
+	template<typename Resource>  constexpr auto ResourceID  = index_in_tuple_v<Resource, Resources>;
+
+	constexpr auto ComponentCount = std::tuple_size_v<Components>;
+	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
+	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
 
 }

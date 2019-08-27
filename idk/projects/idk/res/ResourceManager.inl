@@ -8,8 +8,8 @@ namespace idk
 	Factory& ResourceManager::RegisterFactory(Args&& ... args)
 	{
 		auto ptr = std::make_shared<Factory>(std::forward<Args>(args)...);
-		_plaintext_loaders[resource_ind<typename Factory::Resource>] = ptr;
-		_default_resources[resource_ind<typename Factory::Resource>] = ptr->Create();
+		_plaintext_loaders[ResourceID<typename Factory::Resource>] = ptr;
+		_default_resources[ResourceID<typename Factory::Resource>] = ptr->Create();
 		return *ptr;
 	}
 	template<typename ExtensionLoaderT, typename ... Args>
@@ -22,7 +22,7 @@ namespace idk
 	inline RscHandle<Resource> ResourceManager::Create()
 	{
 		auto& table = GetTable<Resource>();
-		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[resource_ind<Resource>].get())->Create();
+		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get())->Create();
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = handle;
 		table.emplace(handle.guid, std::move(ptr));
@@ -41,7 +41,7 @@ namespace idk
 		if (itr != table.end())
 			return RscHandle<Resource>{};
 
-		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[resource_ind<Resource>].get())->Create(filepath);
+		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get())->Create(filepath);
 		if (!ptr)
 			return RscHandle<Resource>{};
 
@@ -58,7 +58,7 @@ namespace idk
 		if (itr != table.end())
 			return RscHandle<Resource>{};
 
-		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[resource_ind<Resource>].get())->Create(filepath, meta);
+		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get())->Create(filepath, meta);
 		if (!ptr)
 			return RscHandle<Resource>{};
 
@@ -71,7 +71,7 @@ namespace idk
 	template<typename Resource>
 	inline auto& ResourceManager::GetTable()
 	{
-		return *r_cast<Storage<Resource>*>(_resource_tables[resource_ind<Resource>].get());
+		return *r_cast<Storage<Resource>*>(_resource_tables[ResourceID<Resource>].get());
 	}
 
 	template<typename Resource>
@@ -95,7 +95,7 @@ namespace idk
 		if (itr != table.end() && itr->second->_loaded)
 			return *itr->second;
 		else
-			return *r_cast<Resource*>(_default_resources[resource_ind<Resource>].get());
+			return *r_cast<Resource*>(_default_resources[ResourceID<Resource>].get());
 	}
 	template<typename Resource>
 	inline bool ResourceManager::Free(const RscHandle<Resource>& handle)
