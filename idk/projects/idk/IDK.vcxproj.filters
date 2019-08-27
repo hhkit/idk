@@ -683,6 +683,7 @@
       <Filter>meta</Filter>
     </None>
     <None Include="res\FileResources.inl" />
+    <None Include="res\ResourceMeta.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

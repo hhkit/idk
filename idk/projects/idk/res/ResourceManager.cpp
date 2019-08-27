@@ -91,8 +91,34 @@ namespace idk
 	}
 	FileResources ResourceManager::ReloadFile(std::string_view path_to_file)
 	{
-		return FileResources();
+		auto find_file = _loaded_files.find(string{ path_to_file });
+		if (find_file == _loaded_files.end())
+			return FileResources();
+
+		// save old meta
+		auto saved_metas = find_file->second;
+
+		// unload resources
+		UnloadFile(path_to_file);
 	}
+	size_t ResourceManager::UnloadFile(std::string_view path_to_file)
+	{
+		auto find_file = _loaded_files.find(string{ path_to_file });
+		if (find_file == _loaded_files.end())
+			return 0;
+
+		for (auto& elem : find_file->second.resources)
+		{
+			std::visit([this](auto handle) {
+				Free(handle);
+			}, elem._handle);
+		}
+
+		auto retval = find_file->second.resources.size();
+		_loaded_files.erase(find_file);
+		return retval;
+	}
+
 	FileResources ResourceManager::GetFileResources(string_view path_to_file)
 	{
 		auto find_file = _loaded_files.find(string{ path_to_file });

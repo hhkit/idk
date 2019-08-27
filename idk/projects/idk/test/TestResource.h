@@ -15,6 +15,6 @@ namespace idk
 	{
 	public:
 		int k;
-		void OnMetaUpdate() override { k = meta.i * meta.j; }
+		void OnMetaUpdate(const TestMeta& newmeta) override { k = meta.i * meta.j; }
 	};
 }

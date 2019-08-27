@@ -35,16 +35,22 @@ namespace idk
 		// handle ops
 		template<typename Resource> bool      Validate(const RscHandle<Resource>&);
 		template<typename Resource> Resource& Get(const RscHandle<Resource>&);
+		template<typename Resource> bool      Free(const RscHandle<Resource>&);
 
 		// resource creation
 		template<typename Resource> RscHandle<Resource> Create();
 		template<typename Resource> RscHandle<Resource> Create(string_view);
 		template<typename Resource> RscHandle<Resource> Create(string_view path, Guid guid);
+		template<typename Resource, 
+			typename = sfinae<has_tag_v<Resource, MetaTag>>
+		> RscHandle<Resource> Create(string_view path, Guid guid, const typename Resource::Meta& meta);
 
-		// file things
+		// file operations
 		FileResources LoadFile(std::string_view path_to_file);
 		FileResources ReloadFile(std::string_view path_to_file);
+		size_t        UnloadFile(std::string_view path_to_file);
 		FileResources GetFileResources(std::string_view path_to_file);
+
 	private:
 		using GenPtr = shared_ptr<void>;
 		template<typename R>
@@ -57,6 +63,9 @@ namespace idk
 		hash_table<string, FileResources>               _loaded_files;
 
 		static ResourceManager* instance;
+
+		template<typename Resource> auto& GetTable();
+		template<typename Resource> auto FindHandle(const RscHandle<Resource>&);
 
 		template<typename T>
 		friend struct detail::ResourceManager_detail;

@@ -12,6 +12,7 @@ namespace idk
 		explicit operator bool();
 	private:
 		detail::ResourceFile_helper<Resources>::GenericRscHandle _handle;
+		friend class ResourceManager;
 	};
 
 	struct FileResources

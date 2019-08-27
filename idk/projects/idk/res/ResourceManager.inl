@@ -21,7 +21,7 @@ namespace idk
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create()
 	{
-		auto& table = *r_cast<Storage<Resource>*>(_resource_tables[resource_ind<Resource>].get());
+		auto& table = GetTable<Resource>();
 		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[resource_ind<Resource>].get())->Create();
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = handle;
@@ -33,11 +33,11 @@ namespace idk
 	{
 		return Create<Resource>(filepath, Guid::Make());
 	}
+
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create(string_view filepath, Guid guid)
 	{
-		auto& table = *r_cast<Storage<Resource>*>(_resource_tables[resource_ind<Resource>].get());
-		auto itr = table.find(guid);
+		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
 		if (itr != table.end())
 			return RscHandle<Resource>{};
 
@@ -51,21 +51,60 @@ namespace idk
 		return handle;
 	}
 
+	template<typename Resource, typename>
+	inline RscHandle<Resource> ResourceManager::Create(string_view filepath, Guid guid, const typename Resource::Meta& meta)
+	{
+		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
+		if (itr != table.end())
+			return RscHandle<Resource>{};
+
+		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[resource_ind<Resource>].get())->Create(filepath, meta);
+		if (!ptr)
+			return RscHandle<Resource>{};
+
+		auto handle = RscHandle<Resource>{ guid };
+		ptr->_handle = handle;
+		table.emplace_hint(itr, handle.guid, std::move(ptr));
+		return handle;
+	}
+
+	template<typename Resource>
+	inline auto& ResourceManager::GetTable()
+	{
+		return *r_cast<Storage<Resource>*>(_resource_tables[resource_ind<Resource>].get());
+	}
+
+	template<typename Resource>
+	auto ResourceManager::FindHandle(const RscHandle<Resource>& handle)
+	{
+		auto& table = GetTable<Resource>();
+		return std::tuple<Storage<Resource>&, Storage<Resource>::iterator>{table, table.find(handle.guid)};
+	}
+
 	template<typename Resource>
 	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)
 	{
-		auto& table = *r_cast<Storage<Resource>*>(_resource_tables[resource_ind<Resource>].get());
-		auto itr = table.find(handle.guid); 
+		auto [table, itr] = FindHandle(handle);
 		return itr != table.end() && itr->second->_loaded;
 	}
 
 	template<typename Resource>
 	inline Resource& ResourceManager::Get(const RscHandle<Resource>& handle)
 	{
-		auto& table = *r_cast<Storage<Resource>*>(_resource_tables[resource_ind<Resource>].get());
-		if (auto itr = table.find(handle.guid); itr != table.end() && itr->second->_loaded)
+		auto [table, itr] = FindHandle(handle);
+		if (itr != table.end() && itr->second->_loaded)
 			return *itr->second;
 		else
 			return *r_cast<Resource*>(_default_resources[resource_ind<Resource>].get());
+	}
+	template<typename Resource>
+	inline bool ResourceManager::Free(const RscHandle<Resource>& handle)
+	{
+		auto [table, itr] = FindHandle(handle);
+		if (itr == table.end())
+			return false;
+
+		table.erase(itr);
+		return true;
 	}
 }
