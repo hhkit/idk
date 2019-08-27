@@ -78,7 +78,7 @@ namespace idk
 	auto ResourceManager::FindHandle(const RscHandle<Resource>& handle)
 	{
 		auto& table = GetTable<Resource>();
-		return std::tuple<Storage<Resource>&, Storage<Resource>::iterator>{table, table.find(handle.guid)};
+		return std::tuple<Storage<Resource>&, Storage<Resource>::iterator>{table, table.lower_bound(handle.guid)};
 	}
 
 	template<typename Resource>
