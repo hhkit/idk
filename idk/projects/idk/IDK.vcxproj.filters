@@ -417,6 +417,9 @@
     <ClInclude Include="math\random.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="file\FileSystemIncludes.h">
+      <Filter>file</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

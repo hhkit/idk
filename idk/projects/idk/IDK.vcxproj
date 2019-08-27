@@ -33,6 +33,7 @@
     <ClInclude Include="ds\small_string.h" />
     <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileHandle.h" />
+    <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\GfxDbgTest.h" />
