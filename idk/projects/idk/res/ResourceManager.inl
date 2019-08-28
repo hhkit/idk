@@ -22,26 +22,26 @@ namespace idk
 	inline RscHandle<Resource> ResourceManager::Create()
 	{
 		auto& table = GetTable<Resource>();
-		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get())->Create();
+		auto ptr = GetLoader<Resource>().Create();
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = handle;
 		table.emplace(handle.guid, std::move(ptr));
 		return handle;
 	}
 	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create(string_view filepath)
+	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath)
 	{
 		return Create<Resource>(filepath, Guid::Make());
 	}
 
 	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create(string_view filepath, Guid guid)
+	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath, Guid guid)
 	{
 		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
 		if (itr != table.end())
 			return RscHandle<Resource>{};
 
-		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get())->Create(filepath);
+		auto ptr = GetLoader<Resource>().Create(filepath);
 		if (!ptr)
 			return RscHandle<Resource>{};
 
@@ -52,13 +52,13 @@ namespace idk
 	}
 
 	template<typename Resource, typename>
-	inline RscHandle<Resource> ResourceManager::Create(string_view filepath, Guid guid, const typename Resource::Meta& meta)
+	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath, Guid guid, const typename Resource::Meta& meta)
 	{
 		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
 		if (itr != table.end())
 			return RscHandle<Resource>{};
 
-		auto ptr = r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get())->Create(filepath, meta);
+		auto ptr = GetLoader<Resource>().Create(filepath, meta);
 		if (!ptr)
 			return RscHandle<Resource>{};
 
@@ -66,6 +66,12 @@ namespace idk
 		ptr->_handle = handle;
 		table.emplace_hint(itr, handle.guid, std::move(ptr));
 		return handle;
+	}
+
+	template<typename Resource>
+	inline auto& ResourceManager::GetLoader()
+	{
+		return *r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get());
 	}
 
 	template<typename Resource>

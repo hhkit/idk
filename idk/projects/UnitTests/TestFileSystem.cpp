@@ -37,15 +37,12 @@ TEST(FileSystem, TestMount)
 	INIT_FILESYSTEM_UNIT_TEST();
 
 	vfs.Mount(exe_dir + "resource/FS_UnitTests/", "/FS_UnitTests");
+	// Should not work but should not crash too.
+	auto bad_file = vfs.GetFile("/blah/haha.txt");
+
 	vfs.DumpMounts();
 	vfs.Update();
 }
-
-struct test
-{
-	int i;
-	double d;
-};
 
 TEST(FileSystem, TestFileWatchBasic)
 {
@@ -158,22 +155,34 @@ TEST(FileSystem, TestFileHandle)
 	EXPECT_FALSE(move_construct.is_open());
 }
 
-TEST(FileSystem, TestFileReadWrite)
+TEST(FileSystem, TestFileOpen)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
+
+	// Test Open bad file path
+	{
+		FileHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
+
+		auto bad_stream = vfs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::READ);
+		auto bad_stream2 = bad_file_handle.Open(FS_PERMISSIONS::READ);
+
+		EXPECT_FALSE(bad_stream.is_open());
+		EXPECT_FALSE(bad_stream2.is_open());
+	}
+
 	// Test read empty file
 	{
 		FileHandle file_handle = vfs.GetFile("/FS_UnitTests/test_read.txt");
 		
-		auto valid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);	// Should create a file
+		auto valid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
 		auto invalid_handle = file_handle.Open(FS_PERMISSIONS::READ);
 		EXPECT_TRUE(valid_handle.is_open());
 		EXPECT_FALSE(invalid_handle.is_open());
 
+		// Should immediately get EOF
 		char buffer[100]{ 0 };
-	
-		EXPECT_TRUE(!valid_handle.read(buffer, 10));
-		EXPECT_TRUE(!valid_handle.getline(buffer, 10));
+		EXPECT_FALSE(valid_handle.read(buffer, 10));
+		EXPECT_FALSE(valid_handle.getline(buffer, 10));
 	}
 	vfs.Update();
 

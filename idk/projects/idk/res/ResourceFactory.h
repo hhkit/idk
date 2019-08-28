@@ -17,7 +17,7 @@ namespace idk
 	public:
 		using Resource = Res;
 		virtual unique_ptr<Resource> Create() = 0;
-		virtual unique_ptr<Resource> Create(string_view filepath) = 0;
+		virtual unique_ptr<Resource> Create(FileHandle filepath) = 0;
 		virtual ~ResourceFactory_impl() = default;
 	};
 
@@ -27,8 +27,8 @@ namespace idk
 	public:
 		using Resource = Res;
 		virtual unique_ptr<Resource> Create() = 0;
-		virtual unique_ptr<Resource> Create(string_view filepath) = 0;
-		virtual unique_ptr<Resource> Create(string_view filepath, const typename Res::Metadata& m);
+		virtual unique_ptr<Resource> Create(FileHandle filepath) = 0;
+		virtual unique_ptr<Resource> Create(FileHandle filepath, const typename Res::Metadata& m);
 		virtual ~ResourceFactory_impl() = default;
 	};
 
@@ -39,7 +39,7 @@ namespace idk
 	};
 
 	template<typename Res>
-	unique_ptr<Res> ResourceFactory_impl<Res, true>::Create(string_view filepath, const typename Res::Metadata& m)
+	unique_ptr<Res> ResourceFactory_impl<Res, true>::Create(FileHandle filepath, const typename Res::Metadata& m)
 	{
 		auto ptr = Create(filepath);
 		ptr->SetMeta(m);

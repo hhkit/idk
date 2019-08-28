@@ -58,16 +58,16 @@ namespace idk
 	{
 		//default_resources_ = detail::ResourceHelper::GenDefaults();
 	}
-	FileResources ResourceManager::LoadFile(string_view path_to_file)
+	FileResources ResourceManager::LoadFile(FileHandle file)
 	{
-		auto find_file = _loaded_files.find(string{ path_to_file });
+		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
 		if (find_file != _loaded_files.end())
 			return find_file->second;
 
-		auto path_to_meta = string{ path_to_file } + ".meta";
+		auto path_to_meta = string{ file.GetMountPath() } + ".meta";
 
 		auto& fs = Core::GetSystem<FileSystem>();
-		auto file = fs.GetFile(path_to_file);
+		fs.Exists(path_to_meta);
 		auto meta_file = fs.GetFile(path_to_meta);
 
 		if (!file)
@@ -80,13 +80,13 @@ namespace idk
 
 		auto resources = [&]()
 		{
-			if (meta_file)
-				return loader_itr->second->Create(path_to_file, path_to_meta);
-			else
-				return loader_itr->second->Create(path_to_file);
+			//if (meta_file)
+			//	return loader_itr->second->Create(file, path_to_meta);
+			//else
+				return loader_itr->second->Create(file);
 		}();
 
-		_loaded_files.emplace_hint(find_file, path_to_file, resources);
+		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
 		return resources;
 	}
 	FileResources ResourceManager::ReloadFile(std::string_view path_to_file)

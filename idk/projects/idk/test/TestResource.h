@@ -10,8 +10,8 @@ namespace idk
 	};
 
 	class TestResource
-		: public Resource<TestResource>,
-		MetaTag<TestMeta>
+		: public Resource<TestResource>
+		, MetaTag<TestMeta>
 	{
 	public:
 		int k;
