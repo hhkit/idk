@@ -1,4 +1,5 @@
 #pragma once
+#include "ImGui_Interface.h"
 
 namespace idk {
 	namespace ogl {
@@ -6,53 +7,34 @@ namespace idk {
 	}
 	namespace edt {
 		
-		class OI_Interface {
+		class OI_Interface :public I_Interface {
 		public:
 			OI_Interface(ogl::OpenGLState*);
 
-			void Init();
-			void Shutdown();
+			void Init() override;
+			void Shutdown() override;
 
-			void ImGuiFrameBegin();
-			void ImGuiFrameUpdate();
-			void ImGuiFrameEnd();
+			void ImGuiFrameBegin() override;
+			void ImGuiFrameUpdate() override;
+			void ImGuiFrameEnd() override;
 
-			void ImGuiFrameRender();
-			//void ImGuiFramePresent();
-
-			//void ImGuiRecreateSwapChain();
-			//void ImGuiRecreateCommandBuffer();
-
-			//void ImGuiCleanUpSwapChain();
-
+			void ImGuiFrameRender() override;
+			
+			void TestFunction();
 		private:
 
-			//struct EditorInitInfo
-			//{
-			//	//vk::UniquePipelineCache				edt_pipeCache{};
-			//	//uint32_t							edt_min_imageCount{ 2 };
-			//	//uint32_t							edt_imageCount{ edt_min_imageCount };
-			//	//vk::SampleCountFlagBits				edt_sampleBits_MSAA{};
-			//};
+			
 			struct EditorParameter
 			{
 				//ImGui
-				bool								im_demoWindow{ true };
-				vec4                                im_clearColor{};
+				bool					im_demoWindow{ true };
+				vec4                    im_clearColor{};
 
-				//Vulkan
-				//vk::UniqueRenderPass				edt_renderPass{};
-				bool								edt_clearEnable{true};
-				//vk::ClearValue						edt_clearValue{};
-				uint32_t							edt_frameIndex{};
-				uint32_t							edt_imageCount{};
-				uint32_t							edt_semaphoreIndex{};
-				//vector<EditorFrame>					edt_frames{};
-				//vector<EditorPresentationSignal>	edt_frameSemophores{};
+				//OpenGL
+				
 			};
 
 			EditorParameter				editorControls;
-			//EditorInitInfo				editorInit;
 			ogl::OpenGLState*			oglObj;
 		};
 	};

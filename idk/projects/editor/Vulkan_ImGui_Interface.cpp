@@ -100,6 +100,7 @@ namespace idk
 
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
+			io;
 
 			//Imgui Style
 			ImGui::StyleColorsClassic();

@@ -15,6 +15,7 @@
       <Filter>loaders</Filter>
     </ClInclude>
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
+    <ClInclude Include="ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -26,6 +27,7 @@
       <Filter>loaders</Filter>
     </ClCompile>
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
+    <ClCompile Include="ImGui_Interface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="editor">
