@@ -6,6 +6,7 @@
 
 #ifndef PCH_H
 #define PCH_H
+#include <idk.h>
 
 // add headers that you want to pre-compile here
 #include "framework.h"
@@ -13,4 +14,6 @@
 #include <windows.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
+#include <Core/Core.h>
+#include <reflect/reflect.h>
 #endif //PCH_H

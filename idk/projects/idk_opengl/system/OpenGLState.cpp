@@ -43,44 +43,50 @@ namespace idk::ogl
 		auto& object_buffer = sys->object_buffer;
 		auto& curr_write_buffer = sys->curr_write_buffer;
 		auto& curr_draw_buffer = sys->curr_draw_buffer;
-		// lock drawing buffer
 		curr_draw_buffer = curr_write_buffer;
-		
-		// render mesh renderers
-		auto itr_to_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
-			[](const auto& elem)->bool {
-				return elem.typehash == reflect::typehash<MeshRenderer>();
-			});
-
-		pipeline.Use();
-		pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
-
-		glBindVertexArray(vao_id);
-		for (auto& elem : object_buffer[curr_draw_buffer].mesh_render)
+		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
+		for (auto& state : curr_object_buffer.states)
 		{
-			// bind shader
-			auto& material = elem.material_instance.material.as<OpenGLMaterial>();
-			pipeline.PushProgram(material.GetShaderProgram());
+			//Bind frame buffers based on the camera's render target
 
-			// bind attribs
-			auto& mesh = elem.mesh.as<OpenGLMesh>();
-			mesh.Bind(MeshRenderer::GetRequiredAttributes());
+			// lock drawing buffer
+		
+			// render mesh renderers
+			auto itr_to_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
+				[](const auto& elem)->bool {
+					return elem.typehash == reflect::typehash<MeshRenderer>();
+				});
 
-			// set uniforms
-			// object uniforms
-			pipeline.SetUniform("object_transform", elem.transform);
-			pipeline.SetUniform("normal_transform", elem.transform.inverse().transpose());
+			pipeline.Use();
+			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
 
-			// material uniforms
-			for (auto& [id, uniform] : elem.material_instance.uniforms)
+			glBindVertexArray(vao_id);
+			for (auto& elem : state.mesh_render)
 			{
-				std::visit([this, &id](auto& elem) {
-					pipeline.SetUniform(id, elem);
-				}, uniform);
-			}
+				// bind shader
+				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
+				pipeline.PushProgram(material.GetShaderProgram());
 
-			// draw
-			mesh.Draw();
+				// bind attribs
+				auto& mesh = elem.mesh.as<OpenGLMesh>();
+				mesh.Bind(MeshRenderer::GetRequiredAttributes());
+
+				// set uniforms
+				// object uniforms
+				pipeline.SetUniform("object_transform", elem.transform);
+				pipeline.SetUniform("normal_transform", elem.transform.inverse().transpose());
+
+				// material uniforms
+				for (auto& [id, uniform] : elem.material_instance.uniforms)
+				{
+					std::visit([this, &id](auto& elem) {
+						pipeline.SetUniform(id, elem);
+					}, uniform);
+				}
+
+				// draw
+				mesh.Draw();
+			}
 		}
 	}
 

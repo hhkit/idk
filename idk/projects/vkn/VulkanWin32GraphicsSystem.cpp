@@ -42,7 +42,10 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		instance_->DrawFrame();
-
+		auto& curr_buffer = object_buffer[curr_draw_buffer];
+		for (auto& state : curr_buffer.states)
+		{
+		}
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()
 	{
