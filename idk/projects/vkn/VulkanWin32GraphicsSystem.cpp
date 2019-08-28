@@ -5,6 +5,8 @@
 
 #include <vkn/VulkanState.h>
 
+#include <core/Core.h>
+
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 //	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -28,11 +30,12 @@
 
 namespace idk::vkn
 {
-	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem(Windows& windows_app) : windows_{ &windows_app }, instance_{ std::make_unique<VulkanState>() }
+	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
 	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
+		windows_ = &Core::GetSystem<win::Windows>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 		
 	}
@@ -52,6 +55,10 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 		instance_.reset();
+	}
+	GraphicsAPI VulkanWin32GraphicsSystem::GetAPI()
+	{
+		return GraphicsAPI::Vulkan;
 	}
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{

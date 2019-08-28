@@ -18,6 +18,12 @@ namespace idk
 			if (elem)
 				elem->Init();
 	}
+	void SystemManager::LateInitSystems()
+	{
+		for (auto& elem : _list)
+			if (elem)
+				elem->LateInit();
+	}
 	void SystemManager::ShutdownSystems()
 	{
 		for (auto& elem : reverse(_list))

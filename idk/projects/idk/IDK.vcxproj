@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -27,10 +27,19 @@
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
-    <ClInclude Include="anim\BoneRenderer.h" />
+    <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="core\ComponentTags.h" />
+    <ClInclude Include="ds\compressed_pair.h" />
+    <ClInclude Include="ds\dual_set.h" />
+    <ClInclude Include="ds\small_string.h" />
+    <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileHandle.h" />
+    <ClInclude Include="file\FileSystemIncludes.h" />
+    <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\GfxDbgTest.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
+    <ClInclude Include="gfx\RenderObject.h" />
     <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\buffer_desc.h" />
@@ -39,6 +48,20 @@
     <ClInclude Include="gfx\pipeline_config.h" />
     <ClInclude Include="gfx\uniform_info.h" />
     <ClInclude Include="gfx\Material.h" />
+    <ClInclude Include="math\comparable.h" />
+    <ClInclude Include="math\euler_angles.h" />
+    <ClInclude Include="math\interp\Spline.h" />
+    <ClInclude Include="math\matrix_decomposition.h" />
+    <ClInclude Include="math\random.h" />
+    <ClInclude Include="meta\tag.h" />
+    <ClInclude Include="meta\tuple.h" />
+    <ClInclude Include="phys\Collider.h" />
+    <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="res\ExtensionLoader.h" />
+    <ClInclude Include="res\FileResources.h" />
+    <ClInclude Include="res\FileResources_detail.h" />
+    <ClInclude Include="res\ForwardingExtensionLoader.h" />
+    <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
     <ClInclude Include="core\Scheduler.h" />
@@ -80,13 +103,20 @@
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
-    <ClInclude Include="app\TestSystem.h" />
+    <ClInclude Include="test\TestComponent.h" />
+    <ClInclude Include="test\TestResource.h" />
+    <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
     <ClInclude Include="reflect\pretty_function.h" />
     <ClInclude Include="reflect\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
+    <ClInclude Include="shape\capsule.h" />
+    <ClInclude Include="shape\box.h" />
+    <ClInclude Include="shape\ray.h" />
+    <ClInclude Include="shape\sphere.h" />
+    <ClInclude Include="util\align.h" />
     <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
@@ -116,13 +146,17 @@
     <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
+    <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="math\euler_angles.cpp" />
+    <ClCompile Include="math\random.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
+    <ClCompile Include="res\FileResources.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
-    <ClCompile Include="app\TestSystem.cpp" />
+    <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\Core.cpp" />
@@ -134,7 +168,6 @@
     <ClCompile Include="file\DirectoryWatcher.cpp" />
     <ClCompile Include="file\FileSystem.cpp" />
     <ClCompile Include="file\FileSystemInternal.cpp" />
-    <ClCompile Include="math\color.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -149,6 +182,8 @@
     <ClCompile Include="serialize\serialize.cpp" />
     <ClCompile Include="shape\aabb.cpp" />
     <ClCompile Include="reflect\enum_type.cpp" />
+    <ClCompile Include="shape\ray.cpp" />
+    <ClCompile Include="shape\sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -157,9 +192,21 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="ds\compressed_pair.inl" />
+    <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="ds\small_string.inl" />
+    <None Include="event\Signal.inl" />
+    <None Include="math\color.inl" />
+    <None Include="math\comparable.inl" />
+    <None Include="math\matrix_decomposition.inl" />
+    <None Include="meta\tag.inl" />
+    <None Include="meta\tuple.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
+    <None Include="res\FileResources.inl" />
+    <None Include="res\ForwardingExtensionLoader.inl" />
+    <None Include="res\ResourceMeta.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

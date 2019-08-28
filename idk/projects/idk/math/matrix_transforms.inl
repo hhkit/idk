@@ -2,6 +2,7 @@
 #include <ds/range.h>
 #include <ds/zip.h>
 #include "matrix_transforms.h"
+#include <idk.h>
 
 namespace idk
 {
@@ -27,18 +28,21 @@ namespace idk
 		const auto c = cos(angle);
 		const auto s = sin(angle);
 
-
-		return c* ret_t{}
-		+ s * ret_t{
+		const auto crosspdt = ret_t{
 			 0.f, -n.z,  n.y,
 			 n.z,  0.f, -n.x,
 			-n.y,  n.x,  0.f
-		}
-		+ (1 - c) * ret_t {
+		};
+		
+		const auto skew_symmetric = ret_t{
 			n.x * n.x,  n.x * n.y, n.x * n.z,
 			n.y * n.x,  n.y * n.y, n.y * n.z,
 			n.z * n.x,  n.z * n.y, n.z * n.z,
 		};
+
+		return c * ret_t{}
+		+ s * crosspdt
+		+ (1 - c) * skew_symmetric;
 	}
 
 	template<typename T, unsigned D>
@@ -86,5 +90,43 @@ namespace idk
 			vec_t{_0, _0, 2 / (f-n), _0},
 			tvec
 		);
+	}
+	template<typename T>
+	math::matrix<T, 4, 4> look_at(const math::vector<T, 3> & eye, const math::vector<T, 3> & object, const math::vector<T, 3> & global_up)
+	{
+		auto target = (eye - object).normalize();
+		auto right  = global_up.cross(target).normalize();
+		auto up     = target.cross(global_up);
+
+		return math::matrix<T, 4, 4>{
+			vec4{ right,  0 }, 
+			vec4{ up,     0 }, 
+			vec4{ target, 0 }, 
+			vec4{ eye,    1 }
+		};
+	}
+
+	template<typename T, unsigned D>
+	math::matrix<T, D, D> orthonormalize(const math::matrix<T, D, D>& m)
+	{
+		auto retval = m;
+		for (auto i : range<D>())
+		{
+			for (auto j = 0; j < i; ++j)
+			{
+				const auto v = j;
+				retval[i] -= retval[i].dot(retval[v]) * retval[v];
+			}
+			retval[i].normalize();
+		}
+		return retval;
+	}
+	template<typename T>
+	math::matrix<T, 4, 4> invert_rotation(const math::matrix<T, 4, 4>& m)
+	{
+		auto retval = m.transpose();
+		retval[0][3] = retval[1][3] = retval[2][3] = 0;
+		retval[3] = vec4{-m[0].dot(m[3]), -m[1].dot(m[3]), -m[2].dot(m[3]), 1};
+		return retval;
 	}
 }

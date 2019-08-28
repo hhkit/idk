@@ -16,7 +16,7 @@ namespace idk::reflect
 	// add reflected types here... only have to add
 	// types that are used in other reflected types
 	// ie. don't have to add "top-level" reflected types
-	using ReflectedTypes = std::variant<
+	using ReflectedTypes = variant<
 		int
 		, bool
 		, char
@@ -24,14 +24,20 @@ namespace idk::reflect
 		, uint64_t
 		, float
 		, double
-		, std::string
+		, string
+
 		, vec2
 		, vec3
 		, vec4
 		, quat
+		, mat3
+		, mat4
+		, color
+
 		, Handle<GameObject>
 		, Guid
-		, idk::RscHandle<Mesh>
+		, RscHandle<Mesh>
+		, variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> // UniformInstance
 		, vector<string>
 		, hash_table<Guid, string>
 	>;

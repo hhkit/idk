@@ -9,11 +9,18 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
+#include <IncludeComponents.h>
 
 namespace idk
 {
-	class AudioListener {
+	class AudioListener : public Component<AudioListener> {
+
+
+	public:
+
+		void SetAsActive();
+
+		void UpdateListenerPosition();
 
 	};
 

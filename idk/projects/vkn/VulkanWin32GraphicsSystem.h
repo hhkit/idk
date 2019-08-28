@@ -7,31 +7,34 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
 
-namespace idk
+namespace idk::win
 {
 	class Windows;
 }
 namespace idk::vkn
 {
+	using Windows = win::Windows;
 	class VulkanState;
 
 	class VulkanWin32GraphicsSystem
 		: public GraphicsSystem
 	{
 	public:
-		VulkanWin32GraphicsSystem(Windows& windows_app);
+		VulkanWin32GraphicsSystem();
 		void Init() override ;
 
 		void BeginFrame() ;
 		void EndFrame() ;
 		void Shutdown() override;
+		void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
+		GraphicsAPI GetAPI() override;
 		void RenderBuffer() override;
 		VulkanState& Instance() { return *instance_; }
 
 		VulkanState& GetVulkanHandle();
 	private:
 		std::unique_ptr<VulkanState> instance_;
-		Windows* windows_;
+		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;
 	};

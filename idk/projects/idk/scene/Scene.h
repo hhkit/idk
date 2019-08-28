@@ -8,7 +8,7 @@ namespace idk
 {
 	class GameObject;
 
-	class Scene final
+	class Scene 
 		: public Resource<Scene>
 	{
 	public:

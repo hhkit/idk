@@ -171,21 +171,45 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="OpenGLGraphicsSystem.h" />
+    <ClInclude Include="resource\OpenGLMaterialFactory.h" />
+    <ClInclude Include="system\OpenGLState.h" />
+    <ClInclude Include="resource\OpenGLBuffer.h" />
+    <ClInclude Include="system\OpenGLGraphicsSystem.h" />
+    <ClInclude Include="resource\OpenGLMaterial.h" />
+    <ClInclude Include="resource\OpenGLMesh.h" />
+    <ClInclude Include="resource\OpenGLMeshFactory.h" />
+    <ClInclude Include="program\PipelineProgram.h" />
+    <ClInclude Include="resource\OpenGLTypeDescriptors.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="program\Program.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="OpenGLGraphicsSystem.cpp" />
+    <ClCompile Include="glad_wgl.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLBuffer.cpp" />
+    <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
+    <ClCompile Include="system\OpenGLGraphicsSystem.cpp" />
+    <ClCompile Include="resource\OpenGLMaterial.cpp" />
+    <ClCompile Include="resource\OpenGLMesh.cpp" />
+    <ClCompile Include="resource\OpenGLMeshFactory.cpp" />
+    <ClCompile Include="program\PipelineProgram.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="program\Program.cpp" />
+    <ClCompile Include="system\OpenGLState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="program\PipelineProgram.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

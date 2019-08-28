@@ -3,11 +3,77 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="OpenGLGraphicsSystem.h" />
+    <ClInclude Include="resource\OpenGLBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="system\OpenGLGraphicsSystem.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMaterial.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMesh.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMeshFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="program\PipelineProgram.h">
+      <Filter>program</Filter>
+    </ClInclude>
+    <ClInclude Include="program\Program.h">
+      <Filter>program</Filter>
+    </ClInclude>
+    <ClInclude Include="system\OpenGLState.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMaterialFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="resource\OpenGLBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="system\OpenGLGraphicsSystem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMaterial.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMesh.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMeshFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="program\PipelineProgram.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
+    <ClCompile Include="program\Program.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
+    <ClCompile Include="system\OpenGLState.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
+    <ClCompile Include="glad_wgl.c" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="OpenGLGraphicsSystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="system">
+      <UniqueIdentifier>{57144429-01c8-4ed9-b697-1de21d2c0305}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{f023b664-fbb6-4998-8a1f-53fd96fa029b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="program">
+      <UniqueIdentifier>{22d6d055-167f-4e75-8ed2-a5b318137154}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="program\PipelineProgram.inl" />
   </ItemGroup>
 </Project>

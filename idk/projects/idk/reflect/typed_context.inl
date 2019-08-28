@@ -55,11 +55,14 @@ namespace idk::reflect::detail
 
 
 		virtual void copy_assign(void* lhs, const void* rhs) const = 0;
+		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const = 0;
+		virtual ReflectedTypes get_mega_variant(void* obj) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
 		virtual uni_container to_container(void* obj) const = 0;
 		virtual enum_value to_enum_value(void* obj) const = 0;
 		virtual vector<dynamic> unpack(void* obj) const = 0;
+		virtual dynamic get_variant_value(void* obj) const = 0;
 
 		template<typename... Ts>
 		dynamic construct(Ts&& ... args) const
@@ -128,6 +131,31 @@ namespace idk::reflect::detail
 				*static_cast<T*>(lhs) = *static_cast<const T*>(rhs);
 		}
 
+		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const override
+		{
+			std::visit([lhs](auto&& arg)
+			{
+				if constexpr (std::is_convertible_v<decltype(arg), T>)
+				{
+					if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
+						*static_cast<T*>(lhs) = static_cast<T>(arg);
+					else
+						*static_cast<T*>(lhs) = arg;
+				}
+				else
+					throw "Cannot assign rhs to lhs";
+			}, rhs);
+		}
+
+		virtual ReflectedTypes get_mega_variant(void* obj) const override
+		{
+			obj;
+			if constexpr (is_variant_member_v<std::decay_t<T>, ReflectedTypes>)
+				return *static_cast<T*>(obj);
+			else
+				throw "Not part of idk::reflect::ReflectedTypes!";
+		}
+
 		dynamic default_construct() const override
 		{
 			if constexpr (!std::is_default_constructible_v<T>)
@@ -158,9 +186,15 @@ namespace idk::reflect::detail
 		{
 			obj;
 			if constexpr (is_macro_enum_v<T>)
-				return get_type<T>().as_enum_type().from_value(T::_enum(*static_cast<T*>(obj)));
+				return get_type<T>().as_enum_type().from_value(*static_cast<T*>(obj));
 			else
 				throw "not an enum!";
+		}
+
+		template<size_t... Is>
+		void unpack_helper(vector<dynamic>& vec, void* obj, std::index_sequence<Is...>) const
+		{
+			(vec.push_back(std::get<Is>(*static_cast<T*>(obj))), ...);
 		}
 
 		vector<dynamic> unpack(void* obj) const override
@@ -176,10 +210,33 @@ namespace idk::reflect::detail
 				throw "not a tuple!";
 		}
 
-		template<size_t... Is>
-		void unpack_helper(vector<dynamic>& vec, void* obj, std::index_sequence<Is...>) const
+		template<typename... Ts>
+		dynamic get_variant_value(variant<Ts...>& var) const
 		{
-			(vec.push_back(std::get<Is>(*static_cast<T*>(obj))), ...);
+#define VARIANT_INDEX(I) case I: return std::get<I>(var);
+#define VARIANT_CASE(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VARIANT_INDEX, __VA_ARGS__)) default: throw "Unhandled case?"; } }
+					 VARIANT_CASE(1, 0)
+				else VARIANT_CASE(2, 1, 0)
+				else VARIANT_CASE(3, 2, 1, 0)
+				else VARIANT_CASE(4, 3, 2, 1, 0)
+				else VARIANT_CASE(5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(7, 6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(8, 7, 6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+				else VARIANT_CASE(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+				else throw "Unhandled case?";
+#undef VISIT_INDEX
+#undef VARIANT_CASE
+		}
+
+		virtual dynamic get_variant_value(void* obj) const override
+		{
+			obj;
+			if constexpr (is_template_v<T, std::variant>)
+				return get_variant_value(*static_cast<T*>(obj));
+			else
+				throw "not a variant!";
 		}
 	};
 

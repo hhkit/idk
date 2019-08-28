@@ -32,7 +32,9 @@ namespace idk
 		Scheduler::Lock write_bitset = detail::SchedulerHelper<Cs...>::GetWriteLock();
 		auto call = [mem_fn]()
 		{
-			std::invoke(mem_fn, Core::GetSystem<System>(), GameState::GetGameState().GetObjectsOfType<Cs>()...);
+			auto sys = &Core::GetSystem<System>();
+			if (sys)
+				std::invoke(mem_fn, sys, GameState::GetGameState().GetObjectsOfType<Cs>()...);
 		};
 
 		SchedulePass<phase>(Pass{ read_bitset, write_bitset, call, name });

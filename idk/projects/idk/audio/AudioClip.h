@@ -38,26 +38,35 @@ namespace idk
 		AudioClip();
 		~AudioClip();
 
-		void Play(); //If audio is not unique, it will duplicate another sound to play. Else, it will stop and replay a new sound.
-		void Stop();
-		void Pause();
-		void Unpause();
+		void	Play(); //If audio is not unique, it will duplicate another sound to play. Else, it will stop and replay a new sound. By default, will stop current sound and replay.
+		void	Stop();
 
+		void	SetIsPaused(bool i);
+		bool	GetIsPaused();
 		void	SetVolume(float i);
-		float	GetVolume();
+		float	GetVolume() const;
 		void	SetPitch(float i);
-		float	GetPitch();
+		float	GetPitch() const;
 		void	SetPriority(int i);
-		int		GetPriority();
+		int		GetPriority() const;
+		void	SetIsLoop(bool i);
+		bool	GetIsLoop() const;
+		void	SetIsUnique(bool i);
+		bool	GetIsUnique() const;
+		void	SetIs3DSound(bool i);
+		bool	GetIs3DSound() const;
+		void	SetMinDistance(float i);
+		float	GetMinDistance() const;
+		void	SetMaxDistance(float i);
+		float	GetMaxDistance() const;
 
 		void ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
 
 		AudioClipInfo GetAudioClipInfo();	//Returns a readonly information of the sound.
-		void UpdateChannel(); //Updates the channel to null if it is not playing. It's important to update the channel before doing anything to it.
 
 	private:
 		friend class AudioSystem;			//The AudioSystem will have access to AudioClip's variables
-		friend class AudioClipFactory;		//The AudioSystem will have access to AudioClip's variables
+		friend class AudioClipFactory;		//The AudioClipFactory will have access to AudioClip's variables
 
 		FMOD::Sound*	_soundHandle	{ nullptr };	//A handle to FMOD_Sound object. It contains some sound info data as well, but it is wrapped to the AudioClipInfo on CreateSound.
 		FMOD::Channel*	_soundChannel	{ nullptr };	//Whenever a sound is played, this pointer becomes valid
@@ -66,16 +75,20 @@ namespace idk
 
 		float	volume		{ 1.0f		};	//Default = 1 Range: [0,1]
 		float	pitch		{ 1.0f		};	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
-		float	minDistance	{ 100.0f	};	//Minimum distance where volume is at max					 
-		float	frequency	{ 48000.0f	};	//Playback frequency. default = 48000 	 
-		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 
+		float	minDistance	{ 1.0f		};	//Minimum distance where volume is at max. This is in meters					 
+		float	maxDistance	{ 100.0f	};	//Maximum distance where i can hear the sound. This is in meters					 
+		float	frequency	{ 44100.0f	};	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
+		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 //These are not saved, rather it is controlled by which SoundGroup it is at. 
 		bool	isPlaying	{ false		};	//Is the audio currently playing? If the audio is paused, it is still considered playing!
 		bool	is3Dsound	{ true		};	//Does this sound follow the the gameobject position?
-		bool	isUnique	{ false		};	//When I call play, does it duplicate? Or replay the sound again?
-		bool	loop		{ false		};	//Does this audio loop?
+		bool	isUnique	{ true		};	//When I call play, does it duplicate? Or replay the sound again?
+		bool	isLoop		{ false		};	//Does this audio loop?
 
 
-		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode
+		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
+		void UpdateChannel(); //Updates the channel to null if it is not playing. It's important to update the channel before doing anything to it.
+		void UpdateFmodMode(); //A wrapper.
+		void UpdateMinMaxDistance(); //A wrapper.
 	};
 
 }

@@ -77,6 +77,18 @@
     <Filter Include="scene">
       <UniqueIdentifier>{08f522a2-1b53-4a51-a302-0433f32e7f80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{148836fd-f730-4b91-b802-ac1fb0c2f6c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\camera">
+      <UniqueIdentifier>{0d1b9113-c907-43df-b410-c093c7174929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\object">
+      <UniqueIdentifier>{d25200eb-6b2c-4974-ab2d-f1f2adee7057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\interp">
+      <UniqueIdentifier>{c78cfeac-2107-48ce-841f-4eabae9d7857}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -134,9 +146,6 @@
       <Filter>core\systems</Filter>
     </ClInclude>
     <ClInclude Include="app\Application.h">
-      <Filter>app</Filter>
-    </ClInclude>
-    <ClInclude Include="app\TestSystem.h">
       <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="core\SystemManager.h">
@@ -281,31 +290,90 @@
     <ClInclude Include="audio\AudioListener.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Mesh.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
     <ClInclude Include="audio\AudioSource.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\vertex_descriptor.h">
-      <Filter>gfx</Filter>
+    <ClInclude Include="phys\RigidBody.h">
+      <Filter>phys</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Material.h">
-      <Filter>gfx</Filter>
+    <ClInclude Include="phys\Collider.h">
+      <Filter>phys</Filter>
     </ClInclude>
-    <ClInclude Include="anim\BoneRenderer.h">
-      <Filter>gfx</Filter>
+    <ClInclude Include="shape\sphere.h">
+      <Filter>shapes</Filter>
     </ClInclude>
-    <ClInclude Include="IncludeResources.h">
+    <ClInclude Include="shape\ray.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\capsule.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shape\box.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\compressed_pair.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\small_string.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestSystem.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix_decomposition.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestComponent.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="math\comparable.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceMeta.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="IncludeComponents.h">
-      <Filter>core</Filter>
+    <ClInclude Include="event\Signal.h">
+      <Filter>event</Filter>
     </ClInclude>
-    <ClInclude Include="IncludeSystems.h">
-      <Filter>core</Filter>
+    <ClInclude Include="gfx\RenderObject.h">
+      <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MeshRenderer.h" />
+    <ClInclude Include="gfx\Material.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialInstance.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Mesh.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\SkinnedMeshRenderer.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Camera.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\vertex_descriptor.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\tuple.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\dual_set.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="math\euler_angles.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\interp\Spline.h">
+      <Filter>math\interp</Filter>
+    </ClInclude>
+    <ClInclude Include="util\align.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ExtensionLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -327,6 +395,39 @@
     <ClInclude Include="gfx\GfxDbgTest.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="math\random.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\tag.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ForwardingExtensionLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestResource.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ComponentTags.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeComponents.h" />
+    <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="IncludeResources.h" />
+    <ClInclude Include="file\FileSystemIncludes.h">
+      <Filter>file</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -344,9 +445,6 @@
     </ClCompile>
     <ClCompile Include="math\quaternion.cpp">
       <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="app\TestSystem.cpp">
-      <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="core\SystemManager.cpp">
       <Filter>core\systems</Filter>
@@ -399,9 +497,6 @@
     <ClCompile Include="shape\aabb.cpp">
       <Filter>shapes</Filter>
     </ClCompile>
-    <ClCompile Include="math\color.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
     <ClCompile Include="scene\SceneFactory.cpp">
       <Filter>scene</Filter>
     </ClCompile>
@@ -432,14 +527,42 @@
     <ClCompile Include="audio\AudioSource.cpp">
       <Filter>audio</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="shape\sphere.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shape\ray.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TestSystem.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Camera.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="math\euler_angles.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
     <ClCompile Include="gfx\DebugRenderer.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\buffer_desc.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\GfxDbgTest.cpp" />
+    <ClCompile Include="math\random.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="res\FileResources.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\GfxDbgTest.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -543,6 +666,42 @@
     </None>
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
+    </None>
+    <None Include="ds\compressed_pair.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="ds\small_string.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="math\matrix_decomposition.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\comparable.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="event\Signal.inl">
+      <Filter>event</Filter>
+    </None>
+    <None Include="meta\tuple.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="math\color.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="ds\dual_set.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="meta\tag.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="res\FileResources.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ForwardingExtensionLoader.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceMeta.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

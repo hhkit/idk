@@ -111,7 +111,9 @@
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>call $(SolutionDir)tools\compile.bat
+      <Command>
+if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>
@@ -176,7 +178,9 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>call $(SolutionDir)tools\compile.bat
+      <Command>
+if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>

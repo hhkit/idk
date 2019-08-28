@@ -9,6 +9,7 @@ namespace idk
 		: public Resource<Mesh>
 	{
 	public:
-		virtual vtx::Flags attribsProvided() const = 0;
+		virtual int GetAttribs() const = 0;
+		virtual ~Mesh() = default;
 	};
 }

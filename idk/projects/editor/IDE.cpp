@@ -7,8 +7,7 @@
 
 namespace idk
 {
-	IDE::IDE(vkn::VulkanState& v)
-		:edtInterface{&v}
+	IDE::IDE():edtInterface{nullptr}
 	{
 	}
 
@@ -17,7 +16,7 @@ namespace idk
 		// do imgui stuff
 		vkn::VulkanWin32GraphicsSystem * vksys = &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>();
 		vkn::VulkanState* inst = &vksys->Instance();
-
+		edtInterface = edt::VI_Interface{ inst };
 		edtInterface.Init();
 	}
 

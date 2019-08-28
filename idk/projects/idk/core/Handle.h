@@ -83,4 +83,16 @@ namespace idk
 	};
 }
 
+namespace std
+{
+	template<typename T>
+	struct hash <idk::Handle<T>>
+	{
+		size_t operator()(const idk::Handle<T>& id) const noexcept
+		{
+			return std::hash<idk::u64>{}(id.id);
+		}
+	};
+}
+
 #include "Handle.inl"

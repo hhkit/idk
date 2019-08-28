@@ -4,12 +4,13 @@
 
 #include <core/Core.h>
 
+#include "InputManager.h"
 #include "WindowsApplication.h"
 
-namespace idk
+namespace idk::win
 {
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow)
-		: hInstance{ _hInstance }
+		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}
 	{
 		instance = this;
 		// Initialize global strings
@@ -34,9 +35,12 @@ namespace idk
 
 	}
 
+	Windows::~Windows() = default;
+
 	void Windows::PollEvents()
 	{
 		MSG msg;
+		_input_manager->SwapBuffers();
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -46,7 +50,6 @@ namespace idk
 			}
 		}
 
-		retval = (int)msg.wParam;
 	}
 	int Windows::GetReturnVal()
 	{
@@ -64,6 +67,22 @@ namespace idk
 		winProcList.push_back(func); 
 	}
 
+	bool Windows::GetKeyDown(Key key)
+	{
+		return _input_manager->GetKeyDown(static_cast<int>(key));
+	}
+	bool Windows::GetKey(Key key)
+	{
+		return _input_manager->GetKey(static_cast<int>(key));
+	}
+	bool Windows::GetKeyUp(Key key)
+	{
+		return _input_manager->GetKeyUp(static_cast<int>(key));
+	}
+	char Windows::GetChar()
+	{
+		return _input_manager->GetChar();
+	}
 	LRESULT Windows::WndProc(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (_hWnd != hWnd)
@@ -74,6 +93,17 @@ namespace idk
 
 		switch (message)
 		{
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+			_input_manager->SetKeyDown((int)wParam);
+			break;
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+			_input_manager->SetKeyUp((int)wParam);
+			break;
+		case WM_CHAR:
+			_input_manager->SetChar((char)wParam);
+			break;
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
 			break;
@@ -82,6 +112,9 @@ namespace idk
 			break;
 		case WM_NCDESTROY:
 			Core::Shutdown();
+			break;
+		case WM_QUIT:
+			retval = (int)wParam;
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
@@ -139,9 +172,9 @@ namespace idk
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (idk::Windows::instance)  // See Note 1 below
+	if (idk::win::Windows::instance)  // See Note 1 below
 		// Call member function if instance is available
-		return idk::Windows::instance->WndProc(hWnd, message, wParam, lParam);
+		return idk::win::Windows::instance->WndProc(hWnd, message, wParam, lParam);
 	else
 		// Otherwise perform default message handling
 		return DefWindowProc(hWnd, message, wParam, lParam);

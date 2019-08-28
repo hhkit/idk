@@ -23,11 +23,10 @@ namespace FS = std::filesystem;
 			vfs.Init();\
 			string exe_dir = string{ vfs.GetExeDir().data() };\
 			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir");\
-			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir2/recurse_dir");\
 			{	std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_sub_dir1/test_sub_file.txt" }; \
 				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_read.txt"};\
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt"};\
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir2/recurse_dir/recurse_sub_file.txt"};}\
+				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt"};};\
+			std::filesystem::remove_all(string{ exe_dir + "/resource/FS_UnitTests/test_dir_2/" }.c_str());\
 			remove(string {exe_dir + "/resource/FS_UnitTests/test_watch.txt"	}.c_str());\
 			remove(string {exe_dir + "/resource/FS_UnitTests/test_write.txt"	}.c_str());\
 			vfs.Mount( exe_dir + "/resource/FS_UnitTests/", "/FS_UnitTests");
@@ -55,23 +54,85 @@ TEST(FileSystem, TestFileWatchBasic)
 	// Test create:
 	{
 		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
+
+		vfs.Update();
+
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		EXPECT_TRUE(changes.size() == 1);
+		// No files deleted
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		EXPECT_TRUE(changes.size() == 0);
+
+		// Checking if we resolved all changes properly
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
 	}
-	vfs.Update();
+	
 	
 	// Test Write
 	{
 		std::ofstream of{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test_Watch" << std::endl;
+		vfs.Update();
+
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+		EXPECT_TRUE(changes.size() == 1);
+		// No files deleted
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		EXPECT_TRUE(changes.size() == 0);
+
+		// Checking if we resolved all changes properly
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
 	}
-	vfs.Update();
 
 	// Test Delete
 	{
 		string remove_file = exe_dir + "/resource/FS_UnitTests/test_watch.txt";
 		EXPECT_TRUE(remove(remove_file.c_str()) == 0);
-	}
-	vfs.Update();
+		vfs.Update();
 
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		EXPECT_TRUE(changes.size() == 1);
+		// No files deleted
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		EXPECT_TRUE(changes.size() == 0);
+
+		// Checking if we resolved all changes properly
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
+	}
+
+	// Create Dir then create file inside dir
+	{
+		FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_dir_2/");
+		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_dir_2/blah.txt", std::ios::out };
+		vfs.Update();
+
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
+
+		remove(string(exe_dir + "/resource/FS_UnitTests/test_dir_2/blah.txt").c_str());
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+	}
+	
 	// Test Create 2 Files-> Delete 1st one -> Create 1 File (Should have the same handle and prev handle should be invalidated)
 }
 

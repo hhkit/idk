@@ -3,6 +3,8 @@
 #include <res/Resource.h>
 
 #include <gfx/vertex_descriptor.h>
+#include <gfx/RenderObject.h>
+#include <gfx/MaterialInstance.h>
 
 namespace idk
 {
@@ -15,13 +17,14 @@ namespace idk
 	public:
 		bool enabled { true };
 
-		RscHandle<Mesh>     mesh;
-		RscHandle<Material> material;
+		RscHandle<Mesh>  mesh;
+		MaterialInstance material_instance;
 
 		bool cast_shadows   { true };
 		bool receive_shadows{ true };
 
 		bool IsActiveAndEnabled() const;
+		RenderObject GenerateRenderObject() const;
 
 		static const renderer_reqs& GetRequiredAttributes();
 	};

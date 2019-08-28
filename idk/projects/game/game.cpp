@@ -5,17 +5,14 @@
 #include <core/Core.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/VulkanDebugRenderer.h>
-#include <idk_opengl/OpenGLGraphicsSystem.h>
+#include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 #include <editor/IDE.h>
 
-enum class GraphicsLibrary
-{
-	OpenGL,
-	Vulkan,
-	Default = Vulkan
-};
+#include <gfx/MeshRenderer.h>
+#include <scene/SceneManager.h>
+#include <test/TestComponent.h>
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -29,25 +26,34 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     
 	using namespace idk;
 	
-	auto c = Core{};
-	auto& wind = c.AddSystem<Windows>(hInstance, nCmdShow);
+	auto c = std::make_unique<Core>();
+	c->AddSystem<Windows>(hInstance, nCmdShow);
 
-	switch (GraphicsLibrary::Default)
+	switch (GraphicsAPI::Default)
 	{
-		case GraphicsLibrary::Vulkan:
-		{
-			auto& gfx_sys = c.AddSystem<vkn::VulkanWin32GraphicsSystem>(wind);
-			c.AddSystem<vkn::VulkanDebugRenderer>(gfx_sys.Instance());
-			c.AddSystem<IDE>(gfx_sys.Instance());
-		}
+		case GraphicsAPI::Vulkan:
+			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+			c->AddSystem<IDE>();
 			break;
-		case GraphicsLibrary::OpenGL:
-			c.AddSystem<ogl::Win32GraphicsSystem>();
+		case GraphicsAPI::OpenGL:
+			c->AddSystem<ogl::Win32GraphicsSystem>();
 			break;
 		default:
 			break;
 	}
-	c.Run();
+
+	c->Setup();
+
+	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
+	auto go = scene->CreateGameObject();	
+	go->AddComponent<TestComponent>();
+	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	
-	return c.GetSystem<Windows>().GetReturnVal();
+	//mesh_rend->material_instance.material = Core::GetResourceManager().Create<Material>("/assets/shader/flat_color.frag");
+	c->Run();
+	
+	auto retval = c->GetSystem<Windows>().GetReturnVal();
+	c.reset();
+	return retval;
 }

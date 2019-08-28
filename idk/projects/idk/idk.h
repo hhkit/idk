@@ -1,4 +1,5 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
 #include <array>
 #include <vector>
 #include <unordered_set>
@@ -42,6 +43,8 @@ namespace idk
 	using bvec3 = math::vector<bool, 3>;
 	using bvec4 = math::vector<bool, 4>;
 
+	using idk::color;
+
 	using quat = math::quaternion<real>;
 	
 	using mat2 = math::matrix<real, 2, 2>;
@@ -60,9 +63,10 @@ namespace idk
 	auto duration_cast(U&& time) {	return std::chrono::duration_cast<T>(std::forward<U>(time));	};
 
 	// math constants
-	constexpr auto pi = math::constants::pi<real>();
+	constexpr auto pi      = math::constants::pi<real>();
 	constexpr auto half_pi = pi / 2;
-	constexpr auto two_pi = math::constants::tau<real>();
+	constexpr auto two_pi  = math::constants::tau<real>();
+	constexpr auto epsilon = math::constants::epsilon<real>();
 
 	// containers
 	using byte = std::byte;
@@ -95,6 +99,9 @@ namespace idk
 
 	template<typename ... Ts>
 	using variant = std::variant<Ts...>;
+
+	template<bool val>
+	using sfinae = std::enable_if_t<val>;
 
 	// smart pointers
 	template<typename T>

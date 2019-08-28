@@ -1,5 +1,5 @@
 #pragma once
-
+#include <meta/tuple.h>
 namespace idk
 {
 	constexpr auto MaxScene = 8;
@@ -14,13 +14,14 @@ namespace idk
 		//, class Prefab
 
 		/// PHYSICS
-		//,	class RigidBody
-		//,	class Collider
+		,	class RigidBody
+		,	class Collider
 		//, class Constraint
 
 		/// GRAPHICS
 		,	class MeshRenderer
-		//,   class BoneRenderer
+		,   class Camera
+		//,   class SkinnedMeshRenderer
 		//, class Light
 
 		/// ANIMATION
@@ -30,14 +31,16 @@ namespace idk
 		//,	class MonoBehavior
 
 		/// AUDIO
+		,	class AudioSource
+		,	class AudioListener
 		//,	class AudioSource
 		//, class AudioListener
-	>;
-	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
 
+		, class TestComponent
+	>;
+	
 	using Systems = std::tuple<
 		class Application
-		,	class TestSystem
 		,	class FileSystem
 		//,	class InputSystem
 		//,	class ScriptSystem
@@ -48,6 +51,7 @@ namespace idk
 		,	class ResourceManager
 		,	class SceneManager
 		,	class IEditor
+		,   class TestSystem
 	>;
 
 	using Resources = std::tuple<
@@ -56,12 +60,20 @@ namespace idk
 		,   class AudioClip
 		//,	class Texture
 		//,	class Font
-		//,	class Mesh
+		//, class Skeleton
+		//,   class ShaderModel
+		,	class Mesh
+		,   class Material
 		//,	class Animation
 		//,	class Level
 	>;
 
-	constexpr auto SystemCount = std::tuple_size_v<Systems>;
-	constexpr auto ResourceCount = std::tuple_size_v<Resources>;
+	template<typename Component> constexpr auto ComponentID = index_in_tuple_v<Component, Components>;
+	template<typename System>    constexpr auto SystemID    = index_in_tuple_v<System, Systems>;
+	template<typename Resource>  constexpr auto ResourceID  = index_in_tuple_v<Resource, Resources>;
+
+	constexpr auto ComponentCount = std::tuple_size_v<Components>;
+	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
+	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
 
 }
