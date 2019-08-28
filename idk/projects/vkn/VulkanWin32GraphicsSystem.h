@@ -33,6 +33,7 @@ namespace idk::vkn
 
 		VulkanState& GetVulkanHandle();
 	private:
+		void RenderGraphicsState(const GraphicsState&);
 		std::unique_ptr<VulkanState> instance_;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>

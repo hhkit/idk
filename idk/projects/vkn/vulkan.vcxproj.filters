@@ -51,6 +51,15 @@
     <ClInclude Include="idkTexture.h">
       <Filter>render</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanMesh.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMeshFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -99,6 +108,10 @@
     <ClCompile Include="idkTexture.cpp">
       <Filter>render</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanMeshFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -118,6 +131,9 @@
     </Filter>
     <Filter Include="fwd">
       <UniqueIdentifier>{855c816b-63e0-4efa-9da1-75521cd0c075}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{5229d71f-e8fc-4257-80e2-cac5241884d3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
