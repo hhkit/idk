@@ -6,8 +6,8 @@
 #include <file/FileHandle.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
-#include <res/ExtensionLoader.h>
 #include <res/FileResources.h>
+#include <res/ExtensionLoader.h>
 #include <meta/meta.h>
 #include <meta/tag.h>
 
@@ -26,12 +26,13 @@ namespace idk
 
 		void Init() override;
 		void Shutdown() override;
+		void WatchDirectory();
 
 		// loading ops
 		void LoadDefaultResources();
 		template<typename Factory, typename ... Args>
 		Factory& RegisterFactory(Args&& ...);
-		template<typename ExtensionLoader, typename ... Args>
+		template<typename ExtensionLoaderT, typename ... Args>
 		ExtensionLoader& RegisterExtensionLoader(std::string_view extension, Args&& ...);
 
 		// handle ops
@@ -49,9 +50,9 @@ namespace idk
 
 		// file operations
 		FileResources LoadFile(FileHandle path_to_file);
-		FileResources ReloadFile(std::string_view path_to_file);
-		size_t        UnloadFile(std::string_view path_to_file);
-		FileResources GetFileResources(std::string_view path_to_file);
+		FileResources ReloadFile(FileHandle path_to_file);
+		size_t        UnloadFile(FileHandle path_to_file);
+		FileResources GetFileResources(FileHandle path_to_file);
 
 	private:
 		using GenPtr = shared_ptr<void>;

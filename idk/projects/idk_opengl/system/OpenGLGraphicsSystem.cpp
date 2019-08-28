@@ -4,6 +4,7 @@
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <gfx/MeshRenderer.h>
+#include <res/ForwardingExtensionLoader.h>
 
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
@@ -153,6 +154,7 @@ namespace idk::ogl
 	{	
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

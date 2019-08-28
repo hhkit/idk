@@ -3,7 +3,7 @@
 
 namespace idk
 {
-	GenericRscHandle::operator bool()
+	GenericRscHandle::operator bool() const
 	{
 		return std::visit([](auto handle) { return static_cast<bool>(handle); }, _handle);
 	}
@@ -14,14 +14,14 @@ namespace idk
 
 		for (auto& handle : resources.resources)
 		{
-			std::visit([&](auto&& h)
+			handle.visit([&](auto&& h)
 			{
 				SerializedResourceMeta m;
 				m.guid = h.guid;
 				if constexpr(has_tag_v<std::decay_t<decltype(h)>::Resource, MetaTag>)
 					m.metadata = reflect::dynamic(h->GetMeta());
 				retval.emplace_back(m);
-			}, handle._handle);
+			});
 		}
 
 		return retval;

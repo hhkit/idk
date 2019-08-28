@@ -12,12 +12,17 @@ namespace idk
 	{
 	public:
 		template<typename Resource>
+		GenericRscHandle(const RscHandle<Resource>&);
+
+		template<typename Resource>
 		RscHandle<Resource> As() const;
-		explicit operator bool();
+		template<typename Func> auto visit(Func&& func);
+		template<typename Func> auto visit(Func&& func) const;
+
+		explicit operator bool() const;
 	private:
 		detail::ResourceFile_helper<Resources>::GenericRscHandle _handle;
 		friend class ResourceManager;
-		friend vector<SerializedResourceMeta> serialize(const FileResources& resources);
 	};
 
 	struct FileResources
