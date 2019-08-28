@@ -57,7 +57,7 @@ namespace idk
 		else
 		{
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
-			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
 		}
 		Core::GetSystem<FileSystem>();
 		// main loop

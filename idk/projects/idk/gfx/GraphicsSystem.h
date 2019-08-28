@@ -1,26 +1,52 @@
 #pragma once
-
+#include <idk.h>
 #include <core/ISystem.h>
 #include <ds/span.h>
-
+#include <gfx/RenderObject.h>
+#include <gfx/Camera.h>
 namespace idk
 {
+	//Temp Usings, replace when implementations are in.
+	using RenderTexHandle = uint32_t;
 	enum class GraphicsAPI
 	{
 		OpenGL,
 		//	DirectX,
 		Vulkan,
-		Default = Vulkan
+		Default = OpenGL
 	};
 
 	class GraphicsSystem
 		: public ISystem
 	{
+		using CameraData = Camera;//Replace if camera cannot be stored by copy.
 	public:
 		void Init() override = 0;
 		void Shutdown() override = 0;
-		virtual void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) = 0;
-		virtual void RenderBuffer() = 0;
+		//Converts the Renderers and transforms stores the render data into a buffer
+		virtual void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>, span<const Camera> camera);
+		virtual void RenderRenderBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;
+	protected:
+		struct GraphicsState
+		{
+			CameraData           camera;
+			//RenderTexHandle      render_target;//Get RenderTarget from camera.
+			vector<RenderObject> mesh_render;
+			vector<RenderObject> skinned_mesh_render;
+		};
+		struct RenderBuffer
+		{
+			vector<GraphicsState> states;
+		};
+		// triple buffered render state
+		array<RenderBuffer, 3> object_buffer;
+		unsigned               curr_write_buffer = 0;
+		unsigned               curr_draw_buffer  = 1;
+		bool                   write_buffer_dirty = false;
+	private:
+		void SwapWritingBuffer();
+		void SubmitBuffers(RenderBuffer&& buffer);
+
 	};
 }

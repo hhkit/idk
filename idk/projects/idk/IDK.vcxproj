@@ -147,6 +147,7 @@
     <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="file\FileHandle.cpp" />
     <ClCompile Include="gfx\Camera.cpp" />
+    <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
