@@ -22,6 +22,8 @@ namespace idk
 
 		void UpdateListenerPosition();
 
+		bool is_active{ false };
+
 	};
 
 }

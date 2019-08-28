@@ -4,6 +4,12 @@
 //@param	Email : izha95\@hotmail.com
 //@date		12 AUG 2019
 //@brief	Unit test Commands. All these classes will be moved to separate editor classes once tested.
+/*
+
+These commands are only to be used in editor
+
+
+*/
 //////////////////////////////////////////////////////////////////////////////////
 
 
