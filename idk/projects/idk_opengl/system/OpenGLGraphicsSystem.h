@@ -17,7 +17,9 @@ namespace idk::ogl
 		void LateInit()     override;
 		void Shutdown()     override;
 		GraphicsAPI GetAPI() override;
+		OpenGLState& Instance();
 		void RenderRenderBuffer() override;
+		void SwapBuffer() override;
 	private:
 		HDC   _windows_context;
 		HGLRC _opengl_context;

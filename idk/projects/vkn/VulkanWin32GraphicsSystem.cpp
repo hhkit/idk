@@ -4,7 +4,7 @@
 #include <WindowsApplication.h>
 
 #include <vkn/VulkanState.h>
-
+#include <vkn/VulkanMesh.h>
 #include <core/Core.h>
 
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -45,7 +45,11 @@ namespace idk::vkn
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		for (auto& state : curr_buffer.states)
 		{
+			RenderGraphicsState(state);//We may be able to multi thread this
 		}
+	}
+	void VulkanWin32GraphicsSystem::SwapBuffer()
+	{
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()
 	{
@@ -66,6 +70,15 @@ namespace idk::vkn
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{
 		return *(instance_.get());
+	}
+	void VulkanWin32GraphicsSystem::RenderGraphicsState(const GraphicsState& state)
+	{
+		for (auto& obj : state.mesh_render)
+		{
+			//TODO Grab everything and render them
+			auto& mesh = obj.mesh.as<VulkanMesh>();
+			
+		}
 	}
 	/*void VulkanWin32GraphicsSystem::createInstance()
 	{

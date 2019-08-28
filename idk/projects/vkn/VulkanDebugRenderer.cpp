@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <core/Core.h>
 #include <vulkan/vulkan.hpp>
 
 #include <math/matrix_transforms.h>
@@ -8,6 +9,7 @@
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
+#include <vkn/VulkanWin32GraphicsSystem.h>
 
 #include "VulkanDebugRenderer.h"
 namespace idk::vkn
@@ -63,8 +65,9 @@ namespace idk::vkn
 	};
 
 	
-	VulkanDebugRenderer::VulkanDebugRenderer(VulkanState& vulkan):vulkan_{&vulkan}
+	VulkanDebugRenderer::VulkanDebugRenderer():vulkan_{&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().GetVulkanHandle()}
 	{
+		
 	}
 
 

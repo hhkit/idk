@@ -51,9 +51,16 @@ namespace idk::ogl
 		glClearColor(0.f, 0.f, 0.25f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		_opengl->RenderDrawBuffer();
-
+		_opengl->RenderDrawBuffer();	
+	}
+	void Win32GraphicsSystem::SwapBuffer()
+	{
 		::SwapBuffers(_windows_context);
+	}
+	OpenGLState& Win32GraphicsSystem::Instance()
+	{
+		// TODO: insert return statement here
+		return *_opengl;
 	}
 	void Win32GraphicsSystem::CreateContext()
 	{
