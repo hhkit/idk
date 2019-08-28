@@ -4,7 +4,7 @@
 #include <imgui/imgui.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/VulkanState.h>
-#include <loading/FBXLoader.h>
+#include <loading/OpenGLFBXLoader.h>
 
 namespace idk
 {

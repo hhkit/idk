@@ -12,7 +12,7 @@
     </ClInclude>
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
     <ClInclude Include="loading\OpenGLFBXLoader.h">
-      <Filter>assimp</Filter>
+      <Filter>loaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -22,7 +22,7 @@
       <Filter>editor\commands</Filter>
     </ClCompile>
     <ClCompile Include="loading\OpenGLFBXLoader.cpp">
-      <Filter>assimp</Filter>
+      <Filter>loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -33,7 +33,7 @@
       <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
-    <Filter Include="assimp">
+    <Filter Include="loaders">
       <UniqueIdentifier>{5d865121-716d-4d61-80f0-14416a3e4e86}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
