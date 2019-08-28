@@ -4,6 +4,7 @@
 #include <imgui/imgui.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/VulkanState.h>
+#include <loading/OpenGLFBXLoader.h>
 
 namespace idk
 {
@@ -18,6 +19,14 @@ namespace idk
 		vkn::VulkanState* inst = &vksys->Instance();
 		edtInterface = edt::VI_Interface{ inst };
 		edtInterface.Init();
+
+		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
+		{
+		case GraphicsAPI::OpenGL:
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
+		default:
+			break;
+		}
 	}
 
 	void IDE::Shutdown()

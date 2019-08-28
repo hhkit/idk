@@ -7,16 +7,21 @@ namespace idk
 	template<typename T>
 	inline FileResources ForwardingExtensionLoader<T>::Create(FileHandle path_to_resource)
 	{
-		return Core::GetResourceManager().Create<T>(path_to_resource);
+		FileResources retval;
+		retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource));
+		return retval;
 	}
 
 	template<typename T>
 	inline FileResources ForwardingExtensionLoader<T>::Create(FileHandle path_to_resource, span<SerializedResourceMeta> metadatas)
 	{
 		assert(metadatas.size() == 1);
-		if constexpr(has_tag_v<T, MetaTag>)
-			Core::GetResourceManager().Create<T>(path_to_resource, metadatas[0].guid, metadatas[0].metadata.get<typename T::Meta>())
+		FileResources retval;
+		if constexpr (has_tag_v<T, MetaTag>)
+			retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas[0].guid, metadatas[0].metadata.get<typename T::Meta>()));
 		else
-			return Core::GetResourceManager().Create<T>(path_to_resource, metadatas[0].guid);
+			retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas[0].guid));
+
+		return retval;
 	}
 }

@@ -563,6 +563,7 @@
     <ClCompile Include="gfx\GfxDbgTest.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

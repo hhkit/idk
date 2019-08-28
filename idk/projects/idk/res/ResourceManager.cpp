@@ -54,6 +54,16 @@ namespace idk
 		for (auto& elem : _default_resources)
 			elem.reset();
 	}
+
+	void ResourceManager::WatchDirectory()
+	{
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
+			LoadFile(elem);
+
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+			ReloadFile(elem);
+	}
+	
 	void ResourceManager::LoadDefaultResources()
 	{
 		//default_resources_ = detail::ResourceHelper::GenDefaults();
@@ -74,7 +84,6 @@ namespace idk
 			return FileResources{};
 
 		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-
 		if (loader_itr == _extension_loaders.end())
 			return FileResources{};
 
@@ -89,21 +98,30 @@ namespace idk
 		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
 		return resources;
 	}
-	FileResources ResourceManager::ReloadFile(std::string_view path_to_file)
+	FileResources ResourceManager::ReloadFile(FileHandle file)
 	{
-		auto find_file = _loaded_files.find(string{ path_to_file });
+		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
 		if (find_file == _loaded_files.end())
 			return FileResources();
 
 		// save old meta
-		// NEED SOME WAY TO SAVE OLD METAS
+		auto ser = serialize(find_file->second);
 
 		// unload resources
-		UnloadFile(path_to_file);
+		UnloadFile(file);
+
+		// get loader
+		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
+		if (loader_itr == _extension_loaders.end())
+			return FileResources{};
+
+		// reload resources
+		auto stored = loader_itr->second->Create(file, span<SerializedResourceMeta>{ser});
+		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
 	}
-	size_t ResourceManager::UnloadFile(std::string_view path_to_file)
+	size_t ResourceManager::UnloadFile(FileHandle path_to_file)
 	{
-		auto find_file = _loaded_files.find(string{ path_to_file });
+		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
 		if (find_file == _loaded_files.end())
 			return 0;
 
@@ -119,9 +137,9 @@ namespace idk
 		return retval;
 	}
 
-	FileResources ResourceManager::GetFileResources(string_view path_to_file)
+	FileResources ResourceManager::GetFileResources(FileHandle path_to_file)
 	{
-		auto find_file = _loaded_files.find(string{ path_to_file });
+		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
 		if (find_file != _loaded_files.end())
 			return find_file->second;
 		else

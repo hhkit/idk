@@ -9,7 +9,7 @@
 #include <win32/WindowsApplication.h>
 #include <reflect/ReflectRegistration.h>
 #include <editor/IDE.h>
-
+#include <file/FileSystem.h>
 #include <gfx/MeshRenderer.h>
 #include <scene/SceneManager.h>
 #include <test/TestComponent.h>
@@ -50,7 +50,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	
-	//mesh_rend->material_instance.material = Core::GetResourceManager().Create<Material>("/assets/shader/flat_color.frag");
+	mesh_rend->material_instance.material = 
+		Core::GetResourceManager().LoadFile(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag")).resources[0].As<Material>();
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

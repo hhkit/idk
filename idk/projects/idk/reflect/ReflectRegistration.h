@@ -93,6 +93,7 @@ REFLECT_VARS(scale, rotation, position)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
+REFLECT_VARS(is_active)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")

@@ -10,6 +10,7 @@
 #include <vulkan/vulkan_win32.h>
 #include <vkn/DescriptorsManager.h>
 #include <vkn/UboManager.h>
+#include <vkn/idkTexture.h>
 #undef max
 #undef min
 
@@ -229,6 +230,8 @@ namespace idk::vkn
 
 		std::unique_ptr<VulkanView> view_;
 
+		vector<idkTexture>					 m_textureList;
+
 
 		void createInstance();
 		void createSurface(HINSTANCE winstance, HWND wnd);
@@ -247,9 +250,22 @@ namespace idk::vkn
 		void createGraphicsPipeline();
 
 		void createFramebuffers();
+		
+		//Texture functions start//
 		void createTextureImage();
+
+		//In the future this is going to load all the image into the memory when vulkan inits
 		void createTextureImage(const string& imgPath);
-		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
+
+		//This two can be done tgt
+		////
+		void createTextureImageView();
+		void createTextureSampler();
+		////
+
+		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::UniqueImage& image, vk::UniqueDeviceMemory& imageMemory);
+		vk::UniqueImageView createImageView(vk::UniqueImage& img, vk::Format format);
+		//Texture functions end//
 
 		void createCommandPool();
 		void createVertexBuffers();

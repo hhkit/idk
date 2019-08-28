@@ -13,10 +13,10 @@ namespace idk
 		return *ptr;
 	}
 	template<typename ExtensionLoaderT, typename ... Args>
-	inline ExtensionLoaderT& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
+	inline ExtensionLoader& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
 	{
-		static_assert(std::is_base_of<ExtensionLoader, ExtensionLoaderT>, "can only register extension loaders");
-		return *(_extension_loaders[extension] = std::make_unique<ExtensionLoaderT>(std::forward<Args>(args)...));
+		static_assert(std::is_base_of_v<ExtensionLoader, ExtensionLoaderT>, "can only register extension loaders");
+		return *(_extension_loaders[string{ extension }] = std::make_unique<ExtensionLoaderT>(std::forward<Args>(args)...));
 	}
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create()
