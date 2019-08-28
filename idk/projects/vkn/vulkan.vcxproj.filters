@@ -48,6 +48,9 @@
     <ClInclude Include="vulkan_state_fwd.h">
       <Filter>fwd</Filter>
     </ClInclude>
+    <ClInclude Include="idkTexture.h">
+      <Filter>render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -91,6 +94,9 @@
       <Filter>descriptor_sets</Filter>
     </ClCompile>
     <ClCompile Include="draw_call.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="idkTexture.cpp">
       <Filter>render</Filter>
     </ClCompile>
   </ItemGroup>

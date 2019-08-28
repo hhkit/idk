@@ -14,6 +14,7 @@
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 
@@ -26,7 +27,7 @@ namespace idk
 }
 
 //Uncomment to disable validation
-#define WX_VAL_VULK
+//#define WX_VAL_VULK
 
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
@@ -447,6 +448,12 @@ namespace idk::vkn
 			if (!features.fillModeNonSolid) throw "unable to support fillmode non-solid";
 			return (features.fillModeNonSolid) ? 1.0f : 0.0f;
 		},
+			[](vk::PhysicalDeviceProperties const& , vk::PhysicalDeviceFeatures const& features)->float
+		{
+			//throw if this is a deal breaker.
+			if (!features.samplerAnisotropy) throw "unable to support samplerAnisotropy";
+			return (features.samplerAnisotropy) ? 1.0f : 0.0f;
+		},
 		};
 		float total = 0.0f;
 		try
@@ -746,6 +753,8 @@ namespace idk::vkn
 		//};
 		vk::PhysicalDeviceFeatures pdevFeatures{};
 		pdevFeatures.fillModeNonSolid = VK_TRUE;
+		pdevFeatures.samplerAnisotropy = VK_TRUE;
+
 		auto valLayers = GetValidationLayers();
 
 		vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
@@ -1149,21 +1158,152 @@ namespace idk::vkn
 
 	void VulkanState::createTextureImage()
 	{
-		//int texWidth, texHeight, texChannels;
-		//stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		//vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
+		int texWidth, texHeight, texChannels;
+		stbi_uc* pixels = stbi_load("texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
 
-		//if (!pixels) {
-		//	throw std::runtime_error("failed to load texture image!");
-		//}
+		if (!pixels) {
+			throw std::runtime_error("failed to load texture image!");
+		}
 
-		//vk::Buffer stagingBuffer;
-		//vk::DeviceMemory stagingBufferMemory;
+		auto res = hlp::CreateAllocBindBuffer(pdevice, *m_device, imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, dispatcher);
+
+		vk::UniqueBuffer stagingBuffer = std::move(res.first);
+		vk::UniqueDeviceMemory stagingBufferMemory = std::move(res.second);
+
+		idkTexture img;
+		img.size.x = texWidth;
+		img.size.y = texHeight;
+		img.sizeOnDevice = imageSize;
+		img.format = vk::Format::eR8G8B8A8Unorm;
+
+		m_device->mapMemory(*stagingBufferMemory, 0, imageSize, vk::MemoryMapFlags(), &img.rawData, dispatcher);
+		memcpy(img.rawData,pixels,static_cast<size_t>(imageSize));
+		m_device->unmapMemory(*stagingBufferMemory);
+
+		stbi_image_free(pixels);
 		
+		createImage(
+			texWidth, 
+			texHeight, 
+			img.format, 
+			vk::ImageTiling::eOptimal,
+			vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+			vk::MemoryPropertyFlagBits::eDeviceLocal,
+			img.vknData,
+			img.mem
+		);
+
+		//Ehhhhhhh
+		vk::CommandBufferAllocateInfo allocInfo
+		{
+			*m_commandpool
+			,vk::CommandBufferLevel::ePrimary
+			,1
+		};
+		auto commandBuffer = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
+		auto& cmd_buffer = *commandBuffer[0];
+		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.vknData, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+		hlp::CopyBufferToImage(cmd_buffer,m_graphics_queue,*stagingBuffer,img);
+		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.vknData, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+
+		m_textureList.emplace_back(std::move(img));
+
+		//m_device->destroyBuffer(stagingBuffer, nullptr, dispatcher);
+		//m_device->freeMemory(stagingBufferMemory,nullptr,dispatcher);
+		stagingBuffer.reset();
+		//m_device->freeMemory(*stagingBufferMemory, nullptr, dispatcher);
+		stagingBufferMemory.reset();
 	}
 
-	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
+	void VulkanState::createTextureImageView()
 	{
+		for (auto& elem : m_textureList)
+		{
+			elem.imageView = createImageView(elem.vknData,elem.format);
+		}
+	}
+
+	void VulkanState::createTextureSampler()
+	{
+		for (auto& elem : m_textureList)
+		{
+			vk::SamplerCreateInfo samplerInfo = {};
+			samplerInfo.magFilter = vk::Filter::eLinear;
+			samplerInfo.minFilter = vk::Filter::eLinear;
+			samplerInfo.addressModeU = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.addressModeV = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.addressModeW = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.anisotropyEnable = VK_TRUE;
+			samplerInfo.maxAnisotropy = 16;
+			samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
+			samplerInfo.unnormalizedCoordinates = VK_FALSE;
+			samplerInfo.compareEnable = VK_FALSE;
+			samplerInfo.compareOp = vk::CompareOp::eAlways;
+			samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
+
+			elem.sampler = std::move(m_device->createSamplerUnique(samplerInfo, nullptr, dispatcher));
+		}
+	}
+
+	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::UniqueImage& image, vk::UniqueDeviceMemory& imageMemory)
+	{
+		vk::ImageCreateInfo imageInfo = {};
+		imageInfo.imageType = vk::ImageType::e2D;
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = height;
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format;
+		imageInfo.tiling = tiling;
+		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+		imageInfo.usage = usage;
+		imageInfo.samples = vk::SampleCountFlagBits::e1;
+		imageInfo.sharingMode = vk::SharingMode::eExclusive;
+		/*
+		if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create image!");
+		}
+		*/
+		image = m_device->createImageUnique(imageInfo,nullptr,dispatcher);
+
+		//vkGetImageMemoryRequirements(device, image, &memRequirements);
+		vk::MemoryRequirements memRequirements = m_device->getImageMemoryRequirements(*image,dispatcher);
+
+		vk::MemoryAllocateInfo allocInfo = {};
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = hlp::findMemoryType(pdevice,memRequirements.memoryTypeBits, properties);
+
+		/*
+		if (m_device->allocateMemoryUnique(&allocInfo, nullptr, dispatcher) != vk::Result::eSuccess)
+			throw std::runtime_error("failed to allocate image memory");
+
+		m_device->alloca
+		*/
+		imageMemory = m_device->allocateMemoryUnique(allocInfo, nullptr, dispatcher);
+		
+		//if (vkAllocateMemory(*m_device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+		//	throw std::runtime_error("failed to allocate image memory!");
+		//}
+		//vkBindImageMemory(device, image, imageMemory, 0);
+
+		m_device->bindImageMemory(*image,*imageMemory,0,dispatcher);
+	}
+
+	vk::UniqueImageView VulkanState::createImageView(vk::UniqueImage& img, vk::Format format)
+	{
+		vk::ImageViewCreateInfo viewInfo;
+		viewInfo.image = *img;
+		viewInfo.viewType = vk::ImageViewType::e2D;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		return m_device->createImageViewUnique(viewInfo, nullptr, dispatcher);
 	}
 
 	void VulkanState::createCommandPool()
@@ -1701,6 +1841,13 @@ namespace idk::vkn
 		createGraphicsPipeline();
 		createFramebuffers();
 		createCommandPool();
+
+		//Can streamline further
+		createTextureImage();
+		createTextureImageView();
+		createTextureSampler();
+		//
+
 		createVertexBuffers();
 		createIndexBuffers();
 		createUniformBuffers();
@@ -2177,6 +2324,15 @@ namespace idk::vkn
 	{
 		m_device->waitIdle();
 		dbg_vertex_buffer.reset();
+
+		for (auto& elem : m_textureList)
+		{
+			elem.mem.reset();
+			elem.vknData.reset();
+			elem.imageView.reset();
+			elem.sampler.reset();
+		}
+		m_textureList.clear();
 		//instance.release();
 	}
 
