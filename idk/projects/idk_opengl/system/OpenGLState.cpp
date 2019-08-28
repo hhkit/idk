@@ -8,13 +8,14 @@
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
-
+#include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 
 namespace idk::ogl
 {
 	void OpenGLState::Setup()
 	{
+		sys = &Core::GetSystem<Win32GraphicsSystem>();
 		glGenVertexArrays(1, &vao_id);
 	}
 
@@ -36,15 +37,12 @@ namespace idk::ogl
 		);
 	}
 
-	void OpenGLState::SubmitBuffers(vector<RenderObject>&& mesh_render, vector<RenderObject>&& skinned_mesh_render)
-	{
-		object_buffer[curr_write_buffer].mesh_render         = std::move(mesh_render); 
-		object_buffer[curr_write_buffer].skinned_mesh_render = std::move(skinned_mesh_render);
-		SwapWritingBuffer();
-	}
 
 	void OpenGLState::RenderDrawBuffer()
 	{
+		auto& object_buffer = sys->object_buffer;
+		auto& curr_write_buffer = sys->curr_write_buffer;
+		auto& curr_draw_buffer = sys->curr_draw_buffer;
 		// lock drawing buffer
 		curr_draw_buffer = curr_write_buffer;
 		
@@ -86,8 +84,4 @@ namespace idk::ogl
 		}
 	}
 
-	void OpenGLState::SwapWritingBuffer()
-	{
-		write_buffer_dirty = true;
-	}
 }

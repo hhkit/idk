@@ -39,7 +39,7 @@ namespace idk::vkn
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 		
 	}
-	void VulkanWin32GraphicsSystem::RenderBuffer()
+	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		instance_->DrawFrame();
 

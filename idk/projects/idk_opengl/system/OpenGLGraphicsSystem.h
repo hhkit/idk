@@ -16,9 +16,8 @@ namespace idk::ogl
 		void Init()         override;
 		void LateInit()     override;
 		void Shutdown()     override;
-		void BufferGraphicsState(span<MeshRenderer>, span<const Transform>, span<const Parent>) override;
 		GraphicsAPI GetAPI() override;
-		void RenderBuffer() override;
+		void RenderRenderBuffer() override;
 	private:
 		HDC   _windows_context;
 		HGLRC _opengl_context;
@@ -29,5 +28,7 @@ namespace idk::ogl
 		void InitOpenGL();
 		void InitResourceLoader();
 		void DestroyContext();
+
+		friend class OpenGLState;
 	};
 }
