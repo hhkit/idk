@@ -723,5 +723,7 @@
     <Natvis Include="_natvis\guid.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
+    <Natvis Include="_natvis\reflect.natvis" />
+    <Natvis Include="_natvis\ds.natvis" />
   </ItemGroup>
 </Project>
