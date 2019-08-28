@@ -16,6 +16,24 @@ namespace idk
 		_components.emplace_back(comph);
 		return comph;
 	}
+	GenericHandle GameObject::GetComponent(reflect::type type)
+	{
+		auto tid = GameState::GetGameState().GetTypeID(type);
+
+		for (auto& elem : _components)
+			if (elem.type == tid)
+				return elem;
+
+		return GenericHandle{};
+	}
+	GenericHandle GameObject::GetComponent(string_view sv)
+	{
+		return GetComponent(reflect::get_type(sv));
+	}
+	void GameObject::RemoveComponent(GenericHandle h)
+	{
+		GameState::GetGameState().DestroyObject(h);
+	}
 	span<GenericHandle> GameObject::GetComponents()
 	{
 		return span<GenericHandle>(_components.begin()._Ptr, _components.end()._Ptr);
@@ -24,14 +42,24 @@ namespace idk
 	{
 		_active = active;
 	}
-	bool GameObject::GetActiveSelf() const
+	bool GameObject::ActiveSelf() const
 	{
 		return _active;
 	}
-	bool GameObject::GetActiveInHierarchy() const
+	bool GameObject::ActiveInHierarchy() const
 	{
-		auto hParentComponent = GetComponent<Parent>();
+		auto hParentComponent = GetComponent<class Parent>();
 		auto hParent = hParentComponent ? hParentComponent->parent : Handle<GameObject>{};
-		return GetActiveSelf() && (hParent ? hParent->GetActiveInHierarchy() : true);
+		return ActiveSelf() && (hParent ? hParent->ActiveInHierarchy() : true);
+	}
+
+	Handle<class Transform> GameObject::Transform()
+	{
+		return GetComponent<class Transform>();
+	}
+	Handle<class GameObject> GameObject::ParentObject()
+	{
+		auto hParentComponent = GetComponent<class Parent>();
+		return hParentComponent ? hParentComponent->parent : Handle<class GameObject>{};
 	}
 }

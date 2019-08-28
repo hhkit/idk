@@ -4,6 +4,8 @@
 #include <IncludeComponents.h>
 #include <res/ResourceManager.h>
 
+#include <gfx/GfxDbgTest.h>
+
 namespace idk
 {
 	seconds Core::GetDT()
@@ -47,22 +49,39 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&FileSystem::Update, "File System Update");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Update,  "FMOD Update");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan, "Test updates");
-		if (editor) _scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
-		_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
-		_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
-
+		if (editor)
+		{
+			_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
+		}
+		else
+		{
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
+		}
 		Core::GetSystem<FileSystem>();
 		// main loop
 		_scheduler->Setup();
 		if (editor)
 		{
 			while (_running)
+			{
 				_scheduler->SequentialUpdate();
+				//Core::GetSystem<IEditor>().EditorUpdate();
+				//Core::GetSystem<IEditor>().EditorDraw();
+				//GfxDebugTest();
+				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
+			}
 		}
 		else
 		{
 			while (_running)
+			{
+				GfxDebugTest();
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
+				//Core::GetSystem<GraphicsSystem>().EndFrame();
+				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
+				
+			}
 		}
 
 		_system_manager.ShutdownSystems();

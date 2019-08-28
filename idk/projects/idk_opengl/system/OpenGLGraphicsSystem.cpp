@@ -41,8 +41,8 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer>    mesh_renderers, 
-		span<const Transform> transforms, 
-		span<const Parent>    parents)
+		span<const Transform> , 
+		span<const Parent>    )
 	{
 		// todo: scenegraph traversal
 		std::vector<RenderObject> objects;

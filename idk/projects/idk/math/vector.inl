@@ -4,6 +4,7 @@
 
 #include "Vector_detail.h"
 #include "Vector.h"
+#include <meta/tuple.h>
 
 namespace idk::math
 {
@@ -24,7 +25,7 @@ namespace idk::math
 	template<typename T, unsigned D>
 	template<unsigned D2, typename>
 	constexpr vector<T, D>::vector(const vector<T, D2>& rhs)
-		: vector{ detail::TupleToVector<T>(detail::VectorToTuple<T>(rhs, std::make_index_sequence<D>{}), std::make_index_sequence<D>{}) }
+		: vector{ tuple_construct<vector>(detail::VectorToTuple<T>(rhs, std::make_index_sequence<D>{})) }
 	{
 	}
 
@@ -86,35 +87,35 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	T* vector<T, D>::begin()
+	constexpr T* vector<T, D>::begin() noexcept
 	{
 		return std::begin(values);
 	}
 	template<typename T, unsigned D>
-	T* vector<T, D>::end()
+	constexpr T* vector<T, D>::end() noexcept
 	{
 		return std::end(values);
 	}
 	template<typename T, unsigned D>
-	const T* vector<T, D>::begin() const
+	constexpr const T* vector<T, D>::begin() const noexcept
 	{
 		return std::begin(values);
 	}
 
 	template<typename T, unsigned D>
-	const T* vector<T, D>::end() const
+	constexpr const T* vector<T, D>::end() const noexcept
 	{
 		return std::end(values);
 	}
 
 	template<typename T, unsigned D>
-	inline T* vector<T, D>::data()
+	constexpr T* vector<T, D>::data() noexcept
 	{
 		return begin();
 	}
 
 	template<typename T, unsigned D>
-	inline const T* vector<T, D>::data() const
+	constexpr const T* vector<T, D>::data() const noexcept
 	{
 		return begin();
 	}
@@ -258,13 +259,13 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	T& vector<T, D>::operator[](size_t i)
+	constexpr T& vector<T, D>::operator[](size_t i) noexcept
 	{
 		return data()[i];
 	}
 
 	template<typename T, unsigned D>
-	const T& vector<T, D>::operator[](size_t i) const
+	constexpr const T& vector<T, D>::operator[](size_t i) const noexcept
 	{
 		return data()[i];
 	}

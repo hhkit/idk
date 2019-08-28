@@ -1,4 +1,5 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
 #include <array>
 #include <vector>
 #include <unordered_set>
@@ -98,6 +99,9 @@ namespace idk
 
 	template<typename ... Ts>
 	using variant = std::variant<Ts...>;
+
+	template<bool val>
+	using sfinae = std::enable_if_t<val>;
 
 	// smart pointers
 	template<typename T>

@@ -4,9 +4,11 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="WindowsApplication.h" />
+    <ClInclude Include="InputManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="WindowsApplication.cpp" />
+    <ClCompile Include="InputManager.cpp" />
   </ItemGroup>
 </Project>

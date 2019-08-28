@@ -9,12 +9,16 @@ namespace idk
 	template<typename Res>
 	struct RscHandle
 	{
+		using Resource = Res;
+
 		Guid guid{};
 
 		RscHandle() = default;
 		RscHandle(const Guid& guid) : guid{ guid } {}
 
-		void Set(const Resource<Res>& g);
+		void Set(const idk::Resource<Res>& g);
+		template<typename T>
+		T& as() const;
 
 		explicit operator bool() const;
 		Res& operator*() const;

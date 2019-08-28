@@ -53,9 +53,4 @@ namespace idk {
 		
 		return newSound;
 	}
-
-	unique_ptr<AudioClip> idk::AudioClipFactory::Create(string_view filePath, const ResourceMeta&)
-	{
-		return Create(filePath);
-	}
 }

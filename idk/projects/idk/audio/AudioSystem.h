@@ -58,12 +58,13 @@ namespace idk
 		~AudioSystem();//Destructor
 
 		virtual void Init() override; //Initializes the FMOD Core System
-		void Update();
+		void Update(span<AudioSource>);
+		void UpdateTestCaseOnly(); //Remove after test!
+
 		virtual void Shutdown() override;
 
 		//Optional. Must be called before Init()
 		void SetMemoryAllocators(FMOD_MEMORY_ALLOC_CALLBACK useralloc, FMOD_MEMORY_REALLOC_CALLBACK userrealloc, FMOD_MEMORY_FREE_CALLBACK userfree); 
-
 		///////////////////////////////////////////////
 
 		//Sound Functions used by AudioSource
@@ -78,9 +79,16 @@ namespace idk
 		void SetChannel_MUSIC_Volume(const float& newVolume);
 		void SetChannel_AMBIENT_Volume(const float& newVolume);
 		void SetChannel_DIALOGUE_Volume(const float& newVolume);
+		///////////////////////////////////////////////
 
 		//Sound Driver Control
 		void SetCurrentSoundDriver(int index);									//Use GetAllSoundDriverData() to pick the available SoundDriver.
+
+		//Listener Controls
+		///////////////////////////////////////////////
+		void Set3DListenerAttributes(const vec3& position, const vec3& velocity, const vec3& forwardVec, const vec3& upVec); //forwardVec and upVec has to be unit vectors!
+		void SetMainAudioListener(Handle<AudioListener> listenerComponent);
+		///////////////////////////////////////////////
 
 		//Get Data Functions
 		///////////////////////////////////////////////
@@ -105,14 +113,14 @@ namespace idk
 		friend class AudioClipFactory;
 
 
-		FMOD::System*		_Core_System		{ nullptr };	//Is updated on init, destroyed and nulled on shutdown.
-		FMOD_RESULT			_result				{ FMOD_OK };	//Most recent result by the most recent FMOD function call.
+		FMOD::System*		_Core_System		{ nullptr };		//Is updated on init, destroyed and nulled on shutdown.
+		FMOD_RESULT			_result				{ FMOD_OK };		//Most recent result by the most recent FMOD function call.
 
-		int			_number_of_drivers			{ 0 };		//Updated on init. Describes the number of available sound driver that can play audio.
-		int			_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
-		time_point	_time_it_was_initialized	{};			//Updated on Init()
+		int					_number_of_drivers			{ 0 };		//Updated on init. Describes the number of available sound driver that can play audio.
+		int					_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
+		time_point			_time_it_was_initialized	{};			//Updated on Init()
 
-		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};	//Describes each driver.
+		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};			//Describes each driver.
 
 		//Useable after calling Init().
 		FMOD::ChannelGroup* _channelGroup_MASTER	{ nullptr };	//All sounds are routed to MASTER.
@@ -120,6 +128,8 @@ namespace idk
 		FMOD::SoundGroup*	_soundGroup_SFX			{ nullptr };	//Sound Effects
 		FMOD::SoundGroup*	_soundGroup_AMBIENT		{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
 		FMOD::SoundGroup*	_soundGroup_DIALOGUE	{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
+
+		Handle<AudioListener> _mainListener;
 
 		void ParseFMOD_RESULT(FMOD_RESULT);			//All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 

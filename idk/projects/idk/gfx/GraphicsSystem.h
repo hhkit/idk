@@ -10,7 +10,7 @@ namespace idk
 		OpenGL,
 		//	DirectX,
 		Vulkan,
-		Default = OpenGL
+		Default = Vulkan
 	};
 
 	class GraphicsSystem

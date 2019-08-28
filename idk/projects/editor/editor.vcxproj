@@ -100,7 +100,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\editor\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>vulkan.lib;win32.lib;core.lib</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -112,6 +112,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>editorstatic.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -138,9 +139,9 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\editor\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>vulkanD.lib;win32D.lib;coreD.lib</AdditionalUsingDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +149,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>editorstaticD.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,11 +172,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="editor\commands\CommandController.h" />
+    <ClInclude Include="editor\commands\ICommand.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="editor\commands\CommandController.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -182,6 +188,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

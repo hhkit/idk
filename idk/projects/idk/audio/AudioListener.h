@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include <core/Component.h>
+#include <IncludeComponents.h>
 
 namespace idk
 {
@@ -17,7 +17,10 @@ namespace idk
 
 
 	public:
-		bool enabled { true };
+
+		void SetAsActive();
+
+		void UpdateListenerPosition();
 
 	};
 

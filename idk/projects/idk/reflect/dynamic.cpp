@@ -4,7 +4,7 @@
 namespace idk::reflect
 {
 	dynamic::dynamic(reflect::type type, void* obj)
-		: type{ type }, _ptr{ std::make_shared<derived<void*>>(std::forward<void*>(obj)) }
+		: type{ type }, _ptr{ std::make_shared<voidptr>(obj) }
 	{}
 
 	dynamic::dynamic()
@@ -13,8 +13,10 @@ namespace idk::reflect
 
 	dynamic& dynamic::operator=(const dynamic& rhs)
 	{
-		assert(rhs.type == type);
-		type._context->copy_assign(_ptr->get(), rhs._ptr->get());
+		if (type == rhs.type)
+			type._context->copy_assign(_ptr->get(), rhs._ptr->get());
+		else
+			type._context->variant_assign(_ptr->get(), rhs.type._context->get_mega_variant(rhs._ptr->get()));
 		return *this;
 	}
 
@@ -79,6 +81,11 @@ namespace idk::reflect
 	vector<dynamic> dynamic::unpack() const
 	{
 		return type._context->unpack(_ptr->get());
+	}
+
+	dynamic dynamic::get_variant_value() const
+	{
+		return type._context->get_variant_value(_ptr->get());
 	}
 
 

@@ -57,47 +57,75 @@ namespace idk
 				return serialize_json(cont);
 			}
 			else if (obj.type.is_enum_type())
+			{
 				return json(obj.to_enum_value().name());
+			}
+			else if (obj.type.is_template<std::variant>())
+			{
+				auto held = obj.get_variant_value();
+				return json::object({ held.type.name(), serialize_json(held) });
+			}
 			else
 				throw "unhandled case?";
+		}
+		else if (obj.type.is_enum_type())
+		{
+			return json(obj.to_enum_value().name());
 		}
 
 		json j;
 		vector<json*> stack{ &j };
 
-		obj.visit([&](auto&& key, auto&& arg, int depth_change)
+		constexpr static auto f = [](auto&& k, auto&& arg, vector<json*>& stack)
 		{
-			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
-				stack.pop_back();
 
-			if constexpr (std::is_arithmetic_v<K>)
+			if constexpr (std::is_arithmetic_v<T>)
 			{
-				if constexpr (std::is_arithmetic_v<T>)
-					(*stack.back())[key] = arg;
-				else if constexpr (is_basic_serializable_v<T>)
-					(*stack.back())[key] = serialize_text(arg);
-				else if constexpr (is_sequential_container_v<T>)
-					stack.push_back(&((*stack.back())[key] = json::array()));
-				else // associative container
-					stack.push_back(&((*stack.back())[key] = json::object()));
+				(*stack.back())[k] = arg;
+				return true;
 			}
-			else if constexpr (is_basic_serializable_v<K>)
+			else if constexpr (is_basic_serializable_v<T>)
 			{
-				if constexpr (std::is_arithmetic_v<T>)
-					(*stack.back())[serialize_text(key)] = arg;
-				else if constexpr (is_basic_serializable_v<T>)
-					(*stack.back())[serialize_text(key)] = serialize_text(arg);
-				else if constexpr (is_sequential_container_v<T>)
-					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
-				else // associative container
-					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
+				(*stack.back())[k] = serialize_text(arg);
+				return true;
+			}
+			else if constexpr (is_sequential_container_v<T>)
+			{
+				stack.push_back(&((*stack.back())[k] = json::array()));
+				return true;
+			}
+			else if constexpr (is_associative_container_v<T>)
+			{
+				stack.push_back(&((*stack.back())[k] = json::object()));
+				return true;
+			}
+			else if constexpr (std::is_same_v<T, reflect::dynamic>)
+			{
+				(*stack.back())[k] = serialize_json(arg);
+				return false;
 			}
 			else
 			{
-				throw "wtf is this key??";
+				stack.push_back(&((*stack.back())[k] = json::object()));
+				return true;
 			}
+		};
+
+		obj.visit([&](auto&& key, auto&& arg, int depth_change)
+		{
+			using K = std::decay_t<decltype(key)>;
+			while (++depth_change <= 0)
+				stack.pop_back();
+
+			if constexpr (std::is_arithmetic_v<K>)
+				return f(key, arg, stack);
+			else if constexpr (is_basic_serializable_v<K>)
+				return f(serialize_text(key), arg, stack);
+			else if constexpr (std::is_same_v<K, reflect::type>) // variant element
+				return f(string{ key.name() }, arg, stack);
+			else
+				throw "wtf is this key??";
 		});
 
 		return j;
@@ -106,32 +134,6 @@ namespace idk
 	template<>
 	string serialize_text(const reflect::dynamic& obj)
 	{
-		if (obj.type.count() == 0)
-		{
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : return serialize_text(obj.get<TYPE>())
-			switch (obj.type.hash())
-			{
-			SERIALIZE_CASE(int);
-			SERIALIZE_CASE(bool);
-			SERIALIZE_CASE(char);
-			SERIALIZE_CASE(int64_t);
-			SERIALIZE_CASE(uint64_t);
-			SERIALIZE_CASE(float);
-			SERIALIZE_CASE(double);
-			SERIALIZE_CASE(std::string);
-			SERIALIZE_CASE(Guid);
-			default: break;
-			}
-#undef SERIALIZE_CASE
-
-			if (obj.type.is_enum_type())
-				return serialize_text(obj.to_enum_value().name());
-			else if (obj.type.is_container())
-				return serialize_json(obj.to_container()).dump(2);
-			else
-				throw "unhandled case?";
-		}
-
 		return serialize_json(obj).dump(2);
 	}
 
@@ -247,7 +249,7 @@ namespace idk
 		{
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
-			if (depth_change == -1)
+			while (++depth_change <= 0)
 				stack.pop_back();
 
 			if constexpr (std::is_same_v<K, const char*>)
@@ -320,7 +322,16 @@ namespace idk
 					}
 					return false;
 				}
-				else // not basic serializable and not container; go deeper!
+				else if constexpr (is_template_v<T, std::variant>)
+				{
+					auto alt_type_name = iter->begin().key();
+					auto type = reflect::get_type(alt_type_name);
+					auto dyn = type.create();
+					parse_json(iter->begin().value(), dyn);
+					reflect::dynamic{ arg } = dyn;
+					return false;
+				}
+				else // not basic serializable and not container and not variant; go deeper!
 				{
 					stack.push_back(&*iter);
 					return true;

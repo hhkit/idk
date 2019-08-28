@@ -10,6 +10,5 @@ namespace idk::ogl
 	public:
 		unique_ptr<Material> Create() override;
 		unique_ptr<Material> Create(string_view filepath) override;
-		unique_ptr<Material> Create(string_view filepath, const ResourceMeta&) override;
 	};
 }
