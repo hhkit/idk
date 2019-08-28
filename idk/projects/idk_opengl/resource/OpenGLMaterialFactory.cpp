@@ -11,7 +11,7 @@ namespace idk::ogl
 {
 	unique_ptr<Material> OpenGLMaterialFactory::Create()
 	{
-		return unique_ptr<Material>();
+		return Create(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag"));
 	}
 	unique_ptr<Material> OpenGLMaterialFactory::Create(FileHandle filepath)
 	{

@@ -5,6 +5,9 @@
 
 namespace idk
 {
+	struct SerializedResourceMeta;
+	struct FileResources;
+
 	class GenericRscHandle
 	{
 	public:
@@ -14,6 +17,7 @@ namespace idk
 	private:
 		detail::ResourceFile_helper<Resources>::GenericRscHandle _handle;
 		friend class ResourceManager;
+		friend vector<SerializedResourceMeta> serialize(const FileResources& resources);
 	};
 
 	struct FileResources
@@ -26,6 +30,8 @@ namespace idk
 		Guid guid;
 		reflect::dynamic metadata;
 	};
+
+	vector<SerializedResourceMeta> serialize(const FileResources&);
 }
 
 #include "FileResources.inl"
