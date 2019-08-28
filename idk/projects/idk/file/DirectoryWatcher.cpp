@@ -180,17 +180,10 @@ namespace idk
 				// Most troublesome one. 
 				// Need to invalidate the fs_file_handle and all FileHandles pointing to it.
 
-				// First we remove this file from the parent dir.
+				// We remove this file from the parent dir.
 				auto result = parent_dir._files_map.find(internal_file._filename);
 				parent_dir._files_map.erase(result);
 
-				// Next, invalidate it from path_tree. Should be a better way to do this. Not sure yet.
-				// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
-				internal_collated._files[internal_file._tree_index._index]._valid = false;
-
-				// Lastly, we invalidate the file handle that this file was using.
-				// Remember that we DO NOT erase the fs_file_handle in FileSyste::file_handles. We simply invalidate it.
-				vfs._file_handles[internal_file._handle_index].Invalidate();
 				break;
 			}
 			case FS_CHANGE_STATUS::RENAMED:
@@ -495,7 +488,16 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::fileDelete(file_system_detail::fs_file& file)
 	{
+		auto& vfs = Core::GetSystem<FileSystem>();
 		file._change_status = FS_CHANGE_STATUS::DELETED;
+
+		// Invalidate it from path_tree. Should be a better way to do this. Not sure yet. 
+		// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
+		file._valid = false;
+
+		// Lastly, we invalidate the file handle that this file was using.
+		// Remember that we DO NOT erase the fs_file_handle in FileSyste::file_handles. We simply invalidate it.
+		vfs._file_handles[file._handle_index].Invalidate();
 		changed_files.push_back(file._tree_index);
 	}
 

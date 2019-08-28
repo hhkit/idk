@@ -26,13 +26,14 @@ namespace idk::vkn
 		void BeginFrame() ;
 		void EndFrame() ;
 		void Shutdown() override;
-		void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
+		//void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
 		GraphicsAPI GetAPI() override;
-		void RenderBuffer() override;
+		void RenderRenderBuffer() override;
 		VulkanState& Instance() { return *instance_; }
 
 		VulkanState& GetVulkanHandle();
 	private:
+		void RenderGraphicsState(const GraphicsState&);
 		std::unique_ptr<VulkanState> instance_;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>

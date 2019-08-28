@@ -6,36 +6,37 @@
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
+#include <loading/OpenGLFBXLoader.h>
 
 namespace idk
 {
-	IDE::IDE(GraphicsAPI whichone) :edtInterface_v{ nullptr }, edtInterface_o{ nullptr }, gLibVer{whichone}
+	IDE::IDE() :edtInterface_v{ nullptr }, edtInterface_o{ nullptr }
 	{
 	}
 
 	void IDE::Init()
 	{
 		// do imgui stuff
-
-		switch (gLibVer)
+		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
-		case GraphicsAPI::Vulkan:
-
-			edtInterface_v = edt::VI_Interface{ &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance() };
-			edtInterface_v.Init();
-			break;
 		case GraphicsAPI::OpenGL:
-
 			edtInterface_o = edt::OI_Interface{ &Core::GetSystem<ogl::Win32GraphicsSystem>().Instance() };
 			edtInterface_o.Init();
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
 			break;
-		};
+		case GraphicsAPI::Vulkan:
+			edtInterface_v = edt::VI_Interface{ &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance() };
+			edtInterface_v.Init();		
+			break;
+		default:
+			break;
+		}
 	}
 
 	void IDE::Shutdown()
 	{
 		// close imgui stuff
-		switch (gLibVer)
+		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::Vulkan:
 			edtInterface_v.Shutdown();
@@ -49,7 +50,7 @@ namespace idk
 	void IDE::EditorUpdate()
 	{
 		// update editor vars
-		switch (gLibVer)
+		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::Vulkan:
 			edtInterface_v.ImGuiFrameUpdate();
@@ -65,7 +66,7 @@ namespace idk
 	{
 		// call imgui draw,
 		//edtInterface.ImGuiFrameEnd();
-		switch (gLibVer)
+		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::Vulkan:
 			//edtInterface_v.ImGuiFrameUpdate();

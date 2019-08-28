@@ -2,9 +2,9 @@
 
 #include <gfx/Mesh.h>
 #include <res/ResourceFactory.h>
-namespace idk::ogl
+namespace idk::vkn
 {
-	class OpenGLMeshFactory
+	class MeshFactory
 		: public ResourceFactory<Mesh>
 	{
 	public:

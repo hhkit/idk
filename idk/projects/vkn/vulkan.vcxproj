@@ -214,8 +214,11 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\utils.h" />
+    <ClInclude Include="VulkanMesh.h" />
+    <ClInclude Include="VulkanMeshFactory.h" />
     <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
+    <ClInclude Include="VulkanTypeDescriptors.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
     <ClInclude Include="VulkanView.h" />
     <ClInclude Include="vulkan_state_fwd.h" />
@@ -237,6 +240,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="utils\utils.cpp" />
+    <ClCompile Include="VulkanMesh.cpp" />
+    <ClCompile Include="VulkanMeshFactory.cpp" />
     <ClCompile Include="VulkanState.cpp" />
     <ClCompile Include="VulkanView.cpp" />
     <ClCompile Include="BufferHelpers.cpp" />

@@ -119,7 +119,7 @@ namespace idk {
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
 			{
-				FileHandle h{ internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count };
+				FileHandle h{ internal_file._tree_index, true };
 				vec_handles.emplace_back(h);
 			}
 		}
@@ -133,8 +133,8 @@ namespace idk {
 		{
 			auto& file = getFile(key);
 			
-			FileHandle h{ file._handle_index, _file_handles[file._handle_index]._ref_count };
-			 handles.emplace_back(h);
+			FileHandle h{ file._tree_index, true };
+			handles.emplace_back(h);
 		}
 
 		return handles;
@@ -149,7 +149,7 @@ namespace idk {
 
 			if (file._extension == ext)
 			{
-				FileHandle h{ file._handle_index, _file_handles[file._handle_index]._ref_count };
+				FileHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -165,7 +165,7 @@ namespace idk {
 			auto& file = getFile(key);
 			if (file._change_status == change)
 			{
-				FileHandle h{ file._handle_index, _file_handles[file._handle_index]._ref_count };
+				FileHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -177,13 +177,13 @@ namespace idk {
 	{
 		FileHandle fh;
 		auto file_index = getFile(mountPath);
-		if (file_index._mount_id < 0)
+		if (validateKey(file_index) == false)
 			return fh;
 
 		auto& internal_file = getFile(file_index);
 		auto& file_handle = _file_handles[internal_file._handle_index];
 
-		fh._handle_index = internal_file._handle_index;
+		fh._key = internal_file._tree_index;
 		fh._ref_count = file_handle._ref_count;
 
 		return fh;
@@ -234,22 +234,16 @@ namespace idk {
 			else
 			{
 				auto& internal_file = createAndGetFile(mountPath);
-				auto& file_handle = _file_handles[internal_file._handle_index];
-
-				FileHandle handle;
-				handle._ref_count = file_handle._ref_count;
-				handle._handle_index = internal_file._handle_index;
+				
+				FileHandle handle{ internal_file._tree_index, true };
 				return handle.Open(perms, binary_stream);
 			}
 		}
 		else
 		{
 			auto& internal_file = getFile(file_index);
-			auto& file_handle = _file_handles[internal_file._handle_index];
+			FileHandle handle{internal_file._tree_index, true};
 
-			FileHandle handle;
-			handle._ref_count = file_handle._ref_count;
-			handle._handle_index = internal_file._handle_index;
 			return handle.Open(perms, binary_stream);
 		}
 	}
@@ -323,7 +317,7 @@ namespace idk {
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
 			{
-				FileHandle h{ internal_file._handle_index, _file_handles[internal_file._handle_index]._ref_count };
+				FileHandle h{ internal_file._tree_index, true };
 				vec_handles.emplace_back(h);
 			}
 		}
@@ -607,11 +601,17 @@ namespace idk {
 
 	bool FileSystem::validateHandle(const FileHandle& handle) const
 	{
-		if(handle._handle_index < 0)
+		if (handle._key.IsValid() == false)
 			return false;
-
-		auto& internal_handle = _file_handles[handle._handle_index];
-		return handle._ref_count == internal_handle._ref_count;
+		
+		if (handle._is_regular_file)
+		{
+			auto& file = getFile(handle._key);
+			auto& internal_handle = _file_handles[file._handle_index];
+			return handle._ref_count == internal_handle._ref_count && file._valid;
+		}
+		else
+			return getDir(handle._key)._valid;;
 	}
 
 	

@@ -35,8 +35,8 @@ namespace idk
 	struct FileHandle
 	{
 		FileHandle() = default;
+		FileHandle(string_view mountPath);
 		
-
 		string_view			GetFullPath() const;
 		string_view			GetRelPath() const;
 		string_view			GetMountPath() const;
@@ -52,14 +52,19 @@ namespace idk
 		bool				CanOpen() const;
 		
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);
-		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream);
+		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream = false);
 
-		explicit	operator bool();
+		explicit	operator bool() const;
 
 		friend class FileSystem;
 	private:
-		FileHandle(int64_t hIndex, int64_t ref);
-		int64_t _handle_index	= -1;
+		FileHandle(const file_system_detail::fs_key& key, bool is_file = true);
+
+		bool validate() const;
+		bool validateFull() const;
+
 		int64_t _ref_count		= -1;
+		file_system_detail::fs_key _key{};
+		bool _is_regular_file = true;
 	};
 }

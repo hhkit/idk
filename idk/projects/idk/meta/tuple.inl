@@ -16,4 +16,10 @@ namespace idk
 	{
 		return detail::tuple_construct_helper<T>(arg_tuple, std::make_index_sequence < std::tuple_size_v<std::decay_t<decltype(arg_tuple)> >> {});
 	}
+
+	template<typename ... T1s, typename ...T2s>
+	struct tuple_join<std::tuple<T1s...>, std::tuple<T2s...>>
+	{
+		using type = std::tuple<T1s..., T2s...>;
+	};
 }

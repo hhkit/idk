@@ -17,7 +17,7 @@ namespace idk
 
 	public:
 		virtual unique_ptr<AudioClip> Create() override;
-		virtual unique_ptr<AudioClip> Create(string_view filepath) override;
+		virtual unique_ptr<AudioClip> Create(FileHandle filepath) override;
 
 	};
 }

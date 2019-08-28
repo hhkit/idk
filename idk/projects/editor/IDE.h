@@ -2,7 +2,6 @@
 #include <editor/IEditor.h>
 #include <editor/Vulkan_ImGui_Interface.h>
 #include <editor/OpenGL_ImGui_Interface.h>
-#include <idk/gfx/GraphicsSystem.h>
 
 namespace idk
 {
@@ -15,8 +14,7 @@ namespace idk
 	class IDE : public IEditor
 	{
 	public:
-		IDE() = default;
-		IDE(GraphicsAPI);
+		IDE();
 
 		void Init() override;
 		void Shutdown() override;
@@ -25,6 +23,6 @@ namespace idk
 	private:
 		edt::VI_Interface edtInterface_v;
 		edt::OI_Interface edtInterface_o;
-		GraphicsAPI gLibVer;
+		//GraphicsAPI gLibVer;
 	};
 }

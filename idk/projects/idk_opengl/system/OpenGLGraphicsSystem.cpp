@@ -4,6 +4,7 @@
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <gfx/MeshRenderer.h>
+#include <res/ForwardingExtensionLoader.h>
 
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
@@ -39,26 +40,12 @@ namespace idk::ogl
 		DestroyContext();
 	}
 
-	void Win32GraphicsSystem::BufferGraphicsState(
-		span<MeshRenderer>    mesh_renderers, 
-		span<const Transform> , 
-		span<const Parent>    )
-	{
-		// todo: scenegraph traversal
-		std::vector<RenderObject> objects;
-		for (auto& elem : mesh_renderers)
-			if (elem.IsActiveAndEnabled())
-				objects.emplace_back(elem.GenerateRenderObject());
-
-		_opengl->SubmitBuffers(std::move(objects), {});
-	}
-
 	GraphicsAPI Win32GraphicsSystem::GetAPI()
 	{
 		return GraphicsAPI::OpenGL;
 	}
 
-	void Win32GraphicsSystem::RenderBuffer()
+	void Win32GraphicsSystem::RenderRenderBuffer()
 	{
 		glViewport(0, 0, 800, 600);
 		glClearColor(0.f, 0.f, 0.25f, 1.f);
@@ -158,6 +145,7 @@ namespace idk::ogl
 	{	
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

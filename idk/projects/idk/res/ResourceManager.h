@@ -1,11 +1,13 @@
 #pragma once
 #include <idk.h>
 #include <idk_config.h>
+#include <reflect/reflect.h>
 #include <core/ISystem.h>
+#include <file/FileHandle.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
-#include <res/ExtensionLoader.h>
 #include <res/FileResources.h>
+#include <res/ExtensionLoader.h>
 #include <meta/meta.h>
 #include <meta/tag.h>
 
@@ -24,12 +26,13 @@ namespace idk
 
 		void Init() override;
 		void Shutdown() override;
+		void WatchDirectory();
 
 		// loading ops
 		void LoadDefaultResources();
 		template<typename Factory, typename ... Args>
 		Factory& RegisterFactory(Args&& ...);
-		template<typename ExtensionLoader, typename ... Args>
+		template<typename ExtensionLoaderT, typename ... Args>
 		ExtensionLoader& RegisterExtensionLoader(std::string_view extension, Args&& ...);
 
 		// handle ops
@@ -39,17 +42,17 @@ namespace idk
 
 		// resource creation
 		template<typename Resource> RscHandle<Resource> Create();
-		template<typename Resource> RscHandle<Resource> Create(string_view);
-		template<typename Resource> RscHandle<Resource> Create(string_view path, Guid guid);
+		template<typename Resource> RscHandle<Resource> Create(FileHandle);
+		template<typename Resource> RscHandle<Resource> Create(FileHandle path, Guid guid);
 		template<typename Resource, 
 			typename = sfinae<has_tag_v<Resource, MetaTag>>
-		> RscHandle<Resource> Create(string_view path, Guid guid, const typename Resource::Meta& meta);
+		> RscHandle<Resource> Create(FileHandle path, Guid guid, const typename Resource::Meta& meta);
 
 		// file operations
-		FileResources LoadFile(std::string_view path_to_file);
-		FileResources ReloadFile(std::string_view path_to_file);
-		size_t        UnloadFile(std::string_view path_to_file);
-		FileResources GetFileResources(std::string_view path_to_file);
+		FileResources LoadFile(FileHandle path_to_file);
+		FileResources ReloadFile(FileHandle path_to_file);
+		size_t        UnloadFile(FileHandle path_to_file);
+		FileResources GetFileResources(FileHandle path_to_file);
 
 	private:
 		using GenPtr = shared_ptr<void>;
@@ -64,6 +67,7 @@ namespace idk
 
 		static ResourceManager* instance;
 
+		template<typename Resource> auto& GetLoader();
 		template<typename Resource> auto& GetTable();
 		template<typename Resource> auto FindHandle(const RscHandle<Resource>&);
 

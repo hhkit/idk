@@ -11,6 +11,9 @@
       <Filter>editor\commands</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="loading\OpenGLFBXLoader.h">
+      <Filter>loaders</Filter>
+    </ClInclude>
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
@@ -18,6 +21,9 @@
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="editor\commands\CommandController.cpp">
       <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <Filter>loaders</Filter>
     </ClCompile>
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
   </ItemGroup>
@@ -29,5 +35,8 @@
       <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
+    <Filter Include="loaders">
+      <UniqueIdentifier>{5d865121-716d-4d61-80f0-14416a3e4e86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
