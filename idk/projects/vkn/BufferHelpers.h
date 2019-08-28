@@ -1,5 +1,6 @@
 #pragma once
-#include<vulkan/vulkan.hpp>
+#include <vulkan/vulkan.hpp>
+#include <vkn/idkTexture.h>
 
 namespace idk::vkn::hlp
 {
@@ -44,6 +45,10 @@ namespace idk::vkn::hlp
 	void MapMemory(vk::Device& device, vk::DeviceMemory& memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size, Dispatcher const& dispatcher);
 
 	void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
+
+	void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, idkTexture& img);
+
+	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout);
 
 	template<typename T>
 	vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr);
