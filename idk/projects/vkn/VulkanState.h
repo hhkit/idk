@@ -112,6 +112,13 @@ namespace idk::vkn
 		//};
 		Uniforms uniforms2;
 	};
+	struct FrameSubmitRenderInfo
+	{
+		vk::SubmitInfo submitInfo;
+		vk::PresentInfoKHR presentInfo;
+	};
+	typedef uint32_t renderFrameIndex;
+
 	class VulkanView;
 
 	class VulkanState
@@ -160,8 +167,12 @@ namespace idk::vkn
 		void EndFrame();
 
 		void DrawFrame();
+		void PresentFrame();
 		void OnResize();
 		void Cleanup();
+
+		renderFrameIndex GetRenderFrameIndex();
+		void SubmitRenderFrameInfo(const renderFrameIndex& );
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -231,6 +242,16 @@ namespace idk::vkn
 		std::unique_ptr<VulkanView> view_;
 
 		vector<idkTexture>					 m_textureList;
+
+		//////////Frame render variables////////
+		uint32_t					rv;
+		uint32_t					imageIndex;
+		vk::Result					rvRes;
+		vk::Semaphore				waitSemaphores;
+		vk::Semaphore				readySemaphores;
+
+		vector<FrameSubmitRenderInfo> submitList;
+		///////////////////////////////////////
 
 
 		void createInstance();

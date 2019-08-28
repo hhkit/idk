@@ -68,6 +68,11 @@ namespace idk::ogl
 
 		::SwapBuffers(_windows_context);
 	}
+	OpenGLState& Win32GraphicsSystem::Instance()
+	{
+		// TODO: insert return statement here
+		return *_opengl;
+	}
 	void Win32GraphicsSystem::CreateContext()
 	{
 		_windows_context = GetDC(Core::GetSystem<Windows>().GetWindowHandle());

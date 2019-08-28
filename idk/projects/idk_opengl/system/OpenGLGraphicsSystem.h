@@ -19,6 +19,7 @@ namespace idk::ogl
 		void BufferGraphicsState(span<MeshRenderer>, span<const Transform>, span<const Parent>) override;
 		GraphicsAPI GetAPI() override;
 		void RenderBuffer() override;
+		OpenGLState& Instance();
 	private:
 		HDC   _windows_context;
 		HGLRC _opengl_context;

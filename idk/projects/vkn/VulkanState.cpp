@@ -2191,22 +2191,24 @@ namespace idk::vkn
 	{
 		auto& current_signal = m_pres_signals[current_frame];
 		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
-		uint32_t imageIndex;
-		auto rv = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), *current_signal.image_available, {}, dispatcher);
-		if (rv.result != vk::Result::eSuccess)
+		
+		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), *current_signal.image_available, {}, dispatcher);
+		rv = res.value;
+		rvRes = res.result;
+		if (res.result != vk::Result::eSuccess)
 		{
-			if (rv.result == vk::Result::eErrorOutOfDateKHR)
+			if (res.result == vk::Result::eErrorOutOfDateKHR)
 			{
 				RecreateSwapChain();
 				return;
 			}
 			throw std::runtime_error("Failed to acquire next image.");
 		}
-		imageIndex = rv.value;
-		m_swapchain.curr_index = rv.value;
+		imageIndex = res.value;
+		m_swapchain.curr_index = res.value;
 
-		vk::Semaphore waitSemaphores[] = { *current_signal.image_available };
-		vk::Semaphore readySemaphores[] = { *current_signal.render_finished };
+		waitSemaphores =  *current_signal.image_available;
+		readySemaphores =  *current_signal.render_finished;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
 		updateUniformBuffer(imageIndex);
@@ -2214,10 +2216,10 @@ namespace idk::vkn
 		vk::SubmitInfo submitInfo
 		{
 			1
-			,waitSemaphores
+			,&waitSemaphores
 			,waitStages
 			,1,&*m_commandbuffers[imageIndex]
-			,1,readySemaphores
+			,1,&readySemaphores
 		};
 		m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
 
@@ -2264,10 +2266,10 @@ namespace idk::vkn
 			vk::SubmitInfo render_state_submit_info
 			{
 				1
-				,waitSemaphores
+				,&waitSemaphores
 				,waitStages
 				,hlp::arr_count(cmds),std::data(cmds)
-				,1,readySemaphores
+				,1,&readySemaphores
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
@@ -2275,12 +2277,18 @@ namespace idk::vkn
 				throw std::runtime_error("failed to submit draw command buffer!");
 			BeginFrame();
 		}
+		
+		//m_present_queue.waitIdle(dispatcher);
+		PresentFrame();
+	}
 
+	void VulkanState::PresentFrame()
+	{
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 
 		vk::PresentInfoKHR presentInfo
 		{
-			1,readySemaphores
+			1,&readySemaphores
 			,1,swapchains
 			,&imageIndex
 			,nullptr
@@ -2288,34 +2296,34 @@ namespace idk::vkn
 		try
 		{
 
-		try
-		{
-			rv.result = m_present_queue.presentKHR(presentInfo, dispatcher);
-		if (
-			rv.result
-			!= vk::Result::eSuccess || m_ScreenResized)
-		{
-			if (m_ScreenResized)
-				rv.result = vk::Result::eSuboptimalKHR;
-		}
-		}
-		catch (const vk::OutOfDateKHRError& )
-		{
-			rv.result = vk::Result::eErrorOutOfDateKHR;
-		}
-		switch (rv.result)
-		{
-		case vk::Result::eErrorOutOfDateKHR:
-		case vk::Result::eSuboptimalKHR:
-			m_ScreenResized = false;
-			RecreateSwapChain();
-			break;
-		case vk::Result::eSuccess:
-			break;
-		default:
-			throw std::runtime_error("Failed to present");
-			break;
-		}
+			try
+			{
+				rvRes = m_present_queue.presentKHR(presentInfo, dispatcher);
+				if (
+					rvRes
+					!= vk::Result::eSuccess || m_ScreenResized)
+				{
+					if (m_ScreenResized)
+						rvRes = vk::Result::eSuboptimalKHR;
+				}
+			}
+			catch (const vk::OutOfDateKHRError&)
+			{
+				rvRes = vk::Result::eErrorOutOfDateKHR;
+			}
+			switch (rvRes)
+			{
+			case vk::Result::eErrorOutOfDateKHR:
+			case vk::Result::eSuboptimalKHR:
+				m_ScreenResized = false;
+				RecreateSwapChain();
+				break;
+			case vk::Result::eSuccess:
+				break;
+			default:
+				throw std::runtime_error("Failed to present");
+				break;
+			}
 		}
 		catch (const vk::Error& err)
 		{
@@ -2324,9 +2332,9 @@ namespace idk::vkn
 		}
 
 		;
-		NextFrame();
-		//m_present_queue.waitIdle(dispatcher);
 
+
+		NextFrame();
 	}
 
 	void VulkanState::OnResize()

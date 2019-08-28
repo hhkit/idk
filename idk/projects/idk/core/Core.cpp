@@ -51,7 +51,9 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan, "Test updates");
 		if (editor)
 		{
-			_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
+			//_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");	
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
 		}
 		else
 		{
@@ -65,6 +67,7 @@ namespace idk
 		{
 			while (_running)
 			{
+				GfxDebugTest();
 				_scheduler->SequentialUpdate();
 				//Core::GetSystem<IEditor>().EditorUpdate();
 				//Core::GetSystem<IEditor>().EditorDraw();
@@ -78,6 +81,7 @@ namespace idk
 			{
 				GfxDebugTest();
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
+				//Core::GetSystem<IEditor>().EditorDraw();
 				//Core::GetSystem<GraphicsSystem>().EndFrame();
 				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
 				
