@@ -12,6 +12,7 @@
     </ClInclude>
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
     <ClInclude Include="editor\windows\IGE_Window.h" />
+    <ClInclude Include="loading\OpenGLFBXLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -20,6 +21,7 @@
       <Filter>editor\commands</Filter>
     </ClCompile>
     <ClCompile Include="editor\windows\IGE_Window.cpp" />
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="editor">
