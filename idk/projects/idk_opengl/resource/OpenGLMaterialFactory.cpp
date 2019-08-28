@@ -13,10 +13,10 @@ namespace idk::ogl
 	{
 		return unique_ptr<Material>();
 	}
-	unique_ptr<Material> OpenGLMaterialFactory::Create(string_view filepath)
+	unique_ptr<Material> OpenGLMaterialFactory::Create(FileHandle filepath)
 	{
 		auto mat = std::make_unique<OpenGLMaterial>();
-		auto shader_stream = Core::GetSystem<FileSystem>().Open(filepath, FS_PERMISSIONS::READ, false);
+		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, false);
 		std::stringstream stringify;
 		stringify << shader_stream.rdbuf();
 		mat->Set(stringify.str());

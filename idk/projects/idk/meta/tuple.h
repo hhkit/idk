@@ -22,6 +22,11 @@ namespace idk
 	template<typename...Ts>
 	using tuple_cat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
 
+	template<typename T1, typename T2>
+	struct tuple_join;
+
+	template<typename T1, typename T2>
+	using tuple_join_t = typename tuple_join<T1, T2>::type;
 
 	template<typename FindMe, typename Tuple>
 	struct index_in_tuple;

@@ -1,5 +1,6 @@
 #pragma once
 #include <idk_config.h>
+#include <reflect/reflect.h>
 #include "FileResources_detail.h"
 
 namespace idk
@@ -18,6 +19,12 @@ namespace idk
 	struct FileResources
 	{
 		vector<GenericRscHandle> resources;
+	};
+
+	struct SerializedResourceMeta
+	{
+		Guid guid;
+		reflect::dynamic metadata;
 	};
 }
 

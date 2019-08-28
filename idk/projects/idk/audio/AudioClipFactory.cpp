@@ -25,14 +25,14 @@ namespace idk {
 		return unique_ptr<AudioClip>();
 	}
 
-	unique_ptr<AudioClip> AudioClipFactory::Create(string_view filePath)
+	unique_ptr<AudioClip> AudioClipFactory::Create(FileHandle filePath)
 	{
 		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 
 		try {
-			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
 			newSound->ReassignSoundGroup(AudioClip::SubSoundGroup_SFX);
 			newSound->UpdateMinMaxDistance();
 
@@ -42,7 +42,7 @@ namespace idk {
 			return nullptr;
 		}
 		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
-		newSound->soundInfo.filePath = filePath;
+		newSound->soundInfo.filePath = filePath.GetFullPath();
 		char name[512];
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getName(name, 512));
 		newSound->soundInfo.name = name;

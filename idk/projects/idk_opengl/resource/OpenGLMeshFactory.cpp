@@ -46,7 +46,7 @@ namespace idk::ogl
 		return retval;
 	}
 
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(string_view)
+	unique_ptr<Mesh> OpenGLMeshFactory::Create(FileHandle)
 	{
 		return unique_ptr<Mesh>();
 	}

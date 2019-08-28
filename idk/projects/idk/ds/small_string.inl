@@ -4,6 +4,9 @@
 #include <string>
 #include <limits>
 
+#undef min
+#undef max
+
 namespace idk
 {
 	template<typename CharT, typename Traits, typename Allocator>
