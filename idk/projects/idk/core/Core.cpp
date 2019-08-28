@@ -52,14 +52,20 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory, "watch files");
 		if (editor)
 		{
-			_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>(&IEditor::EditorUpdate, "Editor Update");
 			//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");	
 			//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate, "Editor Update");
+
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass      <UpdatePhase::PostRender>(&IEditor::EditorDraw, "Editor Draw");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer, "Buffer graphics objects");
 		}
 		else
 		{
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer, "Buffer graphics objects");
 		}
 		Core::GetSystem<FileSystem>();
 		// main loop

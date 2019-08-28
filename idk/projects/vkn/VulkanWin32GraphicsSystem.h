@@ -29,6 +29,7 @@ namespace idk::vkn
 		//void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
 		GraphicsAPI GetAPI() override;
 		void RenderRenderBuffer() override;
+		void SwapBuffer() override;
 		VulkanState& Instance() { return *instance_; }
 
 		VulkanState& GetVulkanHandle();

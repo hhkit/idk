@@ -97,7 +97,7 @@ namespace idk
 			ImGui::End();
 			///////////////////////////////END///////////////////////////////
 
-			ImGuiFrameEnd();
+			//ImGuiFrameEnd();
 		}
 
 		void OI_Interface::ImGuiFrameEnd()
@@ -108,11 +108,11 @@ namespace idk
 		}
 
 		void OI_Interface::ImGuiFrameRender()
-		{
+		{/*
 			ImGuiIO& io = ImGui::GetIO();
 			glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
 			glClearColor(editorControls.im_clearColor.x, editorControls.im_clearColor.y, editorControls.im_clearColor.z, editorControls.im_clearColor.w);
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT);*/
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
 

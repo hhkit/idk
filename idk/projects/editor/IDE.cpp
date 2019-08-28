@@ -72,7 +72,7 @@ namespace idk
 			//edtInterface_v.ImGuiFrameUpdate();
 			break;
 		case GraphicsAPI::OpenGL:
-			//edtInterface_o.ImGuiFrameEnd();
+			edtInterface_o.ImGuiFrameEnd();
 			break;
 		};
 		Core::GetSystem<vkn::VulkanWin32GraphicsSystem>(); // get command buffer from vulkan

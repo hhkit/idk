@@ -48,6 +48,9 @@ namespace idk::vkn
 			RenderGraphicsState(state);//We may be able to multi thread this
 		}
 	}
+	void VulkanWin32GraphicsSystem::SwapBuffer()
+	{
+	}
 	void VulkanWin32GraphicsSystem::BeginFrame()
 	{
 		instance_->BeginFrame();
