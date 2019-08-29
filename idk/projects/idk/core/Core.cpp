@@ -70,10 +70,14 @@ namespace idk
 		Core::GetSystem<FileSystem>();
 		// main loop
 		_scheduler->Setup();
+		auto& app = Core::GetSystem<Application>();
+
 		if (editor)
 		{
 			while (_running)
 			{
+				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
+					Core::Shutdown();
 				GfxDebugTest();
 				_scheduler->SequentialUpdate();
 				//Core::GetSystem<IEditor>().EditorUpdate();
@@ -86,6 +90,8 @@ namespace idk
 		{
 			while (_running)
 			{
+				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
+					Core::Shutdown();
 				GfxDebugTest();
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
 				//Core::GetSystem<IEditor>().EditorDraw();

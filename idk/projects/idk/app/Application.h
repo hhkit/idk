@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <core/ISystem.h>
 #include <app/Keys.h>
+#include <event/Signal.h>
 
 namespace idk
 {
@@ -9,6 +10,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		Signal<ivec2> OnScreenSizeChanged;
 		// app
 		virtual void PollEvents() = 0;
 

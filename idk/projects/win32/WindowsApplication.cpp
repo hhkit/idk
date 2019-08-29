@@ -107,6 +107,9 @@ namespace idk::win
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
 			break;
+		case WM_SIZE:
+			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
+			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
