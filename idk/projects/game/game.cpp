@@ -33,10 +33,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+			c->AddSystem<vkn::VulkanDebugRenderer>();
 			c->AddSystem<IDE>();
 			break;
 		case GraphicsAPI::OpenGL:
 			c->AddSystem<ogl::Win32GraphicsSystem>();
+			c->AddSystem<IDE>();
 			break;
 		default:
 			break;

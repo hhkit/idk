@@ -8,7 +8,7 @@ namespace idk::vkn
 		public DebugRenderer
 	{
 	public:
-		VulkanDebugRenderer(VulkanState& vulkan);
+		VulkanDebugRenderer();
 		~VulkanDebugRenderer() override;
 
 		void Init( const pipeline_config& pipeline_config) override;

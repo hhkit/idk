@@ -12,6 +12,11 @@
     </ClInclude>
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
     <ClInclude Include="editor\windows\IGE_Window.h" />
+    <ClInclude Include="ImGui_Interface.h" />
+    <ClInclude Include="OpenGL_ImGui_Interface.h" />
+    <ClInclude Include="loading\OpenGLFBXLoader.h">
+      <Filter>loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -20,6 +25,11 @@
       <Filter>editor\commands</Filter>
     </ClCompile>
     <ClCompile Include="editor\windows\IGE_Window.cpp" />
+    <ClCompile Include="ImGui_Interface.cpp" />
+    <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="editor">
@@ -31,6 +41,9 @@
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
     <Filter Include="editor\windows">
       <UniqueIdentifier>{b8f020c5-d088-49f8-841d-626fcb8a63d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader">
+      <UniqueIdentifier>{6736b34e-82f1-486c-a938-0e50208db3da}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

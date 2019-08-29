@@ -100,6 +100,7 @@ namespace idk
 
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
+			io;
 
 			//Imgui Style
 			ImGui::StyleColorsClassic();
@@ -327,6 +328,7 @@ namespace idk
 			info.swapchainCount = 1;
 			info.pSwapchains = &*vknViews.Swapchain().swap_chain;
 			info.pImageIndices = &editorControls.edt_frameIndex;
+
 			try
 			{
 
@@ -467,6 +469,10 @@ namespace idk
 		}
 		void VI_Interface::ImGuiCleanUpSwapChain()
 		{
+			vkn::VulkanView& vknViews = vkObj->View();
+
+			vknViews.Device()->waitIdle(vknViews.Dispatcher());
+			
 			editorControls.edt_frames.clear();
 			editorControls.edt_frameSemophores.clear();
 			editorControls.edt_renderPass.reset();

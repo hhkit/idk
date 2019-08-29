@@ -49,6 +49,8 @@ namespace idk::ogl
 		{
 			//Bind frame buffers based on the camera's render target
 
+			//Set the clear color according to the camera
+
 			// lock drawing buffer
 		
 			// render mesh renderers

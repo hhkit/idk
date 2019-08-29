@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include "ImGui_Interface.h"
 
 namespace idk {
 	namespace vkn {
@@ -22,18 +23,18 @@ namespace idk {
 			vk::UniqueSemaphore					edt_renderFinished{};
 			vk::UniqueFence						edt_inflight_fence{};
 		};
-		class VI_Interface {
+		class VI_Interface :public I_Interface {
 		public:
 			VI_Interface(vkn::VulkanState*);
 
-			void Init();
-			void Shutdown();
+			void Init() override;
+			void Shutdown() override;
 
-			void ImGuiFrameBegin();
-			void ImGuiFrameUpdate();
-			void ImGuiFrameEnd();
+			void ImGuiFrameBegin() override;
+			void ImGuiFrameUpdate() override;
+			void ImGuiFrameEnd() override;
 
-			void ImGuiFrameRender();
+			void ImGuiFrameRender() override;
 			void ImGuiFramePresent();
 
 			void ImGuiRecreateSwapChain();
