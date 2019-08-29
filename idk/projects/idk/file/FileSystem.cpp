@@ -366,16 +366,13 @@ namespace idk {
 			{
 				file_system_detail::fs_dir d;
 
-				file_system_detail::fs_key node;
-				node._mount_id = static_cast<int8_t>(index);
-				node._depth = currDepth;
-				node._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
+				d._tree_index._mount_id = static_cast<int8_t>(index);
+				d._tree_index._depth = currDepth;
+				d._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
 
 				initDir(d, mountSubDir, tmp);
 
-				d._tree_index = node;
-
-				mountSubDir._sub_dirs.emplace(d._filename, node);
+				mountSubDir._sub_dirs.emplace(d._filename, d._tree_index);
 				if (watch)
 					_directory_watcher.WatchDirectory(d);
 
