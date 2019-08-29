@@ -11,6 +11,10 @@ namespace idk
 	{
 	public:
 		Signal<ivec2> OnScreenSizeChanged;
+	//	Signal<>      OnMinimize;
+	//	Signal<>      OnRestore;
+	//	Signal<>      OnFullscreen;
+	//	Signal<>      OnWindowed;
 		// app
 		virtual void PollEvents() = 0;
 
@@ -25,7 +29,7 @@ namespace idk
 		// windows
 		virtual bool  SetFullscreen(bool enable_fullscreen) = 0;
 		virtual bool  SetScreenSize(ivec2 target_size) = 0;
-		virtual ivec2 GetScreenSize() { return ivec2{}; };
+		virtual ivec2 GetScreenSize() = 0 ;
 		virtual void  SwapBuffers() = 0;
 	};
 }
