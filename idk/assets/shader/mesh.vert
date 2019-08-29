@@ -10,15 +10,20 @@ Project: ivan.ho_CS300_1
 Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
-#version 330 core
+#version 450 
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 
-uniform mat4 object_transform;
-uniform mat4 normal_transform;
+struct Transform
+{
+	mat4 transform;
+};
 
-out VS_OUT
+layout(binding = 0, set = 0)uniform Transform object_transform;
+layout(binding = 1, set = 0)uniform Transform normal_transform;
+
+layout(location = 2) out VS_OUT
 {
   vec3 position;
   vec3 normal;
@@ -26,7 +31,7 @@ out VS_OUT
 
 void main()
 {
-	vs_out.position = vec3(object_transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(normal_transform * vec4(normal, 1.0));
+	vs_out.position = vec3(object_transform.transform * vec4(position, 1.0));
+	vs_out.normal   = vec3(normal_transform.transform * vec4(normal, 1.0));
     gl_Position     = vec4(vs_out.position, 1.0);
 }

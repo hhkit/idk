@@ -9,7 +9,6 @@ namespace idk::ogl
 		for (auto& program : _programs)
 		{
 			auto loc = glGetUniformLocation(program->_program_id, uniform.data());
-
 			if constexpr (std::is_same_v<T, bool>)   glProgramUniform1i(program->_program_id, loc, obj);
 			if constexpr (std::is_same_v<T, int>)    glProgramUniform1i(program->_program_id, loc, obj);
 			if constexpr (std::is_same_v<T, float>)  glProgramUniform1f(program->_program_id, loc, obj);

@@ -11,6 +11,7 @@
 #include <vkn/DescriptorsManager.h>
 #include <vkn/UboManager.h>
 #include <vkn/idkTexture.h>
+#include <vkn/ValHandler.h>
 #undef max
 #undef min
 
@@ -136,13 +137,6 @@ namespace idk::vkn
 		using unique_ubo      = unique_ptr<ubo     >;
 		using unique_pipeline = unique_ptr<pipeline>;
 
-		struct ValHandler
-		{
-			virtual VkBool32 processMsg(
-				[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-				[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-				[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData);
-		};
 
 		VulkanState();
 		~VulkanState();

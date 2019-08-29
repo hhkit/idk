@@ -206,8 +206,10 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="idkTexture.h" />
+    <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="UboManager.h" />
+    <ClInclude Include="ValHandler.h" />
     <ClInclude Include="vector_buffer.h" />
     <ClInclude Include="GfxConverters.h" />
     <ClInclude Include="BufferHelpers.h" />
@@ -228,8 +230,10 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="idkTexture.cpp" />
+    <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="UboManager.cpp" />
+    <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />

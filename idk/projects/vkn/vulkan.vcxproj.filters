@@ -60,6 +60,12 @@
     <ClInclude Include="VulkanTypeDescriptors.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="ValHandler.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -111,7 +117,11 @@
     <ClCompile Include="VulkanMeshFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanMesh.cpp" />
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="ValHandler.cpp" />
+    <ClCompile Include="MemoryAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

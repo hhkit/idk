@@ -93,6 +93,16 @@ namespace idk::ogl
 		for (auto& elem : _shaders)
 			glAttachShader(_program_id, elem._shader_id);
 		glLinkProgram(_program_id);
+		GLint success{};
+		glGetProgramiv(_program_id, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			char infoLog[512];
+
+			glGetProgramInfoLog(_program_id, 512, NULL, infoLog);
+			std::cout << "Program link failed!\n";
+			std::cout << infoLog << "\n";
+		}
 		for (auto& elem : _shaders)
 			glDetachShader(_program_id, elem._shader_id);
 		_shaders.clear();

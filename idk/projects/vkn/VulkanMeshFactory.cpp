@@ -5,6 +5,10 @@
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+
+#include <vkn/MemoryAllocator.h>
+
+
 namespace idk::vkn
 {
 	namespace hlp
@@ -48,46 +52,87 @@ namespace idk::vkn
 
 	}
 
+	struct MeshVtx
+	{
+		alignas(sizeof(vec4)) vec3 pos;
+		alignas(sizeof(vec4)) vec3 nml;
+	};
+
+	template<typename CItr>
+	void CpyWithStride(CItr src_start, CItr src_end, void* dst_start, void* dst_end, uint32_t dst_stride)
+	{
+		using T = decltype(*src_start);
+		uint8_t* d_st = r_cast<uint8_t*>(dst_start);
+		uint8_t* d_ed = r_cast<uint8_t*>(dst_end);
+		while (src_start != src_end && dst_end >dst_start)
+		{
+			memcpy_s(d_st, d_ed - d_st, src_start, sizeof(T));
+			d_st += dst_stride;
+			++src_start;
+		}
+	}
+
+
+	void MeshFactory::Init()
+	{
+		//TODO set the uniform layouts (M V P)
+		//config.uniform_layouts;
+
+		//TODO Create Pipeline with config
+	}
+
 	unique_ptr<Mesh> MeshFactory::Create()
 	{
+
 		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		auto& pdevice = vview.PDevice();
 		auto& m_device = vview.Device();
 		auto& dispatcher = vview.Dispatcher();
 		auto retval = std::make_unique<VulkanMesh>();
-		struct Vertex
+
+		vector<MeshVtx> vertices
 		{
-			vec3 pos;
-			vec3 normal;
+			MeshVtx{vec3{0,    +0.5, 0}},
+			MeshVtx{vec3{-0.5, -0.5, 0}},
+			MeshVtx{vec3{+0.5, -0.5, 0}}
 		};
 
-		vector<VulkanDescriptor> descriptor
+
+
+		vector<vec3> positions
 		{
-			VulkanDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
-			VulkanDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) }
+			vec3{   0, +0.5, 0},
+			vec3{-0.5, -0.5, 0},
+			vec3{+0.5, -0.5, 0}
+		};
+		vector<vec3> normals
+		{
+			vec3{ 0, 0, 1},
+			vec3{ 0, 0, 1},
+			vec3{ 0, 0, 1}
 		};
 
-		vector<Vertex> vertices
-		{
-			Vertex{vec3{0,    +0.5, 0}},
-			Vertex{vec3{-0.5, -0.5, 0}},
-			Vertex{vec3{+0.5, -0.5, 0}}
-		};
-		auto num_vtx_bytes = hlp::buffer_size(vertices);
-		auto&& [buffer,memory]=hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vview.Dispatcher());
+		auto num_vtx_bytes = hlp::buffer_size(positions);
+		hlp::MemoryAllocator allocator{};
+		//TODO replace with memory allocator for mesh
+		auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal,allocator, vview.Dispatcher());
+		auto&& [nbuffer,nalloc]  = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal,allocator, vview.Dispatcher());
 		//Make the buffer
-		retval->SetBuffer(BufferType::eAttrib, MeshBuffer{std::move(buffer),num_vtx_bytes});
+		retval->SetBuffer(attrib_index::Position, MeshBuffer{ std::move(pbuffer),std::move(palloc),num_vtx_bytes });
+		retval->SetBuffer(attrib_index::Normal,   MeshBuffer{ std::move(nbuffer),std::move(nalloc),num_vtx_bytes});
 
-		vector<int> indices
+		vector<uint16_t> indices
 		{
 			0, 2, 1
 		};
 
-		auto&& [idx_buffer, idx_memory] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), hlp::buffer_size(indices), vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vview.Dispatcher());
-		retval->SetBuffer(
-			BufferType::eIndex, MeshBuffer{ std::move(idx_buffer) , hlp::buffer_size(indices)}
+		auto&& [idx_buffer, idx_alloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), hlp::buffer_size(indices), vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal,allocator, vview.Dispatcher());
+		retval->SetIndexBuffer(
+			MeshBuffer{ std::move(idx_buffer),std::move(idx_alloc) , hlp::buffer_size(indices) },
+			s_cast<uint32_t>(indices.size())
 		);
-		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, std::data(vertices), *buffer);
+		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, std::data(positions), *pbuffer);
+		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, std::data(normals), *nbuffer);
 		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, hlp::buffer_size(indices), std::data(indices), *idx_buffer);
 		return retval;
 	}

@@ -1659,7 +1659,7 @@ namespace idk::vkn
 
 				vk::CommandBufferBeginInfo begin_info
 				{
-					vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eSimultaneousUse
+					vk::CommandBufferUsageFlagBits::eRenderPassContinue //| vk::CommandBufferUsageFlagBits::eSimultaneousUse
 					,&inherit_info
 				};
 				//vk::CommandBufferBeginInfo beginInfo
@@ -1765,17 +1765,6 @@ namespace idk::vkn
 			, (void*)userData
 		);
 		return createInfo;
-	}
-
-	VkBool32 VulkanState::ValHandler::processMsg(
-		[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-		[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
-	{
-		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-			hlp::cerr() << "Err: ";
-		hlp::cerr() << "validation layer: " << pCallbackData->pMessage << std::endl;
-		return VK_FALSE;
 	}
 
 	void VulkanState::UpdateWindowSize(vec2 size)

@@ -1,9 +1,12 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
 #include <vkn/idkTexture.h>
+#include <vkn/MemoryAllocator.h>
+
 
 namespace idk::vkn::hlp
 {
+
 	uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 
 	template<typename Dispatcher>
@@ -20,7 +23,17 @@ namespace idk::vkn::hlp
 		vk::PhysicalDevice& pdevice, vk::Device& device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher);
 
 	template<typename Dispatcher>
-	void BindBufferMemory(vk::Device& device, vk::Buffer& buffer, vk::DeviceMemory& memory, uint32_t offset, Dispatcher const& dispatcher);
+	void BindBufferMemory(vk::Device device, vk::Buffer buffer, vk::DeviceMemory memory, uint32_t offset, Dispatcher const& dispatcher);
+
+	template<typename Dispatcher>
+	std::pair<vk::UniqueBuffer, UniqueAlloc> CreateAllocBindBuffer(
+		vk::PhysicalDevice& pdevice, vk::Device& device,
+		vk::DeviceSize buffer_size,
+		vk::BufferUsageFlags buffer_usage,
+		vk::MemoryPropertyFlags memory_flags,
+		MemoryAllocator& allocator,
+		const Dispatcher& dispatcher
+	);
 
 	template<typename Dispatcher>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindBuffer(

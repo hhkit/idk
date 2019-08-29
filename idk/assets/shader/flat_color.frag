@@ -23,5 +23,5 @@ out vec4 FragColor;
 
 void main()
 {
-	FragColor = vec4(fs_in.position, 0.0);
+	FragColor = vec4(fs_in.position, 1.0);
 } 
