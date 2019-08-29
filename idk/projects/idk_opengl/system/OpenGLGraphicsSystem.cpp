@@ -28,6 +28,7 @@ namespace idk::ogl
 		_opengl = std::make_unique<OpenGLState>();
 		_opengl->Setup();
 
+		_viewport_size = Core::GetSystem<Application>().GetScreenSize();
 		Core::GetSystem<Application>().OnScreenSizeChanged.Listen([this](ivec2 new_size)
 		{
 			_viewport_size = new_size;

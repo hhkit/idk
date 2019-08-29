@@ -26,7 +26,7 @@ namespace idk::win
 		void PollEvents() override;
 		int GetReturnVal();
 		void Init() override {}
-		ivec2 GetScreenSize()const;
+		ivec2 GetScreenSize() override;
 		vec2 GetMouseScreenPos() override { return vec2{}; }
 		vec2 GetMouseScreenDel() override { return vec2{}; }
 		bool GetKeyDown(Key) override;

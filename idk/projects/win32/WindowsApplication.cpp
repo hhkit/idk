@@ -55,7 +55,7 @@ namespace idk::win
 	{
 		return retval;
 	}
-	ivec2 Windows::GetScreenSize() const
+	ivec2 Windows::GetScreenSize() 
 	{
 		RECT rect;
 		if (!GetClientRect(hWnd, &rect))
@@ -107,6 +107,12 @@ namespace idk::win
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
 			break;
+		case WM_NCCREATE:
+		{
+			auto ptr = reinterpret_cast<CREATESTRUCTW*&>(lParam);
+			OnScreenSizeChanged.Fire(ivec2{ ptr->cx, ptr->cy });
+		}
+		break;
 		case WM_SIZE:
 			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
 			break;
