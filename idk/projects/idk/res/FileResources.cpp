@@ -85,8 +85,8 @@ namespace idk
 
 	GenericMetadata::GenericMetadata(string_view serialized)
 	{
-		char guidbuf[64];
-		char typebuf[64];
+		char guidbuf[64]{};
+		char typebuf[64]{};
 
 		sscanf_s(serialized.data(), "%s%s", guidbuf, 64, typebuf, 64);
 

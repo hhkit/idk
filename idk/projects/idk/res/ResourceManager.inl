@@ -25,13 +25,20 @@ namespace idk
 		auto ptr = GetLoader<Resource>().Create();
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = handle;
+		ptr->_dirty = true;
+		if constexpr (has_tag_v<Resource, MetaTag>)
+			ptr->_dirtymeta = true;
 		table.emplace(handle.guid, std::move(ptr));
 		return handle;
 	}
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath)
 	{
-		return Create<Resource>(filepath, Guid::Make());
+		auto retval = Create<Resource>(filepath, Guid::Make());
+		retval->_dirty = true;
+		if constexpr(has_tag_v<Resource, MetaTag>)
+			retval->_dirtymeta = true;
+		return retval;
 	}
 
 	template<typename Resource>

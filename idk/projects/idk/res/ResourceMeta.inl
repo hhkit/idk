@@ -7,6 +7,7 @@ namespace idk
 	{
 		OnMetaUpdate(inmeta);
 		meta = inmeta;
+		_dirtymeta = true;
 	}
 	template<typename Meta>
 	inline const Meta& MetaTag<Meta>::GetMeta() const
