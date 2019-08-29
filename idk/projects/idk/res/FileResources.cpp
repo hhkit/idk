@@ -68,15 +68,15 @@ namespace idk
 		return std::visit([](auto handle) { return static_cast<bool>(handle); }, _handle);
 	}
 
-	vector<GenericMetadata> save_meta(const FileResources& resources)
+	MetaFile save_meta(const FileResources& resources)
 	{
-		auto retval = vector<GenericMetadata>();
+		auto retval = MetaFile{};
 
 		for (auto& handle : resources.resources)
 		{
 			handle.visit([&](auto&& h)
 			{
-				retval.emplace_back(*h);
+				retval.resource_metas.emplace_back(*h);
 			});
 		}
 
@@ -89,6 +89,8 @@ namespace idk
 		char typebuf[64]{};
 
 		sscanf_s(serialized.data(), "%s%s", guidbuf, 64, typebuf, 64);
+
+		guid = Guid{ guidbuf };
 
 		string_view rest = serialized.substr(strlen(guidbuf) + 1 + strlen(typebuf) + 1);
 		static const auto get_resource_id_ht = FileResourceHelper<Resources>::GetResourceIDJumpTable();

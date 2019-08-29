@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <sstream>
+
 #include <file/FileSystem.h>
 #include <IncludeResources.h>
 #include <serialize/serialize.h>
@@ -85,9 +87,15 @@ namespace idk
 
 		auto resources = [&]()
 		{
-			//if (meta_file)
-			//	return loader_itr->second->Create(file, path_to_meta);
-			//else
+			if (meta_file)
+			{
+				std::stringstream s; 
+				s << meta_file.Open(FS_PERMISSIONS::READ).rdbuf();
+
+				auto metalist = parse_text<MetaFile>(s.str());
+				return loader_itr->second->Create(file, span<GenericMetadata>{metalist.resource_metas});
+			}
+			else
 				return loader_itr->second->Create(file);
 		}();
 
@@ -113,7 +121,7 @@ namespace idk
 			return FileResources{};
 
 		// reload resources
-		auto stored = loader_itr->second->Create(file, span<GenericMetadata>{ser});
+		auto stored = loader_itr->second->Create(file, span<GenericMetadata>{ser.resource_metas});
 		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
 	}
 

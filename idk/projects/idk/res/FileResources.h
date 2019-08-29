@@ -51,7 +51,12 @@ namespace idk
 		shared_ptr<void> pimpl;
 	};
 
-	vector<GenericMetadata> save_meta(const FileResources&);
+	struct MetaFile
+	{
+		vector<GenericMetadata> resource_metas;
+	};
+
+	MetaFile save_meta(const FileResources&);
 
 	template<typename T, typename>
 	inline GenericMetadata::GenericMetadata(const T& resource)
