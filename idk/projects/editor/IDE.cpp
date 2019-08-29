@@ -23,6 +23,7 @@ namespace idk
 			edtInterface_o = edt::OI_Interface{ &Core::GetSystem<ogl::Win32GraphicsSystem>().Instance() };
 			edtInterface_o.Init();
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
 			break;
 		case GraphicsAPI::Vulkan:
 			edtInterface_v = edt::VI_Interface{ &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance() };

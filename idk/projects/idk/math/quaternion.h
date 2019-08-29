@@ -20,6 +20,7 @@ namespace idk::math
 		quaternion(const vector<T, 3> & axis, radian<T> angle);
 
 		quaternion inverse() const;
+		quaternion& normalize();
 
 		// operator overloads
 		quaternion& operator*=(const quaternion&);

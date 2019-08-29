@@ -24,7 +24,7 @@ namespace idk::ogl
 	struct OpenGLDescriptor
 	{
 		vtx::Attrib attrib = vtx::Attrib::Position;
-		unsigned    offset = 0;
 		unsigned    stride = 0;
+		unsigned    offset = 0;
 	};
 }

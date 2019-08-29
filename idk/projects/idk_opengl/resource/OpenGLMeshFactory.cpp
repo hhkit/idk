@@ -25,7 +25,7 @@ namespace idk::ogl
 			Vertex{vec3{-0.5, -0.5, 0}},
 			Vertex{vec3{+0.5, -0.5, 0}}
 		};
-
+		retval->AddMeshEntry(0, 0, 3, 0);
 		retval->AddBuffer( 
 			OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 				.Bind()
