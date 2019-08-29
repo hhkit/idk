@@ -6,17 +6,6 @@ namespace idk::reflect::detail
 {
 
 	template <typename T>
-	struct is_pair : std::false_type
-	{};
-	template <typename T, typename U>
-	struct is_pair<std::pair<T, U>> : std::true_type
-	{};
-	template <typename T>
-	inline constexpr bool is_pair_v = is_pair<T>::value;
-
-
-
-	template <typename T>
 	struct is_pair_assignable : std::false_type
 	{};
 	template <typename T, typename U>
@@ -125,7 +114,7 @@ namespace idk::reflect::detail
 		void copy_assign(void* lhs, const void* rhs) const override
 		{
 			lhs; rhs;
-			if constexpr (is_pair_v<T> && !is_pair_assignable_v<T> || !std::is_copy_assignable_v<T>)
+			if constexpr (is_template_v<T, std::pair> && !is_pair_assignable_v<T> || !std::is_copy_assignable_v<T>)
 				throw "Cannot copy assign";
 			else
 				*static_cast<T*>(lhs) = *static_cast<const T*>(rhs);

@@ -206,13 +206,7 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="idk_reflect_types.h" />
-    <ClInclude Include="reflect\constructor_entry.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="reflect\reflect.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
-    <ClInclude Include="reflect\typed_context.inl">
       <Filter>reflect</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioSystem.h">
@@ -241,9 +235,6 @@
     </ClInclude>
     <ClInclude Include="util\string_hash.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="reflect\pretty_function.h">
-      <Filter>reflect</Filter>
     </ClInclude>
     <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
@@ -428,6 +419,20 @@
     <ClInclude Include="file\FileSystemIncludes.h">
       <Filter>file</Filter>
     </ClInclude>
+    <ClInclude Include="reflect\detail\constructor_entry.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\typed_context.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\pretty_function.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\meta_manager.h" />
+    <ClInclude Include="reflect\typeinfo.h" />
+    <ClInclude Include="reflect\detail\table_storage.h" />
+    <ClInclude Include="reflect\detail\typed_context.h" />
+    <ClInclude Include="reflect\detail\visit_detail.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -635,9 +640,6 @@
     <None Include="ds\zip.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="reflect\constructor_entry.inl">
-      <Filter>reflect</Filter>
-    </None>
     <None Include="reflect\dynamic.inl">
       <Filter>reflect</Filter>
     </None>
@@ -704,6 +706,12 @@
     <None Include="res\ResourceMeta.inl">
       <Filter>res</Filter>
     </None>
+    <None Include="reflect\detail\constructor_entry.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="reflect\detail\meta_manager.inl" />
+    <None Include="reflect\detail\visit_detail.inl" />
+    <None Include="reflect\detail\table_storage.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

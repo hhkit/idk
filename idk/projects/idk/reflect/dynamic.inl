@@ -96,6 +96,7 @@ namespace idk::reflect
 	//     name of property (const char*), or
 	//     container key when visiting container elements ( K = std::decay_t<decltype(key)> )
 	//     for sequential containers, it will be size_t. for associative, it will be type K
+	//     for held object of variants, it will be the held type (as a reflect::type)
 	// value:
 	//     the value, use T = std::decay_t<decltype(value)> to get the type
 	// depth_change: (int)

@@ -57,6 +57,11 @@
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="reflect\detail\meta_manager.h" />
+    <ClInclude Include="reflect\detail\table_storage.h" />
+    <ClInclude Include="reflect\detail\typed_context.h" />
+    <ClInclude Include="reflect\detail\visit_detail.h" />
+    <ClInclude Include="reflect\typeinfo.h" />
     <ClInclude Include="res\ExtensionLoader.h" />
     <ClInclude Include="res\FileResources.h" />
     <ClInclude Include="res\FileResources_detail.h" />
@@ -108,8 +113,8 @@
     <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
-    <ClInclude Include="reflect\pretty_function.h" />
-    <ClInclude Include="reflect\constructor_entry.h" />
+    <ClInclude Include="reflect\detail\pretty_function.h" />
+    <ClInclude Include="reflect\detail\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="shape\capsule.h" />
@@ -121,7 +126,7 @@
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
-    <ClInclude Include="reflect\typed_context.inl" />
+    <ClInclude Include="reflect\detail\typed_context.inl" />
     <ClInclude Include="res\Guid.h" />
     <ClInclude Include="res\Resource.h" />
     <ClInclude Include="res\ResourceFactory.h" />
@@ -203,6 +208,9 @@
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
+    <None Include="reflect\detail\meta_manager.inl" />
+    <None Include="reflect\detail\table_storage.inl" />
+    <None Include="reflect\detail\visit_detail.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="res\FileResources.inl" />
@@ -225,7 +233,7 @@
     <None Include="ds\range.inl" />
     <None Include="ds\span.inl" />
     <None Include="ds\zip.inl" />
-    <None Include="reflect\constructor_entry.inl" />
+    <None Include="reflect\detail\constructor_entry.inl" />
     <None Include="reflect\dynamic.inl" />
     <None Include="reflect\reflect.inl" />
     <None Include="reflect\type.inl" />
