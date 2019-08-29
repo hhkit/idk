@@ -14,7 +14,10 @@ namespace idk
 		const Meta& GetMeta() const;
 	protected:
 		Meta meta;
+		bool _dirtymeta { false };
 		virtual void OnMetaUpdate(const Meta& newmeta) { (newmeta); };
+
+		friend class ResourceManager;
 	};
 }
 
