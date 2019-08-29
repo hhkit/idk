@@ -89,6 +89,9 @@
     <Filter Include="math\interp">
       <UniqueIdentifier>{c78cfeac-2107-48ce-841f-4eabae9d7857}</UniqueIdentifier>
     </Filter>
+    <Filter Include="reflect\detail">
+      <UniqueIdentifier>{53f59ace-a5cc-4e27-8aea-bb3b8f0abbd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -420,19 +423,29 @@
       <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="reflect\detail\constructor_entry.h">
-      <Filter>reflect</Filter>
+      <Filter>reflect\detail</Filter>
     </ClInclude>
     <ClInclude Include="reflect\detail\typed_context.inl">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\typeinfo.h">
       <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\meta_manager.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\table_storage.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\typed_context.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\visit_detail.h">
+      <Filter>reflect\detail</Filter>
     </ClInclude>
     <ClInclude Include="reflect\detail\pretty_function.h">
-      <Filter>reflect</Filter>
+      <Filter>reflect\detail</Filter>
     </ClInclude>
-    <ClInclude Include="reflect\detail\meta_manager.h" />
-    <ClInclude Include="reflect\typeinfo.h" />
-    <ClInclude Include="reflect\detail\table_storage.h" />
-    <ClInclude Include="reflect\detail\typed_context.h" />
-    <ClInclude Include="reflect\detail\visit_detail.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -707,11 +720,17 @@
       <Filter>res</Filter>
     </None>
     <None Include="reflect\detail\constructor_entry.inl">
-      <Filter>reflect</Filter>
+      <Filter>reflect\detail</Filter>
     </None>
-    <None Include="reflect\detail\meta_manager.inl" />
-    <None Include="reflect\detail\visit_detail.inl" />
-    <None Include="reflect\detail\table_storage.inl" />
+    <None Include="reflect\detail\meta_manager.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\table_storage.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\visit_detail.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
@@ -732,7 +751,11 @@
     <Natvis Include="_natvis\guid.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
-    <Natvis Include="_natvis\reflect.natvis" />
-    <Natvis Include="_natvis\ds.natvis" />
+    <Natvis Include="_natvis\reflect.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\ds.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>
