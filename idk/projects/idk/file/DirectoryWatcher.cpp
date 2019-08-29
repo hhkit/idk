@@ -166,7 +166,7 @@ namespace idk
 			if (vfs._mounts.empty())
 				throw("Something is terribly wrong. No mounts found.");
 
-			auto& internal_collated = vfs._mounts[internal_file._tree_index._mount_id]._path_tree[internal_file._tree_index._depth];
+			// auto& internal_collated = vfs._mounts[internal_file._tree_index._mount_id]._path_tree[internal_file._tree_index._depth];
 			auto& parent_dir = vfs.getDir(internal_file._parent);
 			
 			switch (internal_file._change_status)

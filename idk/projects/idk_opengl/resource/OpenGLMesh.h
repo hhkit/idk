@@ -22,8 +22,19 @@ namespace idk::ogl
 
 		void   Bind(const renderer_reqs& locations);
 		void   Draw();
+		void   Reset();
 		void   AddBuffer(OpenGLBuffer&);
+		void   AddMeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index);
 	private:
+		struct MeshEntry
+		{
+			unsigned base_vertex;
+			unsigned base_index;
+			unsigned num_index;
+			unsigned texture_index;
+		};
+
+		vector<MeshEntry>	 _mesh_entries;
 		vector<OpenGLBuffer> _buffers;
 		OpenGLBuffer         _element_array_object;
 		GLenum               _draw_mode = GL_TRIANGLES;

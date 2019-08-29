@@ -63,7 +63,7 @@ namespace idk::ogl
 		return *this;
 	}
 
-	OpenGLBuffer& OpenGLBuffer::Buffer(void* data, size_t stride, GLsizei count)
+	OpenGLBuffer& OpenGLBuffer::Buffer(const void* data, size_t stride, GLsizei count)
 	{
 		_size = count;
 		glBufferData(_type, count * stride, data, GL_STATIC_READ);

@@ -446,6 +446,7 @@
     <ClInclude Include="reflect\detail\pretty_function.h">
       <Filter>reflect\detail</Filter>
     </ClInclude>
+    <ClInclude Include="anim\Skeleton.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
