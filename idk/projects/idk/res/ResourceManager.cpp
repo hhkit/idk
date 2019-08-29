@@ -2,6 +2,7 @@
 
 #include <file/FileSystem.h>
 #include <IncludeResources.h>
+#include <serialize/serialize.h>
 #include "ResourceManager.h"
 
 
@@ -38,7 +39,6 @@ namespace idk
 	{
 		instance = this;
 		_resource_tables   = detail::ResourceHelper::GenResourceTables();
-		LoadDefaultResources();
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = std::string{ fs.GetExeDir() };
@@ -64,10 +64,6 @@ namespace idk
 			ReloadFile(elem);
 	}
 	
-	void ResourceManager::LoadDefaultResources()
-	{
-		//default_resources_ = detail::ResourceHelper::GenDefaults();
-	}
 	FileResources ResourceManager::LoadFile(FileHandle file)
 	{
 		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
@@ -98,6 +94,7 @@ namespace idk
 		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
 		return resources;
 	}
+
 	FileResources ResourceManager::ReloadFile(FileHandle file)
 	{
 		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
@@ -119,6 +116,7 @@ namespace idk
 		auto stored = loader_itr->second->Create(file, span<GenericMetadata>{ser});
 		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
 	}
+
 	size_t ResourceManager::UnloadFile(FileHandle path_to_file)
 	{
 		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
@@ -144,5 +142,34 @@ namespace idk
 			return find_file->second;
 		else
 			return FileResources();
+	}
+
+	void ResourceManager::SaveDirtyMetadata()
+	{
+		auto& fs = Core::GetSystem<FileSystem>();
+		for (auto& [filepath, resources] : _loaded_files)
+		{
+			bool dirty = false;
+			for (auto& elem : resources.resources)
+				elem.visit([&dirty](auto& elem) {
+				dirty |= elem->_dirty;
+			});
+
+			if (dirty)
+			{
+				auto saveus = save_meta(resources);
+
+				auto meta_file = fs.Open(filepath + ".meta", FS_PERMISSIONS::WRITE, false);
+
+				meta_file << serialize_text(saveus);
+
+				// mark as clean
+				for (auto& elem : resources.resources)
+					elem.visit([&dirty](auto& elem) {
+					elem->_dirty = false;
+				});
+			}
+
+		}
 	}
 }

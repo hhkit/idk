@@ -1,6 +1,7 @@
 #pragma once
 #include <idk_config.h>
-#include <reflect/reflect.h>
+#include <meta/tag.h>
+#include <res/ResourceMeta.h>
 #include "FileResources_detail.h"
 
 namespace idk
@@ -34,16 +35,19 @@ namespace idk
 	{
 		Guid   guid;
 
+		GenericMetadata() = default;
 		template<typename T, 
 			typename = sfinae<ResourceID<T> != ResourceCount && 
 				!std::is_same_v<std::decay_t<T>, GenericMetadata>>
 		>
 		explicit GenericMetadata(const T&);
-		template<typename T, typename = sfinae<has_tag_v<T, MetaTag>>>
-		typename T::Metadata* GetMeta();
+		explicit GenericMetadata(string_view serialized);
+
+		template<typename T, typename = sfinae<has_tag_v<T, MetaTag>>> typename T::Metadata* GetMeta();
+		template<typename T, typename = sfinae<has_tag_v<std::decay_t<T>, MetaTag>>> bool SetMeta(T&);
 		explicit operator string() const;
 	private:
-		size_t resource_id;
+		size_t resource_id = 0;
 		shared_ptr<void> pimpl;
 	};
 
@@ -53,7 +57,7 @@ namespace idk
 	inline GenericMetadata::GenericMetadata(const T& resource)
 		: guid{resource.GetHandle().guid},
 		resource_id{ResourceID<T>},
-		pimpl{ }
+		pimpl{}
 	{
 		if constexpr (has_tag_v<T, MetaTag>)
 			pimpl = std::make_shared<typename T::Metadata>(resource.GetMeta());
@@ -65,6 +69,15 @@ namespace idk
 			return nullptr;
 		else
 			return r_cast<typename T::Metadata*>(pimpl.get());
+	}
+	template<typename T, typename>
+	inline bool GenericMetadata::SetMeta(T& obj)
+	{
+		if (ResourceID<T> != resource_id)
+			return false;
+		
+		obj.SetMeta(GetMeta<T>());
+		return true;
 	}
 }
 

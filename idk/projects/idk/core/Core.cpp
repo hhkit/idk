@@ -55,10 +55,10 @@ namespace idk
 			//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");	
 			//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate, "Editor Update");
-
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
-			_scheduler->ScheduleFencedPass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
-			_scheduler->ScheduleFencedPass      <UpdatePhase::PostRender>(&IEditor::EditorDraw, "Editor Draw");
+			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&IEditor::EditorDraw, "Editor Draw");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer, "Buffer graphics objects");
 		}
 		else

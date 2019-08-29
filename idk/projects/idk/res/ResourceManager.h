@@ -29,7 +29,6 @@ namespace idk
 		void WatchDirectory();
 
 		// loading ops
-		void LoadDefaultResources();
 		template<typename Factory, typename ... Args>
 		Factory& RegisterFactory(Args&& ...);
 		template<typename ExtensionLoaderT, typename ... Args>
@@ -53,6 +52,9 @@ namespace idk
 		FileResources ReloadFile(FileHandle path_to_file);
 		size_t        UnloadFile(FileHandle path_to_file);
 		FileResources GetFileResources(FileHandle path_to_file);
+
+		// saving metadata
+		void SaveDirtyMetadata();
 
 	private:
 		using GenPtr = shared_ptr<void>;

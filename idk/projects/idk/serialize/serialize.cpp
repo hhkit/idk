@@ -48,6 +48,7 @@ namespace idk
 				SERIALIZE_CASE(double);
 				case reflect::typehash<string>(): return json(serialize_text(obj.get<string>()));
 				case reflect::typehash<Guid>(): return json(serialize_text(obj.get<Guid>()));
+				case reflect::typehash<GenericMetadata>(): return json(serialize_text(obj.get<GenericMetadata>()));
 			default: break;
 			}
 #undef SERIALIZE_CASE
@@ -228,6 +229,7 @@ namespace idk
 #define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : parse_text(j.get<string>(), obj); break;
 				SERIALIZE_CASE(string);
 				SERIALIZE_CASE(Guid);
+				SERIALIZE_CASE(GenericMetadata);
 				default: break;
 			}
 #undef SERIALIZE_CASE
