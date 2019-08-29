@@ -102,7 +102,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource, span<SerializedResourceMeta> path_to_meta)
+	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource, span<GenericMetadata> path_to_meta)
 	{
 		return FileResources();
 	}

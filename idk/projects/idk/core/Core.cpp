@@ -76,27 +76,20 @@ namespace idk
 		{
 			while (_running)
 			{
-				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
-					Core::Shutdown();
 				GfxDebugTest();
 				_scheduler->SequentialUpdate();
-				//Core::GetSystem<IEditor>().EditorUpdate();
-				//Core::GetSystem<IEditor>().EditorDraw();
-				//GfxDebugTest();
-				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
+				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
+					Core::Shutdown();
 			}
 		}
 		else
 		{
 			while (_running)
 			{
-				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
-					Core::Shutdown();
 				GfxDebugTest();
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
-				//Core::GetSystem<IEditor>().EditorDraw();
-				//Core::GetSystem<GraphicsSystem>().EndFrame();
-				//Core::GetSystem<GraphicsSystem>().RenderBuffer();
+				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
+					Core::Shutdown();
 				
 			}
 		}

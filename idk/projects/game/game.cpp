@@ -55,6 +55,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	
 	//mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" }).resources[0].As<Mesh>();
+	TestResource t;
+	auto m = GenericMetadata{ t };
+
+	static_assert(has_tag_v<TestResource, MetaTag>, "haha");
+	string s{ m };
 
 	mesh_rend->material_instance.material = 
 		Core::GetResourceManager().LoadFile(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag")).resources[0].As<Material>();

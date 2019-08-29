@@ -9,7 +9,7 @@ namespace idk
 		meta = inmeta;
 	}
 	template<typename Meta>
-	inline const Meta& MetaTag<Meta>::GetMeta()
+	inline const Meta& MetaTag<Meta>::GetMeta() const
 	{
 		return meta;
 	}

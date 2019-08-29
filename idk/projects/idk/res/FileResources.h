@@ -30,13 +30,42 @@ namespace idk
 		vector<GenericRscHandle> resources;
 	};
 
-	struct SerializedResourceMeta
+	struct GenericMetadata
 	{
-		Guid guid;
-		reflect::dynamic metadata;
+		Guid   guid;
+
+		template<typename T, 
+			typename = sfinae<ResourceID<T> != ResourceCount && 
+				!std::is_same_v<std::decay_t<T>, GenericMetadata>>
+		>
+		explicit GenericMetadata(const T&);
+		template<typename T, typename = sfinae<has_tag_v<T, MetaTag>>>
+		typename T::Metadata* GetMeta();
+		explicit operator string() const;
+	private:
+		size_t resource_id;
+		shared_ptr<void> pimpl;
 	};
 
-	vector<SerializedResourceMeta> serialize(const FileResources&);
+	vector<GenericMetadata> save_meta(const FileResources&);
+
+	template<typename T, typename>
+	inline GenericMetadata::GenericMetadata(const T& resource)
+		: guid{resource.GetHandle().guid},
+		resource_id{ResourceID<T>},
+		pimpl{ }
+	{
+		if constexpr (has_tag_v<T, MetaTag>)
+			pimpl = std::make_shared<typename T::Metadata>(resource.GetMeta());
+	}
+	template<typename T, typename>
+	typename T::Metadata* GenericMetadata::GetMeta()
+	{
+		if (resource_id != ResourceID<T>)
+			return nullptr;
+		else
+			return r_cast<typename T::Metadata*>(pimpl.get());
+	}
 }
 
 #include "FileResources.inl"

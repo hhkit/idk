@@ -33,7 +33,7 @@ namespace idk
 		template<typename Factory, typename ... Args>
 		Factory& RegisterFactory(Args&& ...);
 		template<typename ExtensionLoaderT, typename ... Args>
-		ExtensionLoader& RegisterExtensionLoader(std::string_view extension, Args&& ...);
+		ExtensionLoaderT& RegisterExtensionLoader(std::string_view extension, Args&& ...);
 
 		// handle ops
 		template<typename Resource> bool      Validate(const RscHandle<Resource>&);

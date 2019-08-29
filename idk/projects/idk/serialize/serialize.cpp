@@ -5,6 +5,7 @@
 #include <core/GameObject.h>
 #include <scene/Scene.h>
 #include <common/Transform.h>
+#include <res/FileResources.h>
 
 #include <json/json.hpp>
 using json = nlohmann::json;
@@ -153,7 +154,6 @@ namespace idk
 
 		return j.dump(2);
 	}
-
 
 
 	template <typename T, typename = void>

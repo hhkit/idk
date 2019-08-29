@@ -3,6 +3,7 @@
 #include <reflect/reflect.h>
 #include <core/Core.h>
 #include <IncludeComponents.h>
+#include <IncludeResources.h>
 
 /* 
  * !!! NOTE !!!
@@ -67,6 +68,10 @@ REFLECT_END()
 /*==========================================================================
  * resources
  *========================================================================*/
+
+REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
+REFLECT_VARS(i, j)
+REFLECT_END()
 
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VAR(guid)

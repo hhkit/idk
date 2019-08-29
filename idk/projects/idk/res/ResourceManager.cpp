@@ -105,7 +105,7 @@ namespace idk
 			return FileResources();
 
 		// save old meta
-		auto ser = serialize(find_file->second);
+		auto ser = save_meta(find_file->second);
 
 		// unload resources
 		UnloadFile(file);
@@ -116,7 +116,7 @@ namespace idk
 			return FileResources{};
 
 		// reload resources
-		auto stored = loader_itr->second->Create(file, span<SerializedResourceMeta>{ser});
+		auto stored = loader_itr->second->Create(file, span<GenericMetadata>{ser});
 		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
 	}
 	size_t ResourceManager::UnloadFile(FileHandle path_to_file)
