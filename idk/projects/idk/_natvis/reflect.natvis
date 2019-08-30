@@ -37,9 +37,7 @@
   </Type>
 
   <Type Name="idk::reflect::dynamic::derived&lt;*&gt;">
-    <Expand>
-      <ExpandedItem>obj</ExpandedItem>
-    </Expand>
+    <DisplayString>{obj}</DisplayString>
   </Type>
   
 </AutoVisualizer>

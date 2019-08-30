@@ -38,6 +38,11 @@ namespace idk::reflect
 		return _context->is_enum_type;
 	}
 
+    bool type::is_basic_serializable() const
+    {
+        return _context->is_basic_serializable;
+    }
+
 	enum_type type::as_enum_type() const
 	{
 		return enum_type{ _context->get_enum_data() };

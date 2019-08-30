@@ -57,6 +57,8 @@ TEST(Serialize, TestSerializeBasic)
 	vector<string> yolo;
 	yolo.emplace_back();
 	parse_text(serialize_text(yolo), yolo);
+    EXPECT_EQ(yolo.size(), 1);
+    EXPECT_EQ(yolo[0], "");
 }
 
 struct serialize_this_bs
@@ -125,6 +127,19 @@ TEST(Serialize, TestSerializeUnknownAndParentAndVariant)
 	auto str2 = serialize_text(s2);
 
 	EXPECT_EQ(str, str2);
+
+
+
+	std::vector<reflect::dynamic> vec_of_dyns;
+	vec_of_dyns.emplace_back(1);
+	vec_of_dyns.emplace_back(1.0f);
+	vec_of_dyns.emplace_back(testserialize_enum(testserialize_enum::TAU));
+	auto s3 = serialize_text(vec_of_dyns);
+    parse_text(s3, vec_of_dyns);
+
+    EXPECT_EQ(vec_of_dyns[0].get<int>(), 1);
+    EXPECT_EQ(vec_of_dyns[1].get<float>(), 1.0f);
+    EXPECT_EQ(vec_of_dyns[2].get<testserialize_enum>(), testserialize_enum::TAU);
 }
 
 static string serialized_scene_0 = "";

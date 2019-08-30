@@ -58,7 +58,7 @@ namespace idk::reflect
 		// gets the hash of the type ( check against typehash<T>() )
 		size_t hash() const;
 
-		// should always be true for now (since get_type has assert)
+		// should always be true for now (unless through invalid dynamic) (since get_type has assert)
 		bool valid() const;
 
 		// number of properties
@@ -72,6 +72,9 @@ namespace idk::reflect
 
 		// is it a smart enum type defined with the macro ENUM?
 		bool is_enum_type() const;
+
+        // is it an arithmetic type or is convertible to string?
+        bool is_basic_serializable() const;
 
 		// Checks if this type is a template type Tpl<typename...>
 		template<template<typename...> typename Tpl> bool is_template() const;
@@ -127,10 +130,16 @@ namespace idk::reflect
 		// get property with index (arg index in REFLECT_VARS)
 		property get_property(size_t index) const;
 
+        // convert to a string. for arithmetic types, calls to_string().
+        // for types that are convertible to string, calls string(obj).
+        // check using type.is_basic_serializable()
+        string to_string() const;
+
 		// convert to unified container. check using type.is_container()
 		uni_container to_container() const;
 
 		// convert to a smart enum value. check using type.is_enum_type()
+        // note that modifying the enum_value will not modify this object.
 		enum_value to_enum_value() const;
 
 		// unpacks a tuple

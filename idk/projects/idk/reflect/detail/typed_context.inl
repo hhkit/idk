@@ -32,10 +32,13 @@ namespace idk::reflect::detail
 		const span<constructor_entry_base* const> ctors;
 		const size_t hash;
 		const bool is_container;
-		const bool is_enum_type;
+        const bool is_enum_type;
+        const bool is_basic_serializable;
 
-		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash, bool is_container, bool is_enum_type)
-			: name{ name }, table{ table }, ctors{ ctors }, hash{ hash }, is_container{ is_container }, is_enum_type{ is_enum_type }
+		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash,
+                           bool is_container, bool is_enum_type, bool is_basic_serializable)
+            : name{ name }, table{ table }, ctors{ ctors }, hash{ hash },
+              is_container{ is_container }, is_enum_type{ is_enum_type }, is_basic_serializable{ is_basic_serializable }
 		{}
 		virtual ~typed_context_base() = default;
 
@@ -48,6 +51,7 @@ namespace idk::reflect::detail
 		virtual ReflectedTypes get_mega_variant(void* obj) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
+		virtual string to_string(void* obj) const = 0;
 		virtual uni_container to_container(void* obj) const = 0;
 		virtual enum_value to_enum_value(void* obj) const = 0;
 		virtual vector<dynamic> unpack(void* obj) const = 0;
@@ -82,11 +86,31 @@ namespace idk::reflect::detail
 		}
 	};
 
+    template<typename T1, typename T2>
+    static void _assign(T1& lhs, T2& rhs)
+    {
+        (lhs); (rhs);
+        if constexpr (std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>)
+        {
+            lhs = static_cast<T1>(rhs);
+        }
+        else if constexpr (std::is_convertible_v<T2, T1>)
+        {
+            if constexpr (std::is_assignable_v<T1, T2>)
+                lhs = rhs;
+            else
+                lhs = T1(rhs);
+        }
+        else
+            throw "Cannot assign lhs = rhs";
+    }
+
 	template<typename T>
 	struct typed_context : typed_context_base
 	{
 		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors)
-			: typed_context_base(name, table, ctors, typehash<T>(), is_sequential_container_v<T> || is_associative_container_v<T>, is_macro_enum_v<T>)
+			: typed_context_base(name, table, ctors, typehash<T>(),
+                                 is_sequential_container_v<T> || is_associative_container_v<T>, is_macro_enum_v<T>, is_basic_serializable_v<T>)
 		{}
 		typed_context()
 			: typed_context(
@@ -113,26 +137,18 @@ namespace idk::reflect::detail
 
 		void copy_assign(void* lhs, const void* rhs) const override
 		{
-			lhs; rhs;
-			if constexpr (is_template_v<T, std::pair> && !is_pair_assignable_v<T> || !std::is_copy_assignable_v<T>)
-				throw "Cannot copy assign";
-			else
-				*static_cast<T*>(lhs) = *static_cast<const T*>(rhs);
+            lhs; rhs;
+            if constexpr (is_template_v<T, std::pair> && !is_pair_assignable_v<T> || !std::is_copy_assignable_v<T>)
+                throw "Cannot copy assign";
+            else
+                *static_cast<T*>(lhs) = *static_cast<const T*>(rhs);
 		}
 
 		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const override
 		{
 			std::visit([lhs](auto&& arg)
 			{
-				if constexpr (std::is_convertible_v<decltype(arg), T>)
-				{
-					if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
-						*static_cast<T*>(lhs) = static_cast<T>(arg);
-					else
-						*static_cast<T*>(lhs) = arg;
-				}
-				else
-					throw "Cannot assign rhs to lhs";
+                _assign(*static_cast<T*>(lhs), arg);
 			}, rhs);
 		}
 
@@ -147,7 +163,9 @@ namespace idk::reflect::detail
 
 		dynamic default_construct() const override
 		{
-			if constexpr (!std::is_default_constructible_v<T>)
+            if constexpr (is_macro_enum_v<T>)
+                return T{ T::values[0] };
+			else if constexpr (!std::is_default_constructible_v<T>)
 				throw "Cannot default construct";
 			else
 				return T{};
@@ -161,6 +179,17 @@ namespace idk::reflect::detail
 			else
 				return T{ *static_cast<const T*>(obj) };
 		}
+
+        string to_string(void* obj) const override
+        {
+            obj;
+            if constexpr (std::is_arithmetic_v<T>)
+                return std::to_string(*static_cast<T*>(obj));
+            else if constexpr (is_basic_serializable_v<T>)
+                return string(*static_cast<T*>(obj));
+            else
+                throw "not a container!";
+        }
 
 		uni_container to_container(void* obj) const override
 		{
