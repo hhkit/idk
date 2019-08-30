@@ -19,7 +19,7 @@ namespace idk
 		auto mat = GetGameObject()->Transform()->GlobalMatrix();
 		auto retval = orthonormalize(mat);
 		retval[3] = mat[3];
-		return retval;
+		return invert_rotation(retval);
 	}
 
 	mat4 Camera::ProjectionMatrix() const
