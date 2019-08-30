@@ -13,10 +13,10 @@ namespace idk
 		return *ptr;
 	}
 	template<typename ExtensionLoaderT, typename ... Args>
-	inline ExtensionLoader& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
+	inline ExtensionLoaderT& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
 	{
 		static_assert(std::is_base_of_v<ExtensionLoader, ExtensionLoaderT>, "can only register extension loaders");
-		return *(_extension_loaders[string{ extension }] = std::make_unique<ExtensionLoaderT>(std::forward<Args>(args)...));
+		return *static_cast<ExtensionLoaderT*>((_extension_loaders[string{ extension }] = std::make_unique<ExtensionLoaderT>(std::forward<Args>(args)...)).get());
 	}
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create()
@@ -25,13 +25,20 @@ namespace idk
 		auto ptr = GetLoader<Resource>().Create();
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = handle;
+		ptr->_dirty = true;
+		if constexpr (has_tag_v<Resource, MetaTag>)
+			ptr->_dirtymeta = true;
 		table.emplace(handle.guid, std::move(ptr));
 		return handle;
 	}
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath)
 	{
-		return Create<Resource>(filepath, Guid::Make());
+		auto retval = Create<Resource>(filepath, Guid::Make());
+		retval->_dirty = true;
+		if constexpr(has_tag_v<Resource, MetaTag>)
+			retval->_dirtymeta = true;
+		return retval;
 	}
 
 	template<typename Resource>

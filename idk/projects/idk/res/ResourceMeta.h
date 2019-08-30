@@ -11,10 +11,13 @@ namespace idk
 	{
 		using Metadata = Meta;
 		void SetMeta(const Meta& inmeta);
-		const Meta& GetMeta();
+		const Meta& GetMeta() const;
 	protected:
 		Meta meta;
+		bool _dirtymeta { false };
 		virtual void OnMetaUpdate(const Meta& newmeta) { (newmeta); };
+
+		friend class ResourceManager;
 	};
 }
 

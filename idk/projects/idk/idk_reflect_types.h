@@ -3,6 +3,7 @@
 #include "idk.h"
 #include <core/Handle.h>
 #include <res/Guid.h>
+#include <res/FileResources.h>
 
 namespace idk
 {
@@ -36,6 +37,9 @@ namespace idk::reflect
 
 		, Handle<GameObject>
 		, Guid
+		, GenericMetadata
+		, vector<GenericMetadata>
+
 		, RscHandle<Mesh>
 		, variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> // UniformInstance
 		, vector<string>

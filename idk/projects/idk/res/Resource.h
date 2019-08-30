@@ -14,7 +14,11 @@ namespace idk
 		atomic<bool>   _loaded      { true };
 		atomic<bool>   _must_load   { false };
 		atomic<bool>   _keep_loaded { false };
+		atomic<bool>   _dirty       { false };
+
 		friend class ResourceManager;
 		friend class ResourceFactory<Res>;
+		template<typename T>
+		friend struct detail::ResourceManager_detail;
 	};
 }

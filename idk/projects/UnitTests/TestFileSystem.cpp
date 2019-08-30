@@ -155,22 +155,53 @@ TEST(FileSystem, TestFileHandle)
 	// Invalidate handle by file deletion
 	{
 		// Create a file
-		{
-			auto valid_handle = vfs.Open("/FS_UnitTests/invalidate.txt", FS_PERMISSIONS::WRITE);
-			EXPECT_TRUE(valid_handle.is_open());
-		}
+		auto valid_handle1 = vfs.Open("/FS_UnitTests/invalidate.txt", FS_PERMISSIONS::WRITE);
+		EXPECT_TRUE(valid_handle1.is_open());
+		valid_handle1.close();
 
 		// Get the file handle to the above file
-		auto& file_handle = vfs.GetFile("/FS_UnitTests/invalidate.txt");
-		EXPECT_TRUE(file_handle);
+		auto file_handle1 = vfs.GetFile("/FS_UnitTests/invalidate.txt");
+		EXPECT_TRUE(file_handle1);
 
+		// file_handle1 is now in created status
 		vfs.Update();
 		
 		// Delete the above file
 		auto res = remove(string{ exe_dir + "/resource/FS_UnitTests/invalidate.txt" }.c_str());
 
+		// After this update, file_handle1 is now under delete status
 		vfs.Update();
-		EXPECT_FALSE(file_handle);
+		EXPECT_FALSE(file_handle1);
+
+		// Create a new file
+		auto valid_handle2 = vfs.Open("/FS_UnitTests/invalidate2.txt", FS_PERMISSIONS::WRITE);
+		EXPECT_TRUE(valid_handle2.is_open());
+		valid_handle2.close();
+		
+		// Get the file handle to the above file
+		auto file_handle2 = vfs.GetFile("/FS_UnitTests/invalidate2.txt");
+		EXPECT_TRUE(file_handle2);
+
+		// file_handle2 should not reuse the same handle as file_handle1.
+		EXPECT_FALSE(file_handle1.SameKeyAs(file_handle2));
+		
+		// Now file_handle1 is free to be reused as its change was resolved in this update
+		vfs.Update();
+
+		auto valid_handle3 = vfs.Open("/FS_UnitTests/invalidate3.txt", FS_PERMISSIONS::WRITE);
+		EXPECT_TRUE(valid_handle3.is_open());
+		valid_handle3.close();
+
+		// Get the file handle to the above file
+		auto file_handle3 = vfs.GetFile("/FS_UnitTests/invalidate3.txt");
+		EXPECT_TRUE(file_handle3);
+
+		// file_handle3 should reuse the first FileHandle that was created.
+		EXPECT_TRUE(file_handle1.SameKeyAs(file_handle3));
+
+		// Delete all files created
+		remove(string{ exe_dir + "/resource/FS_UnitTests/invalidate2.txt" }.c_str());
+		remove(string{ exe_dir + "/resource/FS_UnitTests/invalidate3.txt" }.c_str());
 	}
 }
 
