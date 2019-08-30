@@ -447,6 +447,7 @@
       <Filter>reflect\detail</Filter>
     </ClInclude>
     <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="ds\circular_buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -732,6 +733,7 @@
     <None Include="reflect\detail\visit_detail.inl">
       <Filter>reflect\detail</Filter>
     </None>
+    <None Include="ds\circular_buffer.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
