@@ -32,7 +32,7 @@ namespace idk
 	public:
 		using SlotId = unsigned;
 		// The function signature, which is: void Fn(Args...)
-		using Fn = function<void(Args...)>;
+		using Fn = function<void(Params...)>;
 
 		// Listens for this signal. Pass in a function of signature: void fn(Ts...)
 		// Returns a SlotId, unique only for this signal. Use it to unlisten.

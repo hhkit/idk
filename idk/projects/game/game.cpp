@@ -14,6 +14,19 @@
 #include <scene/SceneManager.h>
 #include <test/TestComponent.h>
 
+#include <serialize/serialize.h>
+
+namespace idk
+{
+	struct yolo
+	{
+		vector<string> guids;
+	};
+}
+REFLECT_BEGIN(idk::yolo, "yolo")
+REFLECT_VAR(guids)
+REFLECT_END()
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -50,14 +63,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
-	go->GetComponent<Transform>()->scale /= 100.f;
+	//go->GetComponent<Transform>()->scale /= 100.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
-	
-	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" }).resources[0].As<Mesh>();
-
+	Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 	mesh_rend->material_instance.material = 
-		Core::GetResourceManager().LoadFile(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag")).resources[0].As<Material>();
+		Core::GetResourceManager().LoadFile(FileHandle("/assets/shader/flat_color.frag")).resources[0].As<Material>();
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

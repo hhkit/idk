@@ -11,7 +11,7 @@ namespace idk
 
 	class TestResource
 		: public Resource<TestResource>
-		, MetaTag<TestMeta>
+		, public MetaTag<TestMeta>
 	{
 	public:
 		int k;

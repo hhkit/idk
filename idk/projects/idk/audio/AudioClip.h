@@ -10,6 +10,7 @@
 
 #pragma once
 #include <res/Resource.h>
+#include <util/enum.h>
 #include "audio/AudioClipInfo.h"
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
 
@@ -23,17 +24,32 @@ namespace FMOD {
 
 namespace idk
 {
+
+	ENUM (SubSoundGroup, int,
+		SubSoundGroup_MUSIC,
+		SubSoundGroup_SFX,
+		SubSoundGroup_AMBIENT,
+		SubSoundGroup_DIALOGUE
+	)
+
+	struct AudioMeta {
+		float	volume{ 1.0f };	//Default = 1 Range: [0,1]
+		float	pitch{ 1.0f };	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
+		float	minDistance{ 1.0f };	//Minimum distance where volume is at max. This is in meters					 
+		float	maxDistance{ 100.0f };	//Maximum distance where i can hear the sound. This is in meters					 
+		bool	is3Dsound{ true };	//Does this sound follow the the gameobject position?
+		bool	isUnique{ true };	//When I call play, does it duplicate? Or replay the sound again?
+		bool	isLoop{ false };	//Does this audio loop?
+
+	};
+
+
 	class AudioClip
-		: public Resource<AudioClip>
+		: public Resource<AudioClip>,
+		  public MetaTag<AudioMeta>
 	{ //A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource
 	public:
 
-		enum SubSoundGroup {
-			SubSoundGroup_MUSIC,
-			SubSoundGroup_SFX,
-			SubSoundGroup_AMBIENT,
-			SubSoundGroup_DIALOGUE
-		};
 
 		AudioClip();
 		~AudioClip();
@@ -73,22 +89,19 @@ namespace idk
 
 		AudioClipInfo soundInfo  {};
 
-		float	volume		{ 1.0f		};	//Default = 1 Range: [0,1]
-		float	pitch		{ 1.0f		};	//Changing pitch will affect the length of the sound, but is not updated in the SoundInfo. The SoundInfo contains the raw data of it.
-		float	minDistance	{ 1.0f		};	//Minimum distance where volume is at max. This is in meters					 
-		float	maxDistance	{ 100.0f	};	//Maximum distance where i can hear the sound. This is in meters					 
-		float	frequency	{ 44100.0f	};	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
-		int		priority	{ 128		};	//0 (most important) to 256 (least important) default = 128	 //These are not saved, rather it is controlled by which SoundGroup it is at. 
-		bool	isPlaying	{ false		};	//Is the audio currently playing? If the audio is paused, it is still considered playing!
-		bool	is3Dsound	{ true		};	//Does this sound follow the the gameobject position?
-		bool	isUnique	{ true		};	//When I call play, does it duplicate? Or replay the sound again?
-		bool	isLoop		{ false		};	//Does this audio loop?
+		float	frequency{ 44100.0f };	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
+		int		priority{ 128 };	//0 (most important) to 256 (least important) default = 128	 //These are not saved, rather it is controlled by which SoundGroup it is at. 
+		bool	isPlaying{ false };	//Is the audio currently playing? If the audio is paused, it is still considered playing!
+
 
 
 		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
 		void UpdateChannel(); //Updates the channel to null if it is not playing. It's important to update the channel before doing anything to it.
 		void UpdateFmodMode(); //A wrapper.
 		void UpdateMinMaxDistance(); //A wrapper.
+
+
+		virtual void OnMetaUpdate(const AudioMeta& newmeta) override;
 	};
 
 }

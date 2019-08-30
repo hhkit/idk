@@ -5,6 +5,8 @@
 
 namespace idk::math
 {
+	struct col_major {};
+
 	// matrix is column order
 	template<typename T, unsigned R, unsigned C>
 	struct matrix

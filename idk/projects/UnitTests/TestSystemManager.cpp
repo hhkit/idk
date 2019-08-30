@@ -18,6 +18,7 @@ public:
 	bool GetKey(idk::Key) override { return false; };
 	bool GetKeyUp(idk::Key) override { return false; };
 	char GetChar() override { return 0; }
+	idk::ivec2 GetScreenSize() override { return idk::ivec2{}; }
 
 	// windows
 	bool SetFullscreen(bool ) override { return false; };

@@ -7,7 +7,7 @@ namespace idk
 	template<typename Func>
 	typename Signal<Params...>::SlotId Signal<Params...>::Listen(Func&& f)
 	{
-		_slots.emplace(_next_id, fwd<Func>(f));
+		_slots.emplace(_next_id, std::forward<Func>(f));
 		return _next_id++;
 	}
 	template<typename ...Params>
@@ -21,6 +21,6 @@ namespace idk
 	void Signal<Params...>::Fire(Args&& ... args)
 	{
 		for (auto& f : _slots)
-			f.second(fwd<Args>(args)...);
+			f.second(std::forward<Args>(args)...);
 	}
 }

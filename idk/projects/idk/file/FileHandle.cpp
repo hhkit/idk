@@ -42,6 +42,18 @@ namespace idk
 		}
 	}
 
+	void FStreamWrapper::close()
+	{
+		auto& vfs = Core::GetSystem<FileSystem>();
+		auto& file_handle = vfs._file_handles[_handle_index];
+		auto& file = vfs.getFile(file_handle._internal_id);
+
+		file_handle.Reset();
+		file._time = FS::last_write_time(FS::path{ file._full_path });
+
+		std::fstream::close();
+	}
+
 	FileHandle::FileHandle(const file_system_detail::fs_key& key, bool is_file)
 		:_key{ key }, _is_regular_file{ is_file }
 	{
@@ -118,6 +130,16 @@ namespace idk
 	{
 	}
 
+	FileHandle::FileHandle(const char* mountPath)
+		: FileHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+	{
+	}
+
+	bool FileHandle::operator==(const FileHandle& rhs) const
+	{
+		return _key == rhs._key && _ref_count == rhs._ref_count && _is_regular_file == rhs._is_regular_file;
+	}
+
 	string_view FileHandle::GetFullPath() const
 	{
 		// Check Handle
@@ -169,6 +191,11 @@ namespace idk
 		auto& file = vfs.getFile(_key);
 		auto& file_handle = vfs._file_handles[file._handle_index];
 		return file_handle.IsOpenAndValid();
+	}
+
+	bool FileHandle::SameKeyAs(const FileHandle& other) const
+	{
+		return _key == other._key;
 	}
 
 	FS_CHANGE_STATUS FileHandle::GetStatus() const
