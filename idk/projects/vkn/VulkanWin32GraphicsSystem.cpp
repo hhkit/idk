@@ -10,6 +10,7 @@
 #include <vkn/VulkanPipeline.h>
 #include <gfx/pipeline_config.h>
 #include <file/FileSystem.h>
+#include <vkn/VulkanMeshFactory.h>
 
 
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -48,24 +49,30 @@ namespace idk::vkn
 	{
 		windows_ = &Core::GetSystem<win::Windows>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
-		
 
+		Core::GetResourceManager().RegisterFactory<MeshFactory>();
+		//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
+		//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
+
+	}
+	void VulkanWin32GraphicsSystem::LateInit()
+	{
 		uint32_t pos_loc = 0;
-		uint32_t nml_loc = 1;
+		uint32_t nml_loc = 0;
 		uint32_t pos_binding = 0;
 		uint32_t nml_binding = 1;
 		uint32_t zzz_binding = 2;
 		pipeline_config config{};
 		buffer_desc pos_desc{};
 		buffer_desc nml_desc{};
-		
+
 		pos_desc.AddAttribute(AttribFormat::eSVec3, pos_loc, 0);
 		nml_desc.AddAttribute(AttribFormat::eSVec3, nml_loc, 0);
 		pos_desc.binding.binding_index = pos_binding;
-		pos_desc.binding.stride = 0;
+		pos_desc.binding.stride = sizeof(vec3);
 		pos_desc.binding.vertex_rate = eVertex;
 		nml_desc.binding.binding_index = nml_binding;
-		nml_desc.binding.stride = 0;
+		nml_desc.binding.stride = sizeof(vec3);
 		nml_desc.binding.vertex_rate = eVertex;
 
 		config.buffer_descriptions.emplace_back(pos_desc);
@@ -74,7 +81,7 @@ namespace idk::vkn
 		{
 			std::stringstream stringify;
 			{
-				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/mesh.vert", FS_PERMISSIONS::READ, false);
+				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/mesh.vert.spv", FS_PERMISSIONS::READ, true);
 				stringify << vbuffer.rdbuf();
 			}
 			v = stringify.str();
@@ -84,13 +91,15 @@ namespace idk::vkn
 		{
 			std::stringstream stringify;
 			{
-				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/flat_color.frag", FS_PERMISSIONS::READ, false);
+				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/flat_color.frag.spv", FS_PERMISSIONS::READ, true);
 				stringify << vbuffer.rdbuf();
 			}
 			f = stringify.str();
 			config.frag_shader = f;
 		}
 		config.prim_top = PrimitiveTopology::eTriangleList;
+		config.fill_type = FillType::eFill;
+		//config.uniform_layouts.emplace()
 		thing.pipeline.Create(config, instance_->View());
 
 		uint32_t num_fo = instance_->View().Swapchain().frame_objects.size();
@@ -98,11 +107,19 @@ namespace idk::vkn
 		frames.resize(num_fo);
 		auto cmd_pool = *instance_->View().Commandpool();
 		auto device = *instance_->View().Device();
-		auto& buffers = cmd_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::eSecondary, num_concurrent_states*num_fo }, vk::DispatchLoaderDefault{});
-		pri_buffer= std::move(device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, 1}, vk::DispatchLoaderDefault{})[0]);
+		auto& buffers = cmd_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, num_concurrent_states * num_fo }, vk::DispatchLoaderDefault{});
+		auto pri_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, num_fo }, vk::DispatchLoaderDefault{});
+		for (auto i = num_fo; i-- > 0;)
+		{
+			frames[i].pri_buffer = std::move(pri_buffers[i]);
+		}auto t_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::eSecondary, num_fo }, vk::DispatchLoaderDefault{});
+		for (auto i = num_fo; i-- > 0;)
+		{
+			frames[i].transition_buffer = std::move(t_buffers[i]);
+		}
 
 
-		for (auto f = frames.size();f-->0;)
+		for (auto f = frames.size(); f-- > 0;)
 		{
 			auto& frame = frames[f];
 			for (auto i = num_concurrent_states; i-- > 0;)
@@ -113,15 +130,20 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
-		instance_->DrawFrame();
+		//instance_->DrawFrame();
+		instance_->AcquireFrame();
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		auto& curr_frame = frames[instance_->View().Swapchain().curr_index];
 		size_t num_concurrent = curr_frame.states.size();
+		auto& pri_buffer = curr_frame.pri_buffer;
+		auto& transition_buffer = curr_frame.transition_buffer;
+		auto queue = instance_->View().GraphicsQueue();
+		auto& swapchain = instance_->View().Swapchain();
 		for (auto& state : curr_frame.states)
 		{
-			state.cmd_buffer.reset({}, vk::DispatchLoaderDefault{});
+			state.Reset();//cmd_buffer.reset({}, vk::DispatchLoaderDefault{});
 		}
-		for (size_t i=0;i+num_concurrent<curr_buffer.states.size();i+=num_concurrent)
+		for (size_t i=0;i+num_concurrent<=curr_buffer.states.size();i+=num_concurrent)
 		{
 			//Spawn/Assign to the threads
 			for (size_t j = 0; j < num_concurrent; ++j){
@@ -132,16 +154,70 @@ namespace idk::vkn
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
-		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
 		vector<vk::CommandBuffer> buffers{};
 		for (auto& state : curr_frame.states)
 		{
-			buffers.emplace_back(state.cmd_buffer);
+			if(state.has_commands)
+				buffers.emplace_back(state.cmd_buffer);
 		}
-		pri_buffer->executeCommands(buffers, vk::DispatchLoaderDefault{});
+		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
+		//if(buffers.size())
+		//	pri_buffer->executeCommands(buffers, vk::DispatchLoaderDefault{});
+		vk::CommandBufferInheritanceInfo iinfo
+		{
+		};
+
+
+
+		vk::ImageSubresourceRange subResourceRange = {};
+		subResourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+		subResourceRange.baseMipLevel = 0;
+		subResourceRange.levelCount = 1;
+		subResourceRange.baseArrayLayer = 0;
+		subResourceRange.layerCount = 1;
+
+		vk::ImageMemoryBarrier presentToClearBarrier = {};
+		presentToClearBarrier.srcAccessMask = vk::AccessFlags{};
+		presentToClearBarrier.dstAccessMask = vk::AccessFlags{};
+		presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
+		presentToClearBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
+		presentToClearBarrier.srcQueueFamilyIndex = *instance_->View().QueueFamily().graphics_family;
+		presentToClearBarrier.dstQueueFamilyIndex = *instance_->View().QueueFamily().graphics_family;
+		presentToClearBarrier.image = swapchain.images[swapchain.curr_index];
+		presentToClearBarrier.subresourceRange = subResourceRange;
+		begin_info.pInheritanceInfo = &iinfo;
+		transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
+		transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
+		transition_buffer->end();
+		//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
+		pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
 		pri_buffer->end();
-		vk::SubmitInfo submit_info{};
-		instance_->View().GraphicsQueue().submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
+
+		auto& current_signal = instance_->View().CurrPresentationSignals();
+
+		auto& waitSemaphores = *current_signal.image_available;
+		auto& readySemaphores = *current_signal.render_finished;
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
+
+		//std::vector<vk::CommandBuffer> cmd_buffers;
+		//for (auto& state : curr_frame.states)
+		//{
+		//	cmd_buffers.emplace_back(state.cmd_buffer);
+		//}
+		//cmd_buffers.emplace_back(*pri_buffer);
+		vk::SubmitInfo submit_info
+		{
+			1
+			,&waitSemaphores
+			,waitStages
+			,hlp::arr_count(buffers),std::data(buffers)
+			,1,&readySemaphores
+		};
+
+
+		instance_->View().Device()->resetFences(1, &*current_signal.inflight_fence, vk::DispatchLoaderDefault{});
+		queue.submit(submit_info, *current_signal.inflight_fence, vk::DispatchLoaderDefault{});
+		instance_->PresentFrame();
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
@@ -156,6 +232,8 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		frames.clear();
+		this->cmd_buffers.clear();
 		instance_.reset();
 	}
 	GraphicsAPI VulkanWin32GraphicsSystem::GetAPI()
@@ -174,7 +252,8 @@ namespace idk::vkn
 		auto& swapchain = instance_->View().Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
-		vk::CommandBufferBeginInfo begin_info{vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
+		vk::CommandBufferInheritanceInfo aaa{};
+		vk::CommandBufferBeginInfo begin_info{vk::CommandBufferUsageFlagBits::eOneTimeSubmit,&aaa};
 		cmd_buffer.begin(begin_info, dispatcher);
 		std::array<float, 4> a{};
 		//TODO grab the appropriate framebuffer and begin renderpass
@@ -195,6 +274,7 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 		for (auto& obj : state.mesh_render)
 		{
+			rs.FlagRendered();
 			//TODO Grab everything and render them
 			auto& mesh = obj.mesh.as<VulkanMesh>();
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
@@ -212,7 +292,13 @@ namespace idk::vkn
 				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 			}
 		}
+		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
+	}
+	void RenderStateV2::Reset() { 
+		cmd_buffer.reset({}, vk::DispatchLoaderDefault{});
+		ubo_manager.Clear(); 
+		has_commands = false; 
 	}
 	/*void VulkanWin32GraphicsSystem::createInstance()
 	{

@@ -61,7 +61,7 @@ namespace idk::vkn::hlp
 
 	void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, idkTexture& img);
 
-	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout);
+	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, vk::CommandBufferInheritanceInfo* info = nullptr);
 
 	template<typename T>
 	vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr);

@@ -17,7 +17,10 @@ namespace idk::vkn
 	struct RenderStateV2
 	{
 		vk::CommandBuffer cmd_buffer;
-		UboManager ubo_manger;
+		UboManager ubo_manager;
+		bool has_commands = false;
+		void FlagRendered() { has_commands = true; }
+		void Reset();
 		RenderStateV2() = default;
 		RenderStateV2(const RenderStateV2&) = delete;
 		RenderStateV2(RenderStateV2&&) = default;
@@ -26,6 +29,8 @@ namespace idk::vkn
 	struct RenderFrameObject
 	{
 		vector<RenderStateV2> states;
+		vk::UniqueCommandBuffer pri_buffer;
+		vk::UniqueCommandBuffer transition_buffer;
 	};
 	using Windows = win::Windows;
 	class VulkanState;
@@ -36,6 +41,7 @@ namespace idk::vkn
 	public:
 		VulkanWin32GraphicsSystem();
 		void Init() override ;
+		void LateInit() override;
 
 		void BeginFrame() ;
 		void EndFrame() ;
@@ -49,10 +55,9 @@ namespace idk::vkn
 		VulkanState& GetVulkanHandle();
 	private:
 		void RenderGraphicsState(const GraphicsState&,RenderStateV2& render_state);
-		vector<vk::UniqueCommandBuffer> cmd_buffers;
-		vk::UniqueCommandBuffer pri_buffer;
-		vector<RenderFrameObject> frames;
 		std::unique_ptr<VulkanState> instance_;
+		vector<vk::UniqueCommandBuffer> cmd_buffers;
+		vector<RenderFrameObject> frames;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;

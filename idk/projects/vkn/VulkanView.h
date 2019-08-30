@@ -12,18 +12,19 @@ namespace idk::vkn
 	class VulkanView
 	{
 	public:
-		vk::DispatchLoaderDefault& Dispatcher()const;
-		vk::DispatchLoaderDynamic& DynDispatcher()const;
-		vk::UniqueInstance&        Instance()const;
-		vk::UniqueSurfaceKHR&      Surface()const;
-		vk::PhysicalDevice&        PDevice()const;
-		uint32_t                   BufferOffsetAlignment()const;
-		uint32_t                   BufferSizeAlignment()const;
-		vk::UniqueDevice&          Device()const;
-		QueueFamilyIndices&        QueueFamily()const;
-		vk::Queue&                 GraphicsQueue()const;
-		vk::Queue&                 PresentQueue()const;
-		SwapChainInfo&             Swapchain()const;
+		vk::DispatchLoaderDefault&          Dispatcher()const;
+		vk::DispatchLoaderDynamic&          DynDispatcher()const;
+		vk::UniqueInstance&                 Instance()const;
+		vk::UniqueSurfaceKHR&               Surface()const;
+		vk::PhysicalDevice&                 PDevice()const;
+		uint32_t                            BufferOffsetAlignment()const;
+		uint32_t                            BufferSizeAlignment()const;
+		vk::UniqueDevice&                   Device()const;
+		QueueFamilyIndices&                 QueueFamily()const;
+		vk::Queue&                          GraphicsQueue()const;
+		vk::Queue&                          PresentQueue()const;
+		SwapChainInfo&                      Swapchain()const;
+		PresentationSignals&   CurrPresentationSignals()const;
 
 		vk::UniquePipeline&        Pipeline()const;
 		vk::UniqueCommandPool&     Commandpool()const;

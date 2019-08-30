@@ -24,12 +24,12 @@ uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t type
 	return *result;
 }
 
-vk::CommandBuffer& BeginSingleTimeCBufferCmd(vk::CommandBuffer& cmd_buffer)
+vk::CommandBuffer& BeginSingleTimeCBufferCmd(vk::CommandBuffer& cmd_buffer,vk::CommandBufferInheritanceInfo* info=nullptr)
 {
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
 	//Setup copy command buffer/pool
-	vk::CommandBufferBeginInfo beginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
+	vk::CommandBufferBeginInfo beginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,info };
 	//Add the commands
 	cmd_buffer.begin(beginInfo, dispatcher);
 
@@ -95,9 +95,9 @@ void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buff
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout)
+void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout,vk::CommandBufferInheritanceInfo* info)
 {
-	BeginSingleTimeCBufferCmd(cmd_buffer);
+	BeginSingleTimeCBufferCmd(cmd_buffer,info);
 	vk::DispatchLoaderDefault dispatcher{};
 
 	//Creating image memory barrier to start performing layout transition for image
@@ -131,7 +131,11 @@ void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::
 		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
 	}
 	else {
-		throw std::invalid_argument("unsupported layout transition!");
+		vBarrier.srcAccessMask = vk::AccessFlags::Flags();
+		vBarrier.dstAccessMask = vk::AccessFlags::Flags();
+		sourceStage = vk::PipelineStageFlagBits::eAllCommands;
+		destinationStage = vk::PipelineStageFlagBits::eAllCommands;
+		//throw std::invalid_argument("unsupported layout transition!");
 	}
 
 	//Pipeline barrier is impt so we need to go in-depth with this

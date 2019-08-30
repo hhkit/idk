@@ -115,6 +115,9 @@
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
+echo AAAA
+call $(SolutionDir)tools\compile_wargs.bat "..\assets\shader\"
+if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>
       <Outputs>$(OutDir)shaders\changed.chg</Outputs>

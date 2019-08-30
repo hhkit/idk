@@ -20,7 +20,8 @@ namespace idk
 			GetGameObject()->GetComponent<Transform>()->LocalMatrix(),
 
 			cast_shadows,
-			receive_shadows
+			receive_shadows,
+			{{0,vtx::Attrib::Position},{1,vtx::Attrib::Normal}}
 		};
 	}
 

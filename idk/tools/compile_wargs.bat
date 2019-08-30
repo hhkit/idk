@@ -1,6 +1,5 @@
 @echo off
-set updated=%1
-set srcpath=..\shaders\
+set srcpath=%1
 set filter=%srcpath%*.frag,%srcpath%*.vert,%srcpath%*.geom
 set filter=*.frag,*.vert,*.geom
 set toolpath=glslc.exe
@@ -9,7 +8,7 @@ rem FOR /r %%p in (%filter%) do (
 rem echo %~dp0/%toolpath% %%p -o %%p.spv
 rem %~dp0%toolpath% %%p -o %%p.spv
 rem )
-echo %~dp0%srcpath%
+
 setlocal enableDelayedExpansion
 FOR /r %~dp0%srcpath% %%p in (%filter%) do (
 echo COMPARING TIME: %%p %%p.spv

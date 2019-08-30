@@ -5,9 +5,14 @@ namespace idk::vkn::hlp
 {
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::PhysicalDevice pd, vk::Device d, vk::Buffer& buffer, vk::MemoryPropertyFlags prop)
 	{
-		auto mem_req = device.getBufferMemoryRequirements(buffer, vk::DispatchLoaderDefault{});
+		auto mem_req = d.getBufferMemoryRequirements(buffer, vk::DispatchLoaderDefault{});
 		auto mem_type = hlp::findMemoryType(pd, mem_req.memoryTypeBits, prop);
-		auto& mem = memories[mem_type];
+		auto itr = memories.find(mem_type);
+		if (itr == memories.end())
+		{
+			itr = memories.emplace(mem_type, Memories{ d,mem_type }).first;
+		}
+		auto& mem = itr->second;
 		auto&& [mem_idx, offset] = mem.Allocate(mem_req.size);
 		return std::make_unique<Alloc>(mem, mem_idx, offset, mem_req.size);
 	}
@@ -16,7 +21,7 @@ namespace idk::vkn::hlp
 		return Allocate(pdevice, device, buffer, prop);
 	}
 
-	vk::DeviceMemory MemoryAllocator::Alloc::Control::Memory() const { return IntMemory().memory; }
+	vk::DeviceMemory MemoryAllocator::Alloc::Control::Memory() const { return *IntMemory().memory; }
 
 	Memories::Memory& MemoryAllocator::Alloc::Control::IntMemory() const { return src->memories[index]; }
 

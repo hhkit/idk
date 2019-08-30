@@ -39,6 +39,11 @@ namespace idk::vkn
 		//vk::Queue          m_transfer_queue = {}{}					                  				 ;
 		SwapChainInfo& VulkanView::Swapchain()const { return vulkan().m_swapchain; }
 
+		PresentationSignals& VulkanView::CurrPresentationSignals() const
+		{
+			return vulkan_->m_pres_signals[vulkan_->current_frame];
+		}
+
 		void VulkanView::SwapRenderState() const
 		{
 			return impl_->SwapRenderState();

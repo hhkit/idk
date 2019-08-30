@@ -28,13 +28,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
-
-	switch (GraphicsAPI::OpenGL)
+	system("pause");
+	switch (GraphicsAPI::Vulkan)
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 			c->AddSystem<vkn::VulkanDebugRenderer>();
-			c->AddSystem<IDE>();
+			//c->AddSystem<IDE>();
 			break;
 		case GraphicsAPI::OpenGL:
 			c->AddSystem<ogl::Win32GraphicsSystem>();
@@ -52,8 +52,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	
-	mesh_rend->material_instance.material = 
-		Core::GetResourceManager().LoadFile(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag")).resources[0].As<Material>();
+	//mesh_rend->material_instance.material = 
+	//	Core::GetResourceManager().LoadFile(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag")).resources[0].As<Material>();
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

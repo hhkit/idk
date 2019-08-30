@@ -8,17 +8,37 @@ namespace idk::vkn::hlp
 	{
 		struct Memory
 		{
-			vk::DeviceMemory memory;
+			vk::UniqueDeviceMemory memory;
 			size_t sz{};
 			size_t curr_offset{};
+
+			Memory(vk::UniqueDeviceMemory&& mem, size_t size) :memory{ std::move(mem) }, sz{ size }{}
+
 			void Free(size_t offset, size_t size);
 			//Returns offset if it is allocated
 			std::optional<size_t> Allocate(size_t size);
 		};
+		vk::Device device;
+		uint32_t type;
 		vector<Memory> memories;
+		size_t chunk_size{};
+		Memories(
+			vk::Device d,
+			uint32_t mem_type,
+			size_t chunkSize = 1 << 24 //16MB
+		) : device{ d },
+			type {mem_type}, 
+			chunk_size{ chunkSize }{}
 		Memory& Add()
 		{
 			//TODO actually create the memory
+			;
+			memories.emplace_back(device.allocateMemoryUnique(
+				vk::MemoryAllocateInfo{
+					chunk_size,type
+				}, nullptr, vk::DispatchLoaderDefault{}
+			),chunk_size);
+			
 			return memories.back();
 		}
 		std::pair<uint32_t, size_t> Allocate(size_t size)
@@ -38,10 +58,6 @@ namespace idk::vkn::hlp
 			{
 				auto& mem = Add();
 				alloc_offset = mem.Allocate(size);
-				if (alloc_offset)
-				{
-					++index;
-				}
 			}
 			return std::make_pair(index, *alloc_offset);
 		}
@@ -75,6 +91,8 @@ namespace idk::vkn::hlp
 			Control control;
 		};
 		using UniqueAlloc =std::unique_ptr<Alloc>;
+
+	MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
 
 		UniqueAlloc Allocate(vk::Buffer& buffer, vk::MemoryPropertyFlags prop);
 		UniqueAlloc Allocate(vk::PhysicalDevice pd, vk::Device d, vk::Buffer& buffer, vk::MemoryPropertyFlags prop);

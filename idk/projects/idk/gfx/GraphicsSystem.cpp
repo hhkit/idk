@@ -26,7 +26,9 @@ namespace idk
 
 	void GraphicsSystem::SwapWritingBuffer()
 	{
-		write_buffer_dirty = true;
+		//write_buffer_dirty = true;
+		//tmp
+		curr_draw_buffer= curr_write_buffer;
 	}
 
 	void GraphicsSystem::SubmitBuffers(RenderBuffer&& buffer)

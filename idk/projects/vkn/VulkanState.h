@@ -113,6 +113,13 @@ namespace idk::vkn
 		//};
 		Uniforms uniforms2;
 	};
+	struct PresentationSignals
+	{
+		vk::UniqueSemaphore image_available;
+		vk::UniqueSemaphore render_finished;
+		vk::UniqueFence     inflight_fence;
+	};
+
 	struct FrameSubmitRenderInfo
 	{
 		vk::SubmitInfo submitInfo;
@@ -159,7 +166,7 @@ namespace idk::vkn
 
 		void BeginFrame();
 		void EndFrame();
-
+		void AcquireFrame();
 		void DrawFrame();
 		void PresentFrame();
 		void OnResize();
@@ -179,13 +186,6 @@ namespace idk::vkn
 		friend class VulkanView;
 		template<typename T>
 		using DynamicHandle = vk::UniqueHandle<T, vk::DispatchLoaderDynamic>;
-		struct PresentationSignals
-		{
-			vk::UniqueSemaphore image_available;
-			vk::UniqueSemaphore render_finished;
-			vk::UniqueFence     inflight_fence;
-		};
-
 		// variables
 
 

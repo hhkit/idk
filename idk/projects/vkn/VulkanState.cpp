@@ -1158,6 +1158,7 @@ namespace idk::vkn
 
 	void VulkanState::createTextureImage()
 	{
+		return;
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load("texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
@@ -2176,11 +2177,11 @@ namespace idk::vkn
 
 	}
 
-	void VulkanState::DrawFrame()
+	void VulkanState::AcquireFrame()
 	{
 		auto& current_signal = m_pres_signals[current_frame];
 		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
-		
+
 		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), *current_signal.image_available, {}, dispatcher);
 		rv = res.value;
 		rvRes = res.result;
@@ -2195,6 +2196,12 @@ namespace idk::vkn
 		}
 		imageIndex = res.value;
 		m_swapchain.curr_index = res.value;
+	}
+
+	void VulkanState::DrawFrame()
+	{
+		AcquireFrame();
+		auto& current_signal = m_pres_signals[current_frame];
 
 		waitSemaphores =  *current_signal.image_available;
 		readySemaphores =  *current_signal.render_finished;
@@ -2275,6 +2282,10 @@ namespace idk::vkn
 	{
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 
+		auto& current_signal = m_pres_signals[current_frame];
+
+		waitSemaphores = *current_signal.image_available;
+		readySemaphores = *current_signal.render_finished;
 		vk::PresentInfoKHR presentInfo
 		{
 			1,&readySemaphores

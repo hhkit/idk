@@ -74,7 +74,7 @@ namespace idk::vkn::hlp
 	{
 		auto buffer = CreateBuffer(device, buffer_size, buffer_usage, dispatcher);
 		auto memory = allocator.Allocate(pdevice, device, *buffer, memory_flags);
-		BindBufferMemory(device, *buffer, memory->Memory(), 0, dispatcher);
+		BindBufferMemory(device, *buffer, memory->Memory(), memory->Offset(), dispatcher);
 		return std::make_pair(std::move(buffer), std::move(memory));
 	}
 	template<typename T, typename Dispatcher>
