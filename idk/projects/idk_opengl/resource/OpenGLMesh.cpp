@@ -3,6 +3,29 @@
 
 namespace idk::ogl
 {
+	OpenGLMesh::OpenGLMesh(OpenGLMesh&& rhs)
+		:	_mesh_entries			{ std::move(rhs._mesh_entries) }, 
+			_buffers				{ std::move(rhs._buffers) }, 
+			_element_array_object	{ std::move(rhs._element_array_object) }, 
+			_draw_mode				{ rhs._draw_mode }
+	{
+	}
+
+	OpenGLMesh& OpenGLMesh::operator=(OpenGLMesh&& rhs)
+	{
+		std::swap(_mesh_entries,		 rhs._mesh_entries);
+		std::swap(_buffers,				 rhs._buffers);
+		std::swap(_element_array_object, rhs._element_array_object);
+		std::swap(_draw_mode,			 rhs._draw_mode);
+		
+		return *this;
+	}
+
+	OpenGLMesh::OpenGLMesh(const vector<OpenGLMesh::MeshEntry>& entries)
+		:_mesh_entries{ entries }
+	{
+	}
+
 	GLenum OpenGLMesh::GetDrawMode() const
 	{
 		return _draw_mode;
@@ -37,7 +60,7 @@ namespace idk::ogl
 		_element_array_object.Bind();
 		for (auto& entry : _mesh_entries)
 		{
-			glDrawElementsBaseVertex( _draw_mode, static_cast<GLsizei>(entry.num_index), GL_UNSIGNED_INT, (void*)(sizeof(unsigned) * entry.base_index), entry.base_vertex);
+			glDrawElementsBaseVertex( _draw_mode, static_cast<GLsizei>(entry._num_index), GL_UNSIGNED_INT, (void*)(sizeof(unsigned) * entry._base_index), entry._base_vertex);
 		}
 		// glDrawElements(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0);
 	}
@@ -64,5 +87,10 @@ namespace idk::ogl
 	void OpenGLMesh::AddMeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index)
 	{
 		_mesh_entries.emplace_back(MeshEntry{ base_v, base_i, num_i, text_index });
+	}
+
+	OpenGLMesh::MeshEntry::MeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index)
+		:_base_vertex{ base_v }, _base_index{ base_i }, _num_index{ num_i }, _texture_index{ text_index }
+	{
 	}
 }

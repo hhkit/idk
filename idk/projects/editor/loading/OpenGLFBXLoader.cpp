@@ -2,17 +2,12 @@
 #include "OpenGLFBXLoader.h"
 #undef min
 #undef max
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-#include <gfx/GraphicsSystem.h>
-#include <idk_opengl/resource/OpenGLMesh.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
-
+#include "FBXLoaderHelpers.h"
 
 namespace idk
 {
+	using Vertex = fbx_loader_detail::Vertex;
+
 	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource)
 	{
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
@@ -35,27 +30,38 @@ namespace idk
 
 		vector<Vertex> vertices;
 		vector<unsigned> indices;
-
 		unsigned num_vertices = 0, num_indices = 0;
 
+		vector<ogl::OpenGLMesh::MeshEntry> mesh_entries;
+
+		hash_table<string, size_t> bones_table;
+		vector<anim::Skeleton::Bone> bones;
+		
+		// Count the number of vertices and indices per mesh entry
+		mesh_entries.reserve(ai_scene->mNumMeshes);
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
 			unsigned curr_base_vertex = num_vertices;
 			unsigned curr_base_index = num_indices;
 			unsigned curr_num_index = ai_scene->mMeshes[i]->mNumFaces * 3;
 
-			opengl_mesh.AddMeshEntry(curr_base_vertex, curr_base_index, curr_num_index, 0);
+			mesh_entries.emplace_back(curr_base_vertex, curr_base_index, curr_num_index, 0);
+			
 			num_vertices += ai_scene->mMeshes[i]->mNumVertices;
 			num_indices += curr_num_index;
 		}
+		opengl_mesh = ogl::OpenGLMesh{ mesh_entries };
 
 		vertices.reserve(num_vertices);
 		indices.reserve(num_indices);
 
+		// Here, we initialize all the vertices, indices, and bones. 
+		// Bones are just initialized with the offset matrix and name for now. Hierarchy will come later when we traverse the nodes.
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
 			const aiMesh* ai_mesh = ai_scene->mMeshes[i];
 
+			// Initialize vertices
 			const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
 			for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
 			{
@@ -77,26 +83,15 @@ namespace idk
 				indices.push_back(face.mIndices[1]);
 				indices.push_back(face.mIndices[2]);
 			}
+
+			fbx_loader_detail::Helper::initBones(ai_mesh, vertices, mesh_entries[i]._base_vertex, bones_table, bones);
 		}
 
-		vector<ogl::OpenGLDescriptor> descriptor
-		{
-			ogl::OpenGLDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
-			ogl::OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) },
-			ogl::OpenGLDescriptor{vtx::Attrib::UV,		 sizeof(Vertex), offsetof(Vertex, uv) }
-		};
+		// Now we load the 
 
-		opengl_mesh.AddBuffer(
-			ogl::OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
-			.Bind()
-			.Buffer(vertices.data(), sizeof(Vertex), s_cast<GLsizei>(vertices.size()))
-		);
-
-		opengl_mesh.AddBuffer(
-			ogl::OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
-			.Bind()
-			.Buffer(indices.data(), sizeof(int), s_cast<GLsizei>(indices.size()))
-		);
+		
+		
+		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
 
 		retval.resources.emplace_back(mesh_handle);
 		return retval;
@@ -104,6 +99,10 @@ namespace idk
 
 	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource, span<SerializedResourceMeta> path_to_meta)
 	{
+		UNREFERENCED_PARAMETER(path_to_resource);
+		UNREFERENCED_PARAMETER(path_to_meta);
+
 		return FileResources();
 	}
+	
 }

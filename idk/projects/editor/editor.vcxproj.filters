@@ -17,6 +17,9 @@
     <ClInclude Include="loading\OpenGLFBXLoader.h">
       <Filter>loader</Filter>
     </ClInclude>
+    <ClInclude Include="loading\FBXLoaderHelpers.h">
+      <Filter>loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -28,6 +31,9 @@
     <ClCompile Include="ImGui_Interface.cpp" />
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
       <Filter>loader</Filter>
     </ClCompile>
   </ItemGroup>
