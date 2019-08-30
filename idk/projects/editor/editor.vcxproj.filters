@@ -19,6 +19,21 @@
     <ClInclude Include="editor\windows\IGE_Window.h">
       <Filter>editor\windows</Filter>
     </ClInclude>
+    <ClInclude Include="editor\commands\CommandList.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_MoveGameObject.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_AddComponent.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_RotateGameObject.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_ScaleGameObject.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -33,6 +48,18 @@
     </ClCompile>
     <ClCompile Include="editor\windows\IGE_Window.cpp">
       <Filter>editor\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_AddComponent.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_RotateGameObject.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_ScaleGameObject.cpp">
+      <Filter>editor\commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
