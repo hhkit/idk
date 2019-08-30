@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <stdafx.h>
-#include "AudioClipFactory.h"
+#include <audio/AudioClipFactory.h>
 #include <idk.h>
 #include <audio/AudioSystem.h> //AudioSystem
 //Dependency includes
