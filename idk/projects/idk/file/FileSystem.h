@@ -55,7 +55,6 @@ namespace idk
 		friend class	file_system_detail::DirectoryWatcher;
 		
 		friend struct	FileHandle;
-		friend struct	FileHandleC;
 		friend class	FStreamWrapper;
 	private:
 		hash_table<string, size_t>					_mount_table;

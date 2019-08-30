@@ -30,6 +30,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="core\ComponentTags.h" />
+    <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\dual_set.h" />
     <ClInclude Include="ds\small_string.h" />
@@ -203,6 +204,7 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="ds\circular_buffer.inl" />
     <None Include="ds\compressed_pair.inl" />
     <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />

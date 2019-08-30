@@ -447,6 +447,7 @@
       <Filter>reflect\detail</Filter>
     </ClInclude>
     <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="prefab\Prefab.h" />
     <ClInclude Include="prefab\PrefabFactory.h" />
@@ -738,6 +739,7 @@
     <None Include="reflect\detail\visit_detail.inl">
       <Filter>reflect\detail</Filter>
     </None>
+    <None Include="ds\circular_buffer.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

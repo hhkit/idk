@@ -183,6 +183,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
     <ClInclude Include="ImGui_Interface.h" />
+    <ClInclude Include="loading\FBXLoaderHelpers.h" />
     <ClInclude Include="loading\OpenGLFBXLoader.h" />
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="pch.h" />
@@ -197,6 +198,7 @@
     <ClCompile Include="editor\windows\IGE_Window.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="ImGui_Interface.cpp" />
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp" />
     <ClCompile Include="loading\OpenGLFBXLoader.cpp" />
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="pch.cpp">

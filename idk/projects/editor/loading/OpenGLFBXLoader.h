@@ -4,6 +4,7 @@
 
 namespace idk
 {
+	namespace fbx_loader_detail { struct Helper; }
 	// class aiScene;
 	class OpenGLFBXLoader
 		: public ExtensionLoader
@@ -12,12 +13,9 @@ namespace idk
 		FileResources Create(FileHandle path_to_resource) override;
 		FileResources Create(FileHandle path_to_resource, span<GenericMetadata> path_to_meta) override;
 
+		friend struct fbx_loader_detail::Helper;
 	private:
-		struct Vertex
-		{
-			vec3 pos;
-			vec3 normal;
-			vec2 uv;
-		};
+		
+		
 	};
 }

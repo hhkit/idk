@@ -14,7 +14,26 @@ namespace idk::ogl
 		: public Mesh
 	{
 	public:
-		OpenGLMesh() = default;
+		struct MeshEntry
+		{
+			MeshEntry() = default;
+			
+			MeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index);
+			
+			unsigned _base_vertex = 0;
+			unsigned _base_index = 0;
+			unsigned _num_index = 0;
+			unsigned _texture_index = 0;
+		};
+
+		OpenGLMesh()						= default;
+		OpenGLMesh(OpenGLMesh&&);
+		OpenGLMesh& operator=(OpenGLMesh&&);
+
+		OpenGLMesh(const vector<MeshEntry>& entries);
+		
+		OpenGLMesh(const OpenGLMesh&)				= delete;
+		OpenGLMesh& operator=(const OpenGLMesh&)	= delete;
 
 		GLenum GetDrawMode() const;
 		void   SetDrawMode(GLenum);
@@ -26,14 +45,6 @@ namespace idk::ogl
 		void   AddBuffer(OpenGLBuffer&);
 		void   AddMeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index);
 	private:
-		struct MeshEntry
-		{
-			unsigned base_vertex;
-			unsigned base_index;
-			unsigned num_index;
-			unsigned texture_index;
-		};
-
 		vector<MeshEntry>	 _mesh_entries;
 		vector<OpenGLBuffer> _buffers;
 		OpenGLBuffer         _element_array_object;
