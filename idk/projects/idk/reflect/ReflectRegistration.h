@@ -77,6 +77,10 @@ REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
 REFLECT_VARS(i, j)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
+REFLECT_VARS(volume, pitch,minDistance,maxDistance,is3Dsound,isUnique,isLoop)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VAR(guid)
 REFLECT_END()

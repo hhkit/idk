@@ -18,6 +18,8 @@ namespace idk
 		virtual void OnMetaUpdate(const Meta& newmeta) { (newmeta); };
 
 		friend class ResourceManager;
+		template<typename T>
+		friend class ForwardingExtensionLoader;
 	};
 }
 

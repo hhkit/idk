@@ -4,13 +4,15 @@
 #include <imgui/imgui.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <editor/Vulkan_ImGui_Interface.h>
+#include <editor/OpenGL_ImGui_Interface.h>
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
 
 namespace idk
 {
-	IDE::IDE() :edtInterface_v{ nullptr }, edtInterface_o{ nullptr }
+	IDE::IDE()
 	{
 	}
 
@@ -20,62 +22,36 @@ namespace idk
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::OpenGL:
-			edtInterface_o = edt::OI_Interface{ &Core::GetSystem<ogl::Win32GraphicsSystem>().Instance() };
-			edtInterface_o.Init();
+			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
 			break;
 		case GraphicsAPI::Vulkan:
-			edtInterface_v = edt::VI_Interface{ &Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance() };
-			edtInterface_v.Init();		
+			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
 			break;
 		default:
 			break;
 		}
+
+		_interface->Init();
 	}
 
 	void IDE::Shutdown()
 	{
-		// close imgui stuff
-		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
-		{
-		case GraphicsAPI::Vulkan:
-			edtInterface_v.Shutdown();
-			break;
-		case GraphicsAPI::OpenGL:
-			edtInterface_o.Shutdown();
-			break;
-		};
+		_interface->Shutdown();
+		_interface.reset();
 	}
 
 	void IDE::EditorUpdate()
 	{
-		// update editor vars
-		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
-		{
-		case GraphicsAPI::Vulkan:
-			edtInterface_v.ImGuiFrameUpdate();
-			break;
-		case GraphicsAPI::OpenGL:
-			edtInterface_o.ImGuiFrameUpdate();
-			break;
-		};
-		//edtInterface.ImGuiFrameEnd();
+		_interface->ImGuiFrameBegin();
+		_interface->ImGuiFrameUpdate();
+		_interface->ImGuiFrameEnd();
 	}
 
 	void IDE::EditorDraw()
 	{
 		// call imgui draw,
-		//edtInterface.ImGuiFrameEnd();
-		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
-		{
-		case GraphicsAPI::Vulkan:
-			//edtInterface_v.ImGuiFrameUpdate();
-			break;
-		case GraphicsAPI::OpenGL:
-			edtInterface_o.ImGuiFrameEnd();
-			break;
-		};
-		Core::GetSystem<vkn::VulkanWin32GraphicsSystem>(); // get command buffer from vulkan
+		_interface->ImGuiFrameRender();
 	}
 }

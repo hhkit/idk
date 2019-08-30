@@ -54,8 +54,6 @@ namespace idk
 
 		void OI_Interface::Shutdown()
 		{
-			//editorInit.edt_pipeCache.reset();
-
 			ImGui_ImplOpenGL3_Shutdown();
 			ImGui_ImplWin32_Shutdown();
 			ImGui::DestroyContext();
@@ -71,7 +69,7 @@ namespace idk
 		void OI_Interface::ImGuiFrameUpdate()
 		{
 
-			ImGuiFrameBegin();
+			//ImGuiFrameBegin();
 
 			//////////////////////////IMGUI DATA HANDLING//////////////////////
 			if (editorControls.im_demoWindow)
@@ -104,16 +102,10 @@ namespace idk
 		void OI_Interface::ImGuiFrameEnd()
 		{
 			ImGui::Render();
-			//memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
-			ImGuiFrameRender();
 		}
 
 		void OI_Interface::ImGuiFrameRender()
-		{/*
-			ImGuiIO& io = ImGui::GetIO();
-			glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-			glClearColor(editorControls.im_clearColor.x, editorControls.im_clearColor.y, editorControls.im_clearColor.z, editorControls.im_clearColor.w);
-			glClear(GL_COLOR_BUFFER_BIT);*/
+		{
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
 
@@ -139,7 +131,5 @@ namespace idk
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
-
-
 	};
 };

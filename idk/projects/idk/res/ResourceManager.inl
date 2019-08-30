@@ -59,7 +59,7 @@ namespace idk
 	}
 
 	template<typename Resource, typename>
-	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath, Guid guid, const typename Resource::Meta& meta)
+	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath, Guid guid, const typename Resource::Metadata& meta)
 	{
 		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
 		if (itr != table.end())
