@@ -447,6 +447,9 @@
       <Filter>reflect\detail</Filter>
     </ClInclude>
     <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="serialize\yaml.h" />
+    <ClInclude Include="prefab\Prefab.h" />
+    <ClInclude Include="prefab\PrefabFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -585,6 +588,7 @@
     <ClCompile Include="gfx\GraphicsSystem.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="prefab\PrefabFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

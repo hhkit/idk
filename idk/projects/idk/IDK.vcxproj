@@ -58,6 +58,8 @@
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="prefab\Prefab.h" />
+    <ClInclude Include="prefab\PrefabFactory.h" />
     <ClInclude Include="reflect\detail\meta_manager.h" />
     <ClInclude Include="reflect\detail\table_storage.h" />
     <ClInclude Include="reflect\detail\typed_context.h" />
@@ -109,6 +111,7 @@
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestSystem.h" />
@@ -157,6 +160,7 @@
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
+    <ClCompile Include="prefab\PrefabFactory.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="res\FileResources.cpp" />
