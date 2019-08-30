@@ -33,7 +33,7 @@ namespace idk {
 
 		try {
 			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
-			newSound->ReassignSoundGroup(AudioClip::SubSoundGroup_SFX);
+			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
 			newSound->UpdateMinMaxDistance();
 
 		}
