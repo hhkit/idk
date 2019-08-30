@@ -28,7 +28,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
-	system("pause");
 	switch (GraphicsAPI::Vulkan)
 	{
 		case GraphicsAPI::Vulkan:
