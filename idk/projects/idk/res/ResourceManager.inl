@@ -23,20 +23,26 @@ namespace idk
 	{
 		auto& table = GetTable<Resource>();
 		auto ptr = GetLoader<Resource>().Create();
+		if (!ptr)
+			return RscHandle<Resource>{};
+		
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = handle;
 		ptr->_dirty = true;
 		if constexpr (has_tag_v<Resource, MetaTag>)
 			ptr->_dirtymeta = true;
 		table.emplace(handle.guid, std::move(ptr));
+		
 		return handle;
 	}
 	template<typename Resource>
 	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath)
 	{
 		auto retval = Create<Resource>(filepath, Guid::Make());
+		if (!retval)
+			return RscHandle<Resource>{};
 		retval->_dirty = true;
-		if constexpr(has_tag_v<Resource, MetaTag>)
+		if constexpr (has_tag_v<Resource, MetaTag>)
 			retval->_dirtymeta = true;
 		return retval;
 	}
