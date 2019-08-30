@@ -16,9 +16,6 @@
     <ClInclude Include="loading\OpenGLFBXLoader.h">
       <Filter>loader</Filter>
     </ClInclude>
-    <ClInclude Include="editor\windows\IGE_Window.h">
-      <Filter>editor\windows</Filter>
-    </ClInclude>
     <ClInclude Include="editor\commands\CommandList.h">
       <Filter>editor\commands</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
     <ClInclude Include="loading\FBXLoaderHelpers.h">
       <Filter>loader</Filter>
     </ClInclude>
+    <ClInclude Include="editor\windows\IGE_IWindow.h" />
+    <ClInclude Include="editor\windows\IGE_MainWindow.h" />
+    <ClInclude Include="editor\windows\IGE_WindowList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -48,9 +48,6 @@
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="loading\OpenGLFBXLoader.cpp">
       <Filter>loader</Filter>
-    </ClCompile>
-    <ClCompile Include="editor\windows\IGE_Window.cpp">
-      <Filter>editor\windows</Filter>
     </ClCompile>
     <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp">
       <Filter>editor\commands</Filter>
@@ -67,6 +64,8 @@
     <ClCompile Include="loading\FBXLoaderHelpers.cpp">
       <Filter>loader</Filter>
     </ClCompile>
+    <ClCompile Include="editor\windows\IGE_IWindow.cpp" />
+    <ClCompile Include="editor\windows\IGE_MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="editor">

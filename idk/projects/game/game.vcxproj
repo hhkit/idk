@@ -111,7 +111,7 @@
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy  /i /f /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
+      <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
@@ -178,7 +178,7 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy  /i /f /c /y "$(SolutionDir)dep\dll" "$(SolutionDir)bin"
+      <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(SolutionDir)bin"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
