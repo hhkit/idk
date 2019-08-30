@@ -9,6 +9,8 @@
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
+#include <editor/windows/IGE_WindowList.h>
+#include <editor/commands/CommandList.h>
 
 namespace idk
 {
@@ -34,6 +36,11 @@ namespace idk
 		}
 
 		_interface->Init();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
+		ige_windows.push_back(std::make_unique<IGE_MainWindow>());
+
+
 	}
 
 	void IDE::Shutdown()
@@ -45,7 +52,17 @@ namespace idk
 	void IDE::EditorUpdate()
 	{
 		_interface->ImGuiFrameBegin();
+
+		for (auto& i : ige_windows) {
+			i->DrawWindow();
+		}
+
 		_interface->ImGuiFrameUpdate();
+		
+		
+		
+		
+		
 		_interface->ImGuiFrameEnd();
 	}
 
