@@ -126,11 +126,7 @@ Variables:
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString
 
-#include <iostream> //cout
-#include <iomanip> //put_time
-#include <ctime> //
 #include <sstream> //ostringstream
-#include <filesystem> //filesystem
 
 namespace idk
 {

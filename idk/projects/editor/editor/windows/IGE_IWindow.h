@@ -1,26 +1,23 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		IGE_Window.h
+//@file		IGE_IWindow.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		28 AUG 2019
+//@date		30 AUG 2019
 //@brief	
 
 /*
-//This is an abstract parent class to create other Windows to InGameEditor
+//This is an interface parent class to create other Windows to the editor
 //You can also use imgui functions instead of using the inherited functions to create your own custom style.
 //This is still work in progress
 
 //When buidling window classes, public parent this class.
-//You should initialize everything it the child class so that when you attach it to InGameEditor, all it has to do is to call Update()
-//You can still add additional functions to the child class if you want InGameEditor to call it at certain points of the function.
+//You can override virtual functions to the child class to do something before or after.
 //An example is shown in IGE_DebugWindow.cpp
 
 //You cannot have windows of the same name in other classes. You can however unique identify them by adding ## in its windowName initializer
 
 */
 //////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 #pragma once
@@ -30,7 +27,7 @@
 #include <string>
 
 namespace idk {
-	class IGE_Window
+	class IGE_IWindow
 	{
 
 	public:
@@ -55,9 +52,9 @@ namespace idk {
 		----------------------------------------------------
 		--------------------------------------------------*/
 
-		IGE_Window(char const* windowName, bool isWindowOpenByDefault, ImVec2 size = ImVec2{ 0.0f,0.0f }, ImVec2 position = ImVec2{ 0.0f ,0.0f }, ImVec2 pivot = ImVec2{ 0.0f,0.0f });
+		IGE_IWindow(char const* windowName, bool isWindowOpenByDefault, ImVec2 size = ImVec2{ 0.0f,0.0f }, ImVec2 position = ImVec2{ 0.0f ,0.0f }, ImVec2 pivot = ImVec2{ 0.0f,0.0f });
 
-		virtual ~IGE_Window();
+		virtual ~IGE_IWindow();
 
 		/*--------------------------------------------------
 		----------------------------------------------------
@@ -66,14 +63,11 @@ namespace idk {
 
 		----------------------------------------------------
 		--------------------------------------------------*/
-		//Initializes the window. This is for advanced use, such as modifying a variable before update or wanting a window color
-		//Most of the time, this is empty.
-		//This is called after ImGui is initialized.
-		virtual void Initialize() {};
-		//Updates and draws the values of the window. This is the function you have to define in your derrived classes
-		virtual void Update() = 0;
+
 		//Repositions and rescales window to how it was initialized. Note that this ignores pivoting from initialized.
-		virtual void RepositionWindow();
+		void ResetWindowPosSize();
+
+		void DrawWindow();	//This draws the window. It is basically a wrapper to call BeginWindow and EndWindow
 
 	protected:
 		/*--------------------------------------------------
@@ -90,10 +84,11 @@ namespace idk {
 		ImGuiCond_			pos_condition_flags		= ImGuiCond_FirstUseEver;							//Flags that affect the Position
 		ImGuiWindowFlags	window_flags			= ImGuiWindowFlags_NoSavedSettings;					//Flags that affect the Window
 		ImGuiHoveredFlags_	mouse_hover_flags		= ImGuiHoveredFlags_AllowWhenBlockedByActiveItem;	//Flags that affect how the mouse is hovered
+
 		/*--------------------------------------------------
 		----------------------------------------------------
 
-					PROTECTED DRAW FUNCTIONS
+					HELPER/WRAPPER FUNCTIONS
 
 		----------------------------------------------------
 		--------------------------------------------------*/
@@ -101,16 +96,23 @@ namespace idk {
 		//Functions you can use when you inherit this class. These are mostly wrapper functions that help when creating your window
 		//For each function call, it draw the next one below.
 
+		//Initializes the window. This is for advanced use, such as modifying a variable before update or wanting a window color
+		//Most of the time, this is empty.
+		//This is called after ImGui is initialized.
+		virtual void Initialize()	{};
+		//Updates and draws the values of the window. This is the function you have to define in your derrived classes
+		virtual void Update()	   = 0;
+
+
 		//Begins the window. This must pair with an EndWindow!
 		//The arguments set what kind of window it is or has.
-		//You can override these in your child classes to do something else.
-		virtual void BeginWindow();
-		virtual void BeginWindow(ImGuiCond_ PosSizeConditionFlags, ImGuiWindowFlags windowFlags);
-		virtual void BeginWindow(ImGuiCond_ PosConditionFlags, ImGuiCond_ SizeConditionFlags, ImGuiWindowFlags windowFlags);
-
+		//You can override these in your child classes to do something before the window begins drawing
+		virtual void BeginWindow()	{};
 
 		//Finishes the window. Nothing else can be drawn after this function. You can still update other variables.
-		void EndWindow();
+		//You can override these in your child classes to do something else before the window ends drawing
+		virtual void EndWindow()	{};
+
 
 		//Creates a "(?)" text and creates a tool tip of argument handled.
 		void DrawHelpMarker(const char* desc);
@@ -142,6 +144,10 @@ namespace idk {
 
 	private:
 		unsigned int itemCounter;
+
+
+		void BeginWindow_V();
+		void EndWindow_V();
 
 	};
 
