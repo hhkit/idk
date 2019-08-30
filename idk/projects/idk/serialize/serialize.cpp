@@ -215,7 +215,7 @@ namespace idk
 	{
 		if (obj.type.count() == 0)
 		{
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = j.get<TYPE>();
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = j.get<TYPE>(); return;
 			switch (obj.type.hash())
 			{
 				SERIALIZE_CASE(int);
@@ -226,7 +226,7 @@ namespace idk
 				SERIALIZE_CASE(float);
 				SERIALIZE_CASE(double);
 #undef SERIALIZE_CASE
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : parse_text(j.get<string>(), obj); break;
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : parse_text(j.get<string>(), obj.get<TYPE>()); return;
 				SERIALIZE_CASE(string);
 				SERIALIZE_CASE(Guid);
 				SERIALIZE_CASE(GenericMetadata);

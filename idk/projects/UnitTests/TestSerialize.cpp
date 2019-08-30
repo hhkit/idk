@@ -51,6 +51,12 @@ TEST(Serialize, TestSerializeBasic)
 	EXPECT_EQ(obj.f, obj2.f);
 	EXPECT_EQ(obj.guid, obj2.guid);
 	EXPECT_EQ(obj.vec, obj2.vec);
+
+
+
+	vector<string> yolo;
+	yolo.emplace_back();
+	parse_text(serialize_text(yolo), yolo);
 }
 
 struct serialize_this_bs
