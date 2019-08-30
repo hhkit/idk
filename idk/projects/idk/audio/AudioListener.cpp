@@ -10,10 +10,35 @@
 
 #include "stdafx.h" //Needed for every CPP. Precompiler
 #include <audio/AudioListener.h>
+#include <audio/AudioSystem.h>
+#include <scene/SceneManager.h>
 
 
 namespace idk
 {
+	void AudioListener::SetAsActive()
+	{
+		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+		audioSystem.SetMainAudioListener(GetHandle());
+		is_active = true;
+	}
+	void AudioListener::UpdateListenerPosition()
+	{
 
+		Handle<GameObject> parent = GetGameObject();
+		if (parent) {
+			Handle<Transform> transform = parent->GetComponent<Transform>();
+			if (transform) {
+				AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+				Handle<RigidBody> rigidbody = parent->GetComponent<RigidBody>();
+				if (rigidbody) {
+					audioSystem.Set3DListenerAttributes(transform->position, rigidbody->velocity, transform->Forward(), transform->Up());
+				}
+				else {
+					audioSystem.Set3DListenerAttributes(transform->position, vec3{}, transform->Forward(), transform->Up());
+				}
 
+			}
+		}
+	}
 }

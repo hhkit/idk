@@ -48,22 +48,26 @@ namespace idk::ogl
 			auto find_type = OpenGLAttribs.find(elem.attrib);
 			assert(find_type != OpenGLAttribs.end());
 
-			auto loc = locations.requirements.find(elem.attrib)->second;
-			glVertexAttribPointer(
-				loc,
-				find_type->second.size,
-				find_type->second.type,
-				GL_FALSE,
-				elem.stride,
-				r_cast<void*>(elem.offset)
-			);
+			auto find_loc = locations.requirements.find(elem.attrib);
+			if (find_loc != locations.requirements.end())
+			{
+				auto loc = find_loc->second;
+				glVertexAttribPointer(
+					loc,
+					find_type->second.size,
+					find_type->second.type,
+					GL_FALSE,
+					elem.stride,
+					r_cast<void*>(elem.offset)
+				);
 
-			glEnableVertexAttribArray(loc);
+				glEnableVertexAttribArray(loc);
+			}
 		}
 		return *this;
 	}
 
-	OpenGLBuffer& OpenGLBuffer::Buffer(void* data, size_t stride, GLsizei count)
+	OpenGLBuffer& OpenGLBuffer::Buffer(const void* data, size_t stride, GLsizei count)
 	{
 		_size = count;
 		glBufferData(_type, count * stride, data, GL_STATIC_READ);

@@ -7,26 +7,6 @@
 
 namespace idk
 {
-	enum class FileSystem_ErrorCode
-	{
-		FILESYSTEM_OK,
-		FILESYSTEM_OTHER,
-		FILESYSTEM_NO_MEM,
-		FILESYSTEM_NO_INIT,
-		FILESYSTEM_IS_INIT,
-		FILESYSTEM_PAST_EOF,
-		FILESYSTEM_NOT_MOUNTED,
-		FILESYSTEM_NOT_FOUND,
-		FILESYSTEM_NOT_FILE,
-		FILESYSTEM_ONLY_READ,
-		FILESYSTEM_ONLY_WRITE,
-		FILESYSTEM_NOT_OPEN,
-		FILESYSTEM_DUPLICATE,
-		FILESYSTEM_FILE_CHANGED,
-		FILESYSTEM_BAD_FILENAME,
-		FILESYSTEM_BAD_ARGUMENT
-	};
-
 	class FileSystem : public ISystem
 	{
 	public:
@@ -46,10 +26,12 @@ namespace idk
 		string_view GetExeDir		()	const { return _exe_dir; }
 		string_view GetAssetDir		()	const { return _asset_dir; }
 
-		
-
 		bool		Exists(string_view mountPath) const;
 		bool		ExistsFull(string_view fullPath) const;
+
+		vector<FileHandle>  QueryFileChangesAll			()								const;
+		vector<FileHandle>  QueryFileChangesByExt		(string_view ext)				const;
+		vector<FileHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
 
 		// Setters
 		void		SetAssetDir(string_view dir) { _asset_dir = dir; }
@@ -63,17 +45,16 @@ namespace idk
 
 		// This functions affect the actual files outside of the system.
 		int Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
-		FileSystem_ErrorCode DelFile(string_view mountPath);
-		
-		FileSystem_ErrorCode GetLastError() const;
+		// FileSystem_ErrorCode DelFile(string_view mountPath);
+		// 
+		// FileSystem_ErrorCode GetLastError() const;
 
 		
 		void DumpMounts() const;
 
 		friend class	file_system_detail::DirectoryWatcher;
-		friend struct	file_system_detail::fs_mount;
+		
 		friend struct	FileHandle;
-		friend struct	FileHandleC;
 		friend class	FStreamWrapper;
 	private:
 		hash_table<string, size_t>					_mount_table;
@@ -92,10 +73,12 @@ namespace idk
 
 		// initializtion
 		void initMount		(size_t index, string_view fullPath, string_view mountPath, bool watch);
-		void recurseSubDir	(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
-		void initFile(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
-		void initDir(file_system_detail::fs_dir& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
-		void recurseSubDirExtensions(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
+		void initFile		(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
+		void initDir		(file_system_detail::fs_dir& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
+
+		// Helper recursion functions
+		void recurseSubDir				(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
+		void recurseSubDirExtensions	(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
 
 		// Helper Getters
 		file_system_detail::fs_file&		getFile	(file_system_detail::fs_key& node);
@@ -111,6 +94,7 @@ namespace idk
 		// Other auxiliary helpers
 		size_t							addFileHandle			(const file_system_detail::fs_key& handle);
 		file_system_detail::fs_key		requestFileSlot			(file_system_detail::fs_mount& mount, int8_t depth);
+		file_system_detail::fs_key		requestDirSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_file&	createAndGetFile		(string_view mountPath);
 
 		vector<string>					tokenizePath			(string_view fullPath)					const;

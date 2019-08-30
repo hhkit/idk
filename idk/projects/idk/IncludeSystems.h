@@ -5,6 +5,7 @@
 #include <file/FileSystem.h>
 
 #include <gfx/GraphicsSystem.h>
+#include <gfx/DebugRenderer.h>
 #include <res/ResourceManager.h>
 #include <scene/SceneManager.h>
 

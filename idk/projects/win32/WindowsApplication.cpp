@@ -50,12 +50,23 @@ namespace idk::win
 			}
 		}
 
-		retval = (int)msg.wParam;
 	}
 	int Windows::GetReturnVal()
 	{
 		return retval;
 	}
+	ivec2 Windows::GetScreenSize() 
+	{
+		RECT rect;
+		if (!GetClientRect(hWnd, &rect))
+			return ivec2{};
+		return ivec2((rect.right - rect.left), (rect.bottom - rect.top));
+	}
+	void Windows::PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func)
+	{
+		winProcList.push_back(func); 
+	}
+
 	bool Windows::GetKeyDown(Key key)
 	{
 		return _input_manager->GetKeyDown(static_cast<int>(key));
@@ -77,6 +88,9 @@ namespace idk::win
 		if (_hWnd != hWnd)
 			return DefWindowProc(_hWnd, message, wParam, lParam);
 
+		for (auto& elem : winProcList)
+			elem(_hWnd, message, wParam, lParam);
+
 		switch (message)
 		{
 		case WM_KEYDOWN:
@@ -93,11 +107,23 @@ namespace idk::win
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
 			break;
+		case WM_NCCREATE:
+		{
+			auto ptr = reinterpret_cast<CREATESTRUCTW*&>(lParam);
+			OnScreenSizeChanged.Fire(ivec2{ ptr->cx, ptr->cy });
+		}
+		break;
+		case WM_SIZE:
+			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
+			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
 		case WM_NCDESTROY:
 			Core::Shutdown();
+			break;
+		case WM_QUIT:
+			retval = (int)wParam;
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);

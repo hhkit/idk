@@ -30,6 +30,9 @@ namespace idk
 		// generic
 		GenericHandle AddComponent(reflect::type);
 		GenericHandle AddComponent(reflect::dynamic);
+		GenericHandle GetComponent(reflect::type);
+		GenericHandle GetComponent(string_view);
+		void          RemoveComponent(GenericHandle);
 
 		span<GenericHandle> GetComponents();
 		// active flags

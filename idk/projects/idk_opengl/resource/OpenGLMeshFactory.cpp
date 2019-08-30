@@ -25,7 +25,7 @@ namespace idk::ogl
 			Vertex{vec3{-0.5, -0.5, 0}},
 			Vertex{vec3{+0.5, -0.5, 0}}
 		};
-
+		retval->AddMeshEntry(0, 0, 3, 0);
 		retval->AddBuffer( 
 			OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 				.Bind()
@@ -46,12 +46,7 @@ namespace idk::ogl
 		return retval;
 	}
 
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(string_view)
-	{
-		return unique_ptr<Mesh>();
-	}
-
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(string_view, const ResourceMeta&)
+	unique_ptr<Mesh> OpenGLMeshFactory::Create(FileHandle)
 	{
 		return unique_ptr<Mesh>();
 	}

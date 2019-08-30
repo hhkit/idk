@@ -23,11 +23,10 @@ namespace FS = std::filesystem;
 			vfs.Init();\
 			string exe_dir = string{ vfs.GetExeDir().data() };\
 			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir");\
-			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir2/recurse_dir");\
 			{	std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_sub_dir1/test_sub_file.txt" }; \
 				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_read.txt"};\
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt"};\
-				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir2/recurse_dir/recurse_sub_file.txt"};}\
+				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt"};};\
+			std::filesystem::remove_all(string{ exe_dir + "/resource/FS_UnitTests/test_dir_2/" }.c_str());\
 			remove(string {exe_dir + "/resource/FS_UnitTests/test_watch.txt"	}.c_str());\
 			remove(string {exe_dir + "/resource/FS_UnitTests/test_write.txt"	}.c_str());\
 			vfs.Mount( exe_dir + "/resource/FS_UnitTests/", "/FS_UnitTests");
@@ -38,15 +37,12 @@ TEST(FileSystem, TestMount)
 	INIT_FILESYSTEM_UNIT_TEST();
 
 	vfs.Mount(exe_dir + "resource/FS_UnitTests/", "/FS_UnitTests");
+	// Should not work but should not crash too.
+	auto bad_file = vfs.GetFile("/blah/haha.txt");
+
 	vfs.DumpMounts();
 	vfs.Update();
 }
-
-struct test
-{
-	int i;
-	double d;
-};
 
 TEST(FileSystem, TestFileWatchBasic)
 {
@@ -55,64 +51,188 @@ TEST(FileSystem, TestFileWatchBasic)
 	// Test create:
 	{
 		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
+
+		vfs.Update();
+
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		EXPECT_TRUE(changes.size() == 1);
+		// No files deleted
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		EXPECT_TRUE(changes.size() == 0);
+
+		// Checking if we resolved all changes properly
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
 	}
-	vfs.Update();
+	
 	
 	// Test Write
 	{
 		std::ofstream of{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test_Watch" << std::endl;
+		vfs.Update();
+
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+		EXPECT_TRUE(changes.size() == 1);
+		// No files deleted
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		EXPECT_TRUE(changes.size() == 0);
+
+		// Checking if we resolved all changes properly
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
 	}
-	vfs.Update();
 
 	// Test Delete
 	{
 		string remove_file = exe_dir + "/resource/FS_UnitTests/test_watch.txt";
 		EXPECT_TRUE(remove(remove_file.c_str()) == 0);
-	}
-	vfs.Update();
+		vfs.Update();
 
-	// Test Create 2 Files-> Delete 1st one -> Create 1 File (Should have the same handle and prev handle should be invalidated)
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		EXPECT_TRUE(changes.size() == 1);
+		// No files deleted
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		EXPECT_TRUE(changes.size() == 0);
+
+		// Checking if we resolved all changes properly
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
+	}
+
+	// Create Dir then create file inside dir
+	{
+		FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_dir_2/");
+		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_dir_2/blah.txt", std::ios::out };
+		vfs.Update();
+
+		auto changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 1);
+		vfs.Update();
+		changes = vfs.QueryFileChangesAll();
+		EXPECT_TRUE(changes.size() == 0);
+	}
 }
 
 TEST(FileSystem, TestFileHandle)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 
-	auto valid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);		// Should create a file
-	auto invalid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	// Should be an invalid handle
+	// Constructors and assignments
+	{
+		auto valid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);		// Should create a file
+		auto invalid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	// Should be an invalid handle
 
-	// Checking if handles are valid or not
-	EXPECT_TRUE(valid_handle.is_open());
-	EXPECT_FALSE(invalid_handle.is_open());
+		// Checking if handles are valid or not
+		EXPECT_TRUE(valid_handle.is_open());
+		EXPECT_FALSE(invalid_handle.is_open());
 
-	// Test move constructor
-	auto move_construct{ std::move(valid_handle) };
-	EXPECT_TRUE(move_construct.is_open());
-	EXPECT_FALSE(valid_handle.is_open());
+		// Test move constructor
+		auto move_construct{ std::move(valid_handle) };
+		EXPECT_TRUE(move_construct.is_open());
+		EXPECT_FALSE(valid_handle.is_open());
 
-	// Test move assignment
-	auto move_asssign = std::move(move_construct);
-	EXPECT_TRUE(move_asssign.is_open());
-	EXPECT_FALSE(move_construct.is_open());
+		// Test move assignment
+		auto move_asssign = std::move(move_construct);
+		EXPECT_TRUE(move_asssign.is_open());
+		EXPECT_FALSE(move_construct.is_open());
+
+		vfs.Update();
+	}
+
+	// Invalidate handle by file deletion
+	{
+		// Create a file
+		auto valid_handle1 = vfs.Open("/FS_UnitTests/invalidate.txt", FS_PERMISSIONS::WRITE);
+		EXPECT_TRUE(valid_handle1.is_open());
+		valid_handle1.close();
+
+		// Get the file handle to the above file
+		auto file_handle1 = vfs.GetFile("/FS_UnitTests/invalidate.txt");
+		EXPECT_TRUE(file_handle1);
+
+		// file_handle1 is now in created status
+		vfs.Update();
+		
+		// Delete the above file
+		auto res = remove(string{ exe_dir + "/resource/FS_UnitTests/invalidate.txt" }.c_str());
+
+		// After this update, file_handle1 is now under delete status
+		vfs.Update();
+		EXPECT_FALSE(file_handle1);
+
+		// Create a new file
+		auto valid_handle2 = vfs.Open("/FS_UnitTests/invalidate2.txt", FS_PERMISSIONS::WRITE);
+		EXPECT_TRUE(valid_handle2.is_open());
+		valid_handle2.close();
+		
+		// Get the file handle to the above file
+		auto file_handle2 = vfs.GetFile("/FS_UnitTests/invalidate2.txt");
+		EXPECT_TRUE(file_handle2);
+
+		// file_handle2 should not reuse the same handle as file_handle1.
+		EXPECT_FALSE(file_handle1.SameKeyAs(file_handle2));
+		
+		// Now file_handle1 is free to be reused as its change was resolved in this update
+		vfs.Update();
+
+		auto valid_handle3 = vfs.Open("/FS_UnitTests/invalidate3.txt", FS_PERMISSIONS::WRITE);
+		EXPECT_TRUE(valid_handle3.is_open());
+		valid_handle3.close();
+
+		// Get the file handle to the above file
+		auto file_handle3 = vfs.GetFile("/FS_UnitTests/invalidate3.txt");
+		EXPECT_TRUE(file_handle3);
+
+		// file_handle3 should reuse the first FileHandle that was created.
+		EXPECT_TRUE(file_handle1.SameKeyAs(file_handle3));
+
+		// Delete all files created
+		remove(string{ exe_dir + "/resource/FS_UnitTests/invalidate2.txt" }.c_str());
+		remove(string{ exe_dir + "/resource/FS_UnitTests/invalidate3.txt" }.c_str());
+	}
 }
 
-TEST(FileSystem, TestFileReadWrite)
+TEST(FileSystem, TestFileOpen)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
+
+	// Test Open bad file path
+	{
+		FileHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
+
+		auto bad_stream = vfs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::READ);
+		auto bad_stream2 = bad_file_handle.Open(FS_PERMISSIONS::READ);
+
+		EXPECT_FALSE(bad_stream.is_open());
+		EXPECT_FALSE(bad_stream2.is_open());
+	}
+
 	// Test read empty file
 	{
 		FileHandle file_handle = vfs.GetFile("/FS_UnitTests/test_read.txt");
 		
-		auto valid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);	// Should create a file
+		auto valid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
 		auto invalid_handle = file_handle.Open(FS_PERMISSIONS::READ);
 		EXPECT_TRUE(valid_handle.is_open());
 		EXPECT_FALSE(invalid_handle.is_open());
 
+		// Should immediately get EOF
 		char buffer[100]{ 0 };
-	
-		EXPECT_TRUE(!valid_handle.read(buffer, 10));
-		EXPECT_TRUE(!valid_handle.getline(buffer, 10));
+		EXPECT_FALSE(valid_handle.read(buffer, 10));
+		EXPECT_FALSE(valid_handle.getline(buffer, 10));
 	}
 	vfs.Update();
 

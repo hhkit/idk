@@ -100,6 +100,9 @@ namespace idk
 	template<typename ... Ts>
 	using variant = std::variant<Ts...>;
 
+	template<bool val>
+	using sfinae = std::enable_if_t<val>;
+
 	// smart pointers
 	template<typename T>
 	using unique_ptr = std::unique_ptr<T>;

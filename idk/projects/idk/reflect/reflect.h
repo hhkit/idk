@@ -2,10 +2,15 @@
 
 #include <idk_reflect_types.h>
 #include <meta/meta.h>
-#include <reflect/pretty_function.h>
-#include <reflect/constructor_entry.h>
 #include <util/string_hash.h>
 #include <util/macro_utils.h>
+
+#include <reflect/typeinfo.h>
+#include <reflect/detail/constructor_entry.h>
+#include <reflect/detail/meta_manager.h>
+#include <reflect/detail/table_storage.h>
+#include <reflect/detail/typed_context.h>
+#include <reflect/detail/visit_detail.h>
 
 // required settings for LIONant/properties
 namespace property::settings
@@ -27,56 +32,15 @@ namespace idk::reflect
 	//    ^^^ forward decls, but also bookmarks
 
 
-	// get full qualified type name of T (decayed).
-	// eg. vec3& => idk::math::vector<float, 3>
-	// NOTE: if comparing types, use typehash<T>() !!!
-	template<typename T> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
-	template<template<typename... > typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
-	template<template<typename, auto> typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
-	template<template<auto... > typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
-
-	// gets hash of type T (decayed).
-	// use this against type.hash()
-	template<typename T> constexpr size_t typehash() { return idk::string_hash(fully_qualified_nameof<T>()); }
-
 	// get type info with name
 	type get_type(string_view name);
 
 	// get type info of T
 	template<typename T> type get_type();
 
-	// see reflect.inl for detailed comments
+	// see reflect.inl for detailed comments (just hover)
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor);
-
-
-
-	namespace detail
-	{
-		using table = ::property::table;
-		template<typename T> using type_definition = ::property::opin::def<T>;
-
-		struct meta
-		{
-			hash_table<string_view, struct typed_context_base*> names_to_contexts;
-			hash_table<size_t, struct typed_context_base*> hashes_to_contexts;
-			static meta& instance() { static meta s; return s; }
-		};
-
-		template<typename T, bool HasTypeDefinition> struct register_type { register_type(); };
-
-		template<typename T> struct class_holder {};
-		template<typename ClassT, typename... Ts> struct table_storage;
-
-		struct typed_context_base;
-		template<typename T> struct typed_context;
-
-		template<typename Visitor>
-		void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_visit_depth);
-		template<typename K, typename V, typename Visitor>
-		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
-	}
-
 
 
 	// type class, contains info about reflected type.
@@ -182,6 +146,7 @@ namespace idk::reflect
 	private:
 		struct base;
 		template<typename T> struct derived;
+		struct voidptr;
 
 		shared_ptr<base> _ptr;
 		dynamic(reflect::type type, void* obj);

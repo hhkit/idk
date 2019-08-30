@@ -33,6 +33,11 @@ namespace idk::math
 		return quaternion{ -x, -y, -z, w };
 	}
 	template<typename T>
+	quaternion<T>& quaternion<T>::normalize()
+	{
+		return static_cast<quaternion<T>&>(Base::normalize());
+	}
+	template<typename T>
 	quaternion<T>& quaternion<T>::operator*=(const quaternion& rhs)
 	{
 		return *this = (*this * rhs);
@@ -43,10 +48,10 @@ namespace idk::math
 		auto copy = *this;
 		const auto plus = T{ 1.0 };
 		const auto minus = T{ -1.0 };
-		copy.x = (this->wxyz * rhs.wxyz).dot(Base{ plus, minus, minus, minus });
-		copy.y = (this->wxyz * rhs.xwzy).dot(Base{ plus, plus, plus, minus });
-		copy.z = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
-		copy.w = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
+		copy.w = (this->wxyz * rhs.wxyz).dot(Base{ plus, minus, minus, minus });
+		copy.x = (this->wxyz * rhs.xwzy).dot(Base{ plus, plus, plus, minus });
+		copy.y = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
+		copy.z = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
 		return copy;
 	}
 

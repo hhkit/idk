@@ -6,16 +6,14 @@
 
 namespace idk::ogl
 {
+	class Win32GraphicsSystem;
 	class OpenGLState
 	{
 	public:
 		void Setup();
 		void GenResources();
 
-		void SubmitBuffers(vector<RenderObject>&& mesh_render, vector<RenderObject>&& skinned_mesh_render);
 		void RenderDrawBuffer();
-		void SwapWritingBuffer();
-		void SwapDrawingBuffer();
 
 	private:
 		// declarations
@@ -24,22 +22,10 @@ namespace idk::ogl
 			size_t  typehash {};
 			Program vertex_shader;
 		};
-
-		struct RenderBuffer 
-		{
-			vector<RenderObject> mesh_render;
-			vector<RenderObject> skinned_mesh_render;
-		};
-
+		Win32GraphicsSystem* sys{};
 		// variables
 		PipelineProgram        pipeline;
 		vector<RendererInfo>   renderer_vertex_shaders;
 		GLuint                 vao_id = 0;
-
-		// triple buffered render state
-		array<RenderBuffer, 3> object_buffer;
-		unsigned               curr_write_buffer  = 0;
-		unsigned               curr_draw_buffer   = 1;
-		bool                   write_buffer_dirty = false;
 	};
 }

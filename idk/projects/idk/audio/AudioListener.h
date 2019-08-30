@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include <core/Component.h>
+#include <IncludeComponents.h>
 
 namespace idk
 {
@@ -20,9 +20,9 @@ namespace idk
 
 		void SetAsActive();
 
-		void UpdateListenerPosition(const vec3& pos, const vec3& forwardVector, const vec3& upVector);
+		void UpdateListenerPosition();
 
-		bool isActive { false };
+		bool is_active{ false };
 
 	};
 

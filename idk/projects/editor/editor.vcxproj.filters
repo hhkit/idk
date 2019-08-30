@@ -10,12 +10,62 @@
     <ClInclude Include="editor\commands\ICommand.h">
       <Filter>editor\commands</Filter>
     </ClInclude>
+    <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="ImGui_Interface.h" />
+    <ClInclude Include="OpenGL_ImGui_Interface.h" />
+    <ClInclude Include="loading\OpenGLFBXLoader.h">
+      <Filter>loader</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\windows\IGE_Window.h">
+      <Filter>editor\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CommandList.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_MoveGameObject.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_AddComponent.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_RotateGameObject.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\commands\CMD_ScaleGameObject.h">
+      <Filter>editor\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\FBXLoaderHelpers.h">
+      <Filter>loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="editor\commands\CommandController.cpp">
       <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui_Interface.cpp" />
+    <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\windows\IGE_Window.cpp">
+      <Filter>editor\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_AddComponent.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_RotateGameObject.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\commands\CMD_ScaleGameObject.cpp">
+      <Filter>editor\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
+      <Filter>loader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +74,13 @@
     </Filter>
     <Filter Include="editor\commands">
       <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
+    <Filter Include="editor\windows">
+      <UniqueIdentifier>{b8f020c5-d088-49f8-841d-626fcb8a63d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader">
+      <UniqueIdentifier>{6736b34e-82f1-486c-a938-0e50208db3da}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <stdafx.h>
-#include "AudioClipFactory.h"
+#include <audio/AudioClipFactory.h>
 #include <idk.h>
 #include <audio/AudioSystem.h> //AudioSystem
 //Dependency includes
@@ -20,20 +20,20 @@
 
 
 namespace idk {
-	unique_ptr<AudioClip> idk::AudioClipFactory::Create()
+	unique_ptr<AudioClip> AudioClipFactory::Create()
 	{
 		return unique_ptr<AudioClip>();
 	}
 
-	unique_ptr<AudioClip> AudioClipFactory::Create(string_view filePath)
+	unique_ptr<AudioClip> AudioClipFactory::Create(FileHandle filePath)
 	{
 		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 
 		try {
-			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
-			newSound->ReassignSoundGroup(AudioClip::SubSoundGroup_SFX);
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
+			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
 			newSound->UpdateMinMaxDistance();
 
 		}
@@ -42,20 +42,15 @@ namespace idk {
 			return nullptr;
 		}
 		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
-		newSound->soundInfo.filePath = filePath;
+		newSound->soundInfo.filePath = filePath.GetFullPath();
 		char name[512];
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getName(name, 512));
 		newSound->soundInfo.name = name;
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
-		
+		newSound->_dirtymeta = true;
 		//Push to list for management.
 		//SoundList.push_back(newSound);
 		
 		return newSound;
-	}
-
-	unique_ptr<AudioClip> idk::AudioClipFactory::Create(string_view filePath, const ResourceMeta&)
-	{
-		return Create(filePath);
 	}
 }

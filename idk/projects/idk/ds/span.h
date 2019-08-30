@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 namespace idk
 {
 	template <typename T>
@@ -8,7 +10,7 @@ namespace idk
 		T* _end;
 
 		constexpr span(T* begin, T* end) noexcept;
-		template <typename Container>
+		template <typename Container, typename = std::enable_if_t<!std::is_same_v<Container, span>>>
 		constexpr explicit span(Container& c) noexcept;
 		constexpr T* begin() const noexcept;
 		constexpr T* end() const noexcept;

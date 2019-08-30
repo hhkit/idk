@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="VulkanWin32GraphicsSystem.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="VulkanState.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="GfxConverters.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderState.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDebugRenderer.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanView.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanPipeline.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferHelpers.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_buffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="draw_call.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="UboManager.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorPoolsManager.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorsManager.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_state_fwd.h">
+      <Filter>fwd</Filter>
+    </ClInclude>
+    <ClInclude Include="idkTexture.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMesh.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMeshFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="VulkanWin32GraphicsSystem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="GfxConverters.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderState.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDebugRenderer.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanView.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanPipeline.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferHelpers.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanState.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_buffer.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="UboManager.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorPoolsManager.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorsManager.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_call.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="idkTexture.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMeshFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="system">
+      <UniqueIdentifier>{ae16a2ac-34ab-44fe-88cf-fbbb70a7cb46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="buffer">
+      <UniqueIdentifier>{93364066-fc1f-4a19-8df1-752682cc0020}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render">
+      <UniqueIdentifier>{388fea0d-f4b9-4998-af46-7eb7b5cc96ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="descriptor_sets">
+      <UniqueIdentifier>{6fd09be6-26fb-4c35-91ec-c05d9b99c0c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fwd">
+      <UniqueIdentifier>{855c816b-63e0-4efa-9da1-75521cd0c075}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{5229d71f-e8fc-4257-80e2-cac5241884d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BufferHelpers.inl">
+      <Filter>utils</Filter>
+    </None>
+    <None Include="VulkanState.inl">
+      <Filter>system</Filter>
+    </None>
+    <None Include="UboManager.inl">
+      <Filter>buffer</Filter>
+    </None>
+    <None Include="DescriptorPoolsManager.inl">
+      <Filter>descriptor_sets</Filter>
+    </None>
+  </ItemGroup>
+</Project>

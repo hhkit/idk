@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="idk::span&lt;*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>_end-_begin</Size>
+        <ValuePointer>_begin</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idk::small_string&lt;*&gt;">
+    <DisplayString Condition="((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &amp; idk::small_string&lt;$T1,$T2,$T3&gt;::_use_longer_mask">{{{((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;longer.ptr,na}}}</DisplayString>
+    <DisplayString>{{{((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.buffer,na}}}</DisplayString>
+    <StringView Condition="((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &amp; idk::small_string&lt;$T1,$T2,$T3&gt;::_use_longer_mask">((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;longer.ptr,na</StringView>
+    <StringView>((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.buffer,na</StringView>
+    <Expand>
+      <Item Name="[size]">((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &amp; idk::small_string&lt;$T1,$T2,$T3&gt;::_use_longer_mask ? ((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;longer.size : (idk::small_string&lt;$T1,$T2,$T3&gt;::_sso_buffer_size - (((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &gt;&gt; 1))</Item>
+      <Item Name="[capacity]">((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &amp; idk::small_string&lt;$T1,$T2,$T3&gt;::_use_longer_mask ? ((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;longer.capacity : idk::small_string&lt;$T1,$T2,$T3&gt;::_sso_buffer_size</Item>
+      <Item Name="[allocator]">*($T3*)(((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)+1)</Item>
+      <ArrayItems>
+        <Size>((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &amp; idk::small_string&lt;$T1,$T2,$T3&gt;::_use_longer_mask ? ((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;longer.size : (idk::small_string&lt;$T1,$T2,$T3&gt;::_sso_buffer_size - (((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &gt;&gt; 1))</Size>
+        <ValuePointer>((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.size_diff &amp; idk::small_string&lt;$T1,$T2,$T3&gt;::_use_longer_mask ? ((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;longer.ptr : ((idk::small_string&lt;$T1,$T2,$T3&gt;::_rep*)this)-&gt;sso.buffer</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idk::compressed_pair&lt;*&gt;">
+    <Expand>
+      <Item Name="[first]">*($T1*)this</Item>
+      <Item Name="[second]">*($T2*)(($T1*)this + 1)</Item>
+    </Expand>
+  </Type>
+  
+</AutoVisualizer>

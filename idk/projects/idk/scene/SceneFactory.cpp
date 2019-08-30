@@ -8,12 +8,7 @@ namespace idk
 		return std::make_unique<Scene>();
 	}
 
-	unique_ptr<Scene> SceneFactory::Create(string_view)
-	{
-		return unique_ptr<Scene>();
-	}
-
-	unique_ptr<Scene> SceneFactory::Create(string_view, const ResourceMeta&)
+	unique_ptr<Scene> SceneFactory::Create(FileHandle)
 	{
 		return unique_ptr<Scene>();
 	}

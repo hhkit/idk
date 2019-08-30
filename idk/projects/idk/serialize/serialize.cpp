@@ -5,6 +5,7 @@
 #include <core/GameObject.h>
 #include <scene/Scene.h>
 #include <common/Transform.h>
+#include <res/FileResources.h>
 
 #include <json/json.hpp>
 using json = nlohmann::json;
@@ -47,6 +48,7 @@ namespace idk
 				SERIALIZE_CASE(double);
 				case reflect::typehash<string>(): return json(serialize_text(obj.get<string>()));
 				case reflect::typehash<Guid>(): return json(serialize_text(obj.get<Guid>()));
+				case reflect::typehash<GenericMetadata>(): return json(serialize_text(obj.get<GenericMetadata>()));
 			default: break;
 			}
 #undef SERIALIZE_CASE
@@ -68,60 +70,64 @@ namespace idk
 			else
 				throw "unhandled case?";
 		}
+		else if (obj.type.is_enum_type())
+		{
+			return json(obj.to_enum_value().name());
+		}
 
 		json j;
 		vector<json*> stack{ &j };
 
+		constexpr static auto f = [](auto&& k, auto&& arg, vector<json*>& stack)
+		{
+			using T = std::decay_t<decltype(arg)>;
+
+			if constexpr (std::is_arithmetic_v<T>)
+			{
+				(*stack.back())[k] = arg;
+				return true;
+			}
+			else if constexpr (is_basic_serializable_v<T>)
+			{
+				(*stack.back())[k] = serialize_text(arg);
+				return true;
+			}
+			else if constexpr (is_sequential_container_v<T>)
+			{
+				stack.push_back(&((*stack.back())[k] = json::array()));
+				return true;
+			}
+			else if constexpr (is_associative_container_v<T>)
+			{
+				stack.push_back(&((*stack.back())[k] = json::object()));
+				return true;
+			}
+			else if constexpr (std::is_same_v<T, reflect::dynamic>)
+			{
+				(*stack.back())[k] = serialize_json(arg);
+				return false;
+			}
+			else
+			{
+				stack.push_back(&((*stack.back())[k] = json::object()));
+				return true;
+			}
+		};
+
 		obj.visit([&](auto&& key, auto&& arg, int depth_change)
 		{
 			using K = std::decay_t<decltype(key)>;
-			using T = std::decay_t<decltype(arg)>;
 			while (++depth_change <= 0)
 				stack.pop_back();
 
 			if constexpr (std::is_arithmetic_v<K>)
-			{
-				if constexpr (std::is_arithmetic_v<T>)
-					(*stack.back())[key] = arg;
-				else if constexpr (is_basic_serializable_v<T>)
-					(*stack.back())[key] = serialize_text(arg);
-				else if constexpr (is_sequential_container_v<T>)
-					stack.push_back(&((*stack.back())[key] = json::array()));
-				else if constexpr (is_associative_container_v<T>)
-					stack.push_back(&((*stack.back())[key] = json::object()));
-				else
-					stack.push_back(&((*stack.back())[key] = json::object()));
-			}
+				return f(key, arg, stack);
 			else if constexpr (is_basic_serializable_v<K>)
-			{
-				if constexpr (std::is_arithmetic_v<T>)
-					(*stack.back())[serialize_text(key)] = arg;
-				else if constexpr (is_basic_serializable_v<T>)
-					(*stack.back())[serialize_text(key)] = serialize_text(arg);
-				else if constexpr (is_sequential_container_v<T>)
-					stack.push_back(&((*stack.back())[serialize_text(key)] = json::array()));
-				else if constexpr (is_associative_container_v<T>)
-					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
-				else
-					stack.push_back(&((*stack.back())[serialize_text(key)] = json::object()));
-			}
+				return f(serialize_text(key), arg, stack);
 			else if constexpr (std::is_same_v<K, reflect::type>) // variant element
-			{
-				if constexpr (std::is_arithmetic_v<T>)
-					(*stack.back())[string{ key.name() }] = arg;
-				else if constexpr (is_basic_serializable_v<T>)
-					(*stack.back())[string{ key.name() }] = serialize_text(arg);
-				else if constexpr (is_sequential_container_v<T>)
-					stack.push_back(&((*stack.back())[string{ key.name() }] = json::array()));
-				else if constexpr (is_associative_container_v<T>)
-					stack.push_back(&((*stack.back())[string{ key.name() }] = json::object()));
-				else
-					stack.push_back(&((*stack.back())[string{ key.name() }] = json::object()));
-			}
+				return f(string{ key.name() }, arg, stack);
 			else
-			{
 				throw "wtf is this key??";
-			}
 		});
 
 		return j;
@@ -149,7 +155,6 @@ namespace idk
 
 		return j.dump(2);
 	}
-
 
 
 	template <typename T, typename = void>
@@ -210,7 +215,7 @@ namespace idk
 	{
 		if (obj.type.count() == 0)
 		{
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = j.get<TYPE>();
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = j.get<TYPE>(); return;
 			switch (obj.type.hash())
 			{
 				SERIALIZE_CASE(int);
@@ -221,9 +226,10 @@ namespace idk
 				SERIALIZE_CASE(float);
 				SERIALIZE_CASE(double);
 #undef SERIALIZE_CASE
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : parse_text(j.get<string>(), obj); break;
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : parse_text(j.get<string>(), obj.get<TYPE>()); return;
 				SERIALIZE_CASE(string);
 				SERIALIZE_CASE(Guid);
+				SERIALIZE_CASE(GenericMetadata);
 				default: break;
 			}
 #undef SERIALIZE_CASE

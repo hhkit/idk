@@ -273,6 +273,7 @@ REFLECT_ENUM(idk::testenum, "testenum")
 
 TEST(Reflect, TestReflectEnum)
 {
+
 	EXPECT_TRUE(is_macro_enum<testenum>::value);
 	EXPECT_FALSE(is_macro_enum<vec3>::value);
 
@@ -308,16 +309,20 @@ struct unknowntest : reflect_this
 };
 REFLECT_BEGIN(unknowntest, "unknowntest")
 REFLECT_PARENT(reflect_this)
-REFLECT_VARS(t)
+REFLECT_VARS(t)			    
 REFLECT_END()
 
 TEST(Reflect, TestParentAndUnknownVisit)
 {
 	unknowntest v;
+	int count = 0;
 	reflect::visit(v, [&](auto&& key, auto&& val, int depth_change)
 	{
-		std::cout << "hi";
+		++count;
 	});
+
+	// reflect_this, reflect_this members, vec4 members, testenum, testenum value
+	EXPECT_EQ(count, 1 + reflect::get_type<reflect_this>().count() + 4 + 1 + 1);
 }
 
 struct varianttest
@@ -330,8 +335,17 @@ REFLECT_END()
 TEST(Reflect, TestVisitVariant)
 {
 	varianttest test{ mat4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 } };
+
+	std::vector<reflect::dynamic> visited_keys;
+	std::vector<reflect::dynamic> visited_values;
+
 	reflect::visit(test, [&](auto&& key, auto&& val, int depth_change)
 	{
-		std::cout << "hi";
+		visited_keys.emplace_back(std::forward<decltype(key)>(key));
+		visited_values.emplace_back(val);
 	});
+
+	EXPECT_STREQ(visited_keys[0].get<const char*>(), "uniform");
+	EXPECT_TRUE(visited_keys[1].get<reflect::type>().is<mat4>());
+	EXPECT_EQ(visited_values[1].get<mat4>(), std::get<7>(test.uniform));
 }

@@ -4,6 +4,7 @@
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <gfx/MeshRenderer.h>
+#include <res/ForwardingExtensionLoader.h>
 
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
@@ -26,6 +27,12 @@ namespace idk::ogl
 
 		_opengl = std::make_unique<OpenGLState>();
 		_opengl->Setup();
+
+		_viewport_size = Core::GetSystem<Application>().GetScreenSize();
+		Core::GetSystem<Application>().OnScreenSizeChanged.Listen([this](ivec2 new_size)
+		{
+			_viewport_size = new_size;
+		});
 	}
 
 	void Win32GraphicsSystem::LateInit()
@@ -39,34 +46,27 @@ namespace idk::ogl
 		DestroyContext();
 	}
 
-	void Win32GraphicsSystem::BufferGraphicsState(
-		span<MeshRenderer>    mesh_renderers, 
-		span<const Transform> , 
-		span<const Parent>    )
-	{
-		// todo: scenegraph traversal
-		std::vector<RenderObject> objects;
-		for (auto& elem : mesh_renderers)
-			if (elem.IsActiveAndEnabled())
-				objects.emplace_back(elem.GenerateRenderObject());
-
-		_opengl->SubmitBuffers(std::move(objects), {});
-	}
-
 	GraphicsAPI Win32GraphicsSystem::GetAPI()
 	{
 		return GraphicsAPI::OpenGL;
 	}
 
-	void Win32GraphicsSystem::RenderBuffer()
+	void Win32GraphicsSystem::RenderRenderBuffer()
 	{
-		glViewport(0, 0, 800, 600);
+		glViewport(0, 0, _viewport_size.x, _viewport_size.y);
 		glClearColor(0.f, 0.f, 0.25f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		_opengl->RenderDrawBuffer();
-
+		_opengl->RenderDrawBuffer();	
+	}
+	void Win32GraphicsSystem::SwapBuffer()
+	{
 		::SwapBuffers(_windows_context);
+	}
+	OpenGLState& Win32GraphicsSystem::Instance()
+	{
+		// TODO: insert return statement here
+		return *_opengl;
 	}
 	void Win32GraphicsSystem::CreateContext()
 	{
@@ -153,6 +153,7 @@ namespace idk::ogl
 	{	
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

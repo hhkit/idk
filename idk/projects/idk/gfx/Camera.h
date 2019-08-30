@@ -14,6 +14,10 @@ namespace idk
 		real near_plane = 0.1f;
 		real far_plane  = 100.f;
 
+		int  depth = 0;
+		//TODO add render texture  
+		vec4 clear_color{0,0,0,1};
+		
 		// perspective settings
 		rad  field_of_view = deg{ 90.f };
 

@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
+#include <sstream>
+
 #include <file/FileSystem.h>
 #include <IncludeResources.h>
+#include <serialize/serialize.h>
 #include "ResourceManager.h"
 
 
@@ -37,24 +40,148 @@ namespace idk
 	void ResourceManager::Init()
 	{
 		instance = this;
-		resource_tables_   = detail::ResourceHelper::GenResourceTables();
-		LoadDefaultResources();
+		_resource_tables   = detail::ResourceHelper::GenResourceTables();
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = std::string{ fs.GetExeDir() };
 		fs.Mount(exe_dir + "/assets", "/assets");
+		fs.SetAssetDir(exe_dir + "/assets");
 	}
 
 	void ResourceManager::Shutdown()
 	{
-		for (auto& elem : resource_tables_)
+		for (auto& elem : _resource_tables)
 			elem.reset();
 
-		for (auto& elem : default_resources_)
+		for (auto& elem : _default_resources)
 			elem.reset();
 	}
-	void ResourceManager::LoadDefaultResources()
+
+	void ResourceManager::WatchDirectory()
 	{
-		//default_resources_ = detail::ResourceHelper::GenDefaults();
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
+			LoadFile(elem);
+
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+			ReloadFile(elem);
+	}
+	
+	FileResources ResourceManager::LoadFile(FileHandle file)
+	{
+		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
+		if (find_file != _loaded_files.end())
+			return find_file->second;
+
+		auto path_to_meta = string{ file.GetMountPath() } + ".meta";
+
+		auto& fs = Core::GetSystem<FileSystem>();
+		fs.Exists(path_to_meta);
+		auto meta_file = fs.GetFile(path_to_meta);
+
+		if (!file)
+			return FileResources{};
+
+		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
+		if (loader_itr == _extension_loaders.end())
+			return FileResources{};
+
+		auto resources = [&]()
+		{
+			if (meta_file)
+			{
+				std::stringstream s; 
+				s << meta_file.Open(FS_PERMISSIONS::READ).rdbuf();
+
+				auto metalist = parse_text<MetaFile>(s.str());
+				return loader_itr->second->Create(file, span<GenericMetadata>{metalist.resource_metas});
+			}
+			else
+				return loader_itr->second->Create(file);
+		}();
+
+		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
+		return resources;
+	}
+
+	FileResources ResourceManager::ReloadFile(FileHandle file)
+	{
+		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
+		if (find_file == _loaded_files.end())
+			return FileResources();
+
+		// save old meta
+		auto ser = save_meta(find_file->second);
+
+		// unload resources
+		UnloadFile(file);
+
+		// get loader
+		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
+		if (loader_itr == _extension_loaders.end())
+			return FileResources{};
+
+		// reload resources
+		auto stored = loader_itr->second->Create(file, span<GenericMetadata>{ser.resource_metas});
+		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
+	}
+
+	size_t ResourceManager::UnloadFile(FileHandle path_to_file)
+	{
+		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
+		if (find_file == _loaded_files.end())
+			return 0;
+
+		for (auto& elem : find_file->second.resources)
+		{
+			std::visit([this](auto handle) {
+				Free(handle);
+			}, elem._handle);
+		}
+
+		auto retval = find_file->second.resources.size();
+		_loaded_files.erase(find_file);
+		return retval;
+	}
+
+	FileResources ResourceManager::GetFileResources(FileHandle path_to_file)
+	{
+		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
+		if (find_file != _loaded_files.end())
+			return find_file->second;
+		else
+			return FileResources();
+	}
+
+	void ResourceManager::SaveDirtyMetadata()
+	{
+		auto& fs = Core::GetSystem<FileSystem>();
+		for (auto& [filepath, resources] : _loaded_files)
+		{
+			bool dirty = false;
+			for (auto& elem : resources.resources)
+				elem.visit([&dirty](auto& elem) {
+				dirty |= elem->_dirty;
+				if constexpr (has_tag_v<decltype(elem), MetaTag>)
+					dirty |= elem->_dirtymeta;
+			});
+
+			if (dirty)
+			{
+				auto saveus = save_meta(resources);
+
+				auto meta_file = fs.Open(filepath + ".meta", FS_PERMISSIONS::WRITE, false);
+
+				meta_file << serialize_text(saveus);
+
+				// mark as clean
+				for (auto& elem : resources.resources)
+					elem.visit([&dirty](auto& elem) {
+					elem->_dirty = false;
+					if constexpr (has_tag_v<decltype(elem), MetaTag>)
+						elem->_dirtymeta = false;
+				});
+			}
+
+		}
 	}
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 
 namespace idk
 {
@@ -8,9 +9,9 @@ namespace idk
 	{}
 
 	template<typename T>
-	template<typename Container>
+	template<typename Container, typename>
 	constexpr span<T>::span(Container& c) noexcept
-		: _begin{ c.begin() }, _end{ c.end() }
+		: _begin{ std::data(c) }, _end{ std::data(c) + std::size(c) }
 	{
 	}
 

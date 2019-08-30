@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <core/ISystem.h>
 #include <app/Keys.h>
+#include <event/Signal.h>
 
 namespace idk
 {
@@ -9,6 +10,11 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		Signal<ivec2> OnScreenSizeChanged;
+	//	Signal<>      OnMinimize;
+	//	Signal<>      OnRestore;
+	//	Signal<>      OnFullscreen;
+	//	Signal<>      OnWindowed;
 		// app
 		virtual void PollEvents() = 0;
 
@@ -21,8 +27,9 @@ namespace idk
 		virtual char GetChar() = 0;
 
 		// windows
-		virtual bool SetFullscreen(bool enable_fullscreen) = 0;
-		virtual bool SetScreenSize(ivec2 target_size) = 0;
-		virtual void SwapBuffers() = 0;
+		virtual bool  SetFullscreen(bool enable_fullscreen) = 0;
+		virtual bool  SetScreenSize(ivec2 target_size) = 0;
+		virtual ivec2 GetScreenSize() = 0 ;
+		virtual void  SwapBuffers() = 0;
 	};
 }
