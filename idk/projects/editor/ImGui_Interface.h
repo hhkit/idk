@@ -6,7 +6,7 @@ namespace idk {
 		class I_Interface {
 		public:
 			I_Interface()=default;
-			~I_Interface() = default;
+			virtual ~I_Interface() = default;
 
 			virtual void Init() = 0;
 			virtual void Shutdown() = 0;
