@@ -66,9 +66,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//go->GetComponent<Transform>()->scale /= 100.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
-	//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+	Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 	mesh_rend->material_instance.material = 
-		Core::GetResourceManager().LoadFile(Core::GetSystem<FileSystem>().GetFile("/assets/shader/flat_color.frag")).resources[0].As<Material>();
+		Core::GetResourceManager().LoadFile(FileHandle("/assets/shader/flat_color.frag")).resources[0].As<Material>();
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

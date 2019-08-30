@@ -45,7 +45,7 @@ namespace idk
 		template<typename Resource> RscHandle<Resource> Create(FileHandle path, Guid guid);
 		template<typename Resource, 
 			typename = sfinae<has_tag_v<Resource, MetaTag>>
-		> RscHandle<Resource> Create(FileHandle path, Guid guid, const typename Resource::Meta& meta);
+		> RscHandle<Resource> Create(FileHandle path, Guid guid, const typename Resource::Metadata& meta);
 
 		// file operations
 		FileResources LoadFile(FileHandle path_to_file);

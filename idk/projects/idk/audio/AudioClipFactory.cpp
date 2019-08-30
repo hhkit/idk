@@ -20,7 +20,7 @@
 
 
 namespace idk {
-	unique_ptr<AudioClip> idk::AudioClipFactory::Create()
+	unique_ptr<AudioClip> AudioClipFactory::Create()
 	{
 		return unique_ptr<AudioClip>();
 	}
@@ -47,7 +47,7 @@ namespace idk {
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getName(name, 512));
 		newSound->soundInfo.name = name;
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
-		
+		newSound->_dirtymeta = true;
 		//Push to list for management.
 		//SoundList.push_back(newSound);
 		
