@@ -161,6 +161,7 @@
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
+    <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabFactory.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />

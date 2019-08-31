@@ -92,6 +92,9 @@
     <Filter Include="reflect\detail">
       <UniqueIdentifier>{53f59ace-a5cc-4e27-8aea-bb3b8f0abbd7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="prefab">
+      <UniqueIdentifier>{ee5f83d5-e8dd-4fa8-b5a9-e37be0d0bf14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -449,8 +452,12 @@
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="serialize\yaml.h" />
-    <ClInclude Include="prefab\Prefab.h" />
-    <ClInclude Include="prefab\PrefabFactory.h" />
+    <ClInclude Include="prefab\PrefabFactory.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\Prefab.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -589,7 +596,12 @@
     <ClCompile Include="gfx\GraphicsSystem.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="prefab\PrefabFactory.cpp" />
+    <ClCompile Include="prefab\Prefab.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabFactory.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

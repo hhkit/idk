@@ -4,3 +4,4 @@
 #include <gfx/Mesh.h>
 #include <gfx/Material.h>
 #include <test/TestResource.h>
+#include <prefab/Prefab.h>
