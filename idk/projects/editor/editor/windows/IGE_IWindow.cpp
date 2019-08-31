@@ -156,6 +156,7 @@ namespace idk {
 		window_position = ImGui::GetWindowPos();
 		window_size = ImGui::GetWindowSize();
 		itemCounter = 0;
+
 		ImGui::End();
 	}
 
