@@ -4,6 +4,7 @@
 #include <core/Handle.h>
 #include <res/Guid.h>
 #include <res/FileResources.h>
+#include <prefab/PrefabData.h>
 
 namespace idk
 {
@@ -44,5 +45,9 @@ namespace idk::reflect
 		, variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> // UniformInstance
 		, vector<string>
 		, hash_table<Guid, string>
+        , vector<reflect::dynamic>
+
+        , PrefabData
+        , vector<PrefabData>
 	>;
 }

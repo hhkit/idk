@@ -1,15 +1,10 @@
 #pragma once
 
 #include <res/Resource.h>
+#include <prefab/PrefabData.h>
 
 namespace idk
 {
-    struct PrefabData
-    {
-        vector<reflect::dynamic> components;
-        vector<PrefabData> children;
-    };
-
 	class Prefab : public Resource<Prefab>
 	{
     public:
