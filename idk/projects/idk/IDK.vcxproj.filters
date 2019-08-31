@@ -458,13 +458,15 @@
     <ClInclude Include="prefab\Prefab.h">
       <Filter>prefab</Filter>
     </ClInclude>
-    <ClInclude Include="prefab\PrefabInstance.h">
-      <Filter>prefab</Filter>
-    </ClInclude>
     <ClInclude Include="prefab\PropertyOverride.h">
       <Filter>prefab</Filter>
     </ClInclude>
-    <ClInclude Include="prefab\PrefabData.h" />
+    <ClInclude Include="prefab\PrefabData.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabInstance.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

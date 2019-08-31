@@ -116,3 +116,7 @@ REFLECT_END()
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
+REFLECT_VARS(prefab, overrides)
+REFLECT_END()

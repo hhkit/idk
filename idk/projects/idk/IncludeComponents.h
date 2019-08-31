@@ -12,4 +12,6 @@
 #include <audio/AudioSource.h>
 #include <audio/AudioListener.h>
 
+#include <prefab/PrefabInstance.h>
+
 #include <test/TestComponent.h>

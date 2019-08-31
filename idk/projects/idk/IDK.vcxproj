@@ -60,9 +60,9 @@
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="prefab\PrefabData.h" />
-    <ClInclude Include="prefab\PrefabInstance.h" />
     <ClInclude Include="prefab\Prefab.h" />
     <ClInclude Include="prefab\PrefabFactory.h" />
+    <ClInclude Include="prefab\PrefabInstance.h" />
     <ClInclude Include="prefab\PropertyOverride.h" />
     <ClInclude Include="reflect\detail\meta_manager.h" />
     <ClInclude Include="reflect\detail\table_storage.h" />
