@@ -63,6 +63,7 @@
     <ClInclude Include="prefab\Prefab.h" />
     <ClInclude Include="prefab\PrefabFactory.h" />
     <ClInclude Include="prefab\PrefabInstance.h" />
+    <ClInclude Include="prefab\PrefabUtility.h" />
     <ClInclude Include="prefab\PropertyOverride.h" />
     <ClInclude Include="reflect\detail\meta_manager.h" />
     <ClInclude Include="reflect\detail\table_storage.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="math\random.cpp" />
     <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabFactory.cpp" />
+    <ClCompile Include="prefab\PrefabUtility.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="res\FileResources.cpp" />

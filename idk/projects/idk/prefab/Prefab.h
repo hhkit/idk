@@ -7,15 +7,15 @@ namespace idk
 {
 	class Prefab : public Resource<Prefab>
 	{
-    public:
-        static void Save(Handle<GameObject> go, FileHandle save_path);
-
 	public:
+        // instantiate this prefab in the scene.
+        // for simplicity's sake only prefab roots have PrefabInstance component attached.
         Handle<GameObject> Instantiate(Scene& scene) const;
 
 	private:
         PrefabData _data;
 
         friend class PrefabFactory;
+        friend class PrefabUtility;
 	};
 }

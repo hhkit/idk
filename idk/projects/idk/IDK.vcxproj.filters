@@ -450,7 +450,6 @@
       <Filter>reflect\detail</Filter>
     </ClInclude>
     <ClInclude Include="anim\Skeleton.h" />
-    <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="prefab\PrefabFactory.h">
       <Filter>prefab</Filter>
@@ -466,6 +465,12 @@
     </ClInclude>
     <ClInclude Include="prefab\PrefabInstance.h">
       <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabUtility.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\circular_buffer.h">
+      <Filter>ds</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -609,6 +614,9 @@
       <Filter>prefab</Filter>
     </ClCompile>
     <ClCompile Include="prefab\PrefabFactory.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabUtility.cpp">
       <Filter>prefab</Filter>
     </ClCompile>
   </ItemGroup>
@@ -760,7 +768,9 @@
     <None Include="reflect\detail\visit_detail.inl">
       <Filter>reflect\detail</Filter>
     </None>
-    <None Include="ds\circular_buffer.inl" />
+    <None Include="ds\circular_buffer.inl">
+      <Filter>ds</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
