@@ -22,6 +22,10 @@ namespace idk
 			j["?"] = obj.type.name();
 			return j;
 		}
+        else if (j.is_null())
+        {
+            return j;
+        }
 		else
 		{
 			json ret = json::object();
