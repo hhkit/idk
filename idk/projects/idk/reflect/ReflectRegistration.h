@@ -70,7 +70,7 @@ REFLECT_END()
  *========================================================================*/
 
 REFLECT_BEGIN(idk::MetaFile, "MetaFile")
-REFLECT_VAR(resource_metas)
+REFLECT_VARS(guids, resource_metas)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")

@@ -16,24 +16,27 @@ namespace idk
 	}
 
 	template<typename T>
-	inline FileResources ForwardingExtensionLoader<T>::Create(FileHandle path_to_resource, span<GenericMetadata> metadatas)
+	inline FileResources ForwardingExtensionLoader<T>::Create(FileHandle path_to_resource, const MetaFile& metadatas)
 	{
-		assert(metadatas.size() == 1);
+		if (metadatas.guids.empty())
+			return Create(path_to_resource);
+
 		FileResources retval;
-		if (metadatas.size())
+		if (metadatas.guids.size())
 		{
 			if constexpr (has_tag_v<T, MetaTag>)
 			{
-				auto meta = metadatas[0].GetMeta<T>();
-				if (meta)
+				using Metadata = typename std::decay_t<T>::Metadata;
+				auto& meta = metadatas.resource_metas[0];
+				if (meta.is<Metadata>())
 				{
-					retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas[0].guid, *meta));
+					retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas.guids[0], meta.get<Metadata>()));
 					return retval;
 				}
 			}
-			retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas[0].guid));
+			retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas.guids[0]));
 			return retval;
-			}
+		}
 
 		return retval;
 	}

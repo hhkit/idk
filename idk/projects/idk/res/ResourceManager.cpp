@@ -93,7 +93,7 @@ namespace idk
 				s << meta_file.Open(FS_PERMISSIONS::READ).rdbuf();
 
 				auto metalist = parse_text<MetaFile>(s.str());
-				return loader_itr->second->Create(file, span<GenericMetadata>{metalist.resource_metas});
+				return loader_itr->second->Create(file, metalist);
 			}
 			else
 				return loader_itr->second->Create(file);
@@ -121,7 +121,7 @@ namespace idk
 			return FileResources{};
 
 		// reload resources
-		auto stored = loader_itr->second->Create(file, span<GenericMetadata>{ser.resource_metas});
+		auto stored = loader_itr->second->Create(file, ser);
 		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
 	}
 

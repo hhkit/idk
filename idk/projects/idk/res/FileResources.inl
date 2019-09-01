@@ -1,4 +1,5 @@
 #include "FileResources.h"
+#include <reflect/reflect.h>
 #pragma once
 
 namespace idk
@@ -21,6 +22,7 @@ namespace idk
 	{
 		return std::visit(func, _handle);
 	}
+
 	template<typename Func>
 	inline auto GenericRscHandle::visit(Func&& func) const
 	{
