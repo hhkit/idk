@@ -1,0 +1,25 @@
+#version 460
+
+in VS_OUT
+{
+  vec3 position;
+  vec2 uv;
+  vec3 normal;
+  vec3 tangent;
+} fs_in;
+
+//__MATERIAL_UNIFORMS;
+
+// forward shading only cares about color!
+out vec4 out_color;
+
+void main()
+{
+	// declare initial values here
+	vec4 color = vec4(1.0);
+
+	//__MATERIAL_CODE__;
+
+	// then compute color here 
+	out_color = color;
+}

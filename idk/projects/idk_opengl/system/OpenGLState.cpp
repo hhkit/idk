@@ -22,7 +22,8 @@ namespace idk::ogl
 	void OpenGLState::GenResources()
 	{
 		// generate mesh renderer
-		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(), Core::GetResourceManager().Create<ShaderProgram>("/assets/shader/mesh.vert")} );
+		auto load_mesh = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert");
+		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(), load_mesh.resources[0].As<ShaderProgram>() } );
 	}
 
 

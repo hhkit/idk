@@ -21,12 +21,15 @@ uniform mat4 normal_transform;
 out VS_OUT
 {
   vec3 position;
+  vec2 uv;
   vec3 normal;
+  vec3 tangent;
 } vs_out;
 
 void main()
 {
 	vs_out.position = vec3(object_transform * vec4(position, 1.0));
 	vs_out.normal   = vec3(normal_transform * vec4(normal, 1.0));
+	vs_out.uv       = vec2();
     gl_Position     = vec4(vs_out.position, 1.0);
 }

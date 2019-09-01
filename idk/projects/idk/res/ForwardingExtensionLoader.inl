@@ -27,11 +27,14 @@ namespace idk
 			if constexpr (has_tag_v<T, MetaTag>)
 			{
 				using Metadata = typename std::decay_t<T>::Metadata;
-				auto& meta = metadatas.resource_metas[0];
-				if (meta.is<Metadata>())
+				if (metadatas.resource_metas.size())
 				{
-					retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas.guids[0], meta.get<Metadata>()));
-					return retval;
+					auto& meta = metadatas.resource_metas[0];
+					if (meta.valid() && meta.is<Metadata>())
+					{
+						retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas.guids[0], meta.get<Metadata>()));
+						return retval;
+					}
 				}
 			}
 			retval.resources.emplace_back(Core::GetResourceManager().Create<T>(path_to_resource, metadatas.guids[0]));
