@@ -65,7 +65,9 @@ namespace idk
 
 	static json serialize_json(const reflect::dynamic& obj)
 	{
-        if (obj.type.is_enum_type())
+        if (!obj.valid())
+            return json();
+        else if (obj.type.is_enum_type())
             return json(obj.to_enum_value().name());
 		else if (obj.type.count() == 0)
 		{
@@ -240,6 +242,8 @@ namespace idk
 	{
 		const json* _json_ptr = &_json;
 
+        if (_json_ptr->is_null())
+            return;
 		if (!obj.valid())
 		{
 			auto iter = _json.find("?");
