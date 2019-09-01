@@ -28,6 +28,8 @@ TEST(Serialize, TestYaml)
     EXPECT_EQ(node["test"]["b"].as_scalar(), "y");
 
     yaml::node node2 = yaml::parse("- test: a:\n- x: b");
+    EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
+    EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
 }
 
 TEST(Serialize, TestSerializeBasic)

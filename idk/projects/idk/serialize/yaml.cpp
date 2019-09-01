@@ -37,6 +37,25 @@ namespace idk::yaml
         }
         return indent;
     }
+    static int handle_indent(string_view::iterator& p, string_view::iterator end, bool& hit_lf)
+    {
+        int indent = 0;
+        hit_lf = false;
+        while (p != end)
+        {
+            if (*p == ' ')
+                ++indent;
+            else if (*p == '\n' || (p[0] == '\r' && p[1] == '\n'))
+            {
+                indent = 0;
+                hit_lf = true;
+            }
+            else if (printable(*p))
+                break;
+            ++p;
+        }
+        return indent;
+    }
     static void strip_trailing_ws(string& str)
     {
         while (str.size() && isspace(str.back()))
@@ -56,7 +75,7 @@ namespace idk::yaml
         auto end = str.end();
 
         {
-            int indent = handle_indent(p, end) == 0;
+            int indent = handle_indent(p, end);
             block_indents.push_back(indent);
         }
 
@@ -72,23 +91,42 @@ namespace idk::yaml
                     {
                         curr_mode = block_seq;
                         stack.push_back(&stack.back()->emplace_back());
+                        bool hit_lf;
+                        int indent = handle_indent(++p, end, hit_lf);
+                        if (hit_lf)
+                        {
+                            if (indent > block_indents.back())
+                                block_indents.push_back(indent);
+                            else if (indent < block_indents.back())
+                            {
+                                block_indents.pop_back();
+                                stack.pop_back();
+                            }
+                            else // same indentation, must be another list item
+                            {
+                                if(*p != '-')
+                                    stack.pop_back();
+                            }
+                        }
+                        else // add indentation for list, ie - x is 2 indentation (for hyphen and space)
+                        { 
+                            block_indents.push_back(indent + 1 + block_indents.back());
+                        }
                     }
                     else if (c == ':')
                     {
                         curr_mode = block_map;
                         stack.push_back(&(*stack.back())[curr_str]);
+                        curr_str.clear();
+                        skipws_until_lf(++p, end);
+                        new_block = false;
                     }
-                    curr_str.clear();
-                    skipws_until_lf(++p, end);
-                    new_block = false;
                     continue;
                 }
                 
                 if (!new_block || printable(p[1]))
                 {
                     curr_str += c;
-                    curr_str += p[1];
-                    ++p;
                 }
             }
 
@@ -98,10 +136,16 @@ namespace idk::yaml
 
                 int indent = handle_indent(p, end);
                 if (p == end)
-                {
                     break;
+
+                if (curr_str.size())
+                {
+                    *stack.back() = node{ curr_str };
+                    stack.pop_back();
+                    curr_str.clear();
                 }
-                else if (curr_mode == block_map || curr_mode == block_seq)
+
+                if (curr_mode == block_map || curr_mode == block_seq)
                 {
                     if (indent > block_indents.back())
                     {
@@ -109,19 +153,26 @@ namespace idk::yaml
                     }
                     else if (indent < block_indents.back())
                     {
-                        if (curr_str.size())
-                            *stack.back() = node{ curr_str };
-                        stack.pop_back();
                         block_indents.pop_back();
-                    }
-                    else
-                    {
-                        if (curr_str.size())
-                            *stack.back() = node{ curr_str };
                         stack.pop_back();
+
+                        // keep going until match an old indent
+                        while (block_indents.size())
+                        {
+                            if (indent > block_indents.back())
+                            {
+                                throw "sibling indent mismatch?";
+                            }
+                            else if (indent < block_indents.back())
+                            {
+                                stack.pop_back();
+                                block_indents.pop_back();
+                            }
+                            else
+                                break;
+                        }
                     }
 
-                    curr_str.clear();
                     new_block = true;
                     continue;
                 }
