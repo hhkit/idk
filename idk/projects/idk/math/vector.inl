@@ -69,6 +69,12 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
+	tvec<T, D> tvec<T, D>::project_onto(const tvec& rhs)const
+	{
+		return (dot(rhs) * rhs)/ rhs.length_sq();
+	}
+
+	template<typename T, unsigned D>
 	tvec<T, D>& tvec<T, D>::normalize()
 	{
 		auto mag = length();

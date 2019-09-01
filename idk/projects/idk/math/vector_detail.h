@@ -162,5 +162,18 @@ namespace idk
 			auto arg_tup = VectorsToTuple(vecs...);
 			return TupleToVector<T>(arg_tup, std::make_index_sequence <std::tuple_size_v<decltype(arg_tup)>>{});
 		}
+
+
+		template<typename T>
+		struct Abs {};
+		template<unsigned...indices>
+		struct Abs<std::index_sequence<indices...>>
+		{
+			template<typename T>
+			static auto abs(const T& lhs)
+			{
+				return T{ std::abs(lhs[indices])... };
+			}
+		};
 	}
 }
