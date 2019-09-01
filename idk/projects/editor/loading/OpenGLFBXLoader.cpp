@@ -97,7 +97,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource, span<GenericMetadata> path_to_meta)
+	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource,const MetaFile& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);
