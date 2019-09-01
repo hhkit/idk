@@ -478,6 +478,7 @@
     <ClInclude Include="gfx\RenderTarget.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

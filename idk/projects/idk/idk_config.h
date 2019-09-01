@@ -58,13 +58,14 @@ namespace idk
 		class Scene
 		,	class TestResource
 		,   class AudioClip
-		//,	class Texture
 		//,	class Font
-		//, class Skeleton
-		//,   class ShaderModel
 		,	class Mesh
 		,   class Material
+		,	class Texture
+		,	class ShaderProgram
+		,	class RenderTarget
 		//,	class Animation
+		//, class Skeleton
 		//,	class Level
 	>;
 

@@ -59,7 +59,7 @@ namespace idk::fbx_loader_detail
 				unsigned vert_id = base_vertex + ai_mesh->mBones[i]->mWeights[j].mVertexId;
 				float weight = ai_mesh->mBones[i]->mWeights[j].mWeight;
 				auto& curr_vert = vertices[vert_id];
-				curr_vert.addBoneData(curr_bone_index, weight);
+				curr_vert.addBoneData(s_cast<int>(curr_bone_index), weight);
 			}
 		}
 	}

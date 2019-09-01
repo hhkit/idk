@@ -6,26 +6,25 @@
 
 namespace idk
 {
-	ENUM(TextureType, char,
-		_2D,
-		Cube
-	);
-
 	ENUM(ColorFormat, char,
-		RGB8,
-		RGBA8)
+		sRGB_8,
+		sRGBA_8,
+		RGBF_16,
+		RGBF_32,
+		RGBAF_16,
+		RGBAF_32
+	)
 
 	ENUM(UVMode, char,
 		Repeat,
-		MirroredRepeat,
+		MirrorRepeat,
 		Clamp
 	);
 
 	struct TextureMeta
 	{
-		TextureType type          = TextureType::_2D;
-		ColorFormat color_format  = ColorFormat::RGB8;
-		UVMode      uv_mode       = UVMode::Repeat;
+		ColorFormat internal_format  = ColorFormat::RGBF_32;
+		UVMode      uv_mode          = UVMode::Repeat;
 	};
 
 	class Texture
@@ -43,9 +42,10 @@ namespace idk
 		// modifiers
 		void Size(ivec2 newsize);
 
-		// imgui identifier
+		// identifier for ImGUIImage
 		virtual void* ID() const = 0;
 	protected:
 		ivec2 _size {};
+		void OnMetaUpdate(const TextureMeta&) = 0;
 	};
 }

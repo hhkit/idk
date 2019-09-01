@@ -20,7 +20,7 @@ namespace idk::ogl
 		struct RendererInfo
 		{
 			size_t  typehash {};
-			Program vertex_shader;
+			RscHandle<ShaderProgram> vertex_shader;
 		};
 		Win32GraphicsSystem* sys{};
 		// variables

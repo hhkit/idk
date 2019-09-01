@@ -8,11 +8,8 @@ namespace idk::ogl
 		: public Material
 	{
 	public:
-		void Set(string_view fragment_code);
-		void Set(const ShaderGraph&) {};
-
-		const Program& GetShaderProgram() const;
+		RscHandle<ShaderProgram> GetShaderProgram() const;
 	private:
-		Program program;
+		RscHandle<ShaderProgram> program;
 	};
 }

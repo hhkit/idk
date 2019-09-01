@@ -112,6 +112,7 @@
     <Lib>
       <AdditionalDependencies>opengl32.lib;win32.lib;core.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -148,6 +149,7 @@
     <Lib>
       <AdditionalDependencies>opengl32.lib;win32D.lib;coreD.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -171,7 +173,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="program\ShaderProgramFactory.h" />
     <ClInclude Include="resource\OpenGLMaterialFactory.h" />
+    <ClInclude Include="resource\OpenGLTexture.h" />
     <ClInclude Include="system\OpenGLState.h" />
     <ClInclude Include="resource\OpenGLBuffer.h" />
     <ClInclude Include="system\OpenGLGraphicsSystem.h" />
@@ -192,8 +196,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="program\ShaderProgramFactory.cpp" />
     <ClCompile Include="resource\OpenGLBuffer.cpp" />
     <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
+    <ClCompile Include="resource\OpenGLTexture.cpp" />
     <ClCompile Include="system\OpenGLGraphicsSystem.cpp" />
     <ClCompile Include="resource\OpenGLMaterial.cpp" />
     <ClCompile Include="resource\OpenGLMesh.cpp" />
@@ -210,6 +216,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="program\PipelineProgram.inl" />
+    <None Include="program\Program.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

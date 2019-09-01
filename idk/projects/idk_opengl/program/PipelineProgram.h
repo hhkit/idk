@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include <gfx/ShaderProgram.h>
 
 namespace idk::ogl
 {
@@ -11,7 +12,7 @@ namespace idk::ogl
 		PipelineProgram();
 		~PipelineProgram();
 
-		void PushProgram(const Program&);
+		void PushProgram(RscHandle<ShaderProgram>);
 		void PopProgram(GLenum shader_flags);
 		void PopAllPrograms();
 
@@ -23,7 +24,7 @@ namespace idk::ogl
 		PipelineProgram& operator=(PipelineProgram&&) noexcept;
 	private:
 		GLuint _pipeline;
-		vector<const Program*> _programs;
+		vector<RscHandle<ShaderProgram>> _programs;
 	};
 }
 #include "PipelineProgram.inl"

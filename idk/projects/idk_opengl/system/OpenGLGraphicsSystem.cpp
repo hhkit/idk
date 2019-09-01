@@ -8,6 +8,7 @@
 
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
+#include <idk_opengl/program/ShaderProgramFactory.h>
 #include <idk_opengl/system/OpenGLState.h>
 
 #include "OpenGLGraphicsSystem.h"
@@ -146,14 +147,19 @@ namespace idk::ogl
 		}
 		else
 			throw;
-		std::cout << (char*)glGetString(GL_VERSION);
+		std::cout << (char*) glGetString(GL_VERSION) << "\n";
 	}
 
 	void Win32GraphicsSystem::InitResourceLoader()
 	{	
+		// register factories
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
+		Core::GetResourceManager().RegisterFactory<ShaderProgramFactory>();
+
+		// register extensions
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vert");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".frag");
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

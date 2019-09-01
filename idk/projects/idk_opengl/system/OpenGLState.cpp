@@ -22,19 +22,7 @@ namespace idk::ogl
 	void OpenGLState::GenResources()
 	{
 		// generate mesh renderer
-		auto vtx_shader = Core::GetSystem<FileSystem>().Open("/assets/shader/mesh.vert", FS_PERMISSIONS::READ, false);
-		std::stringstream stringify;
-		stringify << vtx_shader.rdbuf();
-
-		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(),
-			std::move(
-				Program{}
-					.Attach(Shader{GL_VERTEX_SHADER,
-						stringify.str()
-						})
-					.Link()
-			) }
-		);
+		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(), Core::GetResourceManager().Create<ShaderProgram>("/assets/shader/mesh.vert")} );
 	}
 
 
