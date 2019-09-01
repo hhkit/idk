@@ -65,16 +65,18 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		auto& curr_signal = instance_->View().CurrPresentationSignals();
 		//instance_->DrawFrame();
-		instance_->AcquireFrame();
+		instance_->AcquireFrame(*curr_signal.image_available);
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 
 		auto& curr_frame = _frame_renderers[instance_->View().Swapchain().curr_index];
 		curr_frame.RenderGraphicsStates(curr_buffer.states);
-		instance_->PresentFrame();
+		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
+		instance_->PresentFrame(*instance_->View().CurrPresentationSignals().render_finished);
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()
 	{

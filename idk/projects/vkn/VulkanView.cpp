@@ -64,6 +64,7 @@ namespace idk::vkn
 			return impl_->CurrentRenderState();
 		}
 
+		vk::UniqueRenderPass& VulkanView::ContinuedRenderpass()const { return vulkan().m_crenderpass; }
 		vk::UniqueRenderPass& VulkanView::Renderpass()const { return vulkan().m_renderpass; }
 		vk::UniquePipeline& VulkanView::Pipeline()const { return vulkan().m_pipeline; }
 		vk::UniqueCommandPool& VulkanView::Commandpool()const { return vulkan().m_commandpool; }

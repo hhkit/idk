@@ -14,6 +14,9 @@ namespace idk::vkn
 	{
 		vk::CommandBuffer cmd_buffer;
 		UboManager ubo_manager;//Should belong to each thread group.
+
+		PresentationSignals signal;
+
 		bool has_commands = false;
 		void FlagRendered() { has_commands = true; }
 		void Reset();
@@ -33,6 +36,7 @@ namespace idk::vkn
 
 
 		void RenderGraphicsStates(const vector<GraphicsState>& state);
+		PresentationSignals& GetMainSignal();
 	private:
 		class IRenderThread
 		{

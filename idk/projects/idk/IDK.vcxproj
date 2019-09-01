@@ -60,6 +60,7 @@
     <ClInclude Include="meta\tag.h" />
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
+    <ClInclude Include="phys\collision.h" />
     <ClInclude Include="phys\RigidBody.h" />
     <ClInclude Include="prefab\PrefabData.h" />
     <ClInclude Include="prefab\Prefab.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="gfx\Texture.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
+    <ClCompile Include="phys\collision.cpp" />
     <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabFactory.cpp" />
     <ClCompile Include="prefab\PrefabUtility.cpp" />

@@ -878,6 +878,18 @@ namespace idk::vkn
 			,vk::ImageLayout::eUndefined
 			,vk::ImageLayout::ePresentSrcKHR
 		};
+		vk::AttachmentDescription colorAttachment2
+		{
+			vk::AttachmentDescriptionFlags{}
+			,m_swapchain.surface_format.format
+			,vk::SampleCountFlagBits::e1
+			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentStoreOp::eStore
+			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentStoreOp::eDontCare
+			,vk::ImageLayout::eUndefined
+			,vk::ImageLayout::ePresentSrcKHR
+		};
 
 		vk::AttachmentReference colorAttachmentRef
 		{
@@ -911,11 +923,13 @@ namespace idk::vkn
 		};
 
 		m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
+		renderPassInfo.pAttachments = &colorAttachment2;
+		m_crenderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 
 		//Temporary For RenderState
 		auto& rss = view_->RenderStates();
 		for (auto& rs : rss)
-			rs.RenderPass() = *m_renderpass;
+			rs.RenderPass() = *m_crenderpass;
 	}
 
 	void VulkanState::createDescriptorSetLayout()
@@ -1707,15 +1721,11 @@ namespace idk::vkn
 
 	void VulkanState::createSemaphores()
 	{
-		vk::SemaphoreCreateInfo info{};
-		vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
 		m_pres_signals.resize(max_frames_in_flight);
 
 		for (auto& signal : m_pres_signals)
 		{
-			signal.image_available = m_device->createSemaphoreUnique(info, nullptr, dispatcher);
-			signal.render_finished = m_device->createSemaphoreUnique(info, nullptr, dispatcher);
-			signal.inflight_fence = m_device->createFenceUnique(fenceInfo, nullptr, dispatcher);
+			signal.Init(View());
 		}
 	}
 
@@ -2177,12 +2187,12 @@ namespace idk::vkn
 
 	}
 
-	void VulkanState::AcquireFrame()
+	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
 		auto& current_signal = m_pres_signals[current_frame];
 		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
 
-		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), *current_signal.image_available, {}, dispatcher);
+		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), signal, {}, dispatcher);
 		rv = res.value;
 		rvRes = res.result;
 		if (res.result != vk::Result::eSuccess)
@@ -2198,13 +2208,13 @@ namespace idk::vkn
 		m_swapchain.curr_index = res.value;
 	}
 
-	void VulkanState::DrawFrame()
+	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal)
 	{
-		AcquireFrame();
+		//AcquireFrame();
 		auto& current_signal = m_pres_signals[current_frame];
 
-		waitSemaphores =  *current_signal.image_available;
-		readySemaphores =  *current_signal.render_finished;
+		waitSemaphores = wait;//*current_signal.image_available;
+		readySemaphores = signal;//*current_signal.render_finished;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
 		updateUniformBuffer(imageIndex);
@@ -2245,7 +2255,7 @@ namespace idk::vkn
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
 
 
-			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
+			//command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 			updateUniformBuffer(imageIndex);
 			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 
@@ -2275,20 +2285,20 @@ namespace idk::vkn
 		}
 		
 		//m_present_queue.waitIdle(dispatcher);
-		PresentFrame();
+		//PresentFrame();
 	}
 
-	void VulkanState::PresentFrame()
+	void VulkanState::PresentFrame(vk::Semaphore wait)
 	{
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 
 		auto& current_signal = m_pres_signals[current_frame];
 
-		waitSemaphores = *current_signal.image_available;
-		readySemaphores = *current_signal.render_finished;
+		//waitSemaphores = *current_signal.image_available;
+		//readySemaphores = *current_signal.render_finished;
 		vk::PresentInfoKHR presentInfo
 		{
-			1,&readySemaphores
+			1,&wait
 			,1,swapchains
 			,&imageIndex
 			,nullptr
@@ -2408,5 +2418,15 @@ namespace idk::vkn
 	{
 		ubo_manager.Clear(); //Clear the previous frame's UBOs
 		pools.Reset(); //Reset the previous frame's descriptors
+	}
+	void PresentationSignals::Init(VulkanView& view)
+	{
+		vk::SemaphoreCreateInfo info{};
+		vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
+
+		image_available = view.Device()->createSemaphoreUnique(info, nullptr,  view.Dispatcher());
+		render_finished = view.Device()->createSemaphoreUnique(info, nullptr,  view.Dispatcher());
+		inflight_fence  = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
+		
 	}
 }

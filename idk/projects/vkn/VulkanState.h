@@ -115,9 +115,10 @@ namespace idk::vkn
 	};
 	struct PresentationSignals
 	{
-		vk::UniqueSemaphore image_available;
-		vk::UniqueSemaphore render_finished;
-		vk::UniqueFence     inflight_fence;
+		vk::UniqueSemaphore image_available{};
+		vk::UniqueSemaphore render_finished{};
+		vk::UniqueFence      inflight_fence{};
+		void Init(VulkanView& view);
 	};
 
 	struct FrameSubmitRenderInfo
@@ -166,9 +167,9 @@ namespace idk::vkn
 
 		void BeginFrame();
 		void EndFrame();
-		void AcquireFrame();
-		void DrawFrame();
-		void PresentFrame();
+		void AcquireFrame(vk::Semaphore signal);
+		void DrawFrame(vk::Semaphore wait, vk::Semaphore signal);
+		void PresentFrame(vk::Semaphore wait);
 		void OnResize();
 		void Cleanup();
 
@@ -224,6 +225,7 @@ namespace idk::vkn
 
 
 		vk::UniqueRenderPass                 m_renderpass;
+		vk::UniqueRenderPass                 m_crenderpass;
 		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;
 		vk::UniquePipelineLayout             m_pipelinelayout;
 		vk::UniquePipeline                   m_pipeline;

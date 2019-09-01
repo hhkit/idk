@@ -36,6 +36,7 @@ namespace idk::vkn
 		RenderState&               PrevRenderState()const;
 		RenderState&               CurrRenderState()const;
 		vk::UniqueRenderPass&      Renderpass()const;
+		vk::UniqueRenderPass&      ContinuedRenderpass()const;
 		vk::UniqueCommandBuffer&   CurrCommandbuffer()const;
 		vk::Buffer&                CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.

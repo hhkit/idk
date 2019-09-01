@@ -336,7 +336,7 @@ namespace idk
 					err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
 					check_vk_result(err);
 				}
-				catch (const vk::OutOfDateKHRError& e) {
+				catch (const vk::OutOfDateKHRError& ) {
 				
 					vkObj->RecreateSwapChain();
 					ImGuiRecreateSwapChain();

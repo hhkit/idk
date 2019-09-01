@@ -90,9 +90,9 @@ namespace idk::vkn
 	{
 
 		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
-		auto& pdevice = vview.PDevice();
+		//auto& pdevice = vview.PDevice();
 		auto& m_device = vview.Device();
-		auto& dispatcher = vview.Dispatcher();
+		//auto& dispatcher = vview.Dispatcher();
 		auto retval = std::make_unique<VulkanMesh>();
 
 		vector<MeshVtx> vertices

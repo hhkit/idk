@@ -64,8 +64,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
-	mesh_rend->material_instance.material = 
-		Core::GetResourceManager().LoadFile(FileHandle("/assets/shader/flat_color.frag")).resources[0].As<Material>();
+	//mesh_rend->material_instance.material = 
+	//	Core::GetResourceManager().LoadFile(FileHandle("/assets/shader/flat_color.frag")).resources[0].As<Material>();
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

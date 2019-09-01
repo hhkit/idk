@@ -125,7 +125,9 @@
     </ClCompile>
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
-    <ClCompile Include="FrameRenderer.cpp" />
+    <ClCompile Include="FrameRenderer.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

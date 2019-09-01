@@ -162,7 +162,7 @@ namespace idk::vkn
 		auto& current_signal = View().CurrPresentationSignals();
 
 		auto& waitSemaphores = *current_signal.image_available;
-		auto& readySemaphores = *current_signal.render_finished;
+		auto& readySemaphores = *_states[0].signal.render_finished;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
 		//std::vector<vk::CommandBuffer> cmd_buffers;
@@ -181,8 +181,12 @@ namespace idk::vkn
 		};
 
 
-		View().Device()->resetFences(1, &*current_signal.inflight_fence, vk::DispatchLoaderDefault{});
-		queue.submit(submit_info, *current_signal.inflight_fence, vk::DispatchLoaderDefault{});
+		View().Device()->resetFences(1, &*_states[0].signal.inflight_fence, vk::DispatchLoaderDefault{});
+		queue.submit(submit_info, *_states[0].signal.inflight_fence, vk::DispatchLoaderDefault{});
+	}
+	PresentationSignals& FrameRenderer::GetMainSignal()
+	{
+		return _states[0].signal;
 	}
 	void FrameRenderer::GrowStates(size_t new_min_size)
 	{
@@ -195,7 +199,7 @@ namespace idk::vkn
 			for (auto i = diff; i-- > 0;)
 			{
 				auto& buffer = buffers[i];
-				_states.emplace_back(RenderStateV2{ *buffer,View() });
+				_states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{} }).signal.Init(View());
 				_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}
