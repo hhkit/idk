@@ -451,6 +451,7 @@
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="prefab\Prefab.h" />
     <ClInclude Include="prefab\PrefabFactory.h" />
+    <ClInclude Include="gfx\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -590,6 +591,7 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="prefab\PrefabFactory.cpp" />
+    <ClCompile Include="gfx\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
