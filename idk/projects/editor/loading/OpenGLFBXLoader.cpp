@@ -86,9 +86,9 @@ namespace idk
 			}
 
 			// Push all bones that affect meshes
-			for (size_t i = 0; i < ai_mesh->mNumBones; i++)
+			for (size_t k = 0; k < ai_mesh->mNumBones; k++)
 			{
-				auto curr_bone = ai_mesh->mBones[i];
+				auto curr_bone = ai_mesh->mBones[k];
 				bones_set.emplace(curr_bone->mName.data);
 			}
 		}
