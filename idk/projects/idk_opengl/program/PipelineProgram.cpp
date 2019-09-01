@@ -13,13 +13,16 @@ namespace idk::ogl
 		glDeleteProgramPipelines(1, &_pipeline);
 	}
 
-	void PipelineProgram::PushProgram(const Program& program)
+	void PipelineProgram::PushProgram(RscHandle<ShaderProgram> gen_program)
 	{
-		_programs.erase(std::remove_if(_programs.begin(), _programs.end(), [&program, this](const Program* prog)->bool
+		auto& program = gen_program.as<Program>();
+
+		_programs.erase(std::remove_if(_programs.begin(), _programs.end(), [&program, this](RscHandle<ShaderProgram> prog_handle)->bool
 		{
-			if (prog->_shader_flags & program._shader_flags)
+			auto& prog = prog_handle.as<Program>();
+			if (prog.ShaderFlags() & program.ShaderFlags())
 			{
-				glUseProgramStages(_pipeline, prog->_shader_flags, 0);
+				glUseProgramStages(_pipeline, prog.ShaderFlags(), 0);
 				return true;
 			}
 			else
@@ -27,17 +30,18 @@ namespace idk::ogl
 
 		}), _programs.end());
 
-		_programs.emplace_back(&program);
-		glUseProgramStages(_pipeline, program._shader_flags, program._program_id);
+		_programs.emplace_back(gen_program);
+		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID());
 	}
 
 	void PipelineProgram::PopProgram(GLenum shader_flags)
 	{
-		_programs.erase(std::remove_if(_programs.begin(), _programs.end(), [shader_flags, this](const Program* prog)->bool
+		_programs.erase(std::remove_if(_programs.begin(), _programs.end(), [shader_flags, this](RscHandle<ShaderProgram> prog_handle)->bool
 		{
-			if (prog->_shader_flags & shader_flags)
+			auto& prog = prog_handle.as<Program>();
+			if (prog.ShaderFlags() & shader_flags)
 			{
-				glUseProgramStages(_pipeline, prog->_shader_flags, 0);
+				glUseProgramStages(_pipeline, prog.ShaderFlags(), 0);
 				return true;
 			}
 			else
@@ -48,12 +52,14 @@ namespace idk::ogl
 	void PipelineProgram::PopAllPrograms()
 	{
 		_programs.clear();
-		glUseProgramStages(_pipeline, GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, 0);
+		glUseProgramStages(_pipeline, GL_ALL_SHADER_BITS, 0);
 	}
+
 	void PipelineProgram::Use()
 	{
 		glBindProgramPipeline(_pipeline);
 	}
+
 	PipelineProgram::PipelineProgram(PipelineProgram&& rhs) noexcept
 		: _pipeline{rhs._pipeline}, _programs{std::move(rhs._programs)}
 	{

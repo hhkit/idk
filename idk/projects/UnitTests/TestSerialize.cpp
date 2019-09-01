@@ -4,6 +4,7 @@
 #include <res/Guid.h>
 #include <scene/SceneFactory.h>
 #include <util/enum.h>
+#include <serialize/yaml.h>
 
 using namespace idk;
 
@@ -19,6 +20,17 @@ struct serialize_this
 REFLECT_BEGIN(serialize_this, "serialize_this")
 REFLECT_VARS(guid, vec, f)
 REFLECT_END()
+
+TEST(Serialize, TestYaml)
+{
+    yaml::node node = yaml::parse("test:\n  a: x\n  b: y");
+    EXPECT_EQ(node["test"]["a"].as_scalar(), "x");
+    EXPECT_EQ(node["test"]["b"].as_scalar(), "y");
+
+    yaml::node node2 = yaml::parse("- test: a:\n- x: b");
+    EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
+    EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
+}
 
 TEST(Serialize, TestSerializeBasic)
 {

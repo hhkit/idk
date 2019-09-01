@@ -10,11 +10,11 @@ namespace idk
 		: as_vec4{ r, g, b, a }
 	{
 	}
-	constexpr color::color(const math::vector<float, 3> & vec) noexcept
+	constexpr color::color(const tvec<float, 3> & vec) noexcept
 		: as_vec4{ vec[0], vec[1], vec[2], 1.f }
 	{
 	}
-	constexpr color::color(const math::vector<float, 4> & vec) noexcept
+	constexpr color::color(const tvec<float, 4> & vec) noexcept
 		: as_vec4{ vec }
 	{
 	}
@@ -78,12 +78,12 @@ namespace idk
 		return *this;
 	}
 
-	constexpr color::operator math::vector<float, 3>() const noexcept
+	constexpr color::operator tvec<float, 3>() const noexcept
 	{
 		return as_vec3;
 	}
 
-	constexpr color::operator math::vector<float, 4>() const noexcept
+	constexpr color::operator tvec<float, 4>() const noexcept
 	{
 		return as_vec4;
 	}

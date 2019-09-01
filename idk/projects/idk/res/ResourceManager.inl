@@ -9,7 +9,7 @@ namespace idk
 	{
 		auto ptr = std::make_shared<Factory>(std::forward<Args>(args)...);
 		_plaintext_loaders[ResourceID<typename Factory::Resource>] = ptr;
-		_default_resources[ResourceID<typename Factory::Resource>] = ptr->Create();
+		//_default_resources[ResourceID<typename Factory::Resource>] = ptr->Create();
 		return *ptr;
 	}
 	template<typename ExtensionLoaderT, typename ... Args>

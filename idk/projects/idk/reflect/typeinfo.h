@@ -6,7 +6,7 @@
 namespace idk::reflect
 {
 	// get full qualified type name of T (decayed).
-	// eg. vec3& => idk::math::vector<float, 3>
+	// eg. vec3& => idk::tvec<float, 3>
 	// NOTE: if comparing types, use typehash<T>() !!!
 	template<typename T> 
 	constexpr string_view fully_qualified_nameof()

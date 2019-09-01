@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
+#include <gfx/RenderTarget.h>
 
 namespace idk
 {
@@ -15,7 +16,8 @@ namespace idk
 		real far_plane  = 100.f;
 
 		int  depth = 0;
-		//TODO add render texture  
+		RscHandle<RenderTarget> target;
+
 		vec4 clear_color{0,0,0,1};
 		
 		// perspective settings

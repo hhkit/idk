@@ -76,45 +76,15 @@ namespace idk
 		{
 			handle.visit([&](auto&& h)
 			{
-				retval.resource_metas.emplace_back(*h);
+				retval.guids.emplace_back(h.guid);
+				if constexpr (has_tag_v<typename std::decay_t<decltype(h)>::Resource, MetaTag>)
+					retval.resource_metas.emplace_back(h->GetMeta());
+				else
+					retval.resource_metas.emplace_back(reflect::dynamic{});
+
 			});
 		}
 
 		return retval;
-	}
-
-	GenericMetadata::GenericMetadata(string_view serialized)
-	{
-		char guidbuf[64]{};
-		char typebuf[64]{};
-
-		sscanf_s(serialized.data(), "%s%s", guidbuf, 64, typebuf, 64);
-
-		guid = Guid{ guidbuf };
-
-		string_view rest = serialized.substr(strlen(guidbuf) + 1 + strlen(typebuf) + 1);
-		static const auto get_resource_id_ht = FileResourceHelper<Resources>::GetResourceIDJumpTable();
-		static const auto recreate_meta_jt = FileResourceHelper<Resources>::RecreateMetaJumpTable();
-
-		auto find = get_resource_id_ht.find(typebuf);
-		if (find != get_resource_id_ht.end())
-		{
-			resource_id = find->second;
-			pimpl = recreate_meta_jt[find->second](rest);
-		}
-	}
-
-	GenericMetadata::operator string() const
-	{
-		static const auto name_jump_table = FileResourceHelper<Resources>::GenResourceIDJumpTable();
-		static const auto ser_jump_table = FileResourceHelper<Resources>::GenSerializeJumpTable();
-		std::string construct;
-		construct += string{ guid };                   construct += "\n";
-		construct += name_jump_table[resource_id]();   construct += "\n";
-		auto str2 = ser_jump_table[resource_id](pimpl);
-		if (str2)
-			construct += *str2;
-
-		return construct;
 	}
 }

@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Matrix.h"
 
-namespace idk::math
+namespace idk
 {
-	template struct matrix<float, 3, 3>;
-	template struct matrix<float, 4, 4>;
-	template vector<float, 3> operator*(const matrix<float, 3, 3>&, const vector<float, 3>&);
-	template vector<float, 4> operator*(const matrix<float, 4, 4>&, const vector<float, 4>&);
-	template matrix<float, 3, 3> operator*(const matrix<float, 3, 3> & lhs, const matrix<float, 3, 3> & rhs);
-	template matrix<float, 4, 4> operator*(const matrix<float, 4, 4> & lhs, const matrix<float, 4, 4> & rhs);
+	template struct tmat<float, 3, 3>;
+	template struct tmat<float, 4, 4>;
+	template tvec<float, 3> operator*(const tmat<float, 3, 3>&, const tvec<float, 3>&);
+	template tvec<float, 4> operator*(const tmat<float, 4, 4>&, const tvec<float, 4>&);
+	template tmat<float, 3, 3> operator*(const tmat<float, 3, 3> & lhs, const tmat<float, 3, 3> & rhs);
+	template tmat<float, 4, 4> operator*(const tmat<float, 4, 4> & lhs, const tmat<float, 4, 4> & rhs);
 }

@@ -38,10 +38,15 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\RenderTarget.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\GfxDbgTest.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\RenderObject.h" />
+    <ClInclude Include="gfx\ShaderTemplate.h" />
+    <ClInclude Include="gfx\ShaderTemplateFactory.h" />
+    <ClInclude Include="gfx\Texture.h" />
+    <ClInclude Include="gfx\ShaderProgram.h" />
     <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\buffer_desc.h" />
@@ -157,6 +162,8 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\Material.cpp" />
+    <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
     <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp" />
@@ -164,6 +171,9 @@
     <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="gfx\ShaderTemplate.cpp" />
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
+    <ClCompile Include="gfx\Texture.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
     <ClCompile Include="prefab\Prefab.cpp" />
@@ -175,6 +185,7 @@
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
+    <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
@@ -254,6 +265,7 @@
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
     <None Include="serialize\serialize.inl" />
+    <None Include="serialize\yaml.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
@@ -381,6 +393,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>fmodL_vc.lib;</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -426,6 +439,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>fmod_vc.lib;</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

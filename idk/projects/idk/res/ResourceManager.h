@@ -25,6 +25,7 @@ namespace idk
 		ResourceManager() = default;
 
 		void Init() override;
+		void LateInit() override;
 		void Shutdown() override;
 		void WatchDirectory();
 
@@ -49,6 +50,7 @@ namespace idk
 
 		// file operations
 		FileResources LoadFile(FileHandle path_to_file);
+		FileResources LoadFile(FileHandle path_to_file, const MetaFile& meta);
 		FileResources ReloadFile(FileHandle path_to_file);
 		size_t        UnloadFile(FileHandle path_to_file);
 		FileResources GetFileResources(FileHandle path_to_file);

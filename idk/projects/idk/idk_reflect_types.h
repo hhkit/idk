@@ -40,12 +40,11 @@ namespace idk::reflect
 
 		, Handle<GameObject>
 		, Guid
-		, GenericMetadata
-		, vector<GenericMetadata>
 
 		, RscHandle<Mesh>
 		, variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> // UniformInstance
 		, vector<string>
+		, vector<Guid>
 		, hash_table<Guid, string>
         , vector<reflect::dynamic>
 

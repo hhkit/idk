@@ -10,7 +10,7 @@ namespace idk
 		: public ExtensionLoader
 	{
 		FileResources Create(FileHandle path_to_resource) override;
-		FileResources Create(FileHandle path_to_resource, span<GenericMetadata> metadatas) override;
+		FileResources Create(FileHandle path_to_resource, const MetaFile& metadatas) override;
 	};
 }
 

@@ -2,7 +2,7 @@
 #include <utility>
 #include "quaternion.h"
 
-namespace idk::math
+namespace idk
 {
 	template<typename T>
 	inline quaternion<T>::quaternion()
@@ -15,7 +15,7 @@ namespace idk::math
 	{
 	}
 	template<typename T>
-	inline quaternion<T>::quaternion(const vector<T, 3> & axis, radian<T> angle)
+	inline quaternion<T>::quaternion(const tvec<T, 3> & axis, trad<T> angle)
 	{
 		auto h = angle / 2;
 
@@ -56,29 +56,29 @@ namespace idk::math
 	}
 
 	template<typename T>
-	inline quaternion<T>::operator matrix<T, 4, 4>() const
+	inline quaternion<T>::operator tmat<T, 4, 4>() const
 	{
-		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>
-	inline quaternion<T>::operator matrix<T, 4, 4>()
+	inline quaternion<T>::operator tmat<T, 4, 4>()
 	{
-		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>
-	quaternion<T>::operator matrix<T, 3, 3>() const
+	quaternion<T>::operator tmat<T, 3, 3>() const
 	{
 		auto copy = *this;
-		return copy.operator matrix<T, 3, 3>();
+		return copy.operator tmat<T, 3, 3>();
 	}
 
 	template<typename T>
-	quaternion<T>::operator matrix<T, 3, 3>()
+	quaternion<T>::operator tmat<T, 3, 3>()
 	{
 		this->normalize();
-		return matrix<T, 3, 3>
+		return tmat<T, 3, 3>
 		{
 			1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
 				2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
@@ -89,19 +89,19 @@ namespace idk::math
 namespace idk
 {
 	template<typename M, typename T>
-	auto quat_cast(math::quaternion<T>& q)
+	auto quat_cast(quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(math::quaternion<T>&& q)
+	auto quat_cast(quaternion<T>&& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(const math::quaternion<T>& q)
+	auto quat_cast(const quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}

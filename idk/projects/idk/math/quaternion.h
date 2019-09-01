@@ -3,13 +3,13 @@
 #include "vector.h"
 #include "matrix.h"
 
-namespace idk::math
+namespace idk
 {
 	template <typename T>
 	struct quaternion
-		: vector<T, 4>
+		: tvec<T, 4>
 	{
-		using Base = vector<T, 4>;
+		using Base = tvec<T, 4>;
 		using Base::x;
 		using Base::y;
 		using Base::z;
@@ -17,7 +17,7 @@ namespace idk::math
 
 		quaternion();
 		quaternion(T x, T y, T z, T w);
-		quaternion(const vector<T, 3> & axis, radian<T> angle);
+		quaternion(const tvec<T, 3> & axis, trad<T> angle);
 
 		quaternion inverse() const;
 		quaternion& normalize();
@@ -27,21 +27,21 @@ namespace idk::math
 		quaternion  operator*(const quaternion&) const;
 
 		// conversion to rotation matrix
-		explicit operator matrix<T, 3, 3>();
-		explicit operator matrix<T, 3, 3>() const;
-		explicit operator matrix<T, 4, 4>();
-		explicit operator matrix<T, 4, 4>() const;
+		explicit operator tmat<T, 3, 3>();
+		explicit operator tmat<T, 3, 3>() const;
+		explicit operator tmat<T, 4, 4>();
+		explicit operator tmat<T, 4, 4>() const;
 	};
 }
 
 namespace idk
 {
-	template<typename M, typename T> auto quat_cast(math::quaternion<T>& q);
-	template<typename M, typename T> auto quat_cast(math::quaternion<T>&& q);
-	template<typename M, typename T> auto quat_cast(const math::quaternion<T>& q);
+	template<typename M, typename T> auto quat_cast(quaternion<T>& q);
+	template<typename M, typename T> auto quat_cast(quaternion<T>&& q);
+	template<typename M, typename T> auto quat_cast(const quaternion<T>& q);
 
 
-	extern template struct math::quaternion<float>;
+	extern template struct quaternion<float>;
 }
 
 #include "quaternion.inl"

@@ -1,18 +1,12 @@
 #pragma once
 #include <gfx/Material.h>
 #include <idk_opengl/program/Program.h>
-
 namespace idk::ogl
 {
 	class OpenGLMaterial
 		: public Material
 	{
 	public:
-		void Set(string_view fragment_code);
-		void Set(const ShaderGraph&) {};
-
-		const Program& GetShaderProgram() const;
-	private:
-		Program program;
+		bool BuildShader(RscHandle<ShaderTemplate> lighting_model, string_view material_uniforms, string_view material_code) override;
 	};
 }
