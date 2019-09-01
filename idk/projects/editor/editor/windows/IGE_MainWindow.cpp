@@ -229,9 +229,11 @@ namespace idk {
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4{ 0.64f, 0.64f, 0.64f, 1.0f });
 
 
-
+		//Tool bar
 		ImGui::BeginChild("ToolBar", toolBarSize, true, childFlags);
 		ImGui::PopStyleColor();
+
+
 		const ImVec2 toolButtonSize = ImVec2{ 40.0f,20.0f };
 		const ImVec2 toolButtonStartPos = ImVec2{ 6.0f,4.0f };
 
