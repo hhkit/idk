@@ -166,8 +166,8 @@ namespace idk
 			if (vfs._mounts.empty())
 				throw("Something is terribly wrong. No mounts found.");
 
-			auto& internal_collated = vfs._mounts[internal_file._tree_index._mount_id]._path_tree[internal_file._tree_index._depth];
-			auto& parent_dir = vfs.getDir(internal_file._parent);
+			// auto& internal_collated = vfs._mounts[internal_file._tree_index._mount_id]._path_tree[internal_file._tree_index._depth];
+			
 			
 			switch (internal_file._change_status)
 			{
@@ -178,9 +178,9 @@ namespace idk
 			case FS_CHANGE_STATUS::DELETED:
 			{
 				// Most troublesome one. 
-				// Need to invalidate the fs_file_handle and all FileHandles pointing to it.
-
+			
 				// We remove this file from the parent dir.
+				auto& parent_dir = vfs.getDir(internal_file._parent);
 				auto result = parent_dir._files_map.find(internal_file._filename);
 				parent_dir._files_map.erase(result);
 

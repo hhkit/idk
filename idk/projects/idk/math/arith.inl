@@ -22,7 +22,7 @@ namespace idk
 		return lhs * (LerpFactor(1) - lerp) + rhs * lerp;
 	}
 	template<typename Vec, typename LerpFactor>
-	Vec slerp(const Vec& lhs, const Vec& rhs, LerpFactor lerp, const math::radian<LerpFactor>& ohm, LerpFactor sin_ohm)
+	Vec slerp(const Vec& lhs, const Vec& rhs, LerpFactor lerp, const trad<LerpFactor>& ohm, LerpFactor sin_ohm)
 	{
 		constexpr auto _1 = LerpFactor{ 1 };
 		return sin(ohm * (_1 - lerp)) / sin_ohm * lhs + sin(ohm * lerp) / sin_ohm * rhs;

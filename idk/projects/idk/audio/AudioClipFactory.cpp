@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <stdafx.h>
-#include "AudioClipFactory.h"
+#include <audio/AudioClipFactory.h>
 #include <idk.h>
 #include <audio/AudioSystem.h> //AudioSystem
 //Dependency includes
@@ -20,7 +20,7 @@
 
 
 namespace idk {
-	unique_ptr<AudioClip> idk::AudioClipFactory::Create()
+	unique_ptr<AudioClip> AudioClipFactory::Create()
 	{
 		return unique_ptr<AudioClip>();
 	}
@@ -33,7 +33,7 @@ namespace idk {
 
 		try {
 			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
-			newSound->ReassignSoundGroup(AudioClip::SubSoundGroup_SFX);
+			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
 			newSound->UpdateMinMaxDistance();
 
 		}
@@ -47,7 +47,7 @@ namespace idk {
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getName(name, 512));
 		newSound->soundInfo.name = name;
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
-		
+		newSound->_dirtymeta = true;
 		//Push to list for management.
 		//SoundList.push_back(newSound);
 		

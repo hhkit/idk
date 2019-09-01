@@ -1,9 +1,9 @@
 #pragma once
 #include <type_traits>
 
-namespace idk::math
+namespace idk
 {
-	template<typename T, unsigned D> struct vector;
+	template<typename T, unsigned D> struct tvec;
 
 	namespace detail
 	{
@@ -17,7 +17,7 @@ namespace idk::math
 		static constexpr unsigned Dim_v = Dim<T>::value;
 
 		template <typename T, unsigned D>
-		struct Dim < vector<T, D>>
+		struct Dim < tvec<T, D>>
 		{
 			static constexpr unsigned value = Dim_v<T> * D;
 		};

@@ -3,6 +3,7 @@
 #include <reflect/reflect.h>
 #include <core/Core.h>
 #include <IncludeComponents.h>
+#include <IncludeResources.h>
 
 /* 
  * !!! NOTE !!!
@@ -68,8 +69,24 @@ REFLECT_END()
  * resources
  *========================================================================*/
 
+REFLECT_BEGIN(idk::MetaFile, "MetaFile")
+REFLECT_VAR(resource_metas)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
+REFLECT_VARS(i, j)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
+REFLECT_VARS(volume, pitch,minDistance,maxDistance,is3Dsound,isUnique,isLoop)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VAR(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PrefabData, "PrefabData")
+REFLECT_VARS(components, children)
 REFLECT_END()
 
 /*==========================================================================
@@ -93,8 +110,13 @@ REFLECT_VARS(scale, rotation, position)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
+REFLECT_VARS(is_active)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
+REFLECT_VARS(prefab, overrides)
 REFLECT_END()

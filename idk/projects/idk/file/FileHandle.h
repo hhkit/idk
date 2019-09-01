@@ -14,11 +14,14 @@ namespace idk
 		FStreamWrapper& operator=(FStreamWrapper&& rhs);
 		~FStreamWrapper();
 
+		// Override some files.
+		void close();
+
 		friend class FileSystem;
 		friend struct FileHandle;
 	private:
 		FStreamWrapper() = default;
-
+		
 		int64_t _handle_index = -1;
 	};
 
@@ -36,6 +39,9 @@ namespace idk
 	{
 		FileHandle() = default;
 		FileHandle(string_view mountPath);
+		FileHandle(const char* mountPath);
+
+		bool operator == (const FileHandle& rhs) const;
 		
 		string_view			GetFullPath() const;
 		string_view			GetRelPath() const;
@@ -50,11 +56,14 @@ namespace idk
 		FS_CHANGE_STATUS	GetStatus() const;
 
 		bool				CanOpen() const;
+		bool				SameKeyAs(const FileHandle& other) const;
 		
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);
 		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream = false);
 
 		explicit	operator bool() const;
+
+		
 
 		friend class FileSystem;
 	private:

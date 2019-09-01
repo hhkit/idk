@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="core\ComponentTags.h" />
+    <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\dual_set.h" />
     <ClInclude Include="ds\small_string.h" />
@@ -36,10 +38,12 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\RenderTarget.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\GfxDbgTest.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\RenderObject.h" />
+    <ClInclude Include="gfx\Texture.h" />
     <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
     <ClInclude Include="gfx\buffer_desc.h" />
@@ -57,6 +61,17 @@
     <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
     <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="prefab\PrefabData.h" />
+    <ClInclude Include="prefab\Prefab.h" />
+    <ClInclude Include="prefab\PrefabFactory.h" />
+    <ClInclude Include="prefab\PrefabInstance.h" />
+    <ClInclude Include="prefab\PrefabUtility.h" />
+    <ClInclude Include="prefab\PropertyOverride.h" />
+    <ClInclude Include="reflect\detail\meta_manager.h" />
+    <ClInclude Include="reflect\detail\table_storage.h" />
+    <ClInclude Include="reflect\detail\typed_context.h" />
+    <ClInclude Include="reflect\detail\visit_detail.h" />
+    <ClInclude Include="reflect\typeinfo.h" />
     <ClInclude Include="res\ExtensionLoader.h" />
     <ClInclude Include="res\FileResources.h" />
     <ClInclude Include="res\FileResources_detail.h" />
@@ -103,13 +118,14 @@
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
-    <ClInclude Include="reflect\pretty_function.h" />
-    <ClInclude Include="reflect\constructor_entry.h" />
+    <ClInclude Include="reflect\detail\pretty_function.h" />
+    <ClInclude Include="reflect\detail\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
     <ClInclude Include="shape\aabb.h" />
     <ClInclude Include="shape\capsule.h" />
@@ -121,7 +137,7 @@
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
-    <ClInclude Include="reflect\typed_context.inl" />
+    <ClInclude Include="reflect\detail\typed_context.inl" />
     <ClInclude Include="res\Guid.h" />
     <ClInclude Include="res\Resource.h" />
     <ClInclude Include="res\ResourceFactory.h" />
@@ -142,6 +158,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
     <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp" />
@@ -149,8 +166,12 @@
     <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="gfx\Texture.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
+    <ClCompile Include="prefab\Prefab.cpp" />
+    <ClCompile Include="prefab\PrefabFactory.cpp" />
+    <ClCompile Include="prefab\PrefabUtility.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="res\FileResources.cpp" />
@@ -193,6 +214,7 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="ds\circular_buffer.inl" />
     <None Include="ds\compressed_pair.inl" />
     <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />
@@ -203,6 +225,9 @@
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
+    <None Include="reflect\detail\meta_manager.inl" />
+    <None Include="reflect\detail\table_storage.inl" />
+    <None Include="reflect\detail\visit_detail.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="res\FileResources.inl" />
@@ -225,7 +250,7 @@
     <None Include="ds\range.inl" />
     <None Include="ds\span.inl" />
     <None Include="ds\zip.inl" />
-    <None Include="reflect\constructor_entry.inl" />
+    <None Include="reflect\detail\constructor_entry.inl" />
     <None Include="reflect\dynamic.inl" />
     <None Include="reflect\reflect.inl" />
     <None Include="reflect\type.inl" />
@@ -235,10 +260,12 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\ds.natvis" />
     <Natvis Include="_natvis\guid.natvis" />
     <Natvis Include="_natvis\objectpool.natvis" />
     <Natvis Include="_natvis\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />
+    <Natvis Include="_natvis\reflect.natvis" />
     <Natvis Include="_natvis\scene.natvis" />
     <Natvis Include="_natvis\vector.natvis" />
   </ItemGroup>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="idk::reflect::type">
+    <DisplayString Condition="_context==nullptr">{{ [INVALID] }}</DisplayString>
+    <DisplayString Condition="_context!=nullptr">{{name={_context->name._Mydata,[_context->name._Mysize]s8} hash={_context->hash}}}</DisplayString>
+    <DisplayString>{{name={_context->name._Mydata,[_context->name._Mysize]s8} hash={_context->hash}}}</DisplayString>
+    <Expand>
+      <Item Name="[name]">_context->name</Item>
+      <Item Name="[hash]">_context->hash</Item>
+      <Item Name="[count]">_context->table.m_Count</Item>
+      <Item Name="[valid]">_context!=nullptr</Item>
+      <Item Name="[is_container]">_context->is_container</Item>
+      <Item Name="[is_enum_type]">_context->is_enum_type</Item>
+      <Item Name="[ctors]">_context->ctors</Item>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="-1" />
+        <Size>_context->table.m_Count</Size>
+        <Loop>
+          <Exec>i++</Exec>
+          <Break Condition="i == _context->table.m_Count" />
+          <Item Name="[properties[{i}]]">_context->table.m_pEntry[i].m_pName,s8</Item>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idk::reflect::detail::constructor_entry&lt;*&gt;">
+    <DisplayString>{"$T1"},{"$T2"},{"$T3"},{"$T4"},{"$T5"},{"$T6"}</DisplayString>
+  </Type>
+
+  <Type Name="idk::reflect::dynamic">
+    <Expand>
+      <Item Name="type">type</Item>
+      <Item Name="[obj]">*_ptr._Ptr</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="idk::reflect::dynamic::derived&lt;*&gt;">
+    <DisplayString>{obj}</DisplayString>
+  </Type>
+  
+</AutoVisualizer>

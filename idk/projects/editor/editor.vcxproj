@@ -112,7 +112,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\;$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc142-mt.lib;editorstatic.lib;</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;editorstatic.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -149,7 +149,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\;$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc142-mt.lib;editorstaticD.lib;</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;editorstaticD.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -172,20 +172,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="editor\commands\CMD_AddComponent.h" />
+    <ClInclude Include="editor\commands\CMD_MoveGameObject.h" />
+    <ClInclude Include="editor\commands\CMD_RotateGameObject.h" />
+    <ClInclude Include="editor\commands\CMD_ScaleGameObject.h" />
     <ClInclude Include="editor\commands\CommandController.h" />
+    <ClInclude Include="editor\commands\CommandList.h" />
     <ClInclude Include="editor\commands\ICommand.h" />
+    <ClInclude Include="editor\windows\IGE_IWindow.h" />
+    <ClInclude Include="editor\windows\IGE_MainWindow.h" />
+    <ClInclude Include="editor\windows\IGE_SceneView.h" />
+    <ClInclude Include="editor\windows\IGE_WindowList.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
     <ClInclude Include="ImGui_Interface.h" />
+    <ClInclude Include="loading\FBXLoaderHelpers.h" />
     <ClInclude Include="loading\OpenGLFBXLoader.h" />
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="editor\commands\CMD_AddComponent.cpp" />
+    <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp" />
+    <ClCompile Include="editor\commands\CMD_RotateGameObject.cpp" />
+    <ClCompile Include="editor\commands\CMD_ScaleGameObject.cpp" />
     <ClCompile Include="editor\commands\CommandController.cpp" />
+    <ClCompile Include="editor\windows\IGE_IWindow.cpp" />
+    <ClCompile Include="editor\windows\IGE_MainWindow.cpp" />
+    <ClCompile Include="editor\windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="ImGui_Interface.cpp" />
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp" />
     <ClCompile Include="loading\OpenGLFBXLoader.cpp" />
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="pch.cpp">

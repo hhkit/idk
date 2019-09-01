@@ -5,21 +5,21 @@
 #include "arith.h"
 #include "../meta/casts.h"
 #include <cmath>
-namespace idk::math
+namespace idk
 {
 	template<typename T>
-	inline radian<T>::radian(T val)
+	inline trad<T>::trad(T val)
 		: value{ val }
 	{
 	}
 	template<typename T>
-	inline radian<T>::radian(const degree<T>& rhs)
+	inline trad<T>::trad(const tdeg<T>& rhs)
 		: value{ rhs.value / s_cast<T>(180) * constants::pi<T>()}
 	{
 	}
 
 	template<typename T>
-	radian<T>& radian<T>::normalize()
+	trad<T>& trad<T>::normalize()
 	{
 		value = fmod(value, constants::tau<T>());
 		if (value > constants::pi<T>())
@@ -28,132 +28,132 @@ namespace idk::math
 	}
 
 	template<typename T>
-	radian<T> radian<T>::normalized() const
+	trad<T> trad<T>::normalized() const
 	{
 		auto copy = *this;
 		return copy.normalize();
 	}
 
 	template<typename T>
-	T* radian<T>::data()
+	T* trad<T>::data()
 	{
 		return &value;
 	}
 
 	template<typename T>
-	const T* radian<T>::data() const
+	const T* trad<T>::data() const
 	{
 		return &value;
 	}
 
 	template<typename T>
-	inline radian<T>::operator T() const
+	inline trad<T>::operator T() const
 	{
 		return value;
 	}
 
 	template<typename T>
-	radian<T>& radian<T>::operator+=(const radian& rhs)
+	trad<T>& trad<T>::operator+=(const trad& rhs)
 	{
 		value += rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	radian<T>& radian<T>::operator-=(const radian& rhs)
+	trad<T>& trad<T>::operator-=(const trad& rhs)
 	{
 		value -= rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	radian<T>& radian<T>::operator*=(const T& rhs)
+	trad<T>& trad<T>::operator*=(const T& rhs)
 	{
 		value *= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	radian<T>& radian<T>::operator/=(const T& rhs)
+	trad<T>& trad<T>::operator/=(const T& rhs)
 	{
 		value /= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	inline radian<T> radian<T>::operator+(const radian& rhs) const
+	inline trad<T> trad<T>::operator+(const trad& rhs) const
 	{
 		auto copy = *this;
 		return copy += rhs;
 	}
 
 	template<typename T>
-	inline radian<T> radian<T>::operator-(const radian& rhs) const
+	inline trad<T> trad<T>::operator-(const trad& rhs) const
 	{
 		auto copy = *this;
 		return copy -= rhs;
 	}
 
 	template<typename T>
-	inline radian<T> radian<T>::operator*(const T& rhs) const
+	inline trad<T> trad<T>::operator*(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy *= rhs;
 	}
 
 	template<typename T>
-	inline radian<T> radian<T>::operator/(const T& rhs) const
+	inline trad<T> trad<T>::operator/(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy /= rhs;
 	}
 
 	template<typename T>
-	inline T radian<T>::operator/(const radian& rhs) const
+	inline T trad<T>::operator/(const trad& rhs) const
 	{
 		return value / rhs.value;
 	}
 
 	template<typename T>
-	inline bool radian<T>::operator<(const radian& rhs) const
+	inline bool trad<T>::operator<(const trad& rhs) const
 	{
 		return value < rhs.value;
 	}
 
 	template<typename T>
-	inline bool radian<T>::operator==(const radian& rhs) const
+	inline bool trad<T>::operator==(const trad& rhs) const
 	{
 		return value == rhs.value;
 	}
 
 	template<typename T>
-	inline bool radian<T>::operator!=(const radian& rhs) const
+	inline bool trad<T>::operator!=(const trad& rhs) const
 	{
 		return value != rhs.value;
 	}
 
 
 	template<typename T>
-	radian<T>::operator degree<T>() const
+	trad<T>::operator tdeg<T>() const
 	{
-		return degree<T>{value / constants::pi<T>() * s_cast<T>(180)};
+		return tdeg<T>{value / constants::pi<T>() * s_cast<T>(180)};
 	}
 
 
 	template<typename T>
-	inline degree<T>::degree(T val)
+	inline tdeg<T>::tdeg(T val)
 		: value{ val }
 	{
 	}
 	template<typename T>
-	inline degree<T>::degree(const radian<T>& rhs)
+	inline tdeg<T>::tdeg(const trad<T>& rhs)
 		: value{ rhs.value / constants::pi<T>() * s_cast<T>(180) }
 	{
 	}
 
 
 	template<typename T>
-	degree<T>& degree<T>::normalize()
+	tdeg<T>& tdeg<T>::normalize()
 	{
 		value = fmod(value, T{ 360 });
 		if (value > T{ 180 })
@@ -162,7 +162,7 @@ namespace idk::math
 	}
 
 	template<typename T>
-	degree<T> degree<T>::normalized() const
+	tdeg<T> tdeg<T>::normalized() const
 	{
 		auto copy = *this;
 		return copy.normalize();
@@ -170,118 +170,118 @@ namespace idk::math
 
 
 	template<typename T>
-	inline T* degree<T>::data()
+	inline T* tdeg<T>::data()
 	{
 		return &value;
 	}
 
 	template<typename T>
-	inline const T* degree<T>::data() const
+	inline const T* tdeg<T>::data() const
 	{
 		return &value;
 	}
 
 
 	template<typename T>
-	degree<T>::operator T() const
+	tdeg<T>::operator T() const
 	{
 		return value;
 	}
 
 	template<typename T>
-	degree<T>& degree<T>::operator+=(const degree& rhs)
+	tdeg<T>& tdeg<T>::operator+=(const tdeg& rhs)
 	{
 		value += rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	degree<T>& degree<T>::operator-=(const degree& rhs)
+	tdeg<T>& tdeg<T>::operator-=(const tdeg& rhs)
 	{
 		value -= rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	degree<T>& degree<T>::operator*=(const T& rhs)
+	tdeg<T>& tdeg<T>::operator*=(const T& rhs)
 	{
 		value *= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	degree<T>& degree<T>::operator/=(const T& rhs)
+	tdeg<T>& tdeg<T>::operator/=(const T& rhs)
 	{
 		value /= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	inline degree<T> degree<T>::operator+(const degree& rhs) const
+	inline tdeg<T> tdeg<T>::operator+(const tdeg& rhs) const
 	{
 		auto copy = *this;
 		return copy += rhs;
 	}
 
 	template<typename T>
-	inline degree<T> degree<T>::operator-(const degree& rhs) const
+	inline tdeg<T> tdeg<T>::operator-(const tdeg& rhs) const
 	{
 		auto copy = *this;
 		return copy -= rhs;
 	}
 
 	template<typename T>
-	inline degree<T> degree<T>::operator*(const T& rhs) const
+	inline tdeg<T> tdeg<T>::operator*(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy *= rhs;
 	}
 
 	template<typename T>
-	inline degree<T> degree<T>::operator/(const T& rhs) const
+	inline tdeg<T> tdeg<T>::operator/(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy /= rhs;
 	}
 
 	template<typename T>
-	inline T degree<T>::operator/(const degree& rhs) const
+	inline T tdeg<T>::operator/(const tdeg& rhs) const
 	{
 		return value / rhs.value;
 	}
 
 	template<typename T>
-	inline bool degree<T>::operator<(const degree& rhs) const
+	inline bool tdeg<T>::operator<(const tdeg& rhs) const
 	{
 		return value < rhs.value;
 	}
 
 	template<typename T>
-	inline bool degree<T>::operator==(const degree& rhs) const
+	inline bool tdeg<T>::operator==(const tdeg& rhs) const
 	{
 		return value == rhs.value;
 	}
 
 	template<typename T>
-	inline bool degree<T>::operator!=(const degree& rhs) const
+	inline bool tdeg<T>::operator!=(const tdeg& rhs) const
 	{
 		return value != rhs.value;
 	}
 
 	template<typename T>
-	degree<T>::operator radian<T>() const
+	tdeg<T>::operator trad<T>() const
 	{
-		return radian<T>(value * constants::pi<T>() / s_cast<T>(180));
+		return trad<T>(value * constants::pi<T>() / s_cast<T>(180));
 	}
 
 	template<typename T>
-	radian<T> operator*(const T& coeff, const radian<T>& r)
+	trad<T> operator*(const T& coeff, const trad<T>& r)
 	{
 		return r * coeff;
 	}
 
 	template<typename T>
-	degree<T> operator*(const T& coeff, const degree<T>& d)
+	tdeg<T> operator*(const T& coeff, const tdeg<T>& d)
 	{
 		return d * coeff;
 	}
@@ -290,53 +290,53 @@ namespace idk::math
 namespace idk
 {
 	template<typename T>
-	auto cos(const math::radian<T>& r)
+	auto cos(const trad<T>& r)
 	{
 		return std::cos(r.value);
 	}
 	template<typename T>
-	auto sin(const math::radian<T>& r)
+	auto sin(const trad<T>& r)
 	{
 		return std::sin(r.value);
 	}
 	template<typename T>
-	auto tan(const math::radian<T>& r)
+	auto tan(const trad<T>& r)
 	{
 		return std::tan(r.value);
 	}
 	template<typename T>
-	auto cos(const math::degree<T>& d)
+	auto cos(const tdeg<T>& d)
 	{
-		return cos(math::radian<T>{ d });
+		return cos(trad<T>{ d });
 	}
 	template<typename T>
-	auto sin(const math::degree<T>& d)
+	auto sin(const tdeg<T>& d)
 	{
-		return sin(math::radian<T>{ d });
+		return sin(trad<T>{ d });
 	}
 	template<typename T>
-	auto tan(const math::degree<T>& d)
+	auto tan(const tdeg<T>& d)
 	{
-		return tan(math::radian<T>{ d });
+		return tan(trad<T>{ d });
 	}
 	template<typename T>
-	math::radian<T> acos(const T& frac)
+	trad<T> acos(const T& frac)
 	{
-		return math::radian<T>(std::acos(frac));
+		return trad<T>(std::acos(frac));
 	}
 	template<typename T>
-	math::radian<T> asin(const T& frac)
+	trad<T> asin(const T& frac)
 	{
-		return math::radian<T>(std::acos(frac));
+		return trad<T>(std::acos(frac));
 	}
 	template<typename T>
-	math::radian<T> atan(const T& frac)
+	trad<T> atan(const T& frac)
 	{
-		return math::radian<T>(std::atan(frac));
+		return trad<T>(std::atan(frac));
 	}
 	template<typename T>
-	math::radian<T> atan(const T& y, const T& x)
+	trad<T> atan(const T& y, const T& x)
 	{
-		return math::radian<T>(std::atan2(y, x));
+		return trad<T>(std::atan2(y, x));
 	}
 }

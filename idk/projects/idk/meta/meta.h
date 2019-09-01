@@ -56,6 +56,15 @@ namespace idk
 
 	template<typename T, typename VariantT>
 	constexpr auto is_variant_member_v = is_variant_member<T, VariantT>::value;
+
+
+    // true if is integral/floating point, or is convertible to string
+    template<typename T>
+    struct is_basic_serializable;
+
+    // true if is integral/floating point, or is convertible to string
+    template<typename T>
+    constexpr auto is_basic_serializable_v = is_basic_serializable<T>::value;
 }
 
 #include "meta.inl"

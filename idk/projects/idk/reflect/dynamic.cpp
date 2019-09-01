@@ -68,7 +68,12 @@ namespace idk::reflect
 		return { name, val };
 	}
 
-	uni_container dynamic::to_container() const
+    string dynamic::to_string() const
+    {
+        return type._context->to_string(_ptr->get());
+    }
+
+    uni_container dynamic::to_container() const
 	{
 		return type._context->to_container(_ptr->get());
 	}

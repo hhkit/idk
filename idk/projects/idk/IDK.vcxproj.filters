@@ -89,6 +89,12 @@
     <Filter Include="math\interp">
       <UniqueIdentifier>{c78cfeac-2107-48ce-841f-4eabae9d7857}</UniqueIdentifier>
     </Filter>
+    <Filter Include="reflect\detail">
+      <UniqueIdentifier>{53f59ace-a5cc-4e27-8aea-bb3b8f0abbd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="prefab">
+      <UniqueIdentifier>{ee5f83d5-e8dd-4fa8-b5a9-e37be0d0bf14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -206,13 +212,7 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="idk_reflect_types.h" />
-    <ClInclude Include="reflect\constructor_entry.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="reflect\reflect.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
-    <ClInclude Include="reflect\typed_context.inl">
       <Filter>reflect</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioSystem.h">
@@ -241,9 +241,6 @@
     </ClInclude>
     <ClInclude Include="util\string_hash.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="reflect\pretty_function.h">
-      <Filter>reflect</Filter>
     </ClInclude>
     <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
@@ -428,6 +425,59 @@
     <ClInclude Include="file\FileSystemIncludes.h">
       <Filter>file</Filter>
     </ClInclude>
+    <ClInclude Include="reflect\detail\constructor_entry.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\typed_context.inl">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\typeinfo.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\meta_manager.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\table_storage.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\typed_context.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\visit_detail.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\pretty_function.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="serialize\yaml.h" />
+    <ClInclude Include="prefab\PrefabFactory.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\Prefab.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PropertyOverride.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabData.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabInstance.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabUtility.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\circular_buffer.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Texture.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTarget.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -563,7 +613,24 @@
     <ClCompile Include="gfx\GfxDbgTest.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\GraphicsSystem.cpp" />
+    <ClCompile Include="gfx\GraphicsSystem.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\Prefab.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabFactory.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabUtility.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Texture.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\RenderTarget.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -635,9 +702,6 @@
     <None Include="ds\zip.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="reflect\constructor_entry.inl">
-      <Filter>reflect</Filter>
-    </None>
     <None Include="reflect\dynamic.inl">
       <Filter>reflect</Filter>
     </None>
@@ -704,6 +768,21 @@
     <None Include="res\ResourceMeta.inl">
       <Filter>res</Filter>
     </None>
+    <None Include="reflect\detail\constructor_entry.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\meta_manager.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\table_storage.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\visit_detail.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="ds\circular_buffer.inl">
+      <Filter>ds</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
@@ -722,6 +801,12 @@
       <Filter>_natvis</Filter>
     </Natvis>
     <Natvis Include="_natvis\guid.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\reflect.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\ds.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

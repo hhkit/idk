@@ -27,6 +27,12 @@ namespace idk::ogl
 
 		_opengl = std::make_unique<OpenGLState>();
 		_opengl->Setup();
+
+		_viewport_size = Core::GetSystem<Application>().GetScreenSize();
+		Core::GetSystem<Application>().OnScreenSizeChanged.Listen([this](ivec2 new_size)
+		{
+			_viewport_size = new_size;
+		});
 	}
 
 	void Win32GraphicsSystem::LateInit()
@@ -47,7 +53,7 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::RenderRenderBuffer()
 	{
-		glViewport(0, 0, 800, 600);
+		glViewport(0, 0, _viewport_size.x, _viewport_size.y);
 		glClearColor(0.f, 0.f, 0.25f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 

@@ -2,7 +2,7 @@
 #include <utility>
 #include "quaternion.h"
 
-namespace idk::math
+namespace idk
 {
 	template<typename T>
 	inline quaternion<T>::quaternion()
@@ -15,7 +15,7 @@ namespace idk::math
 	{
 	}
 	template<typename T>
-	inline quaternion<T>::quaternion(const vector<T, 3> & axis, radian<T> angle)
+	inline quaternion<T>::quaternion(const tvec<T, 3> & axis, trad<T> angle)
 	{
 		auto h = angle / 2;
 
@@ -33,6 +33,11 @@ namespace idk::math
 		return quaternion{ -x, -y, -z, w };
 	}
 	template<typename T>
+	quaternion<T>& quaternion<T>::normalize()
+	{
+		return static_cast<quaternion<T>&>(Base::normalize());
+	}
+	template<typename T>
 	quaternion<T>& quaternion<T>::operator*=(const quaternion& rhs)
 	{
 		return *this = (*this * rhs);
@@ -43,37 +48,37 @@ namespace idk::math
 		auto copy = *this;
 		const auto plus = T{ 1.0 };
 		const auto minus = T{ -1.0 };
-		copy.x = (this->wxyz * rhs.wxyz).dot(Base{ plus, minus, minus, minus });
-		copy.y = (this->wxyz * rhs.xwzy).dot(Base{ plus, plus, plus, minus });
-		copy.z = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
-		copy.w = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
+		copy.w = (this->wxyz * rhs.wxyz).dot(Base{ plus, minus, minus, minus });
+		copy.x = (this->wxyz * rhs.xwzy).dot(Base{ plus, plus, plus, minus });
+		copy.y = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
+		copy.z = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
 		return copy;
 	}
 
 	template<typename T>
-	inline quaternion<T>::operator matrix<T, 4, 4>() const
+	inline quaternion<T>::operator tmat<T, 4, 4>() const
 	{
-		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>
-	inline quaternion<T>::operator matrix<T, 4, 4>()
+	inline quaternion<T>::operator tmat<T, 4, 4>()
 	{
-		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>
-	quaternion<T>::operator matrix<T, 3, 3>() const
+	quaternion<T>::operator tmat<T, 3, 3>() const
 	{
 		auto copy = *this;
-		return copy.operator matrix<T, 3, 3>();
+		return copy.operator tmat<T, 3, 3>();
 	}
 
 	template<typename T>
-	quaternion<T>::operator matrix<T, 3, 3>()
+	quaternion<T>::operator tmat<T, 3, 3>()
 	{
 		this->normalize();
-		return matrix<T, 3, 3>
+		return tmat<T, 3, 3>
 		{
 			1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
 				2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
@@ -84,19 +89,19 @@ namespace idk::math
 namespace idk
 {
 	template<typename M, typename T>
-	auto quat_cast(math::quaternion<T>& q)
+	auto quat_cast(quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(math::quaternion<T>&& q)
+	auto quat_cast(quaternion<T>&& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(const math::quaternion<T>& q)
+	auto quat_cast(const quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}

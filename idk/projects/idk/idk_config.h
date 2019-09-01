@@ -11,7 +11,7 @@ namespace idk
 		, class Parent
 
 		/// EDITOR
-		//, class Prefab
+		,   class PrefabInstance
 
 		/// PHYSICS
 		,	class RigidBody

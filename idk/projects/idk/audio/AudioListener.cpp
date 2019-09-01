@@ -20,6 +20,7 @@ namespace idk
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 		audioSystem.SetMainAudioListener(GetHandle());
+		is_active = true;
 	}
 	void AudioListener::UpdateListenerPosition()
 	{

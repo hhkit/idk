@@ -110,4 +110,11 @@ namespace idk
 
 	template<typename T, typename... Ts>
 	struct is_variant_member<T, std::variant<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
+
+
+
+    // true if is integral/floating point, or is constructible to string
+    template<typename T>
+    struct is_basic_serializable : std::disjunction<
+        std::is_arithmetic<T>, std::is_constructible<string, T>> {};
 }

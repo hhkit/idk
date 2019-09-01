@@ -506,7 +506,7 @@ namespace idk
 	void small_string<CharT, Traits, Allocator>::pop_back()
 	{
 		if (_is_sso())
-			_rep.first().sso.buffer[_sso_buffer_size - (_rep.first().sso.size_diff += 2) >> 1] = '\0';
+			_rep.first().sso.buffer[_sso_buffer_size - ((_rep.first().sso.size_diff += 2) >> 1)] = '\0';
 		else
 			_rep.first().longer.ptr[--_rep.first().longer.size] = '\0';
 	}

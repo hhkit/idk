@@ -25,6 +25,7 @@ namespace idk::ogl
 		HGLRC _opengl_context;
 		unique_ptr<OpenGLState> _opengl;
 		color _clear_color;
+		ivec2 _viewport_size;
 
 		void CreateContext();
 		void InitOpenGL();

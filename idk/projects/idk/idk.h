@@ -31,28 +31,28 @@ namespace idk
 {
 	// math
 	using real = float;
-	using vec2 = math::vector<real, 2>;
-	using vec3 = math::vector<real, 3>;
-	using vec4 = math::vector<real, 4>;
+	using vec2 = tvec<real, 2>;
+	using vec3 = tvec<real, 3>;
+	using vec4 = tvec<real, 4>;
 
-	using ivec2 = math::vector<int, 2>;
-	using ivec3 = math::vector<int, 3>;
-	using ivec4 = math::vector<int, 4>;
+	using ivec2 = tvec<int, 2>;
+	using ivec3 = tvec<int, 3>;
+	using ivec4 = tvec<int, 4>;
 
-	using bvec2 = math::vector<bool, 2>;
-	using bvec3 = math::vector<bool, 3>;
-	using bvec4 = math::vector<bool, 4>;
+	using bvec2 = tvec<bool, 2>;
+	using bvec3 = tvec<bool, 3>;
+	using bvec4 = tvec<bool, 4>;
 
 	using idk::color;
 
-	using quat = math::quaternion<real>;
+	using quat = quaternion<real>;
 	
-	using mat2 = math::matrix<real, 2, 2>;
-	using mat3 = math::matrix<real, 3, 3>;
-	using mat4 = math::matrix<real, 4, 4>;
+	using mat2 = tmat<real, 2, 2>;
+	using mat3 = tmat<real, 3, 3>;
+	using mat4 = tmat<real, 4, 4>;
 
-	using rad = math::radian<real>;
-	using deg = math::degree<real>;
+	using rad = trad<real>;
+	using deg = tdeg<real>;
 
 	// time
 	using Clock = std::chrono::high_resolution_clock;
@@ -63,10 +63,10 @@ namespace idk
 	auto duration_cast(U&& time) {	return std::chrono::duration_cast<T>(std::forward<U>(time));	};
 
 	// math constants
-	constexpr auto pi      = math::constants::pi<real>();
+	constexpr auto pi      = constants::pi<real>();
 	constexpr auto half_pi = pi / 2;
-	constexpr auto two_pi  = math::constants::tau<real>();
-	constexpr auto epsilon = math::constants::epsilon<real>();
+	constexpr auto two_pi  = constants::tau<real>();
+	constexpr auto epsilon = constants::epsilon<real>();
 
 	// containers
 	using byte = std::byte;

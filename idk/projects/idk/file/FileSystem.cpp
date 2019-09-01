@@ -227,7 +227,7 @@ namespace idk {
 		auto file_index = getFile(mountPath);
 		// If we cannot find the file and user only wants to read, return an empty stream
 		// Else, we should create the file and return the stream for the user to write to
-		if (file_index._mount_id < 0)
+		if (validateKey(file_index) == false)
 		{
 			if (perms == FS_PERMISSIONS::READ)
 				return FStreamWrapper{};
@@ -288,24 +288,26 @@ namespace idk {
 
 	void FileSystem::initFile(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p)
 	{
-		f._full_path = p.string();
-		f._rel_path = p.relative_path().string();
-		f._filename = p.filename().string();
-		f._mount_path = p_dir._mount_path + "/" + f._filename;
-		f._extension = p.extension().string();
-		f._time = FS::last_write_time(p);
-		f._parent = p_dir._tree_index;
+		f._full_path	= p.string();
+		f._rel_path		= p.relative_path().string();
+		f._filename		= p.filename().string();
+		f._mount_path	= p_dir._mount_path + "/" + f._filename;
+		f._extension	= p.extension().string();
+		f._time			= FS::last_write_time(p);
+		f._parent		= p_dir._tree_index;
+		f._valid		= true;
 
 		p_dir._files_map.emplace(f._filename, f._tree_index);
 	}
 
 	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, std::filesystem::path& p)
 	{
-		d._full_path = p.string();
-		d._rel_path = p.relative_path().string();
-		d._filename = p.filename().string();
-		d._mount_path = p_dir._mount_path + "/" + d._filename;
-		d._parent = p_dir._tree_index;
+		d._full_path	= p.string();
+		d._rel_path		= p.relative_path().string();
+		d._filename		= p.filename().string();
+		d._mount_path	= p_dir._mount_path + "/" + d._filename;
+		d._parent		= p_dir._tree_index;
+		d._valid		= true;
 
 		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
@@ -364,16 +366,13 @@ namespace idk {
 			{
 				file_system_detail::fs_dir d;
 
-				file_system_detail::fs_key node;
-				node._mount_id = static_cast<int8_t>(index);
-				node._depth = currDepth;
-				node._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
+				d._tree_index._mount_id = static_cast<int8_t>(index);
+				d._tree_index._depth = currDepth;
+				d._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
 
 				initDir(d, mountSubDir, tmp);
 
-				d._tree_index = node;
-
-				mountSubDir._sub_dirs.emplace(d._filename, node);
+				mountSubDir._sub_dirs.emplace(d._filename, d._tree_index);
 				if (watch)
 					_directory_watcher.WatchDirectory(d);
 
@@ -683,8 +682,13 @@ namespace idk {
 	{
 		auto check_free_index = std::find_if( mount._path_tree[depth]._files.begin(),
 											  mount._path_tree[depth]._files.end(),
-											  [](const file_system_detail::fs_file& f) { return !f._valid; });
+											  [](const file_system_detail::fs_file& f) 
+												{ 
+													// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
+													return !f._valid && f._change_status == FS_CHANGE_STATUS::NO_CHANGE; 
+												});
 
+		// The conditions for reuse of a fs_file is that 
 		if (check_free_index != mount._path_tree[depth]._files.end())
 		{
 			auto& file_handle = Core::GetSystem<FileSystem>()._file_handles[check_free_index->_handle_index];
@@ -737,7 +741,7 @@ namespace idk {
 		auto end_pos = mount_path.find_last_of('/');
 		auto dir_index = getDir(mount_path.substr(0, end_pos));
 
-		if (dir_index._mount_id < 0)
+		if (validateKey(dir_index) == false)
 			return _empty_file;
 
 		auto& dir = getDir(dir_index);

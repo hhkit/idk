@@ -14,7 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "40 Launcher", "projects\gam
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "50 Unit Testing", "projects\UnitTests\UnitTests.vcxproj", "{8DD30D1D-92B8-4986-9327-365E684B89A7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "10 Core Library", "projects\IDK\IDK.vcxproj", "{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "10 Core Library", "projects\idk\IDK.vcxproj", "{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D} = {075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D}
 	EndProjectSection

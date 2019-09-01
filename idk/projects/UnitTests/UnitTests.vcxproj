@@ -48,7 +48,6 @@
     <ClInclude Include="pch.h" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />
-    <ClCompile Include="TestEditorCommands.cpp" />
     <ClCompile Include="TestSmallString.cpp" />
     <ClCompile Include="TestFileSystem.cpp" />
     <ClCompile Include="TestReflect.cpp" />
@@ -116,11 +115,18 @@
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
     </Link>
+    <CustomBuildStep>
+      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>x</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -148,6 +154,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -155,6 +162,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
+    <CustomBuildStep>
+      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>x</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

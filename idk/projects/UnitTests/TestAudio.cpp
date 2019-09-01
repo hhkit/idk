@@ -22,7 +22,6 @@
 #include <iostream>	
 #include <filesystem> //Using this until our filesystem is up	
 
-
 TEST(Audio, AudioSystemClassTest)
 {
 	using namespace idk;
@@ -131,7 +130,7 @@ TEST(Audio, AudioSystemClassTest)
 
 			if (elapsed.count() > 4 && !testCase3) {
 				std::cout << "Playing second sound to MUSIC group\n";
-				audioPtr2->ReassignSoundGroup(AudioClip::SubSoundGroup_MUSIC);
+				audioPtr2->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_MUSIC);
 
 				audioPtr2->Play();
 				testCase3 = true;

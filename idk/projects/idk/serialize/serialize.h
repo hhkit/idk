@@ -5,15 +5,6 @@
 namespace idk
 {
 
-	// true if is integral/floating point, or is convertible to string
-	template<typename T, typename>
-	struct is_basic_serializable;
-
-	// true if is integral/floating point, or is convertible to string
-	template<typename T>
-	constexpr auto is_basic_serializable_v = is_basic_serializable<T>::value;
-
-
 	// forward decls
 	namespace reflect { class dynamic; class type; }
 	class Scene;
@@ -31,11 +22,14 @@ namespace idk
 
 
 
+    template<typename T>
+    T parse_text(const string& str);
+
 	template<typename T>
 	void parse_text(const string& str, T& obj);
 
-	template<typename T>
-	T parse_text(const string& str);
+    template<>
+    void parse_text(const string& str, reflect::dynamic& obj);
 
 	template<> // parse scene
 	void parse_text(const string& str, Scene& scene);

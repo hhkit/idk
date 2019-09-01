@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Vector.h"
 
-namespace idk::math
+namespace idk
 {
-	template struct vector<float, 2>;
-	template struct vector<float, 3>;
-	template struct vector<float, 4>;
+	template struct tvec<float, 2>;
+	template struct tvec<float, 3>;
+	template struct tvec<float, 4>;
 }

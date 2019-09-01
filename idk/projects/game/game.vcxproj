@@ -76,7 +76,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)build\game\$(Configuration)\</IntDir>
     <TargetName>gameD</TargetName>
-    <LibraryPath>$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(SolutionDir)dep\lib\;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -88,7 +88,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)build\game\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(SolutionDir)dep\lib\;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <TargetName>game</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -111,7 +111,7 @@
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>
+      <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
@@ -181,7 +181,7 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
-      <Command>
+      <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
