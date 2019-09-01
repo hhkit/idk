@@ -5,19 +5,19 @@
 namespace idk
 {
 	template<typename T>
-	inline math::matrix<T, 4, 4> matrix_decomposition<T>::recompose() const
+	inline tmat<T, 4, 4> matrix_decomposition<T>::recompose() const
 	{
 		return translate(this->position) * mat4 { mat3{ rotation } *idk::scale(this->scale) };
 	}
 
 	template<typename T>
-	matrix_decomposition<T> decompose(const math::matrix<T, 4, 4> & mat)
+	matrix_decomposition<T> decompose(const tmat<T, 4, 4> & mat)
 	{
-		using vec_t = math::vector<T, 3>;
+		using vec_t = tvec<T, 3>;
 		auto working = mat;
 		auto retval = matrix_decomposition<T>();
 		retval.position = working[3];
-		working[3] = math::vector<T, 4>{ 0, 0, 0, 1 };
+		working[3] = tvec<T, 4>{ 0, 0, 0, 1 };
 
 		retval.scale = vec_t{ working[0].length(), working[1].length(), working[2].length() };
 
@@ -30,9 +30,9 @@ namespace idk
 	}
 
 	template<typename T>
-	math::quaternion<T> decompose_rotation_matrix(const math::matrix<T, 4, 4> & rotation)
+	quaternion<T> decompose_rotation_matrix(const tmat<T, 4, 4> & rotation)
 	{
-		math::quaternion<T> retval;
+		quaternion<T> retval;
 		constexpr auto _1 = T{ 1 };
 		constexpr auto _2 = T{ 2 };
 
@@ -46,9 +46,9 @@ namespace idk
 	}
 
 	template<typename T>
-	math::quaternion<T> decompose_rotation_matrix(const math::matrix<T, 3, 3> & rotation)
+	quaternion<T> decompose_rotation_matrix(const tmat<T, 3, 3> & rotation)
 	{
-		math::quaternion<T> retval;
+		quaternion<T> retval;
 		constexpr auto _1 = T{ 1 };
 		constexpr auto _2 = T{ 2 };
 

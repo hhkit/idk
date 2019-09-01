@@ -4,7 +4,7 @@ namespace idk
 {
 	float Texture::AspectRatio() const
 	{
-		return s_cast<float>(meta.size.x) / meta.size.y;
+		return s_cast<float>(_size.x) / _size.y;
 	}
 	ivec2 Texture::Size() const
 	{

@@ -475,6 +475,9 @@
     <ClInclude Include="gfx\Texture.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\RenderTarget.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -623,6 +626,9 @@
       <Filter>prefab</Filter>
     </ClCompile>
     <ClCompile Include="gfx\Texture.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\RenderTarget.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
   </ItemGroup>

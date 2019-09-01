@@ -8,14 +8,14 @@ namespace idk
 		union
 		{
 			struct { float r, g, b, a; };
-			math::vector<float, 3> as_vec3;
-			math::vector<float, 4> as_vec4;
+			tvec<float, 3> as_vec3;
+			tvec<float, 4> as_vec4;
 		};
 
 		constexpr color(void) noexcept;
 		constexpr color(float r, float g, float b, float a = float{ 1 }) noexcept;
-		constexpr explicit color(const math::vector<float, 3>&) noexcept;
-		constexpr explicit color(const math::vector<float, 4>&) noexcept;
+		constexpr explicit color(const tvec<float, 3>&) noexcept;
+		constexpr explicit color(const tvec<float, 4>&) noexcept;
 
 		// accessors
 		constexpr float& operator[](size_t) noexcept;
@@ -35,8 +35,8 @@ namespace idk
 		constexpr color& operator*=(float) noexcept;
 
 		// conversion operators
-		constexpr explicit operator math::vector<float,3>() const noexcept;
-		constexpr explicit operator math::vector<float,4>() const noexcept;
+		constexpr explicit operator tvec<float,3>() const noexcept;
+		constexpr explicit operator tvec<float,4>() const noexcept;
 	};
 }
 #include "color.inl"

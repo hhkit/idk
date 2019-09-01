@@ -53,7 +53,7 @@ TEST(Reflect, TestReflectConstexpr)
 	EXPECT_STREQ(string{ t.name() }.c_str(), "idk::span<int>");
 
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<float>() }.c_str(), "float");
-	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<vec4>() }.c_str(), "idk::math::vector<float,4>");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<vec4>() }.c_str(), "idk::vector<float,4>");
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<reflect_this>() }.c_str(), "reflect_this");
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<array>() }.c_str(), "idk::array");
 

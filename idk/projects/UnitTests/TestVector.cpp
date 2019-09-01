@@ -37,13 +37,13 @@ TEST(Math, VectorMagnitudeNormalize)
 	{
 		auto f = dist(generator);
 		EXPECT_LT(
-			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().length() - 1.f), idk::constants::epsilon<float>()
 		);
 		EXPECT_LT(
-			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::constants::epsilon<float>()
 		);
 		EXPECT_LT(
-			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::constants::epsilon<float>()
 		);
 	}
 }

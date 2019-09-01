@@ -6,10 +6,10 @@
 #include "Vector.h"
 #include <meta/tuple.h>
 
-namespace idk::math
+namespace idk
 {
 	template<typename T, unsigned D>
-	inline constexpr vector<T, D>::vector(const T& fill)
+	inline constexpr tvec<T, D>::tvec(const T& fill)
 	{
 		for (auto& elem : *this)
 			elem = fill;
@@ -17,26 +17,26 @@ namespace idk::math
 
 	template<typename T, unsigned D>
 	template<typename ...Args, typename>
-	constexpr vector<T, D>::vector(const Args& ... args)
-		: vector{ detail::VectorConcat<T>(args...) }
+	constexpr tvec<T, D>::tvec(const Args& ... args)
+		: tvec{ detail::VectorConcat<T>(args...) }
 	{
 	}
 
 	template<typename T, unsigned D>
 	template<unsigned D2, typename>
-	constexpr vector<T, D>::vector(const vector<T, D2>& rhs)
-		: vector{ tuple_construct<vector>(detail::VectorToTuple<T>(rhs, std::make_index_sequence<D>{})) }
+	constexpr tvec<T, D>::tvec(const tvec<T, D2>& rhs)
+		: tvec{ tuple_construct<tvec>(detail::VectorToTuple<T>(rhs, std::make_index_sequence<D>{})) }
 	{
 	}
 
 	template<typename T, unsigned D>
-	T vector<T, D>::length_sq() const
+	T tvec<T, D>::length_sq() const
 	{
 		return dot(*this);
 	}
 
 	template<typename T, unsigned D>
-	T vector<T, D>::length() const
+	T tvec<T, D>::length() const
 	{
 		if constexpr (std::is_same_v<float, T>)
 			return sqrtf(length_sq());
@@ -45,13 +45,13 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	T vector<T, D>::distance_sq(const vector& rhs) const
+	T tvec<T, D>::distance_sq(const tvec& rhs) const
 	{
 		return (rhs - *this).length_sq();
 	}
 
 	template<typename T, unsigned D>
-	 T vector<T, D>::distance(const vector& rhs) const
+	 T tvec<T, D>::distance(const tvec& rhs) const
 	{
 		 if constexpr (std::is_same_v<float, T>)
 			 return sqrtf(distance_sq(rhs));
@@ -60,7 +60,7 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	T vector<T, D>::dot(const vector& rhs) const
+	T tvec<T, D>::dot(const tvec& rhs) const
 	{
 		T accum{};
 		for (auto& elem : *this * rhs)
@@ -69,7 +69,7 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D>& vector<T, D>::normalize()
+	tvec<T, D>& tvec<T, D>::normalize()
 	{
 		auto mag = length();
 
@@ -80,48 +80,48 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::get_normalized() const
+	tvec<T, D> tvec<T, D>::get_normalized() const
 	{
 		auto copy = *this;
 		return copy.normalize();
 	}
 
 	template<typename T, unsigned D>
-	constexpr T* vector<T, D>::begin() noexcept
+	constexpr T* tvec<T, D>::begin() noexcept
 	{
 		return std::begin(values);
 	}
 	template<typename T, unsigned D>
-	constexpr T* vector<T, D>::end() noexcept
+	constexpr T* tvec<T, D>::end() noexcept
 	{
 		return std::end(values);
 	}
 	template<typename T, unsigned D>
-	constexpr const T* vector<T, D>::begin() const noexcept
+	constexpr const T* tvec<T, D>::begin() const noexcept
 	{
 		return std::begin(values);
 	}
 
 	template<typename T, unsigned D>
-	constexpr const T* vector<T, D>::end() const noexcept
+	constexpr const T* tvec<T, D>::end() const noexcept
 	{
 		return std::end(values);
 	}
 
 	template<typename T, unsigned D>
-	constexpr T* vector<T, D>::data() noexcept
+	constexpr T* tvec<T, D>::data() noexcept
 	{
 		return begin();
 	}
 
 	template<typename T, unsigned D>
-	constexpr const T* vector<T, D>::data() const noexcept
+	constexpr const T* tvec<T, D>::data() const noexcept
 	{
 		return begin();
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D>& vector<T, D>::operator+=(const vector& rhs)
+	tvec<T, D>& tvec<T, D>::operator+=(const tvec& rhs)
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
@@ -134,14 +134,14 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::operator+(const vector& rhs) const
+	tvec<T, D> tvec<T, D>::operator+(const tvec& rhs) const
 	{
 		auto copy = *this;
 		return copy += rhs;
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D>& vector<T, D>::operator-=(const vector& rhs)
+	tvec<T, D>& tvec<T, D>::operator-=(const tvec& rhs)
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
@@ -153,7 +153,7 @@ namespace idk::math
 		return *this;
 	}
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::operator-() const
+	tvec<T, D> tvec<T, D>::operator-() const
 	{
 		auto copy = *this;
 		for (auto& elem : copy)
@@ -162,14 +162,14 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::operator-(const vector& rhs) const
+	tvec<T, D> tvec<T, D>::operator-(const tvec& rhs) const
 	{
 		auto copy = *this;
 		return copy -= rhs;
 	}
 
 	template<typename T, unsigned D>
-	vector<T,D>& vector<T, D>::operator*=(const vector& rhs)
+	tvec<T,D>& tvec<T, D>::operator*=(const tvec& rhs)
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
@@ -181,14 +181,14 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T,D> vector<T, D>::operator*(const vector& rhs) const
+	tvec<T,D> tvec<T, D>::operator*(const tvec& rhs) const
 	{
 		auto copy = *this;
 		return copy *= rhs;
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D>& vector<T, D>::operator *= (const T& coeff)
+	tvec<T, D>& tvec<T, D>::operator *= (const T& coeff)
 	{
 		for (auto& elem : *this)
 			elem *= coeff;
@@ -196,14 +196,14 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::operator * (const T& coeff) const
+	tvec<T, D> tvec<T, D>::operator * (const T& coeff) const
 	{
 		auto copy = *this;
 		return copy *= coeff;
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D>& vector<T, D>::operator/=(const vector& rhs)
+	tvec<T, D>& tvec<T, D>::operator/=(const tvec& rhs)
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
@@ -215,7 +215,7 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::operator/(const vector& rhs) const
+	tvec<T, D> tvec<T, D>::operator/(const tvec& rhs) const
 	{
 		auto copy = *this;
 		return copy /= rhs;
@@ -223,7 +223,7 @@ namespace idk::math
 
 
 	template<typename T, unsigned D>
-	vector<T, D>& vector<T, D>::operator /= (const T& coeff)
+	tvec<T, D>& tvec<T, D>::operator /= (const T& coeff)
 	{
 		for (auto& elem : *this)
 			elem /= coeff;
@@ -231,7 +231,7 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> vector<T, D>::operator / (const T& coeff) const
+	tvec<T, D> tvec<T, D>::operator / (const T& coeff) const
 	{
 		auto copy = *this;
 		return copy /= coeff;
@@ -239,7 +239,7 @@ namespace idk::math
 
 
 	template<typename T, unsigned D>
-	inline bool vector<T, D>::operator==(const vector& rhs) const
+	inline bool tvec<T, D>::operator==(const tvec& rhs) const
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
@@ -253,25 +253,25 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned D>
-	inline bool vector<T, D>::operator!=(const vector& rhs) const
+	inline bool tvec<T, D>::operator!=(const tvec& rhs) const
 	{
 		return !operator==(rhs);
 	}
 
 	template<typename T, unsigned D>
-	constexpr T& vector<T, D>::operator[](size_t i) noexcept
+	constexpr T& tvec<T, D>::operator[](size_t i) noexcept
 	{
 		return data()[i];
 	}
 
 	template<typename T, unsigned D>
-	constexpr const T& vector<T, D>::operator[](size_t i) const noexcept
+	constexpr const T& tvec<T, D>::operator[](size_t i) const noexcept
 	{
 		return data()[i];
 	}
 
 	template<typename T, unsigned D>
-	vector<T, D> operator*(const T& coeff, const vector<T, D>& v)
+	tvec<T, D> operator*(const T& coeff, const tvec<T, D>& v)
 	{
 		return v * coeff;
 	}
