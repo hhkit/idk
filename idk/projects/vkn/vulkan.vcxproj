@@ -205,6 +205,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="idkTexture.h" />
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="RenderState.h" />
@@ -229,6 +230,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
+    <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="idkTexture.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="RenderState.cpp" />

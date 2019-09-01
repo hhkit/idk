@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
 #include<vkn/UboManager.h>
+#include <vkn/FrameRenderer.h>
 
 namespace idk::win
 {
@@ -14,24 +15,6 @@ namespace idk::win
 }
 namespace idk::vkn
 {
-	struct RenderStateV2
-	{
-		vk::CommandBuffer cmd_buffer;
-		UboManager ubo_manager;
-		bool has_commands = false;
-		void FlagRendered() { has_commands = true; }
-		void Reset();
-		RenderStateV2() = default;
-		RenderStateV2(const RenderStateV2&) = delete;
-		RenderStateV2(RenderStateV2&&) = default;
-	};
-
-	struct RenderFrameObject
-	{
-		vector<RenderStateV2> states;
-		vk::UniqueCommandBuffer pri_buffer;
-		vk::UniqueCommandBuffer transition_buffer;
-	};
 	using Windows = win::Windows;
 	class VulkanState;
 
@@ -54,10 +37,8 @@ namespace idk::vkn
 
 		VulkanState& GetVulkanHandle();
 	private:
-		void RenderGraphicsState(const GraphicsState&,RenderStateV2& render_state);
 		std::unique_ptr<VulkanState> instance_;
-		vector<vk::UniqueCommandBuffer> cmd_buffers;
-		vector<RenderFrameObject> frames;
+		vector<FrameRenderer> _frame_renderers;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;

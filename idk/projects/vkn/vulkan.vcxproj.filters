@@ -66,6 +66,9 @@
     <ClInclude Include="MemoryAllocator.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="FrameRenderer.h">
+      <Filter>render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -122,6 +125,7 @@
     </ClCompile>
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="FrameRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
