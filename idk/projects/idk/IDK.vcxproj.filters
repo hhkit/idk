@@ -489,6 +489,9 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplateFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -648,6 +651,7 @@
     <ClCompile Include="gfx\Material.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

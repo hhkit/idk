@@ -3,8 +3,6 @@
 #include <idk_opengl/program/Program.h>
 namespace idk::ogl
 {
-	class FragmentTemplate;
-
 	class OpenGLMaterial
 		: public Material
 	{

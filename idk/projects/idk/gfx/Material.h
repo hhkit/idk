@@ -32,10 +32,12 @@ namespace idk
 		, public MetaTag<MaterialMeta>
 	{
 	public:
+		virtual ~Material() = default;
+
 		virtual bool BuildShader(RscHandle<ShaderTemplate>, string_view material_uniforms, string_view material_code) = 0;
 		RscHandle<ShaderProgram> GetShaderProgram() const;
 	protected:
-		RscHandle<ShaderProgram> _program;
-		virtual ~Material() = default;
+		RscHandle<ShaderProgram> _program{meta.compiled_shader_guid};
+		void OnMetaUpdate(const MaterialMeta& newmeta) override;
 	};
 }

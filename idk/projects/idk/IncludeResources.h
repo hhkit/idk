@@ -4,6 +4,7 @@
 #include <gfx/Mesh.h>
 #include <gfx/Material.h>
 #include <gfx/ShaderProgram.h>
+#include <gfx/ShaderTemplate.h>
 #include <gfx/Texture.h>
 #include <gfx/RenderTarget.h>
 #include <test/TestResource.h>

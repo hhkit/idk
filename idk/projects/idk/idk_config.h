@@ -59,6 +59,7 @@ namespace idk
 		,	class TestResource
 		,   class AudioClip
 		//,	class Font
+		,	class ShaderTemplate
 		,	class Mesh
 		,   class Material
 		,	class Texture

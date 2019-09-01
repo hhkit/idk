@@ -4,6 +4,7 @@
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <gfx/MeshRenderer.h>
+#include <gfx/ShaderTemplateFactory.h>
 #include <res/ForwardingExtensionLoader.h>
 
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
@@ -24,7 +25,6 @@ namespace idk::ogl
 	{
 		CreateContext();
 		InitOpenGL();
-		InitResourceLoader();
 
 		_opengl = std::make_unique<OpenGLState>();
 		_opengl->Setup();
@@ -38,6 +38,7 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::LateInit()
 	{
+		InitResourceLoader();
 		_opengl->GenResources();
 	}
 
@@ -151,8 +152,10 @@ namespace idk::ogl
 	}
 
 	void Win32GraphicsSystem::InitResourceLoader()
-	{	
+	{
+
 		// register factories
+		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
 		Core::GetResourceManager().RegisterFactory<ShaderProgramFactory>();
@@ -160,6 +163,8 @@ namespace idk::ogl
 		// register extensions
 		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vert");
 		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".frag");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".pfrag");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderTemplate>>(".tmpt");
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

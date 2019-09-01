@@ -26,10 +26,14 @@ namespace idk
 				};
 			}
 
-			static array<shared_ptr<void>, sizeof...(Rs)> GenDefaults()
+			static array<void(*)(ResourceManager*), sizeof...(Rs)> GenDefaults()
 			{
-				return array<shared_ptr<void>, sizeof...(Rs)>{
-					std::shared_ptr<Rs>()...
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[](ResourceManager* resource_man)
+					{
+						if (auto loader = &resource_man->GetLoader<Rs>())
+							resource_man->_default_resources[ResourceID<Rs>] = loader->Create();
+					}...
 				};
 			}
 		};
@@ -46,6 +50,12 @@ namespace idk
 		auto exe_dir = std::string{ fs.GetExeDir() };
 		fs.Mount(exe_dir + "/assets", "/assets");
 		fs.SetAssetDir(exe_dir + "/assets");
+	}
+
+	void ResourceManager::LateInit()
+	{
+		for (auto& func : detail::ResourceHelper::GenDefaults())
+			func(this);
 	}
 
 	void ResourceManager::Shutdown()
@@ -97,6 +107,28 @@ namespace idk
 			}
 			else
 				return loader_itr->second->Create(file);
+		}();
+
+		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
+		return resources;
+	}
+
+	FileResources ResourceManager::LoadFile(FileHandle file, const MetaFile& meta)
+	{
+		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
+		if (find_file != _loaded_files.end())
+			return find_file->second;
+
+		if (!file)
+			return FileResources{};
+
+		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
+		if (loader_itr == _extension_loaders.end())
+			return FileResources{};
+
+		auto resources = [&]()
+		{
+			return loader_itr->second->Create(file, meta);
 		}();
 
 		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);

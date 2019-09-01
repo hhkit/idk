@@ -3,6 +3,17 @@
 
 namespace idk
 {
+	namespace detail
+	{
+		auto& replace(string& configureme, string_view findme, string_view replacewithme)
+		{
+			auto find = configureme.find(findme);
+			if (find != string::npos)
+				configureme.replace(find, findme.length(), replacewithme);
+			return configureme;
+		}
+	}
+
 	ShaderTemplate::ShaderTemplate(string_view code)
 		: template_code{ code }
 	{
@@ -11,8 +22,8 @@ namespace idk
 	string ShaderTemplate::Instantiate(string_view material_uniforms, string_view material_code) const
 	{
 		auto replicate = template_code;
-		replicate.replace(replicate.find(uniform_replacer), uniform_replacer.length(), material_uniforms);
-		replicate.replace(replicate.find(code_replacer), uniform_replacer.length(), material_code);
+		detail::replace(replicate, uniform_replacer, material_uniforms);
+		detail::replace(replicate, code_replacer, material_code);
 		return replicate;
 	}
 }
