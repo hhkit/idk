@@ -24,7 +24,7 @@ namespace idk
 	struct TextureMeta
 	{
 		TextureType type          = TextureType::_2D;
-		ColorFormat color_format  = RGB8;
+		ColorFormat color_format  = ColorFormat::RGB8;
 		ivec2       size          = ivec2{ 1024, 1024 };
 		bool        render_target = false;
 		UVMode      uv_mode       = UVMode::Repeat;

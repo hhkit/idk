@@ -472,7 +472,9 @@
     <ClInclude Include="ds\circular_buffer.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Texture.h" />
+    <ClInclude Include="gfx\Texture.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -620,7 +622,9 @@
     <ClCompile Include="prefab\PrefabUtility.cpp">
       <Filter>prefab</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\Texture.cpp" />
+    <ClCompile Include="gfx\Texture.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
