@@ -652,6 +652,7 @@
       <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
+    <ClCompile Include="serialize\yaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -804,6 +805,7 @@
     <None Include="ds\circular_buffer.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="serialize\yaml.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

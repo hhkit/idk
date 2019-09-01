@@ -184,6 +184,7 @@
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
+    <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
@@ -263,6 +264,7 @@
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
     <None Include="serialize\serialize.inl" />
+    <None Include="serialize\yaml.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
