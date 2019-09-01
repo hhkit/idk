@@ -122,7 +122,7 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y </Command>
+      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>x</Outputs>
@@ -163,7 +163,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y </Command>
+      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>x</Outputs>

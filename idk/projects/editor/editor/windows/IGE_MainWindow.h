@@ -29,6 +29,7 @@ namespace idk {
 		virtual void Update() override;
 	protected:
 		virtual void BeginWindow() override;
+		virtual void EndWindow_V() override;
 	private:
 
 

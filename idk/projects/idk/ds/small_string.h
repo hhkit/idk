@@ -15,7 +15,7 @@ namespace idk
 	template<typename CharT,
 		     typename Traits = std::char_traits<CharT>,
 		     typename Allocator = std::allocator<CharT>>
-	class alignas(32) small_string
+	class /*alignas(32)*/ small_string
 	{
 	public:
 		using traits_type = Traits;

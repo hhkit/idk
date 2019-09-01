@@ -22,7 +22,7 @@ namespace idk {
 
 
 	IGE_MainWindow::IGE_MainWindow()
-		:IGE_IWindow{ "MainWindow1",true,ImVec2{ 0,0 },ImVec2{ 0,0 } } {		//Delegate Constructor to set window size
+		:IGE_IWindow{ "MainWindow",true,ImVec2{ 0,0 },ImVec2{ 0,0 } } {		//Delegate Constructor to set window size
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
 		window_flags = ImGuiWindowFlags_NoDocking 
@@ -35,6 +35,9 @@ namespace idk {
 					 | ImGuiWindowFlags_NoNavFocus 
 					 | ImGuiWindowFlags_MenuBar 
 					 | ImGuiWindowFlags_NoBackground;
+
+		size_condition_flags = ImGuiCond_Always;
+		pos_condition_flags = ImGuiCond_Always;
 		
 	}
 
@@ -55,15 +58,32 @@ namespace idk {
 		//window_size = ImGui::GetWindowSize();
 		//window_position = ImGui::GetWindowPos();
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		window_size = viewport->Size;
 
 		//ImGui::SetNextWindowPos(viewport->Pos);
 		//ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Always);
 		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::SetNextWindowBgAlpha(0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
+	}
+
+	void IGE_MainWindow::EndWindow_V()
+	{
+		EndWindow();
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		//Check if mouse is at this window or not
+		is_mouse_hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+		is_window_collapsed = ImGui::IsWindowCollapsed();
+		window_position = ImGui::GetWindowPos();
+		window_size = viewport->Size;
+
+		itemCounter = 0;
+
+		ImGui::End();
 
 	}
 
@@ -71,10 +91,11 @@ namespace idk {
 	void IGE_MainWindow::Update() {
 
 		ImGui::PopStyleVar(3); //Pop from BeginWindow()
+		ImGui::PopStyleColor(); //Pop from BeginWindow()
 
-		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f });
 
 		/*Main Menu Bar*/
 		if (ImGui::BeginMenuBar()) {
@@ -176,18 +197,85 @@ namespace idk {
 			ImGui::SameLine();
 			DrawHelpMarker("Shortcut: F1");
 
-			ImGui::SameLine();
+			//ImGui::SameLine();
 
+			//ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 			//Draw FPS at menu bar at the top right
-			//ImGui::SameLine(editorRef.GetScreenWidth() - 90.0f);
+			//ImGui::SameLine(viewport->Size.x - 90.0f);
 
+			//Core::GetSystem<Application>().
 			//ImGui::Text("FPS:%-.2f", editorRef.GetFPS());
 
-			
+
+			ImGui::PopStyleColor(2);
 
 			ImGui::EndMenuBar(); //MainMenuBar
 		}
+
+
+
+
+		const ImVec2 toolBarSize{ window_size.x, 30.0f };
+		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar 
+									 | ImGuiWindowFlags_NoScrollbar
+									 | ImGuiWindowFlags_NoResize
+									 | ImGuiWindowFlags_NoSavedSettings
+									 | ImGuiWindowFlags_NoMove
+									 | ImGuiWindowFlags_NoDocking
+									 | ImGuiWindowFlags_NoCollapse;
+
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4{ 0.64f, 0.64f, 0.64f, 1.0f });
+
+
+
+		ImGui::BeginChild("ToolBar", toolBarSize, true, childFlags);
+		ImGui::PopStyleColor();
+		const ImVec2 toolButtonSize = ImVec2{ 40.0f,20.0f };
+		const ImVec2 toolButtonStartPos = ImVec2{ 6.0f,4.0f };
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f); //Have the buttons look like buttons
+
+
+		ImGui::SetCursorPosX(toolButtonStartPos.x);
+		ImGui::SetCursorPosY(toolButtonStartPos.y);
+		if (ImGui::Button("##HandTool", toolButtonSize)) {
+			//Do stuff
+		}
+
+		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x*1);
+		ImGui::SetCursorPosY(toolButtonStartPos.y);
+
+		if (ImGui::Button("##MoveTool", toolButtonSize)) {
+			//Do stuff
+		}
+
+		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 2);
+		ImGui::SetCursorPosY(toolButtonStartPos.y);
+
+		if (ImGui::Button("##RotateTool", toolButtonSize)) {
+			//Do stuff
+		}
+
+		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 3);
+		ImGui::SetCursorPosY(toolButtonStartPos.y);
+
+		if (ImGui::Button("##ScaleTool", toolButtonSize)) {
+			//Do stuff
+		}
+
+		ImGui::PopStyleVar();
+
+
+		ImGui::EndChild();
+
+
+
+		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
+
+		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 
 	}
 

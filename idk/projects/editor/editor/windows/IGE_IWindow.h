@@ -113,6 +113,9 @@ namespace idk {
 		//You can override these in your child classes to do something else before the window ends drawing
 		virtual void EndWindow()	{};
 
+		//These can be overridden if you know what you're doing.
+		virtual void BeginWindow_V();
+		virtual void EndWindow_V();
 
 		//Creates a "(?)" text and creates a tool tip of argument handled.
 		void DrawHelpMarker(const char* desc);
@@ -142,12 +145,12 @@ namespace idk {
 
 		void DrawBorderRect(const ImVec2& minPos, const ImVec2& maxPos, const ImColor& color = ImColor(255, 255, 255), const float& lineSize = 1.0f);
 
-	private:
 		unsigned int itemCounter;
 
+	private:
 
-		void BeginWindow_V();
-		void EndWindow_V();
+
+		
 
 	};
 

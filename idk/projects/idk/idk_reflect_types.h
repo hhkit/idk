@@ -4,11 +4,14 @@
 #include <core/Handle.h>
 #include <res/Guid.h>
 #include <res/FileResources.h>
+#include <prefab/PrefabData.h>
+#include <prefab/PropertyOverride.h>
 
 namespace idk
 {
 	class GameObject;
 	class Mesh;
+    class Prefab;
 }
 
 namespace idk::reflect
@@ -44,5 +47,12 @@ namespace idk::reflect
 		, variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> // UniformInstance
 		, vector<string>
 		, hash_table<Guid, string>
+        , vector<reflect::dynamic>
+
+        , PrefabData
+        , vector<PrefabData>
+        , PropertyOverride
+        , vector<PropertyOverride>
+        , RscHandle<Prefab>
 	>;
 }
