@@ -43,6 +43,7 @@
     <ClInclude Include="gfx\GfxDbgTest.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\RenderObject.h" />
+    <ClInclude Include="gfx\ShaderTemplate.h" />
     <ClInclude Include="gfx\Texture.h" />
     <ClInclude Include="gfx\ShaderProgram.h" />
     <ClInclude Include="gfx\vertex_descriptor.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
     <ClCompile Include="gfx\buffer_desc.cpp" />
@@ -167,6 +169,7 @@
     <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="gfx\ShaderTemplate.cpp" />
     <ClCompile Include="gfx\Texture.cpp" />
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />

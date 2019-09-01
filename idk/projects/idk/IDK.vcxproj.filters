@@ -95,6 +95,9 @@
     <Filter Include="prefab">
       <UniqueIdentifier>{ee5f83d5-e8dd-4fa8-b5a9-e37be0d0bf14}</UniqueIdentifier>
     </Filter>
+    <Filter Include="anim">
+      <UniqueIdentifier>{cfa80d33-f180-41f7-b0fe-108ffbff19c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -344,9 +347,6 @@
     <ClInclude Include="gfx\Mesh.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="anim\SkinnedMeshRenderer.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Camera.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
@@ -449,7 +449,6 @@
     <ClInclude Include="reflect\detail\pretty_function.h">
       <Filter>reflect\detail</Filter>
     </ClInclude>
-    <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="prefab\PrefabFactory.h">
       <Filter>prefab</Filter>
@@ -478,7 +477,18 @@
     <ClInclude Include="gfx\RenderTarget.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ShaderProgram.h" />
+    <ClInclude Include="gfx\ShaderTemplate.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderProgram.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Skeleton.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\SkinnedMeshRenderer.h">
+      <Filter>anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -631,6 +641,12 @@
     </ClCompile>
     <ClCompile Include="gfx\RenderTarget.cpp">
       <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplate.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Material.cpp">
+      <Filter>gfx\object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

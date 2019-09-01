@@ -3,8 +3,4 @@
 
 namespace idk::ogl
 {
-	RscHandle<ShaderProgram> OpenGLMaterial::GetShaderProgram() const
-	{
-		return program;
-	}
 }
