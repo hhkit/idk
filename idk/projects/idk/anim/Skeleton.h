@@ -12,11 +12,15 @@ namespace idk::anim
 			int  _parent;
 			mat4 _offset;
 		};
+
 		Skeleton() = default;
+		Skeleton(const vector<Bone>& bones, const hash_table<string, size_t>& bone_table);
 
 	private:
 		
 		mat4 _global_inverse;
+
+		hash_table<string, size_t> _bone_table;
 		vector<Bone> _bones;
 	};
 }

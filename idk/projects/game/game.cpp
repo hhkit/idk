@@ -63,10 +63,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();
 	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
-	//go->GetComponent<Transform>()->scale /= 100.f;
+	go->GetComponent<Transform>()->scale /= 100.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+
+	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" }).resources[0].As<Mesh>();
+
 	mesh_rend->material_instance.material = 
 		Core::GetResourceManager().LoadFile(FileHandle("/assets/shader/flat_color.frag")).resources[0].As<Material>();
 	c->Run();

@@ -151,6 +151,7 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
