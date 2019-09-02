@@ -785,6 +785,7 @@
     <None Include="ds\circular_buffer.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="phys\collision.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

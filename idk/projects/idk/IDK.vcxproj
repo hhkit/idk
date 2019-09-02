@@ -227,6 +227,7 @@
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
+    <None Include="phys\collision.inl" />
     <None Include="reflect\detail\meta_manager.inl" />
     <None Include="reflect\detail\table_storage.inl" />
     <None Include="reflect\detail\visit_detail.inl" />
