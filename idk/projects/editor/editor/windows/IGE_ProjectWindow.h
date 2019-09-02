@@ -16,24 +16,21 @@ This window displays the editor window where you can select and modify gameobjec
 #include <editor/windows/IGE_IWindow.h>
 
 namespace idk {
-	class IGE_SceneView :
+	class IGE_ProjectWindow :
 		public IGE_IWindow
 	{
 	public:
-		IGE_SceneView();
+		IGE_ProjectWindow();
 
 		virtual void BeginWindow() override;
 		virtual void Update() override;
 
-		void SetTexture(void* textureToRender); //Place the camera texture here. EG: SetTexture((void*)(intptr_t)myGluintTexture);
-
-		vec2 GetScreenSize(); //To get the size of the frame being drawn onto the window.
+	
 	protected:
 
 
 	private:
 
-		ImTextureID sceneTexture = nullptr;
 
 	};
 

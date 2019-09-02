@@ -16,6 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <app/Application.h>
+#include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <iostream>
 
 namespace idk {
@@ -42,14 +43,6 @@ namespace idk {
 	}
 
 
-	IGE_MainWindow::~IGE_MainWindow() {
-	}
-
-	void IGE_MainWindow::Initialize() {
-
-	}
-
-
 	void IGE_MainWindow::BeginWindow()
 	{
 		//ivec2 screen = Core::GetSystem<Application>().GetScreenSize();
@@ -66,7 +59,7 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f }); //The File,Edit Tab
 
 	}
 
@@ -95,7 +88,7 @@ namespace idk {
 
 
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //When you press File or Edit tab
 
 		/*Main Menu Bar*/
 		if (ImGui::BeginMenuBar()) {
@@ -225,8 +218,9 @@ namespace idk {
 									 | ImGuiWindowFlags_NoDocking
 									 | ImGuiWindowFlags_NoCollapse;
 
-
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4{ 0.64f, 0.64f, 0.64f, 1.0f });
+		ImGuiStyle& style = ImGui::GetStyle();
+		
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBg]);
 
 
 		//Tool bar
@@ -277,8 +271,26 @@ namespace idk {
 		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
 
 		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y -toolBarSize.y-(ImGui::GetFrameHeight()*2)), ImGuiDockNodeFlags_PassthruCentralNode);
+		
+		//Imgui internal
+		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
+		ImGui::SetCursorPosY(window_size.y- ImGui::GetFrameHeight()); //30 is child size, 18 is default font size
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBg]);
+
+		ImGui::BeginChild("HintBar", ImVec2{ window_size.x, ImGui::GetFrameHeight() }, true, childFlags);
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+
+
+		ImGui::TextUnformatted(hint_text_output.c_str());
+
+
+		ImGui::EndChild();
 	}
 
 
