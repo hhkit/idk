@@ -658,6 +658,9 @@
     <ClCompile Include="serialize\yaml.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
+    <ClCompile Include="serialize\yaml_parse.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -839,7 +842,7 @@
     <Natvis Include="_natvis\ds.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
-    <Natvis Include="yaml.natvis">
+    <Natvis Include="_natvis\yaml.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>
