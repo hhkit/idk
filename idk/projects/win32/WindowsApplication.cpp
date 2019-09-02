@@ -62,6 +62,26 @@ namespace idk::win
 			return ivec2{};
 		return ivec2((rect.right - rect.left), (rect.bottom - rect.top));
 	}
+	vec2 Windows::GetMouseScreenPos()
+	{
+		ivec2 sSize = GetScreenSize();
+		return vec2{ 
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) };
+	}
+	vec2 Windows::GetMouseScreenDel()
+	{
+		//ivec2 sSize = GetScreenSize();
+		return ndc_screendel;
+	}
+	ivec2 Windows::GetMousePixelPos()
+	{
+		return screenpos;
+	}
+	ivec2 Windows::GetMousePixelDel()
+	{
+		return screendel;
+	}
 	void Windows::PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func)
 	{
 		winProcList.push_back(func); 
@@ -79,6 +99,10 @@ namespace idk::win
 	{
 		return _input_manager->GetKeyUp(static_cast<int>(key));
 	}
+	bool Windows::IsMouseDragging()
+	{
+		return _dragging;
+	}
 	char Windows::GetChar()
 	{
 		return _input_manager->GetChar();
@@ -91,6 +115,7 @@ namespace idk::win
 		for (auto& elem : winProcList)
 			elem(_hWnd, message, wParam, lParam);
 
+		ivec2 sSize = GetScreenSize();
 		switch (message)
 		{
 		case WM_KEYDOWN:
@@ -103,6 +128,68 @@ namespace idk::win
 			break;
 		case WM_CHAR:
 			_input_manager->SetChar((char)wParam);
+			break;
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+			screenpos.x = LOWORD(lParam);
+			screenpos.y = HIWORD(lParam);
+
+			ndc_screendel = vec2{
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
+			vec2{
+			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+			
+			screendel = screenpos - old_screenpos;
+			old_screenpos = screenpos;
+
+			_dragging = DragDetect(hWnd, POINT{screenpos.x,screenpos.y});
+
+			std::cout << std::boolalpha << _dragging << std::endl;
+			_input_manager->SetMouseDragging(_dragging);
+
+			SetFocus(hWnd);
+			SetActiveWindow(hWnd);
+			_input_manager->SetMouseDown((int)wParam);
+
+			break;
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+			screenpos.x = LOWORD(lParam);
+			screenpos.y = HIWORD(lParam);
+
+			ndc_screendel = vec2{
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
+			vec2{
+			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+
+			_dragging = false;
+			_input_manager->SetMouseDragging(_dragging);
+
+			screendel = screenpos - old_screenpos;
+			old_screenpos = screenpos;
+
+			_input_manager->SetMouseUp((int)wParam);
+			break;
+		case WM_MOUSEMOVE:
+			screenpos.x = LOWORD(lParam);
+			screenpos.y = HIWORD(lParam);
+
+			ndc_screendel = vec2{
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
+			vec2{
+			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+
+			screendel = screenpos - old_screenpos;
+			old_screenpos = screenpos;
+
+			break;
+		case WM_MOUSEWHEEL:
 			break;
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);

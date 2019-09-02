@@ -668,7 +668,6 @@
     <ClCompile Include="gfx\Material.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
     <ClCompile Include="anim\AnimationClip.cpp">
       <Filter>anim</Filter>
     </ClCompile>
@@ -681,6 +680,9 @@
     </ClCompile>
     <ClCompile Include="serialize\yaml_parse.cpp">
       <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx\object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

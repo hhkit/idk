@@ -36,6 +36,7 @@ namespace idk {
 
 	void IGE_ProjectWindow::BeginWindow()
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{0.0f,50.0f});
 
 
 
@@ -43,11 +44,12 @@ namespace idk {
 	void IGE_ProjectWindow::Update()
 	{
 		
+		ImGui::PopStyleVar();
 
 
 
 		//Toolbar
-		const ImVec2 toolBarSize{ window_size.x, 20.0f };
+		const ImVec2 toolBarSize{ window_size.x, 18.0f };
 		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
 			| ImGuiWindowFlags_NoScrollbar
 			| ImGuiWindowFlags_NoResize
@@ -64,11 +66,15 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		//Tool bar
+
+		ImGui::SetCursorPos(ImVec2{ 0.0f,ImGui::GetFrameHeight() });
 		ImGui::BeginChild("ProjectToolBar", toolBarSize, false, childFlags);
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
 
 		ImGui::EndChild();
+
+		ImGui::Columns(2);
 
 	}
 

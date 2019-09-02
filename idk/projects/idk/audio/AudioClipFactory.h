@@ -16,7 +16,7 @@ namespace idk
 		: public ResourceFactory <AudioClip> {
 
 	public:
-		virtual unique_ptr<AudioClip> Create() override;
+		virtual unique_ptr<AudioClip> GenerateDefaultResource() override;
 		virtual unique_ptr<AudioClip> Create(FileHandle filepath) override;
 
 	};

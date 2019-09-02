@@ -193,7 +193,7 @@ TEST(Serialize, TestSerializeScene)
 {
 	GameState gs;
 	SceneFactory sf;
-	auto scene = sf.Create();
+	auto scene = sf.GenerateDefaultResource();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();
@@ -218,7 +218,8 @@ TEST(Serialize, TestSerializeScene)
 TEST(Serialize, TestParseScene)
 {
 	GameState gs;
-	SceneFactory sf;
+	SceneFactory real_sf;
+	ResourceFactory<Scene>& sf = real_sf;
 	auto scene = sf.Create();
 
 	parse_text(serialized_scene_0, *scene);

@@ -224,7 +224,7 @@ namespace idk {
 
 
 		//Tool bar
-		ImGui::BeginChild("ToolBar", toolBarSize, true, childFlags);
+		ImGui::BeginChild("ToolBar", toolBarSize, false, childFlags);
 		ImGui::PopStyleColor();
 
 
