@@ -21,9 +21,12 @@ namespace idk
 		// movement
 		virtual vec2 GetMouseScreenPos() = 0;
 		virtual vec2 GetMouseScreenDel() = 0;
+		virtual ivec2 GetMousePixelPos() = 0;
+		virtual ivec2 GetMousePixelDel() = 0;
 		virtual bool GetKeyDown(Key) = 0;
 		virtual bool GetKey(Key) = 0;
 		virtual bool GetKeyUp(Key) = 0;
+		virtual bool IsMouseDragging() = 0;
 		virtual char GetChar() = 0;
 
 		// windows

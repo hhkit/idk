@@ -2,6 +2,8 @@
 #include "MeshRenderer.h"
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <gfx/GraphicsSystem.h>
+#include <gfx/Camera.h>
 
 namespace idk
 {
@@ -17,7 +19,7 @@ namespace idk
 			material_instance,
 
 			vec3{},
-			GetGameObject()->GetComponent<Transform>()->LocalMatrix(),
+			GetGameObject()->GetComponent<Transform>()->LocalMatrix() * Core::GetSystem<GraphicsSystem>().CurrentCamera()->ViewMatrix() ,
 
 			cast_shadows,
 			receive_shadows
