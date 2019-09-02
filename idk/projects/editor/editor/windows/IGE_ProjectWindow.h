@@ -6,8 +6,7 @@
 //@brief	
 
 /*
-This window controls the top main menu bar. It also controls the docking
-of the editor.
+This window displays the editor window where you can select and modify gameobjects.
 */
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -17,19 +16,19 @@ of the editor.
 #include <editor/windows/IGE_IWindow.h>
 
 namespace idk {
-	class IGE_MainWindow :
+	class IGE_ProjectWindow :
 		public IGE_IWindow
 	{
 	public:
-		IGE_MainWindow();
+		IGE_ProjectWindow();
 
+		virtual void BeginWindow() override;
 		virtual void Update() override;
 
-		string hint_text_output	{"Place hint text here"}; //This is modified
-
+	
 	protected:
-		virtual void BeginWindow() override;
-		virtual void EndWindow_V() override;
+
+
 	private:
 
 

@@ -13,6 +13,7 @@ namespace idk
 		};
 
 		constexpr color(void) noexcept;
+		constexpr color(float fill) noexcept;
 		constexpr color(float r, float g, float b, float a = float{ 1 }) noexcept;
 		constexpr explicit color(const tvec<float, 3>&) noexcept;
 		constexpr explicit color(const tvec<float, 4>&) noexcept;

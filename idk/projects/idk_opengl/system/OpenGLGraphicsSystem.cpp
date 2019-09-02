@@ -57,7 +57,8 @@ namespace idk::ogl
 	{
 		glViewport(0, 0, _viewport_size.x, _viewport_size.y);
 		glClearColor(0.f, 0.f, 0.25f, 1.f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		_opengl->RenderDrawBuffer();	
 	}

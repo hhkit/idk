@@ -17,3 +17,4 @@ Include all windows here
 
 #include <editor/windows/IGE_MainWindow.h>
 #include <editor/windows/IGE_SceneView.h>
+#include <editor/windows/IGE_ProjectWindow.h>

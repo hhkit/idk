@@ -11,14 +11,23 @@ in VS_OUT
 //__MATERIAL_UNIFORMS;
 
 // declare output buffers here
-layout(location = 0) out vec4 out_color;
+layout(location = 0) out vec3 out_albedo;
+layout(location = 1) out float out_metallic;
+layout(location = 2) out float out_roughness;
+layout(location = 3) out float out_ambient_o;
 
 void main()
 {
 	// local scope here, graph will assign to this 
-	vec4 color = vec4(1.0);
+	vec3  albedo    = vec4(1.0, 0.0, 0.0, 1.0);
+	float metallic  = 0.5; 
+	float roughness = 0.5;
+	float ambient_o = 0;
 
 	//__MATERIAL_CODE__;
 
-	out_color = vec4(color, 0.0);
+	out_albedo    = albedo;
+	out_metallic  = metallic; 
+	out_roughness = roughness;
+	out_ambient_o = ambient_o;
 }

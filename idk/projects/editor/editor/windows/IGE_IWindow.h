@@ -59,10 +59,15 @@ namespace idk {
 		/*--------------------------------------------------
 		----------------------------------------------------
 
-					PUBLIC ABSTRACT FUNCTIONS
+					PUBLIC FUNCTIONS
 
 		----------------------------------------------------
 		--------------------------------------------------*/
+
+		//Initializes the window. This is for advanced use, such as modifying a variable before update or wanting a window color
+		//Most of the time, this is empty.
+		//This is called after ImGui is initialized.
+		virtual void Initialize()	{};
 
 		//Repositions and rescales window to how it was initialized. Note that this ignores pivoting from initialized.
 		void ResetWindowPosSize();
@@ -96,10 +101,7 @@ namespace idk {
 		//Functions you can use when you inherit this class. These are mostly wrapper functions that help when creating your window
 		//For each function call, it draw the next one below.
 
-		//Initializes the window. This is for advanced use, such as modifying a variable before update or wanting a window color
-		//Most of the time, this is empty.
-		//This is called after ImGui is initialized.
-		virtual void Initialize()	{};
+
 		//Updates and draws the values of the window. This is the function you have to define in your derrived classes
 		virtual void Update()	   = 0;
 

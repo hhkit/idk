@@ -6,6 +6,10 @@ namespace idk
 	constexpr color::color(void) noexcept
 		: r{}, g{}, b{}, a{ 1.f }
 	{}
+	inline constexpr color::color(float fill) noexcept
+		: color {fill, fill, fill}
+	{
+	}
 	constexpr color::color(float r, float g, float b, float a) noexcept
 		: as_vec4{ r, g, b, a }
 	{
