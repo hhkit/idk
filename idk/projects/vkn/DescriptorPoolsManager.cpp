@@ -23,11 +23,11 @@ namespace idk::vkn
 		};
 		pool = device.createDescriptorPoolUnique(create_info, nullptr, vk::DispatchLoaderDefault{});
 	}
-	vk::DescriptorPool DescriptorPoolsManager::Add(uint32_t num_ds)
+	vk::DescriptorPool DescriptorPoolsManager::Add(uint32_t num_ds,vk::DescriptorType type)
 	{
 		uint32_t new_cap = base_chunk_size;
 		while (num_ds > new_cap) new_cap *= 2;
-		auto& new_manager = managers.emplace_back(new_cap, *view.Device());
+		auto& new_manager = managers[type].emplace_back(new_cap, *view.Device(),type);
 		new_manager.size = num_ds;
 		return *new_manager.pool;
 	}
@@ -41,16 +41,22 @@ namespace idk::vkn
 
 	void DescriptorPoolsManager::Reset(vk::DescriptorPool& pool)
 	{
-		auto result = std::find_if(managers.begin(), managers.end(), [pool](auto& manager) {return *manager.pool == pool; });
-		if (result != managers.end())
-			ResetManager(*result);
+		for(auto& [type,managers_] : managers)
+		{
+			type;
+			auto result = std::find_if(managers_.begin(), managers_.end(), [pool](auto& manager) {return *manager.pool == pool; });
+			if (result != managers_.end())
+				ResetManager(*result);
+		}
+
 	}
 
 	void DescriptorPoolsManager::ResetAll()
 	{
-		for (auto& manager : managers)
+		for (auto& pair : managers)
 		{
-			ResetManager(manager);
+			for(auto&manager :pair.second)
+				ResetManager(manager);
 		}
 	}
 
