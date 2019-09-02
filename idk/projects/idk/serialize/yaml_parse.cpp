@@ -157,14 +157,42 @@ namespace idk::yaml
 
 	static void on_curly_brace(parser_state& p)
 	{
-		p.mode() = flow_map;
-		*p.stack.back() = node{ mapping_type{} };
+        if (p.str.size())
+        {
+            p.str += *p;
+            return;
+        }
+
+        if (p.mode() == unknown)
+            p.mode() = flow_map;
+        else if (p.mode() == flow_map)
+            p.mode_stack.push_back(flow_map);
+        else if (p.mode() == flow_seq)
+        {
+            p.mode_stack.push_back(flow_map);
+            p.stack.push_back(&p.stack.back()->emplace_back());
+        }
+        *p.stack.back() = node{ mapping_type{} };
 	}
 
 	static void on_square_brace(parser_state& p)
 	{
-		p.mode() = flow_seq;
-		*p.stack.back() = node{ sequence_type{} };
+        if (p.str.size())
+        {
+            p.str += *p;
+            return;
+        }
+
+        if (p.mode() == unknown)
+            p.mode() = flow_seq;
+        else if (p.mode() == flow_map)
+            p.mode_stack.push_back(flow_seq);
+        else if (p.mode() == flow_seq)
+        {
+            p.mode_stack.push_back(flow_seq);
+            p.stack.push_back(&p.stack.back()->emplace_back());
+        }
+        *p.stack.back() = node{ sequence_type{} };
 	}
 
     static void on_comma(parser_state& p)
@@ -271,8 +299,8 @@ namespace idk::yaml
 
                 case ':': on_colon(p); continue;
                 case ',': on_comma(p); continue;
-				case '{': p.mode_stack.push_back(unknown); on_curly_brace(p); break;
-				case '[': p.mode_stack.push_back(unknown); on_square_brace(p); break;
+				case '{': on_curly_brace(p); break;
+				case '[': on_square_brace(p); break;
                 case '}': on_flow_close(p); continue;
 				default: { if (printable(*p)) p.str += *p; } break;
 				}
@@ -285,8 +313,8 @@ namespace idk::yaml
 				case '\n': break;
 
                 case ',': on_comma(p); continue;
-				case '{': p.stack.push_back(&p.stack.back()->emplace_back()); p.mode_stack.push_back(unknown); on_curly_brace(p); break;
-				case '[': p.stack.push_back(&p.stack.back()->emplace_back()); p.mode_stack.push_back(unknown); on_square_brace(p); break;
+				case '{': on_curly_brace(p); break;
+				case '[': on_square_brace(p); break;
 				case ']': on_flow_close(p); continue;
 				default: { if (printable(*p)) p.str += *p; } break;
 				}
