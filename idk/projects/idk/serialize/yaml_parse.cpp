@@ -84,6 +84,12 @@ namespace idk::yaml
 
 	static void on_hyphen(parser_state& p)
 	{
+        if (p.mode() == flow_map || p.mode() == flow_seq)
+        {
+            ++p;
+            return;
+        }
+
 		if (p.new_block && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
 		{
 			p.mode() = block_seq;
@@ -214,6 +220,14 @@ namespace idk::yaml
 
     static void on_flow_close(parser_state& p)
     {
+        if ((p.mode() == flow_seq && *p == '}') ||
+            (p.mode() == flow_map && *p == ']'))
+        {
+            p.token += *p;
+            ++p;
+            return;
+        }
+
         strip_trailing_ws(p.token);
         if (p.token.size())
         {
@@ -231,8 +245,33 @@ namespace idk::yaml
         skipws_until_lf(++p);
     }
 
+    static void on_exclamation_mark(parser_state& p)
+    {
+        if (p.token.size())
+        {
+            p.token += *p;
+            return;
+        }
+        while (++p)
+        {
+            if (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
+            {
+                skipws_until_lf(p);
+                break;
+            }
+
+            p.token += *p;
+        }
+    }
+
 	static void on_lf(parser_state& p)
 	{
+        if (p.mode() == flow_map || p.mode() == flow_seq)
+        {
+            ++p;
+            return;
+        }
+
 		strip_trailing_ws(p.token);
 
 		int indent = handle_indent(p);
@@ -290,48 +329,20 @@ namespace idk::yaml
 
 		while (p && p.stack.size())
 		{
-			if (p.mode() == flow_map)
-			{
-				switch (*p)
-				{
-				case '\r':
-				case '\n': break;
+            switch (*p)
+            {
+            case '\r': break;
+            case '\n': on_lf(p); continue;
 
-                case ':': on_colon(p); continue;
-                case ',': on_comma(p); continue;
-				case '{': on_curly_brace(p); break;
-				case '[': on_square_brace(p); break;
-                case '}': on_flow_close(p); continue;
-				default: { if (printable(*p)) p.token += *p; } break;
-				}
-			}
-			else if (p.mode() == flow_seq)
-			{
-				switch (*p)
-				{
-				case '\r':
-				case '\n': break;
-
-                case ',': on_comma(p); continue;
-				case '{': on_curly_brace(p); break;
-				case '[': on_square_brace(p); break;
-				case ']': on_flow_close(p); continue;
-				default: { if (printable(*p)) p.token += *p; } break;
-				}
-			}
-			else
-			{
-				switch (*p)
-				{
-				case '-': on_hyphen(p); continue;
-				case ':': on_colon(p); continue;
-				case '{': on_curly_brace(p); break;
-				case '[': on_square_brace(p); break;
-				case '\r': break;
-				case '\n': on_lf(p); continue;
-				default: { if (printable(*p)) p.token += *p; } break;
-				}
-			}
+            case '-': on_hyphen(p); continue;
+            case ':': on_colon(p); continue;
+            case ',': on_comma(p); continue;
+            case '{': on_curly_brace(p); break;
+            case '[': on_square_brace(p); break;
+            case '}':
+            case ']': on_flow_close(p); continue;
+            default: { if (printable(*p)) p.token += *p; } break;
+            }
 
 			++p;
 		} // while
