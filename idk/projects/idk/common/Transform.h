@@ -14,6 +14,7 @@ namespace idk
 		vec3 position;
 
 		vec3 Forward() const;
+		vec3 Right() const;
 		vec3 Up() const;
 
 		mat4 LocalMatrix() const;

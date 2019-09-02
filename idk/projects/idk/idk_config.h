@@ -2,6 +2,8 @@
 #include <meta/tuple.h>
 namespace idk
 {
+	namespace anim { class Skeleton; }
+
 	constexpr auto MaxScene = 8;
 
 	/// NEVER CHANGE THIS TUPLE WITHOUT ASKING THE TECH LEAD
@@ -59,6 +61,7 @@ namespace idk
 		,	class TestResource
 		,   class AudioClip
 		//,	class Font
+		,	class Prefab
 		,	class ShaderTemplate
 		,	class Mesh
 		,   class Material
@@ -66,7 +69,7 @@ namespace idk
 		,	class ShaderProgram
 		,	class RenderTarget
 		//,	class Animation
-		//, class Skeleton
+		,	anim::Skeleton
 		//,	class Level
 	>;
 

@@ -101,7 +101,9 @@ namespace idk
 
 		// Initializes the opengl buffers
 		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
+		retval.resources.emplace_back(mesh_handle);
 
+		/*
 		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();
 		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
 
@@ -110,7 +112,8 @@ namespace idk
 		mat4 skeleton_transform = fbx_loader_detail::Helper::initMat4(ai_scene->mRootNode->mTransformation);
 		skeleton.SetSkeletonTransform(skeleton_transform);
 
-		retval.resources.emplace_back(mesh_handle);
+		return retval;
+		*/
 		return retval;
 	}
 

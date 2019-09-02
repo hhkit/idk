@@ -26,5 +26,7 @@ namespace idk
 		friend class ResourceFactory<Res>;
 		template<typename T>
 		friend struct detail::ResourceManager_detail;
+
+		static_assert(ResourceID<Res> != ResourceCount, "Resource T must be included in the idk_config.h/Resources tuple");
 	};
 }
