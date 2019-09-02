@@ -98,6 +98,9 @@
     <Filter Include="anim">
       <UniqueIdentifier>{cfa80d33-f180-41f7-b0fe-108ffbff19c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gfx\light">
+      <UniqueIdentifier>{b10c8175-8919-495a-97ef-274c5cdf9337}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -492,6 +495,12 @@
     <ClInclude Include="gfx\ShaderTemplateFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\Light.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\LightTypes.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -653,6 +662,7 @@
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
+    <ClCompile Include="anim\Skeleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -38,6 +38,8 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\Light.h" />
+    <ClInclude Include="gfx\LightTypes.h" />
     <ClInclude Include="gfx\RenderTarget.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\GfxDbgTest.h" />

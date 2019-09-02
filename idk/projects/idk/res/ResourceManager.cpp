@@ -117,7 +117,7 @@ namespace idk
 	{
 		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
 		if (find_file != _loaded_files.end())
-			return find_file->second;
+			return ReloadFile(file);
 
 		if (!file)
 			return FileResources{};
