@@ -24,6 +24,9 @@ namespace idk {
 		IGE_MainWindow();
 
 		virtual void Update() override;
+
+		string hint_text_output	{"Place hint text here"}; //This is modified
+
 	protected:
 		virtual void BeginWindow() override;
 		virtual void EndWindow_V() override;

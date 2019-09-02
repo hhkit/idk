@@ -45,6 +45,31 @@ namespace idk {
 		
 
 
+
+		//Toolbar
+		const ImVec2 toolBarSize{ window_size.x, 20.0f };
+		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoSavedSettings
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoCollapse;
+
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBgActive]);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		//Tool bar
+		ImGui::BeginChild("ProjectToolBar", toolBarSize, false, childFlags);
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar(3);
+
+		ImGui::EndChild();
+
 	}
 
 }
