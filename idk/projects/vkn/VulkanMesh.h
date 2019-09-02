@@ -18,25 +18,17 @@ namespace idk::vkn
 	{
 	public:
 		using buffers_t = hash_table<attrib_index ,MeshBuffer>;
-		const MeshBuffer& Get(attrib_index index)const 
-		{
-			auto itr = buffers.find(index);
-			if(itr!=buffers.end())
-				return itr->second;
-			throw std::exception{ "Attempting to get invalid attrib index from vulkan mesh." };
-			//return MeshBuffer{};
-		}
+		const MeshBuffer& Get(attrib_index index)const;
 		const buffers_t& Buffers()const { return buffers; }
 		int GetAttribs() const override;
 		const std::optional<MeshBuffer>& GetIndexBuffer()const { return index_buffer; }
 		uint32_t IndexCount()const { return index_count; }
-		void SetIndexBuffer(MeshBuffer&& buffer, uint32_t count) { index_buffer = std::move(buffer); index_count = count; }
-		void SetBuffer(attrib_index type,MeshBuffer&& buffer)
-		{
-			buffers[type]=std::move(buffer);
-		}
+		void SetIndexBuffer(MeshBuffer&& buffer, uint32_t count, vk::IndexType type);
+		void SetBuffer(attrib_index type, MeshBuffer&& buffer);
+		vk::IndexType IndexType()const { return index_type; }
 	private:
 		buffers_t buffers{};
+		vk::IndexType index_type = vk::IndexType::eUint16;
 		uint32_t index_count;
 		std::optional<MeshBuffer> index_buffer;
 	};

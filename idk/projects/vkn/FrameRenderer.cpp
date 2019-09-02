@@ -253,7 +253,7 @@ namespace idk::vkn
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
 			{
-				cmd_buffer.bindIndexBuffer(*(*oidx).buffer, 0, vk::IndexType::eUint16, vk::DispatchLoaderDefault{});
+				cmd_buffer.bindIndexBuffer(*(*oidx).buffer, 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
 				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 			}
 		}
