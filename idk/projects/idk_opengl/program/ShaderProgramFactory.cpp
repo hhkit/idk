@@ -4,7 +4,7 @@
 #include <sstream>
 namespace idk::ogl
 {
-	unique_ptr<ShaderProgram> ShaderProgramFactory::Create()
+	unique_ptr<ShaderProgram> ShaderProgramFactory::DefaultResource()
 	{
 		return std::make_unique<ogl::Program>();
 	}

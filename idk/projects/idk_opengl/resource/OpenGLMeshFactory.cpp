@@ -4,7 +4,7 @@
 
 namespace idk::ogl
 {
-	unique_ptr<Mesh> OpenGLMeshFactory::Create()
+	unique_ptr<Mesh> OpenGLMeshFactory::DefaultResource()
 	{
 		auto retval = std::make_unique<OpenGLMesh>();
 		struct Vertex
@@ -44,6 +44,11 @@ namespace idk::ogl
 		);
 
 		return retval;
+	}
+
+	unique_ptr<Mesh> OpenGLMeshFactory::Create()
+	{
+		return std::make_unique<OpenGLMesh>();
 	}
 
 	unique_ptr<Mesh> OpenGLMeshFactory::Create(FileHandle)
