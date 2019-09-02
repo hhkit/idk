@@ -24,12 +24,13 @@ namespace idk
 		//assert(currCamera);
 		auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
+		//Please ignore all of this first
 		if (app_sys.GetKey(Key::A)) tfm->position += vec3{ -0.16, 0.0, 0.0 };
 		if (app_sys.GetKey(Key::D)) tfm->position += vec3{ +0.16, 0.0, 0.0 };
 		if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.16, 0.0 };
 		if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.16, 0.0 };
 
-		
+		//Please ignore all of this first
 		if (app_sys.GetKey(Key::Q)) tfm->rotation = (quat{ vec3{0,1,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
 		if (app_sys.GetKey(Key::E)) tfm->rotation = (quat{ vec3{0,1,0}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
 		if (app_sys.GetKey(Key::Z)) tfm->rotation = (quat{ vec3{1,0,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();

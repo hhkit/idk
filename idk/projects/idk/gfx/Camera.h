@@ -40,7 +40,7 @@ namespace idk
 		CamResult currentPosition() const;
 		CamResult currentTarget() const;
 		CamResult currentDirection() const;
-		ViewportPointToRay();
+		Ray ViewportPointToRay();
 
 		mat4 ViewMatrix() const;
 		mat4 ProjectionMatrix() const;
