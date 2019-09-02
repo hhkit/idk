@@ -189,6 +189,9 @@ namespace idk
 			case FS_CHANGE_STATUS::RENAMED:
 				// Very straightforward. Since only the name was changed, don't have to do anything here I think.
 				break;
+			case FS_CHANGE_STATUS::WRITTEN:
+				// Very straightforward. Since only the name was changed, don't have to do anything here I think.
+				break;
 			default:
 				break;
 			}
@@ -352,8 +355,10 @@ namespace idk
 				internal_file._change_status = FS_CHANGE_STATUS::WRITTEN;
 
 				changed_files.push_back(internal_file._tree_index);
+				return;
 			}
 		}
+		std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
 	}
 
 	void file_system_detail::DirectoryWatcher::checkDirCreated(file_system_detail::fs_dir& mountDir)

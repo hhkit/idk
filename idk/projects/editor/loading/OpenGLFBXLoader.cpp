@@ -99,7 +99,16 @@ namespace idk
 		// Loads all the vertex bone weights and indices
 		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_entries, bones_table, vertices);
 
+		// Initializes the opengl buffers
 		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
+
+		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();
+		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
+
+		skeleton = anim::Skeleton{ bones, bones_table };
+
+		mat4 skeleton_transform = fbx_loader_detail::Helper::initMat4(ai_scene->mRootNode->mTransformation);
+		skeleton.SetSkeletonTransform(skeleton_transform);
 
 		retval.resources.emplace_back(mesh_handle);
 		return retval;

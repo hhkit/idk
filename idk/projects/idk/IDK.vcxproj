@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="anim\AnimationClip.h" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="anim\AnimationClip.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
