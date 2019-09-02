@@ -12,7 +12,7 @@ namespace idk::yaml
 		vector<node*> stack{ &root };
 		vector<_mode> mode_stack{ unknown };
 		vector<int> block_indents;
-		string str;
+		string token;
 		bool new_block = true;
 		string_view::iterator p;
 		const string_view::iterator end;
@@ -121,7 +121,7 @@ namespace idk::yaml
 
 		if (!p.new_block || printable(p[1]))
 		{
-			p.str += *p;
+			p.token += *p;
 			++p;
 		}
 	}
@@ -130,9 +130,9 @@ namespace idk::yaml
 	{
         if (p.mode() == flow_map && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
         {
-            strip_trailing_ws(p.str);
-            p.stack.push_back(&(*p.stack.back())[p.str]);
-            p.str.clear();
+            strip_trailing_ws(p.token);
+            p.stack.push_back(&(*p.stack.back())[p.token]);
+            p.token.clear();
             skipws_until_lf(++p);
             return;
         }
@@ -140,9 +140,9 @@ namespace idk::yaml
 		{
 			p.mode() = block_map;
 			p.mode_stack.push_back(unknown);
-            strip_trailing_ws(p.str);
-			p.stack.push_back(&(*p.stack.back())[p.str]);
-			p.str.clear();
+            strip_trailing_ws(p.token);
+			p.stack.push_back(&(*p.stack.back())[p.token]);
+			p.token.clear();
 			skipws_until_lf(++p);
 			p.new_block = false;
 			return;
@@ -150,16 +150,16 @@ namespace idk::yaml
 
 		if (!p.new_block || printable(p[1]))
 		{
-			p.str += *p;
+			p.token += *p;
 			++p;
 		}
 	}
 
 	static void on_curly_brace(parser_state& p)
 	{
-        if (p.str.size())
+        if (p.token.size())
         {
-            p.str += *p;
+            p.token += *p;
             return;
         }
 
@@ -177,9 +177,9 @@ namespace idk::yaml
 
 	static void on_square_brace(parser_state& p)
 	{
-        if (p.str.size())
+        if (p.token.size())
         {
-            p.str += *p;
+            p.token += *p;
             return;
         }
 
@@ -197,34 +197,34 @@ namespace idk::yaml
 
     static void on_comma(parser_state& p)
     {
-        strip_trailing_ws(p.str);
-        if (p.str.size())
+        strip_trailing_ws(p.token);
+        if (p.token.size())
         {
             if (p.mode() == flow_seq)
-                p.stack.back()->emplace_back(p.str);
+                p.stack.back()->emplace_back(p.token);
             else
             {
-                *p.stack.back() = node{ p.str };
+                *p.stack.back() = node{ p.token };
                 p.stack.pop_back();
             }
-            p.str.clear();
+            p.token.clear();
         }
         skipws_until_lf(++p);
     }
 
     static void on_flow_close(parser_state& p)
     {
-        strip_trailing_ws(p.str);
-        if (p.str.size())
+        strip_trailing_ws(p.token);
+        if (p.token.size())
         {
             if (p.mode() == flow_seq)
-                p.stack.back()->emplace_back(p.str);
+                p.stack.back()->emplace_back(p.token);
             else
             {
-                *p.stack.back() = node{ p.str };
+                *p.stack.back() = node{ p.token };
                 p.stack.pop_back();
             }
-            p.str.clear();
+            p.token.clear();
         }
         p.stack.pop_back(); 
         p.mode_stack.pop_back(); 
@@ -233,17 +233,17 @@ namespace idk::yaml
 
 	static void on_lf(parser_state& p)
 	{
-		strip_trailing_ws(p.str);
+		strip_trailing_ws(p.token);
 
 		int indent = handle_indent(p);
 		if (!p)
 			return;
 
-		if (p.str.size())
+		if (p.token.size())
 		{
-			*p.stack.back() = node{ p.str };
+			*p.stack.back() = node{ p.token };
 			p.stack.pop_back();
-			p.str.clear();
+			p.token.clear();
             p.mode_stack.pop_back();
 		}
 
@@ -302,7 +302,7 @@ namespace idk::yaml
 				case '{': on_curly_brace(p); break;
 				case '[': on_square_brace(p); break;
                 case '}': on_flow_close(p); continue;
-				default: { if (printable(*p)) p.str += *p; } break;
+				default: { if (printable(*p)) p.token += *p; } break;
 				}
 			}
 			else if (p.mode() == flow_seq)
@@ -316,7 +316,7 @@ namespace idk::yaml
 				case '{': on_curly_brace(p); break;
 				case '[': on_square_brace(p); break;
 				case ']': on_flow_close(p); continue;
-				default: { if (printable(*p)) p.str += *p; } break;
+				default: { if (printable(*p)) p.token += *p; } break;
 				}
 			}
 			else
@@ -329,17 +329,17 @@ namespace idk::yaml
 				case '[': on_square_brace(p); break;
 				case '\r': break;
 				case '\n': on_lf(p); continue;
-				default: { if (printable(*p)) p.str += *p; } break;
+				default: { if (printable(*p)) p.token += *p; } break;
 				}
 			}
 
 			++p;
 		} // while
 
-		if (p.str.size())
+		if (p.token.size())
 		{
-			strip_trailing_ws(p.str);
-			*p.stack.back() = node{ p.str };
+			strip_trailing_ws(p.token);
+			*p.stack.back() = node{ p.token };
 		}
 
 		return p.root;
