@@ -42,14 +42,6 @@ namespace idk {
 	}
 
 
-	IGE_MainWindow::~IGE_MainWindow() {
-	}
-
-	void IGE_MainWindow::Initialize() {
-
-	}
-
-
 	void IGE_MainWindow::BeginWindow()
 	{
 		//ivec2 screen = Core::GetSystem<Application>().GetScreenSize();

@@ -21,16 +21,19 @@ namespace idk {
 	{
 	public:
 		IGE_SceneView();
-		~IGE_SceneView();
 
-
-		virtual void Initialize() override;
+		virtual void BeginWindow() override;
 		virtual void Update() override;
+
+		void SetTexture(void* textureToRender); //Place the camera texture here. EG: SetTexture((void*)(intptr_t)myGluintTexture);
+
+		vec2 GetScreenSize(); //To get the size of the frame being drawn onto the window.
 	protected:
 
 
 	private:
 
+		ImTextureID sceneTexture = nullptr;
 
 	};
 
