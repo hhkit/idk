@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  
+  <Type Name="idk::yaml::node">
+    <DisplayString Condition="_value._Which == 0">&lt;null&gt;</DisplayString>
+    <DisplayString Condition="_value._Which == 1">&lt;scalar&gt; {*(idk::yaml::scalar_type*)&amp;_value}</DisplayString>
+    <DisplayString Condition="_value._Which == 2">&lt;sequence&gt; {*(idk::yaml::sequence_type*)&amp;_value}</DisplayString>
+    <DisplayString Condition="_value._Which == 3">&lt;mapping&gt; {*(idk::yaml::mapping_type*)&amp;_value}</DisplayString>
+    <Expand>
+      <ExpandedItem Condition="_value._Which == 1">*(idk::yaml::scalar_type*)&amp;_value</ExpandedItem>
+      <ExpandedItem Condition="_value._Which == 2">*(idk::yaml::sequence_type*)&amp;_value</ExpandedItem>
+      <ExpandedItem Condition="_value._Which == 3">*(idk::yaml::mapping_type*)&amp;_value</ExpandedItem>
+    </Expand>
+  </Type>
+  
+</AutoVisualizer>

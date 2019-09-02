@@ -4,14 +4,32 @@
 namespace idk::yaml
 {
     enum _mode : char { block_map, block_seq, flow_map, flow_seq, comment };
+	struct parser_state
+	{
+		parser_state(string_view sv) : p{ sv.begin() }, end{ sv.end() } {}
+
+		node root;
+		vector<node*> stack{ &root };
+		vector<int> block_indents;
+		string str;
+		_mode mode = block_map;
+		bool new_block = true;
+		string_view::iterator p;
+		const string_view::iterator end;
+
+		parser_state& operator++() { ++p; return *this; } // prefix
+		char operator[](size_t i) const { return p[i]; } // subscript
+		char operator*() const { return *p; } // subscript
+		explicit operator bool() const { return p != end; }
+	};
 
     static bool printable(int c)
     {
         return c >= (unsigned char)' ' && c <= (unsigned char)'~';
     }
-    static bool skipws_until_lf(string_view::iterator& p, string_view::iterator end)
+    static bool skipws_until_lf(parser_state& p)
     {
-        while (p != end)
+        while (p)
         {
             if (*p == '\n' || (p[0] == '\r' && p[1] == '\n'))
                 return true;
@@ -22,10 +40,10 @@ namespace idk::yaml
         }
         return true;
     }
-    static int handle_indent(string_view::iterator& p, string_view::iterator end)
+    static int handle_indent(parser_state& p)
     {
         int indent = 0;
-        while (p != end)
+		while (p)
         {
             if (*p == ' ')
                 ++indent;
@@ -37,11 +55,11 @@ namespace idk::yaml
         }
         return indent;
     }
-    static int handle_indent(string_view::iterator& p, string_view::iterator end, bool& hit_lf)
+    static int handle_indent(parser_state& p, bool& hit_lf)
     {
         int indent = 0;
         hit_lf = false;
-        while (p != end)
+        while (p)
         {
             if (*p == ' ')
                 ++indent;
@@ -62,148 +80,157 @@ namespace idk::yaml
             str.pop_back();
     }
 
+	static void on_hyphen(parser_state& p)
+	{
+		if (p.new_block && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
+		{
+			p.mode = block_seq;
+			p.stack.push_back(&p.stack.back()->emplace_back());
+			bool hit_lf;
+			int indent = handle_indent(++p, hit_lf);
+			if (hit_lf)
+			{
+				if (indent > p.block_indents.back())
+					p.block_indents.push_back(indent);
+				else if (indent < p.block_indents.back())
+				{
+					p.block_indents.pop_back();
+					p.stack.pop_back();
+				}
+				else // same indentation, must be another list item
+				{
+					if (*p == '-')
+						p.stack.pop_back();
+					else
+						throw "expected '-'";
+				}
+			}
+			else // add indentation for list, ie - x is 2 indentation (for hyphen and space)
+			{
+				p.block_indents.push_back(indent + 1 + p.block_indents.back());
+			}
+			return;
+		}
+
+		if (!p.new_block || printable(p[1]))
+		{
+			p.str += *p;
+			++p;
+		}
+	}
+
+	static void on_colon(parser_state& p)
+	{
+		if (p.new_block && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
+		{
+			p.mode = block_map;
+			p.stack.push_back(&(*p.stack.back())[p.str]);
+			p.str.clear();
+			skipws_until_lf(++p);
+			p.new_block = false;
+			return;
+		}
+
+		if (!p.new_block || printable(p[1]))
+		{
+			p.str += *p;
+			++p;
+		}
+	}
+
+	static void on_endline(parser_state& p)
+	{
+		strip_trailing_ws(p.str);
+
+		int indent = handle_indent(p);
+		if (!p)
+			return;
+
+		if (p.str.size())
+		{
+			*p.stack.back() = node{ p.str };
+			p.stack.pop_back();
+			p.str.clear();
+		}
+
+		if (p.mode == block_map || p.mode == block_seq)
+		{
+			if (indent > p.block_indents.back())
+			{
+				p.block_indents.push_back(indent);
+			}
+			else if (indent < p.block_indents.back())
+			{
+				p.block_indents.pop_back();
+				if (p.mode == block_map)
+					p.stack.pop_back();
+
+				// keep going until match an old indent
+				while (p.block_indents.size())
+				{
+					if (indent > p.block_indents.back())
+					{
+						throw "sibling indent mismatch?";
+					}
+					else if (indent < p.block_indents.back())
+					{
+						p.stack.pop_back();
+						p.block_indents.pop_back();
+					}
+					else
+						break;
+				}
+			}
+
+			p.new_block = true;
+		}
+	}
+
     node parse(string_view str)
     {
-        node root;
-        vector<node*> stack{ &root };
-        vector<int> block_indents;
-        string curr_str;
-        _mode curr_mode = block_map;
-        bool new_block = true;
-
-        auto p = str.begin();
-        auto end = str.end();
+		parser_state p{ str };
 
         {
-            int indent = handle_indent(p, end);
-            block_indents.push_back(indent);
+            int indent = handle_indent(p);
+            p.block_indents.push_back(indent);
         }
 
-        while(p != end && stack.size())
+        while(p && p.stack.size())
         {
-            char c = *p;
-
-            if (c == '-' || c == ':')
-            {
-                if(new_block && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
-                {
-                    if (c == '-')
-                    {
-                        curr_mode = block_seq;
-                        stack.push_back(&stack.back()->emplace_back());
-                        bool hit_lf;
-                        int indent = handle_indent(++p, end, hit_lf);
-                        if (hit_lf)
-                        {
-                            if (indent > block_indents.back())
-                                block_indents.push_back(indent);
-                            else if (indent < block_indents.back())
-                            {
-                                block_indents.pop_back();
-                                stack.pop_back();
-                            }
-                            else // same indentation, must be another list item
-                            {
-                                if(*p != '-')
-                                    stack.pop_back();
-                            }
-                        }
-                        else // add indentation for list, ie - x is 2 indentation (for hyphen and space)
-                        { 
-                            block_indents.push_back(indent + 1 + block_indents.back());
-                        }
-                    }
-                    else if (c == ':')
-                    {
-                        curr_mode = block_map;
-                        stack.push_back(&(*stack.back())[curr_str]);
-                        curr_str.clear();
-                        skipws_until_lf(++p, end);
-                        new_block = false;
-                    }
-                    continue;
-                }
-                
-                if (!new_block || printable(p[1]))
-                {
-                    curr_str += c;
-                }
-            }
-
-            else if (c == '\n' || (c == '\r' && p[1] == '\n'))
-            {
-                strip_trailing_ws(curr_str);
-
-                int indent = handle_indent(p, end);
-                if (p == end)
-                    break;
-
-                if (curr_str.size())
-                {
-                    *stack.back() = node{ curr_str };
-                    stack.pop_back();
-                    curr_str.clear();
-                }
-
-                if (curr_mode == block_map || curr_mode == block_seq)
-                {
-                    if (indent > block_indents.back())
-                    {
-                        block_indents.push_back(indent);
-                    }
-                    else if (indent < block_indents.back())
-                    {
-                        block_indents.pop_back();
-                        stack.pop_back();
-
-                        // keep going until match an old indent
-                        while (block_indents.size())
-                        {
-                            if (indent > block_indents.back())
-                            {
-                                throw "sibling indent mismatch?";
-                            }
-                            else if (indent < block_indents.back())
-                            {
-                                stack.pop_back();
-                                block_indents.pop_back();
-                            }
-                            else
-                                break;
-                        }
-                    }
-
-                    new_block = true;
-                    continue;
-                }
-            }
-
-            else if (printable(c))
-            {
-                curr_str += c;
-            }
+			switch (*p)
+			{
+			case '-': on_hyphen(p); continue;
+			case ':': on_colon(p); continue;
+			case '\r': break;
+			case '\n': on_endline(p); continue;
+			default: { if (printable(*p)) p.str += *p; }
+			}
 
             ++p;
-
         } // while
 
-        if(curr_str.size())
+        if(p.str.size())
         {
-            strip_trailing_ws(curr_str);
-            *stack.back() = node{ curr_str };
+            strip_trailing_ws(p.str);
+            *p.stack.back() = node{ p.str };
         }
 
-        return root;
+        return p.root;
     }
 
 
 
-    type node::type()
+    type node::type() const
     {
         return yaml::type(_value.index());
     }
 
-    scalar_type& node::as_scalar()
+	bool node::null() const
+	{
+		return type() == type::null;
+	}
+
+	scalar_type& node::as_scalar()
     {
         return std::get<static_cast<int>(type::scalar)>(_value);
     }

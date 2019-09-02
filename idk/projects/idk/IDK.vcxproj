@@ -269,6 +269,7 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="yaml.natvis" />
     <Natvis Include="_natvis\ds.natvis" />
     <Natvis Include="_natvis\guid.natvis" />
     <Natvis Include="_natvis\objectpool.natvis" />

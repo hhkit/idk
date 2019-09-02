@@ -449,7 +449,6 @@
     <ClInclude Include="reflect\detail\pretty_function.h">
       <Filter>reflect\detail</Filter>
     </ClInclude>
-    <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="prefab\PrefabFactory.h">
       <Filter>prefab</Filter>
     </ClInclude>
@@ -491,6 +490,9 @@
     </ClInclude>
     <ClInclude Include="gfx\ShaderTemplateFactory.h">
       <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\yaml.h">
+      <Filter>serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -652,7 +654,10 @@
       <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
-    <ClCompile Include="serialize\yaml.cpp" />
+    <ClCompile Include="anim\Skeleton.cpp" />
+    <ClCompile Include="serialize\yaml.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -805,7 +810,9 @@
     <None Include="ds\circular_buffer.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="serialize\yaml.inl" />
+    <None Include="serialize\yaml.inl">
+      <Filter>serialize</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
@@ -830,6 +837,9 @@
       <Filter>_natvis</Filter>
     </Natvis>
     <Natvis Include="_natvis\ds.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="yaml.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

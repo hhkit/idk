@@ -23,13 +23,27 @@ REFLECT_END()
 
 TEST(Serialize, TestYaml)
 {
+	// test:
+	//   a: x
+	//   b: y
     yaml::node node = yaml::parse("test:\n  a: x\n  b: y");
     EXPECT_EQ(node["test"]["a"].as_scalar(), "x");
     EXPECT_EQ(node["test"]["b"].as_scalar(), "y");
 
+	// - test: a:
+	// - x: b
     yaml::node node2 = yaml::parse("- test: a:\n- x: b");
     EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
     EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
+
+	// -
+	// - test:
+	//   - x
+	//   - y: hi
+	yaml::node node3 = yaml::parse("-\n- test:\n  - x\n  - y: hi");
+	EXPECT_TRUE(node3[0].null());
+	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
+	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
 }
 
 TEST(Serialize, TestSerializeBasic)
