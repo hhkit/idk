@@ -34,6 +34,8 @@ namespace idk::ogl
 		auto& curr_draw_buffer = sys->curr_draw_buffer;
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
+
+		//glEnable(GL_DEPTH_TEST);
 		for (auto& state : curr_object_buffer.states)
 		{
 			//Bind frame buffers based on the camera's render target
