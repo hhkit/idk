@@ -492,6 +492,9 @@
     <ClInclude Include="gfx\ShaderTemplateFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="common\Name.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -653,6 +656,10 @@
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
+    <ClCompile Include="anim\Skeleton.cpp" />
+    <ClCompile Include="common\Name.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
