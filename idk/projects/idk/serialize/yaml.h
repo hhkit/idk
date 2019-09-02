@@ -33,7 +33,7 @@ namespace idk::yaml
 
 		type type() const;
 		bool null() const;
-        template<typename T> T& get();
+        template<typename T> T get();
 
         scalar_type&    as_scalar();
         sequence_type&  as_sequence();

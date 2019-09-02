@@ -103,8 +103,11 @@ namespace idk::yaml
 				}
 				else // same indentation, must be another list item
 				{
-					if (*p == '-')
-						p.stack.pop_back();
+                    if (*p == '-')
+                    {
+                        p.mode_stack.pop_back();
+                        p.stack.pop_back();
+                    }
 					else
 						throw "expected '-'";
 				}
@@ -125,10 +128,19 @@ namespace idk::yaml
 
 	static void on_colon(parser_state& p)
 	{
-		if (p.new_block && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
+        if (p.mode() == flow_map && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
+        {
+            strip_trailing_ws(p.str);
+            p.stack.push_back(&(*p.stack.back())[p.str]);
+            p.str.clear();
+            skipws_until_lf(++p);
+            return;
+        }
+		else if (p.new_block && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
 		{
 			p.mode() = block_map;
 			p.mode_stack.push_back(unknown);
+            strip_trailing_ws(p.str);
 			p.stack.push_back(&(*p.stack.back())[p.str]);
 			p.str.clear();
 			skipws_until_lf(++p);
@@ -155,6 +167,42 @@ namespace idk::yaml
 		*p.stack.back() = node{ sequence_type{} };
 	}
 
+    static void on_comma(parser_state& p)
+    {
+        strip_trailing_ws(p.str);
+        if (p.str.size())
+        {
+            if (p.mode() == flow_seq)
+                p.stack.back()->emplace_back(p.str);
+            else
+            {
+                *p.stack.back() = node{ p.str };
+                p.stack.pop_back();
+            }
+            p.str.clear();
+        }
+        skipws_until_lf(++p);
+    }
+
+    static void on_flow_close(parser_state& p)
+    {
+        strip_trailing_ws(p.str);
+        if (p.str.size())
+        {
+            if (p.mode() == flow_seq)
+                p.stack.back()->emplace_back(p.str);
+            else
+            {
+                *p.stack.back() = node{ p.str };
+                p.stack.pop_back();
+            }
+            p.str.clear();
+        }
+        p.stack.pop_back(); 
+        p.mode_stack.pop_back(); 
+        skipws_until_lf(++p);
+    }
+
 	static void on_lf(parser_state& p)
 	{
 		strip_trailing_ws(p.str);
@@ -168,6 +216,7 @@ namespace idk::yaml
 			*p.stack.back() = node{ p.str };
 			p.stack.pop_back();
 			p.str.clear();
+            p.mode_stack.pop_back();
 		}
 
 		if (indent > p.block_indents.back())
@@ -177,9 +226,9 @@ namespace idk::yaml
 		else if (indent < p.block_indents.back())
 		{
 			p.block_indents.pop_back();
-			p.mode_stack.pop_back();
 			if (p.mode() == block_map)
 				p.stack.pop_back();
+            p.mode_stack.pop_back();
 
 			// keep going until match an old indent
 			while (p.block_indents.size())
@@ -217,16 +266,14 @@ namespace idk::yaml
 			{
 				switch (*p)
 				{
-				case ' ':
 				case '\r':
-				case '\n':
-				case '\t': break;
+				case '\n': break;
 
-				case ':': p.stack.push_back(&(*p.stack.back())[p.str]); p.str.clear(); break;
-				case ',': *p.stack.back() = node{ p.str }; p.str.clear(); p.stack.pop_back();  break;
+                case ':': on_colon(p); continue;
+                case ',': on_comma(p); continue;
 				case '{': p.mode_stack.push_back(unknown); on_curly_brace(p); break;
 				case '[': p.mode_stack.push_back(unknown); on_square_brace(p); break;
-				case '}': *p.stack.back() = node{ p.str }; p.str.clear(); p.stack.pop_back(); p.stack.pop_back(); p.mode_stack.pop_back(); skipws_until_lf(p); break;
+                case '}': on_flow_close(p); continue;
 				default: { if (printable(*p)) p.str += *p; } break;
 				}
 			}
@@ -234,15 +281,13 @@ namespace idk::yaml
 			{
 				switch (*p)
 				{
-				case ' ':
 				case '\r':
-				case '\n':
-				case '\t': break;
+				case '\n': break;
 
-				case ',': { if (p.str.size()) { p.stack.back()->emplace_back(p.str); p.str.clear(); } } break;
+                case ',': on_comma(p); continue;
 				case '{': p.stack.push_back(&p.stack.back()->emplace_back()); p.mode_stack.push_back(unknown); on_curly_brace(p); break;
 				case '[': p.stack.push_back(&p.stack.back()->emplace_back()); p.mode_stack.push_back(unknown); on_square_brace(p); break;
-				case ']': { if (p.str.size()) { p.stack.back()->emplace_back(p.str); p.str.clear(); } } p.mode_stack.pop_back(); p.stack.pop_back(); skipws_until_lf(p); break;
+				case ']': on_flow_close(p); continue;
 				default: { if (printable(*p)) p.str += *p; } break;
 				}
 			}
