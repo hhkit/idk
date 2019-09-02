@@ -2,18 +2,35 @@
 #include "collision.h"
 namespace idk
 {
+	template<>
+	float PerpDist<(&vec3::x)>(vec3 point_at_edge, vec3 extents)
+	{
+		vec3 disp_from_corner = (point_at_edge - extents);
+
+		return (disp_from_corner.y < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.y : disp_from_corner.length());
+	}
+
+	template<>
+	float PerpDist<&vec3::y>(vec3 point_at_edge, vec3 extents)
+	{
+		vec3 disp_from_corner = (point_at_edge - extents);
+
+		return (disp_from_corner.x < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.x : disp_from_corner.length());
+	}
+
+	template< >
+	float PerpDist<&vec3::z>(vec3 point_at_edge, vec3 extents)
+	{
+		vec3 disp_from_corner = (point_at_edge - extents);
+
+		return (disp_from_corner.y < 0) ? disp_from_corner.x : ((disp_from_corner.x < 0) ? disp_from_corner.y : disp_from_corner.length());
+	}
 	bool epsilon_equal(float lhs, float rhs)
 	{
 		//Gotta handle infinity
 		return lhs == rhs || abs(abs(rhs) - abs(lhs)) <= epsilon;
 	}
 
-	struct col_result
-	{
-		float perp_dist = -1.0f;//default false.
-		float dist = 0.0f;
-		operator bool()const { return epsilon_equal(perp_dist, 0) && !(dist == std::numeric_limits<float>::infinity()) && dist >= -epsilon; }
-	};
 
 	//Assumes lhs and rhs are normalized.
 	col_result collide_ray_line(const ray& lhs, const ray& line)

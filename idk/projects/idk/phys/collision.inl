@@ -3,29 +3,6 @@
 namespace idk
 {
 
-	template<>
-	float PerpDist<(&vec3::x)>(vec3 point_at_edge, vec3 extents)
-	{
-		vec3 disp_from_corner = (point_at_edge - extents);
-
-		return (disp_from_corner.y < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.y : disp_from_corner.length());
-	}
-
-	template<>
-	float PerpDist<&vec3::y>(vec3 point_at_edge, vec3 extents)
-	{
-		vec3 disp_from_corner = (point_at_edge - extents);
-
-		return (disp_from_corner.x < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.x : disp_from_corner.length());
-	}
-
-	template< >
-	float PerpDist<&vec3::z>(vec3 point_at_edge, vec3 extents)
-	{
-		vec3 disp_from_corner = (point_at_edge - extents);
-
-		return (disp_from_corner.y < 0) ? disp_from_corner.x : ((disp_from_corner.x < 0) ? disp_from_corner.y : disp_from_corner.length());
-	}
 	template<decltype(&vec3::x) axis>
 	col_result collide_ray_aabb_face(vec3 direction, const vec3& disp_to_box, vec3 extents)
 	{
