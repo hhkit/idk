@@ -191,7 +191,7 @@ TEST(Serialize, TestSerializeScene)
 {
 	GameState gs;
 	SceneFactory sf;
-	auto scene = sf.DefaultResource();
+	auto scene = sf.GenerateDefaultResource();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();

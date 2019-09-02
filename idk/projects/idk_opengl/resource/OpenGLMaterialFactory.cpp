@@ -13,7 +13,7 @@ static const auto default_material_code = R"(
 
 namespace idk::ogl
 {
-	unique_ptr<Material> OpenGLMaterialFactory::DefaultResource()
+	unique_ptr<Material> OpenGLMaterialFactory::GenerateDefaultResource()
 	{
 		auto mat = std::make_unique<OpenGLMaterial>();
 		auto meta = mat->GetMeta();

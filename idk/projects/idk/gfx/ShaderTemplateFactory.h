@@ -8,7 +8,7 @@ namespace idk
 		: public ResourceFactory<ShaderTemplate>
 	{
 	public:
-		unique_ptr<ShaderTemplate> DefaultResource() override;
+		unique_ptr<ShaderTemplate> GenerateDefaultResource() override;
 		unique_ptr<ShaderTemplate> Create(FileHandle) override;
 	};
 }

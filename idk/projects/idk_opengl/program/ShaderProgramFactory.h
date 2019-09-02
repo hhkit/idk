@@ -8,7 +8,7 @@ namespace idk::ogl
 		: public ResourceFactory<ShaderProgram>
 	{
 	public:
-		unique_ptr<ShaderProgram> DefaultResource() override;
+		unique_ptr<ShaderProgram> GenerateDefaultResource() override;
 		unique_ptr<ShaderProgram> Create(FileHandle filepath) override;
 	};
 }

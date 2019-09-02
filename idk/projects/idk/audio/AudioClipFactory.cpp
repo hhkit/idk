@@ -20,7 +20,7 @@
 
 
 namespace idk {
-	unique_ptr<AudioClip> AudioClipFactory::DefaultResource()
+	unique_ptr<AudioClip> AudioClipFactory::GenerateDefaultResource()
 	{
 		return std::make_unique<AudioClip>();
 	}

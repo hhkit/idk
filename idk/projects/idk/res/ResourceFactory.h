@@ -16,8 +16,8 @@ namespace idk
 	{
 	public:
 		using Resource = Res;
-		virtual unique_ptr<Resource> DefaultResource() = 0;
-		virtual unique_ptr<Resource> Create() { return DefaultResource();  };
+		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;
+		virtual unique_ptr<Resource> Create() { return GenerateDefaultResource();  };
 		virtual unique_ptr<Resource> Create(FileHandle filepath) = 0;
 		virtual ~ResourceFactory_impl() = default;
 	};
@@ -27,8 +27,8 @@ namespace idk
 	{
 	public:
 		using Resource = Res;
-		virtual unique_ptr<Resource> DefaultResource() = 0;
-		virtual unique_ptr<Resource> Create() { return DefaultResource(); };
+		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;
+		virtual unique_ptr<Resource> Create() { return GenerateDefaultResource(); };
 		virtual unique_ptr<Resource> Create(FileHandle filepath) = 0;
 		virtual unique_ptr<Resource> Create(FileHandle filepath, const typename Res::Metadata& m);
 		virtual ~ResourceFactory_impl() = default;

@@ -8,7 +8,7 @@ namespace idk
 		: public ResourceFactory<Scene>
 	{
 	public:
-		unique_ptr<Scene> DefaultResource() override;
+		unique_ptr<Scene> GenerateDefaultResource() override;
 		unique_ptr<Scene> Create(FileHandle filepath) override;
 	};
 }

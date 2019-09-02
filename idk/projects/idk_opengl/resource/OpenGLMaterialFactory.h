@@ -8,7 +8,7 @@ namespace idk::ogl
 		: public ResourceFactory<Material>
 	{
 	public:
-		unique_ptr<Material> DefaultResource() override;
+		unique_ptr<Material> GenerateDefaultResource() override;
 		unique_ptr<Material> Create() override;
 		unique_ptr<Material> Create(FileHandle filepath) override;
 	};
