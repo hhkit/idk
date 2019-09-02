@@ -22,10 +22,7 @@ namespace idk {
 	{
 	public:
 		IGE_MainWindow();
-		~IGE_MainWindow();
 
-
-		virtual void Initialize() override;
 		virtual void Update() override;
 	protected:
 		virtual void BeginWindow() override;

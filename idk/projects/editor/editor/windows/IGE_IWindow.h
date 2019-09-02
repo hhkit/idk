@@ -122,7 +122,7 @@ namespace idk {
 
 		//Creates a text. Uses the printf method
 		void DrawText(const char* fmt, ...);
-		void DrawText(const std::string& fmt, ...);
+		void DrawText(const string& fmt, ...);
 
 		//Draws text with color of your choice
 		void DrawTextColor(const ImVec4& color, const char* fmt, ...);
