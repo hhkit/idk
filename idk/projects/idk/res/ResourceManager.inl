@@ -22,7 +22,10 @@ namespace idk
 	inline RscHandle<Resource> ResourceManager::Create()
 	{
 		auto& table = GetTable<Resource>();
-		auto ptr = GetLoader<Resource>().Create();
+		auto& loader = GetLoader<Resource>();
+		if (&loader == nullptr)
+			return RscHandle<Resource>{};
+		auto ptr = loader.Create();
 		if (!ptr)
 			return RscHandle<Resource>{};
 		

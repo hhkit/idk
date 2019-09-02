@@ -46,6 +46,9 @@
     <ClInclude Include="editor\windows\IGE_SceneView.h">
       <Filter>editor\windows</Filter>
     </ClInclude>
+    <ClInclude Include="editor\windows\IGE_ProjectWindow.h">
+      <Filter>editor\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -80,6 +83,9 @@
       <Filter>editor\windows</Filter>
     </ClCompile>
     <ClCompile Include="editor\windows\IGE_SceneView.cpp">
+      <Filter>editor\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\windows\IGE_ProjectWindow.cpp">
       <Filter>editor\windows</Filter>
     </ClCompile>
   </ItemGroup>

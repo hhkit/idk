@@ -4,7 +4,9 @@
 #include <serialize/serialize.h>
 
 // serializer/parser for a small subset of yaml.
-// can only reliably parse the format it serializes
+// only supports: blocks, flows, tags, comments
+// because of the minimal support,
+// we can do a simple top-down one-pass for parsing
 namespace idk::yaml
 {
     class node;
@@ -29,8 +31,9 @@ namespace idk::yaml
         template<typename T, typename = sfinae<is_container_v<T> || is_basic_serializable_v<T>>>
         explicit node(T&& arg);
 
-        type type();
-        template<typename T> T& get();
+		type type() const;
+		bool null() const;
+        template<typename T> T get();
 
         scalar_type&    as_scalar();
         sequence_type&  as_sequence();

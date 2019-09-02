@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="anim\AnimationClip.h" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="common\Name.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
@@ -38,6 +40,8 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\Light.h" />
+    <ClInclude Include="gfx\LightTypes.h" />
     <ClInclude Include="gfx\RenderTarget.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
     <ClInclude Include="gfx\GfxDbgTest.h" />
@@ -156,11 +160,14 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="anim\AnimationClip.cpp" />
+    <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
@@ -213,6 +220,7 @@
     <ClCompile Include="reflect\enum_type.cpp" />
     <ClCompile Include="shape\ray.cpp" />
     <ClCompile Include="shape\sphere.cpp" />
+    <ClCompile Include="serialize\yaml_parse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -268,6 +276,7 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\yaml.natvis" />
     <Natvis Include="_natvis\ds.natvis" />
     <Natvis Include="_natvis\guid.natvis" />
     <Natvis Include="_natvis\objectpool.natvis" />

@@ -32,7 +32,7 @@ namespace idk::yaml
     }
 
     template<typename T>
-    T& node::get()
+    T node::get()
     {
         if constexpr (is_basic_serializable_v<T>)
         {

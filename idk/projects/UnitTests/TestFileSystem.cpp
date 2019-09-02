@@ -25,106 +25,128 @@ namespace FS = std::filesystem;
 			FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir");\
 			{	std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_sub_dir1/test_sub_file.txt" }; \
 				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_read.txt"};\
+				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_write.txt"};\
 				std::ofstream{exe_dir + "/resource/FS_UnitTests/test_sub_dir1/recurse_dir/recurse_sub_file.txt"};};\
 			std::filesystem::remove_all(string{ exe_dir + "/resource/FS_UnitTests/test_dir_2/" }.c_str());\
 			remove(string {exe_dir + "/resource/FS_UnitTests/test_watch.txt"	}.c_str());\
-			remove(string {exe_dir + "/resource/FS_UnitTests/test_write.txt"	}.c_str());\
-			vfs.Mount( exe_dir + "/resource/FS_UnitTests/", "/FS_UnitTests");
+			vfs.Mount( exe_dir + "/resource/FS_UnitTests/", "/FS_UnitTests");\
+			vfs.Update();\
 
 
 TEST(FileSystem, TestMount)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
+	bool test_mount_dup = false;
+	try
+	{
+		vfs.Mount(exe_dir + "resource/FS_UnitTests/", "/FS_UnitTests");
+	}
+	catch (...)
+	{
+		test_mount_dup = true;
+	}
 
-	vfs.Mount(exe_dir + "resource/FS_UnitTests/", "/FS_UnitTests");
+	EXPECT_TRUE(test_mount_dup);
 	// Should not work but should not crash too.
 	auto bad_file = vfs.GetFile("/blah/haha.txt");
 
-	vfs.DumpMounts();
+	// vfs.DumpMounts();
 	vfs.Update();
 }
 
-TEST(FileSystem, TestFileWatchBasic)
+TEST(FileSystem, TestCreate)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 
-	// Test create:
-	{
-		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
+	std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
 
-		vfs.Update();
+	vfs.Update();
 
-		// Checking if querying is correct
-		auto changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 1);
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-		EXPECT_TRUE(changes.size() == 1);
-		// No files deleted
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-		EXPECT_TRUE(changes.size() == 0);
+	// Checking if querying is correct
+	auto changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 1);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+	EXPECT_TRUE(changes.size() == 1);
+	// No files deleted or written
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+	EXPECT_TRUE(changes.size() == 0);
 
-		// Checking if we resolved all changes properly
-		vfs.Update();
-		changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 0);
-	}
-	
-	
-	// Test Write
-	{
-		std::ofstream of{ exe_dir + "/resource/FS_UnitTests/test_watch.txt", std::ios::out };
-		of << "Test_Watch" << std::endl;
-		vfs.Update();
+	// Checking if we resolved all changes properly
+	vfs.Update();
+	changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 0);
 
-		// Checking if querying is correct
-		auto changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 1);
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-		EXPECT_TRUE(changes.size() == 1);
-		// No files deleted
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-		EXPECT_TRUE(changes.size() == 0);
-
-		// Checking if we resolved all changes properly
-		vfs.Update();
-		changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 0);
-	}
-
-	// Test Delete
-	{
-		string remove_file = exe_dir + "/resource/FS_UnitTests/test_watch.txt";
-		EXPECT_TRUE(remove(remove_file.c_str()) == 0);
-		vfs.Update();
-
-		// Checking if querying is correct
-		auto changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 1);
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-		EXPECT_TRUE(changes.size() == 1);
-		// No files deleted
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-		EXPECT_TRUE(changes.size() == 0);
-
-		// Checking if we resolved all changes properly
-		vfs.Update();
-		changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 0);
-	}
-
-	// Create Dir then create file inside dir
-	{
-		FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_dir_2/");
-		std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_dir_2/blah.txt", std::ios::out };
-		vfs.Update();
-
-		auto changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 1);
-		vfs.Update();
-		changes = vfs.QueryFileChangesAll();
-		EXPECT_TRUE(changes.size() == 0);
-	}
 }
+
+TEST(FileSystem, TestWrite)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+
+	std::ofstream of{ exe_dir + "/resource/FS_UnitTests/test_write.txt", std::ios::out };
+	of << "Test Write" << std::endl;
+	vfs.Update();
+
+	// Checking if querying is correct
+	auto changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 1);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+	EXPECT_TRUE(changes.size() == 1);
+
+	// No files deleted or created
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+	EXPECT_TRUE(changes.size() == 0);
+
+	// Checking if we resolved all changes properly
+	vfs.Update();
+	changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 0);
+}
+
+TEST(FileSystem, TestDelete)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+
+	string remove_file = exe_dir + "/resource/FS_UnitTests/test_write.txt";
+	EXPECT_TRUE(remove(remove_file.c_str()) == 0);
+	vfs.Update();
+
+	// Checking if querying is correct
+	auto changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 1);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+	EXPECT_TRUE(changes.size() == 1);
+
+	// No files deleted or written
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+	EXPECT_TRUE(changes.size() == 0);
+
+	// Checking if we resolved all changes properly
+	vfs.Update();
+	changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 0);
+}
+
+TEST(FileSystem, TestSpecial)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+	FS::create_directories(exe_dir + "/resource/FS_UnitTests/test_dir_2/");
+	std::ofstream{ exe_dir + "/resource/FS_UnitTests/test_dir_2/blah.txt", std::ios::out };
+	vfs.Update();
+
+	auto changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 1);
+
+	vfs.Update();
+	changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 0);
+}
+
 
 TEST(FileSystem, TestFileHandle)
 {

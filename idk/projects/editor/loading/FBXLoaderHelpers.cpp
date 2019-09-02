@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "FBXLoaderHelpers.h"
-
+#include <deque>
 namespace idk::fbx_loader_detail
 {
 
@@ -27,42 +27,6 @@ namespace idk::fbx_loader_detail
 		return vec3(vec.x, vec.y, vec.z);
 	}
 
-	void Helper::initBones(const aiMesh* ai_mesh, vector<Vertex>& vertices, unsigned base_vertex, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones)
-	{
-		// We have no concept of heirarchy at this point. Hence, we simply load the bones into a map first.
-		// Then, when we traverse the aiNodes, we construct the skeleton based on what nodes come in.
-		// The reason why we cannot construct the skeleton when we traverse the aiNodes is because aiNodes can be meshes, virtual, or bones.
-		for (size_t i = 0; i < ai_mesh->mNumBones; i++)
-		{
-			auto curr_bone = ai_mesh->mBones[i];
-			string curr_bone_name = curr_bone->mName.data;
-			size_t curr_bone_index = 0;
-
-			auto find_res = bones_table.find(curr_bone_name);
-			if (find_res == bones_table.end())
-			{
-				anim::Skeleton::Bone b;
-				b._name = curr_bone_name;
-				b._offset = initMat4(curr_bone->mOffsetMatrix);
-
-				curr_bone_index = bones.size();
-				bones_table.emplace(curr_bone_name, curr_bone_index);
-				bones.push_back(b);
-			}
-			else
-			{
-				curr_bone_index = find_res->second;
-			}
-
-			for (size_t j = 0; j < ai_mesh->mBones[i]->mNumWeights; j++)
-			{
-				unsigned vert_id = base_vertex + ai_mesh->mBones[i]->mWeights[j].mVertexId;
-				float weight = ai_mesh->mBones[i]->mWeights[j].mWeight;
-				auto& curr_vert = vertices[vert_id];
-				curr_vert.addBoneData(s_cast<int>(curr_bone_index), weight);
-			}
-		}
-	}
 
 	void Helper::initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices)
 	{
@@ -88,35 +52,71 @@ namespace idk::fbx_loader_detail
 		);
 	}
 
-	void Helper::initBoneHierarchy(aiNode* root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones)
+	void Helper::initBoneHierarchy(const aiNode* node, hash_set<string> bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out)
 	{
-		UNREFERENCED_PARAMETER(root_node);
-		UNREFERENCED_PARAMETER(bones_table);
-		UNREFERENCED_PARAMETER(bones);
-	}
-	void Helper::recurseNodes(aiNode* node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones, unsigned parent_index, unsigned next_index)
-	{
-		unsigned curr_index = next_index;
-		for (size_t i = 0; i < node->mNumChildren; ++i)
+		struct BoneTreeNode
 		{
-			aiNode* child = node->mChildren[i];
-			auto res = bones_table.find(string{ child->mName.data });
-			if (res != bones_table.end())
+			int parent;
+			const aiNode* node;
+		};
+
+		std::deque<BoneTreeNode> queue;
+		queue.push_front(BoneTreeNode{ -1, node });
+
+		while (!queue.empty())
+		{
+			auto curr_node = queue.front();
+			queue.pop_front();
+
+			// If this node is not actually a bone, we push all its children into the start of the queue with the parent being the current node's parent.
+			if (bones_set.find(curr_node.node->mName.data) == bones_set.end())
 			{
-				bones[res->second]._parent = parent_index;
-				std::swap(bones[res->second], bones[next_index++]);
+				for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
+					queue.push_front(BoneTreeNode{ curr_node.parent, curr_node.node->mChildren[i] });
+
+				continue;
+			}
+
+			// If curr_node is a bone, we push it into bones_out with parent being curr_node's parent.
+			// We also push the bone into the bones_table. This is so we can easily find a bone by name. The index should be bones_out.size().
+			// The parent of all these children should be bones_out.size() - 1.
+			anim::Skeleton::Bone b{};
+			b._name = curr_node.node->mName.data;
+			b._parent = curr_node.parent;
+			b._offset = initMat4(curr_node.node->mTransformation);
+
+			bones_out.emplace_back(b);
+			bones_table.emplace(b._name, bones_out.size());
+
+			for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
+				queue.push_back(BoneTreeNode{ static_cast<int>(bones_out.size() - 1), curr_node.node->mChildren[i] });
+		}
+	}
+
+	void Helper::initBoneWeights(const aiScene* ai_scene, const vector<ogl::OpenGLMesh::MeshEntry>& entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
+	{
+		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
+		{
+			const aiMesh* ai_mesh = ai_scene->mMeshes[i];
+			for (size_t k = 0; k < ai_mesh->mNumBones; ++k)
+			{
+				const aiBone* ai_bone = ai_mesh->mBones[k];
+				for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
+				{
+					auto res = bones_table.find(ai_bone->mName.data);
+					assert(res != bones_table.end());
+
+					int bone_index = res->second;
+					float weight = ai_bone->mWeights[j].mWeight;
+
+					unsigned vert_id = entries[i]._base_vertex + ai_bone->mWeights[j].mVertexId;
+					vertices[vert_id].addBoneData(bone_index, weight);
+				}
 			}
 		}
-		UNREFERENCED_PARAMETER(curr_index);
-		/*bool is_curr_node_valid = false;
-		auto res = bones_table.find(string{ node->mName.data }) != bones_table.end();
-		if(res != bones_table)
-		for (size_t i = 0; i < node->mNumChildren; ++i)
-		{
-			if(is_curr_node_valid)
-				recurseNodes(node->mChildren[i], bones_table, bones, )
-		}*/
 	}
+
+	
 	void Vertex::addBoneData(int id, float weight)
 	{
 		for (unsigned i = 0; i < 4; i++)

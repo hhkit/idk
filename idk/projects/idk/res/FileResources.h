@@ -32,6 +32,8 @@ namespace idk
 	struct FileResources
 	{
 		vector<GenericRscHandle> resources;
+		auto& operator[](size_t index)       { return resources[index]; }
+		auto& operator[](size_t index) const { return resources[index]; }
 	};
 
 	struct MetaFile
