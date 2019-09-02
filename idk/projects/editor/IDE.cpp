@@ -40,7 +40,11 @@ namespace idk
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 		ige_windows.push_back(std::make_unique<IGE_MainWindow>());
 		ige_windows.push_back(std::make_unique<IGE_SceneView>());
+		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
 
+		for (auto& i : ige_windows) {
+			i->Initialize();
+		}
 
 	}
 
@@ -59,9 +63,6 @@ namespace idk
 		}
 
 		_interface->ImGuiFrameUpdate();
-		
-		
-		
 		
 		
 		_interface->ImGuiFrameEnd();

@@ -26,11 +26,12 @@ namespace idk {
 		// because it would be confusing to have two docking targets within each others.
 		window_flags = ImGuiWindowFlags_NoCollapse
 					 | ImGuiWindowFlags_NoScrollWithMouse
-					 | ImGuiWindowFlags_NoScrollbar
-					 | ImGuiWindowFlags_NoSavedSettings;
+					 | ImGuiWindowFlags_NoScrollbar;
 
 		//size_condition_flags = ImGuiCond_Always;
 		//pos_condition_flags = ImGuiCond_Always;
+
+
 
 	}
 
@@ -39,6 +40,8 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		//ImGuiID dock_id = ImGui::GetID("IGEDOCKSPACE");
+		//ImGui::DockBuilder
 
 		
 	}
@@ -61,7 +64,7 @@ namespace idk {
 
 	vec2 IGE_SceneView::GetScreenSize()
 	{
-		return vec2 { ImGui::GetWindowSize().x,ImGui::GetWindowSize().y - ImGui::GetFrameHeight() };
+		return vec2 { ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
 	}
 
 }
