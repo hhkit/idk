@@ -44,6 +44,10 @@ TEST(Serialize, TestYaml)
 	EXPECT_TRUE(node3[0].null());
 	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
 	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
+
+	// - test: [x, y,{a:b} ]
+	// - test2 : {b:[1,2,3]}
+	yaml::node node4 = yaml::parse("- test: [x, y,{a:b} ]   \r\n- test2 : {b:[1,2,3]}");
 }
 
 TEST(Serialize, TestSerializeBasic)
