@@ -58,6 +58,8 @@ TEST(Serialize, TestYaml)
     EXPECT_EQ(node4[1]["test2"]["b"][0].get<int>(), 1);
     EXPECT_EQ(node4[1]["test2"]["b"][1].get<int>(), 2);
     EXPECT_EQ(node4[1]["test2"]["b"][2].get<int>(), 3);
+
+    yaml::node node5 = yaml::parse("- !testtag \"longassstring\"");
 }
 
 TEST(Serialize, TestSerializeBasic)

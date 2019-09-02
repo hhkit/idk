@@ -13,11 +13,34 @@ namespace idk::yaml
 		vector<_mode> mode_stack{ unknown };
 		vector<int> block_indents;
 		string token;
+        string tag;
 		bool new_block = true;
 		string_view::iterator p;
 		const string_view::iterator end;
 
 		_mode& mode() { return mode_stack.back(); }
+
+        template<typename T>
+        node make_node(T&& arg)
+        {
+            node n(std::forward<T>(arg));
+            if (tag.size()) 
+            {
+                n.tag(tag); 
+                tag.clear(); 
+            }
+            return n;
+        }
+        node make_node()
+        {
+            node n;
+            if (tag.size())
+            {
+                n.tag(tag);
+                tag.clear();
+            }
+            return n;
+        }
 
 		parser_state& operator++() { ++p; return *this; } // prefix
 		char operator[](size_t i) const { return p[i]; } // subscript
@@ -94,7 +117,7 @@ namespace idk::yaml
 		{
 			p.mode() = block_seq;
 			p.mode_stack.push_back(unknown);
-			p.stack.push_back(&p.stack.back()->emplace_back());
+			p.stack.push_back(&p.stack.back()->emplace_back(p.make_node()));
 			bool hit_lf;
 			int indent = handle_indent(++p, hit_lf);
 			if (hit_lf)
@@ -138,6 +161,7 @@ namespace idk::yaml
         {
             strip_trailing_ws(p.token);
             p.stack.push_back(&(*p.stack.back())[p.token]);
+            *p.stack.back() = p.make_node();
             p.token.clear();
             skipws_until_lf(++p);
             return;
@@ -148,6 +172,7 @@ namespace idk::yaml
 			p.mode_stack.push_back(unknown);
             strip_trailing_ws(p.token);
 			p.stack.push_back(&(*p.stack.back())[p.token]);
+            *p.stack.back() = p.make_node();
 			p.token.clear();
 			skipws_until_lf(++p);
 			p.new_block = false;
@@ -176,9 +201,9 @@ namespace idk::yaml
         else if (p.mode() == flow_seq)
         {
             p.mode_stack.push_back(flow_map);
-            p.stack.push_back(&p.stack.back()->emplace_back());
+            p.stack.push_back(&p.stack.back()->emplace_back(p.make_node()));
         }
-        *p.stack.back() = node{ mapping_type{} };
+        *p.stack.back() = p.make_node( mapping_type{} );
 	}
 
 	static void on_square_brace(parser_state& p)
@@ -196,9 +221,9 @@ namespace idk::yaml
         else if (p.mode() == flow_seq)
         {
             p.mode_stack.push_back(flow_seq);
-            p.stack.push_back(&p.stack.back()->emplace_back());
+            p.stack.push_back(&p.stack.back()->emplace_back(p.make_node()));
         }
-        *p.stack.back() = node{ sequence_type{} };
+        *p.stack.back() = p.make_node( sequence_type{} );
 	}
 
     static void on_comma(parser_state& p)
@@ -207,10 +232,10 @@ namespace idk::yaml
         if (p.token.size())
         {
             if (p.mode() == flow_seq)
-                p.stack.back()->emplace_back(p.token);
+                p.stack.back()->emplace_back(p.make_node(p.token));
             else
             {
-                *p.stack.back() = node{ p.token };
+                *p.stack.back() = p.make_node( p.token );
                 p.stack.pop_back();
             }
             p.token.clear();
@@ -232,10 +257,10 @@ namespace idk::yaml
         if (p.token.size())
         {
             if (p.mode() == flow_seq)
-                p.stack.back()->emplace_back(p.token);
+                p.stack.back()->emplace_back(p.make_node(p.token));
             else
             {
-                *p.stack.back() = node{ p.token };
+                *p.stack.back() = p.make_node( p.token );
                 p.stack.pop_back();
             }
             p.token.clear();
@@ -252,6 +277,7 @@ namespace idk::yaml
             p.token += *p;
             return;
         }
+
         while (++p)
         {
             if (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
@@ -261,6 +287,12 @@ namespace idk::yaml
             }
 
             p.token += *p;
+        }
+
+        if (p.token.size())
+        {
+            p.tag = p.token;
+            p.token.clear();
         }
     }
 
@@ -280,7 +312,7 @@ namespace idk::yaml
 
 		if (p.token.size())
 		{
-			*p.stack.back() = node{ p.token };
+			*p.stack.back() = p.make_node( p.token );
 			p.stack.pop_back();
 			p.token.clear();
             p.mode_stack.pop_back();
@@ -341,6 +373,7 @@ namespace idk::yaml
             case '[': on_square_brace(p); break;
             case '}':
             case ']': on_flow_close(p); continue;
+            case '!': on_exclamation_mark(p); continue;
             default: { if (printable(*p)) p.token += *p; } break;
             }
 
@@ -350,7 +383,7 @@ namespace idk::yaml
 		if (p.token.size())
 		{
 			strip_trailing_ws(p.token);
-			*p.stack.back() = node{ p.token };
+			*p.stack.back() = p.make_node( p.token );
 		}
 
 		return p.root;
