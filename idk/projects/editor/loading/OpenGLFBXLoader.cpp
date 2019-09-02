@@ -34,6 +34,7 @@ namespace idk
 
 		vector<ogl::OpenGLMesh::MeshEntry> mesh_entries;
 
+		hash_set<string> bones_set{ai_scene->mRootNode->mName.data};
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
 		
@@ -84,25 +85,46 @@ namespace idk
 				indices.push_back(face.mIndices[2]);
 			}
 
-			fbx_loader_detail::Helper::initBones(ai_mesh, vertices, mesh_entries[i]._base_vertex, bones_table, bones);
+			// Push all bones that affect meshes
+			for (size_t k = 0; k < ai_mesh->mNumBones; k++)
+			{
+				auto curr_bone = ai_mesh->mBones[k];
+				bones_set.emplace(curr_bone->mName.data);
+			}
 		}
 
-		// Now we load the 
+		// Loads the skeleton heirarchy
+		fbx_loader_detail::Helper::initBoneHierarchy(ai_scene->mRootNode, bones_set, bones_table, bones);
 
-		
-		
+		// Loads all the vertex bone weights and indices
+		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_entries, bones_table, vertices);
+
+		// Initializes the opengl buffers
 		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
-
 		retval.resources.emplace_back(mesh_handle);
+
+		/*
+		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();
+		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
+
+		skeleton = anim::Skeleton{ bones, bones_table };
+
+		mat4 skeleton_transform = fbx_loader_detail::Helper::initMat4(ai_scene->mRootNode->mTransformation);
+		skeleton.SetSkeletonTransform(skeleton_transform);
+
+		return retval;
+		*/
 		return retval;
 	}
 
-	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource, span<GenericMetadata> path_to_meta)
+	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource,const MetaFile& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);
 
-		return FileResources();
+		return Create(path_to_resource);
+
+		// return FileResources();
 	}
 	
 }

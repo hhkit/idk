@@ -22,19 +22,8 @@ namespace idk::ogl
 	void OpenGLState::GenResources()
 	{
 		// generate mesh renderer
-		auto vtx_shader = Core::GetSystem<FileSystem>().Open("/assets/shader/mesh.vert", FS_PERMISSIONS::READ, false);
-		std::stringstream stringify;
-		stringify << vtx_shader.rdbuf();
-
-		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(),
-			std::move(
-				Program{}
-					.Attach(Shader{GL_VERTEX_SHADER,
-						stringify.str()
-						})
-					.Link()
-			) }
-		);
+		auto load_mesh = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert");
+		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(), load_mesh.resources[0].As<ShaderProgram>() } );
 	}
 
 
@@ -45,6 +34,8 @@ namespace idk::ogl
 		auto& curr_draw_buffer = sys->curr_draw_buffer;
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
+
+		//glEnable(GL_DEPTH_TEST);
 		for (auto& state : curr_object_buffer.states)
 		{
 			//Bind frame buffers based on the camera's render target

@@ -353,5 +353,5 @@ MigrationBackup/
 /idk/build/tests
 /idk/build/win32
 /idk/assets/models/Running.fbx
-/idk/assets/models/boblampclean.md5mesh
 imgui.ini
+*.pfrag

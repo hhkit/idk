@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
-
 #include <glad/glad.h>
+#include <gfx/ShaderProgram.h>
 
 namespace idk::ogl
 {
@@ -23,13 +23,20 @@ namespace idk::ogl
 	};
 
 	class Program
+		: public ShaderProgram
 	{
 	public:
 		Program() = default;
 		~Program();
 
+		// accessors
+		GLint ID() const;
+		GLint ShaderFlags() const;
+
 		Program& Attach(Shader&& shader);
 		Program& Link();
+		template<typename T>
+		bool SetUniform(std::string_view uniform, const T& obj);
 
 		Program(Program&&) noexcept;
 		Program& operator=(Program&&) noexcept;
@@ -38,7 +45,6 @@ namespace idk::ogl
 		GLint  _shader_flags = 0;
 
 		vector<Shader> _shaders{};
-
-		friend class PipelineProgram;
 	};
 }
+#include "Program.inl"

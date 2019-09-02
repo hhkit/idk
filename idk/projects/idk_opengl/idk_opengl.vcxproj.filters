@@ -31,6 +31,8 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="resource\OpenGLMaterialFactory.h" />
+    <ClInclude Include="resource\OpenGLTexture.h" />
+    <ClInclude Include="program\ShaderProgramFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -61,6 +63,8 @@
     <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
     <ClCompile Include="glad_wgl.c" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="resource\OpenGLTexture.cpp" />
+    <ClCompile Include="program\ShaderProgramFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -74,6 +78,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="program\PipelineProgram.inl" />
+    <None Include="program\Program.inl">
+      <Filter>program</Filter>
+    </None>
+    <None Include="program\PipelineProgram.inl">
+      <Filter>program</Filter>
+    </None>
   </ItemGroup>
 </Project>

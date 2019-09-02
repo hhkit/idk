@@ -90,7 +90,7 @@ namespace idk
 
 
 	template<typename T>
-	struct is_container : std::conjunction<is_associative_container<T>,is_sequential_container<T>> {};
+	struct is_container : std::disjunction<is_associative_container<T>,is_sequential_container<T>> {};
 
 
 	template<typename T, typename = void>

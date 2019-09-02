@@ -79,6 +79,16 @@ namespace idk::ogl
 		glDeleteProgram(_program_id);
 	}
 
+	GLint Program::ID() const
+	{
+		return _program_id;
+	}
+
+	GLint Program::ShaderFlags() const
+	{
+		return _shader_flags;
+	}
+
 	Program& Program::Attach(Shader&& shader)
 	{
 		_shader_flags |= shader._shader_flags;

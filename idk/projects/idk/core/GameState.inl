@@ -25,6 +25,7 @@ namespace idk
 		{
 			auto hGameObject = detail::ObjectPools::GetPool<GameObject>(_objects).Create(scene, fwd<Args>(args)...);
 			hGameObject->GameObject::template AddComponent<Transform>(); // today i learnt: fuck c++
+			hGameObject->GameObject::template AddComponent<Name>();
 			return hGameObject;
 		}
 		else
@@ -37,6 +38,7 @@ namespace idk
 		{
 			auto hGameObject = detail::ObjectPools::GetPool<T>(_objects).Create(handle, fwd<Args>(args)...);
 			hGameObject->GameObject::template AddComponent<Transform>(); // today i learnt: fuck c++
+			hGameObject->GameObject::template AddComponent<Name>();
 			return hGameObject;
 		}
 		else

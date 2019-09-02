@@ -4,6 +4,7 @@
 #include <res/Guid.h>
 #include <scene/SceneFactory.h>
 #include <util/enum.h>
+#include <serialize/yaml.h>
 
 using namespace idk;
 
@@ -19,6 +20,45 @@ struct serialize_this
 REFLECT_BEGIN(serialize_this, "serialize_this")
 REFLECT_VARS(guid, vec, f)
 REFLECT_END()
+
+TEST(Serialize, TestYaml)
+{
+	// test:
+	//   a: x
+	//   b: y
+    yaml::node node = yaml::parse("test:\n  a: x\n  b: y");
+    EXPECT_EQ(node["test"]["a"].as_scalar(), "x");
+    EXPECT_EQ(node["test"]["b"].as_scalar(), "y");
+
+	// - test: a:
+	// - x: b
+    yaml::node node2 = yaml::parse("- test: a:\n- x: b");
+    EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
+    EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
+
+	// -
+	// - test:
+	//   - x
+	//   - y: hi
+    //     z: bye
+    //   - w
+	yaml::node node3 = yaml::parse("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
+	EXPECT_TRUE(node3[0].null());
+	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
+	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
+    EXPECT_EQ(node3[1]["test"][1]["z"].as_scalar(), "bye");
+    EXPECT_EQ(node3[1]["test"][2].as_scalar(), "w");
+
+	// - test: [x, y,{a: b} ]
+	// - test2 : {b: [1,2,3]}
+	yaml::node node4 = yaml::parse("- test: [x, y,{a: b} ]   \r\n- test2 : {b: [1,2,3]}");
+    EXPECT_EQ(node4[0]["test"][0].as_scalar(), "x");
+    EXPECT_EQ(node4[0]["test"][1].as_scalar(), "y");
+    EXPECT_EQ(node4[0]["test"][2]["a"].as_scalar(), "b");
+    EXPECT_EQ(node4[1]["test2"]["b"][0].get<int>(), 1);
+    EXPECT_EQ(node4[1]["test2"]["b"][1].get<int>(), 2);
+    EXPECT_EQ(node4[1]["test2"]["b"][2].get<int>(), 3);
+}
 
 TEST(Serialize, TestSerializeBasic)
 {

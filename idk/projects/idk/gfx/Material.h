@@ -5,7 +5,7 @@
 
 namespace idk
 {
-	class ShaderGraph;
+	class ShaderTemplate;
 
 	ENUM(MaterialDomain, char,
 		Surface,
@@ -24,6 +24,7 @@ namespace idk
 		MaterialDomain domain = MaterialDomain::Surface;
 		BlendMode      blend  = BlendMode::Opaque;
 		ShadingModel   model  = ShadingModel::Unlit;
+		Guid           compiled_shader_guid = Guid::Make();
 	};
 
 	class Material
@@ -31,8 +32,12 @@ namespace idk
 		, public MetaTag<MaterialMeta>
 	{
 	public:
-		virtual void Set(string_view fragment_code) = 0;
-		virtual void Set(const ShaderGraph&) = 0;
 		virtual ~Material() = default;
+
+		virtual bool BuildShader(RscHandle<ShaderTemplate>, string_view material_uniforms, string_view material_code) = 0;
+		RscHandle<ShaderProgram> GetShaderProgram() const;
+	protected:
+		RscHandle<ShaderProgram> _program{meta.compiled_shader_guid};
+		void OnMetaUpdate(const MaterialMeta& newmeta) override;
 	};
 }

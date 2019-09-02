@@ -61,11 +61,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();
-	go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	//go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	//go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+	go->GetComponent<Transform>()->scale /= 200.f;
+	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
 	Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
-	//mesh_rend->material_instance.material = 
-	//	Core::GetResourceManager().LoadFile(FileHandle("/assets/shader/flat_color.frag")).resources[0].As<Material>();
+
+	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+
+	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
+	auto h_mat = Core::GetResourceManager().Create<Material>();
+
+	h_mat->BuildShader(shader_template, "", "");
+	mesh_rend->material_instance.material = h_mat;
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

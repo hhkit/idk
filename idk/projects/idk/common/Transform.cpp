@@ -11,6 +11,11 @@ namespace idk
 	{
 		return GlobalMatrix()[2].get_normalized();
 	}
+
+	vec3 Transform::Right() const
+	{
+		return GlobalMatrix()[0].get_normalized();
+	}
 	
 	vec3 Transform::Up() const
 	{
