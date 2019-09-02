@@ -32,12 +32,10 @@ namespace idk::fbx_loader_detail
 		static inline vec3 initVec3(const aiVector3D& vec);
 
 		// Helper function for initializing bone data
-		static void initBones(const aiMesh* ai_mesh, hash_set<string> bones_table);	// Bones
-
+		
 		static void initOpenGLBuffers	(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
 		static void initBoneHierarchy	(const aiNode* ai_node, hash_set<string> bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
 		static void initBoneWeights		(const aiScene* ai_scene, const vector<ogl::OpenGLMesh::MeshEntry>& entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 	private:
-		void recurseNodes(aiNode* node, hash_table<string, aiBone*>& bones_table, vector<anim::Skeleton::Bone>& bones, unsigned parent_index, unsigned next_index);
 	};
 }

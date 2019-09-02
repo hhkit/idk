@@ -206,6 +206,11 @@ namespace idk {
 		string full_path{ fullPath.data() };
 		string mount_path{ mountPath.data() };
 
+		if (_mount_table.find(mount_path) != _mount_table.end())
+		{
+			throw(FS_ERROR_CODE::FILESYSTEM_DUPLICATE, "Mount alr exists!");
+		}
+
 		// All mountPaths must begin with '/'
 		if (mountPath[0] != '/')
 			throw(FS_ERROR_CODE::FILESYSTEM_BAD_ARGUMENT, "Mount Path needs to start with '/'.");

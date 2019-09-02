@@ -494,6 +494,9 @@
     <ClInclude Include="gfx\ShaderTemplateFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="anim\AnimationClip.h">
+      <Filter>anim</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\Light.h">
       <Filter>gfx\light</Filter>
     </ClInclude>
@@ -666,6 +669,9 @@
       <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
+    <ClCompile Include="anim\AnimationClip.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
     <ClCompile Include="common\Name.cpp">
       <Filter>common</Filter>
     </ClCompile>
