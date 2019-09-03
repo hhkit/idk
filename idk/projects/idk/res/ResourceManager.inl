@@ -110,7 +110,7 @@ namespace idk
 	{
 		auto [table, itr] = FindHandle(RscHandle<RegisterMe>{guid});
 		if (itr != table.end())
-			return RscHandle<Resource>{};
+			return RscHandle<RegisterMe>{};
 
 		auto ptr = std::make_unique<RegisterMe>(std::forward<Args>(args)...);
 		if (!ptr)
