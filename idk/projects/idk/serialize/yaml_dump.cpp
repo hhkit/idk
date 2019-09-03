@@ -35,6 +35,78 @@ namespace idk::yaml
             output += sv;
             is_new_line = false;
         }
+        void write_scalar(const node& _node)
+        {
+            bool must_escape = false;
+            bool has_single_quotes = false;
+            const auto& scalar = _node.as_scalar();
+
+            for (size_t i = 0; i < scalar.size(); ++i)
+            {
+                switch (scalar[i])
+                {
+                case '\'': has_single_quotes = true; break;
+                case '\0': must_escape = true; break;
+                case '\t': must_escape = true; break;
+                case '\n': must_escape = true; break;
+                case '\r': must_escape = true; break;
+                default: break;
+                }
+            }
+
+            if (!must_escape)
+            {
+                // "xyz" => '"xyz"' (so "" dont get lost during parse)
+                if (scalar.front() == '\"' && scalar.back() == '\"')
+                {
+                    write('\'');
+                    if (has_single_quotes) // have to escape single quotes
+                    {
+                        string str;
+                        for (size_t i = 0; i < scalar.size(); ++i)
+                        {
+                            if (scalar[i] == '\'')
+                                str += "''";
+                            else
+                                str += scalar[i];
+                        }
+                        write(str);
+                    }
+                    else
+                        write(scalar);
+                    write('\'');
+                }
+                else
+                    write(scalar);
+            }
+            else
+            {
+                string str = "\"";
+                for (size_t i = 0; i < scalar.size(); ++i)
+                {
+                    switch (scalar[i])
+                    {
+                    case '\\': str += "\\\\"; break;
+                    case '\"': str += "\\\""; break;
+                    case '\0': str += "\\0"; break;
+                    case '\t': str += "\\t"; break;
+                    case '\n': str += "\\n"; break;
+                    case '\r': str += "\\r"; break;
+                    default: str += scalar[i]; break;
+                    }
+                }
+                str += '"';
+                write(str);
+            }
+        }
+        void write_tag(const node& _node)
+        {
+            if (!_node.has_tag())
+                return;
+            write('!');
+            write(_node.tag());
+            write(' ');
+        }
 
         void new_line() 
         {
@@ -79,8 +151,15 @@ namespace idk::yaml
         {
             switch (_node.type())
             {
-            case type::null: write_null(); break;
-            case type::scalar: write(_node.as_scalar()); break;
+            case type::null:
+                write_tag(_node);
+                write_null(); 
+                break;
+
+            case type::scalar:
+                write_tag(_node); 
+                write_scalar(_node);
+                break;
 
             case type::sequence:
             {
@@ -93,6 +172,7 @@ namespace idk::yaml
                         write('[');
                         for (const auto& item : seq)
                         {
+                            write_tag(_node);
                             dump(item);
                             write(", ");
                         }
@@ -106,6 +186,7 @@ namespace idk::yaml
                         {
                             write("- ");
                             indent();
+                            write_tag(_node);
                             if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
                                 new_line();
                             dump(item);
@@ -129,6 +210,7 @@ namespace idk::yaml
                         {
                             write(key);
                             write(": ");
+                            write_tag(_node);
                             dump(item);
                             write(", ");
                         }
@@ -142,15 +224,16 @@ namespace idk::yaml
                         {
                             write(key);
                             write(": ");
-                            // block seq/map in block map, need indent
-							if (item.type() == type::mapping && !should_flow(item))
+                            write_tag(_node);
+                            
+							if (item.type() == type::mapping && !should_flow(item)) // block map in block map, need indent
 							{
 								new_line();
 								indent();
 								dump(item);
 								unindent();
 							}
-							else if (item.type() == type::sequence && !should_flow(item))
+							else if (item.type() == type::sequence && !should_flow(item)) // block seq in block map, no indent
 							{
 								new_line();
 								dump(item);
