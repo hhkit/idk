@@ -29,6 +29,11 @@ namespace idk::yaml
         return _tag;
     }
 
+    bool node::has_tag() const
+    {
+        return _tag.size();
+    }
+
 	scalar_type& node::as_scalar()
     {
         return std::get<static_cast<int>(type::scalar)>(_value);
