@@ -12,4 +12,5 @@
 #include <idk.h>
 #include <core/Core.h>
 #include <reflect/reflect.h>
+#include <glad/glad.h>
 #endif //PCH_H

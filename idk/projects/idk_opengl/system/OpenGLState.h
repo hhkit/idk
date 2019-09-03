@@ -3,6 +3,7 @@
 #include <gfx/RenderObject.h>
 #include <idk_opengl/program/Program.h>
 #include <idk_opengl/program/PipelineProgram.h>
+#include <idk_opengl/system/FrameBufferManager.h>
 
 namespace idk::ogl
 {
@@ -25,6 +26,7 @@ namespace idk::ogl
 		Win32GraphicsSystem* sys{};
 		// variables
 		PipelineProgram        pipeline;
+		FrameBufferManager     fb_man;
 		vector<RendererInfo>   renderer_vertex_shaders;
 		GLuint                 vao_id = 0;
 	};

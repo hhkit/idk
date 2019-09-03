@@ -110,7 +110,7 @@ namespace idk
 	{
 		auto [table, itr] = FindHandle(RscHandle<RegisterMe>{guid});
 		if (itr != table.end())
-			return RscHandle<RegisterMe>{};
+			return RscHandle<RegisterMe>{guid};
 
 		auto ptr = std::make_unique<RegisterMe>(std::forward<Args>(args)...);
 		if (!ptr)
@@ -138,7 +138,7 @@ namespace idk
 	auto ResourceManager::FindHandle(const RscHandle<Resource>& handle)
 	{
 		auto& table = GetTable<BaseResource_t<Resource>>();
-		return std::tuple<Storage<BaseResource_t<Resource>>&, Storage<BaseResource_t<Resource>>::iterator>{table, table.lower_bound(handle.guid)};
+		return std::tuple<Storage<BaseResource_t<Resource>>&, Storage<BaseResource_t<Resource>>::iterator>{table, table.find(handle.guid)};
 	}
 
 	template<typename Resource>

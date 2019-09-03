@@ -7,8 +7,10 @@
 #include <gfx/ShaderTemplateFactory.h>
 #include <res/ForwardingExtensionLoader.h>
 
+#include <idk_opengl/resource/FrameBufferFactory.h>
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
+#include <idk_opengl/resource/OpenGLTextureFactory.h>
 #include <idk_opengl/program/ShaderProgramFactory.h>
 #include <idk_opengl/system/OpenGLState.h>
 
@@ -160,6 +162,8 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
 		Core::GetResourceManager().RegisterFactory<ShaderProgramFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
+		Core::GetResourceManager().RegisterFactory<FrameBufferFactory>();
 
 		// register extensions
 		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vert");
