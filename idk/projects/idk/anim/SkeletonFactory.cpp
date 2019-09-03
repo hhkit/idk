@@ -4,7 +4,7 @@
 
 namespace idk::anim
 {
-	unique_ptr<Skeleton> SkeletonFactory::Create()
+	unique_ptr<Skeleton> SkeletonFactory::GenerateDefaultResource()
 	{
 		auto retval = std::make_unique<Skeleton>();
 		Skeleton::Bone b;
@@ -13,6 +13,12 @@ namespace idk::anim
 		b._parent = -1;
 
 		return retval;
+	}
+
+	unique_ptr<Skeleton> SkeletonFactory::Create()
+	{
+		
+		return std::make_unique<Skeleton>();
 	}
 	unique_ptr<Skeleton> SkeletonFactory::Create(FileHandle filepath)
 	{

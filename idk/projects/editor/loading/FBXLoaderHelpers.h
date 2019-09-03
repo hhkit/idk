@@ -46,7 +46,7 @@ namespace idk::fbx_loader_detail
 		static void initAssimpNodes		(const aiNode* root_node, AssimpNode& node);
 		static void initOpenGLBuffers	(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
 		static void initBoneHierarchy	(const aiNode* ai_node, hash_set<string> bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
-		static void initBoneWeights		(const aiScene* ai_scene, const vector<ogl::OpenGLMesh::MeshEntry>& entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
+		static void initBoneWeights		(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 		
 		static void initAnimMap(const aiAnimation* ai_anim, anim::Animation& anim_clip);
 		static void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip);

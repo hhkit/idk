@@ -8,9 +8,9 @@ namespace idk::anim
 		: public ResourceFactory<Animation>
 	{
 	public:
+		unique_ptr<Animation> GenerateDefaultResource() override;
 		unique_ptr<Animation> Create() override;
 		//unique_ptr<Mesh> Create(const ResourceMeta&);
 		unique_ptr<Animation> Create(FileHandle filepath) override;
 	};
 }
-#pragma once

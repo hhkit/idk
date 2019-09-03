@@ -4,9 +4,13 @@
 
 namespace idk::anim
 {
+	unique_ptr<Animation> AnimationFactory::GenerateDefaultResource()
+	{
+		return std::make_unique<Animation>();
+	}
 	unique_ptr<Animation> AnimationFactory::Create()
 	{
-		return unique_ptr<Animation>();
+		return std::make_unique<Animation>();
 	}
 
 	unique_ptr<Animation> AnimationFactory::Create(FileHandle filepath)
