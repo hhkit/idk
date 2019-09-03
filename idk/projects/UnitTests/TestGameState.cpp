@@ -45,7 +45,8 @@ TEST(GameState, TestScene)
 {
 	using namespace idk;
 	GameState gs;
-	SceneFactory sf;
+	SceneFactory real_sf;
+	ResourceFactory<Scene>& sf = real_sf;
 	auto scene0 = sf.Create();
 	auto scene1 = sf.Create();
 	EXPECT_TRUE(scene0);

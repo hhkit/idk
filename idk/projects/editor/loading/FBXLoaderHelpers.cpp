@@ -110,7 +110,7 @@ namespace idk::fbx_loader_detail
 		}
 	}
 
-	void Helper::initBoneWeights(const aiScene* ai_scene, const vector<ogl::OpenGLMesh::MeshEntry>& entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
+	void Helper::initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
 	{
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{

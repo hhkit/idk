@@ -681,7 +681,10 @@
     <ClCompile Include="serialize\yaml.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_parse.cpp">
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_load.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
     <ClCompile Include="anim\SkeletonFactory.cpp">
@@ -696,6 +699,7 @@
     <ClCompile Include="anim\AnimationFactory.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -850,6 +854,9 @@
     </None>
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
+    </None>
+    <None Include="res\Resource.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

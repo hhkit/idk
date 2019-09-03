@@ -2,6 +2,10 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   
   <Type Name="idk::yaml::node">
+    <DisplayString Condition="_value._Which == 0 &amp;&amp; _tag._Mypair._Myval2._Mysize &gt; 0">&lt;null&gt; !{_tag,sb}</DisplayString>
+    <DisplayString Condition="_value._Which == 1 &amp;&amp; _tag._Mypair._Myval2._Mysize &gt; 0">&lt;scalar&gt; !{_tag,sb} {*(idk::yaml::scalar_type*)&amp;_value}</DisplayString>
+    <DisplayString Condition="_value._Which == 2 &amp;&amp; _tag._Mypair._Myval2._Mysize &gt; 0">&lt;sequence&gt; !{_tag,sb} {*(idk::yaml::sequence_type*)&amp;_value}</DisplayString>
+    <DisplayString Condition="_value._Which == 3 &amp;&amp; _tag._Mypair._Myval2._Mysize &gt; 0">&lt;mapping&gt; !{_tag,sb} {*(idk::yaml::mapping_type*)&amp;_value}</DisplayString>
     <DisplayString Condition="_value._Which == 0">&lt;null&gt;</DisplayString>
     <DisplayString Condition="_value._Which == 1">&lt;scalar&gt; {*(idk::yaml::scalar_type*)&amp;_value}</DisplayString>
     <DisplayString Condition="_value._Which == 2">&lt;sequence&gt; {*(idk::yaml::sequence_type*)&amp;_value}</DisplayString>

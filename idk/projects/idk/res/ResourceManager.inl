@@ -30,7 +30,7 @@ namespace idk
 			return RscHandle<Resource>{};
 		
 		auto handle = RscHandle<Resource>{ Guid::Make() };
-		ptr->_handle = handle;
+		ptr->_handle = RscHandle<BaseResource_t<Resource>>{ handle };
 		ptr->_dirty = true;
 		if constexpr (has_tag_v<Resource, MetaTag>)
 			ptr->_dirtymeta = true;
@@ -87,26 +87,26 @@ namespace idk
 	template<typename Resource>
 	inline auto& ResourceManager::GetLoader()
 	{
-		return *r_cast<ResourceFactory<Resource>*>(_plaintext_loaders[ResourceID<Resource>].get());
+		return *r_cast<ResourceFactory<BaseResource_t<Resource>>*>(_plaintext_loaders[ResourceID<BaseResource_t<Resource>>].get());
 	}
 
 	template<typename Resource>
 	inline auto& ResourceManager::GetTable()
 	{
-		return *r_cast<Storage<Resource>*>(_resource_tables[ResourceID<Resource>].get());
+		return *r_cast<Storage<BaseResource_t<Resource>>*>(_resource_tables[ResourceID<BaseResource_t<Resource>>].get());
 	}
 
 	template<typename Resource>
 	auto ResourceManager::FindHandle(const RscHandle<Resource>& handle)
 	{
-		auto& table = GetTable<Resource>();
-		return std::tuple<Storage<Resource>&, Storage<Resource>::iterator>{table, table.lower_bound(handle.guid)};
+		auto& table = GetTable<BaseResource_t<Resource>>();
+		return std::tuple<Storage<BaseResource_t<Resource>>&, Storage<BaseResource_t<Resource>>::iterator>{table, table.lower_bound(handle.guid)};
 	}
 
 	template<typename Resource>
 	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)
 	{
-		auto [table, itr] = FindHandle(handle);
+		auto [table, itr] = FindHandle(RscHandle<BaseResource_t<Resource>>{handle});
 		return itr != table.end() && itr->second->_loaded;
 	}
 
@@ -115,9 +115,9 @@ namespace idk
 	{
 		auto [table, itr] = FindHandle(handle);
 		if (itr != table.end() && itr->second->_loaded)
-			return *itr->second;
+			return s_cast<Resource&>(*itr->second);
 		else
-			return *r_cast<Resource*>(_default_resources[ResourceID<Resource>].get());
+			return *r_cast<Resource*>(_default_resources[ResourceID<BaseResource_t<Resource>>].get());
 	}
 	template<typename Resource>
 	inline bool ResourceManager::Free(const RscHandle<Resource>& handle)

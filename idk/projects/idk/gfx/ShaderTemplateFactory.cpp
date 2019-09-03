@@ -18,7 +18,7 @@ void main()
 
 namespace idk
 {
-	unique_ptr<ShaderTemplate> ShaderTemplateFactory::Create()
+	unique_ptr<ShaderTemplate> ShaderTemplateFactory::GenerateDefaultResource()
 	{
 		return std::make_unique<ShaderTemplate>(default_template);
 	}

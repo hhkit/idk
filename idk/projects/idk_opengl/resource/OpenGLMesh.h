@@ -42,8 +42,11 @@ namespace idk::ogl
 		void   Bind(const renderer_reqs& locations);
 		void   Draw();
 		void   Reset();
+
+
 		void   AddBuffer(OpenGLBuffer&);
 		void   AddMeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index);
+		span<MeshEntry> GetMeshEntries();
 	private:
 		vector<MeshEntry>	 _mesh_entries;
 		vector<OpenGLBuffer> _buffers;
