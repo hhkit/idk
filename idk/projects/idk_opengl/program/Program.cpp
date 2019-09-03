@@ -116,7 +116,7 @@ namespace idk::ogl
 
 			if (!success)
 			{
-				glGetShaderInfoLog(_program_id, 512, NULL, infoLog);
+				glGetProgramInfoLog(_program_id, 512, NULL, infoLog);
 
 				std::cout << "Program link failed!\n";
 				std::cout << infoLog << "\n";
