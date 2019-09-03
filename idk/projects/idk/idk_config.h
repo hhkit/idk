@@ -2,7 +2,7 @@
 #include <meta/tuple.h>
 namespace idk
 {
-	namespace anim { class Skeleton; }
+	namespace anim { class Skeleton; class Animation; }
 
 	constexpr auto MaxScene = 8;
 
@@ -68,7 +68,7 @@ namespace idk
 		,	class Texture
 		,	class ShaderProgram
 		,	class RenderTarget
-		//,	class Animation
+		,	anim::Animation
 		,	anim::Skeleton
 		//,	class Level
 	>;

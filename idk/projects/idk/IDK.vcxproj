@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="anim\AnimationClip.h" />
+    <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationFactory.h" />
     <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
@@ -160,8 +162,10 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="anim\AnimationClip.cpp" />
+    <ClCompile Include="anim\Animation.cpp" />
+    <ClCompile Include="anim\AnimationFactory.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
+    <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />

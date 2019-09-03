@@ -103,7 +103,7 @@ namespace idk
 		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
 		retval.resources.emplace_back(mesh_handle);
 
-		/*
+		// Loading Skeletons
 		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();
 		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
 
@@ -111,9 +111,21 @@ namespace idk
 
 		mat4 skeleton_transform = fbx_loader_detail::Helper::initMat4(ai_scene->mRootNode->mTransformation);
 		skeleton.SetSkeletonTransform(skeleton_transform);
+		retval.resources.emplace_back(skeleton_handle);
 
-		return retval;
-		*/
+		// Loading Animations
+		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
+		{
+			auto anim_clip_handle = Core::GetResourceManager().Create<anim::Animation>();
+			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
+
+			// There should be a better way to do this. We are traversing the whole aiNode tree twice per animation.
+			fbx_loader_detail::Helper::initAnimMap(ai_scene->mAnimations[i], anim_clip);
+			fbx_loader_detail::Helper::initAnimNodeTransforms(ai_scene->mRootNode, anim_clip);
+
+			retval.resources.emplace_back(anim_clip_handle);
+		}
+		
 		return retval;
 	}
 

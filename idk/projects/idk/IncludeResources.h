@@ -1,6 +1,7 @@
 #pragma once
 #include <res/Resource.h>
 #include <audio/AudioClip.h>
+#include <anim/Animation.h>
 #include <anim/Skeleton.h>
 #include <gfx/Mesh.h>
 #include <gfx/Material.h>

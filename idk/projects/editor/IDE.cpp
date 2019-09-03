@@ -9,6 +9,7 @@
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
+#include <loading/VulkanFBXLoader.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/commands/CommandList.h>
 
@@ -30,6 +31,8 @@ namespace idk
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
+			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".md5mesh");
 			break;
 		default:
 			break;
