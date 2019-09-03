@@ -77,6 +77,8 @@ TEST(Serialize, TestYaml)
     EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - {a: b}\n- test2: \n    b: [1, 2, 3]\n");
 
     yaml::node node5 = yaml::load("- !testtag \"longassstring\"");
+	//EXPECT_EQ(node5[0].as_scalar(), "longassstring");
+	EXPECT_EQ(node5[0].tag(), "testtag");
 }
 
 TEST(Serialize, TestSerializeBasic)
