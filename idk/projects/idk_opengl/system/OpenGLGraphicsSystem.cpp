@@ -7,6 +7,8 @@
 #include <gfx/ShaderTemplateFactory.h>
 #include <res/ForwardingExtensionLoader.h>
 
+#include <idk/anim/SkeletonFactory.h>
+#include <idk/anim/AnimationFactory.h>
 #include <idk_opengl/resource/FrameBufferFactory.h>
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
@@ -160,6 +162,8 @@ namespace idk::ogl
 		// register factories
 		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
+		Core::GetResourceManager().RegisterFactory<idk::anim::SkeletonFactory>();
+		Core::GetResourceManager().RegisterFactory<idk::anim::AnimationFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
 		Core::GetResourceManager().RegisterFactory<ShaderProgramFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();

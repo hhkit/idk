@@ -142,12 +142,21 @@ namespace idk::yaml
                         {
                             write(key);
                             write(": ");
-                            indent();
                             // block seq/map in block map, need indent
-                            if ((item.type() == type::mapping || item.type() == type::sequence) && !should_flow(item))
-                                new_line();
-                            dump(item);
-                            unindent();
+							if (item.type() == type::mapping && !should_flow(item))
+							{
+								new_line();
+								indent();
+								dump(item);
+								unindent();
+							}
+							else if (item.type() == type::sequence && !should_flow(item))
+							{
+								new_line();
+								dump(item);
+							}
+							else
+								dump(item);
                             new_line();
                         }
                     }
