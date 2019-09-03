@@ -247,6 +247,7 @@
     <None Include="reflect\uni_container.inl" />
     <None Include="res\FileResources.inl" />
     <None Include="res\ForwardingExtensionLoader.inl" />
+    <None Include="res\Resource.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />

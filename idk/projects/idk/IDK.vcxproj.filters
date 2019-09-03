@@ -839,6 +839,9 @@
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
+    <None Include="res\Resource.inl">
+      <Filter>res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

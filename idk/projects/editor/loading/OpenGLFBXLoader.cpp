@@ -24,9 +24,7 @@ namespace idk
 		if (ai_scene == nullptr)
 			return retval;
 
-		auto mesh_handle = Core::GetResourceManager().Create<Mesh>();
-		auto& opengl_mesh = mesh_handle.as<ogl::OpenGLMesh>();
-		opengl_mesh.Reset();
+		auto mesh_handle = Core::GetResourceManager().Create<ogl::OpenGLMesh>();
 
 		vector<Vertex> vertices;
 		vector<unsigned> indices;
@@ -46,12 +44,12 @@ namespace idk
 			unsigned curr_base_index = num_indices;
 			unsigned curr_num_index = ai_scene->mMeshes[i]->mNumFaces * 3;
 
-			mesh_entries.emplace_back(curr_base_vertex, curr_base_index, curr_num_index, 0);
+			mesh_handle->AddMeshEntry(curr_base_vertex, curr_base_index, curr_num_index, 0);
 			
 			num_vertices += ai_scene->mMeshes[i]->mNumVertices;
 			num_indices += curr_num_index;
 		}
-		opengl_mesh = ogl::OpenGLMesh{ mesh_entries };
+		//ogl::OpenGLMesh{ mesh_entries };
 
 		vertices.reserve(num_vertices);
 		indices.reserve(num_indices);
@@ -97,11 +95,11 @@ namespace idk
 		fbx_loader_detail::Helper::initBoneHierarchy(ai_scene->mRootNode, bones_set, bones_table, bones);
 
 		// Loads all the vertex bone weights and indices
-		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_entries, bones_table, vertices);
+		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
 
 		// Initializes the opengl buffers
-		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
-		retval.resources.emplace_back(mesh_handle);
+		fbx_loader_detail::Helper::initOpenGLBuffers(*mesh_handle, vertices, indices);
+		retval.resources.emplace_back(RscHandle<Mesh>{mesh_handle});
 
 		/*
 		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();

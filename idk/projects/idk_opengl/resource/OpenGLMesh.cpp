@@ -89,6 +89,11 @@ namespace idk::ogl
 		_mesh_entries.emplace_back(MeshEntry{ base_v, base_i, num_i, text_index });
 	}
 
+	span<OpenGLMesh::MeshEntry> OpenGLMesh::GetMeshEntries()
+	{
+		return span<MeshEntry>(_mesh_entries);
+	}
+
 	OpenGLMesh::MeshEntry::MeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index)
 		:_base_vertex{ base_v }, _base_index{ base_i }, _num_index{ num_i }, _texture_index{ text_index }
 	{
