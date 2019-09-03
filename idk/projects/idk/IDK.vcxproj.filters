@@ -678,12 +678,13 @@
     <ClCompile Include="serialize\yaml.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_parse.cpp">
-      <Filter>serialize</Filter>
-    </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
+    <ClCompile Include="serialize\yaml_load.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

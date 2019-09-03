@@ -350,7 +350,7 @@ namespace idk::yaml
 		p.new_block = true;
 	}
 
-	node parse(string_view str)
+	node load(string_view str)
 	{
 		parser_state p{ str };
 
