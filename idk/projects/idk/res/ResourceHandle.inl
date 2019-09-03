@@ -44,4 +44,11 @@ namespace idk
 		static_assert(std::is_base_of_v<Res, T>, "Can only downcast to inehrited type.");
 		return static_cast<T&>(operator*());
 	}
+	
+	template<typename Res>
+	template<typename Other, typename>
+	inline RscHandle<Res>::operator RscHandle<Other>() const
+	{
+		return RscHandle<Other>{guid};
+	}
 }

@@ -42,15 +42,17 @@ namespace idk
 		FileHandle(const char* mountPath);
 
 		bool operator == (const FileHandle& rhs) const;
-		
-		string_view			GetFullPath() const;
-		string_view			GetRelPath() const;
-		string_view			GetMountPath() const;
 
-		string_view			GetExtension() const;
+		string_view			GetFileName()	const;
 		
-		string_view			GetParentFullPath() const;
-		string_view			GetParentRelPath() const;
+		string_view			GetFullPath()	const;
+		string_view			GetRelPath()	const;
+		string_view			GetMountPath()	const;
+
+		string_view			GetExtension()	const;
+		
+		string_view			GetParentFullPath()  const;
+		string_view			GetParentRelPath()	 const;
 		string_view			GetParentMountPath() const;
 
 		FS_CHANGE_STATUS	GetStatus() const;

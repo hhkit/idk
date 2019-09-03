@@ -14,6 +14,16 @@ namespace idk::yaml
 		return type() == type::null;
 	}
 
+    size_t node::size() const
+    {
+        switch (type())
+        {
+        case type::sequence: return as_sequence().size();
+        case type::mapping: return as_mapping().size();
+        default: return 0;
+        }
+    }
+
     const scalar_type& node::tag() const
     {
         return _tag;
@@ -61,6 +71,16 @@ namespace idk::yaml
         as_sequence().push_back(node);
     }
 
+    sequence_type::const_iterator node::begin() const
+    {
+        return as_sequence().begin();
+    }
+
+    sequence_type::const_iterator node::end() const
+    {
+        return as_sequence().end();
+    }
+
     node& node::operator[](size_t index)
     {
         if (type() == type::null)
@@ -74,4 +94,5 @@ namespace idk::yaml
             _value = mapping_type();
         return as_mapping()[str];
     }
+
 }

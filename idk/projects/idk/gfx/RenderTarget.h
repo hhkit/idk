@@ -9,14 +9,16 @@ namespace idk
 	{
 		ivec2 size {1024, 1024};
 		vector<RscHandle<Texture>> textures;
-		RscHandle<Texture> depth_buffer;
+		//RscHandle<Texture> depth_buffer;
 	};
 
 	class RenderTarget
 		: public Resource<RenderTarget>
 		, public MetaTag<RenderTargetMeta>
 	{
+	public:
 		float AspectRatio() const;
+		virtual ~RenderTarget() = default;
 	};
 
 }

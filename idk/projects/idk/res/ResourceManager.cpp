@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include <sstream>
-
+#include <ds/ranged_for.h>
 #include <file/FileSystem.h>
 #include <IncludeResources.h>
 #include <serialize/serialize.h>
@@ -60,10 +60,10 @@ namespace idk
 
 	void ResourceManager::Shutdown()
 	{
-		for (auto& elem : _resource_tables)
+		for (auto& elem : reverse(_default_resources))
 			elem.reset();
 
-		for (auto& elem : _default_resources)
+		for (auto& elem : _resource_tables)
 			elem.reset();
 	}
 

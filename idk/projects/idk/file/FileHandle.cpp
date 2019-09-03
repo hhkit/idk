@@ -140,6 +140,18 @@ namespace idk
 		return _key == rhs._key && _ref_count == rhs._ref_count && _is_regular_file == rhs._is_regular_file;
 	}
 
+	string_view FileHandle::GetFileName() const
+	{
+		// Check Handle
+		if (validate() == false)
+			return string_view{};
+
+		auto& vfs = Core::GetSystem<FileSystem>();
+		auto& file = vfs.getFile(_key);
+		
+		return file._filename;
+	}
+
 	string_view FileHandle::GetFullPath() const
 	{
 		// Check Handle

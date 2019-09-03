@@ -24,9 +24,7 @@ namespace idk
 		if (ai_scene == nullptr)
 			return retval;
 
-		auto mesh_handle = Core::GetResourceManager().Create<Mesh>();
-		auto& opengl_mesh = mesh_handle.as<ogl::OpenGLMesh>();
-		opengl_mesh.Reset();
+		auto mesh_handle = Core::GetResourceManager().Create<ogl::OpenGLMesh>();
 
 		vector<Vertex> vertices;
 		vector<unsigned> indices;
@@ -46,12 +44,12 @@ namespace idk
 			unsigned curr_base_index = num_indices;
 			unsigned curr_num_index = ai_scene->mMeshes[i]->mNumFaces * 3;
 
-			mesh_entries.emplace_back(curr_base_vertex, curr_base_index, curr_num_index, 0);
+			mesh_handle->AddMeshEntry(curr_base_vertex, curr_base_index, curr_num_index, 0);
 			
 			num_vertices += ai_scene->mMeshes[i]->mNumVertices;
 			num_indices += curr_num_index;
 		}
-		opengl_mesh = ogl::OpenGLMesh{ mesh_entries };
+		//ogl::OpenGLMesh{ mesh_entries };
 
 		vertices.reserve(num_vertices);
 		indices.reserve(num_indices);
@@ -97,13 +95,13 @@ namespace idk
 		fbx_loader_detail::Helper::initBoneHierarchy(ai_scene->mRootNode, bones_set, bones_table, bones);
 
 		// Loads all the vertex bone weights and indices
-		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_entries, bones_table, vertices);
+		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
 
 		// Initializes the opengl buffers
-		fbx_loader_detail::Helper::initOpenGLBuffers(opengl_mesh, vertices, indices);
-		retval.resources.emplace_back(mesh_handle);
+		fbx_loader_detail::Helper::initOpenGLBuffers(*mesh_handle, vertices, indices);
+		retval.resources.emplace_back(RscHandle<Mesh>{mesh_handle});
 
-		/*
+		// Loading Skeletons
 		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();
 		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
 
@@ -111,9 +109,21 @@ namespace idk
 
 		mat4 skeleton_transform = fbx_loader_detail::Helper::initMat4(ai_scene->mRootNode->mTransformation);
 		skeleton.SetSkeletonTransform(skeleton_transform);
+		retval.resources.emplace_back(skeleton_handle);
 
-		return retval;
-		*/
+		// Loading Animations
+		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
+		{
+			auto anim_clip_handle = Core::GetResourceManager().Create<anim::Animation>();
+			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
+
+			// There should be a better way to do this. We are traversing the whole aiNode tree twice per animation.
+			fbx_loader_detail::Helper::initAnimMap(ai_scene->mAnimations[i], anim_clip);
+			fbx_loader_detail::Helper::initAnimNodeTransforms(ai_scene->mRootNode, anim_clip);
+
+			retval.resources.emplace_back(anim_clip_handle);
+		}
+		
 		return retval;
 	}
 
