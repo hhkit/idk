@@ -192,6 +192,7 @@
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
+    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
@@ -220,7 +221,7 @@
     <ClCompile Include="reflect\enum_type.cpp" />
     <ClCompile Include="shape\ray.cpp" />
     <ClCompile Include="shape\sphere.cpp" />
-    <ClCompile Include="serialize\yaml_parse.cpp" />
+    <ClCompile Include="serialize\yaml_load.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />

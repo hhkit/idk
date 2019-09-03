@@ -26,15 +26,19 @@ TEST(Serialize, TestYaml)
 	// test:
 	//   a: x
 	//   b: y
-    yaml::node node = yaml::parse("test:\n  a: x\n  b: y");
+    yaml::node node = yaml::load("test:\n  a: x\n  b: y");
     EXPECT_EQ(node["test"]["a"].as_scalar(), "x");
     EXPECT_EQ(node["test"]["b"].as_scalar(), "y");
+    EXPECT_EQ(yaml::dump(node), "test: {a: x, b: y}\n");
 
 	// - test: a:
 	// - x: b
-    yaml::node node2 = yaml::parse("- test: a:\n- x: b");
+    yaml::node node2 = yaml::load("- test: a:\n- x: b");
     EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
     EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
+    // - {test: a:}
+    // - {x: b}
+    EXPECT_EQ(yaml::dump(node2), "- {test: a:}\n- {x: b}\n");
 
 	// -
 	// - test:
@@ -42,24 +46,37 @@ TEST(Serialize, TestYaml)
 	//   - y: hi
     //     z: bye
     //   - w
-	yaml::node node3 = yaml::parse("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
+	yaml::node node3 = yaml::load("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
 	EXPECT_TRUE(node3[0].null());
 	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
 	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
     EXPECT_EQ(node3[1]["test"][1]["z"].as_scalar(), "bye");
     EXPECT_EQ(node3[1]["test"][2].as_scalar(), "w");
+    // - 
+    // - test: 
+    //   - x
+    //   - {y: hi, z: bye}
+    //   - w
+    EXPECT_EQ(yaml::dump(node3), "- \n- test: \n  - x\n  - {y: hi, z: bye}\n  - w\n");
 
 	// - test: [x, y,{a: b} ]
 	// - test2 : {b: [1,2,3]}
-	yaml::node node4 = yaml::parse("- test: [x, y,{a: b} ]   \r\n- test2 : {b: [1,2,3]}");
+	yaml::node node4 = yaml::load("- test: [x, y,{a: b} ]   \r\n- test2 : {b: [1,2,3]}");
     EXPECT_EQ(node4[0]["test"][0].as_scalar(), "x");
     EXPECT_EQ(node4[0]["test"][1].as_scalar(), "y");
     EXPECT_EQ(node4[0]["test"][2]["a"].as_scalar(), "b");
     EXPECT_EQ(node4[1]["test2"]["b"][0].get<int>(), 1);
     EXPECT_EQ(node4[1]["test2"]["b"][1].get<int>(), 2);
     EXPECT_EQ(node4[1]["test2"]["b"][2].get<int>(), 3);
+    // - test:
+    //   - x
+    //   - y
+    //   - {a: b}
+    // - test2:
+    //     b: [1, 2, 3]
+    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - {a: b}\n- test2: \n    b: [1, 2, 3]\n");
 
-    yaml::node node5 = yaml::parse("- !testtag \"longassstring\"");
+    yaml::node node5 = yaml::load("- !testtag \"longassstring\"");
 }
 
 TEST(Serialize, TestSerializeBasic)

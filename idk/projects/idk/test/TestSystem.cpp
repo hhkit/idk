@@ -18,23 +18,23 @@ namespace idk
 
 	void TestSystem::TestSpan(span<TestComponent> comps)
 	{
-		Handle<Camera> currCamera = Core::GetSystem<GraphicsSystem>().CurrentCamera();
+		//Handle<Camera> currCamera = Core::GetSystem<GraphicsSystem>().CurrentCamera();
 
 		auto& app_sys = Core::GetSystem<Application>();
 		//assert(currCamera);
-		auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		//auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
 		//Please ignore all of this first
-		if (app_sys.GetKey(Key::A)) tfm->position += vec3{ -0.16, 0.0, 0.0 };
-		if (app_sys.GetKey(Key::D)) tfm->position += vec3{ +0.16, 0.0, 0.0 };
-		if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.16, 0.0 };
-		if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.16, 0.0 };
+		//if (app_sys.GetKey(Key::A)) tfm->position += vec3{ -0.16, 0.0, 0.0 };
+		//if (app_sys.GetKey(Key::D)) tfm->position += vec3{ +0.16, 0.0, 0.0 };
+		//if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.16, 0.0 };
+		//if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.16, 0.0 };
 
-		//Please ignore all of this first
-		if (app_sys.GetKey(Key::Q)) tfm->rotation = (quat{ vec3{0,1,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		if (app_sys.GetKey(Key::E)) tfm->rotation = (quat{ vec3{0,1,0}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		if (app_sys.GetKey(Key::Z)) tfm->rotation = (quat{ vec3{1,0,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		if (app_sys.GetKey(Key::C)) tfm->rotation = (quat{ vec3{1,0,0}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
+		////Please ignore all of this first
+		//if (app_sys.GetKey(Key::Q)) tfm->rotation = (quat{ vec3{0,1,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
+		//if (app_sys.GetKey(Key::E)) tfm->rotation = (quat{ vec3{0,1,0}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
+		//if (app_sys.GetKey(Key::Z)) tfm->rotation = (quat{ vec3{1,0,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
+		//if (app_sys.GetKey(Key::C)) tfm->rotation = (quat{ vec3{1,0,0}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
 
 		//std::cout << std::boolalpha << app_sys.IsMouseDragging() << std::endl;
 		if (app_sys.GetKey(Key::LButton) && app_sys.IsMouseDragging())
