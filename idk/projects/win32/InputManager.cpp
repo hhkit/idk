@@ -12,9 +12,24 @@ namespace idk::win
 		curr_buf()[index] = false;
 	}
 
+	void InputManager::SetMouseDown(int index)
+	{
+		curr_buf()[index] = true;
+	}
+
+	void InputManager::SetMouseUp(int index)
+	{
+		curr_buf()[index] = false;
+	}
+
 	void InputManager::SetChar(char c)
 	{
 		_last_char = c;
+	}
+
+	void InputManager::SetMouseDragging(bool d)
+	{
+		_dragging = d;
 	}
 
 	void InputManager::SwapBuffers()
@@ -35,6 +50,18 @@ namespace idk::win
 	bool InputManager::GetKeyUp(int index)
 	{
 		return curr_buf()[index] == false && prev_buf()[index] == true;
+	}
+	bool InputManager::GetMouseDown(int index)
+	{
+		return prev_buf()[index] == false && curr_buf()[index] == true;
+	}
+	bool InputManager::GetMouseUp(int index)
+	{
+		return curr_buf()[index] == false && prev_buf()[index] == true;
+	}
+	bool InputManager::IsMouseDragging(int index)
+	{
+		return curr_buf()[index] && _dragging;
 	}
 	char InputManager::GetChar()
 	{

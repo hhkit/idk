@@ -27,11 +27,14 @@ namespace idk::win
 		int GetReturnVal();
 		void Init() override {}
 		ivec2 GetScreenSize() override;
-		vec2 GetMouseScreenPos() override { return vec2{}; }
-		vec2 GetMouseScreenDel() override { return vec2{}; }
+		vec2 GetMouseScreenPos() override; 
+		vec2 GetMouseScreenDel() override;
+		ivec2 GetMousePixelPos() override;
+		ivec2 GetMousePixelDel() override;
 		bool GetKeyDown(Key) override;
 		bool GetKey(Key) override;
 		bool GetKeyUp(Key) override;
+		bool IsMouseDragging() override;
 		char GetChar() override;
 		// windows
 		bool SetFullscreen(bool) override { return false; }
@@ -48,6 +51,10 @@ namespace idk::win
 		HACCEL    hAccelTable;
 		WCHAR     szWindowClass[MAX_LOADSTRING]{L"idk"};
 		int       retval;
+		ivec2	  screenpos;
+		ivec2     old_screenpos;
+		ivec2	  screendel;
+		vec2	  ndc_screendel;
 		static inline Windows* instance = nullptr;
 
 		unique_ptr<InputManager> _input_manager;
@@ -59,6 +66,8 @@ namespace idk::win
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
 
 		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
+
+		bool _dragging{false};
 	};
 }
 

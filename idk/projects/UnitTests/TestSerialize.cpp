@@ -58,6 +58,8 @@ TEST(Serialize, TestYaml)
     EXPECT_EQ(node4[1]["test2"]["b"][0].get<int>(), 1);
     EXPECT_EQ(node4[1]["test2"]["b"][1].get<int>(), 2);
     EXPECT_EQ(node4[1]["test2"]["b"][2].get<int>(), 3);
+
+    yaml::node node5 = yaml::parse("- !testtag \"longassstring\"");
 }
 
 TEST(Serialize, TestSerializeBasic)
@@ -191,7 +193,7 @@ TEST(Serialize, TestSerializeScene)
 {
 	GameState gs;
 	SceneFactory sf;
-	auto scene = sf.Create();
+	auto scene = sf.GenerateDefaultResource();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();
@@ -216,7 +218,8 @@ TEST(Serialize, TestSerializeScene)
 TEST(Serialize, TestParseScene)
 {
 	GameState gs;
-	SceneFactory sf;
+	SceneFactory real_sf;
+	ResourceFactory<Scene>& sf = real_sf;
 	auto scene = sf.Create();
 
 	parse_text(serialized_scene_0, *scene);

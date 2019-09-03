@@ -14,7 +14,17 @@ namespace idk::yaml
 		return type() == type::null;
 	}
 
+    const scalar_type& node::tag() const
+    {
+        return _tag;
+    }
+
 	scalar_type& node::as_scalar()
+    {
+        return std::get<static_cast<int>(type::scalar)>(_value);
+    }
+
+    const scalar_type& node::as_scalar() const
     {
         return std::get<static_cast<int>(type::scalar)>(_value);
     }
@@ -24,9 +34,24 @@ namespace idk::yaml
         return std::get<static_cast<int>(type::sequence)>(_value);
     }
 
+    const sequence_type& node::as_sequence() const
+    {
+        return std::get<static_cast<int>(type::sequence)>(_value);
+    }
+
     mapping_type& node::as_mapping()
     {
         return std::get<static_cast<int>(type::mapping)>(_value);
+    }
+
+    const mapping_type& node::as_mapping() const
+    {
+        return std::get<static_cast<int>(type::mapping)>(_value);
+    }
+
+    void node::tag(string_view new_tag)
+    {
+        _tag = new_tag;
     }
 
     void node::push_back(const node& node)
