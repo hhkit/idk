@@ -8,7 +8,7 @@ namespace idk
 	template<typename T>
 	string serialize_text(const T& obj)
 	{
-		if constexpr (std::is_arithmetic_v<T>)
+		if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
 			return std::to_string(obj);
 		else if constexpr (is_basic_serializable_v<T>)
 			return string(obj);
@@ -24,7 +24,7 @@ namespace idk
         else if constexpr (std::is_same_v<std::decay_t<T>, bool>)
             obj = str == "true";
         else if constexpr (std::is_same_v<std::decay_t<T>, char>)
-            obj = str[0];
+            obj = static_cast<char>(std::stoi(str));
         else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>)
             obj = std::stoll(str);
         else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>)

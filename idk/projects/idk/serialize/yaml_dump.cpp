@@ -39,17 +39,25 @@ namespace idk::yaml
         {
             bool must_escape = false;
             bool has_single_quotes = false;
+            bool has_flow_braces = false;
             const auto& scalar = _node.as_scalar();
+
+            if (scalar.empty())
+            {
+                write("\"\""); // "" -> empty string
+                return;
+            }
 
             for (size_t i = 0; i < scalar.size(); ++i)
             {
                 switch (scalar[i])
                 {
-                case '\'': has_single_quotes = true; break;
-                case '\0': must_escape = true; break;
-                case '\t': must_escape = true; break;
-                case '\n': must_escape = true; break;
-                case '\r': must_escape = true; break;
+                case '\'':
+                    has_single_quotes = true; break;
+                case '\0': case '\t': case '\n': case '\r': 
+                    must_escape = true; break;
+                case '[': case ']': case '{': case '}':
+                    has_flow_braces = true; break;
                 default: break;
                 }
             }
@@ -60,8 +68,9 @@ namespace idk::yaml
                 if (scalar.front() == '\"' && scalar.back() == '\"')
                 {
                     write('\'');
-                    if (has_single_quotes) // have to escape single quotes
+                    if (has_single_quotes || (style == flow_style && has_flow_braces))
                     {
+                        // have to escape single quotes
                         string str;
                         for (size_t i = 0; i < scalar.size(); ++i)
                         {
@@ -172,7 +181,6 @@ namespace idk::yaml
                         write('[');
                         for (const auto& item : seq)
                         {
-                            write_tag(_node);
                             dump(item);
                             write(", ");
                         }
@@ -186,12 +194,22 @@ namespace idk::yaml
                         {
                             write("- ");
                             indent();
-                            write_tag(_node);
-                            if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
+                            if (item.type() == type::mapping)
+                            {
+                                if (item.has_tag())
+                                {
+                                    write_tag(item);
+                                    new_line();
+                                }
+                            }
+                            else if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
+                            {
+                                write_tag(item);
                                 new_line();
+                            }
                             dump(item);
-                            new_line();
                             unindent();
+                            new_line();
                         }
                     }
                 }
@@ -210,7 +228,6 @@ namespace idk::yaml
                         {
                             write(key);
                             write(": ");
-                            write_tag(_node);
                             dump(item);
                             write(", ");
                         }
@@ -224,10 +241,10 @@ namespace idk::yaml
                         {
                             write(key);
                             write(": ");
-                            write_tag(_node);
                             
 							if (item.type() == type::mapping && !should_flow(item)) // block map in block map, need indent
 							{
+                                write_tag(item);
 								new_line();
 								indent();
 								dump(item);
@@ -235,6 +252,7 @@ namespace idk::yaml
 							}
 							else if (item.type() == type::sequence && !should_flow(item)) // block seq in block map, no indent
 							{
+                                write_tag(item);
 								new_line();
 								dump(item);
 							}

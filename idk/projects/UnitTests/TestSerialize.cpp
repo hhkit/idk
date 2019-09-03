@@ -47,7 +47,7 @@ TEST(Serialize, TestYaml)
     //     z: bye
     //   - w
 	yaml::node node3 = yaml::load("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
-	EXPECT_TRUE(node3[0].null());
+	EXPECT_TRUE(node3[0].is_null());
 	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
 	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
     EXPECT_EQ(node3[1]["test"][1]["z"].as_scalar(), "bye");
@@ -95,18 +95,15 @@ TEST(Serialize, TestSerializeBasic)
 	vec3 v{ 1.0f, 2.0f, 3.0f };
 	auto str = serialize_text(v);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), "{\n  \"x\": 1.0,\n  \"y\": 2.0,\n  \"z\": 3.0\n}");
+	EXPECT_STREQ(str.c_str(), "{x: 1.000000, y: 2.000000, z: 3.000000}");
 
 	serialize_this obj = {
 		Guid{"e82bf459-faca-4c70-a8e9-dd35597575ef"},
 		vec4{5.0f, 6.0f, 7.0f, 8.0f}
 	};
-	auto x = "{\n  \"f\": 69,\n  "
-		"\"guid\": \"e82bf459-faca-4c70-a8e9-dd35597575ef\",\n  "
-		"\"vec\": {\n    \"w\": 8.0,\n    \"x\": 5.0,\n    \"y\": 6.0,\n    \"z\": 7.0\n  }\n}";
 	str = serialize_text(obj);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), x);
+	EXPECT_STREQ(str.c_str(), "guid: e82bf459-faca-4c70-a8e9-dd35597575ef\nvec: \n  x: 5.000000\n  y: 6.000000\n  z: 7.000000\n  w: 8.000000\nf: 69\n");
 
 	// roundtrip
 	auto obj2 = parse_text<serialize_this>(str);
