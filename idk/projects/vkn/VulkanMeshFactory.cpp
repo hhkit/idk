@@ -86,7 +86,7 @@ namespace idk::vkn
 		//TODO Create Pipeline with config
 	}
 
-	unique_ptr<Mesh> MeshFactory::Create()
+	unique_ptr<Mesh> MeshFactory::GenerateDefaultResource()
 	{
 		vector<vec3> positions
 		{

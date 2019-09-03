@@ -4,6 +4,8 @@
 #include <vkn/VulkanPipeline.h>
 #include <vkn/VulkanMesh.h>
 #include <file/FileSystem.h>
+#include <vkn/ShaderModule.h>
+#include <vkn/PipelineManager.h>
 namespace idk::vkn
 {
 	struct SomeHackyThing
@@ -90,6 +92,8 @@ namespace idk::vkn
 			_render_threads.emplace_back(std::move(thread));
 		}
 		InitThing(View());
+		//TODO figure this out
+		//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
 	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states)
 	{
@@ -204,6 +208,10 @@ namespace idk::vkn
 			}
 		}
 	}
+	RscHandle<ShaderProgram> FrameRenderer::GetMeshRendererShaderModule()
+	{
+		return _mesh_renderer_shader_module;
+	}
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& swapchain = View().Swapchain();
@@ -231,11 +239,16 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
 		VulkanPipeline* prev_pipeline=nullptr;
+		vector<RscHandle<ShaderProgram>> shaders;
 		for (auto& obj : state.mesh_render)
 		{
 			rs.FlagRendered();
+			shaders.resize(0);
+			shaders.emplace_back(GetMeshRendererShaderModule());
+			shaders.emplace_back(obj.material_instance.material->GetShaderProgram());
 			//TODO Grab everything and render them
-			auto& pipeline = GetPipeline(GetPipelineHandle());
+			//Maybe change the config to be a managed resource.
+			auto& pipeline = GetPipeline(state.config,shaders);
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			if (&pipeline != prev_pipeline)
 			{
@@ -261,17 +274,22 @@ namespace idk::vkn
 		cmd_buffer.end();
 	}
 
-	VulkanPipeline& FrameRenderer::GetPipeline(PipelineHandle_t)
+	PipelineManager& FrameRenderer::GetPipelineManager()
 	{
-		// TODO: Replace with something that actually gets the pipeline
-		return thing.pipeline;
+		return *_pipeline_manager;
 	}
 
-	PipelineHandle_t FrameRenderer::GetPipelineHandle()
+	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules)
 	{
-		// TODO: Replace with something that actually figures out what pipeline to use
-		return PipelineHandle_t{};
+		// TODO: Replace with something that actually gets the pipeline
+		return GetPipelineManager().GetPipeline(config,modules);
 	}
+
+	//PipelineHandle_t FrameRenderer::GetPipelineHandle()
+	//{
+	//	// TODO: Replace with something that actually figures out what pipeline to use
+	//	return PipelineHandle_t{};
+	//}
 
 	void FrameRenderer::NonThreadedRender::Init(FrameRenderer* renderer)
 	{

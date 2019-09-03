@@ -210,7 +210,12 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="idkTexture.h" />
     <ClInclude Include="MemoryAllocator.h" />
+    <ClInclude Include="object_pool.h" />
+    <ClInclude Include="PipelineManager.h" />
     <ClInclude Include="RenderState.h" />
+    <ClInclude Include="ShaderModule.h" />
+    <ClInclude Include="VulkanGlslLoader.h" />
+    <ClInclude Include="VulkanShaderModuleFactory.h" />
     <ClInclude Include="UboManager.h" />
     <ClInclude Include="ValHandler.h" />
     <ClInclude Include="vector_buffer.h" />
@@ -235,7 +240,9 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="idkTexture.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="PipelineManager.cpp" />
     <ClCompile Include="RenderState.cpp" />
+    <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
@@ -248,8 +255,10 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="utils\utils.cpp" />
+    <ClCompile Include="VulkanGlslLoader.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanMeshFactory.cpp" />
+    <ClCompile Include="VulkanShaderModuleFactory.cpp" />
     <ClCompile Include="VulkanState.cpp" />
     <ClCompile Include="VulkanView.cpp" />
     <ClCompile Include="BufferHelpers.cpp" />

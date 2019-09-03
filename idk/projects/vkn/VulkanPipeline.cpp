@@ -101,12 +101,11 @@ namespace idk::vkn
 			}
 		}
 	};
-	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
 		auto& m_renderpass = GetRenderpass(config, vulkan);
-		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config, vulkan);
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
@@ -149,7 +148,7 @@ namespace idk::vkn
 		//};
 		//For uniforms
 		CreateUniformDescriptors(vulkan, config);//Should probably also allocate the UBO and Descriptors on the View/Data side.
-		auto&& [pipelineLayoutInfo,pli_rsc] = GetLayoutInfo(config);;
+		auto&& [pipelineLayoutInfo, pli_rsc] = GetLayoutInfo(config);;
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
@@ -170,6 +169,28 @@ namespace idk::vkn
 		};
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
 		pipelinelayout = std::move(m_pipelinelayout);
+	}
+	void VulkanPipeline::Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shader_modules, Vulkan_t& vulkan)
+	{
+		const char* entryPoint = "main";
+		vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo;
+		for (auto& [stage, module] : shader_modules)
+		{
+			stageCreateInfo.emplace_back(vk::PipelineShaderStageCreateInfo
+			{
+			vk::PipelineShaderStageCreateFlags{},
+			stage ,
+			module,
+			entryPoint,
+			nullptr
+			});
+		}
+		Create(config, stageCreateInfo, vulkan);
+	}
+	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
+	{
+		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config, vulkan);
+		Create(config, stageCreateInfo, vulkan);
 	}
 	void VulkanPipeline::Reset()
 	{

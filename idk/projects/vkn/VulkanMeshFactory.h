@@ -12,7 +12,7 @@ namespace idk::vkn
 	public:
 		MeshFactory();
 		void Init();
-		unique_ptr<Mesh> Create() override;
+		unique_ptr<Mesh> GenerateDefaultResource() override;
 		//unique_ptr<Mesh> Create(const ResourceMeta&);
 		unique_ptr<Mesh> Create(FileHandle filepath) override;
 	private:

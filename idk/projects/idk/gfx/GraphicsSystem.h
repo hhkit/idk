@@ -3,6 +3,7 @@
 #include <core/ISystem.h>
 #include <ds/span.h>
 #include <gfx/RenderObject.h>
+#include <gfx/pipeline_config.h>
 #include <gfx/Camera.h>
 namespace idk
 {
@@ -20,6 +21,7 @@ namespace idk
 	{
 		using CameraData = Camera;//Replace if camera cannot be stored by copy.
 		CameraData           camera;
+		pipeline_config      config;
 		//RenderTexHandle      render_target;//Get RenderTarget from camera.
 		vector<RenderObject> mesh_render;
 		vector<RenderObject> skinned_mesh_render;

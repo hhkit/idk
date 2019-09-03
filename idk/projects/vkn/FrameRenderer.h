@@ -10,6 +10,7 @@ namespace idk
 }
 namespace idk::vkn
 {
+	class PipelineManager;
 	struct RenderStateV2
 	{
 		vk::CommandBuffer cmd_buffer;
@@ -64,15 +65,21 @@ namespace idk::vkn
 
 		void RenderGraphicsState(const GraphicsState& state,RenderStateV2& rs);
 		VulkanView& View()const { return *_view; }
-		VulkanView* _view = nullptr;
-		VulkanPipeline&  GetPipeline(PipelineHandle_t);
-		PipelineHandle_t GetPipelineHandle();//Add arguments when we know what determines which pipeline to get.
+		
+		RscHandle<ShaderProgram> GetMeshRendererShaderModule();
+		PipelineManager& GetPipelineManager();
+		VulkanPipeline&  GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& prog);
+		//PipelineHandle_t GetPipelineHandle();//Add arguments when we know what determines which pipeline to get.
 
-		vector<RenderStateV2> _states{};
-		const vector<GraphicsState>* _gfx_states{};
-		vector<vk::UniqueCommandBuffer> _state_cmd_buffers;
-		vector<std::unique_ptr<IRenderThread>> _render_threads;
-		vk::CommandPool         _cmd_pool;
+
+		VulkanView*                            _view                       {};
+		RscHandle<ShaderProgram>               _mesh_renderer_shader_module{};
+		PipelineManager*                       _pipeline_manager           {};
+		vector<RenderStateV2>                  _states                     {};
+		const vector<GraphicsState>*           _gfx_states                 {};
+		vector<vk::UniqueCommandBuffer>        _state_cmd_buffers          {};
+		vector<std::unique_ptr<IRenderThread>> _render_threads             {};
+		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
 	};

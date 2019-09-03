@@ -259,7 +259,7 @@ namespace idk::vkn
 		void createFrameObjects();
 		void createImageViews();
 
-		auto createShaderModule(const std::string& code) -> vk::UniqueShaderModule;
+		auto createShaderModule(const string_view& code) -> vk::UniqueShaderModule;
 
 		void createRenderPass();
 

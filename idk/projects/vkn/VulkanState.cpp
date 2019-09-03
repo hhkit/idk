@@ -855,7 +855,7 @@ namespace idk::vkn
 		}
 	}
 
-	vk::UniqueShaderModule VulkanState::createShaderModule(const std::string& code)
+	vk::UniqueShaderModule VulkanState::createShaderModule(const string_view& code)
 	{
 		vk::ShaderModuleCreateInfo mod{
 			vk::ShaderModuleCreateFlags{},

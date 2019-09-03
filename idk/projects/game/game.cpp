@@ -43,7 +43,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
 
-	switch (GraphicsAPI::OpenGL)
+	switch (GraphicsAPI::Vulkan)
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
@@ -68,7 +68,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
-	camera->GetComponent<Name>()->replace("Camera 1");
+	camera->GetComponent<Name>()->name = "Camera 1";
 	camera->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	gSys->SetMainCamera(camHandle);
 	
@@ -84,10 +84,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
 	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
-	auto h_mat = Core::GetResourceManager().Create<Material>();
-
-	h_mat->BuildShader(shader_template, "", "");
-	mesh_rend->material_instance.material = h_mat;
+	//auto h_mat = Core::GetResourceManager().Create<Material>();
+	//
+	//h_mat->BuildShader(shader_template, "", "");
+	//mesh_rend->material_instance.material = h_mat;
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

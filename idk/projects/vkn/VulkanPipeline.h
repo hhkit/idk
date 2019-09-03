@@ -17,7 +17,9 @@ namespace idk::vkn
 	   hash_table<uint32_t,vk::UniqueDescriptorSetLayout> uniform_layouts{};
 
 	
-		void Create(config_t const& config, Vulkan_t& vulkan);
+	   void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan);
+	   void Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits,vk::ShaderModule>> shader_modules, Vulkan_t& vulkan);
+	   void Create(config_t const& config, Vulkan_t& vulkan);
 		void Reset();
 		void Bind(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan)const;
 		//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.
