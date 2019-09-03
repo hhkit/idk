@@ -11,6 +11,7 @@
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <iostream>
+
 void _check_gl_error(const char* file, int line) {
 	GLenum err(glGetError());
 
@@ -53,10 +54,8 @@ namespace idk::ogl
 		auto& curr_draw_buffer = sys->curr_draw_buffer;
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
-		GL_CHECK();
 
 		fb_man.SetRenderTarget({});
-		GL_CHECK();
 
 		//Bind frame buffers based on the camera's render target
 		//Set the clear color according to the camera
@@ -73,23 +72,18 @@ namespace idk::ogl
 				});
 
 			pipeline.Use();
-			GL_CHECK();
 			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
-			GL_CHECK();
 
 			glBindVertexArray(vao_id);
-			GL_CHECK();
 			for (auto& elem : state.mesh_render)
 			{
 				// bind shader
 				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
 				pipeline.PushProgram(material.GetShaderProgram());
-				GL_CHECK();
 
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
 				mesh.Bind(MeshRenderer::GetRequiredAttributes());
-				GL_CHECK();
 
 				// set uniforms
 				// object uniforms
@@ -102,17 +96,14 @@ namespace idk::ogl
 					std::visit([this, &id](auto& elem) {
 						pipeline.SetUniform(id, elem);
 					}, uniform);
-					GL_CHECK();
 				}
 
 				// draw
 				mesh.Draw();
-				GL_CHECK();
 			}
 		}
 
 		fb_man.ResetFramebuffer();
-		GL_CHECK();
 	}
 
 }
