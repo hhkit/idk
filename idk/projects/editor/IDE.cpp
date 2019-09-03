@@ -44,6 +44,7 @@ namespace idk
 		ige_windows.push_back(std::make_unique<IGE_MainWindow>());
 		ige_windows.push_back(std::make_unique<IGE_SceneView>());
 		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
+		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
 
 		for (auto& i : ige_windows) {
 			i->Initialize();

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "FrameBuffer.h"
 #include <core/Core.h>
-#include <gfx/Texture.h>
+#include <idk_opengl/resource/OpenGLTexture.h>
 
 namespace idk::ogl
 {
@@ -10,7 +10,6 @@ namespace idk::ogl
 		glGenRenderbuffers(1, &depthbuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, meta.size.x, meta.size.y);
-		meta.textures.emplace_back();
 	}
 
 	FrameBuffer::~FrameBuffer()
@@ -22,11 +21,16 @@ namespace idk::ogl
 
 	void FrameBuffer::OnMetaUpdate(const Metadata& newmeta)
 	{
+		for (auto& elem : meta.textures)
+			Core::GetResourceManager().Free(elem);
+
 		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newmeta.size.x, newmeta.size.y);
 
 		for (auto& elem : newmeta.textures)
-			elem->Size(newmeta.size);
+		{
+			Core::GetResourceManager().Create<OpenGLTexture>(elem.guid)->Size(newmeta.size);
+		}
 	}
 
 	GLuint FrameBuffer::DepthBuffer() const
