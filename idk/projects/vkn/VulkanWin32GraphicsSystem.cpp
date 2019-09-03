@@ -11,7 +11,14 @@
 #include <gfx/pipeline_config.h>
 #include <file/FileSystem.h>
 #include <vkn/VulkanMeshFactory.h>
-
+#include <vkn/VulkanShaderModuleFactory.h>
+#include <res/ForwardingExtensionLoader.h>
+#include <vkn/VulkanGlslLoader.h>
+#include <vkn/VulkanMaterialFactory.h>
+#include <gfx/ShaderTemplateFactory.h>
+#include <anim/SkeletonFactory.h>
+#include <anim/AnimationFactory.h>
+#include <vkn/PipelineManager.h>
 
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -50,10 +57,21 @@ namespace idk::vkn
 		windows_ = &Core::GetSystem<win::Windows>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 
+		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
+		Core::GetResourceManager().RegisterFactory<idk::anim::SkeletonFactory>();
+		Core::GetResourceManager().RegisterFactory<idk::anim::AnimationFactory>();
 		Core::GetResourceManager().RegisterFactory<MeshFactory>();
+		Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
+		Core::GetResourceManager().RegisterFactory<VulkanShaderModuleFactory>();
 		//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 		//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
-
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vertspv");
+		Core::GetResourceManager().RegisterExtensionLoader<VulkanGlslLoader>(".vert");
+		Core::GetResourceManager().RegisterExtensionLoader<VulkanGlslLoader>(".frag");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderTemplate>>(".tmpt");
+		_pm = std::make_unique<PipelineManager>();
+		_pm->View(instance_->View());
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
@@ -61,6 +79,7 @@ namespace idk::vkn
 		for (auto& frame : _frame_renderers)
 		{
 			frame.Init(&instance_->View(), *instance_->View().Commandpool());
+			frame.SetPipelineManager(*_pm);
 		}
 	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()

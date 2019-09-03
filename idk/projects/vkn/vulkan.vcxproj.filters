@@ -84,6 +84,12 @@
     <ClInclude Include="object_pool.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanMaterial.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMaterialFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -143,10 +149,20 @@
     <ClCompile Include="FrameRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanShaderModuleFactory.cpp" />
-    <ClCompile Include="VulkanGlslLoader.cpp" />
-    <ClCompile Include="ShaderModule.cpp" />
-    <ClCompile Include="PipelineManager.cpp" />
+    <ClCompile Include="VulkanGlslLoader.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanShaderModuleFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderModule.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineManager.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMaterial.cpp" />
+    <ClCompile Include="VulkanMaterialFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

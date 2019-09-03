@@ -15,6 +15,7 @@ namespace idk::win
 }
 namespace idk::vkn
 {
+	class PipelineManager;
 	using Windows = win::Windows;
 	class VulkanState;
 
@@ -39,6 +40,7 @@ namespace idk::vkn
 	private:
 		std::unique_ptr<VulkanState> instance_;
 		vector<FrameRenderer> _frame_renderers;
+		std::unique_ptr<PipelineManager> _pm;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;

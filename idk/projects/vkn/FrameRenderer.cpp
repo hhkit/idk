@@ -66,6 +66,17 @@ namespace idk::vkn
 		ubo_manager.Clear();
 		has_commands = false;
 	}
+	buffer_desc BufferDesc(uint32_t pos_loc, uint32_t pos_binding, AttribFormat format, uint32_t stride, VertexRate rate)
+	{
+		buffer_desc pos_desc{};
+
+		pos_desc.AddAttribute(format, pos_loc, 0);
+		pos_desc.binding.binding_index = pos_binding;
+		pos_desc.binding.stride = stride;
+		pos_desc.binding.vertex_rate = rate;
+
+		return pos_desc;
+	}
 	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
 		//Todo: Initialize the stuff
 		_view = view;
@@ -92,8 +103,38 @@ namespace idk::vkn
 			_render_threads.emplace_back(std::move(thread));
 		}
 		InitThing(View());
+
+
 		//TODO figure this out
-		//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+		string filename = "/assets/shader/mesh.vert";
+		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename + "spv");
+		auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+		if (!actualfile || !rsc.resources.size())
+		{
+
+			vector<buffer_desc> desc{
+				BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+				BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex)
+			};
+			auto file = Core::GetSystem<FileSystem>().GetFile(filename);
+			;
+			//Load the glsl, which will spit out a .___spv
+			Core::GetResourceManager().LoadFile(file);
+			Core::GetSystem<FileSystem>().Update();
+			actualfile = Core::GetSystem<FileSystem>().GetFile(filename+"spv");
+			_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
+			//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+			//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+
+		}
+		else
+		{
+			_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
+		}
+	}
+	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
+	{
+		_pipeline_manager = &manager;
 	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states)
 	{

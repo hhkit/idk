@@ -26,6 +26,9 @@ namespace idk::vkn
 			VulkanPipeline pipeline;
 			VulkanPipeline back_pipeline;
 
+			//PipelineObject() = default;
+			//PipelineObject(PipelineObject&&) noexcept= default;
+			//~PipelineObject() = default;
 			void Create(VulkanView& view)
 			{
 				//TODO: set the pipeline's modules

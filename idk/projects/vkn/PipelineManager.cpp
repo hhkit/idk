@@ -17,14 +17,21 @@ namespace idk::vkn
 		for (auto& module : modules)
 		{
 			auto itr = prog_to_pipe.find(module);
-			is_diff = (prev && itr != prog_to_pipe.end() && itr->second == *prev);
-			prev = itr->second;
+			is_diff = !(prev && itr != prog_to_pipe.end() && itr->second == *prev);
+			if(itr!=prog_to_pipe.end())
+			{
+				prev = itr->second;
+			}
+			else
+			{
+				is_diff = true;
+			}
 		}
 		if (is_diff)
 		{
 			PipelineObject obj{ config,modules };
 			obj.Create(View());
-			auto handle = pipelines.add(std::move(obj.pipeline));
+			auto handle = pipelines.add(std::move(obj));
 			for (auto& module : modules)
 			{
 				prog_to_pipe.emplace(module, handle);

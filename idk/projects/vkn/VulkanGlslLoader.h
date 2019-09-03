@@ -10,6 +10,7 @@ class VulkanGlslLoader
 {
 public:
 	FileResources Create(FileHandle path_to_resource) override;
+	FileResources Create(FileHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
 	//FileResources Create(FileHandle path_to_resource, const MetaFile& path_to_meta) override;
 private:
 

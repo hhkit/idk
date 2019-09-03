@@ -30,7 +30,7 @@ namespace idk::vkn
 			default:                      return vk::ShaderStageFlagBits::eAll;
 			}
 		}(filepath.GetExtension());
-		program->Load(shader_enum, stringify.str());
+		program->Load(shader_enum, {},stringify.str());
 		
 		return std::move(program);
 	}

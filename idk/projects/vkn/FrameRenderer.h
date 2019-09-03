@@ -35,7 +35,7 @@ namespace idk::vkn
 		
 		void Init(VulkanView* view, vk::CommandPool cmd_pool);
 
-
+		void SetPipelineManager(PipelineManager& manager);
 		void RenderGraphicsStates(const vector<GraphicsState>& state);
 		PresentationSignals& GetMainSignal();
 	private:
