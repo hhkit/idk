@@ -115,14 +115,12 @@ namespace idk
                     stack.back()->emplace(k, serialize_text(arg));
 				return true;
 			}
-			else if constexpr (is_sequential_container_v<T>)
+			else if constexpr (is_container_v<T>)
 			{
-				stack.push_back(&(*stack.back())[k]);
-				return true;
-			}
-			else if constexpr (is_associative_container_v<T>)
-			{
-                stack.push_back(&(*stack.back())[k]);
+                if constexpr (std::is_arithmetic_v<K>)
+                    stack.push_back(&stack.back()->emplace_back());
+                else
+                    stack.push_back(&(*stack.back())[k]);
 				return true;
 			}
 			else if constexpr (std::is_same_v<T, reflect::dynamic>)
@@ -130,7 +128,10 @@ namespace idk
                 yaml::node dyn_node = serialize_yaml(arg);
                 if (arg.valid())
                     dyn_node.tag(arg.type.name());
-                (*stack.back())[k] = dyn_node;
+                if constexpr (std::is_arithmetic_v<K>)
+                    stack.back()->emplace_back(dyn_node);
+                else
+                    stack.back()->emplace(k, dyn_node);
 				return false;
 			}
 			else
