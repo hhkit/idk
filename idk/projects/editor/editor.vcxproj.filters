@@ -52,6 +52,9 @@
     <ClInclude Include="loading\VulkanFBXLoader.h">
       <Filter>loader</Filter>
     </ClInclude>
+    <ClInclude Include="editor\windows\IGE_HierarchyWindow.h">
+      <Filter>editor\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -93,6 +96,9 @@
     </ClCompile>
     <ClCompile Include="loading\VulkanFBXLoader.cpp">
       <Filter>loader</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\windows\IGE_HierarchyWindow.cpp">
+      <Filter>editor\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
