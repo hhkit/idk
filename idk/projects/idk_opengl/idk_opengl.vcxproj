@@ -172,6 +172,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="resource\FrameBuffer.h" />
+    <ClInclude Include="resource\FrameBufferFactory.h" />
+    <ClInclude Include="resource\OpenGLTextureFactory.h" />
+    <ClInclude Include="system\FrameBufferManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="program\ShaderProgramFactory.h" />
     <ClInclude Include="resource\OpenGLMaterialFactory.h" />
@@ -188,6 +192,10 @@
     <ClInclude Include="program\Program.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="resource\FrameBuffer.cpp" />
+    <ClCompile Include="resource\FrameBufferFactory.cpp" />
+    <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
+    <ClCompile Include="system\FrameBufferManager.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>

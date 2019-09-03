@@ -16,7 +16,11 @@ namespace idk::yaml
         }
         else if constexpr (is_container_v<T>)
         {
-            if constexpr (is_sequential_container_v<T>)
+            if constexpr (std::is_same_v<sequence_type, std::decay_t<T>>)
+                _value.emplace<sequence_type>(std::forward<T>(arg));
+            else if constexpr (std::is_same_v<mapping_type, std::decay_t<T>>)
+                _value.emplace<mapping_type>(std::forward<T>(arg));
+            else if constexpr (is_sequential_container_v<T>)
             {
                 auto& container = _value.emplace<sequence_type>();
                 for (auto& elem : arg)
@@ -32,7 +36,7 @@ namespace idk::yaml
     }
 
     template<typename T>
-    T node::get()
+    T node::get() const
     {
         if constexpr (is_basic_serializable_v<T>)
         {

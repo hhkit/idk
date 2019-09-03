@@ -35,15 +35,16 @@ namespace idk::ogl
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
-		//glEnable(GL_DEPTH_TEST);
+		//fb_man.SetRenderTarget({});
+
+		//Bind frame buffers based on the camera's render target
+		//Set the clear color according to the camera
+
 		for (auto& state : curr_object_buffer.states)
 		{
-			//Bind frame buffers based on the camera's render target
-
-			//Set the clear color according to the camera
-
 			// lock drawing buffer
-		
+			
+
 			// render mesh renderers
 			auto itr_to_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
 				[](const auto& elem)->bool {
@@ -81,6 +82,8 @@ namespace idk::ogl
 				mesh.Draw();
 			}
 		}
+
+		//fb_man.ResetFramebuffer();
 	}
 
 }

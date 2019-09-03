@@ -41,6 +41,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
+	GraphicsSystem* gSys = nullptr;
 
 	switch (GraphicsAPI::OpenGL)
 	{
@@ -48,10 +49,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 			c->AddSystem<vkn::VulkanDebugRenderer>();
 			c->AddSystem<IDE>();
+
+			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
 			break;
 		case GraphicsAPI::OpenGL:
 			c->AddSystem<ogl::Win32GraphicsSystem>();
 			c->AddSystem<IDE>();
+
+			gSys = &c->GetSystem<ogl::Win32GraphicsSystem>();
 			break;
 		default:
 			break;
@@ -60,6 +65,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	c->Setup();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
+	
+	auto camera = scene->CreateGameObject();
+	Handle<Camera> camHandle = camera->AddComponent<Camera>();
+	camera->GetComponent<Name>()->name = "Camera 1";
+	camera->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	gSys->SetMainCamera(camHandle);
+	
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();
 	//go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };

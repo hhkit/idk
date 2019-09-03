@@ -4,7 +4,7 @@
 #include <sstream>
 namespace idk::ogl
 {
-	unique_ptr<ShaderProgram> ShaderProgramFactory::Create()
+	unique_ptr<ShaderProgram> ShaderProgramFactory::GenerateDefaultResource()
 	{
 		return std::make_unique<ogl::Program>();
 	}
@@ -25,7 +25,6 @@ namespace idk::ogl
 			case string_hash(".geom"): return GL_GEOMETRY_SHADER;
 			case string_hash(".tese"): return GL_TESS_EVALUATION_SHADER;
 			case string_hash(".tesc"): return GL_TESS_CONTROL_SHADER;
-			case string_hash(".pfrag"):
 			case string_hash(".frag"): return GL_FRAGMENT_SHADER;
 			case string_hash(".comp"): return GL_COMPUTE_SHADER;
 			default:                   return 0;

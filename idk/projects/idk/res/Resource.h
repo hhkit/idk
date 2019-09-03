@@ -8,6 +8,8 @@ namespace idk
 	class Resource
 	{
 	public:
+		using BaseResource = Res;
+
 		RscHandle<Res> GetHandle() const { return _handle; }
 		Resource() = default;
 		Resource(const Resource& rhs) : _loaded{ rhs._loaded.load() }, _must_load{ rhs._must_load.load() }, _keep_loaded{ rhs._keep_loaded.load() }, _dirty{ rhs._dirty } {}
@@ -30,3 +32,5 @@ namespace idk
 		static_assert(ResourceID<Res> != ResourceCount, "Resource T must be included in the idk_config.h/Resources tuple");
 	};
 }
+
+#include "Resource.inl"

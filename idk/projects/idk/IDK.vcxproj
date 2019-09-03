@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="anim\AnimationClip.h" />
+    <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationFactory.h" />
     <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
@@ -160,8 +162,10 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="anim\AnimationClip.cpp" />
+    <ClCompile Include="anim\Animation.cpp" />
+    <ClCompile Include="anim\AnimationFactory.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
+    <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
@@ -192,6 +196,7 @@
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
+    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
@@ -220,7 +225,7 @@
     <ClCompile Include="reflect\enum_type.cpp" />
     <ClCompile Include="shape\ray.cpp" />
     <ClCompile Include="shape\sphere.cpp" />
-    <ClCompile Include="serialize\yaml_parse.cpp" />
+    <ClCompile Include="serialize\yaml_load.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -247,6 +252,7 @@
     <None Include="reflect\uni_container.inl" />
     <None Include="res\FileResources.inl" />
     <None Include="res\ForwardingExtensionLoader.inl" />
+    <None Include="res\Resource.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />

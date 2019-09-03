@@ -3,7 +3,7 @@
 
 namespace idk
 {
-	unique_ptr<Scene> SceneFactory::Create()
+	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()
 	{
 		return std::make_unique<Scene>();
 	}

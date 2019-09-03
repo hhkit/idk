@@ -494,9 +494,6 @@
     <ClInclude Include="gfx\ShaderTemplateFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationClip.h">
-      <Filter>anim</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Light.h">
       <Filter>gfx\light</Filter>
     </ClInclude>
@@ -508,6 +505,15 @@
     </ClInclude>
     <ClInclude Include="serialize\yaml.h">
       <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\SkeletonFactory.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Animation.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationFactory.h">
+      <Filter>anim</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -669,19 +675,31 @@
       <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
-    <ClCompile Include="anim\AnimationClip.cpp">
-      <Filter>anim</Filter>
-    </ClCompile>
     <ClCompile Include="common\Name.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="serialize\yaml.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_parse.cpp">
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_load.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
+    <ClCompile Include="anim\SkeletonFactory.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Skeleton.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Animation.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationFactory.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -836,6 +854,9 @@
     </None>
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
+    </None>
+    <None Include="res\Resource.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

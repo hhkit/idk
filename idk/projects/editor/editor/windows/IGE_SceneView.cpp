@@ -16,6 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_SceneView.h>
 #include <app/Application.h>
+#include <gfx/RenderTarget.h>
 #include <iostream>
 
 namespace idk {
@@ -52,9 +53,7 @@ namespace idk {
 
 		ImVec2 imageSize{ GetScreenSize().x,GetScreenSize().y };
 		//imageSize.y = (imageSize.x * (9 / 16));
-		ImGui::Image(sceneTexture, imageSize);
-
-
+		ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize);
 	}
 
 	void IGE_SceneView::SetTexture(void* textureToRender)

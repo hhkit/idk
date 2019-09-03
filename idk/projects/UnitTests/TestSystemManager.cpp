@@ -14,6 +14,9 @@ public:
 	void PollEvents() override { ++i; }
 	idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; };
 	idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; };
+    idk::ivec2 GetMousePixelPos() override { return idk::ivec2{}; };
+    idk::ivec2 GetMousePixelDel() override { return idk::ivec2{}; };
+    bool IsMouseDragging() override { return false; };
 	bool GetKeyDown(idk::Key) override { return false; };
 	bool GetKey(idk::Key) override { return false; };
 	bool GetKeyUp(idk::Key) override { return false; };

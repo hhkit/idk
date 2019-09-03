@@ -85,12 +85,12 @@ namespace idk
 
 	template<typename T>
 	struct is_associative_container<T, std::void_t<decltype(
-		std::declval<T&>().insert(std::declval<std::decay_t<T>::value_type>())
+		std::declval<T&>().insert(std::declval<typename std::decay_t<T>::value_type>())
 	)>> : is_iterable<T> {};
 
 
 	template<typename T>
-	struct is_container : std::disjunction<is_associative_container<T>,is_sequential_container<T>> {};
+	struct is_container : std::disjunction<is_associative_container<T>, is_sequential_container<T>> {};
 
 
 	template<typename T, typename = void>
