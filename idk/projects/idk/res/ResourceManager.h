@@ -48,6 +48,14 @@ namespace idk
 			typename = sfinae<has_tag_v<Resource, MetaTag>>
 		> RscHandle<Resource> Create(FileHandle path, Guid guid, const typename Resource::Metadata& meta);
 
+		template<typename RegisterMe, typename ... Args, 
+			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
+		> RscHandle<RegisterMe> Create(Args&& ...);
+		
+		template<typename RegisterMe, typename ... Args, 
+			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
+		> RscHandle<RegisterMe> Create(Guid guid, Args&& ...);
+
 		// file operations
 		FileResources LoadFile(FileHandle path_to_file);
 		FileResources LoadFile(FileHandle path_to_file, const MetaFile& meta);

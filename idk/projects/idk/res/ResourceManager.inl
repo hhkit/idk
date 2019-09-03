@@ -84,6 +84,44 @@ namespace idk
 		return handle;
 	}
 
+	template<typename RegisterMe, typename ...Args, typename>
+	RscHandle<RegisterMe> ResourceManager::Create(Args&& ... args)
+	{
+		auto& table = GetTable<RegisterMe>();
+		auto& loader = GetLoader<RegisterMe>();
+		if (&loader == nullptr)
+			return RscHandle<RegisterMe>{};
+		auto ptr = std::make_shared<RegisterMe>(std::forward<Args>(args)...);
+		if (!ptr)
+			return RscHandle<RegisterMe>{};
+
+		auto handle = RscHandle<RegisterMe>{ Guid::Make() };
+		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
+		ptr->_dirty = true;
+		if constexpr (has_tag_v<RegisterMe, MetaTag>)
+			ptr->_dirtymeta = true;
+		table.emplace(handle.guid, std::move(ptr));
+
+		return handle;
+	}
+
+	template<typename RegisterMe, typename ...Args, typename>
+	RscHandle<RegisterMe> ResourceManager::Create(Guid guid, Args&& ... args)
+	{
+		auto [table, itr] = FindHandle(RscHandle<RegisterMe>{guid});
+		if (itr != table.end())
+			return RscHandle<Resource>{};
+
+		auto ptr = std::make_unique<RegisterMe>(std::forward<Args>(args)...);
+		if (!ptr)
+			return RscHandle<RegisterMe>{};
+
+		auto handle = RscHandle<RegisterMe>{ guid };
+		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
+		table.emplace_hint(itr, handle.guid, std::move(ptr));
+		return handle;
+	}
+
 	template<typename Resource>
 	inline auto& ResourceManager::GetLoader()
 	{
