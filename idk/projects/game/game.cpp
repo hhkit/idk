@@ -68,7 +68,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
-	camera->GetComponent<Name>()->replace("Camera 1");
+	camera->GetComponent<Name>()->name = "Camera 1";
 	camera->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
 	gSys->SetMainCamera(camHandle);
 	
