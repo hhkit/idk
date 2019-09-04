@@ -22,6 +22,12 @@ namespace idk::reflect
     struct has_clear<T, std::void_t<decltype(std::declval<T>().clear())>>
         : std::true_type {};
 
+    template<typename T, typename K, typename = void>
+    struct has_subscript : std::false_type {};
+    template<typename T, typename K>
+    struct has_subscript<T, K, std::void_t<decltype(std::declval<T>()[std::declval<K>()])>>
+        : std::true_type {};
+
 
 
 	template<typename T, typename>
@@ -61,6 +67,8 @@ namespace idk::reflect
 		virtual void add(const dynamic&) = 0;
 		virtual void clear() = 0;
 		virtual size_t size() = 0;
+        virtual dynamic subscript(size_t index) = 0;
+        virtual dynamic subscript(const dynamic& key) = 0;
 		virtual ~base() {}
 	};
 
@@ -132,5 +140,21 @@ namespace idk::reflect
 		{
 			return container.size();
 		}
+
+        virtual dynamic subscript(size_t index)
+        {
+            if constexpr (has_subscript<DecayedT, size_t>::value)
+                return container[index];
+            else
+                throw "cannot subscript with size_t";
+        }
+
+        virtual dynamic subscript(const dynamic& key)
+        {
+            if constexpr (is_associative_container_v<T>)
+                return container[key.get<DecayedT::key_type>()];
+            else
+                return subscript(key.get<size_t>());
+        }
 	};
 }

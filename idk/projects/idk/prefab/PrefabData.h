@@ -9,6 +9,6 @@ namespace idk
     struct PrefabData
     {
         vector<reflect::dynamic> components;
-        vector<PrefabData> children;
+        int parent_index = -1;
     };
 }

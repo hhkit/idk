@@ -18,7 +18,7 @@ namespace idk
 		string str = ss.str();
 
         auto prefab = std::make_unique<Prefab>();
-		parse_text(str, prefab->_data);
+		parse_text(str, prefab->data);
         return std::move(prefab);
 	}
 

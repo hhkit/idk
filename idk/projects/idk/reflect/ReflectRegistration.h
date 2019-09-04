@@ -82,11 +82,15 @@ REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoo
 REFLECT_END()
 
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
-REFLECT_VAR(guid)
+REFLECT_VARS(guid)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabData, "PrefabData")
-REFLECT_VARS(components, children)
+REFLECT_VARS(parent_index, components)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
+REFLECT_VARS(object_index, component_name, property_path)
 REFLECT_END()
 
 /*==========================================================================
@@ -94,7 +98,7 @@ REFLECT_END()
  *========================================================================*/
 
 REFLECT_BEGIN(idk::Handle<idk::GameObject>, "Handle<GameObject>")
-REFLECT_VAR(id)
+REFLECT_VARS(id)
 REFLECT_END()
 
 /*==========================================================================
@@ -102,7 +106,7 @@ REFLECT_END()
  *========================================================================*/
 
 REFLECT_BEGIN(idk::Parent, "Parent")
-REFLECT_VAR(parent)
+REFLECT_VARS(parent)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Transform, "Transform")
@@ -110,7 +114,7 @@ REFLECT_VARS(scale, rotation, position)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Name, "Name")
-REFLECT_VAR(name)
+REFLECT_VARS(name)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
@@ -122,5 +126,5 @@ REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
-REFLECT_VARS(prefab, overrides)
+REFLECT_VARS(prefab, overrides, objects)
 REFLECT_END()
