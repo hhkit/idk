@@ -51,4 +51,13 @@ namespace idk
 			? ortho(-orthographic_size, +orthographic_size, -orthographic_size * aspect, +orthographic_size * aspect, near_plane, far_plane)
 			: perspective(field_of_view, aspect, near_plane, far_plane);
 	}
+	CameraData Camera::GenerateCameraData() const
+	{
+		return CameraData{
+			0xFFFFFFF,
+			ViewMatrix(),
+			ProjectionMatrix(),
+			render_target
+		};
+	}
 }

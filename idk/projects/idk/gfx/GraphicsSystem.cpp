@@ -8,19 +8,15 @@ namespace idk
 	{
 		// todo: scenegraph traversal
 		RenderBuffer result{};
-		result.states.reserve(cameras.size());
-		//Temporarily commented out cause cameras aren't passed in yet.
-		//for (auto& camera : cameras)
-		{
-			GraphicsState state{};
-		//Temporarily commented out cause cameras aren't passed in yet.
-		//	state.camera = camera;
-			vector<RenderObject>& objects =state.mesh_render;
-			for (auto& elem : mesh_renderers)
-				if (elem.IsActiveAndEnabled())
-					objects.emplace_back(elem.GenerateRenderObject());
-			result.states.emplace_back(std::move(state));
-		}
+		result.camera.reserve(cameras.size());
+
+		for (auto& camera : cameras)
+			result.camera.emplace_back(camera.GenerateCameraData());
+
+		for (auto& elem : mesh_renderers)
+			if (elem.IsActiveAndEnabled())
+				result.mesh_render.emplace_back(elem.GenerateRenderObject());
+
 		SubmitBuffers(std::move(result));
 	}
 

@@ -30,17 +30,13 @@ namespace idk
 		virtual void SwapBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;
 	protected:
-		struct GraphicsState
+		struct RenderBuffer
 		{
 			vector<CameraData>   camera;
-			//RenderTexHandle      render_target;//Get RenderTarget from camera.
 			vector<RenderObject> mesh_render;
 			vector<RenderObject> skinned_mesh_render;
 		};
-		struct RenderBuffer
-		{
-			vector<GraphicsState> states;
-		};
+		using GraphicsState = RenderBuffer;
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
 		unsigned               curr_write_buffer = 0;

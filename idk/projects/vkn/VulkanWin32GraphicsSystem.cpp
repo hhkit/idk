@@ -43,10 +43,7 @@ namespace idk::vkn
 	{
 		instance_->DrawFrame();
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
-		for (auto& state : curr_buffer.states)
-		{
-			RenderGraphicsState(state);//We may be able to multi thread this
-		}
+		RenderGraphicsState(curr_buffer);//We may be able to multi thread this
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{

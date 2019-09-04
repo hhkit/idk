@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
+#include <gfx/RenderObject.h>
 
 namespace idk
 {
@@ -25,11 +26,11 @@ namespace idk
 		real far_plane = 10.f;
 
 		int  depth = 0;
-		//TODO add render texture  
+		RscHandle<RenderTarget> render_target;
 		vec4 clear_color{ 0,0,0,1 };
 
 		// perspective settings
-		rad  field_of_view = rad{ 45.f };
+		rad  field_of_view = deg{ 45.f };
 
 		// orthographic settings
 		bool is_orthographic = false;
@@ -44,6 +45,8 @@ namespace idk
 
 		mat4 ViewMatrix() const;
 		mat4 ProjectionMatrix() const;
+
+		CameraData GenerateCameraData() const;
 	private:
 		vec3 _position;
 		vec3 _target;

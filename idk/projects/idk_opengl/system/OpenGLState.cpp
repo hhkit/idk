@@ -55,13 +55,11 @@ namespace idk::ogl
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
-		fb_man.SetRenderTarget({});
-
-		//Bind frame buffers based on the camera's render target
-		//Set the clear color according to the camera
-
-		for (auto& state : curr_object_buffer.states)
+		// range over cameras
 		{
+			fb_man.SetRenderTarget({});
+			//Bind frame buffers based on the camera's render target
+			//Set the clear color according to the camera
 			// lock drawing buffer
 			
 
@@ -72,10 +70,12 @@ namespace idk::ogl
 				});
 
 			pipeline.Use();
+
+			// per mesh render
 			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
 
 			glBindVertexArray(vao_id);
-			for (auto& elem : state.mesh_render)
+			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
 				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
