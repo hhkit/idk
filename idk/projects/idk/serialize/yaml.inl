@@ -79,15 +79,16 @@ namespace idk::yaml
         }
     }
 
+    // get scalar as type T
     template<typename T>
-    T node::get() const
+    decltype(auto) node::get() const
     {
         if constexpr (is_basic_serializable_v<T>)
         {
             if (type() == type::null)
             {
                 if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
-                    return 0;
+                    return T(0);
                 else
                     return T();
             }
@@ -99,8 +100,9 @@ namespace idk::yaml
             throw "cannot convert scalar to T";
     }
 
+    // returns const& to scalar
     template<>
-    scalar_type node::get<scalar_type>() const
+    decltype(auto) node::get<scalar_type>() const
     {
         return as_scalar();
     }
