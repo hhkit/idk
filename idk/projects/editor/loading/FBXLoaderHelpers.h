@@ -27,31 +27,45 @@ namespace idk::fbx_loader_detail
 		void addBoneData(int id, float weight);
 	};
 
-	struct AssimpNode
+	struct BoneData
 	{
+		BoneData() = default;
+		BoneData(string_view name, const mat4& transform = mat4{}) :_name{ name }, _transform{ transform } {}
 		string _name;
 		mat4 _transform;
-
-		vector<AssimpNode> _children;
 	};
 
-	struct Helper
+	struct BoneDataHash
 	{
-		static mat4 initMat4(const aiMatrix4x4& mat);
-		static mat4 initMat4(const aiMatrix3x3& mat);
-		static vec3 initVec3(const aiVector3D& vec);
-		static quat initQuat(const aiQuaternion& vec);
-
-		// Helper function for initializing bone data
-		static void initAssimpNodes		(const aiNode* root_node, AssimpNode& node);
-		static void initOpenGLBuffers	(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
-		static void initBoneHierarchy	(const aiNode* ai_node, hash_set<string> bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
-		static void initBoneWeights		(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
-		
-		static void initAnimMap(const aiAnimation* ai_anim, anim::Animation& anim_clip);
-		static void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip);
-	private:
-		static void initAssimpNodeRecurse(const aiNode* ai_node, AssimpNode& node);
-		static void initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum);
+		size_t operator()(const BoneData& data) const
+		{
+			return std::hash<string>{}(data._name);
+		}
 	};
+
+	struct BoneDataEqual
+	{
+		size_t operator()(const BoneData& lhs, const BoneData& rhs)const
+		{
+			return lhs._name == rhs._name;
+		}
+	};
+	using BoneSet = hash_set<BoneData, BoneDataHash, BoneDataEqual>;
+
+	// Convert assimp math to ivan's math
+	mat4 initMat4(const aiMatrix4x4& mat);
+	mat4 initMat4(const aiMatrix3x3& mat);
+	vec3 initVec3(const aiVector3D& vec);
+	quat initQuat(const aiQuaternion& vec);
+
+	// Helper function for initializing bone data
+	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
+	void initBoneHierarchy(const aiNode* ai_node, const BoneSet& bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
+	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
+
+	void initAnimMap(const aiAnimation* ai_anim, anim::Animation& anim_clip);
+	// void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip);
+	// 
+	// void initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum);
+
 }

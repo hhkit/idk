@@ -26,7 +26,7 @@ namespace idk::anim
 			vector<Key<vec3>> _scale;
 			vector<Key<quat>> _rotation;
 
-			mat4 _accum;
+			// mat4 _accum;
 		};
 
 		AnimNode* GetAnimNode(string_view name);

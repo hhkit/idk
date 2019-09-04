@@ -32,7 +32,7 @@ namespace idk
 
 		vector<ogl::OpenGLMesh::MeshEntry> mesh_entries;
 
-		hash_set<string> bones_set{ai_scene->mRootNode->mName.data};
+		fbx_loader_detail::BoneSet bones_set{ fbx_loader_detail::BoneData{ai_scene->mRootNode->mName.data} };
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
 		
@@ -87,18 +87,18 @@ namespace idk
 			for (size_t k = 0; k < ai_mesh->mNumBones; k++)
 			{
 				auto curr_bone = ai_mesh->mBones[k];
-				bones_set.emplace(curr_bone->mName.data);
+				bones_set.emplace(curr_bone->mName.data, fbx_loader_detail::initMat4(curr_bone->mOffsetMatrix));
 			}
 		}
 
 		// Loads the skeleton heirarchy
-		fbx_loader_detail::Helper::initBoneHierarchy(ai_scene->mRootNode, bones_set, bones_table, bones);
+		fbx_loader_detail::initBoneHierarchy(ai_scene->mRootNode, bones_set, bones_table, bones);
 
 		// Loads all the vertex bone weights and indices
-		fbx_loader_detail::Helper::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
+		fbx_loader_detail::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
 
 		// Initializes the opengl buffers
-		fbx_loader_detail::Helper::initOpenGLBuffers(*mesh_handle, vertices, indices);
+		fbx_loader_detail::initOpenGLBuffers(*mesh_handle, vertices, indices);
 		retval.resources.emplace_back(RscHandle<Mesh>{mesh_handle});
 
 		// Loading Skeletons
@@ -107,7 +107,7 @@ namespace idk
 
 		skeleton = anim::Skeleton{ bones, bones_table };
 
-		mat4 skeleton_transform = fbx_loader_detail::Helper::initMat4(ai_scene->mRootNode->mTransformation);
+		mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation);
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.resources.emplace_back(skeleton_handle);
 
@@ -117,9 +117,8 @@ namespace idk
 			auto anim_clip_handle = Core::GetResourceManager().Create<anim::Animation>();
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 
-			// There should be a better way to do this. We are traversing the whole aiNode tree twice per animation.
-			fbx_loader_detail::Helper::initAnimMap(ai_scene->mAnimations[i], anim_clip);
-			fbx_loader_detail::Helper::initAnimNodeTransforms(ai_scene->mRootNode, anim_clip);
+			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
+			fbx_loader_detail::initAnimMap(ai_scene->mAnimations[i], anim_clip);
 
 			retval.resources.emplace_back(anim_clip_handle);
 		}
