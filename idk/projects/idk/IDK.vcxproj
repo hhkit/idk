@@ -37,6 +37,7 @@
     <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
     <ClInclude Include="ds\dual_set.h" />
+    <ClInclude Include="ds\slow_tree.h" />
     <ClInclude Include="ds\small_string.h" />
     <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileHandle.h" />
@@ -238,6 +239,7 @@
     <None Include="ds\compressed_pair.inl" />
     <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="ds\slow_tree.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
     <None Include="math\color.inl" />

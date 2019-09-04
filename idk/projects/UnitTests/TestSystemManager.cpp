@@ -53,5 +53,5 @@ TEST(System, TestCore)
 
 	auto core = Core{};
 	core.AddSystem<TestApplication>();
-	core.Run();
+	//core.Run();
 }

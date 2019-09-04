@@ -515,6 +515,9 @@
     <ClInclude Include="anim\AnimationFactory.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="ds\slow_tree.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -858,6 +861,7 @@
     <None Include="res\Resource.inl">
       <Filter>res</Filter>
     </None>
+    <None Include="ds\slow_tree.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
