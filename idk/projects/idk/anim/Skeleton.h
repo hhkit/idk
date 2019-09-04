@@ -13,6 +13,7 @@ namespace idk::anim
 			string _name;
 			int  _parent;
 			mat4 _offset;
+			mat4 _node_transform;
 		};
 
 		Skeleton() = default;
