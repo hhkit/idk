@@ -123,6 +123,7 @@ namespace idk::vkn
 			Core::GetSystem<FileSystem>().Update();
 			actualfile = Core::GetSystem<FileSystem>().GetFile(filename+"spv");
 			_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
+			_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
 			//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 			//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
 

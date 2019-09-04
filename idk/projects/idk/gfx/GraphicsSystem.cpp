@@ -13,6 +13,10 @@ namespace idk
 		//for (auto& camera : cameras)
 		{
 			GraphicsState state{};
+			auto& config = state.config;
+
+			config.prim_top = PrimitiveTopology::eTriangleList;
+			config.fill_type = FillType::eFill;
 		//Temporarily commented out cause cameras aren't passed in yet.
 		//	state.camera = camera;
 			vector<RenderObject>& objects =state.mesh_render;

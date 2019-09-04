@@ -161,8 +161,12 @@
     <ClCompile Include="PipelineManager.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanMaterial.cpp" />
-    <ClCompile Include="VulkanMaterialFactory.cpp" />
+    <ClCompile Include="VulkanMaterialFactory.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMaterial.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

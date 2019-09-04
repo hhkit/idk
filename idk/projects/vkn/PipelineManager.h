@@ -35,7 +35,13 @@ namespace idk::vkn
 				vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
 				for (auto& module : shader_handles)
 				{
-					shaders.emplace_back(module.as<ShaderModule>().Stage(), module.as<ShaderModule>().Module());
+					auto& mod = module.as<ShaderModule>();
+					if (mod.NeedUpdate())
+						mod.Update();
+					auto& desc = mod.AttribDescriptions();
+					for(auto& desc_set : desc)
+						config.buffer_descriptions.emplace_back(desc_set);
+					shaders.emplace_back(mod.Stage(), mod.Module());
 				}
 				pipeline.Create(config, shaders, view);
 			}

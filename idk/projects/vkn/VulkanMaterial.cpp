@@ -19,11 +19,12 @@ namespace idk::vkn
 		auto cmd = ("..\\tools\\glslc.exe " + tmp_filename + " -o \"" + tmp_outfilename+"\"");
 		auto exit_code = system(cmd.c_str());
 		auto ret = exit_code == 0;
-		if (!ret)
+		if (ret)
 		{
 			std::ifstream file{tmp_filename+"spv",std::ios::binary };
 			std::stringstream strm;
 			strm << file.rdbuf();
+			file.close();
 			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, strm.str());
 
 			std::filesystem::remove(std::filesystem::relative(tmp_outfilename));

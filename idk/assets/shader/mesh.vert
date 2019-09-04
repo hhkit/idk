@@ -18,14 +18,14 @@ layout (location = 2) in vec2 uv;
 
 
 
-layout(binding = 0, set = 0)uniform Transform
-{
-	mat4 transform;
-} object_transform;
-layout(binding = 1, set = 0)uniform Transform2
-{
-	mat4 transform;
-} normal_transform;
+//layout(binding = 0, set = 0)uniform Transform
+//{
+//	mat4 transform;
+//} object_transform;
+//layout(binding = 1, set = 0)uniform Transform2
+//{
+//	mat4 transform;
+//} normal_transform;
 
 layout(location = 2) out VS_OUT
 {
@@ -37,8 +37,8 @@ layout(location = 2) out VS_OUT
 
 void main()
 {
-	vs_out.position = vec3(object_transform.transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(normal_transform.transform * vec4(normal, 1.0));
+	vs_out.position = vec3(/*object_transform.transform * */vec4(position, 1.0));
+	vs_out.normal   = vec3(/*normal_transform.transform * */vec4(normal, 1.0));
 	vs_out.uv       = uv;
     gl_Position     = vec4(vs_out.position, 1.0);
 }

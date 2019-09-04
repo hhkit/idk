@@ -12,6 +12,9 @@ namespace idk::vkn
 		vk::ShaderStageFlagBits Stage()const { return stage; }
 		vk::ShaderModule        Module()const { return *module; }
 
+		void AttribDescriptions(vector<buffer_desc>&& attribs){ attrib_descriptions = std::move(attribs); }
+		const vector<buffer_desc>& AttribDescriptions()const { return attrib_descriptions; }
+
 		bool NeedUpdate()const { return s_cast<bool>(back_module); }
 		void Update() { if (NeedUpdate()) { module = std::move(back_module);  back_module.reset(); } }
 		
