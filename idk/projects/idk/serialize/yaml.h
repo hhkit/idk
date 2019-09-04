@@ -4,7 +4,7 @@
 #include <serialize/serialize.h>
 
 // serializer/parser for a small subset of yaml.
-// only supports: blocks, flows (only single line tested), local primary tags, comments
+// only supports: blocks, flows (only single line tested), and local primary tags
 // because of the minimal support, we can do a simple top-down one-pass for parsing.
 namespace idk::yaml
 {
@@ -42,6 +42,7 @@ namespace idk::yaml
         const scalar_type& tag() const;
         const node& at(const scalar_type& key) const;
         template<typename T> T get() const;
+        template<> scalar_type get<scalar_type>() const;
 
         bool is_null() const;
         bool is_scalar() const;

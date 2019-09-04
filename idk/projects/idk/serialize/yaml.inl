@@ -99,6 +99,12 @@ namespace idk::yaml
             throw "cannot convert scalar to T";
     }
 
+    template<>
+    scalar_type node::get<scalar_type>() const
+    {
+        return as_scalar();
+    }
+
     template<typename... Ts>
     node& node::emplace_back(Ts&&... args)
     {

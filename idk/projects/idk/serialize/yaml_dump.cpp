@@ -35,6 +35,8 @@ namespace idk::yaml
             output += sv;
             is_new_line = false;
         }
+
+        // handles quoting/escaping if needed
         void write_scalar(const node& _node)
         {
             bool must_escape = false;
@@ -65,10 +67,11 @@ namespace idk::yaml
             if (!must_escape)
             {
                 // "xyz" => '"xyz"' (so "" dont get lost during parse)
-                if (scalar.front() == '\"' && scalar.back() == '\"')
+                if ((scalar.front() == '\"' && scalar.back() == '\"') ||
+                    (style == flow_style && has_flow_braces)) // ['a[]a'] have to quote-enclose flow braces
                 {
                     write('\'');
-                    if (has_single_quotes || (style == flow_style && has_flow_braces))
+                    if (has_single_quotes)
                     {
                         // have to escape single quotes
                         string str;
@@ -172,45 +175,44 @@ namespace idk::yaml
 
             case type::sequence:
             {
+                assert(style == block_style); // should never have nested flow styles, see should_flow()
                 const auto& seq = _node.as_sequence();
-                if (style == block_style)
+                if (should_flow(_node))
                 {
-                    if (should_flow(_node))
+                    style = flow_style;
+                    write('[');
+                    for (const auto& item : seq)
                     {
-                        style = flow_style;
-                        write('[');
-                        for (const auto& item : seq)
-                        {
-                            dump(item);
-                            write(", ");
-                        }
-                        output.pop_back();
-                        output.back() = ']';
-                        style = block_style;
+                        dump(item);
+                        write(", ");
                     }
-                    else if (seq.size())
+                    output.pop_back();
+                    output.back() = ']';
+                    style = block_style;
+                }
+                else if (seq.size())
+                {
+                    for (const auto& item : seq)
                     {
-                        for (const auto& item : seq)
+                        write("- ");
+                        indent();
+                        // for inner blocks, write tag before going to next line
+                        if (item.type() == type::mapping)
                         {
-                            write("- ");
-                            indent();
-                            if (item.type() == type::mapping)
-                            {
-                                if (item.has_tag())
-                                {
-                                    write_tag(item);
-                                    new_line();
-                                }
-                            }
-                            else if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
+                            if (item.has_tag())
                             {
                                 write_tag(item);
                                 new_line();
                             }
-                            dump(item);
-                            unindent();
+                        }
+                        else if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
+                        {
+                            write_tag(item);
                             new_line();
                         }
+                        dump(item);
+                        unindent();
+                        new_line();
                     }
                 }
             } break;
@@ -218,48 +220,46 @@ namespace idk::yaml
             case type::mapping:
             {
                 const auto& map = _node.as_mapping();
-                if (style == block_style)
+                assert(style == block_style);
+                if (should_flow(_node))
                 {
-                    if (should_flow(_node))
+                    style = flow_style;
+                    write('{');
+                    for (const auto& [key, item] : map)
                     {
-                        style = flow_style;
-                        write('{');
-                        for (const auto& [key, item] : map)
-                        {
-                            write(key);
-                            write(": ");
-                            dump(item);
-                            write(", ");
-                        }
-                        output.pop_back();
-                        output.back() = '}';
-                        style = block_style;
+                        write(key);
+                        write(": ");
+                        dump(item);
+                        write(", ");
                     }
-                    else if (map.size())
+                    output.pop_back();
+                    output.back() = '}';
+                    style = block_style;
+                }
+                else if (map.size())
+                {
+                    for (const auto& [key, item] : map)
                     {
-                        for (const auto& [key, item] : map)
+                        write(key);
+                        write(": ");
+
+                        if (item.type() == type::mapping && !should_flow(item)) // block map in block map, need indent
                         {
-                            write(key);
-                            write(": ");
-                            
-							if (item.type() == type::mapping && !should_flow(item)) // block map in block map, need indent
-							{
-                                write_tag(item);
-								new_line();
-								indent();
-								dump(item);
-								unindent();
-							}
-							else if (item.type() == type::sequence && !should_flow(item)) // block seq in block map, no indent
-							{
-                                write_tag(item);
-								new_line();
-								dump(item);
-							}
-							else
-								dump(item);
+                            write_tag(item);
                             new_line();
+                            indent();
+                            dump(item);
+                            unindent();
                         }
+                        else if (item.type() == type::sequence && !should_flow(item)) // block seq in block map, no indent
+                        {
+                            write_tag(item);
+                            new_line();
+                            dump(item);
+                        }
+                        else
+                            dump(item);
+                        new_line();
                     }
                 }
             } break;

@@ -3,7 +3,7 @@
 
 namespace idk::yaml
 {
-	enum _mode : char { block_map, block_seq, flow_map, flow_seq, comment, unknown };
+	enum _mode : char { block_map, block_seq, flow_map, flow_seq, /*comment,*/ unknown };
 	struct parser_state
 	{
 		parser_state(string_view sv) : p{ sv.begin() }, end{ sv.end() } {}
@@ -455,7 +455,7 @@ namespace idk::yaml
             }
 
 			++p;
-		} // while
+		} 
 
 		if (p.token.size())
 		{

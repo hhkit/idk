@@ -19,6 +19,11 @@ namespace idk::yaml
         }
     }
 
+    bool node::has_tag() const
+    {
+        return _tag.size();
+    }
+
     const scalar_type& node::tag() const
     {
         return _tag;
@@ -29,10 +34,6 @@ namespace idk::yaml
         return as_mapping().at(key);
     }
 
-    bool node::has_tag() const
-    {
-        return _tag.size();
-    }
 
     bool node::is_null() const
     {
@@ -50,6 +51,7 @@ namespace idk::yaml
     {
         return type() == type::mapping;
     }
+
 
 	scalar_type& node::as_scalar()
     {
@@ -76,6 +78,8 @@ namespace idk::yaml
         return std::get<static_cast<int>(type::mapping)>(_value);
     }
 
+
+
     void node::tag(string_view new_tag)
     {
         _tag = new_tag;
@@ -88,6 +92,8 @@ namespace idk::yaml
         as_sequence().push_back(node);
     }
 
+
+
     sequence_type::const_iterator node::begin() const
     {
         return as_sequence().begin();
@@ -97,6 +103,8 @@ namespace idk::yaml
     {
         return as_sequence().end();
     }
+
+
 
     node& node::operator[](size_t index)
     {
