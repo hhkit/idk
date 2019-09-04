@@ -72,4 +72,43 @@ namespace idk
         save_path.Open(FS_PERMISSIONS::WRITE) << serialize_text(prefab._data);
     }
 
+    Handle<GameObject> PrefabUtility::GetPrefabInstanceRoot(Handle<GameObject> go)
+    {
+        while (go)
+        {
+            if (go->HasComponent<PrefabInstance>())
+                return go;
+            go = go->ParentObject();
+        }
+        return go;
+    }
+
+    static void _revert_property_override(GameObject& instance_root, const PrefabData& prefab, const string& path)
+    {
+        size_t offset = 0;
+        while (offset < path.size())
+        {
+            auto end = path.find('/', offset);
+            if (end == string::npos)
+                end = path.size();
+
+
+        }
+    }
+
+    void PrefabUtility::RevertPropertyOverride(Handle<GameObject> instance_root, const string& path)
+    {
+    }
+
+    void PrefabUtility::RevertPrefabInstance(Handle<GameObject> instance_root)
+    {
+        assert(instance_root->HasComponent<PrefabInstance>());
+        auto prefab_inst = instance_root->GetComponent<PrefabInstance>();
+        
+        for (auto& override : prefab_inst->overrides)
+        {
+            //override.
+        }
+    }
+
 }

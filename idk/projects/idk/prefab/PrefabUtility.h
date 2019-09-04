@@ -14,5 +14,14 @@ namespace idk
 
         // save given game object into a prefab, writes into save_path.
         static void Save(Handle<GameObject> go, FileHandle save_path);
+
+        // get the root of a prefab instance.
+        // if the given game object is not part of a prefab instance, returns a null handle.
+        static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);
+
+        static void RevertPropertyOverride(Handle<GameObject> instance_root, const string& path);
+
+        // reverts all overrides of the given prefab instance.
+        static void RevertPrefabInstance(Handle<GameObject> instance_root);
     };
 }
