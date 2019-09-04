@@ -67,6 +67,7 @@
     <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
     <ClCompile Include="TestQuaternion.cpp" />
+    <ClCompile Include="TestTree.cpp" />
     <ClCompile Include="TestVector.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
