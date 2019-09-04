@@ -108,10 +108,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>vulkan-1.lib;win32D.lib</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;win32D.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
     </Lib>
     <CustomBuildStep>
       <Command>call $(SolutionDir)tools\compile.bat
