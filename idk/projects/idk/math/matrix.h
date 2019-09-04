@@ -48,6 +48,7 @@ namespace idk
 		const column_t* end() const;
 		T*              data();
 		const T*        data() const;
+		unsigned        size()const { return R * C; }
 		column_t&       operator[](size_t index);
 		const column_t& operator[](size_t index) const;
 

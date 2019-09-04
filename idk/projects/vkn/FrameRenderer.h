@@ -7,9 +7,43 @@
 namespace idk
 {
 	struct GraphicsState;
+	struct RenderObject;
 }
 namespace idk::vkn
 {
+	struct ProcessedRO
+	{
+		struct BindingInfo
+		{
+			uint32_t binding;
+			vk::Buffer ubuffer;
+			uint32_t buffer_offset;
+			uint32_t arr_index;
+			size_t size;
+			BindingInfo(
+				uint32_t binding_,
+				vk::Buffer& ubuffer_,
+				uint32_t buffer_offset_,
+				uint32_t arr_index_,
+				size_t size_
+			) :
+				binding{ binding_ },
+				ubuffer{ ubuffer_ },
+				buffer_offset{ buffer_offset_ },
+				arr_index{ arr_index_ },
+				size{ size_ }
+			{
+			}
+		};
+		const RenderObject& Object()const
+		{
+			return *itr;
+		}
+
+		//set, update_instr
+		const RenderObject* itr;
+		hash_table<uint32_t, vector<BindingInfo>> bindings;
+	};
 	class PipelineManager;
 	struct RenderStateV2
 	{
@@ -17,6 +51,7 @@ namespace idk::vkn
 		UboManager ubo_manager;//Should belong to each thread group.
 
 		PresentationSignals signal;
+		DescriptorsManager dpools;
 
 		bool has_commands = false;
 		void FlagRendered() { has_commands = true; }
@@ -39,6 +74,8 @@ namespace idk::vkn
 		void RenderGraphicsStates(const vector<GraphicsState>& state);
 		PresentationSignals& GetMainSignal();
 	private:
+		using ProcessedRO=vkn::ProcessedRO;
+		using DsBindingCount =hash_table<vk::DescriptorSetLayout, uint32_t>;
 		class IRenderThread
 		{
 		public:
@@ -63,6 +100,7 @@ namespace idk::vkn
 
 		void GrowStates(size_t new_min_size);
 
+		std::pair<vector<ProcessedRO>, DsBindingCount> ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
 		void RenderGraphicsState(const GraphicsState& state,RenderStateV2& rs);
 		VulkanView& View()const { return *_view; }
 		

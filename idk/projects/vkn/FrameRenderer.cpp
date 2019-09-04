@@ -6,6 +6,7 @@
 #include <file/FileSystem.h>
 #include <vkn/ShaderModule.h>
 #include <vkn/PipelineManager.h>
+#include <math/matrix_transforms.h>
 namespace idk::vkn
 {
 	struct SomeHackyThing
@@ -64,6 +65,7 @@ namespace idk::vkn
 	void RenderStateV2::Reset() {
 		cmd_buffer.reset({}, vk::DispatchLoaderDefault{});
 		ubo_manager.Clear();
+		dpools.Reset();
 		has_commands = false;
 	}
 	buffer_desc BufferDesc(uint32_t pos_loc, uint32_t pos_binding, AttribFormat format, uint32_t stride, VertexRate rate)
@@ -114,7 +116,8 @@ namespace idk::vkn
 
 			vector<buffer_desc> desc{
 				BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex)
+				BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+				BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
 			};
 			auto file = Core::GetSystem<FileSystem>().GetFile(filename);
 			;
@@ -245,7 +248,7 @@ namespace idk::vkn
 			for (auto i = diff; i-- > 0;)
 			{
 				auto& buffer = buffers[i];
-				_states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{} }).signal.Init(View());
+				_states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
 				_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}
@@ -254,6 +257,136 @@ namespace idk::vkn
 	{
 		return _mesh_renderer_shader_module;
 	}
+
+	string GetUniformData(const UniformInstance& uniform)
+	{
+		string data;
+		return data;
+	}
+
+	std::pair<vector<FrameRenderer::ProcessedRO>, FrameRenderer::DsBindingCount> FrameRenderer::ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager)
+	{
+		const vector<RenderObject>& draw_calls = state.mesh_render;
+		const Camera& cam = state.camera;
+		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
+		DsBindingCount& collated_layouts = result.second;
+
+		auto msprog = GetMeshRendererShaderModule();
+		auto& msmod = msprog.as<ShaderModule>();
+		auto& obj_uni = msmod.GetLayout("MVP");
+		auto& nml_uni = msmod.GetLayout("MVP_IVT");
+		auto VP = translate(vec3{ 0,0,0.0f });//cam.ProjectionMatrix() * cam.ViewMatrix();
+		;
+		//Force pipeline creation
+		vector<RscHandle<ShaderProgram>> shaders;
+		for (auto& dc : draw_calls)
+		{
+			//Force pipeline creation
+			shaders.resize(0);
+			shaders.emplace_back(GetMeshRendererShaderModule());
+			auto sprog = dc.material_instance.material->GetShaderProgram();
+			shaders.emplace_back(sprog);
+			//TODO Grab everything and render them
+			//Maybe change the config to be a managed resource.
+			//Force pipeline creation
+			GetPipeline(state.config, shaders);
+			//set, bindings
+			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
+			auto& layouts = sprog.as<ShaderModule>();
+			//Account for the object and normal transform bindings
+			collated_layouts[obj_uni.layout]++;
+			collated_layouts[nml_uni.layout]++;
+			mat4 obj_trf = VP* dc.transform;
+			mat4 obj_ivt= obj_trf.inverse().transpose();
+			auto&& [trf_buffer, trf_offset] = ubo_manager.Add(obj_trf);
+			auto&& [ivt_buffer, ivt_offset] = ubo_manager.Add(obj_ivt);
+
+
+			collated_bindings[obj_uni.set].emplace_back(
+				ProcessedRO::BindingInfo
+				{
+					obj_uni.binding,
+					trf_buffer,
+					trf_offset,
+					0,
+					obj_uni.size
+				}
+			);
+			collated_bindings[nml_uni.set].emplace_back(
+				ProcessedRO::BindingInfo
+				{
+					nml_uni.binding,
+					ivt_buffer,
+					ivt_offset,
+					0,
+					nml_uni.size
+				}
+			);
+
+			//Account for material bindings
+			for (auto& pair: dc.material_instance.uniforms)
+			{
+				auto& name = pair.first;
+				auto& itr = layouts.GetLayout(name);
+				auto& layout = itr.layout;
+				{
+					collated_layouts[layout]++;
+					auto&& data = dc.material_instance.GetUniformBlock(name);
+					auto&& [buffer, offset] = ubo_manager.Add(data);
+					collated_bindings[itr.set].emplace_back(
+						ProcessedRO::BindingInfo
+						{
+							itr.binding,
+							buffer,
+							offset,
+							0,
+							itr.size
+						}
+					);
+				}
+			}
+			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings) });
+		}
+		return result;
+	}
+
+	void UpdateUniformDS(
+		vk::Device& device,
+		vk::DescriptorSet& dset,
+		vector<ProcessedRO::BindingInfo> bindings
+	)
+	{
+		//TODO: Handle Other DSes as well
+		for (auto& binding : bindings)
+		{
+			//auto& dset = ds2[i++];
+			vk::DescriptorBufferInfo bufferInfo[]
+			{
+				vk::DescriptorBufferInfo{
+				binding.ubuffer
+				, binding.buffer_offset
+				, binding.size
+				}
+			};
+			;
+
+			vector<vk::WriteDescriptorSet> descriptorWrite
+			{
+				vk::WriteDescriptorSet{
+					dset
+					,binding.binding
+					,binding.arr_index
+					,hlp::arr_count(bufferInfo)
+					,vk::DescriptorType::eUniformBuffer
+					,nullptr
+					,std::data(bufferInfo)
+					,nullptr
+				}
+			};
+			device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
+		}
+	}
+
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& swapchain = View().Swapchain();
@@ -269,25 +402,36 @@ namespace idk::vkn
 		vk::Rect2D render_area
 		{
 			vk::Offset2D{},vk::Extent2D
-		{
-			s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)
-		}
+			{
+				s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)
+			}
 		};
 		vk::RenderPassBeginInfo rpbi
 		{
 			*View().Renderpass(), *swapchain.frame_buffers[swapchain.curr_index],
 			render_area,1,&v
 		};
+
+
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
 		VulkanPipeline* prev_pipeline=nullptr;
 		vector<RscHandle<ShaderProgram>> shaders;
-		for (auto& obj : state.mesh_render)
+
+		//Preprocess MeshRender's uniforms
+		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
+		rs.ubo_manager.UpdateAllBuffers();
+		auto alloced_dsets = rs.dpools.Allocate(layout_count);
+
+		for (auto& p_ro : processed_ro)
 		{
+			auto& obj = p_ro.Object();
 			rs.FlagRendered();
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
-			shaders.emplace_back(obj.material_instance.material->GetShaderProgram());
+			auto msprog = GetMeshRendererShaderModule();
+			auto sprog = obj.material_instance.material->GetShaderProgram();
+			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			auto& pipeline = GetPipeline(state.config,shaders);
@@ -298,7 +442,28 @@ namespace idk::vkn
 				prev_pipeline = &pipeline;
 			}
 			auto& mesh = obj.mesh.as<VulkanMesh>();
-
+			auto& layouts = pipeline.uniform_layouts;
+			for (auto& [set_index,binfo] : p_ro.bindings)
+			{
+				//Get the descriptor set layout for the current set
+				auto layout_itr = layouts.find(set_index);
+				if (layout_itr != layouts.end())
+				{
+					//Find the allocated pool of descriptor sets that matches the descriptor set layout
+					auto ds_itr = alloced_dsets.find(*layout_itr->second);
+					if (ds_itr == alloced_dsets.end())
+						ds_itr = alloced_dsets.find(*layout_itr->second);
+					if(ds_itr!=alloced_dsets.end())
+					{
+						//Get a descriptor set from the allocated pool
+						auto ds = ds_itr->second.GetNext();
+						//Update the descriptor set
+						UpdateUniformDS(*View().Device(),ds,binfo);
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set_index, ds, nullptr, dispatcher);
+					}
+				}
+			}
+			
 			auto& bindings = obj.attrib_bindings;
 			for (auto&& [bindingz, attrib] : bindings)
 			{

@@ -72,8 +72,18 @@ namespace idk::vkn::hlp
 	template<typename RT, typename T >
 	RT buffer_size(T* begin, T* end);
 
+	template<typename T, typename = void>
+	struct ArrCount
+	{
+		static uint32_t count(const T& ) { return 1; }
+	};
 	template<typename T>
-	uint32_t arr_count(T&& arr) { return static_cast<uint32_t>(std::size(arr)); }
+	struct ArrCount<T, decltype((void)std::size(std::declval<T>()))>
+	{
+		static uint32_t count(const T& t) { return static_cast<uint32_t>(std::size(t)); }
+	};
+	template<typename T>
+	uint32_t arr_count(T&& arr) { return ArrCount<T>::count(arr); }
 }
 
 #include "BufferHelpers.inl"

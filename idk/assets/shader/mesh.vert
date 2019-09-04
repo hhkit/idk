@@ -18,11 +18,11 @@ layout (location = 2) in vec2 uv;
 
 
 
-layout(binding = 0, set = 0)uniform Transform
+layout(set = 0, binding = 0)uniform MVP
 {
 	mat4 transform;
 } object_transform;
-layout(binding = 1, set = 0)uniform Transform2
+layout(set = 0,binding = 1)uniform MVP_IVT
 {
 	mat4 transform;
 } normal_transform;

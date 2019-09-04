@@ -100,6 +100,12 @@ namespace idk::vkn
 			vec3{ 0, 0, 1},
 			vec3{ 0, 0, 1}
 		};
+		vector<vec2> uv
+		{
+			vec2{ 0.5f, 1},
+			vec2{ 0, 0},
+			vec2{ 1, 0}
+		};
 		vector<uint16_t> indices
 		{
 			0, 2, 1,
@@ -143,6 +149,10 @@ namespace idk::vkn
 		{
 			auto& buffer = normals;
 			attribs[attrib_index::Normal] = string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) };
+		}
+		{
+			auto& buffer = uv;
+			attribs[attrib_index::UV] = string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) };
 		}
 
 

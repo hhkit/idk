@@ -42,8 +42,17 @@ namespace idk::vkn
 					for(auto& desc_set : desc)
 						config.buffer_descriptions.emplace_back(desc_set);
 					shaders.emplace_back(mod.Stage(), mod.Module());
+					mod.ApplyUniformToConfig(config);
 				}
 				pipeline.Create(config, shaders, view);
+				for (auto& module : shader_handles)
+				{
+					for (auto& layout : pipeline.uniform_layouts)
+					{
+						auto& mod = module.as<ShaderModule>();
+						mod.SetLayout(layout.first, *layout.second);
+					}
+				}
 			}
 			void Swap()
 			{
