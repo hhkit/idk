@@ -53,25 +53,48 @@ TEST(Prefab, TestPrefabInstantiate)
 
     SceneFactory sf;
     auto scene = sf.GenerateDefaultResource();
-    PrefabFactory pf;
 
     core.GetResourceManager().Init();
-    auto ptr = pf.Create(fs.GetFile("/assets/prefabs/testprefab.idp"));
 
-    auto& data = ptr->data;
+    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
+    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
 
-    auto t0 = data[0].components[0].get<Transform>();
-    EXPECT_EQ(t0.position, vec3(1.0f, 2.0f, 3.0f));
-    EXPECT_EQ(t0.scale, vec3{ 4.0f });
-    EXPECT_EQ(t0.rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
-    EXPECT_EQ(data[0].parent_index, -1);
-    EXPECT_EQ(data[0].components.size(), 2);
-    EXPECT_EQ(data[0].components[1].get<Name>().name, "stoopidguy");
+    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
 
-    auto t1 = data[1].components[0].get<Transform>();
-    EXPECT_EQ(t1.position, vec3(9.0f, 10.0f, 11.0f));
-    EXPECT_EQ(t1.scale, vec3{ 12.0f });
-    EXPECT_EQ(t1.rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
-    EXPECT_EQ(data[1].parent_index, 0);
-    EXPECT_EQ(data[1].components.size(), 2);
+    {
+        auto& data = prefab->data;
+
+        auto t0 = data[0].components[0].get<Transform>();
+        EXPECT_EQ(t0.position, vec3(1.0f, 2.0f, 3.0f));
+        EXPECT_EQ(t0.scale, vec3{ 4.0f });
+        EXPECT_EQ(t0.rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
+        EXPECT_EQ(data[0].parent_index, -1);
+        EXPECT_EQ(data[0].components.size(), 2);
+        EXPECT_EQ(data[0].components[1].get<Name>().name, "stoopidguy");
+
+        auto t1 = data[1].components[0].get<Transform>();
+        EXPECT_EQ(t1.position, vec3(9.0f, 10.0f, 11.0f));
+        EXPECT_EQ(t1.scale, vec3{ 12.0f });
+        EXPECT_EQ(t1.rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
+        EXPECT_EQ(data[1].parent_index, 0);
+        EXPECT_EQ(data[1].components.size(), 2);
+    }
+
+    auto go = PrefabUtility::Instantiate(prefab, *scene);
+    {
+        auto& o0 = *scene->begin();
+        auto t0 = o0.GetComponent<Transform>();
+        EXPECT_EQ(t0->position, vec3(1.0f, 2.0f, 3.0f));
+        EXPECT_EQ(t0->scale, vec3{ 4.0f });
+        EXPECT_EQ(t0->rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
+        EXPECT_EQ(o0.GetComponent<Name>()->name, "stoopidguy");
+
+        auto& o1 = *++scene->begin();
+        auto t1 = o1.GetComponent<Transform>();
+        EXPECT_EQ(t1->position, vec3(9.0f, 10.0f, 11.0f));
+        EXPECT_EQ(t1->scale, vec3{ 12.0f });
+        EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
+        auto p1 = o1.GetComponent<Parent>();
+        EXPECT_EQ(p1->parent.id, o0.GetHandle().id);
+    }
 }
