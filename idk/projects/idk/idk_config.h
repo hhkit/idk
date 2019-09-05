@@ -11,7 +11,6 @@ namespace idk
 	using Components = std::tuple<
 		class Transform
 		, class Name
-		, class Parent
 		/// EDITOR
 		,   class PrefabInstance
 

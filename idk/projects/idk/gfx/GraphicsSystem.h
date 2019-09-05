@@ -25,7 +25,7 @@ namespace idk
 		//Converts the Renderers and transforms stores the render data into a buffer
 		void SetMainCamera(Handle<Camera> camera) { _main_camera = camera; }
 		Handle<Camera> CurrentCamera() { return _main_camera; };
-		virtual void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>, span<const Camera> camera);
+		virtual void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const Camera> camera);
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;

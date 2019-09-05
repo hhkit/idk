@@ -5,7 +5,7 @@
 #include <serialize/serialize.h>
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
-#include <common/Parent.h>
+#include <common/Transform.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 
@@ -17,7 +17,7 @@ namespace idk
         for (const auto& d : data.components)
             handle->AddComponent(d);
         for (const auto& child : data.children)
-            _instantiate(scene, child)->AddComponent<Parent>()->parent = handle;
+            _instantiate(scene, child)->Transform()->parent = handle;
         return handle;
     }
     Handle<GameObject> PrefabUtility::Instantiate(RscHandle<Prefab> prefab, Scene& scene)
@@ -43,8 +43,8 @@ namespace idk
         vector<small_string<decltype(Handle<GameObject>::id)>> nodes{ /* scene.size() */ };
         for (auto& o : scene)
         {
-            if (o.ParentObject())
-                nodes[o.ParentObject().id] += o.GetHandle().id;
+            if (o.Parent())
+                nodes[o.Parent().id] += o.GetHandle().id;
         }
 
         // tree walk
@@ -78,7 +78,7 @@ namespace idk
         {
             if (go->HasComponent<PrefabInstance>())
                 return go;
-            go = go->ParentObject();
+            go = go->Parent();
         }
         return go;
     }

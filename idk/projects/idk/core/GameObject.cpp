@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "GameObject.h"
-#include <common/Parent.h>
-
+#include <common/Transform.h>
 namespace idk
 {
 	GenericHandle GameObject::AddComponent(reflect::type type)
@@ -48,18 +47,16 @@ namespace idk
 	}
 	bool GameObject::ActiveInHierarchy() const
 	{
-		auto hParentComponent = GetComponent<class Parent>();
-		auto hParent = hParentComponent ? hParentComponent->parent : Handle<GameObject>{};
+		auto hParent = Transform()->parent;
 		return ActiveSelf() && (hParent ? hParent->ActiveInHierarchy() : true);
 	}
 
-	Handle<class Transform> GameObject::Transform()
+	Handle<class Transform> GameObject::Transform() const
 	{
 		return GetComponent<class Transform>();
 	}
-	Handle<class GameObject> GameObject::ParentObject()
+	Handle<class GameObject> GameObject::Parent() const
 	{
-		auto hParentComponent = GetComponent<class Parent>();
-		return hParentComponent ? hParentComponent->parent : Handle<class GameObject>{};
+		return Transform()->parent;
 	}
 }

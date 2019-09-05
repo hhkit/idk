@@ -141,9 +141,6 @@
     </ClInclude>
     <ClInclude Include="idk.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="common\Parent.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="core\Handle.h">
       <Filter>core\handles</Filter>
     </ClInclude>
@@ -518,6 +515,7 @@
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
     </ClInclude>
+    <ClInclude Include="common\SceneGraphSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -703,6 +701,7 @@
       <Filter>anim</Filter>
     </ClCompile>
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="common\SceneGraphSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
