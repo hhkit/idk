@@ -36,9 +36,9 @@ TEST(Serialize, TestYaml)
     yaml::node node2 = yaml::load("- test: a:\n- x: b");
     EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
     EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
-    // - {test: a:}
-    // - {x: b}
-    EXPECT_EQ(yaml::dump(node2), "- {test: a:}\n- {x: b}\n");
+    // - test: a:
+    // - x: b
+    EXPECT_EQ(yaml::dump(node2), "- test: a:\n- x: b\n");
 
 	// -
 	// - test:
@@ -71,10 +71,10 @@ TEST(Serialize, TestYaml)
     // - test:
     //   - x
     //   - y
-    //   - {a: b}
+    //   - a: b
     // - test2:
     //     b: [1, 2, 3]
-    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - {a: b}\n- test2: \n    b: [1, 2, 3]\n");
+    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - a: b\n- test2: \n    b: [1, 2, 3]\n");
 
     yaml::node node5 = yaml::load("- !testtag '\"longassstring\"'");
 	EXPECT_EQ(node5[0].as_scalar(), "\"longassstring\"");
@@ -225,8 +225,7 @@ TEST(Serialize, TestSerializeScene)
 	t1->scale = vec3{ 12.0f };
 	t1->rotation = quat{ 13.0f, 14.0f, 15.0f, 16.0f };
 	transform_1_id = t1.id;
-	auto p1 = o1->AddComponent<Parent>();
-	p1->parent = o0;
+	t1->parent = o0;
 
 	serialized_scene_0 = serialize_text(*scene);
 	std::cout << serialized_scene_0;
@@ -254,6 +253,5 @@ TEST(Serialize, TestParseScene)
 	EXPECT_EQ(t1->scale, vec3{ 12.0f });
 	EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
 	EXPECT_EQ(t1.id, transform_1_id);
-	auto p1 = o1.GetComponent<Parent>();
-	EXPECT_EQ(p1->parent.id, o0.GetHandle().id);
+	EXPECT_EQ(o1.Parent(), o0.GetHandle());
 }

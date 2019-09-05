@@ -5,7 +5,7 @@
 #include <serialize/serialize.h>
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
-#include <common/Parent.h>
+#include <common/Transform.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 
@@ -30,7 +30,7 @@ namespace idk
 
             for (const auto& d : iter->components)
                 child_handle->AddComponent(d);
-            child_handle->AddComponent<Parent>()->parent = game_objects[iter->parent_index];
+            child_handle->Transform()->parent = game_objects[iter->parent_index];
         }
 
         auto prefab_inst = handle->AddComponent<PrefabInstance>();
@@ -51,13 +51,19 @@ namespace idk
 
         // build tree
         Scene scene{ go.scene };
-        vector<small_string<GenericHandle::index_t>> nodes{ /* scene.size() */ };
+        vector<small_string<GenericHandle::index_t>> nodes;
         vector<GenericHandle::gen_t> gens;
         for (auto& o : scene)
         {
-            
-            if (o.ParentObject())
-                nodes[o.ParentObject().index] += o.GetHandle().index;
+            auto index = o.GetHandle().index;
+            if (index >= gens.size())
+            {
+                nodes.resize(index + 1);
+                gens.resize(index + 1);
+            }
+            gens[index] = o.GetHandle().gen;
+            if (o.Parent())
+                nodes[o.Parent().index] += index;
         }
 
         // tree walk
@@ -72,10 +78,12 @@ namespace idk
 
             for (auto child_index : nodes[curr_par])
             {
-                Handle<GameObject> child{ child_index };
+                Handle<GameObject> child{ child_index, gens[child_index], go.scene };
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
                 for (auto& c : child->GetComponents())
-                    child_prefab_data.components.emplace_back(*c);
+                {
+					child_prefab_data.components.emplace_back(*c);
+                }
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }
@@ -89,9 +97,27 @@ namespace idk
         {
             if (go->HasComponent<PrefabInstance>())
                 return go;
-            go = go->ParentObject();
+            go = go->Parent();
         }
         return go;
+    }
+
+    void PrefabUtility::RecordPrefabInstanceChange(
+        Handle<GameObject> instance_root, Handle<GameObject> target, GenericHandle component, string_view property_path)
+    {
+        assert(instance_root->HasComponent<PrefabInstance>());
+        auto prefab_inst = instance_root->GetComponent<PrefabInstance>();
+
+        auto iter = std::find(prefab_inst->objects.begin(), prefab_inst->objects.end(), target);
+        if (iter == prefab_inst->objects.end())
+            return;
+
+        PropertyOverride override;
+        override.object_index = static_cast<int>(iter - prefab_inst->objects.begin());
+        override.component_name = (*component).type.name();
+        override.property_path = property_path;
+
+        prefab_inst->overrides.push_back(override);
     }
 
     static reflect::dynamic _resolve_property_path(const reflect::dynamic& obj, const string& path)
@@ -142,15 +168,7 @@ namespace idk
         auto comp = *target->GetComponent(override.component_name);
         auto prop = _resolve_property_path(comp, override.property_path);
 
-        auto comp_type = reflect::get_type(override.component_name);
-        for (auto& original_comp : prefab.data[override.object_index].components)
-        {
-            if (original_comp.type == comp_type)
-            {
-                prop = _resolve_property_path(original_comp, override.property_path);
-                break;
-            }
-        }
+        prop = _resolve_property_path(prefab.data[override.object_index].FindComponent(override.component_name), override.property_path);
 
         for (auto iter = prefab_inst.overrides.begin(); iter != prefab_inst.overrides.end(); ++iter)
         {

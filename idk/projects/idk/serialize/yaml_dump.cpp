@@ -204,6 +204,18 @@ namespace idk::yaml
                                 write_tag(item);
                                 new_line();
                             }
+
+                            // if only 1 key-value pair in mapping, dont bother flowing
+                            if (should_flow(item) && item.size() == 1)
+                            {
+                                auto& [key, val] = *item.as_mapping().begin();
+                                write(key);
+                                write(": ");
+                                dump(val);
+                                unindent();
+                                new_line();
+                                continue; // next item in seq
+                            }
                         }
                         else if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
                         {

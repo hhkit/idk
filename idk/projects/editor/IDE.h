@@ -8,7 +8,7 @@
 namespace idk
 {
 	class IGE_IWindow; //Forward Declare
-
+	class CameraControls;
 
 	class IDE : public IEditor
 	{
@@ -19,8 +19,11 @@ namespace idk
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;
+
+		CameraControls& currentCamera();
 	private:
 		unique_ptr<edt::I_Interface> _interface;
+
 		//GraphicsAPI gLibVer;
 
 		vector <unique_ptr<IGE_IWindow>> ige_windows	{};

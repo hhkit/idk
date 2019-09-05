@@ -34,7 +34,7 @@ namespace idk::win
 		bool GetKeyDown(Key) override;
 		bool GetKey(Key) override;
 		bool GetKeyUp(Key) override;
-		bool IsMouseDragging() override;
+		bool IsMouseDragging(Key) override;
 		char GetChar() override;
 		// windows
 		bool SetFullscreen(bool) override { return false; }
@@ -55,6 +55,9 @@ namespace idk::win
 		ivec2     old_screenpos;
 		ivec2	  screendel;
 		vec2	  ndc_screendel;
+
+		bool	  rightHold{ false };
+		bool      leftHold{ false };
 		static inline Windows* instance = nullptr;
 
 		unique_ptr<InputManager> _input_manager;

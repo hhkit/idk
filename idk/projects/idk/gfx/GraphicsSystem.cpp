@@ -4,7 +4,7 @@
 #include <gfx/RenderObject.h>
 namespace idk
 {
-	void GraphicsSystem::BufferGraphicsState(span<MeshRenderer> mesh_renderers, span<const class Transform>, span<const class Parent>, span<const Camera> cameras)
+	void GraphicsSystem::BufferGraphicsState(span<MeshRenderer> mesh_renderers, span<const class Transform>, span<const Camera> cameras)
 	{
 		// todo: scenegraph traversal
 		RenderBuffer result{};

@@ -10,18 +10,13 @@ namespace idk
 		vec3 result{};
 		bool dirty{};
 	};
-	struct Ray
-	{
-		vec3 direction{};
-		vec3 origin{};
-	};
 	class Camera
 		: public Component<Camera>
 	{
 	public:
 		bool enabled = true;
 
-		real aspect = 16.f / 9.f;
+		//real aspect = 16.f / 9.f;
 		real near_plane = 0.1f;
 		real far_plane = 10.f;
 
@@ -38,22 +33,17 @@ namespace idk
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 
-		CamResult currentPosition() const;
-		CamResult currentTarget() const;
-		CamResult currentDirection() const;
-		Ray ViewportPointToRay();
+		vec3	  currentPosition() const;
+		vec3	  currentDirection() const;
 
-		mat4 ViewMatrix() const;
-		mat4 ProjectionMatrix() const;
+		mat4	  ViewMatrix() const;
+		mat4	  ProjectionMatrix() const;
 
 		CameraData GenerateCameraData() const;
-	private:
-		vec3 _position;
-		vec3 _target;
-		vec3 _direction;
-		vec3 _upVector;
+	private:	
 		float _fov;
-		bool _dirty{ false };
+
+		//Basic controls parameter
 
 		mat4 _viewMatrix;
 		mat4 _projectionMatrix;

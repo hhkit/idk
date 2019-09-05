@@ -53,7 +53,7 @@ namespace idk {
 
 		ImVec2 imageSize{ GetScreenSize().x,GetScreenSize().y };
 		//imageSize.y = (imageSize.x * (9 / 16));
-		ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize);
+		ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 	}
 
 	void IGE_SceneView::SetTexture(void* textureToRender)

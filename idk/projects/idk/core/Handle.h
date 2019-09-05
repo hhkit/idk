@@ -3,6 +3,7 @@
 #include <string>
 
 #include <idk.h>
+#include <math/comparable.h>
 #include <meta/meta.h>
 #include "Handleables.h"
 
@@ -17,6 +18,7 @@ namespace idk::reflect
 namespace idk
 {
 	struct GenericHandle
+		: comparable<GenericHandle>
 	{
 		using type_t  = uint8_t;
 		using scene_t = uint8_t;
@@ -42,9 +44,10 @@ namespace idk
 		bool is_type() const;
 
 		reflect::dynamic operator*() const;
-		operator bool() const;
-		bool operator==(const GenericHandle&);
-		bool operator!=(const GenericHandle&);
+		explicit operator bool() const;
+		bool operator<(const GenericHandle&) const;
+		bool operator==(const GenericHandle&) const;
+		bool operator!=(const GenericHandle&) const;
 	};
 
 	template<typename T>

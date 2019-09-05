@@ -16,6 +16,10 @@
 
 #include <serialize/serialize.h>
 
+#include <gfx/CameraControls.h>
+
+#include <test/TestSystem.h>
+
 namespace idk
 {
 	struct yolo
@@ -69,25 +73,50 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
-	gSys->SetMainCamera(camHandle);
+	camera->GetComponent<Transform>()->position += vec3{ 0.0, 0.0, 0.0 };
+	//camHandle->LookAt(vec3(0, 0, 0));
+	camHandle->render_target = RscHandle<RenderTarget>{};
+	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
+	Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 	
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();
-	//go->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	go->GetComponent<Transform>()->position += vec3{ -0.5, 0.5, 0.0 };
 	//go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
 	go->GetComponent<Transform>()->scale /= 200.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
-	Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+	//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+
+	auto go2 = scene->CreateGameObject();
+	go2->AddComponent<TestComponent>();
+	go2->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	go2->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+	go2->GetComponent<Transform>()->scale /= 200.f;
+	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
+	auto mesh_rend2 = go2->AddComponent<MeshRenderer>();
+	//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+
+	mesh_rend2->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+
+	auto go3 = scene->CreateGameObject();
+	go3->AddComponent<TestComponent>();
+	go3->GetComponent<Transform>()->position += vec3{ 0.0, 0.0, 0.0 };
+	//go3->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+	go3->GetComponent<Transform>()->scale /= 50.f;
+	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
+	auto mesh_rend3 = go3->AddComponent<MeshRenderer>();
+
 
 	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
 	auto h_mat = Core::GetResourceManager().Create<Material>();
 
 	h_mat->BuildShader(shader_template, "", "");
 	mesh_rend->material_instance.material = h_mat;
+	mesh_rend2->material_instance.material = h_mat;
+	mesh_rend3->material_instance.material = h_mat;
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

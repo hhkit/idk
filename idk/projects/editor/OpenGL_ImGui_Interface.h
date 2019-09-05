@@ -1,5 +1,6 @@
 #pragma once
 #include "ImGui_Interface.h"
+#include "EditorInputs.h"
 
 namespace idk {
 	namespace ogl {
@@ -19,8 +20,11 @@ namespace idk {
 			void ImGuiFrameEnd() override;
 
 			void ImGuiFrameRender() override;
+
+			EditorInputs* Inputs() override;
 			
 			void TestFunction();
+
 		private:
 
 			
@@ -36,6 +40,8 @@ namespace idk {
 
 			EditorParameter				editorControls;
 			ogl::OpenGLState*			oglObj;
+			EditorInputs				editorInputs;
+
 		};
 	};
 };

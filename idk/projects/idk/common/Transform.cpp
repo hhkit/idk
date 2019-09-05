@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Transform.h"
 #include <core/GameObject.h>
-#include <common/Parent.h>
 #include <math/matrix_transforms.h>
 #include <math/matrix_decomposition.h>
 
@@ -29,7 +28,6 @@ namespace idk
 
 	mat4 Transform::GlobalMatrix() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (parent)
 			return LocalMatrix() * parent->Transform()->GlobalMatrix();
 		else
@@ -38,7 +36,6 @@ namespace idk
 
 	void Transform::GlobalMatrix(const mat4& m)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 		{
 			auto decomp = decompose(m);
@@ -57,7 +54,6 @@ namespace idk
 
 	vec3 Transform::GlobalPosition() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			return position;
 		else
@@ -66,7 +62,6 @@ namespace idk
 
 	quat Transform::GlobalRotation() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			return rotation;
 		else
@@ -75,7 +70,6 @@ namespace idk
 
 	vec3 Transform::GlobalScale() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			return scale;
 		else
@@ -86,9 +80,13 @@ namespace idk
 		}
 	}
 
+	unsigned Transform::Depth() const
+	{
+		return parent ? parent->Transform()->Depth() + 1 : 0;
+	}
+
 	void Transform::GlobalPosition(vec3 pos)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			position = pos;
 		else
@@ -106,7 +104,6 @@ namespace idk
 
 	void Transform::GlobalRotation(quat rot)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			rotation = rot;
 		else
@@ -124,7 +121,6 @@ namespace idk
 
 	void Transform::GlobalScale(vec3 scl)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			scale = scl;
 		else

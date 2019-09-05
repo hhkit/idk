@@ -41,8 +41,8 @@ namespace idk
 		bool ActiveInHierarchy() const;
 
 		// components
-		Handle<class Transform> Transform();
-		Handle<class GameObject> ParentObject();
+		Handle<class Transform> Transform() const;
+		Handle<class GameObject> Parent() const;
 	private:
 		vector<GenericHandle> _components;
 		bool _active = true;

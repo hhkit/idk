@@ -105,12 +105,8 @@ REFLECT_END()
  * components
  *========================================================================*/
 
-REFLECT_BEGIN(idk::Parent, "Parent")
-REFLECT_VARS(parent)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::Transform, "Transform")
-REFLECT_VARS(scale, rotation, position)
+REFLECT_VARS(scale, rotation, position, parent)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Name, "Name")

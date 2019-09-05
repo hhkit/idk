@@ -176,7 +176,7 @@ namespace idk
 	}
 	bool GameState::CreateObject(const GenericHandle& handle)
 	{
-		return create_handles_jt[handle.type](*this, handle);
+		return s_cast<bool>(create_handles_jt[handle.type](*this, handle));
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::type type)
 	{

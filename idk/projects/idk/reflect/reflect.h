@@ -171,8 +171,8 @@ namespace idk::reflect
 	// represents a reflected type property.
 	struct property
 	{
-		const string_view name;
-		const dynamic value;
+		string_view name;
+		dynamic value;
 	};
 
 

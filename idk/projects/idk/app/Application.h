@@ -26,7 +26,7 @@ namespace idk
 		virtual bool GetKeyDown(Key) = 0;
 		virtual bool GetKey(Key) = 0;
 		virtual bool GetKeyUp(Key) = 0;
-		virtual bool IsMouseDragging() = 0;
+		virtual bool IsMouseDragging(Key) = 0;
 		virtual char GetChar() = 0;
 
 		// windows

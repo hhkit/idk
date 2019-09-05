@@ -34,6 +34,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="common\SceneGraphSystem.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\CameraControls.h" />
     <ClInclude Include="gfx\Light.h" />
     <ClInclude Include="gfx\LightTypes.h" />
     <ClInclude Include="gfx\RenderTarget.h" />
@@ -125,7 +127,6 @@
     <ClInclude Include="math\vector_detail.h" />
     <ClInclude Include="math\vector_dim.h" />
     <ClInclude Include="math\vector_swizzle.h" />
-    <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
@@ -175,6 +176,8 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="common\SceneGraphSystem.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
@@ -190,6 +193,7 @@
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
     <ClCompile Include="prefab\Prefab.cpp" />
+    <ClCompile Include="prefab\PrefabData.cpp" />
     <ClCompile Include="prefab\PrefabFactory.cpp" />
     <ClCompile Include="prefab\PrefabUtility.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
