@@ -77,4 +77,9 @@ namespace idk
 		// call imgui draw,
 		_interface->ImGuiFrameRender();
 	}
+	CameraControls& IDE::currentCamera()
+	{
+		// TODO: insert return statement here
+		return _interface->Inputs()->main_camera;
+	}
 }

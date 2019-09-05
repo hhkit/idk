@@ -16,6 +16,10 @@
 
 #include <serialize/serialize.h>
 
+#include <gfx/CameraControls.h>
+
+#include <test/TestSystem.h>
+
 namespace idk
 {
 	struct yolo
@@ -69,8 +73,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
-	gSys->SetMainCamera(camHandle);
+	camera->GetComponent<Transform>()->position += vec3{ 0.0, 0.0, 0.0 };
+	//camHandle->LookAt(vec3(0, 0, 0));
+	camHandle->render_target = RscHandle<RenderTarget>{};
+	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
+	Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 	
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();

@@ -99,9 +99,19 @@ namespace idk::win
 	{
 		return _input_manager->GetKeyUp(static_cast<int>(key));
 	}
-	bool Windows::IsMouseDragging()
+	bool Windows::IsMouseDragging(Key key)
 	{
-		return _dragging;
+		switch (key)
+		{
+		case Key::LButton:
+			return leftHold;
+			break;
+		case Key::RButton:
+			return rightHold;
+			break;
+		};
+
+		return false;
 	}
 	char Windows::GetChar()
 	{
@@ -130,10 +140,37 @@ namespace idk::win
 			_input_manager->SetChar((char)wParam);
 			break;
 		case WM_LBUTTONDOWN:
+			old_screenpos = screenpos;
+			screenpos.x = LOWORD(lParam);
+			screenpos.y = HIWORD(lParam);
+
+			leftHold = true;
+
+			ndc_screendel = vec2{
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
+			vec2{
+			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+
+			screendel = screenpos - old_screenpos;
+
+			_dragging = leftHold;
+
+			std::cout << std::boolalpha << _dragging << std::endl;
+			_input_manager->SetMouseDragging(_dragging);
+
+			SetFocus(hWnd);
+			SetActiveWindow(hWnd);
+			_input_manager->SetMouseDown((int)wParam);
+
+			break;
 		case WM_RBUTTONDOWN:
 			old_screenpos = screenpos;
 			screenpos.x = LOWORD(lParam);
 			screenpos.y = HIWORD(lParam);
+
+			rightHold = true;
 
 			ndc_screendel = vec2{
 			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
@@ -144,7 +181,7 @@ namespace idk::win
 			
 			screendel = screenpos - old_screenpos;
 
-			_dragging = DragDetect(hWnd, POINT{screenpos.x,screenpos.y});
+			_dragging = rightHold;
 
 			std::cout << std::boolalpha << _dragging << std::endl;
 			_input_manager->SetMouseDragging(_dragging);
@@ -155,10 +192,11 @@ namespace idk::win
 
 			break;
 		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
 			old_screenpos = screenpos;
 			screenpos.x = LOWORD(lParam);
 			screenpos.y = HIWORD(lParam);
+
+			leftHold = false;
 
 			ndc_screendel = vec2{
 			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
@@ -167,7 +205,34 @@ namespace idk::win
 			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
 			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
 
-			_dragging = false;
+			screendel = screenpos - old_screenpos;
+
+			_dragging = leftHold;
+
+			std::cout << std::boolalpha << _dragging << std::endl;
+			_input_manager->SetMouseDragging(_dragging);
+
+			SetFocus(hWnd);
+			SetActiveWindow(hWnd);
+			_input_manager->SetMouseDown((int)wParam);
+
+			break;
+		case WM_RBUTTONUP:
+			old_screenpos = screenpos;
+			screenpos.x = LOWORD(lParam);
+			screenpos.y = HIWORD(lParam);
+
+			rightHold = false;
+
+			ndc_screendel = vec2{
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
+			vec2{
+			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+
+			_dragging = rightHold;
+			std::cout << std::boolalpha << _dragging << std::endl;
 			_input_manager->SetMouseDragging(_dragging);
 
 			screendel = screenpos - old_screenpos;

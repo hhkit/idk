@@ -477,5 +477,9 @@ namespace idk
 			editorControls.edt_frameSemophores.clear();
 			editorControls.edt_renderPass.reset();
 		}
+		EditorInputs* VI_Interface::Inputs()
+		{
+			return &editorInputs;
+		}
 	};
 };

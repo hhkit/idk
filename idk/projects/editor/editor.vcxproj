@@ -172,6 +172,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="editor\commands\CMD_AddComponent.h" />
     <ClInclude Include="editor\commands\CMD_MoveGameObject.h" />
     <ClInclude Include="editor\commands\CMD_RotateGameObject.h" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="editor\commands\CMD_AddComponent.cpp" />
     <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp" />
     <ClCompile Include="editor\commands\CMD_RotateGameObject.cpp" />
