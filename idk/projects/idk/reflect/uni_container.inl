@@ -143,7 +143,8 @@ namespace idk::reflect
 
         virtual dynamic subscript(size_t index)
         {
-            if constexpr (has_subscript<DecayedT, size_t>::value)
+            index;
+            if constexpr (is_sequential_container_v<DecayedT> && has_subscript<DecayedT, size_t>::value)
                 return container[index];
             else
                 throw "cannot subscript with size_t";
