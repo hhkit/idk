@@ -51,7 +51,7 @@ namespace idk
 
         // build tree
         Scene scene{ go.scene };
-        vector<small_string<GenericHandle::index_t>> nodes{ /* scene.size() */ };
+        vector<small_string<GenericHandle::index_t>> nodes(10);
         vector<GenericHandle::gen_t> gens;
         for (auto& o : scene)
         {
@@ -72,7 +72,7 @@ namespace idk
 
             for (auto child_index : nodes[curr_par])
             {
-                Handle<GameObject> child{ child_index };
+                Handle<GameObject> child{ child_index, 0, go.scene };
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
                 for (auto& c : child->GetComponents())
                     child_prefab_data.components.emplace_back(*c);
