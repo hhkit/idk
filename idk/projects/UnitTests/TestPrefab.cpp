@@ -96,3 +96,24 @@ TEST(Prefab, TestPrefabInstantiate)
     //    EXPECT_EQ(o1.Transform()->parent.id, o0.GetHandle().id);
     //}
 }
+
+TEST(Prefab, TestPrefabRevert)
+{
+    Core core;
+    FileSystem& fs = core.GetSystem<FileSystem>();
+    fs.Init();
+
+    SceneFactory sf;
+    auto scene = sf.GenerateDefaultResource();
+
+    core.GetResourceManager().Init();
+
+    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
+    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+
+    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto go = PrefabUtility::Instantiate(prefab, *scene);
+
+    (*go->GetComponents()[2]).get_property("position").value = vec3(69.0f, 69.0f, 69.0f);
+    PrefabUtility::RecordPrefabInstanceChange(go, go, go->GetComponents()[2], "position");
+}

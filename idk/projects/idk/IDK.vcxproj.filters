@@ -518,7 +518,9 @@
     <ClInclude Include="gfx\CameraControls.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
-    <ClInclude Include="common\SceneGraphSystem.h" />
+    <ClInclude Include="common\SceneGraphSystem.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -678,7 +680,6 @@
     <ClCompile Include="gfx\Material.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
     <ClCompile Include="common\Name.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -703,11 +704,21 @@
     <ClCompile Include="anim\AnimationFactory.cpp">
       <Filter>anim</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp">
       <Filter>gfx\camera</Filter>
     </ClCompile>
-    <ClCompile Include="common\SceneGraphSystem.cpp" />
+    <ClCompile Include="serialize\yaml_dump.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabData.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="common\SceneGraphSystem.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -866,7 +877,9 @@
     <None Include="res\Resource.inl">
       <Filter>res</Filter>
     </None>
-    <None Include="ds\slow_tree.inl" />
+    <None Include="ds\slow_tree.inl">
+      <Filter>ds</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

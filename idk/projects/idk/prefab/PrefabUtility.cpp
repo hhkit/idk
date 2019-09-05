@@ -102,11 +102,22 @@ namespace idk
         return go;
     }
 
-    void PrefabUtility::RecordPrefabInstanceChanges(Handle<GameObject> instance_root, GenericHandle target)
+    void PrefabUtility::RecordPrefabInstanceChange(
+        Handle<GameObject> instance_root, Handle<GameObject> target, GenericHandle component, string_view property_path)
     {
         assert(instance_root->HasComponent<PrefabInstance>());
         auto prefab_inst = instance_root->GetComponent<PrefabInstance>();
-        //prefab_inst->overrides 
+
+        auto iter = std::find(prefab_inst->objects.begin(), prefab_inst->objects.end(), target);
+        if (iter == prefab_inst->objects.end())
+            return;
+
+        PropertyOverride override;
+        override.object_index = static_cast<int>(iter - prefab_inst->objects.begin());
+        override.component_name = (*component).type.name();
+        override.property_path = property_path;
+
+        prefab_inst->overrides.push_back(override);
     }
 
     static reflect::dynamic _resolve_property_path(const reflect::dynamic& obj, const string& path)
@@ -157,15 +168,7 @@ namespace idk
         auto comp = *target->GetComponent(override.component_name);
         auto prop = _resolve_property_path(comp, override.property_path);
 
-        auto comp_type = reflect::get_type(override.component_name);
-        for (auto& original_comp : prefab.data[override.object_index].components)
-        {
-            if (original_comp.type == comp_type)
-            {
-                prop = _resolve_property_path(original_comp, override.property_path);
-                break;
-            }
-        }
+        prop = _resolve_property_path(prefab.data[override.object_index].FindComponent(override.component_name), override.property_path);
 
         for (auto iter = prefab_inst.overrides.begin(); iter != prefab_inst.overrides.end(); ++iter)
         {
