@@ -358,7 +358,7 @@ namespace idk
 				return;
 			}
 		}
-		std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
+		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
 	}
 
 	void file_system_detail::DirectoryWatcher::checkDirCreated(file_system_detail::fs_dir& mountDir)

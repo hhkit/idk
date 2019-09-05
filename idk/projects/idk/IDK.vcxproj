@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationFactory.h" />
+    <ClInclude Include="anim\AnimationController.h" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
@@ -165,6 +166,7 @@
   <ItemGroup>
     <ClCompile Include="anim\Animation.cpp" />
     <ClCompile Include="anim\AnimationFactory.cpp" />
+    <ClCompile Include="anim\AnimationController.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />

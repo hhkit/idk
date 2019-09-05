@@ -175,6 +175,7 @@ namespace idk::fbx_loader_detail
 		float num_ticks = duration / fps;
 
 		anim_clip.SetSpeeds(fps, duration, num_ticks);
+		anim_clip.SetName(ai_anim->mName.data);
 	}
 
 	// void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip)
