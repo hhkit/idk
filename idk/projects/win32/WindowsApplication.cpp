@@ -131,6 +131,7 @@ namespace idk::win
 			break;
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
+			old_screenpos = screenpos;
 			screenpos.x = LOWORD(lParam);
 			screenpos.y = HIWORD(lParam);
 
@@ -142,7 +143,6 @@ namespace idk::win
 			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
 			
 			screendel = screenpos - old_screenpos;
-			old_screenpos = screenpos;
 
 			_dragging = DragDetect(hWnd, POINT{screenpos.x,screenpos.y});
 
@@ -156,6 +156,7 @@ namespace idk::win
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
+			old_screenpos = screenpos;
 			screenpos.x = LOWORD(lParam);
 			screenpos.y = HIWORD(lParam);
 
@@ -170,11 +171,12 @@ namespace idk::win
 			_input_manager->SetMouseDragging(_dragging);
 
 			screendel = screenpos - old_screenpos;
-			old_screenpos = screenpos;
+			//old_screenpos = screenpos;
 
 			_input_manager->SetMouseUp((int)wParam);
 			break;
 		case WM_MOUSEMOVE:
+			old_screenpos = screenpos;
 			screenpos.x = LOWORD(lParam);
 			screenpos.y = HIWORD(lParam);
 
@@ -186,7 +188,7 @@ namespace idk::win
 			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
 
 			screendel = screenpos - old_screenpos;
-			old_screenpos = screenpos;
+			//old_screenpos = screenpos;
 
 			break;
 		case WM_MOUSEWHEEL:

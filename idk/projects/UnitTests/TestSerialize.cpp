@@ -36,9 +36,9 @@ TEST(Serialize, TestYaml)
     yaml::node node2 = yaml::load("- test: a:\n- x: b");
     EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
     EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
-    // - {test: a:}
-    // - {x: b}
-    EXPECT_EQ(yaml::dump(node2), "- {test: a:}\n- {x: b}\n");
+    // - test: a:
+    // - x: b
+    EXPECT_EQ(yaml::dump(node2), "- test: a:\n- x: b\n");
 
 	// -
 	// - test:
@@ -71,10 +71,10 @@ TEST(Serialize, TestYaml)
     // - test:
     //   - x
     //   - y
-    //   - {a: b}
+    //   - a: b
     // - test2:
     //     b: [1, 2, 3]
-    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - {a: b}\n- test2: \n    b: [1, 2, 3]\n");
+    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - a: b\n- test2: \n    b: [1, 2, 3]\n");
 
     yaml::node node5 = yaml::load("- !testtag '\"longassstring\"'");
 	EXPECT_EQ(node5[0].as_scalar(), "\"longassstring\"");

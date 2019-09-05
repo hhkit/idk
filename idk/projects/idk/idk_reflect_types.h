@@ -47,6 +47,7 @@ namespace idk::reflect
 		, vector<Guid>
 		, hash_table<Guid, string>
         , vector<reflect::dynamic>
+        , vector<Handle<GameObject>>
 
         , PrefabData
         , vector<PrefabData>

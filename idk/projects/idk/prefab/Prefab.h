@@ -12,10 +12,10 @@ namespace idk
         // for simplicity's sake only prefab roots have PrefabInstance component attached.
         Handle<GameObject> Instantiate(Scene& scene) const;
 
-	private:
-        PrefabData _data;
+        // data[0] = self
+        // the rest refer to children
+        vector<PrefabData> data;
 
-        friend class PrefabFactory;
-        friend class PrefabUtility;
+	private:
 	};
 }

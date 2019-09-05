@@ -178,6 +178,7 @@ namespace idk
 		{
             yaml::node& elem = node.emplace_back();
             elem.tag(serialize_text(obj.GetHandle().id));
+            elem.emplace_back(yaml::mapping_type{ { "active", yaml::node{obj.ActiveSelf()} } });
 			for (auto& handle : obj.GetComponents())
                 elem.emplace_back(serialize_yaml(*handle)).tag((*handle).type.name());
 		}
@@ -336,6 +337,10 @@ namespace idk
 					{
 						if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
 							parse_text(elem.as_scalar(), arg[i]);
+                        else if constexpr(std::is_same_v<std::decay_t<decltype(*arg.begin())>, reflect::dynamic>)
+                        {
+                            parse_yaml(elem, arg[i]);
+                        }
 						else
 						{
 							reflect::dynamic d{ arg[i] };
@@ -426,18 +431,21 @@ namespace idk
 			Handle<GameObject> handle{ parse_text<uint64_t>(elem.tag()) };
 			scene.CreateGameObject(handle);
 
-			for (auto& comp_node : elem)
+            auto iter = elem.begin();
+            handle->SetActive(iter->at("active").get<bool>());
+
+			for (++iter; iter != elem.end(); ++iter)
 			{
-				auto type = reflect::get_type(comp_node.tag());
+				auto type = reflect::get_type(iter->tag());
 				if (type.is<Transform>())
 				{
 					reflect::dynamic obj{ *handle->GetComponent<Transform>() };
-					parse_yaml(comp_node, obj);
+					parse_yaml(*iter, obj);
 				}
 				else
 				{
 					reflect::dynamic obj{ *handle->AddComponent(type) };
-                    parse_yaml(comp_node, obj);
+                    parse_yaml(*iter, obj);
 				}
 			}
 		}

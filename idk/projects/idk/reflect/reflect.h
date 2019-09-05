@@ -204,6 +204,9 @@ namespace idk::reflect
 		// clears the container. throws if container doesn't support clear.
 		void clear();
 
+        dynamic operator[](size_t index);
+        dynamic operator[](const dynamic& key);
+
 	private:
 		struct base;
 		template<typename T> struct derived;

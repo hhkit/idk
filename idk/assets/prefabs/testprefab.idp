@@ -1,0 +1,24 @@
+- parent_index: -1
+  components: 
+  - !Transform 
+    scale: {x: 4.000000, y: 4.000000, z: 4.000000}
+    rotation: 
+      x: 5.000000
+      y: 6.000000
+      z: 7.000000
+      w: 8.000000
+    position: {x: 1.000000, y: 2.000000, z: 3.000000}
+  - !Name 
+    name: stoopidguy
+- parent_index: 0
+  components: 
+  - !Transform 
+    scale: {x: 12.000000, y: 12.000000, z: 12.000000}
+    rotation: 
+      x: 13.000000
+      y: 14.000000
+      z: 15.000000
+      w: 16.000000
+    position: {x: 9.000000, y: 10.000000, z: 11.000000}
+  - !Name 
+    name: ""

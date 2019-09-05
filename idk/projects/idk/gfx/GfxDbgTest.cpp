@@ -3,10 +3,11 @@
 #include <idk.h>
 #include <gfx/DebugRenderer.h>
 #include <math/matrix_transforms.h>
+#include <gfx/GraphicsSystem.h>
 namespace idk
 {
 	//TODO remove once merged with master (26/8/19)
-	mat4 look_at(vec3 const& eye, vec3 const& center, vec3 const& up)
+	/*mat4 look_at(vec3 const& eye, vec3 const& center, vec3 const& up)
 	{
 
 		vec3 const f((center - eye).get_normalized());
@@ -27,7 +28,7 @@ namespace idk
 		Result[3][1] = -dot(u, eye);
 		Result[3][2] = dot(f, eye);
 		return Result;
-	}
+	}*/
 	void GfxDebugTest()
 	{
 		auto& dbg_renderer = Core::GetSystem<DebugRenderer>();
@@ -35,6 +36,10 @@ namespace idk
 		{
 			uint32_t width = 1280;
 			uint32_t height = 720;
+
+
+			//Handle<Camera> currCamera = Core::GetSystem<GraphicsSystem>().CurrentCamera();
+
 			mat4 view = look_at(vec3{ 0,2,2 }, vec3{ 0,0,0 }, vec3{ 0,1,0 });
 			mat4 proj = perspective(idk::rad(45.0f), width / (float)height, 0.1f, 10.0f);
 			static DebugObject tmp{ DbgShape::eCube };

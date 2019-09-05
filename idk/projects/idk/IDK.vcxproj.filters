@@ -515,6 +515,9 @@
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\CameraControls.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
     <ClInclude Include="common\SceneGraphSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -701,6 +704,9 @@
       <Filter>anim</Filter>
     </ClCompile>
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="gfx\CameraControls.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
     <ClCompile Include="common\SceneGraphSystem.cpp" />
   </ItemGroup>
   <ItemGroup>

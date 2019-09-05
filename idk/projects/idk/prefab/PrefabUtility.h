@@ -19,7 +19,7 @@ namespace idk
         // if the given game object is not part of a prefab instance, returns a null handle.
         static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);
 
-        static void RevertPropertyOverride(Handle<GameObject> instance_root, const string& path);
+        static void RevertPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override);
 
         // reverts all overrides of the given prefab instance.
         static void RevertPrefabInstance(Handle<GameObject> instance_root);

@@ -403,6 +403,7 @@ namespace idk::yaml
                 {
                     p.stack.pop_back();
                     p.mode_stack.pop_back();
+                    p.block_indents.pop_back();
                 }
             }
 
@@ -423,6 +424,12 @@ namespace idk::yaml
 					break;
 			}
 		}
+        else if(p.mode_stack.size() > 1 && p.mode_stack[p.mode_stack.size() - 2] == block_map && p.mode() == unknown)
+        {
+            const bool is_seq = *p == '-' && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || (p[1] == '\r' && p[2] == '\n'));
+            if (is_seq)
+                p.block_indents.push_back(indent);
+        }
 
 		p.new_block = true;
 	}
