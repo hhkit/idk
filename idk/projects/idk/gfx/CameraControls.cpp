@@ -124,7 +124,11 @@ namespace idk {
 			float angle_A = _alpha / 180.f * pi;
 			float angle_B = _beta / 180.f * pi;
 
+			angle_A;
+			angle_B;
+
 			float maxDeg = 89.f / 180.f * pi;
+			maxDeg;
 
 			//mat3 rotMatrix = rotate(vec3(0, 1, 0), rad(angle_A));
 			//mat3 rotMatrix2 = rotate(vec3(0, 0, 1), rad(angle_B));

@@ -73,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.0, 0.0, 0.0 };
+	camera->GetComponent<Transform>()->position += vec3{ 0.0, 0.0, -2.5f };
 	//camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
@@ -81,8 +81,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	auto go = scene->CreateGameObject();	
 	go->AddComponent<TestComponent>();
-	go->GetComponent<Transform>()->position += vec3{ -0.5, 0.5, 0.0 };
-	//go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+	go->GetComponent<Transform>()->position += vec3{ -0.5, 0.0, 0.0 };
+	go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
 	go->GetComponent<Transform>()->scale /= 200.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend = go->AddComponent<MeshRenderer>();
@@ -92,7 +92,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto go2 = scene->CreateGameObject();
 	go2->AddComponent<TestComponent>();
-	go2->GetComponent<Transform>()->position += vec3{ 0.5, 0.5, 0.0 };
+	go2->GetComponent<Transform>()->position += vec3{ 0.5, 0.0, 0.0 };
 	go2->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
 	go2->GetComponent<Transform>()->scale /= 200.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
@@ -105,7 +105,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	go3->AddComponent<TestComponent>();
 	go3->GetComponent<Transform>()->position += vec3{ 0.0, 0.0, 0.0 };
 	//go3->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-	go3->GetComponent<Transform>()->scale /= 50.f;
+	go3->GetComponent<Transform>()->scale /= 100.f;
 	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 	auto mesh_rend3 = go3->AddComponent<MeshRenderer>();
 

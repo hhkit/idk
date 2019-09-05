@@ -337,6 +337,7 @@ namespace idk
 					check_vk_result(err);
 				}
 				catch (const vk::OutOfDateKHRError& e) {
+					e;
 				
 					vkObj->RecreateSwapChain();
 					ImGuiRecreateSwapChain();
