@@ -102,6 +102,13 @@ namespace idk
         return go;
     }
 
+    void PrefabUtility::RecordPrefabInstanceChanges(Handle<GameObject> instance_root, GenericHandle target)
+    {
+        assert(instance_root->HasComponent<PrefabInstance>());
+        auto prefab_inst = instance_root->GetComponent<PrefabInstance>();
+        //prefab_inst->overrides 
+    }
+
     static reflect::dynamic _resolve_property_path(const reflect::dynamic& obj, const string& path)
     {
         size_t offset = 0;
