@@ -8,6 +8,7 @@
       z: 7.000000
       w: 8.000000
     position: {x: 1.000000, y: 2.000000, z: 3.000000}
+    parent: {id: 0}
   - !Name 
     name: stoopidguy
 - parent_index: 0
@@ -20,5 +21,6 @@
       z: 15.000000
       w: 16.000000
     position: {x: 9.000000, y: 10.000000, z: 11.000000}
+    parent: {id: 65536}
   - !Name 
     name: ""

@@ -5,7 +5,7 @@
 #include <serialize/serialize.h>
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
-#include <common/Parent.h>
+#include <common/Transform.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 
@@ -30,7 +30,7 @@ namespace idk
 
             for (const auto& d : iter->components)
                 child_handle->AddComponent(d);
-            child_handle->AddComponent<Parent>()->parent = game_objects[iter->parent_index];
+            child_handle->Transform()->parent = game_objects[iter->parent_index];
         }
 
         auto prefab_inst = handle->AddComponent<PrefabInstance>();
@@ -62,8 +62,8 @@ namespace idk
                 gens.resize(index + 1);
             }
             gens[index] = o.GetHandle().gen;
-            if (o.ParentObject())
-                nodes[o.ParentObject().index] += index;
+            if (o.Parent())
+                nodes[o.Parent().index] += index;
         }
 
         // tree walk
@@ -82,8 +82,7 @@ namespace idk
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
                 for (auto& c : child->GetComponents())
                 {
-                    if (!c.is_type<Parent>())
-                        child_prefab_data.components.emplace_back(*c);
+					child_prefab_data.components.emplace_back(*c);
                 }
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
@@ -98,7 +97,7 @@ namespace idk
         {
             if (go->HasComponent<PrefabInstance>())
                 return go;
-            go = go->ParentObject();
+            go = go->Parent();
         }
         return go;
     }

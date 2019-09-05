@@ -32,8 +32,7 @@ TEST(Prefab, TestPrefabSave)
     t1->position = vec3{ 9.0f, 10.0f, 11.0f };
     t1->scale = vec3{ 12.0f };
     t1->rotation = quat{ 13.0f, 14.0f, 15.0f, 16.0f };
-    auto p1 = child->AddComponent<Parent>();
-    p1->parent = go;
+	child->Transform()->parent = go;
 
     auto exe_dir = std::string{ fs.GetExeDir() };
     fs.Mount(exe_dir + "/assets", "/assets");
@@ -94,7 +93,6 @@ TEST(Prefab, TestPrefabInstantiate)
         EXPECT_EQ(t1->position, vec3(9.0f, 10.0f, 11.0f));
         EXPECT_EQ(t1->scale, vec3{ 12.0f });
         EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
-        auto p1 = o1.GetComponent<Parent>();
-        EXPECT_EQ(p1->parent.id, o0.GetHandle().id);
+        EXPECT_EQ(o1.Transform()->parent.id, o0.GetHandle().id);
     }
 }
