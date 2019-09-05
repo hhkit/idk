@@ -43,6 +43,7 @@
     <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\CameraControls.h" />
     <ClInclude Include="gfx\Light.h" />
     <ClInclude Include="gfx\LightTypes.h" />
     <ClInclude Include="gfx\RenderTarget.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
