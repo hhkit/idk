@@ -60,15 +60,15 @@ namespace idk {
 		auto tfm = current_camera->GetGameObject()->Transform();
 
 		
-		if(!selected_target)
-			tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->GlobalPosition(), _target, tfm->Up())));
+		if (!selected_target)
+			current_camera->LookAt(_target, tfm->Up());
 		else
 		{
 			//check for facing direction (same)
 			//if (tfm->Forward().dot(selected_target->Forward()) > 0.f)
-			tfm->position = vec3{ selected_target->GlobalPosition().x, selected_target->GlobalPosition().y, selected_target->GlobalPosition().z + 1.f };
+			//tfm->position = vec3{ selected_target->GlobalPosition().x, selected_target->GlobalPosition().y, selected_target->GlobalPosition().z + 1.f };
 
-			tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->GlobalPosition(), _target, tfm->Up())));
+			current_camera->LookAt(_target, tfm->Up());
 		}
 
 		_focusing = true;

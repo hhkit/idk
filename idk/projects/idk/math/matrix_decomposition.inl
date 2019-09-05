@@ -36,7 +36,7 @@ namespace idk
 		constexpr auto _1 = T{ 1 };
 		constexpr auto _2 = T{ 2 };
 
-		retval.w = sqrt(_1 + rotation[0][0] + rotation[1][1] + rotation[2][2]) / 2;
+		retval.w = sqrt(abs(_1 + rotation[0][0] + rotation[1][1] + rotation[2][2])) / 2;
 		const auto w4 = retval.w * 4;
 		retval.x = (rotation[2][1] - rotation[1][2]) / w4;
 		retval.y = (rotation[0][2] - rotation[2][0]) / w4;
@@ -52,7 +52,7 @@ namespace idk
 		constexpr auto _1 = T{ 1 };
 		constexpr auto _2 = T{ 2 };
 
-		retval.w = sqrt(_1 + rotation[0][0] + rotation[1][1] + rotation[2][2]) / 2;
+		retval.w = sqrt(abs(_1 + rotation[0][0] + rotation[1][1] + rotation[2][2])) / 2;
 		const auto w4 = retval.w * 4;
 		retval.x = (rotation[2][1] - rotation[1][2]) / w4;
 		retval.y = (rotation[0][2] - rotation[2][0]) / w4;

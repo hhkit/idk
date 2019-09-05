@@ -16,7 +16,7 @@ namespace idk
 	{
 		auto tfm = GetGameObject()->Transform();
 
-		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->GlobalPosition(), target_point, up)));
+		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->position, target_point, up)));
 	}
 
 	vec3 Camera::currentPosition() const
