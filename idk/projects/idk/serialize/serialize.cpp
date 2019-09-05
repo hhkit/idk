@@ -337,6 +337,10 @@ namespace idk
 					{
 						if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
 							parse_text(elem.as_scalar(), arg[i]);
+                        else if constexpr(std::is_same_v<std::decay_t<decltype(*arg.begin())>, reflect::dynamic>)
+                        {
+                            parse_yaml(elem, arg[i]);
+                        }
 						else
 						{
 							reflect::dynamic d{ arg[i] };

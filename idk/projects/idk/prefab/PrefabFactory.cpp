@@ -6,6 +6,11 @@
 namespace idk
 {
 
+    unique_ptr<Prefab> PrefabFactory::GenerateDefaultResource()
+    {
+        return std::make_unique<Prefab>();
+    }
+
 	unique_ptr<Prefab> PrefabFactory::Create()
 	{
 		return std::make_unique<Prefab>();

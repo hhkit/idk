@@ -51,13 +51,19 @@ namespace idk
 
         // build tree
         Scene scene{ go.scene };
-        vector<small_string<GenericHandle::index_t>> nodes(10);
+        vector<small_string<GenericHandle::index_t>> nodes;
         vector<GenericHandle::gen_t> gens;
         for (auto& o : scene)
         {
-            
+            auto index = o.GetHandle().index;
+            if (index >= gens.size())
+            {
+                nodes.resize(index + 1);
+                gens.resize(index + 1);
+            }
+            gens[index] = o.GetHandle().gen;
             if (o.ParentObject())
-                nodes[o.ParentObject().index] += o.GetHandle().index;
+                nodes[o.ParentObject().index] += index;
         }
 
         // tree walk
@@ -72,10 +78,13 @@ namespace idk
 
             for (auto child_index : nodes[curr_par])
             {
-                Handle<GameObject> child{ child_index, 0, go.scene };
+                Handle<GameObject> child{ child_index, gens[child_index], go.scene };
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
                 for (auto& c : child->GetComponents())
-                    child_prefab_data.components.emplace_back(*c);
+                {
+                    if (!c.is_type<Parent>())
+                        child_prefab_data.components.emplace_back(*c);
+                }
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }

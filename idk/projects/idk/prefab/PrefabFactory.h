@@ -8,6 +8,8 @@ namespace idk
 {
 	class PrefabFactory : public ResourceFactory<Prefab>
 	{
+    public:
+        unique_ptr<Prefab> GenerateDefaultResource() override;
 		unique_ptr<Prefab> Create() override;
 		unique_ptr<Prefab> Create(FileHandle filepath) override;
 	};
