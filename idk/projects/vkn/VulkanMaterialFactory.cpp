@@ -2,7 +2,7 @@
 #include <vkn/VulkanMaterial.h>
 #include "VulkanMaterialFactory.h"
 static const auto default_material_code = R"(
-	color = vec4(1.0);
+	color = vec4(1.0,0.0,0.2,1.0);
 )";
 namespace idk::vkn
 {

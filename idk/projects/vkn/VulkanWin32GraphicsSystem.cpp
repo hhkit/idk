@@ -88,8 +88,9 @@ namespace idk::vkn
 		//instance_->DrawFrame();
 		instance_->AcquireFrame(*curr_signal.image_available);
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
-
-		auto& curr_frame = _frame_renderers[instance_->View().Swapchain().curr_index];
+		auto curr_index = instance_->View().Swapchain().curr_index;
+		auto& curr_frame = _frame_renderers[curr_index];
+		_pm->CheckForUpdates(curr_index);
 		curr_frame.RenderGraphicsStates(curr_buffer.states);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
