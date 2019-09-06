@@ -5,31 +5,26 @@
 #include <gfx/ShaderTemplate.h>
 #include <fstream>
 #include <sstream>
+#include <vkn/utils/GlslToSpirv.h>
 namespace idk::vkn
 {
 	bool VulkanMaterial::BuildShader(RscHandle<ShaderTemplate> lighting_model, string_view material_uniforms, string_view material_code)
 	{
+		bool ret = false;
 		Core::GetResourceManager().Free(RscHandle<ShaderProgram>{meta.compiled_shader_guid});
 		auto prog = Core::GetResourceManager().Create<ShaderModule>(meta.compiled_shader_guid);
-		auto tmp_filename = "assets/shader/tmp" + meta.compiled_shader_guid.operator idk::string() + ".frag";
-		auto tmp_outfilename = tmp_filename+"spv";
-		std::ofstream tmp{ tmp_filename };
-		tmp << lighting_model->Instantiate(material_uniforms, material_code) << std::flush;
-		tmp.close();
-		auto cmd = ("..\\tools\\glslc.exe " + tmp_filename + " -o \"" + tmp_outfilename+"\"");
-		auto exit_code = system(cmd.c_str());
-		auto ret = exit_code == 0;
+		//std::ofstream tmp{ tmp_filename };
+		//tmp << << std::flush;
+		//tmp.close();
+		auto glsl = lighting_model->Instantiate(material_uniforms, material_code);
+		auto spirv = GlslToSpirv::spirv(glsl, vk::ShaderStageFlagBits::eFragment);
+		ret = static_cast<bool>(spirv);
 		if (ret)
 		{
-			std::ifstream file{tmp_filename+"spv",std::ios::binary };
-			std::stringstream strm;
-			strm << file.rdbuf();
-			file.close();
-			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, strm.str());
 
-			std::filesystem::remove(std::filesystem::relative(tmp_outfilename));
+			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, *spirv);
+
 		}
-		std::filesystem::remove(std::filesystem::relative(tmp_filename));
 
 		return ret;
 	}

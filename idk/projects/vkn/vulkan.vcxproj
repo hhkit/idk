@@ -208,6 +208,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
+    <ClInclude Include="utils\GlslToSpirv.h" />
     <ClInclude Include="idkTexture.h" />
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="object_pool.h" />
@@ -246,6 +247,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="UboManager.cpp" />
+    <ClCompile Include="utils\GlslToSpirv.cpp" />
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />

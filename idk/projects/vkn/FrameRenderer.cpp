@@ -109,7 +109,7 @@ namespace idk::vkn
 
 		//TODO figure this out
 		string filename = "/assets/shader/mesh.vert";
-		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename + "spv");
+		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
 		auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
 		if (!actualfile || !rsc.resources.size())
 		{
@@ -124,7 +124,7 @@ namespace idk::vkn
 			//Load the glsl, which will spit out a .___spv
 			Core::GetResourceManager().LoadFile(file);
 			Core::GetSystem<FileSystem>().Update();
-			actualfile = Core::GetSystem<FileSystem>().GetFile(filename+"spv");
+			//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
 			_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
 			_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
 			//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());

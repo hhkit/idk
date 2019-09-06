@@ -90,6 +90,9 @@
     <ClInclude Include="VulkanMaterialFactory.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="utils\GlslToSpirv.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -167,6 +170,7 @@
     <ClCompile Include="VulkanMaterial.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="utils\GlslToSpirv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

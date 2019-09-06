@@ -62,13 +62,13 @@ namespace idk::vkn
 		Core::GetResourceManager().RegisterFactory<idk::anim::AnimationFactory>();
 		Core::GetResourceManager().RegisterFactory<MeshFactory>();
 		Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
-		Core::GetResourceManager().RegisterFactory<VulkanShaderModuleFactory>();
+		Core::GetResourceManager().RegisterFactory<VulkanGlslLoader>();
 		//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 		//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vertspv");
-		Core::GetResourceManager().RegisterExtensionLoader<VulkanGlslLoader>(".vert");
-		Core::GetResourceManager().RegisterExtensionLoader<VulkanGlslLoader>(".frag");
+		//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");
+		//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vertspv");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vert");
+		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".frag");
 		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderTemplate>>(".tmpt");
 		_pm = std::make_unique<PipelineManager>();
 		_pm->View(instance_->View());

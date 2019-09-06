@@ -84,6 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
 	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
+
 	//auto h_mat = Core::GetResourceManager().Create<Material>();
 	//
 	//h_mat->BuildShader(shader_template, "", "");

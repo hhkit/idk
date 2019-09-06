@@ -24,11 +24,10 @@ namespace idk::vkn
 		}
 		return result;
 	}
-void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code)
+
+void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer)
 {
-	vector<uint32_t> buffer;
-	buffer.resize(byte_code.size()/sizeof(uint32_t));
-	std::memcpy(buffer.data(), byte_code.data(), byte_code.size());
+	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
 	spx::CompilerReflection code_reflector{ buffer };// r_cast<const uint32_t*>(std::data(buffer)), byte_code.size() / sizeof(uint16_t)//};
 	auto aaaa = code_reflector.compile();
 	auto resources = code_reflector.get_shader_resources();
@@ -40,21 +39,28 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 		UboInfo info;
 		auto type = code_reflector.get_type(ub.type_id);
 		info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
-		info.set     = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
-		info.stage   = StageToUniformStage(single_stage);
-		info.size    = type.width;
-		info.type    = vk::DescriptorType::eUniformBuffer;
+		info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
+		info.stage = StageToUniformStage(single_stage);
+		info.size = type.width;
+		info.type = vk::DescriptorType::eUniformBuffer;
 		uint32_t i = 0;
 		for (auto& member_type : type.member_types)
 		{
 			auto tmp = code_reflector.get_type(member_type);
-			info.size += code_reflector.get_declared_struct_member_size(type,i);
+			info.size += code_reflector.get_declared_struct_member_size(type, i);
 		}
-		ubo_info[ub.name]= std::move(info);
+		ubo_info[ub.name] = std::move(info);
 	}
 	back_module = view.CreateShaderModule(byte_code);
 	stage = single_stage;
 	attrib_descriptions = std::move(descriptors);
+}
+void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code)
+{
+	vector<unsigned int> buffer;
+	buffer.resize(byte_code.size()/sizeof(uint32_t));
+	std::memcpy(buffer.data(), byte_code.data(), byte_code.size());
+	Load(single_stage, descriptors, buffer);
 }
 
 const UboInfo& ShaderModule::GetLayout(string uniform_name)

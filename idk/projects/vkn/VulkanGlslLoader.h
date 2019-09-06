@@ -6,11 +6,12 @@ namespace idk::vkn
 {
 
 class VulkanGlslLoader
-	: public ExtensionLoader
+	: public ResourceFactory<ShaderProgram>
 {
 public:
-	FileResources Create(FileHandle path_to_resource) override;
-	FileResources Create(FileHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
+	unique_ptr<ShaderProgram> GenerateDefaultResource() override;
+	unique_ptr<ShaderProgram> Create(FileHandle path_to_resource) override;
+	//unique_ptr<ShaderProgram> Create(FileHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
 	//FileResources Create(FileHandle path_to_resource, const MetaFile& path_to_meta) override;
 private:
 

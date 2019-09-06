@@ -24,6 +24,7 @@ namespace idk::vkn
 	class ShaderModule :public ShaderProgram
 	{
 	public:
+		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& byte_code);
 		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors,string_view byte_code);
 		vk::ShaderStageFlagBits Stage()const { return stage; }
 		vk::ShaderModule        Module()const { return *module; }
