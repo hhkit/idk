@@ -48,12 +48,12 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,  "Poll OS Events");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&FileSystem::Update, "File System Update");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Update,  "FMOD Update");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects, "Build scene graph");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::BuildSceneGraph, "Build scene graph");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan, "Test updates");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory, "watch files");
 		if (editor)
 		{
-			//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");	
-			//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderBuffer, "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::WatchDirectory, "watch files");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate, "Editor Update");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");

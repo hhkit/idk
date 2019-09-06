@@ -27,6 +27,11 @@ namespace idk
 		return true;
 	}
 
+	void SceneManager::DestroyObjects()
+	{
+		GameState::GetGameState().DestroyQueue();
+	}
+
 	void SceneManager::BuildSceneGraph(span<const GameObject> objs)
 	{
 		_sg_builder.BuildSceneGraph(objs);

@@ -25,6 +25,8 @@ namespace idk
 		RscHandle<Scene> GetActiveScene();
 		bool  SetActiveScene(RscHandle<Scene> s);
 
+		void DestroyObjects();
+
 		void BuildSceneGraph(span<const GameObject> objs);
 		SceneGraph& FetchSceneGraph();
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
