@@ -30,11 +30,11 @@ namespace idk
 	}
 
 	template<typename T>
-	quaternion<T> decompose_rotation_matrix(const tmat<T, 4, 4>& r)
+	quaternion<T> decompose_rotation_matrix(const tmat<T, 4, 4>& rotation)
 	{
 		// https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 
-		quaternion<T> q;
+		quaternion<T> retval;
 		constexpr auto _1 = T{ 1 };
 		constexpr auto _2 = T{ 2 };
 		constexpr auto _0_25 = T{ 0.25 };
@@ -44,7 +44,7 @@ namespace idk
 
 		if (tr > 0)
 		{
-			float S = sqrt(tr + _1) * _2; // S=4*qw 
+			float S = sqrt(abs(tr) + _1) * _2; // S=4*qw 
 			retval.w = _0_25 * S;
 			retval.x = (rotation[2][1] - rotation[1][2]) / S;
 			retval.y = (rotation[0][2] - rotation[2][0]) / S;
@@ -124,7 +124,7 @@ namespace idk
 		//	}
 		//}
 
-		return q;
+		return retval;
 	}
 
 	template<typename T>
