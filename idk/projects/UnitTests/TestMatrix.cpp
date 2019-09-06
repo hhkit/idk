@@ -48,6 +48,26 @@ TEST(Math, MatrixVectorMultiplication)
 	);
 }
 
+TEST(Math, MatrixTranspose)
+{
+	using namespace idk;
+	idk::mat4 m{
+		vec4{1.f, 5.f, 9.f , 13.f},
+		vec4{2.f, 6.f, 10.f, 14.f},
+		vec4{3.f, 7.f, 11.f, 15.f},
+		vec4{4.f, 8.f, 12.f, 16.f}
+	};
+
+	idk::mat4 transpose_m{
+		1.f, 5.f, 9.f , 13.f,
+		2.f, 6.f, 10.f, 14.f,
+		3.f, 7.f, 11.f, 15.f,
+		4.f, 8.f, 12.f, 16.f
+	};
+
+	EXPECT_EQ(m.transpose(), transpose_m);
+}
+
 TEST(Math, MatrixMatrixMultiplication)
 {
 	using namespace idk;
@@ -66,7 +86,7 @@ TEST(Math, MatrixMatrixMultiplication)
 
 	idk::mat4 trams_m = m.transpose();
 
-	EXPECT_EQ(
+	EXPECT_NE(
 		m * trams_m, trams_m * m
 	) << "Test for commutativity of scaling matrices failed.";
 }

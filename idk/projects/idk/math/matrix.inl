@@ -29,7 +29,7 @@ namespace idk
 			std::index_sequence<RowIndexes...>)
 		{
 			return tvec<T, C>{
-				(transposeme[TransposeMe][RowIndexes]) ...
+				(transposeme[RowIndexes][TransposeMe]) ...
 			};
 		}
 
