@@ -71,24 +71,27 @@ TEST(Math, MatrixTranspose)
 TEST(Math, MatrixMatrixMultiplication)
 {
 	using namespace idk;
-	idk::mat4 m{
-		vec4{2.f, 0.f, 0.f, 0.f},
-		vec4{0.f, 2.f, 0.f, 0.f},
-		vec4{0.f, 0.f, 2.f, 0.f},
-		vec4{0.f, 2.f, 0.f, 1.f}
+	idk::mat4 m1{
+		5,  7, 9, 10,
+		2,  3, 3,  8,
+		8, 10, 2,  3,
+		3,  3, 4,  8
 	};
 	idk::mat4 m2{
-		vec4{2.f, 0.f, 0.f, 0.f},
-		vec4{0.f, 3.f, 0.f, 0.f},
-		vec4{0.f, 0.f, 4.f, 0.f},
-		vec4{0.f, 2.f, 0.f, 1.f}
+		3,  10, 12, 18,
+		12, 1,  4,   9,
+		9,  10, 12,  2,
+		3,  12, 4,  10
 	};
 
-	idk::mat4 trams_m = m.transpose();
+	idk::mat4 res{
+		210, 267, 236, 271,
+		93,  149, 104, 149,
+		171, 146, 172, 268,
+		105, 169, 128, 169
+	};
 
-	EXPECT_NE(
-		m * trams_m, trams_m * m
-	) << "Test for commutativity of scaling matrices failed.";
+	EXPECT_EQ(m1 * m2, res) << "Test for commutativity of scaling matrices failed.";
 }
 
 TEST(Math, MatrixDeterminant)
