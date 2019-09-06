@@ -10,9 +10,20 @@ namespace idk::vkn
 	using attrib_index = vtx::Attrib;
 	struct MeshBuffer
 	{
-		vk::UniqueBuffer buffer{};
-		hlp::UniqueAlloc alloc{};
-		size_t len{};
+		struct Managed
+		{
+			vk::UniqueBuffer buffer{};
+			hlp::UniqueAlloc alloc{};
+			size_t len{};
+			Managed() = default;
+			Managed(
+				vk::UniqueBuffer b,
+			hlp::UniqueAlloc a,
+			size_t l):buffer{std::move(b)},alloc{ std::move(a) },len{l}{}
+		};
+		std::shared_ptr<Managed> memory;
+		std::optional<vk::Buffer> buffer()const { return (memory) ? std::optional<vk::Buffer> {*memory->buffer} : std::nullopt; }
+		size_t offset{};
 	};
 	class VulkanMesh : public Mesh
 	{
