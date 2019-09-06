@@ -77,7 +77,7 @@ namespace idk
 	class Handleable
 	{
 	public:
-		const Handle<T>& GetHandle() { return handle; }
+		const Handle<T>& GetHandle() const { return handle; }
 	protected:
 		Handleable() = default;
 	private:

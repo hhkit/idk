@@ -21,7 +21,7 @@ namespace idk
 		// defrag??
 		for (auto& elem : objs)
 		{
-		//	sg_lookup.find();
+			auto itr = sg_lookup.find(elem.GetHandle());
 		}
 	}
 

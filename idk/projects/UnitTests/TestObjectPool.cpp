@@ -69,3 +69,34 @@ TEST(ObjectPool, TestObjectPooling)
 	GenericHandle generich;
 	*generich;
 }
+
+TEST(ObjectPool, TestObjectPooling)
+{
+	using namespace idk;
+	pool<int> p;
+
+	for (int i = 0; i < 1000; ++i)
+		p.emplace_back();
+
+	for (int i = 0; i < 1000; ++i)
+		p.pop_back();
+
+	ObjectPool<class GameObject> op;
+	op.ActivateScene(0);
+
+	auto obj1 = op.Create(0);
+	auto obj2 = op.Create(0);
+	auto obj3 = op.Create(0);
+	auto obj4 = op.Create(0);
+	auto obj5 = op.Create(0);
+
+	for (auto& elem : op.GetSpan())
+		std::cout << elem.GetHandle().id << ' ';
+	std::cout << '\n';
+	// reverse
+	op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().id > rhs.GetHandle().id; });
+
+	for (auto& elem : op.GetSpan())
+		std::cout << elem.GetHandle().id << ' ';
+	std::cout << '\n';
+}
