@@ -97,8 +97,11 @@ namespace idk
 
 	template<typename T>
 	template<typename SortFn>
-	inline void ObjectPool<T>::Defrag(SortFn&& functor)
+	unsigned ObjectPool<T>::Defrag(SortFn&& functor)
 	{
+#ifdef _DEBUG
+		unsigned swapcount{};
+#endif
 		const auto beg = _pool.begin();
 		const auto end = _pool.end();
 		auto itr = beg;
@@ -113,6 +116,9 @@ namespace idk
 
 			while (jtr != beg && !functor(jtr[-1], jtr[0]))
 			{
+#ifdef _DEBUG
+				++swapcount;
+#endif
 				// swap jtr[-1] and jtr[0]
 				auto& rhs = jtr[0];
 				auto& lhs = jtr[-1];
@@ -127,6 +133,12 @@ namespace idk
 				--jtr;
 			}
 		}
+
+#ifdef _DEBUG
+		return swapcount;
+#else
+		return 0;
+#endif
 	}
 
 	template<typename T>

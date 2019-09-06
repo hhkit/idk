@@ -32,8 +32,8 @@ namespace idk
 		bool   Destroy(const Handle&);
 
 		// defrags the list using insertion sort
-		template<typename SortFn>
-		void Defrag(SortFn&& functor = std::less<T>{});
+		template<typename SortFn = std::less<T>>
+		unsigned Defrag(SortFn&& functor = std::less<T>{});
 
 		bool ActivateScene(scene_t scene_id, size_t reserve = 8192);
 		bool DeactivateScene(scene_t scene_id);
