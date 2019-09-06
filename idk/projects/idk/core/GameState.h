@@ -36,6 +36,7 @@ namespace idk
 		uint8_t GetTypeID(const reflect::type&);
 
 		template<typename T>  span<T>   GetObjectsOfType();
+		template<typename T, typename Pd>  unsigned  SortObjectsOfType(Pd&&);
 
 		template<typename T>  T*        GetObject(const Handle<T>& handle);
 		template<typename T, typename ... Args>  Handle<T> CreateObject(uint8_t scene, Args&& ... args);

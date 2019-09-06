@@ -527,7 +527,7 @@
     <ClInclude Include="gfx\CameraControls.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
-    <ClInclude Include="common\SceneGraphSystem.h">
+    <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -729,7 +729,7 @@
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="common\SceneGraphSystem.cpp">
+    <ClCompile Include="scene\SceneGraphBuilder.cpp">
       <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>

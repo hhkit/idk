@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <idk_config.h>
 #include <core/ISystem.h>
+#include <scene/SceneGraphBuilder.h>
 namespace idk
 {
 	enum class LoadSceneMode
@@ -14,6 +15,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		using SceneGraph = SceneGraphBuilder::SceneGraph;
 		void Init() override;
 		void Shutdown() override;
 
@@ -23,9 +25,13 @@ namespace idk
 		RscHandle<Scene> GetActiveScene();
 		bool  SetActiveScene(RscHandle<Scene> s);
 
+		void BuildSceneGraph(span<const GameObject> objs);
+		SceneGraph* FetchSceneGraph(Handle<class GameObject>);
+
 		string_view GetSceneName();
 	private:
 		GameState* _gs = nullptr;
+		SceneGraphBuilder _sg_builder;
 		RscHandle<Scene> _active_scene;
 	};
 }
