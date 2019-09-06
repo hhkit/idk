@@ -129,3 +129,35 @@ TEST(Math, MatrixDeterminant)
 	}.determinant()), 0.f) << "Projected column test failed";
 
 }
+
+TEST(Math, MatrixInverse)
+{
+	using namespace idk;
+	
+	mat4 m
+	{
+		3, 2, 4, 5,
+		2, 3, 4, 8,
+		1, 2, 3, 4,
+		0, 0, 0, 1
+	};
+
+	mat4 m2
+	{
+		 1.f/3,  2.f/3, -4.f/3,  -5.f/3,
+		-2.f/3,  5.f/3, -4.f/3, -14.f/3,
+		 1.f/3, -4.f/3,  5.f/3,   7.f/3,
+		     0,      0,      0,       1
+	};
+
+	for (auto& elem : m.inverse())
+	{
+		for (auto& e : elem)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	for (auto& [lvec, rvec] : zip(m.inverse(), m2))
+		for (auto& [lhs, rhs] : zip(lvec, rvec))
+			EXPECT_LE(abs(lhs - rhs), epsilon);
+}
