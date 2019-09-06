@@ -32,9 +32,14 @@ namespace idk
 		_sg_builder.BuildSceneGraph(objs);
 	}
 
-	SceneManager::SceneGraph* SceneManager::FetchSceneGraph(Handle<class GameObject> handle)
+	SceneManager::SceneGraph& SceneManager::FetchSceneGraph()
 	{
-		return _sg_builder.FetchSceneGraph(handle);
+		return _sg_builder.FetchSceneGraph();
+	}
+
+	SceneManager::SceneGraph* SceneManager::FetchSceneGraphFor(Handle<class GameObject> handle)
+	{
+		return _sg_builder.FetchSceneGraphFor(handle);
 	}
 
 }

@@ -28,7 +28,8 @@ namespace idk
 	template<typename ...Args>
 	inline slow_tree<T>& slow_tree<T>::emplace_child(Args&& ... args)
 	{
-		return _children.emplace_back(slow_tree{std::forward<Args>(args)...});
+		_children.emplace_front(slow_tree{std::forward<Args>(args)...});
+		return _children.front();
 	}
 
 	template<typename T>
@@ -49,25 +50,25 @@ namespace idk
 	template<typename T>
 	typename slow_tree<T>::iterator slow_tree<T>::begin()
 	{
-		return _children.data();
+		return _children.begin();
 	}
 
 	template<typename T>
 	typename slow_tree<T>::iterator slow_tree<T>::end()
 	{
-		return _children.data() + _children.size();
+		return _children.end();
 	}
 
 	template<typename T>
 	typename slow_tree<T>::const_iterator slow_tree<T>::begin() const
 	{
-		return _children.data();
+		return _children.begin();
 	}
 
 	template<typename T>
 	typename slow_tree<T>::const_iterator slow_tree<T>::end() const
 	{
-		return _children.data() + _children.size();
+		return _children.end();
 	}
 
 	template<typename T>

@@ -26,7 +26,8 @@ namespace idk
 		bool  SetActiveScene(RscHandle<Scene> s);
 
 		void BuildSceneGraph(span<const GameObject> objs);
-		SceneGraph* FetchSceneGraph(Handle<class GameObject>);
+		SceneGraph& FetchSceneGraph();
+		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
 
 		string_view GetSceneName();
 	private:

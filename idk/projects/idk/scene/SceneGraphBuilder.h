@@ -9,10 +9,11 @@ namespace idk
 	class SceneGraphBuilder
 	{
 	public:
-		using SceneGraph = slow_tree<Handle<class Gameobject>>;
+		using SceneGraph = slow_tree<Handle<class GameObject>>;
 
 		void BuildSceneGraph(span<const GameObject> objs);
-		SceneGraph* FetchSceneGraph(Handle<class GameObject>);
+		SceneGraph& FetchSceneGraph();
+		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
 
 	private:
 		hash_table<
@@ -20,7 +21,7 @@ namespace idk
 			SceneGraph*
 		> sg_lookup;
 
-		slow_tree<Handle<class GameObject>> scene_graphs;
+		SceneGraph scene_graphs;
 	};
 
 }

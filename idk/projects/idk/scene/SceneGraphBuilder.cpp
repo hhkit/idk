@@ -13,7 +13,7 @@ namespace idk
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
 			[](const auto& lhs, const auto& rhs)
 			{
-				return lhs->Transform()->Depth() < rhs->Transform()->Depth();
+				return lhs.Transform()->Depth() < rhs.Transform()->Depth();
 			}
 		);
 
@@ -36,7 +36,12 @@ namespace idk
 		// we now have the rebuilt scene graph
 	}
 
-	SceneGraphBuilder::SceneGraph* SceneGraphBuilder::FetchSceneGraph(Handle<class GameObject> findme)
+	SceneGraphBuilder::SceneGraph& SceneGraphBuilder::FetchSceneGraph()
+	{
+		return scene_graphs;
+	}
+
+	SceneGraphBuilder::SceneGraph* SceneGraphBuilder::FetchSceneGraphFor(Handle<class GameObject> findme)
 	{
 		auto itr = sg_lookup.find(findme);
 		if (itr == sg_lookup.end())

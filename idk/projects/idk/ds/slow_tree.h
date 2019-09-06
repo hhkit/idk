@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-
+#include <forward_list>
 namespace idk
 {
 	namespace policy
@@ -17,9 +17,10 @@ namespace idk
 	template<typename T>
 	class slow_tree
 	{
+		using intern = std::forward_list<slow_tree>;
 	public:
-		using iterator = slow_tree *;
-		using const_iterator = const slow_tree*;
+		using iterator = typename intern::iterator;
+		using const_iterator = typename intern::const_iterator;
 		T obj;
 
 		// constructors
@@ -45,7 +46,7 @@ namespace idk
 		bool pop_child(const T& removeme);
 		template<typename Pred> int pop_child(Pred&& predicate);
 	private:
-		vector<slow_tree> _children;
+		std::forward_list<slow_tree> _children;
 
 		template<typename Visitor> void visit_impl(policy::pre_order_t, Visitor&& visitor, int& depth, int& last_depth) const;
 	};
