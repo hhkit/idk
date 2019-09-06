@@ -108,7 +108,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>vulkan-1.lib;win32D.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib;</AdditionalDependencies>
+      <AdditionalDependencies>glslang-default-resource-limitsd.lib;OGLCompilerd.lib;osdependentd.lib;hlsld.lib;spirvd.lib;glslangd.lib;vulkan-1.lib;win32D.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
