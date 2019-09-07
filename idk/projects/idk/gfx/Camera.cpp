@@ -16,7 +16,7 @@ namespace idk
 	{
 		auto tfm = GetGameObject()->Transform();
 
-		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->position, target_point, up)));
+		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->position, target_point, up)).normalize());
 	}
 
 	vec3 Camera::currentPosition() const
@@ -40,24 +40,15 @@ namespace idk
 		auto retval = orthonormalize(mat);
 		retval[3] = mat[3];
 
-		vec3 upvector = tfm->Up();
+		/*vec3 upvector = tfm->Up();
 		vec3 rightvector = tfm->Right();
 		vec3 forwardvector = tfm->Forward();
 
-		//mat4 matrix;
+		mat4 findMat = retval.inverse();
 
-		//matrix[0] = vec4(rightvector,0);
-		//matrix[1] = vec4(upvector,0);
-		//matrix[2] = vec4(forwardvector, 0);
-		//matrix[3] = vec4(tfm->GlobalPosition(),1);
+		mat4 matrix = mat.transpose();*/
 
-		//auto retval1 = orthonormalize(matrix);
-
-		//auto retval1 = matrix.transpose();
-
-		//ProjectionMatrix();
-
-		return retval;
+		return retval.inverse();
 	}
 
 	mat4 Camera::ProjectionMatrix() const

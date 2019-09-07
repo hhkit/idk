@@ -13,6 +13,7 @@ namespace idk
 		// main camera (Public for now)
 		CameraControls main_camera;
 	private:
+		int _curr_cycle{ 0 };
 
 	};
 };

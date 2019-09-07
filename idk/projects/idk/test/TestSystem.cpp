@@ -19,7 +19,7 @@ namespace idk
 
 	void TestSystem::TestSpan(span<TestComponent> comps)
 	{
-
+		comps;
 		//auto& app_sys = Core::GetSystem<Application>();
 		////assert(currCamera);
 

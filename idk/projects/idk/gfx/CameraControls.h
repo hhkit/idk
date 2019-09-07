@@ -15,15 +15,14 @@ namespace idk {
 		Ray			ViewportPointToRay(const vec2& pos);
 
 		//ArcBall rotation
-		void		RotateArcBallCamera(const vec2& screenpos);
-		void		StopRotatingArcBallCamera();
-		void		StartRotatingArcballCamera();
+		void		RotateCamera(const vec2& screenpos);
+		void		StopRotatingCamera();
+		void		StartRotatingCamera();
 
 		vec3		currentTarget() const;
 		void		SetTarget(Handle<Transform>);
 		void        SetCurrentCamera(Handle<Camera>);
 		void		FocusOnObj(Handle<GameObject>);
-		void		RotateCamera();
 
 		vec3		convertMouseCoord(const vec2&);
 

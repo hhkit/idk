@@ -41,17 +41,11 @@ namespace idk {
 
 		Focus();
 	}
-	void CameraControls::RotateCamera()
-	{
-		//arcball camera implemntation
-
-
-	}
 
 	void CameraControls::LookAt()
 	{
 		auto tfm = current_camera->GetGameObject()->Transform();
-		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->GlobalPosition(), _target, tfm->Up())));
+		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->GlobalPosition(), _target, tfm->Up())).normalize());
 
 	}
 
@@ -66,9 +60,11 @@ namespace idk {
 		{
 			//check for facing direction (same)
 			//if (tfm->Forward().dot(selected_target->Forward()) > 0.f)
-			//tfm->position = vec3{ selected_target->GlobalPosition().x, selected_target->GlobalPosition().y, selected_target->GlobalPosition().z + 1.f };
+			tfm->position = vec3{ selected_target->GlobalPosition().x, selected_target->GlobalPosition().y, selected_target->GlobalPosition().z - 2.5f };
 
-			current_camera->LookAt(_target, tfm->Up());
+			vec3 up = tfm->Up();
+
+			current_camera->LookAt(_target);
 		}
 
 		_focusing = true;
@@ -77,6 +73,7 @@ namespace idk {
 	void CameraControls::SetTarget(Handle<Transform> pos)
 	{
 		selected_target = pos;
+		_target = selected_target->GlobalPosition();
 	}
 
 	void CameraControls::SetCurrentCamera(Handle<Camera> cCam)
@@ -84,7 +81,7 @@ namespace idk {
 		current_camera = cCam;
 	}
 
-	void CameraControls::RotateArcBallCamera(const vec2& screenpos)
+	void CameraControls::RotateCamera(const vec2& screenpos)
 	{
 		if (_rotating)
 		{
@@ -113,13 +110,13 @@ namespace idk {
 
 			auto tfm = current_camera->GetGameObject()->Transform();
 
-			tfm->rotation = (quat{ rotationAxis.normalize(), deg{rotAngle} } *tfm->rotation).normalize();
+			tfm->rotation = (quat{ rotationAxis, deg{rotAngle} } *tfm->rotation).normalize();
 
 			/*/
 
 
-			_alpha = (screenpos.x - _oldScreenPos.x);
-			_beta = (screenpos.y - _oldScreenPos.y);
+			_alpha = (screenpos.x - _oldScreenPos.x)*90.f;
+			_beta = (screenpos.y - _oldScreenPos.y)*90.f;
 
 			float angle_A = _alpha / 180.f * pi;
 			float angle_B = _beta / 180.f * pi;
@@ -137,19 +134,23 @@ namespace idk {
 
 			//auto tfm = current_camera->GetGameObject()->Transform();
 
-			//Ray result = ViewportPointToRay(screenpos);
+			Ray result = ViewportPointToRay(screenpos);
+
+			//_target += vec3{ vec2(result.origin.xy) * Core::GetDT().count() ,0.f };
+
+			//LookAt();
 
 			//_target = result.origin + result.direction;
 
 			//tfm->GlobalRotation(decompose_rotation_matrix(matrix));
 			auto tfm = current_camera->GetGameObject()->Transform();
 
-			//tfm->rotation = (quat{ vec3{0,1,0}, deg{-_beta}  } *tfm->rotation).normalize();
-			//tfm->rotation += (quat{ vec3{1,0,0}, deg{-_alpha}  } *tfm->rotation).normalize();
+			tfm->rotation = (quat{ vec3{0,1,0}, deg{_beta}  } *tfm->rotation).normalize();
+			tfm->rotation += (quat{ vec3{1,0,0}, deg{_alpha}  } *tfm->rotation).normalize();
 
-			vec3 uh{_alpha,_beta,1.f};
+			//vec3 uh{_alpha,_beta,1.f};
 
-			uh = uh.normalize();
+			//uh = uh.normalize();
 
 			_oldScreenPos = screenpos;
 
@@ -159,13 +160,14 @@ namespace idk {
 	}
 
 
-	void CameraControls::StopRotatingArcBallCamera()
+	void CameraControls::StopRotatingCamera()
 	{
 		_rotating = false;
 		_arcBallRotating = false;
+		//_oldScreenPos = { 0,0 };
 	}
 
-	void CameraControls::StartRotatingArcballCamera()
+	void CameraControls::StartRotatingCamera()
 	{
 		_rotating = true;
 	}

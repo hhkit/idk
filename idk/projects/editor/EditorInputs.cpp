@@ -50,13 +50,22 @@ namespace idk
 		if (app_sys.GetKey(Key::B)) tfm->rotation = (quat{ vec3{0,0,1}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
 
 
-		if (app_sys.GetKey(Key::P))
+		if (app_sys.GetKeyUp(Key::P))
 		{
-			auto first = GameState::GetGameState().GetObjectsOfType<GameObject>()[0].GetHandle();
+			auto first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
+
+			if (first->HasComponent<Camera>())
+			{
+				_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
+				first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
+			}
+			_curr_cycle = (_curr_cycle+1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
 			//	currCamera->SetTarget(first->GetComponent<Transform>()->GlobalPosition());
 			//	currCamera->Focus();
 			main_camera.SetTarget(first->GetComponent<Transform>());
 			//currCamera->LookAt(first->Transform()->GlobalPosition());
+			//main_camera.LookAt();
+
 			main_camera.Focus();
 		}
 
@@ -68,18 +77,18 @@ namespace idk
 			vec2 newPos = app_sys.GetMouseScreenPos();
 			//ivec2 newPos2 = app_sys.GetMousePixelPos();
 
-			vec2 anotherPos = vec2{ newPos.x,newPos.y };
+			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
 
-			main_camera.StartRotatingArcballCamera();
-			main_camera.RotateArcBallCamera(anotherPos);
+			main_camera.StartRotatingCamera();
+			main_camera.RotateCamera(anotherPos);
 
 			//currCamera->RotateArcBallCamera(newPos);
 			//tfm->rotation = (quat{ vec3{newPos.x,newPos.y,0}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
-			std::cout << newPos.x << "||" << newPos.y << std::endl;
+			//std::cout << newPos.x << "||" << newPos.y << std::endl;
 		}
 		else
 		{
-			main_camera.StopRotatingArcBallCamera();
+			main_camera.StopRotatingCamera();
 		}
 	}
 };
