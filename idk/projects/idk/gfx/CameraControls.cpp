@@ -145,8 +145,15 @@ namespace idk {
 			//tfm->GlobalRotation(decompose_rotation_matrix(matrix));
 			auto tfm = current_camera->GetGameObject()->Transform();
 
-			tfm->rotation = (quat{ vec3{0,1,0}, deg{_beta}  } *tfm->rotation).normalize();
-			tfm->rotation += (quat{ vec3{1,0,0}, deg{_alpha}  } *tfm->rotation).normalize();
+			//tfm->rotation = (quat{ vec3{0,1,0}, deg{_beta}  } *tfm->rotation).normalize();
+			//tfm->rotation += (quat{ vec3{1,0,0}, deg{_alpha}  } *tfm->rotation).normalize();
+
+			quat rotation;
+			rotation = (quat{ vec3{0,1,0}, deg{_beta} } *tfm->rotation).normalize();
+			rotation += (quat{ vec3{1,0,0}, deg{_alpha} } *tfm->rotation).normalize();
+
+
+			tfm->GlobalRotation(rotation);
 
 			//vec3 uh{_alpha,_beta,1.f};
 
@@ -167,9 +174,10 @@ namespace idk {
 		//_oldScreenPos = { 0,0 };
 	}
 
-	void CameraControls::StartRotatingCamera()
+	void CameraControls::StartRotatingCamera(const vec2& screenpos)
 	{
 		_rotating = true;
+		_oldScreenPos = screenpos;
 	}
 
 	CameraControls::CameraControls(Handle<Camera> cam)
