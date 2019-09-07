@@ -13,22 +13,66 @@
 namespace idk
 {
 
-    static void _set_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
+    namespace helpers
     {
-        if (prefab_comp.is<Transform>())
+        static void set_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
         {
-            auto& t_prefab = prefab_comp.get<Transform>();
-            auto& t_ori = *go->GetComponent<Transform>();
-            t_ori.position = t_prefab.position;
-            t_ori.rotation = t_prefab.rotation;
-            t_ori.scale = t_prefab.scale;
-            t_ori.parent = t_prefab.parent;
+            if (prefab_comp.is<Transform>())
+            {
+                auto& t_prefab = prefab_comp.get<Transform>();
+                auto& t_ori = *go->GetComponent<Transform>();
+                t_ori.position = t_prefab.position;
+                t_ori.rotation = t_prefab.rotation;
+                t_ori.scale = t_prefab.scale;
+                t_ori.parent = t_prefab.parent;
+            }
+            else if (prefab_comp.is<Name>())
+                go->GetComponent<Name>()->name = prefab_comp.get<Name>().name;
+            else
+                go->AddComponent(prefab_comp);
         }
-        else if (prefab_comp.is<Name>())
-            go->GetComponent<Name>()->name = prefab_comp.get<Name>().name;
-        else
-            go->AddComponent(prefab_comp);
+
+        static reflect::dynamic resolve_property_path(const reflect::dynamic& obj, const string& path)
+        {
+            size_t offset = 0;
+            reflect::dynamic curr;
+
+            while (offset < path.size())
+            {
+                auto end = path.find('/', offset);
+                if (end == string::npos)
+                    end = path.size();
+                string_view token(path.data() + offset, end - offset);
+
+                if (curr.valid() && curr.type.is_container())
+                {
+                    auto cont = curr.to_container();
+                    if (cont.value_type.is_template<std::pair>())
+                    {
+                        auto key_type = cont.value_type.create().unpack()[0].type;
+                        curr.~dynamic();
+                        new (&curr) reflect::dynamic(cont[parse_text(string(token), key_type)]);
+                    }
+                    else
+                    {
+                        curr.~dynamic();
+                        new (&curr) reflect::dynamic(cont[parse_text<size_t>(string(token))]);
+                    }
+                }
+                else
+                {
+                    curr.~dynamic();
+                    new (&curr) reflect::dynamic(obj.get_property(token).value);
+                }
+
+                offset = end;
+                ++offset;
+            }
+
+            return curr;
+        }
     }
+
 
     Handle<GameObject> PrefabUtility::Instantiate(RscHandle<Prefab> prefab, Scene& scene)
     {
@@ -38,7 +82,7 @@ namespace idk
         auto handle = scene.CreateGameObject();
         auto iter = prefab->data.begin();
         for (const auto& d : iter->components)
-            _set_component(handle, d);
+            helpers::set_component(handle, d);
 
         vector<Handle<GameObject>> game_objects{ handle };
         for (++iter; iter != prefab->data.end(); ++iter)
@@ -47,7 +91,7 @@ namespace idk
             game_objects.push_back(child_handle);
 
             for (const auto& d : iter->components)
-                _set_component(child_handle, d);
+                helpers::set_component(child_handle, d);
             child_handle->Transform()->parent = game_objects[iter->parent_index];
         }
 
@@ -120,6 +164,52 @@ namespace idk
         return go;
     }
 
+    void PrefabUtility::PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab)
+    {
+        for (uint8_t scene_index = 0; scene_index < MaxScene; ++scene_index)
+        {
+            Scene scene{ scene_index };
+            if (!GameState::GetGameState().ValidateScene(scene))
+                continue;
+
+            for (auto& go : scene)
+            {
+                auto prefab_inst = go.GetComponent<PrefabInstance>();
+                if (!prefab_inst || prefab_inst->prefab != prefab)
+                    continue;
+
+                vector<reflect::dynamic> ori_ov_vals;
+                for (auto& ov : prefab_inst->overrides)
+                {
+                    auto comp_handle = prefab_inst->objects[ov.object_index]->GetComponent(ov.component_name);
+                    if (!comp_handle)
+                        ori_ov_vals.emplace_back();
+                    else
+                    {
+                        auto dyn = helpers::resolve_property_path(*comp_handle, ov.property_path);
+                        ori_ov_vals.emplace_back(dyn.type.create() = dyn);
+                    }
+                }
+
+                for (size_t i = 0; i < prefab_inst->objects.size(); ++i)
+                {
+                    auto& obj = prefab_inst->objects[i];
+                    for (const auto& c : prefab_inst->prefab->data[i].components)
+                        helpers::set_component(obj, c);
+                }
+
+                for (size_t i = 0; i < ori_ov_vals.size(); ++i)
+                {
+                    if (!ori_ov_vals[i].valid())
+                        continue;
+                    auto& ov = prefab_inst->overrides[i];
+                    auto comp_handle = prefab_inst->objects[ov.object_index]->GetComponent(ov.component_name);
+                    helpers::resolve_property_path(*comp_handle, ov.property_path) = ori_ov_vals[i];
+                }
+            }
+        }
+    }
+
     void PrefabUtility::RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path)
     {
         auto instance_root = GetPrefabInstanceRoot(target);
@@ -138,46 +228,6 @@ namespace idk
         prefab_inst->overrides.push_back(override);
     }
 
-    static reflect::dynamic _resolve_property_path(const reflect::dynamic& obj, const string& path)
-    {
-        size_t offset = 0;
-        reflect::dynamic curr;
-
-        while (offset < path.size())
-        {
-            auto end = path.find('/', offset);
-            if (end == string::npos)
-                end = path.size();
-            string_view token(path.data() + offset, end - offset);
-
-            if (curr.valid() && curr.type.is_container())
-            {
-                auto cont = curr.to_container();
-                if (cont.value_type.is_template<std::pair>())
-                {
-                    auto key_type = cont.value_type.create().unpack()[0].type;
-                    curr.~dynamic();
-                    new (&curr) reflect::dynamic(cont[parse_text(string(token), key_type)]);
-                }
-                else
-                {
-                    curr.~dynamic();
-                    new (&curr) reflect::dynamic(cont[parse_text<size_t>(string(token))]);
-                }
-            }
-            else
-            {
-                curr.~dynamic();
-                new (&curr) reflect::dynamic(obj.get_property(token).value);
-            }
-
-            offset = end;
-            ++offset;
-        }
-
-        return curr;
-    }
-
     static void _revert_property_override(PrefabInstance& prefab_inst, const PropertyOverride & override)
     {
         const Prefab& prefab = *prefab_inst.prefab;
@@ -186,13 +236,12 @@ namespace idk
         auto comp_handle = target->GetComponent(override.component_name);
         if (!comp_handle)
             return;
-        auto comp = *comp_handle;
 
-        auto prop = _resolve_property_path(comp, override.property_path);
+        auto prop = helpers::resolve_property_path(*comp_handle, override.property_path);
         if (!prop.valid())
             return;
 
-        auto prop_prefab = _resolve_property_path(
+        auto prop_prefab = helpers::resolve_property_path(
             prefab.data[override.object_index].FindComponent(override.component_name), override.property_path);
         if (!prop_prefab.valid())
             return;
