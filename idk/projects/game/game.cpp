@@ -74,7 +74,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
 	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0.0, -2.5f };
-	camHandle->LookAt(vec3(0, 0, 0),camera->Transform()->Up());
+	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
 	Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;

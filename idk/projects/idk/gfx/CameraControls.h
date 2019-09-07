@@ -17,7 +17,7 @@ namespace idk {
 		//ArcBall rotation
 		void		RotateCamera(const vec2& screenpos);
 		void		StopRotatingCamera();
-		void		StartRotatingCamera();
+		void		StartRotatingCamera(const vec2& screenpos);
 
 		vec3		currentTarget() const;
 		void		SetTarget(Handle<Transform>);
@@ -32,12 +32,13 @@ namespace idk {
 		
 		Handle<Transform> selected_target{};
 		Handle<Camera>    current_camera{};
+
+		bool _rotating{ false };
 	private:
 
 		vec3 _target{ 0.0f,0.0f,0.0f };
 		bool _focusing{ false };
-		bool _arcBallRotating{ false };
-		bool _rotating{ false };
+		bool _arcBallRotating{ false };	
 		vec2 _oldScreenPos{};
 
 		real _alpha{};

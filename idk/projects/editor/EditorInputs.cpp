@@ -77,9 +77,10 @@ namespace idk
 			vec2 newPos = app_sys.GetMouseScreenPos();
 			//ivec2 newPos2 = app_sys.GetMousePixelPos();
 
-			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
+			vec2 anotherPos = vec2{ newPos.x,newPos.y };
 
-			main_camera.StartRotatingCamera();
+			if(!main_camera._rotating)
+				main_camera.StartRotatingCamera(anotherPos);
 			main_camera.RotateCamera(anotherPos);
 
 			//currCamera->RotateArcBallCamera(newPos);
