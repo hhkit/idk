@@ -7,6 +7,7 @@
 #include <core/GameObject.h>
 #include <scene/Scene.h>
 #include <common/Transform.h>
+#include <common/Name.h>
 
 namespace idk
 {
@@ -442,6 +443,10 @@ namespace idk
 					reflect::dynamic obj{ *handle->GetComponent<Transform>() };
 					parse_yaml(*iter, obj);
 				}
+                else if (type.is<Name>())
+                {
+                    handle->GetComponent<Name>()->name = iter->at("name").as_scalar();
+                }
 				else
 				{
 					reflect::dynamic obj{ *handle->AddComponent(type) };

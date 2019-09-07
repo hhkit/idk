@@ -6,11 +6,29 @@
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <common/Name.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 
 namespace idk
 {
+
+    static void _set_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
+    {
+        if (prefab_comp.is<Transform>())
+        {
+            auto& t_prefab = prefab_comp.get<Transform>();
+            auto& t_ori = *go->GetComponent<Transform>();
+            t_ori.position = t_prefab.position;
+            t_ori.rotation = t_prefab.rotation;
+            t_ori.scale = t_prefab.scale;
+            t_ori.parent = t_prefab.parent;
+        }
+        else if (prefab_comp.is<Name>())
+            go->GetComponent<Name>()->name = prefab_comp.get<Name>().name;
+        else
+            go->AddComponent(prefab_comp);
+    }
 
     Handle<GameObject> PrefabUtility::Instantiate(RscHandle<Prefab> prefab, Scene& scene)
     {
@@ -20,7 +38,7 @@ namespace idk
         auto handle = scene.CreateGameObject();
         auto iter = prefab->data.begin();
         for (const auto& d : iter->components)
-            handle->AddComponent(d);
+            _set_component(handle, d);
 
         vector<Handle<GameObject>> game_objects{ handle };
         for (++iter; iter != prefab->data.end(); ++iter)
@@ -29,7 +47,7 @@ namespace idk
             game_objects.push_back(child_handle);
 
             for (const auto& d : iter->components)
-                child_handle->AddComponent(d);
+                _set_component(child_handle, d);
             child_handle->Transform()->parent = game_objects[iter->parent_index];
         }
 
