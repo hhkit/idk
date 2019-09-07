@@ -114,6 +114,16 @@ TEST(Prefab, TestPrefabRevert)
     auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
     auto go = PrefabUtility::Instantiate(prefab, *scene);
 
-    (*go->GetComponents()[2]).get_property("position").value = vec3(69.0f, 69.0f, 69.0f);
-    PrefabUtility::RecordPrefabInstanceChange(go, go, go->GetComponents()[2], "position");
+    (*go->GetComponents()[0]).get_property("position").value = vec3(69.0f, 69.0f, 69.0f);
+    PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[0], "position");
+    // add some completely bullshit property overrides
+    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "Transform", "scrimbux" });
+    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "MissingNo", "scrimbux" });
+    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 1, "Transform", "scrimbux" });
+
+    auto t0 = go->GetComponent<Transform>();
+    EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f));
+
+    PrefabUtility::RevertPrefabInstance(go);
+    EXPECT_EQ(t0->position, vec3(1.0f, 2.0f, 3.0f));
 }

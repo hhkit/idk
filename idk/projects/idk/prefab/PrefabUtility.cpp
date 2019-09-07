@@ -120,10 +120,10 @@ namespace idk
         return go;
     }
 
-    void PrefabUtility::RecordPrefabInstanceChange(
-        Handle<GameObject> instance_root, Handle<GameObject> target, GenericHandle component, string_view property_path)
+    void PrefabUtility::RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path)
     {
-        assert(instance_root->HasComponent<PrefabInstance>());
+        auto instance_root = GetPrefabInstanceRoot(target);
+        assert(instance_root);
         auto prefab_inst = instance_root->GetComponent<PrefabInstance>();
 
         auto iter = std::find(prefab_inst->objects.begin(), prefab_inst->objects.end(), target);
@@ -143,12 +143,14 @@ namespace idk
         size_t offset = 0;
         reflect::dynamic curr;
 
-        while (true)
+        while (offset < path.size())
         {
             auto end = path.find('/', offset);
+            if (end == string::npos)
+                end = path.size();
             string_view token(path.data() + offset, end - offset);
 
-            if (curr.type.is_container())
+            if (curr.valid() && curr.type.is_container())
             {
                 auto cont = curr.to_container();
                 if (cont.value_type.is_template<std::pair>())
@@ -170,27 +172,45 @@ namespace idk
             }
 
             offset = end;
-            if (offset == string::npos)
-                break;
-            else
-                ++offset;
+            ++offset;
         }
 
         return curr;
     }
 
-    static void _revert_property_override(PrefabInstance& prefab_inst, const PropertyOverride& override)
+    static void _revert_property_override(PrefabInstance& prefab_inst, const PropertyOverride & override)
     {
         const Prefab& prefab = *prefab_inst.prefab;
         Handle<GameObject> target = prefab_inst.objects[override.object_index];
-        auto comp = *target->GetComponent(override.component_name);
-        auto prop = _resolve_property_path(comp, override.property_path);
 
-        prop = _resolve_property_path(prefab.data[override.object_index].FindComponent(override.component_name), override.property_path);
+        auto comp_handle = target->GetComponent(override.component_name);
+        if (!comp_handle)
+            return;
+        auto comp = *comp_handle;
+
+        auto prop = _resolve_property_path(comp, override.property_path);
+        if (!prop.valid())
+            return;
+
+        auto prop_prefab = _resolve_property_path(
+            prefab.data[override.object_index].FindComponent(override.component_name), override.property_path);
+        if (!prop_prefab.valid())
+            return;
+
+        prop = prop_prefab;
+    }
+
+    void PrefabUtility::RevertPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override)
+    {
+        assert(instance_root->HasComponent<PrefabInstance>());
+        auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
+        _revert_property_override(prefab_inst, override);
 
         for (auto iter = prefab_inst.overrides.begin(); iter != prefab_inst.overrides.end(); ++iter)
         {
-            if (&*iter == &override)
+            if (iter->object_index == override.object_index &&
+                iter->component_name == override.component_name &&
+                iter->property_path == override.property_path)
             {
                 prefab_inst.overrides.erase(iter);
                 return;
@@ -198,21 +218,14 @@ namespace idk
         }
     }
 
-    void PrefabUtility::RevertPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override)
-    {
-        assert(instance_root->HasComponent<PrefabInstance>());
-        _revert_property_override(*instance_root->GetComponent<PrefabInstance>(), override);
-    }
-
     void PrefabUtility::RevertPrefabInstance(Handle<GameObject> instance_root)
     {
         assert(instance_root->HasComponent<PrefabInstance>());
         auto prefab_inst = *instance_root->GetComponent<PrefabInstance>();
-        
+
         for (auto& override : prefab_inst.overrides)
-        {
             _revert_property_override(prefab_inst, override);
-        }
+        prefab_inst.overrides.clear();
     }
 
 }

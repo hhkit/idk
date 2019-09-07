@@ -19,8 +19,7 @@ namespace idk
         // if the given game object is not part of a prefab instance, returns a null handle.
         static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);
 
-        static void RecordPrefabInstanceChange(
-            Handle<GameObject> instance_root, Handle<GameObject> target, GenericHandle component, string_view property_path);
+        static void RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path);
 
         static void RevertPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override);
 
