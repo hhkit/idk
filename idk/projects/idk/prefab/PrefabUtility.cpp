@@ -185,85 +185,75 @@ namespace idk
 
     void PrefabUtility::PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab)
     {
-        for (uint8_t scene_index = 0; scene_index < MaxScene; ++scene_index)
+        for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
         {
-            Scene scene{ scene_index };
-            if (!GameState::GetGameState().ValidateScene(scene))
+            if (prefab_inst.prefab != prefab)
                 continue;
 
-            for (auto& go : scene)
+            // store current value of overrides
+            vector<reflect::dynamic> curr_ov_vals;
+            for (auto& ov : prefab_inst.overrides)
             {
-                auto prefab_inst = go.GetComponent<PrefabInstance>();
-                if (!prefab_inst || prefab_inst->prefab != prefab)
-                    continue;
-
-                // store current value of overrides
-                vector<reflect::dynamic> curr_ov_vals;
-                for (auto& ov : prefab_inst->overrides)
+                auto comp_handle = prefab_inst.objects[ov.object_index]->GetComponent(ov.component_name);
+                if (!comp_handle)
+                    curr_ov_vals.emplace_back();
+                else
                 {
-                    auto comp_handle = prefab_inst->objects[ov.object_index]->GetComponent(ov.component_name);
+                    auto dyn = helpers::resolve_property_path(*comp_handle, ov.property_path);
+                    curr_ov_vals.emplace_back(dyn.type.create() = dyn);
+                }
+            }
+            vector<reflect::dynamic> default_ov_vals;
+            for (int i = 0; i < prefab_inst.objects.size(); ++i)
+            {
+                for (auto& ov : helpers::default_overrides)
+                {
+                    auto comp_handle = prefab_inst.objects[i]->GetComponent(ov.component_name);
                     if (!comp_handle)
-                        curr_ov_vals.emplace_back();
+                        default_ov_vals.emplace_back();
                     else
                     {
                         auto dyn = helpers::resolve_property_path(*comp_handle, ov.property_path);
-                        curr_ov_vals.emplace_back(dyn.type.create() = dyn);
-                    }
-                }
-                vector<reflect::dynamic> default_ov_vals;
-                for (int i = 0; i < prefab_inst->objects.size(); ++i)
-                {
-                    for (auto& ov : helpers::default_overrides)
-                    {
-                        auto comp_handle = prefab_inst->objects[i]->GetComponent(ov.component_name);
-                        if (!comp_handle)
-                            default_ov_vals.emplace_back();
-                        else
-                        {
-                            auto dyn = helpers::resolve_property_path(*comp_handle, ov.property_path);
-                            default_ov_vals.emplace_back(dyn.type.create() = dyn);
-                        }
-                    }
-                }
-
-                // replace prefab objects with instance objects
-                for (size_t i = 0; i < prefab_inst->objects.size(); ++i)
-                {
-                    auto& obj = prefab_inst->objects[i];
-                    for (const auto& c : prefab_inst->prefab->data[i].components)
-                        helpers::set_component(obj, c);
-                }
-
-                // replace override values
-                for (size_t i = 0; i < curr_ov_vals.size(); ++i)
-                {
-                    if (!curr_ov_vals[i].valid())
-                        continue;
-                    auto& ov = prefab_inst->overrides[i];
-                    auto obj = prefab_inst->objects[ov.object_index];
-                    if (!obj)
-                        continue;
-                    auto comp_handle = obj->GetComponent(ov.component_name);
-                    helpers::resolve_property_path(*comp_handle, ov.property_path) = curr_ov_vals[i];
-                }
-                for (int i = 0; i < prefab_inst->objects.size(); ++i)
-                {
-                    for (int j = 0; j < helpers::num_default_overrides; ++j)
-                    {
-                        int ov_index = helpers::num_default_overrides * i + j;
-                        if (!default_ov_vals[ov_index].valid())
-                            continue;
-                        auto& ov = helpers::default_overrides[j];
-                        auto obj = prefab_inst->objects[i];
-                        if (!obj)
-                            continue;
-                        auto comp_handle = obj->GetComponent(ov.component_name);
-                        helpers::resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[ov_index];
+                        default_ov_vals.emplace_back(dyn.type.create() = dyn);
                     }
                 }
             }
 
-            *(reinterpret_cast<uint8_t*>(&scene) + sizeof(Resource<Scene>)) = 7;//hack
+            // replace prefab objects with instance objects
+            for (size_t i = 0; i < prefab_inst.objects.size(); ++i)
+            {
+                auto& obj = prefab_inst.objects[i];
+                for (const auto& c : prefab_inst.prefab->data[i].components)
+                    helpers::set_component(obj, c);
+            }
+
+            // replace override values
+            for (size_t i = 0; i < curr_ov_vals.size(); ++i)
+            {
+                if (!curr_ov_vals[i].valid())
+                    continue;
+                auto& ov = prefab_inst.overrides[i];
+                auto obj = prefab_inst.objects[ov.object_index];
+                if (!obj)
+                    continue;
+                auto comp_handle = obj->GetComponent(ov.component_name);
+                helpers::resolve_property_path(*comp_handle, ov.property_path) = curr_ov_vals[i];
+            }
+            for (int i = 0; i < prefab_inst.objects.size(); ++i)
+            {
+                for (int j = 0; j < helpers::num_default_overrides; ++j)
+                {
+                    int ov_index = helpers::num_default_overrides * i + j;
+                    if (!default_ov_vals[ov_index].valid())
+                        continue;
+                    auto& ov = helpers::default_overrides[j];
+                    auto obj = prefab_inst.objects[i];
+                    if (!obj)
+                        continue;
+                    auto comp_handle = obj->GetComponent(ov.component_name);
+                    helpers::resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[ov_index];
+                }
+            }
         }
     }
 
