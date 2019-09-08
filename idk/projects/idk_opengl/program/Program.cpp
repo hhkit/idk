@@ -17,25 +17,31 @@ namespace idk::ogl
 			char infoLog[512];
 			glGetShaderiv(_shader_id, GL_COMPILE_STATUS, &success);
 
+			constexpr auto get_shader = [](GLenum shader_t) ->std::string_view
+			{
+				switch (shader_t)
+				{
+				case GL_VERTEX_SHADER:          return "Vertex Shader";
+				case GL_TESS_CONTROL_SHADER:    return "Tesselation Control Shader";
+				case GL_TESS_EVALUATION_SHADER: return "Tesselation Evaluation Shader";
+				case GL_GEOMETRY_SHADER:        return "Geometry Shader";
+				case GL_FRAGMENT_SHADER:        return "Fragment Shader";
+				case GL_COMPUTE_SHADER:         return "Compute Shader";
+				default:                        return "Non-Existent Shader";
+				}
+			};
+
 			if (!success)
 			{
 				glGetShaderInfoLog(_shader_id, 512, NULL, infoLog);
-				auto get_shader = [](GLenum shader_t) ->std::string_view
-				{
-					switch (shader_t)
-					{
-					case GL_VERTEX_SHADER:          return "Vertex Shader";
-					case GL_TESS_CONTROL_SHADER:    return "Tesselation Control Shader";
-					case GL_TESS_EVALUATION_SHADER: return "Tesselation Evaluation Shader";
-					case GL_GEOMETRY_SHADER:        return "Geometry Shader";
-					case GL_FRAGMENT_SHADER:        return "Fragment Shader";
-					case GL_COMPUTE_SHADER:         return "Compute Shader";
-					default:                        return "Non-Existent Shader";
-					}
-				};
 
 				std::cout << get_shader(shader_type) << " compilation failed!\n";
 				std::cout << infoLog << "\n";
+			}
+
+			else
+			{
+				std::cout << get_shader(shader_type) << " compilation succeeded!\n";
 			}
 		}
 		_shader_flags |= [](GLenum shader_t)
@@ -103,16 +109,34 @@ namespace idk::ogl
 		for (auto& elem : _shaders)
 			glAttachShader(_program_id, elem._shader_id);
 		glLinkProgram(_program_id);
-		GLint success{};
-		glGetProgramiv(_program_id, GL_LINK_STATUS, &success);
-		if (!success)
 		{
+			GLint success = 0;
 			char infoLog[512];
+			glGetProgramiv(_program_id, GL_LINK_STATUS, &success);
 
-			glGetProgramInfoLog(_program_id, 512, NULL, infoLog);
-			std::cout << "Program link failed!\n";
-			std::cout << infoLog << "\n";
+			if (!success)
+			{
+				glGetProgramInfoLog(_program_id, 512, NULL, infoLog);
+
+				std::cout << "Program link failed!\n";
+				std::cout << infoLog << "\n";
+			}
+			else
+			{
+				std::cout << "Program link succeeded!\n";
+
+				GLint uniform_count;
+				glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
+				char buf[256]{};
+				for (GLint i = 0; i < uniform_count; ++i)
+				{
+					glGetActiveUniformName(_program_id, i, 256, nullptr, buf);
+					std::cout << "  uniform detected: " << buf << "\n";
+				}
+			}
 		}
+
+
 		for (auto& elem : _shaders)
 			glDetachShader(_program_id, elem._shader_id);
 		_shaders.clear();

@@ -101,6 +101,9 @@
     <Filter Include="gfx\light">
       <UniqueIdentifier>{b10c8175-8919-495a-97ef-274c5cdf9337}</UniqueIdentifier>
     </Filter>
+    <Filter Include="anim\res/factories">
+      <UniqueIdentifier>{18746da9-2d25-47bc-a326-d1fab351109e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -141,9 +144,6 @@
     </ClInclude>
     <ClInclude Include="idk.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="common\Parent.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="core\Handle.h">
       <Filter>core\handles</Filter>
     </ClInclude>
@@ -486,9 +486,6 @@
     <ClInclude Include="gfx\ShaderProgram.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="anim\Skeleton.h">
-      <Filter>anim</Filter>
-    </ClInclude>
     <ClInclude Include="anim\SkinnedMeshRenderer.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -507,14 +504,32 @@
     <ClInclude Include="serialize\yaml.h">
       <Filter>serialize</Filter>
     </ClInclude>
+    <ClInclude Include="ds\slow_tree.h">
+      <Filter>ds</Filter>
+    </ClInclude>
     <ClInclude Include="anim\SkeletonFactory.h">
-      <Filter>anim</Filter>
+      <Filter>anim\res/factories</Filter>
     </ClInclude>
     <ClInclude Include="anim\Animation.h">
-      <Filter>anim</Filter>
+      <Filter>anim\res/factories</Filter>
     </ClInclude>
     <ClInclude Include="anim\AnimationFactory.h">
+      <Filter>anim\res/factories</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Skeleton.h">
+      <Filter>anim\res/factories</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationController.h">
       <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\slow_tree.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CameraControls.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneGraphBuilder.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -676,7 +691,6 @@
     <ClCompile Include="gfx\Material.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
     <ClCompile Include="common\Name.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -689,19 +703,37 @@
     <ClCompile Include="serialize\yaml_load.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="anim\SkeletonFactory.cpp">
-      <Filter>anim</Filter>
-    </ClCompile>
-    <ClCompile Include="anim\Skeleton.cpp">
-      <Filter>anim</Filter>
-    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="anim\Animation.cpp">
-      <Filter>anim</Filter>
+      <Filter>anim\res/factories</Filter>
     </ClCompile>
     <ClCompile Include="anim\AnimationFactory.cpp">
+      <Filter>anim\res/factories</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Skeleton.cpp">
+      <Filter>anim\res/factories</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\SkeletonFactory.cpp">
+      <Filter>anim\res/factories</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationController.cpp">
       <Filter>anim</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="gfx\CameraControls.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabData.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneGraphBuilder.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -860,6 +892,9 @@
     </None>
     <None Include="res\Resource.inl">
       <Filter>res</Filter>
+    </None>
+    <None Include="ds\slow_tree.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

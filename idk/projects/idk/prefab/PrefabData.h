@@ -9,6 +9,8 @@ namespace idk
     struct PrefabData
     {
         vector<reflect::dynamic> components;
-        vector<PrefabData> children;
+        int parent_index = -1;
+
+        reflect::dynamic FindComponent(string_view name, int index = 0) const;
     };
 }

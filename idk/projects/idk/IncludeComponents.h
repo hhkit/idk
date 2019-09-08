@@ -1,7 +1,6 @@
 #pragma once
 #include <core/GameObject.h>
 #include <common/Transform.h>
-#include <common/Parent.h>
 #include <common/Name.h>
 
 #include <phys/RigidBody.h>
@@ -12,6 +11,8 @@
 
 #include <audio/AudioSource.h>
 #include <audio/AudioListener.h>
+
+#include <anim/AnimationController.h>
 
 #include <prefab/PrefabInstance.h>
 

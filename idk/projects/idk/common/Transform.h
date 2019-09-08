@@ -13,6 +13,8 @@ namespace idk
 		quat rotation;
 		vec3 position;
 
+		Handle<class GameObject> parent;
+
 		vec3 Forward() const;
 		vec3 Right() const;
 		vec3 Up() const;
@@ -25,6 +27,8 @@ namespace idk
 		vec3 GlobalPosition() const;
 		quat GlobalRotation() const;
 		vec3 GlobalScale() const;
+
+		unsigned Depth() const;
 
 		void GlobalPosition(vec3);
 		void GlobalRotation(quat);

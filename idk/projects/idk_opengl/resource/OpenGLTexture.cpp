@@ -37,8 +37,8 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_2D, _id);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 		UpdateUV(meta.uv_mode);
+		Buffer(nullptr, _size, meta.internal_format);
 	}
 
 	OpenGLTexture::OpenGLTexture(OpenGLTexture&& rhs)
@@ -72,9 +72,17 @@ namespace idk::ogl
 	void OpenGLTexture::Buffer(void* data, ivec2 size, ColorFormat format)
 	{
 		_size = size;
-		glTexImage2D(_id, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, detail::ToGLColor(format), GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
+		// TODO: fix internal format
+		GL_CHECK();
 	}
 
+
+	void OpenGLTexture::Size(ivec2 new_size)
+	{
+		Texture::Size(new_size);
+		Buffer(nullptr, _size, meta.internal_format);
+	}
 
 	void* OpenGLTexture::ID() const
 	{
@@ -89,5 +97,6 @@ namespace idk::ogl
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, detail::GLUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, detail::GLUVMode(uv_mode));
+		GL_CHECK();
 	}
 }

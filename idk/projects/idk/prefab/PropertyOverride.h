@@ -6,7 +6,8 @@ namespace idk
 {
     struct PropertyOverride
     {
-        string path;
-        string value;
+        int object_index;
+        string component_name;
+        string property_path;
     };
 }

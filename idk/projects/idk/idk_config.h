@@ -11,7 +11,6 @@ namespace idk
 	using Components = std::tuple<
 		class Transform
 		, class Name
-		, class Parent
 		/// EDITOR
 		,   class PrefabInstance
 
@@ -27,7 +26,7 @@ namespace idk
 		//, class Light
 
 		/// ANIMATION
-		//,	class Animator
+		,	class AnimationController
 
 		/// SCRIPTING
 		//,	class MonoBehavior

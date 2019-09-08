@@ -58,7 +58,7 @@ namespace idk::reflect
 		// gets the hash of the type ( check against typehash<T>() )
 		size_t hash() const;
 
-		// should always be true for now (unless through invalid dynamic) (since get_type has assert)
+		// whether the type is valid
 		bool valid() const;
 
 		// number of properties
@@ -171,8 +171,8 @@ namespace idk::reflect
 	// represents a reflected type property.
 	struct property
 	{
-		const string_view name;
-		const dynamic value;
+		string_view name;
+		dynamic value;
 	};
 
 
@@ -203,6 +203,9 @@ namespace idk::reflect
 
 		// clears the container. throws if container doesn't support clear.
 		void clear();
+
+        dynamic operator[](size_t index);
+        dynamic operator[](const dynamic& key);
 
 	private:
 		struct base;

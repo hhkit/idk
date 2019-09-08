@@ -696,7 +696,7 @@ namespace idk {
 		// The conditions for reuse of a fs_file is that 
 		if (check_free_index != mount._path_tree[depth]._files.end())
 		{
-			auto& file_handle = Core::GetSystem<FileSystem>()._file_handles[check_free_index->_handle_index];
+			auto& file_handle = _file_handles[check_free_index->_handle_index];
 			file_handle.Reset();
 			file_handle._internal_id = check_free_index->_tree_index;
 
@@ -710,7 +710,7 @@ namespace idk {
 			file._tree_index._mount_id = mount._mount_index;
 			file._tree_index._depth = depth;
 			file._tree_index._index = static_cast<int8_t>(mount._path_tree[depth]._files.size() - 1);
-			file._handle_index = Core::GetSystem<FileSystem>().addFileHandle(file._tree_index);
+			file._handle_index = addFileHandle(file._tree_index);
 
 			return file._tree_index;
 		}

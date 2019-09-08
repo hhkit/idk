@@ -96,6 +96,52 @@ namespace idk
 	}
 
 	template<typename T>
+	template<typename SortFn>
+	unsigned ObjectPool<T>::Defrag(SortFn&& functor)
+	{
+#ifdef _DEBUG
+		unsigned swapcount{};
+#endif
+		const auto beg = _pool.begin();
+		const auto end = _pool.end();
+		auto itr = beg;
+
+		while (itr != end)
+		{
+			++itr;
+			auto jtr = itr;
+
+			if (jtr == end)
+				break;
+
+			while (jtr != beg && !functor(jtr[-1], jtr[0]))
+			{
+#ifdef _DEBUG
+				++swapcount;
+#endif
+				// swap jtr[-1] and jtr[0]
+				auto& rhs = jtr[0];
+				auto& lhs = jtr[-1];
+				auto rhandle = rhs.handle;
+				auto lhandle = lhs.handle;
+				auto& rslot = _scenes[rhandle.scene].slots[rhandle.index];
+				auto& lslot = _scenes[lhandle.scene].slots[lhandle.index];
+
+				std::swap(rslot, lslot);
+				std::swap(rhs, lhs);
+
+				--jtr;
+			}
+		}
+
+#ifdef _DEBUG
+		return swapcount;
+#else
+		return 0;
+#endif
+	}
+
+	template<typename T>
 	inline bool ObjectPool<T>::Destroy(const Handle& handle)
 	{
 		if (Validate(handle) == false)

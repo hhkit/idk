@@ -44,6 +44,7 @@ namespace idk
 		ige_windows.push_back(std::make_unique<IGE_MainWindow>());
 		ige_windows.push_back(std::make_unique<IGE_SceneView>());
 		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
+		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
 
 		for (auto& i : ige_windows) {
 			i->Initialize();
@@ -75,5 +76,10 @@ namespace idk
 	{
 		// call imgui draw,
 		_interface->ImGuiFrameRender();
+	}
+	CameraControls& IDE::currentCamera()
+	{
+		// TODO: insert return statement here
+		return _interface->Inputs()->main_camera;
 	}
 }

@@ -65,4 +65,13 @@ namespace idk::reflect
 	{
 		return _ptr->clear();
 	}
+
+    dynamic uni_container::operator[](size_t index)
+    {
+        return _ptr->subscript(index);
+    }
+    dynamic uni_container::operator[](const dynamic& key)
+    {
+        return _ptr->subscript(key);
+    }
 }

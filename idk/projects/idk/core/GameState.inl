@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include "GameState.h"
 namespace idk
 {
 	template<typename T>
@@ -12,6 +13,11 @@ namespace idk
 		}
 		else
 			return detail::ObjectPools::GetPool<std::decay_t<T>>(_objects).GetSpan();
+	}
+	template<typename T, typename Pd>
+	inline unsigned GameState::SortObjectsOfType(Pd&& predicate)
+	{
+		return detail::ObjectPools::GetPool<T>(_objects).Defrag(std::forward<Pd>(predicate));
 	}
 	template<typename T>
 	inline T* GameState::GetObject(const Handle<T>& handle)

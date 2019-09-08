@@ -4,7 +4,7 @@
 namespace idk::fbx_loader_detail
 {
 
-	mat4 Helper::initMat4(const aiMatrix4x4& mat)
+	mat4 initMat4(const aiMatrix4x4& mat)
 	{
 		return mat4(
 			mat.a1, mat.b1, mat.c1, mat.d1,
@@ -13,7 +13,7 @@ namespace idk::fbx_loader_detail
 			mat.a4, mat.b4, mat.c4, mat.d4
 		);
 	}
-	mat4 Helper::initMat4(const aiMatrix3x3& mat)
+	mat4 initMat4(const aiMatrix3x3& mat)
 	{
 		return mat4(
 			mat.a1, mat.b1, mat.c1, 0.0f,
@@ -22,30 +22,17 @@ namespace idk::fbx_loader_detail
 			0.0f,	0.0f,	0.0f,	1.0f
 		);
 	}
-	vec3 Helper::initVec3(const aiVector3D& vec)
+	vec3 initVec3(const aiVector3D& vec)
 	{
 		return vec3(vec.x, vec.y, vec.z);
 	}
 
-	inline quat Helper::initQuat(const aiQuaternion& vec)
+	quat initQuat(const aiQuaternion& vec)
 	{
 		return quat(vec.w, vec.x, vec.y, vec.z);
 	}
 
-
-	void Helper::initAssimpNodes(const aiNode* root_node, AssimpNode& node)
-	{
-		node._name = root_node->mName.data;
-		node._transform = initMat4(root_node->mTransformation);
-
-		for (size_t i = 0; i < root_node->mNumChildren; ++i)
-		{
-			node._children.emplace_back();
-			initAssimpNodeRecurse(root_node->mChildren[i], node._children.back());
-		}
-	}
-
-	void Helper::initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices)
+	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices)
 	{
 		vector<ogl::OpenGLDescriptor> descriptor
 		{
@@ -69,27 +56,32 @@ namespace idk::fbx_loader_detail
 		);
 	}
 
-	void Helper::initBoneHierarchy(const aiNode* node, hash_set<string> bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out)
+	void initBoneHierarchy(const aiNode* node, const BoneSet& bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out)
 	{
 		struct BoneTreeNode
 		{
 			int parent;
 			const aiNode* node;
+			mat4 parent_transform;
 		};
 
 		std::deque<BoneTreeNode> queue;
-		queue.push_front(BoneTreeNode{ -1, node });
 
+		queue.push_front(BoneTreeNode{ -1, node });
 		while (!queue.empty())
 		{
 			auto curr_node = queue.front();
 			queue.pop_front();
-
+			mat4 node_transform = curr_node.parent_transform * initMat4(curr_node.node->mTransformation);
+			
 			// If this node is not actually a bone, we push all its children into the start of the queue with the parent being the current node's parent.
-			if (bones_set.find(curr_node.node->mName.data) == bones_set.end())
+			auto bone_data = bones_set.find(BoneData{ curr_node.node->mName.data });
+			if (bone_data == bones_set.end())
 			{
 				for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
-					queue.push_front(BoneTreeNode{ curr_node.parent, curr_node.node->mChildren[i] });
+				{
+					queue.push_front(BoneTreeNode{ curr_node.parent, curr_node.node->mChildren[i], node_transform });
+				}
 
 				continue;
 			}
@@ -100,17 +92,20 @@ namespace idk::fbx_loader_detail
 			anim::Skeleton::Bone b{};
 			b._name = curr_node.node->mName.data;
 			b._parent = curr_node.parent;
-			b._offset = initMat4(curr_node.node->mTransformation);
+			b._offset = bone_data->_transform;
+			b._node_transform = node_transform;
 
 			bones_out.emplace_back(b);
 			bones_table.emplace(bones_out.back()._name, bones_out.size() - 1);
 
 			for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
-				queue.push_back(BoneTreeNode{ static_cast<int>(bones_out.size() - 1), curr_node.node->mChildren[i] });
+			{
+				queue.push_back(BoneTreeNode{ static_cast<int>(bones_out.size() - 1), curr_node.node->mChildren[i], node_transform });
+			}
 		}
 	}
 
-	void Helper::initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
+	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
 	{
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
@@ -133,7 +128,7 @@ namespace idk::fbx_loader_detail
 		}
 	}
 
-	void Helper::initAnimMap(const aiAnimation* ai_anim, anim::Animation& anim_clip)
+	void initAnimMap(const aiAnimation* ai_anim, anim::Animation& anim_clip)
 	{
 		for (size_t i = 0; i < ai_anim->mNumChannels; ++i)
 		{
@@ -180,47 +175,36 @@ namespace idk::fbx_loader_detail
 		float num_ticks = duration / fps;
 
 		anim_clip.SetSpeeds(fps, duration, num_ticks);
+		anim_clip.SetName(ai_anim->mName.data);
 	}
 
-	void Helper::initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip)
-	{
-		mat4 curr_accum;
-
-		// If we can find the AnimNode with the corresponding name, we set its accum to whatever it was before
-		auto res = anim_clip.GetAnimNode(root_node->mName.data);
-		if(res == nullptr)
-			curr_accum = initMat4(root_node->mTransformation);
-		else
-			res->_accum = curr_accum;
-
-		for (size_t i = 0; i < root_node->mNumChildren; ++i)
-			initAnimNodesRecurse(root_node->mChildren[i], anim_clip, curr_accum);
-	}
-
-	void Helper::initAssimpNodeRecurse(const aiNode* ai_node, AssimpNode& node)
-	{
-		node._name = ai_node->mName.data;
-		node._transform = initMat4(ai_node->mTransformation);
-
-		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
-		{
-			node._children.emplace_back();
-			initAssimpNodeRecurse(ai_node->mChildren[i], node._children.back());
-		}
-	}
-
-	void Helper::initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum)
-	{
-		mat4 node_accum;
-		auto res = anim_clip.GetAnimNode(node->mName.data);
-		if (res == nullptr)
-			node_accum = curr_accum * initMat4(node->mTransformation);
-		else
-			res->_accum = curr_accum;
-
-		for (size_t i = 0; i < node->mNumChildren; ++i)
-			initAnimNodesRecurse(node->mChildren[i], anim_clip, node_accum);
-	}
+	// void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip)
+	// {
+	// 	mat4 curr_accum;
+	// 
+	// 	// If we can find the AnimNode with the corresponding name, we set its accum to whatever it was before
+	// 	auto res = anim_clip.GetAnimNode(root_node->mName.data);
+	// 	if(res == nullptr)
+	// 		curr_accum = initMat4(root_node->mTransformation);
+	// 	else
+	// 		res->_accum = curr_accum;
+	// 
+	// 	for (size_t i = 0; i < root_node->mNumChildren; ++i)
+	// 		initAnimNodesRecurse(root_node->mChildren[i], anim_clip, curr_accum);
+	// }
+	// 
+	// void initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum)
+	// {
+	// 	mat4 node_accum;
+	// 	auto res = anim_clip.GetAnimNode(node->mName.data);
+	// 	if (res == nullptr)
+	// 		node_accum = curr_accum * initMat4(node->mTransformation);
+	// 	else
+	// 		res->_accum = curr_accum;
+	// 
+	// 	for (size_t i = 0; i < node->mNumChildren; ++i)
+	// 		initAnimNodesRecurse(node->mChildren[i], anim_clip, node_accum);
+	// }
 
 	void Vertex::addBoneData(int id, float weight)
 	{

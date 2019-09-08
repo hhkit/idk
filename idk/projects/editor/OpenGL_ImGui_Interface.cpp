@@ -96,6 +96,7 @@ namespace idk
 			ImGui::End();
 			///////////////////////////////END///////////////////////////////
 
+			editorInputs.Update();
 			//ImGuiFrameEnd();
 		}
 
@@ -107,6 +108,11 @@ namespace idk
 		void OI_Interface::ImGuiFrameRender()
 		{
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
+
+		EditorInputs* OI_Interface::Inputs()
+		{
+			return &editorInputs;
 		}
 
 		void OI_Interface::TestFunction()

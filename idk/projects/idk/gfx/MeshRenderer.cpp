@@ -19,7 +19,7 @@ namespace idk
 			material_instance,
 
 			vec3{},
-			GetGameObject()->GetComponent<Transform>()->LocalMatrix() * Core::GetSystem<GraphicsSystem>().CurrentCamera()->ViewMatrix() ,
+			GetGameObject()->GetComponent<Transform>()->LocalMatrix() ,
 
 			cast_shadows,
 			receive_shadows,

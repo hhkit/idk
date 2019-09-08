@@ -39,9 +39,9 @@ namespace idk
 	T tvec<T, D>::length() const
 	{
 		if constexpr (std::is_same_v<float, T>)
-			return sqrtf(length_sq());
+			return sqrtf(abs(length_sq()));
 		else
-			return sqrt(static_cast<double>(length_sq()));
+			return sqrt(abs(static_cast<double>(length_sq())));
 	}
 
 	template<typename T, unsigned D>
@@ -54,9 +54,9 @@ namespace idk
 	 T tvec<T, D>::distance(const tvec& rhs) const
 	{
 		 if constexpr (std::is_same_v<float, T>)
-			 return sqrtf(distance_sq(rhs));
+			 return sqrtf(abs(distance_sq(rhs)));
 		 else
-			 return sqrt(static_cast<double>(distance_sq(rhs)));
+			 return sqrt(abs(static_cast<double>(distance_sq(rhs))));
 	}
 
 	template<typename T, unsigned D>
@@ -78,6 +78,9 @@ namespace idk
 	tvec<T, D>& tvec<T, D>::normalize()
 	{
 		auto mag = length();
+
+		if (mag <= 1 && mag >= -1)
+			return *this;
 
 		for (auto& elem : *this)
 			elem /= mag;

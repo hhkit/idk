@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include "ImGui_Interface.h"
+#include "EditorInputs.h"
 
 namespace idk {
 	namespace vkn {
@@ -42,6 +43,8 @@ namespace idk {
 
 			void ImGuiCleanUpSwapChain();
 
+			EditorInputs* Inputs() override;
+
 		private:
 
 			struct EditorInitInfo
@@ -71,6 +74,7 @@ namespace idk {
 			EditorParameter				editorControls;
 			EditorInitInfo				editorInit;
 			vkn::VulkanState*			vkObj;
+			EditorInputs				editorInputs;
 		};
 	};
 };

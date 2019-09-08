@@ -54,11 +54,15 @@ namespace idk
 	{
 		return GameState::GetGameState().ValidateHandle(*this);
 	}
-	bool GenericHandle::operator==(const GenericHandle& rhs)
+	bool GenericHandle::operator<(const GenericHandle& rhs) const
+	{
+		return id < rhs.id;
+	}
+	bool GenericHandle::operator==(const GenericHandle& rhs) const
 	{
 		return id == rhs.id;
 	}
-	bool GenericHandle::operator!=(const GenericHandle& rhs)
+	bool GenericHandle::operator!=(const GenericHandle& rhs) const
 	{
 		return id != rhs.id;
 	}

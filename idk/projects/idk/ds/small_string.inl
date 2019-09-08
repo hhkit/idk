@@ -93,6 +93,7 @@ namespace idk
 	template<typename InputIt>
 	small_string<CharT, Traits, Allocator>::small_string(
 		InputIt first, InputIt last, const Allocator& alloc)
+        : small_string(alloc)
 	{
 		const size_type len = last - first;
 		auto& rep = _rep.first();

@@ -49,6 +49,7 @@
     <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />
+    <ClCompile Include="TestPrefab.cpp" />
     <ClCompile Include="TestSmallString.cpp" />
     <ClCompile Include="TestFileSystem.cpp" />
     <ClCompile Include="TestReflect.cpp" />
@@ -68,6 +69,7 @@
     <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
     <ClCompile Include="TestQuaternion.cpp" />
+    <ClCompile Include="TestTree.cpp" />
     <ClCompile Include="TestVector.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

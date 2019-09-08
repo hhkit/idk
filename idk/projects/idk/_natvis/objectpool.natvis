@@ -53,9 +53,16 @@
   <Type Name="idk::GenericHandle">
     <Expand>
       <CustomListItems MaxItemsPerView="16">
-        <If Condition="type == 0"><Item Name="[GameObject]">*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item></If>
-        <If Condition="type == 1"><Item Name="[Transform]" >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item></If>
-        <If Condition="type == 2"><Item Name="[Parent]"    >*((idk::Handle&lt;idk::Parent&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 0"><Item Name="[GameObject]"    >*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 1"><Item Name="[Transform]"     >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 2"><Item Name="[Name]"          >*((idk::Handle&lt;idk::Name&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 3"><Item Name="[PrefabInstance]">*((idk::Handle&lt;idk::PrefabInstance&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 4"><Item Name="[RigidBody]"     >*((idk::Handle&lt;idk::RigidBody&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 5"><Item Name="[Collider]"      >*((idk::Handle&lt;idk::Collider&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 6"><Item Name="[MeshRenderer]"  >*((idk::Handle&lt;idk::MeshRenderer&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 7"><Item Name="[Camera]"        >*((idk::Handle&lt;idk::Camera&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 8"><Item Name="[AudioSource]"   >*((idk::Handle&lt;idk::AudioSource&gt;*)(&amp;id))</Item></If>
+        <If Condition="type == 9"><Item Name="[AudioListener]" >*((idk::Handle&lt;idk::AudioListener&gt;*)(&amp;id))</Item></If>
       </CustomListItems>
     </Expand>
   </Type>

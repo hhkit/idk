@@ -1,10 +1,12 @@
 #include "pch.h"
 #include <idk.h>
 #include <core/Core.h>
+#include <core/GameObject.h>
 #include <app/Application.h>
 #include <editor/IEditor.h>
-#include <scene/SceneFactory.h>
+#include <scene/SceneManager.h>
 #include <res/ResourceManager.h>
+#include <common/Transform.h>
 class TestApplication : 
 	public idk::Application
 {
@@ -16,7 +18,7 @@ public:
 	idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; };
     idk::ivec2 GetMousePixelPos() override { return idk::ivec2{}; };
     idk::ivec2 GetMousePixelDel() override { return idk::ivec2{}; };
-    bool IsMouseDragging() override { return false; };
+    bool IsMouseDragging(idk::Key) override { return false; };
 	bool GetKeyDown(idk::Key) override { return false; };
 	bool GetKey(idk::Key) override { return false; };
 	bool GetKeyUp(idk::Key) override { return false; };
@@ -53,5 +55,26 @@ TEST(System, TestCore)
 
 	auto core = Core{};
 	core.AddSystem<TestApplication>();
-	core.Run();
+	core.Setup();
+	
+	auto curr_scene = core.GetSystem<SceneManager>().GetActiveScene();
+	auto obj1 = curr_scene->CreateGameObject();
+	curr_scene->CreateGameObject();
+	curr_scene->CreateGameObject();
+
+	curr_scene->CreateGameObject()->Transform()->parent = obj1;
+	curr_scene->CreateGameObject();
+
+	core.GetSystem<SceneManager>().BuildSceneGraph(GameState::GetGameState().GetObjectsOfType<const GameObject>());
+	auto& sg = core.GetSystem<SceneManager>().FetchSceneGraph();
+
+	int indent = 0;
+	sg.visit([&indent](const auto& handle, int depth) {
+		indent += depth;
+		for (int i = 0; i < indent; ++i)
+			std::cout << ' ';
+		std::cout << handle.id << '\n';
+	});
+	// IT WORKSSSSSSSSS
+	//core.Run();
 }

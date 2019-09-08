@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		IGE_MainWindow.h
+//@file		IGE_ProjectWindow.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		4 SEPT 2019
 //@brief	
 
 /*

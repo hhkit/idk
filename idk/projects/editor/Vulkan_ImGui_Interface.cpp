@@ -336,7 +336,8 @@ namespace idk
 					err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
 					check_vk_result(err);
 				}
-				catch (const vk::OutOfDateKHRError& ) {
+				catch (const vk::OutOfDateKHRError& e) {
+					e;
 				
 					vkObj->RecreateSwapChain();
 					ImGuiRecreateSwapChain();
@@ -476,6 +477,10 @@ namespace idk
 			editorControls.edt_frames.clear();
 			editorControls.edt_frameSemophores.clear();
 			editorControls.edt_renderPass.reset();
+		}
+		EditorInputs* VI_Interface::Inputs()
+		{
+			return &editorInputs;
 		}
 	};
 };

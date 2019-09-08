@@ -52,6 +52,12 @@
     <ClInclude Include="loading\VulkanFBXLoader.h">
       <Filter>loader</Filter>
     </ClInclude>
+    <ClInclude Include="editor\windows\IGE_HierarchyWindow.h">
+      <Filter>editor\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorInputs.h">
+      <Filter>controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -94,6 +100,12 @@
     <ClCompile Include="loading\VulkanFBXLoader.cpp">
       <Filter>loader</Filter>
     </ClCompile>
+    <ClCompile Include="editor\windows\IGE_HierarchyWindow.cpp">
+      <Filter>editor\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorInputs.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="editor">
@@ -108,6 +120,9 @@
     </Filter>
     <Filter Include="loader">
       <UniqueIdentifier>{6736b34e-82f1-486c-a938-0e50208db3da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="controls">
+      <UniqueIdentifier>{39054dc7-3aac-467b-99ab-170c8f7698c4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

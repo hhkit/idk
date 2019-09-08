@@ -27,4 +27,24 @@ namespace idk
 		return true;
 	}
 
+	void SceneManager::DestroyObjects()
+	{
+		GameState::GetGameState().DestroyQueue();
+	}
+
+	void SceneManager::BuildSceneGraph(span<const GameObject> objs)
+	{
+		_sg_builder.BuildSceneGraph(objs);
+	}
+
+	SceneManager::SceneGraph& SceneManager::FetchSceneGraph()
+	{
+		return _sg_builder.FetchSceneGraph();
+	}
+
+	SceneManager::SceneGraph* SceneManager::FetchSceneGraphFor(Handle<class GameObject> handle)
+	{
+		return _sg_builder.FetchSceneGraphFor(handle);
+	}
+
 }

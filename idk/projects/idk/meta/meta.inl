@@ -116,5 +116,5 @@ namespace idk
     // true if is integral/floating point, or is constructible to string
     template<typename T>
     struct is_basic_serializable : std::disjunction<
-        std::is_arithmetic<T>, std::is_constructible<string, T>> {};
+        std::is_arithmetic<std::decay_t<T>>, std::is_constructible<string, T>> {};
 }

@@ -40,7 +40,7 @@ namespace idk
 		ivec2 Size() const;
 
 		// modifiers
-		void Size(ivec2 newsize);
+		virtual void Size(ivec2 newsize);
 
 		// identifier for ImGUIImage
 		virtual void* ID() const = 0;

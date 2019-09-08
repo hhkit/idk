@@ -13,4 +13,8 @@
 #include <core/Core.h>
 #include <reflect/reflect.h>
 #include <glad/glad.h>
+
+void _check_gl_error(const char* file, int line);
+
+#define GL_CHECK() _check_gl_error(__FILE__, __LINE__)
 #endif //PCH_H

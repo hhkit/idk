@@ -172,6 +172,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="editor\commands\CMD_AddComponent.h" />
     <ClInclude Include="editor\commands\CMD_MoveGameObject.h" />
     <ClInclude Include="editor\commands\CMD_RotateGameObject.h" />
@@ -179,6 +180,7 @@
     <ClInclude Include="editor\commands\CommandController.h" />
     <ClInclude Include="editor\commands\CommandList.h" />
     <ClInclude Include="editor\commands\ICommand.h" />
+    <ClInclude Include="editor\windows\IGE_HierarchyWindow.h" />
     <ClInclude Include="editor\windows\IGE_IWindow.h" />
     <ClInclude Include="editor\windows\IGE_MainWindow.h" />
     <ClInclude Include="editor\windows\IGE_ProjectWindow.h" />
@@ -195,11 +197,13 @@
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="editor\commands\CMD_AddComponent.cpp" />
     <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp" />
     <ClCompile Include="editor\commands\CMD_RotateGameObject.cpp" />
     <ClCompile Include="editor\commands\CMD_ScaleGameObject.cpp" />
     <ClCompile Include="editor\commands\CommandController.cpp" />
+    <ClCompile Include="editor\windows\IGE_HierarchyWindow.cpp" />
     <ClCompile Include="editor\windows\IGE_IWindow.cpp" />
     <ClCompile Include="editor\windows\IGE_MainWindow.cpp" />
     <ClCompile Include="editor\windows\IGE_ProjectWindow.cpp" />

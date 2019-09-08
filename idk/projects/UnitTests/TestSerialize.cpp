@@ -36,9 +36,9 @@ TEST(Serialize, TestYaml)
     yaml::node node2 = yaml::load("- test: a:\n- x: b");
     EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
     EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
-    // - {test: a:}
-    // - {x: b}
-    EXPECT_EQ(yaml::dump(node2), "- {test: a:}\n- {x: b}\n");
+    // - test: a:
+    // - x: b
+    EXPECT_EQ(yaml::dump(node2), "- test: a:\n- x: b\n");
 
 	// -
 	// - test:
@@ -47,7 +47,7 @@ TEST(Serialize, TestYaml)
     //     z: bye
     //   - w
 	yaml::node node3 = yaml::load("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
-	EXPECT_TRUE(node3[0].null());
+	EXPECT_TRUE(node3[0].is_null());
 	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
 	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
     EXPECT_EQ(node3[1]["test"][1]["z"].as_scalar(), "bye");
@@ -71,14 +71,15 @@ TEST(Serialize, TestYaml)
     // - test:
     //   - x
     //   - y
-    //   - {a: b}
+    //   - a: b
     // - test2:
     //     b: [1, 2, 3]
-    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - {a: b}\n- test2: \n    b: [1, 2, 3]\n");
+    EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - a: b\n- test2: \n    b: [1, 2, 3]\n");
 
-    yaml::node node5 = yaml::load("- !testtag \"longassstring\"");
-	//EXPECT_EQ(node5[0].as_scalar(), "longassstring");
+    yaml::node node5 = yaml::load("- !testtag '\"longassstring\"'");
+	EXPECT_EQ(node5[0].as_scalar(), "\"longassstring\"");
 	EXPECT_EQ(node5[0].tag(), "testtag");
+    EXPECT_EQ(yaml::dump(node5), "[!testtag '\"longassstring\"']");
 }
 
 TEST(Serialize, TestSerializeBasic)
@@ -94,18 +95,15 @@ TEST(Serialize, TestSerializeBasic)
 	vec3 v{ 1.0f, 2.0f, 3.0f };
 	auto str = serialize_text(v);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), "{\n  \"x\": 1.0,\n  \"y\": 2.0,\n  \"z\": 3.0\n}");
+	EXPECT_STREQ(str.c_str(), "{x: 1.000000, y: 2.000000, z: 3.000000}");
 
 	serialize_this obj = {
 		Guid{"e82bf459-faca-4c70-a8e9-dd35597575ef"},
 		vec4{5.0f, 6.0f, 7.0f, 8.0f}
 	};
-	auto x = "{\n  \"f\": 69,\n  "
-		"\"guid\": \"e82bf459-faca-4c70-a8e9-dd35597575ef\",\n  "
-		"\"vec\": {\n    \"w\": 8.0,\n    \"x\": 5.0,\n    \"y\": 6.0,\n    \"z\": 7.0\n  }\n}";
 	str = serialize_text(obj);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), x);
+	EXPECT_STREQ(str.c_str(), "guid: e82bf459-faca-4c70-a8e9-dd35597575ef\nvec: \n  x: 5.000000\n  y: 6.000000\n  z: 7.000000\n  w: 8.000000\nf: 69\n");
 
 	// roundtrip
 	auto obj2 = parse_text<serialize_this>(str);
@@ -227,8 +225,7 @@ TEST(Serialize, TestSerializeScene)
 	t1->scale = vec3{ 12.0f };
 	t1->rotation = quat{ 13.0f, 14.0f, 15.0f, 16.0f };
 	transform_1_id = t1.id;
-	auto p1 = o1->AddComponent<Parent>();
-	p1->parent = o0;
+	t1->parent = o0;
 
 	serialized_scene_0 = serialize_text(*scene);
 	std::cout << serialized_scene_0;
@@ -256,6 +253,5 @@ TEST(Serialize, TestParseScene)
 	EXPECT_EQ(t1->scale, vec3{ 12.0f });
 	EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
 	EXPECT_EQ(t1.id, transform_1_id);
-	auto p1 = o1.GetComponent<Parent>();
-	EXPECT_EQ(p1->parent.id, o0.GetHandle().id);
+	EXPECT_EQ(o1.Parent(), o0.GetHandle());
 }

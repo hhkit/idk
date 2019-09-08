@@ -4,15 +4,59 @@
 
 namespace idk::yaml
 {
+    static void resolve_scalar(scalar_type& scalar)
+    {
+        if (scalar.size() < 2)
+            return;
+
+        if (scalar.front() == '"' && scalar.back() == '"')
+        {
+            // remove double quotes
+            scalar.pop_back();
+            scalar.erase(scalar.begin());
+
+            // handle escape sequences
+            for (size_t i = 0; i + 1 < scalar.size(); ++i)
+            {
+                if (scalar[i] != '\\')
+                    continue;
+
+                switch (scalar[i + 1])
+                {
+                case '\\': scalar.replace(i, 2, 1, '\\'); break;
+                case '"': scalar.replace(i, 2, 1, '\"');  break;
+                case '0': scalar.replace(i, 2, 1, '\0');  break;
+                case 't': scalar.replace(i, 2, 1, '\t');  break;
+                case 'n': scalar.replace(i, 2, 1, '\n');  break;
+                case 'r': scalar.replace(i, 2, 1, '\r');  break;
+                default: break;
+                }
+            }
+        }
+        else if (scalar.front() == '\'' && scalar.back() == '\'')
+        {
+            // remove single quotes... don't handle escapes for single quoted scalars! except for '
+            scalar.pop_back();
+            scalar.erase(scalar.begin());
+
+            for (size_t i = 0; i + 1 < scalar.size(); ++i)
+            {
+                if (scalar[i] == '\'' && scalar[i + 1] == '\'')
+                    scalar.replace(i, 2, 1, '\'');
+            }
+        }
+    }
+
     template<typename T, typename>
     node::node(T&& arg)
     {
         if constexpr (is_basic_serializable_v<T>)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
                 _value = std::to_string(arg);
             else
-                _value = string(arg);
+                _value = scalar_type(arg);
+            resolve_scalar(as_scalar());
         }
         else if constexpr (is_container_v<T>)
         {
@@ -35,15 +79,16 @@ namespace idk::yaml
         }
     }
 
+    // get scalar as type T
     template<typename T>
-    T node::get() const
+    decltype(auto) node::get() const
     {
         if constexpr (is_basic_serializable_v<T>)
         {
             if (type() == type::null)
             {
-                if constexpr (std::is_arithmetic_v<T>)
-                    return 0;
+                if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
+                    return T(0);
                 else
                     return T();
             }
@@ -51,14 +96,38 @@ namespace idk::yaml
                 return parse_text<T>(as_scalar());
             throw "only works on scalars";
         }
-        throw "cannot convert scalar to T";
+        else
+            throw "cannot convert scalar to T";
     }
 
-    template<typename... T>
-    node& node::emplace_back(T&&... args)
+    // returns const& to scalar
+    template<>
+    decltype(auto) node::get<scalar_type>() const
+    {
+        return as_scalar();
+    }
+
+    template<typename... Ts>
+    node& node::emplace_back(Ts&&... args)
     {
         if (type() == type::null)
             _value = sequence_type();
-        return as_sequence().emplace_back(args...);
+        return as_sequence().emplace_back(std::forward<Ts>(args)...);
+    }
+
+    template<typename... Ts>
+    std::pair<mapping_type::iterator, bool> node::emplace(Ts&&... args)
+    {
+        if (type() == type::null)
+            _value = mapping_type();
+        return as_mapping().emplace(std::forward<Ts>(args)...);
+    }
+
+    template<typename T, typename>
+    node& node::operator=(T&& val)
+    {
+        node other(val);
+        std::swap(_value, other._value);
+        return *this;
     }
 }

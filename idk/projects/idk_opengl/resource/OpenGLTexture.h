@@ -17,6 +17,7 @@ namespace idk::ogl
 		void BindToUnit(GLuint texture_unit = 0);
 		void Buffer(void* data, ivec2 size, ColorFormat format_in);
 
+		void Size(ivec2 new_size) override;
 		virtual void* ID() const;
 		
 	private:

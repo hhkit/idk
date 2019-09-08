@@ -48,27 +48,50 @@ TEST(Math, MatrixVectorMultiplication)
 	);
 }
 
-TEST(Math, MatrixMatrixMultiplication)
+TEST(Math, MatrixTranspose)
 {
 	using namespace idk;
 	idk::mat4 m{
-		vec4{2.f, 0.f, 0.f, 0.f},
-		vec4{0.f, 2.f, 0.f, 0.f},
-		vec4{0.f, 0.f, 2.f, 0.f},
-		vec4{0.f, 2.f, 0.f, 1.f}
+		vec4{1.f, 5.f, 9.f , 13.f},
+		vec4{2.f, 6.f, 10.f, 14.f},
+		vec4{3.f, 7.f, 11.f, 15.f},
+		vec4{4.f, 8.f, 12.f, 16.f}
+	};
+
+	idk::mat4 transpose_m{
+		1.f, 5.f, 9.f , 13.f,
+		2.f, 6.f, 10.f, 14.f,
+		3.f, 7.f, 11.f, 15.f,
+		4.f, 8.f, 12.f, 16.f
+	};
+
+	EXPECT_EQ(m.transpose(), transpose_m);
+}
+
+TEST(Math, MatrixMatrixMultiplication)
+{
+	using namespace idk;
+	idk::mat4 m1{
+		5,  7, 9, 10,
+		2,  3, 3,  8,
+		8, 10, 2,  3,
+		3,  3, 4,  8
 	};
 	idk::mat4 m2{
-		vec4{2.f, 0.f, 0.f, 0.f},
-		vec4{0.f, 3.f, 0.f, 0.f},
-		vec4{0.f, 0.f, 4.f, 0.f},
-		vec4{0.f, 2.f, 0.f, 1.f}
+		3,  10, 12, 18,
+		12, 1,  4,   9,
+		9,  10, 12,  2,
+		3,  12, 4,  10
 	};
 
-	idk::mat4 trams_m = m.transpose();
+	idk::mat4 res{
+		210, 267, 236, 271,
+		93,  149, 104, 149,
+		171, 146, 172, 268,
+		105, 169, 128, 169
+	};
 
-	EXPECT_EQ(
-		m * trams_m, trams_m * m
-	) << "Test for commutativity of scaling matrices failed.";
+	EXPECT_EQ(m1 * m2, res) << "Test for commutativity of scaling matrices failed.";
 }
 
 TEST(Math, MatrixDeterminant)
@@ -105,4 +128,36 @@ TEST(Math, MatrixDeterminant)
 		0.f, 0.f, 0.f
 	}.determinant()), 0.f) << "Projected column test failed";
 
+}
+
+TEST(Math, MatrixInverse)
+{
+	using namespace idk;
+	
+	mat4 m
+	{
+		3, 2, 4, 5,
+		2, 3, 4, 8,
+		1, 2, 3, 4,
+		0, 0, 0, 1
+	};
+
+	mat4 m2
+	{
+		 1.f/3,  2.f/3, -4.f/3,  -5.f/3,
+		-2.f/3,  5.f/3, -4.f/3, -14.f/3,
+		 1.f/3, -4.f/3,  5.f/3,   7.f/3,
+		     0,      0,      0,       1
+	};
+
+	for (auto& elem : m.inverse())
+	{
+		for (auto& e : elem)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	for (auto& [lvec, rvec] : zip(m.inverse(), m2))
+		for (auto& [lhs, rhs] : zip(lvec, rvec))
+			EXPECT_LE(abs(lhs - rhs), epsilon);
 }

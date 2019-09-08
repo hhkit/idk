@@ -6,6 +6,11 @@
 namespace idk
 {
 
+    unique_ptr<Prefab> PrefabFactory::GenerateDefaultResource()
+    {
+        return std::make_unique<Prefab>();
+    }
+
 	unique_ptr<Prefab> PrefabFactory::Create()
 	{
 		return std::make_unique<Prefab>();
@@ -18,7 +23,7 @@ namespace idk
 		string str = ss.str();
 
         auto prefab = std::make_unique<Prefab>();
-		parse_text(str, prefab->_data);
+		parse_text(str, prefab->data);
         return std::move(prefab);
 	}
 

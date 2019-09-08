@@ -3,7 +3,7 @@
 #include <sstream>
 
 const idk::string_view default_template = R"(
-#version 460
+#version 450
 
 layout(location=0)out vec4 out_color;
 

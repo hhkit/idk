@@ -4,27 +4,19 @@
 #include <gfx/RenderObject.h>
 namespace idk
 {
-	void GraphicsSystem::BufferGraphicsState(span<MeshRenderer> mesh_renderers, span<const class Transform>, span<const class Parent>, span<const Camera> cameras)
+	void GraphicsSystem::BufferGraphicsState(span<MeshRenderer> mesh_renderers, span<const class Transform>, span<const Camera> cameras)
 	{
 		// todo: scenegraph traversal
 		RenderBuffer result{};
-		result.states.reserve(cameras.size());
-		//Temporarily commented out cause cameras aren't passed in yet.
-		//for (auto& camera : cameras)
-		{
-			GraphicsState state{};
-			auto& config = state.config;
+		result.camera.reserve(cameras.size());
 
-			config.prim_top = PrimitiveTopology::eTriangleList;
-			config.fill_type = FillType::eFill;
-		//Temporarily commented out cause cameras aren't passed in yet.
-		//	state.camera = camera;
-			vector<RenderObject>& objects =state.mesh_render;
-			for (auto& elem : mesh_renderers)
-				if (elem.IsActiveAndEnabled())
-					objects.emplace_back(elem.GenerateRenderObject());
-			result.states.emplace_back(std::move(state));
-		}
+		for (auto& camera : cameras)
+			result.camera.emplace_back(camera.GenerateCameraData());
+
+		for (auto& elem : mesh_renderers)
+			if (elem.IsActiveAndEnabled())
+				result.mesh_render.emplace_back(elem.GenerateRenderObject());
+
 		SubmitBuffers(std::move(result));
 	}
 
