@@ -18,6 +18,7 @@ of the editor.
 #include <app/Application.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <iostream>
+#include <IDE.h>
 
 namespace idk {
 
@@ -135,25 +136,29 @@ namespace idk {
 				//ImGui::MenuItem("Demo Window", NULL, &editorRef.show_demo_window);      // Edit bools storing our windows open/close state
 				ImGui::EndMenu(); //BeginMenu("Debug")
 			}
+
+			IDE& editor = Core::GetSystem<IDE>();
+			static bool boolDemoWindow = false;
+
 			if (ImGui::BeginMenu("Window"))
 			{
-				//if (ImGui::Button("Reset Window Positions", ImVec2(180, 20))) {
-				//
-				//	editorRef.RepositionWindows();
-				//
-				//}
+				for (auto& i : editor.ige_windows) {
+					ImGui::PushID(&i);
+					if (ImGui::MenuItem(i->window_name, NULL, &i->is_open)) {
+						//Do other stuff if needed
+					}
 
-				//Windows
-				//ImGui::MenuItem(editorRef.hierarchyWindow.windowName, NULL, &editorRef.hierarchyWindow.isOpen);						// Edit bools storing our windows open/close state
-				//ImGui::MenuItem(editorRef.projectContentWindow.windowName, NULL, &editorRef.projectContentWindow.isOpen);			// Edit bools storing our windows open/close state
-				//ImGui::MenuItem(editorRef.propertiesWindow.windowName, NULL, &editorRef.propertiesWindow.isOpen);
-				//ImGui::MenuItem(editorRef.gameCameraWindow.windowName, NULL, &editorRef.gameCameraWindow.isOpen);						// Edit bools storing our windows open/close state
-				//ImGui::MenuItem(editorRef.logWindow.windowName, NULL, &editorRef.logWindow.isOpen);						// Edit bools storing our windows open/close state
+					ImGui::PopID();
+				}
+				if (ImGui::MenuItem("ImGui Demo Window", NULL, &editor.bool_demo_window)) {
 
-
+				}
 
 				ImGui::EndMenu(); //Close BeginMenu("Window")
 			}
+
+
+
 
 			//ImGui::MenuItem("Settings", NULL, &editorRef.settingsWindow.isOpen);
 
@@ -287,7 +292,8 @@ namespace idk {
 		ImGui::PopStyleColor();
 
 
-		ImGui::TextUnformatted(hint_text_output.c_str());
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		//ImGui::TextUnformatted(hint_text_output.c_str());
 
 
 		ImGui::EndChild();
