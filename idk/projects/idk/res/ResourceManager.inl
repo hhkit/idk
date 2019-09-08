@@ -181,7 +181,7 @@ namespace idk
 	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)
 	{
 		auto [table, itr] = FindHandle(RscHandle<BaseResource_t<Resource>>{handle});
-		return itr != table.end();
+		return itr != table.end() && itr->second.resource_ptr;
 	}
 
 	template<typename Resource>

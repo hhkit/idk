@@ -6,6 +6,19 @@
 
 namespace idk
 {
+	void Transform::SetParent(Handle<class GameObject> new_parent, bool preserve_global)
+	{
+		if (preserve_global)
+		{
+			auto curr_global = GlobalMatrix();
+			auto new_local = new_parent->Transform()->GlobalMatrix().inverse() * curr_global;
+			auto decomp = decompose(new_local);
+			position = decomp.position;
+			rotation = decomp.rotation;
+			scale = decomp.scale;
+		}
+		parent = new_parent;
+	}
 	vec3 Transform::Forward() const
 	{
 		return GlobalMatrix()[2].get_normalized();
@@ -32,6 +45,14 @@ namespace idk
 			return LocalMatrix() * parent->Transform()->GlobalMatrix();
 		else
 			return LocalMatrix();
+	}
+
+	void Transform::LocalMatrix(const mat4& m)
+	{
+		auto decomp = decompose(m);
+		position = decomp.position;
+		rotation = decomp.rotation;
+		scale    = decomp.scale;
 	}
 
 	void Transform::GlobalMatrix(const mat4& m)
