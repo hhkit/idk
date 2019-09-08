@@ -26,10 +26,14 @@ namespace idk
 		auto cb_itr = control_blocks.find(handle.guid);
 		if (cb_itr != control_blocks.end())
 			control_blocks.erase(cb_itr);
+		else
+			return false;
 
 		auto file_itr = files.find(handle.guid);
 		if (file_itr != files.end())
 			files.erase(file_itr);
+
+		return true;
 	}
 	template<typename T>
 	SaveableResourceManager::FileAssociateResult SaveableResourceManager::Associate(RscHandle<T> handle, string_view mountPath)

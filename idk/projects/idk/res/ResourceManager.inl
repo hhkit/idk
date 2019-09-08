@@ -46,7 +46,9 @@ namespace idk
 			ptr->Dirty();
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
 		}
-		table.emplace(handle.guid, std::move(ptr));
+
+		table[handle.guid].is_new = true;
+		table[handle.guid].resource_ptr = std::move(ptr);
 		
 		return handle;
 	}
@@ -56,6 +58,8 @@ namespace idk
 		auto retval = Create<Resource>(filepath, Guid::Make());
 		if (!retval)
 			return RscHandle<Resource>{};
+
+		GetTable<Resource>()[retval.guid].is_new = true;
 		if constexpr (has_tag_v<Resource, MetaTag>)
 			retval->_dirtymeta = true;
 		return retval;
@@ -76,7 +80,8 @@ namespace idk
 		ptr->_handle = handle;
 		if constexpr (has_tag_v<Resource, Saveable>)
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
-		table.emplace_hint(itr, handle.guid, std::move(ptr));
+
+		table[handle.guid].resource_ptr = std::move(ptr);
 		return handle;
 	}
 
@@ -93,9 +98,11 @@ namespace idk
 
 		auto handle = RscHandle<Resource>{ guid };
 		ptr->_handle = handle;
+
 		if constexpr (has_tag_v<Resource, Saveable>)
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
-		table.emplace_hint(itr, handle.guid, std::move(ptr));
+
+		table[handle.guid].resource_ptr = std::move(ptr);
 
 		return handle;
 	}
@@ -113,7 +120,7 @@ namespace idk
 
 		auto handle = RscHandle<RegisterMe>{ Guid::Make() };
 		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
-		ptr->_dirty = true;
+
 		if constexpr (has_tag_v<RegisterMe, MetaTag>)
 			ptr->_dirtymeta = true;
 		if constexpr (has_tag_v<Resource, Saveable>)
@@ -121,7 +128,9 @@ namespace idk
 			ptr->Dirty();
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
 		}
-		table.emplace(handle.guid, std::move(ptr));
+
+		table[handle.guid].is_new = true;
+		table[handle.guid].resource_ptr = std::move(ptr);
 
 		return handle;
 	}
@@ -144,7 +153,8 @@ namespace idk
 			ptr->Dirty();
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
 		}
-		table.emplace_hint(itr, handle.guid, std::move(ptr));
+
+		table[handle.guid].resource_ptr = std::move(ptr);
 		return handle;
 	}
 
@@ -179,17 +189,21 @@ namespace idk
 	{
 		auto [table, itr] = FindHandle(handle);
 		if (itr != table.end())
-			return s_cast<Resource&>(*itr->second);
-		else
-			return *r_cast<Resource*>(_default_resources[ResourceID<BaseResource_t<Resource>>].get());
+			if (itr->second.resource_ptr)
+				return s_cast<Resource&>(*itr->second.resource_ptr);
+		return *r_cast<Resource*>(_default_resources[ResourceID<BaseResource_t<Resource>>].get());
 	}
 
 	template<typename Resource>
 	inline bool ResourceManager::Free(const RscHandle<Resource>& handle)
 	{
 		auto [table, itr] = FindHandle(handle);
+
 		if (itr == table.end())
 			return false;
+
+		if constexpr (has_tag_v<Resource, Saveable>)
+			Core::template GetSystem<SaveableResourceManager>().DeregisterHandle(handle);
 
 		table.erase(itr);
 		return true;

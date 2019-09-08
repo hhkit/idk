@@ -132,7 +132,10 @@ namespace idk
 					[](SaveableResourceManager* man, Guid guid, string_view path)
 					{
 						if constexpr (has_tag_v<Rs, Saveable>)
+						{
+							Core::GetResourceManager().Associate(path, RscHandle<Rs>{guid});
 							man->Associate(RscHandle<Rs>{ guid }, path);
+						}
 						else
 						{
 							UNREFERENCED_PARAMETER(man);

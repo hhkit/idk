@@ -184,19 +184,38 @@ namespace idk
 			return FileResources();
 	}
 
-	FileResources ResourceManager::Associate(FileHandle file, FileResources&& f)
+	bool ResourceManager::Associate(string_view mount_path, GenericRscHandle f)
 	{
-		if (f.resources.empty())
-			return FileResources();
+		auto itr = _loaded_files.find(string{ mount_path });
+		
+		auto& filemeta = [&]() -> FileResources&
+		{
+			if (itr == _loaded_files.end())
+			{
+				auto [jtr, success] = _loaded_files.emplace(string{ mount_path }, FileResources{});
+				assert(success);
+				return jtr->second;
+			}
+			else
+			{
+				return itr->second;
+			}
+		}();
+		auto find_f = std::find(filemeta.resources.begin(), filemeta.resources.end(), f);
+		if (find_f == filemeta.resources.end())
+		{
+			filemeta.resources.emplace_back(f);
+			f.visit([&](auto& elem) {
 
-		auto [itr, success] = _loaded_files.emplace(file.GetMountPath(), std::move(f));
+				auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
+				auto& control_block = table.find(elem.guid)->second;
 
-		// save old meta
-		auto ser = save_meta(itr->second);
-
-		auto path_to_meta = string{ file.GetMountPath() } + ".meta";
-		auto metastream = Core::GetSystem<FileSystem>().Open(path_to_meta, FS_PERMISSIONS::WRITE);
-		metastream << serialize_text(ser);
+				control_block.is_new = true;
+			});
+			return true;
+		}
+		else
+			return false;
 	}
 
 	void ResourceManager::SaveDirtyMetadata()
@@ -206,7 +225,12 @@ namespace idk
 		{
 			bool dirty = false;
 			for (auto& elem : resources.resources)
-				elem.visit([&dirty](auto& elem) {
+				elem.visit([&](auto& elem) {
+
+				auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
+				auto& control_block = table.find(elem.guid)->second;
+
+				dirty |= control_block.is_new;
 				if constexpr (has_tag_v<decltype(elem), MetaTag>)
 					dirty |= elem->_dirtymeta;
 			});
@@ -221,7 +245,11 @@ namespace idk
 
 				// mark as clean
 				for (auto& elem : resources.resources)
-					elem.visit([&dirty](auto& elem) {
+					elem.visit([&](auto& elem) {
+					auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
+					auto& control_block = table.find(elem.guid)->second;
+
+					control_block.is_new = false;
 					if constexpr (has_tag_v<decltype(elem), MetaTag>)
 						elem->_dirtymeta = false;
 				});

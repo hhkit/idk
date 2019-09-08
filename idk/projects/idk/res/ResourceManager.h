@@ -65,7 +65,7 @@ namespace idk
 		size_t        UnloadFile(FileHandle path_to_file);
 		FileResources GetFileResources(FileHandle path_to_file);
 
-		FileResources Associate(FileHandle file, FileResources&& f);
+		bool          Associate(string_view mount_path, GenericRscHandle f);
 
 		// saving metadata
 		void SaveDirtyMetadata();
@@ -73,7 +73,16 @@ namespace idk
 	private:
 		using GenPtr = shared_ptr<void>;
 		template<typename R>
-		using Storage = hash_table<Guid, std::shared_ptr<R>>;
+		struct ControlBlock
+		{
+			bool is_new = false;
+			// atomic<bool> loaded = false;
+			shared_ptr<R> resource_ptr; // note: make atomic
+		};
+
+		template<typename R>
+		using Storage = hash_table<Guid, ControlBlock<R>>;
+
 		array<GenPtr, ResourceCount> _resource_factories{}; // std::shared_ptr<ResourceFactory<Resource>>
 		array<GenPtr, ResourceCount> _resource_tables   {}; // std::shared_ptr<Storage<Resource>>
 		array<GenPtr, ResourceCount> _default_resources {}; // std::shared_ptr<Resource>

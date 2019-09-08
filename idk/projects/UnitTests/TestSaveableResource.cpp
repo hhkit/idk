@@ -9,7 +9,9 @@ TEST(Saveable, SaveableResource)
 	Core c;
 	c.Setup();
 
-	//auto ht = c.GetResourceManager().Create<TestResource>();
+	auto ht = c.GetResourceManager().Create<TestResource>();
 
-	Core::GetSystem<SaveableResourceManager>().SaveDirtyFiles();
+	// uncomment to test saveable
+	//Core::GetSystem<SaveableResourceManager>().SaveDirtyFiles();
+	//Core::GetSystem<ResourceManager>().SaveDirtyMetadata();
 }
