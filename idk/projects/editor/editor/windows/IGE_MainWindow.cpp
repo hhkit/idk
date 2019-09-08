@@ -81,7 +81,7 @@ namespace idk {
 
 	}
 
-	void IGE_MainWindow::FileMenu()
+	void IGE_MainWindow::DisplayFileMenu()
 	{
 		if (ImGui::BeginMenu("File")) {
 
@@ -126,7 +126,7 @@ namespace idk {
 		}
 	}
 
-	void IGE_MainWindow::EditMenu()
+	void IGE_MainWindow::DisplayEditMenu()
 	{
 		if (ImGui::BeginMenu("Edit"))
 		{
@@ -178,7 +178,34 @@ namespace idk {
 		}
 	}
 
-	void IGE_MainWindow::WindowMenu()
+	void IGE_MainWindow::DisplayGameObjectMenu()
+	{
+		if (ImGui::BeginMenu("GameObject"))
+		{
+			if (ImGui::MenuItem("Create Empty","CTRL+SHIFT+N")) {
+
+
+
+			} //Do something if pressed
+
+
+
+			ImGui::EndMenu(); 
+
+		}
+	}
+
+	void IGE_MainWindow::DisplayComponentMenu()
+	{
+		if (ImGui::BeginMenu("Component"))
+		{
+			//Each button is disabled if gameobject is not selected!
+			ImGui::EndMenu(); 
+
+		}
+	}
+
+	void IGE_MainWindow::DisplayWindowMenu()
 	{
 		IDE& editor = Core::GetSystem<IDE>();
 		static bool boolDemoWindow = false;
@@ -201,7 +228,20 @@ namespace idk {
 		}
 	}
 
-	void IGE_MainWindow::ToolBarChildWindow()
+	void IGE_MainWindow::DisplayHelpMenu()
+	{
+		if (ImGui::BeginMenu("Help"))
+		{
+
+			
+
+			ImGui::EndMenu(); //Close BeginMenu("Help")
+		}
+
+
+	}
+
+	void IGE_MainWindow::DisplayToolBarChildWindow()
 	{
 
 		const ImVec2 toolBarSize{ window_size.x, toolBarHeight };
@@ -254,7 +294,7 @@ namespace idk {
 
 	}
 
-	void IGE_MainWindow::HintBarChildWindow()
+	void IGE_MainWindow::DisplayHintBarChildWindow()
 	{
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -283,36 +323,27 @@ namespace idk {
 		ImGui::PopStyleVar(3); //Pop from BeginWindow()
 		ImGui::PopStyleColor(); //Pop from BeginWindow()
 
-
+		/*Main Menu Bar*/
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //When you press File or Edit tab
-
-		/*Main Menu Bar*/
 		if (ImGui::BeginMenuBar()) {
 
-			FileMenu();
-			EditMenu();
-			WindowMenu();
+			DisplayFileMenu();
+			DisplayEditMenu();
+			DisplayWindowMenu();
+			DisplayGameObjectMenu();
+			DisplayComponentMenu();
+			DisplayHelpMenu();
 
-			if (ImGui::BeginMenu("Help"))
-			{
 
-				ImGui::MenuItem("Middle Mouse to drag camera.", 0, false, false);
-				ImGui::MenuItem("F to focus on selected gameobject.", 0, false, false);
-				ImGui::MenuItem("LMB on gamescreen to deselect gameobject.", 0, false, false);
-				ImGui::MenuItem("CTRL+D to duplicate gameobject.", 0, false, false);
-				ImGui::MenuItem("RMB to move gameobject.", 0, false, false);
-
-				ImGui::EndMenu(); //Close BeginMenu("Help")
-			}
-
-			ImGui::PopStyleColor(2);
 
 			ImGui::EndMenuBar(); //MainMenuBar
 		}
+		ImGui::PopStyleColor(2);
 
-		ToolBarChildWindow();
 
+
+		DisplayToolBarChildWindow();
 
 		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
 		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
@@ -320,7 +351,7 @@ namespace idk {
 		//Imgui internal
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
-		HintBarChildWindow();
+		DisplayHintBarChildWindow();
 
 	}
 
