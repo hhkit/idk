@@ -60,6 +60,11 @@ namespace idk {
 
 		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
+		if (ImGui::IsMouseClicked(0)) {
+			auto i = ImGui::GetMousePos();
+			std::cout << "MousePos: " << i.x << "," << i.y << "\n";
+		}
+
 		//std::cout << currPos.x << "::" << currPos.y << std::endl;
 	}
 

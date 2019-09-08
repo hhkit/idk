@@ -19,3 +19,4 @@ Include all windows here
 #include <editor/windows/IGE_SceneView.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
+#include <editor/windows/IGE_InspectorWindow.h>

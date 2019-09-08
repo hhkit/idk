@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "IDE.h"
+#include <IDE.h>
 
 #include <imgui/imgui.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
@@ -10,8 +10,9 @@
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
 #include <loading/VulkanFBXLoader.h>
-#include <editor/windows/IGE_WindowList.h>
 #include <editor/commands/CommandList.h>
+#include <editor/windows/IGE_WindowList.h>
+
 
 namespace idk
 {
@@ -38,13 +39,20 @@ namespace idk
 			break;
 		}
 
+		//ImGui Initializations
 		_interface->Init();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
-		ige_windows.push_back(std::make_unique<IGE_MainWindow>());
+
+
+		ige_main_window = std::make_unique<IGE_MainWindow>();
+
 		ige_windows.push_back(std::make_unique<IGE_SceneView>());
 		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
 		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
+		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
+
+		ige_main_window->Initialize();
 
 		for (auto& i : ige_windows) {
 			i->Initialize();
@@ -62,11 +70,16 @@ namespace idk
 	{
 		_interface->ImGuiFrameBegin();
 
+		ige_main_window->DrawWindow();
+
 		for (auto& i : ige_windows) {
 			i->DrawWindow();
 		}
 
-		_interface->ImGuiFrameUpdate();
+		if (bool_demo_window)
+			ImGui::ShowDemoWindow(&bool_demo_window);
+	
+		//_interface->ImGuiFrameUpdate();
 		
 		
 		_interface->ImGuiFrameEnd();
