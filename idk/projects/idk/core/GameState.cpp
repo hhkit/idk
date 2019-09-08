@@ -170,7 +170,7 @@ namespace idk
 	{
 		return DectivateScene(scene.scene_id);
 	}
-	bool GameState::ValidateScene(Scene scene)
+	bool GameState::ValidateScene(Scene& scene)
 	{
 		return static_cast<ObjectPool<GameObject>*>(std::get<0>(_objects).get())->ValidateScene(scene.scene_id);
 	}

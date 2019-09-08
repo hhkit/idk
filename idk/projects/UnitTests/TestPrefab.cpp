@@ -114,8 +114,14 @@ TEST(Prefab, TestPrefabRevert)
     auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
     auto go = PrefabUtility::Instantiate(prefab, *scene);
 
+    vec3 ori_scale = go->GetComponent<Transform>()->scale;
+
     (*go->GetComponents()[0]).get_property("position").value = vec3(69.0f, 69.0f, 69.0f);
+    (*go->GetComponents()[0]).get_property("scale").value = vec3(69.0f, 69.0f, 69.0f);
+    (*go->GetComponents()[1]).get_property("name").value = string("changed_name");
     PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[0], "position");
+    PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[0], "scale");
+    PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[1], "name");
     // add some completely bullshit property overrides
     go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "Transform", "scrimbux" });
     go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "MissingNo", "scrimbux" });
@@ -123,7 +129,56 @@ TEST(Prefab, TestPrefabRevert)
 
     auto t0 = go->GetComponent<Transform>();
     EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(t0->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go->GetComponent<Name>()->name, "changed_name");
 
     PrefabUtility::RevertPrefabInstance(go);
-    EXPECT_EQ(t0->position, vec3(1.0f, 2.0f, 3.0f));
+    EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f)) << "Position and rotation should not be reverted.";
+    EXPECT_EQ(t0->scale, ori_scale);
+    EXPECT_EQ(go->GetComponent<Name>()->name, "changed_name") << "Name should not be reverted.";
+}
+
+TEST(Prefab, TestPrefabPropagate)
+{
+    Core core;
+    FileSystem& fs = core.GetSystem<FileSystem>();
+    fs.Init();
+
+    SceneFactory sf;
+    auto scene = sf.GenerateDefaultResource();
+
+    core.GetResourceManager().Init();
+
+    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
+    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+
+    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto go0 = PrefabUtility::Instantiate(prefab, *scene);
+    auto go1 = PrefabUtility::Instantiate(prefab, *scene);
+    auto go2 = PrefabUtility::Instantiate(prefab, *scene);
+    auto go3 = PrefabUtility::Instantiate(prefab, *scene);
+
+    prefab->data[0].components[0].get<Transform>().position = vec3(69.0f, 69.0f, 69.0f);
+    prefab->data[0].components[0].get<Transform>().scale = vec3(69.0f, 69.0f, 69.0f);
+    prefab->data[0].components[1].get<Name>().name = string("changed_name");
+
+    vec3 ori_pos = go0->GetComponent<Transform>()->position;
+
+    PrefabUtility::PropagatePrefabChangesToInstances(prefab);
+
+    EXPECT_EQ(go0->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go0->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go0->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+
+    EXPECT_EQ(go1->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go1->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go1->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+
+    EXPECT_EQ(go2->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go2->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go2->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+
+    EXPECT_EQ(go3->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go3->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go3->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
 }
