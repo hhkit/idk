@@ -131,9 +131,7 @@ namespace idk
 			parent_dir._files_map.erase(res);
 
 			vfs.initFile(internal_file, parent_dir, new_p);
-			auto res2 = parent_dir._files_map.find(internal_file._filename);
-
-			auto& test = vfs.getFile(res2->second);
+			
 			return true;
 		}
 
