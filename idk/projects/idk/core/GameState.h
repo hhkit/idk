@@ -23,7 +23,7 @@ namespace idk
 		bool       ActivateScene(uint8_t scene);
 		bool       DectivateScene(uint8_t scene);
 		bool       DectivateScene(Scene scene);
-		bool       ValidateScene(Scene scene);
+		bool       ValidateScene(Scene& scene);
 
 		bool CreateObject(const GenericHandle& handle);
 		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::type);

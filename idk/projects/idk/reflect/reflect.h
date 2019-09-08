@@ -58,7 +58,7 @@ namespace idk::reflect
 		// gets the hash of the type ( check against typehash<T>() )
 		size_t hash() const;
 
-		// should always be true for now (unless through invalid dynamic) (since get_type has assert)
+		// whether the type is valid
 		bool valid() const;
 
 		// number of properties

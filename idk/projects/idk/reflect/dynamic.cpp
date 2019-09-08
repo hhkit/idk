@@ -43,7 +43,8 @@ namespace idk::reflect
 			if (table.m_pEntry[i].m_pName == name)
 				return get_property(i);
 		}
-		throw "Property not found!";
+
+        return { "", dynamic() };
 	}
 
 	property dynamic::get_property(size_t index) const
@@ -51,7 +52,7 @@ namespace idk::reflect
 		assert(index <= type._context->table.m_Count);
 
 		auto& entry = type._context->table.m_pActionEntries[index];
-		const char* name;
+        const char* name = "";
 		dynamic val;
 
 		std::visit([&](auto&& fn_getset) {
