@@ -35,7 +35,7 @@ struct DescriptorPoolsManager
 
 	VulkanView& view;
 	hash_table<vk::DescriptorType,vector<Manager>> managers;
-	constexpr static uint32_t base_chunk_size = 1024;
+	constexpr static uint32_t base_chunk_size = 128;
 	uint32_t curr_chunk_size = base_chunk_size;
 
 	vk::DescriptorPool Add(uint32_t num_ds, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);

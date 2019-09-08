@@ -86,23 +86,32 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		auto& curr_signal = instance_->View().CurrPresentationSignals();
-		//instance_->DrawFrame();
 		instance_->AcquireFrame(*curr_signal.image_available);
-		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		auto curr_index = instance_->View().Swapchain().curr_index;
 		auto& curr_frame = _frame_renderers[curr_index];
+		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
-		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
+		std::vector<GraphicsState> curr_states(1);// curr_buffer.camera.size());
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			curr_state.Init(curr_buffer.camera[i], curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
 		}
+		// */
 		curr_frame.RenderGraphicsStates(curr_states);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
+		using namespace std::chrono_literals;
+		static std::optional<std::chrono::time_point<std::chrono::high_resolution_clock>> last_time{};
+
+		if (last_time)
+		{
+			;
+			while ((std::chrono::high_resolution_clock::now() - *last_time) < (1000ms / 60));
+		}
+		last_time = std::chrono::high_resolution_clock::now();
 		instance_->PresentFrame(*instance_->View().CurrPresentationSignals().render_finished);
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()

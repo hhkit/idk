@@ -43,6 +43,7 @@ namespace idk
 		mat4	  ProjectionMatrix() const;
 
 		CameraData GenerateCameraData() const;
+		float      AspectRatio()const;
 	private:	
 		float _fov;
 

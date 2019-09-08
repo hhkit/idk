@@ -53,6 +53,10 @@ namespace idk::vkn
 
 	UboManager::DataPair& UboManager::FindPair(size_t size)
 	{
+		if (_buffers.size() > _curr_buffer_idx && !_buffers[_curr_buffer_idx].CanAdd(size))
+		{
+			++_curr_buffer_idx;
+		}
 		if (_buffers.size() <= _curr_buffer_idx)
 		{
 			auto&& [buffer, offset] = MakeBuffer();
@@ -62,10 +66,6 @@ namespace idk::vkn
 			tmp.alignment = OffsetAlignment();
 			tmp.sz_alignment = SizeAlignment();
 			_allocation_table.emplace(_buffers.size() - 1,_memory_blocks.size() - 1);
-		}
-		else if (!_buffers[_curr_buffer_idx].CanAdd(size))
-		{
-			++_curr_buffer_idx;
 		}
 		return _buffers[_curr_buffer_idx];
 	}
@@ -110,7 +110,7 @@ namespace idk::vkn
 	}
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{
-		return data.capacity() >= len + data.size() + AlignmentOffset() + SizeAlignmentOffset(data.size(),sz_alignment);
+		return data.capacity() >= len +AlignmentOffset() + SizeAlignmentOffset(data.size(),sz_alignment);
 	}
 
 	size_t UboManager::DataPair::AlignmentOffset() const

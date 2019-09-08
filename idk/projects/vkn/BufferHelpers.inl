@@ -1,5 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
+size_t Track(size_t s);
+
 namespace idk::vkn::hlp
 {
 	template<typename Dispatcher>
@@ -37,7 +39,7 @@ namespace idk::vkn::hlp
 
 		vk::MemoryAllocateInfo allocInfo
 		{
-			 req.size
+			 Track(req.size)
 			,findMemoryType(pdevice,req.memoryTypeBits, memory_flags)
 		};
 		return device.allocateMemoryUnique(allocInfo, nullptr, dispatcher);

@@ -153,3 +153,11 @@ void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::
 }
 
 }
+
+size_t Track(size_t s)
+{
+	static size_t allocated = 0;
+	allocated += s;
+	return s;
+}
+

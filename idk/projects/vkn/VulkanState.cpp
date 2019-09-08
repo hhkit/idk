@@ -16,6 +16,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+size_t Track(size_t s);
 
 
 namespace idk
@@ -752,16 +753,19 @@ namespace idk::vkn
 		//	,&queuePriority
 		//};
 		vk::PhysicalDeviceFeatures pdevFeatures{};
-		pdevFeatures.fillModeNonSolid = VK_TRUE;
-		pdevFeatures.samplerAnisotropy = VK_TRUE;
+		pdevFeatures.setFillModeNonSolid(VK_TRUE);
+		pdevFeatures.setSamplerAnisotropy(VK_TRUE);
 
 		auto valLayers = GetValidationLayers();
+		vk::PhysicalDeviceDescriptorIndexingFeaturesEXT aaaaaaaa{};
+		aaaaaaaa.runtimeDescriptorArray = true;
 
 		vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
 			hlp::arr_count(info), info.data(),
 			hlp::arr_count(valLayers), valLayers.data(),
 			hlp::arr_count(extensions), extensions.data(), &pdevFeatures
 		);
+		//createInfo.setPNext(&aaaaaaaa);
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
 		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
@@ -1287,7 +1291,7 @@ namespace idk::vkn
 		vk::MemoryRequirements memRequirements = m_device->getImageMemoryRequirements(*image,dispatcher);
 
 		vk::MemoryAllocateInfo allocInfo = {};
-		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.allocationSize = Track(memRequirements.size);
 		allocInfo.memoryTypeIndex = hlp::findMemoryType(pdevice,memRequirements.memoryTypeBits, properties);
 
 		/*

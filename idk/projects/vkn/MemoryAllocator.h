@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
-
+size_t Track(size_t s);
 namespace idk::vkn::hlp
 {
 	struct Memories
@@ -35,7 +35,7 @@ namespace idk::vkn::hlp
 			;
 			memories.emplace_back(device.allocateMemoryUnique(
 				vk::MemoryAllocateInfo{
-					chunk_size,type
+					Track(chunk_size),type
 				}, nullptr, vk::DispatchLoaderDefault{}
 			),chunk_size);
 			

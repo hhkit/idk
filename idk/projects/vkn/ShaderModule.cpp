@@ -52,6 +52,7 @@ namespace idk::vkn
 void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer)
 {
 	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
+	string tmp{ byte_code.data() ,byte_code.size() };
 	auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 	extract_info(buffer, ubo_info, single_stage);
 	back_module = view.CreateShaderModule(byte_code);

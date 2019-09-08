@@ -107,13 +107,14 @@
       <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\;$(SolutionDir)dep\include\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495</DisableSpecificWarnings>
       <EnablePREfast>true</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glslang-default-resource-limitsd.lib;OGLCompilerd.lib;osdependentd.lib;hlsld.lib;spirvd.lib;glslangd.lib;vulkan-1.lib;win32D.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib;</AdditionalDependencies>
+      <AdditionalDependencies>SPIRV-Tools.lib;SPIRV-Tools-optd.lib;OGLCompilerd.lib;SPIRVd.lib;OSDependentd.lib;glslangd.lib;shaderc_util.lib;shaderc.lib;vulkan-1.lib;win32D.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib</AdditionalLibraryDirectories>

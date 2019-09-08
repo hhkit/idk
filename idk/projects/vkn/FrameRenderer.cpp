@@ -8,6 +8,8 @@
 #include <vkn/PipelineManager.h>
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
+#include <gfx/RenderTarget.h>
+
 namespace idk::vkn
 {
 	struct SomeHackyThing
@@ -17,7 +19,7 @@ namespace idk::vkn
 	static SomeHackyThing thing;
 	void InitThing(VulkanView& view)
 	{
-
+		return;
 		uint32_t pos_loc = 0;
 		uint32_t nml_loc = 0;
 		uint32_t pos_binding = 0;
@@ -205,10 +207,12 @@ namespace idk::vkn
 		pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
 		pri_buffer->end();
 
+		buffers.emplace_back(*pri_buffer);
 		auto& current_signal = View().CurrPresentationSignals();
 
 		auto& waitSemaphores = *current_signal.image_available;
-		auto& readySemaphores = *_states[0].signal.render_finished;
+		auto& readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
 		//std::vector<vk::CommandBuffer> cmd_buffers;
@@ -227,8 +231,8 @@ namespace idk::vkn
 		};
 
 
-		View().Device()->resetFences(1, &*_states[0].signal.inflight_fence, vk::DispatchLoaderDefault{});
-		queue.submit(submit_info, *_states[0].signal.inflight_fence, vk::DispatchLoaderDefault{});
+		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
+		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 	}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{
@@ -424,7 +428,19 @@ namespace idk::vkn
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferInheritanceInfo aaa{};
-		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,&aaa };
+		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+
+
+
+		VulkanPipeline* prev_pipeline = nullptr;
+		vector<RscHandle<ShaderProgram>> shaders;
+
+		//Preprocess MeshRender's uniforms
+		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
+		rs.ubo_manager.UpdateAllBuffers();
+		auto alloced_dsets = rs.dpools.Allocate(layout_count);
+
+
 		cmd_buffer.begin(begin_info, dispatcher);
 		std::array<float, 4> a{};
 		//TODO grab the appropriate framebuffer and begin renderpass
@@ -449,18 +465,11 @@ namespace idk::vkn
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
-		VulkanPipeline* prev_pipeline=nullptr;
-		vector<RscHandle<ShaderProgram>> shaders;
 
-		//Preprocess MeshRender's uniforms
-		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
-		rs.ubo_manager.UpdateAllBuffers();
-		auto alloced_dsets = rs.dpools.Allocate(layout_count);
-
+		rs.FlagRendered();
 		for (auto& p_ro : processed_ro)
 		{
 			auto& obj = p_ro.Object();
-			rs.FlagRendered();
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
@@ -513,6 +522,7 @@ namespace idk::vkn
 		}
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
+		Track(0);
 	}
 
 	PipelineManager& FrameRenderer::GetPipelineManager()
