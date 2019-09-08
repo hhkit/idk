@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="imgui\ImCurveEdit.cpp" />
+    <ClCompile Include="imgui\ImGradient.cpp" />
+    <ClCompile Include="imgui\ImGuizmo.cpp" />
+    <ClCompile Include="imgui\ImSequencer.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGUIImpl_Win32.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -28,6 +32,10 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="imgui\ImCurveEdit.h" />
+    <ClInclude Include="imgui\ImGradient.h" />
+    <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="imgui\ImSequencer.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\ImGUIImpl_Win32.h" />
