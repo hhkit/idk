@@ -5,6 +5,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <test/TestComponent.h>
+#include <test/TestResourceFactory.h>
 #include <app/Application.h>
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
@@ -15,6 +16,7 @@ namespace idk
 	void TestSystem::Init()
 	{
 		std::cout << "Init System\n";
+		Core::GetResourceManager().RegisterFactory<TestResourceFactory>();
 	}
 
 	void TestSystem::TestSpan(span<TestComponent> comps)

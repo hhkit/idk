@@ -36,6 +36,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="res\SaveableResource.h" />
+    <ClInclude Include="res\SaveableResourceManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />
@@ -135,6 +136,7 @@
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
+    <ClInclude Include="test\TestResourceFactory.h" />
     <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
@@ -180,6 +182,7 @@
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
@@ -265,6 +268,7 @@
     <None Include="res\ForwardingExtensionLoader.inl" />
     <None Include="res\Resource.inl" />
     <None Include="res\ResourceMeta.inl" />
+    <None Include="res\SaveableResourceManager.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

@@ -4,28 +4,39 @@
 
 namespace idk
 {
+	namespace detail { template<typename T> struct tSavedHelper; }
 	template<typename T>
 	struct ResourceExtension
 	{
-		static_assert(false, "Please specialize ResourceExtension for type T");
+		static constexpr string_view ext = "";
 	};
 
-#define RESOURCE_EXTENSION(Type, Extension)                                 \
-	template<>                                                              \
-	struct ResourceExtension<T>                                             \
-	{                                                                       \
-		static_assert(Extension[0] == '.', "Extensions must begin with '.'")\
-		static constexpr string_view ext = Extension;                       \
+#define RESOURCE_EXTENSION(Type, Extension)                                  \
+	template<>                                                               \
+	struct ResourceExtension<Type>                                           \
+	{                                                                        \
+		static_assert(Extension[0] == '.', "Extensions must begin with '.'");\
+		static constexpr string_view ext = Extension;                        \
 	};
 
-	template<typename T>
+	template<typename T, typename AutoSave = true_type>
 	struct Saveable
 		: ResourceExtension<T>
 	{
 		using ResourceExtension<T>::ext;
-		string filename;
+		string name = string{ reflect::get_type<T>().name() };
 
+		static constexpr auto autosave = AutoSave::value;
+
+		bool IsDirty() const { return _dirty; }
+		void Dirty() { _dirty = true; };
 	private:
+		template<typename T>
+		friend struct detail::tSavedHelper;
 		friend class ResourceManager;
+
+		bool _dirty = false;
+
+		void Clean() { _dirty = false; };
 	};
 }

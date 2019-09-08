@@ -77,6 +77,10 @@ REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
 REFLECT_VARS(i, j)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::TestResource, "TestResource")
+REFLECT_VARS(k, yolo)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
 REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()

@@ -1,5 +1,7 @@
 #include "ResourceManager.h"
 #include <res/ResourceMeta.h>
+#include <res/SaveableResource.h>
+#include <res/SaveableResourceManager.h>
 #pragma once
 
 namespace idk
@@ -39,6 +41,11 @@ namespace idk
 
 		if constexpr (has_tag_v<Resource, MetaTag>)
 			ptr->_dirtymeta = true;
+		if constexpr (has_tag_v<Resource, Saveable>)
+		{
+			ptr->Dirty();
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
+		}
 		table.emplace(handle.guid, std::move(ptr));
 		
 		return handle;
@@ -67,6 +74,8 @@ namespace idk
 
 		auto handle = RscHandle<Resource>{ guid };
 		ptr->_handle = handle;
+		if constexpr (has_tag_v<Resource, Saveable>)
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
 		table.emplace_hint(itr, handle.guid, std::move(ptr));
 		return handle;
 	}
@@ -84,7 +93,10 @@ namespace idk
 
 		auto handle = RscHandle<Resource>{ guid };
 		ptr->_handle = handle;
+		if constexpr (has_tag_v<Resource, Saveable>)
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
 		table.emplace_hint(itr, handle.guid, std::move(ptr));
+
 		return handle;
 	}
 
@@ -104,6 +116,11 @@ namespace idk
 		ptr->_dirty = true;
 		if constexpr (has_tag_v<RegisterMe, MetaTag>)
 			ptr->_dirtymeta = true;
+		if constexpr (has_tag_v<Resource, Saveable>)
+		{
+			ptr->Dirty();
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
+		}
 		table.emplace(handle.guid, std::move(ptr));
 
 		return handle;
@@ -122,6 +139,11 @@ namespace idk
 
 		auto handle = RscHandle<RegisterMe>{ guid };
 		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
+		if constexpr (has_tag_v<Resource, Saveable>)
+		{
+			ptr->Dirty();
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
+		}
 		table.emplace_hint(itr, handle.guid, std::move(ptr));
 		return handle;
 	}

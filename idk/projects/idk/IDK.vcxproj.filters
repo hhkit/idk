@@ -536,6 +536,12 @@
     <ClInclude Include="res\SaveableResource.h">
       <Filter>res</Filter>
     </ClInclude>
+    <ClInclude Include="res\SaveableResourceManager.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestResourceFactory.h">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -741,6 +747,9 @@
     <ClCompile Include="anim\AnimationSystem.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="res\SaveableResourceManager.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -901,6 +910,9 @@
     </None>
     <None Include="ds\slow_tree.inl">
       <Filter>ds</Filter>
+    </None>
+    <None Include="res\SaveableResourceManager.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

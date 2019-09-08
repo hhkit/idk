@@ -50,6 +50,7 @@ namespace idk
 		,   class DebugRenderer
 		,	class AudioSystem
 		,	class ResourceManager
+		,	class SaveableResourceManager
 		,	class SceneManager
 		,	class IEditor
 		,   class TestSystem

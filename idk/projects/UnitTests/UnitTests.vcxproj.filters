@@ -33,6 +33,7 @@
     <ClCompile Include="TestDualSet.cpp" />
     <ClCompile Include="TestTree.cpp" />
     <ClCompile Include="TestPrefab.cpp" />
+    <ClCompile Include="TestSaveableResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
