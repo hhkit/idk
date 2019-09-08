@@ -32,15 +32,15 @@ namespace idk {
 		virtual void EndWindow_V() override;
 	private:
 
-		void FileMenu();
+		void DisplayFileMenu();
+		void DisplayEditMenu();
+		void DisplayGameObjectMenu();
+		void DisplayComponentMenu();
+		void DisplayWindowMenu();
+		void DisplayHelpMenu();
 
-		void EditMenu();
-
-		void WindowMenu();
-
-		void ToolBarChildWindow();
-
-		void HintBarChildWindow();
+		void DisplayToolBarChildWindow();
+		void DisplayHintBarChildWindow();
 
 
 		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
