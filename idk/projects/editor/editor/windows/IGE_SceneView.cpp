@@ -54,18 +54,19 @@ namespace idk {
 		ImVec2 imageSize{ GetScreenSize().x,GetScreenSize().y };
 		//imageSize.y = (imageSize.x * (9 / 16));
 		ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
-		ImVec2 value = ImGui::GetWindowContentRegionMin();
 
-		ImVec2 v = ImGui::GetWindowPos();
 
-		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
+		//ImVec2 value = ImGui::GetWindowContentRegionMin();
+		//ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
 		if (ImGui::IsMouseClicked(0)) {
-			auto i = ImGui::GetMousePos();
-			std::cout << "MousePos: " << i.x << "," << i.y << "\n";
+
+			//Use this function to get
+			//std::cout << "MousePosInWindow: " << GetMousePosInWindowNormalized().x << "," << GetMousePosInWindowNormalized().y << "\n";
+
+			//Select gameobject here!
 		}
 
-		//std::cout << currPos.x << "::" << currPos.y << std::endl;
 	}
 
 	void IGE_SceneView::SetTexture(void* textureToRender)
@@ -76,6 +77,25 @@ namespace idk {
 	vec2 IGE_SceneView::GetScreenSize()
 	{
 		return vec2 { ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
+	}
+
+	vec2 IGE_SceneView::GetMousePosInWindow()
+	{
+		ImVec2 v = ImGui::GetWindowPos();
+		v.y += ImGui::GetFrameHeight();
+		ImVec2 i = ImGui::GetMousePos();
+		
+		return vec2(i.x - v.x, i.y - v.y);
+	}
+
+	vec2 IGE_SceneView::GetMousePosInWindowNormalized()
+	{
+		vec2 i = GetMousePosInWindow();
+		vec2 v = GetScreenSize();
+
+		i.x = i.x != 0.0f ? i.x / v.x : 0.0f;
+		i.y = i.y != 0.0f ? i.y / v.y : 0.0f;
+		return i;
 	}
 
 }

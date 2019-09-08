@@ -32,6 +32,26 @@ namespace idk {
 		virtual void EndWindow_V() override;
 	private:
 
+		void FileMenu();
+
+		void EditMenu();
+
+		void WindowMenu();
+
+		void ToolBarChildWindow();
+
+		void HintBarChildWindow();
+
+
+		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
+										  | ImGuiWindowFlags_NoScrollbar
+										  | ImGuiWindowFlags_NoResize
+										  | ImGuiWindowFlags_NoSavedSettings
+										  | ImGuiWindowFlags_NoMove
+										  | ImGuiWindowFlags_NoDocking
+										  | ImGuiWindowFlags_NoCollapse;
+
+		const float toolBarHeight = 30.0f;
 
 	};
 
