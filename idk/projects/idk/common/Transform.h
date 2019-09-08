@@ -22,6 +22,7 @@ namespace idk
 		mat4 LocalMatrix() const;
 		mat4 GlobalMatrix() const;
 
+		void LocalMatrix(const mat4&);
 		void GlobalMatrix(const mat4&);
 
 		vec3 GlobalPosition() const;

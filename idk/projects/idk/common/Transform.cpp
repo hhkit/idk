@@ -34,6 +34,14 @@ namespace idk
 			return LocalMatrix();
 	}
 
+	void Transform::LocalMatrix(const mat4& m)
+	{
+		auto decomp = decompose(m);
+		position = decomp.position;
+		rotation = decomp.rotation;
+		scale    = decomp.scale;
+	}
+
 	void Transform::GlobalMatrix(const mat4& m)
 	{
 		if (!parent)
