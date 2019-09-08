@@ -33,6 +33,5 @@ namespace idk
 		virtual bool  SetFullscreen(bool enable_fullscreen) = 0;
 		virtual bool  SetScreenSize(ivec2 target_size) = 0;
 		virtual ivec2 GetScreenSize() = 0 ;
-		virtual void  SwapBuffers() = 0;
 	};
 }

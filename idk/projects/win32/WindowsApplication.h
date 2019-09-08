@@ -39,7 +39,6 @@ namespace idk::win
 		// windows
 		bool SetFullscreen(bool) override { return false; }
 		bool SetScreenSize(ivec2) override { return false; }
-		void SwapBuffers() override {}
 		void Shutdown() override {}
 		void PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func);
 
