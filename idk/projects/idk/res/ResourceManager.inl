@@ -108,7 +108,7 @@ namespace idk
 	}
 
 	template<typename RegisterMe, typename ...Args, typename>
-	RscHandle<RegisterMe> ResourceManager::Create(Args&& ... args)
+	RscHandle<RegisterMe> ResourceManager::Emplace(Args&& ... args)
 	{
 		auto& table = GetTable<RegisterMe>();
 		auto& loader = GetLoader<RegisterMe>();
@@ -136,7 +136,7 @@ namespace idk
 	}
 
 	template<typename RegisterMe, typename ...Args, typename>
-	RscHandle<RegisterMe> ResourceManager::Create(Guid guid, Args&& ... args)
+	RscHandle<RegisterMe> ResourceManager::Emplace(Guid guid, Args&& ... args)
 	{
 		auto [table, itr] = FindHandle(RscHandle<RegisterMe>{guid});
 		if (itr != table.end())

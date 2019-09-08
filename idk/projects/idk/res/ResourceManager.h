@@ -52,11 +52,11 @@ namespace idk
 
 		template<typename RegisterMe, typename ... Args, 
 			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
-		> RscHandle<RegisterMe> Create(Args&& ...);
+		> RscHandle<RegisterMe> Emplace(Args&& ...);
 		
 		template<typename RegisterMe, typename ... Args, 
 			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
-		> RscHandle<RegisterMe> Create(Guid guid, Args&& ...);
+		> RscHandle<RegisterMe> Emplace(Guid guid, Args&& ...);
 
 		// file operations
 		FileResources LoadFile(FileHandle path_to_file);

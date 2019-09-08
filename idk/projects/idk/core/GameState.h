@@ -21,8 +21,8 @@ namespace idk
 		~GameState();
 
 		bool       ActivateScene(uint8_t scene);
-		bool       DectivateScene(uint8_t scene);
-		bool       DectivateScene(Scene scene);
+		bool       DeactivateScene(uint8_t scene);
+		bool       DeactivateScene(Scene scene);
 		bool       ValidateScene(Scene& scene);
 
 		bool CreateObject(const GenericHandle& handle);

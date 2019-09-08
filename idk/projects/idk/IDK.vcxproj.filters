@@ -548,6 +548,9 @@
     <ClInclude Include="util\EasyFactory.h">
       <Filter>res</Filter>
     </ClInclude>
+    <ClInclude Include="scene\ProjectManager.h">
+      <Filter>scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -756,7 +759,12 @@
     <ClCompile Include="res\SaveableResourceManager.cpp">
       <Filter>res</Filter>
     </ClCompile>
-    <ClCompile Include="util\ioutils.cpp" />
+    <ClCompile Include="scene\ProjectManager.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="util\ioutils.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

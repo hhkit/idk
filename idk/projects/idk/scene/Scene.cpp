@@ -7,22 +7,12 @@ namespace idk
 	Scene::Scene(uint8_t scene_id_)
 		: scene_id{ scene_id_ }
 	{
-		if (scene_id == MaxScene)
-		{
-			for (uint8_t i = 0; i < MaxScene; ++i)
-			{
-				if (GameState::GetGameState().ActivateScene(i))
-				{
-					scene_id = i;
-					break;
-				}
-			}
-		}
+		GameState::GetGameState().ActivateScene(scene_id_);
 	}
 
 	Scene::~Scene()
 	{
-		GameState::GetGameState().DectivateScene(scene_id);
+		GameState::GetGameState().DeactivateScene(scene_id);
 	}
 
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)
