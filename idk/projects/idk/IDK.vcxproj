@@ -149,7 +149,9 @@
     <ClInclude Include="shape\ray.h" />
     <ClInclude Include="shape\sphere.h" />
     <ClInclude Include="util\align.h" />
+    <ClInclude Include="util\EasyFactory.h" />
     <ClInclude Include="util\enum.h" />
+    <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
     <ClInclude Include="reflect\ReflectRegistration.h" />
@@ -239,6 +241,7 @@
     <ClCompile Include="shape\ray.cpp" />
     <ClCompile Include="shape\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />

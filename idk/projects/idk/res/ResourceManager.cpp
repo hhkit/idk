@@ -184,6 +184,21 @@ namespace idk
 			return FileResources();
 	}
 
+	FileResources ResourceManager::Associate(FileHandle file, FileResources&& f)
+	{
+		if (f.resources.empty())
+			return FileResources();
+
+		auto [itr, success] = _loaded_files.emplace(file.GetMountPath(), std::move(f));
+
+		// save old meta
+		auto ser = save_meta(itr->second);
+
+		auto path_to_meta = string{ file.GetMountPath() } + ".meta";
+		auto metastream = Core::GetSystem<FileSystem>().Open(path_to_meta, FS_PERMISSIONS::WRITE);
+		metastream << serialize_text(ser);
+	}
+
 	void ResourceManager::SaveDirtyMetadata()
 	{
 		auto& fs = Core::GetSystem<FileSystem>();

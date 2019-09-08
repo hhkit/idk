@@ -65,6 +65,8 @@ namespace idk
 		size_t        UnloadFile(FileHandle path_to_file);
 		FileResources GetFileResources(FileHandle path_to_file);
 
+		FileResources Associate(FileHandle file, FileResources&& f);
+
 		// saving metadata
 		void SaveDirtyMetadata();
 

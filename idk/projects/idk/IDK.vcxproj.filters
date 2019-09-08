@@ -542,6 +542,12 @@
     <ClInclude Include="test\TestResourceFactory.h">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="util\ioutils.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\EasyFactory.h">
+      <Filter>res</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -750,6 +756,7 @@
     <ClCompile Include="res\SaveableResourceManager.cpp">
       <Filter>res</Filter>
     </ClCompile>
+    <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

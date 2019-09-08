@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <meta/tag.h>
+#include <file/FileHandle.h>
 #include <res/ResourceMeta.h>
 
 namespace idk
