@@ -34,6 +34,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />

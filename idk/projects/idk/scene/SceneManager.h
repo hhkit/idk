@@ -16,6 +16,8 @@ namespace idk
 	{
 	public:
 		using SceneGraph = SceneGraphBuilder::SceneGraph;
+		struct iterator;
+
 		void Init() override;
 		void Shutdown() override;
 
@@ -32,6 +34,7 @@ namespace idk
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
 
 		string_view GetSceneName();
+
 	private:
 		GameState* _gs = nullptr;
 		SceneGraphBuilder _sg_builder;

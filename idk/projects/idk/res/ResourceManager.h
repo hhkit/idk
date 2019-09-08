@@ -34,6 +34,8 @@ namespace idk
 		Factory& RegisterFactory(Args&& ...);
 		template<typename ExtensionLoaderT, typename ... Args>
 		ExtensionLoaderT& RegisterExtensionLoader(std::string_view extension, Args&& ...);
+		template<typename Factory>
+		Factory& GetFactory();
 
 		// handle ops
 		template<typename Resource> bool      Validate(const RscHandle<Resource>&);
@@ -70,9 +72,9 @@ namespace idk
 		using GenPtr = shared_ptr<void>;
 		template<typename R>
 		using Storage = hash_table<Guid, std::shared_ptr<R>>;
-		array<GenPtr, ResourceCount> _plaintext_loaders{}; // std::shared_ptr<ResourceFactory<Resource>>
-		array<GenPtr, ResourceCount> _resource_tables  {}; // std::shared_ptr<Storage<Resource>>
-		array<GenPtr, ResourceCount> _default_resources{}; // std::shared_ptr<Resource>
+		array<GenPtr, ResourceCount> _resource_factories{}; // std::shared_ptr<ResourceFactory<Resource>>
+		array<GenPtr, ResourceCount> _resource_tables   {}; // std::shared_ptr<Storage<Resource>>
+		array<GenPtr, ResourceCount> _default_resources {}; // std::shared_ptr<Resource>
 
 		hash_table<string, unique_ptr<ExtensionLoader>> _extension_loaders;
 		hash_table<string, FileResources>               _loaded_files;

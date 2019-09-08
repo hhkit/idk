@@ -530,6 +530,9 @@
     <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="res\SaveableResource.h">
+      <Filter>res</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

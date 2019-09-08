@@ -192,7 +192,6 @@ namespace idk
 			bool dirty = false;
 			for (auto& elem : resources.resources)
 				elem.visit([&dirty](auto& elem) {
-				dirty |= elem->_dirty;
 				if constexpr (has_tag_v<decltype(elem), MetaTag>)
 					dirty |= elem->_dirtymeta;
 			});
@@ -208,7 +207,6 @@ namespace idk
 				// mark as clean
 				for (auto& elem : resources.resources)
 					elem.visit([&dirty](auto& elem) {
-					elem->_dirty = false;
 					if constexpr (has_tag_v<decltype(elem), MetaTag>)
 						elem->_dirtymeta = false;
 				});
