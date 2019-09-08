@@ -60,9 +60,9 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 	auto tmp = glsl.data();
 	shader.setStrings(&tmp, 1);
 	TBuiltInResource dafuq = glslang::DefaultTBuiltInResource;
-	if (!shader.parse(&dafuq, 450, true, EShMessages::EShMsgDefault))
+	if (!shader.parse(&dafuq, 450, true, EShMessages::EShMsgVulkanRules))
 		hlp::cerr() << "Shader Compilation Error: " << shader.getInfoLog() << "\n";
-	//else
+	else
 	{
 		glslang::SpvOptions opt{};
 		opt.validate = true;

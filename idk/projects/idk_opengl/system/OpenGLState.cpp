@@ -74,7 +74,7 @@ namespace idk::ogl
 
 			// per mesh render
 			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
-			pipeline.SetUniform("perspective_transform", cam.projection_matrix);
+			pipeline.SetUniform("perspective_transform.transform", cam.projection_matrix);
 
 			glBindVertexArray(vao_id);
 			for (auto& elem : curr_object_buffer.mesh_render)

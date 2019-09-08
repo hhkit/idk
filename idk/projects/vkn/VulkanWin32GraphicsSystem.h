@@ -6,6 +6,7 @@
 #endif
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
+#include <vkn/GraphicsState.h>
 #include<vkn/UboManager.h>
 #include <vkn/FrameRenderer.h>
 

@@ -44,7 +44,7 @@ namespace idk::vkn
 	{
 		if (frame_index >= update_queue.size())
 		{
-			update_queue.resize(frame_index + 1);
+			update_queue.resize(s_cast<size_t>(frame_index) + 1);
 		}
 		auto& curr_queue = update_queue[frame_index];
 		//Clear the previous ones

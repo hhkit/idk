@@ -214,6 +214,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
+    <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="utils\GlslToSpirv.h" />
     <ClInclude Include="idkTexture.h" />
     <ClInclude Include="MemoryAllocator.h" />

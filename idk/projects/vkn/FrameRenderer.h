@@ -4,13 +4,14 @@
 #include <vkn/VulkanView.h>
 #include <vkn/UboManager.h>
 #include <vkn/VulkanPipeline.h>
+#include <gfx/pipeline_config.h>
 namespace idk
 {
-	struct GraphicsState;
 	struct RenderObject;
 }
 namespace idk::vkn
 {
+	struct GraphicsState;
 	struct ProcessedRO
 	{
 		struct BindingInfo
@@ -43,6 +44,7 @@ namespace idk::vkn
 		//set, update_instr
 		const RenderObject* itr;
 		hash_table<uint32_t, vector<BindingInfo>> bindings;
+		shared_ptr<pipeline_config> config;
 	};
 	class PipelineManager;
 	struct RenderStateV2

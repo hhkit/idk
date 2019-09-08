@@ -17,15 +17,6 @@ namespace idk
 		Default = OpenGL
 	};
 
-	struct GraphicsState
-	{
-		using CameraData = Camera;//Replace if camera cannot be stored by copy.
-		CameraData           camera;
-		pipeline_config      config;
-		//RenderTexHandle      render_target;//Get RenderTarget from camera.
-		vector<RenderObject> mesh_render;
-		vector<RenderObject> skinned_mesh_render;
-	};
 	class GraphicsSystem
 		: public ISystem
 	{
@@ -45,13 +36,13 @@ namespace idk
 			vector<RenderObject> mesh_render;
 			vector<RenderObject> skinned_mesh_render;
 		};
-		using GraphicsState = RenderBuffer;
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
 		unsigned               curr_write_buffer = 0;
 		unsigned               curr_draw_buffer  = 1;
 		bool                   write_buffer_dirty = false;
 
+		shared_ptr<pipeline_config> mesh_render_config;
 	private:
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);

@@ -46,13 +46,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-
-	switch (GraphicsAPI::OpenGL)
+	auto gfx_api = GraphicsAPI::Vulkan;
+	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 			c->AddSystem<vkn::VulkanDebugRenderer>();
-			c->AddSystem<IDE>();
+			//c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
 			break;
@@ -77,13 +77,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
-	Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
+	//Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 
 	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
 	auto h_mat = Core::GetResourceManager().Create<Material>();
 	h_mat->BuildShader(shader_template, "", "");
 
-	auto createtest_obj = [&scene, h_mat](vec3 pos) {
+	auto createtest_obj = [&scene, h_mat,gfx_api](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->AddComponent<TestComponent>();
 		go->GetComponent<Transform>()->position = pos;
@@ -93,7 +93,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
-		mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//Temp condition, since mesh loader isn't in for vulkan yet
+		if(gfx_api !=GraphicsAPI::Vulkan)
+			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
 	};
 

@@ -6,6 +6,12 @@ namespace idk
 {
 	void GraphicsSystem::BufferGraphicsState(span<MeshRenderer> mesh_renderers, span<const class Transform>, span<const Camera> cameras)
 	{
+		if (!mesh_render_config)
+		{
+			mesh_render_config = std::make_shared<pipeline_config>();
+			mesh_render_config->fill_type = FillType::eFill;
+			mesh_render_config->prim_top = PrimitiveTopology::eTriangleList;
+		}
 		// todo: scenegraph traversal
 		RenderBuffer result{};
 		result.camera.reserve(cameras.size());
@@ -15,7 +21,7 @@ namespace idk
 
 		for (auto& elem : mesh_renderers)
 			if (elem.IsActiveAndEnabled())
-				result.mesh_render.emplace_back(elem.GenerateRenderObject());
+				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
 
 		SubmitBuffers(std::move(result));
 	}

@@ -44,6 +44,7 @@
 
 namespace idk::vkn
 {
+
 	struct SomeHackyThing
 	{
 		VulkanPipeline pipeline;
@@ -91,7 +92,13 @@ namespace idk::vkn
 		auto curr_index = instance_->View().Swapchain().curr_index;
 		auto& curr_frame = _frame_renderers[curr_index];
 		_pm->CheckForUpdates(curr_index);
-		curr_frame.RenderGraphicsStates(curr_buffer.states);
+		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
+		for (size_t i = 0; i < curr_states.size(); ++i)
+		{
+			auto& curr_state = curr_states[i];
+			curr_state.Init(curr_buffer.camera[i], curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
+		}
+		curr_frame.RenderGraphicsStates(curr_states);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()

@@ -24,33 +24,36 @@ namespace idk::vkn
 		}
 		return result;
 	}
-
+	void extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
+	{
+		spx::CompilerReflection code_reflector{ buffer };// r_cast<const uint32_t*>(std::data(buffer)), byte_code.size() / sizeof(uint16_t)//};
+		auto aaaa = code_reflector.compile();
+		auto resources = code_reflector.get_shader_resources();
+		//type
+		ubo_info.clear();
+		for (auto& ub : resources.uniform_buffers)
+		{
+			UboInfo info;
+			auto type = code_reflector.get_type(ub.type_id);
+			info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
+			info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
+			info.stage = StageToUniformStage(single_stage);
+			info.size = type.width;
+			info.type = vk::DescriptorType::eUniformBuffer;
+			uint32_t i = 0;
+			for (auto& member_type : type.member_types)
+			{
+				auto tmp = code_reflector.get_type(member_type);
+				info.size += s_cast<uint32_t>(code_reflector.get_declared_struct_member_size(type, i));
+			}
+			ubo_info[ub.name] = std::move(info);
+		}
+	}
 void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer)
 {
 	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
-	spx::CompilerReflection code_reflector{ buffer };// r_cast<const uint32_t*>(std::data(buffer)), byte_code.size() / sizeof(uint16_t)//};
-	auto aaaa = code_reflector.compile();
-	auto resources = code_reflector.get_shader_resources();
 	auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
-	//type
-	ubo_info.clear();
-	for (auto& ub : resources.uniform_buffers)
-	{
-		UboInfo info;
-		auto type = code_reflector.get_type(ub.type_id);
-		info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
-		info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
-		info.stage = StageToUniformStage(single_stage);
-		info.size = type.width;
-		info.type = vk::DescriptorType::eUniformBuffer;
-		uint32_t i = 0;
-		for (auto& member_type : type.member_types)
-		{
-			auto tmp = code_reflector.get_type(member_type);
-			info.size += code_reflector.get_declared_struct_member_size(type, i);
-		}
-		ubo_info[ub.name] = std::move(info);
-	}
+	extract_info(buffer, ubo_info, single_stage);
 	back_module = view.CreateShaderModule(byte_code);
 	stage = single_stage;
 	attrib_descriptions = std::move(descriptors);

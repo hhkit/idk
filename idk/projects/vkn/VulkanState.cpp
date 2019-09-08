@@ -1175,7 +1175,7 @@ namespace idk::vkn
 		return;
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load("texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
+		vk::DeviceSize imageSize = s_cast<vk::DeviceSize>(texWidth) * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
 
 		if (!pixels) {
 			throw std::runtime_error("failed to load texture image!");

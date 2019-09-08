@@ -93,6 +93,9 @@
     <ClInclude Include="utils\GlslToSpirv.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsState.h">
+      <Filter>render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
