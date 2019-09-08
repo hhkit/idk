@@ -279,106 +279,23 @@ TEST(FileSystem, TestFileOpen)
 	}
 	vfs.Update();
 
-	// Test Read
-	// {
-	// 	auto valid_handle = vfs.Open("/FS_UnitTests/test_write.txt");
-	// 	auto invalid_handle = vfs.OpenRead("/FS_UnitTests/blah.txt");
-	// 	EXPECT_TRUE(static_cast<bool>(valid_handle));
-	// 	EXPECT_FALSE(static_cast<bool>(invalid_handle));
-	// 
-	// 	// Reading from invalid handle
-	// 	EXPECT_TRUE(invalid_handle.Read(nullptr, 5) < 0);
-	// 
-	// 	char buffer[100] { 0 };
-	// 	auto res = valid_handle.Read(buffer, 1);
-	// 	EXPECT_TRUE(res >= 0);
-	// 	EXPECT_TRUE(strcmp(buffer, "1") == 0);
-	// 
-	// 	res = valid_handle.Read(buffer, 3);
-	// 	EXPECT_TRUE(res >= 0);
-	// 	EXPECT_TRUE(strcmp(buffer, "23\n") == 0);
-	// 
-	// 	res = valid_handle.GetLine(buffer, 100);
-	// 	EXPECT_TRUE(res >= 0);
-	// 	EXPECT_TRUE(strcmp(buffer, "getline test") == 0);
-	// }
-	// vfs.Update();
-	// 
-	// // Test Read In Loop
-	// {
-	// 	{
-	// 		auto write_handle = vfs.OpenWrite("/FS_UnitTests/test_write.txt");	// Should create a file
-	// 		write_handle.Write("123\n456\n789\n", strlen("123\n456\n789\n"));
-	// 	}
-	// 
-	// 	auto valid_handle = vfs.OpenRead("/FS_UnitTests/test_write.txt");
-	// 	EXPECT_TRUE(static_cast<bool>(valid_handle));
-	// 
-	// 	char buffer[100]{ 0 };
-	// 	int res = valid_handle.Read(buffer, 4);
-	// 	std::cout << "Testing Read..." << std::endl;
-	// 	while (res >= 0)
-	// 	{
-	// 		std::cout << buffer;
-	// 		res = valid_handle.Read(buffer, 4);
-	// 	}
-	// 
-	// 	// Both Read and GetLine should fail after this.
-	// 	res = valid_handle.Read(buffer, 100);
-	// 	EXPECT_TRUE(res < 0);
-	// 
-	// 	res = valid_handle.GetLine(buffer, 100);
-	// 	EXPECT_TRUE(res < 0);
-	// 
-	// }
-	// vfs.Update();
-	// 
-	// // Test GetLine In Loop
-	// {
-	// 	auto valid_handle = vfs.OpenRead("/FS_UnitTests/test_write.txt");
-	// 	EXPECT_TRUE(static_cast<bool>(valid_handle));
-	// 
-	// 	char buffer[100]{ 0 };
-	// 	int res = 0;
-	// 
-	// 	std::cout << "Testing GetLine..." << std::endl;
-	// 	for (size_t i = 0; i < 3; ++i)
-	// 	{
-	// 		int res = valid_handle.GetLine(buffer, 100);
-	// 		EXPECT_TRUE(res >= 0);
-	// 
-	// 		std::cout << buffer << std::endl;
-	// 	}
-	// 
-	// 	// Both Read and GetLine should fail after this.
-	// 	res = valid_handle.Read(buffer, 100);
-	// 	EXPECT_TRUE(res < 0);
-	// 
-	// 	res = valid_handle.GetLine(buffer, 100);
-	// 	EXPECT_TRUE(res < 0);
-	// }
-	// 
-	// // Test read/write error
-	// {
-	// 	auto read_handle = vfs.OpenRead("/FS_UnitTests/test_read.txt");
-	// 	auto write_handle = vfs.OpenWrite("/FS_UnitTests/test_write.txt");
-	// 
-	// 	EXPECT_TRUE(static_cast<bool>(read_handle));
-	// 	EXPECT_TRUE(static_cast<bool>(write_handle));
-	// 
-	// 	// Calling Write on read-only handle
-	// 	auto res = read_handle.Write("blah", 4);
-	// 	EXPECT_TRUE(res < 0);
-	// 
-	// 	// Calling Read on write-only handle
-	// 	char buffer[100]{ 0 };
-	// 	res = write_handle.Read(buffer, 5);
-	// 	EXPECT_TRUE(res < 0);
-	// 
-	// 	// Calling GetLine on write-only handle
-	// 	res = write_handle.GetLine(buffer, 5);
-	// 	EXPECT_TRUE(res < 0);
-	// }
-	// // SHUTDOWN_FILESYSTEM_UNIT_TEST()
+}
+
+TEST(FileSystem, TestRename)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+	vfs.Open("/FS_UnitTests/test_rename.txt", FS_PERMISSIONS::WRITE);
+	auto file_handle = vfs.GetFile("/FS_UnitTests/test_rename.txt");
+	vfs.Update();
+
+	EXPECT_TRUE(file_handle.Rename("test_rename2.ext"));
+	vfs.Update();
+	EXPECT_TRUE(vfs.QueryFileChangesAll().size() == 0);
+	EXPECT_FALSE(vfs.GetFile("/FS_UnitTests/test_rename.txt"));
+	EXPECT_FALSE(vfs.GetFile("/FS_UnitTests/test_rename2.txt"));
+	file_handle = vfs.GetFile("/FS_UnitTests/test_rename2.ext");;
+	EXPECT_TRUE(file_handle);
+
+	remove(file_handle.GetFullPath().data());
 }
 

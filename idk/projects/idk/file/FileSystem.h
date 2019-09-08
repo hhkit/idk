@@ -42,9 +42,10 @@ namespace idk
 
 		// Open/closing files
 		FStreamWrapper Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream = false);
-
+		
 		// This functions affect the actual files outside of the system.
 		int Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
+		bool Rename(string_view mountPath, string_view new_name);
 		// FileSystem_ErrorCode DelFile(string_view mountPath);
 		// 
 		// FileSystem_ErrorCode GetLastError() const;

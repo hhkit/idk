@@ -170,7 +170,7 @@ namespace idk
 	{
 		return DectivateScene(scene.scene_id);
 	}
-	bool GameState::ValidateScene(Scene scene)
+	bool GameState::ValidateScene(Scene& scene)
 	{
 		return static_cast<ObjectPool<GameObject>*>(std::get<0>(_objects).get())->ValidateScene(scene.scene_id);
 	}
@@ -215,7 +215,7 @@ namespace idk
 	}
 	uint8_t GameState::GetTypeID(const reflect::type& type)
 	{
-		auto itr = name_to_id_map.find(type.name());
+		auto itr = type.valid() ? name_to_id_map.find(type.name()) : name_to_id_map.end();
 		return itr != name_to_id_map.end() ? itr->second : std::numeric_limits<uint8_t>::max();
 	}
 	GameState& GameState::GetGameState()

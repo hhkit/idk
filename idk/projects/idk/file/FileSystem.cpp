@@ -627,6 +627,12 @@ namespace idk {
 		return 0;
 	}
 
+	bool FileSystem::Rename(string_view mountPath, string_view new_name)
+	{
+		FileHandle handle = GetFile(mountPath);
+		return handle.Rename(new_name);
+	}
+
 	void FileSystem::DumpMounts() const
 	{
 		std::cout << std::boolalpha;

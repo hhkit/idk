@@ -530,6 +530,9 @@
     <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="anim\AnimationSystem.h">
+      <Filter>anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -731,6 +734,9 @@
     </ClCompile>
     <ClCompile Include="scene\SceneGraphBuilder.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationSystem.cpp">
+      <Filter>anim</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
