@@ -81,150 +81,133 @@ namespace idk {
 
 	}
 
+	void IGE_MainWindow::FileMenu()
+	{
+		if (ImGui::BeginMenu("File")) {
 
-	void IGE_MainWindow::Update() {
-
-		ImGui::PopStyleVar(3); //Pop from BeginWindow()
-		ImGui::PopStyleColor(); //Pop from BeginWindow()
-
-
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //When you press File or Edit tab
-
-		/*Main Menu Bar*/
-		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-
-				if (ImGui::MenuItem("New Scene", "CTRL+SHIFT+N")) {
-					std::cout << "New Scene\n";
-				}
-
-
-
-				if (ImGui::MenuItem("Load Scene...", "CTRL+SHIFT+O")) {
-					std::cout << "Load Scene\n";
-
-
-				} //Do something if pressed
-				if (ImGui::MenuItem("Save current Scene", "CTRL+S")) {
-
-					std::cout << "Save current Scene\n";
-
-
-				} //Do something if pressed
-
-
-
-				if (ImGui::MenuItem("Save Scene As...", "CTRL+SHIFT+S")) {
-
-					std::cout << "Save Scene As...\n";
-
-
-
-				} //Do something if pressed
-
-
-				if (ImGui::MenuItem("Quit", "ALT+F4")) {
-					std::cout << "Quit Window\n";
-
-				}
-				ImGui::EndMenu(); //BeginMenu("File")
-			}
-
-			if (ImGui::BeginMenu("Debug")) {
-				//ImGui::MenuItem("Metrics", NULL, &editorRef.show_metrics_window);      // Edit bools storing our windows open/close state
-				//ImGui::MenuItem("Demo Window", NULL, &editorRef.show_demo_window);      // Edit bools storing our windows open/close state
-				ImGui::EndMenu(); //BeginMenu("Debug")
-			}
-
-			IDE& editor = Core::GetSystem<IDE>();
-			static bool boolDemoWindow = false;
-
-			if (ImGui::BeginMenu("Window"))
-			{
-				for (auto& i : editor.ige_windows) {
-					ImGui::PushID(&i);
-					if (ImGui::MenuItem(i->window_name, NULL, &i->is_open)) {
-						//Do other stuff if needed
-					}
-
-					ImGui::PopID();
-				}
-				if (ImGui::MenuItem("ImGui Demo Window", NULL, &editor.bool_demo_window)) {
-
-				}
-
-				ImGui::EndMenu(); //Close BeginMenu("Window")
+			if (ImGui::MenuItem("New Scene", "CTRL+N")) {
+				std::cout << "New Scene\n";
 			}
 
 
 
-
-			//ImGui::MenuItem("Settings", NULL, &editorRef.settingsWindow.isOpen);
-
-
-			//ImGui::MenuItem(editorRef.debugWindow.windowName, NULL, &editorRef.debugWindow.isOpen);      // Edit bools storing our windows open/close state
+			if (ImGui::MenuItem("Open Scene", "CTRL+O")) {
+				std::cout << "Open Scene\n";
 
 
-			if (ImGui::BeginMenu("Help"))
-			{
+			} //Do something if pressed
 
-				ImGui::MenuItem("Middle Mouse to drag camera.", 0, false, false);
-				ImGui::MenuItem("F to focus on selected gameobject.", 0, false, false);
-				ImGui::MenuItem("LMB on gamescreen to deselect gameobject.", 0, false, false);
-				ImGui::MenuItem("CTRL+D to duplicate gameobject.", 0, false, false);
-				ImGui::MenuItem("RMB to move gameobject.", 0, false, false);
+			ImGui::Separator();
 
 
+			if (ImGui::MenuItem("Save", "CTRL+S")) {
 
-				ImGui::EndMenu(); //Close BeginMenu("Help")
+				std::cout << "Save current Scene\n";
+
+
+			} //Do something if pressed
+
+
+
+			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) {
+
+				std::cout << "Save Scene As...\n";
+
+
+
+			} //Do something if pressed
+
+			ImGui::Separator();
+			if (ImGui::MenuItem("Exit", "ALT+F4")) {
+				std::cout << "Quit Window\n";
+
 			}
-
-
-
-			//if (ImGui::Button("Play", ImVec2{ 150,20 })) {
-
-			//}
-
-			if (ImGui::BeginMenu("Play"))
-			{
-
-				ImGui::EndMenu(); //Close BeginMenu("Play")
-			}
-
-			ImGui::SameLine();
-			DrawHelpMarker("Shortcut: F1");
-
-			//ImGui::SameLine();
-
-			//ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-			//Draw FPS at menu bar at the top right
-			//ImGui::SameLine(viewport->Size.x - 90.0f);
-
-			//Core::GetSystem<Application>().
-			//ImGui::Text("FPS:%-.2f", editorRef.GetFPS());
-
-
-			ImGui::PopStyleColor(2);
-
-			ImGui::EndMenuBar(); //MainMenuBar
+			ImGui::EndMenu(); //BeginMenu("File")
 		}
+	}
+
+	void IGE_MainWindow::EditMenu()
+	{
+		if (ImGui::BeginMenu("Edit"))
+		{
+			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, false)) {
 
 
 
+			} //Do something if pressed
 
-		const ImVec2 toolBarSize{ window_size.x, 30.0f };
-		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar 
-									 | ImGuiWindowFlags_NoScrollbar
-									 | ImGuiWindowFlags_NoResize
-									 | ImGuiWindowFlags_NoSavedSettings
-									 | ImGuiWindowFlags_NoMove
-									 | ImGuiWindowFlags_NoDocking
-									 | ImGuiWindowFlags_NoCollapse;
+
+			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, false)) {
+
+
+
+			} //Do something if pressed
+
+
+			ImGui::Separator();
+			if (ImGui::MenuItem("Cut", "CTRL+X", nullptr, false)) {
+
+
+
+			} //Do something if pressed
+			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false)) {
+
+
+
+			} //Do something if pressed
+			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
+
+
+
+			} //Do something if pressed
+
+			ImGui::Separator();
+			if (ImGui::MenuItem("Duplicate", "CTRL+D", nullptr, false)) {
+
+
+
+			} //Do something if pressed
+			if (ImGui::MenuItem("Delete")) {
+
+
+
+			} //Do something if pressed
+
+			ImGui::EndMenu(); //Close BeginMenu("Window")
+
+		}
+	}
+
+	void IGE_MainWindow::WindowMenu()
+	{
+		IDE& editor = Core::GetSystem<IDE>();
+		static bool boolDemoWindow = false;
+
+		if (ImGui::BeginMenu("Window"))
+		{
+			for (auto& i : editor.ige_windows) {
+				ImGui::PushID(&i);
+				if (ImGui::MenuItem(i->window_name, NULL, &i->is_open)) {
+					//Do other stuff if needed
+				}
+
+				ImGui::PopID();
+			}
+			if (ImGui::MenuItem("ImGui Demo Window", NULL, &editor.bool_demo_window)) {
+
+			}
+
+			ImGui::EndMenu(); //Close BeginMenu("Window")
+		}
+	}
+
+	void IGE_MainWindow::ToolBarChildWindow()
+	{
+
+		const ImVec2 toolBarSize{ window_size.x, toolBarHeight };
 
 		ImGuiStyle& style = ImGui::GetStyle();
-		
+
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBg]);
 
 
@@ -237,15 +220,14 @@ namespace idk {
 		const ImVec2 toolButtonStartPos = ImVec2{ 6.0f,4.0f };
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f); //Have the buttons look like buttons
+		ImGui::SetCursorPos(toolButtonStartPos);
 
 
-		ImGui::SetCursorPosX(toolButtonStartPos.x);
-		ImGui::SetCursorPosY(toolButtonStartPos.y);
 		if (ImGui::Button("##HandTool", toolButtonSize)) {
 			//Do stuff
 		}
 
-		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x*1);
+		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 1);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
 		if (ImGui::Button("##MoveTool", toolButtonSize)) {
@@ -268,20 +250,15 @@ namespace idk {
 
 		ImGui::PopStyleVar();
 
-
 		ImGui::EndChild();
 
+	}
 
+	void IGE_MainWindow::HintBarChildWindow()
+	{
 
-		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
-
-		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y -toolBarSize.y-(ImGui::GetFrameHeight()*2)), ImGuiDockNodeFlags_PassthruCentralNode);
-		
-		//Imgui internal
-		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
-
-		ImGui::SetCursorPosY(window_size.y- ImGui::GetFrameHeight()); //30 is child size, 18 is default font size
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImGui::SetCursorPosY(window_size.y - ImGui::GetFrameHeight()); //30 is child size, 18 is default font size
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBg]);
@@ -297,6 +274,54 @@ namespace idk {
 
 
 		ImGui::EndChild();
+
+	}
+
+
+	void IGE_MainWindow::Update() {
+
+		ImGui::PopStyleVar(3); //Pop from BeginWindow()
+		ImGui::PopStyleColor(); //Pop from BeginWindow()
+
+
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //When you press File or Edit tab
+
+		/*Main Menu Bar*/
+		if (ImGui::BeginMenuBar()) {
+
+			FileMenu();
+			EditMenu();
+			WindowMenu();
+
+			if (ImGui::BeginMenu("Help"))
+			{
+
+				ImGui::MenuItem("Middle Mouse to drag camera.", 0, false, false);
+				ImGui::MenuItem("F to focus on selected gameobject.", 0, false, false);
+				ImGui::MenuItem("LMB on gamescreen to deselect gameobject.", 0, false, false);
+				ImGui::MenuItem("CTRL+D to duplicate gameobject.", 0, false, false);
+				ImGui::MenuItem("RMB to move gameobject.", 0, false, false);
+
+				ImGui::EndMenu(); //Close BeginMenu("Help")
+			}
+
+			ImGui::PopStyleColor(2);
+
+			ImGui::EndMenuBar(); //MainMenuBar
+		}
+
+		ToolBarChildWindow();
+
+
+		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
+		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - toolBarHeight - (ImGui::GetFrameHeight()*2)), ImGuiDockNodeFlags_PassthruCentralNode);
+		//Imgui internal
+		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
+
+		HintBarChildWindow();
+
 	}
 
 
