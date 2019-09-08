@@ -28,6 +28,9 @@ namespace idk {
 		void SetTexture(void* textureToRender); //Place the camera texture here. EG: SetTexture((void*)(intptr_t)myGluintTexture);
 
 		vec2 GetScreenSize(); //To get the size of the frame being drawn onto the window.
+
+		vec2 GetMousePosInWindow();
+		vec2 GetMousePosInWindowNormalized();
 	protected:
 
 
