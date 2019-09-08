@@ -6,17 +6,16 @@
 #include <IncludeSystems.h>
 #include <IncludeResources.h>
 #include <res/ForwardingExtensionLoader.h>
+#include <scene/ProjectManager.h>
 
 using namespace idk;
 
 TEST(Prefab, TestPrefabSave)
 {
     Core core;
-    FileSystem& fs = core.GetSystem<FileSystem>();
-    fs.Init();
-
-    SceneFactory sf;
-    auto scene = sf.GenerateDefaultResource();
+	auto& fs = Core::GetSystem<FileSystem>();
+	core.Setup();
+	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
 
     auto go = scene->CreateGameObject();
     
@@ -35,28 +34,26 @@ TEST(Prefab, TestPrefabSave)
 	child->Transform()->parent = go;
 
     auto exe_dir = std::string{ fs.GetExeDir() };
-    fs.Mount(exe_dir + "/assets", "/assets");
-    fs.SetAssetDir(exe_dir + "/assets");
+    // fs.Mount(exe_dir + "/assets", "/assets"); // resource manager already mounts
+    // fs.SetAssetDir(exe_dir + "/assets");		 // resource manager already mounts
 
     fs.Open("/assets/prefabs/testprefab.idp", FS_PERMISSIONS::WRITE);
     auto save_path = fs.GetFile("/assets/prefabs/testprefab.idp");
 
     EXPECT_NO_THROW(PrefabUtility::Save(go, save_path));
+	core.GetResourceManager().Shutdown();
 }
 
 TEST(Prefab, TestPrefabInstantiate)
 {
-    Core core;
-    FileSystem& fs = core.GetSystem<FileSystem>();
-    fs.Init();
-
-    SceneFactory sf;
-    auto scene = sf.GenerateDefaultResource();
-
-    core.GetResourceManager().Init();
+	Core core;
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
     core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+
+	auto& fs = Core::GetSystem<FileSystem>();
+	core.Setup();
+	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
 
     auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
 
@@ -95,18 +92,16 @@ TEST(Prefab, TestPrefabInstantiate)
         EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
         EXPECT_EQ(o1.Transform()->parent.id, o0.GetHandle().id);
     }
+	core.GetResourceManager().Shutdown();
 }
 
 TEST(Prefab, TestPrefabRevert)
 {
     Core core;
     FileSystem& fs = core.GetSystem<FileSystem>();
-    fs.Init();
+	core.Setup();
 
-    SceneFactory sf;
-    auto scene = sf.GenerateDefaultResource();
-
-    core.GetResourceManager().Init();
+	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
     core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
@@ -136,18 +131,17 @@ TEST(Prefab, TestPrefabRevert)
     EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f)) << "Position and rotation should not be reverted.";
     EXPECT_EQ(t0->scale, ori_scale);
     EXPECT_EQ(go->GetComponent<Name>()->name, "changed_name") << "Name should not be reverted.";
+	core.GetResourceManager().Shutdown();
 }
 
 TEST(Prefab, TestPrefabPropagate)
 {
     Core core;
     FileSystem& fs = core.GetSystem<FileSystem>();
-    fs.Init();
+	core.Setup();
 
-    SceneFactory sf;
-    auto scene = sf.GenerateDefaultResource();
+	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
 
-    core.GetResourceManager().Init();
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
     core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");

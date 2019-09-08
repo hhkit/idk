@@ -8,8 +8,6 @@ namespace idk
 	void SceneManager::Init()
 	{
 		Core::GetSystem<ResourceManager>().RegisterFactory<SceneFactory>();
-		_active_scene = Core::GetSystem<ResourceManager>().Create<Scene>();
-		_active_scene->CreateGameObject();
 	}
 
 	void SceneManager::Shutdown()

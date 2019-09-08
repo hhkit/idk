@@ -38,7 +38,7 @@ namespace idk::ogl
 		{
 			// ensure textures are created
 			Core::GetResourceManager().Free(elem);
-			Core::GetResourceManager().Create<OpenGLTexture>(elem.guid);
+			Core::GetResourceManager().Emplace<OpenGLTexture>(elem.guid);
 		}
 		fb->SetMeta(m);
 

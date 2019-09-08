@@ -29,7 +29,7 @@ namespace idk::ogl
 
 		for (auto& elem : newmeta.textures)
 		{
-			Core::GetResourceManager().Create<OpenGLTexture>(elem.guid)->Size(newmeta.size);
+			Core::GetResourceManager().Emplace<OpenGLTexture>(elem.guid)->Size(newmeta.size);
 		}
 	}
 

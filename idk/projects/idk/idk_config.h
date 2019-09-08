@@ -51,6 +51,7 @@ namespace idk
 		,	class ResourceManager
 		,	class SaveableResourceManager
 		,	class SceneManager
+		,	class ProjectManager
 		,	class IEditor
 		,   class TestSystem
 	>;

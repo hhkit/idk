@@ -18,7 +18,7 @@ namespace idk
 	public:
 		class iterator;
 		explicit Scene(uint8_t scene_id);
-		~Scene();
+		virtual ~Scene();
 		Handle<GameObject> CreateGameObject(const Handle<GameObject>&);
 		Handle<GameObject> CreateGameObject();
 		void               DestroyGameObject(const Handle<GameObject>&);

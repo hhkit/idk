@@ -7,6 +7,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <common/Name.h>
+#include <scene/ProjectManager.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 
@@ -131,7 +132,10 @@ namespace idk
         }
 
         // build tree
-        Scene scene{ go.scene };
+        //Scene scene{ go.scene };
+		Scene& scene = *Core::GetSystem<ProjectManager>().GetSceneByBuildIndex(go.scene);
+
+
         vector<small_string<GenericHandle::index_t>> nodes;
         vector<GenericHandle::gen_t> gens;
         for (auto& o : scene)
@@ -185,11 +189,12 @@ namespace idk
 
     void PrefabUtility::PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab)
     {
-        for (uint8_t scene_index = 0; scene_index < MaxScene; ++scene_index)
+        for (auto& block : Core::GetSystem<ProjectManager>().GetScenes())
         {
-            Scene scene{ scene_index };
-            if (!GameState::GetGameState().ValidateScene(scene))
-                continue;
+			if (!block.scene)
+				continue;
+			
+			auto& scene = *block.scene;
 
             for (auto& go : scene)
             {

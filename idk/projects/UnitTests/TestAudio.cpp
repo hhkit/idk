@@ -26,10 +26,9 @@ TEST(Audio, AudioSystemClassTest)
 {
 	using namespace idk;
 	Core c;
-	AudioSystem& test = Core::GetSystem<AudioSystem>();
-	c.Setup();
-	try { 
-		test.Init(); 
+	auto& test = c.GetSystem<AudioSystem>();
+	try {
+		c.Setup();
 	}
 	catch (EXCEPTION_AudioSystem i) {
 		std::cout << i.exceptionDetails << std::endl;
@@ -73,7 +72,7 @@ TEST(Audio, AudioSystemClassTest)
 		std::cout << "Audio path not found, skipping test...\n";
 
 		try {
-			test.Shutdown();
+			c.Shutdown();
 		}
 		catch (EXCEPTION_AudioSystem i) {
 			std::cout << "//////////////////////////////////////\n";
@@ -167,7 +166,7 @@ TEST(Audio, AudioSystemClassTest)
 		}
 	}
 	try {
-		test.Shutdown();
+		c.Shutdown();
 	}
 	catch (EXCEPTION_AudioSystem i) {
 		std::cout << i.exceptionDetails << std::endl;

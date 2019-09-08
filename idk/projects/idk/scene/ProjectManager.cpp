@@ -23,7 +23,7 @@ namespace idk
 
 					if (meta.guids[0] == activateme.guid)
 					{
-						auto scene = Core::GetResourceManager().Emplace<Scene>(elem.build_index);
+						auto scene = Core::GetResourceManager().Emplace<Scene>(activateme.guid, elem.build_index);
 						auto file_stream = path.Open(FS_PERMISSIONS::READ);
 						parse_text(stringify(file_stream), *scene);
 						return SceneActivateResult::Ok;
@@ -55,7 +55,17 @@ namespace idk
 		return false;
 	}
 
-	// are you fucking kidding me C++
+	RscHandle<Scene> ProjectManager::GetSceneByBuildIndex(unsigned char index) const
+	{
+		for (auto& elem : _scenes)
+		{
+			if (elem.build_index == index)
+				return elem.scene;
+		}
+		return RscHandle<Scene>{};
+	}
+
+	// fuck you C++
 	span<ProjectManager::SceneBlock const> ProjectManager::GetScenes() const
 	{
 		return span<const SceneBlock>(_scenes);
@@ -75,7 +85,7 @@ namespace idk
 	{
 	}
 
-	unique_ptr<Scene> ProjectManager::CreateScene()
+	RscHandle<Scene> ProjectManager::CreateScene()
 	{
 		unsigned char build_index = 0;
 		while (build_index < 0x80)
@@ -96,8 +106,9 @@ namespace idk
 				build_index++;
 		}
 
-		_scenes.emplace_back(SceneBlock{ build_index });
+		auto guid = Guid::Make();
+		_scenes.emplace_back(SceneBlock{ build_index, RscHandle<Scene>{guid} });
 
-		return std::make_unique<Scene>(build_index);
+		return Core::GetResourceManager().Emplace<Scene>(guid, build_index);
 	}
 }

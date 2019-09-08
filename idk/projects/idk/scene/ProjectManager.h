@@ -26,19 +26,22 @@ namespace idk
 			Err_SceneNotInProject,
 			Err_ScenePathNotFound
 		};
+		// accessors
+		RscHandle<Scene>       GetSceneByBuildIndex(unsigned char index) const;
+		span<const SceneBlock> GetScenes() const;
 
+		// modifiers
 		SceneActivateResult ActivateScene(RscHandle<class Scene>);
+		RscHandle<Scene>    CreateScene();
 
 		void                SaveProject();
 
+		// properties
 		RscHandle<Scene>    StartupScene() const;
 		// true if successfully set, false otherwise
 		bool                StartupScene(RscHandle<Scene> scene);
 
-		span<const SceneBlock> GetScenes() const;
 	private:
-		friend class SceneFactory;
-
 		vector<SceneBlock>     _scenes;
 		RscHandle<class Scene> _startup_scene;
 
@@ -46,7 +49,6 @@ namespace idk
 		void LateInit() override;
 		void Shutdown() override;
 
-		unique_ptr<Scene> CreateScene();
 
 	};
 }
