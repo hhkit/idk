@@ -4,6 +4,7 @@
 #include "core/Core.h"
 #include "file/FileSystem.h"
 
+#include <iostream>
 #include <filesystem>
 
 namespace FS = std::filesystem;
@@ -41,6 +42,14 @@ namespace idk
 			file._time = FS::last_write_time(FS::path{ file._full_path });
 		}
 	}
+
+	// FileHandle FStreamWrapper::GetHandle() const
+	// {
+	// 	if (_handle_index < 0)
+	// 		return FileHandle{};
+	// 
+	// 	return FileHandle{ Core::GetSystem<FileSystem>()._file_handles[_handle_index]._internal_id };
+	// }
 
 	void FStreamWrapper::close()
 	{
@@ -96,6 +105,40 @@ namespace idk
 			return vfs.getDir(_key)._valid;
 	}
 
+
+	bool FileHandle::Rename(string_view new_file_name)
+	{
+		// Check Handle
+		if (validate() == false)
+			return false;
+
+		auto& vfs = Core::GetSystem<FileSystem>();
+		if (_is_regular_file)
+		{
+			auto& internal_file = vfs.getFile(_key);
+			auto& parent_dir = vfs.getDir(internal_file._parent);
+
+			FS::path old_p{ internal_file._full_path };
+			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
+			try {
+				FS::rename(old_p, new_p);
+			}catch(const FS::filesystem_error& e){
+				std::cout << "[FILEHANDLE] Rename: " << e.what() << std::endl;
+				// return false;
+			}
+			auto res = parent_dir._files_map.find(internal_file._filename);
+			assert(res != parent_dir._files_map.end());
+			parent_dir._files_map.erase(res);
+
+			vfs.initFile(internal_file, parent_dir, new_p);
+			auto res2 = parent_dir._files_map.find(internal_file._filename);
+
+			auto& test = vfs.getFile(res2->second);
+			return true;
+		}
+
+		return false;
+	}
 
 	FileHandle::operator bool() const
 	{
