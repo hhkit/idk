@@ -15,6 +15,9 @@ namespace idk
 
 		Handle<class GameObject> parent;
 
+		// preserve_global = false makes it act the same as simply setting the parent
+		void SetParent(Handle<class GameObject> parent, bool preserve_global = false);
+
 		vec3 Forward() const;
 		vec3 Right() const;
 		vec3 Up() const;
