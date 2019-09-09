@@ -2,12 +2,12 @@
 //@file		IGE_MainWindow.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		9 SEPT 2019
 //@brief	
 
 /*
 This window controls the top main menu bar. It also controls the docking
-of the editor.
+of the editor and polls of any shortcut used.
 */
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -41,6 +41,9 @@ namespace idk {
 
 		void DisplayToolBarChildWindow();
 		void DisplayHintBarChildWindow();
+
+		void PollShortcutInput();
+
 
 
 		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar

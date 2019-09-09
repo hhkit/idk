@@ -318,6 +318,22 @@ namespace idk {
 
 	}
 
+	void IGE_MainWindow::PollShortcutInput()
+	{
+		CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+
+
+		//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+			commandController.UndoCommand();
+		}
+
+		//CTRL + Y (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+			commandController.RedoCommand();
+		}
+	}
+
 
 	void IGE_MainWindow::Update() {
 
@@ -353,6 +369,9 @@ namespace idk {
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
 		DisplayHintBarChildWindow();
+
+		PollShortcutInput();
+		
 
 	}
 
