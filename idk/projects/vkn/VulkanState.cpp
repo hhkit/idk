@@ -2296,7 +2296,7 @@ namespace idk::vkn
 	{
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 
-		auto& current_signal = m_pres_signals[current_frame];
+		//auto& current_signal = m_pres_signals[current_frame];
 
 		//waitSemaphores = *current_signal.image_available;
 		//readySemaphores = *current_signal.render_finished;

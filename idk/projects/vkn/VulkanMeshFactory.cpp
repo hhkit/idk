@@ -53,12 +53,6 @@ namespace idk::vkn
 
 	}
 
-	struct MeshVtx
-	{
-		alignas(sizeof(vec4)) vec3 pos;
-		alignas(sizeof(vec4)) vec3 nml;
-	};
-
 	template<typename CItr>
 	void CpyWithStride(CItr src_start, CItr src_end, void* dst_start, void* dst_end, uint32_t dst_stride)
 	{
@@ -133,11 +127,12 @@ namespace idk::vkn
 			attribs[attrib_index::UV] = std::make_pair(CreateData(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		//After the map is created, pass in the remaining data as such
-		return Create(attribs,indices,s_cast<uint32_t>(positions.size()));
+		return Create(attribs,indices);
 	}
 
 	unique_ptr<Mesh> idk::vkn::MeshFactory::Create(FileHandle filepath)
 	{
+		//@Joseph, fill in here
 		return unique_ptr<Mesh>();
 	}
 
@@ -154,7 +149,7 @@ namespace idk::vkn
 		return std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc),num_vtx_bytes);
 	}
 
-	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint16_t>& index_buffer, uint32_t num_vertices)
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint16_t>& index_buffer)
 	{
 		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//auto& pdevice = vview.PDevice();
@@ -175,7 +170,7 @@ namespace idk::vkn
 		}
 		return retval;
 	}
-	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint32_t>& index_buffer, uint32_t num_vertices)
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint32_t>& index_buffer)
 	{
 		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//auto& pdevice = vview.PDevice();
@@ -212,7 +207,7 @@ namespace idk::vkn
 		}
 	}
 
-	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, size_t>>& attribs, const vector<uint16_t>& index_buffer, uint32_t num_vertices)
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, size_t>>& attribs, const vector<uint16_t>& index_buffer)
 	{
 		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//auto& pdevice = vview.PDevice();
@@ -233,7 +228,7 @@ namespace idk::vkn
 		}
 		return retval;
 	}
-	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, size_t>>& attribs, const vector<uint32_t>& index_buffer, uint32_t num_vertices)
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, size_t>>& attribs, const vector<uint32_t>& index_buffer)
 	{
 		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//auto& pdevice = vview.PDevice();

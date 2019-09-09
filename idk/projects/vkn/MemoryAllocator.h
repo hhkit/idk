@@ -4,6 +4,9 @@
 size_t Track(size_t s);
 namespace idk::vkn::hlp
 {
+	namespace detail
+	{
+
 	struct Memories
 	{
 		struct Memory
@@ -26,21 +29,8 @@ namespace idk::vkn::hlp
 			vk::Device d,
 			uint32_t mem_type,
 			size_t chunkSize = 1 << 24 //16MB
-		) : device{ d },
-			type {mem_type}, 
-			chunk_size{ chunkSize }{}
-		Memory& Add()
-		{
-			//TODO actually create the memory
-			;
-			memories.emplace_back(device.allocateMemoryUnique(
-				vk::MemoryAllocateInfo{
-					Track(chunk_size),type
-				}, nullptr, vk::DispatchLoaderDefault{}
-			),chunk_size);
-			
-			return memories.back();
-		}
+		);
+		Memory& Add();
 		std::pair<uint32_t, size_t> Allocate(size_t size)
 		{
 			std::optional<size_t> alloc_offset;
@@ -62,9 +52,12 @@ namespace idk::vkn::hlp
 			return std::make_pair(index, *alloc_offset);
 		}
 	};
+
+	}
 	class MemoryAllocator
 	{
 	public:
+		using Memories = detail::Memories;
 		class Alloc
 		{
 		public:
@@ -94,6 +87,8 @@ namespace idk::vkn::hlp
 
 	MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
 
+		UniqueAlloc Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req);
+		UniqueAlloc Allocate(vk::Image image, vk::MemoryPropertyFlags prop);
 		UniqueAlloc Allocate(vk::Buffer& buffer, vk::MemoryPropertyFlags prop);
 		UniqueAlloc Allocate(vk::PhysicalDevice pd, vk::Device d, vk::Buffer& buffer, vk::MemoryPropertyFlags prop);
 	private:
