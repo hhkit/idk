@@ -48,9 +48,6 @@
     <ClInclude Include="vulkan_state_fwd.h">
       <Filter>fwd</Filter>
     </ClInclude>
-    <ClInclude Include="idkTexture.h">
-      <Filter>render</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanMesh.h">
       <Filter>resource</Filter>
     </ClInclude>
@@ -58,6 +55,18 @@
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="VulkanTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTexture.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBufferFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBufferManager.h">
       <Filter>resource</Filter>
     </ClInclude>
   </ItemGroup>
@@ -105,13 +114,22 @@
     <ClCompile Include="draw_call.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="idkTexture.cpp">
-      <Filter>render</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanMeshFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="VulkanMesh.cpp" />
+    <ClCompile Include="VknTexture.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFrameBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFrameBufferFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFrameBufferManager.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

@@ -3,12 +3,12 @@
 #include <glad/glad.h>
 namespace idk::ogl
 {
-	class FrameBuffer
+	class VknFrameBuffer
 		: public RenderTarget
 	{
 	public:
-		FrameBuffer();
-		~FrameBuffer();
+		VknFrameBuffer();
+		~VknFrameBuffer();
 
 		void OnMetaUpdate(const Metadata& newmeta) override;
 
