@@ -26,6 +26,7 @@ namespace idk
 				//		- NO:  parent_transform = parent_transform * NODE_transform.
 				// 3) Concat the game object's current transform with the confirmed bone transform. Can subscript directly into game object
 				const auto& skeleton = elem._skeleton->data();
+				
 				// const mat4& glob_inverse = elem._skeleton->GetGlobalInverse();
 
 				// We keep all the bone transforms first. Easier to refer to parent's transform, fewer mat mults.

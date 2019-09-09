@@ -68,11 +68,12 @@ namespace idk
 		{
 			auto obj = scene->CreateGameObject();
 			auto transform = elem._offset.inverse();
-			
-			obj->GetComponent<Transform>()->LocalMatrix(transform);
-			
+					
 			if (elem._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[elem._parent]);
+
+			obj->GetComponent<Transform>()->GlobalMatrix(transform);
+
 
 			_child_objects.push_back(obj);
 		}

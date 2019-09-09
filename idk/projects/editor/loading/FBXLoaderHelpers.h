@@ -52,6 +52,13 @@ namespace idk::fbx_loader_detail
 	};
 	using BoneSet = hash_set<BoneData, BoneDataHash, BoneDataEqual>;
 
+	struct AssimpNode
+	{
+		string name;
+		int parent;
+		mat4 node_transform;
+	};
+
 	// Convert assimp math to ivan's math
 	mat4 initMat4(const aiMatrix4x4& mat);
 	mat4 initMat4(const aiMatrix3x3& mat);
@@ -63,9 +70,12 @@ namespace idk::fbx_loader_detail
 	void initBoneHierarchy(const aiNode* ai_node, const BoneSet& bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
 	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 
-	void initAnimMap(const aiAnimation* ai_anim, anim::Animation& anim_clip);
+	void initAnimNodes(const aiNode* ai_root, const aiAnimation* ai_anim, const BoneSet& bones_set, anim::Animation& anim_clip);
+	void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels);
+	
 	// void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip);
 	// 
 	// void initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum);
 
+	void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node);
 }
