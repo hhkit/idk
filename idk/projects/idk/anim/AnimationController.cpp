@@ -45,6 +45,9 @@ namespace idk
 
 	RscHandle<anim::Animation> AnimationController::GetCurrentAnimation() const
 	{
+		if (_curr_animation >= _animations.size())
+			return RscHandle<anim::Animation>{};
+
 		return _animations[_curr_animation];
 	}
 
@@ -64,14 +67,12 @@ namespace idk
 		for (auto& elem : bones)
 		{
 			auto obj = scene->CreateGameObject();
-			auto transform = decompose(elem._offset.inverse());
+			auto transform = elem._offset.inverse();
 			
-			obj->GetComponent<Transform>()->position	= transform.position;
-			obj->GetComponent<Transform>()->scale		= transform.scale;
-			obj->GetComponent<Transform>()->rotation	= transform.rotation;
-
+			obj->GetComponent<Transform>()->LocalMatrix(transform);
+			
 			if (elem._parent >= 0)
-				obj->GetComponent<Transform>()->parent = _child_objects[elem._parent];
+				obj->GetComponent<Transform>()->SetParent(_child_objects[elem._parent]);
 
 			_child_objects.push_back(obj);
 		}
