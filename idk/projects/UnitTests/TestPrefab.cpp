@@ -142,7 +142,6 @@ TEST(Prefab, TestPrefabPropagate)
 
 	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
-
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
     core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
 
@@ -163,6 +162,51 @@ TEST(Prefab, TestPrefabPropagate)
     EXPECT_EQ(go0->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
     EXPECT_EQ(go0->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
     EXPECT_EQ(go0->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+
+    EXPECT_EQ(go1->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go1->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go1->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+
+    EXPECT_EQ(go2->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go2->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go2->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+
+    EXPECT_EQ(go3->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
+    EXPECT_EQ(go3->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go3->GetComponent<Name>()->name, "stoopidguy") << "Name should not be propagated.";
+}
+
+TEST(Prefab, TestPrefabApply)
+{
+    Core core;
+    FileSystem& fs = core.GetSystem<FileSystem>();
+    core.Setup();
+
+    auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+
+    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
+    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+
+    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto go0 = PrefabUtility::Instantiate(prefab, *scene);
+    auto go1 = PrefabUtility::Instantiate(prefab, *scene);
+    auto go2 = PrefabUtility::Instantiate(prefab, *scene);
+    auto go3 = PrefabUtility::Instantiate(prefab, *scene);
+
+    vec3 ori_pos = go0->GetComponent<Transform>()->position;
+
+    go0->GetComponent<Transform>()->position = vec3(69.0f, 69.0f, 69.0f);
+    go0->GetComponent<Transform>()->scale = vec3(69.0f, 69.0f, 69.0f);
+    go0->GetComponent<Name>()->name = string("changed_name");
+
+    PrefabUtility::RecordPrefabInstanceChange(go0, go0->GetComponents()[0], "position");
+    PrefabUtility::RecordPrefabInstanceChange(go0, go0->GetComponents()[0], "scale");
+    PrefabUtility::RecordPrefabInstanceChange(go0, go0->GetComponents()[1], "name");
+    PrefabUtility::ApplyPrefabInstance(go0);
+
+    EXPECT_EQ(go0->GetComponent<Transform>()->position, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go0->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));
+    EXPECT_EQ(go0->GetComponent<Name>()->name, "changed_name");
 
     EXPECT_EQ(go1->GetComponent<Transform>()->position, ori_pos) << "Position and rotation should not be propagated.";
     EXPECT_EQ(go1->GetComponent<Transform>()->scale, vec3(69.0f, 69.0f, 69.0f));

@@ -25,6 +25,11 @@ namespace idk::reflect
 		return type.valid();
 	}
 
+	dynamic dynamic::copy() const
+	{
+		return _ptr->copy();
+	}
+
 	dynamic::property_iterator dynamic::begin() const
 	{
 		return property_iterator(*this);

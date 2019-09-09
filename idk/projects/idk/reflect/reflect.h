@@ -117,6 +117,9 @@ namespace idk::reflect
 		template<typename T> T& get() const;
 		bool valid() const;
 
+		// makes an rvalue copy of the held value.
+		dynamic copy() const;
+
 		// see reflect.inl for detailed comments
 		template<typename Visitor>
 		void visit(Visitor&& visitor) const;

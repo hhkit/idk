@@ -12,5 +12,6 @@ namespace idk
         int parent_index = -1;
 
         reflect::dynamic FindComponent(string_view name, int index = 0) const;
+        int GetComponentIndex(string_view name, int index = 0) const;
     };
 }

@@ -1,7 +1,23 @@
+//////////////////////////////////////////////////////////////////////////////////
+//@file		IDE.h
+//@author	Muhammad Izha B Rahim, Wei Xiang
+//@param	Email : izha95\@hotmail.com
+//@date		9 SEPT 2019
+//@brief	
+
+/*
+Main Brain of the Game Editor. 
+
+Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
+
+
+*/
+//////////////////////////////////////////////////////////////////////////////////
+
+
 #pragma once
 #include <editor/IEditor.h>
 #include <editor/ImGui_Interface.h>
-//#include <editor/commands/CommandController.h>
 #include <editor/commands/CommandController.h>
 
 
@@ -11,11 +27,13 @@ namespace idk
 {
 	//Forward Declarations
 	class IGE_IWindow; 
+
 	class IGE_MainWindow;
 	class IGE_SceneView;
 	class IGE_ProjectWindow;
 	class IGE_HierarchyWindow;
 	class IGE_InspectorWindow;
+
 	class CameraControls;
 
 	class IDE : public IEditor
@@ -44,6 +62,9 @@ namespace idk
 
 		bool bool_demo_window					 { false };
 		CommandController command_controller			{};
+
+		vector<Handle<GameObject>> selected_gameObjects {};
+
 
 	};
 }
