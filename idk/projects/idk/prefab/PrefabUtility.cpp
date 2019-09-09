@@ -7,7 +7,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <common/Name.h>
-#include <scene/ProjectManager.h>
+#include <scene/SceneManager.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 
@@ -191,7 +191,7 @@ namespace idk
 
         // build tree
         //Scene scene{ go.scene };
-		Scene& scene = *Core::GetSystem<ProjectManager>().GetSceneByBuildIndex(go.scene);
+		Scene& scene = *Core::GetSystem<SceneManager>().GetSceneByBuildIndex(go.scene);
 
 
         vector<small_string<GenericHandle::index_t>> nodes;

@@ -2,7 +2,7 @@
 #include <serialize/serialize.h>
 #include <reflect/ReflectRegistration.h>
 #include <res/Guid.h>
-#include <scene/ProjectManager.h>
+#include <scene/SceneManager.h>
 #include <util/enum.h>
 #include <serialize/yaml.h>
 
@@ -211,7 +211,7 @@ TEST(Serialize, TestSerializeScene)
 	Core core;
 	auto& fs = Core::GetSystem<FileSystem>();
 	core.Setup();
-	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();
@@ -237,7 +237,7 @@ TEST(Serialize, TestParseScene)
 	Core core;
 	auto& fs = Core::GetSystem<FileSystem>();
 	core.Setup();
-	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
 	parse_text(serialized_scene_0, *scene);
 

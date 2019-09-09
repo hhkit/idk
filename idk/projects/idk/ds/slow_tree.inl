@@ -72,6 +72,12 @@ namespace idk
 	}
 
 	template<typename T>
+	inline void slow_tree<T>::clear()
+	{
+		_children.clear();
+	}
+
+	template<typename T>
 	inline bool slow_tree<T>::pop_child(const T& removeme)
 	{
 		auto itr = std::find_if(_children.begin(), _children.end(), [](const auto& elem) { return elem.obj == removeme; });

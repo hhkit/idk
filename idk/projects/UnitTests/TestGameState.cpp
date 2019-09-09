@@ -4,7 +4,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <scene/SceneFactory.h>
-#include <scene/ProjectManager.h>
+#include <scene/SceneManager.h>
 
 TEST(GameState, TestGameState)
 {
@@ -48,9 +48,9 @@ TEST(GameState, TestScene)
 	using namespace idk;
 	Core c;
 	c.Setup();
-	auto scene0 = Core::GetSystem<ProjectManager>().CreateScene();
-	auto scene1 = Core::GetSystem<ProjectManager>().CreateScene();
-	auto scene2 = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene0 = Core::GetSystem<SceneManager>().CreateScene();
+	auto scene1 = Core::GetSystem<SceneManager>().CreateScene();
+	auto scene2 = Core::GetSystem<SceneManager>().CreateScene();
 	EXPECT_TRUE(scene0);
 	EXPECT_TRUE(scene1);
 	

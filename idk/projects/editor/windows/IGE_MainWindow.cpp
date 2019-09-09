@@ -130,18 +130,19 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("Edit"))
 		{
-			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, false)) {
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			bool canUndo = commandController.CanUndo();
+			bool canRedo = commandController.CanRedo();
+			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, canUndo)) {
+				commandController.UndoCommand();
+
+			}
 
 
+			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, canRedo)) {
+				commandController.RedoCommand();
 
-			} //Do something if pressed
-
-
-			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, false)) {
-
-
-
-			} //Do something if pressed
+			}
 
 
 			ImGui::Separator();
@@ -317,6 +318,22 @@ namespace idk {
 
 	}
 
+	void IGE_MainWindow::PollShortcutInput()
+	{
+		CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+
+
+		//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+			commandController.UndoCommand();
+		}
+
+		//CTRL + Y (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+			commandController.RedoCommand();
+		}
+	}
+
 
 	void IGE_MainWindow::Update() {
 
@@ -352,6 +369,9 @@ namespace idk {
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
 		DisplayHintBarChildWindow();
+
+		PollShortcutInput();
+		
 
 	}
 

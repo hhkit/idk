@@ -10,7 +10,7 @@
 #include <vulkan/vulkan_win32.h>
 #include <vkn/DescriptorsManager.h>
 #include <vkn/UboManager.h>
-#include <vkn/idkTexture.h>
+#include <vkn/VknTexture.h>
 #undef max
 #undef min
 
@@ -241,7 +241,7 @@ namespace idk::vkn
 
 		std::unique_ptr<VulkanView> view_;
 
-		vector<idkTexture>					 m_textureList;
+		vector<VknTexture>					 m_textureList;
 
 		//////////Frame render variables////////
 		uint32_t					rv;
