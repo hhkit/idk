@@ -28,7 +28,7 @@ namespace idk::ogl
 	{
 		glDeleteFramebuffers(1, &_fbo_id);
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<VknFrameBuffer> target)
+	void FrameBufferManager::SetRenderTarget(RscHandle<FrameBuffer> target)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 

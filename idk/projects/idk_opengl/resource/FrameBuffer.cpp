@@ -5,21 +5,21 @@
 
 namespace idk::ogl
 {
-	VknFrameBuffer::VknFrameBuffer()
+	FrameBuffer::FrameBuffer()
 	{
 		glGenRenderbuffers(1, &depthbuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, meta.size.x, meta.size.y);
 	}
 
-	VknFrameBuffer::~VknFrameBuffer()
+	FrameBuffer::~FrameBuffer()
 	{
 		for (auto& elem : meta.textures)
 			Core::GetResourceManager().Free(elem);
 		glDeleteRenderbuffers(1, &depthbuffer);
 	}
 
-	void VknFrameBuffer::OnMetaUpdate(const Metadata& newmeta)
+	void FrameBuffer::OnMetaUpdate(const Metadata& newmeta)
 	{
 		for (auto& elem : meta.textures)
 			Core::GetResourceManager().Free(elem);
@@ -33,7 +33,7 @@ namespace idk::ogl
 		}
 	}
 
-	GLuint VknFrameBuffer::DepthBuffer() const
+	GLuint FrameBuffer::DepthBuffer() const
 	{
 		return depthbuffer;
 	}
