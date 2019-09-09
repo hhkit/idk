@@ -96,7 +96,7 @@ namespace idk
 	{
 		auto target = (eye - object).normalize();
 		auto right  = global_up.cross(target).normalize();
-		auto up     = target.cross(global_up).normalize();
+		auto up     = target.cross(right).normalize();
 
 		return tmat<T, 4, 4>{
 			vec4{ right,  0 }, 

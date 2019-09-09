@@ -79,7 +79,7 @@ namespace idk
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
 	
-		//_interface->ImGuiFrameUpdate();
+		_interface->ImGuiFrameUpdate();
 		
 		
 		_interface->ImGuiFrameEnd();
