@@ -6,7 +6,7 @@
 #include <IncludeSystems.h>
 #include <IncludeResources.h>
 #include <res/ForwardingExtensionLoader.h>
-#include <scene/ProjectManager.h>
+#include <scene/SceneManager.h>
 
 using namespace idk;
 
@@ -15,7 +15,7 @@ TEST(Prefab, TestPrefabSave)
     Core core;
 	auto& fs = Core::GetSystem<FileSystem>();
 	core.Setup();
-	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
     auto go = scene->CreateGameObject();
     
@@ -53,7 +53,7 @@ TEST(Prefab, TestPrefabInstantiate)
 
 	auto& fs = Core::GetSystem<FileSystem>();
 	core.Setup();
-	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
     auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
 
@@ -101,7 +101,7 @@ TEST(Prefab, TestPrefabRevert)
     FileSystem& fs = core.GetSystem<FileSystem>();
 	core.Setup();
 
-	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
     core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
@@ -140,7 +140,7 @@ TEST(Prefab, TestPrefabPropagate)
     FileSystem& fs = core.GetSystem<FileSystem>();
 	core.Setup();
 
-	auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();

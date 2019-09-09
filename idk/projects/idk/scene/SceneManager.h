@@ -18,12 +18,32 @@ namespace idk
 		using SceneGraph = SceneGraphBuilder::SceneGraph;
 		struct iterator;
 
-		void Init() override;
-		void Shutdown() override;
+		struct SceneBlock
+		{
+			unsigned char          build_index;
+			RscHandle<class Scene> scene;
+		};
+		enum class SceneActivateResult
+		{
+			Ok = 0,
+			Err_SceneAlreadyActive,
+			Err_SceneNotInProject,
+			Err_ScenePathNotFound
+		};
 
-		RscHandle<Scene> CreateScene(string_view name = "");
-		RscHandle<Scene> LoadScene(uint8_t scene_id, LoadSceneMode = LoadSceneMode::Single);
-		//Scene LoadScene(string_view path_to_scene, LoadSceneMode = LoadSceneMode::Single);
+		// accessors
+		RscHandle<Scene>       GetSceneByBuildIndex(unsigned char index) const;
+		span<const SceneBlock> GetScenes() const;
+
+		// modifiers
+		SceneActivateResult ActivateScene(RscHandle<class Scene>);
+		RscHandle<Scene>    CreateScene();
+
+		// properties
+		RscHandle<Scene>    StartupScene() const;
+		// true if successfully set, false otherwise
+		bool                StartupScene(RscHandle<Scene> scene);
+
 		RscHandle<Scene> GetActiveScene();
 		bool  SetActiveScene(RscHandle<Scene> s);
 
@@ -33,11 +53,14 @@ namespace idk
 		SceneGraph& FetchSceneGraph();
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
 
-		string_view GetSceneName();
-
 	private:
+		void Init() override;
+		void Shutdown() override;
+
 		GameState* _gs = nullptr;
-		SceneGraphBuilder _sg_builder;
-		RscHandle<Scene> _active_scene;
+		vector<SceneBlock>     _scenes;
+		RscHandle<class Scene> _startup_scene;
+		RscHandle<Scene>       _active_scene;
+		SceneGraphBuilder      _sg_builder;
 	};
 }
