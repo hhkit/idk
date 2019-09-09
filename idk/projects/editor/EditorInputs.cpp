@@ -89,7 +89,8 @@ namespace idk
 		}
 		else
 		{
-			main_camera.StopRotatingCamera();
+			if (main_camera._rotating)
+				main_camera.StopRotatingCamera();
 		}
 	}
 };
