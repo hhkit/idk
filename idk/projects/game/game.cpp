@@ -19,6 +19,7 @@
 #include <gfx/CameraControls.h>
 
 #include <test/TestSystem.h>
+#include <renderdoc/renderdoc_app.h>
 
 namespace idk
 {
@@ -40,7 +41,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//_CrtSetBreakAlloc(2455); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-    
+
+	RENDERDOC_API_1_1_2* rdoc_api = NULL;
+
+	// At init, on windows
+	if (HMODULE mod = LoadLibrary(L"renderdoc.dll"))
+	{
+		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
+			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
+	}
+
 	using namespace idk;
 	
 	auto c = std::make_unique<Core>();
