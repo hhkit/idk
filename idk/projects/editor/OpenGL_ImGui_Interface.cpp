@@ -96,6 +96,7 @@ namespace idk
 			ImGui::End();
 			///////////////////////////////END///////////////////////////////
 
+			//editorInputs.Update();
 			//ImGuiFrameEnd();
 		}
 

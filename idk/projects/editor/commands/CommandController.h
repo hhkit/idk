@@ -22,6 +22,7 @@ To change list to circular buffer soon-ish.
 #include <list>
 #include <editor/commands/ICommand.h>
 
+#define COMMAND(COMMAND_CLASSNAME,...) std::make_unique<COMMAND_CLASSNAME>(__VA_ARGS__)
 
 namespace idk {
 
@@ -30,7 +31,7 @@ namespace idk {
 		CommandController();
 		~CommandController();
 		
-		//Executes given ICommand Object. USAGE: ExecuteCommand(std::make_unique<CommandName>(parameters)); DO NOT SEND IN LOCAL VARIABLES
+		//Executes given ICommand Object. USAGE: ExecuteCommand(COMMAND(CMD_AddComponent,gameobjectHandle));
 		void ExecuteCommand(unique_ptr<ICommand> command);
 		//Executes the undo function of previous ICommand Object.
 		void UndoCommand();

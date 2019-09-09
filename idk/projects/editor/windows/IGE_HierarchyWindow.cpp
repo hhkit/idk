@@ -2,7 +2,7 @@
 //@file		IGE_HierarchyWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		4 SEPT 2019
+//@date		9 SEPT 2019
 //@brief	
 
 /*
@@ -15,8 +15,13 @@ of the editor.
 
 #include "pch.h"
 #include <editor/windows/IGE_HierarchyWindow.h>
+#include <editor/commands/CommandList.h>		//Commands
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
+#include <scene/SceneManager.h>
+#include <core/GameObject.h>
+#include <core/Core.h>
+#include <IDE.h>		//IDE
 #include <iostream>
 
 namespace idk {
@@ -76,12 +81,31 @@ namespace idk {
 
 		ImGui::SetCursorPosX(5);
 		if (ImGui::Button("Create")) {
-			if (ImGui::Button("Empty GameObject")) {
-				
-			}
+			ImGui::OpenPopup("CreatePopup");
 
 
 		}
+
+		if (ImGui::BeginPopup("CreatePopup")) {
+			if (ImGui::MenuItem("Create Empty")) {
+				IDE& editor = Core::GetSystem<IDE>();
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+
+				auto& sg = Core::GetSystem<SceneManager>().FetchSceneGraph();
+
+				int indent = 0;
+				sg.visit([&indent](const auto& handle, int depth) {
+					indent += depth;
+					for (int i = 0; i < indent; ++i)
+						std::cout << ' ';
+					std::cout << handle.id << '\n';
+				});
+
+			}
+
+			ImGui::EndPopup();
+		}
+
 
 		ImGui::SameLine();
 		ImVec2 startPos = ImGui::GetCursorPos();
@@ -89,14 +113,48 @@ namespace idk {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 		static char searchBarChar[512];
-		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 512, ImVec2{window_size.x-50,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
+		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 512, ImVec2{window_size.x-100,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
 			//Do something
 		}
 		ImGui::PopStyleVar();
 
 		ImGui::EndChild();
 
+		//Hierarchy Display
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		
+		
+		//Refer to TestSystemManager.cpp
+		sceneGraph.visit([](const Handle<GameObject>& handle, int depth) {
+			if (!handle)
+				return;
+			for (int i = 0; i < depth; ++i)
+				ImGui::Indent();
+		//	handle->Transform()->SetParent(parent, true);
+			string goName = "GameObject ";
+			goName.append(std::to_string(handle.id));
+			//ImGui::PushID(&handle);
+			if (ImGui::Selectable(goName.c_str())) {
+		
+			}
+		
+			//ImGui::PopID();
+		});
 
+
+		//for (auto& i : sceneGraph) {
+		//	ImGui::PushID(i.obj.id);
+		//
+		//	string goName = "GameObject ";
+		//	goName.append(std::to_string(i.obj.id));
+		//	ImGui::Selectable(goName.c_str());
+		//
+		//	ImGui::PopID();
+		//
+		//}
+
+		
 
 	}
 

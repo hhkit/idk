@@ -1,6 +1,8 @@
 #pragma once
 #include <editor/IEditor.h>
 #include <editor/ImGui_Interface.h>
+//#include <editor/commands/CommandController.h>
+#include <editor/commands/CommandController.h>
 
 
 
@@ -41,6 +43,7 @@ namespace idk
 		vector <unique_ptr<IGE_IWindow>> ige_windows	{};
 
 		bool bool_demo_window					 { false };
+		CommandController command_controller			{};
 
 	};
 }
