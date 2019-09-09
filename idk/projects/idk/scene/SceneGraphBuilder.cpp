@@ -8,12 +8,15 @@ namespace idk
 {
 	void SceneGraphBuilder::BuildSceneGraph(span<const GameObject> objs)
 	{
-		sg_lookup.clear(); // throw away old scene graph
+		sg_lookup.clear(); // throw away old scene graphs
+		scene_graphs.clear();
 		// defrag by depth
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
 			[](const auto& lhs, const auto& rhs)
 			{
-				return lhs.Transform()->Depth() < rhs.Transform()->Depth();
+				return lhs.Transform()->Depth() == rhs.Transform()->Depth() ? 
+					 lhs.GetHandle().id < rhs.GetHandle().id
+					:lhs.Transform()->Depth() < rhs.Transform()->Depth();
 			}
 		);
 

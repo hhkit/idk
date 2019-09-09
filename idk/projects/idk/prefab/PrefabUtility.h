@@ -19,6 +19,8 @@ namespace idk
         // if the given game object is not part of a prefab instance, returns a null handle.
         static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);
 
+		// manually propagate ALL changes of a prefab.
+		// most likely don't need to call this.
         static void PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab);
 
         // after changing a value in a component, call this fn.
@@ -32,5 +34,9 @@ namespace idk
 
         // reverts all overrides of the given prefab instance.
         static void RevertPrefabInstance(Handle<GameObject> instance_root);
+
+		static void ApplyAddedComponent(Handle<GameObject> target, GenericHandle component);
+		static void ApplyPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override);
+		static void ApplyPrefabInstance(Handle<GameObject> instance_root);
     };
 }

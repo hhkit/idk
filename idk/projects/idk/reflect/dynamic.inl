@@ -8,6 +8,7 @@ namespace idk::reflect
 	struct dynamic::base
 	{
 		virtual void* get() const = 0;
+		virtual dynamic copy() const = 0;
 		virtual ~base() {}
 	};
 
@@ -26,6 +27,14 @@ namespace idk::reflect
 		{
 			return const_cast<void*>(static_cast<const void*>(&obj));
 		}
+
+		dynamic copy() const override
+		{
+            if constexpr (!std::is_copy_constructible_v<std::decay_t<T>>)
+                throw "object is not copy constructible!";
+            else
+    			return dynamic(static_cast<std::decay_t<T>>(obj));
+		}
 	};
 
 	struct dynamic::voidptr : dynamic::base
@@ -39,6 +48,11 @@ namespace idk::reflect
 		void* get() const override
 		{
 			return obj;
+		}
+
+		dynamic copy() const override
+		{
+			return dynamic(std::move(obj));
 		}
 	};
 

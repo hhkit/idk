@@ -1,3 +1,19 @@
+//////////////////////////////////////////////////////////////////////////////////
+//@file		IDE.cpp
+//@author	Muhammad Izha B Rahim, Wei Xiang
+//@param	Email : izha95\@hotmail.com
+//@date		9 SEPT 2019
+//@brief	
+
+/*
+Main Brain of the Game Editor
+
+Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
+
+*/
+//////////////////////////////////////////////////////////////////////////////////
+
+
 #include "pch.h"
 #include <IDE.h>
 
@@ -44,7 +60,7 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 
-
+		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
 
 		ige_windows.push_back(std::make_unique<IGE_SceneView>());
@@ -79,7 +95,8 @@ namespace idk
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
 	
-		_interface->ImGuiFrameUpdate();
+		//_interface->ImGuiFrameUpdate();
+		_interface->Inputs()->Update();
 		
 		
 		_interface->ImGuiFrameEnd();

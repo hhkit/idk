@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		9 SEPT 2019
 //@brief	
 
 /*
@@ -16,6 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <app/Application.h>
+#include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
@@ -130,18 +131,19 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("Edit"))
 		{
-			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, false)) {
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			bool canUndo = commandController.CanUndo();
+			bool canRedo = commandController.CanRedo();
+			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, canUndo)) {
+				commandController.UndoCommand();
+
+			}
 
 
+			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, canRedo)) {
+				commandController.RedoCommand();
 
-			} //Do something if pressed
-
-
-			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, false)) {
-
-
-
-			} //Do something if pressed
+			}
 
 
 			ImGui::Separator();
@@ -168,7 +170,12 @@ namespace idk {
 
 			} //Do something if pressed
 			if (ImGui::MenuItem("Delete")) {
+				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
+				for (Handle<GameObject>& i : selected_gameObjects) {
+					Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(i);
+				}
 
+				selected_gameObjects.clear();
 
 
 			} //Do something if pressed
@@ -317,6 +324,22 @@ namespace idk {
 
 	}
 
+	void IGE_MainWindow::PollShortcutInput()
+	{
+		CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+
+
+		//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+			commandController.UndoCommand();
+		}
+
+		//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+			commandController.RedoCommand();
+		}
+	}
+
 
 	void IGE_MainWindow::Update() {
 
@@ -352,6 +375,9 @@ namespace idk {
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
 		DisplayHintBarChildWindow();
+
+		PollShortcutInput();
+		
 
 	}
 

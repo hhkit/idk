@@ -3,13 +3,30 @@
 
 #include <iostream>
 
+constexpr auto replacer = R"(
+#ifdef OGL
+#define U_LAYOUT(SET, BIND) 
+#define BLOCK(X) struct X
+#endif
+#ifdef VULKAN
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+#define BLOCK(X) X
+#endif
+)";
+
 namespace idk::ogl
 {
 	Shader::Shader(GLenum shader_type, string_view shader_code)
 	{
 		_shader_id = glCreateShader(shader_type);
-		const char* arr[] = { shader_code.data() } ;
-		glShaderSource(_shader_id, 1, arr, 0);
+
+		auto version_pos = shader_code.find("#version");
+		auto version_end = shader_code.find("\n", version_pos);
+
+		const char* arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, shader_code.substr(version_end).data() } ;
+		const GLint lengths[] = { (version_end - version_pos + 1), -1, -1, -1};
+
+		glShaderSource(_shader_id, sizeof(arr) / sizeof(*arr), arr, lengths);
 		glCompileShader(_shader_id);
 		
 		{
@@ -132,6 +149,23 @@ namespace idk::ogl
 				{
 					glGetActiveUniformName(_program_id, i, 256, nullptr, buf);
 					std::cout << "  uniform detected: " << buf << "\n";
+					std::cout << "  location: " << glGetUniformLocation(_program_id, buf) << "\n";
+					//std::cout << "  location: " << glGetUniformBlockIndex(_program_id, buf) << "\n";
+				}
+
+				GLint numBlocks = 0;
+				glGetProgramInterfaceiv(_program_id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &numBlocks);
+				std::cout << "  blocks found: " << numBlocks << "\n";
+
+				for (GLint i = 0; i < numBlocks; ++i)
+				{
+					GLint val = 0;
+					glGetActiveUniformBlockiv(_program_id, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &val);
+					std::cout << " uniforms in block " << i << ": " << val << "\n";
+					for (GLint j = 0; j < val; ++j)
+					{
+
+					}
 				}
 			}
 		}

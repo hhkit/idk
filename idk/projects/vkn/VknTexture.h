@@ -2,9 +2,12 @@
 #pragma once
 #include<vulkan/vulkan.hpp>
 #include "idk.h"
+#include "gfx/Texture.h"
 
 namespace idk::vkn {	
-	struct idkTexture {
+	struct VknTexture 
+		: public Texture
+	{
 		ivec2					size{};
 		vk::DeviceSize			sizeOnDevice{};
 		void*					rawData{};
@@ -15,9 +18,18 @@ namespace idk::vkn {
 		vk::UniqueImageView     imageView{nullptr};
 		vk::UniqueSampler       sampler{ nullptr };
 
-		idkTexture() = default;
-		~idkTexture();
-		//idkTexture(const idkTexture& rhs);
-		idkTexture(idkTexture&& rhs);
+		VknTexture() = default;
+		~VknTexture();
+		//VknTexture(const VknTexture& rhs);
+		VknTexture(VknTexture&& rhs);
+
+		VknTexture& operator=(VknTexture&&);
+		void Size(ivec2 new_size) override;
+		virtual void* ID() const;
+
+	private:
+		void OnMetaUpdate(const TextureMeta&);
+		void UpdateUV(UVMode);
+
 	};
 };

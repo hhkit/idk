@@ -74,7 +74,7 @@ namespace idk::ogl
 
 			// per mesh render
 			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
-			pipeline.SetUniform("perspective_transform", cam.projection_matrix);
+			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 
 			glBindVertexArray(vao_id);
 			for (auto& elem : curr_object_buffer.mesh_render)
@@ -91,8 +91,8 @@ namespace idk::ogl
 				// object uniforms
 
 				auto obj_tfm = cam.view_matrix* elem.transform;
-				pipeline.SetUniform("object_transform", obj_tfm);
-				pipeline.SetUniform("normal_transform", obj_tfm.inverse().transpose());
+				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
 				for (auto& [id, uniform] : elem.material_instance.uniforms)

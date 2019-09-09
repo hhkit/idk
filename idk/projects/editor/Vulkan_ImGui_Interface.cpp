@@ -165,7 +165,7 @@ namespace idk
 
 		void VI_Interface::ImGuiFrameUpdate()
 		{
-			vkn::VulkanView& vknViews = vkObj->View();
+			//vkn::VulkanView& vknViews = vkObj->View();
 
 			bool& resize = vkObj->View().ImguiResize();
 			if (resize)

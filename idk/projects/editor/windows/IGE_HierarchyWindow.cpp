@@ -2,7 +2,7 @@
 //@file		IGE_HierarchyWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		4 SEPT 2019
+//@date		9 SEPT 2019
 //@brief	
 
 /*
@@ -15,8 +15,13 @@ of the editor.
 
 #include "pch.h"
 #include <editor/windows/IGE_HierarchyWindow.h>
+#include <editor/commands/CommandList.h>		//Commands
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
+#include <scene/SceneManager.h>
+#include <core/GameObject.h>
+#include <core/Core.h>
+#include <IDE.h>		//IDE
 #include <iostream>
 
 namespace idk {
@@ -76,12 +81,22 @@ namespace idk {
 
 		ImGui::SetCursorPosX(5);
 		if (ImGui::Button("Create")) {
-			if (ImGui::Button("Empty GameObject")) {
-				
-			}
+			ImGui::OpenPopup("CreatePopup");
 
 
 		}
+
+		if (ImGui::BeginPopup("CreatePopup")) {
+			if (ImGui::MenuItem("Create Empty")) {
+				IDE& editor = Core::GetSystem<IDE>();
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+
+
+			}
+
+			ImGui::EndPopup();
+		}
+
 
 		ImGui::SameLine();
 		ImVec2 startPos = ImGui::GetCursorPos();
@@ -89,14 +104,72 @@ namespace idk {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 		static char searchBarChar[512];
-		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 512, ImVec2{window_size.x-50,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
+		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 512, ImVec2{window_size.x-100,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
 			//Do something
 		}
 		ImGui::PopStyleVar();
 
 		ImGui::EndChild();
 
+		//Hierarchy Display
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		
+		
+		//Refer to TestSystemManager.cpp
+		sceneGraph.visit([](const Handle<GameObject>& handle, int depth) {
+			if (!handle)
+				return;
 
+			//This indent is temporary, will integrate with ImGui::Tree later TODO
+			for (int i = 0; i < depth; ++i)
+				ImGui::Indent();
+
+			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
+
+			
+			//handle->Transform()->SetParent(parent, true);
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
+
+			//Check if gameobject has been selected
+			for (Handle<GameObject>& i : selected_gameObjects) {
+				if (handle == i) {
+					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+				}
+			}
+
+			string goName = "GameObject ";
+			goName.append(std::to_string(handle.id));
+			//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
+
+
+			
+
+			//Use address of id as ptr_id
+			ImGui::TreeNodeEx(&handle.id, nodeFlags, goName.c_str());
+			//Standard Click
+			if (ImGui::IsItemClicked(0)) {
+				selected_gameObjects.clear();
+				selected_gameObjects.push_back(handle);
+			}
+
+
+
+		});
+
+
+		//for (auto& i : sceneGraph) {
+		//	ImGui::PushID(i.obj.id);
+		//
+		//	string goName = "GameObject ";
+		//	goName.append(std::to_string(i.obj.id));
+		//	ImGui::Selectable(goName.c_str());
+		//
+		//	ImGui::PopID();
+		//
+		//}
+
+		
 
 	}
 
