@@ -213,12 +213,15 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="idkTexture.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="UboManager.h" />
     <ClInclude Include="vector_buffer.h" />
     <ClInclude Include="GfxConverters.h" />
     <ClInclude Include="BufferHelpers.h" />
+    <ClInclude Include="VknFrameBuffer.h" />
+    <ClInclude Include="VknFrameBufferFactory.h" />
+    <ClInclude Include="VknFrameBufferManager.h" />
+    <ClInclude Include="VknTexture.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\utils.h" />
@@ -235,11 +238,14 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
-    <ClCompile Include="idkTexture.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
+    <ClCompile Include="VknFrameBuffer.cpp" />
+    <ClCompile Include="VknFrameBufferFactory.cpp" />
+    <ClCompile Include="VknFrameBufferManager.cpp" />
+    <ClCompile Include="VknTexture.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
