@@ -91,15 +91,6 @@ namespace idk {
 				IDE& editor = Core::GetSystem<IDE>();
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
 
-				auto& sg = Core::GetSystem<SceneManager>().FetchSceneGraph();
-
-				int indent = 0;
-				sg.visit([&indent](const auto& handle, int depth) {
-					indent += depth;
-					for (int i = 0; i < indent; ++i)
-						std::cout << ' ';
-					std::cout << handle.id << '\n';
-				});
 
 			}
 
@@ -129,17 +120,41 @@ namespace idk {
 		sceneGraph.visit([](const Handle<GameObject>& handle, int depth) {
 			if (!handle)
 				return;
+
+			//This indent is temporary, will integrate with ImGui::Tree later TODO
 			for (int i = 0; i < depth; ++i)
 				ImGui::Indent();
-		//	handle->Transform()->SetParent(parent, true);
+
+			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
+
+			
+			//handle->Transform()->SetParent(parent, true);
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
+
+			//Check if gameobject has been selected
+			for (Handle<GameObject>& i : selected_gameObjects) {
+				if (handle == i) {
+					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+				}
+			}
+
 			string goName = "GameObject ";
 			goName.append(std::to_string(handle.id));
-			//ImGui::PushID(&handle);
-			if (ImGui::Selectable(goName.c_str())) {
-		
+			//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
+
+
+			
+
+			//Use address of id as ptr_id
+			ImGui::TreeNodeEx(&handle.id, nodeFlags, goName.c_str());
+			//Standard Click
+			if (ImGui::IsItemClicked(0)) {
+				selected_gameObjects.clear();
+				selected_gameObjects.push_back(handle);
 			}
-		
-			//ImGui::PopID();
+
+
+
 		});
 
 
