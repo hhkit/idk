@@ -78,4 +78,15 @@ namespace idk {
 		}
 	}
 
+	bool CommandController::CanUndo()
+	{
+		return !undoStack.empty();
+	}
+
+	bool CommandController::CanRedo()
+	{
+		return !redoStack.empty();
+	}
+
+
 }

@@ -40,6 +40,10 @@ namespace idk {
 		//Clears the stack
 		void ClearUndoRedoStack();
 
+		bool CanUndo();
+
+		bool CanRedo();
+
 	private:
 
 		//A vector of past commands that have been executed. 

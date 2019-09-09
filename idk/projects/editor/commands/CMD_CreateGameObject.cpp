@@ -27,6 +27,7 @@ namespace idk {
 	{
 		if (new_game_object_handle) {
 			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(new_game_object_handle);
+			new_game_object_handle = {}; //Reassign to blank
 			return true;
 		}
 		else {

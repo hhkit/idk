@@ -130,18 +130,19 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("Edit"))
 		{
-			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, false)) {
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			bool canUndo = commandController.CanUndo();
+			bool canRedo = commandController.CanRedo();
+			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, canUndo)) {
+				commandController.UndoCommand();
+
+			}
 
 
+			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, canRedo)) {
+				commandController.RedoCommand();
 
-			} //Do something if pressed
-
-
-			if (ImGui::MenuItem("Redo", "CTRL+Y", nullptr, false)) {
-
-
-
-			} //Do something if pressed
+			}
 
 
 			ImGui::Separator();
