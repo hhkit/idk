@@ -24,6 +24,8 @@ namespace idk
 		template<typename Func> auto visit(Func&& func) const;
 
 		explicit operator bool() const;
+		bool operator==(const GenericRscHandle&) const;
+		bool operator!=(const GenericRscHandle&) const;
 	private:
 		detail::ResourceFile_helper<Resources>::GenericRscHandle _handle;
 		friend class ResourceManager;

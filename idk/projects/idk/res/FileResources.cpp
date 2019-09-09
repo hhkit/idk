@@ -68,6 +68,16 @@ namespace idk
 		return std::visit([](auto handle) { return static_cast<bool>(handle); }, _handle);
 	}
 
+	bool GenericRscHandle::operator==(const GenericRscHandle& rhs) const
+	{
+		return _handle == rhs._handle;
+	}
+
+	bool GenericRscHandle::operator!=(const GenericRscHandle& rhs) const
+	{
+		return _handle == rhs._handle;
+	}
+
 	MetaFile save_meta(const FileResources& resources)
 	{
 		auto retval = MetaFile{};

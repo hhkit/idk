@@ -27,6 +27,7 @@ namespace idk
 		atomic<bool>                _running;
 		static inline Core*         _instance = nullptr;
 		bool                        _setup = false;
+		bool                        _shutdown = false;
 	};
 }
 #include "Core.inl"

@@ -19,6 +19,8 @@ namespace idk::anim
 		Skeleton() = default;
 		Skeleton(const vector<Bone>& bones, const hash_table<string, size_t>& bone_table);
 
+		const vector<Bone>& data() const { return _bones; }
+
 		void AddBone(string_view name, Bone b);
 		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat.inverse(); }
 

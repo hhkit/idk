@@ -7,12 +7,15 @@
 
 namespace idk
 {
+	// struct FileHandle;
 	class FStreamWrapper : public std::fstream
 	{
 	public:
 		FStreamWrapper(FStreamWrapper&& rhs);
 		FStreamWrapper& operator=(FStreamWrapper&& rhs);
 		~FStreamWrapper();
+
+		// FileHandle GetHandle() const;
 
 		// Override some files.
 		void close();
@@ -63,11 +66,14 @@ namespace idk
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);
 		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream = false);
 
+		bool				Rename(string_view new_file_name);
+
 		explicit	operator bool() const;
 
 		
 
 		friend class FileSystem;
+		friend class FStreamWrapper;
 	private:
 		FileHandle(const file_system_detail::fs_key& key, bool is_file = true);
 

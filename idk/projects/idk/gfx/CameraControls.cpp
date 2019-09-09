@@ -64,7 +64,7 @@ namespace idk {
 
 			vec3 up = tfm->Up();
 
-			current_camera->LookAt(_target);
+			current_camera->LookAt(_target,idk::vec3(0,1,0));
 		}
 
 		_focusing = true;
@@ -85,34 +85,6 @@ namespace idk {
 	{
 		if (_rotating)
 		{
-
-			/*
-			vec2 scrCenter = { 0.5f,
-			0.5f };
-			_radius = std::min(scrCenter.x, scrCenter.y);
-
-
-			vec2 screenPt = { (screenpos.x - scrCenter.x),(scrCenter.y - screenpos.y) };
-
-			if (!_arcBallRotating)
-			{
-				initialVector = convertMouseCoord(screenPt).normalize();
-
-				currVector = initialVector;
-				_arcBallRotating = true;
-			}
-			else
-				currVector = convertMouseCoord(screenPt).normalize();
-
-			vec3 rotationAxis = currVector.cross(initialVector.normalize());
-
-			real rotAngle = std::acos(currVector.dot(initialVector));
-
-			auto tfm = current_camera->GetGameObject()->Transform();
-
-			tfm->rotation = (quat{ rotationAxis, deg{rotAngle} } *tfm->rotation).normalize();
-
-			/*/
 
 
 			_alpha = (screenpos.x - _oldScreenPos.x)*90.f;
@@ -149,8 +121,8 @@ namespace idk {
 			//tfm->rotation += (quat{ vec3{1,0,0}, deg{_alpha}  } *tfm->rotation).normalize();
 
 			quat rotation;
-			rotation = (quat{ vec3{0,1,0}, deg{_beta} } *tfm->rotation).normalize();
-			rotation += (quat{ vec3{1,0,0}, deg{_alpha} } *tfm->rotation).normalize();
+			rotation = (quat{ vec3{0,1,0}, deg{_alpha} } *tfm->rotation).normalize();
+			rotation += (quat{ vec3{1,0,0}, deg{_beta} } *tfm->rotation).normalize();
 
 
 			tfm->GlobalRotation(rotation);

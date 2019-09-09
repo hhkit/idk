@@ -162,15 +162,15 @@ namespace idk
 	{
 		return detail::TableGen::ActivateScene(_objects, scene);
 	}
-	bool GameState::DectivateScene(uint8_t scene)
+	bool GameState::DeactivateScene(uint8_t scene)
 	{
 		return detail::TableGen::DeactivateScene(_objects, scene);
 	}
-	bool GameState::DectivateScene(Scene scene)
+	bool GameState::DeactivateScene(Scene scene)
 	{
-		return DectivateScene(scene.scene_id);
+		return DeactivateScene(scene.scene_id);
 	}
-	bool GameState::ValidateScene(Scene scene)
+	bool GameState::ValidateScene(Scene& scene)
 	{
 		return static_cast<ObjectPool<GameObject>*>(std::get<0>(_objects).get())->ValidateScene(scene.scene_id);
 	}

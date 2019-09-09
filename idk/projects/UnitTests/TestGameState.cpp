@@ -1,8 +1,10 @@
 #include "pch.h"
+#include <core/Core.h>
 #include <core/GameState.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <scene/SceneFactory.h>
+#include <scene/ProjectManager.h>
 
 TEST(GameState, TestGameState)
 {
@@ -44,11 +46,11 @@ TEST(GameState, TestHandles)
 TEST(GameState, TestScene)
 {
 	using namespace idk;
-	GameState gs;
-	SceneFactory real_sf;
-	ResourceFactory<Scene>& sf = real_sf;
-	auto scene0 = sf.Create();
-	auto scene1 = sf.Create();
+	Core c;
+	c.Setup();
+	auto scene0 = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene1 = Core::GetSystem<ProjectManager>().CreateScene();
+	auto scene2 = Core::GetSystem<ProjectManager>().CreateScene();
 	EXPECT_TRUE(scene0);
 	EXPECT_TRUE(scene1);
 	
@@ -67,12 +69,12 @@ TEST(GameState, TestScene)
 	EXPECT_EQ(count, create_in_scene0);
 
 	count = 0;
-	for (auto& elem : Scene{ 1 })
+	for (auto& elem : *scene1)
 		++count;
 	EXPECT_EQ(count, create_in_scene1);
 
 	count = 0;
-	for (auto& elem : Scene{ 2 })
+	for (auto& elem : *scene2)
 		++count;
 	EXPECT_EQ(count, 0);
 }

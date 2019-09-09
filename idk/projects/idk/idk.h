@@ -59,6 +59,7 @@ namespace idk
 
 	using seconds = std::chrono::duration<real>;
 	using time_point = Clock::time_point;
+
 	template<typename T, typename U>
 	auto duration_cast(U&& time) {	return std::chrono::duration_cast<T>(std::forward<U>(time));	};
 
@@ -103,6 +104,9 @@ namespace idk
 
 	template<bool val>
 	using sfinae = std::enable_if_t<val>;
+
+	using std::true_type;
+	using std::false_type;
 
 	// smart pointers
 	template<typename T>

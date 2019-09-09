@@ -29,7 +29,7 @@ namespace idk
 		
 		//binding,attrib
 		hash_table<uint32_t, vtx::Attrib> attrib_bindings;
-		shared_ptr<pipeline_config> config;
+		shared_ptr<pipeline_config> config{};
 	};
 
 	struct CameraData

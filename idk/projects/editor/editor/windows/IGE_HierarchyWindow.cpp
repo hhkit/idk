@@ -76,7 +76,9 @@ namespace idk {
 
 		ImGui::SetCursorPosX(5);
 		if (ImGui::Button("Create")) {
-
+			if (ImGui::Button("Empty GameObject")) {
+				
+			}
 
 
 		}

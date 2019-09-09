@@ -1,5 +1,7 @@
 #include "ResourceManager.h"
 #include <res/ResourceMeta.h>
+#include <res/SaveableResource.h>
+#include <res/SaveableResourceManager.h>
 #pragma once
 
 namespace idk
@@ -8,18 +10,23 @@ namespace idk
 	Factory& ResourceManager::RegisterFactory(Args&& ... args)
 	{
 		auto ptr = std::make_shared<Factory>(std::forward<Args>(args)...);
-		_plaintext_loaders[ResourceID<typename Factory::Resource>] = ptr;
-		//_default_resources[ResourceID<typename Factory::Resource>] = ptr->Create();
+		_resource_factories[ResourceID<typename Factory::Resource>] = ptr;
 		return *ptr;
 	}
 	template<typename ExtensionLoaderT, typename ... Args>
-	inline ExtensionLoaderT& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
+	ExtensionLoaderT& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
 	{
 		static_assert(std::is_base_of_v<ExtensionLoader, ExtensionLoaderT>, "can only register extension loaders");
 		return *static_cast<ExtensionLoaderT*>((_extension_loaders[string{ extension }] = std::make_unique<ExtensionLoaderT>(std::forward<Args>(args)...)).get());
 	}
+	template<typename Factory>
+	Factory& ResourceManager::GetFactory()
+	{
+		return GetLoader<typename Factory::Resource>();
+	}
+
 	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create()
+	RscHandle<Resource> ResourceManager::Create()
 	{
 		auto& table = GetTable<Resource>();
 		auto& loader = GetLoader<Resource>();
@@ -31,10 +38,17 @@ namespace idk
 		
 		auto handle = RscHandle<Resource>{ Guid::Make() };
 		ptr->_handle = RscHandle<BaseResource_t<Resource>>{ handle };
-		ptr->_dirty = true;
+
 		if constexpr (has_tag_v<Resource, MetaTag>)
 			ptr->_dirtymeta = true;
-		table.emplace(handle.guid, std::move(ptr));
+		if constexpr (has_tag_v<Resource, Saveable>)
+		{
+			ptr->Dirty();
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
+		}
+
+		table[handle.guid].is_new = true;
+		table[handle.guid].resource_ptr = std::move(ptr);
 		
 		return handle;
 	}
@@ -44,7 +58,8 @@ namespace idk
 		auto retval = Create<Resource>(filepath, Guid::Make());
 		if (!retval)
 			return RscHandle<Resource>{};
-		retval->_dirty = true;
+
+		GetTable<Resource>()[retval.guid].is_new = true;
 		if constexpr (has_tag_v<Resource, MetaTag>)
 			retval->_dirtymeta = true;
 		return retval;
@@ -63,7 +78,10 @@ namespace idk
 
 		auto handle = RscHandle<Resource>{ guid };
 		ptr->_handle = handle;
-		table.emplace_hint(itr, handle.guid, std::move(ptr));
+		if constexpr (has_tag_v<Resource, Saveable>)
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
+
+		table[handle.guid].resource_ptr = std::move(ptr);
 		return handle;
 	}
 
@@ -80,12 +98,17 @@ namespace idk
 
 		auto handle = RscHandle<Resource>{ guid };
 		ptr->_handle = handle;
-		table.emplace_hint(itr, handle.guid, std::move(ptr));
+
+		if constexpr (has_tag_v<Resource, Saveable>)
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
+
+		table[handle.guid].resource_ptr = std::move(ptr);
+
 		return handle;
 	}
 
 	template<typename RegisterMe, typename ...Args, typename>
-	RscHandle<RegisterMe> ResourceManager::Create(Args&& ... args)
+	RscHandle<RegisterMe> ResourceManager::Emplace(Args&& ... args)
 	{
 		auto& table = GetTable<RegisterMe>();
 		auto& loader = GetLoader<RegisterMe>();
@@ -97,16 +120,23 @@ namespace idk
 
 		auto handle = RscHandle<RegisterMe>{ Guid::Make() };
 		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
-		ptr->_dirty = true;
+
 		if constexpr (has_tag_v<RegisterMe, MetaTag>)
 			ptr->_dirtymeta = true;
-		table.emplace(handle.guid, std::move(ptr));
+		if constexpr (has_tag_v<Resource, Saveable>)
+		{
+			ptr->Dirty();
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
+		}
+
+		table[handle.guid].is_new = true;
+		table[handle.guid].resource_ptr = std::move(ptr);
 
 		return handle;
 	}
 
 	template<typename RegisterMe, typename ...Args, typename>
-	RscHandle<RegisterMe> ResourceManager::Create(Guid guid, Args&& ... args)
+	RscHandle<RegisterMe> ResourceManager::Emplace(Guid guid, Args&& ... args)
 	{
 		auto [table, itr] = FindHandle(RscHandle<RegisterMe>{guid});
 		if (itr != table.end())
@@ -118,14 +148,20 @@ namespace idk
 
 		auto handle = RscHandle<RegisterMe>{ guid };
 		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
-		table.emplace_hint(itr, handle.guid, std::move(ptr));
+		if constexpr (has_tag_v<Resource, Saveable>)
+		{
+			ptr->Dirty();
+			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
+		}
+
+		table[handle.guid].resource_ptr = std::move(ptr);
 		return handle;
 	}
 
 	template<typename Resource>
 	inline auto& ResourceManager::GetLoader()
 	{
-		return *r_cast<ResourceFactory<BaseResource_t<Resource>>*>(_plaintext_loaders[ResourceID<BaseResource_t<Resource>>].get());
+		return *r_cast<ResourceFactory<BaseResource_t<Resource>>*>(_resource_factories[ResourceID<BaseResource_t<Resource>>].get());
 	}
 
 	template<typename Resource>
@@ -145,24 +181,29 @@ namespace idk
 	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)
 	{
 		auto [table, itr] = FindHandle(RscHandle<BaseResource_t<Resource>>{handle});
-		return itr != table.end() && itr->second->_loaded;
+		return itr != table.end() && itr->second.resource_ptr;
 	}
 
 	template<typename Resource>
 	inline Resource& ResourceManager::Get(const RscHandle<Resource>& handle)
 	{
 		auto [table, itr] = FindHandle(handle);
-		if (itr != table.end() && itr->second->_loaded)
-			return s_cast<Resource&>(*itr->second);
-		else
-			return *r_cast<Resource*>(_default_resources[ResourceID<BaseResource_t<Resource>>].get());
+		if (itr != table.end())
+			if (itr->second.resource_ptr)
+				return s_cast<Resource&>(*itr->second.resource_ptr);
+		return *r_cast<Resource*>(_default_resources[ResourceID<BaseResource_t<Resource>>].get());
 	}
+
 	template<typename Resource>
 	inline bool ResourceManager::Free(const RscHandle<Resource>& handle)
 	{
 		auto [table, itr] = FindHandle(handle);
+
 		if (itr == table.end())
 			return false;
+
+		if constexpr (has_tag_v<Resource, Saveable>)
+			Core::template GetSystem<SaveableResourceManager>().DeregisterHandle(handle);
 
 		table.erase(itr);
 		return true;

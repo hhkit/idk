@@ -42,7 +42,7 @@ namespace idk
 		unsigned               curr_draw_buffer  = 1;
 		bool                   write_buffer_dirty = false;
 
-		shared_ptr<pipeline_config> mesh_render_config;
+		shared_ptr<pipeline_config> mesh_render_config{nullptr};
 	private:
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);

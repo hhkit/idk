@@ -30,7 +30,6 @@ namespace idk::ogl
 			default:                   return 0;
 			}
 		}(filepath.GetExtension());
-
 		program->Attach(Shader{ shader_enum, stringify.str() });
 		program->Link();
 

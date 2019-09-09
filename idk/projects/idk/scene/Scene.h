@@ -3,18 +3,22 @@
 #include <core/Handle.h>
 #include <ds/span.h>
 #include <res/Resource.h>
+#include <res/SaveableResource.h>
 
 namespace idk
 {
 	class GameObject;
 
+	RESOURCE_EXTENSION(Scene, ".idscene");
+
 	class Scene 
 		: public Resource<Scene>
+		, public Saveable<Scene, false_type>
 	{
 	public:
 		class iterator;
-		explicit Scene(uint8_t scene_id = MaxScene);
-		~Scene();
+		explicit Scene(uint8_t scene_id);
+		virtual ~Scene();
 		Handle<GameObject> CreateGameObject(const Handle<GameObject>&);
 		Handle<GameObject> CreateGameObject();
 		void               DestroyGameObject(const Handle<GameObject>&);
@@ -22,8 +26,10 @@ namespace idk
 		iterator begin() const;
 		iterator end() const;
 	private:
-		uint8_t scene_id;
+		friend class ProjectManager;
 		friend class GameState;
+
+		uint8_t scene_id;
 	};
 
 	class Scene::iterator

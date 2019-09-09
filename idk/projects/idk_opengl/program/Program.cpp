@@ -8,8 +8,14 @@ namespace idk::ogl
 	Shader::Shader(GLenum shader_type, string_view shader_code)
 	{
 		_shader_id = glCreateShader(shader_type);
-		const char* arr[] = { shader_code.data() } ;
-		glShaderSource(_shader_id, 1, arr, 0);
+		auto version_loc = shader_code.find("#version");
+		auto version_end = shader_code.find("\n", version_loc);
+
+		const char* arr[] = {shader_code.substr(version_loc).data(), "#define OGL\n", 
+			shader_code.substr(version_end, string_view::npos).data() } ;
+		const GLint lengths[] = { (GLint) version_end - (GLint) version_loc + 1, -1, -1 };
+
+		glShaderSource(_shader_id, sizeof(arr)/sizeof(arr[0]), arr, lengths);
 		glCompileShader(_shader_id);
 		
 		{

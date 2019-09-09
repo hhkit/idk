@@ -58,6 +58,9 @@
     <ClInclude Include="EditorInputs.h">
       <Filter>controls</Filter>
     </ClInclude>
+    <ClInclude Include="editor\windows\IGE_InspectorWindow.h">
+      <Filter>editor\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -105,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="EditorInputs.cpp">
       <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\windows\IGE_InspectorWindow.cpp">
+      <Filter>editor\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -5,11 +5,18 @@ namespace idk
 {
 	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()
 	{
-		return std::make_unique<Scene>();
+		return std::make_unique<Scene>(0x80);
+	}
+
+	unique_ptr<Scene> SceneFactory::Create()
+	{
+		assert(false);
+		return unique_ptr<Scene>();
 	}
 
 	unique_ptr<Scene> SceneFactory::Create(FileHandle)
 	{
+		assert(false);
 		return unique_ptr<Scene>();
 	}
 }

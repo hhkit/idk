@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <vkn/BufferHelpers.h>
 #include "VulkanDebugRenderer.h"
-#include "vkn/idkTexture.h"
+#include "vkn/VknTexture.h"
 #include <optional>
 namespace  idk::vkn::hlp
 {
@@ -69,7 +69,7 @@ void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcB
 	EndSingleTimeCbufferCmd(cmd_buffer,queue);
 }
 
-void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, idkTexture& img)
+void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, VknTexture& img)
 {
 	BeginSingleTimeCBufferCmd(cmd_buffer);
 

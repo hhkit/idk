@@ -28,7 +28,11 @@ namespace idk
 		_instance = this;
 	}
 
-	Core::~Core() = default;
+	Core::~Core()
+	{
+		if (_setup && _shutdown == false)
+			_system_manager.ShutdownSystems();
+	}
 
 	void Core::Setup()
 	{
@@ -44,28 +48,28 @@ namespace idk
 
 		auto editor = &GetSystem<IEditor>();
 		// setup loop
-		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&Application::SwapBuffers, "Swap buffers");
-		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,  "Poll OS Events");
-		_scheduler->SchedulePass      <UpdatePhase::Update>    (&FileSystem::Update, "File System Update");
-		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Update,  "FMOD Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects, "Build scene graph");
+		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,       "Poll OS Events");
+		_scheduler->SchedulePass      <UpdatePhase::Update>    (&FileSystem::Update,            "File System Update");
+		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Update,           "FMOD Update");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,  "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::BuildSceneGraph, "Build scene graph");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan, "Test updates");
+		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,          "Test updates");
 		if (editor)
 		{
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::WatchDirectory, "watch files");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate, "Editor Update");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
-			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
-			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
-			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&IEditor::EditorDraw, "Editor Draw");
-			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer, "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory,         "Watch files");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&IEditor::EditorUpdate,                   "Editor Update");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyMetadata,      "Save dirty resources");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState,     "Buffer graphics objects");
+			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,      "Render Render Buffer");
+			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&IEditor::EditorDraw,                     "Editor Draw");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer,              "Swap the buffers");
 		}
 		else
 		{
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
-			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Buffer graphics objects");
-			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer, "Buffer graphics objects");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,  "Render Render Buffer");
+			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer,          "Swap the buffers");
 		}
 		Core::GetSystem<FileSystem>();
 		// main loop
@@ -95,6 +99,7 @@ namespace idk
 		}
 
 		_system_manager.ShutdownSystems();
+		_shutdown = true;
 	}
 	void Core::Shutdown()
 	{

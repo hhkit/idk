@@ -9,7 +9,7 @@ namespace idk::ogl
 {
 	unique_ptr<RenderTarget> FrameBufferFactory::GenerateDefaultResource()
 	{
-		auto fb = std::make_unique<FrameBuffer>();
+		auto fb = std::make_unique<VknFrameBuffer>();
 		auto m = fb->GetMeta();
 		m.size = Core::GetSystem<Application>().GetScreenSize();
 		m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
@@ -18,7 +18,7 @@ namespace idk::ogl
 	}
 	unique_ptr<RenderTarget> FrameBufferFactory::Create()
 	{
-		auto fb = std::make_unique<FrameBuffer>();
+		auto fb = std::make_unique<VknFrameBuffer>();
 		auto m = fb->GetMeta();
 		m.size = ivec2{ 512, 512 };
 		m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
@@ -32,13 +32,13 @@ namespace idk::ogl
 
 	unique_ptr<RenderTarget> FrameBufferFactory::Create(FileHandle filepath, const RenderTarget::Metadata& m)
 	{
-		auto fb = std::make_unique<FrameBuffer>();
+		auto fb = std::make_unique<VknFrameBuffer>();
 
 		for (auto& elem : m.textures)
 		{
 			// ensure textures are created
 			Core::GetResourceManager().Free(elem);
-			Core::GetResourceManager().Create<OpenGLTexture>(elem.guid);
+			Core::GetResourceManager().Emplace<OpenGLTexture>(elem.guid);
 		}
 		fb->SetMeta(m);
 

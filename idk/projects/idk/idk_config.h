@@ -4,7 +4,7 @@ namespace idk
 {
 	namespace anim { class Skeleton; class Animation; }
 
-	constexpr auto MaxScene = 8;
+	constexpr auto MaxScene = 0x82; // 130 scenes allowed
 
 	/// NEVER CHANGE THIS TUPLE WITHOUT ASKING THE TECH LEAD
 	/// YOU WILL BREAK ALL SERIALIZATION
@@ -34,9 +34,8 @@ namespace idk
 		/// AUDIO
 		,	class AudioSource
 		,	class AudioListener
-		//,	class AudioSource
-		//, class AudioListener
 
+		/// IVAN BEING STUPID
 		, class TestComponent
 	>;
 	
@@ -50,7 +49,9 @@ namespace idk
 		,   class DebugRenderer
 		,	class AudioSystem
 		,	class ResourceManager
+		,	class SaveableResourceManager
 		,	class SceneManager
+		,	class ProjectManager
 		,	class IEditor
 		,   class TestSystem
 	>;

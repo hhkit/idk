@@ -15,6 +15,9 @@ namespace idk
 
 		Handle<class GameObject> parent;
 
+		// preserve_global = false makes it act the same as simply setting the parent
+		void SetParent(Handle<class GameObject> parent, bool preserve_global = false);
+
 		vec3 Forward() const;
 		vec3 Right() const;
 		vec3 Up() const;
@@ -22,6 +25,7 @@ namespace idk
 		mat4 LocalMatrix() const;
 		mat4 GlobalMatrix() const;
 
+		void LocalMatrix(const mat4&);
 		void GlobalMatrix(const mat4&);
 
 		vec3 GlobalPosition() const;

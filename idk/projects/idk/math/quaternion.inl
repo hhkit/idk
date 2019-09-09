@@ -43,15 +43,19 @@ namespace idk
 		return *this = (*this * rhs);
 	}
 	template<typename T>
-	quaternion<T> quaternion<T>::operator*(const quaternion& rhs) const
+	quaternion<T> quaternion<T>::operator*(const quaternion& r) const
 	{
 		auto copy = *this;
-		const auto plus = T{ 1.0 };
-		const auto minus = T{ -1.0 };
-		copy.w = (this->wxyz * rhs.wxyz).dot(Base{ plus, minus, minus, minus });
-		copy.x = (this->wxyz * rhs.xwzy).dot(Base{ plus, plus, plus, minus });
-		copy.y = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
-		copy.z = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
+		//const auto plus = T{ 1.0 };
+		//const auto minus = T{ -1.0 };
+		//copy.w = (this->wxyz * r.wxyz).dot(Base{ plus, minus, minus, minus });
+		//copy.x = (this->wxyz * r.xwzy).dot(Base{ plus, plus, plus, minus });
+		//copy.y = (this->wxyz * r.yzwx).dot(Base{ plus, minus, plus, plus });
+		//copy.z = (this->wxyz * r.zyxw).dot(Base{ plus, plus, minus, plus });
+		copy.w = w * r.w - x * r.x - y * r.y - z * r.z;
+		copy.x = w * r.x + x * r.w + y * r.z - z * r.y;
+		copy.y = w * r.y - x * r.z + y * r.w + z * r.x;
+		copy.z = w * r.z + x * r.y - y * r.x + z * r.w;
 		return copy;
 	}
 

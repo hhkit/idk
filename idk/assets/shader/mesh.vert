@@ -16,21 +16,44 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
 
-
-layout(set = 0, binding = 0)uniform MV
+#ifndef OGL
+layout(set = 0, binding = 0)
+#endif
+uniform
+#ifdef OGL 
+struct 
+#endif 
+MV
 {
 	mat4 transform;
 } object_transform;
-layout(set = 0, binding = 1)uniform P
+#ifndef OGL
+layout(set = 0, binding = 1)
+#endif
+
+uniform
+#ifdef OGL 
+struct 
+#endif
+P
 {
 	mat4 transform;
 } perspective_transform;
-layout(set = 0,binding = 2)uniform MVP_IVT
+
+#ifndef OGL
+layout(set = 0,binding = 2)
+#endif
+
+uniform 
+#ifdef OGL 
+struct 
+#endif
+MVP_IVT
 {
 	mat4 transform;
 } normal_transform;
 
-layout(location = 2) out VS_OUT
+layout(location = 1) out VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -39,11 +62,16 @@ layout(location = 2) out VS_OUT
   vec3 view_pos; 		
 } vs_out;
 
+layout(location = 0) out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
 void main()
 {
 	vs_out.position = vec3(object_transform.transform * vec4(position, 1.0));
 	vs_out.normal   = vec3(normal_transform.transform * vec4(normal, 1.0));
 	vs_out.uv       = uv;
     gl_Position     = perspective_transform.transform * vec4(vs_out.position, 1.0);
-	//vs_out.uv = gl_Position.xy;
+	vs_out.uv = gl_Position.xy;
 }

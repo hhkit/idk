@@ -7,6 +7,8 @@
 #include <gfx/GraphicsSystem.h>
 #include <gfx/DebugRenderer.h>
 #include <res/ResourceManager.h>
+#include <res/SaveableResourceManager.h>
 #include <scene/SceneManager.h>
+#include <scene/ProjectManager.h>
 
 #include <test/TestSystem.h>

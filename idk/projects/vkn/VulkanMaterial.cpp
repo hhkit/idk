@@ -12,7 +12,7 @@ namespace idk::vkn
 	{
 		bool ret = false;
 		Core::GetResourceManager().Free(RscHandle<ShaderProgram>{meta.compiled_shader_guid});
-		auto prog = Core::GetResourceManager().Create<ShaderModule>(meta.compiled_shader_guid);
+		auto prog = Core::GetResourceManager().Emplace<ShaderModule>(meta.compiled_shader_guid);
 		//std::ofstream tmp{ tmp_filename };
 		//tmp << << std::flush;
 		//tmp.close();

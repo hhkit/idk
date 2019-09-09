@@ -34,6 +34,8 @@ namespace idk
 		Factory& RegisterFactory(Args&& ...);
 		template<typename ExtensionLoaderT, typename ... Args>
 		ExtensionLoaderT& RegisterExtensionLoader(std::string_view extension, Args&& ...);
+		template<typename Factory>
+		Factory& GetFactory();
 
 		// handle ops
 		template<typename Resource> bool      Validate(const RscHandle<Resource>&);
@@ -50,11 +52,11 @@ namespace idk
 
 		template<typename RegisterMe, typename ... Args, 
 			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
-		> RscHandle<RegisterMe> Create(Args&& ...);
+		> RscHandle<RegisterMe> Emplace(Args&& ...);
 		
 		template<typename RegisterMe, typename ... Args, 
 			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
-		> RscHandle<RegisterMe> Create(Guid guid, Args&& ...);
+		> RscHandle<RegisterMe> Emplace(Guid guid, Args&& ...);
 
 		// file operations
 		FileResources LoadFile(FileHandle path_to_file);
@@ -63,16 +65,27 @@ namespace idk
 		size_t        UnloadFile(FileHandle path_to_file);
 		FileResources GetFileResources(FileHandle path_to_file);
 
+		bool          Associate(string_view mount_path, GenericRscHandle f);
+
 		// saving metadata
 		void SaveDirtyMetadata();
 
 	private:
 		using GenPtr = shared_ptr<void>;
 		template<typename R>
-		using Storage = hash_table<Guid, std::shared_ptr<R>>;
-		array<GenPtr, ResourceCount> _plaintext_loaders{}; // std::shared_ptr<ResourceFactory<Resource>>
-		array<GenPtr, ResourceCount> _resource_tables  {}; // std::shared_ptr<Storage<Resource>>
-		array<GenPtr, ResourceCount> _default_resources{}; // std::shared_ptr<Resource>
+		struct ControlBlock
+		{
+			bool is_new = false;
+			// atomic<bool> loaded = false;
+			shared_ptr<R> resource_ptr; // note: make atomic
+		};
+
+		template<typename R>
+		using Storage = hash_table<Guid, ControlBlock<R>>;
+
+		array<GenPtr, ResourceCount> _resource_factories{}; // std::shared_ptr<ResourceFactory<Resource>>
+		array<GenPtr, ResourceCount> _resource_tables   {}; // std::shared_ptr<Storage<Resource>>
+		array<GenPtr, ResourceCount> _default_resources {}; // std::shared_ptr<Resource>
 
 		hash_table<string, unique_ptr<ExtensionLoader>> _extension_loaders;
 		hash_table<string, FileResources>               _loaded_files;

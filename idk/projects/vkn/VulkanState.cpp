@@ -1190,7 +1190,7 @@ namespace idk::vkn
 		vk::UniqueBuffer stagingBuffer = std::move(res.first);
 		vk::UniqueDeviceMemory stagingBufferMemory = std::move(res.second);
 
-		idkTexture img;
+		VknTexture img;
 		img.size.x = texWidth;
 		img.size.y = texHeight;
 		img.sizeOnDevice = imageSize;
