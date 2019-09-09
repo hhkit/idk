@@ -1,5 +1,7 @@
 #version 450
 
+#define MAX_LIGHTS 16
+
 in VS_OUT
 {
   vec3 position;
@@ -9,6 +11,7 @@ in VS_OUT
 } fs_in;
 
 // lighting 
+// temporary light
 struct Light
 {
     int   type; // 0 for point, 1 for dir, 2 for spot
@@ -22,6 +25,8 @@ struct Light
 	
 	float falloff;
 };
+
+U_LAYOUT(4, 0) uniform Light lights[MAX_LIGHTS];
 
 // lighting functions 
 
@@ -124,5 +129,6 @@ void main()
 	
 	vec3 ambient = vec3(0.03) * albedo * ambient_o;
 	
-	out_color = vec4(fs_in.uv, 0.0, 1);
+	//out_color = vec4(fs_in.uv, 0.0, 1);
+	out_color = vec4(ambient + light_accum, 1);
 }
