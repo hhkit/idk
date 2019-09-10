@@ -89,8 +89,9 @@ namespace idk::ogl
 
 				// set uniforms
 				// object uniforms
-				pipeline.SetUniform("object_transform.transform", elem.transform);
-				pipeline.SetUniform("normal_transform.transform", elem.transform.inverse().transpose());
+				auto obj_tfm = cam.view_matrix* elem.transform;
+				pipeline.SetUniform("object_transform.transform", obj_tfm);
+				pipeline.SetUniform("normal_transform.transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
 				for (auto& [id, uniform] : elem.material_instance.uniforms)

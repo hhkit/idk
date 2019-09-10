@@ -203,45 +203,53 @@ namespace idk
 			ImGui::End();
 			///////////////////////////////END///////////////////////////////
 
-			ImGuiFrameEnd();
+			//ImGuiFrameEnd();
 		}
 
 		void VI_Interface::ImGuiFrameEnd()
 		{
-			ImGui::Render();
-			memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
-			ImGuiFrameRender();
-			ImGuiFramePresent();
+			//memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
+			//ImGuiFrameRender();
+			//ImGuiFramePresent();
 		}
 
 		void VI_Interface::ImGuiFrameRender()
 		{
+			ImGui::Render();
+			memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
+
 			//Vulk interface params
 			vkn::VulkanView& vknViews = vkObj->View();
-			
+
 			//To get result of certain vulk operation
 			vk::Result err;
 
 
 			//Retrieving the semaphore info for the current imgui frame 
-			vk::Semaphore image_acquired_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_imageAvailable;
-			vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
-			
-			auto result = vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
-			editorControls.edt_frameIndex = result.value;
+			//vk::Semaphore image_acquired_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_imageAvailable;
+			//vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
+			vk::Semaphore& render_complete_semaphore = *vknViews.GetCurrentSignals().imgui_render_finished;
+			//vk::Semaphore& wait1_semaphore = *vknViews.GetCurrentSignals().image_available;
+			//vk::Semaphore& wait2_semaphore = *vknViews.GetCurrentSignals().render_finished;
+
+			//auto result = vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
+
+			editorControls.edt_frameIndex = vknViews.AcquiredImageValue();
+			editorControls.edt_semaphoreIndex = vknViews.CurrSemaphoreFrame();
+
 
 			EditorFrame* fd = &(editorControls.edt_frames[editorControls.edt_frameIndex]);
 			{
 				err = vknViews.Device()->waitForFences(1, &*fd->edt_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
 				check_vk_result(err);
-				
+
 				err = vknViews.Device()->resetFences(1, &*fd->edt_fence, vknViews.Dispatcher());
 				check_vk_result(err);
 			}
 			//Reset command pool for imgui's own cPool
 			{
-				vknViews.Device()->resetCommandPool(*fd->edt_cPool,vk::CommandPoolResetFlags::Flags(),vknViews.Dispatcher());
-				
+				vknViews.Device()->resetCommandPool(*fd->edt_cPool, vk::CommandPoolResetFlags::Flags(), vknViews.Dispatcher());
+
 				vk::CommandBufferBeginInfo info = {};
 				info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 				fd->edt_cBuffer->begin(info, vknViews.Dispatcher());
@@ -285,29 +293,31 @@ namespace idk
 				info.renderArea.extent.height = vknViews.Swapchain().extent.height;
 				info.clearValueCount = 1;
 				info.pClearValues = &editorControls.edt_clearValue;
-				fd->edt_cBuffer->beginRenderPass(info,vk::SubpassContents::eInline,vknViews.Dispatcher());
+				fd->edt_cBuffer->beginRenderPass(info, vk::SubpassContents::eInline, vknViews.Dispatcher());
 			}
 
 			// Record Imgui Draw Data and draw funcs into command buffer
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *fd->edt_cBuffer);
 
+			vk::Semaphore waitSArr[] = { *vknViews.GetCurrentSignals().render_finished };
+
 			// Submit command buffer
 			fd->edt_cBuffer->endRenderPass(vknViews.Dispatcher());
 			{
-				vk::PipelineStageFlags wait_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+				vk::PipelineStageFlags wait_stage[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 				vk::SubmitInfo info = {};
 				info.waitSemaphoreCount = 1;
-				info.pWaitSemaphores = &image_acquired_semaphore;
-				info.pWaitDstStageMask = &wait_stage;
+				info.pWaitSemaphores = waitSArr;
+				info.pWaitDstStageMask = wait_stage;
 				info.commandBufferCount = 1;
 				info.pCommandBuffers = &*fd->edt_cBuffer;
 				info.signalSemaphoreCount = 1;
 				info.pSignalSemaphores = &render_complete_semaphore;
 
 				fd->edt_cBuffer->end(vknViews.Dispatcher());
-				
+
 				//Submit to queue
-				err = vknViews.GraphicsQueue().submit(1,&info,*fd->edt_fence,vknViews.Dispatcher());
+				err = vknViews.GraphicsQueue().submit(1, &info, *fd->edt_fence, vknViews.Dispatcher());
 				check_vk_result(err);
 			}
 		}
@@ -329,29 +339,38 @@ namespace idk
 			info.pSwapchains = &*vknViews.Swapchain().swap_chain;
 			info.pImageIndices = &editorControls.edt_frameIndex;
 
-			try
+			if (vknViews.ImguiResize())
 			{
-
-				try {
-					err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
-					check_vk_result(err);
-				}
-				catch (const vk::OutOfDateKHRError& e) {
-					e;
-				
-					vkObj->RecreateSwapChain();
-					ImGuiRecreateSwapChain();
-					ImGuiRecreateCommandBuffer();
-				}
+				ImGuiRecreateSwapChain();
+				ImGuiRecreateCommandBuffer();
+				vknViews.ImguiResize() = false;
 			}
-			catch (const vk::Error& err)
+			else
 			{
-				std::cerr << "Err imgui failed to present: " << err.what() << std::endl;
-				return;
+				try
+				{
+
+					try {
+						err = vknViews.GraphicsQueue().presentKHR(info, vknViews.Dispatcher());
+						check_vk_result(err);
+					}
+					catch (const vk::OutOfDateKHRError& e) {
+						e;
+
+						vkObj->RecreateSwapChain();
+						ImGuiRecreateSwapChain();
+						ImGuiRecreateCommandBuffer();
+					}
+				}
+				catch (const vk::Error& err)
+				{
+					std::cerr << "Err imgui failed to present: " << err.what() << std::endl;
+					return;
+				}
 			}
 
 			//Next frame
-			editorControls.edt_semaphoreIndex = (editorControls.edt_semaphoreIndex + 1) % editorControls.edt_imageCount; // Now we can use the next set of semaphores
+			//editorControls.edt_semaphoreIndex = (editorControls.edt_semaphoreIndex + 1) % editorControls.edt_imageCount; // Now we can use the next set of semaphores
 
 		}
 
@@ -410,8 +429,8 @@ namespace idk
 			for (uint32_t i = 0; i < editorControls.edt_imageCount; i++)
 			{
 				EditorFrame* fd = &editorControls.edt_frames[i];
-				att[0] = fd->edt_backbufferView = *vknViews.Swapchain().image_views[i];
-				fd->edt_backbuffer = vknViews.Swapchain().images[i];
+				att[0] = fd->edt_backbufferView = *vknViews.Swapchain().edt_image_views[i];
+				fd->edt_backbuffer = vknViews.Swapchain().edt_images[i];
 				vk::FramebufferCreateInfo fbInfo{
 					vk::FramebufferCreateFlags{},
 					*editorControls.edt_renderPass,
@@ -467,6 +486,11 @@ namespace idk
 					//check_vk_result(err);
 				}
 			}
+		}
+		void VI_Interface::ImGuiResizeWindow()
+		{
+			ImGuiRecreateSwapChain();
+			ImGuiRecreateCommandBuffer();
 		}
 		void VI_Interface::ImGuiCleanUpSwapChain()
 		{

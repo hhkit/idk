@@ -93,7 +93,7 @@ namespace idk::vkn
 			while ((std::chrono::high_resolution_clock::now() - *last_time) < (1000ms / 60));
 		}
 		last_time = std::chrono::high_resolution_clock::now();
-		instance_->PresentFrame(*instance_->View().CurrPresentationSignals().render_finished);
+		instance_->PresentFrame2();
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()
 	{

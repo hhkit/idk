@@ -42,9 +42,13 @@ namespace idk::vkn
 		//Copies the data into the master buffer and returns the offset to start from.
 		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
 		void                       ResetMasterBuffer()const;
-		bool&					   ImguiResize()const;
+		bool&					   ImguiResize();
 		window_info&			   GetWindowsInfo()const;
-
+		PresentationSignals& GetCurrentSignals()const;
+		uint32_t				   CurrSemaphoreFrame()const;
+		uint32_t				   AcquiredImageValue()const;
+		vk::Result& AcquiredImageResult()const;
+		uint32_t				   MaxFrameInFlight()const;
 
 
 		vk::UniqueShaderModule     CreateShaderModule(const string_view& code);

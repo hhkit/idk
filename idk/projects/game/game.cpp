@@ -52,7 +52,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 			c->AddSystem<vkn::VulkanDebugRenderer>();
-			//c->AddSystem<IDE>();
+			c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
 			break;
@@ -77,7 +77,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
-	if (gfx_api != GraphicsAPI::Vulkan)
+	//if (gfx_api != GraphicsAPI::Vulkan)
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 
 	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
@@ -89,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		go->AddComponent<TestComponent>();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-45} };
-		//go->GetComponent<Transform>()->scale /= 200.0f;// 200.f;
+		go->GetComponent<Transform>()->scale /= 200.0f;// 200.f;
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });

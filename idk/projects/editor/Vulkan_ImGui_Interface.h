@@ -40,6 +40,7 @@ namespace idk {
 
 			void ImGuiRecreateSwapChain();
 			void ImGuiRecreateCommandBuffer();
+			void ImGuiResizeWindow();
 
 			void ImGuiCleanUpSwapChain();
 
@@ -69,6 +70,7 @@ namespace idk {
 				uint32_t							edt_semaphoreIndex{};
 				vector<EditorFrame>					edt_frames{};
 				vector<EditorPresentationSignal>	edt_frameSemophores{};
+				uint32_t							edt_submitInfoIndex{ 0 };
 			};
 
 			EditorParameter				editorControls;

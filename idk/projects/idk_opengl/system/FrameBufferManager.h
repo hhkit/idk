@@ -8,7 +8,7 @@ namespace idk
 
 namespace idk::ogl
 {
-	class VknFrameBuffer;
+	class FrameBuffer;
 
 	class FrameBufferManager
 	{
@@ -18,7 +18,7 @@ namespace idk::ogl
 		FrameBufferManager& operator=(FrameBufferManager&&);
 		~FrameBufferManager();
 
-		void SetRenderTarget(RscHandle<VknFrameBuffer> target);
+		void SetRenderTarget(RscHandle<FrameBuffer> target);
 		void ResetFramebuffer();
 	private:
 		GLuint _fbo_id = 0;
