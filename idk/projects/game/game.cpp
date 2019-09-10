@@ -104,7 +104,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
-		mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/Running.fbx" })[0].As<Mesh>();
+		mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
 	};
 

@@ -196,7 +196,7 @@ namespace idk {
 
 	bool FileSystem::ExistsFull(string_view fullPath) const
 	{
-		return GetFileAttributesA(fullPath.data()) != INVALID_FILE_ATTRIBUTES;
+		return FS::exists(FS::path{ fullPath.data() });
 	}
 
 	void FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)

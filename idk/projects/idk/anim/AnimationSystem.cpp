@@ -52,9 +52,7 @@ namespace idk
 					mat4 local_bone_transform;
 					if (anim_node != nullptr)
 					{
-						
 						// For each channel starting from the front, we concatanate the transformations
-						;
 						for (auto& channel : anim_node->_channels)
 						{
 							if (channel._is_animated)
@@ -67,6 +65,11 @@ namespace idk
 								local_bone_transform = local_bone_transform * channel._node_transform;
 							}
 						}
+					}
+					else
+					{
+						// For now, bones and anim_nodes are 1-1.
+						assert(false);
 					}
 					
 					if (curr_bone._parent < 0)
