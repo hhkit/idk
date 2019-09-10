@@ -147,10 +147,40 @@ namespace idk {
 
 			//Use address of id as ptr_id
 			ImGui::TreeNodeEx(&handle.id, nodeFlags, goName.c_str());
-			//Standard Click
+			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
-				selected_gameObjects.clear();
-				selected_gameObjects.push_back(handle);
+				//Check if handle has been selected
+				bool hasBeenSelected = false;
+				int counter = 0;
+				for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
+					if (handle == selected_gameObjects[counter]) {
+						hasBeenSelected = true;
+						break;
+					}
+				}
+
+				if (hasBeenSelected) {
+					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
+						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+
+					}
+					else { //Select as normal
+						selected_gameObjects.clear();
+						selected_gameObjects.push_back(handle);
+					}
+
+				}
+				else {
+
+					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+						selected_gameObjects.push_back(handle);
+
+					}
+					else {
+						selected_gameObjects.clear();
+						selected_gameObjects.push_back(handle);
+					}
+				}
 			}
 
 
