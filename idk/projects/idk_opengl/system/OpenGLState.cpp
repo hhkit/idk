@@ -85,6 +85,50 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 
 			glBindVertexArray(vao_id);
+			for (auto& elem : curr_object_buffer.skinned_mesh_render)
+			{
+				// bind shader
+				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
+				pipeline.PushProgram(material.GetShaderProgram());
+
+				// shader uniforms
+				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+				for (unsigned i = 0; i < lights.size(); ++i)
+				{
+					auto& light = lights[i];
+					string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
+					pipeline.SetUniform(lightblk + "type", light.index);
+					pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
+					pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
+					pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
+					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
+					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+				}
+				// bind attribs
+				auto& mesh = elem.mesh.as<OpenGLMesh>();
+				mesh.Bind(MeshRenderer::GetRequiredAttributes());
+
+				// per skeleton
+
+				// set uniforms
+				// object uniforms
+
+				auto obj_tfm = cam.view_matrix * elem.transform;
+				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+
+				// material uniforms
+				for (auto& [id, uniform] : elem.material_instance.uniforms)
+				{
+					std::visit([this, &id](auto& elem) {
+						pipeline.SetUniform(id, elem);
+						}, uniform);
+				}
+
+				// draw
+				mesh.Draw();
+			}
+
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
