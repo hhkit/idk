@@ -488,22 +488,22 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 		check_vk_result(err);
 	}
 
-	VkDescriptorSet font_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(g_FontSampler, g_FontView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//VkDescriptorSet font_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(g_FontSampler, g_FontView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-	//// Update the Descriptor Set:
-	//{
-	//	VkDescriptorImageInfo desc_image[1] = {};
-	//	desc_image[0].sampler = g_FontSampler;
-	//	desc_image[0].imageView = g_FontView;
-	//	desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	//	VkWriteDescriptorSet write_desc[1] = {};
-	//	write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	//	write_desc[0].dstSet = g_DescriptorSet;
-	//	write_desc[0].descriptorCount = 1;
-	//	write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	//	write_desc[0].pImageInfo = desc_image;
-	//	vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, NULL);
-	//}
+	// Update the Descriptor Set:
+	{
+		VkDescriptorImageInfo desc_image[1] = {};
+		desc_image[0].sampler = g_FontSampler;
+		desc_image[0].imageView = g_FontView;
+		desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		VkWriteDescriptorSet write_desc[1] = {};
+		write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_desc[0].dstSet = g_DescriptorSet;
+		write_desc[0].descriptorCount = 1;
+		write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_desc[0].pImageInfo = desc_image;
+		vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, NULL);
+	}
 
 	// Create the Upload Buffer:
 	{

@@ -82,7 +82,7 @@ namespace idk::vkn
 		{
 			impl_->CurrentRenderState().MasterBuffer().reset();
 		}
-		bool& VulkanView::ImguiResize() const
+		bool& VulkanView::ImguiResize()
 		{
 			// TODO: insert return statement here
 			return vulkan().m_ScreenResizedForImGui;
@@ -91,6 +91,28 @@ namespace idk::vkn
 		{
 			// TODO: insert return statement here
 			return vulkan().m_window;
+		}
+		PresentationSignals& VulkanView::GetCurrentSignals() const
+		{
+			// TODO: insert return statement here
+			return vulkan().m_pres_signals[vulkan().current_frame];
+		}
+		uint32_t VulkanView::CurrSemaphoreFrame() const
+		{
+			return vulkan().current_frame;
+		}
+		uint32_t VulkanView::AcquiredImageValue() const
+		{
+			return vulkan().rv;
+		}
+		vk::Result& VulkanView::AcquiredImageResult() const
+		{
+			// TODO: insert return statement here
+			return vulkan().rvRes;
+		}
+		uint32_t VulkanView::MaxFrameInFlight() const
+		{
+			return vulkan().max_frames_in_flight;
 		}
 		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
 
