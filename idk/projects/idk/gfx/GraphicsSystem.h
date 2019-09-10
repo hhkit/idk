@@ -35,7 +35,7 @@ namespace idk
 		struct RenderBuffer
 		{
 			vector<CameraData>   camera;
-			vector<Light>        lights;
+			vector<LightData>    lights;
 			vector<RenderObject> mesh_render;
 			vector<RenderObject> skinned_mesh_render;
 		};

@@ -62,8 +62,16 @@ namespace idk::ogl
 
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
-			// lock drawing buffer
 			
+			// calculate lights for this camera
+			vector<LightData> lights = curr_object_buffer.lights;
+			for (auto& elem : lights)
+			{
+				elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
+				elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
+			}
+			
+			// lock drawing buffer
 			// render mesh renderers
 			auto itr_to_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
 				[](const auto& elem)->bool {
@@ -83,6 +91,19 @@ namespace idk::ogl
 				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
 				pipeline.PushProgram(material.GetShaderProgram());
 
+				// shader uniforms
+				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+				for (unsigned i = 0; i < lights.size(); ++i)
+				{
+					auto& light = lights[i];
+					string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
+					pipeline.SetUniform(lightblk + "type",      light.index);
+					pipeline.SetUniform(lightblk + "color",     light.light_color.as_vec3);
+					pipeline.SetUniform(lightblk + "v_pos",     light.v_pos);
+					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
+					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
+					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+				}
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
 				mesh.Bind(MeshRenderer::GetRequiredAttributes());
@@ -90,7 +111,7 @@ namespace idk::ogl
 				// set uniforms
 				// object uniforms
 
-				auto obj_tfm = cam.view_matrix* elem.transform;
+				auto obj_tfm = cam.view_matrix * elem.transform;
 				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 

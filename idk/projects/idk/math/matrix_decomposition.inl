@@ -16,7 +16,7 @@ namespace idk
 		using vec_t = tvec<T, 3>;
 		auto working = mat;
 		auto retval = matrix_decomposition<T>();
-		retval.position = working[3];
+		retval.position = vec3{ working[3] };
 		working[3] = tvec<T, 4>{ 0, 0, 0, 1 };
 
 		retval.scale = vec_t{ working[0].length(), working[1].length(), working[2].length() };

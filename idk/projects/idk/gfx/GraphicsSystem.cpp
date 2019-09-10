@@ -15,7 +15,9 @@ namespace idk
 		result.camera.reserve(cameras.size());
 
 		// memcpy the lights until there is a smarter implementation
-		result.lights = vector<Light>{ lights.begin(), lights.end() };
+		result.lights.reserve(lights.size());
+		for (auto& elem : lights)
+			result.lights.emplace_back(elem.GenerateLightData());
 
 		for (auto& camera : cameras)
 			result.camera.emplace_back(camera.GenerateCameraData());

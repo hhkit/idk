@@ -187,6 +187,7 @@
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
