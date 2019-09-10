@@ -406,7 +406,12 @@ namespace idk::vkn
 	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo([[maybe_unused]] const config_t& config) const
 	{
 		vector<vk::DescriptorSetLayout> layouts;
-		std::transform(uniform_layouts.begin(), uniform_layouts.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
+		layouts.resize(uniform_layouts.size());
+		for (auto& [index, info] : uniform_layouts)
+		{
+			layouts[index] = *info;
+		}
+		//std::transform(uniform_layouts.begin(), uniform_layouts.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
 		return make_pair(vk::PipelineLayoutCreateInfo
 		{
 			vk::PipelineLayoutCreateFlags{}
@@ -416,6 +421,15 @@ namespace idk::vkn
 			, nullptr //pPushConstantRanges    
 		},std::move(layouts));
 	}
+	vk::DescriptorType ConvertUniformType(uniform_layout_t::UniformType type)
+	{
+		static hash_table< uniform_layout_t::UniformType, vk::DescriptorType>map
+		{
+			{uniform_layout_t::UniformType::eBuffer,vk::DescriptorType::eUniformBuffer},
+			{uniform_layout_t::UniformType::eSampler,vk::DescriptorType::eCombinedImageSampler},
+		};
+		return map[type];
+	}
 	vector<vk::DescriptorSetLayoutBinding> GetDescriptorBindings(const uniform_layout_t& ulayout_config)
 	{
 		vector<vk::DescriptorSetLayoutBinding> result;
@@ -423,7 +437,7 @@ namespace idk::vkn
 		{
 			vk::DescriptorSetLayoutBinding a{ 
 				binding.binding,
-				vk::DescriptorType::eUniformBuffer,
+				ConvertUniformType(binding.type),
 				binding.descriptor_count,
 				hlp::MapStages(binding.stages)
 				,nullptr

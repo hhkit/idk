@@ -7,6 +7,15 @@
 namespace idk::vkn::hlp
 {
 	uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+	vk::UniqueCommandBuffer BeginSingleTimeCBufferCmd(vk::Device device, vk::CommandPool pool, vk::CommandBufferInheritanceInfo* info = nullptr);
+
+
+	void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
+		bool wait_for_idle,
+		std::optional<vk::Fence> fence = {},
+		std::optional<vk::Semaphore> wait = {},
+		std::optional<vk::Semaphore> signal = {}
+	);
 
 	template<typename Dispatcher>
 	vk::UniqueBuffer CreateBuffer(vk::Device device, vk::DeviceSize size, vk::BufferUsageFlags usage, Dispatcher const& dispatcher);

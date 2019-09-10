@@ -12,7 +12,7 @@ namespace idk::vkn {
 		vk::DeviceSize			sizeOnDevice{};
 		void*					rawData{};
 		string					path{""};
-		vk::UniqueImage			vknData{nullptr};
+		vk::UniqueImage			image{nullptr};
 		vk::Format				format{};
 		vk::UniqueDeviceMemory  mem{nullptr};
 		hlp::UniqueAlloc        mem_alloc{};

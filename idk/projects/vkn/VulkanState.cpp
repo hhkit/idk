@@ -1209,7 +1209,7 @@ namespace idk::vkn
 			vk::ImageTiling::eOptimal,
 			vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
 			vk::MemoryPropertyFlagBits::eDeviceLocal,
-			img.vknData,
+			img.image,
 			img.mem
 		);
 
@@ -1222,9 +1222,9 @@ namespace idk::vkn
 		};
 		auto commandBuffer = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
 		auto& cmd_buffer = *commandBuffer[0];
-		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.vknData, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 		hlp::CopyBufferToImage(cmd_buffer,m_graphics_queue,*stagingBuffer,img);
-		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.vknData, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 		m_textureList.emplace_back(std::move(img));
 
@@ -1239,7 +1239,7 @@ namespace idk::vkn
 	{
 		for (auto& elem : m_textureList)
 		{
-			elem.imageView = createImageView(elem.vknData,elem.format);
+			elem.imageView = createImageView(elem.image,elem.format);
 		}
 	}
 
@@ -2365,7 +2365,7 @@ namespace idk::vkn
 		for (auto& elem : m_textureList)
 		{
 			elem.mem.reset();
-			elem.vknData.reset();
+			elem.image.reset();
 			elem.imageView.reset();
 			elem.sampler.reset();
 		}

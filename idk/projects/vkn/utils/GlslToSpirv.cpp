@@ -112,7 +112,7 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 	opt.SetTargetEnvironment(shaderc_target_env::shaderc_target_env_vulkan, 0);
 	auto result = compiler.CompileGlslToSpv(std::string{ glsl }, ConvertStageSC(v_stage), "tmp", opt);
 	spirv_out = vector<unsigned int>{result.begin(),result.end()};
-
+	hlp::cerr()<<result.GetErrorMessage()<<std::endl;
 
 	return spirv_out;
 }

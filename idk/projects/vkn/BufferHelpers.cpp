@@ -23,7 +23,54 @@ uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t type
 		throw std::runtime_error("failed to find suitable memory type!");
 	return *result;
 }
+//A version that allocs for you
+vk::UniqueCommandBuffer BeginSingleTimeCBufferCmd(vk::Device device,vk::CommandPool pool, vk::CommandBufferInheritanceInfo* info)
+{
+	vk::CommandBufferAllocateInfo alloc_info
+	{
+		pool,vk::CommandBufferLevel::ePrimary,1
+	};
+	vk::DispatchLoaderDefault dispatcher{};
+	auto cmd_buffers = device.allocateCommandBuffersUnique(alloc_info,dispatcher);
+	auto cmd_buffer = std::move(cmd_buffers[0]);
+	cmd_buffer->reset(vk::CommandBufferResetFlags{}, dispatcher);
+	//Setup copy command buffer/pool
+	vk::CommandBufferBeginInfo beginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,info };
+	//Add the commands
+	cmd_buffer->begin(beginInfo, dispatcher);
 
+	return std::move(cmd_buffer);
+}
+
+void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
+	bool wait_for_idle,
+	std::optional<vk::Fence> fence,
+	std::optional<vk::Semaphore> wait,
+	std::optional<vk::Semaphore> signal
+)
+{
+	vk::Fence f{};
+	if (fence)
+		f = *fence;
+	vk::DispatchLoaderDefault dispatcher{};
+	cmd_buffer.end(dispatcher);
+
+	//Submit commands to queue
+	vk::SubmitInfo submitInfo
+	{
+		 (wait) ? 1U : 0U
+		,(wait) ? &*wait: nullptr
+		,nullptr
+		,1
+		,&cmd_buffer
+		,(signal)?1U:0U
+		,(signal) ? &*signal : nullptr
+	};
+	queue.submit(submitInfo, f, dispatcher);
+	//Not very efficient, would be better to use fences instead.
+	if(wait_for_idle)
+		queue.waitIdle(dispatcher);
+}
 vk::CommandBuffer& BeginSingleTimeCBufferCmd(vk::CommandBuffer& cmd_buffer,vk::CommandBufferInheritanceInfo* info=nullptr)
 {
 	vk::DispatchLoaderDefault dispatcher{};
@@ -90,7 +137,7 @@ void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buff
 		1
 	};
 
-	cmd_buffer.copyBufferToImage(buffer, *img.vknData, vk::ImageLayout::eTransferDstOptimal, 1, &region, dispatcher);
+	cmd_buffer.copyBufferToImage(buffer, *img.image, vk::ImageLayout::eTransferDstOptimal, 1, &region, dispatcher);
 
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }

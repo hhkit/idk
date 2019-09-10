@@ -4,14 +4,36 @@
 #include <vkn/MemoryAllocator.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/VknTexture.h>
+#include <vkn/VulkanView.h>
+#include <vkn/VulkanWin32GraphicsSystem.h>
 namespace idk::vkn
 {
 
+	vk::UniqueImageView CreateImageView2D(vk::Device device,vk::Image image, vk::Format format)
+	{
+		vk::ImageViewCreateInfo viewInfo{
+			vk::ImageViewCreateFlags{},
+			image						   ,//image                           
+			vk::ImageViewType::e2D		   ,//viewType                        
+			vk::Format::eR8G8B8A8Unorm	   ,//format                          
+			vk::ComponentMapping{},
+			vk::ImageSubresourceRange
+			{
+				vk::ImageAspectFlagBits::eColor,//aspectMask     
+				0							   ,//baseMipLevel   
+				1							   ,//levelCount     
+				0							   ,//baseArrayLayer 
+				1							   	//layerCount     
+			}
+		};
+		return device.createImageViewUnique(viewInfo);
+
+	}
 	//Refer to https://www.khronos.org/registry/vulkan/specs/1.0/html/chap6.html#synchronization-access-types for access flags
 	void TransitionImageLayout(vk::CommandBuffer cmd_buffer,
 		vk::AccessFlags src_flags, vk::PipelineStageFlags src_stage,
 		vk::AccessFlags dst_flags, vk::PipelineStageFlags dst_stage,
-		vk::ImageLayout target, vk::Image image, std::optional<vk::ImageSubresourceRange> range ={})
+		vk::ImageLayout original_layout,vk::ImageLayout target, vk::Image image, std::optional<vk::ImageSubresourceRange> range ={})
 	{
 		if (!range)
 			range =
@@ -21,15 +43,18 @@ namespace idk::vkn
 			};
 		vk::ImageMemoryBarrier barrier
 		{
-			src_flags,dst_flags,vk::ImageLayout::eUndefined,target,VK_QUEUE_FAMILY_IGNORED,VK_QUEUE_FAMILY_IGNORED,image,*range
+			src_flags,dst_flags,original_layout,target,VK_QUEUE_FAMILY_IGNORED,VK_QUEUE_FAMILY_IGNORED,image,*range
 		};
 		cmd_buffer.pipelineBarrier(src_stage, dst_stage, {}, nullptr, nullptr, barrier, vk::DispatchLoaderDefault{});
 	}
 
-
-	std::pair<vk::UniqueImage,hlp::UniqueAlloc> LoadTexture(vk::PhysicalDevice pd,vk::Device device,hlp::MemoryAllocator& allocator,const void* rgba, uint32_t width, uint32_t height)
+	std::pair<vk::UniqueImage,hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator,vk::Fence fence,const void* rgba, uint32_t width, uint32_t height)
 	{
-		vk::DeviceMemory image_memory;
+		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		vk::PhysicalDevice pd = view.PDevice();
+		vk::Device device = *view.Device();
+		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
+		auto cmd_buffer = *ucmd_buffer;
 		bool is_render_target = false;
 
 		constexpr size_t rgba_size = 4;
@@ -60,13 +85,12 @@ namespace idk::vkn
 		auto&&[stagingBuffer,stagingMemory] =hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
 		
 		hlp::MapMemory(device, *stagingMemory, 0, rgba, num_bytes, vk::DispatchLoaderDefault{});
-		vk::CommandBuffer cmd_buffer;
 		vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead| vk::AccessFlagBits::eShaderRead;
 		vk::AccessFlags dst_flags = vk::AccessFlagBits::eTransferWrite;
-		vk::PipelineStageFlags shader_flags = vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eTessellationControlShader | vk::PipelineStageFlagBits::eTessellationEvaluationShader;
+		vk::PipelineStageFlags shader_flags = vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader;// | vk::PipelineStageFlagBits::eTessellationControlShader | vk::PipelineStageFlagBits::eTessellationEvaluationShader;
 		vk::PipelineStageFlags src_stages = shader_flags;
 		vk::PipelineStageFlags dst_stages = vk::PipelineStageFlagBits::eTransfer;
-		vk::ImageLayout layout = vk::ImageLayout::eTransferDstOptimal;
+		vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 		if (is_render_target)
 		{
 			src_flags |= vk::AccessFlagBits::eColorAttachmentRead;
@@ -75,9 +99,7 @@ namespace idk::vkn
 			dst_stages |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
 			layout = attachment_layout;
 		}
-
-
-		TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, layout, *image);
+		TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages,vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *image);
 
 		//Copy data from buffer to image
 		vk::BufferImageCopy region{};
@@ -96,32 +118,66 @@ namespace idk::vkn
 			height,
 			1
 		};
-		cmd_buffer.copyBufferToImage(*stagingBuffer, *image, layout, region, vk::DispatchLoaderDefault{});
+		cmd_buffer.copyBufferToImage(*stagingBuffer, *image, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
 
-		layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		;
 
-		TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, layout, *image);
-
+		TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages,vk::ImageLayout::eTransferDstOptimal, layout, *image);
+		
+		device.resetFences(fence);
+		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false,fence);
+		uint64_t wait_for_milli_seconds = 3;
+		uint64_t wait_for_micro_seconds = wait_for_milli_seconds *1000;
+		uint64_t wait_for_nano_seconds = wait_for_micro_seconds*1000;
+		device.waitForFences(fence, VK_TRUE, wait_for_nano_seconds);
 		return std::pair<vk::UniqueImage, hlp::UniqueAlloc>{std::move(image),std::move(alloc)};
 
 	}
 
 
 
-	unique_ptr<Texture> idk::vkn::VulkanTextureFactory::GenerateDefaultResource()
+	VulkanTextureFactory::VulkanTextureFactory(): allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
 	{
+		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		
+		fence = view.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
+	}
+
+	unique_ptr<Texture> VulkanTextureFactory::GenerateDefaultResource()
+	{
+		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
-		uint32_t rgba[] = { 0x000000FF, 0xFFFFFFFF, 0xFFFFFFFF ,0x000000FF };
-		vk::Device d;
-		vk::PhysicalDevice pd;
-		hlp::MemoryAllocator allocator{ d,pd };
+		uint32_t rgba[] = { 0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF };
 
 		auto ptr = std::make_unique<VknTexture>();
-		auto&& [image, alloc] = LoadTexture(pd, d, allocator, rgba, 2, 2);
-		ptr->vknData = std::move(image);
+		auto&& [image, alloc] = LoadTexture(allocator,*fence, rgba, 2, 2);
+		ptr->image = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
+		auto device = *view.Device();
+		ptr->imageView= CreateImageView2D(device, *ptr->image, vk::Format::eR8G8B8A8Unorm);
+
+		vk::SamplerCreateInfo sampler_info
+		{
+			vk::SamplerCreateFlags{},
+			vk::Filter::eLinear,
+			vk::Filter::eLinear,
+			vk::SamplerMipmapMode::eLinear,
+			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerAddressMode::eRepeat,
+			0.0f,
+			VK_TRUE,
+			1.0f,
+			VK_FALSE,//Used for percentage close filtering
+			vk::CompareOp::eAlways,
+			0.0f,0.0f,
+			vk::BorderColor::eFloatOpaqueBlack,
+			VK_FALSE
+
+		};
+		ptr->sampler = device.createSamplerUnique(sampler_info);
 		return std::move(ptr);
 	}
 	unique_ptr<Texture> VulkanTextureFactory::Create()

@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <res/ResourceFactory.h>
 #include <gfx/Texture.h>
+#include <vkn/MemoryAllocator.h>
 
 namespace idk::vkn
 {
@@ -10,9 +11,13 @@ namespace idk::vkn
 		: public ResourceFactory<Texture>
 	{
 	public:
+		VulkanTextureFactory();
 		unique_ptr<Texture> GenerateDefaultResource() override;
 		unique_ptr<Texture> Create() override;
 		unique_ptr<Texture> Create(FileHandle filepath) override;
 		unique_ptr<Texture> Create(FileHandle filepath, const Texture::Metadata&) override;
+	private:
+		vk::UniqueFence fence;
+		hlp::MemoryAllocator allocator;
 	};
 }

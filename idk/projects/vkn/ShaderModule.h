@@ -11,13 +11,13 @@ namespace idk::vkn
 	{
 		vk::DescriptorSetLayout layout;
 		uniform_layout_t::UniformStage stage;
-		vk::DescriptorType type;
+		uniform_layout_t::UniformType type;
 		uint32_t binding, set;
 		uint32_t size;
 
 		static void AddToConfig(pipeline_config& config, const UboInfo& info)
 		{
-			config.uniform_layouts[info.set].bindings.emplace_back(uniform_layout_t::bindings_t{ info.binding,1,{info.stage} });
+			config.uniform_layouts[info.set].bindings.emplace_back(uniform_layout_t::bindings_t{ info.binding,1,{info.stage},info.type });
 		}
 	};
 
