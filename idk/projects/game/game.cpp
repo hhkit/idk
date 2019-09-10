@@ -49,7 +49,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
 			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
+		RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
 	}
 
 	using namespace idk;

@@ -4,11 +4,18 @@
 #include <gfx/RenderObject.h>
 namespace idk
 {
-	void GraphicsSystem::BufferGraphicsState(span<MeshRenderer> mesh_renderers, span<const class Transform>, span<const Camera> cameras)
+	void GraphicsSystem::BufferGraphicsState(
+		span<MeshRenderer> mesh_renderers, 
+		span<const class Transform>, 
+		span<const Camera> cameras, 
+		span<const Light> lights)
 	{
 		// todo: scenegraph traversal
 		RenderBuffer result{};
 		result.camera.reserve(cameras.size());
+
+		// memcpy the lights until there is a smarter implementation
+		result.lights = vector<Light>{ lights.begin(), lights.end() };
 
 		for (auto& camera : cameras)
 			result.camera.emplace_back(camera.GenerateCameraData());

@@ -182,7 +182,7 @@ TEST(Prefab, TestPrefabApply)
     FileSystem& fs = core.GetSystem<FileSystem>();
     core.Setup();
 
-    auto scene = Core::GetSystem<ProjectManager>().CreateScene();
+    auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
     core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");

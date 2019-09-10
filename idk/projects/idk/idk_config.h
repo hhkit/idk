@@ -23,7 +23,7 @@ namespace idk
 		,	class MeshRenderer
 		,   class Camera
 		//,   class SkinnedMeshRenderer
-		//, class Light
+		, class Light
 
 		/// ANIMATION
 		,	class AnimationController

@@ -73,29 +73,9 @@ float GeometrySmith(vec3 normal, vec3 view, vec3 light, float roughness)
 	return ggx1 * ggx2;
 }
 
-//__MATERIAL_UNIFORMS;
-
-// forward shading only cares about color!
-out vec4 out_color;
-
-void main()
+vec3 pbr()
 {
-	// declare initial values here
-	vec3  view_pos  = fs_in.position;
-	vec3  normal    = normalize(fs_in.normal);
-	
-	vec3  albedo    = vec3(1, 0, 0);
-	float metallic  = 0.5;
-	float roughness = 0.5;
-	float ambient_o = 0;
-
-	//__MATERIAL_CODE__;
-
-	// then compute color here 
-	
-	vec3 light_accum = vec3(0);
-	
-	// temporary light code
+// temporary light code
 	Light light;
     light.type = 0;
 	light.color = vec3(1.0);
@@ -125,10 +105,34 @@ void main()
 	kD *= 1.0 - metallic;
 	
 	float NdotL = max(dot(normal, light_dir), 0.0);
-	light_accum += (kD * albedo / PI + specular) * radiance * NdotL;
 	
+	return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+//__MATERIAL_UNIFORMS;
+
+// forward shading only cares about color!
+out vec4 out_color;
+
+void main()
+{
+	// declare initial values here
+	vec3  view_pos  = fs_in.position;
+	vec3  normal    = normalize(fs_in.normal);
+	
+	vec3  albedo    = vec3(1, 0, 0);
+	float metallic  = 0.5;
+	float roughness = 0.5;
+	float ambient_o = 0;
+
+	//__MATERIAL_CODE__;
+
+	// then compute color here 
+	
+	vec3 light_accum = vec3(0);
+	
+	light_accum += pbr();
 	vec3 ambient = vec3(0.03) * albedo * ambient_o;
 	
-	//out_color = vec4(fs_in.uv, 0.0, 1);
-	out_color = vec4(ambient + light_accum, 1);
+	out_coor = vec4(light_accum + ambient, 1);
 }
