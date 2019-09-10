@@ -97,7 +97,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto createtest_obj = [&scene, h_mat](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
-		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+		go->Transform()->rotation = quat{ vec3{1, 0, 0}, deg{-90} };
 		go->GetComponent<Transform>()->scale /= 200.f;
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
