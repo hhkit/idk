@@ -19,6 +19,9 @@ namespace idk::vkn {
 		vk::UniqueImageView     imageView{nullptr};
 		vk::UniqueSampler       sampler{ nullptr };
 
+		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
+		opt<vk::DescriptorSet>	descriptorSet{};
+
 		VknTexture() = default;
 		~VknTexture();
 		//VknTexture(const VknTexture& rhs);

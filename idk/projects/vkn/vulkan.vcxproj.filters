@@ -93,17 +93,23 @@
     <ClInclude Include="GraphicsState.h">
       <Filter>render</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBuffer.h" />
-    <ClInclude Include="VknFrameBufferFactory.h" />
-    <ClInclude Include="VknFrameBufferManager.h" />
     <ClInclude Include="VknTexture.h">
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="VulkanTextureFactory.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="VknFrameBufferManager.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBufferFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
     <ClInclude Include="RegisterVulkanFactories.h">
-      <Filter>system</Filter>
+      <Filter>resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +172,7 @@
     <ClCompile Include="VulkanMesh.cpp">
       <Filter>resource</Filter>
     </ClCompile>
+    <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="FrameRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
@@ -198,10 +205,7 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="RegisterVulkanFactories.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="ValHandler.cpp">
-      <Filter>utils</Filter>
+      <Filter>resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

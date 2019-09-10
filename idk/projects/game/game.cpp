@@ -89,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		go->AddComponent<TestComponent>();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-45} };
-		//go->GetComponent<Transform>()->scale /= 200.0f;// 200.f;
+		go->GetComponent<Transform>()->scale /= 200.0f;// 200.f;
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
