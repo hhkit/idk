@@ -35,10 +35,13 @@ namespace idk
 
 		// Only reset if this stream object was actually open.
 		// If we reset when its not open, we may reset for a different wrapper
+		
 		if (is_open())
 		{
 			flush();
 			file_handle.Reset();
+			std::fstream::close();
+			// For some reason, last_write_time does not immediately update...
 			file._time = FS::last_write_time(FS::path{ file._full_path });
 		}
 	}
