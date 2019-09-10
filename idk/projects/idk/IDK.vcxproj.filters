@@ -769,6 +769,7 @@
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\Light.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -96,7 +96,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto createtest_obj = [&scene, h_mat](vec3 pos) {
 		auto go = scene->CreateGameObject();
-		go->AddComponent<TestComponent>();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
 		go->GetComponent<Transform>()->scale /= 200.f;
@@ -114,6 +113,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	createtest_obj(vec3{ 0, 0.5, 0 });
 	createtest_obj(vec3{ 0, -0.5, 0 });
 
+	auto light = scene->CreateGameObject();
+	light->AddComponent<Light>();
+	light->AddComponent<TestComponent>();
+	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
 	c->Run();
 	
