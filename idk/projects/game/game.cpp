@@ -84,7 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto h_mat = Core::GetResourceManager().Create<Material>();
 	h_mat->BuildShader(shader_template, "", "");
 
-	auto createtest_obj = [&scene, h_mat,gfx_api](vec3 pos) {
+	auto createtest_obj = [&scene, h_mat, gfx_api](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->AddComponent<TestComponent>();
 		go->GetComponent<Transform>()->position = pos;
@@ -95,9 +95,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if(gfx_api !=GraphicsAPI::Vulkan)
+		if (gfx_api != GraphicsAPI::Vulkan)
 			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance.uniforms["tex"] = RscHandle <Texture>{};
 	};
 
 	createtest_obj(vec3{ 0.5, 0, 0 });

@@ -161,9 +161,9 @@ namespace idk::vkn
 		vk::SamplerCreateInfo sampler_info
 		{
 			vk::SamplerCreateFlags{},
-			vk::Filter::eLinear,
-			vk::Filter::eLinear,
-			vk::SamplerMipmapMode::eLinear,
+			vk::Filter::eNearest,
+			vk::Filter::eNearest,
+			vk::SamplerMipmapMode::eNearest,
 			vk::SamplerAddressMode::eRepeat,
 			vk::SamplerAddressMode::eRepeat,
 			vk::SamplerAddressMode::eRepeat,

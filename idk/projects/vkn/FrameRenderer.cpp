@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <forward_list>
 #include "FrameRenderer.h"
 #include <gfx/GraphicsSystem.h> //GraphicsState
 #include <vkn/VulkanPipeline.h>
@@ -268,7 +269,8 @@ namespace idk::vkn
 	template<typename T>
 	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
 	{
-		collated_layouts[obj_uni.layout]++;
+		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
+		collated_layouts[obj_uni.layout].second++;
 		auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
 		collated_bindings[obj_uni.set].emplace_back(
 			ProcessedRO::BindingInfo
@@ -361,25 +363,110 @@ namespace idk::vkn
 				auto& itr = layouts.GetLayout(name);
 				auto& layout = itr.layout;
 				{
-					collated_layouts[layout]++;
-					auto&& data = dc.material_instance.GetUniformBlock(name);
-					auto&& [buffer, offset] = ubo_manager.Add(data);
-					collated_bindings[itr.set].emplace_back(
-						ProcessedRO::BindingInfo
-						{
-							itr.binding,
-							buffer,
-							offset,
-							0,
-							itr.size
-						}
-					);
+					collated_layouts[layout].second++;
+					
+					switch (itr.type)
+					{
+					case uniform_layout_t::UniformType::eBuffer:
+					{
+						auto&& data = dc.material_instance.GetUniformBlock(name);
+						auto&& [buffer, offset] = ubo_manager.Add(data);
+						collated_bindings[itr.set].emplace_back(
+							ProcessedRO::BindingInfo
+							{
+								itr.binding,
+								buffer,
+								offset,
+								0,
+								itr.size
+							}
+						);
+						collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
+					}
+						break;
+					case uniform_layout_t::UniformType::eSampler:
+					{
+						auto&& data = dc.material_instance.GetImageBlock(name);
+						auto& texture = data.begin()->second.as<vkn::VknTexture>();
+						collated_bindings[itr.set].emplace_back(
+							ProcessedRO::BindingInfo
+							{
+								itr.binding,
+								ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eShaderReadOnlyOptimal},
+								0,
+								0,
+								itr.size
+							}
+						);
+						collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+					}
+					break;
+					}
 				}
 			}
 			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
 		}
 		return result;
 	}
+	
+	struct DSUpdater
+	{
+		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
+		std::forward_list<vector<vk::DescriptorImageInfo>>& image_infos;
+		const ProcessedRO::BindingInfo& binding;
+		const vk::DescriptorSet& dset;
+		vk::WriteDescriptorSet operator()(vk::Buffer ubuffer)
+		{
+			//auto& dset = ds2[i++];
+			buffer_infos.emplace_front(
+				vk::DescriptorBufferInfo{
+				  ubuffer
+				, binding.buffer_offset
+				, binding.size
+				}
+			);
+			;
+
+			return
+				vk::WriteDescriptorSet{
+					dset
+					,binding.binding
+					,binding.arr_index
+					,1
+					,vk::DescriptorType::eUniformBuffer
+					,nullptr
+					,& buffer_infos.front()
+					,nullptr
+			}
+			;
+		}
+		vk::WriteDescriptorSet operator()(ProcessedRO::image_t ubuffer)
+		{
+			//auto& dset = ds2[i++];
+			vector<vk::DescriptorImageInfo> bufferInfo
+			{
+				vk::DescriptorImageInfo{
+				  ubuffer.sampler
+				  ,ubuffer.view
+				  ,ubuffer.layout
+				}
+			};
+			;
+			image_infos.emplace_front(std::move(bufferInfo));
+			return
+				vk::WriteDescriptorSet{
+					dset
+					,binding.binding
+					,binding.arr_index
+					,hlp::arr_count(image_infos.front())
+					,vk::DescriptorType::eCombinedImageSampler
+					,std::data(image_infos.front())
+					,nullptr
+					,nullptr
+			}
+			;
+		}
+	};
 
 	void UpdateUniformDS(
 		vk::Device& device,
@@ -387,35 +474,16 @@ namespace idk::vkn
 		vector<ProcessedRO::BindingInfo> bindings
 	)
 	{
+		std::forward_list<vk::DescriptorBufferInfo> buffer_infos;
+		std::forward_list<vector<vk::DescriptorImageInfo>> image_infos;
+		vector<vk::WriteDescriptorSet> descriptorWrite;
 		//TODO: Handle Other DSes as well
 		for (auto& binding : bindings)
 		{
-			//auto& dset = ds2[i++];
-			vk::DescriptorBufferInfo bufferInfo[]
-			{
-				vk::DescriptorBufferInfo{
-				binding.ubuffer
-				, binding.buffer_offset
-				, binding.size
-				}
-			};
-			;
-
-			vector<vk::WriteDescriptorSet> descriptorWrite
-			{
-				vk::WriteDescriptorSet{
-					dset
-					,binding.binding
-					,binding.arr_index
-					,hlp::arr_count(bufferInfo)
-					,vk::DescriptorType::eUniformBuffer
-					,nullptr
-					,std::data(bufferInfo)
-					,nullptr
-				}
-			};
-			device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
+			DSUpdater updater{buffer_infos,image_infos,binding,dset };
+			descriptorWrite.emplace_back(std::visit(updater, binding.ubuffer));
 		}
+		device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
 	}
 	vk::Framebuffer GetFrameBuffer(const CameraData& camera_data, uint32_t curr_index)
 	{

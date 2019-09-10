@@ -21,7 +21,7 @@ struct DescriptorsManager
 	DescriptorPoolsManager pools;
 	//hash_table<vk::DescriptorSetLayout, DescriptorSetManager> ds_sets;
 	DescriptorsManager(VulkanView& view);
-	DescriptorSetLookup Allocate(const hash_table<vk::DescriptorSetLayout, uint32_t>& allocations);
+	DescriptorSetLookup Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations);
 	void Reset();
 };
 }

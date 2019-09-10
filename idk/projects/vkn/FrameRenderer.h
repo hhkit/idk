@@ -11,13 +11,49 @@ namespace idk
 }
 namespace idk::vkn
 {
+	template<typename T, typename ...Args>
+	struct MatchIndex {
+		static uint32_t constexpr value() { return 0; }
+	};
+	template<typename T, typename Front, typename ...Args>
+	struct MatchIndex<T, Front, Args...>
+	{
+		static uint32_t constexpr value()
+		{
+			if constexpr (std::is_same_v<Front, T>)
+			{
+				return 0;
+			}
+			else
+			{
+				return MatchIndex<T, Args...>::value() + 1;
+			}
+		};
+	};
+
+	template<typename V,typename T>
+	struct IndexOf;
+	template<typename ...Args,typename T>
+	struct IndexOf< variant<Args...>,T>
+	{
+		static constexpr uint32_t value = MatchIndex<T, Args...>::value();
+	};
+
 	struct GraphicsState;
 	struct ProcessedRO
 	{
+		struct ImageBinding
+		{
+			vk::ImageView view;
+			vk::Sampler sampler;
+			vk::ImageLayout layout;
+		};
+			using image_t = ImageBinding;
 		struct BindingInfo
 		{
+			using data_t =variant<vk::Buffer, image_t>;
 			uint32_t binding;
-			vk::Buffer ubuffer;
+			data_t ubuffer;
 			uint32_t buffer_offset;
 			uint32_t arr_index;
 			size_t size;
@@ -34,6 +70,35 @@ namespace idk::vkn
 				arr_index{ arr_index_ },
 				size{ size_ }
 			{
+			}
+			BindingInfo(
+				uint32_t binding_,
+				image_t ubuffer_,
+				uint32_t buffer_offset_,
+				uint32_t arr_index_,
+				size_t size_
+			) :
+				binding{ binding_ },
+				ubuffer{ ubuffer_ },
+				buffer_offset{ buffer_offset_ },
+				arr_index{ arr_index_ },
+				size{ size_ }
+			{
+			}
+			std::optional<vk::Buffer> GetBuffer()const
+			{
+				std::optional<vk::Buffer> ret;
+				if (ubuffer.index() == IndexOf<data_t, vk::Buffer>::value)
+					ret = std::get<vk::Buffer>(ubuffer);
+				return ret;
+			}
+			std::optional<image_t> GetImage()const
+			{
+				using Type = image_t;
+				std::optional<Type> ret;
+				if (ubuffer.index() == IndexOf<data_t, Type>::value)
+					ret = std::get<Type>(ubuffer);
+				return ret;
 			}
 		};
 		const RenderObject& Object()const
@@ -77,7 +142,7 @@ namespace idk::vkn
 		PresentationSignals& GetMainSignal();
 	private:
 		using ProcessedRO=vkn::ProcessedRO;
-		using DsBindingCount =hash_table<vk::DescriptorSetLayout, uint32_t>;
+		using DsBindingCount =hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>;
 		class IRenderThread
 		{
 		public:

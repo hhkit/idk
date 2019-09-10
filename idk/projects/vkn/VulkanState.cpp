@@ -2068,7 +2068,7 @@ namespace idk::vkn
 		return r_cast<intptr_t>(layout.operator VkDescriptorSetLayout());
 	}
 	;
-	using DsBindingCount =hash_table<vk::DescriptorSetLayout, uint32_t>;
+	using DsBindingCount =hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType,uint32_t>>;
 	std::pair<ProcessedDrawCalls,DsBindingCount> ProcessDcUniforms(vector<draw_call>& draw_calls, UboManager& ubo_manager)
 	{
 		std::pair<ProcessedDrawCalls, DsBindingCount> result{};
@@ -2083,7 +2083,8 @@ namespace idk::vkn
 				auto itr = layouts.find(uniform.set);
 				if (itr != layouts.end())
 				{
-					collated_layouts[(*itr->second)]++;
+					collated_layouts[(*itr->second)].first = vk::DescriptorType::eUniformBuffer;
+					collated_layouts[(*itr->second)].second++;
 					auto&& [buffer,offset] = ubo_manager.Add(uniform.data);
 					collated_bindings[uniform.set].emplace_back(
 						ProcessedDrawCalls::BindingInfo
