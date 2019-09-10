@@ -8,6 +8,7 @@
 
 #include <gfx/Camera.h>
 #include <gfx/MeshRenderer.h>
+#include <anim/SkinnedMeshRenderer.h>
 #include <gfx/Light.h>
 
 #include <audio/AudioSource.h>

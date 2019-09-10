@@ -8,6 +8,15 @@ namespace idk::anim
 	{
 	}
 
+	const Skeleton::Bone* Skeleton::GetBone(string_view name) const
+	{
+		auto res = _bone_table.find(name.data());
+		if (res == _bone_table.end())
+			return nullptr;
+
+		return &_bones[res->second];
+	}
+
 	void Skeleton::AddBone(string_view name, Bone b)
 	{
 		auto res = _bone_table.find(name.data());

@@ -766,6 +766,9 @@
     <ClCompile Include="util\ioutils.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="anim\SkinnedMeshRenderer.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

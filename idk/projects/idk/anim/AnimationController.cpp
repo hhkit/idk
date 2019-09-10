@@ -28,7 +28,7 @@ namespace idk
 		}
 
 		_elapsed = 0.0f;
-		_curr_animation = res->second;
+		_curr_animation = s_cast<int>(res->second);
 		_is_playing = true;
 	}
 
@@ -68,11 +68,12 @@ namespace idk
 		{
 			auto obj = scene->CreateGameObject();
 			auto transform = elem._offset.inverse();
-			
-			obj->GetComponent<Transform>()->LocalMatrix(transform);
-			
+					
 			if (elem._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[elem._parent]);
+
+			obj->GetComponent<Transform>()->GlobalMatrix(transform);
+
 
 			_child_objects.push_back(obj);
 		}
