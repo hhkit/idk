@@ -35,6 +35,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="math\linear.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceManager.h" />
     <ClInclude Include="scene\ProjectManager.h" />
@@ -261,6 +262,7 @@
     <None Include="event\Signal.inl" />
     <None Include="math\color.inl" />
     <None Include="math\comparable.inl" />
+    <None Include="math\linear.inl" />
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />

@@ -32,14 +32,15 @@ namespace idk
 		auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
 		//Please ignore all of this first
-		if (app_sys.GetKey(Key::A)) tfm->position += vec3{ +0.016, 0.0, 0.0 };
-		if (app_sys.GetKey(Key::D)) tfm->position += vec3{ -0.016, 0.0, 0.0 };
+		constexpr auto cam_vel = 1.f;
+		if (app_sys.GetKey(Key::A))       tfm->position += - cam_vel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::D))       tfm->position += + cam_vel * Core::GetRealDT().count() * tfm->Right();
 		//if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.016, 0.0 };
 		//if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.016, 0.0 };
-		if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, 0.0, -0.016 };
-		if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, 0.0, +0.016 };
-		if (app_sys.GetKey(Key::F)) tfm->position += vec3{ 0, -0.016, 0.0 };
-		if (app_sys.GetKey(Key::G)) tfm->position += vec3{ 0, +0.016, 0.0 };
+		if (app_sys.GetKey(Key::S))       tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))       tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::Control)) tfm->position += -cam_vel * Core::GetRealDT().count() * vec3{0, 1, 0};
+		if (app_sys.GetKey(Key::Space))   tfm->position += +cam_vel * Core::GetRealDT().count() * vec3{0, 1, 0};
 
 		//Please ignore all of this first
 		if (app_sys.GetKey(Key::Q)) tfm->rotation = (quat{ vec3{0,1,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();

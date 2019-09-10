@@ -136,7 +136,7 @@ namespace idk
 
 			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
 
-			position = decompose(parent_inv * new_global).rotation;
+			rotation = decompose(parent_inv * new_global).rotation;
 		}
 	}
 

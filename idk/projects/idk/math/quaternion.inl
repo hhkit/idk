@@ -28,9 +28,20 @@ namespace idk
 		w = c;
 	}
 	template<typename T>
+	inline T quaternion<T>::dot(const quaternion& rhs) const
+	{
+		return this->Base::dot(rhs);
+	}
+	template<typename T>
 	quaternion<T> quaternion<T>::inverse() const
 	{
 		return quaternion{ -x, -y, -z, w };
+	}
+	template<typename T>
+	quaternion<T> quaternion<T>::get_normalized() const
+	{
+		auto copy = *this;
+		return copy.normalize();
 	}
 	template<typename T>
 	quaternion<T>& quaternion<T>::normalize()

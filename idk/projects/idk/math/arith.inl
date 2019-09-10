@@ -31,6 +31,6 @@ namespace idk
 	Vec slerp(const Vec& lhs, const Vec& rhs, LerpFactor lerp)
 	{
 		auto ohm = acos(lhs.get_normalized().dot(rhs.get_normalized()));
-		return slerp(lhs, rhs, ohm, sin(ohm));
+		return slerp(lhs, rhs, lerp, ohm, sin(ohm));
 	}
 }

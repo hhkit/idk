@@ -551,6 +551,7 @@
     <ClInclude Include="scene\ProjectManager.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="math\linear.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -929,6 +930,7 @@
     <None Include="res\SaveableResourceManager.inl">
       <Filter>res</Filter>
     </None>
+    <None Include="math\linear.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
