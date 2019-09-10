@@ -27,6 +27,7 @@ namespace idk::anim
 
 		struct Channel
 		{
+			string _name;
 			mat4 _node_transform;
 			bool _is_animated = false;
 			vector<Key<vec3>> _translate{};
@@ -64,7 +65,7 @@ namespace idk::anim
 		void AddEasyAnimNode(const EasyAnimNode& easy_node);
 	private:
 		hash_table<string_view, AnimNode> _anim_node_table;
-		hash_table<string_view, EasyAnimNode> _easy_anim_table;
+		hash_table<string, EasyAnimNode> _easy_anim_table;
 		string _name;
 
 		float _fps		 = 25.0f;

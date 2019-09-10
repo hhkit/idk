@@ -28,7 +28,7 @@ namespace idk
 		}
 
 		_elapsed = 0.0f;
-		_curr_animation = res->second;
+		_curr_animation = s_cast<int>(res->second);
 		_is_playing = true;
 	}
 

@@ -3,7 +3,6 @@
 #include <deque>
 namespace idk::fbx_loader_detail
 {
-
 	mat4 initMat4(const aiMatrix4x4& mat)
 	{
 		return mat4(
@@ -129,91 +128,7 @@ namespace idk::fbx_loader_detail
 		}
 	}
 
-	void initAnimNodes(const aiNode* ai_root, const aiAnimation* ai_anim, const BoneSet& bones_set, anim::Animation& anim_clip)
-	{
-		for (auto& elem : bones_set)
-		{
-			anim::Animation::EasyAnimNode ea_node;
-			ea_node._name = elem._name;
-
-			anim_clip.AddEasyAnimNode(ea_node);
-		}
-
-		// Init the anim_node table
-		hash_table<string, const aiNodeAnim*> ai_anim_table;
-		for (size_t i = 0; i < ai_anim->mNumChannels; ++i)
-		{
-			const aiNodeAnim* ai_anim_node = ai_anim->mChannels[i];
-			ai_anim_table.emplace(ai_anim_node->mNodeName.data, ai_anim_node);
-		}
-		
-		// Is it animated?
-		auto ai_anim_node = ai_anim_table.find(ai_root->mName.data);
-		bool is_animated = ai_anim_node != ai_anim_table.end();
-
-		anim::Animation::EasyAnimNode* ea_node = anim_clip.GetEasyAnimNode(ai_root->mName.data);
-
-		anim::Animation::Channel channel;
-		channel._node_transform = initMat4(ai_root->mTransformation);
-		ea_node->_channels.emplace_back(channel);
-
-		if (is_animated)
-		{
-			initChannel(ea_node->_channels.back(), ai_anim_node->second);
-		}
-
-		vector<anim::Animation::Channel> channels;
-		for(size_t i = 0; i < ai_root->mNumChildren; ++i)
-			initAnimNodesRecurse(ai_root->mChildren[i], ai_anim_table, anim_clip, channels);
-
-		float fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
-		float duration = static_cast<float>(ai_anim->mDuration);
-		float num_ticks = duration / fps;
-
-		anim_clip.SetSpeeds(fps, duration, num_ticks);
-		anim_clip.SetName(ai_anim->mName.data);
-	}
-
-	void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels)
-	{
-		// Is it animated?
-		auto ai_anim_node = ai_anim_table.find(ai_node->mName.data);
-		bool is_animated = ai_anim_node != ai_anim_table.end();
-
-		// Initializing the channel. Every node will have a channel regardless whether it is virtual/animated or not.
-		anim::Animation::Channel channel;
-		channel._node_transform = initMat4(ai_node->mTransformation);
-		
-		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
-		if (is_animated)
-		{
-			initChannel(channel, ai_anim_node->second);
-		}
-		virtual_channels.emplace_back(channel);
-		
-		auto ea_node = anim_clip.GetEasyAnimNode(ai_node->mName.data);
-		
-		// is it a bone? 
-		if (ea_node != nullptr)
-		{	
-			// Add all the channels into the ea_node. This ea_node is now full initialized.
-			assert(ea_node->_debug_assert == false);
-
-			ea_node->_channels = virtual_channels;
-			ea_node->_debug_assert = true;
-			virtual_channels.clear();
-		}
-		
-		// If this is a virtual node, we simply recurse until we find a bone. 
-		// If no bone is found, we need to clear the virtual channels.
-		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
-			initAnimNodesRecurse(ai_node->mChildren[i], ai_anim_table, anim_clip, virtual_channels);
-
-		// We should always clear here. If no bone is found, all the virtual channels will be cleared.
-		virtual_channels.clear();
-	}
-
-	void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node)
+	static void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node)
 	{
 		for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
 		{
@@ -245,35 +160,93 @@ namespace idk::fbx_loader_detail
 			channel._rotation.emplace_back(val, time);
 		}
 		channel._is_animated = true;
+		
 	}
 
-	// void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip)
-	// {
-	// 	mat4 curr_accum;
-	// 
-	// 	// If we can find the AnimNode with the corresponding name, we set its accum to whatever it was before
-	// 	auto res = anim_clip.GetAnimNode(root_node->mName.data);
-	// 	if(res == nullptr)
-	// 		curr_accum = initMat4(root_node->mTransformation);
-	// 	else
-	// 		res->_accum = curr_accum;
-	// 
-	// 	for (size_t i = 0; i < root_node->mNumChildren; ++i)
-	// 		initAnimNodesRecurse(root_node->mChildren[i], anim_clip, curr_accum);
-	// }
-	// 
-	// void initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum)
-	// {
-	// 	mat4 node_accum;
-	// 	auto res = anim_clip.GetAnimNode(node->mName.data);
-	// 	if (res == nullptr)
-	// 		node_accum = curr_accum * initMat4(node->mTransformation);
-	// 	else
-	// 		res->_accum = curr_accum;
-	// 
-	// 	for (size_t i = 0; i < node->mNumChildren; ++i)
-	// 		initAnimNodesRecurse(node->mChildren[i], anim_clip, node_accum);
-	// }
+	static void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels)
+	{
+		// Is it animated?
+		auto ai_anim_node = ai_anim_table.find(ai_node->mName.data);
+		bool is_animated = ai_anim_node != ai_anim_table.end();
+
+		// Initializing the channel. Every node will have a channel regardless whether it is virtual/animated or not.
+		anim::Animation::Channel channel;
+		channel._name = ai_node->mName.data;
+		channel._node_transform = initMat4(ai_node->mTransformation);
+		
+		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
+		if (is_animated)
+		{
+			initChannel(channel, ai_anim_node->second);
+		}
+		virtual_channels.emplace_back(channel);
+		
+		auto ea_node = anim_clip.GetEasyAnimNode(ai_node->mName.data);
+		
+		// is it a bone? 
+		if (ea_node != nullptr)
+		{	
+			// Add all the channels into the ea_node. This ea_node is now full initialized.
+			assert(ea_node->_debug_assert == false);
+
+			ea_node->_channels = virtual_channels;
+			ea_node->_debug_assert = true;
+			virtual_channels.clear();
+		}
+		
+		// If this is a virtual node, we simply recurse until we find a bone. 
+		// If no bone is found, we need to clear the virtual channels.
+		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
+			initAnimNodesRecurse(ai_node->mChildren[i], ai_anim_table, anim_clip, virtual_channels);
+
+		// We should always clear here. If no bone is found, all the virtual channels will be cleared.
+		virtual_channels.clear();
+	}
+
+	void initAnimNodes(const aiNode* ai_root, const aiAnimation* ai_anim, const BoneSet& bones_set, anim::Animation& anim_clip)
+	{
+		for (auto& elem : bones_set)
+		{
+			anim::Animation::EasyAnimNode ea_node;
+			ea_node._name = elem._name;
+
+			anim_clip.AddEasyAnimNode(ea_node);
+		}
+
+		// Init the anim_node table
+		hash_table<string, const aiNodeAnim*> ai_anim_table;
+		for (size_t i = 0; i < ai_anim->mNumChannels; ++i)
+		{
+			const aiNodeAnim* ai_anim_node = ai_anim->mChannels[i];
+			ai_anim_table.emplace(ai_anim_node->mNodeName.data, ai_anim_node);
+		}
+
+		// Is it animated?
+		auto ai_anim_node = ai_anim_table.find(ai_root->mName.data);
+		bool is_animated = ai_anim_node != ai_anim_table.end();
+
+		anim::Animation::EasyAnimNode* ea_node = anim_clip.GetEasyAnimNode(ai_root->mName.data);
+
+		anim::Animation::Channel channel;
+		channel._node_transform = initMat4(ai_root->mTransformation);
+		ea_node->_channels.emplace_back(channel);
+
+		if (is_animated)
+		{
+			initChannel(ea_node->_channels.back(), ai_anim_node->second);
+		}
+
+		vector<anim::Animation::Channel> channels;
+		for (size_t i = 0; i < ai_root->mNumChildren; ++i)
+			initAnimNodesRecurse(ai_root->mChildren[i], ai_anim_table, anim_clip, channels);
+
+		float fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
+		float duration = static_cast<float>(ai_anim->mDuration);
+		float num_ticks = duration / fps;
+
+		anim_clip.SetSpeeds(fps, duration, num_ticks);
+		anim_clip.SetName(ai_anim->mName.data);
+	}
 
 	void Vertex::addBoneData(int id, float weight)
 	{

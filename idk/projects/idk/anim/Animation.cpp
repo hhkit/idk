@@ -29,6 +29,7 @@ namespace idk::anim
 
 	void Animation::AddAnimNode(const AnimNode& node)
 	{
+		UNREFERENCED_PARAMETER(node);
 		// auto res = _anim_node_table.find(node._name);
 		// if (res == _anim_node_table.end())
 		// {

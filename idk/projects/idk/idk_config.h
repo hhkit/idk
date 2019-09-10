@@ -22,7 +22,7 @@ namespace idk
 		/// GRAPHICS
 		,	class MeshRenderer
 		,   class Camera
-		//,   class SkinnedMeshRenderer
+		,   class SkinnedMeshRenderer
 		//, class Light
 
 		/// ANIMATION

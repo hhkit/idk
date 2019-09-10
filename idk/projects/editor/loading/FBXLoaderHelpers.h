@@ -70,12 +70,9 @@ namespace idk::fbx_loader_detail
 	void initBoneHierarchy(const aiNode* ai_node, const BoneSet& bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
 	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 
+	// void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node);
+	// void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels);
 	void initAnimNodes(const aiNode* ai_root, const aiAnimation* ai_anim, const BoneSet& bones_set, anim::Animation& anim_clip);
-	void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels);
 	
-	// void initAnimNodeTransforms(const aiNode* root_node, anim::Animation& anim_clip);
-	// 
-	// void initAnimNodesRecurse(const aiNode* node, anim::Animation& anim_clip, const mat4& curr_accum);
-
-	void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node);
+	
 }
