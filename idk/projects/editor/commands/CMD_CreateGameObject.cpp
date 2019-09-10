@@ -2,7 +2,7 @@
 //@file		CMD_CreateGameObject.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		9 Sept 2019
+//@date		10 SEPT 2019
 //@brief	Adds components to gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -19,15 +19,15 @@ namespace idk {
 
 	bool CMD_CreateGameObject::execute()
 	{
-		new_game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-		return new_game_object_handle ? true : false; //Return true if create gameobject is successful
+		game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+		return game_object_handle ? true : false; //Return true if create gameobject is successful
 	}
 
 	bool CMD_CreateGameObject::undo()
 	{
-		if (new_game_object_handle) {
-			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(new_game_object_handle);
-			new_game_object_handle = {}; //Reassign to blank
+		if (game_object_handle) {
+			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
+			game_object_handle = {}; //Reassign to blank
 			return true;
 		}
 		else {

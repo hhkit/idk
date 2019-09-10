@@ -15,6 +15,7 @@ Contains all commands
 #pragma once
 
 #include <editor/commands/CMD_CreateGameObject.h>
+#include <editor/commands/CMD_DeleteGameObject.h>
 #include <editor/commands/CMD_MoveGameObject.h>
 #include <editor/commands/CMD_RotateGameObject.h>
 #include <editor/commands/CMD_ScaleGameObject.h>

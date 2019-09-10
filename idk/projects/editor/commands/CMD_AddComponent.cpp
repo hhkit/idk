@@ -2,7 +2,7 @@
 //@file		CMD_AddComponent.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		10 SEPT 2019
 //@brief	Adds components to gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -13,8 +13,9 @@ namespace idk {
 
 
 	CMD_AddComponent::CMD_AddComponent(Handle<GameObject> gameObject, string component)
-		:game_object_handle{ gameObject }, component_name{ component }
+		:component_name{ component }
 	{
+		game_object_handle = gameObject;
 	}
 
 	bool CMD_AddComponent::execute()
@@ -33,6 +34,10 @@ namespace idk {
 			if (new_component_handle) {
 				game_object_handle->RemoveComponent(new_component_handle);
 				return true;
+			}
+			else if (game_object_handle->GetComponent(reflect::get_type(component_name))) { //This is when the gameObjectHandle has a different component handle due to DeleteGameObjectCMD
+				game_object_handle->RemoveComponent(game_object_handle->GetComponent(reflect::get_type(component_name)));
+
 			}
 			else {
 				return false;

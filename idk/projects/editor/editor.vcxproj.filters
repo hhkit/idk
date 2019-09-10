@@ -64,6 +64,9 @@
     <ClInclude Include="windows\IGE_WindowList.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_DeleteGameObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -117,6 +120,9 @@
     </ClCompile>
     <ClCompile Include="windows\IGE_SceneView.cpp">
       <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_DeleteGameObject.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
