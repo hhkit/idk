@@ -29,6 +29,8 @@ namespace idk
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;
+
+		bool editorExist{false};
 	protected:
 		struct RenderBuffer
 		{
