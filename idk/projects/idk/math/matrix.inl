@@ -97,6 +97,14 @@ namespace idk
 	}
 
 	template<typename T, unsigned R, unsigned C>
+	inline tmat<T, R, C>::tmat(const tmat<T, R + 1, C + 1> & mtx)
+		: tmat{}
+	{
+		for (auto& elem : range<C>())
+			intern[elem] = column_t{ mtx[elem] };
+	}
+
+	template<typename T, unsigned R, unsigned C>
 	T tmat<T, R, C>::determinant() const
 	{
 		static_assert(R == C, "determinant can only be called on square matrices");

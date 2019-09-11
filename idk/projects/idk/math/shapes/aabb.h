@@ -24,5 +24,9 @@ namespace idk
 		bool contains(const vec3& point) const;
 		bool contains(const aabb& box)   const;
 		bool overlaps(const aabb& box)   const;
+
+		// transform
+		aabb& operator*=(const mat4&);
+		aabb  operator* (const mat4&) const;
 	};
 }

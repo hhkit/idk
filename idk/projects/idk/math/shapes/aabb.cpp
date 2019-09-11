@@ -89,4 +89,22 @@ namespace idk
 
 		return true;
 	}
+	aabb& aabb::operator*=(const mat4& tfm)
+	{
+		auto old_sz = extents();
+		auto new_center = vec3{ tfm * vec4{ center(), 1 } };
+
+		for (auto [elem, col]: zip(old_sz, tfm))
+			elem *= col.length();
+
+		min = new_center - old_sz;
+		max = new_center + old_sz;
+
+		return *this;
+	}
+	aabb aabb::operator*(const mat4& tfm) const
+	{
+		auto copy = *this;
+		return copy *= tfm;
+	}
 }

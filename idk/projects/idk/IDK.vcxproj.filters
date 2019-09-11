@@ -68,9 +68,6 @@
     <Filter Include="file">
       <UniqueIdentifier>{f2473f67-3de9-4860-9834-dbb2b1f6c894}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shapes">
-      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core\scene">
       <UniqueIdentifier>{ef6ed219-6b06-437d-bf5f-a85f74a19f89}</UniqueIdentifier>
     </Filter>
@@ -103,6 +100,9 @@
     </Filter>
     <Filter Include="anim\res/factories">
       <UniqueIdentifier>{18746da9-2d25-47bc-a326-d1fab351109e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\shapes">
+      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -269,9 +269,6 @@
     <ClInclude Include="math\color.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="shape\aabb.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
     <ClInclude Include="scene\SceneFactory.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -301,18 +298,6 @@
     </ClInclude>
     <ClInclude Include="phys\Collider.h">
       <Filter>phys</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\sphere.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\ray.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\capsule.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\box.h">
-      <Filter>shapes</Filter>
     </ClInclude>
     <ClInclude Include="ds\compressed_pair.h">
       <Filter>ds</Filter>
@@ -552,6 +537,24 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="math\linear.h" />
+    <ClInclude Include="math\shapes.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\aabb.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\box.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\capsule.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\ray.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\sphere.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -618,9 +621,6 @@
     <ClCompile Include="file\DirectoryWatcher.cpp">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="shape\aabb.cpp">
-      <Filter>shapes</Filter>
-    </ClCompile>
     <ClCompile Include="scene\SceneFactory.cpp">
       <Filter>scene</Filter>
     </ClCompile>
@@ -650,12 +650,6 @@
     </ClCompile>
     <ClCompile Include="audio\AudioSource.cpp">
       <Filter>audio</Filter>
-    </ClCompile>
-    <ClCompile Include="shape\sphere.cpp">
-      <Filter>shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="shape\ray.cpp">
-      <Filter>shapes</Filter>
     </ClCompile>
     <ClCompile Include="test\TestSystem.cpp">
       <Filter>test</Filter>
@@ -770,6 +764,17 @@
       <Filter>anim</Filter>
     </ClCompile>
     <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="math\shapes\aabb.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\ray.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\sphere.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\box.cpp" />
+    <ClCompile Include="math\shapes\capsule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
