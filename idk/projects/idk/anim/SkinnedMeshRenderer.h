@@ -23,7 +23,7 @@ namespace idk
 		bool receive_shadows{ true };
 
 		bool IsActiveAndEnabled() const;
-		RenderObject GenerateRenderObject() const;
+		AnimatedRenderObject GenerateRenderObject() const;
 
 		static const renderer_reqs& GetRequiredAttributes();
 	};

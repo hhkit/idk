@@ -11,9 +11,9 @@ namespace idk
 	{
 		return GetGameObject()->ActiveInHierarchy() && enabled;
 	}
-	RenderObject SkinnedMeshRenderer::GenerateRenderObject() const
+	AnimatedRenderObject SkinnedMeshRenderer::GenerateRenderObject() const
 	{
-		return RenderObject{
+		return AnimatedRenderObject{
 			mesh,
 			material_instance,
 
