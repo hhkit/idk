@@ -18,6 +18,11 @@ namespace idk
 	{
 		return size() / 2;
 	}
+
+	const aabb& aabb::bounds() const
+	{
+		return *this;
+	}
 	
 	aabb& aabb::translate(const vec3& trans)
 	{

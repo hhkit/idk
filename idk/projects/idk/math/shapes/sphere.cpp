@@ -9,6 +9,11 @@ namespace idk
 		return radius * 2;
 	}
 
+	aabb sphere::bounds() const
+	{
+		return aabb{ center + vec3{radius}, center - vec3{radius} };
+	}
+
 	sphere& sphere::translate(const vec3& trans)
 	{
 		center += trans;

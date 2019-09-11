@@ -1,5 +1,6 @@
 #pragma once
 #include <idk.h>
+#include <math/shapes/aabb.h>
 
 namespace idk
 {
@@ -10,12 +11,14 @@ namespace idk
 
 		// accessors
 		real diameter() const;
+		aabb bounds() const;
 
 		// properties
 		sphere& translate(const vec3& trans);
 		sphere& center_at(const vec3& pos);
 		sphere& surround(vec3 point);
 		sphere& grow(real distance);
+
 		sphere& operator*=(const mat4& tfm);
 		sphere  operator*(const mat4& tfm) const;
 

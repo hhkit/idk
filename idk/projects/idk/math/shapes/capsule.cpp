@@ -3,6 +3,16 @@
 
 namespace idk
 {
+	aabb capsule::bounds() const
+	{
+		auto half_extent = dir * (height) / 2 + vec3{ radius };
+		
+		for (auto& elem : half_extent)
+			elem = abs(elem);
+
+		return aabb{ center - half_extent, center + half_extent };
+	}
+
 	capsule& capsule::operator*=(const mat4& tfm)
 	{
 		center = tfm * vec4{ center, 1 };

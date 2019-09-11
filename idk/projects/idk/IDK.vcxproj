@@ -37,6 +37,7 @@
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
+    <ClInclude Include="phys\PhysicsSystem.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceManager.h" />
     <ClInclude Include="scene\ProjectManager.h" />
@@ -191,6 +192,9 @@
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
+    <ClCompile Include="phys\Collider.cpp" />
+    <ClCompile Include="phys\PhysicsSystem.cpp" />
+    <ClCompile Include="phys\RigidBody.cpp" />
     <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />

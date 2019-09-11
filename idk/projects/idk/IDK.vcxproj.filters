@@ -555,6 +555,7 @@
     <ClInclude Include="math\shapes\sphere.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="phys\PhysicsSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -775,6 +776,9 @@
     </ClCompile>
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
+    <ClCompile Include="phys\Collider.cpp" />
+    <ClCompile Include="phys\PhysicsSystem.cpp" />
+    <ClCompile Include="phys\RigidBody.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

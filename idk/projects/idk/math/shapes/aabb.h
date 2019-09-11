@@ -13,6 +13,8 @@ namespace idk
 		vec3  size()   const;
 		vec3  extents() const;
 
+		const aabb& bounds() const;
+
 		// modifiers
 		aabb& translate(const vec3& trans);
 		aabb& center_at(const vec3& pos);
