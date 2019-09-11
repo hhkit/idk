@@ -37,7 +37,7 @@ namespace idk
 	{
 		center = tfm * vec4{ center, 1 };
 		auto max_len = real{};
-		std::for_each(tfm.begin(), tfm.end() - 1, [&max_len](auto col) { max_len = max(col.length - sq(), max); });
+		std::for_each(tfm.begin(), tfm.end() - 1, [&max_len](auto col) { max_len = std::max(col.length_sq(), max_len); });
 		radius *= sqrt(max_len);
 		return *this;
 	}
