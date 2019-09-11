@@ -1,0 +1,3 @@
+float,float,float->vec3
+X,Y,Z,Out
+{3} = vec3({0},{1},{2});

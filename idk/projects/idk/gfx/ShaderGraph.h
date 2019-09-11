@@ -1,0 +1,25 @@
+#pragma once
+
+#include "ShaderGraph_data.h"
+#include <res/SaveableResource.h>
+#include <res/Resource.h>
+
+namespace idk
+{
+    namespace shadergraph { class Graph; }
+    RESOURCE_EXTENSION(shadergraph::Graph, ".graph")
+}
+
+namespace idk::shadergraph
+{
+    class Graph
+        : public Resource<Graph>
+        , public Saveable<Graph>
+    {
+    public:
+        Guid master_node;
+        hash_table<Guid, Node> nodes;
+        vector<Value> values;
+        vector<Link> links;
+    };
+}

@@ -6,6 +6,7 @@
 #include <res/FileResources.h>
 #include <prefab/PrefabData.h>
 #include <prefab/PropertyOverride.h>
+#include <gfx/ShaderGraph_data.h>
 
 namespace idk
 {
@@ -54,5 +55,15 @@ namespace idk::reflect
         , PropertyOverride
         , vector<PropertyOverride>
         , RscHandle<Prefab>
+
+        , shadergraph::Link
+        , shadergraph::Node
+        , shadergraph::Slot
+        , shadergraph::Value
+        , shadergraph::ValueType
+        , hash_table<Guid, shadergraph::Node>
+        , vector<shadergraph::Value>
+        , vector<shadergraph::Link>
+        , vector<shadergraph::Slot>
 	>;
 }

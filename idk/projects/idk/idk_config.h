@@ -3,6 +3,7 @@
 namespace idk
 {
 	namespace anim { class Skeleton; class Animation; }
+	namespace shadergraph { class Graph; }
 
 	constexpr auto MaxScene = 0x82; // 130 scenes allowed
 
@@ -70,6 +71,7 @@ namespace idk
 		,	class RenderTarget
 		,	anim::Animation
 		,	anim::Skeleton
+        ,   shadergraph::Graph
 		//,	class Level
 	>;
 

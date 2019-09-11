@@ -557,6 +557,8 @@
       <Filter>math\shapes</Filter>
     </ClInclude>
     <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="gfx\ShaderGraph.h" />
+    <ClInclude Include="gfx\ShaderGraph_data.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

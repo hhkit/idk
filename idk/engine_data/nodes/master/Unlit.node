@@ -1,0 +1,3 @@
+vec3->
+Color
+outColor = vec4({0}, 1.0);
