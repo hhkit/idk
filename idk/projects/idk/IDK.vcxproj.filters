@@ -104,6 +104,9 @@
     <Filter Include="math\shapes">
       <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gfx\shadergraph">
+      <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -464,7 +467,6 @@
     <ClInclude Include="gfx\RenderTarget.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision.h" />
     <ClInclude Include="gfx\ShaderTemplate.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -537,7 +539,6 @@
     <ClInclude Include="scene\ProjectManager.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -556,7 +557,21 @@
     <ClInclude Include="math\shapes\sphere.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="math\linear.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\PhysicsSystem.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph_data.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -701,7 +716,6 @@
     <ClCompile Include="gfx\RenderTarget.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="phys\collision.cpp" />
     <ClCompile Include="gfx\ShaderTemplate.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
@@ -720,7 +734,6 @@
     <ClCompile Include="serialize\yaml_load.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="anim\Animation.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
@@ -766,7 +779,6 @@
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp">
       <Filter>anim</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="math\shapes\aabb.cpp">
       <Filter>math\shapes</Filter>
     </ClCompile>
@@ -776,11 +788,33 @@
     <ClCompile Include="math\shapes\sphere.cpp">
       <Filter>math\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="math\shapes\box.cpp" />
-    <ClCompile Include="math\shapes\capsule.cpp" />
-    <ClCompile Include="phys\Collider.cpp" />
-    <ClCompile Include="phys\PhysicsSystem.cpp" />
-    <ClCompile Include="phys\RigidBody.cpp" />
+    <ClCompile Include="serialize\yaml_dump.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\box.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\capsule.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\Collider.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\PhysicsSystem.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\RigidBody.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Light.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -933,7 +967,6 @@
     <None Include="ds\circular_buffer.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="phys\collision.inl" />
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
@@ -946,7 +979,12 @@
     <None Include="res\SaveableResourceManager.inl">
       <Filter>res</Filter>
     </None>
-    <None Include="math\linear.inl" />
+    <None Include="math\linear.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="phys\collision.inl">
+      <Filter>phys</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

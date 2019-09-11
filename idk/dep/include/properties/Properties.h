@@ -586,30 +586,38 @@ namespace property
         constexpr static auto InsertEntries(  const std::array<property::table_action_entry, entry_count_v>& ActionEntry
                                             , const std::array<table_entry, entry_count_v>&                  UserEntry  ) noexcept
         {
-            std::array< map_entry, map_size_v> Map{ std::pair{nullptr, 0} };
-
-            auto const pEnd = &Map.data()[ map_size_v ];
-            for( std::size_t i=0; i<UserEntry.size(); ++i )
+            if constexpr (map_size_v == 0)
             {
-                auto&       U       = UserEntry[i];
-                auto const  Hash    = U.m_NameHash;
-                auto        pPair   = &Map[ Hash % map_size_v ];
-                do
-                {
-                    if( pPair->first == nullptr )
-                    {
-                        pPair->first  = &ActionEntry[i];
-                        pPair->second = Hash; 
-                        break;
-                    }
-
-                    // Check for duplicates, if this happens please change the property name (bad luck)
-                    assert( pPair->second != U.m_NameHash );
-                    ++pPair;
-                    if ( pPair == pEnd ) pPair = Map.data();
-                } while ( true );
+                (ActionEntry); (UserEntry);
+                return std::array<map_entry, map_size_v>{};
             }
-            return Map;
+            else
+            {
+                std::array< map_entry, map_size_v> Map{ std::pair{nullptr, 0} };
+
+                auto const pEnd = &Map.data()[map_size_v];
+                for (std::size_t i = 0; i < UserEntry.size(); ++i)
+                {
+                    auto& U = UserEntry[i];
+                    auto const  Hash = U.m_NameHash;
+                    auto        pPair = &Map[Hash % map_size_v];
+                    do
+                    {
+                        if (pPair->first == nullptr)
+                        {
+                            pPair->first = &ActionEntry[i];
+                            pPair->second = Hash;
+                            break;
+                        }
+
+                        // Check for duplicates, if this happens please change the property name (bad luck)
+                        assert(pPair->second != U.m_NameHash);
+                        ++pPair;
+                        if (pPair == pEnd) pPair = Map.data();
+                    } while (true);
+                }
+                return Map;
+            }
         }
 
         template< typename T, std::size_t N >

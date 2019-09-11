@@ -97,6 +97,26 @@ REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
 REFLECT_VARS(object_index, component_name, property_path)
 REFLECT_END()
 
+// shader graph:
+
+REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
+
+REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
+REFLECT_VARS(master_node, nodes, values, links)
+REFLECT_END()
+REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
+REFLECT_VARS(node_out, node_in, slot_out, slot_in)
+REFLECT_END()
+REFLECT_BEGIN(idk::shadergraph::Node, "ShaderGraphNode")
+REFLECT_VARS(name, guid, position, selected, input_slots, output_slots)
+REFLECT_END()
+REFLECT_BEGIN(idk::shadergraph::Value, "ShaderGraphValue")
+REFLECT_VARS(type, value, node, slot)
+REFLECT_END()
+REFLECT_BEGIN(idk::shadergraph::Slot, "ShaderGraphSlot")
+REFLECT_VARS(type)
+REFLECT_END()
+
 /*==========================================================================
  * core
  *========================================================================*/
