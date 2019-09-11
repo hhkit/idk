@@ -149,6 +149,28 @@ namespace idk
 				prefab_inst.objects[object_index]->AddComponent(prefab->data[object_index].components[component_index]);
 			}
 		}
+
+        static void propagate_removed_component(RscHandle<Prefab> prefab, int object_index, string_view component_name, int component_add_index)
+        {
+            for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
+            {
+                if (prefab_inst.prefab != prefab)
+                    continue;
+
+                for (auto c : prefab_inst.objects[object_index]->GetComponents())
+                {
+                    if ((*c).type.name() == component_name)
+                    {
+                        if (component_add_index == 0)
+                        {
+                            prefab_inst.objects[object_index]->RemoveComponent(c);
+                            break;
+                        }
+                        --component_add_index;
+                    }
+                }
+            }
+        }
     }
 
 
@@ -430,8 +452,33 @@ namespace idk
 		auto index = std::find(prefab_inst.objects.begin(), prefab_inst.objects.end(), target) - prefab_inst.objects.begin();
 		prefab_inst.prefab->data[index].components.push_back((*component).copy());
 
-		helpers::propagate_added_component(prefab_inst.prefab, index, prefab_inst.prefab->data[index].components.size() - 1);
+		helpers::propagate_added_component(prefab_inst.prefab, static_cast<int>(index),
+                                           static_cast<int>(prefab_inst.prefab->data[index].components.size() - 1));
 	}
+
+    void PrefabUtility::ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index)
+    {
+        auto instance_root = GetPrefabInstanceRoot(target);
+        assert(instance_root);
+        auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
+
+        auto index = std::find(prefab_inst.objects.begin(), prefab_inst.objects.end(), target) - prefab_inst.objects.begin();
+        auto& data = prefab_inst.prefab->data[index].components;
+        for (auto iter = data.begin(); iter != data.end(); ++iter)
+        {
+            if (iter->type.name() == component_name)
+            {
+                if (component_add_index == 0)
+                {
+                    data.erase(iter);
+                    break;
+                }
+                --component_add_index;
+            }
+        }
+
+        helpers::propagate_removed_component(prefab_inst.prefab, static_cast<int>(index), component_name, component_add_index);
+    }
 
 	static void _apply_property_override(PrefabInstance& prefab_inst, const PropertyOverride& override)
 	{
@@ -483,19 +530,58 @@ namespace idk
 
 	void PrefabUtility::ApplyPrefabInstance(Handle<GameObject> instance_root)
 	{
-        // todo handle added component
-
         assert(instance_root->HasComponent<PrefabInstance>());
         auto prefab_inst = *instance_root->GetComponent<PrefabInstance>();
+        auto prefab = prefab_inst.prefab;
 
-        for (auto& override : prefab_inst.overrides)
+        // diff components
+        int i = 0;
+        for (auto obj : prefab_inst.objects)
+        {
+            vector<reflect::dynamic> obj_components;
+            vector<GenericHandle> obj_component_handles;
+            vector<reflect::dynamic*> prefab_component_ptrs;
+            for (auto& d : prefab->data[i].components)
+                prefab_component_ptrs.push_back(&d);
+            for (auto c : obj->GetComponents())
+                obj_component_handles.push_back(c);
+            for (auto c : obj_component_handles)
+                obj_components.push_back(*c);
+
+            for (size_t j = 0; j < prefab_component_ptrs.size(); ++j)
+            {
+                if (prefab_component_ptrs[j]->type == obj_components[j].type)
+                {
+                    prefab_component_ptrs[j] = nullptr;
+                    obj_component_handles[j] = GenericHandle();
+                }
+            }
+
+            // ptrs left in obj comp ptrs == added components
+            // ptrs left in prefab comp ptrs == removed components
+
+            for (auto c : obj_component_handles)
+            {
+                if (c)
+                    ApplyAddedComponent(obj, c);
+            }
+            for (auto* d : prefab_component_ptrs)
+            {
+                if (d)
+                    ApplyRemovedComponent(obj, d->type.name(), 0);
+            }
+
+            i++;
+        }
+
+        for (auto & override : prefab_inst.overrides)
         {
             _apply_property_override(prefab_inst, override);
 
-            helpers::propagate_property(prefab_inst.prefab,
-                override.object_index,
-                prefab_inst.prefab->data[override.object_index].GetComponentIndex(override.component_name),
-                override.property_path);
+            helpers::propagate_property(prefab,
+                                        override.object_index,
+                                        prefab->data[override.object_index].GetComponentIndex(override.component_name),
+                                        override.property_path);
         }
         prefab_inst.overrides.clear();
 	}
