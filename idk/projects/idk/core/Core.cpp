@@ -54,6 +54,7 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,  "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::BuildSceneGraph, "Build scene graph");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,          "Test updates");
+		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::MoveObjects, "Move Objects");
 		if (editor)
 		{
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory,         "Watch files");

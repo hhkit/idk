@@ -112,12 +112,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (gfx_api != GraphicsAPI::Vulkan)
 			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
-		//mesh_rend->material_instance.uniforms["tex"] = RscHandle <Texture>{};
+
+		return go;
 	};
 
 	createtest_obj(vec3{ 0.5, 0, 0 });
 	createtest_obj(vec3{ -0.5, 0, 0 });
-	createtest_obj(vec3{ 0, 0, 0 });
 	createtest_obj(vec3{ 0, 0.5, 0 });
 	createtest_obj(vec3{ 0, -0.5, 0 });
 
@@ -125,6 +125,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	light->AddComponent<Light>();
 	light->AddComponent<TestComponent>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+
+	auto mover = createtest_obj(vec3{ 0, 0, 0 });
+	mover->AddComponent<TestComponent>();
+	mover->AddComponent<RigidBody>();
 
 	c->Run();
 	

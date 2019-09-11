@@ -44,7 +44,7 @@ namespace idk
 		,	class FileSystem
 		//,	class InputSystem
 		//,	class ScriptSystem
-		//,	class PhysicsSystem
+		,	class PhysicsSystem
 		,	class GraphicsSystem
 		,   class DebugRenderer
 		,	class AudioSystem

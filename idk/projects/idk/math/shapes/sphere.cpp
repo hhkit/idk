@@ -1,11 +1,17 @@
 #include "stdafx.h"
 #include "sphere.h"
+#include <cmath>
 
 namespace idk
 {
 	real sphere::diameter() const
 	{
 		return radius * 2;
+	}
+
+	aabb sphere::bounds() const
+	{
+		return aabb{ center + vec3{radius}, center - vec3{radius} };
 	}
 
 	sphere& sphere::translate(const vec3& trans)
@@ -30,6 +36,21 @@ namespace idk
 	{
 		radius += distance;
 		return *this;
+	}
+
+	sphere& sphere::operator*=(const mat4& tfm)
+	{
+		center = tfm * vec4{ center, 1 };
+		auto max_len = real{};
+		std::for_each(tfm.begin(), tfm.end() - 1, [&max_len](auto col) { max_len = std::max(col.length_sq(), max_len); });
+		radius *= sqrt(max_len);
+		return *this;
+	}
+
+	sphere sphere::operator*(const mat4& tfm) const
+	{
+		auto copy = *this;
+		return copy *= tfm;
 	}
 
 	bool sphere::contains(vec3 point) const

@@ -208,8 +208,6 @@ namespace idk::win
 			screendel = screenpos - old_screenpos;
 
 			_dragging = leftHold;
-
-			std::cout << std::boolalpha << _dragging << std::endl;
 			_input_manager->SetMouseDragging(_dragging);
 
 			SetFocus(hWnd);
@@ -232,7 +230,6 @@ namespace idk::win
 			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
 
 			_dragging = rightHold;
-			std::cout << std::boolalpha << _dragging << std::endl;
 			_input_manager->SetMouseDragging(_dragging);
 
 			screendel = screenpos - old_screenpos;

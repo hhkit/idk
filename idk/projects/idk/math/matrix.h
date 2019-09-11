@@ -32,6 +32,9 @@ namespace idk
 		// upcast constructor
 		explicit tmat(const tmat<T, R - 1, C - 1>&);
 
+		// downcast constructor
+		explicit tmat(const tmat<T, R + 1, C + 1>&);
+
 		// common functions
 		T                determinant() const;
 		tmat<T, C, R>  transpose() const;

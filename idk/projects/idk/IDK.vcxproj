@@ -36,6 +36,8 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="math\linear.h" />
+    <ClInclude Include="math\shapes.h" />
+    <ClInclude Include="phys\PhysicsSystem.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceManager.h" />
     <ClInclude Include="scene\ProjectManager.h" />
@@ -146,11 +148,11 @@
     <ClInclude Include="reflect\detail\pretty_function.h" />
     <ClInclude Include="reflect\detail\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
-    <ClInclude Include="shape\aabb.h" />
-    <ClInclude Include="shape\capsule.h" />
-    <ClInclude Include="shape\box.h" />
-    <ClInclude Include="shape\ray.h" />
-    <ClInclude Include="shape\sphere.h" />
+    <ClInclude Include="math\shapes\aabb.h" />
+    <ClInclude Include="math\shapes\capsule.h" />
+    <ClInclude Include="math\shapes\box.h" />
+    <ClInclude Include="math\shapes\ray.h" />
+    <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\EasyFactory.h" />
     <ClInclude Include="util\enum.h" />
@@ -189,6 +191,11 @@
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="math\shapes\box.cpp" />
+    <ClCompile Include="math\shapes\capsule.cpp" />
+    <ClCompile Include="phys\Collider.cpp" />
+    <ClCompile Include="phys\PhysicsSystem.cpp" />
+    <ClCompile Include="phys\RigidBody.cpp" />
     <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
@@ -243,10 +250,10 @@
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\serialize.cpp" />
-    <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="math\shapes\aabb.cpp" />
     <ClCompile Include="reflect\enum_type.cpp" />
-    <ClCompile Include="shape\ray.cpp" />
-    <ClCompile Include="shape\sphere.cpp" />
+    <ClCompile Include="math\shapes\ray.cpp" />
+    <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>

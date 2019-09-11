@@ -9,6 +9,7 @@ namespace idk
 	{
 	public:
 		vec3 velocity = vec3{};
+		vec3 accel    = vec3{};
 		real drag     = 0.f;
 
 		real mass           = 1.f;
@@ -25,6 +26,6 @@ namespace idk
 		bool sleeping         = false; 
 		bool sleep_next_frame = false;
 
-
+		vec3 AddForce(const vec3& newtons);
 	};
 }
