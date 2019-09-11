@@ -10,7 +10,7 @@ Project: ivan.ho_CS300_1
 Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
-#version 330 core
+#version 450 
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -27,7 +27,7 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 	mat4 normal_transform;
 } ObjectMat4s;
 
-out VS_OUT
+layout(location = 1) out VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -35,6 +35,11 @@ out VS_OUT
   vec3 tangent;
   vec3 view_pos; 		
 } vs_out;
+
+layout(location = 0) out gl_PerVertex
+{
+    vec4 gl_Position;
+};
 
 void main()
 {

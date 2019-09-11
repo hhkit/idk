@@ -3,19 +3,19 @@
 namespace idk::vkn
 {
 	template<typename Policy>
-	vk::DescriptorPool DescriptorPoolsManager::Get(uint32_t pool)
+	vk::DescriptorPool DescriptorPoolsManager::Get(uint32_t pool, vk::DescriptorType type )
 	{
-		auto result = IPolicy<Policy>::Get(pool, managers);
+		auto result = IPolicy<Policy>::Get(pool, managers[type]);
 		if (!result)
 		{
-			result = Add(pool);
+			result = Add(pool,type);
 		}
 		return *result;
 	}
 	template<typename Policy>
-	std::optional<vk::DescriptorPool> DescriptorPoolsManager::TryGet(uint32_t pool)
+	std::optional<vk::DescriptorPool> DescriptorPoolsManager::TryGet(uint32_t pool, vk::DescriptorType type)
 	{
-		auto result = IPolicy<Policy>::Get(pool, managers);
+		auto result = IPolicy<Policy>::Get(pool, managers[type]);
 		return result;
 	}
 	template<typename Policy>

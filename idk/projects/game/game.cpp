@@ -57,8 +57,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-
-	switch (GraphicsAPI::OpenGL)
+	auto gfx_api = GraphicsAPI::OpenGL;
+	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
@@ -76,7 +76,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		default:
 			break;
 	}
-
+	if (&c->GetSystem<IDE>())
+		gSys->editorExist = true;
 	c->Setup();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
@@ -88,23 +89,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
-	Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
-
+	float divByVal = 1.f;
+	if (&c->GetSystem<IDE>())
+	{
+		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
+		divByVal = 200.f;
+	}
 	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
 	auto h_mat = Core::GetResourceManager().Create<Material>();
 	h_mat->BuildShader(shader_template, "", "");
 
-	auto createtest_obj = [&scene, h_mat](vec3 pos) {
+	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
-		go->Transform()->rotation = quat{ vec3{1, 0, 0}, deg{-90} };
-		go->GetComponent<Transform>()->scale /= 200.f;
+		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+		go->GetComponent<Transform>()->scale /= divByVal;// 200.f;
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
-		mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//Temp condition, since mesh loader isn't in for vulkan yet
+		if (gfx_api != GraphicsAPI::Vulkan)
+			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
+		//mesh_rend->material_instance.uniforms["tex"] = RscHandle <Texture>{};
 	};
 
 	createtest_obj(vec3{ 0.5, 0, 0 });

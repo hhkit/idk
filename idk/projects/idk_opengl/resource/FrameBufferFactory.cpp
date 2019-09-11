@@ -27,11 +27,13 @@ namespace idk::ogl
 	}
 	unique_ptr<RenderTarget> FrameBufferFactory::Create(FileHandle fh)
 	{
+		UNREFERENCED_PARAMETER(fh);
 		return unique_ptr<RenderTarget>();
 	}
 
 	unique_ptr<RenderTarget> FrameBufferFactory::Create(FileHandle filepath, const RenderTarget::Metadata& m)
 	{
+		UNREFERENCED_PARAMETER(filepath);
 		auto fb = std::make_unique<FrameBuffer>();
 
 		for (auto& elem : m.textures)

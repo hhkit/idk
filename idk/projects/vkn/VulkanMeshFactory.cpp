@@ -5,6 +5,11 @@
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+
+#include <core/Core.h>
+#include <vkn/MemoryAllocator.h>
+
+
 namespace idk::vkn
 {
 	namespace hlp
@@ -48,53 +53,207 @@ namespace idk::vkn
 
 	}
 
-	unique_ptr<Mesh> MeshFactory::Create()
+	template<typename CItr>
+	void CpyWithStride(CItr src_start, CItr src_end, void* dst_start, void* dst_end, uint32_t dst_stride)
 	{
-		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
-		auto& pdevice = vview.PDevice();
-		auto& m_device = vview.Device();
-		auto& dispatcher = vview.Dispatcher();
-		auto retval = std::make_unique<VulkanMesh>();
-		struct Vertex
+		using T = decltype(*src_start);
+		uint8_t* d_st = r_cast<uint8_t*>(dst_start);
+		uint8_t* d_ed = r_cast<uint8_t*>(dst_end);
+		while (src_start != src_end && dst_end >dst_start)
 		{
-			vec3 pos;
-			vec3 normal;
+			memcpy_s(d_st, d_ed - d_st, src_start, sizeof(T));
+			d_st += dst_stride;
+			++src_start;
+		}
+	}
+
+
+	MeshFactory::MeshFactory():allocator{*Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
+	{
+	}
+
+	void MeshFactory::Init()
+	{
+		//TODO set the uniform layouts (M V P)
+		//config.uniform_layouts;
+
+		//TODO Create Pipeline with config
+	}
+
+	unique_ptr<Mesh> MeshFactory::GenerateDefaultResource()
+	{
+		vector<vec3> positions
+		{
+			vec3{   0, +0.5, 0.5f},
+			vec3{-0.5, -0.5, 0.5f},
+			vec3{+0.5, -0.5, 0.5f}
+		};
+		vector<vec3> normals
+		{
+			vec3{ 0, 0, 1},
+			vec3{ 0, 0, 1},
+			vec3{ 0, 0, 1}
+		};
+		vector<vec2> uv
+		{
+			vec2{ 0.5f, 1},
+			vec2{ 0, 0},
+			vec2{ 1, 0}
+		};
+		vector<uint16_t> indices
+		{
+			0, 2, 1,
+			0, 1, 2,
 		};
 
-		vector<VulkanDescriptor> descriptor
-		{
-			VulkanDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
-			VulkanDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) }
-		};
 
-		vector<Vertex> vertices
+		//@Joseph example:
+		//Create this map of attrib to a pair of shared_ptr to meshbuffer::managed and offset
+		hash_table<attrib_index, std::pair<std::shared_ptr<MeshBuffer::Managed>,offset_t>> attribs;
 		{
-			Vertex{vec3{0,    +0.5, 0}},
-			Vertex{vec3{-0.5, -0.5, 0}},
-			Vertex{vec3{+0.5, -0.5, 0}}
-		};
-		auto num_vtx_bytes = hlp::buffer_size(vertices);
-		auto&& [buffer,memory]=hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vview.Dispatcher());
-		//Make the buffer
-		retval->SetBuffer(BufferType::eAttrib, MeshBuffer{std::move(buffer),num_vtx_bytes});
+			auto& buffer = positions;
+			//Use CreateData to create the buffer, then store the result with the offset.
+			//Since it's a shared ptr, you may share the result of CreateData with multiple attrib buffers
+			attribs[attrib_index::Position] = std::make_pair(CreateData(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
+		}
 
-		vector<int> indices
 		{
-			0, 2, 1
-		};
+			auto& buffer = normals;
+			attribs[attrib_index::Normal] = std::make_pair(CreateData(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
+		}
 
-		auto&& [idx_buffer, idx_memory] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), hlp::buffer_size(indices), vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vview.Dispatcher());
-		retval->SetBuffer(
-			BufferType::eIndex, MeshBuffer{ std::move(idx_buffer) , hlp::buffer_size(indices)}
-		);
-		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, std::data(vertices), *buffer);
-		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, hlp::buffer_size(indices), std::data(indices), *idx_buffer);
-		return retval;
+		{
+			auto& buffer = uv;
+			attribs[attrib_index::UV] = std::make_pair(CreateData(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
+		}
+		//After the map is created, pass in the remaining data as such
+		return Create(attribs,indices);
 	}
 
 	unique_ptr<Mesh> idk::vkn::MeshFactory::Create(FileHandle filepath)
 	{
+		//@Joseph, fill in here
 		return unique_ptr<Mesh>();
 	}
 
+
+	std::shared_ptr<MeshBuffer::Managed> MeshFactory::CreateData(string_view raw_data)
+	{
+		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//auto& pdevice = vview.PDevice();
+		auto& m_device = vview.Device();
+		auto num_vtx_bytes = hlp::buffer_size(raw_data);
+		auto data = std::data(raw_data);
+		auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
+		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+		return std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc),num_vtx_bytes);
+	}
+
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint16_t>& index_buffer)
+	{
+		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//auto& pdevice = vview.PDevice();
+		auto& m_device = vview.Device();
+		//auto& dispatcher = vview.Dispatcher();
+		auto retval = std::make_unique<VulkanMesh>();
+		RegisterAttribs(*retval, attribs);
+		{
+			auto num_vtx_bytes = hlp::buffer_size(index_buffer);
+			auto data = std::data(index_buffer);
+			auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
+			hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+			retval->SetIndexBuffer(
+				MeshBuffer{ std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc) , num_vtx_bytes) },
+				s_cast<uint32_t>(index_buffer.size()),
+				vk::IndexType::eUint16
+			);
+		}
+		return retval;
+	}
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint32_t>& index_buffer)
+	{
+		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//auto& pdevice = vview.PDevice();
+		auto& m_device = vview.Device();
+		//auto& dispatcher = vview.Dispatcher();
+		auto retval = std::make_unique<VulkanMesh>();
+		RegisterAttribs(*retval, attribs);
+		{
+			auto num_vtx_bytes = hlp::buffer_size(index_buffer);
+			auto data = std::data(index_buffer);
+			auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
+			hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+			retval->SetIndexBuffer(
+				MeshBuffer{ std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc),num_vtx_bytes) },
+				s_cast<uint32_t>(index_buffer.size()),
+				vk::IndexType::eUint32 
+			);
+		}
+		return retval;
+	}
+
+	void MeshFactory::RegisterAttribs(VulkanMesh& mesh, const hash_table<attrib_index, string_view>& attribs)
+	{
+		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//auto& pdevice = vview.PDevice();
+		auto& m_device = vview.Device();
+		for (auto& attrib : attribs)
+		{
+			auto num_vtx_bytes = hlp::buffer_size(attrib.second);
+			auto data = std::data(attrib.second);
+			auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
+			hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+			mesh.SetBuffer(attrib.first, MeshBuffer{ std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc),num_vtx_bytes) });
+		}
+	}
+
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, size_t>>& attribs, const vector<uint16_t>& index_buffer)
+	{
+		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//auto& pdevice = vview.PDevice();
+		auto& m_device = vview.Device();
+		//auto& dispatcher = vview.Dispatcher();
+		auto retval = std::make_unique<VulkanMesh>();
+		RegisterAttribs(*retval, attribs);
+		{
+			auto num_vtx_bytes = hlp::buffer_size(index_buffer);
+			auto data = std::data(index_buffer);
+			auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
+			hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+			retval->SetIndexBuffer(
+				MeshBuffer{ std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc) , num_vtx_bytes) },
+				s_cast<uint32_t>(index_buffer.size()),
+				vk::IndexType::eUint16
+			);
+		}
+		return retval;
+	}
+	unique_ptr<Mesh> MeshFactory::Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, size_t>>& attribs, const vector<uint32_t>& index_buffer)
+	{
+		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//auto& pdevice = vview.PDevice();
+		auto& m_device = vview.Device();
+		//auto& dispatcher = vview.Dispatcher();
+		auto retval = std::make_unique<VulkanMesh>();
+		RegisterAttribs(*retval, attribs);
+		{
+			auto num_vtx_bytes = hlp::buffer_size(index_buffer);
+			auto data = std::data(index_buffer);
+			auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
+			hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+			retval->SetIndexBuffer(
+				MeshBuffer{ std::make_shared<MeshBuffer::Managed>(std::move(pbuffer),std::move(palloc),num_vtx_bytes) },
+				s_cast<uint32_t>(index_buffer.size()),
+				vk::IndexType::eUint32
+			);
+		}
+		return retval;
+	}
+	void MeshFactory::RegisterAttribs(VulkanMesh& mesh, const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>,size_t>>& attribs)
+	{
+		for (auto& attrib : attribs)
+		{
+			mesh.SetBuffer(attrib.first, MeshBuffer{ attrib.second.first, attrib.second.second });
+		}
+	}
 }

@@ -9,4 +9,5 @@ namespace idk::vkn
 	struct FrameObjects;
 	class VulkanView;
 	struct window_info;
+	struct PresentationSignals;
 }

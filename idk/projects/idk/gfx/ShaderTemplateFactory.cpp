@@ -5,11 +5,11 @@
 const idk::string_view default_template = R"(
 #version 450
 
-out vec4 out_color;
+layout(location=0)out vec4 out_color;
 
 void main()
 {
-	vec4 color = vec4(1.0);
+	vec4 color = vec4(1.0,0.0,1.0f,1.0);
 
 	//__MATERIAL_CODE__;
 

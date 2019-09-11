@@ -34,6 +34,7 @@
     <ClCompile Include="TestTree.cpp" />
     <ClCompile Include="TestPrefab.cpp" />
     <ClCompile Include="TestSaveableResource.cpp" />
+    <ClCompile Include="TestStaticCollision.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

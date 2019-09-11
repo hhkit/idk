@@ -54,8 +54,8 @@ namespace idk
 	mat4 Camera::ProjectionMatrix() const
 	{
 		return is_orthographic
-			? ortho(-orthographic_size, +orthographic_size, -orthographic_size * render_target->AspectRatio(), +orthographic_size * render_target->AspectRatio(), near_plane, far_plane)
-			: perspective(field_of_view, render_target->AspectRatio(), near_plane, far_plane);
+			? ortho(-orthographic_size, +orthographic_size, -orthographic_size * AspectRatio(), +orthographic_size * AspectRatio(), near_plane, far_plane)
+			: perspective(field_of_view, AspectRatio(), near_plane, far_plane);
 	}
 	CameraData Camera::GenerateCameraData() const
 	{
@@ -65,5 +65,9 @@ namespace idk
 			ProjectionMatrix(),
 			render_target
 		};
+	}
+	float Camera::AspectRatio() const
+	{
+		return (render_target)? render_target->AspectRatio():(16.0f/9.0f);
 	}
 }

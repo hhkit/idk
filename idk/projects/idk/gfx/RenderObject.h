@@ -2,6 +2,8 @@
 #include <idk.h>
 #include <res/Resource.h>
 #include <gfx/MaterialInstance.h>
+#include <gfx/vertex_descriptor.h>
+#include <gfx/pipeline_config.h>
 
 namespace idk
 {
@@ -25,6 +27,10 @@ namespace idk
 
 		// culling
 		//sphere bounding_volume;
+		
+		//binding,attrib
+		hash_table<uint32_t, vtx::Attrib> attrib_bindings;
+		shared_ptr<pipeline_config> config{};
 	};
 
 	struct SkeletonTransforms
@@ -46,6 +52,7 @@ namespace idk
 		mat4 projection_matrix;
 		RscHandle<RenderTarget> render_target;
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
+		vec4 clear_color{ 0,0,0,1 };
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 }

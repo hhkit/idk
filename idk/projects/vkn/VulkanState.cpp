@@ -16,6 +16,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+size_t Track(size_t s);
 
 
 namespace idk
@@ -752,16 +753,19 @@ namespace idk::vkn
 		//	,&queuePriority
 		//};
 		vk::PhysicalDeviceFeatures pdevFeatures{};
-		pdevFeatures.fillModeNonSolid = VK_TRUE;
-		pdevFeatures.samplerAnisotropy = VK_TRUE;
+		pdevFeatures.setFillModeNonSolid(VK_TRUE);
+		pdevFeatures.setSamplerAnisotropy(VK_TRUE);
 
 		auto valLayers = GetValidationLayers();
+		vk::PhysicalDeviceDescriptorIndexingFeaturesEXT aaaaaaaa{};
+		aaaaaaaa.runtimeDescriptorArray = true;
 
 		vk::DeviceCreateInfo createInfo(vk::DeviceCreateFlags{},
 			hlp::arr_count(info), info.data(),
 			hlp::arr_count(valLayers), valLayers.data(),
 			hlp::arr_count(extensions), extensions.data(), &pdevFeatures
 		);
+		//createInfo.setPNext(&aaaaaaaa);
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
 		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
@@ -804,7 +808,7 @@ namespace idk::vkn
 				   vk::Extent2D{0,0},//*/
 				   //Always 1 unless developing stereoscopic 3d images
 				   1,
-				   vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
+				   vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc,
 				   imageSharingMode,
 				   queueFamilyIndexCount,
 				   pQueueFamilyIndices,
@@ -817,7 +821,9 @@ namespace idk::vkn
 		m_swapchain.swap_chain = m_device->createSwapchainKHRUnique(createInfo, nullptr, dispatcher);
 
 
-		m_swapchain.images = m_device->getSwapchainImagesKHR(*m_swapchain.swap_chain, dispatcher);
+		m_swapchain.swapchain_images = m_device->getSwapchainImagesKHR(*m_swapchain.swap_chain, dispatcher);
+		m_swapchain.images = m_swapchain.swapchain_images;
+		m_swapchain.edt_images = m_swapchain.swapchain_images;
 		m_swapchain.extent = extent;
 		//m_swapchain.format = surfaceFormat.format;
 		m_swapchain.surface_format = surfaceFormat;
@@ -827,7 +833,7 @@ namespace idk::vkn
 
 	void VulkanState::createFrameObjects()
 	{
-		for ([[maybe_unused]]auto& image : m_swapchain.images)
+		for ([[maybe_unused]]auto& image : m_swapchain.swapchain_images)
 		{
 			FrameObjects fo{ *view_,*view_ };
 			//FrameObjects fo2 = std::move(fo);
@@ -837,25 +843,63 @@ namespace idk::vkn
 
 	void VulkanState::createImageViews()
 	{
-		auto& images = m_swapchain.images;
-		auto& image_views = m_swapchain.image_views;
-		image_views.clear();
-		//for (size_t i = 0; i < images.size(); ++i)
-		for (auto& image : images)
 		{
-			vk::ImageViewCreateInfo createInfo{
-				vk::ImageViewCreateFlags{},
-				image,
-				vk::ImageViewType::e2D,
-				m_swapchain.surface_format.format,
-				vk::ComponentMapping{},
-				vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
-			};
-			image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+			auto& images = m_swapchain.swapchain_images;
+			auto& image_views = m_swapchain.swapchain_image_views;
+			image_views.clear();
+			//for (size_t i = 0; i < images.size(); ++i)
+			for (auto& image : images)
+			{
+				vk::ImageViewCreateInfo createInfo{
+					vk::ImageViewCreateFlags{},
+					image,
+					vk::ImageViewType::e2D,
+					m_swapchain.surface_format.format,
+					vk::ComponentMapping{},
+					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+				};
+				image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+			}
+		}
+		{
+			auto& images = m_swapchain.images;
+			auto& image_views = m_swapchain.image_views;
+			image_views.clear();
+			//for (size_t i = 0; i < images.size(); ++i)
+			for (auto& image : images)
+			{
+				vk::ImageViewCreateInfo createInfo{
+					vk::ImageViewCreateFlags{},
+					image,
+					vk::ImageViewType::e2D,
+					m_swapchain.surface_format.format,
+					vk::ComponentMapping{},
+					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+				};
+				image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+			}
+		}
+		{
+			auto& images = m_swapchain.edt_images;
+			auto& image_views = m_swapchain.edt_image_views;
+			image_views.clear();
+			//for (size_t i = 0; i < images.size(); ++i)
+			for (auto& image : images)
+			{
+				vk::ImageViewCreateInfo createInfo{
+					vk::ImageViewCreateFlags{},
+					image,
+					vk::ImageViewType::e2D,
+					m_swapchain.surface_format.format,
+					vk::ComponentMapping{},
+					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+				};
+				image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+			}
 		}
 	}
 
-	vk::UniqueShaderModule VulkanState::createShaderModule(const std::string& code)
+	vk::UniqueShaderModule VulkanState::createShaderModule(const string_view& code)
 	{
 		vk::ShaderModuleCreateInfo mod{
 			vk::ShaderModuleCreateFlags{},
@@ -872,6 +916,18 @@ namespace idk::vkn
 			,m_swapchain.surface_format.format
 			,vk::SampleCountFlagBits::e1
 			,vk::AttachmentLoadOp::eClear
+			,vk::AttachmentStoreOp::eStore
+			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentStoreOp::eDontCare
+			,vk::ImageLayout::eUndefined
+			,vk::ImageLayout::ePresentSrcKHR
+		};
+		vk::AttachmentDescription colorAttachment2
+		{
+			vk::AttachmentDescriptionFlags{}
+			,m_swapchain.surface_format.format
+			,vk::SampleCountFlagBits::e1
+			,vk::AttachmentLoadOp::eDontCare
 			,vk::AttachmentStoreOp::eStore
 			,vk::AttachmentLoadOp::eDontCare
 			,vk::AttachmentStoreOp::eDontCare
@@ -911,11 +967,13 @@ namespace idk::vkn
 		};
 
 		m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
+		renderPassInfo.pAttachments = &colorAttachment2;
+		m_crenderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 
 		//Temporary For RenderState
 		auto& rss = view_->RenderStates();
 		for (auto& rs : rss)
-			rs.RenderPass() = *m_renderpass;
+			rs.RenderPass() = *m_crenderpass;
 	}
 
 	void VulkanState::createDescriptorSetLayout()
@@ -1158,9 +1216,10 @@ namespace idk::vkn
 
 	void VulkanState::createTextureImage()
 	{
+		return;
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load("texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		vk::DeviceSize imageSize = texWidth * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
+		vk::DeviceSize imageSize = s_cast<vk::DeviceSize>(texWidth) * texHeight * 4; //4 bytes per pixel (STBI_rgb_alpha)
 
 		if (!pixels) {
 			throw std::runtime_error("failed to load texture image!");
@@ -1190,7 +1249,7 @@ namespace idk::vkn
 			vk::ImageTiling::eOptimal,
 			vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
 			vk::MemoryPropertyFlagBits::eDeviceLocal,
-			img.vknData,
+			img.image,
 			img.mem
 		);
 
@@ -1203,9 +1262,9 @@ namespace idk::vkn
 		};
 		auto commandBuffer = m_device->allocateCommandBuffersUnique(allocInfo, dispatcher);
 		auto& cmd_buffer = *commandBuffer[0];
-		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.vknData, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 		hlp::CopyBufferToImage(cmd_buffer,m_graphics_queue,*stagingBuffer,img);
-		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.vknData, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+		hlp::TransitionImageLayout(cmd_buffer, m_graphics_queue, *img.image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 		m_textureList.emplace_back(std::move(img));
 
@@ -1220,7 +1279,7 @@ namespace idk::vkn
 	{
 		for (auto& elem : m_textureList)
 		{
-			elem.imageView = createImageView(elem.vknData,elem.format);
+			elem.imageView = createImageView(elem.image,elem.format);
 		}
 	}
 
@@ -1272,7 +1331,7 @@ namespace idk::vkn
 		vk::MemoryRequirements memRequirements = m_device->getImageMemoryRequirements(*image,dispatcher);
 
 		vk::MemoryAllocateInfo allocInfo = {};
-		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.allocationSize = Track(memRequirements.size);
 		allocInfo.memoryTypeIndex = hlp::findMemoryType(pdevice,memRequirements.memoryTypeBits, properties);
 
 		/*
@@ -1649,6 +1708,13 @@ namespace idk::vkn
 			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 		};
 		m_pri_commandbuffers = m_device->allocateCommandBuffersUnique(allocPriInfo, dispatcher);
+		vk::CommandBufferAllocateInfo allocBlitzInfo
+		{
+			*m_commandpool
+			,vk::CommandBufferLevel::ePrimary
+			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
+		};
+		m_blitz_commandbuffers = m_device->allocateCommandBuffersUnique(allocBlitzInfo, dispatcher);
 		{
 			size_t i = 0;
 			for (auto& commandBuffer : m_commandbuffers) {
@@ -1659,7 +1725,7 @@ namespace idk::vkn
 
 				vk::CommandBufferBeginInfo begin_info
 				{
-					vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eSimultaneousUse
+					vk::CommandBufferUsageFlagBits::eRenderPassContinue //| vk::CommandBufferUsageFlagBits::eSimultaneousUse
 					,&inherit_info
 				};
 				//vk::CommandBufferBeginInfo beginInfo
@@ -1706,15 +1772,11 @@ namespace idk::vkn
 
 	void VulkanState::createSemaphores()
 	{
-		vk::SemaphoreCreateInfo info{};
-		vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
 		m_pres_signals.resize(max_frames_in_flight);
 
 		for (auto& signal : m_pres_signals)
 		{
-			signal.image_available = m_device->createSemaphoreUnique(info, nullptr, dispatcher);
-			signal.render_finished = m_device->createSemaphoreUnique(info, nullptr, dispatcher);
-			signal.inflight_fence = m_device->createFenceUnique(fenceInfo, nullptr, dispatcher);
+			signal.Init(View());
 		}
 	}
 
@@ -1767,17 +1829,6 @@ namespace idk::vkn
 		return createInfo;
 	}
 
-	VkBool32 VulkanState::ValHandler::processMsg(
-		[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-		[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
-	{
-		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-			hlp::cerr() << "Err: ";
-		hlp::cerr() << "validation layer: " << pCallbackData->pMessage << std::endl;
-		return VK_FALSE;
-	}
-
 	void VulkanState::UpdateWindowSize(vec2 size)
 	{
 		m_window.size = ivec2{ size };
@@ -1807,6 +1858,10 @@ namespace idk::vkn
 		m_renderpass.reset();
 		m_swapchain.image_views.clear();
 		m_swapchain.images.clear();
+		m_swapchain.swapchain_image_views.clear();
+		m_swapchain.swapchain_images.clear();
+		m_swapchain.edt_image_views.clear();
+		m_swapchain.edt_images.clear();
 		m_swapchain.swap_chain.reset();
 		m_swapchain.frame_buffers.clear();
 		m_swapchain.uniform_buffers.clear();
@@ -2064,7 +2119,7 @@ namespace idk::vkn
 		return r_cast<intptr_t>(layout.operator VkDescriptorSetLayout());
 	}
 	;
-	using DsBindingCount =hash_table<vk::DescriptorSetLayout, uint32_t>;
+	using DsBindingCount =hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType,uint32_t>>;
 	std::pair<ProcessedDrawCalls,DsBindingCount> ProcessDcUniforms(vector<draw_call>& draw_calls, UboManager& ubo_manager)
 	{
 		std::pair<ProcessedDrawCalls, DsBindingCount> result{};
@@ -2079,7 +2134,8 @@ namespace idk::vkn
 				auto itr = layouts.find(uniform.set);
 				if (itr != layouts.end())
 				{
-					collated_layouts[(*itr->second)]++;
+					collated_layouts[(*itr->second)].first = vk::DescriptorType::eUniformBuffer;
+					collated_layouts[(*itr->second)].second++;
 					auto&& [buffer,offset] = ubo_manager.Add(uniform.data);
 					collated_bindings[uniform.set].emplace_back(
 						ProcessedDrawCalls::BindingInfo
@@ -2187,12 +2243,12 @@ namespace idk::vkn
 
 	}
 
-	void VulkanState::DrawFrame()
+	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
 		auto& current_signal = m_pres_signals[current_frame];
 		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
-		
-		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), *current_signal.image_available, {}, dispatcher);
+
+		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), signal, {}, dispatcher);
 		rv = res.value;
 		rvRes = res.result;
 		if (res.result != vk::Result::eSuccess)
@@ -2206,9 +2262,15 @@ namespace idk::vkn
 		}
 		imageIndex = res.value;
 		m_swapchain.curr_index = res.value;
+	}
 
-		waitSemaphores =  *current_signal.image_available;
-		readySemaphores =  *current_signal.render_finished;
+	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal)
+	{
+		//AcquireFrame();
+		auto& current_signal = m_pres_signals[current_frame];
+
+		waitSemaphores = wait;//*current_signal.image_available;
+		readySemaphores = signal;//*current_signal.render_finished;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
 		updateUniformBuffer(imageIndex);
@@ -2249,7 +2311,7 @@ namespace idk::vkn
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
 
 
-			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
+			//command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 			updateUniformBuffer(imageIndex);
 			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 
@@ -2279,16 +2341,23 @@ namespace idk::vkn
 		}
 		
 		//m_present_queue.waitIdle(dispatcher);
-		PresentFrame();
+		//PresentFrame();
 	}
 
-	void VulkanState::PresentFrame()
+	void VulkanState::PresentFrame(vk::Semaphore wait)
 	{
-		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
+		auto& command_buffer = *m_pri_commandbuffers[m_swapchain.curr_index];
 
+		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
+
+		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
+		//auto& current_signal = m_pres_signals[current_frame];
+
+		//waitSemaphores = *current_signal.image_available;
+		//readySemaphores = *current_signal.render_finished;
 		vk::PresentInfoKHR presentInfo
 		{
-			1,&readySemaphores
+			1,&wait
 			,1,swapchains
 			,&imageIndex
 			,nullptr
@@ -2298,6 +2367,7 @@ namespace idk::vkn
 
 			try
 			{
+				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
 				rvRes = m_present_queue.presentKHR(presentInfo, dispatcher);
 				if (
 					rvRes
@@ -2316,6 +2386,7 @@ namespace idk::vkn
 			case vk::Result::eErrorOutOfDateKHR:
 			case vk::Result::eSuboptimalKHR:
 				m_ScreenResized = false;
+				m_ScreenResizedForImGui = true;
 				RecreateSwapChain();
 				break;
 			case vk::Result::eSuccess:
@@ -2337,6 +2408,130 @@ namespace idk::vkn
 		NextFrame();
 	}
 
+	void VulkanState::PresentFrame2()
+	{
+		auto& current_signal = m_pres_signals[current_frame];
+		m_device->waitForFences(1, &*current_signal.master_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+
+		auto& command_buffer = *m_blitz_commandbuffers[m_swapchain.curr_index];
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+
+		if (imguiEnabled)
+		{
+			waitSemaphores = *current_signal.imgui_render_finished;
+			readySemaphores = *current_signal.master_render_finished;
+
+			//updateUniformBuffer(imageIndex);
+
+			m_device->resetFences(1, &*current_signal.master_fence, dispatcher);
+
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.edt_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+
+			vk::CommandBufferBeginInfo begin_info
+			{
+				vk::CommandBufferUsageFlags{}
+				,nullptr//&inherit_info
+			};
+			command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
+			command_buffer.begin(begin_info);
+
+			vk::ImageBlit imgBlit{};
+
+			// Source
+			imgBlit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imgBlit.srcSubresource.layerCount = 1;
+			imgBlit.srcOffsets[0] = { 0,0,0 };
+			imgBlit.srcOffsets[1].x = m_swapchain.extent.width;
+			imgBlit.srcOffsets[1].y = m_swapchain.extent.height;
+			imgBlit.srcOffsets[1].z = 1;
+
+			// Destination
+			imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imgBlit.dstSubresource.layerCount = 1;
+			imgBlit.dstOffsets[0] = { 0,0,0 };
+			imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
+			imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
+			imgBlit.dstOffsets[1].z = 1;
+
+			command_buffer.blitImage(m_swapchain.edt_images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.swapchain_images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+
+			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
+
+			//BeginFrame();
+
+		}
+		else
+		{
+			waitSemaphores = *current_signal.render_finished;
+			readySemaphores = *current_signal.master_render_finished;
+
+			m_device->resetFences(1, &*current_signal.master_fence, dispatcher);
+
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, false);
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, false);
+
+
+			vk::CommandBufferBeginInfo begin_info
+			{
+				vk::CommandBufferUsageFlags{}
+				,nullptr//&inherit_info
+			};
+
+			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+
+			command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
+			command_buffer.begin(begin_info);
+
+			vk::ImageBlit imgBlit{};
+
+			// Source
+			imgBlit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imgBlit.srcSubresource.layerCount = 1;
+			imgBlit.srcOffsets[0] = { 0,0,0 };
+			imgBlit.srcOffsets[1].x = m_swapchain.extent.width;
+			imgBlit.srcOffsets[1].y = m_swapchain.extent.height;
+			imgBlit.srcOffsets[1].z = 1;
+
+			// Destination
+			imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imgBlit.dstSubresource.layerCount = 1;
+			imgBlit.dstOffsets[0] = { 0,0,0 };
+			imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
+			imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
+			imgBlit.dstOffsets[1].z = 1;
+
+			command_buffer.blitImage(m_swapchain.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.swapchain_images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+
+			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
+
+			//hlp::TransitionImageLayout(command_buffer,m_graphics_queue,m_swapchain.swapchain_images[rv],vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal,vk::ImageLayout::ePresentSrcKHR);
+		}
+		command_buffer.end();
+
+		//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
+
+		vk::CommandBuffer cmds[] =
+		{
+			command_buffer,
+		};
+		vk::SubmitInfo render_state_submit_info
+		{
+			1
+			,&waitSemaphores
+			,waitStages
+			,hlp::arr_count(cmds),std::data(cmds)
+			,1,&readySemaphores
+		};
+		vk::SubmitInfo frame_submit[] = { render_state_submit_info };
+
+		if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.master_fence, dispatcher) != vk::Result::eSuccess)
+			throw std::runtime_error("failed to submit draw command buffer!");
+
+		PresentFrame(readySemaphores);
+	}
+
 	void VulkanState::OnResize()
 	{
 		m_ScreenResized = true;
@@ -2351,7 +2546,7 @@ namespace idk::vkn
 		for (auto& elem : m_textureList)
 		{
 			elem.mem.reset();
-			elem.vknData.reset();
+			elem.image.reset();
 			elem.imageView.reset();
 			elem.sampler.reset();
 		}
@@ -2408,5 +2603,19 @@ namespace idk::vkn
 	{
 		ubo_manager.Clear(); //Clear the previous frame's UBOs
 		pools.Reset(); //Reset the previous frame's descriptors
+	}
+	void PresentationSignals::Init(VulkanView& view)
+	{
+		vk::SemaphoreCreateInfo info{};
+		vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
+
+		image_available = view.Device()->createSemaphoreUnique(info, nullptr,  view.Dispatcher());
+		render_finished = view.Device()->createSemaphoreUnique(info, nullptr,  view.Dispatcher());
+		inflight_fence  = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
+		master_image_available = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
+		master_render_finished = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
+		imgui_render_finished = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
+		inflight_fence = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
+		master_fence = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
 	}
 }

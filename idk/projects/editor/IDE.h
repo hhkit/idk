@@ -65,6 +65,7 @@ namespace idk
 
 		vector<Handle<GameObject>> selected_gameObjects {};
 
+		vector <unique_ptr<IGE_IWindow>> ige_windows	{};
 
 	};
 }

@@ -14,7 +14,7 @@ namespace idk {
 		sizeOnDevice{ std::move(rhs.sizeOnDevice) },
 		rawData{ std::move(rhs.rawData) },
 		path{ std::move(rhs.path) },
-		vknData{ std::move(rhs.vknData) },
+		image{ std::move(rhs.image) },
 		format{ std::move(rhs.format) },
 		mem{ std::move(rhs.mem) },
 		imageView{ std::move(rhs.imageView) },
@@ -30,7 +30,7 @@ namespace idk {
 		std::swap(sizeOnDevice, rhs.sizeOnDevice);
 		std::swap(rawData, rhs.rawData);
 		std::swap(path,rhs.path);
-		std::swap(vknData, rhs.vknData);
+		std::swap(image, rhs.image);
 		std::swap(format, rhs.format);
 		std::swap(mem, rhs.mem);
 		std::swap(imageView, rhs.imageView);

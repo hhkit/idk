@@ -21,6 +21,11 @@ namespace idk
 
 	struct uniform_layout_t
 	{
+		enum UniformType
+		{
+			eBuffer,
+			eSampler
+		};
 		enum UniformStage
 		{
 			eVertex  ,
@@ -31,6 +36,7 @@ namespace idk
 			uint32_t binding;               //Can probably force it to be 1 binding
 			uint32_t descriptor_count;      //
 			hash_set<UniformStage> stages;  //Can probably force it to be both?
+			UniformType type = eBuffer;
 		};
 		std::vector<bindings_t> bindings;
 	};

@@ -11,6 +11,7 @@
 #include <vkn/DescriptorsManager.h>
 #include <vkn/UboManager.h>
 #include <vkn/VknTexture.h>
+#include <vkn/ValHandler.h>
 #undef max
 #undef min
 
@@ -71,6 +72,10 @@ namespace idk::vkn
 		vk::Extent2D                       extent;
 		std::vector<vk::Image            > images;
 		std::vector<vk::UniqueImageView  > image_views;
+		std::vector<vk::Image            > edt_images;
+		std::vector<vk::UniqueImageView  > edt_image_views;
+		std::vector<vk::Image            > swapchain_images;
+		std::vector<vk::UniqueImageView  > swapchain_image_views;
 		std::vector<vk::UniqueFramebuffer> frame_buffers;
 
 		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
@@ -112,6 +117,18 @@ namespace idk::vkn
 		//};
 		Uniforms uniforms2;
 	};
+	struct PresentationSignals
+	{
+		vk::UniqueSemaphore image_available{};
+		vk::UniqueSemaphore render_finished{};
+		vk::UniqueSemaphore imgui_render_finished{};
+		vk::UniqueSemaphore master_image_available{};
+		vk::UniqueSemaphore master_render_finished{};
+		vk::UniqueFence     inflight_fence{};
+		vk::UniqueFence		master_fence{};
+		void Init(VulkanView& view);
+	};
+
 	struct FrameSubmitRenderInfo
 	{
 		vk::SubmitInfo submitInfo;
@@ -136,13 +153,6 @@ namespace idk::vkn
 		using unique_ubo      = unique_ptr<ubo     >;
 		using unique_pipeline = unique_ptr<pipeline>;
 
-		struct ValHandler
-		{
-			virtual VkBool32 processMsg(
-				[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-				[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-				[[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData);
-		};
 
 		VulkanState();
 		~VulkanState();
@@ -165,9 +175,10 @@ namespace idk::vkn
 
 		void BeginFrame();
 		void EndFrame();
-
-		void DrawFrame();
-		void PresentFrame();
+		void AcquireFrame(vk::Semaphore signal);
+		void DrawFrame(vk::Semaphore wait, vk::Semaphore signal);
+		void PresentFrame(vk::Semaphore wait);
+		void PresentFrame2();
 		void OnResize();
 		void Cleanup();
 
@@ -179,19 +190,12 @@ namespace idk::vkn
 			VkDebugUtilsMessageTypeFlagsEXT messageType,
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
-
+		bool						imguiEnabled{ true };
 	private:
 		// type aliases
 		friend class VulkanView;
 		template<typename T>
 		using DynamicHandle = vk::UniqueHandle<T, vk::DispatchLoaderDynamic>;
-		struct PresentationSignals
-		{
-			vk::UniqueSemaphore image_available;
-			vk::UniqueSemaphore render_finished;
-			vk::UniqueFence     inflight_fence;
-		};
-
 		// variables
 
 
@@ -224,12 +228,14 @@ namespace idk::vkn
 		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
 		std::vector<vk::UniqueCommandBuffer> m_commandbuffers2;
 		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
+		vector<vk::UniqueCommandBuffer> m_blitz_commandbuffers;
 		std::vector<PresentationSignals>     m_pres_signals;
 		SwapChainInfo                        m_swapchain;
 
 
 
 		vk::UniqueRenderPass                 m_renderpass;
+		vk::UniqueRenderPass                 m_crenderpass;
 		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;
 		vk::UniquePipelineLayout             m_pipelinelayout;
 		vk::UniquePipeline                   m_pipeline;
@@ -249,6 +255,7 @@ namespace idk::vkn
 		vk::Result					rvRes;
 		vk::Semaphore				waitSemaphores;
 		vk::Semaphore				readySemaphores;
+		bool						m_imguiNeedsToResize{ false };
 
 		vector<FrameSubmitRenderInfo> submitList;
 		///////////////////////////////////////
@@ -263,7 +270,7 @@ namespace idk::vkn
 		void createFrameObjects();
 		void createImageViews();
 
-		auto createShaderModule(const std::string& code) -> vk::UniqueShaderModule;
+		auto createShaderModule(const string_view& code) -> vk::UniqueShaderModule;
 
 		void createRenderPass();
 

@@ -34,17 +34,17 @@ struct DescriptorPoolsManager
 	};
 
 	VulkanView& view;
-	vector<Manager> managers;
-	constexpr static uint32_t base_chunk_size = 1024;
+	hash_table<vk::DescriptorType,vector<Manager>> managers;
+	constexpr static uint32_t base_chunk_size = 128;
 	uint32_t curr_chunk_size = base_chunk_size;
 
-	vk::DescriptorPool Add(uint32_t num_ds);
+	vk::DescriptorPool Add(uint32_t num_ds, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
 
 
 	template<typename Policy = FirstFit>
-	vk::DescriptorPool Get(uint32_t pool);
+	vk::DescriptorPool Get(uint32_t pool,vk::DescriptorType type=vk::DescriptorType::eUniformBuffer);
 	template<typename Policy = FirstFit>
-	std::optional<vk::DescriptorPool> TryGet(uint32_t pool);
+	std::optional<vk::DescriptorPool> TryGet(uint32_t pool, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
 	void ResetManager(Manager& manager);
 	void Reset(vk::DescriptorPool& pool);
 	void ResetAll();

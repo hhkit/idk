@@ -39,6 +39,11 @@ namespace idk::vkn
 		//vk::Queue          m_transfer_queue = {}{}					                  				 ;
 		SwapChainInfo& VulkanView::Swapchain()const { return vulkan().m_swapchain; }
 
+		PresentationSignals& VulkanView::CurrPresentationSignals() const
+		{
+			return vulkan_->m_pres_signals[vulkan_->current_frame];
+		}
+
 		void VulkanView::SwapRenderState() const
 		{
 			return impl_->SwapRenderState();
@@ -59,6 +64,7 @@ namespace idk::vkn
 			return impl_->CurrentRenderState();
 		}
 
+		vk::UniqueRenderPass& VulkanView::ContinuedRenderpass()const { return vulkan().m_crenderpass; }
 		vk::UniqueRenderPass& VulkanView::Renderpass()const { return vulkan().m_renderpass; }
 		vk::UniquePipeline& VulkanView::Pipeline()const { return vulkan().m_pipeline; }
 		vk::UniqueCommandPool& VulkanView::Commandpool()const { return vulkan().m_commandpool; }
@@ -76,7 +82,7 @@ namespace idk::vkn
 		{
 			impl_->CurrentRenderState().MasterBuffer().reset();
 		}
-		bool& VulkanView::ImguiResize() const
+		bool& VulkanView::ImguiResize()
 		{
 			// TODO: insert return statement here
 			return vulkan().m_ScreenResizedForImGui;
@@ -85,6 +91,28 @@ namespace idk::vkn
 		{
 			// TODO: insert return statement here
 			return vulkan().m_window;
+		}
+		PresentationSignals& VulkanView::GetCurrentSignals() const
+		{
+			// TODO: insert return statement here
+			return vulkan().m_pres_signals[vulkan().current_frame];
+		}
+		uint32_t VulkanView::CurrSemaphoreFrame() const
+		{
+			return vulkan().current_frame;
+		}
+		uint32_t VulkanView::AcquiredImageValue() const
+		{
+			return vulkan().rv;
+		}
+		vk::Result& VulkanView::AcquiredImageResult() const
+		{
+			// TODO: insert return statement here
+			return vulkan().rvRes;
+		}
+		uint32_t VulkanView::MaxFrameInFlight() const
+		{
+			return vulkan().max_frames_in_flight;
 		}
 		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
 

@@ -22,7 +22,8 @@ namespace idk
 			GetGameObject()->GetComponent<Transform>()->GlobalMatrix() ,
 
 			cast_shadows,
-			receive_shadows
+			receive_shadows,
+			{{0,vtx::Attrib::Position},{1,vtx::Attrib::Normal},{2,vtx::Attrib::UV}}
 		};
 	}
 

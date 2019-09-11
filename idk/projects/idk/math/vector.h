@@ -39,6 +39,7 @@ namespace idk
 		T      distance(const tvec&) const;
 
 		T      dot(const tvec&) const;
+		tvec     project_onto(const tvec&)const;
 		tvec&  normalize();
 		tvec   get_normalized() const;
 
@@ -62,6 +63,12 @@ namespace idk
 	auto dot(const tvec<T, D>& lhs, const tvec<T, D>& rhs) 
 	{
 		return lhs.dot(rhs);
+	}
+
+	template<typename T, unsigned D>
+	auto vabs(const tvec<T, D>& lhs)
+	{
+		return detail::Abs<std::make_index_sequence<D>>::abs(lhs);
 	}
 
 	extern template struct tvec<float, 2>;

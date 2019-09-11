@@ -101,12 +101,11 @@ namespace idk::vkn
 			}
 		}
 	};
-	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
 		auto& m_renderpass = GetRenderpass(config, vulkan);
-		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config, vulkan);
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
@@ -149,7 +148,7 @@ namespace idk::vkn
 		//};
 		//For uniforms
 		CreateUniformDescriptors(vulkan, config);//Should probably also allocate the UBO and Descriptors on the View/Data side.
-		auto&& [pipelineLayoutInfo,pli_rsc] = GetLayoutInfo(config);;
+		auto&& [pipelineLayoutInfo, pli_rsc] = GetLayoutInfo(config);;
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
@@ -170,6 +169,28 @@ namespace idk::vkn
 		};
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
 		pipelinelayout = std::move(m_pipelinelayout);
+	}
+	void VulkanPipeline::Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shader_modules, Vulkan_t& vulkan)
+	{
+		const char* entryPoint = "main";
+		vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo;
+		for (auto& [stage, module] : shader_modules)
+		{
+			stageCreateInfo.emplace_back(vk::PipelineShaderStageCreateInfo
+			{
+			vk::PipelineShaderStageCreateFlags{},
+			stage ,
+			module,
+			entryPoint,
+			nullptr
+			});
+		}
+		Create(config, stageCreateInfo, vulkan);
+	}
+	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
+	{
+		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config, vulkan);
+		Create(config, stageCreateInfo, vulkan);
 	}
 	void VulkanPipeline::Reset()
 	{
@@ -385,7 +406,12 @@ namespace idk::vkn
 	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo([[maybe_unused]] const config_t& config) const
 	{
 		vector<vk::DescriptorSetLayout> layouts;
-		std::transform(uniform_layouts.begin(), uniform_layouts.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
+		layouts.resize(uniform_layouts.size());
+		for (auto& [index, info] : uniform_layouts)
+		{
+			layouts[index] = *info;
+		}
+		//std::transform(uniform_layouts.begin(), uniform_layouts.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
 		return make_pair(vk::PipelineLayoutCreateInfo
 		{
 			vk::PipelineLayoutCreateFlags{}
@@ -395,6 +421,15 @@ namespace idk::vkn
 			, nullptr //pPushConstantRanges    
 		},std::move(layouts));
 	}
+	vk::DescriptorType ConvertUniformType(uniform_layout_t::UniformType type)
+	{
+		static hash_table< uniform_layout_t::UniformType, vk::DescriptorType>map
+		{
+			{uniform_layout_t::UniformType::eBuffer,vk::DescriptorType::eUniformBuffer},
+			{uniform_layout_t::UniformType::eSampler,vk::DescriptorType::eCombinedImageSampler},
+		};
+		return map[type];
+	}
 	vector<vk::DescriptorSetLayoutBinding> GetDescriptorBindings(const uniform_layout_t& ulayout_config)
 	{
 		vector<vk::DescriptorSetLayoutBinding> result;
@@ -402,7 +437,7 @@ namespace idk::vkn
 		{
 			vk::DescriptorSetLayoutBinding a{ 
 				binding.binding,
-				vk::DescriptorType::eUniformBuffer,
+				ConvertUniformType(binding.type),
 				binding.descriptor_count,
 				hlp::MapStages(binding.stages)
 				,nullptr

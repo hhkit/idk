@@ -10,7 +10,7 @@ namespace idk::vkn
 	DescriptorsManager::DescriptorsManager(VulkanView& view) :pools{view}
 	{
 	}
-	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table<vk::DescriptorSetLayout, uint32_t>& allocations)
+	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)
 	{
 		hash_table<vk::DescriptorSetLayout, DescriptorSets> result;
 		////Get the amount of ds to be allocated
@@ -30,16 +30,17 @@ namespace idk::vkn
 		auto& m_device = pools.view.Device();
 		auto& dispatcher = pools.view.Dispatcher();
 		vector<bool> allocated(allocations.size(), false);
-		uint32_t num_req = 0;
+		hash_table<vk::DescriptorType,uint32_t> num_req;
 		do
 		{
+			num_req.clear();
 			uint32_t i = 0;
-			num_req = 0;
-			for (auto& [layout, num_ds] : allocations)
+			for (auto& [layout, des] : allocations)
 			{
+				auto& [type, num_ds] = des;
 				if (!allocated[i])
 				{
-					auto pool = pools.TryGet(num_ds);
+					auto pool = pools.TryGet(num_ds,type);
 					allocated[i++] = static_cast<bool>(pool);
 					if (pool)
 					{
@@ -55,13 +56,15 @@ namespace idk::vkn
 					}
 					else
 					{
-						num_req += num_ds;
+						num_req[type] += num_ds;
 					}
 				}
 			}
-			if (num_req)
-				pools.Add(num_req);
-		} while (num_req);
+			for (auto& [type, num] : num_req)
+			{
+				pools.Add(num,type);
+			}
+		} while (num_req.size());
 		return result;
 	}
 

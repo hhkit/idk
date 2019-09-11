@@ -50,7 +50,7 @@ namespace idk::vkn
 			std::optional<size_t> allocate(size_t chunk);
 		};
 		VulkanView& view;
-		uint32_t                               _alignment = 0x10;
+		uint32_t                               _alignment = 0x16;
 		constexpr static uint32_t              _chunk_size = 1 << 16;
 		size_t                                 _memory_chunk_size = 1 << 20; //Replace this with the limit obtained from device.
 		//Maybe replace with allocator

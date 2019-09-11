@@ -12,18 +12,19 @@ namespace idk::vkn
 	class VulkanView
 	{
 	public:
-		vk::DispatchLoaderDefault& Dispatcher()const;
-		vk::DispatchLoaderDynamic& DynDispatcher()const;
-		vk::UniqueInstance&        Instance()const;
-		vk::UniqueSurfaceKHR&      Surface()const;
-		vk::PhysicalDevice&        PDevice()const;
-		uint32_t                   BufferOffsetAlignment()const;
-		uint32_t                   BufferSizeAlignment()const;
-		vk::UniqueDevice&          Device()const;
-		QueueFamilyIndices&        QueueFamily()const;
-		vk::Queue&                 GraphicsQueue()const;
-		vk::Queue&                 PresentQueue()const;
-		SwapChainInfo&             Swapchain()const;
+		vk::DispatchLoaderDefault&          Dispatcher()const;
+		vk::DispatchLoaderDynamic&          DynDispatcher()const;
+		vk::UniqueInstance&                 Instance()const;
+		vk::UniqueSurfaceKHR&               Surface()const;
+		vk::PhysicalDevice&                 PDevice()const;
+		uint32_t                            BufferOffsetAlignment()const;
+		uint32_t                            BufferSizeAlignment()const;
+		vk::UniqueDevice&                   Device()const;
+		QueueFamilyIndices&                 QueueFamily()const;
+		vk::Queue&                          GraphicsQueue()const;
+		vk::Queue&                          PresentQueue()const;
+		SwapChainInfo&                      Swapchain()const;
+		PresentationSignals&   CurrPresentationSignals()const;
 
 		vk::UniquePipeline&        Pipeline()const;
 		vk::UniqueCommandPool&     Commandpool()const;
@@ -35,14 +36,19 @@ namespace idk::vkn
 		RenderState&               PrevRenderState()const;
 		RenderState&               CurrRenderState()const;
 		vk::UniqueRenderPass&      Renderpass()const;
+		vk::UniqueRenderPass&      ContinuedRenderpass()const;
 		vk::UniqueCommandBuffer&   CurrCommandbuffer()const;
 		vk::Buffer&                CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.
 		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
 		void                       ResetMasterBuffer()const;
-		bool&					   ImguiResize()const;
+		bool&					   ImguiResize();
 		window_info&			   GetWindowsInfo()const;
-
+		PresentationSignals& GetCurrentSignals()const;
+		uint32_t				   CurrSemaphoreFrame()const;
+		uint32_t				   AcquiredImageValue()const;
+		vk::Result& AcquiredImageResult()const;
+		uint32_t				   MaxFrameInFlight()const;
 
 
 		vk::UniqueShaderModule     CreateShaderModule(const string_view& code);

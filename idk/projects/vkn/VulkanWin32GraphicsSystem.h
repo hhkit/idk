@@ -6,6 +6,9 @@
 #endif
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
+#include <vkn/GraphicsState.h>
+#include<vkn/UboManager.h>
+#include <vkn/FrameRenderer.h>
 
 namespace idk::win
 {
@@ -13,6 +16,7 @@ namespace idk::win
 }
 namespace idk::vkn
 {
+	class PipelineManager;
 	using Windows = win::Windows;
 	class VulkanState;
 
@@ -22,6 +26,7 @@ namespace idk::vkn
 	public:
 		VulkanWin32GraphicsSystem();
 		void Init() override ;
+		void LateInit() override;
 
 		void BeginFrame() ;
 		void EndFrame() ;
@@ -34,8 +39,9 @@ namespace idk::vkn
 
 		VulkanState& GetVulkanHandle();
 	private:
-		void RenderGraphicsState(const GraphicsState&);
 		std::unique_ptr<VulkanState> instance_;
+		vector<FrameRenderer> _frame_renderers;
+		std::unique_ptr<PipelineManager> _pm;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;

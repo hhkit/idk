@@ -2,7 +2,7 @@
 
 #define MAX_LIGHTS 8
 
-in VS_OUT
+layout(location=1)in VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -86,6 +86,12 @@ vec3 pbr(
 ,	float roughness
 ,	float ambient_o
 )
+//__MATERIAL_UNIFORMS;
+
+// forward shading only cares about color!
+layout(location=0)out vec4 out_color;
+
+void main()
 {
 // temporary light code
 	Light light = LightBlk.lights[i];

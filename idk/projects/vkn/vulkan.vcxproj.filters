@@ -57,16 +57,58 @@
     <ClInclude Include="VulkanTypeDescriptors.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VknTexture.h">
+    <ClInclude Include="ValHandler.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameRenderer.h">
       <Filter>render</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBuffer.h">
+    <ClInclude Include="VulkanShaderModuleFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanGlslLoader.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineManager.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderModule.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="object_pool.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMaterial.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMaterialFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GlslToSpirv.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsState.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTexture.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTextureFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBufferManager.h">
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="VknFrameBufferFactory.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBufferManager.h">
+    <ClInclude Include="VknFrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="RegisterVulkanFactories.h">
       <Filter>resource</Filter>
     </ClInclude>
   </ItemGroup>
@@ -118,9 +160,6 @@
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="VulkanMesh.cpp" />
-    <ClCompile Include="VknTexture.cpp">
-      <Filter>render</Filter>
-    </ClCompile>
     <ClCompile Include="VknFrameBuffer.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -128,6 +167,44 @@
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="VknFrameBufferManager.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="ValHandler.cpp" />
+    <ClCompile Include="FrameRenderer.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanGlslLoader.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanShaderModuleFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderModule.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineManager.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GlslToSpirv.cpp" />
+    <ClCompile Include="VulkanMaterialFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMaterial.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTexture.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTextureFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryAllocator.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RegisterVulkanFactories.cpp">
       <Filter>resource</Filter>
     </ClCompile>
   </ItemGroup>

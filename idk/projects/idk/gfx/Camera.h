@@ -31,6 +31,9 @@ namespace idk
 		bool is_orthographic = false;
 		real orthographic_size = 1.f;
 
+		bool overlay_debug_draw = true;
+
+
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 
 		vec3	  currentPosition() const;
@@ -40,6 +43,7 @@ namespace idk
 		mat4	  ProjectionMatrix() const;
 
 		CameraData GenerateCameraData() const;
+		float      AspectRatio()const;
 	private:	
 		float _fov;
 

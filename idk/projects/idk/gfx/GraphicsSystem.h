@@ -3,6 +3,7 @@
 #include <core/ISystem.h>
 #include <ds/span.h>
 #include <gfx/RenderObject.h>
+#include <gfx/pipeline_config.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
 namespace idk
@@ -33,6 +34,8 @@ namespace idk
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;
+
+		bool editorExist{false};
 	protected:
 		struct RenderBuffer
 		{
@@ -42,13 +45,13 @@ namespace idk
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeletons;
 		};
-		using GraphicsState = RenderBuffer;
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
 		unsigned               curr_write_buffer = 0;
 		unsigned               curr_draw_buffer  = 1;
 		bool                   write_buffer_dirty = false;
 
+		shared_ptr<pipeline_config> mesh_render_config{nullptr};
 	private:
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);

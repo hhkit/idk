@@ -31,6 +31,26 @@ namespace idk {
 
 	private:
 
+		void DisplayFileMenu();
+		void DisplayEditMenu();
+		void DisplayGameObjectMenu();
+		void DisplayComponentMenu();
+		void DisplayWindowMenu();
+		void DisplayHelpMenu();
+
+		void DisplayToolBarChildWindow();
+		void DisplayHintBarChildWindow();
+
+
+		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
+										  | ImGuiWindowFlags_NoScrollbar
+										  | ImGuiWindowFlags_NoResize
+										  | ImGuiWindowFlags_NoSavedSettings
+										  | ImGuiWindowFlags_NoMove
+										  | ImGuiWindowFlags_NoDocking
+										  | ImGuiWindowFlags_NoCollapse;
+
+		const float toolBarHeight = 30.0f;
 
 	};
 

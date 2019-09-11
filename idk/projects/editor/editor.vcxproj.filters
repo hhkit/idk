@@ -67,6 +67,9 @@
     <ClInclude Include="commands\CMD_DeleteGameObject.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="editor\windows\IGE_InspectorWindow.h">
+      <Filter>editor\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -123,6 +126,9 @@
     </ClCompile>
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp">
       <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\windows\IGE_InspectorWindow.cpp">
+      <Filter>editor\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

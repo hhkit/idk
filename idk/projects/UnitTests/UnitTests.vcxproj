@@ -47,6 +47,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />
     <ClCompile Include="TestPrefab.cpp" />

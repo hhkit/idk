@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
+size_t Track(size_t s);
 
 namespace idk::vkn::hlp
 {
@@ -38,13 +39,14 @@ namespace idk::vkn::hlp
 
 		vk::MemoryAllocateInfo allocInfo
 		{
-			 req.size
+			 Track(req.size)
 			,findMemoryType(pdevice,req.memoryTypeBits, memory_flags)
 		};
 		return device.allocateMemoryUnique(allocInfo, nullptr, dispatcher);
 	}
+
 	template<typename Dispatcher>
-	void BindBufferMemory(vk::Device& device, vk::Buffer& buffer, vk::DeviceMemory& memory, uint32_t offset, Dispatcher const& dispatcher)
+	void BindBufferMemory(vk::Device device, vk::Buffer buffer, vk::DeviceMemory memory, uint32_t offset, Dispatcher const& dispatcher)
 	{
 		device.bindBufferMemory(buffer, memory, offset, dispatcher);
 	}
@@ -60,6 +62,21 @@ namespace idk::vkn::hlp
 		auto buffer = CreateBuffer(device, buffer_size, buffer_usage, dispatcher);
 		auto memory = AllocateBuffer(pdevice, device, *buffer, memory_flags, dispatcher);
 		BindBufferMemory(device, *buffer, *memory, 0, dispatcher);
+		return std::make_pair(std::move(buffer), std::move(memory));
+	}
+	template<typename Dispatcher>
+	std::pair<vk::UniqueBuffer, UniqueAlloc> CreateAllocBindBuffer(
+		vk::PhysicalDevice& pdevice, vk::Device& device,
+		vk::DeviceSize buffer_size,
+		vk::BufferUsageFlags buffer_usage,
+		vk::MemoryPropertyFlags memory_flags,
+		MemoryAllocator& allocator,
+		const Dispatcher& dispatcher
+	)
+	{
+		auto buffer = CreateBuffer(device, buffer_size, buffer_usage, dispatcher);
+		auto memory = allocator.Allocate(pdevice, device, *buffer, memory_flags);
+		BindBufferMemory(device, *buffer, memory->Memory(), s_cast<uint32_t>(memory->Offset()), dispatcher);
 		return std::make_pair(std::move(buffer), std::move(memory));
 	}
 	template<typename T, typename Dispatcher>

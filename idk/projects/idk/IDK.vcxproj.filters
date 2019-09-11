@@ -479,6 +479,7 @@
     <ClInclude Include="gfx\RenderTarget.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collision.h" />
     <ClInclude Include="gfx\ShaderTemplate.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -705,6 +706,7 @@
     <ClCompile Include="gfx\RenderTarget.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="phys\collision.cpp" />
     <ClCompile Include="gfx\ShaderTemplate.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
@@ -922,6 +924,7 @@
     <None Include="ds\circular_buffer.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="phys\collision.inl" />
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
