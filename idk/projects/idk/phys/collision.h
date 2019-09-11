@@ -1,9 +1,9 @@
 #pragma once
 #include <idk.h>
-#include <shape/ray.h>
-#include <shape/aabb.h>
-#include <shape/capsule.h>
-#include <shape/sphere.h>
+#include <math/shapes/ray.h>
+#include <math/shapes/aabb.h>
+#include <math/shapes/capsule.h>
+#include <math/shapes/sphere.h>
 namespace idk
 {
 	bool epsilon_equal(float lhs, float rhs);
