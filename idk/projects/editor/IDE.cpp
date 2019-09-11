@@ -66,7 +66,9 @@ namespace idk
 		ige_windows.push_back(std::make_unique<IGE_SceneView>());
 		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
 		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
+		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
 
+		//ige_main_window->Initialize();
 		for (auto& i : ige_windows) {
 			i->Initialize();
 		}
@@ -88,6 +90,7 @@ namespace idk
 		}
 
 		_interface->Inputs()->Update();
+		
 		_interface->ImGuiFrameUpdate();
 		
 		

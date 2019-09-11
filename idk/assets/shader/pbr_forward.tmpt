@@ -86,12 +86,6 @@ vec3 pbr(
 ,	float roughness
 ,	float ambient_o
 )
-//__MATERIAL_UNIFORMS;
-
-// forward shading only cares about color!
-layout(location=0)out vec4 out_color;
-
-void main()
 {
 // temporary light code
 	Light light = LightBlk.lights[i];

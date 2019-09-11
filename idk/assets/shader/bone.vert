@@ -1,5 +1,8 @@
-#version 330 core
-
+#version 450
+#ifndef OGL
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+#define BLOCK(X) X
+#endif
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
@@ -15,7 +18,7 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 	mat4 normal_transform;
 } ObjectMat4s;
 
-out VS_OUT
+layout(location=2)out VS_OUT
 {
   vec3 position;
   vec2 uv;

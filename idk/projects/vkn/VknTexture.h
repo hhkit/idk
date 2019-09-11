@@ -3,20 +3,24 @@
 #include<vulkan/vulkan.hpp>
 #include "idk.h"
 #include "gfx/Texture.h"
-
-namespace idk::vkn {	
-	struct VknTexture 
+#include <vkn/MemoryAllocator.h>
+namespace idk::vkn {
+	struct VknTexture
 		: public Texture
 	{
 		ivec2					size{};
 		vk::DeviceSize			sizeOnDevice{};
-		void*					rawData{};
-		string					path{""};
-		vk::UniqueImage			vknData{nullptr};
+		void* rawData{};
+		string					path{ "" };
+		vk::UniqueImage			image{ nullptr };
 		vk::Format				format{};
-		vk::UniqueDeviceMemory  mem{nullptr};
-		vk::UniqueImageView     imageView{nullptr};
+		vk::UniqueDeviceMemory  mem{ nullptr };
+		hlp::UniqueAlloc        mem_alloc{};
+		vk::UniqueImageView     imageView{ nullptr };
 		vk::UniqueSampler       sampler{ nullptr };
+
+		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
+		opt<vk::DescriptorSet>	descriptorSet{};
 
 		VknTexture() = default;
 		~VknTexture();

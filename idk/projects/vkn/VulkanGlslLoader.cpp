@@ -7,6 +7,17 @@
 #include <vkn/utils/GlslToSpirv.h>
 namespace idk::vkn
 {
+	constexpr auto replacer = R"(
+#ifdef OGL
+#define U_LAYOUT(SET, BIND) 
+#define BLOCK(X) struct X
+#endif
+#ifdef VULKAN
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+#define BLOCK(X) X
+#endif
+)";
+
 
 	string FileName(const FileHandle& path_to_resource)
 	{
@@ -26,6 +37,12 @@ namespace idk::vkn
 		std::stringstream stringify;
 		stringify << shader_stream.rdbuf();
 		string val = stringify.str();
+		string shader_code = val;
+		auto version_pos = shader_code.find("#version");
+		auto version_end = shader_code.find("\n", version_pos);
+
+		val =  shader_code.substr(version_pos) + "#define VULKAN\n"+ replacer+ shader_code.substr(version_end);
+
 		auto shader_enum = [](std::string_view ext)->vk::ShaderStageFlagBits
 		{
 			switch (string_hash(ext))
