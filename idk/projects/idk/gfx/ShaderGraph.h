@@ -7,7 +7,7 @@
 namespace idk
 {
     namespace shadergraph { class Graph; }
-    RESOURCE_EXTENSION(shadergraph::Graph, ".graph")
+    RESOURCE_EXTENSION(shadergraph::Graph, ".mat")
 }
 
 namespace idk::shadergraph

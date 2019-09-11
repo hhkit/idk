@@ -193,6 +193,7 @@
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="phys\Collider.cpp" />

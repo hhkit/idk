@@ -43,17 +43,19 @@ namespace idk::shadergraph
     {
         vector<ValueType> ins;
         vector<ValueType> outs;
-        NodeSignature(string str);
+        NodeSignature(const string& str);
     };
 
     struct NodeTemplate
     {
+        using table = hash_table<string, NodeTemplate>;
+
         vector<NodeSignature> signatures;
         vector<string> names;
         string code;
 
-        static NodeTemplate Parse(std::string filename);
-        static hash_table<string, NodeTemplate>& GetMap();
+        static NodeTemplate Parse(string_view filename);
+        static const table& GetTable();
 
         size_t GetSlotIndex(string_view name) const;
     };
