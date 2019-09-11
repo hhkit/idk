@@ -46,7 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::Vulkan;
+	auto gfx_api = GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
@@ -102,7 +102,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (gfx_api != GraphicsAPI::Vulkan)
 			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
-		mesh_rend->material_instance.uniforms["tex"] = RscHandle <Texture>{};
+		//mesh_rend->material_instance.uniforms["tex"] = RscHandle <Texture>{};
 	};
 
 	createtest_obj(vec3{ 0.5, 0, 0 });
