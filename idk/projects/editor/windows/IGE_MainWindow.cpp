@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		9 SEPT 2019
+//@date		10 SEPT 2019
 //@brief	
 
 /*
@@ -18,6 +18,7 @@ of the editor.
 #include <app/Application.h>
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
+#include <editor/commands/CommandList.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
 
@@ -172,7 +173,8 @@ namespace idk {
 			if (ImGui::MenuItem("Delete")) {
 				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 				for (Handle<GameObject>& i : selected_gameObjects) {
-					Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(i);
+					//Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(i);
+					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
 				}
 
 				selected_gameObjects.clear();

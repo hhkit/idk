@@ -2,7 +2,7 @@
 //@file		CMD_AddComponent.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		10 SEPT 2019
 //@brief	Adds components to gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +21,7 @@ namespace idk {
 		virtual bool undo() override;
 
 	private:
-		Handle<GameObject>	game_object_handle		{};
+
 		GenericHandle		new_component_handle	{};
 		const string		component_name			{};
 	};

@@ -2,7 +2,7 @@
 //@file		CMD_ScaleGameObject.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		10 SEPT 2019
 //@brief	Adds components to gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -12,8 +12,10 @@
 
 namespace idk {
 	CMD_ScaleGameObject::CMD_ScaleGameObject(Handle<GameObject> gameObject, const vec3& sca)
-		: game_object_handle{ gameObject }, scale{ sca } 
-	{}
+		: scale{ sca } 
+	{
+		game_object_handle = gameObject;
+	}
 
 	bool CMD_ScaleGameObject::execute()
 	{

@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		CMD_ScaleGameObject.h
+//@file		CMD_DeleteGameObject.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		10 SEPT 2019
-//@brief	Adds components to gameobjects
+//@brief	Delete gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -12,15 +12,18 @@
 
 namespace idk {
 
-	class CMD_ScaleGameObject : public ICommand { //This command is saved when mouse is released, after moving.
+	class CMD_DeleteGameObject : public ICommand { //serialize/deserialize use serialize.h
 	public:
-		CMD_ScaleGameObject(Handle<GameObject> gameObject, const vec3& sca);
+		CMD_DeleteGameObject(Handle<GameObject> gameObject);
 
 		virtual bool execute() override;
+
 		virtual bool undo() override;
 
 	private:
-		const vec3			scale				{};
+		vector<reflect::dynamic>	vector_of_components	{};
+
+
 	};
 
 }

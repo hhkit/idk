@@ -2,7 +2,7 @@
 //@file		CMD_MoveGameObject.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		10 SEPT 2019
 //@brief	Moves gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -13,7 +13,10 @@
 namespace idk {
 
 	CMD_MoveGameObject::CMD_MoveGameObject(Handle<GameObject> gameObject, const vec3& pos) 
-		:game_object_handle{ gameObject }, position{ pos } {}
+		: position{ pos } 
+	{
+		game_object_handle = gameObject;
+	}
 
 	bool CMD_MoveGameObject::execute() {
 		if (game_object_handle) {

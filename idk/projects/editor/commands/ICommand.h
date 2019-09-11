@@ -29,5 +29,9 @@ namespace idk {
 
 		virtual bool undo() = 0;						//Return true if the command works. When it is true, it will add to the redo stack
 		virtual ~ICommand() = default;					// virtual needs default destructor
+	protected:
+
+		Handle<GameObject>	game_object_handle		{};	//This is used in most commands
+
 	};
 }

@@ -2,7 +2,7 @@
 //@file		CMD_MoveGameObject.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		10 SEPT 2019
 //@brief	Moves gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,6 @@ namespace idk {
 		virtual bool undo() override;
 
 	private:
-		Handle<GameObject>	game_object_handle	{};
 		const vec3			position			{};
 	};
 
