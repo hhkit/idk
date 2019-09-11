@@ -34,17 +34,19 @@ namespace idk
 		unsigned i{};
 		for (auto& elem : animators)
 		{
-			skeleton_indices.emplace(elem.GetHandle(), ++i);
-			result.skeletons.emplace_back(
-				SkeletonTransforms{} // generate this from the skeletons
+			skeleton_indices.emplace(elem.GetHandle(), i++);
+			result.skeleton_transforms.emplace_back(
+				SkeletonTransforms{ std::move(elem.GenerateTransforms()) } // generate this from the skeletons
 			);
 		}
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
-			AnimatedRenderObject ro;
-			ro.RenderObject::operator=(elem.GenerateRenderObject());
-			ro.skeleton_index = skeleton_indices[elem.GetGameObject()->Parent()->GetComponent<AnimationController>()];
+			AnimatedRenderObject ro = elem.GenerateRenderObject();
+			// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
+			auto animator = elem.GetGameObject()->GetComponent<AnimationController>();
+			ro.skeleton_index = skeleton_indices[animator];
+			result.skinned_mesh_render.emplace_back(ro);
 		}
 
 		for (auto& camera : cameras)

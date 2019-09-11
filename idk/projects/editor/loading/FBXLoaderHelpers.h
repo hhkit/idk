@@ -20,7 +20,7 @@ namespace idk::fbx_loader_detail
 	{
 		vec3	pos;
 		vec3	normal;
-		vec2	uv;
+		// vec2	uv;
 		ivec4	bone_ids;
 		vec4	bone_weights;
 

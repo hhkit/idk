@@ -99,6 +99,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto h_mat = Core::GetResourceManager().Create<Material>();
 	h_mat->BuildShader(shader_template, "", "");
 
+	// Lambda for creating an animated object... Does not work atm.
+	auto create_anim_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
+		auto go = scene->CreateGameObject();
+		go->GetComponent<Transform>()->position = pos;
+		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+		// go->GetComponent<Transform>()->scale /= divByVal;// 200.f;
+		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
+		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
+		auto animator = go->AddComponent<AnimationController>();
+
+		//Temp condition, since mesh loader isn't in for vulkan yet
+		if (gfx_api != GraphicsAPI::Vulkan)
+		{
+			auto resources = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/test.fbx" });
+			mesh_rend->mesh = resources[0].As<Mesh>();
+			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
+			animator->AddAnimation(resources[2].As<anim::Animation>());
+			animator->Play(0);
+		}
+		mesh_rend->material_instance.material = h_mat;
+
+		return go;
+	};
+
+	// @Joseph: Uncomment this when testing.
+	// create_anim_obj(vec3{ 0,0,0 });
+
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;

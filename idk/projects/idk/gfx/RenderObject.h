@@ -35,14 +35,13 @@ namespace idk
 
 	struct SkeletonTransforms
 	{
-		static constexpr auto MAX_BONES = 100;
-		mat4 bones[MAX_BONES];
+		vector<mat4> bones_transforms;
 	};
 
 	struct AnimatedRenderObject
 		: RenderObject
 	{
-		unsigned skeleton_index;
+		unsigned skeleton_index = 0;
 	};
 
 	struct CameraData

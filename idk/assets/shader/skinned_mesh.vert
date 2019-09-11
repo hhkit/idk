@@ -10,23 +10,64 @@ Project: ivan.ho_CS300_1
 Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
-#version 450
+#version 450 
+#ifndef OGL
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+#define BLOCK(X) X
+#endif
+#define MAX_BONES 100
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
+// layout (location = 2) in vec2 uv;
+layout (location = 2) in ivec4 bone_ids;
+layout (location = 3) in vec4 bone_weights;
 
-layout(set=4,binding=0)uniform OTransform{mat4 transform;}object_transform;
-layout(set=4,binding=4)uniform NTransform{mat4 transform;}normal_transform;
+U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
+{
+	mat4 perspective_transform;
+} PerCamera;
 
-layout(location = 0)out VS_OUT
+U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
+{
+	mat4 object_transform;
+	mat4 normal_transform;
+} ObjectMat4s;
+
+U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
+{
+	mat4 bone_transforms[MAX_BONES];
+} BoneMat4s;
+
+layout(location = 1) out VS_OUT
 {
   vec3 position;
+  vec2 uv;
   vec3 normal;
+  vec3 tangent;
+  vec3 view_pos; 		
 } vs_out;
+
+layout(location = 0) out gl_PerVertex
+{
+    vec4 gl_Position;
+};
 
 void main()
 {
-	vs_out.position = vec3(object_transform.transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(normal_transform.transform * vec4(normal, 1.0));
-    gl_Position     = vec4(vs_out.position, 1.0);
+  mat4 bone_transform = BoneMat4s.bone_transforms[bone_ids[0]] * bone_weights[0]
+                      + BoneMat4s.bone_transforms[bone_ids[1]] * bone_weights[1]
+                      + BoneMat4s.bone_transforms[bone_ids[2]] * bone_weights[2]
+                      + BoneMat4s.bone_transforms[bone_ids[3]] * bone_weights[3];
+  
+	vs_out.position = vec3(ObjectMat4s.object_transform 
+                    * bone_transform 
+                    * vec4(position, 1.0));
+                    
+	vs_out.normal   = vec3(ObjectMat4s.normal_transform 
+                    * bone_transform
+                    * vec4(normal, 1.0));
+	// vs_out.uv       = uv;
+  gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
+	vs_out.uv = gl_Position.xy;
 }

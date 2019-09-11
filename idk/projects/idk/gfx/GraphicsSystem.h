@@ -43,7 +43,7 @@ namespace idk
 			vector<LightData>    lights;
 			vector<RenderObject> mesh_render;
 			vector<AnimatedRenderObject> skinned_mesh_render;
-			vector<SkeletonTransforms> skeletons;
+			vector<SkeletonTransforms> skeleton_transforms;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

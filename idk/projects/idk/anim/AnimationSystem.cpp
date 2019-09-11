@@ -46,8 +46,8 @@ namespace idk
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 				{
 					const auto& curr_bone = skeleton[bone_id];
-					
-					const anim::Animation::AnimNode* anim_node = anim->GetAnimNode(curr_bone._name);
+					auto test = anim->data();
+					const anim::Animation::EasyAnimNode* anim_node = anim->GetEasyAnimNode(curr_bone._name);
 
 					mat4 local_bone_transform;
 					if (anim_node != nullptr)
@@ -103,7 +103,7 @@ namespace idk
 			assert(start + 1 < channel._scale.size());
 
 			float dt = static_cast<float>(channel._scale[start + 1]._time - channel._scale[start]._time);
-			float factor = time_in_ticks - (channel._scale[start]._time / dt);
+			float factor = (time_in_ticks - channel._scale[start]._time) / dt;
 			assert(factor >= 0.0f && factor <= 1.0f);
 
 			scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
@@ -116,7 +116,7 @@ namespace idk
 			assert(start + 1 < channel._translate.size());
 
 			float dt = static_cast<float>(channel._translate[start + 1]._time - channel._translate[start]._time);
-			float factor = time_in_ticks - (channel._translate[start]._time / dt);
+			float factor = (time_in_ticks - channel._translate[start]._time) / dt;
 			assert(factor >= 0.0f && factor <= 1.0f);
 
 			translation = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
@@ -129,18 +129,14 @@ namespace idk
 			assert(start + 1 < channel._rotation.size());
 
 			float dt = static_cast<float>(channel._rotation[start + 1]._time - channel._rotation[start]._time);
-			float factor = time_in_ticks - (channel._rotation[start]._time / dt);
+			float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
 			assert(factor >= 0.0f && factor <= 1.0f);
 
-			auto ohm = acos(channel._rotation[start]._val.get_normalized().dot(channel._rotation[start + 1]._val.get_normalized()));
-			constexpr auto _1 = 1.0f;
-			auto t = sin(ohm * (_1 - 1.0f)) / sin(ohm) * channel._rotation[start]._val + sin(ohm * 1.0f) / sin(ohm) * channel._rotation[start + 1]._val;
-			// rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
-			rotation = quat{ t.w, t.x, t.y, t.z };
+			rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
 			rotation.normalize();
 		}
 		
-
+		auto test = quat_cast<mat3>(quat{ 1, 0,0 ,0 });
 		return translate(translation) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
 	}
 }

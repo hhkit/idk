@@ -54,6 +54,7 @@ namespace idk
 		,	class ProjectManager
 		,	class IEditor
 		,   class TestSystem
+		,	class AnimationSystem
 	>;
 
 	using Resources = std::tuple<

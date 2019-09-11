@@ -5,6 +5,7 @@
 #include <file/FileSystem.h>
 
 #include <gfx/GraphicsSystem.h>
+#include <anim/AnimationSystem.h>
 #include <gfx/DebugRenderer.h>
 
 #include <phys/PhysicsSystem.h>

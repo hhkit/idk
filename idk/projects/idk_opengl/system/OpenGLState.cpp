@@ -10,6 +10,7 @@
 #include <file/FileSystem.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
+#include <anim/SkinnedMeshRenderer.h>
 #include <iostream>
 
 void _check_gl_error(const char* file, int line) {
@@ -75,12 +76,7 @@ namespace idk::ogl
 			}
 			
 			// lock drawing buffer
-			
-
 			pipeline.Use();
-
-			
-
 			glBindVertexArray(vao_id);
 
 			// render skinned mesh renderers
@@ -112,10 +108,18 @@ namespace idk::ogl
 				}
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
-				mesh.Bind(MeshRenderer::GetRequiredAttributes());
-
-				// per skeleton
+				mesh.Bind(SkinnedMeshRenderer::GetRequiredAttributes());
+				//mesh.Bind(MeshRenderer::GetRequiredAttributes());
 				
+				// Setting bone transforms
+				auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
+				for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
+				{
+					auto& transform = skeleton.bones_transforms[i];
+					string bone_transform_blk = "BoneMat4s.bone_transforms[" + std::to_string(i) + "].";
+					pipeline.SetUniform(bone_transform_blk, transform);
+				}
+
 				// set uniforms
 				// object uniforms
 

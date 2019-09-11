@@ -11,6 +11,7 @@ namespace idk
 	{
 	public:
 		void Play(string_view animation_name);
+		void Play(size_t index);
 		void Pause();
 		void Stop();
 
@@ -18,7 +19,7 @@ namespace idk
 
 		// Getters
 		RscHandle<anim::Animation> GetCurrentAnimation() const;
-
+		vector<mat4> GenerateTransforms() const;
 		// Setters
 		void SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc);
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
@@ -41,6 +42,7 @@ namespace idk
 		vector<RscHandle<anim::Animation>> _animations;
 
 		vector<Handle<GameObject>> _child_objects;
+		vector<mat4> _transforms;
 
 		void clearGameObjects();
 	};

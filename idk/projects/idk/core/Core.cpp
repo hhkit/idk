@@ -51,6 +51,7 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&Application::PollEvents,       "Poll OS Events");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&FileSystem::Update,            "File System Update");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Update,           "FMOD Update");
+		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AnimationSystem::Update,       "Animation Update");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,  "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::BuildSceneGraph, "Build scene graph");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,          "Test updates");

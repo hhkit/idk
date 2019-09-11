@@ -1,23 +1,26 @@
 #include "pch.h"
 #include "FBXLoaderHelpers.h"
+#include <math/matrix_decomposition.h>
 #include <deque>
 namespace idk::fbx_loader_detail
 {
 	mat4 initMat4(const aiMatrix4x4& mat)
 	{
-		return mat4(
-			mat.a1, mat.b1, mat.c1, mat.d1,
-			mat.a2, mat.b2, mat.c2, mat.d2,
-			mat.a3, mat.b3, mat.c3, mat.d3,
-			mat.a4, mat.b4, mat.c4, mat.d4
+		mat4 a(
+			mat.a1, mat.a2, mat.a3, mat.a4,
+			mat.b1, mat.b2, mat.b3, mat.b4,
+			mat.c1, mat.c2, mat.c3, mat.c4,
+			mat.d1, mat.d2, mat.d3, mat.d4
 		);
+		auto decomp = decompose(a);
+		return a;
 	}
 	mat4 initMat4(const aiMatrix3x3& mat)
 	{
 		return mat4(
-			mat.a1, mat.b1, mat.c1, 0.0f,
-			mat.a2, mat.b2, mat.c2, 0.0f,
-			mat.a3, mat.b3, mat.c3, 0.0f,
+			mat.a1, mat.a2, mat.a3, 0.0f,
+			mat.b1, mat.b2, mat.b3, 0.0f,
+			mat.c1, mat.c2, mat.c3, 0.0f,
 			0.0f,	0.0f,	0.0f,	1.0f
 		);
 	}
@@ -28,7 +31,7 @@ namespace idk::fbx_loader_detail
 
 	quat initQuat(const aiQuaternion& vec)
 	{
-		return quat(vec.w, vec.x, vec.y, vec.z);
+		return quat(vec.x, vec.y, vec.z, vec.w);
 	}
 
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices)
@@ -37,7 +40,7 @@ namespace idk::fbx_loader_detail
 		{
 			ogl::OpenGLDescriptor{vtx::Attrib::Position,	sizeof(Vertex), offsetof(Vertex, pos) },
 			ogl::OpenGLDescriptor{vtx::Attrib::Normal,		sizeof(Vertex), offsetof(Vertex, normal) },
-			ogl::OpenGLDescriptor{vtx::Attrib::UV,			sizeof(Vertex), offsetof(Vertex, uv) },
+			// ogl::OpenGLDescriptor{vtx::Attrib::UV,			sizeof(Vertex), offsetof(Vertex, uv) },
 			ogl::OpenGLDescriptor{vtx::Attrib::BoneID,		sizeof(Vertex), offsetof(Vertex, bone_ids) },
 			ogl::OpenGLDescriptor{vtx::Attrib::BoneWeight,	sizeof(Vertex), offsetof(Vertex, bone_weights) }
 		};

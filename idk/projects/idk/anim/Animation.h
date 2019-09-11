@@ -58,6 +58,7 @@ namespace idk::anim
 		float		GetNumTicks()	const { return _num_ticks; }
 		AnimNode*	GetAnimNode(string_view name);
 		EasyAnimNode* GetEasyAnimNode(string_view name);
+		const hash_table<string, EasyAnimNode>& data() { return _easy_anim_table; }
 
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
 		void SetName(string_view name) { _name = name; }
