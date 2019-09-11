@@ -24,7 +24,9 @@ namespace idk
 		//Converts the Renderers and transforms stores the render data into a buffer
 		
 		virtual void BufferGraphicsState(
-			span<class MeshRenderer>, 
+			span<class MeshRenderer>,
+			span<AnimationController> animators,
+			span<SkinnedMeshRenderer> skinned_mesh_renderers,
 			span<const class Transform>, 
 			span<const Camera> camera, 
 			span<const Light> lights);
@@ -37,7 +39,8 @@ namespace idk
 			vector<CameraData>   camera;
 			vector<LightData>    lights;
 			vector<RenderObject> mesh_render;
-			vector<RenderObject> skinned_mesh_render;
+			vector<AnimatedRenderObject> skinned_mesh_render;
+			vector<SkeletonTransforms> skeletons;
 		};
 		using GraphicsState = RenderBuffer;
 		// triple buffered render state

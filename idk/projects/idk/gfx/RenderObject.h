@@ -27,6 +27,18 @@ namespace idk
 		//sphere bounding_volume;
 	};
 
+	struct SkeletonTransforms
+	{
+		static constexpr auto MAX_BONES = 100;
+		mat4 bones[MAX_BONES];
+	};
+
+	struct AnimatedRenderObject
+		: RenderObject
+	{
+		unsigned skeleton_index;
+	};
+
 	struct CameraData
 	{
 		int  culling_flags = 0xFFFFFFFF;

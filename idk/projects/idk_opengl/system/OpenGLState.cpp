@@ -42,8 +42,11 @@ namespace idk::ogl
 	void OpenGLState::GenResources()
 	{
 		// generate mesh renderer
-		auto load_mesh = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert");
-		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(), load_mesh.resources[0].As<ShaderProgram>() } );
+		auto load_mesh_vtx = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert");
+		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<MeshRenderer>(), load_mesh_vtx.resources[0].As<ShaderProgram>() } );
+
+		auto load_skinned_mesh_vtx = Core::GetResourceManager().LoadFile("/assets/shader/skinned_mesh.vert");
+		renderer_vertex_shaders.emplace_back(RendererInfo{ reflect::typehash<SkinnedMeshRenderer>(), load_skinned_mesh_vtx.resources[0].As<ShaderProgram>() });
 	}
 
 
@@ -72,19 +75,22 @@ namespace idk::ogl
 			}
 			
 			// lock drawing buffer
-			// render mesh renderers
-			auto itr_to_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
-				[](const auto& elem)->bool {
-					return elem.typehash == reflect::typehash<MeshRenderer>();
-				});
+			
 
 			pipeline.Use();
 
-			// per mesh render
-			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			
 
 			glBindVertexArray(vao_id);
+
+			// render skinned mesh renderers
+			auto itr_to_skinned_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
+				[](const auto& elem)->bool {
+					return elem.typehash == reflect::typehash<SkinnedMeshRenderer>();
+				});
+
+			pipeline.PushProgram(itr_to_skinned_mesh_vtx->vertex_shader);
+			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
@@ -109,7 +115,7 @@ namespace idk::ogl
 				mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 				// per skeleton
-
+				
 				// set uniforms
 				// object uniforms
 
@@ -129,6 +135,16 @@ namespace idk::ogl
 				mesh.Draw();
 			}
 
+			// render mesh renderers
+			auto itr_to_mesh_vtx = std::find_if(renderer_vertex_shaders.begin(), renderer_vertex_shaders.end(),
+				[](const auto& elem)->bool {
+					return elem.typehash == reflect::typehash<MeshRenderer>();
+				});
+
+			pipeline.PushProgram(itr_to_mesh_vtx->vertex_shader);
+			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+
+			// per mesh render
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
