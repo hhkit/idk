@@ -5,6 +5,7 @@
 
 #include <idk_opengl/resource/OpenGLMesh.h>
 #include <idk_opengl/resource/OpenGLMaterial.h>
+#include <idk_opengl/resource/FrameBuffer.h>
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
@@ -62,8 +63,8 @@ namespace idk::ogl
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
-			fb_man.SetRenderTarget({});
-
+			//fb_man.SetRenderTarget({});
+			fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
 			
