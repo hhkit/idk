@@ -424,10 +424,10 @@ namespace idk
         if (!graph)
         {
             //Core::GetSystem<FileSystem>().Open("/assets/Untitled.mat", FS_PERMISSIONS::WRITE);
-            graph = Core::GetResourceManager().Create<Graph>();
-            addNode("master\\Unlit", { 800.0f, 300.0f });
-            graph->master_node = graph->nodes.begin()->first;
-            Core::GetSystem<SaveableResourceManager>().Save(graph);
+            //graph = Core::GetResourceManager().Create<Graph>();
+            //addNode("master\\Unlit", { 800.0f, 300.0f });
+            //graph->master_node = graph->nodes.begin()->first;
+            //Core::GetSystem<SaveableResourceManager>().Save(graph);
         }
 
         if (ImGui::Button("Compile"))
