@@ -21,9 +21,11 @@ namespace idk::vkn
 
 		void SetRenderTarget(RscHandle<VknFrameBuffer> target);
 		void ResetFramebuffer();
+
+		RscHandle<VknFrameBuffer> Framebuffer();
 	private:
 		//Framebuffer id or handle (A list of it)
-
+		RscHandle<VknFrameBuffer> curr_framebuffer{};
 
 	};
 }
