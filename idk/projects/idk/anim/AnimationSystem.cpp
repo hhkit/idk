@@ -36,7 +36,7 @@ namespace idk
 				bone_transforms.reserve(skeleton.size());
 
 				// Compute the time
-				elem._elapsed += Core::GetRealDT().count();
+				elem._elapsed += Core::GetDT().count();
 				if (elem._elapsed >= anim->GetDuration())
 					elem._elapsed -= anim->GetDuration();
 				
@@ -82,7 +82,9 @@ namespace idk
 				}
 
 				for (size_t xform_id = 0; xform_id < bone_transforms.size(); ++xform_id)
+				{
 					elem._child_objects[xform_id]->GetComponent<Transform>()->LocalMatrix(bone_transforms[xform_id]);
+				}
 			}
 		}
 	}

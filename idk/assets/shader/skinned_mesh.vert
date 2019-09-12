@@ -39,12 +39,12 @@ U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 	mat4 bone_transform;
 } BoneMat4s[MAX_BONES];
 
-out gl_PerVertex
+layout (location = 0) out gl_PerVertex
 {
     vec4 gl_Position;
 };
 
-out VS_OUT
+layout (location = 1) out VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -56,15 +56,13 @@ out VS_OUT
 
 void main()
 {
-  mat4 bone_transform = 
-	//bone_transforms[1];
-	                     BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
-                       + BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1]
-                       + BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2]
-                       + BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
+  mat4 bone_transform = BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
+                      + BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1]
+                      + BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2]
+                      + BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
   
-	vs_out.position = vec3(//ObjectMat4s.object_transform 
-                    bone_transform 
+	vs_out.position = vec3(ObjectMat4s.object_transform 
+                    * bone_transform 
                     * vec4(position, 1.0));
 
 	vs_out.normal   = vec3(ObjectMat4s.normal_transform 
