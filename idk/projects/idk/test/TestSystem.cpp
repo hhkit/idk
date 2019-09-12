@@ -36,9 +36,6 @@ namespace idk
 			auto rb = elem.GetGameObject()->GetComponent<RigidBody>();
 			if (rb)
 				rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));
-
-			if (app_sys.GetKey(Key::LButton))
-				std::cout << "MOUSEDOWN\n";
 		}
 	}
 

@@ -14,10 +14,15 @@ namespace idk {
 		Ray			ViewportPointToRay(const vec3& pos);
 		Ray			ViewportPointToRay(const vec2& pos);
 
-		//ArcBall rotation
+		//Rotation
 		void		RotateCamera(const vec2& screenpos);
 		void		StopRotatingCamera();
 		void		StartRotatingCamera(const vec2& screenpos);
+
+		//Panning
+		void		StartPanningCamera(const vec2& screenpos);
+		void		PanCamera(const vec2& screenpos);
+		void		StopPanningCamera();
 
 		vec3		currentTarget() const;
 		void		SetTarget(Handle<Transform>);
@@ -34,15 +39,17 @@ namespace idk {
 		Handle<Camera>    current_camera{};
 
 		bool _rotating{ false };
+		bool _panning{ false };
 	private:
 
 		vec3 _target{ 0.0f,0.0f,0.0f };
 		bool _focusing{ false };
-		bool _arcBallRotating{ false };	
+		bool _arcBallRotating{ false };
 		vec2 _oldScreenPos{};
 
 		real _alpha{};
 		real _beta{};
+		real camSpd{1.f};
 
 		vec3 initialVector{};
 		vec3 currVector{};

@@ -71,7 +71,7 @@ namespace idk
 		}
 
 		//std::cout << std::boolalpha << app_sys.IsMouseDragging() << std::endl;
-		if (app_sys.GetKey(Key::RButton) && app_sys.IsMouseDragging(Key::RButton))
+		if (app_sys.GetKey(Key::RButton))
 		{
 
 			//This is not referencing the sc
@@ -92,6 +92,23 @@ namespace idk
 		{
 			if (main_camera._rotating)
 				main_camera.StopRotatingCamera();
+		}
+		//std::cout << app_sys.GetKey(Key::MButton) << "\n";
+		if (app_sys.GetKey(Key::MButton))
+		{
+			vec2 newPos = app_sys.GetMouseScreenPos();
+			//ivec2 newPos2 = app_sys.GetMousePixelPos();
+
+			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
+
+			if (!main_camera._panning)
+				main_camera.StartPanningCamera(anotherPos);
+			main_camera.PanCamera(anotherPos);
+		}
+		else
+		{
+			if (main_camera._panning)
+				main_camera.StopPanningCamera();
 		}
 	}
 };
