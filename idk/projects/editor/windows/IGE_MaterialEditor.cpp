@@ -423,11 +423,15 @@ namespace idk
     {
         if (!graph)
         {
-            Core::GetSystem<FileSystem>().Open("/assets/Untitled.mat", FS_PERMISSIONS::WRITE);
-            graph = Core::GetResourceManager().Create<Graph>(Core::GetSystem<FileSystem>().GetFile("/assets/Untitled.mat"));
-            addNode("master\\Unlit", { 800.0f, 300.0f });
-            graph->master_node = graph->nodes.begin()->first;
+            //auto file = Core::GetSystem<FileSystem>().GetFile("/assets/ShaderGraph.mat");
+            //if (file)
+            //    graph = Core::GetResourceManager().Create<Graph>(file);
+            //else
+            //    graph = Core::GetResourceManager().Create<Graph>();
+            //addNode("master\\Unlit", { 800.0f, 300.0f });
+            //graph->master_node = graph->nodes.begin()->first;
             //Core::GetSystem<SaveableResourceManager>().Save(graph);
+            return;
         }
 
         if (ImGui::Button("Compile"))
