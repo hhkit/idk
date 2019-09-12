@@ -25,7 +25,7 @@ namespace idk
 	private:
 		FStreamWrapper() = default;
 		
-		int64_t _handle_index = -1;
+		file_system_detail::fs_key _file_key{};
 	};
 
 	class FILEWrapper

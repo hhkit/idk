@@ -223,7 +223,7 @@ namespace idk
 
 				// Next, invalidate it from path_tree. Should be a better way to do this. Not sure yet.
 				// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
-				internal_collated._files[internal_dir._tree_index._index]._valid = false;
+				internal_collated._files[internal_dir._tree_index._index].SetValid(false);
 
 				break;
 			}
@@ -498,11 +498,11 @@ namespace idk
 
 		// Invalidate it from path_tree. Should be a better way to do this. Not sure yet. 
 		// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
-		file._valid = false;
 
-		// Lastly, we invalidate the file handle that this file was using.
-		// Remember that we DO NOT erase the fs_file_handle in FileSyste::file_handles. We simply invalidate it.
-		vfs._file_handles[file._handle_index].Invalidate();
+		// Invalidate the file for read/write as well as 
+		file.SetValid(false);
+		file.SetOpenMode(FS_PERMISSIONS::NONE);
+
 		changed_files.push_back(file._tree_index);
 	}
 

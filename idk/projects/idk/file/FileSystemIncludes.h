@@ -45,6 +45,8 @@ namespace idk
 	{
 		READ,
 		WRITE,
-		APPEND
+		APPEND,
+
+		NONE
 	};
 }
