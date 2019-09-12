@@ -78,8 +78,8 @@ namespace idk
 	template<typename T>
 	using vector = std::vector<T>;
 
-	template<typename T1, typename T2>
-	using hash_table = std::unordered_map<T1, T2>;
+	template<typename T1, typename T2, typename Hasher = std::hash<T1>>
+	using hash_table = std::unordered_map<T1, T2, Hasher>;
 
 	template<typename T, typename Hash = std::hash<T>, typename Equal = std::less<T>>
 	using hash_set = std::unordered_set<T, Hash, Equal>;

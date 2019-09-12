@@ -321,8 +321,8 @@ TEST(Reflect, TestParentAndUnknownVisit)
 		++count;
 	});
 
-	// reflect_this, reflect_this members, vec4 members, testenum, testenum value
-	EXPECT_EQ(count, 1 + reflect::get_type<reflect_this>().count() + 4 + 1 + 1);
+	// reflect_this, reflect_this members, vec4 members, testenum
+	EXPECT_EQ(count, 1 + reflect::get_type<reflect_this>().count() + 4 + 1);
 }
 
 struct varianttest

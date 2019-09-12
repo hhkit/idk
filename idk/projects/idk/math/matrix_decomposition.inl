@@ -49,18 +49,18 @@ namespace idk
 				real fourxsqr = omr22 - dif10;
 				real inv4x = _0_5 / sqrt(fourxsqr);
 				q.x = fourxsqr * inv4x;
-				q.y = (r[0][1] + r[1][0]) * inv4x;
-				q.z = (r[0][2] + r[2][0]) * inv4x;
-				q.w = (r[1][2] - r[2][1]) * inv4x;
+				q.y = (r[1][0] + r[0][1]) * inv4x;
+				q.z = (r[2][0] + r[0][2]) * inv4x;
+				q.w = (r[2][1] - r[1][2]) * inv4x;
 			}
 			else  // y^2 >= x^2
 			{
 				real fourysqr = omr22 + dif10;
 				real inv4y = _0_5 / sqrt(fourysqr);
-				q.x = (r[0][1] + r[1][0]) * inv4y;
+				q.x = (r[1][0] + r[0][1]) * inv4y;
 				q.y = fourysqr * inv4y;
-				q.z = (r[0][2] + r[2][0]) * inv4y;
-				q.w = (r[1][2] - r[2][1]) * inv4y;
+				q.z = (r[2][0] + r[0][2]) * inv4y;
+				q.w = (r[2][1] - r[1][2]) * inv4y;
 			}
 		}
 		else  // z^2 + w^2 >= x^2 + y^2
@@ -71,18 +71,18 @@ namespace idk
 			{
 				real fourzsqr = opr22 - sum10;
 				real inv4z = _0_5 / sqrt(fourzsqr);
-				q.x = (r[0][2] + r[2][0]) * inv4z;
-				q.y = (r[1][2] + r[2][1]) * inv4z;
+				q.x = (r[2][0] + r[0][2]) * inv4z;
+				q.y = (r[2][1] + r[1][2]) * inv4z;
 				q.z = fourzsqr * inv4z;
-				q.w = (r[0][1] - r[1][0]) * inv4z;
+				q.w = (r[1][0] - r[0][1]) * inv4z;
 			}
 			else  // w^2 >= z^2
 			{
 				real fourwsqr = opr22 + sum10;
 				real inv4w = _0_5 / std::sqrt(fourwsqr);
-				q.x = (r[1][2] - r[2][1]) * inv4w;
-				q.y = (r[2][0] - r[0][2]) * inv4w;
-				q.z = (r[0][1] - r[1][0]) * inv4w;
+				q.x = (r[2][1] - r[1][2]) * inv4w;
+				q.y = (r[0][2] - r[2][0]) * inv4w;
+				q.z = (r[1][0] - r[0][1]) * inv4w;
 				q.w = fourwsqr * inv4w;
 			}
 		}
@@ -110,18 +110,18 @@ namespace idk
                 real fourxsqr = omr22 - dif10;
                 real inv4x = _0_5 / sqrt(fourxsqr);
                 q.x = fourxsqr * inv4x;
-                q.y = (r[0][1] + r[1][0]) * inv4x;
-                q.z = (r[0][2] + r[2][0]) * inv4x;
-                q.w = (r[1][2] - r[2][1]) * inv4x;
+                q.y = (r[1][0] + r[0][1]) * inv4x;
+                q.z = (r[2][0] + r[0][2]) * inv4x;
+                q.w = (r[2][1] - r[1][2]) * inv4x;
             }
             else  // y^2 >= x^2
             {
                 real fourysqr = omr22 + dif10;
                 real inv4y = _0_5 / sqrt(fourysqr);
-                q.x = (r[0][1] + r[1][0]) * inv4y;
+                q.x = (r[1][0] + r[0][1]) * inv4y;
                 q.y = fourysqr * inv4y;
-                q.z = (r[0][2] + r[2][0]) * inv4y;
-                q.w = (r[1][2] - r[2][1]) * inv4y;
+                q.z = (r[2][0] + r[0][2]) * inv4y;
+                q.w = (r[2][1] - r[1][2]) * inv4y;
             }
         }
         else  // z^2 + w^2 >= x^2 + y^2
@@ -132,18 +132,18 @@ namespace idk
             {
                 real fourzsqr = opr22 - sum10;
                 real inv4z = _0_5 / sqrt(fourzsqr);
-                q.x = (r[0][2] + r[2][0]) * inv4z;
-                q.y = (r[1][2] + r[2][1]) * inv4z;
+                q.x = (r[2][0] + r[0][2]) * inv4z;
+                q.y = (r[2][1] + r[1][2]) * inv4z;
                 q.z = fourzsqr * inv4z;
-                q.w = (r[0][1] - r[1][0]) * inv4z;
+                q.w = (r[1][0] - r[0][1]) * inv4z;
             }
             else  // w^2 >= z^2
             {
                 real fourwsqr = opr22 + sum10;
                 real inv4w = _0_5 / std::sqrt(fourwsqr);
-                q.x = (r[1][2] - r[2][1]) * inv4w;
-                q.y = (r[2][0] - r[0][2]) * inv4w;
-                q.z = (r[0][1] - r[1][0]) * inv4w;
+                q.x = (r[2][1] - r[1][2]) * inv4w;
+                q.y = (r[0][2] - r[2][0]) * inv4w;
+                q.z = (r[1][0] - r[0][1]) * inv4w;
                 q.w = fourwsqr * inv4w;
             }
         }

@@ -1,102 +1,170 @@
 #include "stdafx.h"
 #include "ShaderGraph.h"
 #include <regex>
-#include <sstream>
-#include <filesystem>
-namespace fs = std::filesystem;
 
 namespace idk::shadergraph
 {
-
-    NodeSignature::NodeSignature(const string& str)
+    struct NodeSlot
     {
-        size_t arrow_pos = str.find_first_of("->");
-        if (arrow_pos == std::string::npos)
-            return;
+        const Guid node;
+        const int slot;
+        bool operator==(const NodeSlot& other) const
+        {
+            return node == other.node && slot == other.slot;
+        }
+    };
 
-        auto str_in = str.substr(0, arrow_pos);
-        auto str_out = std::string{ str.begin() + arrow_pos + 2, str.end() };
+    struct NodeSlotHasher
+    {
+        size_t operator()(const NodeSlot& nodeslot) const
+        {
+            return std::hash<Guid>()(nodeslot.node) + nodeslot.slot;
+        }
+    };
 
-        std::regex regex{ "\\w+" };
+    struct compiler_state
+    {
+        const Graph& graph;
+        hash_table<NodeSlot, variant<const Link*, const Value*>, NodeSlotHasher> inputs_to_outputs{};
+        hash_table<NodeSlot, int, NodeSlotHasher> resolved_outputs{};
+        int slot_counter = 0;
+    };
+
+    static string& make_uppercase(string& str)
+    {
+        for (char& c : str)
+            c = std::toupper(c);
+        return str;
+    }
+    static string& make_lowercase(string& str)
+    {
+        for (char& c : str)
+            c = std::tolower(c);
+        return str;
+    }
+
+    static string var_name(int counter)
+    {
+        return "var_" + std::to_string(counter);
+    }
+
+    static void replace_variables(string& code, int slot_index, const string& replacement)
+    {
+        string to_find = '{' + std::to_string(slot_index) + '}';
+        size_t offset = 0;
+        while ((offset = code.find(to_find, offset)) != string::npos)
+            code = code.replace(offset, to_find.size(), replacement);
+    }
+
+    static void resolve_conditionals(string& code, const Node& node)
+    {
+        std::regex regex{ "\\?(\\d+):(float|vec2|vec3|vec4|mat2|mat3|mat4|sampler2D)\\{(.*)\\}" };
         std::smatch sm;
 
-        while (std::regex_search(str_in, sm, regex))
+        while (std::regex_search(code, sm, regex))
         {
-            auto token = sm.str();
-            for (auto& c : token) c = std::toupper(c);
-            ins.push_back(ValueType::from_string(token));
-            str_in = sm.suffix();
-        }
-        while (std::regex_search(str_out, sm, regex))
-        {
-            auto token = sm.str();
-            for (auto& c : token) c = std::toupper(c);
-            outs.push_back(ValueType::from_string(token));
-            str_out = sm.suffix();
-        }
-    }
+            const auto& index = std::stoi(sm[1]);
+            auto type = sm[2].str();
+            const auto& inner = sm[3];
 
-    NodeTemplate NodeTemplate::Parse(string_view filename)
-    {
-        std::ifstream file{ filename };
-
-        vector<NodeSignature> signatures;
-        vector<std::string> names;
-
-        string line;
-        while (std::getline(file, line))
-        {
-            NodeSignature sig{ line };
-            if (sig.ins.empty() && sig.outs.empty())
+            if (index < node.input_slots.size())
             {
-                std::regex regex{ "\\w+" };
-                std::smatch sm;
-                while (std::regex_search(line, sm, regex))
-                {
-                    names.push_back(sm.str());
-                    line = sm.suffix();
-                }
-                break;
+                if (node.input_slots[index].type == ValueType::from_string(make_uppercase(type)))
+                    code.replace(sm.position(), sm.length(), inner);
+                else
+                    code.replace(sm.position(), sm.length(), "");
             }
             else
-                signatures.push_back(sig);
+            {
+                if (node.output_slots[index - node.input_slots.size()].type == ValueType::from_string(make_uppercase(type)))
+                    code.replace(sm.position(), sm.length(), inner);
+                else
+                    code.replace(sm.position(), sm.length(), "");
+            }
         }
-
-        // rest of file is code
-        std::ostringstream oss;
-        oss << file.rdbuf();
-
-        return { signatures, names, oss.str() };
     }
 
-    static NodeTemplate::table _init_table()
+    static string resolve_node(const Node& node, compiler_state& state)
     {
-        NodeTemplate::table t;
+        string code = "";
 
-        // todo: use idk::FileSystem
-        for (auto& file : fs::recursive_directory_iterator("engine_data\\nodes"))
+        // add "<type> <varname>;" for every output slots
+        for (int i = 0; i < node.output_slots.size(); ++i)
         {
-            if (file.is_directory())
-                continue;
-
-            const auto& path = file.path();
-            auto path_str = path.string();
-            auto node = NodeTemplate::Parse(path_str);
-
-            t.emplace(std::string(path_str.begin() + sizeof("engine_data\\nodes"), path_str.end() - sizeof("node")), node);
+            if (node.output_slots[i].type == ValueType::SAMPLER2D)
+                code += "sampler2D";
+            else
+            {
+                std::string str{ node.output_slots[i].type };
+                code += make_lowercase(str);
+            }
+            code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
         }
 
-        return t;
-    }
-    const NodeTemplate::table& NodeTemplate::GetTable()
-    {
-        static table t = _init_table();
-        return t;
+        // add the code, then replace the output variable names
+        code += NodeTemplate::GetTable().at(node.name).code;
+        resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
+        for (int i = 0; i < node.output_slots.size(); ++i)
+        {
+            replace_variables(code, node.input_slots.size() + i, var_name(state.slot_counter));
+            state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, state.slot_counter++);
+        }
+
+        for (int i = 0; i < node.input_slots.size(); ++i)
+        {
+            auto iter = state.inputs_to_outputs.find({ node.guid, i });
+            assert(iter != state.inputs_to_outputs.end()); // i fucked up
+
+            auto& output = iter->second;
+            if (output.index() == 0) // connected to another node
+            {
+                auto& link = std::get<0>(output);
+                auto& node_out = state.graph.nodes.at(link->node_out);
+
+                auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
+                if (resolved_iter != state.resolved_outputs.end())
+                {
+                    replace_variables(code, i, var_name(resolved_iter->second));
+                }
+                else
+                {
+                    code = resolve_node(state.graph.nodes.at(link->node_out), state) + "\n" + code;
+                    resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
+                    assert(resolved_iter != state.resolved_outputs.end());
+                    replace_variables(code, i, var_name(resolved_iter->second));
+                }
+            }
+            else // connected to value
+            {
+                auto& value = std::get<1>(output);
+                std::string replacement;
+                if (node.input_slots[i].type == ValueType::SAMPLER2D)
+                    replacement = "sampler2D";
+                else
+                {
+                    replacement = node.input_slots[i].type;
+                    make_lowercase(replacement);
+                }
+                replacement += '(' + value->value + ')';
+                replace_variables(code, i, replacement);
+            }
+        }
+
+        return code;
     }
 
-    size_t NodeTemplate::GetSlotIndex(string_view name) const
+    void Graph::Compile()
     {
-        return std::find(names.begin(), names.end(), name) - names.begin();
+        // todo: handle added uniforms
+
+        compiler_state state{ *this };
+
+        for (auto& link : links)
+            state.inputs_to_outputs.emplace(NodeSlot{ link.node_in, link.slot_in }, &link);
+        for (auto& value : values)
+            state.inputs_to_outputs.emplace(NodeSlot{ value.node, value.slot }, &value);
+
+        string code = resolve_node(nodes.at(master_node), state);
     }
 
 }

@@ -812,6 +812,9 @@
     <ClCompile Include="gfx\Light.cpp">
       <Filter>gfx\light</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph_data.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
     <ClCompile Include="gfx\ShaderGraph.cpp">
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
