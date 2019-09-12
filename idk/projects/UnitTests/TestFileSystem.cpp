@@ -409,3 +409,8 @@ TEST(FileSystem, TestSpecialWatch)
 		EXPECT_TRUE(changes.size() == 0);
 	}
 }
+
+TEST(FileSystem, CleanUp)
+{
+	std::filesystem::remove_all(idk::string{ EXE_DIR + "/FS_UnitTests/" }.c_str());
+}
