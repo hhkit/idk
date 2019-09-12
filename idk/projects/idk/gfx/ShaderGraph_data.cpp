@@ -23,14 +23,16 @@ namespace idk::shadergraph
         while (std::regex_search(str_in, sm, regex))
         {
             auto token = sm.str();
-            for (auto& c : token) c = std::toupper(c);
+            for (char& c : token)
+                c = static_cast<char>(toupper(c));
             ins.push_back(ValueType::from_string(token));
             str_in = sm.suffix();
         }
         while (std::regex_search(str_out, sm, regex))
         {
             auto token = sm.str();
-            for (auto& c : token) c = std::toupper(c);
+            for (char& c : token)
+                c = static_cast<char>(toupper(c));
             outs.push_back(ValueType::from_string(token));
             str_out = sm.suffix();
         }

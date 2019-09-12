@@ -33,13 +33,13 @@ namespace idk::shadergraph
     static string& make_uppercase(string& str)
     {
         for (char& c : str)
-            c = std::toupper(c);
+            c = static_cast<char>(toupper(c));
         return str;
     }
     static string& make_lowercase(string& str)
     {
         for (char& c : str)
-            c = std::tolower(c);
+            c = static_cast<char>(tolower(c));
         return str;
     }
 
@@ -106,7 +106,7 @@ namespace idk::shadergraph
         resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
         for (int i = 0; i < node.output_slots.size(); ++i)
         {
-            replace_variables(code, node.input_slots.size() + i, var_name(state.slot_counter));
+            replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
             state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, state.slot_counter++);
         }
 
