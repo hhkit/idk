@@ -15,16 +15,16 @@
 #include <file/FileSystem.h>
 
 namespace FS = std::filesystem;
-static const idk::string EXE_DIR{ "C:\\Users\\Joseph\\Desktop\\GIT\\idk\\idk\\bin" };
+
 static const idk::string READ_DATA{ "0123456789\nqwerty" };
 
 #define INIT_FILESYSTEM_UNIT_TEST()\
 using namespace idk;\
-std::filesystem::remove_all(string{ EXE_DIR + "/FS_UnitTests/" }.c_str());\
 Core c;\
 FileSystem& vfs = Core::GetSystem<FileSystem>();\
 vfs.Init();\
-\
+const string EXE_DIR = vfs.GetExeDir().data();\
+std::filesystem::remove_all(string{ EXE_DIR + "/FS_UnitTests/" }.c_str());\
 FS::create_directories(EXE_DIR + "/FS_UnitTests/depth_1/depth_2");\
 FS::create_directories(EXE_DIR + "/FS_UnitTests/multiple_dir_1");\
 FS::create_directories(EXE_DIR + "/FS_UnitTests/depth_1/multiple_dir_2");\
@@ -69,7 +69,7 @@ void TestCreateWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	// Create the test_watch file
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/test_watch.txt", std::ios::out };
+	std::ofstream{ string{vfs.GetExeDir()} +"/FS_UnitTests/test_watch.txt", std::ios::out };
 
 	vfs.Update();
 
@@ -96,7 +96,7 @@ void TestWriteWatch(idk::FileSystem& vfs)
 	vfs.Update();
 	// Write to the file
 	{
-		std::ofstream of{ EXE_DIR + "/FS_UnitTests/test_watch.txt", std::ios::out };
+		std::ofstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test Write" << std::endl;
 		of.close();
 	}
@@ -124,7 +124,7 @@ void TestDeleteWatch(idk::FileSystem& vfs)
 	using namespace idk;
 	vfs.Update();
 
-	string remove_file = EXE_DIR + "/FS_UnitTests/test_write.txt";
+	string remove_file = string{ vfs.GetExeDir() } + "/FS_UnitTests/test_write.txt";
 	EXPECT_TRUE(remove(remove_file.c_str()) == 0);
 	vfs.Update();
 
@@ -186,7 +186,7 @@ TEST(FileSystem, TestFileHandle)
 		auto depth1_handle = vfs.GetFile("/FS_UnitTests/depth_1/test_d1.txt");
 		auto depth2_handle = vfs.GetFile("/FS_UnitTests/depth_1/depth_2/test_d2.txt");
 		EXPECT_TRUE(depth0_handle && depth1_handle && depth2_handle);
-
+		
 		EXPECT_TRUE(depth0_handle.GetFullPath() == EXE_DIR + "/FS_UnitTests\\test_d0.txt");
 		EXPECT_TRUE(depth1_handle.GetFullPath() == EXE_DIR + "/FS_UnitTests\\depth_1\\test_d1.txt");
 		EXPECT_TRUE(depth2_handle.GetFullPath() == EXE_DIR + "/FS_UnitTests\\depth_1\\depth_2\\test_d2.txt");
@@ -412,5 +412,10 @@ TEST(FileSystem, TestSpecialWatch)
 
 TEST(FileSystem, CleanUp)
 {
+	using namespace idk;
+	Core c;
+	FileSystem& vfs = Core::GetSystem<FileSystem>();
+	vfs.Init();
+	const string EXE_DIR = vfs.GetExeDir().data();
 	std::filesystem::remove_all(idk::string{ EXE_DIR + "/FS_UnitTests/" }.c_str());
 }
