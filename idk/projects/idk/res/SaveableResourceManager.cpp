@@ -155,9 +155,6 @@ namespace idk
 	{
 		static const auto is_dirtyjt  = detail::SavedHelper::GenerateDirtyCheckJT();
 		static const auto autosavejt  = detail::SavedHelper::GenerateAutosaveJT();
-		static const auto extensionjt = detail::SavedHelper::GenerateExtensionJT();
-		static const auto associatejt = detail::SavedHelper::GenerateAssociateJT();
-		static const auto namegetjt   = detail::SavedHelper::GenerateNameGetJT();
 
 		static_assert(!has_tag_v<Texture, Saveable>, "lol");
 
@@ -170,35 +167,6 @@ namespace idk
 
 			if (!autosavejt[index]()) // do not autosave
 				continue;
-
-			// generate unique filename
-			if (!control_block.associated_file)
-			{
-				auto& name = *namegetjt[index](guid);
-				auto ext = extensionjt[index]();
-				while (Core::GetSystem<FileSystem>().Exists("/assets/" + string{ name } +ext.data()))
-				{
-					auto find = name.find("(copy");
-					if (find == string::npos)
-						name += " (copy)";
-					else
-					{
-						string_view substr = string_view(name).substr(find);
-						int copy_num = 2;
-						if (sscanf_s(substr.data(), "(copy %d)", &copy_num) == 0)
-							name.replace(find, string::npos, "(copy 2)");
-						else
-						{
-							char buf[24];
-							sprintf_s(buf, "(copy %d)", copy_num + 1);
-							name.replace(find, string::npos, buf);
-						}
-					}
-				}
-
-				auto filepath = "/assets/" + string{ name } +ext.data();
-				associatejt[index](this, guid, filepath);
-			}
 
 			Save(guid);
 		}
@@ -215,6 +183,10 @@ namespace idk
 
 	SaveableResourceManager::SaveResourceResult SaveableResourceManager::Save(Guid guid)
 	{
+		static const auto extensionjt = detail::SavedHelper::GenerateExtensionJT();
+		static const auto associatejt = detail::SavedHelper::GenerateAssociateJT();
+		static const auto namegetjt = detail::SavedHelper::GenerateNameGetJT();
+
 		auto control_block = control_blocks.find(guid);
 		if (control_block == control_blocks.end())
 			return SaveResourceResult::Err_HandleNotHandled;
@@ -223,7 +195,32 @@ namespace idk
 		static const auto save_filejt = detail::SavedHelper::GenerateSaveFileJT();
 		auto& filepath = control_block->second.associated_file;
 		if (!filepath)
-			return SaveResourceResult::Err_ResourceNoAssociatedFile;
+		{
+			auto& name = *namegetjt[index](guid);
+			auto ext = extensionjt[index]();
+			while (Core::GetSystem<FileSystem>().Exists("/assets/" + string{ name } +ext.data()))
+			{
+				auto find = name.find("(copy");
+				if (find == string::npos)
+					name += " (copy)";
+				else
+				{
+					string_view substr = string_view(name).substr(find);
+					int copy_num = 2;
+					if (sscanf_s(substr.data(), "(copy %d)", &copy_num) == 0)
+						name.replace(find, string::npos, "(copy 2)");
+					else
+					{
+						char buf[24];
+						sprintf_s(buf, "(copy %d)", copy_num + 1);
+						name.replace(find, string::npos, buf);
+					}
+				}
+			}
+
+			auto filepath = "/assets/" + string{ name } +ext.data();
+			associatejt[index](this, guid, filepath);
+		}
 
 		save_filejt[index](guid, *filepath);
 		return SaveResourceResult::Ok;

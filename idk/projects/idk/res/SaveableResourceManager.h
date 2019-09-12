@@ -50,7 +50,7 @@ namespace idk
 		};
 		SaveResourceResult Save(Guid);
 
-		dual_set  <Guid, string_view> files;
+		dual_set  <Guid, string>       files;
 		hash_table<Guid, ControlBlock> control_blocks;
 	};
 }

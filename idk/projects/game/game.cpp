@@ -124,7 +124,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 
 	// @Joseph: Uncomment this when testing.
-	// create_anim_obj(vec3{ 0,0,0 });
+	 create_anim_obj(vec3{ 0,0,0 });
 
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -143,19 +143,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
-	createtest_obj(vec3{ 0.5, 0, 0 });
-	createtest_obj(vec3{ -0.5, 0, 0 });
-	createtest_obj(vec3{ 0, 0.5, 0 });
-	createtest_obj(vec3{ 0, -0.5, 0 });
+	//createtest_obj(vec3{ 0.5, 0, 0 });
+	//createtest_obj(vec3{ -0.5, 0, 0 });
+	//createtest_obj(vec3{ 0, 0.5, 0 });
+	//createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto light = scene->CreateGameObject();
 	light->AddComponent<Light>();
 	light->AddComponent<TestComponent>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
-	auto mover = createtest_obj(vec3{ 0, 0, 0 });
-	mover->AddComponent<TestComponent>();
-	mover->AddComponent<RigidBody>();
+	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
+	//mover->AddComponent<TestComponent>();
+	//mover->AddComponent<RigidBody>();
 
 	c->Run();
 	

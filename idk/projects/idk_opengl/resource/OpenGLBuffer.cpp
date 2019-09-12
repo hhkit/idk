@@ -45,6 +45,7 @@ namespace idk::ogl
 
 		for (auto& elem : descriptor)
 		{
+			GL_INT;
 			auto find_type = OpenGLAttribs.find(elem.attrib);
 			assert(find_type != OpenGLAttribs.end());
 

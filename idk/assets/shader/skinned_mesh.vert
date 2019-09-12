@@ -15,7 +15,7 @@ End Header --------------------------------------------------------*/
 #define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
 #define BLOCK(X) X
 #endif
-#define MAX_BONES 100
+#define MAX_BONES 4
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -36,8 +36,8 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 
 U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 {
-	mat4 bone_transforms[MAX_BONES];
-} BoneMat4s;
+	mat4 bone_transform;
+} BoneMat4s[MAX_BONES];
 
 layout(location = 1) out VS_OUT
 {
@@ -48,17 +48,15 @@ layout(location = 1) out VS_OUT
   vec3 view_pos;
 } vs_out;
 
-layout(location = 0) out gl_PerVertex
-{
-    vec4 gl_Position;
-};
 
 void main()
 {
-  mat4 bone_transform = BoneMat4s.bone_transforms[0];//BoneMat4s.bone_transforms[bone_ids[0]] * bone_weights[0];
-                      // + BoneMat4s.bone_transforms[bone_ids[1]] * bone_weights[1]
-                      // + BoneMat4s.bone_transforms[bone_ids[2]] * bone_weights[2]
-                      // + BoneMat4s.bone_transforms[bone_ids[3]] * bone_weights[3];
+  mat4 bone_transform = 
+	//bone_transforms[1];
+	                     BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
+                       + BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1]
+                       + BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2]
+                       + BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
   
 	vs_out.position = vec3(//ObjectMat4s.object_transform 
                     bone_transform 
@@ -70,5 +68,6 @@ void main()
                     * vec4(normal, 1.0));
 	vs_out.uv       = uv;
   gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
+  gl_Position     = vec4(float(bone_ids.x));
 	// vs_out.uv = gl_Position.xy;
 }
