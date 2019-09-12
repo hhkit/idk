@@ -123,6 +123,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
+	constexpr auto col = ivec3{ 1,0,0 };
+
 	// @Joseph: Uncomment this when testing.
 	// create_anim_obj(vec3{ 0,0,0 });
 

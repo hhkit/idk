@@ -1,6 +1,5 @@
 #pragma once
 namespace idk
 {
-
-	void GfxDebugTest();
+//	void GfxDebugTest();
 }

@@ -12,6 +12,7 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 
 #include "VulkanDebugRenderer.h"
+/*
 namespace idk::vkn
 {
 	namespace glm
@@ -283,3 +284,4 @@ namespace idk::vkn
 		return data;
 	}
 }
+*/

@@ -4,31 +4,9 @@
 #include <gfx/DebugRenderer.h>
 #include <math/matrix_transforms.h>
 #include <gfx/GraphicsSystem.h>
+/*
 namespace idk
 {
-	//TODO remove once merged with master (26/8/19)
-	/*mat4 look_at(vec3 const& eye, vec3 const& center, vec3 const& up)
-	{
-
-		vec3 const f((center - eye).get_normalized());
-		vec3 const s((f.cross(up)).get_normalized());
-		vec3 const u(s.cross(f));
-
-		mat4 Result{};
-		Result[0][0] = s.x;
-		Result[1][0] = s.y;
-		Result[2][0] = s.z;
-		Result[0][1] = u.x;
-		Result[1][1] = u.y;
-		Result[2][1] = u.z;
-		Result[0][2] = -f.x;
-		Result[1][2] = -f.y;
-		Result[2][2] = -f.z;
-		Result[3][0] = -dot(s, eye);
-		Result[3][1] = -dot(u, eye);
-		Result[3][2] = dot(f, eye);
-		return Result;
-	}*/
 	void GfxDebugTest()
 	{
 		auto& dbg_renderer = Core::GetSystem<DebugRenderer>();
@@ -64,3 +42,4 @@ namespace idk
 	}
 
 }
+*/

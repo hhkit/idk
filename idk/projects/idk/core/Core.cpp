@@ -82,7 +82,6 @@ namespace idk
 		{
 			while (_running)
 			{
-				GfxDebugTest();
 				_scheduler->SequentialUpdate();
 				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
 					Core::Shutdown();
@@ -92,7 +91,6 @@ namespace idk
 		{
 			while (_running)
 			{
-				GfxDebugTest();
 				_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
 				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
 					Core::Shutdown();
