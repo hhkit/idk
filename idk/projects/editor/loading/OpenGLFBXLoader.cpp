@@ -70,7 +70,7 @@ namespace idk
 
 				vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z }
 											 ,vec3{ normal.x, normal.y, normal.z }
-											// ,vec2{ text.x, text.y } 
+											 ,vec2{ text.x, text.y } 
 											});
 			}
 

@@ -116,7 +116,7 @@ namespace idk::ogl
 				for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
 				{
 					auto& transform = skeleton.bones_transforms[i];
-					string bone_transform_blk = "BoneMat4s.bone_transforms[" + std::to_string(i) + "].";
+					string bone_transform_blk = "BoneMat4s.bone_transforms[" + std::to_string(i) + "]";
 					pipeline.SetUniform(bone_transform_blk, transform);
 				}
 
