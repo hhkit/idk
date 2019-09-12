@@ -1,0 +1,16 @@
+master_node: f7e66f56-7722-4b20-b534-b58b90af85ce
+nodes: 
+  f7e66f56-7722-4b20-b534-b58b90af85ce: 
+    name: master\Unlit
+    selected: 204
+    guid: f7e66f56-7722-4b20-b534-b58b90af85ce
+    output_slots: 
+    position: {x: 800.000000, y: 300.000000}
+    input_slots: 
+    - type: VEC3
+  values: 
+  - node: f7e66f56-7722-4b20-b534-b58b90af85ce
+    type: VEC3
+    value: 0,0,0
+    slot: 0
+  links: 

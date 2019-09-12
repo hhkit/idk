@@ -34,7 +34,6 @@ namespace idk::win
 		bool GetKeyDown(Key) override;
 		bool GetKey(Key) override;
 		bool GetKeyUp(Key) override;
-		bool IsMouseDragging(Key) override;
 		char GetChar() override;
 		// windows
 		bool SetFullscreen(bool) override { return false; }
@@ -55,8 +54,6 @@ namespace idk::win
 		ivec2	  screendel;
 		vec2	  ndc_screendel;
 
-		bool	  rightHold{ false };
-		bool      leftHold{ false };
 		static inline Windows* instance = nullptr;
 
 		unique_ptr<InputManager> _input_manager;
@@ -64,6 +61,8 @@ namespace idk::win
 		ATOM MyRegisterClass();
 		BOOL InitInstance(int nCmdShow);
 		LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+		void grabScreenCoordinates(LPARAM lParam);
 
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
 

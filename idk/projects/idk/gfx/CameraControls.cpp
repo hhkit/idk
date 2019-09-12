@@ -18,6 +18,7 @@
 #include <test/TestSystem.h>
 
 #include <Core/Component.h>
+#include <iostream>
 
 
 //Math
@@ -138,6 +139,24 @@ namespace idk {
 		}
 	}
 
+	void CameraControls::PanCamera(const vec2& screenpos)
+	{
+		if (_panning)
+		{
+			real x_vec = (screenpos.x - _oldScreenPos.x);
+			real y_vec = (screenpos.y - _oldScreenPos.y);
+
+			auto tfm = current_camera->GetGameObject()->Transform();
+			//tfm->position += camSpd * (x_vec, 0) * Core::GetRealDT().count() * tfm->Right();
+			//tfm->position += camSpd * (0, y_vec) * Core::GetRealDT().count() * tfm->Up();
+			vec2 p = (camSpd * vec2(x_vec, y_vec)) * panSpd * Core::GetRealDT().count();
+			vec3 pos = vec3(p.x,p.y,0).normalize();
+
+			tfm->GlobalPosition(tfm->GlobalPosition()+ pos);
+
+			_oldScreenPos = screenpos;
+		}
+	}
 
 	void CameraControls::StopRotatingCamera()
 	{
@@ -151,6 +170,18 @@ namespace idk {
 		_rotating = true;
 		_oldScreenPos = screenpos;
 	}
+
+	void CameraControls::StartPanningCamera(const vec2& screenpos)
+	{
+		_panning = true;
+		_oldScreenPos = screenpos;
+	}
+
+	void CameraControls::StopPanningCamera()
+	{
+		_panning = false;
+	}
+
 
 	CameraControls::CameraControls(Handle<Camera> cam)
 		:current_camera {cam}
