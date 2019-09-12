@@ -50,6 +50,7 @@ namespace idk {
 		real _alpha{};
 		real _beta{};
 		real camSpd{1.f};
+		real panSpd{60.f};
 
 		vec3 initialVector{};
 		vec3 currVector{};

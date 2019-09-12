@@ -149,7 +149,7 @@ namespace idk {
 			auto tfm = current_camera->GetGameObject()->Transform();
 			//tfm->position += camSpd * (x_vec, 0) * Core::GetRealDT().count() * tfm->Right();
 			//tfm->position += camSpd * (0, y_vec) * Core::GetRealDT().count() * tfm->Up();
-			vec2 p = (camSpd * vec2(x_vec, y_vec)) * 60.f * Core::GetRealDT().count();
+			vec2 p = (camSpd * vec2(x_vec, y_vec)) * panSpd * Core::GetRealDT().count();
 			vec3 pos = vec3(p.x,p.y,0).normalize();
 
 			tfm->GlobalPosition(tfm->GlobalPosition()+ pos);
