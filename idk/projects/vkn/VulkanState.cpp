@@ -2273,7 +2273,7 @@ namespace idk::vkn
 		readySemaphores = signal;//*current_signal.render_finished;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
-		updateUniformBuffer(imageIndex);
+		//updateUniformBuffer(imageIndex);
 
 		vk::SubmitInfo submitInfo
 		{
@@ -2291,6 +2291,8 @@ namespace idk::vkn
 			EndFrame();
 
 			vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
+			
+			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{
 				render_state.RenderPass()
@@ -2311,8 +2313,9 @@ namespace idk::vkn
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
 
 
-			//command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
+			//////////////////////////THIS IS WHERE UBO UPDATES MVP (VIEW TRANSFORM SHOULD BE DONE HERE)/////////////////////////
 			updateUniformBuffer(imageIndex);
+
 			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 
 			command_buffer.executeCommands(render_state.CommandBuffer(), dispatcher);
