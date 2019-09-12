@@ -59,8 +59,9 @@ namespace idk
 		string_view			GetParentMountPath() const;
 
 		FS_CHANGE_STATUS	GetStatus() const;
-
-		bool				CanOpen() const;
+		bool				IsFile()	const { return _is_regular_file; }
+		bool				IsDir()		const { return !_is_regular_file; }
+		bool				CanOpen()	const;
 		bool				SameKeyAs(const FileHandle& other) const;
 		
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);

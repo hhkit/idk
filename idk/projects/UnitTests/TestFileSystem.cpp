@@ -176,6 +176,7 @@ TEST(FileSystem, TestFileHandle)
 		auto move_asssign = std::move(move_construct);
 		EXPECT_TRUE(move_asssign.is_open());
 		EXPECT_FALSE(move_construct.is_open());
+		move_asssign.close();
 
 		vfs.Update();
 	}

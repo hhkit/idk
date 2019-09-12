@@ -96,6 +96,8 @@ namespace idk::file_system_detail
 		bool _valid = true;
 
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
+
+		// TODO: add ref_count and make valid private.
 	};
 
 	struct fs_collated

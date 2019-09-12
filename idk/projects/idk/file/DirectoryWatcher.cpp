@@ -493,7 +493,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::fileDelete(file_system_detail::fs_file& file)
 	{
-		auto& vfs = Core::GetSystem<FileSystem>();
+		// auto& vfs = Core::GetSystem<FileSystem>();
 		file._change_status = FS_CHANGE_STATUS::DELETED;
 
 		// Invalidate it from path_tree. Should be a better way to do this. Not sure yet. 

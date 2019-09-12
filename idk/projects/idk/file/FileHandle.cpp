@@ -127,7 +127,7 @@ namespace idk
 				FS::rename(old_p, new_p);
 			}catch(const FS::filesystem_error& e){
 				std::cout << "[FILEHANDLE] Rename: " << e.what() << std::endl;
-				// return false;
+				return false;
 			}
 			auto res = parent_dir._files_map.find(internal_file._filename);
 			assert(res != parent_dir._files_map.end());
@@ -159,6 +159,8 @@ namespace idk
 
 	string_view FileHandle::GetExtension() const
 	{
+		if (!_is_regular_file)
+			return string_view{};;
 		// Check Handle
 		if (validate() == false)
 			return string_view{};
@@ -191,9 +193,8 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
 		
-		return file._filename;
+		return _is_regular_file ? vfs.getFile(_key)._filename : vfs.getDir(_key)._filename;
 	}
 
 	string_view FileHandle::GetFullPath() const
@@ -203,9 +204,8 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-
-		return file._full_path;
+		
+		return _is_regular_file ? vfs.getFile(_key)._full_path : vfs.getDir(_key)._full_path;
 	}
 
 	string_view FileHandle::GetRelPath() const
@@ -215,9 +215,7 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-
-		return file._rel_path;
+		return _is_regular_file ? vfs.getFile(_key)._rel_path : vfs.getDir(_key)._rel_path;
 	}
 
 	string_view FileHandle::GetParentMountPath() const
@@ -227,10 +225,12 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-		auto& parent = vfs.getFile(file._parent);
+		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
-		return parent._mount_path;
+		if (parent.IsValid())
+			return vfs.getDir(parent)._mount_path;
+
+		return string_view{};
 	}
 
 	bool FileHandle::CanOpen() const
@@ -260,9 +260,7 @@ namespace idk
 		if (validate() == false)
 			return FS_CHANGE_STATUS::INVALID;
 
-		auto& file = vfs.getFile(_key);
-
-		return file._change_status;
+		return _is_regular_file ? vfs.getFile(_key)._change_status : vfs.getDir(_key)._change_status;
 	}
 
 	FStreamWrapper FileHandle::Open(FS_PERMISSIONS perms, bool binary_stream)
@@ -308,10 +306,12 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-		auto& parent = vfs.getFile(file._parent);
-		
-		return parent._full_path;
+		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
+
+		if (parent.IsValid())
+			return vfs.getDir(parent)._full_path;
+
+		return string_view{};
 	}
 
 	string_view FileHandle::GetParentRelPath() const
@@ -321,10 +321,12 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-		auto& parent = vfs.getFile(file._parent);
+		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
-		return parent._rel_path;
+		if (parent.IsValid())
+			return vfs.getDir(parent)._rel_path;
+
+		return string_view{};
 	}
 
 	
