@@ -20,6 +20,8 @@ namespace idk
 		Guid guid{};
 
 		RscHandle() = default;
+		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Other, Res>>>
+		explicit RscHandle(RscHandle<Other> other) : guid{ other.guid } {};
 
 		RscHandle(const Guid& guid) : guid{ guid } {}
 
