@@ -67,8 +67,8 @@
     <ClInclude Include="commands\CMD_DeleteGameObject.h">
       <Filter>commands</Filter>
     </ClInclude>
-    <ClInclude Include="editor\windows\IGE_InspectorWindow.h">
-      <Filter>editor\windows</Filter>
+    <ClInclude Include="windows\IGE_MaterialEditor.h">
+      <Filter>windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -127,8 +127,8 @@
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp">
       <Filter>commands</Filter>
     </ClCompile>
-    <ClCompile Include="editor\windows\IGE_InspectorWindow.cpp">
-      <Filter>editor\windows</Filter>
+    <ClCompile Include="windows\IGE_MaterialEditor.cpp">
+      <Filter>windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

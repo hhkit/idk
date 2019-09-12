@@ -28,6 +28,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/VulkanFBXLoader.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
+#include <gfx/ShaderGraphFactory.h>
+#include <res/ForwardingExtensionLoader.h>
 
 
 namespace idk
@@ -55,6 +57,9 @@ namespace idk
 			break;
 		}
 
+        Core::GetResourceManager().RegisterFactory<shadergraph::Factory>();
+        Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<shadergraph::Graph>>(".mat");
+
 		//ImGui Initializations
 		_interface->Init();
 		ImGuiIO& io = ImGui::GetIO();
@@ -67,6 +72,7 @@ namespace idk
 		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
 		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
 		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
+		ige_windows.push_back(std::make_unique<IGE_MaterialEditor>());
 
 		//ige_main_window->Initialize();
 		for (auto& i : ige_windows) {

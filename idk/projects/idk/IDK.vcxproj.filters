@@ -572,6 +572,9 @@
     <ClInclude Include="gfx\ShaderGraph.h">
       <Filter>gfx\shadergraph</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\ShaderGraphFactory.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -816,6 +819,9 @@
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderGraph.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraphFactory.cpp">
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
   </ItemGroup>
