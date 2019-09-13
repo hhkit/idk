@@ -124,7 +124,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 0,0,0 });
+	// create_anim_obj(vec3{ 0,0,0 });
 
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -143,10 +143,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
-	// createtest_obj(vec3{ 0.5, 0, 0 });
-	// createtest_obj(vec3{ -0.5, 0, 0 });
-	// createtest_obj(vec3{ 0, 0.5, 0 });
-	// createtest_obj(vec3{ 0, -0.5, 0 });
+	createtest_obj(vec3{ 0.5, 0, 0 });
+	createtest_obj(vec3{ -0.5, 0, 0 });
+	createtest_obj(vec3{ 0, 0.5, 0 });
+	createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto light = scene->CreateGameObject();
 	light->GetComponent<Transform>()->position = vec3{ 0,0,-3 };
