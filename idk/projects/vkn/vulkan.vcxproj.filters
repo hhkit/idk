@@ -111,6 +111,9 @@
     <ClInclude Include="RegisterVulkanFactories.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="VknImageData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -205,6 +208,9 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="RegisterVulkanFactories.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknImageData.cpp">
       <Filter>resource</Filter>
     </ClCompile>
   </ItemGroup>

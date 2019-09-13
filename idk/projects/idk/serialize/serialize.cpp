@@ -19,6 +19,9 @@ namespace idk
 
 		if (container.value_type.is_template<std::pair>()) // associative
 		{
+            if (container.size() == 0)
+                return yaml::node{ yaml::mapping_type() };
+
 			for (auto elem : container)
 			{
 				auto pair = elem.unpack();
@@ -35,6 +38,9 @@ namespace idk
 		}
 		else // sequential
 		{
+            if (container.size() == 0)
+                return yaml::node{ yaml::sequence_type() };
+
 			if (container.value_type.hash() == reflect::typehash<reflect::dynamic>()) // stores a dynamic?!
 			{
                 for (auto elem : container)
@@ -108,14 +114,34 @@ namespace idk
                     curr_node.emplace(k, serialize_text(arg));
 				return true;
 			}
-			else if constexpr (is_container_v<T>)
+			else if constexpr (is_associative_container_v<T>)
 			{
                 if constexpr (std::is_arithmetic_v<K>)
-                    stack.push_back(&curr_node.emplace_back());
+                    stack.push_back(&curr_node.emplace_back(yaml::mapping_type()));
                 else
-                    stack.push_back(&curr_node[k]);
+                    stack.push_back(&(curr_node[k] = yaml::mapping_type()));
+
+                if (arg.size() == 0)
+                {
+                    stack.pop_back();
+                    return false;
+                }
 				return true;
 			}
+            else if constexpr (is_sequential_container_v<T>)
+            {
+                if constexpr (std::is_arithmetic_v<K>)
+                    stack.push_back(&curr_node.emplace_back(yaml::sequence_type()));
+                else
+                    stack.push_back(&(curr_node[k] = yaml::sequence_type()));
+
+                if (arg.size() == 0)
+                {
+                    stack.pop_back();
+                    return false;
+                }
+                return true;
+            }
             else if constexpr (is_template_v<T, std::variant>)
             {
                 yaml::node var_node = serialize_yaml(arg);
@@ -364,7 +390,7 @@ namespace idk
 								arg.emplace(parse_text<ElemK>(elem_name), parse_text<ElemV>(elem_val.get<string>()));
                             else
                             {
-                                reflect::dynamic d = arg.emplace(parse_text<ElemK>(elem_name), ElemV{}).second;
+                                reflect::dynamic d = arg.emplace(parse_text<ElemK>(elem_name), ElemV{}).first->second;
                                 parse_yaml(elem_val, d);
                             }
 						}

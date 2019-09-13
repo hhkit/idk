@@ -218,8 +218,8 @@ namespace idk
 				}
 			}
 
-			auto filepath = "/assets/" + string{ name } +ext.data();
-			associatejt[index](this, guid, filepath);
+			auto fp = "/assets/" + string{ name } +ext.data();
+			associatejt[index](this, guid, fp);
 		}
 
 		save_filejt[index](guid, *filepath);

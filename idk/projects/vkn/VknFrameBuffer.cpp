@@ -5,9 +5,9 @@
 
 namespace idk::vkn
 {
-	VknFrameBuffer::VknFrameBuffer(vector<vk::ImageView>& iv, VulkanView& vknView)
+	VknFrameBuffer::VknFrameBuffer(VknImageData iv, VulkanView& vknView)
 		:buffer{},
-		imageViewsRef {iv}
+		image{std::move(iv)}
 	{
 		//Creates an empty framebuffer tht does nothing at all until attach image views is called
 		AttachImageViews(iv,vknView);
@@ -15,7 +15,7 @@ namespace idk::vkn
 
 	VknFrameBuffer::VknFrameBuffer(VknFrameBuffer&& rhs)
 		:buffer{std::move(rhs.buffer)},
-		imageViewsRef{ std::move(rhs.imageViewsRef) },
+		image{ std::move(rhs.image) },
 		uncreated{std::move(rhs.uncreated)}
 	{}
 
@@ -23,7 +23,7 @@ namespace idk::vkn
 	{
 		// TODO: insert return statement here
 		std::swap(buffer,rhs.buffer);
-		std::swap(imageViewsRef,rhs.imageViewsRef);
+		std::swap(image,rhs.image);
 
 		return *this;
 	}
@@ -35,7 +35,6 @@ namespace idk::vkn
 		
 		//glDeleteRenderbuffers(1, &depthbuffer);
 		buffer.reset();
-		imageViewsRef.clear();
 	}
 
 	void VknFrameBuffer::OnMetaUpdate(const Metadata& newmeta)
@@ -52,7 +51,7 @@ namespace idk::vkn
 		}
 	}
 
-	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView>& iv, VulkanView& vknView)
+	void VknFrameBuffer::AttachImageViews(VknImageData& iv, VulkanView& vknView)
 	{
 		//One framebuffer can reference multiple attachments (color, position, light etc.)
 
@@ -68,7 +67,7 @@ namespace idk::vkn
 		vk::FramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.renderPass = *vknView.Renderpass();
 		framebufferInfo.attachmentCount = hlp::arr_count(iv);
-		framebufferInfo.pAttachments = std::data(iv);
+		framebufferInfo.pAttachments = &*iv.imageView;
 		framebufferInfo.width = vknView.Swapchain().extent.width;
 		framebufferInfo.height = vknView.Swapchain().extent.height;
 		framebufferInfo.layers = 1;
@@ -76,6 +75,11 @@ namespace idk::vkn
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo,nullptr,vknView.Dispatcher());
 
 		uncreated = false;
+	}
+
+	vk::UniqueFramebuffer VknFrameBuffer::Buffer()
+	{
+		return std::move(buffer);
 	}
 
 	/*GLuint VknFrameBuffer::DepthBuffer() const

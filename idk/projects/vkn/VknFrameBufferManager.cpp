@@ -71,10 +71,15 @@ namespace idk::vkn
 		//	assert(fb_status == GL_FRAMEBUFFER_COMPLETE);
 		//}
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		curr_framebuffer = target;
 
 	}
 	void VknFrameBufferManager::ResetFramebuffer()
 	{
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+	RscHandle<VknFrameBuffer> VknFrameBufferManager::Framebuffer()
+	{
+		return curr_framebuffer;
 	}
 }

@@ -1,15 +1,12 @@
 #pragma once
 #include <objbase.h>
 #include <idk.h>
-#include <string_view>
-#include <xhash>
+#include <util/hash_combine.h>
 
 #pragma warning(disable:6328)
 
 namespace idk
 {
-	using u64 = std::uint_fast64_t;
-
 	struct Guid
 	{
 		unsigned long  Data1;
@@ -78,9 +75,11 @@ namespace std
 	{
 		size_t operator()(const idk::Guid& guid) const noexcept
 		{
-			const idk::u64* p = reinterpret_cast<const idk::u64*>(&guid);
-			std::hash<idk::u64> hash;
-			return hash(p[0]) ^ hash(p[1]);
+			const size_t* p = reinterpret_cast<const size_t*>(&guid);
+			size_t seed = 0;
+			idk::hash_combine(seed, p[0]);
+			idk::hash_combine(seed, p[1]);
+			return seed;
 		}
 	};
 }

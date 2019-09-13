@@ -60,7 +60,6 @@ namespace idk
 	private:
 		hash_table<string, size_t>					_mount_table;
 		vector<file_system_detail::fs_mount>		_mounts;
-		vector<file_system_detail::fs_file_handle>	_file_handles;
 
 		string _sol_dir;
 		string _app_data_dir;
@@ -93,17 +92,14 @@ namespace idk
 
 
 		// Other auxiliary helpers
-		size_t							addFileHandle			(const file_system_detail::fs_key& handle);
 		file_system_detail::fs_key		requestFileSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_key		requestDirSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_file&	createAndGetFile		(string_view mountPath);
 
 		vector<string>					tokenizePath			(string_view fullPath)					const;
-		bool							validateKey				(const file_system_detail::fs_key& key) const;
 		int								validateMountPath		(string_view mountPath)					const;
 		int								validateFileMountPath	(string_view mountPath)					const;
 		int								validateDirMountPath	(string_view mountPath)					const;
-		bool							validateHandle			(const FileHandle& handle)				const;
 	
 		void							dumpMount				(const file_system_detail::fs_mount& mount)					const;
 		void							dumpDir					(const file_system_detail::fs_dir& mount, string prefix)	const;

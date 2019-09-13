@@ -105,8 +105,10 @@ namespace idk
             auto& tpl = NodeTemplate::GetTable().at(node.name);
 
             auto slash_pos = node.name.find_last_of('\\');
-            auto title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
-            auto title_size = ImGui::CalcTextSize(title);
+            string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
+			if (node.guid == graph->master_node)
+				title += " (Master)";
+            auto title_size = ImGui::CalcTextSize(title.c_str());
             float input_names_width = 0;
             float output_names_width = 0;
             int i = 0;
@@ -124,7 +126,7 @@ namespace idk
 
             ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x * 0.5f);
-            ImGui::Text(title);
+            ImGui::Text(title.c_str());
 
             ImGui::BeginGroup();
 
@@ -404,7 +406,7 @@ namespace idk
 
 
     IGE_MaterialEditor::IGE_MaterialEditor()
-        : IGE_IWindow("Material Editor", true, ImVec2{ 300,600 }, ImVec2{ 150,150 })
+        : IGE_IWindow("Material Editor", true, ImVec2{ 600,300 }, ImVec2{ 150,150 })
     {
     }
 
@@ -413,6 +415,9 @@ namespace idk
         canvas.colors[ImNodes::ColNodeBg] = ImColor(0.25f, 0.25f, 0.3f);
         canvas.colors[ImNodes::ColNodeActiveBg] = ImColor(0.25f, 0.25f, 0.3f);
         canvas.style.curve_thickness = 2.5f;
+
+        graph = Core::GetResourceManager().Create<Graph>(
+            Core::GetSystem<FileSystem>().GetFile("/assets/materials/test.mat"));
     }
 
     void IGE_MaterialEditor::BeginWindow()
@@ -423,16 +428,17 @@ namespace idk
     {
         if (!graph)
         {
-            //Core::GetSystem<FileSystem>().Open("/assets/Untitled.mat", FS_PERMISSIONS::WRITE);
             //graph = Core::GetResourceManager().Create<Graph>();
-            //addNode("master\\Unlit", { 800.0f, 300.0f });
+            //addNode("master\\PBR", { 500.0f, 200.0f });
             //graph->master_node = graph->nodes.begin()->first;
             //Core::GetSystem<SaveableResourceManager>().Save(graph);
+            return;
         }
 
         if (ImGui::Button("Compile"))
         {
             graph->Compile();
+            Core::GetSystem<SaveableResourceManager>().Save(graph);
         }
 
         auto window_pos = ImGui::GetWindowPos();

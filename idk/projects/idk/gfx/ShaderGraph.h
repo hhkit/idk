@@ -14,7 +14,7 @@ namespace idk::shadergraph
 {
     class Graph
         : public Resource<Graph>
-        , public Saveable<Graph>
+        , public Saveable<Graph, false_type>
     {
     public:
         Guid master_node;
