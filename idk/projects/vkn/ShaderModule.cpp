@@ -100,9 +100,33 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 	Load(single_stage, descriptors, buffer);
 }
 
-const UboInfo& ShaderModule::GetLayout(string uniform_name)
+bool ShaderModule::HasLayout(string uniform_name) const
+{
+	auto itr =ubo_info.find(uniform_name);
+	return itr != ubo_info.end();;
+}
+
+hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsBegin() const
+{
+	return ubo_info.cbegin();
+}
+
+hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsEnd() const
+{
+	return ubo_info.cend();
+}
+
+UboInfo& ShaderModule::GetLayout(string uniform_name)
 {
 	return ubo_info[uniform_name];
+}
+
+const UboInfo& ShaderModule::GetLayout(string uniform_name) const
+{
+	auto itr = ubo_info.find(uniform_name);
+	// TODO: insert return statement here
+	
+	return (itr!=ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
 }
 
 }
