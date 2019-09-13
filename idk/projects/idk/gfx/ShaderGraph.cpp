@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ShaderGraph.h"
+#include <gfx/Material.h>
+#include <gfx/MeshRenderer.h>
 #include <regex>
 
 namespace idk::shadergraph
@@ -45,7 +47,7 @@ namespace idk::shadergraph
 
     static string var_name(int counter)
     {
-        return "var_" + std::to_string(counter);
+        return "_v" + std::to_string(counter);
     }
 
     static void replace_variables(string& code, int slot_index, const string& replacement)
@@ -95,7 +97,7 @@ namespace idk::shadergraph
                 code += "sampler2D";
             else
             {
-                std::string str{ node.output_slots[i].type };
+                string str{ node.output_slots[i].type.to_string() };
                 code += make_lowercase(str);
             }
             code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
@@ -142,7 +144,7 @@ namespace idk::shadergraph
                     replacement = "sampler2D";
                 else
                 {
-                    replacement = node.input_slots[i].type;
+                    replacement = node.input_slots[i].type.to_string();
                     make_lowercase(replacement);
                 }
                 replacement += '(' + value->value + ')';
@@ -165,6 +167,15 @@ namespace idk::shadergraph
             state.inputs_to_outputs.emplace(NodeSlot{ value.node, value.slot }, &value);
 
         string code = resolve_node(nodes.at(master_node), state);
+
+		auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
+		auto h_mat = Core::GetResourceManager().Create<Material>();
+		h_mat->BuildShader(shader_template, "", code);
+
+		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
+		{
+			renderer.material_instance.material = h_mat;
+		}
     }
 
 }

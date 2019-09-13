@@ -105,8 +105,10 @@ namespace idk
             auto& tpl = NodeTemplate::GetTable().at(node.name);
 
             auto slash_pos = node.name.find_last_of('\\');
-            auto title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
-            auto title_size = ImGui::CalcTextSize(title);
+            string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
+			if (node.guid == graph->master_node)
+				title += " (Master)";
+            auto title_size = ImGui::CalcTextSize(title.c_str());
             float input_names_width = 0;
             float output_names_width = 0;
             int i = 0;
@@ -124,7 +126,7 @@ namespace idk
 
             ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x * 0.5f);
-            ImGui::Text(title);
+            ImGui::Text(title.c_str());
 
             ImGui::BeginGroup();
 
@@ -427,7 +429,7 @@ namespace idk
         if (!graph)
         {
             //graph = Core::GetResourceManager().Create<Graph>();
-            //addNode("master\\Unlit", { 500.0f, 200.0f });
+            //addNode("master\\PBR", { 500.0f, 200.0f });
             //graph->master_node = graph->nodes.begin()->first;
             //Core::GetSystem<SaveableResourceManager>().Save(graph);
             return;

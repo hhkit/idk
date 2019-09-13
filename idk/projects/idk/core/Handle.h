@@ -93,7 +93,7 @@ namespace std
 	{
 		size_t operator()(const idk::Handle<T>& id) const noexcept
 		{
-			return std::hash<idk::u64>{}(id.id);
+			return std::hash<size_t>{}(id.id);
 		}
 	};
 }

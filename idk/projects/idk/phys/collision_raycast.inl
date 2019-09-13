@@ -1,6 +1,6 @@
 #pragma once
 #include "collision.h"
-namespace idk
+namespace idk::phys
 {
 
 	template<decltype(&vec3::x) axis>

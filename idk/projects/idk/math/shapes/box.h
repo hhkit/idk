@@ -6,8 +6,9 @@ namespace idk
 {
 	struct box
 	{
-		vec3 position;
-		mat3 half_extents;
+		vec3 center;
+		vec3 extents;	// full extents
+		mat3 axes;
 
 		aabb bounds() const;
 
