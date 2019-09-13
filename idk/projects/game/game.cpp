@@ -19,6 +19,7 @@
 #include <gfx/CameraControls.h>
 
 #include <test/TestSystem.h>
+#include <renderdoc/renderdoc_app.h>
 
 namespace idk
 {
@@ -40,7 +41,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//_CrtSetBreakAlloc(2455); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-    
+
+	RENDERDOC_API_1_1_2* rdoc_api = NULL;
+
+	// At init, on windows
+	if (HMODULE mod = LoadLibrary(L"renderdoc.dll"))
+	{
+		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
+			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+		RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
+	}
+
 	using namespace idk;
 	
 	auto c = std::make_unique<Core>();
@@ -88,11 +99,37 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto h_mat = Core::GetResourceManager().Create<Material>();
 	h_mat->BuildShader(shader_template, "", "");
 
+	// Lambda for creating an animated object... Does not work atm.
+	auto create_anim_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
+		auto go = scene->CreateGameObject();
+		go->GetComponent<Transform>()->position = pos;
+		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+		go->GetComponent<Transform>()->scale /= 50;// 200.f;
+		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
+		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
+		auto animator = go->AddComponent<AnimationController>();
+
+		//Temp condition, since mesh loader isn't in for vulkan yet
+		if (gfx_api != GraphicsAPI::Vulkan)
+		{
+			auto resources = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/test.fbx" });
+			mesh_rend->mesh = resources[0].As<Mesh>();
+			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
+			animator->AddAnimation(resources[2].As<anim::Animation>());
+			animator->Play(0);
+		}
+		mesh_rend->material_instance.material = h_mat;
+
+		return go;
+	};
+
+	// @Joseph: Uncomment this when testing.
+	// create_anim_obj(vec3{ 0,0,0 });
+
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
-		go->AddComponent<TestComponent>();
 		go->GetComponent<Transform>()->position = pos;
-		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-45} };
+		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
 		go->GetComponent<Transform>()->scale /= divByVal;// 200.f;
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
@@ -102,15 +139,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (gfx_api != GraphicsAPI::Vulkan)
 			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
-		//mesh_rend->material_instance.uniforms["tex"] = RscHandle <Texture>{};
+
+		return go;
 	};
 
 	createtest_obj(vec3{ 0.5, 0, 0 });
 	createtest_obj(vec3{ -0.5, 0, 0 });
-	createtest_obj(vec3{ 0, 0, 0 });
 	createtest_obj(vec3{ 0, 0.5, 0 });
 	createtest_obj(vec3{ 0, -0.5, 0 });
 
+	auto light = scene->CreateGameObject();
+	light->AddComponent<Light>();
+	light->AddComponent<TestComponent>();
+	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+
+	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
+	//mover->AddComponent<TestComponent>();
+	//mover->AddComponent<RigidBody>();
 
 	c->Run();
 	

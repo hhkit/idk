@@ -45,6 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -102,6 +103,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -113,13 +115,9 @@
     </Link>
     <CustomBuildStep>
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
+xcopy  /i /d /c /y /s "$(SolutionDir)engine_data" "$(OutDir)engine_data"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
-call $(SolutionDir)tools\compile.bat
-if %errorlevel% NEQ 0 exit /b %errorlevel%
-echo AAAA
-call $(SolutionDir)tools\compile_wargs.bat "..\assets\shader\"
-if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>
       <Outputs>$(OutDir)shaders\changed.chg</Outputs>
@@ -172,6 +170,7 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -187,7 +186,6 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
-call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>

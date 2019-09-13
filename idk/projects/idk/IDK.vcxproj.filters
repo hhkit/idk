@@ -68,9 +68,6 @@
     <Filter Include="file">
       <UniqueIdentifier>{f2473f67-3de9-4860-9834-dbb2b1f6c894}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shapes">
-      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core\scene">
       <UniqueIdentifier>{ef6ed219-6b06-437d-bf5f-a85f74a19f89}</UniqueIdentifier>
     </Filter>
@@ -103,6 +100,12 @@
     </Filter>
     <Filter Include="anim\res/factories">
       <UniqueIdentifier>{18746da9-2d25-47bc-a326-d1fab351109e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\shapes">
+      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\shadergraph">
+      <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -269,9 +272,6 @@
     <ClInclude Include="math\color.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="shape\aabb.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
     <ClInclude Include="scene\SceneFactory.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -301,18 +301,6 @@
     </ClInclude>
     <ClInclude Include="phys\Collider.h">
       <Filter>phys</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\sphere.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\ray.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\capsule.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\box.h">
-      <Filter>shapes</Filter>
     </ClInclude>
     <ClInclude Include="ds\compressed_pair.h">
       <Filter>ds</Filter>
@@ -479,7 +467,6 @@
     <ClInclude Include="gfx\RenderTarget.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision.h" />
     <ClInclude Include="gfx\ShaderTemplate.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -552,6 +539,49 @@
     <ClInclude Include="scene\ProjectManager.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="math\shapes.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\aabb.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\box.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\capsule.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\ray.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\sphere.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\linear.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\PhysicsSystem.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph_data.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraphFactory.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="util\hash_combine.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CubeMap.h" />
+    <ClInclude Include="phys\collision_obb.h" />
+    <ClInclude Include="phys\collision_raycast.h" />
+    <ClInclude Include="phys\collision_result.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -618,9 +648,6 @@
     <ClCompile Include="file\DirectoryWatcher.cpp">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="shape\aabb.cpp">
-      <Filter>shapes</Filter>
-    </ClCompile>
     <ClCompile Include="scene\SceneFactory.cpp">
       <Filter>scene</Filter>
     </ClCompile>
@@ -650,12 +677,6 @@
     </ClCompile>
     <ClCompile Include="audio\AudioSource.cpp">
       <Filter>audio</Filter>
-    </ClCompile>
-    <ClCompile Include="shape\sphere.cpp">
-      <Filter>shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="shape\ray.cpp">
-      <Filter>shapes</Filter>
     </ClCompile>
     <ClCompile Include="test\TestSystem.cpp">
       <Filter>test</Filter>
@@ -705,7 +726,6 @@
     <ClCompile Include="gfx\RenderTarget.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="phys\collision.cpp" />
     <ClCompile Include="gfx\ShaderTemplate.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
@@ -724,7 +744,6 @@
     <ClCompile Include="serialize\yaml_load.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="anim\Animation.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
@@ -767,6 +786,53 @@
     <ClCompile Include="util\ioutils.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="anim\SkinnedMeshRenderer.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\aabb.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\ray.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\sphere.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\box.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\capsule.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\Collider.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\PhysicsSystem.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\RigidBody.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Light.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph_data.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraphFactory.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_result.cpp" />
+    <ClCompile Include="phys\collision_obb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -919,7 +985,6 @@
     <None Include="ds\circular_buffer.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="phys\collision.inl" />
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
@@ -931,6 +996,12 @@
     </None>
     <None Include="res\SaveableResourceManager.inl">
       <Filter>res</Filter>
+    </None>
+    <None Include="math\linear.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="phys\collision_raycast.inl">
+      <Filter>phys</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

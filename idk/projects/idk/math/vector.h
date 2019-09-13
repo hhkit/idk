@@ -1,13 +1,16 @@
 #pragma once
 #include <utility>
 
+#include <math/linear.h>
 #include "Vector_detail.h"
 #include "Vector_Dim.h"
 
 namespace idk
 {
 	template<typename T, unsigned D>
-	struct tvec : detail::vector_base<T, D>
+	struct tvec :
+		linear<tvec<T, D>, T>,
+		detail::vector_base<T, D>
 	{
 		using Base = typename detail::vector_base<T, D>;
 		using Base::Base;
@@ -30,12 +33,12 @@ namespace idk
 		constexpr tvec(const tvec<T, D2>&);
 
 		// vector functions
-		T        length_sq() const;
-		T        length() const;
-		T        distance_sq(const tvec&) const;
-		T        distance(const tvec&) const;
+		T      length_sq() const;
+		T      length() const;
+		T      distance_sq(const tvec&) const;
+		T      distance(const tvec&) const;
 
-		T        dot(const tvec&) const;
+		T      dot(const tvec&) const;
 		tvec     project_onto(const tvec&)const;
 		tvec&  normalize();
 		tvec   get_normalized() const;
@@ -49,34 +52,12 @@ namespace idk
 		constexpr const T* data() const noexcept;
 
 		// member functions
-		tvec&  operator+=(const tvec&);	
-		tvec   operator+(const tvec&) const;
-
-		tvec   operator-() const;
-		tvec&  operator-=(const tvec&);
-		tvec   operator-(const tvec&) const;
-
-		tvec&  operator*=(const tvec&);
-		tvec   operator*(const tvec&) const;
-		tvec&  operator*=(const T&);
-		tvec   operator*(const T&) const;
-
-		tvec&  operator/=(const tvec&);
-		tvec   operator/(const tvec&) const;
-		tvec&  operator/=(const T&);
-		tvec   operator/(const T&) const;
-
-		bool     operator==(const tvec&) const;
-		bool     operator!=(const tvec&) const;
 
 		// accessors
 		constexpr T&       operator[](size_t i) noexcept;
 		constexpr const T& operator[](size_t i) const noexcept;
 
 	};
-
-	template <typename T, unsigned D>
-	tvec<T,D> operator*(const T&, const tvec<T, D>&);
 
 	template<typename T, unsigned D>
 	auto dot(const tvec<T, D>& lhs, const tvec<T, D>& rhs) 

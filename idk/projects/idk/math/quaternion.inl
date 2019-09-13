@@ -28,9 +28,20 @@ namespace idk
 		w = c;
 	}
 	template<typename T>
+	inline T quaternion<T>::dot(const quaternion& rhs) const
+	{
+		return this->Base::dot(rhs);
+	}
+	template<typename T>
 	quaternion<T> quaternion<T>::inverse() const
 	{
 		return quaternion{ -x, -y, -z, w };
+	}
+	template<typename T>
+	quaternion<T> quaternion<T>::get_normalized() const
+	{
+		auto copy = *this;
+		return copy.normalize();
 	}
 	template<typename T>
 	quaternion<T>& quaternion<T>::normalize()
@@ -86,7 +97,7 @@ namespace idk
 		{
 			1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
 				2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
-				2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (y * y + z * z)
+				2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)
 		};
 	}
 }

@@ -43,9 +43,20 @@ namespace idk
 		if (cb_itr == control_blocks.end())
 			return FileAssociateResult::Err_HandleNotRegistered;
 
-		if (Core::template GetSystem<FileSystem>().Exists(mountPath))
-			return FileAssociateResult::Err_FileAlreadyExists;
+		if (cb_itr->second.associated_file)
+		{
+			if (*cb_itr->second.associated_file == FileHandle{ mountPath })
+				return FileAssociateResult::Ok;
 
+			if (Core::template GetSystem<FileSystem>().Exists(mountPath))
+				return FileAssociateResult::Err_FileAlreadyExists;
+
+			Core::template GetSystem<FileSystem>().Rename(cb_itr->second.associated_file->GetMountPath(), mountPath);
+			cb_itr->second.associated_file = mountPath;
+			files.erase(files.find(handle.guid));
+			files.emplace(handle.guid, mountPath);
+			return FileAssociateResult::Ok;
+		}
 		if (Core::template GetSystem<FileSystem>().Open(mountPath, FS_PERMISSIONS::WRITE))
 		{
 			cb_itr->second.associated_file = FileHandle{ mountPath };

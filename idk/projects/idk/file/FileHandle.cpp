@@ -14,62 +14,65 @@ namespace idk
 	FStreamWrapper::FStreamWrapper(FStreamWrapper&& rhs)
 		:std::fstream{ std::move(rhs) }
 	{
-		std::swap(_handle_index, rhs._handle_index);
+		std::swap(_file_key, rhs._file_key);
 	}
 
 	FStreamWrapper& FStreamWrapper::operator=(FStreamWrapper&& rhs)
 	{
 		std::fstream::operator=(std::move(rhs));
-		_handle_index = std::move(rhs._handle_index);
+		_file_key = std::move(rhs._file_key);
 		return *this;
 	}
 
 	FStreamWrapper::~FStreamWrapper()
 	{
-		if (_handle_index < 0)
+		if (!_file_key.IsValid())
 			return;
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file_handle = vfs._file_handles[_handle_index];
-		auto& file = vfs.getFile(file_handle._internal_id);
+		auto& file = vfs.getFile(_file_key);
 
 		// Only reset if this stream object was actually open.
 		// If we reset when its not open, we may reset for a different wrapper
 		if (is_open())
 		{
 			flush();
-			file_handle.Reset();
+			file.SetOpenMode(FS_PERMISSIONS::NONE);
+
+			// !!! CLOSE THEN UPDATE TIME
+			std::fstream::close();
 			file._time = FS::last_write_time(FS::path{ file._full_path });
 		}
 	}
 
-	// FileHandle FStreamWrapper::GetHandle() const
-	// {
-	// 	if (_handle_index < 0)
-	// 		return FileHandle{};
-	// 
-	// 	return FileHandle{ Core::GetSystem<FileSystem>()._file_handles[_handle_index]._internal_id };
-	// }
-
 	void FStreamWrapper::close()
 	{
+		if (!_file_key.IsValid())
+			return;
+
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file_handle = vfs._file_handles[_handle_index];
-		auto& file = vfs.getFile(file_handle._internal_id);
+		auto& file = vfs.getFile(_file_key);
 
-		file_handle.Reset();
-		file._time = FS::last_write_time(FS::path{ file._full_path });
+		// Only reset if this stream object was actually open.
+		// If we reset when its not open, we may reset for a different wrapper
+		if (is_open())
+		{
+			flush();
+			file.SetOpenMode(FS_PERMISSIONS::NONE);
 
-		std::fstream::close();
+			// !!! CLOSE THEN UPDATE TIME
+			std::fstream::close();
+			file._time = FS::last_write_time(FS::path{ file._full_path });
+		}
 	}
 
 	FileHandle::FileHandle(const file_system_detail::fs_key& key, bool is_file)
 		:_key{ key }, _is_regular_file{ is_file }
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		if (is_file && vfs.validateKey(_key))
+		if (is_file && _key.IsValid())
 		{
-			_ref_count = vfs._file_handles[vfs.getFile(_key)._handle_index]._ref_count;
+			_ref_count = vfs.getFile(_key).RefCount();
 		}
 	}
 
@@ -82,8 +85,8 @@ namespace idk
 		if (_is_regular_file)
 		{
 			auto& file = vfs.getFile(_key);
-			auto& internal_handle = vfs._file_handles[file._handle_index];
-			return _ref_count == internal_handle._ref_count && file._valid;
+			auto ref_count_actual = vfs.getFile(_key).RefCount();
+			return (_ref_count == ref_count_actual) && file.IsValid();
 		}
 		else
 			return true;
@@ -98,8 +101,8 @@ namespace idk
 		if (_is_regular_file)
 		{
 			auto& file = vfs.getFile(_key);
-			auto& internal_handle = vfs._file_handles[file._handle_index];
-			return _ref_count == internal_handle._ref_count && file._valid;
+			auto ref_count_actual = vfs.getFile(_key).RefCount();
+			return (_ref_count == ref_count_actual) && file.IsValid();
 		}
 		else
 			return vfs.getDir(_key)._valid;
@@ -124,7 +127,7 @@ namespace idk
 				FS::rename(old_p, new_p);
 			}catch(const FS::filesystem_error& e){
 				std::cout << "[FILEHANDLE] Rename: " << e.what() << std::endl;
-				// return false;
+				return false;
 			}
 			auto res = parent_dir._files_map.find(internal_file._filename);
 			assert(res != parent_dir._files_map.end());
@@ -156,6 +159,8 @@ namespace idk
 
 	string_view FileHandle::GetExtension() const
 	{
+		if (!_is_regular_file)
+			return string_view{};;
 		// Check Handle
 		if (validate() == false)
 			return string_view{};
@@ -188,9 +193,8 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
 		
-		return file._filename;
+		return _is_regular_file ? vfs.getFile(_key)._filename : vfs.getDir(_key)._filename;
 	}
 
 	string_view FileHandle::GetFullPath() const
@@ -200,9 +204,8 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-
-		return file._full_path;
+		
+		return _is_regular_file ? vfs.getFile(_key)._full_path : vfs.getDir(_key)._full_path;
 	}
 
 	string_view FileHandle::GetRelPath() const
@@ -212,9 +215,7 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-
-		return file._rel_path;
+		return _is_regular_file ? vfs.getFile(_key)._rel_path : vfs.getDir(_key)._rel_path;
 	}
 
 	string_view FileHandle::GetParentMountPath() const
@@ -224,10 +225,12 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-		auto& parent = vfs.getFile(file._parent);
+		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
-		return parent._mount_path;
+		if (parent.IsValid())
+			return vfs.getDir(parent)._mount_path;
+
+		return string_view{};
 	}
 
 	bool FileHandle::CanOpen() const
@@ -242,8 +245,7 @@ namespace idk
 
 		// Checking if internal handle is valid
 		auto& file = vfs.getFile(_key);
-		auto& file_handle = vfs._file_handles[file._handle_index];
-		return file_handle.IsOpenAndValid();
+		return file.IsValid() && !file.IsOpen();
 	}
 
 	bool FileHandle::SameKeyAs(const FileHandle& other) const
@@ -258,57 +260,41 @@ namespace idk
 		if (validate() == false)
 			return FS_CHANGE_STATUS::INVALID;
 
-		auto& file = vfs.getFile(_key);
-
-		return file._change_status;
+		return _is_regular_file ? vfs.getFile(_key)._change_status : vfs.getDir(_key)._change_status;
 	}
 
 	FStreamWrapper FileHandle::Open(FS_PERMISSIONS perms, bool binary_stream)
 	{
 		FStreamWrapper fs;
 
-		if (!_is_regular_file)
+		if (!CanOpen())
 			return fs;
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		
-		// Checking if handle is valid
-		if (validateFull() == false)
-			return fs;
-		
-		// Checking if internal handle is valid
-		auto& file = vfs.getFile(_key);
-		auto& file_handle = vfs._file_handles[file._handle_index];
-		if (file_handle.IsOpenAndValid() == false)
-			return fs;
+		auto& internal_file = vfs.getFile(_key);
 
-		auto& internal_file = vfs.getFile(file_handle._internal_id);
-		
+		internal_file.SetOpenMode(perms);
+		fs._file_key = internal_file._tree_index;
+
 		switch (perms)
 		{
 		case FS_PERMISSIONS::READ:
 			fs.open(internal_file._full_path, 
 				binary_stream ? std::ios::in | std::ios::binary : std::ios::in);
-			fs._handle_index = file._handle_index;
-
-			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::READ_ONLY);
 			break;
+
 		case FS_PERMISSIONS::WRITE:
 			fs.open(internal_file._full_path, 
 				binary_stream ? std::ios::out | std::ios::binary : std::ios::out);
-			fs._handle_index = file._handle_index;
-
-			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
 			break;
+
 		case FS_PERMISSIONS::APPEND:
 			fs.open(internal_file._full_path, 
 				binary_stream ? std::ios::app | std::ios::binary : std::ios::app);
-			fs._handle_index = file._handle_index;
-
-			file_handle.SetOpenFormat(file_system_detail::OPEN_FORMAT::WRITE_ONLY);
 			break;
+
 		default:
-			return fs;
+			return FStreamWrapper{};
 		}
 		return fs;
 	}
@@ -320,10 +306,12 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-		auto& parent = vfs.getFile(file._parent);
-		
-		return parent._full_path;
+		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
+
+		if (parent.IsValid())
+			return vfs.getDir(parent)._full_path;
+
+		return string_view{};
 	}
 
 	string_view FileHandle::GetParentRelPath() const
@@ -333,10 +321,12 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
-		auto& parent = vfs.getFile(file._parent);
+		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
-		return parent._rel_path;
+		if (parent.IsValid())
+			return vfs.getDir(parent)._rel_path;
+
+		return string_view{};
 	}
 
 	

@@ -20,6 +20,8 @@ namespace idk
 		Guid guid{};
 
 		RscHandle() = default;
+		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Other, Res>>>
+		explicit RscHandle(RscHandle<Other> other) : guid{ other.guid } {};
 
 		RscHandle(const Guid& guid) : guid{ guid } {}
 
@@ -47,9 +49,7 @@ namespace std
 	{
 		size_t operator()(const idk::RscHandle<Res>& res) const noexcept
 		{
-			const idk::u64* p = reinterpret_cast<const idk::u64*>(&res.guid);
-			std::hash<idk::u64> hash;
-			return hash(p[0]) ^ hash(p[1]);
+			return std::hash<idk::Guid>()(res.guid);
 		}
 	};
 }

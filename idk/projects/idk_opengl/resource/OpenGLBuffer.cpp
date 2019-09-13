@@ -45,6 +45,7 @@ namespace idk::ogl
 
 		for (auto& elem : descriptor)
 		{
+			GL_INT;
 			auto find_type = OpenGLAttribs.find(elem.attrib);
 			assert(find_type != OpenGLAttribs.end());
 
@@ -52,14 +53,23 @@ namespace idk::ogl
 			if (find_loc != locations.requirements.end())
 			{
 				auto loc = find_loc->second;
-				glVertexAttribPointer(
-					loc,
-					find_type->second.size,
-					find_type->second.type,
-					GL_FALSE,
-					elem.stride,
-					r_cast<void*>(elem.offset)
-				);
+				if (find_type->second.type == GL_FLOAT)
+					glVertexAttribPointer(
+						loc,
+						find_type->second.size,
+						find_type->second.type,
+						GL_FALSE,
+						elem.stride,
+						r_cast<void*>(elem.offset)
+					);
+				else
+					glVertexAttribIPointer(
+						loc,
+						find_type->second.size,
+						find_type->second.type,
+						elem.stride,
+						r_cast<void*>(elem.offset)
+					);
 
 				glEnableVertexAttribArray(loc);
 			}

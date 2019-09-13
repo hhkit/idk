@@ -32,14 +32,15 @@ namespace idk
 		auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
 		//Please ignore all of this first
-		if (app_sys.GetKey(Key::A)) tfm->position += vec3{ +0.016, 0.0, 0.0 };
-		if (app_sys.GetKey(Key::D)) tfm->position += vec3{ -0.016, 0.0, 0.0 };
+		constexpr auto cam_vel = 1.f;
+		if (app_sys.GetKey(Key::A))       tfm->position += - cam_vel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::D))       tfm->position += + cam_vel * Core::GetRealDT().count() * tfm->Right();
 		//if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.016, 0.0 };
 		//if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.016, 0.0 };
-		if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, 0.0, -0.016 };
-		if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, 0.0, +0.016 };
-		if (app_sys.GetKey(Key::F)) tfm->position += vec3{ 0, -0.016, 0.0 };
-		if (app_sys.GetKey(Key::G)) tfm->position += vec3{ 0, +0.016, 0.0 };
+		if (app_sys.GetKey(Key::S))       tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))       tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::Control)) tfm->position += -cam_vel * Core::GetRealDT().count() * vec3{0, 1, 0};
+		if (app_sys.GetKey(Key::Space))   tfm->position += +cam_vel * Core::GetRealDT().count() * vec3{0, 1, 0};
 
 		//Please ignore all of this first
 		if (app_sys.GetKey(Key::Q)) tfm->rotation = (quat{ vec3{0,1,0}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
@@ -70,7 +71,7 @@ namespace idk
 		}
 
 		//std::cout << std::boolalpha << app_sys.IsMouseDragging() << std::endl;
-		if (app_sys.GetKey(Key::RButton) && app_sys.IsMouseDragging(Key::RButton))
+		if (app_sys.GetKey(Key::RButton))
 		{
 
 			//This is not referencing the sc
@@ -91,6 +92,23 @@ namespace idk
 		{
 			if (main_camera._rotating)
 				main_camera.StopRotatingCamera();
+		}
+		//std::cout << app_sys.GetKey(Key::MButton) << "\n";
+		if (app_sys.GetKey(Key::MButton))
+		{
+			vec2 newPos = app_sys.GetMouseScreenPos();
+			//ivec2 newPos2 = app_sys.GetMousePixelPos();
+
+			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
+
+			if (!main_camera._panning)
+				main_camera.StartPanningCamera(anotherPos);
+			main_camera.PanCamera(anotherPos);
+		}
+		else
+		{
+			if (main_camera._panning)
+				main_camera.StopPanningCamera();
 		}
 	}
 };

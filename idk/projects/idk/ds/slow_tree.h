@@ -40,6 +40,8 @@ namespace idk
 		const_iterator begin() const;
 		const_iterator end()   const;
 
+		// modifiers
+		void clear();
 		template<typename ...Args>
 		slow_tree& emplace_child(Args&& ...);
 

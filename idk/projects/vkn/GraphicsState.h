@@ -8,14 +8,14 @@ namespace idk::vkn
 		CameraData camera;
 		vector<const RenderObject*> mesh_render;
 		vector<const RenderObject*> skinned_mesh_render;
-		void Init(const CameraData& data, const vector<RenderObject>& render_objects, const vector<RenderObject>& skinned_render_objects)
+		void Init(const CameraData& data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)
 		{
 			camera = data;
 			mesh_render.clear();
 			skinned_mesh_render.clear();
 			CullAndAdd(render_objects, skinned_render_objects);
 		}
-		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<RenderObject>& skinned_render_objects)
+		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)
 		{
 			//TODO actuall cull
 			mesh_render.reserve(render_objects.size()+mesh_render.size());

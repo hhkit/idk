@@ -1,9 +1,10 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
-#include <shape/aabb.h>
-#include <shape/sphere.h>
-#include <shape/capsule.h>
+#include <math/shapes/aabb.h>
+#include <math/shapes/box.h>
+#include <math/shapes/sphere.h>
+#include <math/shapes/capsule.h>
 
 namespace idk
 {
@@ -11,7 +12,7 @@ namespace idk
 		: public Component<Collider>
 	{
 	public:
-		using Shapes = variant<sphere, capsule>;
+		using Shapes = variant<box, sphere, capsule>;
 
 		Shapes shape;
 

@@ -28,7 +28,21 @@ namespace idk
 		}
 
 		_elapsed = 0.0f;
-		_curr_animation = res->second;
+		_curr_animation = s_cast<int>(res->second);
+		_is_playing = true;
+	}
+
+	void AnimationController::Play(size_t index)
+	{
+		// 2 design choices here. Either replay anim no matter what or dont reset if same name
+		if (_curr_animation == index)
+		{
+			_is_playing = true;
+			return;
+		}
+
+		_elapsed = 0.0f;
+		_curr_animation = s_cast<int>(index);
 		_is_playing = true;
 	}
 
@@ -45,7 +59,36 @@ namespace idk
 
 	RscHandle<anim::Animation> AnimationController::GetCurrentAnimation() const
 	{
+		if (_curr_animation >= _animations.size())
+			return RscHandle<anim::Animation>{};
+
 		return _animations[_curr_animation];
+	}
+
+	vector<mat4> AnimationController::GenerateTransforms() const
+	{
+		vector<mat4> bone_transforms;
+		bone_transforms.reserve(_child_objects.size());
+
+		for (size_t i = 0; i < _child_objects.size(); ++i)
+		{
+			auto& child = _child_objects[i];
+			auto parent_index = _skeleton->data()[i]._parent;
+			if (parent_index >= 0)
+			{
+				// If we have the parent, we push in the parent.global * child.local
+				mat4 c_transform = child->GetComponent<Transform>()->LocalMatrix(); 
+				mat4 p_transform = bone_transforms[parent_index];
+				bone_transforms.emplace_back(p_transform *c_transform);
+			}
+			else
+			{
+				bone_transforms.emplace_back(
+					child->GetComponent<Transform>()->GlobalMatrix()
+				);
+			}
+		}
+		return bone_transforms;
 	}
 
 	void AnimationController::SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc)
@@ -64,14 +107,12 @@ namespace idk
 		for (auto& elem : bones)
 		{
 			auto obj = scene->CreateGameObject();
-			auto transform = decompose(elem._offset.inverse());
-			
-			obj->GetComponent<Transform>()->position	= transform.position;
-			obj->GetComponent<Transform>()->scale		= transform.scale;
-			obj->GetComponent<Transform>()->rotation	= transform.rotation;
+			auto transform = elem._offset.inverse();
+
+			obj->GetComponent<Transform>()->GlobalMatrix(transform);
 
 			if (elem._parent >= 0)
-				obj->GetComponent<Transform>()->parent = _child_objects[elem._parent];
+				obj->GetComponent<Transform>()->SetParent(_child_objects[elem._parent], true);
 
 			_child_objects.push_back(obj);
 		}

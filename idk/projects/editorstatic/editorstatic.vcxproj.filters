@@ -34,6 +34,7 @@
     <ClCompile Include="imgui\ImCurveEdit.cpp">
       <Filter>imguiGizmo</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imnodes\ImNodes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\ImGUIImpl_Win32.h">
@@ -75,6 +76,7 @@
     <ClInclude Include="imgui\ImSequencer.h">
       <Filter>imguiGizmo</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\imnodes\ImNodes.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

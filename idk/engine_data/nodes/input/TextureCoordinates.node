@@ -1,0 +1,3 @@
+->vec2
+UV
+{0} = texCoord;

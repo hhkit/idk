@@ -3,6 +3,7 @@
 namespace idk
 {
 	namespace anim { class Skeleton; class Animation; }
+	namespace shadergraph { class Graph; }
 
 	constexpr auto MaxScene = 0x82; // 130 scenes allowed
 
@@ -22,8 +23,8 @@ namespace idk
 		/// GRAPHICS
 		,	class MeshRenderer
 		,   class Camera
-		//,   class SkinnedMeshRenderer
-		//, class Light
+		,   class SkinnedMeshRenderer
+		, class Light
 
 		/// ANIMATION
 		,	class AnimationController
@@ -44,7 +45,7 @@ namespace idk
 		,	class FileSystem
 		//,	class InputSystem
 		//,	class ScriptSystem
-		//,	class PhysicsSystem
+		,	class PhysicsSystem
 		,	class GraphicsSystem
 		,   class DebugRenderer
 		,	class AudioSystem
@@ -54,6 +55,7 @@ namespace idk
 		,	class ProjectManager
 		,	class IEditor
 		,   class TestSystem
+		,	class AnimationSystem
 	>;
 
 	using Resources = std::tuple<
@@ -70,6 +72,7 @@ namespace idk
 		,	class RenderTarget
 		,	anim::Animation
 		,	anim::Skeleton
+        ,   shadergraph::Graph
 		//,	class Level
 	>;
 

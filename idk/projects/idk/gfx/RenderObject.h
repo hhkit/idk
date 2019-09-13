@@ -15,6 +15,7 @@ namespace idk
 		// resources
 		RscHandle<Mesh>  mesh;
 		MaterialInstance material_instance;
+	//	hash_table<string, hash_table<string,UniformInstance>> uniforms;
 
 		// transform
 		vec3 velocity;
@@ -30,6 +31,17 @@ namespace idk
 		//binding,attrib
 		hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
+	};
+
+	struct SkeletonTransforms
+	{
+		vector<mat4> bones_transforms;
+	};
+
+	struct AnimatedRenderObject
+		: RenderObject
+	{
+		unsigned skeleton_index = 0;
 	};
 
 	struct CameraData

@@ -70,7 +70,8 @@ namespace idk
 
 				vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z }
 											 ,vec3{ normal.x, normal.y, normal.z }
-											 ,vec2{ text.x, text.y } });
+											 ,vec2{ text.x, text.y } 
+											});
 			}
 
 			// Initialize indices
@@ -116,10 +117,10 @@ namespace idk
 		{
 			auto anim_clip_handle = Core::GetResourceManager().Create<anim::Animation>();
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
-
+		
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
-			fbx_loader_detail::initAnimMap(ai_scene->mAnimations[i], anim_clip);
-
+			fbx_loader_detail::initAnimNodes(ai_scene->mRootNode, ai_scene->mAnimations[i], bones_set, anim_clip);
+		
 			retval.resources.emplace_back(anim_clip_handle);
 		}
 		

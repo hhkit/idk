@@ -45,6 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -223,6 +224,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="PipelineManager.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="ShaderModule.h" />
+    <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanMaterial.h" />
     <ClInclude Include="VulkanMaterialFactory.h" />
@@ -267,6 +269,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VknFrameBuffer.cpp" />
     <ClCompile Include="VknFrameBufferFactory.cpp" />
     <ClCompile Include="VknFrameBufferManager.cpp" />
+    <ClCompile Include="VknImageData.cpp" />
     <ClCompile Include="VknTexture.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">

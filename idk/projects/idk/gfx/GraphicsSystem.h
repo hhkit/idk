@@ -5,10 +5,9 @@
 #include <gfx/RenderObject.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/Camera.h>
+#include <gfx/Light.h>
 namespace idk
 {
-	//Temp Usings, replace when implementations are in.
-	using RenderTexHandle = uint32_t;
 	enum class GraphicsAPI
 	{
 		OpenGL,
@@ -25,7 +24,13 @@ namespace idk
 		void Shutdown() override = 0;
 		//Converts the Renderers and transforms stores the render data into a buffer
 		
-		virtual void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const Camera> camera);
+		virtual void BufferGraphicsState(
+			span<class MeshRenderer>,
+			span<AnimationController> animators,
+			span<SkinnedMeshRenderer> skinned_mesh_renderers,
+			span<const class Transform>, 
+			span<const Camera> camera, 
+			span<const Light> lights);
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;
@@ -35,8 +40,10 @@ namespace idk
 		struct RenderBuffer
 		{
 			vector<CameraData>   camera;
+			vector<LightData>    lights;
 			vector<RenderObject> mesh_render;
-			vector<RenderObject> skinned_mesh_render;
+			vector<AnimatedRenderObject> skinned_mesh_render;
+			vector<SkeletonTransforms> skeleton_transforms;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

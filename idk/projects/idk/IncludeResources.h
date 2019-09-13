@@ -7,6 +7,7 @@
 #include <gfx/Material.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderTemplate.h>
+#include <gfx/ShaderGraph.h>
 #include <gfx/Texture.h>
 #include <gfx/RenderTarget.h>
 #include <test/TestResource.h>

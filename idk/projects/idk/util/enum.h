@@ -37,7 +37,7 @@ struct name																							\
 	constexpr static UnderlyingType values[] { IDENTITY(IGNORE_ASSIGN(__VA_ARGS__)) };				\
 	constexpr static idk::string_view names[] { IDENTITY(TRIM(__VA_ARGS__)) };						\
 																									\
-	name() = delete;																				\
+	name() = default;																				\
 	constexpr name(_enum val)																		\
 		: value{ val }																				\
 	{																								\
@@ -73,5 +73,4 @@ struct name																							\
 																									\
 private:																							\
 	UnderlyingType value;																			\
-	template<typename> friend struct ::property::opin::def;											\
 };

@@ -11,47 +11,25 @@ Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450 
+#ifndef OGL
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+#define BLOCK(X) X
+#endif
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
 
-#ifndef OGL
-layout(set = 0, binding = 0)
-#endif
-uniform
-#ifdef OGL 
-struct 
-#endif 
-MV
+U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
-	mat4 transform;
-} object_transform;
-#ifndef OGL
-layout(set = 0, binding = 1)
-#endif
+	mat4 perspective_transform;
+} PerCamera;
 
-uniform
-#ifdef OGL 
-struct 
-#endif
-P
+U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 {
-	mat4 transform;
-} perspective_transform;
-
-#ifndef OGL
-layout(set = 0,binding = 2)
-#endif
-
-uniform 
-#ifdef OGL 
-struct 
-#endif
-MVP_IVT
-{
-	mat4 transform;
-} normal_transform;
+	mat4 object_transform;
+	mat4 normal_transform;
+} ObjectMat4s;
 
 layout(location = 1) out VS_OUT
 {
@@ -69,9 +47,9 @@ layout(location = 0) out gl_PerVertex
 
 void main()
 {
-	vs_out.position = vec3(object_transform.transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(normal_transform.transform * vec4(normal, 1.0));
+	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position, 1.0));
+	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normal, 1.0));
 	vs_out.uv       = uv;
-    gl_Position     = perspective_transform.transform * vec4(vs_out.position, 1.0);
+    gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
 	vs_out.uv = gl_Position.xy;
 }

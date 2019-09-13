@@ -33,6 +33,8 @@ TEST(Math, VectorMagnitudeNormalize)
 	std::default_random_engine generator;
 	std::uniform_real_distribution<float> dist(-100.f, 100.f);
 
+	&idk::tvec<float, 3>::operator*;
+
 	for (int i = 0; i < 1000; ++i)
 	{
 		auto f = dist(generator);

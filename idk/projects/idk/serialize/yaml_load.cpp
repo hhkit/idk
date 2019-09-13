@@ -257,6 +257,13 @@ namespace idk::yaml
 
     static void on_comma(parser_state& p)
     {
+        if (p.mode() != flow_map && p.mode() != flow_seq)
+        {
+            p.token += *p;
+            ++p;
+            return;
+        }
+
         if (p.token.size() >= 2 && (p.token[0] == '"' || p.token[0] == '\''))
         {
             auto copy = p.token;
@@ -410,18 +417,30 @@ namespace idk::yaml
 			// keep going until match an old indent
 			while (p.block_indents.size())
 			{
-				if (indent > p.block_indents.back())
-				{
-					throw "sibling indent mismatch?";
-				}
-				else if (indent < p.block_indents.back())
-				{
-					p.stack.pop_back();
-					p.block_indents.pop_back();
-					p.mode_stack.pop_back();
-				}
-				else
-					break;
+                if (indent > p.block_indents.back())
+                {
+                    throw "sibling indent mismatch?";
+                }
+                else if (indent < p.block_indents.back())
+                {
+                    p.stack.pop_back();
+                    p.block_indents.pop_back();
+                    p.mode_stack.pop_back();
+                }
+                else if (p.mode() == block_seq)
+                {
+                    const bool seq_conts = *p == '-' && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || (p[1] == '\r' && p[2] == '\n'));
+                    if (!seq_conts)
+                    {
+                        p.stack.pop_back();
+                        p.mode_stack.pop_back();
+                        p.block_indents.pop_back();
+                    }
+                    else
+                        break;
+                }
+                else
+                    break;
 			}
 		}
         else if(p.mode_stack.size() > 1 && p.mode_stack[p.mode_stack.size() - 2] == block_map && p.mode() == unknown)

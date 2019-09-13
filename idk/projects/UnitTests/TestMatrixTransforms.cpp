@@ -5,6 +5,7 @@
 
 #include <idk.h>
 #include <math/matrix_transforms.h>
+#include <math/matrix_decomposition.h>
 
 TEST(Math, MatrixIdentity)
 {
@@ -116,4 +117,21 @@ TEST(Math, MatrixOrthonormalize)
 			)),
 		mat3()
 	);
+}
+
+TEST(Math, MatrixDecomposition)
+{
+	using namespace idk;
+	
+	matrix_decomposition<real> decompost;
+	decompost.position = vec3{ 1,1,1 };
+	decompost.scale = vec3{ 2,3,4 };
+	decompost.rotation = quat{ vec3{1,0,0}, deg{270} };
+
+	auto m      = decompost.recompose();
+	auto decomp = decompose(m);
+	
+	for (auto& [lcol, rcol] : zip(m, decomp.recompose()))
+		for (auto& [elem, erem] : zip(lcol, rcol))
+			EXPECT_LT(abs(elem - erem), epsilon);
 }

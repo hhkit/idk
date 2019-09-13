@@ -177,14 +177,13 @@ namespace idk {
 	{
 		FileHandle fh;
 		auto file_index = getFile(mountPath);
-		if (validateKey(file_index) == false)
+		if (file_index.IsValid() == false)
 			return fh;
 
 		auto& internal_file = getFile(file_index);
-		auto& file_handle = _file_handles[internal_file._handle_index];
-
+		
 		fh._key = internal_file._tree_index;
-		fh._ref_count = file_handle._ref_count;
+		fh._ref_count = internal_file.RefCount();
 
 		return fh;
 	}
@@ -196,7 +195,7 @@ namespace idk {
 
 	bool FileSystem::ExistsFull(string_view fullPath) const
 	{
-		return GetFileAttributesA(fullPath.data()) != INVALID_FILE_ATTRIBUTES;
+		return FS::exists(FS::path{ fullPath.data() });
 	}
 
 	void FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)
@@ -232,7 +231,7 @@ namespace idk {
 		auto file_index = getFile(mountPath);
 		// If we cannot find the file and user only wants to read, return an empty stream
 		// Else, we should create the file and return the stream for the user to write to
-		if (validateKey(file_index) == false)
+		if (file_index.IsValid() == false)
 		{
 			if (perms == FS_PERMISSIONS::READ)
 				return FStreamWrapper{};
@@ -300,7 +299,9 @@ namespace idk {
 		f._extension	= p.extension().string();
 		f._time			= FS::last_write_time(p);
 		f._parent		= p_dir._tree_index;
-		f._valid		= true;
+
+		f.SetValid(true);
+		f.SetOpenMode(FS_PERMISSIONS::NONE);
 
 		p_dir._files_map.emplace(f._filename, f._tree_index);
 	}
@@ -339,7 +340,6 @@ namespace idk {
 	void FileSystem::recurseSubDir(size_t index, int8_t currDepth, file_system_detail::fs_dir& mountSubDir, bool watch)
 	{
 		file_system_detail::fs_mount& mount = _mounts[index];
-		size_t curr_handle_index = _file_handles.size();
 
 		// Increase the depth if this expands the tree
 		++currDepth;
@@ -361,8 +361,7 @@ namespace idk {
 				f._tree_index._depth = currDepth;
 				f._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._files.size());
 
-				f._handle_index = curr_handle_index++;
-				_file_handles.emplace_back(f._tree_index);
+				// f._file_detail is default initialized to have ref_count = 0.
 
 				initFile(f, mountSubDir, tmp);
 				mount._path_tree[currDepth]._files.push_back(f);
@@ -392,7 +391,7 @@ namespace idk {
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
 			throw("Something is terribly wrong. No mounts found.");
-		if (!validateKey(node))
+		if (!node.IsValid())
 			return _empty_file;
 		return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
 	}
@@ -402,7 +401,7 @@ namespace idk {
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
 			throw("Something is terribly wrong. No mounts found.");
-		if (!validateKey(node))
+		if (!node.IsValid())
 			return _empty_dir;
 		return _mounts[node._mount_id]._path_tree[node._depth]._dirs[node._index];
 	}
@@ -412,7 +411,7 @@ namespace idk {
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
 			throw("Something is terribly wrong. No mounts found.");
-		if (!validateKey(node))
+		if (!node.IsValid())
 			return _empty_file;
 		return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
 	}
@@ -422,7 +421,7 @@ namespace idk {
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
 			throw("Something is terribly wrong. No mounts found.");
-		if (!validateKey(node))
+		if (!node.IsValid())
 			return _empty_dir;
 		return _mounts[node._mount_id]._path_tree[node._depth]._dirs[node._index];
 	}
@@ -463,10 +462,14 @@ namespace idk {
 		{
 			for (auto& sub_dir : mount._path_tree[dir_depth]._dirs)
 			{
-				// Find file within the sub_dir
-				auto result = sub_dir._files_map.find(tokenized_path.back());
-				if (result != sub_dir._files_map.end())
-					return result->second;
+				// Make sure that the parent directory is correct
+				if (sub_dir._filename == tokenized_path[tokenized_path.size() - 2])
+				{
+					// Find file within the sub_dir
+					auto result = sub_dir._files_map.find(tokenized_path.back());
+					if (result != sub_dir._files_map.end())
+						return result->second;
+				}
 			}
 		}
 
@@ -519,12 +522,6 @@ namespace idk {
 		return empty_node;
 	}
 
-	size_t FileSystem::addFileHandle(const file_system_detail::fs_key& node)
-	{
-		_file_handles.emplace_back(node);
-		return _file_handles.size() - 1;
-	}
-
 	vector<string> FileSystem::tokenizePath(string_view fullPath) const
 	{
 		string full_path{ fullPath };
@@ -545,10 +542,6 @@ namespace idk {
 		return output;
 	}
 
-	bool FileSystem::validateKey(const file_system_detail::fs_key& key) const
-	{
-		return (key._mount_id >= 0) && (key._depth >= 0) && (key._index >= 0);
-	}
 
 	int FileSystem::validateMountPath(string_view mountPath) const
 	{
@@ -602,22 +595,6 @@ namespace idk {
 		else
 			return -1;
 	}
-
-	bool FileSystem::validateHandle(const FileHandle& handle) const
-	{
-		if (handle._key.IsValid() == false)
-			return false;
-		
-		if (handle._is_regular_file)
-		{
-			auto& file = getFile(handle._key);
-			auto& internal_handle = _file_handles[file._handle_index];
-			return handle._ref_count == internal_handle._ref_count && file._valid;
-		}
-		else
-			return getDir(handle._key)._valid;;
-	}
-
 	
 	int FileSystem::Mkdir(string_view mountPath)
 	{
@@ -696,16 +673,15 @@ namespace idk {
 											  [](const file_system_detail::fs_file& f) 
 												{ 
 													// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
-													return !f._valid && f._change_status == FS_CHANGE_STATUS::NO_CHANGE; 
+													return !f.IsValid() && f._change_status == FS_CHANGE_STATUS::NO_CHANGE;
 												});
 
 		// The conditions for reuse of a fs_file is that 
 		if (check_free_index != mount._path_tree[depth]._files.end())
 		{
-			auto& file_handle = _file_handles[check_free_index->_handle_index];
-			file_handle.Reset();
-			file_handle._internal_id = check_free_index->_tree_index;
-
+			check_free_index->IncRefCount();
+			check_free_index->SetValid(true);
+			check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
 			return check_free_index->_tree_index;
 		}
 		else
@@ -715,9 +691,8 @@ namespace idk {
 
 			file._tree_index._mount_id = mount._mount_index;
 			file._tree_index._depth = depth;
-			file._tree_index._index = static_cast<int8_t>(mount._path_tree[depth]._files.size() - 1);
-			file._handle_index = addFileHandle(file._tree_index);
-
+			file._tree_index._index = s_cast<int8_t>(mount._path_tree[depth]._files.size() - 1);
+			
 			return file._tree_index;
 		}
 	}
@@ -752,7 +727,7 @@ namespace idk {
 		auto end_pos = mount_path.find_last_of('/');
 		auto dir_index = getDir(mount_path.substr(0, end_pos));
 
-		if (validateKey(dir_index) == false)
+		if (dir_index.IsValid() == false)
 			return _empty_file;
 
 		auto& dir = getDir(dir_index);

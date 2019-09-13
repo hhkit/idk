@@ -35,6 +35,15 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="gfx\CubeMap.h" />
+    <ClInclude Include="gfx\ShaderGraph.h" />
+    <ClInclude Include="gfx\ShaderGraph_data.h" />
+    <ClInclude Include="math\linear.h" />
+    <ClInclude Include="math\shapes.h" />
+    <ClInclude Include="phys\collision_obb.h" />
+    <ClInclude Include="phys\collision_raycast.h" />
+    <ClInclude Include="phys\collision_result.h" />
+    <ClInclude Include="phys\PhysicsSystem.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceManager.h" />
     <ClInclude Include="scene\ProjectManager.h" />
@@ -136,6 +145,7 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="serialize\yaml.h" />
+    <ClInclude Include="gfx\ShaderGraphFactory.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestResourceFactory.h" />
@@ -145,14 +155,15 @@
     <ClInclude Include="reflect\detail\pretty_function.h" />
     <ClInclude Include="reflect\detail\constructor_entry.h" />
     <ClInclude Include="serialize\serialize.h" />
-    <ClInclude Include="shape\aabb.h" />
-    <ClInclude Include="shape\capsule.h" />
-    <ClInclude Include="shape\box.h" />
-    <ClInclude Include="shape\ray.h" />
-    <ClInclude Include="shape\sphere.h" />
+    <ClInclude Include="math\shapes\aabb.h" />
+    <ClInclude Include="math\shapes\capsule.h" />
+    <ClInclude Include="math\shapes\box.h" />
+    <ClInclude Include="math\shapes\ray.h" />
+    <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\EasyFactory.h" />
     <ClInclude Include="util\enum.h" />
+    <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
@@ -179,6 +190,7 @@
     <ClCompile Include="anim\AnimationSystem.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
+    <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />
     <ClCompile Include="audio\AudioClipFactory.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
@@ -186,6 +198,16 @@
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="gfx\ShaderGraph.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_data.cpp" />
+    <ClCompile Include="math\shapes\box.cpp" />
+    <ClCompile Include="math\shapes\capsule.cpp" />
+    <ClCompile Include="phys\Collider.cpp" />
+    <ClCompile Include="phys\collision_obb.cpp" />
+    <ClCompile Include="phys\collision_result.cpp" />
+    <ClCompile Include="phys\PhysicsSystem.cpp" />
+    <ClCompile Include="phys\RigidBody.cpp" />
     <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
@@ -216,6 +238,7 @@
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="gfx\ShaderGraphFactory.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />
@@ -235,15 +258,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="reflect\dynamic.cpp" />
+    <ClCompile Include="reflect\dynamic.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\serialize.cpp" />
-    <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="math\shapes\aabb.cpp" />
     <ClCompile Include="reflect\enum_type.cpp" />
-    <ClCompile Include="shape\ray.cpp" />
-    <ClCompile Include="shape\sphere.cpp" />
+    <ClCompile Include="math\shapes\ray.cpp" />
+    <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
@@ -263,10 +288,11 @@
     <None Include="event\Signal.inl" />
     <None Include="math\color.inl" />
     <None Include="math\comparable.inl" />
+    <None Include="math\linear.inl" />
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
-    <None Include="phys\collision.inl" />
+    <None Include="phys\collision_raycast.inl" />
     <None Include="reflect\detail\meta_manager.inl" />
     <None Include="reflect\detail\table_storage.inl" />
     <None Include="reflect\detail\visit_detail.inl" />
@@ -342,6 +368,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>

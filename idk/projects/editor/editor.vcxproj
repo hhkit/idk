@@ -172,21 +172,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="EditorInputs.h" />
-    <ClInclude Include="editor\commands\CMD_AddComponent.h" />
-    <ClInclude Include="editor\commands\CMD_MoveGameObject.h" />
-    <ClInclude Include="editor\commands\CMD_RotateGameObject.h" />
-    <ClInclude Include="editor\commands\CMD_ScaleGameObject.h" />
-    <ClInclude Include="editor\commands\CommandController.h" />
-    <ClInclude Include="editor\commands\CommandList.h" />
-    <ClInclude Include="editor\commands\ICommand.h" />
-    <ClInclude Include="editor\windows\IGE_HierarchyWindow.h" />
-    <ClInclude Include="editor\windows\IGE_InspectorWindow.h" />
-    <ClInclude Include="editor\windows\IGE_IWindow.h" />
-    <ClInclude Include="editor\windows\IGE_MainWindow.h" />
-    <ClInclude Include="editor\windows\IGE_ProjectWindow.h" />
-    <ClInclude Include="editor\windows\IGE_SceneView.h" />
-    <ClInclude Include="editor\windows\IGE_WindowList.h" />
+    <ClInclude Include="commands\CMD_AddComponent.h" />
+    <ClInclude Include="commands\CMD_CreateGameObject.h" />
+    <ClInclude Include="commands\CMD_MoveGameObject.h" />
+    <ClInclude Include="commands\CMD_RotateGameObject.h" />
+    <ClInclude Include="commands\CMD_ScaleGameObject.h" />
+    <ClInclude Include="commands\CommandController.h" />
+    <ClInclude Include="commands\CommandList.h" />
+    <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="windows\IGE_MaterialEditor.h" />
+    <ClInclude Include="windows\IGE_HierarchyWindow.h" />
+    <ClInclude Include="windows\IGE_InspectorWindow.h" />
+    <ClInclude Include="windows\IGE_IWindow.h" />
+    <ClInclude Include="windows\IGE_MainWindow.h" />
+    <ClInclude Include="windows\IGE_ProjectWindow.h" />
+    <ClInclude Include="windows\IGE_SceneView.h" />
+    <ClInclude Include="windows\IGE_WindowList.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
     <ClInclude Include="ImGui_Interface.h" />
@@ -198,18 +201,21 @@
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
     <ClCompile Include="EditorInputs.cpp" />
-    <ClCompile Include="editor\commands\CMD_AddComponent.cpp" />
-    <ClCompile Include="editor\commands\CMD_MoveGameObject.cpp" />
-    <ClCompile Include="editor\commands\CMD_RotateGameObject.cpp" />
-    <ClCompile Include="editor\commands\CMD_ScaleGameObject.cpp" />
-    <ClCompile Include="editor\commands\CommandController.cpp" />
-    <ClCompile Include="editor\windows\IGE_HierarchyWindow.cpp" />
-    <ClCompile Include="editor\windows\IGE_InspectorWindow.cpp" />
-    <ClCompile Include="editor\windows\IGE_IWindow.cpp" />
-    <ClCompile Include="editor\windows\IGE_MainWindow.cpp" />
-    <ClCompile Include="editor\windows\IGE_ProjectWindow.cpp" />
-    <ClCompile Include="editor\windows\IGE_SceneView.cpp" />
+    <ClCompile Include="commands\CMD_AddComponent.cpp" />
+    <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
+    <ClCompile Include="commands\CMD_MoveGameObject.cpp" />
+    <ClCompile Include="commands\CMD_RotateGameObject.cpp" />
+    <ClCompile Include="commands\CMD_ScaleGameObject.cpp" />
+    <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
+    <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
+    <ClCompile Include="windows\IGE_IWindow.cpp" />
+    <ClCompile Include="windows\IGE_MainWindow.cpp" />
+    <ClCompile Include="windows\IGE_MaterialEditor.cpp" />
+    <ClCompile Include="windows\IGE_ProjectWindow.cpp" />
+    <ClCompile Include="windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="ImGui_Interface.cpp" />
     <ClCompile Include="loading\FBXLoaderHelpers.cpp" />
