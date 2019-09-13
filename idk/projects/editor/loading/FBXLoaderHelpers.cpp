@@ -119,7 +119,6 @@ namespace idk::fbx_loader_detail
 				assert(res != bones_table.end());
 
 				int bone_index = static_cast<int>(res->second);
-
 				for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
 				{
 					float weight = ai_bone->mWeights[j].mWeight;
@@ -244,8 +243,8 @@ namespace idk::fbx_loader_detail
 			initAnimNodesRecurse(ai_root->mChildren[i], ai_anim_table, anim_clip, channels);
 
 		float fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
-		float duration = static_cast<float>(ai_anim->mDuration);
-		float num_ticks = duration / fps;
+		float num_ticks = static_cast<float>(ai_anim->mDuration);
+		float duration = num_ticks / fps;
 
 		anim_clip.SetSpeeds(fps, duration, num_ticks);
 		anim_clip.SetName(ai_anim->mName.data);

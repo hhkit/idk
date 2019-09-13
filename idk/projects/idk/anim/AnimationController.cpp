@@ -1,6 +1,6 @@
 #include "stdafx.h" 
 #include <iostream>
-
+#include <idk.h>
 #include "common/Transform.h"
 #include "core/GameObject.h"
 #include "AnimationController.h"
@@ -29,12 +29,15 @@ namespace idk
 
 		_elapsed = 0.0f;
 		_curr_animation = s_cast<int>(res->second);
-		_is_playing = true;
+	_is_playing = true;
 	}
 
 	void AnimationController::Play(size_t index)
 	{
 		// 2 design choices here. Either replay anim no matter what or dont reset if same name
+		if (index >= _animations.size())
+			return;
+
 		if (_curr_animation == index)
 		{
 			_is_playing = true;
@@ -65,11 +68,8 @@ namespace idk
 		return _animations[_curr_animation];
 	}
 
-	vector<mat4> AnimationController::GenerateTransforms() const
+	const vector<mat4>& AnimationController::GenerateTransforms()
 	{
-		vector<mat4> bone_transforms;
-		bone_transforms.reserve(_child_objects.size());
-
 		for (size_t i = 0; i < _child_objects.size(); ++i)
 		{
 			auto& child = _child_objects[i];
@@ -77,18 +77,26 @@ namespace idk
 			if (parent_index >= 0)
 			{
 				// If we have the parent, we push in the parent.global * child.local
-				mat4 c_transform = child->GetComponent<Transform>()->LocalMatrix(); 
-				mat4 p_transform = bone_transforms[parent_index];
-				bone_transforms.emplace_back(p_transform *c_transform);
+				const mat4& c_transform = _bone_transforms[i];
+				const mat4& p_transform = _bone_transforms[parent_index];
+				mat4 final_local_transform = p_transform * c_transform;
+				_bone_transforms[i] = final_local_transform;
 			}
 			else
 			{
-				bone_transforms.emplace_back(
-					child->GetComponent<Transform>()->GlobalMatrix()
-				);
+				_bone_transforms[i] = child->GetComponent<Transform>()->GlobalMatrix();
 			}
 		}
-		return bone_transforms;
+
+		// Apply offsets to all the transforms
+		const auto& skeleton = _skeleton->data();
+		for (size_t i = 0; i < _child_objects.size(); ++i)
+		{
+			auto curr_bone = skeleton[i];
+			_bone_transforms[i] = _skeleton->GetGlobalInverse() * _bone_transforms[i] * curr_bone._offset;
+		}
+
+		return _bone_transforms;
 	}
 
 	void AnimationController::SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc)
@@ -104,18 +112,24 @@ namespace idk
 		clearGameObjects();
 
 		const auto& bones = _skeleton->data();
-		for (auto& elem : bones)
+		for (size_t i = 0; i < bones.size(); ++i)
 		{
+			auto& curr_bone = bones[i];
+
 			auto obj = scene->CreateGameObject();
-			auto transform = elem._offset.inverse();
+			auto transform = curr_bone._offset.inverse();
 
 			obj->GetComponent<Transform>()->GlobalMatrix(transform);
 
-			if (elem._parent >= 0)
-				obj->GetComponent<Transform>()->SetParent(_child_objects[elem._parent], true);
+			obj->SetName(curr_bone._name);
+
+			if (curr_bone._parent >= 0)
+				obj->GetComponent<Transform>()->SetParent(_child_objects[curr_bone._parent], true);
 
 			_child_objects.push_back(obj);
 		}
+
+		_bone_transforms.resize(bones.size());
 	}
 
 	void AnimationController::AddAnimation(RscHandle<anim::Animation> anim_rsc)
