@@ -1,12 +1,7 @@
 #include "stdafx.h"
-#include "collision.h"
-namespace idk
+#include "collision_raycast.h"
+namespace idk::phys
 {
-	col_result::operator bool() const
-	{
-		return epsilon_equal(perp_dist, 0) && !(dist == std::numeric_limits<float>::infinity()) && dist >= -epsilon;
-	}
-
 	template<>
 	float PerpDist<(&vec3::x)>(vec3 point_at_edge, vec3 extents)
 	{
