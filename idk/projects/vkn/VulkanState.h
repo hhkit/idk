@@ -190,7 +190,7 @@ namespace idk::vkn
 			VkDebugUtilsMessageTypeFlagsEXT messageType,
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
-
+		bool						imguiEnabled{ true };
 	private:
 		// type aliases
 		friend class VulkanView;
@@ -255,7 +255,6 @@ namespace idk::vkn
 		vk::Result					rvRes;
 		vk::Semaphore				waitSemaphores;
 		vk::Semaphore				readySemaphores;
-		bool						imguiEnabled{ true };
 		bool						m_imguiNeedsToResize{ false };
 
 		vector<FrameSubmitRenderInfo> submitList;

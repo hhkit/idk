@@ -19,7 +19,7 @@ namespace idk::vkn
 	{
 
 		/*rhs._fbo_id = 0;*/
-		//Should be to coopy the ids
+		//Should be to copy the ids
 
 	}
 	VknFrameBufferManager& VknFrameBufferManager::operator=(VknFrameBufferManager&& rhs)

@@ -18,6 +18,7 @@ of the editor.
 #include <app/Application.h>
 #include <gfx/RenderTarget.h>
 #include <iostream>
+#include <gfx/GraphicsSystem.h>
 
 namespace idk {
 
@@ -53,7 +54,8 @@ namespace idk {
 
 		ImVec2 imageSize{ GetScreenSize().x,GetScreenSize().y };
 		//imageSize.y = (imageSize.x * (9 / 16));
-		//ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+		if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
+			ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 
 
 		//ImVec2 value = ImGui::GetWindowContentRegionMin();

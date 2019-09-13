@@ -2469,6 +2469,8 @@ namespace idk::vkn
 
 			m_device->resetFences(1, &*current_signal.master_fence, dispatcher);
 
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, false);
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, false);
 
 
 			vk::CommandBufferBeginInfo begin_info
@@ -2499,9 +2501,6 @@ namespace idk::vkn
 			imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
 			imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
 			imgBlit.dstOffsets[1].z = 1;
-
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, false);
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, false);
 
 			command_buffer.blitImage(m_swapchain.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.swapchain_images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
 

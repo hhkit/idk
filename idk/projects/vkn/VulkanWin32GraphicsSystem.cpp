@@ -63,6 +63,7 @@ namespace idk::vkn
 			frame.Init(&instance_->View(), *instance_->View().Commandpool());
 			frame.SetPipelineManager(*_pm);
 		}
+		instance_->imguiEnabled = editorExist;
 	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
