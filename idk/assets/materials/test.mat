@@ -1,24 +1,42 @@
-master_node: f5c75910-8e20-420c-af7e-3a21db605eec
+master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
-  1a481fac-39d6-4ac5-920d-eeb9a04095ce: 
+  ee0f4563-64fa-4e16-9e5c-de09b9bfef73: 
     name: input\VertexNormal
-    selected: 204
-    guid: 1a481fac-39d6-4ac5-920d-eeb9a04095ce
+    guid: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
     output_slots: 
     - type: VEC3
-    position: {x: 114.000000, y: 109.000000}
+    position: {x: 104.000000, y: 74.000000}
     input_slots: []
-  f5c75910-8e20-420c-af7e-3a21db605eec: 
-    name: master\Unlit
-    selected: 0
-    guid: f5c75910-8e20-420c-af7e-3a21db605eec
+  d5084548-0ebd-44fb-b98c-94bd0951100a: 
+    name: master\PBR
+    guid: d5084548-0ebd-44fb-b98c-94bd0951100a
     output_slots: []
-    position: {x: 500.000000, y: 200.000000}
+    position: {x: 524.000000, y: 196.000000}
     input_slots: 
     - type: VEC3
-values: []
+    - type: VEC3
+    - type: FLOAT
+    - type: FLOAT
+    - type: FLOAT
+values: 
+- node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  type: FLOAT
+  value: 0.600000
+  slot: 2
+- type: FLOAT
+  node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  value: 1.000000
+  slot: 3
+- node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  type: FLOAT
+  value: 0.000000
+  slot: 4
 links: 
-- node_out: 1a481fac-39d6-4ac5-920d-eeb9a04095ce
-  node_in: f5c75910-8e20-420c-af7e-3a21db605eec
+- node_out: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
+  node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   slot_out: 0
   slot_in: 0
+- node_out: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
+  node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  slot_out: 0
+  slot_in: 1
