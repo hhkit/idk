@@ -2,6 +2,11 @@
 #include "collision.h"
 namespace idk
 {
+	col_result::operator bool() const
+	{
+		return epsilon_equal(perp_dist, 0) && !(dist == std::numeric_limits<float>::infinity()) && dist >= -epsilon;
+	}
+
 	template<>
 	float PerpDist<(&vec3::x)>(vec3 point_at_edge, vec3 extents)
 	{
@@ -18,14 +23,15 @@ namespace idk
 		return (disp_from_corner.x < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.x : disp_from_corner.length());
 	}
 
-	template< >
+	template<>
 	float PerpDist<&vec3::z>(vec3 point_at_edge, vec3 extents)
 	{
 		vec3 disp_from_corner = (point_at_edge - extents);
 
 		return (disp_from_corner.y < 0) ? disp_from_corner.x : ((disp_from_corner.x < 0) ? disp_from_corner.y : disp_from_corner.length());
 	}
-	bool epsilon_equal(float lhs, float rhs)
+
+	bool epsilon_equal(real lhs, real rhs)
 	{
 		//Gotta handle infinity
 		return lhs == rhs || abs(abs(rhs) - abs(lhs)) <= epsilon;
@@ -77,6 +83,7 @@ namespace idk
 		result = (tmp.dist >= 0 &&tmp.dist < result.dist && tmp.perp_dist <= result.perp_dist) ? tmp : result;
 		return result;
 	}
+
 
 
 }

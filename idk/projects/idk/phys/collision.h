@@ -6,12 +6,14 @@
 #include <math/shapes/sphere.h>
 namespace idk
 {
-	bool epsilon_equal(float lhs, float rhs);
+	bool epsilon_equal(real lhs, real rhs);
+
 	struct col_result
 	{
-		float perp_dist=-1.0f;//default false.
-		float dist     = 0.0f;
-		operator bool()const { return epsilon_equal(perp_dist, 0)&& !(dist==std::numeric_limits<float>::infinity()) && dist >=-epsilon ; }
+		real perp_dist = -1.0f; // default false.
+		real dist      =  0.0f;
+		vec3 separating_axis{};
+		explicit operator bool() const;
 	};
 
 	//Assumes lhs and rhs are normalized.
@@ -22,7 +24,5 @@ namespace idk
 	template<decltype(&vec3::x) axis>
 	col_result collide_ray_aabb_face(vec3 direction, const vec3& disp_to_box, vec3 extents);
 	col_result collide_ray_aabb(const ray& lhs, const aabb& bb);
-
-
 }
 #include "collision.inl"

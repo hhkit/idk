@@ -575,6 +575,7 @@
     <ClInclude Include="gfx\ShaderGraphFactory.h">
       <Filter>gfx\shadergraph</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\CubeMap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
