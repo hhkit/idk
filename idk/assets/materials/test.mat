@@ -1,0 +1,76 @@
+master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
+nodes: 
+  ee0f4563-64fa-4e16-9e5c-de09b9bfef73: 
+    name: input\VertexNormal
+    guid: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
+    output_slots: 
+    - type: VEC3
+    position: {x: 104.000000, y: 74.000000}
+    input_slots: []
+  d5084548-0ebd-44fb-b98c-94bd0951100a: 
+    name: master\PBR
+    guid: d5084548-0ebd-44fb-b98c-94bd0951100a
+    output_slots: []
+    position: {x: 514.000000, y: 164.000000}
+    input_slots: 
+    - type: VEC3
+    - type: VEC3
+    - type: FLOAT
+    - type: FLOAT
+    - type: FLOAT
+  5153ff54-e670-4629-99f8-c6c258699945: 
+    name: constants\Vec3Constant
+    guid: 5153ff54-e670-4629-99f8-c6c258699945
+    output_slots: 
+    - type: VEC3
+    position: {x: 132.000000, y: 218.000000}
+    input_slots: 
+    - type: FLOAT
+    - type: FLOAT
+    - type: FLOAT
+  0e99c18c-a5d8-4386-9056-d60929a23733: 
+    name: math\Negate
+    guid: 0e99c18c-a5d8-4386-9056-d60929a23733
+    output_slots: 
+    - type: VEC3
+    position: {x: 321.000000, y: 105.000000}
+    input_slots: 
+    - type: VEC3
+values: 
+- node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  type: FLOAT
+  value: 0.600000
+  slot: 2
+- type: FLOAT
+  node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  value: 0.200000
+  slot: 3
+- node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  type: FLOAT
+  value: 0.000000
+  slot: 4
+- type: FLOAT
+  node: 5153ff54-e670-4629-99f8-c6c258699945
+  value: 1.000000
+  slot: 0
+- node: 5153ff54-e670-4629-99f8-c6c258699945
+  type: FLOAT
+  value: 1.000000
+  slot: 1
+- node: 5153ff54-e670-4629-99f8-c6c258699945
+  type: FLOAT
+  value: 0
+  slot: 2
+links: 
+- node_out: 5153ff54-e670-4629-99f8-c6c258699945
+  node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  slot_out: 3
+  slot_in: 0
+- node_out: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
+  node_in: 0e99c18c-a5d8-4386-9056-d60929a23733
+  slot_out: 0
+  slot_in: 0
+- node_out: 0e99c18c-a5d8-4386-9056-d60929a23733
+  node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  slot_out: 1
+  slot_in: 1
