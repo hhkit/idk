@@ -39,6 +39,7 @@ namespace idk
 	class ResourceFactory 
 		: public ResourceFactory_impl<Res, has_tag_v<Res, MetaTag>>
 	{
+	public:
 		virtual void Init() {};
 	};
 

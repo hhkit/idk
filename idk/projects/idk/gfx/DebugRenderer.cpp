@@ -12,7 +12,7 @@ namespace idk
 	}
 	void DebugRenderer::Draw(const aabb& bounding_box, const color& c, seconds duration, bool depth_test)
 	{
-		Draw(box{ bounding_box.center, bounding_box.extents }, c, duration, depth_test);
+		Draw(box{ bounding_box.center(), bounding_box.extents() }, c, duration, depth_test);
 	}
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{

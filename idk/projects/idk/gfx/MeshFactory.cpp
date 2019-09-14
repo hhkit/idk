@@ -8,7 +8,7 @@ namespace idk
 	{
 		GenerateDefaultMeshes();
 		auto i = 0;
-		for (auto& elem : defaults)
+		for (auto& elem : Mesh::defaults)
 		{
 			if (!elem)
 				std::cout << "Default mesh " << MeshType{ i } << " not created";
