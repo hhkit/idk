@@ -582,6 +582,9 @@
     <ClInclude Include="phys\collision_obb.h" />
     <ClInclude Include="phys\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
+    <ClInclude Include="gfx\MeshFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -833,6 +836,8 @@
     </ClCompile>
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\collision_obb.cpp" />
+    <ClCompile Include="gfx\MeshFactory.cpp" />
+    <ClCompile Include="res\Guid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1003,6 +1008,7 @@
     <None Include="phys\collision_raycast.inl">
       <Filter>phys</Filter>
     </None>
+    <None Include="res\Guid.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

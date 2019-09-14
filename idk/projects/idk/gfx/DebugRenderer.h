@@ -21,10 +21,10 @@ public:
 	
 	// world space debug render
 	void Draw(RscHandle<Mesh> mesh, const mat4& transform, const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
-	void Draw(const aabb&   bounding_box, const color& c = default_color, seconds duration = seconds{0}, bool depth_test = true);
-	void Draw(const box&    oriented_box, const color& c = default_color, seconds duration = seconds{0}, bool depth_test = true);
-	void Draw(const ray&    ray         , const color& c = default_color, seconds duration = seconds{0}, bool depth_test = true);
-	void Draw(const sphere& sphere      , const color& c = default_color, seconds duration = seconds{0}, bool depth_test = true);
+	void Draw(const aabb&   bounding_box                 , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
+	void Draw(const box&    oriented_box                 , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
+	void Draw(const ray&    ray                          , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
+	void Draw(const sphere& sphere                       , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 
 	span<const DebugInfo> GetWorldDebugInfo() const;
 protected:

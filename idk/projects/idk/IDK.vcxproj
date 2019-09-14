@@ -36,6 +36,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="gfx\CubeMap.h" />
+    <ClInclude Include="gfx\MeshFactory.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
     <ClInclude Include="math\linear.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
@@ -208,6 +210,7 @@
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\PhysicsSystem.cpp" />
     <ClCompile Include="phys\RigidBody.cpp" />
+    <ClCompile Include="res\Guid.cpp" />
     <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
@@ -300,6 +303,7 @@
     <None Include="reflect\uni_container.inl" />
     <None Include="res\FileResources.inl" />
     <None Include="res\ForwardingExtensionLoader.inl" />
+    <None Include="res\Guid.inl" />
     <None Include="res\Resource.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="res\SaveableResourceManager.inl" />

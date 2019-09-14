@@ -62,7 +62,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			c->AddSystem<vkn::VulkanDebugRenderer>();
+		//	c->AddSystem<vkn::VulkanDebugRenderer>();
 			c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
@@ -125,6 +125,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 
 	constexpr auto col = ivec3{ 1,0,0 };
+	constexpr auto what = sizeof(unsigned long);
 
 	// @Joseph: Uncomment this when testing.
 	// create_anim_obj(vec3{ 0,0,0 });

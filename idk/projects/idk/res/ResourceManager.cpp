@@ -36,6 +36,17 @@ namespace idk
 					}...
 				};
 			}
+
+			static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[](ResourceManager* resource_man)
+					{
+						if (auto loader = &resource_man->GetLoader<Rs>())
+							loader->Init();
+					}...
+				};
+			}
 		};
 
 		using ResourceHelper = ResourceManager_detail<Resources>;
@@ -56,6 +67,8 @@ namespace idk
 
 	void ResourceManager::LateInit()
 	{
+		for (auto& func : detail::ResourceHelper::InitFactories())
+			func(this);
 		for (auto& func : detail::ResourceHelper::GenDefaults())
 			func(this);
 	}
