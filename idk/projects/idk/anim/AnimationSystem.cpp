@@ -16,7 +16,7 @@ namespace idk
 	{
 		// float a = Core::GetDT().count();
 
-		for (auto elem : controllers)
+		for (auto& elem : controllers)
 		{
 			auto anim = elem.GetCurrentAnimation();
 			if (elem._is_playing && anim)
@@ -27,26 +27,24 @@ namespace idk
 				//		- YES: parent_transform = parent_transform * INTERPOLATED_transform.
 				//		- NO:  parent_transform = parent_transform * NODE_transform.
 				// 3) Concat the game object's current transform with the confirmed bone transform. Can subscript directly into game object
-				const auto& skeleton = elem._skeleton->data();
 				
-				const mat4& glob_inverse = elem._skeleton->GetGlobalInverse();
 
 				// We keep all the bone transforms first. Easier to refer to parent's transform, fewer mat mults.
-				vector<mat4> bone_transforms;
-				bone_transforms.reserve(skeleton.size());
-
+				
 				// Compute the time
 				elem._elapsed += Core::GetDT().count();
 				if (elem._elapsed >= anim->GetDuration())
 					elem._elapsed -= anim->GetDuration();
 				
 				float ticks = elem._elapsed * anim->GetFPS();
-				float time_in_ticks = fmod(ticks, anim->GetNumTicks());
+				float num_ticks = anim->GetNumTicks();
+				float time_in_ticks = fmod(ticks, num_ticks);
 
+				// Loop through the skeleton
+				const auto& skeleton = elem._skeleton->data();
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 				{
 					const auto& curr_bone = skeleton[bone_id];
-					auto test = anim->data();
 					const anim::Animation::EasyAnimNode* anim_node = anim->GetEasyAnimNode(curr_bone._name);
 
 					mat4 local_bone_transform;
@@ -60,7 +58,7 @@ namespace idk
 								// Interpolate here
 								local_bone_transform = local_bone_transform * interpolateChannel(channel, time_in_ticks);
 							}
-							else
+							else if (channel._node_transform != mat4{})
 							{
 								local_bone_transform = local_bone_transform * channel._node_transform;
 							}
@@ -71,19 +69,7 @@ namespace idk
 						// For now, bones and anim_nodes are 1-1.
 						assert(false);
 					}
-					
-					if (curr_bone._parent < 0)
-						bone_transforms.push_back(glob_inverse * local_bone_transform * curr_bone._offset);
-					else
-					{
-						const auto& parent_bone = skeleton[curr_bone._parent];
-						bone_transforms.push_back(parent_bone._offset.inverse() * local_bone_transform * curr_bone._offset);
-					}
-				}
-
-				for (size_t xform_id = 0; xform_id < bone_transforms.size(); ++xform_id)
-				{
-					elem._child_objects[xform_id]->GetComponent<Transform>()->LocalMatrix(bone_transforms[xform_id]);
+					elem._bone_transforms[bone_id] = local_bone_transform;
 				}
 			}
 		}
@@ -138,7 +124,6 @@ namespace idk
 			rotation.normalize();
 		}
 		
-		auto test = quat_cast<mat3>(quat{ 1, 0,0 ,0 });
 		return translate(translation) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
 	}
 }

@@ -19,7 +19,7 @@ namespace idk
 
 		// Getters
 		RscHandle<anim::Animation> GetCurrentAnimation() const;
-		vector<mat4> GenerateTransforms() const;
+		const vector<mat4>& GenerateTransforms();
 		// Setters
 		void SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc);
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
@@ -42,7 +42,7 @@ namespace idk
 		vector<RscHandle<anim::Animation>> _animations;
 
 		vector<Handle<GameObject>> _child_objects;
-		vector<mat4> _transforms;
+		vector<mat4> _bone_transforms;
 
 		void clearGameObjects();
 	};

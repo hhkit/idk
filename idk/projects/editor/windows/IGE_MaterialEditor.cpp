@@ -100,17 +100,20 @@ namespace idk
 
     void IGE_MaterialEditor::drawNode(Node& node)
     {
+        bool is_master_node = node.guid == graph->master_node;
+
         if (ImNodes::BeginNode(&node, r_cast<ImVec2*>(&node.position), &node.selected))
         {
             auto& tpl = NodeTemplate::GetTable().at(node.name);
 
             auto slash_pos = node.name.find_last_of('\\');
             string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
-			if (node.guid == graph->master_node)
+			if (is_master_node)
 				title += " (Master)";
             auto title_size = ImGui::CalcTextSize(title.c_str());
             float input_names_width = 0;
             float output_names_width = 0;
+
             int i = 0;
             for (auto slot_name : tpl.names)
             {
@@ -171,6 +174,30 @@ namespace idk
             ImGui::EndGroup();
 
             ImNodes::EndNode();
+        }
+
+        if (ImGui::BeginPopupContextItem())
+        {
+            if (ImGui::MenuItem("Disconnect"))
+                disconnectNode(node);
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", NULL, false, !is_master_node))
+            {
+
+            }
+            if (ImGui::MenuItem("Copy", NULL, false, !is_master_node))
+            {
+
+            }
+            if (ImGui::MenuItem("Delete", NULL, false, !is_master_node))
+            {
+                removeNode(node);
+            }
+            if (ImGui::MenuItem("Duplicate", NULL, false, !is_master_node))
+            {
+
+            }
+            ImGui::EndPopup();
         }
     }
 
@@ -303,6 +330,22 @@ namespace idk
         graph->nodes[node.guid] = node;
     }
 
+    void IGE_MaterialEditor::removeNode(const Node& node)
+    {
+        disconnectNode(node);
+        auto& g = *graph;
+        g.values.erase(std::remove_if(g.values.begin(), g.values.end(),
+            [guid = node.guid](const Value& v) { return v.node == guid; }), g.values.end());
+        to_delete.push_back(node.guid);
+    }
+
+    void IGE_MaterialEditor::disconnectNode(const Node& node)
+    {
+        auto& g = *graph;
+        g.links.erase(std::remove_if(g.links.begin(), g.links.end(),
+            [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; }), g.links.end());
+    }
+
 
 
     struct node_item { vector<node_item> items; string name; };
@@ -408,6 +451,7 @@ namespace idk
     IGE_MaterialEditor::IGE_MaterialEditor()
         : IGE_IWindow("Material Editor", true, ImVec2{ 600,300 }, ImVec2{ 150,150 })
     {
+        window_flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     }
 
     void IGE_MaterialEditor::Initialize()
@@ -430,32 +474,41 @@ namespace idk
         {
             //graph = Core::GetResourceManager().Create<Graph>();
             //addNode("master\\PBR", { 500.0f, 200.0f });
-            //graph->master_node = graph->nodes.begin()->first;
+            //g.master_node = g.nodes.begin()->first;
             //Core::GetSystem<SaveableResourceManager>().Save(graph);
             return;
         }
 
-        if (ImGui::Button("Compile"))
-        {
-            graph->Compile();
-            Core::GetSystem<SaveableResourceManager>().Save(graph);
-        }
+        auto& g = *graph;
+
 
         auto window_pos = ImGui::GetWindowPos();
 
+        ImGui::SetWindowFontScale(1.0f);
+        ImGui::SetNextWindowSizeConstraints(ImVec2{ 0, 0 }, ImVec2{ 1000, 320 });
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::BeginPopupContextWindow())
+        {
+            auto str = draw_nodes_context_menu();
+            if (str.size())
+            {
+                auto pos = (ImGui::GetWindowPos() - window_pos - canvas.offset) / canvas.zoom;
+                addNode(str, r_cast<vec2&>(pos));
+                // pos = windowpos + nodepos * zoom + offset
+                // nodepos = (screenpos - offset - windowpos) / zoom
+            }
+            ImGui::EndPopup();
+        }
 
 
         ImNodes::BeginCanvas(&canvas);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-        for (auto& value : graph->values)
-        {
+        for (auto& value : g.values)
             drawValue(value);
-        }
-        for (auto& node : graph->nodes)
-        {
+        for (auto& node : g.nodes)
             drawNode(node.second);
-        }
+        for(auto& guid : to_delete)
+            g.nodes.erase(guid);
         ImGui::PopStyleVar();
 
         auto connection_col_active = canvas.colors[ImNodes::ColConnectionActive];
@@ -482,25 +535,25 @@ namespace idk
                 int slot_out = (int)NodeTemplate::GetTable().at(node_out->name).GetSlotIndex(title_out);
 
                 // check if any value attached to input slot; remove it
-                for (auto iter = graph->values.begin(); iter != graph->values.end(); ++iter)
+                for (auto iter = g.values.begin(); iter != g.values.end(); ++iter)
                 {
                     if (iter->node == node_in->guid && iter->slot == slot_in)
                     {
-                        graph->values.erase(iter);
+                        g.values.erase(iter);
                         break;
                     }
                 }
                 // check if any link inputs into input slot (cannot have multiple)
-                for (auto iter = graph->links.begin(); iter != graph->links.end(); ++iter)
+                for (auto iter = g.links.begin(); iter != g.links.end(); ++iter)
                 {
                     if (iter->node_in == node_in->guid && iter->slot_in == slot_in)
                     {
-                        graph->links.erase(iter);
+                        g.links.erase(iter);
                         break;
                     }
                 }
 
-                graph->links.push_back({ node_out->guid, node_in->guid, slot_out, slot_in });
+                g.links.push_back({ node_out->guid, node_in->guid, slot_out, slot_in });
 
                 node_in->input_slots[slot_in].type = node_out->output_slots[slot_out - node_out->input_slots.size()].type;
 
@@ -524,10 +577,10 @@ namespace idk
             }
         }
 
-        for (auto& link : graph->links)
+        for (auto& link : g.links)
         {
-            auto& node_out = graph->nodes[link.node_out];
-            auto& node_in = graph->nodes[link.node_in];
+            auto& node_out = g.nodes[link.node_out];
+            auto& node_in = g.nodes[link.node_in];
             auto col = canvas.colors[ImNodes::ColConnection];
             canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
             ImNodes::Connection(&node_in, NodeTemplate::GetTable().at(node_in.name).names[link.slot_in].c_str(),
@@ -535,37 +588,29 @@ namespace idk
             canvas.colors[ImNodes::ColConnection] = col;
         }
 
-
-
-        //const ImGuiIO& io = ImGui::GetIO();
-        if (ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered() && !ImGui::IsMouseDragPastThreshold(1))
-        {
-            ImGui::FocusWindow(ImGui::GetCurrentWindow());
-            ImGui::OpenPopup("NodesContextMenu");
-        }
-
-        if (ImGui::IsPopupOpen("NodesContextMenu"))
-        {
-            ImGui::SetWindowFontScale(1.0f);
-            ImGui::SetNextWindowSizeConstraints(ImVec2{ 0, 0 }, ImVec2{ 1000, 320 });
-        }
-        if (ImGui::BeginPopup("NodesContextMenu"))
-        {
-            auto str = draw_nodes_context_menu();
-            if (str.size())
-            {
-                auto pos = (ImGui::GetWindowPos() - window_pos - canvas.offset) / canvas.zoom;
-                addNode(str, r_cast<vec2&>(pos));
-                // pos = windowpos + nodepos * zoom + offset
-                // nodepos = (screenpos - offset - windowpos) / zoom
-            }
-            ImGui::EndPopup();
-        }
-
-
-
         ImNodes::EndCanvas();
         canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
+
+
+
+        ImGui::SetCursorPosX(4);
+        ImGui::SetCursorPosY(24);
+
+        if (ImGui::Button("Compile"))
+        {
+            g.Compile();
+            Core::GetSystem<SaveableResourceManager>().Save(graph);
+        }
+
+
+        //ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, )
+        ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, canvas.colors[ImNodes::ColNodeBg].Value);
+        if (ImGui::BeginChild("Parameters", ImVec2(200, 0), true))
+        {
+            ImGui::Text("Hello");
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
     }
 
 }

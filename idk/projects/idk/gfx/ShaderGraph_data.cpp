@@ -75,8 +75,8 @@ namespace idk::shadergraph
     {
         NodeTemplate::table t;
 
-        // todo: use idk::FileSystem
-        for (auto& file : fs::recursive_directory_iterator("engine_data\\nodes"))
+        const auto nodes_dir = Core::GetSystem<FileSystem>().GetFullPath("/engine_data/nodes");
+        for (auto& file : fs::recursive_directory_iterator(nodes_dir))
         {
             if (file.is_directory())
                 continue;
@@ -85,7 +85,7 @@ namespace idk::shadergraph
             auto path_str = path.string();
             auto node = NodeTemplate::Parse(path_str);
 
-            t.emplace(std::string(path_str.begin() + sizeof("engine_data\\nodes"), path_str.end() - sizeof("node")), node);
+            t.emplace(fs::relative(path, nodes_dir).replace_extension().string(), node);
         }
 
         return t;
