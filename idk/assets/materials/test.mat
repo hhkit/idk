@@ -28,14 +28,6 @@ nodes:
     - type: FLOAT
     - type: FLOAT
     - type: FLOAT
-  0e99c18c-a5d8-4386-9056-d60929a23733: 
-    name: math\Negate
-    guid: 0e99c18c-a5d8-4386-9056-d60929a23733
-    output_slots: 
-    - type: VEC3
-    position: {x: 321.000000, y: 105.000000}
-    input_slots: 
-    - type: VEC3
 values: 
 - node: d5084548-0ebd-44fb-b98c-94bd0951100a
   type: FLOAT
@@ -67,10 +59,6 @@ links:
   slot_out: 3
   slot_in: 0
 - node_out: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
-  node_in: 0e99c18c-a5d8-4386-9056-d60929a23733
-  slot_out: 0
-  slot_in: 0
-- node_out: 0e99c18c-a5d8-4386-9056-d60929a23733
   node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  slot_out: 1
+  slot_out: 0
   slot_in: 1

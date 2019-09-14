@@ -24,10 +24,13 @@ namespace idk
     private:
         ImNodes::CanvasState canvas;
         RscHandle<shadergraph::Graph> graph;
+        vector<Guid> to_delete;
 
         void drawNode(shadergraph::Node& node);
         void drawValue(shadergraph::Value& value);
         void addNode(const string& name, vec2 pos);
+        void removeNode(const shadergraph::Node& node);
+        void disconnectNode(const shadergraph::Node& node);
     };
 
 }
