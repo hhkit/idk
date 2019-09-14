@@ -23,14 +23,16 @@ namespace idk::shadergraph
         while (std::regex_search(str_in, sm, regex))
         {
             auto token = sm.str();
-            for (auto& c : token) c = std::toupper(c);
+            for (char& c : token)
+                c = static_cast<char>(toupper(c));
             ins.push_back(ValueType::from_string(token));
             str_in = sm.suffix();
         }
         while (std::regex_search(str_out, sm, regex))
         {
             auto token = sm.str();
-            for (auto& c : token) c = std::toupper(c);
+            for (char& c : token)
+                c = static_cast<char>(toupper(c));
             outs.push_back(ValueType::from_string(token));
             str_out = sm.suffix();
         }
@@ -49,7 +51,7 @@ namespace idk::shadergraph
             NodeSignature sig{ line };
             if (sig.ins.empty() && sig.outs.empty())
             {
-                std::regex regex{ "\\w+" };
+                std::regex regex{ "[\\w \\t()]+" };
                 std::smatch sm;
                 while (std::regex_search(line, sm, regex))
                 {
@@ -73,8 +75,8 @@ namespace idk::shadergraph
     {
         NodeTemplate::table t;
 
-        // todo: use idk::FileSystem
-        for (auto& file : fs::recursive_directory_iterator("engine_data\\nodes"))
+        const auto nodes_dir = Core::GetSystem<FileSystem>().GetFullPath("/engine_data/nodes");
+        for (auto& file : fs::recursive_directory_iterator(nodes_dir))
         {
             if (file.is_directory())
                 continue;
@@ -83,7 +85,7 @@ namespace idk::shadergraph
             auto path_str = path.string();
             auto node = NodeTemplate::Parse(path_str);
 
-            t.emplace(std::string(path_str.begin() + sizeof("engine_data\\nodes"), path_str.end() - sizeof("node")), node);
+            t.emplace(fs::relative(path, nodes_dir).replace_extension().string(), node);
         }
 
         return t;

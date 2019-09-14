@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ShaderGraph.h"
+#include <gfx/Material.h>
+#include <gfx/MeshRenderer.h>
 #include <regex>
 
 namespace idk::shadergraph
@@ -33,19 +35,19 @@ namespace idk::shadergraph
     static string& make_uppercase(string& str)
     {
         for (char& c : str)
-            c = std::toupper(c);
+            c = static_cast<char>(toupper(c));
         return str;
     }
     static string& make_lowercase(string& str)
     {
         for (char& c : str)
-            c = std::tolower(c);
+            c = static_cast<char>(tolower(c));
         return str;
     }
 
     static string var_name(int counter)
     {
-        return "var_" + std::to_string(counter);
+        return "_v" + std::to_string(counter);
     }
 
     static void replace_variables(string& code, int slot_index, const string& replacement)
@@ -95,7 +97,7 @@ namespace idk::shadergraph
                 code += "sampler2D";
             else
             {
-                std::string str{ node.output_slots[i].type };
+                string str{ node.output_slots[i].type.to_string() };
                 code += make_lowercase(str);
             }
             code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
@@ -106,7 +108,7 @@ namespace idk::shadergraph
         resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
         for (int i = 0; i < node.output_slots.size(); ++i)
         {
-            replace_variables(code, node.input_slots.size() + i, var_name(state.slot_counter));
+            replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
             state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, state.slot_counter++);
         }
 
@@ -142,7 +144,7 @@ namespace idk::shadergraph
                     replacement = "sampler2D";
                 else
                 {
-                    replacement = node.input_slots[i].type;
+                    replacement = node.input_slots[i].type.to_string();
                     make_lowercase(replacement);
                 }
                 replacement += '(' + value->value + ')';
@@ -165,6 +167,15 @@ namespace idk::shadergraph
             state.inputs_to_outputs.emplace(NodeSlot{ value.node, value.slot }, &value);
 
         string code = resolve_node(nodes.at(master_node), state);
+
+		auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
+		auto h_mat = Core::GetResourceManager().Create<Material>();
+		h_mat->BuildShader(shader_template, "", code);
+
+		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
+		{
+			renderer.material_instance.material = h_mat;
+		}
     }
 
 }

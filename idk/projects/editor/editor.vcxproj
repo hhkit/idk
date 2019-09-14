@@ -182,6 +182,7 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="windows\IGE_MaterialEditor.h" />
     <ClInclude Include="windows\IGE_HierarchyWindow.h" />
     <ClInclude Include="windows\IGE_InspectorWindow.h" />
     <ClInclude Include="windows\IGE_IWindow.h" />
@@ -212,6 +213,7 @@
     <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
     <ClCompile Include="windows\IGE_IWindow.cpp" />
     <ClCompile Include="windows\IGE_MainWindow.cpp" />
+    <ClCompile Include="windows\IGE_MaterialEditor.cpp" />
     <ClCompile Include="windows\IGE_ProjectWindow.cpp" />
     <ClCompile Include="windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />

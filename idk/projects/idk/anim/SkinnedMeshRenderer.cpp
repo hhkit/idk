@@ -25,9 +25,9 @@ namespace idk
 
 			{{0,vtx::Attrib::Position},
 			 {1,vtx::Attrib::Normal},
-			 // {2,vtx::Attrib::UV},
-			 {2,vtx::Attrib::BoneID},
-			 {3,vtx::Attrib::BoneWeight}}
+			 {2,vtx::Attrib::UV},
+			 {3,vtx::Attrib::BoneID},
+			 {4,vtx::Attrib::BoneWeight}}
 		};
 	}
 	const renderer_reqs& SkinnedMeshRenderer::GetRequiredAttributes()
@@ -36,9 +36,9 @@ namespace idk
 		{ {
 			std::make_pair(vtx::Attrib::Position,		0),
 			std::make_pair(vtx::Attrib::Normal,			1),
-			// std::make_pair(vtx::Attrib::UV,				2),
-			std::make_pair(vtx::Attrib::BoneID,			2),
-			std::make_pair(vtx::Attrib::BoneWeight,		3),
+			std::make_pair(vtx::Attrib::UV,				2),
+			std::make_pair(vtx::Attrib::BoneID,			3),
+			std::make_pair(vtx::Attrib::BoneWeight,		4),
 		} };
 		return r;
 	}

@@ -24,7 +24,7 @@ namespace idk
 		for (auto i : range<3>())
 			working[i] /= retval.scale[i];
 
-		retval.rotation = decompose_rotation_matrix(working);
+		retval.rotation = decompose_rotation_matrix(working).inverse();
 
 		return retval;
 	}

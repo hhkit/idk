@@ -177,7 +177,9 @@ namespace idk::yaml
             {
                 assert(style == block_style); // should never have nested flow styles, see should_flow()
                 const auto& seq = _node.as_sequence();
-                if (should_flow(_node))
+                if (seq.empty())
+                    write("[]");
+                else if (should_flow(_node))
                 {
                     style = flow_style;
                     write('[');
@@ -190,7 +192,7 @@ namespace idk::yaml
                     output.back() = ']';
                     style = block_style;
                 }
-                else if (seq.size())
+                else
                 {
                     for (const auto& item : seq)
                     {
@@ -233,7 +235,9 @@ namespace idk::yaml
             {
                 const auto& map = _node.as_mapping();
                 assert(style == block_style);
-                if (should_flow(_node))
+                if (map.empty())
+                    write("{}");
+                else if (should_flow(_node))
                 {
                     style = flow_style;
                     write('{');
@@ -248,7 +252,7 @@ namespace idk::yaml
                     output.back() = '}';
                     style = block_style;
                 }
-                else if (map.size())
+                else
                 {
                     for (const auto& [key, item] : map)
                     {

@@ -99,20 +99,6 @@ namespace idk::win
 	{
 		return _input_manager->GetKeyUp(static_cast<int>(key));
 	}
-	bool Windows::IsMouseDragging(Key key)
-	{
-		switch (key)
-		{
-		case Key::LButton:
-			return leftHold;
-			break;
-		case Key::RButton:
-			return rightHold;
-			break;
-		};
-
-		return false;
-	}
 	char Windows::GetChar()
 	{
 		return _input_manager->GetChar();
@@ -125,7 +111,6 @@ namespace idk::win
 		for (auto& elem : winProcList)
 			elem(_hWnd, message, wParam, lParam);
 
-		ivec2 sSize = GetScreenSize();
 		switch (message)
 		{
 		case WM_KEYDOWN:
@@ -139,119 +124,42 @@ namespace idk::win
 		case WM_CHAR:
 			_input_manager->SetChar((char)wParam);
 			break;
+		case WM_MBUTTONDOWN:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseDown((int)Key::MButton);
+
+			break;
 		case WM_LBUTTONDOWN:
-			old_screenpos = screenpos;
-			screenpos.x = LOWORD(lParam);
-			screenpos.y = HIWORD(lParam);
+			grabScreenCoordinates(lParam);
 
-			leftHold = true;
-
-			ndc_screendel = vec2{
-			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
-			vec2{
-			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
-
-			screendel = screenpos - old_screenpos;
-
-			_dragging = leftHold;
-
-			std::cout << std::boolalpha << _dragging << std::endl;
-			_input_manager->SetMouseDragging(_dragging);
-
-			SetFocus(hWnd);
-			SetActiveWindow(hWnd);
-			_input_manager->SetMouseDown((int)wParam);
+			_input_manager->SetMouseDown((int)Key::LButton);
 
 			break;
 		case WM_RBUTTONDOWN:
-			old_screenpos = screenpos;
-			screenpos.x = LOWORD(lParam);
-			screenpos.y = HIWORD(lParam);
+			grabScreenCoordinates(lParam);
 
-			rightHold = true;
-
-			ndc_screendel = vec2{
-			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
-			vec2{
-			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
-			
-			screendel = screenpos - old_screenpos;
-
-			_dragging = rightHold;
-
-			std::cout << std::boolalpha << _dragging << std::endl;
-			_input_manager->SetMouseDragging(_dragging);
-
-			SetFocus(hWnd);
-			SetActiveWindow(hWnd);
-			_input_manager->SetMouseDown((int)wParam);
+			_input_manager->SetMouseDown((int)Key::RButton);
 
 			break;
 		case WM_LBUTTONUP:
-			old_screenpos = screenpos;
-			screenpos.x = LOWORD(lParam);
-			screenpos.y = HIWORD(lParam);
+			grabScreenCoordinates(lParam);
 
-			leftHold = false;
-
-			ndc_screendel = vec2{
-			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
-			vec2{
-			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
-
-			screendel = screenpos - old_screenpos;
-
-			_dragging = leftHold;
-			_input_manager->SetMouseDragging(_dragging);
-
-			SetFocus(hWnd);
-			SetActiveWindow(hWnd);
-			_input_manager->SetMouseDown((int)wParam);
+			_input_manager->SetMouseDown((int)Key::LButton);
 
 			break;
 		case WM_RBUTTONUP:
-			old_screenpos = screenpos;
-			screenpos.x = LOWORD(lParam);
-			screenpos.y = HIWORD(lParam);
+			grabScreenCoordinates(lParam);
 
-			rightHold = false;
+			_input_manager->SetMouseUp((int)Key::RButton);
+			break;
+		case WM_MBUTTONUP:
+			grabScreenCoordinates(lParam);
 
-			ndc_screendel = vec2{
-			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
-			vec2{
-			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
-
-			_dragging = rightHold;
-			_input_manager->SetMouseDragging(_dragging);
-
-			screendel = screenpos - old_screenpos;
-			//old_screenpos = screenpos;
-
-			_input_manager->SetMouseUp((int)wParam);
+			_input_manager->SetMouseUp((int)Key::MButton);
 			break;
 		case WM_MOUSEMOVE:
-			old_screenpos = screenpos;
-			screenpos.x = LOWORD(lParam);
-			screenpos.y = HIWORD(lParam);
-
-			ndc_screendel = vec2{
-			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
-			vec2{
-			static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
-			static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
-
-			screendel = screenpos - old_screenpos;
-			//old_screenpos = screenpos;
-
+			grabScreenCoordinates(lParam);
 			break;
 		case WM_MOUSEWHEEL:
 			break;
@@ -280,6 +188,24 @@ namespace idk::win
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		return 0;
+	}
+
+	void Windows::grabScreenCoordinates(LPARAM lParam)
+	{
+		old_screenpos = screenpos;
+		screenpos.x = LOWORD(lParam);
+		screenpos.y = HIWORD(lParam);
+		
+		
+		ivec2 sSize = GetScreenSize();
+		ndc_screendel = vec2{
+		static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+		static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
+		vec2{
+		static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
+		static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+
+		screendel = screenpos - old_screenpos;
 	}
 
 	HINSTANCE Windows::GetInstance()

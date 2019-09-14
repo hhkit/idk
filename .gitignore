@@ -352,8 +352,8 @@ MigrationBackup/
 /idk/testbuild
 /idk/build/tests
 /idk/build/win32
-/idk/assets/models/Running.fbx
 imgui.ini
 *.gen.frag
 /idk/assets/shader/10b6e1eb-694f-4509-b636-f22fca6f6b02.pfrag
 idk/dep/lib/SPIRV-Tools-optd.lib
+/idk/assets/materials/test.mat

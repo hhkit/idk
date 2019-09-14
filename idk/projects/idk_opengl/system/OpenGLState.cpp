@@ -5,6 +5,7 @@
 
 #include <idk_opengl/resource/OpenGLMesh.h>
 #include <idk_opengl/resource/OpenGLMaterial.h>
+#include <idk_opengl/resource/FrameBuffer.h>
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
@@ -62,8 +63,8 @@ namespace idk::ogl
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
-			fb_man.SetRenderTarget({});
-
+			//fb_man.SetRenderTarget({});
+			fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
 			
@@ -116,7 +117,7 @@ namespace idk::ogl
 				for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
 				{
 					auto& transform = skeleton.bones_transforms[i];
-					string bone_transform_blk = "BoneMat4s.bone_transforms[" + std::to_string(i) + "].";
+					string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
 					pipeline.SetUniform(bone_transform_blk, transform);
 				}
 

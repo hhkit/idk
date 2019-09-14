@@ -78,6 +78,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	if (&c->GetSystem<IDE>())
 		gSys->editorExist = true;
+
 	c->Setup();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
@@ -104,7 +105,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		// go->GetComponent<Transform>()->scale /= divByVal;// 200.f;
+		go->GetComponent<Transform>()->scale /= 200;// 200.f;
 		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
 		auto animator = go->AddComponent<AnimationController>();
@@ -112,7 +113,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/test.fbx" });
+			auto resources = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/Running.fbx" });
 			mesh_rend->mesh = resources[0].As<Mesh>();
 			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
 			animator->AddAnimation(resources[2].As<anim::Animation>());
@@ -151,13 +152,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto light = scene->CreateGameObject();
+	light->GetComponent<Transform>()->position = vec3{ 0,0,-3 };
 	light->AddComponent<Light>();
 	light->AddComponent<TestComponent>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
-	auto mover = createtest_obj(vec3{ 0, 0, 0 });
-	mover->AddComponent<TestComponent>();
-	mover->AddComponent<RigidBody>();
+	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
+	//mover->AddComponent<TestComponent>();
+	//mover->AddComponent<RigidBody>();
 
 	c->Run();
 	

@@ -28,6 +28,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/VulkanFBXLoader.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
+#include <gfx/ShaderGraphFactory.h>
+#include <res/ForwardingExtensionLoader.h>
 
 
 namespace idk
@@ -55,10 +57,24 @@ namespace idk
 			break;
 		}
 
+        Core::GetResourceManager().RegisterFactory<shadergraph::Factory>();
+        Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<shadergraph::Graph>>(".mat");
+
+        auto& fs = Core::GetSystem<FileSystem>();
+        fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
+
 		//ImGui Initializations
 		_interface->Init();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
+
+        // font config
+        ImFontConfig config;
+        config.OversampleH = 5;
+        config.OversampleV = 3;
+        config.RasterizerMultiply = 1.5f;
+        auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
+        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 16.0f, &config);
 
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
@@ -67,6 +83,7 @@ namespace idk
 		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
 		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
 		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
+		ige_windows.push_back(std::make_unique<IGE_MaterialEditor>());
 
 		//ige_main_window->Initialize();
 		for (auto& i : ige_windows) {

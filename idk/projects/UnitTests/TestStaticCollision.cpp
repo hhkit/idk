@@ -1,14 +1,14 @@
 #include "pch.h"
-#include <phys/collision.h>
+#include <phys/collision_raycast.h>
 
 using idk::ray;
 
-using idk::col_result;
+using idk::phys::col_result;
 
 bool col_result_expect(const col_result& data, float perp_dist, float dist)
 {
 	using namespace idk;
-	bool resultv = idk::epsilon_equal(data.dist, dist) && epsilon_equal(data.perp_dist, perp_dist);
+	bool resultv = idk::phys::epsilon_equal(data.dist, dist) && phys::epsilon_equal(data.perp_dist, perp_dist);
 	return resultv;
 }
 bool IsNearest(ray r, ray line ,col_result v)
@@ -27,25 +27,26 @@ bool IsNearest(ray r, ray line ,col_result v)
 		vec3 offset_plus = point + r.direction * 0.1f;
 		vec3 offset_minus = point - r.direction * 0.1f;
 		float perp_dist = l_closest_point.distance(point);
-		result = (perp_dist < l_closest_point.distance(offset_plus) && perp_dist < l_closest_point.distance(offset_minus)) && epsilon_equal(perp_dist,v.perp_dist);
+		result = (perp_dist < l_closest_point.distance(offset_plus) && perp_dist < l_closest_point.distance(offset_minus)) && phys::epsilon_equal(perp_dist,v.perp_dist);
 	}
 	else
 	{
 		vec3 diff = line.origin - r.origin;
-		result = epsilon_equal(r.direction.dot(line.direction), r.direction.length() * line.direction.length()) && (diff - diff.project_onto(r.direction)).length()==v.perp_dist;
+		result = phys::epsilon_equal(r.direction.dot(line.direction), r.direction.length() * line.direction.length()) && (diff - diff.project_onto(r.direction)).length()==v.perp_dist;
 	}
 	return result;
 }
 bool PD_Test(ray r, ray line)
 {
 	using namespace idk;
-	auto cresult = collide_ray_line(r, line);
+	auto cresult = phys::collide_ray_line(r, line);
 	return IsNearest(r, line, cresult);
 }
 
 TEST(StaticCollisionTest, RayLineTest)
 {
 	using namespace idk;
+	using namespace idk::phys;
 
 	vec3 origin = vec3{ 0.0f };
 	vec3 xaxis = vec3{ 1.0f,0.0f,0.0f };

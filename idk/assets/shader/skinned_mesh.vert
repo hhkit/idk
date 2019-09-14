@@ -19,9 +19,9 @@ End Header --------------------------------------------------------*/
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-// layout (location = 2) in vec2 uv;
-layout (location = 2) in ivec4 bone_ids;
-layout (location = 3) in vec4 bone_weights;
+layout (location = 2) in vec2 uv;
+layout (location = 3) in ivec4 bone_ids;
+layout (location = 4) in vec4 bone_weights;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
@@ -36,38 +36,39 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 
 U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 {
-	mat4 bone_transforms[MAX_BONES];
-} BoneMat4s;
+	mat4 bone_transform;
+} BoneMat4s[MAX_BONES];
 
-layout(location = 1) out VS_OUT
+layout (location = 0) out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
+layout (location = 1) out VS_OUT
 {
   vec3 position;
   vec2 uv;
   vec3 normal;
   vec3 tangent;
-  vec3 view_pos; 		
+  vec3 view_pos;
 } vs_out;
 
-layout(location = 0) out gl_PerVertex
-{
-    vec4 gl_Position;
-};
 
 void main()
 {
-  mat4 bone_transform = BoneMat4s.bone_transforms[bone_ids[0]] * bone_weights[0]
-                      + BoneMat4s.bone_transforms[bone_ids[1]] * bone_weights[1]
-                      + BoneMat4s.bone_transforms[bone_ids[2]] * bone_weights[2]
-                      + BoneMat4s.bone_transforms[bone_ids[3]] * bone_weights[3];
+  mat4 b_transform =  BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
   
-	vs_out.position = vec3(ObjectMat4s.object_transform 
-                    * bone_transform 
-                    * vec4(position, 1.0));
-                    
+  b_transform      += BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1];
+  b_transform      += BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2];
+  b_transform      += BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
+  
+	vs_out.position = vec3(ObjectMat4s.object_transform * b_transform * vec4(position, 1.0));
+
 	vs_out.normal   = vec3(ObjectMat4s.normal_transform 
-                    * bone_transform
+                    * b_transform
                     * vec4(normal, 1.0));
-	// vs_out.uv       = uv;
-  gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
-	vs_out.uv = gl_Position.xy;
+	vs_out.uv       = uv;
+	gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
+ 
+	// vs_out.uv = gl_Position.xy;
 }

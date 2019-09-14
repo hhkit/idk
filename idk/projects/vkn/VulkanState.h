@@ -3,7 +3,6 @@
 #include <optional>
 #include <fstream>
 #include <sstream>
-#include "math2.h"
 #pragma warning(disable:26495)
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
@@ -80,6 +79,10 @@ namespace idk::vkn
 
 		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
 		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers2;
+		//TODO FrameData
+		//class FrameData
+		//Stores data in frame (images, image_views, framebuffers for swapping)
+
 		std::vector<vk::DescriptorSet    > descriptor_sets;
 		std::vector<vk::DescriptorSet    > descriptor_sets2;
 
