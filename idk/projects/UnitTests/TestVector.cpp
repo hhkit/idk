@@ -20,16 +20,37 @@ TEST(Math, VectorConstruction) {
 template<typename vec>
 void TestNormalized()
 {
-	EXPECT_TRUE(abs(vec{ 0.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 5.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 99.5f    }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 0.00015f }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ idk::constants::epsilon<float>() }.get_normalized().length()) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 0.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 5.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 99.5f    }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ 0.00015f }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
-	EXPECT_TRUE(abs(vec{ idk::constants::epsilon<float>() }.get_normalized().length()) <= idk::constants::epsilon<float>());
+	bool res;
+	float len = vec{ 0.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ 5.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ 99.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ 0.015f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ idk::constants::epsilon<float>() }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+
+	len = vec{ -0.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -5.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -99.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -0.015f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -idk::constants::epsilon<float>() }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
 }
 
 TEST(Math, VectorGettors) {
