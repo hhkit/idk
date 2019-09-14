@@ -32,6 +32,7 @@ namespace idk
 
 		trad operator+(const trad&) const;
 		trad operator-(const trad&) const;
+		trad operator-() const;
 		trad operator*(const T&) const;
 		trad operator/(const T&) const;
 		T      operator/(const trad&) const;
@@ -69,6 +70,7 @@ namespace idk
 
 		tdeg operator+(const tdeg&) const;
 		tdeg operator-(const tdeg&) const;
+		tdeg operator-() const;
 		tdeg operator*(const T&) const;
 		tdeg operator/(const T&) const;
 		T      operator/(const tdeg&) const;

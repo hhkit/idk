@@ -17,6 +17,28 @@ TEST(Math, VectorConstruction) {
 	);
 }
 
+template<typename vec>
+void TestNormalized()
+{
+	EXPECT_TRUE(abs(vec{ 0.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 5.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 99.5f    }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 0.00015f }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ idk::constants::epsilon<float>() }.get_normalized().length()) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 0.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 5.5f     }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 99.5f    }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ 0.00015f }.get_normalized().length() - 1) <= idk::constants::epsilon<float>());
+	EXPECT_TRUE(abs(vec{ idk::constants::epsilon<float>() }.get_normalized().length()) <= idk::constants::epsilon<float>());
+}
+
+TEST(Math, VectorGettors) {
+	TestNormalized < idk::vec2>();
+	TestNormalized < idk::vec3>();
+	TestNormalized < idk::vec4>();
+
+}
+
 TEST(Math, VectorAccess) {
 	EXPECT_TRUE((idk::vec2{ 1.f, 2.f }.x == idk::vec2{ 1.f, 2.f } [0] ));
 	EXPECT_TRUE((idk::vec2{ 1.f, 2.f }.y == idk::vec2{ 1.f, 2.f } [1] ));
