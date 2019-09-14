@@ -10,6 +10,8 @@
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
+#include <gfx/Light.h>
+
 
 namespace idk::vkn
 {
@@ -290,13 +292,20 @@ namespace idk::vkn
 		const CameraData& cam = state.camera;
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
+		
+		const vector<LightData>& tmp_light = *state.lights;
 
+
+		string light_block;
+		uint32_t len = s_cast<uint32_t>(tmp_light.size());
+		light_block += string{ reinterpret_cast<const char*>(&len),sizeof(len) };
+		light_block += string( 16-sizeof(len), '\0');
+		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		auto msprog = GetMeshRendererShaderModule();
 		auto& msmod = msprog.as<ShaderModule>();
-		auto& obj_uni = msmod.GetLayout("MV");
-		auto& pvt_uni = msmod.GetLayout("P");
-		auto& nml_uni = msmod.GetLayout("MVP_IVT");
-		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
+		auto& pvt_uni = msmod.GetLayout("CameraBlock");
+		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
+		auto V = mat4{ vec4{1,0,0,0},vec4{0,-1,0,0} ,vec4{0,0,1,0},vec4{0,0,0,1} }*cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
 		mat4 pvt_trf = cam.projection_matrix;
 		;
 		//Force pipeline creation
@@ -316,11 +325,15 @@ namespace idk::vkn
 			//set, bindings
 			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
 			auto& layouts = sprog.as<ShaderModule>();
+			auto& lit_uni = layouts.GetLayout("LightBlock");
+
 			//Account for the object and normal transform bindings
 			mat4 obj_trf = V * dc.transform;
 			mat4 obj_ivt= obj_trf.inverse().transpose();
-			PreProcUniform(obj_uni, obj_trf, collated_layouts, collated_bindings,ubo_manager);
-			PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
+			vector<mat4> mat4_block{obj_trf,obj_ivt};
+			PreProcUniform(obj_uni, mat4_block , collated_layouts, collated_bindings, ubo_manager);
+			PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
+			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
 			//Account for material bindings
 			for (auto itr = layouts.LayoutsBegin(), end = layouts.LayoutsEnd(); itr != end; ++itr)

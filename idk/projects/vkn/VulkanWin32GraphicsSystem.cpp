@@ -77,7 +77,7 @@ namespace idk::vkn
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
-			curr_state.Init(curr_buffer.camera[i], curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
+			curr_state.Init(curr_buffer.camera[i],curr_buffer.lights, curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
 		}
 		// */
 		curr_frame.RenderGraphicsStates(curr_states);

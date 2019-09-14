@@ -41,7 +41,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//_CrtSetBreakAlloc(2455); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-
+#ifdef USE_RENDER_DOC
 	RENDERDOC_API_1_1_2* rdoc_api = NULL;
 
 	// At init, on windows
@@ -51,19 +51,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
 		RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
 	}
-
+#endif
 	using namespace idk;
 	
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::OpenGL;
+	auto gfx_api = GraphicsAPI::Vulkan;
 	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 			c->AddSystem<vkn::VulkanDebugRenderer>();
-			c->AddSystem<IDE>();
+			//c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
 			break;

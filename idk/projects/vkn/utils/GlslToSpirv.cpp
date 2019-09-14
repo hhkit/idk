@@ -11,6 +11,16 @@
 #include <shaderc/shaderc.hpp>
 namespace idk::vkn
 {
+	constexpr auto replacer = R"(
+#ifdef OGL
+#define U_LAYOUT(SET, BIND) 
+#define BLOCK(X) struct X
+#endif
+#ifdef VULKAN
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND, std140) 
+#define BLOCK(X) X
+#endif
+)";
 	/*
 EShLanguage GlslToSpirv::GetStage(string_view ext)
 {
@@ -67,6 +77,12 @@ shaderc_shader_kind ConvertStageSC(vk::ShaderStageFlagBits stage)
 
 std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk::ShaderStageFlagBits v_stage)
 {
+	string val = static_cast<string>(glsl);
+	string shader_code = val;
+	auto version_pos = shader_code.find("#version");
+	auto version_end = shader_code.find("\n", version_pos);
+
+	val = shader_code.substr(0, version_end) + replacer + shader_code.substr(version_end, shader_code.size() - version_end);
 	std::optional<std::vector<unsigned int>> spirv_out;/*
 	auto stage = ConvertStage(v_stage);
 	glslang::InitializeProcess();
@@ -110,7 +126,7 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 	shaderc::Compiler compiler;
 	shaderc::CompileOptions opt;
 	opt.SetTargetEnvironment(shaderc_target_env::shaderc_target_env_vulkan, 0);
-	auto result = compiler.CompileGlslToSpv(std::string{ glsl }, ConvertStageSC(v_stage), "tmp", opt);
+	auto result = compiler.CompileGlslToSpv(val, ConvertStageSC(v_stage), "tmp", opt);
 	spirv_out = vector<unsigned int>{result.begin(),result.end()};
 	hlp::cerr()<<result.GetErrorMessage()<<std::endl;
 
