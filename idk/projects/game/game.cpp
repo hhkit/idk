@@ -78,6 +78,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	if (&c->GetSystem<IDE>())
 		gSys->editorExist = true;
+
 	c->Setup();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();

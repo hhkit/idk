@@ -481,18 +481,12 @@ namespace idk
 
         auto& g = *graph;
 
-        if (ImGui::Button("Compile"))
-        {
-            g.Compile();
-            Core::GetSystem<SaveableResourceManager>().Save(graph);
-        }
-
 
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
         ImGui::SetNextWindowSizeConstraints(ImVec2{ 0, 0 }, ImVec2{ 1000, 320 });
-        if (ImGui::BeginPopupContextWindow())
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::BeginPopupContextWindow())
         {
             auto str = draw_nodes_context_menu();
             if (str.size())
@@ -596,6 +590,27 @@ namespace idk
 
         ImNodes::EndCanvas();
         canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
+
+
+
+        ImGui::SetCursorPosX(4);
+        ImGui::SetCursorPosY(24);
+
+        if (ImGui::Button("Compile"))
+        {
+            g.Compile();
+            Core::GetSystem<SaveableResourceManager>().Save(graph);
+        }
+
+
+        //ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, )
+        ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, canvas.colors[ImNodes::ColNodeBg].Value);
+        if (ImGui::BeginChild("Parameters", ImVec2(200, 0), true))
+        {
+            ImGui::Text("Hello");
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
     }
 
 }

@@ -90,10 +90,21 @@ namespace idk
 
 		// Apply offsets to all the transforms
 		const auto& skeleton = _skeleton->data();
-		for (size_t i = 0; i < _child_objects.size(); ++i)
+		if (_skeleton->GetGlobalInverse() != mat4{})
 		{
-			auto curr_bone = skeleton[i];
-			_bone_transforms[i] = _skeleton->GetGlobalInverse() * _bone_transforms[i] * curr_bone._offset;
+			for (size_t i = 0; i < _child_objects.size(); ++i)
+			{
+				auto& curr_bone = skeleton[i];
+				_bone_transforms[i] = _skeleton->GetGlobalInverse() * _bone_transforms[i] * curr_bone._offset;
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < _child_objects.size(); ++i)
+			{
+				auto& curr_bone = skeleton[i];
+				_bone_transforms[i] = _bone_transforms[i] * curr_bone._offset;
+			}
 		}
 
 		return _bone_transforms;
