@@ -58,7 +58,7 @@ namespace idk
 								// Interpolate here
 								local_bone_transform = local_bone_transform * interpolateChannel(channel, time_in_ticks);
 							}
-							else
+							else if (channel._node_transform != mat4{})
 							{
 								local_bone_transform = local_bone_transform * channel._node_transform;
 							}
@@ -124,7 +124,6 @@ namespace idk
 			rotation.normalize();
 		}
 		
-		auto test = quat_cast<mat3>(quat{ 1, 0,0 ,0 });
 		return translate(translation) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
 	}
 }
