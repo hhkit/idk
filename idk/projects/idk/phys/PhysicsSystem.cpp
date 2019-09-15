@@ -18,7 +18,8 @@ namespace idk
 	}
 	void PhysicsSystem::PredictTransform(span<class RigidBody> rbs, span<const class Transform>)
 	{
-		auto dt = Core::GetDT().count();
+		const auto dt = Core::GetDT().count();
+		const auto half_dt = dt / 2;
 		
 		for (auto& rigidbody : rbs)
 		{
@@ -28,7 +29,7 @@ namespace idk
 			// auto decomp = decompose(tfm->GlobalMatrix());
 			// decomp.position += rigidbody.velocity * dt;
 			auto mat = tfm->GlobalMatrix();
-			mat[3] += vec4{ rigidbody.velocity * dt, 0 };
+			mat[3] += vec4{ rigidbody.velocity * dt + rigidbody.accel * dt * half_dt, 0 };
 
 			rigidbody._predicted_tfm = mat;
 		}
@@ -121,7 +122,7 @@ namespace idk
 				}
 				else
 				{
-					return std::make_tuple(vec3{}, 0.f, 0.f);
+					return std::make_tuple(vec3{}, 1.f, 0.f);
 				}
 			};
 
@@ -131,18 +132,18 @@ namespace idk
 			auto rel_v = rvel - lvel; // a is not moving
 			auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
 
-			if (contact_v < -epsilon)
+			if (contact_v < +epsilon)
 				continue;
 
 			auto restitution = std::min(lrestitution, rrestitution);
 
-			auto impulse_scalar = (1 + restitution) * contact_v / (linv_mass + rinv_mass);
+			auto impulse_scalar = (1.f + restitution) * contact_v / (linv_mass + rinv_mass);
 			auto impulse = impulse_scalar * result.normal_of_collision;
 
 			if (lrigidbody)
-				lrigidbody->AddForce(impulse / dt);
+				lrigidbody->velocity += impulse * linv_mass;
 			if (rrigidbody)
-				rrigidbody->AddForce(-impulse / dt);
+				rrigidbody->velocity -= impulse * rinv_mass;
 		}
 	}
 
@@ -160,7 +161,7 @@ namespace idk
 				tfm->GlobalPosition() + (rigidbody.velocity * dt) + rigidbody.accel * dt * half_dt);
 			
 			auto accel = rigidbody.accel;
-			rigidbody.velocity += (accel + rigidbody._prev_accel)*half_dt;
+			rigidbody.velocity += (accel + rigidbody._prev_accel) * half_dt;
 
 			rigidbody._prev_accel = rigidbody.accel;
 			rigidbody.accel       = vec3{};

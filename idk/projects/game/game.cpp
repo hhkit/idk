@@ -129,7 +129,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 
 	constexpr auto col = ivec3{ 1,0,0 };
-	constexpr auto what = sizeof(unsigned long);
 
 	// @Joseph: Uncomment this when testing.
 	// create_anim_obj(vec3{ 0,0,0 });
@@ -169,7 +168,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
 	seduceme->AddComponent<Collider>()->shape = sphere{};
-	seduceme->AddComponent<RigidBody>();
+	//seduceme->AddComponent<RigidBody>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
 	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
