@@ -62,3 +62,8 @@ links:
   node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   slot_out: 0
   slot_in: 1
+parameters: 
+- name: TestParam
+  guid: f6b50086-a0d3-435e-80e0-8bee743368ee
+  type: FLOAT
+  default_value: 0

@@ -102,9 +102,6 @@ namespace idk
 			ImGuiIO& io = ImGui::GetIO();
 			io;
 
-			//Imgui Style
-			ImGui::StyleColorsClassic();
-
 			//Platform/renderer bindings
 			ImGui_ImplWin32_Init(vknViews.GetWindowsInfo().wnd);
 

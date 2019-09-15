@@ -15,6 +15,8 @@ namespace idk
 {
     using namespace idk::shadergraph;
 
+    constexpr static auto DRAG_DROP_PARAMETER = "dd_param";
+
     static array<unsigned, ValueType::count + 1> type_colors
     { // from DB32 palette
         0,
@@ -177,7 +179,16 @@ namespace idk
             ImNodes::EndNode();
         }
 
-        if (ImGui::BeginPopupContextItem())
+        if (ImGui::IsWindowHovered() && ImGui::IsMouseReleased(1))
+        {
+            bool x = true;
+        }
+
+        // if context menu is already open, iswindowhovered will return false
+        auto can_open = ImGui::IsPopupOpen(ImGui::GetCurrentWindow()->DC.LastItemId) ||
+            ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+        can_open = can_open && !ImGui::IsMouseDragPastThreshold(1);
+        if (can_open && ImGui::BeginPopupContextItem())
         {
             if (ImGui::MenuItem("Disconnect"))
                 disconnectNode(node);
@@ -497,9 +508,6 @@ namespace idk
         }
 
 
-        show_params_window();
-
-
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
@@ -607,17 +615,33 @@ namespace idk
 
         ImNodes::EndCanvas();
         canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
+
+
+
+
+        //ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+        //ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail()));
+        //if (ImGui::BeginDragDropTarget())
+        //{
+        //    if (const auto* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_PARAMETER))
+        //    {
+        //        bool x = true;
+        //    }
+        //}
+
+
+
+        show_params_window();
     }
 
     void IGE_MaterialEditor::show_params_window()
     {
-        ImGui::SetWindowFontScale(1.0f);
-        if (ImGui::IsWindowFocused())
-            ImGui::SetNextWindowFocus();
-        ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
-        ImGui::SetNextWindowSizeConstraints(ImVec2(150, 200), ImGui::GetContentRegionAvail());
+        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
-        if (ImGui::Begin("Parameters##MaterialEditor_Parameters", 0, ImGuiWindowFlags_NoMove))
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, canvas.colors[ImNodes::ColNodeBg].Value);
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
+
+        if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
             if (ImGui::Button("Add Parameter"))
             {
@@ -640,22 +664,16 @@ namespace idk
                 ImGui::BeginGroup();
 
                 strcpy_s(buf, param.name.c_str());
-                if (ImGui::InputText("Name", buf, 32))
+                if (ImGui::InputText(string(param.type.to_string()).c_str(), buf, 32))
                 {
                     param.name = buf;
                 }
 
-                if (ImGui::BeginCombo("Type", string{ param.type.to_string() }.c_str()))
+                if (ImGui::BeginDragDropSource())
                 {
-                    for (auto& sv : ValueType::names)
-                    {
-                        if (ImGui::Selectable(string{ sv }.c_str()))
-                        {
-                            param.type = ValueType::from_string(sv);
-                            param.default_value = default_value(param.type);
-                        }
-                    }
-                    ImGui::EndCombo();
+                    ImGui::Text(param.name.c_str());
+                    ImGui::SetDragDropPayload(DRAG_DROP_PARAMETER, &param.guid, sizeof(param.guid));
+                    ImGui::EndDragDropSource();
                 }
 
                 switch (param.type)
@@ -711,14 +729,17 @@ namespace idk
                 draw_list->ChannelsSetCurrent(0);
                 auto min = ImGui::GetItemRectMin();
                 auto max = ImVec2(min.x + ImGui::GetWindowContentRegionWidth(), ImGui::GetItemRectMax().y) + ImVec2(2.0f, 2.0f);
-                draw_list->AddRect(min, max, canvas.colors[ImNodes::ColNodeBg]);
+                draw_list->AddRect(min, max, ImGui::GetColorU32(ImGuiCol_Border), 2.0f);
 
                 draw_list->ChannelsMerge();
             }
 
             ImGui::PopStyleVar();
         }
-        ImGui::End();
+        ImGui::EndChild();
+
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor();
     }
 
 }

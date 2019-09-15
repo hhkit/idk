@@ -68,6 +68,9 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 
+        //Imgui Style
+        ImGui::StyleColorsClassic();
+
         // font config
         ImFontConfig config;
         config.OversampleH = 5;
