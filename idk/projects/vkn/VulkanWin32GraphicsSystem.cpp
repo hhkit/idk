@@ -13,6 +13,8 @@
 #include <vkn/PipelineManager.h>
 #include <vkn/RegisterVulkanFactories.h>
 
+#include <glslang/public/ShaderLang.h>
+
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 //	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -46,6 +48,9 @@ namespace idk::vkn
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
 	}
+	VulkanWin32GraphicsSystem::~VulkanWin32GraphicsSystem()
+	{
+	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
 		windows_ = &Core::GetSystem<win::Windows>();
@@ -65,22 +70,63 @@ namespace idk::vkn
 		}
 		instance_->imguiEnabled = editorExist;
 	}
+	/*
+	vector<IBufferedObj*> GetBufferedResources(vector<GraphicsState>& states)
+	{
+		hash_set<RscHandle<Texture>> textures;
+		hash_set<RscHandle<Mesh>> meshes;
+		for (auto& state : states)
+		{
+			for (auto& mesh_render : state.mesh_render)
+			{
+				meshes.emplace(mesh_render->mesh);
+				auto& m_inst = mesh_render->material_instance;
+				for (auto& uniform : m_inst.uniforms)
+				{
+					if (m_inst.IsImageBlock(uniform.first))
+					{
+						for (auto& tex : m_inst.GetImageBlock(uniform.first))
+						{
+							textures.emplace(tex.second);
+						}
+					}
+				}
+			}
+		}
+
+		//Transform the result sets into buffered object vector
+		vector<IBufferedObj*> objs;
+		for (auto& mesh : meshes)
+		{
+
+		}
+	}
+	
+	void UpdateResources(uint32_t frame_index, const vector<IBufferedObj*>& buffered_objects)
+	{
+		for (auto p_obj : buffered_objects)
+		{
+			p_obj->UpdateCurrent(frame_index);
+		}
+	}
+	*/
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		auto& curr_signal = instance_->View().CurrPresentationSignals();
 		instance_->AcquireFrame(*curr_signal.image_available);
 		auto curr_index = instance_->View().Swapchain().curr_index;
+		instance_->ResourceManager().ProcessQueue(curr_index);
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
-		std::vector<GraphicsState> curr_states(1);// curr_buffer.camera.size());
+		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			curr_state.Init(curr_buffer.camera[i],curr_buffer.lights, curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
 		}
 		// */
-		curr_frame.RenderGraphicsStates(curr_states);
+		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
@@ -106,8 +152,10 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		this->_pm.reset();
 		_frame_renderers.clear();
 		instance_.reset();
+		ShFinalize();
 	}
 	GraphicsAPI VulkanWin32GraphicsSystem::GetAPI()
 	{

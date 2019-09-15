@@ -5,6 +5,8 @@
 #include <gfx/vertex_descriptor.h>
 #include <vkn/MemoryAllocator.h>
 
+#include <vkn/VulkanResourceManager.h>
+
 namespace idk::vkn
 {
 	using attrib_index = vtx::Attrib;
@@ -12,7 +14,8 @@ namespace idk::vkn
 	{
 		struct Managed
 		{
-			vk::UniqueBuffer buffer{};
+			//vk::UniqueBuffer 
+			VulkanRsc<vk::Buffer> buffer{};
 			hlp::UniqueAlloc alloc{};
 			size_t len{};
 			Managed() = default;

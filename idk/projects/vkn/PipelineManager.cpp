@@ -10,7 +10,7 @@ namespace idk::vkn
 	{
 		return *_view;
 	}
-	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules)
+	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules,uint32_t frame_index)
 	{
 		bool is_diff = prog_to_pipe.empty();
 		std::optional<handle_t> prev{};
@@ -30,7 +30,9 @@ namespace idk::vkn
 		if (is_diff)
 		{
 			PipelineObject obj{ config,modules };
-			obj.Create(View());
+			obj.Create(View(),frame_index);
+
+			//TODO threadsafe lock here
 			auto handle = pipelines.add(std::move(obj));
 			for (auto& module : modules)
 			{
@@ -64,14 +66,14 @@ namespace idk::vkn
 				if (module.NeedUpdate())
 				{
 					need_update = true;
-					module.Update();
+					module.UpdateCurrent(frame_index);
 				}
 			}
 			if (need_update)
 			{
 				//Recreate pipeline in back_pipeline
 				pipelines[handle].Swap();
-				pipelines[handle].Create(View());
+				pipelines[handle].Create(View(),frame_index);
 			}
 		}
 	}

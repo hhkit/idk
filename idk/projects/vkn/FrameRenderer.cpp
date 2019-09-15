@@ -142,8 +142,10 @@ namespace idk::vkn
 	{
 		_pipeline_manager = &manager;
 	}
-	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states)
+	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
+		_current_frame_index = frame_index;
+		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;
 		GrowStates(gfx_states.size());
 		size_t num_concurrent = curr_frame._render_threads.size();
@@ -584,7 +586,7 @@ namespace idk::vkn
 	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules)
 	{
 		// TODO: Replace with something that actually gets the pipeline
-		return GetPipelineManager().GetPipeline(config,modules);
+		return GetPipelineManager().GetPipeline(config,modules,_current_frame_index);
 	}
 
 	//PipelineHandle_t FrameRenderer::GetPipelineHandle()

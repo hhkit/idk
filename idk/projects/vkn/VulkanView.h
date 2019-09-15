@@ -5,6 +5,7 @@
 namespace idk::vkn
 {
 	class VulkanState;
+	class VulkanResourceManager;
 	struct RenderState;
 	//Interface for the vulkan details. 
 	//Ideally we should move all of the vk:: related data and into VulkanDetail
@@ -12,6 +13,7 @@ namespace idk::vkn
 	class VulkanView
 	{
 	public:
+		VulkanResourceManager&              ResourceManager()const;
 		vk::DispatchLoaderDefault&          Dispatcher()const;
 		vk::DispatchLoaderDynamic&          DynDispatcher()const;
 		vk::UniqueInstance&                 Instance()const;

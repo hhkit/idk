@@ -123,13 +123,14 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 	glslang::FinalizeProcess();
 
 	*/
-	shaderc::Compiler compiler;
-	shaderc::CompileOptions opt;
-	opt.SetTargetEnvironment(shaderc_target_env::shaderc_target_env_vulkan, 0);
-	auto result = compiler.CompileGlslToSpv(val, ConvertStageSC(v_stage), "tmp", opt);
-	spirv_out = vector<unsigned int>{result.begin(),result.end()};
-	hlp::cerr()<<result.GetErrorMessage()<<std::endl;
-
+	{
+		shaderc::Compiler compiler;
+		shaderc::CompileOptions opt;
+		opt.SetTargetEnvironment(shaderc_target_env::shaderc_target_env_vulkan, 0);
+		auto result = compiler.CompileGlslToSpv(val, ConvertStageSC(v_stage), "tmp", opt);
+		spirv_out = vector<unsigned int>{ result.begin(),result.end() };
+		hlp::cerr() << result.GetErrorMessage() << std::endl;
+	}
 	return spirv_out;
 }
 

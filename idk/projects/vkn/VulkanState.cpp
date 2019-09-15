@@ -2567,6 +2567,12 @@ namespace idk::vkn
 		dbg_vertex_buffer.reset();
 	}
 
+	VulkanResourceManager& VulkanState::ResourceManager()
+	{
+		// TODO: insert return statement here
+		return rsc_manager;
+	}
+
 	DbgVertexBuffer::DbgVertexBuffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes)
 	{
 		Resize(pdevice, device, num_bytes);

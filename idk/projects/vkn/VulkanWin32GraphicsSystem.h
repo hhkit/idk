@@ -25,6 +25,7 @@ namespace idk::vkn
 	{
 	public:
 		VulkanWin32GraphicsSystem();
+		~VulkanWin32GraphicsSystem();
 		void Init() override ;
 		void LateInit() override;
 

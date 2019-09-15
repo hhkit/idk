@@ -1,10 +1,10 @@
-#include "pch.h"
 #pragma once
 #include<vulkan/vulkan.hpp>
 #include "idk.h"
 #include "gfx/Texture.h"
 #include <vkn/MemoryAllocator.h>
 namespace idk::vkn {
+
 	struct VknTexture
 		: public Texture
 	{

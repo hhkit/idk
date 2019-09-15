@@ -67,6 +67,11 @@ namespace idk
 
 		for (auto& elem : _resource_tables)
 			elem.reset();
+
+		for (auto& elem : _resource_factories)
+		{
+			elem.reset();
+		}
 	}
 
 	void ResourceManager::WatchDirectory()
