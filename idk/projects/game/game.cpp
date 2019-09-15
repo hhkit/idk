@@ -21,6 +21,9 @@
 #include <test/TestSystem.h>
 #include <renderdoc/renderdoc_app.h>
 
+
+#define USE_RENDER_DOC
+
 namespace idk
 {
 	struct yolo
@@ -41,7 +44,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//_CrtSetBreakAlloc(2455); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-
+#ifdef USE_RENDER_DOC
 	RENDERDOC_API_1_1_2* rdoc_api = NULL;
 
 	// At init, on windows
@@ -51,7 +54,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
 		RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
 	}
-
+#endif
 	using namespace idk;
 	
 	auto c = std::make_unique<Core>();
@@ -89,6 +92,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0.0, -2.5f };
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
+	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
 	float divByVal = 1.f;
 	if (&c->GetSystem<IDE>())
@@ -154,7 +158,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto light = scene->CreateGameObject();
-	light->GetComponent<Transform>()->position = vec3{ 0,0,-3 };
+	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
 	light->AddComponent<Light>();
 	light->AddComponent<TestComponent>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();

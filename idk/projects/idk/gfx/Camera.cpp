@@ -63,7 +63,8 @@ namespace idk
 			0xFFFFFFF,
 			ViewMatrix(),
 			ProjectionMatrix(),
-			render_target
+			render_target,
+			clear_color
 		};
 	}
 	float Camera::AspectRatio() const

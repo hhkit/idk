@@ -32,5 +32,6 @@ layout(location = 2) out vec4 fragColor;
 void main() {
 //+ 1.0z to put the object back within vulkan's clipping range: 0-1 (as opposed to -1 - 1)
     gl_Position =  proj.in_proj * view.in_view *model* vec4(inPosition, 1.0);
+	//gl_Position /= gl_Position.w;
 	fragColor = vec4(inColor,1.0);
 }

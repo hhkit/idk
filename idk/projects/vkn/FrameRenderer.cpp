@@ -10,6 +10,8 @@
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
+#include <gfx/Light.h>
+
 
 namespace idk::vkn
 {
@@ -290,13 +292,20 @@ namespace idk::vkn
 		const CameraData& cam = state.camera;
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
+		
+		const vector<LightData>& tmp_light = *state.lights;
 
+
+		string light_block;
+		uint32_t len = s_cast<uint32_t>(tmp_light.size());
+		light_block += string{ reinterpret_cast<const char*>(&len),sizeof(len) };
+		light_block += string( 16-sizeof(len), '\0');
+		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		auto msprog = GetMeshRendererShaderModule();
 		auto& msmod = msprog.as<ShaderModule>();
-		auto& obj_uni = msmod.GetLayout("MV");
-		auto& pvt_uni = msmod.GetLayout("P");
-		auto& nml_uni = msmod.GetLayout("MVP_IVT");
-		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
+		auto& pvt_uni = msmod.GetLayout("CameraBlock");
+		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
+		auto V = mat4{ vec4{1,0,0,0},vec4{0,-1,0,0} ,vec4{0,0,1,0},vec4{0,0,0,1} }*cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
 		mat4 pvt_trf = cam.projection_matrix;
 		;
 		//Force pipeline creation
@@ -316,91 +325,65 @@ namespace idk::vkn
 			//set, bindings
 			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
 			auto& layouts = sprog.as<ShaderModule>();
+			auto& lit_uni = layouts.GetLayout("LightBlock");
+
 			//Account for the object and normal transform bindings
 			mat4 obj_trf = V * dc.transform;
 			mat4 obj_ivt= obj_trf.inverse().transpose();
-			PreProcUniform(obj_uni, obj_trf, collated_layouts, collated_bindings,ubo_manager);
-			PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
+			vector<mat4> mat4_block{obj_trf,obj_ivt};
+			PreProcUniform(obj_uni, mat4_block , collated_layouts, collated_bindings, ubo_manager);
+			PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
+			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
-
-
-			//collated_layouts[obj_uni.layout]++;
-			//collated_layouts[pvt_uni.layout]++;
-			//collated_layouts[nml_uni.layout]++;
-			//mat4 obj_trf = V * dc.transform;
-			//mat4 pvt_trf = cam.projection_matrix;
-			//mat4 obj_ivt= obj_trf.inverse().transpose();
-			//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(obj_trf);
-			//auto&& [pvt_buffer, pvt_offset] = ubo_manager.Add(pvt_trf);
-			//auto&& [ivt_buffer, ivt_offset] = ubo_manager.Add(obj_ivt);
-			//
-			//
-			//collated_bindings[obj_uni.set].emplace_back(
-			//	ProcessedRO::BindingInfo
-			//	{
-			//		obj_uni.binding,
-			//		trf_buffer,
-			//		trf_offset,
-			//		0,
-			//		obj_uni.size
-			//	}
-			//);
-			//collated_bindings[nml_uni.set].emplace_back(
-			//	ProcessedRO::BindingInfo
-			//	{
-			//		nml_uni.binding,
-			//		ivt_buffer,
-			//		ivt_offset,
-			//		0,
-			//		nml_uni.size
-			//	}
-			//);
-
 			//Account for material bindings
-			for (auto& pair: dc.material_instance.uniforms)
+			for (auto itr = layouts.LayoutsBegin(), end = layouts.LayoutsEnd(); itr != end; ++itr)
 			{
-				auto& name = pair.first;
-				auto& itr = layouts.GetLayout(name);
-				auto& layout = itr.layout;
+				auto& name = itr->first;
+				auto mat_uni_itr = dc.material_instance.uniforms.find(itr->first);
+				if (mat_uni_itr != dc.material_instance.uniforms.end())
 				{
-					collated_layouts[layout].second++;
-					
-					switch (itr.type)
+					auto& ubo_info = itr->second;
+					auto& layout = ubo_info.layout;
 					{
-					case uniform_layout_t::UniformType::eBuffer:
-					{
-						auto&& data = dc.material_instance.GetUniformBlock(name);
-						auto&& [buffer, offset] = ubo_manager.Add(data);
-						collated_bindings[itr.set].emplace_back(
-							ProcessedRO::BindingInfo
-							{
-								itr.binding,
-								buffer,
-								offset,
-								0,
-								itr.size
-							}
-						);
-						collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
-					}
+						collated_layouts[layout].second++;
+
+						switch (ubo_info.type)
+						{
+						case uniform_layout_t::UniformType::eBuffer:
+						{
+							auto&& data = dc.material_instance.GetUniformBlock(name);
+							auto&& [buffer, offset] = ubo_manager.Add(data);
+							collated_bindings[ubo_info.set].emplace_back(
+								ProcessedRO::BindingInfo
+								{
+									ubo_info.binding,
+									buffer,
+									offset,
+									0,
+									ubo_info.size
+								}
+							);
+							collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
+						}
 						break;
-					case uniform_layout_t::UniformType::eSampler:
-					{
-						auto&& data = dc.material_instance.GetImageBlock(name);
-						auto& texture = data.begin()->second.as<vkn::VknTexture>();
-						collated_bindings[itr.set].emplace_back(
-							ProcessedRO::BindingInfo
-							{
-								itr.binding,
-								ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eShaderReadOnlyOptimal},
-								0,
-								0,
-								itr.size
-							}
-						);
-						collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
-					}
-					break;
+						case uniform_layout_t::UniformType::eSampler:
+						{
+							auto&& data = dc.material_instance.GetImageBlock(name);
+							auto& texture = data.begin()->second.as<vkn::VknTexture>();
+							collated_bindings[ubo_info.set].emplace_back(
+								ProcessedRO::BindingInfo
+								{
+									ubo_info.binding,
+									ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eShaderReadOnlyOptimal},
+									0,
+									0,
+									ubo_info.size
+								}
+							);
+							collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+						}
+						break;
+						}
 					}
 				}
 			}

@@ -114,6 +114,9 @@
     <ClInclude Include="VknImageData.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="VknMeshModder.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -213,6 +216,10 @@
     <ClCompile Include="VknImageData.cpp">
       <Filter>resource</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicsState.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VknMeshModder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

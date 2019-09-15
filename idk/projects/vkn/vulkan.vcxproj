@@ -123,12 +123,12 @@
     <CustomBuildStep>
       <Command>call $(SolutionDir)tools\compile.bat
 if %errorlevel% NEQ 0 exit /b %errorlevel%
-call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
+echo aaa
+call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>
-      </Outputs>
+      <Outputs>test.aa</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>%(Inputs)</Inputs>
@@ -225,6 +225,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="ShaderModule.h" />
     <ClInclude Include="VknImageData.h" />
+    <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanMaterial.h" />
     <ClInclude Include="VulkanMaterialFactory.h" />
@@ -256,6 +257,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
+    <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
     <ClCompile Include="RegisterVulkanFactories.cpp" />
@@ -270,6 +272,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VknFrameBufferFactory.cpp" />
     <ClCompile Include="VknFrameBufferManager.cpp" />
     <ClCompile Include="VknImageData.cpp" />
+    <ClCompile Include="VknMeshModder.cpp" />
     <ClCompile Include="VknTexture.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">

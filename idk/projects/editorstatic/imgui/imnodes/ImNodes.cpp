@@ -472,12 +472,12 @@ void EndNode()
         }
         else if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered() && ImGui::IsItemActive())
         {
-            node_selected ^= true;
-            if (!io.KeyCtrl && node_selected)
+            if (!io.KeyCtrl && !node_selected)
             {
                 impl->single_selected_node = node_id;
                 impl->do_selections_frame = ImGui::GetCurrentContext()->FrameCount + 1;
             }
+            node_selected = true;
         }
         else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
         {

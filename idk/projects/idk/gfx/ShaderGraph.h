@@ -21,6 +21,7 @@ namespace idk::shadergraph
         hash_table<Guid, Node> nodes;
         vector<Value> values;
         vector<Link> links;
+        vector<Parameter> parameters;
 
         void Compile();
     };

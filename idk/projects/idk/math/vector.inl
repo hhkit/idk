@@ -79,7 +79,7 @@ namespace idk
 	{
 		auto mag = length();
 
-		if (mag <= 1 && mag >= -1)
+		if (abs(mag) <= constants::epsilon<T>())
 			return *this;
 
 		for (auto& elem : *this)
