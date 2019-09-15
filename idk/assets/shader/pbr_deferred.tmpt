@@ -8,7 +8,7 @@ layout(location =0)in VS_OUT
   vec3 tangent;
 } fs_in;
 
-//__MATERIAL_UNIFORMS;
+//__MATERIAL_UNIFORMS__;
 
 // declare output buffers here
 layout(location = 0) out vec3 out_albedo;

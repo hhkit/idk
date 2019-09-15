@@ -42,7 +42,6 @@ namespace idk::shadergraph
     struct Parameter
     {
         string name;
-        Guid guid;
         ValueType type;
         string default_value;
     };

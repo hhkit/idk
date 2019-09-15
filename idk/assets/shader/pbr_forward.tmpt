@@ -124,7 +124,7 @@ vec3 pbr(
 	return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-//__MATERIAL_UNIFORMS;
+//__MATERIAL_UNIFORMS__;
 
 // forward shading only cares about color!
 layout(location = 0)out vec4 out_color;
