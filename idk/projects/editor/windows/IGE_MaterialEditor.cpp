@@ -101,6 +101,7 @@ namespace idk
     void IGE_MaterialEditor::drawNode(Node& node)
     {
         bool is_master_node = node.guid == graph->master_node;
+        canvas.colors[ImNodes::ColNodeBorder] = node.selected ? canvas.colors[ImNodes::ColConnectionActive] : canvas.colors[ImNodes::ColNodeBg];
 
         if (ImNodes::BeginNode(&node, r_cast<ImVec2*>(&node.position), &node.selected))
         {
@@ -451,7 +452,7 @@ namespace idk
     IGE_MaterialEditor::IGE_MaterialEditor()
         : IGE_IWindow("Material Editor", true, ImVec2{ 600,300 }, ImVec2{ 150,150 })
     {
-        window_flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        window_flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;
     }
 
     void IGE_MaterialEditor::Initialize()
@@ -470,6 +471,9 @@ namespace idk
 
     void IGE_MaterialEditor::Update()
     {
+        if (!is_open || ImGui::IsWindowCollapsed())
+            return;
+
         if (!graph)
         {
             //graph = Core::GetResourceManager().Create<Graph>();
@@ -480,6 +484,20 @@ namespace idk
         }
 
         auto& g = *graph;
+
+
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::Button("Compile"))
+            {
+                g.Compile();
+                Core::GetSystem<SaveableResourceManager>().Save(graph);
+            }
+            ImGui::EndMenuBar();
+        }
+
+
+        show_params_window();
 
 
         auto window_pos = ImGui::GetWindowPos();
@@ -498,7 +516,6 @@ namespace idk
             }
             ImGui::EndPopup();
         }
-
 
         ImNodes::BeginCanvas(&canvas);
 
@@ -590,27 +607,118 @@ namespace idk
 
         ImNodes::EndCanvas();
         canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
+    }
 
+    void IGE_MaterialEditor::show_params_window()
+    {
+        ImGui::SetWindowFontScale(1.0f);
+        if (ImGui::IsWindowFocused())
+            ImGui::SetNextWindowFocus();
+        ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
+        ImGui::SetNextWindowSizeConstraints(ImVec2(150, 200), ImGui::GetContentRegionAvail());
 
-
-        ImGui::SetCursorPosX(4);
-        ImGui::SetCursorPosY(24);
-
-        if (ImGui::Button("Compile"))
+        if (ImGui::Begin("Parameters##MaterialEditor_Parameters", 0, ImGuiWindowFlags_NoMove))
         {
-            g.Compile();
-            Core::GetSystem<SaveableResourceManager>().Save(graph);
-        }
+            if (ImGui::Button("Add Parameter"))
+            {
+                graph->parameters.emplace_back(Parameter{ "NewParameter", Guid::Make(), ValueType::FLOAT, "0" });
+            }
 
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1.0f, 1.0f));
 
-        //ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, )
-        ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, canvas.colors[ImNodes::ColNodeBg].Value);
-        if (ImGui::BeginChild("Parameters", ImVec2(200, 0), true))
-        {
-            ImGui::Text("Hello");
+            static char buf[32];
+            int id = 0;
+            for (auto& param : graph->parameters)
+            {
+                auto* draw_list = ImGui::GetWindowDrawList();
+                draw_list->ChannelsSplit(2);
+                draw_list->ChannelsSetCurrent(1);
+
+                ImGui::PushID(++id);
+                ImGui::BeginGroup();
+                ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(2.0f, 2.0f));
+                ImGui::BeginGroup();
+
+                strcpy_s(buf, param.name.c_str());
+                if (ImGui::InputText("Name", buf, 32))
+                {
+                    param.name = buf;
+                }
+
+                if (ImGui::BeginCombo("Type", string{ param.type.to_string() }.c_str()))
+                {
+                    for (auto& sv : ValueType::names)
+                    {
+                        if (ImGui::Selectable(string{ sv }.c_str()))
+                        {
+                            param.type = ValueType::from_string(sv);
+                            param.default_value = default_value(param.type);
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                switch (param.type)
+                {
+                case ValueType::FLOAT:
+                {
+                    float f = std::stof(param.default_value);
+                    if (ImGui::DragFloat("Default", &f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f);
+                    }
+                    break;
+                }
+                case ValueType::VEC2:
+                {
+                    float f[2]{ 0, 0 };
+                    std::smatch matches;
+                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+                    {
+                        f[0] = std::stof(matches[1]);
+                        f[1] = std::stof(matches[2]);
+                    }
+                    if (ImGui::DragFloat3("Default", f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
+                    }
+                    break;
+                }
+                case ValueType::VEC3:
+                {
+                    float f[3]{ 0, 0, 0 };
+                    std::smatch matches;
+                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+                    {
+                        f[0] = std::stof(matches[1]);
+                        f[1] = std::stof(matches[2]);
+                        f[2] = std::stof(matches[3]);
+                    }
+                    if (ImGui::DragFloat3("Default", f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
+                    }
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                ImGui::EndGroup();
+                ImGui::EndGroup();
+                ImGui::PopID();
+
+                draw_list->ChannelsSetCurrent(0);
+                auto min = ImGui::GetItemRectMin();
+                auto max = ImVec2(min.x + ImGui::GetWindowContentRegionWidth(), ImGui::GetItemRectMax().y) + ImVec2(2.0f, 2.0f);
+                draw_list->AddRect(min, max, canvas.colors[ImNodes::ColNodeBg]);
+
+                draw_list->ChannelsMerge();
+            }
+
+            ImGui::PopStyleVar();
         }
-        ImGui::EndChild();
-        ImGui::PopStyleColor();
+        ImGui::End();
     }
 
 }

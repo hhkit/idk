@@ -100,7 +100,7 @@ REFLECT_END()
 // shader graph:
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-REFLECT_VARS(master_node, nodes, values, links)
+REFLECT_VARS(master_node, nodes, values, links, parameters)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
 REFLECT_VARS(node_out, node_in, slot_out, slot_in)
@@ -113,6 +113,9 @@ REFLECT_VARS(type, value, node, slot)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Slot, "ShaderGraphSlot")
 REFLECT_VARS(type)
+REFLECT_END()
+REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
+REFLECT_VARS(name, guid, type, default_value)
 REFLECT_END()
 
 /*==========================================================================
