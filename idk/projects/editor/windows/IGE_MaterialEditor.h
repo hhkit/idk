@@ -29,6 +29,7 @@ namespace idk
         void show_params_window();
 
         void drawValue(shadergraph::Value& value);
+        void addDefaultSlotValue(const Guid& guid, int slot_in);
 
         void drawNode(shadergraph::Node& node);
         void addNode(const string& name, vec2 pos);
@@ -36,6 +37,7 @@ namespace idk
         void disconnectNode(const shadergraph::Node& node);
 
         void addParamNode(int param_index, vec2 pos);
+        void removeParam(int param_index);
     };
 
 }

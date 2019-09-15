@@ -98,6 +98,17 @@ namespace idk
 
 
 
+    string default_value(ValueType type)
+    {
+        switch (type)
+        {
+        case ValueType::FLOAT: return "0";
+        case ValueType::VEC2: return "0,0";
+        case ValueType::VEC3: return "0,0,0";
+        default: throw;
+        }
+    }
+
     static bool DrawValue_DrawVec(const char* id, vec2 pos, int n, float* f)
     {
         auto canvas = ImNodes::GetCurrentCanvas();
@@ -197,15 +208,11 @@ namespace idk
 
     }
 
-    string default_value(ValueType type)
+    void IGE_MaterialEditor::addDefaultSlotValue(const Guid& guid, int slot_in)
     {
-        switch (type)
-        {
-        case ValueType::FLOAT: return "0";
-        case ValueType::VEC2: return "0,0";
-        case ValueType::VEC3: return "0,0,0";
-        default: throw;
-        }
+        auto& node_in = graph->nodes[guid];
+        auto in_type = node_in.input_slots[slot_in].type;
+        graph->values.emplace_back(Value{ in_type, default_value(in_type), node_in.guid, slot_in });
     }
 
 
@@ -306,11 +313,6 @@ namespace idk
             ImNodes::EndNode();
         }
 
-        if (ImGui::IsWindowHovered() && ImGui::IsMouseReleased(1))
-        {
-            bool x = true;
-        }
-
         // if context menu is already open, iswindowhovered will return false
         auto can_open = ImGui::IsPopupOpen(ImGui::GetCurrentWindow()->DC.LastItemId) ||
             ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
@@ -374,8 +376,11 @@ namespace idk
     void IGE_MaterialEditor::disconnectNode(const Node& node)
     {
         auto& g = *graph;
-        g.links.erase(std::remove_if(g.links.begin(), g.links.end(),
-            [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; }), g.links.end());
+        auto iter = std::remove_if(g.links.begin(), g.links.end(),
+            [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; });
+        for (auto jter = iter; jter != g.links.end(); ++jter)
+            addDefaultSlotValue(jter->node_in, jter->slot_in);
+        g.links.erase(iter, g.links.end());
     }
 
 
@@ -391,6 +396,30 @@ namespace idk
         node.output_slots.push_back(Slot{ param.type });
 
         graph->nodes.emplace(node.guid, node);
+    }
+
+    void IGE_MaterialEditor::removeParam(int param_index)
+    {
+        // since all params are referenced by indices,
+        // we have to shift all param nodes value that reference greater indices
+        // as when you erase a param, all params after that are shifted back by 1.
+
+        vector<Guid> to_del;
+        for (auto& [guid, node] : graph->nodes)
+        {
+            if (node.name[0] != '$')
+                continue;
+
+            auto index = std::stoi(node.name.data() + 1);
+            if (index > param_index)
+                node.name = '$' + std::to_string(index - 1);
+            else if (index == param_index)
+                to_del.push_back(guid);
+        }
+        for (const auto& guid : to_del)
+            removeNode(graph->nodes[guid]);
+
+        graph->parameters.erase(graph->parameters.begin() + param_index);
     }
 
 
@@ -560,15 +589,21 @@ namespace idk
             ImGui::EndPopup();
         }
 
+        for (auto& guid : to_delete)
+            g.nodes.erase(guid);
+
         ImNodes::BeginCanvas(&canvas);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+
         for (auto& value : g.values)
             drawValue(value);
         for (auto& node : g.nodes)
             drawNode(node.second);
+
         for(auto& guid : to_delete)
             g.nodes.erase(guid);
+
         ImGui::PopStyleVar();
 
         auto connection_col_active = canvas.colors[ImNodes::ColConnectionActive];
@@ -661,7 +696,10 @@ namespace idk
             canvas.colors[ImNodes::ColConnection] = col;
         }
         if (link_to_delete != g.links.end())
+        {
+            addDefaultSlotValue(link_to_delete->node_in, link_to_delete->slot_in);
             g.links.erase(link_to_delete);
+        }
 
         ImNodes::EndCanvas();
         canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
@@ -703,6 +741,7 @@ namespace idk
 
             static char buf[32];
             int i = -1;
+            int to_del = -1;
             for (auto& param : graph->parameters)
             {
                 ++i;
@@ -720,13 +759,6 @@ namespace idk
                 if (ImGui::InputText(string(param.type.to_string()).c_str(), buf, 32))
                 {
                     param.name = buf;
-                }
-
-                if (ImGui::BeginDragDropSource())
-                {
-                    ImGui::Text(param.name.c_str());
-                    ImGui::SetDragDropPayload(DRAG_DROP_PARAMETER, &i, sizeof(i));
-                    ImGui::EndDragDropSource();
                 }
 
                 switch (param.type)
@@ -779,6 +811,22 @@ namespace idk
                 ImGui::EndGroup();
                 ImGui::PopID();
 
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    ImGui::Text(param.name.c_str());
+                    ImGui::SetDragDropPayload(DRAG_DROP_PARAMETER, &i, sizeof(i));
+                    ImGui::EndDragDropSource();
+                }
+
+                if (ImGui::BeginPopupContextWindow())
+                {
+                    if (ImGui::MenuItem("Delete"))
+                    {
+                        to_del = i;
+                    }
+                    ImGui::EndPopup();
+                }
+
                 draw_list->ChannelsSetCurrent(0);
                 auto min = ImGui::GetItemRectMin();
                 auto max = ImVec2(min.x + ImGui::GetWindowContentRegionWidth(), ImGui::GetItemRectMax().y) + ImVec2(2.0f, 2.0f);
@@ -786,6 +834,9 @@ namespace idk
 
                 draw_list->ChannelsMerge();
             }
+
+            if (to_del >= 0)
+                removeParam(to_del);
 
             ImGui::PopStyleVar();
         }
