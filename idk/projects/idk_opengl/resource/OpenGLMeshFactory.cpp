@@ -9,7 +9,6 @@ namespace idk::ogl
 {
 	void OpenGLMeshFactory::GenerateDefaultMeshes()
 	{
-		
 		{ /* create sphere mesh*/
 			struct Vertex
 			{
@@ -171,7 +170,7 @@ namespace idk::ogl
 
 			auto subdivideIcosahedron = [addSubVert](std::vector<Vertex>& vertices, std::vector<int>& indices)
 			{
-				constexpr auto SUBDIVISIONS = 3;
+				constexpr auto SUBDIVISIONS = 1;
 				// Each subdivision, we subdivide every face in the CURRENT object
 				for (unsigned i = 0; i < SUBDIVISIONS; ++i)
 				{

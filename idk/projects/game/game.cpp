@@ -94,7 +94,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
-	float divByVal = 1.f;
+	float divByVal = 2.f;
 	if (&c->GetSystem<IDE>())
 	{
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
@@ -138,15 +138,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		//go->GetComponent<Transform>()->scale /= divByVal;// 200.f;
+		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		//if (gfx_api != GraphicsAPI::Vulkan)
-		//	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
-		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		if (gfx_api != GraphicsAPI::Vulkan)
+			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 
 		return go;
@@ -163,9 +163,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	light->AddComponent<TestComponent>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
-	auto mover = createtest_obj(vec3{ 0, 0, 0 });
-	mover->AddComponent<TestComponent>();
-	mover->AddComponent<RigidBody>();
+	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
+	//mover->AddComponent<TestComponent>();
+	//mover->AddComponent<RigidBody>();
 
 	c->Run();
 	
