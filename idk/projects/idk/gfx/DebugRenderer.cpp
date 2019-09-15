@@ -32,6 +32,17 @@ namespace idk
 		Draw(Mesh::defaults[MeshType::Sphere], tfm, c, duration, depth_test);
 	}
 
+	void DebugRenderer::GraphicsTick()
+	{
+		for (auto& elem : debug_info)
+			elem.display_time += Core::GetRealDT();
+		
+		debug_info.erase(std::remove_if(debug_info.begin(), debug_info.end(), [](auto& elem) -> bool
+		{
+			return elem.display_time > elem.duration;
+		}), debug_info.end());
+	}
+
 	span<const DebugRenderer::DebugInfo> DebugRenderer::GetWorldDebugInfo() const
 	{
 		return span<const DebugRenderer::DebugInfo>{debug_info};

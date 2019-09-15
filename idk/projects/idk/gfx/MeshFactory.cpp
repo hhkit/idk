@@ -11,7 +11,7 @@ namespace idk
 		for (auto& elem : Mesh::defaults)
 		{
 			if (!elem)
-				std::cout << "Default mesh " << MeshType{ i } << " not created";
+				std::cout << "Default mesh " << MeshType{ i }.to_string() << " not created\n";
 			++i;
 		}
 	}

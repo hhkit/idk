@@ -144,8 +144,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if (gfx_api != GraphicsAPI::Vulkan)
-			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//if (gfx_api != GraphicsAPI::Vulkan)
+		//	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 

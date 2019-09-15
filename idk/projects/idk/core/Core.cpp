@@ -64,13 +64,16 @@ namespace idk
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState,     "Buffer graphics objects");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,      "Render Render Buffer");
+			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick, "Update durations of debug draw");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&IEditor::EditorDraw,                     "Editor Draw");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer,              "Swap the buffers");
 		}
 		else
 		{
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,  "Render Render Buffer");
+			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick, "Update durations of debug draw");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::SwapBuffer,          "Swap the buffers");
 		}
 		Core::GetSystem<FileSystem>();

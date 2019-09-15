@@ -15,6 +15,8 @@ public:
 		color           color;
 		seconds         duration;
 		bool            depth_test;
+
+		seconds         display_time;
 	};
 
 	static inline const auto default_color = color{ 1,0,0 };
@@ -26,8 +28,11 @@ public:
 	void Draw(const ray&    ray                          , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 	void Draw(const sphere& sphere                       , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 
+	void GraphicsTick();
 	span<const DebugInfo> GetWorldDebugInfo() const;
-protected:
+private:
+	void Init() override {};
+	void Shutdown() override {};
 	vector<DebugInfo> debug_info;
 };
 }

@@ -2,23 +2,18 @@
 Copyright (C) 2019 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
-File Name: default_vertex.glsl
-Purpose: Default vertex shader
+File Name: flat_color.frag
+Purpose: Flat color fragment shader
 Language: GLSL
 Platform: OpenGL, Windows
-Project: ivan.ho_CS300_1
+Project: ivan.ho_CS300_2
 Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
-#version 450 
-//#ifndef OGL
-//#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
-//#define BLOCK(X) X
-//#endif
+#version 450
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 uv;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
@@ -34,10 +29,7 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 layout(location = 1) out VS_OUT
 {
   vec3 position;
-  vec2 uv;
-  vec3 normal;
-  vec3 tangent;
-  vec3 view_pos; 		
+  vec3 normal;	
 } vs_out;
 
 layout(location = 0) out gl_PerVertex
@@ -49,6 +41,5 @@ void main()
 {
 	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position, 1.0));
 	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normal, 1.0));
-	vs_out.uv       = uv;
     gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
 }

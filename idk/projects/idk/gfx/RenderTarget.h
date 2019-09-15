@@ -9,6 +9,8 @@ namespace idk
 	{
 		ivec2 size {1024, 1024};
 		vector<RscHandle<Texture>> textures;
+		bool is_world_renderer = true;
+		bool render_debug = true;
 		//RscHandle<Texture> depth_buffer;
 	};
 

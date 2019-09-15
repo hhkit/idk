@@ -11,6 +11,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
 #include <core/GameState.h>
+#include <gfx/DebugRenderer.h>
 
 namespace idk
 {
@@ -26,6 +27,7 @@ namespace idk
 		t += Core::GetDT().count();
 		auto& app_sys = Core::GetSystem<Application>();
 
+		Core::GetSystem<DebugRenderer>().Draw(sphere{ vec3{0,0,0}, 0.5f });
 		for (auto& elem : comps)
 		{
 			if (app_sys.GetKey(Key::J)) elem.GetGameObject()->Transform()->position += vec3{ +0.016, 0.0, 0.0 };
