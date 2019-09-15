@@ -154,13 +154,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	createtest_obj(vec3{ 0.5, 0, 0 });
 	createtest_obj(vec3{ -0.5, 0, 0 });
-	createtest_obj(vec3{ 0, 0.5, 0 });
-	createtest_obj(vec3{ 0, -0.5, 0 });
+	//createtest_obj(vec3{ 0, 0.5, 0 });
+	//createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto light = scene->CreateGameObject();
-	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
+	light->Transform()->position = vec3{ 1.5, 0, 0 };
+	light->Transform()->scale = vec3{ 1.f / 4 };
+	light->AddComponent<RigidBody>()->velocity = vec3{ -1,0,0 };
 	light->AddComponent<Light>();
+	light->AddComponent<Collider>()->shape = sphere{};
 	light->AddComponent<TestComponent>();
+
+	auto seduceme = scene->CreateGameObject();
+	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
+	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
+	seduceme->AddComponent<Collider>()->shape = sphere{};
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
 	//auto mover = createtest_obj(vec3{ 0, 0, 0 });

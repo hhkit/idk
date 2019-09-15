@@ -20,6 +20,11 @@ namespace idk
 		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
 	}
 
+	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
+	{
+		assert(false);
+	}
+
 	void DebugRenderer::Draw(const ray& ray, const color& c, seconds duration, bool depth_test)
 	{
 		//mat4 tfm = translate(ray.origin) * mat4(rotate(ray.direction))

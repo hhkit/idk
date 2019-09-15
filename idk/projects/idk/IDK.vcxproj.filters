@@ -579,12 +579,13 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CubeMap.h" />
-    <ClInclude Include="phys\collision_obb.h" />
     <ClInclude Include="phys\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="gfx\MeshFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collision_box.h" />
+    <ClInclude Include="phys\collision_sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -835,9 +836,10 @@
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_result.cpp" />
-    <ClCompile Include="phys\collision_obb.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="res\Guid.cpp" />
+    <ClCompile Include="phys\collision_box.cpp" />
+    <ClCompile Include="phys\collision_sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

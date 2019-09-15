@@ -14,6 +14,11 @@ namespace idk
 		return aabb{ center + vec3{radius}, center - vec3{radius} };
 	}
 
+	real sphere::radius_sq() const
+	{
+		return radius * radius;
+	}
+
 	sphere& sphere::translate(const vec3& trans)
 	{
 		center += trans;

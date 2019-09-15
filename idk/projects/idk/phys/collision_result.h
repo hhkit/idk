@@ -5,14 +5,29 @@ namespace idk::phys
 {
 	bool epsilon_equal(real lhs, real rhs);
 
+	struct col_success
+	{
+		vec3 point_of_collision  {};
+		vec3 normal_of_collision {};
+		real penetration_depth_l {};
+		real penetration_depth_r {};
+	};
+
+	struct col_failure
+	{
+		real perp_dist        { -1.0f }; // default false.
+		vec3 separating_axis  {};
+	};
+
 	struct col_result
 	{
-		real perp_dist = -1.0f; // default false.
-		real dist = 0.0f;
-		vec3 normal_of_collision {};
-		vec3 separating_axis     {};
-		bool intersect = false;
+		col_result(const col_success& res) : result{ res } {}
+		col_result(const col_failure& res) : result{ res } {}
 
+		const col_success& success() const { return std::get<col_success>(result); }
+		const col_failure& failure() const { return std::get<col_failure>(result); }
 		explicit operator bool() const;
+	private:
+		std::variant<col_success, col_failure> result;
 	};
 }

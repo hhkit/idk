@@ -8,6 +8,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		void CollideObjects(span<class Collider> colliders, span<const class Transform>);
 		void MoveObjects(span<class RigidBody> rbs, span<class Transform> transforms);
 	private:
 		void Init() override;

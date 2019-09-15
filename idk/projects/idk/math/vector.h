@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <cmath>
 
 #include <math/linear.h>
 #include "Vector_detail.h"
@@ -65,8 +66,9 @@ namespace idk
 		return lhs.dot(rhs);
 	}
 
+	using std::abs;
 	template<typename T, unsigned D>
-	auto vabs(const tvec<T, D>& lhs)
+	auto abs(const tvec<T, D>& lhs)
 	{
 		return detail::Abs<std::make_index_sequence<D>>::abs(lhs);
 	}

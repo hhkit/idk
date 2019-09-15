@@ -12,6 +12,7 @@ namespace idk
 		// accessors
 		real diameter() const;
 		aabb bounds() const;
+		real radius_sq() const;
 
 		// properties
 		sphere& translate(const vec3& trans);
