@@ -21,6 +21,7 @@ of the editor.
 #include <IncludeComponents.h>
 #include <IDE.h>
 #include <iostream>
+#include <ds/span.h>
 #include <imgui/imgui_stl.h>
 
 namespace idk {
@@ -160,9 +161,30 @@ namespace idk {
 			}
 
 			//Display remaining components here
+			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
+			if (componentSpan.size()) {
+				for (auto& component : componentSpan) {
+					if (component == c_name)
+						continue;
 
-			//if 
-			//editor.selected_gameObjects[0]->GetComponents();
+					if (component == c_transform)
+						continue;
+
+					ImGui::PushID(component.id);
+					auto componentName = (*component).type.name();
+					if (ImGui::CollapsingHeader(string(componentName).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+					{
+
+
+
+					}
+					ImGui::PopID();
+				}
+
+
+
+
+			}
 
 
 
