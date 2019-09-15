@@ -68,6 +68,9 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 
+        //Imgui Style
+        ImGui::StyleColorsClassic();
+
         // font config
         ImFontConfig config;
         config.OversampleH = 5;
@@ -84,6 +87,8 @@ namespace idk
 		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
 		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
 		ige_windows.push_back(std::make_unique<IGE_MaterialEditor>());
+
+		ige_main_window->Initialize();
 
 		//ige_main_window->Initialize();
 		for (auto& i : ige_windows) {
@@ -102,13 +107,21 @@ namespace idk
 	{
 		_interface->ImGuiFrameBegin();
 
+		ige_main_window->DrawWindow();
+
 		for (auto& i : ige_windows) {
 			i->DrawWindow();
 		}
 
+		if (bool_demo_window)
+			ImGui::ShowDemoWindow(&bool_demo_window);
+
+
 		_interface->Inputs()->Update();
 		
-		_interface->ImGuiFrameUpdate();
+
+
+		//_interface->ImGuiFrameUpdate();
 		
 		
 		_interface->ImGuiFrameEnd();

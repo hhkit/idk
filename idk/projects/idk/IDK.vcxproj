@@ -260,11 +260,15 @@
     </ClCompile>
     <ClCompile Include="reflect\dynamic.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
-    <ClCompile Include="serialize\serialize.cpp" />
+    <ClCompile Include="serialize\serialize.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="math\shapes\aabb.cpp" />
     <ClCompile Include="reflect\enum_type.cpp" />
     <ClCompile Include="math\shapes\ray.cpp" />

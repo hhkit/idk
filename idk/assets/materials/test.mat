@@ -7,6 +7,13 @@ nodes:
     - type: VEC3
     position: {x: 104.000000, y: 74.000000}
     input_slots: []
+  e046cf72-530b-4783-ad90-75606959bd1d: 
+    name: $0
+    guid: e046cf72-530b-4783-ad90-75606959bd1d
+    output_slots: 
+    - type: FLOAT
+    position: {x: 313.000000, y: 95.000000}
+    input_slots: []
   d5084548-0ebd-44fb-b98c-94bd0951100a: 
     name: master\PBR
     guid: d5084548-0ebd-44fb-b98c-94bd0951100a
@@ -31,22 +38,18 @@ nodes:
 values: 
 - node: d5084548-0ebd-44fb-b98c-94bd0951100a
   type: FLOAT
-  value: 0.600000
-  slot: 2
-- type: FLOAT
-  node: d5084548-0ebd-44fb-b98c-94bd0951100a
   value: 0.200000
   slot: 3
-- node: d5084548-0ebd-44fb-b98c-94bd0951100a
-  type: FLOAT
+- type: FLOAT
+  node: d5084548-0ebd-44fb-b98c-94bd0951100a
   value: 0.000000
   slot: 4
-- type: FLOAT
-  node: 5153ff54-e670-4629-99f8-c6c258699945
-  value: 1.000000
-  slot: 0
 - node: 5153ff54-e670-4629-99f8-c6c258699945
   type: FLOAT
+  value: 1.000000
+  slot: 0
+- type: FLOAT
+  node: 5153ff54-e670-4629-99f8-c6c258699945
   value: 1.000000
   slot: 1
 - node: 5153ff54-e670-4629-99f8-c6c258699945
@@ -62,3 +65,9 @@ links:
   node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   slot_out: 0
   slot_in: 1
+- node_out: e046cf72-530b-4783-ad90-75606959bd1d
+  node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  slot_out: 0
+  slot_in: 2
+parameters: 
+- {name: Metallic, type: FLOAT, default_value: 0}

@@ -56,14 +56,16 @@ namespace idk::reflect
         , vector<PropertyOverride>
         , RscHandle<Prefab>
 
-        , shadergraph::Link
-        , shadergraph::Node
-        , shadergraph::Slot
-        , shadergraph::Value
         , shadergraph::ValueType
+        , shadergraph::Slot
+        , shadergraph::Node
+        , shadergraph::Link
+        , shadergraph::Value
+        , shadergraph::Parameter
         , hash_table<Guid, shadergraph::Node>
-        , vector<shadergraph::Value>
-        , vector<shadergraph::Link>
         , vector<shadergraph::Slot>
+        , vector<shadergraph::Link>
+        , vector<shadergraph::Value>
+        , vector<shadergraph::Parameter>
 	>;
 }

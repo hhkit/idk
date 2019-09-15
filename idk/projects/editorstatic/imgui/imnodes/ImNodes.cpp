@@ -205,7 +205,7 @@ bool RenderConnection(const ImVec2& input_pos, const ImVec2& output_pos, float t
     }
 
     // Draw curve, change when it is hovered
-    bool is_close = min_square_distance <= thickness * thickness;
+    bool is_close = min_square_distance <= thickness * thickness && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
     draw_list->PathStroke(is_close ? canvas->colors[ColConnectionActive] : canvas->colors[ColConnection], false, thickness);
     return is_close;
 }
@@ -222,9 +222,9 @@ void BeginCanvas(CanvasState* canvas)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGuiIO& io = ImGui::GetIO();
 
-    if (!ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+    if (!ImGui::IsMouseDown(0))
     {
-        if (ImGui::IsMouseDragging(1))
+        if (ImGui::IsMouseDragging(1) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
             canvas->offset += io.MouseDelta;
 
         if (io.KeyShift && !io.KeyCtrl)
@@ -442,7 +442,7 @@ void EndNode()
     ImGui::ItemAdd(node_rect, node_item_id);
 
     // Node is active when being dragged
-    if (ImGui::IsMouseDown(0) && !ImGui::IsAnyItemActive() && ImGui::IsItemHovered())
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::IsMouseDown(0) && !ImGui::IsAnyItemActive() && ImGui::IsItemHovered())
         ImGui::SetActiveID(node_item_id, ImGui::GetCurrentWindow());
     else if (!ImGui::IsMouseDown(0) && ImGui::IsItemActive())
         ImGui::ClearActiveID();
@@ -459,43 +459,46 @@ void EndNode()
     {
     case State_None:
     {
-        // Node selection behavior. Selection can change only when no node is being dragged and connections are not being made.
-        if (impl->just_connected || ImGui::GetDragDropPayload() != nullptr)
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
-            // No selections are performed when nodes are being connected.
-            impl->just_connected = false;
-        }
-        else if (impl->do_selections_frame == ImGui::GetCurrentContext()->FrameCount)
-        {
-            // Unselect other nodes when some node was left-clicked.
-            node_selected = impl->single_selected_node == node_id;
-        }
-        else if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered() && ImGui::IsItemActive())
-        {
-            node_selected ^= true;
-            if (!io.KeyCtrl && node_selected)
+            // Node selection behavior. Selection can change only when no node is being dragged and connections are not being made.
+            if (impl->just_connected || ImGui::GetDragDropPayload() != nullptr)
             {
-                impl->single_selected_node = node_id;
-                impl->do_selections_frame = ImGui::GetCurrentContext()->FrameCount + 1;
+                // No selections are performed when nodes are being connected.
+                impl->just_connected = false;
             }
-        }
-        else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
-        {
-            impl->state = State_Drag;
-            if (impl->drag_node == nullptr)
+            else if (impl->do_selections_frame == ImGui::GetCurrentContext()->FrameCount)
             {
-                impl->drag_node = node_id;
-                impl->drag_node_selected = node_selected;
+                // Unselect other nodes when some node was left-clicked.
+                node_selected = impl->single_selected_node == node_id;
             }
-            else
-                impl->single_selected_node = nullptr;
-        }
-        else if (node_id == impl->auto_position_node_id)
-        {
-            // Upon node creation we would like it to be positioned at the center of mouse cursor. This can be done only
-            // once widget dimensions are known at the end of rendering and thus on the next frame.
-            node_pos = ImGui::GetMousePos() - ImGui::GetCurrentWindow()->Pos - canvas->offset - (node_rect.GetSize() / 2);
-            impl->auto_position_node_id = nullptr;
+            else if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered() && ImGui::IsItemActive())
+            {
+                if (!io.KeyCtrl && !node_selected)
+                {
+                    impl->single_selected_node = node_id;
+                    impl->do_selections_frame = ImGui::GetCurrentContext()->FrameCount + 1;
+                }
+                node_selected = true;
+            }
+            else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+            {
+                impl->state = State_Drag;
+                if (impl->drag_node == nullptr)
+                {
+                    impl->drag_node = node_id;
+                    impl->drag_node_selected = node_selected;
+                }
+                else
+                    impl->single_selected_node = nullptr;
+            }
+            else if (node_id == impl->auto_position_node_id)
+            {
+                // Upon node creation we would like it to be positioned at the center of mouse cursor. This can be done only
+                // once widget dimensions are known at the end of rendering and thus on the next frame.
+                node_pos = ImGui::GetMousePos() - ImGui::GetCurrentWindow()->Pos - canvas->offset - (node_rect.GetSize() / 2);
+                impl->auto_position_node_id = nullptr;
+            }
         }
         break;
     }
@@ -627,7 +630,7 @@ bool Connection(void* input_node, const char* input_slot, void* output_node, con
     output_slot_pos.x -= connection_indent;
 
     bool curve_hovered = RenderConnection(input_slot_pos, output_slot_pos, canvas->style.curve_thickness);
-    if (curve_hovered && ImGui::IsWindowHovered())
+    if (curve_hovered && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
     {
         if (ImGui::IsMouseDoubleClicked(0))
             is_connected = false;
@@ -703,7 +706,7 @@ void EndSlot()
     // ImGui::ItemSize(slot_rect.GetSize());
     ImGui::ItemAdd(slot_rect, ImGui::GetID(impl->slot.title));
 
-    if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered())
+    if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered() && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         ImGui::SetActiveID(ImGui::GetID(impl->slot.title), ImGui::GetCurrentWindow());
 
     if (ImGui::IsItemActive() && !ImGui::IsMouseDown(0))
@@ -722,29 +725,32 @@ void EndSlot()
             slot_rect.Max.y - slot_rect.GetHeight() / 2);
     }
 
-    if (ImGui::BeginDragDropSource())
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
     {
-        auto* payload = ImGui::GetDragDropPayload();
-        char drag_id[32];
-        snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.kind);
-        if (payload == nullptr || !payload->IsDataType(drag_id))
+        if (ImGui::BeginDragDropSource())
         {
-            _DragConnectionPayload drag_data{ };
-            drag_data.node_id = impl->node.id;
-            drag_data.slot_kind = impl->slot.kind;
-            drag_data.slot_title = impl->slot.title;
+            auto* payload = ImGui::GetDragDropPayload();
+            char drag_id[32];
+            snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.kind);
+            if (payload == nullptr || !payload->IsDataType(drag_id))
+            {
+                _DragConnectionPayload drag_data{ };
+                drag_data.node_id = impl->node.id;
+                drag_data.slot_kind = impl->slot.kind;
+                drag_data.slot_title = impl->slot.title;
 
-            ImGui::SetDragDropPayload(drag_id, &drag_data, sizeof(drag_data));
+                ImGui::SetDragDropPayload(drag_id, &drag_data, sizeof(drag_data));
 
-            // Clear new connection info
-            impl->new_connection.input_node = nullptr;
-            impl->new_connection.input_slot = nullptr;
-            impl->new_connection.output_node = nullptr;
-            impl->new_connection.output_slot = nullptr;
-            canvas->_impl->ignore_connections.clear();
+                // Clear new connection info
+                impl->new_connection.input_node = nullptr;
+                impl->new_connection.input_slot = nullptr;
+                impl->new_connection.output_node = nullptr;
+                impl->new_connection.output_slot = nullptr;
+                canvas->_impl->ignore_connections.clear();
+            }
+            ImGui::TextUnformatted(impl->slot.title);
+            ImGui::EndDragDropSource();
         }
-        ImGui::TextUnformatted(impl->slot.title);
-        ImGui::EndDragDropSource();
     }
 
     if (IsConnectingCompatibleSlot() && ImGui::BeginDragDropTarget())

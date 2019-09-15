@@ -1,9 +1,5 @@
 #include "pch.h"
 
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif
-
 #include "IGE_MaterialEditor.h"
 #include <gfx/ShaderGraph.h>
 #include <regex>
@@ -14,6 +10,8 @@ namespace fs = std::filesystem;
 namespace idk
 {
     using namespace idk::shadergraph;
+
+    constexpr static auto DRAG_DROP_PARAMETER = "dd_param";
 
     static array<unsigned, ValueType::count + 1> type_colors
     { // from DB32 palette
@@ -98,106 +96,16 @@ namespace idk
         return false;
     }
 
-    void IGE_MaterialEditor::drawNode(Node& node)
+
+
+    string default_value(ValueType type)
     {
-        bool is_master_node = node.guid == graph->master_node;
-
-        if (ImNodes::BeginNode(&node, r_cast<ImVec2*>(&node.position), &node.selected))
+        switch (type)
         {
-            auto& tpl = NodeTemplate::GetTable().at(node.name);
-
-            auto slash_pos = node.name.find_last_of('\\');
-            string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
-			if (is_master_node)
-				title += " (Master)";
-            auto title_size = ImGui::CalcTextSize(title.c_str());
-            float input_names_width = 0;
-            float output_names_width = 0;
-
-            int i = 0;
-            for (auto slot_name : tpl.names)
-            {
-                if (i < node.input_slots.size())
-                    input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
-                else
-                    output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
-                ++i;
-            }
-
-            //float item_offset_x = ImGui::GetStyle().ItemSpacing.x * ImNodes::GetCurrentCanvas()->zoom;
-            title_size.x = std::max(title_size.x, input_names_width + output_names_width + ImGui::GetStyle().ItemSpacing.x * 2);
-
-            ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x * 0.5f);
-            ImGui::Text(title.c_str());
-
-            ImGui::BeginGroup();
-
-            i = 0;
-            float cursor_y = ImGui::GetCursorPosY();
-            for (auto& slot_name : tpl.names)
-            {
-                if (i == node.input_slots.size())
-                    ImGui::SetCursorPosY(cursor_y);
-                ImGui::Spacing();
-
-                int kind = 0;
-                if (i < node.input_slots.size())
-                {
-                    Node* node_out;
-                    const char* title_out;
-                    int kind_out;
-
-                    kind = -node.input_slots[i].type;
-
-                    if (ImNodes::GetPendingConnection(reinterpret_cast<void**>(&node_out), &title_out, &kind_out))
-                    {
-                        for (auto& sig : tpl.signatures)
-                        {
-                            if (sig.ins[i] == kind_out)
-                            {
-                                kind = -kind_out;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    kind = node.output_slots[i - node.input_slots.size()].type;
-                }
-
-                draw_slot(slot_name.c_str(), kind);
-                ++i;
-            }
-
-            ImGui::EndGroup();
-
-            ImNodes::EndNode();
-        }
-
-        if (ImGui::BeginPopupContextItem())
-        {
-            if (ImGui::MenuItem("Disconnect"))
-                disconnectNode(node);
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", NULL, false, !is_master_node))
-            {
-
-            }
-            if (ImGui::MenuItem("Copy", NULL, false, !is_master_node))
-            {
-
-            }
-            if (ImGui::MenuItem("Delete", NULL, false, !is_master_node))
-            {
-                removeNode(node);
-            }
-            if (ImGui::MenuItem("Duplicate", NULL, false, !is_master_node))
-            {
-
-            }
-            ImGui::EndPopup();
+        case ValueType::FLOAT: return "0";
+        case ValueType::VEC2: return "0,0";
+        case ValueType::VEC3: return "0,0,0";
+        default: throw;
         }
     }
 
@@ -209,7 +117,7 @@ namespace idk
         const float itemw = (40.0f + style.ItemSpacing.x) * n;
         pos.x -= itemw + 4.0f;
 
-        auto screen_pos = ImGui::GetWindowPos() + r_cast<ImVec2&>(pos) * canvas->zoom + canvas->offset;
+        auto screen_pos = ImGui::GetWindowPos() + pos * canvas->zoom + canvas->offset;
 
         ImGui::SetCursorScreenPos(screen_pos + ImVec2{ 1.0f, 1.0f });
 
@@ -300,15 +208,141 @@ namespace idk
 
     }
 
-    string default_value(ValueType type)
+    void IGE_MaterialEditor::addDefaultSlotValue(const Guid& guid, int slot_in)
     {
-        switch (type)
+        auto& node_in = graph->nodes[guid];
+        auto in_type = node_in.input_slots[slot_in].type;
+        graph->values.emplace_back(Value{ in_type, default_value(in_type), node_in.guid, slot_in });
+    }
+
+
+
+    void IGE_MaterialEditor::drawNode(Node& node)
+    {
+        bool is_master_node = node.guid == graph->master_node;
+        bool is_param_node = node.name[0] == '$';
+
+        canvas.colors[ImNodes::ColNodeBorder] = node.selected ? canvas.colors[ImNodes::ColConnectionActive] : canvas.colors[ImNodes::ColNodeBg];
+
+        if (ImNodes::BeginNode(&node, reinterpret_cast<ImVec2*>(&node.position), &node.selected))
         {
-        case ValueType::FLOAT: return "0";
-        case ValueType::VEC2: return "0,0";
-        case ValueType::VEC3: return "0,0,0";
-        default: throw;
+            auto slash_pos = node.name.find_last_of('\\');
+            
+            string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
+            if (is_master_node)
+                title += " (Master)";
+            if (is_param_node)
+                title = "Parameter";
+
+            auto title_size = ImGui::CalcTextSize(title.c_str());
+            float input_names_width = 0;
+            float output_names_width = 0;
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x * 0.5f);
+            ImGui::Text(title.c_str());
+
+            ImGui::BeginGroup();
+
+            if (is_param_node)
+            {
+                auto& param = graph->parameters[std::stoi(node.name.data() + 1)];
+                const auto& slot_name = param.name;
+                title_size.x = std::max(title_size.x, ImGui::CalcTextSize(slot_name.c_str()).x);
+                ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
+
+                draw_slot(slot_name.c_str(), param.type);
+            }
+            else
+            {
+                auto& tpl = NodeTemplate::GetTable().at(node.name);
+
+                int i = 0;
+                for (auto slot_name : tpl.names)
+                {
+                    if (i < node.input_slots.size())
+                        input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
+                    else
+                        output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
+                    ++i;
+                }
+
+                title_size.x = std::max(title_size.x, input_names_width + output_names_width + ImGui::GetStyle().ItemSpacing.x * 2);
+                ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
+
+                i = 0;
+                float cursor_y = ImGui::GetCursorPosY();
+                for (auto& slot_name : tpl.names)
+                {
+                    if (i == node.input_slots.size())
+                        ImGui::SetCursorPosY(cursor_y);
+                    ImGui::Spacing();
+
+                    int kind = 0;
+                    if (i < node.input_slots.size())
+                    {
+                        Node* node_out;
+                        const char* title_out;
+                        int kind_out;
+
+                        kind = -node.input_slots[i].type;
+
+                        if (ImNodes::GetPendingConnection(reinterpret_cast<void**>(&node_out), &title_out, &kind_out))
+                        {
+                            for (auto& sig : tpl.signatures)
+                            {
+                                if (sig.ins[i] == kind_out)
+                                {
+                                    kind = -kind_out;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        kind = node.output_slots[i - node.input_slots.size()].type;
+                    }
+
+                    draw_slot(slot_name.c_str(), kind);
+                    ++i;
+                }
+            }
+
+            ImGui::EndGroup();
+
+            ImNodes::EndNode();
         }
+
+        // if context menu is already open, iswindowhovered will return false
+        auto can_open = ImGui::IsPopupOpen(ImGui::GetCurrentWindow()->DC.LastItemId) ||
+            ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+        can_open = can_open && !ImGui::IsMouseDragPastThreshold(1);
+        auto fntscl = ImGui::GetCurrentWindow()->FontWindowScale;
+        ImGui::SetWindowFontScale(1.0f);
+        if (can_open && ImGui::BeginPopupContextItem())
+        {
+            if (ImGui::MenuItem("Disconnect"))
+                disconnectNode(node);
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", NULL, false, !is_master_node))
+            {
+
+            }
+            if (ImGui::MenuItem("Copy", NULL, false, !is_master_node))
+            {
+
+            }
+            if (ImGui::MenuItem("Delete", NULL, false, !is_master_node))
+            {
+                removeNode(node);
+            }
+            if (ImGui::MenuItem("Duplicate", NULL, false, !is_master_node))
+            {
+
+            }
+            ImGui::EndPopup();
+        }
+        ImGui::SetWindowFontScale(fntscl);
     }
 
     void IGE_MaterialEditor::addNode(const string& name, vec2 pos)
@@ -327,7 +361,7 @@ namespace idk
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 
-        graph->nodes[node.guid] = node;
+        graph->nodes.emplace(node.guid, node);
     }
 
     void IGE_MaterialEditor::removeNode(const Node& node)
@@ -342,8 +376,50 @@ namespace idk
     void IGE_MaterialEditor::disconnectNode(const Node& node)
     {
         auto& g = *graph;
-        g.links.erase(std::remove_if(g.links.begin(), g.links.end(),
-            [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; }), g.links.end());
+        auto iter = std::remove_if(g.links.begin(), g.links.end(),
+            [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; });
+        for (auto jter = iter; jter != g.links.end(); ++jter)
+            addDefaultSlotValue(jter->node_in, jter->slot_in);
+        g.links.erase(iter, g.links.end());
+    }
+
+
+
+    void IGE_MaterialEditor::addParamNode(int param_index, vec2 pos)
+    {
+        auto& param = graph->parameters[param_index];
+
+        Node node;
+        node.name = "$" + std::to_string(param_index);
+        node.guid = Guid::Make();
+        node.position = pos;
+        node.output_slots.push_back(Slot{ param.type });
+
+        graph->nodes.emplace(node.guid, node);
+    }
+
+    void IGE_MaterialEditor::removeParam(int param_index)
+    {
+        // since all params are referenced by indices,
+        // we have to shift all param nodes value that reference greater indices
+        // as when you erase a param, all params after that are shifted back by 1.
+
+        vector<Guid> to_del;
+        for (auto& [guid, node] : graph->nodes)
+        {
+            if (node.name[0] != '$')
+                continue;
+
+            auto index = std::stoi(node.name.data() + 1);
+            if (index > param_index)
+                node.name = '$' + std::to_string(index - 1);
+            else if (index == param_index)
+                to_del.push_back(guid);
+        }
+        for (const auto& guid : to_del)
+            removeNode(graph->nodes[guid]);
+
+        graph->parameters.erase(graph->parameters.begin() + param_index);
     }
 
 
@@ -451,7 +527,7 @@ namespace idk
     IGE_MaterialEditor::IGE_MaterialEditor()
         : IGE_IWindow("Material Editor", true, ImVec2{ 600,300 }, ImVec2{ 150,150 })
     {
-        window_flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        window_flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;
     }
 
     void IGE_MaterialEditor::Initialize()
@@ -470,6 +546,9 @@ namespace idk
 
     void IGE_MaterialEditor::Update()
     {
+        if (!is_open || ImGui::IsWindowCollapsed())
+            return;
+
         if (!graph)
         {
             //graph = Core::GetResourceManager().Create<Graph>();
@@ -482,6 +561,17 @@ namespace idk
         auto& g = *graph;
 
 
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::Button("Compile"))
+            {
+                g.Compile();
+                Core::GetSystem<SaveableResourceManager>().Save(graph);
+            }
+            ImGui::EndMenuBar();
+        }
+
+
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
@@ -492,23 +582,28 @@ namespace idk
             if (str.size())
             {
                 auto pos = (ImGui::GetWindowPos() - window_pos - canvas.offset) / canvas.zoom;
-                addNode(str, r_cast<vec2&>(pos));
+                addNode(str, pos);
                 // pos = windowpos + nodepos * zoom + offset
                 // nodepos = (screenpos - offset - windowpos) / zoom
             }
             ImGui::EndPopup();
         }
 
+        for (auto& guid : to_delete)
+            g.nodes.erase(guid);
 
         ImNodes::BeginCanvas(&canvas);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+
         for (auto& value : g.values)
             drawValue(value);
         for (auto& node : g.nodes)
             drawNode(node.second);
+
         for(auto& guid : to_delete)
             g.nodes.erase(guid);
+
         ImGui::PopStyleVar();
 
         auto connection_col_active = canvas.colors[ImNodes::ColConnectionActive];
@@ -532,7 +627,9 @@ namespace idk
             if (ImNodes::GetNewConnection(r_cast<void**>(&node_in), &title_in, r_cast<void**>(&node_out), &title_out))
             {
                 int slot_in = (int)NodeTemplate::GetTable().at(node_in->name).GetSlotIndex(title_in);
-                int slot_out = (int)NodeTemplate::GetTable().at(node_out->name).GetSlotIndex(title_out);
+
+                bool out_is_param = node_out->name[0] == '$';
+                int slot_out = out_is_param ? 0 : (int)NodeTemplate::GetTable().at(node_out->name).GetSlotIndex(title_out);
 
                 // check if any value attached to input slot; remove it
                 for (auto iter = g.values.begin(); iter != g.values.end(); ++iter)
@@ -558,34 +655,50 @@ namespace idk
                 node_in->input_slots[slot_in].type = node_out->output_slots[slot_out - node_out->input_slots.size()].type;
 
                 // resolve new node_in output type
-                auto& tpl = NodeTemplate::GetTable().at(node_in->name);
-                for (auto& sig : tpl.signatures)
+                if (!out_is_param)
                 {
-                    bool match = true;
-                    for (size_t i = 0; i < node_in->input_slots.size(); ++i)
+                    auto& tpl = NodeTemplate::GetTable().at(node_in->name);
+                    for (auto& sig : tpl.signatures)
                     {
-                        if (node_in->input_slots[i].type != sig.ins[i])
-                            match = false;
-                    }
-                    if (match)
-                    {
-                        for (size_t i = 0; i < node_in->output_slots.size(); ++i)
-                            node_in->output_slots[i].type = sig.outs[i];
-                        break;
+                        bool match = true;
+                        for (size_t i = 0; i < node_in->input_slots.size(); ++i)
+                        {
+                            if (node_in->input_slots[i].type != sig.ins[i])
+                                match = false;
+                        }
+                        if (match)
+                        {
+                            for (size_t i = 0; i < node_in->output_slots.size(); ++i)
+                                node_in->output_slots[i].type = sig.outs[i];
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        for (auto& link : g.links)
+        auto link_to_delete = g.links.end();
+        for (auto iter = g.links.begin(); iter != g.links.end(); ++iter)
         {
+            auto& link = *iter;
+
             auto& node_out = g.nodes[link.node_out];
             auto& node_in = g.nodes[link.node_in];
             auto col = canvas.colors[ImNodes::ColConnection];
             canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
-            ImNodes::Connection(&node_in, NodeTemplate::GetTable().at(node_in.name).names[link.slot_in].c_str(),
-                                &node_out, NodeTemplate::GetTable().at(node_out.name).names[link.slot_out].c_str());
+
+            const auto& slot_out = node_out.name[0] == '$' ? g.parameters[std::stoi(node_out.name.data() + 1)].name : NodeTemplate::GetTable().at(node_out.name).names[link.slot_out];
+            if (!ImNodes::Connection(&node_in, NodeTemplate::GetTable().at(node_in.name).names[link.slot_in].c_str(),
+                                     &node_out, slot_out.c_str()))
+            {
+                link_to_delete = iter;
+            }
             canvas.colors[ImNodes::ColConnection] = col;
+        }
+        if (link_to_delete != g.links.end())
+        {
+            addDefaultSlotValue(link_to_delete->node_in, link_to_delete->slot_in);
+            g.links.erase(link_to_delete);
         }
 
         ImNodes::EndCanvas();
@@ -593,23 +706,143 @@ namespace idk
 
 
 
-        ImGui::SetCursorPosX(4);
-        ImGui::SetCursorPosY(24);
 
-        if (ImGui::Button("Compile"))
+        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail()));
+        if (ImGui::BeginDragDropTarget())
         {
-            g.Compile();
-            Core::GetSystem<SaveableResourceManager>().Save(graph);
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_PARAMETER, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+            {
+                addParamNode(*reinterpret_cast<int*>(payload->Data), (ImGui::GetMousePos() - ImGui::GetWindowPos() - canvas.offset) / canvas.zoom);
+            }
+            ImGui::EndDragDropTarget();
         }
 
 
-        //ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, )
-        ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, canvas.colors[ImNodes::ColNodeBg].Value);
-        if (ImGui::BeginChild("Parameters", ImVec2(200, 0), true))
+
+        show_params_window();
+    }
+
+    void IGE_MaterialEditor::show_params_window()
+    {
+        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, canvas.colors[ImNodes::ColNodeBg].Value);
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
+
+        if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
-            ImGui::Text("Hello");
+            if (ImGui::Button("Add Parameter"))
+            {
+                graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT, "0" });
+            }
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1.0f, 1.0f));
+
+            static char buf[32];
+            int i = -1;
+            int to_del = -1;
+            for (auto& param : graph->parameters)
+            {
+                ++i;
+
+                auto* draw_list = ImGui::GetWindowDrawList();
+                draw_list->ChannelsSplit(2);
+                draw_list->ChannelsSetCurrent(1);
+
+                ImGui::PushID(i);
+                ImGui::BeginGroup();
+                ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(2.0f, 2.0f));
+                ImGui::BeginGroup();
+
+                strcpy_s(buf, param.name.c_str());
+                if (ImGui::InputText(string(param.type.to_string()).c_str(), buf, 32))
+                {
+                    param.name = buf;
+                }
+
+                switch (param.type)
+                {
+                case ValueType::FLOAT:
+                {
+                    float f = std::stof(param.default_value);
+                    if (ImGui::DragFloat("Default", &f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f);
+                    }
+                    break;
+                }
+                case ValueType::VEC2:
+                {
+                    float f[2]{ 0, 0 };
+                    std::smatch matches;
+                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+                    {
+                        f[0] = std::stof(matches[1]);
+                        f[1] = std::stof(matches[2]);
+                    }
+                    if (ImGui::DragFloat3("Default", f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
+                    }
+                    break;
+                }
+                case ValueType::VEC3:
+                {
+                    float f[3]{ 0, 0, 0 };
+                    std::smatch matches;
+                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+                    {
+                        f[0] = std::stof(matches[1]);
+                        f[1] = std::stof(matches[2]);
+                        f[2] = std::stof(matches[3]);
+                    }
+                    if (ImGui::DragFloat3("Default", f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
+                    }
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                ImGui::EndGroup();
+                ImGui::EndGroup();
+                ImGui::PopID();
+
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    ImGui::Text(param.name.c_str());
+                    ImGui::SetDragDropPayload(DRAG_DROP_PARAMETER, &i, sizeof(i));
+                    ImGui::EndDragDropSource();
+                }
+
+                if (ImGui::BeginPopupContextWindow())
+                {
+                    if (ImGui::MenuItem("Delete"))
+                    {
+                        to_del = i;
+                    }
+                    ImGui::EndPopup();
+                }
+
+                draw_list->ChannelsSetCurrent(0);
+                auto min = ImGui::GetItemRectMin();
+                auto max = ImVec2(min.x + ImGui::GetWindowContentRegionWidth(), ImGui::GetItemRectMax().y) + ImVec2(2.0f, 2.0f);
+                draw_list->AddRect(min, max, ImGui::GetColorU32(ImGuiCol_Border), 2.0f);
+
+                draw_list->ChannelsMerge();
+            }
+
+            if (to_del >= 0)
+                removeParam(to_del);
+
+            ImGui::PopStyleVar();
         }
         ImGui::EndChild();
+
+        ImGui::PopStyleVar();
         ImGui::PopStyleColor();
     }
 

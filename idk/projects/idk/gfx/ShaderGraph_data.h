@@ -39,6 +39,13 @@ namespace idk::shadergraph
         int slot_in;
     };
 
+    struct Parameter
+    {
+        string name;
+        ValueType type;
+        string default_value;
+    };
+
     struct NodeSignature
     {
         vector<ValueType> ins;

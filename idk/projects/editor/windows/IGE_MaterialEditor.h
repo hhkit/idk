@@ -26,11 +26,18 @@ namespace idk
         RscHandle<shadergraph::Graph> graph;
         vector<Guid> to_delete;
 
-        void drawNode(shadergraph::Node& node);
+        void show_params_window();
+
         void drawValue(shadergraph::Value& value);
+        void addDefaultSlotValue(const Guid& guid, int slot_in);
+
+        void drawNode(shadergraph::Node& node);
         void addNode(const string& name, vec2 pos);
         void removeNode(const shadergraph::Node& node);
         void disconnectNode(const shadergraph::Node& node);
+
+        void addParamNode(int param_index, vec2 pos);
+        void removeParam(int param_index);
     };
 
 }

@@ -20,6 +20,7 @@ of the editor.
 #include <app/Application.h>
 #include <scene/SceneManager.h>
 #include <core/GameObject.h>
+#include <common/Name.h>
 #include <core/Core.h>
 #include <IDE.h>		//IDE
 #include <iostream>
@@ -131,22 +132,35 @@ namespace idk {
 			//handle->Transform()->SetParent(parent, true);
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
 
-			//Check if gameobject has been selected
+			//Check if gameobject has been selected. Causes Big-O(n^2)
 			for (Handle<GameObject>& i : selected_gameObjects) {
 				if (handle == i) {
 					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+					break;
 				}
 			}
-
-			string goName = "GameObject ";
-			goName.append(std::to_string(handle.id));
-			//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
-
-
+			Handle<Name> c_name = handle->GetComponent<Name>();
+			string goName{};
+			if (c_name)
+				goName = c_name->name;
+			
+			bool isNameEmpty = goName.empty();
+			if (isNameEmpty) {
+				goName = "Unnamed (";
+				goName.append(std::to_string(handle.id));
+				goName.append(")");
+				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+			}
 			
 
 			//Use address of id as ptr_id
 			ImGui::TreeNodeEx(&handle.id, nodeFlags, goName.c_str());
+
+			if (isNameEmpty) {
+				ImGui::PopStyleColor();
+			}
+
 			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
 				//Check if handle has been selected
