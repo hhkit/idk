@@ -8,7 +8,7 @@ namespace idk::phys
 	struct col_success
 	{
 		vec3 point_of_collision  {};
-		vec3 normal_of_collision {};
+		vec3 normal_of_collision {}; // normal points towards lhs
 		real penetration_depth_l {};
 		real penetration_depth_r {};
 	};

@@ -89,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0.0, -2.5f };
+	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0.0, 2.5f };
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
@@ -169,6 +169,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
 	seduceme->AddComponent<Collider>()->shape = sphere{};
+	seduceme->AddComponent<RigidBody>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 
 	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
