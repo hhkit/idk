@@ -95,6 +95,12 @@ namespace idk
 	}
 
 	template<typename T>
+	inline trad<T> trad<T>::operator-() const
+	{
+		return trad<T>{-this->value};
+	}
+
+	template<typename T>
 	inline trad<T> trad<T>::operator*(const T& rhs) const
 	{
 		auto copy = *this;
@@ -228,6 +234,12 @@ namespace idk
 	{
 		auto copy = *this;
 		return copy -= rhs;
+	}
+
+	template<typename T>
+	inline tdeg<T> tdeg<T>::operator-() const
+	{
+		return tdeg<T>{-this->value};
 	}
 
 	template<typename T>

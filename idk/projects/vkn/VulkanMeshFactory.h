@@ -4,6 +4,7 @@
 #include <res/ResourceFactory.h>
 #include <vkn/MemoryAllocator.h>
 #include <vkn/VulkanMesh.h>
+#include <vkn/VknMeshModder.h>
 namespace idk::vkn
 {
 	class MeshFactory
@@ -11,20 +12,10 @@ namespace idk::vkn
 	{
 	public:
 		MeshFactory();
-		void Init();
 		unique_ptr<Mesh> GenerateDefaultResource() override;
 		//unique_ptr<Mesh> Create(const ResourceMeta&);
 		unique_ptr<Mesh> Create(FileHandle filepath) override;
-		std::shared_ptr<MeshBuffer::Managed> CreateData(string_view data);
 	private:
-		using offset_t = size_t;
-		unique_ptr<Mesh> Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint16_t>&);
-		unique_ptr<Mesh> Create(const hash_table<attrib_index, string_view>& attribs, const vector<uint32_t>&);
-		void RegisterAttribs(VulkanMesh& mesh,const hash_table<attrib_index, string_view>& attribs);
-
-		unique_ptr<Mesh> Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, offset_t>>& attribs, const vector<uint16_t>&);
-		unique_ptr<Mesh> Create(const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, offset_t>>& attribs, const vector<uint32_t>&);
-		void RegisterAttribs(VulkanMesh& mesh, const hash_table<attrib_index, std::pair<shared_ptr<MeshBuffer::Managed>, offset_t>>& attribs);
-		hlp::MemoryAllocator allocator;
+		MeshModder mesh_modder;
 	};
 }

@@ -24,6 +24,17 @@ namespace idk::vkn
 		}
 		return result;
 	}
+
+	//uint32_t get_struct_size(spx::CompilerReflection& code_reflector, spirv_cross::SPIRType type)
+	//{
+	//	for (auto& member_type : type.member_types)
+	//	{
+	//		auto tmp = code_reflector.get_type(member_type);
+	//		info.size += s_cast<uint32_t>(code_reflector.get_declared_struct_member_size(type, i));
+	//	}
+	//}
+
+
 	void extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
 	{
 		spx::CompilerReflection code_reflector{ buffer };// r_cast<const uint32_t*>(std::data(buffer)), byte_code.size() / sizeof(uint16_t)//};
@@ -46,7 +57,7 @@ namespace idk::vkn
 			for (auto& member_type : type.member_types)
 			{
 				auto tmp = code_reflector.get_type(member_type);
-				info.size += s_cast<uint32_t>(code_reflector.get_declared_struct_member_size(type, i));
+				info.size += s_cast<uint32_t>(code_reflector.get_declared_struct_member_size(type, i++));
 			}
 			ubo_info[ub.name] = std::move(info);
 		}
@@ -87,8 +98,9 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 {
 	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
 	auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
-	extract_info(buffer, ubo_info, single_stage);
+	
 	back_module = view.CreateShaderModule(byte_code);
+	extract_info(buffer, ubo_info, single_stage);
 	stage = single_stage;
 	attrib_descriptions = std::move(descriptors);
 }
@@ -100,9 +112,33 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 	Load(single_stage, descriptors, buffer);
 }
 
-const UboInfo& ShaderModule::GetLayout(string uniform_name)
+bool ShaderModule::HasLayout(string uniform_name) const
 {
-	return ubo_info[uniform_name];
+	auto itr =ubo_info.find(uniform_name);
+	return itr != ubo_info.end();;
+}
+
+hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsBegin() const
+{
+	return ubo_info.cbegin();
+}
+
+hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsEnd() const
+{
+	return ubo_info.cend();
+}
+
+//UboInfo& ShaderModule::GetLayout(string uniform_name)
+//{
+//	return ubo_info[uniform_name];
+//}
+
+const UboInfo& ShaderModule::GetLayout(string uniform_name) const
+{
+	auto itr = ubo_info.find(uniform_name);
+	// TODO: insert return statement here
+	
+	return (itr!=ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
 }
 
 }

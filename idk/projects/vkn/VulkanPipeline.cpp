@@ -406,7 +406,10 @@ namespace idk::vkn
 	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo([[maybe_unused]] const config_t& config) const
 	{
 		vector<vk::DescriptorSetLayout> layouts;
-		layouts.resize(uniform_layouts.size());
+		uint32_t max = 0;
+		for (auto& pair : uniform_layouts) { max = std::max(pair.first, max); }
+		max += 1;
+		layouts.resize(max);
 		for (auto& [index, info] : uniform_layouts)
 		{
 			layouts[index] = *info;
@@ -449,6 +452,23 @@ namespace idk::vkn
 
 	void VulkanPipeline::CreateUniformDescriptors(Vulkan_t& vulkan, const config_t& config)
 	{
+		uint32_t max = 0;
+		for (auto& [set_idx, set] : config.uniform_layouts)
+		{
+			max = std::max(set_idx, max);
+		}
+		++max;
+		uniform_layouts.clear();
+		for (uint32_t i = 0; i < max; ++i)
+		{
+			vk::DescriptorSetLayoutCreateInfo layout_info
+			{
+				vk::DescriptorSetLayoutCreateFlags{}
+				,0
+				,nullptr
+			};
+			uniform_layouts[i] = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
+		}
 		for (auto& [set_idx, set] : config.uniform_layouts)
 		{
 			auto bindings = GetDescriptorBindings(set);

@@ -46,7 +46,11 @@ namespace idk::vkn
 		}
 		void AttribDescriptions(vector<buffer_desc>&& attribs){ attrib_descriptions = std::move(attribs); }
 		const vector<buffer_desc>& AttribDescriptions()const { return attrib_descriptions; }
-		const UboInfo& GetLayout(string uniform_name);
+		bool HasLayout(string uniform_name)const;
+		hash_table<string, UboInfo>::const_iterator LayoutsBegin()const;
+		hash_table<string, UboInfo>::const_iterator LayoutsEnd()const;
+		//UboInfo& GetLayout(string uniform_name);
+		const UboInfo& GetLayout(string uniform_name)const;
 		bool NeedUpdate()const { return s_cast<bool>(back_module); }
 		void Update() { if (NeedUpdate()) { module = std::move(back_module);  back_module.reset(); } }
 		
