@@ -35,6 +35,9 @@
       <Filter>imguiGizmo</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imnodes\ImNodes.cpp" />
+    <ClCompile Include="imgui\imgui_stl.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\ImGUIImpl_Win32.h">
@@ -77,6 +80,9 @@
       <Filter>imguiGizmo</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imnodes\ImNodes.h" />
+    <ClInclude Include="imgui\imgui_stl.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">
