@@ -1,5 +1,7 @@
 #pragma once
+#include <idk.h>
 #include <res/Resource.h>
+#include <res/ResourceMeta.h>
 #include <util/enum.h>
 
 namespace idk
@@ -10,11 +12,48 @@ namespace idk
 		PosZ, NegZ
 		);
 
+	ENUM(CMColorFormat, char,
+		sRGB_8,
+		sRGBA_8,
+		RGBF_16,
+		RGBF_32,
+		RGBAF_16,
+		RGBAF_32
+	)
+
+	ENUM(CMUVMode, char,
+		Repeat,
+		MirrorRepeat,
+		Clamp
+	);
+
+	struct CubeMapMeta
+	{
+		CMColorFormat internal_format = CMColorFormat::RGBF_32;
+		CMUVMode      uv_mode = CMUVMode::Repeat;
+	};
+
 	class CubeMap
 		: public Resource<CubeMap>
+		, public MetaTag<CubeMapMeta>
 	{
 	public:
-		virtual void* GetID(TextureTarget) = 0;
+		CubeMap() = default;
+		virtual void* ID() const{ return 0; };
+		
+		//Dtor
 		virtual ~CubeMap() = default;
+
+		// accessors
+		float AspectRatio() const;
+		ivec2 Size() const;
+
+		// modifiers
+		virtual void Size(ivec2 newsize);
+
+	protected:
+		//Size for each texture in the cubemap
+		ivec2 _size{};
+		void OnMetaUpdate(const CubeMapMeta&) {};
 	};
 }
