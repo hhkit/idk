@@ -157,11 +157,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//createtest_obj(vec3{ 0, 0.5, 0 });
 	//createtest_obj(vec3{ 0, -0.5, 0 });
 
+	auto floor = scene->CreateGameObject();
+	floor->Transform()->position = vec3{ 0, -1, 0 };
+	floor->Transform()->scale    = vec3{ 10, 0.5, 10 };
+	floor->AddComponent<Collider>()->shape = box{};
+
 	auto light = scene->CreateGameObject();
 	light->Transform()->position = vec3{ 1.5, 0, 0 };
 	light->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	light->Transform()->scale = vec3{ 1.f / 4 };
-	//light->AddComponent<RigidBody>()->velocity = vec3{ -1,0,0 };
+	light->AddComponent<RigidBody>();
 	light->AddComponent<Light>();
 	light->AddComponent<Collider>()->shape = box{};
 	light->AddComponent<TestComponent>();

@@ -155,7 +155,7 @@ namespace idk
 
 			auto restitution = std::min(lrestitution, rrestitution);
 
-			auto impulse_scalar = (1.f + restitution) * contact_v / (linv_mass + rinv_mass);
+			auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
 			auto impulse = impulse_scalar * result.normal_of_collision;
 
 			if (lrigidbody)
