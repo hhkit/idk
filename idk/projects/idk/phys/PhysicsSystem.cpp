@@ -159,10 +159,10 @@ namespace idk
 
 			auto restitution = std::min(lrestitution, rrestitution);
 
-			auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
+			auto impulse_scalar = (1.0f + restitution - epsilon) * contact_v / (linv_mass + rinv_mass);
 			auto impulse = impulse_scalar * result.normal_of_collision;
 
-			auto t_of_collision = result.penetration_depth / (rvel - lvel).dot(result.normal_of_collision);
+			auto t_of_collision = result.penetration_depth / contact_v;
 			auto remaining_t = dt - t_of_collision;
 
 			if (lrigidbody)
@@ -170,6 +170,7 @@ namespace idk
 				auto& ref_rb = *lrigidbody;
 
 				auto new_vel = ref_rb.velocity + impulse * linv_mass;
+				// euler integrate to find destination pos
 				ref_rb._predicted_tfm[3] = vec4{ ref_rb.GetGameObject()->Transform()->GlobalPosition() + ref_rb.velocity * t_of_collision + new_vel * remaining_t, 1 };
 				ref_rb.velocity = new_vel;
 			}
@@ -177,7 +178,8 @@ namespace idk
 			{
 				auto& ref_rb = *rrigidbody;
 
-				auto new_vel = ref_rb.velocity - impulse * rinv_mass;;
+				auto new_vel = ref_rb.velocity - impulse * rinv_mass;
+				// euler integrate to find destination pos
 				ref_rb._predicted_tfm[3] = vec4{ ref_rb.GetGameObject()->Transform()->GlobalPosition() + ref_rb.velocity * t_of_collision + new_vel * remaining_t, 1 };
 				ref_rb.velocity = new_vel;
 			}
