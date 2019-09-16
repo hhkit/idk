@@ -30,14 +30,19 @@ namespace idk
 			// do this version if we are doing rotational as we have to rotate globally
 			// auto decomp = decompose(tfm->GlobalMatrix());
 			// decomp.position += rigidbody.velocity * dt;
-			auto mat = tfm->GlobalMatrix();
-			mat[3] += vec4{ rigidbody.velocity * dt + rigidbody.accel * dt * half_dt, 0 };
+
+			auto old_mat = tfm->GlobalMatrix();
+			vec3 old_pos = old_mat[3].xyz;
+
+			// verlet integrate towards new position
+			auto new_pos = old_pos + rigidbody.velocity * dt + rigidbody.accel * dt * half_dt;
 			auto accel = rigidbody.accel;
 			rigidbody.velocity += (accel + rigidbody._prev_accel) * half_dt;
 
 			rigidbody._prev_accel = rigidbody.accel;
 			rigidbody.accel = vec3{};
-			rigidbody._predicted_tfm = mat;
+
+			(rigidbody._predicted_tfm = old_mat)[3].xyz = new_pos;
 		}
 	}
 
@@ -47,11 +52,20 @@ namespace idk
 
 		const auto dt = Core::GetDT().count();
 
-		constexpr auto debug_draw = [](const Collider& collider, const color& c = color{1,0,0})
+		// put shape into world space
+		constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
+		{
+			if (rb)
+				return shape * rb->PredictedTransform();
+			else
+				return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+		};
+
+		constexpr auto debug_draw = [calc_shape](const Collider& collider, const color& c = color{1,0,0}, const seconds & dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
 			{
-				Core::GetSystem<DebugRenderer>().Draw(shape * collider.GetGameObject()->Transform()->GlobalMatrix(), c, Core::GetDT());
+				Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), c, dur);
 			}, collider.shape);
 		};
 
@@ -71,14 +85,6 @@ namespace idk
 					using LShape = std::decay_t<decltype(lhs)>;
 					using RShape = std::decay_t<decltype(rhs)>;
 
-					// put shape into world space
-					constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
-					{
-						if (rb)
-							return shape * rb->PredictedTransform();
-						else
-							return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-					};
 
 					// get rigidbodies
 					const auto lrigidbody = lcollider.GetGameObject()->GetComponent<RigidBody>();
@@ -114,14 +120,14 @@ namespace idk
 
 				if (collision)
 				{
-					debug_draw(lcollider, color{0,1,0});
-					debug_draw(rcollider, color{0,1,1});
+					debug_draw(lcollider, color{0,1,0}, seconds{0.5});
+					debug_draw(rcollider, color{0,1,0}, seconds{0.5});
 					collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.success());
 				}
 				else
 				{
-					debug_draw(lcollider);
-					debug_draw(rcollider);
+					debug_draw(lcollider, color{0,1, 1});
+					debug_draw(rcollider, color{0,1, 1});
 				}
 			}
 		}
@@ -156,10 +162,10 @@ namespace idk
 
 			if (contact_v < +epsilon)
 				continue;
-
+			
 			auto restitution = std::min(lrestitution, rrestitution);
 
-			auto impulse_scalar = (1.0f + restitution - epsilon) * contact_v / (linv_mass + rinv_mass);
+			auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
 			auto impulse = impulse_scalar * result.normal_of_collision;
 
 			auto t_of_collision = result.penetration_depth / contact_v;
@@ -171,7 +177,7 @@ namespace idk
 
 				auto new_vel = ref_rb.velocity + impulse * linv_mass;
 				// euler integrate to find destination pos
-				ref_rb._predicted_tfm[3] = vec4{ ref_rb.GetGameObject()->Transform()->GlobalPosition() + ref_rb.velocity * t_of_collision + new_vel * remaining_t, 1 };
+				ref_rb._predicted_tfm[3].xyz = ref_rb.GetGameObject()->Transform()->GlobalPosition() - 2 * result.penetration_depth * result.normal_of_collision;
 				ref_rb.velocity = new_vel;
 			}
 			if (rrigidbody)
@@ -180,7 +186,7 @@ namespace idk
 
 				auto new_vel = ref_rb.velocity - impulse * rinv_mass;
 				// euler integrate to find destination pos
-				ref_rb._predicted_tfm[3] = vec4{ ref_rb.GetGameObject()->Transform()->GlobalPosition() + ref_rb.velocity * t_of_collision + new_vel * remaining_t, 1 };
+				ref_rb._predicted_tfm[3].xyz = ref_rb.GetGameObject()->Transform()->GlobalPosition() + 2 * result.penetration_depth * result.normal_of_collision;
 				ref_rb.velocity = new_vel;
 			}
 		}
@@ -192,7 +198,7 @@ namespace idk
 		auto half_dt = dt / 2;
 
 		for (auto& rigidbody : rbs)
-			rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody.PredictedTransform());
+			rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
 	}
 	void PhysicsSystem::Init()
 	{

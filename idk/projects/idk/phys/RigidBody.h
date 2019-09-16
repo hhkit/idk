@@ -31,6 +31,7 @@ namespace idk
 		void mass(real);
 
 		vec3 AddForce(const vec3& newtons);
+
 		const mat4& PredictedTransform() const;
 	private:
 		mat4 _predicted_tfm;
