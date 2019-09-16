@@ -72,6 +72,10 @@ namespace idk
 		{
 			elem.reset();
 		}
+		for (auto& elem : this->_extension_loaders)
+		{
+			elem.second.reset();
+		}
 	}
 
 	void ResourceManager::WatchDirectory()
