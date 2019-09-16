@@ -12,6 +12,9 @@
 
 namespace idk
 {
+	constexpr auto slop = 0.01f;
+	constexpr auto damping = 0.95f;
+
 	void PhysicsSystem::ApplyGravity(span<class RigidBody> rbs)
 	{
 		for (auto& elem : rbs)
@@ -26,10 +29,6 @@ namespace idk
 		for (auto& rigidbody : rbs)
 		{
 			auto tfm = rigidbody.GetGameObject()->Transform();
-
-			// do this version if we are doing rotational as we have to rotate globally
-			// auto decomp = decompose(tfm->GlobalMatrix());
-			// decomp.position += rigidbody.velocity * dt;
 
 			auto old_mat = tfm->GlobalMatrix();
 			vec3 old_pos = old_mat[3].xyz;
@@ -162,32 +161,33 @@ namespace idk
 
 			if (contact_v < +epsilon)
 				continue;
-			
+
+
 			auto restitution = std::min(lrestitution, rrestitution);
 
 			auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
 			auto impulse = impulse_scalar * result.normal_of_collision;
-
-			auto t_of_collision = result.penetration_depth / contact_v;
-			auto remaining_t = dt - t_of_collision;
 
 			if (lrigidbody)
 			{
 				auto& ref_rb = *lrigidbody;
 
 				auto new_vel = ref_rb.velocity + impulse * linv_mass;
-				// euler integrate to find destination pos
-				ref_rb._predicted_tfm[3].xyz = ref_rb.GetGameObject()->Transform()->GlobalPosition() - 2 * result.penetration_depth * result.normal_of_collision;
+				// reflect the object across
+				ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - 2 * result.penetration_depth * result.normal_of_collision;
 				ref_rb.velocity = new_vel;
+				Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * 0.25f }, color{1,0,1}, seconds{ 0.5 });
 			}
+
 			if (rrigidbody)
 			{
 				auto& ref_rb = *rrigidbody;
 
 				auto new_vel = ref_rb.velocity - impulse * rinv_mass;
-				// euler integrate to find destination pos
-				ref_rb._predicted_tfm[3].xyz = ref_rb.GetGameObject()->Transform()->GlobalPosition() + 2 * result.penetration_depth * result.normal_of_collision;
+				// reflect the object across
+				ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + 2 * result.penetration_depth * result.normal_of_collision;
 				ref_rb.velocity = new_vel;
+				Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * 0.25f }, color{ 1,0,0.5 }, seconds{ 0.5 });
 			}
 		}
 	}
@@ -195,10 +195,11 @@ namespace idk
 	void PhysicsSystem::MoveObjects(span<RigidBody> rbs, span<Transform> /* we will be writing to transforms */)
 	{
 		auto dt = Core::GetDT().count();
-		auto half_dt = dt / 2;
 
 		for (auto& rigidbody : rbs)
+		{
 			rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
+		}
 	}
 	void PhysicsSystem::Init()
 	{

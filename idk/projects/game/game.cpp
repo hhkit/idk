@@ -158,8 +158,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto floor = scene->CreateGameObject();
-	floor->Transform()->position = vec3{ 0, -2, 0 };
-	floor->Transform()->scale    = vec3{ 10, 1, 10 };
+	floor->Transform()->position = vec3{ 0, -4, 0 };
+	floor->Transform()->scale    = vec3{ 10, 3, 10 };
 	floor->AddComponent<Collider>()->shape = box{};
 
 	auto light = scene->CreateGameObject();
@@ -167,7 +167,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	light->Transform()->position = vec3{ 1.5, 0, 0 };
 	light->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	light->Transform()->scale = vec3{ 1.f / 4 };
-	light->AddComponent<RigidBody>()->velocity;// = vec3{ -1,0,0 };
+	light->AddComponent<RigidBody>();
 	light->AddComponent<Light>();
 	light->AddComponent<Collider>()->shape = box{};
 	light->AddComponent<TestComponent>();
@@ -177,13 +177,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
 	seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
-	seduceme->AddComponent<Collider>()->shape = sphere{};
 	//seduceme->AddComponent<RigidBody>();
-	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+	seduceme->AddComponent<Collider>()->shape = sphere{};
 
-	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
-	//mover->AddComponent<TestComponent>();
-	//mover->AddComponent<RigidBody>();
+
+	auto seducemetoo = scene->CreateGameObject();
+	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
+	seducemetoo->Transform()->position = vec3{ -1.5, 2, 0 };
+	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
+	seducemetoo->AddComponent<RigidBody>();
+	seducemetoo->AddComponent<Collider>()->shape = sphere{};
 
 	c->Run();
 	

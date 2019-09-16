@@ -306,6 +306,65 @@ namespace idk::ogl
 				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
 			);
 		}
+
+		{	/* create tetrahedral mesh */
+			auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
+			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(tet_mesh.guid);
+			std::vector<Vertex> vertices
+			{
+				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
+				Vertex{vec3{ 0,  1, -1}, vec3{ 0,  1, -1}},
+				Vertex{vec3{ 1, -1, -1}, vec3{ 1, -1, -1}},
+				Vertex{vec3{-1, -1, -1}, vec3{-1, -1, -1}},
+			};
+			std::vector<int> indices
+			{
+				0,1,2,
+				1,2,3,
+				2,3,0,
+				3,0,1,
+			};
+
+			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+				.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei)vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
+			);
+		}
+
+		{	/* create line mesh */
+			auto line_mesh = Mesh::defaults[MeshType::Line];
+			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(line_mesh.guid);
+			std::vector<Vertex> vertices
+			{
+				Vertex{vec3{ 0, 0, 1}, vec3{ 0, 0, 1}},
+				Vertex{vec3{ 0, 0,-1}, vec3{ 0, 0,-1}},
+			};
+			std::vector<int> indices
+			{
+				0,1,
+			};
+
+			mesh_handle->SetDrawMode(GL_LINES);
+
+			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+				.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei)vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
+			);
+		}
 	}
 
 	unique_ptr<Mesh> OpenGLMeshFactory::GenerateDefaultResource()

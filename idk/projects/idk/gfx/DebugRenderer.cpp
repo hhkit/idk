@@ -28,7 +28,9 @@ namespace idk
 	void DebugRenderer::Draw(const ray& ray, const color& c, seconds duration, bool depth_test)
 	{
 		//mat4 tfm = translate(ray.origin) * mat4(rotate(ray.direction))
-		assert(false);
+		auto tfm = look_at(ray.origin + ray.direction / 2, ray.origin + ray.direction, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.direction.length() }) };
+		Draw(Mesh::defaults[MeshType::Line], tfm, c, duration, depth_test);
+		
 	}
 
 	void DebugRenderer::Draw(const sphere& sphere, const color& c, seconds duration, bool depth_test)

@@ -99,7 +99,8 @@ namespace idk::phys
 
 		normal = lhs.axes * normal; // put into world space
 		result.normal_of_collision = -normal;
-		result.penetration_depth = penetration_depth;
+		result.penetration_depth = abs(penetration_depth);
+		result.point_of_collision = rhs.center + result.normal_of_collision * (rhs.radius - penetration_depth / 2);
 
 		return result;
 	}

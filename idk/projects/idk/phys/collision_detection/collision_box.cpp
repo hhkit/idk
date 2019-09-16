@@ -73,6 +73,12 @@ namespace idk::phys
 		if (auto res = collide(span<const vec3>{cross_norms}))
 			return *res;
 		else
-			return col_success{ {}, (rhs.center - lhs.center).dot(normal_collision) > 0 ? -normal_collision : normal_collision, max_pen };
+		{
+			col_success result;
+			result.normal_of_collision = (rhs.center - lhs.center).dot(normal_collision) > 0 ? -normal_collision : normal_collision;
+			result.penetration_depth = max_pen;
+			result.point_of_collision; // todo
+			return result;
+		}
 	}
 }
