@@ -77,6 +77,13 @@ REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
 REFLECT_VARS(i, j)
 REFLECT_END()
 
+REFLECT_ENUM(idk::ColorFormat, "ColorFormat")
+REFLECT_ENUM(idk::UVMode, "UVMode")
+
+REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
+REFLECT_VARS(uv_mode,internal_format)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
