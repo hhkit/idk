@@ -9,6 +9,7 @@
 #include <gfx/ShaderTemplate.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/Texture.h>
+#include <gfx/CubeMap.h>
 #include <gfx/RenderTarget.h>
 #include <test/TestResource.h>
 #include <prefab/Prefab.h>

@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		6 SEPT 2019
+//@date		16 SEPT 2019
 //@brief	
 
 /*
@@ -14,6 +14,7 @@ This window displays the editor window where you can select and modify gameobjec
 
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
+#include <IncludeComponents.h>
 
 namespace idk {
 
@@ -32,26 +33,10 @@ namespace idk {
 
 	private:
 
-		void DisplayFileMenu();
-		void DisplayEditMenu();
-		void DisplayGameObjectMenu();
-		void DisplayComponentMenu();
-		void DisplayWindowMenu();
-		void DisplayHelpMenu();
-
-		void DisplayToolBarChildWindow();
-		void DisplayHintBarChildWindow();
+		void DisplayNameComponent(Handle<Name>& c_name);
+		void DisplayTransformComponent(Handle<Transform>& c_transform);
 
 
-		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
-										  | ImGuiWindowFlags_NoScrollbar
-										  | ImGuiWindowFlags_NoResize
-										  | ImGuiWindowFlags_NoSavedSettings
-										  | ImGuiWindowFlags_NoMove
-										  | ImGuiWindowFlags_NoDocking
-										  | ImGuiWindowFlags_NoCollapse;
-
-		const float toolBarHeight = 30.0f;
 
 	};
 

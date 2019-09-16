@@ -2,7 +2,7 @@
 //@file		IGE_HierarchyWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		9 SEPT 2019
+//@date		16 SEPT 2019
 //@brief	
 
 /*
@@ -115,7 +115,7 @@ namespace idk {
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
-		
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
 		
 		//Refer to TestSystemManager.cpp
 		sceneGraph.visit([](const Handle<GameObject>& handle, int depth) {
@@ -200,6 +200,9 @@ namespace idk {
 
 
 		});
+
+		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
+
 
 
 		//for (auto& i : sceneGraph) {

@@ -129,6 +129,9 @@
     <ClInclude Include="VknTextureLoader.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="DDSLoader.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -234,6 +237,7 @@
     <ClCompile Include="VknMeshModder.cpp" />
     <ClCompile Include="VulkanResourceManager.cpp" />
     <ClCompile Include="VknTextureLoader.cpp" />
+    <ClCompile Include="DDSLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -273,6 +277,9 @@
     </None>
     <None Include="BufferedObj.inl">
       <Filter>resource</Filter>
+    </None>
+    <None Include="utils\utils.inl">
+      <Filter>utils</Filter>
     </None>
   </ItemGroup>
 </Project>

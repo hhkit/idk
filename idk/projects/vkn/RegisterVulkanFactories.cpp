@@ -10,6 +10,7 @@
 #include <anim/SkeletonFactory.h>
 #include <anim/AnimationFactory.h>
 #include <vkn/VulkanTextureFactory.h>
+#include <vkn/DDSLoader.h>
 namespace idk::vkn
 {
 
@@ -29,6 +30,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vert");
 	Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".frag");
 	Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderTemplate>>(".tmpt");
+	Core::GetResourceManager().RegisterExtensionLoader<DdsLoader>(".dds");
 }
 
 }

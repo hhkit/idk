@@ -198,6 +198,7 @@
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
