@@ -53,6 +53,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -94,6 +95,7 @@
     <TargetName>vulkan</TargetName>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <LibraryPath>$(SolutionDir)engine\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -115,7 +117,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SPIRV-Tools.lib;SPIRV-Tools-optd.lib;OGLCompilerd.lib;SPIRVd.lib;OSDependentd.lib;glslangd.lib;shaderc_util.lib;shaderc.lib;vulkan-1.lib;win32D.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib</AdditionalDependencies>
+      <AdditionalDependencies>SPIRV-Toolsd.lib;SPIRV-Tools-optd.lib;OGLCompilerd.lib;SPIRVd.lib;OSDependentd.lib;glslangd.lib;shaderc_utild.lib;shadercd.lib;vulkan-1.lib;win32D.lib;dspirv-cross-reflect.lib;dspirv-cross-glsl.lib;dspirv-cross-cpp.lib;dspirv-cross-core.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
@@ -191,10 +193,10 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>vulkan-1.lib;win32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>SPIRV-Tools-opt.lib;SPIRV-Tools.lib;OGLCompiler.lib;SPIRV.lib;OSDependent.lib;glslang.lib;shaderc_util.lib;shaderc.lib;vulkan-1.lib;win32.lib;spirv-cross-reflect.lib;spirv-cross-glsl.lib;spirv-cross-cpp.lib;spirv-cross-core.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
     </Lib>
     <CustomBuildStep>
       <Command>call $(SolutionDir)tools\compile.bat
@@ -212,6 +214,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BufferedObj.h" />
+    <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="draw_call.h" />
@@ -257,6 +260,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDSLoader.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
@@ -307,6 +311,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
       <FileType>CppHeader</FileType>
     </None>
     <None Include="UboManager.inl" />
+    <None Include="utils\utils.inl" />
     <None Include="VulkanState.inl" />
     <None Include="BufferHelpers.inl" />
   </ItemGroup>
