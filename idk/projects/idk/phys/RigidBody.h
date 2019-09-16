@@ -19,7 +19,7 @@ namespace idk
 		rad  angular_velocity = rad{};
 
 		bool use_gravity  = true;
-		bool is_kinematic = true;
+		bool is_kinematic = false;
 		real restitution  = 1.f;
 
 		// sleeping
