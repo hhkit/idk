@@ -118,7 +118,8 @@ namespace idk {
 		//float currentWidth = ImGui::GetColumnWidth(-1);
 		//currentWidth = currentWidth < 100 ? 100 : currentWidth;
 		//currentWidth = currentWidth > 400 ? 400 : currentWidth;
-		//ImGui::SetColumnWidth(-1, currentWidth);
+        if(ImGui::IsWindowAppearing())
+            ImGui::SetColumnWidth(-1, 200);
 
 		ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
@@ -205,11 +206,14 @@ namespace idk {
         ImGui::SetCursorPosX(spacing.x);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing.y);
 
+        static bool renaming_selected_asset = false;
+
         int col = 0;
         for (const auto& entry : fs::directory_iterator(selected_dir))
         {
             const auto& path = entry.path();
-            if (path.extension() == ".meta")
+            const auto ext = path.extension().string();
+            if (ext == ".meta")
                 continue;
 
             auto name = path.filename().string();
@@ -224,8 +228,8 @@ namespace idk {
             }
 
             ImGui::BeginGroup();
-
             ImGui::PushID(name.c_str());
+
             if (ImGui::Button("test", ImVec2(icon_sz, icon_sz)))
             {
                 if (entry.is_directory())
@@ -237,18 +241,42 @@ namespace idk {
                     selected_asset = path.string();
                 }
             }
-            ImGui::PopID();
 
             if (selected_asset == path)
-                ImGui::GetWindowDrawList()->AddRectFilled(
-                    ImGui::GetCursorScreenPos(),
-                    ImGui::GetCursorScreenPos() + ImVec2{ icon_sz, line_height },
-                    ImGui::GetColorU32(ImGuiCol_FrameBg),
-                    line_height * 0.5f);
+            {
+                if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
+                {
+                    //renaming_selected_asset = true;
+                }
 
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // cente
+                if (renaming_selected_asset)
+                {
+                    static char buf[256];
+                    strcpy_s(buf, name.c_str());
+                    ImGui::SetNextItemWidth(icon_sz);
+                    if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
+                    {
+                        name = buf;
+                        renaming_selected_asset = false;
+                    }
+                    if (ImGui::IsItemDeactivated() || !ImGui::IsItemFocused())
+                        renaming_selected_asset = false;
+                }
+                else
+                {
+                    ImGui::GetWindowDrawList()->AddRectFilled(
+                        ImGui::GetItemRectMin(),
+                        ImGui::GetItemRectMax(),
+                        ImGui::GetColorU32(ImGuiCol_FrameBg),
+                        line_height * 0.5f);
+                }
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
+            }
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
             ImGui::Text(label.c_str());
 
+            ImGui::PopID();
             ImGui::EndGroup();
 
             if (++col == icons_per_row)
