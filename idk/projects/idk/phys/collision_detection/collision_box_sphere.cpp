@@ -34,14 +34,69 @@ namespace idk::phys
 
 		const auto distance = [&]() -> real
 		{
-			return normal_len;
+			if (normal_len > epsilon)
+			{
+				normal /= normal_len;
+				return normal_len;
+			}
+
+			auto dist = half_extents.x - circle_local_pos.x;
+			auto min_dist = dist;
+			closest_pt.x = half_extents.x;
+			normal = vec3{ 1,0,0 };
+
+			dist = half_extents.x + circle_local_pos.x;
+			if (dist < min_dist)
+			{
+				min_dist = dist;
+				closest_pt = circle_local_pos;
+				closest_pt.x = -half_extents.x;
+				normal = vec3{ -1,0,0 };
+			}
+
+			dist = half_extents.y - circle_local_pos.y;
+			if (dist < min_dist)
+			{
+				min_dist = dist;
+				closest_pt = circle_local_pos;
+				closest_pt.y = half_extents.y;
+				normal = vec3{ 0,1,0 };
+			}
+
+			dist = half_extents.y + circle_local_pos.y;
+			if (dist < min_dist)
+			{
+				min_dist = dist;
+				closest_pt = circle_local_pos;
+				closest_pt.y = -half_extents.y;
+				normal = vec3{ 0,-1,0 };
+			}
+
+			dist = half_extents.z - circle_local_pos.z;
+			if (dist < min_dist)
+			{
+				min_dist = dist;
+				closest_pt = circle_local_pos;
+				closest_pt.z = half_extents.z;
+				normal = vec3{ 0,0,1 };
+			}
+
+			dist = half_extents.z + circle_local_pos.z;
+			if (dist < min_dist)
+			{
+				min_dist = dist;
+				closest_pt = circle_local_pos;
+				closest_pt.z = -half_extents.z;
+				normal = vec3{ 0,0,-1 };
+			}
+
+			return min_dist;
 		}();
 
 		col_success result;
 
 		const auto penetration_depth = distance - intersection_dist;
 
-		normal /= normal_len;
 		normal = lhs.axes * normal; // put into world space
 		result.normal_of_collision = -normal;
 

@@ -51,6 +51,10 @@ namespace idk
 			}, collider.shape);
 		};
 
+		for (auto& elem : colliders)
+		{
+			Core::GetSystem<DebugRenderer>().Draw(elem.bounds(), color{ 1,1,0 }, Core::GetDT());
+		}
 		for (unsigned i = 0; i < colliders.size(); ++i)
 		{
 			for (unsigned j = i + 1; j < colliders.size(); ++j)

@@ -8,15 +8,15 @@ namespace idk
 	{
 		return (min + max) / 2;
 	}
-	
-	vec3 aabb::size() const
+
+	vec3 aabb::extents() const
 	{
 		return max - min;
 	}
 
-	vec3 aabb::extents() const
+	vec3 aabb::halfextents() const
 	{
-		return size() / 2;
+		return extents() / 2;
 	}
 
 	const aabb& aabb::bounds() const
