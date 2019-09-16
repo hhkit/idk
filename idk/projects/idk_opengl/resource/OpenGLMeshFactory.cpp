@@ -294,6 +294,8 @@ namespace idk::ogl
 				22, 21, 23,
 			};
 
+			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 					.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei) vertices.size())
