@@ -174,6 +174,7 @@
   <ItemGroup>
     <ClInclude Include="resource\FrameBuffer.h" />
     <ClInclude Include="resource\FrameBufferFactory.h" />
+    <ClInclude Include="resource\OpenGLCubemap.h" />
     <ClInclude Include="resource\OpenGLTextureFactory.h" />
     <ClInclude Include="system\FrameBufferManager.h" />
     <ClInclude Include="framework.h" />
@@ -194,6 +195,7 @@
   <ItemGroup>
     <ClCompile Include="resource\FrameBuffer.cpp" />
     <ClCompile Include="resource\FrameBufferFactory.cpp" />
+    <ClCompile Include="resource\OpenGLCubemap.cpp" />
     <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
     <ClCompile Include="system\FrameBufferManager.cpp" />
     <ClCompile Include="glad.c">

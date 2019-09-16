@@ -7,15 +7,38 @@ namespace idk::vkn
 {
 	VknFrameBuffer::VknFrameBuffer(VknImageData iv, VulkanView& vknView)
 		:buffer{},
-		image{std::move(iv)}
+		image{std::move(iv.image)},
+		size{iv.size}
 	{
+
 		//Creates an empty framebuffer tht does nothing at all until attach image views is called
 		AttachImageViews(iv,vknView);
+	}
+
+	VknFrameBuffer::VknFrameBuffer(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize)
+		:buffer{},
+		image{ std::move(img) },
+		imageView{iv},
+		size{ fbsize }
+	{
+		vk::FramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.renderPass = *vknView.Renderpass();
+		framebufferInfo.attachmentCount = hlp::arr_count(iv);
+		framebufferInfo.pAttachments = std::data(iv);
+		framebufferInfo.width = s_cast<uint32_t>(size.x);
+		framebufferInfo.height = s_cast<uint32_t>(size.y);
+		framebufferInfo.layers = 1;
+
+		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
+
+		uncreated = false;
 	}
 
 	VknFrameBuffer::VknFrameBuffer(VknFrameBuffer&& rhs)
 		:buffer{std::move(rhs.buffer)},
 		image{ std::move(rhs.image) },
+		imageView{std::move(rhs.imageView)},
+		size{ std::move(size) },
 		uncreated{std::move(rhs.uncreated)}
 	{}
 
@@ -24,6 +47,9 @@ namespace idk::vkn
 		// TODO: insert return statement here
 		std::swap(buffer,rhs.buffer);
 		std::swap(image,rhs.image);
+		std::swap(imageView,rhs.imageView);
+		std::swap(size,rhs.size);
+		std::swap(uncreated,rhs.uncreated);
 
 		return *this;
 	}
@@ -35,6 +61,8 @@ namespace idk::vkn
 		
 		//glDeleteRenderbuffers(1, &depthbuffer);
 		buffer.reset();
+		imageView.clear();
+		image.reset();
 	}
 
 	void VknFrameBuffer::OnMetaUpdate(const Metadata& newmeta)
@@ -64,15 +92,45 @@ namespace idk::vkn
 		for (auto& elem : iv)
 			ref.emplace_back(*elem);*/
 
+		buffer.reset();
+
 		vk::FramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.renderPass = *vknView.Renderpass();
-		framebufferInfo.attachmentCount = hlp::arr_count(iv);
+		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = &*iv.imageView;
-		framebufferInfo.width = vknView.Swapchain().extent.width;
-		framebufferInfo.height = vknView.Swapchain().extent.height;
+		framebufferInfo.width = s_cast<uint32_t>(iv.size.x);
+		framebufferInfo.height = s_cast<uint32_t>(iv.size.y);
 		framebufferInfo.layers = 1;
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo,nullptr,vknView.Dispatcher());
+
+		uncreated = false;
+	}
+
+	void VknFrameBuffer::AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 size)
+	{
+		//One framebuffer can reference multiple attachments (color, position, light etc.)
+
+		//We are using 3 swapchain images to represent colour attachment
+
+		//Need create other kinds of attachment too in the renderpasses
+
+		//for now vector iv should only have one colour attachment image
+		/*vector<vk::ImageView> ref;
+		for (auto& elem : iv)
+			ref.emplace_back(*elem);*/
+
+		buffer.reset();
+
+		vk::FramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.renderPass = *vknView.Renderpass();
+		framebufferInfo.attachmentCount = hlp::arr_count(iv);
+		framebufferInfo.pAttachments = std::data(iv);
+		framebufferInfo.width  = s_cast<uint32_t>(size.x);
+		framebufferInfo.height = s_cast<uint32_t>(size.y);
+		framebufferInfo.layers = 1;
+
+		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
 
 		uncreated = false;
 	}

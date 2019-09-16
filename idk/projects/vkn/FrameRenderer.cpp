@@ -502,6 +502,9 @@ namespace idk::vkn
 		std::array<float, 4> a{};
 		//TODO grab the appropriate framebuffer and begin renderpass
 		vk::ClearValue v{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(state.camera.clear_color) } };
+		
+		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
+		
 		auto sz = View().GetWindowsInfo().size;
 		vk::Rect2D render_area
 		{

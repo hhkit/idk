@@ -18,7 +18,7 @@ namespace idk::ogl
 		void Buffer(void* data, ivec2 size, ColorFormat format_in);
 
 		void Size(ivec2 new_size) override;
-		virtual void* ID() const;
+		virtual void* ID() const override;
 		
 	private:
 		GLuint _id = 0;

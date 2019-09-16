@@ -5,6 +5,7 @@
 #include <vkn/VknTexture.h>
 #include <vkn/VulkanView.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/utils/utils.h> //ReverseMap
 namespace idk::vkn
 {
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format);
@@ -51,8 +52,6 @@ namespace idk::vkn
 
 	}
 
-	template<typename K, typename V>
-	hash_table<V, K> ReverseMap(const hash_table<K, V>& map);
 
 	hash_table<TextureFormat, vk::Format> FormatMap();
 
@@ -183,16 +182,6 @@ namespace idk::vkn
 
 	}
 
-	template<typename K, typename V>
-	hash_table<V, K> ReverseMap(const hash_table<K, V>& map)
-	{
-		hash_table<V, K> result;
-		for (auto& [k, v] : map)
-		{
-			result.emplace(v, k);
-		}
-		return result;
-	}
 	hash_table<TextureFormat, vk::Format> FormatMap()
 	{
 		return hash_table<TextureFormat, vk::Format>
@@ -215,7 +204,7 @@ namespace idk::vkn
 	}
 	TextureFormat MapFormat(vk::Format tf)
 	{
-		static const auto map = ReverseMap(FormatMap());
+		static const auto map = hlp::ReverseMap(FormatMap());
 		return map.find(tf)->second;
 	}
 }
