@@ -4,10 +4,13 @@
 #include <sstream>
 #include <vkn/VknTexture.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <core/core.h>
+#include <vkn/VulkanView.h>
 namespace idk::vkn
 {
 	DdsLoader::DdsLoader() :allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
 	{
+		load_fence = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
 	FileResources DdsLoader::Create(FileHandle path_to_resource)
 	{
@@ -72,8 +75,8 @@ namespace idk::vkn
 
 	size_t DdsFileInternal::NumBytes() const
 	{
-		auto pitch = std::max(1u, ((header.width + 3) / 4)) * BlockSize();
-		return pitch * s_cast<size_t>(header.height);
+		//auto pitch = std::max(1u, ((header.width + 3) / 4)) * BlockSize();
+		return header.width * header.header_size * BlockSize()/8;//pitch * s_cast<size_t>(header.height);
 	}
 
 	hash_table<BlockType, TextureFormat> MapBlockTypeToTextureFormat()
