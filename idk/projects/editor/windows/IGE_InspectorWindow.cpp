@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		6 SEPT 2019
+//@date		16 SEPT 2019
 //@brief	
 
 /*
@@ -14,7 +14,7 @@ of the editor.
 
 
 #include "pch.h"
-#include <editor/windows/IGE_InspectorWindow.h>
+#include <windows/IGE_InspectorWindow.h>
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
 #include <scene/SceneManager.h>
@@ -23,6 +23,7 @@ of the editor.
 #include <iostream>
 #include <ds/span.h>
 #include <imgui/imgui_stl.h>
+#include <math/euler_angles.h>
 
 namespace idk {
 
@@ -51,113 +52,18 @@ namespace idk {
 
 
 		IDE& editor = Core::GetSystem<IDE>();
-		const int gameObjectsCount = editor.selected_gameObjects.size();
+		const size_t gameObjectsCount = editor.selected_gameObjects.size();
 		if (gameObjectsCount == 1) {
 			//Just show all components, Name and Transform first
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
 			if (c_name) {
-				ImGui::Text("Name: ");
-				ImGui::SameLine();
-				ImGui::InputText("##Name",&c_name->name,ImGuiInputTextFlags_EnterReturnsTrue);
-				string idName = std::to_string(editor.selected_gameObjects[0].id);
-				ImGui::Text("ID: %s", idName.data());
-				//ImGui::SameLine();
-				//ImGui::InputText("##ID", &idName, ImGuiInputTextFlags_ReadOnly);
-				//if (ImGui::InputText("##NAME", &selectedGameObject.lock()->name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+				DisplayNameComponent(c_name);
 
 			}
 
 			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
 			if (c_transform) {
-				if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					const float heightOffset = 2;
-					const float widthOffset  = 80;
-					const float float3Size	 = 0.33f;
-					const float float4Size	 = 0.25f;
-					const float itemSpacing  = 50;
-
-					//ImGui::Columns(2);
-
-					//Position
-					float heightPos = ImGui::GetCursorPosY();
-					ImGui::SetCursorPosY(heightPos + heightOffset);
-					ImGui::Text("Position");
-					ImGui::SameLine();
-					ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-					ImGui::SetCursorPosX(widthOffset);
-
-					ImGui::Text("X");
-					ImGui::SameLine();
-					ImGui::SetCursorPosY(heightPos);
-					ImGui::InputFloat("##PositionX", &c_transform->position.x);
-					ImGui::SameLine();
-
-					ImGui::Text("Y");
-					ImGui::SameLine();
-					ImGui::InputFloat("##PositionY", &c_transform->position.y);
-					ImGui::SameLine();
-
-					ImGui::Text("Z");
-					ImGui::SameLine();
-					ImGui::InputFloat("##PositionZ", &c_transform->position.z);
-
-					//Rotation
-					heightPos = ImGui::GetCursorPosY();
-					ImGui::SetCursorPosY(heightPos + heightOffset);
-					ImGui::Text("Rotation");
-					ImGui::SameLine();
-					ImGui::PushItemWidth(window_size.x * float4Size - itemSpacing);
-					ImGui::SetCursorPosX(widthOffset);
-
-					ImGui::Text("X");
-					ImGui::SameLine();
-					ImGui::SetCursorPosY(heightPos);
-					ImGui::InputFloat("##RotationX", &c_transform->rotation.x);
-					ImGui::SameLine();
-
-					ImGui::Text("Y");
-					ImGui::SameLine();
-					ImGui::InputFloat("##RotationY", &c_transform->rotation.y);
-					ImGui::SameLine();
-
-					ImGui::Text("Z");
-					ImGui::SameLine();
-					ImGui::InputFloat("##RotationZ", &c_transform->rotation.z);
-					ImGui::SameLine();
-
-					ImGui::Text("W");
-					ImGui::SameLine();
-					ImGui::InputFloat("##RotationW", &c_transform->rotation.w);
-
-					//Scale
-					heightPos = ImGui::GetCursorPosY();
-					ImGui::SetCursorPosY(heightPos + heightOffset);
-					ImGui::Text("Scale");
-					ImGui::SameLine();
-					ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-					ImGui::SetCursorPosX(widthOffset);
-
-					ImGui::Text("X");
-					ImGui::SameLine();
-					ImGui::SetCursorPosY(heightPos);
-					ImGui::InputFloat("##ScaleX", &c_transform->scale.x);
-					ImGui::SameLine();
-
-					ImGui::Text("Y");
-					ImGui::SameLine();
-					ImGui::InputFloat("##ScaleY", &c_transform->scale.y);
-					ImGui::SameLine();
-
-					ImGui::Text("Z");
-					ImGui::SameLine();
-					ImGui::InputFloat("##ScaleZ", &c_transform->scale.z);
-
-
-
-					ImGui::PopItemWidth();
-
-				}
+				DisplayTransformComponent(c_transform);
 			}
 
 			//Display remaining components here
@@ -170,7 +76,7 @@ namespace idk {
 					if (component == c_transform)
 						continue;
 
-					ImGui::PushID(component.id);
+					ImGui::PushID(static_cast<int>(component.id));
 					auto componentName = (*component).type.name();
 					if (ImGui::CollapsingHeader(string(componentName).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 					{
@@ -215,5 +121,136 @@ namespace idk {
 
 
 	}
+
+	void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
+	{
+		static string stringBuf{};
+
+		Handle<GameObject> gameObject = c_name->GetGameObject();
+		ImGui::Text("Name: ");
+		ImGui::SameLine();
+		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
+			c_name->name = stringBuf;
+		}
+		//if (ImGui::IsItemDeactivatedAfterEdit()) {
+		//}
+
+		if (ImGui::IsItemClicked()) {
+			stringBuf = c_name->name;
+		}
+		else if (!ImGui::IsItemActive()) { //Disable assignment when editing text
+			stringBuf = c_name->name;
+		}
+
+
+
+		
+		string idName = std::to_string(gameObject.id);
+		ImGui::Text("ID: %s", idName.data());
+		//ImGui::SameLine();
+		//ImGui::InputText("##ID", &idName, ImGuiInputTextFlags_ReadOnly);
+		//if (ImGui::InputText("##NAME", &selectedGameObject.lock()->name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+	}
+
+	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
+	{
+		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			const float heightOffset = 2;
+			const float widthOffset = 80;
+			const float float3Size = 0.33f;
+			const float float4Size = 0.25f;
+			const float itemSpacing = 50;
+			const float XYZSliderWidth = 10;
+
+			//Position
+			float heightPos = ImGui::GetCursorPosY();
+			ImGui::SetCursorPosY(heightPos + heightOffset);
+			ImGui::Text("Position");
+			ImGui::SameLine();
+			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+			ImGui::Text("X");
+			ImGui::SameLine();
+			ImGui::SetCursorPosY(heightPos);
+			ImGui::DragFloat("##PositionX", &c_transform->position.x);
+			ImGui::SameLine();
+
+
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			ImGui::DragFloat("##PositionY", &c_transform->position.y);
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			ImGui::DragFloat("##PositionZ", &c_transform->position.z);
+
+			//Rotation
+			euler_angles original{ c_transform->rotation };
+
+
+			heightPos = ImGui::GetCursorPosY();
+			ImGui::SetCursorPosY(heightPos + heightOffset);
+			ImGui::Text("Rotation");
+			ImGui::SameLine();
+			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+
+			ImGui::Text("X");
+			ImGui::SameLine();
+			ImGui::SetCursorPosY(heightPos);
+			if (ImGui::SliderAngle("##RotationX", original.x.data())) {
+				c_transform->rotation = quat{ original };
+			}
+
+			ImGui::SameLine();
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			if (ImGui::SliderAngle("##RotationY", original.y.data())) {
+				c_transform->rotation = quat{ original };
+			}
+
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			if (ImGui::SliderAngle("##RotationZ", original.z.data())) {
+				c_transform->rotation = quat{ original };
+			}
+
+
+			//Scale
+			heightPos = ImGui::GetCursorPosY();
+			ImGui::SetCursorPosY(heightPos + heightOffset);
+			ImGui::Text("Scale");
+			ImGui::SameLine();
+			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+
+			ImGui::Text("X");
+			ImGui::SameLine();
+			ImGui::SetCursorPosY(heightPos);
+			ImGui::DragFloat("##ScaleX", &c_transform->scale.x);
+			ImGui::SameLine();
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			ImGui::DragFloat("##ScaleY", &c_transform->scale.y);
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			ImGui::DragFloat("##ScaleZ", &c_transform->scale.z);
+
+
+
+			ImGui::PopItemWidth();
+
+		}
+	}
+
 
 }

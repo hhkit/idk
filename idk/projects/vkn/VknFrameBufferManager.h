@@ -1,6 +1,8 @@
 #pragma once
 
 //#include "idk/res/ResourceHandle.h"
+#include <vkn/VulkanView.h>
+#include <vkn/VknFrameBuffer.h>
 
 namespace idk
 {
@@ -22,10 +24,10 @@ namespace idk::vkn
 		void SetRenderTarget(RscHandle<VknFrameBuffer> target);
 		void ResetFramebuffer();
 
-		RscHandle<VknFrameBuffer> Framebuffer();
+		unique_ptr<VknFrameBuffer> Framebuffer();
 	private:
 		//Framebuffer id or handle (A list of it)
-		RscHandle<VknFrameBuffer> curr_framebuffer{};
+		VknFrameBuffer curr_framebuffer{};
 
 	};
 }

@@ -68,6 +68,7 @@ namespace idk
 		,	class Mesh
 		,   class Material
 		,	class Texture
+		,   class CubeMap
 		,	class ShaderProgram
 		,	class RenderTarget
 		,	anim::Animation

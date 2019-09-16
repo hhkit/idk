@@ -26,6 +26,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
 #include <loading/VulkanFBXLoader.h>
+#include <loading/OpenGLCubeMapLoader.h>
+#include <loading/OpenGLTextureLoader.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <gfx/ShaderGraphFactory.h>
@@ -46,11 +48,14 @@ namespace idk
 		case GraphicsAPI::OpenGL:
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".obj");
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLCubeMapLoader>(".cbm");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
 			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".obj");
 			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".md5mesh");
 			break;
 		default:

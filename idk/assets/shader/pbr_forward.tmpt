@@ -2,6 +2,8 @@
 
 #define MAX_LIGHTS 8
 
+layout(set=3,binding=0) uniform sampler2D tex;
+
 layout(location=1)in VS_OUT
 {
   vec3 position;
@@ -152,4 +154,8 @@ void main()
 	vec3 ambient = vec3(0.03) * albedo * ambient_o;
 	
 	out_color = vec4(light_accum + ambient, 1);
+	#ifdef VULKAN
+	//Adding tex color for now since the thing is too damn dark
+	out_color += texture(tex,fs_in.uv);
+	#endif
 }
