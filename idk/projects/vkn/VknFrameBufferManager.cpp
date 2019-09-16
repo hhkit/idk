@@ -4,27 +4,65 @@
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VknTexture.h>
 
+#include <vulkan/vulkan.hpp>
+
 #include <iostream>
+
+#include <core/Core.h>
+#include <gfx/GraphicsSystem.h>
+#include <vkn/VulkanWin32GraphicsSystem.h>
 
 
 namespace idk::vkn
 {
 	VknFrameBufferManager::VknFrameBufferManager()
 	{
-		//glGenFramebuffers(1, &_fbo_id);
-		//Gen a framebuffer
+		//auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
+		//auto sz = vknView.GetWindowsInfo().size;
+
+		//vk::ImageCreateInfo imageInfo = {};
+
+
+		//imageInfo.imageType = vk::ImageType::e2D;
+		//imageInfo.extent.width = s_cast<uint32_t>(sz.x);
+		//imageInfo.extent.height = s_cast<uint32_t>(sz.y);
+		//imageInfo.extent.depth = 1;
+		//imageInfo.mipLevels = 1;
+		//imageInfo.arrayLayers = 1;
+		//imageInfo.format = vk::Format::eR8G8B8A8Unorm;
+		//imageInfo.tiling = vk::ImageTiling::eOptimal;
+		//imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+		//imageInfo.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+		//imageInfo.samples = vk::SampleCountFlagBits::e1;
+		//imageInfo.sharingMode = vk::SharingMode::eExclusive;
+
+		//VknImageData imgd = {vknView.Device()->createImageUnique(imageInfo,nullptr,vknView.Dispatcher())};
+
+		//imgd.size = vec2{ sz };
+
+		//vk::ImageViewCreateInfo createInfo{
+		//			vk::ImageViewCreateFlags{},
+		//			*imgd.image,
+		//			vk::ImageViewType::e2D,
+		//			vknView.Swapchain().surface_format.format,
+		//			vk::ComponentMapping{},
+		//			vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+		//};
+
+		//vknView.Device()->createImageView(createInfo, nullptr, vknView.Dispatcher());
+
+		////Gen a framebuffer
+		//curr_framebuffer = VknFrameBuffer{ std::move(imgd),vknView };
 	}
 
 	VknFrameBufferManager::VknFrameBufferManager(VknFrameBufferManager&& rhs)
+		:curr_framebuffer{std::move(rhs.curr_framebuffer)}
 	{
-
-		/*rhs._fbo_id = 0;*/
-		//Should be to copy the ids
 
 	}
 	VknFrameBufferManager& VknFrameBufferManager::operator=(VknFrameBufferManager&& rhs)
 	{
-		/*std::swap(_fbo_id, rhs._fbo_id);*/
+		std::swap(curr_framebuffer,rhs.curr_framebuffer);
 
 		//Same thing
 		return *this;
@@ -36,50 +74,17 @@ namespace idk::vkn
 	void VknFrameBufferManager::SetRenderTarget(RscHandle<VknFrameBuffer> target)
 	{
 		//Set render target is a impt function
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
-
-		//auto& meta = target->GetMeta();
-		//glViewport(0, 0, meta.size.x, meta.size.y);
-
-
-		//// set texture targets
-		//vector<GLenum> buffers;
-		//auto& yolo = *meta.textures[0];
-		//for (int i = 0; i < meta.textures.size(); ++i)
-		//{
-		//	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, (GLuint)meta.textures[i]->ID(), 0);
-		//	buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
-		//}
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)target->DepthBuffer());
-		//glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
-
-		//{
-		//	auto fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-		//	switch (fb_status)
-		//	{
-		//	case GL_FRAMEBUFFER_UNDEFINED:                     std::cout << "undefined\n";       break;
-		//	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:         std::cout << "incomplete\n";		 break;
-		//	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: std::cout << "missing\n";		 break;
-		//	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:        std::cout << "incomplete draw\n"; break;
-		//	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:        std::cout << "incomplete read\n"; break;
-		//	case GL_FRAMEBUFFER_UNSUPPORTED:                   std::cout << "unsupported\n";	 break;
-		//	case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:        std::cout << "multisample\n";	 break;
-		//	case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:      std::cout << "layer target\n";	 break;
-		//	}
-		//	assert(fb_status == GL_FRAMEBUFFER_COMPLETE);
-		//}
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		curr_framebuffer = target;
-
+		curr_framebuffer = std::move(*target);
 	}
 	void VknFrameBufferManager::ResetFramebuffer()
 	{
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-	RscHandle<VknFrameBuffer> VknFrameBufferManager::Framebuffer()
+	unique_ptr<VknFrameBuffer> VknFrameBufferManager::Framebuffer()
 	{
-		return curr_framebuffer;
+		//return RscHandle<VknFrameBuffer>(curr_framebuffer);
+
+		//ARGH FK I WILL REMEMBER THIS
+		return std::make_unique<VknFrameBuffer>(std::move(curr_framebuffer));
 	}
 }

@@ -5,6 +5,8 @@
 #include <vkn/UboManager.h>
 #include <vkn/VulkanPipeline.h>
 #include <gfx/pipeline_config.h>
+#include <vkn/VknFrameBufferManager.h>
+
 namespace idk
 {
 	struct RenderObject;
@@ -188,5 +190,6 @@ namespace idk::vkn
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
+		VknFrameBufferManager   fb_man{};
 	};
 }

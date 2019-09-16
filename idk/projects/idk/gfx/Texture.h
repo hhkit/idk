@@ -32,6 +32,7 @@ namespace idk
 		, public MetaTag<TextureMeta>
 	{
 	public:
+		Texture() = default;
 		// destructor
 		virtual ~Texture() = default;
 
@@ -43,9 +44,9 @@ namespace idk
 		virtual void Size(ivec2 newsize);
 
 		// identifier for ImGUIImage
-		virtual void* ID() const = 0;
+		virtual void* ID() const { return 0; }
 	protected:
 		ivec2 _size {};
-		void OnMetaUpdate(const TextureMeta&) = 0;
+		void OnMetaUpdate(const TextureMeta&) {};
 	};
 }

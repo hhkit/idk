@@ -1,31 +1,36 @@
 #include "pch.h"
 #include "OpenGLCubemap.h"
 
+#include <idk_opengl/program/ShaderProgramFactory.h>
+#include <idk.h>
+#include <core/Core.h>
+#include <res/ResourceManager.h>
+
 namespace idk::ogl
 {
 	namespace detail
 	{
-		auto GLUVMode(UVMode uv_mode) -> GLenum
+		auto GLUVMode(CMUVMode uv_mode) -> GLenum
 		{
 			switch (uv_mode)
 			{
-			case UVMode::Repeat:       return GL_REPEAT;
-			case UVMode::Clamp:        return GL_CLAMP_TO_EDGE;
-			case UVMode::MirrorRepeat: return GL_MIRRORED_REPEAT;
+			case CMUVMode::Repeat:       return GL_REPEAT;
+			case CMUVMode::Clamp:        return GL_CLAMP_TO_EDGE;
+			case CMUVMode::MirrorRepeat: return GL_MIRRORED_REPEAT;
 			default: return 0;
 			}
 		}
 
-		auto ToGLColor(ColorFormat f)-> GLenum
+		auto ToGLColor(CMColorFormat f)-> GLenum
 		{
 			switch (f)
 			{
-			case ColorFormat::sRGB_8:  return GL_RGB8;
-			case ColorFormat::sRGBA_8: return GL_RGBA8;
-			case ColorFormat::RGBF_16: return GL_RGB16F;
-			case ColorFormat::RGBF_32: return GL_RGB32F;
-			case ColorFormat::RGBAF_16: return GL_RGBA16F;
-			case ColorFormat::RGBAF_32: return GL_RGBA32F;
+			case CMColorFormat::sRGB_8:  return GL_RGB8;
+			case CMColorFormat::sRGBA_8: return GL_RGBA8;
+			case CMColorFormat::RGBF_16: return GL_RGB16F;
+			case CMColorFormat::RGBF_32: return GL_RGB32F;
+			case CMColorFormat::RGBAF_16: return GL_RGBA16F;
+			case CMColorFormat::RGBAF_32: return GL_RGBA32F;
 			default: return 0;
 			}
 		}
@@ -53,10 +58,13 @@ namespace idk::ogl
 		
 		for (unsigned int i = 0; i < 6; i++)
 			Buffer(i,nullptr, _size, meta.internal_format);
+
+		//Todo GET FILE HANDLE
+		//Core::GetResourceManager().GetFactory<ShaderProgramFactory>().Create();
 	}
 
 	OpenGLCubemap::OpenGLCubemap(OpenGLCubemap&& rhs)
-		: Texture{ std::move(rhs) }, _id{ rhs._id }
+		: CubeMap{ std::move(rhs) }, _id{ rhs._id }
 	{
 		rhs._id = 0;
 	}
@@ -64,7 +72,7 @@ namespace idk::ogl
 	OpenGLCubemap& OpenGLCubemap::operator=(OpenGLCubemap&& rhs)
 	{
 		// TODO: insert return statement here
-		Texture::operator=(std::move(rhs));
+		CubeMap::operator=(std::move(rhs));
 		std::swap(_id, rhs._id);
 		return *this;
 	}
@@ -85,7 +93,7 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 	}
 
-	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, ColorFormat format)
+	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMColorFormat format)
 	{
 		_size = size;
 		//glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
@@ -99,7 +107,7 @@ namespace idk::ogl
 
 	void OpenGLCubemap::Size(ivec2 new_size)
 	{
-		Texture::Size(new_size);
+		CubeMap::Size(new_size);
 		for (unsigned int i = 0; i < 6; i++)
 			Buffer(i, nullptr, _size, meta.internal_format);
 	}
@@ -109,11 +117,11 @@ namespace idk::ogl
 		return r_cast<void*>(_id);
 	}
 
-	void OpenGLCubemap::OnMetaUpdate(const TextureMeta& tex_meta)
+	void OpenGLCubemap::OnMetaUpdate(const CubeMapMeta& tex_meta)
 	{
 		UpdateUV(tex_meta.uv_mode);
 	}
-	void OpenGLCubemap::UpdateUV(UVMode uv_mode)
+	void OpenGLCubemap::UpdateUV(CMUVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, detail::GLUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, detail::GLUVMode(uv_mode));

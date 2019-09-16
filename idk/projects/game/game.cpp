@@ -60,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::OpenGL;
+	auto gfx_api = GraphicsAPI::Vulkan;
 	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:

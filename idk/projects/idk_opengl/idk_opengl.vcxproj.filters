@@ -39,6 +39,7 @@
     <ClInclude Include="resource\FrameBuffer.h" />
     <ClInclude Include="resource\FrameBufferFactory.h" />
     <ClInclude Include="resource\OpenGLTextureFactory.h" />
+    <ClInclude Include="resource\OpenGLCubemap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -75,6 +76,7 @@
     <ClCompile Include="resource\FrameBuffer.cpp" />
     <ClCompile Include="resource\FrameBufferFactory.cpp" />
     <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
+    <ClCompile Include="resource\OpenGLCubemap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

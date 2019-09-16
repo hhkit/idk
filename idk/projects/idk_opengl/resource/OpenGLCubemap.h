@@ -1,11 +1,11 @@
 #pragma once
-#include <gfx/Texture.h>
+#include <gfx/CubeMap.h>
 #include <glad/glad.h>
 
 namespace idk::ogl
 {
 	class OpenGLCubemap
-		: public Texture
+		: public CubeMap
 	{
 	public:
 		OpenGLCubemap();
@@ -15,14 +15,14 @@ namespace idk::ogl
 
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
-		void Buffer(unsigned int face_value, void* data, ivec2 size, ColorFormat format_in);
+		void Buffer(unsigned int face_value, void* data, ivec2 size, CMColorFormat format_in);
 
 		void Size(ivec2 new_size) override;
-		virtual void* ID() const;
+		virtual void* ID() const override;
 
 	private:
 		GLuint _id = 0;
-		void OnMetaUpdate(const TextureMeta&);
-		void UpdateUV(UVMode);
+		void OnMetaUpdate(const CubeMapMeta&) override;
+		void UpdateUV(CMUVMode);
 	};
 }

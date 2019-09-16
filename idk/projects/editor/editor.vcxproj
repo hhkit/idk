@@ -182,6 +182,8 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
+    <ClInclude Include="loading\OpenGLTextureLoader.h" />
     <ClInclude Include="windows\IGE_MaterialEditor.h" />
     <ClInclude Include="windows\IGE_HierarchyWindow.h" />
     <ClInclude Include="windows\IGE_InspectorWindow.h" />
@@ -209,6 +211,8 @@
     <ClCompile Include="commands\CMD_RotateGameObject.cpp" />
     <ClCompile Include="commands\CMD_ScaleGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
+    <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
     <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
     <ClCompile Include="windows\IGE_IWindow.cpp" />
