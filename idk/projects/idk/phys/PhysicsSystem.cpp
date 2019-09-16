@@ -32,7 +32,11 @@ namespace idk
 			// decomp.position += rigidbody.velocity * dt;
 			auto mat = tfm->GlobalMatrix();
 			mat[3] += vec4{ rigidbody.velocity * dt + rigidbody.accel * dt * half_dt, 0 };
+			auto accel = rigidbody.accel;
+			rigidbody.velocity += (accel + rigidbody._prev_accel) * half_dt;
 
+			rigidbody._prev_accel = rigidbody.accel;
+			rigidbody.accel = vec3{};
 			rigidbody._predicted_tfm = mat;
 		}
 	}
@@ -158,24 +162,23 @@ namespace idk
 			auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
 			auto impulse = impulse_scalar * result.normal_of_collision;
 
+			auto t_of_collision = result.penetration_depth / (rvel - lvel).dot(result.normal_of_collision);
+			auto remaining_t = dt - t_of_collision;
+
 			if (lrigidbody)
 			{
 				auto& ref_rb = *lrigidbody;
-				auto t_of_collision = result.penetration_depth / ref_rb.velocity.dot(result.normal_of_collision);
-				auto remaining_t = dt - t_of_collision;
 
 				auto new_vel = ref_rb.velocity + impulse * linv_mass;
-				ref_rb._predicted_tfm[3] = ref_rb._predicted_tfm[3] + vec4{ ref_rb.velocity * t_of_collision + new_vel * remaining_t, 0 };
+				ref_rb._predicted_tfm[3] = vec4{ ref_rb.GetGameObject()->Transform()->GlobalPosition() + ref_rb.velocity * t_of_collision + new_vel * remaining_t, 1 };
 				ref_rb.velocity = new_vel;
 			}
 			if (rrigidbody)
 			{
 				auto& ref_rb = *rrigidbody;
-				auto t_of_collision = result.penetration_depth / ref_rb.velocity.dot(result.normal_of_collision);
-				auto remaining_t = dt - t_of_collision;
 
 				auto new_vel = ref_rb.velocity - impulse * rinv_mass;;
-				ref_rb._predicted_tfm[3] = ref_rb._predicted_tfm[3] + vec4{ ref_rb.velocity * t_of_collision + new_vel * remaining_t, 0 };
+				ref_rb._predicted_tfm[3] = vec4{ ref_rb.GetGameObject()->Transform()->GlobalPosition() + ref_rb.velocity * t_of_collision + new_vel * remaining_t, 1 };
 				ref_rb.velocity = new_vel;
 			}
 		}

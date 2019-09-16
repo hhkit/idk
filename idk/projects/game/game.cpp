@@ -136,7 +136,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
-		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
 		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
@@ -167,7 +167,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	light->Transform()->position = vec3{ 1.5, 0, 0 };
 	light->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	light->Transform()->scale = vec3{ 1.f / 4 };
-	light->AddComponent<RigidBody>()->velocity = vec3{ -1,0,0 };
+	light->AddComponent<RigidBody>()->velocity;// = vec3{ -1,0,0 };
 	light->AddComponent<Light>();
 	light->AddComponent<Collider>()->shape = box{};
 	light->AddComponent<TestComponent>();
