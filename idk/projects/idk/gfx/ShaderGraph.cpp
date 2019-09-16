@@ -24,13 +24,17 @@ namespace idk::shadergraph
         }
     };
 
+
+
     struct compiler_state
     {
         const Graph& graph;
         hash_table<NodeSlot, variant<const Link*, const Value*>, NodeSlotHasher> inputs_to_outputs{};
-        hash_table<NodeSlot, int, NodeSlotHasher> resolved_outputs{};
+        hash_table<NodeSlot, string, NodeSlotHasher> resolved_outputs{};
+        vector<std::pair<string, ValueType>> uniforms{};
         int slot_counter = 0;
     };
+
 
     static string& make_uppercase(string& str)
     {
@@ -90,26 +94,37 @@ namespace idk::shadergraph
     {
         string code = "";
 
-        // add "<type> <varname>;" for every output slots
-        for (int i = 0; i < node.output_slots.size(); ++i)
+        if (node.name[0] != '$') // is not a param node
         {
-            if (node.output_slots[i].type == ValueType::SAMPLER2D)
-                code += "sampler2D";
-            else
+            // add "<type> <varname>;" for every output slots
+            for (int i = 0; i < node.output_slots.size(); ++i)
             {
-                string str{ node.output_slots[i].type.to_string() };
-                code += make_lowercase(str);
+                if (node.output_slots[i].type == ValueType::SAMPLER2D)
+                    code += "sampler2D";
+                else
+                {
+                    string str{ node.output_slots[i].type.to_string() };
+                    code += make_lowercase(str);
+                }
+                code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
             }
-            code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
-        }
 
-        // add the code, then replace the output variable names
-        code += NodeTemplate::GetTable().at(node.name).code;
-        resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
-        for (int i = 0; i < node.output_slots.size(); ++i)
+            // add the code, then replace the output variable names
+            code += NodeTemplate::GetTable().at(node.name).code;
+            resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
+            for (int i = 0; i < node.output_slots.size(); ++i)
+            {
+                replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
+                state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, var_name(state.slot_counter++));
+            }
+        }
+        else
         {
-            replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
-            state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, state.slot_counter++);
+            auto uniform_name = node.name;
+            auto& param = state.graph.parameters[std::stoi(uniform_name.data() + 1)];
+            uniform_name.replace(0, 1, "_u");
+            state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, "_ub" + std::to_string(param.type) + "." + uniform_name); // eg. _ub0._u0
+            state.uniforms.emplace_back(std::make_pair(uniform_name, param.type));
         }
 
         for (int i = 0; i < node.input_slots.size(); ++i)
@@ -126,14 +141,14 @@ namespace idk::shadergraph
                 auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
                 if (resolved_iter != state.resolved_outputs.end())
                 {
-                    replace_variables(code, i, var_name(resolved_iter->second));
+                    replace_variables(code, i, resolved_iter->second);
                 }
                 else
                 {
                     code = resolve_node(state.graph.nodes.at(link->node_out), state) + "\n" + code;
                     resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
                     assert(resolved_iter != state.resolved_outputs.end());
-                    replace_variables(code, i, var_name(resolved_iter->second));
+                    replace_variables(code, i, resolved_iter->second);
                 }
             }
             else // connected to value
@@ -167,10 +182,55 @@ namespace idk::shadergraph
             state.inputs_to_outputs.emplace(NodeSlot{ value.node, value.slot }, &value);
 
         string code = resolve_node(nodes.at(master_node), state);
+        string uniforms = "";
+
+        if (state.uniforms.size())
+        {
+            array<string, ValueType::count> uniform_blocks;
+
+            for (auto& [uniform_name, uniform_type] : state.uniforms)
+            {
+                string typestr = "";
+                if (uniform_type == ValueType::SAMPLER2D)
+                    typestr = "sampler2D";
+                else
+                {
+                    string str{ uniform_type.to_string() };
+                    typestr = make_lowercase(str);
+                }
+
+                auto& block = uniform_blocks[uniform_type];
+
+                if (block.empty())
+                {
+                    block += "U_LAYOUT(3, ";
+                    block += std::to_string(uniform_type);
+                    block += ") uniform BLOCK(_UB";
+                    block += uniform_type.to_string();
+                    block += ")\n{\n";
+                }
+                block += "  ";
+                block += typestr;
+                block += ' ';
+                block += uniform_name;
+                block += ";\n";
+            }
+
+            for (size_t i = 0; i < uniform_blocks.size(); ++i)
+            {
+                if (uniform_blocks[i].empty())
+                    continue;
+
+                uniforms += uniform_blocks[i];
+                uniforms += "} _ub";
+                uniforms += std::to_string(i);
+                uniforms += ";\n";
+            }
+        }
 
 		auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
 		auto h_mat = Core::GetResourceManager().Create<Material>();
-		h_mat->BuildShader(shader_template, "", code);
+		h_mat->BuildShader(shader_template, uniforms, code);
 
 		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
 		{

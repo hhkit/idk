@@ -98,11 +98,12 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 {
 	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
 	auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
-	
-	back_module = view.CreateShaderModule(byte_code);
-	extract_info(buffer, ubo_info, single_stage);
-	stage = single_stage;
-	attrib_descriptions = std::move(descriptors);
+	auto back = std::make_unique<Data>();
+	back->module = view.CreateShaderModule(byte_code);
+	extract_info(buffer, back->ubo_info, single_stage);
+	back->stage = single_stage;
+	back->attrib_descriptions = std::move(descriptors);
+	buf_obj.WriteToBack(std::move(back));
 }
 void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code)
 {
@@ -114,18 +115,18 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 
 bool ShaderModule::HasLayout(string uniform_name) const
 {
-	auto itr =ubo_info.find(uniform_name);
-	return itr != ubo_info.end();;
+	auto itr =Current().ubo_info.find(uniform_name);
+	return itr != Current().ubo_info.end();;
 }
 
 hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsBegin() const
 {
-	return ubo_info.cbegin();
+	return Current().ubo_info.cbegin();
 }
 
 hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsEnd() const
 {
-	return ubo_info.cend();
+	return Current().ubo_info.cend();
 }
 
 //UboInfo& ShaderModule::GetLayout(string uniform_name)
@@ -135,10 +136,10 @@ hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsEnd() const
 
 const UboInfo& ShaderModule::GetLayout(string uniform_name) const
 {
-	auto itr = ubo_info.find(uniform_name);
+	auto itr = Current().ubo_info.find(uniform_name);
 	// TODO: insert return statement here
 	
-	return (itr!=ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
+	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
 }
 
 }

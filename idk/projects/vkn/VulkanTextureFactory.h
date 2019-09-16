@@ -14,7 +14,9 @@ namespace idk::vkn
 		VulkanTextureFactory();
 		unique_ptr<Texture> GenerateDefaultResource() override;
 		unique_ptr<Texture> Create() override;
+		//Deprecating
 		unique_ptr<Texture> Create(FileHandle filepath) override;
+		//Deprecating
 		unique_ptr<Texture> Create(FileHandle filepath, const Texture::Metadata&) override;
 	private:
 		vk::UniqueFence fence;

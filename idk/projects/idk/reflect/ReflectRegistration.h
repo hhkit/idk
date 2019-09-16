@@ -115,7 +115,7 @@ REFLECT_BEGIN(idk::shadergraph::Slot, "ShaderGraphSlot")
 REFLECT_VARS(type)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
-REFLECT_VARS(name, guid, type, default_value)
+REFLECT_VARS(name, type, default_value)
 REFLECT_END()
 
 /*==========================================================================

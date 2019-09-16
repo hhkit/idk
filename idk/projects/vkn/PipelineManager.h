@@ -16,7 +16,7 @@ namespace idk::vkn
 		void View(VulkanView& view);
 		VulkanView& View();
 		//Assumes that shader programs are the only differing thing.
-		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules);
+		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules,uint32_t frame_index);
 		void CheckForUpdates(uint32_t frame_index);
 	private:
 		struct PipelineObject
@@ -29,7 +29,7 @@ namespace idk::vkn
 			//PipelineObject() = default;
 			//PipelineObject(PipelineObject&&) noexcept= default;
 			//~PipelineObject() = default;
-			void Create(VulkanView& view)
+			void Create(VulkanView& view, size_t fo_index)
 			{
 				//TODO: set the pipeline's modules
 				vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
@@ -37,7 +37,7 @@ namespace idk::vkn
 				{
 					auto& mod = module.as<ShaderModule>();
 					if (mod.NeedUpdate())
-						mod.Update();
+						mod.UpdateCurrent(fo_index);
 					auto& desc = mod.AttribDescriptions();
 					for(auto& desc_set : desc)
 						config.buffer_descriptions.emplace_back(desc_set);

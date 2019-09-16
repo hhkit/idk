@@ -117,6 +117,18 @@
     <ClInclude Include="VknMeshModder.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferedObj.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanResourceManager.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureLoader.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -220,6 +232,8 @@
       <Filter>render</Filter>
     </ClCompile>
     <ClCompile Include="VknMeshModder.cpp" />
+    <ClCompile Include="VulkanResourceManager.cpp" />
+    <ClCompile Include="VknTextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -256,6 +270,9 @@
     </None>
     <None Include="DescriptorPoolsManager.inl">
       <Filter>descriptor_sets</Filter>
+    </None>
+    <None Include="BufferedObj.inl">
+      <Filter>resource</Filter>
     </None>
   </ItemGroup>
 </Project>

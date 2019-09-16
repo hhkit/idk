@@ -18,6 +18,11 @@ namespace idk::vkn
 			vector<RenderState> render_state_{};
 			uint32_t index_{};
 		};
+		VulkanResourceManager& VulkanView::ResourceManager() const
+		{
+			// TODO: insert return statement here
+			return this->vulkan_->ResourceManager();
+		}
 		vk::DispatchLoaderDefault& VulkanView::Dispatcher() const { return vulkan().dispatcher; }
 
 		vk::DispatchLoaderDynamic& VulkanView::DynDispatcher()const { return vulkan().dyn_dispatcher; }

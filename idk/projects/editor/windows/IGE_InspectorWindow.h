@@ -16,6 +16,7 @@ This window displays the editor window where you can select and modify gameobjec
 #include <editor/windows/IGE_IWindow.h>
 
 namespace idk {
+
 	class IGE_InspectorWindow :
 		public IGE_IWindow
 	{

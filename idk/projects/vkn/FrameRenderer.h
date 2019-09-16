@@ -138,7 +138,7 @@ namespace idk::vkn
 		void Init(VulkanView* view, vk::CommandPool cmd_pool);
 
 		void SetPipelineManager(PipelineManager& manager);
-		void RenderGraphicsStates(const vector<GraphicsState>& state);
+		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 	private:
 		using ProcessedRO=vkn::ProcessedRO;
@@ -176,6 +176,7 @@ namespace idk::vkn
 		VulkanPipeline&  GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& prog);
 		//PipelineHandle_t GetPipelineHandle();//Add arguments when we know what determines which pipeline to get.
 
+		uint32_t _current_frame_index;
 
 		VulkanView*                            _view                       {};
 		RscHandle<ShaderProgram>               _mesh_renderer_shader_module{};

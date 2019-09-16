@@ -11,6 +11,7 @@
 #include <vkn/UboManager.h>
 #include <vkn/VknTexture.h>
 #include <vkn/ValHandler.h>
+#include <vkn/VulkanResourceManager.h>
 #undef max
 #undef min
 
@@ -160,6 +161,8 @@ namespace idk::vkn
 		VulkanState();
 		~VulkanState();
 
+		VulkanResourceManager& ResourceManager();
+
 		void UpdateWindowSize(vec2 size);
 		void CleanupSwapChain();
 		void RecreateSwapChain();
@@ -261,6 +264,8 @@ namespace idk::vkn
 		bool						m_imguiNeedsToResize{ false };
 
 		vector<FrameSubmitRenderInfo> submitList;
+
+		VulkanResourceManager rsc_manager;
 		///////////////////////////////////////
 
 

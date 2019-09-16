@@ -211,6 +211,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="draw_call.h" />
@@ -218,6 +219,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="SpinLock.h" />
     <ClInclude Include="utils\GlslToSpirv.h" />
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="object_pool.h" />
@@ -226,9 +228,11 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="ShaderModule.h" />
     <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VknMeshModder.h" />
+    <ClInclude Include="VknTextureLoader.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanMaterial.h" />
     <ClInclude Include="VulkanMaterialFactory.h" />
+    <ClInclude Include="VulkanResourceManager.h" />
     <ClInclude Include="VulkanShaderModuleFactory.h" />
     <ClInclude Include="UboManager.h" />
     <ClInclude Include="ValHandler.h" />
@@ -274,6 +278,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VknImageData.cpp" />
     <ClCompile Include="VknMeshModder.cpp" />
     <ClCompile Include="VknTexture.cpp" />
+    <ClCompile Include="VknTextureLoader.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -287,6 +292,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VulkanMaterialFactory.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanMeshFactory.cpp" />
+    <ClCompile Include="VulkanResourceManager.cpp" />
     <ClCompile Include="VulkanShaderModuleFactory.cpp" />
     <ClCompile Include="VulkanState.cpp" />
     <ClCompile Include="VulkanTextureFactory.cpp" />
@@ -296,6 +302,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VulkanWin32GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BufferedObj.inl" />
     <None Include="DescriptorPoolsManager.inl">
       <FileType>CppHeader</FileType>
     </None>
