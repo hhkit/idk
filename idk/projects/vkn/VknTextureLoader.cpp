@@ -20,8 +20,7 @@ namespace idk::vkn
 		//2x2 image Checkered
 		const void* rgba = std::data(rgba32);
 		auto format = MapFormat(pixel_format);
-		auto ptr = &texture;
-		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, rgba32.length(), format);
+		auto ptr = &texture;		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, rgba32.length(), format);
 		ptr->image = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
