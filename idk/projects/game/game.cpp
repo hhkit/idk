@@ -22,7 +22,7 @@
 #include <renderdoc/renderdoc_app.h>
 
 
-#define USE_RENDER_DOC
+//#define USE_RENDER_DOC
 
 namespace idk
 {
@@ -60,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::Vulkan;
+	auto gfx_api = GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
@@ -127,11 +127,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		return go;
 	};
+	auto tmp_tex = RscHandle<Texture>{};
+	if(gfx_api == GraphicsAPI::Vulkan)
+		tmp_tex =Core::GetResourceManager().LoadFile(FileHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
 
 	// @Joseph: Uncomment this when testing.
-	// create_anim_obj(vec3{ 0,0,0 });
+	 //create_anim_obj(vec3{ 0,0,0 });
 
-	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
+	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
@@ -144,7 +147,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (gfx_api != GraphicsAPI::Vulkan)
 			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->material_instance.material = h_mat;
-		mesh_rend->material_instance.uniforms["tex"] = RscHandle<Texture>();
+		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
 
 		return go;
 	};

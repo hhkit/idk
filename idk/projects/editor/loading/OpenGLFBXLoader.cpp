@@ -30,14 +30,11 @@ namespace idk
 		vector<unsigned> indices;
 		unsigned num_vertices = 0, num_indices = 0;
 
-		vector<ogl::OpenGLMesh::MeshEntry> mesh_entries;
-
 		fbx_loader_detail::BoneSet bones_set{ fbx_loader_detail::BoneData{ai_scene->mRootNode->mName.data} };
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
 		
 		// Count the number of vertices and indices per mesh entry
-		mesh_entries.reserve(ai_scene->mNumMeshes);
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
 			unsigned curr_base_vertex = num_vertices;

@@ -42,7 +42,7 @@ namespace idk::ogl
 	{
 
 #pragma warning(disable:4312)
-
+		glBindBuffer(_type, _id);
 		for (auto& elem : descriptor)
 		{
 			GL_INT;
