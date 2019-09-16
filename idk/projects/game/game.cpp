@@ -127,7 +127,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		return go;
 	};
-	auto tmp_tex = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
+	auto tmp_tex = RscHandle<Texture>{};
+	if(gfx_api == GraphicsAPI::Vulkan)
+		tmp_tex =Core::GetResourceManager().LoadFile(FileHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
 
 	// @Joseph: Uncomment this when testing.
 	 //create_anim_obj(vec3{ 0,0,0 });
