@@ -197,15 +197,15 @@ namespace idk::ogl
 						// We normalize the vertex because our radius is 1.
 						// addSubVert will check if the vertex is unique or not using the sharedIndices set.
 						// v1 -> v2
-						vec3 hv1 = ((v1 + v2) * 0.5f).normalize();
+						vec3 hv1 = (v1 + v2).normalize();
 						const unsigned hv1Index = addSubVert(vertices, sharedIndices, hv1);
 
 						// v2 -> v3
-						vec3 hv2 = ((v2 + v3) * 0.5f).normalize();
+						vec3 hv2 = (v2 + v3).normalize();
 						const unsigned hv2Index = addSubVert(vertices, sharedIndices, hv2);
 
 						// v3 -> v1
-						vec3 hv3 = ((v3 + v1) * 0.5f).normalize();
+						vec3 hv3 = (v3 + v1).normalize();
 						const unsigned hv3Index = addSubVert(vertices, sharedIndices, hv3);
 
 						// New Indices. Every triangle will subdivide into 4 new triangles.
@@ -247,32 +247,32 @@ namespace idk::ogl
 		{	/* create cube mesh */
 			auto box_mesh = Mesh::defaults[MeshType::Box];
 			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(box_mesh.guid);
-
+			constexpr auto sz = 1.f;
 			std::vector<Vertex> vertices{
-				Vertex{ vec3{ 0.5f,  0.5f,  0.5f}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{ 0.5f, -0.5f,  0.5f}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{-0.5f, -0.5f,  0.5f}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{-0.5f,  0.5f,  0.5f}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{ 0.5f,  0.5f, -0.5f}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{ 0.5f, -0.5f, -0.5f}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{-0.5f, -0.5f, -0.5f}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{-0.5f,  0.5f, -0.5f}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{-0.5f,  0.5f,  0.5f}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{-0.5f,  0.5f, -0.5f}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{-0.5f, -0.5f, -0.5f}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{-0.5f, -0.5f,  0.5f}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{ 0.5f,  0.5f,  0.5f}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{ 0.5f,  0.5f, -0.5f}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{ 0.5f, -0.5f, -0.5f}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{ 0.5f, -0.5f,  0.5f}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{  0.5f, 0.5f,  0.5f}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{  0.5f, 0.5f, -0.5f}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{ -0.5f, 0.5f, -0.5f}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{ -0.5f, 0.5f,  0.5f}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{  0.5f,-0.5f,  0.5f}, vec3{0,-1,0} },  // bottom
-				Vertex{ vec3{  0.5f,-0.5f, -0.5f}, vec3{0,-1,0} },  // bottom
-				Vertex{ vec3{ -0.5f,-0.5f, -0.5f}, vec3{0,-1,0} },  // bottom
-				Vertex{ vec3{ -0.5f,-0.5f,  0.5f}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{- sz, -sz,  sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{- sz,  sz,  sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{  sz,  sz, -sz}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{  sz, -sz, -sz}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{- sz, -sz, -sz}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{- sz,  sz, -sz}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{- sz,  sz,  sz}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{- sz,  sz, -sz}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{- sz, -sz, -sz}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{- sz, -sz,  sz}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{  sz,  sz,  sz}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{  sz,  sz, -sz}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{  sz, -sz, -sz}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{  sz, -sz,  sz}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{  sz,  sz,  sz}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{  sz,  sz, -sz}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{ -sz,  sz, -sz}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{ -sz,  sz,  sz}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{  sz, -sz, -sz}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{ -sz, -sz, -sz}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{ -sz, -sz,  sz}, vec3{0,-1,0} },  // bottom
 			};
 			std::vector<int> indices{
 				1, 0, 3,

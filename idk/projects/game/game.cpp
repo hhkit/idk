@@ -159,14 +159,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto light = scene->CreateGameObject();
 	light->Transform()->position = vec3{ 1.5, 0, 0 };
+	light->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	light->Transform()->scale = vec3{ 1.f / 4 };
 	light->AddComponent<RigidBody>()->velocity = vec3{ -1,0,0 };
 	light->AddComponent<Light>();
-	light->AddComponent<Collider>()->shape = sphere{};
+	light->AddComponent<Collider>()->shape = box{};
 	light->AddComponent<TestComponent>();
 
 	auto seduceme = scene->CreateGameObject();
+	seduceme->GetComponent<Name>()->name = "seduceme";
 	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
+	seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
 	seduceme->AddComponent<Collider>()->shape = box{};
 	//seduceme->AddComponent<RigidBody>();

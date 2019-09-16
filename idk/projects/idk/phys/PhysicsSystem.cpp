@@ -5,6 +5,7 @@
 #include <gfx/DebugRenderer.h>
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
+#include <phys/collision_box.h>
 #include <phys/collision_sphere.h>
 #include <math/matrix_decomposition.h>
 
@@ -82,6 +83,10 @@ namespace idk
 					const auto rshape = calc_shape(rhs, rrigidbody, rcollider);
 
 					// static collisions
+					if constexpr (std::is_same_v<LShape, box> && std::is_same_v<RShape, box>)
+						return phys::collide_box_box_discrete(
+							lshape, rshape);
+					else
 					if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, sphere>)
 						return phys::collide_sphere_sphere_discrete(
 							lshape, rshape);

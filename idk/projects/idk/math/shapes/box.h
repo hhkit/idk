@@ -6,13 +6,15 @@ namespace idk
 {
 	struct box
 	{
-		vec3 center;
-		vec3 extents;	// full extents
-		mat3 axes;
+		vec3 center {};
+		vec3 extents{1};	// full extents
+		mat3 axes   {};
 
 		aabb bounds() const;
+		array<vec3, 8> points() const;
 
 		box& operator*=(const mat4& transform);
 		box  operator*(const mat4& matrix) const;
+
 	};
 }

@@ -7,7 +7,7 @@ namespace idk
 	struct sphere
 	{
 		vec3 center;
-		real radius { 1.f };
+		real radius { 0.5f };
 
 		// accessors
 		real diameter() const;

@@ -18,6 +18,19 @@ namespace idk
 
 		return aabb{ center - extents, center + extents };
 	}
+	array<vec3, 8> box::points() const
+	{
+		return array<vec3, 8>{
+			center + (- extents[0] * axes[0] - extents[1] * axes[1] - extents[2] * axes[2]) / 2,
+			center + (- extents[0] * axes[0] - extents[1] * axes[1] + extents[2] * axes[2]) / 2,
+			center + (- extents[0] * axes[0] + extents[1] * axes[1] - extents[2] * axes[2]) / 2,
+			center + (- extents[0] * axes[0] + extents[1] * axes[1] + extents[2] * axes[2]) / 2,
+			center + (+ extents[0] * axes[0] - extents[1] * axes[1] - extents[2] * axes[2]) / 2,
+			center + (+ extents[0] * axes[0] - extents[1] * axes[1] + extents[2] * axes[2]) / 2,
+			center + (+ extents[0] * axes[0] + extents[1] * axes[1] - extents[2] * axes[2]) / 2,
+			center + (+ extents[0] * axes[0] + extents[1] * axes[1] + extents[2] * axes[2]) / 2,
+		};
+	}
 	box& box::operator*=(const mat4& transform)
 	{
 		auto tfm = transform * mat4{ scale(extents) * axes };
