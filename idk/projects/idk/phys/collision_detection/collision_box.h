@@ -1,5 +1,5 @@
 #pragma once
-#include "collision_result.h"
+#include <phys/collision_result.h>
 #include <math/shapes/box.h>
 
 namespace idk::phys

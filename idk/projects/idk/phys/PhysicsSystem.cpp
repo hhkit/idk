@@ -5,8 +5,9 @@
 #include <gfx/DebugRenderer.h>
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
-#include <phys/collision_box.h>
-#include <phys/collision_sphere.h>
+#include <phys/collision_detection/collision_box.h>
+#include <phys/collision_detection/collision_sphere.h>
+#include <phys/collision_detection/collision_box_sphere.h>
 #include <math/matrix_decomposition.h>
 
 namespace idk
@@ -46,7 +47,7 @@ namespace idk
 		{
 			std::visit([&](const auto& shape)
 			{
-				Core::GetSystem<DebugRenderer>().Draw(shape * collider.GetGameObject()->Transform()->GlobalMatrix(), c);
+				Core::GetSystem<DebugRenderer>().Draw(shape * collider.GetGameObject()->Transform()->GlobalMatrix(), c, Core::GetDT());
 			}, collider.shape);
 		};
 
@@ -87,9 +88,17 @@ namespace idk
 						return phys::collide_box_box_discrete(
 							lshape, rshape);
 					else
+						if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, box>)
+							return -phys::collide_box_sphere_discrete(
+								rshape, lshape);
+					else
 					if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, sphere>)
 						return phys::collide_sphere_sphere_discrete(
 							lshape, rshape);
+					else
+						if constexpr (std::is_same_v<LShape, box> && std::is_same_v<RShape, sphere>)
+							return phys::collide_box_sphere_discrete(
+								lshape, rshape);
 					else
 						return phys::col_failure{};
 

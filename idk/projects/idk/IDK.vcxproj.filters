@@ -584,8 +584,9 @@
     <ClInclude Include="gfx\MeshFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision_box.h" />
-    <ClInclude Include="phys\collision_sphere.h" />
+    <ClInclude Include="phys\collision_detection\collision_box.h" />
+    <ClInclude Include="phys\collision_detection\collision_sphere.h" />
+    <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -838,8 +839,9 @@
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="res\Guid.cpp" />
-    <ClCompile Include="phys\collision_box.cpp" />
-    <ClCompile Include="phys\collision_sphere.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_box.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
