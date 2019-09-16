@@ -11,7 +11,7 @@ namespace idk::vkn
 		//imageView{std::move(iv.imageView)},
 		size{iv.size}
 	{
-		imageView.emplace_back(std::move(*iv.imageView));
+		imageView.emplace_back(*iv.imageView);
 		//Creates an empty framebuffer tht does nothing at all until attach image views is called
 
 		AttachImageViews(std::move(iv.image), imageView, vknView,size);
@@ -93,6 +93,30 @@ namespace idk::vkn
 		}
 	}
 
+	void VknFrameBuffer::ReattachImageViews(VulkanView& vknView)
+	{
+		buffer.reset();
+		vector<vk::ImageView> image_views;
+		auto& meta = GetMeta();
+		//TODO assert that all textures have to be the same size
+		for (auto& im : meta.textures)
+		{
+			image_views.emplace_back(*im.as<VknTexture>().imageView);
+		}
+
+		vk::FramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.renderPass = *vknView.Renderpass();
+		framebufferInfo.attachmentCount = image_views.size();
+		framebufferInfo.pAttachments = image_views.data();
+		framebufferInfo.width  = s_cast<uint32_t>(meta.size.x);
+		framebufferInfo.height = s_cast<uint32_t>(meta.size.y);
+		framebufferInfo.layers = 1;
+
+		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
+
+		uncreated = false;
+	}
+
 	void VknFrameBuffer::AttachImageViews(VknImageData& iv, VulkanView& vknView)
 	{
 		//One framebuffer can reference multiple attachments (color, position, light etc.)
@@ -149,9 +173,9 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	vk::UniqueFramebuffer VknFrameBuffer::Buffer()
+	vk::Framebuffer VknFrameBuffer::Buffer()
 	{
-		return std::move(buffer);
+		return *buffer;
 	}
 
 	/*GLuint VknFrameBuffer::DepthBuffer() const

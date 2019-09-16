@@ -14,14 +14,20 @@ namespace idk::vkn
 	vk::Format    MapFormat(TextureFormat tf);
 	TextureFormat MapFormat(vk::Format    tf);
 
-	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format,
+		string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	{
+		LoadTexture(texture, pixel_format, rgba32.data(), rgba32.size(), size, allocator, load_fence, isRenderTarget);
+	}
+	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
-		const void* rgba = std::data(rgba32);
+
+		const void* rgba = rgba32;
 		auto format = MapFormat(pixel_format);
 		auto ptr = &texture;
-		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, rgba32.length(), format, isRenderTarget);
+		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->image = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
@@ -132,7 +138,8 @@ namespace idk::vkn
 
 		auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
 
-		hlp::MapMemory(device, *stagingMemory, 0, data, num_bytes, vk::DispatchLoaderDefault{});
+		if(data)
+			hlp::MapMemory(device, *stagingMemory, 0, data, num_bytes, vk::DispatchLoaderDefault{});
 		vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
 		vk::AccessFlags dst_flags = vk::AccessFlagBits::eTransferWrite;
 		vk::PipelineStageFlags shader_flags = vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader;// | vk::PipelineStageFlagBits::eTessellationControlShader | vk::PipelineStageFlagBits::eTessellationEvaluationShader;

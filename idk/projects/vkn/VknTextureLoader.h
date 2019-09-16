@@ -21,6 +21,7 @@ namespace idk::vkn
 	class TextureLoader
 	{
 	public:
+		void LoadTexture(VknTexture& texture, TextureFormat pixel_format, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 		void LoadTexture(VknTexture& texture, TextureFormat pixel_format, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 	};
 

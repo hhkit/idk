@@ -49,7 +49,8 @@ namespace idk::vkn
 
 		auto ptr = std::make_unique<VknTexture>();
 		TextureLoader loader;
-		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, allocator, *fence, true);
+
+		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, nullptr,s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
 
 		//imgd.size = vec2{ sz };
 

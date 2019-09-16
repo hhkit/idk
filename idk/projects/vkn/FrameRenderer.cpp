@@ -10,6 +10,7 @@
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
+#include <vkn/VknFrameBuffer.h>
 #include <gfx/Light.h>
 
 
@@ -477,7 +478,7 @@ namespace idk::vkn
 	vk::Framebuffer GetFrameBuffer(const CameraData& camera_data, uint32_t curr_index)
 	{
 		//TODO Actually get the framebuffer from camera_data
-		return {};
+		return camera_data.render_target.as<VknFrameBuffer>().Buffer();
 	}
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
@@ -515,7 +516,7 @@ namespace idk::vkn
 		};
 		auto& camera = state.camera;
 		auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto frame_buffer = (camera.render_target) ? GetFrameBuffer(camera, swapchain.curr_index) : default_frame_buffer;
+		auto frame_buffer = GetFrameBuffer(camera, swapchain.curr_index);
 		vk::RenderPassBeginInfo rpbi
 		{
 			*View().Renderpass(), frame_buffer,

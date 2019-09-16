@@ -18,10 +18,11 @@ namespace idk::vkn
 		~VknFrameBuffer();
 
 		void OnMetaUpdate(const Metadata& newmeta) override;
+		void ReattachImageViews(VulkanView& vknView);
 		void AttachImageViews(VknImageData&, VulkanView& vknView);
 		void AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
 
-		vk::UniqueFramebuffer Buffer();
+		vk::Framebuffer Buffer();
 
 		//GLuint DepthBuffer() const;
 	private:
@@ -29,7 +30,7 @@ namespace idk::vkn
 		vk::UniqueFramebuffer buffer{ nullptr };
 		//VknImageData		  image{};
 		vk::UniqueImage       image{nullptr};
-		
+		vector<vk::UniqueImageView> image_views;
 		vector<vk::ImageView> imageView{};
 		vec2				  size{};
 		bool				  uncreated{true};

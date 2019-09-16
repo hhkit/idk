@@ -11,6 +11,7 @@
 #include <anim/AnimationFactory.h>
 #include <vkn/VulkanTextureFactory.h>
 #include <vkn/DDSLoader.h>
+#include <vkn/VknFrameBufferFactory.h>
 namespace idk::vkn
 {
 
@@ -23,6 +24,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanGlslLoader>();
 	Core::GetResourceManager().RegisterFactory<VulkanTextureFactory>();
+	Core::GetResourceManager().RegisterFactory<VknFrameBufferFactory>();
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");
