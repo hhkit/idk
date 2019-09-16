@@ -308,7 +308,11 @@ namespace idk::vkn
 		auto& pvt_uni = msmod.GetLayout("CameraBlock");
 		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
 		auto V = mat4{ vec4{1,0,0,0},vec4{0,-1,0,0} ,vec4{0,0,1,0},vec4{0,0,0,1} }*cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
-		mat4 pvt_trf = mat4{1,0,0,0, 0,-1,0,0, 0,0,0.5f,0.5f, 0,0,0,1}* cam.projection_matrix;
+		mat4 pvt_trf = mat4{1,0,0,0,
+							0,-1,0,0,
+							0,0,0.5f,0.5f,
+			                0,0,0,1
+		}* cam.projection_matrix;
 		;
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
