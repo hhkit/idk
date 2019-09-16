@@ -10,7 +10,8 @@ namespace idk::vkn
 	{
 	public:
 		VknFrameBuffer() = default;
-		VknFrameBuffer(VknImageData iv, VulkanView& vknView); 
+		VknFrameBuffer(VknTexture iv, VulkanView& vknView); 
+		VknFrameBuffer(unique_ptr<VknTexture> iv, VulkanView& vknView);
 		VknFrameBuffer(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize = {1,1});
 		VknFrameBuffer(VknFrameBuffer&&);
 		VknFrameBuffer& operator=(VknFrameBuffer&&);

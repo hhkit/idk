@@ -11,6 +11,7 @@ namespace idk::vkn
 	enum class TextureFormat
 	{
 		eRGBA32,
+		eBGRA32,
 		eBC1,
 		eBC2,
 		eBC3,
@@ -20,7 +21,7 @@ namespace idk::vkn
 	class TextureLoader
 	{
 	public:
-		void LoadTexture(VknTexture& texture, TextureFormat pixel_format, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence);
+		void LoadTexture(VknTexture& texture, TextureFormat pixel_format, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 	};
 
 

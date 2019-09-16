@@ -8,19 +8,19 @@
 namespace idk::vkn
 {
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format);
-	std::pair<vk::UniqueImage, hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format);
+	std::pair<vk::UniqueImage, hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
 
 	vk::Format    MapFormat(TextureFormat tf);
 	TextureFormat MapFormat(vk::Format    tf);
 
-	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence)
+	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
 		const void* rgba = std::data(rgba32);
 		auto format = MapFormat(pixel_format);
 		auto ptr = &texture;
-		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, rgba32.length(), format);
+		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, rgba32.length(), format, isRenderTarget);
 		ptr->image = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
@@ -98,14 +98,14 @@ namespace idk::vkn
 
 	}
 
-	std::pair<vk::UniqueImage, hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format)
+	std::pair<vk::UniqueImage, hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		vk::PhysicalDevice pd = view.PDevice();
 		vk::Device device = *view.Device();
 		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
 		auto cmd_buffer = *ucmd_buffer;
-		bool is_render_target = false;
+		//bool is_render_target = isRenderTarget;
 
 		size_t num_bytes = len;
 
@@ -140,38 +140,42 @@ namespace idk::vkn
 		vk::PipelineStageFlags src_stages = shader_flags;
 		vk::PipelineStageFlags dst_stages = vk::PipelineStageFlagBits::eTransfer;
 		vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		vk::ImageLayout next_layout = vk::ImageLayout::eTransferDstOptimal;
 		if (is_render_target)
 		{
 			src_flags |= vk::AccessFlagBits::eColorAttachmentRead;
 			src_stages |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
 			dst_flags |= vk::AccessFlagBits::eColorAttachmentWrite;
 			dst_stages |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
-			layout = attachment_layout;
+			next_layout = layout = attachment_layout;
 		}
-		TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *image);
+		TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image);
+		if (!is_render_target)
+		{
 
-		//Copy data from buffer to image
-		vk::BufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
+			//Copy data from buffer to image
+			vk::BufferImageCopy region{};
+			region.bufferOffset = 0;
+			region.bufferRowLength = 0;
+			region.bufferImageHeight = 0;
 
-		region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
+			region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			region.imageSubresource.mipLevel = 0;
+			region.imageSubresource.baseArrayLayer = 0;
+			region.imageSubresource.layerCount = 1;
 
-		region.imageOffset = { 0, 0, 0 };
-		region.imageExtent = {
-			width,
-			height,
-			1
-		};
-		cmd_buffer.copyBufferToImage(*stagingBuffer, *image, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
+			region.imageOffset = { 0, 0, 0 };
+			region.imageExtent = {
+				width,
+				height,
+				1
+			};
+			cmd_buffer.copyBufferToImage(*stagingBuffer, *image, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
 
-		;
+			TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image);
+			;
+		}
 
-		TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image);
 
 		device.resetFences(fence);
 		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
@@ -198,6 +202,7 @@ namespace idk::vkn
 		return hash_table<TextureFormat, vk::Format>
 		{
 			{TextureFormat::eRGBA32, vk::Format::eR8G8B8A8Unorm},
+			{ TextureFormat::eBGRA32, vk::Format::eB8G8R8A8Unorm },
 			{ TextureFormat::eBC1,vk::Format::eBc1RgbaUnormBlock },
 			{ TextureFormat::eBC2,vk::Format::eBc2UnormBlock },
 			{ TextureFormat::eBC3,vk::Format::eBc3UnormBlock },

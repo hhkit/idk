@@ -5,14 +5,28 @@
 
 namespace idk::vkn
 {
-	VknFrameBuffer::VknFrameBuffer(VknImageData iv, VulkanView& vknView)
+	VknFrameBuffer::VknFrameBuffer(VknTexture iv, VulkanView& vknView)
 		:buffer{},
 		image{std::move(iv.image)},
+		//imageView{std::move(iv.imageView)},
 		size{iv.size}
 	{
-
+		imageView.emplace_back(std::move(*iv.imageView));
 		//Creates an empty framebuffer tht does nothing at all until attach image views is called
-		AttachImageViews(iv,vknView);
+
+		AttachImageViews(std::move(iv.image), imageView, vknView,size);
+	}
+
+	VknFrameBuffer::VknFrameBuffer(unique_ptr<VknTexture> iv, VulkanView& vknView)
+		:buffer{},
+		image{ std::move(iv->image) },
+		//imageView{std::move(iv.imageView)},
+		size{ iv->size }
+	{
+		imageView.emplace_back(std::move(*iv->imageView));
+		//Creates an empty framebuffer tht does nothing at all until attach image views is called
+
+		AttachImageViews(std::move(iv->image), imageView, vknView,size);
 	}
 
 	VknFrameBuffer::VknFrameBuffer(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize)
