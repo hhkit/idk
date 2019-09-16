@@ -10,8 +10,7 @@ namespace idk::phys
 			col_success succ;
 			succ.normal_of_collision = (lhs.center - rhs.center).normalize();
 			succ.point_of_collision  = (rhs.center + lhs.center) / 2;
-			succ.penetration_depth_l = lhs.radius - succ.point_of_collision.distance(lhs.center);
-			succ.penetration_depth_r = rhs.radius - succ.point_of_collision.distance(rhs.center);
+			succ.penetration_depth   = lhs.radius + rhs.radius - lhs.center.distance(rhs.center);
 			return succ;
 		}
 		else

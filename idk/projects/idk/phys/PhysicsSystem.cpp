@@ -159,9 +159,25 @@ namespace idk
 			auto impulse = impulse_scalar * result.normal_of_collision;
 
 			if (lrigidbody)
-				lrigidbody->velocity += impulse * linv_mass;
+			{
+				auto& ref_rb = *lrigidbody;
+				auto t_of_collision = result.penetration_depth / ref_rb.velocity.dot(result.normal_of_collision);
+				auto remaining_t = dt - t_of_collision;
+
+				auto new_vel = ref_rb.velocity + impulse * linv_mass;
+				ref_rb._predicted_tfm[3] = ref_rb._predicted_tfm[3] + vec4{ ref_rb.velocity * t_of_collision + new_vel * remaining_t, 0 };
+				ref_rb.velocity = new_vel;
+			}
 			if (rrigidbody)
-				rrigidbody->velocity -= impulse * rinv_mass;
+			{
+				auto& ref_rb = *rrigidbody;
+				auto t_of_collision = result.penetration_depth / ref_rb.velocity.dot(result.normal_of_collision);
+				auto remaining_t = dt - t_of_collision;
+
+				auto new_vel = ref_rb.velocity - impulse * rinv_mass;;
+				ref_rb._predicted_tfm[3] = ref_rb._predicted_tfm[3] + vec4{ ref_rb.velocity * t_of_collision + new_vel * remaining_t, 0 };
+				ref_rb.velocity = new_vel;
+			}
 		}
 	}
 
@@ -171,19 +187,7 @@ namespace idk
 		auto half_dt = dt / 2;
 
 		for (auto& rigidbody : rbs)
-		{
-			auto tfm = rigidbody.GetGameObject()->Transform();
-
-			// velocity verlet
-			tfm->GlobalPosition(
-				tfm->GlobalPosition() + (rigidbody.velocity * dt) + rigidbody.accel * dt * half_dt);
-			
-			auto accel = rigidbody.accel;
-			rigidbody.velocity += (accel + rigidbody._prev_accel) * half_dt;
-
-			rigidbody._prev_accel = rigidbody.accel;
-			rigidbody.accel       = vec3{};
-		}
+			rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody.PredictedTransform());
 	}
 	void PhysicsSystem::Init()
 	{

@@ -22,7 +22,6 @@ namespace idk::phys
 	{
 		auto copy = *this;
 		copy.normal_of_collision = -copy.normal_of_collision;
-		std::swap(copy.penetration_depth_l, copy.penetration_depth_r);
 		return copy;
 	}
 }

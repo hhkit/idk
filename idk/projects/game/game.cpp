@@ -158,10 +158,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto light = scene->CreateGameObject();
+	light->GetComponent<Name>()->name = "voila";
 	light->Transform()->position = vec3{ 1.5, 0, 0 };
 	light->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	light->Transform()->scale = vec3{ 1.f / 4 };
-	//light->AddComponent<RigidBody>()->velocity = vec3{ -1,0,0 };
+	light->AddComponent<RigidBody>()->velocity = vec3{ -1,0,0 };
 	light->AddComponent<Light>();
 	light->AddComponent<Collider>()->shape = box{};
 	light->AddComponent<TestComponent>();

@@ -9,8 +9,7 @@ namespace idk::phys
 	{
 		vec3 point_of_collision  {};
 		vec3 normal_of_collision {}; // normal points towards lhs
-		real penetration_depth_l {};
-		real penetration_depth_r {};
+		real penetration_depth   {};
 
 		col_success operator-() const;
 	};
