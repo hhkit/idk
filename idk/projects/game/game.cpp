@@ -167,7 +167,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto seduceme = scene->CreateGameObject();
 	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
-	seduceme->AddComponent<Collider>()->shape = sphere{};
+	seduceme->AddComponent<Collider>()->shape = box{};
 	//seduceme->AddComponent<RigidBody>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 

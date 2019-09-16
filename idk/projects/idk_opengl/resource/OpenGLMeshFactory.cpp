@@ -9,18 +9,17 @@ namespace idk::ogl
 {
 	void OpenGLMeshFactory::GenerateDefaultMeshes()
 	{
+		struct Vertex
+		{
+			vec3 pos;
+			vec3 normal;
+		};
+		vector<OpenGLDescriptor> descriptor
+		{
+			OpenGLDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
+			OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) }
+		};
 		{ /* create sphere mesh*/
-			struct Vertex
-			{
-				vec3 pos;
-				vec3 normal;
-			};
-			vector<OpenGLDescriptor> descriptor
-			{
-				OpenGLDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
-				OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) }
-			};
-
 			std::vector<Vertex> icosahedron;
 			std::vector<int> icosahedronIndices;
 			icosahedron.reserve(12);
@@ -231,17 +230,78 @@ namespace idk::ogl
 
 			// Subdivide the icosahedron into a sphere here.
 			subdivideIcosahedron(icosahedron, icosahedronIndices);
-			
+
 			auto sphere_mesh = Core::GetResourceManager().Emplace<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddMeshEntry(0, 0, icosahedronIndices.size(), 0);
-			sphere_mesh->AddBuffer(OpenGLBuffer{GL_ARRAY_BUFFER, descriptor}
+			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 				.Bind()
 				.Buffer(icosahedron.data(), sizeof(Vertex), icosahedron.size())
 			);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
 				.Bind()
 				.Buffer(icosahedronIndices.data(), sizeof(int), icosahedronIndices.size())
+			);
+		}
+
+		{	/* create cube mesh */
+			auto box_mesh = Mesh::defaults[MeshType::Box];
+			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(box_mesh.guid);
+
+			std::vector<Vertex> vertices{
+				Vertex{ vec3{ 0.5f,  0.5f,  0.5f}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{ 0.5f, -0.5f,  0.5f}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{-0.5f, -0.5f,  0.5f}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{-0.5f,  0.5f,  0.5f}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{ 0.5f,  0.5f, -0.5f}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{ 0.5f, -0.5f, -0.5f}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{-0.5f, -0.5f, -0.5f}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{-0.5f,  0.5f, -0.5f}, vec3{0,0,-1} },  // back
+				Vertex{ vec3{-0.5f,  0.5f,  0.5f}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{-0.5f,  0.5f, -0.5f}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{-0.5f, -0.5f, -0.5f}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{-0.5f, -0.5f,  0.5f}, vec3{-1,0,0} },  // left
+				Vertex{ vec3{ 0.5f,  0.5f,  0.5f}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{ 0.5f,  0.5f, -0.5f}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{ 0.5f, -0.5f, -0.5f}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{ 0.5f, -0.5f,  0.5f}, vec3{ 1,0,0} },  // right
+				Vertex{ vec3{  0.5f, 0.5f,  0.5f}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{  0.5f, 0.5f, -0.5f}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{ -0.5f, 0.5f, -0.5f}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{ -0.5f, 0.5f,  0.5f}, vec3{0, 1,0} },  // top
+				Vertex{ vec3{  0.5f,-0.5f,  0.5f}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{  0.5f,-0.5f, -0.5f}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{ -0.5f,-0.5f, -0.5f}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{ -0.5f,-0.5f,  0.5f}, vec3{0,-1,0} },  // bottom
+			};
+			std::vector<int> indices{
+				1, 0, 3,
+				2, 1, 3,
+
+				4, 5, 7,
+				5, 6, 7,
+
+				8, 9, 11,
+				9, 10, 11,
+
+				13, 12, 15,
+				14, 13, 15,
+
+				16, 17, 19,
+				17, 18, 19,
+
+				21, 20, 23,
+				22, 21, 23,
+			};
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+					.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei) vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
 			);
 		}
 	}
