@@ -625,8 +625,17 @@ namespace idk {
 
 	bool FileSystem::Rename(string_view mountPath, string_view new_name)
 	{
+		// Try getting the file
 		FileHandle handle = GetFile(mountPath);
-		return handle.Rename(new_name);
+		if(handle)
+			return handle.Rename(new_name);
+
+		// Try getting the directory
+		handle = GetDir(mountPath);
+		if (handle)
+			return handle.Rename(new_name);
+
+		throw(FS_ERROR_CODE::FILESYSTEM_NOT_FOUND, "[FILE SYSTEM] mountPath cannot be found.");
 	}
 
 	void FileSystem::DumpMounts() const

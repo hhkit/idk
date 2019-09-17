@@ -116,6 +116,32 @@ namespace idk
 		}
 	}
 
+	void FileHandle::renameDirRecurse(file_system_detail::fs_dir& dir)
+	{
+		auto& vfs = Core::GetSystem<FileSystem>();
+		for (auto& file_index : dir._files_map)
+		{
+			auto& internal_file = vfs.getFile(file_index.second);
+			string append = '/' + internal_file._filename;
+
+			internal_file._full_path	= dir._full_path	+ append;
+			internal_file._rel_path		= dir._rel_path		+ append;
+			internal_file._mount_path	= dir._mount_path	+ append;
+		}
+
+		for (auto& dir_index : dir._sub_dirs)
+		{
+			auto& internal_dir = vfs.getDir(dir_index.second);
+			string append = '/' + internal_dir._filename;
+
+			internal_dir._full_path = dir._full_path + append;
+			internal_dir._rel_path = dir._rel_path + append;
+			internal_dir._mount_path = dir._mount_path + append;
+
+			renameDirRecurse(internal_dir);
+		}
+	}
+
 
 	bool FileHandle::Rename(string_view new_file_name)
 	{
@@ -134,7 +160,7 @@ namespace idk
 			try {
 				FS::rename(old_p, new_p);
 			}catch(const FS::filesystem_error& e){
-				std::cout << "[FILEHANDLE] Rename: " << e.what() << std::endl;
+				std::cout << "[FILEHANDLE ERROR] Rename: " << e.what() << std::endl;
 				return false;
 			}
 			auto res = parent_dir._files_map.find(internal_file._filename);
@@ -145,8 +171,30 @@ namespace idk
 			
 			return true;
 		}
+		else
+		{
+			auto& internal_dir = vfs.getDir(_key);
+			auto& parent_dir = vfs.getDir(internal_dir._parent);
 
-		return false;
+			FS::path old_p{ internal_dir._full_path };
+			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
+			try {
+				FS::rename(old_p, new_p);
+			}
+			catch (const FS::filesystem_error& e) {
+				std::cout << "[FILEHANDLE ERROR] Rename: " << e.what() << std::endl;
+				return false;
+			}
+			auto res = parent_dir._sub_dirs.find(internal_dir._filename);
+			assert(res != parent_dir._sub_dirs.end());
+			parent_dir._sub_dirs.erase(res);
+
+			vfs.initDir(internal_dir, parent_dir, new_p);
+
+			// Recurse through the dir cos all the subsequent paths are changed as well
+			renameDirRecurse(internal_dir);
+			return true;
+		}
 	}
 
 	FileHandle::operator bool() const

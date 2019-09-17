@@ -81,6 +81,8 @@ namespace idk
 		bool validate() const;
 		bool validateFull() const;
 
+		void renameDirRecurse(file_system_detail::fs_dir& dir);
+
 		int64_t _ref_count		= -1;
 		file_system_detail::fs_key _key{};
 		bool _is_regular_file = true;
