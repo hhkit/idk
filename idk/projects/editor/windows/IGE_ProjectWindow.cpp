@@ -241,6 +241,22 @@ namespace idk {
                     selected_asset = path.string();
                 }
             }
+			if (ImGui::IsItemClicked()) { //Activates on click i.e: it is now single click for assets, but double click for directory
+				if (!entry.is_directory())
+				{
+					selected_asset = path.string();
+				}
+			}
+			if (!entry.is_directory()) {
+
+				if (ImGui::BeginDragDropSource()) {
+					ImGui::SetDragDropPayload(reflect::get_type<string>().name().data(), &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+					ImGui::Text("Drag to inspector button.");
+					ImGui::Text(selected_asset.c_str());
+					ImGui::EndDragDropSource();
+				}
+			}
+
 
             if (selected_asset == path)
             {
