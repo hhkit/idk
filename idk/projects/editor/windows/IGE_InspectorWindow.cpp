@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		16 SEPT 2019
+//@date		17 SEPT 2019
 //@brief	
 
 /*
@@ -19,6 +19,7 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
 #include <scene/SceneManager.h>
+#include <res/ResourceManager.h>
 #include <reflect/reflect.h>
 #include <IncludeComponents.h>
 #include <IDE.h>
@@ -120,6 +121,7 @@ namespace idk {
 							else if constexpr (std::is_same_v<T, vec3>) {
 
 								DisplayVec3(val);
+								return false;
 							}
 							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
 								string meshName{val.guid };
@@ -127,6 +129,35 @@ namespace idk {
 								if (ImGui::Button(meshName.c_str())) {
 
 								}
+								//Create a drag drop payload on selected gameobjects.
+								if (ImGui::BeginDragDropTarget()) {
+									if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("string")) {
+										IM_ASSERT(payload->DataSize == sizeof(string));
+										string* source = static_cast<string*>(payload->Data); // Getting the Payload Data
+										if (source->find(".fbx")!= string::npos) {
+
+											
+											FileHandle fileHandle{ source->data() };
+											//auto file = Core::GetSystem<ResourceManager>().GetFileResources(fileHandle);
+											//file.resources[0].visit([&](auto& handle) {
+											//	if constexpr (std::is_same_v < std::decay_t<decltype(handle)>, RscHandle<Mesh>>)
+											//	{
+											//		const RscHandle<Mesh>& mesh_handle = handle;
+											//		val = mesh_handle;
+											//	}
+											//	else
+											//		(handle);
+											//});
+
+
+
+										}
+
+									}
+									ImGui::EndDragDropTarget();
+								}
+
+
 								return false;
 							}
 							else {
