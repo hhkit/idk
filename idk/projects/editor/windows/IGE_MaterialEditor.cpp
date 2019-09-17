@@ -50,9 +50,11 @@ namespace idk
                 (ImNodes::IsConnectingCompatibleSlot() /*&& !IsAlreadyConnectedWithPendingConnection(title, kind)*/);
 
             ImColor kindColor = type_colors[std::abs(kind)];
-            ImColor color = is_active ? kindColor : canvas->colors[ImNodes::ColConnection];
+            ImColor text_color = ImGui::GetColorU32(ImGuiCol_Text);//is_active ? kindColor : canvas->colors[ImNodes::ColConnection];
+            if (!is_active) text_color.Value.w = 0.7f;
+            ImColor color = is_active ? canvas->colors[ImNodes::ColConnectionActive] : canvas->colors[ImNodes::ColConnection];
 
-            ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+            ImGui::PushStyleColor(ImGuiCol_Text, text_color.Value);
 
             if (ImNodes::IsOutputSlotKind(kind))
             {
@@ -533,8 +535,8 @@ namespace idk
 
     void IGE_MaterialEditor::Initialize()
     {
-        canvas.colors[ImNodes::ColNodeBg] = ImColor(0.25f, 0.25f, 0.3f);
-        canvas.colors[ImNodes::ColNodeActiveBg] = ImColor(0.25f, 0.25f, 0.3f);
+        canvas.colors[ImNodes::ColNodeBg] = ImGui::GetColorU32(ImGuiCol_Border);
+        canvas.colors[ImNodes::ColNodeActiveBg] = ImGui::GetColorU32(ImGuiCol_Border);
         canvas.style.curve_thickness = 2.5f;
 
         graph = Core::GetResourceManager().Create<Graph>(
@@ -728,7 +730,7 @@ namespace idk
     {
         ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, canvas.colors[ImNodes::ColNodeBg].Value);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
 
         if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))

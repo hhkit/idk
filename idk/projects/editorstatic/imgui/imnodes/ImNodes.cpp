@@ -759,7 +759,7 @@ void EndSlot()
         char drag_id[32];
         snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.kind * -1);
 
-        if (auto* payload = ImGui::AcceptDragDropPayload(drag_id))
+        if (auto* payload = ImGui::AcceptDragDropPayload(drag_id, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
         {
             auto* drag_data = (_DragConnectionPayload*) payload->Data;
 

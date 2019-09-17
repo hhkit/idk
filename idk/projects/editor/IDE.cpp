@@ -74,7 +74,62 @@ namespace idk
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 
         //Imgui Style
-        ImGui::StyleColorsClassic();
+        auto& style = ImGui::GetStyle();
+        style.FramePadding = ImVec2(4.0f, 1.0f);
+        style.WindowRounding = 0;
+        style.TabRounding = 0;
+        style.IndentSpacing = 14.0f;
+
+        auto* colors = style.Colors;
+        ImGui::StyleColorsDark();
+
+        colors[ImGuiCol_DragDropTarget].w = 0;
+
+        // grays
+        colors[ImGuiCol_WindowBg] =
+            ImColor(29, 34, 41).Value;
+        colors[ImGuiCol_PopupBg] =
+            ImColor(43, 49, 56, 240).Value;
+        colors[ImGuiCol_Border] =
+        colors[ImGuiCol_Separator] =
+            ImColor(63, 70, 77).Value;
+            //ImColor(106, 118, 129).Value;
+
+        colors[ImGuiCol_MenuBarBg] =
+            ImColor(36, 58, 74).Value;
+
+        // main accent - 2
+        colors[ImGuiCol_TitleBg] =
+            ImColor(5, 30, 51).Value;
+
+        // main accent - 1
+        colors[ImGuiCol_TitleBgActive] =
+        colors[ImGuiCol_TabUnfocused] =
+            ImColor(12, 60, 89).Value;
+
+        // main accent
+        colors[ImGuiCol_Tab] =
+        colors[ImGuiCol_TabUnfocusedActive] =
+        colors[ImGuiCol_FrameBg] =
+        colors[ImGuiCol_Button] =
+        colors[ImGuiCol_Header] =
+        colors[ImGuiCol_SeparatorHovered] =
+            ImColor(23, 75, 111).Value;
+
+        // main accent + 1
+        colors[ImGuiCol_TabHovered] =
+        colors[ImGuiCol_TabActive] =
+        colors[ImGuiCol_ButtonHovered] =
+        colors[ImGuiCol_FrameBgHovered] =
+        colors[ImGuiCol_HeaderHovered] =
+        colors[ImGuiCol_SeparatorActive] =
+            ImColor(46, 115, 143).Value;
+
+        // main accent + 2
+        colors[ImGuiCol_ButtonActive] =
+        colors[ImGuiCol_FrameBgActive] =
+        colors[ImGuiCol_HeaderActive] =
+            ImColor(65, 153, 163).Value;
 
         // font config
         ImFontConfig config;

@@ -62,7 +62,7 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f }); //The File,Edit Tab
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //The File,Edit Tab
 
 	}
 
