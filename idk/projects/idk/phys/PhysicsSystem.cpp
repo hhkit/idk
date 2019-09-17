@@ -12,7 +12,8 @@
 
 namespace idk
 {
-	constexpr auto slop = 0.01f;
+	constexpr auto restitution_slop = 0.01f;
+	constexpr auto penetration_slop = 0.0001f;
 	constexpr auto damping = 0.95f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
@@ -48,8 +49,9 @@ namespace idk
 
 				if (rigidbody.sleeping())
 				{
-					rigidbody._prev_pos = tfm->GlobalPosition();
+					rigidbody._prev_pos = tfm->GlobalPosition() - rigidbody.initial_velocity;
 					rigidbody._predicted_tfm = tfm->GlobalMatrix();
+					rigidbody.initial_velocity = vec3{};
 					continue;
 				};
 
@@ -57,7 +59,8 @@ namespace idk
 				vec3 curr_pos = old_mat[3].xyz;
 
 				// verlet integrate towards new position
-				auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+				//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+				auto new_pos = 2 * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
 				rigidbody._accum_accel = vec3{};
 				rigidbody._prev_pos = curr_pos;
 				old_mat[3].xyz = new_pos;
@@ -180,18 +183,21 @@ namespace idk
 
 
 				auto restitution = std::min(lrestitution, rrestitution);
+				restitution = std::max(restitution - restitution_slop, 0.f);
 
 				auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
-				auto impulse = impulse_scalar * result.normal_of_collision;
+				auto impulse = damping* impulse_scalar * result.normal_of_collision;
+				assert(result.penetration_depth > -epsilon);
 
 				if (lrigidbody)
 				{
 					auto& ref_rb = *lrigidbody;
 
-					auto new_vel = lvel + impulse * linv_mass;
 					// reflect the object across
-					Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * result.penetration_depth }, color{ 1,0,1 }, seconds{ 0.5 });
 					ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + 2 * result.penetration_depth * result.normal_of_collision;
+					Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * 0.05f }, color{ 1,0,1 }, seconds{ 0.5 });
+
+					auto new_vel = lvel + impulse * linv_mass;
 					ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 				}
 
@@ -199,10 +205,11 @@ namespace idk
 				{
 					auto& ref_rb = *rrigidbody;
 
-					auto new_vel = rvel - impulse * rinv_mass;
 					// reflect the object across
-					Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * result.penetration_depth }, color{ 1,0,0.5 }, seconds{ 0.5 });
 					ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - 2 * result.penetration_depth * result.normal_of_collision;
+					Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * 0.05f }, color{ 1,0,0.5 }, seconds{ 0.5 });
+
+					auto new_vel = rvel - impulse * rinv_mass;
 					ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 				}
 			}

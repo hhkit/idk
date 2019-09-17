@@ -8,22 +8,23 @@ namespace idk
 		: public Component<RigidBody>
 	{
 	public:
-		vec3 _accum_accel    = vec3{};
-		real drag     = 0.f;
+		vec3 initial_velocity {};
+		vec3 _accum_accel     {};
+		real drag             { 0.f };
 
-		real inv_mass       = 1.f;
-		vec3 center_of_mass = vec3{};
+		real inv_mass         { 1.f };
+		vec3 center_of_mass   {};
 
-		vec3 axis_of_angular_velocity = vec3{ 1, 0, 0 };
-		rad  angular_velocity = rad{};
+		vec3 axis_of_angular_velocity { 1, 0, 0 };
+		rad  angular_velocity {};
 
-		bool use_gravity  = true;
-		bool is_kinematic = false;
-		real restitution  = 1.f;
+		bool use_gravity  { true  };
+		bool is_kinematic { false };
+		real restitution  { 1.f   };
 
 		// sleeping
-		real sleep_threshold  = +epsilon;
-		bool sleep_next_frame = true;
+		real sleep_threshold  { +epsilon };
+		bool sleep_next_frame { true     };
 
 		real mass() const;
 		void mass(real);

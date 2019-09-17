@@ -164,30 +164,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	floor->Transform()->position = vec3{ 0, -1, 0 };
 	floor->Transform()->scale    = vec3{ 10, 2, 10 };
 	floor->AddComponent<Collider>()->shape = box{};
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Transform()->position = vec3{ 5, 5, 0 };
-		wall->Transform()->scale = vec3{ 2, 10, 10 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Transform()->position = vec3{ -5, 5, 0 };
-		wall->Transform()->scale = vec3{ 2, 10, 10 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Transform()->position = vec3{ 0, 5, 5 };
-		wall->Transform()->scale = vec3{ 10, 10, 2 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Transform()->position = vec3{ 0, 5, -5 };
-		wall->Transform()->scale = vec3{ 10, 10, 2 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
+	//{
+	//	auto wall = scene->CreateGameObject();
+	//	wall->Transform()->position = vec3{ 5, 5, 0 };
+	//	wall->Transform()->scale = vec3{ 2, 10, 10 };
+	//	wall->AddComponent<Collider>()->shape = box{};
+	//}
+	//{
+	//	auto wall = scene->CreateGameObject();
+	//	wall->Transform()->position = vec3{ -5, 5, 0 };
+	//	wall->Transform()->scale = vec3{ 2, 10, 10 };
+	//	wall->AddComponent<Collider>()->shape = box{};
+	//}
+	//{
+	//	auto wall = scene->CreateGameObject();
+	//	wall->Transform()->position = vec3{ 0, 5, 5 };
+	//	wall->Transform()->scale = vec3{ 10, 10, 2 };
+	//	wall->AddComponent<Collider>()->shape = box{};
+	//}
+	//{
+	//	auto wall = scene->CreateGameObject();
+	//	wall->Transform()->position = vec3{ 0, 5, -5 };
+	//	wall->Transform()->scale = vec3{ 10, 10, 2 };
+	//	wall->AddComponent<Collider>()->shape = box{};
+	//}
 
 	//auto bounce_kun = scene->CreateGameObject();
 	//bounce_kun->GetComponent<Name>()->name = "bouncer";
@@ -201,20 +201,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto seduceme = scene->CreateGameObject();
 	seduceme->GetComponent<Name>()->name = "seduceme";
-	seduceme->Transform()->position = vec3{ -1.5, 0, 0 };
+	seduceme->Transform()->position = vec3{ -1.5, 1, 0 };
 	seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
-	//seduceme->AddComponent<RigidBody>();
+	seduceme->AddComponent<RigidBody>();
 	seduceme->AddComponent<Collider>()->shape = sphere{};
 
 
-	auto seducemetoo = scene->CreateGameObject();
-	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
-	seducemetoo->Transform()->position = vec3{ -1.375, 2, 0 };
-	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
-	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
-	seducemetoo->AddComponent<RigidBody>();
-	seducemetoo->AddComponent<Collider>()->shape = sphere{};
+	//auto seducemetoo = scene->CreateGameObject();
+	//seducemetoo->GetComponent<Name>()->name = "seducemetoo";
+	//seducemetoo->Transform()->position = vec3{ -1.375, 2, 0 };
+	//seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+	//seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
+	//seducemetoo->AddComponent<RigidBody>();
+	//seducemetoo->AddComponent<Collider>()->shape = sphere{};
 
 	c->Run();
 	
