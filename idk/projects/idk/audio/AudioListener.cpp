@@ -32,7 +32,7 @@ namespace idk
 				AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 				Handle<RigidBody> rigidbody = parent->GetComponent<RigidBody>();
 				if (rigidbody) {
-					audioSystem.Set3DListenerAttributes(transform->position, rigidbody->velocity, transform->Forward(), transform->Up());
+					audioSystem.Set3DListenerAttributes(transform->position, rigidbody->velocity(), transform->Forward(), transform->Up());
 				}
 				else {
 					audioSystem.Set3DListenerAttributes(transform->position, vec3{}, transform->Forward(), transform->Up());

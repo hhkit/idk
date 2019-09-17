@@ -313,16 +313,17 @@ namespace idk::ogl
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
-				Vertex{vec3{ 0,  1, -1}, vec3{ 0,  1, -1}},
-				Vertex{vec3{ 1, -1, -1}, vec3{ 1, -1, -1}},
+				Vertex{vec3{ 1,  1, -1}, vec3{ 0,  1, -1}},
+				Vertex{vec3{-1,  1, -1}, vec3{ 0,  1, -1}},
 				Vertex{vec3{-1, -1, -1}, vec3{-1, -1, -1}},
+				Vertex{vec3{ 1, -1, -1}, vec3{ 1, -1, -1}},
 			};
 			std::vector<int> indices
 			{
 				0,1,2,
-				1,2,3,
-				2,3,0,
-				3,0,1,
+				0,2,3,
+				0,3,4,
+				0,4,1
 			};
 
 			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);

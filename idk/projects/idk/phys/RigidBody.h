@@ -8,8 +8,7 @@ namespace idk
 		: public Component<RigidBody>
 	{
 	public:
-		vec3 velocity = vec3{};
-		vec3 accel    = vec3{};
+		vec3 _accum_accel    = vec3{};
 		real drag     = 0.f;
 
 		real inv_mass       = 1.f;
@@ -24,18 +23,22 @@ namespace idk
 
 		// sleeping
 		real sleep_threshold  = +epsilon;
-		bool sleeping         = false; 
 		bool sleep_next_frame = true;
 
 		real mass() const;
 		void mass(real);
+		vec3 velocity() const;
+		void velocity(const vec3& new_vel);
+		bool sleeping() const;
+		void sleeping(bool new_bool);
 
 		vec3 AddForce(const vec3& newtons);
 
 		const mat4& PredictedTransform() const;
 	private:
 		mat4 _predicted_tfm;
-		vec3 _prev_accel;
+		vec3 _prev_pos;
+		bool _sleeping = false;
 
 		friend class PhysicsSystem;
 	};

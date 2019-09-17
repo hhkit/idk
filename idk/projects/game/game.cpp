@@ -158,19 +158,43 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//createtest_obj(vec3{ 0, -0.5, 0 });
 
 	auto floor = scene->CreateGameObject();
-	floor->Transform()->position = vec3{ 0, -4, 0 };
-	floor->Transform()->scale    = vec3{ 10, 3, 10 };
+	floor->Transform()->position = vec3{ 0, -1, 0 };
+	floor->Transform()->scale    = vec3{ 10, 2, 10 };
 	floor->AddComponent<Collider>()->shape = box{};
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 5, 5, 0 };
+		wall->Transform()->scale = vec3{ 2, 10, 10 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ -5, 5, 0 };
+		wall->Transform()->scale = vec3{ 2, 10, 10 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 0, 5, 5 };
+		wall->Transform()->scale = vec3{ 10, 10, 2 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 0, 5, -5 };
+		wall->Transform()->scale = vec3{ 10, 10, 2 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
 
-	auto light = scene->CreateGameObject();
-	light->GetComponent<Name>()->name = "voila";
-	light->Transform()->position = vec3{ 1.5, 0, 0 };
-	light->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
-	light->Transform()->scale = vec3{ 1.f / 4 };
-	light->AddComponent<RigidBody>();
-	light->AddComponent<Light>();
-	light->AddComponent<Collider>()->shape = box{};
-	light->AddComponent<TestComponent>();
+	//auto bounce_kun = scene->CreateGameObject();
+	//bounce_kun->GetComponent<Name>()->name = "bouncer";
+	//bounce_kun->Transform()->position = vec3{ 0, 1, 0 };
+	//bounce_kun->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+	//bounce_kun->Transform()->scale = vec3{ 1.f / 4 };
+	//bounce_kun->AddComponent<RigidBody>();
+	//bounce_kun->AddComponent<Light>();
+	//bounce_kun->AddComponent<Collider>()->shape = box{};
+	//bounce_kun->AddComponent<TestComponent>();
 
 	auto seduceme = scene->CreateGameObject();
 	seduceme->GetComponent<Name>()->name = "seduceme";
@@ -183,7 +207,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto seducemetoo = scene->CreateGameObject();
 	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
-	seducemetoo->Transform()->position = vec3{ -1.5, 2, 0 };
+	seducemetoo->Transform()->position = vec3{ -1.375, 2, 0 };
 	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
 	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
 	seducemetoo->AddComponent<RigidBody>();
