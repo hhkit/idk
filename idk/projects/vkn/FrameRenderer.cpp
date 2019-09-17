@@ -16,6 +16,7 @@
 
 namespace idk::vkn
 {
+	static vk::RenderPass tmp_rp;
 	struct SomeHackyThing
 	{
 		VulkanPipeline pipeline;
@@ -137,6 +138,53 @@ namespace idk::vkn
 		else
 		{
 			_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
+		}
+		{
+
+			vk::AttachmentDescription colorAttachment
+			{
+				vk::AttachmentDescriptionFlags{}
+				,vk::Format::eB8G8R8A8Unorm
+				,vk::SampleCountFlagBits::e1
+				,vk::AttachmentLoadOp::eClear
+				,vk::AttachmentStoreOp::eStore
+				,vk::AttachmentLoadOp::eDontCare
+				,vk::AttachmentStoreOp::eDontCare
+				,vk::ImageLayout::eUndefined
+				,vk::ImageLayout::ePresentSrcKHR
+			};
+			vk::AttachmentReference colorAttachmentRef
+			{
+				0
+				,vk::ImageLayout::eColorAttachmentOptimal
+			};
+
+			vk::SubpassDescription subpass
+			{
+				vk::SubpassDescriptionFlags{}
+				,vk::PipelineBindPoint::eGraphics
+				,0,nullptr
+				,1,&colorAttachmentRef
+			};
+
+			vk::SubpassDependency dependency
+			{
+				VK_SUBPASS_EXTERNAL//src
+				,0U				   //dest
+				,vk::PipelineStageFlagBits::eColorAttachmentOutput
+				,vk::PipelineStageFlagBits::eColorAttachmentOutput
+				,vk::AccessFlags{}
+				,vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite
+			};
+			vk::RenderPassCreateInfo renderPassInfo
+			{
+				vk::RenderPassCreateFlags{}
+				,1,&colorAttachment
+				,1,&subpass
+				,1,&dependency
+			};
+
+			tmp_rp = device.createRenderPass(renderPassInfo);
 		}
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
@@ -519,7 +567,7 @@ namespace idk::vkn
 		auto frame_buffer = GetFrameBuffer(camera, swapchain.curr_index);
 		vk::RenderPassBeginInfo rpbi
 		{
-			*View().Renderpass(), frame_buffer,
+			tmp_rp, frame_buffer,
 			render_area,1,&v
 		};
 

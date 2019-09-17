@@ -22,7 +22,17 @@ namespace idk::vkn
 		using Base = vk::UniqueHandle<T, vk::DispatchLoaderDefault>;
 		using Base::Base;
 		VulkanRscDel(Base&& base)noexcept :Base{ std::move(base) } {}
-		using Base::operator=;
+		VulkanRscDel& operator=(VulkanRscDel&& rhs)
+		{
+			auto& tmp = s_cast<Base&>(*this);
+			std::swap(tmp, s_cast<Base&>(rhs));
+			return *this;
+		}
+		VulkanRscDel& operator=(Base&& rhs)
+		{
+			*this = VulkanRscDel{ std::move(rhs) };
+			return *this;
+		}
 		void Destroy() override
 		{
 			this->reset();
@@ -39,7 +49,19 @@ namespace idk::vkn
 		using Base::Base;
 		VulkanRsc() = default;
 		VulkanRsc(Base&& base)noexcept :Base{ std::move(base) } {}
-		using Base::operator=;
+
+		VulkanRsc& operator=(VulkanRsc&& rhs)
+		{
+			auto& tmp = s_cast<Base&>(*this);
+			std::swap(tmp, s_cast<Base&>(rhs));
+			return *this;
+		}
+		VulkanRsc& operator=(Base&& rhs)
+		{
+			*this = VulkanRsc{ std::move(rhs) };
+			return *this;
+		}
+
 		//void Destroy() override
 		//{
 		//	reset();
@@ -54,15 +76,8 @@ namespace idk::vkn
 		{
 			managed.emplace_back(rsc);
 		}*/
-		void QueueToDestroy(ptr_t obj_to_destroy)
-		{
-			managed.emplace_back(std::move(obj_to_destroy));
-		}
-		void ProcessQueue(uint32_t frame_index)
-		{
-			std::swap(destroy_queue[frame_index], managed);
-			managed.clear();
-		}
+		void QueueToDestroy(ptr_t obj_to_destroy);
+		void ProcessQueue(uint32_t frame_index);
 		/*
 		//Finds and queues all the resources with no existing references.
 		void ProcessSingles(uint32_t frame_index)
@@ -85,20 +100,7 @@ namespace idk::vkn
 			managed.resize(end - managed.begin());//trim it down
 		}
 		*/
-		void DestroyAll()
-		{
-			for (auto& ptr : managed)
-			{
-				ptr->Destroy();
-			}
-			for (auto& pair : destroy_queue)
-			{
-				for (auto& ptr : pair.second)
-				{
-					ptr->Destroy();
-				}
-			}
-		}
+		void DestroyAll();
 	private:
 		vector<ptr_t> managed;
 		hash_table<uint32_t, vector<ptr_t>> destroy_queue;

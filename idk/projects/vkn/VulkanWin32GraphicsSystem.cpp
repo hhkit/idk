@@ -14,7 +14,7 @@
 #include <vkn/RegisterVulkanFactories.h>
 
 #include <glslang/public/ShaderLang.h>
-
+#include <vkn/TmpTest.h>
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 //	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -69,6 +69,7 @@ namespace idk::vkn
 			frame.SetPipelineManager(*_pm);
 		}
 		instance_->imguiEnabled = editorExist;
+		TestFunc();
 	}
 	/*
 	vector<IBufferedObj*> GetBufferedResources(vector<GraphicsState>& states)

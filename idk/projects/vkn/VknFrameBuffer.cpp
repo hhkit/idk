@@ -111,6 +111,8 @@ namespace idk::vkn
 		framebufferInfo.width  = s_cast<uint32_t>(meta.size.x);
 		framebufferInfo.height = s_cast<uint32_t>(meta.size.y);
 		framebufferInfo.layers = 1;
+		;
+		ready_semaphore = vknView.Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
 
@@ -177,6 +179,12 @@ namespace idk::vkn
 	{
 		return *buffer;
 	}
+
+	vk::Semaphore VknFrameBuffer::ReadySignal()
+	{
+		return *ready_semaphore;
+	}
+
 
 	/*GLuint VknFrameBuffer::DepthBuffer() const
 	{

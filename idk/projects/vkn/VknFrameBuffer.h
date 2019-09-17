@@ -24,8 +24,10 @@ namespace idk::vkn
 
 		vk::Framebuffer Buffer();
 
+		vk::Semaphore ReadySignal();
 		//GLuint DepthBuffer() const;
 	private:
+		vk::UniqueSemaphore   ready_semaphore;
 		//GLuint depthbuffer = 0;
 		vk::UniqueFramebuffer buffer{ nullptr };
 		//VknImageData		  image{};

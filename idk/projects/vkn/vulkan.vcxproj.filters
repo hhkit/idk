@@ -132,6 +132,12 @@
     <ClInclude Include="DDSLoader.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="ManagedVulkanObjs.h">
+      <Filter>resource\Managed</Filter>
+    </ClInclude>
+    <ClInclude Include="TmpTest.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -238,6 +244,7 @@
     <ClCompile Include="VulkanResourceManager.cpp" />
     <ClCompile Include="VknTextureLoader.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
+    <ClCompile Include="TmpTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -260,6 +267,9 @@
     </Filter>
     <Filter Include="resource">
       <UniqueIdentifier>{5229d71f-e8fc-4257-80e2-cac5241884d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Managed">
+      <UniqueIdentifier>{d43b231f-683a-4f8d-8713-63f27c363028}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

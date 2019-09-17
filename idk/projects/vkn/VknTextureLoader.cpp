@@ -185,10 +185,10 @@ namespace idk::vkn
 
 		device.resetFences(fence);
 		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
-		uint64_t wait_for_milli_seconds = 3;
+		uint64_t wait_for_milli_seconds = 1;
 		uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
 		uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
-		device.waitForFences(fence, VK_TRUE, wait_for_nano_seconds);
+		while(device.waitForFences(fence, VK_TRUE,wait_for_milli_seconds)==vk::Result::eTimeout);
 		return std::pair<vk::UniqueImage, hlp::UniqueAlloc>{std::move(image), std::move(alloc)};
 
 	}
