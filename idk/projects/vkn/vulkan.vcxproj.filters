@@ -199,7 +199,6 @@
     <ClCompile Include="VulkanMesh.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="FrameRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
@@ -215,7 +214,6 @@
     <ClCompile Include="PipelineManager.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="utils\GlslToSpirv.cpp" />
     <ClCompile Include="VulkanMaterialFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -240,11 +238,25 @@
     <ClCompile Include="GraphicsState.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="VknMeshModder.cpp" />
-    <ClCompile Include="VulkanResourceManager.cpp" />
-    <ClCompile Include="VknTextureLoader.cpp" />
-    <ClCompile Include="DDSLoader.cpp" />
     <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="ValHandler.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanResourceManager.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknMeshModder.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTextureLoader.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GlslToSpirv.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSLoader.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

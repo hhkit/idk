@@ -65,7 +65,7 @@ namespace idk::vkn
 		auto sz = m.size;
 		m.textures.emplace_back(s_cast<RscHandle<Texture>>(ptr))->Size(m.size);
 		fb->SetMeta(m);
-		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, nullptr, s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
+		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, {}, nullptr, s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
 
 		auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
 		fb->ReattachImageViews(vknView);

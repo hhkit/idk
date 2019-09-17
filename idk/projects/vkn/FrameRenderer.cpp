@@ -213,6 +213,9 @@ namespace idk::vkn
 				auto& state = gfx_states[i + j];
 				auto& rs = _states[i + j];
 				_render_threads[j]->Render(state, rs);
+				//TODO submit command buffer here and signal the framebuffer's stuff.
+				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
+				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
 				//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
 			}
 			//Wait here
@@ -265,7 +268,7 @@ namespace idk::vkn
 		auto& current_signal = View().CurrPresentationSignals();
 
 		auto& waitSemaphores = *current_signal.image_available;
-		auto& readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
 		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
@@ -533,7 +536,6 @@ namespace idk::vkn
 		auto& swapchain = View().Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
-		vk::CommandBufferInheritanceInfo aaa{};
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 

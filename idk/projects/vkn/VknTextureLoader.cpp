@@ -13,14 +13,88 @@ namespace idk::vkn
 
 	vk::Format    MapFormat(TextureFormat tf);
 	TextureFormat MapFormat(vk::Format    tf);
-
-	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format,
+	
+	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> options,
 		string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
-		LoadTexture(texture, pixel_format, rgba32.data(), rgba32.size(), size, allocator, load_fence, isRenderTarget);
+		LoadTexture(texture, pixel_format,options, rgba32.data(), rgba32.size(), size, allocator, load_fence, isRenderTarget);
 	}
-	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+
+	enum class UvAxis
 	{
+		eU,
+		eV,
+		eW,
+	};
+
+	vk::SamplerAddressMode GetRepeatMode(TextureOptions options, [[maybe_unused]]UvAxis axis)
+	{
+		auto repeat_mode = options.uv_mode;
+		vk::SamplerAddressMode mode = vk::SamplerAddressMode::eClampToEdge;
+		static const hash_table<UVMode::_enum, vk::SamplerAddressMode> map
+		{
+			{UVMode::_enum::Clamp,vk::SamplerAddressMode::eClampToBorder},
+			{UVMode::_enum::Repeat,vk::SamplerAddressMode::eRepeat},
+			{UVMode::_enum::MirrorRepeat,vk::SamplerAddressMode::eMirroredRepeat},
+		};
+		auto itr = map.find(repeat_mode);
+		if (itr != map.end())
+			mode = itr->second;
+		return mode;
+	}
+
+	enum class FilterType
+	{
+		eMin,
+		eMag
+	};
+
+	vk::Filter GetFilterMode(TextureOptions options, FilterType type)
+	{
+		FilterMode filter_mode = (type == FilterType::eMin) ? options.min_filter : options.mag_filter;
+		vk::Filter mode = vk::Filter::eLinear;
+		static const hash_table<FilterMode, vk::Filter> map
+		{
+			{FilterMode::eNearest,vk::Filter::eNearest},
+			{FilterMode::eLinear ,vk::Filter::eLinear},
+			{FilterMode::eCubic  ,vk::Filter::eCubicIMG},
+		};
+		auto itr = map.find(filter_mode);
+		if (itr != map.end())
+			mode = itr->second;
+
+		return mode;
+	}
+
+
+
+	vk::CompareOp MapCompareOp(CompareOp compare_op)
+	{
+		vk::CompareOp mode = vk::CompareOp::eNever;
+		static const hash_table<CompareOp, vk::CompareOp> map
+		{
+			{CompareOp::eNever,			  vk::CompareOp::eNever          },
+			{CompareOp::eLess,			  vk::CompareOp::eLess           },
+			{CompareOp::eEqual ,		  vk::CompareOp::eEqual          },
+			{CompareOp::eLessOrEqual ,	  vk::CompareOp::eLessOrEqual    },
+			{CompareOp::eGreater ,		  vk::CompareOp::eGreater        },
+			{CompareOp::eNotEqual,		  vk::CompareOp::eNotEqual       },
+			{CompareOp::eGreaterOrEqual , vk::CompareOp::eGreaterOrEqual },
+			{CompareOp::eAlways,          vk::CompareOp::eAlways         },
+		};
+		auto itr = map.find(compare_op);
+		if (itr != map.end())
+			mode = itr->second;
+
+		return mode;
+	}
+
+	
+	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> ooptions, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	{
+		TextureOptions options{};
+		if (ooptions)
+			options = *ooptions;
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
 
@@ -38,17 +112,17 @@ namespace idk::vkn
 		vk::SamplerCreateInfo sampler_info
 		{
 			vk::SamplerCreateFlags{},
-			vk::Filter::eNearest,
-			vk::Filter::eNearest,
+			GetFilterMode(options,FilterType::eMin),
+			GetFilterMode(options,FilterType::eMag),
 			vk::SamplerMipmapMode::eNearest,
-			vk::SamplerAddressMode::eRepeat,
-			vk::SamplerAddressMode::eRepeat,
-			vk::SamplerAddressMode::eRepeat,
+			GetRepeatMode(options,UvAxis::eU),
+			GetRepeatMode(options,UvAxis::eV),
+			GetRepeatMode(options,UvAxis::eW),
 			0.0f,
 			VK_TRUE,
-			1.0f,
-			VK_FALSE,//Used for percentage close filtering
-			vk::CompareOp::eAlways,
+			options.anisoptrophy,
+			s_cast<bool>(options.compare_op),//Used for percentage close filtering
+			(options.compare_op)?MapCompareOp(*options.compare_op): vk::CompareOp::eNever,
 			0.0f,0.0f,
 			vk::BorderColor::eFloatOpaqueBlack,
 			VK_FALSE

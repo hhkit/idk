@@ -19,17 +19,20 @@ namespace idk::vkn
 		std::stringstream strm;
 		strm << file.rdbuf();
 		DdsFile dds{ strm.str() };
-		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), dds.Data(), dds.Dimensions(), allocator, *load_fence);
+		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), {}, dds.Data(), dds.Dimensions(), allocator, *load_fence);
 		return FileResources{ {s_cast<RscHandle<Texture>>(tex) } };
 	}
 
 	FileResources DdsLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
 	{
 		auto&& tm = path_to_meta.resource_metas[0].get<TextureMeta>();
-		//TODO map the format
-		//tm.internal_format;
-		//TODO send the format and repeat mode in
-		return Create(path_to_resource);
+		auto tex = Core::GetResourceManager().Emplace<VknTexture>();
+		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
+		std::stringstream strm;
+		strm << file.rdbuf();
+		DdsFile dds{ strm.str() };
+		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), {tm}, dds.Data(), dds.Dimensions(), allocator, *load_fence);
+		return FileResources{ {s_cast<RscHandle<Texture>>(tex) } };
 	}
 
 
