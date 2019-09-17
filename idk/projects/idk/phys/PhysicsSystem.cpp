@@ -13,11 +13,12 @@
 namespace idk
 {
 	constexpr auto restitution_slop = 0.01f;
-	constexpr auto penetration_slop = 0.0001f;
+	constexpr auto penetration_slop = 0.025f;
 	constexpr auto damping = 0.95f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
+		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
 		{
 			if (h_rb)
@@ -25,7 +26,25 @@ namespace idk
 			else
 				return false;
 		};
+		// put shape into world space
+		constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
+		{
+			if (rb)
+				return shape * rb->PredictedTransform();
+			else
+				return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+		};
 
+		constexpr auto debug_draw = [calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
+		{
+			std::visit([&](const auto& shape)
+				{
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), c, dur);
+				}, collider.shape);
+		};
+
+
+		// phases
 		const auto ApplyGravity = [&]()
 		{
 			for (auto& elem : rbs)
@@ -60,7 +79,7 @@ namespace idk
 
 				// verlet integrate towards new position
 				//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-				auto new_pos = 2 * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+				auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
 				rigidbody._accum_accel = vec3{};
 				rigidbody._prev_pos = curr_pos;
 				old_mat[3].xyz = new_pos;
@@ -74,22 +93,6 @@ namespace idk
 
 			const auto dt = Core::GetDT().count();
 
-			// put shape into world space
-			const auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
-			{
-				if (rb)
-					return shape * rb->PredictedTransform();
-				else
-					return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-			};
-
-			const auto debug_draw = [calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
-			{
-				std::visit([&](const auto& shape)
-					{
-						Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), c, dur);
-					}, collider.shape);
-			};
 
 			for (unsigned i = 0; i < colliders.size(); ++i)
 			{
@@ -138,14 +141,14 @@ namespace idk
 
 					if (collision)
 					{
-						debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
+						//debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
+						//debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
 						collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.success());
 					}
 					else
 					{
-						debug_draw(lcollider, color{ 1,0, 0 });
-						debug_draw(rcollider, color{ 1,0, 0 });
+						//debug_draw(lcollider, color{ 1,0, 0 });
+						//debug_draw(rcollider, color{ 1,0, 0 });
 					}
 				}
 			}
@@ -159,21 +162,21 @@ namespace idk
 				const auto rrigidbody = rcollider->GetGameObject()->GetComponent<RigidBody>();
 
 				constexpr auto get_values =
-					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, real>
+					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, real, bool>
 				{
 					if (rb)
 					{
 						auto& ref = *rb;
-						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.restitution, ref.inv_mass);
+						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.restitution, ref.inv_mass, true);
 					}
 					else
 					{
-						return std::make_tuple(vec3{}, 1.f, 0.f);
+						return std::make_tuple(vec3{}, 1.f, 0.f, false);
 					}
 				};
 
-				const auto [lvel, lrestitution, linv_mass] = get_values(lrigidbody);
-				const auto [rvel, rrestitution, rinv_mass] = get_values(rrigidbody);
+				const auto [lvel, lrestitution, linv_mass, lvalid] = get_values(lrigidbody);
+				const auto [rvel, rrestitution, rinv_mass, rvalid] = get_values(rrigidbody);
 
 				auto rel_v = rvel - lvel; // a is not moving
 				auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
@@ -185,50 +188,74 @@ namespace idk
 				auto restitution = std::min(lrestitution, rrestitution);
 				restitution = std::max(restitution - restitution_slop, 0.f);
 
-				auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
-				auto impulse = damping* impulse_scalar * result.normal_of_collision;
 				assert(result.penetration_depth > -epsilon);
-
-				if (lrigidbody)
+				if (result.penetration_depth > penetration_slop)
 				{
-					auto& ref_rb = *lrigidbody;
+					auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
+					auto impulse = damping * impulse_scalar * result.normal_of_collision;
 
-					// reflect the object across
-					ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + 2 * result.penetration_depth * result.normal_of_collision;
-					Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * 0.05f }, color{ 1,0,1 }, seconds{ 0.5 });
+					if (lvalid)
+					{
+						auto& ref_rb = *lrigidbody;
 
-					auto new_vel = lvel + impulse * linv_mass;
-					ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+						// reflect the object across
+						if (rvalid)
+							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + result.penetration_depth * result.normal_of_collision; // equal pushback
+						else
+							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + 2 * result.penetration_depth * result.normal_of_collision; // complete pushback
+						//Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * 0.05f }, color{ 1,0,1 }, seconds{ 0.5 });
+
+						auto new_vel = lvel + impulse * linv_mass;
+						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+					}
+
+					if (rvalid)
+					{
+						auto& ref_rb = *rrigidbody;
+
+						// reflect the object across
+						if (lvalid)
+							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - result.penetration_depth * result.normal_of_collision; // equal pushback
+						else
+							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - 2 * result.penetration_depth * result.normal_of_collision; // complete pushback
+						//Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * 0.05f }, color{ 1,0,0.5 }, seconds{ 0.5 });
+
+						auto new_vel = rvel - impulse * rinv_mass;
+						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+					}
 				}
-
-				if (rrigidbody)
+				else
 				{
-					auto& ref_rb = *rrigidbody;
-
-					// reflect the object across
-					ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - 2 * result.penetration_depth * result.normal_of_collision;
-					Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * 0.05f }, color{ 1,0,0.5 }, seconds{ 0.5 });
-
-					auto new_vel = rvel - impulse * rinv_mass;
-					ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+					if (lvalid)
+					{
+						auto& ref_rb = *lrigidbody;
+						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + result.penetration_depth * result.normal_of_collision;
+					}
+					if (rvalid)
+					{
+						auto& ref_rb = *rrigidbody;
+						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - result.penetration_depth * result.normal_of_collision; // equal pushback
+					}
 				}
 			}
 		};
 
 		const auto FinalizePositions = [&]()
 		{
-			auto dt = Core::GetDT().count();
-
 			for (auto& rigidbody : rbs)
 			{
 				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
 				rigidbody.sleep_next_frame = false;
 			}
+
+			for (auto& collider : colliders)
+				debug_draw(collider);
 		};
 
 		ApplyGravity();
 		PredictTransform();
-		CollideObjects();
+		for (int i = 0; i < 3;++i)
+			CollideObjects();
 		FinalizePositions();
 	}
 

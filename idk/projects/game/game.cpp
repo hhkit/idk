@@ -201,20 +201,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto seduceme = scene->CreateGameObject();
 	seduceme->GetComponent<Name>()->name = "seduceme";
-	seduceme->Transform()->position = vec3{ -1.5, 1, 0 };
-	seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+	seduceme->Transform()->position = vec3{ 0, 1, 0 };
+	seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
 	seduceme->AddComponent<RigidBody>();
-	seduceme->AddComponent<Collider>()->shape = sphere{};
+	seduceme->AddComponent<Collider>()->shape = box{};
 
 
-	//auto seducemetoo = scene->CreateGameObject();
-	//seducemetoo->GetComponent<Name>()->name = "seducemetoo";
-	//seducemetoo->Transform()->position = vec3{ -1.375, 2, 0 };
-	//seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
-	//seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
-	//seducemetoo->AddComponent<RigidBody>();
-	//seducemetoo->AddComponent<Collider>()->shape = sphere{};
+	auto seducemetoo = scene->CreateGameObject();
+	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
+	seducemetoo->Transform()->position = vec3{ 0, 2, 0 };
+	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
+	seducemetoo->AddComponent<RigidBody>();
+	seducemetoo->AddComponent<Collider>()->shape = box{};
 
 	c->Run();
 	

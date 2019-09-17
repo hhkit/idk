@@ -399,7 +399,9 @@ namespace idk
 	{
 		return m * coeff;
 	}
-
+#ifdef _DEBUG
+#pragma optimize("",on)
+#endif
 	template<typename T, unsigned R, unsigned C>
 	tvec<T, R> operator*(const tmat<T, R, C>& lhs, const tvec<T, C>& rhs)
 	{
@@ -411,4 +413,7 @@ namespace idk
 	{
 		return detail::MatrixMatrixMult(lhs, rhs, std::make_index_sequence<I>{});
 	}
+#ifdef _DEBUG
+#pragma optimize("",off)
+#endif
 }

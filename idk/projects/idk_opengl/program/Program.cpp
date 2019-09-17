@@ -24,7 +24,7 @@ namespace idk::ogl
 		auto version_end = shader_code.find("\n", version_pos);
 
 		const char* arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, shader_code.substr(version_end).data() } ;
-		const GLint lengths[] = { (version_end - version_pos + 1), -1, -1, -1};
+		const GLint lengths[] = { (GLint)(version_end - version_pos + 1), -1, -1, -1};
 
 		glShaderSource(_shader_id, sizeof(arr) / sizeof(*arr), arr, lengths);
 		glCompileShader(_shader_id);
