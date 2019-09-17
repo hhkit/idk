@@ -93,11 +93,20 @@ namespace idk::file_system_detail
 		HANDLE	_watch_handle[3];
 		DWORD	_status;
 
-		bool _valid = true;
-
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 
-		// TODO: add ref_count and make valid private.
+		int64_t RefCount()	const { return _ref_count; }
+		bool	IsValid()	const { return _valid; }
+
+		void SetValid(bool is_valid) { _valid = is_valid; }
+
+		void IncRefCount() { ++_ref_count; }
+		void DecRefCount() { ++_ref_count; }
+
+	private:
+		// A FileHandle can be pointing to a valid fs_file but wrong ref_count
+		bool _valid = true;
+		int64_t _ref_count = 0;
 	};
 
 	struct fs_collated

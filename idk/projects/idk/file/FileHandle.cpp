@@ -85,11 +85,15 @@ namespace idk
 		if (_is_regular_file)
 		{
 			auto& file = vfs.getFile(_key);
-			auto ref_count_actual = vfs.getFile(_key).RefCount();
+			auto ref_count_actual = file.RefCount();
 			return (_ref_count == ref_count_actual) && file.IsValid();
 		}
 		else
-			return true;
+		{
+			auto& dir = vfs.getDir(_key);
+			auto ref_count_actual = dir.RefCount();
+			return (_ref_count == ref_count_actual) && dir.IsValid();
+		}
 	}
 
 	bool FileHandle::validateFull() const
@@ -101,11 +105,15 @@ namespace idk
 		if (_is_regular_file)
 		{
 			auto& file = vfs.getFile(_key);
-			auto ref_count_actual = vfs.getFile(_key).RefCount();
+			auto ref_count_actual = file.RefCount();
 			return (_ref_count == ref_count_actual) && file.IsValid();
 		}
 		else
-			return vfs.getDir(_key)._valid;
+		{
+			auto& dir = vfs.getDir(_key);
+			auto ref_count_actual = dir.RefCount();
+			return (_ref_count == ref_count_actual) && dir.IsValid();
+		}
 	}
 
 
@@ -235,14 +243,11 @@ namespace idk
 
 	bool FileHandle::CanOpen() const
 	{
-		if (!_is_regular_file)
+		// Checking if handle is valid & if it is pointing to a file
+		if (!_is_regular_file && !validateFull())
 			return false;
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		// Checking if handle is valid
-		if (validateFull() == false)
-			return false;
-
 		// Checking if internal handle is valid
 		auto& file = vfs.getFile(_key);
 		return file.IsValid() && !file.IsOpen();
@@ -250,7 +255,8 @@ namespace idk
 
 	bool FileHandle::SameKeyAs(const FileHandle& other) const
 	{
-		return _key == other._key;
+		return  (_is_regular_file == other._is_regular_file) &&
+				(_key == other._key);
 	}
 
 	FS_CHANGE_STATUS FileHandle::GetStatus() const

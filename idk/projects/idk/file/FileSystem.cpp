@@ -188,6 +188,21 @@ namespace idk {
 		return fh;
 	}
 
+	FileHandle FileSystem::GetDir(string_view mountPath) const
+	{
+		FileHandle fh;
+		auto dir_index = getDir(mountPath);
+		if (dir_index.IsValid() == false)
+			return fh;
+
+		auto& internal_dir = getDir(dir_index);
+
+		fh._key = internal_dir._tree_index;
+		fh._ref_count = internal_dir.RefCount();
+
+		return fh;
+	}
+
 	bool FileSystem::Exists(string_view mountPath) const
 	{
 		return ExistsFull(GetFullPath(mountPath));
@@ -313,7 +328,8 @@ namespace idk {
 		d._filename		= p.filename().string();
 		d._mount_path	= p_dir._mount_path + "/" + d._filename;
 		d._parent		= p_dir._tree_index;
-		d._valid		= true;
+
+		d.SetValid(true);
 
 		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
@@ -463,9 +479,8 @@ namespace idk {
 			for (auto& sub_dir : mount._path_tree[dir_depth]._dirs)
 			{
 				// Make sure that the parent directory is correct
-				if (sub_dir._filename == tokenized_path[tokenized_path.size() - 2])
+				if (sub_dir._mount_path +  '/' + tokenized_path.back() == mountPath)
 				{
-					// Find file within the sub_dir
 					auto result = sub_dir._files_map.find(tokenized_path.back());
 					if (result != sub_dir._files_map.end())
 						return result->second;
@@ -512,10 +527,14 @@ namespace idk {
 		{
 			for (auto& sub_dir : mount._path_tree[dir_depth]._dirs)
 			{
-				// Find file within the sub_dir
-				auto result = sub_dir._sub_dirs.find(tokenized_path.back());
-				if (result != sub_dir._sub_dirs.end())
-					return result->second;
+				// Make sure that the parent directory is correct
+				if (sub_dir._mount_path + '/' + tokenized_path.back() == mountPath)
+				{
+					// Find file within the sub_dir
+					auto result = sub_dir._sub_dirs.find(tokenized_path.back());
+					if (result != sub_dir._sub_dirs.end())
+						return result->second;
+				}
 			}
 		}
 
@@ -679,9 +698,8 @@ namespace idk {
 		// The conditions for reuse of a fs_file is that 
 		if (check_free_index != mount._path_tree[depth]._files.end())
 		{
-			check_free_index->IncRefCount();
-			check_free_index->SetValid(true);
-			check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
+			// check_free_index->SetValid(true);
+			// check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
 			return check_free_index->_tree_index;
 		}
 		else
@@ -701,10 +719,15 @@ namespace idk {
 	{
 		auto check_free_index = std::find_if( mount._path_tree[depth]._dirs.begin(),
 											  mount._path_tree[depth]._dirs.end(),
-											  [](const file_system_detail::fs_dir& f) { return !f._valid; });
+											  [](const file_system_detail::fs_dir& d) 
+												{ 
+													// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
+													return !d.IsValid() && d._change_status == FS_CHANGE_STATUS::NO_CHANGE;
+												});
 
 		if (check_free_index != mount._path_tree[depth]._dirs.end())
 		{
+			// check_free_index->SetValid(true);
 			return check_free_index->_tree_index;
 		}
 		else

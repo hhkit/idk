@@ -14,47 +14,57 @@ namespace idk
 		void Update();
 		void Shutdown() override;
 
-		// Getters
+		// Files/Directory Getters
+		// =====================================================================================================
+		FileHandle			GetFile					(string_view mountPath)				const;
+		FileHandle			GetDir					(string_view mountPath)				const;
+		string				GetFullPath				(string_view mountPath)				const;
 		vector<FileHandle>	GetFilesWithExtension	(string_view mountPath,
 													 string_view extension, 
 													 bool recurse_sub_trees = true)		const;
-		FileHandle			GetFile					(string_view mountPath)				const;
-		string				GetFullPath				(string_view mountPath)				const;
 
+		bool		Exists		(string_view mountPath)		const;
+		bool		ExistsFull	(string_view fullPath)		const;
+
+		// Get some static paths. These paths aren't changed during the program's lifetime.
+		// =====================================================================================================
 		string_view GetSolutionDir	()	const { return _sol_dir; }
 		string_view GetAppDataDir	()	const { return _app_data_dir; }
 		string_view GetExeDir		()	const { return _exe_dir; }
 		string_view GetAssetDir		()	const { return _asset_dir; }
-
-		bool		Exists(string_view mountPath) const;
-		bool		ExistsFull(string_view fullPath) const;
-
+		
+		// File changes
+		// =====================================================================================================
 		vector<FileHandle>  QueryFileChangesAll			()								const;
 		vector<FileHandle>  QueryFileChangesByExt		(string_view ext)				const;
 		vector<FileHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
 
-		// Setters
+		// Some setters
+		// =====================================================================================================
 		void		SetAssetDir(string_view dir) { _asset_dir = dir; }
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
+		// =====================================================================================================
 		void Mount(string_view fullPath, string_view mountPath, bool watch = true);
-		void Dismount(const string& mountPath);
+		void Dismount(const string& mountPath);	// TODO!
 
-		// Open/closing files
+		// Open files
+		// =====================================================================================================
 		FStreamWrapper Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream = false);
 		
-		// This functions affect the actual files outside of the system.
+		// Making a directory/renaming
+		// =====================================================================================================
 		int Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
 		bool Rename(string_view mountPath, string_view new_name);
-		// FileSystem_ErrorCode DelFile(string_view mountPath);
-		// 
-		// FileSystem_ErrorCode GetLastError() const;
-
+		// TODO: Copy, paste, delete
 		
+		// Debug
+		// =====================================================================================================
 		void DumpMounts() const;
 
+		// Friends
+		// =====================================================================================================
 		friend class	file_system_detail::DirectoryWatcher;
-		
 		friend struct	FileHandle;
 		friend class	FStreamWrapper;
 	private:

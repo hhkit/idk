@@ -184,6 +184,9 @@ namespace idk
 				auto result = parent_dir._files_map.find(internal_file._filename);
 				parent_dir._files_map.erase(result);
 
+				internal_file.IncRefCount();
+				internal_file.SetValid(false);
+
 				break;
 			}
 			case FS_CHANGE_STATUS::RENAMED:
@@ -223,7 +226,8 @@ namespace idk
 
 				// Next, invalidate it from path_tree. Should be a better way to do this. Not sure yet.
 				// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
-				internal_collated._files[internal_dir._tree_index._index].SetValid(false);
+				internal_dir.IncRefCount();
+				internal_dir.SetValid(false);
 
 				break;
 			}
