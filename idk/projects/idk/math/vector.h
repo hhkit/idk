@@ -40,7 +40,7 @@ namespace idk
 		T      distance(const tvec&) const;
 
 		T      dot(const tvec&) const;
-		tvec     project_onto(const tvec&)const;
+		tvec   project_onto(const tvec&)const;
 		tvec&  normalize();
 		tvec   get_normalized() const;
 
@@ -51,6 +51,7 @@ namespace idk
 		constexpr const T* end() const noexcept;
 		constexpr T*       data() noexcept;
 		constexpr const T* data() const noexcept;
+		constexpr size_t   size() const { return D; }
 
 		// member functions
 

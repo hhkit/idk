@@ -13,7 +13,8 @@
 namespace idk
 {
 	constexpr auto restitution_slop = 0.01f;
-	constexpr auto penetration_slop = 0.025f;
+	constexpr auto penetration_min_slop = 0.001f;
+	constexpr auto penetration_max_slop = 0.7f;
 	constexpr auto damping = 0.95f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
@@ -189,20 +190,20 @@ namespace idk
 				restitution = std::max(restitution - restitution_slop, 0.f);
 
 				assert(result.penetration_depth > -epsilon);
-				if (result.penetration_depth > penetration_slop)
 				{
-					auto impulse_scalar = (1.0f + restitution) * contact_v / (linv_mass + rinv_mass);
+					const auto sum_inv_mass = linv_mass + rinv_mass;
+					auto impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
 					auto impulse = damping * impulse_scalar * result.normal_of_collision;
 
+					auto penetration = std::max(result.penetration_depth - penetration_min_slop, 0.0f);
 					if (lvalid)
 					{
 						auto& ref_rb = *lrigidbody;
 
+						auto correction = penetration * penetration_max_slop * result.normal_of_collision;
+
 						// reflect the object across
-						if (rvalid)
-							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + result.penetration_depth * result.normal_of_collision; // equal pushback
-						else
-							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + 2 * result.penetration_depth * result.normal_of_collision; // complete pushback
+						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction;
 						//Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * 0.05f }, color{ 1,0,1 }, seconds{ 0.5 });
 
 						auto new_vel = lvel + impulse * linv_mass;
@@ -213,28 +214,14 @@ namespace idk
 					{
 						auto& ref_rb = *rrigidbody;
 
+						auto correction = - penetration * penetration_max_slop * result.normal_of_collision;
+
 						// reflect the object across
-						if (lvalid)
-							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - result.penetration_depth * result.normal_of_collision; // equal pushback
-						else
-							ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - 2 * result.penetration_depth * result.normal_of_collision; // complete pushback
+						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction;
 						//Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * 0.05f }, color{ 1,0,0.5 }, seconds{ 0.5 });
 
 						auto new_vel = rvel - impulse * rinv_mass;
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
-					}
-				}
-				else
-				{
-					if (lvalid)
-					{
-						auto& ref_rb = *lrigidbody;
-						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + result.penetration_depth * result.normal_of_collision;
-					}
-					if (rvalid)
-					{
-						auto& ref_rb = *rrigidbody;
-						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - result.penetration_depth * result.normal_of_collision; // equal pushback
 					}
 				}
 			}
@@ -254,7 +241,7 @@ namespace idk
 
 		ApplyGravity();
 		PredictTransform();
-		for (int i = 0; i < 3;++i)
+		//for (int i = 0; i < 3;++i)
 			CollideObjects();
 		FinalizePositions();
 	}
