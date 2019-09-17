@@ -19,7 +19,7 @@ namespace idk
 				auto paths = Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext);
 				for (auto& path : paths)
 				{
-					auto meta_file = FileHandle(string{ path.GetMountPath() } +".meta");
+					auto meta_file = PathHandle(string{ path.GetMountPath() } +".meta");
 					auto meta_stream = meta_file.Open(FS_PERMISSIONS::READ);
 					auto meta = parse_text<MetaFile>(stringify(meta_stream));
 

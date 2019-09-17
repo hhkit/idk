@@ -11,7 +11,7 @@ namespace idk::anim
 		unique_ptr<Skeleton> GenerateDefaultResource() override;
 		unique_ptr<Skeleton> Create() override;
 		//unique_ptr<Mesh> Create(const ResourceMeta&);
-		unique_ptr<Skeleton> Create(FileHandle filepath) override;
+		unique_ptr<Skeleton> Create(PathHandle filepath) override;
 
 	};
 }

@@ -41,7 +41,7 @@ namespace idk::file_system_detail
 
 		file_system_detail::fs_key	dirCreate(file_system_detail::fs_dir& dir, std::filesystem::path& p);
 		void						dirDelete(file_system_detail::fs_dir& dir);
-		void						dirRename(file_system_detail::fs_dir& dir, std::filesystem::path& p);
+		void						dirRename(file_system_detail::fs_dir& Mountdir, file_system_detail::fs_dir& dir, std::filesystem::path& p, FS_CHANGE_STATUS status = FS_CHANGE_STATUS::RENAMED);
 	};
 	
 }

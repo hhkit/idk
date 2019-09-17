@@ -100,9 +100,9 @@ namespace idk {
 		}
 	}
 
-	vector<FileHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
+	vector<PathHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
 	{
-		vector<FileHandle> vec_handles;
+		vector<PathHandle> vec_handles;
 		auto dir_index = getDir(mountPath);
 		if (!dir_index.IsValid())
 			return vec_handles;
@@ -119,37 +119,37 @@ namespace idk {
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
 			{
-				FileHandle h{ internal_file._tree_index, true };
+				PathHandle h{ internal_file._tree_index, true };
 				vec_handles.emplace_back(h);
 			}
 		}
 		return vec_handles;
 	}
 
-	vector<FileHandle> FileSystem::QueryFileChangesAll() const
+	vector<PathHandle> FileSystem::QueryFileChangesAll() const
 	{
-		vector<FileHandle> handles;
+		vector<PathHandle> handles;
 		for (auto& key : _directory_watcher.changed_files)
 		{
 			auto& file = getFile(key);
 			
-			FileHandle h{ file._tree_index, true };
+			PathHandle h{ file._tree_index, true };
 			handles.emplace_back(h);
 		}
 
 		return handles;
 	}
 
-	vector<FileHandle> FileSystem::QueryFileChangesByExt(string_view ext) const
+	vector<PathHandle> FileSystem::QueryFileChangesByExt(string_view ext) const
 	{
-		vector<FileHandle> handles;
+		vector<PathHandle> handles;
 		for (auto& key : _directory_watcher.changed_files)
 		{
 			auto& file = getFile(key);
 
 			if (file._extension == ext)
 			{
-				FileHandle h{ file._tree_index, true };
+				PathHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -157,15 +157,15 @@ namespace idk {
 		return handles;
 	}
 
-	vector<FileHandle> FileSystem::QueryFileChangesByChange(FS_CHANGE_STATUS change) const
+	vector<PathHandle> FileSystem::QueryFileChangesByChange(FS_CHANGE_STATUS change) const
 	{
-		vector<FileHandle> handles;
+		vector<PathHandle> handles;
 		for (auto& key : _directory_watcher.changed_files)
 		{
 			auto& file = getFile(key);
 			if (file._change_status == change)
 			{
-				FileHandle h{ file._tree_index, true };
+				PathHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -173,9 +173,9 @@ namespace idk {
 		return handles;
 	}
 
-	FileHandle FileSystem::GetFile(string_view mountPath) const
+	PathHandle FileSystem::GetFile(string_view mountPath) const
 	{
-		FileHandle fh;
+		PathHandle fh;
 		auto file_index = getFile(mountPath);
 		if (file_index.IsValid() == false)
 			return fh;
@@ -184,6 +184,21 @@ namespace idk {
 		
 		fh._key = internal_file._tree_index;
 		fh._ref_count = internal_file.RefCount();
+
+		return fh;
+	}
+
+	PathHandle FileSystem::GetDir(string_view mountPath) const
+	{
+		PathHandle fh;
+		auto dir_index = getDir(mountPath);
+		if (dir_index.IsValid() == false)
+			return fh;
+
+		auto& internal_dir = getDir(dir_index);
+
+		fh._key = internal_dir._tree_index;
+		fh._ref_count = internal_dir.RefCount();
 
 		return fh;
 	}
@@ -239,14 +254,14 @@ namespace idk {
 			{
 				auto& internal_file = createAndGetFile(mountPath);
 				
-				FileHandle handle{ internal_file._tree_index, true };
+				PathHandle handle{ internal_file._tree_index, true };
 				return handle.Open(perms, binary_stream);
 			}
 		}
 		else
 		{
 			auto& internal_file = getFile(file_index);
-			FileHandle handle{internal_file._tree_index, true};
+			PathHandle handle{internal_file._tree_index, true};
 
 			return handle.Open(perms, binary_stream);
 		}
@@ -313,19 +328,20 @@ namespace idk {
 		d._filename		= p.filename().string();
 		d._mount_path	= p_dir._mount_path + "/" + d._filename;
 		d._parent		= p_dir._tree_index;
-		d._valid		= true;
+
+		d.SetValid(true);
 
 		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
 
-	void FileSystem::recurseSubDirExtensions(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
+	void FileSystem::recurseSubDirExtensions(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
 	{
 		for (auto& file_index : subDir._files_map)
 		{
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
 			{
-				FileHandle h{ internal_file._tree_index, true };
+				PathHandle h{ internal_file._tree_index, true };
 				vec_handles.emplace_back(h);
 			}
 		}
@@ -463,9 +479,8 @@ namespace idk {
 			for (auto& sub_dir : mount._path_tree[dir_depth]._dirs)
 			{
 				// Make sure that the parent directory is correct
-				if (sub_dir._filename == tokenized_path[tokenized_path.size() - 2])
+				if (sub_dir._mount_path +  '/' + tokenized_path.back() == mountPath)
 				{
-					// Find file within the sub_dir
 					auto result = sub_dir._files_map.find(tokenized_path.back());
 					if (result != sub_dir._files_map.end())
 						return result->second;
@@ -512,10 +527,14 @@ namespace idk {
 		{
 			for (auto& sub_dir : mount._path_tree[dir_depth]._dirs)
 			{
-				// Find file within the sub_dir
-				auto result = sub_dir._sub_dirs.find(tokenized_path.back());
-				if (result != sub_dir._sub_dirs.end())
-					return result->second;
+				// Make sure that the parent directory is correct
+				if (sub_dir._mount_path + '/' + tokenized_path.back() == mountPath)
+				{
+					// Find file within the sub_dir
+					auto result = sub_dir._sub_dirs.find(tokenized_path.back());
+					if (result != sub_dir._sub_dirs.end())
+						return result->second;
+				}
 			}
 		}
 
@@ -606,8 +625,17 @@ namespace idk {
 
 	bool FileSystem::Rename(string_view mountPath, string_view new_name)
 	{
-		FileHandle handle = GetFile(mountPath);
-		return handle.Rename(new_name);
+		// Try getting the file
+		PathHandle handle = GetFile(mountPath);
+		if(handle)
+			return handle.Rename(new_name);
+
+		// Try getting the directory
+		handle = GetDir(mountPath);
+		if (handle)
+			return handle.Rename(new_name);
+
+		throw(FS_ERROR_CODE::FILESYSTEM_NOT_FOUND, "[FILE SYSTEM] mountPath cannot be found.");
 	}
 
 	void FileSystem::DumpMounts() const
@@ -679,9 +707,8 @@ namespace idk {
 		// The conditions for reuse of a fs_file is that 
 		if (check_free_index != mount._path_tree[depth]._files.end())
 		{
-			check_free_index->IncRefCount();
-			check_free_index->SetValid(true);
-			check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
+			// check_free_index->SetValid(true);
+			// check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
 			return check_free_index->_tree_index;
 		}
 		else
@@ -701,10 +728,15 @@ namespace idk {
 	{
 		auto check_free_index = std::find_if( mount._path_tree[depth]._dirs.begin(),
 											  mount._path_tree[depth]._dirs.end(),
-											  [](const file_system_detail::fs_dir& f) { return !f._valid; });
+											  [](const file_system_detail::fs_dir& d) 
+												{ 
+													// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
+													return !d.IsValid() && d._change_status == FS_CHANGE_STATUS::NO_CHANGE;
+												});
 
 		if (check_free_index != mount._path_tree[depth]._dirs.end())
 		{
+			// check_free_index->SetValid(true);
 			return check_free_index->_tree_index;
 		}
 		else

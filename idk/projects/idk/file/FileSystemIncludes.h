@@ -49,4 +49,11 @@ namespace idk
 
 		NONE
 	};
+
+	enum class FS_FILTERS
+	{
+		FILE,
+		DIR,
+		RECURSE_DIRS
+	};
 }

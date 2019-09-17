@@ -137,8 +137,8 @@ namespace idk {
 										if (source->find(".fbx")!= string::npos) {
 
 											
-											FileHandle fileHandle{ source->data() };
-											//auto file = Core::GetSystem<ResourceManager>().GetFileResources(fileHandle);
+											PathHandle PathHandle{ source->data() };
+											//auto file = Core::GetSystem<ResourceManager>().GetFileResources(PathHandle);
 											//file.resources[0].visit([&](auto& handle) {
 											//	if constexpr (std::is_same_v < std::decay_t<decltype(handle)>, RscHandle<Mesh>>)
 											//	{

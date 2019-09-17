@@ -10,9 +10,9 @@ class VulkanGlslLoader
 {
 public:
 	unique_ptr<ShaderProgram> GenerateDefaultResource() override;
-	unique_ptr<ShaderProgram> Create(FileHandle path_to_resource) override;
-	//unique_ptr<ShaderProgram> Create(FileHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
-	//FileResources Create(FileHandle path_to_resource, const MetaFile& path_to_meta) override;
+	unique_ptr<ShaderProgram> Create(PathHandle path_to_resource) override;
+	//unique_ptr<ShaderProgram> Create(PathHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
+	//FileResources Create(PathHandle path_to_resource, const MetaFile& path_to_meta) override;
 private:
 
 

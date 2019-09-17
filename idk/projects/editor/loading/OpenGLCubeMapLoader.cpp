@@ -13,7 +13,7 @@
 
 namespace idk
 {
-	FileResources OpenGLCubeMapLoader::Create(FileHandle path_to_resource)
+	FileResources OpenGLCubeMapLoader::Create(PathHandle path_to_resource)
 	{	
 		//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
@@ -60,7 +60,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources OpenGLCubeMapLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	FileResources OpenGLCubeMapLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);

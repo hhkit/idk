@@ -8,7 +8,7 @@ namespace idk
 {
 	using Vertex = fbx_loader_detail::Vertex;
 
-	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource)
+	FileResources OpenGLFBXLoader::Create(PathHandle path_to_resource)
 	{
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
@@ -124,7 +124,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources OpenGLFBXLoader::Create(FileHandle path_to_resource,const MetaFile& path_to_meta)
+	FileResources OpenGLFBXLoader::Create(PathHandle path_to_resource,const MetaFile& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);

@@ -154,7 +154,7 @@ TEST(FileSystem, TestDirectoryWatch)
 	TestDeleteWatch(vfs);
 }
 
-TEST(FileSystem, TestFileHandle)
+TEST(FileSystem, TestPathHandle)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 
@@ -206,7 +206,7 @@ TEST(FileSystem, TestFileHandle)
 	}
 }
 
-TEST(FileSystem, TestFileHandleInvalidate)
+TEST(FileSystem, TestPathHandleInvalidate)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 	// Invalidate handle by file deletion
@@ -252,7 +252,7 @@ TEST(FileSystem, TestFileHandleInvalidate)
 	auto file_handle3 = vfs.GetFile("/FS_UnitTests/invalidate3.txt");
 	EXPECT_TRUE(file_handle3);
 
-	// file_handle3 should reuse the first FileHandle that was created.
+	// file_handle3 should reuse the first PathHandle that was created.
 	EXPECT_TRUE(file_handle1.SameKeyAs(file_handle3));
 
 	// Delete all files created
@@ -265,7 +265,7 @@ TEST(FileSystem, TestFileOpen)
 	INIT_FILESYSTEM_UNIT_TEST();
 	// Test Open bad file path
 	{
-		FileHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
+		PathHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
 		EXPECT_FALSE(bad_file_handle);
 
 		auto bad_stream1 = vfs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::READ);
@@ -394,7 +394,7 @@ TEST(FileSystem, TestSpecialWatch)
 
 	// Renaming a file
 	{
-		// Using FileHandle
+		// Using PathHandle
 		auto file = vfs.GetFile("/FS_UnitTests/blank_file.txt");
 		EXPECT_TRUE(file.Rename("blank_file1.txt"));
 		vfs.Update();

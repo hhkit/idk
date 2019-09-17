@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "DirectoryWatcher.h"
-#include "FileHandle.h"
+#include "PathHandle.h"
 
 namespace idk
 {
@@ -14,48 +14,58 @@ namespace idk
 		void Update();
 		void Shutdown() override;
 
-		// Getters
-		vector<FileHandle>	GetFilesWithExtension	(string_view mountPath,
+		// Files/Directory Getters
+		// =====================================================================================================
+		PathHandle			GetFile					(string_view mountPath)				const;
+		PathHandle			GetDir					(string_view mountPath)				const;
+		string				GetFullPath				(string_view mountPath)				const;
+		vector<PathHandle>	GetFilesWithExtension	(string_view mountPath,
 													 string_view extension, 
 													 bool recurse_sub_trees = true)		const;
-		FileHandle			GetFile					(string_view mountPath)				const;
-		string				GetFullPath				(string_view mountPath)				const;
 
+		bool		Exists		(string_view mountPath)		const;
+		bool		ExistsFull	(string_view fullPath)		const;
+
+		// Get some static paths. These paths aren't changed during the program's lifetime.
+		// =====================================================================================================
 		string_view GetSolutionDir	()	const { return _sol_dir; }
 		string_view GetAppDataDir	()	const { return _app_data_dir; }
 		string_view GetExeDir		()	const { return _exe_dir; }
 		string_view GetAssetDir		()	const { return _asset_dir; }
+		
+		// File changes
+		// =====================================================================================================
+		vector<PathHandle>  QueryFileChangesAll			()								const;
+		vector<PathHandle>  QueryFileChangesByExt		(string_view ext)				const;
+		vector<PathHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
 
-		bool		Exists(string_view mountPath) const;
-		bool		ExistsFull(string_view fullPath) const;
-
-		vector<FileHandle>  QueryFileChangesAll			()								const;
-		vector<FileHandle>  QueryFileChangesByExt		(string_view ext)				const;
-		vector<FileHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
-
-		// Setters
+		// Some setters
+		// =====================================================================================================
 		void		SetAssetDir(string_view dir) { _asset_dir = dir; }
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
+		// =====================================================================================================
 		void Mount(string_view fullPath, string_view mountPath, bool watch = true);
-		void Dismount(const string& mountPath);
+		void Dismount(const string& mountPath);	// TODO!
 
-		// Open/closing files
+		// Open files
+		// =====================================================================================================
 		FStreamWrapper Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream = false);
 		
-		// This functions affect the actual files outside of the system.
+		// Making a directory/renaming
+		// =====================================================================================================
 		int Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
 		bool Rename(string_view mountPath, string_view new_name);
-		// FileSystem_ErrorCode DelFile(string_view mountPath);
-		// 
-		// FileSystem_ErrorCode GetLastError() const;
-
+		// TODO: Copy, paste, delete
 		
+		// Debug
+		// =====================================================================================================
 		void DumpMounts() const;
 
+		// Friends
+		// =====================================================================================================
 		friend class	file_system_detail::DirectoryWatcher;
-		
-		friend struct	FileHandle;
+		friend struct	PathHandle;
 		friend class	FStreamWrapper;
 	private:
 		hash_table<string, size_t>					_mount_table;
@@ -78,7 +88,7 @@ namespace idk
 
 		// Helper recursion functions
 		void recurseSubDir				(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
-		void recurseSubDirExtensions	(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
+		void recurseSubDirExtensions	(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
 
 		// Helper Getters
 		file_system_detail::fs_file&		getFile	(file_system_detail::fs_key& node);

@@ -13,7 +13,7 @@ namespace idk
 		control_blocks[handle.guid] = ControlBlock{ std::nullopt, ResourceID<T> };
 	}
 	template<typename T>
-	inline void SaveableResourceManager::RegisterHandle(RscHandle<T> handle, FileHandle f)
+	inline void SaveableResourceManager::RegisterHandle(RscHandle<T> handle, PathHandle f)
 	{
 		static_assert(has_tag_v<T, Saveable>, "T must be a saveable resource");
 		assert(control_blocks.find(handle.guid) == control_blocks.end());
@@ -45,7 +45,7 @@ namespace idk
 
 		if (cb_itr->second.associated_file)
 		{
-			if (*cb_itr->second.associated_file == FileHandle{ mountPath })
+			if (*cb_itr->second.associated_file == PathHandle{ mountPath })
 				return FileAssociateResult::Ok;
 
 			if (Core::template GetSystem<FileSystem>().Exists(mountPath))
@@ -59,7 +59,7 @@ namespace idk
 		}
 		if (Core::template GetSystem<FileSystem>().Open(mountPath, FS_PERMISSIONS::WRITE))
 		{
-			cb_itr->second.associated_file = FileHandle{ mountPath };
+			cb_itr->second.associated_file = PathHandle{ mountPath };
 			files.emplace(cb_itr->first, mountPath);
 			return FileAssociateResult::Ok;
 		}

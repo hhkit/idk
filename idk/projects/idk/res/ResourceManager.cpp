@@ -87,7 +87,7 @@ namespace idk
 			ReloadFile(elem);
 	}
 	
-	FileResources ResourceManager::LoadFile(FileHandle file)
+	FileResources ResourceManager::LoadFile(PathHandle file)
 	{
 		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
 		if (find_file != _loaded_files.end())
@@ -124,7 +124,7 @@ namespace idk
 		return resources;
 	}
 
-	FileResources ResourceManager::LoadFile(FileHandle file, const MetaFile& meta)
+	FileResources ResourceManager::LoadFile(PathHandle file, const MetaFile& meta)
 	{
 		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
 		if (find_file != _loaded_files.end())
@@ -146,7 +146,7 @@ namespace idk
 		return resources;
 	}
 
-	FileResources ResourceManager::ReloadFile(FileHandle file)
+	FileResources ResourceManager::ReloadFile(PathHandle file)
 	{
 		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
 		if (find_file == _loaded_files.end())
@@ -168,7 +168,7 @@ namespace idk
 		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
 	}
 
-	size_t ResourceManager::UnloadFile(FileHandle path_to_file)
+	size_t ResourceManager::UnloadFile(PathHandle path_to_file)
 	{
 		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
 		if (find_file == _loaded_files.end())
@@ -186,7 +186,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources ResourceManager::GetFileResources(FileHandle path_to_file)
+	FileResources ResourceManager::GetFileResources(PathHandle path_to_file)
 	{
 		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
 		if (find_file != _loaded_files.end())

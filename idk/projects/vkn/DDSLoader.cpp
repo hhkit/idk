@@ -12,7 +12,7 @@ namespace idk::vkn
 	{
 		load_fence = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
-	FileResources DdsLoader::Create(FileHandle path_to_resource)
+	FileResources DdsLoader::Create(PathHandle path_to_resource)
 	{
 		auto tex = Core::GetResourceManager().Emplace<VknTexture>();
 		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
@@ -23,7 +23,7 @@ namespace idk::vkn
 		return FileResources{ {s_cast<RscHandle<Texture>>(tex) } };
 	}
 
-	FileResources DdsLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	FileResources DdsLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
 	{
 		auto&& tm = path_to_meta.resource_metas[0].get<TextureMeta>();
 		//TODO map the format

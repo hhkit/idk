@@ -202,7 +202,7 @@ namespace idk
         return handle;
     }
 
-    void PrefabUtility::Save(Handle<GameObject> go, FileHandle save_path)
+    void PrefabUtility::Save(Handle<GameObject> go, PathHandle save_path)
     {
         Prefab prefab;
         auto& root = prefab.data.emplace_back();
