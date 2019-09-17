@@ -23,15 +23,16 @@ namespace idk {
 		IGE_ProjectWindow();
 
 		virtual void BeginWindow() override;
-		virtual void Update() override;
+        virtual void Update() override;
 
 	
 	protected:
 
 
 	private:
-
-
+        void displayDir(const string& dir);
+        string selected_dir;
+        string selected_asset;
 	};
 
 

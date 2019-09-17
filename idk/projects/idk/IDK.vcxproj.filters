@@ -581,6 +581,9 @@
     <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="phys\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
+    <ClInclude Include="gfx\CubeMap.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\MeshFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -837,6 +840,9 @@
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_result.cpp" />
+    <ClCompile Include="gfx\CubeMap.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="res\Guid.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />

@@ -37,26 +37,29 @@ namespace idk::vkn
 	{
 		vector<vec3> positions
 		{
-			vec3{   0, 0.0f, +0.5},
+			vec3{-0.5, 0.0f, +0.5},
 			vec3{-0.5, 0.0f, -0.5},
-			vec3{+0.5, 0.0f, -0.5}
+			vec3{+0.5, 0.0f, -0.5},
+			vec3{+0.5, 0.0f, +0.5},
 		};
 		vector<vec3> normals
 		{
+			vec3{ 0, 1, 0},
 			vec3{ 0, 1, 0},
 			vec3{ 0, 1, 0},
 			vec3{ 0, 1, 0}
 		};
 		vector<vec2> uv
 		{
-			vec2{ 0.5f, 1},
+			vec2{ 0, 1},
 			vec2{ 0, 0},
-			vec2{ 1, 0}
+			vec2{ 1, 0},
+			vec2{ 1, 1}
 		};
 		vector<uint16_t> indices
 		{
 			0, 2, 1,
-			0, 1, 2,
+			3, 2, 0,
 		};
 
 

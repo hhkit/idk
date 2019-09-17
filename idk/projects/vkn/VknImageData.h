@@ -9,6 +9,8 @@ namespace idk::vkn {
 		vk::Format				format{};
 		vk::UniqueImageView     imageView{ nullptr };
 
+		vec2					size{};
+
 		VknImageData() = default;
 		VknImageData(vk::UniqueImage);
 

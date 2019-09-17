@@ -307,8 +307,12 @@ namespace idk::vkn
 		auto& msmod = msprog.as<ShaderModule>();
 		auto& pvt_uni = msmod.GetLayout("CameraBlock");
 		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
-		auto V = mat4{ vec4{1,0,0,0},vec4{0,-1,0,0} ,vec4{0,0,1,0},vec4{0,0,0,1} }*cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
-		mat4 pvt_trf = cam.projection_matrix;
+		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
+		mat4 pvt_trf = mat4{1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+			                0,0,0,1
+		}* cam.projection_matrix;
 		;
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
@@ -498,6 +502,9 @@ namespace idk::vkn
 		std::array<float, 4> a{};
 		//TODO grab the appropriate framebuffer and begin renderpass
 		vk::ClearValue v{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(state.camera.clear_color) } };
+		
+		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
+		
 		auto sz = View().GetWindowsInfo().size;
 		vk::Rect2D render_area
 		{

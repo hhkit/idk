@@ -85,6 +85,10 @@ namespace idk
 		{
 			elem.reset();
 		}
+		for (auto& elem : this->_extension_loaders)
+		{
+			elem.second.reset();
+		}
 	}
 
 	void ResourceManager::WatchDirectory()
@@ -258,11 +262,11 @@ namespace idk
 			if (dirty)
 			{
 				auto saveus = save_meta(resources);
+				std::stringstream stream;
 
+				stream << serialize_text(saveus);
 				auto meta_file = fs.Open(filepath + ".meta", FS_PERMISSIONS::WRITE, false);
-
-				meta_file << serialize_text(saveus);
-
+				meta_file << stream.rdbuf();
 				// mark as clean
 				for (auto& elem : resources.resources)
 					elem.visit([&](auto& elem) {
