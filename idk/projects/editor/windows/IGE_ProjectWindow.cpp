@@ -230,70 +230,83 @@ namespace idk {
             ImGui::BeginGroup();
             ImGui::PushID(name.c_str());
 
-            if (ImGui::Button("test", ImVec2(icon_sz, icon_sz)))
-            {
-                if (entry.is_directory())
-                {
-                    selected_dir = path.string();
-                }
-                else
-                {
-                    selected_asset = path.string();
-                }
-            }
-			if (ImGui::IsItemClicked()) { //Activates on click i.e: it is now single click for assets, but double click for directory
-				if (!entry.is_directory())
-				{
-					selected_asset = path.string();
-				}
-			}
-			if (!entry.is_directory()) {
-
-				if (ImGui::BeginDragDropSource()) {
-					ImGui::SetDragDropPayload("string", &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
-					ImGui::Text("Drag to inspector button.");
-					ImGui::Text(selected_asset.c_str());
-					ImGui::EndDragDropSource();
-				}
-			}
-
+            ImGui::Image(0, ImVec2{ icon_sz, icon_sz });
 
             if (selected_asset == path)
             {
-                if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
-                {
-                    //renaming_selected_asset = true;
-                }
+                static char buf[256];
+                static bool first_focus = false;
 
                 if (renaming_selected_asset)
                 {
-                    static char buf[256];
-                    strcpy_s(buf, name.c_str());
                     ImGui::SetNextItemWidth(icon_sz);
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
                     if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         name = buf;
                         renaming_selected_asset = false;
                     }
-                    if (ImGui::IsItemDeactivated() || !ImGui::IsItemFocused())
+                    ImGui::PopStyleVar();
+                    if (first_focus)
+                    {
+                        ImGui::SetKeyboardFocusHere(-1);
+                        first_focus = false;
+                    }
+                    else if ((ImGui::IsItemDeactivated()))
                         renaming_selected_asset = false;
                 }
-                else
+                else if (!renaming_selected_asset)
                 {
-                    ImGui::GetWindowDrawList()->AddRectFilled(
-                        ImGui::GetItemRectMin(),
-                        ImGui::GetItemRectMax(),
-                        ImGui::GetColorU32(ImGuiCol_FrameBg),
-                        line_height * 0.5f);
-                }
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
-            }
+                    if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
+                    {
+                        renaming_selected_asset = true;
+                        first_focus = true;
+                        strcpy_s(buf, name.c_str());
+                    }
+                    else
+                    {
+                        ImGui::GetWindowDrawList()->AddRectFilled(
+                            ImGui::GetItemRectMin(),
+                            ImGui::GetItemRectMax(),
+                            ImGui::GetColorU32(ImGuiCol_FrameBg),
+                            line_height * 0.5f);
+                    }
 
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
-            ImGui::Text(label.c_str());
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
+
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+                    ImGui::Text(label.c_str());
+                }
+            }
+            else
+            {
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+                ImGui::Text(label.c_str());
+            }
 
             ImGui::PopID();
             ImGui::EndGroup();
+
+            if (ImGui::IsItemClicked())
+            {
+                selected_asset = path.string();
+                renaming_selected_asset = false;
+            }
+            if (entry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
+            {
+                selected_dir = path.string();
+            }
+
+            if (!entry.is_directory())
+            {
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    ImGui::SetDragDropPayload("string", &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+                    ImGui::Text("Drag to inspector button.");
+                    ImGui::Text(("Assets" / fs::relative(selected_asset, assets_dir)).string().c_str());
+                    ImGui::EndDragDropSource();
+                }
+            }
 
             if (++col == icons_per_row)
             {
