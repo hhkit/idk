@@ -14,7 +14,7 @@ namespace idk
 {
 	constexpr auto restitution_slop = 0.01f;
 	constexpr auto penetration_min_slop = 0.001f;
-	constexpr auto penetration_max_slop = 0.7f;
+	constexpr auto penetration_max_slop = 0.5f;
 	constexpr auto damping = 0.95f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
@@ -93,7 +93,11 @@ namespace idk
 			collisions.clear();
 
 			const auto dt = Core::GetDT().count();
-
+			for (auto& elem : colliders)
+			{
+				elem.setup_predict();
+				//Core::GetSystem<DebugRenderer>().Draw(elem._broad_phase, color{ 1,1,0 });
+			}
 
 			for (unsigned i = 0; i < colliders.size(); ++i)
 			{
@@ -109,12 +113,19 @@ namespace idk
 
 
 							// get rigidbodies
-							const auto lrigidbody = lcollider.GetGameObject()->GetComponent<RigidBody>();
-							const auto rrigidbody = rcollider.GetGameObject()->GetComponent<RigidBody>();
+							const auto lrigidbody = lcollider._rigidbody;
+							const auto rrigidbody = rcollider._rigidbody;
 
 							// if both rbs are useless
 							if (!check_rb(lrigidbody) && !check_rb(rrigidbody))
 								return phys::col_failure{};
+
+							if (!lcollider._broad_phase.overlaps(rcollider._broad_phase))
+							{
+								Core::GetSystem<DebugRenderer>().Draw(lcollider._broad_phase, color{ 1,0,1 });
+								Core::GetSystem<DebugRenderer>().Draw(rcollider._broad_phase, color{ 1,0,1 });
+								return phys::col_failure{};
+							}
 
 							const auto lshape = calc_shape(lhs, lrigidbody, lcollider);
 							const auto rshape = calc_shape(rhs, rrigidbody, rcollider);
@@ -124,32 +135,32 @@ namespace idk
 								return phys::collide_box_box_discrete(
 									lshape, rshape);
 							else
-								if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, box>)
-									return -phys::collide_box_sphere_discrete(
-										rshape, lshape);
-								else
-									if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, sphere>)
-										return phys::collide_sphere_sphere_discrete(
-											lshape, rshape);
-									else
-										if constexpr (std::is_same_v<LShape, box> && std::is_same_v<RShape, sphere>)
-											return phys::collide_box_sphere_discrete(
-												lshape, rshape);
-										else
-											return phys::col_failure{};
+							if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, box>)
+								return -phys::collide_box_sphere_discrete(
+									rshape, lshape);
+							else
+							if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, sphere>)
+								return phys::collide_sphere_sphere_discrete(
+									lshape, rshape);
+							else
+							if constexpr (std::is_same_v<LShape, box> && std::is_same_v<RShape, sphere>)
+								return phys::collide_box_sphere_discrete(
+									lshape, rshape);
+							else
+								return phys::col_failure{};
 
 						}, lcollider.shape, rcollider.shape);
 
 					if (collision)
 					{
-						//debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						//debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
+						debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
+						debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
 						collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.success());
 					}
 					else
 					{
-						//debug_draw(lcollider, color{ 1,0, 0 });
-						//debug_draw(rcollider, color{ 1,0, 0 });
+						debug_draw(lcollider, color{ 1,0, 0 });
+						debug_draw(rcollider, color{ 1,0, 0 });
 					}
 				}
 			}
@@ -159,8 +170,8 @@ namespace idk
 				const auto& lcollider = pair.lhs;
 				const auto& rcollider = pair.rhs;
 
-				const auto lrigidbody = lcollider->GetGameObject()->GetComponent<RigidBody>();
-				const auto rrigidbody = rcollider->GetGameObject()->GetComponent<RigidBody>();
+				const auto lrigidbody = lcollider->_rigidbody;
+				const auto rrigidbody = rcollider->_rigidbody;
 
 				constexpr auto get_values =
 					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, real, bool>
@@ -241,7 +252,7 @@ namespace idk
 
 		ApplyGravity();
 		PredictTransform();
-		//for (int i = 0; i < 3;++i)
+		for (int i = 0; i < 3;++i)
 			CollideObjects();
 		FinalizePositions();
 	}

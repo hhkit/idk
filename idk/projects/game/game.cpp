@@ -89,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0.0, 2.5f };
+	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0, 2.5f };
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
@@ -162,6 +162,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto floor = scene->CreateGameObject();
 	floor->Transform()->position = vec3{ 0, -1, 0 };
+	floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	floor->Transform()->scale    = vec3{ 10, 2, 10 };
 	floor->AddComponent<Collider>()->shape = box{};
 	//{
@@ -208,15 +209,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	seduceme->AddComponent<RigidBody>();
 	seduceme->AddComponent<Collider>()->shape = sphere{};
 
-
-	auto seducemetoo = scene->CreateGameObject();
-	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
-	seducemetoo->Transform()->position = vec3{ 0, 2, 0 };
-	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
-	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
-	seducemetoo->AddComponent<RigidBody>();
-	seducemetoo->AddComponent<Collider>()->shape = box{};
-
+	//for (int i = 2; i < 5; ++ i)
+	//{
+	//	auto seducemetoo = scene->CreateGameObject();
+	//	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
+	//	seducemetoo->Transform()->position = vec3{ 0, i, 0 };
+	//	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+	//	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
+	//	seducemetoo->AddComponent<RigidBody>();
+	//	seducemetoo->AddComponent<Collider>()->shape = box{};
+	//}
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();
