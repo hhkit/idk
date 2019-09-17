@@ -102,31 +102,36 @@ namespace idk {
 							keyName.insert(0, "##"); //For Imgui stuff
 
 
-
+							ImGui::SameLine();
+							ImGui::SetCursorPosY(currentHeight);
 
 							//ALL THE TYPE STATEMENTS HERE
 							if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
-								ImGui::SameLine();
-								ImGui::SetCursorPosY(currentHeight);
+								
 								ImGui::DragFloat(keyName.c_str(), &val);
 							}
-							if constexpr (std::is_same_v<T, int>) {
-								ImGui::SameLine();
-								ImGui::SetCursorPosY(currentHeight);
+							else if constexpr (std::is_same_v<T, int>) {
 								ImGui::DragInt(keyName.c_str(), &val);
 							}
 							
 							else if constexpr (std::is_same_v<T, bool>) {
-								ImGui::SameLine();
-								ImGui::SetCursorPosY(currentHeight);
 								ImGui::Checkbox(keyName.c_str(), &val);
 							}
 							else if constexpr (std::is_same_v<T, vec3>) {
 
-								ImGui::SameLine();
-								ImGui::SetCursorPosY(currentHeight);
-
 								DisplayVec3(val);
+							}
+							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
+								string meshName{val.guid };
+								
+								if (ImGui::Button(meshName.c_str())) {
+
+								}
+								return false;
+							}
+							else {
+								ImGui::SetCursorPosY(currentHeight + heightOffset);
+								ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
 							}
 							
 						});
