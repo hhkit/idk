@@ -122,8 +122,8 @@ namespace idk
 
 							if (!lcollider._broad_phase.overlaps(rcollider._broad_phase))
 							{
-								Core::GetSystem<DebugRenderer>().Draw(lcollider._broad_phase, color{ 1,0,1 });
-								Core::GetSystem<DebugRenderer>().Draw(rcollider._broad_phase, color{ 1,0,1 });
+								//Core::GetSystem<DebugRenderer>().Draw(lcollider._broad_phase, color{ 1,0,1 });
+								//Core::GetSystem<DebugRenderer>().Draw(rcollider._broad_phase, color{ 1,0,1 });
 								return phys::col_failure{};
 							}
 
@@ -153,14 +153,14 @@ namespace idk
 
 					if (collision)
 					{
-						debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
+						//debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
+						//debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
 						collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.success());
 					}
 					else
 					{
-						debug_draw(lcollider, color{ 1,0, 0 });
-						debug_draw(rcollider, color{ 1,0, 0 });
+						//debug_draw(lcollider, color{ 1,0, 0 });
+						//debug_draw(rcollider, color{ 1,0, 0 });
 					}
 				}
 			}
