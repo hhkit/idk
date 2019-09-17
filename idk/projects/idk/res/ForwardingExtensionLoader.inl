@@ -5,7 +5,7 @@
 namespace idk 
 {
 	template<typename T>
-	inline FileResources ForwardingExtensionLoader<T>::Create(FileHandle path_to_resource)
+	inline FileResources ForwardingExtensionLoader<T>::Create(PathHandle path_to_resource)
 	{
 		FileResources retval;
 		auto newresource = Core::GetResourceManager().Create<T>(path_to_resource);
@@ -16,7 +16,7 @@ namespace idk
 	}
 
 	template<typename T>
-	inline FileResources ForwardingExtensionLoader<T>::Create(FileHandle path_to_resource, const MetaFile& metadatas)
+	inline FileResources ForwardingExtensionLoader<T>::Create(PathHandle path_to_resource, const MetaFile& metadatas)
 	{
 		if (metadatas.guids.empty())
 			return Create(path_to_resource);

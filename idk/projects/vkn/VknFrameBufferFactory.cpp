@@ -25,12 +25,12 @@ namespace idk::vkn
 		fb->SetMeta(m);
 		return fb;
 	}
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(FileHandle fh)
+	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle fh)
 	{
 		return unique_ptr<RenderTarget>();
 	}
 
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(FileHandle filepath, const RenderTarget::Metadata& m)
+	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle filepath, const RenderTarget::Metadata& m)
 	{
 		auto fb = std::make_unique<VknFrameBuffer>();
 

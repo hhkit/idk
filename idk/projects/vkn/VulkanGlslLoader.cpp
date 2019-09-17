@@ -9,7 +9,7 @@ namespace idk::vkn
 {
 
 
-	string FileName(const FileHandle& path_to_resource)
+	string FileName(const PathHandle& path_to_resource)
 	{
 		//TODO actually get the file name
 		return string(path_to_resource.GetFullPath());
@@ -18,7 +18,7 @@ namespace idk::vkn
 	{
 		return unique_ptr<ShaderProgram>();
 	}
-	unique_ptr<ShaderProgram> VulkanGlslLoader::Create(FileHandle path_to_resource)
+	unique_ptr<ShaderProgram> VulkanGlslLoader::Create(PathHandle path_to_resource)
 	{
 
 		auto program = std::make_unique<ShaderModule>();

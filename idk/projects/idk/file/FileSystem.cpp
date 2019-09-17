@@ -100,9 +100,9 @@ namespace idk {
 		}
 	}
 
-	vector<FileHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
+	vector<PathHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
 	{
-		vector<FileHandle> vec_handles;
+		vector<PathHandle> vec_handles;
 		auto dir_index = getDir(mountPath);
 		if (!dir_index.IsValid())
 			return vec_handles;
@@ -119,37 +119,37 @@ namespace idk {
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
 			{
-				FileHandle h{ internal_file._tree_index, true };
+				PathHandle h{ internal_file._tree_index, true };
 				vec_handles.emplace_back(h);
 			}
 		}
 		return vec_handles;
 	}
 
-	vector<FileHandle> FileSystem::QueryFileChangesAll() const
+	vector<PathHandle> FileSystem::QueryFileChangesAll() const
 	{
-		vector<FileHandle> handles;
+		vector<PathHandle> handles;
 		for (auto& key : _directory_watcher.changed_files)
 		{
 			auto& file = getFile(key);
 			
-			FileHandle h{ file._tree_index, true };
+			PathHandle h{ file._tree_index, true };
 			handles.emplace_back(h);
 		}
 
 		return handles;
 	}
 
-	vector<FileHandle> FileSystem::QueryFileChangesByExt(string_view ext) const
+	vector<PathHandle> FileSystem::QueryFileChangesByExt(string_view ext) const
 	{
-		vector<FileHandle> handles;
+		vector<PathHandle> handles;
 		for (auto& key : _directory_watcher.changed_files)
 		{
 			auto& file = getFile(key);
 
 			if (file._extension == ext)
 			{
-				FileHandle h{ file._tree_index, true };
+				PathHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -157,15 +157,15 @@ namespace idk {
 		return handles;
 	}
 
-	vector<FileHandle> FileSystem::QueryFileChangesByChange(FS_CHANGE_STATUS change) const
+	vector<PathHandle> FileSystem::QueryFileChangesByChange(FS_CHANGE_STATUS change) const
 	{
-		vector<FileHandle> handles;
+		vector<PathHandle> handles;
 		for (auto& key : _directory_watcher.changed_files)
 		{
 			auto& file = getFile(key);
 			if (file._change_status == change)
 			{
-				FileHandle h{ file._tree_index, true };
+				PathHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -173,9 +173,9 @@ namespace idk {
 		return handles;
 	}
 
-	FileHandle FileSystem::GetFile(string_view mountPath) const
+	PathHandle FileSystem::GetFile(string_view mountPath) const
 	{
-		FileHandle fh;
+		PathHandle fh;
 		auto file_index = getFile(mountPath);
 		if (file_index.IsValid() == false)
 			return fh;
@@ -188,9 +188,9 @@ namespace idk {
 		return fh;
 	}
 
-	FileHandle FileSystem::GetDir(string_view mountPath) const
+	PathHandle FileSystem::GetDir(string_view mountPath) const
 	{
-		FileHandle fh;
+		PathHandle fh;
 		auto dir_index = getDir(mountPath);
 		if (dir_index.IsValid() == false)
 			return fh;
@@ -254,14 +254,14 @@ namespace idk {
 			{
 				auto& internal_file = createAndGetFile(mountPath);
 				
-				FileHandle handle{ internal_file._tree_index, true };
+				PathHandle handle{ internal_file._tree_index, true };
 				return handle.Open(perms, binary_stream);
 			}
 		}
 		else
 		{
 			auto& internal_file = getFile(file_index);
-			FileHandle handle{internal_file._tree_index, true};
+			PathHandle handle{internal_file._tree_index, true};
 
 			return handle.Open(perms, binary_stream);
 		}
@@ -334,14 +334,14 @@ namespace idk {
 		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
 
-	void FileSystem::recurseSubDirExtensions(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
+	void FileSystem::recurseSubDirExtensions(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
 	{
 		for (auto& file_index : subDir._files_map)
 		{
 			auto& internal_file = getFile(file_index.second);
 			if (internal_file._extension == extension)
 			{
-				FileHandle h{ internal_file._tree_index, true };
+				PathHandle h{ internal_file._tree_index, true };
 				vec_handles.emplace_back(h);
 			}
 		}
@@ -626,7 +626,7 @@ namespace idk {
 	bool FileSystem::Rename(string_view mountPath, string_view new_name)
 	{
 		// Try getting the file
-		FileHandle handle = GetFile(mountPath);
+		PathHandle handle = GetFile(mountPath);
 		if(handle)
 			return handle.Rename(new_name);
 

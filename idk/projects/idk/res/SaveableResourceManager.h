@@ -4,7 +4,7 @@
 #include <ds/dual_set.h>
 #include <res/ResourceHandle.h>
 #include <res/SaveableResource.h>
-#include <file/FileHandle.h>
+#include <file/PathHandle.h>
 
 namespace idk
 {
@@ -30,7 +30,7 @@ namespace idk
 		};
 
 		template<typename T> void RegisterHandle(RscHandle<T> handle);               // no file
-		template<typename T> void RegisterHandle(RscHandle<T> handle, FileHandle f); // with file
+		template<typename T> void RegisterHandle(RscHandle<T> handle, PathHandle f); // with file
 		template<typename T> bool DeregisterHandle(RscHandle<T> handle);
 
 		template<typename T> FileAssociateResult Associate(RscHandle<T> handle, string_view mountPath);
@@ -45,7 +45,7 @@ namespace idk
 
 		struct ControlBlock
 		{
-			opt<FileHandle> associated_file;
+			opt<PathHandle> associated_file;
 			size_t resource_id;
 		};
 		SaveResourceResult Save(Guid);

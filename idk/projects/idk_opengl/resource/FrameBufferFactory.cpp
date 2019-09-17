@@ -25,13 +25,13 @@ namespace idk::ogl
 		fb->SetMeta(m);
 		return fb;
 	}
-	unique_ptr<RenderTarget> FrameBufferFactory::Create(FileHandle fh)
+	unique_ptr<RenderTarget> FrameBufferFactory::Create(PathHandle fh)
 	{
 		UNREFERENCED_PARAMETER(fh);
 		return unique_ptr<RenderTarget>();
 	}
 
-	unique_ptr<RenderTarget> FrameBufferFactory::Create(FileHandle filepath, const RenderTarget::Metadata& m)
+	unique_ptr<RenderTarget> FrameBufferFactory::Create(PathHandle filepath, const RenderTarget::Metadata& m)
 	{
 		UNREFERENCED_PARAMETER(filepath);
 		auto fb = std::make_unique<FrameBuffer>();

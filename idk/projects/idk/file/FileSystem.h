@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "DirectoryWatcher.h"
-#include "FileHandle.h"
+#include "PathHandle.h"
 
 namespace idk
 {
@@ -16,10 +16,10 @@ namespace idk
 
 		// Files/Directory Getters
 		// =====================================================================================================
-		FileHandle			GetFile					(string_view mountPath)				const;
-		FileHandle			GetDir					(string_view mountPath)				const;
+		PathHandle			GetFile					(string_view mountPath)				const;
+		PathHandle			GetDir					(string_view mountPath)				const;
 		string				GetFullPath				(string_view mountPath)				const;
-		vector<FileHandle>	GetFilesWithExtension	(string_view mountPath,
+		vector<PathHandle>	GetFilesWithExtension	(string_view mountPath,
 													 string_view extension, 
 													 bool recurse_sub_trees = true)		const;
 
@@ -35,9 +35,9 @@ namespace idk
 		
 		// File changes
 		// =====================================================================================================
-		vector<FileHandle>  QueryFileChangesAll			()								const;
-		vector<FileHandle>  QueryFileChangesByExt		(string_view ext)				const;
-		vector<FileHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
+		vector<PathHandle>  QueryFileChangesAll			()								const;
+		vector<PathHandle>  QueryFileChangesByExt		(string_view ext)				const;
+		vector<PathHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
 
 		// Some setters
 		// =====================================================================================================
@@ -65,7 +65,7 @@ namespace idk
 		// Friends
 		// =====================================================================================================
 		friend class	file_system_detail::DirectoryWatcher;
-		friend struct	FileHandle;
+		friend struct	PathHandle;
 		friend class	FStreamWrapper;
 	private:
 		hash_table<string, size_t>					_mount_table;
@@ -88,7 +88,7 @@ namespace idk
 
 		// Helper recursion functions
 		void recurseSubDir				(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
-		void recurseSubDirExtensions	(vector<FileHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
+		void recurseSubDirExtensions	(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
 
 		// Helper Getters
 		file_system_detail::fs_file&		getFile	(file_system_detail::fs_key& node);

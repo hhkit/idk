@@ -13,7 +13,7 @@ namespace idk::anim
 		return std::make_unique<Animation>();
 	}
 
-	unique_ptr<Animation> AnimationFactory::Create(FileHandle filepath)
+	unique_ptr<Animation> AnimationFactory::Create(PathHandle filepath)
 	{
 		UNREFERENCED_PARAMETER(filepath);
 		return unique_ptr<Animation>();

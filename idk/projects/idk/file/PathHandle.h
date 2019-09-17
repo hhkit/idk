@@ -7,7 +7,7 @@
 
 namespace idk
 {
-	// struct FileHandle;
+	// struct PathHandle;
 	class FStreamWrapper : public std::fstream
 	{
 	public:
@@ -15,13 +15,13 @@ namespace idk
 		FStreamWrapper& operator=(FStreamWrapper&& rhs);
 		~FStreamWrapper();
 
-		// FileHandle GetHandle() const;
+		// PathHandle GetHandle() const;
 
 		// Override some files.
 		void close();
 
 		friend class FileSystem;
-		friend struct FileHandle;
+		friend struct PathHandle;
 	private:
 		FStreamWrapper() = default;
 		
@@ -33,18 +33,18 @@ namespace idk
 	public:
 		FILE* data() { return _fp; }
 
-		friend struct FileHandle;
+		friend struct PathHandle;
 	private:
 		FILE* _fp = nullptr;
 	};
 
-	struct FileHandle
+	struct PathHandle
 	{
-		FileHandle() = default;
-		FileHandle(string_view mountPath);
-		FileHandle(const char* mountPath);
+		PathHandle() = default;
+		PathHandle(string_view mountPath);
+		PathHandle(const char* mountPath);
 
-		bool operator == (const FileHandle& rhs) const;
+		bool operator == (const PathHandle& rhs) const;
 
 		string_view			GetFileName()	const;
 		
@@ -62,7 +62,7 @@ namespace idk
 		bool				IsFile()	const { return _is_regular_file; }
 		bool				IsDir()		const { return !_is_regular_file; }
 		bool				CanOpen()	const;
-		bool				SameKeyAs(const FileHandle& other) const;
+		bool				SameKeyAs(const PathHandle& other) const;
 		
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);
 		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream = false);
@@ -71,12 +71,10 @@ namespace idk
 
 		explicit	operator bool() const;
 
-		
-
 		friend class FileSystem;
 		friend class FStreamWrapper;
 	private:
-		FileHandle(const file_system_detail::fs_key& key, bool is_file = true);
+		PathHandle(const file_system_detail::fs_key& key, bool is_file = true);
 
 		bool validate() const;
 		bool validateFull() const;

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "FileHandle.h"
+#include "PathHandle.h"
 #include "core/Core.h"
 #include "file/FileSystem.h"
 
@@ -66,7 +66,7 @@ namespace idk
 		}
 	}
 
-	FileHandle::FileHandle(const file_system_detail::fs_key& key, bool is_file)
+	PathHandle::PathHandle(const file_system_detail::fs_key& key, bool is_file)
 		:_key{ key }, _is_regular_file{ is_file }
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
@@ -76,7 +76,7 @@ namespace idk
 		}
 	}
 
-	bool FileHandle::validate() const
+	bool PathHandle::validate() const
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		if (_key.IsValid() == false)
@@ -96,7 +96,7 @@ namespace idk
 		}
 	}
 
-	bool FileHandle::validateFull() const
+	bool PathHandle::validateFull() const
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		if (_key.IsValid() == false)
@@ -116,7 +116,7 @@ namespace idk
 		}
 	}
 
-	void FileHandle::renameDirRecurse(file_system_detail::fs_dir& dir)
+	void PathHandle::renameDirRecurse(file_system_detail::fs_dir& dir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		for (auto& file_index : dir._files_map)
@@ -143,7 +143,7 @@ namespace idk
 	}
 
 
-	bool FileHandle::Rename(string_view new_file_name)
+	bool PathHandle::Rename(string_view new_file_name)
 	{
 		// Check Handle
 		if (validate() == false)
@@ -160,7 +160,7 @@ namespace idk
 			try {
 				FS::rename(old_p, new_p);
 			}catch(const FS::filesystem_error& e){
-				std::cout << "[FILEHANDLE ERROR] Rename: " << e.what() << std::endl;
+				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
 				return false;
 			}
 			auto res = parent_dir._files_map.find(internal_file._filename);
@@ -182,7 +182,7 @@ namespace idk
 				FS::rename(old_p, new_p);
 			}
 			catch (const FS::filesystem_error& e) {
-				std::cout << "[FILEHANDLE ERROR] Rename: " << e.what() << std::endl;
+				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
 				return false;
 			}
 			auto res = parent_dir._sub_dirs.find(internal_dir._filename);
@@ -197,12 +197,12 @@ namespace idk
 		}
 	}
 
-	FileHandle::operator bool() const
+	PathHandle::operator bool() const
 	{
 		return validateFull();
 	}
 
-	string_view FileHandle::GetMountPath() const
+	string_view PathHandle::GetMountPath() const
 	{
 		// Check Handle
 		if (validate() == false)
@@ -213,7 +213,7 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._mount_path : vfs.getDir(_key)._mount_path;
 	}
 
-	string_view FileHandle::GetExtension() const
+	string_view PathHandle::GetExtension() const
 	{
 		if (!_is_regular_file)
 			return string_view{};;
@@ -227,22 +227,22 @@ namespace idk
 		return file._extension;
 	}
 
-	FileHandle::FileHandle(string_view mountPath)
-		:FileHandle{Core::GetSystem<FileSystem>().GetFile(mountPath)}
+	PathHandle::PathHandle(string_view mountPath)
+		:PathHandle{Core::GetSystem<FileSystem>().GetFile(mountPath)}
 	{
 	}
 
-	FileHandle::FileHandle(const char* mountPath)
-		: FileHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+	PathHandle::PathHandle(const char* mountPath)
+		: PathHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
 	{
 	}
 
-	bool FileHandle::operator==(const FileHandle& rhs) const
+	bool PathHandle::operator==(const PathHandle& rhs) const
 	{
 		return _key == rhs._key && _ref_count == rhs._ref_count && _is_regular_file == rhs._is_regular_file;
 	}
 
-	string_view FileHandle::GetFileName() const
+	string_view PathHandle::GetFileName() const
 	{
 		// Check Handle
 		if (validate() == false)
@@ -253,7 +253,7 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._filename : vfs.getDir(_key)._filename;
 	}
 
-	string_view FileHandle::GetFullPath() const
+	string_view PathHandle::GetFullPath() const
 	{
 		// Check Handle
 		if (validate() == false)
@@ -264,7 +264,7 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._full_path : vfs.getDir(_key)._full_path;
 	}
 
-	string_view FileHandle::GetRelPath() const
+	string_view PathHandle::GetRelPath() const
 	{
 		// Check Handle
 		if (validate() == false)
@@ -274,7 +274,7 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._rel_path : vfs.getDir(_key)._rel_path;
 	}
 
-	string_view FileHandle::GetParentMountPath() const
+	string_view PathHandle::GetParentMountPath() const
 	{
 		// Check Handle
 		if (validate() == false)
@@ -289,7 +289,7 @@ namespace idk
 		return string_view{};
 	}
 
-	bool FileHandle::CanOpen() const
+	bool PathHandle::CanOpen() const
 	{
 		// Checking if handle is valid & if it is pointing to a file
 		if (!_is_regular_file && !validateFull())
@@ -301,13 +301,13 @@ namespace idk
 		return file.IsValid() && !file.IsOpen();
 	}
 
-	bool FileHandle::SameKeyAs(const FileHandle& other) const
+	bool PathHandle::SameKeyAs(const PathHandle& other) const
 	{
 		return  (_is_regular_file == other._is_regular_file) &&
 				(_key == other._key);
 	}
 
-	FS_CHANGE_STATUS FileHandle::GetStatus() const
+	FS_CHANGE_STATUS PathHandle::GetStatus() const
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		// Checking if handle is valid
@@ -317,7 +317,7 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._change_status : vfs.getDir(_key)._change_status;
 	}
 
-	FStreamWrapper FileHandle::Open(FS_PERMISSIONS perms, bool binary_stream)
+	FStreamWrapper PathHandle::Open(FS_PERMISSIONS perms, bool binary_stream)
 	{
 		FStreamWrapper fs;
 
@@ -353,7 +353,7 @@ namespace idk
 		return fs;
 	}
 
-	string_view FileHandle::GetParentFullPath() const
+	string_view PathHandle::GetParentFullPath() const
 	{
 		// Check Handle
 		if (validate() == false)
@@ -368,7 +368,7 @@ namespace idk
 		return string_view{};
 	}
 
-	string_view FileHandle::GetParentRelPath() const
+	string_view PathHandle::GetParentRelPath() const
 	{
 		// Check Handle
 		if (validate() == false)

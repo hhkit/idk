@@ -68,7 +68,7 @@ namespace idk::file_system_detail
 		void DecRefCount()						{ ++_ref_count; }
 		
 	private:
-		// A FileHandle can be pointing to a valid fs_file but wrong ref_count
+		// A PathHandle can be pointing to a valid fs_file but wrong ref_count
 		bool _valid = true;
 		int64_t _ref_count = 0;
 
@@ -104,7 +104,7 @@ namespace idk::file_system_detail
 		void DecRefCount() { ++_ref_count; }
 
 	private:
-		// A FileHandle can be pointing to a valid fs_file but wrong ref_count
+		// A PathHandle can be pointing to a valid fs_file but wrong ref_count
 		bool _valid = true;
 		int64_t _ref_count = 0;
 	};

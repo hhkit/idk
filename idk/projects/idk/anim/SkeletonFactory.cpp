@@ -20,7 +20,7 @@ namespace idk::anim
 		
 		return std::make_unique<Skeleton>();
 	}
-	unique_ptr<Skeleton> SkeletonFactory::Create(FileHandle filepath)
+	unique_ptr<Skeleton> SkeletonFactory::Create(PathHandle filepath)
 	{
 		UNREFERENCED_PARAMETER(filepath);
 		return std::make_unique<Skeleton>();

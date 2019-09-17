@@ -7,8 +7,8 @@ namespace idk
 		: public ExtensionLoader
 	{
 	public:
-		FileResources Create(FileHandle path_to_resource) override;
-		FileResources Create(FileHandle path_to_resource, const MetaFile& path_to_meta) override;
+		FileResources Create(PathHandle path_to_resource) override;
+		FileResources Create(PathHandle path_to_resource, const MetaFile& path_to_meta) override;
 
 	private:
 
