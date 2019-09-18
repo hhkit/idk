@@ -30,6 +30,15 @@ namespace idk::phys
 		}
 	}
 
+	col_result collide_ray_halfspace(const ray& lhs, const halfspace& rhs)
+	{
+		if (rhs.contains(lhs.origin))
+		{
+			col_success success;
+		}
+		return col_failure{};
+	}
+
 	//Assumes lhs and rhs are normalized.
 	col_result collide_ray_line(const ray& lhs, const ray& line)
 	{
@@ -72,7 +81,7 @@ namespace idk::phys
 				: disp_to_rhs - disp_to_rhs.dot(normalized_n) * normalized_n; // rays not on same plane, remove perp component
 
 			//rays are on the same plane
-			vec3 nml_disp = (disp_to_rhs - disp_to_rhs.project_onto(rhs.direction));
+			vec3 nml_disp = (tangential_displacement - tangential_displacement.project_onto(rhs.direction));
 			const auto nml_len = nml_disp.length();
 			const auto normalized_normal_disp = nml_disp / nml_len;
 
@@ -83,24 +92,24 @@ namespace idk::phys
 
 			if (dist > -epsilon)
 			{
+				col_success succ;
+				succ.point_of_collision = lhs.origin + tmp;
+				return succ;
+			}
+			else
+			{
 				col_failure fail;
 				fail.perp_dist = t;
 				fail.separating_axis = nml_disp;
 				return fail;
 			}
-			else
-			{
-				col_success succ;
-				succ.point_of_collision = lhs.origin + tmp;
-				return succ;
-			}
 		}
 	}
 
-	col_result collide_ray_aabb(const ray& lhs, const aabb& bb)
+	col_result collide_ray_aabb(const ray& lhs, const aabb& box)
 	{
-		auto disp_to_box = (bb.center() - lhs.origin);
-		auto extents = bb.extents();
+		auto disp_to_box = (box.center() - lhs.origin);
+		auto extents = box.extents();
 
 		auto result = detail::collide_ray_aabb_face<&vec3::x>(lhs.direction, disp_to_box, extents);
 

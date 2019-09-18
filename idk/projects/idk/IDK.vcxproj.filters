@@ -590,6 +590,7 @@
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
     <ClInclude Include="phys\collision_detection\collision_raycast.h" />
+    <ClInclude Include="math\shapes\half_plane.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -849,6 +850,7 @@
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_raycast.cpp" />
+    <ClCompile Include="math\shapes\half_plane.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

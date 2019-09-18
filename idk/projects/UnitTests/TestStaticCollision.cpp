@@ -12,29 +12,36 @@ namespace idk::phys
 	}
 	bool IsNearest(ray r, ray line, col_result v)
 	{
-		return false;
-	//	using namespace idk;
-	//	bool result = false;
-	//	if (v.dist != std::numeric_limits<float>::infinity())
-	//	{
-	//		ray& l = line;
-	//		float t = v.dist;
-	//		vec3 point = r.get_point(t);
-	//		vec3 disp = point - l.origin;
-	//		vec3 l_disp_to_closest = disp.project_onto(l.direction);
-	//		vec3 l_closest_point = l.origin + l_disp_to_closest;
-	//
-	//		vec3 offset_plus = point + r.direction * 0.1f;
-	//		vec3 offset_minus = point - r.direction * 0.1f;
-	//		float perp_dist = l_closest_point.distance(point);
-	//		result = (perp_dist < l_closest_point.distance(offset_plus) && perp_dist < l_closest_point.distance(offset_minus)) && phys::epsilon_equal(perp_dist, v.perp_dist);
-	//	}
-	//	else
-	//	{
-	//		vec3 diff = line.origin - r.origin;
-	//		result = phys::epsilon_equal(r.direction.dot(line.direction), r.direction.length() * line.direction.length()) && (diff - diff.project_onto(r.direction)).length() == v.perp_dist;
-	//	}
-	//	return result;
+		using namespace idk;
+		bool result = false;
+		const auto dist = [&]()
+		{
+			if (v)
+				return v.success().penetration_depth;
+			else
+				return v.failure().perp_dist;
+		}();
+
+		if (dist != std::numeric_limits<float>::infinity())
+		{
+			ray& l = line;
+			float t = dist;
+			vec3 point = r.get_point(t);
+			vec3 disp = point - l.origin;
+			vec3 l_disp_to_closest = disp.project_onto(l.direction);
+			vec3 l_closest_point = l.origin + l_disp_to_closest;
+	
+			vec3 offset_plus = point + r.direction * 0.1f;
+			vec3 offset_minus = point - r.direction * 0.1f;
+			float perp_dist = l_closest_point.distance(point);
+			result = (perp_dist < l_closest_point.distance(offset_plus) && perp_dist < l_closest_point.distance(offset_minus)) && phys::epsilon_equal(perp_dist, perp_dist);
+		}
+		else
+		{
+			vec3 diff = line.origin - r.origin;
+			result = phys::epsilon_equal(r.direction.dot(line.direction), r.direction.length() * line.direction.length()) && (diff - diff.project_onto(r.direction)).length() == dist;
+		}
+		return result;
 	}
 	bool PD_Test(ray r, ray line)
 	{

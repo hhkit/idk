@@ -41,6 +41,7 @@
     <ClInclude Include="gfx\ShaderGraph_data.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
+    <ClInclude Include="math\shapes\half_plane.h" />
     <ClInclude Include="phys\collision_detection\collision_box.h" />
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
     <ClInclude Include="phys\collision_detection\collision_raycast.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
+    <ClCompile Include="math\shapes\half_plane.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
