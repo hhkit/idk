@@ -28,8 +28,12 @@ namespace idk
 	void DebugRenderer::Draw(const ray& ray, const color& c, seconds duration, bool depth_test)
 	{
 		//mat4 tfm = translate(ray.origin) * mat4(rotate(ray.direction))
-		auto tfm = look_at(ray.origin + ray.direction / 2, ray.origin + ray.direction, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.direction.length() }) };
-		Draw(Mesh::defaults[MeshType::Line], tfm, c, duration, depth_test);
+		auto line_tfm = look_at(ray.origin + ray.direction / 2, ray.origin + ray.direction, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.direction.length() / 2 }) };
+		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
+
+		auto orient_tfm = orient(ray.direction.get_normalized());
+		auto arrow_tfm = translate(ray.origin + ray.direction) * mat4{ orient(ray.direction.get_normalized()) * scale(vec3{ 0.025f }) };
+		Draw(Mesh::defaults[MeshType::Tetrahedron], arrow_tfm, c, duration, depth_test);
 		
 	}
 

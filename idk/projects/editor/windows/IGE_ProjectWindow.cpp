@@ -25,11 +25,9 @@ namespace fs = std::filesystem;
 namespace idk {
 
 	IGE_ProjectWindow::IGE_ProjectWindow()
-		:IGE_IWindow{ "Project##ProjectWindow",true,ImVec2{ 800,200 },ImVec2{ 200,200 } } {		//Delegate Constructor to set window size
-			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-		// because it would be confusing to have two docking targets within each others.
+		: IGE_IWindow{ "Project##ProjectWindow", true, ImVec2{ 800,200 }, ImVec2{ 200,200 } }
+    {
         window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
-
         selected_dir = Core::GetSystem<FileSystem>().GetAssetDir();
 	}
 
@@ -120,36 +118,48 @@ namespace idk {
 		//float currentWidth = ImGui::GetColumnWidth(-1);
 		//currentWidth = currentWidth < 100 ? 100 : currentWidth;
 		//currentWidth = currentWidth > 400 ? 400 : currentWidth;
-		//ImGui::SetColumnWidth(-1, currentWidth);
+        if(ImGui::IsWindowAppearing())
+            ImGui::SetColumnWidth(-1, 200);
 
 		ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 
-		ImGui::BeginChild("AssetViewer1");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+		ImGui::BeginChild("AssetViewer1", ImVec2(), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+        ImGui::PopStyleVar();
 
         fs::path assets_dir = Core::GetSystem<FileSystem>().GetAssetDir();
 
-		//if (ImGui::TreeNodeEx("Asset", ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
-
-        bool selected = assets_dir == selected_dir;
-		if (ImGui::TreeNodeEx("Assets",
-            ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow |
-            ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0)))
         {
-            displayDir(assets_dir.string());
-			ImGui::TreePop();
-		}
+            bool selected = assets_dir == selected_dir;
+            auto open = ImGui::TreeNodeEx("Assets",
+                            ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow |
+                            ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
+            if (ImGui::IsItemClicked())
+                selected_dir = assets_dir.string();
+            if (open)
+            {
+                displayDir(assets_dir.string());
+                ImGui::TreePop();
+            }
+        }
 
 		ImGui::EndChild();
+
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 5);
 		ImGui::NextColumn();
 		ImGui::PopStyleVar(2);
 
+        const auto line_height = ImGui::GetTextLineHeight();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
         ImGui::PushStyleColor(ImGuiCol_MenuBarBg, 0xff333333);
-        ImGui::BeginChild("AssetViewer2", ImVec2(), false, ImGuiWindowFlags_MenuBar);
+        ImGui::BeginChild("AssetViewer2", ImVec2(0, ImGui::GetContentRegionAvail().y - line_height - 4.0f), false,
+                          ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysUseWindowPadding);
         ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
 
         if (ImGui::BeginMenuBar())
         {
@@ -184,9 +194,112 @@ namespace idk {
             ImGui::EndMenuBar();
         }
         
+        const auto content_region = ImGui::GetContentRegionAvail();
+        const float icon_sz = 64.0f;
+        auto spacing = ImGui::GetStyle().ItemSpacing;
+        const int icons_per_row = static_cast<int>((content_region.x - spacing.x) / (icon_sz + spacing.x));
 
+        // if more icons than what can fit in a row, justify it
+        if (icons_per_row < std::distance(fs::directory_iterator(selected_dir), fs::directory_iterator()))
+            spacing.x = (content_region.x - icons_per_row * icon_sz) / (icons_per_row + 1);
+
+        ImGui::SetCursorPosX(spacing.x);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing.y);
+
+        static bool renaming_selected_asset = false;
+
+        int col = 0;
+        for (const auto& entry : fs::directory_iterator(selected_dir))
+        {
+            const auto& path = entry.path();
+            const auto ext = path.extension().string();
+            if (ext == ".meta")
+                continue;
+
+            auto name = path.filename().string();
+            auto label = name;
+            auto label_sz = ImGui::CalcTextSize(label.c_str());
+            while (label_sz.x > icon_sz)
+            {
+                // hello world => hello w...
+                label.pop_back(); label.pop_back(); label.pop_back(); label.pop_back();
+                label += "...";
+                label_sz = ImGui::CalcTextSize(label.c_str());
+            }
+
+            ImGui::BeginGroup();
+            ImGui::PushID(name.c_str());
+
+            if (ImGui::Button("test", ImVec2(icon_sz, icon_sz)))
+            {
+                if (entry.is_directory())
+                {
+                    selected_dir = path.string();
+                }
+                else
+                {
+                    selected_asset = path.string();
+                }
+            }
+
+            if (selected_asset == path)
+            {
+                if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
+                {
+                    //renaming_selected_asset = true;
+                }
+
+                if (renaming_selected_asset)
+                {
+                    static char buf[256];
+                    strcpy_s(buf, name.c_str());
+                    ImGui::SetNextItemWidth(icon_sz);
+                    if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
+                    {
+                        name = buf;
+                        renaming_selected_asset = false;
+                    }
+                    if (ImGui::IsItemDeactivated() || !ImGui::IsItemFocused())
+                        renaming_selected_asset = false;
+                }
+                else
+                {
+                    ImGui::GetWindowDrawList()->AddRectFilled(
+                        ImGui::GetItemRectMin(),
+                        ImGui::GetItemRectMax(),
+                        ImGui::GetColorU32(ImGuiCol_FrameBg),
+                        line_height * 0.5f);
+                }
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
+            }
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+            ImGui::Text(label.c_str());
+
+            ImGui::PopID();
+            ImGui::EndGroup();
+
+            if (++col == icons_per_row)
+            {
+                col = 0;
+                ImGui::SetCursorPosX(spacing.x);
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing.y);
+            }
+            else
+            {
+                ImGui::SameLine(0, spacing.x);
+            }
+        }
 
 		ImGui::EndChild();
+
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, 0xff333333);
+        ImGui::BeginChild("footer", ImVec2(0, line_height));
+        ImGui::SetCursorPosX(2.0f);
+        if (!selected_asset.empty())
+            ImGui::Text(("Assets" / fs::relative(selected_asset, assets_dir)).string().c_str());
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
 
 
 	}

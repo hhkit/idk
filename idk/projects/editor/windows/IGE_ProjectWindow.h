@@ -32,7 +32,7 @@ namespace idk {
 	private:
         void displayDir(const string& dir);
         string selected_dir;
-
+        string selected_asset;
 	};
 
 
