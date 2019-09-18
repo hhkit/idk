@@ -1,8 +1,15 @@
 #include "stdafx.h"
-#include "half_plane.h"
+#include "halfspace.h"
 
 namespace idk
 {
+	halfspace::halfspace(const vec4& plane_eqn)
+		: normal{ plane_eqn.xyz }, dist{ plane_eqn.w }
+	{
+		const auto normal_len = normal.length();
+		normal /= normal_len;
+		dist   /= normal_len;
+	}
 	halfspace::halfspace(const vec3& in_normal, const vec3& pt)
 		: normal{ in_normal.get_normalized() }, dist{normal.dot(pt)}
 	{
@@ -23,6 +30,10 @@ namespace idk
 		auto d = normal * dist; // retrieve point on plane
 		normal = mat * vec4{ normal, 0 };
 		dist = normal.dot(mat * vec4{ d, 1 });
+
+		const auto normal_len = normal.length();
+		normal /= normal_len;
+		dist   /= normal_len;
 		return *this;
 	}
 

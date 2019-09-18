@@ -4,6 +4,26 @@
 
 namespace idk::phys
 {
+	struct raycast_success
+	{
+		bool already_colliding    {};
+		vec3 point_of_collision   {};
+		real distance_to_collision{};
+	};
+
+	struct raycast_failure
+	{
+		vec3 nearest_point    {};
+		real nearest_distance {};
+		vec3 perpendicular    {};
+	};
+
+	struct raycast_result
+	{
+		explicit operator bool() const;
+		variant<raycast_success, raycast_failure> result;
+	};
+
 	namespace detail
 	{
 		template<decltype(&vec3::x) >

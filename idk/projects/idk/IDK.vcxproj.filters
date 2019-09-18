@@ -576,7 +576,6 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CubeMap.h" />
-    <ClInclude Include="phys\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
@@ -591,7 +590,8 @@
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
     <ClInclude Include="phys\collision_detection\collision_raycast.h" />
-    <ClInclude Include="math\shapes\half_plane.h" />
+    <ClInclude Include="math\shapes\frustum.h" />
+    <ClInclude Include="math\shapes\halfspace.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -851,7 +851,8 @@
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_raycast.cpp" />
-    <ClCompile Include="math\shapes\half_plane.cpp" />
+    <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="math\shapes\frustum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

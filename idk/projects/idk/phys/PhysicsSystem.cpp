@@ -201,6 +201,7 @@ namespace idk
 				restitution = std::max(restitution - restitution_slop, 0.f);
 
 				assert(result.penetration_depth > -epsilon);
+
 				{
 					const auto sum_inv_mass = linv_mass + rinv_mass;
 					const auto impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;

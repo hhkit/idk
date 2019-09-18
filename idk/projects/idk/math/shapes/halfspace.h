@@ -5,9 +5,10 @@ namespace idk
 {
 	struct halfspace
 	{
-		vec3 normal{}; // normalize pls
+		vec3 normal{}; // always normalized
 		real dist{};
 
+		explicit halfspace(const vec4& plane_eqn); // plane equation constructor
 		halfspace(const vec3& normal = vec3{ 1,0,0 }, const vec3& pt = vec3{});
 
 		bool contains(const vec3& point) const;

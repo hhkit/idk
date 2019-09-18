@@ -30,13 +30,55 @@ namespace idk::phys
 		}
 	}
 
-	col_result collide_ray_halfspace(const ray& lhs, const halfspace& rhs)
+	col_result collide_ray_halfspace(const ray& l_ray, const halfspace& r_halfspace)
 	{
-		if (rhs.contains(lhs.origin))
+		const auto disp = r_halfspace.origin_pt() - l_ray.origin;
+
+		const auto normal_len = r_halfspace.normal.dot(disp);
+
+		const auto normalized_normal = r_halfspace.normal;
+
+		if (r_halfspace.contains(l_ray.origin)) // ray starts in half plane
 		{
 			col_success success;
+			success.normal_of_collision = normalized_normal;
+			success.penetration_depth = normal_len;
+			success.point_of_collision = l_ray.origin;
+			return success;
 		}
-		return col_failure{};
+
+		const auto disp_dot_ray = disp.dot(l_ray.direction);
+		if (abs(normal_len) > epsilon) // ray is not parallel to plane
+		{
+			// otherwise ray is not in half plane
+			
+			// ray is moving away
+			if (disp_dot_ray < -epsilon)
+			{
+				col_failure fail;
+				fail.perp_dist = normal_len;
+				fail.separating_axis = normalized_normal;
+				return fail;
+			}
+
+			// ray is moving towards
+			const auto ray_normalized = l_ray.direction.get_normalized();
+
+			col_success success;
+			success.normal_of_collision = normalized_normal;
+			success.penetration_depth = normal_len;
+			success.point_of_collision = ray_normalized.dot(normalized_normal) * normal_len * ray_normalized + l_ray.origin;
+
+			return success;
+		}
+		else // ray is parallel to plane
+		{
+			// we already know that the halfplane does not contain the ray
+			col_failure fail;
+			fail.perp_dist = disp_dot_ray;
+			fail.separating_axis = normalized_normal;
+			return fail;
+		}
 	}
 
 	//Assumes lhs and rhs are normalized.
@@ -49,35 +91,21 @@ namespace idk::phys
 
 		const auto normal_len_sq = normal.length_sq();
 
-		if (normal_len_sq < +epsilon)
+		if (normal_len_sq > epsilon) // ray and line point differently
 		{
-			//parallel directions therfore, same plane
-			const auto perp_vec = disp_to_rhs - disp_to_rhs.project_onto(lhs.direction);
-			const auto perp_dist = perp_vec.length();
-			if (epsilon_equal(perp_dist, 0))
-			{
-				col_success result;
-				result.point_of_collision = lhs.origin;
-				return result;
-			}
-			else
-			{
-				constexpr auto parallel_dist = std::numeric_limits<float>::infinity();
-				col_failure result;
-				result.separating_axis = perp_vec / perp_dist;
-				result.perp_dist = perp_dist;
-				return result;
-			}
-		}
-		else
-		{
-			const auto normalized_n = normal / sqrt(normal_len_sq);
+			const auto normalized_n = normal / sqrt(normal_len_sq);	 // direction of difference
+			const auto perp_dist = disp_to_rhs.dot(normalized_n);    // perp distance between ray and line
 
-			const auto perp_dist = disp_to_rhs.dot(normalized_n);
+			if (abs(perp_dist) > epsilon) // rays are not on the same plane
+			{
+				const auto tangential_disp = disp_to_rhs - disp_to_rhs.dot(normalized_n) * normalized_n; // remove normal component
 
-			const auto tangential_displacement = 
-				epsilon_equal(perp_dist, 0) 
-				? disp_to_rhs 
+				// put it back on the line
+			}
+
+			const auto tangential_displacement =
+				epsilon_equal(perp_dist, 0)
+				? disp_to_rhs
 				: disp_to_rhs - disp_to_rhs.dot(normalized_n) * normalized_n; // rays not on same plane, remove perp component
 
 			//rays are on the same plane
@@ -102,6 +130,25 @@ namespace idk::phys
 				fail.perp_dist = t;
 				fail.separating_axis = nml_disp;
 				return fail;
+			}
+		}
+		else // ray is parallel to line
+		{
+			const auto perp_vec = disp_to_rhs - disp_to_rhs.project_onto(lhs.direction);
+			const auto perp_dist = perp_vec.length();
+			if (epsilon_equal(perp_dist, 0))
+			{
+				col_success result;
+				result.point_of_collision = lhs.origin;
+				return result;
+			}
+			else
+			{
+				constexpr auto parallel_dist = std::numeric_limits<float>::infinity();
+				col_failure result;
+				result.separating_axis = perp_vec / perp_dist;
+				result.perp_dist = perp_dist;
+				return result;
 			}
 		}
 	}
