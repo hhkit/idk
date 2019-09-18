@@ -43,7 +43,7 @@
     <ClInclude Include="math\shapes.h" />
     <ClInclude Include="phys\collision_detection\collision_box.h" />
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
-    <ClInclude Include="phys\collision_raycast.h" />
+    <ClInclude Include="phys\collision_detection\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
@@ -211,6 +211,7 @@
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_raycast.cpp" />
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\PhysicsSystem.cpp" />
@@ -304,7 +305,7 @@
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
-    <None Include="phys\collision_raycast.inl" />
+    <None Include="phys\collision_detection\collision_raycast.inl" />
     <None Include="reflect\detail\meta_manager.inl" />
     <None Include="reflect\detail\table_storage.inl" />
     <None Include="reflect\detail\visit_detail.inl" />

@@ -579,7 +579,6 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CubeMap.h" />
-    <ClInclude Include="phys\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
@@ -590,6 +589,7 @@
     <ClInclude Include="phys\collision_detection\collision_box.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
+    <ClInclude Include="phys\collision_detection\collision_raycast.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -848,6 +848,7 @@
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_raycast.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1015,10 +1016,10 @@
     <None Include="math\linear.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="phys\collision_raycast.inl">
+    <None Include="res\Guid.inl" />
+    <None Include="phys\collision_detection\collision_raycast.inl">
       <Filter>phys</Filter>
     </None>
-    <None Include="res\Guid.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
