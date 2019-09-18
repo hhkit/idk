@@ -33,7 +33,7 @@ namespace idk {
 
 	void IGE_ProjectWindow::BeginWindow()
 	{
-        ImGui::SetNextWindowSizeConstraints(ImVec2{ 50.0f,100.0f }, ImVec2());
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 50.0f,100.0f });
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 	}
 
@@ -80,7 +80,7 @@ namespace idk {
 
 	void IGE_ProjectWindow::Update()
 	{
-        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(2);
 
 		ImGuiStyle& style = ImGui::GetStyle();
 

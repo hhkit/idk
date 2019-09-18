@@ -22,6 +22,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <editor/Vulkan_ImGui_Interface.h>
 #include <editor/OpenGL_ImGui_Interface.h>
+#include <win32/WindowsApplication.h>
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
@@ -62,6 +63,8 @@ namespace idk
 			break;
 		}
 
+        Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
+
         Core::GetResourceManager().RegisterFactory<shadergraph::Factory>();
         Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<shadergraph::Graph>>(".mat");
 
@@ -79,24 +82,32 @@ namespace idk
         style.WindowRounding = 0;
         style.TabRounding = 0;
         style.IndentSpacing = 14.0f;
+        style.ScrollbarRounding = 0;
+        style.GrabRounding = 0;
+        style.ChildRounding = 0;
+        style.PopupRounding = 0;
+        style.CurveTessellationTol = 0.5f;
 
         auto* colors = style.Colors;
         ImGui::StyleColorsDark();
 
-        colors[ImGuiCol_DragDropTarget].w = 0;
+        colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
 
         // grays
         colors[ImGuiCol_WindowBg] =
             ImColor(29, 34, 41).Value;
         colors[ImGuiCol_PopupBg] =
+        colors[ImGuiCol_ScrollbarBg] =
             ImColor(43, 49, 56, 240).Value;
         colors[ImGuiCol_Border] =
         colors[ImGuiCol_Separator] =
+        colors[ImGuiCol_ScrollbarGrab] =
             ImColor(63, 70, 77).Value;
             //ImColor(106, 118, 129).Value;
 
         colors[ImGuiCol_MenuBarBg] =
             ImColor(36, 58, 74).Value;
+        colors[ImGuiCol_ScrollbarBg].w = 0.5f;
 
         // main accent - 2
         colors[ImGuiCol_TitleBg] =
@@ -105,7 +116,7 @@ namespace idk
         // main accent - 1
         colors[ImGuiCol_TitleBgActive] =
         colors[ImGuiCol_TabUnfocused] =
-            ImColor(12, 60, 89).Value;
+            ImColor(11, 54, 79).Value;
 
         // main accent
         colors[ImGuiCol_Tab] =
@@ -114,6 +125,7 @@ namespace idk
         colors[ImGuiCol_Button] =
         colors[ImGuiCol_Header] =
         colors[ImGuiCol_SeparatorHovered] =
+        colors[ImGuiCol_ScrollbarGrabHovered] =
             ImColor(23, 75, 111).Value;
 
         // main accent + 1
@@ -123,9 +135,11 @@ namespace idk
         colors[ImGuiCol_FrameBgHovered] =
         colors[ImGuiCol_HeaderHovered] =
         colors[ImGuiCol_SeparatorActive] =
+        colors[ImGuiCol_ScrollbarGrabActive] =
             ImColor(46, 115, 143).Value;
 
         // main accent + 2
+        colors[ImGuiCol_TextSelectedBg] =
         colors[ImGuiCol_ButtonActive] =
         colors[ImGuiCol_FrameBgActive] =
         colors[ImGuiCol_HeaderActive] =
@@ -165,6 +179,9 @@ namespace idk
 
 	void IDE::EditorUpdate()
 	{
+        if (closing)
+            return;
+
 		_interface->ImGuiFrameBegin();
 
 		ige_main_window->DrawWindow();

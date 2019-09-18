@@ -11,6 +11,7 @@ namespace idk
 	{
 	public:
 		Signal<ivec2> OnScreenSizeChanged;
+		Signal<>      OnClosed;
 	//	Signal<>      OnMinimize;
 	//	Signal<>      OnRestore;
 	//	Signal<>      OnFullscreen;
