@@ -65,29 +65,64 @@ TEST(FileSystem, TestMount)
 	vfs.Update();
 }
 
+bool WatchUpdateCheck(idk::FileSystem& vfs, idk::seconds time, idk::FS_CHANGE_STATUS status)
+{
+	using namespace idk;
+	auto start_time = Clock::now();
+
+	while (time > seconds{0})
+	{
+		auto curr_time = Clock::now();
+
+		vfs.Update();
+
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		bool all_check = changes.size() == 1;
+
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		bool create_check = (status == FS_CHANGE_STATUS::CREATED) ? changes.size() == 1 : changes.size() == 0;
+
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+		bool write_check = (status == FS_CHANGE_STATUS::WRITTEN) ? changes.size() == 1 : changes.size() == 0;
+
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		bool delete_check = (status == FS_CHANGE_STATUS::DELETED) ? changes.size() == 1 : changes.size() == 0;
+		
+		if (all_check && create_check && write_check && delete_check)
+			return true;
+
+		time -= duration_cast<seconds>(curr_time - start_time);
+	}
+
+	return false;
+}
+
+void WatchClearCheck(idk::FileSystem& vfs)
+{
+	using namespace idk;
+	// Checking if we resolved all changes properly
+	vfs.Update();
+	auto changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 0);
+
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+	EXPECT_TRUE(changes.size() == 0);
+}
+
 void TestCreateWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	// Create the test_watch file
 	std::ofstream{ string{vfs.GetExeDir()} +"/FS_UnitTests/test_watch.txt", std::ios::out };
 
-	vfs.Update();
-
 	// Checking if querying is correct
-	auto changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 1);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-	EXPECT_TRUE(changes.size() == 1);
-	// No files deleted or written
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-	EXPECT_TRUE(changes.size() == 0);
-
-	// Checking if we resolved all changes properly
-	vfs.Update();
-	changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 0);
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::CREATED));
+	WatchClearCheck(vfs);
 }
 
 void TestWriteWatch(idk::FileSystem& vfs)
@@ -100,23 +135,10 @@ void TestWriteWatch(idk::FileSystem& vfs)
 		of << "Test Write" << std::endl;
 		of.close();
 	}
-	vfs.Update();
+
 	// Checking if querying is correct
-	auto changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 1);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-	EXPECT_TRUE(changes.size() == 1);
-
-	// No files deleted or created
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-	EXPECT_TRUE(changes.size() == 0);
-
-	// Checking if we resolved all changes properly
-	vfs.Update();
-	changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 0);
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::WRITTEN));
+	WatchClearCheck(vfs);
 }
 
 void TestDeleteWatch(idk::FileSystem& vfs)
@@ -126,24 +148,10 @@ void TestDeleteWatch(idk::FileSystem& vfs)
 
 	string remove_file = string{ vfs.GetExeDir() } + "/FS_UnitTests/test_write.txt";
 	EXPECT_TRUE(remove(remove_file.c_str()) == 0);
-	vfs.Update();
 
 	// Checking if querying is correct
-	auto changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 1);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-	EXPECT_TRUE(changes.size() == 1);
-
-	// No files deleted or written
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-	EXPECT_TRUE(changes.size() == 0);
-
-	// Checking if we resolved all changes properly
-	vfs.Update();
-	changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 0);
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::DELETED));
+	WatchClearCheck(vfs);
 }
 
 TEST(FileSystem, TestDirectoryWatch)

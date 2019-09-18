@@ -24,9 +24,9 @@ namespace idk
 
 	enum class FS_QUERY_TYPE
 	{
-		EXT		= 0x01,
-		CHANGE	= 0x02,
-		ALL		= 0x04
+		EXT		= 1 << 0,
+		CHANGE	= 1 << 1,
+		ALL		= 1 << 2
 	};
 
 	enum class FS_CHANGE_STATUS
@@ -50,10 +50,67 @@ namespace idk
 		NONE
 	};
 
-	enum class FS_FILTERS
+	enum class FS_FILTERS : int
 	{
-		FILE,
-		DIR,
-		RECURSE_DIRS
+		NONE			= 1 << 0,
+		FILE			= 1 << 1,
+		DIR				= 1 << 2,
+		EXT				= 1 << 3,
+		RECURSE_DIRS	= 1 << 4,
+
+		ALL				= FILE | DIR | RECURSE_DIRS,
+		ALL_NO_RECURSE	= FILE | DIR
 	};
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	inline auto operator|(T lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		return s_cast<T>(s_cast<UType>(lhs) | s_cast<UType>(rhs));
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	inline auto operator&(T lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		return s_cast<T>(s_cast<UType>(lhs) & s_cast<UType>(rhs));
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	inline auto operator^(T lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		return s_cast<T>(s_cast<UType>(lhs) ^ s_cast<UType>(rhs));
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	inline auto& operator|=(T& lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		lhs = s_cast<T>(s_cast<UType>(lhs) | s_cast<UType>(rhs));
+		return lhs;
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	inline auto& operator&=(T & lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		lhs = s_cast<T>(s_cast<UType>(lhs) & s_cast<UType>(rhs));
+		return *lhs;
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	inline auto& operator^=(T & lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		lhs = s_cast<T>(s_cast<UType>(lhs) ^ s_cast<UType>(rhs));
+		return lhs;
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	bool enum_eq(T lhs, T rhs)
+	{
+		using UType = std::underlying_type_t<T>;
+		return (lhs & rhs) == rhs;
+	}
 }

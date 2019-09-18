@@ -16,6 +16,7 @@ namespace FS = std::filesystem;
 
 namespace idk {
 	
+#pragma region ISystem Stuff
 	void FileSystem::Init()
 	{
 		// Get the base directory. This is where the prog is run from.
@@ -70,6 +71,9 @@ namespace idk {
 	void FileSystem::Shutdown()
 	{
 	}
+#pragma endregion ISystem Stuff
+
+#pragma region General Getters
 
 	string FileSystem::GetFullPath(string_view mountPath) const
 	{
@@ -100,31 +104,67 @@ namespace idk {
 		}
 	}
 
-	vector<PathHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, bool recurse_sub_trees) const
+	PathHandle FileSystem::GetFile(string_view mountPath) const
 	{
-		vector<PathHandle> vec_handles;
-		auto dir_index = getDir(mountPath);
-		if (!dir_index.IsValid())
-			return vec_handles;
+		PathHandle fh;
+		auto file_index = getFile(mountPath);
+		if (file_index.IsValid() == false)
+			return fh;
 
-		auto& dir = getDir(dir_index);
-		if (recurse_sub_trees)
-		{
-			recurseSubDirExtensions(vec_handles, dir, extension);
-			return vec_handles;
-		}
-		
-		for (auto& file_index : dir._files_map)
-		{
-			auto& internal_file = getFile(file_index.second);
-			if (internal_file._extension == extension)
-			{
-				PathHandle h{ internal_file._tree_index, true };
-				vec_handles.emplace_back(h);
-			}
-		}
-		return vec_handles;
+		auto& internal_file = getFile(file_index);
+
+		fh._key = internal_file._tree_index;
+		fh._ref_count = internal_file.RefCount();
+
+		return fh;
 	}
+
+	PathHandle FileSystem::GetDir(string_view mountPath) const
+	{
+		PathHandle fh;
+		auto dir_index = getDir(mountPath);
+		if (dir_index.IsValid() == false)
+			return fh;
+
+		auto& internal_dir = getDir(dir_index);
+
+		fh._key = internal_dir._tree_index;
+		fh._ref_count = internal_dir.RefCount();
+
+		return fh;
+	}
+
+	bool FileSystem::Exists(string_view mountPath) const
+	{
+		return ExistsFull(GetFullPath(mountPath));
+	}
+
+	bool FileSystem::ExistsFull(string_view fullPath) const
+	{
+		return FS::exists(FS::path{ fullPath.data() });
+	}
+
+#pragma endregion General Getters
+
+#pragma region Directory Specific
+
+	vector<PathHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, FS_FILTERS filters) const
+	{
+		auto dir_index = getDir(mountPath);
+		PathHandle h{ dir_index, false };
+		return h.GetFilesWithExtension(extension, filters);
+	}
+
+	vector<PathHandle> FileSystem::GetPaths(string_view mountPath, FS_FILTERS filters, string_view ext) const
+	{
+		auto dir_index = getDir(mountPath);
+		PathHandle h{ dir_index, false };
+		return h.GetPaths(filters, ext);
+	}
+
+#pragma endregion Directory Specific
+
+#pragma region File Changes
 
 	vector<PathHandle> FileSystem::QueryFileChangesAll() const
 	{
@@ -173,46 +213,9 @@ namespace idk {
 		return handles;
 	}
 
-	PathHandle FileSystem::GetFile(string_view mountPath) const
-	{
-		PathHandle fh;
-		auto file_index = getFile(mountPath);
-		if (file_index.IsValid() == false)
-			return fh;
-
-		auto& internal_file = getFile(file_index);
-		
-		fh._key = internal_file._tree_index;
-		fh._ref_count = internal_file.RefCount();
-
-		return fh;
-	}
-
-	PathHandle FileSystem::GetDir(string_view mountPath) const
-	{
-		PathHandle fh;
-		auto dir_index = getDir(mountPath);
-		if (dir_index.IsValid() == false)
-			return fh;
-
-		auto& internal_dir = getDir(dir_index);
-
-		fh._key = internal_dir._tree_index;
-		fh._ref_count = internal_dir.RefCount();
-
-		return fh;
-	}
-
-	bool FileSystem::Exists(string_view mountPath) const
-	{
-		return ExistsFull(GetFullPath(mountPath));
-	}
-
-	bool FileSystem::ExistsFull(string_view fullPath) const
-	{
-		return FS::exists(FS::path{ fullPath.data() });
-	}
-
+#pragma endregion File Changes
+	
+#pragma region Utility
 	void FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)
 	{
 		size_t curr_mount_index = _mounts.size();
@@ -266,6 +269,33 @@ namespace idk {
 			return handle.Open(perms, binary_stream);
 		}
 	}
+
+	int FileSystem::Mkdir(string_view mountPath)
+	{
+		UNREFERENCED_PARAMETER(mountPath);
+		// Testing for now.
+		// FS::create_directories(FS::path{ "C:/Users/Joseph/Desktop/GIT/idk_legacy/Koboru/Koboru/resource/editor/test" });
+		return 0;
+	}
+
+	bool FileSystem::Rename(string_view mountPath, string_view new_name)
+	{
+		// Try getting the file
+		PathHandle handle = GetFile(mountPath);
+		if (handle)
+			return handle.Rename(new_name);
+
+		// Try getting the directory
+		handle = GetDir(mountPath);
+		if (handle)
+			return handle.Rename(new_name);
+
+		throw(FS_ERROR_CODE::FILESYSTEM_NOT_FOUND, "[FILE SYSTEM] mountPath cannot be found.");
+	}
+
+#pragma endregion Utility
+
+#pragma region Helper Inits
 
 	void FileSystem::initMount(size_t index, string_view fullPath, string_view mountPath, bool watch)
 	{
@@ -334,73 +364,9 @@ namespace idk {
 		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
 
-	void FileSystem::recurseSubDirExtensions(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
-	{
-		for (auto& file_index : subDir._files_map)
-		{
-			auto& internal_file = getFile(file_index.second);
-			if (internal_file._extension == extension)
-			{
-				PathHandle h{ internal_file._tree_index, true };
-				vec_handles.emplace_back(h);
-			}
-		}
+#pragma endregion Helper Inits
 
-		for (auto& dir_index : subDir._sub_dirs)
-		{
-			auto& internal_dir = getDir(dir_index.second);
-			recurseSubDirExtensions(vec_handles, internal_dir, extension);
-		}
-	}
-
-	void FileSystem::recurseSubDir(size_t index, int8_t currDepth, file_system_detail::fs_dir& mountSubDir, bool watch)
-	{
-		file_system_detail::fs_mount& mount = _mounts[index];
-
-		// Increase the depth if this expands the tree
-		++currDepth;
-		if (currDepth >= mount._path_tree.size() - 1)
-			mount.AddDepth();
-
-		FS::path currPath{ mountSubDir._full_path };
-		FS::directory_iterator dir{ currPath };
-
-		// initializing all the paths from this path
-		for (auto& elem : dir)
-		{
-			FS::path tmp{ elem.path() };
-			if (FS::is_regular_file(tmp))
-			{
-				file_system_detail::fs_file f;
-
-				f._tree_index._mount_id = static_cast<int8_t>(index);
-				f._tree_index._depth = currDepth;
-				f._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._files.size());
-
-				// f._file_detail is default initialized to have ref_count = 0.
-
-				initFile(f, mountSubDir, tmp);
-				mount._path_tree[currDepth]._files.push_back(f);
-			}
-			else
-			{
-				file_system_detail::fs_dir d;
-
-				d._tree_index._mount_id = static_cast<int8_t>(index);
-				d._tree_index._depth = currDepth;
-				d._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
-
-				initDir(d, mountSubDir, tmp);
-
-				mountSubDir._sub_dirs.emplace(d._filename, d._tree_index);
-				if (watch)
-					_directory_watcher.WatchDirectory(d);
-
-				recurseSubDir(index, currDepth, d, watch);
-				mount._path_tree[currDepth]._dirs.push_back(d);
-			}
-		}
-	}
+#pragma region Helper Getters
 
 	file_system_detail::fs_file& FileSystem::getFile(file_system_detail::fs_key& node)
 	{
@@ -479,7 +445,7 @@ namespace idk {
 			for (auto& sub_dir : mount._path_tree[dir_depth]._dirs)
 			{
 				// Make sure that the parent directory is correct
-				if (sub_dir._mount_path +  '/' + tokenized_path.back() == mountPath)
+				if (sub_dir._mount_path + '/' + tokenized_path.back() == mountPath)
 				{
 					auto result = sub_dir._files_map.find(tokenized_path.back());
 					if (result != sub_dir._files_map.end())
@@ -541,26 +507,9 @@ namespace idk {
 		return empty_node;
 	}
 
-	vector<string> FileSystem::tokenizePath(string_view fullPath) const
-	{
-		string full_path{ fullPath };
-		size_t start = 1, end = 0;
-		string token;
-		vector<string> output;
+#pragma endregion Helper Getters
 
-		while (end != string::npos)
-		{
-			end = full_path.find_first_of("/\\", start);
-			// If at end, use length=maxLength.  Else use length=end-start.
-			token = full_path.substr(start, (end == string::npos) ? string::npos : end - start);
-			output.push_back(token);
-
-			start = full_path.find_first_not_of("/\\", end);
-			if (start == string::npos) end = string::npos;
-		}
-		return output;
-	}
-
+#pragma region Helper Validate
 
 	int FileSystem::validateMountPath(string_view mountPath) const
 	{
@@ -570,7 +519,7 @@ namespace idk {
 			return -1;
 
 		auto end_pos = mount_path.find_first_of('/', 1);
-		
+
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
 		if (mount_index != _mount_table.end())
@@ -606,7 +555,7 @@ namespace idk {
 			return -1;
 
 		auto end_pos = mount_path.find_first_of('/', 1);
-		
+
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
 		if (mount_index != _mount_table.end())
@@ -614,29 +563,194 @@ namespace idk {
 		else
 			return -1;
 	}
-	
-	int FileSystem::Mkdir(string_view mountPath)
+
+#pragma endregion Helper Validate
+
+#pragma region Helper Auxiliary
+
+	vector<string> FileSystem::tokenizePath(string_view fullPath) const
 	{
-		UNREFERENCED_PARAMETER(mountPath);
-		// Testing for now.
-		// FS::create_directories(FS::path{ "C:/Users/Joseph/Desktop/GIT/idk_legacy/Koboru/Koboru/resource/editor/test" });
-		return 0;
+		string full_path{ fullPath };
+		size_t start = 1, end = 0;
+		string token;
+		vector<string> output;
+
+		while (end != string::npos)
+		{
+			end = full_path.find_first_of("/\\", start);
+			// If at end, use length=maxLength.  Else use length=end-start.
+			token = full_path.substr(start, (end == string::npos) ? string::npos : end - start);
+			output.push_back(token);
+
+			start = full_path.find_first_not_of("/\\", end);
+			if (start == string::npos) end = string::npos;
+		}
+		return output;
 	}
 
-	bool FileSystem::Rename(string_view mountPath, string_view new_name)
+	file_system_detail::fs_key FileSystem::requestFileSlot(file_system_detail::fs_mount& mount, int8_t depth)
 	{
-		// Try getting the file
-		PathHandle handle = GetFile(mountPath);
-		if(handle)
-			return handle.Rename(new_name);
+		auto check_free_index = std::find_if(mount._path_tree[depth]._files.begin(),
+			mount._path_tree[depth]._files.end(),
+			[](const file_system_detail::fs_file& f)
+			{
+				// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
+				return !f.IsValid() && f._change_status == FS_CHANGE_STATUS::NO_CHANGE;
+			});
 
-		// Try getting the directory
-		handle = GetDir(mountPath);
-		if (handle)
-			return handle.Rename(new_name);
+		// The conditions for reuse of a fs_file is that 
+		if (check_free_index != mount._path_tree[depth]._files.end())
+		{
+			// check_free_index->SetValid(true);
+			// check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
+			return check_free_index->_tree_index;
+		}
+		else
+		{
+			mount._path_tree[depth]._files.push_back(file_system_detail::fs_file{});
+			auto& file = mount._path_tree[depth]._files.back();
 
-		throw(FS_ERROR_CODE::FILESYSTEM_NOT_FOUND, "[FILE SYSTEM] mountPath cannot be found.");
+			file._tree_index._mount_id = mount._mount_index;
+			file._tree_index._depth = depth;
+			file._tree_index._index = s_cast<int8_t>(mount._path_tree[depth]._files.size() - 1);
+
+			return file._tree_index;
+		}
 	}
+
+	file_system_detail::fs_key FileSystem::requestDirSlot(file_system_detail::fs_mount& mount, int8_t depth)
+	{
+		auto check_free_index = std::find_if(mount._path_tree[depth]._dirs.begin(),
+			mount._path_tree[depth]._dirs.end(),
+			[](const file_system_detail::fs_dir& d)
+			{
+				// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
+				return !d.IsValid() && d._change_status == FS_CHANGE_STATUS::NO_CHANGE;
+			});
+
+		if (check_free_index != mount._path_tree[depth]._dirs.end())
+		{
+			// check_free_index->SetValid(true);
+			return check_free_index->_tree_index;
+		}
+		else
+		{
+			mount._path_tree[depth]._dirs.push_back(file_system_detail::fs_dir{});
+			auto& dir = mount._path_tree[depth]._dirs.back();
+
+			dir._tree_index._mount_id = mount._mount_index;
+			dir._tree_index._depth = depth;
+			dir._tree_index._index = static_cast<int8_t>(mount._path_tree[depth]._dirs.size() - 1);
+
+			return dir._tree_index;
+		}
+	}
+
+	file_system_detail::fs_file& FileSystem::createAndGetFile(string_view mountPath)
+	{
+		// Means we need to create the file...
+		string mount_path{ mountPath.data() };
+		auto end_pos = mount_path.find_last_of('/');
+		auto dir_index = getDir(mount_path.substr(0, end_pos));
+
+		if (dir_index.IsValid() == false)
+			return _empty_file;
+
+		auto& dir = getDir(dir_index);
+		string full_path = dir._full_path + "/" + mount_path.substr(end_pos);
+
+		std::ofstream{ full_path };
+
+		FS::path p{ full_path };
+
+		// Request a slot from mounts
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (_mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
+
+		// initializing the fs_file
+		auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
+		auto& f = getFile(slot);
+		initFile(f, dir, p);
+
+		return f;
+	}
+
+#pragma endregion Helper Auxiliary
+
+#pragma region Helper Recurse
+
+	void FileSystem::recurseSubDir(size_t index, int8_t currDepth, file_system_detail::fs_dir& mountSubDir, bool watch)
+	{
+		file_system_detail::fs_mount& mount = _mounts[index];
+
+		// Increase the depth if this expands the tree
+		++currDepth;
+		if (currDepth >= mount._path_tree.size() - 1)
+			mount.AddDepth();
+
+		FS::path currPath{ mountSubDir._full_path };
+		FS::directory_iterator dir{ currPath };
+
+		// initializing all the paths from this path
+		for (auto& elem : dir)
+		{
+			FS::path tmp{ elem.path() };
+			if (FS::is_regular_file(tmp))
+			{
+				file_system_detail::fs_file f;
+
+				f._tree_index._mount_id = static_cast<int8_t>(index);
+				f._tree_index._depth = currDepth;
+				f._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._files.size());
+
+				// f._file_detail is default initialized to have ref_count = 0.
+
+				initFile(f, mountSubDir, tmp);
+				mount._path_tree[currDepth]._files.push_back(f);
+			}
+			else
+			{
+				file_system_detail::fs_dir d;
+
+				d._tree_index._mount_id = static_cast<int8_t>(index);
+				d._tree_index._depth = currDepth;
+				d._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
+
+				initDir(d, mountSubDir, tmp);
+
+				mountSubDir._sub_dirs.emplace(d._filename, d._tree_index);
+				if (watch)
+					_directory_watcher.WatchDirectory(d);
+
+				recurseSubDir(index, currDepth, d, watch);
+				mount._path_tree[currDepth]._dirs.push_back(d);
+			}
+		}
+	}
+
+	// void FileSystem::recurseSubDirExtensions(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
+	// {
+	// 	for (auto& file_index : subDir._files_map)
+	// 	{
+	// 		auto& internal_file = getFile(file_index.second);
+	// 		if (internal_file._extension == extension)
+	// 		{
+	// 			PathHandle h{ internal_file._tree_index, true };
+	// 			vec_handles.emplace_back(h);
+	// 		}
+	// 	}
+	// 
+	// 	for (auto& dir_index : subDir._sub_dirs)
+	// 	{
+	// 		auto& internal_dir = getDir(dir_index.second);
+	// 		recurseSubDirExtensions(vec_handles, internal_dir, extension);
+	// 	}
+	// }
+
+#pragma endregion Helper Recurse
+
+#pragma region Helper Dump
 
 	void FileSystem::DumpMounts() const
 	{
@@ -693,92 +807,6 @@ namespace idk {
 		}
 	}
 	
-
-	file_system_detail::fs_key FileSystem::requestFileSlot(file_system_detail::fs_mount& mount, int8_t depth)
-	{
-		auto check_free_index = std::find_if( mount._path_tree[depth]._files.begin(),
-											  mount._path_tree[depth]._files.end(),
-											  [](const file_system_detail::fs_file& f) 
-												{ 
-													// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
-													return !f.IsValid() && f._change_status == FS_CHANGE_STATUS::NO_CHANGE;
-												});
-
-		// The conditions for reuse of a fs_file is that 
-		if (check_free_index != mount._path_tree[depth]._files.end())
-		{
-			// check_free_index->SetValid(true);
-			// check_free_index->SetOpenMode(FS_PERMISSIONS::NONE);
-			return check_free_index->_tree_index;
-		}
-		else
-		{
-			mount._path_tree[depth]._files.push_back(file_system_detail::fs_file{});
-			auto& file = mount._path_tree[depth]._files.back();
-
-			file._tree_index._mount_id = mount._mount_index;
-			file._tree_index._depth = depth;
-			file._tree_index._index = s_cast<int8_t>(mount._path_tree[depth]._files.size() - 1);
-			
-			return file._tree_index;
-		}
-	}
-
-	file_system_detail::fs_key FileSystem::requestDirSlot(file_system_detail::fs_mount& mount, int8_t depth)
-	{
-		auto check_free_index = std::find_if( mount._path_tree[depth]._dirs.begin(),
-											  mount._path_tree[depth]._dirs.end(),
-											  [](const file_system_detail::fs_dir& d) 
-												{ 
-													// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
-													return !d.IsValid() && d._change_status == FS_CHANGE_STATUS::NO_CHANGE;
-												});
-
-		if (check_free_index != mount._path_tree[depth]._dirs.end())
-		{
-			// check_free_index->SetValid(true);
-			return check_free_index->_tree_index;
-		}
-		else
-		{
-			mount._path_tree[depth]._dirs.push_back(file_system_detail::fs_dir{});
-			auto& dir = mount._path_tree[depth]._dirs.back();
-
-			dir._tree_index._mount_id = mount._mount_index;
-			dir._tree_index._depth = depth;
-			dir._tree_index._index = static_cast<int8_t>(mount._path_tree[depth]._dirs.size() - 1);
-
-			return dir._tree_index;
-		}
-	}
-
-	file_system_detail::fs_file& FileSystem::createAndGetFile(string_view mountPath)
-	{
-		// Means we need to create the file...
-		string mount_path{ mountPath.data() };
-		auto end_pos = mount_path.find_last_of('/');
-		auto dir_index = getDir(mount_path.substr(0, end_pos));
-
-		if (dir_index.IsValid() == false)
-			return _empty_file;
-
-		auto& dir = getDir(dir_index);
-		string full_path = dir._full_path + "/" + mount_path.substr(end_pos);
-
-		std::ofstream{ full_path };
-
-		FS::path p{ full_path };
-
-		// Request a slot from mounts
-		// Check if there are even mounts. If this hits, something is terribly wrong...
-		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
-
-		// initializing the fs_file
-		auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
-		auto& f = getFile(slot);
-		initFile(f, dir, p);
-
-		return f;
-	}
+#pragma endregion Helper Dump
+	
 }

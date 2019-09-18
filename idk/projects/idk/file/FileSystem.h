@@ -21,7 +21,10 @@ namespace idk
 		string				GetFullPath				(string_view mountPath)				const;
 		vector<PathHandle>	GetFilesWithExtension	(string_view mountPath,
 													 string_view extension, 
-													 bool recurse_sub_trees = true)		const;
+													 FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS)		const;
+
+		vector<PathHandle>  GetPaths				(string_view mountPath,
+													 FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::DIR, string_view ext = string_view{}) const;
 
 		bool		Exists		(string_view mountPath)		const;
 		bool		ExistsFull	(string_view fullPath)		const;
@@ -88,7 +91,7 @@ namespace idk
 
 		// Helper recursion functions
 		void recurseSubDir				(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
-		void recurseSubDirExtensions	(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
+		// void recurseSubDirExtensions	(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
 
 		// Helper Getters
 		file_system_detail::fs_file&		getFile	(file_system_detail::fs_key& node);
