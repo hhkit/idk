@@ -14,6 +14,8 @@ namespace idk::phys
 	}
 
 	//Assumes lhs and rhs are normalized.
+	col_result collide_ray_halfspace(const ray& lhs, const halfspace& rhs);
+
 	col_result collide_ray_line(const ray& lhs, const ray& line);
 	col_result collide_ray_aabb(const ray& lhs, const aabb& bb);
 }
