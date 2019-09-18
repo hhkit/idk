@@ -23,13 +23,13 @@ namespace idk::phys
 	};
 
 	struct col_result
-		: monadic::result<col_success, col_failure>
+		: public monadic::result<col_success, col_failure>
 	{
 	private:
 		using Base = monadic::result<col_success, col_failure>;
 	public:
-		using Base::Base;
-		using Base::operator=;
+		using Base::Base;      // use result's ctors
+		using Base::operator=; // use result's assignment
 
 		col_result operator-() const;
 	};

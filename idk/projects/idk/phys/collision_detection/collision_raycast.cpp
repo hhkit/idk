@@ -41,13 +41,13 @@ namespace idk::phys
 		if (r_halfspace.contains(l_ray.origin)) // ray starts in half plane
 		{
 			raycast_success success;
-			success.already_colliding = true;
+			success.origin_colliding = true;
 			success.distance_to_collision = 0;
 			success.point_of_collision = l_ray.origin;
 			return success;
 		}
 
-		const auto disp_dot_ray = disp.dot(l_ray.direction);
+		const auto disp_dot_ray = disp.dot(l_ray.velocity);
 		if (abs(normal_len) > epsilon) // ray is not parallel to plane
 		{
 			// otherwise ray is not in half plane
@@ -63,10 +63,10 @@ namespace idk::phys
 			}
 
 			// ray is moving towards
-			const auto ray_normalized = l_ray.direction.get_normalized();
+			const auto ray_normalized = l_ray.velocity.get_normalized();
 
 			raycast_success success;
-			success.already_colliding = false;
+			success.origin_colliding = false;
 			success.distance_to_collision = normal_len;
 			success.point_of_collision = ray_normalized.dot(normalized_normal) * normal_len * ray_normalized + l_ray.origin;
 
@@ -88,7 +88,7 @@ namespace idk::phys
 	{
 		auto& rhs = line;
 		//construct a plane around lhs
-		const vec3 normal = lhs.direction.cross(rhs.direction);
+		const vec3 normal = lhs.velocity.cross(rhs.velocity);
 		const vec3 disp_to_rhs = rhs.origin - lhs.origin;
 
 		const auto normal_len_sq = normal.length_sq();
@@ -111,13 +111,13 @@ namespace idk::phys
 				: disp_to_rhs - disp_to_rhs.dot(normalized_n) * normalized_n; // rays not on same plane, remove perp component
 
 			//rays are on the same plane
-			vec3 nml_disp = (tangential_displacement - tangential_displacement.project_onto(rhs.direction));
+			vec3 nml_disp = (tangential_displacement - tangential_displacement.project_onto(rhs.velocity));
 			const auto nml_len = nml_disp.length();
 			const auto normalized_normal_disp = nml_disp / nml_len;
 
-			const auto t = nml_len / lhs.direction.dot(normalized_normal_disp);
+			const auto t = nml_len / lhs.velocity.dot(normalized_normal_disp);
 
-			vec3 tmp = lhs.direction * t;
+			vec3 tmp = lhs.velocity * t;
 			const auto dist = t;
 
 			if (dist > -epsilon)
@@ -136,7 +136,7 @@ namespace idk::phys
 		}
 		else // ray is parallel to line
 		{
-			const auto perp_vec = disp_to_rhs - disp_to_rhs.project_onto(lhs.direction);
+			const auto perp_vec = disp_to_rhs - disp_to_rhs.project_onto(lhs.velocity);
 			const auto perp_dist = perp_vec.length();
 			if (epsilon_equal(perp_dist, 0))
 			{
@@ -155,46 +155,21 @@ namespace idk::phys
 		}
 	}
 
-	col_result collide_ray_aabb(const ray& lhs, const aabb& box)
+	raycast_result collide_ray_aabb(const ray& lhs, const aabb& box)
 	{
+		if (box.contains(lhs.origin))
+		{
+			raycast_success succ;
+			succ.origin_colliding      = true;
+			succ.distance_to_collision = 0;
+			succ.point_of_collision    = lhs.origin;
+			return succ;
+		}
+
 		auto disp_to_box = (box.center() - lhs.origin);
 		auto extents = box.extents();
 
-		auto result = detail::collide_ray_aabb_face<&vec3::x>(lhs.direction, disp_to_box, extents);
-
-		if (auto tmp_res = detail::collide_ray_aabb_face<&vec3::y>(lhs.direction, disp_to_box, extents))
-		{
-			if (result && result.value().penetration_depth > tmp_res.value().penetration_depth)
-				result = tmp_res;
-			// if result already failed ignore the successful axis
-		}
-		else
-		{
-			if (result)
-				result = tmp_res;
-			else
-			{
-				if (tmp_res.error().perp_dist < result.error().perp_dist)
-					result = tmp_res;
-			}
-		}
-
-		if (auto tmp_res = detail::collide_ray_aabb_face<&vec3::z>(lhs.direction, disp_to_box, extents))
-		{
-			if (result && result.value().penetration_depth > tmp_res.value().penetration_depth)
-				result = tmp_res;
-			// if result already failed ignore the successful axis
-		}
-		else
-		{
-			if (result)
-				result = tmp_res;
-			else
-			{
-				if (tmp_res.error().perp_dist < result.error().perp_dist)
-					result = tmp_res;
-			}
-		}
+		auto result = detail::collide_ray_aabb_face<&vec3::x>(lhs, box);
 
 		return result;
 	}

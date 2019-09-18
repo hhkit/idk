@@ -5,46 +5,69 @@ namespace idk::phys
 	namespace detail
 	{
 		template<decltype(&vec3::x) axis>
-		col_result collide_ray_aabb_face(vec3 direction, const vec3& disp_to_box, vec3 extents)
+		raycast_result collide_ray_aabb_face(const ray& l_ray, const aabb& r_aabb)
 		{
-			const real t = direction.*axis / (disp_to_box.*axis - extents.*axis);
-
+			// time to collide
 			constexpr auto nml = []()
 			{
 				if constexpr(axis == &vec3::x) return vec3{ 1,0,0 };
 				if constexpr(axis == &vec3::y) return vec3{ 0,1,0 };
 				if constexpr(axis == &vec3::z) return vec3{ 0,0,1 };
-				return vec3{};
 			}();
 
-			if (t > -epsilon)
+			constexpr auto other1 = []()
 			{
-				auto  point_at_edge = disp_to_box - direction * t;
-				point_at_edge.*axis = 0;
-				point_at_edge = abs(point_at_edge);
-				const auto pd_not_inside = PerpDist<axis>(point_at_edge, extents);
+				if constexpr (axis == &vec3::x) return &vec3::y;
+				if constexpr (axis == &vec3::y) return &vec3::z;
+				if constexpr (axis == &vec3::z) return &vec3::x;
+			}();
 
-				if ((abs(point_at_edge.x) <= extents.x && abs(point_at_edge.y) <= extents.y && abs(point_at_edge.z) <= extents.z))
-				{
-					col_success succ;
-					succ.normal_of_collision = direction.dot(nml) > 0 ? nml : -nml;
-					succ.penetration_depth = 0;
-					succ.point_of_collision.*axis = point_at_edge.*axis;
-					return succ;
-				}
-				else
-				{
-					col_failure fail;
-					fail.perp_dist = pd_not_inside;
-					fail.separating_axis = nml;
-					return fail;
-				}
+			constexpr auto other2 = []()
+			{
+				if constexpr (axis == &vec3::x) return &vec3::z;
+				if constexpr (axis == &vec3::y) return &vec3::x;
+				if constexpr (axis == &vec3::z) return &vec3::y;
+			}();
+
+			const auto is_below = l_ray.origin.*axis < r_aabb.min.*axis;
+
+			const real distance = is_below ? r_aabb.min.*axis - l_ray.origin.*axis : r_aabb.max.*axis - l_ray.origin.*axis;
+
+			const real t = distance / l_ray.velocity.*axis;
+
+			if (t < -epsilon) // ray is flying away
+			{
+				raycast_failure fail;
+				fail.nearest_point = l_ray.origin;
+				fail.nearest_distance = abs(distance);
+				fail.perpendicular = is_below ? -nml : nml;
+				return fail;
 			}
 
-			col_failure fail;
-			fail.perp_dist = abs(t);
-			fail.separating_axis = disp_to_box.dot(nml) > 0 ? nml : -nml;
-			return fail;
+			// ray is flying towards
+			const auto ray_pt = l_ray.get_point_after(t);
+
+			const auto collision_pt = [&]() -> vec3
+			{
+				auto retval = ray_pt;
+				retval.*other1 = std::clamp(ray_pt.*other1, r_aabb.min.*other1, r_aabb.max.*other1);
+				retval.*other2 = std::clamp(ray_pt.*other2, r_aabb.min.*other2, r_aabb.max.*other2);
+				return retval;
+			}();
+
+			if (collision_pt.*other1 == ray_pt.*other1 && collision_pt.*other2 == ray_pt.*other2)
+			{
+				raycast_success succ;
+				succ.point_of_collision    = collision_pt;
+				succ.distance_to_collision = distance;
+				return succ;
+			}
+
+			raycast_failure failure;
+			failure.nearest_point = l_ray.origin;
+			failure.nearest_distance = abs(distance);
+			failure.perpendicular = is_below ? -nml : nml;
+			return failure;
 		}
 	}
 }
