@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-
+#include <ds/result.h>
 namespace idk::phys
 {
 	bool epsilon_equal(real lhs, real rhs);
@@ -23,16 +23,14 @@ namespace idk::phys
 	};
 
 	struct col_result
+		: monadic::result<col_success, col_failure>
 	{
-		col_result(const col_success& res) : result{ res } {}
-		col_result(const col_failure& res) : result{ res } {}
-
-		const col_success& success() const { return std::get<col_success>(result); }
-		const col_failure& failure() const { return std::get<col_failure>(result); }
+	private:
+		using Base = monadic::result<col_success, col_failure>;
+	public:
+		using Base::Base;
+		using Base::operator=;
 
 		col_result operator-() const;
-		explicit operator bool() const;
-	private:
-		std::variant<col_success, col_failure> result;
 	};
 }

@@ -155,7 +155,7 @@ namespace idk
 					{
 						//debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
 						//debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.success());
+						collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.value());
 					}
 					else
 					{

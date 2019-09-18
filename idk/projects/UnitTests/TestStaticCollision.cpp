@@ -7,7 +7,7 @@ namespace idk::phys
 	{
 		using namespace idk;
 		bool resultv = data ? true :
-			epsilon_equal(data.failure().perp_dist, dist) && phys::epsilon_equal(data.failure().perp_dist, perp_dist);
+			epsilon_equal(data.error().perp_dist, dist) && phys::epsilon_equal(data.error().perp_dist, perp_dist);
 		return resultv;
 	}
 	bool IsNearest(ray r, ray line, col_result v)
@@ -17,9 +17,9 @@ namespace idk::phys
 		const auto dist = [&]()
 		{
 			if (v)
-				return v.success().penetration_depth;
+				return v.value().penetration_depth;
 			else
-				return v.failure().perp_dist;
+				return v.error().perp_dist;
 		}();
 
 		if (dist != std::numeric_limits<float>::infinity())

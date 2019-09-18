@@ -5,19 +5,16 @@ namespace idk::phys
 {
 	col_result col_result::operator-() const
 	{
-		return std::visit([](const auto& obj)->col_result { return -obj; }, result);
+		return *this ? col_result{ -value() } : col_result{ -error() };
 	}
-	col_result::operator bool() const
-	{
-		return result.index() == 0;
-		//return epsilon_equal(perp_dist, 0) && !(dist == std::numeric_limits<float>::infinity()) && dist >= -epsilon;
-	}
+
 	col_failure col_failure::operator-() const
 	{
 		auto copy = *this;
 		copy.separating_axis = -copy.separating_axis;
 		return copy;
 	}
+
 	col_success col_success::operator-() const
 	{
 		auto copy = *this;

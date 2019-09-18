@@ -1,6 +1,7 @@
 #pragma once
 #include <phys/collision_result.h>
 #include <math/shapes.h>
+#include <ds/result.h>
 
 namespace idk::phys
 {
@@ -18,11 +19,7 @@ namespace idk::phys
 		vec3 perpendicular    {};
 	};
 
-	struct raycast_result
-	{
-		explicit operator bool() const;
-		variant<raycast_success, raycast_failure> result;
-	};
+	using raycast_result = monadic::result<raycast_success, raycast_failure>;
 
 	namespace detail
 	{
@@ -34,7 +31,7 @@ namespace idk::phys
 	}
 
 	//Assumes lhs and rhs are normalized.
-	col_result collide_ray_halfspace(const ray& lhs, const halfspace& rhs);
+	raycast_result collide_ray_halfspace(const ray& lhs, const halfspace& rhs);
 
 	col_result collide_ray_line(const ray& lhs, const ray& line);
 	col_result collide_ray_aabb(const ray& lhs, const aabb& bb);

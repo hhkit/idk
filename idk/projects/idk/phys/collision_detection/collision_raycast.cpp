@@ -30,7 +30,7 @@ namespace idk::phys
 		}
 	}
 
-	col_result collide_ray_halfspace(const ray& l_ray, const halfspace& r_halfspace)
+	raycast_result collide_ray_halfspace(const ray& l_ray, const halfspace& r_halfspace)
 	{
 		const auto disp = r_halfspace.origin_pt() - l_ray.origin;
 
@@ -40,9 +40,9 @@ namespace idk::phys
 
 		if (r_halfspace.contains(l_ray.origin)) // ray starts in half plane
 		{
-			col_success success;
-			success.normal_of_collision = normalized_normal;
-			success.penetration_depth = normal_len;
+			raycast_success success;
+			success.already_colliding = true;
+			success.distance_to_collision = 0;
 			success.point_of_collision = l_ray.origin;
 			return success;
 		}
@@ -55,18 +55,19 @@ namespace idk::phys
 			// ray is moving away
 			if (disp_dot_ray < -epsilon)
 			{
-				col_failure fail;
-				fail.perp_dist = normal_len;
-				fail.separating_axis = normalized_normal;
+				raycast_failure fail;
+				fail.nearest_distance = normal_len;
+				fail.perpendicular    = normalized_normal;
+				fail.nearest_point    = l_ray.origin;
 				return fail;
 			}
 
 			// ray is moving towards
 			const auto ray_normalized = l_ray.direction.get_normalized();
 
-			col_success success;
-			success.normal_of_collision = normalized_normal;
-			success.penetration_depth = normal_len;
+			raycast_success success;
+			success.already_colliding = false;
+			success.distance_to_collision = normal_len;
 			success.point_of_collision = ray_normalized.dot(normalized_normal) * normal_len * ray_normalized + l_ray.origin;
 
 			return success;
@@ -74,9 +75,10 @@ namespace idk::phys
 		else // ray is parallel to plane
 		{
 			// we already know that the halfplane does not contain the ray
-			col_failure fail;
-			fail.perp_dist = disp_dot_ray;
-			fail.separating_axis = normalized_normal;
+			raycast_failure fail;
+			fail.nearest_distance = disp_dot_ray;
+			fail.perpendicular    = normalized_normal;
+			fail.nearest_point    = l_ray.origin;
 			return fail;
 		}
 	}
@@ -162,7 +164,7 @@ namespace idk::phys
 
 		if (auto tmp_res = detail::collide_ray_aabb_face<&vec3::y>(lhs.direction, disp_to_box, extents))
 		{
-			if (result && result.success().penetration_depth > tmp_res.success().penetration_depth)
+			if (result && result.value().penetration_depth > tmp_res.value().penetration_depth)
 				result = tmp_res;
 			// if result already failed ignore the successful axis
 		}
@@ -172,14 +174,14 @@ namespace idk::phys
 				result = tmp_res;
 			else
 			{
-				if (tmp_res.failure().perp_dist < result.failure().perp_dist)
+				if (tmp_res.error().perp_dist < result.error().perp_dist)
 					result = tmp_res;
 			}
 		}
 
 		if (auto tmp_res = detail::collide_ray_aabb_face<&vec3::z>(lhs.direction, disp_to_box, extents))
 		{
-			if (result && result.success().penetration_depth > tmp_res.success().penetration_depth)
+			if (result && result.value().penetration_depth > tmp_res.value().penetration_depth)
 				result = tmp_res;
 			// if result already failed ignore the successful axis
 		}
@@ -189,7 +191,7 @@ namespace idk::phys
 				result = tmp_res;
 			else
 			{
-				if (tmp_res.failure().perp_dist < result.failure().perp_dist)
+				if (tmp_res.error().perp_dist < result.error().perp_dist)
 					result = tmp_res;
 			}
 		}

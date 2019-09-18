@@ -592,6 +592,7 @@
     <ClInclude Include="phys\collision_detection\collision_raycast.h" />
     <ClInclude Include="math\shapes\frustum.h" />
     <ClInclude Include="math\shapes\halfspace.h" />
+    <ClInclude Include="ds\result.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1024,6 +1025,7 @@
     <None Include="phys\collision_detection\collision_raycast.inl">
       <Filter>phys</Filter>
     </None>
+    <None Include="ds\result.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
