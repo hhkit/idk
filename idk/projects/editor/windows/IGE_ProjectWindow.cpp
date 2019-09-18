@@ -33,7 +33,7 @@ namespace idk {
 
 	void IGE_ProjectWindow::BeginWindow()
 	{
-        ImGui::SetNextWindowSizeConstraints(ImVec2{ 50.0f,100.0f }, ImVec2());
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 50.0f,100.0f });
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 	}
 
@@ -58,7 +58,7 @@ namespace idk {
             bool selected = path == selected_dir;
             if (!dirContainsDir(path))
             {
-                auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
                 if (selected) flags |= ImGuiTreeNodeFlags_Selected;
                 ImGui::TreeNodeEx(path.filename().string().c_str(), flags);
                 if (ImGui::IsItemClicked())
@@ -67,7 +67,7 @@ namespace idk {
             else
             {
                 auto open = ImGui::TreeNodeEx(path.filename().string().c_str(),
-                    ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow |
+                    ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
                     ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
                 if (ImGui::IsItemClicked())
                     selected_dir = path.string();
@@ -80,7 +80,7 @@ namespace idk {
 
 	void IGE_ProjectWindow::Update()
 	{
-        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(2);
 
 		ImGuiStyle& style = ImGui::GetStyle();
 
@@ -93,21 +93,23 @@ namespace idk {
 
 		//ImGui::SetCursorPos(ImVec2{ 0.0f,ImGui::GetFrameHeight() });
 
-        if (ImGui::BeginMenuBar())
+        ImGui::BeginMenuBar();
         {
             if (ImGui::Button("Create"))
             {
             }
+
+            static char searchBarChar[128];
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-            static char searchBarChar[512];
-            ImGui::SetCursorPosX(window_size.x - 300);
-            if (ImGui::InputTextEx("##ToolBarSearchBar", NULL, searchBarChar, 512, ImVec2{ 250,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None))
+            auto w = std::fminf(250.0f, window_size.x - ImGui::GetCursorPosX() - 50.0f);
+            ImGui::SetCursorPosX(window_size.x - w - 50.0f);
+            if (ImGui::InputTextEx("##ToolBarSearchBar", NULL, searchBarChar, 512, ImVec2{ w, ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None))
             {
                 //Do something
             }
             ImGui::PopStyleVar();
-            ImGui::EndMenuBar();
         }
+        ImGui::EndMenuBar();
 
 		//ImGui columns are annoying
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.0f, 2.0f));
@@ -124,7 +126,7 @@ namespace idk {
 		ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4.0f));
 		ImGui::BeginChild("AssetViewer1", ImVec2(), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
         ImGui::PopStyleVar();
 
@@ -155,13 +157,15 @@ namespace idk {
         const auto line_height = ImGui::GetTextLineHeight();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
-        ImGui::PushStyleColor(ImGuiCol_MenuBarBg, 0xff333333);
+        auto menu_bar_col = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
+        menu_bar_col.w *= 0.5f;
+        ImGui::PushStyleColor(ImGuiCol_MenuBarBg, menu_bar_col);
         ImGui::BeginChild("AssetViewer2", ImVec2(0, ImGui::GetContentRegionAvail().y - line_height - 4.0f), false,
                           ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysUseWindowPadding);
         ImGui::PopStyleColor();
         ImGui::PopStyleVar();
 
-        if (ImGui::BeginMenuBar())
+        ImGui::BeginMenuBar();
         {
             ImGui::PushStyleColor(ImGuiCol_Button, 0);
 
@@ -230,54 +234,83 @@ namespace idk {
             ImGui::BeginGroup();
             ImGui::PushID(name.c_str());
 
-            if (ImGui::Button("test", ImVec2(icon_sz, icon_sz)))
-            {
-                if (entry.is_directory())
-                {
-                    selected_dir = path.string();
-                }
-                else
-                {
-                    selected_asset = path.string();
-                }
-            }
+            ImGui::Image(0, ImVec2{ icon_sz, icon_sz });
 
             if (selected_asset == path)
             {
-                if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
-                {
-                    //renaming_selected_asset = true;
-                }
+                static char buf[256];
+                static bool first_focus = false;
 
                 if (renaming_selected_asset)
                 {
-                    static char buf[256];
-                    strcpy_s(buf, name.c_str());
                     ImGui::SetNextItemWidth(icon_sz);
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
                     if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         name = buf;
                         renaming_selected_asset = false;
                     }
-                    if (ImGui::IsItemDeactivated() || !ImGui::IsItemFocused())
+                    ImGui::PopStyleVar();
+                    if (first_focus)
+                    {
+                        ImGui::SetKeyboardFocusHere(-1);
+                        first_focus = false;
+                    }
+                    else if ((ImGui::IsItemDeactivated()))
                         renaming_selected_asset = false;
                 }
-                else
+                else if (!renaming_selected_asset)
                 {
-                    ImGui::GetWindowDrawList()->AddRectFilled(
-                        ImGui::GetItemRectMin(),
-                        ImGui::GetItemRectMax(),
-                        ImGui::GetColorU32(ImGuiCol_FrameBg),
-                        line_height * 0.5f);
-                }
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
-            }
+                    if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
+                    {
+                        renaming_selected_asset = true;
+                        first_focus = true;
+                        strcpy_s(buf, name.c_str());
+                    }
+                    else
+                    {
+                        ImGui::GetWindowDrawList()->AddRectFilled(
+                            ImGui::GetItemRectMin(),
+                            ImGui::GetItemRectMax(),
+                            ImGui::GetColorU32(ImGuiCol_FrameBg),
+                            line_height * 0.5f);
+                    }
 
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
-            ImGui::Text(label.c_str());
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
+
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+                    ImGui::Text(label.c_str());
+                }
+            }
+            else
+            {
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+                ImGui::Text(label.c_str());
+            }
 
             ImGui::PopID();
             ImGui::EndGroup();
+
+            if (ImGui::IsItemClicked())
+            {
+                selected_asset = path.string();
+                renaming_selected_asset = false;
+            }
+            if (entry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
+            {
+                selected_dir = path.string();
+            }
+
+            if (!entry.is_directory())
+            {
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    ImGui::SetDragDropPayload("string", &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+                    ImGui::Text("Drag to inspector button.");
+                    ImGui::Text(("Assets" / fs::relative(selected_asset, assets_dir)).string().c_str());
+                    ImGui::EndDragDropSource();
+                }
+            }
 
             if (++col == icons_per_row)
             {
@@ -293,7 +326,8 @@ namespace idk {
 
 		ImGui::EndChild();
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, 0xff333333);
+        // footer
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, menu_bar_col);
         ImGui::BeginChild("footer", ImVec2(0, line_height));
         ImGui::SetCursorPosX(2.0f);
         if (!selected_asset.empty())

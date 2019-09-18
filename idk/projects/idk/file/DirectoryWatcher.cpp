@@ -156,18 +156,14 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::ResolveAllChanges()
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
+		// Check if there are even mounts. If this hits, something is terribly wrong...
+		if (vfs._mounts.empty())
+			throw("Something is terribly wrong. No mounts found.");
 
 		// Resolve changed files
 		for (auto& file_index : changed_files)
 		{
 			auto& internal_file = vfs.getFile(file_index);
-
-			// Check if there are even mounts. If this hits, something is terribly wrong...
-			if (vfs._mounts.empty())
-				throw("Something is terribly wrong. No mounts found.");
-
-			// auto& internal_collated = vfs._mounts[internal_file._tree_index._mount_id]._path_tree[internal_file._tree_index._depth];
-			
 			
 			switch (internal_file._change_status)
 			{
@@ -183,6 +179,9 @@ namespace idk
 				auto& parent_dir = vfs.getDir(internal_file._parent);
 				auto result = parent_dir._files_map.find(internal_file._filename);
 				parent_dir._files_map.erase(result);
+
+				internal_file.IncRefCount();
+				internal_file.SetValid(false);
 
 				break;
 			}
@@ -204,13 +203,6 @@ namespace idk
 		{
 			auto& internal_dir = vfs.getDir(dir_index);
 
-			// Check if there are even mounts. If this hits, something is terribly wrong...
-			if (vfs._mounts.empty())
-				throw("Something is terribly wrong. No mounts found.");
-
-			auto& internal_collated = vfs._mounts[internal_dir._tree_index._mount_id]._path_tree[internal_dir._tree_index._depth];
-			auto& parent_dir = vfs.getDir(internal_dir._parent);
-
 			switch (internal_dir._change_status)
 			{
 			case FS_CHANGE_STATUS::CREATED:
@@ -218,12 +210,14 @@ namespace idk
 			case FS_CHANGE_STATUS::DELETED:
 			{
 				// First we remove this file from the parent dir.
+				auto& parent_dir = vfs.getDir(internal_dir._parent);
 				auto result = parent_dir._sub_dirs.find(internal_dir._filename);
 				parent_dir._sub_dirs.erase(result);
 
 				// Next, invalidate it from path_tree. Should be a better way to do this. Not sure yet.
 				// When we create files in run-time, we will loop through all the fs_file and find the first valid one if available. Linear time POG.
-				internal_collated._files[internal_dir._tree_index._index].SetValid(false);
+				internal_dir.IncRefCount();
+				internal_dir.SetValid(false);
 
 				break;
 			}
@@ -412,9 +406,41 @@ namespace idk
 		}
 	}
 
-	void file_system_detail::DirectoryWatcher::checkDirRenamed(file_system_detail::fs_dir& dir)
+	void file_system_detail::DirectoryWatcher::checkDirRenamed(file_system_detail::fs_dir& mountDir)
 	{
-		UNREFERENCED_PARAMETER(dir);
+		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		{
+			FS::path tmp{ file.path() };
+
+			// We only check if it is a dir
+			if (FS::is_regular_file(tmp))
+				continue;
+
+			string filename = tmp.filename().string();
+
+			auto result = mountDir._sub_dirs.find(filename);
+			if (result == mountDir._sub_dirs.end())
+			{
+				// File was really renamed.
+				// Now we need to find the corresponding internal fs_file that was renamed
+				// One of the fs_file inside the dir does not exists anymore due to being renamed.
+				auto& vfs = Core::GetSystem<FileSystem>();
+				for (auto& internal_dir_index : mountDir._sub_dirs)
+				{
+					auto& internal_dir = vfs.getDir(internal_dir_index.second);
+					if (!vfs.ExistsFull(internal_dir._full_path))
+					{
+						string prev_path = internal_dir._full_path;
+						dirRename(mountDir, internal_dir, tmp);
+
+						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
+							"\t Prev Path: " << prev_path << "\n"
+							"\t Curr Path: " << tmp.string() << "\n" << std::endl;
+						return;
+					}
+				}
+			}
+		}
 	}
 
 	void file_system_detail::DirectoryWatcher::recurseAndAdd(file_system_detail::fs_dir& mountDir)
@@ -471,6 +497,32 @@ namespace idk
 						 "\t Path: " << internal_dir._full_path << "\n" << std::endl;
 
 			recurseAndDelete(internal_dir);
+		}
+	}
+
+	void file_system_detail::DirectoryWatcher::recurseAndRename(file_system_detail::fs_dir& dir)
+	{
+		auto& vfs = Core::GetSystem<FileSystem>();
+		for (auto& file_index : dir._files_map)
+		{
+			auto& internal_file = vfs.getFile(file_index.second);
+			string append = '/' + internal_file._filename;
+
+			internal_file._full_path = dir._full_path + append;
+			internal_file._rel_path = dir._rel_path + append;
+			internal_file._mount_path = dir._mount_path + append;
+		}
+
+		for (auto& dir_index : dir._sub_dirs)
+		{
+			auto& internal_dir = vfs.getDir(dir_index.second);
+			string append = '/' + internal_dir._filename;
+
+			internal_dir._full_path = dir._full_path + append;
+			internal_dir._rel_path = dir._rel_path + append;
+			internal_dir._mount_path = dir._mount_path + append;
+
+			recurseAndRename(internal_dir);
 		}
 	}
 
@@ -539,10 +591,14 @@ namespace idk
 		changed_dirs.push_back(dir._tree_index);
 	}
 
-	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& dir, std::filesystem::path& p)
+	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_dir& dir, std::filesystem::path& p, FS_CHANGE_STATUS status)
 	{
-		UNREFERENCED_PARAMETER(dir);
-		UNREFERENCED_PARAMETER(p);
+		// This is the file that was renamed.
+		Core::GetSystem<FileSystem>().initDir(dir, mountDir, p);
+		dir._change_status = status;
+
+		changed_dirs.push_back(dir._tree_index);
 	}
+
 	
 }

@@ -16,7 +16,7 @@ namespace idk::shadergraph
         return GenerateDefaultResource();
     }
 
-    unique_ptr<Graph> Factory::Create(FileHandle file_handle)
+    unique_ptr<Graph> Factory::Create(PathHandle file_handle)
     {
         auto fs = file_handle.Open(FS_PERMISSIONS::READ);
         auto str = stringify(fs);

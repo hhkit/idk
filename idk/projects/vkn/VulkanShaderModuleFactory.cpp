@@ -10,7 +10,7 @@ namespace idk::vkn
 	{
 		return std::make_unique<ShaderModule>();
 	}
-	unique_ptr<ShaderProgram> VulkanShaderModuleFactory::Create(FileHandle filepath)
+	unique_ptr<ShaderProgram> VulkanShaderModuleFactory::Create(PathHandle filepath)
 	{
 		auto program = std::make_unique<ShaderModule>();
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, true);

@@ -117,7 +117,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/Running.fbx" });
+			auto resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
 			mesh_rend->mesh = resources[0].As<Mesh>();
 			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
 			animator->AddAnimation(resources[2].As<anim::Animation>());
@@ -129,7 +129,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 	auto tmp_tex = RscHandle<Texture>{};
 	if(gfx_api == GraphicsAPI::Vulkan)
-		tmp_tex =Core::GetResourceManager().LoadFile(FileHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
+		tmp_tex =Core::GetResourceManager().LoadFile(PathHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
 
 	constexpr auto col = ivec3{ 1,0,0 };
 
@@ -143,7 +143,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
-		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		//if (gfx_api != GraphicsAPI::Vulkan)
@@ -190,6 +190,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//	wall->AddComponent<Collider>()->shape = box{};
 	//}
 
+	auto light = scene->CreateGameObject();
+	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
+	light->AddComponent<Light>();
+	light->AddComponent<TestComponent>();
+	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 	//auto bounce_kun = scene->CreateGameObject();
 	//bounce_kun->GetComponent<Name>()->name = "bouncer";
 	//bounce_kun->Transform()->position = vec3{ 0, 1, 0 };

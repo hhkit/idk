@@ -67,5 +67,7 @@ namespace idk
 
 		vector <unique_ptr<IGE_IWindow>> ige_windows	{};
 
+        bool closing = false;
+
 	};
 }

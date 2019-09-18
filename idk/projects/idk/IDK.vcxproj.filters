@@ -287,9 +287,6 @@
     <ClInclude Include="util\enum.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="file\FileHandle.h">
-      <Filter>file</Filter>
-    </ClInclude>
     <ClInclude Include="audio\AudioListener.h">
       <Filter>audio</Filter>
     </ClInclude>
@@ -584,6 +581,9 @@
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="file\PathHandle.h">
+      <Filter>file</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\MeshFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -678,9 +678,6 @@
     </ClCompile>
     <ClCompile Include="reflect\enum_value.cpp">
       <Filter>reflect</Filter>
-    </ClCompile>
-    <ClCompile Include="file\FileHandle.cpp">
-      <Filter>file</Filter>
     </ClCompile>
     <ClCompile Include="audio\AudioListener.cpp">
       <Filter>audio</Filter>
@@ -844,6 +841,9 @@
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp">
       <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="file\PathHandle.cpp">
+      <Filter>file</Filter>
     </ClCompile>
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="res\Guid.cpp" />

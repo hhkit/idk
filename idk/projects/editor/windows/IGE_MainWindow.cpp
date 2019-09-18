@@ -56,13 +56,13 @@ namespace idk {
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 		//ImGui::SetNextWindowPos(viewport->Pos);
-		//ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Always);
-		ImGui::SetNextWindowViewport(viewport->ID);
+		window_size = viewport->Size;
+		//ImGui::SetNextWindowViewport(viewport->ID);
 		ImGui::SetNextWindowBgAlpha(0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f }); //The File,Edit Tab
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //The File,Edit Tab
 
 	}
 
@@ -74,8 +74,8 @@ namespace idk {
 		//Check if mouse is at this window or not
 		is_mouse_hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 		is_window_collapsed = ImGui::IsWindowCollapsed();
-		window_position = ImGui::GetWindowPos();
-		window_size = viewport->Size;
+		//window_position = ImGui::GetWindowPos();
+		//window_size = viewport->Size;
 
 		itemCounter = 0;
 

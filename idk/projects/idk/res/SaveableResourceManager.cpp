@@ -101,10 +101,10 @@ namespace idk
 
 			static auto GenerateSaveFileJT()
 			{
-				using FnPtr = void(*)(Guid, FileHandle);
+				using FnPtr = void(*)(Guid, PathHandle);
 				return array<FnPtr, ResourceCount>
 				{
-					[](Guid guid, FileHandle f)
+					[](Guid guid, PathHandle f)
 					{
 						if constexpr (has_tag_v<Rs, Saveable>)
 						{

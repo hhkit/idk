@@ -415,7 +415,7 @@ namespace idk::ogl
 		return std::make_unique<OpenGLMesh>();
 	}
 
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(FileHandle)
+	unique_ptr<Mesh> OpenGLMeshFactory::Create(PathHandle)
 	{
 		return unique_ptr<Mesh>();
 	}

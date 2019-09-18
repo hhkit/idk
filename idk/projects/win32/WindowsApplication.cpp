@@ -176,6 +176,7 @@ namespace idk::win
 			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
 			break;
 		case WM_DESTROY:
+            OnClosed.Fire();
 			PostQuitMessage(0);
 			break;
 		case WM_NCDESTROY:

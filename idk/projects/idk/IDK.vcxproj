@@ -35,6 +35,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="file\PathHandle.h" />
     <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="gfx\MeshFactory.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
@@ -59,7 +60,6 @@
     <ClInclude Include="ds\slow_tree.h" />
     <ClInclude Include="ds\small_string.h" />
     <ClInclude Include="event\Signal.h" />
-    <ClInclude Include="file\FileHandle.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
     <ClInclude Include="gfx\CameraControls.h" />
@@ -201,6 +201,7 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
@@ -227,7 +228,6 @@
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
     <ClCompile Include="gfx\buffer_desc.cpp" />
     <ClCompile Include="gfx\DebugRenderer.cpp" />
-    <ClCompile Include="file\FileHandle.cpp" />
     <ClCompile Include="gfx\Camera.cpp" />
     <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />

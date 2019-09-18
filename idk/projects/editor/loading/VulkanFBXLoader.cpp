@@ -19,7 +19,7 @@ namespace idk
 	}
 
 	VulkanFBXLoader::~VulkanFBXLoader() = default;
-	FileResources VulkanFBXLoader::Create(FileHandle path_to_resource)
+	FileResources VulkanFBXLoader::Create(PathHandle path_to_resource)
 	{
 		struct MeshEntry
 		{
@@ -156,7 +156,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources VulkanFBXLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	FileResources VulkanFBXLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);

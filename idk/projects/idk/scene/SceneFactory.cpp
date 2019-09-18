@@ -14,7 +14,7 @@ namespace idk
 		return unique_ptr<Scene>();
 	}
 
-	unique_ptr<Scene> SceneFactory::Create(FileHandle)
+	unique_ptr<Scene> SceneFactory::Create(PathHandle)
 	{
 		assert(false);
 		return unique_ptr<Scene>();

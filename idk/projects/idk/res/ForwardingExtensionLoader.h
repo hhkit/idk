@@ -9,8 +9,8 @@ namespace idk
 	class ForwardingExtensionLoader final
 		: public ExtensionLoader
 	{
-		FileResources Create(FileHandle path_to_resource) override;
-		FileResources Create(FileHandle path_to_resource, const MetaFile& metadatas) override;
+		FileResources Create(PathHandle path_to_resource) override;
+		FileResources Create(PathHandle path_to_resource, const MetaFile& metadatas) override;
 	};
 }
 

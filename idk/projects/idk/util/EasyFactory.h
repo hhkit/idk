@@ -10,7 +10,7 @@ namespace idk
 	{
 		virtual unique_ptr<T> GenerateDefaultResource();
 		virtual unique_ptr<T> Create();
-		virtual unique_ptr<T> Create(FileHandle filepath);
+		virtual unique_ptr<T> Create(PathHandle filepath);
 	};
 }
 
@@ -27,7 +27,7 @@ namespace idk
 		return std::make_unique<T>();
 	}
 	template<typename T>
-	inline unique_ptr<T> EasyFactory<T>::Create(FileHandle filepath)
+	inline unique_ptr<T> EasyFactory<T>::Create(PathHandle filepath)
 	{
 		auto ptr = std::make_unique<T>();
 

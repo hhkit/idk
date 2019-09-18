@@ -2,7 +2,7 @@
 //@file		CommandList.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		9 SEPT 2019
+//@date		16 SEPT 2019
 //@brief	
 
 /*
@@ -20,3 +20,4 @@ Contains all commands
 #include <editor/commands/CMD_RotateGameObject.h>
 #include <editor/commands/CMD_ScaleGameObject.h>
 #include <editor/commands/CMD_AddComponent.h>
+#include <editor/commands/CMD_ModifyInput.h>

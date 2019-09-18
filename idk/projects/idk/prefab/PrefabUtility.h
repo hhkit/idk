@@ -13,7 +13,7 @@ namespace idk
         static Handle<GameObject> Instantiate(RscHandle<Prefab> prefab, Scene& scene);
 
         // save given game object into a prefab, writes into save_path.
-        static void Save(Handle<GameObject> go, FileHandle save_path);
+        static void Save(Handle<GameObject> go, PathHandle save_path);
 
         // get the root of a prefab instance.
         // if the given game object is not part of a prefab instance, returns a null handle.

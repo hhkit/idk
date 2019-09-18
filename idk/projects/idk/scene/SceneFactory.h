@@ -10,6 +10,6 @@ namespace idk
 	public:
 		unique_ptr<Scene> GenerateDefaultResource() override;
 		unique_ptr<Scene> Create() override;
-		unique_ptr<Scene> Create(FileHandle filepath) override;
+		unique_ptr<Scene> Create(PathHandle filepath) override;
 	};
 }

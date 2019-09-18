@@ -11,6 +11,6 @@ namespace idk
     public:
         unique_ptr<Prefab> GenerateDefaultResource() override;
 		unique_ptr<Prefab> Create() override;
-		unique_ptr<Prefab> Create(FileHandle filepath) override;
+		unique_ptr<Prefab> Create(PathHandle filepath) override;
 	};
 }

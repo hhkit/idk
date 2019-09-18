@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <meta/tag.h>
-#include <file/FileHandle.h>
+#include <file/PathHandle.h>
 #include <res/ResourceMeta.h>
 
 namespace idk
@@ -19,7 +19,7 @@ namespace idk
 		using Resource = Res;
 		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;
 		virtual unique_ptr<Resource> Create() { return GenerateDefaultResource();  };
-		virtual unique_ptr<Resource> Create(FileHandle filepath) = 0;
+		virtual unique_ptr<Resource> Create(PathHandle filepath) = 0;
 		virtual ~ResourceFactory_impl() = default;
 	};
 
@@ -30,8 +30,8 @@ namespace idk
 		using Resource = Res;
 		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;
 		virtual unique_ptr<Resource> Create() { return GenerateDefaultResource(); };
-		virtual unique_ptr<Resource> Create(FileHandle filepath) = 0;
-		virtual unique_ptr<Resource> Create(FileHandle filepath, const typename Res::Metadata& m);
+		virtual unique_ptr<Resource> Create(PathHandle filepath) = 0;
+		virtual unique_ptr<Resource> Create(PathHandle filepath, const typename Res::Metadata& m);
 		virtual ~ResourceFactory_impl() = default;
 	};
 
@@ -44,7 +44,7 @@ namespace idk
 	};
 
 	template<typename Res>
-	unique_ptr<Res> ResourceFactory_impl<Res, true>::Create(FileHandle filepath, const typename Res::Metadata& m)
+	unique_ptr<Res> ResourceFactory_impl<Res, true>::Create(PathHandle filepath, const typename Res::Metadata& m)
 	{
 		auto ptr = Create(filepath);
 		ptr->SetMeta(m);

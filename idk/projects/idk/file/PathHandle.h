@@ -7,7 +7,7 @@
 
 namespace idk
 {
-	// struct FileHandle;
+	// struct PathHandle;
 	class FStreamWrapper : public std::fstream
 	{
 	public:
@@ -15,13 +15,13 @@ namespace idk
 		FStreamWrapper& operator=(FStreamWrapper&& rhs);
 		~FStreamWrapper();
 
-		// FileHandle GetHandle() const;
+		// PathHandle GetHandle() const;
 
 		// Override some files.
 		void close();
 
 		friend class FileSystem;
-		friend struct FileHandle;
+		friend struct PathHandle;
 	private:
 		FStreamWrapper() = default;
 		
@@ -33,19 +33,21 @@ namespace idk
 	public:
 		FILE* data() { return _fp; }
 
-		friend struct FileHandle;
+		friend struct PathHandle;
 	private:
 		FILE* _fp = nullptr;
 	};
 
-	struct FileHandle
+	struct PathHandle
 	{
-		FileHandle() = default;
-		FileHandle(string_view mountPath);
-		FileHandle(const char* mountPath);
+		PathHandle() = default;
+		PathHandle(string_view mountPath);
+		PathHandle(const char* mountPath);
 
-		bool operator == (const FileHandle& rhs) const;
+		bool operator == (const PathHandle& rhs) const;
 
+		// Path Variable Getters
+		// ====================================================================================
 		string_view			GetFileName()	const;
 		
 		string_view			GetFullPath()	const;
@@ -59,11 +61,21 @@ namespace idk
 		string_view			GetParentMountPath() const;
 
 		FS_CHANGE_STATUS	GetStatus() const;
+
+		// Directory specific getters
+		// ====================================================================================
+		vector<PathHandle> GetFilesWithExtension(string_view ext, FS_FILTERS filters = FS_FILTERS::RECURSE_DIRS) const;
+		vector<PathHandle> GetPaths(FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::DIR, string_view ext = string_view{}) const;
+
+		// Bool checks
+		// ====================================================================================
 		bool				IsFile()	const { return _is_regular_file; }
 		bool				IsDir()		const { return !_is_regular_file; }
 		bool				CanOpen()	const;
-		bool				SameKeyAs(const FileHandle& other) const;
+		bool				SameKeyAs(const PathHandle& other) const;
 		
+		// Auxiliary functions
+		// ====================================================================================
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);
 		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream = false);
 
@@ -71,15 +83,19 @@ namespace idk
 
 		explicit	operator bool() const;
 
-		
-
 		friend class FileSystem;
 		friend class FStreamWrapper;
 	private:
-		FileHandle(const file_system_detail::fs_key& key, bool is_file = true);
+		PathHandle(const file_system_detail::fs_key& key, bool is_file = true);
 
+		// Use this if you don't care if the file really exists or not. 
 		bool validate() const;
+		// Use this if the file MUST exists
 		bool validateFull() const;
+
+		void renameDirUpdate();
+		// void getFilesExtRecurse(const file_system_detail::fs_dir& dir, string_view ext, vector<PathHandle>& out) const;
+		void getPathsRecurse(const file_system_detail::fs_dir& dir, FS_FILTERS filters, string_view ext, vector<PathHandle>& out) const;
 
 		int64_t _ref_count		= -1;
 		file_system_detail::fs_key _key{};

@@ -173,6 +173,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
+    <ClInclude Include="commands\CMD_ModifyInput.h" />
     <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="commands\CMD_AddComponent.h" />
     <ClInclude Include="commands\CMD_CreateGameObject.h" />
@@ -204,6 +205,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
+    <ClInclude Include="commands\CMD_ModifyInput.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
     <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />

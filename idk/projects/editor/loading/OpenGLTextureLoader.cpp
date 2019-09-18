@@ -10,7 +10,7 @@
 
 namespace idk
 {
-	FileResources OpenGLTextureLoader::Create(FileHandle path_to_resource)
+	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource)
 	{
 
 		//Assert for now
@@ -41,7 +41,7 @@ namespace idk
 		return retval;
 	}
 
-	FileResources OpenGLTextureLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);
