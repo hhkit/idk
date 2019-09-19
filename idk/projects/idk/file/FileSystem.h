@@ -16,8 +16,10 @@ namespace idk
 
 		// Files/Directory Getters
 		// =====================================================================================================
+		PathHandle			GetPath					(string_view mountPath)				const;	// Tries GetFile then GetDir
 		PathHandle			GetFile					(string_view mountPath)				const;
 		PathHandle			GetDir					(string_view mountPath)				const;
+		
 		string				GetFullPath				(string_view mountPath)				const;
 		vector<PathHandle>	GetFilesWithExtension	(string_view mountPath,
 													 string_view extension, 
