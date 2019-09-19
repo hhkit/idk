@@ -74,20 +74,38 @@ namespace idk {
 			//Select gameobject here!
 		}
 
-		//Right Mouse control
+		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				ImGui::SetWindowFocus();
-				is_controlling_cam = true;
+				is_controlling_WASDcam = true;
 				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
 			}
 		}
 		else {
-			is_controlling_cam = false;
+			is_controlling_WASDcam = false;
 		}
 
-		if (is_controlling_cam) {
-			UpdateMouseControl();
+		
+
+		//Middle Mouse Pan control
+		if (ImGui::IsMouseDown(2)) {
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
+				ImGui::SetWindowFocus();
+				is_controlling_Pancam = true;
+				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
+			}
+		}
+		else {
+			is_controlling_Pancam = false;
+		}
+
+		if (is_controlling_WASDcam) {
+			UpdateWASDMouseControl();
+		}
+		else if (is_controlling_Pancam) {
+			UpdatePanMouseControl();
+
 		}
 
 	}
@@ -121,27 +139,24 @@ namespace idk {
 		return i;
 	}
 
-	void IGE_SceneView::UpdateMouseControl()
+	void IGE_SceneView::UpdateWASDMouseControl()
 	{
 
 		//Copied from _interface.Inputs().Update()
 
 		auto& app_sys = Core::GetSystem<Application>();
-		//assert(currCamera);
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		//Please ignore all of this first
-		constexpr auto cam_vel = 1.f;
+
 
 		//WASD MOVEMENT
 		if (app_sys.GetKey(Key::A))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Right();
 		if (app_sys.GetKey(Key::D))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Right();
-		//if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.016, 0.0 };
-		//if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.016, 0.0 };
 		if (app_sys.GetKey(Key::S))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
 		if (app_sys.GetKey(Key::W))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		//VERTICAL MOVEMENT
 		if (app_sys.GetKey(Key::Q))	tfm->position += -cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 		if (app_sys.GetKey(Key::E))	tfm->position += +cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
@@ -150,9 +165,9 @@ namespace idk {
 		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
 
 		//MOUSE YAW
-		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize();
+		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
 		//MOUSE PITCH
-		tfm->rotation = (quat{ vec3{1,0,0}, deg{90 * delta.y * pitch_rotation_multiplier} *Core::GetDT().count() } *tfm->rotation).normalize();
+		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
 		//This doesnt work as intended!!!!! ARGH
 		//euler_angles cam_euler { tfm->rotation };
@@ -194,23 +209,26 @@ namespace idk {
 
 
 
-		//std::cout << app_sys.GetKey(Key::MButton) << "\n";
-		if (app_sys.GetKey(Key::MButton))
-		{
-			vec2 newPos = app_sys.GetMouseScreenPos();
-			//ivec2 newPos2 = app_sys.GetMousePixelPos();
 
-			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
 
-			if (!main_camera._panning)
-				main_camera.StartPanningCamera(anotherPos);
-			main_camera.PanCamera(anotherPos);
-		}
-		else
-		{
-			if (main_camera._panning)
-				main_camera.StopPanningCamera();
-		}
+	}
+
+	void IGE_SceneView::UpdatePanMouseControl()
+	{
+		vec2 delta = ImGui::GetMouseDragDelta(2);
+
+
+		auto& app_sys = Core::GetSystem<Application>();
+
+		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		vec3 localY = tfm->Up()* delta.y*pan_multiplier; //Amount to move in localy axis
+		vec3 localX = tfm->Right()* delta.x* pan_multiplier; //Amount to move in localx axis
+		tfm->position += localY;
+		tfm->position += localX;
+
+		ImGui::ResetMouseDragDelta(2);
 
 	}
 
