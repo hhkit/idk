@@ -194,7 +194,7 @@ namespace idk
 			ImGui::ShowDemoWindow(&bool_demo_window);
 
 
-		_interface->Inputs()->Update();
+		//_interface->Inputs()->Update(); //Moved to SceneView.cpp
 		
 
 

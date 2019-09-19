@@ -24,7 +24,7 @@ namespace idk
 		,	class MeshRenderer
 		,   class Camera
 		,   class SkinnedMeshRenderer
-		, class Light
+		,	class Light
 
 		/// ANIMATION
 		,	class AnimationController
@@ -37,7 +37,7 @@ namespace idk
 		,	class AudioListener
 
 		/// IVAN BEING STUPID
-		, class TestComponent
+		,	class TestComponent
 	>;
 	
 	using Systems = std::tuple<

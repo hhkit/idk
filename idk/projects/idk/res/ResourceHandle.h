@@ -19,11 +19,11 @@ namespace idk
 
 		Guid guid{};
 
-		RscHandle() = default;
+		constexpr RscHandle() noexcept = default;
 		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Other, Res>>>
-		explicit RscHandle(RscHandle<Other> other) : guid{ other.guid } {};
+		constexpr explicit RscHandle(RscHandle<Other> other) noexcept : guid{ other.guid } {};
 
-		RscHandle(const Guid& guid) : guid{ guid } {}
+		constexpr RscHandle(const Guid& guid) noexcept : guid{ guid } {}
 
 		void Set(const idk::Resource<Res>& g);
 		template<typename T>

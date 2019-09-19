@@ -6,17 +6,34 @@ namespace idk
 {
 	aabb box::bounds() const
 	{
-		vec3 extents{};
-		for (auto [cvec, length]: zip(axes, extents))
+		vec3 hextents{};
+		for (auto [cvec, length]: zip(axes, half_extents()))
 		{
 			auto col_vec = cvec;
 			for (auto& elem : col_vec)
 				elem = abs(elem);
-			extents += col_vec * length;
+			hextents += col_vec * length;
 		}
-		extents /= 2;
 
-		return aabb{ center - extents, center + extents };
+		return aabb{ center - hextents, center + hextents };
+	}
+	vec3 box::half_extents() const
+	{
+		return extents / 2;
+	}
+	array<vec3, 8> box::points() const
+	{
+		const auto hextents = half_extents();
+		return array<vec3, 8>{
+			center - hextents[0] * axes[0] - hextents[1] * axes[1] - hextents[2] * axes[2],
+			center - hextents[0] * axes[0] - hextents[1] * axes[1] + hextents[2] * axes[2],
+			center - hextents[0] * axes[0] + hextents[1] * axes[1] - hextents[2] * axes[2],
+			center - hextents[0] * axes[0] + hextents[1] * axes[1] + hextents[2] * axes[2],
+			center + hextents[0] * axes[0] - hextents[1] * axes[1] - hextents[2] * axes[2],
+			center + hextents[0] * axes[0] - hextents[1] * axes[1] + hextents[2] * axes[2],
+			center + hextents[0] * axes[0] + hextents[1] * axes[1] - hextents[2] * axes[2],
+			center + hextents[0] * axes[0] + hextents[1] * axes[1] + hextents[2] * axes[2],
+		};
 	}
 	box& box::operator*=(const mat4& transform)
 	{

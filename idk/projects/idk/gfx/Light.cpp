@@ -8,7 +8,7 @@ namespace idk
 	LightData Light::GenerateLightData() const
 	{
 		LightData retval;
-		retval.index = light.index();
+		retval.index = (int) light.index();
 		std::visit([&](auto& light_variant)
 			{
 				using T = std::decay_t<decltype(light_variant)>;

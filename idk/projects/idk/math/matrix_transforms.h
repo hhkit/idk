@@ -32,6 +32,9 @@ namespace idk
 	template<typename T>
 	tmat<T, 4, 4> look_at(const tvec<T, 3>& eye, const tvec<T, 3>& object, const tvec<T, 3>& up);
 
+	template< typename T >
+	tmat<T, 3, 3> orient(const tvec<T, 3> & z_prime);
+
 	// convert a basis to an orthonormal basis using gramm-schidt
 	template<typename T, unsigned D>
 	tmat<T, D, D> orthonormalize(const tmat<T, D, D>&);

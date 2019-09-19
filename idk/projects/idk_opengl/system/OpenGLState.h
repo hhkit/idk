@@ -17,17 +17,20 @@ namespace idk::ogl
 		void RenderDrawBuffer();
 
 	private:
-		// declarations
-		struct RendererInfo
+		enum VertexShaders
 		{
-			size_t  typehash {};
-			RscHandle<ShaderProgram> vertex_shader;
+			Debug,
+			NormalMesh,
+			SkinnedMesh,
+			Max
 		};
+
 		Win32GraphicsSystem* sys{};
 		// variables
 		PipelineProgram        pipeline;
 		FrameBufferManager     fb_man;
-		vector<RendererInfo>   renderer_vertex_shaders;
 		GLuint                 vao_id = 0;
+		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_vertex_shaders;
+		RscHandle<ShaderProgram> debug_fragment;
 	};
 }

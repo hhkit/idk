@@ -8,15 +8,15 @@ namespace idk
 	{
 		return (min + max) / 2;
 	}
-	
-	vec3 aabb::size() const
+
+	vec3 aabb::extents() const
 	{
 		return max - min;
 	}
 
-	vec3 aabb::extents() const
+	vec3 aabb::halfextents() const
 	{
-		return size() / 2;
+		return extents() / 2;
 	}
 
 	const aabb& aabb::bounds() const
@@ -48,11 +48,23 @@ namespace idk
 
 	aabb& aabb::surround(const aabb& rhs)
 	{
-		for (auto [curr, update] : zip(min, rhs.min))
-			curr = std::min(curr, update);
+		auto mintr = min.begin();
+		auto endtr = min.end();
+		auto maxtr = max.begin();
 
-		for (auto [curr, update] : zip(max, rhs.max))
-			curr = std::max(curr, update);
+		auto rmintr = rhs.min.begin();
+		auto rmaxtr = rhs.max.begin();
+
+		while (mintr != endtr)
+		{
+			*mintr = std::min(*mintr, *rmintr);
+			*maxtr = std::max(*maxtr, *rmaxtr);
+
+			++mintr;
+			++maxtr;
+			++rmintr;
+			++rmaxtr;
+		}
 
 		return *this;
 	}
@@ -84,13 +96,31 @@ namespace idk
 		return true;
 	}
 
-	bool aabb::overlaps(const aabb& box) const
+	bool aabb::overlaps(const aabb& rhs) const
 	{
-		for (auto [mymin, mymax, yourmin, yourmax] : zip(min, max, box.min, box.max))
+		auto mintr = min.begin();
+		auto endtr = min.end();
+		auto maxtr = max.begin();
+
+		auto rmintr = rhs.min.begin();
+		auto rmaxtr = rhs.max.begin();
+
+		while (mintr != endtr)
 		{
+			auto& mymin = *mintr;
+			auto& mymax = *maxtr;
+			auto& yourmin = *rmintr;
+			auto& yourmax = *rmaxtr;
+
 			if (mymin > yourmax || yourmin > mymax)
 				return false;
+
+			++mintr;
+			++maxtr;
+			++rmintr;
+			++rmaxtr;
 		}
+
 
 		return true;
 	}

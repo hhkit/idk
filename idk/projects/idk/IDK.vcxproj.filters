@@ -575,8 +575,7 @@
     <ClInclude Include="util\hash_combine.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision_obb.h" />
-    <ClInclude Include="phys\collision_raycast.h" />
+    <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
@@ -584,6 +583,16 @@
     <ClInclude Include="file\PathHandle.h">
       <Filter>file</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\MeshFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_box.h" />
+    <ClInclude Include="phys\collision_detection\collision_sphere.h" />
+    <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
+    <ClInclude Include="math\shapes\frustum.h" />
+    <ClInclude Include="math\shapes\halfspace.h" />
+    <ClInclude Include="ds\result.h" />
+    <ClInclude Include="phys\raycasts\collision_raycast.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -831,13 +840,20 @@
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_result.cpp" />
-    <ClCompile Include="phys\collision_obb.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="file\PathHandle.cpp">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\MeshFactory.cpp" />
+    <ClCompile Include="res\Guid.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_box.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
+    <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="math\shapes\frustum.cpp" />
+    <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1005,7 +1021,9 @@
     <None Include="math\linear.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="phys\collision_raycast.inl">
+    <None Include="res\Guid.inl" />
+    <None Include="ds\result.inl" />
+    <None Include="phys\raycasts\collision_raycast.inl">
       <Filter>phys</Filter>
     </None>
   </ItemGroup>

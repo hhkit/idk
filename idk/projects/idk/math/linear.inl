@@ -7,8 +7,11 @@ namespace idk
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator+=(const Vector& rvec)
 	{
-		for (auto [lhs, rhs] : zip(me().values, rvec.values))
-			lhs += rhs;
+		auto itr = me().begin();
+		const auto end = me().end();
+		auto rtr = rvec.begin();
+		while (itr != end)
+			* itr++ += *rtr++;
 		return me();
 	}
 
@@ -39,8 +42,12 @@ namespace idk
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator*=(const Vector& rvec)
 	{
-		for (auto [lhs, rhs] : zip(me().values, rvec.values))
-			lhs *= rhs;
+		auto itr = me().begin();
+		const auto end = me().end();
+		auto rtr = rvec.begin();
+		while (itr != end)
+			*itr++ *= *rtr++;
+
 		return me();
 	}
 

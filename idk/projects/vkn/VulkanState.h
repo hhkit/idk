@@ -3,7 +3,6 @@
 #include <optional>
 #include <fstream>
 #include <sstream>
-#include "math2.h"
 #pragma warning(disable:26495)
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>

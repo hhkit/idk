@@ -141,7 +141,7 @@ void TestWriteWatch(idk::FileSystem& vfs)
 	}
 	EXPECT_TRUE(time_stamp != FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
-	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 10.0f }, FS_CHANGE_STATUS::WRITTEN));
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
 	WatchClearCheck(vfs);
 }
 
