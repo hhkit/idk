@@ -37,6 +37,14 @@ namespace idk
 
 	class CameraControls;
 
+	enum GizmoOperation {
+		GizmoOperation_Null = 0,
+		GizmoOperation_Translate,
+		GizmoOperation_Rotate,
+		GizmoOperation_Scale
+	};
+
+
 	class IDE : public IEditor
 	{
 	public:
@@ -78,6 +86,8 @@ namespace idk
 		hash_table<size_t, IGE_IWindow*> windows_by_type{};
 
         bool closing = false;
+
+		GizmoOperation gizmo_operation = GizmoOperation_Null;
 
 	};
 }
