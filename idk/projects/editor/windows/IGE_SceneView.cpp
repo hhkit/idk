@@ -79,7 +79,6 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
-				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
 			}
 		}
 		else {
@@ -93,7 +92,6 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
-				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
 			}
 		}
 		else {
@@ -160,22 +158,16 @@ namespace idk {
 		if (app_sys.GetKey(Key::Q))	tfm->position += -cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 		if (app_sys.GetKey(Key::E))	tfm->position += +cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
-		vec2 delta = ImGui::GetMouseDragDelta(1);
+		vec2 delta = ImGui::GetMouseDragDelta(1,0.1f);
 
 		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
 
 		//MOUSE YAW
 		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
 		//MOUSE PITCH
-		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
+		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
-		//This doesnt work as intended!!!!! ARGH
-		//euler_angles cam_euler { tfm->rotation };
-		//cam_euler.x += deg{ 90 * delta.y * pitch_rotation_multiplier };
-		//cam_euler.y += deg{ 90 * delta.x * -yaw_rotation_multiplier };
-		//tfm->rotation = quat{ cam_euler };
 
-		//There is gimbal lock on the X axis when rotating on Y axis 90! 
 
 		ImGui::ResetMouseDragDelta(1);
 
@@ -186,27 +178,6 @@ namespace idk {
 		/**/
 
 
-		//FOCUS BUTTON
-		if (app_sys.GetKeyUp(Key::P))
-		{
-			static int _curr_cycle = 0;
-			auto first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
-		
-			if (first->HasComponent<Camera>())
-			{
-				_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
-				first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
-			}
-			_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
-			//	currCamera->SetTarget(first->GetComponent<Transform>()->GlobalPosition());
-			//	currCamera->Focus();
-			main_camera.SetTarget(first->GetComponent<Transform>());
-			//currCamera->LookAt(first->Transform()->GlobalPosition());
-			//main_camera.LookAt();
-		
-			main_camera.Focus();
-		}
-
 
 
 
@@ -215,7 +186,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
-		vec2 delta = ImGui::GetMouseDragDelta(2);
+		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
 
 
 		auto& app_sys = Core::GetSystem<Application>();

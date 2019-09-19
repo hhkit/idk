@@ -19,6 +19,8 @@ of the editor.
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
+#include <common/Transform.h> //DockBuilderDockNode
+#include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
 
@@ -348,8 +350,9 @@ namespace idk {
 
 	void IGE_MainWindow::PollShortcutInput()
 	{
-		CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-		GizmoOperation& gizmo_operation = Core::GetSystem<IDE>().gizmo_operation;
+		IDE& editor = Core::GetSystem<IDE>();
+		CommandController& commandController = editor.command_controller;
+		GizmoOperation& gizmo_operation = editor.gizmo_operation;
 
 		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
 
@@ -381,6 +384,34 @@ namespace idk {
 				gizmo_operation = GizmoOperation_Scale;
 			}
 			
+			//F = Focus on GameObject
+			if (ImGui::IsKeyPressed(70))
+			{
+				if (editor.selected_gameObjects.size()) {
+					vec3 finalCamPos{};
+					for (Handle<GameObject> i : editor.selected_gameObjects) {
+
+						Handle<Transform> transform = i->GetComponent<Transform>();
+						if (transform) {
+							finalCamPos += transform->position;
+						}
+
+					}
+
+					finalCamPos /= editor.selected_gameObjects.size();
+
+					const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+
+					CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+					Handle<Camera> currCamera = main_camera.current_camera;
+					Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
+					camTransform->position = finalCamPos;
+					camTransform->position += camTransform->Forward() * distanceFromObject;
+				}
+
+
+			}
+
 
 
 		}
