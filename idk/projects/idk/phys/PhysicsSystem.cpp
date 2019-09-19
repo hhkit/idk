@@ -69,7 +69,7 @@ namespace idk
 
 				if (rigidbody.sleeping())
 				{
-					rigidbody._prev_pos = tfm->GlobalPosition() - rigidbody.initial_velocity;
+					rigidbody._prev_pos = tfm->GlobalPosition() - rigidbody.initial_velocity * dt;
 					rigidbody._predicted_tfm = tfm->GlobalMatrix();
 					rigidbody.initial_velocity = vec3{};
 					continue;

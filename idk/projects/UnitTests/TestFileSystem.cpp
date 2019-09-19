@@ -93,6 +93,7 @@ bool WatchUpdateCheck(idk::FileSystem& vfs, idk::seconds time, idk::FS_CHANGE_ST
 			return true;
 
 		time -= duration_cast<seconds>(curr_time - start_time);
+		start_time = curr_time;
 	}
 
 	return false;
@@ -137,7 +138,7 @@ void TestWriteWatch(idk::FileSystem& vfs)
 	}
 
 	// Checking if querying is correct
-	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::WRITTEN));
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
 	WatchClearCheck(vfs);
 }
 

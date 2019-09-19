@@ -145,8 +145,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		//if (gfx_api != GraphicsAPI::Vulkan)
-		//	mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		if (gfx_api != GraphicsAPI::Vulkan)
+			mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
@@ -210,7 +210,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
 	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
-	seduceme->AddComponent<RigidBody>();
+	seduceme->AddComponent<RigidBody>()->initial_velocity = vec3{0.1, 0, 0};
 	seduceme->AddComponent<Collider>()->shape = box{};
 
 	//for (int i = 2; i < 5; ++ i)
