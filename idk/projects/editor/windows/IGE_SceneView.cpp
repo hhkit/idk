@@ -16,9 +16,14 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_SceneView.h>
 #include <app/Application.h>
+#include <common/Transform.h> //transform
+#include <gfx/Camera.h> //camera
+#include <core/GameObject.h>
 #include <gfx/RenderTarget.h>
 #include <iostream>
+#include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
+#include <IDE.h>
 
 namespace idk {
 
@@ -69,6 +74,22 @@ namespace idk {
 			//Select gameobject here!
 		}
 
+		//Right Mouse control
+		if (ImGui::IsMouseDown(1)) {
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
+				ImGui::SetWindowFocus();
+				is_controlling_cam = true;
+				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
+			}
+		}
+		else {
+			is_controlling_cam = false;
+		}
+
+		if (is_controlling_cam) {
+			UpdateMouseControl();
+		}
+
 	}
 
 	void IGE_SceneView::SetTexture(void* textureToRender)
@@ -98,6 +119,99 @@ namespace idk {
 		i.x = i.x != 0.0f ? i.x / v.x : 0.0f;
 		i.y = i.y != 0.0f ? i.y / v.y : 0.0f;
 		return i;
+	}
+
+	void IGE_SceneView::UpdateMouseControl()
+	{
+
+		//Copied from _interface.Inputs().Update()
+
+		auto& app_sys = Core::GetSystem<Application>();
+		//assert(currCamera);
+
+		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		//Please ignore all of this first
+		constexpr auto cam_vel = 1.f;
+
+		//WASD MOVEMENT
+		if (app_sys.GetKey(Key::A))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::D))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Right();
+		//if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.016, 0.0 };
+		//if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.016, 0.0 };
+		if (app_sys.GetKey(Key::S))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::Q))	tfm->position += -cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
+		if (app_sys.GetKey(Key::E))	tfm->position += +cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
+
+		vec2 delta = ImGui::GetMouseDragDelta(1);
+
+		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
+
+		//MOUSE YAW
+		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize();
+		//MOUSE PITCH
+		tfm->rotation = (quat{ vec3{1,0,0}, deg{90 * delta.y * pitch_rotation_multiplier} *Core::GetDT().count() } *tfm->rotation).normalize();
+
+		//This doesnt work as intended!!!!! ARGH
+		//euler_angles cam_euler { tfm->rotation };
+		//cam_euler.x += deg{ 90 * delta.y * pitch_rotation_multiplier };
+		//cam_euler.y += deg{ 90 * delta.x * -yaw_rotation_multiplier };
+		//tfm->rotation = quat{ cam_euler };
+
+		//There is gimbal lock on the X axis when rotating on Y axis 90! 
+
+		ImGui::ResetMouseDragDelta(1);
+
+
+		//TEMP FIX ROLL
+		if (app_sys.GetKey(Key::V)) tfm->rotation = (quat{ vec3{0,0,1}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
+		if (app_sys.GetKey(Key::B)) tfm->rotation = (quat{ vec3{0,0,1}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
+		/**/
+
+
+		//FOCUS BUTTON
+		if (app_sys.GetKeyUp(Key::P))
+		{
+			static int _curr_cycle = 0;
+			auto first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
+		
+			if (first->HasComponent<Camera>())
+			{
+				_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
+				first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
+			}
+			_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
+			//	currCamera->SetTarget(first->GetComponent<Transform>()->GlobalPosition());
+			//	currCamera->Focus();
+			main_camera.SetTarget(first->GetComponent<Transform>());
+			//currCamera->LookAt(first->Transform()->GlobalPosition());
+			//main_camera.LookAt();
+		
+			main_camera.Focus();
+		}
+
+
+
+		//std::cout << app_sys.GetKey(Key::MButton) << "\n";
+		if (app_sys.GetKey(Key::MButton))
+		{
+			vec2 newPos = app_sys.GetMouseScreenPos();
+			//ivec2 newPos2 = app_sys.GetMousePixelPos();
+
+			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
+
+			if (!main_camera._panning)
+				main_camera.StartPanningCamera(anotherPos);
+			main_camera.PanCamera(anotherPos);
+		}
+		else
+		{
+			if (main_camera._panning)
+				main_camera.StopPanningCamera();
+		}
+
 	}
 
 }

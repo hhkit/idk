@@ -38,6 +38,15 @@ namespace idk {
 
 		ImTextureID sceneTexture = nullptr;
 
+		bool is_controlling_cam = false;
+
+		const float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
+		const float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
+
+
+		void UpdateMouseControl();
+
+
 	};
 
 
