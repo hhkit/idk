@@ -43,7 +43,11 @@ namespace idk
 		GizmoOperation_Rotate,
 		GizmoOperation_Scale
 	};
-
+	enum MODE
+	{
+		LOCAL,
+		WORLD
+	};
 
 	class IDE : public IEditor
 	{
@@ -87,7 +91,8 @@ namespace idk
 
         bool closing = false;
 
-		GizmoOperation gizmo_operation = GizmoOperation_Null;
+		GizmoOperation gizmo_operation = GizmoOperation_Translate;
+		MODE gizmo_mode = MODE::WORLD;
 
 	};
 }

@@ -55,6 +55,8 @@ namespace idk {
 		void UpdateWASDMouseControl();
 		void UpdatePanMouseControl();
 
+		void UpdateGizmoControl();
+
 
 	};
 

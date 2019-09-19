@@ -33,6 +33,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/windows/IGE_WindowList.h>
 #include <gfx/ShaderGraphFactory.h>
 #include <res/ForwardingExtensionLoader.h>
+#include <imgui/ImGuizmo.h>
 
 
 namespace idk
@@ -184,6 +185,9 @@ namespace idk
             return;
 
 		_interface->ImGuiFrameBegin();
+		ImGuizmo::BeginFrame();
+
+
 
 		ige_main_window->DrawWindow();
 

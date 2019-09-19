@@ -23,6 +23,7 @@ of the editor.
 #include <iostream>
 #include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
+#include <imgui/ImGuizmo.h>
 #include <IDE.h>
 
 namespace idk {
@@ -105,6 +106,10 @@ namespace idk {
 			UpdatePanMouseControl();
 
 		}
+
+
+		UpdateGizmoControl();
+
 
 	}
 
@@ -191,6 +196,57 @@ namespace idk {
 
 		ImGui::ResetMouseDragDelta(2);
 
+	}
+
+	void IGE_SceneView::UpdateGizmoControl()
+	{
+		//Getting camera datas
+		IDE& editor = Core::GetSystem<IDE>();
+		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		float* viewMatrix = currCamera->ViewMatrix().data();
+		float* projectionMatrix = currCamera->ProjectionMatrix().data();
+
+		//Setting up draw area
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 winPos = ImGui::GetWindowPos();
+		winPos.y = ImGui::GetFrameHeight();
+		ImGuizmo::SetRect(winPos.x, winPos.y, GetScreenSize().x, GetScreenSize().y); //The scene view size
+		ImGuizmo::SetDrawlist(); //Draw on scene view only
+
+		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
+
+		if (editor.selected_gameObjects.size()) {
+			if (editor.selected_gameObjects.size() == 1) {
+				Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>();
+				if (gameObjectTransform) {
+
+					switch (editor.gizmo_operation) {
+					default:
+					case GizmoOperation_Null:
+						break;
+					case GizmoOperation_Translate:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
+
+						break;
+					case GizmoOperation_Rotate:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
+
+						break;
+					case GizmoOperation_Scale:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
+
+						break;
+					}
+				}
+			}
+			else {
+				//For multiple objects
+			}
+
+		}
 	}
 
 }
