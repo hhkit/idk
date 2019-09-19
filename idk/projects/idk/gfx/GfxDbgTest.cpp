@@ -110,7 +110,7 @@ namespace idk
 						box retval;
 						retval.center = vec3{ -1.0f + chunk * i,0,0 };
 						retval.extents = vec3{ chunk,chunk,chunk };
-						retval.axes = quat_cast<mat3>(quat{ vec3{0,1,1},  rad{ 0 * pi * chunk * i } });
+						retval.axes = quat_cast<mat3>(quat{ vec3{0,1,1},  rad{ pi * chunk * i } });
 						return retval;
 					}();
 					

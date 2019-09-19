@@ -130,7 +130,7 @@ namespace idk::vkn
 		{
 			auto& curr_state = curr_states[i];
 			curr_state.Init(curr_buffer.camera[i],curr_buffer.lights, curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
-			_debug_renderer->Render(curr_state.camera.view_matrix, curr_state.camera.projection_matrix);
+			_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
 		// */
 
