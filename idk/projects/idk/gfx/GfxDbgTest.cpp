@@ -4,32 +4,10 @@
 #include <gfx/DebugRenderer.h>
 #include <math/matrix_transforms.h>
 #include <gfx/GraphicsSystem.h>
-#if 0
+#include <math/shapes.h>
+
 namespace idk
 {
-	//TODO remove once merged with master (26/8/19)
-	/*mat4 look_at(vec3 const& eye, vec3 const& center, vec3 const& up)
-	{
-
-		vec3 const f((center - eye).get_normalized());
-		vec3 const s((f.cross(up)).get_normalized());
-		vec3 const u(s.cross(f));
-
-		mat4 Result{};
-		Result[0][0] = s.x;
-		Result[1][0] = s.y;
-		Result[2][0] = s.z;
-		Result[0][1] = u.x;
-		Result[1][1] = u.y;
-		Result[2][1] = u.z;
-		Result[0][2] = -f.x;
-		Result[1][2] = -f.y;
-		Result[2][2] = -f.z;
-		Result[3][0] = -dot(s, eye);
-		Result[3][1] = -dot(u, eye);
-		Result[3][2] = dot(f, eye);
-		return Result;
-	}*/
 	template<typename T>
 	tmat<T, 4, 4> perspective2(trad<T> fov, T a, T n, T f)
 	{
@@ -89,44 +67,59 @@ namespace idk
 			vec3 axis = vec3{ 0,0,1 }.cross(diff).get_normalized();
 
 			auto angle = -acos(-diff.z);
-			mat4 view = //translate(lookat_offset)*mat4 { rotate(axis, angle) };//
-			//view = view.inverse();
-			look_at2(lookat_offset, vec3{ 0,0,0.0f }, vec3{ 0,1,0 });
-			mat4 proj =  perspective2(idk::rad(45.0f), width / (float)height, 0.001f, 20.0f);// translate(vec3{ 0,0,0.5f })* perspective(idk::rad(45.0f), width / (float)height, 0.1f, 20.0f);
-			//proj[2][3] *= -1;
-			static DebugObject tmp{ DbgShape::eCube };
-			tmp.pos = (tmp.pos.x < 1) ? tmp.pos + vec3{ 0.005f,0,0 } : vec3{};
-			tmp.angle = (tmp.angle.value < pi) ? tmp.angle + rad{ 0.001f } : rad{ 0 };
+			const mat4 view =  look_at2(lookat_offset, vec3{ 0,0,0.0f }, vec3{ 0,1,0 });
+			const mat4 proj =  perspective2(idk::rad(45.0f), width / (float)height, 0.001f, 20.0f);
+
+			const box tmp = [angle]()
+			{
+				box retval;
+				retval.center = (retval.center.x < 1) ? retval.center + vec3{ 0.005f,0,0 } : vec3{};
+				rad t_angle = (angle.value < pi) ? angle + rad{ 0.001f } : rad{ 0 };
+				retval.axes = quat_cast<mat3>(quat{ vec3{1,0,0}, t_angle });
+				return retval;
+			}();
+
 			lookat_offset = rotate(vec3{ 0,1,0 }, rad{ 0.005f }) * lookat_offset;
-			DebugObject orbit{ DbgShape::eCube };
 
+			const box orbit = [&]()
+			{
+				box retval;
+				lookat_offset2 = retval.center = rotate(vec3{ 0,1,0 }, rad{ 0.01f }) * lookat_offset2;
+				vec3 diff2 = Normalized(-lookat_offset2);
+				vec3 axis2 = Normalized(vec3{ 0,0,1 }.cross(diff2));
+				auto angle2 = acos(diff2.z);
+				retval.axes = quat_cast<mat3>(quat{ axis2, angle2 });
 
+				return retval;
+			}();
 
-			//e1_l* l2g = forward;
-
-
-			lookat_offset2 = orbit.pos = rotate(vec3{ 0,1,0 }, rad{ 0.01f })  * lookat_offset2;
-			vec3 diff2 = Normalized(vec3{}-lookat_offset2);
-			vec3 axis2 = Normalized(vec3{ 0,0,1 }.cross(diff2));
-			auto angle2 = acos(diff2.z);
-			orbit.Rotation(axis2, angle2);
-			dbg_renderer.DrawShape(orbit);
-			dbg_renderer.DrawShape(tmp);
+			dbg_renderer.Draw(orbit);
+			dbg_renderer.Draw(tmp);
 			int max_count = 10;
 			for (int i = 0; i < max_count; ++i)
 			{
 				float chunk = 2.0f / max_count;
-				dbg_renderer.DrawShape((i % 2) ? DbgShape::eSquare : DbgShape::eCube, vec3{ -1.0f + chunk * i,0,0 }, vec3{ chunk,chunk,chunk }, vec3{ 0,1,1 }, rad{ 0*pi * chunk * i }, vec4{ 0,1,0,1 });
-
+				if (i % 2)
+				{
+					// can't debug square
+				}
+				else
+				{
+					const box b = [&]()
+					{
+						box retval;
+						retval.center = vec3{ -1.0f + chunk * i,0,0 };
+						retval.extents = vec3{ chunk,chunk,chunk };
+						retval.axes = quat_cast<mat3>(quat{ vec3{0,1,1},  rad{ 0 * pi * chunk * i } });
+						return retval;
+					}();
+					
+					dbg_renderer.Draw(b, color{ 0,1,0 });
+				}
 			}
-			//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ 0.2f,0.4f,0 }, vec3{ 0.2f,0.2f,1 }, vec3{ 0,0,1 }, rad{ pi / 6 }, vec4{ 0,1,0,1 });
-			//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ 0.1f,0,0 }, vec3{ 1,1,1 }, vec3{ 0,0,1 }, rad{ pi / 2 }, vec4{ 0,1,0,1 });
-			//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ 0.3f,-0.3f,0 }, vec3{ 1,1,1 }, vec3{ 0,0,1 }, rad{ pi / 5 }, vec4{ 0,1,0,1 });
-			//dbg_renderer.DrawShape(DbgShape::eSquare, vec3{ -0.3f,0.2f,0 }, vec3{ 1,1,1 }, vec3{ 0,0,1 }, rad{ pi / 4 }, vec4{ 0,1,0,1 });
-			dbg_renderer.DrawShape(DebugObject{ DbgShape::eEqTriangle }.Scale(vec3{ 0.5f,0.5f,0.5f }).Rotation(vec3{ 0,0,1 }, rad{ 0 * pi / 3 }).Color(vec4{ 0,1,0,1 }));
-			dbg_renderer.Render(view, proj);
+			// can't debug triangle
+			// dbg_renderer.DrawShape(DebugObject{ DbgShape::eEqTriangle }.Scale(vec3{ 0.5f,0.5f,0.5f }).Rotation(vec3{ 0,0,1 }, rad{ 0 * pi / 3 }).Color(vec4{ 0,1,0,1 }));
 		}
 	}
 
 }
-#endif

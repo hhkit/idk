@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <phys/collision_detection/collision_raycast.h>
+#include <phys/raycasts/collision_raycast.h>
 
 namespace idk::phys
 {
