@@ -104,34 +104,31 @@ namespace idk {
 		}
 	}
 
+	PathHandle FileSystem::GetPath(string_view mountPath) const
+	{
+		PathHandle ret = GetFile(mountPath);
+		if (!ret)
+			return GetDir(mountPath);
+		return ret;
+	}
+
 	PathHandle FileSystem::GetFile(string_view mountPath) const
 	{
-		PathHandle fh;
 		auto file_index = getFile(mountPath);
 		if (file_index.IsValid() == false)
-			return fh;
+			return PathHandle{};
 
-		auto& internal_file = getFile(file_index);
-
-		fh._key = internal_file._tree_index;
-		fh._ref_count = internal_file.RefCount();
-
-		return fh;
+		return PathHandle{ file_index, true };
 	}
 
 	PathHandle FileSystem::GetDir(string_view mountPath) const
 	{
-		PathHandle fh;
 		auto dir_index = getDir(mountPath);
 		if (dir_index.IsValid() == false)
-			return fh;
+			return PathHandle{};
 
-		auto& internal_dir = getDir(dir_index);
-
-		fh._key = internal_dir._tree_index;
-		fh._ref_count = internal_dir.RefCount();
-
-		return fh;
+	
+		return PathHandle{ dir_index, false};
 	}
 
 	bool FileSystem::Exists(string_view mountPath) const

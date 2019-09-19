@@ -5,6 +5,7 @@
 
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanMesh.h>
+#include <vkn/VulkanDebugRenderer.h>
 #include <core/Core.h>
 
 #include <vkn/VulkanPipeline.h>
@@ -59,9 +60,12 @@ namespace idk::vkn
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
 		_pm->View(instance_->View());
+
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
+		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
+		_debug_renderer->Init();
 		_frame_renderers.resize(instance_->View().Swapchain().frame_objects.size());
 		for (auto& frame : _frame_renderers)
 		{
@@ -120,12 +124,16 @@ namespace idk::vkn
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
+
+		_debug_renderer->GrabDebugBuffer();
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			curr_state.Init(curr_buffer.camera[i],curr_buffer.lights, curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
+			_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
 		// */
+
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
@@ -152,6 +160,8 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		_debug_renderer->Shutdown();
+
 		this->_pm.reset();
 		_frame_renderers.clear();
 		instance_.reset();

@@ -6,7 +6,7 @@
 namespace idk
 {
 	template <typename T>
-	struct quaternion
+	struct __declspec(empty_bases) quaternion
 		: linear<quaternion<T>, T>
 		, private tvec<T, 4>
 	{
@@ -34,6 +34,7 @@ namespace idk
 		using Base::begin;
 		using Base::end;
 		using Base::data;
+		using Base::size;
 
 		// operator overloads
 		using linear<quaternion<T>, T>::operator*;

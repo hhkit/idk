@@ -21,8 +21,10 @@ namespace idk
 		bool is_trigger     = false;
 
 		aabb bounds() const;
+		void setup_predict();
 	private:
-		Handle<class RigidBody> _rigid_body;
-		friend class CollisionSystem;
+		Handle<class RigidBody> _rigidbody;
+		aabb _broad_phase;
+		friend class PhysicsSystem;
 	};
 }

@@ -78,6 +78,7 @@ namespace idk::ogl
 		{
 		case GL_ELEMENT_ARRAY_BUFFER:
 			_element_array_object = std::move(buf);
+			break;
 		case GL_ARRAY_BUFFER:
 		default:
 			_buffers.emplace_back(std::move(buf));
