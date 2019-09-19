@@ -86,12 +86,12 @@ namespace idk::vkn
 		idk::pipeline_config config;
 		auto vert_data = []()
 		{
-			auto stream = Core::GetSystem<FileSystem>().Open("shaders/dbgvertex.vert.spv", FS_PERMISSIONS::READ, true);
+			auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgvertex.vert.spv", FS_PERMISSIONS::READ, true);
 			return stringify(stream);
 		}();
 		auto frag_data = []()
 		{
-			auto stream = Core::GetSystem<FileSystem>().Open("shaders/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
+			auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
 			return stringify(stream);
 		}();
 

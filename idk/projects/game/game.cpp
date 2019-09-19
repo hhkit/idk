@@ -60,12 +60,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::Vulkan;
+	auto gfx_api = GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			c->AddSystem<IDE>();
+			//c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
 			break;
@@ -211,7 +211,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
 	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
 	seduceme->AddComponent<RigidBody>();
-	seduceme->AddComponent<Collider>()->shape = sphere{};
+	seduceme->AddComponent<Collider>()->shape = box{};
 
 	//for (int i = 2; i < 5; ++ i)
 	//{

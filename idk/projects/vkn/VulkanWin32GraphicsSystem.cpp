@@ -61,11 +61,11 @@ namespace idk::vkn
 		_pm = std::make_unique<PipelineManager>();
 		_pm->View(instance_->View());
 
-		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
-		_debug_renderer->Init();
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
+		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
+		_debug_renderer->Init();
 		_frame_renderers.resize(instance_->View().Swapchain().frame_objects.size());
 		for (auto& frame : _frame_renderers)
 		{
@@ -124,13 +124,15 @@ namespace idk::vkn
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
+
+		_debug_renderer->GrabDebugBuffer();
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			curr_state.Init(curr_buffer.camera[i],curr_buffer.lights, curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
+			_debug_renderer->Render(curr_state.camera.view_matrix, curr_state.camera.projection_matrix);
 		}
 		// */
-		_debug_renderer->GrabDebugBuffer();
 
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
