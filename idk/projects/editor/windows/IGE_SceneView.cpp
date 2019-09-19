@@ -148,15 +148,16 @@ namespace idk {
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
-
+		//Left shift = 16
+		const float finalCamVel = ImGui::IsKeyDown(16) ? cam_vel * cam_vel_shift_multiplier : cam_vel;
 		//WASD MOVEMENT
-		if (app_sys.GetKey(Key::A))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Right();
-		if (app_sys.GetKey(Key::D))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Right();
-		if (app_sys.GetKey(Key::S))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
-		if (app_sys.GetKey(Key::W))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
-		//VERTICAL MOVEMENT
-		if (app_sys.GetKey(Key::Q))	tfm->position += -cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
-		if (app_sys.GetKey(Key::E))	tfm->position += +cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
+		if (app_sys.GetKey(Key::A))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::D))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::S))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Forward();
+		//VERTICAL MOVEMENT							  
+		if (app_sys.GetKey(Key::Q))	tfm->position += -finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
+		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
 		vec2 delta = ImGui::GetMouseDragDelta(1,0.1f);
 
@@ -172,22 +173,11 @@ namespace idk {
 		ImGui::ResetMouseDragDelta(1);
 
 
-		//TEMP FIX ROLL
-		if (app_sys.GetKey(Key::V)) tfm->rotation = (quat{ vec3{0,0,1}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		if (app_sys.GetKey(Key::B)) tfm->rotation = (quat{ vec3{0,0,1}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		/**/
-
-
-
-
-
-
 	}
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
 		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
-
 
 		auto& app_sys = Core::GetSystem<Application>();
 
