@@ -14,6 +14,7 @@ This window displays the editor window where you can select and modify gameobjec
 
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
+#include <event/Signal.h>
 
 namespace idk
 {
@@ -24,6 +25,9 @@ namespace idk
 
 		virtual void BeginWindow() override;
         virtual void Update() override;
+
+        Signal<PathHandle> OnAssetSelected;
+        Signal<PathHandle> OnAssetDoubleClicked;
 
 	private:
         string selected_dir;

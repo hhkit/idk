@@ -92,6 +92,11 @@ namespace idk
 	{
 	}
 
+    PathHandle::PathHandle(const string& mountPath)
+        : PathHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+    {
+    }
+
 	PathHandle::operator bool() const
 	{
 		return validateFull();

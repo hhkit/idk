@@ -156,15 +156,15 @@ namespace idk
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
 
-		ige_windows.push_back(std::make_unique<IGE_SceneView>());
-		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
-		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
-		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
-		ige_windows.push_back(std::make_unique<IGE_MaterialEditor>());
+#define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
+		ADD_WINDOW(IGE_SceneView);
+		ADD_WINDOW(IGE_ProjectWindow);
+		ADD_WINDOW(IGE_HierarchyWindow);
+		ADD_WINDOW(IGE_InspectorWindow);
+		ADD_WINDOW(IGE_MaterialEditor);
+#undef ADD_WINDOW
 
 		ige_main_window->Initialize();
-
-		//ige_main_window->Initialize();
 		for (auto& i : ige_windows) {
 			i->Initialize();
 		}
@@ -173,6 +173,7 @@ namespace idk
 
 	void IDE::Shutdown()
 	{
+        ige_windows.clear();
 		_interface->Shutdown();
 		_interface.reset();
 	}
@@ -214,4 +215,5 @@ namespace idk
 		// TODO: insert return statement here
 		return _interface->Inputs()->main_camera;
 	}
+
 }

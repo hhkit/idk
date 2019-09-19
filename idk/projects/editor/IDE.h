@@ -20,6 +20,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/ImGui_Interface.h>
 #include <editor/commands/CommandController.h>
 
+#undef FindWindow
 
 
 
@@ -47,6 +48,14 @@ namespace idk
 		void EditorDraw() override;
 
 		CameraControls& currentCamera();
+
+        template <typename T> // move into .inl if there are more template fns
+        T* FindWindow()
+        {
+            auto iter = windows_by_type.find(reflect::typehash<T>());
+            return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
+        }
+
 	private:
 		friend class IGE_MainWindow;
 		friend class IGE_SceneView;
@@ -65,7 +74,8 @@ namespace idk
 
 		vector<Handle<GameObject>> selected_gameObjects {};
 
-		vector <unique_ptr<IGE_IWindow>> ige_windows	{};
+		vector<unique_ptr<IGE_IWindow>> ige_windows	    {};
+		hash_table<size_t, IGE_IWindow*> windows_by_type{};
 
         bool closing = false;
 

@@ -21,10 +21,13 @@ namespace idk
         virtual void BeginWindow() override;
         virtual void Update() override;
 
+        void OpenGraph(const PathHandle& handle);
+
     private:
-        ImNodes::CanvasState canvas;
-        RscHandle<shadergraph::Graph> graph;
-        vector<Guid> to_delete;
+        ImNodes::CanvasState _canvas;
+        RscHandle<shadergraph::Graph> _graph;
+        string _graph_name;
+        vector<Guid> _nodes_to_delete;
 
         void show_params_window();
 
