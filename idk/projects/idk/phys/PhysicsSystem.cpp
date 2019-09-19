@@ -208,36 +208,34 @@ namespace idk
 					const auto impulse = damping * impulse_scalar * result.normal_of_collision;
 
 					const auto penetration = std::max(result.penetration_depth - penetration_min_slop, 0.0f);
-					const auto impulse_vector = penetration * penetration_max_slop * result.normal_of_collision;
+					const auto correction_vector = penetration * penetration_max_slop * result.normal_of_collision;
 
 					if (lvalid)
 					{
 						auto& ref_rb = *lrigidbody;
-
-						const auto correction = impulse_vector;
-
-						// reflect the object across
-						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction;
-						//Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz,  result.normal_of_collision * 0.05f }, color{ 1,0,1 }, seconds{ 0.5 });
-
-						const auto new_vel = lvel + impulse * linv_mass;
-						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+						ref_rb._accum_impulse += impulse;
+						ref_rb._accum_correction += correction_vector;
 					}
 
 					if (rvalid)
 					{
 						auto& ref_rb = *rrigidbody;
-
-						const auto correction = - impulse_vector;
-
-						// reflect the object across
-						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction;
-						//Core::GetSystem<DebugRenderer>().Draw(ray{ ref_rb._predicted_tfm[3].xyz, -result.normal_of_collision * 0.05f }, color{ 1,0,0.5 }, seconds{ 0.5 });
-
-						const auto new_vel = rvel - impulse * rinv_mass;
-						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+						ref_rb._accum_impulse -= impulse;
+						ref_rb._accum_correction -= correction_vector;
 					}
 				}
+			}
+
+			for (auto& rigidbody : rbs)
+			{
+				const auto old_vel = (rigidbody.PredictedTransform()[3].xyz - rigidbody._prev_pos);
+				rigidbody._predicted_tfm[3].xyz = rigidbody._predicted_tfm[3].xyz + rigidbody._accum_correction;
+
+				const auto new_vel = old_vel + rigidbody._accum_impulse * rigidbody.inv_mass;
+				rigidbody._prev_pos = rigidbody._predicted_tfm[3].xyz - new_vel;
+
+				rigidbody._accum_correction = vec3{};
+				rigidbody._accum_impulse = vec3{};
 			}
 		};
 

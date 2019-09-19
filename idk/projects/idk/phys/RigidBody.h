@@ -39,6 +39,8 @@ namespace idk
 	private:
 		mat4 _predicted_tfm;
 		vec3 _prev_pos;
+		vec3 _accum_impulse;
+		vec3 _accum_correction;
 		bool _sleeping = false;
 
 		friend class PhysicsSystem;

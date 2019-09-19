@@ -130,13 +130,14 @@ void TestWriteWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	vfs.Update();
+	auto time = FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt");
 	// Write to the file
 	{
-		std::ofstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
+		std::fstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test Write" << std::endl;
 		of.close();
 	}
-
+	EXPECT_TRUE(time != FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
 	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
 	WatchClearCheck(vfs);

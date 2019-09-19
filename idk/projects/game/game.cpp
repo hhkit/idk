@@ -145,8 +145,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if (gfx_api != GraphicsAPI::Vulkan)
-			mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//if (gfx_api != GraphicsAPI::Vulkan)
+		//	mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
@@ -204,14 +204,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//bounce_kun->AddComponent<Collider>()->shape = box{};
 	//bounce_kun->AddComponent<TestComponent>();
 
-	auto seduceme = scene->CreateGameObject();
-	seduceme->GetComponent<Name>()->name = "seduceme";
-	seduceme->Transform()->position = vec3{ 0, 1, 0 };
-	//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
-	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
-	seduceme->Transform()->scale    = vec3{ 1.f / 4 };
-	seduceme->AddComponent<RigidBody>()->initial_velocity = vec3{0.1, 0, 0};
-	seduceme->AddComponent<Collider>()->shape = box{};
+	if (0)
+	{
+		auto seduceme = scene->CreateGameObject();
+		seduceme->GetComponent<Name>()->name = "seduceme";
+		seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
+		//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
+		seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
+		seduceme->Transform()->scale = vec3{ 1.f / 4 };
+		seduceme->AddComponent<RigidBody>(); // ->initial_velocity = vec3{ 0.1, 0, 0 };
+		seduceme->AddComponent<Collider>()->shape = sphere{};
+	}
+	{
+		auto seducer = scene->CreateGameObject();
+		seducer->GetComponent<Name>()->name = "seducer";
+		seducer->Transform()->position = vec3{ -2, 0.125, 0 };
+		seducer->Transform()->scale = vec3{ 1.f / 4 };
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  1, 0, 0 };
+		seducer->AddComponent<Collider>()->shape = sphere{};
+	}
+	{
+		auto seducer = scene->CreateGameObject();
+		seducer->GetComponent<Name>()->name = "seducer";
+		seducer->Transform()->position = vec3{ 2, 0.125, 0 };
+		seducer->Transform()->scale = vec3{ 1.f / 4 };
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -1, 0, 0 };
+		seducer->AddComponent<Collider>()->shape = sphere{};
+	}
 
 	//for (int i = 2; i < 5; ++ i)
 	//{
