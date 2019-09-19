@@ -14,10 +14,11 @@ This window displays the editor window where you can select and modify gameobjec
 
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
+#include <file/PathHandle.h>
 
-namespace idk {
-	class IGE_ProjectWindow :
-		public IGE_IWindow
+namespace idk
+{
+	class IGE_ProjectWindow : public IGE_IWindow
 	{
 	public:
 		IGE_ProjectWindow();
@@ -25,18 +26,10 @@ namespace idk {
 		virtual void BeginWindow() override;
         virtual void Update() override;
 
-	
-	protected:
-
-
 	private:
-        void displayDir(const string& dir);
-        string selected_dir;
-        string selected_asset;
+        PathHandle selected_dir;
+        PathHandle selected_asset;
+
+        void displayDir(const PathHandle& dir);
 	};
-
-
-
-
-
 }

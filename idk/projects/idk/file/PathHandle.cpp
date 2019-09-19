@@ -102,6 +102,11 @@ namespace idk
 		return _key == rhs._key && _ref_count == rhs._ref_count && _is_regular_file == rhs._is_regular_file;
 	}
 
+    bool PathHandle::operator!=(const PathHandle& rhs) const
+    {
+        return !operator==(rhs);
+    }
+
 #pragma endregion Contructors/Operators
 
 #pragma region Utility
