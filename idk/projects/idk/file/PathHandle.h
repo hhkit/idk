@@ -45,6 +45,7 @@ namespace idk
 		PathHandle(const char* mountPath);
 
 		bool operator == (const PathHandle& rhs) const;
+        bool operator != (const PathHandle& rhs) const;
 
 		// Path Variable Getters
 		// ====================================================================================
