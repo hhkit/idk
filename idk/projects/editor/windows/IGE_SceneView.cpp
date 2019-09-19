@@ -184,7 +184,7 @@ namespace idk {
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier; //Amount to move in localy axis
+		vec3 localY = tfm->Up()* delta.y*-pan_multiplier; //Amount to move in localy axis
 		vec3 localX = tfm->Right()* delta.x* pan_multiplier; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
