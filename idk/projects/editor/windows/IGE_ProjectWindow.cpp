@@ -17,8 +17,9 @@ of the editor.
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
-#include <iostream>
+#include <editor/IDE.h>
 
+#include <iostream>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -295,10 +296,19 @@ namespace idk {
             {
                 selected_asset = path.string();
                 renaming_selected_asset = false;
+
+                auto path_handle = "/assets/" + fs::relative(selected_asset, assets_dir).string();
+                OnAssetSelected.Fire(path_handle);
             }
-            if (entry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
             {
-                selected_dir = path.string();
+                if (entry.is_directory())
+                    selected_dir = path.string();
+                else
+                {
+                    auto path_handle = "/assets/" + fs::relative(selected_asset, assets_dir).string();
+                    OnAssetDoubleClicked.Fire(path_handle);
+                }
             }
 
             if (!entry.is_directory())

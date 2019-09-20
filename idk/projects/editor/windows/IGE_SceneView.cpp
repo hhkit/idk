@@ -23,6 +23,7 @@ of the editor.
 #include <iostream>
 #include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
+#include <imgui/ImGuizmo.h>
 #include <IDE.h>
 
 namespace idk {
@@ -79,7 +80,6 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
-				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
 			}
 		}
 		else {
@@ -98,7 +98,6 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
-				//Core::GetSystem<IDE>()._interface->Inputs()->Update();
 			}
 		}
 		else {
@@ -112,6 +111,10 @@ namespace idk {
 			UpdatePanMouseControl();
 
 		}
+
+
+		UpdateGizmoControl();
+
 
 	}
 
@@ -155,74 +158,36 @@ namespace idk {
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
-
+		//Left shift = 16
+		const float finalCamVel = ImGui::IsKeyDown(16) ? cam_vel * cam_vel_shift_multiplier : cam_vel;
 		//WASD MOVEMENT
-		if (app_sys.GetKey(Key::A))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Right();
-		if (app_sys.GetKey(Key::D))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Right();
-		if (app_sys.GetKey(Key::S))	tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
-		if (app_sys.GetKey(Key::W))	tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
-		//VERTICAL MOVEMENT
-		if (app_sys.GetKey(Key::Q))	tfm->position += -cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
-		if (app_sys.GetKey(Key::E))	tfm->position += +cam_vel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
+		if (app_sys.GetKey(Key::A))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::D))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Right();
+		if (app_sys.GetKey(Key::S))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Forward();
+		//VERTICAL MOVEMENT							  
+		if (app_sys.GetKey(Key::Q))	tfm->position += -finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
+		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
-		vec2 delta = ImGui::GetMouseDragDelta(1);
+		vec2 delta = ImGui::GetMouseDragDelta(1,0.1f);
 
 		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
 
 		//MOUSE YAW
 		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
 		//MOUSE PITCH
-		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
-		// MOUSE ZOOM
+		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
-		//This doesnt work as intended!!!!! ARGH
-		//euler_angles cam_euler { tfm->rotation };
-		//cam_euler.x += deg{ 90 * delta.y * pitch_rotation_multiplier };
-		//cam_euler.y += deg{ 90 * delta.x * -yaw_rotation_multiplier };
-		//tfm->rotation = quat{ cam_euler };
 
-		//There is gimbal lock on the X axis when rotating on Y axis 90! 
 
 		ImGui::ResetMouseDragDelta(1);
-
-
-		//TEMP FIX ROLL
-		if (app_sys.GetKey(Key::V)) tfm->rotation = (quat{ vec3{0,0,1}, deg{90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		if (app_sys.GetKey(Key::B)) tfm->rotation = (quat{ vec3{0,0,1}, deg{-90} *Core::GetDT().count() } *tfm->rotation).normalize();
-		/**/
-
-
-		//FOCUS BUTTON
-		if (app_sys.GetKeyUp(Key::P))
-		{
-			static int _curr_cycle = 0;
-			auto first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
-		
-			if (first->HasComponent<Camera>())
-			{
-				_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
-				first = GameState::GetGameState().GetObjectsOfType<GameObject>()[_curr_cycle].GetHandle();
-			}
-			_curr_cycle = (_curr_cycle + 1) % GameState::GetGameState().GetObjectsOfType<GameObject>().size();
-			//	currCamera->SetTarget(first->GetComponent<Transform>()->GlobalPosition());
-			//	currCamera->Focus();
-			main_camera.SetTarget(first->GetComponent<Transform>());
-			//currCamera->LookAt(first->Transform()->GlobalPosition());
-			//main_camera.LookAt();
-		
-			main_camera.Focus();
-		}
-
-
-
 
 
 	}
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
-		vec2 delta = ImGui::GetMouseDragDelta(2);
-
+		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
 
 		auto& app_sys = Core::GetSystem<Application>();
 
@@ -236,6 +201,57 @@ namespace idk {
 
 		ImGui::ResetMouseDragDelta(2);
 
+	}
+
+	void IGE_SceneView::UpdateGizmoControl()
+	{
+		//Getting camera datas
+		IDE& editor = Core::GetSystem<IDE>();
+		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		float* viewMatrix = currCamera->ViewMatrix().data();
+		float* projectionMatrix = currCamera->ProjectionMatrix().data();
+
+		//Setting up draw area
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 winPos = ImGui::GetWindowPos();
+		winPos.y = ImGui::GetFrameHeight();
+		ImGuizmo::SetRect(winPos.x, winPos.y, GetScreenSize().x, GetScreenSize().y); //The scene view size
+		ImGuizmo::SetDrawlist(); //Draw on scene view only
+
+		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
+
+		if (editor.selected_gameObjects.size()) {
+			if (editor.selected_gameObjects.size() == 1) {
+				Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>();
+				if (gameObjectTransform) {
+
+					switch (editor.gizmo_operation) {
+					default:
+					case GizmoOperation_Null:
+						break;
+					case GizmoOperation_Translate:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
+
+						break;
+					case GizmoOperation_Rotate:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
+
+						break;
+					case GizmoOperation_Scale:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
+
+						break;
+					}
+				}
+			}
+			else {
+				//For multiple objects
+			}
+
+		}
 	}
 
 }

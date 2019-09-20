@@ -80,17 +80,26 @@ namespace idk
 		{
 			_ref_count = vfs.getFile(_key).RefCount();
 		}
+		else if(_key.IsValid())
+		{
+			_ref_count = vfs.getDir(_key).RefCount();
+		}
 	}
 
 	PathHandle::PathHandle(string_view mountPath)
-		:PathHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+		:PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
 	{
 	}
 
 	PathHandle::PathHandle(const char* mountPath)
-		: PathHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+		:PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
 	{
 	}
+
+    PathHandle::PathHandle(const string& mountPath)
+        : PathHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+    {
+    }
 
 	PathHandle::operator bool() const
 	{

@@ -43,6 +43,7 @@ namespace idk
 		PathHandle() = default;
 		PathHandle(string_view mountPath);
 		PathHandle(const char* mountPath);
+		PathHandle(const string& mountPath);
 
 		bool operator == (const PathHandle& rhs) const;
         bool operator != (const PathHandle& rhs) const;

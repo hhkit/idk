@@ -44,6 +44,7 @@ namespace idk {
 		const float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
 		const float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
 		const float cam_vel						= 1.f;
+		const float cam_vel_shift_multiplier	= 4.f;
 
 
 		float pan_multiplier					= 0.1f;
@@ -53,6 +54,8 @@ namespace idk {
 
 		void UpdateWASDMouseControl();
 		void UpdatePanMouseControl();
+
+		void UpdateGizmoControl();
 
 
 	};

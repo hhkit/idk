@@ -19,6 +19,8 @@ of the editor.
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
+#include <common/Transform.h> //DockBuilderDockNode
+#include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
 
@@ -271,31 +273,51 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f); //Have the buttons look like buttons
 		ImGui::SetCursorPos(toolButtonStartPos);
 
+		GizmoOperation& gizmo_operation = Core::GetSystem<IDE>().gizmo_operation;
 
-		if (ImGui::Button("##HandTool", toolButtonSize)) {
-			//Do stuff
+		ImVec4 activeColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
+		ImVec4 inactiveColor = ImGui::GetStyle().Colors[ImGuiCol_Button];
+
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Null);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Null ? activeColor : inactiveColor);
+		if (ImGui::Button("Hand##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Null;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 1);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		if (ImGui::Button("##MoveTool", toolButtonSize)) {
-			//Do stuff
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Translate);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Translate ? activeColor : inactiveColor);
+		if (ImGui::Button("Move##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Translate;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 2);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		if (ImGui::Button("##RotateTool", toolButtonSize)) {
-			//Do stuff
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Rotate);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Rotate ? activeColor : inactiveColor);
+		if (ImGui::Button("Rotate##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Rotate;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 3);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		if (ImGui::Button("##ScaleTool", toolButtonSize)) {
-			//Do stuff
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Scale);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Scale ? activeColor : inactiveColor);
+		if (ImGui::Button("Scale##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Scale;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::PopStyleVar();
 
@@ -328,17 +350,70 @@ namespace idk {
 
 	void IGE_MainWindow::PollShortcutInput()
 	{
-		CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+		IDE& editor = Core::GetSystem<IDE>();
+		CommandController& commandController = editor.command_controller;
+		GizmoOperation& gizmo_operation = editor.gizmo_operation;
+
+		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
+
+			//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				commandController.UndoCommand();
+			}
+
+			//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				commandController.RedoCommand();
+			}
+
+			//QWER = Move, Translate, Rotate, Scale (refer to ASCII Table)
+			//Q = Move
+			if (ImGui::IsKeyPressed(81)) {
+				gizmo_operation = GizmoOperation_Null;
+			}
+			//W = Translate
+			else if (ImGui::IsKeyPressed(87)) {
+				gizmo_operation = GizmoOperation_Translate;
+			}
+			//E = Rotate
+			else if (ImGui::IsKeyPressed(69)) {
+				gizmo_operation = GizmoOperation_Rotate;
+			}
+			//R = Scale
+			else if (ImGui::IsKeyPressed(82)) {
+				gizmo_operation = GizmoOperation_Scale;
+			}
+			
+			//F = Focus on GameObject
+			if (ImGui::IsKeyPressed(70))
+			{
+				if (editor.selected_gameObjects.size()) {
+					vec3 finalCamPos{};
+					for (Handle<GameObject> i : editor.selected_gameObjects) {
+
+						Handle<Transform> transform = i->GetComponent<Transform>();
+						if (transform) {
+							finalCamPos += transform->position;
+						}
+
+					}
+
+					finalCamPos /= editor.selected_gameObjects.size();
+
+					const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+
+					CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+					Handle<Camera> currCamera = main_camera.current_camera;
+					Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
+					camTransform->position = finalCamPos;
+					camTransform->position += camTransform->Forward() * distanceFromObject;
+				}
 
 
-		//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-			commandController.UndoCommand();
-		}
+			}
 
-		//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-			commandController.RedoCommand();
+
+
 		}
 	}
 

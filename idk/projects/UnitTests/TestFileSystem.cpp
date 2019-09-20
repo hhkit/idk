@@ -60,6 +60,8 @@ TEST(FileSystem, TestMount)
 
 	// Should not work but should not crash too.
 	auto bad_file = vfs.GetFile("/blah/haha.txt");
+	PathHandle ph{ "/FS_UnitTests" };
+	EXPECT_TRUE(ph);
 
 	// vfs.DumpMounts();
 	vfs.Update();
@@ -130,14 +132,14 @@ void TestWriteWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	vfs.Update();
-	auto time = FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt");
+	auto time_stamp = FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt");
 	// Write to the file
 	{
-		std::fstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
+		std::ofstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test Write" << std::endl;
 		of.close();
 	}
-	EXPECT_TRUE(time != FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt"));
+	EXPECT_TRUE(time_stamp != FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
 	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
 	WatchClearCheck(vfs);
@@ -419,6 +421,24 @@ TEST(FileSystem, TestSpecialWatch)
 		changes = vfs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 	}
+}
+
+TEST(FileSystem, TestGetPaths)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+
+	// size_t total_size = 0;
+	// auto paths = vfs.GetPaths("/FS_UnitTests");
+	// EXPECT_TRUE(paths.size() == 5);
+	// total_size += paths.size();
+	// 
+	// for (auto& p : paths)
+	// {
+	// 	if (p.IsDir())
+	// 	{
+	// 
+	// 	}
+	// }
 }
 
 TEST(FileSystem, CleanUp)
