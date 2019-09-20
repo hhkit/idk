@@ -57,7 +57,9 @@ namespace idk {
 
 		void UpdateGizmoControl();
 
+		float gizmo_matrix[16]{};
 
+		mat4 GenerateMat4FromGizmoMatrix();
 	};
 
 

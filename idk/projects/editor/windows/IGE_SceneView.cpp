@@ -228,23 +228,47 @@ namespace idk {
 				Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>();
 				if (gameObjectTransform) {
 
+
+
+					if (!ImGuizmo::IsUsing()) {
+						const float* temp = gameObjectTransform->GlobalMatrix().data();
+						for (int i = 0; i < 16; ++i) {
+							gizmo_matrix[i] = temp[i];
+						}
+					}
+					//float* matrix = gameObjectTransform->GlobalMatrix().data();
+
 					switch (editor.gizmo_operation) {
 					default:
 					case GizmoOperation_Null:
+
 						break;
+
 					case GizmoOperation_Translate:
-						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
-
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, NULL);
+						if (ImGuizmo::IsUsing()) {
+							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
+						}
 						break;
+
 					case GizmoOperation_Rotate:
-						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
-
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, NULL);
+						if (ImGuizmo::IsUsing()) {
+							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
+						}
 						break;
-					case GizmoOperation_Scale:
-						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE, gizmo_mode, gameObjectTransform->GlobalMatrix().data(), NULL, NULL);
 
+					case GizmoOperation_Scale:
+						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, NULL);
+						if (ImGuizmo::IsUsing()) {
+							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
+						}
 						break;
 					}
+
+
+
+
 				}
 			}
 			else {
@@ -252,6 +276,19 @@ namespace idk {
 			}
 
 		}
+	}
+
+	mat4 IGE_SceneView::GenerateMat4FromGizmoMatrix()
+	{
+		mat4 dumper{};
+		int i = 0;
+		for (int row = 0; row < 4; ++row) {
+			for (int col = 0; col < 4; ++col) {
+				dumper[row][col] = gizmo_matrix[i];
+				++i;
+			}
+		}
+		return dumper;
 	}
 
 }
