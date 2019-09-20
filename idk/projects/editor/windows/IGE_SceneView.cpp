@@ -59,10 +59,10 @@ namespace idk {
 		if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 			ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 		else
-			ImGui::Image((ImTextureID)(intptr_t)&*RscHandle<RenderTarget>{}->GetMeta().textures[0].as<vkn::VknTexture>().image, imageSize, ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)(intptr_t)RscHandle<RenderTarget>{}->GetMeta().textures[0].as<vkn::VknTexture>().imageView->operator VkImageView(), imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
-		auto& e1 = RscHandle<RenderTarget>{}->GetMeta().textures[0].as<vkn::VknTexture>();
-		auto& e = RscHandle<RenderTarget>{}.as<vkn::VknFrameBuffer>().GetMeta().textures[0].as<vkn::VknTexture>();
+		//auto& e1 = RscHandle<RenderTarget>{}->GetMeta().textures[0].as<vkn::VknTexture>();
+		//auto& e = RscHandle<RenderTarget>{}.as<vkn::VknFrameBuffer>().GetMeta().textures[0].as<vkn::VknTexture>();
 
 		ImVec2 v = ImGui::GetWindowPos();
 
