@@ -23,7 +23,7 @@
 
 #include <shellapi.h>//CommandLineToArgv
 
-#define USE_RENDER_DOC
+//#define USE_RENDER_DOC
 
 namespace idk
 {

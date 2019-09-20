@@ -138,6 +138,15 @@
     <ClInclude Include="TmpTest.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="utils\PresentationSignals.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\TriBuffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SwapchainInfo.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -256,6 +265,12 @@
     </ClCompile>
     <ClCompile Include="DDSLoader.cpp">
       <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\PresentationSignals.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\TriBuffer.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

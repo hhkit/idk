@@ -106,7 +106,7 @@ namespace idk::vkn
 
 		vk::FramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.renderPass = *vknView.Renderpass();
-		framebufferInfo.attachmentCount = image_views.size();
+		framebufferInfo.attachmentCount = (uint32_t)image_views.size();
 		framebufferInfo.pAttachments = image_views.data();
 		framebufferInfo.width  = s_cast<uint32_t>(meta.size.x);
 		framebufferInfo.height = s_cast<uint32_t>(meta.size.y);

@@ -886,7 +886,7 @@ IMGUI_IMPL_API ImTextureID ImGui_ImplVulkan_AddTexture(VkSampler sampler, VkImag
 
 	return (ImTextureID)descriptor_set;
 	
-	return IMGUI_IMPL_API ImTextureID();
+	//return IMGUI_IMPL_API ImTextureID();
 }
 
 

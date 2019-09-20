@@ -231,6 +231,9 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="PipelineManager.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="ShaderModule.h" />
+    <ClInclude Include="utils\PresentationSignals.h" />
+    <ClInclude Include="utils\SwapchainInfo.h" />
+    <ClInclude Include="utils\TriBuffer.h" />
     <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VknTextureLoader.h" />
@@ -276,6 +279,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />
+    <ClCompile Include="utils\PresentationSignals.cpp" />
+    <ClCompile Include="utils\TriBuffer.cpp" />
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />

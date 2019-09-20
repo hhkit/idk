@@ -91,7 +91,7 @@ namespace idk::vkn
 							textures.emplace(tex.second);
 						}
 					}
-				}
+				}	
 			}
 		}
 

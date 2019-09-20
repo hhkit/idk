@@ -46,7 +46,7 @@ namespace idk::vkn
 
 		PresentationSignals& VulkanView::CurrPresentationSignals() const
 		{
-			return vulkan_->m_pres_signals[vulkan_->current_frame];
+			return vulkan_->m_swapchain.m_graphics.pSignals[vulkan_->current_frame];
 		}
 
 		void VulkanView::SwapRenderState() const
@@ -100,7 +100,7 @@ namespace idk::vkn
 		PresentationSignals& VulkanView::GetCurrentSignals() const
 		{
 			// TODO: insert return statement here
-			return vulkan().m_pres_signals[vulkan().current_frame];
+			return vulkan().m_swapchain.m_graphics.pSignals[vulkan().current_frame];
 		}
 		uint32_t VulkanView::CurrSemaphoreFrame() const
 		{

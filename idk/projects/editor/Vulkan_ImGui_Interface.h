@@ -4,9 +4,12 @@
 #include "ImGui_Interface.h"
 #include "EditorInputs.h"
 
+#include "vkn/utils/TriBuffer.h"
+
 namespace idk {
 	namespace vkn {
 		class VulkanState;
+		struct TriBuffer;
 	}
 	namespace edt {
 		struct EditorFrame
@@ -70,6 +73,8 @@ namespace idk {
 				uint32_t							edt_semaphoreIndex{};
 				vector<EditorFrame>					edt_frames{};
 				vector<EditorPresentationSignal>	edt_frameSemophores{};
+
+				shared_ptr<vkn::TriBuffer>          edt_buffer{};
 				uint32_t							edt_submitInfoIndex{ 0 };
 			};
 

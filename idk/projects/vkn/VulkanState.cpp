@@ -820,10 +820,12 @@ namespace idk::vkn
 		};
 		m_swapchain.swap_chain = m_device->createSwapchainKHRUnique(createInfo, nullptr, dispatcher);
 
+		m_swapchain.m_swapchainGraphics.images = m_device->getSwapchainImagesKHR(*m_swapchain.swap_chain, dispatcher);
+		m_swapchain.m_graphics.images = m_swapchain.m_swapchainGraphics.images;
 
-		m_swapchain.swapchain_images = m_device->getSwapchainImagesKHR(*m_swapchain.swap_chain, dispatcher);
-		m_swapchain.images = m_swapchain.swapchain_images;
-		m_swapchain.edt_images = m_swapchain.swapchain_images;
+		for (auto& elem : m_swapchain.m_inBetweens)
+			elem->images = m_swapchain.m_swapchainGraphics.images;
+		//m_swapchain.edt_images = m_swapchain.swapchain_images;
 		m_swapchain.extent = extent;
 		//m_swapchain.format = surfaceFormat.format;
 		m_swapchain.surface_format = surfaceFormat;
@@ -833,7 +835,7 @@ namespace idk::vkn
 
 	void VulkanState::createFrameObjects()
 	{
-		for ([[maybe_unused]]auto& image : m_swapchain.swapchain_images)
+		for ([[maybe_unused]]auto& image : m_swapchain.m_swapchainGraphics.images)
 		{
 			FrameObjects fo{ *view_,*view_ };
 			//FrameObjects fo2 = std::move(fo);
@@ -843,60 +845,66 @@ namespace idk::vkn
 
 	void VulkanState::createImageViews()
 	{
-		{
-			auto& images = m_swapchain.swapchain_images;
-			auto& image_views = m_swapchain.swapchain_image_views;
-			image_views.clear();
-			//for (size_t i = 0; i < images.size(); ++i)
-			for (auto& image : images)
-			{
-				vk::ImageViewCreateInfo createInfo{
-					vk::ImageViewCreateFlags{},
-					image,
-					vk::ImageViewType::e2D,
-					m_swapchain.surface_format.format,
-					vk::ComponentMapping{},
-					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
-				};
-				image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
-			}
-		}
-		{
-			auto& images = m_swapchain.images;
-			auto& image_views = m_swapchain.image_views;
-			image_views.clear();
-			//for (size_t i = 0; i < images.size(); ++i)
-			for (auto& image : images)
-			{
-				vk::ImageViewCreateInfo createInfo{
-					vk::ImageViewCreateFlags{},
-					image,
-					vk::ImageViewType::e2D,
-					m_swapchain.surface_format.format,
-					vk::ComponentMapping{},
-					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
-				};
-				image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
-			}
-		}
-		{
-			auto& images = m_swapchain.edt_images;
-			auto& image_views = m_swapchain.edt_image_views;
-			image_views.clear();
-			//for (size_t i = 0; i < images.size(); ++i)
-			for (auto& image : images)
-			{
-				vk::ImageViewCreateInfo createInfo{
-					vk::ImageViewCreateFlags{},
-					image,
-					vk::ImageViewType::e2D,
-					m_swapchain.surface_format.format,
-					vk::ComponentMapping{},
-					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
-				};
-				image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
-			}
-		}
+		//{
+		//	auto& images = m_swapchain.swapchain_images;
+		//	auto& image_views = m_swapchain.swapchain_image_views;
+		//	image_views.clear();
+		//	//for (size_t i = 0; i < images.size(); ++i)
+		//	for (auto& image : images)
+		//	{
+		//		vk::ImageViewCreateInfo createInfo{
+		//			vk::ImageViewCreateFlags{},
+		//			image,
+		//			vk::ImageViewType::e2D,
+		//			m_swapchain.surface_format.format,
+		//			vk::ComponentMapping{},
+		//			vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+		//		};
+		//		image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+		//	}
+		//}
+		//{
+		//	auto& images = m_swapchain.images;
+		//	auto& image_views = m_swapchain.image_views;
+		//	image_views.clear();
+		//	//for (size_t i = 0; i < images.size(); ++i)
+		//	for (auto& image : images)
+		//	{
+		//		vk::ImageViewCreateInfo createInfo{
+		//			vk::ImageViewCreateFlags{},
+		//			image,
+		//			vk::ImageViewType::e2D,
+		//			m_swapchain.surface_format.format,
+		//			vk::ComponentMapping{},
+		//			vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+		//		};
+		//		image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+		//	}
+		//}
+		//{
+		//	auto& images = m_swapchain.edt_images;
+		//	auto& image_views = m_swapchain.edt_image_views;
+		//	image_views.clear();
+		//	//for (size_t i = 0; i < images.size(); ++i)
+		//	for (auto& image : images)
+		//	{
+		//		vk::ImageViewCreateInfo createInfo{
+		//			vk::ImageViewCreateFlags{},
+		//			image,
+		//			vk::ImageViewType::e2D,
+		//			m_swapchain.surface_format.format,
+		//			vk::ComponentMapping{},
+		//			vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+		//		};
+		//		image_views.emplace_back(m_device->createImageViewUnique(createInfo, nullptr, dispatcher));
+		//	}
+		//}
+
+		m_swapchain.m_graphics.CreateImageViewWithCurrImgs(*view_);
+		m_swapchain.m_swapchainGraphics.CreateImageViewWithCurrImgs(*view_);
+
+		for (auto& elem : m_swapchain.m_inBetweens)
+			elem->CreateImageViewWithCurrImgs(*view_);
 	}
 
 	vk::UniqueShaderModule VulkanState::createShaderModule(const string_view& code)
@@ -1192,7 +1200,7 @@ namespace idk::vkn
 
 	void VulkanState::createFramebuffers()
 	{
-		auto& image_views = m_swapchain.image_views;
+		auto& image_views = m_swapchain.m_graphics.image_views;
 		auto& extent = m_swapchain.extent;
 		m_swapchain.frame_buffers.clear();
 		for (auto& image_view : image_views) {
@@ -1470,7 +1478,7 @@ namespace idk::vkn
 	{
 
 		vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
-		auto size = m_swapchain.images.size();
+		auto size = m_swapchain.m_graphics.images.size();
 		m_swapchain.uniform_buffers.resize(size);
 		m_swapchain.uniform_buffers2.resize(size);
 		for (auto& uniform : m_swapchain.uniform_buffers2)
@@ -1515,13 +1523,13 @@ namespace idk::vkn
 		{
 			vk::DescriptorPoolSize{
 				vk::DescriptorType::eUniformBuffer,
-				hlp::arr_count(m_swapchain.images)*1006
+				hlp::arr_count(m_swapchain.m_graphics.images)*1006
 			}
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
 			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
-			,hlp::arr_count(m_swapchain.images)*1006
+			,hlp::arr_count(m_swapchain.m_graphics.images)*1006
 			,hlp::arr_count(pool_size)
 			,std::data(pool_size)
 		};
@@ -1530,7 +1538,7 @@ namespace idk::vkn
 
 	void VulkanState::createDescriptorSet()
 	{
-		std::vector<vk::DescriptorSetLayout> layouts{ m_swapchain.images.size(), *m_descriptorsetlayout };
+		std::vector<vk::DescriptorSetLayout> layouts{ m_swapchain.m_graphics.images.size(), *m_descriptorsetlayout };
 		vk::DescriptorSetAllocateInfo allocInfo
 		{
 			*m_descriptorpool
@@ -1772,12 +1780,17 @@ namespace idk::vkn
 
 	void VulkanState::createSemaphores()
 	{
-		m_pres_signals.resize(max_frames_in_flight);
+		/*m_pres_signals.resize(max_frames_in_flight);
 
 		for (auto& signal : m_pres_signals)
 		{
 			signal.Init(View());
-		}
+		}*/
+
+		m_swapchain.m_graphics.CreatePresentationSignals(*view_);
+		for (auto& elem : m_swapchain.m_inBetweens)
+			elem->CreatePresentationSignals(*view_);
+		m_swapchain.m_swapchainGraphics.CreatePresentationSignals(*view_);
 	}
 
 	void VulkanState::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
@@ -1856,12 +1869,6 @@ namespace idk::vkn
 		m_pipeline.reset();
 		m_pipelinelayout.reset();
 		m_renderpass.reset();
-		m_swapchain.image_views.clear();
-		m_swapchain.images.clear();
-		m_swapchain.swapchain_image_views.clear();
-		m_swapchain.swapchain_images.clear();
-		m_swapchain.edt_image_views.clear();
-		m_swapchain.edt_images.clear();
 		m_swapchain.swap_chain.reset();
 		m_swapchain.frame_buffers.clear();
 		m_swapchain.uniform_buffers.clear();
@@ -2245,7 +2252,7 @@ namespace idk::vkn
 
 	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
-		auto& current_signal = m_pres_signals[current_frame];
+		auto& current_signal = m_swapchain.m_graphics.pSignals[current_frame];
 		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
 
 		auto res = m_device->acquireNextImageKHR(*m_swapchain.swap_chain, std::numeric_limits<uint32_t>::max(), signal, {}, dispatcher);
@@ -2267,7 +2274,7 @@ namespace idk::vkn
 	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal)
 	{
 		//AcquireFrame();
-		auto& current_signal = m_pres_signals[current_frame];
+		auto& current_signal = m_swapchain.m_graphics.pSignals[current_frame];
 
 		waitSemaphores = wait;//*current_signal.image_available;
 		readySemaphores = signal;//*current_signal.render_finished;
@@ -2351,7 +2358,7 @@ namespace idk::vkn
 	{
 		auto& command_buffer = *m_pri_commandbuffers[m_swapchain.curr_index];
 
-		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
+		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
 
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 		//auto& current_signal = m_pres_signals[current_frame];
@@ -2413,67 +2420,82 @@ namespace idk::vkn
 
 	void VulkanState::PresentFrame2()
 	{
-		auto& current_signal = m_pres_signals[current_frame];
-		m_device->waitForFences(1, &*current_signal.master_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+		auto& current_sc_signal = m_swapchain.m_swapchainGraphics.pSignals[current_frame];
+
+		m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
 
 		auto& command_buffer = *m_blitz_commandbuffers[m_swapchain.curr_index];
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
-		if (imguiEnabled)
+		vk::Fence* prevFence = &*current_sc_signal.inflight_fence;
+
+		for (unsigned i = 0; i < m_swapchain.m_inBetweens.size(); ++i)
 		{
-			waitSemaphores = *current_signal.imgui_render_finished;
-			readySemaphores = *current_signal.master_render_finished;
+			auto& elem = m_swapchain.m_inBetweens[i];
 
-			//updateUniformBuffer(imageIndex);
+			m_device->resetFences(1, &*prevFence, dispatcher);
 
-			m_device->resetFences(1, &*current_signal.master_fence, dispatcher);
-
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.edt_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
-			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
-
-			vk::CommandBufferBeginInfo begin_info
+			if (elem->enabled)
 			{
-				vk::CommandBufferUsageFlags{}
-				,nullptr//&inherit_info
-			};
-			command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
-			command_buffer.begin(begin_info);
+				auto& current_signal = elem->pSignals[current_frame];
 
-			vk::ImageBlit imgBlit{};
+				waitSemaphores = *elem->pSignals[current_frame].render_finished;
+				readySemaphores = ((i+1)== m_swapchain.m_inBetweens.size() )?*current_signal.render_finished:*m_swapchain.m_inBetweens[i+1]->pSignals[current_frame].render_finished;
 
-			// Source
-			imgBlit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
-			imgBlit.srcSubresource.layerCount = 1;
-			imgBlit.srcOffsets[0] = { 0,0,0 };
-			imgBlit.srcOffsets[1].x = m_swapchain.extent.width;
-			imgBlit.srcOffsets[1].y = m_swapchain.extent.height;
-			imgBlit.srcOffsets[1].z = 1;
+				//updateUniformBuffer(imageIndex);
 
-			// Destination
-			imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
-			imgBlit.dstSubresource.layerCount = 1;
-			imgBlit.dstOffsets[0] = { 0,0,0 };
-			imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
-			imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
-			imgBlit.dstOffsets[1].z = 1;
+				//m_device->resetFences(1, &*prevFence, dispatcher);
 
-			command_buffer.blitImage(m_swapchain.edt_images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.swapchain_images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+				hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+				hlp::TransitionImageLayout(command_buffer, m_graphics_queue, elem->images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
 
-			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
+				vk::CommandBufferBeginInfo begin_info
+				{
+					vk::CommandBufferUsageFlags{}
+					,nullptr//&inherit_info
+				};
+				command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
+				command_buffer.begin(begin_info);
 
-			//BeginFrame();
+				vk::ImageBlit imgBlit{};
 
+				// Source
+				imgBlit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+				imgBlit.srcSubresource.layerCount = 1;
+				imgBlit.srcOffsets[0] = { 0,0,0 };
+				imgBlit.srcOffsets[1].x = m_swapchain.extent.width;
+				imgBlit.srcOffsets[1].y = m_swapchain.extent.height;
+				imgBlit.srcOffsets[1].z = 1;
+
+				// Destination
+				imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+				imgBlit.dstSubresource.layerCount = 1;
+				imgBlit.dstOffsets[0] = { 0,0,0 };
+				imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
+				imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
+				imgBlit.dstOffsets[1].z = 1;
+
+				command_buffer.blitImage(elem->images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+
+				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
+
+				//BeginFrame();
+				prevFence = &*(elem->pSignals[current_frame].inflight_fence);
+			}
 		}
-		else
+
+		if(m_swapchain.m_inBetweens.empty())
 		{
-			waitSemaphores = *current_signal.render_finished;
-			readySemaphores = *current_signal.master_render_finished;
+			m_device->resetFences(1, &*prevFence, dispatcher);
 
-			m_device->resetFences(1, &*current_signal.master_fence, dispatcher);
+			waitSemaphores = *m_swapchain.m_graphics.pSignals[current_frame].render_finished;
+			readySemaphores = *m_swapchain.m_swapchainGraphics.pSignals[current_frame].render_finished;
 
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, false);
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, false);
+			//->resetFences(1, &*current_signal.master_fence, dispatcher);
+
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, false);
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, false);
 
 
 			vk::CommandBufferBeginInfo begin_info
@@ -2505,11 +2527,8 @@ namespace idk::vkn
 			imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
 			imgBlit.dstOffsets[1].z = 1;
 
-			command_buffer.blitImage(m_swapchain.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.swapchain_images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+			command_buffer.blitImage(m_swapchain.m_graphics.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
 
-			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
-
-			//hlp::TransitionImageLayout(command_buffer,m_graphics_queue,m_swapchain.swapchain_images[rv],vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal,vk::ImageLayout::ePresentSrcKHR);
 		}
 		command_buffer.end();
 
@@ -2529,7 +2548,7 @@ namespace idk::vkn
 		};
 		vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-		if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.master_fence, dispatcher) != vk::Result::eSuccess)
+		if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_sc_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
 			throw std::runtime_error("failed to submit draw command buffer!");
 
 		PresentFrame(readySemaphores);
@@ -2613,18 +2632,5 @@ namespace idk::vkn
 		ubo_manager.Clear(); //Clear the previous frame's UBOs
 		pools.Reset(); //Reset the previous frame's descriptors
 	}
-	void PresentationSignals::Init(VulkanView& view)
-	{
-		vk::SemaphoreCreateInfo info{};
-		vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
-
-		image_available = view.Device()->createSemaphoreUnique(info, nullptr,  view.Dispatcher());
-		render_finished = view.Device()->createSemaphoreUnique(info, nullptr,  view.Dispatcher());
-		inflight_fence  = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
-		master_image_available = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
-		master_render_finished = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
-		imgui_render_finished = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
-		inflight_fence = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
-		master_fence = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
-	}
+	
 }

@@ -254,7 +254,7 @@ namespace idk::vkn
 		presentToClearBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
 		presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
 		presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
-		presentToClearBarrier.image = swapchain.images[swapchain.curr_index];
+		presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
 		presentToClearBarrier.subresourceRange = subResourceRange;
 		begin_info.pInheritanceInfo = &iinfo;
 		transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
@@ -529,6 +529,7 @@ namespace idk::vkn
 	vk::Framebuffer GetFrameBuffer(const CameraData& camera_data, uint32_t curr_index)
 	{
 		//TODO Actually get the framebuffer from camera_data
+		//auto& e = camera_data.render_target.as<VknFrameBuffer>();
 		return camera_data.render_target.as<VknFrameBuffer>().Buffer();
 	}
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
