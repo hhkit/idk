@@ -24,6 +24,7 @@ namespace idk
 		virtual vec2 GetMouseScreenDel() = 0;
 		virtual ivec2 GetMousePixelPos() = 0;
 		virtual ivec2 GetMousePixelDel() = 0;
+		virtual ivec2 GetMouseScroll() = 0;
 		virtual bool GetKeyDown(Key) = 0;
 		virtual bool GetKey(Key) = 0;
 		virtual bool GetKeyUp(Key) = 0;

@@ -12,8 +12,8 @@ namespace idk::win
 		void SetMouseUp    (int);
 		void SetChar       (char);
 
-		void SetMouseDragging(bool);
-		
+		void SetMouseScroll(const ivec2& scroll);
+		ivec2 GetMouseScroll() const;
 
 		void SwapBuffers();
 		
@@ -22,17 +22,17 @@ namespace idk::win
 		bool GetKeyUp    (int);
 		bool GetMouseDown(int);
 		bool GetMouseUp  (int);
-		bool IsMouseDragging(int);
 		char GetChar();
 	private:
 		using BufType = array<bool, 0xFF>;
 		BufType _input_buffers[2]{ {}, {} };
 		bool    _curr_buffer{};
 		char    _last_char{};
-		bool	_dragging{};
 
 		ivec2 _curr_mouse_pos{};
 		ivec2 _prev_mouse_pos{};
+
+		ivec2 _curr_mouse_scroll{};
 
 		BufType& curr_buf();
 		BufType& prev_buf();

@@ -14,8 +14,8 @@ namespace idk
 {
 	constexpr auto restitution_slop = 0.01f;
 	constexpr auto penetration_min_slop = 0.001f;
-	constexpr auto penetration_max_slop = 0.5;
-	constexpr auto damping = 0.95f;
+	constexpr auto penetration_max_slop = 0.8;
+	constexpr auto damping = 0.975f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{

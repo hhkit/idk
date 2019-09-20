@@ -161,33 +161,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto floor = scene->CreateGameObject();
 	floor->Transform()->position = vec3{ 0, -1, 0 };
-	floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+	//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
 	floor->Transform()->scale    = vec3{ 10, 2, 10 };
 	floor->AddComponent<Collider>()->shape = box{};
-	//{
-	//	auto wall = scene->CreateGameObject();
-	//	wall->Transform()->position = vec3{ 5, 5, 0 };
-	//	wall->Transform()->scale = vec3{ 2, 10, 10 };
-	//	wall->AddComponent<Collider>()->shape = box{};
-	//}
-	//{
-	//	auto wall = scene->CreateGameObject();
-	//	wall->Transform()->position = vec3{ -5, 5, 0 };
-	//	wall->Transform()->scale = vec3{ 2, 10, 10 };
-	//	wall->AddComponent<Collider>()->shape = box{};
-	//}
-	//{
-	//	auto wall = scene->CreateGameObject();
-	//	wall->Transform()->position = vec3{ 0, 5, 5 };
-	//	wall->Transform()->scale = vec3{ 10, 10, 2 };
-	//	wall->AddComponent<Collider>()->shape = box{};
-	//}
-	//{
-	//	auto wall = scene->CreateGameObject();
-	//	wall->Transform()->position = vec3{ 0, 5, -5 };
-	//	wall->Transform()->scale = vec3{ 10, 10, 2 };
-	//	wall->AddComponent<Collider>()->shape = box{};
-	//}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 5, 5, 0 };
+		wall->Transform()->scale = vec3{ 2, 10, 10 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ -5, 5, 0 };
+		wall->Transform()->scale = vec3{ 2, 10, 10 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 0, 5, 5 };
+		wall->Transform()->scale = vec3{ 10, 10, 2 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 0, 5, -5 };
+		wall->Transform()->scale = vec3{ 10, 10, 2 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
 
 	auto light = scene->CreateGameObject();
 	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
@@ -204,6 +204,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//bounce_kun->AddComponent<Collider>()->shape = box{};
 	//bounce_kun->AddComponent<TestComponent>();
 
+	/* physics resolution demonstration */
 	if (0)
 	{
 		auto seduceme = scene->CreateGameObject();

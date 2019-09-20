@@ -86,8 +86,13 @@ namespace idk {
 			is_controlling_WASDcam = false;
 		}
 
-		
-
+		{
+			auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
+			auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			auto tfm = cam.current_camera->GetGameObject()->Transform();
+			if (abs(scroll) > epsilon)
+				tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * pan_multiplier);
+		}
 		//Middle Mouse Pan control
 		if (ImGui::IsMouseDown(2)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
@@ -168,6 +173,7 @@ namespace idk {
 		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
 		//MOUSE PITCH
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
+		// MOUSE ZOOM
 
 		//This doesnt work as intended!!!!! ARGH
 		//euler_angles cam_euler { tfm->rotation };
@@ -224,7 +230,7 @@ namespace idk {
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		vec3 localY = tfm->Up()* delta.y*pan_multiplier; //Amount to move in localy axis
-		vec3 localX = tfm->Right()* delta.x* pan_multiplier; //Amount to move in localx axis
+		vec3 localX = -tfm->Right()* delta.x* pan_multiplier; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
 

@@ -31,6 +31,8 @@ namespace idk::win
 		vec2 GetMouseScreenDel() override;
 		ivec2 GetMousePixelPos() override;
 		ivec2 GetMousePixelDel() override;
+		ivec2 GetMouseScroll() override;
+
 		bool GetKeyDown(Key) override;
 		bool GetKey(Key) override;
 		bool GetKeyUp(Key) override;
