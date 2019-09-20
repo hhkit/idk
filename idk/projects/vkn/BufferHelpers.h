@@ -69,6 +69,8 @@ namespace idk::vkn::hlp
 
 	void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, VknTexture& img);
 
+	void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional < vk::Semaphore> signal = {}, vk::CommandBufferInheritanceInfo* info = nullptr);
+	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage = {}, std::optional < vk::Semaphore> signal = {},vk::CommandBufferInheritanceInfo* info = nullptr);
 	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, vk::CommandBufferInheritanceInfo* info = nullptr);
 
 	template<typename T>

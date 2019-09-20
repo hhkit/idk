@@ -206,6 +206,7 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
+		bool rendered = false;
 		for (size_t i = 0; i + num_concurrent <= gfx_states.size(); i += num_concurrent)
 		{
 			//Spawn/Assign to the threads
@@ -213,6 +214,7 @@ namespace idk::vkn
 				auto& state = gfx_states[i + j];
 				auto& rs = _states[i + j];
 				_render_threads[j]->Render(state, rs);
+				rendered = true;
 				//TODO submit command buffer here and signal the framebuffer's stuff.
 				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
 				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
@@ -247,21 +249,24 @@ namespace idk::vkn
 		subResourceRange.baseArrayLayer = 0;
 		subResourceRange.layerCount = 1;
 
-		vk::ImageMemoryBarrier presentToClearBarrier = {};
-		presentToClearBarrier.srcAccessMask = vk::AccessFlags{};
-		presentToClearBarrier.dstAccessMask = vk::AccessFlags{};
-		presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
-		presentToClearBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
-		presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
-		presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
-		presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
-		presentToClearBarrier.subresourceRange = subResourceRange;
-		begin_info.pInheritanceInfo = &iinfo;
-		transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
-		transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
-		transition_buffer->end();
-		//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
-		pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
+		if (!rendered)
+		{
+			vk::ImageMemoryBarrier presentToClearBarrier = {};
+			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+			presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+			presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
+			presentToClearBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
+			presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
+			presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
+			presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
+			presentToClearBarrier.subresourceRange = subResourceRange;
+			begin_info.pInheritanceInfo = &iinfo;
+			transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
+			transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
+			transition_buffer->end();
+			//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
+			pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
+		}
 		pri_buffer->end();
 
 		buffers.emplace_back(*pri_buffer);

@@ -93,7 +93,7 @@ struct DescriptorManager :IDescriptorManager
 			VkDescriptorImageInfo desc_image[1] = {};
 			desc_image[0].sampler = sampler;
 			desc_image[0].imageView = img;
-			desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ;
 			VkWriteDescriptorSet write_desc[1] = {};
 			write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			write_desc[0].dstSet = set;
@@ -699,7 +699,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 	}
 
 	// Store our identifier
-	io.Fonts->TexID = (ImTextureID)(intptr_t)g_FontImage;
+	io.Fonts->TexID = (ImTextureID)(intptr_t)g_FontView;
 
 	return true;
 }

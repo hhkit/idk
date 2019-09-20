@@ -1716,6 +1716,7 @@ namespace idk::vkn
 			,static_cast<uint32_t>(m_swapchain.frame_buffers.size())
 		};
 		m_pri_commandbuffers = m_device->allocateCommandBuffersUnique(allocPriInfo, dispatcher);
+		m_present_trf_commandbuffers = m_device->allocateCommandBuffersUnique(allocPriInfo, dispatcher);
 		vk::CommandBufferAllocateInfo allocBlitzInfo
 		{
 			*m_commandpool
@@ -2353,12 +2354,16 @@ namespace idk::vkn
 		//m_present_queue.waitIdle(dispatcher);
 		//PresentFrame();
 	}
+	vk::Semaphore CreateVkSemaphore(vk::Device device)
+	{
+		return device.createSemaphore(vk::SemaphoreCreateInfo{});
+	}
 
 	void VulkanState::PresentFrame(vk::Semaphore wait)
 	{
-		auto& command_buffer = *m_pri_commandbuffers[m_swapchain.curr_index];
-
-		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
+		auto& command_buffer = *m_present_trf_commandbuffers[m_swapchain.curr_index];
+		static vk::Semaphore blaargh = CreateVkSemaphore(*View().Device());
+		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR,wait, vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer,blaargh);
 
 		vk::SwapchainKHR swapchains[] = { *m_swapchain.swap_chain };
 		//auto& current_signal = m_pres_signals[current_frame];
@@ -2367,7 +2372,7 @@ namespace idk::vkn
 		//readySemaphores = *current_signal.render_finished;
 		vk::PresentInfoKHR presentInfo
 		{
-			1,&wait
+			1,&blaargh
 			,1,swapchains
 			,&imageIndex
 			,nullptr
@@ -2425,36 +2430,95 @@ namespace idk::vkn
 		m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
 
 		auto& command_buffer = *m_blitz_commandbuffers[m_swapchain.curr_index];
-		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer };
 
 		vk::Fence* prevFence = &*current_sc_signal.inflight_fence;
-
+		bool was_blit = false;
 		for (unsigned i = 0; i < m_swapchain.m_inBetweens.size(); ++i)
 		{
 			auto& elem = m_swapchain.m_inBetweens[i];
 
-			m_device->resetFences(1, &*prevFence, dispatcher);
 
 			if (elem->enabled)
 			{
 				auto& current_signal = elem->pSignals[current_frame];
 
 				waitSemaphores = *elem->pSignals[current_frame].render_finished;
-				readySemaphores = ((i+1)== m_swapchain.m_inBetweens.size() )?*current_signal.render_finished:*m_swapchain.m_inBetweens[i+1]->pSignals[current_frame].render_finished;
+				readySemaphores = ((i + 1) == m_swapchain.m_inBetweens.size()) ? *current_signal.render_finished : *m_swapchain.m_inBetweens[i + 1]->pSignals[current_frame].render_finished;
 
 				//updateUniformBuffer(imageIndex);
 
 				//m_device->resetFences(1, &*prevFence, dispatcher);
+				auto sc_image = m_swapchain.m_swapchainGraphics.images[rv];
+				auto src_image = elem->images[rv];
+				if (sc_image != src_image)
+				{
+					m_device->resetFences(1, &*prevFence, dispatcher);
 
-				hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-				hlp::TransitionImageLayout(command_buffer, m_graphics_queue, elem->images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
-				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+					hlp::TransitionImageLayout(false, command_buffer, m_graphics_queue, sc_image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+					hlp::TransitionImageLayout(false, command_buffer, m_graphics_queue, src_image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal);
+					//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+
+					vk::CommandBufferBeginInfo begin_info
+					{
+						vk::CommandBufferUsageFlags{}
+						,nullptr//&inherit_info
+					};
+					command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
+					command_buffer.begin(begin_info);
+
+					vk::ImageBlit imgBlit{};
+
+					// Source
+					imgBlit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+					imgBlit.srcSubresource.layerCount = 1;
+					imgBlit.srcOffsets[0] = { 0,0,0 };
+					imgBlit.srcOffsets[1].x = m_swapchain.extent.width;
+					imgBlit.srcOffsets[1].y = m_swapchain.extent.height;
+					imgBlit.srcOffsets[1].z = 1;
+
+					// Destination
+					imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+					imgBlit.dstSubresource.layerCount = 1;
+					imgBlit.dstOffsets[0] = { 0,0,0 };
+					imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
+					imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
+					imgBlit.dstOffsets[1].z = 1;
+
+					command_buffer.blitImage(elem->images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+					was_blit = true;
+					//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
+
+					//BeginFrame();
+					prevFence = &*(elem->pSignals[current_frame].inflight_fence);
+
+				}
+			}
+		}
+		vk::Semaphore next = waitSemaphores;
+		if (m_swapchain.m_inBetweens.empty())
+		{
+
+			next = waitSemaphores = *m_swapchain.m_graphics.pSignals[current_frame].render_finished;
+			readySemaphores = *m_swapchain.m_swapchainGraphics.pSignals[current_frame].render_finished;
+
+			if (m_swapchain.m_swapchainGraphics.images[rv] != m_swapchain.m_graphics.images[rv])
+			{
+				m_device->resetFences(1, &*prevFence, dispatcher);
+				//->resetFences(1, &*current_signal.master_fence, dispatcher);
+
+				hlp::TransitionImageLayout(false, command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+				hlp::TransitionImageLayout(false, command_buffer, m_graphics_queue, m_swapchain.m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal);
+
 
 				vk::CommandBufferBeginInfo begin_info
 				{
 					vk::CommandBufferUsageFlags{}
 					,nullptr//&inherit_info
 				};
+
+				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+
 				command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
 				command_buffer.begin(begin_info);
 
@@ -2476,82 +2540,43 @@ namespace idk::vkn
 				imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
 				imgBlit.dstOffsets[1].z = 1;
 
-				command_buffer.blitImage(elem->images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+				command_buffer.blitImage(m_swapchain.m_graphics.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+				was_blit = true;
 
-				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
-
-				//BeginFrame();
-				prevFence = &*(elem->pSignals[current_frame].inflight_fence);
+				next = readySemaphores;
 			}
 		}
 
-		if(m_swapchain.m_inBetweens.empty())
-		{
-			m_device->resetFences(1, &*prevFence, dispatcher);
-
-			waitSemaphores = *m_swapchain.m_graphics.pSignals[current_frame].render_finished;
-			readySemaphores = *m_swapchain.m_swapchainGraphics.pSignals[current_frame].render_finished;
-
-			//->resetFences(1, &*current_signal.master_fence, dispatcher);
-
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, false);
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, false);
-
-
-			vk::CommandBufferBeginInfo begin_info
-			{
-				vk::CommandBufferUsageFlags{}
-				,nullptr//&inherit_info
-			};
-
-			//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
-
-			command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
-			command_buffer.begin(begin_info);
-
-			vk::ImageBlit imgBlit{};
-
-			// Source
-			imgBlit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
-			imgBlit.srcSubresource.layerCount = 1;
-			imgBlit.srcOffsets[0] = { 0,0,0 };
-			imgBlit.srcOffsets[1].x = m_swapchain.extent.width;
-			imgBlit.srcOffsets[1].y = m_swapchain.extent.height;
-			imgBlit.srcOffsets[1].z = 1;
-
-			// Destination
-			imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
-			imgBlit.dstSubresource.layerCount = 1;
-			imgBlit.dstOffsets[0] = { 0,0,0 };
-			imgBlit.dstOffsets[1].x = m_swapchain.extent.width;
-			imgBlit.dstOffsets[1].y = m_swapchain.extent.height;
-			imgBlit.dstOffsets[1].z = 1;
-
-			command_buffer.blitImage(m_swapchain.m_graphics.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain.m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
-
-		}
-		command_buffer.end();
-
 		//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
-
-		vk::CommandBuffer cmds[] =
+		if (was_blit)
 		{
-			command_buffer,
-		};
-		vk::SubmitInfo render_state_submit_info
-		{
-			1
-			,&waitSemaphores
-			,waitStages
-			,hlp::arr_count(cmds),std::data(cmds)
-			,1,&readySemaphores
-		};
-		vk::SubmitInfo frame_submit[] = { render_state_submit_info };
+			command_buffer.end();
+			vk::CommandBuffer cmds[] =
+			{
+				command_buffer,
+			};
+			vk::SubmitInfo render_state_submit_info
+			{
+				1
+				,&waitSemaphores
+				,waitStages
+				,hlp::arr_count(cmds),std::data(cmds)
+				,1,&readySemaphores
+			};
+			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
+			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_sc_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
+				throw std::runtime_error("failed to submit draw command buffer!");
+		}
+		else {
+		
+			//Dis be hack
+			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain.m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::ePresentSrcKHR, vk::ImageLayout::eTransferDstOptimal, next, vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer, readySemaphores);
+			next = readySemaphores;
+		
+		}
 
-		if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_sc_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
-			throw std::runtime_error("failed to submit draw command buffer!");
-
-		PresentFrame(readySemaphores);
+		PresentFrame(next);
+		return;
 	}
 
 	void VulkanState::OnResize()

@@ -24,6 +24,7 @@ namespace idk::vkn {
 			vk::FenceCreateInfo     fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
 
 			image_available = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
+			blit_finished = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
 			render_finished = view.Device()->createSemaphoreUnique(info, nullptr, view.Dispatcher());
 			inflight_fence = view.Device()->createFenceUnique(fenceInfo, nullptr, view.Dispatcher());
 	}

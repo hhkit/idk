@@ -135,6 +135,7 @@ namespace idk::vkn
 
 	hash_table<TextureFormat, vk::Format> FormatMap();
 
+	//Refer to https://www.khronos.org/registry/vulkan/specs/1.0/html/chap6.html#synchronization-access-types for access flags
 	void TransitionImageLayout(vk::CommandBuffer cmd_buffer,
 		vk::AccessFlags src_flags, vk::PipelineStageFlags src_stage,
 		vk::AccessFlags dst_flags, vk::PipelineStageFlags dst_stage,

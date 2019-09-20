@@ -8,6 +8,7 @@ namespace idk::vkn
 	struct PresentationSignals
 	{
 		vk::UniqueSemaphore		image_available{};
+		vk::UniqueSemaphore		blit_finished{};
 		vk::UniqueSemaphore		render_finished{};
 		vk::UniqueFence			inflight_fence{};
 
