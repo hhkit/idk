@@ -89,6 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
 	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0, 2.5f };
+	camHandle->far_plane = 100.f;
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
@@ -205,7 +206,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//bounce_kun->AddComponent<TestComponent>();
 
 	/* physics resolution demonstration */
-	if (0)
 	{
 		auto seduceme = scene->CreateGameObject();
 		seduceme->GetComponent<Name>()->name = "seduceme";
@@ -233,16 +233,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<Collider>()->shape = sphere{};
 	}
 
-	//for (int i = 2; i < 5; ++ i)
-	//{
-	//	auto seducemetoo = scene->CreateGameObject();
-	//	seducemetoo->GetComponent<Name>()->name = "seducemetoo";
-	//	seducemetoo->Transform()->position = vec3{ 0, i, 0 };
-	//	seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
-	//	seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
-	//	seducemetoo->AddComponent<RigidBody>();
-	//	seducemetoo->AddComponent<Collider>()->shape = box{};
-	//}
+	if(0)
+	for (int i = 2; i < 5; ++ i)
+	{
+		auto seducemetoo = scene->CreateGameObject();
+		seducemetoo->GetComponent<Name>()->name = "seducemetoo";
+		seducemetoo->Transform()->position = vec3{ 0, i, 0 };
+		seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+		seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
+		seducemetoo->AddComponent<RigidBody>();
+		seducemetoo->AddComponent<Collider>()->shape = box{};
+	}
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

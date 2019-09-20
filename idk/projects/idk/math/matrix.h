@@ -29,6 +29,9 @@ namespace idk
 		>
 		explicit tmat(U ... values);
 
+		// col major ptr constructor
+		explicit tmat(T* ptr);
+
 		// upcast constructor
 		explicit tmat(const tmat<T, R - 1, C - 1>&);
 

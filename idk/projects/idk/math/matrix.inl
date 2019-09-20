@@ -89,6 +89,15 @@ namespace idk
 	}
 
 	template<typename T, unsigned R, unsigned C>
+	inline tmat<T, R, C>::tmat(T* ptr)
+	{
+		auto writr = data();
+		const auto etr = ptr + R * C;
+		while (ptr != etr)
+			*writr = *ptr++;
+	}
+
+	template<typename T, unsigned R, unsigned C>
 	inline tmat<T, R, C>::tmat(const tmat<T, R - 1, C - 1>& mtx)
 		: tmat{}
 	{

@@ -28,6 +28,8 @@ namespace idk
 		>
 		constexpr explicit tvec(const Args& ...);
 
+		constexpr explicit tvec(T* ptr);
+
 		template<unsigned D2,
 			typename = std::enable_if_t<(D2 > D)>
 		>

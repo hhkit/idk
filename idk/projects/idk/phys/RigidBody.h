@@ -9,7 +9,6 @@ namespace idk
 	{
 	public:
 		vec3 initial_velocity {};
-		vec3 _accum_accel     {};
 		real drag             { 0.f };
 
 		real inv_mass         { 1.f };
@@ -38,9 +37,8 @@ namespace idk
 		const mat4& PredictedTransform() const;
 	private:
 		mat4 _predicted_tfm;
+		vec3 _accum_accel{};
 		vec3 _prev_pos;
-		vec3 _accum_impulse;
-		vec3 _accum_correction;
 		bool _sleeping = false;
 
 		friend class PhysicsSystem;

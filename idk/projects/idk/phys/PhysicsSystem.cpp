@@ -14,8 +14,8 @@ namespace idk
 {
 	constexpr auto restitution_slop = 0.01f;
 	constexpr auto penetration_min_slop = 0.001f;
-	constexpr auto penetration_max_slop = 0.8;
-	constexpr auto damping = 0.975f;
+	constexpr auto penetration_max_slop = 0.9;
+	constexpr auto damping = 0.99f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
@@ -174,21 +174,21 @@ namespace idk
 				const auto rrigidbody = rcollider->_rigidbody;
 
 				constexpr auto get_values =
-					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, real, bool>
+					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, real, RigidBody*>
 				{
 					if (rb)
 					{
 						auto& ref = *rb;
-						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.restitution, ref.inv_mass, true);
+						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.restitution, ref.inv_mass, &ref);
 					}
 					else
 					{
-						return std::make_tuple(vec3{}, 1.f, 0.f, false);
+						return std::make_tuple(vec3{}, 1.f, 0.f, nullptr);
 					}
 				};
 
-				const auto [lvel, lrestitution, linv_mass, lvalid] = get_values(lrigidbody);
-				const auto [rvel, rrestitution, rinv_mass, rvalid] = get_values(rrigidbody);
+				const auto [lvel, lrestitution, linv_mass, lrb_ptr] = get_values(lrigidbody);
+				const auto [rvel, rrestitution, rinv_mass, rrb_ptr] = get_values(rrigidbody);
 
 				auto rel_v = rvel - lvel; // a is not moving
 				auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
@@ -210,32 +210,22 @@ namespace idk
 					const auto penetration = std::max(result.penetration_depth - penetration_min_slop, 0.0f);
 					const auto correction_vector = penetration * penetration_max_slop * result.normal_of_collision;
 
-					if (lvalid)
+					if (lrb_ptr)
 					{
-						auto& ref_rb = *lrigidbody;
-						ref_rb._accum_impulse += impulse;
-						ref_rb._accum_correction += correction_vector;
+						auto& ref_rb = *lrb_ptr;
+						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction_vector;
+						const auto new_vel = lvel + impulse * ref_rb.inv_mass;
+						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 
-					if (rvalid)
+					if (rrb_ptr)
 					{
-						auto& ref_rb = *rrigidbody;
-						ref_rb._accum_impulse -= impulse;
-						ref_rb._accum_correction -= correction_vector;
+						auto& ref_rb = *rrb_ptr;
+						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;
+						const auto new_vel = rvel - impulse * ref_rb.inv_mass;
+						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 				}
-			}
-
-			for (auto& rigidbody : rbs)
-			{
-				const auto old_vel = (rigidbody.PredictedTransform()[3].xyz - rigidbody._prev_pos);
-				rigidbody._predicted_tfm[3].xyz = rigidbody._predicted_tfm[3].xyz + rigidbody._accum_correction;
-
-				const auto new_vel = old_vel + rigidbody._accum_impulse * rigidbody.inv_mass;
-				rigidbody._prev_pos = rigidbody._predicted_tfm[3].xyz - new_vel;
-
-				rigidbody._accum_correction = vec3{};
-				rigidbody._accum_impulse = vec3{};
 			}
 		};
 
@@ -253,7 +243,7 @@ namespace idk
 
 		ApplyGravity();
 		PredictTransform();
-		for (int i = 0; i < 3;++i)
+		for (int i = 0; i < 4;++i)
 			CollideObjects();
 		FinalizePositions();
 	}
