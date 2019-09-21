@@ -556,7 +556,8 @@ namespace idk
 
         Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](PathHandle path)
         {
-            OpenGraph(path);
+            if (path.GetExtension() == Graph::ext)
+                OpenGraph(path);
         });
     }
 
