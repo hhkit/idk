@@ -22,18 +22,7 @@
 #include <renderdoc/renderdoc_app.h>
 
 
-//#define USE_RENDER_DOC
-
-namespace idk
-{
-	struct yolo
-	{
-		vector<string> guids;
-	};
-}
-REFLECT_BEGIN(idk::yolo, "yolo")
-REFLECT_VAR(guids)
-REFLECT_END()
+#define USE_RENDER_DOC
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -82,6 +71,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		gSys->editorExist = true;
 
 	c->Setup();
+
+	Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png");
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	

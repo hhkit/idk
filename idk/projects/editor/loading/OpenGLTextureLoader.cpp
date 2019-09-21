@@ -12,7 +12,6 @@ namespace idk
 {
 	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource)
 	{
-
 		//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 		
@@ -21,23 +20,29 @@ namespace idk
 		auto texture_handle = Core::GetResourceManager().Create<Texture>();
 
 		auto tm = texture_handle->GetMeta();
-		//auto texture_id = (unsigned int)texture_handle->ID();
 
 		ivec2 size{};
 		int channels{};
 
 		auto data = stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0);
 
-		assert(data);
+		if (data) // stbi image can fail
+		{
+			auto col_format = [&]() -> InputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return InputChannels::RED;
+			case 2: return InputChannels::RG;
+			case 3: return InputChannels::RGB;
+			case 4: return InputChannels::RGBA;
+			}
+			}();
 
-		texture_handle.as<ogl::OpenGLTexture>().Buffer(data, size, tm.internal_format);
+			texture_handle.as<ogl::OpenGLTexture>().Buffer(data, size, col_format);
 
-		//auto& tHandle = RscHandle<Texture>(texture_handle.guid);
-
-		//auto thandl = RscHandle{ texture_handle }.as<Texture>();
-
-		retval.resources.emplace_back(texture_handle);
-
+			retval.resources.emplace_back(texture_handle);
+		}
 		return retval;
 	}
 

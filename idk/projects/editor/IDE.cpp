@@ -53,6 +53,7 @@ namespace idk
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".obj");
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLCubeMapLoader>(".cbm");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".png");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
