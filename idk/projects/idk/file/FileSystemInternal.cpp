@@ -45,7 +45,7 @@ namespace idk{
 		_mask |= byte{ static_cast<unsigned char>(format) };
 	}
 
-	file_system_detail::fs_key::fs_key(int8_t m, int8_t d, int8_t i)
+	file_system_detail::fs_key::fs_key(int8_t m, int8_t d, int16_t i)
 		: _mount_id{ m }, _depth{ d }, _index{ i }
 	{
 	}

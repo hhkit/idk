@@ -99,8 +99,8 @@ namespace idk
 		// void getFilesExtRecurse(const file_system_detail::fs_dir& dir, string_view ext, vector<PathHandle>& out) const;
 		void getPathsRecurse(const file_system_detail::fs_dir& dir, FS_FILTERS filters, string_view ext, vector<PathHandle>& out) const;
 
-		int64_t _ref_count		= -1;
 		file_system_detail::fs_key _key{};
+		int16_t _ref_count = -1;
 		bool _is_regular_file = true;
 	};
 }

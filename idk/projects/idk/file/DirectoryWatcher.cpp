@@ -101,7 +101,7 @@ namespace idk
 	{
 		FS::path path{ mountDir._full_path };
 		
-		auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
+		auto num_files = s_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
 			static_cast<bool (*)(const FS::path&)>(FS::is_regular_file)));
 
 		// Files were created
