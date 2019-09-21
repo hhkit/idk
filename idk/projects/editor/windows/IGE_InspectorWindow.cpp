@@ -133,11 +133,11 @@ namespace idk {
 								if (ImGui::BeginDragDropTarget()) {
 									if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("string")) {
 										IM_ASSERT(payload->DataSize == sizeof(string));
-										string* source = static_cast<string*>(payload->Data); // Getting the Payload Data
-										if (source->find(".fbx")!= string::npos) {
+										PathHandle* source = static_cast<PathHandle*>(payload->Data); // Getting the Payload Data
+										if (source->GetExtension() != ".fbx") {
 
 											
-											PathHandle PathHandle{ source->data() };
+											//PathHandle PathHandle{ source->data() };
 											//auto file = Core::GetSystem<ResourceManager>().GetFileResources(PathHandle);
 											//file.resources[0].visit([&](auto& handle) {
 											//	if constexpr (std::is_same_v < std::decay_t<decltype(handle)>, RscHandle<Mesh>>)
