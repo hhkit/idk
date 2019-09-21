@@ -107,6 +107,9 @@
     <Filter Include="gfx\shadergraph">
       <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\collision">
+      <UniqueIdentifier>{a443cd4d-0b4b-4ed3-97e1-29444c85c072}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -557,9 +560,6 @@
     <ClInclude Include="math\linear.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision.h">
-      <Filter>phys</Filter>
-    </ClInclude>
     <ClInclude Include="phys\PhysicsSystem.h">
       <Filter>phys</Filter>
     </ClInclude>
@@ -576,7 +576,6 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CubeMap.h" />
-    <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -586,13 +585,33 @@
     <ClInclude Include="gfx\MeshFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision_detection\collision_box.h" />
-    <ClInclude Include="phys\collision_detection\collision_sphere.h" />
-    <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
-    <ClInclude Include="math\shapes\frustum.h" />
-    <ClInclude Include="math\shapes\halfspace.h" />
-    <ClInclude Include="ds\result.h" />
-    <ClInclude Include="phys\raycasts\collision_raycast.h" />
+    <ClInclude Include="phys\collision_detection\collision_box.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_box_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\raycasts\collision_raycast.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_result.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\result.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\halfspace.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\frustum.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -818,9 +837,6 @@
     <ClCompile Include="phys\Collider.cpp">
       <Filter>phys</Filter>
     </ClCompile>
-    <ClCompile Include="phys\collision.cpp">
-      <Filter>phys</Filter>
-    </ClCompile>
     <ClCompile Include="phys\PhysicsSystem.cpp">
       <Filter>phys</Filter>
     </ClCompile>
@@ -839,21 +855,42 @@
     <ClCompile Include="gfx\ShaderGraphFactory.cpp">
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
-    <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="file\PathHandle.cpp">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\MeshFactory.cpp" />
-    <ClCompile Include="res\Guid.cpp" />
-    <ClCompile Include="phys\collision_detection\collision_box.cpp" />
-    <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
-    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
-    <ClCompile Include="math\shapes\halfspace.cpp" />
-    <ClCompile Include="math\shapes\frustum.cpp" />
-    <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
+    <ClCompile Include="res\Guid.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_box.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\raycasts\collision_raycast.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_result.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\frustum.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\halfspace.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1021,10 +1058,14 @@
     <None Include="math\linear.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="res\Guid.inl" />
-    <None Include="ds\result.inl" />
+    <None Include="res\Guid.inl">
+      <Filter>res</Filter>
+    </None>
     <None Include="phys\raycasts\collision_raycast.inl">
-      <Filter>phys</Filter>
+      <Filter>phys\collision</Filter>
+    </None>
+    <None Include="ds\result.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
