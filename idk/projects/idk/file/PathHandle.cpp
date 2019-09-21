@@ -90,14 +90,12 @@ namespace idk
 		:PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
 	{
 	}
-
-	PathHandle::PathHandle(const char* mountPath)
-		:PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
-	{
-	}
-
+    PathHandle::PathHandle(const char* mountPath)
+        : PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
+    {
+    }
     PathHandle::PathHandle(const string& mountPath)
-        : PathHandle{ Core::GetSystem<FileSystem>().GetFile(mountPath) }
+        : PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
     {
     }
 
