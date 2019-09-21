@@ -531,7 +531,10 @@ namespace idk
     void IGE_MaterialEditor::OpenGraph(const PathHandle& handle)
     {
         _graph = Core::GetResourceManager().LoadFile(handle)[0].As<Graph>();
-        _graph_name = handle.GetFileName();
+        auto p = handle.GetMountPath();
+        p.remove_prefix(sizeof("/assets/") - 1);
+        p.remove_suffix(sizeof(".mat") - 1);
+        _graph_name = p;
 
         ImGui::SetWindowFocus(window_name);
         is_open = true;
@@ -755,6 +758,8 @@ namespace idk
 
         if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
+            ImGui::Text(_graph_name.c_str());
+
             if (ImGui::Button("Add Parameter"))
             {
                 _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT, "0" });
