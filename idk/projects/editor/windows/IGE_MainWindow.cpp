@@ -191,14 +191,27 @@ namespace idk {
 
 	void IGE_MainWindow::DisplayGameObjectMenu()
 	{
+
+		IDE& editor = Core::GetSystem<IDE>();
+		
 		if (ImGui::BeginMenu("GameObject"))
 		{
 			if (ImGui::MenuItem("Create Empty","CTRL+SHIFT+N")) {
 
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+
+			} 
+			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
+				if (editor.selected_gameObjects.size()) {
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
+
+				}
+				else {
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+				}
 
 
-			} //Do something if pressed
-
+			}
 
 
 			ImGui::EndMenu(); 
@@ -350,6 +363,10 @@ namespace idk {
 
 	void IGE_MainWindow::PollShortcutInput()
 	{
+
+		if (ImGui::IsAnyItemActive()) {
+			return;
+		}
 		IDE& editor = Core::GetSystem<IDE>();
 		CommandController& commandController = editor.command_controller;
 		GizmoOperation& gizmo_operation = editor.gizmo_operation;
