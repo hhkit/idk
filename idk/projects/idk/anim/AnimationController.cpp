@@ -132,7 +132,7 @@ namespace idk
 
 			obj->GetComponent<Transform>()->GlobalMatrix(transform);
 
-			obj->SetName(curr_bone._name);
+			obj->Name(curr_bone._name);
 
 			if (curr_bone._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[curr_bone._parent], true);

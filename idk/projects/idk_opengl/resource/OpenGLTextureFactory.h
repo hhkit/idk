@@ -10,7 +10,7 @@ namespace idk::ogl
 	public:
 		unique_ptr<Texture> GenerateDefaultResource() override;
 		unique_ptr<Texture> Create() override;
-		unique_ptr<Texture> Create(FileHandle filepath) override;
-		unique_ptr<Texture> Create(FileHandle filepath, const Texture::Metadata&) override;
+		unique_ptr<Texture> Create(PathHandle filepath) override;
+		unique_ptr<Texture> Create(PathHandle filepath, const Texture::Metadata&) override;
 	};
 }

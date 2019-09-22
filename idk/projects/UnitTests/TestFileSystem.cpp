@@ -60,9 +60,61 @@ TEST(FileSystem, TestMount)
 
 	// Should not work but should not crash too.
 	auto bad_file = vfs.GetFile("/blah/haha.txt");
+	PathHandle ph{ "/FS_UnitTests" };
+	EXPECT_TRUE(ph);
 
 	// vfs.DumpMounts();
 	vfs.Update();
+}
+
+bool WatchUpdateCheck(idk::FileSystem& vfs, idk::seconds time, idk::FS_CHANGE_STATUS status)
+{
+	using namespace idk;
+	auto start_time = Clock::now();
+
+	while (time > seconds{0})
+	{
+		auto curr_time = Clock::now();
+
+		vfs.Update();
+
+		// Checking if querying is correct
+		auto changes = vfs.QueryFileChangesAll();
+		bool all_check = changes.size() == 1;
+
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		bool create_check = (status == FS_CHANGE_STATUS::CREATED) ? changes.size() == 1 : changes.size() == 0;
+
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+		bool write_check = (status == FS_CHANGE_STATUS::WRITTEN) ? changes.size() == 1 : changes.size() == 0;
+
+		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		bool delete_check = (status == FS_CHANGE_STATUS::DELETED) ? changes.size() == 1 : changes.size() == 0;
+		
+		if (all_check && create_check && write_check && delete_check)
+			return true;
+
+		time -= duration_cast<seconds>(curr_time - start_time);
+		start_time = curr_time;
+	}
+
+	return false;
+}
+
+void WatchClearCheck(idk::FileSystem& vfs)
+{
+	using namespace idk;
+	// Checking if we resolved all changes properly
+	vfs.Update();
+	auto changes = vfs.QueryFileChangesAll();
+	EXPECT_TRUE(changes.size() == 0);
+
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+	EXPECT_TRUE(changes.size() == 0);
+	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+	EXPECT_TRUE(changes.size() == 0);
 }
 
 void TestCreateWatch(idk::FileSystem& vfs)
@@ -71,52 +123,26 @@ void TestCreateWatch(idk::FileSystem& vfs)
 	// Create the test_watch file
 	std::ofstream{ string{vfs.GetExeDir()} +"/FS_UnitTests/test_watch.txt", std::ios::out };
 
-	vfs.Update();
-
 	// Checking if querying is correct
-	auto changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 1);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-	EXPECT_TRUE(changes.size() == 1);
-	// No files deleted or written
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-	EXPECT_TRUE(changes.size() == 0);
-
-	// Checking if we resolved all changes properly
-	vfs.Update();
-	changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 0);
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::CREATED));
+	WatchClearCheck(vfs);
 }
 
 void TestWriteWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	vfs.Update();
+	auto time_stamp = FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt");
 	// Write to the file
 	{
 		std::ofstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test Write" << std::endl;
 		of.close();
 	}
-	vfs.Update();
+	EXPECT_TRUE(time_stamp != FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
-	auto changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 1);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-	EXPECT_TRUE(changes.size() == 1);
-
-	// No files deleted or created
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-	EXPECT_TRUE(changes.size() == 0);
-
-	// Checking if we resolved all changes properly
-	vfs.Update();
-	changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 0);
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
+	WatchClearCheck(vfs);
 }
 
 void TestDeleteWatch(idk::FileSystem& vfs)
@@ -126,24 +152,10 @@ void TestDeleteWatch(idk::FileSystem& vfs)
 
 	string remove_file = string{ vfs.GetExeDir() } + "/FS_UnitTests/test_write.txt";
 	EXPECT_TRUE(remove(remove_file.c_str()) == 0);
-	vfs.Update();
 
 	// Checking if querying is correct
-	auto changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 1);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
-	EXPECT_TRUE(changes.size() == 1);
-
-	// No files deleted or written
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
-	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
-	EXPECT_TRUE(changes.size() == 0);
-
-	// Checking if we resolved all changes properly
-	vfs.Update();
-	changes = vfs.QueryFileChangesAll();
-	EXPECT_TRUE(changes.size() == 0);
+	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::DELETED));
+	WatchClearCheck(vfs);
 }
 
 TEST(FileSystem, TestDirectoryWatch)
@@ -154,7 +166,7 @@ TEST(FileSystem, TestDirectoryWatch)
 	TestDeleteWatch(vfs);
 }
 
-TEST(FileSystem, TestFileHandle)
+TEST(FileSystem, TestPathHandle)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 
@@ -206,7 +218,7 @@ TEST(FileSystem, TestFileHandle)
 	}
 }
 
-TEST(FileSystem, TestFileHandleInvalidate)
+TEST(FileSystem, TestPathHandleInvalidate)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 	// Invalidate handle by file deletion
@@ -252,7 +264,7 @@ TEST(FileSystem, TestFileHandleInvalidate)
 	auto file_handle3 = vfs.GetFile("/FS_UnitTests/invalidate3.txt");
 	EXPECT_TRUE(file_handle3);
 
-	// file_handle3 should reuse the first FileHandle that was created.
+	// file_handle3 should reuse the first PathHandle that was created.
 	EXPECT_TRUE(file_handle1.SameKeyAs(file_handle3));
 
 	// Delete all files created
@@ -265,7 +277,7 @@ TEST(FileSystem, TestFileOpen)
 	INIT_FILESYSTEM_UNIT_TEST();
 	// Test Open bad file path
 	{
-		FileHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
+		PathHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
 		EXPECT_FALSE(bad_file_handle);
 
 		auto bad_stream1 = vfs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::READ);
@@ -394,7 +406,7 @@ TEST(FileSystem, TestSpecialWatch)
 
 	// Renaming a file
 	{
-		// Using FileHandle
+		// Using PathHandle
 		auto file = vfs.GetFile("/FS_UnitTests/blank_file.txt");
 		EXPECT_TRUE(file.Rename("blank_file1.txt"));
 		vfs.Update();
@@ -409,6 +421,24 @@ TEST(FileSystem, TestSpecialWatch)
 		changes = vfs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 	}
+}
+
+TEST(FileSystem, TestGetPaths)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+
+	// size_t total_size = 0;
+	// auto paths = vfs.GetPaths("/FS_UnitTests");
+	// EXPECT_TRUE(paths.size() == 5);
+	// total_size += paths.size();
+	// 
+	// for (auto& p : paths)
+	// {
+	// 	if (p.IsDir())
+	// 	{
+	// 
+	// 	}
+	// }
 }
 
 TEST(FileSystem, CleanUp)

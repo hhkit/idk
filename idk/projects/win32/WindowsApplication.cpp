@@ -82,6 +82,10 @@ namespace idk::win
 	{
 		return screendel;
 	}
+	ivec2 Windows::GetMouseScroll()
+	{
+		return _input_manager->GetMouseScroll();
+	}
 	void Windows::PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func)
 	{
 		winProcList.push_back(func); 
@@ -162,6 +166,7 @@ namespace idk::win
 			grabScreenCoordinates(lParam);
 			break;
 		case WM_MOUSEWHEEL:
+			_input_manager->SetMouseScroll(ivec2{ 0, GET_WHEEL_DELTA_WPARAM(wParam) });
 			break;
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
@@ -176,6 +181,7 @@ namespace idk::win
 			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
 			break;
 		case WM_DESTROY:
+            OnClosed.Fire();
 			PostQuitMessage(0);
 			break;
 		case WM_NCDESTROY:
@@ -197,13 +203,8 @@ namespace idk::win
 		screenpos.y = HIWORD(lParam);
 		
 		
-		ivec2 sSize = GetScreenSize();
-		ndc_screendel = vec2{
-		static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
-		static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) } -
-		vec2{
-		static_cast<float>(old_screenpos.x) / static_cast<float>(sSize.x),
-		static_cast<float>(old_screenpos.y) / static_cast<float>(sSize.y) };
+		vec2 sSize = vec2{ GetScreenSize() };
+		ndc_screendel = vec2{ screenpos.x, screenpos.y } / sSize - vec2{ old_screenpos.x, old_screenpos.y } / sSize;
 
 		screendel = screenpos - old_screenpos;
 	}

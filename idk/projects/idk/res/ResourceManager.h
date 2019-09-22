@@ -3,7 +3,7 @@
 #include <idk_config.h>
 #include <reflect/reflect.h>
 #include <core/ISystem.h>
-#include <file/FileHandle.h>
+#include <file/PathHandle.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
 #include <res/FileResources.h>
@@ -44,11 +44,11 @@ namespace idk
 
 		// resource creation
 		template<typename Resource> RscHandle<Resource> Create();
-		template<typename Resource> RscHandle<Resource> Create(FileHandle);
-		template<typename Resource> RscHandle<Resource> Create(FileHandle path, Guid guid);
+		template<typename Resource> RscHandle<Resource> Create(PathHandle);
+		template<typename Resource> RscHandle<Resource> Create(PathHandle path, Guid guid);
 		template<typename Resource, 
 			typename = sfinae<has_tag_v<Resource, MetaTag>>
-		> RscHandle<Resource> Create(FileHandle path, Guid guid, const typename Resource::Metadata& meta);
+		> RscHandle<Resource> Create(PathHandle path, Guid guid, const typename Resource::Metadata& meta);
 
 		template<typename RegisterMe, typename ... Args, 
 			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
@@ -59,11 +59,11 @@ namespace idk
 		> RscHandle<RegisterMe> Emplace(Guid guid, Args&& ...);
 
 		// file operations
-		FileResources LoadFile(FileHandle path_to_file);
-		FileResources LoadFile(FileHandle path_to_file, const MetaFile& meta);
-		FileResources ReloadFile(FileHandle path_to_file);
-		size_t        UnloadFile(FileHandle path_to_file);
-		FileResources GetFileResources(FileHandle path_to_file);
+		FileResources LoadFile(PathHandle path_to_file);
+		FileResources LoadFile(PathHandle path_to_file, const MetaFile& meta);
+		FileResources ReloadFile(PathHandle path_to_file);
+		size_t        UnloadFile(PathHandle path_to_file);
+		FileResources GetFileResources(PathHandle path_to_file);
 
 		bool          Associate(string_view mount_path, GenericRscHandle f);
 

@@ -1,15 +1,17 @@
 #pragma once
 
 #include <gfx/Mesh.h>
+#include <gfx/MeshFactory.h>
 #include <res/ResourceFactory.h>
 namespace idk::ogl
 {
 	class OpenGLMeshFactory
-		: public ResourceFactory<Mesh>
+		: public IMeshFactory
 	{
 	public:
+		void GenerateDefaultMeshes() override;
 		unique_ptr<Mesh> GenerateDefaultResource() override;
 		unique_ptr<Mesh> Create() override;
-		unique_ptr<Mesh> Create(FileHandle filepath) override;
+		unique_ptr<Mesh> Create(PathHandle filepath) override;
 	};
 }

@@ -30,6 +30,15 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
+	inline constexpr tvec<T, D>::tvec(T* ptr)
+	{
+		auto wrtr = begin();
+		const auto etr = end();
+		while (wrtr != etr)
+			*wrtr++ = *ptr++;
+	}
+
+	template<typename T, unsigned D>
 	T tvec<T, D>::length_sq() const
 	{
 		return dot(*this);

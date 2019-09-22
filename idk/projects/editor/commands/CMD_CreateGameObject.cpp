@@ -8,10 +8,16 @@
 
 #include "pch.h"
 #include <editor/commands/CMD_CreateGameObject.h>
+#include <common/Transform.h>
 #include <scene/SceneManager.h>
 
 namespace idk {
 
+
+	CMD_CreateGameObject::CMD_CreateGameObject(Handle<GameObject> go)
+	{
+		parenting_gameobject = go;
+	}
 
 	CMD_CreateGameObject::CMD_CreateGameObject()
 	{
@@ -20,6 +26,11 @@ namespace idk {
 	bool CMD_CreateGameObject::execute()
 	{
 		game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+
+		if (parenting_gameobject) {
+			game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject,false);
+		}
+
 		return game_object_handle ? true : false; //Return true if create gameobject is successful
 	}
 

@@ -339,7 +339,7 @@ namespace idk
 	template<typename T>
 	trad<T> asin(const T& frac)
 	{
-		return trad<T>(std::acos(frac));
+		return trad<T>(std::asin(frac));
 	}
 	template<typename T>
 	trad<T> atan(const T& frac)

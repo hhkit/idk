@@ -19,7 +19,8 @@ namespace idk::ogl
 
 	OpenGLBuffer::~OpenGLBuffer()
 	{
-		glDeleteBuffers(1, &_id);
+		if (_id)
+			glDeleteBuffers(1, &_id);
 	}
 
 	GLuint OpenGLBuffer::type() const
@@ -42,10 +43,9 @@ namespace idk::ogl
 	{
 
 #pragma warning(disable:4312)
-		glBindBuffer(_type, _id);
+		Bind();
 		for (auto& elem : descriptor)
 		{
-			GL_INT;
 			auto find_type = OpenGLAttribs.find(elem.attrib);
 			assert(find_type != OpenGLAttribs.end());
 

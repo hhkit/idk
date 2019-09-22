@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameObject.h"
 #include <common/Transform.h>
+#include <common/Name.h>
 namespace idk
 {
 	GenericHandle GameObject::AddComponent(reflect::type type)
@@ -58,5 +59,15 @@ namespace idk
 	Handle<class GameObject> GameObject::Parent() const
 	{
 		return Transform()->parent;
+	}
+
+	string_view GameObject::Name() const
+	{
+		return GetComponent<class Name>()->name;
+	}
+
+	void GameObject::Name(string_view name)
+	{
+		GetComponent<class Name>()->name = name;
 	}
 }

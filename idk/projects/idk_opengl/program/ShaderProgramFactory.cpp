@@ -9,7 +9,7 @@ namespace idk::ogl
 		return std::make_unique<ogl::Program>();
 	}
 
-	unique_ptr<ShaderProgram> ShaderProgramFactory::Create(FileHandle filepath)
+	unique_ptr<ShaderProgram> ShaderProgramFactory::Create(PathHandle filepath)
 	{
 		auto program = std::make_unique<ogl::Program>();
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, false);

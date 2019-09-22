@@ -2,7 +2,7 @@
 
 #define MAX_LIGHTS 8
 
-layout(set=3,binding=0) uniform sampler2D tex;
+U_LAYOUT(3, 0) uniform sampler2D tex;
 
 layout(location=1)in VS_OUT
 {

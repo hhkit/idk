@@ -53,7 +53,7 @@ namespace idk
 		return handle;
 	}
 	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath)
+	inline RscHandle<Resource> ResourceManager::Create(PathHandle filepath)
 	{
 		auto retval = Create<Resource>(filepath, Guid::Make());
 		if (!retval)
@@ -66,7 +66,7 @@ namespace idk
 	}
 
 	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath, Guid guid)
+	inline RscHandle<Resource> ResourceManager::Create(PathHandle filepath, Guid guid)
 	{
 		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
 		if (itr != table.end())
@@ -86,7 +86,7 @@ namespace idk
 	}
 
 	template<typename Resource, typename>
-	inline RscHandle<Resource> ResourceManager::Create(FileHandle filepath, Guid guid, const typename Resource::Metadata& meta)
+	inline RscHandle<Resource> ResourceManager::Create(PathHandle filepath, Guid guid, const typename Resource::Metadata& meta)
 	{
 		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
 		if (itr != table.end())

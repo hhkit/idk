@@ -7,8 +7,8 @@
 namespace idk
 {
 	ENUM(ColorFormat, char,
-		sRGB_8,
-		sRGBA_8,
+		RGB_8,
+		RGBA_8,
 		RGBF_16,
 		RGBF_32,
 		RGBAF_16,
@@ -19,6 +19,13 @@ namespace idk
 		Repeat,
 		MirrorRepeat,
 		Clamp
+	);
+
+	ENUM(InputChannels, char
+	,	RED
+	,	RG
+	,	RGB
+	,	RGBA
 	);
 
 	struct TextureMeta

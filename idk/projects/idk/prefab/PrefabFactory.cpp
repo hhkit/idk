@@ -16,7 +16,7 @@ namespace idk
 		return std::make_unique<Prefab>();
 	}
 
-	unique_ptr<Prefab> PrefabFactory::Create(FileHandle filepath)
+	unique_ptr<Prefab> PrefabFactory::Create(PathHandle filepath)
 	{
 		std::stringstream ss;
 		ss << filepath.Open(idk::FS_PERMISSIONS::READ).rdbuf();

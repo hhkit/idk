@@ -10,9 +10,8 @@
 
 namespace idk
 {
-	FileResources OpenGLTextureLoader::Create(FileHandle path_to_resource)
+	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource)
 	{
-
 		//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 		
@@ -21,32 +20,74 @@ namespace idk
 		auto texture_handle = Core::GetResourceManager().Create<Texture>();
 
 		auto tm = texture_handle->GetMeta();
-		//auto texture_id = (unsigned int)texture_handle->ID();
 
 		ivec2 size{};
 		int channels{};
 
-		auto data = stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0);
+		auto data = std::unique_ptr<void, decltype(&stbi_image_free)>
+		{
+			stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0),
+			stbi_image_free
+		};
+		if (data) // stbi image can fail
+		{
+			auto col_format = [&]() -> InputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return InputChannels::RED;
+			case 2: return InputChannels::RG;
+			case 3: return InputChannels::RGB;
+			case 4: return InputChannels::RGBA;
+			}
+			}();
 
-		assert(data);
+			texture_handle.as<ogl::OpenGLTexture>().Buffer(data.get(), size, col_format);
 
-		texture_handle.as<ogl::OpenGLTexture>().Buffer(data, size, tm.internal_format);
-
-		//auto& tHandle = RscHandle<Texture>(texture_handle.guid);
-
-		//auto thandl = RscHandle{ texture_handle }.as<Texture>();
-
-		retval.resources.emplace_back(texture_handle);
-
+			retval.resources.emplace_back(texture_handle);
+		}
 		return retval;
 	}
 
-	FileResources OpenGLTextureLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
-	{
-		UNREFERENCED_PARAMETER(path_to_resource);
-		UNREFERENCED_PARAMETER(path_to_meta);
+	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
+	{//Assert for now
+		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
-		return Create(path_to_resource);
+		FileResources retval;
+
+		auto texture_handle = Core::GetResourceManager().Emplace<ogl::OpenGLTexture>(path_to_meta.guids[0]);
+
+		auto& first_meta = path_to_meta.resource_metas[0];
+		if (first_meta.is<Texture::Metadata>())
+			texture_handle->SetMeta(first_meta.get<Texture::Metadata>());
+
+		ivec2 size{};
+		int channels{};
+
+		auto data = std::unique_ptr<void, decltype(&stbi_image_free)>
+		{
+			stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0),
+			stbi_image_free
+		};
+
+		if (data) // stbi image can fail
+		{
+			auto col_format = [&]() -> InputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return InputChannels::RED;
+			case 2: return InputChannels::RG;
+			case 3: return InputChannels::RGB;
+			case 4: return InputChannels::RGBA;
+			}
+			}();
+
+			texture_handle.as<ogl::OpenGLTexture>().Buffer(data.get(), size, col_format);
+
+			retval.resources.emplace_back(RscHandle<Texture>{texture_handle});
+		}
+		return retval;
 	}
 
 };

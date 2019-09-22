@@ -9,6 +9,6 @@ namespace idk::ogl
 	{
 	public:
 		unique_ptr<ShaderProgram> GenerateDefaultResource() override;
-		unique_ptr<ShaderProgram> Create(FileHandle filepath) override;
+		unique_ptr<ShaderProgram> Create(PathHandle filepath) override;
 	};
 }

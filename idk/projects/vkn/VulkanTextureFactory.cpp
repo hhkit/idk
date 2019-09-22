@@ -35,11 +35,11 @@ namespace idk::vkn
 	{
 		return std::make_unique<VknTexture>();
 	}
-	unique_ptr<Texture> VulkanTextureFactory::Create(FileHandle filepath)
+	unique_ptr<Texture> VulkanTextureFactory::Create(PathHandle filepath)
 	{
 		return unique_ptr<Texture>();
 	}
-	unique_ptr<Texture> VulkanTextureFactory::Create(FileHandle filepath, const Texture::Metadata&)
+	unique_ptr<Texture> VulkanTextureFactory::Create(PathHandle filepath, const Texture::Metadata&)
 	{
 		return unique_ptr<Texture>();
 	}

@@ -27,9 +27,14 @@ namespace idk::win
 		_last_char = c;
 	}
 
-	void InputManager::SetMouseDragging(bool d)
+	void InputManager::SetMouseScroll(const ivec2& scroll)
 	{
-		_dragging = d;
+		_curr_mouse_scroll += scroll;
+	}
+
+	ivec2 InputManager::GetMouseScroll() const
+	{
+		return _curr_mouse_scroll;
 	}
 
 	void InputManager::SwapBuffers()
@@ -37,6 +42,7 @@ namespace idk::win
 		prev_buf() = curr_buf();
 		_curr_buffer = !_curr_buffer;
 		_last_char = '\0';
+		_curr_mouse_scroll = ivec2{};
 	}
 
 	bool InputManager::GetKeyDown(int index)
@@ -58,10 +64,6 @@ namespace idk::win
 	bool InputManager::GetMouseUp(int index)
 	{
 		return curr_buf()[index] == false && prev_buf()[index] == true;
-	}
-	bool InputManager::IsMouseDragging(int index)
-	{
-		return curr_buf()[index] && _dragging;
 	}
 	char InputManager::GetChar()
 	{

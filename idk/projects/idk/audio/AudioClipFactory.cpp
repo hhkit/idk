@@ -5,7 +5,7 @@
 //@date		18 AUG 2019
 //@brief	A factory class that creates AudioClip resources.
 /*
-	FileHandle.CanOpen() first before getting full path.
+	PathHandle.CanOpen() first before getting full path.
 
 */
 //////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace idk {
 		return std::make_unique<AudioClip>();
 	}
 
-	unique_ptr<AudioClip> AudioClipFactory::Create(FileHandle filePath)
+	unique_ptr<AudioClip> AudioClipFactory::Create(PathHandle filePath)
 	{
 		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();

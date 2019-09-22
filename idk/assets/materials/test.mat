@@ -1,18 +1,18 @@
 master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
-  ee0f4563-64fa-4e16-9e5c-de09b9bfef73: 
-    name: input\VertexNormal
-    guid: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
-    output_slots: 
-    - type: VEC3
-    position: {x: 104.000000, y: 74.000000}
-    input_slots: []
   e046cf72-530b-4783-ad90-75606959bd1d: 
     name: $0
     guid: e046cf72-530b-4783-ad90-75606959bd1d
     output_slots: 
     - type: FLOAT
     position: {x: 313.000000, y: 95.000000}
+    input_slots: []
+  ee0f4563-64fa-4e16-9e5c-de09b9bfef73: 
+    name: input\VertexNormal
+    guid: ee0f4563-64fa-4e16-9e5c-de09b9bfef73
+    output_slots: 
+    - type: VEC3
+    position: {x: 104.000000, y: 74.000000}
     input_slots: []
   d5084548-0ebd-44fb-b98c-94bd0951100a: 
     name: master\PBR

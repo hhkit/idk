@@ -31,7 +31,7 @@ namespace idk {
 		:IGE_IWindow{ "Hierarchy##IGE_HierarchyWindow",true,ImVec2{ 300,600 },ImVec2{ 150,150 } } {		//Delegate Constructor to set window size
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
-		window_flags = ImGuiWindowFlags_NoCollapse;
+		window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
 
 
 
@@ -68,15 +68,16 @@ namespace idk {
 
 
 		//Toolbar
-		const ImVec2 toolBarSize{ window_size.x, 18.0f };
-		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoSavedSettings
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoDocking
-			| ImGuiWindowFlags_NoCollapse;
-		ImGui::BeginChild("HierarchyToolBar", toolBarSize, false, childFlags);
+		//const ImVec2 toolBarSize{ window_size.x, 18.0f };
+		//const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
+		//	| ImGuiWindowFlags_NoScrollbar
+		//	| ImGuiWindowFlags_NoResize
+		//	| ImGuiWindowFlags_NoSavedSettings
+		//	| ImGuiWindowFlags_NoMove
+		//	| ImGuiWindowFlags_NoDocking
+		//	| ImGuiWindowFlags_NoCollapse;
+		//ImGui::BeginChild("HierarchyToolBar", toolBarSize, false, childFlags);
+        ImGui::BeginMenuBar();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
 
@@ -104,13 +105,15 @@ namespace idk {
 		ImGui::SetCursorPosX(startPos.x+15);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-		static char searchBarChar[512];
-		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 512, ImVec2{window_size.x-100,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
+		static char searchBarChar[128];
+		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 128, ImVec2{window_size.x-100,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
 			//Do something
 		}
 		ImGui::PopStyleVar();
 
-		ImGui::EndChild();
+		ImGui::EndMenuBar();
+
+        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();

@@ -106,6 +106,14 @@ namespace idk
 		};
 	}
 
+	template<typename T>
+	tmat<T, 3, 3> orient(const tvec<T, 3> & z_prime)
+	{
+		auto axis = tvec<T, 3>{0, 0, 1}.cross(z_prime);
+		auto angle = asin(axis.length());
+		return rotate(axis, angle);
+	}
+
 	template<typename T, unsigned D>
 	tmat<T, D, D> orthonormalize(const tmat<T, D, D>& m)
 	{

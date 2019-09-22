@@ -1,48 +1,55 @@
 #include "pch.h"
-#include <phys/collision_raycast.h>
+#include <phys/raycasts/collision_raycast.h>
 
-using idk::ray;
-
-using idk::phys::col_result;
-
-bool col_result_expect(const col_result& data, float perp_dist, float dist)
+namespace idk::phys
 {
-	using namespace idk;
-	bool resultv = idk::phys::epsilon_equal(data.dist, dist) && phys::epsilon_equal(data.perp_dist, perp_dist);
-	return resultv;
-}
-bool IsNearest(ray r, ray line ,col_result v)
-{
-	using namespace idk;
-	bool result = false;
-	if(v.dist != std::numeric_limits<float>::infinity())
+	bool col_result_expect(const col_result& data, float perp_dist, float dist)
 	{
-		ray& l=line;
-		float t = v.dist;
-		vec3 point = r.get_point(t);
-		vec3 disp = point - l.origin;
-		vec3 l_disp_to_closest = disp.project_onto(l.direction);
-		vec3 l_closest_point = l.origin + l_disp_to_closest;
-
-		vec3 offset_plus = point + r.direction * 0.1f;
-		vec3 offset_minus = point - r.direction * 0.1f;
-		float perp_dist = l_closest_point.distance(point);
-		result = (perp_dist < l_closest_point.distance(offset_plus) && perp_dist < l_closest_point.distance(offset_minus)) && phys::epsilon_equal(perp_dist,v.perp_dist);
+		using namespace idk;
+		bool resultv = data ? true :
+			epsilon_equal(data.error().perp_dist, dist) && phys::epsilon_equal(data.error().perp_dist, perp_dist);
+		return resultv;
 	}
-	else
+	bool IsNearest(ray r, ray line, col_result v)
 	{
-		vec3 diff = line.origin - r.origin;
-		result = phys::epsilon_equal(r.direction.dot(line.direction), r.direction.length() * line.direction.length()) && (diff - diff.project_onto(r.direction)).length()==v.perp_dist;
-	}
-	return result;
-}
-bool PD_Test(ray r, ray line)
-{
-	using namespace idk;
-	auto cresult = phys::collide_ray_line(r, line);
-	return IsNearest(r, line, cresult);
-}
+		using namespace idk;
+		bool result = false;
+		const auto dist = [&]()
+		{
+			if (v)
+				return v.value().penetration_depth;
+			else
+				return v.error().perp_dist;
+		}();
 
+		if (dist != std::numeric_limits<float>::infinity())
+		{
+			ray& l = line;
+			float t = dist;
+			vec3 point = r.get_point(t);
+			vec3 disp = point - l.origin;
+			vec3 l_disp_to_closest = disp.project_onto(l.velocity);
+			vec3 l_closest_point = l.origin + l_disp_to_closest;
+	
+			vec3 offset_plus = point + r.velocity * 0.1f;
+			vec3 offset_minus = point - r.velocity * 0.1f;
+			float perp_dist = l_closest_point.distance(point);
+			result = (perp_dist < l_closest_point.distance(offset_plus) && perp_dist < l_closest_point.distance(offset_minus)) && phys::epsilon_equal(perp_dist, perp_dist);
+		}
+		else
+		{
+			vec3 diff = line.origin - r.origin;
+			result = phys::epsilon_equal(r.velocity.dot(line.velocity), r.velocity.length() * line.velocity.length()) && (diff - diff.project_onto(r.velocity)).length() == dist;
+		}
+		return result;
+	}
+	bool PD_Test(ray r, ray line)
+	{
+		using namespace idk;
+		auto cresult = phys::collide_ray_line(r, line);
+		return IsNearest(r, line, cresult);
+	}
+}
 TEST(StaticCollisionTest, RayLineTest)
 {
 	using namespace idk;

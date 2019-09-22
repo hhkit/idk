@@ -22,6 +22,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <editor/Vulkan_ImGui_Interface.h>
 #include <editor/OpenGL_ImGui_Interface.h>
+#include <win32/WindowsApplication.h>
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
@@ -32,6 +33,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/windows/IGE_WindowList.h>
 #include <gfx/ShaderGraphFactory.h>
 #include <res/ForwardingExtensionLoader.h>
+#include <imgui/ImGuizmo.h>
 
 
 namespace idk
@@ -51,6 +53,10 @@ namespace idk
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".obj");
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
 			Core::GetResourceManager().RegisterExtensionLoader<OpenGLCubeMapLoader>(".cbm");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".png");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".jpg");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".jpeg");
+			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".dds");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
@@ -61,6 +67,8 @@ namespace idk
 		default:
 			break;
 		}
+
+        Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
 
         Core::GetResourceManager().RegisterFactory<shadergraph::Factory>();
         Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<shadergraph::Graph>>(".mat");
@@ -74,7 +82,73 @@ namespace idk
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 
         //Imgui Style
-        ImGui::StyleColorsClassic();
+        auto& style = ImGui::GetStyle();
+        style.FramePadding = ImVec2(4.0f, 1.0f);
+        style.WindowRounding = 0;
+        style.TabRounding = 0;
+        style.IndentSpacing = 14.0f;
+        style.ScrollbarRounding = 0;
+        style.GrabRounding = 0;
+        style.ChildRounding = 0;
+        style.PopupRounding = 0;
+        style.CurveTessellationTol = 0.5f;
+
+        auto* colors = style.Colors;
+        ImGui::StyleColorsDark();
+
+        colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
+
+        // grays
+        colors[ImGuiCol_WindowBg] =
+            ImColor(29, 34, 41).Value;
+        colors[ImGuiCol_PopupBg] =
+        colors[ImGuiCol_ScrollbarBg] =
+            ImColor(43, 49, 56, 240).Value;
+        colors[ImGuiCol_Border] =
+        colors[ImGuiCol_Separator] =
+        colors[ImGuiCol_ScrollbarGrab] =
+            ImColor(63, 70, 77).Value;
+            //ImColor(106, 118, 129).Value;
+
+        colors[ImGuiCol_MenuBarBg] =
+            ImColor(36, 58, 74).Value;
+        colors[ImGuiCol_ScrollbarBg].w = 0.5f;
+
+        // main accent - 2
+        colors[ImGuiCol_TitleBg] =
+            ImColor(5, 30, 51).Value;
+
+        // main accent - 1
+        colors[ImGuiCol_TitleBgActive] =
+        colors[ImGuiCol_TabUnfocused] =
+            ImColor(11, 54, 79).Value;
+
+        // main accent
+        colors[ImGuiCol_Tab] =
+        colors[ImGuiCol_TabUnfocusedActive] =
+        colors[ImGuiCol_FrameBg] =
+        colors[ImGuiCol_Button] =
+        colors[ImGuiCol_Header] =
+        colors[ImGuiCol_SeparatorHovered] =
+        colors[ImGuiCol_ScrollbarGrabHovered] =
+            ImColor(23, 75, 111).Value;
+
+        // main accent + 1
+        colors[ImGuiCol_TabHovered] =
+        colors[ImGuiCol_TabActive] =
+        colors[ImGuiCol_ButtonHovered] =
+        colors[ImGuiCol_FrameBgHovered] =
+        colors[ImGuiCol_HeaderHovered] =
+        colors[ImGuiCol_SeparatorActive] =
+        colors[ImGuiCol_ScrollbarGrabActive] =
+            ImColor(46, 115, 143).Value;
+
+        // main accent + 2
+        colors[ImGuiCol_TextSelectedBg] =
+        colors[ImGuiCol_ButtonActive] =
+        colors[ImGuiCol_FrameBgActive] =
+        colors[ImGuiCol_HeaderActive] =
+            ImColor(65, 153, 163).Value;
 
         // font config
         ImFontConfig config;
@@ -87,15 +161,15 @@ namespace idk
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
 
-		ige_windows.push_back(std::make_unique<IGE_SceneView>());
-		ige_windows.push_back(std::make_unique<IGE_ProjectWindow>());
-		ige_windows.push_back(std::make_unique<IGE_HierarchyWindow>());
-		ige_windows.push_back(std::make_unique<IGE_InspectorWindow>());
-		ige_windows.push_back(std::make_unique<IGE_MaterialEditor>());
+#define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
+		ADD_WINDOW(IGE_SceneView);
+		ADD_WINDOW(IGE_ProjectWindow);
+		ADD_WINDOW(IGE_HierarchyWindow);
+		ADD_WINDOW(IGE_InspectorWindow);
+		ADD_WINDOW(IGE_MaterialEditor);
+#undef ADD_WINDOW
 
 		ige_main_window->Initialize();
-
-		//ige_main_window->Initialize();
 		for (auto& i : ige_windows) {
 			i->Initialize();
 		}
@@ -104,13 +178,20 @@ namespace idk
 
 	void IDE::Shutdown()
 	{
+        ige_windows.clear();
 		_interface->Shutdown();
 		_interface.reset();
 	}
 
 	void IDE::EditorUpdate()
 	{
+        if (closing)
+            return;
+
 		_interface->ImGuiFrameBegin();
+		ImGuizmo::BeginFrame();
+
+
 
 		ige_main_window->DrawWindow();
 
@@ -122,7 +203,7 @@ namespace idk
 			ImGui::ShowDemoWindow(&bool_demo_window);
 
 
-		_interface->Inputs()->Update();
+		//_interface->Inputs()->Update(); //Moved to SceneView.cpp
 		
 
 
@@ -142,4 +223,5 @@ namespace idk
 		// TODO: insert return statement here
 		return _interface->Inputs()->main_camera;
 	}
+
 }

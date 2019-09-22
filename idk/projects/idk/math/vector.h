@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <cmath>
 
 #include <math/linear.h>
 #include "Vector_detail.h"
@@ -27,6 +28,8 @@ namespace idk
 		>
 		constexpr explicit tvec(const Args& ...);
 
+		constexpr explicit tvec(T* ptr);
+
 		template<unsigned D2,
 			typename = std::enable_if_t<(D2 > D)>
 		>
@@ -39,7 +42,7 @@ namespace idk
 		T      distance(const tvec&) const;
 
 		T      dot(const tvec&) const;
-		tvec     project_onto(const tvec&)const;
+		tvec   project_onto(const tvec&)const;
 		tvec&  normalize();
 		tvec   get_normalized() const;
 
@@ -50,6 +53,7 @@ namespace idk
 		constexpr const T* end() const noexcept;
 		constexpr T*       data() noexcept;
 		constexpr const T* data() const noexcept;
+		constexpr size_t   size() const { return D; }
 
 		// member functions
 
@@ -65,8 +69,9 @@ namespace idk
 		return lhs.dot(rhs);
 	}
 
+	using std::abs;
 	template<typename T, unsigned D>
-	auto vabs(const tvec<T, D>& lhs)
+	auto abs(const tvec<T, D>& lhs)
 	{
 		return detail::Abs<std::make_index_sequence<D>>::abs(lhs);
 	}

@@ -3,8 +3,22 @@
 
 namespace idk::phys
 {
-	col_result::operator bool() const
+	col_result col_result::operator-() const
 	{
-		return epsilon_equal(perp_dist, 0) && !(dist == std::numeric_limits<float>::infinity()) && dist >= -epsilon;
+		return *this ? col_result{ -value() } : col_result{ -error() };
+	}
+
+	col_failure col_failure::operator-() const
+	{
+		auto copy = *this;
+		copy.separating_axis = -copy.separating_axis;
+		return copy;
+	}
+
+	col_success col_success::operator-() const
+	{
+		auto copy = *this;
+		copy.normal_of_collision = -copy.normal_of_collision;
+		return copy;
 	}
 }

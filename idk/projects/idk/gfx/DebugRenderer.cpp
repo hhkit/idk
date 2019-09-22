@@ -1,89 +1,61 @@
 #include "stdafx.h"
 #include "DebugRenderer.h"
-#include <map>
-#include <vector>
-#include <fstream>
-#include <sstream>
 
+#include <gfx/MeshFactory.h>
 #include <math/matrix_transforms.h>
 
 namespace idk
 {
-	//Temporary, need to use resource manager later
-	std::string inline GetBinaryFile(const std::string& filepath)
+	void DebugRenderer::Draw(RscHandle<Mesh> mesh, const mat4& transform, const color& c, seconds duration, bool depth_test)
 	{
-		std::ifstream file{ filepath,std::ios::binary };
-		std::stringstream data;
-		data << file.rdbuf();
-		file.close();
-		return data.str();
+		debug_info.emplace_back(DebugInfo{ mesh, transform, c, duration, depth_test });
+	}
+	void DebugRenderer::Draw(const aabb& bounding_box, const color& c, seconds duration, bool depth_test)
+	{
+		Draw(box{ bounding_box.center(), bounding_box.extents() }, c, duration, depth_test);
+	}
+	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
+	{
+		mat4 tfm = translate(oriented_box.center) * mat4 { scale(oriented_box.extents / 2)* oriented_box.axes };
+		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
 	}
 
-	//struct DebugRenderer::pimpl
-	//{
-	//	std::map<DbgShape, vbo> shape_buffers;
-	//};
-
-
-
-	void DebugRenderer::Init()
+	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
 	{
-		info = std::make_shared<debug_info>();
-		using buffer_desc  = idk::buffer_desc;
-		using binding_info = idk::buffer_desc::binding_info;
-		using attribute_info = idk::buffer_desc::attribute_info;
-		//impl = std::make_unique<pimpl>();
-
-		idk::pipeline_config config;
-		auto vert_data = GetBinaryFile("shaders/dbgvertex.vert.spv");
-		auto frag_data = GetBinaryFile("shaders/dbgfragment.frag.spv");
-		config.frag_shader = frag_data;
-		config.vert_shader = vert_data;
-		config.fill_type = idk::FillType::eLine;
-		config.prim_top = idk::PrimitiveTopology::eTriangleList;
-		uniform_layout_t uniform_layout{};
-		uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 0,1,{uniform_layout_t::eVertex} });
-		uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 1,1,{uniform_layout_t::eVertex} });
-		config.uniform_layouts.emplace(0, uniform_layout);
-		config.buffer_descriptions.emplace_back(
-			buffer_desc{
-				binding_info{0,sizeof(idk::debug_vertex),idk::VertexRate::eVertex},
-				{
-					attribute_info{ idk::AttribFormat::eSVec3,0,0 }
-				}
-			});
-		config.buffer_descriptions.emplace_back(
-			buffer_desc{
-				binding_info{1,sizeof(idk::debug_instance),idk::VertexRate::eInstance},
-				{
-					 attribute_info{ idk::AttribFormat::eSVec3,0, offsetof(idk::debug_instance,color) }
-					,attribute_info{ idk::AttribFormat::eMat4 ,1, offsetof(idk::debug_instance,model) }
-				}
-			});
-
-		Init(config);
-
-
+		assert(false);
 	}
 
-
-	void DebugRenderer::DrawShape(DbgShape shape, vec3 pos, vec3 scale, vec3 axis, idk::rad angle, vec4 color)
+	void DebugRenderer::Draw(const ray& ray, const color& c, seconds duration, bool depth_test)
 	{
-		this->info->render_info[shape].emplace_back(debug_info::inst_data{ color, idk::translate(pos) * mat4(idk::rotate(axis,angle) * idk::scale(scale)) });
+		//mat4 tfm = translate(ray.origin) * mat4(rotate(ray.direction))
+		auto line_tfm = look_at(ray.origin + ray.velocity / 2, ray.origin + ray.velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.velocity.length() / 2 }) };
+		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
+
+		auto orient_tfm = orient(ray.velocity.get_normalized());
+		auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4{ orient(ray.velocity.get_normalized()) * scale(vec3{ 0.025f }) };
+		Draw(Mesh::defaults[MeshType::Tetrahedron], arrow_tfm, c, duration, depth_test);
+		
 	}
 
-	void DebugRenderer::DrawShape(const DebugObject& obj)
+	void DebugRenderer::Draw(const sphere& sphere, const color& c, seconds duration, bool depth_test)
 	{
-		DrawShape(obj.shape, obj.pos, obj.scale, obj.axis, obj.angle, obj.color);
+		mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius }) };
+		Draw(Mesh::defaults[MeshType::Sphere], tfm, c, duration, depth_test);
 	}
 
-	void DebugRenderer::Render(const mat4& , const mat4& )
+	void DebugRenderer::GraphicsTick()
 	{
+		for (auto& elem : debug_info)
+			elem.display_time += Core::GetRealDT();
+		
+		debug_info.erase(std::remove_if(debug_info.begin(), debug_info.end(), [](auto& elem) -> bool
+		{
+			return elem.display_time > elem.duration;
+		}), debug_info.end());
 	}
 
-
-	DebugRenderer::~DebugRenderer()
+	span<const DebugRenderer::DebugInfo> DebugRenderer::GetWorldDebugInfo() const
 	{
-
+		return span<const DebugRenderer::DebugInfo>{debug_info};
 	}
 }

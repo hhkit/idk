@@ -23,7 +23,7 @@
 
 #include <shellapi.h>//CommandLineToArgv
 
-//#define USE_RENDER_DOC
+#define USE_RENDER_DOC
 
 namespace idk
 {
@@ -82,7 +82,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			c->AddSystem<vkn::VulkanDebugRenderer>();
 			c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
@@ -101,17 +100,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
+	Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png");
+
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	
 	auto camera = scene->CreateGameObject();
 	Handle<Camera> camHandle = camera->AddComponent<Camera>();
 	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0.0, -2.5f };
+	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0, 2.5f };
+	camHandle->far_plane = 100.f;
 	camHandle->LookAt(vec3(0, 0, 0));
 	camHandle->render_target = RscHandle<RenderTarget>{};
 	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
 	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
-	float divByVal = 1.f;
+	float divByVal = 2.f;
 	if (&c->GetSystem<IDE>())
 	{
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
@@ -134,7 +136,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/Running.fbx" });
+			auto resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
 			mesh_rend->mesh = resources[0].As<Mesh>();
 			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
 			animator->AddAnimation(resources[2].As<anim::Animation>());
@@ -146,7 +148,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 	auto tmp_tex = RscHandle<Texture>{};
 	if(gfx_api == GraphicsAPI::Vulkan)
-		tmp_tex =Core::GetResourceManager().LoadFile(FileHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
+		tmp_tex =Core::GetResourceManager().LoadFile(PathHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
+
+	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
 	 //create_anim_obj(vec3{ 0,0,0 });
@@ -154,15 +158,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
-		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		go->GetComponent<Transform>()->scale /= divByVal;// 200.f;
+		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
+		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
-		//Core::GetResourceManager().LoadFile(FileHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if (gfx_api != GraphicsAPI::Vulkan)
-			mesh_rend->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//if (gfx_api != GraphicsAPI::Vulkan)
+		//	mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
 
@@ -171,19 +176,93 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	createtest_obj(vec3{ 0.5, 0, 0 });
 	createtest_obj(vec3{ -0.5, 0, 0 });
-	createtest_obj(vec3{ 0, 0.5, 0 });
-	createtest_obj(vec3{ 0, -0.5, 0 });
+	//createtest_obj(vec3{ 0, 0.5, 0 });
+	//createtest_obj(vec3{ 0, -0.5, 0 });
+
+	auto floor = scene->CreateGameObject();
+	floor->Transform()->position = vec3{ 0, -1, 0 };
+	//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+	floor->Transform()->scale    = vec3{ 10, 2, 10 };
+	floor->AddComponent<Collider>()->shape = box{};
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 5, 5, 0 };
+		wall->Transform()->scale = vec3{ 2, 10, 10 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ -5, 5, 0 };
+		wall->Transform()->scale = vec3{ 2, 10, 10 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 0, 5, 5 };
+		wall->Transform()->scale = vec3{ 10, 10, 2 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
+	{
+		auto wall = scene->CreateGameObject();
+		wall->Transform()->position = vec3{ 0, 5, -5 };
+		wall->Transform()->scale = vec3{ 10, 10, 2 };
+		wall->AddComponent<Collider>()->shape = box{};
+	}
 
 	auto light = scene->CreateGameObject();
 	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
 	light->AddComponent<Light>();
 	light->AddComponent<TestComponent>();
-	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(FileHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+	//auto bounce_kun = scene->CreateGameObject();
+	//bounce_kun->GetComponent<Name>()->name = "bouncer";
+	//bounce_kun->Transform()->position = vec3{ 0, 1, 0 };
+	//bounce_kun->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+	//bounce_kun->Transform()->scale = vec3{ 1.f / 4 };
+	//bounce_kun->AddComponent<RigidBody>();
+	//bounce_kun->AddComponent<Light>();
+	//bounce_kun->AddComponent<Collider>()->shape = box{};
+	//bounce_kun->AddComponent<TestComponent>();
 
-	//auto mover = createtest_obj(vec3{ 0, 0, 0 });
-	//mover->AddComponent<TestComponent>();
-	//mover->AddComponent<RigidBody>();
+	/* physics resolution demonstration */
+	{
+		auto seduceme = scene->CreateGameObject();
+		seduceme->GetComponent<Name>()->name = "seduceme";
+		seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
+		//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
+		seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
+		seduceme->Transform()->scale = vec3{ 1.f / 4 };
+		seduceme->AddComponent<RigidBody>(); // ->initial_velocity = vec3{ 0.1, 0, 0 };
+		seduceme->AddComponent<Collider>()->shape = sphere{};
+	}
+	{
+		auto seducer = scene->CreateGameObject();
+		seducer->GetComponent<Name>()->name = "seducer";
+		seducer->Transform()->position = vec3{ -2, 0.125, 0 };
+		seducer->Transform()->scale = vec3{ 1.f / 4 };
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  1, 0, 0 };
+		seducer->AddComponent<Collider>()->shape = sphere{};
+	}
+	{
+		auto seducer = scene->CreateGameObject();
+		seducer->GetComponent<Name>()->name = "seducer";
+		seducer->Transform()->position = vec3{ 2, 0.125, 0 };
+		seducer->Transform()->scale = vec3{ 1.f / 4 };
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -1, 0, 0 };
+		seducer->AddComponent<Collider>()->shape = sphere{};
+	}
 
+	if(0)
+	for (int i = 2; i < 5; ++ i)
+	{
+		auto seducemetoo = scene->CreateGameObject();
+		seducemetoo->GetComponent<Name>()->name = "seducemetoo";
+		seducemetoo->Transform()->position = vec3{ 0, i, 0 };
+		seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+		seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
+		seducemetoo->AddComponent<RigidBody>();
+		seducemetoo->AddComponent<Collider>()->shape = box{};
+	}
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

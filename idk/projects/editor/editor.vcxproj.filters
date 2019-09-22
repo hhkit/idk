@@ -76,6 +76,12 @@
     <ClInclude Include="loading\OpenGLTextureLoader.h">
       <Filter>loader</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_ModifyInput.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_ModifyInput.inl">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

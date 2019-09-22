@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-#include <file/FileHandle.h>
+#include <file/PathHandle.h>
 #include <res/ResourceFactory.h>
 #include <gfx/ShaderGraph.h>
 
@@ -12,6 +12,6 @@ namespace idk::shadergraph
     public:
         unique_ptr<Graph> GenerateDefaultResource();
         unique_ptr<Graph> Create();
-        unique_ptr<Graph> Create(FileHandle file_handle);
+        unique_ptr<Graph> Create(PathHandle file_handle);
     };
 }
