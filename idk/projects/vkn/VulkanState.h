@@ -98,18 +98,10 @@ namespace idk::vkn
 
 		void InitVulkanEnvironment(window_info info);
 		void NextFrame();
+		uint32_t MaxFramesInFlight()const { return max_frames_in_flight; }
 
-
-#pragma region ("Potentially main thing")
 		VulkanView& View();
-		unique_vbo      CreateVbo(void const* buffer_start, void const* buffer_end);
-		//unique_ubo      CreateUbo(void const* buffer_start, void const* buffer_end);
-		//unique_pipeline CreatePipeline(pipeline_config const& config);
-		void Draw(unique_vbo const& vbo, unique_ubo const& uniforms, unique_pipeline const& pipeline);
-#pragma endregion
 
-		void BeginFrame();
-		void EndFrame();
 		void AcquireFrame(vk::Semaphore signal);
 		void DrawFrame(vk::Semaphore wait, vk::Semaphore signal);
 		void PresentFrame(vk::Semaphore wait);
@@ -160,8 +152,6 @@ namespace idk::vkn
 
 
 		vk::UniqueCommandPool                m_commandpool;
-		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
-		std::vector<vk::UniqueCommandBuffer> m_commandbuffers2;
 		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
 		std::vector<vk::UniqueCommandBuffer> m_present_trf_commandbuffers;
 		vector<vk::UniqueCommandBuffer> m_blitz_commandbuffers;
@@ -175,18 +165,10 @@ namespace idk::vkn
 
 		vk::UniqueRenderPass                 m_renderpass;
 		vk::UniqueRenderPass                 m_crenderpass;
-		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;
-		vk::UniquePipelineLayout             m_pipelinelayout;
-		vk::UniquePipeline                   m_pipeline;
 
-		std::vector<vk::UniqueDeviceMemory>  m_vertex_memories;
-		std::vector<vk::UniqueBuffer      >  m_vertex_buffers;
-		vk::UniqueDeviceMemory               m_ib_memory;
-		vk::UniqueBuffer                     m_index_buffer;
 
 		std::unique_ptr<VulkanView> view_;
 
-		vector<VknTexture>					 m_textureList;
 
 		//////////Frame render variables////////
 		uint32_t					rv;
@@ -194,6 +176,8 @@ namespace idk::vkn
 		vk::Result					rvRes;
 		vk::Semaphore				waitSemaphores;
 		vk::Semaphore				readySemaphores;
+
+		//This should be replaced with a signaling system of some sort
 		bool						m_imguiNeedsToResize{ false };
 
 		//vector<FrameSubmitRenderInfo> submitList;
@@ -215,35 +199,17 @@ namespace idk::vkn
 
 		void createRenderPass();
 
-		void createDescriptorSetLayout();
-		void createGraphicsPipeline();
-
-		void createFramebuffers();
 		
 		//Texture functions start//
-		void createTextureImage();
-
-		//This two can be done tgt
-		////
-		void createTextureImageView();
-		void createTextureSampler();
-		////
-
 		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::UniqueImage& image, vk::UniqueDeviceMemory& imageMemory);
 		vk::UniqueImageView createImageView(vk::UniqueImage& img, vk::Format format);
 		//Texture functions end//
 
 		void createCommandPool();
-		void createVertexBuffers();
-		void createIndexBuffers();
-		void createUniformBuffers();
-		void createDescriptorPool();
-		void createDescriptorSet();
 		void createCommandBuffers();
 		void createSemaphores();
 
 		void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
-		void updateUniformBuffer(uint32_t image_index);
 
 		auto populateDebugMessengerCreateInfo(ValHandler* userData = nullptr) -> vk::DebugUtilsMessengerCreateInfoEXT;
 

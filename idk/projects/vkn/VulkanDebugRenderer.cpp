@@ -241,7 +241,7 @@ namespace idk::vkn
 		impl->inst_buffer.clear();
 		for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 		{
-			if (elem.mesh == Mesh::defaults[MeshType::Box])
+			//if (elem.mesh == Mesh::defaults[MeshType::Box])
 			{
 				DrawShape(DbgShape::eCube, elem.transform, elem.color);
 			}
@@ -288,27 +288,28 @@ namespace idk::vkn
 	}
 	const std::vector<vec3>& GetSquareFace(bool is_line_list)
 	{
+		static constexpr float a = 1.0f;
 		static std::vector<vec3> triangle_list{
-			vec3{ -0.5f,-0.5f,0.0f },
-			vec3{ -0.5f, 0.5f,0.0f },
-			vec3{  0.5f, 0.5f,0.0f },
-			vec3{  0.5f, 0.5f,0.0f },
-			vec3{  0.5f,-0.5f,0.0f },
-			vec3{ -0.5f,-0.5f,0.0f },
+			vec3{ -a,-a,0.0f },
+			vec3{ -a, a,0.0f },
+			vec3{  a, a,0.0f },
+			vec3{  a, a,0.0f },
+			vec3{  a,-a,0.0f },
+			vec3{ -a,-a,0.0f },
 		};
 
 		static std::vector<vec3> line_list{
 			//line list
 
-				vec3{ -0.5f,-0.5f,0.0f },
-				vec3{ -0.5f, 0.5f,0.0f },
-				vec3{ -0.5f, 0.5f,0.0f },
-				vec3{  0.5f, 0.5f,0.0f },
+				vec3{ -a,-a,0.0f },
+				vec3{ -a, a,0.0f },
+				vec3{ -a, a,0.0f },
+				vec3{  a, a,0.0f },
 
-				vec3{  0.5f, 0.5f,0.0f },
-				vec3{  0.5f,-0.5f,0.0f },
-				vec3{  0.5f,-0.5f,0.0f },
-				vec3{ -0.5f,-0.5f,0.0f },
+				vec3{  a, a,0.0f },
+				vec3{  a,-a,0.0f },
+				vec3{  a,-a,0.0f },
+				vec3{ -a,-a,0.0f },
 				//*/
 		};
 		return (is_line_list) ? line_list : triangle_list;

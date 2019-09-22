@@ -119,7 +119,7 @@ namespace idk::vkn
 	{
 		auto& curr_signal = instance_->View().CurrPresentationSignals();
 		instance_->AcquireFrame(*curr_signal.image_available);
-		auto curr_index = instance_->View().Swapchain().curr_index;
+		auto curr_index = instance_->View().CurrFrame();
 		instance_->ResourceManager().ProcessQueue(curr_index);
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
@@ -162,14 +162,6 @@ namespace idk::vkn
 		//}
 		//last_time = std::chrono::high_resolution_clock::now();
 		instance_->PresentFrame2();
-	}
-	void VulkanWin32GraphicsSystem::BeginFrame()
-	{
-		instance_->BeginFrame();
-	}
-	void VulkanWin32GraphicsSystem::EndFrame()
-	{
-		instance_->EndFrame();
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{

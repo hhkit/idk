@@ -563,7 +563,7 @@ namespace idk::vkn
 			if (aitr != allocated.end())
 			{
 				auto&& [view_buffer, vb_offset] = rs.ubo_manager.Add(state.camera.view_matrix);
-				auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
+				auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
 				auto ds = aitr->second.GetNext();
 				UpdateUniformDS(*View().Device(), ds, vector<ProcessedRO::BindingInfo>{ 
 					ProcessedRO::BindingInfo{
@@ -618,8 +618,8 @@ namespace idk::vkn
 			}
 		};
 		auto& camera = state.camera;
-		auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto frame_buffer = GetFrameBuffer(camera, swapchain.curr_index);
+		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
+		auto frame_buffer = GetFrameBuffer(camera, View().CurrFrame());
 		vk::RenderPassBeginInfo rpbi
 		{
 			tmp_rp, frame_buffer,

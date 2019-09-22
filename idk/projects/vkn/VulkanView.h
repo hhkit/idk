@@ -26,11 +26,10 @@ namespace idk::vkn
 		vk::Queue&                          GraphicsQueue()const;
 		vk::Queue&                          PresentQueue()const;
 		SwapChainInfo&                      Swapchain()const;
+		uint32_t                            CurrFrame()const;
 		PresentationSignals&   CurrPresentationSignals()const;
 
-		vk::UniquePipeline&        Pipeline()const;
 		vk::UniqueCommandPool&     Commandpool()const;
-		vector<vk::UniqueCommandBuffer>& Commandbuffers()const;
 
 		//Render State info
 		void                       SwapRenderState()const;//Probably a bad decision to const this shit.
@@ -39,7 +38,6 @@ namespace idk::vkn
 		RenderState&               CurrRenderState()const;
 		vk::UniqueRenderPass&      Renderpass()const;
 		vk::UniqueRenderPass&      ContinuedRenderpass()const;
-		vk::UniqueCommandBuffer&   CurrCommandbuffer()const;
 		vk::Buffer&                CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.
 		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;

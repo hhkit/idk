@@ -44,6 +44,11 @@ namespace idk::vkn
 		//vk::Queue          m_transfer_queue = {}{}					                  				 ;
 		SwapChainInfo& VulkanView::Swapchain()const { return vulkan().m_swapchain; }
 
+		uint32_t VulkanView::CurrFrame() const
+		{
+			return vulkan().current_frame;
+		}
+
 		PresentationSignals& VulkanView::CurrPresentationSignals() const
 		{
 			return vulkan_->m_swapchain.m_graphics.pSignals[vulkan_->current_frame];
@@ -71,10 +76,8 @@ namespace idk::vkn
 
 		vk::UniqueRenderPass& VulkanView::ContinuedRenderpass()const { return vulkan().m_crenderpass; }
 		vk::UniqueRenderPass& VulkanView::Renderpass()const { return vulkan().m_renderpass; }
-		vk::UniquePipeline& VulkanView::Pipeline()const { return vulkan().m_pipeline; }
 		vk::UniqueCommandPool& VulkanView::Commandpool()const { return vulkan().m_commandpool; }
 
-		vk::UniqueCommandBuffer& VulkanView::CurrCommandbuffer()const { return vulkan().m_commandbuffers[vulkan().current_frame]; }
 		vk::Buffer& VulkanView::CurrMasterVtxBuffer() const
 		{
 			return impl_->CurrentRenderState().MasterBuffer().host_buffer.buffer();
@@ -119,7 +122,6 @@ namespace idk::vkn
 		{
 			return vulkan().max_frames_in_flight;
 		}
-		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
 
 		vk::UniqueShaderModule VulkanView::CreateShaderModule(const idk::string_view& code)
 		{

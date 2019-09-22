@@ -30,8 +30,6 @@ namespace idk::vkn
 		void Init() override ;
 		void LateInit() override;
 
-		void BeginFrame() ;
-		void EndFrame() ;
 		void Shutdown() override;
 		//void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
 		GraphicsAPI GetAPI() override;
