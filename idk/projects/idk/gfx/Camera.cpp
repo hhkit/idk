@@ -64,6 +64,7 @@ namespace idk
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,
+			overlay_debug_draw,
 			clear_color
 		};
 	}

@@ -357,7 +357,7 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkCommandBu
 		for (int cmd_list_idx = 0; cmd_list_idx < draw_data->CmdListsCount; ++cmd_list_idx)
 			for (auto pcmd : draw_data->CmdLists[cmd_list_idx]->CmdBuffer)
 			{
-				if (textures.find(pcmd.TextureId) == textures.end())
+				if (textures.find(pcmd.TextureId) == textures.end() && pcmd.TextureId!=0)
 				{
 					textures.emplace(pcmd.TextureId);
 					req_ds++;
@@ -369,7 +369,7 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkCommandBu
 		for(int cmd_list_idx =0;cmd_list_idx< draw_data->CmdListsCount;++cmd_list_idx)
 			for (auto pcmd : draw_data->CmdLists[cmd_list_idx]->CmdBuffer)
 			{
-				if (texture_sets.find(pcmd.TextureId) == texture_sets.end())
+				if (texture_sets.find(pcmd.TextureId) == texture_sets.end() && pcmd.TextureId != 0)
 				{
 					//Create and update the descriptor sets
 					auto ds = ds_manager->CreateImageDescriptorSet(reinterpret_cast<VkImageView>(pcmd.TextureId), g_FontSampler);
@@ -1360,12 +1360,14 @@ void ImGui_ImplVulkanH_DestroyFrameSemaphores(VkDevice device, ImGui_ImplVulkanH
 
 void ImGui_ImplVulkanH_DestroyFrameRenderBuffers(VkDevice device, ImGui_ImplVulkanH_FrameRenderBuffers* buffers, const VkAllocationCallbacks* allocator)
 {
+	
 	if (buffers->VertexBuffer) { vkDestroyBuffer(device, buffers->VertexBuffer, allocator); buffers->VertexBuffer = VK_NULL_HANDLE; }
 	if (buffers->VertexBufferMemory) { vkFreeMemory(device, buffers->VertexBufferMemory, allocator); buffers->VertexBufferMemory = VK_NULL_HANDLE; }
 	if (buffers->IndexBuffer) { vkDestroyBuffer(device, buffers->IndexBuffer, allocator); buffers->IndexBuffer = VK_NULL_HANDLE; }
 	if (buffers->IndexBufferMemory) { vkFreeMemory(device, buffers->IndexBufferMemory, allocator); buffers->IndexBufferMemory = VK_NULL_HANDLE; }
 	buffers->VertexBufferSize = 0;
 	buffers->IndexBufferSize = 0;
+	buffers->~ImGui_ImplVulkanH_FrameRenderBuffers();
 }
 
 void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVulkanH_WindowRenderBuffers* buffers, const VkAllocationCallbacks* allocator)

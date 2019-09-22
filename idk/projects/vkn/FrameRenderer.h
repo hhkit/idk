@@ -170,7 +170,8 @@ namespace idk::vkn
 		void GrowStates(size_t new_min_size);
 
 		std::pair<vector<ProcessedRO>, DsBindingCount> ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
-		void RenderGraphicsState(const GraphicsState& state,RenderStateV2& rs);
+		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
+		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs);
 		VulkanView& View()const { return *_view; }
 		
 		RscHandle<ShaderProgram> GetMeshRendererShaderModule();

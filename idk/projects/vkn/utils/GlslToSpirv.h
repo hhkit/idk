@@ -9,6 +9,6 @@ class GlslToSpirv
 public:
 	//static EShLanguage GetStage(string_view ext);
 	//static EShLanguage ConvertStage(vk::ShaderStageFlagBits stage);
-	static std::optional<std::vector<unsigned int>> spirv(string_view glsl, vk::ShaderStageFlagBits v_stage);
+	static std::optional<std::vector<unsigned int>> spirv(string_view glsl, vk::ShaderStageFlagBits v_stage, string_view code_id = "unknown_shader");
 };
 }

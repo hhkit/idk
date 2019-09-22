@@ -8,7 +8,7 @@
 #include <vkn/utils/GlslToSpirv.h>
 namespace idk::vkn
 {
-	bool VulkanMaterial::BuildShader(RscHandle<ShaderTemplate> lighting_model, string_view material_uniforms, string_view material_code)
+	bool VulkanMaterial::BuildShader(RscHandle<ShaderTemplate> lighting_model, string_view material_uniforms, string_view material_code, string_view material_id)
 	{
 		bool ret = false;
 		Core::GetResourceManager().Free(RscHandle<ShaderProgram>{meta.compiled_shader_guid});
@@ -16,8 +16,9 @@ namespace idk::vkn
 		//std::ofstream tmp{ tmp_filename };
 		//tmp << << std::flush;
 		//tmp.close();
+		
 		auto glsl = lighting_model->Instantiate(material_uniforms, material_code);
-		auto spirv = GlslToSpirv::spirv(glsl, vk::ShaderStageFlagBits::eFragment);
+		auto spirv = GlslToSpirv::spirv(glsl, vk::ShaderStageFlagBits::eFragment, string{ "lighting_model:" }+string{ lighting_model.guid }+", material: "+material_id.data());
 		ret = static_cast<bool>(spirv);
 		if (ret)
 		{

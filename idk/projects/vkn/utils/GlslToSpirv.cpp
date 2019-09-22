@@ -17,7 +17,7 @@ namespace idk::vkn
 #define BLOCK(X) struct X
 #endif
 #ifdef VULKAN
-#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND, std140) 
+#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
 #define BLOCK(X) X
 #endif
 )";
@@ -75,7 +75,7 @@ shaderc_shader_kind ConvertStageSC(vk::ShaderStageFlagBits stage)
 	return itr->second;
 }
 
-std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk::ShaderStageFlagBits v_stage)
+std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk::ShaderStageFlagBits v_stage, string_view code_id)
 {
 	string val = static_cast<string>(glsl);
 	string shader_code = val;
@@ -127,7 +127,7 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions opt;
 		opt.SetTargetEnvironment(shaderc_target_env::shaderc_target_env_vulkan, 0);
-		auto result = compiler.CompileGlslToSpv(val, ConvertStageSC(v_stage), "tmp", opt);
+		auto result = compiler.CompileGlslToSpv(val, ConvertStageSC(v_stage), code_id.data(), opt);
 		spirv_out = vector<unsigned int>{ result.begin(),result.end() };
 		hlp::cerr() << result.GetErrorMessage() << std::endl;
 	}

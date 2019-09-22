@@ -2208,6 +2208,7 @@ namespace idk::vkn
 
 	void VulkanState::EndFrame()
 	{
+		return;
 		auto& rs = view_->CurrRenderState();
 		//auto& dispatcher = view_->Dispatcher();
 		auto& command_buffer = rs.CommandBuffer();
@@ -2317,16 +2318,16 @@ namespace idk::vkn
 			command_buffer.reset(vk::CommandBufferResetFlags{},dispatcher);
 			command_buffer.begin(begin_info);
 			
-			command_buffer.executeCommands(render_state.TransferBuffer(), dispatcher);
+			//command_buffer.executeCommands(render_state.TransferBuffer(), dispatcher);
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
 
 
 			//////////////////////////THIS IS WHERE UBO UPDATES MVP (VIEW TRANSFORM SHOULD BE DONE HERE)/////////////////////////
 			updateUniformBuffer(imageIndex);
 
-			command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
+			//command_buffer.executeCommands(*m_commandbuffers[m_swapchain.curr_index], dispatcher);
 
-			command_buffer.executeCommands(render_state.CommandBuffer(), dispatcher);
+			//command_buffer.executeCommands(render_state.CommandBuffer(), dispatcher);
 			command_buffer.endRenderPass(dispatcher);
 			command_buffer.end();
 
@@ -2341,7 +2342,7 @@ namespace idk::vkn
 				1
 				,&waitSemaphores
 				,waitStages
-				,hlp::arr_count(cmds),std::data(cmds)
+				,0,nullptr//hlp::arr_count(cmds),std::data(cmds)
 				,1,&readySemaphores
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };

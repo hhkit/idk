@@ -537,6 +537,54 @@ namespace idk::vkn
 		//auto& e = camera_data.render_target.as<VknFrameBuffer>();
 		return camera_data.render_target.as<VknFrameBuffer>().Buffer();
 	}
+
+	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
+	//and command buffer hasn't ended
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs)
+	{
+		auto dispatcher = vk::DispatchLoaderDefault{};
+		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		auto& pipeline = *state.dbg_pipeline;
+		//Preprocess MeshRender's uniforms
+		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
+		rs.ubo_manager.UpdateAllBuffers();
+		auto alloced_dsets = rs.dpools.Allocate(layout_count);
+		rs.FlagRendered();
+		pipeline.Bind(cmd_buffer, *_view);
+		//Bind the uniforms
+		auto& layouts = pipeline.uniform_layouts;
+		uint32_t trf_set = 0;
+		auto itr = layouts.find(trf_set);
+		if (itr != layouts.end())
+		{
+			auto ds_layout = *itr->second;
+			auto allocated =rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, {vk::DescriptorType::eUniformBuffer,2}}});
+			auto aitr = allocated.find(ds_layout);
+			if (aitr != allocated.end())
+			{
+				auto&& [view_buffer, vb_offset] = rs.ubo_manager.Add(state.camera.view_matrix);
+				auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
+				auto ds = aitr->second.GetNext();
+				UpdateUniformDS(*View().Device(), ds, vector<ProcessedRO::BindingInfo>{ 
+					ProcessedRO::BindingInfo{
+						0,view_buffer,vb_offset,0,sizeof(mat4)
+					},
+					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4) }
+				});
+				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, 0, ds, {});
+			}
+		}
+
+		const DbgDrawCall* prev = nullptr;
+		for (auto& p_dc : state.dbg_render)
+		{
+			auto& dc = *p_dc;
+			dc.Bind(cmd_buffer,prev);
+			dc.Draw(cmd_buffer);
+			prev = p_dc;
+			
+		}
+	}
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& swapchain = View().Swapchain();
@@ -551,7 +599,6 @@ namespace idk::vkn
 
 		//Preprocess MeshRender's uniforms
 		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
-		rs.ubo_manager.UpdateAllBuffers();
 		auto alloced_dsets = rs.dpools.Allocate(layout_count);
 
 
@@ -637,6 +684,8 @@ namespace idk::vkn
 				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 			}
 		}
+		RenderDebugStuff(state, rs);
+		rs.ubo_manager.UpdateAllBuffers();
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 		Track(0);

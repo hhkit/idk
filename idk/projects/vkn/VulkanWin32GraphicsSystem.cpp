@@ -130,8 +130,20 @@ namespace idk::vkn
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
-			curr_state.Init(curr_buffer.camera[i],curr_buffer.lights, curr_buffer.mesh_render,curr_buffer.skinned_mesh_render);
-			_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
+			auto& curr_cam = curr_buffer.camera[i];
+			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render);
+			curr_state.dbg_render.resize(0);
+			if (curr_cam.overlay_debug_draw)
+			{
+				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
+				//TODO Add cull step
+				curr_state.dbg_render.reserve(_debug_renderer->DbgDrawCalls().size());
+				for (auto& dbgcall : _debug_renderer->DbgDrawCalls())
+				{
+					curr_state.dbg_render.emplace_back(&dbgcall);
+				}
+			}
+			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
 		// */
 
@@ -140,15 +152,15 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
-		using namespace std::chrono_literals;
-		static std::optional<std::chrono::time_point<std::chrono::high_resolution_clock>> last_time{};
-
-		if (last_time)
-		{
-			;
-			while ((std::chrono::high_resolution_clock::now() - *last_time) < (1000ms / 60));
-		}
-		last_time = std::chrono::high_resolution_clock::now();
+		//using namespace std::chrono_literals;
+		//static std::optional<std::chrono::time_point<std::chrono::high_resolution_clock>> last_time{};
+		//
+		//if (last_time)
+		//{
+		//	;
+		//	while ((std::chrono::high_resolution_clock::now() - *last_time) < (1000ms / 60));
+		//}
+		//last_time = std::chrono::high_resolution_clock::now();
 		instance_->PresentFrame2();
 	}
 	void VulkanWin32GraphicsSystem::BeginFrame()

@@ -16,6 +16,8 @@
 
 #include <util/ioutils.h>
 
+#include <vkn/vector_buffer.h>
+
 #include "VulkanDebugRenderer.h"
 namespace idk::vkn
 {
@@ -66,7 +68,18 @@ namespace idk::vkn
 		hash_table<DbgShape, vbo> shape_buffers{};
 		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
 
-		pimpl(VulkanView& deets) :detail{ deets } {};
+		vector<DbgDrawCall> render_buffer;
+
+		hlp::MemoryAllocator allocator;
+		hlp::bbucket_list vert_buffer;
+		hlp::bbucket_list inst_buffer;
+
+		pimpl(VulkanView& deets) :detail{ deets }
+		, allocator{ *deets.Device(),deets.PDevice() }
+		, vert_buffer{ deets.PDevice(),*deets.Device(), allocator }
+		, inst_buffer{ deets.PDevice(),*deets.Device(), allocator }
+
+		{};
 	};
 
 
@@ -181,7 +194,7 @@ namespace idk::vkn
 		this->impl.reset();
 	}
 
-	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj)
+	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj, GraphicsState& out)
 	{
 		auto& detail = impl->detail;
 		auto& pipeline = impl->pipeline;
@@ -208,8 +221,24 @@ namespace idk::vkn
 		info->render_info.clear();
 	}
 
+	const vector<DbgDrawCall>& VulkanDebugRenderer::DbgDrawCalls() const
+	{
+		// TODO: insert return statement here
+		return impl->render_buffer;
+	}
+
+	const VulkanPipeline& VulkanDebugRenderer::GetPipeline() const
+	{
+		// TODO: insert return statement here
+		return impl->pipeline;
+	}
+
 	void VulkanDebugRenderer::GrabDebugBuffer()
 	{
+		info->render_info.clear();
+		impl->render_buffer.clear();
+		impl->vert_buffer.clear();
+		impl->inst_buffer.clear();
 		for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 		{
 			if (elem.mesh == Mesh::defaults[MeshType::Box])
@@ -217,6 +246,38 @@ namespace idk::vkn
 				DrawShape(DbgShape::eCube, elem.transform, elem.color);
 			}
 		}
+		for (auto& [shape, buffer] : info->render_info)
+		{
+			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
+			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
+
+			//Bind vtx buffers
+			size_t num_inst_chunk = impl->inst_buffer.chunk_size()/sizeof(buffer[0]);
+			size_t num_elems= buffer.size();
+			uint32_t inst_binding = dbg_vert_layout::instance_binding;
+			uint32_t vert_binding = dbg_vert_layout::vertex_binding;
+	        
+			size_t num_iterations = num_elems / num_inst_chunk + ((num_elems%num_inst_chunk)?1:0);
+			auto& vbuffer = impl->vert_buffer;
+			auto [vertex_buffer, vb_offset] = vbuffer.new_chunk(s_cast<const void*>(std::data(shape_buffer_proxy)), hlp::buffer_size<uint32_t>(shape_buffer_proxy));
+			auto& inst_buffer = impl->inst_buffer;
+			for (auto i = num_iterations; i-- > 0;)
+			{
+				
+				auto& dcall = impl->render_buffer.emplace_back();
+				dcall.num_instances = static_cast<uint32_t>(std::min(num_inst_chunk,hlp::buffer_size(buffer) - (num_inst_chunk * i)));
+				auto [instance_buffer, ib_offset]
+					= inst_buffer.new_chunk(
+						std::data(buffer)+num_inst_chunk*i,
+						dcall.num_instances
+					);
+				dcall.num_vertices = hlp::arr_count(shape_buffer);
+				dcall.RegisterBuffer(DbgBufferType::ePerInst, inst_binding, buffer_info{ instance_buffer,ib_offset });
+				dcall.RegisterBuffer(DbgBufferType::ePerVtx, vert_binding, buffer_info{ vertex_buffer,vb_offset });
+			}			
+		}
+		impl->inst_buffer.update_buffers();
+		impl->vert_buffer.update_buffers();
 	}
 
 	VulkanDebugRenderer::~VulkanDebugRenderer() = default;
