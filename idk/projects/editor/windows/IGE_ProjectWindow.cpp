@@ -18,6 +18,7 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
 #include <editor/IDE.h>
+#include <gfx/Texture.h>
 
 #include <iostream>
 #include <filesystem>
@@ -230,7 +231,25 @@ namespace idk {
             ImGui::BeginGroup();
             ImGui::PushID(name.c_str());
 
-            ImGui::Image(0, ImVec2{ icon_sz, icon_sz });
+            { // preview image / icon
+                void* id = 0;
+                vec2 sz{ icon_sz, icon_sz };
+                if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
+                {
+                    auto files = Core::GetResourceManager().LoadFile(path);
+                    if (files.resources.size())
+                    {
+                        auto tex = files[0].As<Texture>();
+                        id = tex->ID();
+                        float aspect = tex->AspectRatio();
+                        if (aspect > 1.0f)
+                            sz.y /= aspect;
+                        else if (aspect < 1.0f)
+                            sz.x /= aspect;
+                    }
+                }
+                ImGui::Image(id, sz);
+            }
 
             if (selected_asset == path)
             {

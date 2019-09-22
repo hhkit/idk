@@ -310,7 +310,7 @@ namespace idk {
 		mount._full_path = fullPath;
 		mount._mount_path = mountPath;
 		mount._watching = watch;
-		mount._mount_index = static_cast<int8_t>(index);
+		mount._mount_index = s_cast<int8_t>(index);
 		mount.AddDepth();
 
 		// The root of this mount is depth 0
@@ -321,9 +321,9 @@ namespace idk {
 		d._mount_path = mountPath;
 		d._filename = currPath.filename().string();
 
-		d._tree_index._mount_id = static_cast<int8_t>(index);
+		d._tree_index._mount_id = s_cast<int8_t>(index);
 		d._tree_index._depth = 0;
-		d._tree_index._index = static_cast<int8_t>(mount._path_tree[0]._dirs.size());
+		d._tree_index._index = s_cast<int16_t>(mount._path_tree[0]._dirs.size());
 		if (watch)
 			_directory_watcher.WatchDirectory(d);
 
@@ -424,7 +424,7 @@ namespace idk {
 		auto tokenized_path = tokenizePath(mountPath);
 
 		// The parent directory of the file is one depth higher and we -1 again because we don't count the file token.
-		int8_t dir_depth = static_cast<int8_t>(tokenized_path.size() - 2);
+		int8_t dir_depth = s_cast<int8_t>(tokenized_path.size() - 2);
 
 		// Get the correct directory
 		if (dir_depth == 0)
@@ -476,7 +476,7 @@ namespace idk {
 			tokenized_path.pop_back();
 
 		// The parent directory of the sub directory is one depth higher
-		int8_t dir_depth = static_cast<int8_t>(tokenized_path.size() - 2);
+		int8_t dir_depth = s_cast<int8_t>(tokenized_path.size() - 2);
 
 		// Get the correct directory
 		if (dir_depth < 0)
@@ -520,7 +520,7 @@ namespace idk {
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
 		if (mount_index != _mount_table.end())
-			return static_cast<int>(mount_index->second);
+			return s_cast<int>(mount_index->second);
 		else
 			return -1;
 	}
@@ -539,7 +539,7 @@ namespace idk {
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
 		if (mount_index != _mount_table.end())
-			return static_cast<int>(mount_index->second);
+			return s_cast<int>(mount_index->second);
 		else
 			return -1;
 	}
@@ -556,7 +556,7 @@ namespace idk {
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
 		if (mount_index != _mount_table.end())
-			return static_cast<int>(mount_index->second);
+			return s_cast<int>(mount_index->second);
 		else
 			return -1;
 	}
@@ -609,7 +609,7 @@ namespace idk {
 
 			file._tree_index._mount_id = mount._mount_index;
 			file._tree_index._depth = depth;
-			file._tree_index._index = s_cast<int8_t>(mount._path_tree[depth]._files.size() - 1);
+			file._tree_index._index = s_cast<int16_t>(mount._path_tree[depth]._files.size() - 1);
 
 			return file._tree_index;
 		}
@@ -637,7 +637,7 @@ namespace idk {
 
 			dir._tree_index._mount_id = mount._mount_index;
 			dir._tree_index._depth = depth;
-			dir._tree_index._index = static_cast<int8_t>(mount._path_tree[depth]._dirs.size() - 1);
+			dir._tree_index._index = s_cast<int16_t>(mount._path_tree[depth]._dirs.size() - 1);
 
 			return dir._tree_index;
 		}
@@ -697,9 +697,9 @@ namespace idk {
 			{
 				file_system_detail::fs_file f;
 
-				f._tree_index._mount_id = static_cast<int8_t>(index);
+				f._tree_index._mount_id = s_cast<int8_t>(index);
 				f._tree_index._depth = currDepth;
-				f._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._files.size());
+				f._tree_index._index = s_cast<int16_t>(mount._path_tree[currDepth]._files.size());
 
 				// f._file_detail is default initialized to have ref_count = 0.
 
@@ -710,9 +710,9 @@ namespace idk {
 			{
 				file_system_detail::fs_dir d;
 
-				d._tree_index._mount_id = static_cast<int8_t>(index);
+				d._tree_index._mount_id = s_cast<int8_t>(index);
 				d._tree_index._depth = currDepth;
-				d._tree_index._index = static_cast<int8_t>(mount._path_tree[currDepth]._dirs.size());
+				d._tree_index._index = s_cast<int16_t>(mount._path_tree[currDepth]._dirs.size());
 
 				initDir(d, mountSubDir, tmp);
 
