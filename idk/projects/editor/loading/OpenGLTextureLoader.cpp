@@ -24,8 +24,11 @@ namespace idk
 		ivec2 size{};
 		int channels{};
 
-		auto data = stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0);
-
+		auto data = std::unique_ptr<void, decltype(&stbi_image_free)>
+		{
+			stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0),
+			stbi_image_free
+		};
 		if (data) // stbi image can fail
 		{
 			auto col_format = [&]() -> InputChannels
@@ -39,7 +42,7 @@ namespace idk
 			}
 			}();
 
-			texture_handle.as<ogl::OpenGLTexture>().Buffer(data, size, col_format);
+			texture_handle.as<ogl::OpenGLTexture>().Buffer(data.get(), size, col_format);
 
 			retval.resources.emplace_back(texture_handle);
 		}
@@ -61,7 +64,11 @@ namespace idk
 		ivec2 size{};
 		int channels{};
 
-		auto data = stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0);
+		auto data = std::unique_ptr<void, decltype(&stbi_image_free)>
+		{
+			stbi_load(path_to_resource.GetFullPath().data(), &size.x, &size.y, &channels, 0),
+			stbi_image_free
+		};
 
 		if (data) // stbi image can fail
 		{
@@ -76,7 +83,7 @@ namespace idk
 			}
 			}();
 
-			texture_handle.as<ogl::OpenGLTexture>().Buffer(data, size, col_format);
+			texture_handle.as<ogl::OpenGLTexture>().Buffer(data.get(), size, col_format);
 
 			retval.resources.emplace_back(RscHandle<Texture>{texture_handle});
 		}
