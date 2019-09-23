@@ -60,6 +60,8 @@ namespace idk::vkn
 			}
 		};
 		container_t pipelines;
+
+		hash_table<string, handle_t> prog_to_pipe2;
 		hash_table<RscHandle<ShaderProgram>, handle_t> prog_to_pipe;
 		vector<vector<handle_t>> update_queue;
 		VulkanView* _view;

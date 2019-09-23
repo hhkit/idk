@@ -1,10 +1,12 @@
 #pragma once
 #include <idk.h>
 #include <res/Resource.h>
+#include <gfx/RenderTarget.h>
 
 namespace idk
 {
-	class LightMap;
+	//class LightMap;
+	using LightMap = RenderTarget;
 
 	struct PointLight
 	{
@@ -13,7 +15,7 @@ namespace idk
 		real  attenuation_radius { 1.f };
 		bool  use_inv_sq_atten   { true };
 
-		RscHandle<LightMap> lightmap;
+		RscHandle<LightMap> light_map;
 	};
 
 	struct DirectionalLight
@@ -21,7 +23,7 @@ namespace idk
 		real  intensity     { .5f  };
 		color light_color   { 1.f  };
 
-		RscHandle<LightMap> lightmap;
+		RscHandle<LightMap> light_map;
 	};
 
 	struct SpotLight
@@ -33,7 +35,7 @@ namespace idk
 		real  attenuation_radius { 1.f };
 		bool  use_inv_sq_atten   { true };
 
-		RscHandle<LightMap> lightmap;
+		RscHandle<LightMap> light_map;
 	};
 
 	using LightVariant = variant<PointLight, DirectionalLight, SpotLight>;

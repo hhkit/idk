@@ -71,7 +71,7 @@ namespace idk::vkn
 		thing.pipeline.Create(config, view);
 	}
 	void RenderStateV2::Reset() {
-		cmd_buffer.reset({}, vk::DispatchLoaderDefault{});
+		cmd_buffer.reset({});
 		ubo_manager.Clear();
 		dpools.Reset();
 		has_commands = false;
@@ -115,29 +115,55 @@ namespace idk::vkn
 		InitThing(View());
 
 
-		//TODO figure this out
-		string filename = "/assets/shader/mesh.vert";
-		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-		auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-		if (!actualfile || !rsc.resources.size())
 		{
+			//TODO figure this out
+			string filename = "/assets/shader/mesh.vert";
+			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			if (!actualfile || !rsc.resources.size())
+			{
 
-			vector<buffer_desc> desc{
-				BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-			};
-			Core::GetSystem<FileSystem>().Update();
-			//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
-			_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
-			//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-			//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+				vector<buffer_desc> desc{
+					BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+					BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+					BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				};
+				Core::GetSystem<FileSystem>().Update();
+				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+				_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
+				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
 
+			}
+			else
+			{
+				_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
+			}
 		}
-		else
 		{
-			_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
+			string filename = "/assets/shader/shadow.frag";
+			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			auto& shader_mod = _shadow_shader_module;
+			if (!actualfile || !rsc.resources.size())
+			{
+
+				vector<buffer_desc> desc{
+					BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
+				};
+				Core::GetSystem<FileSystem>().Update();
+				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+				shader_mod = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
+				shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
+				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+
+			}
+			else
+			{
+				shader_mod = rsc.resources.front().As<ShaderProgram>();
+			}
 		}
 		{
 
@@ -379,7 +405,7 @@ namespace idk::vkn
 			//Force pipeline creation
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
-			auto sprog = dc.material_instance.material->GetShaderProgram();
+			auto sprog = (cam.is_shadow)? _shadow_shader_module: dc.material_instance.material->GetShaderProgram();
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
@@ -395,7 +421,8 @@ namespace idk::vkn
 			mat4 obj_ivt= obj_trf.inverse().transpose();
 			vector<mat4> mat4_block{obj_trf,obj_ivt};
 			PreProcUniform(obj_uni, mat4_block , collated_layouts, collated_bindings, ubo_manager);
-			PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
+			if(!cam.is_shadow)
+				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
 			//Account for material bindings
@@ -585,14 +612,18 @@ namespace idk::vkn
 			
 		}
 	}
+
+
+
+
+
+
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& swapchain = View().Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-
-
 
 		VulkanPipeline* prev_pipeline = nullptr;
 		vector<RscHandle<ShaderProgram>> shaders;
@@ -637,7 +668,7 @@ namespace idk::vkn
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = obj.material_instance.material->GetShaderProgram();
+			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance.material->GetShaderProgram();
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
@@ -664,6 +695,7 @@ namespace idk::vkn
 					{
 						//Get a descriptor set from the allocated pool
 						auto ds = ds_itr->second.GetNext();
+						//p_ro.dses[set_index] = ds;
 						//Update the descriptor set
 						UpdateUniformDS(*View().Device(),ds,binfo);
 						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set_index, ds, nullptr, dispatcher);
@@ -684,7 +716,8 @@ namespace idk::vkn
 				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 			}
 		}
-		RenderDebugStuff(state, rs);
+		if(camera.overlay_debug_draw)
+			RenderDebugStuff(state, rs);
 		rs.ubo_manager.UpdateAllBuffers();
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();

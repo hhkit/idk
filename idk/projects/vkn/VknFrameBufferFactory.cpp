@@ -74,11 +74,35 @@ namespace idk::vkn
 	}
 	unique_ptr<RenderTarget> VknFrameBufferFactory::Create()
 	{
+		auto ptr = Core::GetResourceManager().Emplace<VknTexture>();
+		TextureLoader loader;
+
+
+		//imgd.size = vec2{ sz };
+
+		/*vk::ImageViewCreateInfo createInfo{
+					vk::ImageViewCreateFlags{},
+					*ptr->image,
+					vk::ImageViewType::e2D,
+					vknView.Swapchain().surface_format.format,
+					vk::ComponentMapping{},
+					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
+		};
+
+		vknView.Device()->createImageView(createInfo, nullptr, vknView.Dispatcher());*/
+
+
 		auto fb = std::make_unique<VknFrameBuffer>();
 		auto m = fb->GetMeta();
-		m.size = ivec2{ 512, 512 };
-		m.textures.emplace_back(Core::GetResourceManager().Create<VknTexture>())->Size(m.size);
+		m.size = Core::GetSystem<Application>().GetScreenSize();
+		auto sz = m.size;
+		m.textures.emplace_back(s_cast<RscHandle<Texture>>(ptr))->Size(m.size);
 		fb->SetMeta(m);
+		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, {}, nullptr, s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
+
+		auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
+		fb->ReattachImageViews(vknView);
+
 		return fb;
 	}
 	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle fh)

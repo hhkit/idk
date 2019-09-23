@@ -211,7 +211,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto light = scene->CreateGameObject();
 	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
-	light->AddComponent<Light>();
+	auto light_comp = light->AddComponent<Light>();
+	{
+		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
+		light_comp->SetLightMap(light_map);
+	}
 	light->AddComponent<TestComponent>();
 	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 	//auto bounce_kun = scene->CreateGameObject();

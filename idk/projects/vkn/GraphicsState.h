@@ -70,6 +70,7 @@ namespace idk::vkn
 	{
 		CameraData camera;
 		const vector<LightData>* lights;
+		vector<const LightData*> active_lights;
 		vector<const RenderObject*> mesh_render;
 		vector<const RenderObject*> skinned_mesh_render;
 

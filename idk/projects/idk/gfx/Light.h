@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <gfx/LightTypes.h>
+#include <gfx/Camera.h>
 #pragma warning (push)
 #pragma warning (disable : 4324)
 
@@ -16,6 +17,7 @@ namespace idk
 		real  cos_inner = 0;
 		real  cos_outer = 1;
 		real  falloff     = 1;
+		RscHandle<RenderTarget> light_map;
 	};
 
 	class Light
@@ -26,7 +28,12 @@ namespace idk
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
 
+		RscHandle<LightMap>& GetLightMap();
+		const RscHandle<LightMap>& GetLightMap()const;
+		void SetLightMap(const RscHandle<LightMap>& light_map);
+
 		LightData GenerateLightData() const;
+		CameraData GenerateCameraData() const;
 	};
 }
 #pragma warning(pop )
