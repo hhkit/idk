@@ -11,7 +11,13 @@ namespace idk
 		if (preserve_global)
 		{
 			auto curr_global = GlobalMatrix();
-			auto new_local = new_parent->Transform()->GlobalMatrix().inverse() * curr_global;
+			const auto new_local = [&]() {
+				if (new_parent)
+					return new_parent->Transform()->GlobalMatrix().inverse() * curr_global;
+				else
+					return curr_global;
+			}();
+
 			auto decomp = decompose(new_local);
 			position = decomp.position;
 			rotation = decomp.rotation;
