@@ -31,8 +31,9 @@ namespace idk::reflect::detail
 					std::tuple<const detail::table&, void*> tup = FunctionGetSet(offsetted, 0).value();
 					auto name = std::get<0>(tup).m_pName;
 					void* value = std::get<1>(tup);
+                    auto type = get_type(name);
 					visit_key_value(std::move(table.m_pEntry[i].m_pName),
-									dynamic{ get_type(name), value },
+									dynamic{ type, value },
 									std::forward<Visitor>(visitor), depth, last_visit_depth);
 					// uhhh, this branch means you're at a structure not part of idk::ReflectedTypes
 					// it could also mean base class if you used REFLECT_PARENT
