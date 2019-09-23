@@ -224,4 +224,29 @@ namespace idk
 		return _interface->Inputs()->main_camera;
 	}
 
+	void IDE::FocusOnSelectedGameObjects()
+	{
+		if (selected_gameObjects.size()) {
+			vec3 finalCamPos{};
+			for (Handle<GameObject> i : selected_gameObjects) {
+
+				Handle<Transform> transform = i->GetComponent<Transform>();
+				if (transform) {
+					finalCamPos += transform->position;
+				}
+
+			}
+
+			finalCamPos /= selected_gameObjects.size();
+
+			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+
+			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			Handle<Camera> currCamera = main_camera.current_camera;
+			Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
+			camTransform->position = finalCamPos;
+			camTransform->position += camTransform->Forward() * distanceFromObject;
+		}
+	}
+
 }
