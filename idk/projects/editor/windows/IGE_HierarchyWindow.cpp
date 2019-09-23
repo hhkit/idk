@@ -21,6 +21,7 @@ of the editor.
 #include <scene/SceneManager.h>
 #include <core/GameObject.h>
 #include <common/Name.h>
+#include <common/Transform.h>
 #include <core/Core.h>
 #include <IDE.h>		//IDE
 #include <iostream>
@@ -120,14 +121,22 @@ namespace idk {
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
 		
-		//Refer to TestSystemManager.cpp
-		sceneGraph.visit([](const Handle<GameObject>& handle, int depth) {
-			if (!handle)
-				return;
+		//To unindent the first gameobject which is the scene
+		ImGui::Unindent();
 
-			//This indent is temporary, will integrate with ImGui::Tree later TODO
-			for (int i = 0; i < depth; ++i)
-				ImGui::Indent();
+		//Refer to TestSystemManager.cpp
+		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+
+			if (depth > 0) {
+				for (int i = 0; i < depth; ++i)
+					ImGui::Indent();
+			}
+			else {
+				for (int i = depth; i < 0; ++i)
+					ImGui::Unindent();
+			}
+			if (!handle) //Ignore handle zero
+				return true;
 
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 
@@ -142,6 +151,14 @@ namespace idk {
 					break;
 				}
 			}
+
+			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
+			if (children->size() == 0) {
+				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+			}
+
+
 			Handle<Name> c_name = handle->GetComponent<Name>();
 			string goName{};
 			if (c_name)
@@ -158,12 +175,28 @@ namespace idk {
 			
 
 			//Use address of id as ptr_id
-			ImGui::TreeNodeEx(&handle.id, nodeFlags, goName.c_str());
+			//ImGui::PushID(handle.id);
+			
+			string idString = std::to_string(handle.id);
+			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
+
+			
+			//ImGui::PopID();
+
+			
 
 			if (isNameEmpty) {
 				ImGui::PopStyleColor();
 			}
+			if (isTreeOpen) {
 
+				ImGui::TreePop();
+
+			}
+			else {
+				
+				return false;
+			}
 			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
 				//Check if handle has been selected
@@ -189,7 +222,7 @@ namespace idk {
 				}
 				else {
 
-					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Multiselect
 						selected_gameObjects.push_back(handle);
 
 					}
@@ -198,14 +231,17 @@ namespace idk {
 						selected_gameObjects.push_back(handle);
 					}
 				}
+				if (ImGui::IsMouseDoubleClicked(0)) {
+					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				}
 			}
 
-
+			
+			return true;
 
 		});
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
-
 
 
 		//for (auto& i : sceneGraph) {
@@ -222,5 +258,7 @@ namespace idk {
 		
 
 	}
+
+
 
 }
