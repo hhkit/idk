@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <idk_config.h>
+#include <ds/result.h>
 #include <reflect/reflect.h>
 #include <core/ISystem.h>
 #include <file/PathHandle.h>
@@ -13,15 +14,37 @@
 
 namespace idk
 {
-	namespace detail
+	namespace detail { template<typename T> struct ResourceManager_detail; }
+
+	enum class ResourceLoadError : char
 	{
-		template<typename T> struct ResourceManager_detail;
-	}
+		NoFactoryRegistered,
+		FileDoesNotExist,
+		FailedToLoad
+	};
+
+	enum class ResourceSaveError : char
+	{
+		ResourceNotLoaded,
+		ResourceNotReflected,
+	};
+
+	enum class ResourceReleaseError : char
+	{
+		ResourceNotLoaded,
+	};
 
 	class ResourceManager 
 		: public ISystem
 	{
 	public:
+		template<typename Result, typename Err>
+		using result = monadic::result<Result, Err>;
+
+		template<typename Res> using LoadResult = result<RscHandle<Res>, ResourceLoadError>;
+		template<typename Res> using SaveResult = result<RscHandle<Res>, ResourceSaveError>;
+
+
 		ResourceManager() = default;
 
 		void Init() override;
@@ -29,75 +52,37 @@ namespace idk
 		void Shutdown() override;
 		void WatchDirectory();
 
-		// loading ops
-		template<typename Factory, typename ... Args>
-		Factory& RegisterFactory(Args&& ...);
-		template<typename ExtensionLoaderT, typename ... Args>
-		ExtensionLoaderT& RegisterExtensionLoader(std::string_view extension, Args&& ...);
-		template<typename Factory>
-		Factory& GetFactory();
+		/* HANDLE CHECKING - related to handles */
+		template<typename Res> bool Validate(const RscHandle<Res>&);
+		template<typename Res> Res& Get     (const RscHandle<Res>&);
+		template<typename Res> bool Free    (const RscHandle<Res>&);
 
-		// handle ops
-		template<typename Resource> bool      Validate(const RscHandle<Resource>&);
-		template<typename Resource> Resource& Get(const RscHandle<Resource>&);
-		template<typename Resource> bool      Free(const RscHandle<Resource>&);
+		/* RESOURCE LOADING - for high-level users like editor programmer */
+		template<typename Res> RscHandle<Res>  Create();
+		template<typename Res> RscHandle<Res>  Create(std::string_view path_to_new_asset);
+		template<typename Res> LoadResult<Res> Load(PathHandle path);
+		template<typename Res> SaveResult<Res> Save(RscHandle<Res>);
+		template<typename Res> ResourceReleaseError Release(RscHandle<Res>);
 
-		// resource creation
-		template<typename Resource> RscHandle<Resource> Create();
-		template<typename Resource> RscHandle<Resource> Create(PathHandle);
-		template<typename Resource> RscHandle<Resource> Create(PathHandle path, Guid guid);
-		template<typename Resource, 
-			typename = sfinae<has_tag_v<Resource, MetaTag>>
-		> RscHandle<Resource> Create(PathHandle path, Guid guid, const typename Resource::Metadata& meta);
-
-		template<typename RegisterMe, typename ... Args, 
-			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
-		> RscHandle<RegisterMe> Emplace(Args&& ...);
-		
-		template<typename RegisterMe, typename ... Args, 
-			typename = sfinae<std::is_constructible_v<RegisterMe, Args...>>
-		> RscHandle<RegisterMe> Emplace(Guid guid, Args&& ...);
-
-		// file operations
-		FileResources LoadFile(PathHandle path_to_file);
-		FileResources LoadFile(PathHandle path_to_file, const MetaFile& meta);
-		FileResources ReloadFile(PathHandle path_to_file);
-		size_t        UnloadFile(PathHandle path_to_file);
-		FileResources GetFileResources(PathHandle path_to_file);
-
-		bool          Associate(string_view mount_path, GenericRscHandle f);
-
-		// saving metadata
-		void SaveDirtyMetadata();
+		/* FACTORIES - for registering resource factories */
+		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
+		template<typename Factory, typename ... Args> Factory& RegisterLoader (Args&& ... loader_construction_args);
+		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
+		template<typename Res, typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
+		/* THIS WILL REPLACE EXISTING RESOURCE IF IT EXISTS */
+		template<typename Res, typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Guid, Args&& ... construction_args);
 
 	private:
-		using GenPtr = shared_ptr<void>;
+		using GenericPtr = std::shared_ptr<void>;
 		template<typename R>
-		struct ControlBlock
+		struct ResourceControlBlock
 		{
-			bool is_new = false;
-			// atomic<bool> loaded = false;
-			shared_ptr<R> resource_ptr; // note: make atomic
+			shared_ptr<R> resource; // note: make atomic
 		};
 
-		template<typename R>
-		using Storage = hash_table<Guid, ControlBlock<R>>;
-
-		array<GenPtr, ResourceCount> _resource_factories{}; // std::shared_ptr<ResourceFactory<Resource>>
-		array<GenPtr, ResourceCount> _resource_tables   {}; // std::shared_ptr<Storage<Resource>>
-		array<GenPtr, ResourceCount> _default_resources {}; // std::shared_ptr<Resource>
-
-		hash_table<string, unique_ptr<ExtensionLoader>> _extension_loaders;
-		hash_table<string, FileResources>               _loaded_files;
-
-		static ResourceManager* instance;
-
-		template<typename Resource> auto& GetLoader();
-		template<typename Resource> auto& GetTable();
-		template<typename Resource> auto FindHandle(const RscHandle<Resource>&);
-
-		template<typename T>
-		friend struct detail::ResourceManager_detail;
+		array<GenericPtr, ResourceCount> resources; // std::shared_ptr<ResourceControlBlock<R>>
+		array<GenericPtr, ResourceCount> factories;
+		array<GenericPtr, ResourceCount> file_loader;
 	};
 }
 #include "ResourceManager.inl"

@@ -51,8 +51,6 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
-    <ClInclude Include="res\SaveableResource.h" />
-    <ClInclude Include="res\SaveableResourceManager.h" />
     <ClInclude Include="scene\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
@@ -223,7 +221,6 @@
     <ClCompile Include="phys\PhysicsSystem.cpp" />
     <ClCompile Include="phys\RigidBody.cpp" />
     <ClCompile Include="res\Guid.cpp" />
-    <ClCompile Include="res\SaveableResourceManager.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
@@ -322,7 +319,6 @@
     <None Include="res\Guid.inl" />
     <None Include="res\Resource.inl" />
     <None Include="res\ResourceMeta.inl" />
-    <None Include="res\SaveableResourceManager.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
