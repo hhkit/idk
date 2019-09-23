@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include <core/GameObject.h>
+#include "..\res\ResourceBundle.h"
 
 namespace idk
 {
@@ -53,6 +54,11 @@ namespace idk
 		return Scene{ handle.scene };
 	}
 
+	ResourceBundle::ResourceSpan<T>::iterator::iterator(GenericResourceHandle* in)
+		: itr{in}
+	{
+	}
+
 	GameObject& Scene::iterator::operator*()
 	{
 		return *curr_;
@@ -61,6 +67,11 @@ namespace idk
 	GameObject* Scene::iterator::operator->()
 	{
 		return curr_;
+	}
+
+	bool ResourceBundle::ResourceSpan<T>::iterator::operator<(const iterator& rhs) const
+	{
+		return itr < rhs.itr;
 	}
 
 	Scene::iterator& Scene::iterator::operator++()

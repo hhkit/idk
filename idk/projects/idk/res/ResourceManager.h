@@ -77,12 +77,13 @@ namespace idk
 		template<typename R>
 		struct ResourceControlBlock
 		{
+			bool dirty;
 			shared_ptr<R> resource; // note: make atomic
 		};
 
-		array<GenericPtr, ResourceCount> resources; // std::shared_ptr<ResourceControlBlock<R>>
-		array<GenericPtr, ResourceCount> factories;
-		array<GenericPtr, ResourceCount> file_loader;
+		array<GenericPtr, ResourceCount> resources;   // std::shared_ptr<ResourceControlBlock<R>>
+		array<GenericPtr, ResourceCount> factories;   // std::shared_ptr<ResourceFactory<R>>
+		hash_table<string, GenericPtr> file_loader; // 
 	};
 }
 #include "ResourceManager.inl"

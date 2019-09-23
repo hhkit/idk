@@ -389,9 +389,6 @@
     <ClInclude Include="gfx\MeshRenderer.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="res\FileResources.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\FileResources_detail.h">
       <Filter>res</Filter>
     </ClInclude>
@@ -606,6 +603,11 @@
     <ClInclude Include="math\shapes\frustum.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="res\FileLoader.h" />
+    <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\GenericResourceHandle.h" />
+    <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="meta\variant.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -719,9 +721,6 @@
     </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="res\FileResources.cpp">
-      <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
@@ -882,6 +881,7 @@
     <ClCompile Include="gfx\MeshFactory.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
+    <ClCompile Include="res\ResourceBundle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1010,9 +1010,6 @@
     <None Include="meta\tag.inl">
       <Filter>meta</Filter>
     </None>
-    <None Include="res\FileResources.inl">
-      <Filter>res</Filter>
-    </None>
     <None Include="res\ForwardingExtensionLoader.inl">
       <Filter>res</Filter>
     </None>
@@ -1055,6 +1052,8 @@
     <None Include="ds\result.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="meta\variant.inl" />
+    <None Include="res\ResourceBundle.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
