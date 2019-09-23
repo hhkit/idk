@@ -7,8 +7,7 @@
 #include <file/PathHandle.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
-#include <res/FileResources.h>
-#include <res/ExtensionLoader.h>
+#include <res/FileLoader.h>
 #include <meta/meta.h>
 #include <meta/tag.h>
 
@@ -58,10 +57,10 @@ namespace idk
 		template<typename Res> bool Free    (const RscHandle<Res>&);
 
 		/* RESOURCE LOADING - for high-level users like editor programmer */
-		template<typename Res> RscHandle<Res>  Create();
-		template<typename Res> RscHandle<Res>  Create(std::string_view path_to_new_asset);
-		template<typename Res> LoadResult<Res> Load(PathHandle path);
-		template<typename Res> SaveResult<Res> Save(RscHandle<Res>);
+		template<typename Res> RscHandle<Res>       Create();
+		template<typename Res> RscHandle<Res>       Create(std::string_view path_to_new_asset);
+		template<typename Res> LoadResult<Res>      Load(PathHandle path);
+		template<typename Res> SaveResult<Res>      Save(RscHandle<Res>);
 		template<typename Res> ResourceReleaseError Release(RscHandle<Res>);
 
 		/* FACTORIES - for registering resource factories */
@@ -73,6 +72,7 @@ namespace idk
 		template<typename Res, typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Guid, Args&& ... construction_args);
 
 	private:
+		using Extension  = std::string;
 		using GenericPtr = std::shared_ptr<void>;
 		template<typename R>
 		struct ResourceControlBlock
@@ -81,9 +81,15 @@ namespace idk
 			shared_ptr<R> resource; // note: make atomic
 		};
 
-		array<GenericPtr, ResourceCount> resources;   // std::shared_ptr<ResourceControlBlock<R>>
-		array<GenericPtr, ResourceCount> factories;   // std::shared_ptr<ResourceFactory<R>>
-		hash_table<string, GenericPtr> file_loader; // 
+		array<GenericPtr, ResourceCount> _resources;                   // std::shared_ptr<ResourceControlBlock<R>>
+		array<GenericPtr, ResourceCount> _factories;                   // std::shared_ptr<ResourceFactory<R>>
+		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;   // extension to file loader
 	};
+
+	template<typename Res>
+	RscHandle<Res> ResourceManager::Create()
+	{
+		return RscHandle<Res>();
+	}
 }
 #include "ResourceManager.inl"

@@ -4,6 +4,9 @@
 
 namespace idk
 {
+	template<typename T>
+	constexpr auto BaseResourceID = detail::BaseResource<T>::value;
+
 	template<typename Res>
 	class Resource
 	{
