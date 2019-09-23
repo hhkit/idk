@@ -188,15 +188,7 @@ namespace idk {
 			if (isNameEmpty) {
 				ImGui::PopStyleColor();
 			}
-			if (isTreeOpen) {
-
-				ImGui::TreePop();
-
-			}
-			else {
-				
-				return false;
-			}
+			
 			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
 				//Check if handle has been selected
@@ -236,7 +228,45 @@ namespace idk {
 				}
 			}
 
-			
+			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
+			{
+				ImGui::SetDragDropPayload("id", &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+				ImGui::Text("Drag to another gameobject to parent.");
+				ImGui::Text("Drag to self to unparent.");
+				ImGui::EndDragDropSource();
+			}
+			//Create a drag drop payload on selected gameobjects.
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("id")) {
+					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
+					uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
+					if (selected_gameObjects.size()) {
+						for (Handle<GameObject>& i : selected_gameObjects) {
+							if (i == handle) //do not parent self
+								continue;
+
+							if (i == handle->GetComponent<Transform>()->parent)
+								continue;
+
+
+							i->GetComponent<Transform>()->SetParent(handle, true);
+						}
+					}
+
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (isTreeOpen) {
+
+				ImGui::TreePop();
+
+			}
+			else {
+
+				return false;
+			}
+
 			return true;
 
 		});
