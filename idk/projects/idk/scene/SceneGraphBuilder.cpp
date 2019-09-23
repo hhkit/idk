@@ -27,6 +27,12 @@ namespace idk
 		{
 			auto key = elem.GetHandle();
 			auto parent = elem.Parent();
+			if (elem.HierarchyIsQueuedForDestruction())
+			{
+				GameState::GetGameState().DestroyObject(elem.GetHandle());
+				continue;
+			}
+
 			if (parent)
 			{
 				auto& sg = sg_lookup[parent]->emplace_child(key);

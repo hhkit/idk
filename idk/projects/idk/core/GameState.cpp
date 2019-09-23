@@ -105,6 +105,16 @@ namespace idk::detail
 			};
 		}
 
+		static auto GenQueueForDestructionJt()
+		{
+			return GameState::DestroyJT{
+				[](GameState& gs, const GenericHandle& handle)
+				{
+					gs.QueueForDestruction(*handle_cast<Ts>(handle));
+				} ...
+			};
+		}
+
 		static auto GenDestructionJt()
 		{
 			return GameState::DestroyJT{
@@ -143,12 +153,13 @@ namespace idk
 		: _objects{detail::TableGen::Instantiate()}
 	{
 		assert(_instance == nullptr);
-		name_to_id_map      = detail::TableGen::GenTypeLUT();
-		create_dynamic_jt   = detail::TableGen::GenCreateDynamicJt();
-		create_type_jt      = detail::TableGen::GenCreateTypeJt();
-		create_handles_jt   = detail::TableGen::GenCreateJt();
-		destroy_handles_jt  = detail::TableGen::GenDestructionJt();
-		validate_handles_jt = detail::TableGen::GenValidateJt();
+		name_to_id_map       = detail::TableGen::GenTypeLUT();
+		create_dynamic_jt    = detail::TableGen::GenCreateDynamicJt();
+		create_type_jt       = detail::TableGen::GenCreateTypeJt();
+		create_handles_jt    = detail::TableGen::GenCreateJt();
+		destroy_handles_jt   = detail::TableGen::GenDestructionJt();
+		validate_handles_jt  = detail::TableGen::GenValidateJt();
+		queue_for_destroy_jt = detail::TableGen::GenQueueForDestructionJt();
 		_instance = this;
 	}
 
@@ -195,7 +206,10 @@ namespace idk
 	void GameState::DestroyObject(const GenericHandle& handle)
 	{
 		if (handle)
+		{
+			queue_for_destroy_jt[handle.type](*this, handle);
 			_destruction_queue.emplace_back(handle);
+		}
 	}
 	void GameState::DestroyObject(const Handle<GameObject>& handle)
 	{
@@ -203,6 +217,7 @@ namespace idk
 		{
 			for (auto& elem : handle->GetComponents())
 				DestroyObject(elem);
+			handle->_queued_for_destruction = true;
 			_destruction_queue.emplace_back(handle);
 		}
 
