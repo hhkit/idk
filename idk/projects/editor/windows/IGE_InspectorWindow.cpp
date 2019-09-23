@@ -27,6 +27,7 @@ of the editor.
 #include <ds/span.h>
 #include <imgui/imgui_stl.h>
 #include <math/euler_angles.h>
+#include <widgets/InputResource.h>
 
 namespace idk {
 
@@ -125,13 +126,19 @@ namespace idk {
 							}
 							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
 								string meshName{val.guid };
+
+                                PathHandle test = "/assets/models/test.fbx";
+                                if (ImGuidk::InputResourceEx(keyName.c_str(), &test, { ".fbx" }))
+                                {
+                                    std::cout << test.GetMountPath();
+                                }
 								
 								if (ImGui::Button(meshName.c_str())) {
 
 								}
 								//Create a drag drop payload on selected gameobjects.
 								if (ImGui::BeginDragDropTarget()) {
-									if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("string")) {
+									if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE)) {
 										IM_ASSERT(payload->DataSize == sizeof(string));
 										PathHandle* source = static_cast<PathHandle*>(payload->Data); // Getting the Payload Data
 										if (source->GetExtension() != ".fbx") {

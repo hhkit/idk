@@ -13,3 +13,9 @@
 #define IM_VEC4_CLASS_EXTRA                                                 \
         ImVec4(const idk::vec4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }  \
         operator idk::vec4() const { return idk::vec4(x,y,z,w); }
+
+struct DragDrop
+{
+    constexpr static auto PARAMETER = "dd_param";
+    constexpr static auto RESOURCE = "dd_resource";
+};

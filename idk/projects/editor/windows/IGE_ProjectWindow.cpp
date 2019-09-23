@@ -324,7 +324,7 @@ namespace idk {
             {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    ImGui::SetDragDropPayload("string", &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+                    ImGui::SetDragDropPayload(DragDrop::RESOURCE, &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
                     ImGui::Text("Drag to inspector button.");
                     ImGui::Text(selected_asset.GetMountPath().data());
                     ImGui::EndDragDropSource();

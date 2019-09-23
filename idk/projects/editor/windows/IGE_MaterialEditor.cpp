@@ -13,8 +13,6 @@ namespace idk
 {
     using namespace idk::shadergraph;
 
-    constexpr static auto DRAG_DROP_PARAMETER = "dd_param";
-
     static array<unsigned, ValueType::count + 1> type_colors
     { // from DB32 palette
         0,
@@ -738,7 +736,7 @@ namespace idk
         ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail()));
         if (ImGui::BeginDragDropTarget())
         {
-            if (const auto* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_PARAMETER, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::PARAMETER, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
             {
                 addParamNode(*reinterpret_cast<int*>(payload->Data), (ImGui::GetMousePos() - ImGui::GetWindowPos() - _canvas.offset) / _canvas.zoom);
             }
@@ -843,7 +841,7 @@ namespace idk
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
                     ImGui::Text(param.name.c_str());
-                    ImGui::SetDragDropPayload(DRAG_DROP_PARAMETER, &i, sizeof(i));
+                    ImGui::SetDragDropPayload(DragDrop::PARAMETER, &i, sizeof(i));
                     ImGui::EndDragDropSource();
                 }
 
