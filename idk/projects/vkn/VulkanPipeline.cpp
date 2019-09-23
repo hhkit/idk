@@ -2,6 +2,7 @@
 #include "VulkanPipeline.h"
 #include <vkn/GfxConverters.h>
 #include <vkn/BufferHelpers.h>
+#include <vkn/ShaderModule.h>
 namespace idk::vkn
 {
 	template<typename T, typename = void>
@@ -101,7 +102,47 @@ namespace idk::vkn
 			}
 		}
 	};
-	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo, Vulkan_t& vulkan)
+	hash_table<uint32_t, vk::UniqueDescriptorSetLayout> FillEmptyLayouts(
+		hash_table<uint32_t, vk::DescriptorSetLayout>& layouts
+		,VulkanView& view)
+	{
+		hash_table<uint32_t, vk::UniqueDescriptorSetLayout> result;
+		uint32_t max = 0;
+		if (layouts.size())
+		{
+			for ([[maybe_unused]] auto& [set_index, info] : layouts)
+			{
+
+				max = std::max(set_index, max);
+			}
+			++max;
+		}
+		for (uint32_t i = 0; i < max; ++i)
+		{
+			vk::DescriptorSetLayoutCreateInfo layout_info
+			{
+				vk::DescriptorSetLayoutCreateFlags{}
+				,0
+				,nullptr
+			};
+			if(layouts.find(i)==layouts.end())
+				layouts[i] = *(result[i]=view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher()));
+		}
+		return result;
+	}
+	void GetLayouts(const RscHandle<ShaderProgram>& hshader, hash_table<uint32_t, vk::DescriptorSetLayout>& out)
+	{
+		auto& frag_shader = hshader.as<ShaderModule>();
+		auto itr = frag_shader.LayoutsBegin();
+		for (; itr != frag_shader.LayoutsEnd(); ++itr)
+		{
+			auto& [set, layout] = *itr;
+			out.emplace(set, *layout);
+		}
+
+	}
+
+	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
@@ -147,13 +188,22 @@ namespace idk::vkn
 		//	,std::data (dynamicStates)//pDynamicStates    
 		//};
 		//For uniforms
-		CreateUniformDescriptors(vulkan, config);//Should probably also allocate the UBO and Descriptors on the View/Data side.
+
+		{
+			hash_table<uint32_t, vk::DescriptorSetLayout> layouts;
+
+			GetLayouts(config.frag_shader, layouts);
+			GetLayouts(config.vert_shader, layouts);
+			owned_uniform_layouts= FillEmptyLayouts(layouts,vulkan);
+			uniform_layouts = std::move(layouts);
+		}
 		auto&& [pipelineLayoutInfo, pli_rsc] = GetLayoutInfo(config);;
+
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
 			vk::PipelineCreateFlags{}
-			,hlp::arr_count(stageCreateInfo),std::data(stageCreateInfo)
+			,hlp::arr_count(info),std::data(info)
 			,&vertexInputInfo
 			,&inputAssembly
 			,nullptr
@@ -177,14 +227,15 @@ namespace idk::vkn
 		for (auto& [stage, module] : shader_modules)
 		{
 			stageCreateInfo.emplace_back(vk::PipelineShaderStageCreateInfo
-			{
-			vk::PipelineShaderStageCreateFlags{},
-			stage ,
-			module,
-			entryPoint,
-			nullptr
-			});
-		}
+				{
+				vk::PipelineShaderStageCreateFlags{},
+				stage ,
+				module,
+				entryPoint,
+				nullptr
+				});
+
+		}		
 		Create(config, stageCreateInfo, vulkan);
 	}
 	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
@@ -258,11 +309,10 @@ namespace idk::vkn
 		> result;
 		auto& [info, rsc] = result;
 
-		auto vert = config.vert_shader;//GetBinaryFile("shaders/vertex.vert.spv");
-		auto frag = config.frag_shader;//GetBinaryFile("shaders/fragment.frag.spv");
-		rsc.reserve(2);
-		auto& fragModule = rsc.emplace_back(vulkan.CreateShaderModule(frag));
-		auto& vertModule = rsc.emplace_back(vulkan.CreateShaderModule(vert));
+		auto& vert = config.vert_shader.as<ShaderModule>();//GetBinaryFile("shaders/vertex.vert.spv");
+		auto& frag = config.frag_shader.as<ShaderModule>();//GetBinaryFile("shaders/fragment.frag.spv");
+		auto fragModule = frag.Module();//rsc.emplace_back(vulkan.CreateShaderModule(frag));
+		auto vertModule = vert.Module();//rsc.emplace_back(vulkan.CreateShaderModule(vert));
 
 		const char* entryPoint = "main";
 
@@ -270,7 +320,7 @@ namespace idk::vkn
 		{
 			vk::PipelineShaderStageCreateFlags{},
 			vk::ShaderStageFlagBits::eFragment,
-			*fragModule,
+			fragModule,
 			entryPoint,
 			nullptr
 		};
@@ -279,7 +329,7 @@ namespace idk::vkn
 		{
 			vk::PipelineShaderStageCreateFlags{},
 			vk::ShaderStageFlagBits::eVertex,
-			*vertModule,
+			vertModule,
 			entryPoint,
 			nullptr
 		};
@@ -412,7 +462,7 @@ namespace idk::vkn
 		layouts.resize(max);
 		for (auto& [index, info] : uniform_layouts)
 		{
-			layouts[index] = *info;
+			layouts[index] = info;
 		}
 		//std::transform(uniform_layouts.begin(), uniform_layouts.end(), std::back_inserter(layouts), [](auto& u) {return *u.second; });
 		return make_pair(vk::PipelineLayoutCreateInfo
@@ -423,66 +473,6 @@ namespace idk::vkn
 			, 0		  //pushConstantRangeCount 
 			, nullptr //pPushConstantRanges    
 		},std::move(layouts));
-	}
-	vk::DescriptorType ConvertUniformType(uniform_layout_t::UniformType type)
-	{
-		static hash_table< uniform_layout_t::UniformType, vk::DescriptorType>map
-		{
-			{uniform_layout_t::UniformType::eBuffer,vk::DescriptorType::eUniformBuffer},
-			{uniform_layout_t::UniformType::eSampler,vk::DescriptorType::eCombinedImageSampler},
-		};
-		return map[type];
-	}
-	vector<vk::DescriptorSetLayoutBinding> GetDescriptorBindings(const uniform_layout_t& ulayout_config)
-	{
-		vector<vk::DescriptorSetLayoutBinding> result;
-		for (auto& binding : ulayout_config.bindings)
-		{
-			vk::DescriptorSetLayoutBinding a{ 
-				binding.binding,
-				ConvertUniformType(binding.type),
-				binding.descriptor_count,
-				hlp::MapStages(binding.stages)
-				,nullptr
-			};
-			result.emplace_back(a);
-		}
-		return result;
-	}
-
-	void VulkanPipeline::CreateUniformDescriptors(Vulkan_t& vulkan, const config_t& config)
-	{
-		uint32_t max = 0;
-		for (auto& [set_idx, set] : config.uniform_layouts)
-		{
-			max = std::max(set_idx, max);
-		}
-		++max;
-		uniform_layouts.clear();
-		for (uint32_t i = 0; i < max; ++i)
-		{
-			vk::DescriptorSetLayoutCreateInfo layout_info
-			{
-				vk::DescriptorSetLayoutCreateFlags{}
-				,0
-				,nullptr
-			};
-			uniform_layouts[i] = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
-		}
-		for (auto& [set_idx, set] : config.uniform_layouts)
-		{
-			auto bindings = GetDescriptorBindings(set);
-			if (bindings.size())
-			{
-				vk::DescriptorSetLayoutCreateInfo layout_info
-				{
-					vk::DescriptorSetLayoutCreateFlags{}
-					,hlp::arr_count(bindings)
-					,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
-				};
-				uniform_layouts[set_idx] = vulkan.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, vulkan.Dispatcher());
-			}
-		}
 	}
 
 	vk::UniqueRenderPass& VulkanPipeline::GetRenderpass([[maybe_unused]]const config_t& config, [[maybe_unused]] VulkanView& vulkan)

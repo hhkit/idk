@@ -32,7 +32,10 @@ namespace idk
 					[](ResourceManager* resource_man)
 					{
 						if (auto loader = &resource_man->GetLoader<Rs>())
-							resource_man->_default_resources[ResourceID<Rs>] = loader->GenerateDefaultResource();
+						{
+							auto id = ResourceID<Rs>;
+							resource_man->_default_resources[id] = loader->GenerateDefaultResource();
+						}
 					}...
 				};
 			}

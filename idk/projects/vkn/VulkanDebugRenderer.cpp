@@ -99,23 +99,24 @@ namespace idk::vkn
 		idk::pipeline_config config;
 		auto vert_data = []()
 		{
-			auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgvertex.vert.spv", FS_PERMISSIONS::READ, true);
-			return stringify(stream);
+			//auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgvertex.vert".spv", FS_PERMISSIONS::READ, true);
+			return Core::GetResourceManager().LoadFile("/assets/shader/dbgvertex.vert.spv")[0].As<ShaderProgram>();
 		}();
 		auto frag_data = []()
 		{
-			auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
-			return stringify(stream);
+			//auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
+			//return stringify(stream);
+			return Core::GetResourceManager().LoadFile("/assets/shader/dbgfragment.frag.spv")[0].As<ShaderProgram>();
 		}();
 
 		config.frag_shader = frag_data;
 		config.vert_shader = vert_data;
 		config.fill_type = idk::FillType::eLine;
 		config.prim_top = idk::PrimitiveTopology::eTriangleList;
-		uniform_layout_t uniform_layout{};
-		uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 0,1,{uniform_layout_t::eVertex} });
-		uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 1,1,{uniform_layout_t::eVertex} });
-		config.uniform_layouts.emplace(0, uniform_layout);
+		//uniform_layout_t uniform_layout{};
+		//uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 0,1,{uniform_layout_t::eVertex} });
+		//uniform_layout.bindings.emplace_back(uniform_layout_t::bindings_t{ 1,1,{uniform_layout_t::eVertex} });
+		//config.uniform_layouts.emplace(0, uniform_layout);
 		config.buffer_descriptions.emplace_back(
 			buffer_desc{
 				binding_info{0,sizeof(idk::debug_vertex),idk::VertexRate::eVertex},

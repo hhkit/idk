@@ -775,14 +775,6 @@ namespace idk::vkn
 	}
 
 
-	vk::DescriptorSetLayout GetUniformLayout(VulkanPipeline& pipeline, uint32_t set)
-	{
-		auto itr = pipeline.uniform_layouts.find(set);
-		assert(itr != pipeline.uniform_layouts.end());
-			//throw std::runtime_error("Received incorre")
-		return *itr->second;
-	}
-
 	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
 		auto& current_signal = m_swapchain.m_graphics.pSignals[current_frame];

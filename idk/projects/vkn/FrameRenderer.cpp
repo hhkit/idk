@@ -47,23 +47,15 @@ namespace idk::vkn
 		config.buffer_descriptions.emplace_back(nml_desc);
 		string f, v;
 		{
-			std::stringstream stringify;
-			{
-				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/mesh.vert.spv", FS_PERMISSIONS::READ, true);
-				stringify << vbuffer.rdbuf();
-			}
-			v = stringify.str();
-			config.vert_shader = v;
+				auto vbuffer = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert.spv")[0].As<ShaderProgram>();
+			config.vert_shader = vbuffer;
 
 		}
 		{
-			std::stringstream stringify;
 			{
-				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/flat_color.frag.spv", FS_PERMISSIONS::READ, true);
-				stringify << vbuffer.rdbuf();
+				auto vbuffer = Core::GetResourceManager().LoadFile("/assets/shader/flat_color.frag.spv")[0].As<ShaderProgram>();
+				config.vert_shader = vbuffer;
 			}
-			f = stringify.str();
-			config.frag_shader = f;
 		}
 		config.prim_top = PrimitiveTopology::eTriangleList;
 		config.fill_type = FillType::eFill;
@@ -143,10 +135,11 @@ namespace idk::vkn
 		}
 		{
 			string filename = "/assets/shader/shadow.frag";
-			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
 			auto& shader_mod = _shadow_shader_module;
-			if (!actualfile || !rsc.resources.size())
+			//if (!actualfile || !rsc.resources.size())
+			if(!shader_mod)
 			{
 
 				vector<buffer_desc> desc{
@@ -154,16 +147,16 @@ namespace idk::vkn
 				};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				shader_mod = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
+				shader_mod = Core::GetResourceManager().LoadFile(filename).resources.front().As<ShaderProgram>();
 				shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
 
 			}
-			else
-			{
-				shader_mod = rsc.resources.front().As<ShaderProgram>();
-			}
+			//else
+			//{
+			//	shader_mod = rsc.resources.front().As<ShaderProgram>();
+			//}
 		}
 		{
 
@@ -426,7 +419,7 @@ namespace idk::vkn
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
 			//Account for material bindings
-			for (auto itr = layouts.LayoutsBegin(), end = layouts.LayoutsEnd(); itr != end; ++itr)
+			for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 			{
 				auto& name = itr->first;
 				auto mat_uni_itr = dc.material_instance.uniforms.find(itr->first);
@@ -584,7 +577,7 @@ namespace idk::vkn
 		auto itr = layouts.find(trf_set);
 		if (itr != layouts.end())
 		{
-			auto ds_layout = *itr->second;
+			auto ds_layout = itr->second;
 			auto allocated =rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, {vk::DescriptorType::eUniformBuffer,2}}});
 			auto aitr = allocated.find(ds_layout);
 			if (aitr != allocated.end())
@@ -688,9 +681,9 @@ namespace idk::vkn
 				if (layout_itr != layouts.end())
 				{
 					//Find the allocated pool of descriptor sets that matches the descriptor set layout
-					auto ds_itr = alloced_dsets.find(*layout_itr->second);
+					auto ds_itr = alloced_dsets.find(layout_itr->second);
 					if (ds_itr == alloced_dsets.end())
-						ds_itr = alloced_dsets.find(*layout_itr->second);
+						ds_itr = alloced_dsets.find(layout_itr->second);
 					if(ds_itr!=alloced_dsets.end())
 					{
 						//Get a descriptor set from the allocated pool

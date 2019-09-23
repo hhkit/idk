@@ -34,4 +34,8 @@ namespace idk::vkn
 		
 		return std::move(program);
 	}
+	unique_ptr<ShaderProgram> VulkanShaderModuleFactory::Create()
+	{
+		return std::make_unique<ShaderModule>();;
+	}
 }

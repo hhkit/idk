@@ -4,13 +4,28 @@
 #include <res/ExtensionLoader.h>
 namespace idk::vkn
 {
-
-class VulkanGlslLoader
-	: public ResourceFactory<ShaderProgram>
+	
+class VulkanSpvLoader
+	: public ExtensionLoader
 {
 public:
-	unique_ptr<ShaderProgram> GenerateDefaultResource() override;
-	unique_ptr<ShaderProgram> Create(PathHandle path_to_resource) override;
+
+	FileResources Create(PathHandle path_to_resource) override;
+	FileResources Create(PathHandle path_to_resource, const MetaFile& path_to_meta) override { return Create(path_to_resource); }
+
+	//unique_ptr<ShaderProgram> Create(PathHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
+	//FileResources Create(PathHandle path_to_resource, const MetaFile& path_to_meta) override;
+private:
+
+
+};
+class VulkanGlslLoader
+	: public ExtensionLoader
+{
+public:
+	FileResources Create(PathHandle path_to_resource) override;
+	FileResources Create(PathHandle path_to_resource, const MetaFile& path_to_meta) override { return Create(path_to_resource); }
+	
 	//unique_ptr<ShaderProgram> Create(PathHandle path_to_resource, const MetaFile&) override { return Create(path_to_resource); };
 	//FileResources Create(PathHandle path_to_resource, const MetaFile& path_to_meta) override;
 private:
