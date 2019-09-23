@@ -127,11 +127,11 @@ namespace idk {
 							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
 								string meshName{val.guid };
 
-                                PathHandle test = "/assets/models/test.fbx";
-                                if (ImGuidk::InputResourceEx(keyName.c_str(), &test, { ".fbx" }))
-                                {
-                                    std::cout << test.GetMountPath();
-                                }
+                                //PathHandle test = "/assets/models/test.fbx";
+                                //if (ImGuidk::InputResourceEx(keyName.c_str(), &test, { ".fbx" }))
+                                //{
+                                //    std::cout << test.GetMountPath();
+                                //}
 								
 								if (ImGui::Button(meshName.c_str())) {
 

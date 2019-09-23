@@ -85,6 +85,8 @@
     <ClInclude Include="widgets\InputResource.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="DragDropTypes.h" />
+    <ClInclude Include="ResourceExtensions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
