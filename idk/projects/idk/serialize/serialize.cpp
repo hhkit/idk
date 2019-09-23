@@ -83,6 +83,13 @@ namespace idk
                 ret.tag(held.type.name());
                 return ret;
 			}
+            else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
+            {
+                auto& held = obj.get<reflect::dynamic>();
+                yaml::node ret = serialize_yaml(held);
+                ret.tag(held.type.name());
+                return ret;
+            }
 			else
 				throw "unhandled case?";
 		}
@@ -154,7 +161,7 @@ namespace idk
 			else if constexpr (std::is_same_v<T, reflect::dynamic>)
 			{
                 yaml::node dyn_node = serialize_yaml(arg);
-                if (arg.valid())
+                if (arg.valid() && !dyn_node.has_tag())
                     dyn_node.tag(arg.type.name());
                 if constexpr (std::is_arithmetic_v<K>)
                     curr_node.emplace_back(dyn_node);
@@ -312,6 +319,12 @@ namespace idk
 				parse_yaml(node, cont);
                 return;
 			}
+            else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
+            {
+                auto& held = obj.get<reflect::dynamic>();
+                parse_yaml(node, held);
+                return;
+            }
 			else
 				throw "unhandled case?";
 		}

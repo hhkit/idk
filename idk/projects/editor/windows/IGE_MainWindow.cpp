@@ -401,31 +401,21 @@ namespace idk {
 				gizmo_operation = GizmoOperation_Scale;
 			}
 			
+			//DEL = Delete
+			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
+				if (editor.selected_gameObjects.size()) {
+					if (editor.selected_gameObjects.size() == 1) {
+						Handle<GameObject> i = editor.selected_gameObjects.front();
+						editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
+						commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+					}
+				}
+			}
+
 			//F = Focus on GameObject
 			if (ImGui::IsKeyPressed(70))
 			{
-				if (editor.selected_gameObjects.size()) {
-					vec3 finalCamPos{};
-					for (Handle<GameObject> i : editor.selected_gameObjects) {
-
-						Handle<Transform> transform = i->GetComponent<Transform>();
-						if (transform) {
-							finalCamPos += transform->position;
-						}
-
-					}
-
-					finalCamPos /= editor.selected_gameObjects.size();
-
-					const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
-
-					CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
-					Handle<Camera> currCamera = main_camera.current_camera;
-					Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
-					camTransform->position = finalCamPos;
-					camTransform->position += camTransform->Forward() * distanceFromObject;
-				}
-
+				editor.FocusOnSelectedGameObjects();
 
 			}
 
