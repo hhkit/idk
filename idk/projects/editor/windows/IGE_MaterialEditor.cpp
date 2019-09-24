@@ -26,6 +26,19 @@ namespace idk
         0xffba7b37
     };
 
+    static const char* slot_suffix(ValueType type)
+    {
+        switch (type)
+        {
+        case ValueType::FLOAT:      return "(1)";
+        case ValueType::VEC2:       return "(2)";
+        case ValueType::VEC3:       return "(3)";
+        case ValueType::VEC4:       return "(4)";
+        case ValueType::SAMPLER2D:  return "(S)";
+        default: throw;
+        }
+    }
+
     bool draw_slot(const char* title, int kind)
     {
         auto* canvas = ImNodes::GetCurrentCanvas();
@@ -41,6 +54,16 @@ namespace idk
             item_offset_x = -item_offset_x;
         ImGui::SetCursorScreenPos(ImGui::GetCursorScreenPos() + ImVec2{ item_offset_x, 0 });
 
+        if (ImNodes::IsOutputSlotKind(kind))
+        {
+            // Align output slots to the right edge of the node.
+            ImGuiID max_width_id = ImGui::GetID("output-max-title-width");
+            float output_max_title_width = ImMax(storage->GetFloat(max_width_id, title_size.x), title_size.x);
+            storage->SetFloat(max_width_id, output_max_title_width);
+            float offset = (output_max_title_width + style.ItemSpacing.x) - title_size.x;
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+        }
+
         if (ImNodes::BeginSlot(title, kind))
         {
             auto* draw_lists = ImGui::GetWindowDrawList();
@@ -54,18 +77,14 @@ namespace idk
             if (!is_active) text_color.Value.w = 0.7f;
             ImColor color = is_active ? canvas->colors[ImNodes::ColConnectionActive] : canvas->colors[ImNodes::ColConnection];
 
+            string label = title;
+            label += slot_suffix(static_cast<ValueType>(abs(kind)));
+
             ImGui::PushStyleColor(ImGuiCol_Text, text_color.Value);
 
             if (ImNodes::IsOutputSlotKind(kind))
             {
-                // Align output slots to the right edge of the node.
-                ImGuiID max_width_id = ImGui::GetID("output-max-title-width");
-                float output_max_title_width = ImMax(storage->GetFloat(max_width_id, title_size.x), title_size.x);
-                storage->SetFloat(max_width_id, output_max_title_width);
-                float offset = (output_max_title_width + style.ItemSpacing.x) - title_size.x;
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
-                ImGui::TextUnformatted(title);
+                ImGui::TextUnformatted(label.c_str());
                 ImGui::SameLine();
             }
 
@@ -85,7 +104,7 @@ namespace idk
             if (ImNodes::IsInputSlotKind(kind))
             {
                 ImGui::SameLine();
-                ImGui::TextUnformatted(title);
+                ImGui::TextUnformatted(label.c_str());
             }
 
             ImGui::PopStyleColor();
@@ -104,9 +123,11 @@ namespace idk
     {
         switch (type)
         {
-        case ValueType::FLOAT: return "0";
-        case ValueType::VEC2: return "0,0";
-        case ValueType::VEC3: return "0,0,0";
+        case ValueType::FLOAT:      return "0";
+        case ValueType::VEC2:       return "0,0";
+        case ValueType::VEC3:       return "0,0,0";
+        case ValueType::VEC4:       return "0,0,0,0";
+        case ValueType::SAMPLER2D:  return string(Guid());
         default: throw;
         }
     }
@@ -228,7 +249,7 @@ namespace idk
 
         if (ImNodes::BeginNode(&node, reinterpret_cast<ImVec2*>(&node.position), &node.selected))
         {
-            auto slash_pos = node.name.find_last_of('\\');
+            const auto slash_pos = node.name.find_last_of('\\');
             
             string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
             if (is_master_node)
@@ -236,6 +257,7 @@ namespace idk
             if (is_param_node)
                 title = "Parameter";
 
+            const auto suffix_w = ImGui::CalcTextSize("(S)").x; // all slot names will show suffix (only during render)
             auto title_size = ImGui::CalcTextSize(title.c_str());
             float input_names_width = 0;
             float output_names_width = 0;
@@ -249,7 +271,7 @@ namespace idk
             {
                 auto& param = _graph->parameters[std::stoi(node.name.data() + 1)];
                 const auto& slot_name = param.name;
-                title_size.x = std::max(title_size.x, ImGui::CalcTextSize(slot_name.c_str()).x);
+                title_size.x = std::max(title_size.x, ImGui::CalcTextSize(slot_name.c_str()).x + suffix_w);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
                 draw_slot(slot_name.c_str(), param.type);
@@ -259,7 +281,7 @@ namespace idk
                 auto& tpl = NodeTemplate::GetTable().at(node.name);
 
                 int i = 0;
-                for (auto slot_name : tpl.names)
+                for (auto& slot_name : tpl.names)
                 {
                     if (i < node.input_slots.size())
                         input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
@@ -268,7 +290,7 @@ namespace idk
                     ++i;
                 }
 
-                title_size.x = std::max(title_size.x, input_names_width + output_names_width + ImGui::GetStyle().ItemSpacing.x * 2);
+                title_size.x = std::max(title_size.x, input_names_width + output_names_width + ImGui::GetStyle().ItemSpacing.x * 2 + suffix_w * 2);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
                 i = 0;
@@ -760,8 +782,15 @@ namespace idk
             ImGui::Text(_graph_name.c_str());
 
             if (ImGui::Button("Add Parameter"))
+                ImGui::OpenPopup("addparams");
+            if (ImGui::BeginPopup("addparams"))
             {
-                _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT, "0" });
+                if (ImGui::MenuItem("Float"))     _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT,     "0" });
+                if (ImGui::MenuItem("Vec2"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
+                if (ImGui::MenuItem("Vec3"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
+                if (ImGui::MenuItem("Vec4"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
+                if (ImGui::MenuItem("Sampler2D")) _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
+                ImGui::EndPopup();
             }
 
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1.0f, 1.0f));
@@ -830,12 +859,30 @@ namespace idk
                     }
                     break;
                 }
+                case ValueType::VEC4:
+                {
+                    float f[4]{ 0, 0, 0, 0 };
+                    std::smatch matches;
+                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+                    {
+                        f[0] = std::stof(matches[1]);
+                        f[1] = std::stof(matches[2]);
+                        f[2] = std::stof(matches[3]);
+                        f[3] = std::stof(matches[4]);
+                    }
+                    if (ImGui::DragFloat4("Default", f, 0.01f))
+                    {
+                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]) + ',' + std::to_string(f[3]);
+                    }
+                    break;
+                }
                 default:
                     break;
                 }
 
                 ImGui::EndGroup();
                 ImGui::EndGroup();
+
                 ImGui::PopID();
 
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -845,7 +892,8 @@ namespace idk
                     ImGui::EndDragDropSource();
                 }
 
-                if (ImGui::BeginPopupContextWindow())
+                string id = "context_" + i;
+                if (ImGui::BeginPopupContextItem(id.c_str()))
                 {
                     if (ImGui::MenuItem("Delete"))
                     {
