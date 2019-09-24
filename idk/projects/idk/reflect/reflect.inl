@@ -34,6 +34,39 @@ namespace idk::reflect
 		return type{ iter->second };
 	}
 
+    namespace detail
+    {
+        template<typename T>
+        struct is_unpackable : false_type {};
+        template<template<typename...> typename Tpl, typename... Ts>
+        struct is_unpackable<Tpl<Ts...>> : true_type {};
+
+        template<typename T, size_t I>
+        struct type_at_index;
+        template<size_t I, template<typename...> typename Tpl, typename... Ts>
+        struct type_at_index<Tpl<Ts...>, I> { using type = std::tuple_element_t<I, std::tuple<Ts...>>; };
+
+        template<typename T>
+        struct pack_size;
+        template<template<typename...> typename Tpl, typename... Ts>
+        struct pack_size<Tpl<Ts...>> { constexpr static auto value = sizeof...(Ts); };
+
+        template<typename T, size_t... Is>
+        span<type> unpack_types(std::index_sequence<Is...>)
+        {
+            static array<type, sizeof...(Is)> types{ get_type<type_at_index<T, Is>::type>()... };
+            return span<type>(types);
+        }
+    }
+
+    // get span of types of packed T, such as tuple or variant
+    // usage example: reflect::unpack_types< variant<int, float, vec3> >()
+    template<typename T, typename = sfinae<detail::is_unpackable<T>::value>>
+    span<type> unpack_types()
+    {
+        return detail::unpack_types<T>(std::make_index_sequence<detail::pack_size<T>::value>());
+    }
+
 	// recursively visit all members of an object
 	// visitor must be a function with signature:
 	//  (auto&& key, auto&& value, int depth_change) -> bool/void
