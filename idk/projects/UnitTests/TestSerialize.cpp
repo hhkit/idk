@@ -256,3 +256,18 @@ TEST(Serialize, TestParseScene)
 	EXPECT_EQ(t1.id, transform_1_id);
 	EXPECT_EQ(o1.Parent(), o0.GetHandle());
 }
+
+struct structthatcontainsdyn
+{
+    reflect::dynamic dyn;
+};
+REFLECT_BEGIN(structthatcontainsdyn, "structthatcontainsdyn")
+REFLECT_VARS(dyn)
+REFLECT_END()
+TEST(Serialize, TestSerializeStructThatContainsDyn)
+{
+    structthatcontainsdyn x{ string("hello") };
+    auto str = serialize_text(x);
+    structthatcontainsdyn x2 = parse_text<structthatcontainsdyn>(str);
+    ASSERT_EQ(x.dyn.get<string>(), x2.dyn.get<string>());
+}

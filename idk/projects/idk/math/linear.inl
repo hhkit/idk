@@ -18,25 +18,32 @@ namespace idk
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator-=(const Vector& rvec)
 	{
-		for (auto [lhs, rhs] : zip(me().values, rvec.values))
-			lhs -= rhs;
-		return me();
+        auto itr = me().begin();
+        const auto end = me().end();
+        auto rtr = rvec.begin();
+        while (itr != end)
+            *itr++ -= *rtr++;
+        return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator*=(Field scalar)
 	{
-		for (auto& lhs : me().values)
-			lhs *= scalar;
-		return me();
+        auto itr = me().begin();
+        const auto end = me().end();
+        while (itr != end)
+            *itr++ *= scalar;
+        return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator/=(Field scalar)
 	{
-		for (auto& lhs : me().values)
-			lhs /= scalar;
-		return me();
+        auto itr = me().begin();
+        const auto end = me().end();
+        while (itr != end)
+            *itr++ /= scalar;
+        return me();
 	}
 
 	template<typename Vector, typename Field>
@@ -47,16 +54,18 @@ namespace idk
 		auto rtr = rvec.begin();
 		while (itr != end)
 			*itr++ *= *rtr++;
-
 		return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator/=(const Vector& rvec)
 	{
-		for (auto [lhs, rhs] : zip(me().values, rvec.values))
-			lhs /= rhs;
-		return me();
+        auto itr = me().begin();
+        const auto end = me().end();
+        auto rtr = rvec.begin();
+        while (itr != end)
+            *itr++ /= *rtr++;
+        return me();
 	}
 
 	template<typename Vector, typename Field>
@@ -113,9 +122,12 @@ namespace idk
 	template<typename Vector, typename Field>
 	inline constexpr bool linear<Vector, Field>::operator==(const Vector& rvec) const
 	{
-		for (auto [lhs, rhs] : zip(me().values, rvec.values))
-			if (lhs != rhs)
-				return false;
+        auto itr = me().begin();
+        const auto end = me().end();
+        auto rtr = rvec.begin();
+        while (itr != end)
+            if (*itr++ != *rtr++)
+                return false;
 		return true;
 	}
 
@@ -134,12 +146,12 @@ namespace idk
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::me()
 	{
-		return *r_cast<Vector*>(this);
+		return *reinterpret_cast<Vector*>(this);
 	}
 
 	template<typename Vector, typename Field>
 	constexpr const Vector& linear<Vector, Field>::me() const
 	{
-		return *r_cast<const Vector*>(this);
+		return *reinterpret_cast<const Vector*>(this);
 	}
 }

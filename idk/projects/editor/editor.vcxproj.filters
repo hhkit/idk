@@ -82,6 +82,11 @@
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\InputResource.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="DragDropTypes.h" />
+    <ClInclude Include="ResourceExtensions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -148,6 +153,9 @@
     <ClCompile Include="loading\OpenGLTextureLoader.cpp">
       <Filter>loader</Filter>
     </ClCompile>
+    <ClCompile Include="widgets\InputResource.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
@@ -162,6 +170,11 @@
     </Filter>
     <Filter Include="windows">
       <UniqueIdentifier>{b8f020c5-d088-49f8-841d-626fcb8a63d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="widgets">
+      <UniqueIdentifier>{2d26593e-7fd8-4e14-a1e4-cb20be5641c9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

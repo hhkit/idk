@@ -21,4 +21,18 @@ TEST(SlowTree, SlowTreeTraversal)
 		std::cout << elem << "\n";
 
 	});
+
+	indent = 0;
+	hi.visit([&indent](auto elem, int depth)->bool
+		{
+			indent += depth;
+			for (auto i = 0; i < indent; ++i)
+				std::cout << "\t";
+
+			std::cout << elem << "\n";
+
+			return elem != 0;
+		});
+
+	EXPECT_EQ(hi.size(), 4);
 }
