@@ -11,15 +11,18 @@ namespace idk
 		using Base = variant_wrap_t<tuple_to_variant_t<Resources>, RscHandle>;
 		using Base::Base;
 		using Base::operator=;
-
+	public:
 		template<typename T, typename = sfinae<index_in_tuple_v<T, Resources> == ResourceCount>> // inherited handles
 		GenericResourceHandle(RscHandle<T> handle);
 
-		template<typename T, typename = sfinae<index_in_tuple_v<T, Resources> == ResourceCount>> // inherited handles
-		GenericResourceHandle& operator=(RscHandle<T> handle);
+		Guid   guid() const;
+		size_t resource_id() const;
 
 		template<typename T> RscHandle<T>& AsHandle();
 		template<typename T> const RscHandle<T>& AsHandle() const;
+
+		template<typename T, typename = sfinae<index_in_tuple_v<T, Resources> == ResourceCount>> // inherited handles
+		GenericResourceHandle& operator=(RscHandle<T> handle);
 	};
 
 	template<typename T, typename>

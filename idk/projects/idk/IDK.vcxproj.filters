@@ -881,6 +881,7 @@
     </ClCompile>
     <ClCompile Include="res\ResourceBundle.cpp" />
     <ClCompile Include="res\MetaBundle.cpp" />
+    <ClCompile Include="res\GenericResourceHandle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

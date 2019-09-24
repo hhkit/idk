@@ -224,6 +224,7 @@
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\PhysicsSystem.cpp" />
     <ClCompile Include="phys\RigidBody.cpp" />
+    <ClCompile Include="res\GenericResourceHandle.cpp" />
     <ClCompile Include="res\Guid.cpp" />
     <ClCompile Include="res\MetaBundle.cpp" />
     <ClCompile Include="res\ResourceBundle.cpp" />

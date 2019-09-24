@@ -21,7 +21,6 @@ namespace idk
 
 		string_view Name() const        { return _name; }
 		void        Name(string_view n) { _name = n; }
-
 	private:
 		RscHandle<Res> _handle;
 		string         _name;

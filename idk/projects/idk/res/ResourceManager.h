@@ -16,6 +16,11 @@ namespace idk
 {
 	namespace detail { template<typename T> struct ResourceManager_detail; }
 
+	enum class ResourceCreateError : char
+	{
+		PathAlreadyExists,
+	};
+
 	enum class ResourceLoadError : char
 	{
 		ExtensionNotRegistered,
@@ -25,13 +30,15 @@ namespace idk
 
 	enum class ResourceSaveError : char
 	{
+		ResourceNotSaveable,
 		ResourceNotLoaded,
 		ResourceNotReflected,
 	};
 
-	enum class ResourceReleaseError : char
+	enum class ResourceReleaseResult : char
 	{
-		ResourceNotLoaded,
+		Ok,
+		Error_ResourceNotLoaded,
 	};
 
 	class ResourceManager 
@@ -42,11 +49,12 @@ namespace idk
 		using result = monadic::result<Result, Err>;
 
 		using GeneralLoadResult = result<ResourceBundle, ResourceLoadError>; // todo: return resource bundle by const T&
-		template<typename Res> using LoadResult = result<RscHandle<Res>, ResourceLoadError>;
-		
-		template<typename Res> using SaveResult = result<RscHandle<Res>, ResourceSaveError>;
+		template<typename Res> using CreateResult = result<RscHandle<Res>, ResourceCreateError>;
+		template<typename Res> using LoadResult   = result<RscHandle<Res>, ResourceLoadError>;
+		template<typename Res> using SaveResult   = result<RscHandle<Res>, ResourceSaveError>;
 
 		ResourceManager() = default;
+
 		void WatchDirectory();
 
 		/* HANDLE CHECKING - related to handles */
@@ -54,13 +62,15 @@ namespace idk
 		template<typename Res> Res& Get     (const RscHandle<Res>&);
 		template<typename Res> bool Free    (const RscHandle<Res>&);
 
+		template<typename Res> string_view GetPath(const RscHandle<Res>&);
+
 		/* RESOURCE LOADING - for high-level users like editor programmer */
-		template<typename Res> RscHandle<Res>       Create();
-		template<typename Res> RscHandle<Res>       Create(std::string_view path_to_new_asset);
-		template<typename Res> LoadResult<Res>      Load(PathHandle path);
-		                       GeneralLoadResult    Load(PathHandle path);
-		template<typename Res> SaveResult<Res>      Save(RscHandle<Res>);
-		template<typename Res> ResourceReleaseError Release(RscHandle<Res>);
+		template<typename Res>  RscHandle<Res>        Create  ();
+		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
+		template<typename Res>  LoadResult<Res>       Load    (PathHandle path);
+		                        GeneralLoadResult     Load    (PathHandle path);
+		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
+		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
 
 		/* FACTORIES - for registering resource factories */
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
@@ -74,7 +84,7 @@ namespace idk
 
 		template<typename R> struct ResourceControlBlock;
 
-		using Extension  = std::string;
+		using Extension  = string;
 		using GenericPtr = std::shared_ptr<void>;
 		template<typename R>
 		using ResourceStorage = hash_table<Guid, ResourceControlBlock<R>>;
@@ -102,7 +112,8 @@ namespace idk
 	template<typename R> 
 	struct ResourceManager::ResourceControlBlock
 	{
-		bool dirty = false;
+		bool          dirty    { false };
+		opt<string>   path     { std::nullopt };
 		shared_ptr<R> resource; // note: make atomic
 		
 		bool valid() const { return s_cast<bool>(resource); }

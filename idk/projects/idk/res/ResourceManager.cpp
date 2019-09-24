@@ -97,11 +97,11 @@ namespace idk
 
 	void ResourceManager::WatchDirectory()
 	{
-		//for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-		//	LoadFile(elem);
-		//
-		//for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-		//	ReloadFile(elem);
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
+			Load(elem);
+		
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+			Load(elem);
 	}
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path)
@@ -113,10 +113,40 @@ namespace idk
 		if (!path)
 			return ResourceLoadError::FileDoesNotExist;
 
-		auto [itr, success] = _loaded_files.emplace(string{ path.GetMountPath() }, loader->LoadFile(path));
+		auto emplace_path = string{ path.GetMountPath() };
+
+		// TODO: Meta handling
+
+		// unload the file if loaded
+		{
+			auto itr = _loaded_files.find(emplace_path);
+			if (itr != _loaded_files.end())
+			{
+				// release all resources attached to file
+				for (auto& elem : itr->second.GetAll())
+					std::visit([&](const auto& handle) { Release(handle); }, elem);
+				_loaded_files.erase(itr);
+			}
+		}
+
+		// reload the file
+		auto bundle = loader->LoadFile(path);
+		auto [itr, success] = _loaded_files.emplace(emplace_path, bundle);
 		assert(success);
 
-		auto& [ext, bundle] = *itr;
+		// set path
+		for (auto& elem : bundle.GetAll())
+			std::visit(
+				[&](const auto& handle) 
+				{
+					using Res = std::decay_t<decltype(handle)>::Resource;
+
+					auto* cb = GetControlBlock(handle);
+					assert(cb);
+					cb->path = emplace_path;
+				}
+			, elem);
+
 		return bundle;
 	}
 	

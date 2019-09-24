@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 #include <res/ResourceMeta.h>
+#include <file/FileSystem.h>
 #pragma once
 
 namespace idk
@@ -39,6 +40,13 @@ namespace idk
 	}
 
 	template<typename Res>
+	inline string_view ResourceManager::GetPath(const RscHandle<Res>& h)
+	{
+		auto* cb = GetControlBlock(h);
+		return cb ? cb->path : "";
+	}
+
+	template<typename Res>
 	inline RscHandle<Res> ResourceManager::Create()
 	{
 		auto& factory = GetFactory<Res>();
@@ -46,15 +54,43 @@ namespace idk
 
 		auto& table = GetTable<Res>();
 		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock{});
-		
+
+		auto& control_block = itr->second;
 		// attempt to put on another thread
 		{
-			auto& control_block = itr->second;
 			control_block.resource = factory.Create();
 		}
 
 		return RscHandle<Res>(itr->first);
 
+	}
+
+	template<typename Res>
+	ResourceManager::CreateResult<Res> ResourceManager::Create(string_view path_to_new_asset)
+	{
+		auto adapted_path = string{ path_to_new_asset };
+		{
+			// make sure that file doesn't already exist
+			auto itr = _loaded_files.find(adapted_path);
+			if (itr != _loaded_files.end())
+				return ResourceCreateError::PathAlreadyExists;
+		}
+
+		auto& factory = GetFactory<Res>();
+		assert(&factory);
+
+		auto& table = GetTable<Res>();
+		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock{});
+
+		auto& control_block = itr->second;
+		control_block.path = path_to_new_asset;
+
+		// attempt to put on another thread
+		{
+			control_block.resource = factory.Create();
+		}
+
+		return RscHandle<Res>(itr->first);
 	}
 
 	template<typename Res>
@@ -65,6 +101,24 @@ namespace idk
 			return res.error();
 
 		return res.value().Get<Res>();
+	}
+
+	template<typename Res>
+	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> result)
+	{
+		return SaveResult<Res>();
+	}
+
+	template<typename Res>
+	ResourceReleaseResult ResourceManager::Release(RscHandle<Res> path)
+	{
+		auto& table = GetTable<Res>();
+		auto itr = table.find(path.guid);
+		if (itr == table.end())
+			return ResourceReleaseResult::Error_ResourceNotLoaded;
+
+		table.erase(itr);
+		return ResourceReleaseResult::Ok;
 	}
 
 	template<typename Factory, typename ...Args>
@@ -110,9 +164,6 @@ namespace idk
 	{
 		auto& table = GetTable<Res>();
 		auto itr = table.find(handle.guid);
-		if (itr == table.end())
-			return nullptr;
-		else
-			return s_cast<bool>(itr->second.valid());
+		return itr == table.end() ? nullptr : itr->second.valid();
 	}
 }
