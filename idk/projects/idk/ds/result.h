@@ -4,6 +4,10 @@
 
 namespace idk::monadic
 {
+	namespace detail { 
+		template<typename Res, typename Error> struct result_helper;  
+		template<typename Res, typename Error> using result_helper_t = typename result_helper<Res, Error>::type;
+	}
 	// a struct stolen from rust
 	// lets us define a result, or return an error otherwise
 	template<typename Result, typename Error>

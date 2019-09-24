@@ -359,9 +359,6 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="res\ExtensionLoader.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
     </ClInclude>

@@ -7,37 +7,15 @@
 namespace idk
 {
 	template<typename Res>
-	class ResourceFactory;
-
-	template<typename Res, bool HasMeta>
-	class ResourceFactory_impl;
-
-	template<typename Res>
-	class ResourceFactory_impl<Res, false>
-	{
-	public:
-		using Resource = Res;
-		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;
-		virtual unique_ptr<Resource> Create() = 0;
-		virtual ~ResourceFactory_impl() = default;
-	};
-
-	template<typename Res>
-	class ResourceFactory_impl<Res, true>
-	{
-	public:
-		using Resource = Res;
-		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;
-		virtual unique_ptr<Resource> Create() = 0;
-		virtual ~ResourceFactory_impl() = default;
-	};
-
-	template<typename Res>
 	class ResourceFactory
-		: public ResourceFactory_impl<Res, has_tag_v<Res, MetaTag>>
 	{
 	public:
-		virtual void Init() {};
+		using Resource = Res;
+
+		virtual void Init() {};                                     // initialize factory, create default resources
+		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;	// generate default resource - the fallback resource if a handle fails
+		virtual unique_ptr<Resource> Create() = 0;                  // generically create a resource
+		virtual ~ResourceFactory_impl() = default;
 	};
 }
 

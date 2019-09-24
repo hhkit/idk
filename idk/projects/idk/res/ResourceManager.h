@@ -19,7 +19,7 @@ namespace idk
 	{
 		NoFactoryRegistered,
 		FileDoesNotExist,
-		FailedToLoad
+		FailedToLoadResource,
 	};
 
 	enum class ResourceSaveError : char
@@ -40,15 +40,12 @@ namespace idk
 		template<typename Result, typename Err>
 		using result = monadic::result<Result, Err>;
 
+		using GeneralLoadResult = result<ResourceBundle, ResourceLoadError>; // todo: return resource bundle by const T&
 		template<typename Res> using LoadResult = result<RscHandle<Res>, ResourceLoadError>;
+		
 		template<typename Res> using SaveResult = result<RscHandle<Res>, ResourceSaveError>;
 
-
 		ResourceManager() = default;
-
-		void Init() override;
-		void LateInit() override;
-		void Shutdown() override;
 		void WatchDirectory();
 
 		/* HANDLE CHECKING - related to handles */
@@ -60,6 +57,7 @@ namespace idk
 		template<typename Res> RscHandle<Res>       Create();
 		template<typename Res> RscHandle<Res>       Create(std::string_view path_to_new_asset);
 		template<typename Res> LoadResult<Res>      Load(PathHandle path);
+		                       GeneralLoadResult    Load(PathHandle path);
 		template<typename Res> SaveResult<Res>      Save(RscHandle<Res>);
 		template<typename Res> ResourceReleaseError Release(RscHandle<Res>);
 
@@ -84,6 +82,10 @@ namespace idk
 		array<GenericPtr, ResourceCount> _resources;                   // std::shared_ptr<ResourceControlBlock<R>>
 		array<GenericPtr, ResourceCount> _factories;                   // std::shared_ptr<ResourceFactory<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;   // extension to file loader
+
+		void Init() override;
+		void LateInit() override;
+		void Shutdown() override;
 	};
 
 	template<typename Res>

@@ -4,12 +4,12 @@
 
 namespace idk
 {
-	class MetaFile;
+	class MetaBundle;
 
 	class IFileLoader
 	{
 	public:
 		virtual ResourceBundle LoadFile(PathHandle handle) = 0;
-		virtual ResourceBundle LoadFile(PathHandle handle, const MetaFile& meta) = 0;
+		virtual ResourceBundle LoadFile(PathHandle handle, const MetaBundle& meta) = 0;
 	};
 }

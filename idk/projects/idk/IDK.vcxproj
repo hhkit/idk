@@ -108,7 +108,6 @@
     <ClInclude Include="reflect\detail\typed_context.h" />
     <ClInclude Include="reflect\detail\visit_detail.h" />
     <ClInclude Include="reflect\typeinfo.h" />
-    <ClInclude Include="res\ExtensionLoader.h" />
     <ClInclude Include="res\FileResources_detail.h" />
     <ClInclude Include="res\ForwardingExtensionLoader.h" />
     <ClInclude Include="res\ResourceMeta.h" />

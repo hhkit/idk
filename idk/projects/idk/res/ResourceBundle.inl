@@ -41,15 +41,27 @@ namespace idk
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::begin()
+	ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::begin() const
 	{
 		return iterator{ span_over.begin() };
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::end()
+	ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::end() const
 	{
 		return iterator{ span_over.end() };
+	}
+
+	template<typename T>
+	inline size_t ResourceBundle::ResourceSpan<T>::size() const
+	{
+		return span_over.size();
+	}
+
+	template<typename T>
+	ResourceBundle::ResourceSpan<T>::iterator::iterator(GenericResourceHandle* h)
+		: itr{ h }
+	{
 	}
 
 	template<typename T>
@@ -77,5 +89,9 @@ namespace idk
 		auto copy = *this;
 		++itr;
 		return copy;
+	}
+	inline bool ResourceBundle::ResourceSpan<T>::iterator::operator<(const iterator& rhs) const
+	{
+		return itr < rhs.itr;
 	}
 }

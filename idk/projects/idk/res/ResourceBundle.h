@@ -16,8 +16,9 @@ namespace idk
 
 		template<typename T> void Add(RscHandle<T> handle) const; // will reshuffle vector and invalidate span, but you shouldn't be accessing vector directly anyway so this is ok
 	private:
-		vector<GenericResourceHandle> handles; // always sorted so that we can simply span
 		struct sub_array { char index = 0, count = 0; };
+
+		vector<GenericResourceHandle> handles; // always sorted so that we can simply span
 		array<sub_array, ResourceCount> subarrays;
 	};
 
@@ -28,15 +29,16 @@ namespace idk
 
 		ResourceSpan(GenericResourceHandle* btr, GenericResourceHandle* etr);
 
-		iterator begin();
-		iterator end();
+		iterator begin() const;
+		iterator end() const;
+		size_t   size() const;
 	private:
 		span<GenericResourceHandle> span_over;
 	};
 
 	template<typename T>
 	struct ResourceBundle::ResourceSpan<T>::iterator
-		: comparable<ResourceBundle::ResourceSpan<T>::iterator>
+		: comparable<typename ResourceBundle::ResourceSpan<T>::iterator>
 	{
 		iterator(GenericResourceHandle*);
 
