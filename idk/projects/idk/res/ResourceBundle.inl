@@ -41,13 +41,13 @@ namespace idk
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::begin() const
+	typename ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::begin() const
 	{
 		return iterator{ span_over.begin() };
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::end() const
+	typename ResourceBundle::ResourceSpan<T>::iterator ResourceBundle::ResourceSpan<T>::end() const
 	{
 		return iterator{ span_over.end() };
 	}
@@ -77,20 +77,22 @@ namespace idk
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator& ResourceBundle::ResourceSpan<T>::iterator::operator++()
+	typename ResourceBundle::ResourceSpan<T>::iterator& ResourceBundle::ResourceSpan<T>::iterator::operator++()
 	{
 		++itr;
 		return *this;
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator  ResourceBundle::ResourceSpan<T>::iterator::operator++(int)
+	typename ResourceBundle::ResourceSpan<T>::iterator  ResourceBundle::ResourceSpan<T>::iterator::operator++(int)
 	{
 		auto copy = *this;
 		++itr;
 		return copy;
 	}
-	inline bool ResourceBundle::ResourceSpan<T>::iterator::operator<(const iterator& rhs) const
+
+	template<typename T>
+	bool ResourceBundle::ResourceSpan<T>::iterator::operator<(const iterator& rhs) const
 	{
 		return itr < rhs.itr;
 	}

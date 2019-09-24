@@ -1,6 +1,6 @@
 #pragma once
 #include <res/ResourceMeta.h>
-#include <res/SaveableResource.h>
+//#include <res/SaveableResource.h>
 
 namespace idk
 {
@@ -10,12 +10,12 @@ namespace idk
 		int j;
 	};
 
-RESOURCE_EXTENSION(TestResource, ".test")
+//RESOURCE_EXTENSION(TestResource, ".test")
 
 	class TestResource
 		: public Resource<TestResource>
 		, public MetaTag<TestMeta>
-		, public Saveable<TestResource>
+		//, public Saveable<TestResource>
 	{
 	public:
 		int k;

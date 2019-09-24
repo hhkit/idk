@@ -55,6 +55,7 @@
     <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="res\MetaBundle.h" />
     <ClInclude Include="res\ResourceBundle.h" />
     <ClInclude Include="scene\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="phys\PhysicsSystem.cpp" />
     <ClCompile Include="phys\RigidBody.cpp" />
     <ClCompile Include="res\Guid.cpp" />
+    <ClCompile Include="res\MetaBundle.cpp" />
     <ClCompile Include="res\ResourceBundle.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />

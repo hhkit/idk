@@ -1,4 +1,5 @@
 #pragma once
+#include <idk.h>
 
 namespace idk
 {
@@ -18,9 +19,18 @@ namespace idk
 		virtual void OnMetaUpdate(const Meta& newmeta) { (newmeta); };
 
 		friend class ResourceManager;
-		template<typename T>
-		friend class ForwardingExtensionLoader;
 	};
+
+	struct SerializedMeta
+	{
+		Guid   guid;
+		string name;
+		string metadata;
+
+		template<typename Res, typename = sfinae<has_tag_v<Res, MetaTag>>>
+		typename Res::Metadata GetMeta() const;
+	};
+
 }
 
 #include "ResourceMeta.inl"

@@ -4,8 +4,11 @@
 
 namespace idk
 {
+	template<typename Res>
+	struct BaseResource;
+
 	template<typename T>
-	constexpr auto BaseResourceID = detail::BaseResource<T>::value;
+	constexpr auto BaseResourceID = BaseResource<T>::value;
 
 	template<typename Res>
 	class Resource
@@ -15,11 +18,15 @@ namespace idk
 
 		RscHandle<Res> GetHandle() const { return _handle; }
 		Resource() = default;
+
+		string_view Name() const        { return _name; }
+		void        Name(string_view n) { _name = n; }
+
 	private:
 		RscHandle<Res> _handle;
+		string         _name;
 
 		friend class ResourceManager;
-		friend class ResourceFactory<Res>;
 		template<typename T>
 		friend struct detail::ResourceManager_detail;
 

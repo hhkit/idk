@@ -5,6 +5,7 @@
 #include <reflect/reflect.h>
 #include <core/ISystem.h>
 #include <file/PathHandle.h>
+#include <res/ResourceBundle.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
 #include <res/FileLoader.h>
@@ -17,7 +18,7 @@ namespace idk
 
 	enum class ResourceLoadError : char
 	{
-		NoFactoryRegistered,
+		ExtensionNotRegistered,
 		FileDoesNotExist,
 		FailedToLoadResource,
 	};
@@ -63,35 +64,50 @@ namespace idk
 
 		/* FACTORIES - for registering resource factories */
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
-		template<typename Factory, typename ... Args> Factory& RegisterLoader (Args&& ... loader_construction_args);
+		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
-		template<typename Res, typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
-		/* THIS WILL REPLACE EXISTING RESOURCE IF IT EXISTS */
-		template<typename Res, typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Guid, Args&& ... construction_args);
+		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
+		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Guid, Args&& ... construction_args);
 
 	private:
+		static inline ResourceManager* instance = nullptr;
+
+		template<typename R> struct ResourceControlBlock;
+
 		using Extension  = std::string;
 		using GenericPtr = std::shared_ptr<void>;
 		template<typename R>
-		struct ResourceControlBlock
-		{
-			bool dirty;
-			shared_ptr<R> resource; // note: make atomic
-		};
+		using ResourceStorage = hash_table<Guid, ResourceControlBlock<R>>;
 
-		array<GenericPtr, ResourceCount> _resources;                   // std::shared_ptr<ResourceControlBlock<R>>
-		array<GenericPtr, ResourceCount> _factories;                   // std::shared_ptr<ResourceFactory<R>>
-		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;   // extension to file loader
+		array<GenericPtr, ResourceCount>               _default_resources; // std::shared_ptr<R>
+		array<GenericPtr, ResourceCount>               _resource_table;    // std::shared_ptr<hash_table<Guid, ResourceControlBlock<R>>>
+		array<GenericPtr, ResourceCount>               _factories;         // std::shared_ptr<ResourceFactory<R>>
+		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
+		hash_table<string, ResourceBundle>             _loaded_files;
 
-		void Init() override;
+		void Init()     override;
 		void LateInit() override;
 		void Shutdown() override;
+
+		template<typename Res> auto& GetFactory()    { return *r_cast<ResourceFactory<Res>*>(        _factories[BaseResourceID<Res>].get()); }
+		template<typename Res> auto& GetTable()      { return *r_cast<ResourceStorage<Res>*>(   _resource_table[BaseResourceID<Res>].get()); }
+		template<typename Res> Res&  GetDefaultRes() { return *r_cast<Res*>                 (_default_resources[BaseResourceID<Res>].get()); }
+		template<typename Res> ResourceControlBlock<Res>* GetControlBlock(RscHandle<Res> handle);
+
+		IFileLoader* GetLoader(string_view extension);
+
+		template<typename T> friend struct detail::ResourceManager_detail;
 	};
 
-	template<typename Res>
-	RscHandle<Res> ResourceManager::Create()
+	template<typename R> 
+	struct ResourceManager::ResourceControlBlock
 	{
-		return RscHandle<Res>();
-	}
+		bool dirty = false;
+		shared_ptr<R> resource; // note: make atomic
+		
+		bool valid() const { return s_cast<bool>(resource); }
+	};
+
 }
+
 #include "ResourceManager.inl"

@@ -10,8 +10,6 @@
 
 namespace idk
 {
-	ResourceManager* ResourceManager::instance = nullptr;
-
 	namespace detail
 	{
 		template<typename T> struct ResourceManager_detail;
@@ -22,7 +20,7 @@ namespace idk
 			static array<shared_ptr<void>, sizeof...(Rs)> GenResourceTables()
 			{
 				return array<shared_ptr<void>, sizeof...(Rs)>{
-					std::make_shared<ResourceManager::Storage<Rs>>()...
+					std::make_shared<ResourceManager::ResourceStorage<Rs>>()...
 				};
 			}
 
@@ -31,7 +29,7 @@ namespace idk
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
-						if (auto loader = &resource_man->GetLoader<Rs>())
+						if (auto loader = &resource_man->GetFactory<Rs>())
 							resource_man->_default_resources[ResourceID<Rs>] = loader->GenerateDefaultResource();
 					}...
 				};
@@ -42,7 +40,7 @@ namespace idk
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
-						if (auto loader = &resource_man->GetLoader<Rs>())
+						if (auto loader = &resource_man->GetFactory<Rs>())
 							loader->Init();
 					}...
 				};
@@ -55,7 +53,7 @@ namespace idk
 	void ResourceManager::Init()
 	{
 		instance = this;
-		_resource_tables   = detail::ResourceHelper::GenResourceTables();
+		_resource_table = detail::ResourceHelper::GenResourceTables();
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
@@ -78,207 +76,48 @@ namespace idk
 		for (auto& elem : reverse(_default_resources))
 			elem.reset();
 
-		for (auto& elem : _resource_tables)
+		for (auto& elem : _resource_table)
 			elem.reset();
 
-		for (auto& elem : _resource_factories)
-		{
+		for (auto& elem : _factories)
 			elem.reset();
-		}
-		for (auto& elem : this->_extension_loaders)
-		{
+
+		for (auto& elem : _file_loader)
 			elem.second.reset();
-		}
+	}
+
+	IFileLoader* ResourceManager::GetLoader(string_view extension)
+	{
+		auto itr = _file_loader.find(string{ extension });
+		if (itr == _file_loader.end())
+			return nullptr;
+
+		return itr->second.get();
 	}
 
 	void ResourceManager::WatchDirectory()
 	{
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-			LoadFile(elem);
+		//for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
+		//	LoadFile(elem);
+		//
+		//for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+		//	ReloadFile(elem);
+	}
 
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			ReloadFile(elem);
+	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path)
+	{
+		auto* loader = GetLoader(path.GetExtension());
+		if (loader == nullptr)
+			return ResourceLoadError::ExtensionNotRegistered;
+
+		if (!path)
+			return ResourceLoadError::FileDoesNotExist;
+
+		auto [itr, success] = _loaded_files.emplace(string{ path.GetMountPath() }, loader->LoadFile(path));
+		assert(success);
+
+		auto& [ext, bundle] = *itr;
+		return bundle;
 	}
 	
-	FileResources ResourceManager::LoadFile(PathHandle file)
-	{
-		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
-		if (find_file != _loaded_files.end())
-			return find_file->second;
-
-		auto path_to_meta = string{ file.GetMountPath() } + ".meta";
-
-		auto& fs = Core::GetSystem<FileSystem>();
-		fs.Exists(path_to_meta);
-		auto meta_file = fs.GetFile(path_to_meta);
-
-		if (!file)
-			return FileResources{};
-
-		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-		if (loader_itr == _extension_loaders.end())
-			return FileResources{};
-
-		auto resources = [&]()
-		{
-			if (meta_file)
-			{
-				std::stringstream s; 
-				s << meta_file.Open(FS_PERMISSIONS::READ).rdbuf();
-
-				auto metalist = parse_text<MetaFile>(s.str());
-				return loader_itr->second->Create(file, metalist);
-			}
-			else
-				return loader_itr->second->Create(file);
-		}();
-
-		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
-		return resources;
-	}
-
-	FileResources ResourceManager::LoadFile(PathHandle file, const MetaFile& meta)
-	{
-		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
-		if (find_file != _loaded_files.end())
-			return ReloadFile(file);
-
-		if (!file)
-			return FileResources{};
-
-		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-		if (loader_itr == _extension_loaders.end())
-			return FileResources{};
-
-		auto resources = [&]()
-		{
-			return loader_itr->second->Create(file, meta);
-		}();
-
-		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
-		return resources;
-	}
-
-	FileResources ResourceManager::ReloadFile(PathHandle file)
-	{
-		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
-		if (find_file == _loaded_files.end())
-			return FileResources();
-
-		// save old meta
-		auto ser = save_meta(find_file->second);
-
-		// unload resources
-		UnloadFile(file);
-
-		// get loader
-		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-		if (loader_itr == _extension_loaders.end())
-			return FileResources{};
-
-		// reload resources
-		auto stored = loader_itr->second->Create(file, ser);
-		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
-	}
-
-	size_t ResourceManager::UnloadFile(PathHandle path_to_file)
-	{
-		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
-		if (find_file == _loaded_files.end())
-			return 0;
-
-		for (auto& elem : find_file->second.resources)
-		{
-			std::visit([this](auto handle) {
-				Free(handle);
-			}, elem._handle);
-		}
-
-		auto retval = find_file->second.resources.size();
-		_loaded_files.erase(find_file);
-		return retval;
-	}
-
-	FileResources ResourceManager::GetFileResources(PathHandle path_to_file)
-	{
-		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
-		if (find_file != _loaded_files.end())
-			return find_file->second;
-		else
-			return FileResources();
-	}
-
-	bool ResourceManager::Associate(string_view mount_path, GenericRscHandle f)
-	{
-		auto itr = _loaded_files.find(string{ mount_path });
-		
-		auto& filemeta = [&]() -> FileResources&
-		{
-			if (itr == _loaded_files.end())
-			{
-				auto [jtr, success] = _loaded_files.emplace(string{ mount_path }, FileResources{});
-				assert(success);
-				return jtr->second;
-			}
-			else
-			{
-				return itr->second;
-			}
-		}();
-		auto find_f = std::find(filemeta.resources.begin(), filemeta.resources.end(), f);
-		if (find_f == filemeta.resources.end())
-		{
-			filemeta.resources.emplace_back(f);
-			f.visit([&](auto& elem) {
-
-				auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
-				auto& control_block = table.find(elem.guid)->second;
-
-				control_block.is_new = true;
-			});
-			return true;
-		}
-		else
-			return false;
-	}
-
-	void ResourceManager::SaveDirtyMetadata()
-	{
-		auto& fs = Core::GetSystem<FileSystem>();
-		for (auto& [filepath, resources] : _loaded_files)
-		{
-			bool dirty = false;
-			for (auto& elem : resources.resources)
-				elem.visit([&](auto& elem) {
-
-				auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
-				auto& control_block = table.find(elem.guid)->second;
-
-				dirty |= control_block.is_new;
-				if constexpr (has_tag_v<decltype(elem), MetaTag>)
-					dirty |= elem->_dirtymeta;
-			});
-
-			if (dirty)
-			{
-				auto saveus = save_meta(resources);
-				std::stringstream stream;
-
-				stream << serialize_text(saveus);
-				auto meta_file = fs.Open(filepath + ".meta", FS_PERMISSIONS::WRITE, false);
-				meta_file << stream.rdbuf();
-				// mark as clean
-				for (auto& elem : resources.resources)
-					elem.visit([&](auto& elem) {
-					auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
-					auto& control_block = table.find(elem.guid)->second;
-
-					control_block.is_new = false;
-					if constexpr (has_tag_v<decltype(elem), MetaTag>)
-						elem->_dirtymeta = false;
-				});
-			}
-
-		}
-	}
 }

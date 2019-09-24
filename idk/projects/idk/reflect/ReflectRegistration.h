@@ -4,7 +4,7 @@
 #include <core/Core.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
-
+#include <res/MetaBundle.h>
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -69,8 +69,12 @@ REFLECT_END()
  * resources
  *========================================================================*/
 
-REFLECT_BEGIN(idk::MetaFile, "MetaFile")
-REFLECT_VARS(guids, resource_metas)
+REFLECT_BEGIN(idk::SerializedMeta, "SerializedMetadata")
+REFLECT_VARS(guid, name, metadata)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MetaBundle, "MetaBundle")
+REFLECT_VARS(metadatas)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")

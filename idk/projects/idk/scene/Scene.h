@@ -3,17 +3,13 @@
 #include <core/Handle.h>
 #include <ds/span.h>
 #include <res/Resource.h>
-#include <res/SaveableResource.h>
 
 namespace idk
 {
 	class GameObject;
 
-	RESOURCE_EXTENSION(Scene, ".idscene");
-
 	class Scene 
 		: public Resource<Scene>
-		, public Saveable<Scene, false_type>
 	{
 	public:
 		class iterator;

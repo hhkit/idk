@@ -4,7 +4,7 @@
 
 namespace idk
 {
-	class MetaBundle;
+	struct MetaBundle;
 
 	class IFileLoader
 	{

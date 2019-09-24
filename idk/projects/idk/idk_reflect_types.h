@@ -3,10 +3,10 @@
 #include "idk.h"
 #include <core/Handle.h>
 #include <res/Guid.h>
-#include <res/FileResources.h>
 #include <prefab/PrefabData.h>
 #include <prefab/PropertyOverride.h>
 #include <gfx/ShaderGraph_data.h>
+#include <res/ResourceMeta.h>
 
 namespace idk
 {
@@ -55,6 +55,8 @@ namespace idk::reflect
         , PropertyOverride
         , vector<PropertyOverride>
         , RscHandle<Prefab>
+
+		, vector<SerializedMeta>
 
         , shadergraph::ValueType
         , shadergraph::Slot
