@@ -541,7 +541,7 @@ namespace idk
 
 
     IGE_MaterialEditor::IGE_MaterialEditor()
-        : IGE_IWindow("Material Editor", true, ImVec2{ 600,300 }, ImVec2{ 150,150 })
+        : IGE_IWindow("Material Editor", false, ImVec2{ 600,300 }, ImVec2{ 0,0 })
     {
         window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;
     }

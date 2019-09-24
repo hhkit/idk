@@ -23,6 +23,7 @@ of the editor.
 #include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
+#include <editor/windows/IGE_WindowList.h>
 
 namespace idk {
 
@@ -71,7 +72,7 @@ namespace idk {
 	void IGE_MainWindow::EndWindow_V()
 	{
 		EndWindow();
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		//ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 		//Check if mouse is at this window or not
 		is_mouse_hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
@@ -454,6 +455,34 @@ namespace idk {
 
 		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
 		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+
+        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+        {
+            ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
+            ImGui::DockBuilderSetNodeSize(dockspace_id, window_size);
+
+            ImGuiID main = dockspace_id;
+
+            const float Y_RATIO = 0.3f;
+            const float X_RATIO = 0.2f;
+
+            ImGuiID right = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, X_RATIO, nullptr, &main);
+
+            // bottom left: project
+            ImGuiID bottom_left = ImGui::DockBuilderSplitNode(main, ImGuiDir_Down, Y_RATIO, nullptr, &main);
+
+            // left pane: hierarchy
+            ImGuiID left = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, X_RATIO / (1.0f - X_RATIO), nullptr, &main);
+
+            auto& ide = Core::GetSystem<IDE>();
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_SceneView>()->window_name, main);
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProjectWindow>()->window_name, bottom_left);
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_HierarchyWindow>()->window_name, left);
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - toolBarHeight - (ImGui::GetFrameHeight()*2)), ImGuiDockNodeFlags_PassthruCentralNode);
 		//Imgui internal
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
