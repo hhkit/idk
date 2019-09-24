@@ -32,7 +32,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <gfx/ShaderGraphFactory.h>
-#include <res/ForwardingExtensionLoader.h>
+#include <res/EasyFactory.h>
 #include <imgui/ImGuizmo.h>
 
 
@@ -70,8 +70,8 @@ namespace idk
 
         Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
 
-        Core::GetResourceManager().RegisterFactory<shadergraph::Factory>();
-        Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<shadergraph::Graph>>(".mat");
+		Core::GetResourceManager().RegisterFactory<EasyFactory<shadergraph::Graph>>();
+        Core::GetResourceManager().RegisterLoader<shadergraph::Loader>(".mat");
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);

@@ -9,7 +9,12 @@ namespace idk::ogl
 	{
 		unique_ptr<RenderTarget> GenerateDefaultResource() override;
 		unique_ptr<RenderTarget> Create() override;
-		unique_ptr<RenderTarget> Create(PathHandle fh) override;
-		unique_ptr<RenderTarget> Create(PathHandle filepath, const RenderTarget::Metadata& m);
+	};
+
+	class FrameBufferLoader
+		: public IFileLoader
+	{
+		ResourceBundle LoadFile(PathHandle fh) override;
+		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& m) override;
 	};
 }

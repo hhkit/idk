@@ -284,9 +284,6 @@
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="audio\AudioClipFactory.h">
-      <Filter>audio</Filter>
-    </ClInclude>
     <ClInclude Include="util\enum.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -391,9 +388,6 @@
     </ClInclude>
     <ClInclude Include="meta\tag.h">
       <Filter>meta</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ForwardingExtensionLoader.h">
-      <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="test\TestResource.h">
       <Filter>test</Filter>
@@ -606,6 +600,11 @@
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
     <ClInclude Include="meta\variant.h" />
     <ClInclude Include="res\MetaBundle.h" />
+    <ClInclude Include="res\EasyFactory.h" />
+    <ClInclude Include="audio\AudioClipLoader.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplateLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -683,9 +682,6 @@
     </ClCompile>
     <ClCompile Include="reflect\uni_container.cpp">
       <Filter>reflect</Filter>
-    </ClCompile>
-    <ClCompile Include="audio\AudioClipFactory.cpp">
-      <Filter>audio</Filter>
     </ClCompile>
     <ClCompile Include="reflect\enum_type.cpp">
       <Filter>reflect</Filter>
@@ -882,6 +878,10 @@
     <ClCompile Include="res\ResourceBundle.cpp" />
     <ClCompile Include="res\MetaBundle.cpp" />
     <ClCompile Include="res\GenericResourceHandle.cpp" />
+    <ClCompile Include="audio\AudioClipLoader.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1009,9 +1009,6 @@
     </None>
     <None Include="meta\tag.inl">
       <Filter>meta</Filter>
-    </None>
-    <None Include="res\ForwardingExtensionLoader.inl">
-      <Filter>res</Filter>
     </None>
     <None Include="res\ResourceMeta.inl">
       <Filter>res</Filter>

@@ -115,12 +115,13 @@ Variables:
 
 #pragma once
 #include "stdafx.h" //Needed for every CPP. Precompiler
-#include <res/ForwardingExtensionLoader.h>
 #include <audio/AudioSystem.h> //AudioSystem
 #include <audio/AudioClip.h> //AudioClip
-#include <audio/AudioClipFactory.h> //AudioClipFactory
+#include <audio/AudioClipLoader.h> //AudioClipLoader
 #include <audio/AudioSource.h> //AudioClipFactory
 #include <audio/AudioListener.h> //AudioClipFactory
+
+#include <res/EasyFactory.h>
 
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
@@ -140,10 +141,10 @@ namespace idk
 
 	void AudioSystem::Init()
 	{
-		Core::GetResourceManager().RegisterFactory<AudioClipFactory>();
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<AudioClip>>(".wav");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<AudioClip>>(".ogg");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<AudioClip>>(".mp3");
+		Core::GetResourceManager().RegisterFactory<EasyFactory<AudioClip>>();
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".wav");
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".ogg");
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mps");
 
 		// Create the FMOD Core System object.
 		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));

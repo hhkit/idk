@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		AudioClipFactory.h
+//@file		AudioClipLoader.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		18 AUG 2019
@@ -8,16 +8,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include <res/ResourceFactory.h>
+#include <res/FileLoader.h>
 #include <audio/AudioClip.h>
 namespace idk
 {
-	class AudioClipFactory
-		: public ResourceFactory <AudioClip> {
+	class AudioClipLoader
+		: public IFileLoader
+	{
 
 	public:
-		virtual unique_ptr<AudioClip> GenerateDefaultResource() override;
-		virtual unique_ptr<AudioClip> Create(PathHandle filepath) override;
-
+		ResourceBundle LoadFile(PathHandle filepath) override;
+		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& metabundle) override
 	};
 }

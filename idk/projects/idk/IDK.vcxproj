@@ -28,7 +28,7 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
-    <ClInclude Include="audio\AudioClipFactory.h" />
+    <ClInclude Include="audio\AudioClipLoader.h" />
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
@@ -41,6 +41,7 @@
     <ClInclude Include="gfx\MeshFactory.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
+    <ClInclude Include="gfx\ShaderTemplateLoader.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
     <ClInclude Include="math\shapes\frustum.h" />
@@ -52,6 +53,7 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="res\EasyFactory.h" />
     <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
@@ -110,7 +112,6 @@
     <ClInclude Include="reflect\detail\visit_detail.h" />
     <ClInclude Include="reflect\typeinfo.h" />
     <ClInclude Include="res\FileResources_detail.h" />
-    <ClInclude Include="res\ForwardingExtensionLoader.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -199,7 +200,7 @@
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />
-    <ClCompile Include="audio\AudioClipFactory.cpp" />
+    <ClCompile Include="audio\AudioClipLoader.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
@@ -212,6 +213,7 @@
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
@@ -321,7 +323,6 @@
     <None Include="reflect\detail\visit_detail.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
-    <None Include="res\ForwardingExtensionLoader.inl" />
     <None Include="res\Guid.inl" />
     <None Include="res\Resource.inl" />
     <None Include="res\ResourceBundle.inl" />

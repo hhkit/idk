@@ -3,6 +3,11 @@
 
 namespace idk
 {
+	template<typename Res>
+	ResourceBundle::ResourceBundle(const RscHandle<Res>& handle)
+	{
+		Add(handle);
+	}
 	template<typename T>
 	RscHandle<T> ResourceBundle::Get() const
 	{

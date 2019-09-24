@@ -10,6 +10,11 @@ namespace idk
 		template<typename T>
 		struct ResourceSpan;
 		
+		ResourceBundle() = default;
+
+		template<typename Res> // conversion from single resource
+		ResourceBundle(const RscHandle<Res>&);
+
 		template<typename T> RscHandle<T>    Get() const;    // get a resource from the bundle
 		template<typename T> ResourceSpan<T> GetAll() const; // get all resources of one type
 		span<const GenericResourceHandle>    GetAll() const; // gets absolutely all resources

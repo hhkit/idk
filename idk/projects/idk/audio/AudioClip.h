@@ -82,7 +82,7 @@ namespace idk
 
 	private:
 		friend class AudioSystem;			//The AudioSystem will have access to AudioClip's variables
-		friend class AudioClipFactory;		//The AudioClipFactory will have access to AudioClip's variables
+		friend class AudioClipLoader;		//The AudioClipLoader will have access to AudioClip's variables
 
 		FMOD::Sound*	_soundHandle	{ nullptr };	//A handle to FMOD_Sound object. It contains some sound info data as well, but it is wrapped to the AudioClipInfo on CreateSound.
 		FMOD::Channel*	_soundChannel	{ nullptr };	//Whenever a sound is played, this pointer becomes valid

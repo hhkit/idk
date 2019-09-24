@@ -16,6 +16,7 @@ namespace idk::ogl
 		fb->SetMeta(m);
 		return fb;
 	}
+
 	unique_ptr<RenderTarget> FrameBufferFactory::Create()
 	{
 		auto fb = std::make_unique<FrameBuffer>();
@@ -25,15 +26,16 @@ namespace idk::ogl
 		fb->SetMeta(m);
 		return fb;
 	}
-	unique_ptr<RenderTarget> FrameBufferFactory::Create(PathHandle fh)
-	{
-		UNREFERENCED_PARAMETER(fh);
-		return unique_ptr<RenderTarget>();
-	}
 
-	unique_ptr<RenderTarget> FrameBufferFactory::Create(PathHandle filepath, const RenderTarget::Metadata& m)
+	ResourceBundle FrameBufferLoader::LoadFile(PathHandle fh)
 	{
-		UNREFERENCED_PARAMETER(filepath);
+		assert(false);
+		return ResourceBundle();
+	}
+	ResourceBundle FrameBufferLoader::LoadFile(PathHandle filepath, const MetaBundle& m)
+	{
+		assert(false);
+		/*
 		auto fb = std::make_unique<FrameBuffer>();
 
 		for (auto& elem : m.textures)
@@ -45,5 +47,7 @@ namespace idk::ogl
 		fb->SetMeta(m);
 
 		return fb;
+		*/
+		return ResourceBundle{};
 	}
 }

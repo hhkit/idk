@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		AudioClipFactory.cpp
+//@file		AudioClipLoader.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		18 AUG 2019
@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <stdafx.h>
-#include <audio/AudioClipFactory.h>
+#include <audio/AudioClipLoader.h>
 #include <idk.h>
 #include <audio/AudioSystem.h> //AudioSystem
 //Dependency includes
@@ -20,37 +20,36 @@
 
 
 namespace idk {
-	unique_ptr<AudioClip> AudioClipFactory::GenerateDefaultResource()
+	ResourceBundle AudioClipLoader::LoadFile(PathHandle filePath)
 	{
-		return std::make_unique<AudioClip>();
-	}
-
-	unique_ptr<AudioClip> AudioClipFactory::Create(PathHandle filePath)
-	{
-		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
+		auto newSound = Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 
-		try {
+		try 
+		{
 			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
 			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
 			newSound->UpdateMinMaxDistance();
+		}
+		catch (EXCEPTION_AudioSystem) 
+		{
+			return ResourceBundle{};
+		}
 
-		}
-		catch (EXCEPTION_AudioSystem i) { //If an error occurs here, delete newSound and return nullptr
-			//std::cout << i.exceptionDetails << "Returning nullptr.\n";
-			return nullptr;
-		}
 		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
 		newSound->soundInfo.filePath = filePath.GetFullPath();
 		char name[512];
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getName(name, 512));
+
 		newSound->soundInfo.name = name;
+		
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
+		
 		newSound->_dirtymeta = true;
 		//Push to list for management.
 		//SoundList.push_back(newSound);
-		
+
 		return newSound;
 	}
 }
