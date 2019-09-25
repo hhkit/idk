@@ -15,11 +15,12 @@ namespace idk
 		template<typename Res> // conversion from single resource
 		ResourceBundle(const RscHandle<Res>&);
 
+		size_t Count() const;
 		template<typename T> RscHandle<T>    Get() const;    // get a resource from the bundle
 		template<typename T> ResourceSpan<T> GetAll() const; // get all resources of one type
 		span<const GenericResourceHandle>    GetAll() const; // gets absolutely all resources
 
-		template<typename T> void Add(RscHandle<T> handle) const; // will reshuffle vector and invalidate span, but you shouldn't be accessing vector directly anyway so this is ok
+		template<typename T> void Add(RscHandle<T> handle); // will reshuffle vector and invalidate span, but you shouldn't be accessing vector directly anyway so this is ok
 	private:
 		struct sub_array { char index = 0, count = 0; };
 

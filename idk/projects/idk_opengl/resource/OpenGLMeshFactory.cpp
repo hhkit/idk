@@ -231,7 +231,7 @@ namespace idk::ogl
 			// Subdivide the icosahedron into a sphere here.
 			subdivideIcosahedron(icosahedron, icosahedronIndices);
 
-			auto sphere_mesh = Core::GetResourceManager().Emplace<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
+			auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddMeshEntry(0, 0, icosahedronIndices.size(), 0);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -246,7 +246,7 @@ namespace idk::ogl
 
 		{	/* create cube mesh */
 			auto box_mesh = Mesh::defaults[MeshType::Box];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(box_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(box_mesh.guid);
 			constexpr auto sz = 1.f;
 			std::vector<Vertex> vertices{
 				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
@@ -309,7 +309,7 @@ namespace idk::ogl
 
 		{	/* create tetrahedral mesh */
 			auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(tet_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
@@ -341,7 +341,7 @@ namespace idk::ogl
 
 		{	/* create line mesh */
 			auto line_mesh = Mesh::defaults[MeshType::Line];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(line_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(line_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0, 0, 1}, vec3{ 0, 0, 1}},
@@ -413,10 +413,5 @@ namespace idk::ogl
 	unique_ptr<Mesh> OpenGLMeshFactory::Create()
 	{
 		return std::make_unique<OpenGLMesh>();
-	}
-
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(PathHandle)
-	{
-		return unique_ptr<Mesh>();
 	}
 }

@@ -139,7 +139,7 @@ namespace idk
 			std::visit(
 				[&](const auto& handle) 
 				{
-					using Res = std::decay_t<decltype(handle)>::Resource;
+					using Res = typename std::decay_t<decltype(handle)>::Resource;
 
 					auto* cb = GetControlBlock(handle);
 					assert(cb);

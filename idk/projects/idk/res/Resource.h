@@ -1,14 +1,8 @@
 #pragma once
 #include <idk.h>
 #include <res/ResourceHandle.h>
-
 namespace idk
 {
-	template<typename Res>
-	struct BaseResource;
-
-	template<typename T>
-	constexpr auto BaseResourceID = BaseResource<T>::value;
 
 	template<typename Res>
 	class Resource
@@ -32,5 +26,3 @@ namespace idk
 		static_assert(ResourceID<Res> != ResourceCount, "Resource T must be included in the idk_config.h/Resources tuple");
 	};
 }
-
-#include "Resource.inl"

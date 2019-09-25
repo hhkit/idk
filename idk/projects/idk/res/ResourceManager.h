@@ -8,6 +8,7 @@
 #include <res/ResourceBundle.h>
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
+#include <res/ResourceUtils.h>
 #include <res/FileLoader.h>
 #include <meta/meta.h>
 #include <meta/tag.h>

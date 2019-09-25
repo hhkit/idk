@@ -9,9 +9,10 @@ namespace idk
 	{
 	private:
 		using Base = variant_wrap_t<tuple_to_variant_t<Resources>, RscHandle>;
+	public:
 		using Base::Base;
 		using Base::operator=;
-	public:
+
 		template<typename T, typename = sfinae<index_in_tuple_v<T, Resources> == ResourceCount>> // inherited handles
 		GenericResourceHandle(RscHandle<T> handle);
 
@@ -41,12 +42,12 @@ namespace idk
 	template<typename T>
 	RscHandle<T>& GenericResourceHandle::AsHandle()
 	{
-		return reinterpret_cast<RscHandle<T>&>(std::get<ResourceID<typename T::BaseResource>>(*this));
+		return reinterpret_cast<RscHandle<T>&>(std::get<BaseResourceID<T>>(*this));
 	}
 
 	template<typename T>
 	const RscHandle<T>& GenericResourceHandle::AsHandle() const
 	{
-		return reinterpret_cast<RscHandle<T>&>(std::get<ResourceID<typename T::BaseResource>>(*this));
+		return reinterpret_cast<const RscHandle<T>&>(std::get<BaseResourceID<T>>(*this));
 	}
 }

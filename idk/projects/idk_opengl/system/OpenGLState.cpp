@@ -43,11 +43,11 @@ namespace idk::ogl
 
 	void OpenGLState::GenResources()
 	{
-		renderer_vertex_shaders[Debug]       = Core::GetResourceManager().LoadFile("/assets/shader/debug.vert").resources[0].As<ShaderProgram>();
-		renderer_vertex_shaders[NormalMesh]  = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert").resources[0].As<ShaderProgram>();
-		renderer_vertex_shaders[SkinnedMesh] = Core::GetResourceManager().LoadFile("/assets/shader/skinned_mesh.vert").resources[0].As<ShaderProgram>();
+		renderer_vertex_shaders[Debug]       = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.vert");
+		renderer_vertex_shaders[NormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert");
+		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
 
-		debug_fragment = Core::GetResourceManager().LoadFile("/assets/shader/debug.frag").resources[0].As<ShaderProgram>();	
+		debug_fragment = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");	
 	}
 
 

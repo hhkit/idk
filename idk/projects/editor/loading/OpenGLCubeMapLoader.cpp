@@ -13,12 +13,11 @@
 
 namespace idk
 {
-	FileResources OpenGLCubeMapLoader::Create(PathHandle path_to_resource)
-	{	
-		//Assert for now
+	ResourceBundle OpenGLCubeMapLoader::LoadFile(PathHandle path_to_resource)
+	{//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
-		auto texture_handle = Core::GetResourceManager().Create<CubeMap>();
+		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>();
 
 		auto tm = texture_handle->GetMeta();
 		//auto texture_id = texture_handle->ID();
@@ -40,7 +39,7 @@ namespace idk
 		auto cubemap = path.stem();
 		auto ext = cubemap.extension();
 
-		for (int i=0; i< fileExt->size(); ++i)
+		for (int i = 0; i < fileExt->size(); ++i)
 		{
 			auto p = (path.parent_path() / cubemap.stem()).string() + fileExt[i] + ext.string();
 
@@ -48,24 +47,15 @@ namespace idk
 
 			assert(data);
 
-			texture_handle.as<ogl::OpenGLCubemap>().Buffer(i,data, size, tm.internal_format);
+			texture_handle->Buffer(i, data, size, tm.internal_format);
 		}
 
-
-		FileResources retval;
-
-
-		retval.resources.emplace_back(texture_handle);
-
-		return retval;
+		return texture_handle;
 	}
 
-	FileResources OpenGLCubeMapLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
+	ResourceBundle OpenGLCubeMapLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		UNREFERENCED_PARAMETER(path_to_resource);
-		UNREFERENCED_PARAMETER(path_to_meta);
-
-		return Create(path_to_resource);
+		return ResourceBundle();
 	}
 
 };

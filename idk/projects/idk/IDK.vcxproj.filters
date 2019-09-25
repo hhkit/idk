@@ -488,9 +488,6 @@
     <ClInclude Include="anim\Animation.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationFactory.h">
-      <Filter>anim\res/factories</Filter>
-    </ClInclude>
     <ClInclude Include="anim\Skeleton.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
@@ -605,6 +602,7 @@
       <Filter>audio</Filter>
     </ClInclude>
     <ClInclude Include="gfx\ShaderTemplateLoader.h" />
+    <ClInclude Include="res\ResourceUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -759,9 +757,6 @@
       <Filter>serialize</Filter>
     </ClCompile>
     <ClCompile Include="anim\Animation.cpp">
-      <Filter>anim\res/factories</Filter>
-    </ClCompile>
-    <ClCompile Include="anim\AnimationFactory.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
     <ClCompile Include="anim\Skeleton.cpp">
@@ -1031,9 +1026,6 @@
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
-    <None Include="res\Resource.inl">
-      <Filter>res</Filter>
-    </None>
     <None Include="ds\slow_tree.inl">
       <Filter>ds</Filter>
     </None>
@@ -1051,6 +1043,7 @@
     </None>
     <None Include="meta\variant.inl" />
     <None Include="res\ResourceBundle.inl" />
+    <None Include="res\ResourceUtils.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

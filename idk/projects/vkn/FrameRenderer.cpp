@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <forward_list>
 #include "FrameRenderer.h"
+#include <core/Core.h>
 #include <gfx/GraphicsSystem.h> //GraphicsState
 #include <vkn/VulkanPipeline.h>
 #include <vkn/VulkanMesh.h>
@@ -116,8 +117,8 @@ namespace idk::vkn
 		//TODO figure this out
 		string filename = "/assets/shader/mesh.vert";
 		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-		auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-		if (!actualfile || !rsc.resources.size())
+		auto rsc = Core::GetResourceManager().Load(actualfile);
+		if (!actualfile || !rsc->size())
 		{
 
 			vector<buffer_desc> desc{
@@ -127,7 +128,7 @@ namespace idk::vkn
 			};
 			Core::GetSystem<FileSystem>().Update();
 			//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
+			_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile);
 			_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
 			//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 			//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
@@ -135,7 +136,7 @@ namespace idk::vkn
 		}
 		else
 		{
-			_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
+			_mesh_renderer_shader_module = rsc->Get<ShaderProgram>();
 		}
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)

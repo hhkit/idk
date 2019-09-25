@@ -25,10 +25,11 @@ namespace idk
 	{
 		Guid   guid;
 		string name;
+		size_t t_hash;
 		string metadata;
 
 		template<typename Res, typename = sfinae<has_tag_v<Res, MetaTag>>>
-		typename Res::Metadata GetMeta() const;
+		opt<typename Res::Metadata> GetMeta() const;
 	};
 
 }

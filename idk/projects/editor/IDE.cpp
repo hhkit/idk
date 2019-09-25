@@ -49,20 +49,20 @@ namespace idk
 		{
 		case GraphicsAPI::OpenGL:
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLCubeMapLoader>(".cbm");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".png");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".jpg");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".jpeg");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".dds");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".obj");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".md5mesh");
+			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
-			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".md5mesh");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".obj");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".md5mesh");
 			break;
 		default:
 			break;

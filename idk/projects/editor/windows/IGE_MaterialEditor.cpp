@@ -528,7 +528,7 @@ namespace idk
 
     void IGE_MaterialEditor::OpenGraph(const PathHandle& handle)
     {
-        _graph = Core::GetResourceManager().LoadFile(handle)[0].As<Graph>();
+        _graph = *Core::GetResourceManager().Load<Graph>(handle);
         auto p = handle.GetMountPath();
         p.remove_prefix(sizeof("/assets/") - 1);
         p.remove_suffix(sizeof(".mat") - 1);
@@ -591,7 +591,7 @@ namespace idk
             if (ImGui::Button("Compile"))
             {
                 g.Compile();
-                Core::GetSystem<SaveableResourceManager>().Save(_graph);
+                Core::GetResourceManager().Save(_graph);
             }
             ImGui::EndMenuBar();
         }

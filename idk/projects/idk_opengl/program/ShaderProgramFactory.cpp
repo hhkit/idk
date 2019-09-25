@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ShaderProgramFactory.h"
+#include <core/Core.h>
 #include <idk_opengl/program/Program.h>
 #include <sstream>
 namespace idk::ogl
@@ -9,9 +10,9 @@ namespace idk::ogl
 		return std::make_unique<ogl::Program>();
 	}
 
-	unique_ptr<ShaderProgram> ShaderProgramFactory::Create(PathHandle filepath)
+	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath)
 	{
-		auto program = std::make_unique<ogl::Program>();
+		auto program = Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>();
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, false);
 
 		std::stringstream stringify;
@@ -33,6 +34,10 @@ namespace idk::ogl
 		program->Attach(Shader{ shader_enum, stringify.str() });
 		program->Link();
 
-		return std::move(program);
+		return program;
+	}
+	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath, const MetaBundle&)
+	{
+		return ResourceBundle();
 	}
 }

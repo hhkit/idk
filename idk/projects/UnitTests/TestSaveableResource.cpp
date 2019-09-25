@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <test/TestResource.h>
-#include <res/SaveableResourceManager.h>
 
 TEST(Saveable, SaveableResource)
 {

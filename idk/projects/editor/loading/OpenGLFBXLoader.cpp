@@ -7,19 +7,19 @@
 namespace idk
 {
 	using Vertex = fbx_loader_detail::Vertex;
-
-	FileResources OpenGLFBXLoader::Create(PathHandle path_to_resource)
+	
+	ResourceBundle OpenGLFBXLoader::LoadFile(PathHandle path_to_resource)
 	{
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
-		FileResources retval;
+		ResourceBundle retval;
 
 		Assimp::Importer importer;
-		const aiScene* ai_scene = importer.ReadFile( path_to_resource.GetFullPath().data(),
-													 aiProcess_Triangulate |		// Triangulates non-triangles
-													 aiProcess_GenSmoothNormals |	// Generates missing normals
-													 aiProcess_FlipUVs |
-													 aiProcess_JoinIdenticalVertices);;
+		const aiScene* ai_scene = importer.ReadFile(path_to_resource.GetFullPath().data(),
+			aiProcess_Triangulate |		// Triangulates non-triangles
+			aiProcess_GenSmoothNormals |	// Generates missing normals
+			aiProcess_FlipUVs |
+			aiProcess_JoinIdenticalVertices);;
 
 		if (ai_scene == nullptr)
 			return retval;
@@ -33,7 +33,7 @@ namespace idk
 		fbx_loader_detail::BoneSet bones_set{ fbx_loader_detail::BoneData{ai_scene->mRootNode->mName.data} };
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
-		
+
 		// Count the number of vertices and indices per mesh entry
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
@@ -42,7 +42,7 @@ namespace idk
 			unsigned curr_num_index = ai_scene->mMeshes[i]->mNumFaces * 3;
 
 			mesh_handle->AddMeshEntry(curr_base_vertex, curr_base_index, curr_num_index, 0);
-			
+
 			num_vertices += ai_scene->mMeshes[i]->mNumVertices;
 			num_indices += curr_num_index;
 		}
@@ -67,8 +67,8 @@ namespace idk
 
 				vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z }
 											 ,vec3{ normal.x, normal.y, normal.z }
-											 ,vec2{ text.x, text.y } 
-											});
+											 ,vec2{ text.x, text.y }
+					});
 			}
 
 			// Initialize indices
@@ -97,7 +97,7 @@ namespace idk
 
 		// Initializes the opengl buffers
 		fbx_loader_detail::initOpenGLBuffers(*mesh_handle, vertices, indices);
-		retval.resources.emplace_back(RscHandle<Mesh>{mesh_handle});
+		retval.Add(mesh_handle);
 
 		// Loading Skeletons
 		auto skeleton_handle = Core::GetResourceManager().Create<anim::Skeleton>();
@@ -107,31 +107,26 @@ namespace idk
 
 		mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation);
 		skeleton.SetSkeletonTransform(skeleton_transform);
-		retval.resources.emplace_back(skeleton_handle);
+		retval.Add(skeleton_handle);
 
 		// Loading Animations
 		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
 			auto anim_clip_handle = Core::GetResourceManager().Create<anim::Animation>();
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
-		
+
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
 			fbx_loader_detail::initAnimNodes(ai_scene->mRootNode, ai_scene->mAnimations[i], bones_set, anim_clip);
-		
-			retval.resources.emplace_back(anim_clip_handle);
+
+			retval.Add(anim_clip_handle);
 		}
-		
+
 		return retval;
 	}
 
-	FileResources OpenGLFBXLoader::Create(PathHandle path_to_resource,const MetaFile& path_to_meta)
+	ResourceBundle OpenGLFBXLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		UNREFERENCED_PARAMETER(path_to_resource);
-		UNREFERENCED_PARAMETER(path_to_meta);
-
-		return Create(path_to_resource);
-
-		// return FileResources();
+		return ResourceBundle();
 	}
-	
+
 }

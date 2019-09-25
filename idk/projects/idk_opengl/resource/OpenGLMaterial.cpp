@@ -13,7 +13,7 @@ namespace idk::ogl
 		//Core::GetSystem<FileSystem>().Open(path, FS_PERMISSIONS::WRITE) << lighting_model->Instantiate(material_uniforms, material_code);
 		//Core::GetResourceManager().LoadFile(path.data(), MetaFile{ {meta.compiled_shader_guid} });
 		Core::GetResourceManager().Free(RscHandle<ShaderProgram>{meta.compiled_shader_guid});
-		auto prog = Core::GetResourceManager().Emplace<Program>(meta.compiled_shader_guid);
+		auto prog = Core::GetResourceManager().LoaderEmplaceResource<Program>(meta.compiled_shader_guid);
 		prog->Attach(
 			Shader{
 				GL_FRAGMENT_SHADER,

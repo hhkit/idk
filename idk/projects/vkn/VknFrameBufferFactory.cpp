@@ -38,7 +38,7 @@ namespace idk::vkn
 		{
 			// ensure textures are created
 			Core::GetResourceManager().Free(elem);
-			Core::GetResourceManager().Emplace<VknTexture>(elem.guid);
+			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(elem.guid);
 		}
 		fb->SetMeta(m);
 

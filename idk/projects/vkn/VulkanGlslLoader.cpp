@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "VulkanGlslLoader.h"
 #include <filesystem>
-#include <sstream>
+#include <core/Core.h>
 #include <vkn/ShaderModule.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/GlslToSpirv.h>
+#include <util/ioutils.h>
+
 namespace idk::vkn
 {
 
@@ -14,19 +16,17 @@ namespace idk::vkn
 		//TODO actually get the file name
 		return string(path_to_resource.GetFullPath());
 	}
-	unique_ptr<ShaderProgram> VulkanGlslLoader::GenerateDefaultResource()
+	unique_ptr<ShaderProgram> VulkanGlslFactory::GenerateDefaultResource()
 	{
 		return unique_ptr<ShaderProgram>();
 	}
-	unique_ptr<ShaderProgram> VulkanGlslLoader::Create(PathHandle path_to_resource)
-	{
 
-		auto program = std::make_unique<ShaderModule>();
+	ResourceBundle VulkanGlslLoader::LoadFile(PathHandle path_to_resource)
+	{
+		auto program = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();
 		auto& filepath = path_to_resource;
-		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, true);
-		std::stringstream stringify;
-		stringify << shader_stream.rdbuf();
-		string val = stringify.str();
+		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ);
+		string val = stringify(shader_stream);
 
 		auto shader_enum = [](std::string_view ext)->vk::ShaderStageFlagBits
 		{
@@ -41,8 +41,8 @@ namespace idk::vkn
 			default:                      return vk::ShaderStageFlagBits::eAll;
 			}
 		}(filepath.GetExtension());
-		auto spirv =GlslToSpirv::spirv(val, shader_enum);
-		if(spirv)
+		auto spirv = GlslToSpirv::spirv(val, shader_enum);
+		if (spirv)
 			program->Load(shader_enum, {}, string_view{ r_cast<const char*>((*spirv).data()),hlp::buffer_size(*spirv) });
 
 		return std::move(program);

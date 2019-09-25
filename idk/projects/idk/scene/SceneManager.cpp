@@ -16,6 +16,7 @@ namespace idk
 		{
 			if (elem.scene == activateme)
 			{
+				/*
 				auto paths = Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext);
 				for (auto& path : paths)
 				{
@@ -31,7 +32,7 @@ namespace idk
 						return SceneActivateResult::Ok;
 					}
 				}
-
+				*/
 				return SceneActivateResult::Err_ScenePathNotFound;
 			}
 		}
@@ -100,7 +101,7 @@ namespace idk
 		auto guid = Guid::Make();
 		_scenes.emplace_back(SceneBlock{ build_index, RscHandle<Scene>{guid} });
 
-		return Core::GetResourceManager().Emplace<Scene>(guid, build_index);
+		return Core::GetResourceManager().LoaderEmplaceResource<Scene>(guid, build_index);
 	}
 
 	void SceneManager::Init()

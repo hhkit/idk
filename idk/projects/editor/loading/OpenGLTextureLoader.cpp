@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <loading/OpenGLTextureLoader.h>
 #include <gfx/GraphicsSystem.h>
-
+#include <res/MetaBundle.h>
 //Dep
 #include <stb/stb_image.h>
 
@@ -10,14 +10,11 @@
 
 namespace idk
 {
-	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource)
-	{
-		//Assert for now
+	ResourceBundle OpenGLTextureLoader::LoadFile(PathHandle path_to_resource)
+	{//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
-		
-		FileResources retval;
 
-		auto texture_handle = Core::GetResourceManager().Create<Texture>();
+		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
 
 		auto tm = texture_handle->GetMeta();
 
@@ -42,24 +39,20 @@ namespace idk
 			}
 			}();
 
-			texture_handle.as<ogl::OpenGLTexture>().Buffer(data.get(), size, col_format);
-
-			retval.resources.emplace_back(texture_handle);
+			texture_handle->Buffer(data.get(), size, col_format);
 		}
-		return retval;
+
+		return texture_handle;
 	}
 
-	FileResources OpenGLTextureLoader::Create(PathHandle path_to_resource, const MetaFile& path_to_meta)
-	{//Assert for now
-		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
+	ResourceBundle OpenGLTextureLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
+	{
+		auto& metadata = path_to_meta.metadatas[0];
+		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
 
-		FileResources retval;
-
-		auto texture_handle = Core::GetResourceManager().Emplace<ogl::OpenGLTexture>(path_to_meta.guids[0]);
-
-		auto& first_meta = path_to_meta.resource_metas[0];
-		if (first_meta.is<Texture::Metadata>())
-			texture_handle->SetMeta(first_meta.get<Texture::Metadata>());
+		auto first_meta = metadata.GetMeta<Texture>();
+		if (first_meta)
+			texture_handle->SetMeta(*first_meta);
 
 		ivec2 size{};
 		int channels{};
@@ -83,11 +76,12 @@ namespace idk
 			}
 			}();
 
-			texture_handle.as<ogl::OpenGLTexture>().Buffer(data.get(), size, col_format);
+			texture_handle->Buffer(data.get(), size, col_format);
 
-			retval.resources.emplace_back(RscHandle<Texture>{texture_handle});
+			return texture_handle;
 		}
-		return retval;
+
+		return {};
 	}
 
 };

@@ -53,7 +53,7 @@ namespace idk
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
-		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock{});
+		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
 
 		auto& control_block = itr->second;
 		// attempt to put on another thread
@@ -136,7 +136,7 @@ namespace idk
 		static_assert(std::is_base_of_v<IFileLoader, FLoader>, "Can only register FileLoaders");
 
 		auto& ptr = _file_loader[string{ ext }] = std::make_unique<FLoader>(std::forward<Args>(loader_construction_args)...);
-		return s_cast<FLoader>(ptr.get());
+		return *s_cast<FLoader*>(ptr.get());
 	}
 
 	template<typename Res, typename ...Args>
@@ -164,6 +164,6 @@ namespace idk
 	{
 		auto& table = GetTable<Res>();
 		auto itr = table.find(handle.guid);
-		return itr == table.end() ? nullptr : itr->second.valid();
+		return itr == table.end() ? nullptr : &itr->second;
 	}
 }

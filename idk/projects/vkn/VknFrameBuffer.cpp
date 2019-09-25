@@ -75,7 +75,7 @@ namespace idk::vkn
 
 		for (auto& elem : newmeta.textures)
 		{
-			Core::GetResourceManager().Emplace<VknTexture>(elem.guid)->Size(newmeta.size);
+			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(elem.guid)->Size(newmeta.size);
 		}
 	}
 

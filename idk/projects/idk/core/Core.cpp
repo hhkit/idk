@@ -60,8 +60,8 @@ namespace idk
 		{
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory,         "Watch files");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&IEditor::EditorUpdate,                   "Editor Update");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyMetadata,      "Save dirty resources");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
+			//_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyMetadata,      "Save dirty resources");
+			//_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState,     "Buffer graphics objects");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,      "Render Render Buffer");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick, "Update durations of debug draw");
@@ -70,7 +70,7 @@ namespace idk
 		}
 		else
 		{
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
+			//_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,  "Render Render Buffer");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick, "Update durations of debug draw");

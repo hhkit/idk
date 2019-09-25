@@ -14,15 +14,4 @@ namespace idk::anim
 
 		return retval;
 	}
-
-	unique_ptr<Skeleton> SkeletonFactory::Create()
-	{
-		
-		return std::make_unique<Skeleton>();
-	}
-	unique_ptr<Skeleton> SkeletonFactory::Create(PathHandle filepath)
-	{
-		UNREFERENCED_PARAMETER(filepath);
-		return std::make_unique<Skeleton>();
-	}
 }

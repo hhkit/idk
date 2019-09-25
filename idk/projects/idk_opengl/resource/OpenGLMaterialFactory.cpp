@@ -27,9 +27,4 @@ namespace idk::ogl
 		auto mat = std::make_unique<OpenGLMaterial>();
 		return mat;
 	}
-	unique_ptr<Material> OpenGLMaterialFactory::Create(PathHandle filepath)
-	{
-		UNREFERENCED_PARAMETER(filepath);
-		return Create();
-	}
 }

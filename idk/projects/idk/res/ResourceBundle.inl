@@ -1,4 +1,5 @@
 #include "ResourceBundle.h"
+#include <res/ResourceUtils.h>
 #pragma once
 
 namespace idk
@@ -11,21 +12,21 @@ namespace idk
 	template<typename T>
 	RscHandle<T> ResourceBundle::Get() const
 	{
-		auto& subarray = subarrays[ResourceID<typename T::BaseResource>];
+		auto& subarray = subarrays[BaseResourceID<T>];
 		return subarray.count > 0 ? handles[subarray.index].AsHandle<T>() : RscHandle<T>();
 	}
 
 	template<typename T>
 	ResourceBundle::ResourceSpan<T> ResourceBundle::GetAll() const
 	{
-		auto& subarray = subarrays[ResourceID<typename T::BaseResource>];
+		auto& subarray = subarrays[BaseResourceID<T>];
 		return ResourceSpan{ handles.data() + subarray.index, handles.data() + subarray.index + subarray.count };
 	}
 
 	template<typename T>
-	inline void ResourceBundle::Add(RscHandle<T> handle) const
+	inline void ResourceBundle::Add(RscHandle<T> handle)
 	{
-		auto& sub_arr = subarrays[ResourceID<typename T::BaseResource>];
+		auto& sub_arr = subarrays[BaseResourceID<T>];
 		auto new_ind = sub_arr.index + ++sub_arr.count;
 
 		// make space for new resource
@@ -35,7 +36,7 @@ namespace idk
 		handles[new_ind] = handle;
 
 		// push back all subsequent resources
-		for (auto& elem : span<sub_array>{ &sub_arr, std::end(subarrays) })
+		for (auto& elem : span<sub_array>{ &sub_arr, subarrays.data() + subarrays.size() })
 			++elem.index;
 	}
 

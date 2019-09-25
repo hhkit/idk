@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
-    <ClInclude Include="anim\AnimationFactory.h" />
     <ClInclude Include="anim\AnimationController.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
     <ClInclude Include="anim\Skeleton.h" />
@@ -59,6 +58,7 @@
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
     <ClInclude Include="res\MetaBundle.h" />
     <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="scene\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
@@ -194,7 +194,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim\Animation.cpp" />
-    <ClCompile Include="anim\AnimationFactory.cpp" />
     <ClCompile Include="anim\AnimationController.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
@@ -324,9 +323,9 @@
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="res\Guid.inl" />
-    <None Include="res\Resource.inl" />
     <None Include="res\ResourceBundle.inl" />
     <None Include="res\ResourceMeta.inl" />
+    <None Include="res\ResourceUtils.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

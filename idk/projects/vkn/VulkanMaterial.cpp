@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "VulkanMaterial.h"
+#include <core/Core.h>
 #include <vkn/ShaderModule.h>
 #include <file/FileSystem.h>
 #include <gfx/ShaderTemplate.h>
@@ -11,8 +12,8 @@ namespace idk::vkn
 	bool VulkanMaterial::BuildShader(RscHandle<ShaderTemplate> lighting_model, string_view material_uniforms, string_view material_code)
 	{
 		bool ret = false;
-		Core::GetResourceManager().Free(RscHandle<ShaderProgram>{meta.compiled_shader_guid});
-		auto prog = Core::GetResourceManager().Emplace<ShaderModule>(meta.compiled_shader_guid);
+		Core::GetResourceManager().Release(RscHandle<ShaderProgram>{meta.compiled_shader_guid});
+		auto prog = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>(meta.compiled_shader_guid);
 		//std::ofstream tmp{ tmp_filename };
 		//tmp << << std::flush;
 		//tmp.close();

@@ -14,7 +14,9 @@ namespace idk
 		void Add(RscHandle<T>);
 
 		const SerializedMeta* FetchMeta(string_view name) const;
-		// void AddBundle(const ResourceBundle&);
+
+		template<typename T, typename = sfinae<has_tag_v<T, MetaTag>>>
+		const SerializedMeta* FetchMeta() const;
 	};
 }
 
@@ -28,9 +30,19 @@ namespace idk
 		if (h)
 		{
 			if constexpr (has_tag_v<T, MetaTag>)
-				metadatas.emplace_back(SerializedMeta{ h.guid, h->Name(), serialize_text(reflect::dynamic{ h->GetMeta() }) });
+				metadatas.emplace_back(SerializedMeta{ h.guid, h->Name(), reflect::typehash<T>(), serialize_text(reflect::dynamic{ h->GetMeta() }) });
 			else
-				metadatas.emplace_back(SerializedMeta{ h.guid, h->Name() });
+				metadatas.emplace_back(SerializedMeta{ h.guid, h->Name(), reflect::typehash<T>() });
 		}
+	}
+	template<typename T, typename>
+	const SerializedMeta* MetaBundle::FetchMeta() const
+	{
+		for (auto& elem : metadatas)
+		{
+			if (elem.t_hash == reflect::typehash<T>())
+				return &elem;
+		}
+		return nullptr;
 	}
 }

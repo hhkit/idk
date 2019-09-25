@@ -6,25 +6,20 @@
 namespace idk
 {
 
-    unique_ptr<Prefab> PrefabFactory::GenerateDefaultResource()
-    {
-        return std::make_unique<Prefab>();
-    }
-
-	unique_ptr<Prefab> PrefabFactory::Create()
-	{
-		return std::make_unique<Prefab>();
-	}
-
-	unique_ptr<Prefab> PrefabFactory::Create(PathHandle filepath)
+	ResourceBundle PrefabLoader::LoadFile(PathHandle filepath)
 	{
 		std::stringstream ss;
 		ss << filepath.Open(idk::FS_PERMISSIONS::READ).rdbuf();
 		string str = ss.str();
 
-        auto prefab = std::make_unique<Prefab>();
+		auto prefab = Core::GetResourceManager().LoaderEmplaceResource<Prefab>();
 		parse_text(str, prefab->data);
-        return std::move(prefab);
+		return prefab;
+	}
+
+	ResourceBundle PrefabLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
+	{
+		return ResourceBundle();
 	}
 
 }
