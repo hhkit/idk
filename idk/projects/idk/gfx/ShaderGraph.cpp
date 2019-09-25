@@ -29,9 +29,10 @@ namespace idk::shadergraph
     struct compiler_state
     {
         const Graph& graph;
-        hash_table<NodeSlot, variant<const Link*, const Value*>, NodeSlotHasher> inputs_to_outputs{};
+        hash_table<NodeSlot, const Link*, NodeSlotHasher> inputs_to_outputs{};
         hash_table<NodeSlot, string, NodeSlotHasher> resolved_outputs{};
         vector<std::pair<string, ValueType>> uniforms{};
+        vector<string> non_param_textures{};
         int slot_counter = 0;
     };
 
@@ -109,16 +110,38 @@ namespace idk::shadergraph
                 code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
             }
 
+            auto& tpl = NodeTemplate::GetTable().at(node.name);
+
             // add the code, then replace the output variable names
-            code += NodeTemplate::GetTable().at(node.name).code;
+            code += tpl.code;
             resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
             for (int i = 0; i < node.output_slots.size(); ++i)
             {
                 replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, var_name(state.slot_counter++));
             }
+
+            size_t num_slots = tpl.signatures[0].ins.size() + tpl.signatures[0].outs.size();
+            if (tpl.names.size() > num_slots) // have custom controls
+            {
+                string str = node.control_values;
+                for (int i = num_slots; i < tpl.names.size(); ++i)
+                {
+                    string next_value = "";
+                    if (str.size())
+                    {
+                        auto pos = str.find('|');
+                        next_value = str.substr(0, pos);
+                        if (pos != string::npos)
+                            str.erase(0, pos + 1);
+                        else
+                            str.clear();
+                    }
+                    replace_variables(code, i, next_value);
+                }
+            }
         }
-        else
+        else // param node
         {
             auto uniform_name = node.name;
             auto& param = state.graph.parameters[std::stoi(uniform_name.data() + 1)];
@@ -130,40 +153,46 @@ namespace idk::shadergraph
         for (int i = 0; i < node.input_slots.size(); ++i)
         {
             auto iter = state.inputs_to_outputs.find({ node.guid, i });
-            assert(iter != state.inputs_to_outputs.end()); // i fucked up
 
-            auto& output = iter->second;
-            if (output.index() == 0) // connected to another node
+            if (iter == state.inputs_to_outputs.end()) // no connection, use slot's value
             {
-                auto& link = std::get<0>(output);
-                auto& node_out = state.graph.nodes.at(link->node_out);
+                const auto& value = node.input_slots[i].value;
 
-                auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
-                if (resolved_iter != state.resolved_outputs.end())
-                {
-                    replace_variables(code, i, resolved_iter->second);
-                }
-                else
-                {
-                    code = resolve_node(state.graph.nodes.at(link->node_out), state) + "\n" + code;
-                    resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
-                    assert(resolved_iter != state.resolved_outputs.end());
-                    replace_variables(code, i, resolved_iter->second);
-                }
-            }
-            else // connected to value
-            {
-                auto& value = std::get<1>(output);
                 std::string replacement;
                 if (node.input_slots[i].type == ValueType::SAMPLER2D)
-                    replacement = "sampler2D";
+                {
+                    // can't connect textures directly, we need to go through uniforms
+                    auto uniform_name = "_c" + std::to_string(state.non_param_textures.size());
+                    state.non_param_textures.push_back(uniform_name);
+                    replacement = "_ub" + std::to_string(ValueType::SAMPLER2D) + '.' + uniform_name;
+                    replace_variables(code, i, replacement);
+                }
                 else
                 {
                     replacement = node.input_slots[i].type.to_string();
                     make_lowercase(replacement);
+                    replacement += '(' + value + ')';
+                    replace_variables(code, i, replacement);
                 }
-                replacement += '(' + value->value + ')';
-                replace_variables(code, i, replacement);
+
+                continue;
+            }
+
+            // else, connected to another node
+            auto& link = iter->second;
+            auto& node_out = state.graph.nodes.at(link->node_out);
+
+            auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
+            if (resolved_iter != state.resolved_outputs.end())
+            {
+                replace_variables(code, i, resolved_iter->second);
+            }
+            else
+            {
+                code = resolve_node(state.graph.nodes.at(link->node_out), state) + "\n" + code;
+                resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
+                assert(resolved_iter != state.resolved_outputs.end());
+                replace_variables(code, i, resolved_iter->second);
             }
         }
 
@@ -178,8 +207,6 @@ namespace idk::shadergraph
 
         for (auto& link : links)
             state.inputs_to_outputs.emplace(NodeSlot{ link.node_in, link.slot_in }, &link);
-        for (auto& value : values)
-            state.inputs_to_outputs.emplace(NodeSlot{ value.node, value.slot }, &value);
 
         string code = resolve_node(nodes.at(master_node), state);
         string uniforms = "";
@@ -188,7 +215,7 @@ namespace idk::shadergraph
         {
             array<string, ValueType::count> uniform_blocks;
 
-            for (auto& [uniform_name, uniform_type] : state.uniforms)
+            for (const auto& [uniform_name, uniform_type] : state.uniforms)
             {
                 string typestr = "";
                 if (uniform_type == ValueType::SAMPLER2D)
@@ -212,6 +239,22 @@ namespace idk::shadergraph
                 block += "  ";
                 block += typestr;
                 block += ' ';
+                block += uniform_name;
+                block += ";\n";
+            }
+
+            for(const auto& uniform_name : state.non_param_textures)
+            {
+                auto& block = uniform_blocks[ValueType::SAMPLER2D];
+                if (block.empty())
+                {
+                    block += "U_LAYOUT(3, ";
+                    block += std::to_string(ValueType::SAMPLER2D);
+                    block += ") uniform BLOCK(_UB";
+                    block += ValueType(ValueType::SAMPLER2D).to_string();
+                    block += ")\n{\n";
+                }
+                block += "  sampler2D ";
                 block += uniform_name;
                 block += ";\n";
             }
