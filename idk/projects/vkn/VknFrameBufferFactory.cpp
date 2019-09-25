@@ -2,6 +2,7 @@
 #include "VknFrameBufferfactory.h"
 #include <core/Core.h>
 #include <app/Application.h>
+#include <res/MetaBundle.h>
 #include <vkn/VknTexture.h>
 #include <vkn/VknFrameBuffer.h>
 
@@ -25,16 +26,14 @@ namespace idk::vkn
 		fb->SetMeta(m);
 		return fb;
 	}
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle fh)
-	{
-		return unique_ptr<RenderTarget>();
-	}
 
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle filepath, const RenderTarget::Metadata& m)
+	ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
 	{
-		auto fb = std::make_unique<VknFrameBuffer>();
+		auto fb = Core::GetResourceManager().LoaderEmplaceResource<VknFrameBuffer>(bundle.metadatas[0].guid);
 
-		for (auto& elem : m.textures)
+		auto m = bundle.FetchMeta<RenderTarget>()->GetMeta<RenderTarget>();
+
+		for (auto& elem : m->textures)
 		{
 			// ensure textures are created
 			Core::GetResourceManager().Free(elem);

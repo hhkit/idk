@@ -118,7 +118,7 @@ namespace idk::vkn
 		string filename = "/assets/shader/mesh.vert";
 		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
 		auto rsc = Core::GetResourceManager().Load(actualfile);
-		if (!actualfile || !rsc->size())
+		if (!actualfile || !rsc->Count())
 		{
 
 			vector<buffer_desc> desc{

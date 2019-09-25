@@ -13,8 +13,6 @@ namespace idk::vkn
 	public:
 		MeshFactory();
 		unique_ptr<Mesh> GenerateDefaultResource() override;
-		//unique_ptr<Mesh> Create(const ResourceMeta&);
-		unique_ptr<Mesh> Create(PathHandle filepath) override;
 	private:
 		MeshModder mesh_modder;
 	};
