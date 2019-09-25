@@ -42,6 +42,7 @@ namespace idk::yaml
             bool must_escape = false;
             bool has_single_quotes = false;
             bool has_flow_braces = false;
+            bool has_commas = false;
             const auto& scalar = _node.as_scalar();
 
             if (scalar.empty())
@@ -60,6 +61,8 @@ namespace idk::yaml
                     must_escape = true; break;
                 case '[': case ']': case '{': case '}':
                     has_flow_braces = true; break;
+                case ',':
+                    has_commas = true; break;
                 default: break;
                 }
             }
@@ -68,7 +71,7 @@ namespace idk::yaml
             {
                 // "xyz" => '"xyz"' (so "" dont get lost during parse)
                 if ((scalar.front() == '\"' && scalar.back() == '\"') ||
-                    (style == flow_style && has_flow_braces)) // ['a[]a'] have to quote-enclose flow braces
+                    (style == flow_style && (has_flow_braces || has_commas))) // ['a[]a'] or ['a,a'] have to quote-enclose flow braces / commas
                 {
                     write('\'');
                     if (has_single_quotes)

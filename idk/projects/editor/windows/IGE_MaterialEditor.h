@@ -31,7 +31,7 @@ namespace idk
 
         void show_params_window();
 
-        void drawValue(shadergraph::Value& value);
+        void drawValue(shadergraph::Node& node, int input_slot_index);
         void addDefaultSlotValue(const Guid& guid, int slot_in);
 
         void drawNode(shadergraph::Node& node);
