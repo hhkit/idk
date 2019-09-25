@@ -12,10 +12,10 @@
 
 namespace idk
 {
-	constexpr auto restitution_slop = 0.01f;
-	constexpr auto penetration_min_slop = 0.001f;
-	constexpr auto penetration_max_slop = 0.9;
-	constexpr auto damping = 0.99f;
+	constexpr float restitution_slop = 0.01f;
+	constexpr float penetration_min_slop = 0.001f;
+	constexpr float penetration_max_slop = 0.9f;
+	constexpr float damping = 0.99f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
