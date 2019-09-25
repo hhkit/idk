@@ -428,7 +428,7 @@ TEST(FileSystem, TestGetPaths)
 	INIT_FILESYSTEM_UNIT_TEST();
 
 	// size_t total_size = 0;
-	// auto paths = vfs.GetPaths("/FS_UnitTests");
+	// auto paths = vfs.GetEntries("/FS_UnitTests");
 	// EXPECT_TRUE(paths.size() == 5);
 	// total_size += paths.size();
 	// 
