@@ -477,6 +477,8 @@ namespace idk::yaml
             case '}':
             case ']': on_flow_close(p); continue;
             case '!': on_exclamation_mark(p); continue;
+
+            case '\t': throw "fuck your tabs and get out of here";
             default: { if (printable(*p)) p.token += *p; } break;
             }
 
