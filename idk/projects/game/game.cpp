@@ -72,7 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
-	//Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png");
+	Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png");
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	
@@ -91,9 +91,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		divByVal = 200.f;
 	}
-	auto shader_template = Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+	auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
 	auto h_mat = Core::GetResourceManager().Create<Material>();
-	h_mat->BuildShader(*shader_template, "", "");
+	h_mat->BuildShader(shader_template, "", "");
 
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
@@ -108,10 +108,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources = Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
-			mesh_rend->mesh = resources->Get<Mesh>();
-			animator->SetSkeleton(resources->Get<anim::Skeleton>());
-			animator->AddAnimation(resources->Get<anim::Animation>());
+			auto resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
+			mesh_rend->mesh = resources[0].As<Mesh>();
+			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
+			animator->AddAnimation(resources[2].As<anim::Animation>());
 			animator->Play(0);
 		}
 		mesh_rend->material_instance.material = h_mat;
@@ -120,7 +120,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 	auto tmp_tex = RscHandle<Texture>{};
 	if(gfx_api == GraphicsAPI::Vulkan)
-		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
+		tmp_tex =Core::GetResourceManager().LoadFile(PathHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
 
 	constexpr auto col = ivec3{ 1,0,0 };
 
@@ -224,13 +224,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<Collider>()->shape = sphere{};
 	}
 
-	if(0)
+	//if(0)
 	for (int i = 2; i < 5; ++ i)
 	{
 		auto seducemetoo = scene->CreateGameObject();
 		seducemetoo->GetComponent<Name>()->name = "seducemetoo";
 		seducemetoo->Transform()->position = vec3{ 0, i, 0 };
-		seducemetoo->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} };
+		seducemetoo->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
 		seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
 		seducemetoo->AddComponent<RigidBody>();
 		seducemetoo->AddComponent<Collider>()->shape = box{};

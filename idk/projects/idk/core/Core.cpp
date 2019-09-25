@@ -31,7 +31,10 @@ namespace idk
 	Core::~Core()
 	{
 		if (_setup && _shutdown == false)
+		{
+			_system_manager.EarlyShutdownSystems();
 			_system_manager.ShutdownSystems();
+		}
 	}
 
 	void Core::Setup()
@@ -100,7 +103,7 @@ namespace idk
 				
 			}
 		}
-
+		_system_manager.EarlyShutdownSystems();
 		_system_manager.ShutdownSystems();
 		_shutdown = true;
 	}
