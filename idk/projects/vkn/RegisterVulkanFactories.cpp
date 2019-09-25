@@ -4,6 +4,7 @@
 #include <file/FileSystem.h>
 #include <vkn/VulkanMeshFactory.h>
 #include <vkn/VulkanShaderModuleFactory.h>
+#include <vkn/ShaderModule.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <vkn/VulkanMaterialFactory.h>
 #include <gfx/ShaderTemplateFactory.h>
@@ -22,7 +23,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
 	Core::GetResourceManager().RegisterFactory<MeshFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
-	Core::GetResourceManager().RegisterFactory<VulkanGlslLoader>();
+	Core::GetResourceManager().RegisterFactory<EasyFactory<ShaderModule>>();
 	Core::GetResourceManager().RegisterFactory<VulkanTextureFactory>();
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");

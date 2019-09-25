@@ -13,7 +13,7 @@
 #include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include <idk_opengl/resource/OpenGLTextureFactory.h>
-#include <idk_opengl/program/ShaderProgramFactory.h>
+#include <idk_opengl/program/GLSLLoader.h>
 #include <idk_opengl/system/OpenGLState.h>
 
 #include "OpenGLGraphicsSystem.h"
@@ -164,7 +164,7 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
 		Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
-		Core::GetResourceManager().RegisterFactory<ShaderProgramFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<ogl::Program>>();
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
 		Core::GetResourceManager().RegisterFactory<FrameBufferFactory>();
 

@@ -603,6 +603,7 @@
     </ClInclude>
     <ClInclude Include="gfx\ShaderTemplateLoader.h" />
     <ClInclude Include="res\ResourceUtils.h" />
+    <ClInclude Include="res\SaveableResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

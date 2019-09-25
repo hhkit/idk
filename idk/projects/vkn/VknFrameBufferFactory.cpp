@@ -39,7 +39,7 @@ namespace idk::vkn
 			Core::GetResourceManager().Free(elem);
 			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(elem.guid);
 		}
-		fb->SetMeta(m);
+		fb->SetMeta(*m);
 
 		return fb;
 	}

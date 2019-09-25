@@ -1,14 +1,14 @@
 #pragma once
 #include <idk.h>
 #include <gfx/Mesh.h>
-#include <res/ResourceFactory.h>
+#include <res/EasyFactory.h>
 #include <vkn/MemoryAllocator.h>
 #include <vkn/VulkanMesh.h>
 #include <vkn/VknMeshModder.h>
 namespace idk::vkn
 {
 	class MeshFactory
-		: public ResourceFactory<Mesh>
+		: public EasyFactory<VulkanMesh>
 	{
 	public:
 		MeshFactory();

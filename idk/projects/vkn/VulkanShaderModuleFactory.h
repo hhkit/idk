@@ -5,18 +5,12 @@
 
 namespace idk::vkn
 {
-	class VulkanShaderModuleFactory
-		: public ResourceFactory<ShaderProgram>
-	{
-	public:
-		unique_ptr<ShaderProgram> GenerateDefaultResource() override;
-		unique_ptr<ShaderProgram> Create(PathHandle filepath) override;
-	};
-
 	class VulkanShaderModuleLoader
 		: public IFileLoader
 	{
+	public:
 		ResourceBundle LoadFile(PathHandle filepath) override;
+		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
 	};
 
 }

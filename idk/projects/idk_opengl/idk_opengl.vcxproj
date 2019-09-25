@@ -178,7 +178,7 @@
     <ClInclude Include="resource\OpenGLTextureFactory.h" />
     <ClInclude Include="system\FrameBufferManager.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="program\ShaderProgramFactory.h" />
+    <ClInclude Include="program\GLSLLoader.h" />
     <ClInclude Include="resource\OpenGLMaterialFactory.h" />
     <ClInclude Include="resource\OpenGLTexture.h" />
     <ClInclude Include="system\OpenGLState.h" />
@@ -206,7 +206,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="program\ShaderProgramFactory.cpp" />
+    <ClCompile Include="program\GLSLLoader.cpp" />
     <ClCompile Include="resource\OpenGLBuffer.cpp" />
     <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
     <ClCompile Include="resource\OpenGLTexture.cpp" />

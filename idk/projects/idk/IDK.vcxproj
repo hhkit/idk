@@ -59,6 +59,7 @@
     <ClInclude Include="res\MetaBundle.h" />
     <ClInclude Include="res\ResourceBundle.h" />
     <ClInclude Include="res\ResourceUtils.h" />
+    <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="scene\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />

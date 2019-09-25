@@ -5,14 +5,6 @@
 
 namespace idk::ogl
 {
-	class ShaderProgramFactory
-		: public ResourceFactory<ShaderProgram>
-	{
-	public:
-		unique_ptr<ShaderProgram> GenerateDefaultResource() override;
-		unique_ptr<ShaderProgram> Create() override;
-	};
-
 	class GLSLLoader
 		: public IFileLoader
 	{

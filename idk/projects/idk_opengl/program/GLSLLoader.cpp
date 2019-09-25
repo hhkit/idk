@@ -1,15 +1,10 @@
 #include "pch.h"
-#include "ShaderProgramFactory.h"
+#include "GLSLLoader.h"
 #include <core/Core.h>
 #include <idk_opengl/program/Program.h>
 #include <sstream>
 namespace idk::ogl
 {
-	unique_ptr<ShaderProgram> ShaderProgramFactory::GenerateDefaultResource()
-	{
-		return std::make_unique<ogl::Program>();
-	}
-
 	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath)
 	{
 		auto program = Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>();

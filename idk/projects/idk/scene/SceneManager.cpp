@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include <core/Core.h>
+#include <res/MetaBundle.h>
 #include <scene/SceneFactory.h>
 #include <serialize/serialize.h>
 #include <util/ioutils.h>
@@ -16,23 +17,23 @@ namespace idk
 		{
 			if (elem.scene == activateme)
 			{
-				/*
+				
 				auto paths = Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext);
 				for (auto& path : paths)
 				{
 					auto meta_file = PathHandle(string{ path.GetMountPath() } +".meta");
 					auto meta_stream = meta_file.Open(FS_PERMISSIONS::READ);
-					auto meta = parse_text<MetaFile>(stringify(meta_stream));
+					auto meta = parse_text<MetaBundle>(stringify(meta_stream));
 
-					if (meta.guids[0] == activateme.guid)
+					if (meta.metadatas[0].guid == activateme.guid)
 					{
-						auto scene = Core::GetResourceManager().Emplace<Scene>(activateme.guid, elem.build_index);
+						auto scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(activateme.guid, elem.build_index);
 						auto file_stream = path.Open(FS_PERMISSIONS::READ);
 						parse_text(stringify(file_stream), *scene);
 						return SceneActivateResult::Ok;
 					}
 				}
-				*/
+				
 				return SceneActivateResult::Err_ScenePathNotFound;
 			}
 		}
