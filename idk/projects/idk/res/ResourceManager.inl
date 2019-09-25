@@ -21,7 +21,7 @@ namespace idk
 		else
 		{
 			auto& cb = itr->second;
-			return cb.valid() ? GetDefaultRes<Res>() : *cb.resource;
+			return cb.valid() ? *cb.resource : GetDefaultRes<Res>();
 		};
 	}
 
@@ -156,7 +156,7 @@ namespace idk
 			cb.resource = std::make_unique<Res>(std::forward<Args>(construction_args)...);
 		}
 
-		return RscHandle<Res>{};
+		return RscHandle<Res>{guid};
 	}
 
 	template<typename Res>

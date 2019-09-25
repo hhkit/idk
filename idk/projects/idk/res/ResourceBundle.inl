@@ -27,10 +27,12 @@ namespace idk
 	inline void ResourceBundle::Add(RscHandle<T> handle)
 	{
 		auto& sub_arr = subarrays[BaseResourceID<T>];
-		auto new_ind = sub_arr.index + ++sub_arr.count;
+		auto new_ind = sub_arr.index + sub_arr.count++;
 
+		
 		// make space for new resource
-		std::move_backward(handles.data() + new_ind, handles.data() + handles.size() - 1, handles.data() + handles.size());
+		handles.emplace_back();
+		std::move_backward(handles.data() + new_ind, handles.data() + handles.size() - 1, handles.data() + handles.size() );
 
 		// assign new resource
 		handles[new_ind] = handle;
