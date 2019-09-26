@@ -3,6 +3,7 @@
 #include <gfx/Material.h>
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
+#include <gfx/ShaderGraph_helpers.h>
 #include <regex>
 
 namespace idk::shadergraph
@@ -122,7 +123,7 @@ namespace idk::shadergraph
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, var_name(state.slot_counter++));
             }
 
-            size_t num_slots = tpl.signatures[0].ins.size() + tpl.signatures[0].outs.size();
+			int num_slots = static_cast<int>(tpl.signatures[0].ins.size() + tpl.signatures[0].outs.size());
             if (tpl.names.size() > num_slots) // have custom controls
             {
                 string str = node.control_values;
@@ -200,6 +201,21 @@ namespace idk::shadergraph
         return code;
     }
 
+
+
+	static UniformInstance to_uniform_instance(const Parameter& param)
+	{
+		switch (param.type)
+		{
+		case ValueType::FLOAT: return std::stof(param.default_value);
+		case ValueType::VEC2: return helpers::parse_vec2(param.default_value);
+		case ValueType::VEC3: return helpers::parse_vec3(param.default_value);
+		case ValueType::VEC4: return helpers::parse_vec4(param.default_value);
+		default: throw;
+		}
+	}
+
+
     void Graph::Compile()
     {
         // todo: handle added uniforms
@@ -211,6 +227,8 @@ namespace idk::shadergraph
 
         string code = resolve_node(nodes.at(master_node), state);
         string uniforms = "";
+
+		MaterialInstance inst;
 
         if (state.uniforms.size())
         {
@@ -270,19 +288,27 @@ namespace idk::shadergraph
                 uniforms += std::to_string(i);
                 uniforms += ";\n";
             }
+
+			size_t i = 0;
+			for (const auto& [uniform_name, uniform_type] : state.uniforms)
+			{
+				inst.uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name, to_uniform_instance(parameters[i]));
+			}
         }
 
 		auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
 		auto h_mat = Core::GetResourceManager().Create<Material>();
 		h_mat->BuildShader(shader_template, uniforms, code);
 
+		inst.material = h_mat;
+
 		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
 		{
-			renderer.material_instance.material = h_mat;
+			renderer.material_instance = inst;
 		}
 		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<SkinnedMeshRenderer>())
 		{
-			renderer.material_instance.material = h_mat;
+			renderer.material_instance = inst;
 		}
     }
 
