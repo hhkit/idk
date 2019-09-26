@@ -108,7 +108,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" });
+			auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
 			//auto anim_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5anim" });
 			mesh_rend->mesh = mesh_resources[0].As<Mesh>();
 			animator->SetSkeleton(mesh_resources[1].As<anim::Skeleton>());
