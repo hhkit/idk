@@ -38,7 +38,7 @@ namespace idk
 		handles[new_ind] = handle;
 
 		// push back all subsequent resources
-		for (auto& elem : span<sub_array>{ &sub_arr, subarrays.data() + subarrays.size() })
+		for (auto& elem : span<sub_array>{ &sub_arr + 1, subarrays.data() + subarrays.size() })
 			++elem.index;
 	}
 

@@ -20,7 +20,7 @@ namespace idk::vkn
 		auto glsl = lighting_model->Instantiate(material_uniforms, material_code);
 		auto spirv = GlslToSpirv::spirv(glsl, vk::ShaderStageFlagBits::eFragment);
 		ret = static_cast<bool>(spirv);
-		if (ret)
+		if (ret && spirv)
 		{
 
 			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, *spirv);
