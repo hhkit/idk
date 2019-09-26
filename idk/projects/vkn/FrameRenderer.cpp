@@ -111,8 +111,8 @@ namespace idk::vkn
 			//TODO figure this out
 			string filename = "/assets/shader/mesh.vert";
 			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			if (!actualfile || !rsc.resources.size())
+			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			//if (!actualfile || !rsc.resources.size())
 			{
 
 				vector<buffer_desc> desc{
@@ -122,16 +122,17 @@ namespace idk::vkn
 				};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(actualfile).resources.front().As<ShaderProgram>();
-				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+				_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(filename).resources.front().As<ShaderProgram>();
+				auto& mod = _mesh_renderer_shader_module.as<ShaderModule>();
+				mod.AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
 
 			}
-			else
-			{
-				_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
-			}
+			//else
+			//{
+			//	_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
+			//}
 		}
 		{
 			string filename = "/assets/shader/shadow.frag";
@@ -142,13 +143,13 @@ namespace idk::vkn
 			if(!shader_mod)
 			{
 
-				vector<buffer_desc> desc{
-					BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
-				};
+				//vector<buffer_desc> desc{
+				//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
+				//};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
 				shader_mod = Core::GetResourceManager().LoadFile(filename).resources.front().As<ShaderProgram>();
-				shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
+				//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
 
@@ -391,6 +392,7 @@ namespace idk::vkn
 			                0,0,0,1
 		}* cam.projection_matrix;
 		;
+		auto mesh_mod = GetMeshRendererShaderModule();
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
 		for (auto& ptr_dc : draw_calls)
@@ -398,8 +400,10 @@ namespace idk::vkn
 			auto& dc = *ptr_dc;
 			//Force pipeline creation
 			shaders.resize(0);
-			shaders.emplace_back(GetMeshRendererShaderModule());
+			shaders.emplace_back(mesh_mod);
 			auto sprog = (cam.is_shadow)? _shadow_shader_module: dc.material_instance.material->GetShaderProgram();
+			auto& fprog = sprog.as<ShaderModule>();
+			auto& vprog = mesh_mod.as<ShaderModule>();
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
@@ -646,7 +650,11 @@ namespace idk::vkn
 		cmd_buffer.begin(begin_info, dispatcher);
 		std::array<float, 4> a{};
 		//TODO grab the appropriate framebuffer and begin renderpass
-		vk::ClearValue v{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(state.camera.clear_color) } };
+		std::array<float, 4> depth_clear{1.0f,1.0f ,1.0f ,1.0f };
+		vk::ClearValue v[]{ 
+			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(state.camera.clear_color) }},
+			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
+		};
 		
 		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
@@ -666,7 +674,7 @@ namespace idk::vkn
 		vk::RenderPassBeginInfo rpbi
 		{
 			GetRenderPass(state,view), frame_buffer,
-			render_area,1,&v
+			render_area,hlp::arr_count(v),std::data(v)
 		};
 
 

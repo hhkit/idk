@@ -337,9 +337,9 @@ namespace idk
 					info.signalSemaphoreCount = 1;
 					info.pSignalSemaphores = &render_complete_semaphore;
 
-					fd->edt_cBuffer->end(vknViews.Dispatcher());
 
-					vkn::hlp::TransitionImageLayout(*fd->edt_cBuffer, vknViews.GraphicsQueue(), editorControls.edt_frames[editorControls.edt_frameIndex].edt_backbuffer, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+					vkn::hlp::TransitionImageLayout(true,*fd->edt_cBuffer, vknViews.GraphicsQueue(), editorControls.edt_frames[editorControls.edt_frameIndex].edt_backbuffer, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+					fd->edt_cBuffer->end(vknViews.Dispatcher());
 
 					//Submit to queue
 					err = vknViews.GraphicsQueue().submit(1, &info, *fd->edt_fence, vknViews.Dispatcher());

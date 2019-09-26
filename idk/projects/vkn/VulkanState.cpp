@@ -972,7 +972,11 @@ namespace idk::vkn
 			auto& render_state = view_->CurrRenderState();
 			auto& command_buffer = *m_pri_commandbuffers[current_frame];
 
-			vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
+			vk::ClearValue clearcolor[] = {
+				vk::ClearValue {vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } },
+				vk::ClearValue { vk::ClearColorValue{ std::array<float,4>{1.0f,1.0f,1.0f,1.0f} }}
+			};
+			;
 			//Get default framebuffer
 			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknFrameBuffer>();
 			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknFrameBuffer>().Buffer();
@@ -982,8 +986,8 @@ namespace idk::vkn
 				vkn_fb.GetRenderPass()
 				,frame_buffer
 				,vk::Rect2D{ vk::Offset2D{}, m_swapchain->extent }
-				,1
-				,&clearcolor
+				,s_cast<uint32_t>(std::size(clearcolor))
+				,std::data(clearcolor)
 			};
 			vk::CommandBufferBeginInfo begin_info
 			{
@@ -1182,8 +1186,8 @@ namespace idk::vkn
 				m_device->resetFences(1, &*prevFence, dispatcher);
 				//->resetFences(1, &*current_signal.master_fence, dispatcher);
 
-				hlp::TransitionImageLayout(false, command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-				hlp::TransitionImageLayout(false, command_buffer, m_graphics_queue, m_swapchain->m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal);
+				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal);
 
 
 				vk::CommandBufferBeginInfo begin_info
@@ -1194,8 +1198,8 @@ namespace idk::vkn
 
 				//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
 
-				command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
-				command_buffer.begin(begin_info);
+				//command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
+				//command_buffer.begin(begin_info);
 
 				vk::ImageBlit imgBlit{};
 
@@ -1227,6 +1231,7 @@ namespace idk::vkn
 		//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR);
 		if (was_blit)
 		{
+			hlp::TransitionImageLayout(true,command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 			command_buffer.end();
 			vk::CommandBuffer cmds[] =
 			{
@@ -1241,7 +1246,6 @@ namespace idk::vkn
 				,1,&readySemaphores
 			};
 
-			hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_sc_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
