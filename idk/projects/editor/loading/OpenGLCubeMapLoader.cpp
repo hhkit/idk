@@ -55,6 +55,7 @@ namespace idk
 
 	ResourceBundle OpenGLCubeMapLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
+		assert(false);
 		return ResourceBundle();
 	}
 

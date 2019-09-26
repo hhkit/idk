@@ -70,7 +70,7 @@ REFLECT_END()
  *========================================================================*/
 
 REFLECT_BEGIN(idk::SerializedMeta, "SerializedMetadata")
-REFLECT_VARS(guid, name, metadata)
+REFLECT_VARS(guid, name, t_hash, metadata)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::MetaBundle, "MetaBundle")

@@ -126,7 +126,8 @@ namespace idk
 
 	ResourceBundle OpenGLFBXLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		return ResourceBundle();
+		/* need to reassign guids */
+		return LoadFile(path_to_resource);
 	}
 
 }
