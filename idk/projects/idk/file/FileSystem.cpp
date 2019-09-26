@@ -104,7 +104,7 @@ namespace idk {
 		}
 	}
 
-	PathHandle FileSystem::GetEntry(string_view mountPath) const
+	PathHandle FileSystem::GetPath(string_view mountPath) const
 	{
 		PathHandle ret = GetFile(mountPath);
 		if (!ret)
