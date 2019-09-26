@@ -30,7 +30,7 @@ namespace idk
 		vector<unsigned> indices;
 		unsigned num_vertices = 0, num_indices = 0;
 
-		fbx_loader_detail::BoneSet bones_set{ fbx_loader_detail::BoneData{ai_scene->mRootNode->mName.data} };
+		fbx_loader_detail::BoneSet bones_set{ };
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
 

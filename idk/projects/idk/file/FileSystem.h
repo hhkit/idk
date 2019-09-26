@@ -16,7 +16,7 @@ namespace idk
 
 		// Files/Directory Getters
 		// =====================================================================================================
-		PathHandle			GetPath					(string_view mountPath)				const;	// Tries GetFile then GetDir
+		PathHandle			GetEntry					(string_view mountPath)				const;	// Tries GetFile then GetDir
 		PathHandle			GetFile					(string_view mountPath)				const;
 		PathHandle			GetDir					(string_view mountPath)				const;
 		
@@ -25,7 +25,7 @@ namespace idk
 													 string_view extension, 
 													 FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS)		const;
 
-		vector<PathHandle>  GetPaths				(string_view mountPath,
+		vector<PathHandle>  GetEntries				(string_view mountPath,
 													 FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::DIR, string_view ext = string_view{}) const;
 
 		bool		Exists		(string_view mountPath)		const;

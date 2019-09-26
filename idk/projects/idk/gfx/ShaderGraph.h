@@ -19,7 +19,6 @@ namespace idk::shadergraph
     public:
         Guid master_node;
         hash_table<Guid, Node> nodes;
-        vector<Value> values;
         vector<Link> links;
         vector<Parameter> parameters;
 
