@@ -62,7 +62,7 @@ namespace idk
         {
             // Align output slots to the right edge of the node.
             ImGuiID max_width_id = ImGui::GetID("output-max-title-width");
-            float offset = (storage->GetFloat(max_width_id, title_size.x) /*+ style.ItemSpacing.x*/) - title_size.x;
+            float offset = storage->GetFloat(max_width_id, title_size.x) - title_size.x;
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
         }
 
@@ -238,7 +238,6 @@ namespace idk
             if (is_param_node)
                 title = "Parameter";
 
-            const auto suffix_w = ImGui::CalcTextSize("(S)").x; // all slot names will show suffix (only during render)
             auto title_size = ImGui::CalcTextSize(title.c_str());
             float input_names_width = 0;
             float output_names_width = 0;
@@ -252,7 +251,8 @@ namespace idk
             {
                 auto& param = _graph->parameters[std::stoi(node.name.data() + 1)];
                 const auto& slot_name = param.name;
-                title_size.x = std::max(title_size.x, ImGui::CalcTextSize(slot_name.c_str()).x + suffix_w);
+                auto slot_w = ImGui::CalcTextSize(slot_name.c_str()).x + ImGui::CalcTextSize(slot_suffix(param.type)).x;
+                title_size.x = std::max(title_size.x, slot_w);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
                 draw_slot(slot_name.c_str(), param.type);
@@ -268,13 +268,19 @@ namespace idk
                 for (auto& slot_name : tpl.names)
                 {
                     if (i < node.input_slots.size())
-                        input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
+                    {
+                        const auto suffix_w = ImGui::CalcTextSize(slot_suffix(node.input_slots[i].type)).x;
+                        input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x + suffix_w);
+                    }
                     else if (i < num_slots)
-                        output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
+                    {
+                        const auto suffix_w = ImGui::CalcTextSize(slot_suffix(node.output_slots[i - node.input_slots.size()].type)).x;
+                        output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x + suffix_w);
+                    }
+                    else
+                        break;
                     ++i;
                 }
-                if (input_names_width > 0) input_names_width += suffix_w;
-                if (output_names_width > 0) output_names_width += suffix_w;
                 title_size.x = std::max(title_size.x, input_names_width + output_names_width);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
