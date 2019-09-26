@@ -77,9 +77,9 @@ namespace idk::vkn
 
 	VknFrameBuffer::~VknFrameBuffer()
 	{
-		for (auto& elem : meta.textures)
-			if(elem)
-				Core::GetResourceManager().Free(elem);
+		//for (auto& elem : meta.textures)
+		//	if(elem)
+		//		Core::GetResourceManager().Free(elem);
 		
 		//glDeleteRenderbuffers(1, &depthbuffer);
 		buffer.reset();

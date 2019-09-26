@@ -93,7 +93,7 @@ struct DescriptorManager :IDescriptorManager
 			VkDescriptorImageInfo desc_image[1] = {};
 			desc_image[0].sampler = sampler;
 			desc_image[0].imageView = img;
-			desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ;
+			desc_image[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL ;
 			VkWriteDescriptorSet write_desc[1] = {};
 			write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			write_desc[0].dstSet = set;
@@ -340,7 +340,77 @@ static void CreateOrResizeBuffer(VkBuffer& buffer, VkDeviceMemory& buffer_memory
 	check_vk_result(err);
 	p_buffer_size = new_size;
 }
+/*
+void TransitionImageLayout(vk::CommandBuffer command_buffer, ImTextureID tex, vk::ImageLayout in_layout, vk::ImageLayout out_layout)
+{
+	vk::ImageView img = *(reinterpret_cast<vk::ImageView*>(&tex));
 
+	vk::AttachmentDescription colorAttachment
+	{
+		vk::AttachmentDescriptionFlags{}
+		,vk::Format::eR8G8B8A8Unorm
+		,vk::SampleCountFlagBits::e1
+		,vk::AttachmentLoadOp::eLoad
+		,vk::AttachmentStoreOp::eDontCare
+		,vk::AttachmentLoadOp::eLoad
+		,vk::AttachmentStoreOp::eDontCare
+		,in_layout
+		,out_layout
+	};
+	vk::AttachmentReference colorAttachmentRef
+	{
+		0
+		,in_layout
+	};
+	vk::SubpassDescription subpass
+	{
+		vk::SubpassDescriptionFlags{}
+		,vk::PipelineBindPoint::eGraphics
+		,0,nullptr
+		,1,&colorAttachmentRef
+	};
+
+	vk::SubpassDependency dependency
+	{
+		VK_SUBPASS_EXTERNAL//src
+		,0U				   //dest
+		,vk::PipelineStageFlagBits::eColorAttachmentOutput
+		,vk::PipelineStageFlagBits::eColorAttachmentOutput
+		,vk::AccessFlags{}
+		,vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite
+	};
+	vk::RenderPassCreateInfo renderPassInfo
+	{
+		vk::RenderPassCreateFlags{}
+		,1,&colorAttachment
+		,1,&subpass
+		,1,&dependency
+	};
+	auto device = vk::Device{ g_VulkanInitInfo.Device };
+	auto rp = device.createRenderPassUnique(renderPassInfo);
+
+	auto limits = vk::PhysicalDevice{ g_VulkanInitInfo.PhysicalDevice }.getProperties().limits;
+
+	vk::FramebufferCreateInfo framebufferInfo = {};
+	framebufferInfo.renderPass = *rp;
+	framebufferInfo.attachmentCount = 1;
+	framebufferInfo.pAttachments = &img;
+	framebufferInfo.width = 1;
+	framebufferInfo.height = 1;
+	framebufferInfo.layers = 1;
+
+	auto buffer = device.createFramebufferUnique(framebufferInfo);
+
+	vk::RenderPassBeginInfo info
+	{
+		*rp,
+		*buffer,
+		vk::Rect2D{{0,0},{1,1}}
+	};
+	
+	command_buffer.beginRenderPass(info, vk::SubpassContents::eInline);
+	command_buffer.endRenderPass();
+}*/
 static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkCommandBuffer command_buffer, ImGui_ImplVulkanH_FrameRenderBuffers* rb, int fb_width, int fb_height)
 {
 
@@ -363,6 +433,11 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkCommandBu
 					req_ds++;
 				}
 			}
+		//Doesn't work. Just an image view is insufficient.
+		///for (auto&& tex : textures)
+		///{
+		///	TransitionImageLayout(command_buffer, tex, vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+		///}
 
 		ds_manager->ReserveDescriptorSets(g_DescriptorSetLayout, req_ds);
 		texture_sets.clear();
@@ -613,7 +688,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 		VkDescriptorImageInfo desc_image[1] = {};
 		desc_image[0].sampler = g_FontSampler;
 		desc_image[0].imageView = g_FontView;
-		desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		desc_image[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		VkWriteDescriptorSet write_desc[1] = {};
 		write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write_desc[0].dstSet = g_DescriptorSet;
@@ -688,7 +763,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 		use_barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		use_barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		use_barrier[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-		use_barrier[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		use_barrier[0].newLayout = VK_IMAGE_LAYOUT_GENERAL;//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		use_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		use_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		use_barrier[0].image = g_FontImage;
