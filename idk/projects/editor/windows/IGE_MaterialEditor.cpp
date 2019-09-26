@@ -4,6 +4,7 @@
 #include <editor/IDE.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <gfx/ShaderGraph.h>
+#include <gfx/ShaderGraph_helpers.h>
 #include <regex>
 #include <filesystem>
 
@@ -40,73 +41,6 @@ namespace idk
         default: throw;
         }
     }
-
-    string default_value(ValueType type)
-    {
-        switch (type)
-        {
-        case ValueType::FLOAT:      return "0";
-        case ValueType::VEC2:       return "0,0";
-        case ValueType::VEC3:       return "0,0,0";
-        case ValueType::VEC4:       return "0,0,0,0";
-        case ValueType::SAMPLER2D:  return string(Guid());
-        default: throw;
-        }
-    }
-
-    vec2 parse_vec2(const string& val)
-    {
-        vec2 v;
-        std::smatch matches;
-        if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-        {
-            v[0] = std::stof(matches[1]);
-            v[1] = std::stof(matches[2]);
-        }
-        return v;
-    }
-    string serialize_value(const vec2& vec)
-    {
-        return std::to_string(vec[0]) + ',' + std::to_string(vec[1]);
-    }
-
-    vec3 parse_vec3(const string& val)
-    {
-        vec3 v;
-        std::smatch matches;
-        if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-        {
-            v[0] = std::stof(matches[1]);
-            v[1] = std::stof(matches[2]);
-            v[2] = std::stof(matches[3]);
-        }
-        return v;
-    }
-    string serialize_value(const vec3& vec)
-    {
-        return std::to_string(vec[0]) + ',' + std::to_string(vec[1]) + ',' + std::to_string(vec[2]);
-    }
-
-    vec4 parse_vec4(const string& val)
-    {
-        vec4 v;
-        std::smatch matches;
-        if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-        {
-            v[0] = std::stof(matches[1]);
-            v[1] = std::stof(matches[2]);
-            v[2] = std::stof(matches[3]);
-            v[3] = std::stof(matches[4]);
-        }
-        return v;
-    }
-    string serialize_value(const vec4& vec)
-    {
-        return std::to_string(vec[0]) + ',' + std::to_string(vec[1]) + ',' + std::to_string(vec[2]) + ',' + std::to_string(vec[3]);
-    }
-
-
-
 
     bool draw_slot(const char* title, int kind)
     {
@@ -252,23 +186,23 @@ namespace idk
         }
         case ValueType::VEC2:
         {
-            vec2 v = parse_vec2(slot.value);
+            vec2 v = helpers::parse_vec2(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 2, v.values))
-                slot.value = serialize_value(v);
+                slot.value = helpers::serialize_value(v);
             break;
         }
         case ValueType::VEC3:
         {
-            vec3 v = parse_vec3(slot.value);
+            vec3 v = helpers::parse_vec3(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 3, v.values))
-                slot.value = serialize_value(v);
+                slot.value = helpers::serialize_value(v);
             break;
         }
         case ValueType::VEC4:
         {
-            vec4 v = parse_vec4(slot.value);
+            vec4 v = helpers::parse_vec4(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 4, v.values))
-                slot.value = serialize_value(v);
+                slot.value = helpers::serialize_value(v);
             break;
         }
 
@@ -281,7 +215,7 @@ namespace idk
     {
         auto& node_in = _graph->nodes[guid];
         auto in_type = node_in.input_slots[slot_in].type;
-        node_in.input_slots[slot_in].value = default_value(in_type);
+        node_in.input_slots[slot_in].value = helpers::default_value(in_type);
     }
 
 
@@ -407,7 +341,7 @@ namespace idk
                             if (next_value.empty())
                                 final_control_values += (next_value = "0,0,0,1") + '|';
 
-                            vec4 v = parse_vec4(next_value);
+                            vec4 v = helpers::parse_vec4(next_value);
                             if (ImGui::ColorButton(("##" + std::to_string(i)).c_str(), v, 0, ImVec2(w, 0)))
                             {
                                 ImGui::OpenPopup("picker");
@@ -418,7 +352,7 @@ namespace idk
                                 ImGuiColorEditFlags picker_flags = ImGuiColorEditFlags__DisplayMask | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf;
                                 ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 12.0f); // Use 256 + bar sizes?
                                 if (ImGui::ColorPicker4("##picker", v.values, picker_flags, &ImGui::GetCurrentContext()->ColorPickerRef.x))
-                                    final_control_values += serialize_value(v) + "|";
+                                    final_control_values += helpers::serialize_value(v) + "|";
 
                                 ImGui::EndPopup();
                             }
@@ -478,7 +412,7 @@ namespace idk
 
         auto sig = NodeTemplate::GetTable().at(name).signatures[0];
         for (auto in : sig.ins)
-            node.input_slots.push_back({ in, default_value(in) });
+            node.input_slots.push_back({ in, helpers::default_value(in) });
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 

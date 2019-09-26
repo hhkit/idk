@@ -136,6 +136,8 @@ namespace idk
 
 			if (curr_bone._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[curr_bone._parent], true);
+			else
+				obj->GetComponent<Transform>()->SetParent(GetGameObject(), true);
 
 			_child_objects.push_back(obj);
 		}
