@@ -68,7 +68,7 @@ void main()
 	// O B 
 	// Binv O inv  // inv(OB)
 	// Oinv transpose * B inv tranpose  // tranpose(inv(OB))
-	//mat4 nml_transform = ObjectMat4s.normal_transform * transpose(inverse(b_transform));
+	
 	mat4 nml_transform = transpose(inverse(resultant));
 	vs_out.normal   = vec3( nml_transform * vec4(normal, 0.0));
 	vs_out.uv       = uv;

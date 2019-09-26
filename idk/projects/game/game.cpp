@@ -100,7 +100,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		go->GetComponent<Transform>()->scale /= 200;// 200.f;
+		// go->GetComponent<Transform>()->scale /= 200;// 200.f;
 		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
 		auto animator = go->AddComponent<AnimationController>();
@@ -109,7 +109,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
 			auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
-			//auto anim_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5anim" });
+			//auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" });
 			mesh_rend->mesh = mesh_resources[0].As<Mesh>();
 			animator->SetSkeleton(mesh_resources[1].As<anim::Skeleton>());
 			animator->AddAnimation(mesh_resources[2].As<anim::Animation>());
@@ -134,7 +134,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
 		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
-		auto mesh_rend = go->AddComponent<MeshRenderer>();
+	 auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
@@ -224,7 +224,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		mesh_rend->material_instance.material = h_mat;
 		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
-
+	
 	if(0)
 	for (int i = 2; i < 5; ++ i)
 	{

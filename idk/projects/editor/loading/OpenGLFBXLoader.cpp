@@ -14,26 +14,25 @@ namespace idk
 
 		FileResources retval;
 
-		aiPropertyStore* properties = aiCreatePropertyStore();
-		aiSetImportPropertyInteger(properties, "PP_PTV_NORMALIZE", 1);
-
 		Assimp::Importer importer;
-		const aiScene* ai_scene = aiImportFileExWithProperties(// importer.ReadFile( path_to_resource.GetFullPath().data(),
-																path_to_resource.GetFullPath().data(),
-																aiProcess_Triangulate |		// Triangulates non-triangles
-																aiProcess_GenSmoothNormals |	// Generates missing normals
-																aiProcess_FlipUVs |
-																aiProcess_JoinIdenticalVertices, nullptr, properties);;
-
+		const aiScene* ai_scene = importer.ReadFile(//aiImportFileExWithProperties(// importer.ReadFile(
+													path_to_resource.GetFullPath().data(),
+													aiProcess_Triangulate |		// Triangulates non-triangles
+													aiProcess_GenSmoothNormals |	// Generates missing normals
+													aiProcess_FlipUVs |
+													aiProcess_JoinIdenticalVertices);
+		
 		if (ai_scene == nullptr)
 			return retval;
 		auto mesh_handle = Core::GetResourceManager().Create<ogl::OpenGLMesh>();
 
+		vec3 min_pos{ INT_MAX,INT_MAX ,INT_MAX }, max_pos{ INT_MIN,INT_MIN ,INT_MIN };
 		vector<Vertex> vertices;
 		vector<unsigned> indices;
 		unsigned num_vertices = 0, num_indices = 0;
 
-		fbx_loader_detail::BoneSet bones_set{ };
+		fbx_loader_detail::BoneSet bone_set;
+		fbx_loader_detail::MeshSet mesh_set;
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
 		
@@ -73,6 +72,8 @@ namespace idk
 											 ,vec3{ normal.x, normal.y, normal.z }
 											 ,vec2{ text.x, text.y } 
 											});
+
+				updateBounds(vertices.back().pos, min_pos, max_pos);
 			}
 
 			// Initialize indices
@@ -89,12 +90,39 @@ namespace idk
 			for (size_t k = 0; k < ai_mesh->mNumBones; k++)
 			{
 				auto curr_bone = ai_mesh->mBones[k];
-				bones_set.emplace(curr_bone->mName.data, fbx_loader_detail::initMat4(curr_bone->mOffsetMatrix));
+				bone_set.emplace(curr_bone->mName.data, fbx_loader_detail::initMat4(curr_bone->mOffsetMatrix));
 			}
+
+			// Add this mesh into the set
+			mesh_set.emplace(ai_scene->mMeshes[i]->mName.data);
 		}
 
-		// Loads the skeleton heirarchy
-		fbx_loader_detail::initBoneHierarchy(ai_scene->mRootNode, bones_set, bones_table, bones);
+		// Generate a graph of all the aiNodes.
+		// The graph tags each node with a type and makes things a lot easier when parsing data.
+		fbx_loader_detail::AssimpNode root_node;
+		fbx_loader_detail::generateNodeGraph(ai_scene->mRootNode, root_node, bone_set, mesh_set);
+		
+		// Computing the matrix needed to normalize the mesh
+		vec3 translate_vec = (max_pos + min_pos) * 0.5f;
+		mat4 translate_mat = translate(-translate_vec);
+
+		vec3 extents = max_pos - min_pos;
+		float scale_factor = std::max(extents.x, std::max(extents.y, extents.z));
+		vec3 scale_vec;
+		scale_vec.x = 2.0f / scale_factor;
+		scale_vec.y = 2.0f / scale_factor;
+		scale_vec.z = 2.0f / scale_factor;
+		mat4 scale_mat = mat4{ scale(scale_vec) };
+
+		mat4 normalize_mat = scale_mat * translate_mat;// *;
+		mat4 inverse_normalize_mat = translate(translate_vec)* mat4 { scale(vec3{ scale_factor / 2.0f, scale_factor / 2.0f , scale_factor / 2.0f }) };
+
+		fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
+
+		// Loads the skeleton heirarchy.
+		// Passing the inverse of the normalization as the bone transformations happen in the un-normalized mesh space.
+		// The inverse_normalize_mat is added to the bone_offset
+		fbx_loader_detail::initBoneHierarchy(root_node, bones_table, bones, inverse_normalize_mat);
 
 		// Loads all the vertex bone weights and indices
 		fbx_loader_detail::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
@@ -109,7 +137,9 @@ namespace idk
 
 		skeleton = anim::Skeleton{ bones, bones_table };
 
-		mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation);
+		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
+		mat4 skeleton_transform = normalize_mat * 
+			fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.resources.emplace_back(skeleton_handle);
 
@@ -120,8 +150,7 @@ namespace idk
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 		
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
-			fbx_loader_detail::initAnimNodes(ai_scene->mRootNode, ai_scene->mAnimations[i], bones_set, anim_clip);
-		
+			fbx_loader_detail::initAnimNodes(root_node, ai_scene->mAnimations[i], anim_clip);
 			retval.resources.emplace_back(anim_clip_handle);
 		}
 		
@@ -136,6 +165,25 @@ namespace idk
 		return Create(path_to_resource);
 
 		// return FileResources();
+	}
+
+	void OpenGLFBXLoader::updateBounds(const vec3& pos, vec3& minPos, vec3& maxPos) const
+	{
+		// Update the bounding box size.
+		if (pos.x < minPos.x)
+			minPos.x = pos.x;
+		if (pos.x > maxPos.x)
+			maxPos.x = pos.x;
+
+		if (pos.y < minPos.y)
+			minPos.y = pos.y;
+		if (pos.y > maxPos.y)
+			maxPos.y = pos.y;
+
+		if (pos.z < minPos.z)
+			minPos.z = pos.z;
+		if (pos.z > maxPos.z)
+			maxPos.z = pos.z;
 	}
 	
 }
