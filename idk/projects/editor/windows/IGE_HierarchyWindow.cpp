@@ -2,7 +2,7 @@
 //@file		IGE_HierarchyWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		16 SEPT 2019
+//@date		27 SEPT 2019
 //@brief	
 
 /*
@@ -201,41 +201,28 @@ namespace idk {
 					}
 				}
 
-				if (hasBeenSelected) {
-					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
+				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
+					if (hasBeenSelected) {
 						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-
 					}
-					else { //Select as normal
-						selected_gameObjects.clear();
+					else {
 						selected_gameObjects.push_back(handle);
 					}
 
 				}
 				else {
-
-					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Multiselect
-						selected_gameObjects.push_back(handle);
-
-					}
-					else {
-						selected_gameObjects.clear();
-						selected_gameObjects.push_back(handle);
-					}
+					//Select as normal
+					selected_gameObjects.clear();
+					selected_gameObjects.push_back(handle);
 				}
+
 				if (ImGui::IsMouseDoubleClicked(0)) {
 					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 				}
 			}
 
-			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
-			{
-				ImGui::SetDragDropPayload("id", &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
-				ImGui::Text("Drag to another gameobject to parent.");
-				ImGui::Text("Drag to self to unparent.");
-				ImGui::EndDragDropSource();
-			}
-			//Create a drag drop payload on selected gameobjects.
+			
+			//If the drag drops target on to the handle...
 			if (ImGui::BeginDragDropTarget()) {
 				if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("id")) {
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
@@ -245,18 +232,39 @@ namespace idk {
 							if (i == handle) //do not parent self
 								continue;
 
-							if (i == handle->GetComponent<Transform>()->parent)
+							Handle<GameObject> parentCheck = handle->GetComponent<Transform>()->parent; //Check for if im parenting to my own children
+							bool isParentingToChild = false;
+							while (parentCheck) {
+								if (i == parentCheck) {
+									isParentingToChild = true;
+									break;
+								}
+								parentCheck = parentCheck->GetComponent<Transform>()->parent;
+							}
+							if (isParentingToChild) {
 								continue;
+							}
 
-
-							i->GetComponent<Transform>()->SetParent(handle, true);
+							//If im draging to my parent, unparent
+							if (i->GetComponent<Transform>()->parent == handle) {
+								i->GetComponent<Transform>()->parent = Handle <GameObject>{};
+							}
+							else { //Else parent normally
+								i->GetComponent<Transform>()->SetParent(handle, true);
+							}
 						}
 					}
 
 				}
 				ImGui::EndDragDropTarget();
 			}
-
+			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
+			{
+				ImGui::SetDragDropPayload("id", &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+				ImGui::Text("Drag to another gameobject to parent.");
+				ImGui::Text("Drag to parent to unparent.");
+				ImGui::EndDragDropSource();
+			}
 			if (isTreeOpen) {
 
 				ImGui::TreePop();
