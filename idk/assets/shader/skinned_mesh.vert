@@ -66,7 +66,7 @@ void main()
 
 	vs_out.normal   = vec3(ObjectMat4s.normal_transform 
                     * b_transform
-                    * vec4(normal, 1.0));
+                    * vec4(normal, 0.0));
 	vs_out.uv       = uv;
 	gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
  
