@@ -123,7 +123,7 @@ namespace idk
 
 		if constexpr (has_tag_v<RegisterMe, MetaTag>)
 			ptr->_dirtymeta = true;
-		if constexpr (has_tag_v<Resource, Saveable>)
+		if constexpr (has_tag_v<RegisterMe, Saveable>)
 		{
 			ptr->Dirty();
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
@@ -148,7 +148,7 @@ namespace idk
 
 		auto handle = RscHandle<RegisterMe>{ guid };
 		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
-		if constexpr (has_tag_v<Resource, Saveable>)
+		if constexpr (has_tag_v<RegisterMe, Saveable>)
 		{
 			ptr->Dirty();
 			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
