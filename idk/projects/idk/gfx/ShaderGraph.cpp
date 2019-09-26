@@ -2,6 +2,7 @@
 #include "ShaderGraph.h"
 #include <gfx/Material.h>
 #include <gfx/MeshRenderer.h>
+#include <anim/SkinnedMeshRenderer.h>
 #include <regex>
 
 namespace idk::shadergraph
@@ -276,6 +277,10 @@ namespace idk::shadergraph
 		h_mat->BuildShader(shader_template, uniforms, code);
 
 		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
+		{
+			renderer.material_instance.material = h_mat;
+		}
+		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<SkinnedMeshRenderer>())
 		{
 			renderer.material_instance.material = h_mat;
 		}
