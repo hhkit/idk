@@ -5,6 +5,7 @@
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/ShaderGraph_helpers.h>
+#include <editor/widgets/InputResource.h>
 #include <regex>
 #include <filesystem>
 
@@ -24,7 +25,7 @@ namespace idk
         0xff6e9437,
         0xff30be6a,
         0xff50e599,
-        0xffba7b37
+        0xffba7bd7
     };
 
 
@@ -37,7 +38,7 @@ namespace idk
         case ValueType::VEC2:       return "(2)";
         case ValueType::VEC3:       return "(3)";
         case ValueType::VEC4:       return "(4)";
-        case ValueType::SAMPLER2D:  return "(S)";
+        case ValueType::SAMPLER2D:  return "(T)";
         default: throw;
         }
     }
@@ -665,12 +666,16 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 1000, 320 });
-        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::BeginPopupContextWindow())
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered())
+            ImGui::OpenPopup("nodes_context_menu");
+        if (ImGui::IsPopupOpen("nodes_context_menu"))
+            ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
+        if (ImGui::BeginPopup("nodes_context_menu"))
         {
             auto str = draw_nodes_context_menu();
             if (str.size())
             {
+                ImGui::CloseCurrentPopup();
                 auto pos = (ImGui::GetWindowPos() - window_pos - _canvas.offset) / _canvas.zoom;
                 addNode(str, pos);
                 // pos = windowpos + nodepos * zoom + offset
@@ -827,7 +832,7 @@ namespace idk
                 if (ImGui::MenuItem("Vec2"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
                 if (ImGui::MenuItem("Vec3"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
                 if (ImGui::MenuItem("Vec4"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
-                if (ImGui::MenuItem("Sampler2D")) _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
+                if (ImGui::MenuItem("Texture"))   _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
                 ImGui::EndPopup();
             }
 
@@ -850,7 +855,10 @@ namespace idk
                 ImGui::BeginGroup();
 
                 strcpy_s(buf, param.name.c_str());
-                if (ImGui::InputText(string(param.type.to_string()).c_str(), buf, 32))
+                string label{ param.type.to_string() };
+                if (param.type == ValueType::SAMPLER2D)
+                    label = "TEXTURE";
+                if (ImGui::InputText(label.c_str(), buf, 32))
                 {
                     param.name = buf;
                 }
@@ -859,59 +867,38 @@ namespace idk
                 {
                 case ValueType::FLOAT:
                 {
-                    float f = std::stof(param.default_value);
+                    float f = helpers::parse_float(param.default_value);
                     if (ImGui::DragFloat("Default", &f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f);
-                    }
+                        param.default_value = helpers::serialize_value(f);
                     break;
                 }
                 case ValueType::VEC2:
                 {
-                    float f[2]{ 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                    }
-                    if (ImGui::DragFloat3("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
-                    }
+                    vec2 v = helpers::parse_vec2(param.default_value);
+                    if (ImGui::DragFloat3("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
                     break;
                 }
                 case ValueType::VEC3:
                 {
-                    float f[3]{ 0, 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                        f[2] = std::stof(matches[3]);
-                    }
-                    if (ImGui::DragFloat3("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
-                    }
+                    vec3 v = helpers::parse_vec3(param.default_value);
+                    if (ImGui::DragFloat3("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
                     break;
                 }
                 case ValueType::VEC4:
                 {
-                    float f[4]{ 0, 0, 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                        f[2] = std::stof(matches[3]);
-                        f[3] = std::stof(matches[4]);
-                    }
-                    if (ImGui::DragFloat4("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]) + ',' + std::to_string(f[3]);
-                    }
+                    vec4 v = helpers::parse_vec4(param.default_value);
+                    if (ImGui::DragFloat4("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
+                    break;
+                }
+                case ValueType::SAMPLER2D:
+                {
+                    RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
+                    PathHandle path;
+                    if (ImGuidk::InputResourceEx("Default", &path, span<const char* const>(RscExtensions<Texture>)))
+                        param.default_value = helpers::serialize_value(Core::GetResourceManager().LoadFile(path)[0].As<Texture>());
                     break;
                 }
                 default:

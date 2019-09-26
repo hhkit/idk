@@ -18,6 +18,17 @@ namespace idk::shadergraph::helpers
 		}
 	}
 
+
+    float parse_float(const string& val)
+    {
+        return std::stof(val);
+    }
+    string serialize_value(float vec)
+    {
+        return std::to_string(vec);
+    }
+
+
 	vec2 parse_vec2(const string& val)
 	{
 		vec2 v;
@@ -29,11 +40,11 @@ namespace idk::shadergraph::helpers
 		}
 		return v;
 	}
-
-	string serialize_value(const vec2& vec)
+	string serialize_value(vec2 vec)
 	{
 		return std::to_string(vec[0]) + ',' + std::to_string(vec[1]);
 	}
+
 
 	vec3 parse_vec3(const string& val)
 	{
@@ -47,11 +58,11 @@ namespace idk::shadergraph::helpers
 		}
 		return v;
 	}
-
 	string serialize_value(const vec3& vec)
 	{
 		return std::to_string(vec[0]) + ',' + std::to_string(vec[1]) + ',' + std::to_string(vec[2]);
 	}
+
 
 	vec4 parse_vec4(const string& val)
 	{
@@ -66,10 +77,19 @@ namespace idk::shadergraph::helpers
 		}
 		return v;
 	}
-
 	string serialize_value(const vec4& vec)
 	{
 		return std::to_string(vec[0]) + ',' + std::to_string(vec[1]) + ',' + std::to_string(vec[2]) + ',' + std::to_string(vec[3]);
 	}
+
+
+    RscHandle<Texture> parse_sampler2d(const string& val)
+    {
+        return RscHandle<Texture>(Guid(val));
+    }
+    string serialize_value(RscHandle<Texture> tex)
+    {
+        return string(tex.guid);
+    }
 
 }

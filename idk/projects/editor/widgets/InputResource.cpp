@@ -4,7 +4,7 @@
 
 namespace idk
 {
-    bool ImGuidk::InputResourceEx(const char* label, idk::PathHandle* handle, idk::span<const char*> accepted_extensions)
+    bool ImGuidk::InputResourceEx(const char* label, idk::PathHandle* handle, idk::span<const char* const> accepted_extensions)
     {
         using namespace ImGui;
 
@@ -14,7 +14,6 @@ namespace idk
 
         auto& style = GetStyle();
 
-        const char* text = handle->GetMountPath().data() + sizeof("/assets/") - 1;
         const ImGuiID id = window->GetID(label);
 
         const ImVec2 label_size = CalcTextSize(label, NULL, true);
@@ -58,7 +57,12 @@ namespace idk
         const auto col = hovered ? ImGui::GetColorU32(ImGuiCol_FrameBgHovered) : ImGui::GetColorU32(ImGuiCol_FrameBg);
 
         ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, col, false);
-        ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding, text, 0, nullptr);
+
+        if (*handle)
+        {
+            const char* text = handle->GetMountPath().data() + sizeof("/assets/") - 1;
+            ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding, text, 0, nullptr);
+        }
 
         return dropped;
     }

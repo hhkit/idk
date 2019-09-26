@@ -211,6 +211,7 @@ namespace idk::shadergraph
 		case ValueType::VEC2: return helpers::parse_vec2(param.default_value);
 		case ValueType::VEC3: return helpers::parse_vec3(param.default_value);
 		case ValueType::VEC4: return helpers::parse_vec4(param.default_value);
+		case ValueType::SAMPLER2D: return helpers::parse_sampler2d(param.default_value);
 		default: throw;
 		}
 	}
@@ -232,7 +233,7 @@ namespace idk::shadergraph
 
         if (state.uniforms.size())
         {
-            array<string, ValueType::count> uniform_blocks;
+            array<string, ValueType::count + 1> uniform_blocks;
 
             for (const auto& [uniform_name, uniform_type] : state.uniforms)
             {
@@ -292,7 +293,9 @@ namespace idk::shadergraph
 			size_t i = 0;
 			for (const auto& [uniform_name, uniform_type] : state.uniforms)
 			{
-				inst.uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name, to_uniform_instance(parameters[i]));
+                int param_index = std::stoi(uniform_name.data() + 2); // +2 to shift past _u in name
+				inst.uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+                                      to_uniform_instance(parameters[param_index]));
 			}
         }
 
