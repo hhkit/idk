@@ -67,7 +67,7 @@ namespace idk
 		// Directory specific getters
 		// ====================================================================================
 		vector<PathHandle> GetFilesWithExtension(string_view ext, FS_FILTERS filters = FS_FILTERS::RECURSE_DIRS) const;
-		vector<PathHandle> GetPaths(FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::DIR, string_view ext = string_view{}) const;
+		vector<PathHandle> GetEntries(FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::DIR, string_view ext = string_view{}) const;
 
 		// Bool checks
 		// ====================================================================================

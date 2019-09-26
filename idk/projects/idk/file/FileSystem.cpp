@@ -104,7 +104,7 @@ namespace idk {
 		}
 	}
 
-	PathHandle FileSystem::GetPath(string_view mountPath) const
+	PathHandle FileSystem::GetEntry(string_view mountPath) const
 	{
 		PathHandle ret = GetFile(mountPath);
 		if (!ret)
@@ -152,11 +152,11 @@ namespace idk {
 		return h.GetFilesWithExtension(extension, filters);
 	}
 
-	vector<PathHandle> FileSystem::GetPaths(string_view mountPath, FS_FILTERS filters, string_view ext) const
+	vector<PathHandle> FileSystem::GetEntries(string_view mountPath, FS_FILTERS filters, string_view ext) const
 	{
 		auto dir_index = getDir(mountPath);
 		PathHandle h{ dir_index, false };
-		return h.GetPaths(filters, ext);
+		return h.GetEntries(filters, ext);
 	}
 
 #pragma endregion Directory Specific
