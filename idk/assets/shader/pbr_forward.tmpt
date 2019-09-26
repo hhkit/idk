@@ -136,6 +136,8 @@ void main()
 	// declare initial values here
 	vec3  view_pos  = fs_in.position;
 	vec3  normal    = normalize(fs_in.normal);
+	vec3  tangent   = normalize(fs_in.tangent);
+	vec2  uv        = fs_in.uv;
 	
 	vec3  albedo    = vec3(1, 0, 0);
 	float metallic  = 0.5;
