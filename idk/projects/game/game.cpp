@@ -72,7 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
-	auto minecraft_texture = Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png").resources[0].As<Texture>();
+	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	

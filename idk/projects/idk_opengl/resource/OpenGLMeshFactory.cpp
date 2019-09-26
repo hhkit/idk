@@ -237,7 +237,7 @@ namespace idk::ogl
 			for (auto& elem : icosahedron)
 				elem.uv = spherical_projection(elem.pos);
 
-			auto sphere_mesh = Core::GetResourceManager().Emplace<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
+			auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddMeshEntry(0, 0, icosahedronIndices.size(), 0);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }

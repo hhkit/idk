@@ -898,7 +898,7 @@ namespace idk
                     RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
                     PathHandle path;
                     if (ImGuidk::InputResourceEx("Default", &path, span<const char* const>(RscExtensions<Texture>)))
-                        param.default_value = helpers::serialize_value(Core::GetResourceManager().LoadFile(path)[0].As<Texture>());
+                        param.default_value = helpers::serialize_value(*Core::GetResourceManager().Load<Texture>(path));
                     break;
                 }
                 default:
