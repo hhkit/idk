@@ -1,10 +1,15 @@
 #include "stdafx.h"
 
 #include <sstream>
+
 #include <ds/ranged_for.h>
 #include <file/FileSystem.h>
-#include <IncludeResources.h>
+#include <res/MetaBundle.h>
 #include <serialize/serialize.h>
+#include <util/ioutils.h>
+
+#include <IncludeResources.h>
+
 #include "ResourceManager.h"
 
 
@@ -95,6 +100,43 @@ namespace idk
 		return itr->second.get();
 	}
 
+	void ResourceManager::SaveDirtyMetadata()
+	{
+		for (auto& [path, resource] : _loaded_files)
+		{
+			auto dirty = resource.is_new; // is the resource brand new?
+
+			if (!dirty) // are any resource metas dirty?
+				for (auto& elem : resource.bundle.GetAll())
+				{ 
+					dirty = std::visit([&](const auto& handle) -> bool
+						{
+							using Res = typename std::decay_t<decltype(handle)>::Resource;
+							if constexpr (has_tag_v<Res, MetaTag>)
+								return handle->_dirtymeta;
+							else
+								return false;
+						}, elem);
+				}
+
+			if (dirty)
+			{
+				// save the .meta file
+				MetaBundle m;
+
+				for (auto& elem : resource.bundle.GetAll())
+				{
+					std::visit([&](const auto& handle)
+						{
+							m.Add(handle);
+						}, elem);
+				}
+
+				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << serialize_text(m);
+			}
+		}
+	}
+
 	void ResourceManager::WatchDirectory()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
@@ -116,6 +158,18 @@ namespace idk
 		auto emplace_path = string{ path.GetMountPath() };
 
 		// TODO: Meta handling
+		auto meta_path = PathHandle{ string{path.GetMountPath()} + ".meta" };
+
+		auto meta_bundle = [&]() -> opt<MetaBundle>
+		{
+			if (!meta_path)
+				return std::nullopt;
+
+			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
+			auto metastr = stringify(metastream);
+
+			return parse_text<MetaBundle>(metastr);
+		}();
 
 		// unload the file if loaded
 		{
@@ -123,16 +177,24 @@ namespace idk
 			if (itr != _loaded_files.end())
 			{
 				// release all resources attached to file
-				for (auto& elem : itr->second.GetAll())
+				for (auto& elem : itr->second.bundle.GetAll())
 					std::visit([&](const auto& handle) { Release(handle); }, elem);
 				_loaded_files.erase(itr);
 			}
 		}
 
 		// reload the file
-		auto bundle = loader->LoadFile(path);
-		auto [itr, success] = _loaded_files.emplace(emplace_path, bundle);
+		auto bundle = [&]()
+		{
+			if (meta_bundle && meta_bundle->metadatas.size())
+				return loader->LoadFile(path, *meta_bundle);
+			else
+				return loader->LoadFile(path);
+		}();
+		auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
 		assert(success);
+
+		itr->second.is_new = !s_cast<bool>(meta_bundle);
 
 		// set path
 		for (auto& elem : bundle.GetAll())
@@ -143,7 +205,7 @@ namespace idk
 
 					auto* cb = GetControlBlock(handle);
 					assert(cb);
-					cb->path = emplace_path;
+					cb->path   = emplace_path;
 				}
 			, elem);
 

@@ -30,9 +30,9 @@ namespace idk
 		if (h)
 		{
 			if constexpr (has_tag_v<T, MetaTag>)
-				metadatas.emplace_back(SerializedMeta{ h.guid, h->Name(), reflect::typehash<T>(), serialize_text(reflect::dynamic{ h->GetMeta() }) });
+				metadatas.emplace_back(SerializedMeta{ h.guid, string{h->Name()}, reflect::typehash<T>(), serialize_text(reflect::dynamic{ h->GetMeta() }) });
 			else
-				metadatas.emplace_back(SerializedMeta{ h.guid, h->Name(), reflect::typehash<T>() });
+				metadatas.emplace_back(SerializedMeta{ h.guid, string{h->Name()}, reflect::typehash<T>() });
 		}
 	}
 	template<typename T, typename>

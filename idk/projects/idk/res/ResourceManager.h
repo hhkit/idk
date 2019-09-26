@@ -56,6 +56,7 @@ namespace idk
 
 		ResourceManager() = default;
 
+		void SaveDirtyMetadata();
 		void WatchDirectory();
 
 		/* HANDLE CHECKING - related to handles */
@@ -84,8 +85,10 @@ namespace idk
 		static inline ResourceManager* instance = nullptr;
 
 		template<typename R> struct ResourceControlBlock;
+		struct FileControlBlock;
 
 		using Extension  = string;
+		using Path       = string;
 		using GenericPtr = std::shared_ptr<void>;
 		template<typename R>
 		using ResourceStorage = hash_table<Guid, ResourceControlBlock<R>>;
@@ -94,7 +97,7 @@ namespace idk
 		array<GenericPtr, ResourceCount>               _resource_table;    // std::shared_ptr<hash_table<Guid, ResourceControlBlock<R>>>
 		array<GenericPtr, ResourceCount>               _factories;         // std::shared_ptr<ResourceFactory<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
-		hash_table<string, ResourceBundle>             _loaded_files;
+		hash_table<Path,      FileControlBlock>          _loaded_files;
 
 		void Init()     override;
 		void LateInit() override;
@@ -120,6 +123,14 @@ namespace idk
 		bool valid() const { return s_cast<bool>(resource); }
 	};
 
+	struct ResourceManager::FileControlBlock
+	{
+		ResourceBundle bundle;
+		bool is_new { false };
+
+		bool resource_dirty() const;
+		bool meta_dirty()     const;
+	};
 }
 
 #include "ResourceManager.inl"
