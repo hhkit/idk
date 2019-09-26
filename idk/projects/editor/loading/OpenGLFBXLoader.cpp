@@ -27,7 +27,6 @@ namespace idk
 
 		if (ai_scene == nullptr)
 			return retval;
-
 		auto mesh_handle = Core::GetResourceManager().Create<ogl::OpenGLMesh>();
 
 		vector<Vertex> vertices;
@@ -65,6 +64,7 @@ namespace idk
 			const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
 			for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
 			{
+				
 				const aiVector3D& pos = ai_mesh->mVertices[k];
 				const aiVector3D& normal = ai_mesh->mNormals[k];
 				const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;

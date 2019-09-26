@@ -612,6 +612,10 @@
     <ClInclude Include="math\shapes\frustum.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph_helpers.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -891,6 +895,10 @@
     <ClCompile Include="gfx\MeshFactory.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\projector_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

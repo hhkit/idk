@@ -19,5 +19,5 @@ namespace idk::ImGuidk
         return false;
     }
 
-    bool InputResourceEx(const char* label, idk::PathHandle* handle, idk::span<const char*> accepted_extensions);
+    bool InputResourceEx(const char* label, idk::PathHandle* handle, idk::span<const char* const> accepted_extensions);
 }

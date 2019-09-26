@@ -39,6 +39,7 @@
     <ClInclude Include="file\PathHandle.h" />
     <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="gfx\MeshFactory.h" />
+    <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
     <ClInclude Include="math\linear.h" />
@@ -152,6 +153,7 @@
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraphFactory.h" />
+    <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestResourceFactory.h" />
@@ -208,8 +210,10 @@
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
+    <ClCompile Include="gfx\projector_functions.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />

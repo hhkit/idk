@@ -72,7 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
-	Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png");
+	auto minecraft_texture = Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png").resources[0].As<Texture>();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	
@@ -108,24 +108,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
-			mesh_rend->mesh = resources[0].As<Mesh>();
-			animator->SetSkeleton(resources[1].As<anim::Skeleton>());
-			animator->AddAnimation(resources[2].As<anim::Animation>());
+			auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
+			//auto anim_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5anim" });
+			mesh_rend->mesh = mesh_resources[0].As<Mesh>();
+			animator->SetSkeleton(mesh_resources[1].As<anim::Skeleton>());
+			animator->AddAnimation(mesh_resources[2].As<anim::Animation>());
 			animator->Play(0);
 		}
 		mesh_rend->material_instance.material = h_mat;
 
 		return go;
 	};
-	auto tmp_tex = RscHandle<Texture>{};
+	auto tmp_tex = minecraft_texture;
 	if(gfx_api == GraphicsAPI::Vulkan)
 		tmp_tex =Core::GetResourceManager().LoadFile(PathHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
 
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	 //create_anim_obj(vec3{ 0,0,0 });
+	create_anim_obj(vec3{ 0,0,0 });
 
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -138,8 +139,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		//if (gfx_api != GraphicsAPI::Vulkan)
-		//	mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
-		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		//mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
 
@@ -182,19 +183,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	auto light = scene->CreateGameObject();
+	light->Name("Point Light");
 	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
 	light->AddComponent<Light>();
 	light->AddComponent<TestComponent>();
-	//light->AddComponent<MeshRenderer>()->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
-	//auto bounce_kun = scene->CreateGameObject();
-	//bounce_kun->GetComponent<Name>()->name = "bouncer";
-	//bounce_kun->Transform()->position = vec3{ 0, 1, 0 };
-	//bounce_kun->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
-	//bounce_kun->Transform()->scale = vec3{ 1.f / 4 };
-	//bounce_kun->AddComponent<RigidBody>();
-	//bounce_kun->AddComponent<Light>();
-	//bounce_kun->AddComponent<Collider>()->shape = box{};
-	//bounce_kun->AddComponent<TestComponent>();
 
 	/* physics resolution demonstration */
 	{
@@ -204,24 +196,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
 		seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
 		seduceme->Transform()->scale = vec3{ 1.f / 4 };
-		seduceme->AddComponent<RigidBody>(); // ->initial_velocity = vec3{ 0.1, 0, 0 };
-		seduceme->AddComponent<Collider>()->shape = sphere{};
+		seduceme->AddComponent<RigidBody>();
+		auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->material_instance.material = h_mat;
+		seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	{
 		auto seducer = scene->CreateGameObject();
 		seducer->GetComponent<Name>()->name = "seducer";
 		seducer->Transform()->position = vec3{ -2, 0.125, 0 };
 		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  1, 0, 0 };
-		seducer->AddComponent<Collider>()->shape = sphere{};
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
+		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->material_instance.material = h_mat;
+		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	{
 		auto seducer = scene->CreateGameObject();
 		seducer->GetComponent<Name>()->name = "seducer";
 		seducer->Transform()->position = vec3{ 2, 0.125, 0 };
 		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -1, 0, 0 };
-		seducer->AddComponent<Collider>()->shape = sphere{};
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+		auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->material_instance.material = h_mat;
+		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 
 	if(0)
