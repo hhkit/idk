@@ -201,7 +201,7 @@ namespace idk::vkn
 		vk::PipelineDepthStencilStateCreateInfo dsci
 		{
 			vk::PipelineDepthStencilStateCreateFlags{},
-			VK_TRUE,VK_TRUE,vk::CompareOp::eGreater,
+			VK_TRUE,VK_TRUE,vk::CompareOp::eLess,
 			VK_FALSE,VK_FALSE,
 		};
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
