@@ -10,6 +10,7 @@ namespace idk::ogl
 
 		if constexpr (std::is_same_v<T, bool>)   glProgramUniform1i(_program_id, loc, obj);
 		if constexpr (std::is_same_v<T, int>)    glProgramUniform1i(_program_id, loc, obj);
+		if constexpr (std::is_same_v<T, GLuint>) glProgramUniform1i(_program_id, loc, obj);
 		if constexpr (std::is_same_v<T, float>)  glProgramUniform1f(_program_id, loc, obj);
 		if constexpr (std::is_same_v<T, ivec2>)  glProgramUniform2i(_program_id, loc, obj[0], obj[1]);
 		if constexpr (std::is_same_v<T, ivec3>)  glProgramUniform3i(_program_id, loc, obj[0], obj[1], obj[2]);

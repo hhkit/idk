@@ -16,6 +16,8 @@ namespace idk
 		real  cos_inner = 0;
 		real  cos_outer = 1;
 		real  falloff     = 1;
+
+		opt<RscHandle<LightMap>> shadow_map;
 	};
 
 	class Light

@@ -5,6 +5,7 @@
 
 #include <idk_opengl/resource/OpenGLMesh.h>
 #include <idk_opengl/resource/OpenGLMaterial.h>
+#include <idk_opengl/resource/OpenGLTexture.h>
 #include <idk_opengl/resource/FrameBuffer.h>
 
 #include <core/Core.h>
@@ -130,6 +131,8 @@ namespace idk::ogl
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+				GLuint texture_units = 0;
+
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
 					auto& light = lights[i];
@@ -140,7 +143,10 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+
+					texture_units += light.shadow_map.has_value();
 				}
+
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
 				mesh.Bind(MeshRenderer::GetRequiredAttributes());
@@ -155,8 +161,18 @@ namespace idk::ogl
 				// material uniforms
 				for (auto& [id, uniform] : elem.material_instance.uniforms)
 				{
-					std::visit([this, &id](auto& elem) {
-						pipeline.SetUniform(id, elem);
+					std::visit([this, &id, &texture_units](auto& elem) {
+						using T = std::decay_t<decltype(elem)>;
+						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+						{
+							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+							texture->BindToUnit(texture_units);
+							pipeline.SetUniform(id, texture_units);
+
+							++texture_units;
+						}
+						else
+							pipeline.SetUniform(id, elem);
 					}, uniform);
 				}
 
@@ -174,6 +190,8 @@ namespace idk::ogl
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+				GLuint texture_units = 0;
+
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
 					auto& light = lights[i];
@@ -184,6 +202,8 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+
+					texture_units += light.shadow_map.has_value();
 				}
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
@@ -209,9 +229,19 @@ namespace idk::ogl
 				// material uniforms
 				for (auto& [id, uniform] : elem.material_instance.uniforms)
 				{
-					std::visit([this, &id](auto& elem) {
-						pipeline.SetUniform(id, elem);
-					}, uniform);
+					std::visit([this, &id, &texture_units](auto& elem) {
+						using T = std::decay_t<decltype(elem)>;
+						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+						{
+							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+							texture->BindToUnit(texture_units);
+							pipeline.SetUniform(id, texture_units);
+
+							++texture_units;
+						}
+						else
+							pipeline.SetUniform(id, elem);
+						}, uniform);
 				}
 
 				// draw

@@ -72,7 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
-	Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png");
+	auto minecraft_texture = Core::GetResourceManager().LoadFile("/assets/textures/DebugTerrain.png").resources[0].As<Texture>();
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	
@@ -119,7 +119,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		return go;
 	};
-	auto tmp_tex = RscHandle<Texture>{};
+	auto tmp_tex = minecraft_texture;
 	if(gfx_api == GraphicsAPI::Vulkan)
 		tmp_tex =Core::GetResourceManager().LoadFile(PathHandle{ "/assets/textures/texture.dds" })[0].As<Texture>();
 
