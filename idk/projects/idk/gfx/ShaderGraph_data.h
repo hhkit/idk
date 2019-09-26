@@ -11,14 +11,7 @@ namespace idk::shadergraph
     struct Slot
     {
         ValueType type;
-    };
-
-    struct Value
-    {
-        ValueType type;
-        string value;
-        Guid node;
-        int slot;
+        string value; // if unconnected
     };
 
     struct Node
@@ -29,6 +22,7 @@ namespace idk::shadergraph
         bool selected;
         vector<Slot> input_slots;
         vector<Slot> output_slots;
+        string control_values; // if any controls, delimited by |
     };
 
     struct Link

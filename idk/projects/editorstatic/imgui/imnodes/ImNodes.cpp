@@ -222,9 +222,9 @@ void BeginCanvas(CanvasState* canvas)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGuiIO& io = ImGui::GetIO();
 
-    if (!ImGui::IsMouseDown(0))
+    if (!ImGui::IsMouseDown(0) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow))
     {
-        if (ImGui::IsMouseDragging(1) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
+        if (ImGui::IsMouseDragging(1))
             canvas->offset += io.MouseDelta;
 
         if (io.KeyShift && !io.KeyCtrl)

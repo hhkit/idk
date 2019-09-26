@@ -33,8 +33,8 @@ namespace idk
 		{ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal,   1),
-			std::make_pair(vtx::Attrib::Tangent,  2),
-			std::make_pair(vtx::Attrib::UV,       3),
+			std::make_pair(vtx::Attrib::Tangent,  3),
+			std::make_pair(vtx::Attrib::UV,       2),
 		} };
 		return r;
 	}

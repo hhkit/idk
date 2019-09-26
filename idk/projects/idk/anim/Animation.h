@@ -30,6 +30,7 @@ namespace idk::anim
 			string _name;
 			mat4 _node_transform;
 			bool _is_animated = false;
+			Channel& operator+=(const Channel& rhs);
 			vector<Key<vec3>> _translate{};
 			vector<Key<vec3>> _scale{};
 			vector<Key<quat>> _rotation{};

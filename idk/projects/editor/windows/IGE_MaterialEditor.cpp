@@ -4,6 +4,8 @@
 #include <editor/IDE.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <gfx/ShaderGraph.h>
+#include <gfx/ShaderGraph_helpers.h>
+#include <editor/widgets/InputResource.h>
 #include <regex>
 #include <filesystem>
 
@@ -23,8 +25,10 @@ namespace idk
         0xff6e9437,
         0xff30be6a,
         0xff50e599,
-        0xffba7b37
+        0xffba7bd7
     };
+
+
 
     static const char* slot_suffix(ValueType type)
     {
@@ -34,7 +38,7 @@ namespace idk
         case ValueType::VEC2:       return "(2)";
         case ValueType::VEC3:       return "(3)";
         case ValueType::VEC4:       return "(4)";
-        case ValueType::SAMPLER2D:  return "(S)";
+        case ValueType::SAMPLER2D:  return "(T)";
         default: throw;
         }
     }
@@ -58,9 +62,7 @@ namespace idk
         {
             // Align output slots to the right edge of the node.
             ImGuiID max_width_id = ImGui::GetID("output-max-title-width");
-            float output_max_title_width = ImMax(storage->GetFloat(max_width_id, title_size.x), title_size.x);
-            storage->SetFloat(max_width_id, output_max_title_width);
-            float offset = (output_max_title_width + style.ItemSpacing.x) - title_size.x;
+            float offset = (storage->GetFloat(max_width_id, title_size.x) /*+ style.ItemSpacing.x*/) - title_size.x;
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
         }
 
@@ -119,20 +121,7 @@ namespace idk
 
 
 
-    string default_value(ValueType type)
-    {
-        switch (type)
-        {
-        case ValueType::FLOAT:      return "0";
-        case ValueType::VEC2:       return "0,0";
-        case ValueType::VEC3:       return "0,0,0";
-        case ValueType::VEC4:       return "0,0,0,0";
-        case ValueType::SAMPLER2D:  return string(Guid());
-        default: throw;
-        }
-    }
-
-    static bool DrawValue_DrawVec(const char* id, vec2 pos, int n, float* f)
+    static bool draw_value_draw_vec(const char* id, vec2 pos, int n, float* f)
     {
         auto canvas = ImNodes::GetCurrentCanvas();
         auto& style = ImGui::GetStyle();
@@ -160,10 +149,10 @@ namespace idk
 
         switch (n)
         {
-        case 1: ret = ImGui::DragFloat(("##" + std::string(id)).c_str(), f, 0.1f);	break;
-        case 2: ret = ImGui::DragFloat2(("##" + std::string(id)).c_str(), f, 0.1f);	break;
-        case 3: ret = ImGui::DragFloat3(("##" + std::string(id)).c_str(), f, 0.1f);	break;
-        case 4: ret = ImGui::DragFloat4(("##" + std::string(id)).c_str(), f, 0.1f);	break;
+        case 1: ret = ImGui::DragFloat (("##" + std::string(id)).c_str(), f, 0.01f); break;
+        case 2: ret = ImGui::DragFloat2(("##" + std::string(id)).c_str(), f, 0.01f); break;
+        case 3: ret = ImGui::DragFloat3(("##" + std::string(id)).c_str(), f, 0.01f); break;
+        case 4: ret = ImGui::DragFloat4(("##" + std::string(id)).c_str(), f, 0.01f); break;
         default: throw;
         }
 
@@ -175,67 +164,59 @@ namespace idk
         return ret;
     }
 
-    void IGE_MaterialEditor::drawValue(Value& value)
+    void IGE_MaterialEditor::drawValue(Node& node, int input_slot_index)
     {
-        auto& node = _graph->nodes[value.node];
         auto pos = node.position;
-        pos.y += (ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y) / _canvas.zoom * (value.slot + 1);
+        pos.y += (ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y) / _canvas.zoom * (input_slot_index + 1);
 
-        switch (value.type)
+        auto& slot = node.input_slots[input_slot_index];
+        if (slot.value.empty())
+            return;
+
+        auto id = string(node.guid) + std::to_string(input_slot_index);
+
+        switch (slot.type)
         {
 
-        case ValueType::FLOAT: {
-            float f = std::stof(value.value);
-            if (DrawValue_DrawVec((std::string(value.node) + std::to_string(value.slot)).c_str(), pos, 1, &f))
-            {
-                value.value = std::to_string(f);
-            }
-        } break;
-
-        case ValueType::VEC2: { // todo: use serializer
-
-            float f[2]{ 0, 0 };
-            std::smatch matches;
-            if (std::regex_match(value.value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-            {
-                f[0] = std::stof(matches[1]);
-                f[1] = std::stof(matches[2]);
-            }
-
-            if (DrawValue_DrawVec((std::string(value.node) + std::to_string(value.slot)).c_str(), pos, 2, f))
-            {
-                value.value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
-            }
-        } break;
-
-        case ValueType::VEC3: { // todo: use serializer
-
-            float f[3]{ 0, 0, 0 };
-            std::smatch matches;
-            if (std::regex_match(value.value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-            {
-                f[0] = std::stof(matches[1]);
-                f[1] = std::stof(matches[2]);
-                f[2] = std::stof(matches[3]);
-            }
-
-            if (DrawValue_DrawVec((std::string(value.node) + std::to_string(value.slot)).c_str(), pos, 3, f))
-            {
-                value.value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
-            }
-        } break;
+        case ValueType::FLOAT:
+        {
+            float f = std::stof(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 1, &f))
+                slot.value = std::to_string(f);
+            break;
+        }
+        case ValueType::VEC2:
+        {
+            vec2 v = helpers::parse_vec2(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 2, v.values))
+                slot.value = helpers::serialize_value(v);
+            break;
+        }
+        case ValueType::VEC3:
+        {
+            vec3 v = helpers::parse_vec3(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 3, v.values))
+                slot.value = helpers::serialize_value(v);
+            break;
+        }
+        case ValueType::VEC4:
+        {
+            vec4 v = helpers::parse_vec4(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 4, v.values))
+                slot.value = helpers::serialize_value(v);
+            break;
+        }
 
         default:
             break;
         }
-
     }
 
     void IGE_MaterialEditor::addDefaultSlotValue(const Guid& guid, int slot_in)
     {
         auto& node_in = _graph->nodes[guid];
         auto in_type = node_in.input_slots[slot_in].type;
-        _graph->values.emplace_back(Value{ in_type, default_value(in_type), node_in.guid, slot_in });
+        node_in.input_slots[slot_in].value = helpers::default_value(in_type);
     }
 
 
@@ -281,20 +262,27 @@ namespace idk
                 auto& tpl = NodeTemplate::GetTable().at(node.name);
 
                 int i = 0;
+                size_t num_slots = node.input_slots.size() + node.output_slots.size();
+
+                // calc width of node
                 for (auto& slot_name : tpl.names)
                 {
                     if (i < node.input_slots.size())
                         input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
-                    else
+                    else if (i < num_slots)
                         output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
                     ++i;
                 }
-
-                title_size.x = std::max(title_size.x, input_names_width + output_names_width + ImGui::GetStyle().ItemSpacing.x * 2 + suffix_w * 2);
+                if (input_names_width > 0) input_names_width += suffix_w;
+                if (output_names_width > 0) output_names_width += suffix_w;
+                title_size.x = std::max(title_size.x, input_names_width + output_names_width);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
                 i = 0;
                 float cursor_y = ImGui::GetCursorPosY();
+                string control_values = node.control_values;
+                string final_control_values;
+
                 for (auto& slot_name : tpl.names)
                 {
                     if (i == node.input_slots.size())
@@ -321,15 +309,62 @@ namespace idk
                                 }
                             }
                         }
+
+                        auto cursorpos = ImGui::GetCursorPos();
+                        drawValue(node, i); // draw value control when disconnected
+                        ImGui::SetCursorPos(cursorpos);
+                        draw_slot(slot_name.c_str(), kind);
                     }
-                    else
+                    else if (i < num_slots)
                     {
                         kind = node.output_slots[i - node.input_slots.size()].type;
+                        draw_slot(slot_name.c_str(), kind);
+                    }
+                    else // custom controls
+                    {
+                        assert(slot_name[0] == '$'); // did we fuck up the names in the .node?
+
+                        string next_value = "";
+                        if (control_values.size())
+                        {
+                            auto pos = control_values.find('|');
+                            next_value = control_values.substr(0, pos);
+                            if (pos != string::npos)
+                                control_values.erase(0, pos + 1);
+                            else
+                                control_values.clear();
+                        }
+
+                        if (slot_name == "$Color")
+                        {
+                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
+
+                            if (next_value.empty())
+                                final_control_values += (next_value = "0,0,0,1") + '|';
+
+                            vec4 v = helpers::parse_vec4(next_value);
+                            if (ImGui::ColorButton(("##" + std::to_string(i)).c_str(), v, 0, ImVec2(w, 0)))
+                            {
+                                ImGui::OpenPopup("picker");
+                                ImGui::GetCurrentContext()->ColorPickerRef = v;
+                            }
+                            if (ImGui::BeginPopup("picker"))
+                            {
+                                ImGuiColorEditFlags picker_flags = ImGuiColorEditFlags__DisplayMask | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf;
+                                ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 12.0f); // Use 256 + bar sizes?
+                                if (ImGui::ColorPicker4("##picker", v.values, picker_flags, &ImGui::GetCurrentContext()->ColorPickerRef.x))
+                                    final_control_values += helpers::serialize_value(v) + "|";
+
+                                ImGui::EndPopup();
+                            }
+                        }
                     }
 
-                    draw_slot(slot_name.c_str(), kind);
                     ++i;
                 }
+
+                if (final_control_values.size())
+                    node.control_values = final_control_values;
             }
 
             ImGui::EndGroup();
@@ -378,10 +413,7 @@ namespace idk
 
         auto sig = NodeTemplate::GetTable().at(name).signatures[0];
         for (auto in : sig.ins)
-        {
-            node.input_slots.push_back({ in });
-            _graph->values.emplace_back(Value{ in, default_value(in), node.guid, static_cast<int>(node.input_slots.size() - 1) });
-        }
+            node.input_slots.push_back({ in, helpers::default_value(in) });
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 
@@ -391,9 +423,6 @@ namespace idk
     void IGE_MaterialEditor::removeNode(const Node& node)
     {
         disconnectNode(node);
-        auto& g = *_graph;
-        g.values.erase(std::remove_if(g.values.begin(), g.values.end(),
-            [guid = node.guid](const Value& v) { return v.node == guid; }), g.values.end());
         _nodes_to_delete.push_back(node.guid);
     }
 
@@ -457,7 +486,7 @@ namespace idk
             auto folder_name = item.name;
             if (folder_name == "master") // skip master nodes
                 return nullptr;
-            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
             {
                 stack.push_back(&item);
                 for (auto& inner_item : item.items)
@@ -479,11 +508,14 @@ namespace idk
         else
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f });
-            if (ImGui::MenuItem(item.name.c_str()))
-            {
-                ImGui::PopStyleColor();
-                return &item;
-            }
+			ImGui::Unindent();
+            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+			ImGui::Indent();
+			if (ImGui::IsItemClicked())
+			{
+				ImGui::PopStyleColor();
+				return &item;
+			}
             ImGui::PopStyleColor();
         }
 
@@ -493,6 +525,13 @@ namespace idk
     static node_item init_templates_hierarchy()
     {
         node_item root;
+		auto get_uppercase = [](const string& str)
+		{
+			auto ret = str;
+			for (char& c : ret)
+				c = static_cast<char>(toupper(c));
+			return ret;
+		};
 
         for (auto& tpl : NodeTemplate::GetTable())
         {
@@ -516,7 +555,11 @@ namespace idk
         {
             auto* item = stack.back();
             stack.pop_back();
-            std::sort(item->items.begin(), item->items.end(), [](node_item& a, node_item& b) { return a.name < b.name; });
+            std::sort(item->items.begin(), item->items.end(),
+				[get_uppercase](node_item& a, node_item& b)
+				{ 
+					return get_uppercase(a.name) < get_uppercase(b.name);
+				});
             for (auto& inner_item : item->items)
             {
                 stack.push_back(&inner_item);
@@ -530,6 +573,7 @@ namespace idk
     {
         static node_item templates_hierarchy = init_templates_hierarchy();
         std::vector<node_item*> stack;
+
         auto* item = context_menu_node_item(templates_hierarchy, stack);
         
         if (item)
@@ -622,12 +666,16 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        ImGui::SetNextWindowSizeConstraints(ImVec2{ 0, 0 }, ImVec2{ 1000, 320 });
-        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::BeginPopupContextWindow())
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered())
+            ImGui::OpenPopup("nodes_context_menu");
+        if (ImGui::IsPopupOpen("nodes_context_menu"))
+            ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
+        if (ImGui::BeginPopup("nodes_context_menu"))
         {
             auto str = draw_nodes_context_menu();
             if (str.size())
             {
+                ImGui::CloseCurrentPopup();
                 auto pos = (ImGui::GetWindowPos() - window_pos - _canvas.offset) / _canvas.zoom;
                 addNode(str, pos);
                 // pos = windowpos + nodepos * zoom + offset
@@ -643,8 +691,6 @@ namespace idk
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
-        for (auto& value : g.values)
-            drawValue(value);
         for (auto& node : g.nodes)
             drawNode(node.second);
 
@@ -678,15 +724,6 @@ namespace idk
                 bool out_is_param = node_out->name[0] == '$';
                 int slot_out = out_is_param ? 0 : (int)NodeTemplate::GetTable().at(node_out->name).GetSlotIndex(title_out);
 
-                // check if any value attached to input slot; remove it
-                for (auto iter = g.values.begin(); iter != g.values.end(); ++iter)
-                {
-                    if (iter->node == node_in->guid && iter->slot == slot_in)
-                    {
-                        g.values.erase(iter);
-                        break;
-                    }
-                }
                 // check if any link inputs into input slot (cannot have multiple)
                 for (auto iter = g.links.begin(); iter != g.links.end(); ++iter)
                 {
@@ -699,6 +736,9 @@ namespace idk
 
                 g.links.push_back({ node_out->guid, node_in->guid, slot_out, slot_in });
 
+                // clear any unconnected value
+                node_in->input_slots[slot_in].value.clear();
+                // set new type
                 node_in->input_slots[slot_in].type = node_out->output_slots[slot_out - node_out->input_slots.size()].type;
 
                 // resolve new node_in output type
@@ -734,7 +774,10 @@ namespace idk
             auto col = _canvas.colors[ImNodes::ColConnection];
             _canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
 
-            const auto& slot_out = node_out.name[0] == '$' ? g.parameters[std::stoi(node_out.name.data() + 1)].name : NodeTemplate::GetTable().at(node_out.name).names[link.slot_out];
+            const auto& slot_out = node_out.name[0] == '$' ?
+                g.parameters[std::stoi(node_out.name.data() + 1)].name :
+                NodeTemplate::GetTable().at(node_out.name).names[link.slot_out];
+
             if (!ImNodes::Connection(&node_in, NodeTemplate::GetTable().at(node_in.name).names[link.slot_in].c_str(),
                                      &node_out, slot_out.c_str()))
             {
@@ -789,7 +832,7 @@ namespace idk
                 if (ImGui::MenuItem("Vec2"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
                 if (ImGui::MenuItem("Vec3"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
                 if (ImGui::MenuItem("Vec4"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
-                if (ImGui::MenuItem("Sampler2D")) _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
+                if (ImGui::MenuItem("Texture"))   _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
                 ImGui::EndPopup();
             }
 
@@ -812,7 +855,10 @@ namespace idk
                 ImGui::BeginGroup();
 
                 strcpy_s(buf, param.name.c_str());
-                if (ImGui::InputText(string(param.type.to_string()).c_str(), buf, 32))
+                string label{ param.type.to_string() };
+                if (param.type == ValueType::SAMPLER2D)
+                    label = "TEXTURE";
+                if (ImGui::InputText(label.c_str(), buf, 32))
                 {
                     param.name = buf;
                 }
@@ -821,59 +867,38 @@ namespace idk
                 {
                 case ValueType::FLOAT:
                 {
-                    float f = std::stof(param.default_value);
+                    float f = helpers::parse_float(param.default_value);
                     if (ImGui::DragFloat("Default", &f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f);
-                    }
+                        param.default_value = helpers::serialize_value(f);
                     break;
                 }
                 case ValueType::VEC2:
                 {
-                    float f[2]{ 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                    }
-                    if (ImGui::DragFloat3("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
-                    }
+                    vec2 v = helpers::parse_vec2(param.default_value);
+                    if (ImGui::DragFloat3("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
                     break;
                 }
                 case ValueType::VEC3:
                 {
-                    float f[3]{ 0, 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                        f[2] = std::stof(matches[3]);
-                    }
-                    if (ImGui::DragFloat3("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
-                    }
+                    vec3 v = helpers::parse_vec3(param.default_value);
+                    if (ImGui::DragFloat3("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
                     break;
                 }
                 case ValueType::VEC4:
                 {
-                    float f[4]{ 0, 0, 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                        f[2] = std::stof(matches[3]);
-                        f[3] = std::stof(matches[4]);
-                    }
-                    if (ImGui::DragFloat4("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]) + ',' + std::to_string(f[3]);
-                    }
+                    vec4 v = helpers::parse_vec4(param.default_value);
+                    if (ImGui::DragFloat4("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
+                    break;
+                }
+                case ValueType::SAMPLER2D:
+                {
+                    RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
+                    PathHandle path;
+                    if (ImGuidk::InputResourceEx("Default", &path, span<const char* const>(RscExtensions<Texture>)))
+                        param.default_value = helpers::serialize_value(Core::GetResourceManager().LoadFile(path)[0].As<Texture>());
                     break;
                 }
                 default:

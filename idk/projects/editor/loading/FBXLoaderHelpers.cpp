@@ -132,35 +132,97 @@ namespace idk::fbx_loader_detail
 
 	static void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node)
 	{
-		for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
+		// POSITION
+		if (ai_anim_node->mNumPositionKeys <= 2)
 		{
-			auto& position_key = ai_anim_node->mPositionKeys[p];
+			auto& position_key = ai_anim_node->mPositionKeys[0];
 
 			const vec3 val = initVec3(position_key.mValue);
 			const float time = static_cast<float>(position_key.mTime);
 
 			channel._translate.emplace_back(val, time);
-		}
 
-		for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
+			if (ai_anim_node->mNumPositionKeys == 2 && position_key != ai_anim_node->mPositionKeys[1])
+			{
+				const vec3 val_2 = initVec3(ai_anim_node->mPositionKeys[1].mValue);
+				const float time_2 = static_cast<float>(ai_anim_node->mPositionKeys[1].mTime);
+
+				channel._translate.emplace_back(val_2, time_2);
+			}
+		}
+		else
 		{
-			auto& scale_key = ai_anim_node->mScalingKeys[s];
+			for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
+			{
+				auto& position_key = ai_anim_node->mPositionKeys[p];
+
+				const vec3 val = initVec3(position_key.mValue);
+				const float time = static_cast<float>(position_key.mTime);
+
+				channel._translate.emplace_back(val, time);
+			}
+		}
+		
+		// SCALE
+		if (ai_anim_node->mNumScalingKeys <= 2)
+		{
+			auto& scale_key = ai_anim_node->mScalingKeys[0];
 
 			const vec3 val = initVec3(scale_key.mValue);
 			const float time = static_cast<float>(scale_key.mTime);
 
 			channel._scale.emplace_back(val, time);
-		}
+			if (ai_anim_node->mNumScalingKeys == 2 && scale_key != ai_anim_node->mScalingKeys[1])
+			{
+				const vec3 val_2 = initVec3(ai_anim_node->mScalingKeys[1].mValue);
+				const float time_2 = static_cast<float>(ai_anim_node->mScalingKeys[1].mTime);
 
-		for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
+				channel._scale.emplace_back(val_2, time_2);
+			}
+		}
+		else
 		{
-			auto& rotation_key = ai_anim_node->mRotationKeys[r];
+			for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
+			{
+				auto& scale_key = ai_anim_node->mScalingKeys[s];
+
+				const vec3 val = initVec3(scale_key.mValue);
+				const float time = static_cast<float>(scale_key.mTime);
+
+				channel._scale.emplace_back(val, time);
+			}
+		}
+		
+		// ROTATE
+		if (ai_anim_node->mNumRotationKeys <= 2)
+		{
+			auto& rotation_key = ai_anim_node->mRotationKeys[0];
 
 			const quat val = initQuat(rotation_key.mValue);
 			const float time = static_cast<float>(rotation_key.mTime);
 
 			channel._rotation.emplace_back(val, time);
+			if (ai_anim_node->mNumRotationKeys == 2 && rotation_key != ai_anim_node->mRotationKeys[1])
+			{
+				const quat val_2 = initQuat(ai_anim_node->mRotationKeys[1].mValue);
+				const float time_2 = static_cast<float>(ai_anim_node->mRotationKeys[1].mTime);
+
+				channel._rotation.emplace_back(val_2, time_2);
+			}
 		}
+		else
+		{
+			for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
+			{
+				auto& rotation_key = ai_anim_node->mRotationKeys[r];
+
+				const quat val = initQuat(rotation_key.mValue);
+				const float time = static_cast<float>(rotation_key.mTime);
+
+				channel._rotation.emplace_back(val, time);
+			}
+		}
+		
 		channel._is_animated = true;
 		
 	}
@@ -174,13 +236,15 @@ namespace idk::fbx_loader_detail
 		// Initializing the channel. Every node will have a channel regardless whether it is virtual/animated or not.
 		anim::Animation::Channel channel;
 		channel._name = ai_node->mName.data;
-		channel._node_transform = initMat4(ai_node->mTransformation);
 		
 		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
 		if (is_animated)
-		{
 			initChannel(channel, ai_anim_node->second);
+		else
+		{
+			channel._node_transform = initMat4(ai_node->mTransformation);
 		}
+
 		virtual_channels.emplace_back(channel);
 		
 		auto ea_node = anim_clip.GetEasyAnimNode(ai_node->mName.data);
@@ -224,19 +288,19 @@ namespace idk::fbx_loader_detail
 		}
 
 		// Is it animated?
-		auto ai_anim_node = ai_anim_table.find(ai_root->mName.data);
-		bool is_animated = ai_anim_node != ai_anim_table.end();
-
-		anim::Animation::EasyAnimNode* ea_node = anim_clip.GetEasyAnimNode(ai_root->mName.data);
-
-		anim::Animation::Channel channel;
-		channel._node_transform = initMat4(ai_root->mTransformation);
-		ea_node->_channels.emplace_back(channel);
-
-		if (is_animated)
-		{
-			initChannel(ea_node->_channels.back(), ai_anim_node->second);
-		}
+		// auto ai_anim_node = ai_anim_table.find(ai_root->mName.data);
+		// bool is_animated = ai_anim_node != ai_anim_table.end();
+		// 
+		// anim::Animation::EasyAnimNode* ea_node = anim_clip.GetEasyAnimNode(ai_root->mName.data);
+		// 
+		// anim::Animation::Channel channel;
+		// channel._node_transform = initMat4(ai_root->mTransformation);
+		// ea_node->_channels.emplace_back(channel);
+		// 
+		// if (is_animated)
+		// {
+		// 	initChannel(ea_node->_channels.back(), ai_anim_node->second);
+		// }
 
 		vector<anim::Animation::Channel> channels;
 		for (size_t i = 0; i < ai_root->mNumChildren; ++i)

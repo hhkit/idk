@@ -4,7 +4,7 @@
 
 #include <core/Core.h>
 #include <idk_opengl/resource/OpenGLMesh.h>
-
+#include <gfx/projector_functions.h>
 namespace idk::ogl
 {
 	void OpenGLMeshFactory::GenerateDefaultMeshes()
@@ -13,11 +13,13 @@ namespace idk::ogl
 		{
 			vec3 pos;
 			vec3 normal;
+			vec2 uv;
 		};
 		vector<OpenGLDescriptor> descriptor
 		{
 			OpenGLDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
-			OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) }
+			OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) },
+			OpenGLDescriptor{vtx::Attrib::UV,   sizeof(Vertex), offsetof(Vertex, uv) }
 		};
 		{ /* create sphere mesh*/
 			std::vector<Vertex> icosahedron;
@@ -231,7 +233,11 @@ namespace idk::ogl
 			// Subdivide the icosahedron into a sphere here.
 			subdivideIcosahedron(icosahedron, icosahedronIndices);
 
-			auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
+			// project uvs
+			for (auto& elem : icosahedron)
+				elem.uv = spherical_projection(elem.pos);
+
+			auto sphere_mesh = Core::GetResourceManager().Emplace<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddMeshEntry(0, 0, icosahedronIndices.size(), 0);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -274,6 +280,7 @@ namespace idk::ogl
 				Vertex{ vec3{ -sz, -sz, -sz}, vec3{0,-1,0} },  // bottom
 				Vertex{ vec3{ -sz, -sz,  sz}, vec3{0,-1,0} },  // bottom
 			};
+
 			std::vector<int> indices{
 				1, 0, 3,
 				2, 1, 3,

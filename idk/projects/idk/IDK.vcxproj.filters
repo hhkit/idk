@@ -604,6 +604,10 @@
     <ClInclude Include="gfx\ShaderTemplateLoader.h" />
     <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
+    <ClInclude Include="gfx\ShaderGraph_helpers.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -878,6 +882,10 @@
       <Filter>audio</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\projector_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -15,22 +15,21 @@ namespace idk
 		ResourceBundle retval;
 
 		Assimp::Importer importer;
-		const aiScene* ai_scene = importer.ReadFile(path_to_resource.GetFullPath().data(),
-			aiProcess_Triangulate |		// Triangulates non-triangles
-			aiProcess_GenSmoothNormals |	// Generates missing normals
-			aiProcess_FlipUVs |
-			aiProcess_JoinIdenticalVertices);;
+		const aiScene* ai_scene = importer.ReadFile( path_to_resource.GetFullPath().data(),
+													 aiProcess_Triangulate |		// Triangulates non-triangles
+													 aiProcess_GenSmoothNormals |   // Generates missing normals
+													 aiProcess_FlipUVs |
+													 aiProcess_JoinIdenticalVertices);;
 
 		if (ai_scene == nullptr)
 			return retval;
-
 		auto mesh_handle = Core::GetResourceManager().Create<ogl::OpenGLMesh>();
 
 		vector<Vertex> vertices;
 		vector<unsigned> indices;
 		unsigned num_vertices = 0, num_indices = 0;
 
-		fbx_loader_detail::BoneSet bones_set{ fbx_loader_detail::BoneData{ai_scene->mRootNode->mName.data} };
+		fbx_loader_detail::BoneSet bones_set{ };
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
 
@@ -61,6 +60,7 @@ namespace idk
 			const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
 			for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
 			{
+				
 				const aiVector3D& pos = ai_mesh->mVertices[k];
 				const aiVector3D& normal = ai_mesh->mNormals[k];
 				const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;

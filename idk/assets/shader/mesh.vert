@@ -48,7 +48,7 @@ layout(location = 0) out gl_PerVertex
 void main()
 {
 	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normal, 1.0));
+	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normalize(normal), 0.0));
 	vs_out.uv       = uv;
     gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
 }

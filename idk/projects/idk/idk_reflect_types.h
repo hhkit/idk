@@ -62,12 +62,10 @@ namespace idk::reflect
         , shadergraph::Slot
         , shadergraph::Node
         , shadergraph::Link
-        , shadergraph::Value
         , shadergraph::Parameter
         , hash_table<Guid, shadergraph::Node>
         , vector<shadergraph::Slot>
         , vector<shadergraph::Link>
-        , vector<shadergraph::Value>
         , vector<shadergraph::Parameter>
 	>;
 }
