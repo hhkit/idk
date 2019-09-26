@@ -140,7 +140,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		//if (gfx_api != GraphicsAPI::Vulkan)
 		//mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
-		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
 
@@ -196,24 +196,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
 		seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
 		seduceme->Transform()->scale = vec3{ 1.f / 4 };
-		seduceme->AddComponent<RigidBody>(); // ->initial_velocity = vec3{ 0.1, 0, 0 };
-		seduceme->AddComponent<Collider>()->shape = sphere{};
+		seduceme->AddComponent<RigidBody>();
+		auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->material_instance.material = h_mat;
+		seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	{
 		auto seducer = scene->CreateGameObject();
 		seducer->GetComponent<Name>()->name = "seducer";
 		seducer->Transform()->position = vec3{ -2, 0.125, 0 };
 		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  1, 0, 0 };
-		seducer->AddComponent<Collider>()->shape = sphere{};
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
+		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->material_instance.material = h_mat;
+		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	{
 		auto seducer = scene->CreateGameObject();
 		seducer->GetComponent<Name>()->name = "seducer";
 		seducer->Transform()->position = vec3{ 2, 0.125, 0 };
 		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -1, 0, 0 };
-		seducer->AddComponent<Collider>()->shape = sphere{};
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+		auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
+		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+		mesh_rend->material_instance.material = h_mat;
+		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 
 	if(0)
