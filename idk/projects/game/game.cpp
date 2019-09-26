@@ -108,8 +108,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			go->Transform()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
-			auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" });
+			auto mesh_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/Running.fbx" });
 			//auto anim_resources = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5anim" });
 			mesh_rend->mesh = mesh_resources[0].As<Mesh>();
 			animator->SetSkeleton(mesh_resources[1].As<anim::Skeleton>());
@@ -133,14 +132,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
-		go->GetComponent<Transform>()->scale = vec3{ 1 / 200.f };
+		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		//if (gfx_api != GraphicsAPI::Vulkan)
-		mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+		//mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		//mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
 		mesh_rend->material_instance.material = h_mat;
 		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
@@ -148,8 +147,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
-	// createtest_obj(vec3{ 0, 0, -0.5 });
-	//createtest_obj(vec3{ -0.5, 0, 0 });
+	createtest_obj(vec3{ 0.5, 0, 0 });
+	createtest_obj(vec3{ -0.5, 0, 0 });
 	//createtest_obj(vec3{ 0, 0.5, 0 });
 	//createtest_obj(vec3{ 0, -0.5, 0 });
 

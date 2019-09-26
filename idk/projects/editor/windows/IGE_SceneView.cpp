@@ -90,7 +90,7 @@ namespace idk {
 			auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
 			auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			auto tfm = cam.current_camera->GetGameObject()->Transform();
-			if (abs(scroll) > epsilon)
+			if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
 				tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * pan_multiplier);
 		}
 		//Middle Mouse Pan control

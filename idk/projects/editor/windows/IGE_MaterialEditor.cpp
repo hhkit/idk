@@ -551,7 +551,7 @@ namespace idk
             auto folder_name = item.name;
             if (folder_name == "master") // skip master nodes
                 return nullptr;
-            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
             {
                 stack.push_back(&item);
                 for (auto& inner_item : item.items)
@@ -573,11 +573,14 @@ namespace idk
         else
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f });
-            if (ImGui::MenuItem(item.name.c_str()))
-            {
-                ImGui::PopStyleColor();
-                return &item;
-            }
+			ImGui::Unindent();
+            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+			ImGui::Indent();
+			if (ImGui::IsItemClicked())
+			{
+				ImGui::PopStyleColor();
+				return &item;
+			}
             ImGui::PopStyleColor();
         }
 
@@ -587,6 +590,13 @@ namespace idk
     static node_item init_templates_hierarchy()
     {
         node_item root;
+		auto get_uppercase = [](const string& str)
+		{
+			auto ret = str;
+			for (char& c : ret)
+				c = static_cast<char>(toupper(c));
+			return ret;
+		};
 
         for (auto& tpl : NodeTemplate::GetTable())
         {
@@ -610,7 +620,11 @@ namespace idk
         {
             auto* item = stack.back();
             stack.pop_back();
-            std::sort(item->items.begin(), item->items.end(), [](node_item& a, node_item& b) { return a.name < b.name; });
+            std::sort(item->items.begin(), item->items.end(),
+				[get_uppercase](node_item& a, node_item& b)
+				{ 
+					return get_uppercase(a.name) < get_uppercase(b.name);
+				});
             for (auto& inner_item : item->items)
             {
                 stack.push_back(&inner_item);
@@ -624,6 +638,7 @@ namespace idk
     {
         static node_item templates_hierarchy = init_templates_hierarchy();
         std::vector<node_item*> stack;
+
         auto* item = context_menu_node_item(templates_hierarchy, stack);
         
         if (item)
@@ -716,7 +731,7 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        ImGui::SetNextWindowSizeConstraints(ImVec2{ 0, 0 }, ImVec2{ 1000, 320 });
+        ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 1000, 320 });
         if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::BeginPopupContextWindow())
         {
             auto str = draw_nodes_context_menu();

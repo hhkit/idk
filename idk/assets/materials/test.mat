@@ -4,20 +4,16 @@ links:
   slot_in: 0
   slot_out: 1
 - node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 7af555fd-e108-491d-aee9-b15767b179f2
-  slot_in: 2
-  slot_out: 0
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   node_out: a1fd5460-f48c-447f-bba3-4fa0aecc1c96
   slot_in: 1
   slot_out: 0
 master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
   2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6: 
-    control_values: 1.000000,0.000000,0.000000,1.000000|
+    control_values: 0.072537,1.000000,0.000000,1.000000|
     guid: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
     input_slots: []
-    name: constants\Color
+    name: input\basic\Color
     output_slots: 
     - {type: VEC4, value: ""}
     - {type: VEC3, value: ""}
@@ -44,9 +40,9 @@ nodes:
     input_slots: 
     - {type: VEC3, value: ""}
     - {type: VEC3, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: 0}
-    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 1.000000}
+    - {type: FLOAT, value: 1.000000}
+    - {type: FLOAT, value: 0.000000}
     name: master\PBR
     output_slots: []
     position: {x: 514.000000, y: 164.000000}
