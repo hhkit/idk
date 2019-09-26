@@ -48,8 +48,11 @@ namespace idk::vkn
 		uint32_t				   CurrSemaphoreFrame ()const;
 		uint32_t				   AcquiredImageValue ()const;
 		vk::RenderPass             BasicRenderPass    (BasicRenderPasses type)const;
-		vk::Result& AcquiredImageResult()const;
+		vk::Result&				AcquiredImageResult()const;
 		uint32_t				   MaxFrameInFlight()const;
+		uint32_t                   SwapchainImageCount()const;
+
+		VulkanState& vulkan() const;
 
 
 		vk::UniqueShaderModule     CreateShaderModule(const string_view& code);
@@ -63,7 +66,6 @@ namespace idk::vkn
 	private:
 		struct pimpl;
 		std::unique_ptr<pimpl> impl_;
-		VulkanState& vulkan() const;
 		VulkanState* vulkan_;
 	};
 }

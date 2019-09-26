@@ -54,15 +54,6 @@ namespace idk::vkn
 
 	class VulkanState;
 
-	struct FrameObjects
-	{
-		DescriptorsManager pools;
-		UboManager ubo_manager;
-		FrameObjects() = default;
-		FrameObjects(FrameObjects&&) = default;
-		void FrameReset();
-	};
-
 	struct QueueFamilyIndices
 	{
 		uint32_t					 queueFamilyIndexCount;
@@ -124,6 +115,9 @@ namespace idk::vkn
 		//renderFrameIndex GetRenderFrameIndex();
 		//void SubmitRenderFrameInfo(const renderFrameIndex& );
 
+		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, hlp::MemoryAllocator&);
+
+
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 			VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -138,6 +132,11 @@ namespace idk::vkn
 		//vk::RenderPass RenderPass_RgbaColorDepth()const;
 #pragma endregion
 
+
+		uint32_t					imageCount;
+		vk::Extent2D                extent;
+		vk::Format					format;
+		vk::SurfaceFormatKHR        surfaceFormat;
 
 	private:
 		// type aliases
@@ -180,7 +179,7 @@ namespace idk::vkn
 		//Deprecated
 		//std::vector<PresentationSignals>     m_pres_signals;
 
-		SwapChainInfo                        m_swapchain;
+		std::unique_ptr<SwapChainInfo>       m_swapchain;
 
 
 
@@ -198,6 +197,7 @@ namespace idk::vkn
 		vk::Result					rvRes;
 		vk::Semaphore				waitSemaphores;
 		vk::Semaphore				readySemaphores;
+		vk::UniqueFence				imageFence;
 
 		//This should be replaced with a signaling system of some sort
 		bool						m_imguiNeedsToResize{ false };
@@ -223,7 +223,6 @@ namespace idk::vkn
 
 		
 		//Texture functions start//
-		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::UniqueImage& image, vk::UniqueDeviceMemory& imageMemory);
 		vk::UniqueImageView createImageView(vk::UniqueImage& img, vk::Format format);
 		//Texture functions end//
 

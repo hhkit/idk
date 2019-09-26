@@ -225,6 +225,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="RegisterVulkanFactories.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
+    <ClInclude Include="utils\FrameObjects.h" />
     <ClInclude Include="utils\GlslToSpirv.h" />
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="object_pool.h" />
@@ -280,6 +281,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />
     <ClCompile Include="utils\PresentationSignals.cpp" />
+    <ClCompile Include="utils\SwapchainInfo.cpp" />
     <ClCompile Include="utils\TriBuffer.cpp" />
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />

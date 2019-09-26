@@ -42,7 +42,7 @@ namespace idk::vkn
 		vk::Queue& VulkanView::GraphicsQueue()const { return vulkan().m_graphics_queue; }
 		vk::Queue& VulkanView::PresentQueue()const { return vulkan().m_present_queue; }
 		//vk::Queue          m_transfer_queue = {}{}					                  				 ;
-		SwapChainInfo& VulkanView::Swapchain()const { return vulkan().m_swapchain; }
+		SwapChainInfo& VulkanView::Swapchain()const { return *vulkan().m_swapchain; }
 
 		uint32_t VulkanView::CurrFrame() const
 		{
@@ -51,7 +51,7 @@ namespace idk::vkn
 
 		PresentationSignals& VulkanView::CurrPresentationSignals() const
 		{
-			return vulkan_->m_swapchain.m_graphics.pSignals[vulkan_->current_frame];
+			return vulkan_->m_swapchain->m_graphics.pSignals[vulkan_->current_frame];
 		}
 
 		void VulkanView::SwapRenderState() const
@@ -103,7 +103,7 @@ namespace idk::vkn
 		PresentationSignals& VulkanView::GetCurrentSignals() const
 		{
 			// TODO: insert return statement here
-			return vulkan().m_swapchain.m_graphics.pSignals[vulkan().current_frame];
+			return vulkan().m_swapchain->m_graphics.pSignals[vulkan().current_frame];
 		}
 		uint32_t VulkanView::CurrSemaphoreFrame() const
 		{
@@ -125,6 +125,11 @@ namespace idk::vkn
 		uint32_t VulkanView::MaxFrameInFlight() const
 		{
 			return vulkan().max_frames_in_flight;
+		}
+
+		uint32_t VulkanView::SwapchainImageCount() const
+		{
+			return vulkan_->imageCount;
 		}
 
 		vk::UniqueShaderModule VulkanView::CreateShaderModule(const idk::string_view& code)

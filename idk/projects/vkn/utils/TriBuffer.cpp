@@ -3,25 +3,30 @@
 #include "vkn/VulkanView.h"
 #include "vkn/utils/SwapchainInfo.h"
 
+#include <vkn/VulkanState.h>
+
 #include "TriBuffer.h"
 
 namespace idk::vkn {
-	TriBuffer::TriBuffer(VulkanView& view)
-		:images{ }, image_views{}, pSignals{}
+	TriBuffer::TriBuffer(VulkanView& view,const bool& cImage)
+		:images{ }, image_views{}, pSignals{}, mems{*view.Device(),view.PDevice()}
 	{
 		pSignals.resize(view.MaxFrameInFlight());
 		for (auto& elem : pSignals)
 			elem.Init(view);
 	}
-	TriBuffer::TriBuffer(vector<vk::Image> img, vector<vk::UniqueImageView> imgView, VulkanView& view)
-		:images{ img }, image_views{ std::move(imgView) }, pSignals{}
+	/*
+	TriBuffer::TriBuffer(vector<vk::Image> img, vector<vk::UniqueImageView> imgView,vector<hlp::MemoryAllocator> m, VulkanView& view)
+		:images{ img }, image_views{ std::move(imgView) }, mems{std::move(m)}, pSignals{}
 	{
 		pSignals.resize(view.MaxFrameInFlight());
+		
 		for(auto& elem: pSignals)
 			elem.Init(view);
 	}
+	*/
 	TriBuffer::TriBuffer(TriBuffer&& rhs)
-		:images{ std::move(rhs.images) }, image_views{ std::move(rhs.image_views) }, pSignals{ std::move(rhs.pSignals) }
+		:images{ std::move(rhs.images) }, image_views{ std::move(rhs.image_views) }, pSignals{ std::move(rhs.pSignals) }, mems{std::move(rhs.mems)}
 	{
 	}
 	TriBuffer& TriBuffer::operator=(TriBuffer&& rhs)
@@ -29,6 +34,7 @@ namespace idk::vkn {
 		// TODO: insert return statement here
 		std::swap(images,rhs.images);
 		std::swap(image_views,rhs.image_views);
+		std::swap(mems,rhs.mems);
 		std::swap(pSignals,rhs.pSignals);
 
 		return *this;
@@ -49,7 +55,7 @@ namespace idk::vkn {
 				vk::ImageViewCreateFlags{},
 				image,
 				vk::ImageViewType::e2D,
-				view.Swapchain().surface_format.format,
+				view.vulkan().surfaceFormat.format,
 				vk::ComponentMapping{},
 				vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
 			};
@@ -61,5 +67,28 @@ namespace idk::vkn {
 		pSignals.resize(view.MaxFrameInFlight());
 		for (auto& elem : pSignals)
 			elem.Init(view);
+	}
+	void TriBuffer::CreateImagePool(VulkanView& view)
+	{
+		images.clear();
+		for (unsigned int i = 0; i < view.vulkan().imageCount; ++i)
+		{
+			//auto ptr = std::make_unique<VknTexture>();
+			//auto&& [image, alloc] = TextureLoader::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
+			images.emplace_back(vk::Image{});
+
+			view.vulkan().createImage(
+				view.vulkan().extent.width,
+				view.vulkan().extent.height,
+				view.vulkan().surfaceFormat.format,
+				vk::ImageTiling::eOptimal,
+				vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eInputAttachment,
+				vk::MemoryPropertyFlagBits::eDeviceLocal,
+				images[images.size() - 1],
+				mems
+			);
+
+		}
+		CreateImageViewWithCurrImgs(view);
 	}
 };

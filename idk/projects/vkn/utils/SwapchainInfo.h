@@ -3,6 +3,10 @@
 
 #include <vkn/utils/TriBuffer.h>
 
+#include <vkn/utils/FrameObjects.h>
+
+#include <vkn/VulkanView.h>
+
 
 namespace idk::vkn {
 
@@ -22,5 +26,12 @@ namespace idk::vkn {
 
 		vector<FrameObjects> frame_objects;
 
+		SwapChainInfo() = default;
+		SwapChainInfo(VulkanView& view,vk::UniqueSwapchainKHR s, vk::PresentModeKHR pm, vk::SurfaceFormatKHR sf,vk::Extent2D e);
+		SwapChainInfo(VulkanView& view);
+
+		SwapChainInfo(SwapChainInfo&& rhs);
+
+		SwapChainInfo& operator=(SwapChainInfo&& rhs);
 	};
 };

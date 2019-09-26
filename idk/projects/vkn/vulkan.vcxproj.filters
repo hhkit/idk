@@ -147,6 +147,9 @@
     <ClInclude Include="utils\SwapchainInfo.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="utils\FrameObjects.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -272,6 +275,7 @@
     <ClCompile Include="utils\TriBuffer.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="utils\SwapchainInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

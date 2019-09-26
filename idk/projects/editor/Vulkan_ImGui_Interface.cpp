@@ -53,10 +53,12 @@ namespace idk
 
 
 			//New changes
-			editorControls.edt_buffer = std::make_shared<vkn::TriBuffer>(vknViews);
-			editorControls.edt_buffer->images = vknViews.Swapchain().m_swapchainGraphics.images;
+			editorControls.edt_buffer = std::make_shared<vkn::TriBuffer>(vknViews,true);
+			editorControls.edt_buffer->CreateImagePool(vknViews);
 			editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
-			editorControls.edt_buffer->CreatePresentationSignals(vknViews);
+			//editorControls.edt_buffer->images = vknViews.Swapchain().m_swapchainGraphics.images;
+			//editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
+			//editorControls.edt_buffer->CreatePresentationSignals(vknViews);
 			editorControls.edt_buffer->enabled = true;
 
 			vknViews.Swapchain().m_inBetweens.emplace_back(editorControls.edt_buffer);
@@ -336,6 +338,8 @@ namespace idk
 					info.pSignalSemaphores = &render_complete_semaphore;
 
 					fd->edt_cBuffer->end(vknViews.Dispatcher());
+
+					vkn::hlp::TransitionImageLayout(*fd->edt_cBuffer, vknViews.GraphicsQueue(), editorControls.edt_frames[editorControls.edt_frameIndex].edt_backbuffer, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 					//Submit to queue
 					err = vknViews.GraphicsQueue().submit(1, &info, *fd->edt_fence, vknViews.Dispatcher());
