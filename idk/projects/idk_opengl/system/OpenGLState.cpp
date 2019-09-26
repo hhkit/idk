@@ -59,6 +59,15 @@ namespace idk::ogl
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
+		for (const auto& elem : curr_object_buffer.lights)
+		{
+			if (elem.index == 0) // point light
+				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
+
+			if (elem.index == 1) // directional light
+				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir }, elem.light_color);
+		}
+
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
@@ -68,7 +77,7 @@ namespace idk::ogl
 			//Set the clear color according to the camera
 			
 			// calculate lights for this camera
-			vector<LightData> lights = curr_object_buffer.lights;
+			auto lights = curr_object_buffer.lights;
 			for (auto& elem : lights)
 			{
 				elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
