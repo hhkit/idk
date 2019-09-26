@@ -61,12 +61,16 @@ void main()
   b_transform      += BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1];
   b_transform      += BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2];
   b_transform      += BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
-  
-	vs_out.position = vec3(ObjectMat4s.object_transform * b_transform * vec4(position, 1.0));
-
-	vs_out.normal   = vec3(ObjectMat4s.normal_transform 
-                    * b_transform
-                    * vec4(normal, 0.0));
+	
+	b_transform /= (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3]);
+	mat4 resultant = ObjectMat4s.object_transform * b_transform;  
+	vs_out.position = vec3(resultant * vec4(position, 1.0));
+	// O B 
+	// Binv O inv  // inv(OB)
+	// Oinv transpose * B inv tranpose  // tranpose(inv(OB))
+	//mat4 nml_transform = ObjectMat4s.normal_transform * transpose(inverse(b_transform));
+	mat4 nml_transform = transpose(inverse(resultant));
+	vs_out.normal   = vec3( nml_transform * vec4(normal, 0.0));
 	vs_out.uv       = uv;
 	gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
  
