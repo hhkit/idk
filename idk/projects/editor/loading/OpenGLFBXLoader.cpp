@@ -14,12 +14,16 @@ namespace idk
 
 		FileResources retval;
 
+		aiPropertyStore* properties = aiCreatePropertyStore();
+		aiSetImportPropertyInteger(properties, "PP_PTV_NORMALIZE", 1);
+
 		Assimp::Importer importer;
-		const aiScene* ai_scene = importer.ReadFile( path_to_resource.GetFullPath().data(),
-													 aiProcess_Triangulate |		// Triangulates non-triangles
-													 aiProcess_GenSmoothNormals |	// Generates missing normals
-													 aiProcess_FlipUVs |
-													 aiProcess_JoinIdenticalVertices);;
+		const aiScene* ai_scene = aiImportFileExWithProperties(// importer.ReadFile( path_to_resource.GetFullPath().data(),
+																path_to_resource.GetFullPath().data(),
+																aiProcess_Triangulate |		// Triangulates non-triangles
+																aiProcess_GenSmoothNormals |	// Generates missing normals
+																aiProcess_FlipUVs |
+																aiProcess_JoinIdenticalVertices, nullptr, properties);;
 
 		if (ai_scene == nullptr)
 			return retval;

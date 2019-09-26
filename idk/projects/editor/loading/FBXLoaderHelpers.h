@@ -6,6 +6,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/config.h>
+#include <assimp/cimport.h>
 
 #include <gfx/GraphicsSystem.h>
 #include <idk_opengl/resource/OpenGLMesh.h>
