@@ -146,7 +146,7 @@ void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buff
 
 void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
 {
-	if(!dont_begin)
+	if (!dont_begin)
 		BeginSingleTimeCBufferCmd(cmd_buffer, info);
 	vk::DispatchLoaderDefault dispatcher{};
 
@@ -165,28 +165,45 @@ void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Q
 
 	vk::PipelineStageFlags sourceStage;
 	vk::PipelineStageFlags destinationStage;
+	sourceStage = vk::PipelineStageFlagBits::eAllCommands;
+	destinationStage = vk::PipelineStageFlagBits::eAllCommands;
 	vBarrier.srcAccessMask = vk::AccessFlags::Flags();
 	vBarrier.dstAccessMask = vk::AccessFlags::Flags();
-	if (oLayout == vk::ImageLayout::eTransferDstOptimal)
+	switch (oLayout)
 	{
-		sourceStage = vk::PipelineStageFlagBits::eTransfer;
-		vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-	}else 
-	if (oLayout == vk::ImageLayout::eTransferSrcOptimal)
-	{
+		case vk::ImageLayout::eTransferDstOptimal:
+		{
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		}
+		break;
+		case vk::ImageLayout::eTransferSrcOptimal:
+		{
 		sourceStage = vk::PipelineStageFlagBits::eTransfer;
 		vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+		}
+		break;
 	}
-	if (nLayout == vk::ImageLayout::eTransferDstOptimal)
+	switch(nLayout)
 	{
-		destinationStage = vk::PipelineStageFlagBits::eTransfer;
-		vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-	}else
-		if (nLayout == vk::ImageLayout::eTransferSrcOptimal)
+		case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+			destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+			vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+			vBarrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead| vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+			break;
+		case vk::ImageLayout::eTransferDstOptimal:
 		{
 			destinationStage = vk::PipelineStageFlagBits::eTransfer;
-			vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+			vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
 		}
+		break;
+		case vk::ImageLayout::eTransferSrcOptimal:
+			{
+				destinationStage = vk::PipelineStageFlagBits::eTransfer;
+				vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+			}
+		break;
+	}
 	if ((oLayout == vk::ImageLayout::eUndefined || oLayout == vk::ImageLayout::ePreinitialized) && nLayout == vk::ImageLayout::eTransferDstOptimal) {
 		vBarrier.srcAccessMask = vk::AccessFlags::Flags();
 		vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
@@ -204,8 +221,6 @@ void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Q
 	else {
 		//vBarrier.srcAccessMask = vk::AccessFlags::Flags();
 		//vBarrier.dstAccessMask = vk::AccessFlags::Flags();
-		sourceStage = vk::PipelineStageFlagBits::eAllCommands;
-		destinationStage = vk::PipelineStageFlagBits::eAllCommands;
 		//throw std::invalid_argument("unsupported layout transition!");
 	}
 

@@ -525,7 +525,7 @@ namespace idk::vkn
 			,vk::SampleCountFlagBits::e1
 			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eStore
-			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eDontCare
 			,vk::ImageLayout::eUndefined
 			,vk::ImageLayout::ePresentSrcKHR
@@ -547,9 +547,9 @@ namespace idk::vkn
 			vk::AttachmentDescriptionFlags{}
 			,vk::Format::eD16Unorm
 			,vk::SampleCountFlagBits::e1
-			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eStore
-			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eStore
 			,vk::ImageLayout::eDepthStencilAttachmentOptimal
 			,vk::ImageLayout::eGeneral

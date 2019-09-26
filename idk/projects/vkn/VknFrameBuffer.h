@@ -37,6 +37,7 @@ namespace idk::vkn
 		void Finalize() override; //Finalizes the framebuffer
 
 		//GLuint DepthBuffer() const;
+		void SetTextureCreationInfo(hlp::MemoryAllocator* alloc, vk::Fence f) { allocator = alloc; fence = f; }
 	private:
 		void  AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture) override;
 		vk::UniqueSemaphore   ready_semaphore;
@@ -47,6 +48,8 @@ namespace idk::vkn
 		vector<vk::UniqueImageView> image_views;
 		vector<vk::ImageView> imageView{};
 		vec2				  size{};
+		hlp::MemoryAllocator* allocator;
+		vk::Fence             fence;
 		bool				  uncreated{true};
 	};
 }

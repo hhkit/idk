@@ -198,7 +198,7 @@ namespace idk::vkn
 		size_t num_bytes = len;
 
 		vk::ImageUsageFlags attachment_type = (format==vk::Format::eD16Unorm)? vk::ImageUsageFlagBits::eDepthStencilAttachment:vk::ImageUsageFlagBits::eColorAttachment;
-		vk::ImageLayout     attachment_layout = (format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
+		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 		std::optional<vk::ImageSubresourceRange> range{};
 
 		vk::ImageCreateInfo imageInfo{};

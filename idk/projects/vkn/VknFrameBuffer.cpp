@@ -3,6 +3,9 @@
 #include <core/Core.h>
 #include <vkn/VknTexture.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+
+#include <vkn/VknTextureLoader.h>
+
 namespace idk::vkn
 {
 	static VulkanView& View()
@@ -197,7 +200,7 @@ namespace idk::vkn
 
 	void TransitionTexture(vk::CommandBuffer cmd_buffer, AttachmentType type, VknTexture& tex)
 	{
-
+		hlp::TransitionImageLayout(true, cmd_buffer, View().GraphicsQueue(), *tex.image, tex.format, vk::ImageLayout::eUndefined, (type == AttachmentType::eColor) ? vk::ImageLayout::eColorAttachmentOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal);
 	}
 
 	void VknFrameBuffer::PrepareDraw(vk::CommandBuffer& cmd_buffer)
@@ -229,7 +232,19 @@ namespace idk::vkn
 
 	void VknFrameBuffer::AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture)
 	{
-
+		TextureLoader loader;
+		auto ptr = RscHandle<VknTexture>(texture);
+		auto sz = texture->Size();
+		switch (type)
+		{ 
+		case AttachmentType::eColor:
+			loader.LoadTexture(*ptr, TextureFormat::eBGRA32, {}, nullptr, s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, *allocator, fence, true);
+		break;
+		case AttachmentType::eDepth:
+			auto depth_ptr = ptr;
+			loader.LoadTexture(*depth_ptr, TextureFormat::eD16Unorm, {}, nullptr, s_cast<size_t>(2 * sz.x * sz.y), ivec2{ sz }, *allocator, fence, true);
+			break;
+		}
 	}
 
 	void VknFrameBuffer::Finalize()
