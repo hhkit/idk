@@ -510,7 +510,12 @@ namespace idk::vkn
 		};
 		return m_device->createShaderModuleUnique(mod);
 	}
-
+	enum AttachmentType
+	{
+		eDepthStencil,
+		eColor,
+		eSize
+	};
 	void VulkanState::createRenderPass()
 	{
 		vk::AttachmentDescription colorAttachment
@@ -534,14 +539,66 @@ namespace idk::vkn
 			,vk::AttachmentStoreOp::eStore
 			,vk::AttachmentLoadOp::eDontCare
 			,vk::AttachmentStoreOp::eDontCare
-			,vk::ImageLayout::eUndefined
-			,vk::ImageLayout::ePresentSrcKHR
+			,vk::ImageLayout::eColorAttachmentOptimal
+			,vk::ImageLayout::eGeneral
+		};
+		vk::AttachmentDescription depthAttachment
+		{
+			vk::AttachmentDescriptionFlags{}
+			,vk::Format::eD16Unorm
+			,vk::SampleCountFlagBits::e1
+			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentStoreOp::eStore
+			,vk::AttachmentLoadOp::eDontCare
+			,vk::AttachmentStoreOp::eStore
+			,vk::ImageLayout::eDepthStencilAttachmentOptimal
+			,vk::ImageLayout::eGeneral
 		};
 
 		vk::AttachmentReference colorAttachmentRef
 		{
 			0
 			,vk::ImageLayout::eColorAttachmentOptimal
+		};
+		vector< vk::AttachmentDescription> colorAttachments2[BasicRenderPasses::eSizeBrp];
+		vector< vk::AttachmentReference> colorAttachmentRef2[BasicRenderPasses::eSizeBrp][AttachmentType::eSize];
+		
+		colorAttachmentRef2[BasicRenderPasses::eRgbaColorOnly][AttachmentType::eColor] = {
+			{
+				0
+				,vk::ImageLayout::eColorAttachmentOptimal
+			}
+		};
+		colorAttachmentRef2[BasicRenderPasses::eRgbaColorDepth][AttachmentType::eColor] = {
+			vk::AttachmentReference
+			{
+				0
+				,vk::ImageLayout::eColorAttachmentOptimal
+			}
+		};
+		colorAttachmentRef2[BasicRenderPasses::eRgbaColorDepth][AttachmentType::eDepthStencil] = {
+			vk::AttachmentReference{
+				1
+				,vk::ImageLayout::eDepthStencilAttachmentOptimal
+			}
+		};
+		colorAttachmentRef2[BasicRenderPasses::eDepthOnly][AttachmentType::eDepthStencil] = {
+			{
+				0
+				,vk::ImageLayout::eDepthStencilAttachmentOptimal
+			}
+		};
+
+		
+		colorAttachments2[BasicRenderPasses::eRgbaColorOnly]= {
+			colorAttachment
+		};
+		colorAttachments2[BasicRenderPasses::eRgbaColorDepth]={
+			colorAttachment,
+			depthAttachment
+		};
+		colorAttachments2[BasicRenderPasses::eDepthOnly]={
+			depthAttachment
 		};
 
 		vk::SubpassDescription subpass
@@ -552,6 +609,63 @@ namespace idk::vkn
 			,1,&colorAttachmentRef
 		};
 
+
+		vk::SubpassDescription subpass2[BasicRenderPasses::eSizeBrp];
+		BasicRenderPasses rp_type{};
+		for(auto& sp : subpass2)
+		{
+			//auto rp_type = BasicRenderPasses::eDepthOnly;
+			auto& attachmentRef = colorAttachmentRef2[rp_type];
+
+			subpass2[rp_type] = vk::SubpassDescription{
+				vk::SubpassDescriptionFlags{}
+				,vk::PipelineBindPoint::eGraphics
+				,0,nullptr
+				,hlp::arr_count(attachmentRef[AttachmentType::eColor])
+				,std::data(attachmentRef[AttachmentType::eColor])
+				,nullptr
+				,(std::size(attachmentRef[AttachmentType::eDepthStencil]))?std::data(attachmentRef[AttachmentType::eDepthStencil]):nullptr
+			};
+			rp_type++;
+		}
+		vk::SubpassDependency dependency2[BasicRenderPasses::eSizeBrp];
+		{
+			rp_type = BasicRenderPasses::eRgbaColorOnly;
+			dependency2[rp_type] =
+				vk::SubpassDependency{
+					VK_SUBPASS_EXTERNAL//src
+					,0U				   //dest
+					,vk::PipelineStageFlagBits::eColorAttachmentOutput
+					,vk::PipelineStageFlagBits::eColorAttachmentOutput
+					,vk::AccessFlags{}
+					,vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite
+			};
+		}
+		{
+			rp_type = BasicRenderPasses::eRgbaColorDepth;
+			dependency2[rp_type] =
+				vk::SubpassDependency{
+					VK_SUBPASS_EXTERNAL//src
+					,0U				   //dest
+					,vk::PipelineStageFlagBits::eColorAttachmentOutput
+					,vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests
+					,vk::AccessFlags{}
+					, vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite
+					| vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite
+			};
+		}
+		{
+			rp_type = BasicRenderPasses::eDepthOnly;
+			dependency2[rp_type] =
+				vk::SubpassDependency{
+					VK_SUBPASS_EXTERNAL//src
+					,0U				   //dest
+					,vk::PipelineStageFlagBits::eColorAttachmentOutput
+					,vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests
+					,vk::AccessFlags{}
+					,vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite|vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite
+			};
+		}
 		vk::SubpassDependency dependency
 		{
 			VK_SUBPASS_EXTERNAL//src
@@ -568,7 +682,20 @@ namespace idk::vkn
 			,1,&subpass
 			,1,&dependency
 		};
+		vk::RenderPassCreateInfo renderPassInfo2[BasicRenderPasses::eSizeBrp];
+		rp_type = {};
+		for (auto& rpi : renderPassInfo2)
+		{
 
+			rpi=
+			vk::RenderPassCreateInfo{
+				vk::RenderPassCreateFlags{}
+				,hlp::arr_count(colorAttachments2[rp_type]),std::data(colorAttachments2[rp_type])
+				,1,&subpass2[rp_type]
+				,1,&dependency2[rp_type]
+			};
+			m_basic_renderpasses[rp_type++] = m_device->createRenderPassUnique(rpi, nullptr, dispatcher);
+		}
 		m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 		renderPassInfo.pAttachments = &colorAttachment2;
 		m_crenderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
@@ -718,6 +845,11 @@ namespace idk::vkn
 		return static_cast<ValHandler*>((pUserData) ? pUserData : &def)->processMsg(messageSeverity, messageType, pCallbackData);
 	}
 
+	vk::RenderPass VulkanState::BasicRenderPass(BasicRenderPasses type) const
+	{
+		return *m_basic_renderpasses[type];
+	}
+
 	void VulkanState::CleanupSwapChain() {
 
 		m_renderpass.reset();
@@ -815,11 +947,12 @@ namespace idk::vkn
 
 			vk::ClearValue clearcolor{ vk::ClearColorValue{ std::array<float,4>{0.0f,0.0f,0.0f,0.0f} } };
 			//Get default framebuffer
+			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknFrameBuffer>();
 			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknFrameBuffer>().Buffer();
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{
-				render_state.RenderPass()
+				vkn_fb.GetRenderPass()
 				,frame_buffer
 				,vk::Rect2D{ vk::Offset2D{}, m_swapchain.extent }
 				,1

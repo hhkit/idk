@@ -132,7 +132,7 @@ namespace idk::vkn
 					,attribute_info{ idk::AttribFormat::eMat4 ,1, offsetof(idk::debug_instance,model) }
 				}
 			});
-
+		config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
 		Init(config);
 	}
 

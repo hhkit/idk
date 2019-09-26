@@ -173,6 +173,7 @@ namespace idk::vkn
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs);
 		VulkanView& View()const { return *_view; }
+		vk::RenderPass GetRenderPass(const GraphicsState& state, VulkanView& view);
 		
 		RscHandle<ShaderProgram> GetMeshRendererShaderModule();
 		PipelineManager& GetPipelineManager();

@@ -612,6 +612,7 @@
     <ClInclude Include="math\shapes\frustum.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\BasicRenderPasses.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -16,6 +16,7 @@
 #include <vkn/utils/TriBuffer.h>
 
 #include <vkn/utils/SwapchainInfo.h>
+#include <vkn/vulkan_state_fwd.h>
 #undef max
 #undef min
 
@@ -33,6 +34,17 @@ namespace std
 
 namespace idk::vkn 
 {
+	
+	inline BasicRenderPasses operator++(BasicRenderPasses& type)
+	{
+		return type = s_cast<BasicRenderPasses>(s_cast<uint32_t>(type) + 1);
+	}
+	inline BasicRenderPasses operator++(BasicRenderPasses& type, int)
+	{
+		auto result = type;
+		++type;
+		return result;
+	}
 	struct window_info
 	{
 		ivec2     size;
@@ -118,6 +130,15 @@ namespace idk::vkn
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
 		bool						imguiEnabled{ true };
+
+#pragma region ("Render passes")
+		vk::RenderPass BasicRenderPass(BasicRenderPasses type)const;
+		//vk::RenderPass RenderPass_RgbaColorOnly ()const;
+		//vk::RenderPass RenderPass_DepthOnly     ()const;
+		//vk::RenderPass RenderPass_RgbaColorDepth()const;
+#pragma endregion
+
+
 	private:
 		// type aliases
 		friend class VulkanView;
@@ -164,6 +185,7 @@ namespace idk::vkn
 
 
 		vk::UniqueRenderPass                 m_renderpass;
+		vk::UniqueRenderPass                 m_basic_renderpasses[BasicRenderPasses::eSizeBrp];
 		vk::UniqueRenderPass                 m_crenderpass;
 
 

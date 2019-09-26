@@ -40,13 +40,14 @@ namespace idk::vkn
 		vk::UniqueRenderPass&      ContinuedRenderpass()const;
 		vk::Buffer&                CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.
-		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
-		void                       ResetMasterBuffer()const;
-		bool&					   ImguiResize();
-		window_info&			   GetWindowsInfo()const;
-		PresentationSignals& GetCurrentSignals()const;
-		uint32_t				   CurrSemaphoreFrame()const;
-		uint32_t				   AcquiredImageValue()const;
+		uint32_t                   AddToMasterBuffer  (const void* data, uint32_t len)const;
+		void                       ResetMasterBuffer  ()const;
+		bool&					   ImguiResize        ();
+		window_info&			   GetWindowsInfo     ()const;
+		PresentationSignals& GetCurrentSignals        ()const;
+		uint32_t				   CurrSemaphoreFrame ()const;
+		uint32_t				   AcquiredImageValue ()const;
+		vk::RenderPass             BasicRenderPass    (BasicRenderPasses type)const;
 		vk::Result& AcquiredImageResult()const;
 		uint32_t				   MaxFrameInFlight()const;
 

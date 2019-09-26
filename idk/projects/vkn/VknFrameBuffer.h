@@ -3,6 +3,7 @@
 //#include <glad/glad.h>
 #include <vkn/VulkanState.h>
 #include <vkn/VknImageData.h>
+#include <vkn/VulkanView.h>
 namespace idk::vkn
 {
 	class VknFrameBuffer
@@ -21,12 +22,23 @@ namespace idk::vkn
 		void ReattachImageViews(VulkanView& vknView);
 		void AttachImageViews(VknImageData&, VulkanView& vknView);
 		void AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
+		void AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
+		void PrepareDraw(vk::CommandBuffer& cmd_buffer);
+
+		vk::RenderPass GetRenderPass()const;
 
 		vk::Framebuffer Buffer();
 
 		vk::Semaphore ReadySignal();
+		BasicRenderPasses     rp_type;
+
+
+
+		void Finalize() override; //Finalizes the framebuffer
+
 		//GLuint DepthBuffer() const;
 	private:
+		void  AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture) override;
 		vk::UniqueSemaphore   ready_semaphore;
 		//GLuint depthbuffer = 0;
 		vk::UniqueFramebuffer buffer{ nullptr };

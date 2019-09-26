@@ -8,8 +8,14 @@
 #include <vkn/utils/utils.h> //ReverseMap
 namespace idk::vkn
 {
-	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format);
-	std::pair<vk::UniqueImage, hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
+	struct TextureResult
+	{
+		vk::UniqueImage first;
+		hlp::UniqueAlloc second;
+		vk::ImageAspectFlags aspect;
+	};
+	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
+	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
 
 	vk::Format    MapFormat(TextureFormat tf);
 	TextureFormat MapFormat(vk::Format    tf);
@@ -101,13 +107,14 @@ namespace idk::vkn
 		const void* rgba = rgba32;
 		auto format = MapFormat(pixel_format);
 		auto ptr = &texture;
-		auto&& [image, alloc] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
+		auto&& [image, alloc,aspect] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
+		ptr->img_aspect = aspect;
 		ptr->image = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format);
+		ptr->imageView = CreateImageView2D(device, *ptr->image, format,ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -139,13 +146,13 @@ namespace idk::vkn
 	void TransitionImageLayout(vk::CommandBuffer cmd_buffer,
 		vk::AccessFlags src_flags, vk::PipelineStageFlags src_stage,
 		vk::AccessFlags dst_flags, vk::PipelineStageFlags dst_stage,
-		vk::ImageLayout original_layout, vk::ImageLayout target, vk::Image image, std::optional<vk::ImageSubresourceRange> range = {})
+		vk::ImageLayout original_layout, vk::ImageLayout target, vk::Image image, std::optional<vk::ImageAspectFlags> image_aspect = {}, std::optional<vk::ImageSubresourceRange> range = {})
 	{
 		if (!range)
 			range =
 			vk::ImageSubresourceRange
 		{
-			vk::ImageAspectFlagBits::eColor,0,1,0,1
+			(image_aspect)? *image_aspect:vk::ImageAspectFlagBits::eColor,0,1,0,1
 		};
 		vk::ImageMemoryBarrier barrier
 		{
@@ -157,7 +164,7 @@ namespace idk::vkn
 
 
 
-	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format)
+	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect)
 	{
 		vk::ImageViewCreateInfo viewInfo{
 			vk::ImageViewCreateFlags{},
@@ -167,7 +174,7 @@ namespace idk::vkn
 			vk::ComponentMapping{},
 			vk::ImageSubresourceRange
 		{
-			vk::ImageAspectFlagBits::eColor,//aspectMask     
+			aspect                         ,//aspectMask     
 			0							   ,//baseMipLevel   
 			1							   ,//levelCount     
 			0							   ,//baseArrayLayer 
@@ -178,8 +185,9 @@ namespace idk::vkn
 
 	}
 
-	std::pair<vk::UniqueImage, hlp::UniqueAlloc> LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
+	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
+		TextureResult result;
 		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		vk::PhysicalDevice pd = view.PDevice();
 		vk::Device device = *view.Device();
@@ -189,8 +197,8 @@ namespace idk::vkn
 
 		size_t num_bytes = len;
 
-		vk::ImageUsageFlags attachment_type = vk::ImageUsageFlagBits::eColorAttachment;
-		vk::ImageLayout     attachment_layout = vk::ImageLayout::eColorAttachmentOptimal;
+		vk::ImageUsageFlags attachment_type = (format==vk::Format::eD16Unorm)? vk::ImageUsageFlagBits::eDepthStencilAttachment:vk::ImageUsageFlagBits::eColorAttachment;
+		vk::ImageLayout     attachment_layout = (format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 		std::optional<vk::ImageSubresourceRange> range{};
 
 		vk::ImageCreateInfo imageInfo{};
@@ -230,7 +238,11 @@ namespace idk::vkn
 			dst_stages |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
 			next_layout = layout = attachment_layout;
 		}
-		TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image);
+		vk::ImageAspectFlagBits img_aspect = vk::ImageAspectFlagBits::eColor;
+		if ((format == vk::Format::eD16Unorm))
+			img_aspect = vk::ImageAspectFlagBits::eDepth;
+		result.aspect = img_aspect;
+		TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);
 		if (!is_render_target)
 		{
 
@@ -264,7 +276,9 @@ namespace idk::vkn
 		uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
 		uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 		while(device.waitForFences(fence, VK_TRUE,wait_for_milli_seconds)==vk::Result::eTimeout);
-		return std::pair<vk::UniqueImage, hlp::UniqueAlloc>{std::move(image), std::move(alloc)};
+		result.first = std::move(image);
+		result.second = std::move(alloc);
+		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 
 	}
 
@@ -272,6 +286,7 @@ namespace idk::vkn
 	{
 		return hash_table<TextureFormat, vk::Format>
 		{
+			{TextureFormat::eD16Unorm, vk::Format::eD16Unorm},
 			{TextureFormat::eRGBA32, vk::Format::eR8G8B8A8Unorm},
 			{ TextureFormat::eBGRA32, vk::Format::eB8G8R8A8Unorm },
 			{ TextureFormat::eBC1,vk::Format::eBc1RgbaUnormBlock },

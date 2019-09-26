@@ -113,6 +113,10 @@ namespace idk::vkn
 		{
 			return vulkan().rv;
 		}
+		vk::RenderPass VulkanView::BasicRenderPass(BasicRenderPasses type) const
+		{
+			return this->vulkan_->BasicRenderPass(type);
+		}
 		vk::Result& VulkanView::AcquiredImageResult() const
 		{
 			// TODO: insert return statement here

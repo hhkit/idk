@@ -146,7 +146,7 @@ namespace idk::vkn
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
-		auto& m_renderpass = GetRenderpass(config, vulkan);
+		auto m_renderpass = GetRenderpass(config, vulkan);
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
@@ -198,7 +198,12 @@ namespace idk::vkn
 			uniform_layouts = std::move(layouts);
 		}
 		auto&& [pipelineLayoutInfo, pli_rsc] = GetLayoutInfo(config);;
-
+		vk::PipelineDepthStencilStateCreateInfo dsci
+		{
+			vk::PipelineDepthStencilStateCreateFlags{},
+			VK_TRUE,VK_TRUE,vk::CompareOp::eGreater,
+			VK_FALSE,VK_FALSE,
+		};
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
@@ -210,11 +215,11 @@ namespace idk::vkn
 			,&viewportState
 			,&rasterizer
 			,&multisampling
-			,nullptr
+			,(config.render_pass_type!=BasicRenderPasses::eRgbaColorOnly)?&dsci:nullptr
 			,&colorBlending
 			,nullptr
 			,*m_pipelinelayout
-			,*m_renderpass
+			,m_renderpass
 			,0
 		};
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
@@ -475,12 +480,12 @@ namespace idk::vkn
 		},std::move(layouts));
 	}
 
-	vk::UniqueRenderPass& VulkanPipeline::GetRenderpass([[maybe_unused]]const config_t& config, [[maybe_unused]] VulkanView& vulkan)
+	vk::RenderPass VulkanPipeline::GetRenderpass([[maybe_unused]]const config_t& config, [[maybe_unused]] VulkanView& vulkan)
 	{
 
 		//TODO GFX PIPELINE:  add renderpass id into pipeline_config_t
 		//TODO GFX PIPELINE:  get renderpass using renderpass id in pipeline_config_t
-		return vulkan.Renderpass();
+		return vulkan.BasicRenderPass(config.render_pass_type);
 	}
 	//may be deprecated
 

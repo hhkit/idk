@@ -14,6 +14,7 @@ namespace idk::vkn {
 		string					path{ "" };
 		vk::UniqueImage			image{ nullptr };
 		vk::Format				format{};
+		vk::ImageAspectFlags    img_aspect;
 		vk::UniqueDeviceMemory  mem{ nullptr };
 		hlp::UniqueAlloc        mem_alloc{};
 		vk::UniqueImageView     imageView{ nullptr };

@@ -42,6 +42,7 @@ namespace idk::vkn
 
 		//Todo make this a default guid
 		auto ptr = Core::GetResourceManager().Emplace<VknTexture>();
+		auto depth_ptr = Core::GetResourceManager().Emplace<VknTexture>();
 		TextureLoader loader;
 
 
@@ -64,9 +65,11 @@ namespace idk::vkn
 		m.size = Core::GetSystem<Application>().GetScreenSize();
 		auto sz = m.size;
 		m.textures.emplace_back(s_cast<RscHandle<Texture>>(ptr))->Size(m.size);
+		m.textures.emplace_back(s_cast<RscHandle<Texture>>(depth_ptr))->Size(m.size);
 		fb->SetMeta(m);
 		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, {}, nullptr, s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
-
+		loader.LoadTexture(*depth_ptr, TextureFormat::eD16Unorm, {}, nullptr, s_cast<size_t>(2 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
+		fb->rp_type = BasicRenderPasses::eRgbaColorDepth;
 		auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
 		fb->ReattachImageViews(vknView);
 
@@ -75,6 +78,7 @@ namespace idk::vkn
 	unique_ptr<RenderTarget> VknFrameBufferFactory::Create()
 	{
 		auto ptr = Core::GetResourceManager().Emplace<VknTexture>();
+		auto depth_ptr = Core::GetResourceManager().Emplace<VknTexture>();
 		TextureLoader loader;
 
 
@@ -97,8 +101,11 @@ namespace idk::vkn
 		m.size = Core::GetSystem<Application>().GetScreenSize();
 		auto sz = m.size;
 		m.textures.emplace_back(s_cast<RscHandle<Texture>>(ptr))->Size(m.size);
+		m.textures.emplace_back(s_cast<RscHandle<Texture>>(depth_ptr))->Size(m.size);
 		fb->SetMeta(m);
 		loader.LoadTexture(*ptr, TextureFormat::eBGRA32, {}, nullptr, s_cast<size_t>(4 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
+		loader.LoadTexture(*depth_ptr, TextureFormat::eD16Unorm, {}, nullptr, s_cast<size_t>(2 * sz.x * sz.y), ivec2{ sz }, allocator, *fence, true);
+		fb->rp_type = BasicRenderPasses::eRgbaColorDepth;
 
 		auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
 		fb->ReattachImageViews(vknView);

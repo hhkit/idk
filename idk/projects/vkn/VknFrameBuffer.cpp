@@ -2,9 +2,13 @@
 #include "VknFrameBuffer.h"
 #include <core/Core.h>
 #include <vkn/VknTexture.h>
-
+#include <vkn/VulkanWin32GraphicsSystem.h>
 namespace idk::vkn
 {
+	static VulkanView& View()
+	{
+		return Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+	}
 	VknFrameBuffer::VknFrameBuffer(VknTexture iv, VulkanView& vknView)
 		:buffer{},
 		image{std::move(iv.image)},
@@ -106,9 +110,9 @@ namespace idk::vkn
 		}
 
 		vk::FramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.renderPass = *vknView.Renderpass();
+		framebufferInfo.renderPass = vknView.BasicRenderPass(rp_type);
 		framebufferInfo.attachmentCount = (uint32_t)image_views.size();
-		framebufferInfo.pAttachments = image_views.data();
+		framebufferInfo.pAttachments = std::data(image_views);
 		framebufferInfo.width  = s_cast<uint32_t>(meta.size.x);
 		framebufferInfo.height = s_cast<uint32_t>(meta.size.y);
 		framebufferInfo.layers = 1;
@@ -176,6 +180,43 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
+	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 size)
+	{
+		vk::FramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.renderPass = *vknView.Renderpass();
+		framebufferInfo.attachmentCount = hlp::arr_count(iv);
+		framebufferInfo.pAttachments = std::data(iv);
+		framebufferInfo.width = s_cast<uint32_t>(size.x);
+		framebufferInfo.height = s_cast<uint32_t>(size.y);
+		framebufferInfo.layers = 1;
+
+		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
+
+		uncreated = false;
+	}
+
+	void TransitionTexture(vk::CommandBuffer cmd_buffer, AttachmentType type, VknTexture& tex)
+	{
+
+	}
+
+	void VknFrameBuffer::PrepareDraw(vk::CommandBuffer& cmd_buffer)
+	{
+		for (AttachmentType type{};type<AttachmentType::eSizeAT;++type)
+		{
+			for (auto& index : attachments[type])
+			{
+				TransitionTexture(cmd_buffer,type, GetMeta().textures[index].as<VknTexture>());
+
+			}
+		}
+	}
+
+	vk::RenderPass VknFrameBuffer::GetRenderPass() const
+	{
+		return View().BasicRenderPass(rp_type);
+	}
+
 	vk::Framebuffer VknFrameBuffer::Buffer()
 	{
 		return *buffer;
@@ -184,6 +225,25 @@ namespace idk::vkn
 	vk::Semaphore VknFrameBuffer::ReadySignal()
 	{
 		return *ready_semaphore;
+	}
+
+	void VknFrameBuffer::AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture)
+	{
+
+	}
+
+	void VknFrameBuffer::Finalize()
+	{
+		vector<vk::ImageView> image_views;
+		vec2 size;
+		for (auto& tex : GetMeta().textures)
+		{
+			auto& vtex = tex.as<VknTexture>();
+			image_views.emplace_back(*vtex.imageView);
+			size = vec2{ vtex.size };
+		}
+		auto& view = View();
+		AttachImageViews(image_views, view, size);
 	}
 
 

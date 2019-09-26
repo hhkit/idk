@@ -11,6 +11,7 @@ namespace idk::vkn
 
 	enum class TextureFormat
 	{
+		eD16Unorm,
 		eRGBA32,
 		eBGRA32,
 		eBC1,

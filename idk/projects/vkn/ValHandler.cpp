@@ -8,6 +8,9 @@ namespace idk::vkn
 		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			hlp::cerr() << "Err: ";
 		hlp::cerr() << "validation layer: " << pCallbackData->pMessage << "\n";
+
+		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+			5;
 		return VK_FALSE;
 	}
 

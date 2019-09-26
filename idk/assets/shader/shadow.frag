@@ -15,11 +15,12 @@ End Header --------------------------------------------------------*/
 layout(location = 1) in VS_OUT
 {
   vec3 position;
-} fs_in;
+} ;
+layout(location=0)in vec4 gl_FragCoord;
 
 layout(location = 0) out vec4 FragColor;
 
 void main()
 {
-	FragColor = vec4(0,0,0, 1.0);
+	FragColor = vec4(gl_FragCoord.zzz/gl_FragCoord.w, 1.0);
 } 

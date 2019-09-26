@@ -46,7 +46,7 @@ namespace idk::vkn
 		std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
 		vector<vk::DynamicState> GetDynamicStates(const config_t& config)const;
 		std::pair<vk::PipelineLayoutCreateInfo,vector< vk::DescriptorSetLayout>> GetLayoutInfo(const config_t& config)const;
-		vk::UniqueRenderPass& GetRenderpass(const config_t& config, VulkanView& vulkan);
+		vk::RenderPass GetRenderpass(const config_t& config, VulkanView& vulkan);
 
 		// Vulkan_t is necessary cause it needs to get the descriptors from the pool
 		vector<vk::DescriptorSet> GetUniformDescriptors(Vulkan_t& vulkan);

@@ -368,6 +368,7 @@ namespace idk::vkn
 	{
 		const vector<const RenderObject*>& draw_calls = state.mesh_render;
 		const CameraData& cam = state.camera;
+		auto& vkn_fb = cam.render_target.as<VknFrameBuffer>();
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
 		
@@ -403,7 +404,9 @@ namespace idk::vkn
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			//Force pipeline creation
-			GetPipeline(*dc.config, shaders);
+			auto config = *dc.config;
+			config.render_pass_type = vkn_fb.rp_type;
+			GetPipeline(config, shaders);
 			//set, bindings
 			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
 			auto& layouts = sprog.as<ShaderModule>();
@@ -606,14 +609,28 @@ namespace idk::vkn
 		}
 	}
 
+	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView& view)
+	{
+		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
+		//if (state.camera.is_shadow)
+		//	result = view.BasicRenderPass(BasicRenderPasses::eDepthOnly);
+		return state.camera.render_target.as<VknFrameBuffer>().GetRenderPass();
+	}
 
+
+	void TransitionFrameBuffer(const CameraData& camera, vk::CommandBuffer cmd_buffer, VulkanView& view)
+	{
+		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
+		vkn_fb.PrepareDraw(cmd_buffer);
+	}
 
 
 
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
-		auto& swapchain = View().Swapchain();
+		auto& view = View();
+		auto& swapchain = view.Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
@@ -633,7 +650,7 @@ namespace idk::vkn
 		
 		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
-		auto sz = View().GetWindowsInfo().size;
+		auto sz = view.GetWindowsInfo().size;
 		vk::Rect2D render_area
 		{
 			vk::Offset2D{},vk::Extent2D
@@ -643,10 +660,12 @@ namespace idk::vkn
 		};
 		auto& camera = state.camera;
 		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto frame_buffer = GetFrameBuffer(camera, View().CurrFrame());
+		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
+		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
+		TransitionFrameBuffer(camera, cmd_buffer, view);
 		vk::RenderPassBeginInfo rpbi
 		{
-			tmp_rp, frame_buffer,
+			GetRenderPass(state,view), frame_buffer,
 			render_area,1,&v
 		};
 
@@ -665,11 +684,13 @@ namespace idk::vkn
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
-			auto& pipeline = GetPipeline(*p_ro.config,shaders);
+			auto config = *p_ro.config;
+			config.render_pass_type = vkn_fb.rp_type;
+			auto& pipeline = GetPipeline(config,shaders);
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			if (&pipeline != prev_pipeline)
 			{
-				pipeline.Bind(cmd_buffer, View());
+				pipeline.Bind(cmd_buffer, view);
 				prev_pipeline = &pipeline;
 			}
 			auto& mesh = obj.mesh.as<VulkanMesh>();
@@ -690,7 +711,7 @@ namespace idk::vkn
 						auto ds = ds_itr->second.GetNext();
 						//p_ro.dses[set_index] = ds;
 						//Update the descriptor set
-						UpdateUniformDS(*View().Device(),ds,binfo);
+						UpdateUniformDS(*view.Device(),ds,binfo);
 						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set_index, ds, nullptr, dispatcher);
 					}
 				}
