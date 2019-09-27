@@ -307,13 +307,6 @@ namespace idk {
 
 				++counter;
 
-				//Skips similar to closed trees
-				for (int i = 0; i < itemToSkipInGraph.size();++i) {
-					if (itemToSkipInGraph[i] == counter) {
-						return false;
-					}
-				}
-
 				//Finds what is selected and use as min and max
 				for (int i = 0; i < selectedForSelect.size(); ++i) {
 					if (selectedForSelect[i] == handle) {
@@ -322,6 +315,14 @@ namespace idk {
 						break;
 					}
 				}
+
+				//Skips similar to closed trees
+				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
+					if (itemToSkipInGraph[i] == counter) {
+						return false;
+					}
+				}
+
 
 				return true;
 			});
@@ -347,17 +348,18 @@ namespace idk {
 
 				++counter;
 
+
+
+				if (counter >= minMax[0] && counter <= minMax[1]) {
+					selected_gameObjects.push_back(handle);
+				}
 				//Skips similar to closed trees
 				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
 					if (itemToSkipInGraph[i] == counter) {
 						return false;
 					}
 				}
-
-				if (counter >= minMax[0] && counter <= minMax[1]) {
-					selected_gameObjects.push_back(handle);
-				}
-
+				return true;
 			});
 			std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
 		}
