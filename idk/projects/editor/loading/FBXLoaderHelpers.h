@@ -9,12 +9,18 @@
 #include <assimp/config.h>
 #include <assimp/cimport.h>
 
+// System includes
 #include <gfx/GraphicsSystem.h>
+#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+
+// Resource includes
+#include <res/MetaBundle.h>
 #include <idk_opengl/resource/OpenGLMesh.h>
 #include <vkn/VulkanMesh.h>
 #include <anim/Skeleton.h>
 #include <anim/Animation.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+
+// Math
 #include <math/matrix_transforms.h>
 
 namespace idk::fbx_loader_detail
@@ -96,18 +102,16 @@ namespace idk::fbx_loader_detail
 	quat initQuat(const aiQuaternion& vec);
 
 	// Parse the whole assimp node graph into our own format
-	void generateNodeGraph(const aiNode* ai_root_node, AssimpNode& root_node, const BoneSet& bone_set, const MeshSet& mesh_set);
+	void generateNodeGraph(const aiNode* ai_root_node, AssimpNode& root_node, const BoneSet& bone_set);
 
 	// Helper function for initializing bone data
 	void normalizeMeshEntries(vector<Vertex>& vertices, const mat4& matrix);
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
 
 	// Helper functions for bone data
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& matrix);
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
 	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 
 	// Helper functions for animation nodes
 	void initAnimNodes(const AssimpNode& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
-	
-	
 }

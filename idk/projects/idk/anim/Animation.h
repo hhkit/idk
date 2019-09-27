@@ -12,7 +12,7 @@ namespace idk::anim
 
 	class Animation 
 		: public Resource<Animation>
-		//, public MetaTag<AnimationMeta>
+		, public MetaTag<AnimationMeta>
 	{
 	public:
 		// Key represents a keyframe. Can be translate, rotate, or scale.

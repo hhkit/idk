@@ -34,16 +34,15 @@ namespace idk::fbx_loader_detail
 		return quat(vec.x, vec.y, vec.z, vec.w);
 	}
 
-	void generateNodeGraphRecurse(const aiNode* ai_node, AssimpNode& parent_node, const BoneSet& bone_set, const MeshSet& mesh_set)
+	void generateNodeGraphRecurse(const aiNode* ai_node, AssimpNode& parent_node, const BoneSet& bone_set)
 	{
 		AssimpNode curr_node;
 		curr_node._name = ai_node->mName.data;
 		curr_node._node_transform = initMat4(ai_node->mTransformation);
 
-		if (   mesh_set.find(MeshData{ curr_node._name }) != mesh_set.end()
-			|| mesh_set.find(MeshData{ curr_node._name + "mesh" }) != mesh_set.end()
-			)
-			curr_node._ai_type |= MESH;
+		// if (   mesh_set.find(MeshData{ curr_node._name }) != mesh_set.end() || mesh_set.find(MeshData{ curr_node._name + "mesh" }) != mesh_set.end()
+		// 	)
+		// 	curr_node._ai_type |= MESH;
 
 		auto bone_res = bone_set.find(BoneData{ curr_node._name });
 		if (bone_res != bone_set.end())
@@ -59,13 +58,13 @@ namespace idk::fbx_loader_detail
 
 		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
 		{
-			generateNodeGraphRecurse(ai_node->mChildren[i], curr_node, bone_set, mesh_set);
+			generateNodeGraphRecurse(ai_node->mChildren[i], curr_node, bone_set);
 		}
 
 		parent_node._children.emplace_back(std::move(curr_node));
 	}
 
-	void generateNodeGraph(const aiNode* ai_node, AssimpNode& root_node, const BoneSet& bone_set, const MeshSet& mesh_set)
+	void generateNodeGraph(const aiNode* ai_node, AssimpNode& root_node, const BoneSet& bone_set)
 	{
 		root_node._name = ai_node->mName.data;
 		root_node._node_transform = initMat4(ai_node->mTransformation);
@@ -73,7 +72,7 @@ namespace idk::fbx_loader_detail
 
 		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
 		{
-			generateNodeGraphRecurse(ai_node->mChildren[i], root_node, bone_set, mesh_set);
+			generateNodeGraphRecurse(ai_node->mChildren[i], root_node, bone_set);
 		}
 	}
 
@@ -107,7 +106,7 @@ namespace idk::fbx_loader_detail
 		);
 	}
 
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& matrix)
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out)
 	{
 		struct BoneTreeNode
 		{
@@ -144,7 +143,7 @@ namespace idk::fbx_loader_detail
 			anim::Skeleton::Bone b{};
 			b._name = curr_node.assimp_node->_name;
 			b._parent = curr_node.parent;
-			b._offset = curr_node.assimp_node->_bone_offset * matrix;
+			b._offset = curr_node.assimp_node->_bone_offset;
 			b._node_transform = node_transform;
 
 			bones_out.emplace_back(b);

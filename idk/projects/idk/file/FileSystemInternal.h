@@ -48,6 +48,7 @@ namespace idk::file_system_detail
 		string _rel_path;
 		string _mount_path;
 		string _filename;
+		string _stem;
 		string _extension;
 
 		fs_key _parent;
@@ -81,6 +82,7 @@ namespace idk::file_system_detail
 		string _rel_path;
 		string _mount_path;
 		string _filename;
+		string _stem;
 
 		hash_table<string, fs_key> _sub_dirs;
 		hash_table<string, fs_key> _files_map;

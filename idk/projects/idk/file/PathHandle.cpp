@@ -283,6 +283,17 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._filename : vfs.getDir(_key)._filename;
 	}
 
+	string_view PathHandle::GetStem() const
+	{
+		// Check Handle
+		if (validate() == false)
+			return string_view{};
+
+		auto& vfs = Core::GetSystem<FileSystem>();
+
+		return _is_regular_file ? vfs.getFile(_key)._stem : vfs.getDir(_key)._stem;
+	}
+
 	string_view PathHandle::GetExtension() const
 	{
 		if (!_is_regular_file)

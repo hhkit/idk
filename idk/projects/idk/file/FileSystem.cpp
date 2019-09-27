@@ -320,6 +320,7 @@ namespace idk {
 		d._rel_path = currPath.relative_path().string();
 		d._mount_path = mountPath;
 		d._filename = currPath.filename().string();
+		d._stem = currPath.stem().string();
 
 		d._tree_index._mount_id = s_cast<int8_t>(index);
 		d._tree_index._depth = 0;
@@ -337,6 +338,7 @@ namespace idk {
 		f._full_path	= p.string();
 		f._rel_path		= p.relative_path().string();
 		f._filename		= p.filename().string();
+		f._stem			= p.stem().string();
 		f._mount_path	= p_dir._mount_path + "/" + f._filename;
 		f._extension	= p.extension().string();
 		f._time			= FS::last_write_time(p);
@@ -353,6 +355,7 @@ namespace idk {
 		d._full_path	= p.string();
 		d._rel_path		= p.relative_path().string();
 		d._filename		= p.filename().string();
+		d._stem			= p.stem().string();
 		d._mount_path	= p_dir._mount_path + "/" + d._filename;
 		d._parent		= p_dir._tree_index;
 
