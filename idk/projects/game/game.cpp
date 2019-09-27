@@ -127,7 +127,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// @Joseph: Uncomment this when testing.
 	// create_anim_obj(vec3{ 0,0,0 });
-	Core::GetResourceManager().Load(PathHandle{ "/assets/models/boblampclean.md5mesh" });
+	Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
 
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
