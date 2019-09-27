@@ -609,6 +609,9 @@
     </ClInclude>
     <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="res\SaveableResourceLoader.h" />
+    <ClInclude Include="gfx\TextureMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -7,6 +7,7 @@
 #include <prefab/PropertyOverride.h>
 #include <gfx/ShaderGraph_data.h>
 #include <res/ResourceMeta.h>
+#include <gfx/TextureMeta.h>
 
 namespace idk
 {
@@ -57,6 +58,7 @@ namespace idk::reflect
         , RscHandle<Prefab>
 
 		, vector<SerializedMeta>
+        , idk::TextureMeta
 
         , shadergraph::ValueType
         , shadergraph::Slot

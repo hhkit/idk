@@ -621,10 +621,10 @@ namespace idk
         _canvas.colors[ImNodes::ColNodeActiveBg] = ImGui::GetColorU32(ImGuiCol_Border);
         _canvas.style.curve_thickness = 2.5f;
 
-        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](PathHandle path)
+        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](GenericResourceHandle handle)
         {
-            if (path.GetExtension() == Graph::ext)
-                OpenGraph(*Core::GetResourceManager().Load<Graph>(path));
+            if (handle.resource_id() == BaseResourceID<Graph>)
+                OpenGraph(handle.AsHandle<Graph>());
         });
     }
 
@@ -899,9 +899,8 @@ namespace idk
                 case ValueType::SAMPLER2D:
                 {
                     RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
-                    PathHandle path;
-                    if (ImGuidk::InputResourceEx("Default", &path, span<const char* const>(RscExtensions<Texture>)))
-                        param.default_value = helpers::serialize_value(*Core::GetResourceManager().Load<Texture>(path));
+                    if (ImGuidk::InputResource("Default", &tex))
+                        param.default_value = helpers::serialize_value(tex);
                     break;
                 }
                 default:
