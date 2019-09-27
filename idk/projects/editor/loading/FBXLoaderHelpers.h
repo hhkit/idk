@@ -6,6 +6,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/config.h>
+#include <assimp/cimport.h>
 
 #include <gfx/GraphicsSystem.h>
 #include <idk_opengl/resource/OpenGLMesh.h>
@@ -13,6 +15,7 @@
 #include <anim/Skeleton.h>
 #include <anim/Animation.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <math/matrix_transforms.h>
 
 namespace idk::fbx_loader_detail
 {
@@ -27,38 +30,64 @@ namespace idk::fbx_loader_detail
 		void addBoneData(int id, float weight);
 	};
 
-	struct BoneData
+	template<typename T>
+	struct NameHash
 	{
-		BoneData() = default;
-		BoneData(string_view name, const mat4& transform = mat4{}) :_name{ name }, _transform{ transform } {}
-		string _name;
-		mat4 _transform;
-	};
-
-	struct BoneDataHash
-	{
-		size_t operator()(const BoneData& data) const
+		size_t operator()(const T& data) const
 		{
 			return std::hash<string>{}(data._name);
 		}
 	};
 
-	struct BoneDataEqual
+	template<typename T>
+	struct NameEq
 	{
-		size_t operator()(const BoneData& lhs, const BoneData& rhs)const
+		size_t operator()(const T& lhs, const T& rhs)const
 		{
 			return lhs._name == rhs._name;
 		}
 	};
-	using BoneSet = hash_set<BoneData, BoneDataHash, BoneDataEqual>;
 
+
+	// Helper structures
+	struct BoneData
+	{
+		BoneData() = default;
+		BoneData(string_view name, const mat4& transform = mat4{}) :_name{ name }, _offset{ transform } {}
+		string _name;
+		mat4 _offset;
+	};
+
+	struct MeshData
+	{
+		MeshData() = default;
+		MeshData(string_view name) :_name{ name } {}
+		string _name;
+	};
+
+	enum AI_NODE_TYPE
+	{
+		ROOT = 1 << 0,
+		MESH = 1 << 1,
+		BONE = 1 << 2,
+		VIRTUAL = 1 << 3,
+
+		NONE = 0
+	};
 
 	struct AssimpNode
 	{
-		string name;
+		string _name;
+		mat4 _node_transform;
+		mat4 _bone_offset;
+
+		AI_NODE_TYPE _ai_type = NONE;
+
 		vector<AssimpNode> _children;
-		mat4 node_transform;
 	};
+
+	using BoneSet = hash_set<BoneData, NameHash<BoneData>, NameEq<BoneData>>;
+	using MeshSet = hash_set<MeshData, NameHash<MeshData>, NameEq<MeshData>>;
 
 	// Convert assimp math to ivan's math
 	mat4 initMat4(const aiMatrix4x4& mat);
@@ -66,14 +95,19 @@ namespace idk::fbx_loader_detail
 	vec3 initVec3(const aiVector3D& vec);
 	quat initQuat(const aiQuaternion& vec);
 
+	// Parse the whole assimp node graph into our own format
+	void generateNodeGraph(const aiNode* ai_root_node, AssimpNode& root_node, const BoneSet& bone_set, const MeshSet& mesh_set);
+
 	// Helper function for initializing bone data
+	void normalizeMeshEntries(vector<Vertex>& vertices, const mat4& matrix);
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
-	void initBoneHierarchy(const aiNode* ai_node, const BoneSet& bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
+
+	// Helper functions for bone data
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& matrix);
 	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 
-	// void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node);
-	// void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels);
-	void initAnimNodes(const aiNode* ai_root, const aiAnimation* ai_anim, const BoneSet& bones_set, anim::Animation& anim_clip);
+	// Helper functions for animation nodes
+	void initAnimNodes(const AssimpNode& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
 	
 	
 }

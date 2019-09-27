@@ -101,7 +101,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		go->GetComponent<Transform>()->scale /= 200;// 200.f;
+		// go->GetComponent<Transform>()->scale /= 200;// 200.f;
 		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
 		auto animator = go->AddComponent<AnimationController>();
@@ -134,7 +134,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
 		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
-		auto mesh_rend = go->AddComponent<MeshRenderer>();
+	 auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
@@ -225,6 +225,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 
+	{
+		auto seducer = scene->CreateGameObject();
+		seducer->GetComponent<Name>()->name = "seducer";
+		seducer->Transform()->position = vec3{ 1, 0.125, 0 };
+		seducer->Transform()->scale = vec3{ 1.f / 4 };
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
+		mesh_rend->material_instance.material = h_mat;
+		//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	}
+	
 	if(0)
 	for (int i = 2; i < 5; ++ i)
 	{

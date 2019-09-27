@@ -314,6 +314,47 @@ namespace idk::ogl
 			);
 		}
 
+		{	/* create circle mesh */
+			auto circle_mesh = Mesh::defaults[MeshType::Circle];
+			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(circle_mesh.guid);
+			constexpr auto sz = 1.f;
+			constexpr auto numberOfTri = 16;
+			real angle = (2.f * pi) / numberOfTri;
+
+			std::vector<Vertex> vertices;
+			std::vector<int> indices;
+		
+			for (int i = 0; i < numberOfTri; ++i)
+			{
+				vertices.emplace_back(Vertex{ vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)}, vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)} });
+
+				if (i < (numberOfTri-1))
+				{
+					indices.emplace_back(i);
+					indices.emplace_back(i+1);
+				}
+				else
+				{
+					indices.emplace_back(i);
+					indices.emplace_back(0);
+				}
+			}
+
+			mesh_handle->SetDrawMode(GL_LINES);
+
+			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+				.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei)vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
+			);
+		}
+
 		{	/* create tetrahedral mesh */
 			auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
 			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
