@@ -51,14 +51,14 @@ namespace idk {
             if (!path.IsDir())
                 continue;
 
-            bool selected = path == selected_path;
+            bool selected = path == current_dir;
             if (!dirContainsDir(path))
             {
                 auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
                 if (selected) flags |= ImGuiTreeNodeFlags_Selected;
                 ImGui::TreeNodeEx(path.GetFileName().data(), flags);
                 if (ImGui::IsItemClicked())
-                    selected_path = path;
+                    current_dir = path;
             }
             else
             {
@@ -66,7 +66,7 @@ namespace idk {
                     ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
                     ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
                 if (ImGui::IsItemClicked())
-                    selected_path = path;
+                    current_dir = path;
                 displayDir(path);
                 if (open)
                     ImGui::TreePop();
@@ -225,7 +225,7 @@ namespace idk {
                 void* id = 0;
                 vec2 sz{ icon_sz, icon_sz };
                 ImVec4 tint = ImColor(65, 153, 163).Value;
-                ImVec4 selected_tint = ImColor(40, 140, 150).Value;
+                ImVec4 selected_tint = ImColor(30, 120, 130).Value;
 
                 if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
                 {
@@ -250,7 +250,7 @@ namespace idk {
                         else if (aspect < 1.0f)
                             sz.x /= aspect;
                         tint = ImVec4(1, 1, 1, 1);
-                        selected_tint = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
+                        selected_tint = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
                     }
                 }
                 else if (path.IsDir())
