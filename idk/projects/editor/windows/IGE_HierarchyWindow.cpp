@@ -32,7 +32,7 @@ namespace idk {
 		:IGE_IWindow{ "Hierarchy##IGE_HierarchyWindow",true,ImVec2{ 300,600 },ImVec2{ 150,150 } } {		//Delegate Constructor to set window size
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
-		window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
+		window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar;
 
 
 
@@ -107,6 +107,7 @@ namespace idk {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 		static char searchBarChar[128];
+
 		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 128, ImVec2{window_size.x-100,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
 			//Do something
 		}
@@ -146,7 +147,7 @@ namespace idk {
 
 			
 			//handle->Transform()->SetParent(parent, true);
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding;
 
 			//Check if gameobject has been selected. Causes Big-O(n^2)
 			for (Handle<GameObject>& i : selected_gameObjects) {

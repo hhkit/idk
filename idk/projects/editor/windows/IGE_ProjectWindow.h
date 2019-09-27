@@ -28,12 +28,13 @@ namespace idk
 		virtual void BeginWindow() override;
         virtual void Update() override;
 
-        Signal<PathHandle> OnAssetSelected;
-        Signal<PathHandle> OnAssetDoubleClicked;
+        Signal<GenericResourceHandle> OnAssetSelected;
+        Signal<GenericResourceHandle> OnAssetDoubleClicked;
 
 	private:
-        PathHandle selected_dir;
-        PathHandle selected_asset;
+        PathHandle current_dir;
+        PathHandle selected_path;
+        GenericResourceHandle selected_asset;
 
         void displayDir(PathHandle dir);
 	};
