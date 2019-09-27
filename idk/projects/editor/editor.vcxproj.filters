@@ -156,6 +156,7 @@
     <ClCompile Include="loading\OpenGLFBXLoader.cpp">
       <Filter>loader\fbx</Filter>
     </ClCompile>
+    <ClCompile Include="DragDropTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

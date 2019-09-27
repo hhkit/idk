@@ -4,7 +4,7 @@
 
 namespace idk
 {
-    bool ImGuidk::InputResourceEx(const char* label, idk::PathHandle* handle, idk::span<const char* const> accepted_extensions)
+    bool ImGuidk::InputResourceEx(const char* label, GenericResourceHandle* handle, size_t base_resource_id)
     {
         using namespace ImGui;
 
@@ -31,23 +31,15 @@ namespace idk
         {
             if (const auto* payload = AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
             {
-                auto path = *reinterpret_cast<idk::PathHandle*>(payload->Data);
-                auto path_ext = path.GetExtension();
+                const auto& payload_handle = DragDrop::GetResourcePayloadData(payload);
 
-                if (path)
+                if (payload_handle.resource_id() == base_resource_id)
                 {
-                    for (auto ext : accepted_extensions)
+                    hovered = true;
+                    if (payload->IsDelivery())
                     {
-                        if (ext != path_ext)
-                            continue;
-
-                        hovered = true;
-                        if (payload->IsDelivery())
-                        {
-                            *handle = path;
-                            dropped = true;
-                        }
-                        break;
+                        *handle = payload_handle;
+                        dropped = true;
                     }
                 }
             }
@@ -58,11 +50,20 @@ namespace idk
 
         ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, col, false);
 
-        if (*handle)
+        if (handle)
         {
-            const char* text = handle->GetMountPath().data() + sizeof("/assets/") - 1;
-            ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding, text, 0, nullptr);
+            string_view text = std::visit([&](const auto& h)
+            {
+                return Core::GetResourceManager().GetPath(h);
+            }, *handle);
+
+            ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,
+                                     frame_bb.Max - style.FramePadding,
+                                     text.data() + text.rfind('/') + 1, 0, nullptr);
         }
+
+        if (label_size.x > 0)
+            RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
 
         return dropped;
     }

@@ -211,6 +211,7 @@
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <FileType>Document</FileType>
     </ClInclude>
+    <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
