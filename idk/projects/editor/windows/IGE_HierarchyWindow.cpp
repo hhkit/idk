@@ -124,8 +124,8 @@ namespace idk {
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
 
-		int selectedCounter = 0; // This is for Shift Select
-		int selectedItemCounter = 0; // This is for Shift Select
+		int selectedCounter = 0; // This is for Shift Select. This iterates.
+		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
 		bool isShiftSelectCalled = false;
 		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
@@ -213,7 +213,7 @@ namespace idk {
 				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
 					if (selected_gameObjects.size() != 0) {
 						selectedItemCounter = selectedCounter;
-						std::cout << selectedItemCounter << std::endl;
+						//std::cout << selectedItemCounter << std::endl;
 						isShiftSelectCalled = true;
 
 
@@ -289,13 +289,13 @@ namespace idk {
 
 		});
 
-
+		//Shift Select logic
 		if (isShiftSelectCalled) {
-			std::cout << "Items to skip: ";
-			for (int& i : itemToSkipInGraph) {
-				std::cout << i << ", ";
-			}
-			std::cout << std::endl;
+			//std::cout << "Items to skip: ";
+			//for (int& i : itemToSkipInGraph) {
+			//	std::cout << i << ", ";
+			//}
+			//std::cout << std::endl;
 
 			int counter = 0; //This is the same as the above scenegraph. I cant use the tree to track which places to skip, so we are using the vector
 			vector<int> minMax{ -1,-1 };
@@ -326,7 +326,7 @@ namespace idk {
 
 				return true;
 			});
-			std::cout << "Seletected item: " << selectedItemCounter << std::endl;
+			//std::cout << "Seletected item: " << selectedItemCounter << std::endl;
 			if (minMax[0] == minMax[1]) {
 				if (minMax[0] < selectedItemCounter)
 					minMax[1] = selectedItemCounter;
@@ -361,7 +361,7 @@ namespace idk {
 				}
 				return true;
 			});
-			std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
+			//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
 		}
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
