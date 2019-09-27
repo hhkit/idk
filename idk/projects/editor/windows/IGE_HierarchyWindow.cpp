@@ -124,6 +124,10 @@ namespace idk {
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
 
+		int selectedCounter = 0; // This is for Shift Select
+		int selectedItemCounter = 0; // This is for Shift Select
+		bool isShiftSelectCalled = false;
+		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
 		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
 
@@ -170,19 +174,15 @@ namespace idk {
 				goName.append(std::to_string(handle.id));
 				goName.append(")");
 				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.0f, 0.0f, 0.9f));
 			}
 			
-
-			//Use address of id as ptr_id
-			//ImGui::PushID(handle.id);
 			
-			string idString = std::to_string(handle.id);
+			string idString = std::to_string(handle.id); //Use id string as id
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
 
 			
-			//ImGui::PopID();
-
+			++selectedCounter; //Increment counter here
 			
 
 			if (isNameEmpty) {
@@ -210,6 +210,16 @@ namespace idk {
 					}
 
 				}
+				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
+					if (selected_gameObjects.size() != 0) {
+						selectedItemCounter = selectedCounter;
+						std::cout << selectedItemCounter << std::endl;
+						isShiftSelectCalled = true;
+
+
+					}
+				}
+				
 				else {
 					//Select as normal
 					selected_gameObjects.clear();
@@ -271,7 +281,7 @@ namespace idk {
 
 			}
 			else {
-
+				itemToSkipInGraph.push_back(selectedItemCounter);
 				return false;
 			}
 
@@ -279,21 +289,80 @@ namespace idk {
 
 		});
 
+
+		if (isShiftSelectCalled) {
+			std::cout << "Items to skip: ";
+			for (int& i : itemToSkipInGraph) {
+				std::cout << i << ", ";
+			}
+			std::cout << std::endl;
+
+			int counter = 0; //This is the same as the above scenegraph. I cant use the tree to track which places to skip, so we are using the vector
+			vector<int> minMax{ -1,-1 };
+			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
+			vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
+			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+				if (!handle) //Ignore handle zero
+					return true;
+
+				++counter;
+
+				//Skips similar to closed trees
+				for (int i = 0; i < itemToSkipInGraph.size();++i) {
+					if (itemToSkipInGraph[i] == counter) {
+						return false;
+					}
+				}
+
+				//Finds what is selected and use as min and max
+				for (int i = 0; i < selectedForSelect.size(); ++i) {
+					if (selectedForSelect[i] == handle) {
+						minMax[0] = minMax[0] == -1 ? counter : (minMax[0] > counter ? counter : minMax[0]);
+						minMax[1] = minMax[1] == -1 ? counter : (minMax[1] < counter ? counter : minMax[1]);
+						break;
+					}
+				}
+
+				return true;
+			});
+			std::cout << "Seletected item: " << selectedItemCounter << std::endl;
+			if (minMax[0] == minMax[1]) {
+				if (minMax[0] < selectedItemCounter)
+					minMax[1] = selectedItemCounter;
+				else
+					minMax[0] = selectedItemCounter;
+			}
+			else if (minMax[0] > selectedItemCounter) { //out of ranges, selectedItemCounter becomes min
+				minMax[0] = selectedItemCounter;
+			}
+			else if (minMax[1] < selectedItemCounter) { //out of ranges, selectedItemCounter becomes max
+				minMax[1] = selectedItemCounter;
+			}
+
+			selected_gameObjects.clear();
+			counter = 0;
+			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+				if (!handle) //Ignore handle zero
+					return true;
+
+				++counter;
+
+				//Skips similar to closed trees
+				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
+					if (itemToSkipInGraph[i] == counter) {
+						return false;
+					}
+				}
+
+				if (counter >= minMax[0] && counter <= minMax[1]) {
+					selected_gameObjects.push_back(handle);
+				}
+
+			});
+			std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
+		}
+
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
-
-
-		//for (auto& i : sceneGraph) {
-		//	ImGui::PushID(i.obj.id);
-		//
-		//	string goName = "GameObject ";
-		//	goName.append(std::to_string(i.obj.id));
-		//	ImGui::Selectable(goName.c_str());
-		//
-		//	ImGui::PopID();
-		//
-		//}
-
-		
 
 	}
 
