@@ -236,10 +236,20 @@ namespace idk {
                 vec2 sz{ icon_sz, icon_sz };
                 if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
                 {
-                    auto files = Core::GetResourceManager().Load(path);
-                    if (files->Count())
+                    auto get_result = Core::GetResourceManager().Get<Texture>(path);
+                    RscHandle<Texture> tex;
+
+                    if (!get_result)
                     {
-                        auto tex = files->Get<Texture>();
+                        auto load_result = Core::GetResourceManager().Load<Texture>(path);
+                        if (load_result)
+                            tex = *load_result;
+                    }
+                    else
+                        tex = *get_result;
+
+                    if (tex)
+                    {
                         id = tex->ID();
                         float aspect = tex->AspectRatio();
                         if (aspect > 1.0f)
