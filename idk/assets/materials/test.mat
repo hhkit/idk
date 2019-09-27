@@ -1,27 +1,104 @@
 links: 
 - node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
-  slot_in: 0
-  slot_out: 1
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   node_out: 7af555fd-e108-491d-aee9-b15767b179f2
   slot_in: 2
   slot_out: 0
+- node_in: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  node_out: 857596d2-d3c0-43cf-95bb-02a9c9799c0a
+  slot_in: 0
+  slot_out: 0
+- node_in: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+  slot_in: 1
+  slot_out: 0
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 1
+  slot_out: 4
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 2
+  slot_out: 5
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 0
+  slot_out: 3
+- node_in: 540083d4-5151-4b25-8157-ac411f2842d3
+  node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  slot_in: 0
+  slot_out: 3
+- node_in: 78ba2ef9-d97f-4b5c-b763-413025899bbf
+  node_out: 540083d4-5151-4b25-8157-ac411f2842d3
+  slot_in: 0
+  slot_out: 2
+- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  node_out: 78ba2ef9-d97f-4b5c-b763-413025899bbf
+  slot_in: 0
+  slot_out: 2
 - node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   node_out: a1fd5460-f48c-447f-bba3-4fa0aecc1c96
   slot_in: 1
   slot_out: 0
+- node_in: 14a45757-2f1a-4c85-81ee-a64dca338fff
+  node_out: a1fd5460-f48c-447f-bba3-4fa0aecc1c96
+  slot_in: 0
+  slot_out: 0
+- node_in: 78ba2ef9-d97f-4b5c-b763-413025899bbf
+  node_out: 14a45757-2f1a-4c85-81ee-a64dca338fff
+  slot_in: 1
+  slot_out: 2
 master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
+  14a45757-2f1a-4c85-81ee-a64dca338fff: 
+    control_values: ""
+    guid: 14a45757-2f1a-4c85-81ee-a64dca338fff
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: 0.100000}
+    name: math\Multiply
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 291.401489, y: 225.566376}
   2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6: 
-    control_values: 1.000000,0.000000,0.000000,1.000000|
+    control_values: 0.072537,1.000000,0.000000,1.000000|
     guid: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
     input_slots: []
-    name: constants\Color
+    name: input\basic\Color
     output_slots: 
     - {type: VEC4, value: ""}
     - {type: VEC3, value: ""}
-    position: {x: 323.000000, y: 86.000000}
+    position: {x: 88.097649, y: 223.444061}
+  53bbc36e-5863-4a99-a091-93f5aef049dc: 
+    control_values: ""
+    guid: 53bbc36e-5863-4a99-a091-93f5aef049dc
+    input_slots: 
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    name: input\basic\Vec3
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 359.410950, y: 19.589077}
+  540083d4-5151-4b25-8157-ac411f2842d3: 
+    control_values: ""
+    guid: 540083d4-5151-4b25-8157-ac411f2842d3
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: 0.500000}
+    name: math\Multiply
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 385.924805, y: 139.594467}
+  78ba2ef9-d97f-4b5c-b763-413025899bbf: 
+    control_values: ""
+    guid: 78ba2ef9-d97f-4b5c-b763-413025899bbf
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: VEC3, value: ""}
+    name: math\Add
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 565.111877, y: 170.890717}
   7af555fd-e108-491d-aee9-b15767b179f2: 
     control_values: ""
     guid: 7af555fd-e108-491d-aee9-b15767b179f2
@@ -29,15 +106,45 @@ nodes:
     name: $0
     output_slots: 
     - {type: FLOAT, value: ""}
-    position: {x: 238.000000, y: 293.000000}
+    position: {x: 469.722321, y: 356.432312}
+  857596d2-d3c0-43cf-95bb-02a9c9799c0a: 
+    control_values: ""
+    guid: 857596d2-d3c0-43cf-95bb-02a9c9799c0a
+    input_slots: []
+    name: $1
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: -10.352058, y: 8.767229}
+  8c49899c-678c-4a61-98c9-3ba8abd616f7: 
+    control_values: ""
+    guid: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+    input_slots: []
+    name: input\Texture Coordinates
+    output_slots: 
+    - {type: VEC2, value: ""}
+    position: {x: -49.091339, y: 64.896606}
+  99e9f376-1e36-40ee-aaed-f1b22ed73ad6: 
+    control_values: ""
+    guid: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: ""}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: 170.079269, y: 4.841462}
   a1fd5460-f48c-447f-bba3-4fa0aecc1c96: 
     control_values: ""
     guid: a1fd5460-f48c-447f-bba3-4fa0aecc1c96
     input_slots: []
-    name: input\VertexNormal
+    name: input\Vertex Normal
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 221.000000, y: 222.000000}
+    position: {x: 100.116562, y: 331.843628}
   d5084548-0ebd-44fb-b98c-94bd0951100a: 
     control_values: ""
     guid: d5084548-0ebd-44fb-b98c-94bd0951100a
@@ -45,10 +152,11 @@ nodes:
     - {type: VEC3, value: ""}
     - {type: VEC3, value: ""}
     - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: 0}
-    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 1.000000}
+    - {type: FLOAT, value: 100.000000}
     name: master\PBR
     output_slots: []
-    position: {x: 514.000000, y: 164.000000}
+    position: {x: 724.700867, y: 224.665176}
 parameters: 
-- {default_value: 1.000000, name: Metallic, type: FLOAT}
+- {default_value: 0.000000, name: Metallic, type: FLOAT}
+- {default_value: e919c248-3f7e-48ce-a28d-75cb335ac9a7, name: Tex0, type: SAMPLER2D}

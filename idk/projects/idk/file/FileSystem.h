@@ -16,7 +16,7 @@ namespace idk
 
 		// Files/Directory Getters
 		// =====================================================================================================
-		PathHandle			GetEntry					(string_view mountPath)				const;	// Tries GetFile then GetDir
+		PathHandle			GetPath					(string_view mountPath)				const;	// Tries GetFile then GetDir
 		PathHandle			GetFile					(string_view mountPath)				const;
 		PathHandle			GetDir					(string_view mountPath)				const;
 		

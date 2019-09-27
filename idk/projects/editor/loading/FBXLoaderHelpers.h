@@ -52,10 +52,11 @@ namespace idk::fbx_loader_detail
 	};
 	using BoneSet = hash_set<BoneData, BoneDataHash, BoneDataEqual>;
 
+
 	struct AssimpNode
 	{
 		string name;
-		int parent;
+		vector<AssimpNode> _children;
 		mat4 node_transform;
 	};
 

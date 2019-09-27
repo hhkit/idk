@@ -128,6 +128,7 @@ namespace idk::yaml
 
         if (p.mode() == flow_map || p.mode() == flow_seq)
         {
+            p.token += *p;
             ++p;
             return;
         }
