@@ -10,6 +10,7 @@ namespace idk
 		, Sphere
 		, Tetrahedron
 		, Line
+		, Circle
 	);
 
 	class Mesh
@@ -22,6 +23,7 @@ namespace idk
 			{ Guid{0x1ADE959C, 0xCA814653, 0x8E8109DF, 0xCDC81D22} }, // Sphere
 			{ Guid{0x53B3895A, 0x0C8E4086, 0xA24533AF, 0x707B891E} }, // Tetrahedron
 			{ Guid{0x1567AC7E, 0x329443AA, 0x959302FE, 0xC33E7366} }, // Line
+			{ Guid{0xBE85068A, 0x621443FA, 0xA59ABC2F, 0x552DA7F3} }, // Circle
 		};
 
 		virtual int GetAttribs() const = 0;

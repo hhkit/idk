@@ -224,6 +224,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		mesh_rend->material_instance.material = h_mat;
 		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
+
+	{
+		auto seducer = scene->CreateGameObject();
+		seducer->GetComponent<Name>()->name = "seducer";
+		seducer->Transform()->position = vec3{ 1, 0.125, 0 };
+		seducer->Transform()->scale = vec3{ 1.f / 4 };
+		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
+		mesh_rend->material_instance.material = h_mat;
+		//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	}
 	
 	if(0)
 	for (int i = 2; i < 5; ++ i)
