@@ -45,7 +45,7 @@ namespace idk
 
 		virtual ~RenderTarget() = default;
 	protected:
-		virtual void  AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture) {};
+		virtual void  AddAttachmentImpl([[maybe_unused]]AttachmentType type, [[maybe_unused]] RscHandle<Texture> texture) {};
 		//virtual size_t  AddAttachmentImpl(AttachmentType type, uint32_t size_x, uint32_t size_y) = 0;
 		vector<size_t> attachments[AttachmentType::eSizeAT];
 	};

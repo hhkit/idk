@@ -61,7 +61,7 @@ namespace idk
 			//editorControls.edt_buffer->CreatePresentationSignals(vknViews);
 			editorControls.edt_buffer->enabled = true;
 
-			vknViews.Swapchain().m_inBetweens.emplace_back(editorControls.edt_buffer);
+			////vknViews.Swapchain().m_inBetweens.emplace_back(editorControls.edt_buffer);
 			//
 
 			editorInit.edt_min_imageCount = 2;
@@ -347,7 +347,7 @@ namespace idk
 					info.pSignalSemaphores = &render_complete_semaphore;
 
 
-					vkn::hlp::TransitionImageLayout(true,*fd->edt_cBuffer, vknViews.GraphicsQueue(), editorControls.edt_frames[editorControls.edt_frameIndex].edt_backbuffer, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+					//vkn::hlp::TransitionImageLayout(true,*fd->edt_cBuffer, vknViews.GraphicsQueue(), editorControls.edt_frames[editorControls.edt_frameIndex].edt_backbuffer, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 					fd->edt_cBuffer->end(vknViews.Dispatcher());
 
 					//Submit to queue
@@ -441,7 +441,7 @@ namespace idk
 			attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 			attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 			attachment.initialLayout = vk::ImageLayout::eUndefined;
-			attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+			attachment.finalLayout = vk::ImageLayout::eGeneral;
 			vk::AttachmentReference color_attachment = {};
 			color_attachment.attachment = 0;
 			color_attachment.layout = vk::ImageLayout::eColorAttachmentOptimal;

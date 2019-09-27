@@ -985,7 +985,7 @@ namespace idk::vkn
 			{
 				vkn_fb.GetRenderPass()
 				,frame_buffer
-				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(vkn_fb.Size().x,vkn_fb.Size().y) }
+				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(s_cast<uint32_t>(vkn_fb.Size().x),s_cast<uint32_t>(vkn_fb.Size().y)) }
 				,s_cast<uint32_t>(std::size(clearcolor))
 				,std::data(clearcolor)
 			};
@@ -1107,6 +1107,14 @@ namespace idk::vkn
 		auto& command_buffer = *m_blitz_commandbuffers[current_frame];
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer };
 
+		vk::CommandBufferBeginInfo begin_info
+		{
+			vk::CommandBufferUsageFlags{}
+			,nullptr//&inherit_info
+		};
+		command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
+		command_buffer.begin(begin_info);
+
 		vk::Fence* prevFence = &*current_sc_signal.inflight_fence;
 		bool was_blit = false;
 		for (unsigned i = 0; i < m_swapchain->m_inBetweens.size(); ++i)
@@ -1136,14 +1144,7 @@ namespace idk::vkn
 
 					//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
 
-					vk::CommandBufferBeginInfo begin_info
-					{
-						vk::CommandBufferUsageFlags{}
-						,nullptr//&inherit_info
-					};
-					command_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
-					command_buffer.begin(begin_info);
-					hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, src_image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal);
+					hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, src_image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);
 					hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, sc_image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 					vk::ImageBlit imgBlit{};
@@ -1165,7 +1166,8 @@ namespace idk::vkn
 					imgBlit.dstOffsets[1].z = 1;
 
 					//Idk why, but elem->images[rv]'s layout is currently vk::ImageLayout::eTransferDstOptimal, not src. Might need to transition first.
-					command_buffer.blitImage(elem->images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain->m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+					command_buffer.blitImage(src_image, vk::ImageLayout::eTransferSrcOptimal, m_swapchain->m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+					hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, src_image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eGeneral);
 
 					was_blit = true;
 					//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
@@ -1189,7 +1191,7 @@ namespace idk::vkn
 				//->resetFences(1, &*current_signal.master_fence, dispatcher);
 
 				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal);
+				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);
 
 
 				vk::CommandBufferBeginInfo begin_info
@@ -1222,6 +1224,7 @@ namespace idk::vkn
 				imgBlit.dstOffsets[1].z = 1;
 
 				command_buffer.blitImage(m_swapchain->m_graphics.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain->m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
+				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eGeneral);
 				was_blit = true;
 
 				next = readySemaphores;

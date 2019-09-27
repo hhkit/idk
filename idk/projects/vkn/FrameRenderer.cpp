@@ -275,7 +275,7 @@ namespace idk::vkn
 			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
 			presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
 			presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
-			presentToClearBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
+			presentToClearBarrier.newLayout = vk::ImageLayout::eGeneral;
 			presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
 			presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
 			presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
@@ -315,6 +315,7 @@ namespace idk::vkn
 
 		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
+		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknFrameBuffer>()->GetAttachment(AttachmentType::eColor, 0).as<VknTexture>().Image();
 	}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{

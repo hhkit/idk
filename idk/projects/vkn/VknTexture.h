@@ -22,7 +22,8 @@ namespace idk::vkn {
 
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
 		opt<vk::DescriptorSet>	descriptorSet{};
-
+		vk::Image Image()const { return *image; }
+		vk::ImageView ImageView()const { return *imageView; }
 		VknTexture() = default;
 		~VknTexture();
 		//VknTexture(const VknTexture& rhs);
