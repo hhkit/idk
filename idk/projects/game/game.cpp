@@ -92,9 +92,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		divByVal = 200.f;
 	}
-	auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 	auto h_mat = Core::GetResourceManager().Create<Material>();
-	h_mat->BuildShader(shader_template, "", "");
+	auto& mat = *h_mat;
 
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {

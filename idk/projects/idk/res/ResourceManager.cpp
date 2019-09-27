@@ -301,6 +301,8 @@ namespace idk
 		_loaded_files.erase(itr);
 		_loaded_files.emplace(string_path, bundle);
 
+		Core::GetSystem<FileSystem>().Rename(old_path.GetMountPath(), string_path);
+
 		return FileMoveResult::Ok;
 	}
 	

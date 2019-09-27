@@ -32,7 +32,9 @@ namespace idk
 		, public Saveable<Material, false_type>
 	{
 	public:
-		RscHandle<ShaderProgram> _shader_program = Guid::Make();
+		RscHandle<ShaderProgram> _shader_program;
+
+		Material(RscHandle<ShaderProgram> = { Guid::Make() });
 		RscHandle<ShaderTemplate> GetTemplate() const;
 		virtual ~Material() = default;
 	};

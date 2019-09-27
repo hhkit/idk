@@ -10,7 +10,6 @@
 #include <anim/Animation.h>
 #include <anim/SkeletonFactory.h>
 #include <idk_opengl/resource/FrameBufferFactory.h>
-#include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include <idk_opengl/resource/OpenGLTextureFactory.h>
 #include <idk_opengl/program/GLSLLoader.h>

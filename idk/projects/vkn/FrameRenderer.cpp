@@ -323,7 +323,7 @@ namespace idk::vkn
 			//Force pipeline creation
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
-			auto sprog = dc.material_instance.material->GetShaderProgram();
+			auto sprog = dc.material_instance.material->_shader_program;
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
@@ -534,7 +534,7 @@ namespace idk::vkn
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = obj.material_instance.material->GetShaderProgram();
+			auto sprog = obj.material_instance.material->_shader_program;
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
