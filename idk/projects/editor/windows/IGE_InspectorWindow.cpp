@@ -84,9 +84,20 @@ namespace idk {
 					//COMPONENT DISPLAY
 					ImGui::PushID(static_cast<int>(component.id));
 					auto componentName = (*component).type.name();
+					ImVec2 cursorPos = ImGui::GetCursorPos();
+					ImVec2 cursorPos2{}; //This is for setting after all members are placed
+					ImGui::SetCursorPosX(window_size.x - 20);
+					if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+						ImGui::OpenPopup("AdditionalOptions");
+
+					}
+
+					ImGui::SetCursorPos(cursorPos);
+
 					if (ImGui::CollapsingHeader(string(componentName).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 					{
-						(*component).visit([&](auto&& key, auto&& val, int depth_change) {
+						(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
 							using T = std::decay_t<decltype(val)>;
 							reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
 							//reflect::dynamic dynaVal = val;
@@ -126,10 +137,10 @@ namespace idk {
 							}
 							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
 
-                                if (ImGuidk::InputResource(keyName.c_str(), &val))
-                                {
+								if (ImGuidk::InputResource(keyName.c_str(), &val))
+								{
 
-                                }
+								}
 
 								return false;
 							}
@@ -139,9 +150,27 @@ namespace idk {
 							}
 							
 						});
-
-
+						cursorPos2 = ImGui::GetCursorPos();
 					}
+
+					ImGui::SetCursorPos(cursorPos);
+					ImGui::SetCursorPosX(window_size.x - 20);
+					ImGui::Text("...");
+
+					ImGui::SetCursorPos(cursorPos2);
+
+					if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+						if (ImGui::MenuItem("Reset")) {
+
+						}
+						ImGui::Separator();
+						if (ImGui::MenuItem("Remove Component")) {
+
+						}
+						ImGui::EndPopup();
+					}
+
+
 					ImGui::PopID();
 				}
 
@@ -216,6 +245,19 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
 	{
+
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+		ImGui::SetCursorPosX(window_size.x - 20);
+		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
+
+		ImGui::SetCursorPos(cursorPos);
+
+
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 
@@ -272,10 +314,30 @@ namespace idk {
 
 			DisplayVec3(c_transform->scale);
 
-
+			cursorPos2 = ImGui::GetCursorPos();
 
 
 		}
+
+		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPosX(window_size.x - 20);
+		ImGui::Text("...");
+
+		ImGui::SetCursorPos(cursorPos2);
+
+
+		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+			if (ImGui::MenuItem("Reset")) {
+
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Remove Component")) {
+
+			}
+			ImGui::EndPopup();
+		}
+
+
 	}
 
 	void IGE_InspectorWindow::DisplayVec3(vec3& vec)
