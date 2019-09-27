@@ -6,33 +6,33 @@
 
 namespace idk
 {
-	ENUM(ColorFormat, char,
-		RGB_8,
-		RGBA_8,
-		RGBF_16,
-		RGBF_32,
-		RGBAF_16,
-		RGBAF_32
-	)
+    ENUM(ColorFormat, char,
+         RGB_8,
+         RGBA_8,
+         RGBF_16,
+         RGBF_32,
+         RGBAF_16,
+         RGBAF_32
+    )
 
-	ENUM(UVMode, char,
-		Repeat,
-		MirrorRepeat,
-		Clamp
-	);
+    ENUM(UVMode, char,
+         Repeat,
+         MirrorRepeat,
+         Clamp
+    );
 
-	ENUM(InputChannels, char
-	,	RED
-	,	RG
-	,	RGB
-	,	RGBA
-	);
+    ENUM(InputChannels, char
+         , RED
+         , RG
+         , RGB
+         , RGBA
+    );
 
-	struct TextureMeta
-	{
-		ColorFormat internal_format  = ColorFormat::RGBF_32;
-		UVMode      uv_mode          = UVMode::Repeat;
-	};
+    struct TextureMeta
+    {
+        ColorFormat internal_format = ColorFormat::RGBF_32;
+        UVMode      uv_mode = UVMode::Repeat;
+    };
 
 	class Texture
 		: public Resource<Texture>

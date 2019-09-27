@@ -27,10 +27,10 @@ namespace fs = std::filesystem;
 namespace idk {
 
 	IGE_ProjectWindow::IGE_ProjectWindow()
-		: IGE_IWindow{ "Project##ProjectWindow", true, ImVec2{ 800,200 }, ImVec2{ 200,200 } }
+		: IGE_IWindow{ "Project##ProjectWindow", true, ImVec2{ 800,200 }, ImVec2{ 200,200 } }, selected_asset{ RscHandle<Texture>() }
     {
         window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
-        selected_dir = "/assets";
+        current_dir = "/assets";
 	}
 
 	void IGE_ProjectWindow::BeginWindow()
@@ -51,14 +51,14 @@ namespace idk {
             if (!path.IsDir())
                 continue;
 
-            bool selected = path == selected_dir;
+            bool selected = path == selected_path;
             if (!dirContainsDir(path))
             {
                 auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
                 if (selected) flags |= ImGuiTreeNodeFlags_Selected;
                 ImGui::TreeNodeEx(path.GetFileName().data(), flags);
                 if (ImGui::IsItemClicked())
-                    selected_dir = path;
+                    selected_path = path;
             }
             else
             {
@@ -66,7 +66,7 @@ namespace idk {
                     ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
                     ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
                 if (ImGui::IsItemClicked())
-                    selected_dir = path;
+                    selected_path = path;
                 displayDir(path);
                 if (open)
                     ImGui::TreePop();
@@ -129,12 +129,12 @@ namespace idk {
         PathHandle assets_dir = "/assets";
 
         {
-            bool selected = assets_dir == selected_dir;
+            bool selected = assets_dir == current_dir;
             auto open = ImGui::TreeNodeEx("Assets",
                             ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow |
                             ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
             if (ImGui::IsItemClicked())
-                selected_dir = assets_dir;
+                current_dir = assets_dir;
             if (open)
             {
                 displayDir(assets_dir);
@@ -166,13 +166,13 @@ namespace idk {
             ImGui::PushStyleColor(ImGuiCol_Button, 0);
 
             if (ImGui::Button("Assets"))
-                selected_dir = assets_dir;
+                current_dir = assets_dir;
 
-            if (selected_dir != assets_dir)
+            if (current_dir != assets_dir)
             {
                 string concat;
                 int count = 0;
-                for (const auto& part : fs::relative(selected_dir.GetFullPath(), assets_dir.GetFullPath()))
+                for (const auto& part : fs::relative(current_dir.GetFullPath(), assets_dir.GetFullPath()))
                 {
                     auto str = part.string();
                     concat += '/';
@@ -184,7 +184,7 @@ namespace idk {
                     ImGui::Spacing();
                     ImGui::PushID(str.c_str());
                     if (ImGui::Button(str.c_str()))
-                        selected_dir = "/assets" + concat;
+                        current_dir = "/assets" + concat;
                     ++count;
                 }
                 while (count--)
@@ -202,7 +202,7 @@ namespace idk {
         const int icons_per_row = static_cast<int>((content_region.x - spacing.x) / (icon_sz + spacing.x));
 
         // if more icons than what can fit in a row, justify it
-        if (icons_per_row < selected_dir.GetEntries().size())
+        if (icons_per_row < current_dir.GetEntries().size())
             spacing.x = (content_region.x - icons_per_row * icon_sz) / (icons_per_row + 1);
 
         ImGui::SetCursorPosX(spacing.x);
@@ -211,7 +211,7 @@ namespace idk {
         static bool renaming_selected_asset = false;
 
         int col = 0;
-        for (const auto& path : selected_dir.GetEntries())
+        for (const auto& path : current_dir.GetEntries())
         {
             const auto ext = path.GetExtension();
             if (ext == ".meta")
@@ -251,7 +251,7 @@ namespace idk {
                 ImGui::Image(id, sz);
             }
 
-            if (selected_asset == path)
+            if (selected_path == path)
             {
                 static char buf[256];
                 static bool first_focus = false;
@@ -308,14 +308,18 @@ namespace idk {
 
             if (ImGui::IsItemClicked())
             {
-                selected_asset = path;
+                selected_path = path;
                 renaming_selected_asset = false;
-                OnAssetSelected.Fire(selected_asset);
+                if (!path.IsDir())
+                {
+                    selected_asset = Core::GetResourceManager().Load(selected_path)->GetAll()[0];
+                    OnAssetSelected.Fire(selected_asset);
+                }
             }
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
             {
                 if (path.IsDir())
-                    selected_dir = path;
+                    current_dir = path;
                 else
                     OnAssetDoubleClicked.Fire(selected_asset);
             }
@@ -324,9 +328,9 @@ namespace idk {
             {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    ImGui::SetDragDropPayload(DragDrop::RESOURCE, &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+                    DragDrop::SetResourcePayload(selected_asset);
                     ImGui::Text("Drag to inspector button.");
-                    ImGui::Text(selected_asset.GetMountPath().data());
+                    ImGui::Text(selected_path.GetMountPath().data());
                     ImGui::EndDragDropSource();
                 }
             }
@@ -349,8 +353,8 @@ namespace idk {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, menu_bar_col);
         ImGui::BeginChild("footer", ImVec2(0, line_height));
         ImGui::SetCursorPosX(2.0f);
-        if (selected_asset)
-            ImGui::Text(selected_asset.GetMountPath().data());
+        if (selected_path)
+            ImGui::Text(selected_path.GetMountPath().data());
         ImGui::EndChild();
         ImGui::PopStyleColor();
 
