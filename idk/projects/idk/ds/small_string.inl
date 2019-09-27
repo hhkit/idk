@@ -717,7 +717,7 @@ namespace idk
 		len |= len >> 4;
 		len |= len >> 8;
 		len |= len >> 16;
-		return len / sizeof(CharT);
+		return len;
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>

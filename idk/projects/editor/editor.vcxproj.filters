@@ -159,6 +159,7 @@
     <ClCompile Include="loading\OpenGLFBXLoader.cpp">
       <Filter>loader\fbx</Filter>
     </ClCompile>
+    <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="loading\GraphFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
