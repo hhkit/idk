@@ -5,6 +5,7 @@
 
 #include <idk_opengl/resource/OpenGLMesh.h>
 #include <idk_opengl/resource/OpenGLMaterial.h>
+#include <idk_opengl/resource/OpenGLTexture.h>
 #include <idk_opengl/resource/FrameBuffer.h>
 
 #include <core/Core.h>
@@ -43,11 +44,11 @@ namespace idk::ogl
 
 	void OpenGLState::GenResources()
 	{
-		renderer_vertex_shaders[Debug]       = Core::GetResourceManager().LoadFile("/assets/shader/debug.vert").resources[0].As<ShaderProgram>();
-		renderer_vertex_shaders[NormalMesh]  = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert").resources[0].As<ShaderProgram>();
-		renderer_vertex_shaders[SkinnedMesh] = Core::GetResourceManager().LoadFile("/assets/shader/skinned_mesh.vert").resources[0].As<ShaderProgram>();
+		renderer_vertex_shaders[Debug]       = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.vert");
+		renderer_vertex_shaders[NormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert");
+		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
 
-		debug_fragment = Core::GetResourceManager().LoadFile("/assets/shader/debug.frag").resources[0].As<ShaderProgram>();	
+		debug_fragment = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");	
 	}
 
 
@@ -59,6 +60,15 @@ namespace idk::ogl
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
+		for (const auto& elem : curr_object_buffer.lights)
+		{
+			if (elem.index == 0) // point light
+				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
+
+			if (elem.index == 1) // directional light
+				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir }, elem.light_color);
+		}
+
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
@@ -68,7 +78,7 @@ namespace idk::ogl
 			//Set the clear color according to the camera
 			
 			// calculate lights for this camera
-			vector<LightData> lights = curr_object_buffer.lights;
+			auto lights = curr_object_buffer.lights;
 			for (auto& elem : lights)
 			{
 				elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
@@ -121,6 +131,8 @@ namespace idk::ogl
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+				GLuint texture_units = 0;
+
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
 					auto& light = lights[i];
@@ -131,7 +143,10 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+
+					texture_units += static_cast<bool>(light.light_map);
 				}
+
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
 				mesh.Bind(MeshRenderer::GetRequiredAttributes());
@@ -146,8 +161,18 @@ namespace idk::ogl
 				// material uniforms
 				for (auto& [id, uniform] : elem.material_instance.uniforms)
 				{
-					std::visit([this, &id](auto& elem) {
-						pipeline.SetUniform(id, elem);
+					std::visit([this, &id, &texture_units](auto& elem) {
+						using T = std::decay_t<decltype(elem)>;
+						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+						{
+							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+							texture->BindToUnit(texture_units);
+							pipeline.SetUniform(id, texture_units);
+
+							++texture_units;
+						}
+						else
+							pipeline.SetUniform(id, elem);
 					}, uniform);
 				}
 
@@ -165,6 +190,8 @@ namespace idk::ogl
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+				GLuint texture_units = 0;
+
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
 					auto& light = lights[i];
@@ -175,6 +202,8 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+
+					texture_units += static_cast<bool>(light.light_map);
 				}
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
@@ -200,9 +229,19 @@ namespace idk::ogl
 				// material uniforms
 				for (auto& [id, uniform] : elem.material_instance.uniforms)
 				{
-					std::visit([this, &id](auto& elem) {
-						pipeline.SetUniform(id, elem);
-					}, uniform);
+					std::visit([this, &id, &texture_units](auto& elem) {
+						using T = std::decay_t<decltype(elem)>;
+						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+						{
+							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+							texture->BindToUnit(texture_units);
+							pipeline.SetUniform(id, texture_units);
+
+							++texture_units;
+						}
+						else
+							pipeline.SetUniform(id, elem);
+						}, uniform);
 				}
 
 				// draw

@@ -10,7 +10,7 @@
 
 #include <stdafx.h> //Needed for every CPP. Precompiler
 #include <audio/AudioSource.h>
-#include <audio/AudioClipFactory.h>
+#include <audio/AudioClip.h>
 #include <res/Resource.h>
 #include <file/FileSystem.h>
 
@@ -38,7 +38,7 @@ namespace idk
 
 	void AudioSource::AddAudioClip(string_view filePath)
 	{
-		RscHandle<AudioClip> audioPtr1 = Core::GetResourceManager().Create<AudioClip>(Core::GetSystem<FileSystem>().GetFile(filePath));
+		RscHandle<AudioClip> audioPtr1 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(filePath));
 
 		audio_clip_list.push_back(audioPtr1);
 	}

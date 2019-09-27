@@ -34,6 +34,55 @@ namespace idk::fbx_loader_detail
 		return quat(vec.x, vec.y, vec.z, vec.w);
 	}
 
+	void generateNodeGraphRecurse(const aiNode* ai_node, AssimpNode& parent_node, const BoneSet& bone_set, const MeshSet& mesh_set)
+	{
+		AssimpNode curr_node;
+		curr_node._name = ai_node->mName.data;
+		curr_node._node_transform = initMat4(ai_node->mTransformation);
+
+		if (   mesh_set.find(MeshData{ curr_node._name }) != mesh_set.end()
+			|| mesh_set.find(MeshData{ curr_node._name + "mesh" }) != mesh_set.end()
+			)
+			curr_node._ai_type |= MESH;
+
+		auto bone_res = bone_set.find(BoneData{ curr_node._name });
+		if (bone_res != bone_set.end())
+		{
+			curr_node._ai_type |= BONE;
+			curr_node._bone_offset = bone_res->_offset;
+		}
+
+		if (curr_node._name.find("$Assimp$") != string::npos)
+		{
+			curr_node._ai_type |= VIRTUAL;
+		}
+
+		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
+		{
+			generateNodeGraphRecurse(ai_node->mChildren[i], curr_node, bone_set, mesh_set);
+		}
+
+		parent_node._children.emplace_back(std::move(curr_node));
+	}
+
+	void generateNodeGraph(const aiNode* ai_node, AssimpNode& root_node, const BoneSet& bone_set, const MeshSet& mesh_set)
+	{
+		root_node._name = ai_node->mName.data;
+		root_node._node_transform = initMat4(ai_node->mTransformation);
+		root_node._ai_type = ROOT;
+
+		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
+		{
+			generateNodeGraphRecurse(ai_node->mChildren[i], root_node, bone_set, mesh_set);
+		}
+	}
+
+	void normalizeMeshEntries(vector<Vertex>& vertices, const mat4& matrix)
+	{
+		for (auto& elem : vertices)
+			elem.pos = matrix * vec4{ elem.pos, 1.0f };
+	}
+
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices)
 	{
 		vector<ogl::OpenGLDescriptor> descriptor
@@ -58,31 +107,32 @@ namespace idk::fbx_loader_detail
 		);
 	}
 
-	void initBoneHierarchy(const aiNode* node, const BoneSet& bones_set, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out)
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& matrix)
 	{
 		struct BoneTreeNode
 		{
 			int parent;
-			const aiNode* node;
+			const AssimpNode* assimp_node;
 			mat4 parent_transform;
 		};
 
 		std::deque<BoneTreeNode> queue;
 
-		queue.push_front(BoneTreeNode{ -1, node });
+		queue.push_front(BoneTreeNode{ -1, &root_node });
 		while (!queue.empty())
 		{
 			auto curr_node = queue.front();
 			queue.pop_front();
-			mat4 node_transform = curr_node.parent_transform * initMat4(curr_node.node->mTransformation);
+			mat4 node_transform = curr_node.parent_transform * curr_node.assimp_node->_node_transform;
 			
 			// If this node is not actually a bone, we push all its children into the start of the queue with the parent being the current node's parent.
-			auto bone_data = bones_set.find(BoneData{ curr_node.node->mName.data });
-			if (bone_data == bones_set.end())
+			
+			if ((curr_node.assimp_node->_ai_type & BONE) != BONE)
 			{
-				for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
+				//for (size_t i = 0; i < curr_node.assimp_node->_children.s; ++i)
+				for(auto& elem : curr_node.assimp_node->_children)
 				{
-					queue.push_front(BoneTreeNode{ curr_node.parent, curr_node.node->mChildren[i], node_transform });
+					queue.push_front(BoneTreeNode{ curr_node.parent, &elem, node_transform });
 				}
 
 				continue;
@@ -92,17 +142,18 @@ namespace idk::fbx_loader_detail
 			// We also push the bone into the bones_table. This is so we can easily find a bone by name. The index should be bones_out.size().
 			// The parent of all these children should be bones_out.size() - 1.
 			anim::Skeleton::Bone b{};
-			b._name = curr_node.node->mName.data;
+			b._name = curr_node.assimp_node->_name;
 			b._parent = curr_node.parent;
-			b._offset = bone_data->_transform;
+			b._offset = curr_node.assimp_node->_bone_offset * matrix;
 			b._node_transform = node_transform;
 
 			bones_out.emplace_back(b);
 			bones_table.emplace(bones_out.back()._name, bones_out.size() - 1);
 
-			for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
+			// for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
+			for (auto& elem : curr_node.assimp_node->_children)
 			{
-				queue.push_back(BoneTreeNode{ static_cast<int>(bones_out.size() - 1), curr_node.node->mChildren[i], mat4{} });
+				queue.push_back(BoneTreeNode{ static_cast<int>(bones_out.size() - 1), &elem, mat4{} });
 			}
 		}
 	}
@@ -132,89 +183,145 @@ namespace idk::fbx_loader_detail
 
 	static void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node)
 	{
-		for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
+		// POSITION
+		if (ai_anim_node->mNumPositionKeys <= 2)
 		{
-			auto& position_key = ai_anim_node->mPositionKeys[p];
+			auto& position_key = ai_anim_node->mPositionKeys[0];
 
 			const vec3 val = initVec3(position_key.mValue);
 			const float time = static_cast<float>(position_key.mTime);
 
 			channel._translate.emplace_back(val, time);
-		}
 
-		for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
+			if (ai_anim_node->mNumPositionKeys == 2 && position_key != ai_anim_node->mPositionKeys[1])
+			{
+				const vec3 val_2 = initVec3(ai_anim_node->mPositionKeys[1].mValue);
+				const float time_2 = static_cast<float>(ai_anim_node->mPositionKeys[1].mTime);
+
+				channel._translate.emplace_back(val_2, time_2);
+			}
+		}
+		else
 		{
-			auto& scale_key = ai_anim_node->mScalingKeys[s];
+			for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
+			{
+				auto& position_key = ai_anim_node->mPositionKeys[p];
+
+				const vec3 val = initVec3(position_key.mValue);
+				const float time = static_cast<float>(position_key.mTime);
+
+				channel._translate.emplace_back(val, time);
+			}
+		}
+		
+		// SCALE
+		if (ai_anim_node->mNumScalingKeys <= 2)
+		{
+			auto& scale_key = ai_anim_node->mScalingKeys[0];
 
 			const vec3 val = initVec3(scale_key.mValue);
 			const float time = static_cast<float>(scale_key.mTime);
 
 			channel._scale.emplace_back(val, time);
-		}
+			if (ai_anim_node->mNumScalingKeys == 2 && scale_key != ai_anim_node->mScalingKeys[1])
+			{
+				const vec3 val_2 = initVec3(ai_anim_node->mScalingKeys[1].mValue);
+				const float time_2 = static_cast<float>(ai_anim_node->mScalingKeys[1].mTime);
 
-		for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
+				channel._scale.emplace_back(val_2, time_2);
+			}
+		}
+		else
 		{
-			auto& rotation_key = ai_anim_node->mRotationKeys[r];
+			for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
+			{
+				auto& scale_key = ai_anim_node->mScalingKeys[s];
+
+				const vec3 val = initVec3(scale_key.mValue);
+				const float time = static_cast<float>(scale_key.mTime);
+
+				channel._scale.emplace_back(val, time);
+			}
+		}
+		
+		// ROTATE
+		if (ai_anim_node->mNumRotationKeys <= 2)
+		{
+			auto& rotation_key = ai_anim_node->mRotationKeys[0];
 
 			const quat val = initQuat(rotation_key.mValue);
 			const float time = static_cast<float>(rotation_key.mTime);
 
 			channel._rotation.emplace_back(val, time);
+			if (ai_anim_node->mNumRotationKeys == 2 && rotation_key != ai_anim_node->mRotationKeys[1])
+			{
+				const quat val_2 = initQuat(ai_anim_node->mRotationKeys[1].mValue);
+				const float time_2 = static_cast<float>(ai_anim_node->mRotationKeys[1].mTime);
+
+				channel._rotation.emplace_back(val_2, time_2);
+			}
 		}
+		else
+		{
+			for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
+			{
+				auto& rotation_key = ai_anim_node->mRotationKeys[r];
+
+				const quat val = initQuat(rotation_key.mValue);
+				const float time = static_cast<float>(rotation_key.mTime);
+
+				channel._rotation.emplace_back(val, time);
+			}
+		}
+		
 		channel._is_animated = true;
 		
 	}
 
-	static void initAnimNodesRecurse(const aiNode* ai_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels)
+	static void initAnimNodesRecurse(const AssimpNode& assimp_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels)
 	{
+		
 		// Is it animated?
-		auto ai_anim_node = ai_anim_table.find(ai_node->mName.data);
+		auto ai_anim_node = ai_anim_table.find(assimp_node._name);
 		bool is_animated = ai_anim_node != ai_anim_table.end();
 
 		// Initializing the channel. Every node will have a channel regardless whether it is virtual/animated or not.
 		anim::Animation::Channel channel;
-		channel._name = ai_node->mName.data;
-		channel._node_transform = initMat4(ai_node->mTransformation);
+		channel._name = assimp_node._name;
 		
 		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
 		if (is_animated)
-		{
 			initChannel(channel, ai_anim_node->second);
-		}
+		else if ((assimp_node._ai_type & MESH) != MESH)
+			channel._node_transform = assimp_node._node_transform;
+
 		virtual_channels.emplace_back(channel);
 		
-		auto ea_node = anim_clip.GetEasyAnimNode(ai_node->mName.data);
-		
 		// is it a bone? 
-		if (ea_node != nullptr)
+		if ((assimp_node._ai_type & BONE) == BONE)
 		{	
 			// Add all the channels into the ea_node. This ea_node is now full initialized.
-			assert(ea_node->_debug_assert == false);
+			anim::Animation::EasyAnimNode ea_node;
+			assert(ea_node._debug_assert == false);
 
-			ea_node->_channels = virtual_channels;
-			ea_node->_debug_assert = true;
+			ea_node._name = assimp_node._name;
+			ea_node._channels = virtual_channels;
+			ea_node._debug_assert = true;
+			anim_clip.AddEasyAnimNode(ea_node);
 			virtual_channels.clear();
 		}
 		
 		// If this is a virtual node, we simply recurse until we find a bone. 
 		// If no bone is found, we need to clear the virtual channels.
-		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
-			initAnimNodesRecurse(ai_node->mChildren[i], ai_anim_table, anim_clip, virtual_channels);
+		for (auto& elem : assimp_node._children)
+			initAnimNodesRecurse(elem, ai_anim_table, anim_clip, virtual_channels);
 
 		// We should always clear here. If no bone is found, all the virtual channels will be cleared.
 		virtual_channels.clear();
 	}
 
-	void initAnimNodes(const aiNode* ai_root, const aiAnimation* ai_anim, const BoneSet& bones_set, anim::Animation& anim_clip)
+	void initAnimNodes(const AssimpNode& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip)
 	{
-		for (auto& elem : bones_set)
-		{
-			anim::Animation::EasyAnimNode ea_node;
-			ea_node._name = elem._name;
-
-			anim_clip.AddEasyAnimNode(ea_node);
-		}
-
 		// Init the anim_node table
 		hash_table<string, const aiNodeAnim*> ai_anim_table;
 		for (size_t i = 0; i < ai_anim->mNumChannels; ++i)
@@ -223,24 +330,9 @@ namespace idk::fbx_loader_detail
 			ai_anim_table.emplace(ai_anim_node->mNodeName.data, ai_anim_node);
 		}
 
-		// Is it animated?
-		auto ai_anim_node = ai_anim_table.find(ai_root->mName.data);
-		bool is_animated = ai_anim_node != ai_anim_table.end();
-
-		anim::Animation::EasyAnimNode* ea_node = anim_clip.GetEasyAnimNode(ai_root->mName.data);
-
-		anim::Animation::Channel channel;
-		channel._node_transform = initMat4(ai_root->mTransformation);
-		ea_node->_channels.emplace_back(channel);
-
-		if (is_animated)
-		{
-			initChannel(ea_node->_channels.back(), ai_anim_node->second);
-		}
-
 		vector<anim::Animation::Channel> channels;
-		for (size_t i = 0; i < ai_root->mNumChildren; ++i)
-			initAnimNodesRecurse(ai_root->mChildren[i], ai_anim_table, anim_clip, channels);
+		for (auto& elem : root_node._children)
+			initAnimNodesRecurse(elem, ai_anim_table, anim_clip, channels);
 
 		float fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
 		float num_ticks = static_cast<float>(ai_anim->mDuration);

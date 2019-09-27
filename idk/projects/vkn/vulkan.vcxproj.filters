@@ -150,6 +150,9 @@
     <ClInclude Include="utils\FrameObjects.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanPngLoader.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -276,6 +279,7 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="utils\SwapchainInfo.cpp" />
+    <ClCompile Include="VulkanPngLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

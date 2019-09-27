@@ -94,5 +94,8 @@ namespace idk
 		GizmoOperation gizmo_operation = GizmoOperation_Translate;
 		MODE gizmo_mode = MODE::WORLD;
 
+
+		void FocusOnSelectedGameObjects();
+
 	};
 }

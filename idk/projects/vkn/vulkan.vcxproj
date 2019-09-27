@@ -241,6 +241,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanMaterial.h" />
     <ClInclude Include="VulkanMaterialFactory.h" />
+    <ClInclude Include="VulkanPngLoader.h" />
     <ClInclude Include="VulkanResourceManager.h" />
     <ClInclude Include="VulkanShaderModuleFactory.h" />
     <ClInclude Include="UboManager.h" />
@@ -306,6 +307,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="VulkanMaterialFactory.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanMeshFactory.cpp" />
+    <ClCompile Include="VulkanPngLoader.cpp" />
     <ClCompile Include="VulkanResourceManager.cpp" />
     <ClCompile Include="VulkanShaderModuleFactory.cpp" />
     <ClCompile Include="VulkanState.cpp" />

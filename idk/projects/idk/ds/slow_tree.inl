@@ -39,12 +39,22 @@ namespace idk
 		int depth_change = depth - last_visit_depth;
 		last_visit_depth = depth;
 
-		visitor(obj, depth_change);
+		bool recurse = true;
+		if constexpr (std::is_same_v<std::decay_t<decltype(visitor(obj, depth_change))>, void>)
+			visitor(obj, depth_change);
+		else
+		{
+			static_assert(std::is_same_v<std::decay_t<decltype(visitor(obj, depth_change))>, bool>, "visitor of tree must be either void or bool");
+			recurse &= visitor(obj, depth_change);
+		}
 
+		if (recurse)
+		{
 		++depth;
-		for (auto& elem : *this)
-			elem.visit_impl(policy, std::forward<Visitor>(visitor), depth, last_visit_depth);
+			for (auto& elem : *this)
+				elem.visit_impl(policy, std::forward<Visitor>(visitor), depth, last_visit_depth);
 		--depth;
+		}
 	}
 
 	template<typename T>
@@ -69,6 +79,12 @@ namespace idk
 	typename slow_tree<T>::const_iterator slow_tree<T>::end() const
 	{
 		return _children.end();
+	}
+
+	template<typename T>
+	inline size_t slow_tree<T>::size() const
+	{
+		return std::distance(_children.begin(), _children.end());
 	}
 
 	template<typename T>

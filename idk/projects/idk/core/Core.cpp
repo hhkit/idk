@@ -31,7 +31,10 @@ namespace idk
 	Core::~Core()
 	{
 		if (_setup && _shutdown == false)
+		{
+			_system_manager.EarlyShutdownSystems();
 			_system_manager.ShutdownSystems();
+		}
 	}
 
 	void Core::Setup()
@@ -52,8 +55,8 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&FileSystem::Update,              "File System Update");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AudioSystem::Update,             "FMOD Update");
 		_scheduler->SchedulePass      <UpdatePhase::Update>    (&AnimationSystem::Update,         "Animation Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,    "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::BuildSceneGraph,   "Build scene graph");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,    "Destroy Objects");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,            "Test updates");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,     "Physics Update");
 		if (editor)
@@ -61,7 +64,7 @@ namespace idk
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory,         "Watch files");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&IEditor::EditorUpdate,                   "Editor Update");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyMetadata,      "Save dirty resources");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState,     "Buffer graphics objects");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,      "Render Render Buffer");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick, "Update durations of debug draw");
@@ -70,7 +73,7 @@ namespace idk
 		}
 		else
 		{
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
+			//_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SaveableResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState, "Buffer graphics objects");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer,  "Render Render Buffer");
 			_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick, "Update durations of debug draw");
@@ -100,7 +103,7 @@ namespace idk
 				
 			}
 		}
-
+		_system_manager.EarlyShutdownSystems();
 		_system_manager.ShutdownSystems();
 		_shutdown = true;
 	}

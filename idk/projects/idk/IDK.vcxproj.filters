@@ -284,9 +284,6 @@
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="audio\AudioClipFactory.h">
-      <Filter>audio</Filter>
-    </ClInclude>
     <ClInclude Include="util\enum.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -359,9 +356,6 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="res\ExtensionLoader.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -389,17 +383,11 @@
     <ClInclude Include="gfx\MeshRenderer.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="res\FileResources.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\FileResources_detail.h">
       <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="meta\tag.h">
       <Filter>meta</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ForwardingExtensionLoader.h">
-      <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="test\TestResource.h">
       <Filter>test</Filter>
@@ -500,9 +488,6 @@
     <ClInclude Include="anim\Animation.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationFactory.h">
-      <Filter>anim\res/factories</Filter>
-    </ClInclude>
     <ClInclude Include="anim\Skeleton.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
@@ -520,12 +505,6 @@
     </ClInclude>
     <ClInclude Include="anim\AnimationSystem.h">
       <Filter>anim</Filter>
-    </ClInclude>
-    <ClInclude Include="res\SaveableResource.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="res\SaveableResourceManager.h">
-      <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="test\TestResourceFactory.h">
       <Filter>test</Filter>
@@ -613,6 +592,24 @@
       <Filter>math\shapes</Filter>
     </ClInclude>
     <ClInclude Include="gfx\BasicRenderPasses.h" />
+    <ClInclude Include="res\FileLoader.h" />
+    <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\GenericResourceHandle.h" />
+    <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="meta\variant.h" />
+    <ClInclude Include="res\MetaBundle.h" />
+    <ClInclude Include="res\EasyFactory.h" />
+    <ClInclude Include="audio\AudioClipLoader.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplateLoader.h" />
+    <ClInclude Include="res\ResourceUtils.h" />
+    <ClInclude Include="res\SaveableResource.h" />
+    <ClInclude Include="gfx\ShaderGraph_helpers.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -691,9 +688,6 @@
     <ClCompile Include="reflect\uni_container.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
-    <ClCompile Include="audio\AudioClipFactory.cpp">
-      <Filter>audio</Filter>
-    </ClCompile>
     <ClCompile Include="reflect\enum_type.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
@@ -726,9 +720,6 @@
     </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="res\FileResources.cpp">
-      <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
@@ -775,9 +766,6 @@
     <ClCompile Include="anim\Animation.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
-    <ClCompile Include="anim\AnimationFactory.cpp">
-      <Filter>anim\res/factories</Filter>
-    </ClCompile>
     <ClCompile Include="anim\Skeleton.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
@@ -804,9 +792,6 @@
     </ClCompile>
     <ClCompile Include="anim\AnimationSystem.cpp">
       <Filter>anim</Filter>
-    </ClCompile>
-    <ClCompile Include="res\SaveableResourceManager.cpp">
-      <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="scene\ProjectManager.cpp">
       <Filter>scene</Filter>
@@ -892,6 +877,17 @@
     <ClCompile Include="gfx\MeshFactory.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
+    <ClCompile Include="res\ResourceBundle.cpp" />
+    <ClCompile Include="res\MetaBundle.cpp" />
+    <ClCompile Include="res\GenericResourceHandle.cpp" />
+    <ClCompile Include="audio\AudioClipLoader.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\projector_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1020,12 +1016,6 @@
     <None Include="meta\tag.inl">
       <Filter>meta</Filter>
     </None>
-    <None Include="res\FileResources.inl">
-      <Filter>res</Filter>
-    </None>
-    <None Include="res\ForwardingExtensionLoader.inl">
-      <Filter>res</Filter>
-    </None>
     <None Include="res\ResourceMeta.inl">
       <Filter>res</Filter>
     </None>
@@ -1047,14 +1037,8 @@
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
-    <None Include="res\Resource.inl">
-      <Filter>res</Filter>
-    </None>
     <None Include="ds\slow_tree.inl">
       <Filter>ds</Filter>
-    </None>
-    <None Include="res\SaveableResourceManager.inl">
-      <Filter>res</Filter>
     </None>
     <None Include="math\linear.inl">
       <Filter>math</Filter>
@@ -1068,6 +1052,10 @@
     <None Include="ds\result.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="meta\variant.inl" />
+    <None Include="res\ResourceBundle.inl" />
+    <None Include="res\ResourceUtils.inl" />
+    <None Include="res\SaveableResourceLoader.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

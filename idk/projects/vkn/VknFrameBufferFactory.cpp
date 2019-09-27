@@ -2,6 +2,7 @@
 #include "VknFrameBufferfactory.h"
 #include <core/Core.h>
 #include <app/Application.h>
+#include <res/MetaBundle.h>
 #include <vkn/VknTexture.h>
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VknTextureLoader.h>
@@ -41,8 +42,8 @@ namespace idk::vkn
 
 
 		//Todo make this a default guid
-		auto ptr = Core::GetResourceManager().Emplace<VknTexture>();
-		auto depth_ptr = Core::GetResourceManager().Emplace<VknTexture>();
+		auto ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
+		auto depth_ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
 		TextureLoader loader;
 
 
@@ -109,22 +110,20 @@ namespace idk::vkn
 
 		return fb;
 	}
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle fh)
-	{
-		return unique_ptr<RenderTarget>();
-	}
 
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create(PathHandle filepath, const RenderTarget::Metadata& m)
+	ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
 	{
-		auto fb = std::make_unique<VknFrameBuffer>();
+		auto fb = Core::GetResourceManager().LoaderEmplaceResource<VknFrameBuffer>(bundle.metadatas[0].guid);
 
-		for (auto& elem : m.textures)
+		auto m = bundle.FetchMeta<RenderTarget>()->GetMeta<RenderTarget>();
+
+		for (auto& elem : m->textures)
 		{
 			// ensure textures are created
 			Core::GetResourceManager().Free(elem);
-			Core::GetResourceManager().Emplace<VknTexture>(elem.guid);
+			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(elem.guid);
 		}
-		fb->SetMeta(m);
+		fb->SetMeta(*m);
 
 		return fb;
 	}

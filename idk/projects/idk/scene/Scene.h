@@ -8,8 +8,9 @@
 namespace idk
 {
 	class GameObject;
+	class Scene;
 
-	RESOURCE_EXTENSION(Scene, ".idscene");
+	RESOURCE_EXTENSION(Scene, ".ids")
 
 	class Scene 
 		: public Resource<Scene>

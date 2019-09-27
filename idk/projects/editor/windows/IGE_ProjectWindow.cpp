@@ -41,12 +41,12 @@ namespace idk {
 
     static bool dirContainsDir(PathHandle dir)
     {
-        return dir.GetPaths(FS_FILTERS::DIR).size();
+        return dir.GetEntries(FS_FILTERS::DIR).size();
     }
 
     void IGE_ProjectWindow::displayDir(PathHandle dir)
     {
-        for (const auto& path : dir.GetPaths())
+        for (const auto& path : dir.GetEntries())
         {
             if (!path.IsDir())
                 continue;
@@ -202,7 +202,7 @@ namespace idk {
         const int icons_per_row = static_cast<int>((content_region.x - spacing.x) / (icon_sz + spacing.x));
 
         // if more icons than what can fit in a row, justify it
-        if (icons_per_row < selected_dir.GetPaths().size())
+        if (icons_per_row < selected_dir.GetEntries().size())
             spacing.x = (content_region.x - icons_per_row * icon_sz) / (icons_per_row + 1);
 
         ImGui::SetCursorPosX(spacing.x);
@@ -211,7 +211,7 @@ namespace idk {
         static bool renaming_selected_asset = false;
 
         int col = 0;
-        for (const auto& path : selected_dir.GetPaths())
+        for (const auto& path : selected_dir.GetEntries())
         {
             const auto ext = path.GetExtension();
             if (ext == ".meta")
@@ -236,10 +236,10 @@ namespace idk {
                 vec2 sz{ icon_sz, icon_sz };
                 if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
                 {
-                    auto files = Core::GetResourceManager().LoadFile(path);
-                    if (files.resources.size())
+                    auto files = Core::GetResourceManager().Load(path);
+                    if (files->Count())
                     {
-                        auto tex = files[0].As<Texture>();
+                        auto tex = files->Get<Texture>();
                         id = tex->ID();
                         float aspect = tex->AspectRatio();
                         if (aspect > 1.0f)
@@ -324,7 +324,7 @@ namespace idk {
             {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    ImGui::SetDragDropPayload("string", &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+                    ImGui::SetDragDropPayload(DragDrop::RESOURCE, &selected_asset, sizeof(string)); // "STRING" is a tag! This is used in IGE_InspectorWindow
                     ImGui::Text("Drag to inspector button.");
                     ImGui::Text(selected_asset.GetMountPath().data());
                     ImGui::EndDragDropSource();

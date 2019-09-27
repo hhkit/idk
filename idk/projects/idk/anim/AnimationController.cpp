@@ -72,7 +72,7 @@ namespace idk
 	{
 		for (size_t i = 0; i < _child_objects.size(); ++i)
 		{
-			auto& child = _child_objects[i];
+			// auto& child = _child_objects[i];
 			auto parent_index = _skeleton->data()[i]._parent;
 			if (parent_index >= 0)
 			{
@@ -82,10 +82,10 @@ namespace idk
 				mat4 final_local_transform = p_transform * c_transform;
 				_bone_transforms[i] = final_local_transform;
 			}
-			else
-			{
-				_bone_transforms[i] = child->GetComponent<Transform>()->GlobalMatrix();
-			}
+			// else
+			// {
+			// 	_bone_transforms[i] = child->GetComponent<Transform>()->GlobalMatrix();
+			// }
 		}
 
 		// Apply offsets to all the transforms
@@ -136,6 +136,8 @@ namespace idk
 
 			if (curr_bone._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[curr_bone._parent], true);
+			else
+				obj->GetComponent<Transform>()->SetParent(GetGameObject(), true);
 
 			_child_objects.push_back(obj);
 		}

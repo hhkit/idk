@@ -14,9 +14,8 @@ namespace idk
 		return unique_ptr<Scene>();
 	}
 
-	unique_ptr<Scene> SceneFactory::Create(PathHandle)
+	ResourceBundle SceneLoader::LoadFile(PathHandle filepath)
 	{
-		assert(false);
-		return unique_ptr<Scene>();
+		return ResourceBundle();
 	}
 }

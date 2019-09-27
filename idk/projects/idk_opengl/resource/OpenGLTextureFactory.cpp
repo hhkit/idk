@@ -11,12 +11,4 @@ namespace idk::ogl
 	{
 		return std::make_unique<OpenGLTexture>();
 	}
-	unique_ptr<Texture> OpenGLTextureFactory::Create(PathHandle filepath)
-	{
-		return unique_ptr<Texture>();
-	}
-	unique_ptr<Texture> OpenGLTextureFactory::Create(PathHandle filepath, const Texture::Metadata&)
-	{
-		return unique_ptr<Texture>();
-	}
 }

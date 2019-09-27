@@ -13,9 +13,11 @@ namespace idk
 	}
 	void Scheduler::SequentialUpdate()
 	{
+		constexpr auto dt_limit = seconds{0.25};
+
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
-		_accumulated_dt += _real_dt;
+		_accumulated_dt += std::min(_real_dt, dt_limit);
 
 		for (auto& elem : _always_update)
 			elem.call();

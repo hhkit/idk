@@ -1,9 +1,9 @@
 #pragma once
 #include <idk.h>
 #include <res/ResourceHandle.h>
-
 namespace idk
 {
+
 	template<typename Res>
 	class Resource
 	{
@@ -12,16 +12,17 @@ namespace idk
 
 		RscHandle<Res> GetHandle() const { return _handle; }
 		Resource() = default;
+
+		string_view Name() const        { return _name; }
+		void        Name(string_view n) { _name = n; }
 	private:
 		RscHandle<Res> _handle;
+		string         _name;
 
 		friend class ResourceManager;
-		friend class ResourceFactory<Res>;
 		template<typename T>
 		friend struct detail::ResourceManager_detail;
 
 		static_assert(ResourceID<Res> != ResourceCount, "Resource T must be included in the idk_config.h/Resources tuple");
 	};
 }
-
-#include "Resource.inl"

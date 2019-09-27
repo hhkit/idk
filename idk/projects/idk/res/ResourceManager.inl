@@ -1,211 +1,245 @@
 #include "ResourceManager.h"
 #include <res/ResourceMeta.h>
-#include <res/SaveableResource.h>
-#include <res/SaveableResourceManager.h>
+#include <file/FileSystem.h>
 #pragma once
 
 namespace idk
 {
-	template<typename Factory, typename ...Args>
-	Factory& ResourceManager::RegisterFactory(Args&& ... args)
+	template<typename Res>
+	bool ResourceManager::Validate(const RscHandle<Res>& handle)
 	{
-		auto ptr = std::make_shared<Factory>(std::forward<Args>(args)...);
-		_resource_factories[ResourceID<typename Factory::Resource>] = ptr;
-		return *ptr;
-	}
-	template<typename ExtensionLoaderT, typename ... Args>
-	ExtensionLoaderT& ResourceManager::RegisterExtensionLoader(std::string_view extension, Args&& ... args)
-	{
-		static_assert(std::is_base_of_v<ExtensionLoader, ExtensionLoaderT>, "can only register extension loaders");
-		return *static_cast<ExtensionLoaderT*>((_extension_loaders[string{ extension }] = std::make_unique<ExtensionLoaderT>(std::forward<Args>(args)...)).get());
-	}
-	template<typename Factory>
-	Factory& ResourceManager::GetFactory()
-	{
-		return GetLoader<typename Factory::Resource>();
+		return GetControlBlock(handle);
 	}
 
-	template<typename Resource>
-	RscHandle<Resource> ResourceManager::Create()
+	template<typename Res>
+	inline Res& ResourceManager::Get(const RscHandle<Res>& handle)
 	{
-		auto& table = GetTable<Resource>();
-		auto& loader = GetLoader<Resource>();
-		if (&loader == nullptr)
-			return RscHandle<Resource>{};
-		auto ptr = loader.Create();
-		if (!ptr)
-			return RscHandle<Resource>{};
-		
-		auto handle = RscHandle<Resource>{ Guid::Make() };
-		ptr->_handle = RscHandle<BaseResource_t<Resource>>{ handle };
-
-		if constexpr (has_tag_v<Resource, MetaTag>)
-			ptr->_dirtymeta = true;
-		if constexpr (has_tag_v<Resource, Saveable>)
+		auto& table = GetTable<Res>();
+		auto itr = table.find(handle.guid);
+		if (itr == table.end())
+			return GetDefaultRes<Res>();
+		else
 		{
-			ptr->Dirty();
-			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
-		}
-
-		table[handle.guid].is_new = true;
-		table[handle.guid].resource_ptr = std::move(ptr);
-		
-		return handle;
-	}
-	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create(PathHandle filepath)
-	{
-		auto retval = Create<Resource>(filepath, Guid::Make());
-		if (!retval)
-			return RscHandle<Resource>{};
-
-		GetTable<Resource>()[retval.guid].is_new = true;
-		if constexpr (has_tag_v<Resource, MetaTag>)
-			retval->_dirtymeta = true;
-		return retval;
+			auto& cb = itr->second;
+			return cb.valid() ? *cb.resource : GetDefaultRes<Res>();
+		};
 	}
 
-	template<typename Resource>
-	inline RscHandle<Resource> ResourceManager::Create(PathHandle filepath, Guid guid)
+	template<typename Res>
+	inline bool ResourceManager::Free(const RscHandle<Res>& handle)
 	{
-		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
-		if (itr != table.end())
-			return RscHandle<Resource>{};
-
-		auto ptr = GetLoader<Resource>().Create(filepath);
-		if (!ptr)
-			return RscHandle<Resource>{};
-
-		auto handle = RscHandle<Resource>{ guid };
-		ptr->_handle = handle;
-		if constexpr (has_tag_v<Resource, Saveable>)
-			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
-
-		table[handle.guid].resource_ptr = std::move(ptr);
-		return handle;
-	}
-
-	template<typename Resource, typename>
-	inline RscHandle<Resource> ResourceManager::Create(PathHandle filepath, Guid guid, const typename Resource::Metadata& meta)
-	{
-		auto [table, itr] = FindHandle(RscHandle<Resource>{guid});
-		if (itr != table.end())
-			return RscHandle<Resource>{};
-
-		auto ptr = GetLoader<Resource>().Create(filepath, meta);
-		if (!ptr)
-			return RscHandle<Resource>{};
-
-		auto handle = RscHandle<Resource>{ guid };
-		ptr->_handle = handle;
-
-		if constexpr (has_tag_v<Resource, Saveable>)
-			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle, filepath);
-
-		table[handle.guid].resource_ptr = std::move(ptr);
-
-		return handle;
-	}
-
-	template<typename RegisterMe, typename ...Args, typename>
-	RscHandle<RegisterMe> ResourceManager::Emplace(Args&& ... args)
-	{
-		auto& table = GetTable<RegisterMe>();
-		auto& loader = GetLoader<RegisterMe>();
-		if (&loader == nullptr)
-			return RscHandle<RegisterMe>{};
-		auto ptr = std::make_shared<RegisterMe>(std::forward<Args>(args)...);
-		if (!ptr)
-			return RscHandle<RegisterMe>{};
-
-		auto handle = RscHandle<RegisterMe>{ Guid::Make() };
-		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
-
-		if constexpr (has_tag_v<RegisterMe, MetaTag>)
-			ptr->_dirtymeta = true;
-		if constexpr (has_tag_v<RegisterMe, Saveable>)
-		{
-			ptr->Dirty();
-			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
-		}
-
-		table[handle.guid].is_new = true;
-		table[handle.guid].resource_ptr = std::move(ptr);
-
-		return handle;
-	}
-
-	template<typename RegisterMe, typename ...Args, typename>
-	RscHandle<RegisterMe> ResourceManager::Emplace(Guid guid, Args&& ... args)
-	{
-		auto [table, itr] = FindHandle(RscHandle<RegisterMe>{guid});
-		if (itr != table.end())
-			return RscHandle<RegisterMe>{guid};
-
-		auto ptr = std::make_unique<RegisterMe>(std::forward<Args>(args)...);
-		if (!ptr)
-			return RscHandle<RegisterMe>{};
-
-		auto handle = RscHandle<RegisterMe>{ guid };
-		ptr->_handle = RscHandle<BaseResource_t<RegisterMe>>{ handle };
-		if constexpr (has_tag_v<RegisterMe, Saveable>)
-		{
-			ptr->Dirty();
-			Core::template GetSystem<SaveableResourceManager>().RegisterHandle(handle);
-		}
-
-		table[handle.guid].resource_ptr = std::move(ptr);
-		return handle;
-	}
-
-	template<typename Resource>
-	inline auto& ResourceManager::GetLoader()
-	{
-		return *r_cast<ResourceFactory<BaseResource_t<Resource>>*>(_resource_factories[ResourceID<BaseResource_t<Resource>>].get());
-	}
-
-	template<typename Resource>
-	inline auto& ResourceManager::GetTable()
-	{
-		return *r_cast<Storage<BaseResource_t<Resource>>*>(_resource_tables[ResourceID<BaseResource_t<Resource>>].get());
-	}
-
-	template<typename Resource>
-	auto ResourceManager::FindHandle(const RscHandle<Resource>& handle)
-	{
-		auto& table = GetTable<BaseResource_t<Resource>>();
-		return std::tuple<Storage<BaseResource_t<Resource>>&, Storage<BaseResource_t<Resource>>::iterator>{table, table.find(handle.guid)};
-	}
-
-	template<typename Resource>
-	inline bool ResourceManager::Validate(const RscHandle<Resource>& handle)
-	{
-		auto [table, itr] = FindHandle(RscHandle<BaseResource_t<Resource>>{handle});
-		return itr != table.end() && itr->second.resource_ptr;
-	}
-
-	template<typename Resource>
-	inline Resource& ResourceManager::Get(const RscHandle<Resource>& handle)
-	{
-		auto [table, itr] = FindHandle(handle);
-		if (itr != table.end())
-			if (itr->second.resource_ptr)
-				return s_cast<Resource&>(*itr->second.resource_ptr);
-		return *r_cast<Resource*>(_default_resources[ResourceID<BaseResource_t<Resource>>].get());
-	}
-
-	template<typename Resource>
-	inline bool ResourceManager::Free(const RscHandle<Resource>& handle)
-	{
-		auto [table, itr] = FindHandle(handle);
-
+		auto& table = GetTable<Res>();
+		auto itr = table.find(handle.guid);
 		if (itr == table.end())
 			return false;
+		else
+		{
+			table.erase(itr);
+			return true;
+		}
+	}
 
-		if constexpr (has_tag_v<Resource, Saveable>)
-			Core::template GetSystem<SaveableResourceManager>().DeregisterHandle(handle);
+	template<typename Res>
+	inline string_view ResourceManager::GetPath(const RscHandle<Res>& h)
+	{
+		auto* cb = GetControlBlock(h);
+		if (cb)
+		{
+			if (cb->path)
+				return *cb->path;
+		}
+		return "";
+//		return cb && cb->path ? *cb->path : "";
+	}
+
+	template<typename Res>
+	inline RscHandle<Res> ResourceManager::Create()
+	{
+		auto& factory = GetFactory<Res>();
+		assert(&factory);
+
+		auto& table = GetTable<Res>();
+		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
+
+		auto& control_block = itr->second;
+		// attempt to put on another thread
+		{
+			control_block.resource = factory.Create();
+		}
+
+		return RscHandle<Res>(itr->first);
+
+	}
+
+	template<typename Res>
+	ResourceManager::CreateResult<Res> ResourceManager::Create(string_view path_to_new_asset)
+	{
+		auto adapted_path = string{ path_to_new_asset };
+		{
+			// make sure that file doesn't already exist
+			auto itr = _loaded_files.find(adapted_path);
+			if (itr != _loaded_files.end())
+				return ResourceCreateError::PathAlreadyExists;
+		}
+
+		auto& factory = GetFactory<Res>();
+		assert(&factory);
+
+		auto& table = GetTable<Res>();
+		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
+
+		auto& control_block = itr->second;
+		control_block.path = adapted_path;
+
+		// attempt to put on another thread
+		{
+			control_block.resource = factory.Create();
+		}
+
+		auto& fcb = _loaded_files[adapted_path];
+		fcb.is_new = true;
+		fcb.bundle.Add(RscHandle<Res>(itr->first));
+
+		return RscHandle<Res>(itr->first);
+	}
+
+	template<typename Res>
+	ResourceManager::LoadResult<Res> ResourceManager::Load(PathHandle path)
+	{
+		auto res = Load(path);
+		if (!res)
+			return res.error();
+
+		return res.value().Get<Res>();
+	}
+	
+	template<typename Res>
+	ResourceManager::GetResult<Res> ResourceManager::Get(PathHandle path)
+	{
+		auto bundle = Get(path);
+		if (!bundle)
+			return bundle.error();
+
+		return bundle->Get<Res>();
+	}
+
+	template<typename Res>
+	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> saveme)
+	{
+		auto* rcb = GetControlBlock(saveme);
+
+		if (!rcb)
+			return ResourceSaveError::ResourceNotLoaded;
+		
+		auto filepath = [&]() -> string
+		{
+			if (rcb->path)
+				return *rcb->path;
+			else
+				return ""; // gen unique name
+		}();
+
+		auto stream = Core::template GetSystem<FileSystem>().Open( filepath, FS_PERMISSIONS::WRITE);
+		stream << serialize_text(*saveme);
+
+		return saveme;
+	}
+
+	template<typename Res>
+	ResourceReleaseResult ResourceManager::Release(RscHandle<Res> path)
+	{
+		auto& table = GetTable<Res>();
+		auto itr = table.find(path.guid);
+		if (itr == table.end())
+			return ResourceReleaseResult::Error_ResourceNotLoaded;
 
 		table.erase(itr);
-		return true;
+		return ResourceReleaseResult::Ok;
+	}
+
+	template<typename Res>
+	inline FileMoveResult ResourceManager::Rename(RscHandle<Res> resource, string_view new_path)
+	{
+		assert(false);
+		auto* cb = GetControlBlock(resource);
+		if (!cb)
+			return FileMoveResult::Error_ResourceNotFound;
+
+		if (cb->path)
+			return Rename(PathHandle{ cb->path }, new_path);
+
+		if (Core::template GetSystem<FileSystem>().Exists(new_path))
+			return FileMoveResult::Error_DestinationExists;
+
+		_loaded_files.emplace(string{ new_path }, ResourceBundle{ resource });
+
+		return FileMoveResult::Ok;
+	}
+
+	template<typename Factory, typename ...Args>
+	Factory& ResourceManager::RegisterFactory(Args&& ...factory_construction_args)
+	{
+		static_assert(has_tag_v<Factory, ResourceFactory>, "Can only register ResourceFactories");
+
+		auto& ptr = _factories[BaseResourceID<typename Factory::Resource>] = std::make_shared<Factory>(std::forward<Args>(factory_construction_args)...);
+		return *r_cast<Factory*>(ptr.get());
+	}
+
+	template<typename FLoader, typename ...Args>
+	FLoader& ResourceManager::RegisterLoader(string_view ext, Args&& ...loader_construction_args)
+	{
+		static_assert(std::is_base_of_v<IFileLoader, FLoader>, "Can only register FileLoaders");
+
+		auto& ptr = _file_loader[string{ ext }] = std::make_unique<FLoader>(std::forward<Args>(loader_construction_args)...);
+		return *s_cast<FLoader*>(ptr.get());
+	}
+
+	template<typename Res, typename ...Args>
+	RscHandle<Res> ResourceManager::LoaderEmplaceResource(Args&& ...construction_args)
+	{
+		return LoaderEmplaceResource<Res>(Guid::Make(), std::forward<Args>(construction_args)...);
+	}
+
+	template<typename Res, typename ...Args>
+	inline RscHandle<Res> ResourceManager::LoaderEmplaceResource(Guid guid, Args&& ...construction_args)
+	{
+		auto& table = GetTable<Res>();
+		auto& cb = table[guid]; // don't care just replace
+
+		// attempt to put on other thread
+		{
+			cb.resource = std::make_unique<Res>(std::forward<Args>(construction_args)...);
+		}
+
+		return RscHandle<Res>{guid};
+	}
+
+	template<typename Res, typename>
+	inline string ResourceManager::GenUniqueName()
+	{
+		auto start_name = string{ reflect::get_type<Res>().name() };
+
+		auto make_path = [&]()
+		{
+			return "/assets/" + start_name + Res::ext;
+		};
+
+		auto path = make_path();
+
+		while (_loaded_files.find(path) != _loaded_files.end())
+		{
+			start_name += " (copy)";
+			make_path();
+		}
+
+		return path;
+	}
+
+	template<typename Res>
+	ResourceManager::ResourceControlBlock<Res>* ResourceManager::GetControlBlock(RscHandle<Res> handle)
+	{
+		auto& table = GetTable<Res>();
+		auto itr = table.find(handle.guid);
+		return itr == table.end() ? nullptr : &itr->second;
 	}
 }

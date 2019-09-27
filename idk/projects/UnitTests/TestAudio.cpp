@@ -66,7 +66,7 @@ TEST(Audio, AudioSystemClassTest)
 
 	std::cout << "Searching for \\SampleSounds\\My Delirium - Ladyhawke (Lyrics).mp3 in directory...\n";
 
-	RscHandle<AudioClip> audioPtr1 = Core::GetResourceManager().Create<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path2));
+	RscHandle<AudioClip> audioPtr1 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path2));
 
 	if (!audioPtr1) { //Check if null is given
 		std::cout << "Audio path not found, skipping test...\n";
@@ -90,8 +90,8 @@ TEST(Audio, AudioSystemClassTest)
 	}
 
 
-	RscHandle<AudioClip> audioPtr2 = Core::GetResourceManager().Create<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path1));
-	RscHandle<AudioClip> audioPtr3 = Core::GetResourceManager().Create<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path2));
+	RscHandle<AudioClip> audioPtr2 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path1));
+	RscHandle<AudioClip> audioPtr3 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path2));
 
 	std::cout << "Playing first sound in default SFX group...\n";
 

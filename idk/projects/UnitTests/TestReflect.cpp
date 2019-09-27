@@ -28,6 +28,11 @@ TEST(Reflect, TestReflectBasic)
 
 	v2.get<vec3>() *= 2;
 	EXPECT_NE(v.get<vec3>(), v2.get<vec3>());
+
+    auto x = reflect::unpack_types<variant<int, float, vec3>>();
+    EXPECT_EQ(x[0], reflect::get_type<int>());
+    EXPECT_EQ(x[1], reflect::get_type<float>());
+    EXPECT_EQ(x[2], reflect::get_type<vec3>());
 }
 
 struct reflect_this

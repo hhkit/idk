@@ -32,7 +32,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <gfx/ShaderGraphFactory.h>
-#include <res/ForwardingExtensionLoader.h>
+#include <res/EasyFactory.h>
 #include <imgui/ImGuizmo.h>
 
 
@@ -49,20 +49,20 @@ namespace idk
 		{
 		case GraphicsAPI::OpenGL:
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLFBXLoader>(".md5mesh");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLCubeMapLoader>(".cbm");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".png");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".jpg");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".jpeg");
-			Core::GetResourceManager().RegisterExtensionLoader<OpenGLTextureLoader>(".dds");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".obj");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".md5mesh");
+			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
-			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterExtensionLoader<VulkanFBXLoader>(".md5mesh");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".obj");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".md5mesh");
 			break;
 		default:
 			break;
@@ -70,8 +70,8 @@ namespace idk
 
         Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
 
-        Core::GetResourceManager().RegisterFactory<shadergraph::Factory>();
-        Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<shadergraph::Graph>>(".mat");
+		Core::GetResourceManager().RegisterFactory<EasyFactory<shadergraph::Graph>>();
+        Core::GetResourceManager().RegisterLoader<shadergraph::Loader>(".mat");
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
@@ -222,6 +222,31 @@ namespace idk
 	{
 		// TODO: insert return statement here
 		return _interface->Inputs()->main_camera;
+	}
+
+	void IDE::FocusOnSelectedGameObjects()
+	{
+		if (selected_gameObjects.size()) {
+			vec3 finalCamPos{};
+			for (Handle<GameObject> i : selected_gameObjects) {
+
+				Handle<Transform> transform = i->GetComponent<Transform>();
+				if (transform) {
+					finalCamPos += transform->position;
+				}
+
+			}
+
+			finalCamPos /= selected_gameObjects.size();
+
+			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+
+			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			Handle<Camera> currCamera = main_camera.current_camera;
+			Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
+			camTransform->position = finalCamPos;
+			camTransform->position += camTransform->Forward() * distanceFromObject;
+		}
 	}
 
 }

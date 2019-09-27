@@ -61,6 +61,12 @@ namespace idk
 		return Transform()->parent;
 	}
 
+	bool GameObject::HierarchyIsQueuedForDestruction() const
+	{
+		auto parent = Parent();
+		return parent ? IsQueuedForDestruction() || parent->HierarchyIsQueuedForDestruction() : IsQueuedForDestruction();
+	}
+
 	string_view GameObject::Name() const
 	{
 		return GetComponent<class Name>()->name;

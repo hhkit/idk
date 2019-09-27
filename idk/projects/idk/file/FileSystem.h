@@ -25,7 +25,7 @@ namespace idk
 													 string_view extension, 
 													 FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS)		const;
 
-		vector<PathHandle>  GetPaths				(string_view mountPath,
+		vector<PathHandle>  GetEntries				(string_view mountPath,
 													 FS_FILTERS filters = FS_FILTERS::FILE | FS_FILTERS::DIR, string_view ext = string_view{}) const;
 
 		bool		Exists		(string_view mountPath)		const;

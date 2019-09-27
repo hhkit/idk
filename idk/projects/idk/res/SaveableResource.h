@@ -4,7 +4,7 @@
 
 namespace idk
 {
-	namespace detail { template<typename T> struct tSavedHelper; }
+	namespace detail { template<typename T> struct ResourceManager_detail; }
 	template<typename T>
 	struct ResourceExtension
 	{
@@ -32,7 +32,7 @@ namespace idk
 		void Dirty() { _dirty = true; };
 	private:
 		template<typename T>
-		friend struct detail::tSavedHelper;
+		friend struct detail::ResourceManager_detail;
 		friend class ResourceManager;
 
 		bool _dirty = false;

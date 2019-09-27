@@ -1,5 +1,6 @@
 #pragma once
 #include <res/Guid.h>
+#include <res/ResourceUtils.h>
 
 namespace idk
 {

@@ -30,9 +30,4 @@ namespace idk
 
 		return {};
 	}
-	template<typename T>
-	inline bool GameObject::RemoveComponent(const Handle<T>&)
-	{
-		return false;
-	}
 }

@@ -21,7 +21,7 @@ namespace idk
         virtual void BeginWindow() override;
         virtual void Update() override;
 
-        void OpenGraph(const PathHandle& handle);
+        void OpenGraph(const RscHandle<shadergraph::Graph>& handle);
 
     private:
         ImNodes::CanvasState _canvas;
@@ -31,7 +31,7 @@ namespace idk
 
         void show_params_window();
 
-        void drawValue(shadergraph::Value& value);
+        void drawValue(shadergraph::Node& node, int input_slot_index);
         void addDefaultSlotValue(const Guid& guid, int slot_in);
 
         void drawNode(shadergraph::Node& node);

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Animation.h"
-
+#include <set>
 
 namespace idk::anim
 {
@@ -45,6 +45,30 @@ namespace idk::anim
 			_easy_anim_table.emplace(easy_node._name, easy_node);
 			
 		}
+	}
+
+	Animation::Channel& Animation::Channel::operator+=(const Channel& rhs)
+	{
+		// If rhs channel is not animated, we just concat the _node_transform
+		// if (!rhs._is_animated)
+		// {
+		// 	_node_transform = _node_transform * rhs._node_transform;
+		// 	return *this;
+		// }
+		// 
+		// if (!_is_animated)
+		// {
+		// 	_translate = rhs._translate;
+		// 	_rotation = rhs._rotation;
+		// 	_scale = rhs._scale;
+		// 	_is_animated = true;
+		// 	return *this;
+		// }
+		// 
+		// auto set_test = [](auto lhs, auto rhs) { return lhs._time == rhs._time; };
+		// std::set < Key<vec3>, decltype(set_test)> test{_translate.begin(), _translate.end()};
+
+		return *this;
 	}
 }
 

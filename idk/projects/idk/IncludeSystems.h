@@ -11,7 +11,6 @@
 #include <phys/PhysicsSystem.h>
 
 #include <res/ResourceManager.h>
-#include <res/SaveableResourceManager.h>
 #include <scene/SceneManager.h>
 #include <scene/ProjectManager.h>
 

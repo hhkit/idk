@@ -2,27 +2,27 @@
 #include "ShaderGraphFactory.h"
 #include <util/ioutils.h>
 #include <serialize/serialize.h>
+#include <res/MetaBundle.h>
 
 namespace idk::shadergraph
 {
 
-    unique_ptr<Graph> Factory::GenerateDefaultResource()
-    {
-        return std::make_unique<Graph>();
-    }
+	ResourceBundle Loader::LoadFile(PathHandle file_handle)
+	{
+		auto fs = file_handle.Open(FS_PERMISSIONS::READ);
+		auto str = stringify(fs);
+		auto handle = Core::GetResourceManager().LoaderEmplaceResource<Graph>();
+		parse_text(str, *handle);
+		return handle;
+	}
 
-    unique_ptr<Graph> Factory::Create()
-    {
-        return GenerateDefaultResource();
-    }
-
-    unique_ptr<Graph> Factory::Create(PathHandle file_handle)
-    {
-        auto fs = file_handle.Open(FS_PERMISSIONS::READ);
-        auto str = stringify(fs);
-        auto ptr = GenerateDefaultResource();
-        parse_text(str, *ptr.get());
-        return std::move(ptr);
-    }
+	ResourceBundle Loader::LoadFile(PathHandle file_handle, const MetaBundle& meta)
+	{
+		auto fs = file_handle.Open(FS_PERMISSIONS::READ);
+		auto str = stringify(fs);
+		auto handle = Core::GetResourceManager().LoaderEmplaceResource<Graph>(meta.metadatas[0].guid);
+		parse_text(str, *handle);
+		return handle;
+	}
 
 }

@@ -7,15 +7,6 @@
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
     <ClInclude Include="ImGui_Interface.h" />
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
-    <ClInclude Include="loading\OpenGLFBXLoader.h">
-      <Filter>loader</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\FBXLoaderHelpers.h">
-      <Filter>loader</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\VulkanFBXLoader.h">
-      <Filter>loader</Filter>
-    </ClInclude>
     <ClInclude Include="EditorInputs.h">
       <Filter>controls</Filter>
     </ClInclude>
@@ -82,21 +73,26 @@
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\InputResource.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="DragDropTypes.h" />
+    <ClInclude Include="ResourceExtensions.h" />
+    <ClInclude Include="loading\FBXLoaderHelpers.h">
+      <Filter>loader\fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\VulkanFBXLoader.h">
+      <Filter>loader\fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\OpenGLFBXLoader.h">
+      <Filter>loader\fbx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="ImGui_Interface.cpp" />
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
-    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
-      <Filter>loader</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
-      <Filter>loader</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\VulkanFBXLoader.cpp">
-      <Filter>loader</Filter>
-    </ClCompile>
     <ClCompile Include="EditorInputs.cpp">
       <Filter>controls</Filter>
     </ClCompile>
@@ -148,6 +144,18 @@
     <ClCompile Include="loading\OpenGLTextureLoader.cpp">
       <Filter>loader</Filter>
     </ClCompile>
+    <ClCompile Include="widgets\InputResource.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
+      <Filter>loader\fbx</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\VulkanFBXLoader.cpp">
+      <Filter>loader\fbx</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <Filter>loader\fbx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
@@ -162,6 +170,14 @@
     </Filter>
     <Filter Include="windows">
       <UniqueIdentifier>{b8f020c5-d088-49f8-841d-626fcb8a63d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="widgets">
+      <UniqueIdentifier>{2d26593e-7fd8-4e14-a1e4-cb20be5641c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader\fbx">
+      <UniqueIdentifier>{5fa89918-20ca-42f5-b68e-d3370c6c6e57}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

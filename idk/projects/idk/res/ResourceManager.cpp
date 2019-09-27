@@ -1,17 +1,21 @@
 #include "stdafx.h"
 
 #include <sstream>
+
 #include <ds/ranged_for.h>
 #include <file/FileSystem.h>
-#include <IncludeResources.h>
+#include <res/MetaBundle.h>
 #include <serialize/serialize.h>
+#include <util/ioutils.h>
+#include <res/SaveableResourceLoader.h>
+
+#include <IncludeResources.h>
+
 #include "ResourceManager.h"
 
 
 namespace idk
 {
-	ResourceManager* ResourceManager::instance = nullptr;
-
 	namespace detail
 	{
 		template<typename T> struct ResourceManager_detail;
@@ -19,34 +23,65 @@ namespace idk
 		template<typename ... Rs>
 		struct ResourceManager_detail<std::tuple<Rs...>>
 		{
-			static array<shared_ptr<void>, sizeof...(Rs)> GenResourceTables()
+			constexpr static array<shared_ptr<void>, sizeof...(Rs)> GenResourceTables()
 			{
 				return array<shared_ptr<void>, sizeof...(Rs)>{
-					std::make_shared<ResourceManager::Storage<Rs>>()...
+					std::make_shared<ResourceManager::ResourceStorage<Rs>>()...
 				};
 			}
 
-			static array<void(*)(ResourceManager*), sizeof...(Rs)> GenDefaults()
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> GenDefaults()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
-						if (auto loader = &resource_man->GetLoader<Rs>())
-						{
-							auto id = ResourceID<Rs>;
-							resource_man->_default_resources[id] = loader->GenerateDefaultResource();
-						}
+						if (auto loader = &resource_man->GetFactory<Rs>())
+							resource_man->_default_resources[ResourceID<Rs>] = loader->GenerateDefaultResource();
 					}...
 				};
 			}
 
-			static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> CreateSaveableLoaders()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						if constexpr (has_tag_v<Rs, Saveable>)
+							if constexpr (std::is_default_constructible_v<Rs>)
+								resource_man->RegisterLoader<SaveableResourceLoader<Rs>>(Rs::ext);
+					}...
+				};
+			}
+
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
-						if (auto loader = &resource_man->GetLoader<Rs>())
+						if (auto loader = &resource_man->GetFactory<Rs>())
 							loader->Init();
+					}...
+				};
+			}
+
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> SaveFiles()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						if constexpr (has_tag_v<Rs, Saveable>)
+						{
+							if constexpr (Rs::autosave)
+								for (auto& [guid, res_cb] : resource_man->GetTable<Rs>())
+								{
+									auto h = RscHandle<Rs>{ guid };
+									if (h->IsDirty())
+									{
+										resource_man->Save(h);
+										h->Clean();
+									}
+								}
+						}
 					}...
 				};
 			}
@@ -57,8 +92,13 @@ namespace idk
 
 	void ResourceManager::Init()
 	{
+		constexpr static auto saveable_table = detail::ResourceHelper::CreateSaveableLoaders();
+
+		for (auto& func : saveable_table)
+			func(this);
+
 		instance = this;
-		_resource_tables   = detail::ResourceHelper::GenResourceTables();
+		_resource_table = detail::ResourceHelper::GenResourceTables();
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
@@ -70,9 +110,11 @@ namespace idk
 
 	void ResourceManager::LateInit()
 	{
-		for (auto& func : detail::ResourceHelper::InitFactories())
+		constexpr static auto init_table = detail::ResourceHelper::InitFactories();
+		constexpr static auto defaults_table = detail::ResourceHelper::GenDefaults();
+		for (auto& func : init_table)
 			func(this);
-		for (auto& func : detail::ResourceHelper::GenDefaults())
+		for (auto& func : defaults_table)
 			func(this);
 	}
 
@@ -81,207 +123,180 @@ namespace idk
 		for (auto& elem : reverse(_default_resources))
 			elem.reset();
 
-		for (auto& elem : _resource_tables)
+		for (auto& elem : _resource_table)
 			elem.reset();
 
-		for (auto& elem : _resource_factories)
-		{
+		for (auto& elem : _factories)
 			elem.reset();
-		}
-		for (auto& elem : this->_extension_loaders)
-		{
+
+		for (auto& elem : _file_loader)
 			elem.second.reset();
+	}
+
+	IFileLoader* ResourceManager::GetLoader(string_view extension)
+	{
+		auto itr = _file_loader.find(string{ extension });
+		if (itr == _file_loader.end())
+			return nullptr;
+
+		return itr->second.get();
+	}
+
+	void ResourceManager::SaveDirtyFiles()
+	{
+		static constexpr auto save_files = detail::ResourceHelper::SaveFiles();
+
+		for (auto& fn : save_files)
+			fn(this);
+	}
+
+	void ResourceManager::SaveDirtyMetadata()
+	{
+		for (auto& [path, resource] : _loaded_files)
+		{
+			auto dirty = resource.is_new; // is the resource brand new?
+
+			if (!dirty) // are any resource metas dirty?
+				for (auto& elem : resource.bundle.GetAll())
+				{ 
+					dirty = std::visit([&](const auto& handle) -> bool
+						{
+							using Res = typename std::decay_t<decltype(handle)>::Resource;
+							if constexpr (has_tag_v<Res, MetaTag>)
+								return handle->_dirtymeta;
+							else
+								return false;
+						}, elem);
+				}
+
+			if (dirty)
+			{
+				// save the .meta file
+				MetaBundle m;
+
+				for (auto& elem : resource.bundle.GetAll())
+				{
+					std::visit([&](const auto& handle)
+						{
+							m.Add(handle);
+							if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaTag>)
+								handle->_dirtymeta = false;
+						}, elem);
+				}
+
+				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << serialize_text(m);
+				resource.is_new = false;
+			}
 		}
 	}
 
 	void ResourceManager::WatchDirectory()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-			LoadFile(elem);
-
+			Load(elem);
+		
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			ReloadFile(elem);
+			Load(elem);
+	}
+
+	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path)
+	{
+		auto* loader = GetLoader(path.GetExtension());
+		if (loader == nullptr)
+			return ResourceLoadError::ExtensionNotRegistered;
+
+		if (!path)
+			return ResourceLoadError::FileDoesNotExist;
+
+		auto emplace_path = string{ path.GetMountPath() };
+
+		// TODO: Meta handling
+		auto meta_path = PathHandle{ string{path.GetMountPath()} + ".meta" };
+
+		auto meta_bundle = [&]() -> opt<MetaBundle>
+		{
+			if (!meta_path)
+				return std::nullopt;
+
+			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
+			auto metastr = stringify(metastream);
+
+			return parse_text<MetaBundle>(metastr);
+		}();
+
+		// unload the file if loaded
+		{
+			auto itr = _loaded_files.find(emplace_path);
+			if (itr != _loaded_files.end())
+			{
+				// release all resources attached to file
+				for (auto& elem : itr->second.bundle.GetAll())
+					std::visit([&](const auto& handle) { Release(handle); }, elem);
+				_loaded_files.erase(itr);
+			}
+		}
+
+		// reload the file
+		auto bundle = [&]()
+		{
+			if (meta_bundle && meta_bundle->metadatas.size())
+				return loader->LoadFile(path, *meta_bundle);
+			else
+				return loader->LoadFile(path);
+		}();
+		auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
+		assert(success);
+
+		itr->second.is_new = !s_cast<bool>(meta_bundle);
+
+		// set path
+		for (auto& elem : bundle.GetAll())
+			std::visit(
+				[&](const auto& handle) 
+				{
+					using Res = typename std::decay_t<decltype(handle)>::Resource;
+
+					auto* cb = GetControlBlock(handle);
+					assert(cb);
+					cb->path   = emplace_path;
+				}
+			, elem);
+
+		return bundle;
+	}
+
+	ResourceManager::GeneralGetResult ResourceManager::Get(PathHandle path)
+	{
+		auto itr = _loaded_files.find(string{ path.GetMountPath() });
+		if (itr != _loaded_files.end())
+			return itr->second.bundle;
+		return BundleGetError::ResourceNotLoaded;
+	}
+
+	FileMoveResult ResourceManager::Rename(PathHandle old_path, string_view new_path)
+	{
+		auto itr = _loaded_files.find(string{ old_path.GetMountPath() });
+		if (itr == _loaded_files.end())
+			return FileMoveResult::Error_ResourceNotFound;
+
+		if (Core::GetSystem<FileSystem>().Exists(new_path))
+			return FileMoveResult::Error_DestinationExists;
+
+		auto string_path = string{ new_path };
+
+		auto bundle = std::move(itr->second);
+		for (auto& elem : bundle.bundle.GetAll())
+		{
+			std::visit([&](const auto& handle)
+				{
+					GetControlBlock(handle)->path = string_path;
+				}, elem);
+		}
+
+		_loaded_files.erase(itr);
+		_loaded_files.emplace(string_path, bundle);
+
+		return FileMoveResult::Ok;
 	}
 	
-	FileResources ResourceManager::LoadFile(PathHandle file)
-	{
-		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
-		if (find_file != _loaded_files.end())
-			return find_file->second;
-
-		auto path_to_meta = string{ file.GetMountPath() } + ".meta";
-
-		auto& fs = Core::GetSystem<FileSystem>();
-		fs.Exists(path_to_meta);
-		auto meta_file = fs.GetFile(path_to_meta);
-
-		if (!file)
-			return FileResources{};
-
-		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-		if (loader_itr == _extension_loaders.end())
-			return FileResources{};
-
-		auto resources = [&]()
-		{
-			if (meta_file)
-			{
-				std::stringstream s; 
-				s << meta_file.Open(FS_PERMISSIONS::READ).rdbuf();
-
-				auto metalist = parse_text<MetaFile>(s.str());
-				return loader_itr->second->Create(file, metalist);
-			}
-			else
-				return loader_itr->second->Create(file);
-		}();
-
-		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
-		return resources;
-	}
-
-	FileResources ResourceManager::LoadFile(PathHandle file, const MetaFile& meta)
-	{
-		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
-		if (find_file != _loaded_files.end())
-			return ReloadFile(file);
-
-		if (!file)
-			return FileResources{};
-
-		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-		if (loader_itr == _extension_loaders.end())
-			return FileResources{};
-
-		auto resources = [&]()
-		{
-			return loader_itr->second->Create(file, meta);
-		}();
-
-		_loaded_files.emplace_hint(find_file, file.GetMountPath(), resources);
-		return resources;
-	}
-
-	FileResources ResourceManager::ReloadFile(PathHandle file)
-	{
-		auto find_file = _loaded_files.find(string{ file.GetMountPath() });
-		if (find_file == _loaded_files.end())
-			return FileResources();
-
-		// save old meta
-		auto ser = save_meta(find_file->second);
-
-		// unload resources
-		UnloadFile(file);
-
-		// get loader
-		auto loader_itr = _extension_loaders.find(string{ file.GetExtension() });
-		if (loader_itr == _extension_loaders.end())
-			return FileResources{};
-
-		// reload resources
-		auto stored = loader_itr->second->Create(file, ser);
-		return _loaded_files.emplace_hint(find_file, string{ file.GetMountPath() }, stored)->second;
-	}
-
-	size_t ResourceManager::UnloadFile(PathHandle path_to_file)
-	{
-		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
-		if (find_file == _loaded_files.end())
-			return 0;
-
-		for (auto& elem : find_file->second.resources)
-		{
-			std::visit([this](auto handle) {
-				Free(handle);
-			}, elem._handle);
-		}
-
-		auto retval = find_file->second.resources.size();
-		_loaded_files.erase(find_file);
-		return retval;
-	}
-
-	FileResources ResourceManager::GetFileResources(PathHandle path_to_file)
-	{
-		auto find_file = _loaded_files.find(string{ path_to_file.GetMountPath() });
-		if (find_file != _loaded_files.end())
-			return find_file->second;
-		else
-			return FileResources();
-	}
-
-	bool ResourceManager::Associate(string_view mount_path, GenericRscHandle f)
-	{
-		auto itr = _loaded_files.find(string{ mount_path });
-		
-		auto& filemeta = [&]() -> FileResources&
-		{
-			if (itr == _loaded_files.end())
-			{
-				auto [jtr, success] = _loaded_files.emplace(string{ mount_path }, FileResources{});
-				assert(success);
-				return jtr->second;
-			}
-			else
-			{
-				return itr->second;
-			}
-		}();
-		auto find_f = std::find(filemeta.resources.begin(), filemeta.resources.end(), f);
-		if (find_f == filemeta.resources.end())
-		{
-			filemeta.resources.emplace_back(f);
-			f.visit([&](auto& elem) {
-
-				auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
-				auto& control_block = table.find(elem.guid)->second;
-
-				control_block.is_new = true;
-			});
-			return true;
-		}
-		else
-			return false;
-	}
-
-	void ResourceManager::SaveDirtyMetadata()
-	{
-		auto& fs = Core::GetSystem<FileSystem>();
-		for (auto& [filepath, resources] : _loaded_files)
-		{
-			bool dirty = false;
-			for (auto& elem : resources.resources)
-				elem.visit([&](auto& elem) {
-
-				auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
-				auto& control_block = table.find(elem.guid)->second;
-
-				dirty |= control_block.is_new;
-				if constexpr (has_tag_v<decltype(elem), MetaTag>)
-					dirty |= elem->_dirtymeta;
-			});
-
-			if (dirty)
-			{
-				auto saveus = save_meta(resources);
-				std::stringstream stream;
-
-				stream << serialize_text(saveus);
-				auto meta_file = fs.Open(filepath + ".meta", FS_PERMISSIONS::WRITE, false);
-				meta_file << stream.rdbuf();
-				// mark as clean
-				for (auto& elem : resources.resources)
-					elem.visit([&](auto& elem) {
-					auto& table = GetTable<typename std::decay_t<decltype(elem)>::Resource>();
-					auto& control_block = table.find(elem.guid)->second;
-
-					control_block.is_new = false;
-					if constexpr (has_tag_v<decltype(elem), MetaTag>)
-						elem->_dirtymeta = false;
-				});
-			}
-
-		}
-	}
 }

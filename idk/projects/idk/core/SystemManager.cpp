@@ -24,6 +24,12 @@ namespace idk
 			if (elem)
 				elem->LateInit();
 	}
+	void SystemManager::EarlyShutdownSystems()
+	{
+		for (auto& elem : reverse(_list))
+			if (elem)
+				elem->EarlyShutdown();
+	}
 	void SystemManager::ShutdownSystems()
 	{
 		for (auto& elem : reverse(_list))

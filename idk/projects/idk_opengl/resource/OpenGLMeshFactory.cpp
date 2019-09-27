@@ -4,7 +4,7 @@
 
 #include <core/Core.h>
 #include <idk_opengl/resource/OpenGLMesh.h>
-
+#include <gfx/projector_functions.h>
 namespace idk::ogl
 {
 	void OpenGLMeshFactory::GenerateDefaultMeshes()
@@ -13,11 +13,13 @@ namespace idk::ogl
 		{
 			vec3 pos;
 			vec3 normal;
+			vec2 uv;
 		};
 		vector<OpenGLDescriptor> descriptor
 		{
 			OpenGLDescriptor{vtx::Attrib::Position, sizeof(Vertex), offsetof(Vertex, pos) },
-			OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) }
+			OpenGLDescriptor{vtx::Attrib::Normal,   sizeof(Vertex), offsetof(Vertex, normal) },
+			OpenGLDescriptor{vtx::Attrib::UV,   sizeof(Vertex), offsetof(Vertex, uv) }
 		};
 		{ /* create sphere mesh*/
 			std::vector<Vertex> icosahedron;
@@ -231,7 +233,11 @@ namespace idk::ogl
 			// Subdivide the icosahedron into a sphere here.
 			subdivideIcosahedron(icosahedron, icosahedronIndices);
 
-			auto sphere_mesh = Core::GetResourceManager().Emplace<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
+			// project uvs
+			for (auto& elem : icosahedron)
+				elem.uv = spherical_projection(elem.pos);
+
+			auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddMeshEntry(0, 0, icosahedronIndices.size(), 0);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -246,7 +252,7 @@ namespace idk::ogl
 
 		{	/* create cube mesh */
 			auto box_mesh = Mesh::defaults[MeshType::Box];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(box_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(box_mesh.guid);
 			constexpr auto sz = 1.f;
 			std::vector<Vertex> vertices{
 				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
@@ -274,6 +280,7 @@ namespace idk::ogl
 				Vertex{ vec3{ -sz, -sz, -sz}, vec3{0,-1,0} },  // bottom
 				Vertex{ vec3{ -sz, -sz,  sz}, vec3{0,-1,0} },  // bottom
 			};
+
 			std::vector<int> indices{
 				1, 0, 3,
 				2, 1, 3,
@@ -307,9 +314,50 @@ namespace idk::ogl
 			);
 		}
 
+		{	/* create circle mesh */
+			auto circle_mesh = Mesh::defaults[MeshType::Circle];
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(circle_mesh.guid);
+			constexpr auto sz = 1.f;
+			constexpr auto numberOfTri = 16;
+			real angle = (2.f * pi) / numberOfTri;
+
+			std::vector<Vertex> vertices;
+			std::vector<int> indices;
+		
+			for (int i = 0; i < numberOfTri; ++i)
+			{
+				vertices.emplace_back(Vertex{ vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)}, vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)} });
+
+				if (i < (numberOfTri-1))
+				{
+					indices.emplace_back(i);
+					indices.emplace_back(i+1);
+				}
+				else
+				{
+					indices.emplace_back(i);
+					indices.emplace_back(0);
+				}
+			}
+
+			mesh_handle->SetDrawMode(GL_LINES);
+
+			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+				.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei)vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
+			);
+		}
+
 		{	/* create tetrahedral mesh */
 			auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(tet_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
@@ -341,7 +389,7 @@ namespace idk::ogl
 
 		{	/* create line mesh */
 			auto line_mesh = Mesh::defaults[MeshType::Line];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(line_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(line_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0, 0, 1}, vec3{ 0, 0, 1}},
@@ -413,10 +461,5 @@ namespace idk::ogl
 	unique_ptr<Mesh> OpenGLMeshFactory::Create()
 	{
 		return std::make_unique<OpenGLMesh>();
-	}
-
-	unique_ptr<Mesh> OpenGLMeshFactory::Create(PathHandle)
-	{
-		return unique_ptr<Mesh>();
 	}
 }

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <forward_list>
 #include "FrameRenderer.h"
+#include <core/Core.h>
 #include <gfx/GraphicsSystem.h> //GraphicsState
 #include <vkn/VulkanPipeline.h>
 #include <vkn/VulkanMesh.h>
@@ -47,13 +48,13 @@ namespace idk::vkn
 		config.buffer_descriptions.emplace_back(nml_desc);
 		string f, v;
 		{
-				auto vbuffer = Core::GetResourceManager().LoadFile("/assets/shader/mesh.vert.spv")[0].As<ShaderProgram>();
+				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert.spv").value();
 			config.vert_shader = vbuffer;
 
 		}
 		{
 			{
-				auto vbuffer = Core::GetResourceManager().LoadFile("/assets/shader/flat_color.frag.spv")[0].As<ShaderProgram>();
+				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/flat_color.frag.spv").value();
 				config.vert_shader = vbuffer;
 			}
 		}
@@ -122,18 +123,13 @@ namespace idk::vkn
 				};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				_mesh_renderer_shader_module = Core::GetResourceManager().LoadFile(filename).resources.front().As<ShaderProgram>();
-				auto& mod = _mesh_renderer_shader_module.as<ShaderModule>();
-				mod.AttribDescriptions(std::move(desc));
+				_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile);
+				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-
 			}
-			//else
-			//{
-			//	_mesh_renderer_shader_module = rsc.resources.front().As<ShaderProgram>();
-			//}
 		}
+		//else
 		{
 			string filename = "/assets/shader/shadow.frag";
 			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
@@ -148,7 +144,7 @@ namespace idk::vkn
 				//};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				shader_mod = Core::GetResourceManager().LoadFile(filename).resources.front().As<ShaderProgram>();
+				shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename).value();
 				//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();

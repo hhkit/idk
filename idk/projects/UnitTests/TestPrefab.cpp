@@ -5,7 +5,6 @@
 #include <IncludeComponents.h>
 #include <IncludeSystems.h>
 #include <IncludeResources.h>
-#include <res/ForwardingExtensionLoader.h>
 #include <scene/SceneManager.h>
 
 using namespace idk;
@@ -41,7 +40,8 @@ TEST(Prefab, TestPrefabSave)
     auto save_path = fs.GetFile("/assets/prefabs/testprefab.idp");
 
     EXPECT_NO_THROW(PrefabUtility::Save(go, save_path));
-	core.GetResourceManager().Shutdown();
+
+	core.Shutdown();
 }
 
 TEST(Prefab, TestPrefabInstantiate)
@@ -49,13 +49,13 @@ TEST(Prefab, TestPrefabInstantiate)
 	Core core;
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+    core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
 
 	auto& fs = Core::GetSystem<FileSystem>();
 	core.Setup();
 	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
-    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
 
     {
         auto& data = prefab->data;
@@ -92,7 +92,7 @@ TEST(Prefab, TestPrefabInstantiate)
         EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
         EXPECT_EQ(o1.Transform()->parent.id, o0.GetHandle().id);
     }
-	core.GetResourceManager().Shutdown();
+	core.Shutdown();
 }
 
 TEST(Prefab, TestPrefabRevert)
@@ -103,10 +103,10 @@ TEST(Prefab, TestPrefabRevert)
 
 	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
-    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+	auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
+	core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
 
-    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
     auto go = PrefabUtility::Instantiate(prefab, *scene);
 
     vec3 ori_scale = go->GetComponent<Transform>()->scale;
@@ -131,7 +131,7 @@ TEST(Prefab, TestPrefabRevert)
     EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f)) << "Position and rotation should not be reverted.";
     EXPECT_EQ(t0->scale, ori_scale);
     EXPECT_EQ(go->GetComponent<Name>()->name, "changed_name") << "Name should not be reverted.";
-	core.GetResourceManager().Shutdown();
+	core.Shutdown();
 }
 
 TEST(Prefab, TestPrefabPropagate)
@@ -143,9 +143,9 @@ TEST(Prefab, TestPrefabPropagate)
 	auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
     auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+    core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
 
-    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
     auto go0 = PrefabUtility::Instantiate(prefab, *scene);
     auto go1 = PrefabUtility::Instantiate(prefab, *scene);
     auto go2 = PrefabUtility::Instantiate(prefab, *scene);
@@ -184,10 +184,10 @@ TEST(Prefab, TestPrefabApply)
 
     auto scene = Core::GetSystem<SceneManager>().CreateScene();
 
-    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-    core.GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Prefab>>(".idp");
+	auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
+	core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
 
-    auto& prefab = core.GetResourceManager().LoadFile(fs.GetFile("/assets/prefabs/testprefab.idp"))[0].As<Prefab>();
+    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
     auto go0 = PrefabUtility::Instantiate(prefab, *scene);
     auto go1 = PrefabUtility::Instantiate(prefab, *scene);
     auto go2 = PrefabUtility::Instantiate(prefab, *scene);

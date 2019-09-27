@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
-    <ClInclude Include="anim\AnimationFactory.h" />
     <ClInclude Include="anim\AnimationController.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
     <ClInclude Include="anim\Skeleton.h" />
@@ -28,7 +27,7 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
-    <ClInclude Include="audio\AudioClipFactory.h" />
+    <ClInclude Include="audio\AudioClipLoader.h" />
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
@@ -40,20 +39,30 @@
     <ClInclude Include="gfx\BasicRenderPasses.h" />
     <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="gfx\MeshFactory.h" />
+    <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
+    <ClInclude Include="gfx\ShaderTemplateLoader.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
     <ClInclude Include="math\shapes\frustum.h" />
     <ClInclude Include="math\shapes\halfspace.h" />
+    <ClInclude Include="meta\variant.h" />
     <ClInclude Include="phys\collision_detection\collision_box.h" />
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
     <ClInclude Include="phys\raycasts\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="res\EasyFactory.h" />
+    <ClInclude Include="res\FileLoader.h" />
+    <ClInclude Include="res\GenericResourceHandle.h" />
+    <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="res\MetaBundle.h" />
+    <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
-    <ClInclude Include="res\SaveableResourceManager.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
     <ClInclude Include="scene\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
@@ -106,10 +115,7 @@
     <ClInclude Include="reflect\detail\typed_context.h" />
     <ClInclude Include="reflect\detail\visit_detail.h" />
     <ClInclude Include="reflect\typeinfo.h" />
-    <ClInclude Include="res\ExtensionLoader.h" />
-    <ClInclude Include="res\FileResources.h" />
     <ClInclude Include="res\FileResources_detail.h" />
-    <ClInclude Include="res\ForwardingExtensionLoader.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -153,6 +159,7 @@
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraphFactory.h" />
+    <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestResourceFactory.h" />
@@ -192,13 +199,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim\Animation.cpp" />
-    <ClCompile Include="anim\AnimationFactory.cpp" />
     <ClCompile Include="anim\AnimationController.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />
-    <ClCompile Include="audio\AudioClipFactory.cpp" />
+    <ClCompile Include="audio\AudioClipLoader.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
@@ -209,8 +215,11 @@
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
+    <ClCompile Include="gfx\projector_functions.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
@@ -223,8 +232,10 @@
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\PhysicsSystem.cpp" />
     <ClCompile Include="phys\RigidBody.cpp" />
+    <ClCompile Include="res\GenericResourceHandle.cpp" />
     <ClCompile Include="res\Guid.cpp" />
-    <ClCompile Include="res\SaveableResourceManager.cpp" />
+    <ClCompile Include="res\MetaBundle.cpp" />
+    <ClCompile Include="res\ResourceBundle.cpp" />
     <ClCompile Include="scene\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
@@ -247,7 +258,6 @@
     <ClCompile Include="prefab\PrefabUtility.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
-    <ClCompile Include="res\FileResources.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
@@ -312,18 +322,18 @@
     <None Include="math\matrix_decomposition.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
+    <None Include="meta\variant.inl" />
     <None Include="phys\raycasts\collision_raycast.inl" />
     <None Include="reflect\detail\meta_manager.inl" />
     <None Include="reflect\detail\table_storage.inl" />
     <None Include="reflect\detail\visit_detail.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
-    <None Include="res\FileResources.inl" />
-    <None Include="res\ForwardingExtensionLoader.inl" />
     <None Include="res\Guid.inl" />
-    <None Include="res\Resource.inl" />
+    <None Include="res\ResourceBundle.inl" />
     <None Include="res\ResourceMeta.inl" />
-    <None Include="res\SaveableResourceManager.inl" />
+    <None Include="res\ResourceUtils.inl" />
+    <None Include="res\SaveableResourceLoader.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

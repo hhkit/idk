@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "OpenGLCubemap.h"
 
-#include <idk_opengl/program/ShaderProgramFactory.h>
 #include <idk.h>
 #include <core/Core.h>
 #include <res/ResourceManager.h>

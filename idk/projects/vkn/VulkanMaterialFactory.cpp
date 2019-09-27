@@ -16,14 +16,4 @@ namespace idk::vkn
 		mat->BuildShader({}, "", default_material_code);
 		return mat;
 	}
-	unique_ptr<Material> VulkanMaterialFactory::Create()
-	{
-		auto mat = std::make_unique<VulkanMaterial>();
-		return mat;
-	}
-	unique_ptr<Material> VulkanMaterialFactory::Create(PathHandle filepath)
-	{
-		UNREFERENCED_PARAMETER(filepath);
-		return Create();
-	}
 }

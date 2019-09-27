@@ -34,9 +34,9 @@ namespace idk::ogl
 		auto mat = std::make_unique<CubeMap>();
 		return mat;
 	}
-	unique_ptr<CubeMap> OpenGLCubeMapFactory::Create(PathHandle filepath)
-	{
-		UNREFERENCED_PARAMETER(filepath);
-		return Create();
-	}
+	//unique_ptr<CubeMap> OpenGLCubeMapFactory::Create(PathHandle filepath)
+	//{
+	//	UNREFERENCED_PARAMETER(filepath);
+	//	return Create();
+	//}
 }

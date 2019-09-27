@@ -6,12 +6,11 @@
 
 namespace idk::shadergraph
 {
-    class Factory
-        : public ResourceFactory<Graph>
+    class Loader
+        : public IFileLoader
     {
     public:
-        unique_ptr<Graph> GenerateDefaultResource();
-        unique_ptr<Graph> Create();
-        unique_ptr<Graph> Create(PathHandle file_handle);
+		ResourceBundle LoadFile(PathHandle file_handle);
+		ResourceBundle LoadFile(PathHandle file_handle, const MetaBundle& meta);
     };
 }

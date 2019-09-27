@@ -78,11 +78,15 @@ namespace idk
 	{
 	public:
 		const Handle<T>& GetHandle() const { return handle; }
+		bool IsQueuedForDestruction() const { return _queued_for_destruction; }
 	protected:
 		Handleable() = default;
 	private:
 		Handle<T> handle;
+		bool      _queued_for_destruction = false;
+
 		friend class ObjectPool<T>;
+		friend class GameState;
 	};
 }
 

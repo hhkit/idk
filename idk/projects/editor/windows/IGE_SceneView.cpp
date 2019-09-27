@@ -97,7 +97,7 @@ namespace idk {
 			auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
 			auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			auto tfm = cam.current_camera->GetGameObject()->Transform();
-			if (abs(scroll) > epsilon)
+			if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
 				tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * pan_multiplier);
 		}
 		//Middle Mouse Pan control
@@ -217,8 +217,10 @@ namespace idk {
 		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		float* viewMatrix = currCamera->ViewMatrix().data();
-		float* projectionMatrix = currCamera->ProjectionMatrix().data();
+		const auto view_mtx = currCamera->ViewMatrix();
+		const float* viewMatrix = view_mtx.data();
+		const auto pers_mtx = currCamera->ProjectionMatrix();
+		const float* projectionMatrix = pers_mtx.data();
 
 		//Setting up draw area
 		ImGuiIO& io = ImGui::GetIO();
@@ -238,7 +240,8 @@ namespace idk {
 
 
 					if (!ImGuizmo::IsUsing()) {
-						const float* temp = gameObjectTransform->GlobalMatrix().data();
+						auto matrix = gameObjectTransform->GlobalMatrix();
+						const float* temp = matrix.data();
 						for (int i = 0; i < 16; ++i) {
 							gizmo_matrix[i] = temp[i];
 						}

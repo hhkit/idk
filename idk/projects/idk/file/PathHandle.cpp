@@ -217,7 +217,7 @@ namespace idk
 	
 #pragma region Dir Specific Getters
 
-	vector<PathHandle> PathHandle::GetPaths(FS_FILTERS filters, string_view ext) const
+	vector<PathHandle> PathHandle::GetEntries(FS_FILTERS filters, string_view ext) const
 	{
 		vector<PathHandle> out;
 		if (!validateFull() || _is_regular_file)
@@ -266,7 +266,7 @@ namespace idk
 	{
 		filters |= FS_FILTERS::EXT | FS_FILTERS::FILE;
 
-		return GetPaths(filters, ext);
+		return GetEntries(filters, ext);
 	}
 
 #pragma endregion Dir Specific Getters
@@ -460,7 +460,7 @@ namespace idk
 		auto& vfs = Core::GetSystem<FileSystem>();
 		// Change the data in of all the dirs and file
 		FS_FILTERS filters = FS_FILTERS::ALL;
-		auto paths = GetPaths(filters);
+		auto paths = GetEntries(filters);
 		for (auto& p : paths)
 		{
 			if (p._is_regular_file)
