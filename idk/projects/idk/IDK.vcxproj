@@ -173,7 +173,6 @@
     <ClInclude Include="math\shapes\box.h" />
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
-    <ClInclude Include="gfx\TextureMeta.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\EasyFactory.h" />
     <ClInclude Include="util\enum.h" />

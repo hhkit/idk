@@ -69,8 +69,9 @@ namespace idk::yaml
 
             if (!must_escape)
             {
-                // "xyz" => '"xyz"' (so "" dont get lost during parse)
-                if ((scalar.front() == '\"' && scalar.back() == '\"') ||
+                
+                if ((scalar.front() == '\"' && scalar.back() == '\"')      || // "xyz" => '"xyz"' (so "" dont get lost during parse)
+                    (scalar.front() == '{' || scalar.front() == '[')       || // quote-enclose strings that start with [ and { so they're not mistaken for flow map/seq
                     (style == flow_style && (has_flow_braces || has_commas))) // ['a[]a'] or ['a,a'] have to quote-enclose flow braces / commas
                 {
                     write('\'');

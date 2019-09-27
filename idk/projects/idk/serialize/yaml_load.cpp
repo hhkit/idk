@@ -349,6 +349,7 @@ namespace idk::yaml
         if (p.token.size())
         {
             p.token += *p;
+            ++p;
             return;
         }
 
