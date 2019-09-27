@@ -139,6 +139,14 @@ namespace idk::detail
 				} ...
 			};
 		}
+
+		static auto GenComponentNameTable()
+		{
+			return std::array<const char*, 1 + ComponentCount>
+			{
+				reflect::get_type<Ts>().name().data() ...
+			};
+		}
 	};
 
 	using TableGen = TableGenerator<Handleables>;
@@ -236,5 +244,11 @@ namespace idk
 	GameState& GameState::GetGameState()
 	{
 		return *_instance;
+	}
+
+	span<const char*> GameState::GetComponentNames()
+	{
+		static auto arr = detail::TableGen::GenComponentNameTable();
+		return span<const char*>(&arr[1], std::data( arr) + std::size(arr));
 	}
 }

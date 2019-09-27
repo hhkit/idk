@@ -45,6 +45,7 @@ namespace idk
 		template<typename T>  bool      DestroyObjectNow(const Handle<T>& handle);
 
 		static GameState& GetGameState();
+		static span<const char*> GetComponentNames();
 	private:
 		template<typename Fn>
 		using JumpTable = array<Fn, detail::ObjectPools::TypeCount>;

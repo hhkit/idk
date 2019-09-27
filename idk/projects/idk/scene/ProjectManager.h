@@ -11,7 +11,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		static constexpr string_view project_path = "/assets/idk.proj";
+		static constexpr string_view project_path = "/game/project.idk";
 
 		
 
