@@ -48,6 +48,13 @@ namespace idk
 		Error_ResourceNotLoaded,
 	};
 
+	enum class FileMoveResult : char
+	{
+		Ok,
+		Error_ResourceNotFound,
+		Error_DestinationExists
+	};
+
 	class ResourceManager 
 		: public ISystem
 	{
@@ -82,6 +89,8 @@ namespace idk
 								GeneralGetResult      Get     (PathHandle path);
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
+		                        FileMoveResult        Rename(PathHandle old_path, string_view new_mount_path);
+		template<typename Res>  FileMoveResult        Rename(RscHandle<Res> resource, string_view new__mountpath);
 
 		/* FACTORIES - for registering resource factories */
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
@@ -115,6 +124,7 @@ namespace idk
 		template<typename Res> auto& GetFactory()    { return *r_cast<ResourceFactory<Res>*>(        _factories[BaseResourceID<Res>].get()); }
 		template<typename Res> auto& GetTable()      { return *r_cast<ResourceStorage<Res>*>(   _resource_table[BaseResourceID<Res>].get()); }
 		template<typename Res> Res&  GetDefaultRes() { return *r_cast<Res*>                 (_default_resources[BaseResourceID<Res>].get()); }
+		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>> string GenUniqueName();
 		template<typename Res> ResourceControlBlock<Res>* GetControlBlock(RscHandle<Res> handle);
 
 		IFileLoader* GetLoader(string_view extension);

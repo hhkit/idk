@@ -272,5 +272,31 @@ namespace idk
 			return itr->second.bundle;
 		return BundleGetError::ResourceNotLoaded;
 	}
+
+	FileMoveResult ResourceManager::Rename(PathHandle old_path, string_view new_path)
+	{
+		auto itr = _loaded_files.find(string{ old_path.GetMountPath() });
+		if (itr == _loaded_files.end())
+			return FileMoveResult::Error_ResourceNotFound;
+
+		if (Core::GetSystem<FileSystem>().Exists(new_path))
+			return FileMoveResult::Error_DestinationExists;
+
+		auto string_path = string{ new_path };
+
+		auto bundle = std::move(itr->second);
+		for (auto& elem : bundle.bundle.GetAll())
+		{
+			std::visit([&](const auto& handle)
+				{
+					GetControlBlock(handle)->path = string_path;
+				}, elem);
+		}
+
+		_loaded_files.erase(itr);
+		_loaded_files.emplace(string_path, bundle);
+
+		return FileMoveResult::Ok;
+	}
 	
 }

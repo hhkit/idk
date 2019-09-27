@@ -116,10 +116,19 @@ namespace idk
 	template<typename Res>
 	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> saveme)
 	{
-		auto filepath = GetPath(saveme);
-		if (filepath.empty())
+		auto* rcb = GetControlBlock(saveme);
+
+		if (!rcb)
 			return ResourceSaveError::ResourceNotLoaded;
 		
+		auto filepath = [&]() -> string
+		{
+			if (rcb->path)
+				return *rcb->path;
+			else
+				return ""; // gen unique name
+		}();
+
 		auto stream = Core::template GetSystem<FileSystem>().Open( filepath, FS_PERMISSIONS::WRITE);
 		stream << serialize_text(*saveme);
 
@@ -136,6 +145,25 @@ namespace idk
 
 		table.erase(itr);
 		return ResourceReleaseResult::Ok;
+	}
+
+	template<typename Res>
+	inline FileMoveResult ResourceManager::Rename(RscHandle<Res> resource, string_view new_path)
+	{
+		assert(false);
+		auto* cb = GetControlBlock(resource);
+		if (!cb)
+			return FileMoveResult::Error_ResourceNotFound;
+
+		if (cb->path)
+			return Rename(PathHandle{ cb->path }, new_path);
+
+		if (Core::template GetSystem<FileSystem>().Exists(new_path))
+			return FileMoveResult::Error_DestinationExists;
+
+		_loaded_files.emplace(string{ new_path }, ResourceBundle{ resource });
+
+		return FileMoveResult::Ok;
 	}
 
 	template<typename Factory, typename ...Args>
@@ -174,6 +202,27 @@ namespace idk
 		}
 
 		return RscHandle<Res>{guid};
+	}
+
+	template<typename Res, typename>
+	inline string ResourceManager::GenUniqueName()
+	{
+		auto start_name = string{ reflect::get_type<Res>().name() };
+
+		auto make_path = [&]()
+		{
+			return "/assets/" + start_name + Res::ext;
+		};
+
+		auto path = make_path();
+
+		while (_loaded_files.find(path) != _loaded_files.end())
+		{
+			start_name += " (copy)";
+			make_path();
+		}
+
+		return path;
 	}
 
 	template<typename Res>
