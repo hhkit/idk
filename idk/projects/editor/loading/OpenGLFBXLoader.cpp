@@ -6,6 +6,7 @@
 
 //* // tmp include
 #include <scene/SceneManager.h>
+#include <file/FileSystem.h>
 #include <core/GameObject.h>
 #include <prefab/PrefabUtility.h>
 
@@ -208,7 +209,8 @@ namespace idk
 			animator->AddAnimation(anim_clip_handle);
 		}
 		animator->Play(0);
-		PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
+		
+		//PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
 		return retval;
 	}
 
