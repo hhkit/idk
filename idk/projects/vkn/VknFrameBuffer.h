@@ -36,6 +36,8 @@ namespace idk::vkn
 
 		void Finalize() override; //Finalizes the framebuffer
 
+		vec2 Size() { return size; };
+
 		//GLuint DepthBuffer() const;
 		void SetTextureCreationInfo(hlp::MemoryAllocator* alloc, vk::Fence f) { allocator = alloc; fence = f; }
 	private:

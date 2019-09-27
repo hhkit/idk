@@ -55,7 +55,7 @@ namespace idk
 			//New changes
 			editorControls.edt_buffer = std::make_shared<vkn::TriBuffer>(vknViews,true);
 			editorControls.edt_buffer->CreateImagePool(vknViews);
-			editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
+			//editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
 			//editorControls.edt_buffer->images = vknViews.Swapchain().m_swapchainGraphics.images;
 			//editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
 			//editorControls.edt_buffer->CreatePresentationSignals(vknViews);
@@ -177,6 +177,15 @@ namespace idk
 
 		void VI_Interface::ImGuiFrameBegin()
 		{
+			bool& resize = vkObj->View().ImguiResize();
+			if (resize)
+			{
+				resize = false;
+				ImGui_ImplVulkan_SetMinImageCount(editorInit.edt_min_imageCount);
+				ImGuiRecreateSwapChain();
+				ImGuiRecreateCommandBuffer();
+			}
+
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 		}
@@ -409,6 +418,11 @@ namespace idk
 
 			//What is required to be recreated for imGui swapchain will be done here
 			idk::vkn::VulkanView& vknViews = vkObj->View();
+
+			editorControls.edt_buffer->CreateImagePool(vknViews);
+			editorControls.edt_buffer->enabled = true;
+
+			vknViews.Swapchain().m_inBetweens.emplace_back(editorControls.edt_buffer);
 
 			if (editorInit.edt_min_imageCount == 0)
 				editorInit.edt_min_imageCount = ImGui_ImplVulkanH_GetMinImageCountFromPresentMode(static_cast<VkPresentModeKHR>(vknViews.Swapchain().present_mode));

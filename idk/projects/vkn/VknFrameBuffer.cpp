@@ -124,6 +124,8 @@ namespace idk::vkn
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
 
+		size = vec2(meta.size);
+
 		uncreated = false;
 	}
 
@@ -152,10 +154,12 @@ namespace idk::vkn
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo,nullptr,vknView.Dispatcher());
 
+		size = vec2(iv.size);
+
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 size)
+	void VknFrameBuffer::AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
 	{
 		//One framebuffer can reference multiple attachments (color, position, light etc.)
 
@@ -174,26 +178,30 @@ namespace idk::vkn
 		framebufferInfo.renderPass = *vknView.Renderpass();
 		framebufferInfo.attachmentCount = hlp::arr_count(iv);
 		framebufferInfo.pAttachments = std::data(iv);
-		framebufferInfo.width  = s_cast<uint32_t>(size.x);
-		framebufferInfo.height = s_cast<uint32_t>(size.y);
+		framebufferInfo.width  = s_cast<uint32_t>(siz.x);
+		framebufferInfo.height = s_cast<uint32_t>(siz.y);
 		framebufferInfo.layers = 1;
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
 
+		size = vec2(siz);
+
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 size)
+	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
 	{
 		vk::FramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.renderPass = *vknView.Renderpass();
 		framebufferInfo.attachmentCount = hlp::arr_count(iv);
 		framebufferInfo.pAttachments = std::data(iv);
-		framebufferInfo.width = s_cast<uint32_t>(size.x);
-		framebufferInfo.height = s_cast<uint32_t>(size.y);
+		framebufferInfo.width = s_cast<uint32_t>(siz.x);
+		framebufferInfo.height = s_cast<uint32_t>(siz.y);
 		framebufferInfo.layers = 1;
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
+
+		size = vec2(siz);
 
 		uncreated = false;
 	}

@@ -985,7 +985,7 @@ namespace idk::vkn
 			{
 				vkn_fb.GetRenderPass()
 				,frame_buffer
-				,vk::Rect2D{ vk::Offset2D{}, m_swapchain->extent }
+				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(vkn_fb.Size().x,vkn_fb.Size().y) }
 				,s_cast<uint32_t>(std::size(clearcolor))
 				,std::data(clearcolor)
 			};
