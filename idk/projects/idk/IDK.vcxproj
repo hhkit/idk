@@ -61,6 +61,7 @@
     <ClInclude Include="res\ResourceBundle.h" />
     <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
     <ClInclude Include="scene\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
@@ -331,6 +332,7 @@
     <None Include="res\ResourceBundle.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="res\ResourceUtils.inl" />
+    <None Include="res\SaveableResourceLoader.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

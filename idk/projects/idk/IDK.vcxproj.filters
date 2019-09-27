@@ -608,6 +608,7 @@
       <Filter>gfx\shadergraph</Filter>
     </ClInclude>
     <ClInclude Include="gfx\projector_functions.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1053,6 +1054,7 @@
     <None Include="meta\variant.inl" />
     <None Include="res\ResourceBundle.inl" />
     <None Include="res\ResourceUtils.inl" />
+    <None Include="res\SaveableResourceLoader.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

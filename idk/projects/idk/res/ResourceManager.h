@@ -29,6 +29,12 @@ namespace idk
 		FailedToLoadResource,
 	};
 
+	enum class BundleGetError : char
+	{
+		ResourceNotLoaded
+	};
+
+
 	enum class ResourceSaveError : char
 	{
 		ResourceNotSaveable,
@@ -50,12 +56,14 @@ namespace idk
 		using result = monadic::result<Result, Err>;
 
 		using GeneralLoadResult = result<ResourceBundle, ResourceLoadError>; // todo: return resource bundle by const T&
+		using GeneralGetResult  = result<ResourceBundle, BundleGetError>; // todo: return resource bundle by const T&
 		template<typename Res> using CreateResult = result<RscHandle<Res>, ResourceCreateError>;
 		template<typename Res> using LoadResult   = result<RscHandle<Res>, ResourceLoadError>;
 		template<typename Res> using SaveResult   = result<RscHandle<Res>, ResourceSaveError>;
 
 		ResourceManager() = default;
 
+		void SaveDirtyFiles();
 		void SaveDirtyMetadata();
 		void WatchDirectory();
 
@@ -71,6 +79,7 @@ namespace idk
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
 		template<typename Res>  LoadResult<Res>       Load    (PathHandle path);
 		                        GeneralLoadResult     Load    (PathHandle path);
+								GeneralGetResult      Get     (PathHandle path);
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
 
@@ -97,7 +106,7 @@ namespace idk
 		array<GenericPtr, ResourceCount>               _resource_table;    // std::shared_ptr<hash_table<Guid, ResourceControlBlock<R>>>
 		array<GenericPtr, ResourceCount>               _factories;         // std::shared_ptr<ResourceFactory<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
-		hash_table<Path,      FileControlBlock>          _loaded_files;
+		hash_table<Path,      FileControlBlock>        _loaded_files;
 
 		void Init()     override;
 		void LateInit() override;

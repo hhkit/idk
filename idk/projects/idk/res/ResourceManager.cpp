@@ -7,6 +7,7 @@
 #include <res/MetaBundle.h>
 #include <serialize/serialize.h>
 #include <util/ioutils.h>
+#include <res/SaveableResourceLoader.h>
 
 #include <IncludeResources.h>
 
@@ -22,14 +23,14 @@ namespace idk
 		template<typename ... Rs>
 		struct ResourceManager_detail<std::tuple<Rs...>>
 		{
-			static array<shared_ptr<void>, sizeof...(Rs)> GenResourceTables()
+			constexpr static array<shared_ptr<void>, sizeof...(Rs)> GenResourceTables()
 			{
 				return array<shared_ptr<void>, sizeof...(Rs)>{
 					std::make_shared<ResourceManager::ResourceStorage<Rs>>()...
 				};
 			}
 
-			static array<void(*)(ResourceManager*), sizeof...(Rs)> GenDefaults()
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> GenDefaults()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
@@ -40,13 +41,47 @@ namespace idk
 				};
 			}
 
-			static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> CreateSaveableLoaders()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						if constexpr (has_tag_v<Rs, Saveable>)
+							if constexpr (std::is_default_constructible_v<Rs>)
+								resource_man->RegisterLoader<SaveableResourceLoader<Rs>>(Rs::ext);
+					}...
+				};
+			}
+
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
 						if (auto loader = &resource_man->GetFactory<Rs>())
 							loader->Init();
+					}...
+				};
+			}
+
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> SaveFiles()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						if constexpr (has_tag_v<Rs, Saveable>)
+						{
+							if constexpr (Rs::autosave)
+								for (auto& [guid, res_cb] : resource_man->GetTable<Rs>())
+								{
+									auto h = RscHandle<Rs>{ guid };
+									if (h->IsDirty())
+									{
+										resource_man->Save(h);
+										h->Clean();
+									}
+								}
+						}
 					}...
 				};
 			}
@@ -57,6 +92,11 @@ namespace idk
 
 	void ResourceManager::Init()
 	{
+		constexpr static auto saveable_table = detail::ResourceHelper::CreateSaveableLoaders();
+
+		for (auto& func : saveable_table)
+			func(this);
+
 		instance = this;
 		_resource_table = detail::ResourceHelper::GenResourceTables();
 
@@ -70,9 +110,11 @@ namespace idk
 
 	void ResourceManager::LateInit()
 	{
-		for (auto& func : detail::ResourceHelper::InitFactories())
+		constexpr static auto init_table = detail::ResourceHelper::InitFactories();
+		constexpr static auto defaults_table = detail::ResourceHelper::GenDefaults();
+		for (auto& func : init_table)
 			func(this);
-		for (auto& func : detail::ResourceHelper::GenDefaults())
+		for (auto& func : defaults_table)
 			func(this);
 	}
 
@@ -98,6 +140,14 @@ namespace idk
 			return nullptr;
 
 		return itr->second.get();
+	}
+
+	void ResourceManager::SaveDirtyFiles()
+	{
+		static constexpr auto save_files = detail::ResourceHelper::SaveFiles();
+
+		for (auto& fn : save_files)
+			fn(this);
 	}
 
 	void ResourceManager::SaveDirtyMetadata()
@@ -129,10 +179,13 @@ namespace idk
 					std::visit([&](const auto& handle)
 						{
 							m.Add(handle);
+							if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaTag>)
+								handle->_dirtymeta = false;
 						}, elem);
 				}
 
 				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << serialize_text(m);
+				resource.is_new = false;
 			}
 		}
 	}
@@ -210,6 +263,14 @@ namespace idk
 			, elem);
 
 		return bundle;
+	}
+
+	ResourceManager::GeneralGetResult ResourceManager::Get(PathHandle path)
+	{
+		auto itr = _loaded_files.find(string{ path.GetMountPath() });
+		if (itr != _loaded_files.end())
+			return itr->second.bundle;
+		return BundleGetError::ResourceNotLoaded;
 	}
 	
 }

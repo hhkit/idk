@@ -72,6 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
+	Core::GetResourceManager().Create<TestResource>("/assets/test/yolo.test");
 	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
@@ -224,7 +225,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 
-	//if(0)
+	if(0)
 	for (int i = 2; i < 5; ++ i)
 	{
 		auto seducemetoo = scene->CreateGameObject();

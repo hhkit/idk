@@ -43,7 +43,13 @@ namespace idk
 	inline string_view ResourceManager::GetPath(const RscHandle<Res>& h)
 	{
 		auto* cb = GetControlBlock(h);
-		return cb ? cb->path : "";
+		if (cb)
+		{
+			if (cb->path)
+				return *cb->path;
+		}
+		return "";
+//		return cb && cb->path ? *cb->path : "";
 	}
 
 	template<typename Res>
@@ -80,15 +86,19 @@ namespace idk
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
-		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock{});
+		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
 
 		auto& control_block = itr->second;
-		control_block.path = path_to_new_asset;
+		control_block.path = adapted_path;
 
 		// attempt to put on another thread
 		{
 			control_block.resource = factory.Create();
 		}
+
+		auto& fcb = _loaded_files[adapted_path];
+		fcb.is_new = true;
+		fcb.bundle.Add(RscHandle<Res>(itr->first));
 
 		return RscHandle<Res>(itr->first);
 	}
@@ -104,9 +114,16 @@ namespace idk
 	}
 
 	template<typename Res>
-	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> result)
+	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> saveme)
 	{
-		return SaveResult<Res>();
+		auto filepath = GetPath(saveme);
+		if (filepath.empty())
+			return ResourceSaveError::ResourceNotLoaded;
+		
+		auto stream = Core::template GetSystem<FileSystem>().Open( filepath, FS_PERMISSIONS::WRITE);
+		stream << serialize_text(*saveme);
+
+		return saveme;
 	}
 
 	template<typename Res>
