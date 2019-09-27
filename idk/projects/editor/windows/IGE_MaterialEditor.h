@@ -26,7 +26,6 @@ namespace idk
     private:
         ImNodes::CanvasState _canvas;
         RscHandle<shadergraph::Graph> _graph;
-        string _graph_name;
         vector<Guid> _nodes_to_delete;
 
         void show_params_window();

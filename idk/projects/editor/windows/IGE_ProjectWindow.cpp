@@ -274,6 +274,12 @@ namespace idk {
                     {
                         name = buf;
                         renaming_selected_asset = false;
+
+                        // dont work yet
+                        //string str{ selected_path.GetParentMountPath() };
+                        //str += '/';
+                        //str += name;
+                        //Core::GetResourceManager().Rename(selected_path, str);
                     }
                     ImGui::PopStyleVar();
                     if (first_focus)

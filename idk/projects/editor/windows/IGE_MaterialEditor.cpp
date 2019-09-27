@@ -601,7 +601,6 @@ namespace idk
     void IGE_MaterialEditor::OpenGraph(const RscHandle<shadergraph::Graph>& handle)
     {
 		_graph = handle;
-		_graph_name = string{ Core::GetResourceManager().GetPath(handle) };
 
         ImGui::SetWindowFocus(window_name);
         is_open = true;
@@ -825,7 +824,8 @@ namespace idk
 
         if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
-            ImGui::Text(_graph_name.c_str());
+            auto graph_name = Core::GetResourceManager().GetPath(_graph);
+            ImGui::Text(graph_name.data());
 
             if (ImGui::Button("Add Parameter"))
                 ImGui::OpenPopup("addparams");

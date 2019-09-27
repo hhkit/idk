@@ -52,13 +52,18 @@ namespace idk
 
         if (handle)
         {
-            const char* text = std::visit([&](const auto& h)
+            string_view text = std::visit([&](const auto& h)
             {
-                return Core::GetResourceManager().GetPath(h).data();
+                return Core::GetResourceManager().GetPath(h);
             }, *handle);
 
-            ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding, text, 0, nullptr);
+            ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,
+                                     frame_bb.Max - style.FramePadding,
+                                     text.data() + text.rfind('/') + 1, 0, nullptr);
         }
+
+        if (label_size.x > 0)
+            RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
 
         return dropped;
     }
