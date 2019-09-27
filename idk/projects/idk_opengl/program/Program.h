@@ -33,6 +33,8 @@ namespace idk::ogl
 		GLint ID() const;
 		GLint ShaderFlags() const;
 
+		ShaderBuildResult BuildShader(ShaderStage stage, string_view glsl_code) override;
+
 		Program& Attach(Shader&& shader);
 		Program& Link();
 		template<typename T>

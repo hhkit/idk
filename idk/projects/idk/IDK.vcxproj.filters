@@ -609,6 +609,7 @@
     </ClInclude>
     <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="res\SaveableResourceLoader.h" />
+    <ClInclude Include="gfx\IShaderProgramFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -887,6 +888,8 @@
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
     <ClCompile Include="gfx\projector_functions.cpp" />
+    <ClCompile Include="gfx\MaterialInstance.cpp" />
+    <ClCompile Include="gfx\ShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

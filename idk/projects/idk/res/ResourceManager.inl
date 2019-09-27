@@ -55,7 +55,7 @@ namespace idk
 	template<typename Res>
 	inline RscHandle<Res> ResourceManager::Create()
 	{
-		auto& factory = GetFactory<Res>();
+		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
@@ -82,7 +82,7 @@ namespace idk
 				return ResourceCreateError::PathAlreadyExists;
 		}
 
-		auto& factory = GetFactory<Res>();
+		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
@@ -104,9 +104,9 @@ namespace idk
 	}
 
 	template<typename Res>
-	ResourceManager::LoadResult<Res> ResourceManager::Load(PathHandle path)
+	ResourceManager::LoadResult<Res> ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
-		auto res = Load(path);
+		auto res = Load(path, reload_resource);
 		if (!res)
 			return res.error();
 
@@ -176,13 +176,19 @@ namespace idk
 		return FileMoveResult::Ok;
 	}
 
+	template<typename Factory>
+	inline Factory& ResourceManager::GetFactory()
+	{
+		return *s_cast<Factory*>(_factories[BaseResourceID<typename Factory::Resource>].get());
+	}
+
 	template<typename Factory, typename ...Args>
 	Factory& ResourceManager::RegisterFactory(Args&& ...factory_construction_args)
 	{
 		static_assert(has_tag_v<Factory, ResourceFactory>, "Can only register ResourceFactories");
 
 		auto& ptr = _factories[BaseResourceID<typename Factory::Resource>] = std::make_shared<Factory>(std::forward<Args>(factory_construction_args)...);
-		return *r_cast<Factory*>(ptr.get());
+		return *s_cast<Factory*>(ptr.get());
 	}
 
 	template<typename FLoader, typename ...Args>

@@ -163,7 +163,7 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
 		Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
-		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<Material>>();
 		Core::GetResourceManager().RegisterFactory<EasyFactory<ogl::Program>>();
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
 		Core::GetResourceManager().RegisterFactory<FrameBufferFactory>();

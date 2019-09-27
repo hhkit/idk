@@ -37,6 +37,7 @@
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />
     <ClInclude Include="gfx\CubeMap.h" />
+    <ClInclude Include="gfx\IShaderProgramFactory.h" />
     <ClInclude Include="gfx\MeshFactory.h" />
     <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
@@ -213,11 +214,13 @@
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="gfx\MaterialInstance.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="gfx\projector_functions.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
+    <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />

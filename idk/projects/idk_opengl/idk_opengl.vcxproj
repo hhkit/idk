@@ -172,6 +172,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="program\ProgramFactory.h" />
     <ClInclude Include="resource\FrameBuffer.h" />
     <ClInclude Include="resource\FrameBufferFactory.h" />
     <ClInclude Include="resource\OpenGLCubemap.h" />
@@ -179,12 +180,10 @@
     <ClInclude Include="system\FrameBufferManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="program\GLSLLoader.h" />
-    <ClInclude Include="resource\OpenGLMaterialFactory.h" />
     <ClInclude Include="resource\OpenGLTexture.h" />
     <ClInclude Include="system\OpenGLState.h" />
     <ClInclude Include="resource\OpenGLBuffer.h" />
     <ClInclude Include="system\OpenGLGraphicsSystem.h" />
-    <ClInclude Include="resource\OpenGLMaterial.h" />
     <ClInclude Include="resource\OpenGLMesh.h" />
     <ClInclude Include="resource\OpenGLMeshFactory.h" />
     <ClInclude Include="program\PipelineProgram.h" />
@@ -194,6 +193,7 @@
     <ClInclude Include="system\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="program\ProgramFactory.cpp" />
     <ClCompile Include="resource\FrameBuffer.cpp" />
     <ClCompile Include="resource\FrameBufferFactory.cpp" />
     <ClCompile Include="resource\OpenGLCubemap.cpp" />
@@ -209,10 +209,8 @@
     </ClCompile>
     <ClCompile Include="program\GLSLLoader.cpp" />
     <ClCompile Include="resource\OpenGLBuffer.cpp" />
-    <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
     <ClCompile Include="resource\OpenGLTexture.cpp" />
     <ClCompile Include="system\OpenGLGraphicsSystem.cpp" />
-    <ClCompile Include="resource\OpenGLMaterial.cpp" />
     <ClCompile Include="resource\OpenGLMesh.cpp" />
     <ClCompile Include="resource\OpenGLMeshFactory.cpp" />
     <ClCompile Include="program\PipelineProgram.cpp" />
