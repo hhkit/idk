@@ -281,7 +281,7 @@ namespace idk {
 
 			}
 			else {
-				itemToSkipInGraph.push_back(selectedItemCounter);
+				itemToSkipInGraph.push_back(selectedCounter);
 				return false;
 			}
 
