@@ -78,16 +78,6 @@ namespace idk {
 	{
         ImGui::PopStyleVar(2);
 
-		ImGuiStyle& style = ImGui::GetStyle();
-
-		//ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBgActive]);
-
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		//Tool bar
-
-		//ImGui::SetCursorPos(ImVec2{ 0.0f,ImGui::GetFrameHeight() });
 
         ImGui::BeginMenuBar();
         {
@@ -234,6 +224,9 @@ namespace idk {
             { // preview image / icon
                 void* id = 0;
                 vec2 sz{ icon_sz, icon_sz };
+                ImVec4 tint = ImColor(65, 153, 163).Value;
+                ImVec4 selected_tint = ImColor(40, 140, 150).Value;
+
                 if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
                 {
                     auto get_result = Core::GetResourceManager().Get<Texture>(path);
@@ -256,9 +249,17 @@ namespace idk {
                             sz.y /= aspect;
                         else if (aspect < 1.0f)
                             sz.x /= aspect;
+                        tint = ImVec4(1, 1, 1, 1);
+                        selected_tint = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
                     }
                 }
-                ImGui::Image(id, sz);
+                else if (path.IsDir())
+                {
+                    static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
+                    id = folder_icon->ID();
+                }
+
+                ImGui::Image(id, sz, ImVec2(0,0), ImVec2(1,1), selected_path == path ? selected_tint : tint);
             }
 
             if (selected_path == path)
@@ -328,8 +329,26 @@ namespace idk {
                 renaming_selected_asset = false;
                 if (!path.IsDir())
                 {
-                    selected_asset = Core::GetResourceManager().Load(selected_path)->GetAll()[0];
-                    OnAssetSelected.Fire(selected_asset);
+                    auto get_res = Core::GetResourceManager().Get(selected_path);
+                    if (get_res && get_res->Count())
+                    {
+                        selected_asset = get_res->GetAll()[0];
+                        OnAssetSelected.Fire(selected_asset);
+                    }
+                    else if (!get_res)
+                    {
+                        auto load_res = Core::GetResourceManager().Load(selected_path);
+                        if (load_res && load_res->Count())
+                        {
+                            selected_asset = load_res->GetAll()[0];
+                            OnAssetSelected.Fire(selected_asset);
+                        }
+                        else
+                            selected_asset = RscHandle<Texture>();
+                    }
+                    else
+                        selected_asset = RscHandle<Texture>();
+
                 }
             }
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
