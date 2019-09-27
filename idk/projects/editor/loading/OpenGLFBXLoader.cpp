@@ -151,7 +151,7 @@ namespace idk
 
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
 			fbx_loader_detail::initAnimNodes(root_node, ai_scene->mAnimations[i], anim_clip);
-			retval.resources.emplace_back(anim_clip_handle);
+			retval.Add(anim_clip_handle);
 		}
 
 		return retval;

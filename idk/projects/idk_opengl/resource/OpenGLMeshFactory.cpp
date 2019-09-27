@@ -316,7 +316,7 @@ namespace idk::ogl
 
 		{	/* create circle mesh */
 			auto circle_mesh = Mesh::defaults[MeshType::Circle];
-			auto mesh_handle = Core::GetResourceManager().Emplace<OpenGLMesh>(circle_mesh.guid);
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(circle_mesh.guid);
 			constexpr auto sz = 1.f;
 			constexpr auto numberOfTri = 16;
 			real angle = (2.f * pi) / numberOfTri;
