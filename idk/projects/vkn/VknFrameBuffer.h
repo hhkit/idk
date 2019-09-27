@@ -22,6 +22,7 @@ namespace idk::vkn
 		void ReattachImageViews(VulkanView& vknView);
 		void AttachImageViews(VknImageData&, VulkanView& vknView);
 		void AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
+		void AttachImageViews(vk::RenderPass rp,vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
 		void AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
 		void PrepareDraw(vk::CommandBuffer& cmd_buffer);
 

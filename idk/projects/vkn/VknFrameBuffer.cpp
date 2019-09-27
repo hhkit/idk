@@ -33,7 +33,7 @@ namespace idk::vkn
 		imageView.emplace_back(std::move(*iv->imageView));
 		//Creates an empty framebuffer tht does nothing at all until attach image views is called
 
-		AttachImageViews(std::move(iv->image), imageView, vknView,size);
+		AttachImageViews(imageView, vknView,size);
 	}
 
 	VknFrameBuffer::VknFrameBuffer(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize)
@@ -56,9 +56,10 @@ namespace idk::vkn
 	}
 
 	VknFrameBuffer::VknFrameBuffer(VknFrameBuffer&& rhs)
-		:buffer{std::move(rhs.buffer)},
+		:RenderTarget{ std::move(rhs) },
+		buffer {std::move(rhs.buffer)},
 		image{ std::move(rhs.image) },
-		imageView{std::move(rhs.imageView)},
+		imageView{ std::move(rhs.imageView) },
 		size{ std::move(size) },
 		uncreated{std::move(rhs.uncreated)}
 	{}
@@ -189,10 +190,10 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
+	void VknFrameBuffer::AttachImageViews(vk::RenderPass rp, vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
 	{
 		vk::FramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.renderPass = *vknView.Renderpass();
+		framebufferInfo.renderPass = rp;
 		framebufferInfo.attachmentCount = hlp::arr_count(iv);
 		framebufferInfo.pAttachments = std::data(iv);
 		framebufferInfo.width = s_cast<uint32_t>(siz.x);
@@ -204,6 +205,11 @@ namespace idk::vkn
 		size = vec2(siz);
 
 		uncreated = false;
+	}
+
+	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
+	{
+		AttachImageViews(*vknView.Renderpass(),iv, vknView, siz);
 	}
 
 	void TransitionTexture(vk::CommandBuffer cmd_buffer, AttachmentType type, VknTexture& tex)
@@ -253,6 +259,7 @@ namespace idk::vkn
 			loader.LoadTexture(*depth_ptr, TextureFormat::eD16Unorm, {}, nullptr, s_cast<size_t>(2 * sz.x * sz.y), ivec2{ sz }, *allocator, fence, true);
 			break;
 		}
+		auto& test = texture.as<VknTexture>();
 	}
 
 	void VknFrameBuffer::Finalize()
@@ -265,8 +272,20 @@ namespace idk::vkn
 			image_views.emplace_back(*vtex.imageView);
 			size = vec2{ vtex.size };
 		}
+		if (attachments[AttachmentType::eColor].size() && attachments[AttachmentType::eDepth].size())
+		{
+			rp_type = BasicRenderPasses::eRgbaColorDepth;
+		}
+		else if(attachments[AttachmentType::eColor].size())
+		{
+			rp_type = BasicRenderPasses::eRgbaColorOnly;
+		}
+		else
+		{
+			rp_type = BasicRenderPasses::eDepthOnly;
+		}
 		auto& view = View();
-		AttachImageViews(image_views, view, size);
+		AttachImageViews(view.BasicRenderPass(rp_type),image_views, view, size);
 	}
 
 
