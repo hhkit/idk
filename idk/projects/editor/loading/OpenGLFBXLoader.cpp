@@ -38,6 +38,7 @@ namespace idk
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
+		prefab_root->Transform()->scale /= 200.0f;
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 		auto h_mat = Core::GetResourceManager().Create<Material>();
@@ -207,7 +208,8 @@ namespace idk
 			animator->AddAnimation(anim_clip_handle);
 		}
 		animator->Play(0);
-		//PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
+
+		// PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
 		return retval;
 	}
 

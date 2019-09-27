@@ -101,21 +101,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		go->GetComponent<Transform>()->scale /= 200;// 200.f;
+		// go->GetComponent<Transform>()->scale /= 200;// 200.f;
 		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
-		// auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
-		// auto animator = go->AddComponent<AnimationController>();
+		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
+		auto animator = go->AddComponent<AnimationController>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
 			auto resources = Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
-			//mesh_rend->mesh = resources->Get<Mesh>();
-			//animator->SetSkeleton(resources->Get<anim::Skeleton>());
-			//animator->AddAnimation(resources->Get<anim::Animation>());
-			// go->GetComponent<AnimationController>()->Play(0);
+			mesh_rend->mesh = resources->Get<Mesh>();
+			animator->SetSkeleton(resources->Get<anim::Skeleton>());
+			animator->AddAnimation(resources->Get<anim::Animation>());
+			animator->Play(0);
 		}
-	//	mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance.material = h_mat;
 
 		return go;
 	};
@@ -126,7 +126,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 0,0,0 });
+	// create_anim_obj(vec3{ 0,0,0 });
+	Core::GetResourceManager().Load(PathHandle{ "/assets/models/boblampclean.md5mesh" });
 
 	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
