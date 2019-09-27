@@ -125,45 +125,11 @@ namespace idk {
 								return false;
 							}
 							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
-								string meshName{val.guid };
 
-                                //PathHandle test = "/assets/models/test.fbx";
-                                //if (ImGuidk::InputResourceEx(keyName.c_str(), &test, { ".fbx" }))
-                                //{
-                                //    std::cout << test.GetMountPath();
-                                //}
-								
-								if (ImGui::Button(meshName.c_str())) {
+                                if (ImGuidk::InputResource(keyName.c_str(), &val))
+                                {
 
-								}
-								//Create a drag drop payload on selected gameobjects.
-								if (ImGui::BeginDragDropTarget()) {
-									if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE)) {
-										IM_ASSERT(payload->DataSize == sizeof(string));
-										PathHandle* source = static_cast<PathHandle*>(payload->Data); // Getting the Payload Data
-										if (source->GetExtension() != ".fbx") {
-
-											
-											//PathHandle PathHandle{ source->data() };
-											//auto file = Core::GetSystem<ResourceManager>().GetFileResources(PathHandle);
-											//file.resources[0].visit([&](auto& handle) {
-											//	if constexpr (std::is_same_v < std::decay_t<decltype(handle)>, RscHandle<Mesh>>)
-											//	{
-											//		const RscHandle<Mesh>& mesh_handle = handle;
-											//		val = mesh_handle;
-											//	}
-											//	else
-											//		(handle);
-											//});
-
-
-
-										}
-
-									}
-									ImGui::EndDragDropTarget();
-								}
-
+                                }
 
 								return false;
 							}
