@@ -92,7 +92,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		divByVal = 200.f;
 	}
-	auto h_mat = Core::GetResourceManager().Create<Material>();
+	auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
+	h_mat->Compile();
 	auto& mat = *h_mat;
 
 	// Lambda for creating an animated object... Does not work atm.

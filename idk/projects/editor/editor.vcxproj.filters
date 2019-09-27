@@ -87,6 +87,9 @@
     <ClInclude Include="loading\OpenGLFBXLoader.h">
       <Filter>loader\fbx</Filter>
     </ClInclude>
+    <ClInclude Include="loading\GraphFactory.h">
+      <Filter>loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -156,6 +159,7 @@
     <ClCompile Include="loading\OpenGLFBXLoader.cpp">
       <Filter>loader\fbx</Filter>
     </ClCompile>
+    <ClCompile Include="loading\GraphFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

@@ -26,6 +26,9 @@ namespace idk
 	template<typename T>
 	inline void ResourceBundle::Add(RscHandle<T> handle)
 	{
+		if (!handle)
+			return;
+
 		auto& sub_arr = subarrays[BaseResourceID<T>];
 		auto new_ind = sub_arr.index + sub_arr.count++;
 

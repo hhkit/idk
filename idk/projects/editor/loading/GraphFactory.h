@@ -1,19 +1,18 @@
 #pragma once
 #include <idk.h>
-#include <gfx/Material.h>
 #include <res/ResourceFactory.h>
-
+#include <gfx/ShaderGraph.h>
 namespace idk
 {
-	class MaterialFactory
+	class GraphFactory
 		: public ResourceFactory<Material>
 	{
 	public:
-		unique_ptr<Material> GenerateDefaultResource();
-		unique_ptr<Material> Create();
+		unique_ptr<Material> GenerateDefaultResource() override;
+		unique_ptr<Material> Create() override;
 	};
 
-	class MaterialLoader
+	class GraphLoader
 		: public IFileLoader
 	{
 	public:

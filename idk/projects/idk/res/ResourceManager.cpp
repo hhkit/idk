@@ -48,7 +48,8 @@ namespace idk
 					{
 						if constexpr (has_tag_v<Rs, Saveable>)
 							if constexpr (std::is_default_constructible_v<Rs>)
-								resource_man->RegisterLoader<SaveableResourceLoader<Rs>>(Rs::ext);
+								if (resource_man->GetLoader(Rs::ext) == nullptr)
+									resource_man->RegisterLoader<SaveableResourceLoader<Rs>>(Rs::ext);
 					}...
 				};
 			}

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Material.h"
+#include <gfx/ShaderProgram.h>
 
 namespace idk
 {
@@ -24,5 +25,9 @@ namespace idk
 			}
 		}
 		return RscHandle<ShaderTemplate>();
+	}
+	Material::~Material()
+	{
+		Core::GetResourceManager().Release(_shader_program);
 	}
 }

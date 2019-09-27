@@ -4,6 +4,7 @@
 #include <core/Core.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
+#include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
 /* 
  * !!! NOTE !!!

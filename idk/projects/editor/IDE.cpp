@@ -27,6 +27,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <idk_opengl/system/OpenGLState.h>
 #include <loading/OpenGLFBXLoader.h>
 #include <loading/VulkanFBXLoader.h>
+#include <loading/GraphFactory.h>
 #include <loading/OpenGLCubeMapLoader.h>
 #include <loading/OpenGLTextureLoader.h>
 #include <editor/commands/CommandList.h>
@@ -45,33 +46,19 @@ namespace idk
 	void IDE::Init()
 	{
 		// do imgui stuff
+
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::OpenGL:
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".md5mesh");
-			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".md5mesh");
 			break;
 		default:
 			break;
 		}
-
         Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
-
-		Core::GetResourceManager().RegisterFactory<EasyFactory<shadergraph::Graph>>();
-        Core::GetResourceManager().RegisterLoader<shadergraph::Loader>(".mat");
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
@@ -174,6 +161,33 @@ namespace idk
 			i->Initialize();
 		}
 
+	}
+
+	void IDE::LateInit()
+	{
+
+		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
+		{
+		case GraphicsAPI::OpenGL:
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".obj");
+			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".md5mesh");
+			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
+			break;
+		case GraphicsAPI::Vulkan:
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".fbx");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".obj");
+			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".md5mesh");
+			break;
+		default:
+			break;
+		}
+		Core::GetResourceManager().RegisterFactory<GraphFactory>();
+		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 	}
 
 	void IDE::Shutdown()

@@ -5,6 +5,8 @@
 
 namespace idk
 {
+	RESOURCE_EXTENSION(Material, ".mat");
+
 	class ShaderTemplate;
 
 	ENUM(MaterialDomain, char,
@@ -23,7 +25,7 @@ namespace idk
 	{
 		MaterialDomain domain = MaterialDomain::Surface;
 		BlendMode      blend  = BlendMode::Opaque;
-		ShadingModel   model  = ShadingModel::Unlit;
+		ShadingModel   model  = ShadingModel::DefaultLit;
 	};
 
 	class Material
@@ -34,8 +36,7 @@ namespace idk
 	public:
 		RscHandle<ShaderProgram> _shader_program;
 
-		Material(RscHandle<ShaderProgram> = { Guid::Make() });
 		RscHandle<ShaderTemplate> GetTemplate() const;
-		virtual ~Material() = default;
+		virtual ~Material();
 	};
 }

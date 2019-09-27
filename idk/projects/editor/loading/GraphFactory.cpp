@@ -1,26 +1,25 @@
-#include "stdafx.h"
-#include "MaterialFactory.h"
-#include <util/ioutils.h>
+#include "pch.h"
+#include "GraphFactory.h"
 #include <res/MetaBundle.h>
 #include <gfx/ShaderProgram.h>
+#include <util/ioutils.h>
+
 namespace idk
 {
-	unique_ptr<Material> MaterialFactory::GenerateDefaultResource()
+	unique_ptr<Material> GraphFactory::GenerateDefaultResource()
 	{
 		return Create();
 	}
-
-	unique_ptr<Material> MaterialFactory::Create()
+	unique_ptr<Material> GraphFactory::Create()
 	{
-		auto retval = std::make_unique<Material>();
+		auto retval = std::make_unique<shadergraph::Graph>();
 		retval->_shader_program = Core::GetResourceManager().Create<ShaderProgram>();
 		return retval;
 	}
-
-	ResourceBundle MaterialLoader::LoadFile(PathHandle p)
+	ResourceBundle GraphLoader::LoadFile(PathHandle p)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>();
+		auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>();
 		if (stream)
 		{
 			parse_text(stringify(stream), *mat);
@@ -29,10 +28,11 @@ namespace idk
 		}
 		return mat;
 	}
-	ResourceBundle MaterialLoader::LoadFile(PathHandle p, const MetaBundle& m)
+
+	ResourceBundle GraphLoader::LoadFile(PathHandle p, const MetaBundle& m)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>(m.metadatas[0].guid);
+		auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(m.metadatas[0].guid);
 
 		if (stream)
 		{

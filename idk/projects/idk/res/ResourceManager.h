@@ -99,6 +99,7 @@ namespace idk
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
 		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
+		template<typename Res>                        [[nodiscard]] RscHandle<Res> LoaderCreateResource(Guid);
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Guid, Args&& ... construction_args);
 

@@ -65,6 +65,7 @@ namespace idk
 		// attempt to put on another thread
 		{
 			control_block.resource = factory.Create();
+			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{itr->first};
 		}
 
 		return RscHandle<Res>(itr->first);
@@ -94,6 +95,7 @@ namespace idk
 		// attempt to put on another thread
 		{
 			control_block.resource = factory.Create();
+			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ itr->first };
 		}
 
 		auto& fcb = _loaded_files[adapted_path];
@@ -200,6 +202,27 @@ namespace idk
 		return *s_cast<FLoader*>(ptr.get());
 	}
 
+	template<typename Res>
+	inline RscHandle<Res> ResourceManager::LoaderCreateResource(Guid guid)
+	{
+		auto& factory = GetFactoryRes<Res>();
+		assert(&factory);
+
+		auto& table = GetTable<Res>();
+		auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
+		if (!success)
+			return {};
+
+		auto& control_block = itr->second;
+		// attempt to put on another thread
+		{
+			control_block.resource = factory.Create();
+			control_block.resource->_handle = RscHandle<Res>{ itr->first };
+		}
+
+		return RscHandle<Res>(itr->first);
+	}
+
 	template<typename Res, typename ...Args>
 	RscHandle<Res> ResourceManager::LoaderEmplaceResource(Args&& ...construction_args)
 	{
@@ -215,6 +238,7 @@ namespace idk
 		// attempt to put on other thread
 		{
 			cb.resource = std::make_unique<Res>(std::forward<Args>(construction_args)...);
+			cb.resource->_handle = RscHandle<typename Res::BaseResource>{ guid };
 		}
 
 		return RscHandle<Res>{guid};
