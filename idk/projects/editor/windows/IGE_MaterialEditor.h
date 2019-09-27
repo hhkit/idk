@@ -21,7 +21,7 @@ namespace idk
         virtual void BeginWindow() override;
         virtual void Update() override;
 
-        void OpenGraph(const PathHandle& handle);
+        void OpenGraph(const RscHandle<shadergraph::Graph>& handle);
 
     private:
         ImNodes::CanvasState _canvas;

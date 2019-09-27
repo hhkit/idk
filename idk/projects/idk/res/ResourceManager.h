@@ -65,6 +65,7 @@ namespace idk
 		using GeneralLoadResult = result<ResourceBundle, ResourceLoadError>; // todo: return resource bundle by const T&
 		using GeneralGetResult  = result<ResourceBundle, BundleGetError>; // todo: return resource bundle by const T&
 		template<typename Res> using CreateResult = result<RscHandle<Res>, ResourceCreateError>;
+		template<typename Res> using GetResult   = result<RscHandle<Res>,  BundleGetError>;
 		template<typename Res> using LoadResult   = result<RscHandle<Res>, ResourceLoadError>;
 		template<typename Res> using SaveResult   = result<RscHandle<Res>, ResourceSaveError>;
 
@@ -86,6 +87,7 @@ namespace idk
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
 		template<typename Res>  LoadResult<Res>       Load    (PathHandle path);
 		                        GeneralLoadResult     Load    (PathHandle path);
+		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
 								GeneralGetResult      Get     (PathHandle path);
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);

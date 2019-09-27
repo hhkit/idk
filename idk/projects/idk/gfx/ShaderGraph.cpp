@@ -302,6 +302,7 @@ namespace idk::shadergraph
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 		auto h_mat = Core::GetResourceManager().Create<Material>();
+		
 		h_mat->BuildShader(shader_template, uniforms, code);
 
 		inst.material = h_mat;

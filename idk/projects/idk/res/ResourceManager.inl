@@ -112,6 +112,16 @@ namespace idk
 
 		return res.value().Get<Res>();
 	}
+	
+	template<typename Res>
+	ResourceManager::GetResult<Res> ResourceManager::Get(PathHandle path)
+	{
+		auto bundle = Get(path);
+		if (!bundle)
+			return bundle.error();
+
+		return bundle->Get<Res>();
+	}
 
 	template<typename Res>
 	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> saveme)

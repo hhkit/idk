@@ -598,13 +598,10 @@ namespace idk
 
 
 
-    void IGE_MaterialEditor::OpenGraph(const PathHandle& handle)
+    void IGE_MaterialEditor::OpenGraph(const RscHandle<shadergraph::Graph>& handle)
     {
-        _graph = *Core::GetResourceManager().Load<Graph>(handle);
-        auto p = handle.GetMountPath();
-        p.remove_prefix(sizeof("/assets/") - 1);
-        p.remove_suffix(sizeof(".mat") - 1);
-        _graph_name = p;
+		_graph = handle;
+		_graph_name = string{ Core::GetResourceManager().GetPath(handle) };
 
         ImGui::SetWindowFocus(window_name);
         is_open = true;
@@ -627,7 +624,7 @@ namespace idk
         Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](PathHandle path)
         {
             if (path.GetExtension() == Graph::ext)
-                OpenGraph(path);
+                OpenGraph(*Core::GetResourceManager().Load<Graph>(path));
         });
     }
 

@@ -36,10 +36,6 @@ links:
   slot_in: 1
   slot_out: 2
 - node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
-  slot_in: 0
-  slot_out: 3
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
   node_out: 78ba2ef9-d97f-4b5c-b763-413025899bbf
   slot_in: 1
   slot_out: 2
@@ -94,7 +90,7 @@ nodes:
     name: math\Add
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 565.111877, y: 170.890717}
+    position: {x: 505.111877, y: 234.890717}
   7af555fd-e108-491d-aee9-b15767b179f2: 
     control_values: ""
     guid: 7af555fd-e108-491d-aee9-b15767b179f2
@@ -145,11 +141,11 @@ nodes:
     control_values: ""
     guid: d5084548-0ebd-44fb-b98c-94bd0951100a
     input_slots: 
+    - {type: VEC3, value: '1.000000,1.000000,1.000000'}
     - {type: VEC3, value: ""}
-    - {type: VEC3, value: ""}
-    - {type: FLOAT, value: 0}
     - {type: FLOAT, value: 1.000000}
-    - {type: FLOAT, value: 100.000000}
+    - {type: FLOAT, value: 1.000000}
+    - {type: FLOAT, value: 0.000000}
     name: master\PBR
     output_slots: []
     position: {x: 724.700867, y: 224.665176}
