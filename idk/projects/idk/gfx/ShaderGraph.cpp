@@ -95,6 +95,7 @@ namespace idk::shadergraph
     static string resolve_node(const Node& node, compiler_state& state)
     {
         string code = "";
+        string code_from_input = "";
 
         if (node.name[0] != '$') // is not a param node
         {
@@ -190,14 +191,15 @@ namespace idk::shadergraph
             }
             else
             {
-                code = resolve_node(state.graph.nodes.at(link->node_out), state) + "\n" + code;
+                code_from_input += resolve_node(state.graph.nodes.at(link->node_out), state);
+                code_from_input += '\n';
                 resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
                 assert(resolved_iter != state.resolved_outputs.end());
                 replace_variables(code, i, resolved_iter->second);
             }
         }
 
-        return code;
+        return code_from_input + '\n' + code;
     }
 
 
