@@ -66,6 +66,7 @@ namespace idk
 		,	class ShaderTemplate
 		,	class Mesh
 		,   class Material
+		,	class MaterialInstance
 		,	class Texture
 		,   class CubeMap
 		,	class ShaderProgram

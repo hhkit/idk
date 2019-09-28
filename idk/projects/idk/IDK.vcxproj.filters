@@ -633,6 +633,11 @@
     <ClInclude Include="gfx\IShaderProgramFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
+    <ClInclude Include="gfx\IShaderProgramFactory.h" />
+    <ClInclude Include="gfx\MaterialFactory.h" />
+    <ClInclude Include="gfx\UniformInstance.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

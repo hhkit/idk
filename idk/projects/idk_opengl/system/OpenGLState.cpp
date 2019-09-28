@@ -125,7 +125,7 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
-				auto material = elem.material_instance.material;
+				auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
@@ -158,7 +158,7 @@ namespace idk::ogl
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
-				for (auto& [id, uniform] : elem.material_instance.uniforms)
+				for (auto& [id, uniform] : elem.material_instance->uniforms)
 				{
 					std::visit([this, &id, &texture_units](auto& elem) {
 						using T = std::decay_t<decltype(elem)>;
@@ -184,7 +184,7 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
-				auto material = elem.material_instance.material;
+				auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
@@ -226,7 +226,7 @@ namespace idk::ogl
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
-				for (auto& [id, uniform] : elem.material_instance.uniforms)
+				for (auto& [id, uniform] : elem.material_instance->uniforms)
 				{
 					std::visit([this, &id, &texture_units](auto& elem) {
 						using T = std::decay_t<decltype(elem)>;

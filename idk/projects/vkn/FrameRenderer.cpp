@@ -323,7 +323,7 @@ namespace idk::vkn
 			//Force pipeline creation
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
-			auto sprog = dc.material_instance.material->_shader_program;
+			auto sprog = dc.material_instance->material->_shader_program;
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
@@ -346,8 +346,8 @@ namespace idk::vkn
 			for (auto itr = layouts.LayoutsBegin(), end = layouts.LayoutsEnd(); itr != end; ++itr)
 			{
 				auto& name = itr->first;
-				auto mat_uni_itr = dc.material_instance.uniforms.find(itr->first);
-				if (mat_uni_itr != dc.material_instance.uniforms.end())
+				auto mat_uni_itr = dc.material_instance->uniforms.find(itr->first);
+				if (mat_uni_itr != dc.material_instance->uniforms.end())
 				{
 					auto& ubo_info = itr->second;
 					auto& layout = ubo_info.layout;
@@ -358,7 +358,7 @@ namespace idk::vkn
 						{
 						case uniform_layout_t::UniformType::eBuffer:
 						{
-							auto&& data = dc.material_instance.GetUniformBlock(name);
+							auto&& data = dc.material_instance->GetUniformBlock(name);
 							auto&& [buffer, offset] = ubo_manager.Add(data);
 							collated_bindings[ubo_info.set].emplace_back(
 								ProcessedRO::BindingInfo
@@ -375,7 +375,7 @@ namespace idk::vkn
 						break;
 						case uniform_layout_t::UniformType::eSampler:
 						{
-							auto&& data = dc.material_instance.GetImageBlock(name);
+							auto&& data = dc.material_instance->GetImageBlock(name);
 							auto& texture = data.begin()->second.as<vkn::VknTexture>();
 							collated_bindings[ubo_info.set].emplace_back(
 								ProcessedRO::BindingInfo
@@ -534,7 +534,7 @@ namespace idk::vkn
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = obj.material_instance.material->_shader_program;
+			auto sprog = obj.material_instance->material->_shader_program;
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.

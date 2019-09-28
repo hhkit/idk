@@ -74,6 +74,11 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+
 REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
 REFLECT_VARS(guid)
 REFLECT_END()
@@ -124,6 +129,10 @@ REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
 
 REFLECT_BEGIN(idk::Material::Metadata, "MaterialMeta")
 REFLECT_VARS(domain, blend, model)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MaterialInstance, "MaterialInstance")
+REFLECT_VARS(material, uniforms)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabData, "PrefabData")

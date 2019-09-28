@@ -5,6 +5,7 @@
 #include <anim/Skeleton.h>
 #include <gfx/Mesh.h>
 #include <gfx/Material.h>
+#include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderTemplate.h>
 #include <gfx/Texture.h>

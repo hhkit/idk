@@ -44,6 +44,7 @@
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
     <ClInclude Include="gfx\ShaderTemplateLoader.h" />
+    <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
     <ClInclude Include="math\shapes\frustum.h" />

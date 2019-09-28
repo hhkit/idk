@@ -332,7 +332,7 @@ TEST(Reflect, TestParentAndUnknownVisit)
 
 struct varianttest
 {
-	variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> uniform;
+	UniformInstance uniform;
 };
 REFLECT_BEGIN(varianttest, "varianttest")
 REFLECT_VARS(uniform)
