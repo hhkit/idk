@@ -260,6 +260,8 @@ namespace idk
 			Handle<Camera> currCamera = main_camera.current_camera;
 			Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;
+			focused_vector = finalCamPos;
+			scroll_multiplier = default_scroll_multiplier;
 			camTransform->position += camTransform->Forward() * distanceFromObject;
 		}
 	}
