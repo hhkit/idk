@@ -4,6 +4,8 @@
 #include <deque>
 namespace idk::fbx_loader_detail
 {
+	// vec3 FBX_SCALE = vec3{ 100.0f, 100.0f, 100.0f };
+
 	mat4 initMat4(const aiMatrix4x4& mat)
 	{
 		mat4 a(
@@ -12,7 +14,7 @@ namespace idk::fbx_loader_detail
 			mat.c1, mat.c2, mat.c3, mat.c4,
 			mat.d1, mat.d2, mat.d3, mat.d4
 		);
-		auto decomp = decompose(a);
+		//auto decomp = decompose(a);
 		return a;
 	}
 	mat4 initMat4(const aiMatrix3x3& mat)
@@ -39,6 +41,7 @@ namespace idk::fbx_loader_detail
 		AssimpNode curr_node;
 		curr_node._name = ai_node->mName.data;
 		curr_node._node_transform = initMat4(ai_node->mTransformation);
+		//curr_node._node_transform[3] = curr_node._node_transform[3] * vec4{ FBX_SCALE, 1.0f };
 
 		// if (   mesh_set.find(MeshData{ curr_node._name }) != mesh_set.end() || mesh_set.find(MeshData{ curr_node._name + "mesh" }) != mesh_set.end()
 		// 	)
@@ -48,7 +51,9 @@ namespace idk::fbx_loader_detail
 		if (bone_res != bone_set.end())
 		{
 			curr_node._ai_type |= BONE;
-			curr_node._bone_offset = bone_res->_offset;
+			curr_node._bone_offset = bone_res->_offset;// *mat4{ scale(vec3{ 1.0f / FBX_SCALE[0], 1.0f / FBX_SCALE[1], 1.0f / FBX_SCALE[2] }) };
+			// curr_node._bone_offset[3] = curr_node._bone_offset[3] * vec4{   , 1.0f };
+			//auto& trans_vec2 = curr_node._bone_offset[0];
 		}
 
 		if (curr_node._name.find("$Assimp$") != string::npos)
@@ -68,6 +73,7 @@ namespace idk::fbx_loader_detail
 	{
 		root_node._name = ai_node->mName.data;
 		root_node._node_transform = initMat4(ai_node->mTransformation);
+		// root_node._node_transform[3] = root_node._node_transform[3] * vec4{ FBX_SCALE, 1.0f };
 		root_node._ai_type = ROOT;
 
 		for (size_t i = 0; i < ai_node->mNumChildren; ++i)
@@ -106,7 +112,7 @@ namespace idk::fbx_loader_detail
 		);
 	}
 
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out)
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& normalize)
 	{
 		struct BoneTreeNode
 		{
@@ -143,7 +149,7 @@ namespace idk::fbx_loader_detail
 			anim::Skeleton::Bone b{};
 			b._name = curr_node.assimp_node->_name;
 			b._parent = curr_node.parent;
-			b._offset = curr_node.assimp_node->_bone_offset;
+			b._offset = curr_node.assimp_node->_bone_offset * normalize;
 			b._node_transform = node_transform;
 
 			bones_out.emplace_back(b);
@@ -187,14 +193,14 @@ namespace idk::fbx_loader_detail
 		{
 			auto& position_key = ai_anim_node->mPositionKeys[0];
 
-			const vec3 val = initVec3(position_key.mValue);
+			const vec3 val = initVec3(position_key.mValue);// *FBX_SCALE;
 			const float time = static_cast<float>(position_key.mTime);
 
 			channel._translate.emplace_back(val, time);
 
 			if (ai_anim_node->mNumPositionKeys == 2 && position_key != ai_anim_node->mPositionKeys[1])
 			{
-				const vec3 val_2 = initVec3(ai_anim_node->mPositionKeys[1].mValue);
+				const vec3 val_2 = initVec3(ai_anim_node->mPositionKeys[1].mValue);// *FBX_SCALE;
 				const float time_2 = static_cast<float>(ai_anim_node->mPositionKeys[1].mTime);
 
 				channel._translate.emplace_back(val_2, time_2);
@@ -206,7 +212,7 @@ namespace idk::fbx_loader_detail
 			{
 				auto& position_key = ai_anim_node->mPositionKeys[p];
 
-				const vec3 val = initVec3(position_key.mValue);
+				const vec3 val = initVec3(position_key.mValue);// *FBX_SCALE;
 				const float time = static_cast<float>(position_key.mTime);
 
 				channel._translate.emplace_back(val, time);
@@ -291,7 +297,7 @@ namespace idk::fbx_loader_detail
 		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
 		if (is_animated)
 			initChannel(channel, ai_anim_node->second);
-		else if ((assimp_node._ai_type & MESH) != MESH)
+		//else if ((assimp_node._ai_type & MESH) != MESH)
 			channel._node_transform = assimp_node._node_transform;
 
 		virtual_channels.emplace_back(channel);

@@ -22,6 +22,7 @@
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationController.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
+    <ClInclude Include="anim\BoneComponent.h" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
@@ -201,6 +202,7 @@
     <ClCompile Include="anim\Animation.cpp" />
     <ClCompile Include="anim\AnimationController.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
+    <ClCompile Include="anim\BoneComponent.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />

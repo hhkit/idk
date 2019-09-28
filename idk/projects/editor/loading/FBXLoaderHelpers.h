@@ -25,6 +25,8 @@
 
 namespace idk::fbx_loader_detail
 {
+	static vec3 FBX_SCALE = vec3{ 1.0f/100, 1.0f / 100, 1.0f / 100 };
+	// static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
 	struct Vertex
 	{
 		vec3	pos;
@@ -109,7 +111,7 @@ namespace idk::fbx_loader_detail
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
 
 	// Helper functions for bone data
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out);
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& normalize = mat4{});
 	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 
 	// Helper functions for animation nodes

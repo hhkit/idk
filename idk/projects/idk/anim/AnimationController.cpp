@@ -74,18 +74,17 @@ namespace idk
 		{
 			// auto& child = _child_objects[i];
 			auto parent_index = _skeleton->data()[i]._parent;
+			const mat4& c_transform = _bone_transforms[i];
+			//auto test = ;
+			_child_objects[i]->Transform()->LocalMatrix(_skeleton->GetGlobalInverse() * c_transform);
+
 			if (parent_index >= 0)
 			{
 				// If we have the parent, we push in the parent.global * child.local
-				const mat4& c_transform = _bone_transforms[i];
 				const mat4& p_transform = _bone_transforms[parent_index];
 				mat4 final_local_transform = p_transform * c_transform;
 				_bone_transforms[i] = final_local_transform;
 			}
-			// else
-			// {
-			// 	_bone_transforms[i] = child->GetComponent<Transform>()->GlobalMatrix();
-			// }
 		}
 
 		// Apply offsets to all the transforms
@@ -103,7 +102,10 @@ namespace idk
 			for (size_t i = 0; i < _child_objects.size(); ++i)
 			{
 				auto& curr_bone = skeleton[i];
-				_bone_transforms[i] = _bone_transforms[i] * curr_bone._offset;
+				// auto with = _bone_transforms[i] * (curr_bone._offset * translate(vec3{ 2,0,0 }));
+				// auto without = _bone_transforms[i] * (curr_bone._offset);
+				_bone_transforms[i] = _bone_transforms[i] * (curr_bone._offset);
+				// _child_objects[i]->Transform()->LocalMatrix(_bone_transforms[i]);
 			}
 		}
 

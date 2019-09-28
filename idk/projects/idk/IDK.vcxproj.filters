@@ -638,6 +638,7 @@
     <ClInclude Include="gfx\IShaderProgramFactory.h" />
     <ClInclude Include="gfx\MaterialFactory.h" />
     <ClInclude Include="gfx\UniformInstance.h" />
+    <ClInclude Include="anim\BoneComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -932,6 +933,7 @@
     <ClCompile Include="gfx\ShaderProgram.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
+    <ClCompile Include="anim\BoneComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
