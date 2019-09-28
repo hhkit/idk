@@ -105,7 +105,17 @@ namespace idk {
             {
                 if (ImGui::MenuItem("Material"))
                 {
-                    Core::GetResourceManager().Create<shadergraph::Graph>(string{ current_dir.GetMountPath() } + '/' + "NewMaterial.mat");
+                    auto path = string{ current_dir.GetMountPath() } + "/NewMaterial.mat";
+                    int i = 0;
+                    while (PathHandle(path)) // already exists
+                    {
+                        path = string{ current_dir.GetMountPath() } + "NewMaterial";
+                        path += std::to_string(++i);
+                        path += ".mat";
+                    }
+                    auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
+                    if (res && *res)
+                        Core::GetResourceManager().Save(*res);
                 }
                 ImGui::EndPopup();
             }
