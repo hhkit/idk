@@ -22,7 +22,14 @@ namespace idk::ogl
 			Debug,
 			NormalMesh,
 			SkinnedMesh,
+			SkyBox,
 			Max
+		};
+		enum FragmentShaders
+		{
+			FDebug,
+			FSkyBox,
+			FMax
 		};
 
 		Win32GraphicsSystem* sys{};
@@ -31,6 +38,7 @@ namespace idk::ogl
 		FrameBufferManager     fb_man;
 		GLuint                 vao_id = 0;
 		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_vertex_shaders;
-		RscHandle<ShaderProgram> debug_fragment;
+		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_fragment_shaders;
+		//RscHandle<ShaderProgram> debug_fragment;
 	};
 }

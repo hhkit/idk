@@ -59,12 +59,21 @@ namespace idk
 	}
 	CameraData Camera::GenerateCameraData() const
 	{
+		variant<vec4, RscHandle<CubeMap>> m;
+		if (skybox.has_value())
+		{
+			m = *skybox;
+		}
+		else
+			m = clear_color;
+		
 		return CameraData{
 			0xFFFFFFF,
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,
-			clear_color
+			m,
+			skybox_mesh
 		};
 	}
 	float Camera::AspectRatio() const

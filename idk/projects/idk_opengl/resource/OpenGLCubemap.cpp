@@ -83,6 +83,7 @@ namespace idk::ogl
 
 	void OpenGLCubemap::Bind()
 	{
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 	}
 
@@ -94,10 +95,12 @@ namespace idk::ogl
 
 	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMColorFormat format)
 	{
+		format;
+
 		_size = size;
 		//glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
 		
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		
 		// TODO: fix internal format
 		GL_CHECK();

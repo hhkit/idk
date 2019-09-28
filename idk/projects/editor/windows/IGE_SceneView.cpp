@@ -221,6 +221,7 @@ namespace idk {
 		ImVec2 winPos = ImGui::GetWindowPos();
 		winPos.y = ImGui::GetFrameHeight();
 		ImGuizmo::SetRect(winPos.x, winPos.y, GetScreenSize().x, GetScreenSize().y); //The scene view size
+
 		ImGuizmo::SetDrawlist(); //Draw on scene view only
 
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;

@@ -14,6 +14,8 @@
 #include <scene/SceneManager.h>
 #include <test/TestComponent.h>
 
+#include <editor/loading/OpenGLCubeMapLoader.h>
+
 #include <serialize/serialize.h>
 
 #include <gfx/CameraControls.h>
@@ -77,20 +79,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
 	
-	auto camera = scene->CreateGameObject();
-	Handle<Camera> camHandle = camera->AddComponent<Camera>();
-	camera->GetComponent<Name>()->name = "Camera 1";
-	camera->GetComponent<Transform>()->position += vec3{ 0.f, 0, 2.5f };
-	camHandle->far_plane = 100.f;
-	camHandle->LookAt(vec3(0, 0, 0));
-	camHandle->render_target = RscHandle<RenderTarget>{};
-	camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
-	//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
 	float divByVal = 2.f;
-	if (&c->GetSystem<IDE>())
 	{
-		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
-		divByVal = 200.f;
+		auto camera = scene->CreateGameObject();
+		Handle<Camera> camHandle = camera->AddComponent<Camera>();
+		camera->GetComponent<Name>()->name = "Camera 1";
+		camera->GetComponent<Transform>()->position += vec3{ 0.f, 0, 2.5f };
+		camHandle->far_plane = 100.f;
+		camHandle->LookAt(vec3(0, 0, 0));
+		camHandle->render_target = RscHandle<RenderTarget>{};
+		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
+		camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/learnopengl.jpg.cbm");
+		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
+		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
+
+		//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
+		if (&c->GetSystem<IDE>())
+		{
+			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
+			divByVal = 200.f;
+		}
 	}
 	auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 	auto h_mat = Core::GetResourceManager().Create<Material>();

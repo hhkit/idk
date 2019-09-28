@@ -29,8 +29,8 @@ namespace idk
 
 	struct CubeMapMeta
 	{
-		CMColorFormat internal_format = CMColorFormat::RGBF_32;
 		CMUVMode      uv_mode = CMUVMode::Repeat;
+		CMColorFormat internal_format = CMColorFormat::RGBF_32;
 	};
 
 	class CubeMap
