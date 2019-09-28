@@ -54,9 +54,9 @@ namespace idk
 		bool overlay_debug_draw{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
+		bool is_shadow = false;
 		variant<vec4, RscHandle<CubeMap>> clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
-		bool is_shadow = false;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 }

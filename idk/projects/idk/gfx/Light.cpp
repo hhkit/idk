@@ -79,8 +79,8 @@ namespace idk
 			}
 		, light),
 			false,
-			vec4{1,1,1,1},
-			true
+			true,
+			vec4{1,1,1,1}
 		};
 	}
 }
