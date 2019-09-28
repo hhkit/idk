@@ -33,9 +33,11 @@ namespace idk
 
 	private:
         PathHandle current_dir;
+        PathHandle clicked_path;
         PathHandle selected_path;
         GenericResourceHandle selected_asset;
 
         void displayDir(PathHandle dir);
+        GenericResourceHandle getAsset(PathHandle path);
 	};
 }

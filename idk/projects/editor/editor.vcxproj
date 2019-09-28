@@ -188,7 +188,6 @@
     <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
     <ClInclude Include="loading\OpenGLTextureLoader.h" />
-    <ClInclude Include="ResourceExtensions.h" />
     <ClInclude Include="widgets\InputResource.h" />
     <ClInclude Include="windows\IGE_MaterialEditor.h" />
     <ClInclude Include="windows\IGE_HierarchyWindow.h" />
