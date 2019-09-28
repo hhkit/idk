@@ -13,8 +13,10 @@ namespace idk::vkn
 	{
 		auto prog = RscHandle<ShaderModule>{ program };
 		bool ret = false;
+		string kill_me = {glsl_code.data(),glsl_code.size()};
 
-		auto spirv = GlslToSpirv::spirv(glsl_code, vk::ShaderStageFlagBits::eFragment);
+
+		auto spirv = [](auto& program, auto& glsl_code) { if(program->Name().size())return GlslToSpirv::spirv(glsl_code, vk::ShaderStageFlagBits::eFragment, program->Name());  return GlslToSpirv::spirv(glsl_code, vk::ShaderStageFlagBits::eFragment); }(program,glsl_code);
 		ret = static_cast<bool>(spirv);
 		if (ret && spirv)
 		{
