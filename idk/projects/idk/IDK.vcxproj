@@ -37,6 +37,7 @@
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />
+    <ClInclude Include="gfx\BasicRenderPasses.h" />
     <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="gfx\IShaderProgramFactory.h" />
     <ClInclude Include="gfx\MaterialFactory.h" />

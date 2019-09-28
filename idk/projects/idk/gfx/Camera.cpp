@@ -72,6 +72,8 @@ namespace idk
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,
+			overlay_debug_draw,
+			false,
 			m,
 			skybox_mesh
 		};

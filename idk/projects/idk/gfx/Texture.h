@@ -49,6 +49,7 @@ namespace idk
 
 		// modifiers
 		virtual void Size(ivec2 newsize);
+		virtual void ChangeMode();
 
 		// identifier for ImGUIImage
 		virtual void* ID() const { return 0; }

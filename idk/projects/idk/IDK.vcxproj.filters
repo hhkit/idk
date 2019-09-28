@@ -585,6 +585,14 @@
     <ClInclude Include="math\shapes\frustum.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\BasicRenderPasses.h" />
+    <ClInclude Include="res\FileLoader.h" />
+    <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\GenericResourceHandle.h" />
+    <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="meta\variant.h" />
+    <ClInclude Include="res\MetaBundle.h" />
+    <ClInclude Include="res\EasyFactory.h" />
     <ClInclude Include="audio\AudioClipLoader.h">
       <Filter>audio</Filter>
     </ClInclude>

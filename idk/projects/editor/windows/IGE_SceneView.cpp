@@ -26,6 +26,8 @@ of the editor.
 #include <imgui/ImGuizmo.h>
 #include <IDE.h>
 
+#include <vkn/VknFramebuffer.h>
+
 namespace idk {
 
 	IGE_SceneView::IGE_SceneView()

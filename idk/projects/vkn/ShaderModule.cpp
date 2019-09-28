@@ -94,6 +94,83 @@ namespace idk::vkn
 		//	ubo_info[code_reflector.get_name(ub.combined_id)] = std::move(info);
 		//}
 	}
+
+	vk::DescriptorType ConvertUniformType(uniform_layout_t::UniformType type)
+	{
+		static hash_table< uniform_layout_t::UniformType, vk::DescriptorType>map
+		{
+			{uniform_layout_t::UniformType::eBuffer,vk::DescriptorType::eUniformBuffer},
+			{uniform_layout_t::UniformType::eSampler,vk::DescriptorType::eCombinedImageSampler},
+		};
+		return map[type];
+	}
+	vector<vk::DescriptorSetLayoutBinding> GetDescriptorBindings(const vector<uniform_layout_t::bindings_t>& ulayout_config)
+	{
+		vector<vk::DescriptorSetLayoutBinding> result;
+		for (auto& binding : ulayout_config)
+		{
+			vk::DescriptorSetLayoutBinding a{
+				binding.binding,
+				ConvertUniformType(binding.type),
+				binding.descriptor_count,
+				hlp::MapStages(binding.stages)
+				,nullptr
+			};
+			result.emplace_back(a);
+		}
+		return result;
+	}
+	void CreateLayouts(
+		hash_table<string, UboInfo>& ubo_info,
+		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>& layouts,
+		VulkanView& view)
+	{
+
+		hash_table<uint32_t, vector<uniform_layout_t::bindings_t>> set_layout;
+		uint32_t max = 0;
+		if (ubo_info.size())
+		{
+			for ([[maybe_unused]]auto& [set_name, info] : ubo_info)
+			{
+			
+				max = std::max(info.set, max);
+				set_layout[info.set].emplace_back(uniform_layout_t::bindings_t{ info.binding,1,{info.stage},info.type });
+			}
+			++max;
+		}
+		layouts.clear();
+		//for (uint32_t i = 0; i < max; ++i)
+		//{
+		//	vk::DescriptorSetLayoutCreateInfo layout_info
+		//	{
+		//		vk::DescriptorSetLayoutCreateFlags{}
+		//		,0
+		//		,nullptr
+		//	};
+		//	layouts[i] = std::make_pair(false,view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher()));
+		//}
+		for (auto& [set_idx, set] : set_layout)
+		{
+			auto bindings = GetDescriptorBindings(set);
+			if (bindings.size())
+			{
+				vk::DescriptorSetLayoutCreateInfo layout_info
+				{
+					vk::DescriptorSetLayoutCreateFlags{}
+					,hlp::arr_count(bindings)
+					,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
+				};
+				layouts[set_idx] = view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher());
+			}
+		}
+		for ([[maybe_unused]] auto& [set_name, info] : ubo_info)
+		{
+			
+			info.layout = *layouts[info.set];
+		}
+	}
+
+
 void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer)
 {
 	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
@@ -101,6 +178,7 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 	auto back = std::make_unique<Data>();
 	back->module = view.CreateShaderModule(byte_code);
 	extract_info(buffer, back->ubo_info, single_stage);
+	CreateLayouts(back->ubo_info,back->layouts,view);
 	back->stage = single_stage;
 	back->attrib_descriptions = std::move(descriptors);
 	buf_obj.WriteToBack(std::move(back));
@@ -119,14 +197,24 @@ bool ShaderModule::HasLayout(string uniform_name) const
 	return itr != Current().ubo_info.end();;
 }
 
-hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsBegin() const
+hash_table<string, UboInfo>::const_iterator ShaderModule::InfoBegin() const
 {
 	return Current().ubo_info.cbegin();
 }
 
-hash_table<string, UboInfo>::const_iterator ShaderModule::LayoutsEnd() const
+hash_table<string, UboInfo>::const_iterator ShaderModule::InfoEnd() const
 {
 	return Current().ubo_info.cend();
+}
+
+hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator ShaderModule::LayoutsBegin() const
+{
+	return Current().layouts.cbegin();;
+}
+
+hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator ShaderModule::LayoutsEnd() const
+{
+	return Current().layouts.cend();
 }
 
 //UboInfo& ShaderModule::GetLayout(string uniform_name)

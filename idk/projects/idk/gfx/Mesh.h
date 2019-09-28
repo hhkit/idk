@@ -11,6 +11,7 @@ namespace idk
 		, Tetrahedron
 		, Line
 		, Circle
+		, Plane
 	);
 
 	class Mesh

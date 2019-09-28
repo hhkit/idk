@@ -170,8 +170,10 @@ namespace idk::vkn
 		void GrowStates(size_t new_min_size);
 
 		std::pair<vector<ProcessedRO>, DsBindingCount> ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
-		void RenderGraphicsState(const GraphicsState& state,RenderStateV2& rs);
+		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
+		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs);
 		VulkanView& View()const { return *_view; }
+		vk::RenderPass GetRenderPass(const GraphicsState& state, VulkanView& view);
 		
 		RscHandle<ShaderProgram> GetMeshRendererShaderModule();
 		PipelineManager& GetPipelineManager();
@@ -182,6 +184,7 @@ namespace idk::vkn
 
 		VulkanView*                            _view                       {};
 		RscHandle<ShaderProgram>               _mesh_renderer_shader_module{};
+		RscHandle<ShaderProgram>               _shadow_shader_module{};
 		PipelineManager*                       _pipeline_manager           {};
 		vector<RenderStateV2>                  _states                     {};
 		const vector<GraphicsState>*           _gfx_states                 {};

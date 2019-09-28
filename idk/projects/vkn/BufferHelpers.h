@@ -17,58 +17,60 @@ namespace idk::vkn::hlp
 		std::optional<vk::Semaphore> signal = {}
 	);
 
-	template<typename Dispatcher>
-	vk::UniqueBuffer CreateBuffer(vk::Device device, vk::DeviceSize size, vk::BufferUsageFlags usage, Dispatcher const& dispatcher);
+	template<typename Dispatcher = vk::DispatchLoaderDefault>
+	vk::UniqueBuffer CreateBuffer(vk::Device device, vk::DeviceSize size, vk::BufferUsageFlags usage, Dispatcher const& dispatcher = {});
 
-	template<typename T, typename Dispatcher>
-	vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, T* const begin, T* const end, const Dispatcher& dispatcher);
+	template<typename T, typename Dispatcher = vk::DispatchLoaderDefault>
+	vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, T* const begin, T* const end, const Dispatcher& dispatcher = {});
 
-	template<typename T, typename Dispatcher>
-	vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher);
+	template<typename T, typename Dispatcher = vk::DispatchLoaderDefault>
+	vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher = {});
 
-	template<typename Dispatcher>
+	template<typename Dispatcher = vk::DispatchLoaderDefault>
 	vk::UniqueDeviceMemory AllocateBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher);
+		vk::PhysicalDevice& pdevice, vk::Device& device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher = {});
 
-	template<typename Dispatcher>
-	void BindBufferMemory(vk::Device device, vk::Buffer buffer, vk::DeviceMemory memory, uint32_t offset, Dispatcher const& dispatcher);
+	template<typename Dispatcher = vk::DispatchLoaderDefault>
+	void BindBufferMemory(vk::Device device, vk::Buffer buffer, vk::DeviceMemory memory, uint32_t offset, Dispatcher const& dispatcher = {});
 
-	template<typename Dispatcher>
+	template<typename Dispatcher = vk::DispatchLoaderDefault>
 	std::pair<vk::UniqueBuffer, UniqueAlloc> CreateAllocBindBuffer(
 		vk::PhysicalDevice& pdevice, vk::Device& device,
 		vk::DeviceSize buffer_size,
 		vk::BufferUsageFlags buffer_usage,
 		vk::MemoryPropertyFlags memory_flags,
 		MemoryAllocator& allocator,
-		const Dispatcher& dispatcher
+		const Dispatcher& dispatcher = {}
 	);
 
-	template<typename Dispatcher>
+	template<typename Dispatcher = vk::DispatchLoaderDefault>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindBuffer(
 		vk::PhysicalDevice& pdevice, vk::Device& device,
 		vk::DeviceSize buffer_size,
 		vk::BufferUsageFlags buffer_usage,
 		vk::MemoryPropertyFlags memory_flags,
-		const Dispatcher& dispatcher
+		const Dispatcher& dispatcher = {}
 	);
 
-	template<typename T, typename Dispatcher>
+	template<typename T, typename Dispatcher = vk::DispatchLoaderDefault>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device, T const* vertices, T const* vertices_end, const Dispatcher& dispatcher
+		vk::PhysicalDevice& pdevice, vk::Device& device, T const* vertices, T const* vertices_end, const Dispatcher& dispatcher = {}
 	);
 
-	template<typename T, typename Dispatcher>
+	template<typename T, typename Dispatcher = vk::DispatchLoaderDefault>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher
+		vk::PhysicalDevice& pdevice, vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher = {}
 	);
 
-	template<typename T, typename Dispatcher>
-	void MapMemory(vk::Device& device, vk::DeviceMemory& memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size, Dispatcher const& dispatcher);
+	template<typename T, typename Dispatcher = vk::DispatchLoaderDefault>
+	void MapMemory(vk::Device device, vk::DeviceMemory memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size, Dispatcher const& dispatcher = {});
 
 	void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
 	void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, VknTexture& img);
 
+	void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional < vk::Semaphore> signal = {}, vk::CommandBufferInheritanceInfo* info = nullptr);
+	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage = {}, std::optional < vk::Semaphore> signal = {},vk::CommandBufferInheritanceInfo* info = nullptr);
 	void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, vk::CommandBufferInheritanceInfo* info = nullptr);
 
 	template<typename T>

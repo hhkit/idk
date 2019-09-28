@@ -47,9 +47,9 @@ namespace idk
 		: comparable<typename ResourceBundle::ResourceSpan<T>::iterator>
 	{
 		iterator(const GenericResourceHandle*);
-
-		T& operator*() const;
-		T* operator->() const;
+		
+		const RscHandle<T>& operator*() const;
+		const RscHandle<T>* operator->() const;
 		iterator& operator++();
 		iterator  operator++(int);
 

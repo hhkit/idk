@@ -178,7 +178,7 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
 
-					texture_units += light.shadow_map.has_value();
+					texture_units += static_cast<bool>(light.light_map);
 				}
 
 				// bind attribs
@@ -241,7 +241,7 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
 
-					texture_units += light.shadow_map.has_value();
+					texture_units += static_cast<bool>(light.light_map);
 				}
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
