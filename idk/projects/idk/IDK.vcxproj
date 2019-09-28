@@ -177,7 +177,6 @@
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="util\align.h" />
-    <ClInclude Include="util\EasyFactory.h" />
     <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />

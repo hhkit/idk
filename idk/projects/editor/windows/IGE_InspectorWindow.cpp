@@ -143,7 +143,7 @@ namespace idk {
 								DisplayVec3(val);
 								return false;
 							}
-							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
+							else if constexpr (is_template_v<T, RscHandle>) {
 
 								if (ImGuidk::InputResource(keyName.c_str(), &val))
 								{
