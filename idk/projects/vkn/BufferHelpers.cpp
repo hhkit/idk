@@ -83,7 +83,7 @@ vk::CommandBuffer& BeginSingleTimeCBufferCmd(vk::CommandBuffer& cmd_buffer,vk::C
 	return cmd_buffer;
 }
 
-void EndSingleTimeCbufferCmd(vk::CommandBuffer& cmd_buffer, vk::Queue& queue)
+void EndSingleTimeCbufferCmd(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {})
 {
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.end(dispatcher);
@@ -91,11 +91,13 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer& cmd_buffer, vk::Queue& queue)
 	//Submit commands to queue
 	vk::SubmitInfo submitInfo
 	{
-		 0
-		,nullptr
-		,nullptr
+		 (wait) ? 1u : 0u
+		,(wait) ? &*wait : nullptr
+		,(stage)?&*stage:nullptr
 		,1
 		,&cmd_buffer
+		,(signal) ? 1u : 0u
+		,(signal) ? &*signal : nullptr
 	};
 	queue.submit(submitInfo, vk::Fence{}, dispatcher);
 	//Not very efficient, would be better to use fences instead.
@@ -142,9 +144,10 @@ void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buff
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout,vk::CommandBufferInheritanceInfo* info)
+void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
 {
-	BeginSingleTimeCBufferCmd(cmd_buffer,info);
+	if (!dont_begin)
+		BeginSingleTimeCBufferCmd(cmd_buffer, info);
 	vk::DispatchLoaderDefault dispatcher{};
 
 	//Creating image memory barrier to start performing layout transition for image
@@ -162,8 +165,46 @@ void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::
 
 	vk::PipelineStageFlags sourceStage;
 	vk::PipelineStageFlags destinationStage;
-
-	if (oLayout == vk::ImageLayout::eUndefined && nLayout == vk::ImageLayout::eTransferDstOptimal) {
+	sourceStage = vk::PipelineStageFlagBits::eAllCommands;
+	destinationStage = vk::PipelineStageFlagBits::eAllCommands;
+	vBarrier.srcAccessMask = vk::AccessFlags::Flags();
+	vBarrier.dstAccessMask = vk::AccessFlags::Flags();
+	switch (oLayout)
+	{
+		case vk::ImageLayout::eTransferDstOptimal:
+		{
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		}
+		break;
+		case vk::ImageLayout::eTransferSrcOptimal:
+		{
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+		}
+		break;
+	}
+	switch(nLayout)
+	{
+		case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+			destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+			vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+			vBarrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead| vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+			break;
+		case vk::ImageLayout::eTransferDstOptimal:
+		{
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+			vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+		}
+		break;
+		case vk::ImageLayout::eTransferSrcOptimal:
+			{
+				destinationStage = vk::PipelineStageFlagBits::eTransfer;
+				vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+			}
+		break;
+	}
+	if ((oLayout == vk::ImageLayout::eUndefined || oLayout == vk::ImageLayout::ePreinitialized) && nLayout == vk::ImageLayout::eTransferDstOptimal) {
 		vBarrier.srcAccessMask = vk::AccessFlags::Flags();
 		vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
 
@@ -178,10 +219,8 @@ void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::
 		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
 	}
 	else {
-		vBarrier.srcAccessMask = vk::AccessFlags::Flags();
-		vBarrier.dstAccessMask = vk::AccessFlags::Flags();
-		sourceStage = vk::PipelineStageFlagBits::eAllCommands;
-		destinationStage = vk::PipelineStageFlagBits::eAllCommands;
+		//vBarrier.srcAccessMask = vk::AccessFlags::Flags();
+		//vBarrier.dstAccessMask = vk::AccessFlags::Flags();
 		//throw std::invalid_argument("unsupported layout transition!");
 	}
 
@@ -190,13 +229,26 @@ void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::
 		sourceStage,
 		destinationStage,
 		vk::DependencyFlags(),
-		0,nullptr,
-		0,nullptr,
-		1,&vBarrier,
+		0, nullptr,
+		0, nullptr,
+		1, &vBarrier,
 		dispatcher
 	);
 
-	EndSingleTimeCbufferCmd(cmd_buffer, queue);
+	if (!dont_begin)
+		EndSingleTimeCbufferCmd(cmd_buffer, queue, wait, stage, signal);
+}
+
+void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout , std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal,vk::CommandBufferInheritanceInfo* info)
+{
+	TransitionImageLayout(false,cmd_buffer, queue, img, format, oLayout, nLayout, wait, stage, signal, info);
+	
+}
+
+void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout,vk::CommandBufferInheritanceInfo* info)
+{
+	TransitionImageLayout(cmd_buffer, queue, img, format, oLayout, nLayout, std::nullopt, std::nullopt,std::nullopt, info);
+	
 }
 
 }

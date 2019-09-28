@@ -10,7 +10,7 @@ namespace idk::ogl
 	public:
 		unique_ptr<CubeMap> GenerateDefaultResource() override;
 		unique_ptr<CubeMap> Create() override;
-		unique_ptr<CubeMap> Create(PathHandle filepath) override;
-		unique_ptr<CubeMap> Create(PathHandle filepath, const CubeMap::Metadata&) override;
+		//unique_ptr<CubeMap> Create(PathHandle filepath) override;
+		//unique_ptr<CubeMap> Create(PathHandle filepath, const CubeMap::Metadata&) override;
 	};
 }

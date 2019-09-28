@@ -22,7 +22,8 @@ namespace idk
 		for (auto& elem : _always_update)
 			elem.call();
 
-		while (_accumulated_dt > _fixed_dt)
+		int i = 0;
+		while (_accumulated_dt > _fixed_dt&& i++ < 1)
 		{
 			_accumulated_dt -= _fixed_dt;
 			for (auto& elem : _fixed_update)

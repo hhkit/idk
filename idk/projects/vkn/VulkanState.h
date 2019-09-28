@@ -12,6 +12,11 @@
 #include <vkn/VknTexture.h>
 #include <vkn/ValHandler.h>
 #include <vkn/VulkanResourceManager.h>
+#include <vkn/utils/PresentationSignals.h>
+#include <vkn/utils/TriBuffer.h>
+
+#include <vkn/utils/SwapchainInfo.h>
+#include <vkn/vulkan_state_fwd.h>
 #undef max
 #undef min
 
@@ -29,6 +34,17 @@ namespace std
 
 namespace idk::vkn 
 {
+	
+	inline BasicRenderPasses operator++(BasicRenderPasses& type)
+	{
+		return type = s_cast<BasicRenderPasses>(s_cast<uint32_t>(type) + 1);
+	}
+	inline BasicRenderPasses operator++(BasicRenderPasses& type, int)
+	{
+		auto result = type;
+		++type;
+		return result;
+	}
 	struct window_info
 	{
 		ivec2     size;
@@ -37,15 +53,6 @@ namespace idk::vkn
 	};
 
 	class VulkanState;
-
-	struct FrameObjects
-	{
-		DescriptorsManager pools;
-		UboManager ubo_manager;
-		FrameObjects() = default;
-		FrameObjects(FrameObjects&&) = default;
-		void FrameReset();
-	};
 
 	struct QueueFamilyIndices
 	{
@@ -62,82 +69,7 @@ namespace idk::vkn
 		std::vector<vk::SurfaceFormatKHR> formats;
 		std::vector<vk::PresentModeKHR> presentModes;
 	};
-	struct SwapChainInfo
-	{
-		uint32_t curr_index{};
-		vk::UniqueSwapchainKHR             swap_chain;
-		vk::PresentModeKHR				   present_mode;
-		vk::SurfaceFormatKHR			   surface_format;
-		//vk::Format                         format;
-		vk::Extent2D                       extent;
-		std::vector<vk::Image            > images;
-		std::vector<vk::UniqueImageView  > image_views;
-		std::vector<vk::Image            > edt_images;
-		std::vector<vk::UniqueImageView  > edt_image_views;
-		std::vector<vk::Image            > swapchain_images;
-		std::vector<vk::UniqueImageView  > swapchain_image_views;
-		std::vector<vk::UniqueFramebuffer> frame_buffers;
 
-		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers;
-		std::vector<std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> uniform_buffers2;
-		//TODO FrameData
-		//class FrameData
-		//Stores data in frame (images, image_views, framebuffers for swapping)
-
-		std::vector<vk::DescriptorSet    > descriptor_sets;
-		std::vector<vk::DescriptorSet    > descriptor_sets2;
-
-		vector<FrameObjects> frame_objects;
-
-		struct UniformStuff
-		{
-			std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> uniform_buffer;
-			vk::DescriptorSet descriptor_set;
-
-		};
-		struct Uniforms
-		{
-			vk::UniqueDescriptorSetLayout        layout;
-
-			vector<UniformStuff> frame;
-			void Init(size_t num) { frame.resize(num); }
-			auto& uniform_buffer(size_t index) { return frame[index].uniform_buffer; }
-			auto& descriptor_set(size_t index) { return frame[index].descriptor_set; }
-
-			decltype(frame)::iterator begin() { return frame.begin(); }
-			decltype(frame)::iterator end  () { return frame.end  (); }
-			uint32_t size() { return s_cast<uint32_t>(frame.size()); }
-		};
-		//struct UniformManager
-		//{
-		//	struct BindingInfo
-		//	{
-		//		uint32_t offset;
-		//		uint32_t size;
-		//	};
-		//	hlp::vector_buffer master_bo;
-		//	string             local_buffer;
-		//	vector<BindingInfo> bindings;
-		//};
-		Uniforms uniforms2;
-	};
-	struct PresentationSignals
-	{
-		vk::UniqueSemaphore image_available{};
-		vk::UniqueSemaphore render_finished{};
-		vk::UniqueSemaphore imgui_render_finished{};
-		vk::UniqueSemaphore master_image_available{};
-		vk::UniqueSemaphore master_render_finished{};
-		vk::UniqueFence     inflight_fence{};
-		vk::UniqueFence		master_fence{};
-		void Init(VulkanView& view);
-	};
-
-	struct FrameSubmitRenderInfo
-	{
-		vk::SubmitInfo submitInfo;
-		vk::PresentInfoKHR presentInfo;
-	};
 	typedef uint32_t renderFrameIndex;
 
 	class VulkanView;
@@ -169,18 +101,10 @@ namespace idk::vkn
 
 		void InitVulkanEnvironment(window_info info);
 		void NextFrame();
+		uint32_t MaxFramesInFlight()const { return max_frames_in_flight; }
 
-
-#pragma region ("Potentially main thing")
 		VulkanView& View();
-		unique_vbo      CreateVbo(void const* buffer_start, void const* buffer_end);
-		unique_ubo      CreateUbo(void const* buffer_start, void const* buffer_end);
-		unique_pipeline CreatePipeline(pipeline_config const& config);
-		void Draw(unique_vbo const& vbo, unique_ubo const& uniforms, unique_pipeline const& pipeline);
-#pragma endregion
 
-		void BeginFrame();
-		void EndFrame();
 		void AcquireFrame(vk::Semaphore signal);
 		void DrawFrame(vk::Semaphore wait, vk::Semaphore signal);
 		void PresentFrame(vk::Semaphore wait);
@@ -188,8 +112,11 @@ namespace idk::vkn
 		void OnResize();
 		void Cleanup();
 
-		renderFrameIndex GetRenderFrameIndex();
-		void SubmitRenderFrameInfo(const renderFrameIndex& );
+		//renderFrameIndex GetRenderFrameIndex();
+		//void SubmitRenderFrameInfo(const renderFrameIndex& );
+
+		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, hlp::MemoryAllocator&);
+
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -197,6 +124,20 @@ namespace idk::vkn
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
 		bool						imguiEnabled{ true };
+
+#pragma region ("Render passes")
+		vk::RenderPass BasicRenderPass(BasicRenderPasses type)const;
+		//vk::RenderPass RenderPass_RgbaColorOnly ()const;
+		//vk::RenderPass RenderPass_DepthOnly     ()const;
+		//vk::RenderPass RenderPass_RgbaColorDepth()const;
+#pragma endregion
+
+
+		uint32_t					imageCount;
+		vk::Extent2D                extent;
+		vk::Format					format;
+		vk::SurfaceFormatKHR        surfaceFormat;
+
 	private:
 		// type aliases
 		friend class VulkanView;
@@ -231,29 +172,24 @@ namespace idk::vkn
 
 
 		vk::UniqueCommandPool                m_commandpool;
-		std::vector<vk::UniqueCommandBuffer> m_commandbuffers;
-		std::vector<vk::UniqueCommandBuffer> m_commandbuffers2;
 		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
+		std::vector<vk::UniqueCommandBuffer> m_present_trf_commandbuffers;
 		vector<vk::UniqueCommandBuffer> m_blitz_commandbuffers;
-		std::vector<PresentationSignals>     m_pres_signals;
-		SwapChainInfo                        m_swapchain;
+		
+		//Deprecated
+		//std::vector<PresentationSignals>     m_pres_signals;
+
+		std::unique_ptr<SwapChainInfo>       m_swapchain;
 
 
 
 		vk::UniqueRenderPass                 m_renderpass;
+		vk::UniqueRenderPass                 m_basic_renderpasses[BasicRenderPasses::eSizeBrp];
 		vk::UniqueRenderPass                 m_crenderpass;
-		vk::UniqueDescriptorSetLayout        m_descriptorsetlayout;
-		vk::UniquePipelineLayout             m_pipelinelayout;
-		vk::UniquePipeline                   m_pipeline;
 
-		std::vector<vk::UniqueDeviceMemory>  m_vertex_memories;
-		std::vector<vk::UniqueBuffer      >  m_vertex_buffers;
-		vk::UniqueDeviceMemory               m_ib_memory;
-		vk::UniqueBuffer                     m_index_buffer;
 
 		std::unique_ptr<VulkanView> view_;
 
-		vector<VknTexture>					 m_textureList;
 
 		//////////Frame render variables////////
 		uint32_t					rv;
@@ -261,9 +197,12 @@ namespace idk::vkn
 		vk::Result					rvRes;
 		vk::Semaphore				waitSemaphores;
 		vk::Semaphore				readySemaphores;
+		vk::UniqueFence				imageFence;
+
+		//This should be replaced with a signaling system of some sort
 		bool						m_imguiNeedsToResize{ false };
 
-		vector<FrameSubmitRenderInfo> submitList;
+		//vector<FrameSubmitRenderInfo> submitList;
 
 		VulkanResourceManager rsc_manager;
 		///////////////////////////////////////
@@ -282,38 +221,16 @@ namespace idk::vkn
 
 		void createRenderPass();
 
-		void createDescriptorSetLayout();
-		void createGraphicsPipeline();
-
-		void createFramebuffers();
 		
 		//Texture functions start//
-		void createTextureImage();
-
-		//In the future this is going to load all the image into the memory when vulkan inits
-		void createTextureImage(const string& imgPath);
-
-		//This two can be done tgt
-		////
-		void createTextureImageView();
-		void createTextureSampler();
-		////
-
-		void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::UniqueImage& image, vk::UniqueDeviceMemory& imageMemory);
 		vk::UniqueImageView createImageView(vk::UniqueImage& img, vk::Format format);
 		//Texture functions end//
 
 		void createCommandPool();
-		void createVertexBuffers();
-		void createIndexBuffers();
-		void createUniformBuffers();
-		void createDescriptorPool();
-		void createDescriptorSet();
 		void createCommandBuffers();
 		void createSemaphores();
 
 		void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
-		void updateUniformBuffer(uint32_t image_index);
 
 		auto populateDebugMessengerCreateInfo(ValHandler* userData = nullptr) -> vk::DebugUtilsMessengerCreateInfoEXT;
 

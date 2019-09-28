@@ -26,11 +26,10 @@ namespace idk::vkn
 		vk::Queue&                          GraphicsQueue()const;
 		vk::Queue&                          PresentQueue()const;
 		SwapChainInfo&                      Swapchain()const;
+		uint32_t                            CurrFrame()const;
 		PresentationSignals&   CurrPresentationSignals()const;
 
-		vk::UniquePipeline&        Pipeline()const;
 		vk::UniqueCommandPool&     Commandpool()const;
-		vector<vk::UniqueCommandBuffer>& Commandbuffers()const;
 
 		//Render State info
 		void                       SwapRenderState()const;//Probably a bad decision to const this shit.
@@ -39,18 +38,21 @@ namespace idk::vkn
 		RenderState&               CurrRenderState()const;
 		vk::UniqueRenderPass&      Renderpass()const;
 		vk::UniqueRenderPass&      ContinuedRenderpass()const;
-		vk::UniqueCommandBuffer&   CurrCommandbuffer()const;
 		vk::Buffer&                CurrMasterVtxBuffer()const;
 		//Copies the data into the master buffer and returns the offset to start from.
-		uint32_t                   AddToMasterBuffer(const void* data, uint32_t len)const;
-		void                       ResetMasterBuffer()const;
-		bool&					   ImguiResize();
-		window_info&			   GetWindowsInfo()const;
-		PresentationSignals& GetCurrentSignals()const;
-		uint32_t				   CurrSemaphoreFrame()const;
-		uint32_t				   AcquiredImageValue()const;
-		vk::Result& AcquiredImageResult()const;
+		uint32_t                   AddToMasterBuffer  (const void* data, uint32_t len)const;
+		void                       ResetMasterBuffer  ()const;
+		bool&					   ImguiResize        ();
+		window_info&			   GetWindowsInfo     ()const;
+		PresentationSignals& GetCurrentSignals        ()const;
+		uint32_t				   CurrSemaphoreFrame ()const;
+		uint32_t				   AcquiredImageValue ()const;
+		vk::RenderPass             BasicRenderPass    (BasicRenderPasses type)const;
+		vk::Result&				AcquiredImageResult()const;
 		uint32_t				   MaxFrameInFlight()const;
+		uint32_t                   SwapchainImageCount()const;
+
+		VulkanState& vulkan() const;
 
 
 		vk::UniqueShaderModule     CreateShaderModule(const string_view& code);
@@ -64,7 +66,6 @@ namespace idk::vkn
 	private:
 		struct pimpl;
 		std::unique_ptr<pimpl> impl_;
-		VulkanState& vulkan() const;
 		VulkanState* vulkan_;
 	};
 }

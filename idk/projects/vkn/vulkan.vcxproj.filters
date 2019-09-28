@@ -126,6 +126,27 @@
     <ClInclude Include="DDSLoader.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="ManagedVulkanObjs.h">
+      <Filter>resource\Managed</Filter>
+    </ClInclude>
+    <ClInclude Include="TmpTest.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\PresentationSignals.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\TriBuffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SwapchainInfo.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\FrameObjects.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanPngLoader.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -187,7 +208,6 @@
     <ClCompile Include="VulkanMesh.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="FrameRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
@@ -222,10 +242,33 @@
     <ClCompile Include="GraphicsState.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="VknMeshModder.cpp" />
-    <ClCompile Include="VulkanResourceManager.cpp" />
-    <ClCompile Include="VknTextureLoader.cpp" />
-    <ClCompile Include="DDSLoader.cpp" />
+    <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="ValHandler.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanResourceManager.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknMeshModder.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTextureLoader.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GlslToSpirv.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSLoader.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\PresentationSignals.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\TriBuffer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\SwapchainInfo.cpp" />
+    <ClCompile Include="VulkanPngLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -248,6 +291,9 @@
     </Filter>
     <Filter Include="resource">
       <UniqueIdentifier>{5229d71f-e8fc-4257-80e2-cac5241884d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Managed">
+      <UniqueIdentifier>{d43b231f-683a-4f8d-8713-63f27c363028}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

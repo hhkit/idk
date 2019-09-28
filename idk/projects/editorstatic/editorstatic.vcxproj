@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DescriptorPoolManager.cpp" />
     <ClCompile Include="imgui\ImCurveEdit.cpp" />
     <ClCompile Include="imgui\ImGradient.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />
@@ -34,6 +35,7 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DescriptorPoolManager.h" />
     <ClInclude Include="imgui\ImCurveEdit.h" />
     <ClInclude Include="imgui\ImGradient.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
@@ -49,6 +51,9 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DescriptorPoolManager.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

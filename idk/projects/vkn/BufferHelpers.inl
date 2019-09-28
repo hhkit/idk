@@ -96,7 +96,7 @@ namespace idk::vkn::hlp
 	}
 
 	template<typename T, typename Dispatcher>
-	void MapMemory(vk::Device& device, vk::DeviceMemory& memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size, Dispatcher const& dispatcher)
+	void MapMemory(vk::Device device, vk::DeviceMemory memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size, Dispatcher const& dispatcher)
 	{
 		vk::MappedMemoryRange mmr
 		{

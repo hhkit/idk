@@ -28,7 +28,10 @@ namespace idk
 		// memcpy the lights until there is a smarter implementation
 		result.lights.reserve(lights.size());
 		for (auto& elem : lights)
+		{
+			result.camera.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
 			result.lights.emplace_back(elem.GenerateLightData());
+		}
 
 		hash_table<Handle<AnimationController>, unsigned> skeleton_indices;
 		unsigned i{};
