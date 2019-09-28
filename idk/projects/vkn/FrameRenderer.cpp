@@ -123,7 +123,7 @@ namespace idk::vkn
 				};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile);
+				_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
 				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
@@ -144,7 +144,7 @@ namespace idk::vkn
 				//};
 				Core::GetSystem<FileSystem>().Update();
 				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename).value();
+				shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename,false).value();
 				//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
 				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
 				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
@@ -397,10 +397,15 @@ namespace idk::vkn
 			auto& dc = *ptr_dc;
 			//Force pipeline creation
 			shaders.resize(0);
-			shaders.emplace_back(mesh_mod);
-			auto sprog = (cam.is_shadow)? _shadow_shader_module: dc.material_instance.material->GetShaderProgram();
+
+			auto sprog = (cam.is_shadow) ? _shadow_shader_module : dc.material_instance->material->_shader_program;
+			
 			auto& fprog = sprog.as<ShaderModule>();
 			auto& vprog = mesh_mod.as<ShaderModule>();
+
+			if (!fprog || !vprog)
+				continue;
+			shaders.emplace_back(mesh_mod);
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
@@ -650,8 +655,14 @@ namespace idk::vkn
 		auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
 		std::array<float, 4> depth_clear{1.0f,1.0f ,1.0f ,1.0f };
+		std::optional<vec4> clear_col;
+		std::visit([&state, &clear_col](auto clear_data)
+			{
+				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
+					clear_col = clear_data;
+			}, state.camera.clear_data);
 		vk::ClearValue v[]{ 
-			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(state.camera.clear_color) }},
+			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
 			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
 		};
 		
@@ -687,7 +698,7 @@ namespace idk::vkn
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance.material->GetShaderProgram();
+			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance->material->_shader_program;
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
