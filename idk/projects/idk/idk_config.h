@@ -66,13 +66,13 @@ namespace idk
 		,	class ShaderTemplate
 		,	class Mesh
 		,   class Material
+		,	class MaterialInstance
 		,	class Texture
 		,   class CubeMap
 		,	class ShaderProgram
 		,	class RenderTarget
 		,	anim::Animation
 		,	anim::Skeleton
-        ,   shadergraph::Graph
 		//,	class Level
 	>;
 

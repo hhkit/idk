@@ -51,7 +51,7 @@ namespace idk
 		// Path Variable Getters
 		// ====================================================================================
 		string_view			GetFileName()	const; //Returns with extension
-		
+		string_view			GetStem()		const;
 		string_view			GetFullPath()	const;
 		string_view			GetRelPath()	const;
 		string_view			GetMountPath()	const;

@@ -9,9 +9,6 @@
     <ClInclude Include="system\OpenGLGraphicsSystem.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="resource\OpenGLMaterial.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="resource\OpenGLMesh.h">
       <Filter>resource</Filter>
     </ClInclude>
@@ -30,7 +27,6 @@
     <ClInclude Include="system\OpenGLState.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="resource\OpenGLMaterialFactory.h" />
     <ClInclude Include="resource\OpenGLTexture.h" />
     <ClInclude Include="system\FrameBufferManager.h">
       <Filter>program</Filter>
@@ -41,6 +37,7 @@
     <ClInclude Include="resource\OpenGLCubemap.h" />
     <ClInclude Include="program\GLSLLoader.h" />
     <ClInclude Include="system\TextureManager.h" />
+    <ClInclude Include="program\ProgramFactory.h" />
     <ClInclude Include="resource\OpenGLCubemapFactory.h" />
   </ItemGroup>
   <ItemGroup>
@@ -50,9 +47,6 @@
     </ClCompile>
     <ClCompile Include="system\OpenGLGraphicsSystem.cpp">
       <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="resource\OpenGLMaterial.cpp">
-      <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="resource\OpenGLMesh.cpp">
       <Filter>resource</Filter>
@@ -69,7 +63,6 @@
     <ClCompile Include="system\OpenGLState.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="resource\OpenGLMaterialFactory.cpp" />
     <ClCompile Include="glad_wgl.c" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="resource\OpenGLTexture.cpp" />
@@ -81,6 +74,7 @@
     <ClCompile Include="resource\OpenGLCubemapFactory.cpp" />
     <ClCompile Include="program\GLSLLoader.cpp" />
     <ClCompile Include="system\TextureManager.cpp" />
+    <ClCompile Include="program\ProgramFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

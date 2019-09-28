@@ -1,37 +1,40 @@
-#version 450
-#ifndef OGL
-#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
-#define BLOCK(X) X
-#endif
+/* Start Header -------------------------------------------------------
+Copyright (C) 2019 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the prior written
+consent of DigiPen Institute of Technology is prohibited.
+File Name: skybox.vert
+Purpose: Default vertex shader
+Language: GLSL
+Platform: OpenGL, Windows
+Project: gam300
+Author: Chong Wei Xiang, weixiang.c
+Creation date: -
+End Header --------------------------------------------------------*/
+#version 450 
+//#ifndef OGL
+//#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+//#define BLOCK(X) X
+//#endif
+
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 uv;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
-	mat4 perspective_transform;
+	mat4 pv_transform;
 } PerCamera;
 
-U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
+layout(location = 2) out VS_OUT
 {
-	mat4 object_transform;
-	mat4 normal_transform;
-} ObjectMat4s;
-
-layout(location=2)out VS_OUT
-{
-  vec3 position;
-  vec3 cubeMapuv;
-  vec3 normal;
-  vec3 tangent;
-  vec3 view_pos; 		
+  vec3 uv;	
 } vs_out;
+
+layout(location = 0) out gl_PerVertex
+{
+    vec4 gl_Position;
+};
 
 void main()
 {
-	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position, 1.0));
-	//vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normal, 1.0));
-	vs_out.cubeMapuv       = position;
-    gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
-	//vs_out.uv = gl_Position.xy;
+	vs_out.uv       = position;
+    gl_Position     = PerCamera.pv_transform * vec4(position, 1.0);
 }

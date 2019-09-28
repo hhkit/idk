@@ -22,6 +22,7 @@
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationController.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
+    <ClInclude Include="anim\BoneComponent.h" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
@@ -38,11 +39,14 @@
     <ClInclude Include="file\PathHandle.h" />
     <ClInclude Include="gfx\BasicRenderPasses.h" />
     <ClInclude Include="gfx\CubeMap.h" />
+    <ClInclude Include="gfx\IShaderProgramFactory.h" />
+    <ClInclude Include="gfx\MaterialFactory.h" />
     <ClInclude Include="gfx\MeshFactory.h" />
     <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
     <ClInclude Include="gfx\ShaderTemplateLoader.h" />
+    <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
     <ClInclude Include="math\shapes\frustum.h" />
@@ -158,7 +162,6 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="serialize\yaml.h" />
-    <ClInclude Include="gfx\ShaderGraphFactory.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
@@ -175,7 +178,6 @@
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="util\align.h" />
-    <ClInclude Include="util\EasyFactory.h" />
     <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />
@@ -201,6 +203,7 @@
     <ClCompile Include="anim\Animation.cpp" />
     <ClCompile Include="anim\AnimationController.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
+    <ClCompile Include="anim\BoneComponent.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />
@@ -214,11 +217,14 @@
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="gfx\MaterialFactory.cpp" />
+    <ClCompile Include="gfx\MaterialInstance.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
     <ClCompile Include="gfx\projector_functions.cpp" />
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
+    <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
@@ -263,7 +269,6 @@
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
-    <ClCompile Include="gfx\ShaderGraphFactory.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />

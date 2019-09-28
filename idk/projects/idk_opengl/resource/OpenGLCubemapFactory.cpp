@@ -5,38 +5,30 @@
 #include <core/Core.h>
 #include <file/FileSystem.h>
 
-#include "OpenGLCubeMapFactory.h"
-
-static const auto default_material_code = R"(
-	color = vec4(1.0);
-)";
+#include "OpenGLCubemapFactory.h"
 
 namespace idk::ogl
 {
-	unique_ptr<CubeMap> OpenGLCubeMapFactory::GenerateDefaultResource()
+	unique_ptr<CubeMap> OpenGLCubemapFactory::GenerateDefaultResource()
 	{
-		auto mat = std::make_unique<CubeMap>();
-		
-		/*
-		auto meta = mat->GetMeta();
-		meta.compiled_shader_guid = Guid{ "10b6e1eb-694f-4509-b636-f22fca6f6b02" };
-		mat->SetMeta(meta);
-		mat->BuildShader({}, "", default_material_code);
+		auto mat = std::make_unique<OpenGLCubemap>();
 		return mat;
-		*/
-
-		mat->GetMeta();
+	}
+	unique_ptr<CubeMap> OpenGLCubemapFactory::Create()
+	{
+		auto mat = std::make_unique<OpenGLCubemap>();
+		return mat;
+	}
+	unique_ptr<CubeMap> OpenGLCubemapFactory::Create(PathHandle filepath)
+	{
+		UNREFERENCED_PARAMETER(filepath);
+		auto mat = std::make_unique<OpenGLCubemap>();
 
 		return mat;
 	}
-	unique_ptr<CubeMap> OpenGLCubeMapFactory::Create()
+
+	unique_ptr<CubeMap> Create(PathHandle filepath, const CubeMap::Metadata&)
 	{
-		auto mat = std::make_unique<CubeMap>();
-		return mat;
+		return unique_ptr<CubeMap>();
 	}
-	//unique_ptr<CubeMap> OpenGLCubeMapFactory::Create(PathHandle filepath)
-	//{
-	//	UNREFERENCED_PARAMETER(filepath);
-	//	return Create();
-	//}
 }

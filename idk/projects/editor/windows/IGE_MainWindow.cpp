@@ -224,6 +224,38 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("Component"))
 		{
+			IDE& editor = Core::GetSystem<IDE>();
+			bool canSelect = editor.selected_gameObjects.size() == 0 ? false : true;
+
+			span componentNames = GameState::GetComponentNames();
+			for (const char* name : componentNames) {
+				string displayName = name;
+				if (displayName == "Transform")
+					continue;
+				if (displayName == "Name")
+					continue;
+
+				//Comment/Uncomment this to remove text fluff 
+				const string fluffText{ "idk::" };
+
+				std::size_t found = displayName.find(fluffText);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText.size());
+
+				/*
+				const string fluffText2{ ">(void)" };
+				found = displayName.find(fluffText2);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText2.size());
+
+				*/
+
+				if (ImGui::MenuItem(displayName.c_str(),nullptr,nullptr,canSelect)) {
+					//Add component
+					for (Handle<GameObject> i : editor.selected_gameObjects)
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+				}
+			}
 			//Each button is disabled if gameobject is not selected!
 			ImGui::EndMenu(); 
 

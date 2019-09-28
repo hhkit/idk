@@ -26,7 +26,6 @@ namespace idk
     private:
         ImNodes::CanvasState _canvas;
         RscHandle<shadergraph::Graph> _graph;
-        string _graph_name;
         vector<Guid> _nodes_to_delete;
 
         void show_params_window();
@@ -35,7 +34,7 @@ namespace idk
         void addDefaultSlotValue(const Guid& guid, int slot_in);
 
         void drawNode(shadergraph::Node& node);
-        void addNode(const string& name, vec2 pos);
+        shadergraph::Node& addNode(const string& name, vec2 pos);
         void removeNode(const shadergraph::Node& node);
         void disconnectNode(const shadergraph::Node& node);
 

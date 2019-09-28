@@ -4,7 +4,6 @@
 #include <gfx/MeshRenderer.h>
 
 #include <idk_opengl/resource/OpenGLMesh.h>
-#include <idk_opengl/resource/OpenGLMaterial.h>
 #include <idk_opengl/resource/OpenGLTexture.h>
 #include <idk_opengl/resource/FrameBuffer.h>
 
@@ -14,6 +13,8 @@
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>
 #include <iostream>
+#include <gfx/CubeMap.h>
+#include <idk_opengl/resource/OpenGLCubemap.h>
 
 void _check_gl_error(const char* file, int line) {
 	GLenum err(glGetError());
@@ -47,8 +48,10 @@ namespace idk::ogl
 		renderer_vertex_shaders[Debug]       = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.vert");
 		renderer_vertex_shaders[NormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert");
 		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
+		renderer_vertex_shaders[SkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.vert");
 
-		debug_fragment = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");	
+		renderer_fragment_shaders[Debug]     = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
+		renderer_fragment_shaders[SkyBox]    = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.frag");
 	}
 
 
@@ -77,6 +80,37 @@ namespace idk::ogl
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
 			
+			std::visit([&]([[maybe_unused]] const auto& obj)
+			{
+				if constexpr(std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
+				{
+					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
+
+					//oglCubeMap.ID;
+
+					glDepthMask(GL_FALSE);
+					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
+					pipeline.PushProgram(renderer_fragment_shaders[SkyBox]);
+
+					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
+
+
+					auto& mesh = (*cam.CubeMapMesh).as<OpenGLMesh>();
+					mesh.Bind(renderer_reqs
+						{ {
+							std::make_pair(vtx::Attrib::Position, 0)
+						} });
+					oglCubeMap.Bind();
+					mesh.Draw();
+					glDepthMask(GL_TRUE);
+
+				}
+				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, vec4>)
+				{
+					glClearColor(obj.x, obj.y, obj.z, obj.w);
+				}
+			}, cam.clear_data);
+
 			// calculate lights for this camera
 			auto lights = curr_object_buffer.lights;
 			for (auto& elem : lights)
@@ -92,7 +126,7 @@ namespace idk::ogl
 			// render default meshes
 
 			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::Debug]);
-			pipeline.PushProgram(debug_fragment);
+			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 			// render debug
@@ -126,8 +160,8 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
-				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
-				pipeline.PushProgram(material.GetShaderProgram());
+				auto material = elem.material_instance->material;
+				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
@@ -159,7 +193,11 @@ namespace idk::ogl
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
-				for (auto& [id, uniform] : elem.material_instance.uniforms)
+                auto instance_uniforms = elem.material_instance->material->uniforms;
+                for (auto& [id, uniform] : elem.material_instance->uniforms)
+                    instance_uniforms.emplace(id, uniform);
+
+                for (auto& [id, uniform] : instance_uniforms)
 				{
 					std::visit([this, &id, &texture_units](auto& elem) {
 						using T = std::decay_t<decltype(elem)>;
@@ -185,8 +223,8 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
-				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
-				pipeline.PushProgram(material.GetShaderProgram());
+				auto material = elem.material_instance->material;
+				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
@@ -227,7 +265,11 @@ namespace idk::ogl
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
-				for (auto& [id, uniform] : elem.material_instance.uniforms)
+                auto instance_uniforms = elem.material_instance->material->uniforms;
+                for (auto& [id, uniform] : elem.material_instance->uniforms)
+                    instance_uniforms.emplace(id, uniform);
+
+				for (auto& [id, uniform] : instance_uniforms)
 				{
 					std::visit([this, &id, &texture_units](auto& elem) {
 						using T = std::decay_t<decltype(elem)>;

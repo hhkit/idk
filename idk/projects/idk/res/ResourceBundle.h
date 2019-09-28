@@ -33,20 +33,20 @@ namespace idk
 	{
 		struct iterator;
 
-		ResourceSpan(GenericResourceHandle* btr, GenericResourceHandle* etr);
+		ResourceSpan(const GenericResourceHandle* btr, const GenericResourceHandle* etr);
 
 		iterator begin() const;
 		iterator end() const;
 		size_t   size() const;
 	private:
-		span<GenericResourceHandle> span_over;
+		span<const GenericResourceHandle> span_over;
 	};
 
 	template<typename T>
 	struct ResourceBundle::ResourceSpan<T>::iterator
 		: comparable<typename ResourceBundle::ResourceSpan<T>::iterator>
 	{
-		iterator(GenericResourceHandle*);
+		iterator(const GenericResourceHandle*);
 
 		T& operator*() const;
 		T* operator->() const;
@@ -55,7 +55,7 @@ namespace idk
 
 		bool operator<(const iterator&) const;
 	private:
-		GenericResourceHandle* itr;
+		const GenericResourceHandle* itr;
 	};
 }
 #include "ResourceBundle.inl"

@@ -6,6 +6,7 @@
 #include <gfx/ShaderGraph.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <editor/widgets/InputResource.h>
+#include <editor/widgets/EnumCombo.h>
 #include <regex>
 #include <filesystem>
 
@@ -410,7 +411,7 @@ namespace idk
         ImGui::SetWindowFontScale(fntscl);
     }
 
-    void IGE_MaterialEditor::addNode(const string& name, vec2 pos)
+    Node& IGE_MaterialEditor::addNode(const string& name, vec2 pos)
     {
         Node node;
         node.name = name;
@@ -423,7 +424,7 @@ namespace idk
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 
-        _graph->nodes.emplace(node.guid, node);
+        return _graph->nodes.emplace(node.guid, node).first->second;
     }
 
     void IGE_MaterialEditor::removeNode(const Node& node)
@@ -601,7 +602,6 @@ namespace idk
     void IGE_MaterialEditor::OpenGraph(const RscHandle<shadergraph::Graph>& handle)
     {
 		_graph = handle;
-		_graph_name = string{ Core::GetResourceManager().GetPath(handle) };
 
         ImGui::SetWindowFocus(window_name);
         is_open = true;
@@ -621,10 +621,10 @@ namespace idk
         _canvas.colors[ImNodes::ColNodeActiveBg] = ImGui::GetColorU32(ImGuiCol_Border);
         _canvas.style.curve_thickness = 2.5f;
 
-        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](PathHandle path)
+        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](GenericResourceHandle handle)
         {
-            if (path.GetExtension() == Graph::ext)
-                OpenGraph(*Core::GetResourceManager().Load<Graph>(path));
+            if (handle.resource_id() == BaseResourceID<Graph>)
+                OpenGraph(handle.AsHandle<Graph>());
         });
     }
 
@@ -823,9 +823,34 @@ namespace idk
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
 
-        if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
+        if (ImGui::BeginChild("Material_Editor_miniwin", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
-            ImGui::Text(_graph_name.c_str());
+            auto graph_name = Core::GetResourceManager().GetPath(_graph);
+            ImGui::Text(graph_name.data());
+
+            auto meta = _graph->GetMeta();
+            bool changed = false;
+            changed = changed || ImGuidk::EnumCombo("Domain", &meta.domain);
+            changed = changed || ImGuidk::EnumCombo("Blend", &meta.blend);
+            changed = changed || ImGuidk::EnumCombo("Model", &meta.model);
+            if (changed)
+            {
+                //_graph->SetMeta(meta);
+
+                //auto master_node = _graph->nodes[_graph->master_node];
+                //auto new_master_node_name = master_node.name;
+                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::DefaultLit)
+                //    new_master_node_name = "master\\PBR";
+                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::Unlit)
+                //    new_master_node_name = "master\\Unlit";
+
+                //if (master_node.name != new_master_node_name)
+                //{
+                //    auto pos = master_node.position;
+                //    removeNode(master_node);
+                //    _graph->master_node = addNode(new_master_node_name, pos).guid;
+                //}
+            }
 
             if (ImGui::Button("Add Parameter"))
                 ImGui::OpenPopup("addparams");
@@ -899,9 +924,8 @@ namespace idk
                 case ValueType::SAMPLER2D:
                 {
                     RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
-                    PathHandle path;
-                    if (ImGuidk::InputResourceEx("Default", &path, span<const char* const>(RscExtensions<Texture>)))
-                        param.default_value = helpers::serialize_value(*Core::GetResourceManager().Load<Texture>(path));
+                    if (ImGuidk::InputResource("Default", &tex))
+                        param.default_value = helpers::serialize_value(tex);
                     break;
                 }
                 default:

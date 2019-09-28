@@ -85,8 +85,8 @@ namespace idk
 		/* RESOURCE LOADING - for high-level users like editor programmer */
 		template<typename Res>  RscHandle<Res>        Create  ();
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
-		template<typename Res>  LoadResult<Res>       Load    (PathHandle path);
-		                        GeneralLoadResult     Load    (PathHandle path);
+		template<typename Res>  LoadResult<Res>       Load    (PathHandle path, bool reload_resource = true);
+		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
 								GeneralGetResult      Get     (PathHandle path);
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
@@ -95,9 +95,11 @@ namespace idk
 		template<typename Res>  FileMoveResult        Rename(RscHandle<Res> resource, string_view new__mountpath);
 
 		/* FACTORIES - for registering resource factories */
+		template<typename Factory>                    Factory& GetFactory();
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
 		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
+		template<typename Res>                        [[nodiscard]] RscHandle<Res> LoaderCreateResource(Guid);
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Guid, Args&& ... construction_args);
 
@@ -123,7 +125,7 @@ namespace idk
 		void LateInit() override;
 		void Shutdown() override;
 
-		template<typename Res> auto& GetFactory()    { return *r_cast<ResourceFactory<Res>*>(        _factories[BaseResourceID<Res>].get()); }
+		template<typename Res> auto& GetFactoryRes() { return *r_cast<ResourceFactory<Res>*>(        _factories[BaseResourceID<Res>].get()); }
 		template<typename Res> auto& GetTable()      { return *r_cast<ResourceStorage<Res>*>(   _resource_table[BaseResourceID<Res>].get()); }
 		template<typename Res> Res&  GetDefaultRes() { return *r_cast<Res*>                 (_default_resources[BaseResourceID<Res>].get()); }
 		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>> string GenUniqueName();

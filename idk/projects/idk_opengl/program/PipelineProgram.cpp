@@ -31,7 +31,11 @@ namespace idk::ogl
 
 	void PipelineProgram::PushProgram(RscHandle<ShaderProgram> gen_program)
 	{
+		if (!gen_program)
+			return;
 		auto& program = gen_program.as<Program>();
+		if (program.ShaderFlags() == 0)
+			return;
 
 		_programs.erase(std::remove_if(_programs.begin(), _programs.end(), [&program, this](RscHandle<ShaderProgram> prog_handle)->bool
 		{

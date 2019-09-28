@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		17 SEPT 2019
+//@date		28 SEPT 2019
 //@brief	
 
 /*
@@ -57,6 +57,11 @@ namespace idk {
 
 		IDE& editor = Core::GetSystem<IDE>();
 		const size_t gameObjectsCount = editor.selected_gameObjects.size();
+
+		bool isComponentMarkedForDeletion = false;
+		string componentNameMarkedForDeletion{}; //Is empty by default
+
+		//DISPLAY
 		if (gameObjectsCount == 1) {
 			//Just show all components, Name and Transform first
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
@@ -70,121 +75,124 @@ namespace idk {
 				DisplayTransformComponent(c_transform);
 			}
 
+
+
+
 			//Display remaining components here
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
-			if (componentSpan.size()) {
-				for (auto& component : componentSpan) {
-					if (component == c_name)
-						continue;
+			for (auto& component : componentSpan) {
 
-					if (component == c_transform)
-						continue;
+				//Skip Name and Transform
+				if (component == c_name)
+					continue;
+
+				if (component == c_transform)
+					continue;
 
 
-					//COMPONENT DISPLAY
-					ImGui::PushID(static_cast<int>(component.id));
-					auto componentName = (*component).type.name();
-					if (ImGui::CollapsingHeader(string(componentName).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-					{
-						(*component).visit([&](auto&& key, auto&& val, int depth_change) {
-							using T = std::decay_t<decltype(val)>;
-							reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
-							//reflect::dynamic dynaVal = val;
-							const float currentHeight = ImGui::GetCursorPosY();
-							string keyName = dynaKey.get<const char*>();
+				//COMPONENT DISPLAY
+				ImGui::PushID(static_cast<int>(component.id));
+				const auto componentName = (*component).type.name();
+				string displayingComponent{ componentName };
+				const string fluffText{ "idk::" };
+				std::size_t found = displayingComponent.find(fluffText);
 
-							if (keyName == "guid") {
-								return false;
+				if (found != std::string::npos)
+					displayingComponent.erase(found, fluffText.size());
+
+				ImVec2 cursorPos = ImGui::GetCursorPos();
+				ImVec2 cursorPos2{}; //This is for setting after all members are placed
+				ImGui::SetCursorPosX(window_size.x - 20);
+				if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+					ImGui::OpenPopup("AdditionalOptions");
+
+				}
+
+				ImGui::SetCursorPos(cursorPos);
+
+				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+						using T = std::decay_t<decltype(val)>;
+						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
+						//reflect::dynamic dynaVal = val;
+						const float currentHeight = ImGui::GetCursorPosY();
+						string keyName = dynaKey.get<const char*>();
+
+						if (keyName == "guid") {
+							return false;
+						}
+
+
+						keyName[0] = toupper(keyName[0]);
+						ImGui::SetCursorPosY(currentHeight + heightOffset);
+						ImGui::Text(keyName.c_str());
+						keyName.insert(0, "##"); //For Imgui stuff
+
+
+						ImGui::SameLine();
+						ImGui::SetCursorPosY(currentHeight);
+
+						//ALL THE TYPE STATEMENTS HERE
+						if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
+								
+							ImGui::DragFloat(keyName.c_str(), &val);
+						}
+						else if constexpr (std::is_same_v<T, int>) {
+							ImGui::DragInt(keyName.c_str(), &val);
+						}
+							
+						else if constexpr (std::is_same_v<T, bool>) {
+							ImGui::Checkbox(keyName.c_str(), &val);
+						}
+						else if constexpr (std::is_same_v<T, vec3>) {
+
+							DisplayVec3(val);
+							return false;
+						}
+						else if constexpr (is_template_v<T, RscHandle>) {
+
+							if (ImGuidk::InputResource(keyName.c_str(), &val))
+							{
+
 							}
 
-
-							keyName[0] = toupper(keyName[0]);
+							return false;
+						}
+						else {
 							ImGui::SetCursorPosY(currentHeight + heightOffset);
-							ImGui::Text(keyName.c_str());
-							keyName.insert(0, "##"); //For Imgui stuff
-
-
-							ImGui::SameLine();
-							ImGui::SetCursorPosY(currentHeight);
-
-							//ALL THE TYPE STATEMENTS HERE
-							if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
-								
-								ImGui::DragFloat(keyName.c_str(), &val);
-							}
-							else if constexpr (std::is_same_v<T, int>) {
-								ImGui::DragInt(keyName.c_str(), &val);
-							}
+							ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
+						}
 							
-							else if constexpr (std::is_same_v<T, bool>) {
-								ImGui::Checkbox(keyName.c_str(), &val);
-							}
-							else if constexpr (std::is_same_v<T, vec3>) {
+					});
+					cursorPos2 = ImGui::GetCursorPos();
+				}
 
-								DisplayVec3(val);
-								return false;
-							}
-							else if constexpr (std::is_same_v<T, RscHandle<Mesh>>) {
-								string meshName{val.guid };
+				ImGui::SetCursorPos(cursorPos);
+				ImGui::SetCursorPosX(window_size.x - 20);
+				ImGui::Text("...");
 
-                                //PathHandle test = "/assets/models/test.fbx";
-                                //if (ImGuidk::InputResourceEx(keyName.c_str(), &test, { ".fbx" }))
-                                //{
-                                //    std::cout << test.GetMountPath();
-                                //}
-								
-								if (ImGui::Button(meshName.c_str())) {
+				ImGui::SetCursorPos(cursorPos2);
 
-								}
-								//Create a drag drop payload on selected gameobjects.
-								if (ImGui::BeginDragDropTarget()) {
-									if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE)) {
-										IM_ASSERT(payload->DataSize == sizeof(string));
-										PathHandle* source = static_cast<PathHandle*>(payload->Data); // Getting the Payload Data
-										if (source->GetExtension() != ".fbx") {
-
-											
-											//PathHandle PathHandle{ source->data() };
-											//auto file = Core::GetSystem<ResourceManager>().GetFileResources(PathHandle);
-											//file.resources[0].visit([&](auto& handle) {
-											//	if constexpr (std::is_same_v < std::decay_t<decltype(handle)>, RscHandle<Mesh>>)
-											//	{
-											//		const RscHandle<Mesh>& mesh_handle = handle;
-											//		val = mesh_handle;
-											//	}
-											//	else
-											//		(handle);
-											//});
-
-
-
-										}
-
-									}
-									ImGui::EndDragDropTarget();
-								}
-
-
-								return false;
-							}
-							else {
-								ImGui::SetCursorPosY(currentHeight + heightOffset);
-								ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
-							}
-							
-						});
-
+				if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+					if (ImGui::MenuItem("Reset")) {
 
 					}
-					ImGui::PopID();
+					ImGui::Separator();
+					if (ImGui::MenuItem("Remove Component")) {
+						isComponentMarkedForDeletion = true;
+						componentNameMarkedForDeletion = (*component).type.name();
+					}
+					ImGui::EndPopup();
 				}
 
 
-
-
+				ImGui::PopID();
 			}
 
 
+			
 
 		}
 		else if (gameObjectsCount > 1) {
@@ -206,9 +214,53 @@ namespace idk {
 
 		}
 
+		//Add Component Button
+		if (gameObjectsCount) {
+			ImGui::Separator();
+			ImGui::SetCursorPosX(window_size.x * 0.25f);
+			if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
+				ImGui::OpenPopup("AddComp");
+			}
+		}
+
+		if (isComponentMarkedForDeletion) {
+			for (Handle<GameObject> i : editor.selected_gameObjects)
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
+		}
+
+		if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			span componentNames = GameState::GetComponentNames();
+			for (const char* name : componentNames) {
+				string displayName = name;
+				if (displayName == "Transform")
+					continue;
+				if (displayName == "Name")
+					continue;
+
+				//Comment/Uncomment this to remove text fluff 
+				const string fluffText{ "idk::" };
+
+				std::size_t found = displayName.find(fluffText);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText.size());
+
+				/*
+				const string fluffText2{ ">(void)" };
+				found = displayName.find(fluffText2);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText2.size());
+
+				*/
 
 
-
+				if (ImGui::MenuItem(displayName.c_str())) {
+					//Add component
+					for (Handle<GameObject> i : editor.selected_gameObjects)
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent,i, string{ name }));
+				}
+			}
+			ImGui::EndPopup();
+		}
 
 
 
@@ -250,6 +302,19 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
 	{
+
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+		ImGui::SetCursorPosX(window_size.x - 20);
+		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
+
+		ImGui::SetCursorPos(cursorPos);
+
+
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 
@@ -306,10 +371,29 @@ namespace idk {
 
 			DisplayVec3(c_transform->scale);
 
-
+			cursorPos2 = ImGui::GetCursorPos();
 
 
 		}
+
+		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPosX(window_size.x - 20);
+		ImGui::Text("...");
+
+		ImGui::SetCursorPos(cursorPos2);
+
+
+		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+			if (ImGui::MenuItem("Reset")) {
+				c_transform->position	= vec3{ };
+				c_transform->rotation	= quat{ };
+				c_transform->scale		= vec3{ };
+			}
+			ImGui::Separator();
+			ImGui::EndPopup();
+		}
+
+
 	}
 
 	void IGE_InspectorWindow::DisplayVec3(vec3& vec)

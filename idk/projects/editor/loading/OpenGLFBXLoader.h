@@ -12,7 +12,7 @@ namespace idk
 	public:
 		ResourceBundle LoadFile(PathHandle path_to_resource) override;
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
-
+		
 		friend struct fbx_loader_detail::Helper;
 	private:
 		
