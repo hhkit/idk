@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		17 SEPT 2019
+//@date		28 SEPT 2019
 //@brief	
 
 /*
@@ -80,113 +80,117 @@ namespace idk {
 
 			//Display remaining components here
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
-			if (componentSpan.size()) {
-				for (auto& component : componentSpan) {
-					if (component == c_name)
-						continue;
+			for (auto& component : componentSpan) {
 
-					if (component == c_transform)
-						continue;
+				//Skip Name and Transform
+				if (component == c_name)
+					continue;
 
-
-					//COMPONENT DISPLAY
-					ImGui::PushID(static_cast<int>(component.id));
-					auto componentName = (*component).type.name();
-					ImVec2 cursorPos = ImGui::GetCursorPos();
-					ImVec2 cursorPos2{}; //This is for setting after all members are placed
-					ImGui::SetCursorPosX(window_size.x - 20);
-					if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
-
-						ImGui::OpenPopup("AdditionalOptions");
-
-					}
-
-					ImGui::SetCursorPos(cursorPos);
-
-					if (ImGui::CollapsingHeader(string(componentName).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-					{
-						(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
-							using T = std::decay_t<decltype(val)>;
-							reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
-							//reflect::dynamic dynaVal = val;
-							const float currentHeight = ImGui::GetCursorPosY();
-							string keyName = dynaKey.get<const char*>();
-
-							if (keyName == "guid") {
-								return false;
-							}
+				if (component == c_transform)
+					continue;
 
 
-							keyName[0] = toupper(keyName[0]);
-							ImGui::SetCursorPosY(currentHeight + heightOffset);
-							ImGui::Text(keyName.c_str());
-							keyName.insert(0, "##"); //For Imgui stuff
+				//COMPONENT DISPLAY
+				ImGui::PushID(static_cast<int>(component.id));
+				const auto componentName = (*component).type.name();
+				string displayingComponent{ componentName };
+				const string fluffText{ "idk::" };
+				std::size_t found = displayingComponent.find(fluffText);
+
+				if (found != std::string::npos)
+					displayingComponent.erase(found, fluffText.size());
+
+				ImVec2 cursorPos = ImGui::GetCursorPos();
+				ImVec2 cursorPos2{}; //This is for setting after all members are placed
+				ImGui::SetCursorPosX(window_size.x - 20);
+				if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+					ImGui::OpenPopup("AdditionalOptions");
+
+				}
+
+				ImGui::SetCursorPos(cursorPos);
+
+				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+						using T = std::decay_t<decltype(val)>;
+						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
+						//reflect::dynamic dynaVal = val;
+						const float currentHeight = ImGui::GetCursorPosY();
+						string keyName = dynaKey.get<const char*>();
+
+						if (keyName == "guid") {
+							return false;
+						}
 
 
-							ImGui::SameLine();
-							ImGui::SetCursorPosY(currentHeight);
+						keyName[0] = toupper(keyName[0]);
+						ImGui::SetCursorPosY(currentHeight + heightOffset);
+						ImGui::Text(keyName.c_str());
+						keyName.insert(0, "##"); //For Imgui stuff
 
-							//ALL THE TYPE STATEMENTS HERE
-							if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
+
+						ImGui::SameLine();
+						ImGui::SetCursorPosY(currentHeight);
+
+						//ALL THE TYPE STATEMENTS HERE
+						if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
 								
-								ImGui::DragFloat(keyName.c_str(), &val);
-							}
-							else if constexpr (std::is_same_v<T, int>) {
-								ImGui::DragInt(keyName.c_str(), &val);
-							}
-							
-							else if constexpr (std::is_same_v<T, bool>) {
-								ImGui::Checkbox(keyName.c_str(), &val);
-							}
-							else if constexpr (std::is_same_v<T, vec3>) {
-
-								DisplayVec3(val);
-								return false;
-							}
-							else if constexpr (is_template_v<T, RscHandle>) {
-
-								if (ImGuidk::InputResource(keyName.c_str(), &val))
-								{
-
-								}
-
-								return false;
-							}
-							else {
-								ImGui::SetCursorPosY(currentHeight + heightOffset);
-								ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
-							}
-							
-						});
-						cursorPos2 = ImGui::GetCursorPos();
-					}
-
-					ImGui::SetCursorPos(cursorPos);
-					ImGui::SetCursorPosX(window_size.x - 20);
-					ImGui::Text("...");
-
-					ImGui::SetCursorPos(cursorPos2);
-
-					if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
-						if (ImGui::MenuItem("Reset")) {
-
+							ImGui::DragFloat(keyName.c_str(), &val);
 						}
-						ImGui::Separator();
-						if (ImGui::MenuItem("Remove Component")) {
-							isComponentMarkedForDeletion = true;
-							componentNameMarkedForDeletion = (*component).type.name();
+						else if constexpr (std::is_same_v<T, int>) {
+							ImGui::DragInt(keyName.c_str(), &val);
 						}
-						ImGui::EndPopup();
+							
+						else if constexpr (std::is_same_v<T, bool>) {
+							ImGui::Checkbox(keyName.c_str(), &val);
+						}
+						else if constexpr (std::is_same_v<T, vec3>) {
+
+							DisplayVec3(val);
+							return false;
+						}
+						else if constexpr (is_template_v<T, RscHandle>) {
+
+							if (ImGuidk::InputResource(keyName.c_str(), &val))
+							{
+
+							}
+
+							return false;
+						}
+						else {
+							ImGui::SetCursorPosY(currentHeight + heightOffset);
+							ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
+						}
+							
+					});
+					cursorPos2 = ImGui::GetCursorPos();
+				}
+
+				ImGui::SetCursorPos(cursorPos);
+				ImGui::SetCursorPosX(window_size.x - 20);
+				ImGui::Text("...");
+
+				ImGui::SetCursorPos(cursorPos2);
+
+				if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+					if (ImGui::MenuItem("Reset")) {
+
 					}
-
-
-					ImGui::PopID();
+					ImGui::Separator();
+					if (ImGui::MenuItem("Remove Component")) {
+						isComponentMarkedForDeletion = true;
+						componentNameMarkedForDeletion = (*component).type.name();
+					}
+					ImGui::EndPopup();
 				}
 
 
-
-
+				ImGui::PopID();
 			}
+
 
 			
 
@@ -210,12 +214,53 @@ namespace idk {
 
 		}
 
+		//Add Component Button
+		if (gameObjectsCount) {
+			ImGui::Separator();
+			ImGui::SetCursorPosX(window_size.x * 0.25f);
+			if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
+				ImGui::OpenPopup("AddComp");
+			}
+		}
+
 		if (isComponentMarkedForDeletion) {
 			for (Handle<GameObject> i : editor.selected_gameObjects)
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
 		}
 
+		if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			span componentNames = GameState::GetComponentNames();
+			for (const char* name : componentNames) {
+				string displayName = name;
+				if (displayName == "Transform")
+					continue;
+				if (displayName == "Name")
+					continue;
 
+				//Comment/Uncomment this to remove text fluff 
+				const string fluffText{ "idk::" };
+
+				std::size_t found = displayName.find(fluffText);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText.size());
+
+				/*
+				const string fluffText2{ ">(void)" };
+				found = displayName.find(fluffText2);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText2.size());
+
+				*/
+
+
+				if (ImGui::MenuItem(displayName.c_str())) {
+					//Add component
+					for (Handle<GameObject> i : editor.selected_gameObjects)
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent,i, string{ name }));
+				}
+			}
+			ImGui::EndPopup();
+		}
 
 
 
@@ -340,12 +385,11 @@ namespace idk {
 
 		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
 			if (ImGui::MenuItem("Reset")) {
-
+				c_transform->position	= vec3{ };
+				c_transform->rotation	= quat{ };
+				c_transform->scale		= vec3{ };
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("Remove Component")) {
-
-			}
 			ImGui::EndPopup();
 		}
 

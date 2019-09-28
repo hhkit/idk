@@ -4,6 +4,7 @@
 #include <gfx/MaterialInstance.h>
 #include <gfx/vertex_descriptor.h>
 #include <gfx/pipeline_config.h>
+#include <gfx/CubeMap.h>
 
 namespace idk
 {
@@ -47,11 +48,13 @@ namespace idk
 	struct CameraData
 	{
 		int  culling_flags = 0xFFFFFFFF;
-		mat4 view_matrix;
-		mat4 projection_matrix;
-		RscHandle<RenderTarget> render_target;
+		mat4 view_matrix{};
+		mat4 projection_matrix{};
+		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
-		vec4 clear_color{ 0,0,0,1 };
+		//vec4 clear_color{ 0,0,0,1 };
+		variant<vec4, RscHandle<CubeMap>> clear_data;
+		opt<RscHandle<Mesh>> CubeMapMesh{};
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 }
