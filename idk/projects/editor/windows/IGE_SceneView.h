@@ -48,12 +48,15 @@ namespace idk {
 
 
 		float pan_multiplier					= 0.01f;
-		const float pan_multiplier_on_scroll	= 1.1f; //This is additive and clamped. When zooming out pan_multiplier*pan_multiplier_on_scroll, when zooming in pan_multiplier/pan_multiplier_on_scroll
 		const float default_pan_multiplier		= 0.1f; //When on focus, this resets the pan_multiplier
+
+		const float pan_multiplier_on_scroll	= 1.1f; //This is additive and clamped. When zooming out pan_multiplier*pan_multiplier_on_scroll, when zooming in pan_multiplier/pan_multiplier_on_scroll
+
 
 
 		void UpdateWASDMouseControl();
 		void UpdatePanMouseControl();
+		void UpdateScrollMouseControl();
 
 		void UpdateGizmoControl();
 

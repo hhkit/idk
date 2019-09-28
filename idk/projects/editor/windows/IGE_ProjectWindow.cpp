@@ -19,6 +19,7 @@ of the editor.
 #include <app/Application.h>
 #include <editor/IDE.h>
 #include <gfx/Texture.h>
+#include <gfx/ShaderGraph.h>
 
 #include <iostream>
 #include <filesystem>
@@ -98,6 +99,15 @@ namespace idk {
         {
             if (ImGui::Button("Create"))
             {
+                ImGui::OpenPopup("create_menu");
+            }
+            if (ImGui::BeginPopup("create_menu"))
+            {
+                if (ImGui::MenuItem("Material"))
+                {
+                    Core::GetResourceManager().Create<shadergraph::Graph>(string{ current_dir.GetMountPath() } + '/' + "NewMaterial.mat");
+                }
+                ImGui::EndPopup();
             }
 
             static char searchBarChar[128];
@@ -261,6 +271,8 @@ namespace idk {
                             return RscHandle<Texture>();
                         if constexpr (std::is_same_v<T, Texture>)
                             return h;
+                        else
+                            return RscHandle<Texture>();
                     }, getOrLoadFirstAsset(path));
 
                     if (tex)

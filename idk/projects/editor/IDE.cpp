@@ -32,7 +32,6 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/OpenGLTextureLoader.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
-#include <gfx/ShaderGraphFactory.h>
 #include <res/EasyFactory.h>
 #include <imgui/ImGuizmo.h>
 
@@ -260,6 +259,8 @@ namespace idk
 			Handle<Camera> currCamera = main_camera.current_camera;
 			Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;
+			focused_vector = finalCamPos;
+			scroll_multiplier = default_scroll_multiplier;
 			camTransform->position += camTransform->Forward() * distanceFromObject;
 		}
 	}

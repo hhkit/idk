@@ -33,6 +33,9 @@ namespace idk
 
 		bool overlay_debug_draw = true;
 
+		opt<RscHandle<CubeMap>> skybox;
+		opt<RscHandle<Mesh>>    skybox_mesh;
+
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 

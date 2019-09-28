@@ -230,9 +230,7 @@ namespace idk::shadergraph
             state.inputs_to_outputs.emplace(NodeSlot{ link.node_in, link.slot_in }, &link);
 
         string code = resolve_node(nodes.at(master_node), state);
-        string uniforms = "";
-
-		MaterialInstance inst;
+        string uniforms_str = "";
 
         if (state.uniforms.size())
         {
@@ -287,22 +285,21 @@ namespace idk::shadergraph
                 if (uniform_blocks[i].empty())
                     continue;
 
-                uniforms += uniform_blocks[i];
-                uniforms += "} _ub";
-                uniforms += std::to_string(i);
-                uniforms += ";\n";
+                uniforms_str += uniform_blocks[i];
+                uniforms_str += "} _ub";
+                uniforms_str += std::to_string(i);
+                uniforms_str += ";\n";
             }
 
-			size_t i = 0;
 			for (const auto& [uniform_name, uniform_type] : state.uniforms)
 			{
                 int param_index = std::stoi(uniform_name.data() + 2); // +2 to shift past _u in name
-				inst.uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
-                                      to_uniform_instance(parameters[param_index]));
+				uniforms.insert_or_assign("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+                                                to_uniform_instance(parameters[param_index]));
 			}
         }
 
-		auto shader_template = GetTemplate()->Instantiate(uniforms, code);
+		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
 		_shader_program->BuildShader(ShaderStage::Fragment, shader_template);
     }
 

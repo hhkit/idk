@@ -20,7 +20,7 @@ namespace idk
 	ResourceBundle::ResourceSpan<T> ResourceBundle::GetAll() const
 	{
 		auto& subarray = subarrays[BaseResourceID<T>];
-		return ResourceSpan{ handles.data() + subarray.index, handles.data() + subarray.index + subarray.count };
+		return ResourceSpan<T>( handles.data() + subarray.index, handles.data() + subarray.index + subarray.count );
 	}
 
 	template<typename T>
@@ -46,7 +46,7 @@ namespace idk
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::ResourceSpan(GenericResourceHandle* btr, GenericResourceHandle* etr)
+	ResourceBundle::ResourceSpan<T>::ResourceSpan(const GenericResourceHandle* btr, const GenericResourceHandle* etr)
 		: span_over{btr, etr}
 	{
 	}
@@ -70,7 +70,7 @@ namespace idk
 	}
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T>::iterator::iterator(GenericResourceHandle* h)
+	ResourceBundle::ResourceSpan<T>::iterator::iterator(const GenericResourceHandle* h)
 		: itr{ h }
 	{
 	}

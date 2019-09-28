@@ -58,10 +58,21 @@ namespace idk {
 	{
 		ImGui::PopStyleVar(3);
 
-		ImVec2 imageSize{ GetScreenSize().x,GetScreenSize().y };
+        ImVec2 imageSize = GetScreenSize();
+        auto screen_tex = RscHandle<RenderTarget>{}->GetMeta().textures[0];
+        auto rendertex_aspect = screen_tex->AspectRatio();
+        auto windowframe_aspect = imageSize.x / imageSize.y;
+        if (rendertex_aspect > windowframe_aspect) // rendertex is horizontally longer
+            imageSize.x = imageSize.y * rendertex_aspect;
+        else if (rendertex_aspect < windowframe_aspect) // windowframe is horizontally longer
+            imageSize.y = imageSize.x / rendertex_aspect;
+
+        auto offset = (GetScreenSize() - imageSize) * 0.5f;
+        ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + offset);
+
 		//imageSize.y = (imageSize.x * (9 / 16));
 		if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-			ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+			ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 
 		ImVec2 v = ImGui::GetWindowPos();
 
@@ -86,13 +97,7 @@ namespace idk {
 			is_controlling_WASDcam = false;
 		}
 
-		{
-			auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
-			auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
-			auto tfm = cam.current_camera->GetGameObject()->Transform();
-			if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-				tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * pan_multiplier);
-		}
+
 		//Middle Mouse Pan control
 		if (ImGui::IsMouseDown(2)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
@@ -112,6 +117,7 @@ namespace idk {
 
 		}
 
+		UpdateScrollMouseControl();
 
 		UpdateGizmoControl();
 
@@ -125,7 +131,8 @@ namespace idk {
 
 	vec2 IGE_SceneView::GetScreenSize()
 	{
-		return vec2 { ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
+        return vec2{ ImGui::GetWindowContentRegionMax() } - ImGui::GetWindowContentRegionMin();
+        // vec2{ ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
 	}
 
 	vec2 IGE_SceneView::GetMousePosInWindow()
@@ -190,16 +197,34 @@ namespace idk {
 		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
 
 		auto& app_sys = Core::GetSystem<Application>();
+		IDE& editor = Core::GetSystem<IDE>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()* delta.x* pan_multiplier; //Amount to move in localx axis
+		vec3 localY = tfm->Up()* delta.y*pan_multiplier* editor.scroll_multiplier; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_multiplier; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
 
 		ImGui::ResetMouseDragDelta(2);
+
+	}
+
+	void IGE_SceneView::UpdateScrollMouseControl()
+	{
+		
+		auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
+		auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		auto tfm = cam.current_camera->GetGameObject()->Transform();
+		IDE& editor = Core::GetSystem<IDE>();
+		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
+			tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * editor.scroll_multiplier);
+
+		if (scroll > 0)
+			editor.scroll_multiplier *= editor.scroll_subtractive;
+		else if (scroll < 0)
+			editor.scroll_multiplier *= editor.scroll_additive;
 
 	}
 
@@ -221,6 +246,7 @@ namespace idk {
 		ImVec2 winPos = ImGui::GetWindowPos();
 		winPos.y = ImGui::GetFrameHeight();
 		ImGuizmo::SetRect(winPos.x, winPos.y, GetScreenSize().x, GetScreenSize().y); //The scene view size
+
 		ImGuizmo::SetDrawlist(); //Draw on scene view only
 
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
