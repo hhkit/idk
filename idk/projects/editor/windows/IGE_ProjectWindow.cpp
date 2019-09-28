@@ -74,7 +74,7 @@ namespace idk {
         }
     }
 
-    GenericResourceHandle IGE_ProjectWindow::getAsset(PathHandle path)
+    GenericResourceHandle IGE_ProjectWindow::getOrLoadFirstAsset(PathHandle path)
     {
         auto get_res = Core::GetResourceManager().Get(path);
         if (get_res && get_res->Count())
@@ -261,7 +261,7 @@ namespace idk {
                             return RscHandle<Texture>();
                         if constexpr (std::is_same_v<T, Texture>)
                             return h;
-                    }, getAsset(path));
+                    }, getOrLoadFirstAsset(path));
 
                     if (tex)
                     {
@@ -280,6 +280,8 @@ namespace idk {
                     ImGui::Image(id, sz, ImVec2(0, 0), ImVec2(1, 1), selected_path == path ? selected_tint : tint);
                 else
                     ImGui::InvisibleButton("preview", sz);
+
+                // todo: open arrow for bundle
             }
 
             if (selected_path == path)
@@ -349,7 +351,7 @@ namespace idk {
             {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    DragDrop::SetResourcePayload(getAsset(path));
+                    DragDrop::SetResourcePayload(getOrLoadFirstAsset(path));
                     ImGui::Text("Drag to inspector button.");
                     ImGui::Text(path.GetMountPath().data());
                     ImGui::EndDragDropSource();
@@ -367,7 +369,7 @@ namespace idk {
                 renaming_selected_asset = false;
                 if (!path.IsDir())
                 {
-                    selected_asset = getAsset(selected_path);
+                    selected_asset = getOrLoadFirstAsset(selected_path);
                     OnAssetSelected.Fire(selected_asset);
                 }
             }
