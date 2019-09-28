@@ -74,6 +74,21 @@ namespace idk {
         }
     }
 
+    GenericResourceHandle IGE_ProjectWindow::getAsset(PathHandle path)
+    {
+        auto get_res = Core::GetResourceManager().Get(path);
+        if (get_res && get_res->Count())
+            return get_res->GetAll()[0];
+        else if (!get_res)
+        {
+            auto load_res = Core::GetResourceManager().Load(path);
+            if (load_res && load_res->Count())
+                return load_res->GetAll()[0];
+        }
+        
+        return RscHandle<Texture>();
+    }
+
 	void IGE_ProjectWindow::Update()
 	{
         ImGui::PopStyleVar(2);
@@ -200,6 +215,8 @@ namespace idk {
 
         static bool renaming_selected_asset = false;
 
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+
         int col = 0;
         for (const auto& path : current_dir.GetEntries())
         {
@@ -207,7 +224,9 @@ namespace idk {
             if (ext == ".meta")
                 continue;
 
-            string name{ path.GetFileName() };
+            auto stem = path.GetFileName();
+            stem.remove_suffix(path.GetExtension().size());
+            string name{ stem };
             auto label = name;
             auto label_sz = ImGui::CalcTextSize(label.c_str());
             while (label_sz.x > icon_sz)
@@ -229,18 +248,7 @@ namespace idk {
 
                 if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
                 {
-                    auto get_result = Core::GetResourceManager().Get<Texture>(path);
-                    RscHandle<Texture> tex;
-
-                    if (!get_result)
-                    {
-                        auto load_result = Core::GetResourceManager().Load<Texture>(path);
-                        if (load_result)
-                            tex = *load_result;
-                    }
-                    else
-                        tex = *get_result;
-
+                    RscHandle<Texture> tex = getAsset(path).AsHandle<Texture>();
                     if (tex)
                     {
                         id = tex->ID();
@@ -293,28 +301,30 @@ namespace idk {
                 }
                 else if (!renaming_selected_asset)
                 {
-                    if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
-                    {
-                        renaming_selected_asset = true;
-                        first_focus = true;
-                        strcpy_s(buf, name.c_str());
-                    }
-                    else
-                    {
+                    //auto cursor_y = ImGui::GetCursorPosY();
+
+                    //if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
+                    //{
+                    //    renaming_selected_asset = true;
+                    //    first_focus = true;
+                    //    strcpy_s(buf, name.c_str());
+                    //}
+                    //else
+                    //{
                         ImGui::GetWindowDrawList()->AddRectFilled(
-                            ImGui::GetItemRectMin(),
-                            ImGui::GetItemRectMax(),
+                            ImGui::GetCursorScreenPos(),
+                            ImGui::GetCursorScreenPos() + ImVec2(icon_sz, line_height),
                             ImGui::GetColorU32(ImGuiCol_FrameBg),
                             line_height * 0.5f);
-                    }
+                    //}
 
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - line_height - spacing.y);
+                    //ImGui::SetCursorPosY(cursor_y);
 
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
                     ImGui::Text(label.c_str());
                 }
             }
-            else
+            else // not selected
             {
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
                 ImGui::Text(label.c_str());
@@ -323,32 +333,30 @@ namespace idk {
             ImGui::PopID();
             ImGui::EndGroup();
 
+            if (!path.IsDir())
+            {
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    DragDrop::SetResourcePayload(getAsset(path));
+                    ImGui::Text("Drag to inspector button.");
+                    ImGui::Text(path.GetMountPath().data());
+                    ImGui::EndDragDropSource();
+                }
+            }
+
             if (ImGui::IsItemClicked())
+            {
+                clicked_path = path;
+            }
+
+            if (clicked_path == path && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
             {
                 selected_path = path;
                 renaming_selected_asset = false;
                 if (!path.IsDir())
                 {
-                    auto get_res = Core::GetResourceManager().Get(selected_path);
-                    if (get_res && get_res->Count())
-                    {
-                        selected_asset = get_res->GetAll()[0];
-                        OnAssetSelected.Fire(selected_asset);
-                    }
-                    else if (!get_res)
-                    {
-                        auto load_res = Core::GetResourceManager().Load(selected_path);
-                        if (load_res && load_res->Count())
-                        {
-                            selected_asset = load_res->GetAll()[0];
-                            OnAssetSelected.Fire(selected_asset);
-                        }
-                        else
-                            selected_asset = RscHandle<Texture>();
-                    }
-                    else
-                        selected_asset = RscHandle<Texture>();
-
+                    selected_asset = getAsset(selected_path);
+                    OnAssetSelected.Fire(selected_asset);
                 }
             }
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
@@ -357,17 +365,6 @@ namespace idk {
                     current_dir = path;
                 else
                     OnAssetDoubleClicked.Fire(selected_asset);
-            }
-
-            if (!path.IsDir())
-            {
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-                {
-                    DragDrop::SetResourcePayload(selected_asset);
-                    ImGui::Text("Drag to inspector button.");
-                    ImGui::Text(selected_path.GetMountPath().data());
-                    ImGui::EndDragDropSource();
-                }
             }
 
             if (++col == icons_per_row)
@@ -380,7 +377,10 @@ namespace idk {
             {
                 ImGui::SameLine(0, spacing.x);
             }
-        }
+
+        } // for each paths in dir
+
+        ImGui::PopFont();
 
 		ImGui::EndChild();
 

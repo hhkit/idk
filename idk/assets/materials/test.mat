@@ -155,4 +155,4 @@ nodes:
     position: {x: 724.700867, y: 224.665176}
 parameters: 
 - {default_value: 0.000000, name: Metallic, type: FLOAT}
-- {default_value: ee8881ba-8a36-443f-9bf0-23c892e28986, name: Tex0, type: SAMPLER2D}
+- {default_value: 6cc1054e-9191-4ecb-a545-238b0b4bac0c, name: Tex0, type: SAMPLER2D}

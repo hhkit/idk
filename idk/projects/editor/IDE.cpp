@@ -157,6 +157,7 @@ namespace idk
         config.RasterizerMultiply = 1.5f;
         auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 16.0f, &config);
+        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 14.0f, &config);
 
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
