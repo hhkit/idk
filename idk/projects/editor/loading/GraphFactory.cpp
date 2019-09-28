@@ -14,6 +14,7 @@ namespace idk
 	{
 		auto retval = std::make_unique<shadergraph::Graph>();
 		retval->_shader_program = Core::GetResourceManager().Create<ShaderProgram>();
+        auto meta = retval->GetMeta();
 		return retval;
 	}
 	ResourceBundle GraphLoader::LoadFile(PathHandle p)

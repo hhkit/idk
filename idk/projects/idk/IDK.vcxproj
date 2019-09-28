@@ -159,7 +159,6 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="serialize\yaml.h" />
-    <ClInclude Include="gfx\ShaderGraphFactory.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
@@ -266,7 +265,6 @@
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
-    <ClCompile Include="gfx\ShaderGraphFactory.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Component.cpp" />

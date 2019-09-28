@@ -32,7 +32,6 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/OpenGLTextureLoader.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
-#include <gfx/ShaderGraphFactory.h>
 #include <res/EasyFactory.h>
 #include <imgui/ImGuizmo.h>
 
