@@ -172,6 +172,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="commands\CMD_DeleteComponent.h" />
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
     <ClInclude Include="DragDropTypes.h" />
@@ -184,9 +185,9 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
     <ClInclude Include="loading\OpenGLTextureLoader.h" />
-    <ClInclude Include="ResourceExtensions.h" />
     <ClInclude Include="widgets\InputResource.h" />
     <ClInclude Include="windows\IGE_MaterialEditor.h" />
     <ClInclude Include="windows\IGE_HierarchyWindow.h" />
@@ -207,6 +208,7 @@
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <FileType>Document</FileType>
@@ -219,6 +221,7 @@
     <ClCompile Include="commands\CMD_RotateGameObject.cpp" />
     <ClCompile Include="commands\CMD_ScaleGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />

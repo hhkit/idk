@@ -4,6 +4,7 @@
 #include <core/Core.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
+#include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
 /* 
  * !!! NOTE !!!
@@ -66,7 +67,24 @@ REFLECT_VARS(r, g, b, a)
 REFLECT_END()
 
 /*==========================================================================
- * resources
+ * resource handles
+ *========================================================================*/
+
+REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+
+REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+/*==========================================================================
+ * general resources
  *========================================================================*/
 
 REFLECT_BEGIN(idk::SerializedMeta, "SerializedMetadata")
@@ -76,6 +94,11 @@ REFLECT_END()
 REFLECT_BEGIN(idk::MetaBundle, "MetaBundle")
 REFLECT_VARS(metadatas)
 REFLECT_END()
+
+
+/*==========================================================================
+ * specific resources
+ *========================================================================*/
 
 REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
 REFLECT_VARS(i, j)
@@ -103,8 +126,20 @@ REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
 REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
-REFLECT_VARS(guid)
+REFLECT_BEGIN(idk::Material, "Material")
+REFLECT_VARS(_shader_program)
+REFLECT_END()
+
+REFLECT_ENUM(idk::BlendMode, "BlendMode")
+REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
+REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
+
+REFLECT_BEGIN(idk::Material::Metadata, "MaterialMeta")
+REFLECT_VARS(domain, blend, model)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MaterialInstance, "MaterialInstance")
+REFLECT_VARS(material, uniforms)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabData, "PrefabData")
@@ -118,7 +153,7 @@ REFLECT_END()
 // shader graph:
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-REFLECT_VARS(master_node, nodes, links, parameters)
+REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
 REFLECT_VARS(node_out, node_in, slot_out, slot_in)

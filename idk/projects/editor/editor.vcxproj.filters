@@ -77,7 +77,6 @@
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="DragDropTypes.h" />
-    <ClInclude Include="ResourceExtensions.h" />
     <ClInclude Include="loading\FBXLoaderHelpers.h">
       <Filter>loader\fbx</Filter>
     </ClInclude>
@@ -86,6 +85,12 @@
     </ClInclude>
     <ClInclude Include="loading\OpenGLFBXLoader.h">
       <Filter>loader\fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_DeleteComponent.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\GraphFactory.h">
+      <Filter>loader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +162,12 @@
       <Filter>loader\fbx</Filter>
     </ClCompile>
     <ClCompile Include="DragDropTypes.cpp" />
+    <ClCompile Include="commands\CMD_DeleteComponent.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\GraphFactory.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

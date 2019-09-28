@@ -6,9 +6,9 @@
 #include <vkn/VulkanShaderModuleFactory.h>
 #include <vkn/ShaderModule.h>
 #include <vkn/VulkanGlslLoader.h>
-#include <vkn/VulkanMaterialFactory.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>
+#include <gfx/MaterialInstance.h>
 #include <anim/SkeletonFactory.h>
 #include <anim/Animation.h>
 #include <vkn/VulkanTextureFactory.h>
@@ -18,12 +18,12 @@ namespace idk::vkn
 
 void RegisterFactories()
 {
+	Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
 	Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 	Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
 	Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
 	Core::GetResourceManager().RegisterFactory<MeshFactory>();
-	Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
-	Core::GetResourceManager().RegisterFactory<EasyFactory<ShaderModule>>();
+	Core::GetResourceManager().RegisterFactory<VulkanShaderModuleFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanTextureFactory>();
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");

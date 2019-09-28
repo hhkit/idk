@@ -4,12 +4,12 @@
 
 #include <gfx/vertex_descriptor.h>
 #include <gfx/RenderObject.h>
-#include <gfx/MaterialInstance.h>
 
 namespace idk
 {
 	class Mesh;
 	class Material;
+	class MaterialInstance;
 
 	class MeshRenderer
 		: public Component<MeshRenderer>
@@ -17,8 +17,8 @@ namespace idk
 	public:
 		bool enabled { true };
 
-		RscHandle<Mesh>  mesh;
-		MaterialInstance material_instance;
+		RscHandle<Mesh>            mesh;
+		RscHandle<MaterialInstance> material_instance;
 
 		bool cast_shadows   { true };
 		bool receive_shadows{ true };
