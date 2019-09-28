@@ -58,10 +58,21 @@ namespace idk {
 	{
 		ImGui::PopStyleVar(3);
 
-		ImVec2 imageSize{ GetScreenSize().x,GetScreenSize().y };
+        ImVec2 imageSize = GetScreenSize();
+        auto screen_tex = RscHandle<RenderTarget>{}->GetMeta().textures[0];
+        auto rendertex_aspect = screen_tex->AspectRatio();
+        auto windowframe_aspect = imageSize.x / imageSize.y;
+        if (rendertex_aspect > windowframe_aspect) // rendertex is horizontally longer
+            imageSize.x = imageSize.y * rendertex_aspect;
+        else if (rendertex_aspect < windowframe_aspect) // windowframe is horizontally longer
+            imageSize.y = imageSize.x / rendertex_aspect;
+
+        auto offset = (GetScreenSize() - imageSize) * 0.5f;
+        ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + offset);
+
 		//imageSize.y = (imageSize.x * (9 / 16));
 		if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-			ImGui::Image(RscHandle<RenderTarget>{}->GetMeta().textures[0]->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+			ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 
 		ImVec2 v = ImGui::GetWindowPos();
 
@@ -120,7 +131,8 @@ namespace idk {
 
 	vec2 IGE_SceneView::GetScreenSize()
 	{
-		return vec2 { ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
+        return vec2{ ImGui::GetWindowContentRegionMax() } - ImGui::GetWindowContentRegionMin();
+        // vec2{ ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
 	}
 
 	vec2 IGE_SceneView::GetMousePosInWindow()
