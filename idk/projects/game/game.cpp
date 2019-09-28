@@ -89,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
 		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
-		camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/learnopengl.jpg.cbm");
+		camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/lagoon.jpg.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
 		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
 
