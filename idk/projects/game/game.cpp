@@ -93,8 +93,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		divByVal = 200.f;
 	}
 	auto h_mat = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
-	h_mat->Compile();
-	auto& mat = *h_mat;
 
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {

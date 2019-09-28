@@ -26,6 +26,7 @@ namespace idk
 			auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
 			(discardme);
 		}
+		mat->Compile();
 		return mat;
 	}
 
@@ -45,6 +46,7 @@ namespace idk
 		if (meta)
 			mat->SetMeta(*meta->GetMeta<Material>());
 
+		mat->Compile();
 		return mat;
 	}
 }
