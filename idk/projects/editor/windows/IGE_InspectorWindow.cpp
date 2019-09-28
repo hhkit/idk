@@ -216,6 +216,7 @@ namespace idk {
 
 		//Add Component Button
 		if (gameObjectsCount) {
+			ImGui::Separator();
 			ImGui::SetCursorPosX(window_size.x * 0.25f);
 			if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
 				ImGui::OpenPopup("AddComp");
@@ -250,6 +251,7 @@ namespace idk {
 					displayName.erase(found, fluffText2.size());
 
 				*/
+
 
 				if (ImGui::MenuItem(displayName.c_str())) {
 					//Add component
