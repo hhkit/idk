@@ -18,7 +18,7 @@
 namespace idk
 {
 	using Vertex = fbx_loader_detail::Vertex;
-	
+
 	ResourceBundle OpenGLFBXLoader::LoadFile(PathHandle path_to_resource)
 	{
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
@@ -39,7 +39,7 @@ namespace idk
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
-		prefab_root->Transform()->scale /= 200.0f;
+		// prefab_root->Transform()->scale /= 200.0f;
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
@@ -55,7 +55,6 @@ namespace idk
 		fbx_loader_detail::MeshSet mesh_set;
 		hash_table<string, size_t> bones_table;
 		vector<anim::Skeleton::Bone> bones;
-		vector<RscHandle<ogl::OpenGLMesh>> meshes;
 
 		// Initializing the bone_set
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
@@ -131,15 +130,14 @@ namespace idk
 				}
 			}
 
+			// Initializes the opengl buffers
 			fbx_loader_detail::initOpenGLBuffers(*mesh_handle, vertices, indices);
 
 			// Add this mesh into the set
 			mesh_set.emplace(ai_scene->mMeshes[i]->mName.data);
-			// meshes.push_back(mesh_handle);
 
 			// Add mesh resource
-			
-			retval.Add(mesh_handle);
+			retval.Add(RscHandle<Mesh>{ mesh_handle });
 			
 			auto mesh_child = scene->CreateGameObject();
 			mesh_child->Name(mesh_handle->Name());
@@ -152,22 +150,8 @@ namespace idk
 			indices.clear();
 		}
 
-		// Computing the matrix needed to normalize the mesh
-		// vec3 translate_vec = (max_pos + min_pos) * 0.5f;
-		// mat4 translate_mat = translate(-translate_vec);
-		// 
-		// vec3 extents = max_pos - min_pos;
-		// float scale_factor = std::max(extents.x, std::max(extents.y, extents.z));
-		// vec3 scale_vec;
-		// scale_vec.x = 2.0f / scale_factor;
-		// scale_vec.y = 2.0f / scale_factor;
-		// scale_vec.z = 2.0f / scale_factor;
-		// mat4 scale_mat = mat4{ scale(scale_vec) };
-		// 
-		// mat4 normalize_mat = scale_mat * translate_mat;// *;
-		// mat4 inverse_normalize_mat = translate(translate_vec)* mat4 { scale(vec3{ scale_factor / 2.0f, scale_factor / 2.0f , scale_factor / 2.0f }) };
-		// 
-		// fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
+		mat4 normalize_mat = mat4 { scale(fbx_loader_detail::FBX_SCALE)  };
+		fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
 
 		// Loads the skeleton heirarchy.
 		// Passing the inverse of the normalization as the bone transformations happen in the un-normalized mesh space.
@@ -177,7 +161,7 @@ namespace idk
 		// Loads all the vertex bone weights and indices
 		// fbx_loader_detail::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
 
-		// Initializes the opengl buffers
+		
 
 		// Loading Skeletons
 		auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
@@ -189,7 +173,7 @@ namespace idk
 		skeleton = anim::Skeleton{ bones, bones_table };
 
 		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-		mat4 skeleton_transform = //normalize_mat * 
+		mat4 skeleton_transform = normalize_mat * 
 			fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.Add(skeleton_handle);
@@ -211,8 +195,9 @@ namespace idk
 			animator->AddAnimation(anim_clip_handle);
 		}
 		animator->Play(0);
-		
-		//PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
+		// Core::GetSystem<FileSystem>().Open(string{ "/assets/prefabs/" } + path_to_resource.GetStem().data() + ".idp", FS_PERMISSIONS::WRITE);
+		// PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
+		// scene->DestroyGameObject(prefab_root);
 		return retval;
 	}
 
@@ -233,6 +218,17 @@ namespace idk
 		if (ai_scene == nullptr)
 			return retval;
 		// auto mesh_handle = Core::GetResourceManager().Create<ogl::OpenGLMesh>();
+
+		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		auto prefab_root = scene->CreateGameObject();
+		prefab_root->Name(path_to_resource.GetStem());
+		//prefab_root->Transform()->scale /= 200.0f;
+
+		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
+		h_mat->Compile();
+		auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+		mat_inst->material = h_mat;
 
 		vec3 min_pos{ INT_MAX,INT_MAX ,INT_MAX }, max_pos{ INT_MIN,INT_MIN ,INT_MIN };
 		vector<Vertex> vertices;
@@ -335,6 +331,14 @@ namespace idk
 
 			retval.Add(mesh_handle);
 
+			auto mesh_child = scene->CreateGameObject();
+			mesh_child->Name(mesh_handle->Name());
+			mesh_child->Transform()->SetParent(prefab_root);
+			auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
+			mesh_renderer->mesh = RscHandle<Mesh>{ mesh_handle };
+			mesh_renderer->material_instance = mat_inst;
+
+
 			vertices.clear();
 			indices.clear();
 		}
@@ -354,7 +358,8 @@ namespace idk
 		// mat4 normalize_mat = scale_mat * translate_mat;// *;
 		// mat4 inverse_normalize_mat = translate(translate_vec)* mat4 { scale(vec3{ scale_factor / 2.0f, scale_factor / 2.0f , scale_factor / 2.0f }) };
 		// 
-		// fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
+		mat4 normalize_mat = mat4{ scale(fbx_loader_detail::FBX_SCALE) };
+		fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
 
 		// Loads the skeleton heirarchy.
 		// Passing the inverse of the normalization as the bone transformations happen in the un-normalized mesh space.
@@ -384,11 +389,13 @@ namespace idk
 		skeleton = anim::Skeleton{ bones, bones_table };
 
 		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-		mat4 skeleton_transform = //normalize_mat * 
+		mat4 skeleton_transform = normalize_mat * 
 			fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.Add(skeleton_handle);
 
+		auto animator = prefab_root->AddComponent<AnimationController>();
+		animator->SetSkeleton(skeleton_handle);
 		// Loading Animations
 		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
@@ -407,7 +414,9 @@ namespace idk
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
 			fbx_loader_detail::initAnimNodes(root_node, ai_scene->mAnimations[i], anim_clip);
 			retval.Add(anim_clip_handle);
+			animator->AddAnimation(anim_clip_handle);
 		}
+		animator->Play(0);
 
 		return retval;
 	}

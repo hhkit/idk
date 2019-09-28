@@ -100,24 +100,38 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		// go->GetComponent<Transform>()->scale /= 200;// 200.f;
+		go->GetComponent<Transform>()->scale /= 200;// 200.f;
 		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
-		auto mesh_rend = go->AddComponent<SkinnedMeshRenderer>();
+		
 		auto animator = go->AddComponent<AnimationController>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources = Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
-			mesh_rend->mesh = resources->Get<Mesh>();
-			animator->SetSkeleton(resources->Get<anim::Skeleton>());
-			animator->AddAnimation(resources->Get<anim::Animation>());
+			auto resources_running = Core::GetResourceManager().Load(PathHandle{ "/assets/models/test.fbx" });
+			
+			// for (auto handle : resources_running->GetAll<RscHandle<Mesh>>())
+			// {
+			// 	auto mesh_child_go = scene->CreateGameObject();
+			// 	mesh_child_go->Transform()->parent = go;
+			// 
+			// 	auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
+			// 	mesh_rend->mesh = handle;
+			// 	mesh_rend->material_instance = mat_inst;
+			// }
+			// 
+			// animator->SetSkeleton(*resources_running->Get<RscHandle<anim::Skeleton>>());
+			// // auto anim_handles =;
+			// for (auto anim : resources_running->GetAll<RscHandle<anim::Animation>>())
+			// {
+			// 	animator->AddAnimation(anim);
+			// }
+			
 			animator->Play(0);
 		}
-		mesh_rend->material_instance = mat_inst;
-
 		return go;
 	};
+
 	auto tmp_tex = minecraft_texture;
 	if(gfx_api == GraphicsAPI::Vulkan)
 		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
@@ -125,8 +139,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	// create_anim_obj(vec3{ 0,0,0 });
-	Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
+	//create_anim_obj(vec3{ 0,0,0 });
+	 auto resource_bundle = Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
+	// resource_bundle->GetAll();
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -189,53 +204,53 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	light->AddComponent<TestComponent>();
 
 	/* physics resolution demonstration */
-	{
-		auto seduceme = scene->CreateGameObject();
-		seduceme->GetComponent<Name>()->name = "seduceme";
-		seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
-		//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
-		seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
-		seduceme->Transform()->scale = vec3{ 1.f / 4 };
-		seduceme->AddComponent<RigidBody>();
-		auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
-		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance = mat_inst;
-		seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	}
-	{
-		auto seducer = scene->CreateGameObject();
-		seducer->GetComponent<Name>()->name = "seducer";
-		seducer->Transform()->position = vec3{ -2, 0.125, 0 };
-		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
-		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
-		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance = mat_inst;
-		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	}
-	{
-		auto seducer = scene->CreateGameObject();
-		seducer->GetComponent<Name>()->name = "seducer";
-		seducer->Transform()->position = vec3{ 2, 0.125, 0 };
-		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
-		auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
-		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance = mat_inst;
-		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	}
-
-	{
-		auto seducer = scene->CreateGameObject();
-		seducer->GetComponent<Name>()->name = "seducer";
-		seducer->Transform()->position = vec3{ 1, 0.125, 0 };
-		seducer->Transform()->scale = vec3{ 1.f / 4 };
-		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
-		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
-		mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
-		mesh_rend->material_instance = mat_inst;
-		//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	}
+	// {
+	// 	auto seduceme = scene->CreateGameObject();
+	// 	seduceme->GetComponent<Name>()->name = "seduceme";
+	// 	seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
+	// 	//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
+	// 	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
+	// 	seduceme->Transform()->scale = vec3{ 1.f / 4 };
+	// 	seduceme->AddComponent<RigidBody>();
+	// 	auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
+	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+	// 	mesh_rend->material_instance = mat_inst;
+	// 	seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	// }
+	// {
+	// 	auto seducer = scene->CreateGameObject();
+	// 	seducer->GetComponent<Name>()->name = "seducer";
+	// 	seducer->Transform()->position = vec3{ -2, 0.125, 0 };
+	// 	seducer->Transform()->scale = vec3{ 1.f / 4 };
+	// 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
+	// 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+	// 	mesh_rend->material_instance = mat_inst;
+	// 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	// }
+	// {
+	// 	auto seducer = scene->CreateGameObject();
+	// 	seducer->GetComponent<Name>()->name = "seducer";
+	// 	seducer->Transform()->position = vec3{ 2, 0.125, 0 };
+	// 	seducer->Transform()->scale = vec3{ 1.f / 4 };
+	// 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+	// 	auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
+	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+	// 	mesh_rend->material_instance = mat_inst;
+	// 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	// }
+	// 
+	// {
+	// 	auto seducer = scene->CreateGameObject();
+	// 	seducer->GetComponent<Name>()->name = "seducer";
+	// 	seducer->Transform()->position = vec3{ 1, 0.125, 0 };
+	// 	seducer->Transform()->scale = vec3{ 1.f / 4 };
+	// 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+	// 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
+	// 	mesh_rend->material_instance = mat_inst;
+	// 	//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	// }
 	
 	if(0)
 	for (int i = 2; i < 5; ++ i)
