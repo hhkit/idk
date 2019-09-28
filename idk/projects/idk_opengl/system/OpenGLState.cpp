@@ -80,35 +80,36 @@ namespace idk::ogl
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
 			
-			
-			if (std::get<RscHandle<CubeMap>>(cam.clear_data))
+			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
-				auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
+				if constexpr(std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
+				{
+					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
 
-				//oglCubeMap.ID;
-				
-				glDepthMask(GL_FALSE);
-				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::SkyBox]);
-				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FSkyBox]);
+					//oglCubeMap.ID;
 
-				pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
-				
-				
-				auto& mesh = (*cam.CubeMapMesh).as<OpenGLMesh>();
-				mesh.Bind(renderer_reqs
-					{ {
-						std::make_pair(vtx::Attrib::Position, 0)
-					} });
-				oglCubeMap.Bind();
-				mesh.Draw();
-				glDepthMask(GL_TRUE);
-			
-			}
-			else
-			{
-				auto& cv = std::get<0>(cam.clear_data);
-				glClearColor(cv.x,cv.y,cv.z,cv.w);
-			}
+					glDepthMask(GL_FALSE);
+					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
+					pipeline.PushProgram(renderer_fragment_shaders[SkyBox]);
+
+					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
+
+
+					auto& mesh = (*cam.CubeMapMesh).as<OpenGLMesh>();
+					mesh.Bind(renderer_reqs
+						{ {
+							std::make_pair(vtx::Attrib::Position, 0)
+						} });
+					oglCubeMap.Bind();
+					mesh.Draw();
+					glDepthMask(GL_TRUE);
+
+				}
+				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, vec4>)
+				{
+					glClearColor(obj.x, obj.y, obj.z, obj.w);
+				}
+			}, cam.clear_data);
 
 			// calculate lights for this camera
 			auto lights = curr_object_buffer.lights;

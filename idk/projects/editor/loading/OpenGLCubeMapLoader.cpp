@@ -39,17 +39,18 @@ namespace idk
 		auto cubemap = path.stem();
 		auto ext = cubemap.extension();
 
-		for (int i = 0; i < fileExt->size(); ++i)
+		texture_handle->Bind();
+		for (int i = 0; i < std::size(fileExt); ++i)
 		{
 			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
 			auto p = pp + fileExt[i] + ext.string();
-			p = p.substr(1);
 
-			auto data = stbi_load(p.data(), &size.x, &size.y, &channels, 0);
+			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
 
 			//assert(data);
 
 			texture_handle->Buffer(i, data, size, tm.internal_format);
+			stbi_image_free(data);
 		}
 
 		return texture_handle;
@@ -59,13 +60,13 @@ namespace idk
 	{
 		//assert(false);
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
+		auto& metadata = path_to_meta.metadatas[0];
 
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>();
+		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>(metadata.guid);
 
 		auto tm = texture_handle->GetMeta();
 		//auto texture_id = texture_handle->ID();
 
-		auto& metadata = path_to_meta.metadatas[0];
 
 		auto first_meta = metadata.GetMeta<CubeMap>();
 		if (first_meta)
@@ -88,17 +89,18 @@ namespace idk
 		auto cubemap = path.stem();
 		auto ext = cubemap.extension();
 
-		for (int i = 0; i < fileExt->size(); ++i)
+		texture_handle->Bind();
+		for (int i = 0; i < std::size(fileExt); ++i)
 		{
 			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
 			auto p = pp + fileExt[i] + ext.string();
-			p = p.substr(1);
 
-			auto data = stbi_load(p.data(), &size.x, &size.y, &channels, 0);
+			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
 
 			//assert(data);
 
 			texture_handle->Buffer(i, data, size, tm.internal_format);
+			stbi_image_free(data);
 		}
 
 		return texture_handle;
