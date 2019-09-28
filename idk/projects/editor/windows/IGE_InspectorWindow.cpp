@@ -57,6 +57,11 @@ namespace idk {
 
 		IDE& editor = Core::GetSystem<IDE>();
 		const size_t gameObjectsCount = editor.selected_gameObjects.size();
+
+		bool isComponentMarkedForDeletion = false;
+		string componentNameMarkedForDeletion{}; //Is empty by default
+
+		//DISPLAY
 		if (gameObjectsCount == 1) {
 			//Just show all components, Name and Transform first
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
@@ -69,6 +74,9 @@ namespace idk {
 			if (c_transform) {
 				DisplayTransformComponent(c_transform);
 			}
+
+
+
 
 			//Display remaining components here
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
@@ -165,7 +173,8 @@ namespace idk {
 						}
 						ImGui::Separator();
 						if (ImGui::MenuItem("Remove Component")) {
-
+							isComponentMarkedForDeletion = true;
+							componentNameMarkedForDeletion = (*component).type.name();
 						}
 						ImGui::EndPopup();
 					}
@@ -179,7 +188,7 @@ namespace idk {
 
 			}
 
-
+			
 
 		}
 		else if (gameObjectsCount > 1) {
@@ -201,7 +210,10 @@ namespace idk {
 
 		}
 
-
+		if (isComponentMarkedForDeletion) {
+			for (Handle<GameObject> i : editor.selected_gameObjects)
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
+		}
 
 
 

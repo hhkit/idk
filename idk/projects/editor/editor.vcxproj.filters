@@ -87,6 +87,9 @@
     <ClInclude Include="loading\OpenGLFBXLoader.h">
       <Filter>loader\fbx</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_DeleteComponent.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -157,6 +160,9 @@
       <Filter>loader\fbx</Filter>
     </ClCompile>
     <ClCompile Include="DragDropTypes.cpp" />
+    <ClCompile Include="commands\CMD_DeleteComponent.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
