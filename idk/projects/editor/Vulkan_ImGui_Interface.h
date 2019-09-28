@@ -50,7 +50,7 @@ namespace idk {
 			EditorInputs* Inputs() override;
 
 		private:
-
+			bool font_initialized = false;
 			struct EditorInitInfo
 			{
 				vk::UniquePipelineCache				edt_pipeCache{};

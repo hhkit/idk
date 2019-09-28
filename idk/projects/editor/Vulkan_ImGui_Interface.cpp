@@ -127,40 +127,6 @@ namespace idk
 
 			//Upload fonts leave it to later
 			// Upload Fonts
-			{
-				// Use any command queue
-				vk::CommandBuffer& command_buffer = *editorControls.edt_frames[editorControls.edt_frameIndex].edt_cBuffer;
-
-				vknViews.Device()->resetCommandPool(*editorControls.edt_frames[editorControls.edt_frameIndex].edt_cPool,vk::CommandPoolResetFlags::Flags(),vknViews.Dispatcher());
-				vk::CommandBufferBeginInfo begin_info = {};
-				begin_info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-				
-				command_buffer.begin(begin_info, vknViews.Dispatcher());
-
-				ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-
-				vk::SubmitInfo end_info = {};
-				end_info.commandBufferCount = 1;
-				end_info.pCommandBuffers = &command_buffer;
-				//err = vkEndCommandBuffer(command_buffer);
-				//check_vk_result(err);
-				command_buffer.end(vknViews.Dispatcher());
-
-				//m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
-
-		        //err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
-				//check_vk_result(err);
-				vknViews.GraphicsQueue().submit(1, &end_info, vk::Fence(), vknViews.Dispatcher());
-
-
-				//vknViews.Device()->waitForFences(1, &*editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
-
-				//vknViews.Device()->resetFences(1, &*editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].inflight_fence,vknViews.Dispatcher());
-				//err = vkDeviceWaitIdle(g_Device);
-				//check_vk_result(err);
-				vknViews.Device()->waitIdle(vknViews.Dispatcher());
-				ImGui_ImplVulkan_DestroyFontUploadObjects();
-			}
 		}
 
 		void VI_Interface::Shutdown()
@@ -187,6 +153,43 @@ namespace idk
 			}
 
 			ImGui_ImplWin32_NewFrame();
+			if (!font_initialized)
+			{
+				vkn::VulkanView& vknViews = vkObj->View();
+				// Use any command queue
+				vk::CommandBuffer& command_buffer = *editorControls.edt_frames[editorControls.edt_frameIndex].edt_cBuffer;
+
+				vknViews.Device()->resetCommandPool(*editorControls.edt_frames[editorControls.edt_frameIndex].edt_cPool, vk::CommandPoolResetFlags::Flags(), vknViews.Dispatcher());
+				vk::CommandBufferBeginInfo begin_info = {};
+				begin_info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+				command_buffer.begin(begin_info, vknViews.Dispatcher());
+
+				ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+
+				vk::SubmitInfo end_info = {};
+				end_info.commandBufferCount = 1;
+				end_info.pCommandBuffers = &command_buffer;
+				//err = vkEndCommandBuffer(command_buffer);
+				//check_vk_result(err);
+				command_buffer.end(vknViews.Dispatcher());
+
+				//m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+
+				//err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
+				//check_vk_result(err);
+				vknViews.GraphicsQueue().submit(1, &end_info, vk::Fence(), vknViews.Dispatcher());
+
+
+				//vknViews.Device()->waitForFences(1, &*editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
+
+				//vknViews.Device()->resetFences(1, &*editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].inflight_fence,vknViews.Dispatcher());
+				//err = vkDeviceWaitIdle(g_Device);
+				//check_vk_result(err);
+				vknViews.Device()->waitIdle(vknViews.Dispatcher());
+				ImGui_ImplVulkan_DestroyFontUploadObjects();
+				font_initialized = true;
+			}
 			ImGui::NewFrame();
 		}
 
