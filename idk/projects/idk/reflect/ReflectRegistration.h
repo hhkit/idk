@@ -67,7 +67,19 @@ REFLECT_VARS(r, g, b, a)
 REFLECT_END()
 
 /*==========================================================================
- * resources
+ * resource handles
+ *========================================================================*/
+
+REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+/*==========================================================================
+ * general resources
  *========================================================================*/
 
 REFLECT_BEGIN(idk::SerializedMeta, "SerializedMetadata")
@@ -77,6 +89,11 @@ REFLECT_END()
 REFLECT_BEGIN(idk::MetaBundle, "MetaBundle")
 REFLECT_VARS(metadatas)
 REFLECT_END()
+
+
+/*==========================================================================
+ * specific resources
+ *========================================================================*/
 
 REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
 REFLECT_VARS(i, j)
@@ -97,16 +114,16 @@ REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
 REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
-REFLECT_VARS(guid)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
-REFLECT_VARS(guid)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::Material, "ShaderGraph")
+REFLECT_BEGIN(idk::Material, "Material")
 REFLECT_VARS(_shader_program)
+REFLECT_END()
+
+REFLECT_ENUM(idk::BlendMode, "BlendMode")
+REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
+REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
+
+REFLECT_BEGIN(idk::Material::Metadata, "MaterialMeta")
+REFLECT_VARS(domain, blend, model)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabData, "PrefabData")

@@ -166,7 +166,9 @@
     <ClCompile Include="commands\CMD_DeleteComponent.cpp">
       <Filter>commands</Filter>
     </ClCompile>
-    <ClCompile Include="loading\GraphFactory.cpp" />
+    <ClCompile Include="loading\GraphFactory.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
