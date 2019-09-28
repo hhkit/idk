@@ -144,7 +144,11 @@ namespace idk::detail
 		{
 			return std::array<const char*, 1 + ComponentCount>
 			{
-				reflect::get_type<Ts>().name().data() ...
+				[]() -> const char*
+				{
+					static string retval{ reflect::get_type<Ts>().name() };
+					return retval.data();
+				}()...
 			};
 		}
 	};
