@@ -38,6 +38,6 @@ namespace idk
         GenericResourceHandle selected_asset;
 
         void displayDir(PathHandle dir);
-        GenericResourceHandle getAsset(PathHandle path);
+        GenericResourceHandle getOrLoadFirstAsset(PathHandle path);
 	};
 }
