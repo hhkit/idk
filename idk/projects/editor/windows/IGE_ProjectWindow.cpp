@@ -246,9 +246,23 @@ namespace idk {
                 ImVec4 tint = ImColor(65, 153, 163).Value;
                 ImVec4 selected_tint = ImColor(30, 120, 130).Value;
 
-                if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".dds")
+                if (path.IsDir())
                 {
-                    RscHandle<Texture> tex = getAsset(path).AsHandle<Texture>();
+                    static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
+                    id = folder_icon->ID();
+                }
+                else
+                {
+                    RscHandle<Texture> tex = std::visit([](auto h)
+                    {
+                        using T = typename decltype(h)::Resource;
+
+                        if (!h)
+                            return RscHandle<Texture>();
+                        if constexpr (std::is_same_v<T, Texture>)
+                            return h;
+                    }, getAsset(path));
+
                     if (tex)
                     {
                         id = tex->ID();
@@ -261,13 +275,11 @@ namespace idk {
                         selected_tint = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
                     }
                 }
-                else if (path.IsDir())
-                {
-                    static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
-                    id = folder_icon->ID();
-                }
 
-                ImGui::Image(id, sz, ImVec2(0,0), ImVec2(1,1), selected_path == path ? selected_tint : tint);
+                if (id)
+                    ImGui::Image(id, sz, ImVec2(0, 0), ImVec2(1, 1), selected_path == path ? selected_tint : tint);
+                else
+                    ImGui::InvisibleButton("preview", sz);
             }
 
             if (selected_path == path)

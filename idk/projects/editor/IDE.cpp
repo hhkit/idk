@@ -238,7 +238,7 @@ namespace idk
 
 			}
 
-			finalCamPos /= selected_gameObjects.size();
+            finalCamPos /= static_cast<float>(selected_gameObjects.size());
 
 			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
 

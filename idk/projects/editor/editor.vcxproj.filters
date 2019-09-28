@@ -77,7 +77,6 @@
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="DragDropTypes.h" />
-    <ClInclude Include="ResourceExtensions.h" />
     <ClInclude Include="loading\FBXLoaderHelpers.h">
       <Filter>loader\fbx</Filter>
     </ClInclude>

@@ -2,7 +2,6 @@
 
 #include <imgui/imgui.h>
 #include <res/GenericResourceHandle.h>
-#include <editor/ResourceExtensions.h>
 
 namespace idk::ImGuidk
 {
