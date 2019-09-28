@@ -150,7 +150,11 @@ namespace idk::shadergraph
             auto uniform_name = node.name;
             auto& param = state.graph.parameters[std::stoi(uniform_name.data() + 1)];
             uniform_name.replace(0, 1, "_u");
-            state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, "_ub" + std::to_string(param.type) + "." + uniform_name); // eg. _ub0._u0
+            if (param.type == ValueType::SAMPLER2D)
+                state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, uniform_name);
+            else
+                state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 },
+                                               "_ub" + std::to_string(param.type) + "." + uniform_name);
             state.uniforms.emplace_back(std::make_pair(uniform_name, param.type));
         }
 
@@ -168,7 +172,7 @@ namespace idk::shadergraph
                     // can't connect textures directly, we need to go through uniforms
                     auto uniform_name = "_c" + std::to_string(state.non_param_textures.size());
                     state.non_param_textures.push_back(uniform_name);
-                    replacement = "_ub" + std::to_string(ValueType::SAMPLER2D) + '.' + uniform_name;
+                    replacement = uniform_name;
                     replace_variables(code, i, replacement);
                 }
                 else
@@ -238,16 +242,20 @@ namespace idk::shadergraph
 
             for (const auto& [uniform_name, uniform_type] : state.uniforms)
             {
-                string typestr = "";
+                auto& block = uniform_blocks[uniform_type];
+
                 if (uniform_type == ValueType::SAMPLER2D)
-                    typestr = "sampler2D";
-                else
                 {
-                    string str{ uniform_type.to_string() };
-                    typestr = make_lowercase(str);
+                    block += "U_LAYOUT(3, ";
+                    block += std::to_string(ValueType::SAMPLER2D);
+                    block += ") uniform sampler2D ";
+                    block += uniform_name;
+                    block += ";\n";
+                    continue;
                 }
 
-                auto& block = uniform_blocks[uniform_type];
+                string str{ uniform_type.to_string() };
+                string typestr = make_lowercase(str);
 
                 if (block.empty())
                 {
@@ -264,18 +272,12 @@ namespace idk::shadergraph
                 block += ";\n";
             }
 
-            for(const auto& uniform_name : state.non_param_textures)
+            for (const auto& uniform_name : state.non_param_textures)
             {
                 auto& block = uniform_blocks[ValueType::SAMPLER2D];
-                if (block.empty())
-                {
-                    block += "U_LAYOUT(3, ";
-                    block += std::to_string(ValueType::SAMPLER2D);
-                    block += ") uniform BLOCK(_UB";
-                    block += ValueType(ValueType::SAMPLER2D).to_string();
-                    block += ")\n{\n";
-                }
-                block += "  sampler2D ";
+                block += "U_LAYOUT(3, ";
+                block += std::to_string(ValueType::SAMPLER2D);
+                block += ") uniform sampler2D ";
                 block += uniform_name;
                 block += ";\n";
             }
@@ -286,6 +288,9 @@ namespace idk::shadergraph
                     continue;
 
                 uniforms_str += uniform_blocks[i];
+                if (i == ValueType::SAMPLER2D)
+                    continue;
+
                 uniforms_str += "} _ub";
                 uniforms_str += std::to_string(i);
                 uniforms_str += ";\n";
@@ -294,8 +299,11 @@ namespace idk::shadergraph
 			for (const auto& [uniform_name, uniform_type] : state.uniforms)
 			{
                 int param_index = std::stoi(uniform_name.data() + 2); // +2 to shift past _u in name
-				uniforms.insert_or_assign("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
-                                                to_uniform_instance(parameters[param_index]));
+                if (uniform_type == ValueType::SAMPLER2D)
+                    uniforms.insert_or_assign(uniform_name, to_uniform_instance(parameters[param_index]));
+                else
+				    uniforms.insert_or_assign("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+                                                    to_uniform_instance(parameters[param_index]));
 			}
         }
 
