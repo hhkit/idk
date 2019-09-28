@@ -501,8 +501,10 @@ namespace idk::vkn
 
 		cmd_buffer.begin(begin_info, dispatcher);
 		std::array<float, 4> a{};
+
+		auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
-		vk::ClearValue v{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(state.camera.clear_color) } };
+		vk::ClearValue v{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(cd) } };
 		
 		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		

@@ -114,6 +114,13 @@ REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format)
 REFLECT_END()
 
+REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
+REFLECT_ENUM(idk::CMUVMode, "CMUVMode")
+
+REFLECT_BEGIN(idk::CubeMap::Metadata, "CubeMapMeta")
+REFLECT_VARS(uv_mode, internal_format)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
