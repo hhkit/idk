@@ -101,6 +101,14 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Material, "ShaderGraph")
+REFLECT_VARS(_shader_program)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::PrefabData, "PrefabData")
 REFLECT_VARS(parent_index, components)
 REFLECT_END()
@@ -112,7 +120,7 @@ REFLECT_END()
 // shader graph:
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-REFLECT_VARS(master_node, nodes, links, parameters)
+REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
 REFLECT_VARS(node_out, node_in, slot_out, slot_in)

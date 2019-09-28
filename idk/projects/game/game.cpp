@@ -92,7 +92,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		divByVal = 200.f;
 	}
-	auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
+	auto h_mat = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	h_mat->Compile();
 	auto& mat = *h_mat;
 

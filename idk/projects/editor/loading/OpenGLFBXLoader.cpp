@@ -9,7 +9,7 @@
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
 #include <prefab/PrefabUtility.h>
-
+#include <gfx/ShaderGraph.h>
 #include <common/Transform.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <anim/AnimationController.h>
@@ -42,8 +42,8 @@ namespace idk
 		prefab_root->Transform()->scale /= 200.0f;
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
-		auto h_mat = Core::GetResourceManager().Create<Material>();
-		h_mat->BuildShader(shader_template, "", "");
+		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
+		h_mat->Compile();
 
 		vec3 min_pos{ INT_MAX,INT_MAX ,INT_MAX }, max_pos{ INT_MIN,INT_MIN ,INT_MIN };
 		vector<Vertex> vertices;

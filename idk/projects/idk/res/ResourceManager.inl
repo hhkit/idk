@@ -138,7 +138,7 @@ namespace idk
 			if (rcb->path)
 				return *rcb->path;
 			else
-				return ""; // gen unique name
+				return GenUniqueName<Res>(); // gen unique name
 		}();
 
 		auto stream = Core::template GetSystem<FileSystem>().Open( filepath, FS_PERMISSIONS::WRITE);
@@ -251,7 +251,7 @@ namespace idk
 
 		auto make_path = [&]()
 		{
-			return "/assets/" + start_name + Res::ext;
+			return "/assets/" + start_name + string{ Res::ext };
 		};
 
 		auto path = make_path();
@@ -259,7 +259,7 @@ namespace idk
 		while (_loaded_files.find(path) != _loaded_files.end())
 		{
 			start_name += " (copy)";
-			make_path();
+			path = make_path();
 		}
 
 		return path;
