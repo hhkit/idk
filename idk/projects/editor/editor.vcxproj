@@ -185,6 +185,7 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
     <ClInclude Include="loading\OpenGLTextureLoader.h" />
     <ClInclude Include="widgets\InputResource.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="commands\CMD_RotateGameObject.cpp" />
     <ClCompile Include="commands\CMD_ScaleGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />

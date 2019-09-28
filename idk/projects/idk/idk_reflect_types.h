@@ -58,6 +58,7 @@ namespace idk::reflect
 
 		, vector<SerializedMeta>
 
+		, RscHandle<ShaderProgram>
         , shadergraph::ValueType
         , shadergraph::Slot
         , shadergraph::Node

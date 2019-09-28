@@ -35,7 +35,7 @@ namespace idk
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
-						if (auto loader = &resource_man->GetFactory<Rs>())
+						if (auto loader = &resource_man->GetFactoryRes<Rs>())
 							resource_man->_default_resources[ResourceID<Rs>] = loader->GenerateDefaultResource();
 					}...
 				};
@@ -48,7 +48,8 @@ namespace idk
 					{
 						if constexpr (has_tag_v<Rs, Saveable>)
 							if constexpr (std::is_default_constructible_v<Rs>)
-								resource_man->RegisterLoader<SaveableResourceLoader<Rs>>(Rs::ext);
+								if (resource_man->GetLoader(Rs::ext) == nullptr)
+									resource_man->RegisterLoader<SaveableResourceLoader<Rs>>(Rs::ext);
 					}...
 				};
 			}
@@ -58,7 +59,7 @@ namespace idk
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
 					[](ResourceManager* resource_man)
 					{
-						if (auto loader = &resource_man->GetFactory<Rs>())
+						if (auto loader = &resource_man->GetFactoryRes<Rs>())
 							loader->Init();
 					}...
 				};
@@ -199,7 +200,7 @@ namespace idk
 			Load(elem);
 	}
 
-	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path)
+	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
 		auto* loader = GetLoader(path.GetExtension());
 		if (loader == nullptr)
@@ -210,8 +211,25 @@ namespace idk
 
 		auto emplace_path = string{ path.GetMountPath() };
 
-		// TODO: Meta handling
-		auto meta_path = PathHandle{ string{path.GetMountPath()} + ".meta" };
+		// unload the file if loaded
+		{
+			auto itr = _loaded_files.find(emplace_path);
+			if (itr != _loaded_files.end())
+			{
+				if (reload_resource)
+				{
+					// release all resources attached to file
+					for (auto& elem : itr->second.bundle.GetAll())
+						std::visit([&](const auto& handle) { Release(handle); }, elem);
+					_loaded_files.erase(itr);
+				}
+				else
+					return itr->second.bundle;
+			}
+		}
+
+		// Meta handling
+		auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
 
 		auto meta_bundle = [&]() -> opt<MetaBundle>
 		{
@@ -223,18 +241,6 @@ namespace idk
 
 			return parse_text<MetaBundle>(metastr);
 		}();
-
-		// unload the file if loaded
-		{
-			auto itr = _loaded_files.find(emplace_path);
-			if (itr != _loaded_files.end())
-			{
-				// release all resources attached to file
-				for (auto& elem : itr->second.bundle.GetAll())
-					std::visit([&](const auto& handle) { Release(handle); }, elem);
-				_loaded_files.erase(itr);
-			}
-		}
 
 		// reload the file
 		auto bundle = [&]()
@@ -295,6 +301,8 @@ namespace idk
 
 		_loaded_files.erase(itr);
 		_loaded_files.emplace(string_path, bundle);
+
+		Core::GetSystem<FileSystem>().Rename(old_path.GetMountPath(), string_path);
 
 		return FileMoveResult::Ok;
 	}

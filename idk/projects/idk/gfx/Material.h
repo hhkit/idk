@@ -5,6 +5,8 @@
 
 namespace idk
 {
+	RESOURCE_EXTENSION(Material, ".mat");
+
 	class ShaderTemplate;
 
 	ENUM(MaterialDomain, char,
@@ -23,21 +25,18 @@ namespace idk
 	{
 		MaterialDomain domain = MaterialDomain::Surface;
 		BlendMode      blend  = BlendMode::Opaque;
-		ShadingModel   model  = ShadingModel::Unlit;
-		Guid           compiled_shader_guid = Guid::Make();
+		ShadingModel   model  = ShadingModel::DefaultLit;
 	};
 
 	class Material
 		: public Resource<Material>
 		, public MetaTag<MaterialMeta>
+		, public Saveable<Material, false_type>
 	{
 	public:
-		virtual ~Material() = default;
+		RscHandle<ShaderProgram> _shader_program;
 
-		virtual bool BuildShader(RscHandle<ShaderTemplate>, string_view material_uniforms, string_view material_code) = 0;
-		RscHandle<ShaderProgram> GetShaderProgram() const;
-	protected:
-		RscHandle<ShaderProgram> _program{meta.compiled_shader_guid};
-		void OnMetaUpdate(const MaterialMeta& newmeta) override;
+		RscHandle<ShaderTemplate> GetTemplate() const;
+		virtual ~Material();
 	};
 }

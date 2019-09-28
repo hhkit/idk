@@ -5,9 +5,33 @@
 #include <vkn/ShaderModule.h>
 #include <res/MetaBundle.h>
 #include <util/ioutils.h>
+#include <vkn/utils/GlslToSpirv.h>
 
 namespace idk::vkn
 {
+	ShaderBuildResult VulkanShaderModuleFactory::BuildGLSL(const RscHandle<ShaderProgram>& program, ShaderStage stage, string_view glsl_code)
+	{
+		auto prog = RscHandle<ShaderModule>{ program };
+		bool ret = false;
+
+		auto spirv = GlslToSpirv::spirv(glsl_code, vk::ShaderStageFlagBits::eFragment);
+		ret = static_cast<bool>(spirv);
+		if (ret && spirv)
+		{
+			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, *spirv);
+			return ShaderBuildResult::Ok;
+		}
+		return ShaderBuildResult::Err_InvalidGLSL;
+	}
+	unique_ptr<ShaderProgram> VulkanShaderModuleFactory::GenerateDefaultResource()
+	{
+		return std::make_unique<ShaderModule>();
+	}
+	unique_ptr<ShaderProgram> VulkanShaderModuleFactory::Create()
+	{
+		return std::make_unique<ShaderModule>();
+	}
+
 	ResourceBundle VulkanShaderModuleLoader::LoadFile(PathHandle filepath)
 	{
 		auto program = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();

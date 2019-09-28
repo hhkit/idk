@@ -24,7 +24,6 @@ namespace idk
 		: ResourceExtension<T>
 	{
 		using ResourceExtension<T>::ext;
-		string name = string{ reflect::get_type<T>().name() };
 
 		static constexpr auto autosave = AutoSave::value;
 

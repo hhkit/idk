@@ -4,7 +4,6 @@
 #include <gfx/MeshRenderer.h>
 
 #include <idk_opengl/resource/OpenGLMesh.h>
-#include <idk_opengl/resource/OpenGLMaterial.h>
 #include <idk_opengl/resource/OpenGLTexture.h>
 #include <idk_opengl/resource/FrameBuffer.h>
 
@@ -126,8 +125,8 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
-				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
-				pipeline.PushProgram(material.GetShaderProgram());
+				auto material = elem.material_instance.material;
+				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
@@ -185,8 +184,8 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
-				auto& material = elem.material_instance.material.as<OpenGLMaterial>();
-				pipeline.PushProgram(material.GetShaderProgram());
+				auto material = elem.material_instance.material;
+				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());

@@ -2,6 +2,8 @@
 #include "ShaderGraph.h"
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
+#include <gfx/ShaderTemplate.h>
+#include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <regex>
 
@@ -300,21 +302,8 @@ namespace idk::shadergraph
 			}
         }
 
-		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
-		auto h_mat = Core::GetResourceManager().Create<Material>();
-		
-		h_mat->BuildShader(shader_template, uniforms, code);
-
-		inst.material = h_mat;
-
-		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
-		{
-			renderer.material_instance = inst;
-		}
-		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<SkinnedMeshRenderer>())
-		{
-			renderer.material_instance = inst;
-		}
+		auto shader_template = GetTemplate()->Instantiate(uniforms, code);
+		_shader_program->BuildShader(ShaderStage::Fragment, shader_template);
     }
 
 }

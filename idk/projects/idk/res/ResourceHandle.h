@@ -33,6 +33,8 @@ namespace idk
 		explicit operator bool() const;
 		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Other, Res>>>
 		explicit operator RscHandle<Other>() const;
+		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Res, Other>>>
+		RscHandle<Res>& operator=(const RscHandle<Other>& handle) { guid = handle.guid; return *this; }
 
 		Res& operator*() const;
 		Res* operator->() const;

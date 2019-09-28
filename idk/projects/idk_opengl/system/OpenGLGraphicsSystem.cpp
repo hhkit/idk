@@ -7,13 +7,14 @@
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>
+#include <gfx/MaterialFactory.h>
 #include <anim/Animation.h>
 #include <anim/SkeletonFactory.h>
 #include <idk_opengl/resource/FrameBufferFactory.h>
-#include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include <idk_opengl/resource/OpenGLTextureFactory.h>
 #include <idk_opengl/program/GLSLLoader.h>
+#include <idk_opengl/program/ProgramFactory.h>
 #include <idk_opengl/system/OpenGLState.h>
 
 #include "OpenGLGraphicsSystem.h"
@@ -159,16 +160,17 @@ namespace idk::ogl
 	void Win32GraphicsSystem::InitResourceLoader()
 	{
 		// register factories
+		Core::GetResourceManager().RegisterFactory<MaterialFactory>();
 		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
 		Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
-		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
-		Core::GetResourceManager().RegisterFactory<EasyFactory<ogl::Program>>();
+		Core::GetResourceManager().RegisterFactory<ProgramFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
 		Core::GetResourceManager().RegisterFactory<FrameBufferFactory>();
 
 		// register extensions
+		Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".vert");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");

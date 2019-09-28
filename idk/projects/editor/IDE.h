@@ -55,6 +55,7 @@ namespace idk
 		IDE();
 
 		void Init() override;
+		void LateInit() override;
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;

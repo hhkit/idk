@@ -81,12 +81,6 @@
     <ClInclude Include="object_pool.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanMaterial.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanMaterialFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="utils\GlslToSpirv.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -210,12 +204,6 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="utils\GlslToSpirv.cpp" />
-    <ClCompile Include="VulkanMaterialFactory.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanMaterial.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="VknTexture.cpp">
       <Filter>resource</Filter>
     </ClCompile>

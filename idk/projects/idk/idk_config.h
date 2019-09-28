@@ -72,7 +72,6 @@ namespace idk
 		,	class RenderTarget
 		,	anim::Animation
 		,	anim::Skeleton
-        ,   shadergraph::Graph
 		//,	class Level
 	>;
 
