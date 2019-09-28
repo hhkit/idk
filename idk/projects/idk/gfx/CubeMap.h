@@ -21,6 +21,13 @@ namespace idk
 		RGBAF_32
 	)
 
+	ENUM(CMInputChannels, char
+		, RED
+		, RG
+		, RGB
+		, RGBA
+	);
+
 	ENUM(CMUVMode, char,
 		Repeat,
 		MirrorRepeat,

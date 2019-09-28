@@ -49,7 +49,18 @@ namespace idk
 
 			//assert(data);
 
-			texture_handle->Buffer(i, data, size, tm.internal_format);
+			auto col_format = [&]() -> CMInputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return CMInputChannels::RED;
+			case 2: return CMInputChannels::RG;
+			case 3: return CMInputChannels::RGB;
+			case 4: return CMInputChannels::RGBA;
+			}
+			}();
+
+			texture_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
 
@@ -99,7 +110,18 @@ namespace idk
 
 			//assert(data);
 
-			texture_handle->Buffer(i, data, size, tm.internal_format);
+			auto col_format = [&]() -> CMInputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return CMInputChannels::RED;
+			case 2: return CMInputChannels::RG;
+			case 3: return CMInputChannels::RGB;
+			case 4: return CMInputChannels::RGBA;
+			}
+			}();
+
+			texture_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
 

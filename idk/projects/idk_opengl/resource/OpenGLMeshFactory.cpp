@@ -314,6 +314,7 @@ namespace idk::ogl
 			);
 		}
 
+
 		{	/* create circle mesh */
 			auto circle_mesh = Mesh::defaults[MeshType::Circle];
 			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(circle_mesh.guid);

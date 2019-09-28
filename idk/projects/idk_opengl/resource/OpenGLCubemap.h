@@ -15,7 +15,7 @@ namespace idk::ogl
 
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
-		void Buffer(unsigned int face_value, void* data, ivec2 size, CMColorFormat format_in);
+		void Buffer(unsigned int face_value, void* data, ivec2 size, CMInputChannels inputchn = CMInputChannels::RGB);
 
 		void Size(ivec2 new_size) override;
 		virtual void* ID() const override;
