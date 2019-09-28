@@ -25,6 +25,10 @@ namespace idk::vkn
 	class ShaderModule :public ShaderProgram, public IBufferedObj
 	{
 	public:
+
+
+		operator bool()const { return buf_obj.HasCurrent(); }
+
 		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& byte_code);
 		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors,string_view byte_code);
 		vk::ShaderStageFlagBits Stage()const { return Current().stage; }

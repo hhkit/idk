@@ -16,6 +16,7 @@ namespace idk::vkn
 	class BufferedObj :IBufferedObj
 	{
 	public:
+		bool HasCurrent()const { return s_cast<bool>(_current); }
 		BufferedData& Current() { return *_current; }
 		const BufferedData& Current()const { return *_current; }
 		void WriteToBack(unique_ptr<BufferedData>&& new_data){
