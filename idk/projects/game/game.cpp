@@ -89,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
 		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
-		camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/lagoon.jpg.cbm");
+		camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>(PathHandle{ "/assets/textures/skybox/lagoon.jpg.cbm" });
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
 		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
 
@@ -174,12 +174,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	createtest_obj(vec3{ -0.5, 0, 0 });
 	//createtest_obj(vec3{ 0, 0.5, 0 });
 	//createtest_obj(vec3{ 0, -0.5, 0 });
-
-	auto floor = scene->CreateGameObject();
-	floor->Transform()->position = vec3{ 0, -1, 0 };
-	//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
-	floor->Transform()->scale    = vec3{ 10, 2, 10 };
-	floor->AddComponent<Collider>()->shape = box{};
+	{
+		auto floor = scene->CreateGameObject();
+		floor->Transform()->position = vec3{ 0, -1, 0 };
+		//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+		floor->Transform()->scale = vec3{ 10, 2, 10 };
+		floor->AddComponent<Collider>()->shape = box{};
+		auto mesh_rend = floor->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
+		//mesh_rend->material_instance = mat_inst;
+		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" });
+	}
 	{
 		auto wall = scene->CreateGameObject();
 		wall->Transform()->position = vec3{ 5, 5, 0 };

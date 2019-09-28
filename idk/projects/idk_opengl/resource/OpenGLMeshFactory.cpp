@@ -356,6 +356,38 @@ namespace idk::ogl
 			);
 		}
 
+		{	/* create plane mesh */
+			auto plane_mesh = Mesh::defaults[MeshType::Plane];
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(plane_mesh.guid);
+			constexpr auto sz = 1.f;
+			//constexpr auto numberOfTri = 16;
+			//real angle = (2.f * pi) / numberOfTri;
+
+			std::vector<Vertex> vertices{
+				Vertex{ vec3{  sz,  0,  sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{  sz, 0,  -sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{-sz, 0,  -sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{-sz,  0,  sz}, vec3{0,0, 1} },  // front
+			};
+
+			std::vector<int> indices{
+				1, 0, 3,
+				2, 1, 3
+			};
+
+			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+				.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei)vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
+			);
+		}
+
 		{	/* create tetrahedral mesh */
 			auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
 			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
