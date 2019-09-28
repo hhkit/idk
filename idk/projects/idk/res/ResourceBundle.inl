@@ -76,13 +76,13 @@ namespace idk
 	}
 
 	template<typename T>
-	T& ResourceBundle::ResourceSpan<T>::iterator::operator*() const
+	const RscHandle<T>& ResourceBundle::ResourceSpan<T>::iterator::operator*() const
 	{
 		return itr->AsHandle<T>();
 	}
 
 	template<typename T>
-	T* ResourceBundle::ResourceSpan<T>::iterator::operator->() const
+	const RscHandle<T>* ResourceBundle::ResourceSpan<T>::iterator::operator->() const
 	{
 		return &itr->AsHandle<T>();
 	}
