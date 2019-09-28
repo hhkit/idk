@@ -172,6 +172,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="commands\CMD_DeleteComponent.h" />
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
     <ClInclude Include="DragDropTypes.h" />
@@ -208,6 +209,7 @@
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <FileType>Document</FileType>
