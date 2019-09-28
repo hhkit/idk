@@ -7,6 +7,7 @@
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>
+#include <gfx/MaterialInstance.h>
 #include <gfx/MaterialFactory.h>
 #include <anim/Animation.h>
 #include <anim/SkeletonFactory.h>
@@ -161,6 +162,7 @@ namespace idk::ogl
 	{
 		// register factories
 		Core::GetResourceManager().RegisterFactory<MaterialFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
 		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
 		Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();

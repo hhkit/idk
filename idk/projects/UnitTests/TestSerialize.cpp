@@ -157,7 +157,7 @@ TEST(Serialize, TestSerializeComplex)
 
 struct serialass : serialize_this
 {
-	variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> var;
+	UniformInstance var;
 	testserialize_enum x = testserialize_enum::TAU;
 };
 REFLECT_BEGIN(serialass, "serialass")

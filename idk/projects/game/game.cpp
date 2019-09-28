@@ -92,10 +92,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		divByVal = 200.f;
 	}
-	auto h_mat = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
+	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 
 	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, h_mat, gfx_api, divByVal](vec3 pos) {
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
@@ -113,7 +114,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			animator->AddAnimation(resources->Get<anim::Animation>());
 			animator->Play(0);
 		}
-		mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance = mat_inst;
 
 		return go;
 	};
@@ -127,7 +128,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// create_anim_obj(vec3{ 0,0,0 });
 	Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
 
-	auto createtest_obj = [&scene, h_mat, gfx_api, divByVal,tmp_tex](vec3 pos) {
+	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->GetComponent<Transform>()->position = pos;
 		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
@@ -140,8 +141,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//if (gfx_api != GraphicsAPI::Vulkan)
 		//mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance.material = h_mat;
-		mesh_rend->material_instance.uniforms["tex"] = tmp_tex;
+		mesh_rend->material_instance = mat_inst;
+		mesh_rend->material_instance->uniforms["tex"] = tmp_tex;
 
 		return go;
 	};
@@ -198,7 +199,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seduceme->AddComponent<RigidBody>();
 		auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance = mat_inst;
 		seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	{
@@ -209,7 +210,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
 		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance = mat_inst;
 		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	{
@@ -220,7 +221,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
 		auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
 		mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-		mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance = mat_inst;
 		seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 
@@ -232,7 +233,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
 		auto mesh_rend = seducer->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
-		mesh_rend->material_instance.material = h_mat;
+		mesh_rend->material_instance = mat_inst;
 		//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
 	}
 	

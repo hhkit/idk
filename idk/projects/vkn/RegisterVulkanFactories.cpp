@@ -8,6 +8,7 @@
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>
+#include <gfx/MaterialInstance.h>
 #include <anim/SkeletonFactory.h>
 #include <anim/Animation.h>
 #include <vkn/VulkanTextureFactory.h>
@@ -17,6 +18,7 @@ namespace idk::vkn
 
 void RegisterFactories()
 {
+	Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
 	Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 	Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
 	Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();

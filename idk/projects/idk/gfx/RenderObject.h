@@ -14,7 +14,7 @@ namespace idk
 	{
 		// resources
 		RscHandle<Mesh>  mesh;
-		MaterialInstance material_instance;
+		RscHandle<MaterialInstance> material_instance;
 	//	hash_table<string, hash_table<string,UniformInstance>> uniforms;
 
 		// transform

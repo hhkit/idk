@@ -44,6 +44,8 @@ namespace idk
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
 		h_mat->Compile();
+		auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+		mat_inst->material = h_mat;
 
 		vec3 min_pos{ INT_MAX,INT_MAX ,INT_MAX }, max_pos{ INT_MIN,INT_MIN ,INT_MIN };
 		vector<Vertex> vertices;
@@ -144,7 +146,7 @@ namespace idk
 			mesh_child->Transform()->SetParent(prefab_root);
 			auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
 			mesh_renderer->mesh = RscHandle<Mesh>{ mesh_handle };
-			mesh_renderer->material_instance.material = h_mat;
+			mesh_renderer->material_instance = mat_inst;
 
 			vertices.clear();
 			indices.clear();
