@@ -158,7 +158,11 @@ namespace idk::ogl
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
-				for (auto& [id, uniform] : elem.material_instance->uniforms)
+                auto instance_uniforms = elem.material_instance->material->uniforms;
+                for (auto& [id, uniform] : elem.material_instance->uniforms)
+                    instance_uniforms.emplace(id, uniform);
+
+                for (auto& [id, uniform] : instance_uniforms)
 				{
 					std::visit([this, &id, &texture_units](auto& elem) {
 						using T = std::decay_t<decltype(elem)>;
@@ -226,7 +230,11 @@ namespace idk::ogl
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 				// material uniforms
-				for (auto& [id, uniform] : elem.material_instance->uniforms)
+                auto instance_uniforms = elem.material_instance->material->uniforms;
+                for (auto& [id, uniform] : elem.material_instance->uniforms)
+                    instance_uniforms.emplace(id, uniform);
+
+				for (auto& [id, uniform] : instance_uniforms)
 				{
 					std::visit([this, &id, &texture_units](auto& elem) {
 						using T = std::decay_t<decltype(elem)>;

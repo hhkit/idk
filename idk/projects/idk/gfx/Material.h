@@ -36,6 +36,9 @@ namespace idk
 	public:
 		RscHandle<ShaderProgram> _shader_program;
 
+        //Change this to be a map of name -> some struct that represents an entire block
+        hash_table<string, UniformInstance> uniforms;
+
 		RscHandle<ShaderTemplate> GetTemplate() const;
 		virtual ~Material();
 	};

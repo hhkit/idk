@@ -78,6 +78,9 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::MaterialInstance>, "RscHandle<MaterialInstance>")
+REFLECT_VARS(guid)
+REFLECT_END()
 
 REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
 REFLECT_VARS(guid)
@@ -120,7 +123,7 @@ REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoo
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Material, "Material")
-REFLECT_VARS(_shader_program)
+REFLECT_VARS(_shader_program, uniforms)
 REFLECT_END()
 
 REFLECT_ENUM(idk::BlendMode, "BlendMode")
