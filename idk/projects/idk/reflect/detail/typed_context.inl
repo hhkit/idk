@@ -23,6 +23,13 @@ namespace idk::reflect::detail
 	template <typename T>
 	inline constexpr bool is_pair_assignable_v = is_pair_assignable<T>::value;
 
+    template <typename T, typename = void>
+    struct has_on_parse : std::false_type
+    {};
+    template <typename T>
+    struct has_on_parse<T, std::void_t<decltype(std::declval<T>().on_parse())>> : std::true_type
+    {};
+
 
 
 	struct typed_context_base
@@ -56,6 +63,7 @@ namespace idk::reflect::detail
 		virtual enum_value to_enum_value(void* obj) const = 0;
 		virtual vector<dynamic> unpack(void* obj) const = 0;
 		virtual dynamic get_variant_value(void* obj) const = 0;
+        virtual void on_parse(void* obj) const = 0;
 
 		template<typename... Ts>
 		dynamic construct(Ts&& ... args) const
@@ -256,6 +264,14 @@ namespace idk::reflect::detail
 			else
 				throw "not a variant!";
 		}
+
+        virtual void on_parse(void* obj) const override
+        {
+            obj;
+            if constexpr (has_on_parse<T>::value)
+                return static_cast<T*>(obj)->on_parse();
+        }
+
 	};
 
 	template<typename T>

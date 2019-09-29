@@ -271,3 +271,22 @@ TEST(Serialize, TestSerializeStructThatContainsDyn)
     structthatcontainsdyn x2 = parse_text<structthatcontainsdyn>(str);
     ASSERT_EQ(x.dyn.get<string>(), x2.dyn.get<string>());
 }
+
+struct structonparse
+{
+    int x = 0;
+    void on_parse()
+    {
+        x = 999;
+    }
+};
+REFLECT_BEGIN(structonparse, "structonparse")
+REFLECT_VARS(x)
+REFLECT_END()
+TEST(Serialize, TestOnParseCallback)
+{
+    structonparse x;
+    auto str = serialize_text(x);
+    structonparse x2 = parse_text<structonparse>(str);
+    ASSERT_EQ(x2.x, 999);
+}
