@@ -75,8 +75,24 @@ namespace idk {
 				DisplayTransformComponent(c_transform);
 			}
 
+			
+			Handle<AnimationController> c_anim = editor.selected_gameObjects[0]->GetComponent<AnimationController>();
+			if (c_anim)
+			{
+				ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
+				if(ImGui::Button("Play"))
+				{
+					c_anim->Play(0);
+				}
+				if (ImGui::Button("Stop"))
+				{
+					c_anim->Stop();
+				}
+				if (ImGui::Button("Pause"))
+				{
 
-
+				}
+			}
 
 			//Display remaining components here
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
@@ -168,7 +184,7 @@ namespace idk {
 					});
 					cursorPos2 = ImGui::GetCursorPos();
 				}
-
+				
 				ImGui::SetCursorPos(cursorPos);
 				ImGui::SetCursorPosX(window_size.x - 20);
 				ImGui::Text("...");

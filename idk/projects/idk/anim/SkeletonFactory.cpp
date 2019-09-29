@@ -9,7 +9,7 @@ namespace idk::anim
 		auto retval = std::make_unique<Skeleton>();
 		Skeleton::Bone b;
 		b._name = "ROOT";
-		b._offset = mat4{ };
+		b._global_inverse_bind_pose = mat4{ };
 		b._parent = -1;
 
 		return retval;

@@ -26,7 +26,7 @@
 namespace idk::fbx_loader_detail
 {
 	static vec3 FBX_SCALE = vec3{ 1.0f/100, 1.0f / 100, 1.0f / 100 };
-	// static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
+	//static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
 	struct Vertex
 	{
 		vec3	pos;
@@ -61,9 +61,9 @@ namespace idk::fbx_loader_detail
 	struct BoneData
 	{
 		BoneData() = default;
-		BoneData(string_view name, const mat4& transform = mat4{}) :_name{ name }, _offset{ transform } {}
+		BoneData(string_view name, const mat4& transform = mat4{}) :_name{ name }, _global_inverse_bind_pose{ transform } {}
 		string _name;
-		mat4 _offset;
+		mat4 _global_inverse_bind_pose;
 	};
 
 	struct MeshData
@@ -87,7 +87,7 @@ namespace idk::fbx_loader_detail
 	{
 		string _name;
 		mat4 _node_transform;
-		mat4 _bone_offset;
+		mat4 _global_inverse_bind_pose;
 
 		AI_NODE_TYPE _ai_type = NONE;
 

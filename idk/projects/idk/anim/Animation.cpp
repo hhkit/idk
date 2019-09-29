@@ -49,10 +49,10 @@ namespace idk::anim
 
 	Animation::Channel& Animation::Channel::operator+=(const Channel& rhs)
 	{
-		// If rhs channel is not animated, we just concat the _node_transform
+		// If rhs channel is not animated, we just concat the _local_bind_pose
 		// if (!rhs._is_animated)
 		// {
-		// 	_node_transform = _node_transform * rhs._node_transform;
+		// 	_local_bind_pose = _local_bind_pose * rhs._local_bind_pose;
 		// 	return *this;
 		// }
 		// 

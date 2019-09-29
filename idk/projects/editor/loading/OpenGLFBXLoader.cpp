@@ -153,16 +153,6 @@ namespace idk
 		mat4 normalize_mat = mat4 { scale(fbx_loader_detail::FBX_SCALE)  };
 		fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
 
-		// Loads the skeleton heirarchy.
-		// Passing the inverse of the normalization as the bone transformations happen in the un-normalized mesh space.
-		// The inverse_normalize_mat is added to the bone_offset
-		
-
-		// Loads all the vertex bone weights and indices
-		// fbx_loader_detail::initBoneWeights(ai_scene, mesh_handle->GetMeshEntries(), bones_table, vertices);
-
-		
-
 		// Loading Skeletons
 		auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
 		// Name is the root node
@@ -173,7 +163,7 @@ namespace idk
 		skeleton = anim::Skeleton{ bones, bones_table };
 
 		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-		mat4 skeleton_transform = normalize_mat * 
+		mat4 skeleton_transform = //normalize_mat * 
 			fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.Add(skeleton_handle);
@@ -203,6 +193,7 @@ namespace idk
 
 	ResourceBundle OpenGLFBXLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& meta_bundle)
 	{
+		return LoadFile(path_to_resource);
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
 		ResourceBundle retval;
@@ -389,7 +380,7 @@ namespace idk
 		skeleton = anim::Skeleton{ bones, bones_table };
 
 		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-		mat4 skeleton_transform = normalize_mat * 
+		mat4 skeleton_transform = //normalize_mat * 
 			fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.Add(skeleton_handle);
@@ -416,7 +407,7 @@ namespace idk
 			retval.Add(anim_clip_handle);
 			animator->AddAnimation(anim_clip_handle);
 		}
-		animator->Play(0);
+		// animator->Play(0);
 
 		return retval;
 	}

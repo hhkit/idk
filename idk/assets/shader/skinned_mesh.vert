@@ -63,7 +63,8 @@ void main()
   b_transform      += BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
 	
 	b_transform /= (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3]);
-	mat4 resultant = ObjectMat4s.object_transform * b_transform;  
+	mat4 resultant = ObjectMat4s.object_transform *
+                     b_transform;  
 	vs_out.position = vec3(resultant * vec4(position, 1.0));
 	// O B 
 	// Binv O inv  // inv(OB)
