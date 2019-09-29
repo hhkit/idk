@@ -248,7 +248,7 @@ namespace idk {
 			if (ImGui::BeginDragDropTarget()) {
 				if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("id")) {
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
-					uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
+					//uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
 					if (selected_gameObjects.size()) {
 						for (Handle<GameObject>& i : selected_gameObjects) {
 							if (i == handle) //do not parent self

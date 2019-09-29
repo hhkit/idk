@@ -54,7 +54,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
-	int num_args=0;
+	//int num_args=0;
 	//auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	//_CrtSetBreakAlloc(8538); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
