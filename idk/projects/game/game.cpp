@@ -269,7 +269,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		auto light = scene->CreateGameObject();
 		light->Name("Directional Light");
-		light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
+		light->GetComponent<Transform>()->position = vec3{ 1.749,1.699,1.054f };
 		euler_angles rot;
 		rot.x = deg{ 94 };
 		rot.y = deg{ -9 };
