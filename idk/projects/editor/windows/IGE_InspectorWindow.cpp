@@ -208,6 +208,7 @@ namespace idk {
 							{
 								val = variant_construct<T>(new_ind);
 							}
+							return false;
 						}
 						else {
 							ImGui::SetCursorPosY(currentHeight + heightOffset);

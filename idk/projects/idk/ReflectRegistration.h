@@ -66,6 +66,11 @@ REFLECT_CTOR(float, float, float)
 REFLECT_VARS(r, g, b, a)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::rad, "rad")
+REFLECT_CTOR(float)
+REFLECT_VARS(value)
+REFLECT_END()
+
 /*==========================================================================
  * resource handles
  *========================================================================*/
@@ -227,6 +232,22 @@ REFLECT_END()
 // GRAPHICS
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Light, "Light")
+REFLECT_VARS(light, shadow_bias, casts_shadows)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PointLight, "PointLight")
+REFLECT_VARS(intensity, light_color, attenuation_radius)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
+REFLECT_VARS(intensity, light_color)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::SpotLight, "SpotLight")
+REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")

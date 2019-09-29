@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <reflect/reflect.h>
 #include <util/enum.h>
-#include <reflect/ReflectRegistration.h>
+#include <ReflectRegistration.h>
 
 using namespace idk;
 

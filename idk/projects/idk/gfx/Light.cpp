@@ -5,27 +5,27 @@
 
 namespace idk
 {
-	RscHandle<LightMap>& Light::GetLightMap()
+	RscHandle<RenderTarget>& Light::GetLightMap()
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant) ->RscHandle<LightMap> &
+			std::visit([&](auto& light_variant) ->RscHandle<RenderTarget> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	const RscHandle<LightMap>& Light::GetLightMap() const
+	const RscHandle<RenderTarget>& Light::GetLightMap() const
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant)-> const RscHandle<LightMap> &
+			std::visit([&](auto& light_variant)-> const RscHandle<RenderTarget> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	void Light::SetLightMap(const RscHandle<LightMap>& light_map)
+	void Light::SetLightMap(const RscHandle<RenderTarget>& light_map)
 	{
 		GetLightMap() = light_map;
 	}

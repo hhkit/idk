@@ -257,9 +257,6 @@
     <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="reflect\ReflectRegistration.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="serialize\serialize.h">
       <Filter>serialize</Filter>
     </ClInclude>
@@ -648,6 +645,9 @@
     <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="anim\BoneComponent.h" />
     <ClInclude Include="PauseConfigurations.h" />
+    <ClInclude Include="ReflectRegistration.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

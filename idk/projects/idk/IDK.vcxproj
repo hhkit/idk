@@ -184,7 +184,7 @@
     <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
-    <ClInclude Include="reflect\ReflectRegistration.h" />
+    <ClInclude Include="ReflectRegistration.h" />
     <ClInclude Include="reflect\detail\typed_context.inl" />
     <ClInclude Include="res\Guid.h" />
     <ClInclude Include="res\Resource.h" />

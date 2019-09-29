@@ -7,6 +7,7 @@
 #include <prefab/PropertyOverride.h>
 #include <gfx/UniformInstance.h>
 #include <gfx/ShaderGraph_data.h>
+#include <gfx/LightTypes.h>
 #include <res/ResourceMeta.h>
 #include <scene/SceneManager.h>
 #include <phys/Collider.h>
@@ -54,7 +55,7 @@ namespace idk::reflect
 		, RscHandle<Mesh>
 		, UniformInstance
 		, hash_table<string, UniformInstance>
-		//, LightVariant
+		, LightVariant
 
 		// physics
 		, Collider::Shapes

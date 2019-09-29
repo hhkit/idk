@@ -7,7 +7,7 @@
 #include <vkn/VulkanDebugRenderer.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
-#include <reflect/ReflectRegistration.h>
+#include <ReflectRegistration.h>
 #include <editor/IDE.h>
 #include <file/FileSystem.h>
 #include <gfx/MeshRenderer.h>

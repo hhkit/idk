@@ -58,6 +58,7 @@ namespace idk
 		default:
 			break;
 		}
+		Core::GetResourceManager().RegisterFactory<GraphFactory>();
         Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
 
         auto& fs = Core::GetSystem<FileSystem>();
@@ -187,7 +188,6 @@ namespace idk
 		default:
 			break;
 		}
-		Core::GetResourceManager().RegisterFactory<GraphFactory>();
 		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetScheduler().SetPauseState(EditorPause);
