@@ -49,7 +49,7 @@ namespace idk {
 	void* vkn::VknTexture::ID() const
 	{
 		//Should be descriptor set 
-		return nullptr;
+		return r_cast<void*>(imageView->operator VkImageView());
 	}
 
 	void vkn::VknTexture::OnMetaUpdate(const TextureMeta&)

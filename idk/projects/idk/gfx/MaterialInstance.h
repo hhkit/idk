@@ -16,6 +16,7 @@ namespace idk
 
 		bool IsImageBlock(const string& name)const;
 		hash_table<string, RscHandle<Texture>> GetImageBlock(const string& name)const;
+		std::optional<UniformInstance> GetUniform(const string& name)const;
 		string GetUniformBlock(const string& name)const;
 	};
 }

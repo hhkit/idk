@@ -228,7 +228,7 @@ namespace idk::vkn
 		vk::PipelineStageFlags shader_flags = vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader;// | vk::PipelineStageFlagBits::eTessellationControlShader | vk::PipelineStageFlagBits::eTessellationEvaluationShader;
 		vk::PipelineStageFlags src_stages = shader_flags;
 		vk::PipelineStageFlags dst_stages = vk::PipelineStageFlagBits::eTransfer;
-		vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		vk::ImageLayout layout = vk::ImageLayout::eGeneral;
 		vk::ImageLayout next_layout = vk::ImageLayout::eTransferDstOptimal;
 		if (is_render_target)
 		{

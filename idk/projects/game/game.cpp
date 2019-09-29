@@ -57,7 +57,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	int num_args=0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(8538); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(102284); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 #ifdef USE_RENDER_DOC
@@ -77,16 +77,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 	
 	auto c = std::make_unique<Core>();
-	c->AddSystem<Windows>(hInstance, nCmdShow);
+	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::OpenGL;
+	auto gfx_api = GraphicsAPI::Vulkan;
 	switch (gfx_api)
 	{
 		case GraphicsAPI::Vulkan:
-			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			c->AddSystem<IDE>();
+		{
+			auto sys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 
+			c->AddSystem<IDE>();
+			win.OnScreenSizeChanged.Listen([sys](const ivec2&) { sys->Instance().OnResize(); });
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
+		}
 			break;
 		case GraphicsAPI::OpenGL:
 			c->AddSystem<ogl::Win32GraphicsSystem>();
@@ -209,7 +212,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto mesh_rend = floor->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
 		//mesh_rend->material_instance = mat_inst;
-		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" });
+		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" },false);
 	}
 	{
 		auto wall = scene->CreateGameObject();

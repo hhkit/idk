@@ -398,7 +398,10 @@ namespace idk::vkn
 			//Force pipeline creation
 			shaders.resize(0);
 
-			auto sprog = (cam.is_shadow) ? _shadow_shader_module : dc.material_instance->material->_shader_program;
+			auto& mat_inst = *dc.material_instance;
+			auto& mat = *mat_inst.material;
+			;
+			auto sprog = (cam.is_shadow) ? _shadow_shader_module : mat._shader_program;
 			
 			auto& fprog = sprog.as<ShaderModule>();
 			auto& vprog = mesh_mod.as<ShaderModule>();
@@ -431,8 +434,10 @@ namespace idk::vkn
 			for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 			{
 				auto& name = itr->first;
-				auto mat_uni_itr = dc.material_instance->uniforms.find(itr->first);
-				if (mat_uni_itr != dc.material_instance->uniforms.end())
+				auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
+				if (!mat_uni_itr)
+					mat_uni_itr = dc.material_instance->GetUniform(itr->first+"[0]");
+				if (mat_uni_itr )
 				{
 					auto& ubo_info = itr->second;
 					auto& layout = ubo_info.layout;
@@ -460,18 +465,26 @@ namespace idk::vkn
 						break;
 						case uniform_layout_t::UniformType::eSampler:
 						{
-							auto&& data = dc.material_instance->GetImageBlock(name);
-							auto& texture = data.begin()->second.as<vkn::VknTexture>();
-							collated_bindings[ubo_info.set].emplace_back(
-								ProcessedRO::BindingInfo
+							for (auto i = ubo_info.size; i-- > 0;)
+							{
+								auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
+								if (data.size())
 								{
-									ubo_info.binding,
-									ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eShaderReadOnlyOptimal},
-									0,
-									0,
-									ubo_info.size
+
+									auto& texture = data.begin()->second.as<vkn::VknTexture>();
+									collated_bindings[ubo_info.set].emplace_back(
+										ProcessedRO::BindingInfo
+										{
+											ubo_info.binding,
+											ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+											0,
+											i,
+											ubo_info.size
+										}
+									);
+
 								}
-							);
+							}
 							collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
 						}
 						break;

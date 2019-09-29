@@ -246,7 +246,7 @@ namespace idk::shadergraph
 
                 if (uniform_type == ValueType::SAMPLER2D)
                 {
-                    block += "U_LAYOUT(3, ";
+                    block += "S_LAYOUT(3, ";
                     block += std::to_string(ValueType::SAMPLER2D);
                     block += ") uniform sampler2D ";
                     block += uniform_name;

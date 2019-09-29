@@ -7,10 +7,12 @@
 constexpr auto replacer = R"(
 #ifdef OGL
 #define U_LAYOUT(SET, BIND) 
+#define S_LAYOUT(SET, BIND) 
 #define BLOCK(X) struct X
 #endif
 #ifdef VULKAN
 #define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+#define S_LAYOUT(SET, BIND) layout(std140,set = SET, binding = BIND) 
 #define BLOCK(X) X
 #endif
 )";
