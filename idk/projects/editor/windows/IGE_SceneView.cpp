@@ -199,7 +199,7 @@ namespace idk {
 	{
 		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
 
-		auto& app_sys = Core::GetSystem<Application>();
+		//auto& app_sys = Core::GetSystem<Application>();
 		IDE& editor = Core::GetSystem<IDE>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;

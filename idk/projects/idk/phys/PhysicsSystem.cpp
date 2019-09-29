@@ -253,6 +253,7 @@ namespace idk
 		// put shape into world space
 		constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
 		{
+			rb;
 			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
 		};
 
