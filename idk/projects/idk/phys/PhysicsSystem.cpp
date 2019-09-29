@@ -248,6 +248,26 @@ namespace idk
 		FinalizePositions();
 	}
 
+	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
+	{
+		// put shape into world space
+		constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
+		{
+			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+		};
+
+		constexpr auto debug_draw = [calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
+		{
+			std::visit([&](const auto& shape)
+				{
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), c, dur);
+				}, collider.shape);
+		};
+
+		for (auto& collider : colliders)
+			debug_draw(collider);
+	}
+
 
 	void PhysicsSystem::Init()
 	{

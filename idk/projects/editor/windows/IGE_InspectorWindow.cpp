@@ -28,6 +28,7 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <math/euler_angles.h>
 #include <widgets/InputResource.h>
+#include <meta/variant.h>
 
 namespace idk {
 
@@ -176,9 +177,42 @@ namespace idk {
 
 							return false;
 						}
+						else if constexpr (is_template_v<T, std::variant>)
+						{
+							static_assert(is_template_v<T, std::variant>, "HOW????");
+							const int curr_ind = s_cast<int>(val.index());
+							int new_ind = curr_ind;
+							
+							constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+							using VarCombo = std::array<const char*, sz>;
+							
+							
+							static auto combo_items = []()-> VarCombo
+							{
+								static_assert(is_template_v<T, std::variant>, "HOW????");
+
+								static std::array<string, sz> tmp_arr;
+								std::array<const char*, sz> retval;
+								
+								auto sp = reflect::unpack_types<T>();
+								
+								for (auto i = 0; i < sz; ++i)
+								{
+									tmp_arr[i] = string{ sp[i].name() };
+									retval[i] = tmp_arr[i].data();
+								}
+								return retval;
+							}();
+							
+							if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
+							{
+								val = variant_construct<T>(new_ind);
+							}
+						}
 						else {
 							ImGui::SetCursorPosY(currentHeight + heightOffset);
 							ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
+							return true;
 						}
 							
 					});

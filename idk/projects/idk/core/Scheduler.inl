@@ -110,11 +110,11 @@ namespace idk
 	}
 
 	template<typename System, typename ...Components>
-	Scheduler::Pass& Scheduler::Pass::IfPausedThen(void(System::** memfb)(span<Components>...))
+	Scheduler::Pass& Scheduler::Pass::IfPausedThen(void(System::* memfb)(span<Components>...))
 	{
 		Scheduler::Lock read_bitset = detail::SchedulerHelper<Components...>::GetReadLock();
 		Scheduler::Lock write_bitset = detail::SchedulerHelper<Components...>::GetWriteLock();
-		auto call = [memfb]()
+		auto new_call = [memfb]()
 		{
 			auto sys = &Core::GetSystem<System>();
 			if (sys)
@@ -126,6 +126,8 @@ namespace idk
 		};
 		paused_read_components = read_bitset;
 		paused_write_components = write_bitset;
-		paused_call = call;
+		paused_call = new_call;
+
+		return *this;
 	}
 }

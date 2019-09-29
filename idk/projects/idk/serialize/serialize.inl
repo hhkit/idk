@@ -25,6 +25,8 @@ namespace idk
             obj = str == "true";
         else if constexpr (std::is_same_v<std::decay_t<T>, char>)
             obj = static_cast<char>(std::stoi(str));
+		else if constexpr (std::is_same_v<std::decay_t<T>, unsigned char>)
+			obj = static_cast<unsigned char>(std::stoi(str));
         else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>)
             obj = std::stoll(str);
         else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>)

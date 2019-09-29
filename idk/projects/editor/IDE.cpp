@@ -34,7 +34,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/windows/IGE_WindowList.h>
 #include <res/EasyFactory.h>
 #include <imgui/ImGuizmo.h>
-
+#include <core/Scheduler.h>
+#include <PauseConfigurations.h>
 
 namespace idk
 {
@@ -188,6 +189,8 @@ namespace idk
 		}
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
 		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
+
+		Core::GetScheduler().SetPauseState(EditorPause);
 	}
 
 	void IDE::Shutdown()

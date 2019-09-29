@@ -14,5 +14,8 @@ namespace idk
 
 	template<typename T>
 	using tuple_to_variant_t = typename tuple_to_variant<T>::type;
+
+	template<typename T>
+	constexpr auto variant_construct(size_t) noexcept;
 }
 #include "variant.inl"

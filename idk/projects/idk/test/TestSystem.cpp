@@ -11,6 +11,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
 #include <core/GameState.h>
+#include <scene/ProjectManager.h>
 #include <gfx/DebugRenderer.h>
 #include <PauseConfigurations.h>
 
@@ -44,6 +45,9 @@ namespace idk
 			Core::GetScheduler().SetPauseState(GamePause);
 		if (app_sys.GetKeyUp(Key::P))
 			Core::GetScheduler().SetPauseState(UnpauseAll);
+
+		if (app_sys.GetKey(Key::Control) && app_sys.GetKeyDown(Key::S))
+			Core::GetSystem<ProjectManager>().SaveProject();
 	}
 
 	void TestSystem::Shutdown()

@@ -63,11 +63,13 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::BuildSceneGraph,   "Build scene graph");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,    "Destroy Objects");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,            "Test updates");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,     "Physics Update");
+		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,     "Physics Update")
+			.IfPausedThen(&PhysicsSystem::DebugDrawColliders);
 		if (editor)
 		{
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory,         "Watch files");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&IEditor::EditorUpdate,                   "Editor Update");
+			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects, "Destroy Objects");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyMetadata,      "Save dirty resources");
 			_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyFiles, "Save dirty files");
 			_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState,     "Buffer graphics objects");
