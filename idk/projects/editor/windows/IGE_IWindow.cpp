@@ -55,6 +55,18 @@ namespace idk {
 		}
 	}
 
+	void IGE_IWindow::DrawToolTipOnHover(const char* desc)
+	{
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+
 	void IGE_IWindow::DrawText(const char* fmt, ...) {
 		va_list args;
 		va_start(args, fmt);
