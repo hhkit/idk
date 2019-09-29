@@ -43,8 +43,9 @@ namespace idk
 	inline opt<string_view> ResourceManager::GetPath(const RscHandle<Res>& h)
 	{
 		auto* cb = GetControlBlock(h);
-		if (cb && cb->path)
-			return string_view{ *cb->path };
+		if (cb)
+			if (cb->path)
+				return *cb->path;
 		return std::nullopt;
 	}
 
