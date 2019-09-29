@@ -68,9 +68,10 @@ namespace idk {
             imageSize.x = imageSize.y * rendertex_aspect;
         else if (rendertex_aspect < windowframe_aspect) // windowframe is horizontally longer
             imageSize.y = imageSize.x / rendertex_aspect;
+        draw_rect_size = imageSize;
 
-        auto offset = (GetScreenSize() - imageSize) * 0.5f;
-        ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + offset);
+        draw_rect_offset = (GetScreenSize() - imageSize) * 0.5f;
+        ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + draw_rect_offset);
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
@@ -245,9 +246,8 @@ namespace idk {
 		//Setting up draw area
 		ImGuiIO& io = ImGui::GetIO();
 
-		ImVec2 winPos = ImGui::GetWindowPos();
-		winPos.y = ImGui::GetFrameHeight();
-		ImGuizmo::SetRect(winPos.x, winPos.y, GetScreenSize().x, GetScreenSize().y); //The scene view size
+        ImVec2 winPos = vec2{ ImGui::GetWindowPos() } + ImGui::GetWindowContentRegionMin() + draw_rect_offset;
+		ImGuizmo::SetRect(winPos.x, winPos.y, draw_rect_size.x, draw_rect_size.y); //The scene view size
 
 		ImGuizmo::SetDrawlist(); //Draw on scene view only
 

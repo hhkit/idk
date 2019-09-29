@@ -14,6 +14,7 @@ This window displays the editor window where you can select and modify gameobjec
 
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
+#include <imgui/imgui.h>
 
 namespace idk {
 	class IGE_SceneView :
@@ -37,6 +38,8 @@ namespace idk {
 	private:
 
 		ImTextureID sceneTexture = nullptr;
+        vec2 draw_rect_offset;
+        vec2 draw_rect_size;
 
 		bool is_controlling_WASDcam = false;
 		bool is_controlling_Pancam = false;

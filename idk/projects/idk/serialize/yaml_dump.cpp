@@ -147,7 +147,7 @@ namespace idk::yaml
             {
                 for (const auto& item : _node)
                 {
-                    if (item.size() >= 1)
+                    if (item.is_mapping() || item.is_sequence())
                         return false;
                 }
             }
@@ -155,7 +155,7 @@ namespace idk::yaml
             {
                 for (const auto& item : _node.as_mapping())
                 {
-                    if (item.second.size() >= 1)
+                    if (item.second.is_mapping() || item.second.is_sequence())
                         return false;
                 }
             }

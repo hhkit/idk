@@ -92,7 +92,9 @@
     <ClInclude Include="loading\GraphFactory.h">
       <Filter>loader</Filter>
     </ClInclude>
-    <ClInclude Include="widgets\EnumCombo.h" />
+    <ClInclude Include="widgets\EnumCombo.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
