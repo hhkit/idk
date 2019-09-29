@@ -18,28 +18,12 @@ namespace idk {
 	{
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
+		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
+		_app_data_dir = Core::GetSystem<Application>().GetAppData();
 
-		// Get the program directory
-		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-		if(bytes == 0)
-			std::cout << "[File System] Unable to get program directory." << std::endl;
-		_exe_dir = buffer;
-		auto pos = _exe_dir.find_last_of("\\");
-		_exe_dir = _exe_dir.substr(0, pos);
-
-		// Get the solution directory
-		if (!_getcwd(buffer, sizeof(buffer)))
-			std::cout << "[File System] Unable to get solution directory." << std::endl;
-		_sol_dir = buffer;
-
-		// Get App Data directory
-		char* env_buff;
-		size_t len;
-		auto err = _dupenv_s(&env_buff, &len, "appdata");
-		if (err)
-			std::cout << "[File System] Unable to get solution directory." << std::endl;
-		_app_data_dir = env_buff;
-		free(env_buff);
+		_exe_dir = FS::path{ _exe_dir }.generic_string();
+		_sol_dir = FS::path{ _sol_dir }.generic_string();
+		_app_data_dir = FS::path{ _app_data_dir }.generic_string();
 	}
 
 	void FileSystem::Update()
