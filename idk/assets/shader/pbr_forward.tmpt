@@ -2,12 +2,18 @@
 
 #define MAX_LIGHTS 1
 
+uniform BLOCK(PBRBlock)
+{
+	mat4 inverse_view_transform;
+} PerCamera;
+
 U_LAYOUT(3, 0) uniform sampler2D tex;
 
-//uniform samplerCube irradiance_probe;
-//uniform samplerCube environment_probe;
+uniform samplerCube irradiance_probe;
+uniform samplerCube environment_probe;
+uniform sampler2D   brdfLUT;  
 
-layout(location=1)in VS_OUT
+layout(location=1) in VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -91,6 +97,7 @@ vec3 pbr(
 	int i
 ,	vec3  view_pos
 ,	vec3  normal
+,   vec3  reflected
 ,	vec3  albedo
 ,	float metallic
 ,	float roughness
@@ -129,9 +136,9 @@ vec3 pbr(
 	vec3 kS = F;
 	vec3 kD = vec3(1.0) - kS;
 	
-	kD *= 1.0 - metallic;
-	
 	float NdotL = max(dot(normal, light_dir), 0.0);
+	
+	kD *= 1.0 - metallic;
 	
 	return kD * (albedo / PI + specular) * radiance * NdotL;
 }
@@ -154,22 +161,34 @@ void main()
 	float roughness = 1.0;
 	float ambient_o = 0;
 
+	out_color = vec4(normal, 1);
+
 	//__MATERIAL_CODE__;
 
 	// then compute color here 
 	
 	vec3 light_accum = vec3(0);
 	
+	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(view_pos, normal),0));
+	
 	for (int i = 0; i < LightBlk.light_count; ++i)
-		light_accum += pbr(i, view_pos, normal, albedo, metallic, roughness, ambient_o);
+		light_accum += pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o);
 	
-	//vec3 kS = fresnelRoughness(max(dot(normal,view_pos), 0.0), vec3(0.04), roughness);
-	//vec3 kD = 1.0 - kS;
-	//vec3 irradiance = texture(irradiance_probe, normal).rgb;
-	vec3 diffuse = vec3(0.03) * albedo;
-	vec3 ambient = diffuse * ambient_o;
+	vec3 kS = fresnelRoughness(max(dot(normal,view_pos), 0.0), vec3(0.04), roughness);
+	vec3 kD = 1.0 - kS;
+	kD *= 1.0 - metallic;
 	
-	out_color = vec4(light_accum + ambient, 1);
-	// out_color = vec4(uv, 0, 1);
-	// out_color = vec4(normal, 1.0);
+	vec3 irradiance = vec3(0.03); //texture(irradiance_probe, normal).rgb;
+	vec3 diffuse = irradiance * albedo;
+	
+	const float MAX_REFLECTION_LOD = 4.0;
+	
+	//vec3 prefilteredColor = textureLod(environment_probe, reflected, roughness * MAX_REFLECTION_LOD).rgb;
+	//vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, view_pos), 0.0), roughness)).rg;
+	//vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+	vec3 specular = vec3(0.03);
+	vec3 ambient = (kD * diffuse + specular) * ambient_o;
+	
+	//out_color = vec4(light_accum + ambient, 1);
+	out_color = vec4(specular, 1);
 }

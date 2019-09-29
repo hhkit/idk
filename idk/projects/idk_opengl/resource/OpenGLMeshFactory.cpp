@@ -364,10 +364,10 @@ namespace idk::ogl
 			//real angle = (2.f * pi) / numberOfTri;
 
 			std::vector<Vertex> vertices{
-				Vertex{ vec3{  sz,  0,  sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{  sz, 0,  -sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{-sz, 0,  -sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{-sz,  0,  sz}, vec3{0,0, 1} },  // front
+				Vertex{ vec3{  sz,  0,  sz}, vec3{0, 1,0}, vec2{0, 0} },  // front
+				Vertex{ vec3{  sz, 0,  -sz}, vec3{0, 1,0}, vec2{0, 1} },  // front
+				Vertex{ vec3{-sz, 0,  -sz},  vec3{0, 1,0}, vec2{1, 1} },  // front
+				Vertex{ vec3{-sz,  0,  sz},  vec3{0, 1,0}, vec2{1, 0} },  // front
 			};
 
 			std::vector<int> indices{

@@ -9,6 +9,7 @@
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
+#include <math/matrix_transforms.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>
@@ -80,6 +81,8 @@ namespace idk::ogl
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
 			
+			const auto inv_view_tfm = invert_rotation(cam.view_matrix);
+
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
 				if constexpr(std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
@@ -180,6 +183,11 @@ namespace idk::ogl
 							++texture_units;
 						}
 					}, cam.clear_data);
+				auto brdf = Core::GetResourceManager().Load("/assets/textures/brdf/ibl_brdf_lut.png", false)->Get<ogl::OpenGLTexture>();
+				brdf->BindToUnit(texture_units);
+				pipeline.SetUniform("brdfLUT", texture_units);
+				texture_units++;
+				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
 				for (unsigned i = 0; i < lights.size(); ++i)
@@ -241,9 +249,23 @@ namespace idk::ogl
 				auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
+				GLuint texture_units = 0;
+				// bind probe
+				std::visit([&]([[maybe_unused]] const auto& obj)
+					{
+						using T = std::decay_t<decltype(obj)>;
+						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+						{
+							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+							opengl_handle->BindToUnit(texture_units);
+							pipeline.SetUniform("irradiance_probe", texture_units);
+							pipeline.SetUniform("environment_probe", texture_units);
+							++texture_units;
+						}
+					}, cam.clear_data);
+
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
-				GLuint texture_units = 0;
 
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{

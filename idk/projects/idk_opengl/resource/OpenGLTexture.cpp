@@ -85,6 +85,7 @@ namespace idk::ogl
 	{
 		_size = size;
 		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
+		glGenerateMipmap(GL_TEXTURE_2D);
 		// TODO: fix internal format
 		GL_CHECK();
 	}
