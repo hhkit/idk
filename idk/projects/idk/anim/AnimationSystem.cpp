@@ -33,7 +33,7 @@ namespace idk
 				// We keep all the bone transforms first. Easier to refer to parent's transform, fewer mat mults.
 				
 				// Compute the time
-				elem._elapsed += Core::GetDT().count();
+				elem._elapsed += Core::GetRealDT().count();
 				if (elem._elapsed >= anim->GetDuration())
 					elem._elapsed -= anim->GetDuration();
 				
@@ -81,8 +81,6 @@ namespace idk
 					curr_pose.rotation =	curr_local_bind_pose.rotation	* curr_pose.rotation;
 					curr_pose.scale =		curr_local_bind_pose.scale		+ curr_pose.scale;
 					mat4 compose_curr_pose = curr_pose.recompose();
-
-					auto parent_index = skeleton[bone_id]._parent;
 
 					// During GenerateTransforms in the Animator, it will use the child transforms to 
 					// generate the final transforms

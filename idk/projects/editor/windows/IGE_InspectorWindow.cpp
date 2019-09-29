@@ -182,6 +182,7 @@ namespace idk {
 					{
 						static_assert(is_template_v<T, std::variant>, "HOW????");
 
+						constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
 						static std::array<string, sz> tmp_arr;
 						std::array<const char*, sz> retval;
 
