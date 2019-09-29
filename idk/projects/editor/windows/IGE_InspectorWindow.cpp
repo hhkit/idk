@@ -359,8 +359,10 @@ namespace idk {
 
 		
 		string idName = std::to_string(gameObject.id);
-		ImGui::Text("ID: %s", idName.data());
-
+		if (editor.selected_gameObjects.size() == 1)
+			ImGui::Text("ID: %s", idName.data());
+		else
+			ImGui::TextDisabled("Multiple gameobjects selected");
 	}
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
