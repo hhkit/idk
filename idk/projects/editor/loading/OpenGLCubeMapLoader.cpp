@@ -64,6 +64,7 @@ namespace idk
 			stbi_image_free(data);
 		}
 
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		return texture_handle;
 	}
 
@@ -125,6 +126,7 @@ namespace idk
 			stbi_image_free(data);
 		}
 
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		return texture_handle;
 	}
 

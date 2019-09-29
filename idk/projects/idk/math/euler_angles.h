@@ -8,6 +8,7 @@ namespace idk
 	{
 		rad x, y, z;
 
+		euler_angles() = default;
 		explicit euler_angles(quat q);
 		explicit operator quat();
 	};
