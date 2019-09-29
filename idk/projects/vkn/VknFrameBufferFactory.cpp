@@ -44,7 +44,7 @@ namespace idk::vkn
 		//Todo make this a default guid
 		auto ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
 		auto depth_ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-		TextureLoader loader;
+		//TextureLoader loader;
 
 
 		//imgd.size = vec2{ sz };

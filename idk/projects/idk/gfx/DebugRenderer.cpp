@@ -22,6 +22,10 @@ namespace idk
 
 	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
 	{
+		capsule;
+		c;
+		duration;
+		depth_test;
 		assert(false);
 	}
 

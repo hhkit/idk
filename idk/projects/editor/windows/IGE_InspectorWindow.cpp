@@ -117,6 +117,9 @@ namespace idk {
 				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+						
+						depth_change;
+						
 						using T = std::decay_t<decltype(val)>;
 						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
 						//reflect::dynamic dynaVal = val;
@@ -128,7 +131,7 @@ namespace idk {
 						}
 
 
-						keyName[0] = toupper(keyName[0]);
+						keyName[0] = (char)toupper(keyName[0]);
 						ImGui::SetCursorPosY(currentHeight + heightOffset);
 						ImGui::Text(keyName.c_str());
 						keyName.insert(0, "##"); //For Imgui stuff
@@ -141,13 +144,16 @@ namespace idk {
 						if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
 								
 							ImGui::DragFloat(keyName.c_str(), &val);
+							return false;
 						}
 						else if constexpr (std::is_same_v<T, int>) {
 							ImGui::DragInt(keyName.c_str(), &val);
+							return false;
 						}
 							
 						else if constexpr (std::is_same_v<T, bool>) {
 							ImGui::Checkbox(keyName.c_str(), &val);
+							return false;
 						}
 						else if constexpr (std::is_same_v<T, vec3>) {
 
@@ -183,7 +189,7 @@ namespace idk {
 								static_assert(is_template_v<T, std::variant>, "HOW????");
 
 								static std::array<string, sz> tmp_arr;
-								std::array<const char*, sz> retval;
+								std::array<const char*, sz> retval{};
 
 								auto sp = reflect::unpack_types<T>();
 
@@ -238,6 +244,15 @@ namespace idk {
 
 		}
 		else if (gameObjectsCount > 1) {
+
+			//Just show all components, Name and Transform first
+			//First gameobject takes priority
+			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
+			if (c_name) {
+				DisplayNameComponent(c_name);
+
+			}
+
 			//Just show similar components
 
 			//for (auto& i : editor.selected_gameObjects) {
@@ -315,6 +330,7 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
 	{
+		//The c_name is to just get the first gameobject
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
@@ -323,12 +339,19 @@ namespace idk {
 		ImGui::SameLine();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
-			editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ c_name }, &c_name->name, stringBuf));
+			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
+				string outputString = stringBuf;
+				if (i > 0) {
+					outputString.append(" (");
+					outputString.append(std::to_string(i));
+					outputString.append(")");
+				}
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
 
+			}
 
 		}
-		//if (ImGui::IsItemDeactivatedAfterEdit()) {
-		//}
+
 
 		if (ImGui::IsItemClicked()) {
 			stringBuf = c_name->name;
@@ -341,19 +364,10 @@ namespace idk {
 
 		
 		string idName = std::to_string(gameObject.id);
-		ImGui::Text("ID: %s", idName.data());
-
-		//ImVec2 endScreenPos = ImGui::GetCursorScreenPos();
-		//
-		//ImGui::Separator();
-		//ImDrawList* drawList = ImGui::GetWindowDrawList();
-		//
-		//drawList->AddRectFilled(startScreenPos, endScreenPos, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
-
-
-		//ImGui::SameLine();
-		//ImGui::InputText("##ID", &idName, ImGuiInputTextFlags_ReadOnly);
-		//if (ImGui::InputText("##NAME", &selectedGameObject.lock()->name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (editor.selected_gameObjects.size() == 1)
+			ImGui::Text("ID: %s", idName.data());
+		else
+			ImGui::TextDisabled("Multiple gameobjects selected");
 	}
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
