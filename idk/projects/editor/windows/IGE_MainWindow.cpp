@@ -24,6 +24,8 @@ of the editor.
 #include <iostream>
 #include <IDE.h>
 #include <editor/windows/IGE_WindowList.h>
+#include <core/Scheduler.h>
+#include <PauseConfigurations.h>
 
 namespace idk {
 
@@ -388,12 +390,33 @@ namespace idk {
 		ImGui::SetCursorPosY(toolButtonStartPos.y+3);
 
 		MODE& gizmo_mode = Core::GetSystem<IDE>().gizmo_mode;
-
-
 		string localGlobal = gizmo_mode == WORLD ? "Global##Tool" : "Local##Tool";
 		if (ImGui::Button(localGlobal.c_str(), ImVec2{ toolButtonSize.x+20.0f,toolButtonSize.y-6.0f })) {
 			gizmo_mode = gizmo_mode == WORLD ? LOCAL : WORLD;
 		}
+
+
+
+        ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
+        ImGui::SetCursorPosY(toolButtonStartPos.y);
+        if (ImGui::Button("Play", toolButtonSize))
+        {
+            Core::GetScheduler().SetPauseState(UnpauseAll);
+        }
+        ImGui::SameLine(0, 0);
+        if (ImGui::Button("Pause", toolButtonSize))
+        {
+            Core::GetScheduler().SetPauseState(EditorPause);
+        }
+        ImGui::SameLine(0, 0);
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
+        if (ImGui::Button("Stop", toolButtonSize))
+        {
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopItemFlag();
+
 
 
 		ImGui::PopStyleVar();
