@@ -49,6 +49,7 @@ namespace idk::anim
 
 	Channel& Channel::operator+=(const Channel& rhs)
 	{
+		rhs;
 		// If rhs channel is not animated, we just concat the _local_bind_pose
 		// if (!rhs._is_animated)
 		// {

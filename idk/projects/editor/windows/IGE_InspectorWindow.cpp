@@ -298,6 +298,18 @@ namespace idk {
 
 		}
 		else if (gameObjectsCount > 1) {
+
+			//Just show all components, Name and Transform first
+			//First gameobject takes priority
+			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
+			if (c_name) {
+				DisplayNameComponent(c_name);
+
+			}
+			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
+			if (c_transform) {
+				DisplayTransformComponent(c_transform);
+			}
 			//Just show similar components
 
 			//for (auto& i : editor.selected_gameObjects) {
@@ -328,6 +340,11 @@ namespace idk {
 		if (isComponentMarkedForDeletion) {
 			for (Handle<GameObject> i : editor.selected_gameObjects)
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
+
+			//Reset values
+			componentNameMarkedForDeletion = {};
+			isComponentMarkedForDeletion = false;
+
 		}
 
 		if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
@@ -370,20 +387,28 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
 	{
+		//The c_name is to just get the first gameobject
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
-
+		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
 		Handle<GameObject> gameObject = c_name->GetGameObject();
 		ImGui::Text("Name: ");
 		ImGui::SameLine();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
-			editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ c_name }, &c_name->name, stringBuf));
+			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
+				string outputString = stringBuf;
+				if (i > 0) {
+					outputString.append(" (");
+					outputString.append(std::to_string(i));
+					outputString.append(")");
+				}
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
 
+			}
 
 		}
-		//if (ImGui::IsItemDeactivatedAfterEdit()) {
-		//}
+
 
 		if (ImGui::IsItemClicked()) {
 			stringBuf = c_name->name;
@@ -396,10 +421,10 @@ namespace idk {
 
 		
 		string idName = std::to_string(gameObject.id);
-		ImGui::Text("ID: %s", idName.data());
-		//ImGui::SameLine();
-		//ImGui::InputText("##ID", &idName, ImGuiInputTextFlags_ReadOnly);
-		//if (ImGui::InputText("##NAME", &selectedGameObject.lock()->name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (editor.selected_gameObjects.size() == 1)
+			ImGui::Text("ID: %s", idName.data());
+		else
+			ImGui::TextDisabled("Multiple gameobjects selected");
 	}
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
@@ -407,6 +432,10 @@ namespace idk {
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
+		IDE& editor = Core::GetSystem<IDE>();
+
+
+
 		ImGui::SetCursorPosX(window_size.x - 20);
 		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
 
@@ -419,7 +448,7 @@ namespace idk {
 
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-
+			
 
 			//Position
 			float heightPos = ImGui::GetCursorPosY();
@@ -427,7 +456,47 @@ namespace idk {
 			ImGui::Text("Position");
 			ImGui::SameLine();
 
-			DisplayVec3(c_transform->position);
+			//XYZ
+			vec3& vecPosRef = c_transform->position;
+			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+			ImGui::Text("X");
+			ImGui::SameLine();
+
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
+			ImGui::PushID(&vecPosRef.x);
+			if (ImGui::DragFloat("##X", &vecPosRef.x)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position.x = vecPosRef.x;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			ImGui::PushID(&vecPosRef.y);
+			if (ImGui::DragFloat("##Y", &vecPosRef.y)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position.y = vecPosRef.y;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			ImGui::PushID(&vecPosRef.z);
+			if (ImGui::DragFloat("##Z", &vecPosRef.z)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position.z = vecPosRef.z;
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::PopItemWidth();
+			//END XYZ
+
 
 			//Rotation (use custom vec3 display)
 			euler_angles original{ c_transform->rotation };
@@ -444,7 +513,11 @@ namespace idk {
 			ImGui::SameLine();
 			ImGui::SetCursorPosY(heightPos);
 			if (ImGui::SliderAngle("##RotationX", original.x.data())) {
-				c_transform->rotation = quat{ original };
+				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
+					euler_angles eachGORotation { i->GetComponent<Transform>()->rotation };
+					eachGORotation.x = original.x;
+					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
+				}
 			}
 
 			ImGui::SameLine();
@@ -452,7 +525,11 @@ namespace idk {
 			ImGui::Text("Y");
 			ImGui::SameLine();
 			if (ImGui::SliderAngle("##RotationY", original.y.data())) {
-				c_transform->rotation = quat{ original };
+				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
+					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
+					eachGORotation.y = original.y;
+					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
+				}
 			}
 
 			ImGui::SameLine();
@@ -460,7 +537,11 @@ namespace idk {
 			ImGui::Text("Z");
 			ImGui::SameLine();
 			if (ImGui::SliderAngle("##RotationZ", original.z.data())) {
-				c_transform->rotation = quat{ original };
+				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
+					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
+					eachGORotation.z = original.z;
+					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
+				}
 			}
 
 			ImGui::PopItemWidth();
@@ -471,8 +552,46 @@ namespace idk {
 			ImGui::Text("Scale");
 			ImGui::SameLine();
 
-			DisplayVec3(c_transform->scale);
+			//XYZ
+			vec3& vecScaRef = c_transform->scale;
+			ImGui::PushItemWidth(window_size.x* float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+			ImGui::Text("X");
+			ImGui::SameLine();
 
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
+			ImGui::PushID(&vecScaRef.x);
+			if (ImGui::DragFloat("##X", &vecScaRef.x)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->scale.x = vecScaRef.x;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			ImGui::PushID(&vecScaRef.y);
+			if (ImGui::DragFloat("##Y", &vecScaRef.y)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->scale.y = vecScaRef.y;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			ImGui::PushID(&vecScaRef.z);
+			if (ImGui::DragFloat("##Z", &vecScaRef.z)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->scale.z = vecScaRef.z;
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::PopItemWidth();
+			//END XYZ
 
 
 		}
@@ -487,15 +606,75 @@ namespace idk {
 
 		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
 			if (ImGui::MenuItem("Reset")) {
-				c_transform->position	= vec3{ };
-				c_transform->rotation	= quat{ };
-				c_transform->scale		= vec3{ };
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position	= vec3{ };
+					i->GetComponent<Transform>()->rotation	= quat{ };
+					i->GetComponent<Transform>()->scale		= vec3{ };
+				}
 			}
 			ImGui::Separator();
 			ImGui::EndPopup();
 		}
 
 
+	}
+
+	void IGE_InspectorWindow::DisplayAnimationControllerComponent(Handle<AnimationController>& c_anim)
+	{
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+		ImGui::SetCursorPosX(window_size.x - 20);
+		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
+
+		ImGui::SetCursorPos(cursorPos);
+
+
+		if (ImGui::CollapsingHeader("Animation Controller", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			//Draw All your custom variables here.
+
+			//ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
+			if (ImGui::Button("Play"))
+			{
+				c_anim->Play(0);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Stop"))
+			{
+				c_anim->Stop();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Pause"))
+			{
+				c_anim->Pause();
+			}
+
+		}
+
+		cursorPos2 = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPosX(window_size.x - 20);
+		ImGui::Text("...");
+
+		ImGui::SetCursorPos(cursorPos2);
+
+
+		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+			if (ImGui::MenuItem("Reset")) {
+
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Remove Component")) {
+				isComponentMarkedForDeletion = true;
+				GenericHandle i = (*c_anim).GetHandle();
+				componentNameMarkedForDeletion = (*i).type.name();
+			}
+			ImGui::EndPopup();
+		}
 	}
 
 	void IGE_InspectorWindow::DisplayVec3(vec3& vec)

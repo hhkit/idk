@@ -24,6 +24,8 @@ of the editor.
 #include <iostream>
 #include <IDE.h>
 #include <editor/windows/IGE_WindowList.h>
+#include <core/Scheduler.h>
+#include <PauseConfigurations.h>
 
 namespace idk {
 
@@ -106,7 +108,26 @@ namespace idk {
 
 
 			if (ImGui::MenuItem("Save", "CTRL+S")) {
+				auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+				auto path = [&]() -> opt<string>
+				{
+					if (auto path = Core::GetResourceManager().GetPath(curr_scene))
+						return string{ *path };
+					else
+					{
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext);
+						if (dialog_result)
+							return *dialog_result;
+						else 
+							return std::nullopt;
+					}
+				}();
 
+				if (path)
+				{
+					Core::GetResourceManager().Rename(curr_scene, *path);
+					Core::GetResourceManager().Save(curr_scene);
+				}
 				std::cout << "Save current Scene\n";
 
 
@@ -364,6 +385,39 @@ namespace idk {
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
+
+		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 6);
+		ImGui::SetCursorPosY(toolButtonStartPos.y+3);
+
+		MODE& gizmo_mode = Core::GetSystem<IDE>().gizmo_mode;
+		string localGlobal = gizmo_mode == WORLD ? "Global##Tool" : "Local##Tool";
+		if (ImGui::Button(localGlobal.c_str(), ImVec2{ toolButtonSize.x+20.0f,toolButtonSize.y-6.0f })) {
+			gizmo_mode = gizmo_mode == WORLD ? LOCAL : WORLD;
+		}
+
+
+
+        ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
+        ImGui::SetCursorPosY(toolButtonStartPos.y);
+        if (ImGui::Button("Play", toolButtonSize))
+        {
+            Core::GetScheduler().SetPauseState(UnpauseAll);
+        }
+        ImGui::SameLine(0, 0);
+        if (ImGui::Button("Pause", toolButtonSize))
+        {
+            Core::GetScheduler().SetPauseState(EditorPause);
+        }
+        ImGui::SameLine(0, 0);
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
+        if (ImGui::Button("Stop", toolButtonSize))
+        {
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopItemFlag();
+
+
 
 		ImGui::PopStyleVar();
 

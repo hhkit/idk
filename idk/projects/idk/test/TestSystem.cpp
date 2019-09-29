@@ -14,6 +14,8 @@
 #include <scene/ProjectManager.h>
 #include <gfx/DebugRenderer.h>
 #include <PauseConfigurations.h>
+#include <file/FileSystem.h>
+#include <gfx/ShaderGraph.h>
 
 namespace idk
 {
@@ -40,6 +42,13 @@ namespace idk
 			//if (rb)
 			//	rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));
 		}
+
+		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+			if (file.GetExtension() == ".tmpt")
+			{
+				for (auto& elem : Core::GetResourceManager().GetAll<shadergraph::Graph>())
+					elem->Compile();
+			}
 
 		if (app_sys.GetKeyDown(Key::P))
 			Core::GetScheduler().SetPauseState(GamePause);

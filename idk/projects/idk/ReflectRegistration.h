@@ -279,3 +279,7 @@ REFLECT_END()
 REFLECT_BEGIN(idk::Animator, "Animator")
 REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects, _bone_transforms, _bind_pose)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::Camera, "Camera")
+REFLECT_VARS(enabled, near_plane, far_plane)
+REFLECT_END()

@@ -37,7 +37,6 @@ layout(location = 1) out VS_OUT
   vec2 uv;
   vec3 normal;
   vec3 tangent;
-  vec3 view_pos; 		
 } vs_out;
 
 layout(location = 0) out gl_PerVertex

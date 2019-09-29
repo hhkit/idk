@@ -99,6 +99,11 @@ namespace idk::reflect
 		return type._context->get_variant_value(_ptr->get());
 	}
 
+    void dynamic::on_parse() const
+    {
+        return type._context->on_parse(_ptr->get());
+    }
+
 
 
 	dynamic::property_iterator::property_iterator(const dynamic& obj, size_t index)

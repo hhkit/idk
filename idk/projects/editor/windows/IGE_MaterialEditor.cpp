@@ -826,7 +826,7 @@ namespace idk
         if (ImGui::BeginChild("Material_Editor_miniwin", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
             auto graph_name = Core::GetResourceManager().GetPath(_graph);
-            ImGui::Text(graph_name.data());
+            ImGui::Text(graph_name->data());
 
             auto meta = _graph->GetMeta();
             bool changed = false;

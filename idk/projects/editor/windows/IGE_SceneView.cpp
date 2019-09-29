@@ -199,7 +199,7 @@ namespace idk {
 	{
 		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
 
-		auto& app_sys = Core::GetSystem<Application>();
+		//auto& app_sys = Core::GetSystem<Application>();
 		IDE& editor = Core::GetSystem<IDE>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
@@ -244,7 +244,7 @@ namespace idk {
 		const float* projectionMatrix = pers_mtx.data();
 
 		//Setting up draw area
-		ImGuiIO& io = ImGui::GetIO();
+		//ImGuiIO& io = ImGui::GetIO();
 
         ImVec2 winPos = vec2{ ImGui::GetWindowPos() } + ImGui::GetWindowContentRegionMin() + draw_rect_offset;
 		ImGuizmo::SetRect(winPos.x, winPos.y, draw_rect_size.x, draw_rect_size.y); //The scene view size

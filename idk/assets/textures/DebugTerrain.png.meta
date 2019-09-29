@@ -1,0 +1,4 @@
+guids: [f3b0c05a-a0c7-4cad-9602-b7e397e5b003]
+resource_metas: 
+- !TextureMeta 
+  {internal_format: !ColorFormat RGBF_32, uv_mode: !UVMode Repeat}

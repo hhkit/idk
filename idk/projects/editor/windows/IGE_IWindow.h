@@ -122,6 +122,8 @@ namespace idk {
 		//Creates a "(?)" text and creates a tool tip of argument handled.
 		void DrawHelpMarker(const char* desc);
 
+		void DrawToolTipOnHover(const char* desc);
+
 		//Creates a text. Uses the printf method
 		void DrawText(const char* fmt, ...);
 		void DrawText(const string& fmt, ...);
