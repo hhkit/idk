@@ -245,8 +245,7 @@ namespace idk {
 		//Setting up draw area
 		ImGuiIO& io = ImGui::GetIO();
 
-		ImVec2 winPos = ImGui::GetWindowPos();
-		winPos.y = ImGui::GetFrameHeight();
+        ImVec2 winPos = vec2{ ImGui::GetWindowPos() } + ImGui::GetWindowContentRegionMin();
 		ImGuizmo::SetRect(winPos.x, winPos.y, GetScreenSize().x, GetScreenSize().y); //The scene view size
 
 		ImGuizmo::SetDrawlist(); //Draw on scene view only
