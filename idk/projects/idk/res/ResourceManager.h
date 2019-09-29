@@ -89,6 +89,7 @@ namespace idk
 		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
 								GeneralGetResult      Get     (PathHandle path);
+		template<typename Res>  vector<RscHandle<Res>>GetAll();
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
 		                        FileMoveResult        Rename(PathHandle old_path, string_view new_mount_path);

@@ -123,6 +123,17 @@ namespace idk
 	}
 
 	template<typename Res>
+	inline vector<RscHandle<Res>> ResourceManager::GetAll()
+	{
+		auto& table = GetTable<Res>();
+		auto  retval = vector<RscHandle<Res>>();
+		retval.reserve(table.size());
+		for (auto& [guid, whatever] : table)
+			retval.emplace_back(RscHandle<Res>{guid});
+		return retval;
+	}
+
+	template<typename Res>
 	ResourceManager::SaveResult<Res> ResourceManager::Save(RscHandle<Res> saveme)
 	{
 		auto* rcb = GetControlBlock(saveme);

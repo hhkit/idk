@@ -257,3 +257,7 @@ REFLECT_END()
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
 REFLECT_VARS(prefab, overrides, objects)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::Camera, "Camera")
+REFLECT_VARS(enabled, near_plane, far_plane)
+REFLECT_END()
