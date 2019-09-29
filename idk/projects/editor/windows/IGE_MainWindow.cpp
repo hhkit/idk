@@ -384,6 +384,18 @@ namespace idk {
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
 
+		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 6);
+		ImGui::SetCursorPosY(toolButtonStartPos.y+3);
+
+		MODE& gizmo_mode = Core::GetSystem<IDE>().gizmo_mode;
+
+
+		string localGlobal = gizmo_mode == WORLD ? "Global##Tool" : "Local##Tool";
+		if (ImGui::Button(localGlobal.c_str(), ImVec2{ toolButtonSize.x+20.0f,toolButtonSize.y-6.0f })) {
+			gizmo_mode = gizmo_mode == WORLD ? LOCAL : WORLD;
+		}
+
+
 		ImGui::PopStyleVar();
 
 		ImGui::EndChild();

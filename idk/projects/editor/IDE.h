@@ -93,7 +93,7 @@ namespace idk
         bool closing = false;
 
 		GizmoOperation gizmo_operation = GizmoOperation_Translate;
-		MODE gizmo_mode = MODE::WORLD;
+		MODE gizmo_mode = MODE::LOCAL; //World is might not work properly for scaling for now.
 
 
 		void FocusOnSelectedGameObjects();
