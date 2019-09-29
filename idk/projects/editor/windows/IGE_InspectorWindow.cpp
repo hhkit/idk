@@ -59,6 +59,8 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
 		const size_t gameObjectsCount = editor.selected_gameObjects.size();
 
+
+
 		//DISPLAY
 		if (gameObjectsCount == 1) {
 			//Just show all components, Name and Transform first
@@ -117,9 +119,9 @@ namespace idk {
 				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
-						
+
 						depth_change;
-						
+
 						using T = std::decay_t<decltype(val)>;
 						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
 						//reflect::dynamic dynaVal = val;
@@ -131,7 +133,7 @@ namespace idk {
 						}
 
 
-						keyName[0] = (char)toupper(keyName[0]);
+						keyName[0] = static_cast<char>(toupper(keyName[0]));
 						ImGui::SetCursorPosY(currentHeight + heightOffset);
 						ImGui::Text(keyName.c_str());
 						keyName.insert(0, "##"); //For Imgui stuff
@@ -252,7 +254,10 @@ namespace idk {
 				DisplayNameComponent(c_name);
 
 			}
-
+			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
+			if (c_transform) {
+				DisplayTransformComponent(c_transform);
+			}
 			//Just show similar components
 
 			//for (auto& i : editor.selected_gameObjects) {
@@ -375,6 +380,10 @@ namespace idk {
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
+		IDE& editor = Core::GetSystem<IDE>();
+
+
+
 		ImGui::SetCursorPosX(window_size.x - 20);
 		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
 
@@ -387,7 +396,7 @@ namespace idk {
 
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-
+			
 
 			//Position
 			float heightPos = ImGui::GetCursorPosY();
@@ -395,7 +404,47 @@ namespace idk {
 			ImGui::Text("Position");
 			ImGui::SameLine();
 
-			DisplayVec3(c_transform->position);
+			//XYZ
+			vec3& vecPosRef = c_transform->position;
+			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+			ImGui::Text("X");
+			ImGui::SameLine();
+
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
+			ImGui::PushID(&vecPosRef.x);
+			if (ImGui::DragFloat("##X", &vecPosRef.x)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position.x = vecPosRef.x;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			ImGui::PushID(&vecPosRef.y);
+			if (ImGui::DragFloat("##Y", &vecPosRef.y)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position.y = vecPosRef.y;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			ImGui::PushID(&vecPosRef.z);
+			if (ImGui::DragFloat("##Z", &vecPosRef.z)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position.z = vecPosRef.z;
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::PopItemWidth();
+			//END XYZ
+
 
 			//Rotation (use custom vec3 display)
 			euler_angles original{ c_transform->rotation };
@@ -412,7 +461,11 @@ namespace idk {
 			ImGui::SameLine();
 			ImGui::SetCursorPosY(heightPos);
 			if (ImGui::SliderAngle("##RotationX", original.x.data())) {
-				c_transform->rotation = quat{ original };
+				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
+					euler_angles eachGORotation { i->GetComponent<Transform>()->rotation };
+					eachGORotation.x = original.x;
+					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
+				}
 			}
 
 			ImGui::SameLine();
@@ -420,7 +473,11 @@ namespace idk {
 			ImGui::Text("Y");
 			ImGui::SameLine();
 			if (ImGui::SliderAngle("##RotationY", original.y.data())) {
-				c_transform->rotation = quat{ original };
+				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
+					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
+					eachGORotation.y = original.y;
+					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
+				}
 			}
 
 			ImGui::SameLine();
@@ -428,7 +485,11 @@ namespace idk {
 			ImGui::Text("Z");
 			ImGui::SameLine();
 			if (ImGui::SliderAngle("##RotationZ", original.z.data())) {
-				c_transform->rotation = quat{ original };
+				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
+					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
+					eachGORotation.z = original.z;
+					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
+				}
 			}
 
 			ImGui::PopItemWidth();
@@ -439,8 +500,46 @@ namespace idk {
 			ImGui::Text("Scale");
 			ImGui::SameLine();
 
-			DisplayVec3(c_transform->scale);
+			//XYZ
+			vec3& vecScaRef = c_transform->scale;
+			ImGui::PushItemWidth(window_size.x* float3Size - itemSpacing);
+			ImGui::SetCursorPosX(widthOffset);
+			ImGui::Text("X");
+			ImGui::SameLine();
 
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
+			ImGui::PushID(&vecScaRef.x);
+			if (ImGui::DragFloat("##X", &vecScaRef.x)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->scale.x = vecScaRef.x;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Y");
+			ImGui::SameLine();
+			ImGui::PushID(&vecScaRef.y);
+			if (ImGui::DragFloat("##Y", &vecScaRef.y)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->scale.y = vecScaRef.y;
+				}
+			}
+			ImGui::PopID();
+			ImGui::SameLine();
+
+			ImGui::Text("Z");
+			ImGui::SameLine();
+			ImGui::PushID(&vecScaRef.z);
+			if (ImGui::DragFloat("##Z", &vecScaRef.z)) {
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->scale.z = vecScaRef.z;
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::PopItemWidth();
+			//END XYZ
 
 
 		}
@@ -455,9 +554,11 @@ namespace idk {
 
 		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
 			if (ImGui::MenuItem("Reset")) {
-				c_transform->position	= vec3{ };
-				c_transform->rotation	= quat{ };
-				c_transform->scale		= vec3{ };
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					i->GetComponent<Transform>()->position	= vec3{ };
+					i->GetComponent<Transform>()->rotation	= quat{ };
+					i->GetComponent<Transform>()->scale		= vec3{ };
+				}
 			}
 			ImGui::Separator();
 			ImGui::EndPopup();

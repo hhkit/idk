@@ -40,11 +40,11 @@ namespace idk::ogl
 		{
 			_viewport_size = new_size;
 		});
+		InitResourceLoader();
 	}
 
 	void Win32GraphicsSystem::LateInit()
 	{
-		InitResourceLoader();
 		_opengl->GenResources();
 	}
 

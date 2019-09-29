@@ -118,6 +118,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camHandle->far_plane = 100.f;
 		camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
+		//camHandle->render_target->AddAttachment(eDepth);
 		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/lagoon.jpg.cbm");

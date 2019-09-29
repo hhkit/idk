@@ -447,7 +447,9 @@ namespace idk
 			{
 				throw "how did we get here?";
 			}
-		});
+		}); // visit
+
+        obj.on_parse();
 	}
 
     template<>

@@ -147,6 +147,7 @@ namespace idk::win
 	}
 	opt<string> Windows::OpenFileDialog(string_view extension)
 	{
+		extension;
 		OPENFILENAME ofn;       // common dialog box structure
 		TCHAR szFile[260];       // buffer for file name
 		HWND hwnd{};              // owner window

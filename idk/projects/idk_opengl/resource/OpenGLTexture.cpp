@@ -26,6 +26,7 @@ namespace idk::ogl
 			case ColorFormat::RGBF_32: return GL_RGB32F;
 			case ColorFormat::RGBAF_16: return GL_RGBA16F;
 			case ColorFormat::RGBAF_32: return GL_RGBA32F;
+			case ColorFormat::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
 			default: return 0;
 			}
 		}
@@ -72,6 +73,7 @@ namespace idk::ogl
 	
 	void OpenGLTexture::Bind()
 	{
+		//glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _id);
 	}
 	

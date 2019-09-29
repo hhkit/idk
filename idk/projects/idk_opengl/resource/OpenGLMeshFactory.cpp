@@ -239,14 +239,14 @@ namespace idk::ogl
 
 			auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
-			sphere_mesh->AddMeshEntry(0, 0, icosahedronIndices.size(), 0);
+			sphere_mesh->AddMeshEntry(0, 0, s_cast<unsigned int>(icosahedronIndices.size()), 0);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 				.Bind()
-				.Buffer(icosahedron.data(), sizeof(Vertex), icosahedron.size())
+				.Buffer(icosahedron.data(), sizeof(Vertex), s_cast<GLsizei>(icosahedron.size()))
 			);
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
 				.Bind()
-				.Buffer(icosahedronIndices.data(), sizeof(int), icosahedronIndices.size())
+				.Buffer(icosahedronIndices.data(), sizeof(int), s_cast<GLsizei>(icosahedronIndices.size()))
 			);
 		}
 
@@ -301,7 +301,7 @@ namespace idk::ogl
 				22, 21, 23,
 			};
 
-			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);
 
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -343,7 +343,7 @@ namespace idk::ogl
 
 			mesh_handle->SetDrawMode(GL_LINES);
 
-			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);
 
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -375,7 +375,7 @@ namespace idk::ogl
 				2, 1, 3
 			};
 
-			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);
 
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -407,7 +407,7 @@ namespace idk::ogl
 				0,4,1
 			};
 
-			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);
 
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -435,7 +435,7 @@ namespace idk::ogl
 
 			mesh_handle->SetDrawMode(GL_LINES);
 
-			mesh_handle->AddMeshEntry(0, 0, indices.size(), 0);
+			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);
 
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
