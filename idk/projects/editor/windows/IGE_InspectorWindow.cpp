@@ -50,28 +50,28 @@ namespace idk {
 
 
 
-    static string format_name(string_view name)
-    {
-        string str{ name };
-        str[0] = (char)toupper(str[0]);
-        for (int i = 0; i < str.size(); ++i)
-        {
-            if (str[i] == '_')
-            {
-                str[i] = ' ';
-                if (i + 1 < str.size())
-                    str[i + 1] = (char)toupper(str[i + 1]);
-            }
-        }
-        for (int i = 1; i < str.size(); ++i)
-        {
-            if (str[i] >= 'A' && str[i] <= 'Z' && str[i - 1] >= 'a' && str[i - 1] <= 'z')
-            {
-                str.insert(i, 1, ' ');
-            }
-        }
-        return str;
-    }
+	static string format_name(string_view name)
+	{
+		string str{ name };
+		str[0] = (char)toupper(str[0]);
+		for (int i = 0; i < str.size(); ++i)
+		{
+			if (str[i] == '_')
+			{
+				str[i] = ' ';
+				if (i + 1 < str.size())
+					str[i + 1] = (char)toupper(str[i + 1]);
+			}
+		}
+		for (int i = 1; i < str.size(); ++i)
+		{
+			if (str[i] >= 'A' && str[i] <= 'Z' && str[i - 1] >= 'a' && str[i - 1] <= 'z')
+			{
+				str.insert(i, 1, ' ');
+			}
+		}
+		return str;
+	}
 
 	void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
 	{
@@ -134,32 +134,32 @@ namespace idk {
 				else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
 
 					ImGui::DragFloat(keyName.c_str(), &val);
-                    return false;
+					return false;
 				}
 				else if constexpr (std::is_same_v<T, int>) {
 					ImGui::DragInt(keyName.c_str(), &val);
-                    return false;
+					return false;
 				}
 
 				else if constexpr (std::is_same_v<T, bool>) {
 					ImGui::Checkbox(keyName.c_str(), &val);
-                    return false;
+					return false;
 				}
 				else if constexpr (std::is_same_v<T, vec3>) {
 
 					DisplayVec3(val);
 					return false;
 				}
-                else if constexpr (std::is_same_v<T, color>)
-                {
-                    ImGui::ColorEdit4(keyName.c_str(), val.data());
-                    return false;
-                }
-                else if constexpr (std::is_same_v<T, rad>)
-                {
-                    ImGui::SliderAngle(keyName.c_str(), val.data());
-                    return false;
-                }
+				else if constexpr (std::is_same_v<T, color>)
+				{
+					ImGui::ColorEdit4(keyName.c_str(), val.data());
+					return false;
+				}
+				else if constexpr (std::is_same_v<T, rad>)
+				{
+					ImGui::SliderAngle(keyName.c_str(), val.data());
+					return false;
+				}
 				else if constexpr (is_template_v<T, RscHandle>) {
 
 					if (ImGuidk::InputResource(keyName.c_str(), &val))
@@ -224,8 +224,6 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
 		const size_t gameObjectsCount = editor.selected_gameObjects.size();
 
-		bool isComponentMarkedForDeletion = false;
-		string componentNameMarkedForDeletion{}; //Is empty by default
 
 		//DISPLAY
 		if (gameObjectsCount == 1) {
@@ -254,85 +252,20 @@ namespace idk {
 
 				if (component.is_type<Animator>())
 				{
-					DisplayAnimatorComponent(handle_cast<Animator>(component));
+					Handle<Animator> c_anim = editor.selected_gameObjects[0]->GetComponent<Animator>();
+					DisplayAnimatorComponent(c_anim);
 					continue;
 				}
 
-
 				//COMPONENT DISPLAY
-				ImGui::PushID(static_cast<int>(component.id));
-				const auto componentName = (*component).type.name();
-				string displayingComponent{ componentName };
-				const string fluffText{ "idk::" };
-				std::size_t found = displayingComponent.find(fluffText);
-
-				if (found != std::string::npos)
-					displayingComponent.erase(found, fluffText.size());
-
-				ImVec2 cursorPos = ImGui::GetCursorPos();
-				ImVec2 cursorPos2{}; //This is for setting after all members are placed
-				ImGui::SetCursorPosX(window_size.x - 20);
-				if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
-
-					ImGui::OpenPopup("AdditionalOptions");
-
-				}
-
-				ImGui::SetCursorPos(cursorPos);
-
-				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					displayVal(*component);
-
-					if (component.is_type<Animator>())
-					{
-						// ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
-						if (ImGui::Button("Play"))
-						{
-							(*component).get<Animator>().Play(0);
-						}
-						if (ImGui::Button("Stop"))
-						{
-							(*component).get<Animator>().Stop();
-						}
-						if (ImGui::Button("Pause"))
-						{
-							(*component).get<Animator>().Pause();
-						}
-					}
-				}
-
-				cursorPos2 = ImGui::GetCursorPos();
-				ImGui::SetCursorPos(cursorPos);
-				ImGui::SetCursorPosX(window_size.x - 20);
-				ImGui::Text("...");
-
-				ImGui::SetCursorPos(cursorPos2);
-
-				if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
-					if (ImGui::MenuItem("Reset")) {
-
-					}
-					ImGui::Separator();
-					if (ImGui::MenuItem("Remove Component")) {
-						isComponentMarkedForDeletion = true;
-						componentNameMarkedForDeletion = (*component).type.name();
-					}
-					ImGui::EndPopup();
-				}
-
-
-				ImGui::PopID();
+				DisplayOtherComponent(component);
 			}
-
-
-			
 
 		}
 		else if (gameObjectsCount > 1) {
 
 			//Just show all components, Name and Transform first
-			//First gameobject takes priority
+			//First gameobject takes priority. By default, name and transform will always be shown.
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
 			if (c_name) {
 				DisplayNameComponent(c_name);
@@ -342,21 +275,48 @@ namespace idk {
 			if (c_transform) {
 				DisplayTransformComponent(c_transform);
 			}
-			//Just show similar components
 
-			//for (auto& i : editor.selected_gameObjects) {
-			//
-			//
-			//	//Hierarchy Display
-			//	SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-			//	SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
-			//	sceneGraph.visit([](const Handle<GameObject>& handle, int depth) {
-			//
-			//
-			//
-			//		});
-			//
-			//}
+
+			//Just show similar components, based on first object
+			span<GenericHandle> componentSpan = editor.selected_gameObjects[0]->GetComponents();
+			hash_set<string,std::hash<string>,std::equal_to<string>> similarComponentNames;
+			for (GenericHandle component : componentSpan) {
+				if (component == c_name)
+					continue;
+				if (component == c_transform)
+					continue;
+				similarComponentNames.insert(string((*component).type.name()));
+			}
+
+
+			//Loop similarComponent
+			//Inside loop, for each selected check if it contains such handle
+			//If hit one, go to next similarComponent
+			//If not, remove!
+			vector<string> componentsToDiscard{};
+			for (string componentName : similarComponentNames) {
+				bool doesAllSelectedHasComponent = true;
+				for (auto& gameObject : editor.selected_gameObjects) {
+					if (!gameObject->GetComponent(componentName)) {
+						doesAllSelectedHasComponent = false;
+						break;
+					}
+				}
+				if (!doesAllSelectedHasComponent) {
+					componentsToDiscard.push_back(componentName);
+				}
+			}
+
+			for (string i : componentsToDiscard) {
+				similarComponentNames.erase(i);
+			}
+
+			//At this point we are sure that these components have these names
+			for (string i : similarComponentNames) {
+				GenericHandle component = editor.selected_gameObjects[0]->GetComponent(i);
+				DisplayOtherComponent(component);
+				//ImGui::Text(i.c_str());
+			}
 
 		}
 
@@ -651,7 +611,7 @@ namespace idk {
 
 	}
 
-	void IGE_InspectorWindow::DisplayAnimatorComponent(Handle<Animator> c_anim)
+	void IGE_InspectorWindow::DisplayAnimatorComponent(Handle<Animator>& c_anim)
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
@@ -707,6 +667,56 @@ namespace idk {
 			}
 			ImGui::EndPopup();
 		}
+	}
+
+	void IGE_InspectorWindow::DisplayOtherComponent(GenericHandle& component)
+	{
+		//COMPONENT DISPLAY
+		ImGui::PushID(static_cast<int>(component.id));
+		const auto componentName = (*component).type.name();
+		string displayingComponent{ componentName };
+		const string fluffText{ "idk::" };
+		std::size_t found = displayingComponent.find(fluffText);
+
+		if (found != std::string::npos)
+			displayingComponent.erase(found, fluffText.size());
+
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{}; //This is for setting after all members are placed
+		ImGui::SetCursorPosX(window_size.x - 20);
+		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
+
+		ImGui::SetCursorPos(cursorPos);
+
+		if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			displayVal(*component);
+		}
+
+		cursorPos2 = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPosX(window_size.x - 20);
+		ImGui::Text("...");
+
+		ImGui::SetCursorPos(cursorPos2);
+
+		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+			if (ImGui::MenuItem("Reset")) {
+
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Remove Component")) {
+				isComponentMarkedForDeletion = true;
+				componentNameMarkedForDeletion = (*component).type.name();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::PopID();
 	}
 
 	void IGE_InspectorWindow::DisplayVec3(vec3& vec)
