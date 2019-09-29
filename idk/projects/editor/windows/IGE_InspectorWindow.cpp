@@ -59,9 +59,6 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
 		const size_t gameObjectsCount = editor.selected_gameObjects.size();
 
-		bool isComponentMarkedForDeletion = false;
-		string componentNameMarkedForDeletion{}; //Is empty by default
-
 		//DISPLAY
 		if (gameObjectsCount == 1) {
 			//Just show all components, Name and Transform first
@@ -78,21 +75,8 @@ namespace idk {
 
 			
 			Handle<AnimationController> c_anim = editor.selected_gameObjects[0]->GetComponent<AnimationController>();
-			if (c_anim)
-			{
-				ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
-				if(ImGui::Button("Play"))
-				{
-					c_anim->Play(0);
-				}
-				if (ImGui::Button("Stop"))
-				{
-					c_anim->Stop();
-				}
-				if (ImGui::Button("Pause"))
-				{
-					c_anim->Pause();
-				}
+			if (c_anim) {
+				DisplayAnimationControllerComponent(c_anim);
 			}
 
 			//Display remaining components here
@@ -106,6 +90,8 @@ namespace idk {
 				if (component == c_transform)
 					continue;
 
+				if (component == c_anim)
+					continue;
 
 				//COMPONENT DISPLAY
 				ImGui::PushID(static_cast<int>(component.id));
@@ -182,20 +168,20 @@ namespace idk {
 							static_assert(is_template_v<T, std::variant>, "HOW????");
 							const int curr_ind = s_cast<int>(val.index());
 							int new_ind = curr_ind;
-							
+
 							constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
 							using VarCombo = std::array<const char*, sz>;
-							
-							
+
+
 							static auto combo_items = []()-> VarCombo
 							{
 								static_assert(is_template_v<T, std::variant>, "HOW????");
 
 								static std::array<string, sz> tmp_arr;
 								std::array<const char*, sz> retval;
-								
+
 								auto sp = reflect::unpack_types<T>();
-								
+
 								for (auto i = 0; i < sz; ++i)
 								{
 									tmp_arr[i] = string{ sp[i].name() };
@@ -203,7 +189,7 @@ namespace idk {
 								}
 								return retval;
 							}();
-							
+
 							if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
 							{
 								val = variant_construct<T>(new_ind);
@@ -277,6 +263,11 @@ namespace idk {
 		if (isComponentMarkedForDeletion) {
 			for (Handle<GameObject> i : editor.selected_gameObjects)
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
+
+			//Reset values
+			componentNameMarkedForDeletion = {};
+			isComponentMarkedForDeletion = false;
+
 		}
 
 		if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
@@ -321,7 +312,7 @@ namespace idk {
 	{
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
-
+		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
 		Handle<GameObject> gameObject = c_name->GetGameObject();
 		ImGui::Text("Name: ");
 		ImGui::SameLine();
@@ -346,6 +337,15 @@ namespace idk {
 		
 		string idName = std::to_string(gameObject.id);
 		ImGui::Text("ID: %s", idName.data());
+
+		//ImVec2 endScreenPos = ImGui::GetCursorScreenPos();
+		//
+		//ImGui::Separator();
+		//ImDrawList* drawList = ImGui::GetWindowDrawList();
+		//
+		//drawList->AddRectFilled(startScreenPos, endScreenPos, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
+
+
 		//ImGui::SameLine();
 		//ImGui::InputText("##ID", &idName, ImGuiInputTextFlags_ReadOnly);
 		//if (ImGui::InputText("##NAME", &selectedGameObject.lock()->name, ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -445,6 +445,64 @@ namespace idk {
 		}
 
 
+	}
+
+	void IGE_InspectorWindow::DisplayAnimationControllerComponent(Handle<AnimationController>& c_anim)
+	{
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+		ImGui::SetCursorPosX(window_size.x - 20);
+		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
+
+		ImGui::SetCursorPos(cursorPos);
+
+
+		if (ImGui::CollapsingHeader("Animation Controller", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			//Draw All your custom variables here.
+
+			//ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
+			if (ImGui::Button("Play"))
+			{
+				c_anim->Play(0);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Stop"))
+			{
+				c_anim->Stop();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Pause"))
+			{
+				c_anim->Pause();
+			}
+
+		}
+
+		cursorPos2 = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPosX(window_size.x - 20);
+		ImGui::Text("...");
+
+		ImGui::SetCursorPos(cursorPos2);
+
+
+		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+			if (ImGui::MenuItem("Reset")) {
+
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Remove Component")) {
+				isComponentMarkedForDeletion = true;
+				GenericHandle i = (*c_anim).GetHandle();
+				componentNameMarkedForDeletion = (*i).type.name();
+			}
+			ImGui::EndPopup();
+		}
 	}
 
 	void IGE_InspectorWindow::DisplayVec3(vec3& vec)
