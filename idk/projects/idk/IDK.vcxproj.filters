@@ -647,6 +647,7 @@
     <ClInclude Include="gfx\MaterialFactory.h" />
     <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="anim\BoneComponent.h" />
+    <ClInclude Include="PauseConfigurations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

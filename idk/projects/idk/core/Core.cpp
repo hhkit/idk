@@ -16,6 +16,11 @@ namespace idk
 	{
 		return _instance->_scheduler->GetRealDeltaTime();
 	}
+
+	Scheduler& Core::GetScheduler()
+	{
+		return *_instance->_scheduler;
+	}
 	
 	ResourceManager& Core::GetResourceManager()
 	{
