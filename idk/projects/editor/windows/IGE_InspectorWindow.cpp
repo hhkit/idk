@@ -154,6 +154,11 @@ namespace idk {
 							DisplayVec3(val);
 							return false;
 						}
+						else if constexpr (std::is_same_v<T, color>)
+						{
+							ImGui::ColorEdit4(keyName.data(), val.data());
+							return false;
+						}
 						else if constexpr (is_template_v<T, RscHandle>) {
 
 							if (ImGuidk::InputResource(keyName.c_str(), &val))
@@ -194,7 +199,7 @@ namespace idk {
 							{
 								val = variant_construct<T>(new_ind);
 							}
-							return false;
+							return true;
 						}
 						else {
 							ImGui::SetCursorPosY(currentHeight + heightOffset);

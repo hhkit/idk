@@ -164,9 +164,24 @@ namespace idk::ogl
 				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
-				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+
+				// set probe
 				GLuint texture_units = 0;
 
+				std::visit([&]([[maybe_unused]] const auto& obj)
+					{
+						using T = std::decay_t<decltype(obj)>;
+						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+						{
+							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+							opengl_handle->BindToUnit(texture_units);
+							pipeline.SetUniform("irradiance_probe", texture_units);
+							pipeline.SetUniform("environment_probe", texture_units);
+							++texture_units;
+						}
+					}, cam.clear_data);
+
+				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
 					auto& light = lights[i];
