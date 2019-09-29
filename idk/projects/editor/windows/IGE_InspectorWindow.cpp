@@ -233,6 +233,15 @@ namespace idk {
 
 		}
 		else if (gameObjectsCount > 1) {
+
+			//Just show all components, Name and Transform first
+			//First gameobject takes priority
+			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
+			if (c_name) {
+				DisplayNameComponent(c_name);
+
+			}
+
 			//Just show similar components
 
 			//for (auto& i : editor.selected_gameObjects) {
@@ -310,6 +319,7 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
 	{
+		//The c_name is to just get the first gameobject
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
@@ -318,12 +328,19 @@ namespace idk {
 		ImGui::SameLine();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
-			editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ c_name }, &c_name->name, stringBuf));
+			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
+				string outputString = stringBuf;
+				if (i > 0) {
+					outputString.append(" (");
+					outputString.append(std::to_string(i));
+					outputString.append(")");
+				}
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
 
+			}
 
 		}
-		//if (ImGui::IsItemDeactivatedAfterEdit()) {
-		//}
+
 
 		if (ImGui::IsItemClicked()) {
 			stringBuf = c_name->name;
@@ -338,17 +355,6 @@ namespace idk {
 		string idName = std::to_string(gameObject.id);
 		ImGui::Text("ID: %s", idName.data());
 
-		//ImVec2 endScreenPos = ImGui::GetCursorScreenPos();
-		//
-		//ImGui::Separator();
-		//ImDrawList* drawList = ImGui::GetWindowDrawList();
-		//
-		//drawList->AddRectFilled(startScreenPos, endScreenPos, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
-
-
-		//ImGui::SameLine();
-		//ImGui::InputText("##ID", &idName, ImGuiInputTextFlags_ReadOnly);
-		//if (ImGui::InputText("##NAME", &selectedGameObject.lock()->name, ImGuiInputTextFlags_EnterReturnsTrue)) {
 	}
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
