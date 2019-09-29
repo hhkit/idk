@@ -42,9 +42,18 @@ namespace idk
 		vector<RscHandle<anim::Animation>> _animations;
 
 		vector<Handle<GameObject>> _child_objects;
-		vector<mat4> _bone_transforms{ mat4{} };
 		vector<matrix_decomposition<real>> _bind_pose;
+		// AnimationSystem is responsible for updating this.
+		// This is before the global inverse bind pose multiplication (transformations are concatanated alr)
+		vector<mat4> _pre_global_transforms{ mat4{} };
+
+		// This is what we send to the graphics system.
+		vector<mat4> _final_bone_transforms{ mat4{} };
+
+		bool _play_when_paused = false;
 
 		void clearGameObjects();
+		void saveBindPose();
+		void restoreBindPose();
 	};
 }

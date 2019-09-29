@@ -42,7 +42,6 @@ namespace idk
 				float time_in_ticks = fmod(ticks, num_ticks);
 
 				// Loop through the skeleton
-				
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 				{
 					auto& curr_go = elem._child_objects[bone_id];
@@ -84,39 +83,12 @@ namespace idk
 					mat4 compose_curr_pose = curr_pose.recompose();
 
 					auto parent_index = skeleton[bone_id]._parent;
-					curr_go->Transform()->LocalMatrix(compose_curr_pose);
-					if (parent_index >= 0)
-					{
-						// If we have the parent, we push in the parent.global * child.local
-						const mat4& p_transform = elem._bone_transforms[parent_index];
-						compose_curr_pose = p_transform * compose_curr_pose;
-					}
 
-					elem._bone_transforms[bone_id] = compose_curr_pose;
-						
-				}
-				
-				// Apply offsets to all the transforms
-				// const auto& skeleton = elem._skeleton->data();
-				if (elem._skeleton->GetGlobalInverse() != mat4{})
-				{
-					for (size_t i = 0; i < elem._child_objects.size(); ++i)
-					{
-						auto& curr_bone = skeleton[i];
-						elem._bone_transforms[i] = elem._skeleton->GetGlobalInverse() * elem._bone_transforms[i] * curr_bone._global_inverse_bind_pose;
-					}
-				}
-				else
-				{
-					for (size_t i = 0; i < elem._child_objects.size(); ++i)
-					{
-						auto& curr_bone = skeleton[i];
-						elem._bone_transforms[i] = elem._bone_transforms[i] * curr_bone._global_inverse_bind_pose;
-					}
+					// During GenerateTransforms in the Animator, it will use the child transforms to 
+					// generate the final transforms
+					curr_go->Transform()->LocalMatrix(compose_curr_pose);
 				}
 			}
-
-			
 		}
 	}
 
