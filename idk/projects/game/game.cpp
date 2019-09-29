@@ -118,10 +118,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camHandle->far_plane = 100.f;
 		camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
-		//camHandle->render_target->AddAttachment(eDepth);
+
+		/*
+		camHandle->shadow_map_index = camHandle->render_target->AddAttachment(eDepth, 1024, 1024);
+		if (camHandle->shadow_map_index.has_value())
+		{
+
+			auto shadowHand = camHandle->render_target->GetAttachment(eDepth, *camHandle->shadow_map_index);
+			auto m = shadowHand->GetMeta();
+			m.internal_format = (ColorFormat::DEPTH_COMPONENT);
+			shadowHand->SetMeta(m);
+		}
+		*/
 		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
 		if(gfx_api!=GraphicsAPI::Vulkan)
-			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/lagoon.jpg.cbm");
+			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/hl.png.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
 		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
 
@@ -211,7 +222,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		floor->AddComponent<Collider>()->shape = box{};
 		auto mesh_rend = floor->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
-		//mesh_rend->material_instance = mat_inst;
+		mesh_rend->material_instance = mat_inst;
 		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" });
 	}
 	{
@@ -246,6 +257,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
 		light_comp->SetLightMap(light_map);
+		
+		//auto shadow_map = Core::GetResourceManager().Create<RenderTarget>();
+
+		//auto m = shadow_map->GetMeta();
+
+
+		/*m.internal_format = (ColorFormat::DEPTH_COMPONENT);
+		shadowHand->SetMeta(m);*/
+
+		//light_comp->SetShadowMap(shadow_map);
 	}
 	light->AddComponent<TestComponent>();
 
