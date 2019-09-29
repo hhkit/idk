@@ -19,6 +19,7 @@ namespace idk
 		for (auto& elem : controllers)
 		{
 			auto anim = elem.GetCurrentAnimation();
+			const auto& skeleton = elem._skeleton->data();
 			if (elem._is_playing && anim)
 			{
 				// Update the components here:
@@ -41,7 +42,7 @@ namespace idk
 				float time_in_ticks = fmod(ticks, num_ticks);
 
 				// Loop through the skeleton
-				const auto& skeleton = elem._skeleton->data();
+				
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 				{
 					auto& curr_go = elem._child_objects[bone_id];
@@ -114,6 +115,8 @@ namespace idk
 					}
 				}
 			}
+
+			
 		}
 	}
 

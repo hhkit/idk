@@ -41,7 +41,7 @@ namespace idk
 		{
 			auto curr_go = _child_objects[i];
 			_bind_pose[i].position	= curr_go->Transform()->position;
-			_bind_pose[i].rotation		= curr_go->Transform()->rotation;
+			_bind_pose[i].rotation	= curr_go->Transform()->rotation;
 			_bind_pose[i].scale		= curr_go->Transform()->scale;
 		}
 
