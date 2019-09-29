@@ -45,4 +45,59 @@ namespace idk::vkn::hlp
 		cmd_buffer.updateBuffer(*_buffer, offset, hlp::make_array_proxy(static_cast<uint32_t>(len), data), vk::DispatchLoaderDefault{});
 	}
 
+
+	// modifiers
+
+	bool bbucket_list::will_grow(string_view chunk) const
+	{
+		return empty() || back().full(chunk.size());
+	}
+
+	std::pair<vk::Buffer, uint32_t> bbucket_list::new_chunk(string_view chunk)
+	{
+		if (_buckets.size() == 0 || back().full(chunk.size()))
+		{
+			add_bucket();
+		}
+		auto& bucket = _buckets.back();
+		return std::make_pair(*bucket.buffer, bucket.allocate(chunk));
+	}
+
+	vk::Buffer bbucket_list::current_buffer() const { return *back().buffer; }
+
+	void bbucket_list::update_buffers()
+	{
+		if(!empty())
+			for (size_t i=0;i<_index+1; i++)
+			{
+				auto& b = _buckets[i];
+				auto data = std::data(b.data);
+				if(b.size)
+					hlp::MapMemory(_device, b.memory->Memory(), b.memory->Offset(), data, b.size);
+			}
+	}
+	void bbucket_list::add_bucket()
+	{
+		if(!empty())
+			++_index;
+		if (_index >= _buckets.size())
+		{
+			_buckets.emplace_back(_device, _pdevice, *_allocator, _usage_flags, _mempr_flags, _chunk_size);
+		}
+	}
+	bbucket_list::bucket::bucket(vk::Device device, vk::PhysicalDevice pd, MemoryAllocator& allocator, vk::BufferUsageFlags buffer_flags, vk::MemoryPropertyFlags mem_flags, size_t cap) :capacity{ cap }, data(cap, '0')
+	{
+		auto&& [buf, alloc] = hlp::CreateAllocBindBuffer(pd, device, cap, buffer_flags, mem_flags, allocator, vk::DispatchLoaderDefault{});
+		buffer = std::move(buf);
+		memory = std::move(alloc);
+		data.resize(0);
+	}
+	uint32_t bbucket_list::bucket::allocate(string_view d)
+	{
+		uint32_t new_size = s_cast<uint32_t>(size);
+		size += d.size();
+		data += d;
+		return new_size;
+	}
+
 }

@@ -38,6 +38,7 @@
     <ClInclude Include="program\GLSLLoader.h" />
     <ClInclude Include="system\TextureManager.h" />
     <ClInclude Include="program\ProgramFactory.h" />
+    <ClInclude Include="resource\OpenGLCubemapFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -70,6 +71,7 @@
     <ClCompile Include="resource\FrameBufferFactory.cpp" />
     <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
     <ClCompile Include="resource\OpenGLCubemap.cpp" />
+    <ClCompile Include="resource\OpenGLCubemapFactory.cpp" />
     <ClCompile Include="program\GLSLLoader.cpp" />
     <ClCompile Include="system\TextureManager.cpp" />
     <ClCompile Include="program\ProgramFactory.cpp" />

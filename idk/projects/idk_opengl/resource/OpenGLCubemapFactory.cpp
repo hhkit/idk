@@ -19,16 +19,16 @@ namespace idk::ogl
 		auto mat = std::make_unique<OpenGLCubemap>();
 		return mat;
 	}
-	unique_ptr<CubeMap> OpenGLCubemapFactory::Create(PathHandle filepath)
-	{
-		UNREFERENCED_PARAMETER(filepath);
-		auto mat = std::make_unique<OpenGLCubemap>();
+	//unique_ptr<CubeMap> OpenGLCubemapFactory::Create(PathHandle filepath)
+	//{
+	//	UNREFERENCED_PARAMETER(filepath);
+	//	auto mat = std::make_unique<OpenGLCubemap>();
+	//
+	//	return mat;
+	//}
 
-		return mat;
-	}
-
-	unique_ptr<CubeMap> Create(PathHandle filepath, const CubeMap::Metadata&)
-	{
-		return unique_ptr<CubeMap>();
-	}
+	//unique_ptr<CubeMap> Create(PathHandle filepath, const CubeMap::Metadata&)
+	//{
+	//	return unique_ptr<CubeMap>();
+	//}
 }

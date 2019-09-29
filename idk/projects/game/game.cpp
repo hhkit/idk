@@ -23,27 +23,55 @@
 #include <test/TestSystem.h>
 #include <renderdoc/renderdoc_app.h>
 
+#include <shellapi.h>//CommandLineToArgv
 
-#define USE_RENDER_DOC
+//#define USE_RENDER_DOC
+
+namespace idk
+{
+	struct yolo
+	{
+		vector<string> guids;
+	};
+}
+REFLECT_BEGIN(idk::yolo, "yolo")
+REFLECT_VAR(guids)
+REFLECT_END()
+
+bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
+{
+	bool result = false;
+	for (int i = 0; (i < num_args) & (!result); ++i)
+	{
+		result |= arg == args[i];
+	}
+	return result;
+}
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+	int num_args=0;
+	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	//_CrtSetBreakAlloc(8538); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 #ifdef USE_RENDER_DOC
-	RENDERDOC_API_1_1_2* rdoc_api = NULL;
-
-	// At init, on windows
-	if (HMODULE mod = LoadLibrary(L"renderdoc.dll"))
+	if(!HasArg(L"--nodoc",command_lines,num_args)) //Additional check to allow disabling of renderdoc without changing game.cpp
 	{
-		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
-			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-		RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
+		RENDERDOC_API_1_1_2* rdoc_api = NULL;
+
+		// At init, on windows
+		if (HMODULE mod = LoadLibrary(L"renderdoc.dll"))
+		{
+			pRENDERDOC_GetAPI RENDERDOC_GetAPI =
+				(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+			RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
+		}
 	}
 #endif
 	using namespace idk;
@@ -56,7 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		case GraphicsAPI::Vulkan:
 			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			//c->AddSystem<IDE>();
+			c->AddSystem<IDE>();
 
 			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
 			break;
@@ -89,7 +117,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
 		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
-		camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/lagoon.jpg.cbm");
+		if(gfx_api!=GraphicsAPI::Vulkan)
+			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/lagoon.jpg.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
 		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
 
@@ -118,22 +147,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			auto resources_running = Core::GetResourceManager().Load(PathHandle{ "/assets/models/test.fbx" });
 			
-			// for (auto handle : resources_running->GetAll<RscHandle<Mesh>>())
-			// {
-			// 	auto mesh_child_go = scene->CreateGameObject();
-			// 	mesh_child_go->Transform()->parent = go;
-			// 
-			// 	auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
-			// 	mesh_rend->mesh = handle;
-			// 	mesh_rend->material_instance = mat_inst;
-			// }
-			// 
-			// animator->SetSkeleton(*resources_running->Get<RscHandle<anim::Skeleton>>());
-			// // auto anim_handles =;
-			// for (auto anim : resources_running->GetAll<RscHandle<anim::Animation>>())
-			// {
-			// 	animator->AddAnimation(anim);
-			// }
+			for (auto handle : resources_running->GetAll<Mesh>())
+			{
+				auto mesh_child_go = scene->CreateGameObject();
+				mesh_child_go->Transform()->parent = go;
+			
+				auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
+				mesh_rend->mesh = handle;
+				mesh_rend->material_instance = mat_inst;
+			}
+			
+			animator->SetSkeleton(resources_running->Get<anim::Skeleton>());
+			// auto anim_handles =;
+			for (auto& anim : resources_running->GetAll<anim::Animation>())
+			{
+				animator->AddAnimation(anim);
+			}
 			
 			animator->Play(0);
 		}
@@ -174,12 +203,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	createtest_obj(vec3{ -0.5, 0, 0 });
 	//createtest_obj(vec3{ 0, 0.5, 0 });
 	//createtest_obj(vec3{ 0, -0.5, 0 });
-
-	auto floor = scene->CreateGameObject();
-	floor->Transform()->position = vec3{ 0, -1, 0 };
-	//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
-	floor->Transform()->scale    = vec3{ 10, 2, 10 };
-	floor->AddComponent<Collider>()->shape = box{};
+	{
+		auto floor = scene->CreateGameObject();
+		floor->Transform()->position = vec3{ 0, -1, 0 };
+		//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+		floor->Transform()->scale = vec3{ 10, 2, 10 };
+		floor->AddComponent<Collider>()->shape = box{};
+		auto mesh_rend = floor->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
+		//mesh_rend->material_instance = mat_inst;
+		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" });
+	}
 	{
 		auto wall = scene->CreateGameObject();
 		wall->Transform()->position = vec3{ 5, 5, 0 };
@@ -208,57 +242,61 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto light = scene->CreateGameObject();
 	light->Name("Point Light");
 	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
-	light->AddComponent<Light>();
+	auto light_comp = light->AddComponent<Light>();
+	{
+		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
+		light_comp->SetLightMap(light_map);
+	}
 	light->AddComponent<TestComponent>();
 
 	/* physics resolution demonstration */
-	// {
-	// 	auto seduceme = scene->CreateGameObject();
-	// 	seduceme->GetComponent<Name>()->name = "seduceme";
-	// 	seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
-	// 	//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
-	// 	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
-	// 	seduceme->Transform()->scale = vec3{ 1.f / 4 };
-	// 	seduceme->AddComponent<RigidBody>();
-	// 	auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
-	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-	// 	mesh_rend->material_instance = mat_inst;
-	// 	seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	// }
-	// {
-	// 	auto seducer = scene->CreateGameObject();
-	// 	seducer->GetComponent<Name>()->name = "seducer";
-	// 	seducer->Transform()->position = vec3{ -2, 0.125, 0 };
-	// 	seducer->Transform()->scale = vec3{ 1.f / 4 };
-	// 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
-	// 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
-	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-	// 	mesh_rend->material_instance = mat_inst;
-	// 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	// }
-	// {
-	// 	auto seducer = scene->CreateGameObject();
-	// 	seducer->GetComponent<Name>()->name = "seducer";
-	// 	seducer->Transform()->position = vec3{ 2, 0.125, 0 };
-	// 	seducer->Transform()->scale = vec3{ 1.f / 4 };
-	// 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
-	// 	auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
-	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-	// 	mesh_rend->material_instance = mat_inst;
-	// 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	// }
-	// 
-	// {
-	// 	auto seducer = scene->CreateGameObject();
-	// 	seducer->GetComponent<Name>()->name = "seducer";
-	// 	seducer->Transform()->position = vec3{ 1, 0.125, 0 };
-	// 	seducer->Transform()->scale = vec3{ 1.f / 4 };
-	// 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
-	// 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
-	// 	mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
-	// 	mesh_rend->material_instance = mat_inst;
-	// 	//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	// }
+	 {
+	 	auto seduceme = scene->CreateGameObject();
+	 	seduceme->GetComponent<Name>()->name = "seduceme";
+	 	seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
+	 	//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
+	 	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
+	 	seduceme->Transform()->scale = vec3{ 1.f / 4 };
+	 	seduceme->AddComponent<RigidBody>();
+	 	auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
+	 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+	 	mesh_rend->material_instance = mat_inst;
+	 	seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	 }
+	 {
+	 	auto seducer = scene->CreateGameObject();
+	 	seducer->GetComponent<Name>()->name = "seducer";
+	 	seducer->Transform()->position = vec3{ -2, 0.125, 0 };
+	 	seducer->Transform()->scale = vec3{ 1.f / 4 };
+	 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
+	 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+	 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+	 	mesh_rend->material_instance = mat_inst;
+	 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	 }
+	 {
+	 	auto seducer = scene->CreateGameObject();
+	 	seducer->GetComponent<Name>()->name = "seducer";
+	 	seducer->Transform()->position = vec3{ 2, 0.125, 0 };
+	 	seducer->Transform()->scale = vec3{ 1.f / 4 };
+	 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+	 	auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
+	 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+	 	mesh_rend->material_instance = mat_inst;
+	 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	 }
+	 
+	 {
+	 	auto seducer = scene->CreateGameObject();
+	 	seducer->GetComponent<Name>()->name = "seducer";
+	 	seducer->Transform()->position = vec3{ 1, 0.125, 0 };
+	 	seducer->Transform()->scale = vec3{ 1.f / 4 };
+	 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
+	 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
+	 	mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
+	 	mesh_rend->material_instance = mat_inst;
+	 	//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
+	 }
 	
 	if(0)
 	for (int i = 2; i < 5; ++ i)

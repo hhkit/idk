@@ -12,7 +12,7 @@ namespace idk::vkn::hlp
 			itr = memories.emplace(mem_type, Memories{ d,mem_type }).first;
 		}
 		auto& mem = itr->second;
-		auto&& [mem_idx, offset] = mem.Allocate(mem_req.size);
+		auto&& [mem_idx, offset] = mem.Allocate(mem_req.size,mem_req.alignment);
 		return std::make_unique<Alloc>(mem, mem_idx, offset, mem_req.size);
 	}
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::PhysicalDevice pd, vk::Device d, vk::Buffer& buffer, vk::MemoryPropertyFlags prop)
@@ -51,14 +51,21 @@ namespace idk::vkn::hlp
 		//TODO actually manage the freed memory
 	}
 
+	size_t Aligned(size_t offset, size_t alignment)
+	{
+		size_t mod = (offset) % alignment;
+		return offset + ((mod)?(alignment - mod):0);
+	}
+
 	//Returns offset if it is allocated
-	std::optional<size_t> Memories::Memory::Allocate(size_t size)
+	std::optional<size_t> Memories::Memory::Allocate(size_t size,size_t alignment)
 	{
 		std::optional<size_t> result{};
-		if (sz >= curr_offset + size)
+		auto aligned_offset = Aligned(curr_offset, alignment);
+		if (sz >= aligned_offset + size)
 		{
-			result = curr_offset;
-			curr_offset += size;
+			result = aligned_offset;
+			curr_offset = aligned_offset+size;
 		}
 		return result;
 	}

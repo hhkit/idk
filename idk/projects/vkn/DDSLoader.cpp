@@ -21,7 +21,7 @@ namespace idk::vkn
 		std::stringstream strm;
 		strm << file.rdbuf();
 		DdsFile dds{ strm.str() };
-		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), dds.Data(), dds.Dimensions(), allocator, *load_fence);
+		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), {}, dds.Data(), dds.Dimensions(), allocator, *load_fence, false);
 		return tex;
 	}
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
@@ -35,7 +35,9 @@ namespace idk::vkn
 		std::stringstream strm;
 		strm << file.rdbuf();
 		DdsFile dds{ strm.str() };
-		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), dds.Data(), dds.Dimensions(), allocator, *load_fence);
+		TextureOptions to;
+		to = *path_to_meta.metadatas[0].GetMeta<Texture>();
+		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()),to, dds.Data(), dds.Dimensions(), allocator, *load_fence,false);
 		return tex;
 	}
 

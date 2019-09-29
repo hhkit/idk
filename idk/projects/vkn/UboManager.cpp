@@ -92,7 +92,8 @@ namespace idk::vkn
 			auto& memory = _memory_blocks[memory_idx].memory;
 			auto& buffer = _buffers[buffer_idx];
 			auto initial_offset = InitialOffset(buffer.data.data(), _alignment);
-			hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data)+initial_offset,buffer.data.size()-initial_offset,view.Dispatcher() );
+			if(buffer.data.size())
+				hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data)+initial_offset,buffer.data.size()-initial_offset,view.Dispatcher() );
 		}
 	}
 

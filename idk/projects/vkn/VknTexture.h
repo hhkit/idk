@@ -14,6 +14,7 @@ namespace idk::vkn {
 		string					path{ "" };
 		vk::UniqueImage			image{ nullptr };
 		vk::Format				format{};
+		vk::ImageAspectFlags    img_aspect;
 		vk::UniqueDeviceMemory  mem{ nullptr };
 		hlp::UniqueAlloc        mem_alloc{};
 		vk::UniqueImageView     imageView{ nullptr };
@@ -21,7 +22,8 @@ namespace idk::vkn {
 
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
 		opt<vk::DescriptorSet>	descriptorSet{};
-
+		vk::Image Image()const { return *image; }
+		vk::ImageView ImageView()const { return *imageView; }
 		VknTexture() = default;
 		~VknTexture();
 		//VknTexture(const VknTexture& rhs);

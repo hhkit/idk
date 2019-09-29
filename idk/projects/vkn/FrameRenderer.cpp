@@ -11,11 +11,13 @@
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
+#include <vkn/VknFrameBuffer.h>
 #include <gfx/Light.h>
 
 
 namespace idk::vkn
 {
+	static vk::RenderPass tmp_rp;
 	struct SomeHackyThing
 	{
 		VulkanPipeline pipeline;
@@ -46,23 +48,15 @@ namespace idk::vkn
 		config.buffer_descriptions.emplace_back(nml_desc);
 		string f, v;
 		{
-			std::stringstream stringify;
-			{
-				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/mesh.vert.spv", FS_PERMISSIONS::READ, true);
-				stringify << vbuffer.rdbuf();
-			}
-			v = stringify.str();
-			config.vert_shader = v;
+				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert.spv").value();
+			config.vert_shader = vbuffer;
 
 		}
 		{
-			std::stringstream stringify;
 			{
-				auto vbuffer = Core::GetSystem<FileSystem>().Open("/assets/shader/flat_color.frag.spv", FS_PERMISSIONS::READ, true);
-				stringify << vbuffer.rdbuf();
+				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/flat_color.frag.spv").value();
+				config.vert_shader = vbuffer;
 			}
-			f = stringify.str();
-			config.frag_shader = f;
 		}
 		config.prim_top = PrimitiveTopology::eTriangleList;
 		config.fill_type = FillType::eFill;
@@ -70,7 +64,7 @@ namespace idk::vkn
 		thing.pipeline.Create(config, view);
 	}
 	void RenderStateV2::Reset() {
-		cmd_buffer.reset({}, vk::DispatchLoaderDefault{});
+		cmd_buffer.reset({});
 		ubo_manager.Clear();
 		dpools.Reset();
 		has_commands = false;
@@ -114,29 +108,99 @@ namespace idk::vkn
 		InitThing(View());
 
 
-		//TODO figure this out
-		string filename = "/assets/shader/mesh.vert";
-		auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-		auto rsc = Core::GetResourceManager().Load(actualfile);
-		if (!actualfile || !rsc->Count())
 		{
+			//TODO figure this out
+			string filename = "/assets/shader/mesh.vert";
+			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			//if (!actualfile || !rsc.resources.size())
+			{
 
-			vector<buffer_desc> desc{
-				BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-			};
-			Core::GetSystem<FileSystem>().Update();
-			//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile);
-			_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
-			//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-			//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-
+				vector<buffer_desc> desc{
+					BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+					BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+					BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				};
+				Core::GetSystem<FileSystem>().Update();
+				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+				_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
+				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			}
 		}
-		else
+		//else
 		{
-			_mesh_renderer_shader_module = rsc->Get<ShaderProgram>();
+			string filename = "/assets/shader/shadow.frag";
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			auto& shader_mod = _shadow_shader_module;
+			//if (!actualfile || !rsc.resources.size())
+			if(!shader_mod)
+			{
+
+				//vector<buffer_desc> desc{
+				//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
+				//};
+				Core::GetSystem<FileSystem>().Update();
+				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+				shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename,false).value();
+				//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
+				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+
+			}
+			//else
+			//{
+			//	shader_mod = rsc.resources.front().As<ShaderProgram>();
+			//}
+		}
+		{
+
+			vk::AttachmentDescription colorAttachment
+			{
+				vk::AttachmentDescriptionFlags{}
+				,vk::Format::eB8G8R8A8Unorm
+				,vk::SampleCountFlagBits::e1
+				,vk::AttachmentLoadOp::eClear
+				,vk::AttachmentStoreOp::eStore
+				,vk::AttachmentLoadOp::eDontCare
+				,vk::AttachmentStoreOp::eDontCare
+				,vk::ImageLayout::eUndefined
+				,vk::ImageLayout::ePresentSrcKHR
+			};
+			vk::AttachmentReference colorAttachmentRef
+			{
+				0
+				,vk::ImageLayout::eColorAttachmentOptimal
+			};
+
+			vk::SubpassDescription subpass
+			{
+				vk::SubpassDescriptionFlags{}
+				,vk::PipelineBindPoint::eGraphics
+				,0,nullptr
+				,1,&colorAttachmentRef
+			};
+
+			vk::SubpassDependency dependency
+			{
+				VK_SUBPASS_EXTERNAL//src
+				,0U				   //dest
+				,vk::PipelineStageFlagBits::eColorAttachmentOutput
+				,vk::PipelineStageFlagBits::eColorAttachmentOutput
+				,vk::AccessFlags{}
+				,vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite
+			};
+			vk::RenderPassCreateInfo renderPassInfo
+			{
+				vk::RenderPassCreateFlags{}
+				,1,&colorAttachment
+				,1,&subpass
+				,1,&dependency
+			};
+
+			tmp_rp = device.createRenderPass(renderPassInfo);
 		}
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
@@ -158,6 +222,7 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
+		bool rendered = false;
 		for (size_t i = 0; i + num_concurrent <= gfx_states.size(); i += num_concurrent)
 		{
 			//Spawn/Assign to the threads
@@ -165,6 +230,10 @@ namespace idk::vkn
 				auto& state = gfx_states[i + j];
 				auto& rs = _states[i + j];
 				_render_threads[j]->Render(state, rs);
+				rendered = true;
+				//TODO submit command buffer here and signal the framebuffer's stuff.
+				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
+				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
 				//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
 			}
 			//Wait here
@@ -196,28 +265,31 @@ namespace idk::vkn
 		subResourceRange.baseArrayLayer = 0;
 		subResourceRange.layerCount = 1;
 
-		vk::ImageMemoryBarrier presentToClearBarrier = {};
-		presentToClearBarrier.srcAccessMask = vk::AccessFlags{};
-		presentToClearBarrier.dstAccessMask = vk::AccessFlags{};
-		presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
-		presentToClearBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
-		presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
-		presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
-		presentToClearBarrier.image = swapchain.images[swapchain.curr_index];
-		presentToClearBarrier.subresourceRange = subResourceRange;
-		begin_info.pInheritanceInfo = &iinfo;
-		transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
-		transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
-		transition_buffer->end();
-		//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
-		pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
+		if (!rendered)
+		{
+			vk::ImageMemoryBarrier presentToClearBarrier = {};
+			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+			presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+			presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
+			presentToClearBarrier.newLayout = vk::ImageLayout::eGeneral;
+			presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
+			presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
+			presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
+			presentToClearBarrier.subresourceRange = subResourceRange;
+			begin_info.pInheritanceInfo = &iinfo;
+			transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
+			transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
+			transition_buffer->end();
+			//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
+			pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
+		}
 		pri_buffer->end();
 
 		buffers.emplace_back(*pri_buffer);
 		auto& current_signal = View().CurrPresentationSignals();
 
 		auto& waitSemaphores = *current_signal.image_available;
-		auto& readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
 		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
@@ -239,6 +311,7 @@ namespace idk::vkn
 
 		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
+		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknFrameBuffer>()->GetAttachment(AttachmentType::eColor, 0).as<VknTexture>().Image();
 	}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{
@@ -293,6 +366,7 @@ namespace idk::vkn
 	{
 		const vector<const RenderObject*>& draw_calls = state.mesh_render;
 		const CameraData& cam = state.camera;
+		auto& vkn_fb = cam.render_target.as<VknFrameBuffer>();
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
 		
@@ -315,6 +389,7 @@ namespace idk::vkn
 			                0,0,0,1
 		}* cam.projection_matrix;
 		;
+		auto mesh_mod = GetMeshRendererShaderModule();
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
 		for (auto& ptr_dc : draw_calls)
@@ -322,13 +397,22 @@ namespace idk::vkn
 			auto& dc = *ptr_dc;
 			//Force pipeline creation
 			shaders.resize(0);
-			shaders.emplace_back(GetMeshRendererShaderModule());
-			auto sprog = dc.material_instance->material->_shader_program;
+
+			auto sprog = (cam.is_shadow) ? _shadow_shader_module : dc.material_instance->material->_shader_program;
+			
+			auto& fprog = sprog.as<ShaderModule>();
+			auto& vprog = mesh_mod.as<ShaderModule>();
+
+			if (!fprog || !vprog)
+				continue;
+			shaders.emplace_back(mesh_mod);
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			//Force pipeline creation
-			GetPipeline(*dc.config, shaders);
+			auto config = *dc.config;
+			config.render_pass_type = vkn_fb.rp_type;
+			GetPipeline(config, shaders);
 			//set, bindings
 			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
 			auto& layouts = sprog.as<ShaderModule>();
@@ -339,11 +423,12 @@ namespace idk::vkn
 			mat4 obj_ivt= obj_trf.inverse().transpose();
 			vector<mat4> mat4_block{obj_trf,obj_ivt};
 			PreProcUniform(obj_uni, mat4_block , collated_layouts, collated_bindings, ubo_manager);
-			PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
+			if(!cam.is_shadow)
+				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
 			//Account for material bindings
-			for (auto itr = layouts.LayoutsBegin(), end = layouts.LayoutsEnd(); itr != end; ++itr)
+			for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 			{
 				auto& name = itr->first;
 				auto mat_uni_itr = dc.material_instance->uniforms.find(itr->first);
@@ -478,24 +563,89 @@ namespace idk::vkn
 	vk::Framebuffer GetFrameBuffer(const CameraData& camera_data, uint32_t curr_index)
 	{
 		//TODO Actually get the framebuffer from camera_data
-		return {};
+		//auto& e = camera_data.render_target.as<VknFrameBuffer>();
+		return camera_data.render_target.as<VknFrameBuffer>().Buffer();
 	}
-	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
+
+	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
+	//and command buffer hasn't ended
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs)
 	{
-		auto& swapchain = View().Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
-		vk::CommandBufferInheritanceInfo aaa{};
+		auto& pipeline = *state.dbg_pipeline;
+		//Preprocess MeshRender's uniforms
+		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
+		rs.ubo_manager.UpdateAllBuffers();
+		auto alloced_dsets = rs.dpools.Allocate(layout_count);
+		rs.FlagRendered();
+		pipeline.Bind(cmd_buffer, *_view);
+		//Bind the uniforms
+		auto& layouts = pipeline.uniform_layouts;
+		uint32_t trf_set = 0;
+		auto itr = layouts.find(trf_set);
+		if (itr != layouts.end())
+		{
+			auto ds_layout = itr->second;
+			auto allocated =rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, {vk::DescriptorType::eUniformBuffer,2}}});
+			auto aitr = allocated.find(ds_layout);
+			if (aitr != allocated.end())
+			{
+				auto&& [view_buffer, vb_offset] = rs.ubo_manager.Add(state.camera.view_matrix);
+				auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
+				auto ds = aitr->second.GetNext();
+				UpdateUniformDS(*View().Device(), ds, vector<ProcessedRO::BindingInfo>{ 
+					ProcessedRO::BindingInfo{
+						0,view_buffer,vb_offset,0,sizeof(mat4)
+					},
+					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4) }
+				});
+				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, 0, ds, {});
+			}
+		}
+
+		const DbgDrawCall* prev = nullptr;
+		for (auto& p_dc : state.dbg_render)
+		{
+			auto& dc = *p_dc;
+			dc.Bind(cmd_buffer,prev);
+			dc.Draw(cmd_buffer);
+			prev = p_dc;
+			
+		}
+	}
+
+	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView& view)
+	{
+		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
+		//if (state.camera.is_shadow)
+		//	result = view.BasicRenderPass(BasicRenderPasses::eDepthOnly);
+		return state.camera.render_target.as<VknFrameBuffer>().GetRenderPass();
+	}
+
+
+	void TransitionFrameBuffer(const CameraData& camera, vk::CommandBuffer cmd_buffer, VulkanView& view)
+	{
+		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
+		vkn_fb.PrepareDraw(cmd_buffer);
+	}
+
+
+
+
+	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
+	{
+		auto& view = View();
+		auto& swapchain = view.Swapchain();
+		auto dispatcher = vk::DispatchLoaderDefault{};
+		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-
-
 
 		VulkanPipeline* prev_pipeline = nullptr;
 		vector<RscHandle<ShaderProgram>> shaders;
 
 		//Preprocess MeshRender's uniforms
 		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
-		rs.ubo_manager.UpdateAllBuffers();
 		auto alloced_dsets = rs.dpools.Allocate(layout_count);
 
 
@@ -504,11 +654,21 @@ namespace idk::vkn
 
 		auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
-		vk::ClearValue v{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(cd) } };
+		std::array<float, 4> depth_clear{1.0f,1.0f ,1.0f ,1.0f };
+		std::optional<vec4> clear_col;
+		std::visit([&state, &clear_col](auto clear_data)
+			{
+				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
+					clear_col = clear_data;
+			}, state.camera.clear_data);
+		vk::ClearValue v[]{ 
+			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
+			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
+		};
 		
 		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
-		auto sz = View().GetWindowsInfo().size;
+		auto sz = view.GetWindowsInfo().size;
 		vk::Rect2D render_area
 		{
 			vk::Offset2D{},vk::Extent2D
@@ -517,12 +677,14 @@ namespace idk::vkn
 			}
 		};
 		auto& camera = state.camera;
-		auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto frame_buffer = (camera.render_target) ? GetFrameBuffer(camera, swapchain.curr_index) : default_frame_buffer;
+		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
+		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
+		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
+		TransitionFrameBuffer(camera, cmd_buffer, view);
 		vk::RenderPassBeginInfo rpbi
 		{
-			*View().Renderpass(), frame_buffer,
-			render_area,1,&v
+			GetRenderPass(state,view), frame_buffer,
+			render_area,hlp::arr_count(v),std::data(v)
 		};
 
 
@@ -536,15 +698,17 @@ namespace idk::vkn
 			shaders.resize(0);
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = obj.material_instance->material->_shader_program;
+			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance->material->_shader_program;
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
-			auto& pipeline = GetPipeline(*p_ro.config,shaders);
+			auto config = *p_ro.config;
+			config.render_pass_type = vkn_fb.rp_type;
+			auto& pipeline = GetPipeline(config,shaders);
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			if (&pipeline != prev_pipeline)
 			{
-				pipeline.Bind(cmd_buffer, View());
+				pipeline.Bind(cmd_buffer, view);
 				prev_pipeline = &pipeline;
 			}
 			auto& mesh = obj.mesh.as<VulkanMesh>();
@@ -556,15 +720,16 @@ namespace idk::vkn
 				if (layout_itr != layouts.end())
 				{
 					//Find the allocated pool of descriptor sets that matches the descriptor set layout
-					auto ds_itr = alloced_dsets.find(*layout_itr->second);
+					auto ds_itr = alloced_dsets.find(layout_itr->second);
 					if (ds_itr == alloced_dsets.end())
-						ds_itr = alloced_dsets.find(*layout_itr->second);
+						ds_itr = alloced_dsets.find(layout_itr->second);
 					if(ds_itr!=alloced_dsets.end())
 					{
 						//Get a descriptor set from the allocated pool
 						auto ds = ds_itr->second.GetNext();
+						//p_ro.dses[set_index] = ds;
 						//Update the descriptor set
-						UpdateUniformDS(*View().Device(),ds,binfo);
+						UpdateUniformDS(*view.Device(),ds,binfo);
 						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set_index, ds, nullptr, dispatcher);
 					}
 				}
@@ -583,6 +748,9 @@ namespace idk::vkn
 				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 			}
 		}
+		if(camera.overlay_debug_draw)
+			RenderDebugStuff(state, rs);
+		rs.ubo_manager.UpdateAllBuffers();
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 		Track(0);

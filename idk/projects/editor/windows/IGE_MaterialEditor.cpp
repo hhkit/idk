@@ -6,6 +6,7 @@
 #include <gfx/ShaderGraph.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <editor/widgets/InputResource.h>
+#include <editor/widgets/EnumCombo.h>
 #include <regex>
 #include <filesystem>
 
@@ -410,7 +411,7 @@ namespace idk
         ImGui::SetWindowFontScale(fntscl);
     }
 
-    void IGE_MaterialEditor::addNode(const string& name, vec2 pos)
+    Node& IGE_MaterialEditor::addNode(const string& name, vec2 pos)
     {
         Node node;
         node.name = name;
@@ -423,7 +424,7 @@ namespace idk
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 
-        _graph->nodes.emplace(node.guid, node);
+        return _graph->nodes.emplace(node.guid, node).first->second;
     }
 
     void IGE_MaterialEditor::removeNode(const Node& node)
@@ -822,10 +823,34 @@ namespace idk
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
 
-        if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
+        if (ImGui::BeginChild("Material_Editor_miniwin", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
             auto graph_name = Core::GetResourceManager().GetPath(_graph);
             ImGui::Text(graph_name.data());
+
+            auto meta = _graph->GetMeta();
+            bool changed = false;
+            changed = changed || ImGuidk::EnumCombo("Domain", &meta.domain);
+            changed = changed || ImGuidk::EnumCombo("Blend", &meta.blend);
+            changed = changed || ImGuidk::EnumCombo("Model", &meta.model);
+            if (changed)
+            {
+                //_graph->SetMeta(meta);
+
+                //auto master_node = _graph->nodes[_graph->master_node];
+                //auto new_master_node_name = master_node.name;
+                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::DefaultLit)
+                //    new_master_node_name = "master\\PBR";
+                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::Unlit)
+                //    new_master_node_name = "master\\Unlit";
+
+                //if (master_node.name != new_master_node_name)
+                //{
+                //    auto pos = master_node.position;
+                //    removeNode(master_node);
+                //    _graph->master_node = addNode(new_master_node_name, pos).guid;
+                //}
+            }
 
             if (ImGui::Button("Add Parameter"))
                 ImGui::OpenPopup("addparams");

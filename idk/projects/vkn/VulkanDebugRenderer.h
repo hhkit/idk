@@ -2,7 +2,7 @@
 #include <gfx/pipeline_config.h>
 #include <gfx/uniform_info.h>
 #include <gfx/debug_vtx_layout.h>
-
+#include <vkn/GraphicsState.h>
 namespace idk::vkn
 {
 	enum DbgShape
@@ -35,8 +35,10 @@ namespace idk::vkn
 		void Init(const pipeline_config& pipeline_config);
 		void Shutdown();
 		void DrawShape(DbgShape shape, const mat4& tfm, const color& color);
-		void Render(const mat4& view, const mat4& projection);
+		void Render(const mat4& view, const mat4& projection, GraphicsState& out);
 
+		const vector<DbgDrawCall>& DbgDrawCalls()const;
+		const VulkanPipeline& GetPipeline()const;
 		void GrabDebugBuffer();
 	private:
 		struct pimpl;

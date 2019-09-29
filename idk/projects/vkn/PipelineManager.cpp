@@ -10,23 +10,49 @@ namespace idk::vkn
 	{
 		return *_view;
 	}
+	template<typename P>
+	bool LessChain(P clhs, P crhs)
+	{
+		return clhs < crhs;
+	}
+	template<typename P,  typename ...Args>
+	bool LessChain(P clhs, P crhs, Args... args)
+	{
+		return clhs < crhs || (clhs == crhs && LessChain(args...));
+	}
+	
+	bool Less(const RscHandle<ShaderProgram>& lhs, const RscHandle<ShaderProgram>& rhs)
+	{
+		return LessChain(lhs.guid.Data1, rhs.guid.Data1, lhs.guid.Data2, rhs.guid.Data2, lhs.guid.Data3, rhs.guid.Data3, lhs.guid.Data4, rhs.guid.Data4);
+			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
+	}
 	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules,uint32_t frame_index)
 	{
-		bool is_diff = prog_to_pipe.empty();
 		std::optional<handle_t> prev{};
-		for (auto& module : modules)
+		bool is_diff = prog_to_pipe2.empty();
+		string combi;
+		size_t arr[16] = {};
+		for (size_t i = 0; i < modules.size(); ++i)
 		{
-			auto itr = prog_to_pipe.find(module);
-			is_diff = !(prev && itr != prog_to_pipe.end() && itr->second == *prev);
-			if(itr!=prog_to_pipe.end())
-			{
-				prev = itr->second;
-			}
-			else
-			{
-				is_diff = true;
-			}
+			arr[i] = i;
+			for (size_t j = 0; j < i; ++j)
+				if (Less(modules[arr[i]] , modules[arr[j]]))
+					std::swap(arr[i], arr[j]);
 		}
+		for (size_t i = 0; i < modules.size(); ++i)
+		{
+			combi += modules[arr[i]].guid.operator idk::string();
+		}
+		auto itr = prog_to_pipe2.find(combi);
+		if (itr != prog_to_pipe2.end())
+		{
+			prev = itr->second;
+		}
+		else
+		{
+			is_diff = true;
+		}
+		
 		if (is_diff)
 		{
 			PipelineObject obj{ config,modules };
@@ -34,10 +60,7 @@ namespace idk::vkn
 
 			//TODO threadsafe lock here
 			auto handle = pipelines.add(std::move(obj));
-			for (auto& module : modules)
-			{
-				prog_to_pipe.emplace(module, handle);
-			}
+			prog_to_pipe2.emplace(combi,handle);
 			prev = handle;
 		}
 		return pipelines.get(*prev).pipeline;

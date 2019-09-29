@@ -182,9 +182,9 @@ namespace idk {
 						}
 							
 					});
-					cursorPos2 = ImGui::GetCursorPos();
 				}
-				
+
+				cursorPos2 = ImGui::GetCursorPos();
 				ImGui::SetCursorPos(cursorPos);
 				ImGui::SetCursorPosX(window_size.x - 20);
 				ImGui::Text("...");
@@ -387,11 +387,11 @@ namespace idk {
 
 			DisplayVec3(c_transform->scale);
 
-			cursorPos2 = ImGui::GetCursorPos();
 
 
 		}
 
+		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
 		ImGui::SetCursorPosX(window_size.x - 20);
 		ImGui::Text("...");
