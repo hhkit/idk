@@ -50,6 +50,7 @@ namespace idk::reflect
 		, mat3
 		, mat4
 		, color
+        , rad
 
 		// game objects
 		, Handle<GameObject>

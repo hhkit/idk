@@ -36,14 +36,7 @@ namespace idk
 			return;
 		}
 
-		// Need to save the local transforms of the child objects as bind pose
-		for (size_t i = 0; i < _child_objects.size(); ++i)
-		{
-			auto curr_go = _child_objects[i];
-			_bind_pose[i].position	= curr_go->Transform()->position;
-			_bind_pose[i].rotation	= curr_go->Transform()->rotation;
-			_bind_pose[i].scale		= curr_go->Transform()->scale;
-		}
+		saveBindPose();
 
 		_elapsed = 0.0f;
 		_curr_animation = s_cast<int>(index);
@@ -57,34 +50,8 @@ namespace idk
 
 	void Animator::Stop()
 	{
-		// Need to revert back to the bind pose
-		const auto& bones = _skeleton->data();
-		for (size_t i = 0; i < bones.size(); ++i)
-		{
-			mat4 local_bind_pose = _bind_pose[i].recompose();
+		restoreBindPose();
 
-			_child_objects[i]->Transform()->LocalMatrix(local_bind_pose);
-
-			// compute the bone_transform for the bind pose
-			auto parent_index = _skeleton->data()[i]._parent;
-			if (parent_index >= 0)
-			{
-				// If we have the parent, we push in the parent.global * child.local
-				const mat4& p_transform = _bone_transforms[parent_index];
-				mat4 final_local_transform = p_transform * local_bind_pose;
-				_bone_transforms[i] = final_local_transform;
-			}
-			else
-				_bone_transforms[i] = local_bind_pose;
-		}
-
-		// Multiply the global inverse bind pose
-		for (size_t i = 0; i < _child_objects.size(); ++i)
-		{
-			auto& curr_bone = _skeleton->data()[i];
-			_bone_transforms[i] = _skeleton->GetGlobalInverse() * _bone_transforms[i] * curr_bone._global_inverse_bind_pose;
-
-		}
 		_elapsed = 0.0f;
 		_curr_animation = -1;
 		_is_playing = false;
@@ -100,7 +67,55 @@ namespace idk
 
 	const vector<mat4>& Animator::GenerateTransforms()
 	{
-		return _bone_transforms;
+		// We grab the parent transform if its there, and multiply it with the child local.
+		// We save this result into pre_transforms and then multiply that by global inverse bind pose 
+		// and put it into final transforms.
+		auto global_inverse = _skeleton->GetGlobalInverse();
+		const auto& skeleton = _skeleton->data();
+		if (global_inverse != mat4{})
+		{
+			for (size_t i = 0; i < _child_objects.size(); ++i)
+			{
+				auto& curr_bone = skeleton[i];
+				auto& curr_go = _child_objects[i];
+
+				auto parent_index = skeleton[i]._parent;
+				if (parent_index >= 0)
+				{
+					const mat4& p_transform = _pre_global_transforms[parent_index];
+					_pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
+				}
+				else
+				{
+					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
+				}
+
+				_final_bone_transforms[i] = global_inverse * _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < _child_objects.size(); ++i)
+			{
+				auto& curr_bone = skeleton[i];
+				auto& curr_go = _child_objects[i];
+
+				auto parent_index = skeleton[i]._parent;
+				if (parent_index >= 0)
+				{
+					// If we have the parent, we push in the parent.global * child.local
+					const mat4& p_transform = _pre_global_transforms[parent_index];
+					_pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
+				}
+				else
+				{
+					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
+				}
+
+				_final_bone_transforms[i] = _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+			}
+		}
+		return _final_bone_transforms;
 	}
 
 	void Animator::SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc)
@@ -112,15 +127,17 @@ namespace idk
 		// We also need to generate all the game objects here.
 		// The game object's transform is the inverse of bone_offset.
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
-
-		_bone_transforms.clear();
+		
+		_pre_global_transforms.clear();
+		_final_bone_transforms.clear();
 		_bind_pose.clear();
 		clearGameObjects();
 
 		const auto& bones = _skeleton->data();
-		_bind_pose.reserve(bones.size());
-		_child_objects.reserve(bones.size());
-		_bone_transforms.reserve(bones.size());
+		_bind_pose.resize(bones.size());
+		_child_objects.resize(bones.size());
+		_pre_global_transforms.resize(bones.size());
+		_final_bone_transforms.resize(bones.size());
 		
 		for (size_t i = 0; i < bones.size(); ++i)
 		{
@@ -140,30 +157,9 @@ namespace idk
 			else
 				obj->GetComponent<Transform>()->SetParent(GetGameObject(), false);
 
-			// compute the bone_transform for the bind pose
-			auto parent_index = _skeleton->data()[i]._parent;
-			if (parent_index >= 0)
-			{
-				// If we have the parent, we push in the parent.global * child.local
-				const mat4& p_transform = _bone_transforms[parent_index];
-				mat4 final_local_transform = p_transform * local_bind_pose;
-				_bone_transforms.push_back(final_local_transform);
-			}
-			else
-				_bone_transforms.push_back(local_bind_pose);
-
-			_bind_pose.push_back(curr_bone._local_bind_pose);
-			_child_objects.push_back(obj);
+			_bind_pose[i] = curr_bone._local_bind_pose;
+			_child_objects[i] = obj;
 		}
-
-		// Multiply the global inverse bind pose
-		for (size_t i = 0; i < _child_objects.size(); ++i)
-		{
-			auto& curr_bone = _skeleton->data()[i];
-			_bone_transforms[i] = _skeleton->GetGlobalInverse() * _bone_transforms[i] * curr_bone._global_inverse_bind_pose;
-
-		}
-
 	}
 
 	void Animator::AddAnimation(RscHandle<anim::Animation> anim_rsc)
@@ -198,6 +194,42 @@ namespace idk
 			scene->DestroyGameObject(obj);
 		}
 		_child_objects.clear();
+	}
+
+	void Animator::saveBindPose()
+	{
+		// Need to save the local transforms of the child objects as bind pose
+		for (size_t i = 0; i < _child_objects.size(); ++i)
+		{
+			auto curr_go = _child_objects[i];
+			_bind_pose[i].position = curr_go->Transform()->position;
+			_bind_pose[i].rotation = curr_go->Transform()->rotation;
+			_bind_pose[i].scale = curr_go->Transform()->scale;
+		}
+	}
+
+	void Animator::restoreBindPose()
+	{
+		// Need to revert back to the bind pose
+		const auto& bones = _skeleton->data();
+		for (size_t i = 0; i < bones.size(); ++i)
+		{
+			mat4 local_bind_pose = _bind_pose[i].recompose();
+
+			_child_objects[i]->Transform()->LocalMatrix(local_bind_pose);
+
+			// compute the bone_transform for the bind pose
+			auto parent_index = _skeleton->data()[i]._parent;
+			if (parent_index >= 0)
+			{
+				// If we have the parent, we push in the parent.global * child.local
+				const mat4& p_transform = _pre_global_transforms[parent_index];
+				mat4 final_local_transform = p_transform * local_bind_pose;
+				_pre_global_transforms[i] = final_local_transform;
+			}
+			else
+				_pre_global_transforms[i] = local_bind_pose;
+		}
 	}
 
 }
