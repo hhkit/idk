@@ -41,7 +41,7 @@ namespace idk::ogl
 		//auto& yolo = *meta.textures[0];
 		for (int i = 0; i < meta.textures.size(); ++i)
 		{
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, r_cast<GLuint>(meta.textures[i]->ID()), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 		}
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
