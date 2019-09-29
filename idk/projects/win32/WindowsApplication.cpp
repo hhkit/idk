@@ -1,6 +1,14 @@
 #include "pch.h"
 
 #include <iostream>
+#include <direct.h>
+#include <tchar.h>
+#include <Shlwapi.h>
+#include <ShlObj.h>
+#include <stdio.h>  
+#include <locale>
+#include <codecvt>
+#include <commdlg.h>
 
 #include <core/Core.h>
 
@@ -106,6 +114,76 @@ namespace idk::win
 	char Windows::GetChar()
 	{
 		return _input_manager->GetChar();
+	}
+	string Windows::GetExecutableDir()
+	{
+		char buffer[MAX_PATH] = { 0 };
+
+		// Get the program directory
+		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+		if (bytes == 0)
+			std::cout << "[File System] Unable to get program directory." << std::endl;
+		auto exe_dir = string{ buffer };
+		auto pos = exe_dir.find_last_of("\\");
+		return exe_dir.substr(0, pos);
+	}
+	string Windows::GetAppData()
+	{
+		char* env_buff;
+		size_t len;
+		auto err = _dupenv_s(&env_buff, &len, "appdata");
+		if (err)
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		auto appdata = string{ env_buff ? env_buff : "" };
+		free(env_buff);
+		return appdata;
+	}
+	string Windows::GetCurrentWorkingDir()
+	{
+		char buffer[MAX_PATH] = { 0 };
+		if (!_getcwd(buffer, sizeof(buffer)))
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		return string{ buffer };
+	}
+	opt<string> Windows::OpenFileDialog(string_view extension)
+	{
+		OPENFILENAME ofn;       // common dialog box structure
+		TCHAR szFile[260];       // buffer for file name
+		HWND hwnd{};              // owner window
+
+		std::wstring init = [&]()
+		{ 
+			auto exe_dir = GetExecutableDir();
+			return std::wstring{ exe_dir.begin(), exe_dir.end() };
+		}();
+
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hwnd;
+		ofn.lpstrFile = szFile;
+		// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
+		// use the contents of szFile to initialize itself.
+		ofn.lpstrFile[0] = L'\0';
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = L"Scene (.idscene)\0*.idscene\0All\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = init.data();
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+		// Display the Open dialog box. 
+
+		if (GetSaveFileName(&ofn) == TRUE)
+		{
+			auto filename = std::wstring{ ofn.lpstrFile };
+			using convert_type = std::codecvt_utf8<wchar_t>;
+			std::wstring_convert<convert_type, wchar_t> converter;
+
+			return converter.to_bytes(filename);
+		}
+		return std::nullopt;
 	}
 	LRESULT Windows::WndProc(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{

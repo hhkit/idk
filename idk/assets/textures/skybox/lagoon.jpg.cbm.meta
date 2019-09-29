@@ -1,0 +1,5 @@
+metadatas: 
+- guid: 92d20d3f-f196-4811-86fb-3ea3c98ecfe1
+  metadata: '{internal_format: !CMColorFormat RGBF_32, uv_mode: !CMUVMode Clamp}'
+  name: ""
+  t_hash: 86328866315637336

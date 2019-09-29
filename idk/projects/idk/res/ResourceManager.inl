@@ -40,16 +40,12 @@ namespace idk
 	}
 
 	template<typename Res>
-	inline string_view ResourceManager::GetPath(const RscHandle<Res>& h)
+	inline opt<string_view> ResourceManager::GetPath(const RscHandle<Res>& h)
 	{
 		auto* cb = GetControlBlock(h);
-		if (cb)
-		{
-			if (cb->path)
-				return *cb->path;
-		}
-		return "";
-//		return cb && cb->path ? *cb->path : "";
+		if (cb && cb->path)
+			return string_view{ *cb->path };
+		return std::nullopt;
 	}
 
 	template<typename Res>
@@ -162,18 +158,17 @@ namespace idk
 	template<typename Res>
 	inline FileMoveResult ResourceManager::Rename(RscHandle<Res> resource, string_view new_path)
 	{
-		assert(false);
 		auto* cb = GetControlBlock(resource);
 		if (!cb)
 			return FileMoveResult::Error_ResourceNotFound;
 
 		if (cb->path)
-			return Rename(PathHandle{ cb->path }, new_path);
+			return Rename(PathHandle{ *cb->path }, new_path);
 
 		if (Core::template GetSystem<FileSystem>().Exists(new_path))
 			return FileMoveResult::Error_DestinationExists;
 
-		_loaded_files.emplace(string{ new_path }, ResourceBundle{ resource });
+		_loaded_files.emplace(string{ new_path }, FileControlBlock{ ResourceBundle{ resource }, true });
 
 		return FileMoveResult::Ok;
 	}

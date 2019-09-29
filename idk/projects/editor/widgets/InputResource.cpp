@@ -54,7 +54,7 @@ namespace idk
         {
             string_view text = std::visit([&](const auto& h)
             {
-                return Core::GetResourceManager().GetPath(h);
+                return *Core::GetResourceManager().GetPath(h);
             }, *handle);
 
             ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,

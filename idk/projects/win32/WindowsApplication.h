@@ -41,6 +41,11 @@ namespace idk::win
 		bool SetFullscreen(bool) override { return false; }
 		bool SetScreenSize(ivec2) override { return false; }
 		void Shutdown() override {}
+		string GetExecutableDir() override;
+		string GetAppData() override ;
+		string GetCurrentWorkingDir() override;
+		opt<string> OpenFileDialog(string_view extension = "") override;
+
 		void PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func);
 
 		HINSTANCE GetInstance();

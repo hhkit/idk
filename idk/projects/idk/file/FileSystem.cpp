@@ -4,13 +4,10 @@
 
 #include <filesystem>
 #include <utility>
-#include <direct.h>
-#include <tchar.h>
-#include <stdio.h>  
-#include <Shlwapi.h>
 #include <iostream>
 #include <utility>
 
+#include <app/Application.h>
 namespace FS = std::filesystem;
 
 
@@ -20,29 +17,13 @@ namespace idk {
 	void FileSystem::Init()
 	{
 		// Get the base directory. This is where the prog is run from.
-		char buffer[MAX_PATH] = { 0 };
-
-		// Get the program directory
-		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-		if(bytes == 0)
-			std::cout << "[File System] Unable to get program directory." << std::endl;
-		_exe_dir = buffer;
-		auto pos = _exe_dir.find_last_of("\\");
-		_exe_dir = _exe_dir.substr(0, pos);
+		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 
 		// Get the solution directory
-		if (!_getcwd(buffer, sizeof(buffer)))
-			std::cout << "[File System] Unable to get solution directory." << std::endl;
-		_sol_dir = buffer;
+		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
 
 		// Get App Data directory
-		char* env_buff;
-		size_t len;
-		auto err = _dupenv_s(&env_buff, &len, "appdata");
-		if (err)
-			std::cout << "[File System] Unable to get solution directory." << std::endl;
-		_app_data_dir = env_buff;
-		free(env_buff);
+		_app_data_dir = Core::GetSystem<Application>().GetAppData();
 	}
 
 	void FileSystem::Update()

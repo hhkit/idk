@@ -34,5 +34,11 @@ namespace idk
 		virtual bool  SetFullscreen(bool enable_fullscreen) = 0;
 		virtual bool  SetScreenSize(ivec2 target_size) = 0;
 		virtual ivec2 GetScreenSize() = 0 ;
+
+		// file IO
+		virtual string GetExecutableDir() = 0;
+		virtual string GetAppData() = 0;
+		virtual string GetCurrentWorkingDir() = 0;
+		virtual opt<string> OpenFileDialog(string_view extension) = 0;
 	};
 }

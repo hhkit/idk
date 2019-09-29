@@ -106,7 +106,26 @@ namespace idk {
 
 
 			if (ImGui::MenuItem("Save", "CTRL+S")) {
+				auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+				auto path = [&]() -> opt<string>
+				{
+					if (auto path = Core::GetResourceManager().GetPath(curr_scene))
+						return string{ *path };
+					else
+					{
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext);
+						if (dialog_result)
+							return *dialog_result;
+						else 
+							return std::nullopt;
+					}
+				}();
 
+				if (path)
+				{
+					Core::GetResourceManager().Rename(curr_scene, *path);
+					Core::GetResourceManager().Save(curr_scene);
+				}
 				std::cout << "Save current Scene\n";
 
 

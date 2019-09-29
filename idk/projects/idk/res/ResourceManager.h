@@ -80,7 +80,7 @@ namespace idk
 		template<typename Res> Res& Get     (const RscHandle<Res>&);
 		template<typename Res> bool Free    (const RscHandle<Res>&);
 
-		template<typename Res> string_view GetPath(const RscHandle<Res>&);
+		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
 
 		/* RESOURCE LOADING - for high-level users like editor programmer */
 		template<typename Res>  RscHandle<Res>        Create  ();

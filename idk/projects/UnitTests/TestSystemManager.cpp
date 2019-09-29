@@ -29,6 +29,11 @@ public:
 	bool SetFullscreen(bool ) override { return false; };
 	bool SetScreenSize(idk::ivec2 ) override { return false; };
 
+	std::string GetExecutableDir() { return {}; };
+	std::string GetAppData() { return {}; };
+	std::string GetCurrentWorkingDir() { return {}; };
+	std::optional<std::string> OpenFileDialog(std::string_view) { return {}; };
+
 	void Shutdown() override { i++;  std::cout << "application shutdown\n"; }
 };
 /*
