@@ -361,6 +361,24 @@ namespace idk::vkn
 			}
 		);
 	}
+	template<typename WTF>
+	void PreProcUniform(const UboInfo& obj_uni,uint32_t index, RscHandle<RenderTarget> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
+	{
+		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
+		collated_layouts[obj_uni.layout].second++;
+		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
+		auto& texture = val->GetAttachment(AttachmentType::eDepth,0).as<VknTexture>();
+		collated_bindings[obj_uni.set].emplace_back(
+			ProcessedRO::BindingInfo
+			{
+				obj_uni.binding,
+				ProcessedRO::image_t{texture.ImageView(),*texture.sampler,vk::ImageLayout::eGeneral},
+				0,
+				index,
+				obj_uni.size
+			}
+		);
+	}
 
 	std::pair<vector<FrameRenderer::ProcessedRO>, FrameRenderer::DsBindingCount> FrameRenderer::ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager)
 	{
@@ -408,6 +426,7 @@ namespace idk::vkn
 
 			if (!fprog || !vprog)
 				continue;
+
 			shaders.emplace_back(mesh_mod);
 			shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
@@ -430,6 +449,18 @@ namespace idk::vkn
 				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
+
+
+			if (!cam.is_shadow)
+			{
+				for (auto& shadow_map : state.active_lights)
+				{
+					auto& sm_uni = shadow_map->light_map;
+					PreProcUniform<int>(fprog.GetLayout("shadow_map"),0, sm_uni, collated_layouts, collated_bindings );
+				}
+
+			}
+
 			//Account for material bindings
 			for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 			{
@@ -485,6 +516,7 @@ namespace idk::vkn
 
 								}
 							}
+							//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
 							collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
 						}
 						break;

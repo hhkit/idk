@@ -240,11 +240,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	auto light = scene->CreateGameObject();
-	light->Name("Point Light");
+	light->Name("SpotLight");
 	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
 	auto light_comp = light->AddComponent<Light>();
 	{
 		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
+		auto light_obj = SpotLight{};
+		//light_obj.inner_angle = rad{ 0.5f };
+		light_obj.attenuation_radius = 0.001f;
+		light_comp->light = light_obj;
 		light_comp->SetLightMap(light_map);
 	}
 	light->AddComponent<TestComponent>();
