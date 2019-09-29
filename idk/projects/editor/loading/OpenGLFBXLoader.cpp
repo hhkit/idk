@@ -12,7 +12,7 @@
 #include <gfx/ShaderGraph.h>
 #include <common/Transform.h>
 #include <anim/SkinnedMeshRenderer.h>
-#include <anim/AnimationController.h>
+#include <anim/Animator.h>
 //*/
 
 namespace idk
