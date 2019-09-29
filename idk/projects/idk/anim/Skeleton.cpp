@@ -8,7 +8,7 @@ namespace idk::anim
 	{
 	}
 
-	const Skeleton::Bone* Skeleton::GetBone(string_view name) const
+	const Bone* Skeleton::GetBone(string_view name) const
 	{
 		auto res = _bone_table.find(name.data());
 		if (res == _bone_table.end())
@@ -25,9 +25,5 @@ namespace idk::anim
 			_bone_table.emplace(string{ name }, _bones.size());
 			_bones.emplace_back(b);
 		}
-	}
-	mat4 Skeleton::BonePose::compose() const
-	{
-		return translate(_translation) * mat4 { quat_cast<mat3>(_rotation) * scale(_scale) };
 	}
 }

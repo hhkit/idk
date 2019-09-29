@@ -2,14 +2,14 @@
 #include "GraphicsSystem.h"
 #include <core/GameObject.h>
 #include <gfx/MeshRenderer.h>
-#include <anim/AnimationController.h>
+#include <anim/Animator.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 namespace idk
 {
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
-		span<AnimationController> animators,
+		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
@@ -33,7 +33,7 @@ namespace idk
 			result.lights.emplace_back(elem.GenerateLightData());
 		}
 
-		hash_table<Handle<AnimationController>, unsigned> skeleton_indices;
+		hash_table<Handle<Animator>, unsigned> skeleton_indices;
 		unsigned i{};
 		for (auto& elem : animators)
 		{
@@ -49,7 +49,7 @@ namespace idk
 			AnimatedRenderObject ro = elem.GenerateRenderObject();
 			// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
 			auto parent = elem.GetGameObject()->Parent();
-			auto animator = parent->GetComponent<AnimationController>();
+			auto animator = parent->GetComponent<Animator>();
 			ro.skeleton_index = skeleton_indices[animator];
 			result.skinned_mesh_render.emplace_back(ro);
 		}

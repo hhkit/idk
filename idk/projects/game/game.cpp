@@ -142,7 +142,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
 		
-		auto animator = go->AddComponent<AnimationController>();
+		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)

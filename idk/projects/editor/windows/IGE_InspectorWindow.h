@@ -36,6 +36,8 @@ namespace idk {
 		bool isComponentMarkedForDeletion = false;
 		string componentNameMarkedForDeletion{}; //Is empty by default
 
+		void displayVal(reflect::dynamic dyn);
+
 		void DisplayNameComponent(Handle<Name>& c_name);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 		void DisplayAnimationControllerComponent(Handle<AnimationController>& c_anim);

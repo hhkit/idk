@@ -10,49 +10,49 @@ namespace idk::anim
 
 	};
 
+	// Key represents a keyframe. Can be translate, rotate, or scale.
+	template<typename T>
+	struct Key
+	{
+		Key() = default;
+		Key(const T& val, float time) : _val{ val }, _time{ time } {}
+		T		_val;
+		float	_time;
+	};
+
+	struct Channel
+	{
+		string _name;
+		mat4 _node_transform;
+		bool _is_animated = false;
+		Channel& operator+=(const Channel& rhs);
+		vector<Key<vec3>> _translate{};
+		vector<Key<vec3>> _scale{};
+		vector<Key<quat>> _rotation{};
+	};
+
+	// represents an animated bone
+	struct AnimNode
+	{
+		string _name;
+
+		mat4 GetTransform(float time) const;
+
+		vector<Channel> _channels;
+	};
+
+	struct EasyAnimNode
+	{
+		string _name;
+		bool _debug_assert = false;
+		vector<Channel> _channels;
+	};
+
 	class Animation 
 		: public Resource<Animation>
 		//, public MetaTag<AnimationMeta>
 	{
 	public:
-		// Key represents a keyframe. Can be translate, rotate, or scale.
-		template<typename T>
-		struct Key
-		{
-			Key() = default;
-			Key(const T& val, float time) : _val{ val }, _time{ time } {}
-			T		_val;
-			float	_time;
-		};
-
-		struct Channel
-		{
-			string _name;
-			mat4 _node_transform;
-			bool _is_animated = false;
-			Channel& operator+=(const Channel& rhs);
-			vector<Key<vec3>> _translate{};
-			vector<Key<vec3>> _scale{};
-			vector<Key<quat>> _rotation{};
-		};
-
-		// represents an animated bone
-		struct AnimNode
-		{
-			string _name;
-
-			mat4 GetTransform(float time) const;
-
-			vector<Channel> _channels;
-		};
-
-		struct EasyAnimNode
-		{
-			string _name;
-			bool _debug_assert = false;
-			vector<Channel> _channels;
-		};
-
 		string_view GetName()		const { return _name; }
 		float		GetFPS()		const { return _fps; }
 		float		GetDuration()	const { return _duration; }

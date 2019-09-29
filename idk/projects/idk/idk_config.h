@@ -27,7 +27,7 @@ namespace idk
 		,	class Light
 
 		/// ANIMATION
-		,	class AnimationController
+		,	class Animator
 
 		/// SCRIPTING
 		//,	class MonoBehavior

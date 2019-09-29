@@ -19,11 +19,27 @@ namespace idk {
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 
+		// Get the program directory
+		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+		if(bytes == 0)
+			std::cout << "[File System] Unable to get program directory." << std::endl;
+		_exe_dir = buffer;
+		auto pos = _exe_dir.find_last_of("\\");
+		_exe_dir = _exe_dir.substr(0, pos);
+
 		// Get the solution directory
-		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
+		if (!_getcwd(buffer, sizeof(buffer)))
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		_sol_dir = buffer;
 
 		// Get App Data directory
-		_app_data_dir = Core::GetSystem<Application>().GetAppData();
+		char* env_buff;
+		size_t len;
+		auto err = _dupenv_s(&env_buff, &len, "appdata");
+		if (err)
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		_app_data_dir = env_buff;
+		free(env_buff);
 	}
 
 	void FileSystem::Update()
@@ -110,6 +126,31 @@ namespace idk {
 
 	
 		return PathHandle{ dir_index, false};
+	}
+
+	string FileSystem::ConvertFullToVirtual(string_view fullPath) const
+	{
+		string full_path{ fullPath };
+		FS::path fs_path (full_path);
+		string ret_path;
+		auto fs_parent_path = fs_path.parent_path();
+		while (FS::exists(fs_parent_path))
+		{
+			for (auto& mount : _mounts)
+			{
+				string parent_path_str = fs_parent_path.generic_string();
+				// Check if the full path matches the full path of the mount
+				if (mount._full_path == parent_path_str)
+				{
+					size_t start = parent_path_str.size();
+					ret_path = mount._mount_path + full_path.substr(start);
+					return ret_path;
+				}
+			}
+			fs_parent_path = fs_parent_path.parent_path();
+		}
+
+		return ret_path;
 	}
 
 	bool FileSystem::Exists(string_view mountPath) const
@@ -283,12 +324,13 @@ namespace idk {
 			return;
 		}
 
-		FS::path currPath{ fullPath };
-		FS::directory_iterator dir{ currPath };
+		FS::path curr_path{ fullPath };
+		
+		FS::directory_iterator dir{ curr_path };
 
 		// Initializing base variables of the mount
 		file_system_detail::fs_mount& mount = _mounts[index];
-		mount._full_path = fullPath;
+		mount._full_path = curr_path.generic_string();
 		mount._mount_path = mountPath;
 		mount._watching = watch;
 		mount._mount_index = s_cast<int8_t>(index);
@@ -297,11 +339,11 @@ namespace idk {
 		// The root of this mount is depth 0
 		file_system_detail::fs_dir d;
 
-		d._full_path = fullPath;
-		d._rel_path = currPath.relative_path().string();
+		d._full_path = curr_path.generic_string();
+		d._rel_path = curr_path.relative_path().generic_string();
 		d._mount_path = mountPath;
-		d._filename = currPath.filename().string();
-		d._stem = currPath.stem().string();
+		d._filename = curr_path.filename().generic_string();
+		d._stem = curr_path.stem().generic_string();
 
 		d._tree_index._mount_id = s_cast<int8_t>(index);
 		d._tree_index._depth = 0;
@@ -316,12 +358,12 @@ namespace idk {
 
 	void FileSystem::initFile(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p)
 	{
-		f._full_path	= p.string();
-		f._rel_path		= p.relative_path().string();
-		f._filename		= p.filename().string();
-		f._stem			= p.stem().string();
+		f._full_path	= p.generic_string();
+		f._rel_path		= p.relative_path().generic_string();
+		f._filename		= p.filename().generic_string();
+		f._stem			= p.stem().generic_string();
 		f._mount_path	= p_dir._mount_path + "/" + f._filename;
-		f._extension	= p.extension().string();
+		f._extension	= p.extension().generic_string();
 		f._time			= FS::last_write_time(p);
 		f._parent		= p_dir._tree_index;
 
@@ -333,10 +375,10 @@ namespace idk {
 
 	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, std::filesystem::path& p)
 	{
-		d._full_path	= p.string();
-		d._rel_path		= p.relative_path().string();
-		d._filename		= p.filename().string();
-		d._stem			= p.stem().string();
+		d._full_path	= p.generic_string();
+		d._rel_path		= p.relative_path().generic_string();
+		d._filename		= p.filename().generic_string();
+		d._stem			= p.stem().generic_string();
 		d._mount_path	= p_dir._mount_path + "/" + d._filename;
 		d._parent		= p_dir._tree_index;
 

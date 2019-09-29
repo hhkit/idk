@@ -6,6 +6,8 @@
 #include <IncludeResources.h>
 #include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
+#include <math/matrix_decomposition.h>
+
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -71,6 +73,10 @@ REFLECT_CTOR(float)
 REFLECT_VARS(value)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::matrix_decomposition<idk::real>, "matrix_decomposition")
+REFLECT_VARS(position, rotation, scale)
+REFLECT_END()
+
 /*==========================================================================
  * resource handles
  *========================================================================*/
@@ -84,6 +90,14 @@ REFLECT_VARS(guid)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::anim::Animation>, "RscHandle<Animation>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::anim::Skeleton>, "RscHandle<Skeleton>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
@@ -256,6 +270,14 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
 REFLECT_VARS(prefab, overrides, objects)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
+REFLECT_VARS(mesh, material_instance)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Animator, "Animator")
+REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects, _bone_transforms, _bind_pose)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
