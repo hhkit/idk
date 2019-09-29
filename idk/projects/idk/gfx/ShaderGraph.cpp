@@ -293,7 +293,7 @@ namespace idk::shadergraph
             }
 
             if (state.tex_counter > 0) // U_LAYOUT(3, 8) uniform sampler2D _uTex[count];
-                uniform_blocks[ValueType::SAMPLER2D] = "U_LAYOUT(3, " + std::to_string(ValueType::SAMPLER2D) +
+                uniform_blocks[ValueType::SAMPLER2D] = "U_LAYOUT(4, " + std::to_string(ValueType::SAMPLER2D) +
                                                        ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
             uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
 
