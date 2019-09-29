@@ -133,38 +133,37 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 
 	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos) {
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
 		auto go = scene->CreateGameObject();
+
+		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
-		// go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
-		go->GetComponent<Transform>()->scale /= 200;// 200.f;
-		// go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
 		
 		auto animator = go->AddComponent<AnimationController>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
-			auto resources_running = Core::GetResourceManager().Load(PathHandle{ "/assets/models/test.fbx" });
+			auto resources_running = Core::GetResourceManager().Load(path);
 			
 			for (auto handle : resources_running->GetAll<Mesh>())
 			{
 				auto mesh_child_go = scene->CreateGameObject();
+
+				mesh_child_go->Name(handle->Name());
 				mesh_child_go->Transform()->parent = go;
-			
+				
 				auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
 				mesh_rend->mesh = handle;
 				mesh_rend->material_instance = mat_inst;
 			}
 			
 			animator->SetSkeleton(resources_running->Get<anim::Skeleton>());
-			// auto anim_handles =;
+
 			for (auto& anim : resources_running->GetAll<anim::Animation>())
 			{
 				animator->AddAnimation(anim);
 			}
-			
-			animator->Play(0);
 		}
 		return go;
 	};
@@ -176,9 +175,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	//create_anim_obj(vec3{ 0,0,0 });
-	 auto resource_bundle = Core::GetResourceManager().Load(PathHandle{ "/assets/models/Running.fbx" });
-	// resource_bundle->GetAll();
+	create_anim_obj(vec3{ 0,0,0 });
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal,tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();

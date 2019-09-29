@@ -90,7 +90,7 @@ namespace idk {
 				}
 				if (ImGui::Button("Pause"))
 				{
-
+					c_anim->Pause();
 				}
 			}
 
