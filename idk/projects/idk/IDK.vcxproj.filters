@@ -488,9 +488,6 @@
     <ClInclude Include="anim\Skeleton.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationController.h">
-      <Filter>anim</Filter>
-    </ClInclude>
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
     </ClInclude>
@@ -647,6 +644,9 @@
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ReflectRegistration.h">
       <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Animator.h">
+      <Filter>anim</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -807,9 +807,6 @@
     <ClCompile Include="anim\SkeletonFactory.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
-    <ClCompile Include="anim\AnimationController.cpp">
-      <Filter>anim</Filter>
-    </ClCompile>
     <ClCompile Include="gfx\CameraControls.cpp">
       <Filter>gfx\camera</Filter>
     </ClCompile>
@@ -943,6 +940,9 @@
       <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="anim\BoneComponent.cpp" />
+    <ClCompile Include="anim\Animator.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

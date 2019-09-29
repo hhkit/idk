@@ -3,16 +3,16 @@
 #include <idk.h>
 #include "common/Transform.h"
 #include "core/GameObject.h"
-#include "AnimationController.h"
+#include "Animator.h"
 #include "scene/SceneManager.h"
 
 #include "math/matrix_decomposition.h"
 
 namespace idk 
 {
-	void AnimationController::Play(string_view animation_name)
+	void Animator::Play(string_view animation_name)
 	{
-		auto res = _animation_table.find(animation_name);
+		auto res = _animation_table.find(animation_name.data());
 		if (res == _animation_table.end())
 		{
 			// Maybe throw here???
@@ -24,7 +24,7 @@ namespace idk
 		Play(res->second);
 	}
 
-	void AnimationController::Play(size_t index)
+	void Animator::Play(size_t index)
 	{
 		// 2 design choices here. Either replay anim no matter what or dont reset if same name
 		if (index >= _animations.size())
@@ -40,9 +40,9 @@ namespace idk
 		for (size_t i = 0; i < _child_objects.size(); ++i)
 		{
 			auto curr_go = _child_objects[i];
-			_bind_pose[i]._translation	= curr_go->Transform()->position;
-			_bind_pose[i]._rotation		= curr_go->Transform()->rotation;
-			_bind_pose[i]._scale		= curr_go->Transform()->scale;
+			_bind_pose[i].position	= curr_go->Transform()->position;
+			_bind_pose[i].rotation		= curr_go->Transform()->rotation;
+			_bind_pose[i].scale		= curr_go->Transform()->scale;
 		}
 
 		_elapsed = 0.0f;
@@ -50,18 +50,18 @@ namespace idk
 		_is_playing = true;
 	}
 
-	void AnimationController::Pause()
+	void Animator::Pause()
 	{
 		_is_playing = false;
 	}
 
-	void AnimationController::Stop()
+	void Animator::Stop()
 	{
 		// Need to revert back to the bind pose
 		const auto& bones = _skeleton->data();
 		for (size_t i = 0; i < bones.size(); ++i)
 		{
-			mat4 local_bind_pose = _bind_pose[i].compose();
+			mat4 local_bind_pose = _bind_pose[i].recompose();
 
 			_child_objects[i]->Transform()->LocalMatrix(local_bind_pose);
 
@@ -90,7 +90,7 @@ namespace idk
 		_is_playing = false;
 	}
 
-	RscHandle<anim::Animation> AnimationController::GetCurrentAnimation() const
+	RscHandle<anim::Animation> Animator::GetCurrentAnimation() const
 	{
 		if (_curr_animation >= _animations.size())
 			return RscHandle<anim::Animation>{};
@@ -98,12 +98,12 @@ namespace idk
 		return _animations[_curr_animation];
 	}
 
-	const vector<mat4>& AnimationController::GenerateTransforms()
+	const vector<mat4>& Animator::GenerateTransforms()
 	{
 		return _bone_transforms;
 	}
 
-	void AnimationController::SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc)
+	void Animator::SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc)
 	{
 		if (!skeleton_rsc)
 			return;
@@ -129,7 +129,7 @@ namespace idk
 			auto obj = scene->CreateGameObject();
 			// auto transform = curr_bone._global_inverse_bind_pose.inverse();
 			
-			mat4 local_bind_pose = curr_bone._local_bind_pose.compose();
+			mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
 
 			obj->GetComponent<Transform>()->LocalMatrix(local_bind_pose);
 			
@@ -166,7 +166,7 @@ namespace idk
 
 	}
 
-	void AnimationController::AddAnimation(RscHandle<anim::Animation> anim_rsc)
+	void Animator::AddAnimation(RscHandle<anim::Animation> anim_rsc)
 	{
 		if (anim_rsc)
 		{
@@ -175,7 +175,7 @@ namespace idk
 		}
 	}
 
-	void AnimationController::Reset()
+	void Animator::Reset()
 	{
 		clearGameObjects();
 
@@ -189,7 +189,7 @@ namespace idk
 		_curr_animation = -1;
 	}
 
-	void AnimationController::clearGameObjects()
+	void Animator::clearGameObjects()
 	{
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 

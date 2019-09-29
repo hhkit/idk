@@ -4,7 +4,7 @@
 
 namespace idk::anim
 {
-	Animation::AnimNode* Animation::GetAnimNode(string_view name)
+	AnimNode* Animation::GetAnimNode(string_view name)
 	{
 		auto res = _anim_node_table.find(name.data());
 		if (res == _anim_node_table.end())
@@ -12,7 +12,7 @@ namespace idk::anim
 		return &res->second;
 	}
 
-	Animation::EasyAnimNode* Animation::GetEasyAnimNode(string_view name)
+	EasyAnimNode* Animation::GetEasyAnimNode(string_view name)
 	{
 		auto res = _easy_anim_table.find(name.data());
 		if (res == _easy_anim_table.end())
@@ -47,7 +47,7 @@ namespace idk::anim
 		}
 	}
 
-	Animation::Channel& Animation::Channel::operator+=(const Channel& rhs)
+	Channel& Channel::operator+=(const Channel& rhs)
 	{
 		// If rhs channel is not animated, we just concat the _local_bind_pose
 		// if (!rhs._is_animated)

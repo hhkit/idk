@@ -63,7 +63,7 @@ TEST(FileSystem, TestMount)
 	PathHandle ph{ "/FS_UnitTests" };
 	EXPECT_TRUE(ph);
 
-	// vfs.DumpMounts();
+	vfs.DumpMounts();
 	vfs.Update();
 }
 
@@ -440,6 +440,14 @@ TEST(FileSystem, TestGetPaths)
 	// 	}
 	// }
 }
+
+TEST(FileSystem, TestConvertToVirtual)
+{
+	INIT_FILESYSTEM_UNIT_TEST();
+
+	auto path = vfs.ConvertFullToVirtual("C:/Users/joseph.cheng/Desktop/GIT/idk/idk/bin/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
+}
+
 
 TEST(FileSystem, CleanUp)
 {

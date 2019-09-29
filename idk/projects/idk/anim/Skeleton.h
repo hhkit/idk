@@ -4,25 +4,19 @@
 
 namespace idk::anim
 {
+	struct Bone
+	{
+		string _name;
+		int  _parent;
+		mat4 _global_inverse_bind_pose;
+		matrix_decomposition<real> _local_bind_pose;
+	};
+
 	class Skeleton
 		: public Resource<Skeleton>
 	{
 	public:
-		struct BonePose
-		{
-			vec3 _translation;
-			quat _rotation;
-			vec3 _scale;
-
-			mat4 compose() const;
-		};
-		struct Bone
-		{
-			string _name;
-			int  _parent;
-			mat4 _global_inverse_bind_pose;
-			BonePose _local_bind_pose;
-		};
+		
 
 		Skeleton() = default;
 		Skeleton(const vector<Bone>& bones, const hash_table<string, size_t>& bone_table);

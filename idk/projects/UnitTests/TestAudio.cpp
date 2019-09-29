@@ -55,12 +55,12 @@ TEST(Audio, AudioSystemClassTest)
 	}
 
 	
-	string path1 = std::filesystem::current_path().string();
+	string path1 = std::filesystem::current_path().generic_string();
 	std::cout << "Current Working Directory: " << path1;
 	std::cout << "\n";
 	path1.append("\\SampleSounds\\My Delirium - Ladyhawke (Lyrics).mp3"); 
 
-	string path2 = std::filesystem::current_path().string();
+	string path2 = std::filesystem::current_path().generic_string();
 	path2.append("\\SampleSounds\\25secClosing_IZHA");
 	path2.append(".wav");
 

@@ -26,7 +26,7 @@ namespace idk
 		
 		virtual void BufferGraphicsState(
 			span<class MeshRenderer>,
-			span<AnimationController> animators,
+			span<Animator> animators,
 			span<SkinnedMeshRenderer> skinned_mesh_renderers,
 			span<const class Transform>, 
 			span<const Camera> camera, 

@@ -3,7 +3,7 @@
 #include <core/ISystem.h>
 #include <idk.h>
 
-#include "AnimationController.h"
+#include "Animator.h"
 
 namespace idk
 {
@@ -13,8 +13,8 @@ namespace idk
 	public:
 		virtual void Init() override;
 
-		void Update(span<AnimationController>);
-
+		void Update(span<Animator>);
+		void UpdatePaused(span<Animator>);
 		virtual void Shutdown() override;
 
 	private:
@@ -33,6 +33,6 @@ namespace idk
 			return vec.size() - 1;
 		}
 
-		anim::Skeleton::BonePose interpolateChannel(const anim::Animation::Channel& channel, float time_in_ticks);
+		matrix_decomposition<real> interpolateChannel(const anim::Channel& channel, float time_in_ticks);
 	};
 }

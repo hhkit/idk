@@ -39,7 +39,7 @@ TEST(Prefab, TestPrefabSave)
     fs.Open("/assets/prefabs/testprefab.idp", FS_PERMISSIONS::WRITE);
     auto save_path = fs.GetFile("/assets/prefabs/testprefab.idp");
 
-    EXPECT_NO_THROW(PrefabUtility::Save(go, save_path));
+    EXPECT_NO_THROW(PrefabUtility::Save(go, save_path.GetMountPath()));
 
 	core.Shutdown();
 }

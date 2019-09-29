@@ -33,6 +33,8 @@ namespace idk {
 
 	private:
 
+		void displayVal(reflect::dynamic dyn);
+
 		void DisplayNameComponent(Handle<Name>& c_name);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 

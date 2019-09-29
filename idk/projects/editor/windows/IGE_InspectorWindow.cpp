@@ -46,10 +46,149 @@ namespace idk {
 	void IGE_InspectorWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{150.0f,100.0f});
-
-
-
 	}
+
+
+
+	void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
+	{
+		dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+
+			using K = std::decay_t<decltype(key)>;
+			using T = std::decay_t<decltype(val)>;
+
+			//reflect::dynamic dynaVal = val;
+			const float currentHeight = ImGui::GetCursorPosY();
+
+			if constexpr (!std::is_same_v<K, const char*>)
+				throw "Unhandled case";
+			else
+			{
+				string key_str = key;
+
+				if (key_str == "guid") {
+					return false;
+				}
+				if (dyn.is<Animator>())
+				{
+					if (key_str == "_animation_table" ||
+						key_str == "_animations" ||
+						key_str == "_child_objects" ||
+						key_str == "_bone_transforms" ||
+						key_str == "_bind_pose")
+						return false;
+				}
+
+				string keyName = key;
+				keyName[0] = toupper(keyName[0]);
+				ImGui::SetCursorPosY(currentHeight + heightOffset);
+				ImGui::Text(keyName.c_str());
+				keyName.insert(0, "##"); //For Imgui stuff
+
+
+				ImGui::SameLine();
+				ImGui::SetCursorPosY(currentHeight);
+
+
+				if constexpr (is_sequential_container_v<T>)
+				{
+					reflect::uni_container cont{ val };
+					ImGui::Button("+");
+					ImGui::Indent();
+					for (auto dyn : cont)
+					{
+						displayVal(dyn);
+					}
+					ImGui::Unindent();
+
+					return false;
+				}
+				else if constexpr (is_associative_container_v<T>)
+				{
+					ImGui::Text("Associative Container");
+					return false;
+					/*reflect::uni_container cont{ val };
+					ImGui::Button("+");
+					ImGui::Indent();
+					for (auto dyn : cont)
+					{
+						auto pair = dyn.unpack();
+						displayVal(pair[0]);
+					}
+					ImGui::Unindent();*/
+				}
+
+				//ALL THE TYPE STATEMENTS HERE
+				if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
+
+					ImGui::DragFloat(keyName.c_str(), &val);
+				}
+				else if constexpr (std::is_same_v<T, int>) {
+					ImGui::DragInt(keyName.c_str(), &val);
+				}
+
+				else if constexpr (std::is_same_v<T, bool>) {
+					ImGui::Checkbox(keyName.c_str(), &val);
+				}
+				else if constexpr (std::is_same_v<T, vec3>) {
+
+					DisplayVec3(val);
+					return false;
+				}
+				else if constexpr (is_template_v<T, RscHandle>) {
+
+					if (ImGuidk::InputResource(keyName.c_str(), &val))
+					{
+
+					}
+
+					return false;
+				}
+				else if constexpr (is_template_v<T, std::variant>)
+				{
+					static_assert(is_template_v<T, std::variant>, "HOW????");
+					const int curr_ind = s_cast<int>(val.index());
+					int new_ind = curr_ind;
+
+					constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+					using VarCombo = std::array<const char*, sz>;
+
+
+					static auto combo_items = []()-> VarCombo
+					{
+						static_assert(is_template_v<T, std::variant>, "HOW????");
+
+						static std::array<string, sz> tmp_arr;
+						std::array<const char*, sz> retval;
+
+						auto sp = reflect::unpack_types<T>();
+
+						for (auto i = 0; i < sz; ++i)
+						{
+							tmp_arr[i] = string{ sp[i].name() };
+							retval[i] = tmp_arr[i].data();
+						}
+						return retval;
+					}();
+
+					if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
+					{
+						val = variant_construct<T>(new_ind);
+					}
+					return false;
+				}
+				else {
+					ImGui::SetCursorPosY(currentHeight + heightOffset);
+					ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
+					return true;
+				}
+			}
+
+		});
+	}
+
+
+
 	void IGE_InspectorWindow::Update()
 	{
 		
@@ -74,25 +213,6 @@ namespace idk {
 			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
 			if (c_transform) {
 				DisplayTransformComponent(c_transform);
-			}
-
-			
-			Handle<AnimationController> c_anim = editor.selected_gameObjects[0]->GetComponent<AnimationController>();
-			if (c_anim)
-			{
-				ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
-				if(ImGui::Button("Play"))
-				{
-					c_anim->Play(0);
-				}
-				if (ImGui::Button("Stop"))
-				{
-					c_anim->Stop();
-				}
-				if (ImGui::Button("Pause"))
-				{
-					c_anim->Pause();
-				}
 			}
 
 			//Display remaining components here
@@ -130,93 +250,24 @@ namespace idk {
 
 				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
-						using T = std::decay_t<decltype(val)>;
-						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
-						//reflect::dynamic dynaVal = val;
-						const float currentHeight = ImGui::GetCursorPosY();
-						string keyName = dynaKey.get<const char*>();
+					displayVal(*component);
 
-						if (keyName == "guid") {
-							return false;
-						}
-
-
-						keyName[0] = toupper(keyName[0]);
-						ImGui::SetCursorPosY(currentHeight + heightOffset);
-						ImGui::Text(keyName.c_str());
-						keyName.insert(0, "##"); //For Imgui stuff
-
-
-						ImGui::SameLine();
-						ImGui::SetCursorPosY(currentHeight);
-
-						//ALL THE TYPE STATEMENTS HERE
-						if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
-								
-							ImGui::DragFloat(keyName.c_str(), &val);
-						}
-						else if constexpr (std::is_same_v<T, int>) {
-							ImGui::DragInt(keyName.c_str(), &val);
-						}
-							
-						else if constexpr (std::is_same_v<T, bool>) {
-							ImGui::Checkbox(keyName.c_str(), &val);
-						}
-						else if constexpr (std::is_same_v<T, vec3>) {
-
-							DisplayVec3(val);
-							return false;
-						}
-						else if constexpr (is_template_v<T, RscHandle>) {
-
-							if (ImGuidk::InputResource(keyName.c_str(), &val))
-							{
-
-							}
-
-							return false;
-						}
-						else if constexpr (is_template_v<T, std::variant>)
+					if (component.is_type<Animator>())
+					{
+						// ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
+						if (ImGui::Button("Play"))
 						{
-							static_assert(is_template_v<T, std::variant>, "HOW????");
-							const int curr_ind = s_cast<int>(val.index());
-							int new_ind = curr_ind;
-							
-							constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-							using VarCombo = std::array<const char*, sz>;
-							
-							
-							static auto combo_items = []()-> VarCombo
-							{
-								static_assert(is_template_v<T, std::variant>, "HOW????");
-
-								static std::array<string, sz> tmp_arr;
-								std::array<const char*, sz> retval;
-								
-								auto sp = reflect::unpack_types<T>();
-								
-								for (auto i = 0; i < sz; ++i)
-								{
-									tmp_arr[i] = string{ sp[i].name() };
-									retval[i] = tmp_arr[i].data();
-								}
-								return retval;
-							}();
-							
-							if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
-							{
-								val = variant_construct<T>(new_ind);
-							}
-							return false;
+							(*component).get<Animator>().Play(0);
 						}
-						else {
-							ImGui::SetCursorPosY(currentHeight + heightOffset);
-							ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
-							return true;
+						if (ImGui::Button("Stop"))
+						{
+							(*component).get<Animator>().Stop();
 						}
-							
-					});
+						if (ImGui::Button("Pause"))
+						{
+							(*component).get<Animator>().Pause();
+						}
+					}
 				}
 
 				cursorPos2 = ImGui::GetCursorPos();
