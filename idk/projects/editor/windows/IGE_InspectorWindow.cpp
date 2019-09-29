@@ -60,7 +60,9 @@ namespace idk {
 			//reflect::dynamic dynaVal = val;
 			const float currentHeight = ImGui::GetCursorPosY();
 
-			if constexpr (!std::is_same_v<K, const char*>)
+			if constexpr (std::is_same_v<K, reflect::type>)
+				return true;
+			else if constexpr (!std::is_same_v<K, const char*>)
 				throw "Unhandled case";
 			else
 			{
@@ -69,15 +71,15 @@ namespace idk {
 				if (key_str == "guid") {
 					return false;
 				}
-				if (dyn.is<Animator>())
-				{
-					if (key_str == "_animation_table" ||
-						key_str == "_animations" ||
-						key_str == "_child_objects" ||
-						key_str == "_bone_transforms" ||
-						key_str == "_bind_pose")
-						return false;
-				}
+				//if (dyn.is<Animator>())
+				//{
+				//	if (key_str == "_animation_table" ||
+				//		key_str == "_animations" ||
+				//		key_str == "_child_objects" ||
+				//		key_str == "_bone_transforms" ||
+				//		key_str == "_bind_pose")
+				//		return false;
+				//}
 
 				string keyName = key;
 				keyName[0] = toupper(keyName[0]);
@@ -175,7 +177,8 @@ namespace idk {
 					{
 						val = variant_construct<T>(new_ind);
 					}
-					return false;
+
+					return true;
 				}
 				else {
 					ImGui::SetCursorPosY(currentHeight + heightOffset);
@@ -225,6 +228,12 @@ namespace idk {
 
 				if (component == c_transform)
 					continue;
+
+				if (component.is_type<Animator>())
+				{
+					DisplayAnimatorComponent(handle_cast<Animator>(component));
+					continue;
+				}
 
 
 				//COMPONENT DISPLAY
@@ -619,7 +628,7 @@ namespace idk {
 
 	}
 
-	void IGE_InspectorWindow::DisplayAnimationControllerComponent(Handle<AnimationController>& c_anim)
+	void IGE_InspectorWindow::DisplayAnimatorComponent(Handle<Animator> c_anim)
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};

@@ -40,7 +40,7 @@ namespace idk {
 
 		void DisplayNameComponent(Handle<Name>& c_name);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
-		void DisplayAnimationControllerComponent(Handle<AnimationController>& c_anim);
+		void DisplayAnimatorComponent(Handle<Animator> c_anim);
 
 		void DisplayVec3(vec3& vec);
 
