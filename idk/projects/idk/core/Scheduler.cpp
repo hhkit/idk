@@ -5,11 +5,11 @@ namespace idk
 {
 	Scheduler::Scheduler()
 	{
+		for (auto& elem : _systems_paused)
+			elem = false;
 	}
 	void Scheduler::Setup()
 	{
-		for (auto& elem : _systems_paused)
-			elem = false;
 
 		_last_frame = _this_frame = Clock::now();
 		_accumulated_dt = seconds{};

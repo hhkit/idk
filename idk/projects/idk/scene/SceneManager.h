@@ -31,6 +31,9 @@ namespace idk
 			Err_ScenePathNotFound
 		};
 
+		vector<SceneBlock>     _scenes;        // public for reflection to use, please don't touch
+		RscHandle<class Scene> _startup_scene; // public for reflection to use, please don't touch
+
 		// accessors
 		RscHandle<Scene>       GetSceneByBuildIndex(unsigned char index) const;
 		span<const SceneBlock> GetScenes() const;
@@ -58,8 +61,6 @@ namespace idk
 		void Shutdown() override;
 
 		GameState* _gs = nullptr;
-		vector<SceneBlock>     _scenes;
-		RscHandle<class Scene> _startup_scene;
 		RscHandle<Scene>       _active_scene;
 		SceneGraphBuilder      _sg_builder;
 	};

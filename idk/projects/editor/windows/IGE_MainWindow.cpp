@@ -91,7 +91,7 @@ namespace idk {
 		if (ImGui::BeginMenu("File")) {
 
 			if (ImGui::MenuItem("New Scene", "CTRL+N")) {
-				std::cout << "New Scene\n";
+				Core::GetSystem<SceneManager>().SetActiveScene(Core::GetSystem<SceneManager>().CreateScene());
 			}
 
 

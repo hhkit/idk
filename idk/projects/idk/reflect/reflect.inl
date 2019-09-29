@@ -54,7 +54,7 @@ namespace idk::reflect
         template<typename T, size_t... Is>
         span<type> unpack_types(std::index_sequence<Is...>)
         {
-            static array<type, sizeof...(Is)> types{ get_type<type_at_index<T, Is>::type>()... };
+            static array<type, sizeof...(Is)> types{ get_type<typename type_at_index<T, Is>::type>()... };
             return span<type>(types);
         }
     }

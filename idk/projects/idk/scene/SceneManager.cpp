@@ -99,10 +99,14 @@ namespace idk
 				build_index++;
 		}
 
-		auto guid = Guid::Make();
-		_scenes.emplace_back(SceneBlock{ build_index, RscHandle<Scene>{guid} });
+		auto retval = Core::GetResourceManager().LoaderEmplaceResource<Scene>(build_index);
+		_scenes.emplace_back(
+			SceneBlock{ 
+				build_index, 
+				retval
+			});
 
-		return Core::GetResourceManager().LoaderEmplaceResource<Scene>(guid, build_index);
+		return retval;
 	}
 
 	void SceneManager::Init()
