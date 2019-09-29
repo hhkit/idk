@@ -277,7 +277,7 @@ REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects, _bone_transforms, _bind_pose)
+REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
