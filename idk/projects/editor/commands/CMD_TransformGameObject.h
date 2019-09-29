@@ -3,7 +3,8 @@
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		10 SEPT 2019
-//@brief	Moves gameobjects
+//@brief	Keeps gameobjects transform values. Does not call on first execute.
+//			That means you have to modify the values before saving them.
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -12,15 +13,18 @@
 
 namespace idk {
 
-	class CMD_MoveGameObject : public ICommand { //This command is saved when mouse is released, after moving.
+	class CMD_TransformGameObject : public ICommand { //This command is saved when mouse is released, after moving.
 	public:
-		CMD_MoveGameObject(Handle<GameObject> gameObject, const vec3& pos);
+		CMD_TransformGameObject(Handle<GameObject> gameObject, const mat4& matrix_old, const mat4& matrix_new);
 
 		virtual bool execute() override;
 		virtual bool undo() override;
 
 	private:
-		const vec3			position			{};
+		mat4		original_values			{};
+		mat4		new_values				{};
+
+		bool		first_execute			{ false };
 	};
 
 }

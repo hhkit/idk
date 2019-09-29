@@ -55,6 +55,11 @@ namespace idk {
 		const float itemSpacing = 50;
 		const float XYZSliderWidth = 10;
 
+		//For when transforms are edited
+		bool			hasChanged = false; 
+		vector<mat4>	originalMatrix{};
+		bool			isBeingModified = false;
+		void			TransformModifiedCheck();
 
 	};
 

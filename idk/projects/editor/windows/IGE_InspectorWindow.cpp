@@ -132,7 +132,6 @@ namespace idk {
 
 				//ALL THE TYPE STATEMENTS HERE
 				else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
-
 					ImGui::DragFloat(keyName.c_str(), &val);
 					return false;
 				}
@@ -146,7 +145,6 @@ namespace idk {
 					return false;
 				}
 				else if constexpr (std::is_same_v<T, vec3>) {
-
 					DisplayVec3(val);
 					return false;
 				}
@@ -440,7 +438,14 @@ namespace idk {
 
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			
+			//This is dumped if no items are changed.
+			if (!isBeingModified) {
+				originalMatrix.clear();
+				for (Handle<GameObject> i : editor.selected_gameObjects) {
+					originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+				}
+			}
+
 
 			//Position
 			float heightPos = ImGui::GetCursorPosY();
@@ -462,6 +467,9 @@ namespace idk {
 					i->GetComponent<Transform>()->position.x = vecPosRef.x;
 				}
 			}
+			TransformModifiedCheck();
+
+
 			ImGui::PopID();
 			ImGui::SameLine();
 
@@ -473,6 +481,9 @@ namespace idk {
 					i->GetComponent<Transform>()->position.y = vecPosRef.y;
 				}
 			}
+			TransformModifiedCheck();
+
+
 			ImGui::PopID();
 			ImGui::SameLine();
 
@@ -484,6 +495,9 @@ namespace idk {
 					i->GetComponent<Transform>()->position.z = vecPosRef.z;
 				}
 			}
+			TransformModifiedCheck();
+
+
 			ImGui::PopID();
 
 			ImGui::PopItemWidth();
@@ -511,6 +525,8 @@ namespace idk {
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
+			TransformModifiedCheck();
+
 
 			ImGui::SameLine();
 
@@ -523,6 +539,8 @@ namespace idk {
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
+			TransformModifiedCheck();
+
 
 			ImGui::SameLine();
 
@@ -535,6 +553,8 @@ namespace idk {
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
+			TransformModifiedCheck();
+
 
 			ImGui::PopItemWidth();
 
@@ -558,6 +578,9 @@ namespace idk {
 					i->GetComponent<Transform>()->scale.x = vecScaRef.x;
 				}
 			}
+			TransformModifiedCheck();
+
+
 			ImGui::PopID();
 			ImGui::SameLine();
 
@@ -569,6 +592,9 @@ namespace idk {
 					i->GetComponent<Transform>()->scale.y = vecScaRef.y;
 				}
 			}
+			TransformModifiedCheck();
+
+
 			ImGui::PopID();
 			ImGui::SameLine();
 
@@ -580,6 +606,17 @@ namespace idk {
 					i->GetComponent<Transform>()->scale.z = vecScaRef.z;
 				}
 			}
+			TransformModifiedCheck();
+
+			if (hasChanged) {
+				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
+					mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+				}
+				hasChanged		= false;
+				isBeingModified = false;
+			}
+
 			ImGui::PopID();
 
 			ImGui::PopItemWidth();
@@ -748,6 +785,22 @@ namespace idk {
 
 		ImGui::PopItemWidth();
 
+	}
+
+	void IGE_InspectorWindow::TransformModifiedCheck()
+	{
+		if (ImGui::IsItemEdited()) {
+			isBeingModified = true;
+		}
+		if (ImGui::IsItemDeactivatedAfterEdit()) {
+			hasChanged = true;
+
+		}
+		else if (ImGui::IsItemDeactivated()) {
+			hasChanged = false;
+			isBeingModified = false;
+
+		}
 	}
 
 
