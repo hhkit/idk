@@ -298,10 +298,14 @@ namespace idk {
                     }
                 }
 
+                auto cursorpos = ImGui::GetCursorPos();
+                auto offset = (ImVec2(icon_sz, icon_sz) - sz) * 0.5f;
+                ImGui::SetCursorPos(cursorpos + offset);
                 if (id)
                     ImGui::Image(id, sz, ImVec2(0, 0), ImVec2(1, 1), selected_path == path ? selected_tint : tint);
                 else
                     ImGui::InvisibleButton("preview", sz);
+                ImGui::SetCursorPos(cursorpos + ImVec2(0, icon_sz + ImGui::GetStyle().ItemSpacing.y));
 
                 // todo: open arrow for bundle
             }
