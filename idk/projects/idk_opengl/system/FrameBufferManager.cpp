@@ -38,7 +38,7 @@ namespace idk::ogl
 
 		// set texture targets
 		vector<GLenum> buffers;
-		auto& yolo = *meta.textures[0];
+		//auto& yolo = *meta.textures[0];
 		for (int i = 0; i < meta.textures.size(); ++i)
 		{
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, (GLuint)meta.textures[i]->ID(), 0);

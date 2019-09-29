@@ -314,6 +314,8 @@ namespace idk {
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 			vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
 			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+
+				depth;
 				if (!handle) //Ignore handle zero
 					return true;
 
@@ -355,6 +357,9 @@ namespace idk {
 			selected_gameObjects.clear();
 			counter = 0;
 			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+				
+				depth;
+				
 				if (!handle) //Ignore handle zero
 					return true;
 

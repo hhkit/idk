@@ -114,6 +114,7 @@ namespace idk::fbx_loader_detail
 
 	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& normalize)
 	{
+		normalize;
 		struct BoneTreeNode
 		{
 			int parent;

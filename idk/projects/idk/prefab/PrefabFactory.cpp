@@ -19,6 +19,8 @@ namespace idk
 
 	ResourceBundle PrefabLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
 	{
+		filepath;
+		bundle;
 		return ResourceBundle();
 	}
 

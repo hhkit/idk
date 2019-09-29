@@ -29,11 +29,14 @@ namespace idk::ogl
 
 	ResourceBundle FrameBufferLoader::LoadFile(PathHandle fh)
 	{
+		fh;
 		assert(false);
 		return ResourceBundle();
 	}
 	ResourceBundle FrameBufferLoader::LoadFile(PathHandle filepath, const MetaBundle& m)
 	{
+		filepath;
+		m;
 		assert(false);
 		/*
 		auto fb = std::make_unique<FrameBuffer>();

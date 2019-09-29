@@ -117,6 +117,9 @@ namespace idk {
 				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+						
+						depth_change;
+						
 						using T = std::decay_t<decltype(val)>;
 						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
 						//reflect::dynamic dynaVal = val;
@@ -128,7 +131,7 @@ namespace idk {
 						}
 
 
-						keyName[0] = toupper(keyName[0]);
+						keyName[0] = (char)toupper(keyName[0]);
 						ImGui::SetCursorPosY(currentHeight + heightOffset);
 						ImGui::Text(keyName.c_str());
 						keyName.insert(0, "##"); //For Imgui stuff
@@ -141,13 +144,16 @@ namespace idk {
 						if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
 								
 							ImGui::DragFloat(keyName.c_str(), &val);
+							return false;
 						}
 						else if constexpr (std::is_same_v<T, int>) {
 							ImGui::DragInt(keyName.c_str(), &val);
+							return false;
 						}
 							
 						else if constexpr (std::is_same_v<T, bool>) {
 							ImGui::Checkbox(keyName.c_str(), &val);
+							return false;
 						}
 						else if constexpr (std::is_same_v<T, vec3>) {
 
@@ -178,7 +184,7 @@ namespace idk {
 								static_assert(is_template_v<T, std::variant>, "HOW????");
 
 								static std::array<string, sz> tmp_arr;
-								std::array<const char*, sz> retval;
+								std::array<const char*, sz> retval{};
 
 								auto sp = reflect::unpack_types<T>();
 

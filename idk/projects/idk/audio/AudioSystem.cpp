@@ -221,6 +221,7 @@ namespace idk
 		for (auto& elem : audio_sources)
 		{
 			//Do something
+			elem;
 		}
 
 		//Only one listener component will update FMODs listener
