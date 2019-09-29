@@ -297,9 +297,10 @@ namespace idk::shadergraph
                                                        ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
             uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
 
-            int param_index = 0;
+            int param_index = -1;
 			for (const auto& [uniform_name, uniform_type] : state.uniforms)
 			{
+                ++param_index;
                 if (uniform_name.empty())
                     continue;
 
@@ -308,8 +309,6 @@ namespace idk::shadergraph
                 else
 				    uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
                                                     to_uniform_instance(parameters[param_index]));
-
-                ++param_index;
 			}
         }
 

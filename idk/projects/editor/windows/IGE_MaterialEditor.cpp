@@ -344,7 +344,7 @@ namespace idk
 
                         if (slot_name == "$Color")
                         {
-                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
+                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 * _canvas.zoom + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
 
                             if (next_value.empty())
                                 final_control_values += (next_value = "0,0,0,1") + '|';
