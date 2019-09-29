@@ -30,6 +30,17 @@ namespace idk
 				};
 			}
 
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> ReleaseTableResources()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[](ResourceManager* resource_man)
+					{
+						if (auto table = &resource_man->GetTable<Rs>())
+							table->clear();
+					}...
+				};
+			}
+
 			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> GenDefaults()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
@@ -121,10 +132,15 @@ namespace idk
 
 	void ResourceManager::Shutdown()
 	{
+		constexpr static auto release_tables = detail::ResourceHelper::ReleaseTableResources();
+
 		for (auto& elem : reverse(_default_resources))
 			elem.reset();
 
-		for (auto& elem : _resource_table)
+		for (auto& elem : release_tables)
+			elem(this);
+
+		for (auto& elem : reverse(_resource_table))
 			elem.reset();
 
 		for (auto& elem : _factories)
