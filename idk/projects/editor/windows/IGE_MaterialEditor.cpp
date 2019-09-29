@@ -657,7 +657,7 @@ namespace idk
 
         if (ImGui::BeginMenuBar())
         {
-            if (ImGui::Button("Compile"))
+            if (ImGui::Button("Compile & Save"))
             {
                 g.Compile();
                 Core::GetResourceManager().Save(_graph);
@@ -669,7 +669,7 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered())
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered())
             ImGui::OpenPopup("nodes_context_menu");
         if (ImGui::IsPopupOpen("nodes_context_menu"))
             ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
