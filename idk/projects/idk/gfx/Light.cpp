@@ -47,7 +47,9 @@ namespace idk
 				{
 					const DirectionalLight& dir_light = light_variant;
 					retval.light_color = dir_light.light_color;
-					retval.v_dir = GetGameObject()->Transform()->Forward();
+					auto tfm = GetGameObject()->Transform();
+					retval.v_pos = tfm->GlobalPosition();
+					retval.v_dir = tfm->Forward();
 				}
 
 				if constexpr (std::is_same_v<T, SpotLight>)

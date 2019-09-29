@@ -93,7 +93,7 @@ vec3 pbr(
 	Light light = LightBlk.lights[i];
 	
 	vec3  light_dir =	light.v_pos - view_pos;
-	if (light.type == 1) light_dir = light.v_dir;
+	if (light.type == 1) light_dir = -light.v_dir;
 	
 	float dist      =  length(light_dir); 
 	light_dir /= dist;
