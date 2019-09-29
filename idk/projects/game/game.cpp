@@ -132,7 +132,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		*/
 		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
 		if(gfx_api!=GraphicsAPI::Vulkan)
-			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/hl.png.cbm");
+			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
 		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
 
