@@ -10,7 +10,8 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		void PhysicsTick      (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
+		void PhysicsTick       (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
+		void DebugDrawColliders(span<class Collider> colliders);
 	private:
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
 		struct pair_hasher   { size_t operator()(const CollisionPair&) const; };

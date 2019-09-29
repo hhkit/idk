@@ -70,6 +70,10 @@ REFLECT_END()
  * resource handles
  *========================================================================*/
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Scene>, "RscHandle<Scene>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
@@ -179,6 +183,10 @@ REFLECT_BEGIN(idk::Handle<idk::GameObject>, "Handle<GameObject>")
 REFLECT_VARS(id)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::SceneManager, "SceneManager")
+REFLECT_VARS(_scenes)
+REFLECT_END()
+
 /*==========================================================================
  * components
  *========================================================================*/
@@ -195,10 +203,28 @@ REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()
 
+// PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
 REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, restitution)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::Collider, "Collider")
+REFLECT_VARS(enabled, shape, is_trigger)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::box, "box")
+REFLECT_VARS(center, extents, axes)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::sphere, "sphere")
+REFLECT_VARS(center, radius)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::capsule, "sphere")
+REFLECT_VARS(center, radius, height)
+REFLECT_END()
+
+// GRAPHICS
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
 REFLECT_END()

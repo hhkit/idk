@@ -11,15 +11,14 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		static constexpr string_view project_path = "/game/project.idk";
+		static constexpr string_view project_path = "/assets/project.idk";
 
-		
+		void SaveProject();
 
 	private:
 		void Init() override;
 		void LateInit() override;
 		void Shutdown() override;
-		void SaveProject();
 
 
 	};

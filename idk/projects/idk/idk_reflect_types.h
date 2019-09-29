@@ -8,6 +8,8 @@
 #include <gfx/UniformInstance.h>
 #include <gfx/ShaderGraph_data.h>
 #include <res/ResourceMeta.h>
+#include <scene/SceneManager.h>
+#include <phys/Collider.h>
 
 namespace idk
 {
@@ -26,6 +28,7 @@ namespace idk::reflect
 		int
 		, bool
 		, char
+		, unsigned char
 		, int64_t
 		, uint64_t
 		, float
@@ -40,12 +43,24 @@ namespace idk::reflect
 		, mat4
 		, color
 
+		// game objects
 		, Handle<GameObject>
 		, Guid
 
+		// projects
+		, vector<SceneManager::SceneBlock>
+
+		// graphics
 		, RscHandle<Mesh>
 		, UniformInstance
 		, hash_table<string, UniformInstance>
+		//, LightVariant
+
+		// physics
+		, Collider::Shapes
+
+		// resources
+		, vector<SerializedMeta>
 
 		, vector<string>
 		, vector<Guid>
@@ -53,13 +68,12 @@ namespace idk::reflect
         , vector<reflect::dynamic>
         , vector<Handle<GameObject>>
 
+		// prefabs
         , PrefabData
         , vector<PrefabData>
         , PropertyOverride
         , vector<PropertyOverride>
         , RscHandle<Prefab>
-
-		, vector<SerializedMeta>
 
 		, RscHandle<ShaderProgram>
         , shadergraph::ValueType

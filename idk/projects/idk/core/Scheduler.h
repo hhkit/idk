@@ -72,7 +72,7 @@ namespace idk
 	public:
 		Pass(Lock read, Lock write, FnPtr call, string_view update_name);
 		template<typename System, typename ... Components>
-		Pass& IfPausedThen(void (System::** memfb)(span<Components>...));
+		Pass& IfPausedThen(void (System::* memfb)(span<Components>...));
 	private:
 		Lock read_components;
 		Lock write_components;
