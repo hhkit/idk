@@ -171,10 +171,11 @@ namespace idk
 			}
 			else
 			{
+                yaml::node node = serialize_yaml(reflect::dynamic{ arg });
                 if constexpr (std::is_arithmetic_v<K>)
-                    stack.push_back(&curr_node.emplace_back());
+                    stack.push_back(&curr_node.emplace_back(node));
                 else
-                    stack.push_back(&curr_node[k]);
+                    stack.push_back(&(curr_node[k] = node));
 				return true;
 			}
 		};

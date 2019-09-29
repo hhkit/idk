@@ -187,6 +187,10 @@ REFLECT_BEGIN(idk::SceneManager, "SceneManager")
 REFLECT_VARS(_scenes)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")
+REFLECT_VARS(build_index, scene)
+REFLECT_END()
+
 /*==========================================================================
  * components
  *========================================================================*/
