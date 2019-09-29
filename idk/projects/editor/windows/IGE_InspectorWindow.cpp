@@ -50,9 +50,32 @@ namespace idk {
 
 
 
+    static string format_name(string_view name)
+    {
+        string str{ name };
+        str[0] = (char)toupper(str[0]);
+        for (int i = 0; i < str.size(); ++i)
+        {
+            if (str[i] == '_')
+            {
+                str[i] = ' ';
+                if (i + 1 < str.size())
+                    str[i + 1] = (char)toupper(str[i + 1]);
+            }
+        }
+        for (int i = 1; i < str.size(); ++i)
+        {
+            if (str[i] >= 'A' && str[i] <= 'Z' && str[i - 1] >= 'a' && str[i - 1] <= 'z')
+            {
+                str.insert(i, 1, ' ');
+            }
+        }
+        return str;
+    }
+
 	void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
 	{
-		dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+		dyn.visit([&](auto&& key, auto&& val, int /*depth_change*/) { //Displays all the members for that variable
 
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(val)>;
@@ -60,33 +83,20 @@ namespace idk {
 			//reflect::dynamic dynaVal = val;
 			const float currentHeight = ImGui::GetCursorPosY();
 
-			if constexpr (std::is_same_v<K, reflect::type>)
+			if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
 				return true;
 			else if constexpr (!std::is_same_v<K, const char*>)
 				throw "Unhandled case";
 			else
 			{
-				string key_str = key;
+				string keyName = format_name(key);
 
-				if (key_str == "guid") {
+				if (keyName == "Guid")
 					return false;
-				}
-				//if (dyn.is<Animator>())
-				//{
-				//	if (key_str == "_animation_table" ||
-				//		key_str == "_animations" ||
-				//		key_str == "_child_objects" ||
-				//		key_str == "_bone_transforms" ||
-				//		key_str == "_bind_pose")
-				//		return false;
-				//}
 
-				string keyName = key;
-				keyName[0] = toupper(keyName[0]);
 				ImGui::SetCursorPosY(currentHeight + heightOffset);
 				ImGui::Text(keyName.c_str());
 				keyName.insert(0, "##"); //For Imgui stuff
-
 
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(currentHeight);
@@ -121,29 +131,41 @@ namespace idk {
 				}
 
 				//ALL THE TYPE STATEMENTS HERE
-				if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
+				else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
 
 					ImGui::DragFloat(keyName.c_str(), &val);
+                    return false;
 				}
 				else if constexpr (std::is_same_v<T, int>) {
 					ImGui::DragInt(keyName.c_str(), &val);
+                    return false;
 				}
 
 				else if constexpr (std::is_same_v<T, bool>) {
 					ImGui::Checkbox(keyName.c_str(), &val);
+                    return false;
 				}
 				else if constexpr (std::is_same_v<T, vec3>) {
 
 					DisplayVec3(val);
 					return false;
 				}
+                else if constexpr (std::is_same_v<T, color>)
+                {
+                    ImGui::ColorEdit4(keyName.c_str(), val.data());
+                    return false;
+                }
+                else if constexpr (std::is_same_v<T, rad>)
+                {
+                    ImGui::SliderAngle(keyName.c_str(), val.data());
+                    return false;
+                }
 				else if constexpr (is_template_v<T, RscHandle>) {
 
 					if (ImGuidk::InputResource(keyName.c_str(), &val))
 					{
 
 					}
-
 					return false;
 				}
 				else if constexpr (is_template_v<T, std::variant>)
@@ -167,7 +189,7 @@ namespace idk {
 
 						for (auto i = 0; i < sz; ++i)
 						{
-							tmp_arr[i] = string{ sp[i].name() };
+							tmp_arr[i] = format_name(sp[i].name());
 							retval[i] = tmp_arr[i].data();
 						}
 						return retval;
