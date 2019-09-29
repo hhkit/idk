@@ -14,12 +14,7 @@ namespace idk
 	{
 		vkn::MeshModder _modder;
 	};
-	VulkanFBXLoader::VulkanFBXLoader() :_data{ std::make_unique<Data>() }
-	{
-	}
-
-	VulkanFBXLoader::~VulkanFBXLoader() = default;
-	FileResources VulkanFBXLoader::Create(FileHandle path_to_resource)
+	ResourceBundle VulkanFBXLoader::LoadFile(PathHandle path_to_resource)
 	{
 		struct MeshEntry
 		{
@@ -31,19 +26,19 @@ namespace idk
 
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::Vulkan);
 
-		FileResources retval;
+		ResourceBundle retval;
 
 		Assimp::Importer importer;
 		const aiScene* ai_scene = importer.ReadFile(path_to_resource.GetFullPath().data(),
-													aiProcess_Triangulate |		// Triangulates non-triangles
-													aiProcess_GenSmoothNormals |	// Generates missing normals
-													aiProcess_FlipUVs |
-													aiProcess_JoinIdenticalVertices);;
+			aiProcess_Triangulate |		// Triangulates non-triangles
+			aiProcess_GenSmoothNormals |	// Generates missing normals
+			aiProcess_FlipUVs |
+			aiProcess_JoinIdenticalVertices);;
 
 		if (ai_scene == nullptr)
 			return retval;
 
-		auto mesh_handle = Core::GetResourceManager().Create<vkn::VulkanMesh>();
+		auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<vkn::VulkanMesh>();
 
 		vector<vec3	>	positions;
 		vector<vec3	>	normals;
@@ -73,7 +68,7 @@ namespace idk
 			num_vertices += ai_scene->mMeshes[i]->mNumVertices;
 			num_indices += curr_num_index;
 		}
-		
+
 		positions.reserve(num_vertices);
 		normals.reserve(num_vertices);
 		uvs.reserve(num_vertices);
@@ -151,20 +146,21 @@ namespace idk
 
 		mesh_modder.RegisterAttribs(*mesh_handle, attribs);
 		mesh_modder.SetIndexBuffer32(*mesh_handle, index_buffer, s_cast<uint32_t>(indices.size()));
-		retval.resources.emplace_back(RscHandle<Mesh>{mesh_handle});
+		retval.Add(mesh_handle);
 
 		return retval;
 	}
-
-	FileResources VulkanFBXLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	ResourceBundle VulkanFBXLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
 		UNREFERENCED_PARAMETER(path_to_resource);
 		UNREFERENCED_PARAMETER(path_to_meta);
-
-		return Create(path_to_resource);
-
-		// return FileResources();
+		assert(false);
+		return LoadFile(path_to_resource);
 	}
-	
+	VulkanFBXLoader::VulkanFBXLoader() :_data{ std::make_unique<Data>() }
+	{
+	}
+
+	VulkanFBXLoader::~VulkanFBXLoader() = default;
 
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <res/Guid.h>
+#include <res/ResourceUtils.h>
 
 namespace idk
 {
@@ -19,11 +20,11 @@ namespace idk
 
 		Guid guid{};
 
-		RscHandle() = default;
+		constexpr RscHandle() noexcept = default;
 		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Other, Res>>>
-		explicit RscHandle(RscHandle<Other> other) : guid{ other.guid } {};
+		constexpr explicit RscHandle(RscHandle<Other> other) noexcept : guid{ other.guid } {};
 
-		RscHandle(const Guid& guid) : guid{ guid } {}
+		constexpr RscHandle(const Guid& guid) noexcept : guid{ guid } {}
 
 		void Set(const idk::Resource<Res>& g);
 		template<typename T>
@@ -32,6 +33,8 @@ namespace idk
 		explicit operator bool() const;
 		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Other, Res>>>
 		explicit operator RscHandle<Other>() const;
+		template<typename Other, typename = std::enable_if_t<std::is_base_of_v<Res, Other>>>
+		RscHandle<Res>& operator=(const RscHandle<Other>& handle) { guid = handle.guid; return *this; }
 
 		Res& operator*() const;
 		Res* operator->() const;

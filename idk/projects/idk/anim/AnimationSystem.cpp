@@ -44,24 +44,30 @@ namespace idk
 				const auto& skeleton = elem._skeleton->data();
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 				{
+					auto& curr_go = elem._child_objects[bone_id];
 					const auto& curr_bone = skeleton[bone_id];
 					const anim::Animation::EasyAnimNode* anim_node = anim->GetEasyAnimNode(curr_bone._name);
 
-					mat4 local_bone_transform;
+					anim::Skeleton::BonePose curr_pose;
+					bool first = true;
 					if (anim_node != nullptr)
 					{
 						// For each channel starting from the front, we concatanate the transformations
 						for (auto& channel : anim_node->_channels)
 						{
-							if (channel._is_animated)
+							// Concat the interpolated channels and the current pose.
+							auto interp_pose = interpolateChannel(channel, time_in_ticks);
+							if (first)
 							{
-								// Interpolate here
-								local_bone_transform = local_bone_transform * interpolateChannel(channel, time_in_ticks);
+								curr_pose._translation = interp_pose._translation;
+								curr_pose._rotation =	 interp_pose._rotation;
+								curr_pose._scale =		 interp_pose._scale;
+								first = false;
+								continue;
 							}
-							else if (channel._node_transform != mat4{})
-							{
-								local_bone_transform = local_bone_transform * channel._node_transform;
-							}
+							curr_pose._translation =	curr_pose._translation	+ interp_pose._translation;
+							curr_pose._rotation =		curr_pose._rotation		* interp_pose._rotation;
+							curr_pose._scale =			curr_pose._scale		+ interp_pose._scale;
 						}
 					}
 					else
@@ -69,7 +75,43 @@ namespace idk
 						// For now, bones and anim_nodes are 1-1.
 						assert(false);
 					}
-					elem._bone_transforms[bone_id] = local_bone_transform;
+					
+					const auto& curr_local_bind_pose = elem._bind_pose[bone_id];
+					curr_pose._translation =	curr_local_bind_pose._translation	+ curr_pose._translation;
+					curr_pose._rotation =		curr_local_bind_pose._rotation		* curr_pose._rotation;
+					curr_pose._scale =			curr_local_bind_pose._scale			+ curr_pose._scale;
+					mat4 compose_curr_pose = curr_pose.compose();
+
+					auto parent_index = skeleton[bone_id]._parent;
+					curr_go->Transform()->LocalMatrix(compose_curr_pose);
+					if (parent_index >= 0)
+					{
+						// If we have the parent, we push in the parent.global * child.local
+						const mat4& p_transform = elem._bone_transforms[parent_index];
+						compose_curr_pose = p_transform * compose_curr_pose;
+					}
+
+					elem._bone_transforms[bone_id] = compose_curr_pose;
+						
+				}
+				
+				// Apply offsets to all the transforms
+				// const auto& skeleton = elem._skeleton->data();
+				if (elem._skeleton->GetGlobalInverse() != mat4{})
+				{
+					for (size_t i = 0; i < elem._child_objects.size(); ++i)
+					{
+						auto& curr_bone = skeleton[i];
+						elem._bone_transforms[i] = elem._skeleton->GetGlobalInverse() * elem._bone_transforms[i] * curr_bone._global_inverse_bind_pose;
+					}
+				}
+				else
+				{
+					for (size_t i = 0; i < elem._child_objects.size(); ++i)
+					{
+						auto& curr_bone = skeleton[i];
+						elem._bone_transforms[i] = elem._bone_transforms[i] * curr_bone._global_inverse_bind_pose;
+					}
 				}
 			}
 		}
@@ -78,52 +120,70 @@ namespace idk
 	void AnimationSystem::Shutdown()
 	{
 	}
-	mat4 AnimationSystem::interpolateChannel(const anim::Animation::Channel& channel, float time_in_ticks)
+
+	anim::Skeleton::BonePose AnimationSystem::interpolateChannel(const anim::Animation::Channel& channel, float time_in_ticks)
 	{
-		vec3 scale = channel._scale[0]._val;
-		quat rotation = channel._rotation[0]._val;
-		vec3 translation = channel._translate[0]._val;
+		anim::Skeleton::BonePose curr_pose;
+		curr_pose._scale = channel._scale.size() == 0			? vec3{} : channel._scale[0]._val;
+		curr_pose._rotation = channel._rotation.size() == 0		? quat{} : channel._rotation[0]._val;
+		curr_pose._translation = channel._translate.size() == 0	? vec3{} : channel._translate[0]._val;
 
 		// Scaling
 		if (channel._scale.size() > 1)
 		{
 			size_t start = find_key(channel._scale, time_in_ticks);
-			assert(start + 1 < channel._scale.size());
+			if (start + 1 >= channel._scale.size())
+			{
+				curr_pose._scale = channel._scale[start]._val;
+			}
+			else
+			{
+				float dt = static_cast<float>(channel._scale[start + 1]._time - channel._scale[start]._time);
+				float factor = (time_in_ticks - channel._scale[start]._time) / dt;
+				assert(factor >= 0.0f && factor <= 1.0f);
 
-			float dt = static_cast<float>(channel._scale[start + 1]._time - channel._scale[start]._time);
-			float factor = (time_in_ticks - channel._scale[start]._time) / dt;
-			assert(factor >= 0.0f && factor <= 1.0f);
-
-			scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
+				curr_pose._scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
+			}
 		}
 
 		// Translate
 		if (channel._translate.size() > 1)
 		{
 			size_t start = find_key(channel._translate, time_in_ticks);
-			assert(start + 1 < channel._translate.size());
+			if (start + 1 >= channel._translate.size())
+			{
+				curr_pose._translation = channel._translate[start]._val;
+			}
+			else
+			{
+				float dt = static_cast<float>(channel._translate[start + 1]._time - channel._translate[start]._time);
+				float factor = (time_in_ticks - channel._translate[start]._time) / dt;
+				assert(factor >= 0.0f && factor <= 1.0f);
 
-			float dt = static_cast<float>(channel._translate[start + 1]._time - channel._translate[start]._time);
-			float factor = (time_in_ticks - channel._translate[start]._time) / dt;
-			assert(factor >= 0.0f && factor <= 1.0f);
-
-			translation = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
+				curr_pose._translation = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
+			}
 		}
 
 		// Rotate
 		if (channel._rotation.size() > 1)
 		{
 			size_t start = find_key(channel._rotation, time_in_ticks);
-			assert(start + 1 < channel._rotation.size());
+			if (start + 1 >= channel._rotation.size())
+			{
+				curr_pose._rotation = channel._rotation[start]._val;
+			}
+			else
+			{
+				float dt = static_cast<float>(channel._rotation[start + 1]._time - channel._rotation[start]._time);
+				float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
+				assert(factor >= 0.0f && factor <= 1.0f);
 
-			float dt = static_cast<float>(channel._rotation[start + 1]._time - channel._rotation[start]._time);
-			float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
-			assert(factor >= 0.0f && factor <= 1.0f);
-
-			rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
-			rotation.normalize();
+				curr_pose._rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
+				// rotation =  * rotation;
+				curr_pose._rotation.normalize();
+			}
 		}
 		
-		return translate(translation) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
+		return curr_pose;
 	}
 }

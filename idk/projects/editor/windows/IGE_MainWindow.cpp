@@ -19,8 +19,11 @@ of the editor.
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
+#include <common/Transform.h> //DockBuilderDockNode
+#include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
+#include <editor/windows/IGE_WindowList.h>
 
 namespace idk {
 
@@ -56,26 +59,26 @@ namespace idk {
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 		//ImGui::SetNextWindowPos(viewport->Pos);
-		//ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Always);
-		ImGui::SetNextWindowViewport(viewport->ID);
+		window_size = viewport->Size;
+		//ImGui::SetNextWindowViewport(viewport->ID);
 		ImGui::SetNextWindowBgAlpha(0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f }); //The File,Edit Tab
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.92f, 0.92f, 0.92f, 1.0f }); //The File,Edit Tab
 
 	}
 
 	void IGE_MainWindow::EndWindow_V()
 	{
 		EndWindow();
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		//ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 		//Check if mouse is at this window or not
 		is_mouse_hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 		is_window_collapsed = ImGui::IsWindowCollapsed();
-		window_position = ImGui::GetWindowPos();
-		window_size = viewport->Size;
+		//window_position = ImGui::GetWindowPos();
+		//window_size = viewport->Size;
 
 		itemCounter = 0;
 
@@ -189,14 +192,27 @@ namespace idk {
 
 	void IGE_MainWindow::DisplayGameObjectMenu()
 	{
+
+		IDE& editor = Core::GetSystem<IDE>();
+		
 		if (ImGui::BeginMenu("GameObject"))
 		{
 			if (ImGui::MenuItem("Create Empty","CTRL+SHIFT+N")) {
 
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+
+			} 
+			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
+				if (editor.selected_gameObjects.size()) {
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
+
+				}
+				else {
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+				}
 
 
-			} //Do something if pressed
-
+			}
 
 
 			ImGui::EndMenu(); 
@@ -208,6 +224,38 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("Component"))
 		{
+			IDE& editor = Core::GetSystem<IDE>();
+			bool canSelect = editor.selected_gameObjects.size() == 0 ? false : true;
+
+			span componentNames = GameState::GetComponentNames();
+			for (const char* name : componentNames) {
+				string displayName = name;
+				if (displayName == "Transform")
+					continue;
+				if (displayName == "Name")
+					continue;
+
+				//Comment/Uncomment this to remove text fluff 
+				const string fluffText{ "idk::" };
+
+				std::size_t found = displayName.find(fluffText);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText.size());
+
+				/*
+				const string fluffText2{ ">(void)" };
+				found = displayName.find(fluffText2);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText2.size());
+
+				*/
+
+				if (ImGui::MenuItem(displayName.c_str(),nullptr,nullptr,canSelect)) {
+					//Add component
+					for (Handle<GameObject> i : editor.selected_gameObjects)
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+				}
+			}
 			//Each button is disabled if gameobject is not selected!
 			ImGui::EndMenu(); 
 
@@ -271,31 +319,51 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f); //Have the buttons look like buttons
 		ImGui::SetCursorPos(toolButtonStartPos);
 
+		GizmoOperation& gizmo_operation = Core::GetSystem<IDE>().gizmo_operation;
 
-		if (ImGui::Button("##HandTool", toolButtonSize)) {
-			//Do stuff
+		ImVec4 activeColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
+		ImVec4 inactiveColor = ImGui::GetStyle().Colors[ImGuiCol_Button];
+
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Null);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Null ? activeColor : inactiveColor);
+		if (ImGui::Button("Hand##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Null;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 1);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		if (ImGui::Button("##MoveTool", toolButtonSize)) {
-			//Do stuff
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Translate);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Translate ? activeColor : inactiveColor);
+		if (ImGui::Button("Move##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Translate;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 2);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		if (ImGui::Button("##RotateTool", toolButtonSize)) {
-			//Do stuff
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Rotate);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Rotate ? activeColor : inactiveColor);
+		if (ImGui::Button("Rotate##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Rotate;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 3);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		if (ImGui::Button("##ScaleTool", toolButtonSize)) {
-			//Do stuff
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Scale);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Scale ? activeColor : inactiveColor);
+		if (ImGui::Button("Scale##Tool", toolButtonSize)) {
+			gizmo_operation = GizmoOperation_Scale;
 		}
+		ImGui::PopItemFlag();
+		ImGui::PopStyleColor();
 
 		ImGui::PopStyleVar();
 
@@ -328,17 +396,64 @@ namespace idk {
 
 	void IGE_MainWindow::PollShortcutInput()
 	{
-		CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 
-
-		//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-			commandController.UndoCommand();
+		if (ImGui::IsAnyItemActive()) {
+			return;
 		}
+		IDE& editor = Core::GetSystem<IDE>();
+		CommandController& commandController = editor.command_controller;
+		GizmoOperation& gizmo_operation = editor.gizmo_operation;
 
-		//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-			commandController.RedoCommand();
+		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
+
+			//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				commandController.UndoCommand();
+			}
+
+			//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				commandController.RedoCommand();
+			}
+
+			//QWER = Move, Translate, Rotate, Scale (refer to ASCII Table)
+			//Q = Move
+			if (ImGui::IsKeyPressed(81)) {
+				gizmo_operation = GizmoOperation_Null;
+			}
+			//W = Translate
+			else if (ImGui::IsKeyPressed(87)) {
+				gizmo_operation = GizmoOperation_Translate;
+			}
+			//E = Rotate
+			else if (ImGui::IsKeyPressed(69)) {
+				gizmo_operation = GizmoOperation_Rotate;
+			}
+			//R = Scale
+			else if (ImGui::IsKeyPressed(82)) {
+				gizmo_operation = GizmoOperation_Scale;
+			}
+			
+			//DEL = Delete
+			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
+				if (editor.selected_gameObjects.size()) {
+					if (editor.selected_gameObjects.size() == 1) {
+						Handle<GameObject> i = editor.selected_gameObjects.front();
+						editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
+						commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+					}
+				}
+			}
+
+			//F = Focus on GameObject
+			if (ImGui::IsKeyPressed(70))
+			{
+				editor.FocusOnSelectedGameObjects();
+
+			}
+
+
+
 		}
 	}
 
@@ -372,6 +487,34 @@ namespace idk {
 
 		ImGui::SetCursorPosY(48.0f); //30 is child size, 18 is default font size
 		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+
+        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+        {
+            ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
+            ImGui::DockBuilderSetNodeSize(dockspace_id, window_size);
+
+            ImGuiID main = dockspace_id;
+
+            const float Y_RATIO = 0.3f;
+            const float X_RATIO = 0.2f;
+
+            ImGuiID right = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, X_RATIO, nullptr, &main);
+
+            // bottom left: project
+            ImGuiID bottom_left = ImGui::DockBuilderSplitNode(main, ImGuiDir_Down, Y_RATIO, nullptr, &main);
+
+            // left pane: hierarchy
+            ImGuiID left = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, X_RATIO / (1.0f - X_RATIO), nullptr, &main);
+
+            auto& ide = Core::GetSystem<IDE>();
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_SceneView>()->window_name, main);
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProjectWindow>()->window_name, bottom_left);
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_HierarchyWindow>()->window_name, left);
+            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - toolBarHeight - (ImGui::GetFrameHeight()*2)), ImGuiDockNodeFlags_PassthruCentralNode);
 		//Imgui internal
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);

@@ -20,6 +20,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/ImGui_Interface.h>
 #include <editor/commands/CommandController.h>
 
+#undef FindWindow
 
 
 
@@ -36,17 +37,38 @@ namespace idk
 
 	class CameraControls;
 
+	enum GizmoOperation {
+		GizmoOperation_Null = 0,
+		GizmoOperation_Translate,
+		GizmoOperation_Rotate,
+		GizmoOperation_Scale
+	};
+	enum MODE
+	{
+		LOCAL,
+		WORLD
+	};
+
 	class IDE : public IEditor
 	{
 	public:
 		IDE();
 
 		void Init() override;
+		void LateInit() override;
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;
 
 		CameraControls& currentCamera();
+
+        template <typename T> // move into .inl if there are more template fns
+        T* FindWindow()
+        {
+            auto iter = windows_by_type.find(reflect::typehash<T>());
+            return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
+        }
+
 	private:
 		friend class IGE_MainWindow;
 		friend class IGE_SceneView;
@@ -65,7 +87,20 @@ namespace idk
 
 		vector<Handle<GameObject>> selected_gameObjects {};
 
-		vector <unique_ptr<IGE_IWindow>> ige_windows	{};
+		vector<unique_ptr<IGE_IWindow>> ige_windows	    {};
+		hash_table<size_t, IGE_IWindow*> windows_by_type{};
 
+        bool closing = false;
+
+		GizmoOperation gizmo_operation = GizmoOperation_Translate;
+		MODE gizmo_mode = MODE::WORLD;
+
+
+		void FocusOnSelectedGameObjects();
+		vec3 focused_vector{}; //Updated everytime FocusOnSelectedGameObjects is called. For Scroll Vector WIP
+		float scroll_multiplier = 1.0f;
+		const float default_scroll_multiplier = 1.0f; //When on focus, this resets the scroll_multiplier
+		const float scroll_additive = 1.05f;		//Amount of multiplication when scrolling farther
+		const float scroll_subtractive = 0.85f;		//Amount of multiplication when scrolling nearer
 	};
 }

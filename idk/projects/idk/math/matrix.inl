@@ -89,6 +89,15 @@ namespace idk
 	}
 
 	template<typename T, unsigned R, unsigned C>
+	inline tmat<T, R, C>::tmat(T* ptr)
+	{
+		auto writr = data();
+		const auto etr = ptr + R * C;
+		while (ptr != etr)
+			*writr = *ptr++;
+	}
+
+	template<typename T, unsigned R, unsigned C>
 	inline tmat<T, R, C>::tmat(const tmat<T, R - 1, C - 1>& mtx)
 		: tmat{}
 	{
@@ -399,7 +408,9 @@ namespace idk
 	{
 		return m * coeff;
 	}
-
+#ifdef _DEBUG
+#pragma optimize("",on)
+#endif
 	template<typename T, unsigned R, unsigned C>
 	tvec<T, R> operator*(const tmat<T, R, C>& lhs, const tvec<T, C>& rhs)
 	{
@@ -411,4 +422,7 @@ namespace idk
 	{
 		return detail::MatrixMatrixMult(lhs, rhs, std::make_index_sequence<I>{});
 	}
+#ifdef _DEBUG
+#pragma optimize("",off)
+#endif
 }

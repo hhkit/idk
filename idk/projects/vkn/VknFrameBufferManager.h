@@ -29,5 +29,7 @@ namespace idk::vkn
 		//Framebuffer id or handle (A list of it)
 		VknFrameBuffer curr_framebuffer{};
 
+		hlp::MemoryAllocator allocator;
+		vk::UniqueFence			fence;
 	};
 }

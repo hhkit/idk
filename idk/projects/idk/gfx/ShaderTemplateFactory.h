@@ -1,14 +1,13 @@
 #pragma once
-#include <res/ResourceFactory.h>
+#include <res/EasyFactory.h>
 #include <gfx/ShaderTemplate.h>
 
 namespace idk
 {
 	class ShaderTemplateFactory
-		: public ResourceFactory<ShaderTemplate>
+		: public EasyFactory<ShaderTemplate>
 	{
 	public:
 		unique_ptr<ShaderTemplate> GenerateDefaultResource() override;
-		unique_ptr<ShaderTemplate> Create(FileHandle) override;
 	};
 }

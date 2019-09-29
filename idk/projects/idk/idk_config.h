@@ -24,7 +24,7 @@ namespace idk
 		,	class MeshRenderer
 		,   class Camera
 		,   class SkinnedMeshRenderer
-		, class Light
+		,	class Light
 
 		/// ANIMATION
 		,	class AnimationController
@@ -37,7 +37,7 @@ namespace idk
 		,	class AudioListener
 
 		/// IVAN BEING STUPID
-		, class TestComponent
+		,	class TestComponent
 	>;
 	
 	using Systems = std::tuple<
@@ -50,7 +50,6 @@ namespace idk
 		,   class DebugRenderer
 		,	class AudioSystem
 		,	class ResourceManager
-		,	class SaveableResourceManager
 		,	class SceneManager
 		,	class ProjectManager
 		,	class IEditor
@@ -67,13 +66,13 @@ namespace idk
 		,	class ShaderTemplate
 		,	class Mesh
 		,   class Material
+		,	class MaterialInstance
 		,	class Texture
 		,   class CubeMap
 		,	class ShaderProgram
 		,	class RenderTarget
 		,	anim::Animation
 		,	anim::Skeleton
-        ,   shadergraph::Graph
 		//,	class Level
 	>;
 

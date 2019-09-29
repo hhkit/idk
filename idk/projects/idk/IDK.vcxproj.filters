@@ -107,6 +107,9 @@
     <Filter Include="gfx\shadergraph">
       <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\collision">
+      <UniqueIdentifier>{a443cd4d-0b4b-4ed3-97e1-29444c85c072}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -281,14 +284,8 @@
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="audio\AudioClipFactory.h">
-      <Filter>audio</Filter>
-    </ClInclude>
     <ClInclude Include="util\enum.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="file\FileHandle.h">
-      <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioListener.h">
       <Filter>audio</Filter>
@@ -359,9 +356,6 @@
     <ClInclude Include="util\align.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="res\ExtensionLoader.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -389,17 +383,11 @@
     <ClInclude Include="gfx\MeshRenderer.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="res\FileResources.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\FileResources_detail.h">
       <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="meta\tag.h">
       <Filter>meta</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ForwardingExtensionLoader.h">
-      <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="test\TestResource.h">
       <Filter>test</Filter>
@@ -500,9 +488,6 @@
     <ClInclude Include="anim\Animation.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationFactory.h">
-      <Filter>anim\res/factories</Filter>
-    </ClInclude>
     <ClInclude Include="anim\Skeleton.h">
       <Filter>anim\res/factories</Filter>
     </ClInclude>
@@ -521,20 +506,11 @@
     <ClInclude Include="anim\AnimationSystem.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="res\SaveableResource.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="res\SaveableResourceManager.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="test\TestResourceFactory.h">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="util\ioutils.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\EasyFactory.h">
-      <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="scene\ProjectManager.h">
       <Filter>scene</Filter>
@@ -560,9 +536,6 @@
     <ClInclude Include="math\linear.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision.h">
-      <Filter>phys</Filter>
-    </ClInclude>
     <ClInclude Include="phys\PhysicsSystem.h">
       <Filter>phys</Filter>
     </ClInclude>
@@ -572,18 +545,109 @@
     <ClInclude Include="gfx\ShaderGraph.h">
       <Filter>gfx\shadergraph</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ShaderGraphFactory.h">
-      <Filter>gfx\shadergraph</Filter>
-    </ClInclude>
     <ClInclude Include="util\hash_combine.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision_obb.h" />
-    <ClInclude Include="phys\collision_raycast.h" />
-    <ClInclude Include="phys\collision_result.h" />
+    <ClInclude Include="gfx\CubeMap.h" />
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="file\PathHandle.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_box.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_box_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\raycasts\collision_raycast.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_result.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\result.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\halfspace.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\frustum.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\BasicRenderPasses.h" />
+    <ClInclude Include="res\FileLoader.h" />
+    <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\GenericResourceHandle.h" />
+    <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="meta\variant.h" />
+    <ClInclude Include="res\MetaBundle.h" />
+    <ClInclude Include="res\EasyFactory.h" />
+    <ClInclude Include="audio\AudioClipLoader.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph_helpers.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="res\EasyFactory.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\GenericResourceHandle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\GenericResourceHandle_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\variant.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceBundle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceUtils.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\SaveableResource.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\SaveableResourceLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\MetaBundle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplateLoader.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\IShaderProgramFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
+    <ClInclude Include="gfx\IShaderProgramFactory.h" />
+    <ClInclude Include="gfx\MaterialFactory.h" />
+    <ClInclude Include="gfx\UniformInstance.h" />
+    <ClInclude Include="anim\BoneComponent.h" />
+    <ClInclude Include="PauseConfigurations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -662,17 +726,11 @@
     <ClCompile Include="reflect\uni_container.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
-    <ClCompile Include="audio\AudioClipFactory.cpp">
-      <Filter>audio</Filter>
-    </ClCompile>
     <ClCompile Include="reflect\enum_type.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
     <ClCompile Include="reflect\enum_value.cpp">
       <Filter>reflect</Filter>
-    </ClCompile>
-    <ClCompile Include="file\FileHandle.cpp">
-      <Filter>file</Filter>
     </ClCompile>
     <ClCompile Include="audio\AudioListener.cpp">
       <Filter>audio</Filter>
@@ -700,9 +758,6 @@
     </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="res\FileResources.cpp">
-      <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
@@ -740,16 +795,10 @@
     <ClCompile Include="serialize\yaml.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
-      <Filter>gfx\object</Filter>
-    </ClCompile>
     <ClCompile Include="serialize\yaml_load.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
     <ClCompile Include="anim\Animation.cpp">
-      <Filter>anim\res/factories</Filter>
-    </ClCompile>
-    <ClCompile Include="anim\AnimationFactory.cpp">
       <Filter>anim\res/factories</Filter>
     </ClCompile>
     <ClCompile Include="anim\Skeleton.cpp">
@@ -778,9 +827,6 @@
     </ClCompile>
     <ClCompile Include="anim\AnimationSystem.cpp">
       <Filter>anim</Filter>
-    </ClCompile>
-    <ClCompile Include="res\SaveableResourceManager.cpp">
-      <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="scene\ProjectManager.cpp">
       <Filter>scene</Filter>
@@ -812,9 +858,6 @@
     <ClCompile Include="phys\Collider.cpp">
       <Filter>phys</Filter>
     </ClCompile>
-    <ClCompile Include="phys\collision.cpp">
-      <Filter>phys</Filter>
-    </ClCompile>
     <ClCompile Include="phys\PhysicsSystem.cpp">
       <Filter>phys</Filter>
     </ClCompile>
@@ -830,14 +873,76 @@
     <ClCompile Include="gfx\ShaderGraph.cpp">
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\ShaderGraphFactory.cpp">
-      <Filter>gfx\shadergraph</Filter>
-    </ClCompile>
-    <ClCompile Include="phys\collision_result.cpp" />
-    <ClCompile Include="phys\collision_obb.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="file\PathHandle.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="res\Guid.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_box.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\raycasts\collision_raycast.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_result.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\frustum.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\halfspace.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioClipLoader.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="res\GenericResourceHandle.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\ResourceBundle.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\MetaBundle.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MaterialFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MaterialInstance.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\projector_functions.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderProgram.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\BoneComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -966,12 +1071,6 @@
     <None Include="meta\tag.inl">
       <Filter>meta</Filter>
     </None>
-    <None Include="res\FileResources.inl">
-      <Filter>res</Filter>
-    </None>
-    <None Include="res\ForwardingExtensionLoader.inl">
-      <Filter>res</Filter>
-    </None>
     <None Include="res\ResourceMeta.inl">
       <Filter>res</Filter>
     </None>
@@ -993,20 +1092,32 @@
     <None Include="serialize\yaml.inl">
       <Filter>serialize</Filter>
     </None>
-    <None Include="res\Resource.inl">
-      <Filter>res</Filter>
-    </None>
     <None Include="ds\slow_tree.inl">
       <Filter>ds</Filter>
-    </None>
-    <None Include="res\SaveableResourceManager.inl">
-      <Filter>res</Filter>
     </None>
     <None Include="math\linear.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="phys\collision_raycast.inl">
-      <Filter>phys</Filter>
+    <None Include="res\Guid.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="phys\raycasts\collision_raycast.inl">
+      <Filter>phys\collision</Filter>
+    </None>
+    <None Include="ds\result.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="meta\variant.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="res\SaveableResourceLoader.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceBundle.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceUtils.inl">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

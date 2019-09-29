@@ -19,7 +19,7 @@ namespace idk::vkn::hlp
 
 			void Free(size_t offset, size_t size);
 			//Returns offset if it is allocated
-			std::optional<size_t> Allocate(size_t size);
+			std::optional<size_t> Allocate(size_t size,size_t alignment);
 		};
 		vk::Device device;
 		uint32_t type;
@@ -31,13 +31,13 @@ namespace idk::vkn::hlp
 			size_t chunkSize = 1 << 24 //16MB
 		);
 		Memory& Add();
-		std::pair<uint32_t, size_t> Allocate(size_t size)
+		std::pair<uint32_t, size_t> Allocate(size_t size, size_t alignment)
 		{
 			std::optional<size_t> alloc_offset;
 			uint32_t index{};
 			for (auto& mem : memories)
 			{
-				alloc_offset = mem.Allocate(size);
+				alloc_offset = mem.Allocate(size,alignment);
 				if (alloc_offset)
 				{
 					break;
@@ -47,7 +47,7 @@ namespace idk::vkn::hlp
 			if (!alloc_offset)
 			{
 				auto& mem = Add();
-				alloc_offset = mem.Allocate(size);
+				alloc_offset = mem.Allocate(size,alignment);
 			}
 			return std::make_pair(index, *alloc_offset);
 		}

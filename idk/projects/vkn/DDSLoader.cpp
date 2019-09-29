@@ -6,30 +6,39 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <core/core.h>
 #include <vkn/VulkanView.h>
+#include <res/MetaBundle.h>
+
 namespace idk::vkn
 {
 	DdsLoader::DdsLoader() :allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
 	{
 		load_fence = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
-	FileResources DdsLoader::Create(FileHandle path_to_resource)
+	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource)
 	{
-		auto tex = Core::GetResourceManager().Emplace<VknTexture>();
+		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
 		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
 		std::stringstream strm;
 		strm << file.rdbuf();
 		DdsFile dds{ strm.str() };
-		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), dds.Data(), dds.Dimensions(), allocator, *load_fence);
-		return FileResources{ {s_cast<RscHandle<Texture>>(tex) } };
+		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), {}, dds.Data(), dds.Dimensions(), allocator, *load_fence, false);
+		return tex;
 	}
-
-	FileResources DdsLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		auto&& tm = path_to_meta.resource_metas[0].get<TextureMeta>();
+		auto&& tm = *path_to_meta.metadatas[0].GetMeta<Texture>();
 		//TODO map the format
 		//tm.internal_format;
 		//TODO send the format and repeat mode in
-		return Create(path_to_resource);
+		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(path_to_meta.metadatas[0].guid);
+		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
+		std::stringstream strm;
+		strm << file.rdbuf();
+		DdsFile dds{ strm.str() };
+		TextureOptions to;
+		to = *path_to_meta.metadatas[0].GetMeta<Texture>();
+		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()),to, dds.Data(), dds.Dimensions(), allocator, *load_fence,false);
+		return tex;
 	}
 
 

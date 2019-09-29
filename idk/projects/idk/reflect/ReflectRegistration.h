@@ -4,7 +4,8 @@
 #include <core/Core.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
-
+#include <gfx/ShaderGraph.h>
+#include <res/MetaBundle.h>
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -66,12 +67,41 @@ REFLECT_VARS(r, g, b, a)
 REFLECT_END()
 
 /*==========================================================================
- * resources
+ * resource handles
  *========================================================================*/
 
-REFLECT_BEGIN(idk::MetaFile, "MetaFile")
-REFLECT_VARS(guids, resource_metas)
+REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
+REFLECT_VARS(guid)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::MaterialInstance>, "RscHandle<MaterialInstance>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+/*==========================================================================
+ * general resources
+ *========================================================================*/
+
+REFLECT_BEGIN(idk::SerializedMeta, "SerializedMetadata")
+REFLECT_VARS(guid, name, t_hash, metadata)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MetaBundle, "MetaBundle")
+REFLECT_VARS(metadatas)
+REFLECT_END()
+
+
+/*==========================================================================
+ * specific resources
+ *========================================================================*/
 
 REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
 REFLECT_VARS(i, j)
@@ -84,6 +114,13 @@ REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format)
 REFLECT_END()
 
+REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
+REFLECT_ENUM(idk::CMUVMode, "CMUVMode")
+
+REFLECT_BEGIN(idk::CubeMap::Metadata, "CubeMapMeta")
+REFLECT_VARS(uv_mode, internal_format)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
@@ -92,8 +129,20 @@ REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
 REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
-REFLECT_VARS(guid)
+REFLECT_BEGIN(idk::Material, "Material")
+REFLECT_VARS(_shader_program, uniforms)
+REFLECT_END()
+
+REFLECT_ENUM(idk::BlendMode, "BlendMode")
+REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
+REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
+
+REFLECT_BEGIN(idk::Material::Metadata, "MaterialMeta")
+REFLECT_VARS(domain, blend, model)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MaterialInstance, "MaterialInstance")
+REFLECT_VARS(material, uniforms)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabData, "PrefabData")
@@ -107,19 +156,16 @@ REFLECT_END()
 // shader graph:
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-REFLECT_VARS(master_node, nodes, values, links, parameters)
+REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
 REFLECT_VARS(node_out, node_in, slot_out, slot_in)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Node, "ShaderGraphNode")
-REFLECT_VARS(name, guid, position, input_slots, output_slots)
-REFLECT_END()
-REFLECT_BEGIN(idk::shadergraph::Value, "ShaderGraphValue")
-REFLECT_VARS(type, value, node, slot)
+REFLECT_VARS(name, guid, position, input_slots, output_slots, control_values)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Slot, "ShaderGraphSlot")
-REFLECT_VARS(type)
+REFLECT_VARS(type, value)
 REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
 REFLECT_VARS(name, type, default_value)
@@ -147,6 +193,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RigidBody, "RigidBody")
+REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, restitution)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")

@@ -38,6 +38,10 @@ namespace idk::reflect
 	// get type info of T
 	template<typename T> type get_type();
 
+    // get span of types of packed T, such as tuple or variant
+    // usage example: reflect::unpack_types< variant<int, float, vec3> >()
+    template<typename T, typename> span<type> unpack_types();
+
 	// see reflect.inl for detailed comments (just hover)
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor);
@@ -325,3 +329,7 @@ namespace idk::reflect
 #undef property_vend_cpp
 #undef property_friend
 #undef property_vtable
+
+REFLECT_BEGIN(idk::string, "string") REFLECT_END()
+REFLECT_BEGIN(idk::reflect::dynamic, "reflect::dynamic") REFLECT_END()
+REFLECT_BEGIN(idk::reflect::type, "reflect::type") REFLECT_END()

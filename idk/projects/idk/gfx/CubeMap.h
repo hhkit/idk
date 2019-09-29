@@ -21,6 +21,13 @@ namespace idk
 		RGBAF_32
 	)
 
+	ENUM(CMInputChannels, char
+		, RED
+		, RG
+		, RGB
+		, RGBA
+	);
+
 	ENUM(CMUVMode, char,
 		Repeat,
 		MirrorRepeat,
@@ -29,8 +36,8 @@ namespace idk
 
 	struct CubeMapMeta
 	{
-		CMColorFormat internal_format = CMColorFormat::RGBF_32;
 		CMUVMode      uv_mode = CMUVMode::Repeat;
+		CMColorFormat internal_format = CMColorFormat::RGBF_32;
 	};
 
 	class CubeMap

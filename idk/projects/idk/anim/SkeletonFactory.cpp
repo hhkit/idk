@@ -9,20 +9,9 @@ namespace idk::anim
 		auto retval = std::make_unique<Skeleton>();
 		Skeleton::Bone b;
 		b._name = "ROOT";
-		b._offset = mat4{ };
+		b._global_inverse_bind_pose = mat4{ };
 		b._parent = -1;
 
 		return retval;
-	}
-
-	unique_ptr<Skeleton> SkeletonFactory::Create()
-	{
-		
-		return std::make_unique<Skeleton>();
-	}
-	unique_ptr<Skeleton> SkeletonFactory::Create(FileHandle filepath)
-	{
-		UNREFERENCED_PARAMETER(filepath);
-		return std::make_unique<Skeleton>();
 	}
 }

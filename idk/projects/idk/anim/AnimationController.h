@@ -43,6 +43,7 @@ namespace idk
 
 		vector<Handle<GameObject>> _child_objects;
 		vector<mat4> _bone_transforms;
+		vector<anim::Skeleton::BonePose> _bind_pose;
 
 		void clearGameObjects();
 	};

@@ -1,17 +1,13 @@
 #pragma once
-#include <res/ExtensionLoader.h>
+#include <res/FileLoader.h>
 
 namespace idk
 {
 	class OpenGLCubeMapLoader
-		: public ExtensionLoader
+		: public IFileLoader
 	{
 	public:
-		FileResources Create(FileHandle path_to_resource) override;
-		FileResources Create(FileHandle path_to_resource, const MetaFile& path_to_meta) override;
-
-	private:
-
-
+		ResourceBundle LoadFile(PathHandle path_to_resource) override;
+		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 	};
 };

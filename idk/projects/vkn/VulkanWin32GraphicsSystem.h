@@ -19,6 +19,7 @@ namespace idk::vkn
 	class PipelineManager;
 	using Windows = win::Windows;
 	class VulkanState;
+	class VulkanDebugRenderer;
 
 	class VulkanWin32GraphicsSystem
 		: public GraphicsSystem
@@ -29,8 +30,6 @@ namespace idk::vkn
 		void Init() override ;
 		void LateInit() override;
 
-		void BeginFrame() ;
-		void EndFrame() ;
 		void Shutdown() override;
 		//void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
 		GraphicsAPI GetAPI() override;
@@ -43,6 +42,7 @@ namespace idk::vkn
 		std::unique_ptr<VulkanState> instance_;
 		vector<FrameRenderer> _frame_renderers;
 		std::unique_ptr<PipelineManager> _pm;
+		unique_ptr<VulkanDebugRenderer> _debug_renderer;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;

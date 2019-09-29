@@ -42,11 +42,16 @@ namespace idk::vkn
 		vk::Queue& VulkanView::GraphicsQueue()const { return vulkan().m_graphics_queue; }
 		vk::Queue& VulkanView::PresentQueue()const { return vulkan().m_present_queue; }
 		//vk::Queue          m_transfer_queue = {}{}					                  				 ;
-		SwapChainInfo& VulkanView::Swapchain()const { return vulkan().m_swapchain; }
+		SwapChainInfo& VulkanView::Swapchain()const { return *vulkan().m_swapchain; }
+
+		uint32_t VulkanView::CurrFrame() const
+		{
+			return vulkan().current_frame;
+		}
 
 		PresentationSignals& VulkanView::CurrPresentationSignals() const
 		{
-			return vulkan_->m_pres_signals[vulkan_->current_frame];
+			return vulkan_->m_swapchain->m_graphics.pSignals[vulkan_->current_frame];
 		}
 
 		void VulkanView::SwapRenderState() const
@@ -71,10 +76,8 @@ namespace idk::vkn
 
 		vk::UniqueRenderPass& VulkanView::ContinuedRenderpass()const { return vulkan().m_crenderpass; }
 		vk::UniqueRenderPass& VulkanView::Renderpass()const { return vulkan().m_renderpass; }
-		vk::UniquePipeline& VulkanView::Pipeline()const { return vulkan().m_pipeline; }
 		vk::UniqueCommandPool& VulkanView::Commandpool()const { return vulkan().m_commandpool; }
 
-		vk::UniqueCommandBuffer& VulkanView::CurrCommandbuffer()const { return vulkan().m_commandbuffers[vulkan().current_frame]; }
 		vk::Buffer& VulkanView::CurrMasterVtxBuffer() const
 		{
 			return impl_->CurrentRenderState().MasterBuffer().host_buffer.buffer();
@@ -100,7 +103,7 @@ namespace idk::vkn
 		PresentationSignals& VulkanView::GetCurrentSignals() const
 		{
 			// TODO: insert return statement here
-			return vulkan().m_pres_signals[vulkan().current_frame];
+			return vulkan().m_swapchain->m_graphics.pSignals[vulkan().current_frame];
 		}
 		uint32_t VulkanView::CurrSemaphoreFrame() const
 		{
@@ -109,6 +112,10 @@ namespace idk::vkn
 		uint32_t VulkanView::AcquiredImageValue() const
 		{
 			return vulkan().rv;
+		}
+		vk::RenderPass VulkanView::BasicRenderPass(BasicRenderPasses type) const
+		{
+			return this->vulkan_->BasicRenderPass(type);
 		}
 		vk::Result& VulkanView::AcquiredImageResult() const
 		{
@@ -119,7 +126,11 @@ namespace idk::vkn
 		{
 			return vulkan().max_frames_in_flight;
 		}
-		std::vector<vk::UniqueCommandBuffer>& VulkanView::Commandbuffers()const { return vulkan().m_commandbuffers; }
+
+		uint32_t VulkanView::SwapchainImageCount() const
+		{
+			return vulkan_->imageCount;
+		}
 
 		vk::UniqueShaderModule VulkanView::CreateShaderModule(const idk::string_view& code)
 		{

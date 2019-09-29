@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include <core/GameObject.h>
+#include "..\res\ResourceBundle.h"
 
 namespace idk
 {

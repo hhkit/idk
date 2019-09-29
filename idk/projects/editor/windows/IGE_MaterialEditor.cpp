@@ -1,7 +1,12 @@
 #include "pch.h"
 
 #include "IGE_MaterialEditor.h"
+#include <editor/IDE.h>
+#include <editor/windows/IGE_ProjectWindow.h>
 #include <gfx/ShaderGraph.h>
+#include <gfx/ShaderGraph_helpers.h>
+#include <editor/widgets/InputResource.h>
+#include <editor/widgets/EnumCombo.h>
 #include <regex>
 #include <filesystem>
 
@@ -10,8 +15,6 @@ namespace fs = std::filesystem;
 namespace idk
 {
     using namespace idk::shadergraph;
-
-    constexpr static auto DRAG_DROP_PARAMETER = "dd_param";
 
     static array<unsigned, ValueType::count + 1> type_colors
     { // from DB32 palette
@@ -23,8 +26,23 @@ namespace idk
         0xff6e9437,
         0xff30be6a,
         0xff50e599,
-        0xffba7b37
+        0xffba7bd7
     };
+
+
+
+    static const char* slot_suffix(ValueType type)
+    {
+        switch (type)
+        {
+        case ValueType::FLOAT:      return "(1)";
+        case ValueType::VEC2:       return "(2)";
+        case ValueType::VEC3:       return "(3)";
+        case ValueType::VEC4:       return "(4)";
+        case ValueType::SAMPLER2D:  return "(T)";
+        default: throw;
+        }
+    }
 
     bool draw_slot(const char* title, int kind)
     {
@@ -41,6 +59,14 @@ namespace idk
             item_offset_x = -item_offset_x;
         ImGui::SetCursorScreenPos(ImGui::GetCursorScreenPos() + ImVec2{ item_offset_x, 0 });
 
+        if (ImNodes::IsOutputSlotKind(kind))
+        {
+            // Align output slots to the right edge of the node.
+            ImGuiID max_width_id = ImGui::GetID("output-max-title-width");
+            float offset = storage->GetFloat(max_width_id, title_size.x) - title_size.x;
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+        }
+
         if (ImNodes::BeginSlot(title, kind))
         {
             auto* draw_lists = ImGui::GetWindowDrawList();
@@ -50,20 +76,18 @@ namespace idk
                 (ImNodes::IsConnectingCompatibleSlot() /*&& !IsAlreadyConnectedWithPendingConnection(title, kind)*/);
 
             ImColor kindColor = type_colors[std::abs(kind)];
-            ImColor color = is_active ? kindColor : canvas->colors[ImNodes::ColConnection];
+            ImColor text_color = ImGui::GetColorU32(ImGuiCol_Text);//is_active ? kindColor : canvas->colors[ImNodes::ColConnection];
+            if (!is_active) text_color.Value.w = 0.7f;
+            ImColor color = is_active ? canvas->colors[ImNodes::ColConnectionActive] : canvas->colors[ImNodes::ColConnection];
 
-            ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+            string label = title;
+            label += slot_suffix(static_cast<ValueType>(abs(kind)));
+
+            ImGui::PushStyleColor(ImGuiCol_Text, text_color.Value);
 
             if (ImNodes::IsOutputSlotKind(kind))
             {
-                // Align output slots to the right edge of the node.
-                ImGuiID max_width_id = ImGui::GetID("output-max-title-width");
-                float output_max_title_width = ImMax(storage->GetFloat(max_width_id, title_size.x), title_size.x);
-                storage->SetFloat(max_width_id, output_max_title_width);
-                float offset = (output_max_title_width + style.ItemSpacing.x) - title_size.x;
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
-                ImGui::TextUnformatted(title);
+                ImGui::TextUnformatted(label.c_str());
                 ImGui::SameLine();
             }
 
@@ -83,7 +107,7 @@ namespace idk
             if (ImNodes::IsInputSlotKind(kind))
             {
                 ImGui::SameLine();
-                ImGui::TextUnformatted(title);
+                ImGui::TextUnformatted(label.c_str());
             }
 
             ImGui::PopStyleColor();
@@ -98,18 +122,7 @@ namespace idk
 
 
 
-    string default_value(ValueType type)
-    {
-        switch (type)
-        {
-        case ValueType::FLOAT: return "0";
-        case ValueType::VEC2: return "0,0";
-        case ValueType::VEC3: return "0,0,0";
-        default: throw;
-        }
-    }
-
-    static bool DrawValue_DrawVec(const char* id, vec2 pos, int n, float* f)
+    static bool draw_value_draw_vec(const char* id, vec2 pos, int n, float* f)
     {
         auto canvas = ImNodes::GetCurrentCanvas();
         auto& style = ImGui::GetStyle();
@@ -137,10 +150,10 @@ namespace idk
 
         switch (n)
         {
-        case 1: ret = ImGui::DragFloat(("##" + std::string(id)).c_str(), f, 0.1f);	break;
-        case 2: ret = ImGui::DragFloat2(("##" + std::string(id)).c_str(), f, 0.1f);	break;
-        case 3: ret = ImGui::DragFloat3(("##" + std::string(id)).c_str(), f, 0.1f);	break;
-        case 4: ret = ImGui::DragFloat4(("##" + std::string(id)).c_str(), f, 0.1f);	break;
+        case 1: ret = ImGui::DragFloat (("##" + std::string(id)).c_str(), f, 0.01f); break;
+        case 2: ret = ImGui::DragFloat2(("##" + std::string(id)).c_str(), f, 0.01f); break;
+        case 3: ret = ImGui::DragFloat3(("##" + std::string(id)).c_str(), f, 0.01f); break;
+        case 4: ret = ImGui::DragFloat4(("##" + std::string(id)).c_str(), f, 0.01f); break;
         default: throw;
         }
 
@@ -152,81 +165,73 @@ namespace idk
         return ret;
     }
 
-    void IGE_MaterialEditor::drawValue(Value& value)
+    void IGE_MaterialEditor::drawValue(Node& node, int input_slot_index)
     {
-        auto& node = graph->nodes[value.node];
         auto pos = node.position;
-        pos.y += (ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y) / canvas.zoom * (value.slot + 1);
+        pos.y += (ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y) / _canvas.zoom * (input_slot_index + 1);
 
-        switch (value.type)
+        auto& slot = node.input_slots[input_slot_index];
+        if (slot.value.empty())
+            return;
+
+        auto id = string(node.guid) + std::to_string(input_slot_index);
+
+        switch (slot.type)
         {
 
-        case ValueType::FLOAT: {
-            float f = std::stof(value.value);
-            if (DrawValue_DrawVec((std::string(value.node) + std::to_string(value.slot)).c_str(), pos, 1, &f))
-            {
-                value.value = std::to_string(f);
-            }
-        } break;
-
-        case ValueType::VEC2: { // todo: use serializer
-
-            float f[2]{ 0, 0 };
-            std::smatch matches;
-            if (std::regex_match(value.value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-            {
-                f[0] = std::stof(matches[1]);
-                f[1] = std::stof(matches[2]);
-            }
-
-            if (DrawValue_DrawVec((std::string(value.node) + std::to_string(value.slot)).c_str(), pos, 2, f))
-            {
-                value.value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
-            }
-        } break;
-
-        case ValueType::VEC3: { // todo: use serializer
-
-            float f[3]{ 0, 0, 0 };
-            std::smatch matches;
-            if (std::regex_match(value.value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-            {
-                f[0] = std::stof(matches[1]);
-                f[1] = std::stof(matches[2]);
-                f[2] = std::stof(matches[3]);
-            }
-
-            if (DrawValue_DrawVec((std::string(value.node) + std::to_string(value.slot)).c_str(), pos, 3, f))
-            {
-                value.value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
-            }
-        } break;
+        case ValueType::FLOAT:
+        {
+            float f = std::stof(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 1, &f))
+                slot.value = std::to_string(f);
+            break;
+        }
+        case ValueType::VEC2:
+        {
+            vec2 v = helpers::parse_vec2(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 2, v.values))
+                slot.value = helpers::serialize_value(v);
+            break;
+        }
+        case ValueType::VEC3:
+        {
+            vec3 v = helpers::parse_vec3(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 3, v.values))
+                slot.value = helpers::serialize_value(v);
+            break;
+        }
+        case ValueType::VEC4:
+        {
+            vec4 v = helpers::parse_vec4(slot.value);
+            if (draw_value_draw_vec(id.c_str(), pos, 4, v.values))
+                slot.value = helpers::serialize_value(v);
+            break;
+        }
 
         default:
             break;
         }
-
     }
 
     void IGE_MaterialEditor::addDefaultSlotValue(const Guid& guid, int slot_in)
     {
-        auto& node_in = graph->nodes[guid];
+        auto& node_in = _graph->nodes[guid];
         auto in_type = node_in.input_slots[slot_in].type;
-        graph->values.emplace_back(Value{ in_type, default_value(in_type), node_in.guid, slot_in });
+        node_in.input_slots[slot_in].value = helpers::default_value(in_type);
     }
 
 
 
     void IGE_MaterialEditor::drawNode(Node& node)
     {
-        bool is_master_node = node.guid == graph->master_node;
+        bool is_master_node = node.guid == _graph->master_node;
         bool is_param_node = node.name[0] == '$';
 
-        canvas.colors[ImNodes::ColNodeBorder] = node.selected ? canvas.colors[ImNodes::ColConnectionActive] : canvas.colors[ImNodes::ColNodeBg];
+        _canvas.colors[ImNodes::ColNodeBorder] = node.selected ? _canvas.colors[ImNodes::ColConnectionActive] : _canvas.colors[ImNodes::ColNodeBg];
 
         if (ImNodes::BeginNode(&node, reinterpret_cast<ImVec2*>(&node.position), &node.selected))
         {
-            auto slash_pos = node.name.find_last_of('\\');
+            const auto slash_pos = node.name.find_last_of('\\');
             
             string title = node.name.c_str() + (slash_pos == std::string::npos ? 0 : slash_pos + 1);
             if (is_master_node)
@@ -245,9 +250,10 @@ namespace idk
 
             if (is_param_node)
             {
-                auto& param = graph->parameters[std::stoi(node.name.data() + 1)];
+                auto& param = _graph->parameters[std::stoi(node.name.data() + 1)];
                 const auto& slot_name = param.name;
-                title_size.x = std::max(title_size.x, ImGui::CalcTextSize(slot_name.c_str()).x);
+                auto slot_w = ImGui::CalcTextSize(slot_name.c_str()).x + ImGui::CalcTextSize(slot_suffix(param.type)).x;
+                title_size.x = std::max(title_size.x, slot_w);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
                 draw_slot(slot_name.c_str(), param.type);
@@ -257,20 +263,33 @@ namespace idk
                 auto& tpl = NodeTemplate::GetTable().at(node.name);
 
                 int i = 0;
-                for (auto slot_name : tpl.names)
+                size_t num_slots = node.input_slots.size() + node.output_slots.size();
+
+                // calc width of node
+                for (auto& slot_name : tpl.names)
                 {
                     if (i < node.input_slots.size())
-                        input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
+                    {
+                        const auto suffix_w = ImGui::CalcTextSize(slot_suffix(node.input_slots[i].type)).x;
+                        input_names_width = std::max(input_names_width, ImGui::CalcTextSize(slot_name.c_str()).x + suffix_w);
+                    }
+                    else if (i < num_slots)
+                    {
+                        const auto suffix_w = ImGui::CalcTextSize(slot_suffix(node.output_slots[i - node.input_slots.size()].type)).x;
+                        output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x + suffix_w);
+                    }
                     else
-                        output_names_width = std::max(output_names_width, ImGui::CalcTextSize(slot_name.c_str()).x);
+                        break;
                     ++i;
                 }
-
-                title_size.x = std::max(title_size.x, input_names_width + output_names_width + ImGui::GetStyle().ItemSpacing.x * 2);
+                title_size.x = std::max(title_size.x, input_names_width + output_names_width);
                 ImGui::GetStateStorage()->SetFloat(ImGui::GetID("output-max-title-width"), title_size.x);
 
                 i = 0;
                 float cursor_y = ImGui::GetCursorPosY();
+                string control_values = node.control_values;
+                string final_control_values;
+
                 for (auto& slot_name : tpl.names)
                 {
                     if (i == node.input_slots.size())
@@ -297,15 +316,62 @@ namespace idk
                                 }
                             }
                         }
+
+                        auto cursorpos = ImGui::GetCursorPos();
+                        drawValue(node, i); // draw value control when disconnected
+                        ImGui::SetCursorPos(cursorpos);
+                        draw_slot(slot_name.c_str(), kind);
                     }
-                    else
+                    else if (i < num_slots)
                     {
                         kind = node.output_slots[i - node.input_slots.size()].type;
+                        draw_slot(slot_name.c_str(), kind);
+                    }
+                    else // custom controls
+                    {
+                        assert(slot_name[0] == '$'); // did we fuck up the names in the .node?
+
+                        string next_value = "";
+                        if (control_values.size())
+                        {
+                            auto pos = control_values.find('|');
+                            next_value = control_values.substr(0, pos);
+                            if (pos != string::npos)
+                                control_values.erase(0, pos + 1);
+                            else
+                                control_values.clear();
+                        }
+
+                        if (slot_name == "$Color")
+                        {
+                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
+
+                            if (next_value.empty())
+                                final_control_values += (next_value = "0,0,0,1") + '|';
+
+                            vec4 v = helpers::parse_vec4(next_value);
+                            if (ImGui::ColorButton(("##" + std::to_string(i)).c_str(), v, 0, ImVec2(w, 0)))
+                            {
+                                ImGui::OpenPopup("picker");
+                                ImGui::GetCurrentContext()->ColorPickerRef = v;
+                            }
+                            if (ImGui::BeginPopup("picker"))
+                            {
+                                ImGuiColorEditFlags picker_flags = ImGuiColorEditFlags__DisplayMask | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf;
+                                ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 12.0f); // Use 256 + bar sizes?
+                                if (ImGui::ColorPicker4("##picker", v.values, picker_flags, &ImGui::GetCurrentContext()->ColorPickerRef.x))
+                                    final_control_values += helpers::serialize_value(v) + "|";
+
+                                ImGui::EndPopup();
+                            }
+                        }
                     }
 
-                    draw_slot(slot_name.c_str(), kind);
                     ++i;
                 }
+
+                if (final_control_values.size())
+                    node.control_values = final_control_values;
             }
 
             ImGui::EndGroup();
@@ -345,7 +411,7 @@ namespace idk
         ImGui::SetWindowFontScale(fntscl);
     }
 
-    void IGE_MaterialEditor::addNode(const string& name, vec2 pos)
+    Node& IGE_MaterialEditor::addNode(const string& name, vec2 pos)
     {
         Node node;
         node.name = name;
@@ -354,28 +420,22 @@ namespace idk
 
         auto sig = NodeTemplate::GetTable().at(name).signatures[0];
         for (auto in : sig.ins)
-        {
-            node.input_slots.push_back({ in });
-            graph->values.emplace_back(Value{ in, default_value(in), node.guid, static_cast<int>(node.input_slots.size() - 1) });
-        }
+            node.input_slots.push_back({ in, helpers::default_value(in) });
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 
-        graph->nodes.emplace(node.guid, node);
+        return _graph->nodes.emplace(node.guid, node).first->second;
     }
 
     void IGE_MaterialEditor::removeNode(const Node& node)
     {
         disconnectNode(node);
-        auto& g = *graph;
-        g.values.erase(std::remove_if(g.values.begin(), g.values.end(),
-            [guid = node.guid](const Value& v) { return v.node == guid; }), g.values.end());
-        to_delete.push_back(node.guid);
+        _nodes_to_delete.push_back(node.guid);
     }
 
     void IGE_MaterialEditor::disconnectNode(const Node& node)
     {
-        auto& g = *graph;
+        auto& g = *_graph;
         auto iter = std::remove_if(g.links.begin(), g.links.end(),
             [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; });
         for (auto jter = iter; jter != g.links.end(); ++jter)
@@ -387,7 +447,7 @@ namespace idk
 
     void IGE_MaterialEditor::addParamNode(int param_index, vec2 pos)
     {
-        auto& param = graph->parameters[param_index];
+        auto& param = _graph->parameters[param_index];
 
         Node node;
         node.name = "$" + std::to_string(param_index);
@@ -395,7 +455,7 @@ namespace idk
         node.position = pos;
         node.output_slots.push_back(Slot{ param.type });
 
-        graph->nodes.emplace(node.guid, node);
+        _graph->nodes.emplace(node.guid, node);
     }
 
     void IGE_MaterialEditor::removeParam(int param_index)
@@ -405,7 +465,7 @@ namespace idk
         // as when you erase a param, all params after that are shifted back by 1.
 
         vector<Guid> to_del;
-        for (auto& [guid, node] : graph->nodes)
+        for (auto& [guid, node] : _graph->nodes)
         {
             if (node.name[0] != '$')
                 continue;
@@ -417,9 +477,9 @@ namespace idk
                 to_del.push_back(guid);
         }
         for (const auto& guid : to_del)
-            removeNode(graph->nodes[guid]);
+            removeNode(_graph->nodes[guid]);
 
-        graph->parameters.erase(graph->parameters.begin() + param_index);
+        _graph->parameters.erase(_graph->parameters.begin() + param_index);
     }
 
 
@@ -433,7 +493,7 @@ namespace idk
             auto folder_name = item.name;
             if (folder_name == "master") // skip master nodes
                 return nullptr;
-            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
             {
                 stack.push_back(&item);
                 for (auto& inner_item : item.items)
@@ -455,11 +515,14 @@ namespace idk
         else
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f });
-            if (ImGui::MenuItem(item.name.c_str()))
-            {
-                ImGui::PopStyleColor();
-                return &item;
-            }
+			ImGui::Unindent();
+            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+			ImGui::Indent();
+			if (ImGui::IsItemClicked())
+			{
+				ImGui::PopStyleColor();
+				return &item;
+			}
             ImGui::PopStyleColor();
         }
 
@@ -469,6 +532,13 @@ namespace idk
     static node_item init_templates_hierarchy()
     {
         node_item root;
+		auto get_uppercase = [](const string& str)
+		{
+			auto ret = str;
+			for (char& c : ret)
+				c = static_cast<char>(toupper(c));
+			return ret;
+		};
 
         for (auto& tpl : NodeTemplate::GetTable())
         {
@@ -492,7 +562,11 @@ namespace idk
         {
             auto* item = stack.back();
             stack.pop_back();
-            std::sort(item->items.begin(), item->items.end(), [](node_item& a, node_item& b) { return a.name < b.name; });
+            std::sort(item->items.begin(), item->items.end(),
+				[get_uppercase](node_item& a, node_item& b)
+				{ 
+					return get_uppercase(a.name) < get_uppercase(b.name);
+				});
             for (auto& inner_item : item->items)
             {
                 stack.push_back(&inner_item);
@@ -506,6 +580,7 @@ namespace idk
     {
         static node_item templates_hierarchy = init_templates_hierarchy();
         std::vector<node_item*> stack;
+
         auto* item = context_menu_node_item(templates_hierarchy, stack);
         
         if (item)
@@ -524,20 +599,33 @@ namespace idk
 
 
 
-    IGE_MaterialEditor::IGE_MaterialEditor()
-        : IGE_IWindow("Material Editor", true, ImVec2{ 600,300 }, ImVec2{ 150,150 })
+    void IGE_MaterialEditor::OpenGraph(const RscHandle<shadergraph::Graph>& handle)
     {
-        window_flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;
+		_graph = handle;
+
+        ImGui::SetWindowFocus(window_name);
+        is_open = true;
+    }
+
+
+
+    IGE_MaterialEditor::IGE_MaterialEditor()
+        : IGE_IWindow("Material Editor", false, ImVec2{ 600,300 }, ImVec2{ 0,0 })
+    {
+        window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;
     }
 
     void IGE_MaterialEditor::Initialize()
     {
-        canvas.colors[ImNodes::ColNodeBg] = ImColor(0.25f, 0.25f, 0.3f);
-        canvas.colors[ImNodes::ColNodeActiveBg] = ImColor(0.25f, 0.25f, 0.3f);
-        canvas.style.curve_thickness = 2.5f;
+        _canvas.colors[ImNodes::ColNodeBg] = ImGui::GetColorU32(ImGuiCol_Border);
+        _canvas.colors[ImNodes::ColNodeActiveBg] = ImGui::GetColorU32(ImGuiCol_Border);
+        _canvas.style.curve_thickness = 2.5f;
 
-        graph = Core::GetResourceManager().Create<Graph>(
-            Core::GetSystem<FileSystem>().GetFile("/assets/materials/test.mat"));
+        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](GenericResourceHandle handle)
+        {
+            if (handle.resource_id() == BaseResourceID<Graph>)
+                OpenGraph(handle.AsHandle<Graph>());
+        });
     }
 
     void IGE_MaterialEditor::BeginWindow()
@@ -547,10 +635,16 @@ namespace idk
     void IGE_MaterialEditor::Update()
     {
         if (!is_open || ImGui::IsWindowCollapsed())
-            return;
-
-        if (!graph)
         {
+            ImNodes::BeginCanvas(&_canvas);
+            ImNodes::EndCanvas();
+            return;
+        }
+
+        if (!_graph)
+        {
+            ImNodes::BeginCanvas(&_canvas);
+            ImNodes::EndCanvas();
             //graph = Core::GetResourceManager().Create<Graph>();
             //addNode("master\\PBR", { 500.0f, 200.0f });
             //g.master_node = g.nodes.begin()->first;
@@ -558,7 +652,7 @@ namespace idk
             return;
         }
 
-        auto& g = *graph;
+        auto& g = *_graph;
 
 
         if (ImGui::BeginMenuBar())
@@ -566,7 +660,7 @@ namespace idk
             if (ImGui::Button("Compile"))
             {
                 g.Compile();
-                Core::GetSystem<SaveableResourceManager>().Save(graph);
+                Core::GetResourceManager().Save(_graph);
             }
             ImGui::EndMenuBar();
         }
@@ -575,13 +669,17 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        ImGui::SetNextWindowSizeConstraints(ImVec2{ 0, 0 }, ImVec2{ 1000, 320 });
-        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::BeginPopupContextWindow())
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered())
+            ImGui::OpenPopup("nodes_context_menu");
+        if (ImGui::IsPopupOpen("nodes_context_menu"))
+            ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
+        if (ImGui::BeginPopup("nodes_context_menu"))
         {
             auto str = draw_nodes_context_menu();
             if (str.size())
             {
-                auto pos = (ImGui::GetWindowPos() - window_pos - canvas.offset) / canvas.zoom;
+                ImGui::CloseCurrentPopup();
+                auto pos = (ImGui::GetWindowPos() - window_pos - _canvas.offset) / _canvas.zoom;
                 addNode(str, pos);
                 // pos = windowpos + nodepos * zoom + offset
                 // nodepos = (screenpos - offset - windowpos) / zoom
@@ -589,24 +687,22 @@ namespace idk
             ImGui::EndPopup();
         }
 
-        for (auto& guid : to_delete)
+        for (auto& guid : _nodes_to_delete)
             g.nodes.erase(guid);
 
-        ImNodes::BeginCanvas(&canvas);
+        ImNodes::BeginCanvas(&_canvas);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
-        for (auto& value : g.values)
-            drawValue(value);
         for (auto& node : g.nodes)
             drawNode(node.second);
 
-        for(auto& guid : to_delete)
+        for(auto& guid : _nodes_to_delete)
             g.nodes.erase(guid);
 
         ImGui::PopStyleVar();
 
-        auto connection_col_active = canvas.colors[ImNodes::ColConnectionActive];
+        auto connection_col_active = _canvas.colors[ImNodes::ColConnectionActive];
         {
             Node* node;
             const char* title;
@@ -614,7 +710,7 @@ namespace idk
 
             if (ImNodes::GetPendingConnection(r_cast<void**>(&node), &title, &kind))
             {
-                canvas.colors[ImNodes::ColConnectionActive] = type_colors[std::abs(kind)];
+                _canvas.colors[ImNodes::ColConnectionActive] = type_colors[std::abs(kind)];
             }
         }
 
@@ -631,15 +727,6 @@ namespace idk
                 bool out_is_param = node_out->name[0] == '$';
                 int slot_out = out_is_param ? 0 : (int)NodeTemplate::GetTable().at(node_out->name).GetSlotIndex(title_out);
 
-                // check if any value attached to input slot; remove it
-                for (auto iter = g.values.begin(); iter != g.values.end(); ++iter)
-                {
-                    if (iter->node == node_in->guid && iter->slot == slot_in)
-                    {
-                        g.values.erase(iter);
-                        break;
-                    }
-                }
                 // check if any link inputs into input slot (cannot have multiple)
                 for (auto iter = g.links.begin(); iter != g.links.end(); ++iter)
                 {
@@ -652,6 +739,9 @@ namespace idk
 
                 g.links.push_back({ node_out->guid, node_in->guid, slot_out, slot_in });
 
+                // clear any unconnected value
+                node_in->input_slots[slot_in].value.clear();
+                // set new type
                 node_in->input_slots[slot_in].type = node_out->output_slots[slot_out - node_out->input_slots.size()].type;
 
                 // resolve new node_in output type
@@ -684,16 +774,19 @@ namespace idk
 
             auto& node_out = g.nodes[link.node_out];
             auto& node_in = g.nodes[link.node_in];
-            auto col = canvas.colors[ImNodes::ColConnection];
-            canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
+            auto col = _canvas.colors[ImNodes::ColConnection];
+            _canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
 
-            const auto& slot_out = node_out.name[0] == '$' ? g.parameters[std::stoi(node_out.name.data() + 1)].name : NodeTemplate::GetTable().at(node_out.name).names[link.slot_out];
+            const auto& slot_out = node_out.name[0] == '$' ?
+                g.parameters[std::stoi(node_out.name.data() + 1)].name :
+                NodeTemplate::GetTable().at(node_out.name).names[link.slot_out];
+
             if (!ImNodes::Connection(&node_in, NodeTemplate::GetTable().at(node_in.name).names[link.slot_in].c_str(),
                                      &node_out, slot_out.c_str()))
             {
                 link_to_delete = iter;
             }
-            canvas.colors[ImNodes::ColConnection] = col;
+            _canvas.colors[ImNodes::ColConnection] = col;
         }
         if (link_to_delete != g.links.end())
         {
@@ -702,7 +795,7 @@ namespace idk
         }
 
         ImNodes::EndCanvas();
-        canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
+        _canvas.colors[ImNodes::ColConnectionActive] = connection_col_active;
 
 
 
@@ -711,9 +804,9 @@ namespace idk
         ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail()));
         if (ImGui::BeginDragDropTarget())
         {
-            if (const auto* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_PARAMETER, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::PARAMETER, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
             {
-                addParamNode(*reinterpret_cast<int*>(payload->Data), (ImGui::GetMousePos() - ImGui::GetWindowPos() - canvas.offset) / canvas.zoom);
+                addParamNode(*reinterpret_cast<int*>(payload->Data), (ImGui::GetMousePos() - ImGui::GetWindowPos() - _canvas.offset) / _canvas.zoom);
             }
             ImGui::EndDragDropTarget();
         }
@@ -727,14 +820,48 @@ namespace idk
     {
         ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, canvas.colors[ImNodes::ColNodeBg].Value);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
 
-        if (ImGui::BeginChild("Parameters##MaterialEditor_Parameters", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
+        if (ImGui::BeginChild("Material_Editor_miniwin", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
-            if (ImGui::Button("Add Parameter"))
+            auto graph_name = Core::GetResourceManager().GetPath(_graph);
+            ImGui::Text(graph_name.data());
+
+            auto meta = _graph->GetMeta();
+            bool changed = false;
+            changed = changed || ImGuidk::EnumCombo("Domain", &meta.domain);
+            changed = changed || ImGuidk::EnumCombo("Blend", &meta.blend);
+            changed = changed || ImGuidk::EnumCombo("Model", &meta.model);
+            if (changed)
             {
-                graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT, "0" });
+                //_graph->SetMeta(meta);
+
+                //auto master_node = _graph->nodes[_graph->master_node];
+                //auto new_master_node_name = master_node.name;
+                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::DefaultLit)
+                //    new_master_node_name = "master\\PBR";
+                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::Unlit)
+                //    new_master_node_name = "master\\Unlit";
+
+                //if (master_node.name != new_master_node_name)
+                //{
+                //    auto pos = master_node.position;
+                //    removeNode(master_node);
+                //    _graph->master_node = addNode(new_master_node_name, pos).guid;
+                //}
+            }
+
+            if (ImGui::Button("Add Parameter"))
+                ImGui::OpenPopup("addparams");
+            if (ImGui::BeginPopup("addparams"))
+            {
+                if (ImGui::MenuItem("Float"))     _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT,     "0" });
+                if (ImGui::MenuItem("Vec2"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
+                if (ImGui::MenuItem("Vec3"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
+                if (ImGui::MenuItem("Vec4"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
+                if (ImGui::MenuItem("Texture"))   _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
+                ImGui::EndPopup();
             }
 
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1.0f, 1.0f));
@@ -742,7 +869,7 @@ namespace idk
             static char buf[32];
             int i = -1;
             int to_del = -1;
-            for (auto& param : graph->parameters)
+            for (auto& param : _graph->parameters)
             {
                 ++i;
 
@@ -756,7 +883,10 @@ namespace idk
                 ImGui::BeginGroup();
 
                 strcpy_s(buf, param.name.c_str());
-                if (ImGui::InputText(string(param.type.to_string()).c_str(), buf, 32))
+                string label{ param.type.to_string() };
+                if (param.type == ValueType::SAMPLER2D)
+                    label = "TEXTURE";
+                if (ImGui::InputText(label.c_str(), buf, 32))
                 {
                     param.name = buf;
                 }
@@ -765,42 +895,37 @@ namespace idk
                 {
                 case ValueType::FLOAT:
                 {
-                    float f = std::stof(param.default_value);
+                    float f = helpers::parse_float(param.default_value);
                     if (ImGui::DragFloat("Default", &f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f);
-                    }
+                        param.default_value = helpers::serialize_value(f);
                     break;
                 }
                 case ValueType::VEC2:
                 {
-                    float f[2]{ 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                    }
-                    if (ImGui::DragFloat3("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]);
-                    }
+                    vec2 v = helpers::parse_vec2(param.default_value);
+                    if (ImGui::DragFloat3("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
                     break;
                 }
                 case ValueType::VEC3:
                 {
-                    float f[3]{ 0, 0, 0 };
-                    std::smatch matches;
-                    if (std::regex_match(param.default_value, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
-                    {
-                        f[0] = std::stof(matches[1]);
-                        f[1] = std::stof(matches[2]);
-                        f[2] = std::stof(matches[3]);
-                    }
-                    if (ImGui::DragFloat3("Default", f, 0.01f))
-                    {
-                        param.default_value = std::to_string(f[0]) + ',' + std::to_string(f[1]) + ',' + std::to_string(f[2]);
-                    }
+                    vec3 v = helpers::parse_vec3(param.default_value);
+                    if (ImGui::DragFloat3("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
+                    break;
+                }
+                case ValueType::VEC4:
+                {
+                    vec4 v = helpers::parse_vec4(param.default_value);
+                    if (ImGui::DragFloat4("Default", v.values, 0.01f))
+                        param.default_value = helpers::serialize_value(v);
+                    break;
+                }
+                case ValueType::SAMPLER2D:
+                {
+                    RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
+                    if (ImGuidk::InputResource("Default", &tex))
+                        param.default_value = helpers::serialize_value(tex);
                     break;
                 }
                 default:
@@ -809,16 +934,18 @@ namespace idk
 
                 ImGui::EndGroup();
                 ImGui::EndGroup();
+
                 ImGui::PopID();
 
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
                     ImGui::Text(param.name.c_str());
-                    ImGui::SetDragDropPayload(DRAG_DROP_PARAMETER, &i, sizeof(i));
+                    ImGui::SetDragDropPayload(DragDrop::PARAMETER, &i, sizeof(i));
                     ImGui::EndDragDropSource();
                 }
 
-                if (ImGui::BeginPopupContextWindow())
+                string id = "context_" + i;
+                if (ImGui::BeginPopupContextItem(id.c_str()))
                 {
                     if (ImGui::MenuItem("Delete"))
                     {

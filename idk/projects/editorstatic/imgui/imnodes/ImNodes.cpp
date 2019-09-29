@@ -222,9 +222,9 @@ void BeginCanvas(CanvasState* canvas)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGuiIO& io = ImGui::GetIO();
 
-    if (!ImGui::IsMouseDown(0))
+    if (!ImGui::IsMouseDown(0) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow))
     {
-        if (ImGui::IsMouseDragging(1) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
+        if (ImGui::IsMouseDragging(1))
             canvas->offset += io.MouseDelta;
 
         if (io.KeyShift && !io.KeyCtrl)
@@ -759,7 +759,7 @@ void EndSlot()
         char drag_id[32];
         snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.kind * -1);
 
-        if (auto* payload = ImGui::AcceptDragDropPayload(drag_id))
+        if (auto* payload = ImGui::AcceptDragDropPayload(drag_id, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
         {
             auto* drag_data = (_DragConnectionPayload*) payload->Data;
 

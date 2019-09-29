@@ -11,6 +11,8 @@
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
 #include <core/GameState.h>
+#include <gfx/DebugRenderer.h>
+#include <PauseConfigurations.h>
 
 namespace idk
 {
@@ -33,10 +35,15 @@ namespace idk
 			if (app_sys.GetKey(Key::K)) elem.GetGameObject()->Transform()->position += vec3{ 0, 0.0, -0.016 };
 			if (app_sys.GetKey(Key::I)) elem.GetGameObject()->Transform()->position += vec3{ 0, 0.0, +0.016 };
 
-			auto rb = elem.GetGameObject()->GetComponent<RigidBody>();
-			if (rb)
-				rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));
+			//auto rb = elem.GetGameObject()->GetComponent<RigidBody>();
+			//if (rb)
+			//	rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));
 		}
+
+		if (app_sys.GetKeyDown(Key::P))
+			Core::GetScheduler().SetPauseState(GamePause);
+		if (app_sys.GetKeyUp(Key::P))
+			Core::GetScheduler().SetPauseState(UnpauseAll);
 	}
 
 	void TestSystem::Shutdown()

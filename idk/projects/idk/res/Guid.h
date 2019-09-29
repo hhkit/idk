@@ -9,52 +9,20 @@ namespace idk
 {
 	struct Guid
 	{
-		unsigned long  Data1;
+		unsigned int   Data1;
 		unsigned short Data2;
 		unsigned short Data3;
 		unsigned char  Data4[8];
 
-		bool operator==(const Guid& other) const
-		{
-			return std::memcmp(this, &other, sizeof(GUID)) == 0;
-		}
-		explicit operator string() const
-		{
-			char guid_cstr[39];
-			snprintf(guid_cstr, sizeof(guid_cstr),
-				"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-				Data1, Data2, Data3,
-				Data4[0], Data4[1], Data4[2], Data4[3],
-				Data4[4], Data4[5], Data4[6], Data4[7]);
-			return string{ guid_cstr };
-		}
+		constexpr Guid() noexcept;
+		explicit  Guid(const std::string_view& str) noexcept;
+		constexpr Guid(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+		bool operator==(const Guid& other) const noexcept;
 
+		explicit operator string() const;
 		// is valid?
-		explicit operator bool() const
-		{
-			return *reinterpret_cast<const GUID*>(this) != GUID_NULL;
-		}
-
-		explicit Guid(const std::string_view& str)
-			: Guid{}
-		{
-			sscanf_s(str.data(),
-				"%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
-				&Data1, &Data2, &Data3,
-				&Data4[0], &Data4[1], &Data4[2], &Data4[3],
-				&Data4[4], &Data4[5], &Data4[6], &Data4[7]);
-		}
-
-		Guid()
-			: Data1{ 0 }, Data2{ 0 }, Data3{ 0 }, Data4{ 0,0,0,0,0,0,0,0 }
-		{}
-
-		static inline Guid Make()
-		{
-			Guid guid;
-			auto res = CoCreateGuid((GUID*)& guid); (res);
-			return guid;
-		}
+		explicit operator bool() const noexcept;
+		static inline Guid Make();
 
 	private:
 		struct Natvis
@@ -83,3 +51,4 @@ namespace std
 		}
 	};
 }
+#include "Guid.inl"

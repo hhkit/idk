@@ -3,17 +3,19 @@
 #include <glad/glad.h>
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
+#include <res/EasyFactory.h>
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
-#include <res/ForwardingExtensionLoader.h>
-
-#include <idk/anim/SkeletonFactory.h>
-#include <idk/anim/AnimationFactory.h>
+#include <gfx/ShaderTemplateLoader.h>
+#include <gfx/MaterialInstance.h>
+#include <gfx/MaterialFactory.h>
+#include <anim/Animation.h>
+#include <anim/SkeletonFactory.h>
 #include <idk_opengl/resource/FrameBufferFactory.h>
-#include <idk_opengl/resource/OpenGLMaterialFactory.h>
 #include <idk_opengl/resource/OpenGLMeshFactory.h>
 #include <idk_opengl/resource/OpenGLTextureFactory.h>
-#include <idk_opengl/program/ShaderProgramFactory.h>
+#include <idk_opengl/program/GLSLLoader.h>
+#include <idk_opengl/program/ProgramFactory.h>
 #include <idk_opengl/system/OpenGLState.h>
 
 #include "OpenGLGraphicsSystem.h"
@@ -158,22 +160,23 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::InitResourceLoader()
 	{
-
 		// register factories
+		Core::GetResourceManager().RegisterFactory<MaterialFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
 		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
-		Core::GetResourceManager().RegisterFactory<idk::anim::SkeletonFactory>();
-		Core::GetResourceManager().RegisterFactory<idk::anim::AnimationFactory>();
-		Core::GetResourceManager().RegisterFactory<OpenGLMaterialFactory>();
-		Core::GetResourceManager().RegisterFactory<ShaderProgramFactory>();
+		Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
+		Core::GetResourceManager().RegisterFactory<ProgramFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
 		Core::GetResourceManager().RegisterFactory<FrameBufferFactory>();
 
 		// register extensions
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vert");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".frag");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".pfrag");
-		Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderTemplate>>(".tmpt");
+		Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
+		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".vert");
+		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
+		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
+		Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

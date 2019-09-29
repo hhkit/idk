@@ -3,10 +3,11 @@
 #include "idk.h"
 #include <core/Handle.h>
 #include <res/Guid.h>
-#include <res/FileResources.h>
 #include <prefab/PrefabData.h>
 #include <prefab/PropertyOverride.h>
+#include <gfx/UniformInstance.h>
 #include <gfx/ShaderGraph_data.h>
+#include <res/ResourceMeta.h>
 
 namespace idk
 {
@@ -43,7 +44,9 @@ namespace idk::reflect
 		, Guid
 
 		, RscHandle<Mesh>
-		, variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> // UniformInstance
+		, UniformInstance
+		, hash_table<string, UniformInstance>
+
 		, vector<string>
 		, vector<Guid>
 		, hash_table<Guid, string>
@@ -56,16 +59,17 @@ namespace idk::reflect
         , vector<PropertyOverride>
         , RscHandle<Prefab>
 
+		, vector<SerializedMeta>
+
+		, RscHandle<ShaderProgram>
         , shadergraph::ValueType
         , shadergraph::Slot
         , shadergraph::Node
         , shadergraph::Link
-        , shadergraph::Value
         , shadergraph::Parameter
         , hash_table<Guid, shadergraph::Node>
         , vector<shadergraph::Slot>
         , vector<shadergraph::Link>
-        , vector<shadergraph::Value>
         , vector<shadergraph::Parameter>
 	>;
 }

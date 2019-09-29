@@ -25,7 +25,6 @@ namespace idk
 		template<typename T> Handle<T> AddComponent();
 		template<typename T> Handle<T> GetComponent() const;
 		template<typename T> bool      HasComponent() const;
-		template<typename T> bool      RemoveComponent(const Handle<T>&);
 
 		// generic
 		GenericHandle AddComponent(reflect::type);
@@ -43,14 +42,15 @@ namespace idk
 		// components
 		Handle<class Transform> Transform() const;
 		Handle<class GameObject> Parent() const;
-
-		// FOR TESTING
-		string_view GetName() const { return _name; }
-		void SetName(string_view name) { _name = name; }
+		bool HierarchyIsQueuedForDestruction() const;
+		string_view Name() const;
+		void Name(string_view name);
+		
+		
 	private:
 		vector<GenericHandle> _components;
 		bool _active = true;
-		string _name;
+
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;
 

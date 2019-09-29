@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		16 SEPT 2019
+//@date		28 SEPT 2019
 //@brief	
 
 /*
@@ -15,15 +15,19 @@ of the editor.
 
 #include "pch.h"
 #include <windows/IGE_InspectorWindow.h>
+#include <editor/commands/CommandList.h>
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
 #include <scene/SceneManager.h>
+#include <res/ResourceManager.h>
+#include <reflect/reflect.h>
 #include <IncludeComponents.h>
 #include <IDE.h>
 #include <iostream>
 #include <ds/span.h>
 #include <imgui/imgui_stl.h>
 #include <math/euler_angles.h>
+#include <widgets/InputResource.h>
 
 namespace idk {
 
@@ -53,6 +57,11 @@ namespace idk {
 
 		IDE& editor = Core::GetSystem<IDE>();
 		const size_t gameObjectsCount = editor.selected_gameObjects.size();
+
+		bool isComponentMarkedForDeletion = false;
+		string componentNameMarkedForDeletion{}; //Is empty by default
+
+		//DISPLAY
 		if (gameObjectsCount == 1) {
 			//Just show all components, Name and Transform first
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
@@ -66,33 +75,140 @@ namespace idk {
 				DisplayTransformComponent(c_transform);
 			}
 
+			
+			Handle<AnimationController> c_anim = editor.selected_gameObjects[0]->GetComponent<AnimationController>();
+			if (c_anim)
+			{
+				ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
+				if(ImGui::Button("Play"))
+				{
+					c_anim->Play(0);
+				}
+				if (ImGui::Button("Stop"))
+				{
+					c_anim->Stop();
+				}
+				if (ImGui::Button("Pause"))
+				{
+					c_anim->Pause();
+				}
+			}
+
 			//Display remaining components here
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
-			if (componentSpan.size()) {
-				for (auto& component : componentSpan) {
-					if (component == c_name)
-						continue;
+			for (auto& component : componentSpan) {
 
-					if (component == c_transform)
-						continue;
+				//Skip Name and Transform
+				if (component == c_name)
+					continue;
 
-					ImGui::PushID(static_cast<int>(component.id));
-					auto componentName = (*component).type.name();
-					if (ImGui::CollapsingHeader(string(componentName).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-					{
+				if (component == c_transform)
+					continue;
 
 
+				//COMPONENT DISPLAY
+				ImGui::PushID(static_cast<int>(component.id));
+				const auto componentName = (*component).type.name();
+				string displayingComponent{ componentName };
+				const string fluffText{ "idk::" };
+				std::size_t found = displayingComponent.find(fluffText);
+
+				if (found != std::string::npos)
+					displayingComponent.erase(found, fluffText.size());
+
+				ImVec2 cursorPos = ImGui::GetCursorPos();
+				ImVec2 cursorPos2{}; //This is for setting after all members are placed
+				ImGui::SetCursorPosX(window_size.x - 20);
+				if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+					ImGui::OpenPopup("AdditionalOptions");
+
+				}
+
+				ImGui::SetCursorPos(cursorPos);
+
+				if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					(*component).visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+						using T = std::decay_t<decltype(val)>;
+						reflect::dynamic dynaKey = std::forward<decltype(key)>(key);
+						//reflect::dynamic dynaVal = val;
+						const float currentHeight = ImGui::GetCursorPosY();
+						string keyName = dynaKey.get<const char*>();
+
+						if (keyName == "guid") {
+							return false;
+						}
+
+
+						keyName[0] = toupper(keyName[0]);
+						ImGui::SetCursorPosY(currentHeight + heightOffset);
+						ImGui::Text(keyName.c_str());
+						keyName.insert(0, "##"); //For Imgui stuff
+
+
+						ImGui::SameLine();
+						ImGui::SetCursorPosY(currentHeight);
+
+						//ALL THE TYPE STATEMENTS HERE
+						if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) {
+								
+							ImGui::DragFloat(keyName.c_str(), &val);
+						}
+						else if constexpr (std::is_same_v<T, int>) {
+							ImGui::DragInt(keyName.c_str(), &val);
+						}
+							
+						else if constexpr (std::is_same_v<T, bool>) {
+							ImGui::Checkbox(keyName.c_str(), &val);
+						}
+						else if constexpr (std::is_same_v<T, vec3>) {
+
+							DisplayVec3(val);
+							return false;
+						}
+						else if constexpr (is_template_v<T, RscHandle>) {
+
+							if (ImGuidk::InputResource(keyName.c_str(), &val))
+							{
+
+							}
+
+							return false;
+						}
+						else {
+							ImGui::SetCursorPosY(currentHeight + heightOffset);
+							ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");
+						}
+							
+					});
+				}
+
+				cursorPos2 = ImGui::GetCursorPos();
+				ImGui::SetCursorPos(cursorPos);
+				ImGui::SetCursorPosX(window_size.x - 20);
+				ImGui::Text("...");
+
+				ImGui::SetCursorPos(cursorPos2);
+
+				if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+					if (ImGui::MenuItem("Reset")) {
 
 					}
-					ImGui::PopID();
+					ImGui::Separator();
+					if (ImGui::MenuItem("Remove Component")) {
+						isComponentMarkedForDeletion = true;
+						componentNameMarkedForDeletion = (*component).type.name();
+					}
+					ImGui::EndPopup();
 				}
 
 
-
-
+				ImGui::PopID();
 			}
 
 
+			
 
 		}
 		else if (gameObjectsCount > 1) {
@@ -114,9 +230,53 @@ namespace idk {
 
 		}
 
+		//Add Component Button
+		if (gameObjectsCount) {
+			ImGui::Separator();
+			ImGui::SetCursorPosX(window_size.x * 0.25f);
+			if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
+				ImGui::OpenPopup("AddComp");
+			}
+		}
+
+		if (isComponentMarkedForDeletion) {
+			for (Handle<GameObject> i : editor.selected_gameObjects)
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
+		}
+
+		if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			span componentNames = GameState::GetComponentNames();
+			for (const char* name : componentNames) {
+				string displayName = name;
+				if (displayName == "Transform")
+					continue;
+				if (displayName == "Name")
+					continue;
+
+				//Comment/Uncomment this to remove text fluff 
+				const string fluffText{ "idk::" };
+
+				std::size_t found = displayName.find(fluffText);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText.size());
+
+				/*
+				const string fluffText2{ ">(void)" };
+				found = displayName.find(fluffText2);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText2.size());
+
+				*/
 
 
-
+				if (ImGui::MenuItem(displayName.c_str())) {
+					//Add component
+					for (Handle<GameObject> i : editor.selected_gameObjects)
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent,i, string{ name }));
+				}
+			}
+			ImGui::EndPopup();
+		}
 
 
 
@@ -125,12 +285,16 @@ namespace idk {
 	void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
 	{
 		static string stringBuf{};
+		IDE& editor = Core::GetSystem<IDE>();
 
 		Handle<GameObject> gameObject = c_name->GetGameObject();
 		ImGui::Text("Name: ");
 		ImGui::SameLine();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
-			c_name->name = stringBuf;
+			//c_name->name = stringBuf;
+			editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ c_name }, &c_name->name, stringBuf));
+
+
 		}
 		//if (ImGui::IsItemDeactivatedAfterEdit()) {
 		//}
@@ -154,40 +318,32 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
 	{
+
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+		ImGui::SetCursorPosX(window_size.x - 20);
+		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
+
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
+
+		ImGui::SetCursorPos(cursorPos);
+
+
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			const float heightOffset = 2;
-			const float widthOffset = 80;
-			const float float3Size = 0.33f;
-			const float float4Size = 0.25f;
-			const float itemSpacing = 50;
-			const float XYZSliderWidth = 10;
+
 
 			//Position
 			float heightPos = ImGui::GetCursorPosY();
 			ImGui::SetCursorPosY(heightPos + heightOffset);
 			ImGui::Text("Position");
 			ImGui::SameLine();
-			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-			ImGui::SetCursorPosX(widthOffset);
-			ImGui::Text("X");
-			ImGui::SameLine();
-			ImGui::SetCursorPosY(heightPos);
-			ImGui::DragFloat("##PositionX", &c_transform->position.x);
-			ImGui::SameLine();
 
+			DisplayVec3(c_transform->position);
 
-
-			ImGui::Text("Y");
-			ImGui::SameLine();
-			ImGui::DragFloat("##PositionY", &c_transform->position.y);
-			ImGui::SameLine();
-
-			ImGui::Text("Z");
-			ImGui::SameLine();
-			ImGui::DragFloat("##PositionZ", &c_transform->position.z);
-
-			//Rotation
+			//Rotation (use custom vec3 display)
 			euler_angles original{ c_transform->rotation };
 
 
@@ -221,35 +377,70 @@ namespace idk {
 				c_transform->rotation = quat{ original };
 			}
 
+			ImGui::PopItemWidth();
 
 			//Scale
 			heightPos = ImGui::GetCursorPosY();
 			ImGui::SetCursorPosY(heightPos + heightOffset);
 			ImGui::Text("Scale");
 			ImGui::SameLine();
-			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-			ImGui::SetCursorPosX(widthOffset);
 
-			ImGui::Text("X");
-			ImGui::SameLine();
-			ImGui::SetCursorPosY(heightPos);
-			ImGui::DragFloat("##ScaleX", &c_transform->scale.x);
-			ImGui::SameLine();
-
-			ImGui::Text("Y");
-			ImGui::SameLine();
-			ImGui::DragFloat("##ScaleY", &c_transform->scale.y);
-			ImGui::SameLine();
-
-			ImGui::Text("Z");
-			ImGui::SameLine();
-			ImGui::DragFloat("##ScaleZ", &c_transform->scale.z);
+			DisplayVec3(c_transform->scale);
 
 
-
-			ImGui::PopItemWidth();
 
 		}
+
+		cursorPos2 = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPosX(window_size.x - 20);
+		ImGui::Text("...");
+
+		ImGui::SetCursorPos(cursorPos2);
+
+
+		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
+			if (ImGui::MenuItem("Reset")) {
+				c_transform->position	= vec3{ };
+				c_transform->rotation	= quat{ };
+				c_transform->scale		= vec3{ };
+			}
+			ImGui::Separator();
+			ImGui::EndPopup();
+		}
+
+
+	}
+
+	void IGE_InspectorWindow::DisplayVec3(vec3& vec)
+	{
+		ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
+		ImGui::SetCursorPosX(widthOffset);
+
+		ImGui::Text("X");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
+		ImGui::PushID(&vec.x);
+		ImGui::DragFloat("##X", &vec.x);
+		ImGui::PopID();
+		ImGui::SameLine();
+
+		ImGui::Text("Y");
+		ImGui::SameLine();
+		ImGui::PushID(&vec.y);
+		ImGui::DragFloat("##Y", &vec.y);
+		ImGui::PopID();
+		ImGui::SameLine();
+
+		ImGui::Text("Z");
+		ImGui::SameLine();
+		ImGui::PushID(&vec.z);
+		ImGui::DragFloat("##Z", &vec.z);
+		ImGui::PopID();
+
+		ImGui::PopItemWidth();
+
 	}
 
 

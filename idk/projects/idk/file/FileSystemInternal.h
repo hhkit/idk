@@ -18,14 +18,14 @@ namespace idk::file_system_detail
 	struct fs_key
 	{
 		fs_key() = default;
-		fs_key(int8_t m, int8_t d, int8_t i);
+		fs_key(int8_t m, int8_t d, int16_t i);
 
 		bool IsValid() const;
 		bool operator == (const fs_key& rhs) const;
 		
 		int8_t _mount_id = -1;
 		int8_t _depth = -1;
-		int8_t _index = -1;
+		int16_t _index = -1;
 	};
 
 	struct fs_file_detail
@@ -34,7 +34,7 @@ namespace idk::file_system_detail
 		// Others = open type?
 		byte	_mask = byte{ 0x00 };
 
-		int64_t _ref_count = 0;
+		int16_t _ref_count = 0;
 
 		void Reset();
 		void Invalidate();
@@ -48,6 +48,7 @@ namespace idk::file_system_detail
 		string _rel_path;
 		string _mount_path;
 		string _filename;
+		string _stem;
 		string _extension;
 
 		fs_key _parent;
@@ -57,7 +58,7 @@ namespace idk::file_system_detail
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 		std::filesystem::file_time_type _time;
 
-		int64_t RefCount()	const { return _ref_count; }
+		int16_t RefCount()	const { return _ref_count; }
 		bool	IsOpen()	const { return _open_mode != FS_PERMISSIONS::NONE; }
 		bool	IsValid()	const { return _valid; }
 
@@ -68,9 +69,9 @@ namespace idk::file_system_detail
 		void DecRefCount()						{ ++_ref_count; }
 		
 	private:
-		// A FileHandle can be pointing to a valid fs_file but wrong ref_count
+		// A PathHandle can be pointing to a valid fs_file but wrong ref_count
 		bool _valid = true;
-		int64_t _ref_count = 0;
+		int16_t _ref_count = 0;
 
 		FS_PERMISSIONS _open_mode = FS_PERMISSIONS::NONE;
 	};
@@ -81,6 +82,7 @@ namespace idk::file_system_detail
 		string _rel_path;
 		string _mount_path;
 		string _filename;
+		string _stem;
 
 		hash_table<string, fs_key> _sub_dirs;
 		hash_table<string, fs_key> _files_map;
@@ -93,11 +95,20 @@ namespace idk::file_system_detail
 		HANDLE	_watch_handle[3];
 		DWORD	_status;
 
-		bool _valid = true;
-
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 
-		// TODO: add ref_count and make valid private.
+		int16_t RefCount()	const { return _ref_count; }
+		bool	IsValid()	const { return _valid; }
+
+		void SetValid(bool is_valid) { _valid = is_valid; }
+
+		void IncRefCount() { ++_ref_count; }
+		void DecRefCount() { ++_ref_count; }
+
+	private:
+		// A PathHandle can be pointing to a valid fs_file but wrong ref_count
+		bool _valid = true;
+		int16_t _ref_count = 0;
 	};
 
 	struct fs_collated

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <loading/OpenGLCubeMapLoader.h>
 #include <gfx/GraphicsSystem.h>
-
+#include <res/MetaBundle.h>
 #include <filesystem>
 
 //Dep
@@ -13,12 +13,11 @@
 
 namespace idk
 {
-	FileResources OpenGLCubeMapLoader::Create(FileHandle path_to_resource)
-	{	
-		//Assert for now
+	ResourceBundle OpenGLCubeMapLoader::LoadFile(PathHandle path_to_resource)
+	{//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
-		auto texture_handle = Core::GetResourceManager().Create<CubeMap>();
+		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>();
 
 		auto tm = texture_handle->GetMeta();
 		//auto texture_id = texture_handle->ID();
@@ -40,32 +39,93 @@ namespace idk
 		auto cubemap = path.stem();
 		auto ext = cubemap.extension();
 
-		for (int i=0; i< fileExt->size(); ++i)
+		texture_handle->Bind();
+		for (int i = 0; i < std::size(fileExt); ++i)
 		{
-			auto p = (path.parent_path() / cubemap.stem()).string() + fileExt[i] + ext.string();
+			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
+			auto p = pp + fileExt[i] + ext.string();
 
-			auto data = stbi_load(p.data(), &size.x, &size.y, &channels, 0);
+			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
 
-			assert(data);
+			//assert(data);
 
-			texture_handle.as<ogl::OpenGLCubemap>().Buffer(i,data, size, tm.internal_format);
+			auto col_format = [&]() -> CMInputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return CMInputChannels::RED;
+			case 2: return CMInputChannels::RG;
+			case 3: return CMInputChannels::RGB;
+			case 4: return CMInputChannels::RGBA;
+			}
+			}();
+
+			texture_handle->Buffer(i, data, size, col_format);
+			stbi_image_free(data);
 		}
 
-
-		FileResources retval;
-
-
-		retval.resources.emplace_back(texture_handle);
-
-		return retval;
+		return texture_handle;
 	}
 
-	FileResources OpenGLCubeMapLoader::Create(FileHandle path_to_resource, const MetaFile& path_to_meta)
+	ResourceBundle OpenGLCubeMapLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		UNREFERENCED_PARAMETER(path_to_resource);
-		UNREFERENCED_PARAMETER(path_to_meta);
+		//assert(false);
+		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
+		auto& metadata = path_to_meta.metadatas[0];
 
-		return Create(path_to_resource);
+		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>(metadata.guid);
+
+		auto tm = texture_handle->GetMeta();
+		//auto texture_id = texture_handle->ID();
+
+
+		auto first_meta = metadata.GetMeta<CubeMap>();
+		if (first_meta)
+			texture_handle->SetMeta(*first_meta);
+
+		ivec2 size{};
+		int channels{};
+
+		static string fileExt[] = {
+			".r",
+			".l",
+			".t",
+			".d",
+			".b",
+			".f"
+		};
+
+		std::filesystem::path path{ path_to_resource.GetMountPath() };
+
+		auto cubemap = path.stem();
+		auto ext = cubemap.extension();
+
+		texture_handle->Bind();
+		for (int i = 0; i < std::size(fileExt); ++i)
+		{
+			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
+			auto p = pp + fileExt[i] + ext.string();
+
+			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
+
+			//assert(data);
+
+			auto col_format = [&]() -> CMInputChannels
+			{	switch (channels)
+			{
+			default:
+			case 1: return CMInputChannels::RED;
+			case 2: return CMInputChannels::RG;
+			case 3: return CMInputChannels::RGB;
+			case 4: return CMInputChannels::RGBA;
+			}
+			}();
+
+			texture_handle->Buffer(i, data, size, col_format);
+			stbi_image_free(data);
+		}
+
+		return texture_handle;
 	}
 
 };

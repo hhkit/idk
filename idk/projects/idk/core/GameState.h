@@ -45,6 +45,7 @@ namespace idk
 		template<typename T>  bool      DestroyObjectNow(const Handle<T>& handle);
 
 		static GameState& GetGameState();
+		static span<const char*> GetComponentNames();
 	private:
 		template<typename Fn>
 		using JumpTable = array<Fn, detail::ObjectPools::TypeCount>;
@@ -53,6 +54,7 @@ namespace idk
 		using CreateDynamicJT = JumpTable<GenericHandle(*)(GameState&, const Handle<GameObject>&, const reflect::dynamic&)>;
 		using CreateJT        = JumpTable<GenericHandle(*)(GameState&, const GenericHandle&)>;
 		using DestroyJT       = JumpTable<void(*)(GameState&, const GenericHandle&)>;
+		using QueueForDestructionJT = JumpTable<void(*)(GameState&, const GenericHandle&)>;
 		using ValidateJT      = JumpTable<bool(*)(GameState&, const GenericHandle&)>;
 		using TypeIDLUT       = hash_table<string_view, uint8_t>;
 
@@ -66,12 +68,15 @@ namespace idk
 		static inline CreateJT        create_handles_jt;
 		static inline DestroyJT       destroy_handles_jt;
 		static inline ValidateJT      validate_handles_jt;
+		static inline QueueForDestructionJT queue_for_destroy_jt;
 
 		static inline TypeIDLUT name_to_id_map;
 
 		friend detail::ObjectPools;
 		template<typename T>
 		friend struct detail::TableGenerator;
+
+		template<typename T> void QueueForDestruction(T& obj) { obj._queued_for_destruction = true; }
 	};
 
 	extern template Handle<class GameObject> GameState::CreateObject<class GameObject>(uint8_t);

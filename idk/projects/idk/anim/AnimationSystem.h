@@ -23,16 +23,16 @@ namespace idk
 		{
 			for (unsigned i = 0; i < vec.size(); ++i)
 			{
-				if (ticks < static_cast<float>(vec[i + 1]._time))
+				if (ticks < static_cast<float>(vec[i]._time))
 				{
-					return i;
+					return i - 1;
 				}
 			}
-			assert(0);
+			
 
-			return 0;
+			return vec.size() - 1;
 		}
 
-		mat4 interpolateChannel(const anim::Animation::Channel& channel, float time_in_ticks);
+		anim::Skeleton::BonePose interpolateChannel(const anim::Animation::Channel& channel, float time_in_ticks);
 	};
 }

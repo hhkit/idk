@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "OpenGLCubemap.h"
 
-#include <idk_opengl/program/ShaderProgramFactory.h>
 #include <idk.h>
 #include <core/Core.h>
 #include <res/ResourceManager.h>
@@ -35,6 +34,19 @@ namespace idk::ogl
 			}
 		}
 
+		auto ToGLinputChannels(CMInputChannels i)-> GLint
+		{
+			switch (i)
+			{
+			case CMInputChannels::RED:  return GL_RED;
+			case CMInputChannels::RG:   return GL_RG;
+			case CMInputChannels::RGB:  return GL_RGB;
+			case CMInputChannels::RGBA: return GL_RGBA;
+			default: return 0;
+			}
+		}
+
+
 		/*
 		
 			Texture target	Orientation
@@ -52,12 +64,19 @@ namespace idk::ogl
 		glGenTextures(1, &_id);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		/*
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		*/
+
+		meta.uv_mode = CMUVMode::Clamp;
 		UpdateUV(meta.uv_mode);
 		
 		for (unsigned int i = 0; i < 6; i++)
-			Buffer(i,nullptr, _size, meta.internal_format);
+			Buffer(i,nullptr, _size);
 
 		//Todo GET FILE HANDLE
 		//Core::GetResourceManager().GetFactory<ShaderProgramFactory>().Create();
@@ -84,6 +103,7 @@ namespace idk::ogl
 
 	void OpenGLCubemap::Bind()
 	{
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 	}
 
@@ -93,12 +113,14 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 	}
 
-	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMColorFormat format)
+	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMInputChannels format)
 	{
+		format;
+
 		_size = size;
 		//glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
 		
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLinputChannels(format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data);
 		
 		// TODO: fix internal format
 		GL_CHECK();
@@ -109,7 +131,7 @@ namespace idk::ogl
 	{
 		CubeMap::Size(new_size);
 		for (unsigned int i = 0; i < 6; i++)
-			Buffer(i, nullptr, _size, meta.internal_format);
+			Buffer(i, nullptr, _size);
 	}
 
 	void* OpenGLCubemap::ID() const

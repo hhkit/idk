@@ -36,6 +36,15 @@ namespace idk {
 		void DisplayNameComponent(Handle<Name>& c_name);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 
+		void DisplayVec3(vec3& vec);
+
+		//Variables for vec3/vec4
+		const float heightOffset = 2;
+		const float widthOffset = 80;
+		const float float3Size = 0.33f;
+		const float float4Size = 0.25f;
+		const float itemSpacing = 50;
+		const float XYZSliderWidth = 10;
 
 
 	};

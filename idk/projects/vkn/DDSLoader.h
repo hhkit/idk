@@ -1,7 +1,6 @@
 #pragma once
 #include <idk.h>
 
-#include <res/ExtensionLoader.h>
 #include <vkn/VknTextureLoader.h>
 namespace idk::vkn
 {
@@ -90,12 +89,13 @@ namespace idk::vkn
 		const DdsFileInternal* file;
 	};
 
-	class DdsLoader:public ExtensionLoader
+	class DdsLoader
+		: public IFileLoader
 	{
 	public:
 		DdsLoader();
-		FileResources Create(FileHandle path_to_resource) override;
-		FileResources Create(FileHandle path_to_resource, const MetaFile& path_to_meta) override;
+		ResourceBundle LoadFile(PathHandle path_to_resource) override;
+		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 	private:
 		vk::UniqueFence load_fence;
 		TextureLoader loader;

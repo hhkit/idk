@@ -22,7 +22,7 @@ namespace idk
 	{
 	public:
 		Handle<GameObject> GetGameObject() const;
-		virtual const GenericHandle& GetHandle() = 0;
+		virtual const GenericHandle& GetHandle() const = 0;
 
 		GenericComponent(const GenericComponent&) = default;
 		GenericComponent(GenericComponent&&) noexcept = default;
@@ -43,7 +43,7 @@ namespace idk
 		: public GenericComponent, public Handleable<T>
 	{
 	public:
-		const Handle<T>& GetHandle() override
+		const Handle<T>& GetHandle() const override
 		{
 			return Handleable<T>::GetHandle();
 		}

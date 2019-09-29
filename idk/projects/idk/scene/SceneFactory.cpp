@@ -5,7 +5,7 @@ namespace idk
 {
 	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()
 	{
-		return std::make_unique<Scene>(0x80);
+		return std::make_unique<Scene>((unsigned char) 0x80);
 	}
 
 	unique_ptr<Scene> SceneFactory::Create()
@@ -14,9 +14,8 @@ namespace idk
 		return unique_ptr<Scene>();
 	}
 
-	unique_ptr<Scene> SceneFactory::Create(FileHandle)
+	ResourceBundle SceneLoader::LoadFile(PathHandle filepath)
 	{
-		assert(false);
-		return unique_ptr<Scene>();
+		return ResourceBundle();
 	}
 }

@@ -33,7 +33,7 @@ namespace idk::constants
 	constexpr T epsilon()
 	{
 		if constexpr (std::is_same_v<T, float>)
-			return 0.001f;
+			return 0.0001f;
 		else if constexpr (std::is_same_v<T, double>)
 			return 0.0000001;
 		else // integral type

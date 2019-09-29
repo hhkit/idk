@@ -8,12 +8,20 @@ namespace idk::anim
 		: public Resource<Skeleton>
 	{
 	public:
+		struct BonePose
+		{
+			vec3 _translation;
+			quat _rotation;
+			vec3 _scale;
+
+			mat4 compose() const;
+		};
 		struct Bone
 		{
 			string _name;
 			int  _parent;
-			mat4 _offset;
-			mat4 _node_transform;
+			mat4 _global_inverse_bind_pose;
+			BonePose _local_bind_pose;
 		};
 
 		Skeleton() = default;
@@ -24,7 +32,7 @@ namespace idk::anim
 		const vector<Bone>& data() const { return _bones; }
 
 		void AddBone(string_view name, Bone b);
-		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat.inverse(); }
+		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat; }
 
 	private:
 		mat4 _global_inverse;

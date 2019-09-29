@@ -18,7 +18,7 @@ namespace idk
 			material_instance,
 
 			vec3{},
-			GetGameObject()->GetComponent<Transform>()->LocalMatrix() ,
+			GetGameObject()->GetComponent<Transform>()->GlobalMatrix() ,
 
 			cast_shadows,
 			receive_shadows,

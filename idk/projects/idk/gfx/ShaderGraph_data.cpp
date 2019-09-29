@@ -51,11 +51,14 @@ namespace idk::shadergraph
             NodeSignature sig{ line };
             if (sig.ins.empty() && sig.outs.empty())
             {
-                std::regex regex{ "[\\w \\t()]+" };
+                std::regex regex{ "[^,]+" };
                 std::smatch sm;
                 while (std::regex_search(line, sm, regex))
                 {
-                    names.push_back(sm.str());
+                    auto str = sm.str();
+                    while (str.size() && isspace(str.back())) // strip trailing ws
+                        str.pop_back();
+                    names.push_back(str);
                     line = sm.suffix();
                 }
                 break;

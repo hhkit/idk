@@ -42,6 +42,7 @@ namespace idk::yaml
             bool must_escape = false;
             bool has_single_quotes = false;
             bool has_flow_braces = false;
+            bool has_commas = false;
             const auto& scalar = _node.as_scalar();
 
             if (scalar.empty())
@@ -60,15 +61,18 @@ namespace idk::yaml
                     must_escape = true; break;
                 case '[': case ']': case '{': case '}':
                     has_flow_braces = true; break;
+                case ',':
+                    has_commas = true; break;
                 default: break;
                 }
             }
 
             if (!must_escape)
             {
-                // "xyz" => '"xyz"' (so "" dont get lost during parse)
-                if ((scalar.front() == '\"' && scalar.back() == '\"') ||
-                    (style == flow_style && has_flow_braces)) // ['a[]a'] have to quote-enclose flow braces
+                
+                if ((scalar.front() == '\"' && scalar.back() == '\"')      || // "xyz" => '"xyz"' (so "" dont get lost during parse)
+                    (scalar.front() == '{' || scalar.front() == '[')       || // quote-enclose strings that start with [ and { so they're not mistaken for flow map/seq
+                    (style == flow_style && (has_flow_braces || has_commas))) // ['a[]a'] or ['a,a'] have to quote-enclose flow braces / commas
                 {
                     write('\'');
                     if (has_single_quotes)
@@ -233,19 +237,29 @@ namespace idk::yaml
 
             case type::mapping:
             {
-                const auto& map = _node.as_mapping();
+                const auto& unordered_map = _node.as_mapping();
                 assert(style == block_style);
-                if (map.empty())
+                if (unordered_map.empty())
+                {
                     write("{}");
-                else if (should_flow(_node))
+                    break;
+                }
+
+                vector<mapping_type::const_iterator> ordered;
+                ordered.reserve(unordered_map.size());
+                for (auto iter = unordered_map.begin(); iter != unordered_map.end(); ++iter)
+                    ordered.push_back(iter);
+                std::sort(ordered.begin(), ordered.end(), [](auto lhs, auto rhs) { return lhs->first < rhs->first; });
+
+                if (should_flow(_node))
                 {
                     style = flow_style;
                     write('{');
-                    for (const auto& [key, item] : map)
+                    for (const auto iter : ordered)
                     {
-                        write(key);
+                        write(iter->first);
                         write(": ");
-                        dump(item);
+                        dump(iter->second);
                         write(", ");
                     }
                     output.pop_back();
@@ -254,11 +268,12 @@ namespace idk::yaml
                 }
                 else
                 {
-                    for (const auto& [key, item] : map)
+                    for (const auto iter : ordered)
                     {
-                        write(key);
+                        write(iter->first);
                         write(": ");
 
+                        const auto& item = iter->second;
                         if (item.type() == type::mapping && !should_flow(item)) // block map in block map, need indent
                         {
                             write_tag(item);

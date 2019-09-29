@@ -1,14 +1,33 @@
 #include "stdafx.h"
 #include "Material.h"
+#include <gfx/ShaderProgram.h>
 
 namespace idk
 {
-	RscHandle<ShaderProgram> Material::GetShaderProgram() const
+	RscHandle<ShaderTemplate> Material::GetTemplate() const
 	{
-		return _program;
+		if (meta.domain == MaterialDomain::Surface)
+		{
+			switch (meta.blend)
+			{
+			case BlendMode::Opaque:
+				switch (meta.model)
+				{
+				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+				}
+			case BlendMode::Masked:
+				switch (meta.model)
+				{
+				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+				}
+			}
+		}
+		return RscHandle<ShaderTemplate>();
 	}
-	void Material::OnMetaUpdate(const MaterialMeta& newmeta)
+	Material::~Material()
 	{
-		_program.guid = newmeta.compiled_shader_guid;
+		Core::GetResourceManager().Release(_shader_program);
 	}
 }

@@ -4,7 +4,7 @@
 
 namespace idk
 {
-	namespace detail { template<typename T> struct tSavedHelper; }
+	namespace detail { template<typename T> struct ResourceManager_detail; }
 	template<typename T>
 	struct ResourceExtension
 	{
@@ -24,7 +24,6 @@ namespace idk
 		: ResourceExtension<T>
 	{
 		using ResourceExtension<T>::ext;
-		string name = string{ reflect::get_type<T>().name() };
 
 		static constexpr auto autosave = AutoSave::value;
 
@@ -32,7 +31,7 @@ namespace idk
 		void Dirty() { _dirty = true; };
 	private:
 		template<typename T>
-		friend struct detail::tSavedHelper;
+		friend struct detail::ResourceManager_detail;
 		friend class ResourceManager;
 
 		bool _dirty = false;

@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "ShaderGraph.h"
-#include <gfx/Material.h>
 #include <gfx/MeshRenderer.h>
+#include <anim/SkinnedMeshRenderer.h>
+#include <gfx/ShaderTemplate.h>
+#include <gfx/ShaderProgram.h>
+#include <gfx/ShaderGraph_helpers.h>
 #include <regex>
 
 namespace idk::shadergraph
@@ -29,9 +32,10 @@ namespace idk::shadergraph
     struct compiler_state
     {
         const Graph& graph;
-        hash_table<NodeSlot, variant<const Link*, const Value*>, NodeSlotHasher> inputs_to_outputs{};
+        hash_table<NodeSlot, const Link*, NodeSlotHasher> inputs_to_outputs{};
         hash_table<NodeSlot, string, NodeSlotHasher> resolved_outputs{};
         vector<std::pair<string, ValueType>> uniforms{};
+        vector<string> non_param_textures{};
         int slot_counter = 0;
     };
 
@@ -93,6 +97,7 @@ namespace idk::shadergraph
     static string resolve_node(const Node& node, compiler_state& state)
     {
         string code = "";
+        string code_from_input = "";
 
         if (node.name[0] != '$') // is not a param node
         {
@@ -109,66 +114,115 @@ namespace idk::shadergraph
                 code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
             }
 
+            auto& tpl = NodeTemplate::GetTable().at(node.name);
+
             // add the code, then replace the output variable names
-            code += NodeTemplate::GetTable().at(node.name).code;
+            code += tpl.code;
             resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
             for (int i = 0; i < node.output_slots.size(); ++i)
             {
                 replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, var_name(state.slot_counter++));
             }
+
+			int num_slots = static_cast<int>(tpl.signatures[0].ins.size() + tpl.signatures[0].outs.size());
+            if (tpl.names.size() > num_slots) // have custom controls
+            {
+                string str = node.control_values;
+                for (int i = num_slots; i < tpl.names.size(); ++i)
+                {
+                    string next_value = "";
+                    if (str.size())
+                    {
+                        auto pos = str.find('|');
+                        next_value = str.substr(0, pos);
+                        if (pos != string::npos)
+                            str.erase(0, pos + 1);
+                        else
+                            str.clear();
+                    }
+                    replace_variables(code, i, next_value);
+                }
+            }
         }
-        else
+        else // param node
         {
             auto uniform_name = node.name;
             auto& param = state.graph.parameters[std::stoi(uniform_name.data() + 1)];
             uniform_name.replace(0, 1, "_u");
-            state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, "_ub" + std::to_string(param.type) + "." + uniform_name); // eg. _ub0._u0
+            if (param.type == ValueType::SAMPLER2D)
+                state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, uniform_name);
+            else
+                state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 },
+                                               "_ub" + std::to_string(param.type) + "." + uniform_name);
             state.uniforms.emplace_back(std::make_pair(uniform_name, param.type));
         }
 
         for (int i = 0; i < node.input_slots.size(); ++i)
         {
             auto iter = state.inputs_to_outputs.find({ node.guid, i });
-            assert(iter != state.inputs_to_outputs.end()); // i fucked up
 
-            auto& output = iter->second;
-            if (output.index() == 0) // connected to another node
+            if (iter == state.inputs_to_outputs.end()) // no connection, use slot's value
             {
-                auto& link = std::get<0>(output);
-                auto& node_out = state.graph.nodes.at(link->node_out);
+                const auto& value = node.input_slots[i].value;
 
-                auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
-                if (resolved_iter != state.resolved_outputs.end())
-                {
-                    replace_variables(code, i, resolved_iter->second);
-                }
-                else
-                {
-                    code = resolve_node(state.graph.nodes.at(link->node_out), state) + "\n" + code;
-                    resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
-                    assert(resolved_iter != state.resolved_outputs.end());
-                    replace_variables(code, i, resolved_iter->second);
-                }
-            }
-            else // connected to value
-            {
-                auto& value = std::get<1>(output);
                 std::string replacement;
                 if (node.input_slots[i].type == ValueType::SAMPLER2D)
-                    replacement = "sampler2D";
+                {
+                    // can't connect textures directly, we need to go through uniforms
+                    auto uniform_name = "_c" + std::to_string(state.non_param_textures.size());
+                    state.non_param_textures.push_back(uniform_name);
+                    replacement = uniform_name;
+                    replace_variables(code, i, replacement);
+                }
                 else
                 {
                     replacement = node.input_slots[i].type.to_string();
                     make_lowercase(replacement);
+                    replacement += '(' + value + ')';
+                    replace_variables(code, i, replacement);
                 }
-                replacement += '(' + value->value + ')';
-                replace_variables(code, i, replacement);
+
+                continue;
+            }
+
+            // else, connected to another node
+            auto& link = iter->second;
+            auto& node_out = state.graph.nodes.at(link->node_out);
+
+            auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
+            if (resolved_iter != state.resolved_outputs.end())
+            {
+                replace_variables(code, i, resolved_iter->second);
+            }
+            else
+            {
+                code_from_input += resolve_node(state.graph.nodes.at(link->node_out), state);
+                code_from_input += '\n';
+                resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
+                assert(resolved_iter != state.resolved_outputs.end());
+                replace_variables(code, i, resolved_iter->second);
             }
         }
 
-        return code;
+        return code_from_input + '\n' + code;
     }
+
+
+
+	static UniformInstance to_uniform_instance(const Parameter& param)
+	{
+		switch (param.type)
+		{
+		case ValueType::FLOAT: return std::stof(param.default_value);
+		case ValueType::VEC2: return helpers::parse_vec2(param.default_value);
+		case ValueType::VEC3: return helpers::parse_vec3(param.default_value);
+		case ValueType::VEC4: return helpers::parse_vec4(param.default_value);
+		case ValueType::SAMPLER2D: return helpers::parse_sampler2d(param.default_value);
+		default: throw;
+		}
+	}
+
 
     void Graph::Compile()
     {
@@ -178,28 +232,30 @@ namespace idk::shadergraph
 
         for (auto& link : links)
             state.inputs_to_outputs.emplace(NodeSlot{ link.node_in, link.slot_in }, &link);
-        for (auto& value : values)
-            state.inputs_to_outputs.emplace(NodeSlot{ value.node, value.slot }, &value);
 
         string code = resolve_node(nodes.at(master_node), state);
-        string uniforms = "";
+        string uniforms_str = "";
 
         if (state.uniforms.size())
         {
-            array<string, ValueType::count> uniform_blocks;
+            array<string, ValueType::count + 1> uniform_blocks;
 
-            for (auto& [uniform_name, uniform_type] : state.uniforms)
+            for (const auto& [uniform_name, uniform_type] : state.uniforms)
             {
-                string typestr = "";
+                auto& block = uniform_blocks[uniform_type];
+
                 if (uniform_type == ValueType::SAMPLER2D)
-                    typestr = "sampler2D";
-                else
                 {
-                    string str{ uniform_type.to_string() };
-                    typestr = make_lowercase(str);
+                    block += "U_LAYOUT(3, ";
+                    block += std::to_string(ValueType::SAMPLER2D);
+                    block += ") uniform sampler2D ";
+                    block += uniform_name;
+                    block += ";\n";
+                    continue;
                 }
 
-                auto& block = uniform_blocks[uniform_type];
+                string str{ uniform_type.to_string() };
+                string typestr = make_lowercase(str);
 
                 if (block.empty())
                 {
@@ -216,26 +272,43 @@ namespace idk::shadergraph
                 block += ";\n";
             }
 
+            for (const auto& uniform_name : state.non_param_textures)
+            {
+                auto& block = uniform_blocks[ValueType::SAMPLER2D];
+                block += "U_LAYOUT(3, ";
+                block += std::to_string(ValueType::SAMPLER2D);
+                block += ") uniform sampler2D ";
+                block += uniform_name;
+                block += ";\n";
+            }
+
             for (size_t i = 0; i < uniform_blocks.size(); ++i)
             {
                 if (uniform_blocks[i].empty())
                     continue;
 
-                uniforms += uniform_blocks[i];
-                uniforms += "} _ub";
-                uniforms += std::to_string(i);
-                uniforms += ";\n";
+                uniforms_str += uniform_blocks[i];
+                if (i == ValueType::SAMPLER2D)
+                    continue;
+
+                uniforms_str += "} _ub";
+                uniforms_str += std::to_string(i);
+                uniforms_str += ";\n";
             }
+
+			for (const auto& [uniform_name, uniform_type] : state.uniforms)
+			{
+                int param_index = std::stoi(uniform_name.data() + 2); // +2 to shift past _u in name
+                if (uniform_type == ValueType::SAMPLER2D)
+                    uniforms.insert_or_assign(uniform_name, to_uniform_instance(parameters[param_index]));
+                else
+				    uniforms.insert_or_assign("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+                                                    to_uniform_instance(parameters[param_index]));
+			}
         }
 
-		auto shader_template = Core::GetResourceManager().LoadFile("/assets/shader/pbr_forward.tmpt")[0].As<ShaderTemplate>();
-		auto h_mat = Core::GetResourceManager().Create<Material>();
-		h_mat->BuildShader(shader_template, uniforms, code);
-
-		for (auto& renderer : GameState::GetGameState().GetObjectsOfType<MeshRenderer>())
-		{
-			renderer.material_instance.material = h_mat;
-		}
+		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
+		_shader_program->BuildShader(ShaderStage::Fragment, shader_template);
     }
 
 }

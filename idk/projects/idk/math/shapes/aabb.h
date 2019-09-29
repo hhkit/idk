@@ -10,8 +10,8 @@ namespace idk
 
 		// accessors
 		vec3  center() const;
-		vec3  size()   const;
 		vec3  extents() const;
+		vec3  halfextents() const;
 
 		const aabb& bounds() const;
 

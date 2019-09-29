@@ -46,10 +46,24 @@ namespace idk
 			//Creation
 			vkn::VulkanView& vknViews = vkObj->View();
 
-			editorInit.edt_imageCount = vkn::hlp::arr_count(vknViews.Swapchain().image_views);
+			editorInit.edt_imageCount = vkn::hlp::arr_count(vknViews.Swapchain().m_swapchainGraphics.image_views);
 			editorControls.edt_imageCount = editorInit.edt_imageCount;
 			editorControls.edt_frameIndex;
 			editorControls.edt_semaphoreIndex;
+
+
+			//New changes
+			editorControls.edt_buffer = std::make_shared<vkn::TriBuffer>(vknViews,true);
+			editorControls.edt_buffer->CreateImagePool(vknViews);
+			//editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
+			//editorControls.edt_buffer->images = vknViews.Swapchain().m_swapchainGraphics.images;
+			//editorControls.edt_buffer->CreateImageViewWithCurrImgs(vknViews);
+			//editorControls.edt_buffer->CreatePresentationSignals(vknViews);
+			editorControls.edt_buffer->enabled = true;
+
+			////vknViews.Swapchain().m_inBetweens.emplace_back(editorControls.edt_buffer);
+			//
+
 			editorInit.edt_min_imageCount = 2;
 			editorInit.edt_pipeCache;
 
@@ -113,14 +127,42 @@ namespace idk
 
 			//Upload fonts leave it to later
 			// Upload Fonts
+		}
+
+		void VI_Interface::Shutdown()
+		{
+			ImGuiCleanUpSwapChain();
+
+			editorInit.edt_pipeCache.reset();
+			editorControls.edt_buffer.reset();
+
+			ImGui_ImplVulkan_Shutdown();
+			ImGui_ImplWin32_Shutdown();
+			ImGui::DestroyContext();
+		}
+
+		void VI_Interface::ImGuiFrameBegin()
+		{
+			bool& resize = vkObj->View().ImguiResize();
+			if (resize)
 			{
+				resize = false;
+				ImGui_ImplVulkan_SetMinImageCount(editorInit.edt_min_imageCount);
+				ImGuiRecreateSwapChain();
+				ImGuiRecreateCommandBuffer();
+			}
+
+			ImGui_ImplWin32_NewFrame();
+			if (!font_initialized)
+			{
+				vkn::VulkanView& vknViews = vkObj->View();
 				// Use any command queue
 				vk::CommandBuffer& command_buffer = *editorControls.edt_frames[editorControls.edt_frameIndex].edt_cBuffer;
 
-				vknViews.Device()->resetCommandPool(*editorControls.edt_frames[editorControls.edt_frameIndex].edt_cPool,vk::CommandPoolResetFlags::Flags(),vknViews.Dispatcher());
+				vknViews.Device()->resetCommandPool(*editorControls.edt_frames[editorControls.edt_frameIndex].edt_cPool, vk::CommandPoolResetFlags::Flags(), vknViews.Dispatcher());
 				vk::CommandBufferBeginInfo begin_info = {};
 				begin_info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-				
+
 				command_buffer.begin(begin_info, vknViews.Dispatcher());
 
 				ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
@@ -132,31 +174,22 @@ namespace idk
 				//check_vk_result(err);
 				command_buffer.end(vknViews.Dispatcher());
 
+				//m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+
 				//err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
 				//check_vk_result(err);
-				vknViews.GraphicsQueue().submit(1, &end_info, vk::Fence{}, vknViews.Dispatcher());
+				vknViews.GraphicsQueue().submit(1, &end_info, vk::Fence(), vknViews.Dispatcher());
 
+
+				//vknViews.Device()->waitForFences(1, &*editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
+
+				//vknViews.Device()->resetFences(1, &*editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].inflight_fence,vknViews.Dispatcher());
 				//err = vkDeviceWaitIdle(g_Device);
 				//check_vk_result(err);
 				vknViews.Device()->waitIdle(vknViews.Dispatcher());
 				ImGui_ImplVulkan_DestroyFontUploadObjects();
+				font_initialized = true;
 			}
-		}
-
-		void VI_Interface::Shutdown()
-		{
-			ImGuiCleanUpSwapChain();
-
-			editorInit.edt_pipeCache.reset();
-
-			ImGui_ImplVulkan_Shutdown();
-			ImGui_ImplWin32_Shutdown();
-			ImGui::DestroyContext();
-		}
-
-		void VI_Interface::ImGuiFrameBegin()
-		{
-			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 		}
 
@@ -212,110 +245,118 @@ namespace idk
 
 		void VI_Interface::ImGuiFrameRender()
 		{
-			ImGui::Render();
-			memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
-
 			//Vulk interface params
 			vkn::VulkanView& vknViews = vkObj->View();
 
-			//To get result of certain vulk operation
-			vk::Result err;
-
-
-			//Retrieving the semaphore info for the current imgui frame 
-			//vk::Semaphore image_acquired_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_imageAvailable;
-			//vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
-			vk::Semaphore& render_complete_semaphore = *vknViews.GetCurrentSignals().imgui_render_finished;
-			//vk::Semaphore& wait1_semaphore = *vknViews.GetCurrentSignals().image_available;
-			//vk::Semaphore& wait2_semaphore = *vknViews.GetCurrentSignals().render_finished;
-
-			//auto result = vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
-
-			editorControls.edt_frameIndex = vknViews.AcquiredImageValue();
-			editorControls.edt_semaphoreIndex = vknViews.CurrSemaphoreFrame();
-
-
-			EditorFrame* fd = &(editorControls.edt_frames[editorControls.edt_frameIndex]);
+			if (vknViews.ImguiResize())
+				ImGuiResizeWindow();
+			else
 			{
-				err = vknViews.Device()->waitForFences(1, &*fd->edt_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
-				check_vk_result(err);
+				ImGui::Render();
+				memcpy(&editorControls.edt_clearValue.color.float32[0], &editorControls.im_clearColor, 4 * sizeof(float));
 
-				err = vknViews.Device()->resetFences(1, &*fd->edt_fence, vknViews.Dispatcher());
-				check_vk_result(err);
-			}
-			//Reset command pool for imgui's own cPool
-			{
-				vknViews.Device()->resetCommandPool(*fd->edt_cPool, vk::CommandPoolResetFlags::Flags(), vknViews.Dispatcher());
 
-				vk::CommandBufferBeginInfo info = {};
-				info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-				fd->edt_cBuffer->begin(info, vknViews.Dispatcher());
+				//To get result of certain vulk operation
+				vk::Result err;
 
-				vk::ImageSubresourceRange imgRange = {};
-				imgRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-				imgRange.levelCount = 1;
-				imgRange.layerCount = 1;
-				// Note: previous layout doesn't matter, which will likely cause contents to be discarded
-				vk::ImageMemoryBarrier presentToClearBarrier = {};
-				presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eMemoryRead;
-				presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-				presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
-				presentToClearBarrier.newLayout = vk::ImageLayout::eTransferDstOptimal;
-				presentToClearBarrier.srcQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
-				presentToClearBarrier.dstQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
-				presentToClearBarrier.image = fd->edt_backbuffer;
-				presentToClearBarrier.subresourceRange = imgRange;
 
-				// Change layout of image to be optimal for presenting
-				vk::ImageMemoryBarrier clearToPresentBarrier = {};
-				clearToPresentBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-				clearToPresentBarrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
-				clearToPresentBarrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
-				clearToPresentBarrier.newLayout = vk::ImageLayout::eColorAttachmentOptimal;
-				clearToPresentBarrier.srcQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
-				clearToPresentBarrier.dstQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
-				clearToPresentBarrier.image = fd->edt_backbuffer;
-				clearToPresentBarrier.subresourceRange = imgRange;
+				//Retrieving the semaphore info for the current imgui frame 
+				//vk::Semaphore image_acquired_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_imageAvailable;
+				//vk::Semaphore render_complete_semaphore = *editorControls.edt_frameSemophores[editorControls.edt_semaphoreIndex].edt_renderFinished;
+				vk::Semaphore& render_complete_semaphore = *editorControls.edt_buffer->pSignals[vknViews.CurrSemaphoreFrame()].render_finished;
+				//vk::Semaphore& wait1_semaphore = *vknViews.GetCurrentSignals().image_available;
+				//vk::Semaphore& wait2_semaphore = *vknViews.GetCurrentSignals().render_finished;
 
-				fd->edt_cBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vknViews.Dispatcher());
-				fd->edt_cBuffer->clearColorImage(fd->edt_backbuffer, vk::ImageLayout::eTransferDstOptimal, editorControls.edt_clearValue.color, imgRange, vknViews.Dispatcher());
-				fd->edt_cBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags{}, nullptr, nullptr, clearToPresentBarrier, vknViews.Dispatcher());
-			}
-			//Begin renderpass for imgui cbuffer
-			{
-				vk::RenderPassBeginInfo info{};
-				info.renderPass = *editorControls.edt_renderPass;
-				info.framebuffer = *fd->edt_framebuffer;
-				info.renderArea.extent.width = vknViews.Swapchain().extent.width;
-				info.renderArea.extent.height = vknViews.Swapchain().extent.height;
-				info.clearValueCount = 1;
-				info.pClearValues = &editorControls.edt_clearValue;
-				fd->edt_cBuffer->beginRenderPass(info, vk::SubpassContents::eInline, vknViews.Dispatcher());
-			}
+				//auto result = vknViews.Device()->acquireNextImageKHR(*vknViews.Swapchain().swap_chain, std::numeric_limits<uint32_t>::max(), image_acquired_semaphore, {},vknViews.Dispatcher());
 
-			// Record Imgui Draw Data and draw funcs into command buffer
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *fd->edt_cBuffer);
+				editorControls.edt_frameIndex = vknViews.AcquiredImageValue();
+				editorControls.edt_semaphoreIndex = vknViews.CurrSemaphoreFrame();
 
-			vk::Semaphore waitSArr[] = { *vknViews.GetCurrentSignals().render_finished };
 
-			// Submit command buffer
-			fd->edt_cBuffer->endRenderPass(vknViews.Dispatcher());
-			{
-				vk::PipelineStageFlags wait_stage[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-				vk::SubmitInfo info = {};
-				info.waitSemaphoreCount = 1;
-				info.pWaitSemaphores = waitSArr;
-				info.pWaitDstStageMask = wait_stage;
-				info.commandBufferCount = 1;
-				info.pCommandBuffers = &*fd->edt_cBuffer;
-				info.signalSemaphoreCount = 1;
-				info.pSignalSemaphores = &render_complete_semaphore;
+				EditorFrame* fd = &(editorControls.edt_frames[editorControls.edt_frameIndex]);
+				{
+					err = vknViews.Device()->waitForFences(1, &*fd->edt_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), vknViews.Dispatcher());
+					check_vk_result(err);
 
-				fd->edt_cBuffer->end(vknViews.Dispatcher());
+					err = vknViews.Device()->resetFences(1, &*fd->edt_fence, vknViews.Dispatcher());
+					check_vk_result(err);
+				}
+				//Reset command pool for imgui's own cPool
+				{
+					vknViews.Device()->resetCommandPool(*fd->edt_cPool, vk::CommandPoolResetFlags::Flags(), vknViews.Dispatcher());
 
-				//Submit to queue
-				err = vknViews.GraphicsQueue().submit(1, &info, *fd->edt_fence, vknViews.Dispatcher());
-				check_vk_result(err);
+					vk::CommandBufferBeginInfo info = {};
+					info.flags |= vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+					fd->edt_cBuffer->begin(info, vknViews.Dispatcher());
+
+					vk::ImageSubresourceRange imgRange = {};
+					imgRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+					imgRange.levelCount = 1;
+					imgRange.layerCount = 1;
+					// Note: previous layout doesn't matter, which will likely cause contents to be discarded
+					vk::ImageMemoryBarrier presentToClearBarrier = {};
+					presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eMemoryRead;
+					presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+					presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
+					presentToClearBarrier.newLayout = vk::ImageLayout::eTransferDstOptimal;
+					presentToClearBarrier.srcQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+					presentToClearBarrier.dstQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+					presentToClearBarrier.image = fd->edt_backbuffer;
+					presentToClearBarrier.subresourceRange = imgRange;
+
+					// Change layout of image to be optimal for presenting
+					vk::ImageMemoryBarrier clearToPresentBarrier = {};
+					clearToPresentBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+					clearToPresentBarrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+					clearToPresentBarrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+					clearToPresentBarrier.newLayout = vk::ImageLayout::eColorAttachmentOptimal;
+					clearToPresentBarrier.srcQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+					clearToPresentBarrier.dstQueueFamilyIndex = *vknViews.QueueFamily().graphics_family;
+					clearToPresentBarrier.image = fd->edt_backbuffer;
+					clearToPresentBarrier.subresourceRange = imgRange;
+
+					fd->edt_cBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vknViews.Dispatcher());
+					fd->edt_cBuffer->clearColorImage(fd->edt_backbuffer, vk::ImageLayout::eTransferDstOptimal, editorControls.edt_clearValue.color, imgRange, vknViews.Dispatcher());
+					fd->edt_cBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags{}, nullptr, nullptr, clearToPresentBarrier, vknViews.Dispatcher());
+				}
+				//Begin renderpass for imgui cbuffer
+				{
+					vk::RenderPassBeginInfo info{};
+					info.renderPass = *editorControls.edt_renderPass;
+					info.framebuffer = *fd->edt_framebuffer;
+					info.renderArea.extent.width = vknViews.Swapchain().extent.width;
+					info.renderArea.extent.height = vknViews.Swapchain().extent.height;
+					info.clearValueCount = 1;
+					info.pClearValues = &editorControls.edt_clearValue;
+					fd->edt_cBuffer->beginRenderPass(info, vk::SubpassContents::eInline, vknViews.Dispatcher());
+				}
+
+				// Record Imgui Draw Data and draw funcs into command buffer
+				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *fd->edt_cBuffer);
+
+				vk::Semaphore waitSArr[] = { *vknViews.GetCurrentSignals().render_finished };
+
+				// Submit command buffer
+				fd->edt_cBuffer->endRenderPass(vknViews.Dispatcher());
+				{
+					vk::PipelineStageFlags wait_stage[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+					vk::SubmitInfo info = {};
+					info.waitSemaphoreCount = 1;
+					info.pWaitSemaphores = waitSArr;
+					info.pWaitDstStageMask = wait_stage;
+					info.commandBufferCount = 1;
+					info.pCommandBuffers = &*fd->edt_cBuffer;
+					info.signalSemaphoreCount = 1;
+					info.pSignalSemaphores = &render_complete_semaphore;
+
+
+					//vkn::hlp::TransitionImageLayout(true,*fd->edt_cBuffer, vknViews.GraphicsQueue(), editorControls.edt_frames[editorControls.edt_frameIndex].edt_backbuffer, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+					fd->edt_cBuffer->end(vknViews.Dispatcher());
+
+					//Submit to queue
+					err = vknViews.GraphicsQueue().submit(1, &info, *fd->edt_fence, vknViews.Dispatcher());
+					check_vk_result(err);
+				}
 			}
 		}
 
@@ -381,6 +422,11 @@ namespace idk
 			//What is required to be recreated for imGui swapchain will be done here
 			idk::vkn::VulkanView& vknViews = vkObj->View();
 
+			editorControls.edt_buffer->CreateImagePool(vknViews);
+			editorControls.edt_buffer->enabled = true;
+
+			vknViews.Swapchain().m_inBetweens.emplace_back(editorControls.edt_buffer);
+
 			if (editorInit.edt_min_imageCount == 0)
 				editorInit.edt_min_imageCount = ImGui_ImplVulkanH_GetMinImageCountFromPresentMode(static_cast<VkPresentModeKHR>(vknViews.Swapchain().present_mode));
 
@@ -398,7 +444,7 @@ namespace idk
 			attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 			attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 			attachment.initialLayout = vk::ImageLayout::eUndefined;
-			attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+			attachment.finalLayout = vk::ImageLayout::eGeneral;
 			vk::AttachmentReference color_attachment = {};
 			color_attachment.attachment = 0;
 			color_attachment.layout = vk::ImageLayout::eColorAttachmentOptimal;
@@ -426,8 +472,8 @@ namespace idk
 			for (uint32_t i = 0; i < editorControls.edt_imageCount; i++)
 			{
 				EditorFrame* fd = &editorControls.edt_frames[i];
-				att[0] = fd->edt_backbufferView = *vknViews.Swapchain().edt_image_views[i];
-				fd->edt_backbuffer = vknViews.Swapchain().edt_images[i];
+				att[0] = fd->edt_backbufferView = *editorControls.edt_buffer->image_views[i];
+				fd->edt_backbuffer = editorControls.edt_buffer->images[i];
 				vk::FramebufferCreateInfo fbInfo{
 					vk::FramebufferCreateFlags{},
 					*editorControls.edt_renderPass,

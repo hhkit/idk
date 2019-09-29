@@ -110,7 +110,7 @@ namespace idk
 
 	private:
 		friend class AudioClip;
-		friend class AudioClipFactory;
+		friend class AudioClipLoader;
 
 
 		FMOD::System*		_Core_System		{ nullptr };		//Is updated on init, destroyed and nulled on shutdown.

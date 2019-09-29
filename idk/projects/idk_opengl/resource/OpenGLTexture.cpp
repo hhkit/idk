@@ -20,12 +20,24 @@ namespace idk::ogl
 		{
 			switch (f)
 			{
-			case ColorFormat::sRGB_8:  return GL_RGB8;
-			case ColorFormat::sRGBA_8: return GL_RGBA8;
+			case ColorFormat::RGB_8:  return GL_RGB8;
+			case ColorFormat::RGBA_8: return GL_RGBA8;
 			case ColorFormat::RGBF_16: return GL_RGB16F;
 			case ColorFormat::RGBF_32: return GL_RGB32F;
 			case ColorFormat::RGBAF_16: return GL_RGBA16F;
 			case ColorFormat::RGBAF_32: return GL_RGBA32F;
+			default: return 0;
+			}
+		}
+
+		auto ToGLinputChannels(InputChannels i)-> GLint
+		{
+			switch (i)
+			{
+			case InputChannels::RED:  return GL_RED;
+			case InputChannels::RG:   return GL_RG;
+			case InputChannels::RGB:  return GL_RGB;
+			case InputChannels::RGBA: return GL_RGBA;
 			default: return 0;
 			}
 		}
@@ -38,7 +50,7 @@ namespace idk::ogl
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		UpdateUV(meta.uv_mode);
-		Buffer(nullptr, _size, meta.internal_format);
+		Buffer(nullptr, _size);
 	}
 
 	OpenGLTexture::OpenGLTexture(OpenGLTexture&& rhs)
@@ -69,10 +81,10 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_2D, _id);
 	}
 
-	void OpenGLTexture::Buffer(void* data, ivec2 size, ColorFormat format)
+	void OpenGLTexture::Buffer(void* data, ivec2 size, InputChannels format)
 	{
 		_size = size;
-		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
 		// TODO: fix internal format
 		GL_CHECK();
 	}
@@ -81,7 +93,7 @@ namespace idk::ogl
 	void OpenGLTexture::Size(ivec2 new_size)
 	{
 		Texture::Size(new_size);
-		Buffer(nullptr, _size, meta.internal_format);
+		Buffer(nullptr, _size);
 	}
 
 	void* OpenGLTexture::ID() const

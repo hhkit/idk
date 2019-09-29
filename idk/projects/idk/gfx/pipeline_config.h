@@ -2,8 +2,11 @@
 #include <idk.h>
 #include <optional>
 #include <gfx/buffer_desc.h>
+#include <gfx/ShaderProgram.h>
+#include <gfx/BasicRenderPasses.h>
 namespace idk
 {
+
 	enum FillType
 	{
 		eFill
@@ -43,13 +46,14 @@ namespace idk
 
 	struct pipeline_config
 	{
-		string_view frag_shader{};
-		string_view vert_shader{};
+		RscHandle<ShaderProgram> frag_shader{};
+		RscHandle<ShaderProgram> vert_shader{};
 		std::optional<ivec2> screen_size{};
 		vector<buffer_desc> buffer_descriptions;
 		FillType fill_type = eFill;
 		PrimitiveTopology prim_top = eTriangleList;
-		hash_table<uint32_t,uniform_layout_t> uniform_layouts;
+		BasicRenderPasses render_pass_type = {};
+		//hash_table<uint32_t,uniform_layout_t> uniform_layouts; //Encapsulated in shader program.
 		bool restart_on_special_idx = false; //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
 	};
 }

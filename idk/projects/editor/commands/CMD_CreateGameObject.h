@@ -14,12 +14,15 @@ namespace idk {
 
 	class CMD_CreateGameObject : public ICommand { //serialize/deserialize use serialize.h
 	public:
+		CMD_CreateGameObject(Handle<GameObject> parenting_gameobject);
 		CMD_CreateGameObject();
 
 		virtual bool execute() override;
 
 		virtual bool undo() override;
 
+	private:
+		Handle<GameObject> parenting_gameobject{};
 	};
 
 }

@@ -2,15 +2,17 @@
 
 #include <idk.h>
 #include <prefab/Prefab.h>
+#include <res/EasyFactory.h>
 #include <res/ResourceFactory.h>
 
 namespace idk
 {
-	class PrefabFactory : public ResourceFactory<Prefab>
+	using PrefabFactory = EasyFactory<Prefab>;
+
+	class PrefabLoader
+		: public IFileLoader
 	{
-    public:
-        unique_ptr<Prefab> GenerateDefaultResource() override;
-		unique_ptr<Prefab> Create() override;
-		unique_ptr<Prefab> Create(FileHandle filepath) override;
+		ResourceBundle LoadFile(PathHandle filepath) override;
+		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
 	};
 }

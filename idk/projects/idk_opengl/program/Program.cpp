@@ -1,6 +1,7 @@
 #include "pch.h"
+#include <core/Core.h>
 #include "Program.h"
-
+#include <gfx/IShaderProgramFactory.h>
 #include <iostream>
 
 constexpr auto replacer = R"(
@@ -24,7 +25,7 @@ namespace idk::ogl
 		auto version_end = shader_code.find("\n", version_pos);
 
 		const char* arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, shader_code.substr(version_end).data() } ;
-		const GLint lengths[] = { (version_end - version_pos + 1), -1, -1, -1};
+		const GLint lengths[] = { (GLint)(version_end - version_pos + 1), -1, -1, -1};
 
 		glShaderSource(_shader_id, sizeof(arr) / sizeof(*arr), arr, lengths);
 		glCompileShader(_shader_id);
@@ -112,6 +113,7 @@ namespace idk::ogl
 		return _shader_flags;
 	}
 
+
 	Program& Program::Attach(Shader&& shader)
 	{
 		_shader_flags |= shader._shader_flags;
@@ -121,6 +123,9 @@ namespace idk::ogl
 
 	Program& Program::Link()
 	{
+		if (_program_id)
+			glDeleteProgram(_program_id);
+
 		_program_id = glCreateProgram();
 		glProgramParameteri(_program_id, GL_PROGRAM_SEPARABLE, GL_TRUE);
 		for (auto& elem : _shaders)
@@ -169,7 +174,6 @@ namespace idk::ogl
 				}
 			}
 		}
-
 
 		for (auto& elem : _shaders)
 			glDetachShader(_program_id, elem._shader_id);

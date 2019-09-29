@@ -157,7 +157,7 @@ TEST(Serialize, TestSerializeComplex)
 
 struct serialass : serialize_this
 {
-	variant<bool, float, int, vec2, vec3, vec4, mat3, mat4> var;
+	UniformInstance var;
 	testserialize_enum x = testserialize_enum::TAU;
 };
 REFLECT_BEGIN(serialass, "serialass")
@@ -255,4 +255,19 @@ TEST(Serialize, TestParseScene)
 	EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
 	EXPECT_EQ(t1.id, transform_1_id);
 	EXPECT_EQ(o1.Parent(), o0.GetHandle());
+}
+
+struct structthatcontainsdyn
+{
+    reflect::dynamic dyn;
+};
+REFLECT_BEGIN(structthatcontainsdyn, "structthatcontainsdyn")
+REFLECT_VARS(dyn)
+REFLECT_END()
+TEST(Serialize, TestSerializeStructThatContainsDyn)
+{
+    structthatcontainsdyn x{ string("hello") };
+    auto str = serialize_text(x);
+    structthatcontainsdyn x2 = parse_text<structthatcontainsdyn>(str);
+    ASSERT_EQ(x.dyn.get<string>(), x2.dyn.get<string>());
 }

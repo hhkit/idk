@@ -93,9 +93,4 @@ namespace idk::vkn
 		return mesh;
 	}
 
-	unique_ptr<Mesh> idk::vkn::MeshFactory::Create(FileHandle filepath)
-	{
-		return std::make_unique<VulkanMesh>();
-	}
-
 }

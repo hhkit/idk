@@ -1,9 +1,25 @@
 #include "pch.h"
 #include "PipelineProgram.h"
 #include <idk_opengl/program/Program.h>
+#include <iostream>
 
 namespace idk::ogl
 {
+	void DebugPipeline(GLuint pipeline)
+	{
+		GLint length = 0;
+		glGetProgramPipelineiv(pipeline, GL_INFO_LOG_LENGTH, &length);
+		if (length)
+		{
+			std::string infolog;
+			infolog.reserve(length + 1);
+
+			glGetProgramPipelineInfoLog(pipeline, length, &length, infolog.data());
+			std::cout << infolog << "\n";
+		}
+	}
+
+
 	PipelineProgram::PipelineProgram()
 	{
 		glGenProgramPipelines(1, &_pipeline);
@@ -15,7 +31,11 @@ namespace idk::ogl
 
 	void PipelineProgram::PushProgram(RscHandle<ShaderProgram> gen_program)
 	{
+		if (!gen_program)
+			return;
 		auto& program = gen_program.as<Program>();
+		if (program.ShaderFlags() == 0)
+			return;
 
 		_programs.erase(std::remove_if(_programs.begin(), _programs.end(), [&program, this](RscHandle<ShaderProgram> prog_handle)->bool
 		{
@@ -31,7 +51,9 @@ namespace idk::ogl
 		}), _programs.end());
 
 		_programs.emplace_back(gen_program);
-		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID());
+		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID()); 
+		DebugPipeline(_pipeline);
+
 	}
 
 	void PipelineProgram::PopProgram(GLenum shader_flags)
@@ -42,6 +64,7 @@ namespace idk::ogl
 			if (prog.ShaderFlags() & shader_flags)
 			{
 				glUseProgramStages(_pipeline, prog.ShaderFlags(), 0);
+				DebugPipeline(_pipeline);
 				return true;
 			}
 			else
@@ -53,6 +76,7 @@ namespace idk::ogl
 	{
 		_programs.clear();
 		glUseProgramStages(_pipeline, GL_ALL_SHADER_BITS, 0);
+		DebugPipeline(_pipeline);
 	}
 
 	void PipelineProgram::Use()
