@@ -17,6 +17,7 @@ Takes in a NEW Commands and handles its delete internally
 
 #include "pch.h"
 #include "CommandController.h"
+#include <IDE.h>
 
 namespace idk {
 	CommandController::CommandController()
@@ -63,6 +64,9 @@ namespace idk {
 			redoStack.push_back(std::move(undoStack.back()));
 
 		undoStack.pop_back();
+
+		IDE& editor = Core::GetSystem<IDE>();
+		editor.RefreshSelectedMatrix();
 	}
 
 	void CommandController::RedoCommand() {

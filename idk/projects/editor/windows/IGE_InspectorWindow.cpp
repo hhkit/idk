@@ -438,13 +438,14 @@ namespace idk {
 
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
+			vector<mat4>& originalMatrix = editor.selected_matrix;
 			//This is dumped if no items are changed.
-			if (!isBeingModified) {
-				originalMatrix.clear();
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
-				}
-			}
+			//if (!isBeingModified) {
+			//	originalMatrix.clear();
+			//	for (Handle<GameObject> i : editor.selected_gameObjects) {
+			//		originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+			//	}
+			//}
 
 
 			//Position
@@ -612,9 +613,11 @@ namespace idk {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
 					mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+					//Refresh the new matrix values
+					editor.RefreshSelectedMatrix();
 				}
 				hasChanged		= false;
-				isBeingModified = false;
+				//isBeingModified = false;
 			}
 
 			ImGui::PopID();
@@ -789,16 +792,16 @@ namespace idk {
 
 	void IGE_InspectorWindow::TransformModifiedCheck()
 	{
-		if (ImGui::IsItemEdited()) {
-			isBeingModified = true;
-		}
+		// if (ImGui::IsItemEdited()) {
+		// 	isBeingModified = true;
+		// }
 		if (ImGui::IsItemDeactivatedAfterEdit()) {
 			hasChanged = true;
 
 		}
 		else if (ImGui::IsItemDeactivated()) {
 			hasChanged = false;
-			isBeingModified = false;
+			//isBeingModified = false;
 
 		}
 	}
