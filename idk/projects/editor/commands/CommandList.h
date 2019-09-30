@@ -16,9 +16,7 @@ Contains all commands
 
 #include <editor/commands/CMD_CreateGameObject.h>
 #include <editor/commands/CMD_DeleteGameObject.h>
-#include <editor/commands/CMD_MoveGameObject.h>
-#include <editor/commands/CMD_RotateGameObject.h>
-#include <editor/commands/CMD_ScaleGameObject.h>
+#include <editor/commands/CMD_TransformGameObject.h>
 #include <editor/commands/CMD_AddComponent.h>
 #include <editor/commands/CMD_DeleteComponent.h>
 #include <editor/commands/CMD_ModifyInput.h>

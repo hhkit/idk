@@ -177,13 +177,11 @@
     <ClInclude Include="commands\CMD_DeleteComponent.h" />
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
+    <ClInclude Include="commands\CMD_TransformGameObject.h" />
     <ClInclude Include="DragDropTypes.h" />
     <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="commands\CMD_AddComponent.h" />
     <ClInclude Include="commands\CMD_CreateGameObject.h" />
-    <ClInclude Include="commands\CMD_MoveGameObject.h" />
-    <ClInclude Include="commands\CMD_RotateGameObject.h" />
-    <ClInclude Include="commands\CMD_ScaleGameObject.h" />
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
@@ -216,13 +214,11 @@
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <FileType>Document</FileType>
     </ClInclude>
+    <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
-    <ClCompile Include="commands\CMD_MoveGameObject.cpp" />
-    <ClCompile Include="commands\CMD_RotateGameObject.cpp" />
-    <ClCompile Include="commands\CMD_ScaleGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
     <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
