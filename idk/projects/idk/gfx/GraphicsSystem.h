@@ -38,6 +38,7 @@ namespace idk
 		virtual void Prerender() {};
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
+		void BufferedLightData(vector<LightData>& out);
 		virtual GraphicsAPI GetAPI() = 0;
 
 		bool editorExist{false};
@@ -46,6 +47,7 @@ namespace idk
 		{
 			vector<CameraData>   camera;
 			vector<LightData>    lights;
+			vector<CameraData>   light_camera_data;
 			vector<RenderObject> mesh_render;
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;

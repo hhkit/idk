@@ -35,7 +35,9 @@ namespace idk::vkn
 		GraphicsAPI GetAPI() override;
 		void RenderRenderBuffer() override;
 		void SwapBuffer() override;
+		
 		VulkanState& Instance() { return *instance_; }
+
 
 		VulkanState& GetVulkanHandle();
 	private:

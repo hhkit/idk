@@ -334,7 +334,7 @@ namespace idk::ogl
 		pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::SkyBox]);
 		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().brdf);
 
-		pipeline.SetUniform("environment_probe", r_cast<int>(handle->ID()));
+		pipeline.SetUniform("environment_probe", s_cast<int>(r_cast<intptr_t>(handle->ID())));
 
 		box_mesh->Bind(renderer_reqs
 			{ {

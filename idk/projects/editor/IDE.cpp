@@ -36,6 +36,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <imgui/ImGuizmo.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
+#include <editor/windows/IGE_ShadowMapWindow.h>
 
 namespace idk
 {
@@ -152,6 +153,7 @@ namespace idk
 
 #define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
 		ADD_WINDOW(IGE_SceneView);
+		ADD_WINDOW(IGE_ShadowMapWindow);
 		ADD_WINDOW(IGE_ProjectWindow);
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);

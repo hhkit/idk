@@ -493,73 +493,73 @@ namespace idk::vkn
 			}
 			if(fprog)
 			{
-			//Account for material bindings
-			for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
-			{
-				auto& name = itr->first;
-				auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
-				if (!mat_uni_itr)
-					mat_uni_itr = dc.material_instance->GetUniform(itr->first+"[0]");
-				if (mat_uni_itr )
+				//Account for material bindings
+				for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 				{
-					auto& ubo_info = itr->second;
-					auto& layout = ubo_info.layout;
+					auto& name = itr->first;
+					auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
+					if (!mat_uni_itr)
+						mat_uni_itr = dc.material_instance->GetUniform(itr->first+"[0]");
+					if (mat_uni_itr )
 					{
-						layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
-						//collated_layouts[layout].second++;
-
-						switch (ubo_info.type)
+						auto& ubo_info = itr->second;
+						auto& layout = ubo_info.layout;
 						{
-							case uniform_layout_t::UniformType::eBuffer:
+							layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
+							//collated_layouts[layout].second++;
+
+							switch (ubo_info.type)
 							{
-								auto&& data = dc.material_instance->GetUniformBlock(name);
-								auto&& [buffer, offset] = ubo_manager.Add(data);
-								collated_bindings[ubo_info.set].emplace_back(
-									ProcessedRO::BindingInfo
-									{
-										ubo_info.binding,
-										buffer,
-										offset,
-										0,
-										ubo_info.size
-									}
-								);
-								collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
-							}
-							break;
-							case uniform_layout_t::UniformType::eSampler:
-							{
-								for (auto i = ubo_info.size; i-- > 0;)
+								case uniform_layout_t::UniformType::eBuffer:
 								{
-									auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
-									if (data.size())
-									{
-
-										auto& texture = data.begin()->second.as<vkn::VknTexture>();
-										collated_bindings[ubo_info.set].emplace_back(
-											ProcessedRO::BindingInfo
-											{
-												ubo_info.binding,
-												ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
-												0,
-												i,
-												ubo_info.size
-											}
-										);
-
-									}
+									auto&& data = dc.material_instance->GetUniformBlock(name);
+									auto&& [buffer, offset] = ubo_manager.Add(data);
+									collated_bindings[ubo_info.set].emplace_back(
+										ProcessedRO::BindingInfo
+										{
+											ubo_info.binding,
+											buffer,
+											offset,
+											0,
+											ubo_info.size
+										}
+									);
+									collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
 								}
-								//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
-								collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
-							}
-							break;
+								break;
+								case uniform_layout_t::UniformType::eSampler:
+									{
+										for (auto i = ubo_info.size; i-- > 0;)
+										{
+											auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
+											if (data.size())
+											{
+
+												auto& texture = data.begin()->second.as<vkn::VknTexture>();
+												collated_bindings[ubo_info.set].emplace_back(
+													ProcessedRO::BindingInfo
+													{
+														ubo_info.binding,
+														ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+														0,
+														i,
+														ubo_info.size
+													}
+												);
+
+											}
+										}
+										//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
+										collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+									}
+									break;
 							}
 						}
-					}
+						}
 				
 				}
-				itr_index++;
 			}
+			itr_index++;
 			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
 		}
 		return result;
@@ -781,6 +781,8 @@ namespace idk::vkn
 			auto msprog = GetMeshRendererShaderModule();
 			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance->material->_shader_program;
 			auto* fprog = (camera.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
+			if ((!camera.is_shadow && !obj.material_instance) || !msprog)
+				continue;
 			if(fprog)
 				shaders.emplace_back(sprog);
 			//TODO Grab everything and render them

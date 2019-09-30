@@ -185,6 +185,7 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
     <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
     <ClInclude Include="loading\OpenGLTextureLoader.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
+    <ClCompile Include="windows\IDE_ShadowMapWindow.cpp" />
     <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
     <ClCompile Include="windows\IGE_IWindow.cpp" />

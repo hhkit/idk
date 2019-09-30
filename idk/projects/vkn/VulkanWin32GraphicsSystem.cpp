@@ -124,6 +124,11 @@ namespace idk::vkn
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
+
+		auto copy_cams = curr_buffer.light_camera_data;
+		std::copy(curr_buffer.camera.begin(), curr_buffer.camera.end(), std::back_inserter(copy_cams));
+		std::swap(copy_cams, curr_buffer.camera);
+
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
 
 		_debug_renderer->GrabDebugBuffer();
