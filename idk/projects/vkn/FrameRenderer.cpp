@@ -130,31 +130,31 @@ namespace idk::vkn
 			}
 		}
 		//else
-		{
-			string filename = "/assets/shader/shadow.frag";
-			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			auto& shader_mod = _shadow_shader_module;
-			//if (!actualfile || !rsc.resources.size())
-			if(!shader_mod)
-			{
-
-				//vector<buffer_desc> desc{
-				//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
-				//};
-				Core::GetSystem<FileSystem>().Update();
-				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename,false).value();
-				//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
-				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-
-			}
-			//else
-			//{
-			//	shader_mod = rsc.resources.front().As<ShaderProgram>();
-			//}
-		}
+		//{
+		//	string filename = "/assets/shader/shadow.frag";
+		//	//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+		//	//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+		//	auto& shader_mod = _shadow_shader_module;
+		//	//if (!actualfile || !rsc.resources.size())
+		//	if(!shader_mod)
+		//	{
+		//
+		//		//vector<buffer_desc> desc{
+		//		//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
+		//		//};
+		//		Core::GetSystem<FileSystem>().Update();
+		//		//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+		//		shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename,false).value();
+		//		//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
+		//		//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+		//		//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+		//
+		//	}
+		//	//else
+		//	//{
+		//	//	shader_mod = rsc.resources.front().As<ShaderProgram>();
+		//	//}
+		//}
 		{
 
 			vk::AttachmentDescription colorAttachment
@@ -419,16 +419,17 @@ namespace idk::vkn
 			auto& mat_inst = *dc.material_instance;
 			auto& mat = *mat_inst.material;
 			;
-			auto sprog = (cam.is_shadow) ? _shadow_shader_module : mat._shader_program;
+			auto sprog = mat._shader_program;
 			
-			auto& fprog = sprog.as<ShaderModule>();
+			auto* fprog = (cam.is_shadow)?nullptr:&sprog.as<ShaderModule>();
 			auto& vprog = mesh_mod.as<ShaderModule>();
 
-			if (!fprog || !vprog)
+			if ((!fprog&&!cam.is_shadow) || !mat_inst.material || !vprog)
 				continue;
 
 			shaders.emplace_back(mesh_mod);
-			shaders.emplace_back(sprog);
+			if(fprog)
+				shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			//Force pipeline creation
@@ -456,11 +457,12 @@ namespace idk::vkn
 				for (auto& shadow_map : state.active_lights)
 				{
 					auto& sm_uni = shadow_map->light_map;
-					PreProcUniform<int>(fprog.GetLayout("shadow_map"),0, sm_uni, collated_layouts, collated_bindings );
+					PreProcUniform<int>(fprog->GetLayout("shadow_map"),0, sm_uni, collated_layouts, collated_bindings );
 				}
 
 			}
-
+			if(fprog)
+			{
 			//Account for material bindings
 			for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 			{
@@ -477,49 +479,50 @@ namespace idk::vkn
 
 						switch (ubo_info.type)
 						{
-						case uniform_layout_t::UniformType::eBuffer:
-						{
-							auto&& data = dc.material_instance->GetUniformBlock(name);
-							auto&& [buffer, offset] = ubo_manager.Add(data);
-							collated_bindings[ubo_info.set].emplace_back(
-								ProcessedRO::BindingInfo
-								{
-									ubo_info.binding,
-									buffer,
-									offset,
-									0,
-									ubo_info.size
-								}
-							);
-							collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
-						}
-						break;
-						case uniform_layout_t::UniformType::eSampler:
-						{
-							for (auto i = ubo_info.size; i-- > 0;)
+							case uniform_layout_t::UniformType::eBuffer:
 							{
-								auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
-								if (data.size())
-								{
-
-									auto& texture = data.begin()->second.as<vkn::VknTexture>();
-									collated_bindings[ubo_info.set].emplace_back(
-										ProcessedRO::BindingInfo
-										{
-											ubo_info.binding,
-											ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
-											0,
-											i,
-											ubo_info.size
-										}
-									);
-
-								}
+								auto&& data = dc.material_instance->GetUniformBlock(name);
+								auto&& [buffer, offset] = ubo_manager.Add(data);
+								collated_bindings[ubo_info.set].emplace_back(
+									ProcessedRO::BindingInfo
+									{
+										ubo_info.binding,
+										buffer,
+										offset,
+										0,
+										ubo_info.size
+									}
+								);
+								collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
 							}
-							//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
-							collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
-						}
-						break;
+							break;
+							case uniform_layout_t::UniformType::eSampler:
+							{
+								for (auto i = ubo_info.size; i-- > 0;)
+								{
+									auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
+									if (data.size())
+									{
+
+										auto& texture = data.begin()->second.as<vkn::VknTexture>();
+										collated_bindings[ubo_info.set].emplace_back(
+											ProcessedRO::BindingInfo
+											{
+												ubo_info.binding,
+												ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+												0,
+												i,
+												ubo_info.size
+											}
+										);
+
+									}
+								}
+								//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
+								collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+							}
+							break;
+							}
 						}
 					}
 				}
@@ -744,7 +747,9 @@ namespace idk::vkn
 			shaders.emplace_back(GetMeshRendererShaderModule());
 			auto msprog = GetMeshRendererShaderModule();
 			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance->material->_shader_program;
-			shaders.emplace_back(sprog);
+			auto* fprog = (camera.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
+			if(fprog)
+				shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			auto config = *p_ro.config;

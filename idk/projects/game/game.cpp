@@ -135,6 +135,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 
+	auto& mat_inst_v = mat_inst->material.as<Material>();
+	auto& shader_v = mat_inst->material->_shader_program.as<ShaderProgram>();;
+
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
 		auto go = scene->CreateGameObject();
@@ -247,7 +250,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
 		auto light_obj = SpotLight{};
 		//light_obj.inner_angle = rad{ 0.5f };
-		light_obj.attenuation_radius = 0.001f;
+		light_obj.attenuation_radius = 0.1f;
 		light_comp->light = light_obj;
 		light_comp->SetLightMap(light_map);
 	}

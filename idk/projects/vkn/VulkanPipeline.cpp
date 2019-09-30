@@ -132,14 +132,18 @@ namespace idk::vkn
 	}
 	void GetLayouts(const RscHandle<ShaderProgram>& hshader, hash_table<uint32_t, vk::DescriptorSetLayout>& out)
 	{
-		auto& frag_shader = hshader.as<ShaderModule>();
-		auto itr = frag_shader.LayoutsBegin();
-		for (; itr != frag_shader.LayoutsEnd(); ++itr)
+		if (hshader)
 		{
-			auto& [set, layout] = *itr;
-			out.emplace(set, *layout);
-		}
 
+			auto& shader = hshader.as<ShaderModule>();
+			auto itr = shader.LayoutsBegin();
+			for (; itr != shader.LayoutsEnd(); ++itr)
+			{
+				auto& [set, layout] = *itr;
+				out.emplace(set, *layout);
+			}
+
+		}
 	}
 
 	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan)
@@ -191,6 +195,7 @@ namespace idk::vkn
 
 		{
 			hash_table<uint32_t, vk::DescriptorSetLayout> layouts;
+
 
 			GetLayouts(config.frag_shader, layouts);
 			GetLayouts(config.vert_shader, layouts);
@@ -314,33 +319,49 @@ namespace idk::vkn
 		> result;
 		auto& [info, rsc] = result;
 
-		auto& vert = config.vert_shader.as<ShaderModule>();//GetBinaryFile("shaders/vertex.vert.spv");
-		auto& frag = config.frag_shader.as<ShaderModule>();//GetBinaryFile("shaders/fragment.frag.spv");
-		auto fragModule = frag.Module();//rsc.emplace_back(vulkan.CreateShaderModule(frag));
-		auto vertModule = vert.Module();//rsc.emplace_back(vulkan.CreateShaderModule(vert));
+		auto vertModule = [](auto& config) ->std::optional<vk::ShaderModule> 
+		{
+			if (config.vert_shader)
+				return config.vert_shader.as<ShaderModule>().Module();
+			else
+				return std::nullopt;
+		}(config);
+		auto fragModule = [](auto& config) ->std::optional<vk::ShaderModule>
+		{ 
+			if (config.frag_shader)
+				return config.frag_shader.as<ShaderModule>().Module();
+			else
+				return std::nullopt;
+		}(config);//rsc.emplace_back(vulkan.CreateShaderModule(frag));
 
 		const char* entryPoint = "main";
-
-		vk::PipelineShaderStageCreateInfo fragShaderStageInfo
+		if (fragModule)
 		{
-			vk::PipelineShaderStageCreateFlags{},
-			vk::ShaderStageFlagBits::eFragment,
-			fragModule,
-			entryPoint,
-			nullptr
-		};
+			vk::PipelineShaderStageCreateInfo fragShaderStageInfo
+			{
+				vk::PipelineShaderStageCreateFlags{},
+				vk::ShaderStageFlagBits::eFragment,
+				*fragModule,
+				entryPoint,
+				nullptr
+			};
+			info.emplace_back(fragShaderStageInfo);
+
+		}
+		if (vertModule)
+		{
 
 		vk::PipelineShaderStageCreateInfo vertShaderStageInfo
 		{
 			vk::PipelineShaderStageCreateFlags{},
 			vk::ShaderStageFlagBits::eVertex,
-			vertModule,
+			*vertModule,
 			entryPoint,
 			nullptr
 		};
 		//vk::PipelineShaderStageCreateInfo stageCreateInfo[] = { vertShaderStageInfo,fragShaderStageInfo };
-		info.emplace_back(fragShaderStageInfo);
 		info.emplace_back(vertShaderStageInfo);
+		}
 		return result;
 	}
 

@@ -46,7 +46,14 @@ namespace idk::vkn
 		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
 		bool HasUpdate()const override { return buf_obj.HasUpdate(); }
 		void UpdateCurrent(size_t index)override { buf_obj.UpdateCurrent(index); }
-		
+
+		ShaderModule() = default;
+		ShaderModule(const ShaderModule&) = default;
+		ShaderModule(ShaderModule&&) = default;
+		ShaderModule& operator=(ShaderModule&&) = default;
+		ShaderModule& operator=(const ShaderModule&) = default;
+		~ShaderModule();
+
 	private:
 		struct Data
 		{

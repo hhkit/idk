@@ -230,5 +230,10 @@ const UboInfo& ShaderModule::GetLayout(string uniform_name) const
 	
 	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
 }
+void DoNothing();
+ShaderModule::~ShaderModule()
+{
+	DoNothing();
+}
 
 }

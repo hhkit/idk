@@ -22,7 +22,7 @@ namespace idk
 	{
 		mat4 operator()(SpotLight spotlight)
 		{
-			return perspective(spotlight.outer_angle, 1.0f, 0.1f, spotlight.attenuation_radius);
+			return perspective(spotlight.outer_angle, 1.0f, 0.1f, (spotlight.use_inv_sq_atten) ? (1 / spotlight.attenuation_radius) : spotlight.attenuation_radius);;//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
@@ -86,7 +86,7 @@ namespace idk
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
 					
-					vp = perspective(spotlight.outer_angle*2,1.0f,0.01f, (spotlight.use_inv_sq_atten)? (1/spotlight.attenuation_radius) :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
+					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 				retval.vp = LightCameraProj{}(light_variant) *LightCameraView{ this }(light_variant);
 				retval.light_map = light_variant.light_map;
