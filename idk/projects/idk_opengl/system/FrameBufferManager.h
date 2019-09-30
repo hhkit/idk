@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include <idk_opengl/resource/OpenGLCubemap.h>
 
 namespace idk
 {
@@ -18,9 +19,12 @@ namespace idk::ogl
 		FrameBufferManager& operator=(FrameBufferManager&&);
 		~FrameBufferManager();
 
+		void SetRenderTarget(const RscHandle<OpenGLCubemap>& target, bool for_convolution = false);
 		void SetRenderTarget(RscHandle<FrameBuffer> target);
 		void ResetFramebuffer();
 	private:
 		GLuint _fbo_id = 0;
+
+		void CheckFBStatus();
 	};
 }

@@ -16,6 +16,7 @@ namespace idk::ogl
 
 		void RenderDrawBuffer();
 
+		void ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle);
 	private:
 		enum VertexShaders
 		{

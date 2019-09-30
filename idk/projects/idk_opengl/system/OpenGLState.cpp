@@ -331,4 +331,12 @@ namespace idk::ogl
 		fb_man.ResetFramebuffer();
 	}
 
+	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)
+	{
+		auto sz = handle->Size();
+		//glViewport(0, 0, sz.x, sz.y);
+
+		//fb_man.SetRenderTarget(handle);
+	}
+
 }

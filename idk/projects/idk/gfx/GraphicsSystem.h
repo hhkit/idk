@@ -6,6 +6,7 @@
 #include <gfx/pipeline_config.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
+
 namespace idk
 {
 	enum class GraphicsAPI
@@ -20,10 +21,13 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		RscHandle<Texture> brdf;
+		
 		void Init() override = 0;
 		void Shutdown() override = 0;
-		//Converts the Renderers and transforms stores the render data into a buffer
 		
+
+		//Converts the Renderers and transforms stores the render data into a buffer
 		virtual void BufferGraphicsState(
 			span<class MeshRenderer>,
 			span<Animator> animators,
@@ -31,6 +35,7 @@ namespace idk
 			span<const class Transform>, 
 			span<const Camera> camera, 
 			span<const Light> lights);
+		virtual void Prerender() {};
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
 		virtual GraphicsAPI GetAPI() = 0;

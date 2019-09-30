@@ -7,6 +7,7 @@
 #include <gfx/RenderObject.h>
 namespace idk
 {
+
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
