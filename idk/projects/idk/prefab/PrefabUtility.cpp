@@ -202,56 +202,58 @@ namespace idk
         return handle;
     }
 
-    void PrefabUtility::Save(Handle<GameObject> go, PathHandle save_path)
+	RscHandle<Prefab> PrefabUtility::Save(Handle<GameObject> go, string_view save_path)
     {
-        Prefab prefab;
-        auto& root = prefab.data.emplace_back();
-        for (auto& c : go->GetComponents())
-        {
-            root.components.emplace_back((*c).copy());
-        }
+		auto handle = Core::GetResourceManager().LoaderEmplaceResource<Prefab>();
+		auto& prefab = *handle;
+		auto& root = prefab.data.emplace_back();
+		for (auto& c : go->GetComponents())
+		{
+			root.components.emplace_back((*c).copy());
+		}
 
-        // build tree
-        //Scene scene{ go.scene };
+		// build tree
+		//Scene scene{ go.scene };
 		Scene& scene = *Core::GetSystem<SceneManager>().GetSceneByBuildIndex(go.scene);
 
 
-        vector<small_string<GenericHandle::index_t>> nodes;
-        vector<GenericHandle::gen_t> gens;
-        for (auto& o : scene)
-        {
-            auto index = o.GetHandle().index;
-            if (index >= gens.size())
-            {
-                nodes.resize(index + 1);
-                gens.resize(index + 1);
-            }
-            gens[index] = o.GetHandle().gen;
-            if (o.Parent())
-                nodes[o.Parent().index] += index;
-        }
+		vector<small_string<GenericHandle::index_t>> nodes;
+		vector<GenericHandle::gen_t> gens;
+		for (auto& o : scene)
+		{
+			auto index = o.GetHandle().index;
+			if (index >= gens.size())
+			{
+				nodes.resize(index + 1);
+				gens.resize(index + 1);
+			}
+			gens[index] = o.GetHandle().gen;
+			if (o.Parent())
+				nodes[o.Parent().index] += index;
+		}
 
-        // tree walk
-        small_string<GenericHandle::index_t> stack(1, go.index);
-        small_string<GenericHandle::index_t> game_objects;
-        while (stack.size())
-        {
-            auto curr_par = stack.back();
-            stack.pop_back();
-            stack += nodes[curr_par];
-            game_objects += curr_par;
+		// tree walk
+		small_string<GenericHandle::index_t> stack(1, go.index);
+		small_string<GenericHandle::index_t> game_objects;
+		while (stack.size())
+		{
+			auto curr_par = stack.back();
+			stack.pop_back();
+			stack += nodes[curr_par];
+			game_objects += curr_par;
 
-            for (auto child_index : nodes[curr_par])
-            {
-                Handle<GameObject> child{ child_index, gens[child_index], go.scene };
-                PrefabData& child_prefab_data = prefab.data.emplace_back();
-                for (auto& c : child->GetComponents())
+			for (auto child_index : nodes[curr_par])
+			{
+				Handle<GameObject> child{ child_index, gens[child_index], go.scene };
+				PrefabData& child_prefab_data = prefab.data.emplace_back();
+				for (auto& c : child->GetComponents())
 					child_prefab_data.components.emplace_back((*c).copy());
-                child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
-            }
-        }
+				child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
+			}
+		}
 
-        save_path.Open(FS_PERMISSIONS::WRITE) << serialize_text(prefab.data);
+		Core::GetSystem<FileSystem>().Open(save_path, FS_PERMISSIONS::WRITE) << serialize_text(prefab.data);
+		return handle;
     }
 
     Handle<GameObject> PrefabUtility::GetPrefabInstanceRoot(Handle<GameObject> go)

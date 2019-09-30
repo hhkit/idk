@@ -33,8 +33,17 @@ namespace idk {
 
 	private:
 
+		bool isComponentMarkedForDeletion = false;
+		string componentNameMarkedForDeletion{}; //Is empty by default
+
+		void displayVal(reflect::dynamic dyn);
+
 		void DisplayNameComponent(Handle<Name>& c_name);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
+		void DisplayAnimatorComponent(Handle<Animator>& c_anim);
+
+
+		void DisplayOtherComponent(GenericHandle& component);
 
 		void DisplayVec3(vec3& vec);
 
@@ -46,6 +55,11 @@ namespace idk {
 		const float itemSpacing = 50;
 		const float XYZSliderWidth = 10;
 
+		//For when transforms are edited
+		bool			hasChanged = false; 
+		vector<mat4>	originalMatrix{};
+		bool			isBeingModified = false;
+		void			TransformModifiedCheck();
 
 	};
 

@@ -155,6 +155,9 @@ namespace idk::reflect
 		// if this is a variant, gets the held variant value. check using type.is_template<std::variant>()
 		dynamic get_variant_value() const;
 
+        // call on_parse if it exists. meant for serializers.
+        void on_parse() const;
+
 		template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, dynamic>>>
 		dynamic& operator=(T&& rhs);
 		dynamic& operator=(const dynamic& rhs);

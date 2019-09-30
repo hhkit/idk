@@ -28,27 +28,27 @@ namespace idk
 		mat4 operator()(T&) { return mat4{}; }
 	};
 
-	RscHandle<LightMap>& Light::GetLightMap()
+	RscHandle<RenderTarget>& Light::GetLightMap()
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant) ->RscHandle<LightMap> &
+			std::visit([&](auto& light_variant) ->RscHandle<RenderTarget> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	const RscHandle<LightMap>& Light::GetLightMap() const
+	const RscHandle<RenderTarget>& Light::GetLightMap() const
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant)-> const RscHandle<LightMap> &
+			std::visit([&](auto& light_variant)-> const RscHandle<RenderTarget> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	void Light::SetLightMap(const RscHandle<LightMap>& light_map)
+	void Light::SetLightMap(const RscHandle<RenderTarget>& light_map)
 	{
 		GetLightMap() = light_map;
 	}
@@ -72,9 +72,9 @@ namespace idk
 				{
 					const DirectionalLight& dir_light = light_variant;
 					retval.light_color = dir_light.light_color;
-					retval.v_dir = GetGameObject()->Transform()->Forward();
-					//TODO: Grab potential shadow receivers and caster before generating the approrpriate sized map
-					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
+					auto tfm = GetGameObject()->Transform();
+					retval.v_pos = tfm->GlobalPosition();
+					retval.v_dir = tfm->Forward();
 				}
 
 				if constexpr (std::is_same_v<T, SpotLight>)

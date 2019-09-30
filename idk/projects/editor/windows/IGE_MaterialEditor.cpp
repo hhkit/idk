@@ -344,7 +344,7 @@ namespace idk
 
                         if (slot_name == "$Color")
                         {
-                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
+                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 * _canvas.zoom + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
 
                             if (next_value.empty())
                                 final_control_values += (next_value = "0,0,0,1") + '|';
@@ -657,7 +657,7 @@ namespace idk
 
         if (ImGui::BeginMenuBar())
         {
-            if (ImGui::Button("Compile"))
+            if (ImGui::Button("Compile & Save"))
             {
                 g.Compile();
                 Core::GetResourceManager().Save(_graph);
@@ -669,7 +669,7 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered())
+        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered())
             ImGui::OpenPopup("nodes_context_menu");
         if (ImGui::IsPopupOpen("nodes_context_menu"))
             ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
@@ -826,7 +826,7 @@ namespace idk
         if (ImGui::BeginChild("Material_Editor_miniwin", ImVec2(200, 300), true, ImGuiWindowFlags_NoMove))
         {
             auto graph_name = Core::GetResourceManager().GetPath(_graph);
-            ImGui::Text(graph_name.data());
+            ImGui::Text(graph_name->data());
 
             auto meta = _graph->GetMeta();
             bool changed = false;

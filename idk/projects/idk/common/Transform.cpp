@@ -48,7 +48,7 @@ namespace idk
 	mat4 Transform::GlobalMatrix() const
 	{
 		if (parent)
-			return LocalMatrix() * parent->Transform()->GlobalMatrix();
+			return parent->Transform()->GlobalMatrix() * LocalMatrix();
 		else
 			return LocalMatrix();
 	}

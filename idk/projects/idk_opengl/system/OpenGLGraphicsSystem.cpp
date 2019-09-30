@@ -24,7 +24,13 @@
 
 namespace idk::ogl
 {
-	Win32GraphicsSystem::Win32GraphicsSystem() = default;
+	Win32GraphicsSystem::Win32GraphicsSystem()
+		: cubemaps_to_convolute{
+		&Win32GraphicsSystem::ConvoluteCubeMap
+	}
+	{
+	};
+
 	Win32GraphicsSystem::~Win32GraphicsSystem() = default;
 
 	void Win32GraphicsSystem::Init()
@@ -40,11 +46,11 @@ namespace idk::ogl
 		{
 			_viewport_size = new_size;
 		});
+		InitResourceLoader();
 	}
 
 	void Win32GraphicsSystem::LateInit()
 	{
-		InitResourceLoader();
 		_opengl->GenResources();
 	}
 
@@ -72,11 +78,21 @@ namespace idk::ogl
 	{
 		::SwapBuffers(_windows_context);
 	}
+	void Win32GraphicsSystem::EnqueueCubemapForConvolution(RscHandle<ogl::OpenGLCubemap> handle)
+	{
+		cubemaps_to_convolute.enqueue(this, handle);
+	}
 	OpenGLState& Win32GraphicsSystem::Instance()
 	{
 		// TODO: insert return statement here
 		return *_opengl;
 	}
+
+	void Win32GraphicsSystem::Prerender()
+	{
+		cubemaps_to_convolute.invoke_all();
+	}
+
 	void Win32GraphicsSystem::CreateContext()
 	{
 		_windows_context = GetDC(Core::GetSystem<Windows>().GetWindowHandle());
@@ -177,6 +193,11 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
 		Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
+	}
+
+	void Win32GraphicsSystem::ConvoluteCubeMap(RscHandle<ogl::OpenGLCubemap> handle)
+	{
+		_opengl->ConvoluteCubeMap(handle);
 	}
 
 	void Win32GraphicsSystem::DestroyContext()

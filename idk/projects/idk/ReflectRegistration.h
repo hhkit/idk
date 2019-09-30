@@ -6,6 +6,8 @@
 #include <IncludeResources.h>
 #include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
+#include <math/matrix_decomposition.h>
+
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -66,6 +68,15 @@ REFLECT_CTOR(float, float, float)
 REFLECT_VARS(r, g, b, a)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::rad, "rad")
+REFLECT_CTOR(float)
+REFLECT_VARS(value)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::matrix_decomposition<idk::real>, "matrix_decomposition")
+REFLECT_VARS(position, rotation, scale)
+REFLECT_END()
+
 /*==========================================================================
  * resource handles
  *========================================================================*/
@@ -79,6 +90,14 @@ REFLECT_VARS(guid)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::anim::Animation>, "RscHandle<Animation>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::anim::Skeleton>, "RscHandle<Skeleton>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
@@ -187,6 +206,10 @@ REFLECT_BEGIN(idk::SceneManager, "SceneManager")
 REFLECT_VARS(_scenes)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")
+REFLECT_VARS(build_index, scene)
+REFLECT_END()
+
 /*==========================================================================
  * components
  *========================================================================*/
@@ -229,6 +252,34 @@ REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::Light, "Light")
+REFLECT_VARS(light, shadow_bias, casts_shadows)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PointLight, "PointLight")
+REFLECT_VARS(intensity, light_color, attenuation_radius)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
+REFLECT_VARS(intensity, light_color)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::SpotLight, "SpotLight")
+REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
 REFLECT_VARS(prefab, overrides, objects)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
+REFLECT_VARS(mesh, material_instance)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Animator, "Animator")
+REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Camera, "Camera")
+REFLECT_VARS(enabled, near_plane, far_plane)
 REFLECT_END()

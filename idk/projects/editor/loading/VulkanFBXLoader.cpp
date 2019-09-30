@@ -53,7 +53,7 @@ namespace idk
 
 		fbx_loader_detail::BoneSet bones_set{ fbx_loader_detail::BoneData{ai_scene->mRootNode->mName.data} };
 		hash_table<string, size_t> bones_table;
-		vector<anim::Skeleton::Bone> bones;
+		vector<anim::Bone> bones;
 
 		// Count the number of vertices and indices per mesh entry
 		mesh_entries.reserve(ai_scene->mNumMeshes);

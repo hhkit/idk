@@ -30,7 +30,7 @@ namespace idk {
 
 
 	private:
-
+		ImGuiTextFilter textFilter{};
 
 	};
 

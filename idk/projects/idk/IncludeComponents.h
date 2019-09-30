@@ -14,7 +14,7 @@
 #include <audio/AudioSource.h>
 #include <audio/AudioListener.h>
 
-#include <anim/AnimationController.h>
+#include <anim/Animator.h>
 
 #include <prefab/PrefabInstance.h>
 

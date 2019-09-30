@@ -19,6 +19,7 @@ namespace idk
 		PathHandle			GetPath					(string_view mountPath)				const;	// Tries GetFile then GetDir
 		PathHandle			GetFile					(string_view mountPath)				const;
 		PathHandle			GetDir					(string_view mountPath)				const;
+		string				ConvertFullToVirtual	(string_view fullPath)				const;
 		
 		string				GetFullPath				(string_view mountPath)				const;
 		vector<PathHandle>	GetFilesWithExtension	(string_view mountPath,

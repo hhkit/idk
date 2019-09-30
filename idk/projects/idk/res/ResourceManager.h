@@ -80,7 +80,7 @@ namespace idk
 		template<typename Res> Res& Get     (const RscHandle<Res>&);
 		template<typename Res> bool Free    (const RscHandle<Res>&);
 
-		template<typename Res> string_view GetPath(const RscHandle<Res>&);
+		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
 
 		/* RESOURCE LOADING - for high-level users like editor programmer */
 		template<typename Res>  RscHandle<Res>        Create  ();
@@ -89,6 +89,7 @@ namespace idk
 		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
 								GeneralGetResult      Get     (PathHandle path);
+		template<typename Res>  vector<RscHandle<Res>>GetAll();
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
 		                        FileMoveResult        Rename(PathHandle old_path, string_view new_mount_path);

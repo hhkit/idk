@@ -7,15 +7,23 @@
 #include <prefab/PropertyOverride.h>
 #include <gfx/UniformInstance.h>
 #include <gfx/ShaderGraph_data.h>
+#include <gfx/LightTypes.h>
 #include <res/ResourceMeta.h>
 #include <scene/SceneManager.h>
 #include <phys/Collider.h>
+#include <math/matrix_decomposition.h>
 
 namespace idk
 {
 	class GameObject;
 	class Mesh;
     class Prefab;
+
+	namespace anim
+	{
+		class Animation;
+		class Skeleton;
+	}
 }
 
 namespace idk::reflect
@@ -42,6 +50,7 @@ namespace idk::reflect
 		, mat3
 		, mat4
 		, color
+        , rad
 
 		// game objects
 		, Handle<GameObject>
@@ -54,11 +63,21 @@ namespace idk::reflect
 		, RscHandle<Mesh>
 		, UniformInstance
 		, hash_table<string, UniformInstance>
-		//, LightVariant
+		, LightVariant
 
 		// physics
 		, Collider::Shapes
 
+		// anim
+		, RscHandle<anim::Skeleton>
+		, RscHandle<anim::Animation>
+		, vector<RscHandle<anim::Animation>>
+		// , vector<Handle<GameObject>>
+		, matrix_decomposition<real>
+		, vector<matrix_decomposition<real>>
+		, vector<mat4>
+		, hash_table<string, size_t>
+		
 		// resources
 		, vector<SerializedMeta>
 

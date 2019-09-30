@@ -244,7 +244,7 @@ namespace idk
 			if (!FS::is_regular_file(tmp))
 				continue;
 
-			string filename = tmp.filename().string();
+			string filename = tmp.filename().generic_string();
 
 			auto result = mountDir._files_map.find(filename);
 			if (result == mountDir._files_map.end())
@@ -286,7 +286,7 @@ namespace idk
 			if (!FS::is_regular_file(tmp))
 				continue;
 
-			string filename = tmp.filename().string();
+			string filename = tmp.filename().generic_string();
 
 			auto result = mountDir._files_map.find(filename);
 			if (result == mountDir._files_map.end())
@@ -305,7 +305,7 @@ namespace idk
 						
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 									 "\t Prev Path: " << prev_path << "\n"
-									 "\t Curr Path: " << tmp.string() << "\n" << std::endl;
+									 "\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
 						return;
 					}
 				}
@@ -329,7 +329,7 @@ namespace idk
 			if (!FS::is_regular_file(tmp))
 				continue;
 
-			string filename = tmp.filename().string();
+			string filename = tmp.filename().generic_string();
 
 			auto result = dir._files_map.find(filename);
 			if (result == dir._files_map.end())
@@ -366,7 +366,7 @@ namespace idk
 			if (FS::is_regular_file(tmp))
 				continue;
 
-			string dir_name = tmp.filename().string();
+			string dir_name = tmp.filename().generic_string();
 
 			auto result = mountDir._sub_dirs.find(dir_name);
 			if (result == mountDir._sub_dirs.end())
@@ -416,7 +416,7 @@ namespace idk
 			if (FS::is_regular_file(tmp))
 				continue;
 
-			string filename = tmp.filename().string();
+			string filename = tmp.filename().generic_string();
 
 			auto result = mountDir._sub_dirs.find(filename);
 			if (result == mountDir._sub_dirs.end())
@@ -435,7 +435,7 @@ namespace idk
 
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 							"\t Prev Path: " << prev_path << "\n"
-							"\t Curr Path: " << tmp.string() << "\n" << std::endl;
+							"\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
 						return;
 					}
 				}

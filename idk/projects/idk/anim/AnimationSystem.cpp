@@ -12,13 +12,14 @@ namespace idk
 	{
 	}
 
-	void AnimationSystem::Update(span<AnimationController> controllers)
+	void AnimationSystem::Update(span<Animator> controllers)
 	{
 		// float a = Core::GetDT().count();
 
 		for (auto& elem : controllers)
 		{
 			auto anim = elem.GetCurrentAnimation();
+			const auto& skeleton = elem._skeleton->data();
 			if (elem._is_playing && anim)
 			{
 				// Update the components here:
@@ -32,7 +33,7 @@ namespace idk
 				// We keep all the bone transforms first. Easier to refer to parent's transform, fewer mat mults.
 				
 				// Compute the time
-				elem._elapsed += Core::GetDT().count();
+				elem._elapsed += Core::GetRealDT().count();
 				if (elem._elapsed >= anim->GetDuration())
 					elem._elapsed -= anim->GetDuration();
 				
@@ -41,14 +42,13 @@ namespace idk
 				float time_in_ticks = fmod(ticks, num_ticks);
 
 				// Loop through the skeleton
-				const auto& skeleton = elem._skeleton->data();
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 				{
 					auto& curr_go = elem._child_objects[bone_id];
 					const auto& curr_bone = skeleton[bone_id];
-					const anim::Animation::EasyAnimNode* anim_node = anim->GetEasyAnimNode(curr_bone._name);
+					const anim::EasyAnimNode* anim_node = anim->GetEasyAnimNode(curr_bone._name);
 
-					anim::Skeleton::BonePose curr_pose;
+					matrix_decomposition<real> curr_pose;
 					bool first = true;
 					if (anim_node != nullptr)
 					{
@@ -59,15 +59,15 @@ namespace idk
 							auto interp_pose = interpolateChannel(channel, time_in_ticks);
 							if (first)
 							{
-								curr_pose._translation = interp_pose._translation;
-								curr_pose._rotation =	 interp_pose._rotation;
-								curr_pose._scale =		 interp_pose._scale;
+								curr_pose.position =	interp_pose.position;
+								curr_pose.rotation =	interp_pose.rotation;
+								curr_pose.scale =		interp_pose.scale;
 								first = false;
 								continue;
 							}
-							curr_pose._translation =	curr_pose._translation	+ interp_pose._translation;
-							curr_pose._rotation =		curr_pose._rotation		* interp_pose._rotation;
-							curr_pose._scale =			curr_pose._scale		+ interp_pose._scale;
+							curr_pose.position = curr_pose.position + interp_pose.position;
+							curr_pose.rotation = curr_pose.rotation	* interp_pose.rotation;
+							curr_pose.scale =	 curr_pose.scale	+ interp_pose.scale;
 						}
 					}
 					else
@@ -77,41 +77,14 @@ namespace idk
 					}
 					
 					const auto& curr_local_bind_pose = elem._bind_pose[bone_id];
-					curr_pose._translation =	curr_local_bind_pose._translation	+ curr_pose._translation;
-					curr_pose._rotation =		curr_local_bind_pose._rotation		* curr_pose._rotation;
-					curr_pose._scale =			curr_local_bind_pose._scale			+ curr_pose._scale;
-					mat4 compose_curr_pose = curr_pose.compose();
+					curr_pose.position =	curr_local_bind_pose.position	+ curr_pose.position;
+					curr_pose.rotation =	curr_local_bind_pose.rotation	* curr_pose.rotation;
+					curr_pose.scale =		curr_local_bind_pose.scale		+ curr_pose.scale;
+					mat4 compose_curr_pose = curr_pose.recompose();
 
-					auto parent_index = skeleton[bone_id]._parent;
+					// During GenerateTransforms in the Animator, it will use the child transforms to 
+					// generate the final transforms
 					curr_go->Transform()->LocalMatrix(compose_curr_pose);
-					if (parent_index >= 0)
-					{
-						// If we have the parent, we push in the parent.global * child.local
-						const mat4& p_transform = elem._bone_transforms[parent_index];
-						compose_curr_pose = p_transform * compose_curr_pose;
-					}
-
-					elem._bone_transforms[bone_id] = compose_curr_pose;
-						
-				}
-				
-				// Apply offsets to all the transforms
-				// const auto& skeleton = elem._skeleton->data();
-				if (elem._skeleton->GetGlobalInverse() != mat4{})
-				{
-					for (size_t i = 0; i < elem._child_objects.size(); ++i)
-					{
-						auto& curr_bone = skeleton[i];
-						elem._bone_transforms[i] = elem._skeleton->GetGlobalInverse() * elem._bone_transforms[i] * curr_bone._global_inverse_bind_pose;
-					}
-				}
-				else
-				{
-					for (size_t i = 0; i < elem._child_objects.size(); ++i)
-					{
-						auto& curr_bone = skeleton[i];
-						elem._bone_transforms[i] = elem._bone_transforms[i] * curr_bone._global_inverse_bind_pose;
-					}
 				}
 			}
 		}
@@ -121,12 +94,12 @@ namespace idk
 	{
 	}
 
-	anim::Skeleton::BonePose AnimationSystem::interpolateChannel(const anim::Animation::Channel& channel, float time_in_ticks)
+	matrix_decomposition<real> AnimationSystem::interpolateChannel(const anim::Channel& channel, float time_in_ticks)
 	{
-		anim::Skeleton::BonePose curr_pose;
-		curr_pose._scale = channel._scale.size() == 0			? vec3{} : channel._scale[0]._val;
-		curr_pose._rotation = channel._rotation.size() == 0		? quat{} : channel._rotation[0]._val;
-		curr_pose._translation = channel._translate.size() == 0	? vec3{} : channel._translate[0]._val;
+		matrix_decomposition<real> interp_pose;
+		interp_pose.scale = channel._scale.size() == 0			? vec3{} : channel._scale[0]._val;
+		interp_pose.rotation = channel._rotation.size() == 0	? quat{} : channel._rotation[0]._val;
+		interp_pose.position = channel._translate.size() == 0	? vec3{} : channel._translate[0]._val;
 
 		// Scaling
 		if (channel._scale.size() > 1)
@@ -134,7 +107,7 @@ namespace idk
 			size_t start = find_key(channel._scale, time_in_ticks);
 			if (start + 1 >= channel._scale.size())
 			{
-				curr_pose._scale = channel._scale[start]._val;
+				interp_pose.scale = channel._scale[start]._val;
 			}
 			else
 			{
@@ -142,7 +115,7 @@ namespace idk
 				float factor = (time_in_ticks - channel._scale[start]._time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose._scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
+				interp_pose.scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
 			}
 		}
 
@@ -152,7 +125,7 @@ namespace idk
 			size_t start = find_key(channel._translate, time_in_ticks);
 			if (start + 1 >= channel._translate.size())
 			{
-				curr_pose._translation = channel._translate[start]._val;
+				interp_pose.position = channel._translate[start]._val;
 			}
 			else
 			{
@@ -160,7 +133,7 @@ namespace idk
 				float factor = (time_in_ticks - channel._translate[start]._time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose._translation = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
+				interp_pose.position = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
 			}
 		}
 
@@ -170,7 +143,7 @@ namespace idk
 			size_t start = find_key(channel._rotation, time_in_ticks);
 			if (start + 1 >= channel._rotation.size())
 			{
-				curr_pose._rotation = channel._rotation[start]._val;
+				interp_pose.rotation = channel._rotation[start]._val;
 			}
 			else
 			{
@@ -178,12 +151,12 @@ namespace idk
 				float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose._rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
+				interp_pose.rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
 				// rotation =  * rotation;
-				curr_pose._rotation.normalize();
+				interp_pose.rotation.normalize();
 			}
 		}
 		
-		return curr_pose;
+		return interp_pose;
 	}
 }

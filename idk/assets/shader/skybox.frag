@@ -25,5 +25,8 @@ layout(location = 0) out vec4 FragColor;
 
 void main()
 {
-	FragColor = texture(sb, fs_in.uv);
+	vec3 color = texture(sb, fs_in.uv).rgb;
+	//color = color / (color + vec3(1.0));
+	//FragColor = vec4(pow(color, vec3(1.0/2.2)), 1); 
+	FragColor = vec4(color, 1);
 } 

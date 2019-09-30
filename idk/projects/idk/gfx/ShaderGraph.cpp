@@ -35,7 +35,8 @@ namespace idk::shadergraph
         hash_table<NodeSlot, const Link*, NodeSlotHasher> inputs_to_outputs{};
         hash_table<NodeSlot, string, NodeSlotHasher> resolved_outputs{};
         vector<std::pair<string, ValueType>> uniforms{};
-        vector<string> non_param_textures{};
+        hash_table<string, string> non_param_textures{};
+        int tex_counter = 0;
         int slot_counter = 0;
     };
 
@@ -148,14 +149,22 @@ namespace idk::shadergraph
         else // param node
         {
             auto uniform_name = node.name;
-            auto& param = state.graph.parameters[std::stoi(uniform_name.data() + 1)];
-            uniform_name.replace(0, 1, "_u");
+            auto param_index = std::stoi(uniform_name.data() + 1);
+            auto& param = state.graph.parameters[param_index];
             if (param.type == ValueType::SAMPLER2D)
+            {
+                uniform_name = "_uTex[";
+                uniform_name += std::to_string(state.tex_counter++);
+                uniform_name += ']';
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, uniform_name);
+            }
             else
+            {
+                uniform_name.replace(0, 1, "_u");
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 },
                                                "_ub" + std::to_string(param.type) + "." + uniform_name);
-            state.uniforms.emplace_back(std::make_pair(uniform_name, param.type));
+            }
+            state.uniforms[param_index] = std::make_pair(uniform_name, param.type);
         }
 
         for (int i = 0; i < node.input_slots.size(); ++i)
@@ -170,8 +179,8 @@ namespace idk::shadergraph
                 if (node.input_slots[i].type == ValueType::SAMPLER2D)
                 {
                     // can't connect textures directly, we need to go through uniforms
-                    auto uniform_name = "_c" + std::to_string(state.non_param_textures.size());
-                    state.non_param_textures.push_back(uniform_name);
+                    auto uniform_name = "_uTex[" + std::to_string(state.tex_counter++) + ']';
+                    state.non_param_textures[uniform_name] = node.input_slots[i].value;
                     replacement = uniform_name;
                     replace_variables(code, i, replacement);
                 }
@@ -229,12 +238,14 @@ namespace idk::shadergraph
         // todo: handle added uniforms
 
         compiler_state state{ *this };
+        state.uniforms.resize(parameters.size());
 
         for (auto& link : links)
             state.inputs_to_outputs.emplace(NodeSlot{ link.node_in, link.slot_in }, &link);
 
         string code = resolve_node(nodes.at(master_node), state);
         string uniforms_str = "";
+        uniforms.clear();
 
         if (state.uniforms.size())
         {
@@ -242,6 +253,9 @@ namespace idk::shadergraph
 
             for (const auto& [uniform_name, uniform_type] : state.uniforms)
             {
+                if(uniform_name.empty() || uniform_type == ValueType::SAMPLER2D)
+                    continue;
+
                 auto& block = uniform_blocks[uniform_type];
 
                 if (uniform_type == ValueType::SAMPLER2D)
@@ -272,37 +286,38 @@ namespace idk::shadergraph
                 block += ";\n";
             }
 
-            for (const auto& uniform_name : state.non_param_textures)
+            for (const auto& [uniform_name, guid_str] : state.non_param_textures)
             {
-                auto& block = uniform_blocks[ValueType::SAMPLER2D];
-                block += "U_LAYOUT(3, ";
-                block += std::to_string(ValueType::SAMPLER2D);
-                block += ") uniform sampler2D ";
-                block += uniform_name;
-                block += ";\n";
+                uniforms.emplace(uniform_name, RscHandle<Texture>(Guid(guid_str)));
             }
 
             for (size_t i = 0; i < uniform_blocks.size(); ++i)
             {
-                if (uniform_blocks[i].empty())
+                if (uniform_blocks[i].empty() || i == ValueType::SAMPLER2D)
                     continue;
 
                 uniforms_str += uniform_blocks[i];
-                if (i == ValueType::SAMPLER2D)
-                    continue;
-
                 uniforms_str += "} _ub";
                 uniforms_str += std::to_string(i);
                 uniforms_str += ";\n";
             }
 
+            if (state.tex_counter > 0) // U_LAYOUT(3, 8) uniform sampler2D _uTex[count];
+                uniform_blocks[ValueType::SAMPLER2D] = "U_LAYOUT(4, " + std::to_string(ValueType::SAMPLER2D) +
+                                                       ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
+            uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
+
+            int param_index = -1;
 			for (const auto& [uniform_name, uniform_type] : state.uniforms)
 			{
-                int param_index = std::stoi(uniform_name.data() + 2); // +2 to shift past _u in name
+                ++param_index;
+                if (uniform_name.empty())
+                    continue;
+
                 if (uniform_type == ValueType::SAMPLER2D)
-                    uniforms.insert_or_assign(uniform_name, to_uniform_instance(parameters[param_index]));
+                    uniforms.emplace(uniform_name, to_uniform_instance(parameters[param_index]));
                 else
-				    uniforms.insert_or_assign("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+				    uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
                                                     to_uniform_instance(parameters[param_index]));
 			}
         }

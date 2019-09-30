@@ -83,7 +83,7 @@ namespace idk
 		case UpdatePhase::Update:     return _always_update    .emplace_back(std::move(p));
 		case UpdatePhase::Fixed:      return _fixed_update     .emplace_back(std::move(p));
 		case UpdatePhase::PreRender:  return _prerender_update .emplace_back(std::move(p));
-		case UpdatePhase::PostRender: return _postrender_update.emplace_back(std::move(p));
+		case UpdatePhase::Render: return _postrender_update.emplace_back(std::move(p));
 		};
 	}
 

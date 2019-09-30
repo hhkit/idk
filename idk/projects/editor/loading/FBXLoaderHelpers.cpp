@@ -112,8 +112,9 @@ namespace idk::fbx_loader_detail
 		);
 	}
 
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Skeleton::Bone>& bones_out, const mat4& normalize)
+	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Bone>& bones_out, const mat4& normalize)
 	{
+		normalize;
 		struct BoneTreeNode
 		{
 			int parent;
@@ -146,7 +147,7 @@ namespace idk::fbx_loader_detail
 			// If curr_node is a bone, we push it into bones_out with parent being curr_node's parent.
 			// We also push the bone into the bones_table. This is so we can easily find a bone by name. The index should be bones_out.size().
 			// The parent of all these children should be bones_out.size() - 1.
-			anim::Skeleton::Bone b{};
+			anim::Bone b{};
 			b._name = curr_node.assimp_node->_name;
 			b._parent = curr_node.parent;
 
@@ -157,9 +158,9 @@ namespace idk::fbx_loader_detail
 			auto local_bind = mat4{ scale(fbx_loader_detail::FBX_SCALE) } *node_transform;
 			decomp = decompose(local_bind);
 			auto decomp2 = decompose(node_transform);
-			b._local_bind_pose._translation = decomp.position;// *FBX_SCALE;
-			b._local_bind_pose._rotation = decomp.rotation;
-			b._local_bind_pose._scale = decomp2.scale;
+			b._local_bind_pose.position= decomp.position;// *FBX_SCALE;
+			b._local_bind_pose.rotation = decomp.rotation;
+			b._local_bind_pose.scale = decomp2.scale;
 
 			bones_out.emplace_back(b);
 			bones_table.emplace(bones_out.back()._name, bones_out.size() - 1);
@@ -195,7 +196,7 @@ namespace idk::fbx_loader_detail
 		}
 	}
 
-	static void initChannel(anim::Animation::Channel& channel, const aiNodeAnim* ai_anim_node, const mat4& concat_matrix)
+	static void initChannel(anim::Channel& channel, const aiNodeAnim* ai_anim_node, const mat4& concat_matrix)
 	{
 		auto inverse_mat = concat_matrix.inverse();
 		auto decomp = decompose(concat_matrix);
@@ -276,7 +277,7 @@ namespace idk::fbx_loader_detail
 		
 	}
 
-	static void initAnimNodesRecurse(const AssimpNode& assimp_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Animation::Channel>& virtual_channels, mat4& concat_transform)
+	static void initAnimNodesRecurse(const AssimpNode& assimp_node, hash_table<string, const aiNodeAnim*> ai_anim_table, anim::Animation& anim_clip, vector<anim::Channel>& virtual_channels, mat4& concat_transform)
 	{
 		
 		// Is it animated?
@@ -284,7 +285,7 @@ namespace idk::fbx_loader_detail
 		bool is_animated = ai_anim_node != ai_anim_table.end();
 		int i;
 		// Initializing the channel. Every node will have a channel regardless whether it is virtual/animated or not.
-		anim::Animation::Channel channel;
+		anim::Channel channel;
 		channel._name = assimp_node._name;
 		if (channel._name.find("mixamorig:RightHandPinky4") != string::npos)
 			i = 5;
@@ -310,7 +311,7 @@ namespace idk::fbx_loader_detail
 		if ((assimp_node._ai_type & BONE) == BONE)
 		{	
 			// Add all the channels into the ea_node. This ea_node is now full initialized.
-			anim::Animation::EasyAnimNode ea_node;
+			anim::EasyAnimNode ea_node;
 			assert(ea_node._debug_assert == false);
 
 			ea_node._name = assimp_node._name;
@@ -342,7 +343,7 @@ namespace idk::fbx_loader_detail
 		}
 
 		mat4 concat_transform;
-		vector<anim::Animation::Channel> channels;
+		vector<anim::Channel> channels;
 		for (auto& elem : root_node._children)
 			initAnimNodesRecurse(elem, ai_anim_table, anim_clip, channels, concat_transform);
 

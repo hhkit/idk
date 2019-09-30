@@ -106,11 +106,15 @@ namespace idk {
 		ImGui::SetCursorPosX(startPos.x+15);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-		static char searchBarChar[128];
 
-		if (ImGui::InputTextEx("##ToolBarSearchBar",NULL, searchBarChar, 128, ImVec2{window_size.x-100,ImGui::GetFrameHeight()-2}, ImGuiInputTextFlags_None)) {
-			//Do something
-		}
+		//Can call textFilter.Draw(), but I want to use a custom inputText.
+		bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - 100,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
+		if (value_changed)
+			textFilter.Build();
+
+		if (!ImGui::IsItemActive())
+			DrawToolTipOnHover("Type here to filter gameobjects.\n" "Add a '-' to exclude gameobjects.");
+		
 		ImGui::PopStyleVar();
 
 		ImGui::EndMenuBar();
@@ -178,6 +182,13 @@ namespace idk {
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.0f, 0.0f, 0.9f));
 			}
 			
+			if (!textFilter.PassFilter(goName.c_str())) {
+				if (isNameEmpty) {
+					ImGui::PopStyleColor();
+				}
+				++selectedCounter; //Increment counter here
+				return true;
+			}
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
@@ -237,7 +248,7 @@ namespace idk {
 			if (ImGui::BeginDragDropTarget()) {
 				if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("id")) {
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
-					uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
+					//uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
 					if (selected_gameObjects.size()) {
 						for (Handle<GameObject>& i : selected_gameObjects) {
 							if (i == handle) //do not parent self
@@ -303,6 +314,8 @@ namespace idk {
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 			vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
 			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+
+				depth;
 				if (!handle) //Ignore handle zero
 					return true;
 
@@ -344,6 +357,9 @@ namespace idk {
 			selected_gameObjects.clear();
 			counter = 0;
 			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+				
+				depth;
+				
 				if (!handle) //Ignore handle zero
 					return true;
 

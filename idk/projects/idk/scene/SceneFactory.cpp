@@ -16,6 +16,7 @@ namespace idk
 
 	ResourceBundle SceneLoader::LoadFile(PathHandle filepath)
 	{
+		filepath;
 		return ResourceBundle();
 	}
 }

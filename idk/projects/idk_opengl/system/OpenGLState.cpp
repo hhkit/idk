@@ -9,6 +9,7 @@
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
+#include <math/matrix_transforms.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>
@@ -69,7 +70,7 @@ namespace idk::ogl
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
 
 			if (elem.index == 1) // directional light
-				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir }, elem.light_color);
+				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.1f }, elem.light_color);
 		}
 
 		// range over cameras
@@ -80,6 +81,8 @@ namespace idk::ogl
 			//Bind frame buffers based on the camera's render target
 			//Set the clear color according to the camera
 			
+			const auto inv_view_tfm = invert_rotation(cam.view_matrix);
+
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
 				if constexpr(std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
@@ -131,26 +134,19 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.render_target->GetMeta().render_debug)
-			{
-				if (cam.render_target->GetMeta().is_world_renderer)
+			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-					for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
-					{
-						auto& mesh = elem.mesh.as<OpenGLMesh>();
-						mesh.Bind(MeshRenderer::GetRequiredAttributes());
+					auto& mesh = elem.mesh.as<OpenGLMesh>();
+					mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
-						auto obj_tfm = cam.view_matrix * elem.transform;
-						pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-						pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-						pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
-						//	elem.duration == elem.duration.zero() 
-						//	? 1.f 
-						//	: (elem.duration - elem.display_time) / elem.duration);
-						mesh.Draw();
-					}
+					auto obj_tfm = cam.view_matrix * elem.transform;
+					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+
+					mesh.Draw();
 				}
-			}
 
 			// per mesh render
 			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
@@ -164,9 +160,29 @@ namespace idk::ogl
 				pipeline.PushProgram(material->_shader_program);
 
 				// shader uniforms
-				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+
+				// set probe
 				GLuint texture_units = 0;
 
+				std::visit([&]([[maybe_unused]] const auto& obj)
+					{
+						using T = std::decay_t<decltype(obj)>;
+						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+						{
+							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+							opengl_handle->BindConvolutedToUnit(texture_units);
+							pipeline.SetUniform("irradiance_probe", texture_units++);
+							opengl_handle->BindToUnit(texture_units);
+							pipeline.SetUniform("environment_probe", texture_units++);
+						}
+					}, cam.clear_data);
+				auto brdf = Core::GetResourceManager().Load("/assets/textures/brdf/ibl_brdf_lut.png", false)->Get<ogl::OpenGLTexture>();
+				brdf->BindToUnit(texture_units);
+				pipeline.SetUniform("brdfLUT", texture_units);
+				texture_units++;
+				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
+
+				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
 					auto& light = lights[i];
@@ -226,9 +242,23 @@ namespace idk::ogl
 				auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
+				GLuint texture_units = 0;
+				// bind probe
+				std::visit([&]([[maybe_unused]] const auto& obj)
+					{
+						using T = std::decay_t<decltype(obj)>;
+						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+						{
+							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+							opengl_handle->BindConvolutedToUnit(texture_units);
+							pipeline.SetUniform("irradiance_probe", texture_units++);
+							opengl_handle->BindToUnit(texture_units);
+							pipeline.SetUniform("environment_probe", texture_units++);
+						}
+					}, cam.clear_data);
+
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
-				GLuint texture_units = 0;
 
 				for (unsigned i = 0; i < lights.size(); ++i)
 				{
@@ -291,6 +321,28 @@ namespace idk::ogl
 			}
 		}
 
+		fb_man.ResetFramebuffer();
+	}
+
+	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)
+	{
+		fb_man.SetRenderTarget(handle, true);
+		glDepthMask(GL_FALSE);
+
+		auto box_mesh = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] };
+
+		pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::SkyBox]);
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().brdf);
+
+		pipeline.SetUniform("environment_probe", r_cast<int>(handle->ID()));
+
+		box_mesh->Bind(renderer_reqs
+			{ {
+				std::make_pair(vtx::Attrib::Position, 0)
+			} });
+		box_mesh->Draw();
+		glDepthMask(GL_TRUE);
+		GL_CHECK();
 		fb_man.ResetFramebuffer();
 	}
 

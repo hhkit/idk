@@ -8,8 +8,9 @@
 #include <stb/stb_image.h>
 
 //Resources
-#include <idk_opengl/resource/OpenGLCubemap.h>
 #include <gfx/CubeMap.h>
+#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <idk_opengl/resource/OpenGLCubemap.h>
 
 namespace idk
 {
@@ -63,7 +64,8 @@ namespace idk
 			texture_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
-
+		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(texture_handle);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		return texture_handle;
 	}
 
@@ -124,7 +126,9 @@ namespace idk
 			texture_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
+		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(texture_handle);
 
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		return texture_handle;
 	}
 

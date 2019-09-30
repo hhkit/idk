@@ -12,7 +12,7 @@
 #include <gfx/ShaderGraph.h>
 #include <common/Transform.h>
 #include <anim/SkinnedMeshRenderer.h>
-#include <anim/AnimationController.h>
+#include <anim/Animator.h>
 //*/
 
 namespace idk
@@ -54,7 +54,7 @@ namespace idk
 		fbx_loader_detail::BoneSet bone_set;
 		fbx_loader_detail::MeshSet mesh_set;
 		hash_table<string, size_t> bones_table;
-		vector<anim::Skeleton::Bone> bones;
+		vector<anim::Bone> bones;
 
 		// Initializing the bone_set
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
@@ -167,7 +167,7 @@ namespace idk
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.Add(skeleton_handle);
 
-		auto animator = prefab_root->AddComponent<AnimationController>();
+		auto animator = prefab_root->AddComponent<Animator>();
 		animator->SetSkeleton(skeleton_handle);
 
 		// Loading Animations
@@ -184,9 +184,10 @@ namespace idk
 			animator->AddAnimation(anim_clip_handle);
 		}
 		// animator->Play(0);
-		// Core::GetSystem<FileSystem>().Open(string{ "/assets/prefabs/" } + path_to_resource.GetStem().data() + ".idp", FS_PERMISSIONS::WRITE);
-		// PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
+		// Saving the prefab
+		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp" );
 		scene->DestroyGameObject(prefab_root);
+		retval.Add(prefab_handle);
 		return retval;
 	}
 
@@ -225,7 +226,7 @@ namespace idk
 		fbx_loader_detail::BoneSet bone_set;
 		fbx_loader_detail::MeshSet mesh_set;
 		hash_table<string, size_t> bones_table;
-		vector<anim::Skeleton::Bone> bones;
+		vector<anim::Bone> bones;
 
 		// Initializing the bone_set
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
@@ -352,7 +353,7 @@ namespace idk
 		skeleton.SetSkeletonTransform(skeleton_transform);
 		retval.Add(skeleton_handle);
 
-		auto animator = prefab_root->AddComponent<AnimationController>();
+		auto animator = prefab_root->AddComponent<Animator>();
 		animator->SetSkeleton(skeleton_handle);
 
 		// Loading Animations
@@ -375,10 +376,9 @@ namespace idk
 
 			animator->AddAnimation(anim_clip_handle);
 		}
-		// animator->Play(0);
-		// Core::GetSystem<FileSystem>().Open(string{ "/assets/prefabs/" } + path_to_resource.GetStem().data() + ".idp", FS_PERMISSIONS::WRITE);
-		// PrefabUtility::Save(prefab_root, PathHandle{ string{"/assets/prefabs/"} + path_to_resource.GetStem().data() + ".idp" });
+		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } + path_to_resource.GetStem().data() + ".idp");
 		scene->DestroyGameObject(prefab_root);
+		retval.Add(prefab_handle);
 		return retval;
 	}
 
