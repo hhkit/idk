@@ -76,6 +76,7 @@ namespace idk
 		friend class IGE_HierarchyWindow;
 		friend class IGE_InspectorWindow;
 		friend class CMD_DeleteGameObject;
+		friend class CommandController;
 
 		unique_ptr<edt::I_Interface> _interface;
 

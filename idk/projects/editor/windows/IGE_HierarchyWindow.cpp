@@ -132,6 +132,7 @@ namespace idk {
 		int selectedCounter = 0; // This is for Shift Select. This iterates.
 		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
 		bool isShiftSelectCalled = false;
+		bool hasSelected_GameobjectsModified = false;
 		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
 		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
@@ -220,12 +221,12 @@ namespace idk {
 					else {
 						selected_gameObjects.push_back(handle);
 					}
+					hasSelected_GameobjectsModified = true;
 
 				}
 				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
 					if (selected_gameObjects.size() != 0) {
 						selectedItemCounter = selectedCounter;
-						//std::cout << selectedItemCounter << std::endl;
 						isShiftSelectCalled = true;
 
 
@@ -236,6 +237,7 @@ namespace idk {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(handle);
+					hasSelected_GameobjectsModified = true;
 				}
 
 				if (ImGui::IsMouseDoubleClicked(0)) {
@@ -369,6 +371,7 @@ namespace idk {
 
 				if (counter >= minMax[0] && counter <= minMax[1]) {
 					selected_gameObjects.push_back(handle);
+					hasSelected_GameobjectsModified = true;
 				}
 				//Skips similar to closed trees
 				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
@@ -379,7 +382,11 @@ namespace idk {
 				return true;
 			});
 			//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
+
+			//Refresh the new matrix values
 		}
+		if (hasSelected_GameobjectsModified)
+			Core::GetSystem<IDE>().RefreshSelectedMatrix();
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 
