@@ -51,8 +51,9 @@ namespace idk::ogl
 		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
 		renderer_vertex_shaders[SkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.vert");
 
-		renderer_fragment_shaders[Debug]     = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
-		renderer_fragment_shaders[SkyBox]    = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.frag");
+		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
+		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.frag");
+		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/shadow.frag");
 	}
 
 
@@ -70,7 +71,100 @@ namespace idk::ogl
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
 
 			if (elem.index == 1) // directional light
+			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.1f }, elem.light_color);
+				//fb_man.SetRenderTarget({});
+				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{elem.light_map});
+				//Bind frame buffers based on the camera's render target
+				//Set the clear color according to the camera
+
+				const auto light_view_tfm = elem.v;
+				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
+
+				// per mesh render
+				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
+
+				// bind shader
+				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				for (auto& elem : curr_object_buffer.mesh_render)
+				{
+					// shader uniforms
+					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
+					// set probe
+					GLuint texture_units = 0;
+
+					// bind attribs
+					auto& mesh = elem.mesh.as<OpenGLMesh>();
+					mesh.Bind(MeshRenderer::GetRequiredAttributes());
+
+					// set uniforms
+					// object uniforms
+
+					auto obj_tfm = light_view_tfm * elem.transform;
+					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+
+					// material uniforms
+					auto instance_uniforms = elem.material_instance->material->uniforms;
+					for (auto& [id, uniform] : elem.material_instance->uniforms)
+						instance_uniforms.emplace(id, uniform);
+
+					for (auto& [id, uniform] : instance_uniforms)
+					{
+						std::visit([this, &id, &texture_units](auto& elem) {
+							using T = std::decay_t<decltype(elem)>;
+							if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+							{
+								auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+								texture->BindToUnit(texture_units);
+								pipeline.SetUniform(id, texture_units);
+
+								++texture_units;
+							}
+							else
+								pipeline.SetUniform(id, elem);
+						}, uniform);
+					}
+
+					// draw
+					mesh.Draw();
+				}
+
+				pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
+				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
+
+				for (auto& elem : curr_object_buffer.skinned_mesh_render)
+				{
+					// bind shader
+					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
+
+					// bind attribs
+					auto& mesh = elem.mesh.as<OpenGLMesh>();
+					mesh.Bind(SkinnedMeshRenderer::GetRequiredAttributes());
+					//mesh.Bind(MeshRenderer::GetRequiredAttributes());
+
+					// Setting bone transforms
+					auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
+					for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
+					{
+						auto& transform = skeleton.bones_transforms[i];
+						string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
+						pipeline.SetUniform(bone_transform_blk, transform);
+					}
+
+					// set uniforms
+					// object uniforms
+
+					auto obj_tfm = light_view_tfm * elem.transform;
+					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+
+					// draw
+					mesh.Draw();
+				}
+			}
 		}
 
 		// range over cameras
@@ -106,7 +200,7 @@ namespace idk::ogl
 					glDisable(GL_CULL_FACE);
 					glDepthMask(GL_FALSE);
 					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
-					pipeline.PushProgram(renderer_fragment_shaders[SkyBox]);
+					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
 
 					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
 
@@ -191,6 +285,11 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+					pipeline.SetUniform(lightblk + "vp"       , light.vp);
+
+					auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+					t.as<OpenGLTexture>().BindToUnit(texture_units);
+					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
 
 					texture_units += static_cast<bool>(light.light_map);
 				}

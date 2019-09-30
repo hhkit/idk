@@ -162,7 +162,9 @@
     <ClCompile Include="commands\CMD_TransformGameObject.cpp">
       <Filter>commands</Filter>
     </ClCompile>
-    <ClCompile Include="windows\IDE_ShadowMapWindow.cpp" />
+    <ClCompile Include="windows\IDE_ShadowMapWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

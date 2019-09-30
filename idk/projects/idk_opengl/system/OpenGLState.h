@@ -30,6 +30,7 @@ namespace idk::ogl
 		{
 			FDebug,
 			FSkyBox,
+			FShadow,
 			FMax
 		};
 
@@ -39,7 +40,7 @@ namespace idk::ogl
 		FrameBufferManager     fb_man;
 		GLuint                 vao_id = 0;
 		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_vertex_shaders;
-		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_fragment_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		//RscHandle<ShaderProgram> debug_fragment;
 	};
 }
