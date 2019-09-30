@@ -21,8 +21,7 @@ namespace idk {
 		virtual bool undo() override;
 
 	private:
-		vector<reflect::dynamic>	vector_of_components	{};
-
+		string						serialized_gameobject	{};
 
 	};
 
