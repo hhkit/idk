@@ -230,6 +230,9 @@ namespace idk
 		
 		
 		_interface->ImGuiFrameEnd();
+
+
+		command_controller.FlushCommands();
 	}
 
 	void IDE::EditorDraw()
@@ -241,6 +244,15 @@ namespace idk
 	{
 		// TODO: insert return statement here
 		return _interface->Inputs()->main_camera;
+	}
+
+	void IDE::RefreshSelectedMatrix()
+	{
+		//Refresh the new matrix values
+		selected_matrix.clear();
+		for (Handle<GameObject> i : selected_gameObjects) {
+			selected_matrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+		}
 	}
 
 	void IDE::FocusOnSelectedGameObjects()

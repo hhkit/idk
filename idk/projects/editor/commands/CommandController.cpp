@@ -30,17 +30,27 @@ namespace idk {
 
 	void CommandController::ExecuteCommand(unique_ptr<ICommand> command) {
 
-		bool isSuccess = command->execute();
+		pollStack.push(std::move(command));
+	}
 
-		if (isSuccess) {
-			if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one
-				undoStack.pop_front();
-			}
-			undoStack.push_back(std::move(command));
+	void CommandController::FlushCommands()
+	{
+		while (pollStack.size()) {
+			unique_ptr<ICommand> command = std::move(pollStack.front());
+			pollStack.pop();
+
+			bool isSuccess = command->execute();
+
+			if (isSuccess) {
+				if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one
+					undoStack.pop_front();
+				}
+				undoStack.push_back(std::move(command));
 
 
-			if (redoStack.size() != NULL) {     //Clear the redo stack after execution
-				redoStack.clear();
+				if (redoStack.size() != NULL) {     //Clear the redo stack after execution
+					redoStack.clear();
+				}
 			}
 		}
 	}

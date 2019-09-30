@@ -20,6 +20,7 @@ To change list to circular buffer soon-ish.
 #pragma once
 
 #include <list>
+#include <queue>
 #include <editor/commands/ICommand.h>
 
 #define COMMAND(COMMAND_CLASSNAME,...) std::make_unique<COMMAND_CLASSNAME>(__VA_ARGS__)
@@ -32,6 +33,7 @@ namespace idk {
 		~CommandController();
 		
 		//Executes given ICommand Object. USAGE: ExecuteCommand(COMMAND(CMD_AddComponent,gameobjectHandle));
+		//Puts all command into a stack that is called when flushcommands is called
 		void ExecuteCommand(unique_ptr<ICommand> command);
 		//Executes the undo function of previous ICommand Object.
 		void UndoCommand();
@@ -43,8 +45,10 @@ namespace idk {
 		bool CanUndo();
 
 		bool CanRedo();
-
 	private:
+		friend class IDE;
+		//FlushCommand gathers all command call and this pollstack executes all at once at the end of IDE frame.
+		void FlushCommands();
 
 		//A vector of past commands that have been executed. 
 		//When ExecuteCommand or RedoCommand is called, this is added to stack. 
@@ -52,13 +56,13 @@ namespace idk {
 		//This stack is cleared when changing scenes.
 		std::list<unique_ptr<ICommand>> undoStack{};
 
-
 		//A vector of past commands that have been undone. 
 		//When ExecuteCommand is called, this stack is cleared. 
 		//When UndoCommand is called, this is added to stack.
 		//This stack is cleared when changing scenes.
 		std::list<unique_ptr<ICommand>> redoStack{};
 
+		std::queue<unique_ptr<ICommand>> pollStack{}; //ExecuteCommand gathers all command call and this pollstack executes all at once at the end of IDE frame.
 
 		size_t undoLimit			{ 512 }; //By default it is 512
 
