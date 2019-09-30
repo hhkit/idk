@@ -12,7 +12,7 @@
 
   <Type Name="idk::ObjectPool&lt; * &gt;">
     <Expand>
-      <Item Name="[size]">sceneCounter</Item>
+      <Item Name="[pool]">_pool</Item>
       <CustomListItems MaxItemsPerView="16">
         <Variable Name="sceneCounter" InitialValue="0"/>
         <Loop>
@@ -24,8 +24,24 @@
       </CustomListItems>
     </Expand>
   </Type>
-  
-  <Type Name="idk::Handle&lt; * &gt;">
+
+  <Type Name="idk::ObjectPool&lt;*&gt;::Map">
+    <Expand>
+      <CustomListItems MaxItemsPerView="16">
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <If Condition="i != slots.size() &amp;&amp; slots[i].index != 4294967295">
+            <Item Name="[{i}]">slots[i]</Item>
+          </If>
+          <Exec>i += 1</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+
+
+    <Type Name="idk::Handle&lt; * &gt;">
     <DisplayString>[{"$T1"} id={id, h}]</DisplayString>
     <Expand>
       <CustomListItems MaxItemsPerView="16">

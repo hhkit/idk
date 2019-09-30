@@ -13,7 +13,7 @@
   - !Animator 
     _animation_table: {Take 001: 0}
     _animations: 
-    - guid: 4c2cbe6b-4554-48c2-be3a-aa615302c4e8
+    - guid: 047ccd80-86a9-4366-8edd-833a0002508f
     _child_objects: 
     - id: 17179967488
     - id: 21474934784
@@ -67,7 +67,7 @@
     - id: 227633364992
     - id: 231928332288
     - id: 236223299584
-    _skeleton: {guid: 49516d9f-a938-474a-a8cc-76d49ad11549}
+    _skeleton: {guid: 1f643c3f-0065-43ca-a2af-df83d6953555}
   parent_index: -1
 - components: 
   - !Transform 
@@ -82,8 +82,8 @@
   - !Name 
     name: Houdini_Character_OBJ:Eyebrows_low1
   - !SkinnedMeshRenderer 
-    material_instance: {guid: d7a357dc-064b-41f5-adf2-ea57ad150890}
-    mesh: {guid: 2cfb6b6f-7e70-4de2-aa78-68412d9bf58c}
+    material_instance: {guid: 7beffe65-64e1-4e80-b929-4d5d88586ef2}
+    mesh: {guid: 0f29715a-3a9b-4ca4-a96c-4bd85671577e}
   parent_index: 0
 - components: 
   - !Transform 

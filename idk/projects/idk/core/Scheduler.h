@@ -15,7 +15,7 @@ namespace idk
 		Update,
 		Fixed,
 		PreRender,
-		PostRender,
+		Render,
 	};
 
 	template<typename ... Ts>
