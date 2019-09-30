@@ -68,15 +68,15 @@ namespace idk
 
 		if (editor)
 		{
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::WatchDirectory,    "Watch files");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate,              "Editor Update");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::DestroyObjects,       "Destroy Objects Again");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
-			_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyFiles,    "Save dirty files");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::WatchDirectory,    "Watch files");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&IEditor::EditorUpdate,              "Editor Update");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&SceneManager::DestroyObjects,       "Destroy Objects Again");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>    (&ResourceManager::SaveDirtyFiles,    "Save dirty files");
 		}
 
-		_scheduler->SchedulePass      <UpdatePhase::PostRender>    (&GraphicsSystem::BufferGraphicsState,"Buffer graphics objects");
-		//_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::Prerender,          "Prerender");
+		_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::BufferGraphicsState,"Buffer graphics objects");
+		_scheduler->SchedulePass      <UpdatePhase::PostRender>(&GraphicsSystem::Prerender,          "Prerender");
 		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&GraphicsSystem::RenderRenderBuffer, "Render Render Buffer");
 		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&DebugRenderer::GraphicsTick,        "Update durations of debug draw");
 		_scheduler->ScheduleFencedPass<UpdatePhase::PostRender>(&IEditor::EditorDraw,                "Editor Draw");

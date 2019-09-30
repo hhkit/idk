@@ -102,8 +102,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		gSys->editorExist = true;
 
 	c->Setup();
+	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
 
-	Core::GetResourceManager().Load("/assets/textures/brdf/ibl_brdf_lut.png");
 	Core::GetResourceManager().Create<TestResource>("/assets/test/yolo.test");
 
 	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");

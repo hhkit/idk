@@ -127,6 +127,12 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 	}
 
+	void OpenGLCubemap::BindConvolutedToUnit(GLuint texture_unit)
+	{
+		glActiveTexture(GL_TEXTURE0 + texture_unit);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _convoluted_id);
+	}
+
 	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMInputChannels format)
 	{
 		format;

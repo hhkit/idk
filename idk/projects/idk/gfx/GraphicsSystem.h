@@ -21,7 +21,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		RscHandle<Texture> brdf;
+		RscHandle<ShaderProgram> brdf;
 		
 		void Init() override = 0;
 		void Shutdown() override = 0;

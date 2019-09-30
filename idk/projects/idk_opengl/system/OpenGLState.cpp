@@ -177,10 +177,10 @@ namespace idk::ogl
 						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 						{
 							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+							opengl_handle->BindConvolutedToUnit(texture_units);
+							pipeline.SetUniform("irradiance_probe", texture_units++);
 							opengl_handle->BindToUnit(texture_units);
-							pipeline.SetUniform("irradiance_probe", texture_units);
-							pipeline.SetUniform("environment_probe", texture_units);
-							++texture_units;
+							pipeline.SetUniform("environment_probe", texture_units++);
 						}
 					}, cam.clear_data);
 				auto brdf = Core::GetResourceManager().Load("/assets/textures/brdf/ibl_brdf_lut.png", false)->Get<ogl::OpenGLTexture>();
@@ -257,10 +257,10 @@ namespace idk::ogl
 						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 						{
 							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+							opengl_handle->BindConvolutedToUnit(texture_units);
+							pipeline.SetUniform("irradiance_probe", texture_units++);
 							opengl_handle->BindToUnit(texture_units);
-							pipeline.SetUniform("irradiance_probe", texture_units);
-							pipeline.SetUniform("environment_probe", texture_units);
-							++texture_units;
+							pipeline.SetUniform("environment_probe", texture_units++);
 						}
 					}, cam.clear_data);
 
@@ -333,10 +333,24 @@ namespace idk::ogl
 
 	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)
 	{
-		auto sz = handle->Size();
-		//glViewport(0, 0, sz.x, sz.y);
+		fb_man.SetRenderTarget(handle, true);
+		glDepthMask(GL_FALSE);
 
-		//fb_man.SetRenderTarget(handle);
+		auto box_mesh = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] };
+
+		pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::SkyBox]);
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().brdf);
+
+		pipeline.SetUniform("environment_probe", r_cast<int>(handle->ID()));
+
+		box_mesh->Bind(renderer_reqs
+			{ {
+				std::make_pair(vtx::Attrib::Position, 0)
+			} });
+		box_mesh->Draw();
+		glDepthMask(GL_TRUE);
+		GL_CHECK();
+		fb_man.ResetFramebuffer();
 	}
 
 }
