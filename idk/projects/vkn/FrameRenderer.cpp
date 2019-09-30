@@ -348,7 +348,7 @@ namespace idk::vkn
 	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
 	{
 		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
-		collated_layouts[obj_uni.layout].second++;
+		//collated_layouts[obj_uni.layout].second++;
 		auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
 		collated_bindings[obj_uni.set].emplace_back(
 			ProcessedRO::BindingInfo
@@ -365,7 +365,7 @@ namespace idk::vkn
 	void PreProcUniform(const UboInfo& obj_uni,uint32_t index, RscHandle<RenderTarget> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
 	{
 		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
-		collated_layouts[obj_uni.layout].second++;
+		//collated_layouts[obj_uni.layout].second++;
 		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
 		auto& texture = val->GetAttachment(AttachmentType::eDepth,0).as<VknTexture>();
 		collated_bindings[obj_uni.set].emplace_back(
@@ -398,18 +398,33 @@ namespace idk::vkn
 		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		auto msprog = GetMeshRendererShaderModule();
 		auto& msmod = msprog.as<ShaderModule>();
-		auto& pvt_uni = msmod.GetLayout("CameraBlock");
-		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
+
 		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
-		mat4 pvt_trf = mat4{1,0,0,0,
+		mat4 pvt_trf = mat4{ 1,0,0,0,
 							0,1,0,0,
 							0,0,0.5f,0.5f,
-			                0,0,0,1
-		}* cam.projection_matrix;
+							0,0,0,1
+		}*cam.projection_matrix;
+
+		auto& pvt_uni = msmod.GetLayout("CameraBlock");
+		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
+		mat4 pbr_trf = V.inverse();
 		;
 		auto mesh_mod = GetMeshRendererShaderModule();
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
+
+		hash_table<vk::DescriptorSetLayout, int> set_tracker;
+		auto layout_incrementer = [](auto& tracking_table, auto layout, int index, auto& layout_count)
+		{
+			auto itr = tracking_table.find(layout);
+			if (itr == tracking_table.end() || itr->second != index)
+			{
+				layout_count[layout].second++;
+			}
+			tracking_table[layout] = index;
+		};
+		int itr_index = 0;
 		for (auto& ptr_dc : draw_calls)
 		{
 			auto& dc = *ptr_dc;
@@ -440,16 +455,27 @@ namespace idk::vkn
 			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
 			auto& layouts = sprog.as<ShaderModule>();
 			auto& lit_uni = layouts.GetLayout("LightBlock");
+			auto& pbr_uni = layouts.GetLayout("PBRBlock");
 
 			//Account for the object and normal transform bindings
 			mat4 obj_trf = V * dc.transform;
 			mat4 obj_ivt= obj_trf.inverse().transpose();
 			vector<mat4> mat4_block{obj_trf,obj_ivt};
-			PreProcUniform(obj_uni, mat4_block , collated_layouts, collated_bindings, ubo_manager);
-			if(!cam.is_shadow)
+			PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
+			layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
+			if (!cam.is_shadow)
+			{
+
+
+				PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
+				layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
+
 				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
+				layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
+			}
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
+			layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
 
 
 			if (!cam.is_shadow)
@@ -457,7 +483,11 @@ namespace idk::vkn
 				for (auto& shadow_map : state.active_lights)
 				{
 					auto& sm_uni = shadow_map->light_map;
-					PreProcUniform<int>(fprog->GetLayout("shadow_map"),0, sm_uni, collated_layouts, collated_bindings );
+					{
+						auto& layout = fprog->GetLayout("shadow_maps");
+						PreProcUniform<int>(layout,0, sm_uni, collated_layouts, collated_bindings );
+						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+					}
 				}
 
 			}
@@ -475,7 +505,8 @@ namespace idk::vkn
 					auto& ubo_info = itr->second;
 					auto& layout = ubo_info.layout;
 					{
-						collated_layouts[layout].second++;
+						layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
+						//collated_layouts[layout].second++;
 
 						switch (ubo_info.type)
 						{
@@ -525,7 +556,9 @@ namespace idk::vkn
 							}
 						}
 					}
+				
 				}
+				itr_index++;
 			}
 			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
 		}
