@@ -5,9 +5,11 @@
 namespace idk::ogl
 {
 	template<typename T>
-	void PipelineProgram::SetUniform(std::string_view uniform, const T& obj)
+	bool PipelineProgram::SetUniform(std::string_view uniform, const T& obj)
 	{
+		bool set = false;
 		for (auto& elem : _programs)
-			elem.as<Program>().SetUniform(uniform, obj);
+			set |= elem.as<Program>().SetUniform(uniform, obj);
+		return set;
 	}
 }

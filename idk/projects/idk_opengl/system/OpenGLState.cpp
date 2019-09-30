@@ -76,21 +76,34 @@ namespace idk::ogl
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
-			//fb_man.SetRenderTarget({});
-			fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
-			//Bind frame buffers based on the camera's render target
-			//Set the clear color according to the camera
-			
 			const auto inv_view_tfm = invert_rotation(cam.view_matrix);
+			// calculate lights for this camera
+			auto lights = curr_object_buffer.lights;
+			for (auto& elem : lights)
+			{
+				elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
+				elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
+			}
+
+			{
+				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
+			}
+			
+			// lock drawing buffer
+			pipeline.Use();
+			glBindVertexArray(vao_id);
 
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
-				if constexpr(std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
+				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
 				{
+					if (!obj)
+						return;
 					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
 
 					//oglCubeMap.ID;
 
+					glDisable(GL_CULL_FACE);
 					glDepthMask(GL_FALSE);
 					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
 					pipeline.PushProgram(renderer_fragment_shaders[SkyBox]);
@@ -103,30 +116,15 @@ namespace idk::ogl
 						{ {
 							std::make_pair(vtx::Attrib::Position, 0)
 						} });
-					oglCubeMap.Bind();
+					oglCubeMap.BindToUnit(0);
+					pipeline.SetUniform("sb", 0);
 					mesh.Draw();
 					glDepthMask(GL_TRUE);
-
+					glEnable(GL_CULL_FACE);
 				}
-				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, vec4>)
-				{
+				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
 					glClearColor(obj.x, obj.y, obj.z, obj.w);
-				}
 			}, cam.clear_data);
-
-			// calculate lights for this camera
-			auto lights = curr_object_buffer.lights;
-			for (auto& elem : lights)
-			{
-				elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
-				elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
-			}
-			
-			// lock drawing buffer
-			pipeline.Use();
-			glBindVertexArray(vao_id);
-
-			// render default meshes
 
 			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::Debug]);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
@@ -203,7 +201,6 @@ namespace idk::ogl
 
 				// set uniforms
 				// object uniforms
-
 				auto obj_tfm = cam.view_matrix * elem.transform;
 				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
@@ -326,23 +323,47 @@ namespace idk::ogl
 
 	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)
 	{
+		pipeline.Use();
+		glBindVertexArray(vao_id);
 		fb_man.SetRenderTarget(handle, true);
-		glDepthMask(GL_FALSE);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
 
 		auto box_mesh = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] };
 
-		pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::SkyBox]);
-		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().brdf);
+		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.vert", false));
+		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/single_pass_cube.geom", false));
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().convoluter);
 
-		pipeline.SetUniform("environment_probe", r_cast<int>(handle->ID()));
+		static const auto perspective_matrix = perspective(deg{ 90 }, 1.f, 0.1f, 100.f);
+		
+		static const mat4 view_matrices[] =
+		{
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(1.0f,  0.0f,  0.0f), vec3(0.0f, -1.0f,  0.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(-1.0f,  0.0f,  0.0f),vec3(0.0f, -1.0f,  0.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f,  1.0f,  0.0f), vec3(0.0f,  0.0f,  1.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f,  0.0f), vec3(0.0f,  0.0f, -1.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f,  0.0f,  1.0f), vec3(0.0f, -1.0f,  0.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f,  0.0f, -1.0f), vec3(0.0f, -1.0f,  0.0f)))}
+		};
 
-		box_mesh->Bind(renderer_reqs
+		pipeline.SetUniform("Mat4Blk.perspective_mtx", perspective_matrix);
+		for (auto i = 0; i < 6; ++i)
+			pipeline.SetUniform("Mat4Blk.pv_matrices[" + std::to_string(i) + "]", view_matrices[i]);
+
+		handle->BindToUnit(0);
+		pipeline.SetUniform("environment_probe", 0);
+
+		box_mesh->Bind(
 			{ {
-				std::make_pair(vtx::Attrib::Position, 0)
+			std::make_pair(vtx::Attrib::Position, 0),
+			std::make_pair(vtx::Attrib::Normal, 1),
+			std::make_pair(vtx::Attrib::UV, 2)
 			} });
 		box_mesh->Draw();
-		glDepthMask(GL_TRUE);
-		GL_CHECK();
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		pipeline.PopAllPrograms();
 		fb_man.ResetFramebuffer();
 	}
 

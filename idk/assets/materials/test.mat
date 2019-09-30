@@ -149,7 +149,7 @@ nodes:
     - {type: VEC3, value: ""}
     - {type: VEC3, value: ""}
     - {type: FLOAT, value: 1.000000}
-    - {type: FLOAT, value: 0.150000}
+    - {type: FLOAT, value: 1.000000}
     - {type: FLOAT, value: 1.000000}
     name: master\PBR
     output_slots: []

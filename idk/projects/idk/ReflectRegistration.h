@@ -81,31 +81,36 @@ REFLECT_END()
  * resource handles
  *========================================================================*/
 
-REFLECT_BEGIN(idk::RscHandle<class idk::Scene>, "RscHandle<Scene>")
+REFLECT_BEGIN(idk::RscHandle<class idk::Scene>, "<Scene>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "RscHandle<Mesh>")
+REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "RscHandle<Material>")
+REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "<Material>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::anim::Animation>, "RscHandle<Animation>")
+REFLECT_BEGIN(idk::RscHandle<class idk::anim::Animation>, "<Animation>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::anim::Skeleton>, "RscHandle<Skeleton>")
+REFLECT_BEGIN(idk::RscHandle<class idk::anim::Skeleton>, "<Skeleton>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::MaterialInstance>, "RscHandle<MaterialInstance>")
+
+REFLECT_BEGIN(idk::RscHandle<class idk::CubeMap>, "<CubeMap>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "RscHandle<ShaderProgram>")
+REFLECT_BEGIN(idk::RscHandle<class idk::MaterialInstance>, "<MaterialInstance>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "<ShaderProgram>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
@@ -281,5 +286,5 @@ REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane)
+REFLECT_VARS(enabled, near_plane, far_plane, clear)
 REFLECT_END()

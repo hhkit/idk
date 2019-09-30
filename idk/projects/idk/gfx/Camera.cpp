@@ -4,7 +4,7 @@
 #include <common/Transform.h>
 #include <math/matrix_transforms.h>
 #include <math/matrix_decomposition.h>
-
+#include <gfx/Mesh.h>
 #include <gfx/RenderTarget.h>
 
 //Test
@@ -58,15 +58,7 @@ namespace idk
 			: perspective(field_of_view, AspectRatio(), near_plane, far_plane);
 	}
 	CameraData Camera::GenerateCameraData() const
-	{
-		variant<vec4, RscHandle<CubeMap>> m;
-		if (skybox.has_value())
-		{
-			m = *skybox;
-		}
-		else
-			m = clear_color;
-		
+	{	
 		return CameraData{
 			0xFFFFFFF,
 			ViewMatrix(),
@@ -74,8 +66,16 @@ namespace idk
 			render_target,
 			overlay_debug_draw,
 			false,
-			m,
-			skybox_mesh
+			std::visit([&](const auto& obj)->std::variant<vec4, RscHandle<CubeMap>> 
+			{ 
+				using T = std::decay_t<decltype(obj)>;
+				if constexpr (std::is_same_v<T, color>)
+					return obj.as_vec4;
+				else
+					return obj;
+		
+			}, clear),
+			Mesh::defaults[MeshType::Box]
 		};
 	}
 	float Camera::AspectRatio() const

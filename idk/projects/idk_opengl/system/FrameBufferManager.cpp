@@ -33,26 +33,37 @@ namespace idk::ogl
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 		if (for_convolution)
 		{
-			auto sz = target->Size();
-			glViewport(0, 0, sz.x, sz.y);
+			glViewport(0, 0, 32, 32);// set texture targets
+			auto ids = target->ConvolutedID();
+			glBindTexture(GL_TEXTURE_CUBE_MAP, ids[0]);
+
+			vector<GLenum> buffers{GL_COLOR_ATTACHMENT0};
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, ids[0], 0);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			GL_CHECK();
+			glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
+			GL_CHECK();
+			glClear(GL_COLOR_BUFFER_BIT);
 		}
 		else
-			glViewport(0, 0, 32, 32);// set texture targets
-
-		auto id = r_cast<GLint>(for_convolution ? target->ConvolutedID() : target->ID());
-
-		vector<GLenum> buffers;
-		//auto& yolo = *meta.textures[0];
-		for (int i = 0; i < 6; ++i)
 		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, 
-				GL_COLOR_ATTACHMENT0, 
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				id,
-				0);
-		}
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			auto sz = target->Size();
+			glViewport(0, 0, sz.x, sz.y);
 
+			auto id = r_cast<GLint>(target->ID());
+
+			vector<GLenum> buffers;
+			//auto& yolo = *meta.textures[0];
+			for (int i = 0; i < 6; ++i)
+			{
+				glFramebufferTexture2D(GL_FRAMEBUFFER,
+					GL_COLOR_ATTACHMENT0,
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+					id,
+					0);
+			}
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
 		CheckFBStatus();
 	}
 

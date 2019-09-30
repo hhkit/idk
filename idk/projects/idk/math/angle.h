@@ -12,77 +12,77 @@ namespace idk
 	{
 		T value;
 
-		explicit trad(T val = T{});
-		explicit trad(const tdeg<T>&);
+		constexpr explicit trad(T val = T{});
+		constexpr explicit trad(const tdeg<T>&);
 
-		trad& normalize();        // normalize to (-pi, pi]
-		trad  normalized() const; // normalize to (-pi, pi]
+		constexpr trad& normalize();        // normalize to (-pi, pi]
+		constexpr trad  normalized() const; // normalize to (-pi, pi]
 
 		T*       data();
 		const T* data() const;
 
 		// operator overloads
-		explicit operator tdeg<T>() const;
-		explicit operator T() const;
+		constexpr explicit operator tdeg<T>() const;
+		constexpr explicit operator T() const;
 
-		trad& operator+=(const trad&);
-		trad& operator-=(const trad&);
-		trad& operator*=(const T&);
-		trad& operator/=(const T&);
+		constexpr trad& operator+=(const trad&);
+		constexpr trad& operator-=(const trad&);
+		constexpr trad& operator*=(const T&);
+		constexpr trad& operator/=(const T&);
 
-		trad operator+(const trad&) const;
-		trad operator-(const trad&) const;
-		trad operator-() const;
-		trad operator*(const T&) const;
-		trad operator/(const T&) const;
-		T      operator/(const trad&) const;
+		constexpr trad operator+(const trad&) const;
+		constexpr trad operator-(const trad&) const;
+		constexpr trad operator-() const;
+		constexpr trad operator*(const T&) const;
+		constexpr trad operator/(const T&) const;
+		constexpr T      operator/(const trad&) const;
 
-		bool operator<(const trad&) const;
+		constexpr bool operator<(const trad&) const;
 
-		bool operator==(const trad&) const;
-		bool operator!=(const trad&) const;
+		constexpr bool operator==(const trad&) const;
+		constexpr bool operator!=(const trad&) const;
 	};
 
 	template<typename T>
-	trad<T> operator*(const T&, const trad<T>&);
+	constexpr trad<T> operator*(const T&, const trad<T>&);
 
 	template<typename T>
 	struct tdeg : comparable<tdeg<T>>
 	{
 		T value;
 
-		explicit tdeg(T val = T{});
-		explicit tdeg(const trad<T>&);
+		constexpr explicit tdeg(T val = T{});
+		constexpr explicit tdeg(const trad<T>&);
 
-		tdeg& normalize();        // normalize to (-180, 180]
-		tdeg  normalized() const; // normalize to (-180, 180]
+		constexpr tdeg& normalize();        // normalize to (-180, 180]
+		constexpr tdeg  normalized() const; // normalize to (-180, 180]
 
 		T*       data();
 		const T* data() const;
 
-		operator trad<T>() const;
-		explicit operator T() const;
+		constexpr operator trad<T>() const;
+		constexpr explicit operator T() const;
 
-		tdeg& operator+=(const tdeg&);
-		tdeg& operator-=(const tdeg&);
-		tdeg& operator*=(const T&);
-		tdeg& operator/=(const T&);
+		constexpr tdeg& operator+=(const tdeg&);
+		constexpr tdeg& operator-=(const tdeg&);
+		constexpr tdeg& operator*=(const T&);
+		constexpr tdeg& operator/=(const T&);
 
-		tdeg operator+(const tdeg&) const;
-		tdeg operator-(const tdeg&) const;
-		tdeg operator-() const;
-		tdeg operator*(const T&) const;
-		tdeg operator/(const T&) const;
-		T      operator/(const tdeg&) const;
+		constexpr tdeg operator+(const tdeg&) const;
+		constexpr tdeg operator-(const tdeg&) const;
+		constexpr tdeg operator-() const;
+		constexpr tdeg operator*(const T&) const;
+		constexpr tdeg operator/(const T&) const;
+		constexpr T      operator/(const tdeg&) const;
 
-		bool operator<(const tdeg&) const;
+		constexpr bool operator<(const tdeg&) const;
 
-		bool operator==(const tdeg&) const;
-		bool operator!=(const tdeg&) const;
+		constexpr bool operator==(const tdeg&) const;
+		constexpr bool operator!=(const tdeg&) const;
 	};
 
 	template<typename T>
-	tdeg<T> operator*(const T&, const tdeg<T>&);
+	constexpr tdeg<T> operator*(const T&, const tdeg<T>&);
 }
 
 namespace idk

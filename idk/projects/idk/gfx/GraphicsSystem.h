@@ -21,7 +21,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		RscHandle<ShaderProgram> brdf;
+		RscHandle<ShaderProgram> convoluter;
 		
 		void Init() override = 0;
 		void Shutdown() override = 0;

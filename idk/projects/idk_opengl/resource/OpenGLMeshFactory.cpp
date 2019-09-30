@@ -371,8 +371,8 @@ namespace idk::ogl
 			};
 
 			std::vector<int> indices{
-				1, 0, 3,
-				2, 1, 3
+				0, 1, 3,
+				1, 2, 3
 			};
 
 			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);

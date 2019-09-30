@@ -75,15 +75,15 @@ namespace idk
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 		auto& metadata = path_to_meta.metadatas[0];
 
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>(metadata.guid);
+		auto cubemap_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>(metadata.guid);
 
-		auto tm = texture_handle->GetMeta();
+		auto tm = cubemap_handle->GetMeta();
 		//auto texture_id = texture_handle->ID();
 
 
 		auto first_meta = metadata.GetMeta<CubeMap>();
 		if (first_meta)
-			texture_handle->SetMeta(*first_meta);
+			cubemap_handle->SetMeta(*first_meta);
 
 		ivec2 size{};
 		int channels{};
@@ -102,7 +102,7 @@ namespace idk
 		auto cubemap = path.stem();
 		auto ext = cubemap.extension();
 
-		texture_handle->Bind();
+		cubemap_handle->Bind();
 		for (int i = 0; i < std::size(fileExt); ++i)
 		{
 			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
@@ -123,13 +123,13 @@ namespace idk
 			}
 			}();
 
-			texture_handle->Buffer(i, data, size, col_format);
+			cubemap_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
-		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(texture_handle);
+		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(cubemap_handle);
 
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-		return texture_handle;
+		return cubemap_handle;
 	}
 
 };

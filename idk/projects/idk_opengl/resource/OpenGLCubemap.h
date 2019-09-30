@@ -21,10 +21,10 @@ namespace idk::ogl
 		using CubeMap::Size;
 		void Size(ivec2 new_size) override;
 		virtual void* ID() const override;
-		virtual void* ConvolutedID() const override;
+		span<const GLuint> ConvolutedID() const;
 	private:
 		GLuint _id = 0;
-		GLuint _convoluted_id = 0;
+		GLuint _convoluted_id[2]{};
 		void OnMetaUpdate(const CubeMapMeta&) override;
 		void UpdateUV(CMUVMode);
 	};

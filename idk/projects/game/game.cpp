@@ -102,7 +102,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		gSys->editorExist = true;
 
 	c->Setup();
-	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
+	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag");
 
 	Core::GetResourceManager().Create<TestResource>("/assets/test/yolo.test");
 
@@ -125,11 +125,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
 		//camHandle->render_target->AddAttachment(eDepth);
-		camHandle->clear_color = vec4{ 0.05,0.05,0.1,1 };
+		camHandle->clear = color{ 0.05,0.05,0.1,1 };
 		if(gfx_api!=GraphicsAPI::Vulkan)
-			camHandle->skybox = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
+			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
-		camHandle->skybox_mesh = Mesh::defaults[MeshType::Box];
 
 		//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
 		if (&c->GetSystem<IDE>())

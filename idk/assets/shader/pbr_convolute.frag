@@ -14,17 +14,14 @@ End Header --------------------------------------------------------*/
 
 uniform samplerCube environment_probe;
 
-layout(location = 1) in VS_OUT
+layout (location = 3) in VS_OUT
 {
   vec3 position;
-  vec2 uv;
-  vec3 normal;
-  vec3 tangent;
 } vs_out;
 
 uniform samplerCube sb;
 
-layout(location = 0) out vec4 out_color;
+out vec4 out_color;
 
 const float PI = 3.1415926535;
 const float HALF_PI = PI / 2;
@@ -32,7 +29,7 @@ const float TAU = PI * 2;
 
 void main()
 {
-	vec3 normal = vs_out.normal;
+	vec3 normal = normalize(vs_out.position);
 	vec3 irradiance = vec3(0);
 	
 	vec3 up = vec3(0, 1, 0);
@@ -60,4 +57,11 @@ void main()
     }
 	
 	out_color = vec4(irradiance * PI / nrSamples, 1);
+	//if (gl_Layer == 0) out_color = vec4(  1,0.5,0.5,1);
+	//if (gl_Layer == 1) out_color = vec4(  0,0.5,0.5,1);
+	//if (gl_Layer == 2) out_color = vec4(0.5,  1,0.5,1);
+	//if (gl_Layer == 3) out_color = vec4(0.5,  0,0.5,1);
+	//if (gl_Layer == 4) out_color = vec4(0.5,0.5,  1,1);
+	//if (gl_Layer == 5) out_color = vec4(0.5,0.5,  0,1);
+	//out_color = vec4(normal / 2 + vec3(0.5), 1);
 } 

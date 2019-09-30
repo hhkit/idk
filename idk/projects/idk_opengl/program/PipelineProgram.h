@@ -18,7 +18,7 @@ namespace idk::ogl
 
 		void Use();
 		template<typename T>
-		void SetUniform(std::string_view uniform, const T& obj);
+		bool SetUniform(std::string_view uniform, const T& obj);
 
 		PipelineProgram(PipelineProgram&&) noexcept;
 		PipelineProgram& operator=(PipelineProgram&&) noexcept;
