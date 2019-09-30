@@ -134,26 +134,19 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.render_target->GetMeta().render_debug)
-			{
-				if (cam.render_target->GetMeta().is_world_renderer)
+			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-					for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
-					{
-						auto& mesh = elem.mesh.as<OpenGLMesh>();
-						mesh.Bind(MeshRenderer::GetRequiredAttributes());
+					auto& mesh = elem.mesh.as<OpenGLMesh>();
+					mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
-						auto obj_tfm = cam.view_matrix * elem.transform;
-						pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-						pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-						pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
-						//	elem.duration == elem.duration.zero() 
-						//	? 1.f 
-						//	: (elem.duration - elem.display_time) / elem.duration);
-						mesh.Draw();
-					}
+					auto obj_tfm = cam.view_matrix * elem.transform;
+					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+
+					mesh.Draw();
 				}
-			}
 
 			// per mesh render
 			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
