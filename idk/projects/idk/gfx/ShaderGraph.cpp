@@ -258,6 +258,16 @@ namespace idk::shadergraph
 
                 auto& block = uniform_blocks[uniform_type];
 
+                if (uniform_type == ValueType::SAMPLER2D)
+                {
+                    block += "S_LAYOUT(3, ";
+                    block += std::to_string(ValueType::SAMPLER2D);
+                    block += ") uniform sampler2D ";
+                    block += uniform_name;
+                    block += ";\n";
+                    continue;
+                }
+
                 string str{ uniform_type.to_string() };
                 string typestr = make_lowercase(str);
 

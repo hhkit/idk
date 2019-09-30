@@ -89,6 +89,9 @@
     <ClInclude Include="commands\CMD_TransformGameObject.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="windows\IGE_ShadowMapWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -159,6 +162,7 @@
     <ClCompile Include="commands\CMD_TransformGameObject.cpp">
       <Filter>commands</Filter>
     </ClCompile>
+    <ClCompile Include="windows\IDE_ShadowMapWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

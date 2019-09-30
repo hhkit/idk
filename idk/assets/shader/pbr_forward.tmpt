@@ -2,16 +2,17 @@
 
 #define MAX_LIGHTS 8
 
-uniform BLOCK(PBRBlock)
+U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
 	mat4 inverse_view_transform;
 } PerCamera;
 
-U_LAYOUT(3, 0) uniform sampler2D tex;
+S_LAYOUT(2, 0) uniform sampler2D tex;
+//S_LAYOUT(3, 1) uniform samplerCube test;
 
-uniform samplerCube irradiance_probe;
-uniform samplerCube environment_probe;
-uniform sampler2D   brdfLUT;  
+S_LAYOUT(6,1) uniform samplerCube irradiance_probe;
+S_LAYOUT(6,2) uniform samplerCube environment_probe;
+S_LAYOUT(6,3) uniform sampler2D   brdfLUT;  
 
 layout(location=1) in VS_OUT
 {
@@ -35,6 +36,8 @@ struct Light
 	float cos_outer;
 	
 	float falloff;
+	
+	mat4 vp;
 };
 
 U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
@@ -42,6 +45,8 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 	int   light_count;
 	Light lights[MAX_LIGHTS];
 } LightBlk;
+S_LAYOUT(6, 0) uniform sampler2D shadow_maps[MAX_LIGHTS];
+
 
 // lighting functions 
 
@@ -156,7 +161,7 @@ void main()
 	vec3  tangent   = normalize(fs_in.tangent);
 	vec2  uv        = fs_in.uv;
 	
-	vec3  albedo    = texture(tex, fs_in.uv).xyz;//vec3(1, 0, 0);
+	vec3  albedo    = texture(tex, vec2(fs_in.uv)).xyz;//vec3(1, 0, 0);
 	float metallic  = 0.5;
 	float roughness = 1.0;
 	float ambient_o = 0;

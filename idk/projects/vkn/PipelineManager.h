@@ -33,6 +33,7 @@ namespace idk::vkn
 			{
 				//TODO: set the pipeline's modules
 				vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
+				config.buffer_descriptions.clear();
 				for (auto& module : shader_handles)
 				{
 					auto& mod = module.as<ShaderModule>();

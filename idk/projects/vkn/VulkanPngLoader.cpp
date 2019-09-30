@@ -28,6 +28,7 @@ namespace idk::vkn
 		if(tm)
 			to= *tm;
 		loader.LoadTexture(tex, TextureFormat::eRGBA32, to, string_view{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4) }, size, allocator, *fence);
+		stbi_image_free(tex_data);
 		return rtex;
 	}
 	ResourceBundle idk::vkn::PngLoader::LoadFile(PathHandle handle)

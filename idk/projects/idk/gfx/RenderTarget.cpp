@@ -9,6 +9,10 @@ namespace idk
 	}
 	RscHandle<Texture> RenderTarget::GetAttachment(AttachmentType type, size_t index)const
 	{
+		if (attachments[type].size() <= index)
+		{
+			return (meta.textures.size()) ? meta.textures.back() : RscHandle<Texture>{};
+		}
 		return GetMeta().textures[attachments[type][index]];
 	}
 	size_t  RenderTarget::AddAttachment(AttachmentType type, uint32_t size_x, uint32_t size_y)

@@ -51,9 +51,6 @@
     <ClInclude Include="VulkanMesh.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanMeshFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanTypeDescriptors.h">
       <Filter>resource</Filter>
     </ClInclude>
@@ -65,12 +62,6 @@
     </ClInclude>
     <ClInclude Include="FrameRenderer.h">
       <Filter>render</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanShaderModuleFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanGlslLoader.h">
-      <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="PipelineManager.h">
       <Filter>system</Filter>
@@ -90,19 +81,10 @@
     <ClInclude Include="VknTexture.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanTextureFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="VknFrameBufferManager.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBufferFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="VknFrameBuffer.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="RegisterVulkanFactories.h">
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="VknImageData.h">
@@ -118,12 +100,6 @@
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="VulkanResourceManager.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="VknTextureLoader.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="DDSLoader.h">
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="ManagedVulkanObjs.h">
@@ -144,8 +120,32 @@
     <ClInclude Include="utils\FrameObjects.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="RegisterVulkanFactories.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBufferFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMeshFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanShaderModuleFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTextureFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
     <ClInclude Include="VulkanPngLoader.h">
-      <Filter>resource</Filter>
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanGlslLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLoader.h">
+      <Filter>resource\Loaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -192,14 +192,8 @@
     <ClCompile Include="draw_call.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanMeshFactory.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VknFrameBuffer.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="VknFrameBufferFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="VknFrameBufferManager.cpp">
@@ -211,12 +205,6 @@
     <ClCompile Include="FrameRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanGlslLoader.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanShaderModuleFactory.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderModule.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -227,14 +215,8 @@
     <ClCompile Include="VknTexture.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanTextureFactory.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="MemoryAllocator.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="RegisterVulkanFactories.cpp">
-      <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="VknImageData.cpp">
       <Filter>resource</Filter>
@@ -252,14 +234,8 @@
     <ClCompile Include="VknMeshModder.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="VknTextureLoader.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="utils\GlslToSpirv.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSLoader.cpp">
-      <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="utils\PresentationSignals.cpp">
       <Filter>utils</Filter>
@@ -268,7 +244,33 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="utils\SwapchainInfo.cpp" />
-    <ClCompile Include="VulkanPngLoader.cpp" />
+    <ClCompile Include="RegisterVulkanFactories.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFrameBufferFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMeshFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanShaderModuleFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTextureFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanPngLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanGlslLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTextureLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -294,6 +296,12 @@
     </Filter>
     <Filter Include="resource\Managed">
       <UniqueIdentifier>{d43b231f-683a-4f8d-8713-63f27c363028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Factories">
+      <UniqueIdentifier>{6e07ef8c-3935-4cb2-a274-1e4e221cedde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Loaders">
+      <UniqueIdentifier>{6afb71d8-dab9-485a-9d2a-7e1b38225231}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -51,18 +51,18 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR    lpCmdLine,
+	_In_ int       nCmdShow)
 {
-	int num_args=0;
+	int num_args = 0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(8538); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(102284); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 #ifdef USE_RENDER_DOC
-	if(!HasArg(L"--nodoc",command_lines,num_args)) //Additional check to allow disabling of renderdoc without changing game.cpp
+	if (!HasArg(L"--nodoc", command_lines, num_args)) //Additional check to allow disabling of renderdoc without changing game.cpp
 	{
 		RENDERDOC_API_1_1_2* rdoc_api = NULL;
 
@@ -76,27 +76,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 #endif
 	using namespace idk;
-	
+
 	auto c = std::make_unique<Core>();
-	c->AddSystem<Windows>(hInstance, nCmdShow);
+	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
-		case GraphicsAPI::Vulkan:
-			c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			c->AddSystem<IDE>();
+	case GraphicsAPI::Vulkan:
+	{
+		auto sys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 
-			gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
-			break;
-		case GraphicsAPI::OpenGL:
-			c->AddSystem<ogl::Win32GraphicsSystem>();
-			c->AddSystem<IDE>();
+		c->AddSystem<IDE>();
+		win.OnScreenSizeChanged.Listen([sys](const ivec2&) { sys->Instance().OnResize(); });
+		gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
+	}
+	break;
+	case GraphicsAPI::OpenGL:
+		c->AddSystem<ogl::Win32GraphicsSystem>();
+		c->AddSystem<IDE>();
 
-			gSys = &c->GetSystem<ogl::Win32GraphicsSystem>();
-			break;
-		default:
-			break;
+		gSys = &c->GetSystem<ogl::Win32GraphicsSystem>();
+		break;
+	default:
+		break;
 	}
 	if (&c->GetSystem<IDE>())
 		gSys->editorExist = true;
@@ -109,7 +112,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
 
 	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
-	
+
 	float divByVal = 2.f;
 	{
 		auto camera = scene->CreateGameObject();
@@ -141,32 +144,35 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
 
+	auto& mat_inst_v = mat_inst->material.as<Material>();
+	auto& shader_v = mat_inst->material->_shader_program.as<ShaderProgram>();;
+
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
 		auto go = scene->CreateGameObject();
 
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
-		
+
 		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
 		if (gfx_api != GraphicsAPI::Vulkan)
 		{
 			auto resources_running = Core::GetResourceManager().Load(path);
-			
+
 			for (auto handle : resources_running->GetAll<Mesh>())
 			{
 				auto mesh_child_go = scene->CreateGameObject();
 
 				mesh_child_go->Name(handle->Name());
 				mesh_child_go->Transform()->parent = go;
-				
+
 				auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
 				mesh_rend->mesh = handle;
 				mesh_rend->material_instance = mat_inst;
 			}
-			
+
 			animator->SetSkeleton(resources_running->Get<anim::Skeleton>());
 
 			for (auto& anim : resources_running->GetAll<anim::Animation>())
@@ -178,7 +184,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	};
 
 	auto tmp_tex = minecraft_texture;
-	if(gfx_api == GraphicsAPI::Vulkan)
+	if (gfx_api == GraphicsAPI::Vulkan)
 		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
 
 	constexpr auto col = ivec3{ 1,0,0 };
@@ -186,14 +192,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// @Joseph: Uncomment this when testing.
 	create_anim_obj(vec3{ 1.796,0,-1.781 });
 
-	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal,tmp_tex](vec3 pos) {
+	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
 		go->Name("test");
 		go->GetComponent<Transform>()->position = pos;
-		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} }; 
+		go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
 		go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
 		//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
-	 auto mesh_rend = go->AddComponent<MeshRenderer>();
+		auto mesh_rend = go->AddComponent<MeshRenderer>();
 		//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
@@ -285,7 +291,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		light->AddComponent<TestComponent>();
 	}
-
+	{
+	auto light = scene->CreateGameObject();
+	light->Name("SpotLight");
+	light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
+	auto light_comp = light->AddComponent<Light>();
+	{
+		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
+		auto light_obj = SpotLight{};
+		//light_obj.inner_angle = rad{ 0.5f };
+		light_obj.attenuation_radius = 0.1f;
+		light_comp->light = light_obj;
+		light_comp->SetLightMap(light_map);
+	}
+	light->AddComponent<TestComponent>();
+}
 	{
 		auto light = scene->CreateGameObject();
 		light->Name("Point Light 2");

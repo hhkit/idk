@@ -17,6 +17,7 @@ namespace idk
 		real  cos_inner = 0;
 		real  cos_outer = 1;
 		real  falloff     = 1;
+		mat4  vp{};
 		RscHandle<RenderTarget> light_map;
 	};
 

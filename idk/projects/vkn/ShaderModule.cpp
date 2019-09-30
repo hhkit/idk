@@ -70,8 +70,9 @@ namespace idk::vkn
 			info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
 			info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
 			info.stage = StageToUniformStage(single_stage);
-			info.size = type.width;
+			info.size = (type.array.size())?type.array.back():1;
 			info.type = uniform_layout_t::UniformType::eSampler;
+			
 			uint32_t i = 0;
 			for (auto& member_type : type.member_types)
 			{
@@ -134,7 +135,7 @@ namespace idk::vkn
 			{
 			
 				max = std::max(info.set, max);
-				set_layout[info.set].emplace_back(uniform_layout_t::bindings_t{ info.binding,1,{info.stage},info.type });
+				set_layout[info.set].emplace_back(uniform_layout_t::bindings_t{ info.binding,(info.type!=uniform_layout_t::UniformType::eSampler)?1:info.size,{info.stage},info.type });
 			}
 			++max;
 		}
@@ -228,6 +229,11 @@ const UboInfo& ShaderModule::GetLayout(string uniform_name) const
 	// TODO: insert return statement here
 	
 	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
+}
+void DoNothing();
+ShaderModule::~ShaderModule()
+{
+	DoNothing();
 }
 
 }

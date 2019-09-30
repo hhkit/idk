@@ -74,7 +74,7 @@ namespace idk {
         ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + draw_rect_offset);
 
 		//imageSize.y = (imageSize.x * (9 / 16));
-		if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
+		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 			ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 
 		ImVec2 v = ImGui::GetWindowPos();

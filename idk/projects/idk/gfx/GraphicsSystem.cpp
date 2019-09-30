@@ -8,6 +8,10 @@
 namespace idk
 {
 
+	void GraphicsSystem::BufferedLightData(vector<LightData>& out)
+	{
+		out = object_buffer[curr_draw_buffer].lights;
+	}
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -30,7 +34,7 @@ namespace idk
 		result.lights.reserve(lights.size());
 		for (auto& elem : lights)
 		{
-		//	result.camera.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
+			result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
 			result.lights.emplace_back(elem.GenerateLightData());
 		}
 

@@ -12,14 +12,14 @@ Creation date: -
 End Header --------------------------------------------------------*/
 #version 450
 
-uniform samplerCube environment_probe;
+S_LAYOUT(6,0) uniform samplerCube environment_probe;
 
 layout (location = 3) in VS_OUT
 {
   vec3 position;
 } vs_out;
 
-uniform samplerCube sb;
+S_LAYOUT(6,1) uniform samplerCube sb;
 
 out vec4 out_color;
 
