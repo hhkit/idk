@@ -2,7 +2,7 @@
 
 #define MAX_LIGHTS 8
 
-uniform BLOCK(PBRBlock)
+U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
 	mat4 inverse_view_transform;
 } PerCamera;
@@ -10,9 +10,9 @@ uniform BLOCK(PBRBlock)
 S_LAYOUT(2, 0) uniform sampler2D tex;
 //S_LAYOUT(3, 1) uniform samplerCube test;
 
-uniform samplerCube irradiance_probe;
-uniform samplerCube environment_probe;
-uniform sampler2D   brdfLUT;  
+S_LAYOUT(6,1) uniform samplerCube irradiance_probe;
+S_LAYOUT(6,2) uniform samplerCube environment_probe;
+S_LAYOUT(6,3) uniform sampler2D   brdfLUT;  
 
 layout(location=1) in VS_OUT
 {

@@ -12,7 +12,7 @@ Creation date: -
 End Header --------------------------------------------------------*/
 #version 450
 
-uniform samplerCube environment_probe;
+S_LAYOUT(6,0) uniform samplerCube environment_probe;
 
 layout(location = 1) in VS_OUT
 {
@@ -22,7 +22,7 @@ layout(location = 1) in VS_OUT
   vec3 tangent;
 } vs_out;
 
-uniform samplerCube sb;
+S_LAYOUT(6,1) uniform samplerCube sb;
 
 layout(location = 0) out vec4 out_color;
 
