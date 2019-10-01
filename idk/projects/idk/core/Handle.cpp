@@ -15,7 +15,7 @@ namespace idk
 		template<typename ... Ts>
 		struct GenericHandle_helper < std::tuple<Ts...> >
 		{
-			static auto GenerateDerefLUT()
+			constexpr static auto GenerateDerefLUT()
 			{
 				using Fn = reflect::dynamic(*)(const GenericHandle & h);
 

@@ -171,6 +171,6 @@ nodes:
     output_slots: []
     position: {x: 724.700867, y: 224.665176}
 parameters: 
-- {default_value: 0.500000, name: Metallic, type: FLOAT}
+- {default_value: 0.000000, name: Metallic, type: FLOAT}
 - {default_value: 65509e2c-bcb6-48a1-9c88-17a3701d6028, name: Tex0, type: SAMPLER2D}
-- {default_value: 0.500000, name: Roughness, type: FLOAT}
+- {default_value: 1.000000, name: Roughness, type: FLOAT}
