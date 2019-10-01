@@ -75,9 +75,15 @@ namespace idk::ogl
 		assert(Core::GetSystem<GraphicsSystem>().brdf);
 		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
 
-		auto SetObjectUniforms = [this](const auto& object, const mat4& view_materix)
+		auto BindVertexShader = [this](const RscHandle<ShaderProgram>& handle, const mat4& perspective_matrix)
 		{
-			auto obj_tfm = view_materix * object.transform;
+			pipeline.PushProgram(handle);
+			pipeline.SetUniform("PerCamera.perspective_transform", perspective_matrix);
+		};
+
+		auto SetObjectUniforms = [this](const auto& object, const mat4& view_matrix)
+		{
+			auto obj_tfm = view_matrix * object.transform;
 			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 			pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 		};
@@ -99,13 +105,10 @@ namespace idk::ogl
 				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
 
 				// per mesh render
-				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 
-				// bind shader
-				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 				for (auto& elem : curr_object_buffer.mesh_render)
 				{
 					// set probe
@@ -140,10 +143,8 @@ namespace idk::ogl
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
 
-				pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
+				BindVertexShader(renderer_vertex_shaders[SkinnedMesh], light_p_tfm);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-
-				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
 
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
@@ -213,10 +214,9 @@ namespace idk::ogl
 					glClearColor(obj.x, obj.y, obj.z, obj.w);
 			}, cam.clear_data);
 
-			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::Debug]);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
@@ -229,8 +229,7 @@ namespace idk::ogl
 				}
 
 			// per mesh render
-			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			for (auto& elem : curr_object_buffer.mesh_render)
@@ -309,8 +308,7 @@ namespace idk::ogl
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 			}
 
-			pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
