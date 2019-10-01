@@ -117,28 +117,6 @@ namespace idk::ogl
 					// set uniforms
 					SetObjectUniforms(elem, light_view_tfm);
 
-					// material uniforms
-					auto instance_uniforms = elem.material_instance->material->uniforms;
-					for (auto& [id, uniform] : elem.material_instance->uniforms)
-						instance_uniforms.emplace(id, uniform);
-
-					for (auto& [id, uniform] : instance_uniforms)
-					{
-						std::visit([this, &id, &texture_units](auto& elem) {
-							using T = std::decay_t<decltype(elem)>;
-							if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-							{
-								auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-								texture->BindToUnit(texture_units);
-								pipeline.SetUniform(id, texture_units);
-
-								++texture_units;
-							}
-							else
-								pipeline.SetUniform(id, elem);
-						}, uniform);
-					}
-
 					// bind attribs
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
@@ -198,15 +176,13 @@ namespace idk::ogl
 
 					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
 
+					oglCubeMap.BindToUnit(0);
+					pipeline.SetUniform("sb", 0);
 
-					auto& mesh = (*cam.CubeMapMesh).as<OpenGLMesh>();
-					mesh.Bind(renderer_reqs
+					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(
 						{ {
 							std::make_pair(vtx::Attrib::Position, 0)
 						} });
-					oglCubeMap.BindToUnit(0);
-					pipeline.SetUniform("sb", 0);
-					mesh.Draw();
 					glDepthMask(GL_TRUE);
 					glEnable(GL_CULL_FACE);
 				}
