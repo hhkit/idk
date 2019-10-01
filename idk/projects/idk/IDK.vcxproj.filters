@@ -648,6 +648,9 @@
     <ClInclude Include="anim\Animator.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="script\MonoBehaviorData.h" />
+    <ClInclude Include="script\MonoBehavior.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -943,6 +946,7 @@
     <ClCompile Include="anim\Animator.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="script\MonoBehavior.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
