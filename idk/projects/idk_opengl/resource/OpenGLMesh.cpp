@@ -65,6 +65,12 @@ namespace idk::ogl
 		glDrawElements(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0);
 	}
 
+	void OpenGLMesh::BindAndDraw(const renderer_reqs& locations)
+	{
+		Bind(locations);
+		Draw();
+	}
+
 	void OpenGLMesh::Reset()
 	{
 		_buffers.clear();

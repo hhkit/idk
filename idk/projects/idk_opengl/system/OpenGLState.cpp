@@ -104,9 +104,6 @@ namespace idk::ogl
 					// set probe
 					GLuint texture_units = 0;
 
-					// bind attribs
-					auto& mesh = elem.mesh.as<OpenGLMesh>();
-					mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 					// set uniforms
 					// object uniforms
@@ -137,23 +134,17 @@ namespace idk::ogl
 						}, uniform);
 					}
 
-					// draw
-					mesh.Draw();
+					// bind attribs
+					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
 
 				pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
+				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
+
 				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
 
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
-					// bind shader
-					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-
-					// bind attribs
-					auto& mesh = elem.mesh.as<OpenGLMesh>();
-					mesh.Bind(SkinnedMeshRenderer::GetRequiredAttributes());
-					//mesh.Bind(MeshRenderer::GetRequiredAttributes());
-
 					// Setting bone transforms
 					auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
 					for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
@@ -171,7 +162,7 @@ namespace idk::ogl
 					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 					// draw
-					mesh.Draw();
+					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
 				}
 			}
 		}
@@ -203,8 +194,6 @@ namespace idk::ogl
 					if (!obj)
 						return;
 					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
-
-					//oglCubeMap.ID;
 
 					glDisable(GL_CULL_FACE);
 					glDepthMask(GL_FALSE);
@@ -238,15 +227,13 @@ namespace idk::ogl
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-					auto& mesh = elem.mesh.as<OpenGLMesh>();
-					mesh.Bind(MeshRenderer::GetRequiredAttributes());
-
 					auto obj_tfm = cam.view_matrix * elem.transform;
 					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+
 					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
-					mesh.Draw();
+					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
 
 			// per mesh render
@@ -302,9 +289,6 @@ namespace idk::ogl
 					texture_units += static_cast<bool>(light.light_map);
 				}
 
-				// bind attribs
-				auto& mesh = elem.mesh.as<OpenGLMesh>();
-				mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 				// set uniforms
 				// object uniforms
@@ -335,7 +319,7 @@ namespace idk::ogl
 				}
 
 				// draw
-				mesh.Draw();
+				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 			}
 
 			pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
@@ -380,10 +364,6 @@ namespace idk::ogl
 
 					texture_units += static_cast<bool>(light.light_map);
 				}
-				// bind attribs
-				auto& mesh = elem.mesh.as<OpenGLMesh>();
-				mesh.Bind(SkinnedMeshRenderer::GetRequiredAttributes());
-				//mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 				// Setting bone transforms
 				auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
@@ -424,7 +404,7 @@ namespace idk::ogl
 				}
 
 				// draw
-				mesh.Draw();
+				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
 			}
 		}
 
@@ -439,7 +419,6 @@ namespace idk::ogl
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		auto box_mesh = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] };
 
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.vert", false));
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/single_pass_cube.geom", false));
@@ -464,13 +443,13 @@ namespace idk::ogl
 		handle->BindToUnit(0);
 		pipeline.SetUniform("environment_probe", 0);
 
-		box_mesh->Bind(
-			{ {
+		RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] }
+		->BindAndDraw({ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal, 1),
 			std::make_pair(vtx::Attrib::UV, 2)
 			} });
-		box_mesh->Draw();
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();
@@ -485,17 +464,15 @@ namespace idk::ogl
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		auto fsq = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] };
 
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/fsq.vert", false));
 		pipeline.PushProgram(RscHandle<ShaderProgram>{handle});
 
-		fsq->Bind(
-			{ {
+		RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] }
+		->BindAndDraw({ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::UV, 1),
 			} });
-		fsq->Draw();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
