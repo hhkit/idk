@@ -5,6 +5,16 @@ namespace idk::ogl
 {
 	namespace detail
 	{
+		auto GLFilter(FilterMode filter_mode) -> GLenum
+		{
+			switch (filter_mode)
+			{
+			case FilterMode::Linear:       return GL_LINEAR;
+			case FilterMode::Nearest:        return GL_NEAREST;
+			default: return 0;
+			}
+		}
+
 		auto GLUVMode(UVMode uv_mode) -> GLenum
 		{
 			switch (uv_mode)
@@ -12,6 +22,7 @@ namespace idk::ogl
 			case UVMode::Repeat:       return GL_REPEAT;
 			case UVMode::Clamp:        return GL_CLAMP_TO_EDGE;
 			case UVMode::MirrorRepeat: return GL_MIRRORED_REPEAT;
+			case UVMode::ClampToBorder: return GL_CLAMP_TO_BORDER;
 			default: return 0;
 			}
 		}
@@ -41,6 +52,7 @@ namespace idk::ogl
 			case InputChannels::RG:   return GL_RG;
 			case InputChannels::RGB:  return GL_RGB;
 			case InputChannels::RGBA: return GL_RGBA;
+			case InputChannels::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
 			default: return 0;
 			}
 		}
@@ -50,8 +62,8 @@ namespace idk::ogl
 	{
 		glGenTextures(1, &_id);
 		glBindTexture(GL_TEXTURE_2D, _id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		UpdateFilter(meta.filter_mode);
 		UpdateUV(meta.uv_mode);
 		Buffer(nullptr, _size);
 	}
@@ -109,12 +121,19 @@ namespace idk::ogl
 	void OpenGLTexture::OnMetaUpdate(const TextureMeta& tex_meta)
 	{
 		UpdateUV(tex_meta.uv_mode);
-		Buffer(nullptr, Size());
+		UpdateFilter(tex_meta.filter_mode);
+		Buffer(nullptr, Size(),tex_meta.format);
 	}
 	void OpenGLTexture::UpdateUV(UVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, detail::GLUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, detail::GLUVMode(uv_mode));
+		GL_CHECK();
+	}
+	void OpenGLTexture::UpdateFilter(FilterMode f_mode)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, detail::GLFilter(f_mode));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, detail::GLFilter(f_mode));
 		GL_CHECK();
 	}
 }

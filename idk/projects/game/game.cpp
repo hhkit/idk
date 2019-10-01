@@ -293,6 +293,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
 			auto m = light_map->GetMeta().textures[0]->GetMeta();
 			m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			m.format = InputChannels::DEPTH_COMPONENT;
+			m.filter_mode = FilterMode::Nearest;
+			m.uv_mode = UVMode::ClampToBorder;
 			//light_map->GetMeta().textures[0]->Size(ivec2{ 1024,1024 });
 			light_map->GetMeta().textures[0]->SetMeta(m);
 			light_comp->SetLightMap(light_map);

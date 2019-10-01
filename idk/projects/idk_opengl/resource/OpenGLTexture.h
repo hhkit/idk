@@ -25,5 +25,6 @@ namespace idk::ogl
 		GLuint _id = 0;
 		void OnMetaUpdate(const TextureMeta&);
 		void UpdateUV(UVMode);
+		void UpdateFilter(FilterMode);
 	};
 }

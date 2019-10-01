@@ -103,26 +103,35 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 {
 	 // perform perspective divide
     vec3 projCoords = fPosInLS.xyz / fPosInLS.w;
+	float dist      =  length(lightDir); 
+	lightDir /= dist;
 	
 	//Transformation of proj coord to NDC[0,1]
 	projCoords = (projCoords * 0.5f) + 0.5f; 
 	
 	//Get closest depth to light's pov
+	
+	//PCF
+	float curDepth = 0.f;
+	
 	vec4 sampleShadow = texture(shadow_maps[iter], projCoords.xy);
-	float nearestDepth =  sampleShadow.r;
+	float nearestDepth =  sampleShadow.z;
 	
 	//Get current light depth
-	float curDepth = projCoords.z;  
+	curDepth = projCoords.z;  
+	
+	if(curDepth > 1.0f)
+		return 0.f;
 	
 	//return nearestDepth;
 	
 	 // check if current frag is in shadow and return the result
-	//if (curDepth > nearestDepth + max(0.05 * (1.0 - dot(normal,lightDir)),0.005)) 
-	
-	if (curDepth > nearestDepth + 0.0005) 	
+	if ((curDepth- max(0.05 * (1.0 - dot(normal,lightDir)),0.009)) > nearestDepth ) 
 		return 1.0f;
 	else
 		return 0.0f;
+	
+	//return (1- (1-nearestDepth ) * 25);
 	//return 0;
 	//return 0;
 }
@@ -207,12 +216,15 @@ void main()
 	
 	vec4 world_pos = PerCamera.inverse_view_transform*vec4(view_pos,1);
 	
+	mat4 vvvp;
+	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		if (LightBlk.lights[i].type == 1)
 		{
 		    result *= vec3(1 - ShadowCalculation(i,-(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
+			vvvp = LightBlk.lights[i].vp;
 		}
 		else 
 		{
@@ -242,4 +254,10 @@ void main()
 	//color = pow(color, vec3(1.0/2.2)); 
 	//out_color = vec4(vec3(PerCamera.inverse_view_transform*vec4(-LightBlk.lights[0].v_dir,0)).xyz,1);
 	out_color = vec4(color,1);
+	
+	vec4 fposls = vvvp* world_pos;
+	vec3 pCoord = fposls.xyz/fposls.w;
+	pCoord = pCoord *0.5 + 0.5;
+	
+	//out_color = vec4(vec3(texture(shadow_maps[1], pCoord.xy).r),1.0);
 }
