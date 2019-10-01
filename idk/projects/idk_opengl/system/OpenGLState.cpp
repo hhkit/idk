@@ -143,13 +143,11 @@ namespace idk::ogl
 					auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
 					opengl_handle->BindConvolutedToUnit(texture_units);
 					pipeline.SetUniform("irradiance_probe", texture_units++);
-					opengl_handle->BindToUnit(texture_units);
-					pipeline.SetUniform("environment_probe", texture_units++);
+					pipeline.SetUniform("environment_probe", opengl_handle, texture_units++);
 				}
 			}, clear_data);
 
-			brdf_texture->BindToUnit(texture_units);
-			pipeline.SetUniform("brdfLUT", texture_units++);
+			pipeline.SetUniform("brdfLUT", brdf_texture, texture_units++);
 			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 		};
 
@@ -170,11 +168,11 @@ namespace idk::ogl
 				pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
 				pipeline.SetUniform(lightblk + "vp", light.vp);
 
-				auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
-				t.as<OpenGLTexture>().BindToUnit(texture_units);
-				pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
-
-				texture_units += static_cast<bool>(light.light_map);
+				if (light.light_map)
+				{
+					auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", RscHandle<OpenGLTexture>{t}, texture_units++);
+				}
 			}
 		};
 #pragma endregion
@@ -246,7 +244,6 @@ namespace idk::ogl
 					if (!obj)
 						return;
 
-					auto& oglCubeMap = obj.as<OpenGLCubemap>();
 					glDisable(GL_CULL_FACE);
 					glDepthMask(GL_FALSE);
 
@@ -254,9 +251,8 @@ namespace idk::ogl
 					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
 
 					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
-
-					oglCubeMap.BindToUnit(0);
-					pipeline.SetUniform("sb", 0);
+										
+					pipeline.SetUniform("sb", RscHandle<OpenGLCubemap>{obj}, 0);
 
 					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw({{ std::make_pair(vtx::Attrib::Position, 0) }});
 					glDepthMask(GL_TRUE);
@@ -342,8 +338,7 @@ namespace idk::ogl
 		for (auto i = 0; i < 6; ++i)
 			pipeline.SetUniform("Mat4Blk.pv_matrices[" + std::to_string(i) + "]", view_matrices[i]);
 
-		handle->BindToUnit(0);
-		pipeline.SetUniform("environment_probe", 0);
+		pipeline.SetUniform("environment_probe", handle, 0);
 
 		RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] }
 		->BindAndDraw({ {
