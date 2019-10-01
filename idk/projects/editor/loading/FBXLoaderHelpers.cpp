@@ -277,7 +277,7 @@ namespace idk::fbx_loader_detail
 		auto decomp2 = decompose(inverse_mat);
 
 		// POSITION
-		if (ai_anim_node->mNumPositionKeys > 0)
+		if (ai_anim_node->mNumPositionKeys > 1)
 		{
 			vec3 prev;
 			for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
@@ -300,7 +300,7 @@ namespace idk::fbx_loader_detail
 		}
 		
 		// SCALE
-		if (ai_anim_node->mNumScalingKeys > 0)
+		if (ai_anim_node->mNumScalingKeys > 1)
 		{
 			vec3 prev;
 			for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
@@ -328,7 +328,7 @@ namespace idk::fbx_loader_detail
 		}
 
 		// ROTATE
-		if (ai_anim_node->mNumRotationKeys > 0)
+		if (ai_anim_node->mNumRotationKeys > 1)
 		{
 			//quat prev
 			for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
