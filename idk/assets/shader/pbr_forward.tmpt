@@ -114,10 +114,12 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 	//Get current light depth
 	float curDepth = projCoords.z;  
 	
+	//return nearestDepth;
+	
 	 // check if current frag is in shadow and return the result
 	//if (curDepth > nearestDepth + max(0.05 * (1.0 - dot(normal,lightDir)),0.005)) 
 	
-	if (curDepth > nearestDepth + 0.005) 	
+	if (curDepth > nearestDepth + 0.0005) 	
 		return 1.0f;
 	else
 		return 0.0f;
@@ -203,14 +205,14 @@ void main()
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
-	vec4 world_pos = vec4(fs_in.world_pos,1);
+	vec4 world_pos = PerCamera.inverse_view_transform*vec4(view_pos,1);
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		if (LightBlk.lights[i].type == 1)
 		{
-		    result *= (1 - vec3(ShadowCalculation(i,-LightBlk.lights[i].v_dir ,normal ,LightBlk.lights[i].vp * world_pos)));
+		    result *= vec3(1 - ShadowCalculation(i,-(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
 		}
 		else 
 		{
@@ -231,8 +233,8 @@ void main()
 	vec3 prefilteredColor = textureLod(environment_probe, reflected, roughness * MAX_REFLECTION_LOD).rgb;
 	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, view_dir), 0.0), roughness)).rg;
 	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
-	//vec3 ambient = (kD * diffuse + specular) * ambient_o;
-	vec3 ambient = vec3(0.03);
+	vec3 ambient = (kD * diffuse + specular) * ambient_o;
+	ambient = vec3(0.03);
 	//vec3 ambient = (kD * diffuse) * ambient_o;
 	
 	vec3 color = light_accum + ambient;

@@ -291,7 +291,7 @@ namespace idk::ogl
 						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
 						t.as<OpenGLTexture>().BindToUnit(texture_units);
 						pipeline.SetUniform(lightblk + "vp", light.vp);
-						pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
 						texture_units++;
 					}
 					//texture_units += static_cast<bool>(light.light_map);
@@ -379,7 +379,7 @@ namespace idk::ogl
 						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
 						t.as<OpenGLTexture>().BindToUnit(texture_units);
 						pipeline.SetUniform(lightblk + "vp", light.vp);
-						pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
 						texture_units++;
 					}
 					//texture_units += static_cast<bool>(light.light_map);
