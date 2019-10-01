@@ -205,7 +205,7 @@ namespace idk::fbx_loader_detail
 		if (ai_anim_node->mNumPositionKeys > 1)
 		{
 			vec3 prev;
-			for (size_t p = 1; p < ai_anim_node->mNumPositionKeys; ++p)
+			for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
 			{
 				auto& position_key = ai_anim_node->mPositionKeys[p];
 
@@ -214,7 +214,7 @@ namespace idk::fbx_loader_detail
 				//	abs(prev[1] - curr[1]) > epsilon &&
 				//	abs(prev[2] - curr[2]) > epsilon)
 				{
-					const float time = static_cast<float>(position_key.mTime - ai_anim_node->mPositionKeys[1].mTime);
+					const float time = static_cast<float>(position_key.mTime - ai_anim_node->mPositionKeys[0].mTime);
 
 					auto scaled_translate = (curr - decomp.position) * FBX_SCALE;
 					channel._translate.emplace_back(scaled_translate, time);
@@ -228,7 +228,7 @@ namespace idk::fbx_loader_detail
 		if (ai_anim_node->mNumScalingKeys > 1)
 		{
 			vec3 prev;
-			for (size_t s = 1; s < ai_anim_node->mNumScalingKeys; ++s)
+			for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
 			{
 				auto& scale_key = ai_anim_node->mScalingKeys[s];
 
@@ -237,7 +237,7 @@ namespace idk::fbx_loader_detail
 				//	abs(prev[1] - curr[1]) > epsilon &&
 				//	abs(prev[2] - curr[2]) > epsilon)
 				{
-					const float time = static_cast<float>(scale_key.mTime - ai_anim_node->mScalingKeys[1].mTime);
+					const float time = static_cast<float>(scale_key.mTime - ai_anim_node->mScalingKeys[0].mTime);
 					auto final_scale = curr - decomp.scale;
 					
 					for (auto& elem : final_scale)
@@ -256,11 +256,11 @@ namespace idk::fbx_loader_detail
 		if (ai_anim_node->mNumRotationKeys > 1)
 		{
 			//quat prev
-			for (size_t r = 1; r < ai_anim_node->mNumRotationKeys; ++r)
+			for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
 			{
 				auto& rotation_key = ai_anim_node->mRotationKeys[r];
 				const quat curr = initQuat(rotation_key.mValue);
-				const float time = static_cast<float>(rotation_key.mTime - ai_anim_node->mRotationKeys[1].mTime);
+				const float time = static_cast<float>(rotation_key.mTime - ai_anim_node->mRotationKeys[0].mTime);
 
 				auto final_rot = curr;// *quat_cast<mat3>(decomp.rotation).inverse();
 				//auto decomp_rot = decompose_rotation_matrix(final_rot);
@@ -283,12 +283,11 @@ namespace idk::fbx_loader_detail
 		// Is it animated?
 		auto ai_anim_node = ai_anim_table.find(assimp_node._name);
 		bool is_animated = ai_anim_node != ai_anim_table.end();
-		int i;
+		
 		// Initializing the channel. Every node will have a channel regardless whether it is virtual/animated or not.
 		anim::Channel channel;
 		channel._name = assimp_node._name;
-		if (channel._name.find("mixamorig:RightHandPinky4") != string::npos)
-			i = 5;
+		
 		concat_transform = concat_transform * assimp_node._node_transform;
 		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
 		if (is_animated)
