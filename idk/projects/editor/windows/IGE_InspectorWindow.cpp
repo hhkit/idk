@@ -519,10 +519,11 @@ namespace idk {
 			ImGui::Text("X");
 			ImGui::SameLine();
 			ImGui::SetCursorPosY(heightPos);
-			if (ImGui::SliderAngle("##RotationX", original.x.data())) {
+            deg x_deg{ original.x };
+            if (ImGui::DragFloat("##RotationX", x_deg.data(), 1.0f)) {
 				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
 					euler_angles eachGORotation { i->GetComponent<Transform>()->rotation };
-					eachGORotation.x = original.x;
+                    eachGORotation.x = x_deg;
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
@@ -533,10 +534,11 @@ namespace idk {
 
 			ImGui::Text("Y");
 			ImGui::SameLine();
-			if (ImGui::SliderAngle("##RotationY", original.y.data())) {
+            deg y_deg{ original.y };
+            if (ImGui::DragFloat("##RotationY", y_deg.data(), 1.0f)) {
 				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
 					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
-					eachGORotation.y = original.y;
+					eachGORotation.y = y_deg;
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
@@ -547,10 +549,11 @@ namespace idk {
 
 			ImGui::Text("Z");
 			ImGui::SameLine();
-			if (ImGui::SliderAngle("##RotationZ", original.z.data())) {
+            deg z_deg{ original.z };
+			if (ImGui::DragFloat("##RotationZ", z_deg.data(), 1.0f)) {
 				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
 					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
-					eachGORotation.z = original.z;
+					eachGORotation.z = z_deg;
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
