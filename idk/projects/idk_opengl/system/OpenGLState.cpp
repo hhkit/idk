@@ -94,22 +94,21 @@ namespace idk::ogl
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
 		assert(Core::GetSystem<GraphicsSystem>().brdf);
-		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
-
-		auto BindVertexShader = [this](const RscHandle<ShaderProgram>& handle, const mat4& perspective_matrix)
+#pragma region Helper Lambdas
+		const auto BindVertexShader = [this](const RscHandle<ShaderProgram>& handle, const mat4& perspective_matrix)
 		{
 			pipeline.PushProgram(handle);
 			pipeline.SetUniform("PerCamera.perspective_transform", perspective_matrix);
 		};
 
-		auto SetObjectUniforms = [this](const auto& object, const mat4& view_matrix)
+		const auto SetObjectUniforms = [this](const auto& object, const mat4& view_matrix)
 		{
 			auto obj_tfm = view_matrix * object.transform;
 			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 			pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 		};
 
-		auto SetSkeletonUniforms = [this, &curr_object_buffer](const AnimatedRenderObject& render_object)
+		const auto SetSkeletonUniforms = [this, &curr_object_buffer](const AnimatedRenderObject& render_object)
 		{
 			auto& skeleton = curr_object_buffer.skeleton_transforms[render_object.skeleton_index];
 			for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
@@ -120,8 +119,7 @@ namespace idk::ogl
 			}
 		};
 
-
-		auto BindMaterialInstance = [this, &curr_object_buffer](const MaterialInstance& material_instance, GLuint& texture_units)
+		const auto BindMaterialInstance = [this, &curr_object_buffer](const MaterialInstance& material_instance, GLuint& texture_units)
 		{
 			auto material = material_instance.material;
 			pipeline.PushProgram(material->_shader_program);
@@ -135,7 +133,7 @@ namespace idk::ogl
 				std::visit(MaterialVisitor{pipeline, texture_units, id}, uniform);
 		};
 
-		auto BindPBR = [this](const std::variant<vec4, RscHandle<CubeMap>>& clear_data, const mat4& inv_view_tfm, GLuint& texture_units)
+		const auto BindPBR = [this](const std::variant<vec4, RscHandle<CubeMap>>& clear_data, const mat4& inv_view_tfm, GLuint& texture_units)
 		{
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
@@ -155,6 +153,36 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 		};
 
+		const auto BindLights = [this, &curr_object_buffer](GLuint& texture_units)
+		{
+			auto& lights = curr_object_buffer.lights;
+
+			pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+			for (unsigned i = 0; i < lights.size(); ++i)
+			{
+				auto& light = lights[i];
+				string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
+				pipeline.SetUniform(lightblk + "type", light.index);
+				pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
+				pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
+				pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
+				pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
+				pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+				pipeline.SetUniform(lightblk + "vp", light.vp);
+
+				auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+				t.as<OpenGLTexture>().BindToUnit(texture_units);
+				pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+
+				texture_units += static_cast<bool>(light.light_map);
+			}
+		};
+#pragma endregion
+
+		pipeline.Use();
+		glBindVertexArray(vao_id);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			if (elem.index == 0) // point light
@@ -163,7 +191,7 @@ namespace idk::ogl
 			if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				//fb_man.SetRenderTarget({});
+
 				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{elem.light_map});
 				//Bind frame buffers based on the camera's render target
 				//Set the clear color according to the camera
@@ -175,16 +203,9 @@ namespace idk::ogl
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				for (auto& elem : curr_object_buffer.mesh_render)
 				{
-					// set probe
-					GLuint texture_units = 0;
-
-					// set uniforms
 					SetObjectUniforms(elem, light_view_tfm);
-
-					// bind attribs
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
 
@@ -213,24 +234,22 @@ namespace idk::ogl
 				elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
 			}
 
-			{
-				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
-			}
-			
-			// lock drawing buffer
-			pipeline.Use();
-			glBindVertexArray(vao_id);
 
-			std::visit([&]([[maybe_unused]] const auto& obj)
+			fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
+			
+			// draw skybox if present
+			std::visit(
+				[&]([[maybe_unused]] const auto& obj)
 			{
 				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
 				{
 					if (!obj)
 						return;
-					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
 
+					auto& oglCubeMap = obj.as<OpenGLCubemap>();
 					glDisable(GL_CULL_FACE);
 					glDepthMask(GL_FALSE);
+
 					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
 					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
 
@@ -239,68 +258,41 @@ namespace idk::ogl
 					oglCubeMap.BindToUnit(0);
 					pipeline.SetUniform("sb", 0);
 
-					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(
-						{ {
-							std::make_pair(vtx::Attrib::Position, 0)
-						} });
+					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw({{ std::make_pair(vtx::Attrib::Position, 0) }});
 					glDepthMask(GL_TRUE);
 					glEnable(GL_CULL_FACE);
 				}
-				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
+				else
 					glClearColor(obj.x, obj.y, obj.z, obj.w);
 			}, cam.clear_data);
 
+			// render debug
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 
-			// render debug
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-
 					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 					SetObjectUniforms(elem, cam.view_matrix);
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
 
 			// per mesh render
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
-				// bind shader
 				GLuint texture_units = 0;
+
 				BindMaterialInstance(*elem.material_instance, texture_units);
-
-				// shader uniforms
 				BindPBR(cam.clear_data, inv_view_tfm, texture_units);
-
-				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
-				for (unsigned i = 0; i < lights.size(); ++i)
-				{
-					auto& light = lights[i];
-					string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
-					pipeline.SetUniform(lightblk + "type",      light.index);
-					pipeline.SetUniform(lightblk + "color",     light.light_color.as_vec3);
-					pipeline.SetUniform(lightblk + "v_pos",     light.v_pos);
-					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
-					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
-					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
-					pipeline.SetUniform(lightblk + "vp"       , light.vp);
-
-					auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
-					t.as<OpenGLTexture>().BindToUnit(texture_units);
-					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
-
-					texture_units += static_cast<bool>(light.light_map);
-				}
-
+				BindLights(texture_units);
 				SetObjectUniforms(elem, cam.view_matrix);
-
-
-				// draw
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 			}
 
@@ -310,32 +302,10 @@ namespace idk::ogl
 				GLuint texture_units = 0;
 
 				BindMaterialInstance(*elem.material_instance, texture_units);
-
-				// bind probe
 				BindPBR(cam.clear_data, inv_view_tfm, texture_units);
-
-				// shader uniforms
-				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
-
-				for (unsigned i = 0; i < lights.size(); ++i)
-				{
-					auto& light = lights[i];
-					string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
-					pipeline.SetUniform(lightblk + "type", light.index);
-					pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
-					pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
-					pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
-					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
-					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
-
-					texture_units += static_cast<bool>(light.light_map);
-				}
-
+				BindLights(texture_units);
 				SetSkeletonUniforms(elem);
 				SetObjectUniforms(elem, cam.view_matrix);
-
-
-				// draw
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
 			}
 		}
