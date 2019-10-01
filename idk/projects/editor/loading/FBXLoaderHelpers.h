@@ -25,8 +25,8 @@
 
 namespace idk::fbx_loader_detail
 {
-	static vec3 FBX_SCALE = vec3{ 1.0f/100, 1.0f / 100, 1.0f / 100 };
-	//static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
+	// static vec3 FBX_SCALE = vec3{ 1.0f/100, 1.0f / 100, 1.0f / 100 };
+	static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
 	struct Vertex
 	{
 		vec3	pos;
@@ -75,10 +75,11 @@ namespace idk::fbx_loader_detail
 
 	enum AI_NODE_TYPE
 	{
-		ROOT = 1 << 0,
-		MESH = 1 << 1,
-		BONE = 1 << 2,
-		VIRTUAL = 1 << 3,
+		ROOT		= 1 << 0,
+		MESH		= 1 << 1,
+		BONE_ROOT	= 1 << 2,
+		BONE		= 1 << 3,
+		VIRTUAL		= 1 << 4,
 
 		NONE = 0
 	};
@@ -90,8 +91,8 @@ namespace idk::fbx_loader_detail
 		mat4 _global_inverse_bind_pose;
 
 		AI_NODE_TYPE _ai_type = NONE;
-
-		vector<AssimpNode> _children;
+		int _parent = -1;
+		vector<int> _children;
 	};
 
 	using BoneSet = hash_set<BoneData, NameHash<BoneData>, NameEq<BoneData>>;
@@ -104,16 +105,16 @@ namespace idk::fbx_loader_detail
 	quat initQuat(const aiQuaternion& vec);
 
 	// Parse the whole assimp node graph into our own format
-	void generateNodeGraph(const aiNode* ai_root_node, AssimpNode& root_node, const BoneSet& bone_set);
+	void generateNodeGraph(const aiNode* ai_root_node, vector<AssimpNode>& assimp_node_vec, const BoneSet& bone_set);
 
 	// Helper function for initializing bone data
 	void normalizeMeshEntries(vector<Vertex>& vertices, const mat4& matrix);
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
 
 	// Helper functions for bone data
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Bone>& bones_out, const mat4& normalize = mat4{});
+	void initBoneHierarchy(const vector<AssimpNode>& root_node, hash_table<string, size_t>& bones_table, vector<anim::Bone>& bones_out, const mat4& normalize = mat4{});
 	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
 
 	// Helper functions for animation nodes
-	void initAnimNodes(const AssimpNode& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
+	void initAnimNodes(const vector<AssimpNode>& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
 }

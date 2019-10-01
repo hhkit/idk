@@ -33,7 +33,7 @@ namespace idk
 				// We keep all the bone transforms first. Easier to refer to parent's transform, fewer mat mults.
 				
 				// Compute the time
-				elem._elapsed += Core::GetRealDT().count();
+				//elem._elapsed += Core::GetRealDT().count();
 				if (elem._elapsed >= anim->GetDuration())
 					elem._elapsed -= anim->GetDuration();
 				
