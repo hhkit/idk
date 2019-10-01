@@ -2,7 +2,7 @@
 //@file		IGE_InspectorWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		28 SEPT 2019
+//@date		02 OCT 2019
 //@brief	
 
 /*
@@ -622,9 +622,10 @@ namespace idk {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
 					mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
-					//Refresh the new matrix values
-					editor.RefreshSelectedMatrix();
+					
 				}
+				//Refresh the new matrix values
+				editor.RefreshSelectedMatrix();
 				hasChanged		= false;
 				//isBeingModified = false;
 			}
