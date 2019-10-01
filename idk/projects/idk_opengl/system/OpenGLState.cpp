@@ -135,6 +135,26 @@ namespace idk::ogl
 				std::visit(MaterialVisitor{pipeline, texture_units, id}, uniform);
 		};
 
+		auto BindPBR = [this](const std::variant<vec4, RscHandle<CubeMap>>& clear_data, const mat4& inv_view_tfm, GLuint& texture_units)
+		{
+			std::visit([&]([[maybe_unused]] const auto& obj)
+			{
+				using T = std::decay_t<decltype(obj)>;
+				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+				{
+					auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+					opengl_handle->BindConvolutedToUnit(texture_units);
+					pipeline.SetUniform("irradiance_probe", texture_units++);
+					opengl_handle->BindToUnit(texture_units);
+					pipeline.SetUniform("environment_probe", texture_units++);
+				}
+			}, clear_data);
+
+			brdf_texture->BindToUnit(texture_units);
+			pipeline.SetUniform("brdfLUT", texture_units++);
+			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			if (elem.index == 0) // point light
@@ -255,22 +275,7 @@ namespace idk::ogl
 				BindMaterialInstance(*elem.material_instance, texture_units);
 
 				// shader uniforms
-				std::visit([&]([[maybe_unused]] const auto& obj)
-					{
-						using T = std::decay_t<decltype(obj)>;
-						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
-						{
-							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
-							opengl_handle->BindConvolutedToUnit(texture_units);
-							pipeline.SetUniform("irradiance_probe", texture_units++);
-							opengl_handle->BindToUnit(texture_units);
-							pipeline.SetUniform("environment_probe", texture_units++);
-						}
-					}, cam.clear_data);
-
-				brdf_texture->BindToUnit(texture_units);
-				pipeline.SetUniform("brdfLUT", texture_units++);
-				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
+				BindPBR(cam.clear_data, inv_view_tfm, texture_units);
 
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
 				for (unsigned i = 0; i < lights.size(); ++i)
@@ -307,21 +312,7 @@ namespace idk::ogl
 				BindMaterialInstance(*elem.material_instance, texture_units);
 
 				// bind probe
-				std::visit([&]([[maybe_unused]] const auto& obj)
-					{
-						using T = std::decay_t<decltype(obj)>;
-						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
-						{
-							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
-							opengl_handle->BindConvolutedToUnit(texture_units);
-							pipeline.SetUniform("irradiance_probe", texture_units++);
-							opengl_handle->BindToUnit(texture_units);
-							pipeline.SetUniform("environment_probe", texture_units++);
-						}
-					}, cam.clear_data);
-
-				brdf_texture->BindToUnit(texture_units);
-				pipeline.SetUniform("brdfLUT", texture_units++);
+				BindPBR(cam.clear_data, inv_view_tfm, texture_units);
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
