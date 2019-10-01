@@ -229,8 +229,10 @@ namespace idk {
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
 			if (c_name) {
 				DisplayNameComponent(c_name);
-
 			}
+
+            if (editor.selected_gameObjects[0]->HasComponent<PrefabInstance>())
+                DisplayPrefabInstanceControls(editor.selected_gameObjects[0]->GetComponent<PrefabInstance>());
 
 			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
 			if (c_transform) {
@@ -241,11 +243,8 @@ namespace idk {
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
 			for (auto& component : componentSpan) {
 
-				//Skip Name and Transform
-				if (component == c_name)
-					continue;
-
-				if (component == c_transform)
+				//Skip Name and Transform and PrefabInstance
+				if (component == c_name || component == c_transform || component.is_type<PrefabInstance>())
 					continue;
 
 				if (component.is_type<Animator>())
@@ -416,6 +415,13 @@ namespace idk {
 		else
 			ImGui::TextDisabled("Multiple gameobjects selected");
 	}
+
+    void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
+    {
+        ImGui::Text("Prefab: ");
+        ImGui::SameLine();
+        ImGui::Text(Core::GetResourceManager().GetPath(c_prefab->prefab)->data());
+    }
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
 	{
