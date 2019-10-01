@@ -93,8 +93,7 @@ namespace idk::ogl
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
-		assert(Core::GetSystem<GraphicsSystem>().brdf);
-#pragma region Helper Lambdas
+		#pragma region Helper Lambdas
 		const auto BindVertexShader = [this](const RscHandle<ShaderProgram>& handle, const mat4& perspective_matrix)
 		{
 			pipeline.PushProgram(handle);
@@ -180,6 +179,9 @@ namespace idk::ogl
 		pipeline.Use();
 		glBindVertexArray(vao_id);
 
+		/***********************************************************************************************************/
+		/* SHADOW PASS                                                                                             */
+		/***********************************************************************************************************/
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		for (const auto& elem : curr_object_buffer.lights)
 		{
@@ -191,16 +193,13 @@ namespace idk::ogl
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
 
 				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{elem.light_map});
-				//Bind frame buffers based on the camera's render target
-				//Set the clear color according to the camera
 
 				const auto light_view_tfm = elem.v;
 				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
 
-				// per mesh render
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm);
 				for (auto& elem : curr_object_buffer.mesh_render)
 				{
 					SetObjectUniforms(elem, light_view_tfm);
@@ -208,8 +207,6 @@ namespace idk::ogl
 				}
 
 				BindVertexShader(renderer_vertex_shaders[SkinnedMesh], light_p_tfm);
-				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
 					// Setting bone transforms
@@ -220,7 +217,9 @@ namespace idk::ogl
 			}
 		}
 
-		// range over cameras
+		/***********************************************************************************************************/
+		/* DRAWING PASS                                                                                            */
+		/***********************************************************************************************************/
 		for(auto cam: curr_object_buffer.camera)
 		{
 			const auto inv_view_tfm = invert_rotation(cam.view_matrix);
@@ -232,12 +231,10 @@ namespace idk::ogl
 				elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
 			}
 
-
 			fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
 			
 			// draw skybox if present
-			std::visit(
-				[&]([[maybe_unused]] const auto& obj)
+			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
 				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
 				{
@@ -251,10 +248,10 @@ namespace idk::ogl
 					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
 
 					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
-										
 					pipeline.SetUniform("sb", RscHandle<OpenGLCubemap>{obj}, 0);
 
-					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw({{ std::make_pair(vtx::Attrib::Position, 0) }});
+					RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::Box]}->BindAndDraw({{ std::make_pair(vtx::Attrib::Position, 0) }});
+
 					glDepthMask(GL_TRUE);
 					glEnable(GL_CULL_FACE);
 				}
