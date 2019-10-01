@@ -90,6 +90,11 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::Prerender()
 	{
+		if (prev_brdf != brdf)
+		{
+			_opengl->ComputeBRDF(RscHandle<ogl::Program>{brdf});
+			prev_brdf = brdf;
+		}
 		cubemaps_to_convolute.invoke_all();
 	}
 
@@ -190,6 +195,7 @@ namespace idk::ogl
 		// register extensions
 		Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".vert");
+		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".geom");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
 		Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");

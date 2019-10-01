@@ -229,8 +229,10 @@ namespace idk {
 			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
 			if (c_name) {
 				DisplayNameComponent(c_name);
-
 			}
+
+            if (editor.selected_gameObjects[0]->HasComponent<PrefabInstance>())
+                DisplayPrefabInstanceControls(editor.selected_gameObjects[0]->GetComponent<PrefabInstance>());
 
 			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
 			if (c_transform) {
@@ -241,11 +243,8 @@ namespace idk {
 			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
 			for (auto& component : componentSpan) {
 
-				//Skip Name and Transform
-				if (component == c_name)
-					continue;
-
-				if (component == c_transform)
+				//Skip Name and Transform and PrefabInstance
+				if (component == c_name || component == c_transform || component.is_type<PrefabInstance>())
 					continue;
 
 				if (component.is_type<Animator>())
@@ -417,6 +416,13 @@ namespace idk {
 			ImGui::TextDisabled("Multiple gameobjects selected");
 	}
 
+    void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
+    {
+        ImGui::Text("Prefab: ");
+        ImGui::SameLine();
+        ImGui::Text(Core::GetResourceManager().GetPath(c_prefab->prefab)->data());
+    }
+
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
 	{
 
@@ -438,13 +444,14 @@ namespace idk {
 
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
+			vector<mat4>& originalMatrix = editor.selected_matrix;
 			//This is dumped if no items are changed.
-			if (!isBeingModified) {
-				originalMatrix.clear();
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
-				}
-			}
+			//if (!isBeingModified) {
+			//	originalMatrix.clear();
+			//	for (Handle<GameObject> i : editor.selected_gameObjects) {
+			//		originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+			//	}
+			//}
 
 
 			//Position
@@ -518,10 +525,11 @@ namespace idk {
 			ImGui::Text("X");
 			ImGui::SameLine();
 			ImGui::SetCursorPosY(heightPos);
-			if (ImGui::SliderAngle("##RotationX", original.x.data())) {
+            deg x_deg{ original.x };
+            if (ImGui::DragFloat("##RotationX", x_deg.data(), 1.0f)) {
 				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
 					euler_angles eachGORotation { i->GetComponent<Transform>()->rotation };
-					eachGORotation.x = original.x;
+                    eachGORotation.x = x_deg;
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
@@ -532,10 +540,11 @@ namespace idk {
 
 			ImGui::Text("Y");
 			ImGui::SameLine();
-			if (ImGui::SliderAngle("##RotationY", original.y.data())) {
+            deg y_deg{ original.y };
+            if (ImGui::DragFloat("##RotationY", y_deg.data(), 1.0f)) {
 				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
 					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
-					eachGORotation.y = original.y;
+					eachGORotation.y = y_deg;
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
@@ -546,10 +555,11 @@ namespace idk {
 
 			ImGui::Text("Z");
 			ImGui::SameLine();
-			if (ImGui::SliderAngle("##RotationZ", original.z.data())) {
+            deg z_deg{ original.z };
+			if (ImGui::DragFloat("##RotationZ", z_deg.data(), 1.0f)) {
 				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
 					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
-					eachGORotation.z = original.z;
+					eachGORotation.z = z_deg;
 					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
 				}
 			}
@@ -612,9 +622,11 @@ namespace idk {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
 					mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+					//Refresh the new matrix values
+					editor.RefreshSelectedMatrix();
 				}
 				hasChanged		= false;
-				isBeingModified = false;
+				//isBeingModified = false;
 			}
 
 			ImGui::PopID();
@@ -789,16 +801,16 @@ namespace idk {
 
 	void IGE_InspectorWindow::TransformModifiedCheck()
 	{
-		if (ImGui::IsItemEdited()) {
-			isBeingModified = true;
-		}
+		// if (ImGui::IsItemEdited()) {
+		// 	isBeingModified = true;
+		// }
 		if (ImGui::IsItemDeactivatedAfterEdit()) {
 			hasChanged = true;
 
 		}
 		else if (ImGui::IsItemDeactivated()) {
 			hasChanged = false;
-			isBeingModified = false;
+			//isBeingModified = false;
 
 		}
 	}

@@ -22,7 +22,6 @@ namespace idk
 
 		int  depth = 0;
 		RscHandle<RenderTarget> render_target;
-		vec4 clear_color{ 0,0,0,1 };
 
 		// perspective settings
 		rad  field_of_view = deg{ 45.f };
@@ -33,9 +32,7 @@ namespace idk
 
 		bool overlay_debug_draw = true;
 
-		opt<RscHandle<CubeMap>> skybox;
-		opt<RscHandle<Mesh>>    skybox_mesh;
-
+		std::variant<color, RscHandle<CubeMap>> clear;
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 

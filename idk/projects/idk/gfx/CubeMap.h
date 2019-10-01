@@ -47,7 +47,6 @@ namespace idk
 	public:
 		CubeMap() = default;
 		virtual void* ID() const{ return 0; };
-		virtual void* ConvolutedID() const { return 0; };
 		
 		//Dtor
 		virtual ~CubeMap() = default;

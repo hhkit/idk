@@ -7,12 +7,14 @@
 namespace idk
 {
     ENUM(ColorFormat, char,
-         RGB_8,
-         RGBA_8,
-         RGBF_16,
-         RGBF_32,
-         RGBAF_16,
-         RGBAF_32,
+		RG_8,
+	    RGF_16,
+        RGB_8,
+        RGBA_8,
+        RGBF_16,
+        RGBF_32,
+        RGBAF_16,
+        RGBAF_32,
 		DEPTH_COMPONENT
     )
 

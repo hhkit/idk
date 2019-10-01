@@ -8,18 +8,18 @@
 namespace idk
 {
 	template<typename T>
-	inline trad<T>::trad(T val)
+	constexpr inline trad<T>::trad(T val)
 		: value{ val }
 	{
 	}
 	template<typename T>
-	inline trad<T>::trad(const tdeg<T>& rhs)
+	constexpr inline trad<T>::trad(const tdeg<T>& rhs)
 		: value{ rhs.value / s_cast<T>(180) * constants::pi<T>()}
 	{
 	}
 
 	template<typename T>
-	trad<T>& trad<T>::normalize()
+	constexpr trad<T>& trad<T>::normalize()
 	{
 		value = fmod(value, constants::tau<T>());
 		if (value > constants::pi<T>())
@@ -28,7 +28,7 @@ namespace idk
 	}
 
 	template<typename T>
-	trad<T> trad<T>::normalized() const
+	constexpr trad<T> trad<T>::normalized() const
 	{
 		auto copy = *this;
 		return copy.normalize();
@@ -47,119 +47,119 @@ namespace idk
 	}
 
 	template<typename T>
-	inline trad<T>::operator T() const
+	constexpr inline trad<T>::operator T() const
 	{
 		return value;
 	}
 
 	template<typename T>
-	trad<T>& trad<T>::operator+=(const trad& rhs)
+	constexpr trad<T>& trad<T>::operator+=(const trad& rhs)
 	{
 		value += rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	trad<T>& trad<T>::operator-=(const trad& rhs)
+	constexpr trad<T>& trad<T>::operator-=(const trad& rhs)
 	{
 		value -= rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	trad<T>& trad<T>::operator*=(const T& rhs)
+	constexpr trad<T>& trad<T>::operator*=(const T& rhs)
 	{
 		value *= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	trad<T>& trad<T>::operator/=(const T& rhs)
+	constexpr trad<T>& trad<T>::operator/=(const T& rhs)
 	{
 		value /= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	inline trad<T> trad<T>::operator+(const trad& rhs) const
+	constexpr  trad<T> trad<T>::operator+(const trad& rhs) const
 	{
 		auto copy = *this;
 		return copy += rhs;
 	}
 
 	template<typename T>
-	inline trad<T> trad<T>::operator-(const trad& rhs) const
+	constexpr  trad<T> trad<T>::operator-(const trad& rhs) const
 	{
 		auto copy = *this;
 		return copy -= rhs;
 	}
 
 	template<typename T>
-	inline trad<T> trad<T>::operator-() const
+	constexpr  trad<T> trad<T>::operator-() const
 	{
 		return trad<T>{-this->value};
 	}
 
 	template<typename T>
-	inline trad<T> trad<T>::operator*(const T& rhs) const
+	constexpr  trad<T> trad<T>::operator*(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy *= rhs;
 	}
 
 	template<typename T>
-	inline trad<T> trad<T>::operator/(const T& rhs) const
+	constexpr  trad<T> trad<T>::operator/(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy /= rhs;
 	}
 
 	template<typename T>
-	inline T trad<T>::operator/(const trad& rhs) const
+	constexpr  T trad<T>::operator/(const trad& rhs) const
 	{
 		return value / rhs.value;
 	}
 
 	template<typename T>
-	inline bool trad<T>::operator<(const trad& rhs) const
+	constexpr  bool trad<T>::operator<(const trad& rhs) const
 	{
 		return value < rhs.value;
 	}
 
 	template<typename T>
-	inline bool trad<T>::operator==(const trad& rhs) const
+	constexpr  bool trad<T>::operator==(const trad& rhs) const
 	{
 		return value == rhs.value;
 	}
 
 	template<typename T>
-	inline bool trad<T>::operator!=(const trad& rhs) const
+	constexpr  bool trad<T>::operator!=(const trad& rhs) const
 	{
 		return value != rhs.value;
 	}
 
 
 	template<typename T>
-	trad<T>::operator tdeg<T>() const
+	constexpr trad<T>::operator tdeg<T>() const
 	{
 		return tdeg<T>{value / constants::pi<T>() * s_cast<T>(180)};
 	}
 
 
 	template<typename T>
-	inline tdeg<T>::tdeg(T val)
+	constexpr  tdeg<T>::tdeg(T val)
 		: value{ val }
 	{
 	}
 	template<typename T>
-	inline tdeg<T>::tdeg(const trad<T>& rhs)
+	constexpr  tdeg<T>::tdeg(const trad<T>& rhs)
 		: value{ rhs.value / constants::pi<T>() * s_cast<T>(180) }
 	{
 	}
 
 
 	template<typename T>
-	tdeg<T>& tdeg<T>::normalize()
+	constexpr tdeg<T>& tdeg<T>::normalize()
 	{
 		value = fmod(value, T{ 360 });
 		if (value > T{ 180 })
@@ -168,7 +168,7 @@ namespace idk
 	}
 
 	template<typename T>
-	tdeg<T> tdeg<T>::normalized() const
+	constexpr tdeg<T> tdeg<T>::normalized() const
 	{
 		auto copy = *this;
 		return copy.normalize();
@@ -189,111 +189,111 @@ namespace idk
 
 
 	template<typename T>
-	tdeg<T>::operator T() const
+	constexpr 	tdeg<T>::operator T() const
 	{
 		return value;
 	}
 
 	template<typename T>
-	tdeg<T>& tdeg<T>::operator+=(const tdeg& rhs)
+	constexpr tdeg<T>& tdeg<T>::operator+=(const tdeg& rhs)
 	{
 		value += rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	tdeg<T>& tdeg<T>::operator-=(const tdeg& rhs)
+	constexpr tdeg<T>& tdeg<T>::operator-=(const tdeg& rhs)
 	{
 		value -= rhs.value;
 		return *this;
 	}
 
 	template<typename T>
-	tdeg<T>& tdeg<T>::operator*=(const T& rhs)
+	constexpr tdeg<T>& tdeg<T>::operator*=(const T& rhs)
 	{
 		value *= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	tdeg<T>& tdeg<T>::operator/=(const T& rhs)
+	constexpr tdeg<T>& tdeg<T>::operator/=(const T& rhs)
 	{
 		value /= rhs;
 		return *this;
 	}
 
 	template<typename T>
-	inline tdeg<T> tdeg<T>::operator+(const tdeg& rhs) const
+	constexpr  tdeg<T> tdeg<T>::operator+(const tdeg& rhs) const
 	{
 		auto copy = *this;
 		return copy += rhs;
 	}
 
 	template<typename T>
-	inline tdeg<T> tdeg<T>::operator-(const tdeg& rhs) const
+	constexpr  tdeg<T> tdeg<T>::operator-(const tdeg& rhs) const
 	{
 		auto copy = *this;
 		return copy -= rhs;
 	}
 
 	template<typename T>
-	inline tdeg<T> tdeg<T>::operator-() const
+	constexpr  tdeg<T> tdeg<T>::operator-() const
 	{
 		return tdeg<T>{-this->value};
 	}
 
 	template<typename T>
-	inline tdeg<T> tdeg<T>::operator*(const T& rhs) const
+	constexpr  tdeg<T> tdeg<T>::operator*(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy *= rhs;
 	}
 
 	template<typename T>
-	inline tdeg<T> tdeg<T>::operator/(const T& rhs) const
+	constexpr  tdeg<T> tdeg<T>::operator/(const T& rhs) const
 	{
 		auto copy = *this;
 		return copy /= rhs;
 	}
 
 	template<typename T>
-	inline T tdeg<T>::operator/(const tdeg& rhs) const
+	constexpr  T tdeg<T>::operator/(const tdeg& rhs) const
 	{
 		return value / rhs.value;
 	}
 
 	template<typename T>
-	inline bool tdeg<T>::operator<(const tdeg& rhs) const
+	constexpr  bool tdeg<T>::operator<(const tdeg& rhs) const
 	{
 		return value < rhs.value;
 	}
 
 	template<typename T>
-	inline bool tdeg<T>::operator==(const tdeg& rhs) const
+	constexpr  bool tdeg<T>::operator==(const tdeg& rhs) const
 	{
 		return value == rhs.value;
 	}
 
 	template<typename T>
-	inline bool tdeg<T>::operator!=(const tdeg& rhs) const
+	constexpr  bool tdeg<T>::operator!=(const tdeg& rhs) const
 	{
 		return value != rhs.value;
 	}
 
 	template<typename T>
-	tdeg<T>::operator trad<T>() const
+	constexpr tdeg<T>::operator trad<T>() const
 	{
 		return trad<T>(value * constants::pi<T>() / s_cast<T>(180));
 	}
 
 	template<typename T>
-	trad<T> operator*(const T& coeff, const trad<T>& r)
+	constexpr trad<T> operator*(const T& coeff, const trad<T>& r)
 	{
 		return r * coeff;
 	}
 
 	template<typename T>
-	tdeg<T> operator*(const T& coeff, const tdeg<T>& d)
+	constexpr tdeg<T> operator*(const T& coeff, const tdeg<T>& d)
 	{
 		return d * coeff;
 	}

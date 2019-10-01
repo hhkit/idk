@@ -148,30 +148,33 @@ namespace idk::ogl
 			else
 			{
 				std::cout << "Program link succeeded!\n";
-
-				GLint uniform_count;
-				glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
-				char buf[256]{};
-				for (GLint i = 0; i < uniform_count; ++i)
+				
+				if (0)
 				{
-					glGetActiveUniformName(_program_id, i, 256, nullptr, buf);
-					std::cout << "  uniform detected: " << buf << "\n";
-					std::cout << "  location: " << glGetUniformLocation(_program_id, buf) << "\n";
-					//std::cout << "  location: " << glGetUniformBlockIndex(_program_id, buf) << "\n";
-				}
-
-				GLint numBlocks = 0;
-				glGetProgramInterfaceiv(_program_id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &numBlocks);
-				std::cout << "  blocks found: " << numBlocks << "\n";
-
-				for (GLint i = 0; i < numBlocks; ++i)
-				{
-					GLint val = 0;
-					glGetActiveUniformBlockiv(_program_id, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &val);
-					std::cout << " uniforms in block " << i << ": " << val << "\n";
-					for (GLint j = 0; j < val; ++j)
+					GLint uniform_count;
+					glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
+					char buf[256]{};
+					for (GLint i = 0; i < uniform_count; ++i)
 					{
+						glGetActiveUniformName(_program_id, i, 256, nullptr, buf);
+						std::cout << "  uniform detected: " << buf << "\n";
+						std::cout << "  location: " << glGetUniformLocation(_program_id, buf) << "\n";
+						//std::cout << "  location: " << glGetUniformBlockIndex(_program_id, buf) << "\n";
+					}
 
+					GLint numBlocks = 0;
+					glGetProgramInterfaceiv(_program_id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &numBlocks);
+					std::cout << "  blocks found: " << numBlocks << "\n";
+
+					for (GLint i = 0; i < numBlocks; ++i)
+					{
+						GLint val = 0;
+						glGetActiveUniformBlockiv(_program_id, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &val);
+						std::cout << " uniforms in block " << i << ": " << val << "\n";
+						for (GLint j = 0; j < val; ++j)
+						{
+
+						}
 					}
 				}
 			}

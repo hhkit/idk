@@ -124,7 +124,27 @@ namespace idk {
 
 		UpdateGizmoControl();
 
+        // draw current global axes
+        const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
+        const float axis_len = 24.0f;
+        IDE& editor = Core::GetSystem<IDE>();
+        CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+        Handle<Camera> currCamera = main_camera.current_camera;
+        Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+        auto view = currCamera->ViewMatrix();
 
+        vec2 right = (view * vec4(1.0f, 0, 0, 0)).xy;
+        right.x *= -1;
+        vec2 up = (view * vec4(0, 1.0f, 0, 0)).xy;
+        vec3 forward = view * vec4(0, 0, 1.0f, 0);
+        forward.x *= -1;
+        vec2 forw = forward.xy;
+        if (forward.z < 0)
+            ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
+        ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * right, 0xff0000ff, 2.0f);
+        ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * up, 0xff00ff00, 2.0f);
+        if (forward.z > 0)
+            ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
 	}
 
 	void IGE_SceneView::SetTexture(void* textureToRender)

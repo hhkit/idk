@@ -15,6 +15,12 @@ namespace idk
 			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
 			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
 		}
+		mat4 operator()(DirectionalLight)
+		{
+			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
+			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
+			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
+		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
@@ -23,6 +29,10 @@ namespace idk
 		mat4 operator()(SpotLight spotlight)
 		{
 			return perspective(spotlight.outer_angle, 1.0f, 0.1f, (spotlight.use_inv_sq_atten) ? (1 / spotlight.attenuation_radius) : spotlight.attenuation_radius);;//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+		}
+		mat4 operator()(DirectionalLight dirLight)
+		{
+			return ortho(-10.f, 10.f, -10.f, 10.f, 0.1f, 10.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
@@ -88,7 +98,9 @@ namespace idk
 					
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
-				retval.vp = LightCameraProj{}(light_variant) *LightCameraView{ this }(light_variant);
+				retval.v = LightCameraView{ this }(light_variant);
+				retval.p = LightCameraProj{}(light_variant);
+				retval.vp =  retval.p*retval.v;
 				retval.light_map = light_variant.light_map;
 			}
 		, light);

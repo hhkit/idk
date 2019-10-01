@@ -39,6 +39,7 @@ namespace idk {
 		void displayVal(reflect::dynamic dyn);
 
 		void DisplayNameComponent(Handle<Name>& c_name);
+        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);
 
@@ -57,8 +58,7 @@ namespace idk {
 
 		//For when transforms are edited
 		bool			hasChanged = false; 
-		vector<mat4>	originalMatrix{};
-		bool			isBeingModified = false;
+		//bool			isBeingModified = false;
 		void			TransformModifiedCheck();
 
 	};

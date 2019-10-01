@@ -36,6 +36,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <imgui/ImGuizmo.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
+#include <editor/windows/IGE_ShadowMapWindow.h>
 
 namespace idk
 {
@@ -138,6 +139,10 @@ namespace idk
         colors[ImGuiCol_HeaderActive] =
             ImColor(65, 153, 163).Value;
 
+        // complement accent
+        //style.Colors[ImGuiCol_PlotLinesHovered]
+        // ImColor(
+
         // font config
         ImFontConfig config;
         config.OversampleH = 5;
@@ -152,6 +157,7 @@ namespace idk
 
 #define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
 		ADD_WINDOW(IGE_SceneView);
+		ADD_WINDOW(IGE_ShadowMapWindow);
 		ADD_WINDOW(IGE_ProjectWindow);
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);
@@ -228,6 +234,9 @@ namespace idk
 		
 		
 		_interface->ImGuiFrameEnd();
+
+
+		command_controller.FlushCommands();
 	}
 
 	void IDE::EditorDraw()
@@ -239,6 +248,15 @@ namespace idk
 	{
 		// TODO: insert return statement here
 		return _interface->Inputs()->main_camera;
+	}
+
+	void IDE::RefreshSelectedMatrix()
+	{
+		//Refresh the new matrix values
+		selected_matrix.clear();
+		for (Handle<GameObject> i : selected_gameObjects) {
+			selected_matrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+		}
 	}
 
 	void IDE::FocusOnSelectedGameObjects()

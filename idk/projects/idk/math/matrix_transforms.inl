@@ -7,12 +7,12 @@
 namespace idk
 {
 	template<typename T>
-	T identity()
+	constexpr T identity()
 	{
 		return T();
 	}
 	template<typename T, unsigned D>
-	tmat<T, D, D> scale(const tvec<T, D>& rhs)
+	constexpr tmat<T, D, D> scale(const tvec<T, D>& rhs)
 	{
 		tmat<T, D, D> retval;
 		for (auto [row, scale, n] : zip(retval, rhs, range<D>()))
@@ -46,7 +46,7 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
-	tmat<T, D + 1, D + 1> translate(const tvec<T, D> & translate_vec)
+	constexpr tmat<T, D + 1, D + 1> translate(const tvec<T, D> & translate_vec)
 	{
 		auto retval = tmat<T, D + 1, D + 1>();
 		retval[D] = tvec<T, D + 1>{ translate_vec, 1.f };
@@ -75,7 +75,7 @@ namespace idk
 		return perspective(trad<T>{fov}, aspect_ratio, n, f);
 	}
 	template<typename T>
-	tmat<T, 4, 4> ortho(T l, T r, T b, T t, T n, T f)
+	constexpr tmat<T, 4, 4> ortho(T l, T r, T b, T t, T n, T f)
 	{
 		constexpr auto _2 = s_cast<T>(2);
 		constexpr auto _1 = s_cast<T>(1);
@@ -92,7 +92,7 @@ namespace idk
 		);
 	}
 	template<typename T>
-	tmat<T, 4, 4> look_at(const tvec<T, 3> & eye, const tvec<T, 3> & object, const tvec<T, 3> & global_up)
+	constexpr tmat<T, 4, 4> look_at(const tvec<T, 3> & eye, const tvec<T, 3> & object, const tvec<T, 3> & global_up)
 	{
 		auto target = (eye - object).normalize();
 		auto right  = global_up.cross(target).normalize();
@@ -101,7 +101,7 @@ namespace idk
 		return tmat<T, 4, 4>{
 			vec4{ right,  0 }, 
 			vec4{ up,     0 }, 
-			vec4{ target, 0 }, 
+			vec4{ target, 0 },
 			vec4{ eye,    1 }
 		};
 	}
@@ -115,7 +115,7 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
-	tmat<T, D, D> orthonormalize(const tmat<T, D, D>& m)
+	constexpr tmat<T, D, D> orthonormalize(const tmat<T, D, D>& m)
 	{
 		auto retval = m;
 		for (auto i : range<D>())
@@ -130,7 +130,7 @@ namespace idk
 		return retval;
 	}
 	template<typename T>
-	tmat<T, 4, 4> invert_rotation(const tmat<T, 4, 4>& m)
+	constexpr tmat<T, 4, 4> invert_rotation(const tmat<T, 4, 4>& m)
 	{
 		auto retval = m.transpose();
 		retval[0][3] = retval[1][3] = retval[2][3] = 0;

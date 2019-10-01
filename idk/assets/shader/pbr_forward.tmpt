@@ -98,6 +98,24 @@ float GeometrySmith(vec3 normal, vec3 view, vec3 light, float roughness)
 	return ggx1 * ggx2;
 }
 
+float ShadowCalculation(int iter, vec4 fPosInLS)
+{
+	 // perform perspective divide
+    vec3 projCoords = fPosInLS.xyz / fPosInLS.w;
+	
+	//Transformation of proj coord to NDC[0,1]
+	projCoords = (projCoords * 0.5f) + 0.5f; 
+	
+	//Get closest depth to light's pov
+	float nearestDepth = texture(shadow_maps[iter], projCoords.xy).r; 
+	
+	//Get current light depth
+	float curDepth = projCoords.z;  
+	
+	 // check if current frag is in shadow and return the result
+    return (curDepth > nearestDepth)  ? 1.0f: 0.0f;
+}
+
 vec3 pbr(
 	int i
 ,	vec3  view_pos
@@ -177,7 +195,9 @@ void main()
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
-		light_accum += pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o);
+		light_accum += (pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o)
+//		             * (1.0f - ShadowCalculation(i,LightBlk.lights[i].vp * vec4(fs_in.position,1.0f)))
+					 );
 	
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
@@ -189,15 +209,13 @@ void main()
 	
 	const float MAX_REFLECTION_LOD = 4.0;
 	
-	//vec3 prefilteredColor = textureLod(environment_probe, reflected, roughness * MAX_REFLECTION_LOD).rgb;
-	//vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, view_dir), 0.0), roughness)).rg;
-	//vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
-	//vec3 ambient = (kD * diffuse + specular) * ambient_o;
-	vec3 ambient = vec3(0.03) * albedo * ambient_o;	
+	vec3 prefilteredColor = textureLod(environment_probe, reflected, roughness * MAX_REFLECTION_LOD).rgb;
+	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, view_dir), 0.0), roughness)).rg;
+	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+	vec3 ambient = (kD * diffuse + specular) * ambient_o;
 	
 	vec3 color = light_accum + ambient;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2)); 
 	out_color = vec4(color, 1);
-	//out_color = vec4(vec3(metallic), 1);
 }

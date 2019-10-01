@@ -75,6 +75,8 @@ namespace idk
 		friend class IGE_ProjectWindow;
 		friend class IGE_HierarchyWindow;
 		friend class IGE_InspectorWindow;
+		friend class CMD_DeleteGameObject;
+		friend class CommandController;
 
 		unique_ptr<edt::I_Interface> _interface;
 
@@ -86,6 +88,8 @@ namespace idk
 		CommandController command_controller			{};
 
 		vector<Handle<GameObject>> selected_gameObjects {};
+		vector<mat4>			   selected_matrix		{}; //For selected_gameObjects
+		void RefreshSelectedMatrix();
 
 		vector<unique_ptr<IGE_IWindow>> ige_windows	    {};
 		hash_table<size_t, IGE_IWindow*> windows_by_type{};

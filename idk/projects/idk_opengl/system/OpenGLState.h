@@ -17,6 +17,7 @@ namespace idk::ogl
 		void RenderDrawBuffer();
 
 		void ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle);
+		void ComputeBRDF(const RscHandle<ogl::Program>&);
 	private:
 		enum VertexShaders
 		{
@@ -30,16 +31,18 @@ namespace idk::ogl
 		{
 			FDebug,
 			FSkyBox,
+			FShadow,
 			FMax
 		};
 
 		Win32GraphicsSystem* sys{};
 		// variables
-		PipelineProgram        pipeline;
-		FrameBufferManager     fb_man;
-		GLuint                 vao_id = 0;
+		PipelineProgram          pipeline;
+		FrameBufferManager       fb_man;
+		GLuint                   vao_id = 0;
+		RscHandle<OpenGLTexture> brdf_texture;
 		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_vertex_shaders;
-		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_fragment_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		//RscHandle<ShaderProgram> debug_fragment;
 	};
 }

@@ -31,6 +31,7 @@ namespace idk::ogl
 		unique_ptr<OpenGLState> _opengl;
 		color _clear_color;
 		ivec2 _viewport_size;
+		RscHandle<ShaderProgram> prev_brdf;
 		Dispatcher<void(Win32GraphicsSystem*, RscHandle<ogl::OpenGLCubemap>)> cubemaps_to_convolute;
 
 

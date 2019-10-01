@@ -1,0 +1,17 @@
+{
+  "guids": [
+    "a852f063-2321-46d1-b9da-11a5d7a9d7c6"
+  ],
+  "resource_metas": [
+    {
+      "?": "AudioMeta",
+      "is3Dsound": true,
+      "isLoop": false,
+      "isUnique": true,
+      "maxDistance": 100.0,
+      "minDistance": 1.0,
+      "pitch": 1.0,
+      "volume": 1.0
+    }
+  ]
+}

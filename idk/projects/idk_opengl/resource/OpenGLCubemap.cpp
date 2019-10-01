@@ -64,13 +64,13 @@ namespace idk::ogl
 		glGenTextures(1, &_id);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		/*
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		*/
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
 
 		meta.uv_mode = CMUVMode::Clamp;
 		UpdateUV(meta.uv_mode);
@@ -82,18 +82,18 @@ namespace idk::ogl
 		//Core::GetResourceManager().GetFactory<ShaderProgramFactory>().Create();
 
 		// generate convoluted cubemap
-		glGenTextures(1, &_convoluted_id);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _convoluted_id);
-		for (unsigned int i = 0; i < 6; ++i)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0,
-				GL_RGB, GL_FLOAT, nullptr);
-		}
+		glGenTextures(2, _convoluted_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _convoluted_id[0]);
+		for (int i = 0; i < 6; ++i)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 
 	OpenGLCubemap::OpenGLCubemap(OpenGLCubemap&& rhs)
@@ -130,7 +130,8 @@ namespace idk::ogl
 	void OpenGLCubemap::BindConvolutedToUnit(GLuint texture_unit)
 	{
 		glActiveTexture(GL_TEXTURE0 + texture_unit);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _convoluted_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _convoluted_id[0]);
+		//GL_CHECK();
 	}
 
 	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMInputChannels format)
@@ -138,11 +139,7 @@ namespace idk::ogl
 		format;
 
 		_size = size;
-		//glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, GL_RGB, GL_FLOAT, data);
-		
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLinputChannels(format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data);
-		
-		// TODO: fix internal format
 		GL_CHECK();
 	}
 
@@ -159,9 +156,9 @@ namespace idk::ogl
 		return r_cast<void*>(_id);
 	}
 
-	void* OpenGLCubemap::ConvolutedID() const
+	span<const GLuint> OpenGLCubemap::ConvolutedID() const
 	{
-		return r_cast<void*>(_convoluted_id);
+		return span<const GLuint>{_convoluted_id};
 	}
 
 	void OpenGLCubemap::OnMetaUpdate(const CubeMapMeta& tex_meta)

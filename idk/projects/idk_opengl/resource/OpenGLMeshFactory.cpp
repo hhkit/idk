@@ -371,8 +371,39 @@ namespace idk::ogl
 			};
 
 			std::vector<int> indices{
-				1, 0, 3,
-				2, 1, 3
+				0, 1, 3,
+				1, 2, 3
+			};
+
+			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
+				.Bind().Buffer(vertices.data(), sizeof(Vertex), (GLsizei)vertices.size())
+			);
+
+			mesh_handle->AddBuffer(
+				OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
+				.Bind().Buffer(indices.data(), sizeof(int), (GLsizei)indices.size())
+			);
+		}
+		{	/* create FSQ mesh */
+			auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
+			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(fsq_mesh.guid);
+			constexpr auto sz = 1.f;
+			//constexpr auto numberOfTri = 16;
+			//real angle = (2.f * pi) / numberOfTri;
+
+			std::vector<Vertex> vertices{
+				Vertex{ vec3{  sz, sz, 0}, vec3{0, 1,0}, vec2{1, 1} },  // front
+				Vertex{ vec3{  sz,-sz, 0}, vec3{0, 1,0}, vec2{1, 0} },  // front
+				Vertex{ vec3{-sz, -sz, 0},  vec3{0, 1,0}, vec2{0, 0} },  // front
+				Vertex{ vec3{-sz,  sz, 0},  vec3{0, 1,0}, vec2{0, 1} },  // front
+			};
+
+			std::vector<int> indices{
+				0, 1, 3,
+				1, 2, 3
 			};
 
 			mesh_handle->AddMeshEntry(0, 0, s_cast<unsigned int>(indices.size()), 0);

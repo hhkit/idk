@@ -132,6 +132,7 @@ namespace idk {
 		int selectedCounter = 0; // This is for Shift Select. This iterates.
 		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
 		bool isShiftSelectCalled = false;
+		bool hasSelected_GameobjectsModified = false;
 		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
 		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
@@ -173,7 +174,8 @@ namespace idk {
 			if (c_name)
 				goName = c_name->name;
 			
-			bool isNameEmpty = goName.empty();
+			const bool isNameEmpty = goName.empty();
+            const bool is_prefab = handle->HasComponent<PrefabInstance>();
 			if (isNameEmpty) {
 				goName = "Unnamed (";
 				goName.append(std::to_string(handle.id));
@@ -181,11 +183,14 @@ namespace idk {
 				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.0f, 0.0f, 0.9f));
 			}
+            if(is_prefab)
+                ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_PlotLinesHovered]);
 			
 			if (!textFilter.PassFilter(goName.c_str())) {
-				if (isNameEmpty) {
+				if (isNameEmpty)
 					ImGui::PopStyleColor();
-				}
+                if (is_prefab)
+                    ImGui::PopStyleColor();
 				++selectedCounter; //Increment counter here
 				return true;
 			}
@@ -197,9 +202,10 @@ namespace idk {
 			++selectedCounter; //Increment counter here
 			
 
-			if (isNameEmpty) {
-				ImGui::PopStyleColor();
-			}
+            if (isNameEmpty)
+                ImGui::PopStyleColor();
+            if (is_prefab)
+                ImGui::PopStyleColor();
 			
 			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
@@ -220,12 +226,12 @@ namespace idk {
 					else {
 						selected_gameObjects.push_back(handle);
 					}
+					hasSelected_GameobjectsModified = true;
 
 				}
 				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
 					if (selected_gameObjects.size() != 0) {
 						selectedItemCounter = selectedCounter;
-						//std::cout << selectedItemCounter << std::endl;
 						isShiftSelectCalled = true;
 
 
@@ -236,6 +242,7 @@ namespace idk {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(handle);
+					hasSelected_GameobjectsModified = true;
 				}
 
 				if (ImGui::IsMouseDoubleClicked(0)) {
@@ -369,6 +376,7 @@ namespace idk {
 
 				if (counter >= minMax[0] && counter <= minMax[1]) {
 					selected_gameObjects.push_back(handle);
+					hasSelected_GameobjectsModified = true;
 				}
 				//Skips similar to closed trees
 				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
@@ -379,7 +387,11 @@ namespace idk {
 				return true;
 			});
 			//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
+
+			//Refresh the new matrix values
 		}
+		if (hasSelected_GameobjectsModified)
+			Core::GetSystem<IDE>().RefreshSelectedMatrix();
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 
