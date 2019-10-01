@@ -174,7 +174,8 @@ namespace idk {
 			if (c_name)
 				goName = c_name->name;
 			
-			bool isNameEmpty = goName.empty();
+			const bool isNameEmpty = goName.empty();
+            const bool is_prefab = handle->HasComponent<PrefabInstance>();
 			if (isNameEmpty) {
 				goName = "Unnamed (";
 				goName.append(std::to_string(handle.id));
@@ -182,11 +183,14 @@ namespace idk {
 				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.0f, 0.0f, 0.9f));
 			}
+            if(is_prefab)
+                ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_PlotLinesHovered]);
 			
 			if (!textFilter.PassFilter(goName.c_str())) {
-				if (isNameEmpty) {
+				if (isNameEmpty)
 					ImGui::PopStyleColor();
-				}
+                if (is_prefab)
+                    ImGui::PopStyleColor();
 				++selectedCounter; //Increment counter here
 				return true;
 			}
@@ -198,9 +202,10 @@ namespace idk {
 			++selectedCounter; //Increment counter here
 			
 
-			if (isNameEmpty) {
-				ImGui::PopStyleColor();
-			}
+            if (isNameEmpty)
+                ImGui::PopStyleColor();
+            if (is_prefab)
+                ImGui::PopStyleColor();
 			
 			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
