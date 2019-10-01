@@ -5,7 +5,9 @@
 
 namespace idk
 {
-	class Prefab : public Resource<Prefab>
+    RESOURCE_EXTENSION(Prefab, ".idp")
+
+	class Prefab : public Resource<Prefab>, public Saveable<Prefab>
 	{
 	public:
         // instantiate this prefab in the scene.
