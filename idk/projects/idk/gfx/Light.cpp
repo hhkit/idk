@@ -13,13 +13,35 @@ namespace idk
 		{
 			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
 			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return invert_rotation(look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 }));
+			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
+		}
+		mat4 LookAt(vec3 pos, vec3 target_point,vec3 up)
+		{
+			//mat4 tfm;
+			return look_at(pos, target_point, up);//).normalize();
+		}
+		mat4 View(const mat4& tfm)
+		{
+			auto mat =tfm;// = game_object.Transform()->GlobalMatrix();
+			//auto tfm = game_object.Transform();
+			auto retval = orthonormalize(mat);
+			retval[3] = mat[3];
+
+			/*vec3 upvector = tfm->Up();
+			vec3 rightvector = tfm->Right();
+			vec3 forwardvector = tfm->Forward();
+
+			mat4 findMat = retval.inverse();
+
+			mat4 matrix = mat.transpose();*/
+
+			return retval.inverse();
 		}
 		mat4 operator()(DirectionalLight)
 		{
-			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
-			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return look_at(v_pos, (v_pos + v_dir), vec3{ 0,1,0 });
+			const vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
+			const vec3 v_dir = light->GetGameObject()->Transform()->Forward();
+			return View(LookAt(v_pos, v_pos - v_dir, vec3{ 0,1,0 }));//tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->position, target_point, up)).normalize());//look_at(v_pos- v_dir*10.0f, v_pos , vec3{ 0,1,0 }).inverse();
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
@@ -37,6 +59,16 @@ namespace idk
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
+
+	void Light::InitShadowMap()
+	{
+		std::visit([&](auto& light_variant) 
+				{
+					if(NeedShadowMap(light_variant))
+						light_variant.InitShadowMap();
+				}
+		, light);
+	}
 
 	RscHandle<RenderTarget>& Light::GetLightMap()
 	{

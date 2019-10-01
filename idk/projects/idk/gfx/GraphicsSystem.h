@@ -40,6 +40,7 @@ namespace idk
 		virtual void Prerender() {};
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
+		void PrepareLights(span<Light> lights);
 		void BufferedLightData(vector<LightData>& out);
 		void RenderObjData(vector<RenderObject>& out);
 		void AnimatedRenderObjData(vector<AnimatedRenderObject>& out);

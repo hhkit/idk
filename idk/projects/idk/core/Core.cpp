@@ -76,6 +76,7 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyFiles,    "Save dirty files");
 		}
 
+		_scheduler->SchedulePass      <UpdatePhase::Update>(&GraphicsSystem::PrepareLights      , "Prepare Lights");
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&GraphicsSystem::BufferGraphicsState,"Buffer graphics objects");
 
 		_scheduler->SchedulePass      <UpdatePhase::Render>(&GraphicsSystem::Prerender,          "Prerender");

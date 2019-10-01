@@ -31,6 +31,7 @@ namespace idk
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
 
+		void InitShadowMap();
 		RscHandle<RenderTarget>& GetLightMap();
 		const RscHandle<RenderTarget>& GetLightMap()const;
 		void SetLightMap(const RscHandle<RenderTarget>& light_map);

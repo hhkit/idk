@@ -943,6 +943,7 @@
     <ClCompile Include="anim\Animator.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\LightTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

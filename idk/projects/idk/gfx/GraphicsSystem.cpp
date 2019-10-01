@@ -7,7 +7,13 @@
 #include <gfx/RenderObject.h>
 namespace idk
 {
-
+	void GraphicsSystem::PrepareLights(span<Light> lights)
+	{
+		for (auto& light : lights)
+		{
+			light.InitShadowMap();
+		}
+	}
 	void GraphicsSystem::BufferedLightData(vector<LightData>& out)
 	{
 		out = object_buffer[curr_draw_buffer].lights;
@@ -77,6 +83,30 @@ namespace idk
 		SubmitBuffers(std::move(result));
 	}
 
+	CameraData GraphicsSystem::GetLightCameraData(const Light& light)
+	{
+
+		return CameraData();
+	}
+
+	LightData GraphicsSystem::GetLightData(const Light& light)
+	{
+		return LightData();
+	}
+
+	RscHandle<RenderTarget> GraphicsSystem::GetShadowMap(const Light&)
+	{
+		return RscHandle<RenderTarget>();
+	}
+
+	void GraphicsSystem::ResetPool()
+	{
+		for (auto& index : shadow_map_pool_index)
+		{
+			index.second = 0;
+		}
+	}
+
 	void GraphicsSystem::SwapWritingBuffer()
 	{
 		//write_buffer_dirty = true;
@@ -90,5 +120,37 @@ namespace idk
 		SwapWritingBuffer();
 	}
 
+	//GraphicsSystem::TempLight::TempLight(const Light& l, GraphicsSystem& sys) :light{ l }
+	//{
+	//	auto init_map = [](auto& light) {
+	//		return light.InitShadowMap();
+	//	};
+	//	auto get_id = [](auto& light) {
+	//		return light.unique_id();
+	//	};
+	//	;
+	//	auto id = std::visit(get_id, l.light);
+	//	auto& pool = sys.shadow_map_pool[id];
+	//	auto& next_index = sys.shadow_map_pool_index[id];
+	//	if (pool.size() <= next_index)
+	//	{
+	//		pool.emplace_back(std::visit(init_map, l.light));
+	//	}
+	//	shadow_map = pool[next_index++];
+	//}
+
+	CameraData GraphicsSystem::TempLight::GenerateCameraData()
+	{
+		auto data =light.GenerateCameraData();
+		data.render_target = shadow_map;
+		return data;
+	}
+
+	LightData GraphicsSystem::TempLight::GenerateLightData()
+	{
+		auto data = light.GenerateLightData();
+		data.light_map = shadow_map;
+		return data;
+	}
 
 }
