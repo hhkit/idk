@@ -109,6 +109,7 @@ namespace idk::ogl
 	void OpenGLTexture::OnMetaUpdate(const TextureMeta& tex_meta)
 	{
 		UpdateUV(tex_meta.uv_mode);
+		Buffer(nullptr, Size());
 	}
 	void OpenGLTexture::UpdateUV(UVMode uv_mode)
 	{

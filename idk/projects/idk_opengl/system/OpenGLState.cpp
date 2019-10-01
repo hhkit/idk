@@ -76,6 +76,7 @@ namespace idk::ogl
 		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
 		for (const auto& elem : curr_object_buffer.lights)
 		{
+			pipeline.Use();
 			if (elem.index == 0) // point light
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
 
@@ -83,13 +84,17 @@ namespace idk::ogl
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
 				//fb_man.SetRenderTarget({});
+
 				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{elem.light_map});
 				//Bind frame buffers based on the camera's render target
 				//Set the clear color according to the camera
 
+				glClearColor(1.f,1.f,1.f,1.f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 				const auto light_view_tfm = elem.v;
 				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
-
+				//pipeline.PopAllPrograms();
 				// per mesh render
 				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
 
@@ -114,31 +119,11 @@ namespace idk::ogl
 					auto obj_tfm = light_view_tfm * elem.transform;
 					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-
-					// material uniforms
-					auto instance_uniforms = elem.material_instance->material->uniforms;
-					for (auto& [id, uniform] : elem.material_instance->uniforms)
-						instance_uniforms.emplace(id, uniform);
-
-					for (auto& [id, uniform] : instance_uniforms)
-					{
-						std::visit([this, &id, &texture_units](auto& elem) {
-							using T = std::decay_t<decltype(elem)>;
-							if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-							{
-								auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-								texture->BindToUnit(texture_units);
-								pipeline.SetUniform(id, texture_units);
-
-								++texture_units;
-							}
-							else
-								pipeline.SetUniform(id, elem);
-						}, uniform);
-					}
+					pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
 
 					// draw
 					mesh.Draw();
+					//GL_CHECK();
 				}
 
 				pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
@@ -169,10 +154,14 @@ namespace idk::ogl
 					auto obj_tfm = light_view_tfm * elem.transform;
 					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+					pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
 
 					// draw
 					mesh.Draw();
+					//GL_CHECK();
 				}
+
+				fb_man.ResetFramebuffer();
 			}
 		}
 
@@ -233,6 +222,7 @@ namespace idk::ogl
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			pipeline.SetUniform("PerCamera.view_transform", cam.view_matrix);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
@@ -293,13 +283,18 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
-					pipeline.SetUniform(lightblk + "vp"       , light.vp);
 
-					auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
-					t.as<OpenGLTexture>().BindToUnit(texture_units);
-					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
-
-					texture_units += static_cast<bool>(light.light_map);
+					if (light.light_map)
+					{
+						//glActiveTexture(GL_TEXTURE0 + texture_units);
+						//glBindTexture(GL_TEXTURE_2D, light.light_map.as<FrameBuffer>().DepthBuffer());
+						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+						t.as<OpenGLTexture>().BindToUnit(texture_units);
+						pipeline.SetUniform(lightblk + "vp", light.vp);
+						pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+						texture_units++;
+					}
+					//texture_units += static_cast<bool>(light.light_map);
 				}
 
 				// bind attribs
@@ -311,6 +306,7 @@ namespace idk::ogl
 				auto obj_tfm = cam.view_matrix * elem.transform;
 				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+				pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
 
 				// material uniforms
                 auto instance_uniforms = elem.material_instance->material->uniforms;
@@ -378,7 +374,15 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
 
-					texture_units += static_cast<bool>(light.light_map);
+					if (light.light_map)
+					{
+						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+						t.as<OpenGLTexture>().BindToUnit(texture_units);
+						pipeline.SetUniform(lightblk + "vp", light.vp);
+						pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+						texture_units++;
+					}
+					//texture_units += static_cast<bool>(light.light_map);
 				}
 				// bind attribs
 				auto& mesh = elem.mesh.as<OpenGLMesh>();
@@ -400,6 +404,7 @@ namespace idk::ogl
 				auto obj_tfm = cam.view_matrix * elem.transform;
 				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+				pipeline.SetUniform("ObjectMat4s.view_transform", cam.view_matrix * elem.transform);
 
 				// material uniforms
                 auto instance_uniforms = elem.material_instance->material->uniforms;

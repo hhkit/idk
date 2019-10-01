@@ -22,5 +22,5 @@ layout(location = 0) out vec4 FragColor;
 
 void main()
 {
-	//FragColor = vec4(abs(gl_FragCoord.zzz/gl_FragCoord.w), 1.0);
+	FragColor = vec4(abs(gl_FragCoord.zzz / gl_FragCoord.w), 1.0);
 } 
