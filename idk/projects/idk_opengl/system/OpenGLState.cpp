@@ -74,6 +74,14 @@ namespace idk::ogl
 
 		assert(Core::GetSystem<GraphicsSystem>().brdf);
 		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
+
+		auto SetObjectUniforms = [this](const auto& object, const mat4& view_materix)
+		{
+			auto obj_tfm = view_materix * object.transform;
+			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+			pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			if (elem.index == 0) // point light
@@ -92,6 +100,7 @@ namespace idk::ogl
 
 				// per mesh render
 				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
+				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 
 				// bind shader
 				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
@@ -99,18 +108,11 @@ namespace idk::ogl
 
 				for (auto& elem : curr_object_buffer.mesh_render)
 				{
-					// shader uniforms
-					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 					// set probe
 					GLuint texture_units = 0;
 
-
 					// set uniforms
-					// object uniforms
-
-					auto obj_tfm = light_view_tfm * elem.transform;
-					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+					SetObjectUniforms(elem, light_view_tfm);
 
 					// material uniforms
 					auto instance_uniforms = elem.material_instance->material->uniforms;
@@ -154,14 +156,7 @@ namespace idk::ogl
 						pipeline.SetUniform(bone_transform_blk, transform);
 					}
 
-					// set uniforms
-					// object uniforms
-
-					auto obj_tfm = light_view_tfm * elem.transform;
-					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-
-					// draw
+					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
 				}
 			}
@@ -227,12 +222,9 @@ namespace idk::ogl
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-					auto obj_tfm = cam.view_matrix * elem.transform;
-					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 
 					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
-
+					SetObjectUniforms(elem, cam.view_matrix);
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 				}
 
@@ -289,12 +281,7 @@ namespace idk::ogl
 					texture_units += static_cast<bool>(light.light_map);
 				}
 
-
-				// set uniforms
-				// object uniforms
-				auto obj_tfm = cam.view_matrix * elem.transform;
-				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+				SetObjectUniforms(elem, cam.view_matrix);
 
 				// material uniforms
                 auto instance_uniforms = elem.material_instance->material->uniforms;
@@ -374,12 +361,8 @@ namespace idk::ogl
 					pipeline.SetUniform(bone_transform_blk, transform);
 				}
 
-				// set uniforms
-				// object uniforms
 
-				auto obj_tfm = cam.view_matrix * elem.transform;
-				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+				SetObjectUniforms(elem, cam.view_matrix);
 
 				// material uniforms
                 auto instance_uniforms = elem.material_instance->material->uniforms;
