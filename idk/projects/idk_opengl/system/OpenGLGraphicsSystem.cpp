@@ -90,6 +90,11 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::Prerender()
 	{
+		if (prev_brdf != brdf)
+		{
+			_opengl->ComputeBRDF(RscHandle<ogl::Program>{brdf});
+			prev_brdf = brdf;
+		}
 		cubemaps_to_convolute.invoke_all();
 	}
 

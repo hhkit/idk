@@ -44,6 +44,14 @@ links:
   node_out: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
   slot_in: 0
   slot_out: 1
+- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  node_out: 7af555fd-e108-491d-aee9-b15767b179f2
+  slot_in: 2
+  slot_out: 0
+- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  node_out: be4001bf-6e88-4a3b-8640-9722616cad44
+  slot_in: 3
+  slot_out: 0
 master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
   14a45757-2f1a-4c85-81ee-a64dca338fff: 
@@ -142,18 +150,27 @@ nodes:
     output_slots: 
     - {type: VEC3, value: ""}
     position: {x: 100.116562, y: 331.843628}
+  be4001bf-6e88-4a3b-8640-9722616cad44: 
+    control_values: ""
+    guid: be4001bf-6e88-4a3b-8640-9722616cad44
+    input_slots: []
+    name: $2
+    output_slots: 
+    - {type: FLOAT, value: ""}
+    position: {x: 473.315582, y: 427.197723}
   d5084548-0ebd-44fb-b98c-94bd0951100a: 
     control_values: ""
     guid: d5084548-0ebd-44fb-b98c-94bd0951100a
     input_slots: 
     - {type: VEC3, value: ""}
     - {type: VEC3, value: ""}
-    - {type: FLOAT, value: 1.000000}
-    - {type: FLOAT, value: 1.000000}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
     - {type: FLOAT, value: 1.000000}
     name: master\PBR
     output_slots: []
     position: {x: 724.700867, y: 224.665176}
 parameters: 
-- {default_value: 0.000000, name: Metallic, type: FLOAT}
+- {default_value: 0.500000, name: Metallic, type: FLOAT}
 - {default_value: 65509e2c-bcb6-48a1-9c88-17a3701d6028, name: Tex0, type: SAMPLER2D}
+- {default_value: 0.500000, name: Roughness, type: FLOAT}

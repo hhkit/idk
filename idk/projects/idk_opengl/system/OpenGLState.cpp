@@ -54,6 +54,13 @@ namespace idk::ogl
 		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
 		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.frag");
 		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/shadow.frag");
+
+		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
+		brdf_texture->Bind();
+		auto m =brdf_texture->GetMeta();
+		m.internal_format = ColorFormat::RGF_16;
+		brdf_texture->SetMeta(m);
+		brdf_texture->Size(ivec2{ 512 });
 	}
 
 
@@ -65,6 +72,8 @@ namespace idk::ogl
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 
+		assert(Core::GetSystem<GraphicsSystem>().brdf);
+		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			if (elem.index == 0) // point light
@@ -72,7 +81,7 @@ namespace idk::ogl
 
 			if (elem.index == 1) // directional light
 			{
-				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.1f }, elem.light_color);
+				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
 				//fb_man.SetRenderTarget({});
 				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{elem.light_map});
 				//Bind frame buffers based on the camera's render target
@@ -268,10 +277,9 @@ namespace idk::ogl
 							pipeline.SetUniform("environment_probe", texture_units++);
 						}
 					}, cam.clear_data);
-				auto brdf = Core::GetResourceManager().Load("/assets/textures/brdf/ibl_brdf_lut.png", false)->Get<ogl::OpenGLTexture>();
-				brdf->BindToUnit(texture_units);
-				pipeline.SetUniform("brdfLUT", texture_units);
-				texture_units++;
+
+				brdf_texture->BindToUnit(texture_units);
+				pipeline.SetUniform("brdfLUT", texture_units++);
 				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
@@ -352,6 +360,9 @@ namespace idk::ogl
 							pipeline.SetUniform("environment_probe", texture_units++);
 						}
 					}, cam.clear_data);
+
+				brdf_texture->BindToUnit(texture_units);
+				pipeline.SetUniform("brdfLUT", texture_units++);
 
 				// shader uniforms
 				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
@@ -438,12 +449,12 @@ namespace idk::ogl
 		
 		static const mat4 view_matrices[] =
 		{
-			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(1.0f,  0.0f,  0.0f), vec3(0.0f, -1.0f,  0.0f)))},
-			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(-1.0f,  0.0f,  0.0f),vec3(0.0f, -1.0f,  0.0f)))},
-			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f,  1.0f,  0.0f), vec3(0.0f,  0.0f,  1.0f)))},
-			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f,  0.0f), vec3(0.0f,  0.0f, -1.0f)))},
-			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f,  0.0f,  1.0f), vec3(0.0f, -1.0f,  0.0f)))},
-			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f,  0.0f, -1.0f), vec3(0.0f, -1.0f,  0.0f)))}
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3( 1.0f,  0.0f,  0.0f), vec3(0.0f, -1.0f,  0.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3(-1.0f,  0.0f,  0.0f), vec3(0.0f, -1.0f,  0.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3( 0.0f,  1.0f,  0.0f), vec3(0.0f,  0.0f,  1.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3( 0.0f, -1.0f,  0.0f), vec3(0.0f,  0.0f, -1.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3( 0.0f,  0.0f,  1.0f), vec3(0.0f, -1.0f,  0.0f)))},
+			mat4{invert_rotation(look_at(vec3(0.0f, 0.0f, 0.0f), vec3( 0.0f,  0.0f, -1.0f), vec3(0.0f, -1.0f,  0.0f)))}
 		};
 
 		pipeline.SetUniform("Mat4Blk.perspective_mtx", perspective_matrix);
@@ -460,6 +471,32 @@ namespace idk::ogl
 			std::make_pair(vtx::Attrib::UV, 2)
 			} });
 		box_mesh->Draw();
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		pipeline.PopAllPrograms();
+		fb_man.ResetFramebuffer();
+	}
+
+	void OpenGLState::ComputeBRDF(const RscHandle<ogl::Program>& handle)
+	{
+		pipeline.Use();
+		glBindVertexArray(vao_id);
+		fb_man.SetRenderTarget(brdf_texture);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+
+		auto fsq = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] };
+
+		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/fsq.vert", false));
+		pipeline.PushProgram(RscHandle<ShaderProgram>{handle});
+
+		fsq->Bind(
+			{ {
+			std::make_pair(vtx::Attrib::Position, 0),
+			std::make_pair(vtx::Attrib::UV, 1),
+			} });
+		fsq->Draw();
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();

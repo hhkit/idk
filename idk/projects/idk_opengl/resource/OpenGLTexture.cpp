@@ -20,6 +20,8 @@ namespace idk::ogl
 		{
 			switch (f)
 			{
+			case ColorFormat::RG_8: return GL_RG;
+			case ColorFormat::RGF_16: return GL_RG16F;
 			case ColorFormat::RGB_8:  return GL_RGB8;
 			case ColorFormat::RGBA_8: return GL_RGBA8;
 			case ColorFormat::RGBF_16: return GL_RGB16F;

@@ -105,6 +105,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		gSys->editorExist = true;
 
 	c->Setup();
+	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag");
 
 	Core::GetResourceManager().Create<TestResource>("/assets/test/yolo.test");

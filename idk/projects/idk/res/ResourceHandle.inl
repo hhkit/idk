@@ -29,7 +29,7 @@ namespace idk
 	template<typename Res>
 	inline bool RscHandle<Res>::operator!=(const RscHandle& rhs) const
 	{
-		return guid != rhs.guid;
+		return !operator==(rhs);
 	}
 	template<typename Res>
 	inline void RscHandle<Res>::Set(const idk::Resource<Res>& g)

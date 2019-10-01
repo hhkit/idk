@@ -1,7 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include <idk_opengl/resource/OpenGLCubemap.h>
-
+#include <idk_opengl/resource/OpenGLTexture.h>
 namespace idk
 {
 	class RenderTarget;
@@ -20,6 +20,7 @@ namespace idk::ogl
 		~FrameBufferManager();
 
 		void SetRenderTarget(const RscHandle<OpenGLCubemap>& target, bool for_convolution = false);
+		void SetRenderTarget(RscHandle<OpenGLTexture> target);
 		void SetRenderTarget(RscHandle<FrameBuffer> target);
 		void ResetFramebuffer();
 	private:

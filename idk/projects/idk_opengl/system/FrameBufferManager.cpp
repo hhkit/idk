@@ -67,6 +67,22 @@ namespace idk::ogl
 		CheckFBStatus();
 	}
 
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
+
+		auto sz = target->Size();
+		glViewport(0, 0, sz.x, sz.y);
+
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
+		GLuint buffers[]= { GL_COLOR_ATTACHMENT0 };
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+		glDrawBuffers(1, buffers);
+
+		CheckFBStatus();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	}
 	void FrameBufferManager::SetRenderTarget(RscHandle<FrameBuffer> target)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);

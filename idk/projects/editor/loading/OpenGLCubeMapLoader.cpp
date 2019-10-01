@@ -64,8 +64,8 @@ namespace idk
 			texture_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
-		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(texture_handle);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(texture_handle);
 		return texture_handle;
 	}
 
@@ -126,9 +126,9 @@ namespace idk
 			cubemap_handle->Buffer(i, data, size, col_format);
 			stbi_image_free(data);
 		}
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(cubemap_handle);
 
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		return cubemap_handle;
 	}
 
