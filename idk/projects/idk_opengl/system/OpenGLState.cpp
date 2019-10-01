@@ -64,6 +64,27 @@ namespace idk::ogl
 	}
 
 
+	struct MaterialVisitor
+	{
+		PipelineProgram& pipeline;
+		GLuint& texture_units;
+		string_view uniform_id;
+
+		template<typename T> auto operator()(const T& elem) const
+		{
+			if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+			{
+				auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+				texture->BindToUnit(texture_units);
+				pipeline.SetUniform(uniform_id, texture_units);
+
+				++texture_units;
+			}
+			else
+				pipeline.SetUniform(uniform_id, elem);
+		}
+	};
+
 	void OpenGLState::RenderDrawBuffer()
 	{
 		auto& object_buffer = sys->object_buffer;
@@ -86,6 +107,32 @@ namespace idk::ogl
 			auto obj_tfm = view_matrix * object.transform;
 			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 			pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+		};
+
+		auto SetSkeletonUniforms = [this, &curr_object_buffer](const AnimatedRenderObject& render_object)
+		{
+			auto& skeleton = curr_object_buffer.skeleton_transforms[render_object.skeleton_index];
+			for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
+			{
+				auto& transform = skeleton.bones_transforms[i];
+				string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
+				pipeline.SetUniform(bone_transform_blk, transform);
+			}
+		};
+
+
+		auto BindMaterialInstance = [this, &curr_object_buffer](const MaterialInstance& material_instance, GLuint& texture_units)
+		{
+			auto material = material_instance.material;
+			pipeline.PushProgram(material->_shader_program);
+
+			// material uniforms
+			auto instance_uniforms = material_instance.material->uniforms;
+			for (auto& [id, uniform] : material_instance.uniforms)
+				instance_uniforms.emplace(id, uniform);
+
+			for (auto& [id, uniform] : instance_uniforms)
+				std::visit(MaterialVisitor{pipeline, texture_units, id}, uniform);
 		};
 
 		for (const auto& elem : curr_object_buffer.lights)
@@ -127,14 +174,7 @@ namespace idk::ogl
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
 					// Setting bone transforms
-					auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
-					for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
-					{
-						auto& transform = skeleton.bones_transforms[i];
-						string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
-						pipeline.SetUniform(bone_transform_blk, transform);
-					}
-
+					SetSkeletonUniforms(elem);
 					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
 				}
@@ -211,14 +251,10 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
-				auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
+				GLuint texture_units = 0;
+				BindMaterialInstance(*elem.material_instance, texture_units);
 
 				// shader uniforms
-
-				// set probe
-				GLuint texture_units = 0;
-
 				std::visit([&]([[maybe_unused]] const auto& obj)
 					{
 						using T = std::decay_t<decltype(obj)>;
@@ -258,27 +294,6 @@ namespace idk::ogl
 
 				SetObjectUniforms(elem, cam.view_matrix);
 
-				// material uniforms
-                auto instance_uniforms = elem.material_instance->material->uniforms;
-                for (auto& [id, uniform] : elem.material_instance->uniforms)
-                    instance_uniforms.emplace(id, uniform);
-
-                for (auto& [id, uniform] : instance_uniforms)
-				{
-					std::visit([this, &id, &texture_units](auto& elem) {
-						using T = std::decay_t<decltype(elem)>;
-						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-						{
-							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-							texture->BindToUnit(texture_units);
-							pipeline.SetUniform(id, texture_units);
-
-							++texture_units;
-						}
-						else
-							pipeline.SetUniform(id, elem);
-					}, uniform);
-				}
 
 				// draw
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
@@ -287,11 +302,10 @@ namespace idk::ogl
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
-				// bind shader
-				auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
-
 				GLuint texture_units = 0;
+
+				BindMaterialInstance(*elem.material_instance, texture_units);
+
 				// bind probe
 				std::visit([&]([[maybe_unused]] const auto& obj)
 					{
@@ -326,39 +340,9 @@ namespace idk::ogl
 					texture_units += static_cast<bool>(light.light_map);
 				}
 
-				// Setting bone transforms
-				auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
-				for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
-				{
-					auto& transform = skeleton.bones_transforms[i];
-					string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
-					pipeline.SetUniform(bone_transform_blk, transform);
-				}
-
-
+				SetSkeletonUniforms(elem);
 				SetObjectUniforms(elem, cam.view_matrix);
 
-				// material uniforms
-                auto instance_uniforms = elem.material_instance->material->uniforms;
-                for (auto& [id, uniform] : elem.material_instance->uniforms)
-                    instance_uniforms.emplace(id, uniform);
-
-				for (auto& [id, uniform] : instance_uniforms)
-				{
-					std::visit([this, &id, &texture_units](auto& elem) {
-						using T = std::decay_t<decltype(elem)>;
-						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-						{
-							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-							texture->BindToUnit(texture_units);
-							pipeline.SetUniform(id, texture_units);
-
-							++texture_units;
-						}
-						else
-							pipeline.SetUniform(id, elem);
-						}, uniform);
-				}
 
 				// draw
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
