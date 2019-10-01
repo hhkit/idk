@@ -196,7 +196,7 @@ void main()
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 		light_accum += (pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o)
-//		             * (1.0f - ShadowCalculation(i,LightBlk.lights[i].vp * vec4(fs_in.position,1.0f)))
+		             * (1.0f - ShadowCalculation(i,LightBlk.lights[i].vp * vec4(fs_in.position,1.0f)))
 					 );
 	
 	vec3 F = mix(vec3(0.04), albedo, metallic);

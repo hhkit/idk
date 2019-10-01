@@ -51,13 +51,13 @@ namespace idk::ogl
 		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
 		renderer_vertex_shaders[SkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.vert");
 
-		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
+		renderer_fragment_shaders[FDebug]  = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
 		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.frag");
 		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/shadow.frag");
 
 		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
 		brdf_texture->Bind();
-		auto m =brdf_texture->GetMeta();
+		auto m = brdf_texture->GetMeta();
 		m.internal_format = ColorFormat::RGF_16;
 		brdf_texture->SetMeta(m);
 		brdf_texture->Size(ivec2{ 512 });
@@ -132,7 +132,7 @@ namespace idk::ogl
 				std::visit(MaterialVisitor{pipeline, texture_units, id}, uniform);
 		};
 
-		const auto BindPBR = [this](const std::variant<vec4, RscHandle<CubeMap>>& clear_data, const mat4& inv_view_tfm, GLuint& texture_units)
+		const auto SetPBRUniforms = [this](const std::variant<vec4, RscHandle<CubeMap>>& clear_data, const mat4& inv_view_tfm, GLuint& texture_units)
 		{
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
@@ -150,7 +150,7 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 		};
 
-		const auto BindLights = [this, &curr_object_buffer](GLuint& texture_units)
+		const auto SetLightUniforms = [this, &curr_object_buffer](GLuint& texture_units)
 		{
 			auto& lights = curr_object_buffer.lights;
 
@@ -260,12 +260,11 @@ namespace idk::ogl
 			}, cam.clear_data);
 
 			// render debug
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix);
-			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
-
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix);
+				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
 					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
@@ -275,7 +274,6 @@ namespace idk::ogl
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}
 
-			// per mesh render
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix);
 
 			for (auto& elem : curr_object_buffer.mesh_render)
@@ -283,8 +281,8 @@ namespace idk::ogl
 				GLuint texture_units = 0;
 
 				BindMaterialInstance(*elem.material_instance, texture_units);
-				BindPBR(cam.clear_data, inv_view_tfm, texture_units);
-				BindLights(texture_units);
+				SetPBRUniforms(cam.clear_data, inv_view_tfm, texture_units);
+				SetLightUniforms(texture_units);
 				SetObjectUniforms(elem, cam.view_matrix);
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<MeshRenderer>();
 			}
@@ -295,8 +293,8 @@ namespace idk::ogl
 				GLuint texture_units = 0;
 
 				BindMaterialInstance(*elem.material_instance, texture_units);
-				BindPBR(cam.clear_data, inv_view_tfm, texture_units);
-				BindLights(texture_units);
+				SetPBRUniforms(cam.clear_data, inv_view_tfm, texture_units);
+				SetLightUniforms(texture_units);
 				SetSkeletonUniforms(elem);
 				SetObjectUniforms(elem, cam.view_matrix);
 				RscHandle<OpenGLMesh>{ elem.mesh }->BindAndDraw<SkinnedMeshRenderer>();
@@ -313,7 +311,6 @@ namespace idk::ogl
 		fb_man.SetRenderTarget(handle, true);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-
 
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.vert", false));
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/single_pass_cube.geom", false));
@@ -357,7 +354,6 @@ namespace idk::ogl
 		fb_man.SetRenderTarget(brdf_texture);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-
 
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/fsq.vert", false));
 		pipeline.PushProgram(RscHandle<ShaderProgram>{handle});
