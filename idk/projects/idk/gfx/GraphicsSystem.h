@@ -27,7 +27,7 @@ namespace idk
 		void Init() override = 0;
 		void Shutdown() override = 0;
 		
-		struct RenderBuffer;
+		//struct RenderBuffer;
 
 		//Converts the Renderers and transforms stores the render data into a buffer
 		virtual void BufferGraphicsState(
