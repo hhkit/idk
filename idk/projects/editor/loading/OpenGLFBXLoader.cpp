@@ -94,10 +94,18 @@ namespace idk
 				const aiVector3D& pos = ai_mesh->mVertices[k];
 				const aiVector3D& normal = ai_mesh->mNormals[k];
 				const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;
+				aiVector3D tangent, bi_tangent;
+				if (ai_mesh->HasTangentsAndBitangents())
+				{
+					tangent = ai_mesh->mTangents[k];
+					bi_tangent = ai_mesh->mBitangents[k];
+				}
 
 				vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z }
 											 ,vec3{ normal.x, normal.y, normal.z }
-											 ,vec2{ text.x, text.y } 
+											 ,vec2{ text.x, text.y }
+											 ,vec3{ tangent.x, tangent.y, tangent.z }
+											 ,vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z }
 											});
 
 				// updateBounds(vertices.back().pos, min_pos, max_pos);
@@ -150,8 +158,8 @@ namespace idk
 			indices.clear();
 		}
 
-		mat4 normalize_mat = mat4 { scale(fbx_loader_detail::FBX_SCALE)  };
-		fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
+		// mat4 normalize_mat = mat4 { scale(fbx_loader_detail::FBX_SCALE)  };
+		// fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
 
 		// Loading Skeletons
 		auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
@@ -185,8 +193,8 @@ namespace idk
 		}
 		// animator->Play(0);
 		// Saving the prefab
-		//auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp" );
-		//retval.Add(prefab_handle);
+		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp" );
+		retval.Add(prefab_handle);
 
 		scene->DestroyGameObject(prefab_root);
 		return retval;
@@ -255,13 +263,13 @@ namespace idk
 		{
 			const aiMesh* ai_mesh = ai_scene->mMeshes[i];
 			RscHandle<ogl::OpenGLMesh> mesh_handle;
-
-			auto rsc_exists = meta_bundle.FetchMeta(ai_mesh->mName.data);
-			if (rsc_exists)
-				mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>(rsc_exists->guid);
-			else
-				mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>();
-
+			{
+				auto rsc_exists = meta_bundle.FetchMeta(ai_mesh->mName.data);
+				if (rsc_exists)
+					mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>(rsc_exists->guid);
+				else
+					mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>();
+			}
 			mesh_handle->Name(ai_mesh->mName.data);
 
 			vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));

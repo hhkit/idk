@@ -36,6 +36,7 @@ namespace idk::fbx_loader_detail
 		return quat(vec.x, vec.y, vec.z, vec.w);
 	}
 
+
 	void generateNodeGraphRecurse(const aiNode* ai_node, AssimpNode& parent_node, const BoneSet& bone_set)
 	{
 		//AssimpNode curr_node;
@@ -84,6 +85,10 @@ namespace idk::fbx_loader_detail
 		
 		bool first_bone = true;
 		int root_index = 0;
+
+		bool found_pivot = false;
+		quat bone_pivot;
+
 		while (!ai_data_queue.empty())
 		{
 			auto ai_data = ai_data_queue.front();
@@ -92,6 +97,7 @@ namespace idk::fbx_loader_detail
 			AssimpNode assimp_node;
 			assimp_node._name = ai_data.ai_node->mName.data;
 			assimp_node._node_transform = initMat4(ai_data.ai_node->mTransformation);
+			assimp_node._assimp_node_transform = ai_data.ai_node->mTransformation;
 			assimp_node._parent = ai_data.parent;
 
 			auto bone_res = bone_set.find(BoneData{ assimp_node._name });
@@ -104,14 +110,24 @@ namespace idk::fbx_loader_detail
 
 
 			// Check if this node is virtual
-			if (assimp_node._name.find("$Assimp$") != string::npos)
+			if (assimp_node._name.find("$AssimpFbx$") != string::npos)
 			{
 				assimp_node._ai_type = VIRTUAL;
+				if (assimp_node._name.find("PreRotation") != string::npos)
+				{
+					bone_pivot = decompose(assimp_node._node_transform).rotation;
+					assimp_node._ai_type |= BONE_PIVOT;
+					found_pivot = true;
+				}
 			}
 			else if (bone_res != bone_set.end())
 			{
-				assimp_node._ai_type = BONE;
-				assimp_node._global_inverse_bind_pose = bone_res->_global_inverse_bind_pose;
+				assimp_node._ai_type					= BONE;
+				assimp_node._global_inverse_bind_pose	= bone_res->_global_inverse_bind_pose;
+				assimp_node._bone_pivot					= bone_pivot;
+				assimp_node._has_bone_pivot				= found_pivot;
+				found_pivot = false;
+
 				// Recurse up and find the first non-virtual, non-ROOT node
 				if (first_bone == true)
 				{
@@ -155,11 +171,13 @@ namespace idk::fbx_loader_detail
 	{
 		vector<ogl::OpenGLDescriptor> descriptor
 		{
-			ogl::OpenGLDescriptor{vtx::Attrib::Position,	sizeof(Vertex), offsetof(Vertex, pos) },
-			ogl::OpenGLDescriptor{vtx::Attrib::Normal,		sizeof(Vertex), offsetof(Vertex, normal) },
-			ogl::OpenGLDescriptor{vtx::Attrib::UV,			sizeof(Vertex), offsetof(Vertex, uv) },
-			ogl::OpenGLDescriptor{vtx::Attrib::BoneID,		sizeof(Vertex), offsetof(Vertex, bone_ids) },
-			ogl::OpenGLDescriptor{vtx::Attrib::BoneWeight,	sizeof(Vertex), offsetof(Vertex, bone_weights) }
+			ogl::OpenGLDescriptor{vtx::Attrib::Position,		sizeof(Vertex), offsetof(Vertex, pos) },
+			ogl::OpenGLDescriptor{vtx::Attrib::Normal,			sizeof(Vertex), offsetof(Vertex, normal) },
+			ogl::OpenGLDescriptor{vtx::Attrib::UV,				sizeof(Vertex), offsetof(Vertex, uv) },
+			ogl::OpenGLDescriptor{vtx::Attrib::Tangent,			sizeof(Vertex), offsetof(Vertex, tangent) },
+			ogl::OpenGLDescriptor{vtx::Attrib::Bitangent,		sizeof(Vertex), offsetof(Vertex, bi_tangent) },
+			ogl::OpenGLDescriptor{vtx::Attrib::BoneID,			sizeof(Vertex), offsetof(Vertex, bone_ids) },
+			ogl::OpenGLDescriptor{vtx::Attrib::BoneWeight,		sizeof(Vertex), offsetof(Vertex, bone_weights) }
 		};
 
 		mesh.AddBuffer(
@@ -232,10 +250,15 @@ namespace idk::fbx_loader_detail
 			auto local_bind = mat4{ scale(fbx_loader_detail::FBX_SCALE) } *node_transform;
 			auto decomp1 = decompose(local_bind);
 			auto decomp2 = decompose(node_transform);
-			b._local_bind_pose.position= decomp1.position;// *FBX_SCALE;
-			b._local_bind_pose.rotation = decomp1.rotation;
-			b._local_bind_pose.scale = decomp2.scale;
+			// aiVector3D pos;
+			// aiVector3D scale;
+			// aiQuaternion rot;
+			// aiDecomposeMatrix(&curr_node.assimp_node->_assimp_node_transform, &scale, &rot, &pos);
 
+			b._local_bind_pose.position= decomp2.position;// *FBX_SCALE;
+			b._local_bind_pose.rotation = decomp2.rotation;
+			b._local_bind_pose.scale = decomp2.scale;
+			auto recomp_decomp2 = decomp2.recompose();
 			bones_out.emplace_back(b);
 			bones_table.emplace(bones_out.back()._name, bones_out.size() - 1);
 
@@ -247,7 +270,7 @@ namespace idk::fbx_loader_detail
 		}
 	}
 
-	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
+	/*void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
 	{
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
@@ -268,7 +291,7 @@ namespace idk::fbx_loader_detail
 				}
 			}
 		}
-	}
+	}*/
 
 	static void initChannel(anim::Channel& channel, const aiNodeAnim* ai_anim_node, const mat4& concat_matrix)
 	{
@@ -337,7 +360,7 @@ namespace idk::fbx_loader_detail
 				const quat curr = initQuat(rotation_key.mValue);
 				const float time = static_cast<float>(rotation_key.mTime - ai_anim_node->mRotationKeys[0].mTime);
 
-				auto final_rot = curr;
+				auto final_rot = decomp.rotation.inverse() * curr;
 				channel._rotation.emplace_back(final_rot, time);
 			}
 			channel._is_animated = true;
@@ -357,7 +380,16 @@ namespace idk::fbx_loader_detail
 		anim::Channel channel;
 		channel._name = assimp_node._name;
 		
-		concat_transform = concat_transform * assimp_node._node_transform;
+		// We don't apply the bone pivot because the pivot is always applied regardless of the animation. 
+		// It is also not accounted for in aiNodeAnim's rotation channel
+		if((assimp_node._ai_type & BONE_PIVOT) != BONE_PIVOT)
+			concat_transform = concat_transform * assimp_node._node_transform;
+		// auto decomp_test1 = decompose(concat_transform);
+		// auto decomp_test2 = decompose(assimp_node._node_transform);
+		// if (assimp_node._name == "Shoulders")
+		// 	__debugbreak();
+
+
 		// Initialize the key frames if this node is animated. Again, we do not care if this is vritual or not.
 		if (is_animated)
 		{
@@ -417,6 +449,39 @@ namespace idk::fbx_loader_detail
 		anim_clip.SetName(ai_anim->mName.data);
 	}
 
+	void addBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out)
+	{
+		for (unsigned i = 0; i < 4; i++)
+		{
+			if (weights_out[i] == 0.0)
+			{
+				ids_out[i] = id_in;
+				weights_out[i] = weight_in;
+				return;
+			}
+		}
+		// Need to get the bone with the lowest weight and replace it with this one
+		unsigned min_index = 0;
+		for (unsigned i = 1; i < 4; i++)
+		{
+			if (weights_out[i] < weights_out[min_index])
+			{
+				min_index = i;
+			}
+		}
+
+		if (weight_in > weights_out[min_index])
+		{
+			ids_out[min_index] = id_in;
+			weights_out[min_index] = weight_in;
+		}
+
+		// Normalize all weights
+		auto sum_weights = weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3];
+		weights_out /= sum_weights;
+		assert(abs(1.0f - (weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3])) < epsilon);
+	}
+
 	void Vertex::addBoneData(int id, float weight)
 	{
 		for (unsigned i = 0; i < 4; i++)
@@ -428,7 +493,25 @@ namespace idk::fbx_loader_detail
 				return;
 			}
 		}
+		// Need to get the bone with the lowest weight and replace it with this one
+		unsigned min_index = 0;
+		for (unsigned i = 1; i < 4; i++)
+		{
+			if (bone_weights[i] < bone_weights[min_index])
+			{
+				min_index = i;
+			}
+		}
 
-		// assert(false);
+		if (weight > bone_weights[min_index])
+		{
+			bone_ids[min_index] = id;
+			bone_weights[min_index] = weight;
+		}
+
+		// Normalize all weights
+		auto sum_weights = bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3];
+		bone_weights /= sum_weights;
+		assert(abs(1.0f - (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3])) < epsilon);
 	}
 }

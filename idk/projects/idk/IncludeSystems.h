@@ -1,5 +1,6 @@
 #pragma once
 #include <app/Application.h>
+#include <app/GamepadSystem.h>
 #include <editor/IEditor.h>
 #include <audio/AudioSystem.h>
 #include <file/FileSystem.h>
