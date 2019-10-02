@@ -642,12 +642,13 @@
     <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="anim\BoneComponent.h" />
     <ClInclude Include="PauseConfigurations.h" />
-    <ClInclude Include="ReflectRegistration.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="anim\Animator.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="script\MonoBehaviorData.h" />
+    <ClInclude Include="script\MonoBehavior.h" />
+    <ClInclude Include="ReflectRegistration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -943,6 +944,8 @@
     <ClCompile Include="anim\Animator.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\ScriptSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

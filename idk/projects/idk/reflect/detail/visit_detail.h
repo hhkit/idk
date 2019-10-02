@@ -7,9 +7,9 @@ namespace idk::reflect
 	namespace detail
 	{
 		template<typename Visitor>
-		void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_visit_depth);
+		void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_depth);
 
 		template<typename K, typename V, typename Visitor>
-		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
+		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_depth);
 	}
 }

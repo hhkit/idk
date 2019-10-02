@@ -15,7 +15,7 @@ namespace idk::ogl
 
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
-		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB);
+		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB, ColorFormat internalFormat_in = ColorFormat::RGBF_32);
 
 		using Texture::Size;
 		void Size(ivec2 new_size) override;
@@ -25,5 +25,6 @@ namespace idk::ogl
 		GLuint _id = 0;
 		void OnMetaUpdate(const TextureMeta&);
 		void UpdateUV(UVMode);
+		void UpdateFilter(FilterMode);
 	};
 }

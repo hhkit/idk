@@ -14,8 +14,8 @@ namespace idk::ogl
 	{
 		std::swap(_buffers,				 rhs._buffers);
 		std::swap(_element_array_object, rhs._element_array_object);
-		std::swap(_draw_mode,			 rhs._draw_mode);
-		
+		std::swap(_draw_mode, rhs._draw_mode);
+
 		return *this;
 	}
 
@@ -58,6 +58,12 @@ namespace idk::ogl
 		glDrawElements(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0);
 	}
 
+	void OpenGLMesh::BindAndDraw(const renderer_reqs& locations)
+	{
+		Bind(locations);
+		Draw();
+	}
+
 	void OpenGLMesh::Reset()
 	{
 		_buffers.clear();
@@ -66,7 +72,7 @@ namespace idk::ogl
 
 	void OpenGLMesh::AddBuffer(OpenGLBuffer& buf)
 	{
-		switch(buf.type())
+		switch (buf.type())
 		{
 		case GL_ELEMENT_ARRAY_BUFFER:
 			_element_array_object = std::move(buf);

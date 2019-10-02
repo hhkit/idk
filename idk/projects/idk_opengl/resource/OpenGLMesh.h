@@ -15,7 +15,7 @@ namespace idk::ogl
 	{
 	public:
 
-		OpenGLMesh()						= default;
+		OpenGLMesh() = default;
 		OpenGLMesh(OpenGLMesh&&);
 		OpenGLMesh& operator=(OpenGLMesh&&);
 		
@@ -28,6 +28,9 @@ namespace idk::ogl
 
 		void   Bind(const renderer_reqs& locations);
 		void   Draw();
+		void   BindAndDraw(const renderer_reqs& locations);
+		template<typename T>
+		void   BindAndDraw() { BindAndDraw(T::GetRequiredAttributes()); }
 		void   Reset();
 
 		void   AddBuffer(OpenGLBuffer&);

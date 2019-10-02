@@ -65,18 +65,19 @@ namespace idk
 
 		if (data) // stbi image can fail
 		{
-			auto col_format = [&]() -> InputChannels
-			{	switch (channels)
+			auto col_format = [channels]() -> InputChannels
 			{
-			default:
-			case 1: return InputChannels::RED;
-			case 2: return InputChannels::RG;
-			case 3: return InputChannels::RGB;
-			case 4: return InputChannels::RGBA;
-			}
+                switch (channels)
+			    {
+			    default:
+			    case 1: return InputChannels::RED;
+			    case 2: return InputChannels::RG;
+			    case 3: return InputChannels::RGB;
+			    case 4: return InputChannels::RGBA;
+			    }
 			}();
 
-			texture_handle->Buffer(data.get(), size, col_format);
+			texture_handle->Buffer(data.get(), size, col_format, first_meta->internal_format);
 
 			return texture_handle;
 		}

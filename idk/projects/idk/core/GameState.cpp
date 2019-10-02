@@ -78,7 +78,7 @@ namespace idk::detail
 					}
 					else
 					{
-						auto handle = gs.CreateObject<Ts>(go.scene, dyn.get<Ts>());
+						auto handle = gs.CreateObject<Ts>(go.scene, std::move(dyn.get<Ts>()));
 						handle->_gameObject = go;
 						return handle;
 					}

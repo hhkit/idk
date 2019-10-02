@@ -14,4 +14,6 @@
 #include <scene/SceneManager.h>
 #include <scene/ProjectManager.h>
 
+#include <script/ScriptSystem.h>
+
 #include <test/TestSystem.h>
