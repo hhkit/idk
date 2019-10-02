@@ -6,6 +6,12 @@
 
 namespace idk
 {
+	enum DialogOptions
+	{
+		Open,
+		Save,
+	};
+
 	class Application
 		: public ISystem
 	{
@@ -39,6 +45,6 @@ namespace idk
 		virtual string GetExecutableDir() = 0;
 		virtual string GetAppData() = 0;
 		virtual string GetCurrentWorkingDir() = 0;
-		virtual opt<string> OpenFileDialog(string_view extension) = 0;
+		virtual opt<string> OpenFileDialog(string_view extension = ".*", DialogOptions save_dialog = DialogOptions::Open) = 0;
 	};
 }

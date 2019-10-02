@@ -28,17 +28,6 @@
 
 #define USE_RENDER_DOC
 
-namespace idk
-{
-	struct yolo
-	{
-		vector<string> guids;
-	};
-}
-REFLECT_BEGIN(idk::yolo, "yolo")
-REFLECT_VAR(guids)
-REFLECT_END()
-
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
 	bool result = false;
@@ -112,7 +101,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
 
-	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
+	auto scene = RscHandle<Scene>{};
 
 	float divByVal = 2.f;
 	{

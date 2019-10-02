@@ -32,7 +32,7 @@ public:
 	std::string GetExecutableDir() { return {}; };
 	std::string GetAppData() { return {}; };
 	std::string GetCurrentWorkingDir() { return {}; };
-	std::optional<std::string> OpenFileDialog(std::string_view) { return {}; };
+	std::optional<std::string> OpenFileDialog(std::string_view, idk::DialogOptions) override { return {}; };
 
 	void Shutdown() override { i++;  std::cout << "application shutdown\n"; }
 };

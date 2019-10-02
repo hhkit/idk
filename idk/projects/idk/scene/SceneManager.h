@@ -30,6 +30,7 @@ namespace idk
 		RscHandle<Scene>   _startup_scene; // public for reflection to use, please don't touch
 		RscHandle<Scene>   _active_scene;  // public for reflection to use, please don't touch
 
+
 		// accessors
 		RscHandle<Scene>       GetSceneByBuildIndex(unsigned char index) const;
 		span<const SceneBlock> GetScenes() const;

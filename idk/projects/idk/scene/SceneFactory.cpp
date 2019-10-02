@@ -26,6 +26,18 @@ namespace idk
 	}
 	ResourceBundle SceneLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
 	{
-		return RscHandle<Scene>{bundle.metadatas[0].guid};
+		const auto guid = bundle.metadatas[0].guid;
+		const auto build_index = [&]() ->unsigned char
+		{
+			for (auto& block : Core::GetSystem<SceneManager>().GetScenes())
+			{
+				if (block.scene == guid)
+					return block.build_index;
+			}
+			return {};
+		}();
+
+		const auto scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(guid, build_index);
+		return scene;
 	}
 }

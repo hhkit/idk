@@ -9,12 +9,10 @@ namespace idk
 	Scene::Scene(uint8_t scene_id_)
 		: scene_id{ scene_id_ }
 	{
-	//	GameState::GetGameState().ActivateScene(scene_id_);
 	}
 
 	Scene::~Scene()
 	{
-	//	GameState::GetGameState().DeactivateScene(scene_id);
 	}
 
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)
@@ -32,20 +30,25 @@ namespace idk
 		GameState::GetGameState().DestroyObject(go);
 	}
 
+	bool Scene::Loaded()
+	{
+		return _loaded;
+	}
+
 	SceneLoadResult Scene::Load()
 	{
 		if (_loaded)
 			return SceneLoadResult::Err_SceneAlreadyActive;
 
-		auto path = Core::GetResourceManager().GetPath(GetHandle());
+		_loaded = true;
+		GameState::GetGameState().ActivateScene(scene_id);
 
+		auto path = Core::GetResourceManager().GetPath(GetHandle());
 		if (!path)
 			return SceneLoadResult::Err_ScenePathNotFound;
 
-		GameState::GetGameState().ActivateScene(scene_id);
 		auto stream = Core::GetSystem<FileSystem>().Open(*path, FS_PERMISSIONS::READ);
 		parse_text(stringify(stream), *this);
-		_loaded = true;
 		return SceneLoadResult::Ok;
 	}
 

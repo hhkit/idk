@@ -38,6 +38,7 @@ namespace idk
 		Handle<GameObject> CreateGameObject();
 		void               DestroyGameObject(const Handle<GameObject>&);
 
+		bool              Loaded();
 		SceneLoadResult   Load();
 		SceneUnloadResult Unload();
 
