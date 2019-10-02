@@ -288,8 +288,14 @@ namespace idk
 
 			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
 			auto metastr = stringify(metastream);
-
-			return parse_text<MetaBundle>(metastr);
+			try
+			{
+				return parse_text<MetaBundle>(metastr);
+			}
+			catch (...)
+			{
+				return std::nullopt;
+			}
 		}();
 
 		// reload the file
