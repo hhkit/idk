@@ -58,6 +58,7 @@ namespace idk
 		auto editor = &GetSystem<IEditor>();
 		// setup loop
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&Application::PollEvents,            "Poll OS Events");
+		_scheduler->SchedulePass      <UpdatePhase::Update>(&GamepadSystem::Update,              "Update gamepad states");
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&FileSystem::Update,                 "Check for file changes");
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&AudioSystem::Update,                "Update listeners and sources");
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&AnimationSystem::Update,            "Animate animators");

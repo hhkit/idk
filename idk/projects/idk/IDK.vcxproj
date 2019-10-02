@@ -26,6 +26,7 @@
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
+    <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />
@@ -35,6 +36,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="app\GamepadEnums.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />

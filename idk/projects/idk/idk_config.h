@@ -44,6 +44,7 @@ namespace idk
 		class Application
 		,	class FileSystem
 		//,	class InputSystem
+		,	class GamepadSystem
 		,	class ScriptSystem
 		,	class PhysicsSystem
 		,	class GraphicsSystem
