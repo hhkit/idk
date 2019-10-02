@@ -122,8 +122,9 @@ namespace idk::fbx_loader_detail
 
 	// Helper functions for bone data
 	void initBoneHierarchy(const vector<AssimpNode>& root_node, hash_table<string, size_t>& bones_table, vector<anim::Bone>& bones_out, const mat4& normalize = mat4{});
-	
 
 	// Helper functions for animation nodes
 	void initAnimNodes(const vector<AssimpNode>& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
+
+	void addBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out);
 }
