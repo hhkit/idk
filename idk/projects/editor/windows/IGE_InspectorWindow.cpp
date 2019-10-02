@@ -258,7 +258,7 @@ namespace idk {
 					ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
 				}
 
-                if (changed)
+                if (changed && _prefab_inst)
                     PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, _curr_property_path);
 
                 _curr_property_stack.pop_back();
