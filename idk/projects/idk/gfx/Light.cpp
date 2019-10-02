@@ -20,7 +20,7 @@ namespace idk
 			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
 			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
 			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
-			return look_at(vec3(0,0,0), vec3(v_dir.x, v_dir.y, -v_dir.z).normalize(), vec3{ 0,1,0 });
+			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, -v_dir.z), vec3{ 0,1,0 });
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
