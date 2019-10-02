@@ -3,7 +3,7 @@
 #include <IncludeSystems.h>
 #include <IncludeComponents.h>
 #include <res/ResourceManager.h>
-
+#include <prefab/PrefabFactory.h>
 #include <gfx/GfxDbgTest.h>
 
 namespace idk
@@ -45,6 +45,7 @@ namespace idk
 	void Core::Setup()
 	{
 		_system_manager.InitSystems();
+        GetResourceManager().RegisterFactory<PrefabFactory>();
 		_system_manager.LateInitSystems();
 		_setup = true;
 	}

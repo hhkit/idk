@@ -139,6 +139,10 @@ namespace idk
         colors[ImGuiCol_HeaderActive] =
             ImColor(65, 153, 163).Value;
 
+        // complement accent
+        //style.Colors[ImGuiCol_PlotLinesHovered]
+        // ImColor(
+
         // font config
         ImFontConfig config;
         config.OversampleH = 5;

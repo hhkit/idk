@@ -177,6 +177,10 @@ REFLECT_BEGIN(idk::PrefabData, "PrefabData")
 REFLECT_VARS(parent_index, components)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::Prefab, "Prefab")
+REFLECT_VARS(data)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
 REFLECT_VARS(object_index, component_name, property_path)
 REFLECT_END()

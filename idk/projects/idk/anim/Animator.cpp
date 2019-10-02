@@ -115,7 +115,7 @@ namespace idk
 				{
 					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
-
+				auto test = decompose(_pre_global_transforms[i]);
 				_final_bone_transforms[i] = _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 			}
 		}

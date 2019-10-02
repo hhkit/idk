@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		02 OCT 2019
 //@brief	
 
 /*
@@ -24,6 +24,7 @@ of the editor.
 #include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
 #include <imgui/ImGuizmo.h>
+#include <editor/commands/CommandList.h>
 #include <IDE.h>
 
 #include <vkn/VknFramebuffer.h>
@@ -123,6 +124,28 @@ namespace idk {
 		UpdateScrollMouseControl();
 
 		UpdateGizmoControl();
+
+		// draw current global axes
+		const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
+		const float axis_len = 24.0f;
+		IDE& editor = Core::GetSystem<IDE>();
+		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		auto view = currCamera->ViewMatrix();
+
+		vec2 right = (view * vec4(1.0f, 0, 0, 0)).xy;
+		right.x *= -1;
+		vec2 up = (view * vec4(0, 1.0f, 0, 0)).xy;
+		vec3 forward = view * vec4(0, 0, 1.0f, 0);
+		forward.x *= -1;
+		vec2 forw = forward.xy;
+		if (forward.z < 0)
+			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
+		ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * right, 0xff0000ff, 2.0f);
+		ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * up, 0xff00ff00, 2.0f);
+		if (forward.z > 0)
+			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
 
 
 	}
@@ -258,16 +281,15 @@ namespace idk {
 				Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>();
 				if (gameObjectTransform) {
 
-
-
 					if (!ImGuizmo::IsUsing()) {
 						auto matrix = gameObjectTransform->GlobalMatrix();
 						const float* temp = matrix.data();
 						for (int i = 0; i < 16; ++i) {
 							gizmo_matrix[i] = temp[i];
 						}
+
+						//std::cout << "Save variable\n";
 					}
-					//float* matrix = gameObjectTransform->GlobalMatrix().data();
 
 					switch (editor.gizmo_operation) {
 					default:
@@ -278,6 +300,7 @@ namespace idk {
 					case GizmoOperation_Translate:
 						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, NULL);
 						if (ImGuizmo::IsUsing()) {
+							is_being_modified = true;
 							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
 						}
 						break;
@@ -285,6 +308,7 @@ namespace idk {
 					case GizmoOperation_Rotate:
 						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, NULL);
 						if (ImGuizmo::IsUsing()) {
+							is_being_modified = true;
 							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
 						}
 						break;
@@ -292,6 +316,7 @@ namespace idk {
 					case GizmoOperation_Scale:
 						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, NULL);
 						if (ImGuizmo::IsUsing()) {
+							is_being_modified = true;
 							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
 						}
 						break;
@@ -305,6 +330,22 @@ namespace idk {
 			else {
 				//For multiple objects
 			}
+
+			if (is_being_modified) {
+				if (!ImGuizmo::IsUsing()) {
+					std::cout << "Push Command\n";
+					vector<mat4>& originalMatrix = editor.selected_matrix;
+					for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
+						mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+					}
+					//Refresh the new matrix values
+					editor.RefreshSelectedMatrix();
+
+					is_being_modified = false;
+				}
+			}
+
 
 		}
 	}

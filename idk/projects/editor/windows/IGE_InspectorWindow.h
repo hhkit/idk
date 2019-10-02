@@ -39,6 +39,7 @@ namespace idk {
 		void displayVal(reflect::dynamic dyn);
 
 		void DisplayNameComponent(Handle<Name>& c_name);
+        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);
 

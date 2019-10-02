@@ -1,3 +1,4 @@
+data: 
 - components: 
   - !Transform 
     parent: {id: 0}
