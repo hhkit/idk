@@ -202,25 +202,17 @@ namespace idk
         return handle;
     }
 
-	RscHandle<Prefab> PrefabUtility::Save(Handle<GameObject> go, string_view save_path)
+    static void _create(Handle<GameObject> go, RscHandle<Prefab> handle)
     {
-        auto handle = [save_path]() {
-            auto create_res = Core::GetResourceManager().Create<Prefab>(save_path);
-            if (create_res)
-                return *create_res;
-            else
-                return *Core::GetResourceManager().Load<Prefab>(save_path);
-        }();
-
-		auto& prefab = *handle;
+        auto& prefab = *handle;
         prefab.data.clear();
-		auto& root = prefab.data.emplace_back();
-		for (auto& c : go->GetComponents())
-		{
-			root.components.emplace_back((*c).copy());
-		}
+        auto& root = prefab.data.emplace_back();
+        for (auto& c : go->GetComponents())
+        {
+            root.components.emplace_back((*c).copy());
+        }
 
-		// build tree
+        // build tree
         Scene& scene = *Core::GetSystem<SceneManager>().GetSceneByBuildIndex(go.scene);
 
         vector<small_string<GenericHandle::index_t>> nodes;
@@ -257,10 +249,27 @@ namespace idk
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }
+    }
 
-        Core::GetResourceManager().Save(handle);
+    RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go)
+    {
+        auto handle = Core::GetResourceManager().Create<Prefab>();
+        _create(go, handle);
+        return handle;
+    }
 
-		return handle;
+	RscHandle<Prefab> PrefabUtility::Save(Handle<GameObject> go, string_view save_path)
+    {
+        auto handle = [save_path]() {
+            auto create_res = Core::GetResourceManager().Create<Prefab>(save_path);
+            if (create_res)
+                return *create_res;
+            else
+                return *Core::GetResourceManager().Load<Prefab>(save_path);
+        }();
+
+        _create(go, handle);
+        return handle;
     }
 
     Handle<GameObject> PrefabUtility::GetPrefabInstanceRoot(Handle<GameObject> go)

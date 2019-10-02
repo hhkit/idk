@@ -33,6 +33,15 @@ namespace idk {
 		if (game_object_handle) {
 			
 			IDE& editor = Core::GetSystem<IDE>();
+
+			//Find and get all CMDs using Handle<GameObject>
+			commands_affected.clear();
+			for (unique_ptr<ICommand>& i : editor.command_controller.undoStack) {
+				if (i->game_object_handle == game_object_handle) {
+					commands_affected.push_back(i.get());
+				}
+			}
+
 			auto iterator = editor.selected_gameObjects.begin();
 			for (; iterator != editor.selected_gameObjects.end(); ++iterator) {
 				if (*iterator == game_object_handle) {
@@ -44,7 +53,6 @@ namespace idk {
 				editor.selected_gameObjects.erase(iterator);
 			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
 
-			//Find and get all CMDs using Handle<GameObject> TODO
 
 			return true;
 		}
@@ -63,8 +71,8 @@ namespace idk {
 					Transform& t = c.get<Transform>();
 					game_object_handle->GetComponent<Transform>()->position = t.position;
 					game_object_handle->GetComponent<Transform>()->rotation = t.rotation;
-					game_object_handle->GetComponent<Transform>()->scale = t.scale;
-					game_object_handle->GetComponent<Transform>()->parent = t.parent;
+					game_object_handle->GetComponent<Transform>()->scale	= t.scale;
+					game_object_handle->GetComponent<Transform>()->parent	= t.parent;
 				}
 				else if (c.is<Name>())
 				{
@@ -75,8 +83,16 @@ namespace idk {
 					game_object_handle->AddComponent(c);
 				}
 
-				//Reassign all CMDs using Handle<GameObject> TODO
-
+				//Reassign all CMDs using Handle<GameObject> Big O(n^2)
+				IDE& editor = Core::GetSystem<IDE>();
+				for (ICommand* i : commands_affected) {
+					for (unique_ptr<ICommand>& j : editor.command_controller.undoStack) {
+						if (i == j.get()) { //If this unique pointer matches with the commands_affected
+							j->game_object_handle = game_object_handle;
+							break;
+						}
+					}
+				}
 			}
 			return true;
 		}
