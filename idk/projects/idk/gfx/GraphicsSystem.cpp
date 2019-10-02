@@ -12,6 +12,14 @@ namespace idk
 	{
 		out = object_buffer[curr_draw_buffer].lights;
 	}
+	void GraphicsSystem::RenderObjData(vector<RenderObject>& out)
+	{
+		out = object_buffer[curr_draw_buffer].mesh_render;
+	}
+	void GraphicsSystem::AnimatedRenderObjData(vector<AnimatedRenderObject>& out)
+	{
+		out = object_buffer[curr_draw_buffer].skinned_mesh_render;
+	}
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,

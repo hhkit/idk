@@ -6,7 +6,7 @@ namespace idk::yaml
 
     type node::type() const
     {
-        return yaml::type(_value.index());
+        return static_cast<yaml::type>(_value.index());
     }
 
     size_t node::size() const

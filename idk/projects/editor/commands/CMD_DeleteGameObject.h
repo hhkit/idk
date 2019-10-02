@@ -2,7 +2,7 @@
 //@file		CMD_DeleteGameObject.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		10 SEPT 2019
+//@date		02 OCT 2019
 //@brief	Delete gameobjects
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +21,8 @@ namespace idk {
 		virtual bool undo() override;
 
 	private:
-		string						serialized_gameobject	{};
+		vector<reflect::dynamic>	vector_of_components{};
+
 
 	};
 

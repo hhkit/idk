@@ -21,20 +21,29 @@ namespace idk
     ENUM(UVMode, char,
          Repeat,
          MirrorRepeat,
-         Clamp
+         Clamp,
+		ClampToBorder
     );
+
+	ENUM(FilterMode, char,
+		Linear,
+		Nearest
+	);
 
     ENUM(InputChannels, char
          , RED
          , RG
          , RGB
          , RGBA
+		, DEPTH_COMPONENT
     );
 
     struct TextureMeta
     {
         ColorFormat internal_format = ColorFormat::RGBF_32;
         UVMode      uv_mode = UVMode::Repeat;
+		InputChannels format = InputChannels::RGBA;
+		FilterMode  filter_mode = FilterMode::Linear;
     };
 
 	class Texture

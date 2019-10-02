@@ -196,8 +196,10 @@ namespace idk {
 			} //Do something if pressed
 			if (ImGui::MenuItem("Delete")) {
 				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-				for (Handle<GameObject>& i : selected_gameObjects) {
-					//Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(i);
+				IDE& editor = Core::GetSystem<IDE>();
+				while (!editor.selected_gameObjects.empty()) {
+					Handle<GameObject> i = editor.selected_gameObjects.front();
+					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
 					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
 				}
 
@@ -490,12 +492,10 @@ namespace idk {
 			
 			//DEL = Delete
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
-				if (editor.selected_gameObjects.size()) {
-					if (editor.selected_gameObjects.size() == 1) {
-						Handle<GameObject> i = editor.selected_gameObjects.front();
-						editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
-						commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
-					}
+				while (!editor.selected_gameObjects.empty()) {
+					Handle<GameObject> i = editor.selected_gameObjects.front();
+					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
+					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
 				}
 			}
 

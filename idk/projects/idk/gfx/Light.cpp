@@ -9,30 +9,31 @@ namespace idk
 	struct LightCameraView
 	{
 		const Light* light;
-		mat4 operator()(const SpotLight&)
+		mat4 operator()(SpotLight )
 		{
-			const vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
-			const vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
+			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
+			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
+			return invert_rotation(look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 }));
 		}
-		mat4 operator()(const DirectionalLight&)
+		mat4 operator()(DirectionalLight)
 		{
-			const vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
-			const vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
+			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
+			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
+			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
+			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, -v_dir.z), vec3{ 0,1,0 });
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
 	struct LightCameraProj
 	{
-		mat4 operator()(const SpotLight& spotlight)
+		mat4 operator()(SpotLight spotlight)
 		{
 			return perspective(spotlight.outer_angle, 1.0f, 0.1f, (spotlight.use_inv_sq_atten) ? (1 / spotlight.attenuation_radius) : spotlight.attenuation_radius);;//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
-		mat4 operator()(const DirectionalLight&)
+		mat4 operator()(DirectionalLight dirLight)
 		{
-			return ortho(-10.f, 10.f, -10.f, 10.f, 0.1f, 10.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+			return ortho(-10.f, 10.f, -10.f, 10.f,-10.f, 10.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
@@ -65,9 +66,10 @@ namespace idk
 	LightData Light::GenerateLightData() const
 	{
 		LightData retval;
-		retval.index = s_cast<int>(light.index());
+		retval.index = (int) light.index();
 		std::visit([&](auto& light_variant)
 			{
+				mat4 vp;
 				using T = std::decay_t<decltype(light_variant)>;
 				if constexpr (std::is_same_v<T, PointLight>)
 				{
@@ -81,7 +83,7 @@ namespace idk
 				{
 					const DirectionalLight& dir_light = light_variant;
 					retval.light_color = dir_light.light_color;
-					const auto tfm = GetGameObject()->Transform();
+					auto tfm = GetGameObject()->Transform();
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
 				}
@@ -108,6 +110,8 @@ namespace idk
 	}
 	CameraData Light::GenerateCameraData() const
 	{
+		mat4 view_matrix;
+		mat4 projection_matrix;
 		return CameraData{
 			0xFFFFFFF,
 			std::visit(LightCameraView{ this },light),

@@ -28,6 +28,7 @@ Derived using IDE_SceneView.cpp as a base/reference
 
 #include <vkn/VknFramebuffer.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+
 namespace idk {
 	struct IGE_ShadowMapWindow::Pimpl
 	{
@@ -100,6 +101,9 @@ namespace idk {
 			ImGui::Image(img.ID(), size*(this->window_size.y*0.5f/size.y), ImVec2(0, 1), ImVec2(1, 0));
 			ImGui::NewLine();
 		}
+
+		vector<RenderObject> rdata;
+		gfx_sys.RenderObjData(rdata);
 
 	}
 
