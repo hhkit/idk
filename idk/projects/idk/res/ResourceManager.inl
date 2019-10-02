@@ -50,7 +50,13 @@ namespace idk
 	}
 
 	template<typename Res>
-	inline RscHandle<Res> ResourceManager::Create()
+	span<Res> ResourceManager::SpanOverNew()
+	{
+		return span<Res>(GetNewVector<Res>());
+	}
+
+	template<typename Res>
+	RscHandle<Res> ResourceManager::Create()
 	{
 		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
@@ -63,6 +69,7 @@ namespace idk
 		{
 			control_block.resource = factory.Create();
 			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{itr->first};
+			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}
 
 		return RscHandle<Res>(itr->first);
@@ -93,6 +100,7 @@ namespace idk
 		{
 			control_block.resource = factory.Create();
 			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ itr->first };
+			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}
 
 		auto& fcb = _loaded_files[adapted_path];
@@ -226,6 +234,7 @@ namespace idk
 		{
 			control_block.resource = factory.Create();
 			control_block.resource->_handle = RscHandle<Res>{ itr->first };
+			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}
 
 		return RscHandle<Res>(itr->first);
@@ -247,6 +256,7 @@ namespace idk
 		{
 			cb.resource = std::make_unique<Res>(std::forward<Args>(construction_args)...);
 			cb.resource->_handle = RscHandle<typename Res::BaseResource>{ guid };
+			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{ guid });
 		}
 
 		return RscHandle<Res>{guid};

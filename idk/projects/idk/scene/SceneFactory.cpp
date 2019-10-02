@@ -6,7 +6,9 @@ namespace idk
 {
 	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()
 	{
-		return std::make_unique<Scene>((unsigned char) 0x80);
+		auto retval = std::make_unique<Scene>((unsigned char) 0x80);
+		GameState::GetGameState().ActivateScene(0x80);
+		return retval;
 	}
 
 	unique_ptr<Scene> SceneFactory::Create() noexcept

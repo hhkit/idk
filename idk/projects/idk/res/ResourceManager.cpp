@@ -65,6 +65,26 @@ namespace idk
 				};
 			}
 
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> CreateNewResourceVectors()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						resource_man->_new_resources[BaseResourceID<Rs>] = std::make_shared<vector<RscHandle<Rs>>>();
+					}...
+				};
+			}
+
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> DumpNewResourceVectors()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						resource_man->GetNewVector<Rs>().clear();
+					}...
+				};
+			}
+
 			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
@@ -105,8 +125,11 @@ namespace idk
 	void ResourceManager::Init()
 	{
 		constexpr static auto saveable_table = detail::ResourceHelper::CreateSaveableLoaders();
-
 		for (auto& func : saveable_table)
+			func(this);
+
+		constexpr static auto new_vector_table = detail::ResourceHelper::CreateNewResourceVectors();
+		for (auto& func : new_vector_table)
 			func(this);
 
 		instance = this;
@@ -160,6 +183,14 @@ namespace idk
 			return nullptr;
 
 		return itr->second.get();
+	}
+
+	void ResourceManager::EmptyNewResources()
+	{
+		static constexpr auto dump_new_table = detail::ResourceHelper::DumpNewResourceVectors();
+
+		for (auto& fn : dump_new_table)
+			fn(this);
 	}
 
 	void ResourceManager::SaveDirtyFiles()

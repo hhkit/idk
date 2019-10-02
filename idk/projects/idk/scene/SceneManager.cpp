@@ -87,6 +87,12 @@ namespace idk
 		Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
 	}
 
+	void SceneManager::LateInit()
+	{
+		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::FILE))
+			Core::GetResourceManager().Load(elem);
+	}
+
 	RscHandle<Scene> SceneManager::GetActiveScene()
 	{
 		return _active_scene;

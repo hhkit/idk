@@ -16,16 +16,13 @@ namespace idk
 	{
 		Ok = 0,
 		Err_SceneAlreadyActive,
-		Err_SceneNotInProject,
-		Err_ScenePathNotFound
+		Err_ScenePathNotFound,
 	};
 	
 	enum class SceneUnloadResult
 	{
 		Ok = 0,
-		Err_SceneAlreadyActive,
-		Err_SceneNotInProject,
-		Err_ScenePathNotFound
+		Err_SceneAlreadyInactive,
 	};
 
 	class Scene 
@@ -51,6 +48,7 @@ namespace idk
 		friend class GameState;
 
 		uint8_t scene_id;
+		bool      _loaded = 0;
 	};
 
 	class Scene::iterator

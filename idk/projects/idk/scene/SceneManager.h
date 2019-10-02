@@ -53,6 +53,7 @@ namespace idk
 
 	private:
 		void Init() override;
+		void LateInit() override;
 		void Shutdown() override;
 
 		GameState*         _gs { nullptr };

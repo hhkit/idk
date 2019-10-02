@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include <core/GameObject.h>
+#include <util/ioutils.h>
 #include "..\res\ResourceBundle.h"
 
 namespace idk
@@ -29,6 +30,34 @@ namespace idk
 	void Scene::DestroyGameObject(const Handle<GameObject>& go)
 	{
 		GameState::GetGameState().DestroyObject(go);
+	}
+
+	SceneLoadResult Scene::Load()
+	{
+		if (_loaded)
+			return SceneLoadResult::Err_SceneAlreadyActive;
+
+		auto path = Core::GetResourceManager().GetPath(GetHandle());
+
+		if (!path)
+			return SceneLoadResult::Err_ScenePathNotFound;
+
+		GameState::GetGameState().ActivateScene(scene_id);
+		auto stream = Core::GetSystem<FileSystem>().Open(*path, FS_PERMISSIONS::READ);
+		parse_text(stringify(stream), *this);
+		_loaded = true;
+		return SceneLoadResult::Ok;
+	}
+
+	SceneUnloadResult Scene::Unload()
+	{
+		if (!_loaded)
+			return SceneUnloadResult::Err_SceneAlreadyInactive;
+
+		GameState::GetGameState().DeactivateScene(scene_id);
+		_loaded = false;
+
+		return SceneUnloadResult::Ok;
 	}
 
 	Scene::iterator Scene::begin() const

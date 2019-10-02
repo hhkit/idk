@@ -185,9 +185,9 @@ namespace idk {
 				}
 				else if constexpr (is_template_v<T, RscHandle>) 
                 {
-					if (changed |= ImGuidk::InputResource(keyName.c_str(), &val))
+					if (ImGuidk::InputResource(keyName.c_str(), &val))
 					{
-
+						changed = true;
 					}
 				}
 				else if constexpr (is_template_v<T, std::variant>)
@@ -218,9 +218,10 @@ namespace idk {
 						return retval;
 					}();
 
-					if (changed |= ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
+					if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
 					{
 						val = variant_construct<T>(new_ind);
+						changed = true;
 					}
 
 					recurse = true;
