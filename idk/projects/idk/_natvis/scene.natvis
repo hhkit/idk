@@ -13,4 +13,22 @@
       </CustomListItems>
     </Expand>
   </Type>
+  <Type Name="idk::Transform">
+    <Expand>
+      <Item Name="[handle]">handle</Item>
+      <Item Name="[pos]">position</Item>
+      <Item Name="[scale]">scale</Item>
+      <Item Name="[rotation]">rotation</Item>
+      <CustomListItems>
+        <Variable Name="search" InitialValue="parent"/>
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <Break Condition="search.id == 0"/>
+          <!--<Exec>search = parent-></Exec>-->
+          <Exec>++i</Exec>
+        </Loop>
+        <Item Name="Depth" >i</Item>
+      </CustomListItems>
+    </Expand>
+  </Type>
 </AutoVisualizer>

@@ -127,7 +127,7 @@ namespace idk
 				auto& rslot = _scenes[rhandle.scene].slots[rhandle.index];
 				auto& lslot = _scenes[lhandle.scene].slots[lhandle.index];
 
-				std::swap(rslot, lslot);
+				std::swap(rslot.index, lslot.index);
 				std::swap(rhs, lhs);
 
 				--jtr;

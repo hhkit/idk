@@ -18,4 +18,6 @@
 
 #include <prefab/PrefabInstance.h>
 
+#include <script/MonoBehavior.h>
+
 #include <test/TestComponent.h>
