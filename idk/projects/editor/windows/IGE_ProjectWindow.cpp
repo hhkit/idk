@@ -263,8 +263,8 @@ namespace idk {
             { // preview image / icon
                 void* id = 0;
                 vec2 sz{ icon_sz, icon_sz };
-                ImVec4 tint = ImColor(65, 153, 163).Value;
-                ImVec4 selected_tint = ImColor(30, 120, 130).Value;
+                ImVec4 tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
+                ImVec4 selected_tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered);
 
                 if (path.IsDir())
                 {
@@ -293,8 +293,8 @@ namespace idk {
                             sz.y /= aspect;
                         else if (aspect < 1.0f)
                             sz.x /= aspect;
-                        tint = ImVec4(1, 1, 1, 1);
-                        selected_tint = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
+                        tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
+                        selected_tint = ImVec4(1, 1, 1, 1);
                     }
                 }
 
@@ -354,7 +354,7 @@ namespace idk {
                         ImGui::GetWindowDrawList()->AddRectFilled(
                             ImGui::GetCursorScreenPos(),
                             ImGui::GetCursorScreenPos() + ImVec2(icon_sz, line_height),
-                            ImGui::GetColorU32(ImGuiCol_FrameBg),
+                            ImGui::GetColorU32(ImGuiCol_FrameBgHovered),
                             line_height * 0.5f);
                     //}
 

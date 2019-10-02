@@ -544,8 +544,8 @@ namespace idk
 	void PrefabUtility::ApplyPrefabInstance(Handle<GameObject> instance_root)
 	{
         assert(instance_root->HasComponent<PrefabInstance>());
-        auto prefab_inst = *instance_root->GetComponent<PrefabInstance>();
-        auto prefab = prefab_inst.prefab;
+        auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
+        auto& prefab = prefab_inst.prefab;
 
         // diff components
         int i = 0;
@@ -575,7 +575,7 @@ namespace idk
 
             for (auto c : obj_component_handles)
             {
-                if (c)
+                if (c && !c.is_type<PrefabInstance>())
                     ApplyAddedComponent(obj, c);
             }
             for (auto* d : prefab_component_ptrs)

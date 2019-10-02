@@ -12,7 +12,7 @@ data:
   - !Name 
     name: stoopidguy
   - !MeshRenderer 
-    cast_shadows: 0
+    cast_shadows: 1
     enabled: 1
     mesh: {guid: 00000000-0000-0000-0000-000000000000}
     receive_shadows: 1
