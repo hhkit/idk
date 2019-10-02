@@ -71,6 +71,7 @@ namespace idk
 
 		ResourceManager() = default;
 
+		void EmptyNewResources();
 		void SaveDirtyFiles();
 		void SaveDirtyMetadata();
 		void WatchDirectory();
@@ -81,6 +82,8 @@ namespace idk
 		template<typename Res> bool Free    (const RscHandle<Res>&);
 
 		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
+
+		template<typename Res> [[nodiscard]] span<Res> SpanOverNew();
 
 		/* RESOURCE LOADING - for high-level users like editor programmer */
 		template<typename Res>  RscHandle<Res>        Create  ();
@@ -118,6 +121,7 @@ namespace idk
 
 		array<GenericPtr, ResourceCount>               _default_resources; // std::shared_ptr<R>
 		array<GenericPtr, ResourceCount>               _resource_table;    // std::shared_ptr<hash_table<Guid, ResourceControlBlock<R>>>
+		array<GenericPtr, ResourceCount>               _new_resources;     // std::vector<RscHandle<R>>
 		array<GenericPtr, ResourceCount>               _factories;         // std::shared_ptr<ResourceFactory<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
 		hash_table<Path,      FileControlBlock>        _loaded_files;
@@ -126,9 +130,10 @@ namespace idk
 		void LateInit() override;
 		void Shutdown() override;
 
-		template<typename Res> auto& GetFactoryRes() { return *r_cast<ResourceFactory<Res>*>(        _factories[BaseResourceID<Res>].get()); }
-		template<typename Res> auto& GetTable()      { return *r_cast<ResourceStorage<Res>*>(   _resource_table[BaseResourceID<Res>].get()); }
-		template<typename Res> Res&  GetDefaultRes() { return *r_cast<Res*>                 (_default_resources[BaseResourceID<Res>].get()); }
+		template<typename Res> auto& GetFactoryRes() { return *r_cast<ResourceFactory<Res>*>  (        _factories[BaseResourceID<Res>].get()); }
+		template<typename Res> auto& GetTable()      { return *r_cast<ResourceStorage<Res>*>  (   _resource_table[BaseResourceID<Res>].get()); }
+		template<typename Res> Res&  GetDefaultRes() { return *r_cast<Res*>                   (_default_resources[BaseResourceID<Res>].get()); }
+		template<typename Res> auto& GetNewVector () { return *r_cast<vector<RscHandle<Res>>*>(    _new_resources[BaseResourceID<Res>].get()); }
 		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>> string GenUniqueName();
 		template<typename Res> ResourceControlBlock<Res>* GetControlBlock(RscHandle<Res> handle);
 
