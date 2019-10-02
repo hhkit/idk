@@ -151,9 +151,11 @@ namespace idk
 			auto obj = scene->CreateGameObject();
 			// auto transform = curr_bone._global_inverse_bind_pose.inverse();
 			
-			mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
+			// mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
 
-			obj->GetComponent<Transform>()->LocalMatrix(local_bind_pose);
+			obj->GetComponent<Transform>()->position = curr_bone._local_bind_pose.position;
+			obj->GetComponent<Transform>()->rotation = curr_bone._local_bind_pose.rotation;
+			obj->GetComponent<Transform>()->scale = curr_bone._local_bind_pose.scale;
 			
 			obj->Name(curr_bone._name);
 

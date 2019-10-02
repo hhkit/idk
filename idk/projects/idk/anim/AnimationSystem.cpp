@@ -80,11 +80,14 @@ namespace idk
 					curr_pose.position =	curr_local_bind_pose.position	+ curr_pose.position;
 					curr_pose.rotation =	curr_local_bind_pose.rotation	* curr_pose.rotation;
 					curr_pose.scale =		curr_local_bind_pose.scale		+ curr_pose.scale;
-					mat4 compose_curr_pose = curr_pose.recompose();
+					// mat4 compose_curr_pose = curr_pose.recompose();
 
 					// During GenerateTransforms in the Animator, it will use the child transforms to 
 					// generate the final transforms
-					curr_go->Transform()->LocalMatrix(compose_curr_pose);
+					curr_go->Transform()->position = curr_pose.position;
+					curr_go->Transform()->rotation = curr_pose.rotation;
+					curr_go->Transform()->scale = curr_pose.scale;
+					
 				}
 			}
 		}

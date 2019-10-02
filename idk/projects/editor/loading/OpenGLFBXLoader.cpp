@@ -30,8 +30,7 @@ namespace idk
 													aiProcess_Triangulate |			// Triangulates non-triangles
 													aiProcess_GenSmoothNormals |	// Generates missing normals
 													aiProcess_CalcTangentSpace |	// Generate tangents and bi-tangents
-													aiProcess_FlipUVs |
-													aiProcess_JoinIdenticalVertices);
+													aiProcess_FlipUVs );
 		
 		if (ai_scene == nullptr)
 			return retval;
@@ -193,8 +192,8 @@ namespace idk
 		}
 		// animator->Play(0);
 		// Saving the prefab
-		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp" );
-		retval.Add(prefab_handle);
+		//auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp" );
+		//retval.Add(prefab_handle);
 
 		scene->DestroyGameObject(prefab_root);
 		return retval;
@@ -211,8 +210,7 @@ namespace idk
 			aiProcess_Triangulate |			// Triangulates non-triangles
 			aiProcess_GenSmoothNormals |	// Generates missing normals
 			aiProcess_CalcTangentSpace |	// Generate tangents and bi-tangents
-			aiProcess_FlipUVs |
-			aiProcess_JoinIdenticalVertices);
+			aiProcess_FlipUVs);
 
 		if (ai_scene == nullptr)
 			return retval;
@@ -385,9 +383,9 @@ namespace idk
 
 			animator->AddAnimation(anim_clip_handle);
 		}
-		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } + path_to_resource.GetStem().data() + ".idp");
+		//auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } + path_to_resource.GetStem().data() + ".idp");
 		scene->DestroyGameObject(prefab_root);
-		retval.Add(prefab_handle);
+		//retval.Add(prefab_handle);
 		return retval;
 	}
 

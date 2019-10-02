@@ -155,7 +155,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto& shader_v = mat_inst->material->_shader_program.as<ShaderProgram>();;
 
 	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Calico Cat.fbx" }) {
 		auto go = scene->CreateGameObject();
 
 		go->Name(path.GetStem());

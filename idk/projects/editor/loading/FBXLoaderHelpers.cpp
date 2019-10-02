@@ -36,6 +36,16 @@ namespace idk::fbx_loader_detail
 		return quat(vec.x, vec.y, vec.z, vec.w);
 	}
 
+	aiMatrix4x4 initMat4(const mat4& mat)
+	{
+		return aiMatrix4x4{
+			mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+			mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+			mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+			mat[0][3], mat[1][3], mat[2][3], mat[3][3]
+		};
+	}
+
 
 	void generateNodeGraphRecurse(const aiNode* ai_node, AssimpNode& parent_node, const BoneSet& bone_set)
 	{
@@ -248,17 +258,20 @@ namespace idk::fbx_loader_detail
 			// b._global_inverse_bind_pose[3] = b._global_inverse_bind_pose[3] * vec4{ FBX_SCALE, 1.0f };
 			
 			auto local_bind = mat4{ scale(fbx_loader_detail::FBX_SCALE) } *node_transform;
-			auto decomp1 = decompose(local_bind);
-			auto decomp2 = decompose(node_transform);
-			// aiVector3D pos;
-			// aiVector3D scale;
-			// aiQuaternion rot;
-			// aiDecomposeMatrix(&curr_node.assimp_node->_assimp_node_transform, &scale, &rot, &pos);
+			//auto decomp1 = decompose(local_bind);
+			//auto decomp2 = decompose(node_transform);
 
-			b._local_bind_pose.position= decomp2.position;// *FBX_SCALE;
-			b._local_bind_pose.rotation = decomp2.rotation;
-			b._local_bind_pose.scale = decomp2.scale;
-			auto recomp_decomp2 = decomp2.recompose();
+			aiMatrix4x4 assimp_mat = initMat4(local_bind);
+			aiVector3D pos;
+			aiVector3D scale;
+			aiQuaternion rot;
+			aiDecomposeMatrix(&assimp_mat, &scale, &rot, &pos);
+
+			b._local_bind_pose.position = initVec3(pos);// decomp2.position;
+			b._local_bind_pose.rotation = initQuat(rot);// decomp2.rotation;
+			b._local_bind_pose.scale	= initVec3(scale);// decomp2.scale;
+
+			//auto recomp_decomp2 = b._local_bind_pose.recompose();
 			bones_out.emplace_back(b);
 			bones_table.emplace(bones_out.back()._name, bones_out.size() - 1);
 
@@ -295,9 +308,22 @@ namespace idk::fbx_loader_detail
 
 	static void initChannel(anim::Channel& channel, const aiNodeAnim* ai_anim_node, const mat4& concat_matrix)
 	{
-		auto inverse_mat = concat_matrix.inverse();
-		auto decomp = decompose(concat_matrix);
-		auto decomp2 = decompose(inverse_mat);
+		//auto inverse_mat = concat_matrix.inverse();
+		//auto decomp = decompose(concat_matrix);
+		//auto decomp2 = decompose(concat_matrix);
+
+		aiMatrix4x4 assimp_mat = initMat4(concat_matrix);
+		aiVector3D pos;
+		aiVector3D scale;
+		aiQuaternion rot;
+		aiDecomposeMatrix(&assimp_mat, &scale, &rot, &pos);
+		matrix_decomposition<real> decomp;
+		//* 
+		decomp.position = initVec3(pos);
+		decomp.rotation = initQuat(rot);
+		decomp.scale	= initVec3(scale);
+		//*/decomp = decompose(concat_matrix);
+		//*/
 
 		// POSITION
 		if (ai_anim_node->mNumPositionKeys > 1)
