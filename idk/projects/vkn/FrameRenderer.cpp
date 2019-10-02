@@ -388,8 +388,13 @@ namespace idk::vkn
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
 		
-		const vector<LightData>& tmp_light = *state.lights;
+		vector<LightData> tmp_light = *state.lights;
+		for (auto& light : tmp_light)
+		{
+			light.v_pos = cam.view_matrix * vec4{ light.v_pos,1 };
+			light.v_dir = (cam.view_matrix * vec4{ light.v_dir,0 }).get_normalized();
 
+		}
 
 		string light_block;
 		uint32_t len = s_cast<uint32_t>(tmp_light.size());

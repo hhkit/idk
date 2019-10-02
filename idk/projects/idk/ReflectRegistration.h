@@ -274,7 +274,7 @@ REFLECT_VARS(intensity, light_color, width,height)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SpotLight, "SpotLight")
-REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius)
+REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
