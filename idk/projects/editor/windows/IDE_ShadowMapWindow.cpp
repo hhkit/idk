@@ -89,9 +89,7 @@ namespace idk {
 		gfx_sys.BufferedLightData(_pimpl->buffered_light_data);
 		_pimpl->UpdateLightInfo();
 		auto& light_info= _pimpl->info;
-		int index = std::min(s_cast<int>(light_info.size()), _selected_light);
 
-		int i = 0;
 		for (auto& light : light_info)
 		{
 			//ImGui::RadioButton(light.name.c_str(), &index, i);

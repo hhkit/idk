@@ -212,7 +212,7 @@ REFLECT_VARS(id)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
-REFLECT_VARS(_scenes)
+REFLECT_VARS(_scenes, _startup_scene)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")

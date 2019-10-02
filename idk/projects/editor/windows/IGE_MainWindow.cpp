@@ -125,7 +125,7 @@ namespace idk {
 
 				if (path)
 				{
-					Core::GetResourceManager().Rename(curr_scene, *path);
+					Core::GetResourceManager().Rename(curr_scene, Core::GetSystem<FileSystem>().ConvertFullToVirtual(*path));
 					Core::GetResourceManager().Save(curr_scene);
 				}
 				std::cout << "Save current Scene\n";

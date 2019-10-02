@@ -129,7 +129,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
 		//camHandle->render_target->AddAttachment(eDepth);
-		camHandle->clear = color{ 0.05,0.05,0.1,1 };
+		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
@@ -144,9 +144,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
-
-	auto& mat_inst_v = mat_inst->material.as<Material>();
-	auto& shader_v = mat_inst->material->_shader_program.as<ShaderProgram>();;
 
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
@@ -267,7 +264,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		light_comp->light = PointLight{
 			real{1.f},
-			color{0.8,0,0}
+			color{0.8f,0.f,0.f}
 		};
 		light->AddComponent<TestComponent>();
 	}

@@ -180,7 +180,8 @@ namespace idk
 		if (Core::template GetSystem<FileSystem>().Exists(new_path))
 			return FileMoveResult::Error_DestinationExists;
 
-		_loaded_files.emplace(string{ new_path }, FileControlBlock{ ResourceBundle{ resource }, true });
+		_loaded_files[string{ new_path }] = FileControlBlock{ ResourceBundle{ resource }, true };
+		cb->path = string{ new_path };
 
 		return FileMoveResult::Ok;
 	}
