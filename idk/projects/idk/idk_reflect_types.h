@@ -8,6 +8,7 @@
 #include <gfx/UniformInstance.h>
 #include <gfx/ShaderGraph_data.h>
 #include <gfx/LightTypes.h>
+#include <math/shapes.h>
 #include <res/ResourceMeta.h>
 #include <scene/SceneManager.h>
 #include <phys/Collider.h>
@@ -67,6 +68,9 @@ namespace idk::reflect
 		, LightVariant
 
 		// physics
+		, box
+		, sphere
+		, capsule
 		, Collider::Shapes
 
 		// anim

@@ -8,13 +8,13 @@ namespace idk
     class GamepadSystem : public ISystem
     {
     public:
-        virtual void Init() = 0;
-        virtual void Shutdown() = 0;
-        virtual void Update() = 0;
+		virtual void Init() {};
+		virtual void Shutdown() {};
+		virtual void Update() {};
 
-        virtual bool GetButtonDown(char, GamepadButton) = 0;
-        virtual bool GetButtonUp(char, GamepadButton) = 0;
-        virtual bool GetButton(char, GamepadButton) = 0;
-        virtual float GetAxis(char, GamepadAxis) = 0;
+		virtual bool GetButtonDown(char, GamepadButton) { return false; };
+		virtual bool GetButtonUp(char, GamepadButton) { return false; };
+		virtual bool GetButton(char, GamepadButton) { return false; };
+		virtual float GetAxis(char, GamepadAxis) { return false; };
     };
 }
