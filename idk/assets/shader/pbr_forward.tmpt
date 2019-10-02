@@ -270,9 +270,9 @@ void main()
 	//out_color = vec4(vec3(PerCamera.inverse_view_transform*vec4(-LightBlk.lights[0].v_dir,0)).xyz,1);
 	out_color = vec4(color,1);
 	
-	vec4 fposls = vvvp* world_pos;
-	vec3 pCoord = fposls.xyz/fposls.w;
-	pCoord = pCoord *0.5 + 0.5;
+	//vec4 fposls = vvvp* world_pos;
+	//vec3 pCoord = fposls.xyz/fposls.w;
+	//pCoord = pCoord *0.5 + 0.5;
 	
 	//out_color = vec4(vec3(texture(shadow_maps[1], pCoord.xy).r),1.0);
 }
