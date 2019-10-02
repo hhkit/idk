@@ -90,8 +90,6 @@ namespace idk {
 				throw "Unhandled case";
 			else
 			{
-                while (++depth_change <= 0)
-                    _curr_property_stack.pop_back();
                 _curr_property_stack.push_back(key);
                 _curr_property_path.clear();
                 for (const auto& prop : _curr_property_stack)
@@ -488,6 +486,12 @@ namespace idk {
         ImGui::SameLine();
         auto path = *Core::GetResourceManager().GetPath(c_prefab->prefab);
         ImGui::Text(path.data() + path.rfind('/') + 1);
+
+        ImGui::SameLine();
+        if (ImGui::Button("Apply"))
+        {
+            PrefabUtility::ApplyPrefabInstance(c_prefab->GetGameObject());
+        }
     }
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
