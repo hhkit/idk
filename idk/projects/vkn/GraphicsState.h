@@ -72,12 +72,16 @@ namespace idk::vkn
 		const vector<LightData>* lights;
 		vector<const LightData*> active_lights;
 		vector<const RenderObject*> mesh_render;
-		vector<const RenderObject*> skinned_mesh_render;
+		vector<const AnimatedRenderObject*> skinned_mesh_render;
+
+		const vector<SkeletonTransforms>* skeleton_transforms;
+
+		const vector<SkeletonTransforms>& GetSkeletonTransforms()const { return *skeleton_transforms; }
 
 		vector<const DbgDrawCall*> dbg_render;
 		const VulkanPipeline* dbg_pipeline;
 
-		void Init(const CameraData& data, const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects);
+		void Init(const CameraData& data, const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
 		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects);
 	};
 

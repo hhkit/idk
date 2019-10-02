@@ -11,10 +11,10 @@ Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450 
-#ifndef OGL
-#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
-#define BLOCK(X) X
-#endif
+//#ifndef OGL
+//#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+//#define BLOCK(X) X
+//#endif
 #define MAX_BONES 100
 
 layout (location = 0) in vec3 position;

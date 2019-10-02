@@ -10,6 +10,11 @@ namespace idk
 	};
 	enum AttribFormat
 	{
+		eIVec1,//int32
+		eIVec2,//int32
+		eIVec3,//int32
+		eIVec4,//int32
+		eSVec1,//Single Precision Floats
 		eSVec2,//Single Precision Floats
 		eSVec3,//Single Precision Floats
 		eSVec4,//Single Precision Floats

@@ -136,7 +136,7 @@ namespace idk::vkn
 		{
 			auto& curr_state = curr_states[i];
 			auto& curr_cam = curr_buffer.camera[i];
-			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render);
+			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			curr_state.dbg_render.resize(0);
 			if (curr_cam.overlay_debug_draw)
 			{

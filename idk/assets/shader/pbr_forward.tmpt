@@ -7,7 +7,7 @@ U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 	mat4 inverse_view_transform;
 } PerCamera;
 
-S_LAYOUT(2, 0) uniform sampler2D tex;
+S_LAYOUT(7, 0) uniform sampler2D tex;
 //S_LAYOUT(3, 1) uniform samplerCube test;
 
 S_LAYOUT(6,1) uniform samplerCube irradiance_probe;

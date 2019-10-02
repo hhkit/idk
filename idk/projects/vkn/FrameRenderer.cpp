@@ -80,6 +80,33 @@ namespace idk::vkn
 
 		return pos_desc;
 	}
+	RscHandle<ShaderProgram> LoadShader(string filename, vector<buffer_desc> desc)
+	{
+		RscHandle<ShaderProgram> result;
+		{
+			//TODO figure this out
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			//if (!actualfile || !rsc.resources.size())
+			{
+
+				//vector<buffer_desc> desc{
+				//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+				//	BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+				//	BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				//};
+				Core::GetSystem<FileSystem>().Update();
+				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+				result = *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
+				auto& mod =result.as<ShaderModule>();
+				if(desc.size())
+					mod.AttribDescriptions(std::move(desc));
+				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			}
+		}
+		return result;
+	}
 	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
 		//Todo: Initialize the stuff
 		_view = view;
@@ -111,25 +138,55 @@ namespace idk::vkn
 		{
 			//TODO figure this out
 			string filename = "/assets/shader/mesh.vert";
-			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			//if (!actualfile || !rsc.resources.size())
-			{
-
-				vector<buffer_desc> desc{
-					BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-					BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-					BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-				};
-				Core::GetSystem<FileSystem>().Update();
-				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
-				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
-				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-			}
+			_mesh_renderer_shader_module=LoadShader(filename, {
+						BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				});
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			////if (!actualfile || !rsc.resources.size())
+			//{
+			//
+			//	vector<buffer_desc> desc{
+			//		BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+			//	};
+			//	Core::GetSystem<FileSystem>().Update();
+			//	//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//	_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
+			//	_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+			//	//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+			//	//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			//}
 		}
-		//else
+		{
+			//TODO figure this out
+			string filename = "/assets/shader/skinned_mesh.vert";
+			_skinned_mesh_shader_module = LoadShader(filename, {
+						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				});
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			////if (!actualfile || !rsc.resources.size())
+			//{
+			//
+			//	vector<buffer_desc> desc{
+			//		BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+			//	};
+			//	Core::GetSystem<FileSystem>().Update();
+			//	//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//	_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
+			//	_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+			//	//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+			//	//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			//}
+		}
 		//{
 		//	string filename = "/assets/shader/shadow.frag";
 		//	//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
@@ -343,7 +400,8 @@ namespace idk::vkn
 		string data;
 		return data;
 	}
-	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;
+	
+	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
 	template<typename T>
 	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
 	{
@@ -378,6 +436,12 @@ namespace idk::vkn
 				obj_uni.size
 			}
 		);
+	}
+	template<typename lol=void>
+	void BindBones(const UboInfo& info,const AnimatedRenderObject& aro, const vector<SkeletonTransforms>& bones, UboManager& ubos, FrameRenderer::DsBindingCount & collated_layouts, collated_bindings_t & collated_bindings)
+	{
+		auto&&[buffer,offset]=ubos.Add(bones[aro.skeleton_index]);
+		collated_bindings[info.set].emplace_back(info.binding,buffer,offset,0,info.size);
 	}
 
 	std::pair<vector<FrameRenderer::ProcessedRO>, FrameRenderer::DsBindingCount> FrameRenderer::ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager)

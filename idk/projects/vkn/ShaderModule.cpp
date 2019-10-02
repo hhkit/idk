@@ -33,10 +33,59 @@ namespace idk::vkn
 	//		info.size += s_cast<uint32_t>(code_reflector.get_declared_struct_member_size(type, i));
 	//	}
 	//}
-
-
-	void extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
+	AttribFormat GetFormat(const spirv_cross::SPIRType& type)
 	{
+		static AttribFormat vec_formats[5]
+		{
+			AttribFormat{},
+			AttribFormat::eSVec1,
+			AttribFormat::eSVec2,
+			AttribFormat::eSVec3,
+			AttribFormat::eSVec4,
+		};
+		static AttribFormat ivec_formats[5]
+		{
+			AttribFormat{},
+			AttribFormat::eIVec1,
+			AttribFormat::eIVec2,
+			AttribFormat::eIVec3,
+			AttribFormat::eIVec4,
+		};
+		AttribFormat format{};
+		switch (type.basetype)
+		{
+		case spirv_cross::SPIRType::Float:
+			format = vec_formats[type.vecsize];
+			break;
+		case spirv_cross::SPIRType::Int:
+			format = ivec_formats[type.vecsize];
+			break;
+		}
+		return format;
+	}
+	VertexRate GetRate(string var_name)
+	{
+		static const hash_table<string, VertexRate> map
+		{
+			{"positon"         ,VertexRate::eVertex},
+			{"normal"          ,VertexRate::eVertex},
+			{"uv"              ,VertexRate::eVertex},
+			{"bone_ids"        ,VertexRate::eVertex},
+			{"bone_weights"    ,VertexRate::eVertex},
+		};
+		VertexRate result{};
+		auto itr = map.find(var_name);
+		result = (itr != map.end()) ? itr->second : result;
+		return result;
+	}
+	struct ExtractedMisc
+	{
+		//location
+		hash_table<uint32_t,buffer_desc> extracted_desc;
+	};
+	ExtractedMisc extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
+	{
+		ExtractedMisc result{};
 		spx::CompilerReflection code_reflector{ buffer };// r_cast<const uint32_t*>(std::data(buffer)), byte_code.size() / sizeof(uint16_t)//};
 		//code_reflector.build_combined_image_samplers();
 		auto aaaa = code_reflector.compile();
@@ -44,6 +93,27 @@ namespace idk::vkn
 		//type
 		
 		ubo_info.clear();
+		struct tmp_t
+		{
+			spirv_cross::SPIRType base_type;
+			spirv_cross::SPIRType type;
+			string name;
+			uint32_t id;
+		};
+		if (single_stage == vk::ShaderStageFlagBits::eVertex)
+		{
+
+		for (auto&& input : resources.stage_inputs)
+		{
+			auto tmp = tmp_t{ code_reflector.get_type(input.base_type_id),code_reflector.get_type(input.type_id),input.name,input.id };// temps.emplace_back();
+			auto location = code_reflector.get_decoration(input.id, spv::Decoration::DecorationLocation);
+			auto& bdesc = result.extracted_desc[location];// .desc;
+			bdesc.AddAttribute(GetFormat(tmp.type), location, 0);
+			//bdesc.binding.binding_index = 0;
+			bdesc.binding.stride = (tmp.type.width* tmp.type.vecsize)/8;
+			bdesc.binding.vertex_rate = GetRate(tmp.name);
+		}
+		}
 		for (auto& ub : resources.uniform_buffers)
 		{
 			UboInfo info;
@@ -94,6 +164,7 @@ namespace idk::vkn
 		//	uint32_t i = 0;
 		//	ubo_info[code_reflector.get_name(ub.combined_id)] = std::move(info);
 		//}
+		return result;
 	}
 
 	vk::DescriptorType ConvertUniformType(uniform_layout_t::UniformType type)
@@ -170,7 +241,55 @@ namespace idk::vkn
 			info.layout = *layouts[info.set];
 		}
 	}
-
+	void FillDefaultBufferDesc(ExtractedMisc& info, vector<buffer_desc>& descriptors)
+	{
+		vector<decltype(&*info.extracted_desc.begin())> pair_ptrs(info.extracted_desc.size());
+		vector<bool> filled_bindings(descriptors.size()+info.extracted_desc.size(),false);
+		auto get_next_binding = [](auto& filled_bindings) ->uint32_t
+		{
+			for (size_t i = 0; i < filled_bindings.size(); ++i)
+			{
+				if (!filled_bindings[i])
+				{
+					filled_bindings[i] = true;
+					return s_cast<uint32_t>(i);
+				}
+			}
+			throw std::runtime_error("incorrect binding setup");
+			return -1;
+		};
+		pair_ptrs.resize(0);
+		bool binding_set = false;
+		for (auto& desc : descriptors)
+		{
+			if (desc.binding.binding_index)
+				binding_set = filled_bindings[*desc.binding.binding_index] = true;
+		}
+		for (auto& pair : info.extracted_desc)
+		{
+			auto& location = pair.first;
+			auto found = std::find_if(descriptors.begin(), descriptors.end(), 
+				[&location](const buffer_desc& desc) 
+				{
+					bool found = false; 
+					for (auto& attr : desc.attributes) 
+					{
+						found |= attr.location == location; 
+					}
+					return found;
+				});
+			if(found==descriptors.end())
+				pair_ptrs.emplace_back(&pair);
+		}
+		for (auto& pair_ptr : pair_ptrs)
+		{
+			auto& desc = pair_ptr->second;
+			if (binding_set)
+				desc.binding.binding_index = get_next_binding(filled_bindings);
+			descriptors.emplace_back(std::move(desc));
+		}
+		info.extracted_desc.clear();//invalid now
+	}
 
 void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer)
 {
@@ -178,8 +297,9 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 	auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 	auto back = std::make_unique<Data>();
 	back->module = view.CreateShaderModule(byte_code);
-	extract_info(buffer, back->ubo_info, single_stage);
+	auto&& extracted= extract_info(buffer, back->ubo_info, single_stage);
 	CreateLayouts(back->ubo_info,back->layouts,view);
+	FillDefaultBufferDesc(extracted,descriptors);
 	back->stage = single_stage;
 	back->attrib_descriptions = std::move(descriptors);
 	buf_obj.WriteToBack(std::move(back));
@@ -234,6 +354,14 @@ void DoNothing();
 ShaderModule::~ShaderModule()
 {
 	DoNothing();
+}
+
+std::optional<uint32_t> ShaderModule::Data::GetBinding(uint32_t location) const
+{
+	std::optional<uint32_t> result{};
+	auto itr = loc_to_bind.find(location);
+	result = (itr != loc_to_bind.end()) ? itr->second : result;
+	return result;
 }
 
 }
