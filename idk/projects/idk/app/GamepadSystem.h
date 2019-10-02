@@ -16,5 +16,6 @@ namespace idk
 		virtual bool GetButtonUp(char, GamepadButton) { return false; };
 		virtual bool GetButton(char, GamepadButton) { return false; };
 		virtual float GetAxis(char, GamepadAxis) { return false; };
+		virtual void SetRumble(char player, float low_freq, float high_freq) { (player); (low_freq); (high_freq); };
     };
 }
