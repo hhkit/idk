@@ -98,29 +98,38 @@ float GeometrySmith(vec3 normal, vec3 view, vec3 light, float roughness)
 	
 	return ggx1 * ggx2;
 }
-
-float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
+vec3 ShadowCoords(vec4 fPosInLS)
 {
+	fPosInLS = fPosInLS *0.5 + 0.5;
 	 // perform perspective divide
     vec3 projCoords = fPosInLS.xyz / fPosInLS.w;
 	
 	//Transformation of proj coord to NDC[0,1]
-	projCoords = (projCoords * 0.5f) + 0.5f; 
-	
-	//Get closest depth to light's pov
-	vec4 sampleShadow = texture(shadow_maps[iter], projCoords.xy);
-	float nearestDepth =  sampleShadow.r;
-	
-	//Get current light depth
-	float curDepth = projCoords.z;  
-	
-	 // check if current frag is in shadow and return the result
-	//if (curDepth > nearestDepth + max(0.05 * (1.0 - dot(normal,lightDir)),0.005)) 
-	
-	if (curDepth > nearestDepth + 0.005) 	
-		return 1.0f;
-	else
+	projCoords = projCoords; 
+	return projCoords.xyz ;
+}
+float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
+{
+	vec3 projCoords = ShadowCoords(fPosInLS);
+	if(projCoords.x>0&&projCoords.y>0&&projCoords.x<1&&projCoords.y<1)
+	{	
+		//Get closest depth to light's pov
+		vec4 sampleShadow = texture(shadow_maps[iter], projCoords.xy);
+		float nearestDepth =  sampleShadow.r;
+
+		//Get current light depth
+		float curDepth = projCoords.z;  
+
+		 // check if current frag is in shadow and return the result
+		//if (curDepth > nearestDepth + max(0.05 * (1.0 - dot(normal,lightDir)),0.005)) 
+
+		if (curDepth > nearestDepth + 0.03) 	
+			return 1.0f;
+		else
+			return 0.0f;
+	}else{
 		return 0.0f;
+	}
 	//return 0;
 	//return 0;
 }
@@ -139,21 +148,34 @@ vec3 pbr(
 // temporary light code
 	Light light = LightBlk.lights[i];
 	
-	vec3  light_dir =	light.v_pos - view_pos;
-	if (light.type == 1) light_dir = -light.v_dir;
+	vec3  frag_to_light = (vec4(light.v_pos,1)).xyz - view_pos;
+	vec3  light_dir =	frag_to_light;
+
+	if (light.type == 1 || light.type==2) light_dir = -light.v_dir;
 	
-	float dist      =  length(light_dir); 
+	float dist      =  length(frag_to_light); 
 	light_dir /= dist;
 	vec3  view_dir  = -normalize(view_pos); // camera is at 0
 	vec3  half_vec  =  normalize(view_dir + light_dir);
 	
 	float atten = 1;
 	
-	if (light.type == 0 || light.type == 2) atten /= (dist * dist);
+	float spotlight_effect =1;
 	
-	atten = max(atten, 1);
+	if(light.type==2)
+	{
 	
-	vec3 radiance = light.color.rgb * atten;
+		float cos_alpha= dot(normalize((frag_to_light)),normalize(light_dir));
+	    float cos_phi  = light.cos_outer;
+	    float cos_theta  = light.cos_inner;
+		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),0.5),1);
+        spotlight_effect = (acos(cos_alpha)>acos(cos_phi))?0:spotlight_effect;
+	}
+	if (light.type == 0 || light.type == 2) atten = (1/light.falloff)/(dist*dist);
+	
+	atten = min(max(atten, 1),10);
+	
+	vec3 radiance = light.color.rgb * atten * spotlight_effect;
 	
 	const vec3 f0 = vec3(0.04);
 	vec3 F = fresnel(max(dot(half_vec, view_dir), 0.0), mix(f0, albedo, metallic));
@@ -172,6 +194,7 @@ vec3 pbr(
 	
 	kD *= 1.0 - metallic;
 	
+	//return vec3(cos_alpha*0.5 +0.5);
 	return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
@@ -203,18 +226,18 @@ void main()
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
-	vec4 world_pos = vec4(fs_in.world_pos,1);
+	vec4 world_pos = PerCamera.inverse_view_transform *vec4(fs_in.position,1);
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
-		vec3 result = pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o); 
+		vec3 result = pbr(i, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		if (LightBlk.lights[i].type == 1)
 		{
-		    result *= (1 - vec3(ShadowCalculation(i,-LightBlk.lights[i].v_dir ,normal ,LightBlk.lights[i].vp * world_pos)));
+		    result *= (vec3(1-ShadowCalculation(i,LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
 		}
-		else 
+		else
 		{
-			result = vec3(0);
+		    result *= (vec3(1-ShadowCalculation(i,LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
 		}
 		light_accum += result;
 	}
@@ -233,11 +256,15 @@ void main()
 	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
 	//vec3 ambient = (kD * diffuse + specular) * ambient_o;
 	vec3 ambient = vec3(0.03);
-	//vec3 ambient = (kD * diffuse) * ambient_o;
+//	vec3 ambient = (kD * diffuse) * ambient_o;
 	
 	vec3 color = light_accum + ambient;
 	//color = color / (color + vec3(1.0));
 	//color = pow(color, vec3(1.0/2.2)); 
 	//out_color = vec4(vec3(PerCamera.inverse_view_transform*vec4(-LightBlk.lights[0].v_dir,0)).xyz,1);
+	//vec4 light_pos = LightBlk.lights[0].vp*world_pos;
+	//vec2 col = vec2(1);
+	//if(ShadowCoords(light_pos).x<1 &&ShadowCoords(light_pos).x >0&& ShadowCoords(light_pos).y>0 &&ShadowCoords(light_pos).y<1)
+	//	col = vec2(0);
 	out_color = vec4(color,1);
 }
