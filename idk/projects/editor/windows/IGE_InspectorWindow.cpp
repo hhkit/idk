@@ -91,7 +91,8 @@ namespace idk {
 			else
 			{
                 while (++depth_change <= 0)
-                    _curr_property_stack.pop_back();
+					if(!_curr_property_stack.empty())   //Hard fix for now? 
+						_curr_property_stack.pop_back();
                 _curr_property_stack.push_back(key);
                 _curr_property_path.clear();
                 for (const auto& prop : _curr_property_stack)
