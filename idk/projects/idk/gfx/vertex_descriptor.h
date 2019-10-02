@@ -10,27 +10,30 @@ namespace idk
 		ENUM(Attrib, int,
 			Position,
 			Normal,
-			Tangent,
 			UV,
+			Tangent,
+			Bitangent,
 			BoneID,
 			BoneWeight
 		)
 
 		enum Flags : int
 		{
-			Pos    = 1 << Attrib::Position,
-			Norm   = 1 << Attrib::Normal,
-			Tan    = 1 << Attrib::Tangent,
-			Uv     = 1 << Attrib::UV,
-			BoneId = 1 << Attrib::BoneID,
+			Pos		= 1 << Attrib::Position,
+			Norm	= 1 << Attrib::Normal,
+			Uv		= 1 << Attrib::UV,
+			Tan		= 1 << Attrib::Tangent,
+			Bitan	= 1 << Attrib::Bitangent,
+			BoneId	= 1 << Attrib::BoneID,
 			BoneWt  = 1 << Attrib::BoneWeight,
 		};
 
 		using NativeType = std::tuple<
 			vec3,  // Position
 			vec3,  // Normal
-			vec3,  // Tangent
 			vec2,  // UV
+			vec3,  // Tangent
+			vec3,  // Bitangent
 			ivec4, // ID
 			vec4   // Weight
 		>;

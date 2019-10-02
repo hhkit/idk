@@ -105,7 +105,8 @@ namespace idk
 				{
 					// If we have the parent, we push in the parent.global * child.local
 					const mat4& p_transform = _pre_global_transforms[parent_index];
-					_pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
+					const mat4& c_transform = curr_go->Transform()->LocalMatrix();
+					_pre_global_transforms[i] = p_transform * c_transform;
 				}
 				else
 				{

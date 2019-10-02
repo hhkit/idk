@@ -15,8 +15,9 @@ namespace idk::ogl
 	{
 		std::make_pair(vtx::Attrib::Position,   OpenGLType{ GL_FLOAT, 3}),
 		std::make_pair(vtx::Attrib::Normal,     OpenGLType{ GL_FLOAT, 3}),
-		std::make_pair(vtx::Attrib::Tangent,    OpenGLType{ GL_FLOAT, 3}),
 		std::make_pair(vtx::Attrib::UV,         OpenGLType{ GL_FLOAT, 2}),
+		std::make_pair(vtx::Attrib::Tangent,    OpenGLType{ GL_FLOAT, 3}),
+		std::make_pair(vtx::Attrib::Bitangent,    OpenGLType{ GL_FLOAT, 3}),
 		std::make_pair(vtx::Attrib::BoneID,     OpenGLType{ GL_INT,   4}),
 		std::make_pair(vtx::Attrib::BoneWeight, OpenGLType{ GL_FLOAT, 4}),
 	};
