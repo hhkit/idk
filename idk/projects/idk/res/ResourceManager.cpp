@@ -308,6 +308,7 @@ namespace idk
 			return FileMoveResult::Error_DestinationExists;
 
 		auto string_path = string{ new_path };
+		Core::GetSystem<FileSystem>().Rename(old_path.GetMountPath(), string_path);
 
 		auto bundle = std::move(itr->second);
 		for (auto& elem : bundle.bundle.GetAll())
@@ -321,7 +322,6 @@ namespace idk
 		_loaded_files.erase(itr);
 		_loaded_files.emplace(string_path, bundle);
 
-		Core::GetSystem<FileSystem>().Rename(old_path.GetMountPath(), string_path);
 
 		return FileMoveResult::Ok;
 	}

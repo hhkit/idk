@@ -8,12 +8,12 @@ namespace idk
 	Scene::Scene(uint8_t scene_id_)
 		: scene_id{ scene_id_ }
 	{
-		GameState::GetGameState().ActivateScene(scene_id_);
+	//	GameState::GetGameState().ActivateScene(scene_id_);
 	}
 
 	Scene::~Scene()
 	{
-		GameState::GetGameState().DeactivateScene(scene_id);
+	//	GameState::GetGameState().DeactivateScene(scene_id);
 	}
 
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)

@@ -12,6 +12,22 @@ namespace idk
 
 	RESOURCE_EXTENSION(Scene, ".ids")
 
+	enum class SceneLoadResult
+	{
+		Ok = 0,
+		Err_SceneAlreadyActive,
+		Err_SceneNotInProject,
+		Err_ScenePathNotFound
+	};
+	
+	enum class SceneUnloadResult
+	{
+		Ok = 0,
+		Err_SceneAlreadyActive,
+		Err_SceneNotInProject,
+		Err_ScenePathNotFound
+	};
+
 	class Scene 
 		: public Resource<Scene>
 		, public Saveable<Scene, false_type>
@@ -20,9 +36,13 @@ namespace idk
 		class iterator;
 		explicit Scene(uint8_t scene_id);
 		virtual ~Scene();
+
 		Handle<GameObject> CreateGameObject(const Handle<GameObject>&);
 		Handle<GameObject> CreateGameObject();
 		void               DestroyGameObject(const Handle<GameObject>&);
+
+		SceneLoadResult   Load();
+		SceneUnloadResult Unload();
 
 		iterator begin() const;
 		iterator end() const;
