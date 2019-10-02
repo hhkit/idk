@@ -385,7 +385,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
-    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab.idp").value()->Instantiate(*scene);
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
 
 
 

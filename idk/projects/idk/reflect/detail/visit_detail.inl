@@ -6,16 +6,14 @@ namespace idk::reflect::detail
 {
 
 	template<typename K, typename V, typename Visitor>
-	void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_visit_depth);
+	void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_depth);
 
 	template<typename Visitor>
-	void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_visit_depth)
+	void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_depth)
 	{
 		const table& table = type._context->table;
 		if (table.m_Count == 0)
 			return;
-
-		++depth;
 
 		// adapted from EnumRecursive in properties.h#820
 		for (size_t i = 0; i < table.m_Count; ++i)
@@ -31,10 +29,9 @@ namespace idk::reflect::detail
 					std::tuple<const detail::table&, void*> tup = FunctionGetSet(offsetted, 0).value();
 					auto name = std::get<0>(tup).m_pName;
 					void* value = std::get<1>(tup);
-                    auto type = get_type(name);
 					visit_key_value(std::move(table.m_pEntry[i].m_pName),
-									dynamic{ type, value },
-									std::forward<Visitor>(visitor), depth, last_visit_depth);
+									dynamic{ get_type(name), value },
+									std::forward<Visitor>(visitor), depth, last_depth);
 					// uhhh, this branch means you're at a structure not part of idk::ReflectedTypes
 					// it could also mean base class if you used REFLECT_PARENT
 				}
@@ -46,22 +43,18 @@ namespace idk::reflect::detail
 					void* offsetted = ::property::details::HandleBasePointer(obj, entry.m_Offset);
 					T& value = *reinterpret_cast<T*>(offsetted);
 
-					visit_key_value(std::move(table.m_pEntry[i].m_pName), value, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit_key_value(std::move(table.m_pEntry[i].m_pName), value, std::forward<Visitor>(visitor), depth, last_depth);
 				}
 
 			}, entry.m_FunctionTypeGetSet);
 		}
-
-		--depth;
 	}
 
 	template<typename Container, typename Visitor>
-	void visit_container(Container& container, Visitor&& visitor, int& depth, int& last_visit_depth)
+	void visit_container(Container& container, Visitor&& visitor, int& depth, int& last_depth)
 	{
 		if (container.size() == 0)
 			return;
-
-		++depth;
 
 		if constexpr (is_sequential_container_v<Container>)
 		{
@@ -69,7 +62,7 @@ namespace idk::reflect::detail
 			for (auto& elem : container)
 			{
 				// key should be rvalue, so move it
-				visit_key_value(std::move(i), elem, std::forward<Visitor>(visitor), depth, last_visit_depth);
+				visit_key_value(std::move(i), elem, std::forward<Visitor>(visitor), depth, last_depth);
 				++i;
 			}
 		}
@@ -80,21 +73,17 @@ namespace idk::reflect::detail
 			for (auto& elem : container)
 			{
 				if constexpr (is_template_v<std::decay_t<V>, std::pair>)
-					visit_key_value(elem.first, elem.second, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit_key_value(elem.first, elem.second, std::forward<Visitor>(visitor), depth, last_depth);
 				else
-					visit_key_value(elem, elem, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit_key_value(elem, elem, std::forward<Visitor>(visitor), depth, last_depth);
 			}
 		}
-
-		--depth;
 	}
 
 	template<typename Visitor, typename... Ts>
-	void visit_variant(variant<Ts...>& var, Visitor&& visitor, int& depth, int& last_visit_depth)
+	void visit_variant(variant<Ts...>& var, Visitor&& visitor, int& depth, int& last_depth)
 	{
-		++depth;
-
-#define VISIT_INDEX(I) case I: visit_key_value(get_type<std::variant_alternative_t<I, variant<Ts...>>>(), std::get<I>(var), std::forward<Visitor>(visitor), depth, last_visit_depth); break;
+#define VISIT_INDEX(I) case I: visit_key_value(get_type<std::variant_alternative_t<I, variant<Ts...>>>(), std::get<I>(var), std::forward<Visitor>(visitor), depth, last_depth); break;
 #define VARIANT_CASE(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VISIT_INDEX, __VA_ARGS__)) default: throw "Unhandled case?"; } }
 		VARIANT_CASE(1, 0)
 else VARIANT_CASE(1, 0)
@@ -110,13 +99,11 @@ else VARIANT_CASE(1, 0)
 			else throw "Unhandled case?";
 #undef VISIT_INDEX
 #undef VARIANT_CASE
-
-			--depth;
 	}
 
 	// where visitor is actually called
 	template<typename K, typename V, typename Visitor>
-	void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_visit_depth)
+	void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_depth)
 	{
 		constexpr static bool ValIsContainer =
 			(is_associative_container_v<V> || is_sequential_container_v<V>) && !std::is_same_v<std::decay_t<V>, string>;
@@ -125,35 +112,37 @@ else VARIANT_CASE(1, 0)
 		constexpr static bool ValIsDynamic =
 			std::is_same_v<std::decay_t<V>, dynamic>;
 
-		int depth_change = depth - last_visit_depth;
-		last_visit_depth = depth;
+		int depth_change = depth - last_depth;
+        last_depth = depth;
 
+        ++depth;
 		if constexpr (std::is_same_v<std::result_of_t<decltype(visitor)(K, V, int&)>, bool>) // does it return bool?
 		{
 			if (visitor(std::forward<K>(key), std::forward<V>(val), depth_change)) // if false, stop recursive
 			{
 				if constexpr (ValIsDynamic)
-					visit(val._ptr->get(), val.type, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit(val._ptr->get(), val.type, std::forward<Visitor>(visitor), depth, last_depth);
 				else if constexpr (ValIsContainer)
-					visit_container(val, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit_container(val, std::forward<Visitor>(visitor), depth, last_depth);
 				else if constexpr (ValIsVariant)
-					visit_variant(val, std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit_variant(val, std::forward<Visitor>(visitor), depth, last_depth);
 				else
-					visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth, last_visit_depth);
+					visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth, last_depth);
 			}
 		}
 		else // does not return bool, always stop recursive
 		{
 			visitor(std::forward<K>(key), std::forward<V>(val), depth_change);
 			if constexpr (ValIsDynamic)
-				visit(val._ptr->get(), val.type, std::forward<Visitor>(visitor), depth, last_visit_depth);
+				visit(val._ptr->get(), val.type, std::forward<Visitor>(visitor), depth, last_depth);
 			else if constexpr (ValIsContainer)
-				visit_container(val, std::forward<Visitor>(visitor), depth, last_visit_depth);
+				visit_container(val, std::forward<Visitor>(visitor), depth, last_depth);
 			else if constexpr (ValIsVariant)
-				visit_variant(val, std::forward<Visitor>(visitor), depth, last_visit_depth);
+				visit_variant(val, std::forward<Visitor>(visitor), depth, last_depth);
 			else
-				visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth, last_visit_depth);
+				visit(&val, get_type<decltype(val)>(), std::forward<Visitor>(visitor), depth, last_depth);
 		}
+        --depth;
 	}
 
 }

@@ -1,0 +1,32 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 1.000000, y: 2.000000, z: 3.000000}
+    rotation: 
+      w: 8.000000
+      x: 5.000000
+      y: 6.000000
+      z: 7.000000
+    scale: {x: 4.000000, y: 4.000000, z: 4.000000}
+  - !Name 
+    name: stoopidguy
+  - !MeshRenderer 
+    cast_shadows: 0
+    enabled: 1
+    mesh: {guid: 00000000-0000-0000-0000-000000000000}
+    receive_shadows: 1
+  parent_index: -1
+- components: 
+  - !Transform 
+    parent: {id: 65536}
+    position: {x: 9.000000, y: 10.000000, z: 11.000000}
+    rotation: 
+      w: 16.000000
+      x: 13.000000
+      y: 14.000000
+      z: 15.000000
+    scale: {x: 12.000000, y: 12.000000, z: 12.000000}
+  - !Name 
+    name: ""
+  parent_index: 0

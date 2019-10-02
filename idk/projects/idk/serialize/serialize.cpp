@@ -173,10 +173,10 @@ namespace idk
 			{
                 yaml::node node = serialize_yaml(reflect::dynamic{ arg });
                 if constexpr (std::is_arithmetic_v<K>)
-                    stack.push_back(&curr_node.emplace_back(node));
+                    curr_node.emplace_back(node);
                 else
-                    stack.push_back(&(curr_node[k] = node));
-				return true;
+                    curr_node[k] = node;
+				return false;
 			}
 		};
 
@@ -425,8 +425,7 @@ namespace idk
 				}
 				else if constexpr (is_template_v<T, std::variant>)
 				{
-					auto type = reflect::get_type(item_node.tag());
-					auto dyn = type.create();
+					auto dyn = reflect::get_type(item_node.tag()).create();
 					parse_yaml(item_node, dyn);
 					reflect::dynamic{ arg } = dyn;
 					return false;

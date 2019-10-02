@@ -642,12 +642,10 @@
     <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="anim\BoneComponent.h" />
     <ClInclude Include="PauseConfigurations.h" />
-    <ClInclude Include="ReflectRegistration.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="anim\Animator.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="ReflectRegistration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -463,6 +463,8 @@ namespace idk
 
 		helpers::propagate_added_component(prefab_inst.prefab, static_cast<int>(index),
                                            static_cast<int>(prefab_inst.prefab->data[index].components.size() - 1));
+
+        prefab_inst.prefab->Dirty();
 	}
 
     void PrefabUtility::ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index)
@@ -487,6 +489,7 @@ namespace idk
         }
 
         helpers::propagate_removed_component(prefab_inst.prefab, static_cast<int>(index), component_name, component_add_index);
+        prefab_inst.prefab->Dirty();
     }
 
 	static void _apply_property_override(PrefabInstance& prefab_inst, const PropertyOverride& override)
@@ -527,7 +530,7 @@ namespace idk
 				iter->property_path == override.property_path)
 			{
 				prefab_inst.overrides.erase(iter);
-				return;
+				break;
 			}
 		}
 
@@ -535,6 +538,7 @@ namespace idk
 			override.object_index,
 			prefab_inst.prefab->data[override.object_index].GetComponentIndex(override.component_name),
 			override.property_path);
+        prefab_inst.prefab->Dirty();
 	}
 
 	void PrefabUtility::ApplyPrefabInstance(Handle<GameObject> instance_root)
@@ -593,6 +597,7 @@ namespace idk
                                         override.property_path);
         }
         prefab_inst.overrides.clear();
+        prefab_inst.prefab->Dirty();
 	}
 
 }

@@ -36,6 +36,12 @@ namespace idk {
 		bool isComponentMarkedForDeletion = false;
 		string componentNameMarkedForDeletion{}; //Is empty by default
 
+        Handle<PrefabInstance> _prefab_inst;
+        int _prefab_curr_obj_index;
+        GenericHandle _prefab_curr_component;
+        vector<string> _curr_property_stack;
+        string _curr_property_path;
+
 		void displayVal(reflect::dynamic dyn);
 
 		void DisplayNameComponent(Handle<Name>& c_name);
