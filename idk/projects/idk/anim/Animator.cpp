@@ -79,6 +79,8 @@ namespace idk
 				auto& curr_bone = skeleton[i];
 				auto& curr_go = _child_objects[i];
 
+				if (!curr_go)
+					continue;
 				auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
@@ -100,18 +102,21 @@ namespace idk
 				auto& curr_bone = skeleton[i];
 				auto& curr_go = _child_objects[i];
 
+				if (!curr_go)
+					continue;
 				auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
 					// If we have the parent, we push in the parent.global * child.local
 					const mat4& p_transform = _pre_global_transforms[parent_index];
-					_pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
+					const mat4& c_transform = curr_go->Transform()->LocalMatrix();
+					_pre_global_transforms[i] = p_transform * c_transform;
 				}
 				else
 				{
 					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
-
+				auto test = decompose(_pre_global_transforms[i]);
 				_final_bone_transforms[i] = _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 			}
 		}

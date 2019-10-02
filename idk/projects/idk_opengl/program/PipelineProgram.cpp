@@ -53,7 +53,7 @@ namespace idk::ogl
 		}), _programs.end());
 
 		_programs.emplace_back(gen_program);
-		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID()); 
+		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID());
 		DebugPipeline(_pipeline);
 
 	}
@@ -99,7 +99,7 @@ namespace idk::ogl
 	}
 
 	PipelineProgram::PipelineProgram(PipelineProgram&& rhs) noexcept
-		: _pipeline{rhs._pipeline}, _programs{std::move(rhs._programs)}
+		: _pipeline{ rhs._pipeline }, _programs{ std::move(rhs._programs) }
 	{
 		rhs._pipeline = 0;
 	}

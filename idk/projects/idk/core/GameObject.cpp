@@ -63,8 +63,16 @@ namespace idk
 
 	bool GameObject::HierarchyIsQueuedForDestruction() const
 	{
+		return IsQueuedForDestruction() || ParentIsQueuedForDestruction();
+	}
+
+	bool GameObject::ParentIsQueuedForDestruction() const
+	{
 		auto parent = Parent();
-		return parent ? IsQueuedForDestruction() || parent->HierarchyIsQueuedForDestruction() : IsQueuedForDestruction();
+		if (parent)
+			return parent->HierarchyIsQueuedForDestruction();
+		else
+			return false;
 	}
 
 	string_view GameObject::Name() const

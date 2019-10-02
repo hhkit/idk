@@ -25,16 +25,18 @@
 
 namespace idk::fbx_loader_detail
 {
-	static vec3 FBX_SCALE = vec3{ 1.0f/100, 1.0f / 100, 1.0f / 100 };
-	//static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
+	// static vec3 FBX_SCALE = vec3{ 1.0f/100, 1.0f / 100, 1.0f / 100 };
+	static vec3 FBX_SCALE = vec3{ 1.0f, 1.0f, 1.0f };
 	struct Vertex
 	{
 		vec3	pos;
 		vec3	normal;
 		vec2	uv;
+		vec3	tangent;
+		vec3	bi_tangent;
 		ivec4	bone_ids;
 		vec4	bone_weights;
-
+		
 		void addBoneData(int id, float weight);
 	};
 
@@ -75,10 +77,12 @@ namespace idk::fbx_loader_detail
 
 	enum AI_NODE_TYPE
 	{
-		ROOT = 1 << 0,
-		MESH = 1 << 1,
-		BONE = 1 << 2,
-		VIRTUAL = 1 << 3,
+		ROOT		= 1 << 0,
+		MESH		= 1 << 1,
+		BONE_ROOT	= 1 << 2,
+		BONE		= 1 << 3,
+		BONE_PIVOT	= 1 << 4,
+		VIRTUAL		= 1 << 5,
 
 		NONE = 0
 	};
@@ -87,11 +91,17 @@ namespace idk::fbx_loader_detail
 	{
 		string _name;
 		mat4 _node_transform;
+		aiMatrix4x4 _assimp_node_transform;
+
 		mat4 _global_inverse_bind_pose;
+		
+		bool _has_bone_pivot = false;
+		quat _bone_pivot;
 
 		AI_NODE_TYPE _ai_type = NONE;
-
-		vector<AssimpNode> _children;
+		
+		int _parent = -1;
+		vector<int> _children;
 	};
 
 	using BoneSet = hash_set<BoneData, NameHash<BoneData>, NameEq<BoneData>>;
@@ -104,16 +114,17 @@ namespace idk::fbx_loader_detail
 	quat initQuat(const aiQuaternion& vec);
 
 	// Parse the whole assimp node graph into our own format
-	void generateNodeGraph(const aiNode* ai_root_node, AssimpNode& root_node, const BoneSet& bone_set);
+	void generateNodeGraph(const aiNode* ai_root_node, vector<AssimpNode>& assimp_node_vec, const BoneSet& bone_set);
 
 	// Helper function for initializing bone data
 	void normalizeMeshEntries(vector<Vertex>& vertices, const mat4& matrix);
 	void initOpenGLBuffers(idk::ogl::OpenGLMesh& mesh, const vector<Vertex>& vertices, const vector<unsigned>& indices);
 
 	// Helper functions for bone data
-	void initBoneHierarchy(const AssimpNode& root_node, hash_table<string, size_t>& bones_table, vector<anim::Bone>& bones_out, const mat4& normalize = mat4{});
-	void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices);
+	void initBoneHierarchy(const vector<AssimpNode>& root_node, hash_table<string, size_t>& bones_table, vector<anim::Bone>& bones_out, const mat4& normalize = mat4{});
 
 	// Helper functions for animation nodes
-	void initAnimNodes(const AssimpNode& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
+	void initAnimNodes(const vector<AssimpNode>& root_node, const aiAnimation* ai_anim, anim::Animation& anim_clip);
+
+	void addBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out);
 }

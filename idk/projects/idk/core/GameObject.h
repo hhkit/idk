@@ -43,6 +43,7 @@ namespace idk
 		Handle<class Transform> Transform() const;
 		Handle<class GameObject> Parent() const;
 		bool HierarchyIsQueuedForDestruction() const;
+		bool ParentIsQueuedForDestruction() const;
 		string_view Name() const;
 		void Name(string_view name);
 		

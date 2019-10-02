@@ -45,6 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -52,6 +53,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -225,7 +227,7 @@
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
-    <ClCompile Include="windows\IDE_ShadowMapWindow.cpp" />
+    <ClCompile Include="windows\IGE_ShadowMapWindow.cpp" />
     <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
     <ClCompile Include="windows\IGE_IWindow.cpp" />

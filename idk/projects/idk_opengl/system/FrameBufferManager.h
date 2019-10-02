@@ -25,6 +25,7 @@ namespace idk::ogl
 		void ResetFramebuffer();
 	private:
 		GLuint _fbo_id = 0;
+		//GLuint _rbo_id = 0;
 
 		void CheckFBStatus();
 	};

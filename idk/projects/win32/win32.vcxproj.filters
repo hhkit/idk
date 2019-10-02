@@ -5,10 +5,12 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="WindowsApplication.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="XInputSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="WindowsApplication.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="XInputSystem.cpp" />
   </ItemGroup>
 </Project>

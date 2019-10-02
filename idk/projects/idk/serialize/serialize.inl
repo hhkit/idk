@@ -22,7 +22,7 @@ namespace idk
         if constexpr (std::is_same_v<std::decay_t<T>, int>)
             obj = std::stoi(str);
         else if constexpr (std::is_same_v<std::decay_t<T>, bool>)
-            obj = str == "true";
+            obj = str != "0" && str != "false";
         else if constexpr (std::is_same_v<std::decay_t<T>, char>)
             obj = static_cast<char>(std::stoi(str));
 		else if constexpr (std::is_same_v<std::decay_t<T>, unsigned char>)

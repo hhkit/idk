@@ -30,7 +30,7 @@ namespace idk
 		,	class Animator
 
 		/// SCRIPTING
-		//,	class MonoBehavior
+		,	class MonoBehavior
 
 		/// AUDIO
 		,	class AudioSource
@@ -44,7 +44,8 @@ namespace idk
 		class Application
 		,	class FileSystem
 		//,	class InputSystem
-		//,	class ScriptSystem
+		,	class GamepadSystem
+		,	class ScriptSystem
 		,	class PhysicsSystem
 		,	class GraphicsSystem
 		,   class DebugRenderer
