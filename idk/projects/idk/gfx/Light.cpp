@@ -9,7 +9,7 @@ namespace idk
 	struct LightCameraView
 	{
 		const Light* light;
-		mat4 operator()(SpotLight )
+		mat4 operator()(const SpotLight& )
 		{
 			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
 			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
@@ -37,7 +37,7 @@ namespace idk
 
 			return retval.inverse();
 		}
-		mat4 operator()(DirectionalLight)
+		mat4 operator()(const DirectionalLight&)
 		{
 			const vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
 			const vec3 v_dir = light->GetGameObject()->Transform()->Forward();
@@ -52,9 +52,9 @@ namespace idk
 		{
 			return perspective(spotlight.outer_angle, 1.0f, 0.1f, (spotlight.use_inv_sq_atten) ? (1 / spotlight.attenuation_radius) : spotlight.attenuation_radius);;//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
-		mat4 operator()(DirectionalLight dirLight)
+		mat4 operator()(const DirectionalLight& dirLight)
 		{
-			return ortho(-10.f, 10.f, -10.f, 10.f, 0.1f, 10.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+			return ortho(-dirLight.width, dirLight.width, -dirLight.height, dirLight.height, 0.1f, 100.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }

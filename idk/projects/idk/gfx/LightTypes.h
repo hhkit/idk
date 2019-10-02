@@ -37,6 +37,8 @@ namespace idk
 	{
 		real  intensity     { .5f  };
 		color light_color   { 1.f  };
+		real  width         { 5.0f };
+		real  height        { 5.0f };
 
 		RscHandle<RenderTarget> light_map;
 		RscHandle<RenderTarget> InitShadowMap();

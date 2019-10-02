@@ -10,16 +10,16 @@ namespace idk
 {
 	struct LightData
 	{
-		alignas(16) int   index       = 0;
+		int   index       = 0;
 		alignas(16) color light_color = color{1, 1, 1};
 		alignas(16) vec3  v_pos       = vec3{};
 		alignas(16) vec3  v_dir       = vec3{};
 		real  cos_inner = 0;
 		real  cos_outer = 1;
 		real  falloff     = 1;
-		mat4  vp{};
-		mat4  v{};
-		mat4  p{};
+		alignas(16) mat4  vp{};
+		alignas(16) mat4  v{};
+		alignas(16) mat4  p{};
 		RscHandle<RenderTarget> light_map;
 	};
 

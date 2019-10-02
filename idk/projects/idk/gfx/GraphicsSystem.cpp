@@ -83,30 +83,6 @@ namespace idk
 		SubmitBuffers(std::move(result));
 	}
 
-	CameraData GraphicsSystem::GetLightCameraData(const Light& light)
-	{
-
-		return CameraData();
-	}
-
-	LightData GraphicsSystem::GetLightData(const Light& light)
-	{
-		return LightData();
-	}
-
-	RscHandle<RenderTarget> GraphicsSystem::GetShadowMap(const Light&)
-	{
-		return RscHandle<RenderTarget>();
-	}
-
-	void GraphicsSystem::ResetPool()
-	{
-		for (auto& index : shadow_map_pool_index)
-		{
-			index.second = 0;
-		}
-	}
-
 	void GraphicsSystem::SwapWritingBuffer()
 	{
 		//write_buffer_dirty = true;
@@ -139,18 +115,18 @@ namespace idk
 	//	shadow_map = pool[next_index++];
 	//}
 
-	CameraData GraphicsSystem::TempLight::GenerateCameraData()
-	{
-		auto data =light.GenerateCameraData();
-		data.render_target = shadow_map;
-		return data;
-	}
-
-	LightData GraphicsSystem::TempLight::GenerateLightData()
-	{
-		auto data = light.GenerateLightData();
-		data.light_map = shadow_map;
-		return data;
-	}
+	//CameraData GraphicsSystem::TempLight::GenerateCameraData()
+	//{
+	//	auto data =light.GenerateCameraData();
+	//	data.render_target = shadow_map;
+	//	return data;
+	//}
+	//
+	//LightData GraphicsSystem::TempLight::GenerateLightData()
+	//{
+	//	auto data = light.GenerateLightData();
+	//	data.light_map = shadow_map;
+	//	return data;
+	//}
 
 }

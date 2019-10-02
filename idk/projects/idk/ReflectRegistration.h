@@ -270,7 +270,7 @@ REFLECT_VARS(intensity, light_color, attenuation_radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
-REFLECT_VARS(intensity, light_color)
+REFLECT_VARS(intensity, light_color, width,height)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SpotLight, "SpotLight")
