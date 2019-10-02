@@ -12,6 +12,9 @@ namespace idk
         // for simplicity's sake only prefab roots have PrefabInstance component attached.
         static Handle<GameObject> Instantiate(RscHandle<Prefab> prefab, Scene& scene);
 
+        // create prefab from given game object, does not save it.
+        static RscHandle<Prefab> Create(Handle<GameObject> go);
+
         // save given game object into a prefab, writes into save_path.
         static RscHandle<Prefab> Save(Handle<GameObject> go, string_view save_path);
 
