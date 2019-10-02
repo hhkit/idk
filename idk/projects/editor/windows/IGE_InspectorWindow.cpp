@@ -492,6 +492,11 @@ namespace idk {
         {
             PrefabUtility::ApplyPrefabInstance(c_prefab->GetGameObject());
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Revert"))
+        {
+            PrefabUtility::RevertPrefabInstance(c_prefab->GetGameObject());
+        }
     }
 
 	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)

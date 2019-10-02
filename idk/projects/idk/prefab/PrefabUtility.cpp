@@ -195,9 +195,9 @@ namespace idk
             child_handle->Transform()->parent = game_objects[iter->parent_index];
         }
 
-        auto prefab_inst = handle->AddComponent<PrefabInstance>();
-        prefab_inst->prefab = prefab;
-        prefab_inst->objects = game_objects;
+        auto& prefab_inst = *handle->AddComponent<PrefabInstance>();
+        prefab_inst.prefab = prefab;
+        prefab_inst.objects = game_objects;
 
         return handle;
     }
@@ -355,14 +355,14 @@ namespace idk
     {
         auto instance_root = GetPrefabInstanceRoot(target);
         assert(instance_root);
-        auto prefab_inst = instance_root->GetComponent<PrefabInstance>();
+        auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
 
-        auto iter = std::find(prefab_inst->objects.begin(), prefab_inst->objects.end(), target);
-        if (iter == prefab_inst->objects.end())
+        auto iter = std::find(prefab_inst.objects.begin(), prefab_inst.objects.end(), target);
+        if (iter == prefab_inst.objects.end())
             return;
 
         PropertyOverride override;
-        override.object_index = static_cast<int>(iter - prefab_inst->objects.begin());
+        override.object_index = static_cast<int>(iter - prefab_inst.objects.begin());
         override.component_name = (*component).type.name();
         override.property_path = property_path;
 
@@ -372,7 +372,7 @@ namespace idk
         // check if there is already such an override
         // or if there is already an override of the property's parent
         // ie. scale when the property_path passed in is scale/x
-        for (auto& ov : prefab_inst->overrides)
+        for (auto& ov : prefab_inst.overrides)
         {
             if (ov.object_index == override.object_index && ov.component_name == override.component_name)
             {
@@ -397,7 +397,7 @@ namespace idk
             }
         }
 
-        prefab_inst->overrides.push_back(override);
+        prefab_inst.overrides.push_back(override);
     }
 
     static void _revert_property_override(PrefabInstance& prefab_inst, const PropertyOverride& override)
@@ -445,7 +445,7 @@ namespace idk
     void PrefabUtility::RevertPrefabInstance(Handle<GameObject> instance_root)
     {
         assert(instance_root->HasComponent<PrefabInstance>());
-        auto prefab_inst = *instance_root->GetComponent<PrefabInstance>();
+        auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
 
         for (auto& override : prefab_inst.overrides)
             _revert_property_override(prefab_inst, override);
