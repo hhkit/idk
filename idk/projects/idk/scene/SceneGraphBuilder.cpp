@@ -14,9 +14,9 @@ namespace idk
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
 			[](const auto& lhs, const auto& rhs)
 			{
-				return lhs.Transform()->Depth() == rhs.Transform()->Depth() ? 
-					 lhs.GetHandle().id < rhs.GetHandle().id
-					:lhs.Transform()->Depth() < rhs.Transform()->Depth();
+				return lhs.Transform()->Depth() == rhs.Transform()->Depth()
+					?  lhs.GetHandle().id < rhs.GetHandle().id
+					:  lhs.Transform()->Depth() < rhs.Transform()->Depth();
 			}
 		);
 
@@ -26,13 +26,8 @@ namespace idk
 		for (auto& elem : objs)
 		{
 			auto key = elem.GetHandle();
-			auto parent = elem.Parent();
-			if (elem.HierarchyIsQueuedForDestruction())
-			{
-				GameState::GetGameState().DestroyObject(elem.GetHandle());
-				continue;
-			}
-
+			const auto parent = elem.Parent();
+			assert(key);
 			if (parent)
 			{
 				auto& sg = sg_lookup[parent]->emplace_child(key);

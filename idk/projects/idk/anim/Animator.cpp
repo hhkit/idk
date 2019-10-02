@@ -79,6 +79,8 @@ namespace idk
 				auto& curr_bone = skeleton[i];
 				auto& curr_go = _child_objects[i];
 
+				if (!curr_go)
+					continue;
 				auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
@@ -100,6 +102,8 @@ namespace idk
 				auto& curr_bone = skeleton[i];
 				auto& curr_go = _child_objects[i];
 
+				if (!curr_go)
+					continue;
 				auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{

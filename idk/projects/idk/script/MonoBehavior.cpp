@@ -3,9 +3,26 @@
 
 namespace idk
 {
-	const std::string& MonoBehavior::RescueMonoObject()
+	//const std::string& MonoBehavior::RescueMonoObject()
+	//{
+	//	// TODO: insert return statement here
+	//}
+
+	MonoBehavior::MonoBehavior()
 	{
-		// TODO: insert return statement here
+	}
+
+	MonoBehavior::MonoBehavior(MonoBehavior&& rhs)
+	{
+	}
+
+	MonoBehavior& MonoBehavior::operator=(MonoBehavior&& rhs)
+	{
+		return *this;;
+	}
+
+	MonoBehavior::~MonoBehavior()
+	{
 	}
 
 }

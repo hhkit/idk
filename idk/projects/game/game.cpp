@@ -382,6 +382,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducemetoo->AddComponent<RigidBody>();
 		seducemetoo->AddComponent<Collider>()->shape = box{};
 	}
+
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

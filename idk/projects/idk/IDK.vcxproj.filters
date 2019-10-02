@@ -947,6 +947,7 @@
       <Filter>anim</Filter>
     </ClCompile>
     <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\ScriptSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

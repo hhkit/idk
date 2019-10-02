@@ -10,7 +10,7 @@ namespace idk
 		: public Component<MonoBehavior>
 	{
 		friend class MonoSystem;
-		//MonoObject* _obj = nullptr; // c# object
+		MonoObject* _obj = nullptr; // c# object
 		MonoBehaviorData* _data = nullptr;
 		hash_table<string, MonoMethod*> _methods;
 		string _type;
@@ -20,7 +20,7 @@ namespace idk
 	public:
 		MonoBehavior();
 		MonoBehavior(MonoBehavior&& rhs);
-		MonoBehavior&& operator=(MonoBehavior&& rhs);
+		MonoBehavior& operator=(MonoBehavior&& rhs);
 		~MonoBehavior();
 
 		const std::string& RescueMonoObject();

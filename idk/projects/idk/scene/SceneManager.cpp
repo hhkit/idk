@@ -1,10 +1,14 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include <core/Core.h>
+#include <core/GameObject.h>
+#include <common/Transform.h>
 #include <res/MetaBundle.h>
 #include <scene/SceneFactory.h>
 #include <serialize/serialize.h>
 #include <util/ioutils.h>
+
+#include <iostream>
 
 namespace idk
 {
@@ -125,8 +129,24 @@ namespace idk
 		return true;
 	}
 
-	void SceneManager::DestroyObjects()
+	void SceneManager::DestroyObjects(span<GameObject> objs)
 	{
+		GameState::GetGameState().SortObjectsOfType<GameObject>(
+			[](const auto& lhs, const auto& rhs)
+			{
+				return lhs.Transform()->Depth() == rhs.Transform()->Depth()
+					? lhs.GetHandle().id < rhs.GetHandle().id
+					: lhs.Transform()->Depth() < rhs.Transform()->Depth();
+			}
+		);
+		for (auto& elem : objs)
+			std::cout << elem.Transform()->Depth() << ": " << elem.Name() << '\n';
+		std::cout << '\n';
+		for (auto& elem : objs)
+		{
+			if (elem.HierarchyIsQueuedForDestruction())
+				GameState::GetGameState().DestroyObject(elem.GetHandle());
+		}
 		GameState::GetGameState().DestroyQueue();
 	}
 

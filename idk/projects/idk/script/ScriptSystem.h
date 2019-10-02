@@ -2,12 +2,15 @@
 #include <idk.h>
 
 #include <deque>
+#include <mono/jit/jit.h>
 
 #include <core/ISystem.h>
-#include <mono/jit/jit.h>
+#include <script/MonoBehaviorData.h>
 
 namespace idk
 {
+	class MonoBehavior;
+
 	class ScriptSystem
 		: public ISystem
 	{
@@ -18,8 +21,8 @@ namespace idk
 		MonoAssembly* script_assembly = nullptr;
 		MonoAssembly* lib_assembly = nullptr;
 
-		hash_table<std::string, MonoBehaviorData> mono_behaviors;
-		hash_table<std::string, std::deque<MonoBehavior*>> behavior_handles;
+		hash_table<string, MonoBehaviorData> mono_behaviors;
+		hash_table<string, std::deque<MonoBehavior*>> behavior_handles;
 
 		void RegisterMonoBehavior(MonoBehavior*);
 		void DeregisterMonoBehavior(MonoBehavior*);
@@ -32,9 +35,6 @@ namespace idk
 		bool ImplementsInterface(MonoClass*, std::string_view);
 	public:
 		string path_to_game_dll = "";
-
-		void Init() override;
-		void Shutdown() override;
 
 		void ScriptAwaken(span<MonoBehavior>);
 		void ScriptUpdate(span<MonoBehavior>);

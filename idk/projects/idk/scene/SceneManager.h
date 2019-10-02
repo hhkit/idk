@@ -50,7 +50,7 @@ namespace idk
 		RscHandle<Scene> GetActiveScene();
 		bool  SetActiveScene(RscHandle<Scene> s);
 
-		void DestroyObjects();
+		void DestroyObjects(span<GameObject> objs);
 
 		void BuildSceneGraph(span<const GameObject> objs);
 		SceneGraph& FetchSceneGraph();

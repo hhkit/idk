@@ -60,8 +60,8 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&FileSystem::Update,                 "Check for file changes");
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&AudioSystem::Update,                "Update listeners and sources");
 		_scheduler->SchedulePass      <UpdatePhase::Update>(&AnimationSystem::Update,            "Animate animators");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::BuildSceneGraph,      "Build scene graph");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::DestroyObjects,       "Destroy Objects");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::BuildSceneGraph,      "Build scene graph");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed> (&TestSystem::TestSpan,               "Test system until scripts are up");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed> (&PhysicsSystem::PhysicsTick,         "Physics Update")
 			.IfPausedThen(&PhysicsSystem::DebugDrawColliders);
@@ -71,6 +71,7 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::WatchDirectory,    "Watch files");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate,              "Editor Update");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::DestroyObjects,       "Destroy Objects Again");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::BuildSceneGraph,      "Build scene graph");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyFiles,    "Save dirty files");
 		}

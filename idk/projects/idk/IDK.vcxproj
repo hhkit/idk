@@ -272,6 +272,7 @@
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\ScriptSystem.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
