@@ -13,13 +13,14 @@ namespace idk
 		{
 			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
 			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
+			return invert_rotation(look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 }));
 		}
 		mat4 operator()(DirectionalLight)
 		{
 			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
 			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 });
+			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
+			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, -v_dir.z), vec3{ 0,1,0 });
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
@@ -32,7 +33,7 @@ namespace idk
 		}
 		mat4 operator()(DirectionalLight dirLight)
 		{
-			return ortho(-10.f, 10.f, -10.f, 10.f, 0.1f, 10.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+			return ortho(-10.f, 10.f, -10.f, 10.f,-10.f, 10.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }

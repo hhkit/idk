@@ -27,6 +27,7 @@ namespace idk
 		void Init() override = 0;
 		void Shutdown() override = 0;
 		
+		//struct RenderBuffer;
 
 		//Converts the Renderers and transforms stores the render data into a buffer
 		virtual void BufferGraphicsState(
@@ -40,6 +41,8 @@ namespace idk
 		virtual void RenderRenderBuffer() = 0;
 		virtual void SwapBuffer() = 0;
 		void BufferedLightData(vector<LightData>& out);
+		void RenderObjData(vector<RenderObject>& out);
+		void AnimatedRenderObjData(vector<AnimatedRenderObject>& out);
 		virtual GraphicsAPI GetAPI() = 0;
 
 		bool editorExist{false};

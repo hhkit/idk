@@ -149,7 +149,7 @@ namespace idk::ogl
 			{
 				std::cout << "Program link succeeded!\n";
 				
-				if (0)
+				//if (0)
 				{
 					GLint uniform_count;
 					glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
