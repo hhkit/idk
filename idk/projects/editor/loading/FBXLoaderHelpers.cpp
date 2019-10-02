@@ -449,6 +449,39 @@ namespace idk::fbx_loader_detail
 		anim_clip.SetName(ai_anim->mName.data);
 	}
 
+	void addBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out)
+	{
+		for (unsigned i = 0; i < 4; i++)
+		{
+			if (weights_out[i] == 0.0)
+			{
+				ids_out[i] = id_in;
+				weights_out[i] = weight_in;
+				return;
+			}
+		}
+		// Need to get the bone with the lowest weight and replace it with this one
+		unsigned min_index = 0;
+		for (unsigned i = 1; i < 4; i++)
+		{
+			if (weights_out[i] < weights_out[min_index])
+			{
+				min_index = i;
+			}
+		}
+
+		if (weight_in > weights_out[min_index])
+		{
+			ids_out[min_index] = id_in;
+			weights_out[min_index] = weight_in;
+		}
+
+		// Normalize all weights
+		auto sum_weights = weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3];
+		weights_out /= sum_weights;
+		assert(abs(1.0f - (weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3])) < epsilon);
+	}
+
 	void Vertex::addBoneData(int id, float weight)
 	{
 		for (unsigned i = 0; i < 4; i++)
