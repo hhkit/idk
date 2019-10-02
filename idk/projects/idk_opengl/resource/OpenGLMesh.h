@@ -17,23 +17,23 @@ namespace idk::ogl
 		struct MeshEntry
 		{
 			MeshEntry() = default;
-			
+
 			MeshEntry(unsigned base_v, unsigned base_i, unsigned num_i, unsigned text_index);
-			
+
 			unsigned _base_vertex = 0;
 			unsigned _base_index = 0;
 			unsigned _num_index = 0;
 			unsigned _texture_index = 0;
 		};
 
-		OpenGLMesh()						= default;
+		OpenGLMesh() = default;
 		OpenGLMesh(OpenGLMesh&&);
 		OpenGLMesh& operator=(OpenGLMesh&&);
 
 		OpenGLMesh(const vector<MeshEntry>& entries);
-		
-		OpenGLMesh(const OpenGLMesh&)				= delete;
-		OpenGLMesh& operator=(const OpenGLMesh&)	= delete;
+
+		OpenGLMesh(const OpenGLMesh&) = delete;
+		OpenGLMesh& operator=(const OpenGLMesh&) = delete;
 
 		GLenum GetDrawMode() const;
 		void   SetDrawMode(GLenum);
@@ -41,6 +41,9 @@ namespace idk::ogl
 
 		void   Bind(const renderer_reqs& locations);
 		void   Draw();
+		void   BindAndDraw(const renderer_reqs& locations);
+		template<typename T>
+		void   BindAndDraw() { BindAndDraw(T::GetRequiredAttributes()); }
 		void   Reset();
 
 

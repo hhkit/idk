@@ -63,6 +63,27 @@ namespace idk::ogl
 		brdf_texture->Size(ivec2{ 512 });
 	}
 
+	struct MaterialVisitor
+	{
+		PipelineProgram& pipeline;
+		GLuint& texture_units;
+		string_view uniform_id;
+
+		template<typename T> auto operator()(const T& elem) const
+		{
+			if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+			{
+				auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+				texture->BindToUnit(texture_units);
+				pipeline.SetUniform(uniform_id, texture_units);
+
+				++texture_units;
+			}
+			else
+				pipeline.SetUniform(uniform_id, elem);
+		}
+	};
+
 
 	void OpenGLState::RenderDrawBuffer()
 	{

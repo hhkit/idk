@@ -229,7 +229,9 @@ void main()
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
-	vec4 world_pos = PerCamera.inverse_view_transform*vec4(view_pos,1);
+	vec4 world_pos = 
+		PerCamera.inverse_view_transform *
+		vec4(view_pos,1);
 	
 	mat4 vvvp;
 	
@@ -251,6 +253,7 @@ void main()
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
+	
 	
 	vec3 irradiance = texture(irradiance_probe, normal).rgb;
 	vec3 diffuse = irradiance * albedo;

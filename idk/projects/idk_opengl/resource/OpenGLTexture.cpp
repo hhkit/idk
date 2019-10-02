@@ -97,10 +97,10 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_2D, _id);
 	}
 
-	void OpenGLTexture::Buffer(void* data, ivec2 size, InputChannels format)
+	void OpenGLTexture::Buffer(void* data, ivec2 size, InputChannels format, ColorFormat internalFormat)
 	{
 		_size = size;
-		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(meta.internal_format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
+		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(internalFormat), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
 		glGenerateMipmap(GL_TEXTURE_2D);
 		// TODO: fix internal format
 		GL_CHECK();
@@ -122,7 +122,7 @@ namespace idk::ogl
 	{
 		UpdateUV(tex_meta.uv_mode);
 		UpdateFilter(tex_meta.filter_mode);
-		Buffer(nullptr, Size(),tex_meta.format);
+		Buffer(nullptr, Size(),tex_meta.format,tex_meta.internal_format);
 	}
 	void OpenGLTexture::UpdateUV(UVMode uv_mode)
 	{

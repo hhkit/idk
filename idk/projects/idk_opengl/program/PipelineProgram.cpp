@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "PipelineProgram.h"
 #include <idk_opengl/program/Program.h>
+#include <idk_opengl/resource/OpenGLTexture.h>
+#include <idk_opengl/resource/OpenGLCubemap.h>
 #include <iostream>
 
 namespace idk::ogl
@@ -51,7 +53,7 @@ namespace idk::ogl
 		}), _programs.end());
 
 		_programs.emplace_back(gen_program);
-		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID()); 
+		glUseProgramStages(_pipeline, program.ShaderFlags(), program.ID());
 		DebugPipeline(_pipeline);
 
 	}
@@ -84,8 +86,20 @@ namespace idk::ogl
 		glBindProgramPipeline(_pipeline);
 	}
 
+	bool PipelineProgram::SetUniform(std::string_view uniform, const RscHandle<OpenGLTexture>& texture, GLuint texture_unit)
+	{
+		texture->BindToUnit(texture_unit);
+		return SetUniform(uniform, texture_unit);
+	}
+
+	bool PipelineProgram::SetUniform(std::string_view uniform, const RscHandle<OpenGLCubemap>& texture, GLuint texture_unit)
+	{
+		texture->BindToUnit(texture_unit);
+		return SetUniform(uniform, texture_unit);
+	}
+
 	PipelineProgram::PipelineProgram(PipelineProgram&& rhs) noexcept
-		: _pipeline{rhs._pipeline}, _programs{std::move(rhs._programs)}
+		: _pipeline{ rhs._pipeline }, _programs{ std::move(rhs._programs) }
 	{
 		rhs._pipeline = 0;
 	}
