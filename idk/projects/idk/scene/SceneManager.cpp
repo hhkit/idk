@@ -12,38 +12,6 @@
 
 namespace idk
 {
-	SceneManager::SceneActivateResult SceneManager::ActivateScene(RscHandle<class Scene> activateme)
-	{
-		if (activateme)
-			return SceneActivateResult::Err_SceneAlreadyActive;
-
-		for (auto& elem : _scenes)
-		{
-			if (elem.scene == activateme)
-			{
-				
-				auto paths = Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext);
-				for (auto& path : paths)
-				{
-					auto meta_file = PathHandle(string{ path.GetMountPath() } +".meta");
-					auto meta_stream = meta_file.Open(FS_PERMISSIONS::READ);
-					auto meta = parse_text<MetaBundle>(stringify(meta_stream));
-
-					if (meta.metadatas[0].guid == activateme.guid)
-					{
-						auto scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(activateme.guid, elem.build_index);
-						auto file_stream = path.Open(FS_PERMISSIONS::READ);
-						parse_text(stringify(file_stream), *scene);
-						return SceneActivateResult::Ok;
-					}
-				}
-				
-				return SceneActivateResult::Err_ScenePathNotFound;
-			}
-		}
-		return SceneActivateResult::Err_SceneNotInProject;
-	}
-
 	RscHandle<Scene> SceneManager::StartupScene() const
 	{
 		return _startup_scene;
@@ -115,7 +83,16 @@ namespace idk
 
 	void SceneManager::Init()
 	{
-		Core::GetSystem<ResourceManager>().RegisterFactory<SceneFactory>();
+		Core::GetResourceManager().RegisterFactory<SceneFactory>();
+		Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
+	}
+
+	void SceneManager::LateInit()
+	{
+		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
+			Core::GetResourceManager().Load(elem);
+		if (_active_scene)
+			_active_scene->Load();
 	}
 
 	RscHandle<Scene> SceneManager::GetActiveScene()

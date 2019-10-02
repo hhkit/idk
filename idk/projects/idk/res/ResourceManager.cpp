@@ -65,6 +65,26 @@ namespace idk
 				};
 			}
 
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> CreateNewResourceVectors()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						resource_man->_new_resources[BaseResourceID<Rs>] = std::make_shared<vector<RscHandle<Rs>>>();
+					}...
+				};
+			}
+
+			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> DumpNewResourceVectors()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
+					[]([[maybe_unused]] ResourceManager* resource_man)
+					{
+						resource_man->GetNewVector<Rs>().clear();
+					}...
+				};
+			}
+
 			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
@@ -105,8 +125,11 @@ namespace idk
 	void ResourceManager::Init()
 	{
 		constexpr static auto saveable_table = detail::ResourceHelper::CreateSaveableLoaders();
-
 		for (auto& func : saveable_table)
+			func(this);
+
+		constexpr static auto new_vector_table = detail::ResourceHelper::CreateNewResourceVectors();
+		for (auto& func : new_vector_table)
 			func(this);
 
 		instance = this;
@@ -128,6 +151,9 @@ namespace idk
 			func(this);
 		for (auto& func : defaults_table)
 			func(this);
+
+		//for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::FILE))
+		//	Load(elem);
 	}
 
 	void ResourceManager::Shutdown()
@@ -157,6 +183,14 @@ namespace idk
 			return nullptr;
 
 		return itr->second.get();
+	}
+
+	void ResourceManager::EmptyNewResources()
+	{
+		static constexpr auto dump_new_table = detail::ResourceHelper::DumpNewResourceVectors();
+
+		for (auto& fn : dump_new_table)
+			fn(this);
 	}
 
 	void ResourceManager::SaveDirtyFiles()
@@ -254,8 +288,14 @@ namespace idk
 
 			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
 			auto metastr = stringify(metastream);
-
-			return parse_text<MetaBundle>(metastr);
+			try
+			{
+				return parse_text<MetaBundle>(metastr);
+			}
+			catch (...)
+			{
+				return std::nullopt;
+			}
 		}();
 
 		// reload the file
@@ -305,6 +345,7 @@ namespace idk
 			return FileMoveResult::Error_DestinationExists;
 
 		auto string_path = string{ new_path };
+		Core::GetSystem<FileSystem>().Rename(old_path.GetMountPath(), string_path);
 
 		auto bundle = std::move(itr->second);
 		for (auto& elem : bundle.bundle.GetAll())
@@ -318,7 +359,6 @@ namespace idk
 		_loaded_files.erase(itr);
 		_loaded_files.emplace(string_path, bundle);
 
-		Core::GetSystem<FileSystem>().Rename(old_path.GetMountPath(), string_path);
 
 		return FileMoveResult::Ok;
 	}

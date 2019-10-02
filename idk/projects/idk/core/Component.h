@@ -14,7 +14,7 @@ namespace idk
 	class GameObject;
 
 	// all components must derive from this template
-	template<typename T> 
+	template<typename T, bool UniqueComponent = true> 
 	class Component;
 
 	// don't derive from this
@@ -35,14 +35,16 @@ namespace idk
 		template<typename>
 		friend struct detail::TableGenerator;
 		GenericComponent() = default;
-		template<typename T> friend class Component;
+		template<typename T, bool> friend class Component;
 	};
 
-	template<typename T>
+	template<typename T, bool UniqueC>
 	class Component 
 		: public GenericComponent, public Handleable<T>
 	{
 	public:
+		static constexpr auto Unique = UniqueC;
+
 		const Handle<T>& GetHandle() const override
 		{
 			return Handleable<T>::GetHandle();

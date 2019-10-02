@@ -1,17 +1,5 @@
-{
-  "guids": [
-    "a852f063-2321-46d1-b9da-11a5d7a9d7c6"
-  ],
-  "resource_metas": [
-    {
-      "?": "AudioMeta",
-      "is3Dsound": true,
-      "isLoop": false,
-      "isUnique": true,
-      "maxDistance": 100.0,
-      "minDistance": 1.0,
-      "pitch": 1.0,
-      "volume": 1.0
-    }
-  ]
-}
+metadatas: 
+- guid: 10e92dd7-21c6-4ce9-85e3-bc0cb97a2ef4
+  metadata: "is3Dsound: 1\nisLoop: 0\nisUnique: 1\nmaxDistance: 100.000000\nminDistance: 1.000000\npitch: 1.000000\nvolume: 1.000000\n"
+  name: ""
+  t_hash: 10288074540718190817

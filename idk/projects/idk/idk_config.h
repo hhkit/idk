@@ -51,15 +51,15 @@ namespace idk
 		,   class DebugRenderer
 		,	class AudioSystem
 		,	class ResourceManager
-		,	class SceneManager
 		,	class ProjectManager
+		,	class SceneManager
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
 	>;
 
 	using Resources = std::tuple<
-		class Scene
+			class Scene
 		,	class TestResource
 		,   class AudioClip
 		//,	class Font

@@ -9,12 +9,13 @@ namespace idk
 	{
 	public:
 		unique_ptr<Scene> GenerateDefaultResource() override;
-		unique_ptr<Scene> Create() override;
+		unique_ptr<Scene> Create() noexcept override;
 	};
 
 	class SceneLoader
 		: public IFileLoader
 	{
-		ResourceBundle LoadFile(PathHandle filepath) override;
+		ResourceBundle LoadFile(PathHandle filepath) noexcept override;
+		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
 	};
 }

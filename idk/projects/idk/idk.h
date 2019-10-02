@@ -99,6 +99,9 @@ namespace idk
 	template<typename T>
 	using opt = std::optional<T>;
 
+	template<typename T>
+	using Ref = std::reference_wrapper<T>;
+
 	template<typename ... Ts>
 	using variant = std::variant<Ts...>;
 

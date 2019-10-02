@@ -12,11 +12,11 @@ namespace idk
 	{
 	}
 
-	MonoBehavior::MonoBehavior(MonoBehavior&& rhs)
+	MonoBehavior::MonoBehavior(MonoBehavior&&)
 	{
 	}
 
-	MonoBehavior& MonoBehavior::operator=(MonoBehavior&& rhs)
+	MonoBehavior& MonoBehavior::operator=(MonoBehavior&&)
 	{
 		return *this;;
 	}

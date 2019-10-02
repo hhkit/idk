@@ -128,6 +128,7 @@ namespace idk {
 				{
 					size_t start = parent_path_str.size();
 					ret_path = mount._mount_path + full_path.substr(start);
+					std::replace(ret_path.begin(), ret_path.end(), '\\', '/'); 
 					return ret_path;
 				}
 			}
