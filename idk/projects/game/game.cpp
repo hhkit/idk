@@ -154,7 +154,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
-
+		go->GetComponent<Transform>()->scale /= 100.0f;
 		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet

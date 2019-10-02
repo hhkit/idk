@@ -70,11 +70,11 @@ namespace idk
 
 		// Generate a graph of all the aiNodes.
 		// The graph tags each node with a type and makes things a lot easier when parsing data.
-		fbx_loader_detail::AssimpNode root_node;
-		fbx_loader_detail::generateNodeGraph(ai_scene->mRootNode, root_node, bone_set);
+		vector<fbx_loader_detail::AssimpNode> assimp_node_vec;
+		fbx_loader_detail::generateNodeGraph(ai_scene->mRootNode, assimp_node_vec, bone_set);
 
 		// Initialize the bone hierarchy. This step is done before meshes cos meshes need the bone index.
-		fbx_loader_detail::initBoneHierarchy(root_node, bones_table, bones);
+		fbx_loader_detail::initBoneHierarchy(assimp_node_vec, bones_table, bones);
 
 		// Here, we initialize all the vertices, indices, and bones. 
 		// Bones are just initialized with the local bind pose matrix and name for now.
@@ -178,7 +178,7 @@ namespace idk
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
-			fbx_loader_detail::initAnimNodes(root_node, ai_scene->mAnimations[i], anim_clip);
+			fbx_loader_detail::initAnimNodes(assimp_node_vec, ai_scene->mAnimations[i], anim_clip);
 			retval.Add(anim_clip_handle);
 
 			animator->AddAnimation(anim_clip_handle);
@@ -243,11 +243,11 @@ namespace idk
 
 		// Generate a graph of all the aiNodes.
 		// The graph tags each node with a type and makes things a lot easier when parsing data.
-		fbx_loader_detail::AssimpNode root_node;
-		fbx_loader_detail::generateNodeGraph(ai_scene->mRootNode, root_node, bone_set);
+		vector<fbx_loader_detail::AssimpNode> assimp_node_vec;
+		fbx_loader_detail::generateNodeGraph(ai_scene->mRootNode, assimp_node_vec, bone_set);
 
 		// Initialize the bone hierarchy. This step is done before meshes cos meshes need the bone index.
-		fbx_loader_detail::initBoneHierarchy(root_node, bones_table, bones);
+		fbx_loader_detail::initBoneHierarchy(assimp_node_vec, bones_table, bones);
 
 		// Here, we initialize all the vertices, indices, and bones. 
 		// Bones are just initialized with the local bind pose matrix and name for now.
@@ -372,7 +372,7 @@ namespace idk
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 
 			// There should be a better way to do this. We are traversing the whole aiNode tree once per animation.
-			fbx_loader_detail::initAnimNodes(root_node, ai_scene->mAnimations[i], anim_clip);
+			fbx_loader_detail::initAnimNodes(assimp_node_vec, ai_scene->mAnimations[i], anim_clip);
 			retval.Add(anim_clip_handle);
 
 			animator->AddAnimation(anim_clip_handle);

@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		30 AUG 2019
+//@date		02 OCT 2019
 //@brief	
 
 /*
@@ -66,6 +66,8 @@ namespace idk {
 		float gizmo_matrix[16]{};
 
 		mat4 GenerateMat4FromGizmoMatrix();
+
+		bool is_being_modified = false;
 	};
 
 
