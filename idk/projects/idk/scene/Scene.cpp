@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include <core/GameObject.h>
+#include <util/ioutils.h>
 #include "..\res\ResourceBundle.h"
 
 namespace idk
@@ -8,12 +9,10 @@ namespace idk
 	Scene::Scene(uint8_t scene_id_)
 		: scene_id{ scene_id_ }
 	{
-		GameState::GetGameState().ActivateScene(scene_id_);
 	}
 
 	Scene::~Scene()
 	{
-		GameState::GetGameState().DeactivateScene(scene_id);
 	}
 
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)
@@ -29,6 +28,39 @@ namespace idk
 	void Scene::DestroyGameObject(const Handle<GameObject>& go)
 	{
 		GameState::GetGameState().DestroyObject(go);
+	}
+
+	bool Scene::Loaded()
+	{
+		return _loaded;
+	}
+
+	SceneLoadResult Scene::Load()
+	{
+		if (_loaded)
+			return SceneLoadResult::Err_SceneAlreadyActive;
+
+		_loaded = true;
+		GameState::GetGameState().ActivateScene(scene_id);
+
+		auto path = Core::GetResourceManager().GetPath(GetHandle());
+		if (!path)
+			return SceneLoadResult::Err_ScenePathNotFound;
+
+		auto stream = Core::GetSystem<FileSystem>().Open(*path, FS_PERMISSIONS::READ);
+		parse_text(stringify(stream), *this);
+		return SceneLoadResult::Ok;
+	}
+
+	SceneUnloadResult Scene::Unload()
+	{
+		if (!_loaded)
+			return SceneUnloadResult::Err_SceneAlreadyInactive;
+
+		GameState::GetGameState().DeactivateScene(scene_id);
+		_loaded = false;
+
+		return SceneUnloadResult::Ok;
 	}
 
 	Scene::iterator Scene::begin() const

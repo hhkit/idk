@@ -53,8 +53,6 @@ namespace idk
 	}
 	string MaterialInstance::GetUniformBlock(const string& name) const
 	{
-		auto& uniform_block = uniforms;
-		auto& mat = *material;
 		string result;
 		auto uni = GetUniform(name);
 		if (uni)

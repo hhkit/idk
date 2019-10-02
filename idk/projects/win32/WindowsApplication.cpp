@@ -145,7 +145,7 @@ namespace idk::win
 			std::cout << "[File System] Unable to get solution directory." << std::endl;
 		return string{ buffer };
 	}
-	opt<string> Windows::OpenFileDialog(string_view extension)
+	opt<string> Windows::OpenFileDialog(string_view extension, DialogOptions dialog)
 	{
 		extension;
 		OPENFILENAME ofn;       // common dialog box structure
@@ -167,7 +167,7 @@ namespace idk::win
 		// use the contents of szFile to initialize itself.
 		ofn.lpstrFile[0] = L'\0';
 		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = L"Scene (.idscene)\0*.idscene\0All\0*.*\0";
+		ofn.lpstrFilter = L"Scene (.ids)\0*.ids\0All\0*.*\0";
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;
@@ -175,14 +175,27 @@ namespace idk::win
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 		// Display the Open dialog box. 
-
-		if (GetSaveFileName(&ofn) == TRUE)
+		switch (dialog)
 		{
-			auto filename = std::wstring{ ofn.lpstrFile };
-			using convert_type = std::codecvt_utf8<wchar_t>;
-			std::wstring_convert<convert_type, wchar_t> converter;
+		case DialogOptions::Save:
+			if (GetSaveFileName(&ofn) == TRUE)
+			{
+				auto filename = std::wstring{ ofn.lpstrFile };
+				using convert_type = std::codecvt_utf8<wchar_t>;
+				std::wstring_convert<convert_type, wchar_t> converter;
 
-			return converter.to_bytes(filename);
+				return converter.to_bytes(filename);
+			}
+			break;
+		case DialogOptions::Open:
+			if (GetOpenFileName(&ofn) == TRUE)
+			{
+				auto filename = std::wstring{ ofn.lpstrFile };
+				using convert_type = std::codecvt_utf8<wchar_t>;
+				std::wstring_convert<convert_type, wchar_t> converter;
+
+				return converter.to_bytes(filename);
+			}
 		}
 		return std::nullopt;
 	}

@@ -62,11 +62,6 @@ namespace idk
 					elem->Compile();
 			}
 
-		if (app_sys.GetKeyDown(Key::P))
-			Core::GetScheduler().SetPauseState(GamePause);
-		if (app_sys.GetKeyUp(Key::P))
-			Core::GetScheduler().SetPauseState(UnpauseAll);
-
 		if (app_sys.GetKey(Key::Control) && app_sys.GetKeyDown(Key::S))
 			Core::GetSystem<ProjectManager>().SaveProject();
 	}
