@@ -7,6 +7,7 @@
 #include <vkn/VulkanDebugRenderer.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
+#include <win32/XInputSystem.h>
 #include <ReflectRegistration.h>
 #include <editor/IDE.h>
 #include <file/FileSystem.h>
@@ -78,7 +79,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 
 	auto c = std::make_unique<Core>();
-	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+	
+    auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+    c->AddSystem<win::XInputSystem>();
+
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = GraphicsAPI::OpenGL;
 	switch (gfx_api)
