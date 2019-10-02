@@ -18,6 +18,7 @@ namespace idk::win
         bool GetButtonUp(char player, GamepadButton button);
         bool GetButton(char player, GamepadButton button);
         float GetAxis(char player, GamepadAxis axis);
+        void SetRumble(char player, float low_freq, float high_freq);
 
     private:
         struct x_gamepad_state

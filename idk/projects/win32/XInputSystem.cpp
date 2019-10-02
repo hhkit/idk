@@ -101,6 +101,15 @@ namespace idk::win
         }
     }
 
+    void XInputSystem::SetRumble(char player, float low_freq, float high_freq)
+    {
+        XINPUT_VIBRATION vibration;
+        ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+        vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(low_freq, 0.0f, 1.0f) * 0xffff);
+        vibration.wRightMotorSpeed = static_cast<WORD>(std::clamp(high_freq, 0.0f, 1.0f) * 0xffff);
+        XInputSetState(player, &vibration);
+    }
+
     static vec2 thumbstick_deadzone_filter(short x, short y, short deadzone)
     {
         vec2 ret{ 0, 0 };
@@ -136,7 +145,7 @@ namespace idk::win
         reinterpret_cast<vec2&>(ret.thumb_left_x) = thumbstick_deadzone_filter(
             state.Gamepad.sThumbLX, state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
         reinterpret_cast<vec2&>(ret.thumb_right_x) = thumbstick_deadzone_filter(
-            state.Gamepad.sThumbLX, state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+            state.Gamepad.sThumbRX, state.Gamepad.sThumbRY, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
         return ret;
     }
 
