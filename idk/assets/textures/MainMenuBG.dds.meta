@@ -1,0 +1,5 @@
+metadatas: 
+- guid: 10643ae3-18da-482d-8865-7572a1d5dc5a
+  metadata: '{internal_format: !ColorFormat DXT1, uv_mode: !UVMode Repeat}'
+  name: ""
+  t_hash: 16991284332866690938

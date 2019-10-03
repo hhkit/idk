@@ -40,6 +40,9 @@ namespace idk::ogl
 			case ColorFormat::RGBAF_16: return GL_RGBA16F;
 			case ColorFormat::RGBAF_32: return GL_RGBA32F;
 			case ColorFormat::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
+			case ColorFormat::DXT1: return 0x83F1;
+			case ColorFormat::DXT3: return 0x83F2;
+			case ColorFormat::DXT5: return 0x83F3;
 			default: return 0;
 			}
 		}
@@ -100,8 +103,18 @@ namespace idk::ogl
 	void OpenGLTexture::Buffer(void* data, ivec2 size, InputChannels format, ColorFormat internalFormat)
 	{
 		_size = size;
-		glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(internalFormat), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
+		glBindTexture(GL_TEXTURE_2D, _id);
+		if (internalFormat == ColorFormat::DEPTH_COMPONENT)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(internalFormat), size.x, size.y, 0, detail::ToGLinputChannels(InputChannels::DEPTH_COMPONENT), GL_UNSIGNED_BYTE, data); // oh no
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(internalFormat), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
+		}
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 		// TODO: fix internal format
 		GL_CHECK();
 	}
