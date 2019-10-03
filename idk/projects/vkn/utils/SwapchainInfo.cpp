@@ -24,7 +24,7 @@ namespace idk::vkn {
 		frame_objects{}
 	{
 	}
-	SwapChainInfo::SwapChainInfo(SwapChainInfo&& rhs)
+	SwapChainInfo::SwapChainInfo(SwapChainInfo&& rhs) noexcept
 		:swap_chain{ std::move(rhs.swap_chain) },
 		present_mode{ std::move(rhs.present_mode) },
 		surface_format{ std::move(rhs.surface_format) },
@@ -36,7 +36,7 @@ namespace idk::vkn {
 	{
 	}
 
-	SwapChainInfo& SwapChainInfo::operator=(SwapChainInfo&& rhs)
+	SwapChainInfo& SwapChainInfo::operator=(SwapChainInfo&& rhs) noexcept
 	{
 		// TODO: insert return statement here
 		std::swap(swap_chain,rhs.swap_chain);

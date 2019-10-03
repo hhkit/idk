@@ -280,10 +280,18 @@ namespace idk
 				const aiVector3D& pos = ai_mesh->mVertices[k];
 				const aiVector3D& normal = ai_mesh->mNormals[k];
 				const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;
+				aiVector3D tangent, bi_tangent;
+				if (ai_mesh->HasTangentsAndBitangents())
+				{
+					tangent = ai_mesh->mTangents[k];
+					bi_tangent = ai_mesh->mBitangents[k];
+				}
 
 				vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z }
 											 ,vec3{ normal.x, normal.y, normal.z }
 											 ,vec2{ text.x, text.y }
+											 ,vec3{ tangent.x, tangent.y, tangent.z }
+											 ,vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z }
 					});
 
 				// updateBounds(vertices.back().pos, min_pos, max_pos);

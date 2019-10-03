@@ -34,10 +34,10 @@ namespace idk
 
 		// Get some static paths. These paths aren't changed during the program's lifetime.
 		// =====================================================================================================
-		string_view GetSolutionDir	()	const { return _sol_dir; }
-		string_view GetAppDataDir	()	const { return _app_data_dir; }
-		string_view GetExeDir		()	const { return _exe_dir; }
-		string_view GetAssetDir		()	const { return _asset_dir; }
+		string_view GetSolutionDir	()	const noexcept { return _sol_dir; }
+		string_view GetAppDataDir	()	const noexcept { return _app_data_dir; }
+		string_view GetExeDir		()	const noexcept { return _exe_dir; }
+		string_view GetAssetDir		()	const noexcept { return _asset_dir; }
 		
 		// File changes
 		// =====================================================================================================
@@ -89,16 +89,16 @@ namespace idk
 
 		// initializtion
 		void initMount		(size_t index, string_view fullPath, string_view mountPath, bool watch);
-		void initFile		(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
-		void initDir		(file_system_detail::fs_dir& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p);
+		void initFile		(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p);
+		void initDir		(file_system_detail::fs_dir& f, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p);
 
 		// Helper recursion functions
 		void recurseSubDir				(size_t index, int8_t depth, file_system_detail::fs_dir& mountSubDir, bool watch);
 		// void recurseSubDirExtensions	(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const;
 
 		// Helper Getters
-		file_system_detail::fs_file&		getFile	(file_system_detail::fs_key& node);
-		file_system_detail::fs_dir&			getDir	(file_system_detail::fs_key& node);
+		file_system_detail::fs_file&		getFile	(const file_system_detail::fs_key& node);
+		file_system_detail::fs_dir&			getDir	(const file_system_detail::fs_key& node);
 
 		const file_system_detail::fs_file&	getFile	(const file_system_detail::fs_key& node) const;
 		const file_system_detail::fs_dir&	getDir	(const file_system_detail::fs_key& node) const;

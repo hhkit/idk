@@ -13,14 +13,14 @@ namespace idk
 			static lock_t GetReadLock()
 			{
 				lock_t retval{};
-				auto v = ((retval[index_in_tuple_v<std::decay_t<Cs>, Components>] = true) && ...); (v);
+				const auto v = ((retval[index_in_tuple_v<std::decay_t<Cs>, Components>] = true) && ...); (v);
 				return retval;
 			}
 
 			static lock_t GetWriteLock()
 			{
 				lock_t retval{};
-				auto v = ((retval[index_in_tuple_v<std::decay_t<Cs>, Components>] = !std::is_const_v<Cs>) && ...); (v);
+				const auto v = ((retval[index_in_tuple_v<std::decay_t<Cs>, Components>] = !std::is_const_v<Cs>) && ...); (v);
 				return retval;
 			}
 		};
@@ -47,9 +47,9 @@ namespace idk
 	template<UpdatePhase phase, typename System, typename ... Cs>
 	Scheduler::Pass& Scheduler::SchedulePass(void(System::*mem_fn)(span<Cs>...), const char* name)
 	{
-		Scheduler::Lock read_bitset  = detail::SchedulerHelper<Cs...>::GetReadLock();
-		Scheduler::Lock write_bitset = detail::SchedulerHelper<Cs...>::GetWriteLock();
-		auto call = [mem_fn, this]()
+		const Scheduler::Lock read_bitset  = detail::SchedulerHelper<Cs...>::GetReadLock();
+		const Scheduler::Lock write_bitset = detail::SchedulerHelper<Cs...>::GetWriteLock();
+		const auto call = [mem_fn, this]()
 		{
 			auto sys = &Core::GetSystem<System>();
 			const auto is_paused = _systems_paused[SystemID<System>];
@@ -93,7 +93,7 @@ namespace idk
 		Scheduler::Lock all_true;
 		all_true.set();
 
-		auto call = [mem_fn, this]()
+		const auto call = [mem_fn, this]()
 		{
 			auto sys = &Core::GetSystem<System>();
 			const auto is_paused = _systems_paused[SystemID<System>];
@@ -112,9 +112,9 @@ namespace idk
 	template<typename System, typename ...Components>
 	Scheduler::Pass& Scheduler::Pass::IfPausedThen(void(System::* memfb)(span<Components>...))
 	{
-		Scheduler::Lock read_bitset = detail::SchedulerHelper<Components...>::GetReadLock();
-		Scheduler::Lock write_bitset = detail::SchedulerHelper<Components...>::GetWriteLock();
-		auto new_call = [memfb]()
+		const Scheduler::Lock read_bitset = detail::SchedulerHelper<Components...>::GetReadLock();
+		const Scheduler::Lock write_bitset = detail::SchedulerHelper<Components...>::GetWriteLock();
+		const auto new_call = [memfb]()
 		{
 			auto sys = &Core::GetSystem<System>();
 			if (sys)

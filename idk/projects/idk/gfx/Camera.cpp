@@ -14,21 +14,21 @@ namespace idk
 {
 	void Camera::LookAt(vec3 target_point, vec3 up)
 	{
-		auto tfm = GetGameObject()->Transform();
+		const auto tfm = GetGameObject()->Transform();
 
 		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->position, target_point, up)).normalize());
 	}
 
 	vec3 Camera::currentPosition() const
 	{
-		auto tfm = GetGameObject()->Transform();
+		const auto tfm = GetGameObject()->Transform();
 
 		return tfm->GlobalPosition();
 	}
 
 	vec3 Camera::currentDirection() const
 	{
-		auto tfm = GetGameObject()->Transform();
+		const auto tfm = GetGameObject()->Transform();
 		//return _direction;
 		return GetGameObject()->Transform()->Forward().normalize();
 	}
@@ -36,7 +36,7 @@ namespace idk
 	mat4 Camera::ViewMatrix() const
 	{
 		auto mat = GetGameObject()->Transform()->GlobalMatrix();
-		auto tfm = GetGameObject()->Transform();
+		const auto tfm = GetGameObject()->Transform();
 		auto retval = orthonormalize(mat);
 		retval[3] = mat[3];
 

@@ -70,7 +70,7 @@ namespace idk
 		// We grab the parent transform if its there, and multiply it with the child local.
 		// We save this result into pre_transforms and then multiply that by global inverse bind pose 
 		// and put it into final transforms.
-		auto global_inverse = _skeleton->GetGlobalInverse();
+		const auto global_inverse = _skeleton->GetGlobalInverse();
 		const auto& skeleton = _skeleton->data();
 		if (global_inverse != mat4{})
 		{
@@ -81,7 +81,7 @@ namespace idk
 
 				if (!curr_go)
 					continue;
-				auto parent_index = skeleton[i]._parent;
+				const auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
 					const mat4& p_transform = _pre_global_transforms[parent_index];
@@ -104,7 +104,7 @@ namespace idk
 
 				if (!curr_go)
 					continue;
-				auto parent_index = skeleton[i]._parent;
+				const auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
 					// If we have the parent, we push in the parent.global * child.local
@@ -116,7 +116,7 @@ namespace idk
 				{
 					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
-				auto test = decompose(_pre_global_transforms[i]);
+				const auto test = decompose(_pre_global_transforms[i]);
 				_final_bone_transforms[i] = _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 			}
 		}
@@ -226,7 +226,7 @@ namespace idk
 			_child_objects[i]->Transform()->LocalMatrix(local_bind_pose);
 
 			// compute the bone_transform for the bind pose
-			auto parent_index = _skeleton->data()[i]._parent;
+			const auto parent_index = _skeleton->data()[i]._parent;
 			if (parent_index >= 0)
 			{
 				// If we have the parent, we push in the parent.global * child.local

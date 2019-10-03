@@ -65,9 +65,9 @@ namespace idk
 
 	Scene::iterator Scene::begin() const
 	{
-		auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
+		const auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		auto beg = span.begin();
-		auto etr = span.end();
+		const auto etr = span.end();
 
 		while (beg != etr && beg->GetHandle().scene != scene_id)
 			++beg; 
@@ -77,7 +77,7 @@ namespace idk
 
 	Scene::iterator Scene::end() const
 	{
-		auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
+		const auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		return iterator{scene_id, span.end(), span.end() };
 	}
 

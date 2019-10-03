@@ -60,7 +60,7 @@ namespace idk::yaml
 		explicit operator bool() const { return p != end; }
 	};
 
-	static bool printable(int c)
+	constexpr static bool printable(int c)
 	{
 		return c >= static_cast<unsigned char>(' ') && c <= static_cast<unsigned char>('~');
 	}

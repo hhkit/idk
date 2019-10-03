@@ -42,12 +42,12 @@ namespace idk
 		auto r22 = r[2][2];
 		if (r22 <= 0)  // x^2 + y^2 >= z^2 + w^2
 		{
-			real dif10 = r[1][1] - r[0][0];
-			real omr22 = _1 - r22;
+			const real dif10 = r[1][1] - r[0][0];
+			const real omr22 = _1 - r22;
 			if (dif10 <= 0)  // x^2 >= y^2
 			{
-				real fourxsqr = omr22 - dif10;
-				real inv4x = _0_5 / sqrt(fourxsqr);
+				const real fourxsqr = omr22 - dif10;
+				const real inv4x = _0_5 / sqrt(fourxsqr);
 				q.x = fourxsqr * inv4x;
 				q.y = (r[1][0] + r[0][1]) * inv4x;
 				q.z = (r[2][0] + r[0][2]) * inv4x;
@@ -55,8 +55,8 @@ namespace idk
 			}
 			else  // y^2 >= x^2
 			{
-				real fourysqr = omr22 + dif10;
-				real inv4y = _0_5 / sqrt(fourysqr);
+				const real fourysqr = omr22 + dif10;
+				const real inv4y = _0_5 / sqrt(fourysqr);
 				q.x = (r[1][0] + r[0][1]) * inv4y;
 				q.y = fourysqr * inv4y;
 				q.z = (r[2][0] + r[0][2]) * inv4y;
@@ -65,12 +65,12 @@ namespace idk
 		}
 		else  // z^2 + w^2 >= x^2 + y^2
 		{
-			real sum10 = r[1][1] + r[0][0];
-			real opr22 = _1 + r22;
+			const real sum10 = r[1][1] + r[0][0];
+			const real opr22 = _1 + r22;
 			if (sum10 <= 0)  // z^2 >= w^2
 			{
-				real fourzsqr = opr22 - sum10;
-				real inv4z = _0_5 / sqrt(fourzsqr);
+				const real fourzsqr = opr22 - sum10;
+				const real inv4z = _0_5 / sqrt(fourzsqr);
 				q.x = (r[2][0] + r[0][2]) * inv4z;
 				q.y = (r[2][1] + r[1][2]) * inv4z;
 				q.z = fourzsqr * inv4z;
@@ -78,8 +78,8 @@ namespace idk
 			}
 			else  // w^2 >= z^2
 			{
-				real fourwsqr = opr22 + sum10;
-				real inv4w = _0_5 / std::sqrt(fourwsqr);
+				const real fourwsqr = opr22 + sum10;
+				const real inv4w = _0_5 / std::sqrt(fourwsqr);
 				q.x = (r[2][1] - r[1][2]) * inv4w;
 				q.y = (r[0][2] - r[2][0]) * inv4w;
 				q.z = (r[1][0] - r[0][1]) * inv4w;

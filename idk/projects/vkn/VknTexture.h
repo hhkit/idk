@@ -27,9 +27,9 @@ namespace idk::vkn {
 		VknTexture() = default;
 		~VknTexture();
 		//VknTexture(const VknTexture& rhs);
-		VknTexture(VknTexture&& rhs);
+		VknTexture(VknTexture&& rhs) noexcept;
 
-		VknTexture& operator=(VknTexture&&);
+		VknTexture& operator=(VknTexture&&) noexcept;
 		void Size(ivec2 new_size) override;
 		virtual void* ID() const;
 

@@ -20,11 +20,11 @@ namespace idk
 	ResourceBundle MaterialLoader::LoadFile(PathHandle p)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>();
+		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>();
 		if (stream)
 		{
 			parse_text(stringify(stream), *mat);
-			auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
+			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
 			(discardme);
 		}
 		return mat;
@@ -32,12 +32,12 @@ namespace idk
 	ResourceBundle MaterialLoader::LoadFile(PathHandle p, const MetaBundle& m)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>(m.metadatas[0].guid);
+		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>(m.metadatas[0].guid);
 
 		if (stream)
 		{
 			parse_text(stringify(stream), *mat);
-			auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
+			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
 			(discardme);
 		}
 

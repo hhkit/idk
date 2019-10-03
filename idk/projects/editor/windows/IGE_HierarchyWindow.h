@@ -31,7 +31,7 @@ namespace idk {
 
 	private:
 		ImGuiTextFilter textFilter{};
-
+		bool show_editor_objects{};
 	};
 
 

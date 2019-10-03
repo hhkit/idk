@@ -127,7 +127,7 @@ namespace idk
 	aabb& aabb::operator*=(const mat4& tfm)
 	{
 		auto old_sz = extents();
-		auto new_center = vec3{ tfm * vec4{ center(), 1 } };
+		const auto new_center = vec3{ tfm * vec4{ center(), 1 } };
 
 		for (auto [elem, col]: zip(old_sz, tfm))
 			elem *= col.length();

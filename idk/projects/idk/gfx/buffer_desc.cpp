@@ -4,7 +4,7 @@ namespace idk
 {
 size_t buffer_desc::AddAttribute(AttribFormat format, uint32_t location, uint32_t offset)
 {
-	size_t index = attributes.size();
+	const size_t index = attributes.size();
 	attribute_info attrib{ format,location,offset };
 	if (attrib.format == eMat3 || attrib.format == eMat4)
 	{

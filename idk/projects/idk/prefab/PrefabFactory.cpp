@@ -12,7 +12,7 @@ namespace idk
 		ss << filepath.Open(idk::FS_PERMISSIONS::READ).rdbuf();
 		string str = ss.str();
 
-		auto prefab = Core::GetResourceManager().LoaderEmplaceResource<Prefab>();
+		const auto prefab = Core::GetResourceManager().LoaderEmplaceResource<Prefab>();
 		parse_text(str, prefab->data);
 		return prefab;
 	}

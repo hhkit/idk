@@ -1,0 +1,3 @@
+vec3->vec3
+In,Out
+{1} = unpack_normal({0});

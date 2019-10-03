@@ -46,43 +46,6 @@ namespace idk::fbx_loader_detail
 		};
 	}
 
-
-	void generateNodeGraphRecurse(const aiNode* ai_node, AssimpNode& parent_node, const BoneSet& bone_set)
-	{
-		//AssimpNode curr_node;
-		//curr_node._name = ai_node->mName.data;
-		//curr_node._node_transform = initMat4(ai_node->mTransformation);
-		//// curr_node._local_bind_pose[3] = curr_node._local_bind_pose[3] * vec4{ FBX_SCALE, 1.0f };
-		//
-		//// if (   mesh_set.find(MeshData{ curr_node._name }) != mesh_set.end() || mesh_set.find(MeshData{ curr_node._name + "mesh" }) != mesh_set.end()
-		//// 	)
-		//// 	curr_node._ai_type |= MESH;
-		//
-		//if (curr_node._name.find("$Assimp$") != string::npos)
-		//{
-		//	curr_node._ai_type |= VIRTUAL;
-		//}
-		//
-		//auto bone_res = bone_set.find(BoneData{ curr_node._name });
-		//if (bone_res != bone_set.end())
-		//{
-		//	curr_node._ai_type |= BONE;
-		//	curr_node._global_inverse_bind_pose = bone_res->_global_inverse_bind_pose;
-		//	//*;
-		//	// curr_node._global_inverse_bind_pose[3] = curr_node._global_inverse_bind_pose[3] * vec4{   , 1.0f };
-		//	//auto& trans_vec2 = curr_node._global_inverse_bind_pose[0];
-		//}
-		//
-		//
-		//
-		//for (size_t i = 0; i < ai_node->mNumChildren; ++i)
-		//{
-		//	generateNodeGraphRecurse(ai_node->mChildren[i], curr_node, bone_set);
-		//}
-		//
-		//parent_node._children.emplace_back(std::move(curr_node));
-	}
-
 	void generateNodeGraph(const aiNode* ai_root, vector<AssimpNode>& assimp_node_vec, const BoneSet& bone_set)
 	{
 		struct aiNodeData

@@ -126,7 +126,7 @@ namespace idk::shadergraph
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, i }, var_name(state.slot_counter++));
             }
 
-			int num_slots = static_cast<int>(tpl.signatures[0].ins.size() + tpl.signatures[0].outs.size());
+			const auto num_slots = static_cast<int>(tpl.signatures[0].ins.size() + tpl.signatures[0].outs.size());
             if (tpl.names.size() > num_slots) // have custom controls
             {
                 string str = node.control_values;
@@ -135,7 +135,7 @@ namespace idk::shadergraph
                     string next_value = "";
                     if (str.size())
                     {
-                        auto pos = str.find('|');
+                        const auto pos = str.find('|');
                         next_value = str.substr(0, pos);
                         if (pos != string::npos)
                             str.erase(0, pos + 1);

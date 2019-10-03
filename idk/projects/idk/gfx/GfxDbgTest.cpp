@@ -18,7 +18,7 @@ namespace idk
 			0,0,0.5f,0.5f,
 			0,0,0,1
 		}*perspective(fov, a, n, f);
-		auto t = tan(fov / 2);
+		const auto t = tan(fov / 2);
 
 		constexpr auto _2 = s_cast<T>(2);
 		constexpr auto _1 = s_cast<T>(1);
@@ -39,9 +39,9 @@ namespace idk
 	template<typename T>
 	tmat<T, 4, 4> look_at2(const tvec<T, 3> & eye, const tvec<T, 3> & object, const tvec<T, 3> & global_up)
 	{
-		auto target = (object- eye).normalize();
-		auto right = target.cross(global_up).normalize();
-		auto up = right.cross(target).normalize();
+		const auto target = (object- eye).normalize();
+		const auto right = target.cross(global_up).normalize();
+		const auto up = right.cross(target).normalize();
 
 		return tmat<T, 4, 4>{
 			vec4{ right,  0 },
@@ -55,18 +55,18 @@ namespace idk
 		auto& dbg_renderer = Core::GetSystem<DebugRenderer>();
 		if (&dbg_renderer)
 		{
-			uint32_t width = 1280;
-			uint32_t height = 720;
+			const uint32_t width = 1280;
+			const uint32_t height = 720;
 
 
 			//Handle<Camera> currCamera = Core::GetSystem<GraphicsSystem>().CurrentCamera();
 			static vec3 lookat_offset{ 0,0,5.0f };
 			static vec3 lookat_offset2{ 0,0,-2.5f };
 
-			vec3 diff = (vec3{}-lookat_offset).get_normalized();
-			vec3 axis = vec3{ 0,0,1 }.cross(diff).get_normalized();
+			const vec3 diff = (vec3{}-lookat_offset).get_normalized();
+			const vec3 axis = vec3{ 0,0,1 }.cross(diff).get_normalized();
 
-			auto angle = -acos(-diff.z);
+			const auto angle = -acos(-diff.z);
 			const mat4 view =  look_at2(lookat_offset, vec3{ 0,0,0.0f }, vec3{ 0,1,0 });
 			const mat4 proj =  perspective2(idk::rad(45.0f), width / (float)height, 0.001f, 20.0f);
 
@@ -74,7 +74,7 @@ namespace idk
 			{
 				box retval;
 				retval.center = (retval.center.x < 1) ? retval.center + vec3{ 0.005f,0,0 } : vec3{};
-				rad t_angle = (angle.value < pi) ? angle + rad{ 0.001f } : rad{ 0 };
+				const rad t_angle = (angle.value < pi) ? angle + rad{ 0.001f } : rad{ 0 };
 				retval.axes = quat_cast<mat3>(quat{ vec3{1,0,0}, t_angle });
 				return retval;
 			}();
@@ -85,9 +85,9 @@ namespace idk
 			{
 				box retval;
 				lookat_offset2 = retval.center = rotate(vec3{ 0,1,0 }, rad{ 0.01f }) * lookat_offset2;
-				vec3 diff2 = Normalized(-lookat_offset2);
-				vec3 axis2 = Normalized(vec3{ 0,0,1 }.cross(diff2));
-				auto angle2 = acos(diff2.z);
+				const vec3 diff2 = Normalized(-lookat_offset2);
+				const vec3 axis2 = Normalized(vec3{ 0,0,1 }.cross(diff2));
+				const auto angle2 = acos(diff2.z);
 				retval.axes = quat_cast<mat3>(quat{ axis2, angle2 });
 
 				return retval;
@@ -95,7 +95,7 @@ namespace idk
 
 			dbg_renderer.Draw(orbit);
 			dbg_renderer.Draw(tmp);
-			int max_count = 10;
+			const int max_count = 10;
 			for (int i = 0; i < max_count; ++i)
 			{
 				float chunk = 2.0f / max_count;
@@ -118,7 +118,6 @@ namespace idk
 				}
 			}
 			// can't debug triangle
-			// dbg_renderer.DrawShape(DebugObject{ DbgShape::eEqTriangle }.Scale(vec3{ 0.5f,0.5f,0.5f }).Rotation(vec3{ 0,0,1 }, rad{ 0 * pi / 3 }).Color(vec4{ 0,1,0,1 }));
 		}
 	}
 

@@ -25,7 +25,7 @@ namespace idk
 	inline Guid Guid::Make()
 	{
 		Guid guid;
-		auto res = CoCreateGuid((GUID*)& guid); (res);
+		const auto res = CoCreateGuid((GUID*)& guid); (res);
 		return guid;
 	}
 }

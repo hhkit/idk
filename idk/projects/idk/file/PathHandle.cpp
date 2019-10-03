@@ -230,7 +230,7 @@ namespace idk
 		{
 			for (auto& dir_index : dir._sub_dirs)
 			{
-				auto& internal_dir = vfs.getDir(dir_index.second);
+				const auto& internal_dir = vfs.getDir(dir_index.second);
 				if (internal_dir.IsValid())
 				{
 					PathHandle h{ internal_dir._tree_index, false };
@@ -246,7 +246,7 @@ namespace idk
 		{
 			for (auto& file_index : dir._files_map)
 			{
-				auto& internal_file = vfs.getFile(file_index.second);
+				const auto& internal_file = vfs.getFile(file_index.second);
 				if (internal_file.IsValid())
 				{
 					// If extensions are enabled and the extensions don't match, we ignore this file
@@ -303,7 +303,7 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& file = vfs.getFile(_key);
+		const auto& file = vfs.getFile(_key);
 
 		return file._extension;
 	}
@@ -347,7 +347,7 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
+		const file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
 		if (parent.IsValid())
 			return vfs.getDir(parent)._full_path;
@@ -362,7 +362,7 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
+		const file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
 		if (parent.IsValid())
 			return vfs.getDir(parent)._rel_path;
@@ -378,7 +378,7 @@ namespace idk
 			return string_view{};
 
 		auto& vfs = Core::GetSystem<FileSystem>();
-		file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
+		const file_system_detail::fs_key parent = _is_regular_file ? vfs.getFile(_key)._parent : vfs.getDir(_key)._parent;
 
 		if (parent.IsValid())
 			return vfs.getDir(parent)._mount_path;
@@ -397,7 +397,7 @@ namespace idk
 
 		auto& vfs = Core::GetSystem<FileSystem>();
 		// Checking if internal handle is valid
-		auto& file = vfs.getFile(_key);
+		const auto& file = vfs.getFile(_key);
 		return file.IsValid() && !file.IsOpen();
 	}
 
@@ -430,15 +430,13 @@ namespace idk
 		// Only checks if the ref count is correct. Ref count is inc when file deleted
 		if (_is_regular_file)
 		{
-			auto& file = vfs.getFile(_key);
-			auto ref_count_actual = file.RefCount();
-			return (_ref_count == ref_count_actual);
+			const auto& file = vfs.getFile(_key);
+			return (_ref_count == file.RefCount());
 		}
 		else
 		{
-			auto& dir = vfs.getDir(_key);
-			auto ref_count_actual = dir.RefCount();
-			return (_ref_count == ref_count_actual);
+			const auto& dir = vfs.getDir(_key);
+			return (_ref_count == dir.RefCount());
 		}
 	}
 
@@ -451,15 +449,13 @@ namespace idk
 		// Checks everything. Essentially, does the file exists?
 		if (_is_regular_file)
 		{
-			auto& file = vfs.getFile(_key);
-			auto ref_count_actual = file.RefCount();
-			return (_ref_count == ref_count_actual) && file.IsValid();
+			const auto& file = vfs.getFile(_key);
+			return (_ref_count == file.RefCount()) && file.IsValid();
 		}
 		else
 		{
-			auto& dir = vfs.getDir(_key);
-			auto ref_count_actual = dir.RefCount();
-			return (_ref_count == ref_count_actual) && dir.IsValid();
+			const auto& dir = vfs.getDir(_key);
+			return (_ref_count == dir.RefCount()) && dir.IsValid();
 		}
 	}
 #pragma endregion Helper Bool Checks
@@ -470,14 +466,14 @@ namespace idk
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		// Change the data in of all the dirs and file
-		FS_FILTERS filters = FS_FILTERS::ALL;
+		const FS_FILTERS filters = FS_FILTERS::ALL;
 		auto paths = GetEntries(filters);
 		for (auto& p : paths)
 		{
 			if (p._is_regular_file)
 			{
 				auto& internal_file = vfs.getFile(p._key);
-				auto& parent_dir = vfs.getDir(internal_file._parent);
+				const auto& parent_dir = vfs.getDir(internal_file._parent);
 
 				string append = '/' + internal_file._filename;
 
@@ -488,7 +484,7 @@ namespace idk
 			else
 			{
 				auto& internal_dir = vfs.getDir(p._key);
-				auto& parent_dir = vfs.getDir(internal_dir._parent);
+				const auto& parent_dir = vfs.getDir(internal_dir._parent);
 
 				string append = '/' + internal_dir._filename;
 
@@ -505,7 +501,7 @@ namespace idk
 		{
 			for (auto& dir_index : dir._sub_dirs)
 			{
-				auto& internal_dir = vfs.getDir(dir_index.second);
+				const auto& internal_dir = vfs.getDir(dir_index.second);
 				if (internal_dir.IsValid())
 				{
 					PathHandle h{ internal_dir._tree_index, false };
@@ -521,7 +517,7 @@ namespace idk
 		{
 			for (auto& file_index : dir._files_map)
 			{
-				auto& internal_file = vfs.getFile(file_index.second);
+				const auto& internal_file = vfs.getFile(file_index.second);
 				if (internal_file.IsValid())
 				{
 					// If extensions are enabled and the extensions don't match, we ignore this file
@@ -534,27 +530,5 @@ namespace idk
 			}
 		}
 	}
-
-	// void PathHandle::getFilesExtRecurse(const file_system_detail::fs_dir& dir, string_view ext, vector<PathHandle>& out) const
-	// {
-	// 	auto& vfs = Core::GetSystem<FileSystem>();
-	// 	auto& dir = vfs.getDir(_key);
-	// 
-	// 	for (auto& file_index : dir._files_map)
-	// 	{
-	// 		auto& internal_file = vfs.getFile(file_index.second);
-	// 		if (internal_file._extension == ext)
-	// 		{
-	// 			PathHandle h{ internal_file._tree_index, true };
-	// 			out.emplace_back(h);
-	// 		}
-	// 	}
-	// 
-	// 	for (auto& dir_index : dir._sub_dirs)
-	// 	{
-	// 		auto& internal_dir = vfs.getDir(dir_index.second);
-	// 		getFilesExtRecurse(internal_dir, ext, out);
-	// 	}
-	// }
 #pragma endregion Helper Recursion
 }

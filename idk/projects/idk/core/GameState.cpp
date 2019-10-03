@@ -46,7 +46,7 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenCreateTypeJt()
+		constexpr static auto GenCreateTypeJt()
 		{
 			return GameState::CreateTypeJT{
 				[](GameState& gs, const Handle<GameObject>& go) -> GenericHandle
@@ -66,7 +66,7 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenCreateDynamicJt()
+		constexpr static auto GenCreateDynamicJt()
 		{
 			return GameState::CreateDynamicJT{
 				[](GameState& gs, const Handle<GameObject>& go, const reflect::dynamic& dyn) -> GenericHandle
@@ -86,7 +86,7 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenCreateJt()
+		constexpr static auto GenCreateJt()
 		{
 			return GameState::CreateJT{
 				[](GameState& gs, const GenericHandle& handle) -> GenericHandle
@@ -95,7 +95,7 @@ namespace idk::detail
 				} ...
 			};
 		}
-		static auto GenValidateJt()
+		constexpr static auto GenValidateJt()
 		{
 			return GameState::ValidateJT{
 				[](GameState& gs, const GenericHandle& handle) -> bool
@@ -105,7 +105,7 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenQueueForDestructionJt()
+		constexpr static auto GenQueueForDestructionJt()
 		{
 			return GameState::DestroyJT{
 				[](GameState& gs, const GenericHandle& handle)
@@ -115,7 +115,7 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenDestructionJt()
+		constexpr static auto GenDestructionJt()
 		{
 			return GameState::DestroyJT{
 				[](GameState& gs, const GenericHandle& handle)
@@ -124,10 +124,9 @@ namespace idk::detail
 						gs.DestroyObjectNow(handle_cast<Ts>(handle));
 					else
 					{
-						auto real_handle = handle_cast<Ts>(handle);
-						if (real_handle)
+						if (const auto real_handle = handle_cast<Ts>(handle))
 						{
-							auto entity = real_handle->GetGameObject();
+							const auto entity = real_handle->GetGameObject();
 							gs.DestroyObjectNow(real_handle);
 							assert(entity);
 							auto realent = std::addressof(*entity);
@@ -193,7 +192,7 @@ namespace idk
 	{
 		return DeactivateScene(scene.scene_id);
 	}
-	bool GameState::ValidateScene(Scene& scene)
+	bool GameState::ValidateScene(const Scene& scene)
 	{
 		return static_cast<ObjectPool<GameObject>*>(std::get<0>(_objects).get())->ValidateScene(scene.scene_id);
 	}
@@ -203,12 +202,12 @@ namespace idk
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::type type)
 	{
-		auto id = GetTypeID(type);
+		const auto id = GetTypeID(type);
 		return id <= ComponentCount ? create_type_jt[id](*this, handle) : GenericHandle{};
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::dynamic dyn)
 	{
-		auto id = GetTypeID(dyn.type);
+		const auto id = GetTypeID(dyn.type);
 		return id <= ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
 	}
 	bool GameState::ValidateHandle(const GenericHandle& handle)

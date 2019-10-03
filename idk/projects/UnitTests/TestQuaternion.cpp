@@ -26,7 +26,7 @@ TEST(Math, QuaternionMultiplication)
 	auto q = slerp(quat{ 1, 0, 0, 0 }, quat{ 0, 0, 1, 0 }, 0.f);
 	auto q2 = q * 5.f;
 	auto q3 = 5.f * q;
-	quat::Scalar a;
+	[[maybe_unused]] quat::Scalar a;
 	5.f * vec4{};
 }
 

@@ -11,7 +11,7 @@ namespace idk
 	template<typename Res>
 	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(PathHandle p)
 	{
-		auto res = Core::GetResourceManager().LoaderEmplaceResource<Res>();
+		const auto res = Core::GetResourceManager().LoaderEmplaceResource<Res>();
 		auto stream = p.Open(FS_PERMISSIONS::READ);
 		parse_text(stringify(stream), *res);
 		res->Dirty();
@@ -23,7 +23,7 @@ namespace idk
 	{
 		if (bundle.metadatas.size())
 		{
-			auto res = Core::GetResourceManager().LoaderEmplaceResource<Res>(bundle.metadatas[0].guid);
+			const auto res = Core::GetResourceManager().LoaderEmplaceResource<Res>(bundle.metadatas[0].guid);
 			auto stream = p.Open(FS_PERMISSIONS::READ);
 			parse_text(stringify(stream), *res);
 			if constexpr (has_tag_v<Res, MetaTag>)

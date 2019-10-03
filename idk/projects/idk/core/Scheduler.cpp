@@ -22,18 +22,18 @@ namespace idk
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
 		_accumulated_dt += std::min(_real_dt, dt_limit);
 
-		auto execute_pass = [](auto& pass_vector)
+		constexpr auto execute_pass = [](auto& pass_vector)
 		{
 			for (auto& elem : pass_vector)
 			{
-				time_point pt = Clock::now();
+				const time_point pt = Clock::now();
 				bool paused = false;
 				if (!elem.call() && elem.paused_call)
 				{
 					elem.paused_call();
 					paused = true;
 				}
-				time_point end = Clock::now();
+				const time_point end = Clock::now();
 				elem.previous_frames.push_back(Pass::Call{ duration_cast<seconds>(end - pt), paused });
 			}
 		};

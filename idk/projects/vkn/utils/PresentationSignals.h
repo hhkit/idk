@@ -13,9 +13,9 @@ namespace idk::vkn
 		vk::UniqueFence			inflight_fence{};
 
 		PresentationSignals() = default;
-		PresentationSignals(PresentationSignals&& rhs);
+		PresentationSignals(PresentationSignals&& rhs) noexcept;
 
-		PresentationSignals& operator=(PresentationSignals&& rhs);
+		PresentationSignals& operator=(PresentationSignals&& rhs) noexcept;
 		
 		void Init(VulkanView& view);
 	};

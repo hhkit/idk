@@ -38,9 +38,9 @@ namespace idk
 
 	void AudioSource::AddAudioClip(string_view filePath)
 	{
-		RscHandle<AudioClip> audioPtr1 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(filePath));
-
-		audio_clip_list.push_back(audioPtr1);
+		auto audioPtr1 = Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(filePath));
+		if (audioPtr1)
+			audio_clip_list.push_back(*audioPtr1);
 	}
 
 

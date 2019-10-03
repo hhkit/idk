@@ -8,7 +8,7 @@ namespace idk::phys
 		template<>
 		float PerpDist<(&vec3::x)>(vec3 point_at_edge, vec3 extents)
 		{
-			vec3 disp_from_corner = (point_at_edge - extents);
+			const vec3 disp_from_corner = (point_at_edge - extents);
 
 			return (disp_from_corner.y < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.y : disp_from_corner.length());
 		}
@@ -16,7 +16,7 @@ namespace idk::phys
 		template<>
 		float PerpDist<&vec3::y>(vec3 point_at_edge, vec3 extents)
 		{
-			vec3 disp_from_corner = (point_at_edge - extents);
+			const vec3 disp_from_corner = (point_at_edge - extents);
 
 			return (disp_from_corner.x < 0) ? disp_from_corner.z : ((disp_from_corner.z < 0) ? disp_from_corner.x : disp_from_corner.length());
 		}
@@ -24,7 +24,7 @@ namespace idk::phys
 		template<>
 		float PerpDist<&vec3::z>(vec3 point_at_edge, vec3 extents)
 		{
-			vec3 disp_from_corner = (point_at_edge - extents);
+			const vec3 disp_from_corner = (point_at_edge - extents);
 
 			return (disp_from_corner.y < 0) ? disp_from_corner.x : ((disp_from_corner.x < 0) ? disp_from_corner.y : disp_from_corner.length());
 		}
@@ -111,13 +111,13 @@ namespace idk::phys
 				: disp_to_rhs - disp_to_rhs.dot(normalized_n) * normalized_n; // rays not on same plane, remove perp component
 
 			//rays are on the same plane
-			vec3 nml_disp = (tangential_displacement - tangential_displacement.project_onto(rhs.velocity));
+			const vec3 nml_disp = (tangential_displacement - tangential_displacement.project_onto(rhs.velocity));
 			const auto nml_len = nml_disp.length();
 			const auto normalized_normal_disp = nml_disp / nml_len;
 
 			const auto t = nml_len / lhs.velocity.dot(normalized_normal_disp);
 
-			vec3 tmp = lhs.velocity * t;
+			const vec3 tmp = lhs.velocity * t;
 			const auto dist = t;
 
 			if (dist > -epsilon)
@@ -167,7 +167,7 @@ namespace idk::phys
 		}
 
 		auto disp_to_box = (box.center() - lhs.origin);
-		auto extents = box.extents();
+		const auto extents = box.extents();
 
 		auto result = detail::collide_ray_aabb_face<&vec3::x>(lhs, box);
 

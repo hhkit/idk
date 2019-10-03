@@ -18,7 +18,7 @@ namespace idk
 
 		for (auto& elem : controllers)
 		{
-			auto anim = elem.GetCurrentAnimation();
+			const auto anim = elem.GetCurrentAnimation();
 			const auto& skeleton = elem._skeleton->data();
 			if (elem._is_playing && anim)
 			{
@@ -37,9 +37,9 @@ namespace idk
 				if (elem._elapsed >= anim->GetDuration())
 					elem._elapsed -= anim->GetDuration();
 				
-				float ticks = elem._elapsed * anim->GetFPS();
-				float num_ticks = anim->GetNumTicks();
-				float time_in_ticks = fmod(ticks, num_ticks);
+				const float ticks = elem._elapsed * anim->GetFPS();
+				const float num_ticks = anim->GetNumTicks();
+				const float time_in_ticks = fmod(ticks, num_ticks);
 
 				// Loop through the skeleton
 				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
@@ -56,7 +56,7 @@ namespace idk
 						for (auto& channel : anim_node->_channels)
 						{
 							// Concat the interpolated channels and the current pose.
-							auto interp_pose = interpolateChannel(channel, time_in_ticks);
+							const auto interp_pose = interpolateChannel(channel, time_in_ticks);
 							if (first)
 							{
 								curr_pose.position =	interp_pose.position;
@@ -107,15 +107,15 @@ namespace idk
 		// Scaling
 		if (channel._scale.size() > 1)
 		{
-			size_t start = find_key(channel._scale, time_in_ticks);
+			const size_t start = find_key(channel._scale, time_in_ticks);
 			if (start + 1 >= channel._scale.size())
 			{
 				interp_pose.scale = channel._scale[start]._val;
 			}
 			else
 			{
-				float dt = static_cast<float>(channel._scale[start + 1]._time - channel._scale[start]._time);
-				float factor = (time_in_ticks - channel._scale[start]._time) / dt;
+				const float dt = static_cast<float>(channel._scale[start + 1]._time - channel._scale[start]._time);
+				const float factor = (time_in_ticks - channel._scale[start]._time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
 				interp_pose.scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
@@ -125,15 +125,15 @@ namespace idk
 		// Translate
 		if (channel._translate.size() > 1)
 		{
-			size_t start = find_key(channel._translate, time_in_ticks);
+			const size_t start = find_key(channel._translate, time_in_ticks);
 			if (start + 1 >= channel._translate.size())
 			{
 				interp_pose.position = channel._translate[start]._val;
 			}
 			else
 			{
-				float dt = static_cast<float>(channel._translate[start + 1]._time - channel._translate[start]._time);
-				float factor = (time_in_ticks - channel._translate[start]._time) / dt;
+				const float dt = static_cast<float>(channel._translate[start + 1]._time - channel._translate[start]._time);
+				const float factor = (time_in_ticks - channel._translate[start]._time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
 				interp_pose.position = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
@@ -143,15 +143,15 @@ namespace idk
 		// Rotate
 		if (channel._rotation.size() > 1)
 		{
-			size_t start = find_key(channel._rotation, time_in_ticks);
+			const size_t start = find_key(channel._rotation, time_in_ticks);
 			if (start + 1 >= channel._rotation.size())
 			{
 				interp_pose.rotation = channel._rotation[start]._val;
 			}
 			else
 			{
-				float dt = static_cast<float>(channel._rotation[start + 1]._time - channel._rotation[start]._time);
-				float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
+				const float dt = static_cast<float>(channel._rotation[start + 1]._time - channel._rotation[start]._time);
+				const float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
 				interp_pose.rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);

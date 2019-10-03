@@ -6,7 +6,7 @@
 namespace idk
 {
 	template<typename T>
-	bool GenericHandle::is_type() const
+	bool GenericHandle::is_type() const noexcept
 	{
 		return Handle<T>::type_id == type;
 	}

@@ -18,7 +18,7 @@ namespace idk
 					return curr_global;
 			}();
 
-			auto decomp = decompose(new_local);
+			const auto decomp = decompose(new_local);
 			position = decomp.position;
 			rotation = decomp.rotation;
 			scale = decomp.scale;
@@ -55,7 +55,7 @@ namespace idk
 
 	void Transform::LocalMatrix(const mat4& m)
 	{
-		auto decomp = decompose(m);
+		const auto decomp = decompose(m);
 		position = decomp.position;
 		rotation = decomp.rotation;
 		scale    = decomp.scale;
@@ -65,14 +65,14 @@ namespace idk
 	{
 		if (!parent)
 		{
-			auto decomp = decompose(m);
+			const auto decomp = decompose(m);
 			position = decomp.position;
 			rotation = decomp.rotation;
 			scale    = decomp.scale;
 		}
 		else
 		{
-			auto decomp = decompose(parent->Transform()->GlobalMatrix().inverse() * m);
+			const auto decomp = decompose(parent->Transform()->GlobalMatrix().inverse() * m);
 			position = decomp.position;
 			rotation = decomp.rotation;
 			scale    = decomp.scale;
@@ -118,13 +118,11 @@ namespace idk
 			position = pos;
 		else
 		{
-			auto curr_global = GlobalMatrix();
+			const auto curr_global = GlobalMatrix();
 			auto decomp = decompose(GlobalMatrix());
 			decomp.position = pos;
-			auto new_global = decomp.recompose();
-			
-			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
-
+			const auto new_global = decomp.recompose();
+			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
 			position = decompose(parent_inv * new_global).position;
 		}
 	}
@@ -135,13 +133,11 @@ namespace idk
 			rotation = rot;
 		else
 		{
-			auto curr_global = GlobalMatrix();
+			const auto curr_global = GlobalMatrix();
 			auto decomp = decompose(GlobalMatrix());
 			decomp.rotation = rot;
-			auto new_global = decomp.recompose();
-
-			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
-
+			const auto new_global = decomp.recompose();
+			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
 			rotation = decompose(parent_inv * new_global).rotation;
 		}
 	}
@@ -152,12 +148,12 @@ namespace idk
 			scale = scl;
 		else
 		{
-			auto curr_global = GlobalMatrix();
+			const auto curr_global = GlobalMatrix();
 			auto decomp = decompose(GlobalMatrix());
 			decomp.scale = scl;
-			auto new_global = decomp.recompose();
+			const auto new_global = decomp.recompose();
 
-			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
+			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
 			position = decompose(parent_inv * new_global).scale;
 		}
 	}

@@ -16,7 +16,7 @@ namespace idk
 			template<unsigned ... Indexes>
 			constexpr void _advance(std::index_sequence<Indexes...>) noexcept
 			{
-				auto var = std::make_tuple(++std::get<Indexes>(track) ...);
+				const auto var = std::make_tuple(++std::get<Indexes>(track) ...);
 				(var);
 			}
 

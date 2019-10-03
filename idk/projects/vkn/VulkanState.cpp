@@ -1127,7 +1127,10 @@ namespace idk::vkn
 				auto& current_signal = elem->pSignals[current_frame];
 
 				waitSemaphores = *elem->pSignals[current_frame].render_finished;
-				readySemaphores = ((i + 1) == m_swapchain->m_inBetweens.size()) ? *current_signal.render_finished : *m_swapchain->m_inBetweens[i + 1]->pSignals[current_frame].render_finished;
+				readySemaphores = 
+					((s_cast<size_t>(i) + 1) == m_swapchain->m_inBetweens.size()) 
+					? *current_signal.render_finished 
+					: *m_swapchain->m_inBetweens[s_cast<size_t>(i) + 1]->pSignals[current_frame].render_finished;
 
 				//updateUniformBuffer(imageIndex);
 

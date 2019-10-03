@@ -65,7 +65,7 @@ namespace idk
 
 			for (auto& rigidbody : rbs)
 			{
-				auto tfm = rigidbody.GetGameObject()->Transform();
+				const auto tfm = rigidbody.GetGameObject()->Transform();
 
 				if (rigidbody.sleeping())
 				{
@@ -76,7 +76,7 @@ namespace idk
 				};
 
 				auto old_mat = tfm->GlobalMatrix();
-				vec3 curr_pos = old_mat[3].xyz;
+				const vec3 curr_pos = old_mat[3].xyz;
 
 				// verlet integrate towards new position
 				//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
@@ -165,7 +165,7 @@ namespace idk
 				}
 			}
 
-			for (auto& [pair, result] : collisions)
+			for (const auto& [pair, result] : collisions)
 			{
 				const auto& lcollider = pair.lhs;
 				const auto& rcollider = pair.rhs;

@@ -44,12 +44,12 @@ namespace idk
 		return data()[_size - 1];
 	}
 	template<typename T>
-	T* pool<T>::data()
+	T* pool<T>::data() noexcept
 	{
 		return r_cast<T*>(_intern.data());
 	}
 	template<typename T>
-	size_t pool<T>::size() const
+	size_t pool<T>::size() const noexcept
 	{
 		return _size;
 	}
