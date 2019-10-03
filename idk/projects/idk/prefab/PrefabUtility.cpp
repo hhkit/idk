@@ -123,11 +123,12 @@ namespace idk
 		}
 
 
-		static void propagate_property(RscHandle<Prefab> prefab, int object_index, int component_index, string_view property_path)
+		static void propagate_property(Handle<GameObject> origin, RscHandle<Prefab> prefab,
+                                       int object_index, int component_index, string_view property_path)
 		{
 			for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
 			{
-				if (prefab_inst.prefab != prefab)
+				if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin)
 					continue;
 
 				auto component_name = prefab->data[object_index].components[component_index].type.name();
@@ -139,22 +140,23 @@ namespace idk
 			}
 		}
 
-		static void propagate_added_component(RscHandle<Prefab> prefab, int object_index, int component_index)
+		static void propagate_added_component(Handle<GameObject> origin, RscHandle<Prefab> prefab, int object_index, int component_index)
 		{
 			for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
 			{
-				if (prefab_inst.prefab != prefab)
+				if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin)
 					continue;
 
 				prefab_inst.objects[object_index]->AddComponent(prefab->data[object_index].components[component_index]);
 			}
 		}
 
-        static void propagate_removed_component(RscHandle<Prefab> prefab, int object_index, string_view component_name, int component_add_index)
+        static void propagate_removed_component(Handle<GameObject> origin, RscHandle<Prefab> prefab,
+                                                int object_index, string_view component_name, int component_add_index)
         {
             for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
             {
-                if (prefab_inst.prefab != prefab)
+                if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin)
                     continue;
 
                 for (auto c : prefab_inst.objects[object_index]->GetComponents())
@@ -474,7 +476,7 @@ namespace idk
 		auto index = std::find(prefab_inst.objects.begin(), prefab_inst.objects.end(), target) - prefab_inst.objects.begin();
 		prefab_inst.prefab->data[index].components.push_back((*component).copy());
 
-		helpers::propagate_added_component(prefab_inst.prefab, static_cast<int>(index),
+		helpers::propagate_added_component(instance_root, prefab_inst.prefab, static_cast<int>(index),
                                            static_cast<int>(prefab_inst.prefab->data[index].components.size() - 1));
 
         prefab_inst.prefab->Dirty();
@@ -501,7 +503,7 @@ namespace idk
             }
         }
 
-        helpers::propagate_removed_component(prefab_inst.prefab, static_cast<int>(index), component_name, component_add_index);
+        helpers::propagate_removed_component(instance_root, prefab_inst.prefab, static_cast<int>(index), component_name, component_add_index);
         prefab_inst.prefab->Dirty();
     }
 
@@ -547,10 +549,11 @@ namespace idk
 			}
 		}
 
-		helpers::propagate_property(prefab_inst.prefab,
-			override.object_index,
-			prefab_inst.prefab->data[override.object_index].GetComponentIndex(override.component_name),
-			override.property_path);
+        helpers::propagate_property(instance_root,
+                                    prefab_inst.prefab,
+                                    override.object_index,
+                                    prefab_inst.prefab->data[override.object_index].GetComponentIndex(override.component_name),
+                                    override.property_path);
         prefab_inst.prefab->Dirty();
 	}
 
@@ -600,11 +603,12 @@ namespace idk
             i++;
         }
 
-        for (auto & override : prefab_inst.overrides)
+        for (auto& override : prefab_inst.overrides)
         {
             _apply_property_override(prefab_inst, override);
 
-            helpers::propagate_property(prefab,
+            helpers::propagate_property(instance_root,
+                                        prefab,
                                         override.object_index,
                                         prefab->data[override.object_index].GetComponentIndex(override.component_name),
                                         override.property_path);
