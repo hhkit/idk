@@ -16,7 +16,7 @@ namespace idk
 
     namespace helpers
     {
-        static void set_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
+        static void add_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
         {
             if (prefab_comp.is<Transform>())
             {
@@ -182,7 +182,7 @@ namespace idk
         auto handle = scene.CreateGameObject();
         auto iter = prefab->data.begin();
         for (const auto& d : iter->components)
-            helpers::set_component(handle, d);
+            helpers::add_component(handle, d);
 
         vector<Handle<GameObject>> game_objects{ handle };
         for (++iter; iter != prefab->data.end(); ++iter)
@@ -191,7 +191,7 @@ namespace idk
             game_objects.push_back(child_handle);
 
             for (const auto& d : iter->components)
-                helpers::set_component(child_handle, d);
+                helpers::add_component(child_handle, d);
             child_handle->Transform()->parent = game_objects[iter->parent_index];
         }
 
@@ -325,8 +325,12 @@ namespace idk
                 auto& obj = prefab_inst.objects[i];
 				for (const auto& c : prefab_inst.prefab->data[i].components)
 				{
-					if (obj->GetComponent(c.type)) // if component exists
-						helpers::set_component(obj, c);
+                    if (auto handle = obj->GetComponent(c.type)) // if component exists
+                    {
+                        auto dyn = *handle;
+                        for (size_t prop_index = 0; prop_index < dyn.type.count(); ++prop_index)
+                            dyn.get_property(prop_index).value = c.get_property(prop_index).value;
+                    }
 				}
             }
 

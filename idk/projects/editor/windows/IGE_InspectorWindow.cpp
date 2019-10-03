@@ -14,26 +14,29 @@ of the editor.
 
 
 #include "pch.h"
-#include <windows/IGE_InspectorWindow.h>
-#include <editor/commands/CommandList.h>
-#include <editorstatic/imgui/imgui_internal.h> //InputTextEx
-#include <app/Application.h>
-#include <scene/SceneManager.h>
-#include <res/ResourceManager.h>
-#include <reflect/reflect.h>
-#include <IncludeComponents.h>
+#include "IGE_InspectorWindow.h"
+
 #include <IDE.h>
-#include <iostream>
-#include <ds/span.h>
-#include <imgui/imgui_stl.h>
-#include <math/euler_angles.h>
-#include <widgets/InputResource.h>
-#include <widgets/DragVec3.h>
-#include <meta/variant.h>
-#include <prefab/PrefabUtility.h>
+#include <editor/commands/CommandList.h>
+#include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+
+#include <app/Application.h>
+#include <ds/span.h>
+#include <reflect/reflect.h>
+#include <res/ResourceManager.h>
+#include <scene/SceneManager.h>
+#include <math/euler_angles.h>
+#include <meta/variant.h>
+#include <prefab/PrefabUtility.h>
+#include <IncludeComponents.h>
 #include <IncludeResources.h>
+
+#include <imgui/imgui_stl.h>
+#include <imgui/imgui_internal.h> //InputTextEx
+#include <iostream>
+
 
 namespace idk {
 
@@ -96,7 +99,7 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
         if (_displayed_asset.guid())
         {
-
+            DisplayAsset(_displayed_asset);
         }
         else
         {
@@ -696,20 +699,82 @@ namespace idk {
 
     void IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
     {
-        //auto& data = prefab->data[0];
-        //
-        //auto trans = data.FindComponent(reflect::get_type<Transform>().name());
-        //auto& components = prefab->data[0].components;
+        auto& data = prefab->data[0];
 
-        //for(auto& c : )
+        auto trans = data.FindComponent(reflect::get_type<Transform>().name());
+        if (trans.valid())
+        {
+            ImGui::PushID(0);
+            if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                auto& c = trans.get<Transform>();
+
+                const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
+                const float pad_y = ImGui::GetStyle().FramePadding.y;
+
+                ImGui::PushItemWidth(item_width);
+
+                auto y = ImGui::GetCursorPosY();
+                ImGui::SetCursorPosY(y + pad_y);
+                ImGui::Text("Position");
+                ImGui::SetCursorPosY(y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+                ImGuidk::DragVec3("##0", &c.position);
+
+                y = ImGui::GetCursorPosY();
+                ImGui::SetCursorPosY(y + pad_y);
+                ImGui::Text("Rotation");
+                ImGui::SetCursorPosY(y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+                ImGuidk::DragQuat("##1", &c.rotation);
+
+                y = ImGui::GetCursorPosY();
+                ImGui::SetCursorPosY(y + pad_y);
+                ImGui::Text("Scale");
+                ImGui::SetCursorPosY(y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+                if (ImGuidk::DragVec3("##2", &c.scale))
+                {
+                    PrefabUtility::PropagatePrefabChangesToInstances(prefab);
+                    prefab->Dirty();
+                }
+
+                ImGui::PopItemWidth();
+            }
+            ImGui::PopID();
+        }
+
+        auto& components = prefab->data[0].components;
+
+        int i = 0;
+        for (auto& c : components)
+        {
+            ++i;
+            if (c.type == reflect::get_type<Transform>() ||
+                c.type == reflect::get_type<Name>())
+                continue;
+
+            ImGui::PushID(i);
+            if (ImGui::CollapsingHeader(c.type.name().data(), ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                if (displayVal(c))
+                {
+                    PrefabUtility::PropagatePrefabChangesToInstances(prefab);
+                    prefab->Dirty();
+                }
+            }
+            ImGui::PopID();
+        }
     }
 
 
 
-    void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
+    bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
+
+        bool outer_changed = false;
 
         dyn.visit([&](auto&& key, auto&& val, int /*depth_change*/) { //Displays all the members for that variable
 
@@ -766,7 +831,6 @@ namespace idk {
 
                 keyName.insert(0, "##"); //For Imgui stuff
 
-                ImGui::SameLine();
                 ImGui::SetCursorPosY(currentHeight);
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
@@ -793,6 +857,10 @@ namespace idk {
                 else if constexpr (std::is_same_v<T, vec3>)
                 {
                     changed |= ImGuidk::DragVec3(keyName.c_str(), &val);
+                }
+                else if constexpr (std::is_same_v<T, quat>)
+                {
+                    changed |= ImGuidk::DragQuat(keyName.c_str(), &val);
                 }
                 else if constexpr (std::is_same_v<T, color>)
                 {
@@ -892,6 +960,7 @@ namespace idk {
                     ImGui::EndPopup();
                 }
 
+                outer_changed |= changed;
                 if (changed && _prefab_inst)
                     PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
 
@@ -903,6 +972,8 @@ namespace idk {
             }
 
         });
+
+        return outer_changed;
     }
 
 	void IGE_InspectorWindow::TransformModifiedCheck()
