@@ -139,6 +139,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
+    //auto test___ = mat_inst->GetUniformBlock("_UB1");
 
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Calico Cat.fbx" }) {
