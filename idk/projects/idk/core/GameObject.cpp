@@ -18,7 +18,7 @@ namespace idk
 	}
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{
-		auto tid = GameState::GetGameState().GetTypeID(type);
+		const auto tid = GameState::GetGameState().GetTypeID(type);
 
 		for (auto& elem : _components)
 			if (elem.type == tid)
