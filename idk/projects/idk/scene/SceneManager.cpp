@@ -33,6 +33,9 @@ namespace idk
 
 	RscHandle<Scene> SceneManager::GetSceneByBuildIndex(unsigned char index) const
 	{
+		if (index == 0x81)
+			return _prefab_scene;
+
 		for (auto& elem : _scenes)
 		{
 			if (elem.build_index == index)
@@ -91,13 +94,21 @@ namespace idk
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
 			Core::GetResourceManager().Load(elem);
+		
 		if (_active_scene)
 			_active_scene->Load();
+
+		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(0x81);
 	}
 
 	RscHandle<Scene> SceneManager::GetActiveScene()
 	{
 		return _active_scene;
+	}
+
+	RscHandle<Scene> SceneManager::GetPrefabScene()
+	{
+		return _prefab_scene;
 	}
 
 	bool SceneManager::SetActiveScene(RscHandle<Scene> s)

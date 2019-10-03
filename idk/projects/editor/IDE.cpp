@@ -32,11 +32,11 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/OpenGLTextureLoader.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
+#include <editor/windows/IGE_ShadowMapWindow.h>
 #include <res/EasyFactory.h>
 #include <imgui/ImGuizmo.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
-#include <editor/windows/IGE_ShadowMapWindow.h>
 
 namespace idk
 {
@@ -162,6 +162,7 @@ namespace idk
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);
 		ADD_WINDOW(IGE_MaterialEditor);
+		ADD_WINDOW(IGE_ProfilerWindow);
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();

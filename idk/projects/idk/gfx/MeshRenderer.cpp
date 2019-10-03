@@ -23,7 +23,12 @@ namespace idk
 
 			cast_shadows,
 			receive_shadows,
-			{{0,vtx::Attrib::Position},{1,vtx::Attrib::Normal},{2,vtx::Attrib::UV}}
+			{
+				{0,vtx::Attrib::Position},
+				{1,vtx::Attrib::Normal},
+				{2,vtx::Attrib::UV},
+				{3,vtx::Attrib::Tangent},
+			}
 		};
 	}
 
@@ -33,8 +38,8 @@ namespace idk
 		{ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal,   1),
-			std::make_pair(vtx::Attrib::Tangent,  3),
 			std::make_pair(vtx::Attrib::UV,       2),
+			std::make_pair(vtx::Attrib::Tangent,  3),
 		} };
 		return r;
 	}

@@ -131,7 +131,7 @@ namespace idk
 
 		// We also need to generate all the game objects here.
 		// The game object's transform is the inverse of bone_offset.
-		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(GetHandle().scene);
 		
 		_pre_global_transforms.clear();
 		_final_bone_transforms.clear();
@@ -194,7 +194,7 @@ namespace idk
 
 	void Animator::clearGameObjects()
 	{
-		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(GetHandle().scene);
 
 		for (auto& obj : _child_objects)
 		{

@@ -19,6 +19,7 @@ End Header --------------------------------------------------------*/
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
+layout (location = 3) in vec3 tangent;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
@@ -37,6 +38,7 @@ layout(location = 1) out VS_OUT
   vec2 uv;
   vec3 normal;
   vec3 tangent;
+  vec3 world_pos;
 } vs_out;
 
 layout(location = 0) out gl_PerVertex
@@ -47,7 +49,8 @@ layout(location = 0) out gl_PerVertex
 void main()
 {
 	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normalize(normal), 0.0));
+	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normal, 0.0));
+	vs_out.tangent  = vec3(ObjectMat4s.normal_transform * vec4(tangent, 0.0));
 	vs_out.uv       = uv;
     gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
 }

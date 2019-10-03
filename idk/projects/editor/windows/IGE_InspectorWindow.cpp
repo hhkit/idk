@@ -34,14 +34,11 @@ of the editor.
 namespace idk {
 
 	IGE_InspectorWindow::IGE_InspectorWindow()
-		:IGE_IWindow{ "Inspector##IGE_InspectorWindow",true,ImVec2{ 300,600 },ImVec2{ 450,150 } } {		//Delegate Constructor to set window size
-			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+		:IGE_IWindow{ "Inspector##IGE_InspectorWindow",true,ImVec2{ 300,600 },ImVec2{ 450,150 } } 
+	{	//Delegate Constructor to set window size
+		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
 		window_flags = ImGuiWindowFlags_NoCollapse;
-
-
-
-
 	}
 
 	void IGE_InspectorWindow::BeginWindow()
@@ -476,7 +473,11 @@ namespace idk {
 		
 		string idName = std::to_string(gameObject.id);
 		if (editor.selected_gameObjects.size() == 1)
-			ImGui::Text("ID: %s", idName.data());
+			ImGui::Text("ID: %s (scene: %d, index: %d, gen: %d)", 
+				idName.data(), 
+				s_cast<int>(gameObject.scene), 
+				s_cast<int>(gameObject.index), 
+				s_cast<int>(gameObject.gen));
 		else
 			ImGui::TextDisabled("Multiple gameobjects selected");
 	}

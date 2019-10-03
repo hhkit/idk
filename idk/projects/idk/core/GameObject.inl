@@ -9,9 +9,9 @@ namespace idk
 	{
 		if constexpr (T::Unique)
 		{
-			auto handle = GetComponent<T>();
-			if (handle)
-				return handle;
+			auto existing_handle = GetComponent<T>();
+			if (existing_handle)
+				return existing_handle;
 		}
 
 		auto comp = GameState::GetGameState().CreateObject<T>(GetHandle().scene);

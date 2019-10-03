@@ -20,8 +20,9 @@ End Header --------------------------------------------------------*/
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
-layout (location = 3) in ivec4 bone_ids;
-layout (location = 4) in vec4 bone_weights;
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in ivec4 bone_ids;
+layout (location = 5) in vec4 bone_weights;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
@@ -56,22 +57,20 @@ layout (location = 1) out VS_OUT
 
 void main()
 {
-  mat4 b_transform =  BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
-  
-  b_transform      += BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1];
-  b_transform      += BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2];
-  b_transform      += BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
+	mat4 b_transform =  BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
+	
+	b_transform      += BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1];
+	b_transform      += BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2];
+	b_transform      += BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
 	
 	b_transform /= (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3]);
 	mat4 resultant = ObjectMat4s.object_transform *
                      b_transform;  
 	vs_out.position = vec3(resultant * vec4(position, 1.0));
-	// O B 
-	// Binv O inv  // inv(OB)
-	// Oinv transpose * B inv tranpose  // tranpose(inv(OB))
 	
 	mat4 nml_transform = transpose(inverse(resultant));
 	vs_out.normal   = vec3( nml_transform * vec4(normal, 0.0));
+	vs_out.tangent  = vec3( nml_transform * vec4(tangent, 0.0));
 	vs_out.uv       = uv;
 	gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
  

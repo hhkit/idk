@@ -44,6 +44,7 @@ namespace idk
 		bool                StartupScene(RscHandle<Scene> scene);
 
 		RscHandle<Scene> GetActiveScene();
+		RscHandle<Scene> GetPrefabScene();
 		bool  SetActiveScene(RscHandle<Scene> s);
 
 		void DestroyObjects(span<GameObject> objs);
@@ -59,5 +60,6 @@ namespace idk
 
 		GameState*         _gs { nullptr };
 		SceneGraphBuilder  _sg_builder;
+		RscHandle<Scene>   _prefab_scene;
 	};
 }

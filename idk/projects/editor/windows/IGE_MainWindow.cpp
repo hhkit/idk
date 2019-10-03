@@ -185,7 +185,7 @@ namespace idk {
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", "ALT+F4")) {
 				std::cout << "Quit Window\n";
-
+				Core::Shutdown();
 			}
 			ImGui::EndMenu(); //BeginMenu("File")
 		}
