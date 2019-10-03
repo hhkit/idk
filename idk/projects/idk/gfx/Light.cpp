@@ -76,6 +76,7 @@ namespace idk
 					const PointLight& point_light = light_variant;
 					retval.light_color = point_light.light_color;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
+					retval.intensity = point_light.intensity;
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 
@@ -86,6 +87,7 @@ namespace idk
 					auto tfm = GetGameObject()->Transform();
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
+					retval.intensity = dir_light.intensity;
 				}
 
 				if constexpr (std::is_same_v<T, SpotLight>)
@@ -96,13 +98,15 @@ namespace idk
 					retval.v_dir = GetGameObject()->Transform()->Forward();
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
-					
+					retval.intensity = spotlight.intensity;
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
+				retval.shadow_bias = shadow_bias;
 				retval.v = LightCameraView{ this }(light_variant);
 				retval.p = LightCameraProj{}(light_variant);
 				retval.vp =  retval.p*retval.v;
 				retval.light_map = light_variant.light_map;
+				retval.cast_shadow = casts_shadows;
 			}
 		, light);
 

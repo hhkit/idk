@@ -39,6 +39,12 @@
     <ClInclude Include="system\TextureManager.h" />
     <ClInclude Include="program\ProgramFactory.h" />
     <ClInclude Include="resource\OpenGLCubemapFactory.h" />
+    <ClInclude Include="DDSData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLoader.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
