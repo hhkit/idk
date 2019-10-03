@@ -60,6 +60,7 @@ namespace idk {
 		const float float4Size = 0.25f;
 		const float itemSpacing = 50;
 		const float XYZSliderWidth = 10;
+        constexpr static float item_width_ratio = 0.6f;
 
 		//For when transforms are edited
 		bool			hasChanged = false; 

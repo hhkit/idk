@@ -92,6 +92,7 @@
     <ClInclude Include="windows\IGE_ShadowMapWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\DragVec3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
+    <ClCompile Include="widgets\DragVec3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

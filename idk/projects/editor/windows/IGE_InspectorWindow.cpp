@@ -28,6 +28,7 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <math/euler_angles.h>
 #include <widgets/InputResource.h>
+#include <widgets/DragVec3.h>
 #include <meta/variant.h>
 #include <prefab/PrefabUtility.h>
 
@@ -76,6 +77,9 @@ namespace idk {
 
 	void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
 	{
+        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+
 		dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
 
 			using K = std::decay_t<decltype(key)>;
@@ -105,8 +109,6 @@ namespace idk {
 				if (keyName == "Guid")
 					return false;
 
-				ImGui::SetCursorPosY(currentHeight + heightOffset);
-
                 bool has_override = false;
                 if (_prefab_inst)
                 {
@@ -124,6 +126,7 @@ namespace idk {
 
                 ImGui::BeginGroup();
 
+                ImGui::SetCursorPosY(currentHeight + pad_y);
                 if (has_override)
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
 				ImGui::Text(keyName.c_str());
@@ -134,8 +137,10 @@ namespace idk {
 
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(currentHeight);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
                 ImGui::PushID(keyName.c_str());
+                ImGui::PushItemWidth(item_width);
 
                 bool recurse = false;
                 bool changed = false;
@@ -157,26 +162,7 @@ namespace idk {
 				}
 				else if constexpr (std::is_same_v<T, vec3>)
                 {
-                    ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-                    ImGui::SetCursorPosX(widthOffset);
-
-                    ImGui::Text("X");
-                    ImGui::SameLine();
-
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
-                    changed |= ImGui::DragFloat("##X", &val.x);
-                    ImGui::SameLine();
-
-                    ImGui::Text("Y");
-                    ImGui::SameLine();
-                    changed |= ImGui::DragFloat("##Y", &val.y);
-                    ImGui::SameLine();
-
-                    ImGui::Text("Z");
-                    ImGui::SameLine();
-                    changed |= ImGui::DragFloat("##Z", &val.z);
-
-                    ImGui::PopItemWidth();
+                    changed |= ImGuidk::DragVec3(keyName.c_str(), &val);
 				}
 				else if constexpr (std::is_same_v<T, color>)
 				{
@@ -283,6 +269,7 @@ namespace idk {
                     PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
 
                 _curr_property_stack.pop_back();
+                ImGui::PopItemWidth();
                 ImGui::PopID();
 
                 return recurse;

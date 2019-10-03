@@ -140,6 +140,8 @@ namespace idk
             ImColor(65, 153, 163).Value;
 
         // complement accent
+        colors[ImGuiCol_PlotLinesHovered] =
+            ImColor(222, 116, 35).Value;
         //style.Colors[ImGuiCol_PlotLinesHovered]
         // ImColor(
 
