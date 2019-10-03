@@ -59,18 +59,22 @@ namespace idk::vkn
 			uint32_t buffer_offset;
 			uint32_t arr_index;
 			size_t size;
+			vk::DescriptorSetLayout layout;
+
 			BindingInfo(
 				uint32_t binding_,
 				vk::Buffer& ubuffer_,
 				uint32_t buffer_offset_,
 				uint32_t arr_index_,
-				size_t size_
+				size_t size_,
+				vk::DescriptorSetLayout layout_
 			) :
 				binding{ binding_ },
 				ubuffer{ ubuffer_ },
 				buffer_offset{ buffer_offset_ },
 				arr_index{ arr_index_ },
-				size{ size_ }
+				size{ size_ },
+				layout{ layout_ }
 			{
 			}
 			BindingInfo(
@@ -78,13 +82,15 @@ namespace idk::vkn
 				image_t ubuffer_,
 				uint32_t buffer_offset_,
 				uint32_t arr_index_,
-				size_t size_
+				size_t size_,
+				vk::DescriptorSetLayout layout_
 			) :
 				binding{ binding_ },
 				ubuffer{ ubuffer_ },
 				buffer_offset{ buffer_offset_ },
 				arr_index{ arr_index_ },
-				size{ size_ }
+				size{ size_ },
+				layout{ layout_ }
 			{
 			}
 			std::optional<vk::Buffer> GetBuffer()const
@@ -101,6 +107,10 @@ namespace idk::vkn
 				if (ubuffer.index() == IndexOf<data_t, Type>::value)
 					ret = std::get<Type>(ubuffer);
 				return ret;
+			}
+			vk::DescriptorSetLayout GetLayout()const
+			{
+				return layout;
 			}
 		};
 		const RenderObject& Object()const

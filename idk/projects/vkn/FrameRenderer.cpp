@@ -417,7 +417,8 @@ namespace idk::vkn
 			trf_buffer,
 			trf_offset,
 			0,
-			obj_uni.size
+			obj_uni.size,
+			obj_uni.layout
 		};
 		//);
 	}
@@ -454,7 +455,8 @@ namespace idk::vkn
 				ProcessedRO::image_t{texture.ImageView(),*texture.sampler,vk::ImageLayout::eGeneral},
 				0,
 				index,
-				obj_uni.size
+				obj_uni.size,
+				obj_uni.layout
 			}
 		);
 	}
@@ -488,26 +490,26 @@ namespace idk::vkn
 		{
 			return _shader.as<ShaderModule>();
 		}
-		struct ExBindingInfo
-		{
-			ProcessedRO::BindingInfo info;
-			vk::DescriptorSetLayout layout;
-			operator ProcessedRO::BindingInfo& ()
-			{
-				return info;
-			}
-			ExBindingInfo(const ProcessedRO::BindingInfo& i, vk::DescriptorSetLayout l) : info{i},layout{l}
-			{
-			}
-		};
+		//struct ExBindingInfo
+		//{
+		//	ProcessedRO::BindingInfo info;
+		//	vk::DescriptorSetLayout layout;
+		//	operator ProcessedRO::BindingInfo& ()
+		//	{
+		//		return info;
+		//	}
+		//	ExBindingInfo(const ProcessedRO::BindingInfo& i, vk::DescriptorSetLayout l) : info{i},layout{l}
+		//	{
+		//	}
+		//};
 
-		vector<std::pair<uint32_t, ExBindingInfo>> binding_infos;//set, binding_info
+		vector<std::pair<uint32_t, ProcessedRO::BindingInfo>> binding_infos;//set, binding_info
 		template<typename T>
 		void RegisterBindingInfo(const string& name, const T& data)
 		{
 			auto& shader = Shader();
 			auto& uni_info = shader.GetLayout(name);
-			binding_infos.emplace_back(uni_info.set, ExBindingInfo{CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager),uni_info.layout });
+			binding_infos.emplace_back(uni_info.set, CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
 		}
 		template<typename Tracker>
 		void BindRegistered(collated_bindings_t& collated_bindings,Tracker&& tracker)
@@ -708,7 +710,8 @@ namespace idk::vkn
 											buffer,
 											offset,
 											0,
-											ubo_info.size
+											ubo_info.size,
+											layout
 										}
 									);
 									collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
@@ -730,7 +733,8 @@ namespace idk::vkn
 													ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
 													0,
 													i,
-													ubo_info.size
+													ubo_info.size,
+											layout
 												}
 											);
 
@@ -855,7 +859,8 @@ namespace idk::vkn
 										buffer,
 										offset,
 										0,
-										ubo_info.size
+										ubo_info.size,
+											layout
 									}
 								);
 								collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
@@ -877,7 +882,8 @@ namespace idk::vkn
 												ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
 												0,
 												i,
-												ubo_info.size
+												ubo_info.size,
+											layout
 											}
 										);
 
@@ -1015,9 +1021,9 @@ namespace idk::vkn
 				auto ds = aitr->second.GetNext();
 				UpdateUniformDS(*View().Device(), ds, vector<ProcessedRO::BindingInfo>{ 
 					ProcessedRO::BindingInfo{
-						0,view_buffer,vb_offset,0,sizeof(mat4)
+						0,view_buffer,vb_offset,0,sizeof(mat4),itr->second
 					},
-					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4) }
+					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
 				});
 				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, 0, ds, {});
 			}
@@ -1139,13 +1145,12 @@ namespace idk::vkn
 			for (auto& [set_index,binfo] : p_ro.bindings)
 			{
 				//Get the descriptor set layout for the current set
-				auto layout_itr = layouts.find(set_index);
-				if (layout_itr != layouts.end())
+				//auto layout_itr = layouts.find(set_index);
+				//if (layout_itr != layouts.end())
 				{
 					//Find the allocated pool of descriptor sets that matches the descriptor set layout
-					auto ds_itr = alloced_dsets.find(layout_itr->second);
-					if (ds_itr == alloced_dsets.end())
-						ds_itr = alloced_dsets.find(layout_itr->second);
+					auto layout = binfo.front().GetLayout();
+					auto ds_itr = alloced_dsets.find(layout);
 					if(ds_itr!=alloced_dsets.end())
 					{
 						//Get a descriptor set from the allocated pool
