@@ -122,9 +122,9 @@ namespace idk {
                 DisplayNameComponent(c_name);
             }
 
-            if (gos[0]->HasComponent<PrefabInstance>())
+            if (auto inst_root = PrefabUtility::GetPrefabInstanceRoot(gos[0]))
             {
-                _prefab_inst = gos[0]->GetComponent<PrefabInstance>();
+                _prefab_inst = inst_root->GetComponent<PrefabInstance>();
                 _prefab_curr_obj_index = std::find(_prefab_inst->objects.begin(), _prefab_inst->objects.end(), gos[0]) - _prefab_inst->objects.begin();
                 DisplayPrefabInstanceControls(_prefab_inst);
             }

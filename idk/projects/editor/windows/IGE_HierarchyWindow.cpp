@@ -23,6 +23,7 @@ of the editor.
 #include <common/Name.h>
 #include <common/Transform.h>
 #include <core/Core.h>
+#include <prefab/PrefabUtility.h>
 #include <IDE.h>		//IDE
 #include <iostream>
 
@@ -175,7 +176,7 @@ namespace idk {
 				goName = c_name->name;
 			
 			const bool isNameEmpty = goName.empty();
-            const bool is_prefab = handle->HasComponent<PrefabInstance>();
+            const bool is_prefab = bool(PrefabUtility::GetPrefabInstanceRoot(handle));
 			if (isNameEmpty) {
 				goName = "Unnamed (";
 				goName.append(std::to_string(handle.id));
