@@ -41,7 +41,7 @@ namespace idk
 					sprintf_s(curr_fps, "%.5f s", last);
 				else
 					sprintf_s(curr_fps, "(PAUSED) %.5f s", last);
-				ImGui::PlotHistogram(pass.Name().data(), history.data(), history.size(), 0, curr_fps, 0.f, .025f);
+				ImGui::PlotHistogram(pass.Name().data(), history.data(), static_cast<int>(history.size()), 0, curr_fps, 0.f, .025f);
 			};
 		};
 

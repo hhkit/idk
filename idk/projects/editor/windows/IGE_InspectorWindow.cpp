@@ -711,7 +711,7 @@ namespace idk {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
-        dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+        dyn.visit([&](auto&& key, auto&& val, int /*depth_change*/) { //Displays all the members for that variable
 
             using K = std::decay_t<decltype(key)>;
             using T = std::decay_t<decltype(val)>;
@@ -786,7 +786,6 @@ namespace idk {
                 {
                     changed |= ImGui::DragInt(keyName.c_str(), &val);
                 }
-
                 else if constexpr (std::is_same_v<T, bool>)
                 {
                     changed |= ImGui::Checkbox(keyName.c_str(), &val);
@@ -812,25 +811,21 @@ namespace idk {
                 }
                 else if constexpr (is_template_v<T, std::variant>)
                 {
-                    static_assert(is_template_v<T, std::variant>, "HOW????");
                     const int curr_ind = s_cast<int>(val.index());
                     int new_ind = curr_ind;
 
                     constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
                     using VarCombo = std::array<const char*, sz>;
 
-
                     static auto combo_items = []()-> VarCombo
                     {
-                        static_assert(is_template_v<T, std::variant>, "HOW????");
-
                         constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
                         static std::array<string, sz> tmp_arr;
-                        std::array<const char*, sz> retval;
+                        std::array<const char*, sz> retval{};
 
                         auto sp = reflect::unpack_types<T>();
 
-                        for (auto i = 0; i < sz; ++i)
+                        for (size_t i = 0; i < sz; ++i)
                         {
                             tmp_arr[i] = format_name(sp[i].name());
                             retval[i] = tmp_arr[i].data();
@@ -838,7 +833,7 @@ namespace idk {
                         return retval;
                     }();
 
-                    if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
+                    if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), static_cast<int>(sz)))
                     {
                         val = variant_construct<T>(new_ind);
                         changed = true;
