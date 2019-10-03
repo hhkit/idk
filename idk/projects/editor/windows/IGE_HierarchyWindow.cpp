@@ -145,7 +145,7 @@ namespace idk {
 				for (int i = depth; i < 0; ++i)
 					ImGui::Unindent();
 			}
-			if (!handle || handle.scene == 0x80) //Ignore handle zero
+			if (!handle) //Ignore handle zero
 				return true;
 
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
