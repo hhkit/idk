@@ -22,11 +22,20 @@ namespace idk
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
 		_accumulated_dt += std::min(_real_dt, dt_limit);
 
-		auto execute_pass = [](const auto& pass_vector)
+		auto execute_pass = [](auto& pass_vector)
 		{
 			for (auto& elem : pass_vector)
+			{
+				time_point pt = Clock::now();
+				bool paused = false;
 				if (!elem.call() && elem.paused_call)
+				{
 					elem.paused_call();
+					paused = true;
+				}
+				time_point end = Clock::now();
+				elem.previous_frames.push_back(Pass::Call{ duration_cast<seconds>(end - pt), paused });
+			}
 		};
 
 		execute_pass(_always_update);
@@ -42,16 +51,35 @@ namespace idk
 
 		_last_frame = _this_frame;
 	}
-	seconds Scheduler::GetDeltaTime()
+	seconds Scheduler::GetDeltaTime()noexcept
 	{
 		return _fixed_dt;
 	}
-	seconds Scheduler::GetRealDeltaTime()
+	seconds Scheduler::GetRealDeltaTime()noexcept
 	{
 		return _real_dt;
+	}
+	span<Scheduler::Pass> Scheduler::GetPasses(UpdatePhase phase)noexcept
+	{
+		switch (phase)
+		{
+		case UpdatePhase::Fixed:     return span<Pass>(_fixed_update);
+		default:
+		case UpdatePhase::Update:    return span<Pass>(_always_update);
+		case UpdatePhase::PreRender: return span<Pass>(_prerender_update);
+		case UpdatePhase::Render:    return span<Pass>(_postrender_update);
+		};
 	}
 	Scheduler::Pass::Pass(Lock read, Lock write, FnPtr call, string_view update_name)
 		: read_components{ read }, write_components{ write }, call{ call }, update_name{update_name}
 	{
+	}
+	string_view Scheduler::Pass::Name() const
+	{
+		return update_name;
+	}
+	const Scheduler::Pass::PerformanceGraph& Scheduler::Pass::Graph() const
+	{
+		return previous_frames;
 	}
 }

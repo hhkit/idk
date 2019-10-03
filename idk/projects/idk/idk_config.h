@@ -30,7 +30,7 @@ namespace idk
 		,	class Animator
 
 		/// SCRIPTING
-		//,	class MonoBehavior
+		,	class MonoBehavior
 
 		/// AUDIO
 		,	class AudioSource
@@ -44,21 +44,22 @@ namespace idk
 		class Application
 		,	class FileSystem
 		//,	class InputSystem
-		//,	class ScriptSystem
+		,	class GamepadSystem
+		,	class ScriptSystem
 		,	class PhysicsSystem
 		,	class GraphicsSystem
 		,   class DebugRenderer
 		,	class AudioSystem
 		,	class ResourceManager
-		,	class SceneManager
 		,	class ProjectManager
+		,	class SceneManager
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
 	>;
 
 	using Resources = std::tuple<
-		class Scene
+			class Scene
 		,	class TestResource
 		,   class AudioClip
 		//,	class Font

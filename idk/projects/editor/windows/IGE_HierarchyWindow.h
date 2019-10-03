@@ -14,6 +14,7 @@ This window displays the editor window where you can select and modify gameobjec
 
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
+#include <event/Signal.h>
 
 namespace idk {
 	class IGE_HierarchyWindow :
@@ -25,6 +26,7 @@ namespace idk {
 		virtual void BeginWindow() override;
 		virtual void Update() override;
 
+        Signal<> OnGameObjectSelectionChanged;
 	
 	protected:
 

@@ -9,6 +9,7 @@ namespace idk::anim
 		string _name;
 		int  _parent;
 		mat4 _global_inverse_bind_pose;
+		quat _bone_pivot;
 		matrix_decomposition<real> _local_bind_pose;
 	};
 
@@ -22,12 +23,13 @@ namespace idk::anim
 		Skeleton(const vector<Bone>& bones, const hash_table<string, size_t>& bone_table);
 
 		const mat4& GetGlobalInverse() const { return _global_inverse; }
+		vector<std::pair<string_view, mat4>> GetBindPose() const;
 		const Bone* GetBone(string_view name) const;
 		const vector<Bone>& data() const { return _bones; }
 
 		void AddBone(string_view name, Bone b);
 		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat; }
-
+		
 	private:
 		mat4 _global_inverse;
 

@@ -109,7 +109,7 @@ namespace idk
 		while (itr != end)
 		{
 			++itr;
-			auto jtr = itr;
+			auto* jtr = itr;
 
 			if (jtr == end)
 				break;
@@ -122,12 +122,12 @@ namespace idk
 				// swap jtr[-1] and jtr[0]
 				auto& rhs = jtr[0];
 				auto& lhs = jtr[-1];
-				auto rhandle = rhs.handle;
-				auto lhandle = lhs.handle;
+				const auto rhandle = rhs.handle;
+				const auto lhandle = lhs.handle;
 				auto& rslot = _scenes[rhandle.scene].slots[rhandle.index];
 				auto& lslot = _scenes[lhandle.scene].slots[lhandle.index];
 
-				std::swap(rslot, lslot);
+				std::swap(rslot.index, lslot.index);
 				std::swap(rhs, lhs);
 
 				--jtr;

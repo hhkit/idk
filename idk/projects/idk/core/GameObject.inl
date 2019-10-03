@@ -7,6 +7,13 @@ namespace idk
 	template<typename T>
 	inline Handle<T> GameObject::AddComponent()
 	{
+		if constexpr (T::Unique)
+		{
+			auto existing_handle = GetComponent<T>();
+			if (existing_handle)
+				return existing_handle;
+		}
+
 		auto comp = GameState::GetGameState().CreateObject<T>(GetHandle().scene);
 		comp->_gameObject = GetHandle();
 		_components.emplace_back(comp);

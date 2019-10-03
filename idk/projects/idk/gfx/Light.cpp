@@ -39,9 +39,10 @@ namespace idk
 		}
 		mat4 operator()(const DirectionalLight&)
 		{
-			const vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
-			const vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return View(LookAt(v_pos, v_pos - v_dir, vec3{ 0,1,0 }));//tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->position, target_point, up)).normalize());//look_at(v_pos- v_dir*10.0f, v_pos , vec3{ 0,1,0 }).inverse();
+			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
+			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
+			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
+			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, -v_dir.z), vec3{ 0,1,0 });
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }

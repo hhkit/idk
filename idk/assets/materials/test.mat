@@ -57,7 +57,7 @@ nodes:
     - {type: VEC3, value: ""}
     position: {x: 291.401489, y: 225.566376}
   2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6: 
-    control_values: 1.000000,0.000000,0.000000,1.000000|
+    control_values: 1.000000,0.999990,0.999990,1.000000|
     guid: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
     input_slots: []
     name: input\basic\Color
@@ -165,4 +165,4 @@ nodes:
 parameters: 
 - {default_value: 0.500000, name: Metallic, type: FLOAT}
 - {default_value: 65509e2c-bcb6-48a1-9c88-17a3701d6028, name: Tex0, type: SAMPLER2D}
-- {default_value: 1.000000, name: Roughness, type: FLOAT}
+- {default_value: 0.500000, name: Roughness, type: FLOAT}

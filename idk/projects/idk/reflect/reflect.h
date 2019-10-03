@@ -99,7 +99,7 @@ namespace idk::reflect
 		friend struct detail::typed_context_base;
 		friend type get_type(string_view name);
 		template<typename T> friend type get_type();
-		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_visit_depth);
+		template<typename Visitor> friend void detail::visit(void*, type, Visitor&&, int&, int&);
 	};
 
 
@@ -171,8 +171,8 @@ namespace idk::reflect
 		dynamic(reflect::type type, void* obj);
 
 		friend struct detail::typed_context_base;
-		template<typename Visitor> friend void detail::visit(void* obj, reflect::type type, Visitor&& visitor, int& depth, int& last_visit_depth);
-		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& last_visit_depth);
+		template<typename Visitor> friend void detail::visit(void*, reflect::type, Visitor&&, int&, int&);
+		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&&, V&&, Visitor&&, int&, int&);
 	};
 
 

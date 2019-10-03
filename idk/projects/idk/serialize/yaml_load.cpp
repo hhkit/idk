@@ -62,7 +62,7 @@ namespace idk::yaml
 
 	static bool printable(int c)
 	{
-		return c >= (unsigned char)' ' && c <= (unsigned char)'~';
+		return c >= static_cast<unsigned char>(' ') && c <= static_cast<unsigned char>('~');
 	}
 	static bool skipws_until_lf(parser_state& p)
 	{
@@ -144,7 +144,7 @@ namespace idk::yaml
             }
 			p.stack.push_back(&p.stack.back()->emplace_back());
 			bool hit_lf;
-			int indent = handle_indent(++p, hit_lf);
+			const int indent = handle_indent(++p, hit_lf);
 			if (hit_lf)
 			{
 				if (indent > p.block_indents.back())
@@ -381,7 +381,7 @@ namespace idk::yaml
 
 		strip_trailing_ws(p.token);
 
-		int indent = handle_indent(p);
+		const int indent = handle_indent(p);
 		if (!p)
 			return;
 
@@ -458,11 +458,7 @@ namespace idk::yaml
 	node load(string_view str)
 	{
 		parser_state p{ str };
-
-		{
-			int indent = handle_indent(p);
-			p.block_indents.push_back(indent);
-		}
+        p.block_indents.push_back(handle_indent(p));
 
 		while (p && p.stack.size())
 		{

@@ -16,6 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <app/Application.h>
+#include <scene/ProjectManager.h>
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
@@ -94,20 +95,35 @@ namespace idk {
 
 			if (ImGui::MenuItem("New Scene", "CTRL+N")) {
 				Core::GetSystem<SceneManager>().SetActiveScene(Core::GetSystem<SceneManager>().CreateScene());
+				Core::GetSystem<SceneManager>().GetActiveScene()->Load();
 			}
 
 
 
 			if (ImGui::MenuItem("Open Scene", "CTRL+O")) {
 				std::cout << "Open Scene\n";
+				if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext))
+				{
+					auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
+					auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
+					auto hnd = *scene_res;
+					auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+					if (hnd != active_scene)
+					{
+						if (active_scene)
+							active_scene->Unload();
 
+						Core::GetSystem<SceneManager>().SetActiveScene(hnd);
+						hnd->Load();
+					}
+				}
 
 			} //Do something if pressed
 
 			ImGui::Separator();
 
-
-			if (ImGui::MenuItem("Save", "CTRL+S")) {
+			if (ImGui::MenuItem("Save", "CTRL+S")) 
+			{
 				auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 				auto path = [&]() -> opt<string>
 				{
@@ -115,9 +131,9 @@ namespace idk {
 						return string{ *path };
 					else
 					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext);
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext, DialogOptions::Save);
 						if (dialog_result)
-							return *dialog_result;
+							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 						else 
 							return std::nullopt;
 					}
@@ -125,28 +141,51 @@ namespace idk {
 
 				if (path)
 				{
-					Core::GetResourceManager().Rename(curr_scene, *path);
+					auto& p = *path;
+					if (p.find(Scene::ext) == std::string::npos)
+						p += Scene::ext;
+
+					Core::GetResourceManager().Rename(curr_scene, p);
 					Core::GetResourceManager().Save(curr_scene);
+					Core::GetSystem<ProjectManager>().SaveProject();
 				}
-				std::cout << "Save current Scene\n";
-
-
 			} //Do something if pressed
 
 
 
-			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) {
+			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) 
+			{
+				auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+				auto path = [&]() -> opt<string>
+				{
+					if (auto path = Core::GetResourceManager().GetPath(curr_scene))
+						return string{ *path };
+					else
+					{
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext, DialogOptions::Save);
+						if (dialog_result)
+							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
+						else
+							return std::nullopt;
+					}
+				}();
 
-				std::cout << "Save Scene As...\n";
+				if (path)
+				{
+					auto& p = *path;
+					if (p.find(Scene::ext) == std::string::npos)
+						p += Scene::ext;
 
-
-
+					Core::GetResourceManager().Rename(curr_scene, p);
+					Core::GetResourceManager().Save(curr_scene);
+					Core::GetSystem<ProjectManager>().SaveProject();
+				}
 			} //Do something if pressed
 
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", "ALT+F4")) {
 				std::cout << "Quit Window\n";
-
+				Core::Shutdown();
 			}
 			ImGui::EndMenu(); //BeginMenu("File")
 		}
@@ -196,8 +235,10 @@ namespace idk {
 			} //Do something if pressed
 			if (ImGui::MenuItem("Delete")) {
 				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-				for (Handle<GameObject>& i : selected_gameObjects) {
-					//Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(i);
+				IDE& editor = Core::GetSystem<IDE>();
+				while (!editor.selected_gameObjects.empty()) {
+					Handle<GameObject> i = editor.selected_gameObjects.front();
+					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
 					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
 				}
 
@@ -490,12 +531,10 @@ namespace idk {
 			
 			//DEL = Delete
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
-				if (editor.selected_gameObjects.size()) {
-					if (editor.selected_gameObjects.size() == 1) {
-						Handle<GameObject> i = editor.selected_gameObjects.front();
-						editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
-						commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
-					}
+				while (!editor.selected_gameObjects.empty()) {
+					Handle<GameObject> i = editor.selected_gameObjects.front();
+					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
+					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
 				}
 			}
 

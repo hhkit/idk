@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <idk_config.h>
-
+#include <ds/circular_buffer.h>
 #include <bitset>
 namespace idk
 {
@@ -39,8 +39,10 @@ namespace idk
 		void ParallelizedUpdate();
 		template<typename ... Ts>
 		void SetPauseState(PausedSystemConfig<Ts...>);
-		seconds GetDeltaTime();
-		seconds GetRealDeltaTime();
+		seconds GetDeltaTime()noexcept;
+		seconds GetRealDeltaTime()noexcept;
+
+		span<Pass> GetPasses(UpdatePhase) noexcept;
 	private:
 		using Lock = std::bitset<ComponentCount>;
 		using FnPtr = function<bool()>;
@@ -70,9 +72,18 @@ namespace idk
 
 	class Scheduler::Pass {
 	public:
+		struct Call
+		{
+			seconds time;
+			bool paused;
+		};
+		using PerformanceGraph = circular_buffer < Call, 50>;
 		Pass(Lock read, Lock write, FnPtr call, string_view update_name);
 		template<typename System, typename ... Components>
 		Pass& IfPausedThen(void (System::* memfb)(span<Components>...));
+
+		string_view Name() const;
+		const PerformanceGraph& Graph() const;
 	private:
 		Lock read_components;
 		Lock write_components;
@@ -81,6 +92,8 @@ namespace idk
 		Lock paused_read_components;
 		Lock paused_write_components;
 		FnPtr paused_call;
+
+		PerformanceGraph previous_frames;
 
 		string_view update_name;
 		friend Scheduler;

@@ -7,6 +7,7 @@
 #include <vkn/VulkanDebugRenderer.h>
 #include <idk_opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
+#include <win32/XInputSystem.h>
 #include <ReflectRegistration.h>
 #include <editor/IDE.h>
 #include <file/FileSystem.h>
@@ -27,17 +28,6 @@
 #include <shellapi.h>//CommandLineToArgv
 
 #define USE_RENDER_DOC
-
-namespace idk
-{
-	struct yolo
-	{
-		vector<string> guids;
-	};
-}
-REFLECT_BEGIN(idk::yolo, "yolo")
-REFLECT_VAR(guids)
-REFLECT_END()
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
@@ -78,7 +68,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 
 	auto c = std::make_unique<Core>();
-	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+	
+    auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+    c->AddSystem<win::XInputSystem>();
+
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = GraphicsAPI::Vulkan;
 	switch (gfx_api)
@@ -112,7 +105,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
 
-	auto scene = c->GetSystem<SceneManager>().GetActiveScene();
+	auto scene = RscHandle<Scene>{};
 
 	float divByVal = 2.f;
 	{
@@ -146,9 +139,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
-
-	auto& mat_inst_v = mat_inst->material.as<Material>();
-	auto& shader_v = mat_inst->material->_shader_program.as<ShaderProgram>();;
+    //auto test___ = mat_inst->GetUniformBlock("_UB1");
 
 	// Lambda for creating an animated object... Does not work atm.
 	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
@@ -156,7 +147,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
-
+		go->GetComponent<Transform>()->scale /= 100.0f;
 		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
@@ -186,6 +177,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
+	auto create_mesh_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos = vec3{0,0,0}, PathHandle path = PathHandle{ "/assets/models/sphere.obj" }) {
+		auto go = scene->CreateGameObject();
+
+		go->Name(path.GetStem());
+		auto resource_bundle = Core::GetResourceManager().Load(path);
+		go->GetComponent<Transform>()->position = pos;
+		auto mesh_renderer = go->AddComponent<MeshRenderer>();
+		mesh_renderer->mesh = resource_bundle->Get<Mesh>();
+		mesh_renderer->material_instance = mat_inst;
+
+		assert(!resource_bundle->Get<anim::Skeleton>());
+		assert(!resource_bundle->Get<anim::Animation>());
+		return go;
+	};
+
+
+
 	auto tmp_tex = minecraft_texture;
 	if (gfx_api == GraphicsAPI::Vulkan)
 		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
@@ -194,6 +202,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// @Joseph: Uncomment this when testing.
 	create_anim_obj(vec3{ 1.796,0,-1.781 });
+	create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -270,7 +279,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		light_comp->light = PointLight{
 			real{1.f},
-			color{0.8f,0,0}
+			color{0.8f,0.f,0.f}
 		};
 		light->AddComponent<TestComponent>();
 	}
@@ -394,6 +403,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducemetoo->AddComponent<RigidBody>();
 		seducemetoo->AddComponent<Collider>()->shape = box{};
 	}
+
+
+
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
+
+
+
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

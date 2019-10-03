@@ -18,7 +18,7 @@ namespace idk
 	}
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{
-		auto tid = GameState::GetGameState().GetTypeID(type);
+		const auto tid = GameState::GetGameState().GetTypeID(type);
 
 		for (auto& elem : _components)
 			if (elem.type == tid)
@@ -63,8 +63,16 @@ namespace idk
 
 	bool GameObject::HierarchyIsQueuedForDestruction() const
 	{
+		return IsQueuedForDestruction() || ParentIsQueuedForDestruction();
+	}
+
+	bool GameObject::ParentIsQueuedForDestruction() const
+	{
 		auto parent = Parent();
-		return parent ? IsQueuedForDestruction() || parent->HierarchyIsQueuedForDestruction() : IsQueuedForDestruction();
+		if (parent)
+			return parent->HierarchyIsQueuedForDestruction();
+		else
+			return false;
 	}
 
 	string_view GameObject::Name() const

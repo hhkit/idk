@@ -24,6 +24,7 @@ namespace idk {
 	public:
 		IGE_InspectorWindow();
 
+        virtual void Initialize() override;
 		virtual void BeginWindow() override;
 		virtual void Update() override;
 
@@ -32,20 +33,27 @@ namespace idk {
 
 
 	private:
+        GenericResourceHandle _displayed_asset{ RscHandle<Texture>() }; // if false, show gameobject(s)
 
 		bool isComponentMarkedForDeletion = false;
 		string componentNameMarkedForDeletion{}; //Is empty by default
 
-		void displayVal(reflect::dynamic dyn);
+        Handle<PrefabInstance> _prefab_inst;
+        int _prefab_curr_obj_index;
+        GenericHandle _prefab_curr_component;
+        vector<string> _curr_property_stack;
 
+        void DisplayGameObjects(vector<Handle<GameObject>> gos);
 		void DisplayNameComponent(Handle<Name>& c_name);
+        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);
-
-
 		void DisplayOtherComponent(GenericHandle& component);
 
-		void DisplayVec3(vec3& vec);
+        void DisplayAsset(GenericResourceHandle handle);
+        void DisplayAsset(RscHandle<Prefab> prefab);
+
+        void displayVal(reflect::dynamic dyn);
 
 		//Variables for vec3/vec4
 		const float heightOffset = 2;
@@ -54,6 +62,7 @@ namespace idk {
 		const float float4Size = 0.25f;
 		const float itemSpacing = 50;
 		const float XYZSliderWidth = 10;
+        constexpr static float item_width_ratio = 0.6f;
 
 		//For when transforms are edited
 		bool			hasChanged = false; 

@@ -29,26 +29,26 @@ namespace idk
 	{
 		if constexpr (std::is_same_v<T, GameObject>)
 		{
-			auto hGameObject = detail::ObjectPools::GetPool<GameObject>(_objects).Create(scene, fwd<Args>(args)...);
+			auto hGameObject = detail::ObjectPools::GetPool<GameObject>(_objects).Create(scene, std::forward<Args>(args)...);
 			hGameObject->GameObject::template AddComponent<Transform>(); // today i learnt: fuck c++
 			hGameObject->GameObject::template AddComponent<Name>();
 			return hGameObject;
 		}
 		else
-			return detail::ObjectPools::GetPool<T>(_objects).Create(scene, fwd<Args>(args)...);
+			return detail::ObjectPools::GetPool<T>(_objects).Create(scene, std::forward<Args>(args)...);
 	}
 	template<typename T, typename ... Args>
 	inline Handle<T> GameState::CreateObject(const Handle<T>& handle, Args&& ... args)
 	{
 		if constexpr (std::is_same_v<T, GameObject>)
 		{
-			auto hGameObject = detail::ObjectPools::GetPool<T>(_objects).Create(handle, fwd<Args>(args)...);
+			auto hGameObject = detail::ObjectPools::GetPool<T>(_objects).Create(handle, std::forward<Args>(args)...);
 			hGameObject->GameObject::template AddComponent<Transform>(); // today i learnt: fuck c++
 			hGameObject->GameObject::template AddComponent<Name>();
 			return hGameObject;
 		}
 		else
-			return detail::ObjectPools::GetPool<T>(_objects).Create(handle, fwd<Args>(args)...);
+			return detail::ObjectPools::GetPool<T>(_objects).Create(handle, std::forward<Args>(args)...);
 	}
 	template<typename T>
 	inline bool GameState::ValidateHandle(const Handle<T>& handle)

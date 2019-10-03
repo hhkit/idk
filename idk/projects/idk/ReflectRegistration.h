@@ -212,7 +212,7 @@ REFLECT_VARS(id)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
-REFLECT_VARS(_scenes)
+REFLECT_VARS(_scenes, _startup_scene, _active_scene)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")
@@ -252,7 +252,7 @@ REFLECT_BEGIN(idk::sphere, "sphere")
 REFLECT_VARS(center, radius)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::capsule, "sphere")
+REFLECT_BEGIN(idk::capsule, "capsule")
 REFLECT_VARS(center, radius, height)
 REFLECT_END()
 

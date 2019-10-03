@@ -26,6 +26,7 @@
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
+    <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />
@@ -35,6 +36,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
+    <ClInclude Include="app\GamepadEnums.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />
@@ -162,6 +164,9 @@
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="script\MonoBehavior.h" />
+    <ClInclude Include="script\MonoBehaviorData.h" />
+    <ClInclude Include="script\ScriptSystem.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="test\TestComponent.h" />
@@ -269,6 +274,8 @@
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
+    <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\ScriptSystem.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
@@ -447,7 +454,7 @@
     <TargetExt>.lib</TargetExt>
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -462,7 +469,7 @@
     <TargetName>core</TargetName>
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -491,7 +498,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -536,7 +543,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -79,6 +79,8 @@ namespace idk
 				auto& curr_bone = skeleton[i];
 				auto& curr_go = _child_objects[i];
 
+				if (!curr_go)
+					continue;
 				auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
@@ -100,18 +102,21 @@ namespace idk
 				auto& curr_bone = skeleton[i];
 				auto& curr_go = _child_objects[i];
 
+				if (!curr_go)
+					continue;
 				auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
 					// If we have the parent, we push in the parent.global * child.local
 					const mat4& p_transform = _pre_global_transforms[parent_index];
-					_pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
+					const mat4& c_transform = curr_go->Transform()->LocalMatrix();
+					_pre_global_transforms[i] = p_transform * c_transform;
 				}
 				else
 				{
 					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
-
+				auto test = decompose(_pre_global_transforms[i]);
 				_final_bone_transforms[i] = _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 			}
 		}
@@ -126,7 +131,7 @@ namespace idk
 
 		// We also need to generate all the game objects here.
 		// The game object's transform is the inverse of bone_offset.
-		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(GetHandle().scene);
 		
 		_pre_global_transforms.clear();
 		_final_bone_transforms.clear();
@@ -146,9 +151,11 @@ namespace idk
 			auto obj = scene->CreateGameObject();
 			// auto transform = curr_bone._global_inverse_bind_pose.inverse();
 			
-			mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
+			// mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
 
-			obj->GetComponent<Transform>()->LocalMatrix(local_bind_pose);
+			obj->GetComponent<Transform>()->position = curr_bone._local_bind_pose.position;
+			obj->GetComponent<Transform>()->rotation = curr_bone._local_bind_pose.rotation;
+			obj->GetComponent<Transform>()->scale = curr_bone._local_bind_pose.scale;
 			
 			obj->Name(curr_bone._name);
 
@@ -187,7 +194,7 @@ namespace idk
 
 	void Animator::clearGameObjects()
 	{
-		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(GetHandle().scene);
 
 		for (auto& obj : _child_objects)
 		{

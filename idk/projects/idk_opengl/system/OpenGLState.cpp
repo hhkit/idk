@@ -63,6 +63,27 @@ namespace idk::ogl
 		brdf_texture->Size(ivec2{ 512 });
 	}
 
+	struct MaterialVisitor
+	{
+		PipelineProgram& pipeline;
+		GLuint& texture_units;
+		string_view uniform_id;
+
+		template<typename T> auto operator()(const T& elem) const
+		{
+			if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+			{
+				auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+				texture->BindToUnit(texture_units);
+				pipeline.SetUniform(uniform_id, texture_units);
+
+				++texture_units;
+			}
+			else
+				pipeline.SetUniform(uniform_id, elem);
+		}
+	};
+
 
 	void OpenGLState::RenderDrawBuffer()
 	{
@@ -85,16 +106,20 @@ namespace idk::ogl
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
 				//fb_man.SetRenderTarget({});
 
-				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{elem.light_map});
+				fb_man.SetRenderTarget(RscHandle<OpenGLTexture>{elem.light_map->GetAttachment(AttachmentType::eDepth, 0)});
 				//Bind frame buffers based on the camera's render target
 				//Set the clear color according to the camera
 
 				glClearColor(1.f,1.f,1.f,1.f);
+				glClearDepth(1.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				//Fix for peterpanning
+				glCullFace(GL_FRONT);
 
 				const auto light_view_tfm = elem.v;
 				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
-				//pipeline.PopAllPrograms();
+				pipeline.PopAllPrograms();
 				// per mesh render
 				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
 
@@ -161,10 +186,16 @@ namespace idk::ogl
 					//GL_CHECK();
 				}
 
+				glDisable(GL_DEPTH_TEST);
+
+				//reset culling 
+				glCullFace(GL_BACK);
+
 				fb_man.ResetFramebuffer();
 			}
 		}
 
+		glEnable(GL_DEPTH_TEST);
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
@@ -183,6 +214,7 @@ namespace idk::ogl
 			
 			// lock drawing buffer
 			pipeline.Use();
+			pipeline.PopAllPrograms();
 			glBindVertexArray(vao_id);
 
 			std::visit([&]([[maybe_unused]] const auto& obj)
@@ -289,9 +321,12 @@ namespace idk::ogl
 						//glActiveTexture(GL_TEXTURE0 + texture_units);
 						//glBindTexture(GL_TEXTURE_2D, light.light_map.as<FrameBuffer>().DepthBuffer());
 						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+						//auto t = light.light_map.as<FrameBuffer>();
+						//auto u = t.GetMeta();
+						//u.textures[0].as<OpenGLTexture>().BindToUnit(texture_units);
 						t.as<OpenGLTexture>().BindToUnit(texture_units);
 						pipeline.SetUniform(lightblk + "vp", light.vp);
-						pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
 						texture_units++;
 					}
 					//texture_units += static_cast<bool>(light.light_map);
@@ -378,8 +413,12 @@ namespace idk::ogl
 					{
 						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
 						t.as<OpenGLTexture>().BindToUnit(texture_units);
+
+						//auto t = light.light_map.as<FrameBuffer>();
+						//auto u = t.GetMeta();
+						//u.textures[0].as<OpenGLTexture>().BindToUnit(texture_units);
 						pipeline.SetUniform(lightblk + "vp", light.vp);
-						pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
+						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
 						texture_units++;
 					}
 					//texture_units += static_cast<bool>(light.light_map);

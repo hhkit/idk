@@ -12,6 +12,7 @@ namespace idk::ogl
 	FrameBufferManager::FrameBufferManager()
 	{
 		glGenFramebuffers(1, &_fbo_id);
+		//glGenRenderbuffers(1, &_rbo_id);
 	}
 
 	FrameBufferManager::FrameBufferManager(FrameBufferManager&& rhs)
@@ -69,15 +70,35 @@ namespace idk::ogl
 
 	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
 		auto sz = target->Size();
 		glViewport(0, 0, sz.x, sz.y);
-		
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
-		GLuint buffers[]= { GL_COLOR_ATTACHMENT0 };
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-		glDrawBuffers(1, buffers);
+		if (target->GetMeta().internal_format == ColorFormat::DEPTH_COMPONENT)
+		{
+			//glBindRenderbuffer(GL_RENDERBUFFER, _rbo_id);
+			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024,1024);
+			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
+			glDepthFunc(GL_LEQUAL);
+
+			//glEnable(GL_DEPTH_TEST);
+
+			target->Bind();
+			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rbo_id);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
+			GLuint buffers[] = { GL_DEPTH_ATTACHMENT };
+			
+			glDrawBuffers(1, buffers);
+		}
+		else
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
+			target->Bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
+			GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			glDrawBuffers(1, buffers);
+		}
+
 
 		CheckFBStatus();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -96,6 +117,7 @@ namespace idk::ogl
 		//auto& yolo = *meta.textures[0];
 		for (int i = 0; i < meta.textures.size(); ++i)
 		{
+			meta.textures[i].as<OpenGLTexture>().Bind();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 		}

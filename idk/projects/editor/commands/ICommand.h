@@ -30,6 +30,7 @@ namespace idk {
 		virtual bool undo() = 0;						//Return true if the command works. When it is true, it will add to the redo stack
 		virtual ~ICommand() = default;					// virtual needs default destructor
 	protected:
+		friend class CMD_DeleteGameObject;
 
 		Handle<GameObject>	game_object_handle		{};	//This is used in most commands
 
