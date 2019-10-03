@@ -691,10 +691,11 @@ namespace idk::vkn
 					for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 					{
 						auto& name = itr->first;
-						auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
+						auto& mat_inst = *dc.material_instance;
+						auto mat_uni_itr = mat_inst.GetUniform(itr->first);
 						if (!mat_uni_itr)
-							mat_uni_itr = dc.material_instance->GetUniform(itr->first + "[0]");
-						if (mat_uni_itr)
+							mat_uni_itr = mat_inst.GetUniform(itr->first + "[0]");
+						if (mat_uni_itr || mat_inst.IsUniformBlock(itr->first))
 						{
 							auto& ubo_info = itr->second;
 							auto& layout = ubo_info.layout;

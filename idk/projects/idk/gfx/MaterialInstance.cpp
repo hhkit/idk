@@ -52,13 +52,20 @@ namespace idk
 		}
 		return result;
 	}
+	bool MaterialInstance::IsUniformBlock(string_view name) const
+	{
+		return name.substr(0,sizeof("_UB")-1)=="_UB";
+	}
 	string MaterialInstance::GetUniformBlock(const string& name) const
 	{
         // https://www.khronos.org/registry/OpenGL/specs/gl/glspec45.core.pdf pg 138
 
-        auto& mat = *material;
+		string data;
+		if (IsUniformBlock(name))
+		{
+			auto& mat = *material;
+
         shadergraph::ValueType type = std::stoi(name.data() + sizeof("_UB") - 1);
-        string data;
 
         switch (type)
         {
@@ -114,6 +121,7 @@ namespace idk
             break;
         }
 
+		}
 		return data;
 	}
 }
