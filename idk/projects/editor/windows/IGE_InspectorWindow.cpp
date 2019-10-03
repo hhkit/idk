@@ -124,7 +124,9 @@ namespace idk {
 
             if (gos[0]->HasComponent<PrefabInstance>())
             {
-                DisplayPrefabInstanceControls(_prefab_inst = gos[0]->GetComponent<PrefabInstance>());
+                _prefab_inst = gos[0]->GetComponent<PrefabInstance>();
+                _prefab_curr_obj_index = std::find(_prefab_inst->objects.begin(), _prefab_inst->objects.end(), gos[0]) - _prefab_inst->objects.begin();
+                DisplayPrefabInstanceControls(_prefab_inst);
             }
 
             Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
@@ -348,6 +350,7 @@ namespace idk {
 
 		ImGui::SetCursorPos(cursorPos);
 
+        ImGui::PushID("Transform");
 
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 		{
@@ -361,169 +364,84 @@ namespace idk {
 			//}
 
 
-			//Position
-			float heightPos = ImGui::GetCursorPosY();
-			ImGui::SetCursorPosY(heightPos + heightOffset);
-			ImGui::Text("Position");
-			ImGui::SameLine();
+            auto& c = *c_transform;
 
-			//XYZ
-			vec3& vecPosRef = c_transform->position;
-			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-			ImGui::SetCursorPosX(widthOffset);
-			ImGui::Text("X");
-			ImGui::SameLine();
+            const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
+            const float pad_y = ImGui::GetStyle().FramePadding.y;
 
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
-			ImGui::PushID(&vecPosRef.x);
-			if (ImGui::DragFloat("##X", &vecPosRef.x)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->position.x = vecPosRef.x;
-				}
-			}
-			TransformModifiedCheck();
+            ImGui::PushItemWidth(item_width);
 
+            auto y = ImGui::GetCursorPosY();
+            ImGui::SetCursorPosY(y + pad_y);
+            ImGui::Text("Position");
+            ImGui::SetCursorPosY(y);
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+            auto origin = c.position;
+            if (ImGuidk::DragVec3("##0", &c.position))
+            {
+                for (Handle<GameObject> i : editor.selected_gameObjects)
+                {
+                    i->GetComponent<Transform>()->position = c.position;
+                }
+            }
+            TransformModifiedCheck();
 
-			ImGui::PopID();
-			ImGui::SameLine();
+            y = ImGui::GetCursorPosY();
+            ImGui::SetCursorPosY(y + pad_y);
+            ImGui::Text("Rotation");
+            ImGui::SetCursorPosY(y);
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+            if (ImGuidk::DragQuat("##1", &c.rotation))
+            {
+                for (Handle<GameObject> i : editor.selected_gameObjects)
+                {
+                    i->GetComponent<Transform>()->rotation = c.rotation;
+                }
+            }
+            TransformModifiedCheck();
 
-			ImGui::Text("Y");
-			ImGui::SameLine();
-			ImGui::PushID(&vecPosRef.y);
-			if (ImGui::DragFloat("##Y", &vecPosRef.y)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->position.y = vecPosRef.y;
-				}
-			}
-			TransformModifiedCheck();
+            bool has_scale_override = false;
+            if (_prefab_inst)
+            {
+                for (const auto& ov : _prefab_inst->overrides)
+                {
+                    if (ov.object_index == _prefab_curr_obj_index &&
+                        ov.component_name == reflect::get_type<Transform>().name() &&
+                        ov.property_path == "scale")
+                    {
+                        has_scale_override = true;
+                        break;
+                    }
+                }
+            }
+            if (has_scale_override)
+                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
 
+            y = ImGui::GetCursorPosY();
+            ImGui::SetCursorPosY(y + pad_y);
+            ImGui::Text("Scale");
+            ImGui::SetCursorPosY(y);
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
-			ImGui::PopID();
-			ImGui::SameLine();
+            if (has_scale_override)
+                ImGui::PopStyleColor();
 
-			ImGui::Text("Z");
-			ImGui::SameLine();
-			ImGui::PushID(&vecPosRef.z);
-			if (ImGui::DragFloat("##Z", &vecPosRef.z)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->position.z = vecPosRef.z;
-				}
-			}
-			TransformModifiedCheck();
+            if (ImGuidk::DragVec3("##2", &c.scale))
+            {
+                for (Handle<GameObject> i : editor.selected_gameObjects)
+                {
+                    i->GetComponent<Transform>()->scale = c.scale;
+                }
+                if (_prefab_inst)
+                {
+                    PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "scale");
+                }
+            }
+            TransformModifiedCheck();
 
-
-			ImGui::PopID();
-
-			ImGui::PopItemWidth();
-			//END XYZ
-
-
-			//Rotation (use custom vec3 display)
-			euler_angles original{ c_transform->rotation };
-
-
-			heightPos = ImGui::GetCursorPosY();
-			ImGui::SetCursorPosY(heightPos + heightOffset);
-			ImGui::Text("Rotation");
-			ImGui::SameLine();
-			ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-			ImGui::SetCursorPosX(widthOffset);
-
-			ImGui::Text("X");
-			ImGui::SameLine();
-			ImGui::SetCursorPosY(heightPos);
-            deg x_deg{ original.x };
-            if (ImGui::DragFloat("##RotationX", x_deg.data(), 1.0f)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
-					euler_angles eachGORotation { i->GetComponent<Transform>()->rotation };
-                    eachGORotation.x = x_deg;
-					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
-				}
-			}
-			TransformModifiedCheck();
+            ImGui::PopItemWidth();
 
 
-			ImGui::SameLine();
-
-			ImGui::Text("Y");
-			ImGui::SameLine();
-            deg y_deg{ original.y };
-            if (ImGui::DragFloat("##RotationY", y_deg.data(), 1.0f)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
-					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
-					eachGORotation.y = y_deg;
-					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
-				}
-			}
-			TransformModifiedCheck();
-
-
-			ImGui::SameLine();
-
-			ImGui::Text("Z");
-			ImGui::SameLine();
-            deg z_deg{ original.z };
-			if (ImGui::DragFloat("##RotationZ", z_deg.data(), 1.0f)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) { //Get each object rotation in euler, replace that euler axis and dump it back to rotation
-					euler_angles eachGORotation{ i->GetComponent<Transform>()->rotation };
-					eachGORotation.z = z_deg;
-					i->GetComponent<Transform>()->rotation = quat{ eachGORotation };
-				}
-			}
-			TransformModifiedCheck();
-
-
-			ImGui::PopItemWidth();
-
-			//Scale
-			heightPos = ImGui::GetCursorPosY();
-			ImGui::SetCursorPosY(heightPos + heightOffset);
-			ImGui::Text("Scale");
-			ImGui::SameLine();
-
-			//XYZ
-			vec3& vecScaRef = c_transform->scale;
-			ImGui::PushItemWidth(window_size.x* float3Size - itemSpacing);
-			ImGui::SetCursorPosX(widthOffset);
-			ImGui::Text("X");
-			ImGui::SameLine();
-
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
-			ImGui::PushID(&vecScaRef.x);
-			if (ImGui::DragFloat("##X", &vecScaRef.x)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->scale.x = vecScaRef.x;
-				}
-			}
-			TransformModifiedCheck();
-
-
-			ImGui::PopID();
-			ImGui::SameLine();
-
-			ImGui::Text("Y");
-			ImGui::SameLine();
-			ImGui::PushID(&vecScaRef.y);
-			if (ImGui::DragFloat("##Y", &vecScaRef.y)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->scale.y = vecScaRef.y;
-				}
-			}
-			TransformModifiedCheck();
-
-
-			ImGui::PopID();
-			ImGui::SameLine();
-
-			ImGui::Text("Z");
-			ImGui::SameLine();
-			ImGui::PushID(&vecScaRef.z);
-			if (ImGui::DragFloat("##Z", &vecScaRef.z)) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->scale.z = vecScaRef.z;
-				}
-			}
-			TransformModifiedCheck();
 
 			if (hasChanged) {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
@@ -536,14 +454,9 @@ namespace idk {
 				hasChanged		= false;
 				//isBeingModified = false;
 			}
-
-			ImGui::PopID();
-
-			ImGui::PopItemWidth();
-			//END XYZ
-
-
 		}
+
+        ImGui::PopID();
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
