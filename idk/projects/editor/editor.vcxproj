@@ -106,6 +106,7 @@
       <AdditionalUsingDirectories>vulkan.lib;win32.lib;core.lib</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +147,7 @@
       <AdditionalUsingDirectories>vulkanD.lib;win32D.lib;coreD.lib</AdditionalUsingDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

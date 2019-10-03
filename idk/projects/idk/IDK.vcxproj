@@ -453,7 +453,7 @@
     <TargetExt>.lib</TargetExt>
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -468,7 +468,7 @@
     <TargetName>core</TargetName>
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -497,7 +497,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -542,7 +542,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

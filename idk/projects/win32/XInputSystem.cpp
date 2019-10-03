@@ -103,6 +103,9 @@ namespace idk::win
 
     void XInputSystem::SetRumble(char player, float low_freq, float high_freq)
     {
+        if ((_connected_users & (1 << player)) == 0)
+            return;
+
         XINPUT_VIBRATION vibration;
         ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
         vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(low_freq, 0.0f, 1.0f) * 0xffff);

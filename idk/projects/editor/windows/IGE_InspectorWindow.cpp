@@ -91,13 +91,14 @@ namespace idk {
 			else
 			{
                 _curr_property_stack.push_back(key);
-                _curr_property_path.clear();
+                
+                string curr_prop_path;
                 for (const auto& prop : _curr_property_stack)
                 {
-                    _curr_property_path += prop;
-                    _curr_property_path += '/';
+                    curr_prop_path += prop;
+                    curr_prop_path += '/';
                 }
-                _curr_property_path.pop_back();
+                curr_prop_path.pop_back();
 
 				string keyName = format_name(key);
 
@@ -113,13 +114,15 @@ namespace idk {
                     {
                         if (ov.object_index == _prefab_curr_obj_index &&
                             ov.component_name == (*_prefab_curr_component).type.name() &&
-                            ov.property_path == _curr_property_path)
+                            ov.property_path == curr_prop_path)
                         {
                             has_override = true;
                             break;
                         }
                     }
                 }
+
+                ImGui::BeginGroup();
 
                 if (has_override)
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
@@ -259,8 +262,25 @@ namespace idk {
 					ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
 				}
 
+                ImGui::EndGroup();
+
+                if (has_override && ImGui::BeginPopupContextItem("__context"))
+                {
+                    if(ImGui::MenuItem("Apply Property"))
+                    {
+                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                    }
+                    if (ImGui::MenuItem("Revert Property"))
+                    {
+                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                    }
+                    ImGui::EndPopup();
+                }
+
                 if (changed && _prefab_inst)
-                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, _curr_property_path);
+                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
 
                 _curr_property_stack.pop_back();
                 ImGui::PopID();
