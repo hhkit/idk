@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "InputResource.h"
 #include <imgui/imgui_internal.h>
+#include <res/ResourceHandle.h>
+#include <IncludeResources.h>
 
 namespace idk
 {
@@ -52,11 +54,14 @@ namespace idk
 
         if (handle)
         {
-            string_view text = std::visit([&](const auto& h)
+            string text = std::visit([&](const auto& h)
             {
+                auto name = h->Name();
 				auto path = Core::GetResourceManager().GetPath(h);
-				return path ? *path : "";
+                return name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
             }, *handle);
+            if (text.empty())
+                text = "None";
 
             ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,
                                      frame_bb.Max - style.FramePadding,

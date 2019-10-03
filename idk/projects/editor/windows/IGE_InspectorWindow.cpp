@@ -238,6 +238,7 @@ namespace idk {
                 }
 				else
                 {
+                    ImGui::NewLine();
                     ImGui::Indent();
                     displayVal(val);
                     ImGui::Unindent();
