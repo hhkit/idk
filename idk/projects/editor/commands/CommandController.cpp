@@ -17,6 +17,7 @@ Takes in a NEW Commands and handles its delete internally
 
 #include "pch.h"
 #include "CommandController.h"
+#include <editor/commands/CMD_DeleteGameObject.h>
 #include <IDE.h>
 
 namespace idk {
@@ -46,12 +47,16 @@ namespace idk {
 				if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one
 					undoStack.pop_front();
 				}
-				undoStack.push_back(std::move(command));
 
+				undoStack.push_back(std::move(command));
 
 				if (redoStack.size() != NULL) {     //Clear the redo stack after execution
 					redoStack.clear();
 				}
+				if (dynamic_cast<CMD_DeleteGameObject*>(undoStack.back().get()))
+					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
+
+
 			}
 		}
 	}
