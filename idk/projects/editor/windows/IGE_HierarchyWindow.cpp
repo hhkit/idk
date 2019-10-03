@@ -390,8 +390,11 @@ namespace idk {
 
 			//Refresh the new matrix values
 		}
-		if (hasSelected_GameobjectsModified)
-			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+        if (hasSelected_GameobjectsModified)
+        {
+            Core::GetSystem<IDE>().RefreshSelectedMatrix();
+            OnGameObjectSelectionChanged.Fire();
+        }
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 

@@ -24,6 +24,7 @@ namespace idk {
 	public:
 		IGE_InspectorWindow();
 
+        virtual void Initialize() override;
 		virtual void BeginWindow() override;
 		virtual void Update() override;
 
@@ -32,6 +33,7 @@ namespace idk {
 
 
 	private:
+        GenericResourceHandle _displayed_asset{ RscHandle<Texture>() }; // if false, show gameobject(s)
 
 		bool isComponentMarkedForDeletion = false;
 		string componentNameMarkedForDeletion{}; //Is empty by default
@@ -41,17 +43,17 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
 
-		void displayVal(reflect::dynamic dyn);
-
+        void DisplayGameObjects(vector<Handle<GameObject>> gos);
 		void DisplayNameComponent(Handle<Name>& c_name);
         void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);
 		void DisplayTransformComponent(Handle<Transform>& c_transform);
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);
-
-
 		void DisplayOtherComponent(GenericHandle& component);
 
-		void DisplayVec3(vec3& vec);
+        void DisplayAsset(GenericResourceHandle handle);
+        void DisplayAsset(RscHandle<Prefab> prefab);
+
+        void displayVal(reflect::dynamic dyn);
 
 		//Variables for vec3/vec4
 		const float heightOffset = 2;

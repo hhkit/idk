@@ -31,6 +31,9 @@ of the editor.
 #include <widgets/DragVec3.h>
 #include <meta/variant.h>
 #include <prefab/PrefabUtility.h>
+#include <editor/windows/IGE_HierarchyWindow.h>
+#include <editor/windows/IGE_ProjectWindow.h>
+#include <IncludeResources.h>
 
 namespace idk {
 
@@ -42,7 +45,19 @@ namespace idk {
 		window_flags = ImGuiWindowFlags_NoCollapse;
 	}
 
-	void IGE_InspectorWindow::BeginWindow()
+    void IGE_InspectorWindow::Initialize()
+    {
+        Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->OnGameObjectSelectionChanged.Listen([&]()
+            {
+                _displayed_asset = RscHandle<Texture>();
+            });
+        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetSelected.Listen([&](GenericResourceHandle h)
+            {
+                _displayed_asset = h;
+            });
+    }
+
+    void IGE_InspectorWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{150.0f,100.0f});
 	}
@@ -72,379 +87,182 @@ namespace idk {
 		return str;
 	}
 
-	void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
-	{
-        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
-        const float pad_y = ImGui::GetStyle().FramePadding.y;
-
-		dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
-
-			using K = std::decay_t<decltype(key)>;
-			using T = std::decay_t<decltype(val)>;
-
-			//reflect::dynamic dynaVal = val;
-			const float currentHeight = ImGui::GetCursorPosY();
-
-			if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
-				return true;
-			else if constexpr (!std::is_same_v<K, const char*>)
-				throw "Unhandled case";
-			else
-			{
-                _curr_property_stack.push_back(key);
-                
-                string curr_prop_path;
-                for (const auto& prop : _curr_property_stack)
-                {
-                    curr_prop_path += prop;
-                    curr_prop_path += '/';
-                }
-                curr_prop_path.pop_back();
-
-				string keyName = format_name(key);
-
-				if (keyName == "Guid")
-					return false;
-
-                bool has_override = false;
-                if (_prefab_inst)
-                {
-                    for (const auto& ov : _prefab_inst->overrides)
-                    {
-                        if (ov.object_index == _prefab_curr_obj_index &&
-                            ov.component_name == (*_prefab_curr_component).type.name() &&
-                            ov.property_path == curr_prop_path)
-                        {
-                            has_override = true;
-                            break;
-                        }
-                    }
-                }
-
-                ImGui::BeginGroup();
-
-                ImGui::SetCursorPosY(currentHeight + pad_y);
-                if (has_override)
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-				ImGui::Text(keyName.c_str());
-                if (has_override)
-                    ImGui::PopStyleColor();
-
-				keyName.insert(0, "##"); //For Imgui stuff
-
-				ImGui::SameLine();
-				ImGui::SetCursorPosY(currentHeight);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-
-                ImGui::PushID(keyName.c_str());
-                ImGui::PushItemWidth(item_width);
-
-                bool recurse = false;
-                bool changed = false;
-                bool changed_and_deactivated = false;
-
-				//ALL THE TYPE STATEMENTS HERE
-				if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) 
-                {
-                    changed |= ImGui::DragFloat(keyName.c_str(), &val);
-				}
-				else if constexpr (std::is_same_v<T, int>) 
-                {
-                    changed |= ImGui::DragInt(keyName.c_str(), &val);
-				}
-
-				else if constexpr (std::is_same_v<T, bool>)
-                {
-                    changed |= ImGui::Checkbox(keyName.c_str(), &val);
-				}
-				else if constexpr (std::is_same_v<T, vec3>)
-                {
-                    changed |= ImGuidk::DragVec3(keyName.c_str(), &val);
-				}
-				else if constexpr (std::is_same_v<T, color>)
-				{
-                    changed |= ImGui::ColorEdit4(keyName.c_str(), val.data());
-				}
-				else if constexpr (std::is_same_v<T, rad>)
-				{
-                    changed |= ImGui::SliderAngle(keyName.c_str(), val.data());
-				}
-				else if constexpr (is_template_v<T, RscHandle>) 
-                {
-					if (ImGuidk::InputResource(keyName.c_str(), &val))
-					{
-						changed = true;
-					}
-				}
-				else if constexpr (is_template_v<T, std::variant>)
-				{
-					static_assert(is_template_v<T, std::variant>, "HOW????");
-					const int curr_ind = s_cast<int>(val.index());
-					int new_ind = curr_ind;
-
-					constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-					using VarCombo = std::array<const char*, sz>;
-
-
-					static auto combo_items = []()-> VarCombo
-					{
-						static_assert(is_template_v<T, std::variant>, "HOW????");
-
-						constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-						static std::array<string, sz> tmp_arr;
-						std::array<const char*, sz> retval;
-
-						auto sp = reflect::unpack_types<T>();
-
-						for (auto i = 0; i < sz; ++i)
-						{
-							tmp_arr[i] = format_name(sp[i].name());
-							retval[i] = tmp_arr[i].data();
-						}
-						return retval;
-					}();
-
-					if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
-					{
-						val = variant_construct<T>(new_ind);
-						changed = true;
-					}
-
-					recurse = true;
-				}
-                else if constexpr (is_sequential_container_v<T>)
-                {
-                    reflect::uni_container cont{ val };
-                    ImGui::Button("+");
-                    ImGui::Indent();
-                    for (auto dyn : cont)
-                    {
-                        displayVal(dyn);
-                    }
-                    ImGui::Unindent();
-                }
-                else if constexpr (is_associative_container_v<T>)
-                {
-                    ImGui::Text("Associative Container");
-                    /*reflect::uni_container cont{ val };
-                    ImGui::Button("+");
-                    ImGui::Indent();
-                    for (auto dyn : cont)
-                    {
-                        auto pair = dyn.unpack();
-                        displayVal(pair[0]);
-                    }
-                    ImGui::Unindent();*/
-                }
-				else
-                {
-                    ImGui::NewLine();
-                    ImGui::Indent();
-                    displayVal(val);
-                    ImGui::Unindent();
-					/*ImGui::SetCursorPosY(currentHeight + heightOffset);
-					ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
-				}
-
-                ImGui::EndGroup();
-
-                if (has_override && ImGui::BeginPopupContextItem("__context"))
-                {
-                    if(ImGui::MenuItem("Apply Property"))
-                    {
-                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
-                        PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                    }
-                    if (ImGui::MenuItem("Revert Property"))
-                    {
-                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
-                        PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                    }
-                    ImGui::EndPopup();
-                }
-
-                if (changed && _prefab_inst)
-                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
-
-                _curr_property_stack.pop_back();
-                ImGui::PopItemWidth();
-                ImGui::PopID();
-
-                return recurse;
-			}
-
-		});
-	}
-
 
 
 	void IGE_InspectorWindow::Update()
 	{
-		
 		ImGui::PopStyleVar(1);
 
-
 		IDE& editor = Core::GetSystem<IDE>();
-		const size_t gameObjectsCount = editor.selected_gameObjects.size();
+        if (_displayed_asset.guid())
+        {
+
+        }
+        else
+        {
+            DisplayGameObjects(editor.selected_gameObjects);
+        }
+	}
+
+    void IGE_InspectorWindow::DisplayGameObjects(vector<Handle<GameObject>> gos)
+    {
+        const size_t gameObjectsCount = gos.size();
 
         _prefab_inst = Handle<PrefabInstance>();
 
-		//DISPLAY
-		if (gameObjectsCount == 1) {
-			//Just show all components, Name and Transform first
-			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
-			if (c_name) {
-				DisplayNameComponent(c_name);
-			}
-
-            if (editor.selected_gameObjects[0]->HasComponent<PrefabInstance>())
-            {
-                DisplayPrefabInstanceControls(_prefab_inst = editor.selected_gameObjects[0]->GetComponent<PrefabInstance>());
+        //DISPLAY
+        if (gameObjectsCount == 1)
+        {
+            //Just show all components, Name and Transform first
+            Handle<Name> c_name = gos[0]->GetComponent<Name>();
+            if (c_name) {
+                DisplayNameComponent(c_name);
             }
 
-			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
-			if (c_transform) {
-				DisplayTransformComponent(c_transform);
-			}
+            if (gos[0]->HasComponent<PrefabInstance>())
+            {
+                DisplayPrefabInstanceControls(_prefab_inst = gos[0]->GetComponent<PrefabInstance>());
+            }
 
-			//Display remaining components here
-			auto componentSpan = editor.selected_gameObjects[0]->GetComponents();
-			for (auto& component : componentSpan) {
+            Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
+            if (c_transform) {
+                DisplayTransformComponent(c_transform);
+            }
 
-				//Skip Name and Transform and PrefabInstance
-				if (component == c_name || component == c_transform || component.is_type<PrefabInstance>())
-					continue;
+            //Display remaining components here
+            auto componentSpan = gos[0]->GetComponents();
+            for (auto& component : componentSpan) {
 
-				if (component.is_type<Animator>())
-				{
-					Handle<Animator> c_anim = editor.selected_gameObjects[0]->GetComponent<Animator>();
-					DisplayAnimatorComponent(c_anim);
-					continue;
-				}
+                //Skip Name and Transform and PrefabInstance
+                if (component == c_name || component == c_transform || component.is_type<PrefabInstance>())
+                    continue;
 
-				//COMPONENT DISPLAY
-				DisplayOtherComponent(component);
-			}
+                if (component.is_type<Animator>())
+                {
+                    Handle<Animator> c_anim = gos[0]->GetComponent<Animator>();
+                    DisplayAnimatorComponent(c_anim);
+                    continue;
+                }
 
-		}
-		else if (gameObjectsCount > 1) {
+                //COMPONENT DISPLAY
+                DisplayOtherComponent(component);
+            }
+        }
+        else if (gameObjectsCount > 1)
+        {
+            //Just show all components, Name and Transform first
+            //First gameobject takes priority. By default, name and transform will always be shown.
+            Handle<Name> c_name = gos[0]->GetComponent<Name>();
+            if (c_name) {
+                DisplayNameComponent(c_name);
 
-			//Just show all components, Name and Transform first
-			//First gameobject takes priority. By default, name and transform will always be shown.
-			Handle<Name> c_name = editor.selected_gameObjects[0]->GetComponent<Name>();
-			if (c_name) {
-				DisplayNameComponent(c_name);
-
-			}
-			Handle<Transform> c_transform = editor.selected_gameObjects[0]->GetComponent<Transform>();
-			if (c_transform) {
-				DisplayTransformComponent(c_transform);
-			}
-
-
-			//Just show similar components, based on first object
-			span<GenericHandle> componentSpan = editor.selected_gameObjects[0]->GetComponents();
-			hash_set<string,std::hash<string>,std::equal_to<string>> similarComponentNames;
-			for (GenericHandle component : componentSpan) {
-				if (component == c_name)
-					continue;
-				if (component == c_transform)
-					continue;
-				similarComponentNames.insert(string((*component).type.name()));
-			}
+            }
+            Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
+            if (c_transform) {
+                DisplayTransformComponent(c_transform);
+            }
 
 
-			//Loop similarComponent
-			//Inside loop, for each selected check if it contains such handle
-			//If hit one, go to next similarComponent
-			//If not, remove!
-			vector<string> componentsToDiscard{};
-			for (string componentName : similarComponentNames) {
-				bool doesAllSelectedHasComponent = true;
-				for (auto& gameObject : editor.selected_gameObjects) {
-					if (!gameObject->GetComponent(componentName)) {
-						doesAllSelectedHasComponent = false;
-						break;
-					}
-				}
-				if (!doesAllSelectedHasComponent) {
-					componentsToDiscard.push_back(componentName);
-				}
-			}
+            //Just show similar components, based on first object
+            span<GenericHandle> componentSpan = gos[0]->GetComponents();
+            hash_set<string, std::hash<string>, std::equal_to<string>> similarComponentNames;
+            for (GenericHandle component : componentSpan) {
+                if (component == c_name)
+                    continue;
+                if (component == c_transform)
+                    continue;
+                similarComponentNames.insert(string((*component).type.name()));
+            }
 
-			for (string i : componentsToDiscard) {
-				similarComponentNames.erase(i);
-			}
 
-			//At this point we are sure that these components have these names
-			for (string i : similarComponentNames) {
-				GenericHandle component = editor.selected_gameObjects[0]->GetComponent(i);
-				DisplayOtherComponent(component);
-				//ImGui::Text(i.c_str());
-			}
+            //Loop similarComponent
+            //Inside loop, for each selected check if it contains such handle
+            //If hit one, go to next similarComponent
+            //If not, remove!
+            vector<string> componentsToDiscard{};
+            for (string componentName : similarComponentNames) {
+                bool doesAllSelectedHasComponent = true;
+                for (auto& gameObject : gos) {
+                    if (!gameObject->GetComponent(componentName)) {
+                        doesAllSelectedHasComponent = false;
+                        break;
+                    }
+                }
+                if (!doesAllSelectedHasComponent) {
+                    componentsToDiscard.push_back(componentName);
+                }
+            }
 
-		}
+            for (string i : componentsToDiscard) {
+                similarComponentNames.erase(i);
+            }
 
-		//Add Component Button
-		if (gameObjectsCount) {
-			ImGui::Separator();
-			ImGui::SetCursorPosX(window_size.x * 0.25f);
-			if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
-				ImGui::OpenPopup("AddComp");
-			}
-		}
+            //At this point we are sure that these components have these names
+            for (string i : similarComponentNames) {
+                GenericHandle component = gos[0]->GetComponent(i);
+                DisplayOtherComponent(component);
+                //ImGui::Text(i.c_str());
+            }
 
-		if (isComponentMarkedForDeletion) {
-			for (Handle<GameObject> i : editor.selected_gameObjects)
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
+        }
 
-			//Reset values
-			componentNameMarkedForDeletion = {};
-			isComponentMarkedForDeletion = false;
+        //Add Component Button
+        if (gameObjectsCount) {
+            ImGui::Separator();
+            ImGui::SetCursorPosX(window_size.x * 0.25f);
+            if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
+                ImGui::OpenPopup("AddComp");
+            }
+        }
 
-		}
+        if (isComponentMarkedForDeletion) {
+            for (Handle<GameObject> i : gos)
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
 
-		if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
-			span componentNames = GameState::GetComponentNames();
-			for (const char* name : componentNames) {
-				string displayName = name;
-				if (displayName == "Transform" ||
+            //Reset values
+            componentNameMarkedForDeletion = {};
+            isComponentMarkedForDeletion = false;
+
+        }
+
+        if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+            span componentNames = GameState::GetComponentNames();
+            for (const char* name : componentNames) {
+                string displayName = name;
+                if (displayName == "Transform" ||
                     displayName == "Name" ||
                     displayName == "PrefabInstance")
-					continue;
+                    continue;
 
-				//Comment/Uncomment this to remove text fluff 
-				const string fluffText{ "idk::" };
+                //Comment/Uncomment this to remove text fluff 
+                const string fluffText{ "idk::" };
 
-				std::size_t found = displayName.find(fluffText);
-				if (found != std::string::npos)
-					displayName.erase(found, fluffText.size());
+                std::size_t found = displayName.find(fluffText);
+                if (found != std::string::npos)
+                    displayName.erase(found, fluffText.size());
 
-				/*
-				const string fluffText2{ ">(void)" };
-				found = displayName.find(fluffText2);
-				if (found != std::string::npos)
-					displayName.erase(found, fluffText2.size());
+                /*
+                const string fluffText2{ ">(void)" };
+                found = displayName.find(fluffText2);
+                if (found != std::string::npos)
+                    displayName.erase(found, fluffText2.size());
 
-				*/
+                */
 
 
-				if (ImGui::MenuItem(displayName.c_str())) {
-					//Add component
-                    for (Handle<GameObject> i : editor.selected_gameObjects)
+                if (ImGui::MenuItem(displayName.c_str())) {
+                    //Add component
+                    for (Handle<GameObject> i : gos)
                     {
-                        editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+                        Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
                     }
-				}
-			}
-			ImGui::EndPopup();
-		}
+                }
+            }
+            ImGui::EndPopup();
+        }
+    }
 
-
-
-	}
-
-	void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
+    void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
 	{
 		//The c_name is to just get the first gameobject
 		static string stringBuf{};
@@ -858,36 +676,239 @@ namespace idk {
 		ImGui::PopID();
 	}
 
-	void IGE_InspectorWindow::DisplayVec3(vec3& vec)
-	{
-		ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-		ImGui::SetCursorPosX(widthOffset);
 
-		ImGui::Text("X");
-		ImGui::SameLine();
 
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
-		ImGui::PushID(&vec.x);
-		ImGui::DragFloat("##X", &vec.x);
-		ImGui::PopID();
-		ImGui::SameLine();
+    void IGE_InspectorWindow::DisplayAsset(GenericResourceHandle handle)
+    {
+        ImGui::Text(string(handle.guid()).c_str());
 
-		ImGui::Text("Y");
-		ImGui::SameLine();
-		ImGui::PushID(&vec.y);
-		ImGui::DragFloat("##Y", &vec.y);
-		ImGui::PopID();
-		ImGui::SameLine();
+        std::visit([&](auto h)
+        {
+                using ResT = typename decltype(h)::Resource;
+                auto path = Core::GetResourceManager().GetPath(h);
 
-		ImGui::Text("Z");
-		ImGui::SameLine();
-		ImGui::PushID(&vec.z);
-		ImGui::DragFloat("##Z", &vec.z);
-		ImGui::PopID();
+                if constexpr (std::is_same_v<ResT, Prefab>)
+                    DisplayAsset(h);
 
-		ImGui::PopItemWidth();
 
-	}
+        }, handle);
+    }
+
+    void IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
+    {
+        //auto& data = prefab->data[0];
+        //
+        //auto trans = data.FindComponent(reflect::get_type<Transform>().name());
+        //auto& components = prefab->data[0].components;
+
+        //for(auto& c : )
+    }
+
+
+
+    void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
+    {
+        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+
+        dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+
+            using K = std::decay_t<decltype(key)>;
+            using T = std::decay_t<decltype(val)>;
+
+            //reflect::dynamic dynaVal = val;
+            const float currentHeight = ImGui::GetCursorPosY();
+
+            if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
+                return true;
+            else if constexpr (!std::is_same_v<K, const char*>)
+                throw "Unhandled case";
+            else
+            {
+                _curr_property_stack.push_back(key);
+
+                string curr_prop_path;
+                for (const auto& prop : _curr_property_stack)
+                {
+                    curr_prop_path += prop;
+                    curr_prop_path += '/';
+                }
+                curr_prop_path.pop_back();
+
+                string keyName = format_name(key);
+
+                if (keyName == "Guid")
+                    return false;
+
+                bool has_override = false;
+                if (_prefab_inst)
+                {
+                    for (const auto& ov : _prefab_inst->overrides)
+                    {
+                        if (ov.object_index == _prefab_curr_obj_index &&
+                            ov.component_name == (*_prefab_curr_component).type.name() &&
+                            ov.property_path == curr_prop_path)
+                        {
+                            has_override = true;
+                            break;
+                        }
+                    }
+                }
+
+                ImGui::BeginGroup();
+
+                ImGui::SetCursorPosY(currentHeight + pad_y);
+                if (has_override)
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                ImGui::Text(keyName.c_str());
+                if (has_override)
+                    ImGui::PopStyleColor();
+
+                keyName.insert(0, "##"); //For Imgui stuff
+
+                ImGui::SameLine();
+                ImGui::SetCursorPosY(currentHeight);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+
+                ImGui::PushID(keyName.c_str());
+                ImGui::PushItemWidth(item_width);
+
+                bool recurse = false;
+                bool changed = false;
+                bool changed_and_deactivated = false;
+
+                //ALL THE TYPE STATEMENTS HERE
+                if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)
+                {
+                    changed |= ImGui::DragFloat(keyName.c_str(), &val);
+                }
+                else if constexpr (std::is_same_v<T, int>)
+                {
+                    changed |= ImGui::DragInt(keyName.c_str(), &val);
+                }
+
+                else if constexpr (std::is_same_v<T, bool>)
+                {
+                    changed |= ImGui::Checkbox(keyName.c_str(), &val);
+                }
+                else if constexpr (std::is_same_v<T, vec3>)
+                {
+                    changed |= ImGuidk::DragVec3(keyName.c_str(), &val);
+                }
+                else if constexpr (std::is_same_v<T, color>)
+                {
+                    changed |= ImGui::ColorEdit4(keyName.c_str(), val.data());
+                }
+                else if constexpr (std::is_same_v<T, rad>)
+                {
+                    changed |= ImGui::SliderAngle(keyName.c_str(), val.data());
+                }
+                else if constexpr (is_template_v<T, RscHandle>)
+                {
+                    if (ImGuidk::InputResource(keyName.c_str(), &val))
+                    {
+                        changed = true;
+                    }
+                }
+                else if constexpr (is_template_v<T, std::variant>)
+                {
+                    static_assert(is_template_v<T, std::variant>, "HOW????");
+                    const int curr_ind = s_cast<int>(val.index());
+                    int new_ind = curr_ind;
+
+                    constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+                    using VarCombo = std::array<const char*, sz>;
+
+
+                    static auto combo_items = []()-> VarCombo
+                    {
+                        static_assert(is_template_v<T, std::variant>, "HOW????");
+
+                        constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+                        static std::array<string, sz> tmp_arr;
+                        std::array<const char*, sz> retval;
+
+                        auto sp = reflect::unpack_types<T>();
+
+                        for (auto i = 0; i < sz; ++i)
+                        {
+                            tmp_arr[i] = format_name(sp[i].name());
+                            retval[i] = tmp_arr[i].data();
+                        }
+                        return retval;
+                    }();
+
+                    if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), std::size(combo_items)))
+                    {
+                        val = variant_construct<T>(new_ind);
+                        changed = true;
+                    }
+
+                    recurse = true;
+                }
+                else if constexpr (is_sequential_container_v<T>)
+                {
+                    reflect::uni_container cont{ val };
+                    ImGui::Button("+");
+                    ImGui::Indent();
+                    for (auto dyn : cont)
+                    {
+                        displayVal(dyn);
+                    }
+                    ImGui::Unindent();
+                }
+                else if constexpr (is_associative_container_v<T>)
+                {
+                    ImGui::Text("Associative Container");
+                    /*reflect::uni_container cont{ val };
+                    ImGui::Button("+");
+                    ImGui::Indent();
+                    for (auto dyn : cont)
+                    {
+                        auto pair = dyn.unpack();
+                        displayVal(pair[0]);
+                    }
+                    ImGui::Unindent();*/
+                }
+                else
+                {
+                    ImGui::NewLine();
+                    ImGui::Indent();
+                    displayVal(val);
+                    ImGui::Unindent();
+                    /*ImGui::SetCursorPosY(currentHeight + heightOffset);
+                    ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
+                }
+
+                ImGui::EndGroup();
+
+                if (has_override && ImGui::BeginPopupContextItem("__context"))
+                {
+                    if (ImGui::MenuItem("Apply Property"))
+                    {
+                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                    }
+                    if (ImGui::MenuItem("Revert Property"))
+                    {
+                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                    }
+                    ImGui::EndPopup();
+                }
+
+                if (changed && _prefab_inst)
+                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
+
+                _curr_property_stack.pop_back();
+                ImGui::PopItemWidth();
+                ImGui::PopID();
+
+                return recurse;
+            }
+
+        });
+    }
 
 	void IGE_InspectorWindow::TransformModifiedCheck()
 	{
