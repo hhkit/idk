@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 #include <res/ResourceMeta.h>
+#include <res/SaveableResource.h>
 #include <file/FileSystem.h>
 #pragma once
 
@@ -99,6 +100,8 @@ namespace idk
 		// attempt to put on another thread
 		{
 			control_block.resource = factory.Create();
+            if constexpr(has_tag_v<Res, Saveable>)
+                control_block.resource->Dirty();
 			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ itr->first };
 			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}

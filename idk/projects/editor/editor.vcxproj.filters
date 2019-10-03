@@ -92,9 +92,11 @@
     <ClInclude Include="windows\IGE_ShadowMapWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
-    <ClInclude Include="widgets\DragVec3.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h">
       <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\DragVec3.h">
+      <Filter>widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -169,8 +171,12 @@
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
-    <ClCompile Include="widgets\DragVec3.cpp" />
-    <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
+    <ClCompile Include="widgets\DragVec3.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ProfilerWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

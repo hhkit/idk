@@ -29,8 +29,8 @@ namespace idk
 			if constexpr (std::is_default_constructible_v<T>)
 			{
 				auto retval = std::make_unique<T>();
-				if constexpr (has_tag_v<T, Saveable>)
-					retval->Dirty();
+				//if constexpr (has_tag_v<T, Saveable>)
+				//	retval->Dirty();
 				return retval;
 			}
 			else

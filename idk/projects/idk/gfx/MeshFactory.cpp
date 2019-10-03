@@ -12,6 +12,7 @@ namespace idk
 		{
 			if (!elem)
 				std::cout << "Default mesh " << MeshType{ i }.to_string() << " not created\n";
+            elem->Name(string{ "Default" } + string{ MeshType{ i }.to_string() });
 			++i;
 		}
 	}
