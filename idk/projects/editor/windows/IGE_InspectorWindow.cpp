@@ -28,6 +28,7 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <math/euler_angles.h>
 #include <widgets/InputResource.h>
+#include <widgets/DragVec3.h>
 #include <meta/variant.h>
 #include <prefab/PrefabUtility.h>
 
@@ -73,6 +74,9 @@ namespace idk {
 
 	void IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
 	{
+        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+
 		dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
 
 			using K = std::decay_t<decltype(key)>;
@@ -88,20 +92,19 @@ namespace idk {
 			else
 			{
                 _curr_property_stack.push_back(key);
-                _curr_property_path.clear();
+                
+                string curr_prop_path;
                 for (const auto& prop : _curr_property_stack)
                 {
-                    _curr_property_path += prop;
-                    _curr_property_path += '/';
+                    curr_prop_path += prop;
+                    curr_prop_path += '/';
                 }
-                _curr_property_path.pop_back();
+                curr_prop_path.pop_back();
 
 				string keyName = format_name(key);
 
 				if (keyName == "Guid")
 					return false;
-
-				ImGui::SetCursorPosY(currentHeight + heightOffset);
 
                 bool has_override = false;
                 if (_prefab_inst)
@@ -110,7 +113,7 @@ namespace idk {
                     {
                         if (ov.object_index == _prefab_curr_obj_index &&
                             ov.component_name == (*_prefab_curr_component).type.name() &&
-                            ov.property_path == _curr_property_path)
+                            ov.property_path == curr_prop_path)
                         {
                             has_override = true;
                             break;
@@ -118,6 +121,9 @@ namespace idk {
                     }
                 }
 
+                ImGui::BeginGroup();
+
+                ImGui::SetCursorPosY(currentHeight + pad_y);
                 if (has_override)
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
 				ImGui::Text(keyName.c_str());
@@ -128,8 +134,10 @@ namespace idk {
 
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(currentHeight);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
                 ImGui::PushID(keyName.c_str());
+                ImGui::PushItemWidth(item_width);
 
                 bool recurse = false;
                 bool changed = false;
@@ -151,26 +159,7 @@ namespace idk {
 				}
 				else if constexpr (std::is_same_v<T, vec3>)
                 {
-                    ImGui::PushItemWidth(window_size.x * float3Size - itemSpacing);
-                    ImGui::SetCursorPosX(widthOffset);
-
-                    ImGui::Text("X");
-                    ImGui::SameLine();
-
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - heightOffset);
-                    changed |= ImGui::DragFloat("##X", &val.x);
-                    ImGui::SameLine();
-
-                    ImGui::Text("Y");
-                    ImGui::SameLine();
-                    changed |= ImGui::DragFloat("##Y", &val.y);
-                    ImGui::SameLine();
-
-                    ImGui::Text("Z");
-                    ImGui::SameLine();
-                    changed |= ImGui::DragFloat("##Z", &val.z);
-
-                    ImGui::PopItemWidth();
+                    changed |= ImGuidk::DragVec3(keyName.c_str(), &val);
 				}
 				else if constexpr (std::is_same_v<T, color>)
 				{
@@ -256,10 +245,28 @@ namespace idk {
 					ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
 				}
 
+                ImGui::EndGroup();
+
+                if (has_override && ImGui::BeginPopupContextItem("__context"))
+                {
+                    if(ImGui::MenuItem("Apply Property"))
+                    {
+                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                    }
+                    if (ImGui::MenuItem("Revert Property"))
+                    {
+                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                    }
+                    ImGui::EndPopup();
+                }
+
                 if (changed && _prefab_inst)
-                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, _curr_property_path);
+                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
 
                 _curr_property_stack.pop_back();
+                ImGui::PopItemWidth();
                 ImGui::PopID();
 
                 return recurse;

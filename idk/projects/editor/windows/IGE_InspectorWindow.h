@@ -40,7 +40,6 @@ namespace idk {
         int _prefab_curr_obj_index;
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
-        string _curr_property_path;
 
 		void displayVal(reflect::dynamic dyn);
 
@@ -61,6 +60,7 @@ namespace idk {
 		const float float4Size = 0.25f;
 		const float itemSpacing = 50;
 		const float XYZSliderWidth = 10;
+        constexpr static float item_width_ratio = 0.6f;
 
 		//For when transforms are edited
 		bool			hasChanged = false; 

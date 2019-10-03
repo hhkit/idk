@@ -92,6 +92,7 @@
     <ClInclude Include="windows\IGE_ShadowMapWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\DragVec3.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
@@ -168,6 +169,7 @@
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
+    <ClCompile Include="widgets\DragVec3.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
