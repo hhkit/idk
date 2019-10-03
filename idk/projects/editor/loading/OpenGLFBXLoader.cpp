@@ -160,22 +160,25 @@ namespace idk
 		// mat4 normalize_mat = mat4 { scale(fbx_loader_detail::FBX_SCALE)  };
 		// fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
 
-		// Loading Skeletons
-		auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
-		// Name is the root node
-		skeleton_handle->Name(bones[0]._name);
-
-		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
-
-		skeleton = anim::Skeleton{ bones, bones_table };
-
-		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-		mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
-		skeleton.SetSkeletonTransform(skeleton_transform);
-		retval.Add(skeleton_handle);
-
 		auto animator = prefab_root->AddComponent<Animator>();
-		animator->SetSkeleton(skeleton_handle);
+		// Loading Skeletons
+		if (!bones.empty())
+		{
+			auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
+			// Name is the root node
+			skeleton_handle->Name(bones[0]._name);
+
+			auto& skeleton = skeleton_handle.as<anim::Skeleton>();
+
+			skeleton = anim::Skeleton{ bones, bones_table };
+
+			// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
+			mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
+			skeleton.SetSkeletonTransform(skeleton_transform);
+
+			animator->SetSkeleton(skeleton_handle);
+			retval.Add(skeleton_handle);
+		}
 
 		// Loading Animations
 		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
@@ -192,9 +195,12 @@ namespace idk
 		}
 		// animator->Play(0);
 		// Saving the prefab
-        auto prefab_handle = PrefabUtility::Create(prefab_root);
+		if (path_to_resource.GetExtension() != ".obj")
+		{
+			auto prefab_handle = PrefabUtility::Create(prefab_root);
+			retval.Add(prefab_handle);
+		}
         scene->DestroyGameObject(prefab_root);
-        retval.Add(prefab_handle);
 		return retval;
 	}
 
@@ -335,33 +341,32 @@ namespace idk
 			indices.clear();
 		}
 
-		mat4 normalize_mat = mat4{ scale(fbx_loader_detail::FBX_SCALE) };
-		fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
-
-		// Loading Skeletons
-		RscHandle<anim::Skeleton> skeleton_handle;
-		{
-			auto search_res = meta_bundle.FetchMeta(bones[0]._name);
-			if (search_res)
-				skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>(search_res->guid);
-			else
-				skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
-		}
-		// Name is the root node
-		skeleton_handle->Name(bones[0]._name);
-
-		auto& skeleton = skeleton_handle.as<anim::Skeleton>();
-
-		skeleton = anim::Skeleton{ bones, bones_table };
-
-		// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-		mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
-		skeleton.SetSkeletonTransform(skeleton_transform);
-		retval.Add(skeleton_handle);
-
 		auto animator = prefab_root->AddComponent<Animator>();
-		animator->SetSkeleton(skeleton_handle);
+		// Loading Skeletons
+		if (!bones.empty())
+		{
+			// Loading Skeletons
+			RscHandle<anim::Skeleton> skeleton_handle;
+			{
+				auto search_res = meta_bundle.FetchMeta(bones[0]._name);
+				if (search_res)
+					skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>(search_res->guid);
+				else
+					skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
+			}
+			// Name is the root node
+			skeleton_handle->Name(bones[0]._name);
 
+			auto& skeleton = skeleton_handle.as<anim::Skeleton>();
+
+			skeleton = anim::Skeleton{ bones, bones_table };
+
+			// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
+			mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
+			skeleton.SetSkeletonTransform(skeleton_transform);
+			animator->SetSkeleton(skeleton_handle);
+			retval.Add(skeleton_handle);			
+		}
 		// Loading Animations
 		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
@@ -382,9 +387,12 @@ namespace idk
 
 			animator->AddAnimation(anim_clip_handle);
 		}
-		auto prefab_handle = PrefabUtility::Create(prefab_root);
+		if (path_to_resource.GetExtension() != ".obj")
+		{
+			auto prefab_handle = PrefabUtility::Create(prefab_root);
+			retval.Add(prefab_handle);
+		}
 		scene->DestroyGameObject(prefab_root);
-		retval.Add(prefab_handle);
 		return retval;
 	}
 
