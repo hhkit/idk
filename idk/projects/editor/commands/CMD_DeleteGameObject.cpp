@@ -25,7 +25,6 @@ namespace idk {
 		for (auto& c : gameObject->GetComponents())
 			vector_of_components.emplace_back((*c).copy());
 
-
 	}
 
 	bool CMD_DeleteGameObject::execute()
@@ -41,7 +40,7 @@ namespace idk {
 					commands_affected.push_back(i.get());
 				}
 			}
-
+			//Find and deselect from selected gameobject
 			auto iterator = editor.selected_gameObjects.begin();
 			for (; iterator != editor.selected_gameObjects.end(); ++iterator) {
 				if (*iterator == game_object_handle) {
@@ -51,6 +50,7 @@ namespace idk {
 
 			if (iterator != editor.selected_gameObjects.end())
 				editor.selected_gameObjects.erase(iterator);
+
 			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
 
 
@@ -82,18 +82,20 @@ namespace idk {
 				else {
 					game_object_handle->AddComponent(c);
 				}
+				
+			}
 
-				//Reassign all CMDs using Handle<GameObject> Big O(n^2)
-				IDE& editor = Core::GetSystem<IDE>();
-				for (ICommand* i : commands_affected) {
-					for (unique_ptr<ICommand>& j : editor.command_controller.undoStack) {
-						if (i == j.get()) { //If this unique pointer matches with the commands_affected
-							j->game_object_handle = game_object_handle;
-							break;
-						}
+			//Reassign all CMDs using Handle<GameObject> Big O(n^2)
+			IDE& editor = Core::GetSystem<IDE>();
+			for (ICommand* i : commands_affected) {
+				for (unique_ptr<ICommand>& j : editor.command_controller.undoStack) {
+					if (i == j.get()) { //If this unique pointer matches with the commands_affected
+						j->game_object_handle = game_object_handle;
+						break;
 					}
 				}
 			}
+
 			return true;
 		}
 		else {
