@@ -143,6 +143,7 @@ namespace idk::vkn
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 	private:
+		struct VertexUniformConfig;
 		using ProcessedRO=vkn::ProcessedRO;
 		using DsBindingCount =hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>;
 		class IRenderThread

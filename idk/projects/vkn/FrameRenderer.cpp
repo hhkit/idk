@@ -15,6 +15,7 @@
 #include <gfx/Light.h>
 
 
+
 namespace idk::vkn
 {
 	static vk::RenderPass tmp_rp;
@@ -402,21 +403,41 @@ namespace idk::vkn
 	}
 	
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
+
 	template<typename T>
-	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, UboManager& ubo_manager)
 	{
 		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
 		//collated_layouts[obj_uni.layout].second++;
 		auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
+		//collated_bindings[obj_uni.set].emplace_back(
+		return ProcessedRO::BindingInfo
+		{
+			obj_uni.binding,
+			trf_buffer,
+			trf_offset,
+			0,
+			obj_uni.size
+		};
+		//);
+	}
+
+	template<typename T>
+	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
+	{
+		//collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
+		////collated_layouts[obj_uni.layout].second++;
+		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
 		collated_bindings[obj_uni.set].emplace_back(
-			ProcessedRO::BindingInfo
-			{
-				obj_uni.binding,
-				trf_buffer,
-				trf_offset,
-				0,
-				obj_uni.size
-			}
+			CreateBindingInfo(obj_uni, val, collated_layouts, ubo_manager)
+			//ProcessedRO::BindingInfo
+			//{
+			//	obj_uni.binding,
+			//	trf_buffer,
+			//	trf_offset,
+			//	0,
+			//	obj_uni.size
+			//}
 		);
 	}
 	template<typename WTF>
@@ -444,14 +465,70 @@ namespace idk::vkn
 		collated_bindings[info.set].emplace_back(info.binding,buffer,offset,0,info.size);
 	}
 
+	struct FrameRenderer::VertexUniformConfig
+	{
+		RscHandle<ShaderProgram> _shader;
+		//template<typename T= FrameRenderer>
+		struct Ref
+		{
+			using CollatedLayouts_t = DsBindingCount;
+			CollatedLayouts_t& collated_layouts;
+			UboManager& ubo_manager;
+			Ref(CollatedLayouts_t* cl = nullptr, UboManager* u = nullptr) :collated_layouts{ *cl }, ubo_manager{ *u }{}
+		};
+		Ref ref;
+		void SetRef(
+			DsBindingCount& collated_layouts,
+			//set, bindings
+			UboManager& ubo_manager)
+		{
+			new (&ref) Ref{ &collated_layouts,&ubo_manager };
+		}
+		ShaderModule& Shader()const
+		{
+			return _shader.as<ShaderModule>();
+		}
+
+		vector<std::pair<uint32_t, ProcessedRO::BindingInfo>> binding_infos;//set, binding_info
+		template<typename T>
+		void RegisterBindingInfo(const string& name, const T& data)
+		{
+			auto& shader = Shader();
+			auto& uni_info = shader.GetLayout(name);
+			binding_infos.emplace_back(uni_info.set,CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
+		}
+		void BindRegistered(collated_bindings_t& collated_bindings)
+		{
+			for (auto& info : binding_infos)
+			{
+				collated_bindings[info.first].emplace_back(info.second);
+			}
+		}
+		template<typename T, typename Tracker>
+		void BindOnce(collated_bindings_t& collated_bindings, const string& name, const T& data, Tracker tracker)
+		{
+			auto& shader = Shader();
+			auto& uni_info = shader.GetLayout(name);
+			collated_bindings[uni_info.set].emplace_back(CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
+			tracker(uni_info.layout,ref.collated_layouts);
+		}
+		VertexUniformConfig()
+		{
+		}
+	};
+
+
+	//Possible Idea: Create a Pipeline object that tracks currently bound descriptor sets
 	std::pair<vector<FrameRenderer::ProcessedRO>, FrameRenderer::DsBindingCount> FrameRenderer::ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager)
 	{
-		const vector<const RenderObject*>& draw_calls = state.mesh_render;
+
+		VertexUniformConfig mesh_config, skinned_mesh_config;
 		const CameraData& cam = state.camera;
 		auto& vkn_fb = cam.render_target.as<VknFrameBuffer>();
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
-		
+
+
 		vector<LightData> tmp_light = *state.lights;
 		for (auto& light : tmp_light)
 		{
@@ -466,7 +543,14 @@ namespace idk::vkn
 		light_block += string( 16-sizeof(len), '\0');
 		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		auto msprog = GetMeshRendererShaderModule();
+
+		
 		auto& msmod = msprog.as<ShaderModule>();
+
+		mesh_config._shader = msprog;
+		mesh_config.SetRef(collated_layouts, ubo_manager);
+		skinned_mesh_config._shader = _skinned_mesh_shader_module;
+	
 
 		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
 		mat4 pvt_trf = mat4{ 1,0,0,0,
@@ -474,6 +558,9 @@ namespace idk::vkn
 							0,0,0.5f,0.5f,
 							0,0,0,1
 		}*cam.projection_matrix;
+
+		mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf);
+		skinned_mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf);
 
 		auto& pvt_uni = msmod.GetLayout("CameraBlock");
 		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
@@ -493,92 +580,103 @@ namespace idk::vkn
 			}
 			tracking_table[layout] = index;
 		};
-		int itr_index = 0;
-		for (auto& ptr_dc : draw_calls)
+		auto bind_incr = [&layout_incrementer](auto& tracking_table, int index)
 		{
-			auto& dc = *ptr_dc;
-			//Force pipeline creation
-			shaders.resize(0);
+			return [&layout_incrementer, &tracking_table, index](auto layout, auto& layout_count)
+			{
+				layout_incrementer(tracking_table, layout, index, layout_count);
+			};
+		};
+		int itr_index = 0;
 
-			auto& mat_inst = *dc.material_instance;
-			auto& mat = *mat_inst.material;
-			;
-			auto sprog = mat._shader_program;
+		{
+			const vector<const RenderObject*>& draw_calls = state.mesh_render;
+			for (auto& ptr_dc : draw_calls)
+			{
+				auto& dc = *ptr_dc;
+				//Force pipeline creation
+				shaders.resize(0);
+
+				auto& mat_inst = *dc.material_instance;
+				auto& mat = *mat_inst.material;
+				;
+				auto sprog = mat._shader_program;
 			
-			auto* fprog = (cam.is_shadow)?nullptr:&sprog.as<ShaderModule>();
-			auto& vprog = mesh_mod.as<ShaderModule>();
+				auto* fprog = (cam.is_shadow)?nullptr:&sprog.as<ShaderModule>();
+				auto& vprog = mesh_mod.as<ShaderModule>();
 
-			if ((!fprog&&!cam.is_shadow) || !mat_inst.material || !vprog)
-				continue;
+				if ((!fprog&&!cam.is_shadow) || !mat_inst.material || !vprog)
+					continue;
 
-			shaders.emplace_back(mesh_mod);
-			if(fprog)
-				shaders.emplace_back(sprog);
-			//TODO Grab everything and render them
-			//Maybe change the config to be a managed resource.
-			//Force pipeline creation
-			auto config = *dc.config;
-			config.render_pass_type = vkn_fb.rp_type;
-			GetPipeline(config, shaders);
-			//set, bindings
-			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
-			auto& layouts = sprog.as<ShaderModule>();
-			auto& lit_uni = layouts.GetLayout("LightBlock");
-			auto& pbr_uni = layouts.GetLayout("PBRBlock");
+				shaders.emplace_back(mesh_mod);
+				if(fprog)
+					shaders.emplace_back(sprog);
+				//TODO Grab everything and render them
+				//Maybe change the config to be a managed resource.
+				//Force pipeline creation
+				auto config = *dc.config;
+				config.render_pass_type = vkn_fb.rp_type;
+				GetPipeline(config, shaders);
+				//set, bindings
+				hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
+				auto& layouts = sprog.as<ShaderModule>();
+				auto& lit_uni = layouts.GetLayout("LightBlock");
+				auto& pbr_uni = layouts.GetLayout("PBRBlock");
 
-			//Account for the object and normal transform bindings
-			mat4 obj_trf = V * dc.transform;
-			mat4 obj_ivt= obj_trf.inverse().transpose();
-			vector<mat4> mat4_block{obj_trf,obj_ivt};
-			PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
-			layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
-			if (!cam.is_shadow)
-			{
-
-
-				PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
-				layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
-
-				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
-				layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
-			}
-			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
-			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
-			layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
-
-
-			if (!cam.is_shadow)
-			{
-				for (auto& shadow_map : state.active_lights)
+				//Account for the object and normal transform bindings
+				mat4 obj_trf = V * dc.transform;
+				mat4 obj_ivt= obj_trf.inverse().transpose();
+				vector<mat4> mat4_block{obj_trf,obj_ivt};
+				PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
+				layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
+				if (!cam.is_shadow)
 				{
-					auto& sm_uni = shadow_map->light_map;
-					{
-						auto& layout = fprog->GetLayout("shadow_maps");
-						PreProcUniform<int>(layout,0, sm_uni, collated_layouts, collated_bindings );
-						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
-					}
+
+
+PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
+layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
+
+PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings, ubo_manager);
+layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
 				}
+				//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
+				//PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
+				mesh_config.BindRegistered(collated_bindings);
+				layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
 
-			}
-			if(fprog)
-			{
-				//Account for material bindings
-				for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
+
+				if (!cam.is_shadow)
 				{
-					auto& name = itr->first;
-					auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
-					if (!mat_uni_itr)
-						mat_uni_itr = dc.material_instance->GetUniform(itr->first+"[0]");
-					if (mat_uni_itr )
+					for (auto& shadow_map : state.active_lights)
 					{
-						auto& ubo_info = itr->second;
-						auto& layout = ubo_info.layout;
+						auto& sm_uni = shadow_map->light_map;
 						{
-							layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
-							//collated_layouts[layout].second++;
+							auto& layout = fprog->GetLayout("shadow_maps");
+							PreProcUniform<int>(layout, 0, sm_uni, collated_layouts, collated_bindings);
+							layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+						}
+					}
 
-							switch (ubo_info.type)
+				}
+				if (fprog)
+				{
+					//Account for material bindings
+					for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
+					{
+						auto& name = itr->first;
+						auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
+						if (!mat_uni_itr)
+							mat_uni_itr = dc.material_instance->GetUniform(itr->first + "[0]");
+						if (mat_uni_itr)
+						{
+							auto& ubo_info = itr->second;
+							auto& layout = ubo_info.layout;
 							{
+								layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
+								//collated_layouts[layout].second++;
+
+								switch (ubo_info.type)
+								{
 								case uniform_layout_t::UniformType::eBuffer:
 								{
 									auto&& data = dc.material_instance->GetUniformBlock(name);
@@ -597,40 +695,191 @@ namespace idk::vkn
 								}
 								break;
 								case uniform_layout_t::UniformType::eSampler:
+								{
+									for (auto i = ubo_info.size; i-- > 0;)
 									{
-										for (auto i = ubo_info.size; i-- > 0;)
+										auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
+										if (data.size())
 										{
-											auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
-											if (data.size())
-											{
 
-												auto& texture = data.begin()->second.as<vkn::VknTexture>();
-												collated_bindings[ubo_info.set].emplace_back(
-													ProcessedRO::BindingInfo
-													{
-														ubo_info.binding,
-														ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
-														0,
-														i,
-														ubo_info.size
-													}
-												);
+											auto& texture = data.begin()->second.as<vkn::VknTexture>();
+											collated_bindings[ubo_info.set].emplace_back(
+												ProcessedRO::BindingInfo
+												{
+													ubo_info.binding,
+													ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+													0,
+													i,
+													ubo_info.size
+												}
+											);
 
-											}
 										}
-										//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
-										collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
 									}
-									break;
+									//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
+									collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+								}
+								break;
+								}
 							}
 						}
+
+					}
+				}
+				itr_index++;
+				result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
+			}
+		}
+
+		{
+		const vector<const AnimatedRenderObject*>& draw_calls = state.skinned_mesh_render;
+		for (auto& ptr_dc : draw_calls)
+		{
+			auto& dc = *ptr_dc;
+			//Force pipeline creation
+			shaders.resize(0);
+
+			auto& mat_inst = *dc.material_instance;
+			auto& mat = *mat_inst.material;
+			;
+			auto sprog = mat._shader_program;
+
+			auto* fprog = (cam.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
+			auto& vprog = mesh_mod.as<ShaderModule>();
+
+			if ((!fprog && !cam.is_shadow) || !mat_inst.material || !vprog)
+				continue;
+
+			shaders.emplace_back(mesh_mod);
+			if (fprog)
+				shaders.emplace_back(sprog);
+			//TODO Grab everything and render them
+			//Maybe change the config to be a managed resource.
+			//Force pipeline creation
+			auto config = *dc.config;
+			config.render_pass_type = vkn_fb.rp_type;
+			GetPipeline(config, shaders);
+			//set, bindings
+			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
+			auto& layouts = sprog.as<ShaderModule>();
+			auto& lit_uni = layouts.GetLayout("LightBlock");
+			auto& pbr_uni = layouts.GetLayout("PBRBlock");
+
+			//Account for the object and normal transform bindings
+			mat4 obj_trf = V * dc.transform;
+			mat4 obj_ivt = obj_trf.inverse().transpose();
+			vector<mat4> mat4_block{ obj_trf,obj_ivt };
+			//PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
+			skinned_mesh_config.BindOnce(collated_bindings, "ObjectMat4Block", mat4_block, bind_incr(set_tracker, itr_index));
+			//layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
+
+			
+			skinned_mesh_config.BindOnce(collated_bindings, "BoneMat4Block", state.GetSkeletonTransforms()[dc.skeleton_index].bones_transforms,bind_incr(set_tracker,itr_index));
+
+			if (!cam.is_shadow)
+			{
+
+
+				PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
+				layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
+
+				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings, ubo_manager);
+				layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
+			}
+			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
+			//PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
+			mesh_config.BindRegistered(collated_bindings);
+			layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
+
+
+			if (!cam.is_shadow)
+			{
+				for (auto& shadow_map : state.active_lights)
+				{
+					auto& sm_uni = shadow_map->light_map;
+					{
+						auto& layout = fprog->GetLayout("shadow_maps");
+						PreProcUniform<int>(layout, 0, sm_uni, collated_layouts, collated_bindings);
+						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+					}
+				}
+
+			}
+			if (fprog)
+			{
+				//Account for material bindings
+				for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
+				{
+					auto& name = itr->first;
+					auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
+					if (!mat_uni_itr)
+						mat_uni_itr = dc.material_instance->GetUniform(itr->first + "[0]");
+					if (mat_uni_itr)
+					{
+						auto& ubo_info = itr->second;
+						auto& layout = ubo_info.layout;
+						{
+							layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
+							//collated_layouts[layout].second++;
+
+							switch (ubo_info.type)
+							{
+							case uniform_layout_t::UniformType::eBuffer:
+							{
+								auto&& data = dc.material_instance->GetUniformBlock(name);
+								auto&& [buffer, offset] = ubo_manager.Add(data);
+								collated_bindings[ubo_info.set].emplace_back(
+									ProcessedRO::BindingInfo
+									{
+										ubo_info.binding,
+										buffer,
+										offset,
+										0,
+										ubo_info.size
+									}
+								);
+								collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
+							}
+							break;
+							case uniform_layout_t::UniformType::eSampler:
+							{
+								for (auto i = ubo_info.size; i-- > 0;)
+								{
+									auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
+									if (data.size())
+									{
+
+										auto& texture = data.begin()->second.as<vkn::VknTexture>();
+										collated_bindings[ubo_info.set].emplace_back(
+											ProcessedRO::BindingInfo
+											{
+												ubo_info.binding,
+												ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+												0,
+												i,
+												ubo_info.size
+											}
+										);
+
+									}
+								}
+								//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
+								collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+							}
+							break;
+							}
 						}
-				
+					}
+
 				}
 			}
 			itr_index++;
 			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
 		}
+		}
+
+
+
 		return result;
 	}
 	
