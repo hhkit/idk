@@ -488,20 +488,34 @@ namespace idk::vkn
 		{
 			return _shader.as<ShaderModule>();
 		}
+		struct ExBindingInfo
+		{
+			ProcessedRO::BindingInfo info;
+			vk::DescriptorSetLayout layout;
+			operator ProcessedRO::BindingInfo& ()
+			{
+				return info;
+			}
+			ExBindingInfo(const ProcessedRO::BindingInfo& i, vk::DescriptorSetLayout l) : info{i},layout{l}
+			{
+			}
+		};
 
-		vector<std::pair<uint32_t, ProcessedRO::BindingInfo>> binding_infos;//set, binding_info
+		vector<std::pair<uint32_t, ExBindingInfo>> binding_infos;//set, binding_info
 		template<typename T>
 		void RegisterBindingInfo(const string& name, const T& data)
 		{
 			auto& shader = Shader();
 			auto& uni_info = shader.GetLayout(name);
-			binding_infos.emplace_back(uni_info.set,CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
+			binding_infos.emplace_back(uni_info.set, ExBindingInfo{CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager),uni_info.layout });
 		}
-		void BindRegistered(collated_bindings_t& collated_bindings)
+		template<typename Tracker>
+		void BindRegistered(collated_bindings_t& collated_bindings,Tracker&& tracker)
 		{
 			for (auto& info : binding_infos)
 			{
 				collated_bindings[info.first].emplace_back(info.second);
+				tracker(info.second.layout, ref.collated_layouts);
 			}
 		}
 		template<typename T, typename Tracker>
@@ -550,7 +564,8 @@ namespace idk::vkn
 		mesh_config._shader = msprog;
 		mesh_config.SetRef(collated_layouts, ubo_manager);
 		skinned_mesh_config._shader = _skinned_mesh_shader_module;
-	
+		skinned_mesh_config.SetRef(collated_layouts, ubo_manager);
+
 
 		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
 		mat4 pvt_trf = mat4{ 1,0,0,0,
@@ -559,14 +574,11 @@ namespace idk::vkn
 							0,0,0,1
 		}*cam.projection_matrix;
 
-		mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf);
-		skinned_mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf);
-
 		auto& pvt_uni = msmod.GetLayout("CameraBlock");
 		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
 		mat4 pbr_trf = V.inverse();
 		;
-		auto mesh_mod = GetMeshRendererShaderModule();
+		auto mesh_mod = msprog;
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
 
@@ -587,7 +599,15 @@ namespace idk::vkn
 				layout_incrementer(tracking_table, layout, index, layout_count);
 			};
 		};
+
+
+
 		int itr_index = 0;
+		mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf        );
+		skinned_mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf);
+
+
+
 
 		{
 			const vector<const RenderObject*>& draw_calls = state.mesh_render;
@@ -633,16 +653,16 @@ namespace idk::vkn
 				{
 
 
-PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
-layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
+					PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
+					layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
 
-PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings, ubo_manager);
-layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
+					PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings, ubo_manager);
+					layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
 				}
 				//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 				//PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
-				mesh_config.BindRegistered(collated_bindings);
-				layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
+				mesh_config.BindRegistered(collated_bindings, bind_incr(set_tracker, itr_index));
+				//layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
 
 
 				if (!cam.is_shadow)
@@ -745,12 +765,12 @@ layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
 			auto sprog = mat._shader_program;
 
 			auto* fprog = (cam.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
-			auto& vprog = mesh_mod.as<ShaderModule>();
+			auto& vprog = _skinned_mesh_shader_module.as<ShaderModule>();
 
 			if ((!fprog && !cam.is_shadow) || !mat_inst.material || !vprog)
 				continue;
 
-			shaders.emplace_back(mesh_mod);
+			shaders.emplace_back(_skinned_mesh_shader_module);
 			if (fprog)
 				shaders.emplace_back(sprog);
 			//TODO Grab everything and render them
@@ -788,8 +808,8 @@ layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
 			}
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
 			//PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
-			mesh_config.BindRegistered(collated_bindings);
-			layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
+			skinned_mesh_config.BindRegistered(collated_bindings, bind_incr(set_tracker, itr_index));
+			//layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
 
 
 			if (!cam.is_shadow)

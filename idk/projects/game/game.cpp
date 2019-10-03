@@ -80,7 +80,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::OpenGL;
+	auto gfx_api = GraphicsAPI::Vulkan;
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
@@ -131,7 +131,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//camHandle->is_orthographic = true;
 		//camHandle->orthographic_size = 10.f;
 		//camHandle->render_target->AddAttachment(eDepth);
-		camHandle->clear = color{ 0.05,0.05,0.1,1 };
+		camHandle->clear = color{ 0.3f,0.3f,0.5f,1 };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
@@ -160,7 +160,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if (gfx_api != GraphicsAPI::Vulkan)
+		//if (gfx_api != GraphicsAPI::Vulkan)
 		{
 			auto resources_running = Core::GetResourceManager().Load(path);
 
@@ -270,7 +270,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		light_comp->light = PointLight{
 			real{1.f},
-			color{0.8,0,0}
+			color{0.8f,0,0}
 		};
 		light->AddComponent<TestComponent>();
 	}
@@ -278,24 +278,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		auto light = scene->CreateGameObject();
 		light->Name("Directional Light");
-		light->GetComponent<Transform>()->position = vec3{ 1.749,1.699,1.054f };
+		light->GetComponent<Transform>()->position = vec3{0,0.5f,-0.5f};// vec3{ 1.749f,1.699f,1.054f };
 		euler_angles rot;
-		rot.x = deg{ 94 };
-		rot.y = deg{ -9 };
-		rot.z = deg{ -49 };
+		rot.x = deg{45};//deg{ 94 };
+		rot.y = deg{0};//deg{ -9 };
+		rot.z = deg{0};//deg{ -49 };
 		light->Transform()->rotation = s_cast<quat>(rot);
 		auto light_comp = light->AddComponent<Light>();
 		{
-			light_comp->light = DirectionalLight{
+			auto light_type = SpotLight{//DirectionalLight{
 				real{1.f},
-				color{0.5,0,1}
+				color{1.0f,1.0f,1.0f}// 0.5,0,1 }
 			};
+			light_type.attenuation_radius = 0.01f;
+			light_comp->light = light_type;
+
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
-			auto m = light_map->GetMeta().textures[0]->GetMeta();
-			m.internal_format = ColorFormat::DEPTH_COMPONENT;
-			//light_map->GetMeta().textures[0]->Size(ivec2{ 1024,1024 });
-			light_map->GetMeta().textures[0]->SetMeta(m);
-			light_comp->SetLightMap(light_map);
+			//auto m = light_map->GetMeta().textures[0]->GetMeta();
+			//m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			////light_map->GetMeta().textures[0]->Size(ivec2{ 1024,1024 });
+			//light_map->GetMeta().textures[0]->SetMeta(m);
+			//light_comp->SetLightMap(light_map);
 		}
 		light->AddComponent<TestComponent>();
 	}
@@ -391,13 +394,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducemetoo->AddComponent<RigidBody>();
 		seducemetoo->AddComponent<Collider>()->shape = box{};
 	}
-
-
-
-    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab.idp").value()->Instantiate(*scene);
-
-
-
 	c->Run();
 	
 	auto retval = c->GetSystem<Windows>().GetReturnVal();

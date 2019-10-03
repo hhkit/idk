@@ -70,7 +70,8 @@ namespace idk
 			auto parent = elem.GetGameObject()->Parent();
 			auto animator = parent->GetComponent<Animator>();
 			ro.skeleton_index = skeleton_indices[animator];
-			result.skinned_mesh_render.emplace_back(ro);
+			ro.config = mesh_render_config;
+			result.skinned_mesh_render.emplace_back(std::move(ro));
 		}
 
 		for (auto& camera : cameras)
