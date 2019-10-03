@@ -70,6 +70,7 @@ namespace idk::vkn
 			{"positon"         ,VertexRate::eVertex},
 			{"normal"          ,VertexRate::eVertex},
 			{"uv"              ,VertexRate::eVertex},
+			{"tangent"         ,VertexRate::eVertex},
 			{"bone_ids"        ,VertexRate::eVertex},
 			{"bone_weights"    ,VertexRate::eVertex},
 		};
@@ -108,7 +109,7 @@ namespace idk::vkn
 			auto tmp = tmp_t{ code_reflector.get_type(input.base_type_id),code_reflector.get_type(input.type_id),input.name,input.id };// temps.emplace_back();
 			auto location = code_reflector.get_decoration(input.id, spv::Decoration::DecorationLocation);
 			auto& bdesc = result.extracted_desc[location];// .desc;
-			bdesc.AddAttribute(GetFormat(tmp.type), location, 0);
+			bdesc.AddAttribute(GetFormat(tmp.type), location, 0,true);
 			//bdesc.binding.binding_index = 0;
 			bdesc.binding.stride = (tmp.type.width* tmp.type.vecsize)/8;
 			bdesc.binding.vertex_rate = GetRate(tmp.name);

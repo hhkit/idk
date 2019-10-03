@@ -14,7 +14,8 @@
 #include <vkn/VknFrameBuffer.h>
 #include <gfx/Light.h>
 
-
+#include <gfx/MeshRenderer.h>
+#include <anim/SkinnedMeshRenderer.h>
 
 namespace idk::vkn
 {
@@ -140,9 +141,9 @@ namespace idk::vkn
 			//TODO figure this out
 			string filename = "/assets/shader/mesh.vert";
 			_mesh_renderer_shader_module=LoadShader(filename, {
-						BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-						BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-						BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
 				});
 			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
 			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
@@ -623,7 +624,9 @@ namespace idk::vkn
 				auto& mat = *mat_inst.material;
 				;
 				auto sprog = mat._shader_program;
-			
+				std::optional<RscHandle<ShaderProgram>> mesh_shd, geom_shd, frag_shd;
+				mesh_shd = msprog;
+
 				auto* fprog = (cam.is_shadow)?nullptr:&sprog.as<ShaderModule>();
 				auto& vprog = mesh_mod.as<ShaderModule>();
 
@@ -631,8 +634,10 @@ namespace idk::vkn
 					continue;
 
 				shaders.emplace_back(mesh_mod);
-				if(fprog)
-					shaders.emplace_back(sprog);
+				if (fprog)
+				{
+					shaders.emplace_back(*(frag_shd = sprog));
+				}
 				//TODO Grab everything and render them
 				//Maybe change the config to be a managed resource.
 				//Force pipeline creation
@@ -751,7 +756,7 @@ namespace idk::vkn
 					}
 				}
 				itr_index++;
-				result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
+				result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config, mesh_shd,geom_shd,frag_shd });
 			}
 		}
 
@@ -759,6 +764,7 @@ namespace idk::vkn
 		const vector<const AnimatedRenderObject*>& draw_calls = state.skinned_mesh_render;
 		for (auto& ptr_dc : draw_calls)
 		{
+			std::optional<RscHandle<ShaderProgram>> mesh_shd, geom_shd, frag_shd;
 			auto& dc = *ptr_dc;
 			//Force pipeline creation
 			shaders.resize(0);
@@ -769,14 +775,14 @@ namespace idk::vkn
 			auto sprog = mat._shader_program;
 
 			auto* fprog = (cam.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
-			auto& vprog = _skinned_mesh_shader_module.as<ShaderModule>();
-
+			mesh_shd = _skinned_mesh_shader_module;
+			auto& vprog = mesh_shd->as<ShaderModule>();
 			if ((!fprog && !cam.is_shadow) || !mat_inst.material || !vprog)
 				continue;
 
-			shaders.emplace_back(_skinned_mesh_shader_module);
+			shaders.emplace_back(*mesh_shd);
 			if (fprog)
-				shaders.emplace_back(sprog);
+				shaders.emplace_back( *(frag_shd=sprog));
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			//Force pipeline creation
@@ -900,7 +906,7 @@ namespace idk::vkn
 				}
 			}
 			itr_index++;
-			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
+			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config,mesh_shd,geom_shd,frag_shd });
 		}
 		}
 
@@ -1121,14 +1127,19 @@ namespace idk::vkn
 		{
 			auto& obj = p_ro.Object();
 			shaders.resize(0);
-			shaders.emplace_back(GetMeshRendererShaderModule());
-			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance->material->_shader_program;
+			//shaders.emplace_back(GetMeshRendererShaderModule());
+			auto msprog = *p_ro.vertex_shader;//GetMeshRendererShaderModule();
+			auto sprog = (camera.is_shadow) ? _shadow_shader_module : *p_ro.frag_shader;//obj.material_instance->material->_shader_program;
 			auto* fprog = (camera.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
+			auto opt_gprog = p_ro.geom_shader;
 			if ((!camera.is_shadow && !obj.material_instance) || !msprog)
 				continue;
 			if(fprog)
 				shaders.emplace_back(sprog);
+			if(opt_gprog)
+				shaders.emplace_back(*opt_gprog);
+			shaders.emplace_back(msprog);
+
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			auto config = *p_ro.config;
@@ -1163,12 +1174,14 @@ namespace idk::vkn
 				}
 			}
 			
-			auto& bindings = obj.attrib_bindings;
-			for (auto&& [bindingz, attrib] : bindings)
+			auto& renderer_req = *obj.renderer_req;
+			
+			for (auto&& [attrib, location] : renderer_req.requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(bindingz, *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 			}
+			
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
 			{

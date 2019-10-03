@@ -255,7 +255,7 @@ namespace idk
 		}
 		// animator->Play(0);
 		// Saving the prefab
-		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp");
+		auto prefab_handle = PrefabUtility::Create(prefab_root);// Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp");
 		retval.Add(prefab_handle);
 
 		scene->DestroyGameObject(prefab_root);
@@ -547,7 +547,7 @@ namespace idk
 		}
 		// animator->Play(0);
 		// Saving the prefab
-		auto prefab_handle = PrefabUtility::Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp");
+		auto prefab_handle = PrefabUtility::Create(prefab_root);// Save(prefab_root, string{ "/assets/prefabs/" } +path_to_resource.GetStem().data() + ".idp");
 		retval.Add(prefab_handle);
 
 		scene->DestroyGameObject(prefab_root);

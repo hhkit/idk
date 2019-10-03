@@ -122,6 +122,10 @@ namespace idk::vkn
 		const RenderObject* itr;
 		hash_table<uint32_t, vector<BindingInfo>> bindings;
 		shared_ptr<pipeline_config> config;
+
+		std::optional<RscHandle<ShaderProgram>> vertex_shader;
+		std::optional<RscHandle<ShaderProgram>> geom_shader;
+		std::optional<RscHandle<ShaderProgram>> frag_shader;
 	};
 	class PipelineManager;
 	struct RenderStateV2

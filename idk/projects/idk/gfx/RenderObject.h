@@ -30,7 +30,8 @@ namespace idk
 		//sphere bounding_volume;
 		
 		//binding,attrib
-		hash_table<uint32_t, vtx::Attrib> attrib_bindings;
+		const renderer_reqs* renderer_req;
+		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
 	};
 

@@ -35,6 +35,7 @@ namespace idk
 			//Must offset the next location by 3/4 when AttribFormat is Mat3/4
 			uint32_t     location{};
 			uint32_t     offset{};
+			bool  fixed_location = false;
 		};
 		binding_info           binding = {};
 		vector<attribute_info> attributes = {};
@@ -43,6 +44,7 @@ namespace idk
 			//Must offset the next location by 3/4 when AttribFormat is Mat3/4
 			, uint32_t     location
 			, uint32_t     offset
+			, bool fixed_location = false
 		);
 
 		buffer_desc Process(uint32_t location_offset)const;
