@@ -35,7 +35,7 @@ namespace idk {
 
 			//Find and get all CMDs using Handle<GameObject>
 			commands_affected.clear();
-			for (unique_ptr<ICommand>& i : editor.command_controller.undoStack) {
+			for (const auto& i : editor.command_controller.undoStack) {
 				if (i->game_object_handle == game_object_handle) {
 					commands_affected.push_back(i.get());
 				}
@@ -68,7 +68,7 @@ namespace idk {
 
 				if (c.is<Transform>())
 				{
-					Transform& t = c.get<Transform>();
+					const Transform& t = c.get<Transform>();
 					game_object_handle->GetComponent<Transform>()->position = t.position;
 					game_object_handle->GetComponent<Transform>()->rotation = t.rotation;
 					game_object_handle->GetComponent<Transform>()->scale	= t.scale;
@@ -76,7 +76,7 @@ namespace idk {
 				}
 				else if (c.is<Name>())
 				{
-					Name& t = c.get<Name>();
+					const Name& t = c.get<Name>();
 					game_object_handle->GetComponent<Name>()->name = t.name;
 				}
 				else {
@@ -87,8 +87,8 @@ namespace idk {
 
 			//Reassign all CMDs using Handle<GameObject> Big O(n^2)
 			IDE& editor = Core::GetSystem<IDE>();
-			for (ICommand* i : commands_affected) {
-				for (unique_ptr<ICommand>& j : editor.command_controller.undoStack) {
+			for (const auto& i : commands_affected) {
+				for (const auto& j : editor.command_controller.undoStack) {
 					if (i == j.get()) { //If this unique pointer matches with the commands_affected
 						j->game_object_handle = game_object_handle;
 						break;

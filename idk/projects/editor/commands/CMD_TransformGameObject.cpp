@@ -29,7 +29,7 @@ namespace idk {
 		}
 
 		if (game_object_handle) {
-			Handle<Transform> transformHandle = game_object_handle->GetComponent<Transform>();
+			const Handle<Transform> transformHandle = game_object_handle->GetComponent<Transform>();
 			if (transformHandle) {
 				transformHandle->GlobalMatrix(new_values);
 				return true;
@@ -43,7 +43,7 @@ namespace idk {
 
 	bool CMD_TransformGameObject::undo()  {
 		if (game_object_handle) {
-			Handle<Transform> transformHandle = game_object_handle->GetComponent<Transform>();
+			const Handle<Transform> transformHandle = game_object_handle->GetComponent<Transform>();
 			if (transformHandle) {
 				transformHandle->GlobalMatrix(original_values);
 				return true;

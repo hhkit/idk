@@ -35,15 +35,15 @@ namespace idk
 		if (ai_scene == nullptr)
 			return retval;
 		
-		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
-		auto prefab_root = scene->CreateGameObject();
+		const auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
 		// prefab_root->Transform()->scale /= 200.0f;
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
 		h_mat->Compile();
-		auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+		const auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 		mat_inst->material = h_mat;
 
 		// vec3 min_pos{ INT_MAX,INT_MAX ,INT_MAX }, max_pos{ INT_MIN,INT_MIN ,INT_MIN };
@@ -80,7 +80,7 @@ namespace idk
 		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
 			const aiMesh* ai_mesh = ai_scene->mMeshes[i];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>();
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>();
 			mesh_handle->Name(ai_mesh->mName.data);
 
 			vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
@@ -127,7 +127,7 @@ namespace idk
 				auto res = bones_table.find(ai_bone->mName.data);
 				assert(res != bones_table.end());
 
-				int bone_index = static_cast<int>(res->second);
+				const int bone_index = static_cast<int>(res->second);
 				for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
 				{
 					float weight = ai_bone->mWeights[j].mWeight;
@@ -146,10 +146,10 @@ namespace idk
 			// Add mesh resource
 			retval.Add(RscHandle<Mesh>{ mesh_handle });
 			
-			auto mesh_child = scene->CreateGameObject();
+			const auto mesh_child = scene->CreateGameObject();
 			mesh_child->Name(mesh_handle->Name());
 			mesh_child->Transform()->SetParent(prefab_root);
-			auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
+			const auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
 			mesh_renderer->mesh = RscHandle<Mesh>{ mesh_handle };
 			mesh_renderer->material_instance = mat_inst;
 
@@ -160,11 +160,11 @@ namespace idk
 		// mat4 normalize_mat = mat4 { scale(fbx_loader_detail::FBX_SCALE)  };
 		// fbx_loader_detail::normalizeMeshEntries(vertices, normalize_mat);
 
-		auto animator = prefab_root->AddComponent<Animator>();
+		const auto animator = prefab_root->AddComponent<Animator>();
 		// Loading Skeletons
 		if (!bones.empty())
 		{
-			auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
+			const auto skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
 			// Name is the root node
 			skeleton_handle->Name(bones[0]._name);
 
@@ -173,7 +173,7 @@ namespace idk
 			skeleton = anim::Skeleton{ bones, bones_table };
 
 			// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-			mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
+			const mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 			skeleton.SetSkeletonTransform(skeleton_transform);
 
 			animator->SetSkeleton(skeleton_handle);
@@ -183,7 +183,7 @@ namespace idk
 		// Loading Animations
 		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
-			auto anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
+			const auto anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
 			anim_clip_handle->Name(ai_scene->mAnimations[i]->mName.data);
 			auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 
@@ -197,7 +197,7 @@ namespace idk
 		// Saving the prefab
 		if (path_to_resource.GetExtension() != ".obj")
 		{
-			auto prefab_handle = PrefabUtility::Create(prefab_root);
+			const auto prefab_handle = PrefabUtility::Create(prefab_root);
 			retval.Add(prefab_handle);
 		}
         scene->DestroyGameObject(prefab_root);
@@ -220,15 +220,15 @@ namespace idk
 		if (ai_scene == nullptr)
 			return retval;
 
-		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
-		auto prefab_root = scene->CreateGameObject();
+		const auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
 		// prefab_root->Transform()->scale /= 200.0f;
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
 		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
 		h_mat->Compile();
-		auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+		const auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 		mat_inst->material = h_mat;
 
 		// vec3 min_pos{ INT_MAX,INT_MAX ,INT_MAX }, max_pos{ INT_MIN,INT_MIN ,INT_MIN };
@@ -319,12 +319,12 @@ namespace idk
 				auto res = bones_table.find(ai_bone->mName.data);
 				assert(res != bones_table.end());
 
-				int bone_index = static_cast<int>(res->second);
+				const int bone_index = static_cast<int>(res->second);
 				for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
 				{
-					float weight = ai_bone->mWeights[j].mWeight;
+					const float weight = ai_bone->mWeights[j].mWeight;
 
-					unsigned vert_id = ai_bone->mWeights[j].mVertexId;
+					const unsigned vert_id = ai_bone->mWeights[j].mVertexId;
 					vertices[vert_id].addBoneData(bone_index, weight);
 				}
 			}
@@ -338,10 +338,10 @@ namespace idk
 			// Add mesh resource
 			retval.Add(RscHandle<Mesh>{ mesh_handle });
 
-			auto mesh_child = scene->CreateGameObject();
+			const auto mesh_child = scene->CreateGameObject();
 			mesh_child->Name(mesh_handle->Name());
 			mesh_child->Transform()->SetParent(prefab_root);
-			auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
+			const auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
 			mesh_renderer->mesh = RscHandle<Mesh>{ mesh_handle };
 			mesh_renderer->material_instance = mat_inst;
 
@@ -349,7 +349,7 @@ namespace idk
 			indices.clear();
 		}
 
-		auto animator = prefab_root->AddComponent<Animator>();
+		const auto animator = prefab_root->AddComponent<Animator>();
 		// Loading Skeletons
 		if (!bones.empty())
 		{
@@ -370,7 +370,7 @@ namespace idk
 			skeleton = anim::Skeleton{ bones, bones_table };
 
 			// Setting the skeleton transform - we multiply the normalized_mesh matrix here because the bone_transform un-does it
-			mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
+			const mat4 skeleton_transform = fbx_loader_detail::initMat4(ai_scene->mRootNode->mTransformation).inverse();
 			skeleton.SetSkeletonTransform(skeleton_transform);
 			animator->SetSkeleton(skeleton_handle);
 			retval.Add(skeleton_handle);			
@@ -397,7 +397,7 @@ namespace idk
 		}
 		if (path_to_resource.GetExtension() != ".obj")
 		{
-			auto prefab_handle = PrefabUtility::Create(prefab_root);
+			const auto prefab_handle = PrefabUtility::Create(prefab_root);
 			retval.Add(prefab_handle);
 		}
 		scene->DestroyGameObject(prefab_root);

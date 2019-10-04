@@ -26,7 +26,7 @@ namespace idk::fbx_loader_detail
 			0.0f,	0.0f,	0.0f,	1.0f
 		);
 	}
-	vec3 initVec3(const aiVector3D& vec)
+	vec3 initVec3(const aiVector3D& vec) noexcept
 	{
 		return vec3(vec.x, vec.y, vec.z);
 	}
@@ -74,7 +74,7 @@ namespace idk::fbx_loader_detail
 			assimp_node._parent = ai_data.parent;
 
 			auto bone_res = bone_set.find(BoneData{ assimp_node._name });
-			int curr_index = s_cast<int>(assimp_node_vec.size());
+			const int curr_index = s_cast<int>(assimp_node_vec.size());
 			if (assimp_node._parent >= 0)
 			{
 				// add my index to the parent node
@@ -196,7 +196,7 @@ namespace idk::fbx_loader_detail
 		{
 			auto curr_node = queue.front();
 			queue.pop_front();
-			mat4 node_transform = curr_node.parent_transform * curr_node.assimp_node->_node_transform;
+			const mat4 node_transform = curr_node.parent_transform * curr_node.assimp_node->_node_transform;
 			
 			// If this node is not actually a bone, we push all its children into the start of the queue with the parent being the current node's parent.			
 			if ((curr_node.assimp_node->_ai_type & BONE) != BONE)
@@ -217,15 +217,15 @@ namespace idk::fbx_loader_detail
 			b._name = curr_node.assimp_node->_name;
 			b._parent = curr_node.parent;
 
-			auto decomp = decompose(curr_node.assimp_node->_global_inverse_bind_pose);
+			const auto decomp = decompose(curr_node.assimp_node->_global_inverse_bind_pose);
 			b._global_inverse_bind_pose = mat4{ scale(fbx_loader_detail::FBX_SCALE) } * curr_node.assimp_node->_global_inverse_bind_pose;
 			// b._global_inverse_bind_pose[3] = b._global_inverse_bind_pose[3] * vec4{ FBX_SCALE, 1.0f };
 			
-			auto local_bind = mat4{ scale(fbx_loader_detail::FBX_SCALE) } *node_transform;
+			const auto local_bind = mat4{ scale(fbx_loader_detail::FBX_SCALE) } *node_transform;
 			//auto decomp1 = decompose(local_bind);
 			//auto decomp2 = decompose(node_transform);
 
-			aiMatrix4x4 assimp_mat = initMat4(local_bind);
+			const aiMatrix4x4 assimp_mat = initMat4(local_bind);
 			aiVector3D pos;
 			aiVector3D scale;
 			aiQuaternion rot;
@@ -276,7 +276,7 @@ namespace idk::fbx_loader_detail
 		//auto decomp = decompose(concat_matrix);
 		//auto decomp2 = decompose(concat_matrix);
 
-		aiMatrix4x4 assimp_mat = initMat4(concat_matrix);
+		const aiMatrix4x4 assimp_mat = initMat4(concat_matrix);
 		aiVector3D pos;
 		aiVector3D scale;
 		aiQuaternion rot;
@@ -295,7 +295,7 @@ namespace idk::fbx_loader_detail
 			vec3 prev;
 			for (size_t p = 0; p < ai_anim_node->mNumPositionKeys; ++p)
 			{
-				auto& position_key = ai_anim_node->mPositionKeys[p];
+				const auto& position_key = ai_anim_node->mPositionKeys[p];
 
 				const vec3 curr = initVec3(position_key.mValue);
 				//if (abs(prev[0] - curr[0]) > epsilon &&
@@ -318,7 +318,7 @@ namespace idk::fbx_loader_detail
 			vec3 prev;
 			for (size_t s = 0; s < ai_anim_node->mNumScalingKeys; ++s)
 			{
-				auto& scale_key = ai_anim_node->mScalingKeys[s];
+				const auto& scale_key = ai_anim_node->mScalingKeys[s];
 
 				const vec3 curr = initVec3(scale_key.mValue);
 				//if (abs(prev[0] - curr[0]) > epsilon &&
@@ -346,7 +346,7 @@ namespace idk::fbx_loader_detail
 			//quat prev
 			for (size_t r = 0; r < ai_anim_node->mNumRotationKeys; ++r)
 			{
-				auto& rotation_key = ai_anim_node->mRotationKeys[r];
+				const auto& rotation_key = ai_anim_node->mRotationKeys[r];
 				const quat curr = initQuat(rotation_key.mValue);
 				const float time = static_cast<float>(rotation_key.mTime - ai_anim_node->mRotationKeys[0].mTime);
 
@@ -431,9 +431,9 @@ namespace idk::fbx_loader_detail
 		for (auto& elem : root_node._children)
 			initAnimNodesRecurse(assimp_node_vec, elem, ai_anim_table, anim_clip, channels, concat_transform);
 
-		float fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
-		float num_ticks = static_cast<float>(ai_anim->mDuration);
-		float duration = num_ticks / fps;
+		const float fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
+		const float num_ticks = static_cast<float>(ai_anim->mDuration);
+		const float duration = num_ticks / fps;
 
 		anim_clip.SetSpeeds(fps, duration, num_ticks);
 		anim_clip.SetName(ai_anim->mName.data);

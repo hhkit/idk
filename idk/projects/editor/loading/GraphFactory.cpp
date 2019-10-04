@@ -34,11 +34,11 @@ namespace idk
 	ResourceBundle GraphLoader::LoadFile(PathHandle p)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>();
+		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>();
 		if (stream)
 		{
 			parse_text(stringify(stream), *mat);
-			auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
+			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
 			(discardme);
 		}
 		mat->Compile();
@@ -48,12 +48,12 @@ namespace idk
 	ResourceBundle GraphLoader::LoadFile(PathHandle p, const MetaBundle& m)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(m.metadatas[0].guid);
+		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(m.metadatas[0].guid);
 
 		if (stream)
 		{
 			parse_text(stringify(stream), *mat);
-			auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
+			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
 			(discardme);
 		}
 

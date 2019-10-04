@@ -28,8 +28,8 @@ namespace idk
 		auto& app_sys = Core::GetSystem<Application>();
 		//assert(currCamera);
 
-		Handle<Camera> currCamera = main_camera.current_camera;
-		auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		const Handle<Camera> currCamera = main_camera.current_camera;
+		const auto tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
 		//Please ignore all of this first
 		constexpr auto cam_vel = 1.f;
@@ -75,10 +75,10 @@ namespace idk
 		{
 
 			//This is not referencing the sc
-			vec2 newPos = app_sys.GetMouseScreenPos();
+			const vec2 newPos = app_sys.GetMouseScreenPos();
 			//ivec2 newPos2 = app_sys.GetMousePixelPos();
 
-			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
+			const vec2 anotherPos = vec2{ newPos.x,-newPos.y };
 
 			if(!main_camera._rotating)
 				main_camera.StartRotatingCamera(anotherPos);
@@ -96,10 +96,10 @@ namespace idk
 		//std::cout << app_sys.GetKey(Key::MButton) << "\n";
 		if (app_sys.GetKey(Key::MButton))
 		{
-			vec2 newPos = app_sys.GetMouseScreenPos();
+			const vec2 newPos = app_sys.GetMouseScreenPos();
 			//ivec2 newPos2 = app_sys.GetMousePixelPos();
 
-			vec2 anotherPos = vec2{ newPos.x,-newPos.y };
+			const vec2 anotherPos = vec2{ newPos.x,-newPos.y };
 
 			if (!main_camera._panning)
 				main_camera.StartPanningCamera(anotherPos);

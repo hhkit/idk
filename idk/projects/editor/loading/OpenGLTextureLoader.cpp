@@ -104,7 +104,7 @@ namespace idk
 
 	ResourceBundle OpenGLTextureLoader::Load_stbi(PathHandle path_to_resource)
 	{
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
+		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
 
 		auto tm = texture_handle->GetMeta();
 
@@ -118,7 +118,7 @@ namespace idk
 		};
 		if (data) // stbi image can fail
 		{
-			auto col_format = [&]() -> InputChannels
+			const auto col_format = [&]() -> InputChannels
 			{	switch (channels)
 			{
 			default:
@@ -141,7 +141,7 @@ namespace idk
 		
 		
 		DDS_HEADER header;
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
+		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
 		auto tm = texture_handle->GetMeta();
 		const char* filePath = path_to_resource.GetFullPath().data();
 
@@ -167,10 +167,10 @@ namespace idk
 		fread(&header, sizeof(header), 1, fp);
 
 		//Get the width, height and mipmapcount of the data
-		unsigned int height = header.dwHeight;
-		unsigned int width = header.dwWidth;
+		const unsigned int height = header.dwHeight;
+		const unsigned int width = header.dwWidth;
 		unsigned int mipMapCount = header.dwMipMapCount;
-		unsigned int linearSize = header.dwPitchOrLinearSize;
+		const unsigned int linearSize = header.dwPitchOrLinearSize;
 
 		//Load dds info
 		DdsLoadInfo* li = nullptr;
@@ -372,7 +372,7 @@ namespace idk
 	ResourceBundle OpenGLTextureLoader::Load_stbi(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
 		auto& metadata = path_to_meta.metadatas[0];
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
+		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
 
 		auto first_meta = metadata.GetMeta<Texture>();
 		if (first_meta)
@@ -389,7 +389,7 @@ namespace idk
 
 		if (data) // stbi image can fail
 		{
-			auto col_format = [channels]() -> InputChannels
+			const auto col_format = [channels]() -> InputChannels
 			{
 				switch (channels)
 				{
@@ -417,9 +417,9 @@ namespace idk
 
 		auto& metadata = path_to_meta.metadatas[0];
 
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
+		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
 
-		auto v = metadata.GetMeta<OpenGLTexture>();
+		const auto v = metadata.GetMeta<OpenGLTexture>();
 
 		const char* filePath = path_to_resource.GetFullPath().data();
 
@@ -445,8 +445,8 @@ namespace idk
 		fread(&header, sizeof(header), 1, fp);
 
 		//Get the width, height and mipmapcount of the data
-		unsigned int height = header.dwHeight;
-		unsigned int width = header.dwWidth;
+		const unsigned int height = header.dwHeight;
+		const unsigned int width = header.dwWidth;
 		unsigned int mipMapCount = header.dwMipMapCount;
 
 		//Load dds info
@@ -504,9 +504,9 @@ namespace idk
 			unsigned char* data = (unsigned char*)malloc(size);
 
 			//Fail if data is corrupted
-			if (!data) {
-				goto failure;
-			}
+			if (!data)
+				return texture_handle;
+		
 			//Get the original texture image data
 			texture_handle->Size(ivec2(width, height));
 			//Read the mip maps and create textures based on them
@@ -625,11 +625,6 @@ namespace idk
 		//Close the connection
 		fclose(fp);
 
-		return texture_handle;
-
-		//Flag if image fails
-	failure:
-		//return false;
 		return texture_handle;
 	}
 

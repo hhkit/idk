@@ -41,7 +41,7 @@ namespace idk {
 			unique_ptr<ICommand> command = std::move(pollStack.front());
 			pollStack.pop();
 
-			bool isSuccess = command->execute();
+			const bool isSuccess = command->execute();
 
 			if (isSuccess) {
 				if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one

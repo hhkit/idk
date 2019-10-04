@@ -259,7 +259,7 @@ namespace idk
 	{
 		//Refresh the new matrix values
 		selected_matrix.clear();
-		for (Handle<GameObject> i : selected_gameObjects) {
+		for (const auto& i : selected_gameObjects) {
 			selected_matrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
 		}
 	}
@@ -268,9 +268,9 @@ namespace idk
 	{
 		if (selected_gameObjects.size()) {
 			vec3 finalCamPos{};
-			for (Handle<GameObject> i : selected_gameObjects) {
+			for (const auto& i : selected_gameObjects) {
 
-				Handle<Transform> transform = i->GetComponent<Transform>();
+				const auto transform = i->GetComponent<Transform>();
 				if (transform) {
 					finalCamPos += transform->position;
 				}
@@ -281,9 +281,9 @@ namespace idk
 
 			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
 
-			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
-			Handle<Camera> currCamera = main_camera.current_camera;
-			Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
+			const CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			const Handle<Camera> currCamera = main_camera.current_camera;
+			const Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;
 			focused_vector = finalCamPos;
 			scroll_multiplier = default_scroll_multiplier;

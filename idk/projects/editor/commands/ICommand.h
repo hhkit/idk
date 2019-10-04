@@ -22,13 +22,15 @@ namespace idk {
 	class ICommand {
 	public:
 		//Disables Copy or Move constructor
-		ICommand() {}
-		ICommand(ICommand&& disabled) = delete;
+		ICommand() noexcept = default;
 		ICommand(const ICommand& disabled) = delete;
+		ICommand(ICommand&& disabled) = delete;
+		ICommand& operator=(const ICommand& disabled) = delete;
+		ICommand& operator=(ICommand&& disabled) = delete;
 		virtual bool execute() = 0;						//Return true if the command works. When it is true, it will add to the undo stack
 
 		virtual bool undo() = 0;						//Return true if the command works. When it is true, it will add to the redo stack
-		virtual ~ICommand() = default;					// virtual needs default destructor
+		virtual ~ICommand() noexcept = default;					// virtual needs default destructor
 	protected:
 		friend class CMD_DeleteGameObject;
 

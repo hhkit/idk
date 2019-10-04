@@ -18,7 +18,7 @@ namespace idk
 	{//Assert for now
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 
-		auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>();
+		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>();
 
 		auto tm = texture_handle->GetMeta();
 		//auto texture_id = texture_handle->ID();
@@ -50,7 +50,7 @@ namespace idk
 
 			//assert(data);
 
-			auto col_format = [&]() -> CMInputChannels
+			const auto col_format = [&]() -> CMInputChannels
 			{	switch (channels)
 			{
 			default:
@@ -75,7 +75,7 @@ namespace idk
 		assert(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL);
 		auto& metadata = path_to_meta.metadatas[0];
 
-		auto cubemap_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>(metadata.guid);
+		const auto cubemap_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLCubemap>(metadata.guid);
 
 		auto tm = cubemap_handle->GetMeta();
 		//auto texture_id = texture_handle->ID();
@@ -112,7 +112,7 @@ namespace idk
 
 			//assert(data);
 
-			auto col_format = [&]() -> CMInputChannels
+			const auto col_format = [&]() -> CMInputChannels
 			{	switch (channels)
 			{
 			default:

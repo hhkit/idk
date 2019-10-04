@@ -110,7 +110,7 @@ namespace idk::fbx_loader_detail
 	// Convert assimp math to ivan's math
 	mat4 initMat4(const aiMatrix4x4& mat);
 	mat4 initMat4(const aiMatrix3x3& mat);
-	vec3 initVec3(const aiVector3D& vec);
+	vec3 initVec3(const aiVector3D& vec) noexcept;
 	quat initQuat(const aiQuaternion& vec);
 
 	// Parse the whole assimp node graph into our own format
