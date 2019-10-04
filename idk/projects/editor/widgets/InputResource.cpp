@@ -3,6 +3,7 @@
 #include <imgui/imgui_internal.h>
 #include <res/ResourceHandle.h>
 #include <IncludeResources.h>
+#include <map>
 
 namespace idk
 {
@@ -52,24 +53,58 @@ namespace idk
 
         ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, col, false);
 
+        string text;
         if (handle)
         {
-            string text = std::visit([&](const auto& h)
+            text = std::visit([](auto h)
             {
                 auto name = h->Name();
 				auto path = Core::GetResourceManager().GetPath(h);
                 return name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
             }, *handle);
-            if (text.empty())
-                text = "None";
-
-            ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,
-                                     frame_bb.Max - style.FramePadding,
-                                     text.data() + text.rfind('/') + 1, 0, nullptr);
         }
+        if (text.empty())
+            text = "None";
+
+        ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,
+            frame_bb.Max - style.FramePadding,
+            text.data() + text.rfind('/') + 1, 0, nullptr);
 
         if (label_size.x > 0)
             RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
+
+        if (IsItemClicked())
+        {
+            OpenPopup("selector");
+            SetNextWindowPos(frame_bb.GetBL());
+        }
+        if (BeginPopup("selector"))
+        {
+            std::visit([&](auto h)
+            {
+                using T = typename decltype(h)::Resource;
+                auto all_handles = Core::GetResourceManager().GetAll<T>();
+                std::map<string, RscHandle<T>> table;
+
+                for (auto handle_i : all_handles)
+                {
+                    auto name = handle_i->Name();
+                    auto path = Core::GetResourceManager().GetPath(handle_i);
+                    auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
+                    table.emplace(str, handle_i);
+                }
+                for (auto& [name, handle_i] : table)
+                {
+                    if (MenuItem(name.c_str()))
+                    {
+                        *handle = handle_i;
+                        dropped = true;
+                    }
+                }
+            }, *handle);
+
+            ImGui::EndPopup();
+        }
 
         return dropped;
     }

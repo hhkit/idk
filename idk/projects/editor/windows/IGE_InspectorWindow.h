@@ -53,7 +53,7 @@ namespace idk {
         void DisplayAsset(GenericResourceHandle handle);
         void DisplayAsset(RscHandle<Prefab> prefab);
 
-        void displayVal(reflect::dynamic dyn);
+        bool displayVal(reflect::dynamic dyn);
 
 		//Variables for vec3/vec4
 		const float heightOffset = 2;

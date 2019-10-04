@@ -113,6 +113,8 @@ namespace idk::ogl
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
 
 				//Fix for peterpanning
 				glCullFace(GL_FRONT);
@@ -315,6 +317,9 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+					pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
+					pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
+					pipeline.SetUniform(lightblk + "intensity", light.intensity);
 
 					if (light.light_map)
 					{
@@ -408,6 +413,9 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
 					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
 					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+					pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
+					pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
+					pipeline.SetUniform(lightblk + "intensity", light.intensity);
 
 					if (light.light_map)
 					{

@@ -98,6 +98,10 @@
     <ClInclude Include="widgets\DragVec3.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\DragQuat.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="imguidk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -176,6 +180,9 @@
     </ClCompile>
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp">
       <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\DragQuat.cpp">
+      <Filter>widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

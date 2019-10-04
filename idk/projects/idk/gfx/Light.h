@@ -17,10 +17,13 @@ namespace idk
 		real  cos_inner = 0;
 		real  cos_outer = 1;
 		real  falloff     = 1;
-		alignas(16) mat4  vp{};
-		alignas(16) mat4  v{};
+		real  shadow_bias{epsilon};
+		real  intensity{1.f};
+		alignas(16) mat4  vp {};
+		alignas(16) mat4  v {};
 		alignas(16) mat4  p{};
 		RscHandle<RenderTarget> light_map;
+		bool cast_shadow{true};
 	};
 
 	class Light

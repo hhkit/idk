@@ -37,7 +37,6 @@ namespace idk::ImGuidk
         PopID();
 
         PushID(1);
-        //SetCursorPosY(y + g.Style.FramePadding.y);
         Text("Y");
         SameLine(axis_char_width * 2 + g.Style.ItemInnerSpacing.x * 3 + drag_float_width);
         SetCursorPosY(y);
@@ -46,7 +45,6 @@ namespace idk::ImGuidk
         PopID();
 
         PushID(2);
-        //SetCursorPosY(y + g.Style.FramePadding.y);
         Text("Z");
         SameLine(axis_char_width * 3 + g.Style.ItemInnerSpacing.x * 5 + drag_float_width * 2);
         SetCursorPosY(y);

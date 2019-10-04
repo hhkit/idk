@@ -38,6 +38,12 @@ struct Light
 	
 	float falloff;
 	
+	float shadow_bias;
+	
+	float intensity;
+	
+	bool cast_shadow;
+	
 	mat4 vp;
 };
 
@@ -47,7 +53,7 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 	Light lights[MAX_LIGHTS];
 } LightBlk;
 
-S_LAYOUT(6, 0) uniform sampler2D shadow_maps[MAX_LIGHTS];
+S_LAYOUT(6, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 // lighting functions 
 
@@ -166,7 +172,8 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 	float curDepth = projCoords.z;
 		
 	//Bias calculation
-	float bias = max(0.05 * (1.0 - dot(normal,lightDir)),0.009);
+	//float bias = max(0.05 * (1.0 - dot(normal,lightDir)),0.009);
+	float bias = LightBlk.lights[iter].shadow_bias;
 	
 	//PCF
 	float avgDepth = 0.f;
@@ -290,7 +297,8 @@ void main()
 		vec3 result = pbr(i, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		if (LightBlk.lights[i].type == 1)
 		{
-		    result *= vec3(1 - ShadowCalculation(i,-(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
+			if(LightBlk.lights[i].cast_shadow)
+				result *= vec3(1 - ShadowCalculation(i,-(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
 			vvvp = LightBlk.lights[i].vp;
 		}
 		else
