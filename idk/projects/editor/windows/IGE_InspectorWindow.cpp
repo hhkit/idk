@@ -77,7 +77,7 @@ namespace idk {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
-		dyn.visit([&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
+		dyn.visit([&](auto&& key, auto&& val, [[maybe_unused]] int depth_change) { //Displays all the members for that variable
 
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(val)>;
@@ -141,7 +141,7 @@ namespace idk {
 
                 bool recurse = false;
                 bool changed = false;
-                bool changed_and_deactivated = false;
+                [[maybe_unused]] bool changed_and_deactivated = false;
 
 				//ALL THE TYPE STATEMENTS HERE
 				if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>) 
@@ -192,7 +192,7 @@ namespace idk {
 
 						constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
 						static std::array<string, sz> tmp_arr;
-						std::array<const char*, sz> retval;
+						std::array<const char*, sz> retval{};
 
 						auto sp = reflect::unpack_types<T>();
 
