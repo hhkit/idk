@@ -87,7 +87,7 @@ namespace idk
 	}
 
 	PathHandle::PathHandle(string_view mountPath)
-		:PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
+		: PathHandle{ Core::GetSystem<FileSystem>().GetPath(mountPath) }
 	{
 	}
     PathHandle::PathHandle(const char* mountPath)

@@ -51,7 +51,7 @@ namespace idk::ogl
 			auto sz = target->Size();
 			glViewport(0, 0, sz.x, sz.y);
 
-			auto id = r_cast<GLint>(target->ID());
+            auto id = static_cast<GLint>(reinterpret_cast<ptrdiff_t>(target->ID()));
 
 			vector<GLenum> buffers;
 			//auto& yolo = *meta.textures[0];

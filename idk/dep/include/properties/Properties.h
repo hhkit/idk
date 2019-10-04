@@ -878,7 +878,7 @@ namespace property
                         if constexpr ( T_DISPLAY ) if ( Index == lists_iterator_ends_v )
                         {
                             // Deal with a new scope let the user know
-                            CallBack( { &NameString[ 0 ], static_cast<std::size_t>( StrAdded + StringIndex - 1 ) }, {}, Table, EntryIndex, Flags | flags::details::IS_SCOPE );
+                            CallBack( { &NameString[ 0 ], static_cast<std::size_t>( StrAdded ) + StringIndex - 1 }, {}, Table, EntryIndex, Flags | flags::details::IS_SCOPE );
                         }
 
                         EnumRecursive<T_DISPLAY>( NewTable, pNewBase, NameString, StringIndex + StrAdded, CallBack );
@@ -1376,7 +1376,7 @@ namespace property
         if ( Table.m_NameHash != Pack.m_lPath[ iCurrentPath++ ].m_Key )
             return false;
 
-        int   Ret = property::details::UnpackRecursive( Table, pClassInstance, const_cast<pack&>( Pack ), iCurrentEntry, iCurrentPath );
+        const int Ret = property::details::UnpackRecursive( Table, pClassInstance, const_cast<pack&>( Pack ), iCurrentEntry, iCurrentPath );
         assert( Ret == 0 );
         return true;
     }

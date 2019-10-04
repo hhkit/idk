@@ -34,7 +34,7 @@ namespace idk {
 	{
 		//Handle<Camera> currentCam = current_camera;
 		
-		auto tfm = gameObjToFocus->GetComponent<Transform>();
+		const auto tfm = gameObjToFocus->GetComponent<Transform>();
 
 		SetTarget(tfm);
 
@@ -45,16 +45,14 @@ namespace idk {
 
 	void CameraControls::LookAt()
 	{
-		auto tfm = current_camera->GetGameObject()->Transform();
+        const auto tfm = current_camera->GetGameObject()->Transform();
 		tfm->GlobalRotation(decompose_rotation_matrix(look_at(tfm->GlobalPosition(), _target, tfm->Up())).normalize());
-
 	}
 
 	void CameraControls::Focus()
 	{
-		auto tfm = current_camera->GetGameObject()->Transform();
+        const auto tfm = current_camera->GetGameObject()->Transform();
 
-		
 		if (!selected_target)
 			current_camera->LookAt(_target, tfm->Up());
 		else
@@ -62,9 +60,6 @@ namespace idk {
 			//check for facing direction (same)
 			//if (tfm->Forward().dot(selected_target->Forward()) > 0.f)
 			tfm->position = vec3{ selected_target->GlobalPosition().x, selected_target->GlobalPosition().y, selected_target->GlobalPosition().z - 2.5f };
-
-			vec3 up = tfm->Up();
-
 			current_camera->LookAt(_target,idk::vec3(0,1,0));
 		}
 
@@ -91,14 +86,14 @@ namespace idk {
 			_alpha = (screenpos.x - _oldScreenPos.x)*90.f;
 			_beta = (screenpos.y - _oldScreenPos.y)*90.f;
 
-			float angle_A = _alpha / 180.f * pi;
-			float angle_B = _beta / 180.f * pi;
+			//float angle_A = _alpha / 180.f * pi;
+			//float angle_B = _beta / 180.f * pi;
 
-			angle_A;
-			angle_B;
+			//angle_A;
+			//angle_B;
 
-			float maxDeg = 89.f / 180.f * pi;
-			maxDeg;
+			//float maxDeg = 89.f / 180.f * pi;
+			//maxDeg;
 
 			//mat3 rotMatrix = rotate(vec3(0, 1, 0), rad(angle_A));
 			//mat3 rotMatrix2 = rotate(vec3(0, 0, 1), rad(angle_B));
@@ -107,7 +102,7 @@ namespace idk {
 
 			//auto tfm = current_camera->GetGameObject()->Transform();
 
-			Ray result = ViewportPointToRay(screenpos);
+			//Ray result = ViewportPointToRay(screenpos);
 
 			//_target += vec3{ vec2(result.origin.xy) * Core::GetDT().count() ,0.f };
 
@@ -116,7 +111,7 @@ namespace idk {
 			//_target = result.origin + result.direction;
 
 			//tfm->GlobalRotation(decompose_rotation_matrix(matrix));
-			auto tfm = current_camera->GetGameObject()->Transform();
+			const auto tfm = current_camera->GetGameObject()->Transform();
 
 			//tfm->rotation = (quat{ vec3{0,1,0}, deg{_beta}  } *tfm->rotation).normalize();
 			//tfm->rotation += (quat{ vec3{1,0,0}, deg{_alpha}  } *tfm->rotation).normalize();
@@ -143,14 +138,14 @@ namespace idk {
 	{
 		if (_panning)
 		{
-			real x_vec = (screenpos.x - _oldScreenPos.x);
-			real y_vec = (screenpos.y - _oldScreenPos.y);
+			const real x_vec = (screenpos.x - _oldScreenPos.x);
+			const real y_vec = (screenpos.y - _oldScreenPos.y);
 
-			auto tfm = current_camera->GetGameObject()->Transform();
+			const auto tfm = current_camera->GetGameObject()->Transform();
 			//tfm->position += camSpd * (x_vec, 0) * Core::GetRealDT().count() * tfm->Right();
 			//tfm->position += camSpd * (0, y_vec) * Core::GetRealDT().count() * tfm->Up();
-			vec2 p = (camSpd * vec2(x_vec, y_vec)) * panSpd * Core::GetRealDT().count();
-			vec3 pos = vec3(p.x,p.y,0).normalize();
+			const vec2 p = (camSpd * vec2(x_vec, y_vec)) * panSpd * Core::GetRealDT().count();
+			const vec3 pos = vec3(p.x,p.y,0).normalize();
 
 			tfm->GlobalPosition(tfm->GlobalPosition()+ pos);
 
@@ -194,11 +189,11 @@ namespace idk {
 		//auto vec = GetGameObject()->Transform()->GlobalPosition();
 
 		//Viewport(0,1) to screen space (NDC)(-1,1) first 
-		vec2 screen_pos = { (2.f * vp_pos.x - 1.f) * current_camera->render_target->AspectRatio(), 1.f - 2.f * vp_pos.y };
+		const vec2 screen_pos = { (2.f * vp_pos.x - 1.f) * current_camera->render_target->AspectRatio(), 1.f - 2.f * vp_pos.y };
 
 
 		//screen space back to 4d clip space 
-		vec4 clip_pos = { screen_pos.x,screen_pos.y, -1.f,1.f };
+        const vec4 clip_pos = { screen_pos.x,screen_pos.y, -1.f,1.f };
 
 
 		//Inversing pos from clip space to view space on the near plane
@@ -224,11 +219,11 @@ namespace idk {
 		//auto vec = GetGameObject()->Transform()->GlobalPosition();
 
 		//Viewport(0,1) to screen space (NDC)(-1,1) first 
-		vec2 screen_pos = { (2.f * vp_pos.x - 1.f) * current_camera->render_target->AspectRatio(), 1.f - 2.f * vp_pos.y };
+        const vec2 screen_pos = { (2.f * vp_pos.x - 1.f) * current_camera->render_target->AspectRatio(), 1.f - 2.f * vp_pos.y };
 
 
 		//screen space back to 4d clip space 
-		vec4 clip_pos = { screen_pos.x,screen_pos.y, -1.f,1.f };
+        const vec4 clip_pos = { screen_pos.x,screen_pos.y, -1.f,1.f };
 
 
 		//Inversing pos from clip space to view space on the near plane
@@ -250,9 +245,8 @@ namespace idk {
 
 	vec3 CameraControls::convertMouseCoord(const vec2& screenCoord)
 	{
-		real d = screenCoord.x * screenCoord.x + screenCoord.y + screenCoord.y;
-
-		real radiusSq = _radius * _radius;
+        const real d = screenCoord.x * screenCoord.x + screenCoord.y + screenCoord.y;
+        const real radiusSq = _radius * _radius;
 
 		//Check if the point is out of the ball radius
 		return  (d > radiusSq) ?

@@ -138,7 +138,7 @@ namespace idk::ogl
 		else if(_isCompressedTexture)
 		{
 			if(size.x && size.y && imgSize)
-				glCompressedTexImage2D(GL_TEXTURE_2D, mipmap_size, detail::ToGLColor(internalFormat), size.x, size.y, 0, imgSize, data);
+				glCompressedTexImage2D(GL_TEXTURE_2D, mipmap_size, detail::ToGLColor(internalFormat), size.x, size.y, 0, static_cast<GLsizei>(imgSize), data);
 		}
 		else
 		{

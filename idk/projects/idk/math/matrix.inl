@@ -315,7 +315,7 @@ namespace idk
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
-		const auto etr = this->end();
+		const auto* etr = this->end();
 
 		while (ltr != etr)
 			*ltr++ += *rtr++;
@@ -335,10 +335,10 @@ namespace idk
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
-		const auto etr = this->end();
+		const auto* etr = this->end();
 
 		while (ltr != etr)
-			* ltr++ -= *rtr++;
+			*ltr++ -= *rtr++;
 
 		return *this;
 	}

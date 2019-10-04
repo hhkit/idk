@@ -104,9 +104,9 @@ namespace idk
 						if constexpr (has_tag_v<Rs, Saveable>)
 						{
 							if constexpr (Rs::autosave)
-								for (auto& [guid, res_cb] : resource_man->GetTable<Rs>())
+								for (const auto& [guid, res_cb] : resource_man->GetTable<Rs>())
 								{
-									auto h = RscHandle<Rs>{ guid };
+									const auto h = RscHandle<Rs>{ guid };
 									if (h->IsDirty())
 									{
 										resource_man->Save(h);
@@ -308,7 +308,7 @@ namespace idk
 			else
 				return loader->LoadFile(path);
 		}();
-		auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
+		const auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
 		assert(success);
 
 		itr->second.is_new = !s_cast<bool>(meta_bundle);

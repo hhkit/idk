@@ -4,7 +4,7 @@
 
 namespace idk
 {
-	string stringify(std::istream& istream)
+	string stringify(const std::istream& istream)
 	{
 		std::stringstream s;
 		s << istream.rdbuf();
