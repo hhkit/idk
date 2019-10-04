@@ -2,6 +2,7 @@
 #include "MaterialFactory.h"
 #include <util/ioutils.h>
 #include <res/MetaBundle.h>
+#include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 namespace idk
 {
@@ -19,20 +20,44 @@ namespace idk
 
 	ResourceBundle MaterialLoader::LoadFile(PathHandle p)
 	{
-		auto stream = p.Open(FS_PERMISSIONS::READ);
-		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>();
-		if (stream)
-		{
-			parse_text(stringify(stream), *mat);
-			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
-			(discardme);
-		}
-		return mat;
+		return LoadFile(p, MetaBundle{});
 	}
 	ResourceBundle MaterialLoader::LoadFile(PathHandle p, const MetaBundle& m)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<Material>(m.metadatas[0].guid);
+		const auto mat = [&]()
+		{
+			auto meta = m.FetchMeta("material");
+			if (meta)
+			{
+				auto retval = Core::GetResourceManager().LoaderEmplaceResource<Material>(meta->guid);;
+				retval->SetMeta(*meta->GetMeta<Material>());;
+				return retval;
+			}
+			else
+			{
+				auto retval = Core::GetResourceManager().LoaderEmplaceResource<Material>();
+				retval->Name("material");
+				return retval;
+			}
+		}();
+
+		auto meta = m.FetchMeta<Material>();
+		if (meta)
+
+
+		mat->_default_instance = [&]()
+		{
+			auto meta = m.FetchMeta("mat_instance");
+			if(meta)
+				return Core::GetResourceManager().LoaderEmplaceResource<MaterialInstance>(meta->guid);
+			else
+			{
+				auto retval = Core::GetResourceManager().LoaderEmplaceResource<MaterialInstance>();
+				retval->Name("mat_instance");
+				return retval;
+			}
+		}();
 
 		if (stream)
 		{
@@ -41,10 +66,10 @@ namespace idk
 			(discardme);
 		}
 
-		auto meta = m.FetchMeta<Material>();
-		if (meta)
-			mat->SetMeta(*meta->GetMeta<Material>());
-
-		return mat;
+		ResourceBundle bundle;
+		bundle.Add(mat->_default_instance);
+		bundle.Add(mat);
+		bundle.Add(mat->_shader_program);
+		return bundle;
 	}
 }

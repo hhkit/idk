@@ -177,6 +177,26 @@ namespace idk::ogl
 			}
 		};
 
+		const auto SetPBRUniforms = [this](CameraData& cam, const mat4& inv_view_tfm, GLuint& texture_units)
+		{
+			std::visit([&]([[maybe_unused]] const auto& obj)
+				{
+					using T = std::decay_t<decltype(obj)>;
+					if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+					{
+						auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+						opengl_handle->BindConvolutedToUnit(texture_units);
+						pipeline.SetUniform("irradiance_probe", texture_units++);
+						opengl_handle->BindToUnit(texture_units);
+						pipeline.SetUniform("environment_probe", texture_units++);
+					}
+				}, cam.clear_data);
+
+			brdf_texture->BindToUnit(texture_units);
+			pipeline.SetUniform("brdfLUT", texture_units++);
+			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			pipeline.Use();
@@ -186,11 +206,7 @@ namespace idk::ogl
 			if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				//fb_man.SetRenderTarget({});
-
 				fb_man.SetRenderTarget(RscHandle<OpenGLTexture>{elem.light_map->GetAttachment(AttachmentType::eDepth, 0)});
-				//Bind frame buffers based on the camera's render target
-				//Set the clear color according to the camera
 
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);
@@ -198,39 +214,33 @@ namespace idk::ogl
 				glEnable(GL_DEPTH_TEST);
 				glDepthFunc(GL_LESS);
 
-				//Fix for peterpanning
-				glCullFace(GL_FRONT);
+				glCullFace(GL_FRONT); //Fix for peterpanning
 
-				const auto light_view_tfm = elem.v;
-				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
+				const auto& light_view_tfm = elem.v;
+				const auto& light_p_tfm = elem.p; //near and far is currently hardcoded
 				pipeline.PopAllPrograms();
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm, light_view_tfm);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm, light_view_tfm);
 
 				for (auto& elem : curr_object_buffer.mesh_render)
 				{
-					// shader uniforms
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], light_p_tfm, light_view_tfm);
-
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
-					// bind shader
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-
 					SetSkeletons(elem.skeleton_index);
 					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 				}
 
 				glDisable(GL_DEPTH_TEST);
-
-				//reset culling 
 				glCullFace(GL_BACK);
 
 				fb_man.ResetFramebuffer();
@@ -313,31 +323,12 @@ namespace idk::ogl
 				auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
-				// shader uniforms
-
 				// set probe
 				GLuint texture_units = 0;
-
-				std::visit([&]([[maybe_unused]] const auto& obj)
-					{
-						using T = std::decay_t<decltype(obj)>;
-						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
-						{
-							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
-							opengl_handle->BindConvolutedToUnit(texture_units);
-							pipeline.SetUniform("irradiance_probe", texture_units++);
-							opengl_handle->BindToUnit(texture_units);
-							pipeline.SetUniform("environment_probe", texture_units++);
-						}
-					}, cam.clear_data);
-
-				brdf_texture->BindToUnit(texture_units);
-				pipeline.SetUniform("brdfLUT", texture_units++);
-				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
-
-				SetLightUniforms(span<LightData>{lights}, texture_units);
+				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
+				SetLightUniforms   (span<LightData>{lights}, texture_units);
 				SetMaterialUniforms(elem.material_instance, texture_units);
-				SetObjectUniforms(elem, cam.view_matrix);
+				SetObjectUniforms  (elem, cam.view_matrix);
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 			}
@@ -350,27 +341,11 @@ namespace idk::ogl
 				pipeline.PushProgram(material->_shader_program);
 
 				GLuint texture_units = 0;
-				// bind probe
-				std::visit([&]([[maybe_unused]] const auto& obj)
-					{
-						using T = std::decay_t<decltype(obj)>;
-						if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
-						{
-							auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
-							opengl_handle->BindConvolutedToUnit(texture_units);
-							pipeline.SetUniform("irradiance_probe", texture_units++);
-							opengl_handle->BindToUnit(texture_units);
-							pipeline.SetUniform("environment_probe", texture_units++);
-						}
-					}, cam.clear_data);
-
-				brdf_texture->BindToUnit(texture_units);
-				pipeline.SetUniform("brdfLUT", texture_units++);
-
-				SetLightUniforms(span<LightData>{lights}, texture_units);
-				SetSkeletons(elem.skeleton_index);
+				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
+				SetLightUniforms   (span<LightData>{lights}, texture_units);
+				SetSkeletons       (elem.skeleton_index);
 				SetMaterialUniforms(elem.material_instance, texture_units);
-				SetObjectUniforms(elem, cam.view_matrix);
+				SetObjectUniforms  (elem, cam.view_matrix);
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
@@ -384,10 +359,9 @@ namespace idk::ogl
 		pipeline.Use();
 		glBindVertexArray(vao_id);
 		fb_man.SetRenderTarget(handle, true);
+
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-
-		auto box_mesh = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] };
 
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.vert", false));
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/single_pass_cube.geom", false));
@@ -412,13 +386,13 @@ namespace idk::ogl
 		handle->BindToUnit(0);
 		pipeline.SetUniform("environment_probe", 0);
 
-		box_mesh->Bind(
+		RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::Box] }->BindAndDraw(
 			{ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal, 1),
 			std::make_pair(vtx::Attrib::UV, 2)
 			} });
-		box_mesh->Draw();
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();
@@ -433,17 +407,14 @@ namespace idk::ogl
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		auto fsq = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] };
-
 		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/fsq.vert", false));
 		pipeline.PushProgram(RscHandle<ShaderProgram>{handle});
 
-		fsq->Bind(
+		RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] }->BindAndDraw(
 			{ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::UV, 1),
 			} });
-		fsq->Draw();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);

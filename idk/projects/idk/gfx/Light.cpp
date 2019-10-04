@@ -73,7 +73,7 @@ namespace idk
 				if constexpr (std::is_same_v<T, PointLight>)
 				{
 					const PointLight& point_light = light_variant;
-					retval.light_color = point_light.light_color;
+					retval.light_color = point_light.light_color * point_light.intensity;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
 					retval.intensity = point_light.intensity;
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
@@ -82,7 +82,7 @@ namespace idk
 				if constexpr (std::is_same_v<T, DirectionalLight>)
 				{
 					const DirectionalLight& dir_light = light_variant;
-					retval.light_color = dir_light.light_color;
+					retval.light_color = dir_light.light_color * dir_light.light_color;
 					const auto tfm = GetGameObject()->Transform();
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
@@ -92,7 +92,7 @@ namespace idk
 				if constexpr (std::is_same_v<T, SpotLight>)
 				{
 					const SpotLight& spotlight = light_variant;
-					retval.light_color = spotlight.light_color;
+					retval.light_color = spotlight.light_color * spotlight.light_color;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
 					retval.v_dir = GetGameObject()->Transform()->Forward();
 					retval.cos_inner = cos(spotlight.inner_angle);
