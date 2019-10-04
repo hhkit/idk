@@ -174,7 +174,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSData.h" />
-    <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="program\ProgramFactory.h" />
     <ClInclude Include="resource\FrameBuffer.h" />
     <ClInclude Include="resource\FrameBufferFactory.h" />
