@@ -13,6 +13,7 @@
 #include <common/Transform.h>
 #include <serialize/serialize.h> //Serialize/Deserialize
 #include <IDE.h>		//IDE
+#include <iostream>		//IDE
 
 namespace idk {
 
@@ -21,9 +22,7 @@ namespace idk {
 	CMD_DeleteGameObject::CMD_DeleteGameObject(Handle<GameObject> gameObject)
 	{
 		game_object_handle = gameObject;
-		//Copy all components from this gameobject
-		for (auto& c : gameObject->GetComponents())
-			vector_of_components.emplace_back((*c).copy());
+		
 
 	}
 
@@ -35,7 +34,7 @@ namespace idk {
 
 			//Find and get all CMDs using Handle<GameObject>
 			commands_affected.clear();
-			for (unique_ptr<ICommand>& i : editor.command_controller.undoStack) {
+			for (const auto& i : editor.command_controller.undoStack) {
 				if (i->game_object_handle == game_object_handle) {
 					commands_affected.push_back(i.get());
 				}
@@ -47,12 +46,13 @@ namespace idk {
 					break;
 				}
 			}
-
 			if (iterator != editor.selected_gameObjects.end())
 				editor.selected_gameObjects.erase(iterator);
 
-			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
+			gameobject_vector.clear();
+			RecursiveCollectObjects(game_object_handle,gameobject_vector);
 
+			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
 
 			return true;
 		}
@@ -61,45 +61,114 @@ namespace idk {
 
 	bool CMD_DeleteGameObject::undo()
 	{
-		game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+		//game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
 		
-		if (game_object_handle) {
-			for (auto& c : vector_of_components) {
+		//if (game_object_handle) {
+		try {
+			RecursiveCreateObjects(gameobject_vector, true);
+		}
+		catch (bool fail) {
+			return false;
+		}
 
+		//Reassign all CMDs using Handle<GameObject> Big O(n^2)
+		IDE& editor = Core::GetSystem<IDE>();
+		for (const auto& i : commands_affected) {
+			for (const auto& j : editor.command_controller.undoStack) {
+				if (i == j.get()) { //If this unique pointer matches with the commands_affected
+					j->game_object_handle = game_object_handle;
+					break;
+				}
+			}
+		}
+
+		return true;
+		//}
+		//else {
+		//	return false;
+		//}
+	}
+
+	void CMD_DeleteGameObject::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
+	{
+		
+		RecursiveObjects newObject{};
+		//Copy all components from this gameobject
+		for (auto& c : i->GetComponents())
+			newObject.vector_of_components.emplace_back((*c).copy());
+
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(i);
+
+		if (children) {
+			//std::cout << "NUM OF CHILDREN: " << children->size() << std::endl;
+
+			//If there is no children, it will stop
+			children->visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
+				(void)depth;
+
+				//Skip parent
+				//std::cout << "CHILD: " << handle->GetComponent<Name>()->name << std::endl;
+				if (handle == i)
+					return true;
+
+				RecursiveCollectObjects(handle, newObject.children); //Depth first recursive
+
+				return false;
+
+				});
+		}
+		vector_ref.push_back(newObject);
+	}
+
+	void CMD_DeleteGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
+	{
+		//if (!i) {
+		//	i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+		//
+		//}
+		for (RecursiveObjects& object : vector_ref) {
+			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			if (isRoot) {
+				game_object_handle = i;
+				isRoot = false;
+			}
+
+			if (!game_object_handle) {
+				throw false; //Throws if the recursion fails
+			}
+
+			for (auto& c : object.vector_of_components) {
+			
 				if (c.is<Transform>())
 				{
 					Transform& t = c.get<Transform>();
-					game_object_handle->GetComponent<Transform>()->position = t.position;
-					game_object_handle->GetComponent<Transform>()->rotation = t.rotation;
-					game_object_handle->GetComponent<Transform>()->scale	= t.scale;
-					game_object_handle->GetComponent<Transform>()->parent	= t.parent;
+					i->GetComponent<Transform>()->position	= t.position;
+					i->GetComponent<Transform>()->rotation	= t.rotation;
+					i->GetComponent<Transform>()->scale		= t.scale;
+					if (object.parent_of_children) {
+						i->GetComponent<Transform>()->parent = object.parent_of_children;
+					}
+					else {
+						i->GetComponent<Transform>()->parent = t.parent;
+					}
 				}
 				else if (c.is<Name>())
 				{
 					Name& t = c.get<Name>();
-					game_object_handle->GetComponent<Name>()->name = t.name;
+					i->GetComponent<Name>()->name = t.name;
 				}
 				else {
-					game_object_handle->AddComponent(c);
-				}
-				
-			}
-
-			//Reassign all CMDs using Handle<GameObject> Big O(n^2)
-			IDE& editor = Core::GetSystem<IDE>();
-			for (ICommand* i : commands_affected) {
-				for (unique_ptr<ICommand>& j : editor.command_controller.undoStack) {
-					if (i == j.get()) { //If this unique pointer matches with the commands_affected
-						j->game_object_handle = game_object_handle;
-						break;
-					}
+					i->AddComponent(c);
 				}
 			}
 
-			return true;
-		}
-		else {
-			return false;
+			//Assign children with this gameobject as parent
+			for (auto& childObject : object.children) {
+				childObject.parent_of_children = i;
+			}
+
+			RecursiveCreateObjects(object.children);
 		}
 	}
 
