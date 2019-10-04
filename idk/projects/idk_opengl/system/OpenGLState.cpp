@@ -133,12 +133,6 @@ namespace idk::ogl
 				{
 					// shader uniforms
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-					// set probe
-					GLuint texture_units = 0;
-
-					// bind attribs
-					auto& mesh = elem.mesh.as<OpenGLMesh>();
-					mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 					// set uniforms
 					// object uniforms
@@ -148,9 +142,7 @@ namespace idk::ogl
 					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 					pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
 
-					// draw
-					mesh.Draw();
-					//GL_CHECK();
+					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
 				pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
@@ -160,11 +152,6 @@ namespace idk::ogl
 				{
 					// bind shader
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-
-					// bind attribs
-					auto& mesh = elem.mesh.as<OpenGLMesh>();
-					mesh.Bind(SkinnedMeshRenderer::GetRequiredAttributes());
-					//mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 					// Setting bone transforms
 					auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
@@ -184,8 +171,7 @@ namespace idk::ogl
 					pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
 
 					// draw
-					mesh.Draw();
-					//GL_CHECK();
+					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 				}
 
 				glDisable(GL_DEPTH_TEST);
@@ -236,15 +222,13 @@ namespace idk::ogl
 
 					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
 
-
-					auto& mesh = (*cam.CubeMapMesh).as<OpenGLMesh>();
-					mesh.Bind(renderer_reqs
+					oglCubeMap.BindToUnit(0);
+					pipeline.SetUniform("sb", 0);
+					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
 						{ {
 							std::make_pair(vtx::Attrib::Position, 0)
 						} });
-					oglCubeMap.BindToUnit(0);
-					pipeline.SetUniform("sb", 0);
-					mesh.Draw();
+
 					glDepthMask(GL_TRUE);
 					glEnable(GL_CULL_FACE);
 				}
@@ -253,24 +237,21 @@ namespace idk::ogl
 			}, cam.clear_data);
 
 			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::Debug]);
-			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
-
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 			pipeline.SetUniform("PerCamera.view_transform", cam.view_matrix);
+
+			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-					auto& mesh = elem.mesh.as<OpenGLMesh>();
-					mesh.Bind(MeshRenderer::GetRequiredAttributes());
-
 					auto obj_tfm = cam.view_matrix * elem.transform;
 					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
-					mesh.Draw();
+					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
 			// per mesh render
@@ -323,23 +304,14 @@ namespace idk::ogl
 
 					if (light.light_map)
 					{
-						//glActiveTexture(GL_TEXTURE0 + texture_units);
-						//glBindTexture(GL_TEXTURE_2D, light.light_map.as<FrameBuffer>().DepthBuffer());
 						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
-						//auto t = light.light_map.as<FrameBuffer>();
-						//auto u = t.GetMeta();
-						//u.textures[0].as<OpenGLTexture>().BindToUnit(texture_units);
 						t.as<OpenGLTexture>().BindToUnit(texture_units);
 						pipeline.SetUniform(lightblk + "vp", light.vp);
 						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
 						texture_units++;
 					}
-					//texture_units += static_cast<bool>(light.light_map);
 				}
 
-				// bind attribs
-				auto& mesh = elem.mesh.as<OpenGLMesh>();
-				mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 				// set uniforms
 				// object uniforms
@@ -370,8 +342,7 @@ namespace idk::ogl
 					}, uniform);
 				}
 
-				// draw
-				mesh.Draw();
+				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 			}
 
 			pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
@@ -431,10 +402,6 @@ namespace idk::ogl
 					}
 					//texture_units += static_cast<bool>(light.light_map);
 				}
-				// bind attribs
-				auto& mesh = elem.mesh.as<OpenGLMesh>();
-				mesh.Bind(SkinnedMeshRenderer::GetRequiredAttributes());
-				//mesh.Bind(MeshRenderer::GetRequiredAttributes());
 
 				// Setting bone transforms
 				auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
@@ -475,8 +442,7 @@ namespace idk::ogl
 						}, uniform);
 				}
 
-				// draw
-				mesh.Draw();
+				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
 		}
 

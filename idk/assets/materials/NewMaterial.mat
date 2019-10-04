@@ -1,0 +1,29 @@
+_shader_program: {guid: 5b6ef3e0-e6c8-41f4-9488-e4292d468029}
+links: 
+- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+  node_out: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
+  slot_in: 1
+  slot_out: 0
+master_node: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+nodes: 
+  2449cd31-a85b-4d34-bf51-73fd5b4f33b8: 
+    control_values: ""
+    guid: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
+    input_slots: []
+    name: input\VertexNormal
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 169.000000, y: 165.000000}
+  9550e80c-4d2f-4e84-8d65-9a29295b539c: 
+    control_values: ""
+    guid: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+    input_slots: 
+    - {type: VEC3, value: '1.000000,1.000000,1.000000'}
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
+    name: master\PBR
+    output_slots: []
+    position: {x: 539.000000, y: 150.000000}
+parameters: []
