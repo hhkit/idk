@@ -122,6 +122,37 @@ namespace idk::ogl
 			}
 		};
 
+		const auto SetLightUniforms = [this](span<LightData> lights, GLuint& texture_units)
+		{
+			// shader uniforms
+			pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
+
+			for (unsigned i = 0; i < lights.size(); ++i)
+			{
+				auto& light = lights[i];
+				string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
+				pipeline.SetUniform(lightblk + "type", light.index);
+				pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
+				pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
+				pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
+				pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
+				pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+				pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
+				pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
+				pipeline.SetUniform(lightblk + "intensity", light.intensity);
+
+				if (light.light_map)
+				{
+					auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+					t.as<OpenGLTexture>().BindToUnit(texture_units);
+
+					pipeline.SetUniform(lightblk + "vp", light.vp);
+					(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
+					texture_units++;
+				}
+			}
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			pipeline.Use();
@@ -280,31 +311,7 @@ namespace idk::ogl
 				pipeline.SetUniform("brdfLUT", texture_units++);
 				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 
-				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
-				for (unsigned i = 0; i < lights.size(); ++i)
-				{
-					auto& light = lights[i];
-					string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
-					pipeline.SetUniform(lightblk + "type",      light.index);
-					pipeline.SetUniform(lightblk + "color",     light.light_color.as_vec3);
-					pipeline.SetUniform(lightblk + "v_pos",     light.v_pos);
-					pipeline.SetUniform(lightblk + "v_dir",     light.v_dir);
-					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
-					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
-					pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
-					pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
-					pipeline.SetUniform(lightblk + "intensity", light.intensity);
-
-					if (light.light_map)
-					{
-						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
-						t.as<OpenGLTexture>().BindToUnit(texture_units);
-						pipeline.SetUniform(lightblk + "vp", light.vp);
-						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
-						texture_units++;
-					}
-				}
-
+				SetLightUniforms(span<LightData>{lights}, texture_units);
 				SetObjectUniforms(elem, cam.view_matrix);
 
 				// material uniforms
@@ -357,36 +364,7 @@ namespace idk::ogl
 				brdf_texture->BindToUnit(texture_units);
 				pipeline.SetUniform("brdfLUT", texture_units++);
 
-				// shader uniforms
-				pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
-
-				for (unsigned i = 0; i < lights.size(); ++i)
-				{
-					auto& light = lights[i];
-					string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
-					pipeline.SetUniform(lightblk + "type", light.index);
-					pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
-					pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
-					pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
-					pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
-					pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
-					pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
-					pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
-					pipeline.SetUniform(lightblk + "intensity", light.intensity);
-
-					if (light.light_map)
-					{
-						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
-						t.as<OpenGLTexture>().BindToUnit(texture_units);
-
-						pipeline.SetUniform(lightblk + "vp", light.vp);
-						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
-						texture_units++;
-					}
-					//texture_units += static_cast<bool>(light.light_map);
-				}
-
-				// Setting bone transforms
+				SetLightUniforms(span<LightData>{lights}, texture_units);
 				SetSkeletons(elem.skeleton_index);
 				SetObjectUniforms(elem, cam.view_matrix);
 
