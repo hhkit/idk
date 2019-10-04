@@ -74,7 +74,7 @@ namespace idk
 	template<typename ...Args>
 	opt<typename dual_set<T1,T2>::const_iterator> dual_set<T1, T2>::emplace(Args&& ... args)
 	{
-		auto&& [itr, success] = _table_first.emplace(std::forward<Args>(args)...);
+		const auto [itr, success] = _table_first.emplace(std::forward<Args>(args)...);
 		if (!success)
 			return std::nullopt;
 

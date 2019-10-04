@@ -16,7 +16,7 @@ namespace idk::ImGuidk
         euler_angles euler{ *q };
         static ImGuiID active_id;
 
-        ImGuiContext& g = *GImGui;
+        [[maybe_unused]] ImGuiContext& g = *GImGui;
         auto id = GetID(label);
         if (active_id != id)
             euler = euler_angles{ *q };

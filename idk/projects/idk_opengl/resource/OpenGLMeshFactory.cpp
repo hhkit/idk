@@ -41,8 +41,8 @@ namespace idk::ogl
 			// x = r*cos(elevation)*cos(72*i) 
 			// y = r*cos(elevation)*sin(72*i) 
 			// z = r*sin(elevation)
-			auto cosEle = cos(elevation);
-			auto sinEle = sin(elevation);
+			const auto cosEle = cos(elevation);
+			const auto sinEle = sin(elevation);
 
 			// Add top vertex first
 			icosahedron.push_back(Vertex{ vec3{ 0, 0, 1 }, vec3{ 0, 0, 1 } });
@@ -50,12 +50,12 @@ namespace idk::ogl
 			for (unsigned i = 0; i < 5; ++i)
 			{
 				// Calculating the top part of the icosahedron
-				float xTop = cosEle * cos(topAngle);
-				float yTop = cosEle * sin(topAngle);
+				const float xTop = cosEle * cos(topAngle);
+				const float yTop = cosEle * sin(topAngle);
 
 				// Calculating the bottom part of the icosahedron
-				float xBot = cosEle * cos(bottomAngle);
-				float yBot = cosEle * sin(bottomAngle);
+				const float xBot = cosEle * cos(bottomAngle);
+				const float yBot = cosEle * sin(bottomAngle);
 
 				// For the z coordinate of top/bottom, they are simply negations of each other.
 				icosahedron.push_back(Vertex{ vec3{ xTop, yTop,  sinEle }, vec3{ xTop, yTop,  sinEle } });
@@ -150,7 +150,7 @@ namespace idk::ogl
 				}
 			};
 
-			auto addSubVert = [](std::vector<Vertex>& vertices, hash_table<vec3, int, compareVec>& shared, const vec3& pos) -> unsigned
+			const auto addSubVert = [](std::vector<Vertex>& vertices, hash_table<vec3, int, compareVec>& shared, const vec3& pos) -> unsigned
 			{
 				// Get the index IF this vertex is unique and we pushed it into the vertices vector
 				auto index = static_cast<int>(vertices.size());
@@ -169,7 +169,7 @@ namespace idk::ogl
 				return index;
 			};
 
-			auto subdivideIcosahedron = [addSubVert](std::vector<Vertex>& vertices, std::vector<int>& indices)
+			const auto subdivideIcosahedron = [addSubVert](std::vector<Vertex>& vertices, std::vector<int>& indices)
 			{
 				constexpr auto SUBDIVISIONS = 1;
 				// Each subdivision, we subdivide every face in the CURRENT object
@@ -191,23 +191,23 @@ namespace idk::ogl
 						const unsigned v2Index = tmpIndices[j++];
 						const unsigned v3Index = tmpIndices[j++];
 
-						vec3 v1 = vertices[v1Index].pos;
-						vec3 v2 = vertices[v2Index].pos;
-						vec3 v3 = vertices[v3Index].pos;
+						const vec3 v1 = vertices[v1Index].pos;
+						const vec3 v2 = vertices[v2Index].pos;
+						const vec3 v3 = vertices[v3Index].pos;
 
 						// Compute half vertex of every edge of the triangle
 						// We normalize the vertex because our radius is 1.
 						// addSubVert will check if the vertex is unique or not using the sharedIndices set.
 						// v1 -> v2
-						vec3 hv1 = (v1 + v2).normalize();
+						const vec3 hv1 = (v1 + v2).normalize();
 						const unsigned hv1Index = addSubVert(vertices, sharedIndices, hv1);
 
 						// v2 -> v3
-						vec3 hv2 = (v2 + v3).normalize();
+						const vec3 hv2 = (v2 + v3).normalize();
 						const unsigned hv2Index = addSubVert(vertices, sharedIndices, hv2);
 
 						// v3 -> v1
-						vec3 hv3 = (v3 + v1).normalize();
+						const vec3 hv3 = (v3 + v1).normalize();
 						const unsigned hv3Index = addSubVert(vertices, sharedIndices, hv3);
 
 						// New Indices. Every triangle will subdivide into 4 new triangles.
@@ -237,7 +237,7 @@ namespace idk::ogl
 			for (auto& elem : icosahedron)
 				elem.uv = spherical_projection(elem.pos);
 
-			auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
+			const auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 				.Bind()
@@ -250,8 +250,8 @@ namespace idk::ogl
 		}
 
 		{	/* create cube mesh */
-			auto box_mesh = Mesh::defaults[MeshType::Box];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(box_mesh.guid);
+			const auto box_mesh = Mesh::defaults[MeshType::Box];
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(box_mesh.guid);
 			constexpr auto sz = 1.f;
 			std::vector<Vertex> vertices{
 				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
@@ -313,11 +313,11 @@ namespace idk::ogl
 
 
 		{	/* create circle mesh */
-			auto circle_mesh = Mesh::defaults[MeshType::Circle];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(circle_mesh.guid);
+			const auto circle_mesh = Mesh::defaults[MeshType::Circle];
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(circle_mesh.guid);
 			constexpr auto sz = 1.f;
 			constexpr auto numberOfTri = 16;
-			real angle = (2.f * pi) / numberOfTri;
+			const real angle = (2.f * pi) / numberOfTri;
 
 			std::vector<Vertex> vertices;
 			std::vector<int> indices;
@@ -352,8 +352,8 @@ namespace idk::ogl
 		}
 
 		{	/* create plane mesh */
-			auto plane_mesh = Mesh::defaults[MeshType::Plane];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(plane_mesh.guid);
+			const auto plane_mesh = Mesh::defaults[MeshType::Plane];
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(plane_mesh.guid);
 			constexpr auto sz = 1.f;
 			//constexpr auto numberOfTri = 16;
 			//real angle = (2.f * pi) / numberOfTri;
@@ -381,8 +381,8 @@ namespace idk::ogl
 			);
 		}
 		{	/* create FSQ mesh */
-			auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(fsq_mesh.guid);
+			const auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(fsq_mesh.guid);
 			constexpr auto sz = 1.f;
 			//constexpr auto numberOfTri = 16;
 			//real angle = (2.f * pi) / numberOfTri;
@@ -411,8 +411,8 @@ namespace idk::ogl
 		}
 
 		{	/* create tetrahedral mesh */
-			auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
+			const auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
@@ -441,8 +441,8 @@ namespace idk::ogl
 		}
 
 		{	/* create line mesh */
-			auto line_mesh = Mesh::defaults[MeshType::Line];
-			auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(line_mesh.guid);
+			const auto line_mesh = Mesh::defaults[MeshType::Line];
+			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(line_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0, 0, 1}, vec3{ 0, 0, 1}},

@@ -23,10 +23,10 @@ namespace idk::ogl
 	{
 		_shader_id = glCreateShader(shader_type);
 
-		auto version_pos = shader_code.find("#version");
-		auto version_end = shader_code.find("\n", version_pos);
+		const auto version_pos = shader_code.find("#version");
+		const auto version_end = shader_code.find("\n", version_pos);
 
-		const char* arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, shader_code.substr(version_end).data() } ;
+		const char* const arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, shader_code.substr(version_end).data() } ;
 		const GLint lengths[] = { (GLint)(version_end - version_pos + 1), -1, -1, -1};
 
 		glShaderSource(_shader_id, sizeof(arr) / sizeof(*arr), arr, lengths);

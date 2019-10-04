@@ -5,7 +5,7 @@ namespace idk::ogl
 	template<typename T>
 	bool Program::SetUniform(std::string_view uniform, const T& obj)
 	{
-		auto loc = glGetUniformLocation(_program_id, uniform.data());
+		const auto loc = glGetUniformLocation(_program_id, uniform.data());
 		if (loc < 0) return false;
 
 		if constexpr (std::is_same_v<T, bool>)   glProgramUniform1i(_program_id, loc, obj);

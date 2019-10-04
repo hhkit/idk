@@ -49,7 +49,7 @@ namespace idk {
 		}
 	}
 
-	void FileSystem::Shutdown()
+	void FileSystem::Shutdown() noexcept
 	{
 	}
 #pragma endregion ISystem Stuff
@@ -600,7 +600,7 @@ namespace idk {
 	{
 		auto check_free_index = std::find_if(mount._path_tree[depth]._files.begin(),
 			mount._path_tree[depth]._files.end(),
-			[](const file_system_detail::fs_file& f)
+			[](const file_system_detail::fs_file& f) noexcept
 			{
 				// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
 				return !f.IsValid() && f._change_status == FS_CHANGE_STATUS::NO_CHANGE;
@@ -630,7 +630,7 @@ namespace idk {
 	{
 		auto check_free_index = std::find_if(mount._path_tree[depth]._dirs.begin(),
 			mount._path_tree[depth]._dirs.end(),
-			[](const file_system_detail::fs_dir& d)
+			[](const file_system_detail::fs_dir& d) noexcept
 			{
 				// The conditions for reuse of a file_t is that the file is not valid anymore AND the file was not changed this update
 				return !d.IsValid() && d._change_status == FS_CHANGE_STATUS::NO_CHANGE;

@@ -104,7 +104,7 @@ namespace idk::ogl
 
 		DEVMODE devMode = { 0 };
 		devMode.dmSize = sizeof(DEVMODE);
-		BOOL b = EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &devMode);
+		const BOOL b = EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &devMode);
 		if (b == 0)
 			throw;
 
@@ -120,7 +120,7 @@ namespace idk::ogl
 		pfdesc.cDepthBits = 24;//24 bit depth buffer - not used in this demo
 		pfdesc.cStencilBits = 8; //8 bit stencil buffer - not used in this demo
 
-		int pf = ChoosePixelFormat(_windows_context, &pfdesc);//checks if the graphics card can support the pixel format requested
+		const int pf = ChoosePixelFormat(_windows_context, &pfdesc);//checks if the graphics card can support the pixel format requested
 		if (pf == 0)
 		{
 			ReleaseDC(Core::GetSystem<Windows>().GetWindowHandle(), _windows_context);
@@ -157,7 +157,7 @@ namespace idk::ogl
 	void Win32GraphicsSystem::InitOpenGL()
 	{
 		gladLoadGL();
-		int attribs[] =
+		const int attribs[] =
 		{
 			WGL_CONTEXT_MAJOR_VERSION_ARB, 1,
 			WGL_CONTEXT_MINOR_VERSION_ARB, 0,

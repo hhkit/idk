@@ -258,7 +258,7 @@ REFLECT_END()
 
 // GRAPHICS
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
-REFLECT_VARS(enabled, mesh, cast_shadows, receive_shadows)
+REFLECT_VARS(enabled, mesh, material_instance, cast_shadows, receive_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Light, "Light")

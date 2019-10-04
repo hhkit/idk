@@ -151,11 +151,6 @@ namespace idk
 			func(this);
 		for (auto& func : defaults_table)
 			func(this);
-
-		//for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-		//	Load(elem);
-		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-			Load(elem);
 	}
 
 	void ResourceManager::Shutdown()

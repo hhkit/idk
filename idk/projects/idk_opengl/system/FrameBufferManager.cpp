@@ -35,7 +35,7 @@ namespace idk::ogl
 		if (for_convolution)
 		{
 			glViewport(0, 0, 32, 32);// set texture targets
-			auto ids = target->ConvolutedID();
+			const auto ids = target->ConvolutedID();
 			glBindTexture(GL_TEXTURE_CUBE_MAP, ids[0]);
 
 			vector<GLenum> buffers{GL_COLOR_ATTACHMENT0};
@@ -48,7 +48,7 @@ namespace idk::ogl
 		}
 		else
 		{
-			auto sz = target->Size();
+			const auto sz = target->Size();
 			glViewport(0, 0, sz.x, sz.y);
 
 			auto id = r_cast<GLint>(target->ID());
@@ -71,7 +71,7 @@ namespace idk::ogl
 	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target)
 	{
 
-		auto sz = target->Size();
+		const auto sz = target->Size();
 		glViewport(0, 0, sz.x, sz.y);
 		if (target->GetMeta().internal_format == ColorFormat::DEPTH_COMPONENT)
 		{
@@ -85,7 +85,7 @@ namespace idk::ogl
 			target->Bind();
 			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rbo_id);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
-			GLuint buffers[] = { GL_DEPTH_ATTACHMENT };
+			const GLuint buffers[] = { GL_DEPTH_ATTACHMENT };
 			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			glDrawBuffers(1, buffers);
 		}
@@ -94,7 +94,7 @@ namespace idk::ogl
 			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 			target->Bind();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
-			GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
+			const GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			glDrawBuffers(1, buffers);
 		}
@@ -136,7 +136,7 @@ namespace idk::ogl
 
 	void FrameBufferManager::CheckFBStatus()
 	{
-		auto fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		const auto fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 		switch (fb_status)
 		{

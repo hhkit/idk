@@ -105,7 +105,7 @@ namespace idk::ogl
 
 		const auto SetObjectUniforms = [this](const auto& render_obj, const mat4& view_matrix)
 		{
-			auto obj_tfm = view_matrix * render_obj.transform;
+			const auto obj_tfm = view_matrix * render_obj.transform;
 			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
 			pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
 			pipeline.SetUniform("ObjectMat4s.model_transform", render_obj.transform);
@@ -143,7 +143,7 @@ namespace idk::ogl
 
 				if (light.light_map)
 				{
-					auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+					const auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
@@ -165,7 +165,7 @@ namespace idk::ogl
 					using T = std::decay_t<decltype(elem)>;
 					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
 					{
-						auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+						const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
 						texture->BindToUnit(texture_units);
 						pipeline.SetUniform(id, texture_units);
 
@@ -184,7 +184,7 @@ namespace idk::ogl
 					using T = std::decay_t<decltype(obj)>;
 					if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 					{
-						auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+						const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
 						opengl_handle->BindConvolutedToUnit(texture_units);
 						pipeline.SetUniform("irradiance_probe", texture_units++);
 						opengl_handle->BindToUnit(texture_units);
@@ -224,20 +224,20 @@ namespace idk::ogl
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm, light_view_tfm);
 
-				for (auto& elem : curr_object_buffer.mesh_render)
+				for (auto& mesh_renderer : curr_object_buffer.mesh_render)
 				{
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-					SetObjectUniforms(elem, light_view_tfm);
-					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+					SetObjectUniforms(mesh_renderer, light_view_tfm);
+					RscHandle<OpenGLMesh>{mesh_renderer.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], light_p_tfm, light_view_tfm);
-				for (auto& elem : curr_object_buffer.skinned_mesh_render)
+				for (auto& skinned_mesh_renderer : curr_object_buffer.skinned_mesh_render)
 				{
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-					SetSkeletons(elem.skeleton_index);
-					SetObjectUniforms(elem, light_view_tfm);
-					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
+					SetSkeletons(skinned_mesh_renderer.skeleton_index);
+					SetObjectUniforms(skinned_mesh_renderer, light_view_tfm);
+					RscHandle<OpenGLMesh>{skinned_mesh_renderer.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 				}
 
 				glDisable(GL_DEPTH_TEST);
@@ -320,7 +320,7 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// bind shader
-				auto material = elem.material_instance->material;
+				const auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
 				// set probe
@@ -337,7 +337,7 @@ namespace idk::ogl
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
-				auto material = elem.material_instance->material;
+				const auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
 				GLuint texture_units = 0;

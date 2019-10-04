@@ -8,13 +8,13 @@ namespace idk::ogl
 {
 	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath)
 	{
-		auto program = Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>();
+		const auto program = Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>();
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, false);
 
 		std::stringstream stringify;
 		stringify << shader_stream.rdbuf();
 
-		auto shader_enum = [](std::string_view ext)->GLenum
+		const auto shader_enum = [](std::string_view ext)->GLenum
 		{
 			switch (string_hash(ext))
 			{
@@ -34,13 +34,13 @@ namespace idk::ogl
 	}
 	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
 	{
-		auto program = Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>(bundle.metadatas[0].guid);
+		const auto program = Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>(bundle.metadatas[0].guid);
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ, false);
 
 		std::stringstream stringify;
 		stringify << shader_stream.rdbuf();
 
-		auto shader_enum = [](std::string_view ext)->GLenum
+		const auto shader_enum = [](std::string_view ext)->GLenum
 		{
 			switch (string_hash(ext))
 			{

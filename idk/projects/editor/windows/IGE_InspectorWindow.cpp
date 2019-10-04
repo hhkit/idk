@@ -125,7 +125,7 @@ namespace idk {
             if (auto inst_root = PrefabUtility::GetPrefabInstanceRoot(gos[0]))
             {
                 _prefab_inst = inst_root->GetComponent<PrefabInstance>();
-                _prefab_curr_obj_index = std::find(_prefab_inst->objects.begin(), _prefab_inst->objects.end(), gos[0]) - _prefab_inst->objects.begin();
+                _prefab_curr_obj_index = s_cast<int>(std::find(_prefab_inst->objects.begin(), _prefab_inst->objects.end(), gos[0]) - _prefab_inst->objects.begin());
                 DisplayPrefabInstanceControls(_prefab_inst);
             }
 
@@ -752,7 +752,7 @@ namespace idk {
 
                 bool recurse = false;
                 bool changed = false;
-                bool changed_and_deactivated = false;
+				[[maybe_unused]] bool changed_and_deactivated = false;
 
                 //ALL THE TYPE STATEMENTS HERE
                 if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)

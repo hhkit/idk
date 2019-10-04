@@ -12,7 +12,7 @@ namespace idk
 	public:
 		void Init() override;
 		void Update();
-		void Shutdown() override;
+		void Shutdown() noexcept override;
 
 		// Files/Directory Getters
 		// =====================================================================================================

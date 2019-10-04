@@ -65,6 +65,9 @@ namespace idk::reflect
 		, UniformInstance
 		, hash_table<string, UniformInstance>
 		, std::variant<color, RscHandle<CubeMap>> // camera clear
+		, PointLight
+		, DirectionalLight
+		, SpotLight
 		, LightVariant
 
 		// physics

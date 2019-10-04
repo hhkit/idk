@@ -2,5 +2,4 @@
 <RuleSet Name="idk" ToolsVersion="16.0">
   <Include Path="cppcorecheckconstrules.ruleset" Action="Default" />
   <Include Path="cppcorecheckstylerules.ruleset" Action="Default" />
-  <Include Path="nativeminimumrules.ruleset" Action="Default" />
 </RuleSet>
