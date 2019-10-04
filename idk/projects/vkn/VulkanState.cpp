@@ -622,7 +622,7 @@ namespace idk::vkn
 
 		vk::SubpassDescription subpass2[BasicRenderPasses::eSizeBrp];
 		BasicRenderPasses rp_type{};
-		for(auto& sp : subpass2)
+		for([[maybe_unused]]auto& sp : subpass2)
 		{
 			//auto rp_type = BasicRenderPasses::eDepthOnly;
 			auto& attachmentRef = colorAttachmentRef2[rp_type];
@@ -716,7 +716,7 @@ namespace idk::vkn
 			rs.RenderPass() = *m_crenderpass;
 	}
 
-	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, hlp::MemoryAllocator& allocator)
+	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format fmt, vk::ImageTiling tiling, vk::ImageUsageFlags usage, [[maybe_unused]] vk::MemoryPropertyFlags ppts, vk::Image& image, hlp::MemoryAllocator& allocator)
 	{
 		if (!imageFence)
 			imageFence = m_device->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
@@ -732,7 +732,7 @@ namespace idk::vkn
 		imageInfo.extent.depth = 1;
 		imageInfo.mipLevels = 1;
 		imageInfo.arrayLayers = 1;
-		imageInfo.format = format;
+		imageInfo.format = fmt;
 		imageInfo.tiling = tiling;
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 		imageInfo.usage = usage;
@@ -763,7 +763,7 @@ namespace idk::vkn
 		vk::PipelineStageFlags shader_flags = vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader;// | vk::PipelineStageFlagBits::eTessellationControlShader | vk::PipelineStageFlagBits::eTessellationEvaluationShader;
 		vk::PipelineStageFlags src_stages = shader_flags;
 		vk::PipelineStageFlags dst_stages = vk::PipelineStageFlagBits::eTransfer;
-		vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		[[maybe_unused]] vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 		vk::ImageLayout next_layout = vk::ImageLayout::eTransferDstOptimal;
 
 		hlp::TransitionImageLayout(true, cmd_buffer, m_graphics_queue, image, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, next_layout);
@@ -772,17 +772,17 @@ namespace idk::vkn
 		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view_->GraphicsQueue(), false, *imageFence);
 		uint64_t wait_for_milli_seconds = 1;
 		uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
-		uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+		[[maybe_unused]] uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 		while (device->waitForFences(*imageFence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
 
 	}
 
-	vk::UniqueImageView VulkanState::createImageView(vk::UniqueImage& img, vk::Format format)
+	vk::UniqueImageView VulkanState::createImageView(vk::UniqueImage& img, vk::Format fmt)
 	{
 		vk::ImageViewCreateInfo viewInfo;
 		viewInfo.image = *img;
 		viewInfo.viewType = vk::ImageViewType::e2D;
-		viewInfo.format = format;
+		viewInfo.format = fmt;
 		viewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = 1;
@@ -969,7 +969,7 @@ namespace idk::vkn
 		m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
 
 		{
-			auto& render_state = view_->CurrRenderState();
+			[[maybe_unused]] auto& render_state = view_->CurrRenderState();
 			auto& command_buffer = *m_pri_commandbuffers[current_frame];
 
 			vk::ClearValue clearcolor[] = {
@@ -1197,7 +1197,7 @@ namespace idk::vkn
 				hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_graphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);
 
 
-				vk::CommandBufferBeginInfo begin_info
+				vk::CommandBufferBeginInfo beg_info
 				{
 					vk::CommandBufferUsageFlags{}
 					,nullptr//&inherit_info

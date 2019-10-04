@@ -67,15 +67,15 @@ namespace idk::vkn
 		DdsFile& operator=(DdsFile&& file) = default;
 
 
-		DdsFile& operator=(string file)
+		DdsFile& operator=(string _file)
 		{
-			DdsFile tmp{ std::move(file) };
+			DdsFile tmp{ std::move(_file) };
 			(*this) = std::move(tmp);
 			return *this;
 		}
-		DdsFile& operator=(string_view file) 
+		DdsFile& operator=(string_view _file) 
 		{
-			DdsFile tmp{ file };
+			DdsFile tmp{ _file };
 			(*this) = std::move(tmp);
 			return *this;
 		}

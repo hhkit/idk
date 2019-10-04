@@ -53,6 +53,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -78,7 +79,7 @@
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
     <TargetName>idk_opengl</TargetName>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -107,7 +108,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)projects\idk\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\win32\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

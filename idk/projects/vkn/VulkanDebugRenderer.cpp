@@ -195,7 +195,7 @@ namespace idk::vkn
 		this->impl.reset();
 	}
 
-	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj, GraphicsState& out)
+	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj, GraphicsState& )
 	{
 		auto& detail = impl->detail;
 		auto& pipeline = impl->pipeline;

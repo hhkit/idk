@@ -100,9 +100,9 @@ namespace idk::vkn
 
 	void MeshModder::SetIndexBuffer16(VulkanMesh& mesh, shared_ptr<MeshBuffer::Managed> index_buffer, uint32_t num_indices)
 	{
-		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		[[maybe_unused]] auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//auto& pdevice = vview.PDevice();
-		auto& m_device = vview.Device();
+		//auto& m_device = vview.Device();
 		//auto& dispatcher = vview.Dispatcher();
 		{
 			mesh.SetIndexBuffer(
@@ -117,9 +117,9 @@ namespace idk::vkn
 
 	void MeshModder::SetIndexBuffer32(VulkanMesh& mesh, shared_ptr<MeshBuffer::Managed> index_buffer, uint32_t num_indices)
 	{
-		auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		[[maybe_unused]] auto& vview = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//auto& pdevice = vview.PDevice();
-		auto& m_device = vview.Device();
+		//auto& m_device = vview.Device();
 		//auto& dispatcher = vview.Dispatcher();
 		{
 			mesh.SetIndexBuffer(

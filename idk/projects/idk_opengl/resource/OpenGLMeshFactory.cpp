@@ -156,7 +156,7 @@ namespace idk::ogl
 				auto index = static_cast<int>(vertices.size());
 
 				// Try to insert into the set.
-				auto result = shared.emplace(pos, index);
+				const auto result = shared.emplace(pos, index);
 				// Check if the insertion failed or succeeded
 				if (result.second == false)
 					// If we failed, we simply point index to the element that was foudn to be the same inside the set

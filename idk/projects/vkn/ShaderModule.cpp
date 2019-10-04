@@ -61,7 +61,7 @@ namespace idk::vkn
 			}
 			ubo_info[ub.name] = std::move(info);
 		}
-		auto& cs = code_reflector.get_combined_image_samplers();
+		//auto& cs = code_reflector.get_combined_image_samplers();
 
 		for (auto& ub : resources.sampled_images)
 		{

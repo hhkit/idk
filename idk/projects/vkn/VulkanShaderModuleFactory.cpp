@@ -9,7 +9,7 @@
 
 namespace idk::vkn
 {
-	ShaderBuildResult VulkanShaderModuleFactory::BuildGLSL(const RscHandle<ShaderProgram>& program, ShaderStage stage, string_view glsl_code)
+	ShaderBuildResult VulkanShaderModuleFactory::BuildGLSL(const RscHandle<ShaderProgram>& program, ShaderStage, string_view glsl_code)
 	{
 		auto prog = RscHandle<ShaderModule>{ program };
 		bool ret = false;

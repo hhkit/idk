@@ -46,10 +46,10 @@ namespace idk::ogl
 		Bind();
 		for (auto& elem : descriptor)
 		{
-			auto find_type = OpenGLAttribs.find(elem.attrib);
+			const auto find_type = OpenGLAttribs.find(elem.attrib);
 			assert(find_type != OpenGLAttribs.end());
 
-			auto find_loc = locations.requirements.find(elem.attrib);
+			const auto find_loc = locations.requirements.find(elem.attrib);
 			if (find_loc != locations.requirements.end())
 			{
 				auto loc = find_loc->second;

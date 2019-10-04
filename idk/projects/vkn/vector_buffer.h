@@ -37,7 +37,7 @@ namespace idk::vkn::hlp
 		bbucket_list() = default;
 		bbucket_list(vk::PhysicalDevice pdevice, vk::Device device, std::shared_ptr<MemoryAllocator> allocator, std::optional<size_t> num_bytes_per_chunk={}) :_pdevice{ pdevice }, _device{ device }, _allocator{ allocator }, _chunk_size{ num_bytes_per_chunk? *num_bytes_per_chunk :_dchunk_size}{}
 		bbucket_list(vk::PhysicalDevice pdevice, vk::Device device, MemoryAllocator& allocator, std::optional<size_t> num_bytes_per_chunk={}) :
-			_pdevice{ pdevice }, _device{ device }, _allocator{ &allocator,[](MemoryAllocator* ptr) {} }, _chunk_size{ num_bytes_per_chunk ? *num_bytes_per_chunk : _dchunk_size }{}
+			_pdevice{ pdevice }, _device{ device }, _allocator{ &allocator,[](MemoryAllocator*) {} }, _chunk_size{ num_bytes_per_chunk ? *num_bytes_per_chunk : _dchunk_size }{}
 
 		// accessor
 		bool empty()const { return _buckets.size() == 0 || (_index == 0 && _buckets[_index].size == 0); }

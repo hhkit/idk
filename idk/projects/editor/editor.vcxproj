@@ -79,7 +79,7 @@
     <IntDir>$(SolutionDir)build\editor\$(Configuration)\</IntDir>
     <TargetName>editor</TargetName>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -111,7 +111,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

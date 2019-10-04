@@ -46,7 +46,7 @@ namespace idk::vkn::hlp
 	MemoryAllocator::Alloc::~Alloc() = default;
 
 
-	void Memories::Memory::Free(size_t offset, size_t size)
+	void Memories::Memory::Free(size_t /*offset*/, size_t /*size*/)
 	{
 		//TODO actually manage the freed memory
 	}

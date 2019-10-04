@@ -105,27 +105,27 @@ namespace idk::vkn
 	void VknFrameBuffer::ReattachImageViews(VulkanView& vknView)
 	{
 		buffer.reset();
-		vector<vk::ImageView> image_views;
-		auto& meta = GetMeta();
+		vector<vk::ImageView> vimage_views;
+		auto& mmeta = GetMeta();
 		//TODO assert that all textures have to be the same size
-		for (auto& im : meta.textures)
+		for (auto& im : mmeta.textures)
 		{
-			image_views.emplace_back(*im.as<VknTexture>().imageView);
+			vimage_views.emplace_back(*im.as<VknTexture>().imageView);
 		}
 
 		vk::FramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.renderPass = vknView.BasicRenderPass(rp_type);
-		framebufferInfo.attachmentCount = (uint32_t)image_views.size();
-		framebufferInfo.pAttachments = std::data(image_views);
-		framebufferInfo.width  = s_cast<uint32_t>(meta.size.x);
-		framebufferInfo.height = s_cast<uint32_t>(meta.size.y);
+		framebufferInfo.attachmentCount = (uint32_t)vimage_views.size();
+		framebufferInfo.pAttachments = std::data(vimage_views);
+		framebufferInfo.width  = s_cast<uint32_t>(mmeta.size.x);
+		framebufferInfo.height = s_cast<uint32_t>(mmeta.size.y);
 		framebufferInfo.layers = 1;
 		;
 		ready_semaphore = vknView.Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 
 		buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
 
-		size = vec2(meta.size);
+		size = vec2(mmeta.size);
 
 		uncreated = false;
 	}
@@ -259,18 +259,18 @@ namespace idk::vkn
 			loader.LoadTexture(*depth_ptr, TextureFormat::eD16Unorm, {}, nullptr, s_cast<size_t>(2 * sz.x * sz.y), ivec2{ sz }, *allocator, fence, true);
 			break;
 		}
-		auto& test = texture.as<VknTexture>();
+		//auto& test = texture.as<VknTexture>();
 	}
 
 	void VknFrameBuffer::Finalize()
 	{
-		vector<vk::ImageView> image_views;
-		vec2 size;
+		vector<vk::ImageView> image_views_;
+		vec2 sz;
 		for (auto& tex : GetMeta().textures)
 		{
 			auto& vtex = tex.as<VknTexture>();
-			image_views.emplace_back(*vtex.imageView);
-			size = vec2{ vtex.size };
+			image_views_.emplace_back(*vtex.imageView);
+			sz = vec2{ vtex.size };
 		}
 		if (attachments[AttachmentType::eColor].size() && attachments[AttachmentType::eDepth].size())
 		{
@@ -285,7 +285,7 @@ namespace idk::vkn
 			rp_type = BasicRenderPasses::eDepthOnly;
 		}
 		auto& view = View();
-		AttachImageViews(view.BasicRenderPass(rp_type),image_views, view, size);
+		AttachImageViews(view.BasicRenderPass(rp_type), image_views_, view, sz);
 	}
 
 

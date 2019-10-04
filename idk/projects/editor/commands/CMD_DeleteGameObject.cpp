@@ -67,7 +67,7 @@ namespace idk {
 		try {
 			RecursiveCreateObjects(gameobject_vector, true);
 		}
-		catch (bool fail) {
+		catch (bool) {
 			return false;
 		}
 

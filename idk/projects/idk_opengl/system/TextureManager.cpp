@@ -17,7 +17,7 @@ namespace idk::ogl
 			return GL_TEXTURE0;
 		}
 
-		auto itr = texture_units.find_second(handle);
+		const auto itr = texture_units.find_second(handle);
 		if (itr != texture_units.end())
 			return itr->first;
 

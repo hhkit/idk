@@ -78,7 +78,7 @@ namespace idk
 		if (!success)
 			return std::nullopt;
 
-		auto itr_s = _table_second.find(itr->second);
+		const auto itr_s = _table_second.find(itr->second);
 		if (itr_s != _table_second.end())
 		{
 			_table_first.erase(itr);
@@ -119,7 +119,7 @@ namespace idk
 	template<typename T1, typename T2>
 	typename dual_set<T1, T2>::const_iterator  dual_set<T1, T2>::find_second(const T2& findme)
 	{
-		auto itr_s = _table_second.find(findme);
+		const auto itr_s = _table_second.find(findme);
 		if (itr_s == _table_second.end())
 			return _table_first.end();
 		else

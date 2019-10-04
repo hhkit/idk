@@ -111,7 +111,7 @@ namespace idk::vkn
 		return fb;
 	}
 
-	ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
+	ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle, const MetaBundle& bundle)
 	{
 		auto fb = Core::GetResourceManager().LoaderEmplaceResource<VknFrameBuffer>(bundle.metadatas[0].guid);
 

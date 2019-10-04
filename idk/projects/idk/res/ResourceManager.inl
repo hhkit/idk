@@ -16,7 +16,7 @@ namespace idk
 	inline Res& ResourceManager::Get(const RscHandle<Res>& handle)
 	{
 		auto& table = GetTable<Res>();
-		auto itr = table.find(handle.guid);
+		const auto itr = table.find(handle.guid);
 		if (itr == table.end())
 			return GetDefaultRes<Res>();
 		else
@@ -30,7 +30,7 @@ namespace idk
 	inline bool ResourceManager::Free(const RscHandle<Res>& handle)
 	{
 		auto& table = GetTable<Res>();
-		auto itr = table.find(handle.guid);
+		const auto itr = table.find(handle.guid);
 		if (itr == table.end())
 			return false;
 		else
@@ -290,7 +290,7 @@ namespace idk
 	ResourceManager::ResourceControlBlock<Res>* ResourceManager::GetControlBlock(RscHandle<Res> handle)
 	{
 		auto& table = GetTable<Res>();
-		auto itr = table.find(handle.guid);
+		const auto itr = table.find(handle.guid);
 		return itr == table.end() ? nullptr : &itr->second;
 	}
 }

@@ -338,7 +338,7 @@ namespace idk::vkn
 		return _mesh_renderer_shader_module;
 	}
 
-	string GetUniformData(const UniformInstance& uniform)
+	string GetUniformData(const UniformInstance&)
 	{
 		string data;
 		return data;
@@ -641,7 +641,7 @@ namespace idk::vkn
 		}
 		device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
 	}
-	vk::Framebuffer GetFrameBuffer(const CameraData& camera_data, uint32_t curr_index)
+	vk::Framebuffer GetFrameBuffer(const CameraData& camera_data, uint32_t)
 	{
 		//TODO Actually get the framebuffer from camera_data
 		//auto& e = camera_data.render_target.as<VknFrameBuffer>();
@@ -696,7 +696,7 @@ namespace idk::vkn
 		}
 	}
 
-	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView& view)
+	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView&)
 	{
 		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
 		//if (state.camera.is_shadow)
@@ -705,7 +705,7 @@ namespace idk::vkn
 	}
 
 
-	void TransitionFrameBuffer(const CameraData& camera, vk::CommandBuffer cmd_buffer, VulkanView& view)
+	void TransitionFrameBuffer(const CameraData& camera, vk::CommandBuffer cmd_buffer, VulkanView& )
 	{
 		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
 		vkn_fb.PrepareDraw(cmd_buffer);
@@ -717,7 +717,7 @@ namespace idk::vkn
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& view = View();
-		auto& swapchain = view.Swapchain();
+		//auto& swapchain = view.Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
@@ -733,7 +733,7 @@ namespace idk::vkn
 		cmd_buffer.begin(begin_info, dispatcher);
 		std::array<float, 4> a{};
 
-		auto& cd = std::get<vec4>(state.camera.clear_data);
+		//auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
 		std::array<float, 4> depth_clear{1.0f,1.0f ,1.0f ,1.0f };
 		std::optional<vec4> clear_col;
@@ -747,7 +747,7 @@ namespace idk::vkn
 			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
 		};
 		
-		auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
+		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
 		auto sz = view.GetWindowsInfo().size;
 		vk::Rect2D render_area

@@ -8,7 +8,7 @@
 #include "TriBuffer.h"
 
 namespace idk::vkn {
-	TriBuffer::TriBuffer(VulkanView& view,const bool& cImage)
+	TriBuffer::TriBuffer(VulkanView& view,[[maybe_unused]]const bool& cImage)
 		:images{ }, image_views{}, pSignals{}, mems{*view.Device(),view.PDevice()}
 	{
 		pSignals.resize(view.MaxFrameInFlight());

@@ -144,7 +144,7 @@ void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buff
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
+void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
 {
 	if (!dont_begin)
 		BeginSingleTimeCBufferCmd(cmd_buffer, info);

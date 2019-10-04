@@ -26,7 +26,7 @@ namespace idk::vkn
 	}
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		auto&& tm = *path_to_meta.metadatas[0].GetMeta<Texture>();
+		//auto&& tm = *path_to_meta.metadatas[0].GetMeta<Texture>();
 		//TODO map the format
 		//tm.internal_format;
 		//TODO send the format and repeat mode in

@@ -311,7 +311,7 @@ namespace idk::vkn
 		[[maybe_unused]] auto [binding, attrib] = hlp::ConvertVtxDesc(config.buffer_descriptions);
 		return binding;
 	}
-	std::pair<vector<vk::PipelineShaderStageCreateInfo>, vector<vk::UniqueShaderModule>> VulkanPipeline::GetShaderStageInfo(const config_t& config, Vulkan_t& vulkan) const
+	std::pair<vector<vk::PipelineShaderStageCreateInfo>, vector<vk::UniqueShaderModule>> VulkanPipeline::GetShaderStageInfo(const config_t& config, Vulkan_t&) const
 	{
 		std::pair<
 			vector<vk::PipelineShaderStageCreateInfo>,
