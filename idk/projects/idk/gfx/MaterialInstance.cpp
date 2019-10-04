@@ -23,15 +23,30 @@ namespace idk
 		}
 		return ret;
 	}
-	hash_table<string, RscHandle<Texture>> MaterialInstance::GetImageBlock(const string& name) const
+	vector<RscHandle<Texture>> MaterialInstance::GetImageBlock(const string& name) const
 	{
 		//TODO actually get a block
-		hash_table<string, RscHandle<Texture>> result;
+		vector<RscHandle<Texture>> result;
 		auto uni= GetUniform(name);
 		if (uni)
 		{
 			//Todo, replace name with the individual names in the block
-			result.emplace(name, std::get<RscHandle<Texture>>(*uni));
+			result.emplace_back(std::get<RscHandle<Texture>>(*uni));
+		}
+		else
+		{
+			int i = 0;
+			bool should_stop = false;
+			while (!should_stop)
+			{
+				auto opt= GetUniform(name + "[" + std::to_string(i) + "]");
+				if (opt)
+				{
+					result.emplace_back(std::get<RscHandle<Texture>>(*opt));
+				}
+				should_stop = !opt;
+				++i;
+			}
 		}
 		return result;
 	}

@@ -443,12 +443,12 @@ namespace idk::vkn
 		);
 	}
 	template<typename WTF>
-	void PreProcUniform(const UboInfo& obj_uni,uint32_t index, RscHandle<RenderTarget> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
+	void PreProcUniform(const UboInfo& obj_uni, uint32_t index, RscHandle<Texture> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
 	{
 		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
 		//collated_layouts[obj_uni.layout].second++;
 		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
-		auto& texture = val->GetAttachment(AttachmentType::eDepth,0).as<VknTexture>();
+		auto& texture = val.as<VknTexture>();
 		collated_bindings[obj_uni.set].emplace_back(
 			ProcessedRO::BindingInfo
 			{
@@ -460,6 +460,14 @@ namespace idk::vkn
 				obj_uni.layout
 			}
 		);
+	}
+	template<typename WTF>
+	void PreProcUniform(const UboInfo& obj_uni,uint32_t index, RscHandle<RenderTarget> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
+	{
+		//collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
+		//collated_layouts[obj_uni.layout].second++;
+		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
+		PreProcUniform<WTF>(obj_uni,index, val->GetAttachment(AttachmentType::eDepth, 0),collated_layouts, collated_bindings);
 	}
 	template<typename lol=void>
 	void BindBones(const UboInfo& info,const AnimatedRenderObject& aro, const vector<SkeletonTransforms>& bones, UboManager& ubos, FrameRenderer::DsBindingCount & collated_layouts, collated_bindings_t & collated_bindings)
@@ -674,16 +682,21 @@ namespace idk::vkn
 
 				if (!cam.is_shadow)
 				{
+					auto& layout = fprog->GetLayout("shadow_maps");
+					uint32_t i = 0;
 					for (auto& shadow_map : state.active_lights)
 					{
 						auto& sm_uni = shadow_map->light_map;
 						{
-							auto& layout = fprog->GetLayout("shadow_maps");
-							PreProcUniform<int>(layout, 0, sm_uni, collated_layouts, collated_bindings);
+							PreProcUniform<int>(layout, i++, sm_uni, collated_layouts, collated_bindings);
 							layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
 						}
 					}
-
+					for (; i < layout.size; ++i)
+					{
+						PreProcUniform<int>(layout, i, RscHandle<Texture>{}, collated_layouts, collated_bindings);
+						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+					}
 				}
 				if (fprog)
 				{
@@ -694,7 +707,10 @@ namespace idk::vkn
 						auto& mat_inst = *dc.material_instance;
 						auto mat_uni_itr = mat_inst.GetUniform(itr->first);
 						if (!mat_uni_itr)
+						{
 							mat_uni_itr = mat_inst.GetUniform(itr->first + "[0]");
+						}
+							
 						if (mat_uni_itr || mat_inst.IsUniformBlock(itr->first))
 						{
 							auto& ubo_info = itr->second;
@@ -725,24 +741,28 @@ namespace idk::vkn
 								break;
 								case uniform_layout_t::UniformType::eSampler:
 								{
-									for (auto i = ubo_info.size; i-- > 0;)
+									//for (auto i = ubo_info.size; i-- > 0;)
 									{
-										auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
+										auto&& data = dc.material_instance->GetImageBlock(name);// +((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
 										if (data.size())
 										{
-
-											auto& texture = data.begin()->second.as<vkn::VknTexture>();
-											collated_bindings[ubo_info.set].emplace_back(
-												ProcessedRO::BindingInfo
-												{
-													ubo_info.binding,
-													ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
-													0,
-													i,
-													ubo_info.size,
-											layout
-												}
-											);
+											uint32_t i = 0;
+											for (auto& htex : data)
+											{
+												auto& texture = htex.as<vkn::VknTexture>();
+												collated_bindings[ubo_info.set].emplace_back(
+													ProcessedRO::BindingInfo
+													{
+														ubo_info.binding,
+														ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+														0,
+														i,
+														ubo_info.size,
+												layout
+													}
+												);
+												++i;
+											}
 
 										}
 									}
@@ -825,16 +845,22 @@ namespace idk::vkn
 
 			if (!cam.is_shadow)
 			{
+				auto& layout = fprog->GetLayout("shadow_maps");
+				uint32_t i = 0;
 				for (auto& shadow_map : state.active_lights)
 				{
 					auto& sm_uni = shadow_map->light_map;
 					{
-						auto& layout = fprog->GetLayout("shadow_maps");
-						PreProcUniform<int>(layout, 0, sm_uni, collated_layouts, collated_bindings);
+						PreProcUniform<int>(layout, i++, sm_uni, collated_layouts, collated_bindings);
 						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
 					}
 				}
-
+				for (; i < layout.size; ++i)
+				{
+					PreProcUniform<int>(layout, i, RscHandle<Texture>{}, collated_layouts, collated_bindings);
+					layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+				}
+				
 			}
 			if (fprog)
 			{
@@ -875,24 +901,43 @@ namespace idk::vkn
 							break;
 							case uniform_layout_t::UniformType::eSampler:
 							{
-								for (auto i = ubo_info.size; i-- > 0;)
+								//for (auto i = ubo_info.size; i-- > 0;)
 								{
-									auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
+									auto&& data = dc.material_instance->GetImageBlock(name);// +((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
 									if (data.size())
 									{
-
-										auto& texture = data.begin()->second.as<vkn::VknTexture>();
-										collated_bindings[ubo_info.set].emplace_back(
-											ProcessedRO::BindingInfo
-											{
-												ubo_info.binding,
-												ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
-												0,
-												i,
-												ubo_info.size,
+										uint32_t i = 0;
+										for (auto& htex : data)
+										{
+											auto& texture = htex.as<vkn::VknTexture>();
+											collated_bindings[ubo_info.set].emplace_back(
+												ProcessedRO::BindingInfo
+												{
+													ubo_info.binding,
+													ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+													0,
+													i,
+													ubo_info.size,
 											layout
-											}
-										);
+												}
+											);
+											++i;
+										}
+										uint32_t total = ubo_info.size;
+										for (; i < total; ++i)
+										{
+											collated_bindings[ubo_info.set].emplace_back(
+												ProcessedRO::BindingInfo
+												{
+													ubo_info.binding,
+													ProcessedRO::image_t{vk::ImageView{},vk::Sampler{},vk::ImageLayout::eGeneral},
+													0,
+													i,
+													ubo_info.size,
+											layout
+												}
+											);
+										}
 
 									}
 								}
