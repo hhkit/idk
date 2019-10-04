@@ -153,6 +153,30 @@ namespace idk::ogl
 			}
 		};
 
+		const auto SetMaterialUniforms = [this](RscHandle<MaterialInstance> material_instance, GLuint& texture_units)
+		{
+			auto instance_uniforms = material_instance->material->uniforms;
+			for (auto& [id, uniform] : material_instance->uniforms)
+				instance_uniforms.emplace(id, uniform);
+
+			for (auto& [id, uniform] : instance_uniforms)
+			{
+				std::visit([this, &texture_units](auto& elem, string_view id) {
+					using T = std::decay_t<decltype(elem)>;
+					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+					{
+						auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+						texture->BindToUnit(texture_units);
+						pipeline.SetUniform(id, texture_units);
+
+						++texture_units;
+					}
+					else
+						pipeline.SetUniform(id, elem);
+					}, uniform, std::variant<string_view>{id});
+			}
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			pipeline.Use();
@@ -312,29 +336,8 @@ namespace idk::ogl
 				pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 
 				SetLightUniforms(span<LightData>{lights}, texture_units);
+				SetMaterialUniforms(elem.material_instance, texture_units);
 				SetObjectUniforms(elem, cam.view_matrix);
-
-				// material uniforms
-                auto instance_uniforms = elem.material_instance->material->uniforms;
-                for (auto& [id, uniform] : elem.material_instance->uniforms)
-                    instance_uniforms.emplace(id, uniform);
-
-                for (auto& [id, uniform] : instance_uniforms)
-				{
-					std::visit([this, &id, &texture_units](auto& elem) {
-						using T = std::decay_t<decltype(elem)>;
-						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-						{
-							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-							texture->BindToUnit(texture_units);
-							pipeline.SetUniform(id, texture_units);
-
-							++texture_units;
-						}
-						else
-							pipeline.SetUniform(id, elem);
-					}, uniform);
-				}
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 			}
@@ -366,29 +369,8 @@ namespace idk::ogl
 
 				SetLightUniforms(span<LightData>{lights}, texture_units);
 				SetSkeletons(elem.skeleton_index);
+				SetMaterialUniforms(elem.material_instance, texture_units);
 				SetObjectUniforms(elem, cam.view_matrix);
-
-				// material uniforms
-                auto instance_uniforms = elem.material_instance->material->uniforms;
-                for (auto& [id, uniform] : elem.material_instance->uniforms)
-                    instance_uniforms.emplace(id, uniform);
-
-				for (auto& [id, uniform] : instance_uniforms)
-				{
-					std::visit([this, &id, &texture_units](auto& elem) {
-						using T = std::decay_t<decltype(elem)>;
-						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-						{
-							auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-							texture->BindToUnit(texture_units);
-							pipeline.SetUniform(id, texture_units);
-
-							++texture_units;
-						}
-						else
-							pipeline.SetUniform(id, elem);
-						}, uniform);
-				}
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
