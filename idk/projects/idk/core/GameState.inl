@@ -8,7 +8,7 @@ namespace idk
 	{
 		if constexpr (std::is_const_v<T>)
 		{
-			auto objspan = detail::ObjectPools::GetPool<std::decay_t<T>>(_objects).GetSpan();
+			const auto objspan = detail::ObjectPools::GetPool<std::decay_t<T>>(_objects).GetSpan();
 			return span<T>{objspan.begin(), objspan.end()};
 		}
 		else

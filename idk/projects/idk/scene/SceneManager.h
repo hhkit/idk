@@ -22,7 +22,7 @@ namespace idk
 
 		struct SceneBlock
 		{
-			unsigned char          build_index;
+			unsigned char          build_index{};
 			RscHandle<class Scene> scene;
 		};
 

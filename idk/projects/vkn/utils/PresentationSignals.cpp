@@ -3,13 +3,13 @@
 #include "vkn/VulkanView.h"
 
 namespace idk::vkn {
-	PresentationSignals::PresentationSignals(PresentationSignals&& rhs)
+	PresentationSignals::PresentationSignals(PresentationSignals&& rhs) noexcept
 		:image_available{std::move(rhs.image_available)},
 		render_finished{std::move(rhs.render_finished)},
 		inflight_fence{std::move(rhs.inflight_fence)}
 	{
 	}
-	PresentationSignals& PresentationSignals::operator=(PresentationSignals&& rhs)
+	PresentationSignals& PresentationSignals::operator=(PresentationSignals&& rhs) noexcept
 	{
 		// TODO: insert return statement here
 		std::swap(image_available,rhs.image_available);

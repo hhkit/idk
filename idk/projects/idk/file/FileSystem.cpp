@@ -63,10 +63,10 @@ namespace idk {
 		if (mount_path[0] != '/')
 			return string{};
 
-		auto end_pos = mount_path.find_first_of('/', 1);
+		const auto end_pos = mount_path.find_first_of('/', 1);
 		
 		string mount_key = mount_path.substr(0, end_pos);
-		auto mount_index = validateMountPath(mountPath);
+		const auto mount_index = validateMountPath(mountPath);
 		if (mount_index >= 0)
 		{
 			// Check if there are even mounts. If this hits, something is terribly wrong...
@@ -95,7 +95,7 @@ namespace idk {
 
 	PathHandle FileSystem::GetFile(string_view mountPath) const
 	{
-		auto file_index = getFile(mountPath);
+		const auto file_index = getFile(mountPath);
 		if (file_index.IsValid() == false)
 			return PathHandle{};
 
@@ -104,7 +104,7 @@ namespace idk {
 
 	PathHandle FileSystem::GetDir(string_view mountPath) const
 	{
-		auto dir_index = getDir(mountPath);
+		const auto dir_index = getDir(mountPath);
 		if (dir_index.IsValid() == false)
 			return PathHandle{};
 
@@ -126,7 +126,7 @@ namespace idk {
 				// Check if the full path matches the full path of the mount
 				if (mount._full_path == parent_path_str)
 				{
-					size_t start = parent_path_str.size();
+					const size_t start = parent_path_str.size();
 					ret_path = mount._mount_path + full_path.substr(start);
 					std::replace(ret_path.begin(), ret_path.end(), '\\', '/'); 
 					return ret_path;
@@ -154,15 +154,15 @@ namespace idk {
 
 	vector<PathHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, FS_FILTERS filters) const
 	{
-		auto dir_index = getDir(mountPath);
-		PathHandle h{ dir_index, false };
+		const auto dir_index = getDir(mountPath);
+		const PathHandle h{ dir_index, false };
 		return h.GetFilesWithExtension(extension, filters);
 	}
 
 	vector<PathHandle> FileSystem::GetEntries(string_view mountPath, FS_FILTERS filters, string_view ext) const
 	{
-		auto dir_index = getDir(mountPath);
-		PathHandle h{ dir_index, false };
+		const auto dir_index = getDir(mountPath);
+		const PathHandle h{ dir_index, false };
 		return h.GetEntries(filters, ext);
 	}
 
@@ -222,7 +222,7 @@ namespace idk {
 #pragma region Utility
 	void FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)
 	{
-		size_t curr_mount_index = _mounts.size();
+		const size_t curr_mount_index = _mounts.size();
 		
 		string full_path{ fullPath.data() };
 		string mount_path{ mountPath.data() };
@@ -250,7 +250,7 @@ namespace idk {
 
 	FStreamWrapper FileSystem::Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream)
 	{
-		auto file_index = getFile(mountPath);
+		const auto file_index = getFile(mountPath);
 		// If we cannot find the file and user only wants to read, return an empty stream
 		// Else, we should create the file and return the stream for the user to write to
 		if (file_index.IsValid() == false)
@@ -259,7 +259,7 @@ namespace idk {
 				return FStreamWrapper{};
 			else
 			{
-				auto& internal_file = createAndGetFile(mountPath);
+				const auto& internal_file = createAndGetFile(mountPath);
 				
 				PathHandle handle{ internal_file._tree_index, true };
 				return handle.Open(perms, binary_stream);
@@ -267,7 +267,7 @@ namespace idk {
 		}
 		else
 		{
-			auto& internal_file = getFile(file_index);
+			const auto& internal_file = getFile(file_index);
 			PathHandle handle{internal_file._tree_index, true};
 
 			return handle.Open(perms, binary_stream);
@@ -341,7 +341,7 @@ namespace idk {
 		mount._path_tree[0]._dirs.push_back(d);
 	}
 
-	void FileSystem::initFile(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, std::filesystem::path& p)
+	void FileSystem::initFile(file_system_detail::fs_file& f, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p)
 	{
 		f._full_path	= p.generic_string();
 		f._rel_path		= p.relative_path().generic_string();
@@ -358,7 +358,7 @@ namespace idk {
 		p_dir._files_map.emplace(f._filename, f._tree_index);
 	}
 
-	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, std::filesystem::path& p)
+	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p)
 	{
 		d._full_path	= p.generic_string();
 		d._rel_path		= p.relative_path().generic_string();
@@ -376,7 +376,7 @@ namespace idk {
 
 #pragma region Helper Getters
 
-	file_system_detail::fs_file& FileSystem::getFile(file_system_detail::fs_key& node)
+	file_system_detail::fs_file& FileSystem::getFile(const file_system_detail::fs_key& node)
 	{
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
@@ -386,7 +386,7 @@ namespace idk {
 		return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
 	}
 
-	file_system_detail::fs_dir& FileSystem::getDir(file_system_detail::fs_key& node)
+	file_system_detail::fs_dir& FileSystem::getDir(const file_system_detail::fs_key& node)
 	{
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
@@ -423,7 +423,7 @@ namespace idk {
 		if (!Exists(mountPath))
 			return empty_node;
 
-		int mount_index = validateFileMountPath(mountPath);
+		const int mount_index = validateFileMountPath(mountPath);
 		if (mount_index < 0)
 			return empty_node;
 
@@ -435,7 +435,7 @@ namespace idk {
 		auto tokenized_path = tokenizePath(mountPath);
 
 		// The parent directory of the file is one depth higher and we -1 again because we don't count the file token.
-		int8_t dir_depth = s_cast<int8_t>(tokenized_path.size() - 2);
+		const auto dir_depth = s_cast<int8_t>(tokenized_path.size() - 2);
 
 		// Get the correct directory
 		if (dir_depth == 0)
@@ -472,7 +472,7 @@ namespace idk {
 		if (!Exists(mountPath))
 			return empty_node;
 
-		int mount_index = validateDirMountPath(mountPath);
+		const int mount_index = validateDirMountPath(mountPath);
 		if (mount_index < 0)
 			return empty_node;
 
@@ -487,7 +487,7 @@ namespace idk {
 			tokenized_path.pop_back();
 
 		// The parent directory of the sub directory is one depth higher
-		int8_t dir_depth = s_cast<int8_t>(tokenized_path.size() - 2);
+		const auto dir_depth = s_cast<int8_t>(tokenized_path.size() - 2);
 
 		// Get the correct directory
 		if (dir_depth < 0)
@@ -526,7 +526,7 @@ namespace idk {
 		if (mount_path[0] != '/')
 			return -1;
 
-		auto end_pos = mount_path.find_first_of('/', 1);
+		const auto end_pos = mount_path.find_first_of('/', 1);
 
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
@@ -543,7 +543,7 @@ namespace idk {
 		if (mount_path[0] != '/')
 			return -1;
 
-		auto end_pos = mount_path.find_first_of('/', 1);
+		const auto end_pos = mount_path.find_first_of('/', 1);
 		if (end_pos == string::npos)
 			return -1;
 
@@ -562,7 +562,7 @@ namespace idk {
 		if (mount_path[0] != '/')
 			return -1;
 
-		auto end_pos = mount_path.find_first_of('/', 1);
+		const auto end_pos = mount_path.find_first_of('/', 1);
 
 		string mount_key = mount_path.substr(0, end_pos);
 		auto mount_index = _mount_table.find(mount_key);
@@ -658,8 +658,8 @@ namespace idk {
 	{
 		// Means we need to create the file...
 		string mount_path{ mountPath.data() };
-		auto end_pos = mount_path.find_last_of('/');
-		auto dir_index = getDir(mount_path.substr(0, end_pos));
+		const auto end_pos = mount_path.find_last_of('/');
+		const auto dir_index = getDir(mount_path.substr(0, end_pos));
 
 		if (dir_index.IsValid() == false)
 			return _empty_file;
@@ -677,7 +677,7 @@ namespace idk {
 			throw("Something is terribly wrong. No mounts found.");
 
 		// initializing the fs_file
-		auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
+		const auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
 		auto& f = getFile(slot);
 		initFile(f, dir, p);
 

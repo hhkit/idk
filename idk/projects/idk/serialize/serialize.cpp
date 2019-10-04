@@ -234,7 +234,7 @@ namespace idk
 		if (container.type.is_template<std::array>())
 		{
 			auto container_iter = container.begin();
-			auto sz = container.size();
+			const auto sz = container.size();
 			size_t i = 0;
 			for (auto iter = node.begin(); iter != node.end() && i < sz; ++iter, ++i)
 			{
@@ -470,7 +470,7 @@ namespace idk
 		const auto node = yaml::load(str);
 		for (auto& elem : node)
 		{
-			Handle<GameObject> handle{ parse_text<uint64_t>(elem.tag()) };
+			const Handle<GameObject> handle{ parse_text<uint64_t>(elem.tag()) };
 			scene.CreateGameObject(handle);
 
             auto iter = elem.begin();
@@ -478,7 +478,7 @@ namespace idk
 
 			for (++iter; iter != elem.end(); ++iter)
 			{
-				auto type = reflect::get_type(iter->tag());
+				const auto type = reflect::get_type(iter->tag());
 				if (type.is<Transform>())
 				{
 					reflect::dynamic obj{ *handle->GetComponent<Transform>() };

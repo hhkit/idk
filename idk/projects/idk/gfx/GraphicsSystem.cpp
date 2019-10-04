@@ -61,8 +61,8 @@ namespace idk
 		{
 			AnimatedRenderObject ro = elem.GenerateRenderObject();
 			// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
-			auto parent = elem.GetGameObject()->Parent();
-			auto animator = parent->GetComponent<Animator>();
+			const auto parent = elem.GetGameObject()->Parent();
+			const auto animator = parent->GetComponent<Animator>();
 			ro.skeleton_index = skeleton_indices[animator];
 			result.skinned_mesh_render.emplace_back(ro);
 		}

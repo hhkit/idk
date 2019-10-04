@@ -10,7 +10,7 @@ namespace idk::shadergraph
 
     NodeSignature::NodeSignature(const string& str)
     {
-        size_t arrow_pos = str.find_first_of("->");
+        const size_t arrow_pos = str.find_first_of("->");
         if (arrow_pos == std::string::npos)
             return;
 

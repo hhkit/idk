@@ -76,7 +76,7 @@ namespace idk::vkn::hlp
 				size_t offset;
 				size_t size;
 				Control(Memories* mem, uint32_t idx, size_t o, size_t sz) : src{ mem }, index{ idx }, offset{ o }, size{ sz }{}
-				Control(Control&& mv) :index{ mv.index }, src{ mv.src }, offset{ mv.offset }, size{ mv.size }{mv.src = nullptr; }
+				Control(Control&& mv) noexcept :index{ mv.index }, src{ mv.src }, offset{ mv.offset }, size{ mv.size }{mv.src = nullptr; }
 				vk::DeviceMemory Memory()const;
 				Memories::Memory& IntMemory()const;
 				~Control();

@@ -56,7 +56,7 @@ namespace idk
 	template<typename T>
 	tmat<T, 4, 4> perspective(trad<T> fov, T a, T n, T f)
 	{
-		auto t = tan(fov / 2);
+		const auto t = tan(fov / 2);
 
 		constexpr auto _2 = s_cast<T>(2);
 		constexpr auto _1 = s_cast<T>(1);
@@ -94,9 +94,9 @@ namespace idk
 	template<typename T>
 	constexpr tmat<T, 4, 4> look_at(const tvec<T, 3> & eye, const tvec<T, 3> & object, const tvec<T, 3> & global_up)
 	{
-		auto target = (eye - object).normalize();
-		auto right  = global_up.cross(target).normalize();
-		auto up     = target.cross(right).normalize();
+		const auto target = (eye - object).normalize();
+		const auto right  = global_up.cross(target).normalize();
+		const auto up     = target.cross(right).normalize();
 
 		return tmat<T, 4, 4>{
 			vec4{ right,  0 }, 
@@ -109,8 +109,8 @@ namespace idk
 	template<typename T>
 	tmat<T, 3, 3> orient(const tvec<T, 3> & z_prime)
 	{
-		auto axis = tvec<T, 3>{0, 0, 1}.cross(z_prime);
-		auto angle = asin(axis.length());
+		const auto axis = tvec<T, 3>{0, 0, 1}.cross(z_prime);
+		const auto angle = asin(axis.length());
 		return rotate(axis, angle);
 	}
 

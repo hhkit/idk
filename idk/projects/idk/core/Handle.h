@@ -36,12 +36,12 @@ namespace idk
 			uint64_t id = 0;
 		};
 
-		GenericHandle() = default;
+		GenericHandle() : id{} {};
 		explicit GenericHandle(uint64_t id);
 		GenericHandle(uint8_t  type, uint8_t  scene, uint16_t gen, uint32_t index);
 
 		template<typename T> 
-		bool is_type() const;
+		bool is_type() const noexcept;
 
 		reflect::dynamic operator*() const;
 		explicit operator bool() const;
@@ -77,8 +77,8 @@ namespace idk
 	class Handleable
 	{
 	public:
-		const Handle<T>& GetHandle() const { return handle; }
-		bool IsQueuedForDestruction() const { return _queued_for_destruction; }
+		const Handle<T>& GetHandle() const noexcept { return handle; }
+		bool IsQueuedForDestruction() const noexcept { return _queued_for_destruction; }
 	protected:
 		Handleable() = default;
 	private:

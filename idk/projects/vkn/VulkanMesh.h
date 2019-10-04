@@ -31,7 +31,7 @@ namespace idk::vkn
 	class VulkanMesh : public Mesh
 	{
 	public:
-		using buffers_t = hash_table<attrib_index ,MeshBuffer>;
+		using buffers_t = hash_table<attrib_index, MeshBuffer>;
 		const MeshBuffer& Get(attrib_index index)const;
 		const buffers_t& Buffers()const { return buffers; }
 		int GetAttribs() const override;
@@ -43,7 +43,7 @@ namespace idk::vkn
 	private:
 		buffers_t buffers{};
 		vk::IndexType index_type = vk::IndexType::eUint16;
-		uint32_t index_count;
+		uint32_t index_count{};
 		std::optional<MeshBuffer> index_buffer;
 	};
 

@@ -63,7 +63,7 @@ namespace idk
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
-		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
+		const auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
 
 		auto& control_block = itr->second;
 		// attempt to put on another thread
@@ -92,7 +92,7 @@ namespace idk
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
-		auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
+		const auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
 
 		auto& control_block = itr->second;
 		control_block.path = adapted_path;
@@ -139,7 +139,7 @@ namespace idk
 		auto& table = GetTable<Res>();
 		auto  retval = vector<RscHandle<Res>>();
 		retval.reserve(table.size());
-		for (auto& [guid, whatever] : table)
+		for (const auto& [guid, whatever] : table)
 			retval.emplace_back(RscHandle<Res>{guid});
 		return retval;
 	}
@@ -228,7 +228,7 @@ namespace idk
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
-		auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
+		const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
 		if (!success)
 			return {};
 
@@ -270,7 +270,7 @@ namespace idk
 	{
 		auto start_name = string{ reflect::get_type<Res>().name() };
 
-		auto make_path = [&]()
+		const auto make_path = [&]()
 		{
 			return "/assets/" + start_name + string{ Res::ext };
 		};

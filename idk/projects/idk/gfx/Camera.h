@@ -44,9 +44,7 @@ namespace idk
 
 		CameraData GenerateCameraData() const;
 		float      AspectRatio()const;
-	private:	
-		float _fov;
-
+	private:
 		//Basic controls parameter
 
 		mat4 _viewMatrix;

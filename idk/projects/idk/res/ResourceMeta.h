@@ -14,7 +14,7 @@ namespace idk
 		void SetMeta(const Meta& inmeta);
 		const Meta& GetMeta() const;
 	protected:
-		Meta meta;
+		Meta meta{};
 		bool _dirtymeta { false };
 		virtual void OnMetaUpdate(const Meta& newmeta) { (newmeta); };
 
@@ -25,7 +25,7 @@ namespace idk
 	{
 		Guid   guid;
 		string name;
-		size_t t_hash;
+		size_t t_hash{};
 		string metadata;
 
 		template<typename Res, typename = sfinae<has_tag_v<Res, MetaTag>>>

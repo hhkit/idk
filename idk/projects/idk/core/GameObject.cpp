@@ -34,21 +34,21 @@ namespace idk
 	{
 		GameState::GetGameState().DestroyObject(h);
 	}
-	span<GenericHandle> GameObject::GetComponents()
+	span<GenericHandle> GameObject::GetComponents() noexcept
 	{
-		return span<GenericHandle>(_components.begin()._Ptr, _components.end()._Ptr);
+		return span<GenericHandle>(_components);
 	}
-	void GameObject::SetActive(bool active)
+	void GameObject::SetActive(bool active) noexcept
 	{
 		_active = active;
 	}
-	bool GameObject::ActiveSelf() const
+	bool GameObject::ActiveSelf() const noexcept
 	{
 		return _active;
 	}
 	bool GameObject::ActiveInHierarchy() const
 	{
-		auto hParent = Transform()->parent;
+		const auto hParent = Transform()->parent;
 		return ActiveSelf() && (hParent ? hParent->ActiveInHierarchy() : true);
 	}
 
@@ -68,7 +68,7 @@ namespace idk
 
 	bool GameObject::ParentIsQueuedForDestruction() const
 	{
-		auto parent = Parent();
+		const auto parent = Parent();
 		if (parent)
 			return parent->HierarchyIsQueuedForDestruction();
 		else

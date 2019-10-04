@@ -14,7 +14,7 @@ namespace idk
 	template<typename T>
 	T fmod(T numerator, T denominator)
 	{
-		auto reps = floor(numerator / denominator);
+		const auto reps = floor(numerator / denominator);
 		return numerator - reps * denominator;
 	}
 	template<typename T, typename LerpFactor>
@@ -48,11 +48,11 @@ namespace idk
 		// Divide by 0
 		if (Vec_T(1) - cos_theta > constants::epsilon<Vec_T>())
 		{
-			auto ohm = acos(cos_theta);
-			auto s_ohm = sin(ohm);
+			const auto ohm = acos(cos_theta);
+			const auto s_ohm = sin(ohm);
 			
-			auto scale_p = sin((LerpFactor(1) - lerp) * ohm) / s_ohm;
-			auto scale_q = sin(lerp * ohm) / s_ohm;
+			const auto scale_p = sin((LerpFactor(1) - lerp) * ohm) / s_ohm;
+			const auto scale_q = sin(lerp * ohm) / s_ohm;
 
 			return (scale_p * lhs) + (scale_q * rhs);
 		}

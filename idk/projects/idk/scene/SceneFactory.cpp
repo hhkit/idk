@@ -24,7 +24,7 @@ namespace idk
 		assert(false); 
 		return ResourceBundle();
 	}
-	ResourceBundle SceneLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
+	ResourceBundle SceneLoader::LoadFile(PathHandle, const MetaBundle& bundle)
 	{
 		const auto guid = bundle.metadatas[0].guid;
 		const auto build_index = [&]() ->unsigned char

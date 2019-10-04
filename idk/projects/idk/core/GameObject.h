@@ -33,10 +33,10 @@ namespace idk
 		GenericHandle GetComponent(string_view);
 		void          RemoveComponent(GenericHandle);
 
-		span<GenericHandle> GetComponents();
+		span<GenericHandle> GetComponents() noexcept;
 		// active flags
-		void SetActive(bool);
-		bool ActiveSelf() const;
+		void SetActive(bool) noexcept;
+		bool ActiveSelf() const noexcept;
 		bool ActiveInHierarchy() const;
 
 		// components

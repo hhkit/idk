@@ -84,8 +84,7 @@ namespace idk::vkn
 
 	size_t DdsFileInternal::NumBytes() const
 	{
-		//auto pitch = std::max(1u, ((header.width + 3) / 4)) * BlockSize();
-		return header.width * header.height;//pitch * s_cast<size_t>(header.height);
+		return s_cast<size_t>(header.width) * s_cast<size_t>(header.height);
 	}
 
 	hash_table<BlockType, TextureFormat> MapBlockTypeToTextureFormat()

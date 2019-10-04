@@ -8,7 +8,7 @@ namespace idk {
 		//mem.reset();
 	}
 
-	vkn::VknTexture::VknTexture(VknTexture&& rhs)
+	vkn::VknTexture::VknTexture(VknTexture&& rhs) noexcept
 		:Texture{ std::move(rhs) },
 		size{ std::move(rhs.size) },
 		sizeOnDevice{ std::move(rhs.sizeOnDevice) },
@@ -21,7 +21,7 @@ namespace idk {
 		sampler{ std::move(rhs.sampler) }
 	{}
 
-	vkn::VknTexture& idk::vkn::VknTexture::operator=(VknTexture&& rhs)
+	vkn::VknTexture& idk::vkn::VknTexture::operator=(VknTexture&& rhs) noexcept
 	{
 		// TODO: insert return statement here
 		Texture::operator=(std::move(rhs));

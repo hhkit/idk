@@ -221,13 +221,13 @@ namespace idk
 			retval[2][3] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
 			retval[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
 
-			float det =   m[0][0] * retval[0][0]
+			const auto det =   m[0][0] * retval[0][0]
 						+ m[0][1] * retval[1][0]
 						+ m[0][2] * retval[2][0]
 						+ m[0][3] * retval[3][0];
 
 			// not invertible
-			if (fabs(det) <= constants::epsilon<float>())
+			if (fabs(det) <= constants::epsilon<T>())
 				return tmat<T, C, R>();
 
 			retval /= det;
@@ -315,7 +315,7 @@ namespace idk
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
-		auto etr = this->end();
+		const auto etr = this->end();
 
 		while (ltr != etr)
 			*ltr++ += *rtr++;
@@ -335,7 +335,7 @@ namespace idk
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
-		auto etr = this->end();
+		const auto etr = this->end();
 
 		while (ltr != etr)
 			* ltr++ -= *rtr++;

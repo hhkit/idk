@@ -23,7 +23,7 @@
 namespace idk {
 	ResourceBundle AudioClipLoader::LoadFile(PathHandle filePath)
 	{
-		auto newSound = Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(); //Uses standard new alloc. Might need to change.
+		const auto newSound = Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 
@@ -55,7 +55,7 @@ namespace idk {
 	}
 	ResourceBundle AudioClipLoader::LoadFile(PathHandle filePath, const MetaBundle& metabundle)
 	{
-		auto newSound = Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(metabundle.metadatas[0].guid); //Uses standard new alloc. Might need to change.
+		const auto newSound = Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(metabundle.metadatas[0].guid); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 

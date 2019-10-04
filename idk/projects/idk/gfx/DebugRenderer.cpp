@@ -16,7 +16,7 @@ namespace idk
 	}
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{
-		mat4 tfm = translate(oriented_box.center) * mat4 { scale(oriented_box.extents / 2)* oriented_box.axes };
+		const mat4 tfm = translate(oriented_box.center) * mat4 { scale(oriented_box.extents / 2)* oriented_box.axes };
 		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
 	}
 
@@ -32,18 +32,18 @@ namespace idk
 	void DebugRenderer::Draw(const ray& ray, const color& c, seconds duration, bool depth_test)
 	{
 		//mat4 tfm = translate(ray.origin) * mat4(rotate(ray.direction))
-		auto line_tfm = look_at(ray.origin + ray.velocity / 2, ray.origin + ray.velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.velocity.length() / 2 }) };
+		const auto line_tfm = look_at(ray.origin + ray.velocity / 2, ray.origin + ray.velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.velocity.length() / 2 }) };
 		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
 
-		auto orient_tfm = orient(ray.velocity.get_normalized());
-		auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4{ orient(ray.velocity.get_normalized()) * scale(vec3{ 0.025f }) };
+		const auto orient_tfm = orient(ray.velocity.get_normalized());
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4{ orient(ray.velocity.get_normalized()) * scale(vec3{ 0.025f }) };
 		Draw(Mesh::defaults[MeshType::Tetrahedron], arrow_tfm, c, duration, depth_test);
 		
 	}
 
 	void DebugRenderer::Draw(const sphere& sphere, const color& c, seconds duration, bool depth_test)
 	{
-		mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius }) };
+		const mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius }) };
 		Draw(Mesh::defaults[MeshType::Sphere], tfm, c, duration, depth_test);
 	}
 

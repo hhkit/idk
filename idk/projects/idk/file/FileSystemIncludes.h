@@ -63,7 +63,7 @@ namespace idk
 	};
 
 	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
-	inline auto operator|(T lhs, T rhs)
+	inline auto operator|(T lhs, T rhs) noexcept
 	{
 		using UType = std::underlying_type_t<T>;
 		return s_cast<T>(s_cast<UType>(lhs) | s_cast<UType>(rhs));

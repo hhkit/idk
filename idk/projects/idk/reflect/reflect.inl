@@ -28,7 +28,7 @@ namespace idk::reflect
 		auto iter = detail::meta::instance().hashes_to_contexts.find(typehash<T>());
 		if (iter == detail::meta::instance().hashes_to_contexts.end()) // type not registered?
 		{
-			detail::register_type<std::decay_t<T>, false> __reg;
+			const detail::register_type<std::decay_t<T>, false> __reg;
 			return get_type<T>();
 		}
 		return type{ iter->second };

@@ -112,7 +112,7 @@ else VARIANT_CASE(1, 0)
 		constexpr static bool ValIsDynamic =
 			std::is_same_v<std::decay_t<V>, dynamic>;
 
-		int depth_change = depth - last_depth;
+		const int depth_change = depth - last_depth;
         last_depth = depth;
 
         ++depth;

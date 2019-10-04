@@ -59,13 +59,14 @@ S_LAYOUT(6, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 const float PI = 3.1415926535;
 
-vec3 map_normal(sampler2D normal_map, vec2 uv)
+vec3 unpack_normal(vec3 normal_in)
 {
 	vec3 T = fs_in.tangent;
 	vec3 N = fs_in.normal;
 	vec3 B = cross(N, T);
 	mat3 TBN = mat3(T,B,N);
-	return TBN * texture(normal_map, uv).xyz;
+	normal_in -= vec3(0.5);
+	return normalize(TBN * normal_in);
 }
 
 vec3 fresnel(float cos_theta, vec3 f0)
@@ -242,6 +243,7 @@ void main()
 	// then compute color here 
 	
 	vec3 light_accum = vec3(0);
+	normal = normalize(normal);
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
@@ -249,20 +251,13 @@ void main()
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
 	
-	mat4 vvvp;
-	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr(i, view_pos, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		if (LightBlk.lights[i].type == 1)
 		{
-			if(LightBlk.lights[i].cast_shadow)
-				result *= vec3(1 - ShadowCalculation(i,-(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
-			vvvp = LightBlk.lights[i].vp;
-		}
-		else 
-		{
-			//result = vec3(0);
+		//	if(LightBlk.lights[i].cast_shadow)
+		//		result *= vec3(1 - ShadowCalculation(i,-(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
 		}
 		light_accum += result;
 	}
@@ -281,18 +276,11 @@ void main()
 	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, view_dir), 0.0), roughness)).rg;
 	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
 	vec3 ambient = (kD * diffuse + specular) * ambient_o;
-	ambient = vec3(0.03);
-	//vec3 ambient = (kD * diffuse) * ambient_o;
 	
 	vec3 color = light_accum + ambient;
-	//color = color / (color + vec3(1.0));
-	//color = pow(color, vec3(1.0/2.2)); 
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0/2.2)); 
 	//out_color = vec4(vec3(PerCamera.inverse_view_transform*vec4(-LightBlk.lights[0].v_dir,0)).xyz,1);
 	out_color = vec4(color,1);
 	
-	//vec4 fposls = vvvp* world_pos;
-	//vec3 pCoord = fposls.xyz/fposls.w;
-	//pCoord = pCoord *0.5 + 0.5;
-	
-	//out_color = vec4(vec3(texture(shadow_maps[1], pCoord.xy).r),1.0);
 }

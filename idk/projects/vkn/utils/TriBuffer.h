@@ -20,8 +20,8 @@ namespace idk::vkn
 		TriBuffer(VulkanView& view, const bool& createImage = false);
 		//TriBuffer(vector<vk::Image> img, vector<vk::UniqueImageView> imgView, vector<hlp::MemoryAllocator>,VulkanView& view);
 
-		TriBuffer(TriBuffer&& rhs);
-		TriBuffer& operator=(TriBuffer&& rhs);
+		TriBuffer(TriBuffer&& rhs) noexcept;
+		TriBuffer& operator=(TriBuffer&& rhs) noexcept;
 		~TriBuffer();
 
 		void CreateImageViewWithCurrImgs(VulkanView& view);

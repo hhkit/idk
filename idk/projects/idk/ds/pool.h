@@ -21,8 +21,8 @@ namespace idk
 		T&         back();
 
 		// accessors
-		T*         data();
-		size_t     size() const;
+		T*         data() noexcept;
+		size_t     size() const noexcept;
 		T&         operator[](const size_t& index);
 
 		// modifiers

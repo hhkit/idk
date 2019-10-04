@@ -25,11 +25,11 @@ namespace idk::vkn {
 			elem.Init(view);
 	}
 	*/
-	TriBuffer::TriBuffer(TriBuffer&& rhs)
+	TriBuffer::TriBuffer(TriBuffer&& rhs) noexcept
 		:images{ std::move(rhs.images) }, image_views{ std::move(rhs.image_views) }, pSignals{ std::move(rhs.pSignals) }, mems{std::move(rhs.mems)}
 	{
 	}
-	TriBuffer& TriBuffer::operator=(TriBuffer&& rhs)
+	TriBuffer& TriBuffer::operator=(TriBuffer&& rhs) noexcept
 	{
 		// TODO: insert return statement here
 		std::swap(images,rhs.images);

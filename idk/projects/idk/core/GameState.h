@@ -23,7 +23,7 @@ namespace idk
 		bool       ActivateScene(uint8_t scene);
 		bool       DeactivateScene(uint8_t scene);
 		bool       DeactivateScene(Scene scene);
-		bool       ValidateScene(Scene& scene);
+		bool       ValidateScene(const Scene& scene);
 
 		bool CreateObject(const GenericHandle& handle);
 		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::type);
@@ -70,7 +70,7 @@ namespace idk
 		static inline ValidateJT      validate_handles_jt;
 		static inline QueueForDestructionJT queue_for_destroy_jt;
 
-		static inline TypeIDLUT name_to_id_map;
+		static inline TypeIDLUT name_to_id_map{};
 
 		friend detail::ObjectPools;
 		template<typename T>

@@ -150,7 +150,7 @@ namespace idk
 		auto& scene = _scenes[handle.scene];
 
 		auto& pool_end = _pool.back();
-		auto  end_handle = pool_end.handle;
+		const auto end_handle = pool_end.handle;
 		auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
 		auto& destroy_slot = scene.slots[handle.index];
 
@@ -195,7 +195,7 @@ namespace idk
 			{
 				// destroy
 				auto& pool_end = _pool.back();
-				auto  end_handle = pool_end.handle;
+				const auto end_handle = pool_end.handle;
 				auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
 				auto& destroyme = _pool[elem.index];
 				end_slot.index = elem.index;

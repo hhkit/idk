@@ -4,9 +4,11 @@
 namespace idk
 {
 	struct color
+		: linear<color, float>
 	{
 		union
 		{
+			float values[4];
 			struct { float r, g, b, a; };
 			tvec<float, 3> as_vec3;
 			tvec<float, 4> as_vec4;

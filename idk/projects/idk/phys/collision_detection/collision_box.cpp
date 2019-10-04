@@ -28,7 +28,7 @@ namespace idk::phys
 		const auto lpoints = lhs.points();
 		const auto rpoints = rhs.points();
 
-		auto collide = [&](span<const vec3> axes) -> opt<col_failure>
+		const auto collide = [&](span<const vec3> axes) -> opt<col_failure>
 		{
 			for (auto& n : axes)
 			{

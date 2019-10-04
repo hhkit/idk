@@ -100,7 +100,7 @@ namespace idk
 		void getPathsRecurse(const file_system_detail::fs_dir& dir, FS_FILTERS filters, string_view ext, vector<PathHandle>& out) const;
 
 		file_system_detail::fs_key _key{};
-		int16_t _ref_count = -1;
-		bool _is_regular_file = true;
+		int16_t _ref_count   { -1 };
+		bool _is_regular_file{ true };
 	};
 }

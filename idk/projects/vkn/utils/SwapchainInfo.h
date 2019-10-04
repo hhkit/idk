@@ -30,8 +30,8 @@ namespace idk::vkn {
 		SwapChainInfo(VulkanView& view,vk::UniqueSwapchainKHR s, vk::PresentModeKHR pm, vk::SurfaceFormatKHR sf,vk::Extent2D e);
 		SwapChainInfo(VulkanView& view);
 
-		SwapChainInfo(SwapChainInfo&& rhs);
+		SwapChainInfo(SwapChainInfo&& rhs)  noexcept;
 
-		SwapChainInfo& operator=(SwapChainInfo&& rhs);
+		SwapChainInfo& operator=(SwapChainInfo&& rhs)  noexcept;
 	};
 };

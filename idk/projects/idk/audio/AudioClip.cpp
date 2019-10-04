@@ -224,7 +224,7 @@ namespace idk
 	void AudioClip::UpdateFmodMode()
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		FMOD_MODE fmodMode = ConvertSettingToFMOD_MODE();
+		const FMOD_MODE fmodMode = ConvertSettingToFMOD_MODE();
 		audioSystem.ParseFMOD_RESULT(_soundHandle->setMode(fmodMode));
 
 		UpdateChannel();

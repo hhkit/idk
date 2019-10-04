@@ -9,15 +9,15 @@ namespace idk
 		: public ResourceFactory<Material>
 	{
 	public:
-		unique_ptr<Material> GenerateDefaultResource();
-		unique_ptr<Material> Create();
+		unique_ptr<Material> GenerateDefaultResource() override;
+		unique_ptr<Material> Create() override;
 	};
 
 	class MaterialLoader
 		: public IFileLoader
 	{
 	public:
-		ResourceBundle LoadFile(PathHandle p);
-		ResourceBundle LoadFile(PathHandle p, const MetaBundle& m);
+		ResourceBundle LoadFile(PathHandle p) override;
+		ResourceBundle LoadFile(PathHandle p, const MetaBundle& m) override;
 	};
 }

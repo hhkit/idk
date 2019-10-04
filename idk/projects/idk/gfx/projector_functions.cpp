@@ -6,20 +6,20 @@ namespace idk
 	vec2 spherical_projection(vec3 vec)
 	{
 		auto r = vec.length();
-		auto v = acos(vec.z / r);
+		const auto v = acos(vec.z / r);
 
 		return vec2{ atan2(vec.y, vec.x) / two_pi + 0.5f, v / rad{ pi } };
 	}
 
 	std::pair<vec2, TextureTarget> cube_projection(vec3 vec)
 	{
-		float absX = fabs(vec.x);
-		float absY = fabs(vec.y);
-		float absZ = fabs(vec.z);
+		const float absX = fabs(vec.x);
+		const float absY = fabs(vec.y);
+		const float absZ = fabs(vec.z);
 
-		int isXPositive = vec.x > 0 ? 1 : 0;
-		int isYPositive = vec.y > 0 ? 1 : 0;
-		int isZPositive = vec.z > 0 ? 1 : 0;
+		const int isXPositive = vec.x > 0 ? 1 : 0;
+		const int isYPositive = vec.y > 0 ? 1 : 0;
+		const int isZPositive = vec.z > 0 ? 1 : 0;
 
 		float maxAxis = 0.f, uc = 0.f, vc = 0.f;
 

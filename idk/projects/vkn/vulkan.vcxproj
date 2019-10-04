@@ -121,6 +121,7 @@
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <CustomBuildStep>
       <Command>call $(SolutionDir)tools\compile.bat
@@ -197,6 +198,7 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib\;$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <CustomBuildStep>
       <Command>call $(SolutionDir)tools\compile.bat

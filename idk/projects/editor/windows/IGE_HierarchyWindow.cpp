@@ -125,6 +125,7 @@ namespace idk {
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
+		ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
 		
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
@@ -135,6 +136,8 @@ namespace idk {
 		bool hasSelected_GameobjectsModified = false;
 		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
+
+
 		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
 
 			if (depth > 0) {
@@ -145,12 +148,10 @@ namespace idk {
 				for (int i = depth; i < 0; ++i)
 					ImGui::Unindent();
 			}
-			if (!handle)// || handle.scene == 0x80) //Ignore handle zero
+			if (!handle) //Ignore handle zero
 				return true;
 
-			IDE& editor = Core::GetSystem<IDE>();
-			Handle<Camera>& editorCam = editor.currentCamera().current_camera;
-			if (handle == editorCam->GetGameObject())
+			if (!show_editor_objects && handle.scene == 0x80) // ignore eidtor
 				return true;
 			
 

@@ -43,7 +43,7 @@ namespace idk
                 auto end = path.find('/', offset);
                 if (end == string::npos)
                     end = path.size();
-                string_view token(path.data() + offset, end - offset);
+                const string_view token(path.data() + offset, end - offset);
 
                 if (curr.valid() && curr.type.is_container())
                 {
@@ -131,7 +131,7 @@ namespace idk
 				if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin)
 					continue;
 
-				auto component_name = prefab->data[object_index].components[component_index].type.name();
+				const auto component_name = prefab->data[object_index].components[component_index].type.name();
 				if (!has_override(prefab_inst, object_index, component_name, property_path))
 				{
 					resolve_property_path(*prefab_inst.objects[object_index]->GetComponent(component_name), property_path) =
@@ -189,7 +189,7 @@ namespace idk
         vector<Handle<GameObject>> game_objects{ handle };
         for (++iter; iter != prefab->data.end(); ++iter)
         {
-            auto child_handle = scene.CreateGameObject();
+            const auto child_handle = scene.CreateGameObject();
             game_objects.push_back(child_handle);
 
             for (const auto& d : iter->components)
@@ -219,9 +219,9 @@ namespace idk
 
         vector<small_string<GenericHandle::index_t>> nodes;
         vector<GenericHandle::gen_t> gens;
-        for (auto& o : scene)
+        for (const auto& o : scene)
         {
-            auto index = o.GetHandle().index;
+            const auto index = s_cast<size_t>(o.GetHandle().index);
             if (index >= gens.size())
             {
                 nodes.resize(index + 1);
@@ -244,7 +244,7 @@ namespace idk
 
             for (auto child_index : nodes[curr_par])
             {
-                Handle<GameObject> child{ child_index, gens[child_index], go.scene };
+                const Handle<GameObject> child{ child_index, gens[child_index], go.scene };
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
                 for (auto& c : child->GetComponents())
                     child_prefab_data.components.emplace_back((*c).copy());
@@ -296,7 +296,7 @@ namespace idk
             vector<reflect::dynamic> curr_ov_vals;
             for (auto& ov : prefab_inst.overrides)
             {
-                auto comp_handle = prefab_inst.objects[ov.object_index]->GetComponent(ov.component_name);
+                const auto comp_handle = prefab_inst.objects[ov.object_index]->GetComponent(ov.component_name);
                 if (!comp_handle)
                     curr_ov_vals.emplace_back();
                 else
@@ -310,7 +310,7 @@ namespace idk
             {
                 for (auto& ov : helpers::default_overrides)
                 {
-                    auto comp_handle = prefab_inst.objects[i]->GetComponent(ov.component_name);
+                    const auto comp_handle = prefab_inst.objects[i]->GetComponent(ov.component_name);
                     if (!comp_handle)
                         default_ov_vals.emplace_back();
                     else
@@ -345,21 +345,21 @@ namespace idk
                 auto obj = prefab_inst.objects[ov.object_index];
                 if (!obj)
                     continue;
-                auto comp_handle = obj->GetComponent(ov.component_name);
+                const auto comp_handle = obj->GetComponent(ov.component_name);
                 helpers::resolve_property_path(*comp_handle, ov.property_path) = curr_ov_vals[i];
             }
             for (int i = 0; i < prefab_inst.objects.size(); ++i)
             {
                 for (int j = 0; j < helpers::num_default_overrides; ++j)
                 {
-                    int ov_index = helpers::num_default_overrides * i + j;
+                    const int ov_index = helpers::num_default_overrides * i + j;
                     if (!default_ov_vals[ov_index].valid())
                         continue;
                     auto& ov = helpers::default_overrides[j];
                     auto obj = prefab_inst.objects[i];
                     if (!obj)
                         continue;
-                    auto comp_handle = obj->GetComponent(ov.component_name);
+                    const auto comp_handle = obj->GetComponent(ov.component_name);
                     helpers::resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[ov_index];
                 }
             }
@@ -368,7 +368,7 @@ namespace idk
 
     void PrefabUtility::RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path)
     {
-        auto instance_root = GetPrefabInstanceRoot(target);
+        const auto instance_root = GetPrefabInstanceRoot(target);
         assert(instance_root);
         auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
 
@@ -421,9 +421,9 @@ namespace idk
             return;
 
         const Prefab& prefab = *prefab_inst.prefab;
-        Handle<GameObject> target = prefab_inst.objects[override.object_index];
+        const Handle<GameObject> target = prefab_inst.objects[override.object_index];
 
-        auto comp_handle = target->GetComponent(override.component_name);
+        const auto comp_handle = target->GetComponent(override.component_name);
         if (!comp_handle)
             return;
 
@@ -469,7 +469,7 @@ namespace idk
 
 	void PrefabUtility::ApplyAddedComponent(Handle<GameObject> target, GenericHandle component)
 	{
-		auto instance_root = GetPrefabInstanceRoot(target);
+		const auto instance_root = GetPrefabInstanceRoot(target);
 		assert(instance_root);
 		auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
 
@@ -484,7 +484,7 @@ namespace idk
 
     void PrefabUtility::ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index)
     {
-        auto instance_root = GetPrefabInstanceRoot(target);
+        const auto instance_root = GetPrefabInstanceRoot(target);
         assert(instance_root);
         auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
 
@@ -519,9 +519,9 @@ namespace idk
 		if (!prop_prefab.valid())
 			return;
 
-		Handle<GameObject> target = prefab_inst.objects[override.object_index];
+		const Handle<GameObject> target = prefab_inst.objects[override.object_index];
 
-		auto comp_handle = target->GetComponent(override.component_name);
+		const auto comp_handle = target->GetComponent(override.component_name);
 		if (!comp_handle)
 			return;
 
@@ -561,7 +561,7 @@ namespace idk
 	{
         assert(instance_root->HasComponent<PrefabInstance>());
         auto& prefab_inst = *instance_root->GetComponent<PrefabInstance>();
-        auto& prefab = prefab_inst.prefab;
+        const auto& prefab = prefab_inst.prefab;
 
         // diff components
         int i = 0;
@@ -594,7 +594,7 @@ namespace idk
                 if (c && !c.is_type<PrefabInstance>())
                     ApplyAddedComponent(obj, c);
             }
-            for (auto* d : prefab_component_ptrs)
+            for (const auto* d : prefab_component_ptrs)
             {
                 if (d)
                     ApplyRemovedComponent(obj, d->type.name(), 0);

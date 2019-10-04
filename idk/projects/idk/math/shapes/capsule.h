@@ -6,8 +6,8 @@ namespace idk
 {
 	struct capsule
 	{
-		real radius;
-		real height;
+		real radius{};
+		real height{};
 		vec3 center;
 		vec3 dir; // taken to be "forward" or "z-axis"
 

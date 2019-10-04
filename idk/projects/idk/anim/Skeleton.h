@@ -7,7 +7,7 @@ namespace idk::anim
 	struct Bone
 	{
 		string _name;
-		int  _parent;
+		int  _parent = 0;
 		mat4 _global_inverse_bind_pose;
 		quat _bone_pivot;
 		matrix_decomposition<real> _local_bind_pose;

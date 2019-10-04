@@ -17,12 +17,10 @@ namespace idk
 	template<typename T>
 	inline quaternion<T>::quaternion(const tvec<T, 3> & axis, trad<T> angle)
 	{
-		auto h = angle / 2;
-
-		auto s = sin(h);
-		auto c = cos(h);
-
-		auto n = s * axis.get_normalized();
+		const auto h = angle / 2;
+		const auto s = sin(h);
+		const auto c = cos(h);
+		const auto n = s * axis.get_normalized();
 
 		this->xyz = n;
 		w = c;

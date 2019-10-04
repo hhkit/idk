@@ -58,15 +58,15 @@ namespace idk::file_system_detail
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 		std::filesystem::file_time_type _time;
 
-		int16_t RefCount()	const { return _ref_count; }
-		bool	IsOpen()	const { return _open_mode != FS_PERMISSIONS::NONE; }
-		bool	IsValid()	const { return _valid; }
+		int16_t RefCount()	const noexcept { return _ref_count; }
+		bool	IsOpen()	const noexcept { return _open_mode != FS_PERMISSIONS::NONE; }
+		bool	IsValid()	const noexcept { return _valid; }
 
-		void SetOpenMode(FS_PERMISSIONS perms)	{ _open_mode = perms; }
-		void SetValid	(bool is_valid)			{ _valid = is_valid; }
+		void SetOpenMode(FS_PERMISSIONS perms) noexcept { _open_mode = perms; }
+		void SetValid	(bool is_valid)	       noexcept { _valid = is_valid; }
 
-		void IncRefCount()						{ ++_ref_count; }
-		void DecRefCount()						{ ++_ref_count; }
+		void IncRefCount() noexcept						{ ++_ref_count; }
+		void DecRefCount() noexcept						{ ++_ref_count; }
 		
 	private:
 		// A PathHandle can be pointing to a valid fs_file but wrong ref_count
@@ -91,19 +91,19 @@ namespace idk::file_system_detail
 		fs_key _tree_index;
 
 		// For file watching
-		HANDLE	_dir_handle;
-		HANDLE	_watch_handle[3];
-		DWORD	_status;
+		HANDLE	_dir_handle     {};
+		HANDLE	_watch_handle[3]{};
+		DWORD	_status         {};
 
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;
 
-		int16_t RefCount()	const { return _ref_count; }
-		bool	IsValid()	const { return _valid; }
+		int16_t RefCount()	const noexcept { return _ref_count; }
+		bool	IsValid()	const noexcept { return _valid; }
 
 		void SetValid(bool is_valid) { _valid = is_valid; }
 
-		void IncRefCount() { ++_ref_count; }
-		void DecRefCount() { ++_ref_count; }
+		void IncRefCount() noexcept{ ++_ref_count; }
+		void DecRefCount() noexcept{ ++_ref_count; }
 
 	private:
 		// A PathHandle can be pointing to a valid fs_file but wrong ref_count

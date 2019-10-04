@@ -8,7 +8,7 @@ namespace idk::reflect
 
 	string_view enum_value::name() const
 	{
-		size_t count = enum_type._data->count;
+		const size_t count = enum_type._data->count;
 		for (size_t i = 0; i < count; ++i)
 		{
 			if (enum_type.at(i) == _value)
@@ -25,7 +25,7 @@ namespace idk::reflect
 
 	size_t enum_value::index() const
 	{
-		size_t count = enum_type._data->count;
+		const size_t count = enum_type._data->count;
 		for (size_t i = 0; i < count; ++i)
 		{
 			if (enum_type.at(i) == _value)
@@ -38,7 +38,7 @@ namespace idk::reflect
 	enum_value& enum_value::try_assign(string_view name)
 	{
 		auto* names = enum_type._data->names;
-		size_t count = enum_type._data->count;
+		const size_t count = enum_type._data->count;
 		for (size_t i = 0; i < count; ++i)
 		{
 			if (names[i] == name)
@@ -61,7 +61,7 @@ namespace idk::reflect
 
 	enum_value& enum_value::try_assign(int64_t val)
 	{
-		size_t count = enum_type._data->count;
+		const size_t count = enum_type._data->count;
 		for (size_t i = 0; i < count; ++i)
 		{
 			if (enum_type.at(i) == val)

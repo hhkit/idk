@@ -7,7 +7,7 @@ namespace idk
 	{
 		auto& replace(string& configureme, string_view findme, string_view replacewithme)
 		{
-			auto find = configureme.find(findme);
+			const auto find = configureme.find(findme);
 			if (find != string::npos)
 				configureme.replace(find, findme.length(), replacewithme);
 			return configureme;

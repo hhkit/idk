@@ -47,7 +47,7 @@ namespace idk
 		}
 	}
 
-	void file_system_detail::DirectoryWatcher::UpdateWatchedDir(fs_mount& mount, fs_dir& dir)
+	void file_system_detail::DirectoryWatcher::UpdateWatchedDir(const fs_mount& mount, fs_dir& dir)
 	{
 		UNREFERENCED_PARAMETER(mount);
 
@@ -128,7 +128,7 @@ namespace idk
 		FS::path path{ mountDir._full_path };
 		FS::directory_iterator dir{ path };
 
-		auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
+		const auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
 							[](const FS::path& p) -> bool
 							{
 								return !FS::is_regular_file(p);
@@ -249,9 +249,9 @@ namespace idk
 			auto result = mountDir._files_map.find(filename);
 			if (result == mountDir._files_map.end())
 			{
-				auto key = fileCreate(mountDir, tmp);
+				const auto key = fileCreate(mountDir, tmp);
 
-				auto& f = vfs.getFile(key);
+				const auto& f = vfs.getFile(key);
 				std::cout << "[FILE SYSTEM] File Created: " << "\n"
 							 "\t Path: " << f._full_path << "\n" << std::endl;
 				break;
@@ -322,7 +322,7 @@ namespace idk
 	{
 		for (auto& file : FS::directory_iterator(dir._full_path))
 		{
-			auto current_file_last_write_time = FS::last_write_time(file);
+			const auto current_file_last_write_time = FS::last_write_time(file);
 			FS::path tmp{ file.path() };
 
 			// We only check if it is a regular file
@@ -376,7 +376,7 @@ namespace idk
 					throw("Something is terribly wrong. No mounts found.");
 
 				// Create the new dir
-				auto key = dirCreate(mountDir, tmp);
+				const auto key = dirCreate(mountDir, tmp);
 
 				auto& d = vfs.getDir(key);
 				std::cout << "[FILE SYSTEM] Dir Created: " << "\n"
@@ -456,7 +456,7 @@ namespace idk
 					throw("Something is terribly wrong. No mounts found.");
 
 				// Create the new dir
-				auto key = dirCreate(mountDir, tmp);
+				const auto key = dirCreate(mountDir, tmp);
 
 				auto& d = vfs.getDir(key);
 				std::cout << "[FILE SYSTEM] Dir Created (Recursed): " << "\n"
@@ -467,9 +467,9 @@ namespace idk
 			else
 			{
 				// Add file
-				auto key = fileCreate(mountDir, tmp);
+				const auto key = fileCreate(mountDir, tmp);
 
-				auto& f = vfs.getFile(key);
+				const auto& f = vfs.getFile(key);
 				std::cout << "[FILE SYSTEM] File Created (From dir created notification): " << "\n"
 							 "\t Path: " << f._full_path << "\n" << std::endl;					 
 			}
@@ -526,7 +526,7 @@ namespace idk
 		}
 	}
 
-	file_system_detail::fs_key file_system_detail::DirectoryWatcher::fileCreate(file_system_detail::fs_dir& mountDir, FS::path& p)
+	file_system_detail::fs_key file_system_detail::DirectoryWatcher::fileCreate(file_system_detail::fs_dir& mountDir, const FS::path& p)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		// Check if there are even mounts. If this hits, something is terribly wrong...
@@ -534,7 +534,7 @@ namespace idk
 			throw("Something is terribly wrong. No mounts found.");
 
 		// Request a slot from mounts
-		fs_key slot = vfs.requestFileSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
+		const fs_key slot = vfs.requestFileSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
 		fs_file& f = vfs.getFile(slot);
 		vfs.initFile(f, mountDir, p);
 		f._change_status = FS_CHANGE_STATUS::CREATED;
@@ -558,7 +558,7 @@ namespace idk
 		changed_files.push_back(file._tree_index);
 	}
 
-	void file_system_detail::DirectoryWatcher::fileRename(file_system_detail::fs_dir& dir, file_system_detail::fs_file& file, std::filesystem::path& p, FS_CHANGE_STATUS status)
+	void file_system_detail::DirectoryWatcher::fileRename(file_system_detail::fs_dir& dir, file_system_detail::fs_file& file, const std::filesystem::path& p, FS_CHANGE_STATUS status)
 	{
 		// This is the file that was renamed.
 		Core::GetSystem<FileSystem>().initFile(file, dir, p);
@@ -567,11 +567,11 @@ namespace idk
 		changed_files.push_back(file._tree_index);
 	}
 
-	file_system_detail::fs_key file_system_detail::DirectoryWatcher::dirCreate(file_system_detail::fs_dir& mountDir, std::filesystem::path& p)
+	file_system_detail::fs_key file_system_detail::DirectoryWatcher::dirCreate(file_system_detail::fs_dir& mountDir, const std::filesystem::path& p)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		// Request a slot from mounts
-		fs_key slot = vfs.requestDirSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
+		const fs_key slot = vfs.requestDirSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
 		fs_dir& d = vfs.getDir(slot);
 		vfs.initDir(d, mountDir, p);
 		d._change_status = FS_CHANGE_STATUS::CREATED;
@@ -591,7 +591,7 @@ namespace idk
 		changed_dirs.push_back(dir._tree_index);
 	}
 
-	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_dir& dir, std::filesystem::path& p, FS_CHANGE_STATUS status)
+	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_dir& dir, const std::filesystem::path& p, FS_CHANGE_STATUS status)
 	{
 		// This is the file that was renamed.
 		Core::GetSystem<FileSystem>().initDir(dir, mountDir, p);
