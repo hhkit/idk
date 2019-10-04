@@ -30,6 +30,7 @@ namespace idk::ogl
 			case CMColorFormat::RGBF_32: return GL_RGB32F;
 			case CMColorFormat::RGBAF_16: return GL_RGBA16F;
 			case CMColorFormat::RGBAF_32: return GL_RGBA32F;
+			case CMColorFormat::SRGB:   return GL_SRGB;
 			default: return 0;
 			}
 		}
@@ -134,13 +135,13 @@ namespace idk::ogl
 		//GL_CHECK();
 	}
 
-	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMInputChannels format)
+	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMInputChannels format, CMColorFormat colorFormat)
 	{
 		format;
 
 		_size = size;
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLinputChannels(format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLColor(colorFormat), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		GL_CHECK();

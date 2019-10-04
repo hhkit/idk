@@ -16,7 +16,7 @@ namespace idk::ogl
 
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
-		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB, ColorFormat internalFormat_in = ColorFormat::RGBF_32, const unsigned& mipmap_size =0, const float& imgSize=0.f);
+		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB, ColorFormat internalFormat_in = ColorFormat::SRGB, const unsigned& mipmap_size =0, const float& imgSize=0.f);
 
 		using Texture::Size;
 		void Size(ivec2 new_size) override;
