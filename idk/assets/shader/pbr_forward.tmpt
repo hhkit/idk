@@ -283,7 +283,7 @@ void main()
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
 				result *= vec3(1 - ShadowCalculation(i,(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
-			vvvp = LightBlk.lights[i].vp;
+			//vvvp = LightBlk.lights[i].vp;
 		}
 		else
 		{
@@ -307,15 +307,16 @@ void main()
 	//vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, view_dir), 0.0), roughness)).rg;
 	//vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
 	vec3 //ambient = (kD * diffuse + specular) * ambient_o;
+	ambient = vec3(0.03);
 	
 	vec3 color = light_accum + ambient;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2)); 
 	//out_color = vec4(vec3(PerCamera.inverse_view_transform*vec4(-LightBlk.lights[0].v_dir,0)).xyz,1);
-	vec4 light_pos = LightBlk.lights[0].vp*world_pos;
-	vec2 col = vec2(1);
-	if(ShadowCoords(light_pos).x<1 &&ShadowCoords(light_pos).x >0&& ShadowCoords(light_pos).y>0 &&ShadowCoords(light_pos).y<1)
-		col = vec2(texture(shadow_maps[0], ShadowCoords(light_pos).xy).r);
+	//vec4 light_pos = LightBlk.lights[0].vp*world_pos;
+	//vec2 col = vec2(1);
+	//if(ShadowCoords(light_pos).x<1 &&ShadowCoords(light_pos).x >0&& ShadowCoords(light_pos).y>0 &&ShadowCoords(light_pos).y<1)
+	//	col = vec2(texture(shadow_maps[0], ShadowCoords(light_pos).xy).r);
 	out_color = vec4(color,1);
 	
 }

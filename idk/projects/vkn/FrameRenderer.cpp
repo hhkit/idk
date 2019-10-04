@@ -1052,9 +1052,9 @@ namespace idk::vkn
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		auto& pipeline = *state.dbg_pipeline;
 		//Preprocess MeshRender's uniforms
-		auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
-		rs.ubo_manager.UpdateAllBuffers();
-		auto alloced_dsets = rs.dpools.Allocate(layout_count);
+		//auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
+		//rs.ubo_manager.UpdateAllBuffers();
+		//auto alloced_dsets = rs.dpools.Allocate(layout_count);
 		rs.FlagRendered();
 		pipeline.Bind(cmd_buffer, *_view);
 		//Bind the uniforms
