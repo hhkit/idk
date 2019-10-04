@@ -98,7 +98,7 @@ namespace idk
 		if (_active_scene)
 			_active_scene->Load();
 
-		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(0x81);
+		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(uint8_t(0x81));
 	}
 
 	RscHandle<Scene> SceneManager::GetActiveScene()

@@ -30,7 +30,7 @@ namespace idk
 	constexpr Vector& linear<Vector, Field>::operator*=(Field scalar)
 	{
         auto itr = me().begin();
-        const auto end = me().end();
+        const auto* end = me().end();
         while (itr != end)
             *itr++ *= scalar;
         return me();

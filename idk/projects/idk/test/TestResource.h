@@ -18,7 +18,7 @@ RESOURCE_EXTENSION(TestResource, ".test")
 		, public Saveable<TestResource>
 	{
 	public:
-		int k;
+        int k = 0;
 		string yolo = "haha";
 		void OnMetaUpdate(const TestMeta& newmeta) override { (newmeta); k = meta.i * meta.j; }
 	};

@@ -141,7 +141,7 @@ namespace idk
 		
 		
 		DDS_HEADER header;
-		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
+	const	auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(true);
 		auto tm = texture_handle->GetMeta();
 		const char* filePath = path_to_resource.GetFullPath().data();
 
@@ -218,51 +218,43 @@ namespace idk
 		//Check if image is compressed
 		if (li->compressed) {
 			//Image is a compressed image
-			GLsizei size = mipMapCount > 1 ? linearSize * 2 : linearSize;
-
+			GLsizei size = std::max(li->divSize, x) / li->divSize * std::max(li->divSize, y) / li->divSize * li->blockBytes;
 
 			//Check if this is a compressed dds image that uses linear size
 			//assert(header.dwFlags & DDSD_LINEARSIZE);
-			unsigned char* data = (unsigned char*)malloc(size* sizeof(unsigned char));
-			//Read the mip maps and create textures based on them
-			fread(data, 1, size, fp);
+			unsigned char* data = (unsigned char*)malloc(size);
+
 			//Fail if data is corrupted
 			if (!data) {
 				goto failure;
 			}
 			//Get the original texture image data
-			//temp_t->width = width;
-			//temp_t->height = height;
-			//temp_t->Image_Format = temp_t->Internal_Format = li->internalFormat;
 			tm.internal_format = ogl::detail::FromLGLColor(li->internalFormat);
 			tm.format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
-			
+			//Read the mip maps and create textures based on them
+			fread(data, 1, size, fp);
 			unsigned offset = 0;
 			//Read the data to start pulling out mip maps of the texture
-			for (unsigned int ix = 0; ix < mipMapCount &&(x || y); ++ix) {
-				if (x == 0)
-					x = 1;
-				if (y == 0)
-					y = 1;
+			for (unsigned int ix = 0; ix < mipMapCount; ++ix) {
 
 				//Ensure that mipmap size is nvr less than its division size (ratio of the image)
-				size = ((x + 3) / 4) * ((y + 3) / 4) * li->blockBytes;
-				glCompressedTexImage2D(GL_TEXTURE_2D, ix, li->internalFormat, x, y, 0, size, data+ offset);
+				size = std::max(li->divSize, x) / li->divSize * std::max(li->divSize, y) / li->divSize * li->blockBytes;
 
-				
-				offset += size;
+				glCompressedTexImage2D(GL_TEXTURE_2D, ix, li->internalFormat, x, y, 0, size, data + offset);
+
 				//Down the mipmap size
 				x = (x + 1) >> 1;
 				y = (y + 1) >> 1;
-
-				//offset += size;
+				
+				offset += size;
 			}
 
 			//Free the image data
 			free(data);
 		}
 		else if (li->palette) {
+			
 			//Image is a uncompressed image
 			assert(header.dwFlags & DDSD_PITCH);
 			assert(header.ddspf.dwRGBBitCount == 8);
@@ -308,6 +300,7 @@ namespace idk
 			//Free the image data
 			free(data);
 			free(unpacked);
+			
 		}
 		else {
 			//Image is other kinds of dds format
@@ -317,20 +310,23 @@ namespace idk
 			size_t size = x * y * li->blockBytes;
 
 			//Get the original texture image data
-			//temp_t->width = width;
-			//temp_t->height = height;
-			//temp_t->Image_Format = li->externalFormat;
-			//temp_t->Internal_Format = li->internalFormat;
-
-			tm.internal_format = li->internalFormat;
-			tm.format = li->externalFormat;
+			tm.internal_format = ogl::detail::FromLGLColor(li->internalFormat);
+			tm.format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 
+			//assert(header.dwFlags & DDSD_LINEARSIZE);
 			unsigned char* data = (unsigned char*)malloc(size);
 
+			//Fail if data is corrupted
+			if (!data) {
+				goto failure;
+			}
+			//Get the original texture image data
+			texture_handle->Size(ivec2(width, height));
+			//Read the mip maps and create textures based on them
+			fread(data, 1, size, fp);
+			//Read the data to start pulling out mip maps of the texture
 			for (unsigned int ix = 0; ix < mipMapCount; ++ix) {
-				//Read the data for each mip maps of the texture
-				fread(data, 1, size, fp);
 
 				//Down the mipmap size
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, y);
@@ -417,7 +413,7 @@ namespace idk
 
 		auto& metadata = path_to_meta.metadatas[0];
 
-		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
+		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid, true);
 
 		const auto v = metadata.GetMeta<OpenGLTexture>();
 
@@ -508,6 +504,8 @@ namespace idk
 				return texture_handle;
 		
 			//Get the original texture image data
+			v->internal_format = ogl::detail::FromLGLColor(li->internalFormat);
+			v->format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 			//Read the mip maps and create textures based on them
 			fread(data, 1, size, fp);
@@ -531,21 +529,20 @@ namespace idk
 			free(data);
 		}
 		else if (li->palette) {
-			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
-			mipMapCount = (header.dwFlags & DDSD_MIPMAPCOUNT) ? header.dwMipMapCount : 1;
+			
+			//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+			//mipMapCount = (header.dwFlags & DDSD_MIPMAPCOUNT) ? header.dwMipMapCount : 1;
 			//Image is a uncompressed image
-			assert(header.dwFlags & DDSD_PITCH);
-			assert(header.ddspf.dwRGBBitCount == 8);
+			//assert(header.dwFlags & DDSD_PITCH);
+			//assert(header.ddspf.dwRGBBitCount == 8);
 			size_t size = header.dwPitchOrLinearSize * height;
 
 			//Assert if mipmap padding is not equals to the size of the dds block format
 			assert(size == x * y * li->blockBytes);
 
 			//Get the original texture image data
-			//temp_t->width = width;
-			//temp_t->height = height;
-			//temp_t->Image_Format = li->externalFormat;
-			//temp_t->Internal_Format = li->internalFormat;
+			v->internal_format = ogl::detail::FromLGLColor(li->internalFormat);
+			v->format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 
 			//get the data for the image
@@ -578,10 +575,11 @@ namespace idk
 			free(unpacked);
 
 			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipMapCount - 1);
+			
 		}
 		else {
-			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
-			mipMapCount = (header.dwFlags & DDSD_MIPMAPCOUNT) ? header.dwMipMapCount : 1;
+			//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+			//mipMapCount = (header.dwFlags & DDSD_MIPMAPCOUNT) ? header.dwMipMapCount : 1;
 			//Image is other kinds of dds format
 			if (li->swap) {
 				glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_TRUE);
@@ -618,6 +616,7 @@ namespace idk
 
 		//Store the path of the image
 
+		texture_handle->SetMeta(*v);
 		//Unbind the image
 		//temp_t->Unbind();
 		glBindTexture(GL_TEXTURE_2D, 0);

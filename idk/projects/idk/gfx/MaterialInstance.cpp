@@ -57,7 +57,7 @@ namespace idk
         // https://www.khronos.org/registry/OpenGL/specs/gl/glspec45.core.pdf pg 138
 
         auto& mat = *material;
-        shadergraph::ValueType type = std::stoi(name.data() + sizeof("_UB") - 1);
+        const shadergraph::ValueType type = std::stoi(name.data() + sizeof("_UB") - 1);
         string data;
 
         switch (type)

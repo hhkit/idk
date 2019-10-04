@@ -42,9 +42,6 @@
     <ClInclude Include="DDSData.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="DDSLoader.h">
-      <Filter>resource</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

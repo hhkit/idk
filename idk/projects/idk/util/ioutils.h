@@ -4,5 +4,5 @@
 
 namespace idk
 {
-	string stringify(std::istream& istream);
+	string stringify(const std::istream& istream);
 }

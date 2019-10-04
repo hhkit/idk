@@ -134,7 +134,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    name: constants\Vec3
+    name: input\basic\Vec3
     output_slots: 
     - {type: VEC3, value: ""}
     position: {x: -53.870853, y: 157.406952}

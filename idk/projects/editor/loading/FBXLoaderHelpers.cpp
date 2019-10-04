@@ -217,11 +217,12 @@ namespace idk::fbx_loader_detail
 			b._name = curr_node.assimp_node->_name;
 			b._parent = curr_node.parent;
 
-			const auto decomp = decompose(curr_node.assimp_node->_global_inverse_bind_pose);
+			// auto decomp = decompose(curr_node.assimp_node->_global_inverse_bind_pose);
 			b._global_inverse_bind_pose = mat4{ scale(fbx_loader_detail::FBX_SCALE) } * curr_node.assimp_node->_global_inverse_bind_pose;
 			// b._global_inverse_bind_pose[3] = b._global_inverse_bind_pose[3] * vec4{ FBX_SCALE, 1.0f };
 			
-			const auto local_bind = mat4{ scale(fbx_loader_detail::FBX_SCALE) } *node_transform;
+			auto local_bind = //mat4{ scale(fbx_loader_detail::FBX_SCALE) } * 
+							  node_transform;
 			//auto decomp1 = decompose(local_bind);
 			//auto decomp2 = decompose(node_transform);
 
@@ -246,29 +247,6 @@ namespace idk::fbx_loader_detail
 			}
 		}
 	}
-
-	/*void initBoneWeights(const aiScene* ai_scene, span<ogl::OpenGLMesh::MeshEntry> entries, hash_table<string, size_t>& bones_table, vector<Vertex>& vertices)
-	{
-		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
-		{
-			const aiMesh* ai_mesh = ai_scene->mMeshes[i];
-			for (size_t k = 0; k < ai_mesh->mNumBones; ++k)
-			{
-				const aiBone* ai_bone = ai_mesh->mBones[k];
-				auto res = bones_table.find(ai_bone->mName.data);
-				assert(res != bones_table.end());
-
-				int bone_index = static_cast<int>(res->second);
-				for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
-				{
-					float weight = ai_bone->mWeights[j].mWeight;
-
-					unsigned vert_id = entries[i]._base_vertex + ai_bone->mWeights[j].mVertexId;
-					vertices[vert_id].addBoneData(bone_index, weight);
-				}
-			}
-		}
-	}*/
 
 	static void initChannel(anim::Channel& channel, const aiNodeAnim* ai_anim_node, const mat4& concat_matrix)
 	{
@@ -298,16 +276,11 @@ namespace idk::fbx_loader_detail
 				const auto& position_key = ai_anim_node->mPositionKeys[p];
 
 				const vec3 curr = initVec3(position_key.mValue);
-				//if (abs(prev[0] - curr[0]) > epsilon &&
-				//	abs(prev[1] - curr[1]) > epsilon &&
-				//	abs(prev[2] - curr[2]) > epsilon)
-				{
-					const float time = static_cast<float>(position_key.mTime - ai_anim_node->mPositionKeys[0].mTime);
+				const float time = static_cast<float>(position_key.mTime - ai_anim_node->mPositionKeys[0].mTime);
 
-					auto scaled_translate = (curr - decomp.position) * FBX_SCALE;
-					channel._translate.emplace_back(scaled_translate, time);
-					prev = curr;
-				}
+				auto scaled_translate = (curr - decomp.position) * FBX_SCALE;
+				channel._translate.emplace_back(scaled_translate, time);
+				prev = curr;
 			}
 			channel._is_animated = true;
 		}
@@ -321,21 +294,16 @@ namespace idk::fbx_loader_detail
 				const auto& scale_key = ai_anim_node->mScalingKeys[s];
 
 				const vec3 curr = initVec3(scale_key.mValue);
-				//if (abs(prev[0] - curr[0]) > epsilon &&
-				//	abs(prev[1] - curr[1]) > epsilon &&
-				//	abs(prev[2] - curr[2]) > epsilon)
+				const float time = static_cast<float>(scale_key.mTime - ai_anim_node->mScalingKeys[0].mTime);
+				auto final_scale = curr - decomp.scale;
+
+				for (auto& elem : final_scale)
 				{
-					const float time = static_cast<float>(scale_key.mTime - ai_anim_node->mScalingKeys[0].mTime);
-					auto final_scale = curr - decomp.scale;
-					
-					for (auto& elem : final_scale)
-					{
-						if (abs(elem) < epsilon)
-							elem = 0.0f;
-					}
-					channel._scale.emplace_back(final_scale, time);
-					prev = curr;
+					if (abs(elem) < epsilon)
+						elem = 0.0f;
 				}
+				channel._scale.emplace_back(final_scale, time);
+				prev = curr;
 			}
 			channel._is_animated = true;
 		}

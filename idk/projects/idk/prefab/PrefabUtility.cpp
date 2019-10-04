@@ -221,7 +221,7 @@ namespace idk
         vector<GenericHandle::gen_t> gens;
         for (const auto& o : scene)
         {
-            const auto index = s_cast<size_t>(o.GetHandle().index);
+            const auto index = static_cast<size_t>(o.GetHandle().index);
             if (index >= gens.size())
             {
                 nodes.resize(index + 1);
@@ -229,7 +229,7 @@ namespace idk
             }
             gens[index] = o.GetHandle().gen;
             if (o.Parent())
-                nodes[o.Parent().index] += index;
+                nodes[o.Parent().index] += static_cast<GenericHandle::index_t>(index);
         }
 
         // tree walk
@@ -327,7 +327,7 @@ namespace idk
                 auto& obj = prefab_inst.objects[i];
 				for (const auto& c : prefab_inst.prefab->data[i].components)
 				{
-                    if (auto handle = obj->GetComponent(c.type)) // if component exists
+                    if (const auto handle = obj->GetComponent(c.type)) // if component exists
                     {
                         auto dyn = *handle;
                         for (size_t prop_index = 0; prop_index < dyn.type.count(); ++prop_index)

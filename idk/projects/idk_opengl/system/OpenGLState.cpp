@@ -224,20 +224,20 @@ namespace idk::ogl
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm, light_view_tfm);
 
-				for (auto& mesh_renderer : curr_object_buffer.mesh_render)
+				for (auto& render_obj : curr_object_buffer.mesh_render)
 				{
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-					SetObjectUniforms(mesh_renderer, light_view_tfm);
-					RscHandle<OpenGLMesh>{mesh_renderer.mesh}->BindAndDraw<MeshRenderer>();
+					SetObjectUniforms(render_obj, light_view_tfm);
+					RscHandle<OpenGLMesh>{render_obj.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], light_p_tfm, light_view_tfm);
-				for (auto& skinned_mesh_renderer : curr_object_buffer.skinned_mesh_render)
+				for (auto& render_obj : curr_object_buffer.skinned_mesh_render)
 				{
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-					SetSkeletons(skinned_mesh_renderer.skeleton_index);
-					SetObjectUniforms(skinned_mesh_renderer, light_view_tfm);
-					RscHandle<OpenGLMesh>{skinned_mesh_renderer.mesh}->BindAndDraw<SkinnedMeshRenderer>();
+					SetSkeletons(render_obj.skeleton_index);
+					SetObjectUniforms(render_obj, light_view_tfm);
+					RscHandle<OpenGLMesh>{render_obj.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 				}
 
 				glDisable(GL_DEPTH_TEST);
