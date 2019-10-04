@@ -20,7 +20,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 5e9ce107-5698-45b4-adab-984396775518}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !RigidBody 
@@ -45,7 +45,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 0b60531a-9b3c-42cd-bda4-fe2698de6af8}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !RigidBody 
@@ -76,7 +76,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: d5564c39-f462-4f43-a4b1-37bc3b681088}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !RigidBody 
@@ -107,7 +107,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 60ed08cc-03d0-4f3f-aa28-7158ccc6e9e8}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !RigidBody 
@@ -138,7 +138,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 1d91d3be-bad6-477f-b0fc-a75933848eea}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !RigidBody 
@@ -169,7 +169,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: a3c28211-141c-4493-b292-4ff949cc710e}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !RigidBody 
@@ -212,7 +212,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: d125f771-94f9-436c-b0c4-f3bae68c219e}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
 - !30064902144 
@@ -231,7 +231,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: b4eaa7fa-5b11-4023-9806-c42f215520d4}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
   - !Collider 
@@ -274,7 +274,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 92defb39-1c83-4f52-8df5-56d544f913f2}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
 - !38654836736 
@@ -306,3 +306,27 @@
         intern[2]: {x: 0.000000, y: 0.000000, z: 1.000000}
       center: {x: 0.000000, y: 0.000000, z: 0.000000}
       extents: {x: 1.000000, y: 1.000000, z: 1.000000}
+- !42949738496 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0.001372, y: 1.613199, z: 1.989438}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+  - !Name 
+    name: pointlight
+  - !Light 
+    casts_shadows: 1
+    light: !PointLight 
+      attenuation_radius: 1.000000
+      intensity: 1.000000
+      light_color: 
+        a: 1.000000
+        b: 1.000000
+        g: 1.000000
+        r: 1.000000
+    shadow_bias: 0.000100

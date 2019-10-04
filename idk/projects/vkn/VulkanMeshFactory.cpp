@@ -36,13 +36,13 @@ namespace idk::vkn
 	{
 		vec3 p01 = p1 - p0;
 		vec3 p02 = p2 - p0;
-		float u02 = uv2.x - uv0.x;
-		float u01 = uv1.x - uv0.x;
+		[[maybe_unused]] float u02 = uv2.x - uv0.x;
+		[[maybe_unused]] float u01 = uv1.x - uv0.x;
 
 		float v02 = uv2.y - uv0.y;
 		float v01 = uv1.y - uv0.y;
 
-		float m = u01 * v02 - u02 * v01;
+		//float m = u01 * v02 - u02 * v01;
 
 		return v02 * p01 - v01 * p02;
 	}

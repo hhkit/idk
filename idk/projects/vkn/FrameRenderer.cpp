@@ -585,7 +585,7 @@ namespace idk::vkn
 							0,0,0,1
 		}*cam.projection_matrix;
 
-		auto& pvt_uni = msmod.GetLayout("CameraBlock");
+		[[maybe_unused]] auto& pvt_uni = msmod.GetLayout("CameraBlock");
 		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
 		mat4 pbr_trf = V.inverse();
 		;
@@ -704,14 +704,14 @@ namespace idk::vkn
 					for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
 					{
 						auto& name = itr->first;
-						auto& mat_inst = *dc.material_instance;
-						auto mat_uni_itr = mat_inst.GetUniform(itr->first);
+						auto& _mat_inst = *dc.material_instance;
+						auto mat_uni_itr = _mat_inst.GetUniform(itr->first);
 						if (!mat_uni_itr)
 						{
-							mat_uni_itr = mat_inst.GetUniform(itr->first + "[0]");
+							mat_uni_itr = _mat_inst.GetUniform(itr->first + "[0]");
 						}
 							
-						if (mat_uni_itr || mat_inst.IsUniformBlock(itr->first))
+						if (mat_uni_itr || _mat_inst.IsUniformBlock(itr->first))
 						{
 							auto& ubo_info = itr->second;
 							auto& layout = ubo_info.layout;
@@ -1198,7 +1198,7 @@ namespace idk::vkn
 				prev_pipeline = &pipeline;
 			}
 			auto& mesh = obj.mesh.as<VulkanMesh>();
-			auto& layouts = pipeline.uniform_layouts;
+			[[maybe_unused]] auto& layouts = pipeline.uniform_layouts;
 			for (auto& [set_index,binfo] : p_ro.bindings)
 			{
 				//Get the descriptor set layout for the current set
