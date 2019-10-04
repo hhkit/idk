@@ -226,13 +226,14 @@ namespace idk
 		auto& vfs = Core::GetSystem<FileSystem>();
 		auto& dir = vfs.getDir(_key);
 
-		for (auto& dir_index : dir._sub_dirs)
+		if ((filters & FS_FILTERS::DIR) == FS_FILTERS::DIR)
 		{
-			auto& internal_dir = vfs.getDir(dir_index.second);
-			if (internal_dir.IsValid())
+			for (auto& dir_index : dir._sub_dirs)
 			{
-				PathHandle h{ internal_dir._tree_index, false };
-				if ((filters & FS_FILTERS::DIR) == FS_FILTERS::DIR)
+				auto& internal_dir = vfs.getDir(dir_index.second);
+				if (internal_dir.IsValid())
+				{
+					PathHandle h{ internal_dir._tree_index, false };
 					out.emplace_back(h);
 
 				if ((filters & FS_FILTERS::RECURSE_DIRS) == FS_FILTERS::RECURSE_DIRS)
@@ -495,16 +496,16 @@ namespace idk
 	void PathHandle::getPathsRecurse(const file_system_detail::fs_dir& dir, FS_FILTERS filters, string_view ext, vector<PathHandle>& out) const
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		
-		for (auto& dir_index : dir._sub_dirs)
+		if ((filters & FS_FILTERS::DIR) == FS_FILTERS::DIR)
 		{
-			auto& internal_dir = vfs.getDir(dir_index.second);
-			if (internal_dir.IsValid())
+			for (auto& dir_index : dir._sub_dirs)
 			{
-				PathHandle h{ internal_dir._tree_index, false };
-				if ((filters & FS_FILTERS::DIR) == FS_FILTERS::DIR)
+				auto& internal_dir = vfs.getDir(dir_index.second);
+				if (internal_dir.IsValid())
+				{
+					PathHandle h{ internal_dir._tree_index, false };
 					out.emplace_back(h);
-					
+
 				if ((filters & FS_FILTERS::RECURSE_DIRS) == FS_FILTERS::RECURSE_DIRS)
 					getPathsRecurse(internal_dir, filters, ext, out);
 			}
