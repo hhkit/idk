@@ -73,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::OpenGL;
+	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
@@ -298,7 +298,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			light_comp->light = DirectionalLight{
 				real{1.f},
-				color{0.5,0,1}
+				color{1,1,1}
 			};
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
 			auto m = light_map->GetMeta().textures[0]->GetMeta();

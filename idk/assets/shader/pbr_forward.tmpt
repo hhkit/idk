@@ -299,8 +299,8 @@ void main()
 	kD *= 1.0 - metallic;
 	
 	
-	vec3 irradiance = texture(irradiance_probe, normal).rgb;
-	vec3 diffuse = irradiance * albedo;
+	//vec3 irradiance = texture(irradiance_probe, normal).rgb;
+	//vec3 diffuse = irradiance * albedo;
 	
 	const float MAX_REFLECTION_LOD = 4.0;
 	

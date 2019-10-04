@@ -7,7 +7,7 @@
 
 namespace idk
 {
-    bool ImGuidk::InputResourceEx(const char* label, GenericResourceHandle* handle, size_t base_resource_id)
+    bool ImGuidk::InputResourceEx(const char* label, GenericResourceHandle* handle, [[maybe_unused]] size_t base_resource_id)
     {
         using namespace ImGui;
 
