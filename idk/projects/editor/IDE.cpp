@@ -225,6 +225,10 @@ namespace idk
 		ige_main_window->DrawWindow();
 
 		for (auto& i : ige_windows) {
+			if (flag_skip_render) {
+				flag_skip_render = false;
+				break;
+			}
 			i->DrawWindow();
 		}
 

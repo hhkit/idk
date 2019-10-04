@@ -115,6 +115,12 @@ namespace idk {
 
 						Core::GetSystem<SceneManager>().SetActiveScene(hnd);
 						hnd->Load();
+
+						//Clear IDE values
+						Core::GetSystem<IDE>().flag_skip_render = true;
+						Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
+						Core::GetSystem<IDE>().selected_gameObjects.clear();
+						Core::GetSystem<IDE>().selected_matrix.clear();
 					}
 				}
 
