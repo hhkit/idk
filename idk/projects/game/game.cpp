@@ -177,6 +177,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
+	/*
 	auto create_mesh_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos = vec3{0,0,0}, PathHandle path = PathHandle{ "/assets/models/sphere.obj" }) {
 		auto go = scene->CreateGameObject();
 
@@ -191,7 +192,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		assert(!resource_bundle->Get<anim::Animation>());
 		return go;
 	};
-
+	*/
 
 
 	auto tmp_tex = minecraft_texture;
@@ -201,8 +202,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 1.796,0,-1.781 });
-	create_mesh_obj();	// Create just a mesh object
+	create_anim_obj(vec3{ 2,0,-2 });
+	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -344,6 +345,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		light->AddComponent<TestComponent>();
 	}
 	/* physics resolution demonstration */
+#if 0
 	 {
 	 	auto seduceme = scene->CreateGameObject();
 	 	seduceme->GetComponent<Name>()->name = "seduceme";
@@ -404,7 +406,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		seducemetoo->AddComponent<Collider>()->shape = box{};
 	}
 
-
+#endif
 
     Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
     Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);

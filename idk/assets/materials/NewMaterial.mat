@@ -4,6 +4,14 @@ links:
   node_out: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
   slot_in: 1
   slot_out: 0
+- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+  node_out: b9f4c276-4507-4847-bc27-659094166989
+  slot_in: 2
+  slot_out: 0
+- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+  node_out: ce2e5286-dd3e-4706-af8d-28c93b829fc0
+  slot_in: 3
+  slot_out: 0
 master_node: 9550e80c-4d2f-4e84-8d65-9a29295b539c
 nodes: 
   2449cd31-a85b-4d34-bf51-73fd5b4f33b8: 
@@ -18,12 +26,30 @@ nodes:
     control_values: ""
     guid: 9550e80c-4d2f-4e84-8d65-9a29295b539c
     input_slots: 
-    - {type: VEC3, value: '1.000000,1.000000,1.000000'}
+    - {type: VEC3, value: '1.000000,0.000000,0.000000'}
     - {type: VEC3, value: ""}
-    - {type: FLOAT, value: 0}
-    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
     - {type: FLOAT, value: 0}
     name: master\PBR
     output_slots: []
     position: {x: 539.000000, y: 150.000000}
-parameters: []
+  b9f4c276-4507-4847-bc27-659094166989: 
+    control_values: ""
+    guid: b9f4c276-4507-4847-bc27-659094166989
+    input_slots: []
+    name: $0
+    output_slots: 
+    - {type: FLOAT, value: ""}
+    position: {x: 290.000000, y: 236.000000}
+  ce2e5286-dd3e-4706-af8d-28c93b829fc0: 
+    control_values: ""
+    guid: ce2e5286-dd3e-4706-af8d-28c93b829fc0
+    input_slots: []
+    name: $1
+    output_slots: 
+    - {type: FLOAT, value: ""}
+    position: {x: 280.000000, y: 303.000000}
+parameters: 
+- {default_value: 0, name: Metallic, type: FLOAT}
+- {default_value: 0, name: Roughness, type: FLOAT}

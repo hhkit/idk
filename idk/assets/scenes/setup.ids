@@ -1,58 +1,31 @@
-- !65536 
+- !131072 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    rotation: 
-      w: 1.000000
-      x: 0.000000
-      y: 0.000000
-      z: 0.000000
-    scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-  - !Name 
-    name: ""
-- !4295032832 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    rotation: 
-      w: 1.000000
-      x: 0.000000
-      y: 0.000000
-      z: 0.000000
-    scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-  - !Name 
-    name: ""
-- !8590000128 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: -1.868374, y: 1.219008, z: -0.305252}
+    position: {x: 0.000000, y: 0.755237, z: 0.000000}
     rotation: 
       w: 1.000000
       x: -0.000000
       y: -0.000000
       z: -0.000000
-    scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    scale: {x: 0.500000, y: 0.500000, z: 0.500000}
   - !Name 
-    name: yolo
+    name: pbrball
   - !Collider 
     enabled: 1
     is_trigger: 0
     shape: !sphere 
       center: {x: 0.000000, y: 0.000000, z: 0.000000}
-      radius: 0.500000
-- !12885032960 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    rotation: 
-      w: 1.000000
-      x: 0.000000
-      y: 0.000000
-      z: 0.000000
-    scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-  - !Name 
-    name: ""
+      radius: 1.000000
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1

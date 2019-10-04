@@ -2,4 +2,7 @@
 <RuleSet Name="idk" ToolsVersion="16.0">
   <Include Path="cppcorecheckconstrules.ruleset" Action="Default" />
   <Include Path="cppcorecheckstylerules.ruleset" Action="Default" />
+  <Rules AnalyzerId="Microsoft.Analyzers.NativeCodeAnalysis" RuleNamespace="Microsoft.Rules.Native">
+    <Rule Id="C26438" Action="None" />
+  </Rules>
 </RuleSet>
