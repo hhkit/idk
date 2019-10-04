@@ -95,6 +95,22 @@ namespace idk::ogl
 
 		assert(Core::GetSystem<GraphicsSystem>().brdf);
 		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
+
+		const auto BindVertexShader = [this](RscHandle<ShaderProgram> vertex_shader, const mat4& projection_mtx, const mat4& view_mtx)
+		{
+			pipeline.PushProgram(vertex_shader);
+			pipeline.SetUniform("PerCamera.perspective_transform", projection_mtx);
+			pipeline.SetUniform("PerCamera.view_transform", view_mtx);
+		};
+
+		const auto SetObjectUniforms = [this](const auto& render_obj, const mat4& view_matrix)
+		{
+			auto obj_tfm = view_matrix * render_obj.transform;
+			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
+			pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+			pipeline.SetUniform("ObjectMat4s.model_transform", render_obj.transform);
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			pipeline.Use();
@@ -122,31 +138,19 @@ namespace idk::ogl
 				const auto light_view_tfm = elem.v;
 				const auto light_p_tfm = elem.p; //near and far is currently hardcoded
 				pipeline.PopAllPrograms();
-				// per mesh render
-				pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
 
-				// bind shader
-				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm, light_view_tfm);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				for (auto& elem : curr_object_buffer.mesh_render)
 				{
 					// shader uniforms
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
-
-					// set uniforms
-					// object uniforms
-
-					auto obj_tfm = light_view_tfm * elem.transform;
-					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-					pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
-
+					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
-				pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
-				pipeline.SetUniform("PerCamera.perspective_transform", light_p_tfm);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], light_p_tfm, light_view_tfm);
 
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
@@ -162,15 +166,7 @@ namespace idk::ogl
 						pipeline.SetUniform(bone_transform_blk, transform);
 					}
 
-					// set uniforms
-					// object uniforms
-
-					auto obj_tfm = light_view_tfm * elem.transform;
-					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-					pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
-
-					// draw
+					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 				}
 
@@ -236,27 +232,21 @@ namespace idk::ogl
 					glClearColor(obj.x, obj.y, obj.z, obj.w);
 			}, cam.clear_data);
 
-			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::Debug]);
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
-			pipeline.SetUniform("PerCamera.view_transform", cam.view_matrix);
-
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
-					auto obj_tfm = cam.view_matrix * elem.transform;
-					pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-					pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
+					SetObjectUniforms(elem, cam.view_matrix);
 					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
 			// per mesh render
-			pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::NormalMesh]);
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix, cam.view_matrix);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			for (auto& elem : curr_object_buffer.mesh_render)
@@ -312,13 +302,7 @@ namespace idk::ogl
 					}
 				}
 
-
-				// set uniforms
-				// object uniforms
-				auto obj_tfm = cam.view_matrix * elem.transform;
-				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-				pipeline.SetUniform("ObjectMat4s.model_transform", elem.transform);
+				SetObjectUniforms(elem, cam.view_matrix);
 
 				// material uniforms
                 auto instance_uniforms = elem.material_instance->material->uniforms;
@@ -345,8 +329,7 @@ namespace idk::ogl
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 			}
 
-			pipeline.PushProgram(renderer_vertex_shaders[SkinnedMesh]);
-			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix, cam.view_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
@@ -415,10 +398,7 @@ namespace idk::ogl
 				// set uniforms
 				// object uniforms
 
-				auto obj_tfm = cam.view_matrix * elem.transform;
-				pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
-				pipeline.SetUniform("ObjectMat4s.normal_transform", obj_tfm.inverse().transpose());
-				pipeline.SetUniform("ObjectMat4s.view_transform", cam.view_matrix * elem.transform);
+				SetObjectUniforms(elem, cam.view_matrix);
 
 				// material uniforms
                 auto instance_uniforms = elem.material_instance->material->uniforms;

@@ -60,14 +60,6 @@ links:
   node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
   slot_in: 1
   slot_out: 0
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: cea7d69a-a98d-4c41-9e2f-54240890c5db
-  slot_in: 3
-  slot_out: 3
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
-  slot_in: 4
-  slot_out: 3
 - node_in: 7b47c039-a436-4ee7-82de-ce3b7758ff84
   node_out: efe470eb-07a5-49b8-9e72-bcab56fc470f
   slot_in: 0
@@ -77,17 +69,13 @@ links:
   slot_in: 1
   slot_out: 0
 - node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 7b47c039-a436-4ee7-82de-ce3b7758ff84
-  slot_in: 2
-  slot_out: 3
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: e149b4ec-f809-4059-93cb-a0f7d3aeb0b5
-  slot_in: 1
+  node_out: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
+  slot_in: 0
   slot_out: 1
 - node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
-  slot_in: 0
-  slot_out: 3
+  node_out: 98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc
+  slot_in: 1
+  slot_out: 0
 master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
   2d67e13d-4f70-472f-83e8-f57ddc178edb: 
@@ -195,6 +183,14 @@ nodes:
     output_slots: 
     - {type: SAMPLER2D, value: ""}
     position: {x: -442.604584, y: 822.257507}
+  98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc: 
+    control_values: ""
+    guid: 98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc
+    input_slots: []
+    name: input\VertexNormal
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 435.150970, y: 201.029541}
   99e9f376-1e36-40ee-aaed-f1b22ed73ad6: 
     control_values: ""
     guid: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
@@ -237,9 +233,9 @@ nodes:
     input_slots: 
     - {type: VEC3, value: ""}
     - {type: VEC3, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 1.000000}
+    - {type: FLOAT, value: 0.100000}
+    - {type: FLOAT, value: 1.000000}
     name: master\PBR
     output_slots: []
     position: {x: 724.700867, y: 224.665176}
