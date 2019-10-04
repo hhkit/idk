@@ -200,6 +200,9 @@ namespace idk
 		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetScheduler().SetPauseState(EditorPause);
+
+		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::ALL))//| FS_FILTERS::RECURSE_DIRS))
+			Core::GetResourceManager().Load(elem, false);
 	}
 
 	void IDE::Shutdown()
