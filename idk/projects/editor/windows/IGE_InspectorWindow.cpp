@@ -710,10 +710,19 @@ namespace idk {
             switch (u.index())
             {
             case index_in_variant_v<float, UniformInstance>:
+            {
+                auto val = std::get<index_in_variant_v<float, UniformInstance>>(*material->GetUniform(name));
                 ImGui::Text(label);
                 ImGui::SetCursorPosY(y);
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-                changed |= ImGui::DragFloat("", &std::get<index_in_variant_v<float, UniformInstance>>(u), 0.01f);
+                if (ImGui::DragFloat("", &val, 0.01f))
+                {
+                    material->uniforms[name] = val;
+                    changed = true;
+                }
+                break;
+            }
+
 
             default:
                 break;
