@@ -139,7 +139,10 @@ namespace idk::ogl
 		format;
 
 		_size = size;
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLinputChannels(format), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		GL_CHECK();
 	}
 

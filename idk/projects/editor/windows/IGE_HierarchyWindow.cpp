@@ -22,7 +22,9 @@ of the editor.
 #include <core/GameObject.h>
 #include <common/Name.h>
 #include <common/Transform.h>
+#include <gfx/Camera.h>
 #include <core/Core.h>
+#include <prefab/PrefabUtility.h>
 #include <IDE.h>		//IDE
 #include <iostream>
 
@@ -33,8 +35,6 @@ namespace idk {
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
 		window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar;
-
-
 
 
 	}
@@ -153,11 +153,10 @@ namespace idk {
 
 			if (!show_editor_objects && handle.scene == 0x80) // ignore eidtor
 				return true;
+			
 
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 
-			
-			//handle->Transform()->SetParent(parent, true);
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding;
 
 			//Check if gameobject has been selected. Causes Big-O(n^2)
@@ -181,7 +180,7 @@ namespace idk {
 				goName = c_name->name;
 			
 			const bool isNameEmpty = goName.empty();
-            const bool is_prefab = handle->HasComponent<PrefabInstance>();
+            const bool is_prefab = bool(PrefabUtility::GetPrefabInstanceRoot(handle));
 			if (isNameEmpty) {
 				goName = "Unnamed (";
 				goName.append(std::to_string(handle.id));
@@ -331,7 +330,10 @@ namespace idk {
 				depth;
 				if (!handle) //Ignore handle zero
 					return true;
-
+				IDE& editor = Core::GetSystem<IDE>();
+				Handle<Camera>& editorCam = editor.currentCamera().current_camera;
+				if (handle == editorCam->GetGameObject())
+					return true;
 				++counter;
 
 				//Finds what is selected and use as min and max
@@ -396,8 +398,11 @@ namespace idk {
 
 			//Refresh the new matrix values
 		}
-		if (hasSelected_GameobjectsModified)
-			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+        if (hasSelected_GameobjectsModified)
+        {
+            Core::GetSystem<IDE>().RefreshSelectedMatrix();
+            OnGameObjectSelectionChanged.Fire();
+        }
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 

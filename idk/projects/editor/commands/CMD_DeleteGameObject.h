@@ -22,8 +22,7 @@ namespace idk {
 
 	private:
 		vector<reflect::dynamic>	vector_of_components{};
-
-		vector<ICommand*> commands_affected{}; //Stores a dumb pointer (This is to check if the unique pointer is still there)
+		vector<ICommand*>			commands_affected	{}; //Stores a dumb pointer (This is to check if the unique pointer is still there)
 	};
 
 }

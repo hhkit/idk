@@ -235,8 +235,6 @@ namespace idk::shadergraph
 
     void Graph::Compile()
     {
-        // todo: handle added uniforms
-
         compiler_state state{ *this };
         state.uniforms.resize(parameters.size());
 
@@ -259,24 +257,17 @@ namespace idk::shadergraph
                 auto& block = uniform_blocks[uniform_type];
 
                 if (uniform_type == ValueType::SAMPLER2D)
-                {
-                    block += "S_LAYOUT(3, ";
-                    block += std::to_string(ValueType::SAMPLER2D);
-                    block += ") uniform sampler2D ";
-                    block += uniform_name;
-                    block += ";\n";
                     continue;
-                }
 
                 string str{ uniform_type.to_string() };
                 string typestr = make_lowercase(str);
 
                 if (block.empty())
                 {
-                    block += "U_LAYOUT(3, ";
+                    block += "U_LAYOUT(1, ";
                     block += std::to_string(uniform_type);
                     block += ") uniform BLOCK(_UB";
-                    block += uniform_type.to_string();
+                    block += std::to_string(uniform_type);
                     block += ")\n{\n";
                 }
                 block += "  ";
@@ -303,7 +294,7 @@ namespace idk::shadergraph
             }
 
             if (state.tex_counter > 0) // U_LAYOUT(3, 8) uniform sampler2D _uTex[count];
-                uniform_blocks[ValueType::SAMPLER2D] = "U_LAYOUT(4, " + std::to_string(ValueType::SAMPLER2D) +
+                uniform_blocks[ValueType::SAMPLER2D] = "S_LAYOUT(2, " + std::to_string(ValueType::SAMPLER2D) +
                                                        ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
             uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
 

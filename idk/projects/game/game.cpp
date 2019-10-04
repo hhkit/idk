@@ -139,9 +139,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
+    //auto test___ = mat_inst->GetUniformBlock("_UB1");
 
 	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Calico Cat.fbx" }) {
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
 		auto go = scene->CreateGameObject();
 
 		go->Name(path.GetStem());
@@ -176,6 +177,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return go;
 	};
 
+	auto create_mesh_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos = vec3{0,0,0}, PathHandle path = PathHandle{ "/assets/models/sphere.obj" }) {
+		auto go = scene->CreateGameObject();
+
+		go->Name(path.GetStem());
+		auto resource_bundle = Core::GetResourceManager().Load(path);
+		go->GetComponent<Transform>()->position = pos;
+		auto mesh_renderer = go->AddComponent<MeshRenderer>();
+		mesh_renderer->mesh = resource_bundle->Get<Mesh>();
+		mesh_renderer->material_instance = mat_inst;
+
+		assert(!resource_bundle->Get<anim::Skeleton>());
+		assert(!resource_bundle->Get<anim::Animation>());
+		return go;
+	};
+
+
+
 	auto tmp_tex = minecraft_texture;
 	if (gfx_api == GraphicsAPI::Vulkan)
 		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
@@ -184,6 +202,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// @Joseph: Uncomment this when testing.
 	create_anim_obj(vec3{ 1.796,0,-1.781 });
+	create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();

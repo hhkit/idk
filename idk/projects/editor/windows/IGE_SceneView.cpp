@@ -333,7 +333,6 @@ namespace idk {
 
 			if (is_being_modified) {
 				if (!ImGuizmo::IsUsing()) {
-					std::cout << "Push Command\n";
 					vector<mat4>& originalMatrix = editor.selected_matrix;
 					for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
 						mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();

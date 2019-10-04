@@ -57,7 +57,7 @@ namespace idk::fbx_loader_detail
 		std::deque<aiNodeData> ai_data_queue { queue_start };
 		
 		bool first_bone = true;
-		int root_index = 0;
+		int root_index = -1;
 
 		bool found_pivot = false;
 		quat bone_pivot;
@@ -131,7 +131,8 @@ namespace idk::fbx_loader_detail
 				ai_data_queue.push_back(tmp);
 			}
 		}
-		assimp_node_vec[root_index]._ai_type = BONE_ROOT | BONE;
+		if(root_index >= 0)
+			assimp_node_vec[root_index]._ai_type = BONE_ROOT | BONE;
 	}
 
 	void normalizeMeshEntries(vector<Vertex>& vertices, const mat4& matrix)

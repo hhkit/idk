@@ -22,4 +22,28 @@ namespace idk
 	{
 		using type = std::tuple<T1s..., T2s...>;
 	};
+
+    template<typename ... Ts, template<typename ...> typename Wrap>
+    struct tuple_wrap<std::tuple<Ts...>, Wrap>
+    {
+        using type = std::tuple<Wrap<Ts>...>;
+    };
+
+    template<typename FindMe>
+    struct index_in_tuple<FindMe, std::tuple<>>
+    {
+        static constexpr uint8_t value = 0;
+    };
+
+    template<typename FindMe, typename ... Ts>
+    struct index_in_tuple<FindMe, std::tuple<FindMe, Ts...>>
+    {
+        static constexpr uint8_t value = 0;
+    };
+
+    template<typename FindMe, typename First, typename ... Ts>
+    struct index_in_tuple<FindMe, std::tuple<First, Ts...>>
+    {
+        static constexpr uint8_t value = index_in_tuple<FindMe, std::tuple<Ts...>>::value + 1;
+    };
 }

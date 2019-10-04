@@ -41,4 +41,24 @@ namespace idk
 		constexpr auto jt = detail::variant_helper<T>::ConstructJT();
 		return jt[i]();
 	}
+
+
+
+    template<typename FindMe>
+    struct index_in_variant<FindMe, std::variant<>>
+    {
+        static constexpr uint8_t value = 0;
+    };
+
+    template<typename FindMe, typename ... Ts>
+    struct index_in_variant<FindMe, std::variant<FindMe, Ts...>>
+    {
+        static constexpr uint8_t value = 0;
+    };
+
+    template<typename FindMe, typename First, typename ... Ts>
+    struct index_in_variant<FindMe, std::variant<First, Ts...>>
+    {
+        static constexpr uint8_t value = index_in_variant<FindMe, std::variant<Ts...>>::value + 1;
+    };
 }

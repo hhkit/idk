@@ -23,7 +23,6 @@ namespace idk
         static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);
 
 		// manually propagate ALL changes of a prefab.
-		// most likely don't need to call this.
         static void PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab);
 
         // after changing a value in a component, call this fn.

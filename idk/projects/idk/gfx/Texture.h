@@ -15,7 +15,11 @@ namespace idk
         RGBF_32,
         RGBAF_16,
         RGBAF_32,
-		DEPTH_COMPONENT
+		DEPTH_COMPONENT,
+		DXT1,
+		DXT3,
+		DXT5
+
     )
 
     ENUM(UVMode, char,
