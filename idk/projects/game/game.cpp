@@ -151,7 +151,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if (gfx_api != GraphicsAPI::Vulkan)
+		
 		{
 			auto resources_running = Core::GetResourceManager().Load(path);
 
