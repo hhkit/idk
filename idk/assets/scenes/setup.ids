@@ -2,7 +2,7 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.000000, y: 0.755237, z: 0.000000}
+    position: {x: -2.317815, y: 0.755237, z: 0.000000}
     rotation: 
       w: 1.000000
       x: -0.000000
@@ -10,7 +10,7 @@
       z: -0.000000
     scale: {x: 0.500000, y: 0.500000, z: 0.500000}
   - !Name 
-    name: pbrball
+    name: pbrball00-00
   - !Collider 
     enabled: 1
     is_trigger: 0
@@ -29,3 +29,280 @@
     is_kinematic: 0
     restitution: 1.000000
     use_gravity: 1
+- !4295098368 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -1.061162, y: 0.728270, z: -0.108691}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.500000, y: 0.500000, z: 0.500000}
+  - !Name 
+    name: pbrball05-00
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+- !8590065664 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0.479355, y: 0.590792, z: -0.326576}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.500000, y: 0.500000, z: 0.500000}
+  - !Name 
+    name: pbrball10-00
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+- !12885032960 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -2.457264, y: 0.522017, z: 1.211417}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.480000, y: 0.480000, z: 0.480000}
+  - !Name 
+    name: pbrball00-05
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+- !17180000256 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -1.196026, y: 0.608286, z: 1.510674}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.510000, y: 0.510000, z: 0.510000}
+  - !Name 
+    name: pbrball05-05
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+- !21474967552 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0.298350, y: 0.689072, z: 1.387628}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.490000, y: 0.490000, z: 0.490000}
+  - !Name 
+    name: pbrball10-05
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+- !25769934848 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -2.554332, y: 0.715999, z: 2.547158}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.500000, y: 0.500000, z: 0.500000}
+  - !Name 
+    name: pbrball00-10
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+- !30064902144 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -1.301655, y: 0.840006, z: 2.828502}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.490000, y: 0.490000, z: 0.490000}
+  - !Name 
+    name: pbrball05-10
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+- !34359869440 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0.189561, y: 0.711679, z: 2.789898}
+    rotation: 
+      w: 1.000000
+      x: -0.000000
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 0.500000, y: 0.500000, z: 0.500000}
+  - !Name 
+    name: pbrball10-10
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      radius: 1.000000
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+- !38654836736 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -1.444134, y: 2.304867, z: 2.958887}
+    rotation: 
+      w: 0.999992
+      x: -0.003955
+      y: -0.000000
+      z: -0.000000
+    scale: {x: 2.719104, y: 0.877735, z: 0.355990}
+  - !Name 
+    name: yolobox
+  - !RigidBody 
+    initial_velocity: {x: 0.000000, y: 0.000000, z: 0.000000}
+    inv_mass: 1.000000
+    is_kinematic: 0
+    restitution: 1.000000
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      axes: 
+        intern[0]: {x: 1.000000, y: 0.000000, z: 0.000000}
+        intern[1]: {x: 0.000000, y: 1.000000, z: 0.000000}
+        intern[2]: {x: 0.000000, y: 0.000000, z: 1.000000}
+      center: {x: 0.000000, y: 0.000000, z: 0.000000}
+      extents: {x: 1.000000, y: 1.000000, z: 1.000000}
