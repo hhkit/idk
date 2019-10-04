@@ -11,9 +11,10 @@ namespace idk
 		const Light* light;
 		mat4 operator()(const SpotLight& )
 		{
-			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
-			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
-			return look_at(v_pos, v_pos + v_dir, vec3{ 0,1,0 }).inverse();
+			auto trf = light->GetGameObject()->Transform();
+			vec3 v_pos = trf->GlobalPosition();
+			vec3 v_dir = trf->Forward();
+			return look_at(v_pos, v_pos + v_dir, trf->Up()).inverse();
 		}
 		mat4 LookAt(vec3 pos, vec3 target_point,vec3 up)
 		{
@@ -39,10 +40,11 @@ namespace idk
 		}
 		mat4 operator()(const DirectionalLight&)
 		{
-			vec3 v_pos = light->GetGameObject()->Transform()->GlobalPosition();
-			vec3 v_dir = light->GetGameObject()->Transform()->Forward();
+			auto trf = light->GetGameObject()->Transform();
+			vec3 v_pos = trf->GlobalPosition();
+			vec3 v_dir = trf->Forward();
 			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
-			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, -v_dir.z), vec3{ 0,1,0 });
+			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, v_dir.z), trf->Up());
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }

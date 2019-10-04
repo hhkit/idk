@@ -10,20 +10,20 @@ namespace idk
 {
 	struct LightData
 	{
-		int   index       = 0;
-		alignas(16) color light_color = color{1, 1, 1};
-		alignas(16) vec3  v_pos       = vec3{};
-		alignas(16) vec3  v_dir       = vec3{};
-		real  cos_inner = 0;
-		real  cos_outer = 1;
-		real  falloff     = 1;
-		real  shadow_bias{epsilon};
-		real  intensity{1.f};
-		alignas(16) mat4  vp {};
-		alignas(16) mat4  v {};
-		alignas(16) mat4  p{};
-		RscHandle<RenderTarget> light_map;
-		bool cast_shadow{true};
+		int   index       = 0;                            //4 ->16
+		alignas(16) color light_color = color{1, 1, 1};	  //32
+		alignas(16) vec3  v_pos       = vec3{};			  //48
+		alignas(16) vec3  v_dir       = vec3{};			  //64
+		real  cos_inner = 0;							  //68
+		real  cos_outer = 1;							  //72
+		real  falloff     = 1;							  //76
+		real  shadow_bias{epsilon};						  //80
+		real  intensity{1.f};							  //84
+		int cast_shadow{ true };						  //88 ->96
+		alignas(16) mat4  vp {};						  //160
+		alignas(16) mat4  v {};							  //
+		alignas(16) mat4  p{};							  //
+		RscHandle<RenderTarget> light_map;				  //
 	};
 
 	class Light

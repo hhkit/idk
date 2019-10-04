@@ -60,7 +60,7 @@ namespace idk
 		real  intensity          { 1.f };
 		color light_color        { 1.f };
 		rad   inner_angle        { 0.f };
-		rad   outer_angle        { half_pi };
+		rad   outer_angle        { half_pi/2 };
 		real  attenuation_radius { 1.f };
 		bool  use_inv_sq_atten   { true };
 
