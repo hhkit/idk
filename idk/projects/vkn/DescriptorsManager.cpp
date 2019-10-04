@@ -41,7 +41,7 @@ namespace idk::vkn
 				if (!allocated[i]&&num_ds>0)
 				{
 					auto pool = pools.TryGet(num_ds,type);
-					allocated[i++] = static_cast<bool>(pool);
+					allocated[i] = static_cast<bool>(pool);
 					if (pool)
 					{
 						//TODO compute num_ds with layout's number of descriptors
@@ -59,6 +59,7 @@ namespace idk::vkn
 						num_req[type] += num_ds;
 					}
 				}
+				++i;
 			}
 			for (auto& [type, num] : num_req)
 			{

@@ -156,6 +156,11 @@ namespace idk::vkn
 		auto mesh = std::make_unique<VulkanMesh>();
 		mesh_modder.RegisterAttribs(*mesh, attribs);
 		mesh_modder.SetIndexBuffer16(*mesh, index_buffer,s_cast<uint32_t>(indices.size()));
+
+		auto plane_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(Mesh::defaults[MeshType::Plane].guid);
+		
+		mesh_modder.RegisterAttribs(*plane_handle, attribs);
+		mesh_modder.SetIndexBuffer16(*plane_handle, index_buffer,s_cast<uint32_t>(indices.size()));
 		//After the map is created, pass in the remaining data as such
 		return mesh;
 	}
