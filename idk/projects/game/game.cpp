@@ -301,7 +301,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			};
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
 			auto m = light_map->GetMeta().textures[0]->GetMeta();
-			//m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			m.internal_format = ColorFormat::DEPTH_COMPONENT;
 			//m.format = InputChannels::DEPTH_COMPONENT;
 			m.filter_mode = FilterMode::Nearest;
 			m.uv_mode = UVMode::ClampToBorder;

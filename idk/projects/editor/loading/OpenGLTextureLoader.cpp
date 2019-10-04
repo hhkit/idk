@@ -50,6 +50,7 @@ namespace idk
 			case ColorFormat::RGBF_32		 : return GL_RGB32F;
 			case ColorFormat::RGBAF_16       : return GL_RGBA16F;
 			case ColorFormat::RGBAF_32       : return GL_RGBA32F;
+			case ColorFormat::SRGB: return GL_SRGB;
 			case ColorFormat::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
 			case ColorFormat::DXT1			 : return 0x83F1;
 			case ColorFormat::DXT3			 : return 0x83F2;
@@ -69,6 +70,7 @@ namespace idk
 			case  GL_RGB32F: return ColorFormat::RGBF_32;
 			case  GL_RGBA16F: return ColorFormat::RGBAF_16;
 			case  GL_RGBA32F: return ColorFormat::RGBAF_32;
+			case GL_SRGB: return ColorFormat::SRGB;
 			case  GL_DEPTH_COMPONENT: return ColorFormat::DEPTH_COMPONENT;
 			case  0x83F1: return ColorFormat::DXT1;
 			case  0x83F2: return ColorFormat::DXT3;

@@ -237,9 +237,6 @@ namespace idk
 
 
 		//_interface->Inputs()->Update(); //Moved to SceneView.cpp
-		
-
-
 		//_interface->ImGuiFrameUpdate();
 		
 		
