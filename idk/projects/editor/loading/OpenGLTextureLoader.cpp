@@ -415,7 +415,7 @@ namespace idk
 
 		const auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid, true);
 
-		const auto v = metadata.GetMeta<OpenGLTexture>();
+        auto v = metadata.GetMeta<OpenGLTexture>().value_or(Texture::Metadata{});
 
 		const char* filePath = path_to_resource.GetFullPath().data();
 
@@ -504,8 +504,8 @@ namespace idk
 				return texture_handle;
 		
 			//Get the original texture image data
-			v->internal_format = ogl::detail::FromLGLColor(li->internalFormat);
-			v->format = ogl::detail::FromLGLinputChannels(li->externalFormat);
+			v.internal_format = ogl::detail::FromLGLColor(li->internalFormat);
+			v.format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 			//Read the mip maps and create textures based on them
 			fread(data, 1, size, fp);
@@ -541,8 +541,8 @@ namespace idk
 			assert(size == x * y * li->blockBytes);
 
 			//Get the original texture image data
-			v->internal_format = ogl::detail::FromLGLColor(li->internalFormat);
-			v->format = ogl::detail::FromLGLinputChannels(li->externalFormat);
+			v.internal_format = ogl::detail::FromLGLColor(li->internalFormat);
+			v.format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 
 			//get the data for the image
@@ -616,7 +616,7 @@ namespace idk
 
 		//Store the path of the image
 
-		texture_handle->SetMeta(*v);
+		texture_handle->SetMeta(v);
 		//Unbind the image
 		//temp_t->Unbind();
 		glBindTexture(GL_TEXTURE_2D, 0);

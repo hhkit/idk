@@ -10,7 +10,7 @@ nodes:
     control_values: ""
     guid: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
     input_slots: []
-    name: input\VertexNormal
+    name: input\Vertex Normal
     output_slots: 
     - {type: VEC3, value: ""}
     position: {x: 169.000000, y: 165.000000}
