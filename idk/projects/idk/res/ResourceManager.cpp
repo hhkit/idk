@@ -104,9 +104,9 @@ namespace idk
 						if constexpr (has_tag_v<Rs, Saveable>)
 						{
 							if constexpr (Rs::autosave)
-								for (const auto& [guid, res_cb] : resource_man->GetTable<Rs>())
+								for (auto& [guid, res_cb] : resource_man->GetTable<Rs>())
 								{
-									const auto h = RscHandle<Rs>{ guid };
+									auto h = RscHandle<Rs>{ guid };
 									if (h->IsDirty())
 									{
 										resource_man->Save(h);
@@ -152,7 +152,7 @@ namespace idk
 		for (auto& func : defaults_table)
 			func(this);
 
-		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::ALL))
+		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::FILE))
 			Load(elem);
 	}
 
@@ -306,7 +306,7 @@ namespace idk
 			else
 				return loader->LoadFile(path);
 		}();
-		const auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
+		auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
 		assert(success);
 
 		itr->second.is_new = !s_cast<bool>(meta_bundle);
