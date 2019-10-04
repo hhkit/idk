@@ -10,6 +10,11 @@ namespace idk
 	};
 	enum AttribFormat
 	{
+		eIVec1,//int32
+		eIVec2,//int32
+		eIVec3,//int32
+		eIVec4,//int32
+		eSVec1,//Single Precision Floats
 		eSVec2,//Single Precision Floats
 		eSVec3,//Single Precision Floats
 		eSVec4,//Single Precision Floats
@@ -30,6 +35,7 @@ namespace idk
 			//Must offset the next location by 3/4 when AttribFormat is Mat3/4
 			uint32_t     location{};
 			uint32_t     offset{};
+			bool  fixed_location = false;
 		};
 		binding_info           binding = {};
 		vector<attribute_info> attributes = {};
@@ -38,6 +44,7 @@ namespace idk
 			//Must offset the next location by 3/4 when AttribFormat is Mat3/4
 			, uint32_t     location
 			, uint32_t     offset
+			, bool fixed_location = false
 		);
 
 		buffer_desc Process(uint32_t location_offset)const;

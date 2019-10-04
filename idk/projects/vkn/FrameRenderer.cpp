@@ -14,6 +14,8 @@
 #include <vkn/VknFrameBuffer.h>
 #include <gfx/Light.h>
 
+#include <gfx/MeshRenderer.h>
+#include <anim/SkinnedMeshRenderer.h>
 
 namespace idk::vkn
 {
@@ -80,6 +82,33 @@ namespace idk::vkn
 
 		return pos_desc;
 	}
+	RscHandle<ShaderProgram> LoadShader(string filename, vector<buffer_desc> desc)
+	{
+		RscHandle<ShaderProgram> result;
+		{
+			//TODO figure this out
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			//if (!actualfile || !rsc.resources.size())
+			{
+
+				//vector<buffer_desc> desc{
+				//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+				//	BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+				//	BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				//};
+				Core::GetSystem<FileSystem>().Update();
+				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+				result = *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
+				auto& mod =result.as<ShaderModule>();
+				if(desc.size())
+					mod.AttribDescriptions(std::move(desc));
+				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			}
+		}
+		return result;
+	}
 	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
 		//Todo: Initialize the stuff
 		_view = view;
@@ -111,25 +140,55 @@ namespace idk::vkn
 		{
 			//TODO figure this out
 			string filename = "/assets/shader/mesh.vert";
-			auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			//if (!actualfile || !rsc.resources.size())
-			{
-
-				vector<buffer_desc> desc{
-					BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-					BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-					BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-				};
-				Core::GetSystem<FileSystem>().Update();
-				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
-				_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
-				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-			}
+			_mesh_renderer_shader_module=LoadShader(filename, {
+						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				});
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			////if (!actualfile || !rsc.resources.size())
+			//{
+			//
+			//	vector<buffer_desc> desc{
+			//		BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+			//	};
+			//	Core::GetSystem<FileSystem>().Update();
+			//	//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//	_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
+			//	_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+			//	//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+			//	//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			//}
 		}
-		//else
+		{
+			//TODO figure this out
+			string filename = "/assets/shader/skinned_mesh.vert";
+			_skinned_mesh_shader_module = LoadShader(filename, {
+						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+						//BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+				});
+			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
+			////if (!actualfile || !rsc.resources.size())
+			//{
+			//
+			//	vector<buffer_desc> desc{
+			//		BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
+			//		BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
+			//	};
+			//	Core::GetSystem<FileSystem>().Update();
+			//	//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
+			//	_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
+			//	_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
+			//	//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
+			//	//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
+			//}
+		}
 		//{
 		//	string filename = "/assets/shader/shadow.frag";
 		//	//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
@@ -343,31 +402,53 @@ namespace idk::vkn
 		string data;
 		return data;
 	}
-	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;
+	
+	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
+
 	template<typename T>
-	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, UboManager& ubo_manager)
 	{
 		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
 		//collated_layouts[obj_uni.layout].second++;
 		auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
+		//collated_bindings[obj_uni.set].emplace_back(
+		return ProcessedRO::BindingInfo
+		{
+			obj_uni.binding,
+			trf_buffer,
+			trf_offset,
+			0,
+			obj_uni.size,
+			obj_uni.layout
+		};
+		//);
+	}
+
+	template<typename T>
+	void PreProcUniform(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings, UboManager& ubo_manager)
+	{
+		//collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
+		////collated_layouts[obj_uni.layout].second++;
+		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
 		collated_bindings[obj_uni.set].emplace_back(
-			ProcessedRO::BindingInfo
-			{
-				obj_uni.binding,
-				trf_buffer,
-				trf_offset,
-				0,
-				obj_uni.size
-			}
+			CreateBindingInfo(obj_uni, val, collated_layouts, ubo_manager)
+			//ProcessedRO::BindingInfo
+			//{
+			//	obj_uni.binding,
+			//	trf_buffer,
+			//	trf_offset,
+			//	0,
+			//	obj_uni.size
+			//}
 		);
 	}
 	template<typename WTF>
-	void PreProcUniform(const UboInfo& obj_uni,uint32_t index, RscHandle<RenderTarget> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
+	void PreProcUniform(const UboInfo& obj_uni, uint32_t index, RscHandle<Texture> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
 	{
 		collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
 		//collated_layouts[obj_uni.layout].second++;
 		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
-		auto& texture = val->GetAttachment(AttachmentType::eDepth,0).as<VknTexture>();
+		auto& texture = val.as<VknTexture>();
 		collated_bindings[obj_uni.set].emplace_back(
 			ProcessedRO::BindingInfo
 			{
@@ -375,21 +456,111 @@ namespace idk::vkn
 				ProcessedRO::image_t{texture.ImageView(),*texture.sampler,vk::ImageLayout::eGeneral},
 				0,
 				index,
-				obj_uni.size
+				obj_uni.size,
+				obj_uni.layout
 			}
 		);
 	}
+	template<typename WTF>
+	void PreProcUniform(const UboInfo& obj_uni,uint32_t index, RscHandle<RenderTarget> val, FrameRenderer::DsBindingCount& collated_layouts, collated_bindings_t& collated_bindings)
+	{
+		//collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
+		//collated_layouts[obj_uni.layout].second++;
+		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
+		PreProcUniform<WTF>(obj_uni,index, val->GetAttachment(AttachmentType::eDepth, 0),collated_layouts, collated_bindings);
+	}
+	template<typename lol=void>
+	void BindBones(const UboInfo& info,const AnimatedRenderObject& aro, const vector<SkeletonTransforms>& bones, UboManager& ubos, FrameRenderer::DsBindingCount & collated_layouts, collated_bindings_t & collated_bindings)
+	{
+		auto&&[buffer,offset]=ubos.Add(bones[aro.skeleton_index]);
+		collated_bindings[info.set].emplace_back(info.binding,buffer,offset,0,info.size);
+	}
 
+	struct FrameRenderer::VertexUniformConfig
+	{
+		RscHandle<ShaderProgram> _shader;
+		//template<typename T= FrameRenderer>
+		struct Ref
+		{
+			using CollatedLayouts_t = DsBindingCount;
+			CollatedLayouts_t& collated_layouts;
+			UboManager& ubo_manager;
+			Ref(CollatedLayouts_t* cl = nullptr, UboManager* u = nullptr) :collated_layouts{ *cl }, ubo_manager{ *u }{}
+		};
+		Ref ref;
+		void SetRef(
+			DsBindingCount& collated_layouts,
+			//set, bindings
+			UboManager& ubo_manager)
+		{
+			new (&ref) Ref{ &collated_layouts,&ubo_manager };
+		}
+		ShaderModule& Shader()const
+		{
+			return _shader.as<ShaderModule>();
+		}
+		//struct ExBindingInfo
+		//{
+		//	ProcessedRO::BindingInfo info;
+		//	vk::DescriptorSetLayout layout;
+		//	operator ProcessedRO::BindingInfo& ()
+		//	{
+		//		return info;
+		//	}
+		//	ExBindingInfo(const ProcessedRO::BindingInfo& i, vk::DescriptorSetLayout l) : info{i},layout{l}
+		//	{
+		//	}
+		//};
+
+		vector<std::pair<uint32_t, ProcessedRO::BindingInfo>> binding_infos;//set, binding_info
+		template<typename T>
+		void RegisterBindingInfo(const string& name, const T& data)
+		{
+			auto& shader = Shader();
+			auto& uni_info = shader.GetLayout(name);
+			binding_infos.emplace_back(uni_info.set, CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
+		}
+		template<typename Tracker>
+		void BindRegistered(collated_bindings_t& collated_bindings,Tracker&& tracker)
+		{
+			for (auto& info : binding_infos)
+			{
+				collated_bindings[info.first].emplace_back(info.second);
+				tracker(info.second.layout, ref.collated_layouts);
+			}
+		}
+		template<typename T, typename Tracker>
+		void BindOnce(collated_bindings_t& collated_bindings, const string& name, const T& data, Tracker tracker)
+		{
+			auto& shader = Shader();
+			auto& uni_info = shader.GetLayout(name);
+			collated_bindings[uni_info.set].emplace_back(CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
+			tracker(uni_info.layout,ref.collated_layouts);
+		}
+		VertexUniformConfig()
+		{
+		}
+	};
+
+
+	//Possible Idea: Create a Pipeline object that tracks currently bound descriptor sets
 	std::pair<vector<FrameRenderer::ProcessedRO>, FrameRenderer::DsBindingCount> FrameRenderer::ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager)
 	{
-		const vector<const RenderObject*>& draw_calls = state.mesh_render;
+
+		VertexUniformConfig mesh_config, skinned_mesh_config;
 		const CameraData& cam = state.camera;
 		auto& vkn_fb = cam.render_target.as<VknFrameBuffer>();
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
-		
-		const vector<LightData>& tmp_light = *state.lights;
 
+
+		vector<LightData> tmp_light = *state.lights;
+		for (auto& light : tmp_light)
+		{
+			light.v_pos = cam.view_matrix * vec4{ light.v_pos,1 };
+			light.v_dir = (cam.view_matrix * vec4{ light.v_dir,0 }).get_normalized();
+
+		}
 
 		string light_block;
 		uint32_t len = s_cast<uint32_t>(tmp_light.size());
@@ -397,7 +568,15 @@ namespace idk::vkn
 		light_block += string( 16-sizeof(len), '\0');
 		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		auto msprog = GetMeshRendererShaderModule();
+
+		
 		auto& msmod = msprog.as<ShaderModule>();
+
+		mesh_config._shader = msprog;
+		mesh_config.SetRef(collated_layouts, ubo_manager);
+		skinned_mesh_config._shader = _skinned_mesh_shader_module;
+		skinned_mesh_config.SetRef(collated_layouts, ubo_manager);
+
 
 		auto V = cam.view_matrix;//cam.ProjectionMatrix() * cam.ViewMatrix();
 		mat4 pvt_trf = mat4{ 1,0,0,0,
@@ -410,7 +589,7 @@ namespace idk::vkn
 		auto& obj_uni = msmod.GetLayout("ObjectMat4Block");
 		mat4 pbr_trf = V.inverse();
 		;
-		auto mesh_mod = GetMeshRendererShaderModule();
+		auto mesh_mod = msprog;
 		//Force pipeline creation
 		vector<RscHandle<ShaderProgram>> shaders;
 
@@ -424,9 +603,189 @@ namespace idk::vkn
 			}
 			tracking_table[layout] = index;
 		};
+		auto bind_incr = [&layout_incrementer](auto& tracking_table, int index)
+		{
+			return [&layout_incrementer, &tracking_table, index](auto layout, auto& layout_count)
+			{
+				layout_incrementer(tracking_table, layout, index, layout_count);
+			};
+		};
+
+
+
 		int itr_index = 0;
+		mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf        );
+		skinned_mesh_config.RegisterBindingInfo("CameraBlock", pvt_trf);
+
+
+
+
+		{
+			const vector<const RenderObject*>& draw_calls = state.mesh_render;
+			for (auto& ptr_dc : draw_calls)
+			{
+				auto& dc = *ptr_dc;
+				//Force pipeline creation
+				shaders.resize(0);
+
+				auto& mat_inst = *dc.material_instance;
+				auto& mat = *mat_inst.material;
+				;
+				auto sprog = mat._shader_program;
+				std::optional<RscHandle<ShaderProgram>> mesh_shd, geom_shd, frag_shd;
+				mesh_shd = msprog;
+
+				auto* fprog = (cam.is_shadow)?nullptr:&sprog.as<ShaderModule>();
+				auto& vprog = mesh_mod.as<ShaderModule>();
+
+				if ((!fprog&&!cam.is_shadow) || !mat_inst.material || !vprog)
+					continue;
+
+				shaders.emplace_back(mesh_mod);
+				if (fprog)
+				{
+					shaders.emplace_back(*(frag_shd = sprog));
+				}
+				//TODO Grab everything and render them
+				//Maybe change the config to be a managed resource.
+				//Force pipeline creation
+				auto config = *dc.config;
+				config.render_pass_type = vkn_fb.rp_type;
+				GetPipeline(config, shaders);
+				//set, bindings
+				hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
+				auto& layouts = sprog.as<ShaderModule>();
+				auto& lit_uni = layouts.GetLayout("LightBlock");
+				auto& pbr_uni = layouts.GetLayout("PBRBlock");
+
+				//Account for the object and normal transform bindings
+				mat4 obj_trf = V * dc.transform;
+				mat4 obj_ivt= obj_trf.inverse().transpose();
+				vector<mat4> mat4_block{obj_trf,obj_ivt};
+				PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
+				layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
+				if (!cam.is_shadow)
+				{
+
+
+					PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
+					layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
+
+					PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings, ubo_manager);
+					layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
+				}
+				//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
+				//PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
+				mesh_config.BindRegistered(collated_bindings, bind_incr(set_tracker, itr_index));
+				//layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
+
+
+				if (!cam.is_shadow)
+				{
+					auto& layout = fprog->GetLayout("shadow_maps");
+					uint32_t i = 0;
+					for (auto& shadow_map : state.active_lights)
+					{
+						auto& sm_uni = shadow_map->light_map;
+						{
+							PreProcUniform<int>(layout, i++, sm_uni, collated_layouts, collated_bindings);
+							layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+						}
+					}
+					for (; i < layout.size; ++i)
+					{
+						PreProcUniform<int>(layout, i, RscHandle<Texture>{}, collated_layouts, collated_bindings);
+						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+					}
+				}
+				if (fprog)
+				{
+					//Account for material bindings
+					for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
+					{
+						auto& name = itr->first;
+						auto& mat_inst = *dc.material_instance;
+						auto mat_uni_itr = mat_inst.GetUniform(itr->first);
+						if (!mat_uni_itr)
+						{
+							mat_uni_itr = mat_inst.GetUniform(itr->first + "[0]");
+						}
+							
+						if (mat_uni_itr || mat_inst.IsUniformBlock(itr->first))
+						{
+							auto& ubo_info = itr->second;
+							auto& layout = ubo_info.layout;
+							{
+								layout_incrementer(set_tracker, layout, itr_index, collated_layouts);
+								//collated_layouts[layout].second++;
+
+								switch (ubo_info.type)
+								{
+								case uniform_layout_t::UniformType::eBuffer:
+								{
+									auto&& data = dc.material_instance->GetUniformBlock(name);
+									auto&& [buffer, offset] = ubo_manager.Add(data);
+									collated_bindings[ubo_info.set].emplace_back(
+										ProcessedRO::BindingInfo
+										{
+											ubo_info.binding,
+											buffer,
+											offset,
+											0,
+											ubo_info.size,
+											layout
+										}
+									);
+									collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
+								}
+								break;
+								case uniform_layout_t::UniformType::eSampler:
+								{
+									//for (auto i = ubo_info.size; i-- > 0;)
+									{
+										auto&& data = dc.material_instance->GetImageBlock(name);// +((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
+										if (data.size())
+										{
+											uint32_t i = 0;
+											for (auto& htex : data)
+											{
+												auto& texture = htex.as<vkn::VknTexture>();
+												collated_bindings[ubo_info.set].emplace_back(
+													ProcessedRO::BindingInfo
+													{
+														ubo_info.binding,
+														ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+														0,
+														i,
+														ubo_info.size,
+												layout
+													}
+												);
+												++i;
+											}
+
+										}
+									}
+									//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
+									collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+								}
+								break;
+								}
+							}
+						}
+
+					}
+				}
+				itr_index++;
+				result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config, mesh_shd,geom_shd,frag_shd });
+			}
+		}
+
+		{
+		const vector<const AnimatedRenderObject*>& draw_calls = state.skinned_mesh_render;
 		for (auto& ptr_dc : draw_calls)
 		{
+			std::optional<RscHandle<ShaderProgram>> mesh_shd, geom_shd, frag_shd;
 			auto& dc = *ptr_dc;
 			//Force pipeline creation
 			shaders.resize(0);
@@ -435,16 +794,16 @@ namespace idk::vkn
 			auto& mat = *mat_inst.material;
 			;
 			auto sprog = mat._shader_program;
-			
-			auto* fprog = (cam.is_shadow)?nullptr:&sprog.as<ShaderModule>();
-			auto& vprog = mesh_mod.as<ShaderModule>();
 
-			if ((!fprog&&!cam.is_shadow) || !mat_inst.material || !vprog)
+			auto* fprog = (cam.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
+			mesh_shd = _skinned_mesh_shader_module;
+			auto& vprog = mesh_shd->as<ShaderModule>();
+			if ((!fprog && !cam.is_shadow) || !mat_inst.material || !vprog)
 				continue;
 
-			shaders.emplace_back(mesh_mod);
-			if(fprog)
-				shaders.emplace_back(sprog);
+			shaders.emplace_back(*mesh_shd);
+			if (fprog)
+				shaders.emplace_back( *(frag_shd=sprog));
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			//Force pipeline creation
@@ -459,10 +818,15 @@ namespace idk::vkn
 
 			//Account for the object and normal transform bindings
 			mat4 obj_trf = V * dc.transform;
-			mat4 obj_ivt= obj_trf.inverse().transpose();
-			vector<mat4> mat4_block{obj_trf,obj_ivt};
-			PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
-			layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
+			mat4 obj_ivt = obj_trf.inverse().transpose();
+			vector<mat4> mat4_block{ obj_trf,obj_ivt };
+			//PreProcUniform(obj_uni, mat4_block, collated_layouts, collated_bindings, ubo_manager);
+			skinned_mesh_config.BindOnce(collated_bindings, "ObjectMat4Block", mat4_block, bind_incr(set_tracker, itr_index));
+			//layout_incrementer(set_tracker, obj_uni.layout, itr_index, collated_layouts);
+
+			
+			skinned_mesh_config.BindOnce(collated_bindings, "BoneMat4Block", state.GetSkeletonTransforms()[dc.skeleton_index].bones_transforms,bind_incr(set_tracker,itr_index));
+
 			if (!cam.is_shadow)
 			{
 
@@ -470,28 +834,35 @@ namespace idk::vkn
 				PreProcUniform(pbr_uni, pbr_trf, collated_layouts, collated_bindings, ubo_manager);
 				layout_incrementer(set_tracker, pbr_uni.layout, itr_index, collated_layouts);
 
-				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings,ubo_manager);
+				PreProcUniform(lit_uni, light_block, collated_layouts, collated_bindings, ubo_manager);
 				layout_incrementer(set_tracker, lit_uni.layout, itr_index, collated_layouts);
 			}
 			//PreProcUniform(nml_uni, obj_ivt, collated_layouts, collated_bindings,ubo_manager);
-			PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
-			layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
+			//PreProcUniform(pvt_uni, pvt_trf, collated_layouts, collated_bindings,ubo_manager);
+			skinned_mesh_config.BindRegistered(collated_bindings, bind_incr(set_tracker, itr_index));
+			//layout_incrementer(set_tracker, pvt_uni.layout, itr_index, collated_layouts);
 
 
 			if (!cam.is_shadow)
 			{
+				auto& layout = fprog->GetLayout("shadow_maps");
+				uint32_t i = 0;
 				for (auto& shadow_map : state.active_lights)
 				{
 					auto& sm_uni = shadow_map->light_map;
 					{
-						auto& layout = fprog->GetLayout("shadow_maps");
-						PreProcUniform<int>(layout,0, sm_uni, collated_layouts, collated_bindings );
+						PreProcUniform<int>(layout, i++, sm_uni, collated_layouts, collated_bindings);
 						layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
 					}
 				}
-
+				for (; i < layout.size; ++i)
+				{
+					PreProcUniform<int>(layout, i, RscHandle<Texture>{}, collated_layouts, collated_bindings);
+					layout_incrementer(set_tracker, layout.layout, itr_index, collated_layouts);
+				}
+				
 			}
-			if(fprog)
+			if (fprog)
 			{
 				//Account for material bindings
 				for (auto itr = layouts.InfoBegin(), end = layouts.InfoEnd(); itr != end; ++itr)
@@ -499,8 +870,8 @@ namespace idk::vkn
 					auto& name = itr->first;
 					auto mat_uni_itr = dc.material_instance->GetUniform(itr->first);
 					if (!mat_uni_itr)
-						mat_uni_itr = dc.material_instance->GetUniform(itr->first+"[0]");
-					if (mat_uni_itr )
+						mat_uni_itr = dc.material_instance->GetUniform(itr->first + "[0]");
+					if (mat_uni_itr)
 					{
 						auto& ubo_info = itr->second;
 						auto& layout = ubo_info.layout;
@@ -510,58 +881,83 @@ namespace idk::vkn
 
 							switch (ubo_info.type)
 							{
-								case uniform_layout_t::UniformType::eBuffer:
-								{
-									auto&& data = dc.material_instance->GetUniformBlock(name);
-									auto&& [buffer, offset] = ubo_manager.Add(data);
-									collated_bindings[ubo_info.set].emplace_back(
-										ProcessedRO::BindingInfo
-										{
-											ubo_info.binding,
-											buffer,
-											offset,
-											0,
-											ubo_info.size
-										}
-									);
-									collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
-								}
-								break;
-								case uniform_layout_t::UniformType::eSampler:
+							case uniform_layout_t::UniformType::eBuffer:
+							{
+								auto&& data = dc.material_instance->GetUniformBlock(name);
+								auto&& [buffer, offset] = ubo_manager.Add(data);
+								collated_bindings[ubo_info.set].emplace_back(
+									ProcessedRO::BindingInfo
 									{
-										for (auto i = ubo_info.size; i-- > 0;)
-										{
-											auto&& data = dc.material_instance->GetImageBlock(name + ((ubo_info.size>1)?"[" + std::to_string(i) + "]":""));
-											if (data.size())
-											{
-
-												auto& texture = data.begin()->second.as<vkn::VknTexture>();
-												collated_bindings[ubo_info.set].emplace_back(
-													ProcessedRO::BindingInfo
-													{
-														ubo_info.binding,
-														ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
-														0,
-														i,
-														ubo_info.size
-													}
-												);
-
-											}
-										}
-										//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
-										collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+										ubo_info.binding,
+										buffer,
+										offset,
+										0,
+										ubo_info.size,
+											layout
 									}
-									break;
+								);
+								collated_layouts[layout].first = vk::DescriptorType::eUniformBuffer;
+							}
+							break;
+							case uniform_layout_t::UniformType::eSampler:
+							{
+								//for (auto i = ubo_info.size; i-- > 0;)
+								{
+									auto&& data = dc.material_instance->GetImageBlock(name);// +((ubo_info.size > 1) ? "[" + std::to_string(i) + "]" : ""));
+									if (data.size())
+									{
+										uint32_t i = 0;
+										for (auto& htex : data)
+										{
+											auto& texture = htex.as<vkn::VknTexture>();
+											collated_bindings[ubo_info.set].emplace_back(
+												ProcessedRO::BindingInfo
+												{
+													ubo_info.binding,
+													ProcessedRO::image_t{*texture.imageView,*texture.sampler,vk::ImageLayout::eGeneral},
+													0,
+													i,
+													ubo_info.size,
+											layout
+												}
+											);
+											++i;
+										}
+										uint32_t total = ubo_info.size;
+										for (; i < total; ++i)
+										{
+											collated_bindings[ubo_info.set].emplace_back(
+												ProcessedRO::BindingInfo
+												{
+													ubo_info.binding,
+													ProcessedRO::image_t{vk::ImageView{},vk::Sampler{},vk::ImageLayout::eGeneral},
+													0,
+													i,
+													ubo_info.size,
+											layout
+												}
+											);
+										}
+
+									}
+								}
+								//TODO the pairing is wrong, if two bindings in the same set are of different types, this will cause 1 to be overriden.
+								collated_layouts[layout].first = vk::DescriptorType::eCombinedImageSampler;
+							}
+							break;
 							}
 						}
-						}
-				
+					}
+
 				}
 			}
 			itr_index++;
-			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config });
+			result.first.emplace_back(ProcessedRO{ &dc,std::move(collated_bindings),dc.config,mesh_shd,geom_shd,frag_shd });
 		}
+		}
+
+
+
 		return result;
 	}
 	
@@ -677,9 +1073,9 @@ namespace idk::vkn
 				auto ds = aitr->second.GetNext();
 				UpdateUniformDS(*View().Device(), ds, vector<ProcessedRO::BindingInfo>{ 
 					ProcessedRO::BindingInfo{
-						0,view_buffer,vb_offset,0,sizeof(mat4)
+						0,view_buffer,vb_offset,0,sizeof(mat4),itr->second
 					},
-					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4) }
+					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
 				});
 				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, 0, ds, {});
 			}
@@ -777,14 +1173,19 @@ namespace idk::vkn
 		{
 			auto& obj = p_ro.Object();
 			shaders.resize(0);
-			shaders.emplace_back(GetMeshRendererShaderModule());
-			auto msprog = GetMeshRendererShaderModule();
-			auto sprog = (camera.is_shadow)? _shadow_shader_module : obj.material_instance->material->_shader_program;
+			//shaders.emplace_back(GetMeshRendererShaderModule());
+			auto msprog = *p_ro.vertex_shader;//GetMeshRendererShaderModule();
+			auto sprog = (camera.is_shadow) ? _shadow_shader_module : *p_ro.frag_shader;//obj.material_instance->material->_shader_program;
 			auto* fprog = (camera.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
+			auto opt_gprog = p_ro.geom_shader;
 			if ((!camera.is_shadow && !obj.material_instance) || !msprog)
 				continue;
 			if(fprog)
 				shaders.emplace_back(sprog);
+			if(opt_gprog)
+				shaders.emplace_back(*opt_gprog);
+			shaders.emplace_back(msprog);
+
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			auto config = *p_ro.config;
@@ -801,13 +1202,12 @@ namespace idk::vkn
 			for (auto& [set_index,binfo] : p_ro.bindings)
 			{
 				//Get the descriptor set layout for the current set
-				auto layout_itr = layouts.find(set_index);
-				if (layout_itr != layouts.end())
+				//auto layout_itr = layouts.find(set_index);
+				//if (layout_itr != layouts.end())
 				{
 					//Find the allocated pool of descriptor sets that matches the descriptor set layout
-					auto ds_itr = alloced_dsets.find(layout_itr->second);
-					if (ds_itr == alloced_dsets.end())
-						ds_itr = alloced_dsets.find(layout_itr->second);
+					auto layout = binfo.front().GetLayout();
+					auto ds_itr = alloced_dsets.find(layout);
 					if(ds_itr!=alloced_dsets.end())
 					{
 						//Get a descriptor set from the allocated pool
@@ -820,12 +1220,14 @@ namespace idk::vkn
 				}
 			}
 			
-			auto& bindings = obj.attrib_bindings;
-			for (auto&& [bindingz, attrib] : bindings)
+			auto& renderer_req = *obj.renderer_req;
+			
+			for (auto&& [attrib, location] : renderer_req.requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(bindingz, *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 			}
+			
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
 			{

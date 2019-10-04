@@ -38,7 +38,7 @@ namespace idk::vkn
 			for (auto& [layout, des] : allocations)
 			{
 				auto& [type, num_ds] = des;
-				if (!allocated[i])
+				if (!allocated[i]&&num_ds>0)
 				{
 					auto pool = pools.TryGet(num_ds,type);
 					allocated[i++] = static_cast<bool>(pool);

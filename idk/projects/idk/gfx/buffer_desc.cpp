@@ -2,10 +2,11 @@
 #include "buffer_desc.h"
 namespace idk
 {
-size_t buffer_desc::AddAttribute(AttribFormat format, uint32_t location, uint32_t offset)
+size_t buffer_desc::AddAttribute(AttribFormat format, uint32_t location, uint32_t offset,bool fixed_location)
 {
 	const size_t index = attributes.size();
 	attribute_info attrib{ format,location,offset };
+	attrib.fixed_location = fixed_location;
 	if (attrib.format == eMat3 || attrib.format == eMat4)
 	{
 		int count = ((attrib.format == eMat3) ? 3 : 4) - 1;
@@ -27,7 +28,8 @@ buffer_desc buffer_desc::Process(uint32_t location_offset) const
 	transformed.binding = binding;
 	for (auto attrib : attributes)
 	{
-		attrib.location += location_offset;
+		if(!attrib.fixed_location)
+			attrib.location += location_offset;
 		if (attrib.format == eMat3 || attrib.format == eMat4)
 		{
 			int count = ((attrib.format == eMat3) ? 3 : 4) - 1;
