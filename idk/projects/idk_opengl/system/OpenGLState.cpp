@@ -111,6 +111,17 @@ namespace idk::ogl
 			pipeline.SetUniform("ObjectMat4s.model_transform", render_obj.transform);
 		};
 
+		const auto SetSkeletons = [this, &curr_object_buffer](int skeleton_index)
+		{
+			auto& skeleton = curr_object_buffer.skeleton_transforms[skeleton_index];
+			for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
+			{
+				auto& transform = skeleton.bones_transforms[i];
+				string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
+				pipeline.SetUniform(bone_transform_blk, transform);
+			}
+		};
+
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			pipeline.Use();
@@ -157,15 +168,7 @@ namespace idk::ogl
 					// bind shader
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
 
-					// Setting bone transforms
-					auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
-					for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
-					{
-						auto& transform = skeleton.bones_transforms[i];
-						string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
-						pipeline.SetUniform(bone_transform_blk, transform);
-					}
-
+					SetSkeletons(elem.skeleton_index);
 					SetObjectUniforms(elem, light_view_tfm);
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 				}
@@ -376,9 +379,6 @@ namespace idk::ogl
 						auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
 						t.as<OpenGLTexture>().BindToUnit(texture_units);
 
-						//auto t = light.light_map.as<FrameBuffer>();
-						//auto u = t.GetMeta();
-						//u.textures[0].as<OpenGLTexture>().BindToUnit(texture_units);
 						pipeline.SetUniform(lightblk + "vp", light.vp);
 						(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
 						texture_units++;
@@ -387,17 +387,7 @@ namespace idk::ogl
 				}
 
 				// Setting bone transforms
-				auto& skeleton = curr_object_buffer.skeleton_transforms[elem.skeleton_index];
-				for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
-				{
-					auto& transform = skeleton.bones_transforms[i];
-					string bone_transform_blk = "BoneMat4s[" + std::to_string(i) + "].bone_transform";
-					pipeline.SetUniform(bone_transform_blk, transform);
-				}
-
-				// set uniforms
-				// object uniforms
-
+				SetSkeletons(elem.skeleton_index);
 				SetObjectUniforms(elem, cam.view_matrix);
 
 				// material uniforms
