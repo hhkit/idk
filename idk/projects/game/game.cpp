@@ -73,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::OpenGL;
+	auto gfx_api = (HasArg(L"--vulkan", command_lines, num_args))?GraphicsAPI::Vulkan:GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
@@ -124,7 +124,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//camHandle->is_orthographic = true;
 		//camHandle->orthographic_size = 10.f;
 		//camHandle->render_target->AddAttachment(eDepth);
-		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
+		camHandle->clear = color{ 0.3f,0.3f,0.5f,1 };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
 		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
@@ -151,7 +151,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto animator = go->AddComponent<Animator>();
 
 		//Temp condition, since mesh loader isn't in for vulkan yet
-		if (gfx_api != GraphicsAPI::Vulkan)
+		//if (gfx_api != GraphicsAPI::Vulkan)
 		{
 			auto resources_running = Core::GetResourceManager().Load(path);
 
@@ -202,7 +202,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// @Joseph: Uncomment this when testing.
 	create_anim_obj(vec3{ 1.796,0,-1.781 });
-	create_mesh_obj();	// Create just a mesh object
+	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
 		auto go = scene->CreateGameObject();
@@ -287,27 +287,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		auto light = scene->CreateGameObject();
 		light->Name("Directional Light");
-		light->GetComponent<Transform>()->position = vec3{ 1.749,1.699,1.054f };
+		light->GetComponent<Transform>()->position = vec3{0,0.5f,-0.5f};// vec3{ 1.749f,1.699f,1.054f };
 		euler_angles rot;
-		rot.x = deg{ 94 };
-		rot.y = deg{ -9 };
-		rot.z = deg{ -49 };
+		rot.x = deg{45};//deg{ 94 };
+		rot.y = deg{0};//deg{ -9 };
+		rot.z = deg{0};//deg{ -49 };
 		light->Transform()->rotation = s_cast<quat>(rot);
 		auto light_comp = light->AddComponent<Light>();
 		{
-			light_comp->light = DirectionalLight{
+			auto light_type = DirectionalLight{
 				real{1.f},
 				color{0.5,0,1}
 			};
+			//light_type.attenuation_radius = 0.01f;
+			light_comp->light = light_type;
+
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
-			auto m = light_map->GetMeta().textures[0]->GetMeta();
-			m.internal_format = ColorFormat::DEPTH_COMPONENT;
-			//m.format = InputChannels::DEPTH_COMPONENT;
-			m.filter_mode = FilterMode::Nearest;
-			m.uv_mode = UVMode::ClampToBorder;
-			//light_map->GetMeta().textures[0]->Size(ivec2{ 1024,1024 });
-			light_map->GetMeta().textures[0]->SetMeta(m);
-			light_comp->SetLightMap(light_map);
+			//auto m = light_map->GetMeta().textures[0]->GetMeta();
+			//m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			////light_map->GetMeta().textures[0]->Size(ivec2{ 1024,1024 });
+			//light_map->GetMeta().textures[0]->SetMeta(m);
+			//light_comp->SetLightMap(light_map);
 		}
 		light->AddComponent<TestComponent>();
 	}

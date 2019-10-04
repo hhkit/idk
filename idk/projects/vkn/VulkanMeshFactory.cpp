@@ -32,6 +32,60 @@ namespace idk::vkn
 	{
 	}
 
+	vec3 compute_tangent(vec3 p0, vec3 p1, vec3 p2, vec2 uv0, vec2 uv1, vec2 uv2)
+	{
+		vec3 p01 = p1 - p0;
+		vec3 p02 = p2 - p0;
+		float u02 = uv2.x - uv0.x;
+		float u01 = uv1.x - uv0.x;
+
+		float v02 = uv2.y - uv0.y;
+		float v01 = uv1.y - uv0.y;
+
+		float m = u01 * v02 - u02 * v01;
+
+		return v02 * p01 - v01 * p02;
+	}
+	template<typename T>
+	T zero_error(T val)
+	{
+		return (abs(val) <= constants::epsilon<T>()) ? 0 : val;
+	}
+
+	//Treats the indices as a triangle list
+	void compute_tangents(vector<vec3>& tangents, const vector<vec3>& pos, const vector<vec2>& uv, const vector<uint16_t>& indices)
+	{
+		tangents.resize(0);//clear
+		tangents.resize(pos.size());
+
+		for (int i = 0; i < indices.size()-3; i+=3)
+		{
+			auto i0 = indices[i], i1 = indices[i+1], i2 = indices[i+2];
+			vec3 tangent = compute_tangent(pos[i0], pos[i1], pos[i2], uv[i0], uv[i1], uv[i2]);
+
+			vec3 e01 = pos[i1] - pos[i0];
+			vec3 e02 = pos[i2] - pos[i0];
+			vec3 e12 = pos[i2] - pos[i1];
+			//N0 = E0 X  E1
+			real n0 =  e01.dot(e02);
+			//N1 = E2 X -E0
+			real n1 =  (-e01).dot(e12);
+			//N2 = -E1 X -E2  
+			real n2 = (-e02).dot(-e12);
+
+
+			tangents[i0] = tangent * s_cast<real>(acos(zero_error(n0)));
+			tangents[i1] = tangent * s_cast<real>(acos(zero_error(n1)));
+			tangents[i2] = tangent * s_cast<real>(acos(zero_error(n2)));
+
+		}
+		for (auto& tangent : tangents)
+		{
+			tangent.normalize();
+		}
+
+	}
+
 
 	unique_ptr<Mesh> MeshFactory::GenerateDefaultResource()
 	{
@@ -49,6 +103,13 @@ namespace idk::vkn
 			vec3{ 0, 1, 0},
 			vec3{ 0, 1, 0}
 		};
+		vector<vec3> tangents
+		{
+			vec3{ 1, 0, 0},
+			vec3{ 1, 0, 0},
+			vec3{ 1, 0, 0},
+			vec3{ 1, 0, 0}
+		};
 		vector<vec2> uv
 		{
 			vec2{ 0, 1},
@@ -61,7 +122,7 @@ namespace idk::vkn
 			0, 2, 1,
 			3, 2, 0,
 		};
-
+		compute_tangents(tangents, positions, uv, indices);
 
 		//@Joseph example:
 		//Create this map of attrib to a pair of shared_ptr to meshbuffer::managed and offset
@@ -71,6 +132,12 @@ namespace idk::vkn
 			//Use CreateData to create the buffer, then store the result with the offset.
 			//Since it's a shared ptr, you may share the result of CreateData with multiple attrib buffers
 			attribs[attrib_index::Position] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
+		}
+		{
+			auto& buffer = tangents;
+			//Use CreateData to create the buffer, then store the result with the offset.
+			//Since it's a shared ptr, you may share the result of CreateData with multiple attrib buffers
+			attribs[attrib_index::Tangent] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 
 		{

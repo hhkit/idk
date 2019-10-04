@@ -23,12 +23,13 @@ namespace idk
 
 			cast_shadows,
 			receive_shadows,
-			{
-				{0,vtx::Attrib::Position},
-				{1,vtx::Attrib::Normal},
-				{2,vtx::Attrib::UV},
-				{3,vtx::Attrib::Tangent},
-			}
+			&GetRequiredAttributes()
+			//{
+			//	{0,vtx::Attrib::Position},
+			//	{1,vtx::Attrib::Normal},
+			//	{2,vtx::Attrib::UV},
+			//	{3,vtx::Attrib::Tangent},
+			//}
 		};
 	}
 

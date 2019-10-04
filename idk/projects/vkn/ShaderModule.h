@@ -46,6 +46,8 @@ namespace idk::vkn
 		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
 		bool HasUpdate()const override { return buf_obj.HasUpdate(); }
 		void UpdateCurrent(size_t index)override { buf_obj.UpdateCurrent(index); }
+		
+		std::optional<uint32_t> GetBinding(uint32_t location)const { return buf_obj.Current().GetBinding(location); }
 
 		ShaderModule() = default;
 		ShaderModule(const ShaderModule&) = default;
@@ -61,6 +63,8 @@ namespace idk::vkn
 			hash_table<string, UboInfo> ubo_info;
 			hash_table<uint32_t, vk::UniqueDescriptorSetLayout> layouts;
 			vector<buffer_desc> attrib_descriptions;
+			hash_table<uint32_t, uint32_t> loc_to_bind;
+			std::optional<uint32_t> GetBinding(uint32_t location)const;
 			vk::UniqueShaderModule module;
 		};
 		Data& Current()

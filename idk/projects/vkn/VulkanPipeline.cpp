@@ -146,6 +146,15 @@ namespace idk::vkn
 		}
 	}
 
+	std::optional<uint32_t> VulkanPipeline::GetBinding(uint32_t location) const
+	{
+		std::optional<uint32_t> result;
+		auto itr = loc2bind.find(location);
+		if (itr != loc2bind.end())
+			result = itr->second;
+		return result;
+	}
+
 	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan)
 	{
 		auto& m_device = vulkan.Device();
@@ -154,6 +163,13 @@ namespace idk::vkn
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
+
+		loc2bind.clear();
+
+		for (auto& attr : attr_desc)
+		{
+			loc2bind.emplace(attr.location, attr.binding);
+		}
 
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
 			vk::PipelineVertexInputStateCreateFlags{}

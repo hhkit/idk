@@ -11,10 +11,10 @@ Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450 
-#ifndef OGL
-#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
-#define BLOCK(X) X
-#endif
+//#ifndef OGL
+//#define U_LAYOUT(SET, BIND) layout(set = SET, binding = BIND) 
+//#define BLOCK(X) X
+//#endif
 #define MAX_BONES 100
 
 layout (location = 0) in vec3 position;
@@ -37,8 +37,8 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 
 U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 {
-	mat4 bone_transform;
-} BoneMat4s[MAX_BONES];
+	mat4 bone_transform[MAX_BONES];
+} BoneMat4s;
 
 layout (location = 0) out gl_PerVertex
 {
@@ -57,11 +57,11 @@ layout (location = 1) out VS_OUT
 
 void main()
 {
-	mat4 b_transform =  BoneMat4s[bone_ids[0]].bone_transform * bone_weights[0];
-	
-	b_transform      += BoneMat4s[bone_ids[1]].bone_transform * bone_weights[1];
-	b_transform      += BoneMat4s[bone_ids[2]].bone_transform * bone_weights[2];
-	b_transform      += BoneMat4s[bone_ids[3]].bone_transform * bone_weights[3];
+  mat4 b_transform =  BoneMat4s.bone_transform[bone_ids[0]] * bone_weights[0];
+  
+  b_transform      += BoneMat4s.bone_transform[bone_ids[1]] * bone_weights[1];
+  b_transform      += BoneMat4s.bone_transform[bone_ids[2]] * bone_weights[2];
+  b_transform      += BoneMat4s.bone_transform[bone_ids[3]] * bone_weights[3];
 	
 	b_transform /= (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3]);
 	mat4 resultant = ObjectMat4s.object_transform *

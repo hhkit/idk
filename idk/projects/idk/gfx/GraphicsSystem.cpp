@@ -7,7 +7,13 @@
 #include <gfx/RenderObject.h>
 namespace idk
 {
-
+	void GraphicsSystem::PrepareLights(span<Light> lights)
+	{
+		for (auto& light : lights)
+		{
+			light.InitShadowMap();
+		}
+	}
 	void GraphicsSystem::BufferedLightData(vector<LightData>& out)
 	{
 		out = object_buffer[curr_draw_buffer].lights;
@@ -64,7 +70,8 @@ namespace idk
 			const auto parent = elem.GetGameObject()->Parent();
 			const auto animator = parent->GetComponent<Animator>();
 			ro.skeleton_index = skeleton_indices[animator];
-			result.skinned_mesh_render.emplace_back(ro);
+			ro.config = mesh_render_config;
+			result.skinned_mesh_render.emplace_back(std::move(ro));
 		}
 
 		for (auto& camera : cameras)
@@ -90,5 +97,37 @@ namespace idk
 		SwapWritingBuffer();
 	}
 
+	//GraphicsSystem::TempLight::TempLight(const Light& l, GraphicsSystem& sys) :light{ l }
+	//{
+	//	auto init_map = [](auto& light) {
+	//		return light.InitShadowMap();
+	//	};
+	//	auto get_id = [](auto& light) {
+	//		return light.unique_id();
+	//	};
+	//	;
+	//	auto id = std::visit(get_id, l.light);
+	//	auto& pool = sys.shadow_map_pool[id];
+	//	auto& next_index = sys.shadow_map_pool_index[id];
+	//	if (pool.size() <= next_index)
+	//	{
+	//		pool.emplace_back(std::visit(init_map, l.light));
+	//	}
+	//	shadow_map = pool[next_index++];
+	//}
+
+	//CameraData GraphicsSystem::TempLight::GenerateCameraData()
+	//{
+	//	auto data =light.GenerateCameraData();
+	//	data.render_target = shadow_map;
+	//	return data;
+	//}
+	//
+	//LightData GraphicsSystem::TempLight::GenerateLightData()
+	//{
+	//	auto data = light.GenerateLightData();
+	//	data.light_map = shadow_map;
+	//	return data;
+	//}
 
 }

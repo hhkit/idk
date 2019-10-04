@@ -23,15 +23,30 @@ namespace idk
 		}
 		return ret;
 	}
-	hash_table<string, RscHandle<Texture>> MaterialInstance::GetImageBlock(const string& name) const
+	vector<RscHandle<Texture>> MaterialInstance::GetImageBlock(const string& name) const
 	{
 		//TODO actually get a block
-		hash_table<string, RscHandle<Texture>> result;
+		vector<RscHandle<Texture>> result;
 		auto uni= GetUniform(name);
 		if (uni)
 		{
 			//Todo, replace name with the individual names in the block
-			result.emplace(name, std::get<RscHandle<Texture>>(*uni));
+			result.emplace_back(std::get<RscHandle<Texture>>(*uni));
+		}
+		else
+		{
+			int i = 0;
+			bool should_stop = false;
+			while (!should_stop)
+			{
+				auto opt= GetUniform(name + "[" + std::to_string(i) + "]");
+				if (opt)
+				{
+					result.emplace_back(std::get<RscHandle<Texture>>(*opt));
+				}
+				should_stop = !opt;
+				++i;
+			}
 		}
 		return result;
 	}
@@ -52,13 +67,20 @@ namespace idk
 		}
 		return result;
 	}
+	bool MaterialInstance::IsUniformBlock(string_view name) const
+	{
+		return name.substr(0,sizeof("_UB")-1)=="_UB";
+	}
 	string MaterialInstance::GetUniformBlock(const string& name) const
 	{
         // https://www.khronos.org/registry/OpenGL/specs/gl/glspec45.core.pdf pg 138
 
-        auto& mat = *material;
+		string data;
+		if (IsUniformBlock(name))
+		{
+			auto& mat = *material;
+
         const shadergraph::ValueType type = std::stoi(name.data() + sizeof("_UB") - 1);
-        string data;
 
         switch (type)
         {
@@ -114,6 +136,7 @@ namespace idk
             break;
         }
 
+		}
 		return data;
 	}
 }

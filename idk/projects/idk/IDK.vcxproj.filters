@@ -989,6 +989,7 @@
     <ClCompile Include="script\ScriptSystem.cpp">
       <Filter>script</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\LightTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
