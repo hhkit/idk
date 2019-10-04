@@ -27,6 +27,10 @@ layout(location = 1) in vec3 inColor;
 layout(location = 2) in mat4 model;
 
 layout(location = 2) out vec4 fragColor;
+layout(location = 0) out gl_PerVertex
+{
+    vec4 gl_Position;
+};
 
 //layout(location = 1) out vec4 color;
 void main() {
