@@ -156,8 +156,8 @@ namespace idk::ogl
 		const auto SetMaterialUniforms = [this](RscHandle<MaterialInstance> material_instance, GLuint& texture_units)
 		{
 			auto instance_uniforms = material_instance->material->uniforms;
-			for (auto& [id, uniform] : material_instance->uniforms)
-				instance_uniforms.emplace(id, uniform);
+            for (auto& [id, uniform] : material_instance->uniforms)
+                instance_uniforms[id] = uniform;
 
 			for (auto& [id, uniform] : instance_uniforms)
 			{

@@ -32,6 +32,9 @@
  * math
  *========================================================================*/
 
+REFLECT_BEGIN(float, "float") REFLECT_END()
+REFLECT_BEGIN(int, "int") REFLECT_END()
+
 REFLECT_BEGIN(idk::vec2, "vec2")
 REFLECT_CTOR(float, float)
 REFLECT_VARS(x, y)
@@ -270,11 +273,11 @@ REFLECT_VARS(intensity, light_color, attenuation_radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
-REFLECT_VARS(intensity, light_color)
+REFLECT_VARS(intensity, light_color, width,height)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SpotLight, "SpotLight")
-REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius)
+REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")

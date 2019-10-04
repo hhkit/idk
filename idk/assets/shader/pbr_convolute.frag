@@ -21,7 +21,7 @@ layout (location = 3) in VS_OUT
 
 S_LAYOUT(6,1) uniform samplerCube sb;
 
-out vec4 out_color;
+layout(location=0)out vec4 out_color;
 
 const float PI = 3.1415926535;
 const float HALF_PI = PI / 2;

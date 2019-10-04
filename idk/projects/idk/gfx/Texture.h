@@ -15,6 +15,7 @@ namespace idk
         RGBF_32,
         RGBAF_16,
         RGBAF_32,
+		SRGB,
 		DEPTH_COMPONENT,
 		DXT1,
 		DXT3,

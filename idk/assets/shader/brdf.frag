@@ -1,6 +1,6 @@
 #version 450 core
 
-out vec2 color;
+layout(location=0) out vec2 color;
 
 layout(location = 2) in VS_OUT
 {

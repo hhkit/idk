@@ -59,18 +59,22 @@ namespace idk::vkn
 			uint32_t buffer_offset;
 			uint32_t arr_index;
 			size_t size;
+			vk::DescriptorSetLayout layout;
+
 			BindingInfo(
 				uint32_t binding_,
 				vk::Buffer& ubuffer_,
 				uint32_t buffer_offset_,
 				uint32_t arr_index_,
-				size_t size_
+				size_t size_,
+				vk::DescriptorSetLayout layout_
 			) :
 				binding{ binding_ },
 				ubuffer{ ubuffer_ },
 				buffer_offset{ buffer_offset_ },
 				arr_index{ arr_index_ },
-				size{ size_ }
+				size{ size_ },
+				layout{ layout_ }
 			{
 			}
 			BindingInfo(
@@ -78,13 +82,15 @@ namespace idk::vkn
 				image_t ubuffer_,
 				uint32_t buffer_offset_,
 				uint32_t arr_index_,
-				size_t size_
+				size_t size_,
+				vk::DescriptorSetLayout layout_
 			) :
 				binding{ binding_ },
 				ubuffer{ ubuffer_ },
 				buffer_offset{ buffer_offset_ },
 				arr_index{ arr_index_ },
-				size{ size_ }
+				size{ size_ },
+				layout{ layout_ }
 			{
 			}
 			std::optional<vk::Buffer> GetBuffer()const
@@ -102,6 +108,10 @@ namespace idk::vkn
 					ret = std::get<Type>(ubuffer);
 				return ret;
 			}
+			vk::DescriptorSetLayout GetLayout()const
+			{
+				return layout;
+			}
 		};
 		const RenderObject& Object()const
 		{
@@ -112,6 +122,10 @@ namespace idk::vkn
 		const RenderObject* itr;
 		hash_table<uint32_t, vector<BindingInfo>> bindings;
 		shared_ptr<pipeline_config> config;
+
+		std::optional<RscHandle<ShaderProgram>> vertex_shader;
+		std::optional<RscHandle<ShaderProgram>> geom_shader;
+		std::optional<RscHandle<ShaderProgram>> frag_shader;
 	};
 	class PipelineManager;
 	struct RenderStateV2
@@ -143,6 +157,7 @@ namespace idk::vkn
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 	private:
+		struct VertexUniformConfig;
 		using ProcessedRO=vkn::ProcessedRO;
 		using DsBindingCount =hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>;
 		class IRenderThread
@@ -184,6 +199,7 @@ namespace idk::vkn
 
 		VulkanView*                            _view                       {};
 		RscHandle<ShaderProgram>               _mesh_renderer_shader_module{};
+		RscHandle<ShaderProgram>               _skinned_mesh_shader_module{};
 		RscHandle<ShaderProgram>               _shadow_shader_module{};
 		PipelineManager*                       _pipeline_manager           {};
 		vector<RenderStateV2>                  _states                     {};

@@ -226,7 +226,7 @@ namespace idk
 		// prefab_root->Transform()->scale /= 200.0f;
 
 		auto shader_template = *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
-		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat");
+		auto h_mat = *Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false);
 		h_mat->Compile();
 		const auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 		mat_inst->material = h_mat;

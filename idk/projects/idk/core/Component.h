@@ -32,8 +32,7 @@ namespace idk
 	private:
 		Handle<GameObject> _gameObject;
 		friend class GameObject;
-		template<typename>
-		friend struct detail::TableGenerator;
+		template<typename> friend struct detail::TableGenerator;
 		GenericComponent() = default;
 		template<typename T, bool> friend class Component;
 	};

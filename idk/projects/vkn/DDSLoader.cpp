@@ -81,10 +81,27 @@ namespace idk::vkn
 		}
 		return block_size;
 	}
-
+	size_t compressed_size([[maybe_unused]]BlockType type, size_t uncompressed_size)
+	{
+		const size_t result = uncompressed_size;
+		//switch (type)
+		//{
+		//case BlockType::eBC1:
+		//	result = uncompressed_size / 6;
+		//	break;
+		//
+		//case BlockType::eBC2:
+		//case BlockType::eBC3:
+		//	result = uncompressed_size / 4;
+		//	break;
+		//default:
+		//	break;
+		//}
+		return result;
+	}
 	size_t DdsFileInternal::NumBytes() const
 	{
-		return s_cast<size_t>(header.width) * s_cast<size_t>(header.height);
+		return compressed_size(this->GetBlockType(), s_cast<size_t>(header.width) * s_cast<size_t>(header.height));
 	}
 
 	hash_table<BlockType, TextureFormat> MapBlockTypeToTextureFormat()

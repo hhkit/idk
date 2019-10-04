@@ -3,6 +3,7 @@
 #include <res/ResourceHandle.h>
 namespace idk
 {
+    namespace detail { template<typename T> struct ResourceManager_detail; }
 
 	template<typename Res>
 	class Resource

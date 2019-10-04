@@ -6,8 +6,11 @@
 
 namespace idk
 {
+    RESOURCE_EXTENSION(MaterialInstance, ".matinst")
+
 	class MaterialInstance
 		: public Resource<MaterialInstance>
+        , public Saveable<MaterialInstance>
 	{
 	public:
 		RscHandle<Material> material;
@@ -15,8 +18,9 @@ namespace idk
 		hash_table<string, UniformInstance> uniforms;
 
 		bool IsImageBlock(const string& name)const;
-		hash_table<string, RscHandle<Texture>> GetImageBlock(const string& name)const;
+		vector<RscHandle<Texture>> GetImageBlock(const string& name)const;
 		std::optional<UniformInstance> GetUniform(const string& name)const;
+		bool IsUniformBlock(string_view name)const;
 		string GetUniformBlock(const string& name)const;
 	};
 }

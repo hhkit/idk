@@ -20,6 +20,8 @@ of the editor.
 #include <editor/IDE.h>
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
+#include <gfx/MaterialInstance.h>
+#include <editor/DragDropTypes.h>
 
 #include <iostream>
 #include <filesystem>
@@ -28,7 +30,7 @@ namespace fs = std::filesystem;
 namespace idk {
 
 	IGE_ProjectWindow::IGE_ProjectWindow()
-		: IGE_IWindow{ "Project##ProjectWindow", true, ImVec2{ 800,200 }, ImVec2{ 200,200 } }, selected_asset{ RscHandle<Texture>() }
+		: IGE_IWindow{ "Project##ProjectWindow", true, ImVec2{ 800,200 }, ImVec2{ 200,200 } }
     {
         window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
         current_dir = "/assets";
@@ -377,9 +379,13 @@ namespace idk {
             {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    DragDrop::SetResourcePayload(getOrLoadFirstAsset(path));
-                    ImGui::Text("Drag to inspector button.");
-                    ImGui::Text(path.GetMountPath().data());
+                    auto get_res = Core::GetResourceManager().Get(path);
+                    if (get_res && get_res->Count())
+                    {
+                        DragDrop::SetResourcePayload(*get_res);
+                        ImGui::Text("Drag to inspector button.");
+                        ImGui::Text(path.GetMountPath().data());
+                    }
                     ImGui::EndDragDropSource();
                 }
             }
@@ -395,8 +401,14 @@ namespace idk {
                 renaming_selected_asset = false;
                 if (!path.IsDir())
                 {
-                    selected_asset = getOrLoadFirstAsset(selected_path);
-                    OnAssetSelected.Fire(selected_asset);
+                    auto get_res = Core::GetResourceManager().Get(path);
+                    if (get_res && get_res->Count())
+                    {
+                        selected_assets.clear();
+                        for (auto h : get_res->GetAll())
+                            selected_assets.push_back(h);
+                        OnAssetsSelected.Fire(span<GenericResourceHandle>(selected_assets));
+                    }
                 }
             }
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
@@ -404,7 +416,32 @@ namespace idk {
                 if (path.IsDir())
                     current_dir = path;
                 else
-                    OnAssetDoubleClicked.Fire(selected_asset);
+                    OnAssetDoubleClicked.Fire(selected_assets[0]);
+            }
+
+            if(ImGui::BeginPopupContextItem(path.GetMountPath().data()))
+            {
+                if (path.GetExtension() == shadergraph::Graph::ext)
+                {
+                    if (ImGui::MenuItem("Create Material Instance"))
+                    {
+                        auto create_path = string{ current_dir.GetMountPath() } + "/NewMaterialInstance" + string{ MaterialInstance::ext };
+                        int i = 0;
+                        while (PathHandle(create_path)) // already exists
+                        {
+                            create_path = string{ current_dir.GetMountPath() } + "NewMaterialInstance";
+                            create_path += std::to_string(++i);
+                            create_path += MaterialInstance::ext;
+                        }
+                        auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
+                        if (res && *res)
+                        {
+                            res.value()->material = *Core::GetResourceManager().Get<Material>(path);
+                            Core::GetResourceManager().Save(*res);
+                        }
+                    }
+                }
+                ImGui::EndPopup();
             }
 
             if (++col == icons_per_row)
