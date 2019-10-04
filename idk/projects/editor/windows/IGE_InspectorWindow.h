@@ -52,6 +52,8 @@ namespace idk {
 
         void DisplayAsset(GenericResourceHandle handle);
         void DisplayAsset(RscHandle<Prefab> prefab);
+        void DisplayAsset(RscHandle<MaterialInstance> material);
+        void DisplayAsset(RscHandle<Material> material);
 
         bool displayVal(reflect::dynamic dyn);
 

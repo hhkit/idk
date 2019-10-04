@@ -17,6 +17,7 @@ of the editor.
 #include "IGE_InspectorWindow.h"
 
 #include <IDE.h>
+#include <gfx/ShaderGraph.h>
 #include <editor/commands/CommandList.h>
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
@@ -97,6 +98,8 @@ namespace idk {
 		ImGui::PopStyleVar(1);
 
 		IDE& editor = Core::GetSystem<IDE>();
+
+        _prefab_inst = Handle<PrefabInstance>();
         if (_displayed_asset.guid())
         {
             DisplayAsset(_displayed_asset);
@@ -110,8 +113,6 @@ namespace idk {
     void IGE_InspectorWindow::DisplayGameObjects(vector<Handle<GameObject>> gos)
     {
         const size_t gameObjectsCount = gos.size();
-
-        _prefab_inst = Handle<PrefabInstance>();
 
         //DISPLAY
         if (gameObjectsCount == 1)
@@ -606,6 +607,11 @@ namespace idk {
                 if constexpr (std::is_same_v<ResT, Prefab>)
                     DisplayAsset(h);
 
+                if constexpr (std::is_same_v<ResT, MaterialInstance>)
+                    DisplayAsset(h);
+
+                if constexpr (std::is_same_v<ResT, Material>)
+                    DisplayAsset(h);
 
         }, handle);
     }
@@ -680,7 +686,92 @@ namespace idk {
         }
     }
 
+    void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material)
+    {
+        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
 
+        auto graph = RscHandle<shadergraph::Graph>{ material->material };
+        bool changed = false;
+
+        for (auto& [name, u] : material->material->uniforms)
+        {
+            if (u.index() == index_in_variant_v<RscHandle<Texture>, UniformInstance>)
+                continue;
+
+            auto y = ImGui::GetCursorPosY();
+
+            ImGui::SetCursorPosY(y + pad_y);
+
+            ImGui::PushID(name.c_str());
+            ImGui::PushItemWidth(item_width);
+
+            auto label = graph->parameters[std::stoi(name.data() + sizeof("_ub0._u") - 1)].name.c_str();
+            switch (u.index())
+            {
+            case index_in_variant_v<float, UniformInstance>:
+            {
+                auto val = std::get<index_in_variant_v<float, UniformInstance>>(*material->GetUniform(name));
+                ImGui::Text(label);
+                ImGui::SetCursorPosY(y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+                if (ImGui::DragFloat("", &val, 0.01f))
+                {
+                    material->uniforms[name] = val;
+                    changed = true;
+                }
+                break;
+            }
+
+
+            default:
+                break;
+            }
+
+            ImGui::PopItemWidth();
+            ImGui::PopID();
+        }
+
+        if (changed)
+            material->Dirty();
+    }
+
+    void IGE_InspectorWindow::DisplayAsset(RscHandle<Material> material)
+    {
+        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+
+        auto graph = RscHandle<shadergraph::Graph>{ material };
+
+        for (auto& [name, u] : material->uniforms)
+        {
+            if (u.index() == index_in_variant_v<RscHandle<Texture>, UniformInstance>)
+                continue;
+
+            auto y = ImGui::GetCursorPosY();
+
+            ImGui::SetCursorPosY(y + pad_y);
+
+            ImGui::PushID(name.c_str());
+            ImGui::PushItemWidth(item_width);
+
+            auto label = graph->parameters[std::stoi(name.data() + sizeof("_ub0._u") - 1)].name.c_str();
+            switch (u.index())
+            {
+            case index_in_variant_v<float, UniformInstance>:
+                ImGui::Text(label);
+                ImGui::SetCursorPosY(y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+                ImGui::DragFloat("", &std::get<index_in_variant_v<float, UniformInstance>>(u), 0.01f);
+
+            default:
+                break;
+            }
+
+            ImGui::PopItemWidth();
+            ImGui::PopID();
+        }
+    }
 
     bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
     {

@@ -32,6 +32,9 @@
  * math
  *========================================================================*/
 
+REFLECT_BEGIN(float, "float") REFLECT_END()
+REFLECT_BEGIN(int, "int") REFLECT_END()
+
 REFLECT_BEGIN(idk::vec2, "vec2")
 REFLECT_CTOR(float, float)
 REFLECT_VARS(x, y)

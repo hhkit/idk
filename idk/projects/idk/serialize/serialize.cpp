@@ -326,6 +326,13 @@ namespace idk
                 parse_yaml(node, held);
                 return;
             }
+            else if (obj.type.is_template<std::variant>())
+            {
+                auto dyn = reflect::get_type(node.tag()).create();
+                parse_yaml(node, dyn);
+                obj = dyn;
+                return;
+            }
 			else
 				throw "unhandled case?";
 		}

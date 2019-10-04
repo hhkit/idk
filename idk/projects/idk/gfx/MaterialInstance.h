@@ -6,8 +6,11 @@
 
 namespace idk
 {
+    RESOURCE_EXTENSION(MaterialInstance, ".matinst")
+
 	class MaterialInstance
 		: public Resource<MaterialInstance>
+        , public Saveable<MaterialInstance>
 	{
 	public:
 		RscHandle<Material> material;

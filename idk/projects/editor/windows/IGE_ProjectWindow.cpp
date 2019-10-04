@@ -20,6 +20,7 @@ of the editor.
 #include <editor/IDE.h>
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
+#include <gfx/MaterialInstance.h>
 #include <editor/DragDropTypes.h>
 
 #include <iostream>
@@ -416,6 +417,31 @@ namespace idk {
                     current_dir = path;
                 else
                     OnAssetDoubleClicked.Fire(selected_assets[0]);
+            }
+
+            if(ImGui::BeginPopupContextItem(path.GetMountPath().data()))
+            {
+                if (path.GetExtension() == shadergraph::Graph::ext)
+                {
+                    if (ImGui::MenuItem("Create Material Instance"))
+                    {
+                        auto create_path = string{ current_dir.GetMountPath() } + "/NewMaterialInstance" + string{ MaterialInstance::ext };
+                        int i = 0;
+                        while (PathHandle(create_path)) // already exists
+                        {
+                            create_path = string{ current_dir.GetMountPath() } + "NewMaterialInstance";
+                            create_path += std::to_string(++i);
+                            create_path += MaterialInstance::ext;
+                        }
+                        auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
+                        if (res && *res)
+                        {
+                            res.value()->material = *Core::GetResourceManager().Get<Material>(path);
+                            Core::GetResourceManager().Save(*res);
+                        }
+                    }
+                }
+                ImGui::EndPopup();
             }
 
             if (++col == icons_per_row)
