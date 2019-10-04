@@ -12,8 +12,7 @@
 #include <common/Name.h>
 #include <common/Transform.h>
 #include <serialize/serialize.h> //Serialize/Deserialize
-#include <IDE.h>		//IDE
-#include <iostream>		//IDE
+#include <IDE.h>				 //IDE
 
 namespace idk {
 
@@ -61,14 +60,12 @@ namespace idk {
 
 	bool CMD_DeleteGameObject::undo()
 	{
-		//game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-		
-		//if (game_object_handle) {
+
 		try {
 			RecursiveCreateObjects(gameobject_vector, true);
 		}
-		catch (bool fail) {
-			return false;
+		catch (const bool fail) {
+			return fail;
 		}
 
 		//Reassign all CMDs using Handle<GameObject> Big O(n^2)
@@ -83,10 +80,6 @@ namespace idk {
 		}
 
 		return true;
-		//}
-		//else {
-		//	return false;
-		//}
 	}
 
 	void CMD_DeleteGameObject::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
@@ -101,14 +94,12 @@ namespace idk {
 		SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(i);
 
 		if (children) {
-			//std::cout << "NUM OF CHILDREN: " << children->size() << std::endl;
 
 			//If there is no children, it will stop
 			children->visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
 				(void)depth;
 
 				//Skip parent
-				//std::cout << "CHILD: " << handle->GetComponent<Name>()->name << std::endl;
 				if (handle == i)
 					return true;
 
@@ -123,10 +114,7 @@ namespace idk {
 
 	void CMD_DeleteGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
 	{
-		//if (!i) {
-		//	i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-		//
-		//}
+
 		for (RecursiveObjects& object : vector_ref) {
 			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
 			if (isRoot) {

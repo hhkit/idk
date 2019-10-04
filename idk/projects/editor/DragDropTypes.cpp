@@ -1,19 +1,29 @@
 #include "pch.h"
-
 #include <imgui/imgui.h>
+
+#include "DragDropTypes.h"
 #include <res/GenericResourceHandle.h>
 
 namespace idk
 {
+    static vector<GenericResourceHandle> resource_payload;
 
     void DragDrop::SetResourcePayload(const GenericResourceHandle& handle)
     {
-        ImGui::SetDragDropPayload(RESOURCE, &handle, sizeof(handle));
+        resource_payload.clear();
+        resource_payload.push_back(handle);
+        ImGui::SetDragDropPayload(RESOURCE, resource_payload.data(), sizeof(GenericResourceHandle*));
     }
 
-    const GenericResourceHandle& DragDrop::GetResourcePayloadData(const ImGuiPayload* payload)
+    void DragDrop::SetResourcePayload(const ResourceBundle& bundle)
     {
-        return *reinterpret_cast<GenericResourceHandle*>(payload->Data);
+        resource_payload = vector<GenericResourceHandle>(bundle.GetAll().begin(), bundle.GetAll().end());
+        ImGui::SetDragDropPayload(RESOURCE, resource_payload.data(), sizeof(GenericResourceHandle*));
+    }
+
+    const vector<GenericResourceHandle>& DragDrop::GetResourcePayloadData()
+    {
+        return resource_payload;
     }
 
 }

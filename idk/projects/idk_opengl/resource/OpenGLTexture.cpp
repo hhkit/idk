@@ -45,6 +45,7 @@ namespace idk::ogl
 			case ColorFormat::RGBF_32: return GL_RGB32F;
 			case ColorFormat::RGBAF_16: return GL_RGBA16F;
 			case ColorFormat::RGBAF_32: return GL_RGBA32F;
+			case ColorFormat::SRGB: return GL_SRGB;
 			case ColorFormat::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
 			case ColorFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			case ColorFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
@@ -168,9 +169,6 @@ namespace idk::ogl
 
 	void OpenGLTexture::OnMetaUpdate(const TextureMeta& tex_meta)
 	{
-		UpdateUV(tex_meta.uv_mode);
-		UpdateFilter(tex_meta.filter_mode);
-		Buffer(nullptr, Size(),tex_meta.format,tex_meta.internal_format);
 
 		if (_isCompressedTexture)
 		{

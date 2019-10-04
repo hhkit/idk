@@ -54,9 +54,9 @@ namespace idk {
             {
                 _displayed_asset = RscHandle<Texture>();
             });
-        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetSelected.Listen([&](GenericResourceHandle h)
+        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetsSelected.Listen([&](span<GenericResourceHandle> handles)
             {
-                _displayed_asset = h;
+                _displayed_asset = handles[0];
             });
     }
 

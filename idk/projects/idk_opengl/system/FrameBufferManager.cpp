@@ -84,15 +84,22 @@ namespace idk::ogl
 
 			target->Bind();
 			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rbo_id);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
-			const GLuint buffers[] = { GL_DEPTH_ATTACHMENT };
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
+			GLuint buffers[] = { GL_DEPTH_ATTACHMENT };
 			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			glDrawBuffers(1, buffers);
 		}
 		else
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
+			TextureMeta mm = target->GetMeta();
+			if (mm.internal_format != ColorFormat::RGBAF_16)
+			{
+				mm.internal_format = ColorFormat::RGBAF_16;
+				target->SetMeta(mm);
+			}
 			target->Bind();
+
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
 			const GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
@@ -117,6 +124,12 @@ namespace idk::ogl
 		//auto& yolo = *meta.textures[0];
 		for (int i = 0; i < meta.textures.size(); ++i)
 		{
+			TextureMeta mm = meta.textures[i].as<OpenGLTexture>().GetMeta();
+			if (mm.internal_format != ColorFormat::RGBAF_16)
+			{
+				mm.internal_format = ColorFormat::RGBAF_16;
+				meta.textures[i].as<OpenGLTexture>().SetMeta(mm);
+			}
 			meta.textures[i].as<OpenGLTexture>().Bind();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);

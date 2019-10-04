@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GraphFactory.h"
 #include <res/MetaBundle.h>
+#include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <util/ioutils.h>
@@ -47,21 +48,33 @@ namespace idk
 
 	ResourceBundle GraphLoader::LoadFile(PathHandle p, const MetaBundle& m)
 	{
-		auto stream = p.Open(FS_PERMISSIONS::READ);
-		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(m.metadatas[0].guid);
+        auto stream = p.Open(FS_PERMISSIONS::READ);
 
-		if (stream)
-		{
-			parse_text(stringify(stream), *mat);
-			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
-			(discardme);
-		}
+        auto meta = m.FetchMeta<Material>();
+        const auto mat = meta 
+            ? Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(meta->guid)
+            : Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>();
 
-		auto meta = m.FetchMeta<Material>();
-		if (meta)
-			mat->SetMeta(*meta->GetMeta<Material>());
+        //const auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(m.metadatas[0].guid);
 
-		mat->Compile();
-		return mat;
+        if (stream)
+        {
+            parse_text(stringify(stream), *mat);
+            const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
+            (discardme);
+        }
+
+        if (meta)
+            mat->SetMeta(*meta->GetMeta<Material>());
+
+        mat->_default_instance = Core::GetResourceManager().LoaderEmplaceResource<MaterialInstance>(mat.guid);
+        mat->_default_instance->material = mat;
+
+        mat->Compile();
+
+        ResourceBundle b;
+        b.Add(mat);
+        b.Add(mat->_default_instance);
+        return b;
 	}
 }

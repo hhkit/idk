@@ -73,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = GraphicsAPI::Vulkan;
+	auto gfx_api = (HasArg(L"--vulkan", command_lines, num_args))?GraphicsAPI::Vulkan:GraphicsAPI::OpenGL;
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
@@ -137,7 +137,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
+	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
     //auto test___ = mat_inst->GetUniformBlock("_UB1");
 
@@ -295,11 +295,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		light->Transform()->rotation = s_cast<quat>(rot);
 		auto light_comp = light->AddComponent<Light>();
 		{
-			auto light_type = SpotLight{//DirectionalLight{
+			auto light_type = DirectionalLight{
 				real{1.f},
-				color{1.0f,1.0f,1.0f}// 0.5,0,1 }
+				color{0.5,0,1}
 			};
-			light_type.attenuation_radius = 0.01f;
+			//light_type.attenuation_radius = 0.01f;
 			light_comp->light = light_type;
 
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();

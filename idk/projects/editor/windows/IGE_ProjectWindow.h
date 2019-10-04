@@ -28,14 +28,14 @@ namespace idk
 		virtual void BeginWindow() override;
         virtual void Update() override;
 
-        Signal<GenericResourceHandle> OnAssetSelected;
+        Signal<span<GenericResourceHandle>> OnAssetsSelected;
         Signal<GenericResourceHandle> OnAssetDoubleClicked;
 
 	private:
         PathHandle current_dir;
         PathHandle clicked_path;
         PathHandle selected_path;
-        GenericResourceHandle selected_asset;
+        vector<GenericResourceHandle> selected_assets;
 
         void displayDir(PathHandle dir);
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);
