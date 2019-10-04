@@ -5,6 +5,8 @@
 
 namespace idk
 {
+    struct GenericResourceHandle;
+
 	struct ResourceBundle
 	{
 		template<typename T>

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "InputResource.h"
 #include <imgui/imgui_internal.h>
-#include <res/ResourceHandle.h>
+#include <editor/DragDropTypes.h>
 #include <IncludeResources.h>
 #include <map>
 
@@ -34,15 +34,19 @@ namespace idk
         {
             if (const auto* payload = AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
             {
-                const auto& payload_handle = DragDrop::GetResourcePayloadData(payload);
+                auto res_payload = DragDrop::GetResourcePayloadData();
 
-                if (payload_handle.resource_id() == base_resource_id)
+                for (auto& h : res_payload)
                 {
-                    hovered = true;
-                    if (payload->IsDelivery())
+                    if (h.resource_id() == handle->resource_id())
                     {
-                        *handle = payload_handle;
-                        dropped = true;
+                        hovered = true;
+                        if (payload->IsDelivery())
+                        {
+                            *handle = h;
+                            dropped = true;
+                        }
+                        break;
                     }
                 }
             }

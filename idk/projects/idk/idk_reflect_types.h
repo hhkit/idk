@@ -62,6 +62,7 @@ namespace idk::reflect
 
 		// graphics
 		, RscHandle<Mesh>
+		, RscHandle<MaterialInstance>
 		, UniformInstance
 		, hash_table<string, UniformInstance>
 		, std::variant<color, RscHandle<CubeMap>> // camera clear

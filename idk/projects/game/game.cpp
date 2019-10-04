@@ -137,7 +137,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
+	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
     //auto test___ = mat_inst->GetUniformBlock("_UB1");
 

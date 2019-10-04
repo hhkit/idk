@@ -7,6 +7,7 @@
 #include <gfx/ShaderGraph_helpers.h>
 #include <editor/widgets/InputResource.h>
 #include <editor/widgets/EnumCombo.h>
+#include <editor/DragDropTypes.h>
 #include <regex>
 #include <filesystem>
 
