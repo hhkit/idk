@@ -164,6 +164,10 @@ REFLECT_BEGIN(idk::Material, "Material")
 REFLECT_VARS(_shader_program, uniforms)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::UniformInstance, "UniformInstance")
+REFLECT_VARS(name, value)
+REFLECT_END()
+
 REFLECT_ENUM(idk::BlendMode, "BlendMode")
 REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
 REFLECT_ENUM(idk::ShadingModel, "ShadingModel")

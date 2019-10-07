@@ -95,13 +95,13 @@
     <ClInclude Include="windows\IGE_ProfilerWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
-    <ClInclude Include="widgets\DragVec3.h">
-      <Filter>widgets</Filter>
-    </ClInclude>
     <ClInclude Include="widgets\DragQuat.h">
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="imguidk.h" />
+    <ClInclude Include="widgets\DragVec.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -175,13 +175,13 @@
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
-    <ClCompile Include="widgets\DragVec3.cpp">
-      <Filter>widgets</Filter>
-    </ClCompile>
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
     <ClCompile Include="widgets\DragQuat.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\DragVec.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,12 +5,12 @@ links:
   slot_in: 1
   slot_out: 0
 - node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
-  node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
-  slot_in: 2
-  slot_out: 0
-- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
   node_out: 9d40ef6d-0b8d-409f-af98-b2fec6f67472
   slot_in: 3
+  slot_out: 0
+- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+  node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
+  slot_in: 2
   slot_out: 0
 master_node: 9550e80c-4d2f-4e84-8d65-9a29295b539c
 nodes: 

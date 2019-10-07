@@ -606,7 +606,9 @@ namespace idk
         if (ImGui::IsWindowAppearing())
             filter.Clear();
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetFrameHeight() * 0.5f);
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_WindowBg));
         filter.Draw("", ImGui::GetWindowContentRegionWidth());
+        ImGui::PopStyleColor();
         ImGui::PopStyleVar();
 
         ImGui::BeginChild("nodes");

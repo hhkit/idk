@@ -196,7 +196,7 @@
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
     <ClInclude Include="widgets\DragQuat.h" />
-    <ClInclude Include="widgets\DragVec3.h" />
+    <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
     <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
@@ -239,7 +239,7 @@
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
     <ClCompile Include="widgets\DragQuat.cpp" />
-    <ClCompile Include="widgets\DragVec3.cpp" />
+    <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp" />

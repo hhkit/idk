@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "DragQuat.h"
-#include <editor/widgets/DragVec3.h>
+#include <editor/widgets/DragVec.h>
 #include <math/euler_angles.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

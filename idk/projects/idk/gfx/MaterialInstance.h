@@ -14,12 +14,11 @@ namespace idk
 	{
 	public:
 		RscHandle<Material> material;
-		//Change this to be a map of name -> some struct that represents an entire block
-		hash_table<string, UniformInstance> uniforms;
+		hash_table<string, UniformInstanceValue> uniforms;
 
 		bool IsImageBlock(const string& name)const;
 		vector<RscHandle<Texture>> GetImageBlock(const string& name)const;
-		std::optional<UniformInstance> GetUniform(const string& name)const;
+		std::optional<UniformInstanceValue> GetUniform(const string& name)const;
 		bool IsUniformBlock(string_view name)const;
 		string GetUniformBlock(const string& name)const;
 	};

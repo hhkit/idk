@@ -155,13 +155,11 @@ namespace idk::ogl
 
 		const auto SetMaterialUniforms = [this](RscHandle<MaterialInstance> material_instance, GLuint& texture_units)
 		{
-			auto instance_uniforms = material_instance->material->uniforms;
-            for (auto& [id, uniform] : material_instance->uniforms)
-                instance_uniforms[id] = uniform;
-
-			for (auto& [id, uniform] : instance_uniforms)
+			for (auto& [name, uniform] : material_instance->material->uniforms)
 			{
-				std::visit([this, &texture_units](auto& elem, string_view id) {
+                auto val = *material_instance->GetUniform(name);
+				std::visit([this, &texture_units, id = uniform.name](auto& elem)
+                {
 					using T = std::decay_t<decltype(elem)>;
 					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
 					{
@@ -173,7 +171,24 @@ namespace idk::ogl
 					}
 					else
 						pipeline.SetUniform(id, elem);
-					}, uniform, std::variant<string_view>{id});
+				}, val);
+			}
+			for (auto& uniform : material_instance->material->hidden_uniforms)
+			{
+				std::visit([this, &texture_units, id = uniform.name](auto& elem)
+                {
+					using T = std::decay_t<decltype(elem)>;
+					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+					{
+						const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+						texture->BindToUnit(texture_units);
+						pipeline.SetUniform(id, texture_units);
+
+						++texture_units;
+					}
+					else
+						pipeline.SetUniform(id, elem);
+				}, uniform.value);
 			}
 		};
 

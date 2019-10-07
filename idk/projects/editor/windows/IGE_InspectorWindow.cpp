@@ -595,23 +595,39 @@ namespace idk {
 
 
 
+    static string get_asset_name(const GenericResourceHandle& handle)
+    {
+        return std::visit([](auto h) -> string
+        {
+            auto name = h->Name();
+            auto path = Core::GetResourceManager().GetPath(h);
+            if (!name.empty())
+                return string{ name };
+            else if (path)
+                return string{ PathHandle{ *path }.GetStem() };
+        }, handle);
+    }
+
     void IGE_InspectorWindow::DisplayAsset(GenericResourceHandle handle)
     {
-        ImGui::Text(string(handle.guid()).c_str());
+        ImGui::Text(get_asset_name(handle).c_str());
 
         std::visit([&](auto h)
         {
-                using ResT = typename decltype(h)::Resource;
-                auto path = Core::GetResourceManager().GetPath(h);
+            using ResT = typename decltype(h)::Resource;
+            auto path = Core::GetResourceManager().GetPath(h);
 
-                if constexpr (std::is_same_v<ResT, Prefab>)
-                    DisplayAsset(h);
+            ImGui::Text(format_name(reflect::get_type<ResT>().name()).c_str());
+            ImGui::Text(string(handle.guid()).c_str());
 
-                if constexpr (std::is_same_v<ResT, MaterialInstance>)
-                    DisplayAsset(h);
+            if constexpr (std::is_same_v<ResT, Prefab>)
+                DisplayAsset(h);
 
-                if constexpr (std::is_same_v<ResT, Material>)
-                    DisplayAsset(h);
+            if constexpr (std::is_same_v<ResT, MaterialInstance>)
+                DisplayAsset(h);
+
+            if constexpr (std::is_same_v<ResT, Material>)
+                DisplayAsset(h);
 
         }, handle);
     }
@@ -696,25 +712,40 @@ namespace idk {
 
         for (auto& [name, u] : material->material->uniforms)
         {
-            if (u.index() == index_in_variant_v<RscHandle<Texture>, UniformInstance>)
-                continue;
-
-            auto y = ImGui::GetCursorPosY();
+            const auto y = ImGui::GetCursorPosY();
 
             ImGui::SetCursorPosY(y + pad_y);
 
             ImGui::PushID(name.c_str());
+
+            bool has_override = material->uniforms.find(name) != material->uniforms.end();
+            if (ImGui::Checkbox("##override", &has_override))
+            {
+                if (has_override)
+                    material->uniforms[name] = material->material->uniforms[name].value;
+                else
+                    material->uniforms.erase(name);
+            }
+            ImGui::SameLine();
+
             ImGui::PushItemWidth(item_width);
 
-            auto label = graph->parameters[std::stoi(name.data() + sizeof("_ub0._u") - 1)].name.c_str();
-            switch (u.index())
+            if (!has_override)
             {
-            case index_in_variant_v<float, UniformInstance>:
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_TitleBg));
+            }
+
+            ImGui::Text(name.c_str());
+            ImGui::SetCursorPosY(y);
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+
+            switch (u.value.index())
             {
-                auto val = std::get<index_in_variant_v<float, UniformInstance>>(*material->GetUniform(name));
-                ImGui::Text(label);
-                ImGui::SetCursorPosY(y);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+            case index_in_variant_v<float, UniformInstanceValue>:
+            {
+                auto val = std::get<index_in_variant_v<float, UniformInstanceValue>>(*material->GetUniform(name));
                 if (ImGui::DragFloat("", &val, 0.01f))
                 {
                     material->uniforms[name] = val;
@@ -722,10 +753,55 @@ namespace idk {
                 }
                 break;
             }
-
+            case index_in_variant_v<vec2, UniformInstanceValue>:
+            {
+                auto val = std::get<index_in_variant_v<vec2, UniformInstanceValue>>(*material->GetUniform(name));
+                if (ImGuidk::DragVec2("", &val, 0.01f))
+                {
+                    material->uniforms[name] = val;
+                    changed = true;
+                }
+                break;
+            }
+            case index_in_variant_v<vec3, UniformInstanceValue>:
+            {
+                auto val = std::get<index_in_variant_v<vec3, UniformInstanceValue>>(*material->GetUniform(name));
+                if (ImGuidk::DragVec3("", &val, 0.01f))
+                {
+                    material->uniforms[name] = val;
+                    changed = true;
+                }
+                break;
+            }
+            case index_in_variant_v<vec4, UniformInstanceValue>:
+            {
+                auto val = std::get<index_in_variant_v<vec4, UniformInstanceValue>>(*material->GetUniform(name));
+                if (ImGui::DragFloat4("", val.data(), 0.01f))
+                {
+                    material->uniforms[name] = val;
+                    changed = true;
+                }
+                break;
+            }
+            case index_in_variant_v<RscHandle<Texture>, UniformInstanceValue>:
+            {
+                auto val = std::get<index_in_variant_v<RscHandle<Texture>, UniformInstanceValue>>(*material->GetUniform(name));
+                if (ImGuidk::InputResource("", &val))
+                {
+                    material->uniforms[name] = val;
+                    changed = true;
+                }
+                break;
+            }
 
             default:
                 break;
+            }
+
+            if (!has_override)
+            {
+                ImGui::PopItemFlag();
+                ImGui::PopStyleColor(2);
             }
 
             ImGui::PopItemWidth();
@@ -743,34 +819,34 @@ namespace idk {
 
         auto graph = RscHandle<shadergraph::Graph>{ material };
 
-        for (auto& [name, u] : material->uniforms)
-        {
-            if (u.index() == index_in_variant_v<RscHandle<Texture>, UniformInstance>)
-                continue;
+        //for (auto& [name, u] : material->uniforms)
+        //{
+        //    if (u.index() == index_in_variant_v<RscHandle<Texture>, UniformInstance>)
+        //        continue;
 
-            auto y = ImGui::GetCursorPosY();
+        //    auto y = ImGui::GetCursorPosY();
 
-            ImGui::SetCursorPosY(y + pad_y);
+        //    ImGui::SetCursorPosY(y + pad_y);
 
-            ImGui::PushID(name.c_str());
-            ImGui::PushItemWidth(item_width);
+        //    ImGui::PushID(name.c_str());
+        //    ImGui::PushItemWidth(item_width);
 
-            auto label = graph->parameters[std::stoi(name.data() + sizeof("_ub0._u") - 1)].name.c_str();
-            switch (u.index())
-            {
-            case index_in_variant_v<float, UniformInstance>:
-                ImGui::Text(label);
-                ImGui::SetCursorPosY(y);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-                ImGui::DragFloat("", &std::get<index_in_variant_v<float, UniformInstance>>(u), 0.01f);
+        //    auto label = graph->parameters[std::stoi(name.data() + sizeof("_ub0._u") - 1)].name.c_str();
+        //    switch (u.index())
+        //    {
+        //    case index_in_variant_v<float, UniformInstance>:
+        //        ImGui::Text(label);
+        //        ImGui::SetCursorPosY(y);
+        //        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+        //        ImGui::DragFloat("", &std::get<index_in_variant_v<float, UniformInstance>>(u), 0.01f);
 
-            default:
-                break;
-            }
+        //    default:
+        //        break;
+        //    }
 
-            ImGui::PopItemWidth();
-            ImGui::PopID();
-        }
+        //    ImGui::PopItemWidth();
+        //    ImGui::PopID();
+        //}
     }
 
     bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
