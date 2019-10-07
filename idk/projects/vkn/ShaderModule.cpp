@@ -257,7 +257,7 @@ namespace idk::vkn
 				}
 			}
 			throw std::runtime_error("incorrect binding setup");
-			return -1;
+            return static_cast<uint32_t>(-1);
 		};
 		pair_ptrs.resize(0);
 		bool binding_set = false;

@@ -21,6 +21,7 @@ namespace idk
         virtual void BeginWindow() override;
         virtual void Update() override;
 
+
         void OpenGraph(const RscHandle<shadergraph::Graph>& handle);
 
     private:
@@ -28,7 +29,9 @@ namespace idk
         RscHandle<shadergraph::Graph> _graph;
         vector<Guid> _nodes_to_delete;
 
-        void show_params_window();
+        void handleNewLink();
+        void handleDeletedLink();
+        void drawLeftColumn();
 
         void drawValue(shadergraph::Node& node, int input_slot_index);
         void addDefaultSlotValue(const Guid& guid, int slot_in);
