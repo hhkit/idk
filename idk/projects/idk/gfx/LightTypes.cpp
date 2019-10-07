@@ -4,20 +4,20 @@
 //#include "LightTypes.h"
 namespace idk
 {
-	const void* PointLight::unique_id() const
+	const void* PointLight::unique_id() const noexcept
 	{
 		static const char test[] = "PointLight";
-		return test;
+		return s_cast<const char*>(test);
 	}
-	const void* SpotLight::unique_id() const
+	const void* SpotLight::unique_id() const noexcept
 	{
 		static const char test[] = "SpotLight";
-		return test;
+		return s_cast<const char*>(test);
 	}
-	const void* DirectionalLight::unique_id() const
+	const void* DirectionalLight::unique_id() const noexcept
 	{
 		static const char test[] = "DirectionalLight";
-		return test;
+		return s_cast<const char*>(test);
 	}
 	//	SpotLight::
 //		SpotLight(
@@ -135,17 +135,17 @@ RscHandle<RenderTarget> idk::PointLight::InitShadowMap()
 {
 	//TODO turn it into a cube map
 	auto &shadow_map =light_map= Core::GetResourceManager().Create<RenderTarget>();
-	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
+	auto m = shadow_map->GetMeta().textures.at(0)->GetMeta();
 	m.internal_format = ColorFormat::DEPTH_COMPONENT;
-	shadow_map->GetMeta().textures[0]->SetMeta(m);
+	shadow_map->GetMeta().textures.at(0)->SetMeta(m);
 	return shadow_map;
 }
 RscHandle<RenderTarget> DirectionalLight::InitShadowMap()
 {
 	auto& shadow_map = light_map = Core::GetResourceManager().Create<RenderTarget>();
-	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
+	auto m = shadow_map->GetMeta().textures.at(0)->GetMeta();
 	m.internal_format = ColorFormat::DEPTH_COMPONENT;
-	shadow_map->GetMeta().textures[0]->SetMeta(m);
+	shadow_map->GetMeta().textures.at(0)->SetMeta(m);
 	return shadow_map;
 }
 RscHandle<RenderTarget> SpotLight::InitShadowMap()

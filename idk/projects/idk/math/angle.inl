@@ -8,12 +8,12 @@
 namespace idk
 {
 	template<typename T>
-	constexpr inline trad<T>::trad(T val)
+	constexpr inline trad<T>::trad(T val) noexcept
 		: value{ val }
 	{
 	}
 	template<typename T>
-	constexpr inline trad<T>::trad(const tdeg<T>& rhs)
+	constexpr inline trad<T>::trad(const tdeg<T>& rhs) noexcept
 		: value{ rhs.value / s_cast<T>(180) * constants::pi<T>()}
 	{
 	}
@@ -147,12 +147,12 @@ namespace idk
 
 
 	template<typename T>
-	constexpr  tdeg<T>::tdeg(T val)
+	constexpr  tdeg<T>::tdeg(T val) noexcept
 		: value{ val }
 	{
 	}
 	template<typename T>
-	constexpr  tdeg<T>::tdeg(const trad<T>& rhs)
+	constexpr  tdeg<T>::tdeg(const trad<T>& rhs) noexcept
 		: value{ rhs.value / constants::pi<T>() * s_cast<T>(180) }
 	{
 	}
