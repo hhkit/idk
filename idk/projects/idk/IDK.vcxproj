@@ -376,6 +376,7 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\filesystem.natvis" />
     <Natvis Include="_natvis\yaml.natvis" />
     <Natvis Include="_natvis\ds.natvis" />
     <Natvis Include="_natvis\guid.natvis" />
