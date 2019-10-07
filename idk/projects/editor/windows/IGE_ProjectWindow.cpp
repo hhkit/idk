@@ -92,6 +92,26 @@ namespace idk {
         return RscHandle<Texture>();
     }
 
+    string IGE_ProjectWindow::unique_new_file_path(string_view name, string_view ext)
+    {
+        string stripped_path{ current_dir.GetMountPath() };
+        stripped_path += '/';
+        stripped_path += name;
+
+        string path = stripped_path;
+        path += ext;
+
+        int i = 0;
+        while (PathHandle(path)) // already exists
+        {
+            path = stripped_path;
+            path += std::to_string(++i);
+            path += ext;
+        }
+
+        return path;
+    }
+
 	void IGE_ProjectWindow::Update()
 	{
         ImGui::PopStyleVar(2);
@@ -107,14 +127,7 @@ namespace idk {
             {
                 if (ImGui::MenuItem("Material"))
                 {
-                    auto path = string{ current_dir.GetMountPath() } + "/NewMaterial.mat";
-                    int i = 0;
-                    while (PathHandle(path)) // already exists
-                    {
-                        path = string{ current_dir.GetMountPath() } + "NewMaterial";
-                        path += std::to_string(++i);
-                        path += ".mat";
-                    }
+                    auto path = unique_new_file_path("NewMaterial", Material::ext);
                     auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
                     if (res && *res)
                         Core::GetResourceManager().Save(*res);
@@ -425,14 +438,7 @@ namespace idk {
                 {
                     if (ImGui::MenuItem("Create Material Instance"))
                     {
-                        auto create_path = string{ current_dir.GetMountPath() } + "/NewMaterialInstance" + string{ MaterialInstance::ext };
-                        int i = 0;
-                        while (PathHandle(create_path)) // already exists
-                        {
-                            create_path = string{ current_dir.GetMountPath() } + "NewMaterialInstance";
-                            create_path += std::to_string(++i);
-                            create_path += MaterialInstance::ext;
-                        }
+                        auto create_path = unique_new_file_path("NewMaterialInstance", MaterialInstance::ext);
                         auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
                         if (res && *res)
                         {
