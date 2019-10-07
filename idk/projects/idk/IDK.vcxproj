@@ -37,6 +37,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="app\GamepadEnums.h" />
+    <ClInclude Include="gfx\Framebuffer.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />

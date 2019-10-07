@@ -686,6 +686,7 @@
     <ClInclude Include="app\GamepadEnums.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\Framebuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

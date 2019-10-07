@@ -198,8 +198,6 @@ namespace idk::vkn
 		uint32_t _current_frame_index;
 
 		VulkanView*                            _view                       {};
-		RscHandle<ShaderProgram>               _mesh_renderer_shader_module{};
-		RscHandle<ShaderProgram>               _skinned_mesh_shader_module{};
 		RscHandle<ShaderProgram>               _shadow_shader_module{};
 		PipelineManager*                       _pipeline_manager           {};
 		vector<RenderStateV2>                  _states                     {};

@@ -7,6 +7,14 @@ namespace idk
 	{
 		return s_cast<float>(meta.size.x) / meta.size.y;
 	}
+	RscHandle<Texture> RenderTarget::GetColorBuffer()
+	{
+		return meta.textures.at(kColorIndex);
+	}
+	RscHandle<Texture> RenderTarget::GetDepthBuffer()
+	{
+		return meta.textures.at(kDepthIndex);
+	}
 	RscHandle<Texture> RenderTarget::GetAttachment(AttachmentType type, size_t index)const
 	{
 		if (attachments[type].size() <= index)

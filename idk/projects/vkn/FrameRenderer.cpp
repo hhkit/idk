@@ -19,104 +19,23 @@
 
 namespace idk::vkn
 {
-	static vk::RenderPass tmp_rp;
-	struct SomeHackyThing
-	{
-		VulkanPipeline pipeline;
-	};
-	static SomeHackyThing thing;
-	void InitThing(VulkanView& view)
-	{
-		return;
-		uint32_t pos_loc = 0;
-		uint32_t nml_loc = 0;
-		uint32_t pos_binding = 0;
-		uint32_t nml_binding = 1;
-		//uint32_t zzz_binding = 2;
-		pipeline_config config{};
-		buffer_desc pos_desc{};
-		buffer_desc nml_desc{};
-
-		pos_desc.AddAttribute(AttribFormat::eSVec3, pos_loc, 0);
-		nml_desc.AddAttribute(AttribFormat::eSVec3, nml_loc, 0);
-		pos_desc.binding.binding_index = pos_binding;
-		pos_desc.binding.stride = sizeof(vec3);
-		pos_desc.binding.vertex_rate = eVertex;
-		nml_desc.binding.binding_index = nml_binding;
-		nml_desc.binding.stride = sizeof(vec3);
-		nml_desc.binding.vertex_rate = eVertex;
-
-		config.buffer_descriptions.emplace_back(pos_desc);
-		config.buffer_descriptions.emplace_back(nml_desc);
-		string f, v;
-		{
-				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert.spv").value();
-			config.vert_shader = vbuffer;
-
-		}
-		{
-			{
-				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/flat_color.frag.spv").value();
-				config.vert_shader = vbuffer;
-			}
-		}
-		config.prim_top = PrimitiveTopology::eTriangleList;
-		config.fill_type = FillType::eFill;
-		//config.uniform_layouts.emplace()
-		thing.pipeline.Create(config, view);
-	}
 	void RenderStateV2::Reset() {
 		cmd_buffer.reset({});
 		ubo_manager.Clear();
 		dpools.Reset();
 		has_commands = false;
 	}
-	buffer_desc BufferDesc(uint32_t pos_loc, uint32_t pos_binding, AttribFormat format, uint32_t stride, VertexRate rate)
+	RscHandle<ShaderProgram> LoadShader(string filename)
 	{
-		buffer_desc pos_desc{};
-
-		pos_desc.AddAttribute(format, pos_loc, 0);
-		pos_desc.binding.binding_index = pos_binding;
-		pos_desc.binding.stride = stride;
-		pos_desc.binding.vertex_rate = rate;
-
-		return pos_desc;
-	}
-	RscHandle<ShaderProgram> LoadShader(string filename, vector<buffer_desc> desc)
-	{
-		RscHandle<ShaderProgram> result;
-		{
-			//TODO figure this out
-			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			//if (!actualfile || !rsc.resources.size())
-			{
-
-				//vector<buffer_desc> desc{
-				//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				//	BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-				//	BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-				//};
-				Core::GetSystem<FileSystem>().Update();
-				//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-				result = *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
-				auto& mod =result.as<ShaderModule>();
-				if(desc.size())
-					mod.AttribDescriptions(std::move(desc));
-				//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-				//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-			}
-		}
-		return result;
+		return *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
 	}
 	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
 		//Todo: Initialize the stuff
 		_view = view;
 		//Do only the stuff per frame
-		//uint32_t num_fo = instance_->View().Swapchain().frame_objects.size();
 		uint32_t num_fo = 1;
 		uint32_t num_concurrent_states = 1;
-		//frames.resize(num_fo);
+
 		_cmd_pool = cmd_pool;
 		auto device = *View().Device();
 		auto pri_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, num_fo }, vk::DispatchLoaderDefault{});
@@ -134,133 +53,8 @@ namespace idk::vkn
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}
-		InitThing(View());
 
 
-		{
-			//TODO figure this out
-			string filename = "/assets/shader/mesh.vert";
-			_mesh_renderer_shader_module=LoadShader(filename, {
-						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-						//BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-				});
-			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			////if (!actualfile || !rsc.resources.size())
-			//{
-			//
-			//	vector<buffer_desc> desc{
-			//		BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-			//		BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-			//		BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-			//	};
-			//	Core::GetSystem<FileSystem>().Update();
-			//	//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			//	_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
-			//	_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
-			//	//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-			//	//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-			//}
-		}
-		{
-			//TODO figure this out
-			string filename = "/assets/shader/skinned_mesh.vert";
-			_skinned_mesh_shader_module = LoadShader(filename, {
-						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-						//BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-				});
-			//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			////auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-			////if (!actualfile || !rsc.resources.size())
-			//{
-			//
-			//	vector<buffer_desc> desc{
-			//		BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-			//		BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
-			//		BufferDesc(0, 2, AttribFormat::eSVec2, sizeof(vec2), eVertex),
-			//	};
-			//	Core::GetSystem<FileSystem>().Update();
-			//	//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-			//	_mesh_renderer_shader_module = *Core::GetResourceManager().Load<ShaderProgram>(actualfile,false);
-			//	_mesh_renderer_shader_module.as<ShaderModule>().AttribDescriptions(std::move(desc));
-			//	//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-			//	//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-			//}
-		}
-		//{
-		//	string filename = "/assets/shader/shadow.frag";
-		//	//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-		//	//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
-		//	auto& shader_mod = _shadow_shader_module;
-		//	//if (!actualfile || !rsc.resources.size())
-		//	if(!shader_mod)
-		//	{
-		//
-		//		//vector<buffer_desc> desc{
-		//		//	BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex)
-		//		//};
-		//		Core::GetSystem<FileSystem>().Update();
-		//		//actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
-		//		shader_mod = Core::GetResourceManager().Load<ShaderProgram>(filename,false).value();
-		//		//shader_mod.as<ShaderModule>().AttribDescriptions(std::move(desc));
-		//		//_mesh_renderer_shader_module.as<ShaderModule>().Load(vk::ShaderStageFlagBits::eVertex,std::move(desc), strm.str());
-		//		//_mesh_renderer_shader_module = Core::GetResourceManager().Create<ShaderModule>();
-		//
-		//	}
-		//	//else
-		//	//{
-		//	//	shader_mod = rsc.resources.front().As<ShaderProgram>();
-		//	//}
-		//}
-		{
-
-			vk::AttachmentDescription colorAttachment
-			{
-				vk::AttachmentDescriptionFlags{}
-				,vk::Format::eB8G8R8A8Unorm
-				,vk::SampleCountFlagBits::e1
-				,vk::AttachmentLoadOp::eClear
-				,vk::AttachmentStoreOp::eStore
-				,vk::AttachmentLoadOp::eDontCare
-				,vk::AttachmentStoreOp::eDontCare
-				,vk::ImageLayout::eUndefined
-				,vk::ImageLayout::ePresentSrcKHR
-			};
-			vk::AttachmentReference colorAttachmentRef
-			{
-				0
-				,vk::ImageLayout::eColorAttachmentOptimal
-			};
-
-			vk::SubpassDescription subpass
-			{
-				vk::SubpassDescriptionFlags{}
-				,vk::PipelineBindPoint::eGraphics
-				,0,nullptr
-				,1,&colorAttachmentRef
-			};
-
-			vk::SubpassDependency dependency
-			{
-				VK_SUBPASS_EXTERNAL//src
-				,0U				   //dest
-				,vk::PipelineStageFlagBits::eColorAttachmentOutput
-				,vk::PipelineStageFlagBits::eColorAttachmentOutput
-				,vk::AccessFlags{}
-				,vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite
-			};
-			vk::RenderPassCreateInfo renderPassInfo
-			{
-				vk::RenderPassCreateFlags{}
-				,1,&colorAttachment
-				,1,&subpass
-				,1,&dependency
-			};
-
-			tmp_rp = device.createRenderPass(renderPassInfo);
-		}
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{

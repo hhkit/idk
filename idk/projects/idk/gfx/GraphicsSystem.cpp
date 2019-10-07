@@ -16,15 +16,20 @@ namespace idk
 	}
 	void GraphicsSystem::BufferedLightData(vector<LightData>& out)
 	{
-		out = object_buffer[curr_draw_buffer].lights;
+		out = object_buffer.at(curr_draw_buffer).lights;
 	}
 	void GraphicsSystem::RenderObjData(vector<RenderObject>& out)
 	{
-		out = object_buffer[curr_draw_buffer].mesh_render;
+		out = object_buffer.at(curr_draw_buffer).mesh_render;
 	}
 	void GraphicsSystem::AnimatedRenderObjData(vector<AnimatedRenderObject>& out)
 	{
-		out = object_buffer[curr_draw_buffer].skinned_mesh_render;
+		out = object_buffer.at(curr_draw_buffer).skinned_mesh_render;
+	}
+
+	void GraphicsSystem::LateInit()
+	{
+		LoadShaders();
 	}
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
@@ -81,7 +86,17 @@ namespace idk
 			if (elem.IsActiveAndEnabled())
 				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
 
+		result.skinned_mesh_vtx = skinned_mesh_vtx;
+		result.mesh_vtx = mesh_vtx;
+
 		SubmitBuffers(std::move(result));
+	}
+
+	void GraphicsSystem::LoadShaders()
+	{
+		mesh_vtx = *Core::GetResourceManager().Load<ShaderProgram>("assets/shaders/mesh.vert");
+		skinned_mesh_vtx = *Core::GetResourceManager().Load<ShaderProgram>("assets/shaders/skinned_mesh.vert");
+		LoadShaderImpl();
 	}
 
 	void GraphicsSystem::SwapWritingBuffer()
