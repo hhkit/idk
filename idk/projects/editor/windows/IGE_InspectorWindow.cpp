@@ -605,6 +605,7 @@ namespace idk {
                 return string{ name };
             else if (path)
                 return string{ PathHandle{ *path }.GetStem() };
+            return "";
         }, handle);
     }
 

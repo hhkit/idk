@@ -92,6 +92,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Texture>, "<Texture>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "<Material>")
 REFLECT_VARS(guid)
 REFLECT_END()

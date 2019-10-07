@@ -12,6 +12,30 @@ links:
   node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
   slot_in: 2
   slot_out: 0
+- node_in: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
+  node_out: 8cde6425-134a-42bf-ac3f-91f6caeedf62
+  slot_in: 0
+  slot_out: 0
+- node_in: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
+  node_out: c12537e3-ff2d-4e62-9827-229a3919e48d
+  slot_in: 1
+  slot_out: 0
+- node_in: eb496af1-5e71-4429-bacb-2f8ab7bd8154
+  node_out: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
+  slot_in: 0
+  slot_out: 3
+- node_in: eb496af1-5e71-4429-bacb-2f8ab7bd8154
+  node_out: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
+  slot_in: 1
+  slot_out: 4
+- node_in: eb496af1-5e71-4429-bacb-2f8ab7bd8154
+  node_out: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
+  slot_in: 2
+  slot_out: 5
+- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+  node_out: eb496af1-5e71-4429-bacb-2f8ab7bd8154
+  slot_in: 0
+  slot_out: 3
 master_node: 9550e80c-4d2f-4e84-8d65-9a29295b539c
 nodes: 
   1bd680de-07ae-4d0f-8915-ab1330429283: 
@@ -29,12 +53,20 @@ nodes:
     name: input\Vertex Normal
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 169.000000, y: 165.000000}
+    position: {x: 162.000000, y: 189.000000}
+  8cde6425-134a-42bf-ac3f-91f6caeedf62: 
+    control_values: ""
+    guid: 8cde6425-134a-42bf-ac3f-91f6caeedf62
+    input_slots: []
+    name: $2
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: 83.000000, y: 59.000000}
   9550e80c-4d2f-4e84-8d65-9a29295b539c: 
     control_values: ""
     guid: 9550e80c-4d2f-4e84-8d65-9a29295b539c
     input_slots: 
-    - {type: VEC3, value: '1.000000,1.000000,1.000000'}
+    - {type: VEC3, value: ""}
     - {type: VEC3, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
@@ -50,6 +82,40 @@ nodes:
     output_slots: 
     - {type: FLOAT, value: ""}
     position: {x: 278.000000, y: 319.000000}
+  c12537e3-ff2d-4e62-9827-229a3919e48d: 
+    control_values: ""
+    guid: c12537e3-ff2d-4e62-9827-229a3919e48d
+    input_slots: []
+    name: input\Texture Coordinates
+    output_slots: 
+    - {type: VEC2, value: ""}
+    position: {x: 27.000000, y: 131.000000}
+  d056e8a7-d92d-41c8-87c8-b185c06b1dc0: 
+    control_values: ""
+    guid: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: ""}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: 234.000000, y: 31.000000}
+  eb496af1-5e71-4429-bacb-2f8ab7bd8154: 
+    control_values: ""
+    guid: eb496af1-5e71-4429-bacb-2f8ab7bd8154
+    input_slots: 
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    name: input\basic\Vec3
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 429.000000, y: 52.000000}
 parameters: 
 - {default_value: 0, name: Metallic, type: FLOAT}
 - {default_value: 0, name: Roughness, type: FLOAT}
+- {default_value: 65509e2c-bcb6-48a1-9c88-17a3701d6028, name: Texture, type: SAMPLER2D}

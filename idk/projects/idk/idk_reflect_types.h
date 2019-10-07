@@ -62,7 +62,9 @@ namespace idk::reflect
 
 		// graphics
 		, RscHandle<Mesh>
+		, RscHandle<Material>
 		, RscHandle<MaterialInstance>
+        , RscHandle<Texture>
 		, UniformInstance
 		, UniformInstanceValue
 		, hash_table<string, UniformInstance>

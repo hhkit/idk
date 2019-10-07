@@ -606,7 +606,7 @@ namespace idk
         if (ImGui::IsWindowAppearing())
             filter.Clear();
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetFrameHeight() * 0.5f);
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_WindowBg));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_Border));
         filter.Draw("", ImGui::GetWindowContentRegionWidth());
         ImGui::PopStyleColor();
         ImGui::PopStyleVar();
@@ -968,7 +968,8 @@ namespace idk
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                     {
                         ImGui::Text(param.name.c_str());
-                        ImGui::SetDragDropPayload(DragDrop::PARAMETER, &i, sizeof(i));
+                        int param_index = i - 1;
+                        ImGui::SetDragDropPayload(DragDrop::PARAMETER, &param_index, sizeof(i));
                         ImGui::EndDragDropSource();
                     }
 
