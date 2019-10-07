@@ -487,19 +487,39 @@ namespace idk
 
     struct node_item { vector<node_item> items; string name; };
 
-    static node_item* context_menu_node_item(node_item& item, std::vector<node_item*>& stack)
+    static bool context_menu_node_item_filter(const node_item& item, const ImGuiTextFilter& filter)
+    {
+        if (filter.PassFilter(item.name.c_str()))
+            return true;
+        if (item.items.size())
+        {
+            for (const auto& i : item.items)
+            {
+                if (context_menu_node_item_filter(i, filter))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    static node_item* context_menu_node_item(node_item& item, std::vector<node_item*>& stack, const ImGuiTextFilter& filter, bool ignore_filter = false)
     {
         if (item.items.size())
         {
             auto folder_name = item.name;
             if (folder_name == "master") // skip master nodes
                 return nullptr;
+            if (!ignore_filter && !context_menu_node_item_filter(item, filter))
+                return nullptr;
+            if (!ignore_filter && filter.PassFilter(item.name.c_str())) // if folder name filtered, pass all descendants
+                ignore_filter = true;
+
             if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
             {
                 stack.push_back(&item);
                 for (auto& inner_item : item.items)
                 {
-                    auto* res = context_menu_node_item(inner_item, stack);
+                    auto* res = context_menu_node_item(inner_item, stack, filter, ignore_filter);
                     if (res)
                     {
                         if (item.name.size())
@@ -513,7 +533,7 @@ namespace idk
                     ImGui::TreePop();
             }
         }
-        else
+        else if (ignore_filter || context_menu_node_item_filter(item, filter))
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f });
 			ImGui::Unindent();
@@ -582,7 +602,16 @@ namespace idk
         static node_item templates_hierarchy = init_templates_hierarchy();
         std::vector<node_item*> stack;
 
-        auto* item = context_menu_node_item(templates_hierarchy, stack);
+        static ImGuiTextFilter filter;
+        if (ImGui::IsWindowAppearing())
+            filter.Clear();
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetFrameHeight() * 0.5f);
+        filter.Draw("", ImGui::GetWindowContentRegionWidth());
+        ImGui::PopStyleVar();
+
+        ImGui::BeginChild("nodes");
+        auto* item = context_menu_node_item(templates_hierarchy, stack, filter);
+        ImGui::EndChild();
         
         if (item)
         {
@@ -681,7 +710,9 @@ namespace idk
 
         ImGui::SetWindowFontScale(1.0f);
         if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered())
+        {
             ImGui::OpenPopup("nodes_context_menu");
+        }
         if (ImGui::IsPopupOpen("nodes_context_menu"))
             ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
         if (ImGui::BeginPopup("nodes_context_menu"))
@@ -875,22 +906,11 @@ namespace idk
 
         if (ImGui::CollapsingHeader("Parameters", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            if (ImGui::Button("Add Parameter"))
-                ImGui::OpenPopup("addparams");
-            if (ImGui::BeginPopup("addparams"))
-            {
-                if (ImGui::MenuItem("Float"))     _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT,     "0" });
-                if (ImGui::MenuItem("Vec2"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
-                if (ImGui::MenuItem("Vec3"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
-                if (ImGui::MenuItem("Vec4"))      _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
-                if (ImGui::MenuItem("Texture"))   _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
-                ImGui::EndPopup();
-            }
-
             static char buf[32];
-            static int renaming = -1;
-            int i = -1;
-            int to_del = -1;
+            static int renaming = 0;
+            static bool just_rename = false;
+            int i = 0;
+            int to_del = 0;
             for (auto& param : _graph->parameters)
             {
                 ++i;
@@ -911,15 +931,25 @@ namespace idk
                 if (renaming == i)
                 {
                     ImGui::PushItemWidth(bw);
-                    if (ImGui::InputText("##rename", buf, 32, ImGuiInputTextFlags_EnterReturnsTrue))
+                    if (ImGui::InputText("##rename", buf, 32, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         renaming = -1;
-                        param.name = buf; // TODO: make sure name is unique
+                        string new_name = buf;
+                        int j = 0;
+                        while (std::find_if(_graph->parameters.begin(), _graph->parameters.end(),
+                                            [&new_name](const Parameter& p) { return p.name == new_name; }) != _graph->parameters.end())
+                            new_name = buf + std::to_string(++j);
+                        std::swap(param.name, new_name);
                     }
                     ImGui::PopItemWidth();
 
-                    if (ImGui::IsAnyMouseDown() && !ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
-                        renaming = -1;
+                    if (just_rename)
+                    {
+                        ImGui::SetKeyboardFocusHere(-1);
+                        just_rename = false;
+                    }
+                    else if (ImGui::IsItemDeactivated())
+                        renaming = 0;
                 }
                 else
                 {
@@ -930,6 +960,7 @@ namespace idk
                     if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
                     {
                         renaming = i;
+                        just_rename = true;
                     }
 
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -946,6 +977,11 @@ namespace idk
                         {
                             to_del = i;
                         }
+                        if (ImGui::MenuItem("Rename"))
+                        {
+                            renaming = i;
+                            just_rename = true;
+                        }
                         ImGui::EndPopup();
                     }
                 }
@@ -953,8 +989,6 @@ namespace idk
                 ImGui::SameLine();
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - label_sz.x - ImGui::GetStyle().FramePadding.x);
                 ImGui::Text(label.c_str());
-
-
 
                 ImGui::Text("Default");
                 ImGui::SameLine();
@@ -1009,8 +1043,27 @@ namespace idk
                 ImGui::Separator();
             }
 
-            if (to_del >= 0)
+            if (to_del)
                 removeParam(to_del);
+
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * 0.5f -
+                (ImGui::CalcTextSize("Add Parameter").x + ImGui::GetStyle().FramePadding.x * 2) * 0.5f);
+            if (ImGui::Button("Add Parameter"))
+                ImGui::OpenPopup("addparams");
+            if (ImGui::IsPopupOpen("addparams"))
+            {
+                ImGui::SetNextWindowPos(ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y));
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetItemRectSize().x, 0));
+            }
+            if (ImGui::BeginPopup("addparams"))
+            {
+                if (ImGui::MenuItem("Float"))   _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT,     "0" });
+                if (ImGui::MenuItem("Vec2"))    _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
+                if (ImGui::MenuItem("Vec3"))    _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
+                if (ImGui::MenuItem("Vec4"))    _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
+                if (ImGui::MenuItem("Texture")) _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
+                ImGui::EndPopup();
+            }
 
         } // collapsing header parameters
 
