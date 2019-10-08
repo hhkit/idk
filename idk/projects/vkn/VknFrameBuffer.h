@@ -11,19 +11,13 @@ namespace idk::vkn
 	{
 	public:
 		VknRenderTarget() = default;
-		VknRenderTarget(VknTexture iv, VulkanView& vknView); 
-		VknRenderTarget(unique_ptr<VknTexture> iv, VulkanView& vknView);
-		VknRenderTarget(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize = {1,1});
-		VknRenderTarget(VknRenderTarget&&);
-		VknRenderTarget& operator=(VknRenderTarget&&);
-		~VknRenderTarget();
+		VknRenderTarget(VknRenderTarget&&) noexcept= default;
+		VknRenderTarget& operator=(VknRenderTarget&&) noexcept = default;
+		VknRenderTarget(const VknRenderTarget&) = delete;
+		VknRenderTarget& operator=(const VknRenderTarget&) = delete;
+		~VknRenderTarget() = default;
 
 		void OnMetaUpdate(const Metadata& newmeta) override;
-		void ReattachImageViews(VulkanView& vknView);
-		void AttachImageViews(VknImageData&, VulkanView& vknView);
-		void AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
-		void AttachImageViews(vk::RenderPass rp,vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
-		void AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 size = {});
 		void PrepareDraw(vk::CommandBuffer& cmd_buffer);
 
 		vk::RenderPass GetRenderPass()const;
@@ -31,28 +25,14 @@ namespace idk::vkn
 		vk::Framebuffer Buffer();
 
 		vk::Semaphore ReadySignal();
-		BasicRenderPasses     rp_type;
 
-
-
-		void Finalize() override; //Finalizes the framebuffer
-
-		vec2 Size() { return size; };
-
-		//GLuint DepthBuffer() const;
-		void SetTextureCreationInfo(hlp::MemoryAllocator* alloc, vk::Fence f) { allocator = alloc; fence = f; }
+		const ivec2& Size()const { return size; };
+		BasicRenderPasses GetRenderPassType() { return rp_type; }
 	private:
-		void  AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture) override;
+		BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
 		vk::UniqueSemaphore   ready_semaphore;
-		//GLuint depthbuffer = 0;
 		vk::UniqueFramebuffer buffer{ nullptr };
-		//VknImageData		  image{};
-		vk::UniqueImage       image{nullptr};
-		vector<vk::UniqueImageView> image_views;
-		vector<vk::ImageView> imageView{};
-		vec2				  size{};
-		hlp::MemoryAllocator* allocator;
-		vk::Fence             fence;
+		ivec2				  size{};
 		bool				  uncreated{true};
 	};
 }

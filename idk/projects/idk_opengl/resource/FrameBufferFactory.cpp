@@ -12,7 +12,13 @@ namespace idk::ogl
 		auto fb = std::make_unique<FrameBuffer>();
 		auto m = fb->GetMeta();
 		m.size = Core::GetSystem<Application>().GetScreenSize();
-		m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+		//m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kColorIndex] = tex;
+		tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kDepthIndex] = tex;
 		fb->SetMeta(m);
 		return fb;
 	}
@@ -22,7 +28,12 @@ namespace idk::ogl
 		auto fb = std::make_unique<FrameBuffer>();
 		auto m = fb->GetMeta();
 		m.size = ivec2{ 512, 512 };
-		m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kColorIndex] = tex;
+		tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kDepthIndex] = tex;
 		fb->SetMeta(m);
 		return fb;
 	}

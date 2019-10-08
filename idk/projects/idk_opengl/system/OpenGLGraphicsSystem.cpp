@@ -52,6 +52,7 @@ namespace idk::ogl
 	void Win32GraphicsSystem::LateInit()
 	{
 		_opengl->GenResources();
+		GraphicsSystem::LateInit();
 	}
 
 	void Win32GraphicsSystem::Shutdown()

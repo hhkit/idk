@@ -184,7 +184,57 @@ namespace idk::vkn
 		return device.createImageViewUnique(viewInfo);
 
 	}
-
+	size_t ceil_div(size_t n, size_t d);
+	size_t ComputeTextureLength(size_t width, size_t height, vk::Format format)
+	{
+		size_t result=width*height*4; //default to 4bytes per pixel (Rgba)
+		size_t block_size = 4;
+		size_t block_width  = ceil_div(width , block_size);
+		size_t block_height = ceil_div(height, block_size);
+		switch (format)
+		{
+			case vk::Format::eR8G8B8A8Unorm        :
+			case vk::Format::eR8G8B8A8Snorm        :
+			case vk::Format::eR8G8B8A8Uscaled      :
+			case vk::Format::eR8G8B8A8Sscaled      :
+			case vk::Format::eR8G8B8A8Uint         :
+			case vk::Format::eR8G8B8A8Sint         :
+			case vk::Format::eR8G8B8A8Srgb         :
+			case vk::Format::eB8G8R8A8Unorm        :
+			case vk::Format::eB8G8R8A8Snorm        :
+			case vk::Format::eB8G8R8A8Uscaled      :
+			case vk::Format::eB8G8R8A8Sscaled      :
+			case vk::Format::eB8G8R8A8Uint         :
+			case vk::Format::eB8G8R8A8Sint         :
+			case vk::Format::eB8G8R8A8Srgb         :
+			case vk::Format::eA8B8G8R8UnormPack32  :
+			case vk::Format::eA8B8G8R8SnormPack32  :
+			case vk::Format::eA8B8G8R8UscaledPack32:
+			case vk::Format::eA8B8G8R8SscaledPack32:
+			case vk::Format::eA8B8G8R8UintPack32   :
+			case vk::Format::eA8B8G8R8SintPack32   :
+			case vk::Format::eA8B8G8R8SrgbPack32   :
+				result = width * height * 4;
+				break;
+			case vk::Format::eBc1RgbUnormBlock :
+			case vk::Format::eBc1RgbSrgbBlock  :
+			case vk::Format::eBc1RgbaUnormBlock:
+			case vk::Format::eBc1RgbaSrgbBlock :
+			case vk::Format::eBc4UnormBlock    :
+			case vk::Format::eBc4SnormBlock    :
+				result = block_width * block_width * 8;
+			break;
+			case vk::Format::eBc2UnormBlock:
+			case vk::Format::eBc2SrgbBlock :
+			case vk::Format::eBc3UnormBlock:
+			case vk::Format::eBc3SrgbBlock :
+            case vk::Format::eBc5UnormBlock: 
+            case vk::Format::eBc5SnormBlock:
+			result = block_width * block_width * 16;
+			break;
+		}
+		return result;
+	}
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		TextureResult result;
@@ -194,6 +244,9 @@ namespace idk::vkn
 		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
 		auto cmd_buffer = *ucmd_buffer;
 		//bool is_render_target = isRenderTarget;
+
+		if (len == 0 && !data) //If data isn't given.
+			len = ComputeTextureLength(width, height, format);
 
 		size_t num_bytes = len;
 

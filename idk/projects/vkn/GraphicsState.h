@@ -76,6 +76,9 @@ namespace idk::vkn
 
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
+		RscHandle<ShaderProgram> mesh_vtx;
+		RscHandle<ShaderProgram> skinned_mesh_vtx;
+
 		const vector<SkeletonTransforms>& GetSkeletonTransforms()const { return *skeleton_transforms; }
 
 		vector<const DbgDrawCall*> dbg_render;

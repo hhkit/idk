@@ -143,7 +143,7 @@ namespace idk::ogl
 
 				if (light.light_map)
 				{
-					const auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+					const auto t = light.light_map->GetDepthBuffer();
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
@@ -206,7 +206,7 @@ namespace idk::ogl
 			if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				fb_man.SetRenderTarget(RscHandle<OpenGLTexture>{elem.light_map->GetAttachment(AttachmentType::eDepth, 0)});
+				fb_man.SetRenderTarget(RscHandle<OpenGLTexture>{elem.light_map->GetDepthBuffer()});
 
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);

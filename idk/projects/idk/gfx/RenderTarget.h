@@ -19,6 +19,9 @@ namespace idk
 		, public MetaTag<RenderTargetMeta>
 	{
 	public:
+		RenderTarget()noexcept = default;
+		RenderTarget(RenderTarget&&) noexcept = default;
+		RenderTarget& operator=(RenderTarget&&) noexcept = default;
 		static constexpr uint32_t kColorIndex = 0;
 		static constexpr uint32_t kDepthIndex = 1;
 		float AspectRatio() const;

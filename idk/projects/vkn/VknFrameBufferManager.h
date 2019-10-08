@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 //#include "idk/res/ResourceHandle.h"
@@ -33,3 +34,4 @@ namespace idk::vkn
 		vk::UniqueFence			fence;
 	};
 }
+*/

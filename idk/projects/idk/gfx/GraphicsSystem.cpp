@@ -94,8 +94,12 @@ namespace idk
 
 	void GraphicsSystem::LoadShaders()
 	{
-		mesh_vtx = *Core::GetResourceManager().Load<ShaderProgram>("assets/shaders/mesh.vert");
-		skinned_mesh_vtx = *Core::GetResourceManager().Load<ShaderProgram>("assets/shaders/skinned_mesh.vert");
+		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert");
+		if(tmp)
+			mesh_vtx = *tmp;
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
+		if(tmp)
+			skinned_mesh_vtx = *tmp;
 		LoadShaderImpl();
 	}
 

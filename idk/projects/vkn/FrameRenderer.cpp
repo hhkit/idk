@@ -164,7 +164,7 @@ namespace idk::vkn
 
 		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
-		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetAttachment(AttachmentType::eColor, 0).as<VknTexture>().Image();
+		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{
@@ -186,11 +186,6 @@ namespace idk::vkn
 			}
 		}
 	}
-	RscHandle<ShaderProgram> FrameRenderer::GetMeshRendererShaderModule()
-	{
-		return _mesh_renderer_shader_module;
-	}
-
 	string GetUniformData(const UniformInstance&)
 	{
 		string data;
@@ -261,7 +256,7 @@ namespace idk::vkn
 		//collated_layouts[obj_uni.layout].first = vk::DescriptorType::eCombinedImageSampler;
 		//collated_layouts[obj_uni.layout].second++;
 		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
-		PreProcUniform<WTF>(obj_uni,index, val->GetAttachment(AttachmentType::eDepth, 0),collated_layouts, collated_bindings);
+		PreProcUniform<WTF>(obj_uni,index, val->GetDepthBuffer(),collated_layouts, collated_bindings);
 	}
 	template<typename lol=void>
 	void BindBones(const UboInfo& info,const AnimatedRenderObject& aro, const vector<SkeletonTransforms>& bones, UboManager& ubos, FrameRenderer::DsBindingCount & collated_layouts, collated_bindings_t & collated_bindings)
@@ -292,6 +287,10 @@ namespace idk::vkn
 		ShaderModule& Shader()const
 		{
 			return _shader.as<ShaderModule>();
+		}
+		RscHandle<ShaderModule> ShaderHandle()const
+		{
+			return RscHandle<ShaderModule>{_shader};
 		}
 		//struct ExBindingInfo
 		//{
@@ -361,14 +360,14 @@ namespace idk::vkn
 		light_block += string{ reinterpret_cast<const char*>(&len),sizeof(len) };
 		light_block += string( 16-sizeof(len), '\0');
 		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
-		auto msprog = GetMeshRendererShaderModule();
+		auto msprog = state.mesh_vtx;
 
 		
 		auto& msmod = msprog.as<ShaderModule>();
 
 		mesh_config._shader = msprog;
 		mesh_config.SetRef(collated_layouts, ubo_manager);
-		skinned_mesh_config._shader = _skinned_mesh_shader_module;
+		skinned_mesh_config._shader = state.skinned_mesh_vtx;
 		skinned_mesh_config.SetRef(collated_layouts, ubo_manager);
 
 
@@ -444,7 +443,7 @@ namespace idk::vkn
 				//Maybe change the config to be a managed resource.
 				//Force pipeline creation
 				auto config = *dc.config;
-				config.render_pass_type = vkn_fb.rp_type;
+				config.render_pass_type = vkn_fb.GetRenderPassType();
 				GetPipeline(config, shaders);
 				//set, bindings
 				hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
@@ -590,7 +589,7 @@ namespace idk::vkn
 			auto sprog = mat._shader_program;
 
 			auto* fprog = (cam.is_shadow) ? nullptr : &sprog.as<ShaderModule>();
-			mesh_shd = _skinned_mesh_shader_module;
+			mesh_shd = skinned_mesh_config.ShaderHandle();
 			auto& vprog = mesh_shd->as<ShaderModule>();
 			if ((!fprog && !cam.is_shadow) || !mat_inst.material || !vprog)
 				continue;
@@ -602,7 +601,7 @@ namespace idk::vkn
 			//Maybe change the config to be a managed resource.
 			//Force pipeline creation
 			auto config = *dc.config;
-			config.render_pass_type = vkn_fb.rp_type;
+			config.render_pass_type = vkn_fb.GetRenderPassType();
 			GetPipeline(config, shaders);
 			//set, bindings
 			hash_table < uint32_t, vector<ProcessedRO::BindingInfo>> collated_bindings;
@@ -983,7 +982,7 @@ namespace idk::vkn
 			//TODO Grab everything and render them
 			//Maybe change the config to be a managed resource.
 			auto config = *p_ro.config;
-			config.render_pass_type = vkn_fb.rp_type;
+			config.render_pass_type = vkn_fb.GetRenderPassType();
 			auto& pipeline = GetPipeline(config,shaders);
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			if (&pipeline != prev_pipeline)

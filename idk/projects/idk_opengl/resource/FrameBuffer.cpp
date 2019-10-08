@@ -24,13 +24,18 @@ namespace idk::ogl
 		for (auto& elem : meta.textures)
 			Core::GetResourceManager().Free(elem);
 
-		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newmeta.size.x, newmeta.size.y);
 
 		for (auto& elem : newmeta.textures)
 		{
-			Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid)->Size(newmeta.size);
+			auto tex = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
+			tex->Size(newmeta.size);
 		}
+		auto tex = newmeta.textures[kDepthIndex];
+		auto tmeta = tex->GetMeta();
+		tmeta.internal_format = ColorFormat::DEPTH_COMPONENT;
+		tex->SetMeta(tmeta);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newmeta.size.x, newmeta.size.y);
 	}
 
 	GLuint FrameBuffer::DepthBuffer() const

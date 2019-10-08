@@ -69,7 +69,7 @@ namespace idk
 			std::optional<RscHandle<ShaderProgram>> overriding_vtx;
 			std::optional<RscHandle<ShaderProgram>> overriding_geom;
 			std::optional<RscHandle<ShaderProgram>> overriding_frag;
-			std::optional<RscHandle<FrameBuffer>>  output_buffer;
+			//std::optional<RscHandle<FrameBuffer>>  output_buffer;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

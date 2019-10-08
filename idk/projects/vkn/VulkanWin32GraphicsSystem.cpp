@@ -64,6 +64,7 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
+		GraphicsSystem::LateInit();
 		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
 		_debug_renderer->Init();
 		_frame_renderers.resize(instance_->View().Swapchain().frame_objects.size());
@@ -137,6 +138,8 @@ namespace idk::vkn
 			auto& curr_state = curr_states[i];
 			auto& curr_cam = curr_buffer.camera[i];
 			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
+			curr_state.mesh_vtx = curr_buffer.mesh_vtx;
+			curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 			curr_state.dbg_render.resize(0);
 			if (curr_cam.overlay_debug_draw)
 			{

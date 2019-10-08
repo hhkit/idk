@@ -9,32 +9,10 @@ namespace idk
 	}
 	RscHandle<Texture> RenderTarget::GetColorBuffer()
 	{
-		return meta.textures.at(kColorIndex);
+		return meta.textures[kColorIndex];
 	}
 	RscHandle<Texture> RenderTarget::GetDepthBuffer()
 	{
-		return meta.textures.at(kDepthIndex);
-	}
-	RscHandle<Texture> RenderTarget::GetAttachment(AttachmentType type, size_t index)const
-	{
-		if (attachments[type].size() <= index)
-		{
-			return (meta.textures.size()) ? meta.textures.back() : RscHandle<Texture>{};
-		}
-		return GetMeta().textures[attachments[type][index]];
-	}
-	size_t  RenderTarget::AddAttachment(AttachmentType type, uint32_t size_x, uint32_t size_y)
-	{
-		RscHandle<Texture> texture = Core::GetResourceManager().Create<Texture>();
-		texture->Size(ivec2{size_x,size_y});
-		AddAttachmentImpl(type, texture);
-		auto new_index = meta.textures.size();
-		meta.textures.emplace_back(texture);
-		attachments[type].emplace_back(new_index);
-		return new_index;
-	}
-	size_t RenderTarget::NumAttachments(AttachmentType type)const
-	{
-		return attachments[type].size();
+		return meta.textures[kDepthIndex];
 	}
 }

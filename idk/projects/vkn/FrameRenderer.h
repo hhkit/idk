@@ -207,6 +207,6 @@ namespace idk::vkn
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
-		VknFrameBufferManager   fb_man{};
+		//VknFrameBufferManager   fb_man{};
 	};
 }

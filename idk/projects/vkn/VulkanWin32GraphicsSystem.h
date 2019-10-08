@@ -37,7 +37,7 @@ namespace idk::vkn
 		void SwapBuffer() override;
 		
 		VulkanState& Instance() { return *instance_; }
-
+		VulkanView&  View()const { return instance_->View();}
 
 		VulkanState& GetVulkanHandle();
 	private:
