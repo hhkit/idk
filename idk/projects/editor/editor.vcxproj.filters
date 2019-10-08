@@ -87,7 +87,6 @@
       <Filter>windows</Filter>
     </ClInclude>
     <ClInclude Include="widgets\DragQuat.h">
-<<<<<<< HEAD
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="imguidk.h" />
@@ -109,13 +108,11 @@
     </ClInclude>
     <ClInclude Include="loading\VulkanFBXLoader.h">
       <Filter>loader\assimp\legacy</Filter>
-=======
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="widgets\DragVec.h">
       <Filter>widgets</Filter>
->>>>>>> e17b417f0f306446056c786f9190808c78f1b1d8
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -190,7 +187,6 @@
     <ClCompile Include="widgets\DragVec.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
-<<<<<<< HEAD
     <ClCompile Include="loading\AssimpImporter.cpp">
       <Filter>loader\assimp</Filter>
     </ClCompile>
@@ -206,8 +202,6 @@
     <ClCompile Include="loading\VulkanFBXLoader.cpp">
       <Filter>loader\assimp\legacy</Filter>
     </ClCompile>
-=======
->>>>>>> e17b417f0f306446056c786f9190808c78f1b1d8
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
