@@ -978,8 +978,8 @@ namespace idk::vkn
 			};
 			;
 			//Get default framebuffer
-			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknFrameBuffer>();
-			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknFrameBuffer>().Buffer();
+			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknRenderTarget>();
+			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknRenderTarget>().Buffer();
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{

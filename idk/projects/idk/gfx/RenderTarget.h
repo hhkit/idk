@@ -8,7 +8,7 @@ namespace idk
 	struct RenderTargetMeta
 	{
 		ivec2 size {1024, 1024};
-		vector<RscHandle<Texture>> textures;
+		RscHandle<Texture> textures[2];
 		bool is_world_renderer = true;
 		bool render_debug = true;
 		//RscHandle<Texture> depth_buffer;
@@ -19,6 +19,8 @@ namespace idk
 		, public MetaTag<RenderTargetMeta>
 	{
 	public:
+		static constexpr uint32_t kColorIndex = 0;
+		static constexpr uint32_t kDepthIndex = 1;
 		float AspectRatio() const;
 		RscHandle<Texture> GetColorBuffer();
 		RscHandle<Texture> GetDepthBuffer();

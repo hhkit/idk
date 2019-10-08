@@ -12,7 +12,7 @@ namespace idk::vkn
 	{
 		return Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 	}
-	VknFrameBuffer::VknFrameBuffer(VknTexture iv, VulkanView& vknView)
+	VknRenderTarget::VknRenderTarget(VknTexture iv, VulkanView& vknView)
 		:buffer{},
 		image{std::move(iv.image)},
 		//imageView{std::move(iv.imageView)},
@@ -24,7 +24,7 @@ namespace idk::vkn
 		AttachImageViews(std::move(iv.image), imageView, vknView,size);
 	}
 
-	VknFrameBuffer::VknFrameBuffer(unique_ptr<VknTexture> iv, VulkanView& vknView)
+	VknRenderTarget::VknRenderTarget(unique_ptr<VknTexture> iv, VulkanView& vknView)
 		:buffer{},
 		image{ std::move(iv->image) },
 		//imageView{std::move(iv.imageView)},
@@ -36,7 +36,7 @@ namespace idk::vkn
 		AttachImageViews(imageView, vknView,size);
 	}
 
-	VknFrameBuffer::VknFrameBuffer(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize)
+	VknRenderTarget::VknRenderTarget(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize)
 		:buffer{},
 		image{ std::move(img) },
 		imageView{iv},
@@ -55,7 +55,7 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	VknFrameBuffer::VknFrameBuffer(VknFrameBuffer&& rhs)
+	VknRenderTarget::VknRenderTarget(VknRenderTarget&& rhs)
 		:RenderTarget{ std::move(rhs) },
 		buffer {std::move(rhs.buffer)},
 		image{ std::move(rhs.image) },
@@ -64,7 +64,7 @@ namespace idk::vkn
 		uncreated{std::move(rhs.uncreated)}
 	{}
 
-	VknFrameBuffer& VknFrameBuffer::operator=(VknFrameBuffer&& rhs)
+	VknRenderTarget& VknRenderTarget::operator=(VknRenderTarget&& rhs)
 	{
 		// TODO: insert return statement here
 		std::swap(buffer,rhs.buffer);
@@ -76,7 +76,7 @@ namespace idk::vkn
 		return *this;
 	}
 
-	VknFrameBuffer::~VknFrameBuffer()
+	VknRenderTarget::~VknRenderTarget()
 	{
 		//for (auto& elem : meta.textures)
 		//	if(elem)
@@ -88,21 +88,23 @@ namespace idk::vkn
 		image.reset();
 	}
 
-	void VknFrameBuffer::OnMetaUpdate(const Metadata& newmeta)
+	void VknRenderTarget::OnMetaUpdate(const Metadata& newmeta)
 	{
 		for (auto& elem : meta.textures)
 			Core::GetResourceManager().Free(elem);
-
+		//TODO get these from somewhere persistent.
+		hlp::MemoryAllocator* alloc;
+		vk::Fence fence;
 		/*glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newmeta.size.x, newmeta.size.y);*/
-
-		for (auto& elem : newmeta.textures)
-		{
-			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(elem.guid)->Size(newmeta.size);
-		}
+		TextureLoader loader;
+		auto color_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(newmeta.textures[kColorIndex].guid);
+		loader.LoadTexture(*color_tex, TextureFormat::eRGBA32, {}, nullptr, 0, newmeta.size, *alloc, fence, true);
+		auto depth_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(newmeta.textures[kDepthIndex].guid);
+		loader.LoadTexture(*depth_tex, TextureFormat::eD16Unorm, {}, nullptr, 0, newmeta.size, *alloc, fence, true);
 	}
 
-	void VknFrameBuffer::ReattachImageViews(VulkanView& vknView)
+	void VknRenderTarget::ReattachImageViews(VulkanView& vknView)
 	{
 		buffer.reset();
 		vector<vk::ImageView> vimage_views;
@@ -130,7 +132,7 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(VknImageData& iv, VulkanView& vknView)
+	void VknRenderTarget::AttachImageViews(VknImageData& iv, VulkanView& vknView)
 	{
 		//One framebuffer can reference multiple attachments (color, position, light etc.)
 
@@ -160,7 +162,7 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
+	void VknRenderTarget::AttachImageViews(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
 	{
 		//One framebuffer can reference multiple attachments (color, position, light etc.)
 
@@ -190,7 +192,7 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(vk::RenderPass rp, vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
+	void VknRenderTarget::AttachImageViews(vk::RenderPass rp, vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
 	{
 		vk::FramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.renderPass = rp;
@@ -207,7 +209,7 @@ namespace idk::vkn
 		uncreated = false;
 	}
 
-	void VknFrameBuffer::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
+	void VknRenderTarget::AttachImageViews(vector<vk::ImageView> iv, VulkanView& vknView, vec2 siz)
 	{
 		AttachImageViews(*vknView.Renderpass(),iv, vknView, siz);
 	}
@@ -217,7 +219,7 @@ namespace idk::vkn
 		hlp::TransitionImageLayout(true, cmd_buffer, View().GraphicsQueue(), *tex.image, tex.format, vk::ImageLayout::eUndefined, (type == AttachmentType::eColor) ? vk::ImageLayout::eColorAttachmentOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal);
 	}
 
-	void VknFrameBuffer::PrepareDraw(vk::CommandBuffer& cmd_buffer)
+	void VknRenderTarget::PrepareDraw(vk::CommandBuffer& cmd_buffer)
 	{
 		for (AttachmentType type{};type<AttachmentType::eSizeAT;++type)
 		{
@@ -229,22 +231,22 @@ namespace idk::vkn
 		}
 	}
 
-	vk::RenderPass VknFrameBuffer::GetRenderPass() const
+	vk::RenderPass VknRenderTarget::GetRenderPass() const
 	{
 		return View().BasicRenderPass(rp_type);
 	}
 
-	vk::Framebuffer VknFrameBuffer::Buffer()
+	vk::Framebuffer VknRenderTarget::Buffer()
 	{
 		return *buffer;
 	}
 
-	vk::Semaphore VknFrameBuffer::ReadySignal()
+	vk::Semaphore VknRenderTarget::ReadySignal()
 	{
 		return *ready_semaphore;
 	}
 
-	void VknFrameBuffer::AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture)
+	void VknRenderTarget::AddAttachmentImpl(AttachmentType type, RscHandle<Texture> texture)
 	{
 		TextureLoader loader;
 		auto ptr = RscHandle<VknTexture>(texture);
@@ -262,7 +264,7 @@ namespace idk::vkn
 		//auto& test = texture.as<VknTexture>();
 	}
 
-	void VknFrameBuffer::Finalize()
+	void VknRenderTarget::Finalize()
 	{
 		vector<vk::ImageView> image_views_;
 		vec2 sz;

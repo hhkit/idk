@@ -5,11 +5,11 @@
 #include <vulkan/vulkan.hpp>
 namespace idk::vkn
 {
-	class VknFrameBufferFactory
+	class VknRenderTargetFactory
 		: public ResourceFactory<RenderTarget>
 	{
 	public:
-		VknFrameBufferFactory();
+		VknRenderTargetFactory();
 		unique_ptr<RenderTarget> GenerateDefaultResource() override;
 		unique_ptr<RenderTarget> Create() override;
 		//unique_ptr<RenderTarget> Create(PathHandle fh) override;

@@ -27,7 +27,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<MeshFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanShaderModuleFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanTextureFactory>();
-	Core::GetResourceManager().RegisterFactory<VknFrameBufferFactory>();
+	Core::GetResourceManager().RegisterFactory<VknRenderTargetFactory>();
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");

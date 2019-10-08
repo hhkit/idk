@@ -164,7 +164,7 @@ namespace idk::vkn
 
 		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
-		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknFrameBuffer>()->GetAttachment(AttachmentType::eColor, 0).as<VknTexture>().Image();
+		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetAttachment(AttachmentType::eColor, 0).as<VknTexture>().Image();
 	}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{
@@ -343,7 +343,7 @@ namespace idk::vkn
 
 		VertexUniformConfig mesh_config, skinned_mesh_config;
 		const CameraData& cam = state.camera;
-		auto& vkn_fb = cam.render_target.as<VknFrameBuffer>();
+		auto& vkn_fb = cam.render_target.as<VknRenderTarget>();
 		std::pair<vector<ProcessedRO>, DsBindingCount> result{};
 		DsBindingCount& collated_layouts = result.second;
 
@@ -835,7 +835,7 @@ namespace idk::vkn
 	{
 		//TODO Actually get the framebuffer from camera_data
 		//auto& e = camera_data.render_target.as<VknFrameBuffer>();
-		return camera_data.render_target.as<VknFrameBuffer>().Buffer();
+		return camera_data.render_target.as<VknRenderTarget>().Buffer();
 	}
 
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
@@ -891,13 +891,13 @@ namespace idk::vkn
 		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
 		//if (state.camera.is_shadow)
 		//	result = view.BasicRenderPass(BasicRenderPasses::eDepthOnly);
-		return state.camera.render_target.as<VknFrameBuffer>().GetRenderPass();
+		return state.camera.render_target.as<VknRenderTarget>().GetRenderPass();
 	}
 
 
 	void TransitionFrameBuffer(const CameraData& camera, vk::CommandBuffer cmd_buffer, VulkanView& )
 	{
-		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
+		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
 		vkn_fb.PrepareDraw(cmd_buffer);
 	}
 
@@ -949,7 +949,7 @@ namespace idk::vkn
 		};
 		auto& camera = state.camera;
 		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto& vkn_fb = camera.render_target.as<VknFrameBuffer>();
+		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
 		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
 		TransitionFrameBuffer(camera, cmd_buffer, view);
 		vk::RenderPassBeginInfo rpbi

@@ -11,14 +11,14 @@
 namespace idk::vkn
 {
 
-	VknFrameBufferFactory::VknFrameBufferFactory():allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View().PDevice() }
+	VknRenderTargetFactory::VknRenderTargetFactory():allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View().PDevice() }
 	{
 		auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
 		fence = vknView.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
-	unique_ptr<RenderTarget> VknFrameBufferFactory::GenerateDefaultResource()
+	unique_ptr<RenderTarget> VknRenderTargetFactory::GenerateDefaultResource()
 	{
-
+		auto& rsc_manager = Core::GetResourceManager();
 
 		/*vk::ImageCreateInfo imageInfo = {};
 
@@ -42,40 +42,29 @@ namespace idk::vkn
 
 
 		//Todo make this a default guid
-		auto ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-		auto depth_ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-		//TextureLoader loader;
+		auto ptr = rsc_manager.LoaderEmplaceResource<VknTexture>();
+		auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>();
 
-
-		//imgd.size = vec2{ sz };
-
-		/*vk::ImageViewCreateInfo createInfo{
-					vk::ImageViewCreateFlags{},
-					*ptr->image,
-					vk::ImageViewType::e2D,
-					vknView.Swapchain().surface_format.format,
-					vk::ComponentMapping{},
-					vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor,0,1,0,1 }
-		};
-
-		vknView.Device()->createImageView(createInfo, nullptr, vknView.Dispatcher());*/
-
-
-		auto fb = std::make_unique<VknFrameBuffer>();
+		auto fb = std::make_unique<VknRenderTarget>();
 		auto m = fb->GetMeta();
 		m.size = Core::GetSystem<Application>().GetScreenSize();
-		auto sz = m.size;
+
+		m.textures[RenderTarget::kColorIndex] = ptr;
+		m.textures[RenderTarget::kDepthIndex] = depth_ptr;
 		fb->SetMeta(m);
 		fb->SetTextureCreationInfo(&allocator, *fence);
-		fb->AddAttachment(AttachmentType::eColor, m.size.x, m.size.y);
-		fb->AddAttachment(AttachmentType::eDepth, m.size.x, m.size.y);
+
+		
+
+		//fb->AddAttachment(AttachmentType::eColor, m.size.x, m.size.y);
+		//fb->AddAttachment(AttachmentType::eDepth, m.size.x, m.size.y);
 		fb->rp_type = BasicRenderPasses::eRgbaColorDepth;
 		auto& vknView = Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View();
 		fb->ReattachImageViews(vknView);
 
 		return fb;
 	}
-	unique_ptr<RenderTarget> VknFrameBufferFactory::Create()
+	unique_ptr<RenderTarget> VknRenderTargetFactory::Create()
 	{
 
 
@@ -93,7 +82,7 @@ namespace idk::vkn
 		vknView.Device()->createImageView(createInfo, nullptr, vknView.Dispatcher());*/
 
 
-		auto fb = std::make_unique<VknFrameBuffer>();
+		auto fb = std::make_unique<VknRenderTarget>();
 		auto m = fb->GetMeta();
 		m.size = Core::GetSystem<Application>().GetScreenSize();
 		auto sz = m.size;
@@ -113,7 +102,7 @@ namespace idk::vkn
 
 	ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle, const MetaBundle& bundle)
 	{
-		auto fb = Core::GetResourceManager().LoaderEmplaceResource<VknFrameBuffer>(bundle.metadatas[0].guid);
+		auto fb = Core::GetResourceManager().LoaderEmplaceResource<VknRenderTarget>(bundle.metadatas[0].guid);
 
 		auto m = bundle.FetchMeta<RenderTarget>()->GetMeta<RenderTarget>();
 

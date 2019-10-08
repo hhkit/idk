@@ -6,17 +6,17 @@
 #include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-	class VknFrameBuffer
+	class VknRenderTarget
 		: public RenderTarget
 	{
 	public:
-		VknFrameBuffer() = default;
-		VknFrameBuffer(VknTexture iv, VulkanView& vknView); 
-		VknFrameBuffer(unique_ptr<VknTexture> iv, VulkanView& vknView);
-		VknFrameBuffer(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize = {1,1});
-		VknFrameBuffer(VknFrameBuffer&&);
-		VknFrameBuffer& operator=(VknFrameBuffer&&);
-		~VknFrameBuffer();
+		VknRenderTarget() = default;
+		VknRenderTarget(VknTexture iv, VulkanView& vknView); 
+		VknRenderTarget(unique_ptr<VknTexture> iv, VulkanView& vknView);
+		VknRenderTarget(vk::UniqueImage img, vector<vk::ImageView> iv, VulkanView& vknView, vec2 fbsize = {1,1});
+		VknRenderTarget(VknRenderTarget&&);
+		VknRenderTarget& operator=(VknRenderTarget&&);
+		~VknRenderTarget();
 
 		void OnMetaUpdate(const Metadata& newmeta) override;
 		void ReattachImageViews(VulkanView& vknView);

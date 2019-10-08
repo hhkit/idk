@@ -68,7 +68,7 @@ namespace idk::vkn
 		ptr->size = ivec2(sz);
 
 		//Gen a framebuffer
-		curr_framebuffer = VknFrameBuffer{ std::move(ptr),vknView };
+		curr_framebuffer = VknRenderTarget{ std::move(ptr),vknView };
 	}
 
 	VknFrameBufferManager::VknFrameBufferManager(VknFrameBufferManager&& rhs)
@@ -88,7 +88,7 @@ namespace idk::vkn
 	{
 		//glDeleteFramebuffers(1, &_fbo_id);
 	}
-	void VknFrameBufferManager::SetRenderTarget(RscHandle<VknFrameBuffer> target)
+	void VknFrameBufferManager::SetRenderTarget(RscHandle<VknRenderTarget> target)
 	{
 		//Set render target is a impt function
 		curr_framebuffer = std::move(*target);
@@ -97,11 +97,11 @@ namespace idk::vkn
 	{
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-	unique_ptr<VknFrameBuffer> VknFrameBufferManager::Framebuffer()
+	unique_ptr<VknRenderTarget> VknFrameBufferManager::Framebuffer()
 	{
 		//return RscHandle<VknFrameBuffer>(curr_framebuffer);
 
 		//ARGH FK I WILL REMEMBER THIS
-		return std::make_unique<VknFrameBuffer>(std::move(curr_framebuffer));
+		return std::make_unique<VknRenderTarget>(std::move(curr_framebuffer));
 	}
 }
