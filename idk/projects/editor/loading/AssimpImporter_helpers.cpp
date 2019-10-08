@@ -271,47 +271,23 @@ namespace idk::ai_helpers
 			aiQuaternion	child_local_rot;
 
 			auto bone_node = scene.bone_table.find(node_name);
-			// If we can't find the aiBone, there are a couple of possiblities.
-			// 1) It is a mesh that is parented to the parent bone/mesh
-			// 2) It is a bone that has no weights. In which case, we will use the node transforms as the base from which we build its local transform.
-			if (bone_node == scene.bone_table.end())
+			aiMatrix4x4 global_inverse = curr_node.node->mTransformation;
+			global_inverse.Inverse();
+
+			// Multiply the parent's inverse if its there
+			if (new_bone._parent >= 0)
 			{
-				// Error handling
-				string error_string = "[Warning] None aiBone node" + node_name + " found in bone hierarchy.";
-				if (curr_node.node->mMeshes != nullptr)
-					error_string += " Meshes that are parented to bones are not supported yet.";
-				else
-					error_string += " Using compiled transform as local pose.";
-				PrintError(error_string);
-
-				aiMatrix4x4 global_inverse = curr_node.node->mTransformation;
-				global_inverse.Inverse();
-
-				// Multiply the parent's inverse if its there
-				if (new_bone._parent >= 0)
-				{
-					// My global inverse is P(inv) * C_local(inv)
-					global_inverse = to_aiMat4(skinless_skeleton[new_bone._parent]._global_inverse_bind_pose) * global_inverse;
-				}
-
-				// Initialize child local/global pose
-				ai_child_local_bind_pose = to_aiMat4(node_transform);
-				ai_child_world_bind_pose = global_inverse;
-				ai_child_world_bind_pose.Inverse();
-
-				// Initialize global inverse in bone
-				new_bone._global_inverse_bind_pose = to_mat4(global_inverse);
+				// My global inverse is P(inv) * C_local(inv)
+				global_inverse = to_aiMat4(skinless_skeleton[new_bone._parent]._global_inverse_bind_pose) * global_inverse;
 			}
-			else
-			{
-				// Initialize child local/global pose
-				ai_child_world_bind_pose = bone_node->second->mOffsetMatrix;
-				ai_child_world_bind_pose.Inverse();
-				ai_child_local_bind_pose = new_bone._parent >= 0 ? to_aiMat4(skinless_skeleton[new_bone._parent]._global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
 
-				// Initialize global inverse in bone
-				new_bone._global_inverse_bind_pose = to_mat4(bone_node->second->mOffsetMatrix);
-			}
+			// Initialize child local/global pose
+			ai_child_local_bind_pose = to_aiMat4(node_transform);
+			ai_child_world_bind_pose = global_inverse;
+			ai_child_world_bind_pose.Inverse();
+
+			// Initialize global inverse in bone
+			new_bone._global_inverse_bind_pose = to_mat4(global_inverse);
 
 			// World
 			aiDecomposeMatrix(&ai_child_world_bind_pose, &child_world_scale, &child_world_rot, &child_world_pos);
