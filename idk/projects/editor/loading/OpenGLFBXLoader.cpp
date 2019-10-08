@@ -1,4 +1,4 @@
-//#include "pch.h"
+#include "pch.h"
 //#include "OpenGLFBXLoader.h"
 //#undef min
 //#undef max

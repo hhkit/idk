@@ -1,4 +1,4 @@
-//#pragma once
+#pragma once
 //#include <idk.h>
 //#include <res/FileLoader.h>
 //

@@ -1,4 +1,4 @@
-//#include "pch.h"
+#include "pch.h"
 //#include "FBXLoaderHelpers.h"
 //#include <math/matrix_decomposition.h>
 //#include <deque>
