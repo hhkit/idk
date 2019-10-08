@@ -16,7 +16,7 @@ namespace idk
 
 		RscHandle<RenderTarget> light_map;
 
-		const void* unique_id()const ;
+		const void* unique_id()const noexcept;
 
 		RscHandle<RenderTarget> InitShadowMap();
 		//PointLight();
@@ -42,7 +42,7 @@ namespace idk
 
 		RscHandle<RenderTarget> light_map;
 		RscHandle<RenderTarget> InitShadowMap();
-		const void* unique_id()const;
+		const void* unique_id()const noexcept;
 		//DirectionalLight(
 		//	real  intensity={ .5f },
 		//	color light_color=color{ 1.f }
@@ -66,7 +66,7 @@ namespace idk
 
 		RscHandle<RenderTarget> light_map;
 		RscHandle<RenderTarget> InitShadowMap();
-		const void* unique_id()const;
+		const void* unique_id()const noexcept;
 		//SpotLight();
 		//SpotLight(
 		//	real  intensity={ 1.f },

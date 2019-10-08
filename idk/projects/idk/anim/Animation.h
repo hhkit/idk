@@ -10,42 +10,30 @@ namespace idk::anim
 
 	};
 
-	// Key represents a keyframe. Can be translate, rotate, or scale.
+	// KeyFrame represents a keyframe. Can be translate, rotate, or scale.
 	template<typename T>
-	struct Key
+	struct KeyFrame
 	{
-		Key() = default;
-		Key(const T& val, float time) : _val{ val }, _time{ time } {}
-		T		_val;
-		float	_time;
+		KeyFrame() = default;
+		KeyFrame(const T& val, float time) : val{ val }, time{ time } {}
+		T		val;
+		float	time;
 	};
 
-	struct Channel
+	struct AnimatedBone
 	{
-		string _name;
-		mat4 _node_transform;
-		bool _is_animated = false;
-		Channel& operator+=(const Channel& rhs);
-		vector<Key<vec3>> _translate{};
-		vector<Key<vec3>> _scale{};
-		vector<Key<quat>> _rotation{};
-	};
-
-	// represents an animated bone
-	struct AnimNode
-	{
-		string _name;
-
-		mat4 GetTransform(float time) const;
-
-		vector<Channel> _channels;
+		string bone_name;
+		
+		vector<KeyFrame<vec3>> translate_track{};
+		vector<KeyFrame<vec3>> scale_track{};
+		vector<KeyFrame<quat>> rotation_track{};
 	};
 
 	struct EasyAnimNode
 	{
 		string _name;
 		bool _debug_assert = false;
-		vector<Channel> _channels;
+		vector<AnimatedBone> _channels;
 	};
 
 	class Animation 
@@ -57,17 +45,16 @@ namespace idk::anim
 		float		GetFPS()		const { return _fps; }
 		float		GetDuration()	const { return _duration; }
 		float		GetNumTicks()	const { return _num_ticks; }
-		AnimNode*	GetAnimNode(string_view name);
-		EasyAnimNode* GetEasyAnimNode(string_view name);
-		const hash_table<string, EasyAnimNode>& data() { return _easy_anim_table; }
+
+		AnimatedBone* GetAnimatedBone(string_view name);
+		const hash_table<string, AnimatedBone>& data() { return _animated_bones; }
 
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
 		void SetName(string_view name) { _name = name; }
-		void AddAnimNode(const AnimNode& node);
-		void AddEasyAnimNode(const EasyAnimNode& easy_node);
+
+		void AddAnimatedBone(const AnimatedBone& animated_bone);
 	private:
-		hash_table<string_view, AnimNode> _anim_node_table;
-		hash_table<string, EasyAnimNode> _easy_anim_table;
+		hash_table<string, AnimatedBone> _animated_bones;
 		string _name;
 
 		float _fps		 = 25.0f;

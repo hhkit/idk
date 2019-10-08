@@ -1,13 +1,17 @@
 metadatas: 
-- guid: 14f3434c-c3cb-4e90-a2ce-3a78fb7652eb
+- guid: dc2c94bd-6145-4ecd-bc5f-bba08304e7c4
+  metadata: ""
+  name: ""
+  t_hash: 17875543692026336741
+- guid: 9e9c7e0b-1cd6-4d48-b30b-4e43a7bb29f7
   metadata: ""
   name: Houdini_Character_OBJ:Eyebrows_low1
   t_hash: 326446362706798958
-- guid: ebd34e99-7cd2-4aa5-811d-7903601a7e34
+- guid: 0c91fadb-ea21-4a25-8696-c42f26994214
   metadata: ""
   name: Take 001
   t_hash: 7153150125844154484
-- guid: c677c7c1-f591-4d50-91b7-2876bef05f34
+- guid: 85943ffc-0b88-4c81-a037-212feb4948e0
   metadata: ""
   name: ""
   t_hash: 9925753886702286037

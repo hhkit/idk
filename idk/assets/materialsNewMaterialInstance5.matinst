@@ -1,2 +1,5 @@
 material: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
-uniforms: {_ub1._u0: !float 0.500000, _ub1._u1: !float 0.500000}
+uniforms: 
+  Metallic: !float 0.500000
+  Roughness: !float 0.500000
+  Texture: !<Texture> {guid: 1704ca64-2ab1-4f6d-a270-a24aa089debb}

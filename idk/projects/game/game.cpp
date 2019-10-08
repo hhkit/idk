@@ -142,7 +142,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     //auto test___ = mat_inst->GetUniformBlock("_UB1");
 
 	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/test.fbx" }) {
 		auto go = scene->CreateGameObject();
 
 		go->Name(path.GetStem());

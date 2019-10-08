@@ -23,7 +23,7 @@ namespace idk
 		{
 			for (unsigned i = 0; i < vec.size(); ++i)
 			{
-				if (ticks < static_cast<float>(vec[i]._time))
+				if (ticks < static_cast<float>(vec[i].time))
 				{
 					return i - 1;
 				}
@@ -33,6 +33,7 @@ namespace idk
 			return vec.size() - 1;
 		}
 
-		matrix_decomposition<real> interpolateChannel(const anim::Channel& channel, float time_in_ticks);
+		void AnimationPass(span<Animator> animators);
+		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 	};
 }

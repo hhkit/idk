@@ -1,2 +1,3 @@
 material: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
-uniforms: {}
+uniforms: 
+  Texture: !<Texture> {guid: b084e6a6-c4bb-4834-8990-834abf022f0c}

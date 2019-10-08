@@ -202,6 +202,7 @@ namespace idk::yaml
                     {
                         write("- ");
                         indent();
+                        const bool flow = should_flow(item);
                         // for inner blocks, write tag before going to next line
                         if (item.type() == type::mapping)
                         {
@@ -212,7 +213,7 @@ namespace idk::yaml
                             }
 
                             // if only 1 key-value pair in mapping, dont bother flowing
-                            if (should_flow(item) && item.size() == 1)
+                            if (flow && item.size() == 1)
                             {
                                 auto& [key, val] = *item.as_mapping().begin();
                                 write(key);
@@ -223,11 +224,13 @@ namespace idk::yaml
                                 continue; // next item in seq
                             }
                         }
-                        else if (item.type() == type::sequence && !should_flow(item)) // block seq in block seq is weird af
+                        else if (item.type() == type::sequence && !flow) // block seq in block seq is weird af
                         {
                             write_tag(item);
                             new_line();
                         }
+                        else if (flow)
+                            write_tag(item);
                         dump(item);
                         unindent();
                         new_line();
@@ -274,7 +277,8 @@ namespace idk::yaml
                         write(": ");
 
                         const auto& item = iter->second;
-                        if (item.type() == type::mapping && !should_flow(item)) // block map in block map, need indent
+                        const bool flow = should_flow(item);
+                        if (item.type() == type::mapping && !flow) // block map in block map, need indent
                         {
                             write_tag(item);
                             new_line();
@@ -282,14 +286,18 @@ namespace idk::yaml
                             dump(item);
                             unindent();
                         }
-                        else if (item.type() == type::sequence && !should_flow(item)) // block seq in block map, no indent
+                        else if (item.type() == type::sequence && !flow) // block seq in block map, no indent
                         {
                             write_tag(item);
                             new_line();
                             dump(item);
                         }
                         else
+                        {
+                            if (flow)
+                                write_tag(item);
                             dump(item);
+                        }
                         new_line();
                     }
                 }

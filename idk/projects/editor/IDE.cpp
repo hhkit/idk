@@ -25,8 +25,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <win32/WindowsApplication.h>
 #include <vkn/VulkanState.h>
 #include <idk_opengl/system/OpenGLState.h>
-#include <loading/OpenGLFBXLoader.h>
-#include <loading/VulkanFBXLoader.h>
+#include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
 #include <loading/OpenGLCubeMapLoader.h>
 #include <loading/OpenGLTextureLoader.h>
@@ -176,32 +175,23 @@ namespace idk
 
 	void IDE::LateInit()
 	{
-
-		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
+		if(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
 		{
-		case GraphicsAPI::OpenGL:
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".md5mesh");
 			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-			break;
-		case GraphicsAPI::Vulkan:
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".md5mesh");
-			break;
-		default:
-			break;
 		}
+
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
 		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetScheduler().SetPauseState(EditorPause);
 
-		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::ALL))//| FS_FILTERS::RECURSE_DIRS))
+		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
 			Core::GetResourceManager().Load(elem, false);
 	}
 

@@ -81,27 +81,42 @@ namespace idk::vkn
 		}
 		return block_size;
 	}
-	size_t compressed_size([[maybe_unused]]BlockType type, size_t uncompressed_size)
+	size_t ceil_div(size_t n, size_t d)
 	{
-		const size_t result = uncompressed_size;
-		//switch (type)
-		//{
-		//case BlockType::eBC1:
-		//	result = uncompressed_size / 6;
-		//	break;
-		//
-		//case BlockType::eBC2:
-		//case BlockType::eBC3:
-		//	result = uncompressed_size / 4;
-		//	break;
-		//default:
-		//	break;
-		//}
+		return n / d + ((n % d) ? 1 : 0);
+	}
+	size_t align(size_t v, size_t a)
+	{
+		const auto mod = v % a;
+		// v + (a-mod)%mod;
+		return v + (mod) ? (a-mod) : 0;
+	}
+	size_t compressed_size([[maybe_unused]]BlockType type, size_t width, size_t height)
+	{
+		size_t result = width * height;
+		const size_t block_size = 4;
+		width  = ceil_div(width , block_size );
+		height = ceil_div(height, block_size );
+		switch (type)
+		{
+		case BlockType::eBC1:
+		case BlockType::eBC4:
+			result = (width * height)*8; // 8 bytes per chunk
+			break;
+		
+		case BlockType::eBC2:
+		case BlockType::eBC3:
+		case BlockType::eBC5:
+			result = (width * height)*16; //16 bytes per chunk
+			break;
+		default:
+			break;
+		}
 		return result;
 	}
 	size_t DdsFileInternal::NumBytes() const
 	{
-		return compressed_size(this->GetBlockType(), s_cast<size_t>(header.width) * s_cast<size_t>(header.height));
+		return compressed_size(this->GetBlockType(), s_cast<size_t>(header.width) , s_cast<size_t>(header.height));
 	}
 
 	hash_table<BlockType, TextureFormat> MapBlockTypeToTextureFormat()

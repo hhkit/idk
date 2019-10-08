@@ -92,6 +92,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Texture>, "<Texture>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "<Material>")
 REFLECT_VARS(guid)
 REFLECT_END()
@@ -162,6 +166,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Material, "Material")
 REFLECT_VARS(_shader_program, uniforms)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::UniformInstance, "UniformInstance")
+REFLECT_VARS(name, value)
 REFLECT_END()
 
 REFLECT_ENUM(idk::BlendMode, "BlendMode")

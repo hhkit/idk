@@ -1,13 +1,21 @@
 metadatas: 
-- guid: 0a110b56-d116-40ba-84a1-de9983ea4ddd
+- guid: 6c8cfb28-4f3e-4d5d-9b1e-f201336a8f5c
   metadata: ""
-  name: pCube1
+  name: ""
+  t_hash: 17875543692026336741
+- guid: b2869e4c-6128-42e2-82ef-50f887577ad5
+  metadata: ""
+  name: Default_guy_geo
   t_hash: 326446362706798958
-- guid: 3ea2d88a-393b-4f5d-80a2-847fa45062ed
+- guid: accc50eb-df5e-4c3b-b1e9-19c8e953072d
+  metadata: ""
+  name: Default_guy_geo
+  t_hash: 326446362706798958
+- guid: b4a45f5a-5fa6-4c3a-a66c-fa89dadd6f1b
   metadata: ""
   name: Take 001
   t_hash: 7153150125844154484
-- guid: c7d335c7-f4bf-4f26-a355-e37466fed257
+- guid: e34db715-79c6-4811-8112-8d3036abaf35
   metadata: ""
   name: ""
   t_hash: 9925753886702286037

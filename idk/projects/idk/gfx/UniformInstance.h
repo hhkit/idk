@@ -2,5 +2,10 @@
 #include <idk.h>
 namespace idk
 {
-	using UniformInstance = variant<bool, float, int, vec2, vec3, vec4, mat3, mat4, RscHandle<Texture>>;
+	using UniformInstanceValue = variant<bool, float, int, vec2, vec3, vec4, mat3, mat4, RscHandle<Texture>>;
+    struct UniformInstance
+    {
+        string name; // in shader
+        UniformInstanceValue value;
+    };
 }

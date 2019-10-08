@@ -62,9 +62,13 @@ namespace idk::reflect
 
 		// graphics
 		, RscHandle<Mesh>
+		, RscHandle<Material>
 		, RscHandle<MaterialInstance>
+        , RscHandle<Texture>
 		, UniformInstance
+		, UniformInstanceValue
 		, hash_table<string, UniformInstance>
+		, hash_table<string, UniformInstanceValue>
 		, std::variant<color, RscHandle<CubeMap>> // camera clear
 		, PointLight
 		, DirectionalLight

@@ -27,7 +27,7 @@ namespace idk
 	{
 		//TODO actually get a block
 		vector<RscHandle<Texture>> result;
-		auto uni= GetUniform(name);
+		auto uni = GetUniform(name);
 		if (uni)
 		{
 			//Todo, replace name with the individual names in the block
@@ -50,16 +50,16 @@ namespace idk
 		}
 		return result;
 	}
-	std::optional<UniformInstance> MaterialInstance::GetUniform(const string& name) const
+	std::optional<UniformInstanceValue> MaterialInstance::GetUniform(const string& name) const
 	{
-		std::optional<UniformInstance> result;
+		std::optional<UniformInstanceValue> result;
 		auto itr = uniforms.find(name);
 		if (itr == uniforms.end())
 		{
 			auto& mat = *material;
-			itr = mat.uniforms.find(name);
-			if (itr != mat.uniforms.end())
-				result = itr->second;
+			auto itr2 = mat.uniforms.find(name);
+			if (itr2 != mat.uniforms.end())
+				result = itr2->second.value;
 		}
 		else
 		{
@@ -69,65 +69,109 @@ namespace idk
 	}
 	bool MaterialInstance::IsUniformBlock(string_view name) const
 	{
-		return name.substr(0,sizeof("_UB")-1)=="_UB";
+		return name.starts_with("_UB");
 	}
 	string MaterialInstance::GetUniformBlock(const string& name) const
 	{
         // https://www.khronos.org/registry/OpenGL/specs/gl/glspec45.core.pdf pg 138
 
 		string data;
-		if (IsUniformBlock(name))
-		{
-			auto& mat = *material;
+        if (!IsUniformBlock(name))
+            return data;
 
+		auto& mat = *material;
         const shadergraph::ValueType type = std::stoi(name.data() + sizeof("_UB") - 1);
 
         switch (type)
         {
         case shadergraph::ValueType::FLOAT: // align contiguous (N)
-            for (auto& [uni, val] : mat.uniforms)
+            for (const auto& pair : mat.uniforms)
             {
-                if (val.index() == index_in_variant_v<float, UniformInstance>)
+                const auto& val = pair.second.value;
+                if (val.index() == index_in_variant_v<float, UniformInstanceValue>)
                 {
                     auto sz = data.size();
                     data.resize(sz + sizeof(float));
-                    memcpy_s(data.data() + sz, sizeof(float), &std::get<index_in_variant_v<float, UniformInstance>>(val), sizeof(float));
+                    memcpy_s(data.data() + sz, sizeof(float), &std::get<index_in_variant_v<float, UniformInstanceValue>>(val), sizeof(float));
+                }
+            }
+            for (const auto& uni : mat.hidden_uniforms)
+            {
+                const auto& val = uni.value;
+                if (val.index() == index_in_variant_v<float, UniformInstanceValue>)
+                {
+                    auto sz = data.size();
+                    data.resize(sz + sizeof(float));
+                    memcpy_s(data.data() + sz, sizeof(float), &std::get<index_in_variant_v<float, UniformInstanceValue>>(val), sizeof(float));
                 }
             }
             return data;
 
         case shadergraph::ValueType::VEC2: // align contiguous (2N)
-            for (auto& [uni, val] : mat.uniforms)
+            for (const auto& pair : mat.uniforms)
             {
-                if (val.index() == index_in_variant_v<vec2, UniformInstance>)
+                const auto& val = pair.second.value;
+                if (val.index() == index_in_variant_v<vec2, UniformInstanceValue>)
                 {
                     auto sz = data.size();
                     data.resize(sz + sizeof(vec2));
-                    memcpy_s(data.data() + sz, sizeof(vec2), &std::get<index_in_variant_v<vec2, UniformInstance>>(val), sizeof(vec2));
+                    memcpy_s(data.data() + sz, sizeof(vec2), &std::get<index_in_variant_v<vec2, UniformInstanceValue>>(val), sizeof(vec2));
+                }
+            }
+            for (const auto& uni : mat.hidden_uniforms)
+            {
+                const auto& val = uni.value;
+                if (val.index() == index_in_variant_v<vec2, UniformInstanceValue>)
+                {
+                    auto sz = data.size();
+                    data.resize(sz + sizeof(vec2));
+                    memcpy_s(data.data() + sz, sizeof(vec2), &std::get<index_in_variant_v<vec2, UniformInstanceValue>>(val), sizeof(vec2));
                 }
             }
             return data;
 
         case shadergraph::ValueType::VEC4: // align contiguous (4N)
-            for (auto& [uni, val] : mat.uniforms)
+            for (const auto& pair : mat.uniforms)
             {
-                if (val.index() == index_in_variant_v<vec4, UniformInstance>)
+                const auto& val = pair.second.value;
+                if (val.index() == index_in_variant_v<vec4, UniformInstanceValue>)
                 {
                     auto sz = data.size();
                     data.resize(sz + sizeof(vec4));
-                    memcpy_s(data.data() + sz, sizeof(vec4), &std::get<index_in_variant_v<vec4, UniformInstance>>(val), sizeof(vec4));
+                    memcpy_s(data.data() + sz, sizeof(vec4), &std::get<index_in_variant_v<vec4, UniformInstanceValue>>(val), sizeof(vec4));
+                }
+            }
+            for (const auto& uni : mat.hidden_uniforms)
+            {
+                const auto& val = uni.value;
+                if (val.index() == index_in_variant_v<vec4, UniformInstanceValue>)
+                {
+                    auto sz = data.size();
+                    data.resize(sz + sizeof(vec4));
+                    memcpy_s(data.data() + sz, sizeof(vec4), &std::get<index_in_variant_v<vec4, UniformInstanceValue>>(val), sizeof(vec4));
                 }
             }
             return data;
 
         case shadergraph::ValueType::VEC3: // align to vec4 (4N)
-            for (auto& [uni, val] : mat.uniforms)
+            for (const auto& pair : mat.uniforms)
             {
-                if (val.index() == index_in_variant_v<vec3, UniformInstance>)
+                const auto& val = pair.second.value;
+                if (val.index() == index_in_variant_v<vec3, UniformInstanceValue>)
                 {
                     auto sz = data.size();
                     data.resize(sz + sizeof(vec4));
-                    memcpy_s(data.data() + sz, sizeof(vec3), &std::get<index_in_variant_v<vec3, UniformInstance>>(val), sizeof(vec3));
+                    memcpy_s(data.data() + sz, sizeof(vec3), &std::get<index_in_variant_v<vec3, UniformInstanceValue>>(val), sizeof(vec3));
+                }
+            }
+            for (const auto& uni : mat.hidden_uniforms)
+            {
+                const auto& val = uni.value;
+                if (val.index() == index_in_variant_v<vec3, UniformInstanceValue>)
+                {
+                    auto sz = data.size();
+                    data.resize(sz + sizeof(vec4));
+                    memcpy_s(data.data() + sz, sizeof(vec3), &std::get<index_in_variant_v<vec3, UniformInstanceValue>>(val), sizeof(vec3));
                 }
             }
             return data;
@@ -136,7 +180,6 @@ namespace idk
             break;
         }
 
-		}
 		return data;
 	}
 }

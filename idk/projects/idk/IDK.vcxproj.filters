@@ -989,7 +989,9 @@
     <ClCompile Include="script\ScriptSystem.cpp">
       <Filter>script</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\LightTypes.cpp" />
+    <ClCompile Include="gfx\LightTypes.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1193,6 +1195,9 @@
       <Filter>_natvis</Filter>
     </Natvis>
     <Natvis Include="_natvis\yaml.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\filesystem.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

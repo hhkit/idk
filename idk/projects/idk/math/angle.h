@@ -12,8 +12,8 @@ namespace idk
 	{
 		T value;
 
-		constexpr explicit trad(T val = T{});
-		constexpr explicit trad(const tdeg<T>&);
+		constexpr explicit trad(T val = T{}) noexcept;
+		constexpr explicit trad(const tdeg<T>&) noexcept;
 
 		constexpr trad& normalize();        // normalize to (-pi, pi]
 		constexpr trad  normalized() const; // normalize to (-pi, pi]
@@ -51,8 +51,8 @@ namespace idk
 	{
 		T value;
 
-		constexpr explicit tdeg(T val = T{});
-		constexpr explicit tdeg(const trad<T>&);
+		constexpr explicit tdeg(T val = T{}) noexcept;
+		constexpr explicit tdeg(const trad<T>&) noexcept;
 
 		constexpr tdeg& normalize();        // normalize to (-180, 180]
 		constexpr tdeg  normalized() const; // normalize to (-180, 180]
