@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <reflect/reflect.h>
 #include <util/enum.h>
+#include <meta/variant.h>
 #include <ReflectRegistration.h>
 
 using namespace idk;
@@ -332,7 +333,7 @@ TEST(Reflect, TestParentAndUnknownVisit)
 
 struct varianttest
 {
-	UniformInstance uniform;
+	UniformInstanceValue uniform;
 };
 REFLECT_BEGIN(varianttest, "varianttest")
 REFLECT_VARS(uniform)
@@ -352,5 +353,6 @@ TEST(Reflect, TestVisitVariant)
 
 	EXPECT_STREQ(visited_keys[0].get<const char*>(), "uniform");
 	EXPECT_TRUE(visited_keys[1].get<reflect::type>().is<mat4>());
-	EXPECT_EQ(visited_values[1].get<mat4>(), std::get<7>(test.uniform));
+    constexpr size_t index = index_in_variant_v<mat4, UniformInstanceValue>;
+	EXPECT_EQ(visited_values[1].get<mat4>(), std::get<index>(test.uniform));
 }

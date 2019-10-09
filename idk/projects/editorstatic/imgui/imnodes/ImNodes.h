@@ -54,6 +54,7 @@ struct _CanvasStateImpl;
 
 struct IMGUI_API CanvasState
 {
+    ImVec2 prev_win_pos;
     /// Current zoom of canvas.
     float zoom = 1.0f;
     float prev_zoom = 1.0f;
