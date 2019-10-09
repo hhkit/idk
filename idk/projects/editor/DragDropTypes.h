@@ -14,6 +14,7 @@ namespace idk
     public:
         constexpr static auto PARAMETER = "dd_param";
         constexpr static auto RESOURCE  = "dd_resource";
+        constexpr static auto GAME_OBJECT  = "dd_gameobject";
 
         static void SetResourcePayload(const GenericResourceHandle& handle);
         static void SetResourcePayload(const ResourceBundle& bundle);

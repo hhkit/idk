@@ -88,6 +88,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Scene>, "<Scene>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Prefab>, "<Prefab>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()

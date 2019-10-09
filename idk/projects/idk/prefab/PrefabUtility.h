@@ -17,6 +17,7 @@ namespace idk
 
         // save given game object into a prefab, writes into save_path.
         static RscHandle<Prefab> Save(Handle<GameObject> go, string_view save_path);
+        static RscHandle<Prefab> SaveAndConnect(Handle<GameObject> go, string_view save_path);
 
         // get the root of a prefab instance.
         // if the given game object is not part of a prefab instance, returns a null handle.

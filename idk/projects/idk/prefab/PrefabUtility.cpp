@@ -201,16 +201,30 @@ namespace idk
         prefab_inst.prefab = prefab;
         prefab_inst.objects = game_objects;
 
+        if (prefab->Name().size())
+            handle->Name(prefab->Name());
+        else if (auto path = Core::GetResourceManager().GetPath(prefab))
+            handle->Name(PathHandle(*path).GetStem());
+
         return handle;
     }
 
-    static void _create(Handle<GameObject> go, RscHandle<Prefab> handle)
+    static void _create(Handle<GameObject> go, RscHandle<Prefab> handle, Handle<PrefabInstance> inst = Handle<PrefabInstance>())
     {
+        if (inst)
+        {
+            inst->objects.clear();
+            inst->objects.push_back(go);
+            inst->prefab = handle;
+        }
+
         auto& prefab = *handle;
         prefab.data.clear();
         auto& root = prefab.data.emplace_back();
         for (auto& c : go->GetComponents())
         {
+            if (c.is_type<PrefabInstance>())
+                continue;
             root.components.emplace_back((*c).copy());
         }
 
@@ -246,8 +260,12 @@ namespace idk
             {
                 const Handle<GameObject> child{ child_index, gens[child_index], go.scene };
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
+                if (inst)
+                    inst->objects.push_back(child);
                 for (auto& c : child->GetComponents())
+                {
                     child_prefab_data.components.emplace_back((*c).copy());
+                }
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }
@@ -271,6 +289,20 @@ namespace idk
         }();
 
         _create(go, handle);
+        return handle;
+    }
+
+    RscHandle<Prefab> PrefabUtility::SaveAndConnect(Handle<GameObject> go, string_view save_path)
+    {
+        auto handle = [save_path]() {
+            auto create_res = Core::GetResourceManager().Create<Prefab>(save_path);
+            if (create_res)
+                return *create_res;
+            else
+                return *Core::GetResourceManager().Load<Prefab>(save_path);
+        }();
+
+        _create(go, handle, go->AddComponent<PrefabInstance>());
         return handle;
     }
 
