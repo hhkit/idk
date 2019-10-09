@@ -223,15 +223,23 @@ namespace idk {
 
 			} //Do something if pressed
 			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false)) {
+				IDE& editor = Core::GetSystem<IDE>();
+				editor.copied_gameobjects.clear();
+				for (auto& i : editor.selected_gameObjects) {
+					vector<RecursiveObjects> newObject{};
+					editor.RecursiveCollectObjects(i, newObject);
+					editor.copied_gameobjects.push_back(std::move(newObject));
+				}
 
-
-
-			} //Do something if pressed
+			} 
 			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
+				IDE& editor = Core::GetSystem<IDE>();
+				for (auto& i : editor.copied_gameobjects) {
+					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
+				}
 
 
-
-			} //Do something if pressed
+			}
 
 			ImGui::Separator();
 			if (ImGui::MenuItem("Duplicate", "CTRL+D", nullptr, false)) {
@@ -498,7 +506,7 @@ namespace idk {
 	void IGE_MainWindow::PollShortcutInput()
 	{
 
-		if (ImGui::IsAnyItemActive()) {
+		if (ImGui::IsAnyItemActive()) { //Do not do any shortcuts when inputs are active! EG: Editing texts!
 			return;
 		}
 		IDE& editor = Core::GetSystem<IDE>();
@@ -507,15 +515,33 @@ namespace idk {
 
 		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
 
-			//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+			//CTRL + Z
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
 				commandController.UndoCommand();
 			}
 
-			//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
+			//CTRL + Y
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
 				commandController.RedoCommand();
 			}
+
+			//CTRL + C
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				editor.copied_gameobjects.clear();
+				for (auto& i : editor.selected_gameObjects) {
+					vector<RecursiveObjects> newObject{};
+					editor.RecursiveCollectObjects(i, newObject);
+					editor.copied_gameobjects.push_back(std::move(newObject));
+				}
+			}
+
+			//CTRL + V
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				for (auto& i : editor.copied_gameobjects) {
+					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject,i));
+				}
+			}
+
 
 			//QWER = Move, Translate, Rotate, Scale (refer to ASCII Table)
 			//Q = Move

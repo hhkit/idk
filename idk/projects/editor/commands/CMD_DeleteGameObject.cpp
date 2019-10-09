@@ -49,7 +49,7 @@ namespace idk {
 				editor.selected_gameObjects.erase(iterator);
 
 			gameobject_vector.clear();
-			RecursiveCollectObjects(game_object_handle,gameobject_vector);
+			editor.RecursiveCollectObjects(game_object_handle,gameobject_vector);
 
 			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
 
@@ -82,36 +82,6 @@ namespace idk {
 		return true;
 	}
 
-	void CMD_DeleteGameObject::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
-	{
-		
-		RecursiveObjects newObject{};
-		//Copy all components from this gameobject
-		for (auto& c : i->GetComponents())
-			newObject.vector_of_components.emplace_back((*c).copy());
-
-		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(i);
-
-		if (children) {
-
-			//If there is no children, it will stop
-			children->visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
-				(void)depth;
-
-				//Skip parent
-				if (handle == i)
-					return true;
-
-				RecursiveCollectObjects(handle, newObject.children); //Depth first recursive
-
-				return false;
-
-				});
-		}
-		vector_ref.push_back(newObject);
-	}
-
 	void CMD_DeleteGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
 	{
 
@@ -127,13 +97,13 @@ namespace idk {
 			}
 
 			for (auto& c : object.vector_of_components) {
-			
+
 				if (c.is<Transform>())
 				{
 					Transform& t = c.get<Transform>();
-					i->GetComponent<Transform>()->position	= t.position;
-					i->GetComponent<Transform>()->rotation	= t.rotation;
-					i->GetComponent<Transform>()->scale		= t.scale;
+					i->GetComponent<Transform>()->position = t.position;
+					i->GetComponent<Transform>()->rotation = t.rotation;
+					i->GetComponent<Transform>()->scale = t.scale;
 					if (object.parent_of_children) {
 						i->GetComponent<Transform>()->parent = object.parent_of_children;
 					}

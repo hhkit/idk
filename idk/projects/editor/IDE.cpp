@@ -283,4 +283,36 @@ namespace idk
 		}
 	}
 
+	void IDE::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
+	{
+
+		RecursiveObjects newObject{};
+		//Copy all components from this gameobject
+		for (auto& c : i->GetComponents())
+			newObject.vector_of_components.emplace_back((*c).copy());
+
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(i);
+
+		if (children) {
+
+			//If there is no children, it will stop
+			children->visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
+				(void)depth;
+
+				//Skip parent
+				if (handle == i)
+					return true;
+
+				RecursiveCollectObjects(handle, newObject.children); //Depth first recursive
+
+				return false;
+
+				});
+		}
+		vector_ref.push_back(newObject);
+	}
+
+
+
 }
