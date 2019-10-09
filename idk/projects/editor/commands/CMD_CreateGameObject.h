@@ -14,8 +14,8 @@ namespace idk {
 
 	class CMD_CreateGameObject : public ICommand { //serialize/deserialize use serialize.h
 	public:
-		CMD_CreateGameObject(Handle<GameObject> parenting_gameobject);
-		CMD_CreateGameObject();
+		CMD_CreateGameObject(Handle<GameObject> parenting_gameobject); //Create empty on parented
+		CMD_CreateGameObject(vector<RecursiveObjects> copied_object = {}); //Create empty, if use_copy is true, will use IDE::copied_gameobject to generate gameobject
 
 		virtual bool execute() override;
 
@@ -23,6 +23,9 @@ namespace idk {
 
 	private:
 		Handle<GameObject> parenting_gameobject{};
+
+		void RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot = false);
+		vector<RecursiveObjects> copied_object{}; //If this is empty, create empty. Else use copied_object to build gameobject
 	};
 
 }

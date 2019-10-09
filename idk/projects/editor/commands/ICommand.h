@@ -19,6 +19,12 @@ Commands will never handle new or delete, it can only contain pointers
 
 #pragma once
 namespace idk {
+	//This is for collecting deleted gameobjects and its children as well as CreateGameObject Used for undo
+	struct RecursiveObjects {
+		Handle<GameObject>			parent_of_children{}; //Only for children, used when undoing. The main deleted gameobject would have this as null.
+		vector<reflect::dynamic>	vector_of_components{}; //Contains components for the new gameobject
+		vector<RecursiveObjects>	children{};
+	};
 	class ICommand {
 	public:
 		//Disables Copy or Move constructor
