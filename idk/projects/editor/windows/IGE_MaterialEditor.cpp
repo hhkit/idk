@@ -747,6 +747,8 @@ namespace idk
 
         ImNodes::BeginCanvas(&_canvas);
 
+		drawLinks();
+
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
         auto end = _node_order.end();
@@ -784,9 +786,7 @@ namespace idk
             }
         }
 
-        drawLinks();
         handleNewLink();
-
 
         ImNodes::EndCanvas();
 
