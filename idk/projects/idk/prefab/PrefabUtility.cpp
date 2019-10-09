@@ -73,11 +73,11 @@ namespace idk
             return curr;
         }
 
-        const static PropertyOverride default_overrides[3]{
-            { -1, "Transform", "position" }, { -1, "Transform", "rotation" },
+        const static PropertyOverride default_overrides[]{
+            { -1, "Transform", "position" }, { -1, "Transform", "rotation" }, { -1, "Transform", "parent" },
             { -1, "Name", "name" }
         };
-        constexpr static auto num_default_overrides = 3;
+        constexpr static auto num_default_overrides = sizeof(default_overrides) / sizeof(PropertyOverride);
 
         static bool is_default_override(const PropertyOverride& ov)
         {
@@ -363,6 +363,23 @@ namespace idk
                     helpers::resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[ov_index];
                 }
             }
+        }
+    }
+
+    void PrefabUtility::PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path)
+    {
+        PropertyOverride prop_override{ object_index, string{component_name}, string{property_path} };
+        for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
+        {
+            if (prefab_inst.prefab != prefab)
+                continue;
+            if (helpers::has_override(prefab_inst, object_index, component_name, property_path))
+                continue;
+            if (helpers::is_default_override(prop_override))
+                continue;
+
+            helpers::resolve_property_path(*prefab_inst.objects[object_index]->GetComponent(component_name), property_path) =
+                helpers::resolve_property_path(prefab->data[object_index].FindComponent(component_name), property_path);
         }
     }
 

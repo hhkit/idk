@@ -637,11 +637,12 @@ namespace idk {
     {
         auto& data = prefab->data[0];
 
-        auto trans = data.FindComponent(reflect::get_type<Transform>().name());
+        auto name = reflect::get_type<Transform>().name();
+        auto trans = data.FindComponent(name);
         if (trans.valid())
         {
             ImGui::PushID(0);
-            if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::CollapsingHeader(name.data(), ImGuiTreeNodeFlags_DefaultOpen))
             {
                 auto& c = trans.get<Transform>();
 
@@ -671,7 +672,7 @@ namespace idk {
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
                 if (ImGuidk::DragVec3("##2", &c.scale))
                 {
-                    PrefabUtility::PropagatePrefabChangesToInstances(prefab);
+                    PrefabUtility::PropagatePropertyToInstances(prefab, 0, name, "scale");
                     prefab->Dirty();
                 }
 
