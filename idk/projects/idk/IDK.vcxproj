@@ -37,6 +37,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="app\GamepadEnums.h" />
+    <ClInclude Include="gfx\FramebufferFactory.h" />
     <ClInclude Include="gfx\Framebuffer.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
+    <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\LightTypes.cpp" />
     <ClCompile Include="gfx\MaterialFactory.cpp" />

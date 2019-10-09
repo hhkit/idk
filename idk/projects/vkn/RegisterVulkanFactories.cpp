@@ -13,7 +13,7 @@
 #include <anim/Animation.h>
 #include <vkn/VulkanTextureFactory.h>
 #include <vkn/DDSLoader.h>
-#include <vkn/VknFrameBufferFactory.h>
+#include <vkn/VknRenderTargetFactory.h>
 #include <vkn/VulkanPngLoader.h>
 namespace idk::vkn
 {

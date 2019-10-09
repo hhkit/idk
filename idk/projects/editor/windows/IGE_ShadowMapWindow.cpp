@@ -26,7 +26,7 @@ Derived using IDE_SceneView.cpp as a base/reference
 #include <imgui/ImGuizmo.h>
 #include <IDE.h>
 
-#include <vkn/VknFramebuffer.h>
+#include <vkn/VknRenderTarget.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 
 namespace idk {

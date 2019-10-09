@@ -84,9 +84,6 @@
     <ClInclude Include="VknFrameBufferManager.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBuffer.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="VknImageData.h">
       <Filter>resource</Filter>
     </ClInclude>
@@ -123,9 +120,6 @@
     <ClInclude Include="RegisterVulkanFactories.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBufferFactory.h">
-      <Filter>resource\Factories</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanMeshFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
@@ -146,6 +140,18 @@
     </ClInclude>
     <ClInclude Include="DDSLoader.h">
       <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTarget.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTargetFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFramebufferFactory.h">
+      <Filter>resource\Factories</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -193,9 +199,6 @@
       <Filter>render</Filter>
     </ClCompile>
     <ClCompile Include="VulkanMesh.cpp" />
-    <ClCompile Include="VknFrameBuffer.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="VknFrameBufferManager.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -247,9 +250,6 @@
     <ClCompile Include="RegisterVulkanFactories.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
-    <ClCompile Include="VknFrameBufferFactory.cpp">
-      <Filter>resource\Factories</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanMeshFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
@@ -271,6 +271,13 @@
     <ClCompile Include="DDSLoader.cpp">
       <Filter>resource\Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="VknRenderTarget.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknRenderTargetFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFramebufferFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

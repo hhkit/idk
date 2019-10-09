@@ -3,7 +3,7 @@
 
 //#include "idk/res/ResourceHandle.h"
 #include <vkn/VulkanView.h>
-#include <vkn/VknFrameBuffer.h>
+#include <vkn/VknRenderTarget.h>
 
 namespace idk
 {

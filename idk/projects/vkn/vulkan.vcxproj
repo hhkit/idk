@@ -237,6 +237,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
+    <ClInclude Include="VknFrameBuffer.h" />
+    <ClInclude Include="VknFramebufferFactory.h" />
     <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VknTextureLoader.h" />
@@ -249,8 +251,8 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="vector_buffer.h" />
     <ClInclude Include="GfxConverters.h" />
     <ClInclude Include="BufferHelpers.h" />
-    <ClInclude Include="VknFrameBuffer.h" />
-    <ClInclude Include="VknFrameBufferFactory.h" />
+    <ClInclude Include="VknRenderTarget.h" />
+    <ClInclude Include="VknRenderTargetFactory.h" />
     <ClInclude Include="VknFrameBufferManager.h" />
     <ClInclude Include="VknTexture.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
@@ -287,8 +289,9 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
-    <ClCompile Include="VknFrameBuffer.cpp" />
-    <ClCompile Include="VknFrameBufferFactory.cpp" />
+    <ClCompile Include="VknFramebufferFactory.cpp" />
+    <ClCompile Include="VknRenderTarget.cpp" />
+    <ClCompile Include="VknRenderTargetFactory.cpp" />
     <ClCompile Include="VknFrameBufferManager.cpp" />
     <ClCompile Include="VknImageData.cpp" />
     <ClCompile Include="VknMeshModder.cpp" />

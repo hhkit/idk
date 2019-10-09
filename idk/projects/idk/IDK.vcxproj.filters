@@ -686,7 +686,12 @@
     <ClInclude Include="app\GamepadEnums.h">
       <Filter>app</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Framebuffer.h" />
+    <ClInclude Include="gfx\Framebuffer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FramebufferFactory.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -991,6 +996,7 @@
       <Filter>script</Filter>
     </ClCompile>
     <ClCompile Include="gfx\LightTypes.cpp" />
+    <ClCompile Include="gfx\Framebuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

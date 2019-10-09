@@ -1,38 +1,20 @@
 #pragma once
-#include <gfx/RenderTarget.h>
-//#include <glad/glad.h>
-#include <vkn/VulkanState.h>
-#include <vkn/VknImageData.h>
-#include <vkn/VulkanView.h>
+#include <gfx/Framebuffer.h>
+#include <vulkan/vulkan.hpp>
 namespace idk::vkn
 {
-	class VknRenderTarget
-		: public RenderTarget
+	struct VknAttachment : idk::Attachment
+	{
+		RscHandle<Texture> buffer;
+	};
+	class VknFrameBuffer: public FrameBuffer
 	{
 	public:
-		VknRenderTarget() = default;
-		VknRenderTarget(VknRenderTarget&&) noexcept= default;
-		VknRenderTarget& operator=(VknRenderTarget&&) noexcept = default;
-		VknRenderTarget(const VknRenderTarget&) = delete;
-		VknRenderTarget& operator=(const VknRenderTarget&) = delete;
-		~VknRenderTarget() = default;
-
-		void OnMetaUpdate(const Metadata& newmeta) override;
-		void PrepareDraw(vk::CommandBuffer& cmd_buffer);
-
-		vk::RenderPass GetRenderPass()const;
-
-		vk::Framebuffer Buffer();
-
-		vk::Semaphore ReadySignal();
-
-		const ivec2& Size()const { return size; };
-		BasicRenderPasses GetRenderPassType() { return rp_type; }
+		vk::Framebuffer GetFramebuffer()const { return *_framebuffer; }
+		vk::RenderPass GetRenderPass()const { return *_renderpass; }
+		void SetFramebuffer(vk::UniqueFramebuffer fb) { _framebuffer = std::move(fb); }
 	private:
-		BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
-		vk::UniqueSemaphore   ready_semaphore;
-		vk::UniqueFramebuffer buffer{ nullptr };
-		ivec2				  size{};
-		bool				  uncreated{true};
+		vk::UniqueFramebuffer _framebuffer;
+		vk::UniqueRenderPass _renderpass;
 	};
 }

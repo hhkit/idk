@@ -27,7 +27,7 @@ of the editor.
 #include <editor/commands/CommandList.h>
 #include <IDE.h>
 
-#include <vkn/VknFramebuffer.h>
+#include <vkn/VknRenderTarget.h>
 
 namespace idk {
 

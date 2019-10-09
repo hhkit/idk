@@ -14,7 +14,7 @@
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
 
-#include <vkn/VknFrameBuffer.h>
+#include <vkn/VknRenderTarget.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>

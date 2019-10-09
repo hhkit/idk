@@ -11,7 +11,7 @@
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
-#include <vkn/VknFrameBuffer.h>
+#include <vkn/VknRenderTarget.h>
 #include <gfx/Light.h>
 
 #include <gfx/MeshRenderer.h>

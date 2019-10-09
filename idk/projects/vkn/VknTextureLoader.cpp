@@ -16,7 +16,7 @@ namespace idk::vkn
 	};
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
-
+	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info);
 	vk::Format    MapFormat(TextureFormat tf);
 	TextureFormat MapFormat(vk::Format    tf);
 	
@@ -96,6 +96,51 @@ namespace idk::vkn
 	}
 
 	
+	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptions, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info)
+	{
+		TextureOptions options{};
+		auto format = load_info.format;
+
+		if (ooptions)
+		{
+			options = *ooptions;
+			format = MapFormat(options.internal_format);
+		}
+		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		//2x2 image Checkered
+
+		auto ptr = &texture;
+		auto&& [image, alloc, aspect] = vkn::LoadTexture(allocator, load_fence, load_info,in_info);
+		ptr->img_aspect = aspect;
+		ptr->image = std::move(image);
+		ptr->mem_alloc = std::move(alloc);
+		//TODO set up Samplers and Image Views
+
+		auto device = *view.Device();
+		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+
+		vk::SamplerCreateInfo sampler_info
+		{
+			vk::SamplerCreateFlags{},
+			GetFilterMode(options,FilterType::eMin),
+			GetFilterMode(options,FilterType::eMag),
+			vk::SamplerMipmapMode::eNearest,
+			GetRepeatMode(options,UvAxis::eU),
+			GetRepeatMode(options,UvAxis::eV),
+			GetRepeatMode(options,UvAxis::eW),
+			0.0f,
+			VK_TRUE,
+			options.anisoptrophy,
+			s_cast<bool>(options.compare_op),//Used for percentage close filtering
+			(options.compare_op) ? MapCompareOp(*options.compare_op) : vk::CompareOp::eNever,
+			0.0f,0.0f,
+			vk::BorderColor::eFloatOpaqueBlack,
+			VK_FALSE
+
+		};
+		ptr->sampler = device.createSamplerUnique(sampler_info);
+
+	}
 	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> ooptions, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		TextureOptions options{};
@@ -235,6 +280,143 @@ namespace idk::vkn
 		}
 		return result;
 	}
+	TexCreateInfo ColorBufferTexInfo(uint32_t width, uint32_t height)
+	{
+		TexCreateInfo info{};
+		info.width = width;
+		info.height = height;
+		info.format = vk::Format::eB8G8R8A8Unorm;
+		info.image_usage = vk::ImageUsageFlagBits::eColorAttachment;
+		info.aspect = vk::ImageAspectFlagBits::eColor;
+		info.sampled(true);
+		return info;
+	}
+
+	TexCreateInfo DepthBufferTexInfo(uint32_t width, uint32_t height)
+	{
+		TexCreateInfo info{};
+		info.width = width;
+		info.height = height;
+		info.format = vk::Format::eD16Unorm;
+		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		info.aspect = vk::ImageAspectFlagBits::eDepth;
+		info.sampled(true);
+		return info;
+	}
+
+
+	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info)
+	{
+		TextureResult result;
+		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		vk::PhysicalDevice pd = view.PDevice();
+		vk::Device device = *view.Device();
+		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
+		auto cmd_buffer = *ucmd_buffer;
+		auto format = load_info.format;
+		//bool is_render_target = isRenderTarget;
+		size_t len;
+		uint32_t width = load_info.width, height = load_info.height;
+		if (!in_info) //If data isn't given.
+			len = ComputeTextureLength(width, height, format);
+		else
+		{
+			len = in_info->len;
+		}
+		size_t num_bytes = len;
+
+		vk::ImageUsageFlags image_usage = load_info.image_usage;//(format == vk::Format::eD16Unorm) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
+		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
+		if (in_info)
+			image_usage |= vk::ImageUsageFlagBits::eTransferDst;
+
+		std::optional<vk::ImageSubresourceRange> range{};
+
+		vk::ImageCreateInfo imageInfo{};
+		imageInfo.imageType = vk::ImageType::e2D;
+		imageInfo.extent.width = static_cast<uint32_t>(width);
+		imageInfo.extent.height = static_cast<uint32_t>(height);
+		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
+		imageInfo.mipLevels = load_info.mipmap_level; //Currently no mipmapping
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format; //Unsigned normalized so that it can still be interpreted as a float later
+		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
+		imageInfo.initialLayout = (in_info)?vk::ImageLayout::eUndefined:load_info.layout;
+		imageInfo.usage = image_usage;// vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
+		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
+		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
+
+		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
+		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
+		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
+
+		const vk::ImageAspectFlagBits img_aspect = load_info.aspect;
+		result.aspect = img_aspect;
+		if (in_info)
+		{
+
+			auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
+
+			if (in_info)
+				hlp::MapMemory(device, *stagingMemory, 0, in_info->data, num_bytes, vk::DispatchLoaderDefault{});
+			//TODO update this part so that we check the usage flags and set access flags accordingly.
+			vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
+			vk::AccessFlags dst_flags = vk::AccessFlagBits::eTransferWrite;
+			vk::PipelineStageFlags shader_flags = vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader;// | vk::PipelineStageFlagBits::eTessellationControlShader | vk::PipelineStageFlagBits::eTessellationEvaluationShader;
+			vk::PipelineStageFlags src_stages = shader_flags;
+			vk::PipelineStageFlags dst_stages = vk::PipelineStageFlagBits::eTransfer;
+			vk::ImageLayout layout = vk::ImageLayout::eGeneral;
+			vk::ImageLayout next_layout = vk::ImageLayout::eTransferDstOptimal;
+			//if (is_render_target)
+			//{
+			//	src_flags |= vk::AccessFlagBits::eColorAttachmentRead;
+			//	src_stages |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
+			//	dst_flags |= vk::AccessFlagBits::eColorAttachmentWrite;
+			//	dst_stages |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
+			//	next_layout = layout = attachment_layout;
+			//}
+			//if ((format == vk::Format::eD16Unorm))
+			//	img_aspect = vk::ImageAspectFlagBits::eDepth;
+			TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);
+			//if (!is_render_target)
+			{
+
+				//Copy data from buffer to image
+				vk::BufferImageCopy region{};
+				region.bufferOffset = 0;
+				region.bufferRowLength = 0;
+				region.bufferImageHeight = 0;
+
+				region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+				region.imageSubresource.mipLevel = 0;
+				region.imageSubresource.baseArrayLayer = 0;
+				region.imageSubresource.layerCount = 1;
+
+				region.imageOffset = { 0, 0, 0 };
+				region.imageExtent = {
+					width,
+					height,
+					1
+				};
+				cmd_buffer.copyBufferToImage(*stagingBuffer, *image, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
+
+				TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image);
+				;
+			}
+
+
+			device.resetFences(fence);
+			hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
+			uint64_t wait_for_milli_seconds = 1;
+			[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
+			//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+			while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
+		}
+		result.first = std::move(image);
+		result.second = std::move(alloc);
+		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
+	}
+	
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		TextureResult result;

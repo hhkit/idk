@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "VknFrameBuffer.h"
+#include "VknRenderTarget.h"
 #include <core/Core.h>
 #include <vkn/VknTexture.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 
 #include <vkn/VknTextureLoader.h>
 
-#include <vkn/VknFrameBufferFactory.h>
+#include <vkn/VknRenderTargetFactory.h>
 
 namespace idk::vkn
 {
