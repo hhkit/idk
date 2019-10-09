@@ -43,6 +43,8 @@ namespace idk
 
         void addParamNode(int param_index, vec2 pos);
         void removeParam(int param_index);
+
+        string genUniqueParamName(string_view base);
     };
 
 }

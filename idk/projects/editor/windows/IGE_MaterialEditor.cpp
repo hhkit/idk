@@ -3,11 +3,12 @@
 #include "IGE_MaterialEditor.h"
 #include <editor/IDE.h>
 #include <editor/windows/IGE_ProjectWindow.h>
-#include <gfx/ShaderGraph.h>
-#include <gfx/ShaderGraph_helpers.h>
 #include <editor/widgets/InputResource.h>
 #include <editor/widgets/EnumCombo.h>
 #include <editor/DragDropTypes.h>
+#include <gfx/ShaderGraph.h>
+#include <gfx/ShaderGraph_helpers.h>
+#include <gfx/MaterialInstance.h>
 #include <regex>
 #include <filesystem>
 
@@ -865,6 +866,22 @@ namespace idk
         }
     }
 
+
+
+    string IGE_MaterialEditor::genUniqueParamName(string_view base)
+    {
+        const auto& params = _graph->parameters;
+        string new_name{ base };
+        int i = 0;
+        while (std::find_if(params.begin(), params.end(),
+                            [&new_name](const Parameter& p) { return p.name == new_name; }) != params.end())
+        {
+            new_name = base;
+            new_name += std::to_string(++i);
+        }
+        return new_name;
+    }
+
     void IGE_MaterialEditor::drawLeftColumn()
     {
         ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
@@ -936,11 +953,28 @@ namespace idk
                     if (ImGui::InputText("##rename", buf, 32, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         renaming = -1;
-                        string new_name = buf;
-                        int j = 0;
-                        while (std::find_if(_graph->parameters.begin(), _graph->parameters.end(),
-                                            [&new_name](const Parameter& p) { return p.name == new_name; }) != _graph->parameters.end())
-                            new_name = buf + std::to_string(++j);
+                        string new_name = genUniqueParamName(buf);
+
+                        { // replace name in graph's uniform table
+                            auto node = _graph->uniforms.extract(param.name);
+                            node.key() = new_name;
+                            _graph->uniforms.insert(std::move(node));
+                        }
+                        // replace name of all material instances with overriden uniform
+                        for (auto& mat_inst : Core::GetResourceManager().GetAll<MaterialInstance>())
+                        {
+                            if (mat_inst->material.guid == _graph.guid)
+                            {
+                                auto iter = mat_inst->uniforms.find(param.name);
+                                if (iter != mat_inst->uniforms.end())
+                                {
+                                    auto node = mat_inst->uniforms.extract(iter);
+                                    node.key() = new_name;
+                                    mat_inst->uniforms.insert(std::move(node));
+                                }
+                            }
+                        }
+
                         std::swap(param.name, new_name);
                     }
                     ImGui::PopItemWidth();
@@ -1060,11 +1094,11 @@ namespace idk
             }
             if (ImGui::BeginPopup("addparams"))
             {
-                if (ImGui::MenuItem("Float"))   _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::FLOAT,     "0" });
-                if (ImGui::MenuItem("Vec2"))    _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC2,      "0,0" });
-                if (ImGui::MenuItem("Vec3"))    _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC3,      "0,0,0" });
-                if (ImGui::MenuItem("Vec4"))    _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::VEC4,      "0,0,0,0" });
-                if (ImGui::MenuItem("Texture")) _graph->parameters.emplace_back(Parameter{ "NewParameter", ValueType::SAMPLER2D, string(Guid()) });
+                if (ImGui::MenuItem("Float"))   _graph->parameters.emplace_back(Parameter{ genUniqueParamName("NewFloat"),   ValueType::FLOAT,     "0" });
+                if (ImGui::MenuItem("Vec2"))    _graph->parameters.emplace_back(Parameter{ genUniqueParamName("NewVec2"),    ValueType::VEC2,      "0,0" });
+                if (ImGui::MenuItem("Vec3"))    _graph->parameters.emplace_back(Parameter{ genUniqueParamName("NewVec3"),    ValueType::VEC3,      "0,0,0" });
+                if (ImGui::MenuItem("Vec4"))    _graph->parameters.emplace_back(Parameter{ genUniqueParamName("NewVec4"),    ValueType::VEC4,      "0,0,0,0" });
+                if (ImGui::MenuItem("Texture")) _graph->parameters.emplace_back(Parameter{ genUniqueParamName("NewTexture"), ValueType::SAMPLER2D, string(Guid()) });
                 ImGui::EndPopup();
             }
 
