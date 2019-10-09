@@ -33,13 +33,16 @@ namespace idk
 	ResourceBundle AssimpImporter::LoadFile(PathHandle path_to_resource)
 	{
 		ResourceBundle ret_val;
+
+		ai_helpers::Scene importer_scene;
+		const bool success = ai_helpers::Import(importer_scene, path_to_resource);
+		assert(success);
+		if (!success)
+			return ret_val;
+
 		vector<RscHandle<Mesh>> mesh_handles;
 		RscHandle<anim::Skeleton> skeleton_handle;
 		vector<RscHandle<anim::Animation>> animation_handles;
-
-		ai_helpers::Scene importer_scene;
-
-		assert(ai_helpers::Import(importer_scene, path_to_resource));
 
 		ai_helpers::CompileMeshes(importer_scene, importer_scene.ai_scene->mRootNode);
 		ai_helpers::CompileBones(importer_scene);
@@ -195,13 +198,16 @@ namespace idk
 	ResourceBundle AssimpImporter::LoadFile(PathHandle path_to_resource, const MetaBundle& meta_bundle)
 	{
 		ResourceBundle ret_val;
+
+		ai_helpers::Scene importer_scene;
+		const bool success = ai_helpers::Import(importer_scene, path_to_resource);
+		assert(success);
+		if (!success)
+			return ret_val;
+
 		vector<RscHandle<Mesh>> mesh_handles;
 		RscHandle<anim::Skeleton> skeleton_handle;
 		vector<RscHandle<anim::Animation>> animation_handles;
-
-		ai_helpers::Scene importer_scene;
-
-		assert(ai_helpers::Import(importer_scene, path_to_resource));
 
 		ai_helpers::CompileMeshes(importer_scene, importer_scene.ai_scene->mRootNode);
 		ai_helpers::CompileBones(importer_scene);
