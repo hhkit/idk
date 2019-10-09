@@ -136,8 +136,6 @@ namespace idk
 
         ImGui::SetCursorScreenPos(screen_pos + ImVec2{ 1.0f, 1.0f });
 
-        ImGui::BeginGroup();
-
         ImRect rect = { screen_pos, screen_pos + ImVec2{ itemw * canvas->zoom, ImGui::GetTextLineHeight() + 2.0f } };
 
         ImGui::GetWindowDrawList()->AddRectFilled(rect.Min, rect.Max,
@@ -162,8 +160,6 @@ namespace idk
         ImGui::PopStyleVar();
         ImGui::PopItemWidth();
 
-        ImGui::EndGroup();
-
         return ret;
     }
 
@@ -186,6 +182,8 @@ namespace idk
             float f = std::stof(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 1, &f))
                 slot.value = std::to_string(f);
+            if (ImGui::IsItemDeactivatedAfterEdit())
+                _graph->Compile();
             break;
         }
         case ValueType::VEC2:
@@ -193,6 +191,8 @@ namespace idk
             vec2 v = helpers::parse_vec2(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 2, v.values))
                 slot.value = helpers::serialize_value(v);
+            if (ImGui::IsItemDeactivatedAfterEdit())
+                _graph->Compile();
             break;
         }
         case ValueType::VEC3:
@@ -200,6 +200,8 @@ namespace idk
             vec3 v = helpers::parse_vec3(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 3, v.values))
                 slot.value = helpers::serialize_value(v);
+            if (ImGui::IsItemDeactivatedAfterEdit())
+                _graph->Compile();
             break;
         }
         case ValueType::VEC4:
@@ -207,6 +209,8 @@ namespace idk
             vec4 v = helpers::parse_vec4(slot.value);
             if (draw_value_draw_vec(id.c_str(), pos, 4, v.values))
                 slot.value = helpers::serialize_value(v);
+            if (ImGui::IsItemDeactivatedAfterEdit())
+                _graph->Compile();
             break;
         }
 
@@ -685,10 +689,6 @@ namespace idk
         {
             ImNodes::BeginCanvas(&_canvas);
             ImNodes::EndCanvas();
-            //graph = Core::GetResourceManager().Create<Graph>();
-            //addNode("master\\PBR", { 500.0f, 200.0f });
-            //g.master_node = g.nodes.begin()->first;
-            //Core::GetSystem<SaveableResourceManager>().Save(graph);
             return;
         }
 
@@ -857,6 +857,8 @@ namespace idk
                     }
                 }
             }
+
+            g.Compile();
         }
     }
 
@@ -889,6 +891,7 @@ namespace idk
         {
             addDefaultSlotValue(link_to_delete->node_in, link_to_delete->slot_in);
             g.links.erase(link_to_delete);
+            g.Compile();
         }
     }
 
@@ -997,11 +1000,14 @@ namespace idk
                                     auto node = mat_inst->uniforms.extract(iter);
                                     node.key() = new_name;
                                     mat_inst->uniforms.insert(std::move(node));
+                                    mat_inst->Dirty();
                                 }
                             }
                         }
 
                         std::swap(param.name, new_name);
+                        _graph->Compile();
+                        _graph->Dirty();
                     }
                     ImGui::PopItemWidth();
 
@@ -1066,6 +1072,8 @@ namespace idk
                     float f = helpers::parse_float(param.default_value);
                     if (ImGui::DragFloat("", &f, 0.01f))
                         param.default_value = helpers::serialize_value(f);
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                        _graph->Compile();
                     break;
                 }
                 case ValueType::VEC2:
@@ -1073,6 +1081,8 @@ namespace idk
                     vec2 v = helpers::parse_vec2(param.default_value);
                     if (ImGui::DragFloat3("", v.values, 0.01f))
                         param.default_value = helpers::serialize_value(v);
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                        _graph->Compile();
                     break;
                 }
                 case ValueType::VEC3:
@@ -1080,20 +1090,27 @@ namespace idk
                     vec3 v = helpers::parse_vec3(param.default_value);
                     if (ImGui::DragFloat3("", v.values, 0.01f))
                         param.default_value = helpers::serialize_value(v);
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                        _graph->Compile();
                     break;
-                }
+                } 
                 case ValueType::VEC4:
                 {
                     vec4 v = helpers::parse_vec4(param.default_value);
                     if (ImGui::DragFloat4("", v.values, 0.01f))
                         param.default_value = helpers::serialize_value(v);
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                        _graph->Compile();
                     break;
                 }
                 case ValueType::SAMPLER2D:
                 {
                     RscHandle<Texture> tex = helpers::parse_sampler2d(param.default_value);
                     if (ImGuidk::InputResource("", &tex))
+                    {
                         param.default_value = helpers::serialize_value(tex);
+                        _graph->Compile();
+                    }
                     break;
                 }
                 default:
