@@ -28,9 +28,10 @@ namespace idk
         ImNodes::CanvasState _canvas;
         RscHandle<shadergraph::Graph> _graph;
         vector<Guid> _nodes_to_delete;
+        vector<Guid> _node_order;
 
         void handleNewLink();
-        void handleDeletedLink();
+        void drawLinks();
         void drawLeftColumn();
 
         void drawValue(shadergraph::Node& node, int input_slot_index);

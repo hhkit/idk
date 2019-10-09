@@ -426,6 +426,7 @@ namespace idk
         for (auto out : sig.outs)
             node.output_slots.push_back({ out });
 
+        _node_order.push_back(node.guid);
         return _graph->nodes.emplace(node.guid, node).first->second;
     }
 
@@ -458,6 +459,7 @@ namespace idk
         node.output_slots.push_back(Slot{ param.type });
 
         _graph->nodes.emplace(node.guid, node);
+        _node_order.push_back(node.guid);
     }
 
     void IGE_MaterialEditor::removeParam(int param_index)
@@ -635,6 +637,9 @@ namespace idk
     void IGE_MaterialEditor::OpenGraph(const RscHandle<shadergraph::Graph>& handle)
     {
 		_graph = handle;
+        _node_order.clear();
+        for (auto& pair : _graph->nodes)
+            _node_order.push_back(pair.first);
 
         ImGui::SetWindowFocus(window_name);
         is_open = true;
@@ -651,7 +656,9 @@ namespace idk
     void IGE_MaterialEditor::Initialize()
     {
         _canvas.colors[ImNodes::ColNodeBg] = ImGui::GetColorU32(ImGuiCol_Border);
+        _canvas.colors[ImNodes::ColNodeBg].Value.w = 0.75f;
         _canvas.colors[ImNodes::ColNodeActiveBg] = ImGui::GetColorU32(ImGuiCol_Border);
+        _canvas.colors[ImNodes::ColNodeActiveBg].Value.w = 0.75f;
         _canvas.style.curve_thickness = 2.5f;
 
         Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked.Listen([&](GenericResourceHandle handle)
@@ -733,14 +740,32 @@ namespace idk
         }
 
         for (auto& guid : _nodes_to_delete)
+        {
+            _node_order.erase(std::find(_node_order.begin(), _node_order.end(), guid));
             g.nodes.erase(guid);
+        }
 
         ImNodes::BeginCanvas(&_canvas);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
-        for (auto& node : g.nodes)
-            drawNode(node.second);
+        auto end = _node_order.end();
+        auto iter = _node_order.begin();
+        while (iter != end)
+        {
+            auto& node = g.nodes.at(*iter);
+            bool was_selected = node.selected;
+            drawNode(node);
+            if (!was_selected && node.selected)
+            {
+                // rotate node onto end of _node_order (so it will be drawn at the top next frame)
+                // then decrement end so it will not be drawn twice this frame, and draw the new iter-pointed node
+                std::rotate(iter, iter + 1, _node_order.end());
+                --end;
+                continue;
+            }
+            ++iter;
+        }
 
         for(auto& guid : _nodes_to_delete)
             g.nodes.erase(guid);
@@ -759,8 +784,9 @@ namespace idk
             }
         }
 
+        drawLinks();
         handleNewLink();
-        handleDeletedLink();
+
 
         ImNodes::EndCanvas();
 
@@ -834,7 +860,7 @@ namespace idk
         }
     }
 
-    void IGE_MaterialEditor::handleDeletedLink()
+    void IGE_MaterialEditor::drawLinks()
     {
         Graph& g = *_graph;
 
