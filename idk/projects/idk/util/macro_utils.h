@@ -2,8 +2,8 @@
 
 #define IDENTITY(x) x
 #define GLUE(L, R) L##R
-#define _GET_NTH(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,N,...) N
-#define COUNT_ARGS(...) IDENTITY(_GET_NTH(__VA_ARGS__,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0))
+#define _GET_NTH(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,_30,_31,_32,N,...) N
+#define COUNT_ARGS(...) IDENTITY(_GET_NTH(__VA_ARGS__,32,31,30, 29, 28, 27, 26, 25, 24, 23, 22, 21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0))
 
 #define _FOREACH_1(m, x)      m(x)
 #define _FOREACH_2(m, x, ...) m(x) IDENTITY(_FOREACH_1(m, __VA_ARGS__))
@@ -21,6 +21,22 @@
 #define _FOREACH_14(m, x, ...) m(x) IDENTITY(_FOREACH_13(m, __VA_ARGS__))
 #define _FOREACH_15(m, x, ...) m(x) IDENTITY(_FOREACH_14(m, __VA_ARGS__))
 #define _FOREACH_16(m, x, ...) m(x) IDENTITY(_FOREACH_15(m, __VA_ARGS__))
+#define _FOREACH_17(m, x, ...) m(x) IDENTITY(_FOREACH_16(m, __VA_ARGS__))
+#define _FOREACH_18(m, x, ...) m(x) IDENTITY(_FOREACH_17(m, __VA_ARGS__))
+#define _FOREACH_19(m, x, ...) m(x) IDENTITY(_FOREACH_18(m, __VA_ARGS__))
+#define _FOREACH_20(m, x, ...) m(x) IDENTITY(_FOREACH_19(m, __VA_ARGS__))
+#define _FOREACH_21(m, x, ...) m(x) IDENTITY(_FOREACH_20(m, __VA_ARGS__))
+#define _FOREACH_22(m, x, ...) m(x) IDENTITY(_FOREACH_21(m, __VA_ARGS__))
+#define _FOREACH_23(m, x, ...) m(x) IDENTITY(_FOREACH_22(m, __VA_ARGS__))
+#define _FOREACH_24(m, x, ...) m(x) IDENTITY(_FOREACH_23(m, __VA_ARGS__))
+#define _FOREACH_25(m, x, ...) m(x) IDENTITY(_FOREACH_24(m, __VA_ARGS__))
+#define _FOREACH_26(m, x, ...) m(x) IDENTITY(_FOREACH_25(m, __VA_ARGS__))
+#define _FOREACH_27(m, x, ...) m(x) IDENTITY(_FOREACH_26(m, __VA_ARGS__))
+#define _FOREACH_28(m, x, ...) m(x) IDENTITY(_FOREACH_27(m, __VA_ARGS__))
+#define _FOREACH_29(m, x, ...) m(x) IDENTITY(_FOREACH_28(m, __VA_ARGS__))
+#define _FOREACH_30(m, x, ...) m(x) IDENTITY(_FOREACH_29(m, __VA_ARGS__))
+#define _FOREACH_31(m, x, ...) m(x) IDENTITY(_FOREACH_30(m, __VA_ARGS__))
+#define _FOREACH_32(m, x, ...) m(x) IDENTITY(_FOREACH_31(m, __VA_ARGS__))
 
 #define _FOREACH_N(macro, N, ...) IDENTITY(GLUE(_FOREACH_, N)(macro, __VA_ARGS__))
 #define FOREACH(macro, ...) _FOREACH_N(macro, COUNT_ARGS(__VA_ARGS__), __VA_ARGS__)
