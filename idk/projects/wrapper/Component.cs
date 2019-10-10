@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace idk
+﻿namespace idk
 {
     public class Component
         : IObject

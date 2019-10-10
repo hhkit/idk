@@ -25,4 +25,8 @@ namespace idk
 	{
 	}
 
+	void MonoBehavior::UpdateCoroutines()
+	{
+	}
+
 }

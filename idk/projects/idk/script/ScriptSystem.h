@@ -15,30 +15,14 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		friend class MonoBehavior;
-		MonoDomain* domain = nullptr;
-		MonoDomain* script_domain = nullptr;
-		MonoAssembly* script_assembly = nullptr;
-		MonoAssembly* lib_assembly = nullptr;
-
-		hash_table<string, MonoBehaviorData> mono_behaviors;
-		hash_table<string, std::deque<MonoBehavior*>> behavior_handles;
-
-		void RegisterMonoBehavior(MonoBehavior*);
-		void DeregisterMonoBehavior(MonoBehavior*);
-
-		void FindMonoBehaviors();
-		void ClearMonoBehaviors();
-
-		void LoadGameScripts();
-		void UnloadGameScripts();
-		bool ImplementsInterface(MonoClass*, std::string_view);
-	public:
 		string path_to_game_dll = "";
 
-		void ScriptAwaken(span<MonoBehavior>);
-		void ScriptUpdate(span<MonoBehavior>);
+		// for the sake of clarity, these update phases are done in sequence of declaration
+		void ScriptStart(span<MonoBehavior>);
 		void ScriptFixedUpdate(span<MonoBehavior>);
+		void ScriptUpdate(span<MonoBehavior>);
+		void ScriptUpdateCoroutines(span<MonoBehavior>);
+		void ScriptLateUpdate(span<MonoBehavior>);
 
 		MonoBehaviorData* GetMonoBehaviorType(std::string_view);
 		const hash_table<string, MonoBehaviorData>& GetMonoBehaviorDataList();
@@ -49,9 +33,23 @@ namespace idk
 
 		void RefreshGameScripts();
 
-		MonoBehavior* GetMonoBehaviorInstance(std::string_view type);
-		span<MonoBehavior*> GetMonoBehaviorsOfType(std::string_view type);
+		Handle<MonoBehavior>       GetMonoBehaviorInstance(std::string_view type);
+		span<Handle<MonoBehavior>> GetMonoBehaviorsOfType(std::string_view type);
 	private:
+		friend class MonoBehavior;
+		MonoDomain* domain = nullptr;
+		MonoAssembly* lib_assembly = nullptr;
+
+		hash_table<string, MonoBehaviorData>          mono_behaviors;
+		hash_table<string, std::deque<Handle<MonoBehavior>>> behavior_handles;
+
+		void FindMonoBehaviors();
+		void ClearMonoBehaviors();
+
+		void LoadGameScripts();
+		void UnloadGameScripts();
+		bool ImplementsInterface(MonoClass*, std::string_view);
+
 		void Init() override;
 		void Shutdown() override;
 	};

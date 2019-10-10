@@ -9,14 +9,6 @@ namespace idk
 	class MonoBehavior 
 		: public Component<MonoBehavior>
 	{
-		friend class MonoSystem;
-		MonoObject* _obj = nullptr; // c# object
-		MonoBehaviorData* _data = nullptr;
-		hash_table<string, MonoMethod*> _methods;
-		string _type;
-		string _serialized;
-
-		uint32_t _gc_handle{};
 	public:
 		MonoBehavior();
 		MonoBehavior(MonoBehavior&& rhs);
@@ -40,5 +32,16 @@ namespace idk
 		//void Stop() override;
 
 		void UpdateCoroutines();
+	private:
+		friend class MonoSystem;
+
+		MonoObject*                      _obj {}; // c# object
+		MonoBehaviorData*               _data {}; // data to idk metadata for type
+		hash_table<string, MonoMethod*> _methods;
+		string                          _type;
+		string                          _serialized;
+
+		bool initialized                      {};
+		uint32_t _gc_handle                   {};
 	};
 }

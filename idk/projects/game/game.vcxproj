@@ -119,7 +119,9 @@
 xcopy  /i /d /c /y /s "$(SolutionDir)engine_data" "$(OutDir)engine_data"
 xcopy  /i /d /c /y /s "$(SolutionDir)editor_data" "$(OutDir)editor_data"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
+if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 </Command>
       <Outputs>$(OutDir)shaders\changed.chg</Outputs>
@@ -189,6 +191,7 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
 xcopy  /i /d /c /y /s "$(SolutionDir)engine_data" "$(OutDir)engine_data"
 xcopy  /i /d /c /y /s "$(SolutionDir)editor_data" "$(OutDir)editor_data"
 if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"
+if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
 if %errorlevel% NEQ 0 exit /b %errorlevel%
 call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv

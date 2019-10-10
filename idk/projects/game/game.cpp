@@ -77,25 +77,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
-	{
-		auto sys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-
-		c->AddSystem<IDE>();
-		win.OnScreenSizeChanged.Listen([sys](const ivec2&) { sys->Instance().OnResize(); });
-		gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
-	}
-	break;
-	case GraphicsAPI::OpenGL:
-		c->AddSystem<ogl::Win32GraphicsSystem>();
-		c->AddSystem<IDE>();
-
-		gSys = &c->GetSystem<ogl::Win32GraphicsSystem>();
+		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
+	case GraphicsAPI::OpenGL: 
+		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;
 	default:
 		break;
 	}
-	if (&c->GetSystem<IDE>())
-		gSys->editorExist = true;
+	c->AddSystem<IDE>();
+
 
 	c->Setup();
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");

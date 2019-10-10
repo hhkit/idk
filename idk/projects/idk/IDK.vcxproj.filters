@@ -686,6 +686,9 @@
     <ClInclude Include="app\GamepadEnums.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="machine.h" />
+    <ClInclude Include="debug\idk_assert.h" />
+    <ClInclude Include="script\MonoEnvironment.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -992,6 +995,7 @@
     <ClCompile Include="gfx\LightTypes.cpp">
       <Filter>gfx\light</Filter>
     </ClCompile>
+    <ClCompile Include="script\MonoEnvironment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

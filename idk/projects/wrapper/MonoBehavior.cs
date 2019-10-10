@@ -29,6 +29,12 @@ namespace idk
         public virtual void FixedUpdate() { }
 
         /// <summary>
+        ///     Called on fixed update
+        /// </summary>
+        public virtual void LateUpdate() { }
+
+
+        /// <summary>
         /// Start a coroutine.
         /// </summary>
         /// <param name="enumerator">Return from IEnumerator function</param>

@@ -41,6 +41,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "30 Editor Module", "project
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "22 OpenGL Module", "projects\opengl\idk_opengl.vcxproj", "{1052ECE8-7459-43A4-A57C-83A23BBD77C7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1} = {05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}
+		{F75C42DC-B24A-4529-97F4-86A7009E6833} = {F75C42DC-B24A-4529-97F4-86A7009E6833}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "31 Engine Wrapper", "projects\wrapper\31 Engine Wrapper.csproj", "{1343D3BF-7F00-488D-AF2B-6EC7F096D49B}"
 EndProject

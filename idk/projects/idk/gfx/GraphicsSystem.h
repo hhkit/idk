@@ -45,8 +45,6 @@ namespace idk
 		void RenderObjData(vector<RenderObject>& out);
 		void AnimatedRenderObjData(vector<AnimatedRenderObject>& out);
 		virtual GraphicsAPI GetAPI() = 0;
-
-		bool editorExist{false};
 	protected:
 		struct RenderBuffer
 		{
