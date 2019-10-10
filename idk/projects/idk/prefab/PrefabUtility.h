@@ -17,6 +17,7 @@ namespace idk
 
         // save given game object into a prefab, writes into save_path.
         static RscHandle<Prefab> Save(Handle<GameObject> go, string_view save_path);
+        static RscHandle<Prefab> SaveAndConnect(Handle<GameObject> go, string_view save_path);
 
         // get the root of a prefab instance.
         // if the given game object is not part of a prefab instance, returns a null handle.
@@ -24,7 +25,12 @@ namespace idk
 
 		// manually propagate ALL changes of a prefab.
         static void PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab);
+
+        // propagate specific property
         static void PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path);
+
+        // propagate last added component
+        static void PropagateAddedComponentToInstances(RscHandle<Prefab> prefab, int object_index);
 
         // after changing a value in a component, call this fn.
         //   target:        target game object / child object of the prefab instance
@@ -40,7 +46,7 @@ namespace idk
 
 		static void ApplyAddedComponent(Handle<GameObject> target, GenericHandle component);
         static void ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index);
-		static void ApplyPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override);
+		static void ApplyPropertyOverride(Handle<GameObject> target, const PropertyOverride& override);
 		static void ApplyPrefabInstance(Handle<GameObject> instance_root);
     };
 }

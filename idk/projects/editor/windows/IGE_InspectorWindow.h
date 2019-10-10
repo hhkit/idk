@@ -39,7 +39,6 @@ namespace idk {
 		string componentNameMarkedForDeletion{}; //Is empty by default
 
         Handle<PrefabInstance> _prefab_inst;
-        int _prefab_curr_obj_index;
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
 

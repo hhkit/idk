@@ -88,6 +88,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Scene>, "<Scene>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Prefab>, "<Prefab>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
@@ -193,7 +197,7 @@ REFLECT_VARS(data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
-REFLECT_VARS(object_index, component_name, property_path)
+REFLECT_VARS(component_name, property_path)
 REFLECT_END()
 
 // shader graph:
@@ -289,7 +293,7 @@ REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radiu
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
-REFLECT_VARS(prefab, overrides, objects)
+REFLECT_VARS(prefab, overrides, object_index)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")

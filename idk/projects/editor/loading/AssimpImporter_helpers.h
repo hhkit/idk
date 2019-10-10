@@ -20,8 +20,8 @@
 #include "vkn/VknMeshModder.h"
 
 // Opengl
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
-#include <idk_opengl/resource/OpenGLMesh.h>
+#include <opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/resource/OpenGLMesh.h>
 
 // Animation
 #include <anim/Skeleton.h>

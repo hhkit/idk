@@ -17,6 +17,7 @@ of the editor.
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/commands/CommandList.h>		//Commands
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
+#include <editor/DragDropTypes.h>
 #include <app/Application.h>
 #include <scene/SceneManager.h>
 #include <core/GameObject.h>
@@ -258,7 +259,7 @@ namespace idk {
 			
 			//If the drag drops target on to the handle...
 			if (ImGui::BeginDragDropTarget()) {
-				if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("id")) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) {
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
 					//uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
 					if (selected_gameObjects.size()) {
@@ -294,7 +295,7 @@ namespace idk {
 			}
 			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
 			{
-				ImGui::SetDragDropPayload("id", &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
 				ImGui::Text("Drag to another gameobject to parent.");
 				ImGui::Text("Drag to parent to unparent.");
 				ImGui::EndDragDropSource();

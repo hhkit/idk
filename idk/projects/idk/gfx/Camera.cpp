@@ -30,7 +30,7 @@ namespace idk
 	{
 		const auto tfm = GetGameObject()->Transform();
 		//return _direction;
-		return GetGameObject()->Transform()->Forward().normalize();
+		return GetGameObject()->Transform()->Forward();
 	}
 
 	mat4 Camera::ViewMatrix() const

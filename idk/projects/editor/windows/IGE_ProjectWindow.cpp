@@ -18,10 +18,13 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
 #include <editor/IDE.h>
+#include <editor/DragDropTypes.h>
+#include <core/GameObject.h>
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/MaterialInstance.h>
-#include <editor/DragDropTypes.h>
+#include <prefab/PrefabUtility.h>
+#include <prefab/Prefab.h>
 
 #include <iostream>
 #include <filesystem>
@@ -200,6 +203,19 @@ namespace idk {
                           ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysUseWindowPadding);
         ImGui::PopStyleColor();
         ImGui::PopStyleVar();
+
+        auto cursor_pos = ImGui::GetCursorPos();
+        ImGui::Dummy(ImGui::GetContentRegionAvail());
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+            {
+                Handle<GameObject> go = *reinterpret_cast<Handle<GameObject>*>(payload->Data);
+                PrefabUtility::SaveAndConnect(go, unique_new_file_path(go->Name().size() ? go->Name() : "NewPrefab", Prefab::ext));
+            }
+        }
+        ImGui::SetCursorPos(cursor_pos);
+
 
         ImGui::BeginMenuBar();
         {

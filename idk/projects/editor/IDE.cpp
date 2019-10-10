@@ -19,12 +19,12 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 #include <imgui/imgui.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/system/OpenGLGraphicsSystem.h>
 #include <editor/Vulkan_ImGui_Interface.h>
 #include <editor/OpenGL_ImGui_Interface.h>
 #include <win32/WindowsApplication.h>
 #include <vkn/VulkanState.h>
-#include <idk_opengl/system/OpenGLState.h>
+#include <opengl/system/OpenGLState.h>
 #include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
 #include <loading/OpenGLCubeMapLoader.h>

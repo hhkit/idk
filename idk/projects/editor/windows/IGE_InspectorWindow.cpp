@@ -123,11 +123,11 @@ namespace idk {
                 DisplayNameComponent(c_name);
             }
 
-            if (auto inst_root = PrefabUtility::GetPrefabInstanceRoot(gos[0]))
+            if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
-                _prefab_inst = inst_root->GetComponent<PrefabInstance>();
-                _prefab_curr_obj_index = s_cast<int>(std::find(_prefab_inst->objects.begin(), _prefab_inst->objects.end(), gos[0]) - _prefab_inst->objects.begin());
-                DisplayPrefabInstanceControls(_prefab_inst);
+                _prefab_inst = prefab_inst;
+                if (prefab_inst->object_index == 0)
+                    DisplayPrefabInstanceControls(_prefab_inst);
             }
 
             Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
@@ -406,8 +406,7 @@ namespace idk {
             {
                 for (const auto& ov : _prefab_inst->overrides)
                 {
-                    if (ov.object_index == _prefab_curr_obj_index &&
-                        ov.component_name == reflect::get_type<Transform>().name() &&
+                    if (ov.component_name == reflect::get_type<Transform>().name() &&
                         ov.property_path == "scale")
                     {
                         has_scale_override = true;
@@ -704,6 +703,30 @@ namespace idk {
             }
             ImGui::PopID();
         }
+
+        ImGui::Separator();
+        ImGui::SetCursorPosX(window_size.x * 0.25f);
+        if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f, 0.0f }))
+            ImGui::OpenPopup("AddComp");
+
+        if (ImGui::BeginPopup("AddComp"))
+        {
+            for (const char* c_name : GameState::GetComponentNames())
+            {
+                string displayName = c_name;
+                if (displayName == "Transform" ||
+                    displayName == "Name" ||
+                    displayName == "PrefabInstance")
+                    continue;
+
+                if (ImGui::MenuItem(displayName.c_str()))
+                {
+                    prefab->data[0].components.push_back(reflect::get_type(c_name).create());
+                    PrefabUtility::PropagateAddedComponentToInstances(prefab, 0);
+                }
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material)
@@ -894,8 +917,7 @@ namespace idk {
                 {
                     for (const auto& ov : _prefab_inst->overrides)
                     {
-                        if (ov.object_index == _prefab_curr_obj_index &&
-                            ov.component_name == (*_prefab_curr_component).type.name() &&
+                        if (ov.component_name == (*_prefab_curr_component).type.name() &&
                             ov.property_path == curr_prop_path)
                         {
                             has_override = true;
@@ -1033,12 +1055,12 @@ namespace idk {
                 {
                     if (ImGui::MenuItem("Apply Property"))
                     {
-                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path };
                         PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                     }
                     if (ImGui::MenuItem("Revert Property"))
                     {
-                        PropertyOverride ov{ _prefab_curr_obj_index, string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path };
                         PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
                     }
                     ImGui::EndPopup();

@@ -1,27 +1,31 @@
 #include "stdafx.h"
 #include "MonoBehavior.h"
 
-namespace idk
+namespace idk::mono
 {
-	//const std::string& MonoBehavior::RescueMonoObject()
+	//const std::string& Behavior::RescueMonoObject()
 	//{
 	//	// TODO: insert return statement here
 	//}
 
-	MonoBehavior::MonoBehavior()
+	Behavior::Behavior()
 	{
 	}
 
-	MonoBehavior::MonoBehavior(MonoBehavior&&)
+	Behavior::Behavior(Behavior&&)
 	{
 	}
 
-	MonoBehavior& MonoBehavior::operator=(MonoBehavior&&)
+	Behavior& Behavior::operator=(Behavior&&)
 	{
 		return *this;;
 	}
 
-	MonoBehavior::~MonoBehavior()
+	Behavior::~Behavior()
+	{
+	}
+
+	void Behavior::UpdateCoroutines()
 	{
 	}
 

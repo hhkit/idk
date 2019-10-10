@@ -58,8 +58,15 @@ namespace idk::detail
 					}
 					else
 					{
+						if constexpr (Ts::Unique)
+						{
+							auto component = go->GetComponent<Ts>();
+							if (component)
+								return component;
+						}
 						auto handle = gs.CreateObject<Ts>(go.scene);
 						handle->_gameObject = go;
+						go->_components.emplace_back(handle);
 						return handle;
 					}
 				} ...
@@ -78,8 +85,15 @@ namespace idk::detail
 					}
 					else
 					{
+						if constexpr (Ts::Unique)
+						{
+							auto component = go->GetComponent<Ts>();
+							if (component)
+								return component;
+						}
 						auto handle = gs.CreateObject<Ts>(go.scene, std::move(dyn.get<Ts>()));
 						handle->_gameObject = go;
+						go->_components.emplace_back(handle);
 						return handle;
 					}
 				} ...

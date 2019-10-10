@@ -6,15 +6,11 @@ namespace idk
 {
 	GenericHandle GameObject::AddComponent(reflect::type type)
 	{
-		auto comphandle = GameState::GetGameState().CreateComponent(GetHandle(), type);
-		_components.emplace_back(comphandle);
-		return comphandle;
+		return GameState::GetGameState().CreateComponent(GetHandle(), type);
 	}
 	GenericHandle GameObject::AddComponent(reflect::dynamic dyn)
 	{
-		auto comph = GameState::GetGameState().CreateComponent(GetHandle(), dyn);
-		_components.emplace_back(comph);
-		return comph;
+		return GameState::GetGameState().CreateComponent(GetHandle(), dyn);
 	}
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{
