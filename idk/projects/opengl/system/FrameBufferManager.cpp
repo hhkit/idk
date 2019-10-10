@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "FrameBufferManager.h"
 #include <gfx/RenderTarget.h>
-#include <idk_opengl/resource/FrameBuffer.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/FrameBuffer.h>
+#include <opengl/resource/OpenGLTexture.h>
 
 #include <iostream>
 

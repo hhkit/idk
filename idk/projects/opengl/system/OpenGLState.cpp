@@ -3,19 +3,19 @@
 #include <gfx/DebugRenderer.h>
 #include <gfx/MeshRenderer.h>
 
-#include <idk_opengl/resource/OpenGLMesh.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
-#include <idk_opengl/resource/FrameBuffer.h>
+#include <opengl/resource/OpenGLMesh.h>
+#include <opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/FrameBuffer.h>
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
 #include <math/matrix_transforms.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>
 #include <iostream>
 #include <gfx/CubeMap.h>
-#include <idk_opengl/resource/OpenGLCubemap.h>
+#include <opengl/resource/OpenGLCubemap.h>
 
 void _check_gl_error(const char* file, int line) {
 	GLenum err(glGetError());

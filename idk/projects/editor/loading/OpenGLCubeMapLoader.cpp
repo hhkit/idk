@@ -9,8 +9,8 @@
 
 //Resources
 #include <gfx/CubeMap.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
-#include <idk_opengl/resource/OpenGLCubemap.h>
+#include <opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/resource/OpenGLCubemap.h>
 
 namespace idk
 {

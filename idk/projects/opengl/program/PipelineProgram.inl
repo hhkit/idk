@@ -1,6 +1,6 @@
 #pragma once
 #include <glad/glad.h>
-#include <idk_opengl/program/Program.h>
+#include <opengl/program/Program.h>
 
 namespace idk::ogl
 {

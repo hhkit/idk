@@ -1,5 +1,5 @@
 #pragma once
-#include <idk_opengl/resource/OpenGLCubemap.h>
+#include <opengl/resource/OpenGLCubemap.h>
 #include <res/ResourceFactory.h>
 
 namespace idk::ogl

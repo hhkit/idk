@@ -11,12 +11,12 @@
 #include <gfx/MaterialFactory.h>
 #include <anim/Animation.h>
 #include <anim/SkeletonFactory.h>
-#include <idk_opengl/resource/FrameBufferFactory.h>
-#include <idk_opengl/resource/OpenGLMeshFactory.h>
-#include <idk_opengl/resource/OpenGLTextureFactory.h>
-#include <idk_opengl/program/GLSLLoader.h>
-#include <idk_opengl/program/ProgramFactory.h>
-#include <idk_opengl/system/OpenGLState.h>
+#include <opengl/resource/FrameBufferFactory.h>
+#include <opengl/resource/OpenGLMeshFactory.h>
+#include <opengl/resource/OpenGLTextureFactory.h>
+#include <opengl/program/GLSLLoader.h>
+#include <opengl/program/ProgramFactory.h>
+#include <opengl/system/OpenGLState.h>
 
 #include "OpenGLGraphicsSystem.h"
 

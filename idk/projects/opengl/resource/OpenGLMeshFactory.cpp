@@ -3,7 +3,7 @@
 #include <set>
 
 #include <core/Core.h>
-#include <idk_opengl/resource/OpenGLMesh.h>
+#include <opengl/resource/OpenGLMesh.h>
 #include <gfx/projector_functions.h>
 namespace idk::ogl
 {

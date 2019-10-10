@@ -1,9 +1,9 @@
 #pragma once
 #include <idk.h>
 #include <gfx/RenderObject.h>
-#include <idk_opengl/program/Program.h>
-#include <idk_opengl/program/PipelineProgram.h>
-#include <idk_opengl/system/FrameBufferManager.h>
+#include <opengl/program/Program.h>
+#include <opengl/program/PipelineProgram.h>
+#include <opengl/system/FrameBufferManager.h>
 
 namespace idk::ogl
 {

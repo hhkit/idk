@@ -2,8 +2,8 @@
 #include "FrameBufferfactory.h"
 #include <core/Core.h>
 #include <app/Application.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
-#include <idk_opengl/resource/FrameBuffer.h>
+#include <opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/FrameBuffer.h>
 
 namespace idk::ogl
 {

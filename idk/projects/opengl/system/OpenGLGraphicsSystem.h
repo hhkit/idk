@@ -3,7 +3,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <event/Dispatcher.h>
-#include <idk_opengl/resource/OpenGLCubemap.h>
+#include <opengl/resource/OpenGLCubemap.h>
 
 namespace idk::ogl
 {

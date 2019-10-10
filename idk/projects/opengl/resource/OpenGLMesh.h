@@ -5,8 +5,8 @@
 
 #include <gfx/Mesh.h>
 #include <gfx/vertex_descriptor.h>
-#include <idk_opengl/resource/OpenGLTypeDescriptors.h>
-#include <idk_opengl/resource/OpenGLBuffer.h>
+#include <opengl/resource/OpenGLTypeDescriptors.h>
+#include <opengl/resource/OpenGLBuffer.h>
 
 namespace idk::ogl
 {

@@ -12,11 +12,11 @@
 //
 //// System includes
 //#include <gfx/GraphicsSystem.h>
-//#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+//#include <opengl/system/OpenGLGraphicsSystem.h>
 //
 //// Resource includes
 //#include <res/MetaBundle.h>
-//#include <idk_opengl/resource/OpenGLMesh.h>
+//#include <opengl/resource/OpenGLMesh.h>
 //#include <vkn/VulkanMesh.h>
 //#include <anim/Skeleton.h>
 //#include <anim/Animation.h>

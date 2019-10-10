@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ProgramFactory.h"
-#include <idk_opengl/program/Program.h>
+#include <opengl/program/Program.h>
 namespace idk::ogl
 {
 	ShaderBuildResult ProgramFactory::BuildGLSL(const RscHandle<ShaderProgram>& program, ShaderStage stage, string_view glsl_code)

@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 #include <gfx/vertex_descriptor.h>
-#include <idk_opengl/resource/OpenGLTypeDescriptors.h>
+#include <opengl/resource/OpenGLTypeDescriptors.h>
 
 
 namespace idk::ogl

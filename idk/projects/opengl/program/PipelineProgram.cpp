@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "PipelineProgram.h"
-#include <idk_opengl/program/Program.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
-#include <idk_opengl/resource/OpenGLCubemap.h>
+#include <opengl/program/Program.h>
+#include <opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/OpenGLCubemap.h>
 #include <iostream>
 
 namespace idk::ogl

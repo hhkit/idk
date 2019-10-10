@@ -1,7 +1,7 @@
 #pragma once
 #include <res/EasyFactory.h>
 #include <res/ResourceFactory.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/OpenGLTexture.h>
 
 namespace idk::ogl
 {

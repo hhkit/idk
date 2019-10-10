@@ -1,7 +1,7 @@
 #pragma once
 #include <glad/glad.h>
-#include <idk_opengl/resource/OpenGLCubemap.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/OpenGLCubemap.h>
+#include <opengl/resource/OpenGLTexture.h>
 namespace idk
 {
 	class RenderTarget;

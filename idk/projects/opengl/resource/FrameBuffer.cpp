@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "FrameBuffer.h"
 #include <core/Core.h>
-#include <idk_opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/OpenGLTexture.h>
 
 namespace idk::ogl
 {
