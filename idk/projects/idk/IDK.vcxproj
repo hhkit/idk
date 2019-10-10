@@ -284,7 +284,6 @@
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
-    <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />

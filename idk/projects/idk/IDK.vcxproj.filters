@@ -710,9 +710,6 @@
     <ClCompile Include="core\SystemManager.cpp">
       <Filter>core\systems</Filter>
     </ClCompile>
-    <ClCompile Include="core\Component.cpp">
-      <Filter>core\data</Filter>
-    </ClCompile>
     <ClCompile Include="core\GameObject.cpp">
       <Filter>core\data</Filter>
     </ClCompile>
