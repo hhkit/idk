@@ -55,7 +55,9 @@ namespace idk
 		if (_setup == false)
 			Setup();
 
-		auto editor = &GetSystem<IEditor>();
+		using mono::ScriptSystem;
+		auto* editor = &GetSystem<IEditor>();
+
 		// setup loop
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 

@@ -3,6 +3,7 @@
 namespace idk
 {
 	namespace anim { class Skeleton; class Animation; }
+	namespace mono { class ScriptSystem; class Behavior; }
 	namespace shadergraph { class Graph; }
 
 	constexpr auto MaxScene = 0x82; // 130 scenes allowed
@@ -30,7 +31,7 @@ namespace idk
 		,	class Animator
 
 		/// SCRIPTING
-		,	class MonoBehavior
+		,	class mono::Behavior
 
 		/// AUDIO
 		,	class AudioSource
@@ -45,7 +46,7 @@ namespace idk
 		,	class FileSystem
 		//,	class InputSystem
 		,	class GamepadSystem
-		,	class ScriptSystem
+		,	class mono::ScriptSystem
 		,	class PhysicsSystem
 		,	class GraphicsSystem
 		,   class DebugRenderer

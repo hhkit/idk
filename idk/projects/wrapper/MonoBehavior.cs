@@ -33,6 +33,9 @@ namespace idk
         /// </summary>
         public virtual void LateUpdate() { }
 
+        //public virtual void OnTriggerEnter(Collider other) { };
+        //public virtual void OnTriggerStay(Collider other) { };
+        //public virtual void OnTriggerExit(Collider other) { };
 
         /// <summary>
         /// Start a coroutine.

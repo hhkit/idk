@@ -16,6 +16,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "10 Core Library", "projects\idk\IDK.vcxproj", "{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D} = {075A5580-AA1E-48FF-B8EC-CCB07ED9CF4D}
+		{1343D3BF-7F00-488D-AF2B-6EC7F096D49B} = {1343D3BF-7F00-488D-AF2B-6EC7F096D49B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01 Editor Static Dep", "projects\editorstatic\editorstatic.vcxproj", "{AF8E182B-2C39-4ADF-9BC1-C72C76F80823}"

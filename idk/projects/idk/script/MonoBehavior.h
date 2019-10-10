@@ -2,18 +2,18 @@
 #include <core/Component.h>
 #include <mono/jit/jit.h>
 
-namespace idk
+namespace idk::mono
 {
 	struct MonoBehaviorData;
 
-	class MonoBehavior 
-		: public Component<MonoBehavior>
+	class Behavior 
+		: public Component<Behavior>
 	{
 	public:
-		MonoBehavior();
-		MonoBehavior(MonoBehavior&& rhs);
-		MonoBehavior& operator=(MonoBehavior&& rhs);
-		~MonoBehavior();
+		Behavior();
+		Behavior(Behavior&& rhs);
+		Behavior& operator=(Behavior&& rhs);
+		~Behavior();
 
 		const std::string& RescueMonoObject();
 		void RestoreMonoObject();
