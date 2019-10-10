@@ -5,11 +5,9 @@ namespace idk
 
 	size_t FrameBuffer::NumAttachments() const
 	{
-		size_t i = 0;
-		for (auto& attachment : attachments) 
-		{
-			i += attachment.size(); 
-		}
+		size_t i = attachments.size();
+		i = (depth_attachment) ? i + 1 : i;
+		i = (stencil_attachment) ? i + 1 : i;//Probably gotta merge depth and stencil
 		return i;
 	}
 }

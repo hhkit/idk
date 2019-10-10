@@ -7,7 +7,6 @@ namespace idk
 	//using AttachmentInfo = int;
 	struct AttachmentInfo
 	{
-		AttachmentType type;
 		LoadOp  load_op = LoadOp::eClear;
 		StoreOp store_op = StoreOp::eStore;
 		ColorFormat internal_format = ColorFormat::RGBAF_32;
@@ -17,6 +16,7 @@ namespace idk
 	struct FrameBufferInfo
 	{
 		vector<AttachmentInfo> attachments;
+		std::optional<AttachmentInfo> depth_attachment, stencil_attachment;
 		ivec2 size;
 	};
 	struct FrameBufferBuilder
@@ -59,19 +59,23 @@ namespace idk
 			Reset(fb);
 			for (auto& attachment_info : info.attachments)
 			{
-				auto& attachment_ptr = fb.attachments[attachment_info.type].emplace_back();
-				CreateAttachment(attachment_info, info.size, attachment_ptr);
+				auto& attachment_ptr = fb.attachments.emplace_back();
+				CreateAttachment(AttachmentType::eColor,attachment_info, info.size, attachment_ptr);
 			}
+			if (info.depth_attachment)
+				CreateAttachment(AttachmentType::eDepth, *info.depth_attachment, info.size, h_fb->depth_attachment);
+			if (info.stencil_attachment)
+				CreateAttachment(AttachmentType::eStencil, *info.stencil_attachment, info.size, h_fb->stencil_attachment);
 			Finalize(fb);
 		}
 	protected:
 		//out must be assigned a make unique of the implementation version of attachment
-		virtual void CreateAttachment(const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out) = 0;
+		virtual void CreateAttachment(AttachmentType type,const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out) = 0;
 		virtual void PreReset(FrameBuffer& framebuffer) = 0;//resets the framebuffer (queue resource for destruction)
 		void Reset(FrameBuffer& framebuffer)
 		{
 			PreReset(framebuffer);
-			framebuffer.attachments->clear();
+			framebuffer.attachments.clear();
 			framebuffer.size = ivec2{};
 		}
 		virtual void Finalize(FrameBuffer& h_fb) = 0;

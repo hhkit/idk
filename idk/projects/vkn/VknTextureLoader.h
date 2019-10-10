@@ -52,12 +52,13 @@ namespace idk::vkn
 	{
 		const void* data;
 		size_t len;
+		vk::Format format;
 	};
 	struct TexCreateInfo
 	{
 		uint32_t width{};
 		uint32_t height{};
-		vk::Format format;
+		vk::Format internal_format;
 		vk::ImageUsageFlags image_usage{};
 		uint32_t mipmap_level = 1;
 		vk::ImageAspectFlagBits aspect;
@@ -80,5 +81,8 @@ namespace idk::vkn
 		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 	};
 
-
+	vk::Format    MapFormat(TextureFormat tf);
+	vk::Format    MapFormat(ColorFormat tf);
+	TextureFormat MapFormat(vk::Format    tf);
+	vk::Format    UnSrgb(vk::Format);
 }

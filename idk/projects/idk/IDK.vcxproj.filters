@@ -996,7 +996,9 @@
       <Filter>script</Filter>
     </ClCompile>
     <ClCompile Include="gfx\LightTypes.cpp" />
-    <ClCompile Include="gfx\Framebuffer.cpp" />
+    <ClCompile Include="gfx\Framebuffer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

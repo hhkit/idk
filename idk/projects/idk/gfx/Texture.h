@@ -6,22 +6,47 @@
 
 namespace idk
 {
-    ENUM(ColorFormat, char,
+	ENUM(ColorFormat, char,
+		R_8,
+		R_16,
+		R_32F,
+		R_64F,
+		Rint_8,
+		Rint_16,
+		Rint_32,
+		Rint_64,
 		RG_8,
-	    RGF_16,
-        RGB_8,
-        RGBA_8,
-        RGBF_16,
-        RGBF_32,
-        RGBAF_16,
-        RGBAF_32,
-		SRGB,
+		RGF_16,
+		RGB_8,
+		RGBF_16,
+		RGBF_32,
+		RGBA_8,
+		RGBAF_16,
+		RGBAF_32,
+		BGRA_8,
+		SRGB ,
+		SRGBA,
 		DEPTH_COMPONENT,
 		DXT1,
 		DXT3,
-		DXT5
-
-    )
+		DXT5,
+		DXT1_A,
+		SRGB_DXT1 ,
+		SRGB_DXT3 ,
+		SRGB_DXT5 ,
+		SRGBA_DXT1
+	);
+	inline bool IsSrgb(ColorFormat cf)
+	{
+		return
+			(cf == ColorFormat::SRGB_DXT1 ) |
+			(cf == ColorFormat::SRGBA_DXT1) |
+			(cf == ColorFormat::SRGB_DXT3 ) |
+			(cf == ColorFormat::SRGB_DXT5 ) |
+			(cf == ColorFormat::SRGB      ) |
+			(cf == ColorFormat::SRGBA	  )
+			;
+	}
 
     ENUM(UVMode, char,
          Repeat,

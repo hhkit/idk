@@ -17,6 +17,7 @@ namespace idk
 	{
 		eColor,
 		eDepth,
+		eStencil,
 		eSizeAT
 	};
 
@@ -37,9 +38,10 @@ namespace idk
 	class FrameBuffer : public Resource<FrameBuffer>
 	{
 	public:
-		vector<unique_ptr<Attachment>> attachments[AttachmentType::eSizeAT];
+		vector<unique_ptr<Attachment>> attachments{};
+		unique_ptr<Attachment> depth_attachment{}, stencil_attachment{};
 		size_t NumAttachments()const;
-		ivec2 size;
+		ivec2 size{};
 	};
 
 }

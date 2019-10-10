@@ -5,23 +5,88 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
+
+struct AttachmentOps
+{
+	unsigned load   :  2;//take up 2bits
+	unsigned store  :  1;//take up 1bits
+	unsigned sload  :  2;//take up 2bits
+	unsigned sstore :  1;//take up 1bits
+	AttachmentOps(const idk::Attachment& a):
+		load{ static_cast<decltype(load)>(a.load_op) },
+		store{ static_cast<decltype(store)>(a.store_op) },
+		sload{ static_cast<decltype( sload)>(a.stencil_load_op) },
+		sstore{ static_cast<decltype(sstore)>(a.stencil_store_op) }
+	{
+	}
+	//AttachmentOps(AttachmentOps&&) = default;
+	//AttachmentOps& operator=(AttachmentOps&&) = default;
+	//AttachmentOps(const AttachmentOps&) = default;
+	//AttachmentOps& operator=(const AttachmentOps&) = default;
+};
+bool operator==(const AttachmentOps& lhs, const AttachmentOps& rhs)
+{
+	return lhs.load == rhs.load
+		&&
+		lhs.sload == rhs.sload
+		&&
+		lhs.store == rhs.store
+		&&
+		lhs.sstore == rhs.sstore;
+}
+bool operator==(const idk::small_vector<AttachmentOps>& lhs, const idk::small_vector<AttachmentOps>& rhs)
+{
+	bool same = lhs.size() == rhs.size();
+	if (same)
+		for (auto litr = lhs.cbegin(), ritr = rhs.cbegin(); litr != lhs.cend(); ++litr, ++ritr)
+		{
+			same &= *litr == *ritr;
+		}
+	return same;
+}
+
+struct rp_type_t
+{
+	uint32_t num_col = 0;
+	bool has_depth   = false;
+	bool has_stencil = false;
+	idk::small_vector<AttachmentOps> attachments;
+	bool operator==(const rp_type_t& rhs)const
+	{
+		return num_col == rhs.num_col && has_depth == rhs.has_depth && has_stencil == rhs.has_stencil && attachments == rhs.attachments;
+	}
+};
+
+namespace std
+{
+	template<>
+	struct hash<rp_type_t>
+	{
+		size_t operator()(const rp_type_t& rhs)const
+		{
+			return static_cast<size_t>(rhs.num_col) << 2 | static_cast<size_t>(rhs.has_depth) << 1 | static_cast<size_t>(rhs.has_stencil);
+		}
+	};
+}
+
+rp_type_t to_rp_type(idk::FrameBuffer& fb)
+{
+	rp_type_t result;
+	result.num_col    = static_cast<uint32_t>(fb.attachments.size());
+	result.has_depth  = static_cast<bool    >(fb.depth_attachment  );
+	result.has_stencil= static_cast<bool    >(fb.stencil_attachment);
+	result.attachments.reserve(result.num_col);
+	for (auto& attachment : fb.attachments)
+	{
+		result.attachments.emplace_back(*attachment);
+	}
+	return result;
+}
+
 namespace idk::vkn
 {
 
-	//void AttTypeToTexOpt(AttachmentType type, TextureOptions& opt)
-	//{
-	//	switch (type)
-	//	{
-	//	case idk::eColor:
-	//		break;
-	//	case idk::eDepth:
-	//		break;
-	//	case idk::eSizeAT:
-	//		break;
-	//	default:
-	//		break;
-	//	}
-	//}
+
 	VulkanView& View();
 
 	vk::AttachmentLoadOp(&InitLoadOp())[3]
@@ -56,15 +121,25 @@ namespace idk::vkn
 	{
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence fence;
-		hash_table<uint64_t, vk::UniqueRenderPass> render_passes;//probably should move this to a manager
+		hash_table<rp_type_t, vk::UniqueRenderPass> render_passes;//probably should move this to a manager
 
-		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,uint32_t num_depth, const vector<unique_ptr<Attachment>>& col_attachments, const vector<unique_ptr<Attachment>>& depth_attachments)
+		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,const VknFrameBuffer& fb)
 		{
-			vector< vk::AttachmentDescription> attachments_desc(col_attachments.size() + depth_attachments.size());
-			vector< vk::AttachmentReference>   attachments_ref (col_attachments.size()+depth_attachments.size());
+			//uint32_t num_col = fb.attachments.size();
+			const vector<unique_ptr<Attachment>>& col_attachments = fb.attachments;
+			vector< vk::AttachmentDescription> attachments_desc(num_col);
+			vector< vk::AttachmentReference>   attachments_ref (num_col);
+
+			vk::AttachmentDescription depth_attachment_desc;
+			vk::AttachmentDescription stencil_attachment_desc;
+			vk::AttachmentReference depth_attachment_ref;
+			//TODO: Figure out how to deal with DepthStencil since vulkan only accepts them together, they can't be separate.
+			vk::AttachmentReference stencil_attachment_ref;
+
 			uint32_t i = 0;
-			for (auto& col_attachment : col_attachments)
+			for (uint32_t i=0; i<num_col;++i)
 			{
+				auto& col_attachment = col_attachments[i];
 				auto& vk_att = static_cast<const VknAttachment&>(*col_attachment);
 				auto& vk_tex = vk_att.buffer.as<VknTexture>();
 				attachments_ref[i] =
@@ -72,7 +147,7 @@ namespace idk::vkn
 					i
 					,vk::ImageLayout::eColorAttachmentOptimal
 				};
-				attachments_desc[i++] =
+				attachments_desc[i] =
 				vk::AttachmentDescription{
 						vk::AttachmentDescriptionFlags{}
 						, vk_tex.format
@@ -85,16 +160,19 @@ namespace idk::vkn
 						, vk::ImageLayout::eGeneral
 				};
 			}
-			for (auto& depth_attachment : depth_attachments)
+			vk::AttachmentReference* pdepth_ref = nullptr;
+			vk::AttachmentReference* pstencil_ref = nullptr;
+			//for (auto& depth_attachment : depth_attachments)
+			if (fb.depth_attachment)
 			{
-				auto& vk_att = static_cast<const VknAttachment&>(*depth_attachment);
+				auto& vk_att = static_cast<const VknAttachment&>(*fb.depth_attachment);
 				auto& vk_tex = vk_att.buffer.as<VknTexture>();
-				attachments_ref[i] =
+				depth_attachment_ref =
 					vk::AttachmentReference{
-						i
+						i++
 						,vk::ImageLayout::eDepthStencilAttachmentOptimal
 				};
-				attachments_desc[i++] =
+				depth_attachment_desc =
 					vk::AttachmentDescription{
 							vk::AttachmentDescriptionFlags{}
 							, vk_tex.format
@@ -106,7 +184,9 @@ namespace idk::vkn
 							, vk::ImageLayout::eUndefined
 							, vk::ImageLayout::eGeneral
 				};
+				pdepth_ref = &depth_attachment_ref;
 			}
+
 			vk::SubpassDescription subpass
 			{
 				vk::SubpassDescriptionFlags{}
@@ -114,7 +194,7 @@ namespace idk::vkn
 				,0,nullptr
 				,hlp::arr_count(col_attachments),(hlp::arr_count(col_attachments))?std::data(attachments_ref):nullptr
 				,nullptr
-				,(hlp::arr_count(depth_attachments))?std::data(attachments_ref)+ hlp::arr_count(col_attachments) :nullptr
+				,pdepth_ref
 			};
 			vk::PipelineStageFlags src_mask  = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 			vk::PipelineStageFlags dest_mask{};
@@ -126,7 +206,7 @@ namespace idk::vkn
 			}
 
 
-			if (hlp::arr_count(depth_attachments))
+			if (fb.depth_attachment)
 			{
 				dest_mask |= vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
 				access_flag |= vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
@@ -149,18 +229,17 @@ namespace idk::vkn
 			};
 			return View().Device()->createRenderPassUnique(renderPassInfo);
 		}
-
-		vk::RenderPass GetRenderPass(uint64_t rp_type, const vector<unique_ptr<Attachment>>& col_attachments, const vector<unique_ptr<Attachment>>& depth_attachments)
+		//Gets or the appropriate renderpass, initalizes if not-present.
+		vk::RenderPass GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
 		{
+			const vector<unique_ptr<Attachment>>& col_attachments = fb.attachments;
 			auto itr = render_passes.find(rp_type);
 			if (itr == render_passes.end())
 			{
 				itr = render_passes.emplace(rp_type,
 					CreateRenderPass(
-						s_cast<uint32_t>(rp_type & 0xFFFFFFFFFF), 
-						s_cast<uint32_t>(rp_type >> 32),
-						col_attachments,
-						depth_attachments
+						rp_type.num_col,
+						fb
 					)).first;
 			}
 			return *itr->second;
@@ -175,7 +254,7 @@ namespace idk::vkn
 	{
 	}
 
-	void VknFrameBufferFactory::CreateAttachment(const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
+	void VknFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
 		using tex_create_ptr_t = TexCreateInfo(*)(uint32_t width, uint32_t height);
 		constexpr static tex_create_ptr_t cr8_funcs[]
@@ -192,7 +271,7 @@ namespace idk::vkn
 		RscHandle<VknTexture> tex = Core::GetResourceManager().Create<VknTexture>();
 		TextureLoader loader;
 		TextureOptions opt;
-		TexCreateInfo tci = cr8_funcs[info.type](size.x,size.y);
+		TexCreateInfo tci = cr8_funcs[type](size.x,size.y);
 		opt.internal_format = info.internal_format;
 		opt.filter_mode = info.filter_mode;
 		loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
@@ -205,29 +284,27 @@ namespace idk::vkn
 	{
 		VknFrameBuffer& fb = static_cast<VknFrameBuffer&>(h_fb);
 		VulkanView& vknView = View();
-		vector<vk::ImageView> image_views(fb.NumAttachments());
-		
+		vector<vk::ImageView> image_views(fb.NumAttachments()+1);
 		uint32_t i = 0;
-		for (auto& col_attachment : fb.attachments[AttachmentType::eColor])
+		for (auto& col_attachment : fb.attachments)
 		{
 			auto& attachment = static_cast<VknAttachment&>(*col_attachment);
 			auto& v_tex = attachment.buffer.as<VknTexture>();
 			image_views[i++] = v_tex.ImageView();
 		}
-		uint64_t rp_type = i ;
-		for (auto& depth_attachment : fb.attachments[AttachmentType::eDepth])
+		if (fb.depth_attachment)
 		{
-			auto& attachment = static_cast<VknAttachment&>(*depth_attachment);
+			auto& attachment = static_cast<VknAttachment&>(*fb.depth_attachment);
 			auto& v_tex = attachment.buffer.as<VknTexture>();
 			image_views[i++] = v_tex.ImageView();
 		}
-		rp_type |= (i-rp_type)<<32;
+		rp_type_t rp_type = to_rp_type(fb);//(s_cast<uint64_t>(i))<<2 | (s_cast<uint32_t>(fb.depth_attachment)<<1) | s_cast<bool>(fb.stencil_attachment);
 
 		vk::FramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.renderPass = _pimpl->GetRenderPass(rp_type,fb.attachments[AttachmentType::eColor], fb.attachments[AttachmentType::eDepth]);
+		framebufferInfo.renderPass = _pimpl->GetRenderPass(rp_type,fb);
 		framebufferInfo.attachmentCount = hlp::arr_count(image_views);
 		framebufferInfo.pAttachments = std::data(image_views);
-		framebufferInfo.width = s_cast<uint32_t> (fb.size.x);
+		framebufferInfo.width  = s_cast<uint32_t>(fb.size.x);
 		framebufferInfo.height = s_cast<uint32_t>(fb.size.y);
 		framebufferInfo.layers = 1;
 

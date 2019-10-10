@@ -17,8 +17,6 @@ namespace idk::vkn
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info);
-	vk::Format    MapFormat(TextureFormat tf);
-	TextureFormat MapFormat(vk::Format    tf);
 	
 	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> options,
 		string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
@@ -99,7 +97,7 @@ namespace idk::vkn
 	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptions, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info)
 	{
 		TextureOptions options{};
-		auto format = load_info.format;
+		auto format = load_info.internal_format;
 
 		if (ooptions)
 		{
@@ -238,6 +236,20 @@ namespace idk::vkn
 		size_t block_height = ceil_div(height, block_size);
 		switch (format)
 		{
+		case vk::Format::eR32G32B32A32Sfloat:
+		case vk::Format::eR32G32B32A32Uint:
+		case vk::Format::eR32G32B32A32Sint:
+			result = width * height * 16;
+			break;
+		case vk::Format::eR16G16B16A16Sfloat:
+		case vk::Format::eR16G16B16A16Unorm:
+		case vk::Format::eR16G16B16A16Snorm:
+		case vk::Format::eR16G16B16A16Uscaled:
+		case vk::Format::eR16G16B16A16Sscaled:
+		case vk::Format::eR16G16B16A16Uint:
+		case vk::Format::eR16G16B16A16Sint:
+			result = width * height * 8;
+			break;
 			case vk::Format::eR8G8B8A8Unorm        :
 			case vk::Format::eR8G8B8A8Snorm        :
 			case vk::Format::eR8G8B8A8Uscaled      :
@@ -285,7 +297,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.format = vk::Format::eB8G8R8A8Unorm;
+		info.internal_format = vk::Format::eB8G8R8A8Unorm;
 		info.image_usage = vk::ImageUsageFlagBits::eColorAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eColor;
 		info.sampled(true);
@@ -297,38 +309,79 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.format = vk::Format::eD16Unorm;
+		info.internal_format = vk::Format::eD16Unorm;
 		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eDepth;
 		info.sampled(true);
 		return info;
 	}
+	std::pair<vk::UniqueImage, hlp::UniqueAlloc> CreateBlitImage(hlp::MemoryAllocator& allocator,uint32_t mipmap_level, uint32_t width, uint32_t height, vk::Format format)
+	{
 
+		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		vk::PhysicalDevice pd = view.PDevice();
+		vk::Device device = *view.Device();
+
+		vk::ImageCreateInfo imageInfo{};
+		imageInfo.imageType = vk::ImageType::e2D;
+		imageInfo.extent.width = static_cast<uint32_t>(width);
+		imageInfo.extent.height = static_cast<uint32_t>(height);
+		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
+		imageInfo.mipLevels = mipmap_level; //Currently no mipmapping
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format; //Unsigned normalized so that it can still be interpreted as a float later
+		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
+		imageInfo.initialLayout = vk::ImageLayout::eGeneral;
+		imageInfo.usage = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;// vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
+		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
+		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
+
+
+		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
+		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
+		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
+		return std::make_pair(std::move(image), std::move(alloc));
+	}
+
+	void BlitConvert(vk::CommandBuffer cmd_buffer,vk::ImageAspectFlags aspect,vk::Image src_image,vk::Image dest_image, uint32_t mip_level,uint32_t width, uint32_t height)
+	{
+		cmd_buffer.blitImage(src_image, vk::ImageLayout::eGeneral, dest_image, vk::ImageLayout::eGeneral, vk::ImageBlit
+			{
+				vk::ImageSubresourceLayers{aspect,1,mip_level,1},
+				std::array<vk::Offset3D,2>{vk::Offset3D{0,0,0},vk::Offset3D{s_cast<int32_t>(width),s_cast<int32_t>(height),0}},
+				vk::ImageSubresourceLayers{aspect,1,mip_level,1},
+				std::array<vk::Offset3D,2>{vk::Offset3D{0,0,0},vk::Offset3D{s_cast<int32_t>(width),s_cast<int32_t>(height),0}},
+			},vk::Filter::eNearest
+		);
+	}
 
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info)
 	{
+		auto format = load_info.internal_format, internal_format = load_info.internal_format;
 		TextureResult result;
 		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		vk::PhysicalDevice pd = view.PDevice();
 		vk::Device device = *view.Device();
 		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
 		auto cmd_buffer = *ucmd_buffer;
-		auto format = load_info.format;
+		//auto format = load_info.internal_format;
 		//bool is_render_target = isRenderTarget;
 		size_t len;
 		uint32_t width = load_info.width, height = load_info.height;
-		if (!in_info) //If data isn't given.
-			len = ComputeTextureLength(width, height, format);
-		else
-		{
-			len = in_info->len;
-		}
-		size_t num_bytes = len;
 
 		vk::ImageUsageFlags image_usage = load_info.image_usage;//(format == vk::Format::eD16Unorm) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
 		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
-		if (in_info)
+
+		if (!in_info) { //If data isn't given.
+			len = ComputeTextureLength(width, height, format);
+		}
+		else
+		{
+			len = in_info->len;
+			format = in_info->format;
 			image_usage |= vk::ImageUsageFlagBits::eTransferDst;
+		}
+		size_t num_bytes = len;
 
 		std::optional<vk::ImageSubresourceRange> range{};
 
@@ -355,10 +408,6 @@ namespace idk::vkn
 		if (in_info)
 		{
 
-			auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
-
-			if (in_info)
-				hlp::MapMemory(device, *stagingMemory, 0, in_info->data, num_bytes, vk::DispatchLoaderDefault{});
 			//TODO update this part so that we check the usage flags and set access flags accordingly.
 			vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
 			vk::AccessFlags dst_flags = vk::AccessFlagBits::eTransferWrite;
@@ -367,6 +416,23 @@ namespace idk::vkn
 			vk::PipelineStageFlags dst_stages = vk::PipelineStageFlagBits::eTransfer;
 			vk::ImageLayout layout = vk::ImageLayout::eGeneral;
 			vk::ImageLayout next_layout = vk::ImageLayout::eTransferDstOptimal;
+
+			vk::UniqueImage blit_src_img;
+			hlp::UniqueAlloc blit_img_alloc;
+			vk::Image copy_dest = *image;
+			if (internal_format != format)
+			{
+				auto&& [img, al] = CreateBlitImage(allocator, load_info.mipmap_level, width, height,internal_format);
+
+				blit_src_img = std::move(img);
+				blit_img_alloc = std::move(al);
+				copy_dest = *blit_src_img;
+				layout = vk::ImageLayout::eTransferSrcOptimal;
+			}
+			auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
+
+			if (in_info)
+				hlp::MapMemory(device, *stagingMemory, 0, in_info->data, num_bytes, vk::DispatchLoaderDefault{});
 			//if (is_render_target)
 			//{
 			//	src_flags |= vk::AccessFlagBits::eColorAttachmentRead;
@@ -377,7 +443,7 @@ namespace idk::vkn
 			//}
 			//if ((format == vk::Format::eD16Unorm))
 			//	img_aspect = vk::ImageAspectFlagBits::eDepth;
-			TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);
+			TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, copy_dest, img_aspect);
 			//if (!is_render_target)
 			{
 
@@ -398,14 +464,20 @@ namespace idk::vkn
 					height,
 					1
 				};
-				cmd_buffer.copyBufferToImage(*stagingBuffer, *image, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
+				cmd_buffer.copyBufferToImage(*stagingBuffer, copy_dest, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
 
 				TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image);
 				;
 			}
 
-
 			device.resetFences(fence);
+
+			if (internal_format != format)
+			{
+				BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, load_info.mipmap_level, width, height);
+				TransitionImageLayout(cmd_buffer, src_flags, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect);
+			}
+
 			hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
 			uint64_t wait_for_milli_seconds = 1;
 			[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
@@ -524,9 +596,9 @@ namespace idk::vkn
 			{TextureFormat::eD16Unorm, vk::Format::eD16Unorm},
 			{TextureFormat::eRGBA32, vk::Format::eR8G8B8A8Unorm},
 			{ TextureFormat::eBGRA32, vk::Format::eB8G8R8A8Unorm },
-			{ TextureFormat::eBC1,vk::Format::eBc1RgbaUnormBlock },
-			{ TextureFormat::eBC2,vk::Format::eBc2UnormBlock },
-			{ TextureFormat::eBC3,vk::Format::eBc3UnormBlock },
+			{ TextureFormat::eBC1,vk::Format::eBc1RgbaSrgbBlock },//Auto srgb
+			{ TextureFormat::eBC2,vk::Format::eBc2SrgbBlock },	  //Auto srgb
+			{ TextureFormat::eBC3,vk::Format::eBc3SrgbBlock },	  //Auto srgb
 			{ TextureFormat::eBC4,vk::Format::eBc4UnormBlock },
 			{ TextureFormat::eBC5,vk::Format::eBc5UnormBlock },
 
@@ -534,9 +606,72 @@ namespace idk::vkn
 
 	}
 
+	hash_table<ColorFormat::_enum, vk::Format> CFormatMap()
+	{
+		return hash_table<ColorFormat::_enum, vk::Format>
+		{
+			{ ColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD16Unorm},
+			{ ColorFormat::_enum::R_8, vk::Format::eR8Unorm },
+			{ ColorFormat::_enum::R_16, vk::Format::eR16Unorm },
+			{ ColorFormat::_enum::R_32F, vk::Format::eR32Sfloat },
+			{ ColorFormat::_enum::R_64F, vk::Format::eR64Sfloat },
+			{ ColorFormat::_enum::Rint_8, vk::Format::eR8Uint },
+			{ ColorFormat::_enum::Rint_16, vk::Format::eR16Uint },
+			{ ColorFormat::_enum::Rint_32, vk::Format::eR32Uint },
+			{ ColorFormat::_enum::Rint_64, vk::Format::eR64Uint },
+			{ ColorFormat::_enum::RG_8, vk::Format::eR8G8Unorm },
+			{ ColorFormat::_enum::RGF_16, vk::Format::eR16G16Sfloat },
+			{ ColorFormat::_enum::RGB_8, vk::Format::eR8G8B8Unorm },
+			{ ColorFormat::_enum::RGBF_16, vk::Format::eR16G16B16Sfloat },
+			{ ColorFormat::_enum::RGBF_32, vk::Format::eR32G32B32Sfloat },
+			{ ColorFormat::_enum::RGBA_8, vk::Format::eR8G8B8A8Unorm },
+			{ ColorFormat::_enum::RGBAF_16, vk::Format::eR16G16B16A16Sfloat },
+			{ ColorFormat::_enum::RGBAF_32, vk::Format::eR32G32B32A32Sfloat },
+			{ ColorFormat::_enum::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
+			{ ColorFormat::_enum::SRGB ,   vk::Format::eR8G8B8Srgb },
+			{ ColorFormat::_enum::SRGBA,   vk::Format::eR8G8B8A8Srgb },
+			{ ColorFormat::_enum::DXT1,vk::Format::eBc1RgbUnormBlock },
+			{ ColorFormat::_enum::DXT3,vk::Format::eBc2UnormBlock },
+			{ ColorFormat::_enum::DXT5,vk::Format::eBc3UnormBlock },
+			{ ColorFormat::_enum::DXT1_A,vk::Format::eBc1RgbaUnormBlock },
+			{ ColorFormat::_enum::SRGB_DXT1,vk::Format::eBc1RgbSrgbBlock },
+			{ ColorFormat::_enum::SRGB_DXT3,vk::Format::eBc2SrgbBlock },
+			{ ColorFormat::_enum::SRGB_DXT5,vk::Format::eBc3SrgbBlock },
+			{ ColorFormat::_enum::SRGBA_DXT1,vk::Format::eBc1RgbaSrgbBlock},
+		};
+
+	}
+	hash_table<vk::Format, vk::Format> SrgbMap()
+	{
+		return hash_table<vk::Format, vk::Format>
+		{
+			{ vk::Format::eR8G8B8Unorm, vk::Format::eR8G8B8Srgb },
+			{ vk::Format::eR8G8B8A8Unorm,   vk::Format::eR8G8B8A8Srgb },
+			{ vk::Format::eBc1RgbUnormBlock  ,vk::Format::eBc1RgbSrgbBlock },
+			{ vk::Format::eBc2UnormBlock     ,vk::Format::eBc2SrgbBlock },
+			{ vk::Format::eBc3UnormBlock     ,vk::Format::eBc3SrgbBlock },
+			{ vk::Format::eBc1RgbaUnormBlock ,vk::Format::eBc1RgbaSrgbBlock },
+		};
+
+	}
+	vk::Format    UnSrgb(vk::Format f)
+	{
+		static const auto map = hlp::ReverseMap(SrgbMap());
+		vk::Format result=f;
+		auto itr = map.find(f);
+		if (itr != map.end())
+			result = itr->second;
+		return result;
+	}
+
 	vk::Format MapFormat(TextureFormat tf)
 	{
 		static const auto map = FormatMap();
+		return map.find(tf)->second;
+	}
+	vk::Format MapFormat(ColorFormat tf)
+	{
+		static const auto map = CFormatMap();
 		return map.find(tf)->second;
 	}
 	TextureFormat MapFormat(vk::Format tf)

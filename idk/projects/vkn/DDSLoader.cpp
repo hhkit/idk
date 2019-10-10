@@ -37,7 +37,22 @@ namespace idk::vkn
 		DdsFile dds{ strm.str() };
 		TextureOptions to;
 		to = *path_to_meta.metadatas[0].GetMeta<Texture>();
-		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()),to, dds.Data(), dds.Dimensions(), allocator, *load_fence,false);
+		TexCreateInfo tci;
+		tci.aspect = vk::ImageAspectFlagBits::eColor;
+		tci.width = dds.Dimensions().x;
+		tci.height = dds.Dimensions().y;
+		tci.mipmap_level = dds.File().header.mip_map_count;
+		tci.internal_format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
+		bool linearize = IsSrgb(to.internal_format);
+		if (!linearize)
+		{
+			tci.internal_format = UnSrgb(tci.internal_format);
+		}
+		InputTexInfo iti;
+		iti.data = dds.Data().data();
+		iti.len = dds.Data().length();
+		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
+		loader.LoadTexture(*tex, allocator, *load_fence,to,tci,iti);
 		return tex;
 	}
 
