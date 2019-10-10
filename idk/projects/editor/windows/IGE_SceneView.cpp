@@ -14,20 +14,22 @@ of the editor.
 
 
 #include "pch.h"
+#include <imgui/ImGuizmo.h>
 #include <editor/windows/IGE_SceneView.h>
+#include <editor/commands/CommandList.h>
+#include <editor/DragDropTypes.h>
+#include <IDE.h>
 #include <app/Application.h>
+#include <core/GameObject.h>
 #include <common/Transform.h> //transform
 #include <gfx/Camera.h> //camera
-#include <core/GameObject.h>
 #include <gfx/RenderTarget.h>
-#include <iostream>
-#include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
-#include <imgui/ImGuizmo.h>
-#include <editor/commands/CommandList.h>
-#include <IDE.h>
-
+#include <prefab/PrefabUtility.h>
+#include <math/euler_angles.h>
 #include <vkn/VknFramebuffer.h>
+
+#include <iostream>
 
 namespace idk {
 
@@ -76,7 +78,29 @@ namespace idk {
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-			ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+		ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
+            {
+                auto res_payload = DragDrop::GetResourcePayloadData();
+
+                for (auto& h : res_payload)
+                {
+                    if (h.resource_id() != BaseResourceID<Prefab>)
+                        continue;
+                    if (!payload->IsDelivery())
+                        continue;
+
+                    auto go = PrefabUtility::Instantiate(h.AsHandle<Prefab>(), *Core::GetSystem<SceneManager>().GetActiveScene());
+                    Handle<Camera> cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+                    go->Transform()->position = cam->currentPosition() + cam->GetGameObject()->Transform()->Forward();
+                    break;
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
 
 		ImVec2 v = ImGui::GetWindowPos();
 
