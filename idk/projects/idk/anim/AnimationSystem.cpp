@@ -80,8 +80,7 @@ namespace idk
 				const float dt = static_cast<float>(animated_bone.scale_track[start + 1].time - animated_bone.scale_track[start].time);
 				const float factor = (time_in_ticks - animated_bone.scale_track[start].time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
-
-				curr_pose.scale = lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[start + 1].val, factor);
+				curr_pose.scale = lerp(lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[start + 1].val, factor), curr_pose.scale, _blend);
 			}
 		}
 
@@ -98,8 +97,7 @@ namespace idk
 				const float dt = static_cast<float>(animated_bone.translate_track[start + 1].time - animated_bone.translate_track[start].time);
 				const float factor = (time_in_ticks - animated_bone.translate_track[start].time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
-
-				curr_pose.position = lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[start + 1].val, factor);
+				curr_pose.position = lerp(lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[start + 1].val, factor), curr_pose.position, _blend);
 			}
 		}
 
@@ -117,8 +115,7 @@ namespace idk
 				const float factor = (time_in_ticks - animated_bone.rotation_track[start].time) / dt;
 				assert(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose.rotation = slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor);
-				// rotation =  * rotation;
+				curr_pose.rotation = slerp(slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor), curr_pose.rotation, _blend);
 				curr_pose.rotation.normalize();
 			}
 		}

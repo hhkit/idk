@@ -16,8 +16,9 @@ namespace idk
 		void Update(span<Animator>);
 		void UpdatePaused(span<Animator>);
 		virtual void Shutdown() override;
-
+		float _blend = 0.0f;
 	private:
+		
 		template<typename T>
 		size_t find_key(const vector<T>& vec, float ticks)
 		{
