@@ -24,6 +24,7 @@ of the editor.
 #include <gfx/ShaderGraph.h>
 #include <gfx/MaterialInstance.h>
 #include <prefab/PrefabUtility.h>
+#include <prefab/Prefab.h>
 
 #include <iostream>
 #include <filesystem>
@@ -210,7 +211,7 @@ namespace idk {
             if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
             {
                 Handle<GameObject> go = *reinterpret_cast<Handle<GameObject>*>(payload->Data);
-                PrefabUtility::SaveAndConnect(go, string(current_dir.GetMountPath()) + '/' + string(go->Name().size() ? go->Name() : "NewPrefab"));
+                PrefabUtility::SaveAndConnect(go, unique_new_file_path(go->Name().size() ? go->Name() : "NewPrefab", Prefab::ext));
             }
         }
         ImGui::SetCursorPos(cursor_pos);

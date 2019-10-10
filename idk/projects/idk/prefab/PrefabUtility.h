@@ -25,7 +25,12 @@ namespace idk
 
 		// manually propagate ALL changes of a prefab.
         static void PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab);
+
+        // propagate specific property
         static void PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path);
+
+        // propagate last added component
+        static void PropagateAddedComponentToInstances(RscHandle<Prefab> prefab, int object_index);
 
         // after changing a value in a component, call this fn.
         //   target:        target game object / child object of the prefab instance
