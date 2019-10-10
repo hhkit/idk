@@ -701,6 +701,30 @@ namespace idk {
             }
             ImGui::PopID();
         }
+
+        ImGui::Separator();
+        ImGui::SetCursorPosX(window_size.x * 0.25f);
+        if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f, 0.0f }))
+            ImGui::OpenPopup("AddComp");
+
+        if (ImGui::BeginPopup("AddComp"))
+        {
+            for (const char* c_name : GameState::GetComponentNames())
+            {
+                string displayName = c_name;
+                if (displayName == "Transform" ||
+                    displayName == "Name" ||
+                    displayName == "PrefabInstance")
+                    continue;
+
+                if (ImGui::MenuItem(displayName.c_str()))
+                {
+                    prefab->data[0].components.push_back(reflect::get_type(c_name).create());
+                    PrefabUtility::PropagateAddedComponentToInstances(prefab, 0);
+                }
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material)

@@ -153,6 +153,17 @@ namespace idk
                     prefab->data[prefab_inst.object_index].components[component_index]);
 			}
 		}
+        static void propagate_added_component(RscHandle<Prefab> prefab, int component_index)
+        {
+            for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
+            {
+                if (prefab_inst.prefab != prefab)
+                    continue;
+
+                prefab_inst.GetGameObject()->AddComponent(
+                    prefab->data[prefab_inst.object_index].components[component_index]);
+            }
+        }
 
         static void propagate_removed_component(Handle<PrefabInstance> origin, string_view component_name, int component_add_index)
         {
@@ -412,6 +423,11 @@ namespace idk
             helpers::resolve_property_path(*prefab_inst.GetGameObject()->GetComponent(component_name), property_path) =
                 helpers::resolve_property_path(prefab->data[object_index].FindComponent(component_name), property_path);
         }
+    }
+
+    void PrefabUtility::PropagateAddedComponentToInstances(RscHandle<Prefab> prefab, int object_index)
+    {
+        helpers::propagate_added_component(prefab, static_cast<int>(prefab->data[object_index].components.size() - 1));
     }
 
     void PrefabUtility::RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path)
