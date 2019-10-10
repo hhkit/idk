@@ -689,6 +689,10 @@
     <ClInclude Include="machine.h" />
     <ClInclude Include="debug\idk_assert.h" />
     <ClInclude Include="script\MonoEnvironment.h" />
+    <ClInclude Include="debug\Logger.h" />
+    <ClInclude Include="script\ManagedObj.h" />
+    <ClInclude Include="script\ManagedType.h" />
+    <ClInclude Include="script\ManagedThunk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -993,6 +997,9 @@
       <Filter>gfx\light</Filter>
     </ClCompile>
     <ClCompile Include="script\MonoEnvironment.cpp" />
+    <ClCompile Include="debug\Logger.cpp" />
+    <ClCompile Include="script\ManagedObj.cpp" />
+    <ClCompile Include="script\ManagedType.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
