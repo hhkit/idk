@@ -283,6 +283,7 @@
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
     <ClCompile Include="script\ManagedObj.cpp" />
+    <ClCompile Include="script\ManagedThunk.cpp" />
     <ClCompile Include="script\ManagedType.cpp" />
     <ClCompile Include="script\MonoBehavior.cpp" />
     <ClCompile Include="script\MonoEnvironment.cpp" />

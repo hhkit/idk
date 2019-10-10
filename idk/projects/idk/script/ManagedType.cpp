@@ -17,7 +17,7 @@ namespace idk::mono
 		if (!method)
 			return false;
 
-		thunks.emplace(string{ method_name }, mono_method_get_unmanaged_thunk(method));
+		thunks.emplace(string{ method_name }, ManagedThunk{ method });
 		return true;
 	}
 	std::variant<ManagedThunk, MonoMethod*, std::nullopt_t> ManagedType::GetMethod(string_view method_name, int param_count) const
@@ -30,7 +30,8 @@ namespace idk::mono
 		
 		{
 			auto method = FindMethod(method_name, param_count);
-			return method;
+			if (method)
+				return method;
 		}
 
 		return std::nullopt;

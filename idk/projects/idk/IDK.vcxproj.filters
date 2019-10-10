@@ -1000,6 +1000,7 @@
     <ClCompile Include="debug\Logger.cpp" />
     <ClCompile Include="script\ManagedObj.cpp" />
     <ClCompile Include="script\ManagedType.cpp" />
+    <ClCompile Include="script\ManagedThunk.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
