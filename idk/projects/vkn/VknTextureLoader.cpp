@@ -331,7 +331,7 @@ namespace idk::vkn
 		imageInfo.arrayLayers = 1;
 		imageInfo.format = format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
-		imageInfo.initialLayout = vk::ImageLayout::eGeneral;
+		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 		imageInfo.usage = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;// vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
 		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
 		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
@@ -466,7 +466,7 @@ namespace idk::vkn
 				};
 				cmd_buffer.copyBufferToImage(*stagingBuffer, copy_dest, vk::ImageLayout::eTransferDstOptimal, region, vk::DispatchLoaderDefault{});
 
-				TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image);
+				TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, copy_dest);
 				;
 			}
 
@@ -474,6 +474,7 @@ namespace idk::vkn
 
 			if (internal_format != format)
 			{
+				TransitionImageLayout(cmd_buffer, src_flags, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *image, img_aspect);
 				BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, load_info.mipmap_level, width, height);
 				TransitionImageLayout(cmd_buffer, src_flags, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect);
 			}

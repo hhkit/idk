@@ -41,7 +41,7 @@ namespace idk::vkn
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
 		tci.width = dds.Dimensions().x;
 		tci.height = dds.Dimensions().y;
-		tci.mipmap_level = dds.File().header.mip_map_count;
+		tci.mipmap_level = dds.File().header.mip_map_count+1;
 		tci.internal_format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
 		bool linearize = IsSrgb(to.internal_format);
 		if (!linearize)
