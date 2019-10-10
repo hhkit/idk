@@ -41,7 +41,7 @@ namespace idk
 
 		static void ApplyAddedComponent(Handle<GameObject> target, GenericHandle component);
         static void ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index);
-		static void ApplyPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override);
+		static void ApplyPropertyOverride(Handle<GameObject> target, const PropertyOverride& override);
 		static void ApplyPrefabInstance(Handle<GameObject> instance_root);
     };
 }
