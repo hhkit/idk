@@ -339,21 +339,9 @@ namespace idk {
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
 		IDE& editor = Core::GetSystem<IDE>();
-
-
-
-		ImGui::SetCursorPosX(window_size.x - 20);
-		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
-
-			ImGui::OpenPopup("AdditionalOptions");
-
-		}
-
-		ImGui::SetCursorPos(cursorPos);
-
         ImGui::PushID("Transform");
 
-		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
 		{
 			vector<mat4>& originalMatrix = editor.selected_matrix;
 			//This is dumped if no items are changed.
@@ -460,8 +448,11 @@ namespace idk {
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(window_size.x - 20);
-		ImGui::Text("...");
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+		if (ImGui::Button("...")) {
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
 
 		ImGui::SetCursorPos(cursorPos2);
 
@@ -474,6 +465,7 @@ namespace idk {
 					i->GetComponent<Transform>()->scale		= vec3{ };
 				}
 			}
+			MenuItem_CopyComponent(c_transform);
 			ImGui::Separator();
 			ImGui::EndPopup();
 		}
@@ -485,17 +477,8 @@ namespace idk {
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
-		ImGui::SetCursorPosX(window_size.x - 20);
-		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
 
-			ImGui::OpenPopup("AdditionalOptions");
-
-		}
-
-		ImGui::SetCursorPos(cursorPos);
-
-
-		if (ImGui::CollapsingHeader("Animation Controller", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader("Animation Controller", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
 		{
 			//Draw All your custom variables here.
 
@@ -521,8 +504,11 @@ namespace idk {
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(window_size.x - 20);
-		ImGui::Text("...");
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+		if (ImGui::Button("...")) {
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
 
 		ImGui::SetCursorPos(cursorPos2);
 
@@ -532,11 +518,8 @@ namespace idk {
 
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("Remove Component")) {
-				isComponentMarkedForDeletion = true;
-				GenericHandle i = (*c_anim).GetHandle();
-				componentNameMarkedForDeletion = (*i).type.name();
-			}
+			MenuItem_RemoveComponent(c_anim);
+			MenuItem_CopyComponent(c_anim);
 			ImGui::EndPopup();
 		}
 	}
@@ -555,27 +538,22 @@ namespace idk {
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
-		ImGui::SetCursorPosX(window_size.x - 20);
-		if (ImGui::ArrowButton("AdditionalOptions", ImGuiDir_Down)) { //This is hidden, so lets redraw this as text after the collapsing header.
-
-			ImGui::OpenPopup("AdditionalOptions");
-
-		}
-
-		ImGui::SetCursorPos(cursorPos);
 
         if (_prefab_inst)
             _prefab_curr_component = component;
 
-		if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
 		{
 			displayVal(*component);
 		}
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(window_size.x - 20);
-		ImGui::Text("...");
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+		if (ImGui::Button("...")) {
+			ImGui::OpenPopup("AdditionalOptions");
+
+		}
 
 		ImGui::SetCursorPos(cursorPos2);
 
@@ -584,14 +562,27 @@ namespace idk {
 
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("Remove Component")) {
-				isComponentMarkedForDeletion = true;
-				componentNameMarkedForDeletion = (*component).type.name();
-			}
+			MenuItem_RemoveComponent(component);
+			MenuItem_CopyComponent(component);
 			ImGui::EndPopup();
 		}
 
 		ImGui::PopID();
+	}
+
+	void IGE_InspectorWindow::MenuItem_RemoveComponent(GenericHandle i)
+	{
+		if (ImGui::MenuItem("Remove Component")) {
+			isComponentMarkedForDeletion = true;
+			componentNameMarkedForDeletion = (*i).type.name();
+		}
+	}
+
+	void IGE_InspectorWindow::MenuItem_CopyComponent(GenericHandle i)
+	{
+		if (ImGui::MenuItem("Copy Component")) {
+			Core::GetSystem<IDE>().copied_component = (*i).copy();
+		}
 	}
 
 
@@ -692,7 +683,7 @@ namespace idk {
                 c.type == reflect::get_type<Name>())
                 continue;
 
-            auto cursor_pos = ImGui::GetCursorPos();
+			auto cursor_pos = ImGui::GetCursorPos();
 
             ImGui::PushID(i);
             if (ImGui::CollapsingHeader(c.type.name().data(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
@@ -702,33 +693,33 @@ namespace idk {
                     PrefabUtility::PropagatePrefabChangesToInstances(prefab);
                     prefab->Dirty();
                 }
-            }
+			}
 
-            auto cursor_pos2 = ImGui::GetCursorPos();
+			auto cursor_pos2 = ImGui::GetCursorPos();
 
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
-            ImGui::SetCursorPosY(cursor_pos.y);
-            if (ImGui::Button("..."))
-            {
-                ImGui::OpenPopup("AdditionalOptions");
-            }
+			ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+			ImGui::SetCursorPosY(cursor_pos.y);
+			if (ImGui::Button("..."))
+			{
+				ImGui::OpenPopup("AdditionalOptions");
+			}
 
-            if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None))
-            {
-                if (ImGui::MenuItem("Reset"))
-                {
+			if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None))
+			{
+				if (ImGui::MenuItem("Reset"))
+				{
 
-                }
-                ImGui::Separator();
-                if (ImGui::MenuItem("Remove Component"))
-                {
-                    PrefabUtility::RemoveComponentFromPrefab(prefab, 0, i - 1);
-                    prefab->Dirty();
-                }
-                ImGui::EndPopup();
-            }
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Remove Component"))
+				{
+					PrefabUtility::RemoveComponentFromPrefab(prefab, 0, i - 1);
+					prefab->Dirty();
+				}
+				ImGui::EndPopup();
+			}
 
-            ImGui::SetCursorPos(cursor_pos2);
+			ImGui::SetCursorPos(cursor_pos2);
 
             ImGui::PopID();
         }
@@ -750,7 +741,7 @@ namespace idk {
 
                 if (ImGui::MenuItem(displayName.c_str()))
                 {
-                    PrefabUtility::AddComponentToPrefab(prefab, 0, reflect::get_type(c_name).create());
+					PrefabUtility::AddComponentToPrefab(prefab, 0, reflect::get_type(c_name).create());
                 }
             }
             ImGui::EndPopup();

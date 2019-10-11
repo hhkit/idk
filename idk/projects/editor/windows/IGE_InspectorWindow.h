@@ -42,12 +42,16 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
 
-        void DisplayGameObjects(vector<Handle<GameObject>> gos);
-		void DisplayNameComponent(Handle<Name>& c_name);
-        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);
-		void DisplayTransformComponent(Handle<Transform>& c_transform);
-		void DisplayAnimatorComponent(Handle<Animator>& c_anim);
-		void DisplayOtherComponent(GenericHandle& component);
+        void DisplayGameObjects(vector<Handle<GameObject>> gos);			   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayNameComponent(Handle<Name>& c_name);					   //If multiple objects are selected, this will only display the first gameObject.
+        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayTransformComponent(Handle<Transform>& c_transform);		   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayAnimatorComponent(Handle<Animator>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayOtherComponent(GenericHandle& component);				   //If multiple objects are selected, this will only display the first gameObject.
+
+		void MenuItem_RemoveComponent(GenericHandle i);
+		void MenuItem_CopyComponent(GenericHandle i);
+
 
         void DisplayAsset(GenericResourceHandle handle);
         void DisplayAsset(RscHandle<Prefab> prefab);

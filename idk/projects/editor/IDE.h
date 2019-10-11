@@ -111,6 +111,7 @@ namespace idk
 		bool flag_skip_render					= false;
 
 		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
-		vector<vector<RecursiveObjects>> copied_gameobjects{}; //A vector of data containing gameobject data.
+		vector<vector<RecursiveObjects>> copied_gameobjects	{}; //A vector of data containing gameobject data.
+		reflect::dynamic				 copied_component	{};
 	};
 }
