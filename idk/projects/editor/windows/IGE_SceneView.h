@@ -68,6 +68,8 @@ namespace idk {
 		mat4 GenerateMat4FromGizmoMatrix();
 
 		bool is_being_modified = false;
+
+		ray GenerateRayFromCurrentScreen();
 	};
 
 

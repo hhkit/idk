@@ -386,4 +386,33 @@ namespace idk {
 		return dumper;
 	}
 
+	ray IGE_SceneView::GenerateRayFromCurrentScreen()
+	{
+		//auto& app_sys = Core::GetSystem<Application>();
+		IDE& editor = Core::GetSystem<IDE>();
+
+		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+
+		const auto view_mtx = currCamera->ViewMatrix();
+		const auto pers_mtx = currCamera->ProjectionMatrix();
+		
+		vec2 ndcPos = GetMousePosInWindowNormalized();
+
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,0,1);
+		vfPos *= 1.f/vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
+
+		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
+		vbPos *= 1.f/vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
+
+		ray newRay;
+
+		newRay.origin = wfPos;
+		newRay.velocity = wbPos-wfPos;
+
+		return newRay;
+	}
+
 }
