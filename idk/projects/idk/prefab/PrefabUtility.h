@@ -29,8 +29,11 @@ namespace idk
         // propagate specific property
         static void PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path);
 
-        // propagate last added component
-        static void PropagateAddedComponentToInstances(RscHandle<Prefab> prefab, int object_index);
+        // add component and propagate
+        static void AddComponentToPrefab(RscHandle<Prefab> prefab, int object_index, reflect::dynamic component);
+
+        // remove component and propagate
+        static void RemoveComponentFromPrefab(RscHandle<Prefab> prefab, int object_index, int component_index);
 
         // after changing a value in a component, call this fn.
         //   target:        target game object / child object of the prefab instance
