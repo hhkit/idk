@@ -692,8 +692,10 @@ namespace idk {
                 c.type == reflect::get_type<Name>())
                 continue;
 
+            auto cursor_pos = ImGui::GetCursorPos();
+
             ImGui::PushID(i);
-            if (ImGui::CollapsingHeader(c.type.name().data(), ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::CollapsingHeader(c.type.name().data(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
             {
                 if (displayVal(c))
                 {
@@ -701,6 +703,33 @@ namespace idk {
                     prefab->Dirty();
                 }
             }
+
+            auto cursor_pos2 = ImGui::GetCursorPos();
+
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+            ImGui::SetCursorPosY(cursor_pos.y);
+            if (ImGui::Button("..."))
+            {
+                ImGui::OpenPopup("AdditionalOptions");
+            }
+
+            if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None))
+            {
+                if (ImGui::MenuItem("Reset"))
+                {
+
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Remove Component"))
+                {
+                    PrefabUtility::RemoveComponentFromPrefab(prefab, 0, i - 1);
+                    prefab->Dirty();
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::SetCursorPos(cursor_pos2);
+
             ImGui::PopID();
         }
 
@@ -721,8 +750,7 @@ namespace idk {
 
                 if (ImGui::MenuItem(displayName.c_str()))
                 {
-                    prefab->data[0].components.push_back(reflect::get_type(c_name).create());
-                    PrefabUtility::PropagateAddedComponentToInstances(prefab, 0);
+                    PrefabUtility::AddComponentToPrefab(prefab, 0, reflect::get_type(c_name).create());
                 }
             }
             ImGui::EndPopup();

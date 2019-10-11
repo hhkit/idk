@@ -187,6 +187,27 @@ namespace idk
                 }
             }
         }
+        static void propagate_removed_component(RscHandle<Prefab> prefab, string_view component_name, int component_add_index)
+        {
+            for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
+            {
+                if (prefab_inst.prefab != prefab)
+                    continue;
+
+                for (auto c : prefab_inst.GetGameObject()->GetComponents())
+                {
+                    if ((*c).type.name() == component_name)
+                    {
+                        if (component_add_index == 0)
+                        {
+                            prefab_inst.GetGameObject()->RemoveComponent(c);
+                            break;
+                        }
+                        --component_add_index;
+                    }
+                }
+            }
+        }
     }
 
 
@@ -425,9 +446,25 @@ namespace idk
         }
     }
 
-    void PrefabUtility::PropagateAddedComponentToInstances(RscHandle<Prefab> prefab, int object_index)
+    void PrefabUtility::AddComponentToPrefab(RscHandle<Prefab> prefab, int object_index, reflect::dynamic component)
     {
-        helpers::propagate_added_component(prefab, static_cast<int>(prefab->data[object_index].components.size() - 1));
+        auto& data = prefab->data[object_index].components;
+        data.push_back(component);
+        helpers::propagate_added_component(prefab, static_cast<int>(data.size() - 1));
+    }
+
+    void PrefabUtility::RemoveComponentFromPrefab(RscHandle<Prefab> prefab, int object_index, int component_index)
+    {
+        auto& data = prefab->data[object_index].components;
+        auto type = data[component_index].type;
+        int add_index = 0;
+        for (size_t i = 0; i < component_index; ++i)
+        {
+            if (data[i].type == type)
+                ++add_index;
+        }
+        helpers::propagate_removed_component(prefab, type.name(), add_index);
+        data.erase(data.begin() + component_index);
     }
 
     void PrefabUtility::RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path)
