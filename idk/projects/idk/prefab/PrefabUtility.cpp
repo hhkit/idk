@@ -51,20 +51,13 @@ namespace idk
                     if (cont.value_type.is_template<std::pair>())
                     {
                         auto key_type = cont.value_type.create().unpack()[0].type;
-                        curr.~dynamic();
-                        new (&curr) reflect::dynamic(cont[parse_text(string(token), key_type)]);
+                        curr.swap(cont[parse_text(string(token), key_type)]);
                     }
                     else
-                    {
-                        curr.~dynamic();
-                        new (&curr) reflect::dynamic(cont[parse_text<size_t>(string(token))]);
-                    }
+                        curr.swap(cont[parse_text<size_t>(string(token))]);
                 }
                 else
-                {
-                    curr.~dynamic();
-                    new (&curr) reflect::dynamic(obj.get_property(token).value);
-                }
+                    curr.swap(obj.get_property(token).value);
 
                 offset = end;
                 ++offset;

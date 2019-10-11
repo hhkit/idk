@@ -30,6 +30,13 @@ namespace idk::reflect
 		return _ptr->copy();
 	}
 
+    dynamic& dynamic::swap(dynamic&& other)
+    {
+        std::swap(_ptr, other._ptr);
+        std::swap(const_cast<reflect::type&>(type), const_cast<reflect::type&>(other.type)); // saved!
+        return *this;
+    }
+
 	dynamic::property_iterator dynamic::begin() const
 	{
 		return property_iterator(*this);
@@ -66,7 +73,7 @@ namespace idk::reflect
 			using T = ::property::vartype_from_functiongetset<fn_getset_t>;
 			void* offsetted = ::property::details::HandleBasePointer(_ptr->get(), entry.m_Offset);
 			T& value = *reinterpret_cast<T*>(offsetted);
-			new (&val) dynamic{ value };
+			val.swap(value);
 			name = type._context->table.m_pEntry[index].m_pName;
 
 		}, entry.m_FunctionTypeGetSet);

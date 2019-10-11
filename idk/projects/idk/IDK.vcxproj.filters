@@ -113,6 +113,9 @@
     <Filter Include="script">
       <UniqueIdentifier>{0ea81c08-6894-4f4d-92fb-1d23678faa9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{2eea3a1f-43c1-42ef-b2cd-443933fd8622}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -611,22 +614,13 @@
     <ClInclude Include="res\SaveableResource.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="res\SaveableResourceLoader.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\MetaBundle.h">
       <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="gfx\MaterialFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\projector_functions.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\ShaderTemplateLoader.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\IShaderProgramFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
     <ClInclude Include="gfx\projector_functions.h" />
@@ -687,12 +681,25 @@
       <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="machine.h" />
-    <ClInclude Include="debug\idk_assert.h" />
     <ClInclude Include="script\MonoEnvironment.h" />
-    <ClInclude Include="debug\Logger.h" />
     <ClInclude Include="script\ManagedObj.h" />
     <ClInclude Include="script\ManagedType.h" />
     <ClInclude Include="script\ManagedThunk.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\IShaderProgramFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\idk_assert.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\Logger.h">
+      <Filter>debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -997,10 +1004,12 @@
       <Filter>gfx\light</Filter>
     </ClCompile>
     <ClCompile Include="script\MonoEnvironment.cpp" />
-    <ClCompile Include="debug\Logger.cpp" />
     <ClCompile Include="script\ManagedObj.cpp" />
     <ClCompile Include="script\ManagedType.cpp" />
     <ClCompile Include="script\ManagedThunk.cpp" />
+    <ClCompile Include="debug\Logger.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

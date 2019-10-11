@@ -283,7 +283,7 @@ namespace idk
 		if (!obj.valid())
 		{
             if (node.has_tag())
-                new (&obj) reflect::dynamic{ reflect::get_type(node.tag()).create() };
+                obj.swap(reflect::get_type(node.tag()).create());
 			else
 				throw "invalid dynamic passed in!";
 		}

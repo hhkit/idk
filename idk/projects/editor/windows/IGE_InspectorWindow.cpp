@@ -584,7 +584,7 @@ namespace idk {
 	void IGE_InspectorWindow::MenuItem_CopyComponent(GenericHandle i)
 	{
 		if (ImGui::MenuItem("Copy Component")) {
-			Core::GetSystem<IDE>().copied_component = (*i).copy();
+			Core::GetSystem<IDE>().copied_component.swap((*i).copy());
 		}
 	}
 
