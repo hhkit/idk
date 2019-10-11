@@ -51,6 +51,7 @@ namespace idk {
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);
+		void MenuItem_PasteComponent();
 
 
         void DisplayAsset(GenericResourceHandle handle);
@@ -71,7 +72,6 @@ namespace idk {
 
 		//For when transforms are edited
 		bool			hasChanged = false; 
-		//bool			isBeingModified = false;
 		void			TransformModifiedCheck();
 
 	};
