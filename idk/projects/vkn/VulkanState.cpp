@@ -900,7 +900,7 @@ namespace idk::vkn
 		createCommandBuffers();
 		createSemaphores();
 	}
-
+	void PrintFormatBlitCompatibility();
 	void VulkanState::InitVulkanEnvironment(window_info info)
 	{
 		m_window = info;
@@ -921,6 +921,7 @@ namespace idk::vkn
 
 		createCommandBuffers();
 		createSemaphores();
+		PrintFormatBlitCompatibility();
 	}
 
 	void VulkanState::NextFrame()

@@ -24,6 +24,35 @@ namespace idk::vkn
 		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), {}, dds.Data(), dds.Dimensions(), allocator, *load_fence, false);
 		return tex;
 	}
+
+	hash_table<vk::Format, vk::Format> DecompressMap()
+	{
+		return hash_table<vk::Format, vk::Format>
+		{
+			{ vk::Format::eBc1RgbUnormBlock  , vk::Format::eR8G8B8A8Unorm },
+			{ vk::Format::eBc2UnormBlock     , vk::Format::eR8G8B8A8Unorm },
+			{ vk::Format::eBc3UnormBlock     , vk::Format::eR8G8B8A8Unorm },
+			{ vk::Format::eBc1RgbaUnormBlock , vk::Format::eR8G8B8A8Unorm },
+		};
+
+	}
+	vk::Format ToDecompressed(vk::Format format)
+	{
+		static const auto map = DecompressMap();
+		vk::Format result = format;
+		auto itr = map.find(format);
+		if (itr != map.end())
+			result = itr->second;
+		return result;
+	}
+	uint32_t validate_mipmap_level(uint32_t m_lvl, uint32_t w, uint32_t h)
+	{
+		uint32_t d = std::max(w, h);//padded out
+		uint32_t i = m_lvl;
+		//while d is too small to support i mipmaps
+		while (i > 0 && !((d >> i)>=4))--i; //Decrease mipmap count
+		return i;
+	}
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
 		//auto&& tm = *path_to_meta.metadatas[0].GetMeta<Texture>();
@@ -37,21 +66,25 @@ namespace idk::vkn
 		DdsFile dds{ strm.str() };
 		TextureOptions to;
 		to = *path_to_meta.metadatas[0].GetMeta<Texture>();
-		TexCreateInfo tci;
-		tci.aspect = vk::ImageAspectFlagBits::eColor;
-		tci.width = dds.Dimensions().x;
-		tci.height = dds.Dimensions().y;
-		tci.mipmap_level = dds.File().header.mip_map_count+1;
-		tci.internal_format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
-		bool linearize = IsSrgb(to.internal_format);
-		if (!linearize)
-		{
-			tci.internal_format = UnSrgb(tci.internal_format);
-		}
+
 		InputTexInfo iti;
 		iti.data = dds.Data().data();
 		iti.len = dds.Data().length();
 		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
+		TexCreateInfo tci;
+		tci.aspect = vk::ImageAspectFlagBits::eColor;
+		tci.width = dds.Dimensions().x;
+		tci.height = dds.Dimensions().y;
+		tci.mipmap_level = std::max(dds.File().header.mip_map_count,0u);
+		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width,tci.height);
+		tci.internal_format = MapFormat(to.internal_format);
+		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
+		
+		bool linearize = !IsSrgb(to.internal_format);
+		if (linearize)
+		{
+			tci.internal_format = ToDecompressed(UnSrgb(MapFormat(to.internal_format)));
+		}
 		loader.LoadTexture(*tex, allocator, *load_fence,to,tci,iti);
 		return tex;
 	}
