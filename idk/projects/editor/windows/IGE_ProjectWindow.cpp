@@ -341,55 +341,51 @@ namespace idk {
                 // todo: open arrow for bundle
             }
 
+            static bool just_rename = false;
+            ImVec2 text_frame_sz{ icon_sz, ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2 };
+
             if (selected_path == path)
             {
                 static char buf[256];
-                static bool first_focus = false;
 
                 if (renaming_selected_asset)
                 {
                     ImGui::SetNextItemWidth(icon_sz);
-                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
                     if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         name = buf;
                         renaming_selected_asset = false;
 
-                        // dont work yet
-                        //string str{ selected_path.GetParentMountPath() };
-                        //str += '/';
-                        //str += name;
-                        //Core::GetResourceManager().Rename(selected_path, str);
+                        //auto new_path = unique_new_file_path(name, selected_path.GetExtension());
+                        //for (auto selected_handle : selected_assets)
+                        //    std::visit([sv=string_view(new_path)](auto h) { Core::GetResourceManager().Rename(h, sv); }, selected_handle);
                     }
-                    ImGui::PopStyleVar();
-                    if (first_focus)
+                    if (just_rename)
                     {
                         ImGui::SetKeyboardFocusHere(-1);
-                        first_focus = false;
+                        just_rename = false;
                     }
                     else if ((ImGui::IsItemDeactivated()))
                         renaming_selected_asset = false;
                 }
-                else if (!renaming_selected_asset)
+                else
                 {
-                    //auto cursor_y = ImGui::GetCursorPosY();
+                    auto cursor_y = ImGui::GetCursorPosY();
 
-                    //if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
-                    //{
-                    //    renaming_selected_asset = true;
-                    //    first_focus = true;
-                    //    strcpy_s(buf, name.c_str());
-                    //}
-                    //else
-                    //{
-                        ImGui::GetWindowDrawList()->AddRectFilled(
-                            ImGui::GetCursorScreenPos(),
-                            ImGui::GetCursorScreenPos() + ImVec2(icon_sz, line_height),
-                            ImGui::GetColorU32(ImGuiCol_FrameBgHovered),
-                            line_height * 0.5f);
-                    //}
+                    ImGui::GetWindowDrawList()->AddRectFilled(
+                        ImGui::GetCursorScreenPos(),
+                        ImGui::GetCursorScreenPos() + text_frame_sz,
+                        ImGui::GetColorU32(ImGuiCol_FrameBgHovered),
+                        text_frame_sz.y * 0.5f);
 
-                    //ImGui::SetCursorPosY(cursor_y);
+                    if (ImGui::InvisibleButton("rename_hitbox", text_frame_sz))
+                    {
+                        renaming_selected_asset = true;
+                        just_rename = true;
+                        strcpy_s(buf, name.c_str());
+                    }
+
+                    ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
 
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
                     ImGui::Text(label.c_str());
@@ -397,6 +393,9 @@ namespace idk {
             }
             else // not selected
             {
+                auto cursor_y = ImGui::GetCursorPosY();
+                ImGui::Dummy(text_frame_sz);
+                ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
                 ImGui::Text(label.c_str());
             }
@@ -424,7 +423,7 @@ namespace idk {
                 clicked_path = path;
             }
 
-            if (clicked_path == path && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
+            if (!just_rename && clicked_path == path && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
             {
                 selected_path = path;
                 renaming_selected_asset = false;
