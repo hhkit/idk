@@ -448,7 +448,7 @@ namespace idk {
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth()-10);
 		if (ImGui::Button("...")) {
 			ImGui::OpenPopup("AdditionalOptions");
 
@@ -466,6 +466,7 @@ namespace idk {
 				}
 			}
 			MenuItem_CopyComponent(c_transform);
+			MenuItem_PasteComponent();
 			ImGui::Separator();
 			ImGui::EndPopup();
 		}
@@ -504,7 +505,7 @@ namespace idk {
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 10);
 		if (ImGui::Button("...")) {
 			ImGui::OpenPopup("AdditionalOptions");
 
@@ -520,6 +521,7 @@ namespace idk {
 			ImGui::Separator();
 			MenuItem_RemoveComponent(c_anim);
 			MenuItem_CopyComponent(c_anim);
+			MenuItem_PasteComponent();
 			ImGui::EndPopup();
 		}
 	}
@@ -549,7 +551,7 @@ namespace idk {
 
 		cursorPos2 = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 10);
 		if (ImGui::Button("...")) {
 			ImGui::OpenPopup("AdditionalOptions");
 
@@ -564,6 +566,7 @@ namespace idk {
 			ImGui::Separator();
 			MenuItem_RemoveComponent(component);
 			MenuItem_CopyComponent(component);
+			MenuItem_PasteComponent();
 			ImGui::EndPopup();
 		}
 
@@ -582,6 +585,18 @@ namespace idk {
 	{
 		if (ImGui::MenuItem("Copy Component")) {
 			Core::GetSystem<IDE>().copied_component = (*i).copy();
+		}
+	}
+
+	void IGE_InspectorWindow::MenuItem_PasteComponent()
+	{
+		if (ImGui::MenuItem("Paste Component")) {
+			//if (Core::GetSystem<IDE>().copied_component != reflect::dynamic{}) {
+			//	reflect::dynamic newComponent{};
+			//	parse_text(Core::GetSystem<IDE>().copied_component, newComponent);
+			//	string compName = string{ newComponent.type.name() };
+			//	std::cout << "Component pasted is " << compName << std::endl;
+			//}
 		}
 	}
 
@@ -697,7 +712,7 @@ namespace idk {
 
 			auto cursor_pos2 = ImGui::GetCursorPos();
 
-			ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+			ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 10);
 			ImGui::SetCursorPosY(cursor_pos.y);
 			if (ImGui::Button("..."))
 			{
