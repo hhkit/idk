@@ -128,6 +128,10 @@ namespace idk {
             }
             if (ImGui::BeginPopup("create_menu"))
             {
+                if (ImGui::MenuItem("Folder"))
+                {
+                    //auto path = unique_new_file_path("NewFolder", "");
+                }
                 if (ImGui::MenuItem("Material"))
                 {
                     auto path = unique_new_file_path("NewMaterial", Material::ext);
@@ -453,7 +457,9 @@ namespace idk {
                 {
                     if (ImGui::MenuItem("Create Material Instance"))
                     {
-                        auto create_path = unique_new_file_path("NewMaterialInstance", MaterialInstance::ext);
+                        string filename{ path.GetStem() };
+                        filename += "_Instance";
+                        auto create_path = unique_new_file_path(filename, MaterialInstance::ext);
                         auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
                         if (res && *res)
                         {
