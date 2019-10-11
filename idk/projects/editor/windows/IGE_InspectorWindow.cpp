@@ -22,7 +22,7 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
-
+#include "anim/AnimationSystem.h"
 #include <app/Application.h>
 #include <ds/span.h>
 #include <reflect/reflect.h>
@@ -514,6 +514,8 @@ namespace idk {
 			{
 				c_anim->Pause();
 			}
+
+			ImGui::DragFloat("Test Blend", &Core::GetSystem<AnimationSystem>()._blend, 0.01f, 0.0f, 1.0f);
 
 		}
 

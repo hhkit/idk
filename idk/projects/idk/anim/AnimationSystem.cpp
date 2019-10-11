@@ -117,8 +117,7 @@ namespace idk
 				const float factor = (time_in_ticks - animated_bone.rotation_track[start].time) / dt;
 				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose.rotation = slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor);
-				// rotation =  * rotation;
+				curr_pose.rotation = slerp(slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor), curr_pose.rotation, _blend);
 				curr_pose.rotation.normalize();
 			}
 		}

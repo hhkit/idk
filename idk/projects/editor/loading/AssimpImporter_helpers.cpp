@@ -33,7 +33,22 @@ namespace idk::ai_helpers
 		scene.num_meshes = scene.ai_scene->mNumMeshes;
 		for (size_t i = 0; i < scene.num_meshes; ++i)
 		{
-			scene.meshes.emplace_back(scene.ai_scene->mMeshes[i]);
+			aiMesh* curr_mesh = scene.ai_scene->mMeshes[i];
+			if (scene.mesh_table.find(curr_mesh->mName.data) == scene.mesh_table.end())
+			{
+				scene.meshes.emplace_back(curr_mesh);
+				scene.mesh_table.emplace(curr_mesh->mName.data, curr_mesh);
+			}
+			else
+			{
+				PrintError(string{ "[Warning] Mesh " } + curr_mesh->mName.data + " referenced more than once. Appending \"- Copy\".)");
+				aiString new_name = { curr_mesh->mName };
+				new_name.Append("- Copy");
+				curr_mesh->mName = new_name;
+				scene.meshes.emplace_back(scene.ai_scene->mMeshes[i]);
+				scene.mesh_table.emplace(curr_mesh->mName.data, scene.ai_scene->mMeshes[i]);
+			}
+			
 		}
 
 		
