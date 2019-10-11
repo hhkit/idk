@@ -7,4 +7,11 @@ namespace idk::mono
 		: thunk{ mono_method_get_unmanaged_thunk(method) }
 	{
 	}
+
+	void yolo()
+	{
+		ManagedThunk m{ nullptr };
+		Handle<GameObject> go;
+		m.Invoke(go, 5, 4);
+	}
 }

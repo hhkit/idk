@@ -7,13 +7,13 @@
 
 namespace idk::mono
 {
+	// contains the environment in which a system lives
 	class MonoEnvironment
 	{
 	public:
 		MonoEnvironment(string_view full_path_to_game_dll);
 
 		~MonoEnvironment();
-
 	private:
 		MonoDomain*   script_domain   {};
 		MonoAssembly* script_assembly {};

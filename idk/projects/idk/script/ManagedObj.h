@@ -3,6 +3,8 @@
 
 namespace idk::mono
 {
+	class ManagedType;
+
 	class ManagedObject
 	{
 	public:
@@ -16,5 +18,7 @@ namespace idk::mono
 		MonoObject* Fetch() const noexcept;
 	private:
 		uint32_t _gc_handle{};
+		ManagedType* _type{};
 	};
+
 }

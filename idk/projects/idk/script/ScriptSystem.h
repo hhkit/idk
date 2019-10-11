@@ -28,13 +28,8 @@ namespace idk::mono
 		void ScriptUpdateCoroutines(span<Behavior>);
 		void ScriptLateUpdate(span<Behavior>);
 
-		MonoBehaviorData* GetMonoBehaviorType(std::string_view);
-		const hash_table<string, MonoBehaviorData>& GetMonoBehaviorDataList();
-
 		MonoAssembly* GetLibrary() const;
-		MonoDomain* GetScriptDomain();
-		MonoImage*  GetLibImage();
-		MonoClass*  GetClassOfType(std::string_view type_name);
+		MonoEnvironment* Environment() const;
 
 		void RefreshGameScripts();
 
@@ -48,12 +43,8 @@ namespace idk::mono
 		hash_table<string, std::deque<Handle<Behavior>>> behavior_handles;
 		unique_ptr<MonoEnvironment> environment;
 
-		void FindMonoBehaviors();
-		void ClearMonoBehaviors();
-
 		void LoadGameScripts();
 		void UnloadGameScripts();
-		bool ImplementsInterface(MonoClass*, std::string_view);
 
 		void Init() override;
 		void Shutdown() override;

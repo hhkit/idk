@@ -22,6 +22,11 @@ namespace idk::mono
 		environment = std::make_unique<MonoEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
 	}
 
+	void ScriptSystem::UnloadGameScripts()
+	{
+		environment = nullptr;
+	}
+
 	void ScriptSystem::Init()
 	{
 		Core::GetSystem<FileSystem>().Mount(
@@ -80,6 +85,10 @@ namespace idk::mono
 	MonoAssembly* ScriptSystem::GetLibrary() const
 	{
 		return lib_assembly;
+	}
+	MonoEnvironment* ScriptSystem::Environment() const
+	{
+		return environment.get();
 	}
 	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
 	{
