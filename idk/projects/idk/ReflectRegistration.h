@@ -4,6 +4,7 @@
 #include <core/Core.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
+#include <IncludeSystems.h>
 #include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
 #include <math/matrix_decomposition.h>
@@ -235,6 +236,14 @@ REFLECT_VARS(build_index, scene)
 REFLECT_END()
 
 /*==========================================================================
+ * configs
+ *========================================================================*/
+
+REFLECT_BEGIN(idk::TagSystemConfig, "TagSystemConfig")
+REFLECT_VARS(tags)
+REFLECT_END()
+
+/*==========================================================================
  * components
  *========================================================================*/
 
@@ -244,6 +253,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Name, "Name")
 REFLECT_VARS(name)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Tag, "Tag")
+REFLECT_VARS(index)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")

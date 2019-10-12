@@ -44,8 +44,11 @@ namespace idk
 		Handle<class GameObject> Parent() const;
 		bool HierarchyIsQueuedForDestruction() const;
 		bool ParentIsQueuedForDestruction() const;
+
 		string_view Name() const;
 		void Name(string_view name);
+        string_view Tag() const;
+        void Tag(string_view tag);
 		
 		
 	private:

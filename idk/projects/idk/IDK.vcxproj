@@ -37,6 +37,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="app\GamepadEnums.h" />
+    <ClInclude Include="core\ConfigurableSystem.h" />
     <ClInclude Include="debug\idk_assert.h" />
     <ClInclude Include="debug\Logger.h" />
     <ClInclude Include="machine.h" />
@@ -176,6 +177,8 @@
     <ClInclude Include="script\ScriptSystem.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
+    <ClInclude Include="common\Tag.h" />
+    <ClInclude Include="common\TagSystem.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestResourceFactory.h" />
@@ -226,6 +229,7 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="common\TagSystem.cpp" />
     <ClCompile Include="debug\Logger.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
