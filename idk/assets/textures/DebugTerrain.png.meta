@@ -1,4 +1,5 @@
-guids: [f3b0c05a-a0c7-4cad-9602-b7e397e5b003]
-resource_metas: 
-- !TextureMeta 
-  {internal_format: !ColorFormat RGBF_32, uv_mode: !UVMode Repeat}
+metadatas: 
+- guid: 24703c99-e5e4-454a-899e-2ea4a4e22214
+  metadata: '{internal_format: !ColorFormat RGBF_32, uv_mode: !UVMode Repeat}'
+  name: ""
+  t_hash: 16991284332866690938

@@ -191,8 +191,11 @@ namespace idk
 
 		Core::GetScheduler().SetPauseState(EditorPause);
 
-		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-			Core::GetResourceManager().Load(elem, false);
+        for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
+        {
+            if (elem.GetExtension() != ".meta")
+                Core::GetResourceManager().Load(elem, false);
+        }
 	}
 
 	void IDE::Shutdown()

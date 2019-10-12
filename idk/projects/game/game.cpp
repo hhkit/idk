@@ -89,12 +89,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 	c->Setup();
-	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
-	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag");
+	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag", false);
+	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag", false);
 
 	Core::GetResourceManager().Create<TestResource>("/assets/test/yolo.test");
 
-	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
+	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png", false);
 
 	auto scene = RscHandle<Scene>{};
 
@@ -115,7 +115,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camHandle->render_target = RscHandle<RenderTarget>{};
 		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 		if(gfx_api!=GraphicsAPI::Vulkan)
-			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
+			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
 
 		if (&c->GetSystem<IDE>())
 		{
@@ -124,7 +124,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
+	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
 
 	// Lambda for creating an animated object... Does not work atm.
@@ -137,7 +137,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto animator = go->AddComponent<Animator>();
 
 		{
-			auto resources_running = Core::GetResourceManager().Load(path);
+			auto resources_running = Core::GetResourceManager().Load(path, false);
 
 			for (auto handle : resources_running->GetAll<Mesh>())
 			{
@@ -164,7 +164,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto tmp_tex = minecraft_texture;
 	if (gfx_api == GraphicsAPI::Vulkan)
-		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
+		tmp_tex = *Core::GetResourceManager().Load<Texture>("/assets/textures/texture.dds", false);
 
 	constexpr auto col = ivec3{ 1,0,0 };
 
@@ -201,7 +201,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto mesh_rend = floor->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
 		mesh_rend->material_instance = mat_inst;
-		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" });
+		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>("/assets/textures/Grass.jpg", false);
 	}
 
 	{
@@ -229,8 +229,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		light->AddComponent<TestComponent>();
 	}
 
-    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
-    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp", false).value()->Instantiate(*scene);
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp", false).value()->Instantiate(*scene);
 
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
