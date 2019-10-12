@@ -124,7 +124,7 @@ namespace idk
 				anim_clip_handle->Name(compiled_animation.name);
 
 				auto& anim_clip = anim_clip_handle.as<anim::Animation>();
-
+				
 				anim_clip.SetName(compiled_animation.name);
 				anim_clip.SetSpeeds(compiled_animation.fps, compiled_animation.duration, compiled_animation.num_ticks);
 
@@ -141,6 +141,13 @@ namespace idk
 		// If importer_scene has no skeleton, then we only save as prefab if there is more than 1 mesh
 		// If importer_scene has animation but no meshes, then we save the importer_scene as just an animation asset with no skeleton.
 		// Check for errors here as well. Eg: Has animation but no skeleton etc (Unlikely).
+
+		// Check if this is a pure animation file. If it is, we don't even bother creating the prefab.
+		if (importer_scene.has_animation && !importer_scene.has_skeleton)
+		{
+			return ret_val;
+		}
+
 		const auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		const auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
@@ -159,6 +166,9 @@ namespace idk
 			const auto animator = prefab_root->AddComponent<Animator>();
 
 			animator->SetSkeleton(skeleton_handle);
+
+			for (auto& anim : animation_handles)
+				animator->AddAnimation(anim);
 		}
 		else if (importer_scene.has_meshes && !importer_scene.has_skeleton)
 		{
@@ -181,14 +191,10 @@ namespace idk
 				}
 			}
 		}
-		// else if (importer_scene.has_skeleton && importer_scene.has_animation)
-		// {
-		// 	// Not supported yet
-		// }
-		// else
-		// {
-		// 	
-		// }
+		else
+		{
+			IDK_ASSERT_MSG(false, "[AssimpImporter] Joseph needs to be kicked from the team.");
+		}
 		const auto prefab_handle = PrefabUtility::Create(prefab_root);
 		ret_val.Add(prefab_handle);
 		scene->DestroyGameObject(prefab_root);
@@ -336,7 +342,14 @@ namespace idk
 		// Here we decide whether or not to save as a prefab.
 		// If importer_scene has no skeleton, then we only save as prefab if there is more than 1 mesh
 		// If importer_scene has animation but no meshes, then we save the importer_scene as just an animation asset with no skeleton.
-		// Check for errors here as well. Eg: Has animation but no skeleton etc (Unlikely).
+		// Check for errors here as well. Eg: Has skeleton but no mesh and no animation (Unlikely).
+
+		// Check if this is a pure animation file. If it is, we don't even bother creating the prefab.
+		if (importer_scene.has_animation && !importer_scene.has_skeleton)
+		{
+			return ret_val;
+		}
+
 		const auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		const auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
@@ -355,6 +368,9 @@ namespace idk
 			const auto animator = prefab_root->AddComponent<Animator>();
 
 			animator->SetSkeleton(skeleton_handle);
+
+			for (auto& anim : animation_handles)
+				animator->AddAnimation(anim);
 		}
 		else if (importer_scene.has_meshes && !importer_scene.has_skeleton)
 		{
@@ -377,14 +393,7 @@ namespace idk
 				}
 			}
 		}
-		// else if (importer_scene.has_skeleton && importer_scene.has_animation)
-		// {
-		// 	// Not supported yet
-		// }
-		// else
-		// {
-		// 	
-		// }
+		
 		const auto prefab_handle = PrefabUtility::Create(prefab_root);
 		ret_val.Add(prefab_handle);
 		scene->DestroyGameObject(prefab_root);
