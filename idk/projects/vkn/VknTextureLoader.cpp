@@ -180,7 +180,7 @@ namespace idk::vkn
 
 		};
 		ptr->sampler = device.createSamplerUnique(sampler_info);
-
+		texture.Size(size);
 	}
 
 

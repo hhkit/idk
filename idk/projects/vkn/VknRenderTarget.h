@@ -4,6 +4,7 @@
 #include <vkn/VulkanState.h>
 #include <vkn/VknImageData.h>
 #include <vkn/VulkanView.h>
+#include <vkn/ManagedVulkanObjs.h>
 namespace idk::vkn
 {
 	class VknRenderTarget
@@ -30,8 +31,8 @@ namespace idk::vkn
 		BasicRenderPasses GetRenderPassType() { return rp_type; }
 	private:
 		BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
-		vk::UniqueSemaphore   ready_semaphore;
-		vk::UniqueFramebuffer buffer{ nullptr };
+		UniqueSemaphore       ready_semaphore{};
+		UniqueFramebuffer     buffer{};
 		ivec2				  size{};
 		bool				  uncreated{true};
 	};

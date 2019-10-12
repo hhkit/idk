@@ -137,7 +137,10 @@ RscHandle<RenderTarget> idk::PointLight::InitShadowMap()
 	auto &shadow_map =light_map= Core::GetResourceManager().Create<RenderTarget>();
 	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
 	m.internal_format = ColorFormat::DEPTH_COMPONENT;
+	auto meta = shadow_map->GetMeta();
+	meta.size = ivec2{512,512};
 	shadow_map->GetMeta().textures[0]->SetMeta(m);
+	//shadow_map->SetMeta(meta);
 	return shadow_map;
 }
 RscHandle<RenderTarget> DirectionalLight::InitShadowMap()
@@ -145,15 +148,21 @@ RscHandle<RenderTarget> DirectionalLight::InitShadowMap()
 	auto& shadow_map = light_map = Core::GetResourceManager().Create<RenderTarget>();
 	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
 	m.internal_format = ColorFormat::DEPTH_COMPONENT;
+	auto meta = shadow_map->GetMeta();
+	meta.size = ivec2{ 512,512 };
 	shadow_map->GetMeta().textures[0]->SetMeta(m);
+	//shadow_map->SetMeta(meta);
 	return shadow_map;
 }
 RscHandle<RenderTarget> SpotLight::InitShadowMap()
 {
 	auto& shadow_map = light_map = Core::GetResourceManager().Create<RenderTarget>();
-	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
-	m.internal_format = ColorFormat::DEPTH_COMPONENT;
-	shadow_map->GetMeta().textures[0]->SetMeta(m);
+	//auto m = shadow_map->GetMeta().textures[0]->GetMeta();
+	//m.internal_format = ColorFormat::DEPTH_COMPONENT;
+	auto meta = shadow_map->GetMeta();
+	meta.size = ivec2{ 512,512 };
+	//shadow_map->GetMeta().textures[0]->SetMeta(m);
+	shadow_map->SetMeta(meta);
 	return shadow_map;
 }
 }
