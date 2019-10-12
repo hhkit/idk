@@ -15,7 +15,7 @@
 #include <scene/SceneManager.h>
 #include <test/TestComponent.h>
 #include <math/euler_angles.h>
-
+#include <iostream>
 #include <editor/loading/OpenGLCubeMapLoader.h>
 
 #include <serialize/serialize.h>
@@ -127,37 +127,52 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
 
-	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/test.fbx" }) {
+	
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/YY_model.fbx" }) {
 		auto go = scene->CreateGameObject();
 
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
 		go->GetComponent<Transform>()->scale /= 100.0f;
+
+		auto model_resource = Core::GetResourceManager().Load(path);
+		string model_stem{ path.GetStem() };
 		auto animator = go->AddComponent<Animator>();
-
+		for (auto handle : model_resource->GetAll<Mesh>())
 		{
-			auto resources_running = Core::GetResourceManager().Load(path);
+			auto mesh_child_go = scene->CreateGameObject();
 
-			for (auto handle : resources_running->GetAll<Mesh>())
+			mesh_child_go->Name(handle->Name());
+			mesh_child_go->Transform()->parent = go;
+
+			auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
+			mesh_rend->mesh = handle;
+			mesh_rend->material_instance = mat_inst;
+		}
+
+		animator->SetSkeleton(model_resource->Get<anim::Skeleton>());
+
+		// Load other animations
+		PathHandle parent_dir{ path.GetParentMountPath() };
+		auto entries = parent_dir.GetEntries(FS_FILTERS::FILE | FS_FILTERS::EXT, ".fbx");
+		for (auto& file : entries)
+		{
+			string file_name{ file.GetFileName() };
+			
+			// Find all fbx files formatted like "model_name@anim_name.fbx"
+			if (file_name.find(model_stem + "@") != string::npos)
 			{
-				auto mesh_child_go = scene->CreateGameObject();
-
-				mesh_child_go->Name(handle->Name());
-				mesh_child_go->Transform()->parent = go;
-
-				auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
-				mesh_rend->mesh = handle;
-				mesh_rend->material_instance = mat_inst;
-			}
-
-			animator->SetSkeleton(resources_running->Get<anim::Skeleton>());
-
-			for (auto& anim : resources_running->GetAll<anim::Animation>())
-			{
-				animator->AddAnimation(anim);
+				std::cout << "Found animation file: " << file_name << "." << std::endl;
+				auto animation_resource = Core::GetResourceManager().Load(file);
+				for (auto& anim : animation_resource->GetAll<anim::Animation>())
+				{
+					std::cout << "Adding animation: " << anim->Name() << "." << std::endl;
+					animator->AddAnimation(anim);
+				}
+				
 			}
 		}
+		
 		return go;
 	};
 
@@ -169,7 +184,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 2,0,-2 });
+	create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
