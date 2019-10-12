@@ -22,7 +22,8 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
-#include "anim/AnimationSystem.h"
+#include <common/TagSystem.h>
+#include <anim/AnimationSystem.h>
 #include <app/Application.h>
 #include <ds/span.h>
 #include <reflect/reflect.h>
@@ -117,11 +118,7 @@ namespace idk {
         //DISPLAY
         if (gameObjectsCount == 1)
         {
-            //Just show all components, Name and Transform first
-            Handle<Name> c_name = gos[0]->GetComponent<Name>();
-            if (c_name) {
-                DisplayNameComponent(c_name);
-            }
+            DisplayGameObjectHeader(gos[0]);
 
             if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
@@ -140,7 +137,9 @@ namespace idk {
             for (auto& component : componentSpan) {
 
                 //Skip Name and Transform and PrefabInstance
-                if (component == c_name || component == c_transform || component.is_type<PrefabInstance>())
+                if (component == c_transform ||
+                    component.is_type<PrefabInstance>() ||
+                    component.is_type<Name>())
                     continue;
 
                 if (component.is_type<Animator>())
@@ -150,7 +149,7 @@ namespace idk {
                     continue;
                 }
 
-                //COMPONENT DISPLAY
+                //COMPONENT DISPLAY 
                 DisplayOtherComponent(component);
             }
         }
@@ -158,11 +157,7 @@ namespace idk {
         {
             //Just show all components, Name and Transform first
             //First gameobject takes priority. By default, name and transform will always be shown.
-            Handle<Name> c_name = gos[0]->GetComponent<Name>();
-            if (c_name) {
-                DisplayNameComponent(c_name);
-
-            }
+            DisplayGameObjectHeader(gos[0]);
             Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
             if (c_transform) {
                 DisplayTransformComponent(c_transform);
@@ -173,7 +168,7 @@ namespace idk {
             span<GenericHandle> componentSpan = gos[0]->GetComponents();
             hash_set<string, std::hash<string>, std::equal_to<string>> similarComponentNames;
             for (GenericHandle component : componentSpan) {
-                if (component == c_name)
+                if (component.is_type<Name>())
                     continue;
                 if (component == c_transform)
                     continue;
@@ -237,6 +232,8 @@ namespace idk {
                 string displayName = name;
                 if (displayName == "Transform" ||
                     displayName == "Name" ||
+                    displayName == "Tag" ||
+                    displayName == "Layer" ||
                     displayName == "PrefabInstance")
                     continue;
 
@@ -268,14 +265,14 @@ namespace idk {
         }
     }
 
-    void IGE_InspectorWindow::DisplayNameComponent(Handle<Name>& c_name)
+    void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
 	{
 		//The c_name is to just get the first gameobject
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
-		Handle<GameObject> gameObject = c_name->GetGameObject();
-		ImGui::Text("Name: ");
+
+		ImGui::Text("Name");
 		ImGui::SameLine();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
@@ -294,24 +291,38 @@ namespace idk {
 
 
 		if (ImGui::IsItemClicked()) {
-			stringBuf = c_name->name;
+			stringBuf = game_object->Name();
 		}
 		else if (!ImGui::IsItemActive()) { //Disable assignment when editing text
-			stringBuf = c_name->name;
+			stringBuf = game_object->Name();
 		}
 
-
-
-		
-		string idName = std::to_string(gameObject.id);
+		string idName = std::to_string(game_object.id);
 		if (editor.selected_gameObjects.size() == 1)
 			ImGui::Text("ID: %s (scene: %d, index: %d, gen: %d)", 
 				idName.data(), 
-				s_cast<int>(gameObject.scene), 
-				s_cast<int>(gameObject.index), 
-				s_cast<int>(gameObject.gen));
+				s_cast<int>(game_object.scene),
+				s_cast<int>(game_object.index),
+				s_cast<int>(game_object.gen));
 		else
 			ImGui::TextDisabled("Multiple gameobjects selected");
+
+
+        ImGui::Text("Tag");
+        ImGui::SameLine();
+
+        auto curr_tag = game_object->Tag();
+        if (ImGui::BeginCombo("##tag", curr_tag.size() ? curr_tag.data() : "Untagged"))
+        {
+            if (ImGui::MenuItem("Untagged"))
+                game_object->Tag("");
+            for (const auto& tag : Core::GetSystem<TagSystem>().GetConfig().tags)
+            {
+                if (ImGui::MenuItem(tag.data()))
+                    game_object->Tag(tag);
+            }
+            ImGui::EndCombo();
+        }
 	}
 
     void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
@@ -751,6 +762,8 @@ namespace idk {
                 string displayName = c_name;
                 if (displayName == "Transform" ||
                     displayName == "Name" ||
+                    displayName == "Tag" ||
+                    displayName == "Layer" ||
                     displayName == "PrefabInstance")
                     continue;
 

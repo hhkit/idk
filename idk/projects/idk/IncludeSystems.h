@@ -1,4 +1,7 @@
 #pragma once
+
+#include <common/TagSystem.h>
+
 #include <app/Application.h>
 #include <app/GamepadSystem.h>
 #include <editor/IEditor.h>

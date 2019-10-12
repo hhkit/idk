@@ -43,7 +43,7 @@ namespace idk {
         vector<string> _curr_property_stack;
 
         void DisplayGameObjects(vector<Handle<GameObject>> gos);			   //If multiple objects are selected, this will only display the first gameObject.
-		void DisplayNameComponent(Handle<Name>& c_name);					   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayGameObjectHeader(Handle<GameObject> game_object);	       //If multiple objects are selected, this will only display the first gameObject.
         void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayTransformComponent(Handle<Transform>& c_transform);		   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.

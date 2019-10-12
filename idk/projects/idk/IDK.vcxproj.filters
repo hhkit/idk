@@ -700,6 +700,13 @@
     <ClInclude Include="debug\Logger.h">
       <Filter>debug</Filter>
     </ClInclude>
+    <ClInclude Include="common\TagSystem.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Tag.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1010,6 +1017,7 @@
     <ClCompile Include="debug\Logger.cpp">
       <Filter>debug</Filter>
     </ClCompile>
+    <ClCompile Include="common\TagSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

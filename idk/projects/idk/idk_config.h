@@ -13,6 +13,8 @@ namespace idk
 	using Components = std::tuple<
 		class Transform
 		, class Name
+        , class Tag
+
 		/// EDITOR
 		,   class PrefabInstance
 
@@ -57,6 +59,7 @@ namespace idk
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
+        ,   class TagSystem
 	>;
 
 	using Resources = std::tuple<
@@ -86,4 +89,9 @@ namespace idk
 	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
 	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
 
+    namespace natvis
+    {
+        constexpr auto FileSystemID = SystemID<FileSystem>;
+        constexpr auto TagSystemID = SystemID<TagSystem>;
+    }
 }

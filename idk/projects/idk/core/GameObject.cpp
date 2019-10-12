@@ -2,6 +2,9 @@
 #include "GameObject.h"
 #include <common/Transform.h>
 #include <common/Name.h>
+#include <common/TagSystem.h>
+#include <common/Tag.h>
+
 namespace idk
 {
 	GenericHandle GameObject::AddComponent(reflect::type type)
@@ -80,4 +83,26 @@ namespace idk
 	{
 		GetComponent<class Name>()->name = name;
 	}
+
+    string_view GameObject::Tag() const
+    {
+        const auto tag = GetComponent<class Tag>();
+        if (tag)
+            return Core::GetSystem<TagSystem>().GetTagFromIndex(tag->index);
+        else
+            return "";
+    }
+
+    void GameObject::Tag(string_view tag)
+    {
+        auto tag_c = GetComponent<class Tag>();
+        if (tag.empty())
+            RemoveComponent(tag_c);
+        else
+        {
+            if (!tag_c)
+                tag_c = AddComponent<class Tag>();
+            tag_c->index = Core::GetSystem<TagSystem>().GetIndexFromTag(tag);
+        }
+    }
 }
