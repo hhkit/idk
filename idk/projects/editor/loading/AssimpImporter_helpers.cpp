@@ -336,7 +336,7 @@ namespace idk::ai_helpers
 		// Error checking also happens here.
 
 		// We create a skinless skeleton if the scene has animations but no mesh
-		if (scene.ai_scene->HasAnimations() && !scene.ai_scene->HasMeshes())
+		if (scene.ai_scene->HasAnimations() && !scene.has_skeleton)
 			BuildSkinlessSkeleton(scene);
 
 		for (size_t i = 0; i < scene.ai_scene->mNumAnimations; ++i)
