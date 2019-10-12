@@ -50,9 +50,13 @@ namespace idk::vkn
 	};
 	struct InputTexInfo
 	{
-		const void* data;
-		size_t len;
-		vk::Format format;
+		const void* data{};
+		size_t len{};
+		vk::Format format{};
+		InputTexInfo(
+			const void* d=nullptr,
+		size_t l=0,
+			vk::Format f = {}) noexcept :data{ d }, len{ l }, format{ f }{}
 	};
 	struct TexCreateInfo
 	{
