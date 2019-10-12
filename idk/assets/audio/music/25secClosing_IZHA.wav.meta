@@ -1,5 +1,5 @@
 metadatas: 
 - guid: 10e92dd7-21c6-4ce9-85e3-bc0cb97a2ef4
-  metadata: "is3Dsound: 1\nisLoop: 0\nisUnique: 1\nmaxDistance: 100.000000\nminDistance: 1.000000\npitch: 1.000000\nvolume: 1.000000\n"
+  metadata: "is3Dsound: 1\nisLoop: 0\nisUnique: 1\nmaxDistance: 100\nminDistance: 1\npitch: 1\nvolume: 1\n"
   name: ""
   t_hash: 10288074540718190817

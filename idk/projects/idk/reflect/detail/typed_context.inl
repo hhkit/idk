@@ -1,6 +1,7 @@
 #pragma once
 
 #include <reflect/reflect.h>
+#include <serialize/serialize.h>
 
 namespace idk::reflect::detail
 {
@@ -191,12 +192,10 @@ namespace idk::reflect::detail
         string to_string(void* obj) const override
         {
             obj;
-            if constexpr (std::is_arithmetic_v<T>)
-                return std::to_string(*static_cast<T*>(obj));
-            else if constexpr (is_basic_serializable_v<T>)
-                return string(*static_cast<T*>(obj));
+            if constexpr (is_basic_serializable_v<T>)
+                return serialize_text(*static_cast<T*>(obj));
             else
-                throw "not a container!";
+                throw "not serializable!";
         }
 
 		uni_container to_container(void* obj) const override

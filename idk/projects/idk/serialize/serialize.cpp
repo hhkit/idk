@@ -459,22 +459,22 @@ namespace idk
 	}
 
     template<>
-    void parse_text(const string& str, reflect::dynamic& obj)
+    void parse_text(string_view sv, reflect::dynamic& obj)
     {
-        parse_yaml(yaml::load(str), obj);
+        parse_yaml(yaml::load(sv), obj);
     }
 
-    reflect::dynamic parse_text(const string& str, reflect::type type)
+    reflect::dynamic parse_text(string_view sv, reflect::type type)
     {
         auto obj = type.create();
-        parse_text(str, obj);
+        parse_text(sv, obj);
         return obj;
     }
 
 	template<>
-	void parse_text(const string& str, Scene& scene)
+	void parse_text(string_view sv, Scene& scene)
 	{
-		const auto node = yaml::load(str);
+		const auto node = yaml::load(sv);
 		for (auto& elem : node)
 		{
 			const Handle<GameObject> handle{ parse_text<uint64_t>(elem.tag()) };

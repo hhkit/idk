@@ -5,6 +5,14 @@
 namespace idk
 {
 
+    enum class serialize_error : char
+    {
+        invalid_argument,
+        result_out_of_range
+    };
+
+
+
 	// forward decls
 	namespace reflect { class dynamic; class type; }
 	class Scene;
@@ -23,18 +31,18 @@ namespace idk
 
 
     template<typename T>
-    T parse_text(const string& str);
+    T parse_text(string_view sv);
 
 	template<typename T>
-	void parse_text(const string& str, T& obj);
+	void parse_text(string_view sv, T& obj);
 
     template<>
-    void parse_text(const string& str, reflect::dynamic& obj);
+    void parse_text(string_view sv, reflect::dynamic& obj);
 
 	template<> // parse scene
-	void parse_text(const string& str, Scene& scene);
+	void parse_text(string_view sv, Scene& scene);
 
-	reflect::dynamic parse_text(const string& str, reflect::type type);
+	reflect::dynamic parse_text(string_view sv, reflect::type type);
 
 }
 

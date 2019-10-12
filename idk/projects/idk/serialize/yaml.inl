@@ -52,10 +52,7 @@ namespace idk::yaml
     {
         if constexpr (is_basic_serializable_v<T>)
         {
-            if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
-                _value = std::to_string(arg);
-            else
-                _value = scalar_type(arg);
+            _value = serialize_text(arg);
             resolve_scalar(as_scalar());
         }
         else if constexpr (is_container_v<T>)

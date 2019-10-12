@@ -21,11 +21,11 @@ namespace idk::shadergraph::helpers
 
     float parse_float(const string& val)
     {
-        return std::stof(val);
+        return parse_text<float>(val);
     }
     string serialize_value(float vec)
     {
-        return std::to_string(vec);
+        return serialize_text(vec);
     }
 
 
@@ -35,14 +35,14 @@ namespace idk::shadergraph::helpers
 		std::smatch matches;
 		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
-			v[0] = std::stof(matches[1]);
-			v[1] = std::stof(matches[2]);
+            v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) });
+            v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) });
 		}
 		return v;
 	}
 	string serialize_value(vec2 vec)
 	{
-		return std::to_string(vec[0]) + ',' + std::to_string(vec[1]);
+		return serialize_text(vec[0]) + ',' + serialize_text(vec[1]);
 	}
 
 
@@ -52,15 +52,15 @@ namespace idk::shadergraph::helpers
 		std::smatch matches;
 		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
-			v[0] = std::stof(matches[1]);
-			v[1] = std::stof(matches[2]);
-			v[2] = std::stof(matches[3]);
+            v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) });
+            v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) });
+            v[2] = parse_text<float>(string_view{ &*matches[3].first, static_cast<size_t>(matches[3].length()) });
 		}
 		return v;
 	}
 	string serialize_value(const vec3& vec)
 	{
-		return std::to_string(vec[0]) + ',' + std::to_string(vec[1]) + ',' + std::to_string(vec[2]);
+		return serialize_text(vec[0]) + ',' + serialize_text(vec[1]) + ',' + serialize_text(vec[2]);
 	}
 
 
@@ -70,16 +70,16 @@ namespace idk::shadergraph::helpers
 		std::smatch matches;
 		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
-			v[0] = std::stof(matches[1]);
-			v[1] = std::stof(matches[2]);
-			v[2] = std::stof(matches[3]);
-			v[3] = std::stof(matches[4]);
+			v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) });
+            v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) });
+            v[2] = parse_text<float>(string_view{ &*matches[3].first, static_cast<size_t>(matches[3].length()) });
+            v[3] = parse_text<float>(string_view{ &*matches[4].first, static_cast<size_t>(matches[4].length()) });
 		}
 		return v;
 	}
 	string serialize_value(const vec4& vec)
 	{
-		return std::to_string(vec[0]) + ',' + std::to_string(vec[1]) + ',' + std::to_string(vec[2]) + ',' + std::to_string(vec[3]);
+		return serialize_text(vec[0]) + ',' + serialize_text(vec[1]) + ',' + serialize_text(vec[2]) + ',' + serialize_text(vec[3]);
 	}
 
 
