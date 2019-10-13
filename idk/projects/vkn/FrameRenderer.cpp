@@ -17,8 +17,21 @@
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
 
+namespace std
+{
+	template<>
+	struct hash<vk::Semaphore>
+	{
+		size_t operator()(const vk::Semaphore& s)const
+		{
+			return reinterpret_cast<intptr_t>(s.operator VkSemaphore());
+		}
+	};
+}
+
 namespace idk::vkn
 {
+
 	void RenderStateV2::Reset() {
 		cmd_buffer.reset({});
 		ubo_manager.Clear();
@@ -143,6 +156,16 @@ namespace idk::vkn
 
 		auto& waitSemaphores = *current_signal.image_available;
 		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		hash_set<vk::Semaphore> ready_semaphores;
+		for (auto& state : gfx_states)
+		{
+			auto semaphore = state.camera.render_target.as<VknRenderTarget>().ReadySignal();
+			if(semaphore)
+			ready_semaphores.emplace(semaphore);
+		}
+		//Temp, get rid of this once the other parts no longer depend on render_finished
+		ready_semaphores.emplace(readySemaphores);
+		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
 		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
@@ -158,7 +181,7 @@ namespace idk::vkn
 			,&waitSemaphores
 			,waitStages
 			,hlp::arr_count(buffers),std::data(buffers)
-			,1,&readySemaphores
+			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
 		};
 
 
@@ -938,7 +961,13 @@ namespace idk::vkn
 		
 		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
-		auto sz = view.GetWindowsInfo().size;
+		auto& camera = state.camera;
+		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
+		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
+		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
+		TransitionFrameBuffer(camera, cmd_buffer, view);
+
+		auto sz = camera.render_target->GetMeta().size;
 		vk::Rect2D render_area
 		{
 			vk::Offset2D{},vk::Extent2D
@@ -946,11 +975,6 @@ namespace idk::vkn
 				s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)
 			}
 		};
-		auto& camera = state.camera;
-		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
-		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
-		TransitionFrameBuffer(camera, cmd_buffer, view);
 		vk::RenderPassBeginInfo rpbi
 		{
 			GetRenderPass(state,view), frame_buffer,
