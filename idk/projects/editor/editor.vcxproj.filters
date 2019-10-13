@@ -201,6 +201,9 @@
     <ClCompile Include="loading\VulkanFBXLoader.cpp">
       <Filter>loader\assimp\legacy</Filter>
     </ClCompile>
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

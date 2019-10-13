@@ -42,6 +42,8 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
 
+        static string format_name(string_view name);
+
         void DisplayGameObjects(vector<Handle<GameObject>> gos);			   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayGameObjectHeader(Handle<GameObject> game_object);	       //If multiple objects are selected, this will only display the first gameObject.
         void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);   //If multiple objects are selected, this will only display the first gameObject.
@@ -53,7 +55,6 @@ namespace idk {
 		void MenuItem_CopyComponent(GenericHandle i);
 		void MenuItem_PasteComponent();
 
-
         void DisplayAsset(GenericResourceHandle handle);
         void DisplayAsset(RscHandle<Prefab> prefab);
         void DisplayAsset(RscHandle<MaterialInstance> material);
@@ -61,13 +62,6 @@ namespace idk {
 
         bool displayVal(reflect::dynamic dyn);
 
-		//Variables for vec3/vec4
-		const float heightOffset = 2;
-		const float widthOffset = 80;
-		const float float3Size = 0.33f;
-		const float float4Size = 0.25f;
-		const float itemSpacing = 50;
-		const float XYZSliderWidth = 10;
         constexpr static float item_width_ratio = 0.6f;
 
 		//For when transforms are edited
