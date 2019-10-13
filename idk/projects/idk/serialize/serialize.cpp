@@ -229,8 +229,10 @@ namespace idk
 
 	static parse_error parse_yaml(const yaml::node& node, reflect::dynamic& obj); // forward decl
 
-	static void parse_yaml(const yaml::node& node, reflect::uni_container& container)
+	static parse_error parse_yaml(const yaml::node& node, reflect::uni_container& container)
 	{
+        parse_error err = parse_error::none;
+
 		if (container.type.is_template<std::array>())
 		{
 			auto container_iter = container.begin();
@@ -239,8 +241,10 @@ namespace idk
 			for (auto iter = node.begin(); iter != node.end() && i < sz; ++iter, ++i)
 			{
 				auto elem = *container_iter;
-				parse_yaml(*iter, elem);
+                const auto res = parse_yaml(*iter, elem);
 				++container_iter;
+                if (res != parse_error::none)
+                    err = res;
 			}
 		}
 		else
@@ -252,28 +256,38 @@ namespace idk
 				for (auto& elem : node)
 				{
 					auto dyn = container.value_type.create();
-                    parse_yaml(elem, dyn);
-					container.add(dyn);
+                    const auto res = parse_yaml(elem, dyn);
+                    if (res != parse_error::none)
+                        err = res;
+                    container.add(dyn);
 				}
 			}
 			else if(node.is_mapping())
 			{
-				if (container.value_type.is_template<std::pair>())
-				{
-					for (auto& [key, item_node] : node.as_mapping())
-					{
-						auto pair = container.value_type.create();
-						auto unpacked = pair.unpack();
-						parse_text(key, unpacked[0]);
-                        parse_yaml(item_node, unpacked[1]);
-						container.add(pair);
-					}
-				}
-				else
-					throw "set???";
+                if (container.value_type.is_template<std::pair>())
+                {
+                    for (auto& [key, item_node] : node.as_mapping())
+                    {
+                        auto pair = container.value_type.create();
+                        auto unpacked = pair.unpack();
+                        const auto k_res = parse_text(key, unpacked[0]);
+                        const auto v_res = parse_yaml(item_node, unpacked[1]);
+                        if (k_res == parse_error::none)
+                        {
+                            container.add(pair);
+                            if (v_res != parse_error::none)
+                                err = v_res;
+                        }
+                        else
+                            err = k_res;
+                    }
+                }
+                else
+                    err = parse_error::type_cannot_be_parsed;
 			}
 		}
 
+        return err;
 	}
 
 	static parse_error parse_yaml(const yaml::node& node, reflect::dynamic& obj)
@@ -317,21 +331,20 @@ namespace idk
 			else if (obj.type.is_container())
 			{
 				auto cont = obj.to_container();
-				parse_yaml(node, cont);
-                return parse_error::none;
+				return parse_yaml(node, cont);
 			}
             else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
             {
                 auto& held = obj.get<reflect::dynamic>();
-                parse_yaml(node, held);
-                return parse_error::none;
+                return parse_yaml(node, held);
             }
             else if (obj.type.is_template<std::variant>())
             {
                 auto dyn = reflect::get_type(node.tag()).create();
-                parse_yaml(node, dyn);
-                obj = dyn;
-                return parse_error::none;
+                const auto res = parse_yaml(node, dyn);
+                if (res == parse_error::none)
+                    obj = dyn;
+                return res;
             }
 			else
                 return parse_error::type_cannot_be_parsed;
@@ -343,7 +356,7 @@ namespace idk
         }
 
 		vector<const yaml::node*> stack{ &node };
-        parse_error res{};
+        parse_error err = parse_error::none;
 
 		obj.visit([&](auto&& key, auto&& arg, int depth_change)
 		{
@@ -368,7 +381,7 @@ namespace idk
 				}
 				else if constexpr (is_basic_serializable_v<T>)
 				{
-                    res = parse_text(item_node.as_scalar(), arg);
+                    err = parse_text(item_node.as_scalar(), arg);
 					return false;
 				}
 				else if constexpr (is_sequential_container_v<T>)
@@ -386,22 +399,22 @@ namespace idk
 					{
                         if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
                         {
-                            res = parse_text(elem.as_scalar(), arg[i]);
+                            const auto res = parse_text(elem.as_scalar(), arg[i]);
                             if (res != parse_error::none)
-                                break;
+                                err = res;
                         }
                         else if constexpr(std::is_same_v<std::decay_t<decltype(*arg.begin())>, reflect::dynamic>)
                         {
-                            res = parse_yaml(elem, arg[i]);
+                            const auto res = parse_yaml(elem, arg[i]);
                             if (res != parse_error::none)
-                                break;
+                                err = res;
                         }
 						else
 						{
 							reflect::dynamic d{ arg[i] };
-                            res = parse_yaml(elem, d);
+                            const auto res = parse_yaml(elem, d);
                             if (res != parse_error::none)
-                                break;
+                                err = res;
 						}
 						++i;
 					}
@@ -420,8 +433,8 @@ namespace idk
                             auto k_res = parse_text<ElemK>(elem_name);
                             if (!k_res)
                             {
-                                res = k_res.error();
-                                break;
+                                err = k_res.error();
+                                continue;
                             }
 
                             if constexpr (is_basic_serializable_v<ElemV>)
@@ -429,18 +442,18 @@ namespace idk
                                 auto v_res = parse_text<ElemV>(elem_val.get<string>());
                                 if (!v_res)
                                 {
-                                    res = v_res.error();
-                                    break;
+                                    err = v_res.error();
+                                    arg.emplace(*k_res, ElemV());
                                 }
-
-                                arg.emplace(*k_res, *v_res);
+                                else
+                                    arg.emplace(*k_res, *v_res);
                             }
                             else
                             {
                                 reflect::dynamic d = arg.emplace(*k_res, ElemV{}).first->second;
-                                res = parse_yaml(elem_val, d);
+                                const auto res = parse_yaml(elem_val, d);
                                 if (res != parse_error::none)
-                                    break;
+                                    err = res;
                             }
 						}
 						else
@@ -451,17 +464,18 @@ namespace idk
                                 auto v_res = parse_text<ElemV>(elem_val.get<string>());
                                 if (!v_res)
                                 {
-                                    res = v_res.error();
-                                    break;
+                                    err = v_res.error();
+                                    arg.emplace(ElemV());
                                 }
-                                arg.emplace(*v_res);
+                                else
+                                    arg.emplace(*v_res);
                             }
 							else
 							{
 								ElemV elem_to_emplace{};
-                                res = parse_yaml(elem_val, elem_to_emplace);
+                                const auto res = parse_yaml(elem_val, elem_to_emplace);
                                 if (res != parse_error::none)
-                                    break;
+                                    err = res;
 								arg.emplace(std::move(elem_to_emplace));
 							}
 						}
@@ -471,13 +485,13 @@ namespace idk
 				else if constexpr (is_template_v<T, std::variant>)
 				{
 					auto dyn = reflect::get_type(item_node.tag()).create();
-                    res = parse_yaml(item_node, dyn);
+                    err = parse_yaml(item_node, dyn);
 					reflect::dynamic{ arg } = dyn;
 					return false;
 				}
                 else if constexpr (std::is_same_v<T, reflect::dynamic>) // arg not reflected in ReflectedTypes
                 {
-                    res = parse_yaml(item_node, arg);
+                    err = parse_yaml(item_node, arg);
                     return false;
                 }
 				else // not basic serializable and not container and not variant; go deeper!
@@ -488,16 +502,13 @@ namespace idk
 			}
 			else
 			{
-				res = parse_error::invalid_argument;
+				err = parse_error::invalid_argument;
                 return false;
 			}
 		}); // visit
 
-        if (res != parse_error::none)
-            return res;
-
         obj.on_parse();
-        return res;
+        return err;
 	}
 
     template<>
@@ -523,9 +534,11 @@ namespace idk
 	template<>
     parse_error parse_text(string_view sv, Scene& scene)
 	{
-		const auto res = yaml::load(sv);
+		auto res = yaml::load(sv);
         if (!res)
             return parse_error::ill_formed_yaml;
+
+        parse_error err = parse_error::none;
 
 		for (auto& elem : *res)
 		{
@@ -542,23 +555,13 @@ namespace idk
 			for (++iter; iter != elem.end(); ++iter)
 			{
 				const auto type = reflect::get_type(iter->tag());
-				if (type.is<Transform>())
-				{
-					reflect::dynamic obj{ *handle->GetComponent<Transform>() };
-					parse_yaml(*iter, obj);
-				}
-                else if (type.is<Name>())
-                {
-                    handle->GetComponent<Name>()->name = iter->at("name").as_scalar();
-                }
-				else
-				{
-					reflect::dynamic obj{ *handle->AddComponent(type) };
-                    parse_yaml(*iter, obj);
-				}
+				reflect::dynamic obj{ *handle->AddComponent(type) };
+                const auto res2 = parse_yaml(*iter, obj);
+                if (res2 != parse_error::none)
+                    err = res2;
 			}
 		}
 
-        return parse_error::none;
+        return err;
 	}
 }
