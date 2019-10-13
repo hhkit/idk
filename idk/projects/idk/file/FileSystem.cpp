@@ -5,17 +5,16 @@
 #include <filesystem>
 #include <utility>
 #include <iostream>
-#include <utility>
 
 #include <app/Application.h>
 namespace FS = std::filesystem;
 
 
 namespace idk {
-	
 #pragma region ISystem Stuff
 	void FileSystem::Init()
 	{
+#ifdef TEST
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
@@ -24,6 +23,27 @@ namespace idk {
 		_exe_dir = FS::path{ _exe_dir }.generic_string();
 		_sol_dir = FS::path{ _sol_dir }.generic_string();
 		_app_data_dir = FS::path{ _app_data_dir }.generic_string();
+#else
+		char buffer[MAX_PATH] = { 0 };
+
+		// Get the program directory
+		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+		if (bytes == 0)
+			std::cout << "[File System] Unable to get program directory." << std::endl;
+		_exe_dir = string{ buffer };
+		auto pos = _exe_dir.find_last_of("\\");
+		_exe_dir = _exe_dir.substr(0, pos);
+
+		_exe_dir = FS::path{ _exe_dir }.generic_string();
+		_sol_dir = _exe_dir;
+		_app_data_dir = _exe_dir;
+		//if (!_getcwd(buffer, sizeof(buffer)))
+		//	std::cout << "[File System] Unable to get solution directory." << std::endl;
+		//return string{ buffer };
+
+#endif
+
+		
 	}
 
 	void FileSystem::Update()
@@ -37,12 +57,13 @@ namespace idk {
 			if (mount._watching)
 			{
 				// For every depth
-				for (auto& collated : mount._path_tree)
+				//for (auto& collated : mount._path_tree)
 				{
 					// For every dir in the current depth
-					for (auto& dir : collated._dirs)
+					//for (auto& dir : collated._dirs)
 					{
-						_directory_watcher.UpdateWatchedDir(mount, dir);
+						
+						_directory_watcher.UpdateWatchedDir(mount, mount._path_tree[0]._dirs[0]);
 					}
 				}
 			}
@@ -241,7 +262,13 @@ namespace idk {
 
 		if (full_path.back() == '/' || full_path.back() == '\\')
 			full_path.pop_back();
-		
+
+		if (!ExistsFull(fullPath))
+		{
+			std::cout << "[FILE SYSTEM] Bad path given to Mount function" << std::endl;
+			return;
+		}
+
 		_mount_table.emplace(mount_path, _mounts.size());
 		_mounts.push_back(file_system_detail::fs_mount{});
 
@@ -303,11 +330,6 @@ namespace idk {
 
 	void FileSystem::initMount(size_t index, string_view fullPath, string_view mountPath, bool watch)
 	{
-		if (!ExistsFull(fullPath))
-		{
-			std::cout << "[FILE SYSTEM] Bad path given to Mount function" << std::endl;
-			return;
-		}
 
 		FS::path curr_path{ fullPath };
 		
@@ -355,7 +377,10 @@ namespace idk {
 		f.SetValid(true);
 		f.SetOpenMode(FS_PERMISSIONS::NONE);
 
-		p_dir._files_map.emplace(f._filename, f._tree_index);
+		// auto in_table = p_dir._files_map.find(f._filename);
+		// Add it in if it doesnt exists
+		// if(in_table == p_dir._files_map.end())
+			
 	}
 
 	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p)
@@ -369,7 +394,11 @@ namespace idk {
 
 		d.SetValid(true);
 
-		p_dir._sub_dirs.emplace(d._filename, d._tree_index);
+		// auto in_table = p_dir._sub_dirs.find(d._filename);
+		// Add it in if it doesnt exists
+		//if (in_table == p_dir._sub_dirs.end())
+		//	p_dir._sub_dirs.emplace(d._filename, d._tree_index);
+		// p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
 
 #pragma endregion Helper Inits
@@ -680,7 +709,7 @@ namespace idk {
 		const auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
 		auto& f = getFile(slot);
 		initFile(f, dir, p);
-
+		dir._files_map.emplace(f._filename, f._tree_index);
 		return f;
 	}
 
@@ -715,6 +744,7 @@ namespace idk {
 				// f._file_detail is default initialized to have ref_count = 0.
 
 				initFile(f, mountSubDir, tmp);
+				mountSubDir._files_map.emplace(f._filename, f._tree_index);
 				mount._path_tree[currDepth]._files.push_back(f);
 			}
 			else
@@ -726,10 +756,10 @@ namespace idk {
 				d._tree_index._index = s_cast<int16_t>(mount._path_tree[currDepth]._dirs.size());
 
 				initDir(d, mountSubDir, tmp);
-
+				// p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 				mountSubDir._sub_dirs.emplace(d._filename, d._tree_index);
-				if (watch)
-					_directory_watcher.WatchDirectory(d);
+				// if (watch)
+				// 	_directory_watcher.WatchDirectory(d);
 
 				recurseSubDir(index, currDepth, d, watch);
 				mount._path_tree[currDepth]._dirs.push_back(d);

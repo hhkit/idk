@@ -180,7 +180,7 @@ namespace idk
 			parent_dir._files_map.erase(res);
 
 			vfs.initFile(internal_file, parent_dir, new_p);
-			
+			parent_dir._files_map.emplace(internal_file._filename, internal_file._tree_index);
 			return true;
 		}
 		else
@@ -206,7 +206,7 @@ namespace idk
 			parent_dir._sub_dirs.erase(res);
 
 			vfs.initDir(internal_dir, parent_dir, new_p);
-
+			parent_dir._sub_dirs.emplace(internal_dir._filename, internal_dir._tree_index);
 			renameDirUpdate();
 			
 			return true;
