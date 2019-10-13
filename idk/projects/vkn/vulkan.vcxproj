@@ -224,7 +224,9 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
+    <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderStateV2.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="utils\FrameObjects.h" />
@@ -277,6 +279,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
+    <ClCompile Include="ProcessedRO.cpp" />
     <ClCompile Include="RegisterVulkanFactories.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="ShaderModule.cpp" />

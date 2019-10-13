@@ -153,6 +153,12 @@
     <ClInclude Include="VknFramebufferFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
+    <ClInclude Include="ProcessedRO.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStateV2.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -278,6 +284,7 @@
       <Filter>resource\Factories</Filter>
     </ClCompile>
     <ClCompile Include="VknFramebufferFactory.cpp" />
+    <ClCompile Include="ProcessedRO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -309,6 +316,9 @@
     </Filter>
     <Filter Include="resource\Loaders">
       <UniqueIdentifier>{6afb71d8-dab9-485a-9d2a-7e1b38225231}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\objects">
+      <UniqueIdentifier>{508115dd-c293-4bd2-87bf-81a317729a67}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

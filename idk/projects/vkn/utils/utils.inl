@@ -13,3 +13,35 @@ namespace idk::vkn::hlp
 		}
 		return result;}
 }
+
+namespace idk::vkn::meta
+{
+	namespace detail
+	{
+		template<typename T, typename ...Args>
+		struct MatchIndex {
+			static uint32_t constexpr value() { return 0; }
+		};
+		template<typename T, typename Front, typename ...Args>
+		struct MatchIndex<T, Front, Args...>
+		{
+			static uint32_t constexpr value()
+			{
+				if constexpr (std::is_same_v<Front, T>)
+				{
+					return 0;
+				}
+				else
+				{
+					return MatchIndex<T, Args...>::value() + 1;
+				}
+			};
+		};
+	}
+
+	template<typename ...Args, typename T>
+	struct IndexOf< variant<Args...>, T>
+	{
+		static constexpr uint32_t value = detail::MatchIndex<T, Args...>::value();
+	};
+}

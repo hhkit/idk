@@ -11,4 +11,9 @@ namespace idk::vkn::hlp {
 	hash_table<V, K> ReverseMap(const hash_table<K, V>& map);
 	std::string GetBinaryFile(const std::string& filepath);
 }
+namespace idk::vkn::meta
+{
+	template<typename V, typename T>
+	struct IndexOf;
+}
 #include "utils.inl"
