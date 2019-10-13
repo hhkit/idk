@@ -19,6 +19,7 @@ namespace idk
 		float _blend = 0.0f;
 	private:
 		
+		bool _was_paused = true;
 		template<typename T>
 		size_t find_key(const vector<T>& vec, float ticks)
 		{
@@ -34,7 +35,7 @@ namespace idk
 			return vec.size() - 1;
 		}
 
-		void AnimationPass(span<Animator> animators);
+		void AnimationPass(Animator& animators);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 	};
 }

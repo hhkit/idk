@@ -14,55 +14,98 @@ namespace idk
 
 	void AnimationSystem::Update(span<Animator> animators)
 	{
-		AnimationPass(animators);
+		if (_was_paused)
+		{
+			for (auto& elem : animators)
+			{
+				elem.Reset();
+				elem.SaveBindPose();
+				if (elem._curr_animation >= 0)
+					elem.Play(elem._curr_animation);
+			}
+			_was_paused = false;
+		}
+		for (auto& elem : animators)
+		{
+			const auto anim = elem.GetAnimationRsc(elem._curr_animation);
+			if (elem._is_playing && anim)
+			{
+				AnimationPass(elem);
+			}
+		}
 		// Blend pass
 		// Mix pass
+	}
+
+	void AnimationSystem::UpdatePaused(span<Animator> animators)
+	{
+		if (!_was_paused)
+		{
+			for (auto& elem : animators)
+			{
+				elem.Reset();
+				elem.RestoreBindPose();
+			}
+			_was_paused = true;
+		}
+		for (auto& elem : animators)
+		{
+			const auto anim = elem.GetAnimationRsc(elem._curr_animation);
+			if (elem._preview_playback && anim)
+			{
+				AnimationPass(elem);
+			}
+		}
 	}
 
 	void AnimationSystem::Shutdown()
 	{
 	}
 
-	void AnimationSystem::AnimationPass(span<Animator> animators)
+	void AnimationSystem::AnimationPass(Animator& animator)
 	{
-		for (auto& elem : animators)
+		const auto anim_state = animator.GetAnimationState(animator._curr_animation);
+		const auto anim = anim_state.animation;
+		const auto& skeleton = animator._skeleton->data();
+		const float ticks = animator._elapsed * anim->GetFPS() * anim_state.speed;
+		const float num_ticks = anim->GetNumTicks();
+		const float time_in_ticks = fmod(ticks, num_ticks);
+
+		// Loop through the skeleton
+		for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 		{
-			const auto anim = elem.GetCurrentAnimation();
-			const auto& skeleton = elem._skeleton->data();
-			if (elem._is_playing && anim)
-			{
-				// Compute the time
-				elem._elapsed += Core::GetRealDT().count();
-				if (elem._elapsed >= anim->GetDuration())
-					elem._elapsed -= anim->GetDuration();
+			const auto& curr_bone = skeleton[bone_id];
+			const anim::AnimatedBone* animated_bone = anim->GetAnimatedBone(curr_bone._name);
 
-				const float ticks = elem._elapsed * anim->GetFPS();
-				const float num_ticks = anim->GetNumTicks();
-				const float time_in_ticks = fmod(ticks, num_ticks);
+			auto& curr_go = animator._child_objects[bone_id];
+			if (!curr_go || animated_bone == nullptr)
+				continue;
 
-				// Loop through the skeleton
-				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
-				{
-					const auto& curr_bone = skeleton[bone_id];
-					const anim::AnimatedBone* animated_bone = anim->GetAnimatedBone(curr_bone._name);
+			matrix_decomposition<real> curr_pose = animator._bind_pose[bone_id];
+			// Interpolate function will fill in the curr_pose as needed. If there are no keys, it will keep it in bind pose.
+			InterpolateBone(*animated_bone, time_in_ticks, curr_pose);
 
-					auto& curr_go = elem._child_objects[bone_id];
-					if (!curr_go || animated_bone == nullptr)
-						continue;	
+			// During GenerateTransforms in the Animator, it will use the child transforms to 
+			// generate the final transforms
+			curr_go->Transform()->position = curr_pose.position;
+			curr_go->Transform()->rotation = curr_pose.rotation;
+			curr_go->Transform()->scale = curr_pose.scale;
 
-					matrix_decomposition<real> curr_pose = elem._bind_pose[bone_id];
-					// Interpolate function will fill in the curr_pose as needed. If there are no keys, it will keep it in bind pose.
-					InterpolateBone(*animated_bone, time_in_ticks, curr_pose);
-					
-					// During GenerateTransforms in the Animator, it will use the child transforms to 
-					// generate the final transforms
-					curr_go->Transform()->position = curr_pose.position;
-					curr_go->Transform()->rotation = curr_pose.rotation;
-					curr_go->Transform()->scale = curr_pose.scale;
-
-				}
-			}
 		}
+
+		// Check if the animator wants to stop after this update
+		if (animator._is_stopping == true)
+		{
+			animator._is_playing = false;
+			animator._preview_playback = false;
+			animator._is_stopping = false;
+			return;
+		}
+
+		// Compute the time
+		animator._elapsed += Core::GetRealDT().count();
+		if (animator._elapsed >= anim->GetDuration())
+			animator._elapsed -= anim->GetDuration();
 	}
 
 	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)
