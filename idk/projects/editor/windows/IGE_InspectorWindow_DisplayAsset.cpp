@@ -2,6 +2,7 @@
 #include "IGE_InspectorWindow.h"
 
 #include <editor/imguidk.h>
+#include <editor/utils.h>
 #include <gfx/ShaderGraph.h>
 #include <prefab/PrefabUtility.h>
 #include <IncludeComponents.h>

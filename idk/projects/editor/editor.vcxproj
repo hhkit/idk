@@ -201,6 +201,7 @@
     <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
+    <ClInclude Include="windows\IGE_ProjectSettings.h" />
     <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
     <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
@@ -239,6 +240,7 @@
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
@@ -257,11 +259,13 @@
     <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
+    <ClCompile Include="utils.cpp" />
     <ClCompile Include="widgets\DragQuat.cpp" />
     <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
+    <ClCompile Include="windows\IGE_ProjectSettings.cpp" />
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp" />
     <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow.cpp" />

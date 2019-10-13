@@ -22,3 +22,4 @@ Include all windows here
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_InspectorWindow.h>
 #include <editor/windows/IGE_MaterialEditor.h>
+#include <editor/windows/IGE_ProjectSettings.h>

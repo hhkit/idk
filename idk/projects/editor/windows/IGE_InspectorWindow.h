@@ -42,8 +42,6 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
 
-        static string format_name(string_view name);
-
         void DisplayGameObjects(vector<Handle<GameObject>> gos);			   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayGameObjectHeader(Handle<GameObject> game_object);	       //If multiple objects are selected, this will only display the first gameObject.
         void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);   //If multiple objects are selected, this will only display the first gameObject.

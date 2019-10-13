@@ -13,7 +13,7 @@ namespace idk
 
         using Config = ConfigT;
         void SetConfig(const Config& config) { ApplyConfig(_config = config); }
-        const Config& GetConfig() { return _config; }
+        const Config& GetConfig() const { return _config; }
 
     protected:
         virtual void ApplyConfig(const Config& config) = 0;

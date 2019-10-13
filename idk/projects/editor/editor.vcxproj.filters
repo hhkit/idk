@@ -113,6 +113,10 @@
     <ClInclude Include="loading\VulkanFBXLoader.h">
       <Filter>loader\assimp\legacy</Filter>
     </ClInclude>
+    <ClInclude Include="windows\IGE_ProjectSettings.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -204,6 +208,10 @@
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp">
       <Filter>windows</Filter>
     </ClCompile>
+    <ClCompile Include="windows\IGE_ProjectSettings.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

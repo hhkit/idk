@@ -22,6 +22,7 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/utils.h>
 #include <common/TagSystem.h>
 #include <anim/AnimationSystem.h>
 #include <app/Application.h>
@@ -32,6 +33,7 @@ of the editor.
 #include <math/euler_angles.h>
 #include <meta/variant.h>
 #include <prefab/PrefabUtility.h>
+
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 
@@ -65,31 +67,6 @@ namespace idk {
     void IGE_InspectorWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{150.0f,100.0f});
-	}
-
-
-
-    string IGE_InspectorWindow::format_name(string_view name)
-	{
-		string str{ name };
-		str[0] = (char)toupper(str[0]);
-		for (int i = 0; i < str.size(); ++i)
-		{
-			if (str[i] == '_')
-			{
-				str[i] = ' ';
-				if (i + 1 < str.size())
-					str[i + 1] = (char)toupper(str[i + 1]);
-			}
-		}
-		for (int i = 1; i < str.size(); ++i)
-		{
-			if (str[i] >= 'A' && str[i] <= 'Z' && str[i - 1] >= 'a' && str[i - 1] <= 'z')
-			{
-				str.insert(i, 1, ' ');
-			}
-		}
-		return str;
 	}
 
 
