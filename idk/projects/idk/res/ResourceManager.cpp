@@ -285,14 +285,9 @@ namespace idk
 
 			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
 			auto metastr = stringify(metastream);
-			try
-			{
-				return parse_text<MetaBundle>(metastr);
-			}
-			catch (...)
-			{
-				return std::nullopt;
-			}
+            if (auto res = parse_text<MetaBundle>(metastr))
+                return *res;
+            return std::nullopt;
 		}();
 
 		// reload the file

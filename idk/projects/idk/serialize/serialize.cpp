@@ -200,13 +200,13 @@ namespace idk
 	}
 
 	template<>
-	string serialize_text(const reflect::dynamic& obj)
+    string serialize_text(const reflect::dynamic& obj)
 	{
         return yaml::dump(serialize_yaml(obj));
 	}
 
 	template<>
-	string serialize_text(const Scene& scene)
+    string serialize_text(const Scene& scene)
 	{
         yaml::node node;
 		for (auto& obj : scene)
@@ -227,7 +227,7 @@ namespace idk
 	template <typename T>
 	struct has_resize<T, std::void_t<decltype(std::declval<T>().clear())>> : std::true_type {};
 
-	static void parse_yaml(const yaml::node& node, reflect::dynamic& obj); // forward decl
+	static parse_error parse_yaml(const yaml::node& node, reflect::dynamic& obj); // forward decl
 
 	static void parse_yaml(const yaml::node& node, reflect::uni_container& container)
 	{
@@ -276,26 +276,26 @@ namespace idk
 
 	}
 
-	static void parse_yaml(const yaml::node& node, reflect::dynamic& obj)
+	static parse_error parse_yaml(const yaml::node& node, reflect::dynamic& obj)
 	{
         if (node.is_null())
-            return;
+            return parse_error::none;
 		if (!obj.valid())
 		{
             if (node.has_tag())
                 obj.swap(reflect::get_type(node.tag()).create());
-			else
-				throw "invalid dynamic passed in!";
+            else
+                return parse_error::invalid_argument;
 		}
 
         if (obj.type.is_enum_type())
         {
             obj = obj.to_enum_value().try_assign(node.as_scalar()).value();
-            return;
+            return parse_error::none;
         }
 		else if (obj.type.count() == 0)
 		{
-#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = node.get<TYPE>(); return;
+#define SERIALIZE_CASE(TYPE) case reflect::typehash<TYPE>() : obj = node.get<TYPE>(); return parse_error::none;
 			switch (obj.type.hash())
 			{
 				SERIALIZE_CASE(int);
@@ -312,37 +312,38 @@ namespace idk
             if (obj.type.is_basic_serializable())
             {
                 obj = node.as_scalar();
-                return;
+                return parse_error::none;
             }
 			else if (obj.type.is_container())
 			{
 				auto cont = obj.to_container();
 				parse_yaml(node, cont);
-                return;
+                return parse_error::none;
 			}
             else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
             {
                 auto& held = obj.get<reflect::dynamic>();
                 parse_yaml(node, held);
-                return;
+                return parse_error::none;
             }
             else if (obj.type.is_template<std::variant>())
             {
                 auto dyn = reflect::get_type(node.tag()).create();
                 parse_yaml(node, dyn);
                 obj = dyn;
-                return;
+                return parse_error::none;
             }
 			else
-				throw "unhandled case?";
+                return parse_error::type_cannot_be_parsed;
 		}
         else if (obj.type.is_basic_serializable())
         {
             obj = node.as_scalar();
-            return;
+            return parse_error::none;
         }
 
 		vector<const yaml::node*> stack{ &node };
+        parse_error res{};
 
 		obj.visit([&](auto&& key, auto&& arg, int depth_change)
 		{
@@ -367,7 +368,7 @@ namespace idk
 				}
 				else if constexpr (is_basic_serializable_v<T>)
 				{
-					parse_text(item_node.as_scalar(), arg);
+                    res = parse_text(item_node.as_scalar(), arg);
 					return false;
 				}
 				else if constexpr (is_sequential_container_v<T>)
@@ -383,16 +384,24 @@ namespace idk
 					int i = 0;
 					for (auto& elem : item_node)
 					{
-						if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
-							parse_text(elem.as_scalar(), arg[i]);
+                        if constexpr (is_basic_serializable_v<decltype(*arg.begin())>)
+                        {
+                            res = parse_text(elem.as_scalar(), arg[i]);
+                            if (res != parse_error::none)
+                                break;
+                        }
                         else if constexpr(std::is_same_v<std::decay_t<decltype(*arg.begin())>, reflect::dynamic>)
                         {
-                            parse_yaml(elem, arg[i]);
+                            res = parse_yaml(elem, arg[i]);
+                            if (res != parse_error::none)
+                                break;
                         }
 						else
 						{
 							reflect::dynamic d{ arg[i] };
-                            parse_yaml(elem, d);
+                            res = parse_yaml(elem, d);
+                            if (res != parse_error::none)
+                                break;
 						}
 						++i;
 					}
@@ -407,23 +416,52 @@ namespace idk
 						{
 							using ElemK = std::decay_t<decltype(arg.begin()->first)>;
 							using ElemV = std::decay_t<decltype(arg.begin()->second)>;
-							if constexpr(is_basic_serializable_v<ElemV>)
-								arg.emplace(parse_text<ElemK>(elem_name), parse_text<ElemV>(elem_val.get<string>()));
+
+                            auto k_res = parse_text<ElemK>(elem_name);
+                            if (!k_res)
+                            {
+                                res = k_res.error();
+                                break;
+                            }
+
+                            if constexpr (is_basic_serializable_v<ElemV>)
+                            {
+                                auto v_res = parse_text<ElemV>(elem_val.get<string>());
+                                if (!v_res)
+                                {
+                                    res = v_res.error();
+                                    break;
+                                }
+
+                                arg.emplace(*k_res, *v_res);
+                            }
                             else
                             {
-                                reflect::dynamic d = arg.emplace(parse_text<ElemK>(elem_name), ElemV{}).first->second;
-                                parse_yaml(elem_val, d);
+                                reflect::dynamic d = arg.emplace(*k_res, ElemV{}).first->second;
+                                res = parse_yaml(elem_val, d);
+                                if (res != parse_error::none)
+                                    break;
                             }
 						}
 						else
 						{
 							using ElemV = std::decay_t<decltype(*arg.begin())>;
-							if constexpr (is_basic_serializable_v<decltype(arg.begin()->second)>)
-								arg.emplace(parse_text<ElemV>(elem_val.get<string>()));
+                            if constexpr (is_basic_serializable_v<decltype(arg.begin()->second)>)
+                            {
+                                auto v_res = parse_text<ElemV>(elem_val.get<string>());
+                                if (!v_res)
+                                {
+                                    res = v_res.error();
+                                    break;
+                                }
+                                arg.emplace(*v_res);
+                            }
 							else
 							{
 								ElemV elem_to_emplace{};
-                                parse_yaml(elem_val, elem_to_emplace);
+                                res = parse_yaml(elem_val, elem_to_emplace);
+                                if (res != parse_error::none)
+                                    break;
 								arg.emplace(std::move(elem_to_emplace));
 							}
 						}
@@ -433,13 +471,13 @@ namespace idk
 				else if constexpr (is_template_v<T, std::variant>)
 				{
 					auto dyn = reflect::get_type(item_node.tag()).create();
-					parse_yaml(item_node, dyn);
+                    res = parse_yaml(item_node, dyn);
 					reflect::dynamic{ arg } = dyn;
 					return false;
 				}
                 else if constexpr (std::is_same_v<T, reflect::dynamic>) // arg not reflected in ReflectedTypes
                 {
-                    parse_yaml(item_node, arg);
+                    res = parse_yaml(item_node, arg);
                     return false;
                 }
 				else // not basic serializable and not container and not variant; go deeper!
@@ -448,36 +486,54 @@ namespace idk
 					return true;
 				}
 			}
-
 			else
 			{
-				throw "how did we get here?";
+				res = parse_error::invalid_argument;
+                return false;
 			}
 		}); // visit
 
+        if (res != parse_error::none)
+            return res;
+
         obj.on_parse();
+        return res;
 	}
 
     template<>
-    void parse_text(string_view sv, reflect::dynamic& obj)
+    parse_error parse_text(string_view sv, reflect::dynamic& obj)
     {
-        parse_yaml(yaml::load(sv), obj);
+        auto res = yaml::load(sv);
+        if (res)
+            return parse_yaml(*res, obj);
+        else
+            return parse_error::ill_formed_yaml;
     }
 
-    reflect::dynamic parse_text(string_view sv, reflect::type type)
+    monadic::result<reflect::dynamic, parse_error> parse_text(string_view sv, reflect::type type)
     {
         auto obj = type.create();
-        parse_text(sv, obj);
-        return obj;
+        const auto res = parse_text(sv, obj);
+        if (res == parse_error::none)
+            return obj;
+        else
+            return res;
     }
 
 	template<>
-	void parse_text(string_view sv, Scene& scene)
+    parse_error parse_text(string_view sv, Scene& scene)
 	{
-		const auto node = yaml::load(sv);
-		for (auto& elem : node)
+		const auto res = yaml::load(sv);
+        if (!res)
+            return parse_error::ill_formed_yaml;
+
+		for (auto& elem : *res)
 		{
-			const Handle<GameObject> handle{ parse_text<uint64_t>(elem.tag()) };
+            auto parse_id_res = parse_text<uint64_t>(elem.tag());
+            if (!parse_id_res)
+                return parse_id_res.error();
+
+			const Handle<GameObject> handle{ *parse_id_res };
 			scene.CreateGameObject(handle);
 
             auto iter = elem.begin();
@@ -502,5 +558,7 @@ namespace idk
 				}
 			}
 		}
+
+        return parse_error::none;
 	}
 }

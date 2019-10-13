@@ -18,8 +18,12 @@ namespace idk
 	template<typename Res, typename>
 	opt<typename Res::Metadata> SerializedMeta::GetMeta() const
 	{
-		if (t_hash == reflect::template typehash<Res>())
-			return parse_text<typename Res::Metadata>(metadata);
+        if (t_hash == reflect::template typehash<Res>())
+        {
+            auto res = parse_text<typename Res::Metadata>(metadata);
+            if (res)
+                return *res;
+        }
 
 		return std::nullopt;
 	}
