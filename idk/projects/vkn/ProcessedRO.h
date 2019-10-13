@@ -61,32 +61,31 @@ namespace idk::vkn
 				layout{ layout_ }
 			{
 			}
+			BindingInfo() = default;
 			std::optional<vk::Buffer> GetBuffer()const;
-			std::optional<image_t> GetImage()const
-			{
-				using Type = image_t;
-				std::optional<Type> ret;
-				if (ubuffer.index() == meta::IndexOf<data_t, Type>::value)
-					ret = std::get<Type>(ubuffer);
-				return ret;
-			}
-			vk::DescriptorSetLayout GetLayout()const
-			{
-				return layout;
-			}
+			std::optional<image_t> GetImage()const;
+			bool IsImage()const;
+			vk::DescriptorSetLayout GetLayout()const;
 		};
 		const RenderObject& Object()const
 		{
 			return *itr;
 		}
 
+		ProcessedRO() = default;
+		ProcessedRO(ProcessedRO&&)noexcept = default;
+		ProcessedRO& operator=(ProcessedRO&&)noexcept = default;
+		ProcessedRO(const ProcessedRO&) = default;
+		ProcessedRO& operator=(const ProcessedRO&) = default;
+
 		//set, update_instr
-		const RenderObject* itr;
-		hash_table<uint32_t, vector<BindingInfo>> bindings;
+		const RenderObject* itr=nullptr;
+		hash_table<uint32_t, vector<BindingInfo>> bindings; //Deprecate this
 		shared_ptr<pipeline_config> config;
 
 		std::optional<RscHandle<ShaderProgram>> vertex_shader;
 		std::optional<RscHandle<ShaderProgram>> geom_shader;
 		std::optional<RscHandle<ShaderProgram>> frag_shader;
+
 	};
 }

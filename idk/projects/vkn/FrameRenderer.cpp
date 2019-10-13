@@ -16,7 +16,7 @@
 
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
-
+#include <vkn/vulkan_enum_info.h>
 namespace std
 {
 	template<>
@@ -29,186 +29,14 @@ namespace std
 	};
 }
 
+
+
 namespace idk::vkn
 {
-
-	void RenderStateV2::Reset() {
-		cmd_buffer.reset({});
-		ubo_manager.Clear();
-		dpools.Reset();
-		has_commands = false;
-	}
-	RscHandle<ShaderProgram> LoadShader(string filename)
-	{
-		return *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
-	}
-	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
-		//Todo: Initialize the stuff
-		_view = view;
-		//Do only the stuff per frame
-		uint32_t num_fo = 1;
-		uint32_t num_concurrent_states = 1;
-
-		_cmd_pool = cmd_pool;
-		auto device = *View().Device();
-		auto pri_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, num_fo }, vk::DispatchLoaderDefault{});
-		_pri_buffer = std::move(pri_buffers[0]);
-		auto t_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::eSecondary, num_fo }, vk::DispatchLoaderDefault{});
-		{
-			_transition_buffer = std::move(t_buffers[0]);
-		}
-
-		GrowStates(num_concurrent_states);
-		//Temp
-		for (auto i = num_concurrent_states; i-- > 0;)
-		{
-			auto thread = std::make_unique<NonThreadedRender>();
-			thread->Init(this);
-			_render_threads.emplace_back(std::move(thread));
-		}
-
-
-	}
-	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
-	{
-		_pipeline_manager = &manager;
-	}
-	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
-	{
-		_current_frame_index = frame_index;
-		//Update all the resources that need to be updated.
-		auto& curr_frame = *this;
-		GrowStates(gfx_states.size());
-		size_t num_concurrent = curr_frame._render_threads.size();
-		auto& pri_buffer = curr_frame._pri_buffer;
-		auto& transition_buffer = curr_frame._transition_buffer;
-		auto queue = View().GraphicsQueue();
-		auto& swapchain = View().Swapchain();
-		for (auto& state : curr_frame._states)
-		{
-			state.Reset();
-		}
-		bool rendered = false;
-		for (size_t i = 0; i + num_concurrent <= gfx_states.size(); i += num_concurrent)
-		{
-			//Spawn/Assign to the threads
-			for (size_t j = 0; j < num_concurrent; ++j) {
-				auto& state = gfx_states[i + j];
-				auto& rs = _states[i + j];
-				_render_threads[j]->Render(state, rs);
-				rendered = true;
-				//TODO submit command buffer here and signal the framebuffer's stuff.
-				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
-				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
-				//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
-			}
-			//Wait here
-			for (auto& thread : _render_threads) {
-				thread->Join();
-			}
-		}
-		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
-		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
-		vector<vk::CommandBuffer> buffers{};
-		for (auto& state : curr_frame._states)
-		{
-			if (state.has_commands)
-				buffers.emplace_back(state.cmd_buffer);
-		}
-		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
-		//if(buffers.size())
-		//	pri_buffer->executeCommands(buffers, vk::DispatchLoaderDefault{});
-		vk::CommandBufferInheritanceInfo iinfo
-		{
-		};
-
-
-
-		vk::ImageSubresourceRange subResourceRange = {};
-		subResourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-		subResourceRange.baseMipLevel = 0;
-		subResourceRange.levelCount = 1;
-		subResourceRange.baseArrayLayer = 0;
-		subResourceRange.layerCount = 1;
-
-		if (!rendered)
-		{
-			vk::ImageMemoryBarrier presentToClearBarrier = {};
-			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
-			presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-			presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
-			presentToClearBarrier.newLayout = vk::ImageLayout::eGeneral;
-			presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
-			presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
-			presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
-			presentToClearBarrier.subresourceRange = subResourceRange;
-			begin_info.pInheritanceInfo = &iinfo;
-			transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
-			transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
-			transition_buffer->end();
-			//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
-			pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
-		}
-		pri_buffer->end();
-
-		buffers.emplace_back(*pri_buffer);
-		auto& current_signal = View().CurrPresentationSignals();
-
-		auto& waitSemaphores = *current_signal.image_available;
-		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
-		hash_set<vk::Semaphore> ready_semaphores;
-		for (auto& state : gfx_states)
-		{
-			auto semaphore = state.camera.render_target.as<VknRenderTarget>().ReadySignal();
-			if(semaphore)
-			ready_semaphores.emplace(semaphore);
-		}
-		//Temp, get rid of this once the other parts no longer depend on render_finished
-		ready_semaphores.emplace(readySemaphores);
-		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
-		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
-		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
-
-		//std::vector<vk::CommandBuffer> cmd_buffers;
-		//for (auto& state : curr_frame.states)
-		//{
-		//	cmd_buffers.emplace_back(state.cmd_buffer);
-		//}
-		//cmd_buffers.emplace_back(*pri_buffer);
-		vk::SubmitInfo submit_info
-		{
-			1
-			,&waitSemaphores
-			,waitStages
-			,hlp::arr_count(buffers),std::data(buffers)
-			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
-		};
-
-
-		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
-		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
-		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
-	}
-	PresentationSignals& FrameRenderer::GetMainSignal()
-	{
-		return _states[0].signal;
-	}
-	void FrameRenderer::GrowStates(size_t new_min_size)
-	{
-		auto cmd_pool = *View().Commandpool();
-		auto device = *View().Device();
-		if (new_min_size > _states.size())
-		{
-			auto diff = s_cast<uint32_t>(new_min_size - _states.size());
-			auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, diff }, vk::DispatchLoaderDefault{});
-			for (auto i = diff; i-- > 0;)
-			{
-				auto& buffer = buffers[i];
-				_states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
-				_state_cmd_buffers.emplace_back(std::move(buffer));
-			}
-		}
-	}
+	using desc_type_info = DescriptorTypeI;
+	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::array<uint32_t, DescriptorTypeI::size()>>;
+	template<vk::DescriptorType type>
+	static constexpr size_t desc_type_index = desc_type_info::map<type>();
 	string GetUniformData(const UniformInstance&)
 	{
 		string data;
@@ -216,6 +44,39 @@ namespace idk::vkn
 	}
 	
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
+
+	template<typename T>
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni,uint32_t arr_index,const T& val, UboManager& ubo_manager)
+	{
+		auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
+		//collated_bindings[obj_uni.set].emplace_back(
+		return ProcessedRO::BindingInfo
+		{
+			obj_uni.binding,
+			trf_buffer,
+			trf_offset,
+			arr_index,
+			obj_uni.size,
+			obj_uni.layout
+		};
+		//);
+	}
+	
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index,const VknTexture& val)
+	{
+		//collated_layouts[obj_uni.layout][desc_type_index<vk::DescriptorType::eCombinedImageSampler>]++;
+		//collated_bindings[obj_uni.set].emplace_back(
+		return ProcessedRO::BindingInfo
+		{
+			obj_uni.binding,
+			ProcessedRO::ImageBinding{ val.ImageView(),*val.sampler,vk::ImageLayout::eGeneral },
+			0,
+			arr_index,
+			obj_uni.size,
+			obj_uni.layout
+		};
+		//);
+	}
 
 	template<typename T>
 	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, UboManager& ubo_manager)
@@ -242,7 +103,8 @@ namespace idk::vkn
 		//collated_layouts[obj_uni.layout].first = vk::DescriptorType::eUniformBuffer;
 		////collated_layouts[obj_uni.layout].second++;
 		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
-		collated_bindings[obj_uni.set].emplace_back(
+		auto& bindings = collated_bindings[obj_uni.set];
+		bindings.emplace_back(
 			CreateBindingInfo(obj_uni, val, collated_layouts, ubo_manager)
 			//ProcessedRO::BindingInfo
 			//{
@@ -261,7 +123,8 @@ namespace idk::vkn
 		//collated_layouts[obj_uni.layout].second++;
 		//auto&& [trf_buffer, trf_offset] = ubo_manager.Add(val);
 		auto& texture = val.as<VknTexture>();
-		collated_bindings[obj_uni.set].emplace_back(
+		auto& bindings = collated_bindings[obj_uni.set];
+		bindings.emplace_back(
 			ProcessedRO::BindingInfo
 			{
 				obj_uni.binding,
@@ -285,8 +148,172 @@ namespace idk::vkn
 	void BindBones(const UboInfo& info,const AnimatedRenderObject& aro, const vector<SkeletonTransforms>& bones, UboManager& ubos, FrameRenderer::DsBindingCount & collated_layouts, collated_bindings_t & collated_bindings)
 	{
 		auto&&[buffer,offset]=ubos.Add(bones[aro.skeleton_index]);
-		collated_bindings[info.set].emplace_back(info.binding,buffer,offset,0,info.size);
+		auto& bindings = collated_bindings[info.set];
+		bindings.emplace_back(info.binding, buffer, offset, 0, info.size);
 	}
+
+	struct PipelineThingy
+	{
+		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
+		vector<ProcessedRO> draw_calls;
+		using set_t = uint32_t;
+		using binding_t = uint32_t;
+		struct set_bindings
+		{
+			vk::DescriptorSetLayout layout;
+			vector<std::optional<ProcessedRO::BindingInfo>>  bindings;
+			bool dirty = false;
+			void SetLayout(vk::DescriptorSetLayout new_layout,bool clear_bindings =false)
+			{
+				//If the layouts are different, the bindings are not compatible, clear it.
+				//or we just want the bindings to be cleared, so clear it.
+				if (new_layout != layout || clear_bindings)
+				{
+					bindings.resize(0);
+				}
+				layout = new_layout;
+			}
+			void Bind(ProcessedRO::BindingInfo info)
+			{
+				if (bindings.size() >= info.binding)
+					bindings.resize(static_cast<size_t>(info.binding) + 1);
+
+				bindings[info.binding] = std::move(info);
+				dirty = true;
+			}
+			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts)
+			{
+				monadic::result< vector<ProcessedRO::BindingInfo>, string> result{};
+				
+				string err_msg;
+				vector<ProcessedRO::BindingInfo> set_bindings;
+				bool failed = false;
+				if(dirty)
+				{
+					set_bindings.resize(bindings.size());
+					for (size_t i=0;i<bindings.size();++i)
+					{
+						if (!bindings[i])
+						{
+							failed = true;
+							err_msg += "Binding [" + std::to_string(i) + "] is missing\n";
+						}
+						set_bindings[i] = *bindings[i];
+					}
+					if (failed)
+						result = std::move(err_msg);
+					else
+					{
+						for (auto& binding : set_bindings)
+						{
+							collated_layouts[layout][
+								binding.IsImage()?
+										desc_type_index<vk::DescriptorType::eCombinedImageSampler>
+									:
+										desc_type_index<vk::DescriptorType::eUniformBuffer>
+							]++;
+						}
+						result = std::move(set_bindings);
+						dirty = false;
+					}
+				}
+				return std::move(result);
+			}
+		};
+
+		hash_table<set_t, set_bindings> curr_bindings;
+		struct Ref
+		{
+			CollatedLayouts_t& collated_layouts;
+			UboManager& ubo_manager;
+			Ref(CollatedLayouts_t* cl = nullptr, UboManager* u = nullptr) :collated_layouts{ *cl }, ubo_manager{ *u }{}
+		};
+		Ref ref;
+		void SetRef(
+			CollatedLayouts_t& collated_layouts,
+			//set, bindings
+			UboManager& ubo_manager)
+		{
+			new (&ref) Ref{ &collated_layouts,&ubo_manager };
+		}
+		void BindShader(ShaderStage stage, RscHandle<ShaderProgram> shader)
+		{
+			auto& mod = shader.as<ShaderModule>();
+			//Update existing bindings
+			for (auto l_itr = mod.LayoutsBegin(); l_itr != mod.LayoutsEnd(); ++l_itr)
+			{
+				auto& [set, layout] = *l_itr;
+				auto b_itr = curr_bindings.find(set);
+				if (b_itr != curr_bindings.end())
+					b_itr->second.SetLayout(*layout);
+					
+			}
+			shaders[static_cast<size_t>(stage)] = shader;
+		}
+
+		std::optional<UboInfo> GetUniform(const string& uniform_name) const
+		{
+			std::optional<UboInfo> result{};
+			for (auto& ohshader : shaders)
+			{
+				if (ohshader)
+				{
+					auto& shader = ohshader->as<ShaderModule>();
+					if (shader.HasLayout(uniform_name))
+					{
+						result = shader.GetLayout(uniform_name);
+						break;
+					}
+				}
+			}
+			return result;
+		}
+
+			   		
+		template<typename T>
+		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data)
+		{
+			auto info = GetUniform(uniform_name);
+			if (info)
+			{
+				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, data,ref.ubo_manager));
+			}
+			return s_cast<bool>(info);
+		}
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture)
+		{
+			auto info = GetUniform(uniform_name);
+			if (info)
+			{
+				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture));
+			}
+			return s_cast<bool>(info);
+		}
+
+		void FinalizeDrawCall(const RenderObject& ro)
+		{
+			hash_table<uint32_t, vector<ProcessedRO::BindingInfo>> sets;
+			for (auto& [set, bindings] : curr_bindings)
+			{
+				auto result = bindings.FinalizeDC(ref.collated_layouts);
+				if (result) //If binding was valid
+				{
+					if(result.value().size())
+						sets[set] = std::move(result.value());
+				}
+				else
+				{
+					hlp::cerr() <<"Failed to bind set["<<set<<"]: {" << result.error()<<"}\n";
+				}
+			}
+			draw_calls.emplace_back(ProcessedRO{ &ro,std::move(sets),nullptr,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
+		}
+
+		void UpdateDS()
+		{
+			
+		}
+	};
 
 	struct FrameRenderer::VertexUniformConfig
 	{
@@ -860,6 +887,179 @@ namespace idk::vkn
 		return camera_data.render_target.as<VknRenderTarget>().Buffer();
 	}
 
+
+
+	RscHandle<ShaderProgram> LoadShader(string filename)
+	{
+		return *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
+	}
+	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
+		//Todo: Initialize the stuff
+		_view = view;
+		//Do only the stuff per frame
+		uint32_t num_fo = 1;
+		uint32_t num_concurrent_states = 1;
+
+		_cmd_pool = cmd_pool;
+		auto device = *View().Device();
+		auto pri_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, num_fo }, vk::DispatchLoaderDefault{});
+		_pri_buffer = std::move(pri_buffers[0]);
+		auto t_buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::eSecondary, num_fo }, vk::DispatchLoaderDefault{});
+		{
+			_transition_buffer = std::move(t_buffers[0]);
+		}
+
+		GrowStates(num_concurrent_states);
+		//Temp
+		for (auto i = num_concurrent_states; i-- > 0;)
+		{
+			auto thread = std::make_unique<NonThreadedRender>();
+			thread->Init(this);
+			_render_threads.emplace_back(std::move(thread));
+		}
+
+
+	}
+	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
+	{
+		_pipeline_manager = &manager;
+	}
+	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
+	{
+		_current_frame_index = frame_index;
+		//Update all the resources that need to be updated.
+		auto& curr_frame = *this;
+		GrowStates(gfx_states.size());
+		size_t num_concurrent = curr_frame._render_threads.size();
+		auto& pri_buffer = curr_frame._pri_buffer;
+		auto& transition_buffer = curr_frame._transition_buffer;
+		auto queue = View().GraphicsQueue();
+		auto& swapchain = View().Swapchain();
+		for (auto& state : curr_frame._states)
+		{
+			state.Reset();
+		}
+		bool rendered = false;
+		for (size_t i = 0; i + num_concurrent <= gfx_states.size(); i += num_concurrent)
+		{
+			//Spawn/Assign to the threads
+			for (size_t j = 0; j < num_concurrent; ++j) {
+				auto& state = gfx_states[i + j];
+				auto& rs = _states[i + j];
+				_render_threads[j]->Render(state, rs);
+				rendered = true;
+				//TODO submit command buffer here and signal the framebuffer's stuff.
+				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
+				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
+				//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
+			}
+			//Wait here
+			for (auto& thread : _render_threads) {
+				thread->Join();
+			}
+		}
+		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
+		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
+		vector<vk::CommandBuffer> buffers{};
+		for (auto& state : curr_frame._states)
+		{
+			if (state.has_commands)
+				buffers.emplace_back(state.cmd_buffer);
+		}
+		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
+		//if(buffers.size())
+		//	pri_buffer->executeCommands(buffers, vk::DispatchLoaderDefault{});
+		vk::CommandBufferInheritanceInfo iinfo
+		{
+		};
+
+
+
+		vk::ImageSubresourceRange subResourceRange = {};
+		subResourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+		subResourceRange.baseMipLevel = 0;
+		subResourceRange.levelCount = 1;
+		subResourceRange.baseArrayLayer = 0;
+		subResourceRange.layerCount = 1;
+
+		if (!rendered)
+		{
+			vk::ImageMemoryBarrier presentToClearBarrier = {};
+			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+			presentToClearBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+			presentToClearBarrier.oldLayout = vk::ImageLayout::eUndefined;
+			presentToClearBarrier.newLayout = vk::ImageLayout::eGeneral;
+			presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
+			presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
+			presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
+			presentToClearBarrier.subresourceRange = subResourceRange;
+			begin_info.pInheritanceInfo = &iinfo;
+			transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
+			transition_buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, nullptr, nullptr, presentToClearBarrier, vk::DispatchLoaderDefault{});
+			transition_buffer->end();
+			//hlp::TransitionImageLayout(*transition_buffer, queue, swapchain.images[swapchain.curr_index], vk::Format::eUndefined, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR,&iinfo);
+			pri_buffer->executeCommands(*transition_buffer, vk::DispatchLoaderDefault{});
+		}
+		pri_buffer->end();
+
+		buffers.emplace_back(*pri_buffer);
+		auto& current_signal = View().CurrPresentationSignals();
+
+		auto& waitSemaphores = *current_signal.image_available;
+		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		hash_set<vk::Semaphore> ready_semaphores;
+		for (auto& state : gfx_states)
+		{
+			auto semaphore = state.camera.render_target.as<VknRenderTarget>().ReadySignal();
+			if(semaphore)
+			ready_semaphores.emplace(semaphore);
+		}
+		//Temp, get rid of this once the other parts no longer depend on render_finished
+		ready_semaphores.emplace(readySemaphores);
+		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
+		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
+
+		//std::vector<vk::CommandBuffer> cmd_buffers;
+		//for (auto& state : curr_frame.states)
+		//{
+		//	cmd_buffers.emplace_back(state.cmd_buffer);
+		//}
+		//cmd_buffers.emplace_back(*pri_buffer);
+		vk::SubmitInfo submit_info
+		{
+			1
+			,&waitSemaphores
+			,waitStages
+			,hlp::arr_count(buffers),std::data(buffers)
+			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
+		};
+
+
+		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
+		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
+		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
+	}
+	PresentationSignals& FrameRenderer::GetMainSignal()
+	{
+		return _states[0].signal;
+	}
+	void FrameRenderer::GrowStates(size_t new_min_size)
+	{
+		auto cmd_pool = *View().Commandpool();
+		auto device = *View().Device();
+		if (new_min_size > _states.size())
+		{
+			auto diff = s_cast<uint32_t>(new_min_size - _states.size());
+			auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, diff }, vk::DispatchLoaderDefault{});
+			for (auto i = diff; i-- > 0;)
+			{
+				auto& buffer = buffers[i];
+				_states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
+				_state_cmd_buffers.emplace_back(std::move(buffer));
+			}
+		}
+	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
 	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs)

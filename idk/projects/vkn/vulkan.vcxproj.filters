@@ -159,6 +159,9 @@
     <ClInclude Include="RenderStateV2.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="vulkan_enum_info.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -284,7 +287,12 @@
       <Filter>resource\Factories</Filter>
     </ClCompile>
     <ClCompile Include="VknFramebufferFactory.cpp" />
-    <ClCompile Include="ProcessedRO.cpp" />
+    <ClCompile Include="ProcessedRO.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderStateV2.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

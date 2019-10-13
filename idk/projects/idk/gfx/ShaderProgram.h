@@ -18,6 +18,7 @@ namespace idk
 		Geometry,
 		Fragment,
 		Compute,
+		Size
 	};
 
 	class ShaderProgram

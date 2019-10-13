@@ -2,7 +2,6 @@
 #include "DescriptorPoolsManager.h"
 #include <vkn/BufferHelpers.h>
 #include <vkn/VulkanView.h>
-
 namespace idk::vkn
 {
 	DescriptorPoolsManager::Manager::Manager(uint32_t capacity_, vk::Device device, vk::DescriptorType type_) :type{ type_ },capacity{capacity_}
@@ -32,6 +31,19 @@ namespace idk::vkn
 		return *new_manager.pool;
 	}
 
+	vk::DescriptorPool DescriptorPoolsManager::Add(const uint32_t(&num_dses)[DescriptorTypeI::size()])
+	{
+		uint32_t new_caps[std::size_v<decltype(num_dses)>];
+		for (size_t i=0;i<std::size(num_dses);++i)
+		{
+			auto& num_ds = num_dses[i];
+			auto& new_cap = new_caps[i];
+			while (num_ds > new_cap) new_cap *= 2;
+		}
+		auto& new_manager = managers2.emplace_back(*view.Device(), new_caps);
+		return *new_manager.pool;
+	}
+
 	void DescriptorPoolsManager::ResetManager(Manager& manager)
 	{
 		vk::Device d = *view.Device();
@@ -58,6 +70,29 @@ namespace idk::vkn
 			for(auto&manager :pair.second)
 				ResetManager(manager);
 		}
+	}
+
+	DescriptorPoolsManager::Manager2::Manager2(vk::Device device, const uint32_t(&capacities)[DescriptorTypeI::size()])
+	{
+		vk::DescriptorPoolSize pool_size[std::size_v<decltype(capacities)>];
+		uint32_t max_sets = 0;
+		for (size_t i = 0; i < std::size(capacities); ++i)
+		{
+			pool_size[i] = vk::DescriptorPoolSize{
+				DescriptorTypeI::map(i),
+				cap[i].capacity = capacities[i]
+			};
+			max_sets += capacities[i];
+			cap[i].size = 0;
+		}
+		vk::DescriptorPoolCreateInfo create_info
+		{
+			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
+			,max_sets
+			,hlp::arr_count(pool_size)
+			,std::data(pool_size)
+		};
+		pool = device.createDescriptorPoolUnique(create_info, nullptr, vk::DispatchLoaderDefault{});
 	}
 
 }
