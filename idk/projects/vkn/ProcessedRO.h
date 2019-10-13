@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/utils/utils.h>
-
+#include <gfx/pipeline_config.h>
 namespace idk
 {
 	struct RenderObject;
