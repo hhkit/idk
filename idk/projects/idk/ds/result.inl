@@ -9,6 +9,15 @@ namespace idk::monadic
 		return std::get<Success>(*this);
 	}
 	template<typename Result, typename Error>
+	template<typename>
+	Result result<Result, Error>::value_or(const Result& result)
+	{
+		if (*this)
+			return value();
+		else
+			return result;
+	}
+	template<typename Result, typename Error>
 	inline Error& result<Result, Error>::error()
 	{
 		return std::get<Failure>(*this);
