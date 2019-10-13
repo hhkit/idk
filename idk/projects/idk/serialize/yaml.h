@@ -50,7 +50,7 @@ namespace idk::yaml
         bool has_tag() const;
         const scalar_type& tag() const;
         const node& at(const scalar_type& key) const;
-        template<typename T> decltype(auto) get() const;
+        template<typename T, typename = sfinae<is_basic_serializable_v<T>>> decltype(auto) get() const;
         template<> decltype(auto) get<scalar_type>() const;
 
         bool is_null() const;

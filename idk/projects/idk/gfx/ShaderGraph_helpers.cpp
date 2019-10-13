@@ -21,7 +21,7 @@ namespace idk::shadergraph::helpers
 
     float parse_float(const string& val)
     {
-        return *parse_text<float>(val);
+        return parse_text<float>(val).value_or(0);
     }
     string serialize_value(float vec)
     {
@@ -35,8 +35,8 @@ namespace idk::shadergraph::helpers
 		std::smatch matches;
 		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
-            v[0] = *parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) });
-            v[1] = *parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) });
+            v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) }).value_or(0);
+            v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) }).value_or(0);
 		}
 		return v;
 	}
@@ -52,9 +52,9 @@ namespace idk::shadergraph::helpers
 		std::smatch matches;
 		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
-            v[0] = *parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) });
-            v[1] = *parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) });
-            v[2] = *parse_text<float>(string_view{ &*matches[3].first, static_cast<size_t>(matches[3].length()) });
+            v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) }).value_or(0);
+            v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) }).value_or(0);
+            v[2] = parse_text<float>(string_view{ &*matches[3].first, static_cast<size_t>(matches[3].length()) }).value_or(0);
 		}
 		return v;
 	}
@@ -70,10 +70,10 @@ namespace idk::shadergraph::helpers
 		std::smatch matches;
 		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
-			v[0] = *parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) });
-            v[1] = *parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) });
-            v[2] = *parse_text<float>(string_view{ &*matches[3].first, static_cast<size_t>(matches[3].length()) });
-            v[3] = *parse_text<float>(string_view{ &*matches[4].first, static_cast<size_t>(matches[4].length()) });
+			v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) }).value_or(0);
+            v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) }).value_or(0);
+            v[2] = parse_text<float>(string_view{ &*matches[3].first, static_cast<size_t>(matches[3].length()) }).value_or(0);
+            v[3] = parse_text<float>(string_view{ &*matches[4].first, static_cast<size_t>(matches[4].length()) }).value_or(0);
 		}
 		return v;
 	}
