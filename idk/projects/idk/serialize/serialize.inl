@@ -7,7 +7,7 @@ namespace idk
 {
 
 	template<typename T>
-	string serialize_text(const T& obj)
+    string serialize_text(const T& obj)
 	{
         if constexpr (std::is_same_v<std::decay_t<T>, bool>)
             return obj ? "1" : "0";
@@ -34,32 +34,47 @@ namespace idk
 	}
 
 	template<typename T>
-	void parse_text(string_view sv, T& obj)
+    parse_error parse_text(string_view sv, T& obj)
 	{
         if constexpr (std::is_same_v<std::decay_t<T>, bool>)
+        {
             obj = sv != "0" && sv != "false";
+            return parse_error::none;
+        }
         else if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
         {
-            /*const std::from_chars_result res = */
-            std::from_chars(sv.data(), sv.data() + sv.size(), obj);
+            const std::from_chars_result res = std::from_chars(sv.data(), sv.data() + sv.size(), obj);
+            if (res.ec == std::errc{})
+                return parse_error::none;
+            else if (res.ec == std::errc::invalid_argument)
+                return parse_error::invalid_argument;
+            else
+                return parse_error::result_out_of_range;
         }
-        else if constexpr (is_macro_enum_v<T>)
-            obj = std::decay_t<T>::from_string(sv);
-        else if constexpr (is_basic_serializable_v<T>)
-            obj = T(string{ sv });
         else
         {
-            reflect::dynamic dyn{ obj };
-            parse_text(sv, dyn);
+            if constexpr (is_macro_enum_v<T>)
+                obj = std::decay_t<T>::from_string(sv);
+            else if constexpr (is_basic_serializable_v<T>)
+                obj = T(string{ sv });
+            else
+            {
+                reflect::dynamic dyn{ obj };
+                parse_text(sv, dyn);
+            }
+            return parse_error::none;
         }
 	}
 
 	template<typename T>
-	T parse_text(string_view sv)
+    monadic::result<T, parse_error> parse_text(string_view sv)
 	{
 		T obj;
-		parse_text(sv, obj);
-		return obj;
+        const auto res = parse_text(sv, obj);
+        if (res == parse_error::none)
+            return obj;
+        else
+            return res;
 	}
 
 }

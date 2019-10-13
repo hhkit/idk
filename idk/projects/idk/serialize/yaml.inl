@@ -85,12 +85,18 @@ namespace idk::yaml
             if (type() == type::null)
             {
                 if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
-                    return T(0);
+                    return static_cast<T>(0);
                 else
                     return T();
             }
             else if (type() == type::scalar)
-                return parse_text<T>(as_scalar());
+            {
+                auto res = parse_text<T>(as_scalar());
+                if (res)
+                    return static_cast<T>(*res);
+                else
+                    return static_cast<T>(0);
+            }
             throw "only works on scalars";
         }
         else

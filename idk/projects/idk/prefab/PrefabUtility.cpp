@@ -51,10 +51,10 @@ namespace idk
                     if (cont.value_type.is_template<std::pair>())
                     {
                         auto key_type = cont.value_type.create().unpack()[0].type;
-                        curr.swap(cont[parse_text(string(token), key_type)]);
+                        curr.swap(cont[*parse_text(string(token), key_type)]);
                     }
                     else
-                        curr.swap(cont[parse_text<size_t>(string(token))]);
+                        curr.swap(cont[*parse_text<size_t>(string(token))]);
                 }
                 else
                     curr.swap(obj.get_property(token).value);
