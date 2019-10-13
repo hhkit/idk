@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationState.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
     <ClInclude Include="anim\BoneComponent.h" />

@@ -723,6 +723,10 @@
     <ClInclude Include="script\ManagedType.h">
       <Filter>script</Filter>
     </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h" />
+    <ClInclude Include="anim\AnimationState.h">
+      <Filter>anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

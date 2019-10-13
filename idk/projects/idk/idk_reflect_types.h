@@ -19,7 +19,7 @@ namespace idk
 	class GameObject;
 	class Mesh;
     class Prefab;
-
+	struct AnimationState;
 	namespace anim
 	{
 		class Animation;
@@ -84,8 +84,9 @@ namespace idk::reflect
 		// anim
 		, RscHandle<anim::Skeleton>
 		, RscHandle<anim::Animation>
+		//, idk::AnimationState
 		, vector<RscHandle<anim::Animation>>
-		// , vector<Handle<GameObject>>
+		// , vector<idk::AnimationState>
 		, matrix_decomposition<real>
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>

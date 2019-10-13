@@ -467,11 +467,48 @@ namespace idk {
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
 
-		if (ImGui::CollapsingHeader("Animation Controller", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
+		if (ImGui::CollapsingHeader("Animator", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
 		{
 			//Draw All your custom variables here.
+			// Display the current animation
+			
+			if (ImGui::BeginCombo("Start State", c_anim->GetStateName(c_anim->_start_animation).c_str()))
+			{
+				for (size_t i = 0; i < c_anim->_animations.size(); ++i)
+				{
+					if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_start_animation == i))
+					{
+						c_anim->Stop();
+						c_anim->_start_animation = s_cast<int>(i);
+					}
+				}
+				ImGui::EndCombo();
+			}
 
-			//ImGui::TextColored(ImVec4{ 1,0,0,1 }, "@IZAH/MAL: \n\tHelp me shift to correct place when free :3");
+			if (ImGui::BeginCombo("Current State", c_anim->GetStateName(c_anim->_curr_animation).c_str()))
+			{
+				for (size_t i = 0; i < c_anim->_animations.size(); ++i)
+				{
+					if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_curr_animation == i))
+					{
+						// Reset the animation
+						c_anim->_elapsed = 0.0f;
+						// Set the new current animation
+						c_anim->_curr_animation = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+			
+			if (ImGui::Checkbox("Preview", &c_anim->_preview_playback))
+			{
+				if (!c_anim->_preview_playback)
+				{
+					c_anim->_elapsed = 0.0f;
+					c_anim->RestoreBindPose();
+				}
+			}
+
 			if (ImGui::Button("Play"))
 			{
 				c_anim->Play(0);

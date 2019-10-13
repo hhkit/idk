@@ -72,7 +72,8 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AudioSystem::Update,                  "Update listeners and sources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
-		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
+												  .IfPausedThen(&AnimationSystem::UpdatePaused);
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
