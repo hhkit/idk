@@ -22,5 +22,18 @@ namespace idk
 		std::optional<UniformInstance> GetUniform(const string& name)const;
 		bool IsUniformBlock(string_view name)const;
 		string GetUniformBlock(const string& name)const;
+		using uniform_store_t = decltype(uniforms);
+		struct temp_store
+		{
+			uniform_store_t uniforms;
+
+			bool IsImageBlock(uniform_store_t::iterator itr)const;
+			bool IsUniformBlock(uniform_store_t::iterator itr)const;
+			vector<RscHandle<Texture>> GetImageBlock(uniform_store_t::iterator itr)const;
+			string GetUniformBlock(uniform_store_t::iterator itr)const;
+		};
+
+		temp_store get_cache()const;
+
 	};
 }

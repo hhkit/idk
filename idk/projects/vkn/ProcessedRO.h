@@ -87,5 +87,8 @@ namespace idk::vkn
 		std::optional<RscHandle<ShaderProgram>> geom_shader;
 		std::optional<RscHandle<ShaderProgram>> frag_shader;
 
+		//set, ds
+		hash_table<uint32_t,vk::DescriptorSet> descriptor_sets;
+		bool rebind_shaders = false;
 	};
 }

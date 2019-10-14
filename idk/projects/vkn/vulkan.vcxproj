@@ -224,6 +224,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
+    <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
     <ClInclude Include="RenderStateV2.h" />
@@ -245,6 +246,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VknTextureLoader.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
+    <ClInclude Include="VulkanHashes.h" />
     <ClInclude Include="VulkanPngLoader.h" />
     <ClInclude Include="VulkanResourceManager.h" />
     <ClInclude Include="VulkanShaderModuleFactory.h" />
@@ -280,6 +282,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
+    <ClCompile Include="PipelineThingy.cpp" />
     <ClCompile Include="ProcessedRO.cpp" />
     <ClCompile Include="RegisterVulkanFactories.cpp" />
     <ClCompile Include="RenderState.cpp" />

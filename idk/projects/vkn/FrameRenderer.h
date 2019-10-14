@@ -10,6 +10,8 @@
 #include <vkn/RenderStateV2.h>
 #include <vkn/ProcessedRO.h>
 
+#include <vkn/PipelineThingy.h>
+
 namespace idk
 {
 	struct RenderObject;
@@ -57,7 +59,7 @@ namespace idk::vkn
 
 		void GrowStates(size_t new_min_size);
 
-		std::pair<vector<ProcessedRO>, DsBindingCount> ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
+		PipelineThingy ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs);
 		VulkanView& View()const { return *_view; }

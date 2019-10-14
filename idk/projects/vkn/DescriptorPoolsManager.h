@@ -49,7 +49,7 @@ struct DescriptorPoolsManager
 			for (auto& manager : managers)
 			{
 				bool pass = true;
-				for (size_t i = 0; i < sizeof(num_ds); ++i)
+				for (size_t i = 0; i < std::size(num_ds); ++i)
 				{
 					if (manager.cap[i].capacity - manager.cap[i].size < num_ds[i])
 					{
@@ -59,7 +59,7 @@ struct DescriptorPoolsManager
 				}
 				if (pass)
 				{
-					for (size_t i = 0; i < sizeof(num_ds); ++i)
+					for (size_t i = 0; i < std::size(num_ds); ++i)
 					{
 						manager.cap[i].size += num_ds[i];
 					}

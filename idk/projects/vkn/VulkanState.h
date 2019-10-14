@@ -17,20 +17,10 @@
 
 #include <vkn/utils/SwapchainInfo.h>
 #include <vkn/vulkan_state_fwd.h>
+#include <vkn/VulkanHashes.h>
 #undef max
 #undef min
 
-namespace std
-{
-	template<>
-	struct hash<vk::DescriptorSetLayout>
-	{
-		size_t operator()(const vk::DescriptorSetLayout& dsl)const
-		{
-			return idk::r_cast<intptr_t>(dsl.operator VkDescriptorSetLayout());
-		}
-	};
-}
 
 namespace idk::vkn 
 {

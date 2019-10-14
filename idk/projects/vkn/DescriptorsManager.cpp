@@ -19,11 +19,15 @@ namespace idk::vkn
 		vector<bool> allocated(allocations.size()*DescriptorTypeI::size(), false);
 		//hash_table<vk::DescriptorType, uint32_t> num_req;
 		bool req_more = false;
-		std::array<uint32_t, DescriptorTypeI::size()> num_req;
+		std::array<uint32_t, DescriptorTypeI::size()> num_req{};
 		do
 		{
+			req_more = false;
 			//num_req.clear();
 			uint32_t i = 0;
+			for(auto& n : num_req)
+				n = 0;//clear the previous iteration's numbers.
+
 			for (auto& [layout, alloc_info] : allocations)
 			{
 				auto& [num_ds, des] = alloc_info;
@@ -59,8 +63,9 @@ namespace idk::vkn
 				}
 				++i;
 			}
-			pools.Add(num_req._Elems);
-		} while (num_req.size());
+			if(req_more)
+				pools.Add(num_req._Elems);
+		} while (req_more);
 		return result;
 	}
 	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)

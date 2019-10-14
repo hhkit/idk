@@ -162,6 +162,12 @@
     <ClInclude Include="vulkan_enum_info.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineThingy.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanHashes.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -293,6 +299,7 @@
     <ClCompile Include="RenderStateV2.cpp">
       <Filter>render\objects</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineThingy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
