@@ -15,8 +15,8 @@ namespace idk::mono
 	public:
 		ManagedThunk(MonoMethod* method);
 
-		template<typename ... Args>
-		MonoObject* Invoke(Args&& ...);
+		template<typename Ret = MonoObject*, typename ... Args>
+		Ret Invoke(Args&& ...);
 	private:
 		void* thunk;
 	};
@@ -48,8 +48,8 @@ namespace idk::mono
 		type operator()(const ManagedObject& obj) const noexcept { return obj.Fetch(); };
 	};
 
-	template<typename ...Args>
-	inline MonoObject* ManagedThunk::Invoke(Args&& ... args)
+	template<typename Ret, typename ...Args>
+	inline Ret ManagedThunk::Invoke(Args&& ... args)
 	{
 		using FuncType = MonoObject * (*)(typename Boxer < std::decay_t<Args> > ::type...);
 		const auto invoker = s_cast<FuncType>(thunk);

@@ -18,6 +18,7 @@ Takes in a NEW Commands and handles its delete internally
 #include "pch.h"
 #include "CommandController.h"
 #include <editor/commands/CMD_DeleteGameObject.h>
+#include <editor/commands/CMD_DeleteComponent.h>
 #include <IDE.h>
 
 namespace idk {
@@ -38,6 +39,7 @@ namespace idk {
 	void CommandController::FlushCommands()
 	{
 		while (pollStack.size()) {
+			
 			unique_ptr<ICommand> command = std::move(pollStack.front());
 			pollStack.pop();
 
@@ -55,7 +57,8 @@ namespace idk {
 				}
 				if (dynamic_cast<CMD_DeleteGameObject*>(undoStack.back().get()))
 					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
-
+				if (dynamic_cast<CMD_DeleteComponent*>(undoStack.back().get()))
+					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
 
 			}
 		}

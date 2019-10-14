@@ -57,47 +57,36 @@ namespace idk
 
 
 
-    void TagSystem::ApplyConfig(const Config& config)
+    void TagSystem::ApplyConfig(Config& config)
     {
-        Config copy = config;
-
-        if (copy.tags.size() > max_tags)
+        if (config.tags.size() > max_tags)
         {
-            copy.tags.resize(max_tags);
+            config.tags.resize(max_tags);
             std::cout << "[Warning] Cannot have more than " << max_tags << " tags. Tags will be truncated." << std::endl;
-            SetConfig(copy);
-            return;
         }
 
-        bool changed = false;
-
         _tags_to_indices.clear();
-        for (size_t i = 0; i < copy.tags.size(); ++i)
+        for (size_t i = 0; i < config.tags.size(); ++i)
         {
-            if (copy.tags[i].empty())
+            if (config.tags[i].empty())
             {
-                copy.tags.erase(copy.tags.begin() + i);
-                changed = true;
+                config.tags.erase(config.tags.begin() + i);
                 continue;
             }
 
             // has duplicate tag
-            if (_tags_to_indices.find(copy.tags[i]) != _tags_to_indices.end())
+            if (_tags_to_indices.find(config.tags[i]) != _tags_to_indices.end())
             {
-                string tag = copy.tags[i];
+                string tag = config.tags[i];
                 int counter = 0;
-                copy.tags[i] = "";
-                while (std::find(copy.tags.begin(), copy.tags.end(), tag + serialize_text(counter)) != copy.tags.end())
+                config.tags[i] = "";
+                while (std::find(config.tags.begin(), config.tags.end(), tag + serialize_text(counter)) != config.tags.end())
                     ++counter;
-                copy.tags[i] = tag + serialize_text(counter);
-                changed = true;
+                config.tags[i] = tag + serialize_text(counter);
             }
 
-            _tags_to_indices.emplace(copy.tags[i], static_cast<tag_t>(i));
+            _tags_to_indices.emplace(config.tags[i], static_cast<tag_t>(i));
         }
-
-        if (changed)
-            SetConfig(copy);
     }
 
 }

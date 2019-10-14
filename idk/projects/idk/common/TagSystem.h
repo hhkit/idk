@@ -25,7 +25,7 @@ namespace idk
         tag_t GetIndexFromTag(string_view tag);
 
     protected:
-        virtual void ApplyConfig(const Config& config);
+        virtual void ApplyConfig(Config& config);
 
     private:
         hash_table<string_view, tag_t> _tags_to_indices;

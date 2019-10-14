@@ -15,6 +15,7 @@ namespace idk {
 	class CMD_AddComponent : public ICommand { //serialize/deserialize use serialize.h
 	public:
 		CMD_AddComponent(Handle<GameObject> gameObject, string component);
+		CMD_AddComponent(Handle<GameObject> gameObject, const reflect::dynamic& component);
 
 		virtual bool execute() override;
 
@@ -24,6 +25,7 @@ namespace idk {
 
 		GenericHandle		new_component_handle	{};
 		const string		component_name			{};
+		reflect::dynamic	component_reflect		{};
 	};
 
 }

@@ -26,14 +26,14 @@ TEST(Serialize, TestYaml)
 	// test:
 	//   a: x
 	//   b: y
-    yaml::node node = yaml::load("test:\n  a: x\n  b: y");
+    yaml::node node = *yaml::load("test:\n  a: x\n  b: y");
     EXPECT_EQ(node["test"]["a"].as_scalar(), "x");
     EXPECT_EQ(node["test"]["b"].as_scalar(), "y");
     EXPECT_EQ(yaml::dump(node), "test: {a: x, b: y}\n");
 
 	// - test: a:
 	// - x: b
-    yaml::node node2 = yaml::load("- test: a:\n- x: b");
+    yaml::node node2 = *yaml::load("- test: a:\n- x: b");
     EXPECT_EQ(node2[0]["test"].as_scalar(), "a:");
     EXPECT_EQ(node2[1]["x"].as_scalar(), "b");
     // - test: a:
@@ -46,7 +46,7 @@ TEST(Serialize, TestYaml)
 	//   - y: hi
     //     z: bye
     //   - w
-	yaml::node node3 = yaml::load("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
+	yaml::node node3 = *yaml::load("-\n- test:\n  - x\n  - y: hi\n    z: bye\n  - w");
 	EXPECT_TRUE(node3[0].is_null());
 	EXPECT_EQ(node3[1]["test"][0].as_scalar(), "x");
 	EXPECT_EQ(node3[1]["test"][1]["y"].as_scalar(), "hi");
@@ -61,7 +61,7 @@ TEST(Serialize, TestYaml)
 
 	// - test: [x, y,{a: b} ]
 	// - test2 : {b: [1,2,3]}
-	yaml::node node4 = yaml::load("- test: [x, y,{a: b} ]   \r\n- test2 : {b: [1,2,3]}");
+	yaml::node node4 = *yaml::load("- test: [x, y,{a: b} ]   \r\n- test2 : {b: [1,2,3]}");
     EXPECT_EQ(node4[0]["test"][0].as_scalar(), "x");
     EXPECT_EQ(node4[0]["test"][1].as_scalar(), "y");
     EXPECT_EQ(node4[0]["test"][2]["a"].as_scalar(), "b");
@@ -76,7 +76,7 @@ TEST(Serialize, TestYaml)
     //     b: [1, 2, 3]
     EXPECT_EQ(yaml::dump(node4), "- test: \n  - x\n  - y\n  - a: b\n- test2: \n    b: [1, 2, 3]\n");
 
-    yaml::node node5 = yaml::load("- !testtag '\"longassstring\"'");
+    yaml::node node5 = *yaml::load("- !testtag '\"longassstring\"'");
 	EXPECT_EQ(node5[0].as_scalar(), "\"longassstring\"");
 	EXPECT_EQ(node5[0].tag(), "testtag");
     EXPECT_EQ(yaml::dump(node5), "[!testtag '\"longassstring\"']");
@@ -106,7 +106,7 @@ TEST(Serialize, TestSerializeBasic)
 	EXPECT_STREQ(str.c_str(), "guid: e82bf459-faca-4c70-a8e9-dd35597575ef\nvec: \n  x: 5.000000\n  y: 6.000000\n  z: 7.000000\n  w: 8.000000\nf: 69\n");
 
 	// roundtrip
-	auto obj2 = parse_text<serialize_this>(str);
+	auto obj2 = *parse_text<serialize_this>(str);
 	EXPECT_EQ(obj.f, obj2.f);
 	EXPECT_EQ(obj.guid, obj2.guid);
 	EXPECT_EQ(obj.vec, obj2.vec);
@@ -143,7 +143,7 @@ TEST(Serialize, TestSerializeComplex)
 	std::cout << str;
 	
 	// roundtrip
-	serialize_this_bs bs2 = parse_text<serialize_this_bs>(str);
+	serialize_this_bs bs2 = *parse_text<serialize_this_bs>(str);
 	EXPECT_EQ(bs2.start, bs.start);
 	EXPECT_EQ(bs2.mid, bs.mid);
 	EXPECT_EQ(bs2.end, bs.end);
@@ -175,7 +175,7 @@ TEST(Serialize, TestSerializeUnknownAndParentAndVariant)
 	auto str = serialize_text(s);
 
 	// roundtrip
-	auto s2 = parse_text<serialass>(str);
+	auto s2 = *parse_text<serialass>(str);
 
 	EXPECT_EQ(s.f, s2.f);
 	EXPECT_EQ(s.guid, s2.guid);
@@ -268,7 +268,7 @@ TEST(Serialize, TestSerializeStructThatContainsDyn)
 {
     structthatcontainsdyn x{ string("hello") };
     auto str = serialize_text(x);
-    structthatcontainsdyn x2 = parse_text<structthatcontainsdyn>(str);
+    structthatcontainsdyn x2 = *parse_text<structthatcontainsdyn>(str);
     ASSERT_EQ(x.dyn.get<string>(), x2.dyn.get<string>());
 }
 
@@ -287,6 +287,6 @@ TEST(Serialize, TestOnParseCallback)
 {
     structonparse x;
     auto str = serialize_text(x);
-    structonparse x2 = parse_text<structonparse>(str);
+    structonparse x2 = *parse_text<structonparse>(str);
     ASSERT_EQ(x2.x, 999);
 }

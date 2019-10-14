@@ -10,11 +10,13 @@ namespace idk::mono
 	ManagedObject::ManagedObject(const ManagedObject& rhs)
 		: _gc_handle
 		{ 
+			rhs._gc_handle ?
 			[](const ManagedObject& rhs) -> uint32_t
 			{
 				const auto fetch = rhs.Fetch();
 				return fetch ? mono_gchandle_new(fetch, false) : 0;
 			}(rhs)
+			: 0
 		}
 	{
 	}
@@ -44,8 +46,23 @@ namespace idk::mono
 		if (_gc_handle)
 			mono_gchandle_free(_gc_handle);
 	}
+
+	void ManagedObject::Assign(string_view fieldname, MonoObject* obj)
+	{
+		auto me = Fetch();
+		auto field = Field(fieldname);
+		if (field)
+			mono_field_set_value(me, field, obj);
+	}
+
 	MonoObject* ManagedObject::Fetch() const noexcept
 	{
 		return mono_gchandle_get_target(_gc_handle);
+	}
+	MonoClassField* ManagedObject::Field(string_view fieldname)
+	{
+		auto me = Fetch();
+		auto klass = mono_object_get_class(me);
+		return mono_class_get_field_from_name(klass, fieldname.data());
 	}
 }
