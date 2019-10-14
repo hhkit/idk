@@ -22,6 +22,7 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/utils.h>
 #include <file/FileSystem.h>
 #include <common/TagSystem.h>
@@ -96,7 +97,7 @@ namespace idk {
         //DISPLAY
         if (gameObjectsCount == 1)
         {
-            DisplayGameObjectHeader(gos[0]);
+			DisplayGameObjectHeader(gos[0]);
 
             if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
@@ -115,10 +116,10 @@ namespace idk {
             for (auto& component : componentSpan) {
 
                 //Skip Name and Transform and PrefabInstance
-                if (component == c_transform ||
-                    component.is_type<PrefabInstance>() ||
-                    component.is_type<Name>())
-                    continue;
+				if (component == c_transform ||
+					component.is_type<PrefabInstance>() ||
+					component.is_type<Name>())                    
+					continue;
 
                 if (component.is_type<Animator>())
                 {
@@ -127,7 +128,7 @@ namespace idk {
                     continue;
                 }
 
-                //COMPONENT DISPLAY 
+                //COMPONENT DISPLAY
                 DisplayOtherComponent(component);
             }
         }
@@ -135,7 +136,7 @@ namespace idk {
         {
             //Just show all components, Name and Transform first
             //First gameobject takes priority. By default, name and transform will always be shown.
-            DisplayGameObjectHeader(gos[0]);
+			DisplayGameObjectHeader(gos[0]);
             Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
             if (c_transform) {
                 DisplayTransformComponent(c_transform);
@@ -146,8 +147,8 @@ namespace idk {
             span<GenericHandle> componentSpan = gos[0]->GetComponents();
             hash_set<string, std::hash<string>, std::equal_to<string>> similarComponentNames;
             for (GenericHandle component : componentSpan) {
-                if (component.is_type<Name>())
-                    continue;
+				if (component.is_type<Name>())
+					continue;
                 if (component == c_transform)
                     continue;
                 similarComponentNames.insert(string((*component).type.name()));
@@ -194,15 +195,7 @@ namespace idk {
             }
         }
 
-        if (isComponentMarkedForDeletion) {
-            for (Handle<GameObject> i : gos)
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, componentNameMarkedForDeletion));
 
-            //Reset values
-            componentNameMarkedForDeletion = {};
-            isComponentMarkedForDeletion = false;
-
-        }
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
             span componentNames = GameState::GetComponentNames();
@@ -210,8 +203,8 @@ namespace idk {
                 string displayName = name;
                 if (displayName == "Transform" ||
                     displayName == "Name" ||
-                    displayName == "Tag" ||
-                    displayName == "Layer" ||
+					displayName == "Tag" ||
+					displayName == "Layer" ||
                     displayName == "PrefabInstance")
                     continue;
 
@@ -222,13 +215,6 @@ namespace idk {
                 if (found != std::string::npos)
                     displayName.erase(found, fluffText.size());
 
-                /*
-                const string fluffText2{ ">(void)" };
-                found = displayName.find(fluffText2);
-                if (found != std::string::npos)
-                    displayName.erase(found, fluffText2.size());
-
-                */
 
 
                 if (ImGui::MenuItem(displayName.c_str())) {
@@ -243,7 +229,7 @@ namespace idk {
         }
     }
 
-    void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
+	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
 	{
 		//The c_name is to just get the first gameobject
 		static string stringBuf{};
@@ -286,8 +272,8 @@ namespace idk {
 			ImGui::TextDisabled("Multiple gameobjects selected");
 
 
-        ImGui::Text("Tag");
-        ImGui::SameLine();
+		ImGui::Text("Tag");
+		ImGui::SameLine();
 
         auto curr_tag = game_object->Tag();
         if (ImGui::BeginCombo("##tag", curr_tag.size() ? curr_tag.data() : "Untagged"))
@@ -298,6 +284,11 @@ namespace idk {
             {
                 if (ImGui::MenuItem(tag.data()))
                     game_object->Tag(tag);
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Add Tag##_add_tag_"))
+            {
+                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->Focus<TagSystem>();
             }
             ImGui::EndCombo();
         }
@@ -482,8 +473,8 @@ namespace idk {
 		if (ImGui::CollapsingHeader("Animator", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
 		{
 			//Draw All your custom variables here.
-			// Display the current animation
-			
+// Display the current animation
+
 			if (ImGui::BeginCombo("Start State", c_anim->GetStateName(c_anim->_start_animation).c_str()))
 			{
 				for (size_t i = 0; i < c_anim->_animations.size(); ++i)
@@ -511,7 +502,7 @@ namespace idk {
 				}
 				ImGui::EndCombo();
 			}
-			
+
 			if (ImGui::Checkbox("Preview", &c_anim->_preview_playback))
 			{
 				if (!c_anim->_preview_playback)
@@ -519,7 +510,7 @@ namespace idk {
 					c_anim->_elapsed = 0.0f;
 					c_anim->RestoreBindPose();
 				}
-			}
+			}			
 
 			if (ImGui::Button("Play"))
 			{
@@ -613,8 +604,10 @@ namespace idk {
 	void IGE_InspectorWindow::MenuItem_RemoveComponent(GenericHandle i)
 	{
 		if (ImGui::MenuItem("Remove Component")) {
-			isComponentMarkedForDeletion = true;
-			componentNameMarkedForDeletion = (*i).type.name();
+			IDE& editor = Core::GetSystem<IDE>();
+			for (Handle<GameObject> gameObject : editor.selected_gameObjects)
+				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+
 		}
 	}
 
@@ -628,12 +621,34 @@ namespace idk {
 	void IGE_InspectorWindow::MenuItem_PasteComponent()
 	{
 		if (ImGui::MenuItem("Paste Component")) {
-			//if (Core::GetSystem<IDE>().copied_component != reflect::dynamic{}) {
-			//	reflect::dynamic newComponent{};
-			//	parse_text(Core::GetSystem<IDE>().copied_component, newComponent);
-			//	string compName = string{ newComponent.type.name() };
-			//	std::cout << "Component pasted is " << compName << std::endl;
-			//}
+			IDE& editor = Core::GetSystem<IDE>();
+			if (!editor.copied_component.valid())
+				return;
+
+			for (auto& i : editor.selected_gameObjects) {
+				GenericHandle componentToMod = i->GetComponent(editor.copied_component.type);
+				if (componentToMod) { //Name cannot be pasted as there is no button to copy
+					//replace values
+					if (componentToMod == i->GetComponent<Transform>()) {
+						//If transform, only modify values
+						std::cout << "Modify transform values\n";
+
+
+
+
+					}
+					else {
+						//Mark to remove Component
+						string compName = string((*componentToMod).type.name());
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, compName));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, editor.copied_component)); //Remember commands are flushed at end of each update!
+					}
+				}
+				else {
+					//Add component
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, editor.copied_component));
+				}
+			}
 		}
 	}
 

@@ -35,9 +35,6 @@ namespace idk {
 	private:
         GenericResourceHandle _displayed_asset{ RscHandle<Texture>() }; // if false, show gameobject(s)
 
-		bool isComponentMarkedForDeletion = false;
-		string componentNameMarkedForDeletion{}; //Is empty by default
-
         Handle<PrefabInstance> _prefab_inst;
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
