@@ -20,7 +20,6 @@ namespace idk
 		PathHandle			GetFile					(string_view mountPath)				const;
 		PathHandle			GetDir					(string_view mountPath)				const;
 		string				ConvertFullToVirtual	(string_view fullPath)				const;
-		string				ConvertVirtualToFull	(string_view mountPath)				const;
 		
 		string				GetFullPath				(string_view mountPath)				const;
 		vector<PathHandle>	GetFilesWithExtension	(string_view mountPath,
@@ -61,11 +60,8 @@ namespace idk
 		
 		// Making a directory/renaming
 		// =====================================================================================================
-		bool MakeDir(string_view mountPath, bool signal = false); // Should create all sub directories if they dont exists
-		bool DeleteDir(PathHandle dir, bool signal = false);
-		bool Rename(string_view mountPath, string_view new_name, bool signal = false);
-		bool Copy(PathHandle from, PathHandle to, bool overwrite = true, bool signal = false);	// to must exists for now
-		bool CopyAndDelete(PathHandle from, PathHandle to, bool overwrite = true, bool signal = false);	// to must exists for now
+		int Mkdir(string_view mountPath); // Should create all sub directories if they dont exists
+		bool Rename(string_view mountPath, string_view new_name);
 		// TODO: Copy, paste, delete
 		
 		// Debug

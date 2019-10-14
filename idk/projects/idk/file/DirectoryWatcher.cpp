@@ -55,18 +55,14 @@ namespace idk
 		// false = returns when any one of the handles signal
 		// 0     = No waiting, function immediately returns
 		dir._status = WaitForMultipleObjects(3, dir._watch_handle, false, 0);
-		
+
 		switch (dir._status)
 		{
 		case WAIT_OBJECT_0:
 		{
 			// Directory Created/Deleted/Renamed/Replaced
-			created_dirs.clear();
-			deleted_dirs.clear();
 			RefreshTree(dir);
-			std::cout << "RefreshTree: " << std::endl;
-			std::cout << "TOTAL DIRECTORIES CHANGED: " << changed_dirs.size() << std::endl;
-			std::cout << "TOTAL FILES CHANGED: " << changed_files.size() << std::endl;
+
 			if (FindNextChangeNotification(dir._watch_handle[0]) == FALSE) {
 				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
 			}
@@ -75,12 +71,8 @@ namespace idk
 		case WAIT_OBJECT_0 + 1:
 		{
 			// File Created/Deleted/Renamed/Replaced
-			created_files.clear();
-			deleted_files.clear();
 			RefreshDir(dir);
-			std::cout << "RefreshDir: " << std::endl;
-			std::cout << "TOTAL DIRECTORIES CHANGED: " << changed_dirs.size() << std::endl;
-			std::cout << "TOTAL FILES CHANGED: " << changed_files.size() << std::endl;
+
 			if (FindNextChangeNotification(dir._watch_handle[1]) == FALSE) {
 				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
 			}
@@ -280,23 +272,10 @@ namespace idk
 			{
 				const auto key = fileCreate(mountDir, tmp);
 
-				auto& f = vfs.getFile(key);
-				
-
-				auto was_deleted = deleted_files.find(f._filename);
-				if (was_deleted != deleted_files.end())
-				{
-					f._change_status = FS_CHANGE_STATUS::MOVED;
-					std::cout << "[FILE SYSTEM] File Moved: " << "\n"
-						"\t Path: " << f._full_path << "\n" << std::endl;
-				}
-				else
-				{
-					created_files.emplace(f._filename, key);
-					std::cout << "[FILE SYSTEM] File Created: " << "\n"
-						"\t Path: " << f._full_path << "\n" << std::endl;
-				}
-				//break;
+				const auto& f = vfs.getFile(key);
+				std::cout << "[FILE SYSTEM] File Created: " << "\n"
+							 "\t Path: " << f._full_path << "\n" << std::endl;
+				break;
 			}
 		}
 	}
@@ -311,21 +290,8 @@ namespace idk
 			{
 				fileDelete(internal_file);
 				
-				
-
-				auto was_created = created_files.find(internal_file._filename);
-				if (was_created != created_files.end())
-				{
-					internal_file._change_status = FS_CHANGE_STATUS::MOVED;
-					std::cout << "[FILE SYSTEM] File Moved: " << "\n"
-						"\t Path: " << internal_file._full_path << "\n" << std::endl;
-				}
-				else
-				{
-					deleted_files.emplace(internal_file._filename, internal_file._tree_index);
-					std::cout << "[FILE SYSTEM] File Deleted: " << "\n"
-						"\t Path: " << internal_file._full_path << "\n" << std::endl;
-				}
+				std::cout << "[FILE SYSTEM] File Deleted: " << "\n"
+							 "\t Path: " << internal_file._full_path << "\n" << std::endl;
 			}
 		}
 
@@ -361,7 +327,7 @@ namespace idk
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 									 "\t Prev Path: " << prev_path << "\n"
 									 "\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
-						// return;
+						return;
 					}
 				}
 			}
@@ -404,7 +370,7 @@ namespace idk
 				internal_file._change_status = FS_CHANGE_STATUS::WRITTEN;
 
 				changed_files.push_back(internal_file._tree_index);
-				// return;
+				return;
 			}
 		}
 		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
@@ -433,13 +399,12 @@ namespace idk
 				// Create the new dir
 				const auto key = dirCreate(mountDir, tmp);
 
-
 				auto& d = vfs.getDir(key);
 				std::cout << "[FILE SYSTEM] Dir Created: " << "\n"
 							 "\t Path: " << d._full_path << "\n" << std::endl;
 							
 				recurseAndAdd(d);
-				//break;
+				break;
 			}
 		}
 	}
@@ -494,7 +459,7 @@ namespace idk
 							"\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
 
 						recurseAndRename(internal_dir);
-						// return;
+						return;
 					}
 				}
 			}
@@ -646,7 +611,7 @@ namespace idk
 		d._change_status = FS_CHANGE_STATUS::CREATED;
 
 		changed_dirs.push_back(d._tree_index);
-		
+
 		// WatchDirectory(d);
 
 		return d._tree_index;
@@ -674,11 +639,6 @@ namespace idk
 		dir._change_status = status;
 
 		changed_dirs.push_back(dir._tree_index);
-	}
-
-	void file_system_detail::DirectoryWatcher::finalizeRefreshDir()
-	{
-		
 	}
 
 	
