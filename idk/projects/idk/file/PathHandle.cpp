@@ -72,7 +72,7 @@ namespace idk
 
 #pragma region Contructors/Operators
 
-	PathHandle::PathHandle(const file_system_detail::fs_key& key, bool is_file)
+	PathHandle::PathHandle(string_view mountPath, const file_system_detail::fs_key& key, bool is_file)
 		:_key{ key }, _is_regular_file{ is_file }
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
@@ -83,6 +83,10 @@ namespace idk
 		else if(_key.IsValid())
 		{
 			_ref_count = vfs.getDir(_key).RefCount();
+		}
+		else
+		{
+			bad_mount_path = mountPath;
 		}
 	}
 
@@ -154,8 +158,7 @@ namespace idk
 		return fs;
 	}
 
-
-	bool PathHandle::Rename(string_view new_file_name)
+	bool PathHandle::Rename(string_view new_file_name, bool signal)
 	{
 		// Check Handle
 		if (validateFull() == false)
@@ -175,12 +178,15 @@ namespace idk
 				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
 				return false;
 			}
-			auto res = parent_dir._files_map.find(internal_file._filename);
-			assert(res != parent_dir._files_map.end());
-			parent_dir._files_map.erase(res);
+			if (!signal)
+			{
+				auto res = parent_dir._files_map.find(internal_file._filename);
+				assert(res != parent_dir._files_map.end());
+				parent_dir._files_map.erase(res);
 
-			vfs.initFile(internal_file, parent_dir, new_p);
-			parent_dir._files_map.emplace(internal_file._filename, internal_file._tree_index);
+				vfs.initFile(internal_file, parent_dir, new_p);
+				parent_dir._files_map.emplace(internal_file._filename, internal_file._tree_index);
+			}
 			return true;
 		}
 		else
@@ -201,16 +207,34 @@ namespace idk
 				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
 				return false;
 			}
-			auto res = parent_dir._sub_dirs.find(internal_dir._filename);
-			assert(res != parent_dir._sub_dirs.end());
-			parent_dir._sub_dirs.erase(res);
+			if (!signal)
+			{
+				auto res = parent_dir._sub_dirs.find(internal_dir._filename);
+				assert(res != parent_dir._sub_dirs.end());
+				parent_dir._sub_dirs.erase(res);
 
-			vfs.initDir(internal_dir, parent_dir, new_p);
-			parent_dir._sub_dirs.emplace(internal_dir._filename, internal_dir._tree_index);
-			renameDirUpdate();
-			
+				vfs.initDir(internal_dir, parent_dir, new_p);
+				parent_dir._sub_dirs.emplace(internal_dir._filename, internal_dir._tree_index);
+				renameDirUpdate();
+			}
 			return true;
 		}
+	}
+
+	bool PathHandle::CopyTo(string_view new_path, bool signal)
+	{
+		return false;
+	}
+
+	bool PathHandle::CopyAndDelete(string_view new_path, bool signal)
+	{
+		return false;
+	}
+
+	bool PathHandle::Reinit()
+	{
+		*this = Core::GetSystem<FileSystem>().GetPath(bad_mount_path);
+		return validateFull();
 	}
 
 #pragma endregion Utility
@@ -231,7 +255,7 @@ namespace idk
 			auto& internal_dir = vfs.getDir(dir_index.second);
 			if (internal_dir.IsValid())
 			{
-				PathHandle h{ internal_dir._tree_index, false };
+				PathHandle h{ internal_dir._mount_path, internal_dir._tree_index, false };
 				if ((filters & FS_FILTERS::DIR) == FS_FILTERS::DIR)
 					out.emplace_back(h);
 
@@ -251,7 +275,7 @@ namespace idk
 					if ((filters & FS_FILTERS::EXT) == FS_FILTERS::EXT && internal_file._extension != ext)
 						continue;
 
-					PathHandle h{ internal_file._tree_index, true };
+					PathHandle h{ internal_file._mount_path, internal_file._tree_index, true };
 					out.emplace_back(h);
 				}
 			}
@@ -423,7 +447,9 @@ namespace idk
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
 		if (_key.IsValid() == false)
+		{
 			return false;
+		}
 
 		// Only checks if the ref count is correct. Ref count is inc when file deleted
 		if (_is_regular_file)
@@ -501,7 +527,7 @@ namespace idk
 			auto& internal_dir = vfs.getDir(dir_index.second);
 			if (internal_dir.IsValid())
 			{
-				PathHandle h{ internal_dir._tree_index, false };
+				PathHandle h{ internal_dir._mount_path, internal_dir._tree_index, false };
 				if ((filters & FS_FILTERS::DIR) == FS_FILTERS::DIR)
 					out.emplace_back(h);
 
@@ -521,7 +547,7 @@ namespace idk
 					if ((filters & FS_FILTERS::EXT) == FS_FILTERS::EXT && internal_file._extension != ext)
 						continue;
 
-					PathHandle h{ internal_file._tree_index, true };
+					PathHandle h{ internal_file._mount_path, internal_file._tree_index, true };
 					out.emplace_back(h);
 				}
 			}

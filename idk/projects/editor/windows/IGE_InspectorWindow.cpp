@@ -22,7 +22,9 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/utils.h>
+#include <file/FileSystem.h>
 #include <common/TagSystem.h>
 #include <anim/AnimationSystem.h>
 #include <app/Application.h>
@@ -40,7 +42,7 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <imgui/imgui_internal.h> //InputTextEx
 #include <iostream>
-
+#define JOSEPH_TEST 0
 
 namespace idk {
 
@@ -273,18 +275,23 @@ namespace idk {
 		ImGui::Text("Tag");
 		ImGui::SameLine();
 
-		auto curr_tag = game_object->Tag();
-		if (ImGui::BeginCombo("##tag", curr_tag.size() ? curr_tag.data() : "Untagged"))
-		{
-			if (ImGui::MenuItem("Untagged"))
-				game_object->Tag("");
-			for (const auto& tag : Core::GetSystem<TagSystem>().GetConfig().tags)
-			{
-				if (ImGui::MenuItem(tag.data()))
-					game_object->Tag(tag);
-			}
-			ImGui::EndCombo();
-		}
+        auto curr_tag = game_object->Tag();
+        if (ImGui::BeginCombo("##tag", curr_tag.size() ? curr_tag.data() : "Untagged"))
+        {
+            if (ImGui::MenuItem("Untagged"))
+                game_object->Tag("");
+            for (const auto& tag : Core::GetSystem<TagSystem>().GetConfig().tags)
+            {
+                if (ImGui::MenuItem(tag.data()))
+                    game_object->Tag(tag);
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Add Tag##_add_tag_"))
+            {
+                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->Focus<TagSystem>();
+            }
+            ImGui::EndCombo();
+        }
 	}
 
     void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
@@ -401,8 +408,19 @@ namespace idk {
             TransformModifiedCheck();
 
             ImGui::PopItemWidth();
-
-
+#if JOSEPH_TEST
+			static string dir_string;
+			ImGui::InputText("Directory", &dir_string);
+			if (ImGui::Button("Make Directory"))
+			{
+				Core::GetSystem<FileSystem>().MakeDir(dir_string);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Delete Directory"))
+			{
+				Core::GetSystem<FileSystem>().DeleteDir(dir_string);
+			}
+#endif
 
 			if (hasChanged) {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {

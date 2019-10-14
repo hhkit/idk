@@ -21,6 +21,12 @@ namespace idk::file_system_detail
 		vector<fs_key> changed_files;
 		vector<fs_key> changed_dirs;
 
+		hash_table<string, fs_key> created_files;
+		hash_table<string, fs_key> deleted_files;
+
+		hash_table<string, fs_key> created_dirs;
+		hash_table<string, fs_key> deleted_dirs;
+
 		void checkFilesCreated	(file_system_detail::fs_dir& dir);
 		void checkFilesDeleted	(file_system_detail::fs_dir& dir);
 		void checkFilesRenamed	(file_system_detail::fs_dir& dir);
@@ -42,6 +48,8 @@ namespace idk::file_system_detail
 		file_system_detail::fs_key	dirCreate(file_system_detail::fs_dir& dir, const std::filesystem::path& p);
 		void						dirDelete(file_system_detail::fs_dir& dir);
 		void						dirRename(file_system_detail::fs_dir& Mountdir, file_system_detail::fs_dir& dir, const std::filesystem::path& p, FS_CHANGE_STATUS status = FS_CHANGE_STATUS::RENAMED);
+
+		void finalizeRefreshDir();
 	};
 	
 }
