@@ -81,17 +81,14 @@ namespace idk
 		FStreamWrapper		Open(FS_PERMISSIONS perms, bool binary_stream = false);
 		FILEWrapper			OpenC(FS_PERMISSIONS perm, bool binary_stream = false);
 
-		bool				Rename(string_view new_file_name, bool signal = false);
-		bool				CopyTo(string_view new_path, bool signal = false);
-		bool				CopyAndDelete(string_view new_path, bool signal = false);
-		bool				Reinit();
+		bool				Rename(string_view new_file_name);
 
 		explicit	operator bool() const;
 
 		friend class FileSystem;
 		friend class FStreamWrapper;
 	private:
-		PathHandle(string_view mountPath, const file_system_detail::fs_key& key, bool is_file = true);
+		PathHandle(const file_system_detail::fs_key& key, bool is_file = true);
 
 		// Use this if you don't care if the file really exists or not. 
 		bool validate() const;
@@ -105,6 +102,5 @@ namespace idk
 		file_system_detail::fs_key _key{};
 		int16_t _ref_count   { -1 };
 		bool _is_regular_file{ true };
-		string bad_mount_path;
 	};
 }

@@ -14,7 +14,6 @@ namespace idk {
 #pragma region ISystem Stuff
 	void FileSystem::Init()
 	{
-#ifdef TEST
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
@@ -23,26 +22,6 @@ namespace idk {
 		_exe_dir = FS::path{ _exe_dir }.generic_string();
 		_sol_dir = FS::path{ _sol_dir }.generic_string();
 		_app_data_dir = FS::path{ _app_data_dir }.generic_string();
-#else
-		char buffer[MAX_PATH] = { 0 };
-
-		// Get the program directory
-		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-		if (bytes == 0)
-			std::cout << "[File System] Unable to get program directory." << std::endl;
-		_exe_dir = string{ buffer };
-		auto pos = _exe_dir.find_last_of("\\");
-		_exe_dir = _exe_dir.substr(0, pos);
-
-		_exe_dir = FS::path{ _exe_dir }.generic_string();
-		_sol_dir = _exe_dir;
-		_app_data_dir = _exe_dir;
-		//if (!_getcwd(buffer, sizeof(buffer)))
-		//	std::cout << "[File System] Unable to get solution directory." << std::endl;
-		//return string{ buffer };
-
-#endif
-
 		
 	}
 
@@ -120,7 +99,7 @@ namespace idk {
 		if (file_index.IsValid() == false)
 			return PathHandle{};
 
-		return PathHandle{ mountPath, file_index, true };
+		return PathHandle{ file_index, true };
 	}
 
 	PathHandle FileSystem::GetDir(string_view mountPath) const
@@ -130,7 +109,7 @@ namespace idk {
 			return PathHandle{};
 
 	
-		return PathHandle{ mountPath, dir_index, false};
+		return PathHandle{ dir_index, false};
 	}
 
 	string FileSystem::ConvertFullToVirtual(string_view fullPath) const
@@ -159,30 +138,6 @@ namespace idk {
 		return ret_path;
 	}
 
-	string FileSystem::ConvertVirtualToFull(string_view mountPath) const
-	{
-		string mount_path{ mountPath.data() };
-		string full_path;
-
-		if (mount_path[0] != '/')
-			return full_path;
-
-		const auto end_pos = mount_path.find_first_of('/', 1);
-
-		string mount_key = mount_path.substr(0, end_pos);
-		const auto mount_index = validateMountPath(mountPath);
-		if (mount_index >= 0)
-		{
-			// Check if there are even mounts. If this hits, something is terribly wrong...
-			if (_mounts.empty())
-				throw("Something is terribly wrong. No mounts found.");
-
-			full_path = _mounts[mount_index]._full_path + mount_path.substr(end_pos);
-		}
-
-		return full_path;
-	}
-
 	bool FileSystem::Exists(string_view mountPath) const
 	{
 		return ExistsFull(GetFullPath(mountPath));
@@ -200,14 +155,14 @@ namespace idk {
 	vector<PathHandle> FileSystem::GetFilesWithExtension(string_view mountPath, string_view extension, FS_FILTERS filters) const
 	{
 		const auto dir_index = getDir(mountPath);
-		const PathHandle h{ mountPath, dir_index, false };
+		const PathHandle h{ dir_index, false };
 		return h.GetFilesWithExtension(extension, filters);
 	}
 
 	vector<PathHandle> FileSystem::GetEntries(string_view mountPath, FS_FILTERS filters, string_view ext) const
 	{
 		const auto dir_index = getDir(mountPath);
-		const PathHandle h{ mountPath, dir_index, false };
+		const PathHandle h{ dir_index, false };
 		return h.GetEntries(filters, ext);
 	}
 
@@ -222,7 +177,7 @@ namespace idk {
 		{
 			auto& file = getFile(key);
 			
-			PathHandle h{ file._mount_path, file._tree_index, true };
+			PathHandle h{ file._tree_index, true };
 			handles.emplace_back(h);
 		}
 
@@ -238,7 +193,7 @@ namespace idk {
 
 			if (file._extension == ext)
 			{
-				PathHandle h{ file._mount_path, file._tree_index, true };
+				PathHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -254,7 +209,7 @@ namespace idk {
 			auto& file = getFile(key);
 			if (file._change_status == change)
 			{
-				PathHandle h{ file._mount_path, file._tree_index, true };
+				PathHandle h{ file._tree_index, true };
 				handles.emplace_back(h);
 			}
 		}
@@ -312,103 +267,28 @@ namespace idk {
 			{
 				const auto& internal_file = createAndGetFile(mountPath);
 				
-				PathHandle handle{ internal_file._mount_path, internal_file._tree_index, true };
+				PathHandle handle{ internal_file._tree_index, true };
 				return handle.Open(perms, binary_stream);
 			}
 		}
 		else
 		{
 			const auto& internal_file = getFile(file_index);
-			PathHandle handle{ internal_file._mount_path, internal_file._tree_index, true };
+			PathHandle handle{internal_file._tree_index, true};
 
 			return handle.Open(perms, binary_stream);
 		}
 	}
 
-	bool FileSystem::MakeDir(string_view mountPath, bool signal)
+	int FileSystem::Mkdir(string_view mountPath)
 	{
-		string mount_path{ mountPath.data() };
-		string full_path;
-
-		if (mount_path[0] != '/')
-			return false;
-
-		const auto end_pos = mount_path.find_first_of('/', 1);
-
-		string mount_key = mount_path.substr(0, end_pos);
-		const auto mount_index = validateMountPath(mountPath);
-		if (mount_index < 0)
-			return false;
-		if (_mounts.empty())
-			return false;
-
-		full_path = _mounts[mount_index]._full_path + mount_path.substr(end_pos);
-
-		file_system_detail::fs_key start_create_key{ s_cast<int8_t>(mount_index), 0, 0 };
-		size_t token_id = 1;
-		auto path_tokens = tokenizePath(mountPath);
-		// Look to see which directory is the start point for create
-		for (token_id = 1; token_id < path_tokens.size(); ++token_id)
-		{
-			auto& dir_to_check = path_tokens[token_id];
-			auto& curr_dir = getDir(start_create_key);
-			bool found = false;
-			for (auto& dir : curr_dir._sub_dirs)
-			{
-				if (dir_to_check == dir.first)
-				{
-					found = true;
-					start_create_key = dir.second;
-					break;
-				}
-			}
-			if (found == false)
-				break;
-		}
-
-
-		//try {
-		//	FS::create_directories(FS::path{ full_path });
-		//}
-		//catch (const FS::filesystem_error& e)
-		//{
-		//	std::cout << "[FileSystem Error] MakeDir: " << e.what() << std::endl;
-		//	return false;
-		//}
-		
-		// Need to recurse and see what files have been created
-		for (; token_id < path_tokens.size(); ++token_id)
-		{
-			auto& internal_dir = getDir(start_create_key);
-			FS::path new_p{ internal_dir._full_path + path_tokens[token_id] };
-
-		}
-		return true;
+		UNREFERENCED_PARAMETER(mountPath);
+		// Testing for now.
+		// FS::create_directories(FS::path{ "C:/Users/Joseph/Desktop/GIT/idk_legacy/Koboru/Koboru/resource/editor/test" });
+		return 0;
 	}
 
-	bool FileSystem::DeleteDir(PathHandle dir, bool signal)
-	{
-		// Must be valid handle and a directory
-		if(!dir || !dir.IsDir())
-			return false;
-
-		try {
-			FS::remove_all(dir.GetFullPath());
-		}
-		catch (const FS::filesystem_error& e)
-		{
-			std::cout << "[FileSystem Error] DeleteDir: " << e.what() << std::endl;
-			return false;
-		}
-
-		auto& internal_dir = getDir(dir._key);
-		auto& parent_dir = getDir(internal_dir._parent);
-		// Recurse and remove all files and directories from the current internal dir
-
-		return true;
-	}
-
-	bool FileSystem::Rename(string_view mountPath, string_view new_name, bool signal)
+	bool FileSystem::Rename(string_view mountPath, string_view new_name)
 	{
 		// Try getting the file
 		PathHandle handle = GetFile(mountPath);
@@ -421,25 +301,6 @@ namespace idk {
 			return handle.Rename(new_name);
 
 		throw(FS_ERROR_CODE::FILESYSTEM_NOT_FOUND, "[FILE SYSTEM] mountPath cannot be found.");
-	}
-
-	bool FileSystem::Copy(PathHandle from, PathHandle to, bool overwrite, bool signal)
-	{
-		return false;
-	}
-
-	bool FileSystem::CopyAndDelete(PathHandle from, PathHandle to, bool overwrite, bool signal)
-	{
-		const bool copy_res = Copy(from, to, overwrite, signal);
-		if (!copy_res)
-			return false;
-
-		bool delete_res = false;
-		if (from.IsDir())
-			delete_res = DeleteDir(from, signal);
-		else
-			delete_res = DeleteDir(from.GetParentMountPath(), signal);
-		return delete_res;
 	}
 
 #pragma endregion Utility
@@ -884,6 +745,25 @@ namespace idk {
 			}
 		}
 	}
+
+	// void FileSystem::recurseSubDirExtensions(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
+	// {
+	// 	for (auto& file_index : subDir._files_map)
+	// 	{
+	// 		auto& internal_file = getFile(file_index.second);
+	// 		if (internal_file._extension == extension)
+	// 		{
+	// 			PathHandle h{ internal_file._tree_index, true };
+	// 			vec_handles.emplace_back(h);
+	// 		}
+	// 	}
+	// 
+	// 	for (auto& dir_index : subDir._sub_dirs)
+	// 	{
+	// 		auto& internal_dir = getDir(dir_index.second);
+	// 		recurseSubDirExtensions(vec_handles, internal_dir, extension);
+	// 	}
+	// }
 
 #pragma endregion Helper Recurse
 
