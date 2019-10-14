@@ -25,7 +25,7 @@ namespace idk
 
         bool outer_changed = false;
 
-        dyn.visit([&](auto&& key, auto&& val, int /*depth_change*/)
+        dyn.visit([&](auto&& key, auto&& val, int depth_change)
         {
             using K = std::decay_t<decltype(key)>;
             using T = std::decay_t<decltype(val)>;
@@ -34,21 +34,28 @@ namespace idk
 
             if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
                 return true;
-            else if constexpr (!std::is_same_v<K, const char*>)
-                throw "Unhandled case";
             else
             {
-                string keyName = format_name(key);
+                string keyName = "";
+                if constexpr (std::is_same_v<K, const char*>)
+                    keyName = format_name(key);
+                else if constexpr (std::is_integral_v<K>)
+                    keyName = serialize_text(key);
+                else
+                    throw "unhandled case?";
+
+                while (depth_change++ < 0)
+                    ImGui::Unindent();
 
                 ImGui::BeginGroup();
 
                 ImGui::SetCursorPosY(currentHeight + pad_y);
-                ImGui::Text("");
+                ImGui::Text(keyName.c_str());
 
                 ImGui::SetCursorPosY(currentHeight);
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
-                ImGui::PushID("");
+                ImGui::PushID(keyName.c_str());
                 ImGui::PushItemWidth(item_width);
 
                 bool changed = false;
@@ -82,6 +89,18 @@ namespace idk
                 else if constexpr (std::is_same_v<T, rad>)
                 {
                     changed |= ImGui::SliderAngle("", val.data());
+                }
+                else if constexpr (std::is_same_v<T, string>)
+                {
+                    changed |= ImGui::InputText("", val.data(), val.size() + 1, ImGuiInputTextFlags_CallbackResize,
+                                                [](ImGuiInputTextCallbackData* data)
+                                                {
+                                                    auto* str = reinterpret_cast<string*>(data->UserData);
+                                                    str->resize(data->BufTextLen);
+                                                    data->Buf = str->data();
+                                                    return 0;
+                                                },
+                                                &val);
                 }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
@@ -125,13 +144,13 @@ namespace idk
                 else if constexpr (is_sequential_container_v<T>)
                 {
                     reflect::uni_container cont{ val };
-                    ImGui::Button("+");
-                    ImGui::Indent();
-                    for (auto dyn : cont)
+                    if (ImGui::Button("+"))
                     {
-                        displayVal(dyn);
+                        cont.add(cont.value_type.create());
                     }
-                    ImGui::Unindent();
+                    ImGui::Indent();
+
+                    recurse = true;
                 }
                 else if constexpr (is_associative_container_v<T>)
                 {
@@ -150,10 +169,11 @@ namespace idk
                 {
                     ImGui::NewLine();
                     ImGui::Indent();
-                    displayVal(val);
-                    ImGui::Unindent();
-                    /*ImGui::SetCursorPosY(currentHeight + heightOffset);
-                    ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
+                    //displayVal(val);
+                    //ImGui::Unindent();
+                    ///*ImGui::SetCursorPosY(currentHeight + heightOffset);
+                    //ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
+                    recurse = true;
                 }
 
                 ImGui::EndGroup();
@@ -181,9 +201,9 @@ namespace idk
     void DisplayConfig<TagSystem>()
     {
         auto& sys = Core::GetSystem<TagSystem>();
-        const auto& config = sys.GetConfig();
-
-        displayVal(config);
+        auto config = sys.GetConfig();
+        if (displayVal(config))
+            sys.SetConfig(config);
     }
 
 
