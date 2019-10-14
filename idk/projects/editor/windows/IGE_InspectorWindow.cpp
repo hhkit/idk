@@ -22,6 +22,7 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/utils.h>
 #include <common/TagSystem.h>
 #include <anim/AnimationSystem.h>
@@ -297,6 +298,11 @@ namespace idk {
             {
                 if (ImGui::MenuItem(tag.data()))
                     game_object->Tag(tag);
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Add Tag##_add_tag_"))
+            {
+                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->Focus<TagSystem>();
             }
             ImGui::EndCombo();
         }

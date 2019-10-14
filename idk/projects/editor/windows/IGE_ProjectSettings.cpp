@@ -8,8 +8,9 @@ namespace idk
 {
 
     IGE_ProjectSettings::IGE_ProjectSettings()
-        : IGE_IWindow{ "Project Settings", false }
+        : IGE_IWindow{ "Project Settings", false, ImVec2(500.0f, 750.0f) }
     {
+        window_flags = 0;
     }
 
     void IGE_ProjectSettings::BeginWindow()
@@ -202,16 +203,67 @@ namespace idk
     {
         auto& sys = Core::GetSystem<TagSystem>();
         auto config = sys.GetConfig();
-        if (displayVal(config))
+
+        const float item_width = ImGui::GetWindowContentRegionWidth() * 0.6f;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+        const float btn_width = ImGui::GetTextLineHeight() + pad_y * 2;
+        bool changed = false;
+
+        ImGui::PushItemWidth(item_width - btn_width - ImGui::GetStyle().ItemSpacing.x);
+
+        ImGui::PushID("tags");
+        if (ImGui::TreeNodeEx("Tags", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
+        {
+            for (int i = 0; i < config.tags.size(); ++i)
+            {
+                const float cursor_y = ImGui::GetCursorPosY();
+                ImGui::SetCursorPosY(cursor_y + pad_y);
+                ImGui::Text("User Tag %d", i + 1);
+
+                ImGui::SetCursorPosY(cursor_y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+
+                ImGui::PushID(i);
+
+                char buf[32];
+                strcpy_s(buf, config.tags[i].data());
+
+                ImGui::InputText("", buf, 32);
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    config.tags[i] = buf;
+                    changed = true;
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("-", ImVec2(btn_width, 0)))
+                {
+                    config.tags.erase(config.tags.begin() + i);
+                    --i;
+                    changed = true;
+                }
+
+                ImGui::PopID();
+            }
+
+            if (ImGui::Button("Add Tag"))
+            {
+                config.tags.push_back("NewTag");
+                changed = true;
+            }
+
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+
+        ImGui::PopItemWidth();
+
+        if (changed)
             sys.SetConfig(config);
     }
 
 
-    enum config
-    {
-        _tags_and_layers = 0,
-        _max
-    };
+
     static const char* config_labels[]
     {
         "Tags and Layers"

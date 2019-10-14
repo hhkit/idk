@@ -11,7 +11,20 @@ namespace idk
         virtual void BeginWindow() override;
         virtual void Update() override;
 
+        template<typename T>
+        void Focus()
+        {
+            if constexpr (std::is_same_v<T, TagSystem>)
+                _selection = _tags_and_layers;
+        }
+
     private:
+        enum config
+        {
+            _tags_and_layers = 0,
+            _max
+        };
+
         int _selection = 0;
     };
 }
