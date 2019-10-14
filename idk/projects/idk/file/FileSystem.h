@@ -38,17 +38,12 @@ namespace idk
 		string_view GetSolutionDir	()	const noexcept { return _sol_dir; }
 		string_view GetAppDataDir	()	const noexcept { return _app_data_dir; }
 		string_view GetExeDir		()	const noexcept { return _exe_dir; }
-		string_view GetAssetDir		()	const noexcept { return _asset_dir; }
 		
 		// File changes
 		// =====================================================================================================
 		vector<PathHandle>  QueryFileChangesAll			()								const;
 		vector<PathHandle>  QueryFileChangesByExt		(string_view ext)				const;
 		vector<PathHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
-
-		// Some setters
-		// =====================================================================================================
-		void		SetAssetDir(string_view dir) { _asset_dir = dir; }
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
 		// =====================================================================================================
@@ -84,7 +79,6 @@ namespace idk
 		string _sol_dir;
 		string _app_data_dir;
 		string _exe_dir;
-		string _asset_dir;
 
 		file_system_detail::fs_file		_empty_file;
 		file_system_detail::fs_dir		_empty_dir;

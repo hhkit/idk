@@ -16,7 +16,7 @@
 
 #include <res/ResourceManager.h>
 #include <scene/SceneManager.h>
-#include <scene/ProjectManager.h>
+#include <proj/ProjectManager.h>
 
 #include <script/ScriptSystem.h>
 

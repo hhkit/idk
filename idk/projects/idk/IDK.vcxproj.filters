@@ -512,9 +512,6 @@
     <ClInclude Include="util\ioutils.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="scene\ProjectManager.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="math\shapes.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -727,6 +724,9 @@
     <ClInclude Include="anim\AnimationState.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="proj\ProjectManager.h">
+      <Filter>scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -901,9 +901,6 @@
     <ClCompile Include="anim\AnimationSystem.cpp">
       <Filter>anim</Filter>
     </ClCompile>
-    <ClCompile Include="scene\ProjectManager.cpp">
-      <Filter>scene</Filter>
-    </ClCompile>
     <ClCompile Include="util\ioutils.cpp">
       <Filter>util</Filter>
     </ClCompile>
@@ -1047,6 +1044,9 @@
     </ClCompile>
     <ClCompile Include="script\MonoEnvironment.cpp">
       <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="proj\ProjectManager.cpp">
+      <Filter>scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

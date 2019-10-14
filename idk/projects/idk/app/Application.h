@@ -6,10 +6,15 @@
 
 namespace idk
 {
-	enum DialogOptions
+    enum class DialogType
+    {
+        Open, Save
+    };
+	struct DialogOptions
 	{
-		Open,
-		Save,
+        string_view filter_name;
+        string_view extension;
+        DialogType type = DialogType::Open;
 	};
 
 	class Application
@@ -45,6 +50,6 @@ namespace idk
 		virtual string GetExecutableDir() = 0;
 		virtual string GetAppData() = 0;
 		virtual string GetCurrentWorkingDir() = 0;
-		virtual opt<string> OpenFileDialog(string_view extension = ".*", DialogOptions save_dialog = DialogOptions::Open) = 0;
+		virtual opt<string> OpenFileDialog(const DialogOptions& dialog) = 0;
 	};
 }

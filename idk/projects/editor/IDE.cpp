@@ -36,6 +36,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <imgui/ImGuizmo.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
+#include <proj/ProjectManager.h>
 
 namespace idk
 {
@@ -45,6 +46,21 @@ namespace idk
 
 	void IDE::Init()
 	{
+        auto& proj_manager = Core::GetSystem<ProjectManager>();
+        const auto recent_proj = proj_manager.GetRecentProjectPath();
+        if (recent_proj.empty())
+        {
+            const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
+            auto proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+            while (!proj)
+                proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+            proj_manager.LoadProject(*proj);
+        }
+        else
+            proj_manager.LoadProject(recent_proj);
+
+
+
 		// do imgui stuff
 
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())

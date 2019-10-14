@@ -44,7 +44,7 @@ namespace idk::win
 		string GetExecutableDir() override;
 		string GetAppData() override ;
 		string GetCurrentWorkingDir() override;
-		opt<string> OpenFileDialog(string_view extension, DialogOptions save_dialog) override;
+		opt<string> OpenFileDialog(const DialogOptions& dialog) override;
 
 		void PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func);
 

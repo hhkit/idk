@@ -16,7 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <app/Application.h>
-#include <scene/ProjectManager.h>
+#include <proj/ProjectManager.h>
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
@@ -102,7 +102,8 @@ namespace idk {
 
 			if (ImGui::MenuItem("Open Scene", "CTRL+O")) {
 				std::cout << "Open Scene\n";
-				if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext))
+
+                if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 				{
 					auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 					auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
@@ -137,7 +138,7 @@ namespace idk {
 						return string{ *path };
 					else
 					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext, DialogOptions::Save);
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
 						if (dialog_result)
 							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 						else 
@@ -168,7 +169,7 @@ namespace idk {
 						return string{ *path };
 					else
 					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext, DialogOptions::Save);
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
 						if (dialog_result)
 							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 						else

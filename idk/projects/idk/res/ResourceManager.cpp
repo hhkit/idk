@@ -137,9 +137,6 @@ namespace idk
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
-		fs.Mount(exe_dir + "/assets", "/assets");
-		fs.SetAssetDir(exe_dir + "/assets");
-
         fs.Mount(exe_dir + "/engine_data", "/engine_data");
 	}
 

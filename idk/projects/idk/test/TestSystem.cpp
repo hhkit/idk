@@ -12,7 +12,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
 #include <core/GameState.h>
-#include <scene/ProjectManager.h>
+#include <proj/ProjectManager.h>
 #include <gfx/DebugRenderer.h>
 #include <PauseConfigurations.h>
 #include <file/FileSystem.h>
