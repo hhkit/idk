@@ -275,7 +275,7 @@ namespace idk
 				const auto& f = vfs.getFile(key);
 				std::cout << "[FILE SYSTEM] File Created: " << "\n"
 							 "\t Path: " << f._full_path << "\n" << std::endl;
-				break;
+				// break;
 			}
 		}
 	}
@@ -327,7 +327,7 @@ namespace idk
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 									 "\t Prev Path: " << prev_path << "\n"
 									 "\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
-						return;
+						// return;
 					}
 				}
 			}
@@ -370,7 +370,7 @@ namespace idk
 				internal_file._change_status = FS_CHANGE_STATUS::WRITTEN;
 
 				changed_files.push_back(internal_file._tree_index);
-				return;
+				// return;
 			}
 		}
 		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
@@ -404,7 +404,7 @@ namespace idk
 							 "\t Path: " << d._full_path << "\n" << std::endl;
 							
 				recurseAndAdd(d);
-				break;
+				// break;
 			}
 		}
 	}
@@ -459,7 +459,7 @@ namespace idk
 							"\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
 
 						recurseAndRename(internal_dir);
-						return;
+						// return;
 					}
 				}
 			}
