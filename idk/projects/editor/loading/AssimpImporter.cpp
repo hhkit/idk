@@ -36,7 +36,7 @@ namespace idk
 
 		ai_helpers::Scene importer_scene;
 		const bool success = ai_helpers::Import(importer_scene, path_to_resource);
-		assert(success);
+		IDK_ASSERT_MSG(success, "[AssimpImporter] Assimp failed to load file.");
 		if (!success)
 			return ret_val;
 
@@ -207,7 +207,7 @@ namespace idk
 
 		ai_helpers::Scene importer_scene;
 		const bool success = ai_helpers::Import(importer_scene, path_to_resource);
-		assert(success);
+		IDK_ASSERT_MSG(success, "[AssimpImporter] Assimp failed to load file.");
 		if (!success)
 			return ret_val;
 
