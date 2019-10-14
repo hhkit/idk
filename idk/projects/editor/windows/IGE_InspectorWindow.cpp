@@ -23,6 +23,7 @@ of the editor.
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/utils.h>
+#include <file/FileSystem.h>
 #include <common/TagSystem.h>
 #include <anim/AnimationSystem.h>
 #include <app/Application.h>
@@ -40,7 +41,7 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <imgui/imgui_internal.h> //InputTextEx
 #include <iostream>
-
+#define JOSEPH_TEST 0
 
 namespace idk {
 
@@ -416,8 +417,19 @@ namespace idk {
             TransformModifiedCheck();
 
             ImGui::PopItemWidth();
-
-
+#if JOSEPH_TEST
+			static string dir_string;
+			ImGui::InputText("Directory", &dir_string);
+			if (ImGui::Button("Make Directory"))
+			{
+				Core::GetSystem<FileSystem>().MakeDir(dir_string);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Delete Directory"))
+			{
+				Core::GetSystem<FileSystem>().DeleteDir(dir_string);
+			}
+#endif
 
 			if (hasChanged) {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {

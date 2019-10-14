@@ -36,6 +36,7 @@ namespace idk
 		DELETED,
 		RENAMED,
 		WRITTEN,
+		MOVED,
 		PATH_CHANGED,
 
 		INVALID = -1
