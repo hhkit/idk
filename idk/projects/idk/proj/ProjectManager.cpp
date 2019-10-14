@@ -54,9 +54,13 @@ namespace idk
         fs::path configs = dir / "Config";
         if (!fs::exists(configs))
             fs::create_directory(configs);
-        core_fs.Mount(configs.string(), "/configs");
+        core_fs.Mount(configs.string(), "/config");
 
         fs::path recent_path = core_fs.GetAppDataDir();
+        recent_path /= "idk";
+        if (!fs::exists(recent_path))
+            fs::create_directory(recent_path);
+
         recent_path /= ".recent";
         std::ofstream recent_file{ recent_path };
         recent_file << full_path;
@@ -65,10 +69,14 @@ namespace idk
     string ProjectManager::GetRecentProjectPath() const
     {
         fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
+        recent_path /= "idk";
         recent_path /= ".recent";
         if (!fs::exists(recent_path))
             return "";
         std::ifstream recent_file{ recent_path };
-        return stringify(recent_file);
+        fs::path proj = stringify(recent_file);
+        if (!fs::exists(proj))
+            return "";
+        return proj.string();
     }
 }
