@@ -18,11 +18,22 @@ namespace idk {
 		game_object_handle = gameObject;
 	}
 
+	CMD_AddComponent::CMD_AddComponent(Handle<GameObject> gameObject,const reflect::dynamic& component) 
+		: component_name{}
+	{
+		game_object_handle = gameObject;
+		component_reflect.swap(component.copy());
+	}
+
 	bool CMD_AddComponent::execute()
 	{
 		if (game_object_handle) {
-			new_component_handle = game_object_handle->AddComponent(reflect::get_type(component_name));
+			if (!component_name.empty())
+				new_component_handle = game_object_handle->AddComponent(reflect::get_type(component_name));
 			//Find all Commands of similar objects in the controller and modify the handle to point to this!
+			else {
+				new_component_handle = game_object_handle->AddComponent(component_reflect);
+			}
 			return true;
 		}
 		return false;
