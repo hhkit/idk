@@ -14,7 +14,6 @@ namespace idk {
 #pragma region ISystem Stuff
 	void FileSystem::Init()
 	{
-#ifdef TEST
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
@@ -23,26 +22,6 @@ namespace idk {
 		_exe_dir = FS::path{ _exe_dir }.generic_string();
 		_sol_dir = FS::path{ _sol_dir }.generic_string();
 		_app_data_dir = FS::path{ _app_data_dir }.generic_string();
-#else
-		char buffer[MAX_PATH] = { 0 };
-
-		// Get the program directory
-		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-		if (bytes == 0)
-			std::cout << "[File System] Unable to get program directory." << std::endl;
-		_exe_dir = string{ buffer };
-		auto pos = _exe_dir.find_last_of("\\");
-		_exe_dir = _exe_dir.substr(0, pos);
-
-		_exe_dir = FS::path{ _exe_dir }.generic_string();
-		_sol_dir = _exe_dir;
-		_app_data_dir = _exe_dir;
-		//if (!_getcwd(buffer, sizeof(buffer)))
-		//	std::cout << "[File System] Unable to get solution directory." << std::endl;
-		//return string{ buffer };
-
-#endif
-
 		
 	}
 
