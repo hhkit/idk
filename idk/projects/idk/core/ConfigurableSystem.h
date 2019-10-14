@@ -16,7 +16,7 @@ namespace idk
         const Config& GetConfig() const { return _config; }
 
     protected:
-        virtual void ApplyConfig(const Config& config) = 0;
+        virtual void ApplyConfig(Config& config) = 0;
 
     private:
         Config _config;

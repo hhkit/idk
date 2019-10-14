@@ -118,7 +118,9 @@ namespace idk {
                 //Skip Name and Transform and PrefabInstance
 				if (component == c_transform ||
 					component.is_type<PrefabInstance>() ||
-					component.is_type<Name>())                    
+					component.is_type<Name>() ||
+					component.is_type<Tag>()
+                    )
 					continue;
 
                 if (component.is_type<Animator>())
@@ -288,7 +290,7 @@ namespace idk {
             ImGui::Separator();
             if (ImGui::MenuItem("Add Tag##_add_tag_"))
             {
-                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->Focus<TagSystem>();
+                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->FocusConfig<TagSystem>();
             }
             ImGui::EndCombo();
         }

@@ -12,8 +12,10 @@ namespace idk
         virtual void Update() override;
 
         template<typename T>
-        void Focus()
+        void FocusConfig()
         {
+            ImGui::SetWindowFocus(window_name);
+            is_open = true;
             if constexpr (std::is_same_v<T, TagSystem>)
                 _selection = _tags_and_layers;
         }
