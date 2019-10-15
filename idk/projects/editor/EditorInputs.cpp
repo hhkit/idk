@@ -37,8 +37,8 @@ namespace idk
 		if (app_sys.GetKey(Key::D))       tfm->position += + cam_vel * Core::GetRealDT().count() * tfm->Right();
 		//if (app_sys.GetKey(Key::S)) tfm->position += vec3{ 0, -0.016, 0.0 };
 		//if (app_sys.GetKey(Key::W)) tfm->position += vec3{ 0, +0.016, 0.0 };
-		if (app_sys.GetKey(Key::S))       tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
-		if (app_sys.GetKey(Key::W))       tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::S))       tfm->position += -cam_vel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))       tfm->position += +cam_vel * Core::GetRealDT().count() * tfm->Forward();
 		if (app_sys.GetKey(Key::Control)) tfm->position += -cam_vel * Core::GetRealDT().count() * vec3{0, 1, 0};
 		if (app_sys.GetKey(Key::Space))   tfm->position += +cam_vel * Core::GetRealDT().count() * vec3{0, 1, 0};
 
