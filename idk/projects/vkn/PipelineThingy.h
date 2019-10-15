@@ -36,7 +36,7 @@ namespace idk::vkn
 		struct set_bindings
 		{
 			vk::DescriptorSetLayout layout;
-			vector<std::optional<ProcessedRO::BindingInfo>>  bindings;
+			hash_table<uint32_t,vector<std::optional<ProcessedRO::BindingInfo>>>  bindings;
 			bool dirty = false;
 			void SetLayout(vk::DescriptorSetLayout new_layout, bool clear_bindings = false)
 			{
@@ -44,17 +44,23 @@ namespace idk::vkn
 				//or we just want the bindings to be cleared, so clear it.
 				if (new_layout != layout || clear_bindings)
 				{
-					bindings.resize(0);
+					bindings.clear();
 				}
 				layout = new_layout;
 			}
 			void Bind(ProcessedRO::BindingInfo info)
 			{
-				if (bindings.size() <= info.binding)
-					bindings.resize(static_cast<size_t>(info.binding) + 1);
-
-				bindings[info.binding] = std::move(info);
+				//if (bindings.size() <= info.binding)
+				//	bindings.resize(static_cast<size_t>(info.binding) + 1);
+				auto& vec = bindings[info.binding];
+				if (vec.size() <= info.arr_index)
+					vec.resize(info.arr_index + 1);
+				vec[info.arr_index] = std::move(info);
 				dirty = true;
+			}
+			void Unbind(uint32_t binding)
+			{
+				bindings.erase(binding);
 			}
 			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts)
 			{
@@ -64,28 +70,33 @@ namespace idk::vkn
 				vector<ProcessedRO::BindingInfo> set_bindings;
 				uint32_t type_count[DescriptorTypeI::size()] = {};
 				bool failed = false;
-				uint32_t last_valid = 0;
 				if (dirty)
 				{
-					set_bindings.resize(bindings.size());
-					for (size_t i = 0; i < bindings.size(); ++i)
+					size_t max_size = 0;
+					for (auto& binding : bindings)
+					{
+						max_size += binding.second.size();
+					}
+					set_bindings.reserve(max_size);
+					for (auto& [binding_index,binding] : bindings)
 					{
 						//if (!bindings[i])
 						//{
 						//	failed = true;
 						//	err_msg += "Binding [" + std::to_string(i) + "] is missing\n";
 						//}
-						if (bindings[i])
+						for (auto& elem : binding)
 						{
-							auto& binding = set_bindings[last_valid] = *bindings[i];
-							type_count[binding.IsImage() ?
-								desc_type_index<vk::DescriptorType::eCombinedImageSampler>
-								:
-								desc_type_index<vk::DescriptorType::eUniformBuffer>]++;
-							last_valid++;
+							if (elem)
+							{
+								auto& binding_elem = set_bindings.emplace_back(*elem);
+								type_count[binding_elem.IsImage() ?
+									desc_type_index<vk::DescriptorType::eCombinedImageSampler>
+									:
+									desc_type_index<vk::DescriptorType::eUniformBuffer>]++;
+							}
 						}
 					}
-					set_bindings.resize(last_valid);
 					if (failed)
 						result = std::move(err_msg);
 					else
@@ -154,6 +165,10 @@ namespace idk::vkn
 		};
 		//);
 	}
+	namespace detail
+	{
+		bool is_bound(PipelineThingy::set_bindings& existing_bindings, uint32_t binding_index, uint32_t array_index);
+	}
 	template<typename T>
 	bool PipelineThingy::BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound)
 	{
@@ -161,7 +176,7 @@ namespace idk::vkn
 		if (info)
 		{
 			auto itr = curr_bindings.find(info->set);
-			if (!skip_if_bound || itr == curr_bindings.end() || info->binding>= itr->second.bindings.size()|| !itr->second.bindings[info->binding])
+			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second,info->binding,array_index))
 				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, data, ref.ubo_manager));
 		}
 		return s_cast<bool>(info);

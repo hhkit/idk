@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "pch.h"
 #include "PipelineThingy.h"
 
@@ -10,10 +11,11 @@ namespace idk::vkn
 	struct DSUpdater
 	{
 		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
-		std::forward_list<vector<vk::DescriptorImageInfo>>& image_infos;
+		vector<vector<vk::DescriptorImageInfo>>& image_infos;
 		const ProcessedRO::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
-		vk::WriteDescriptorSet operator()(vk::Buffer ubuffer)
+		vk::WriteDescriptorSet& curr;
+		void operator()(vk::Buffer ubuffer)
 		{
 			//auto& dset = ds2[i++];
 			buffer_infos.emplace_front(
@@ -25,8 +27,8 @@ namespace idk::vkn
 			);
 			;
 
-			return
-				vk::WriteDescriptorSet{
+			
+			curr=vk::WriteDescriptorSet{
 					dset
 					,binding.binding
 					,binding.arr_index
@@ -38,34 +40,35 @@ namespace idk::vkn
 			}
 			;
 		}
-		vk::WriteDescriptorSet operator()(ProcessedRO::image_t ubuffer)
+		void operator()(ProcessedRO::image_t ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo> bufferInfo
-			{
+			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			bufferInfo[binding.arr_index-curr.dstArrayElement]=(
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
 				  ,ubuffer.view
 				  ,ubuffer.layout
 				}
-			};
-			;
-			image_infos.emplace_front(std::move(bufferInfo));
-			return
-				vk::WriteDescriptorSet{
-					dset
-					,binding.binding
-					,binding.arr_index
-					,hlp::arr_count(image_infos.front())
-					,vk::DescriptorType::eCombinedImageSampler
-					,std::data(image_infos.front())
-					,nullptr
-					,nullptr
-			}
-			;
+			);
+			curr.pImageInfo = std::data(bufferInfo);
+			curr.descriptorType = vk::DescriptorType::eCombinedImageSampler;
 		}
 	};
-
+	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw)
+	{
+		auto insert_itr = dsw.begin();
+		for (auto itr = dsw.begin(); itr != dsw.end(); ++itr)
+		{
+			if (itr->descriptorCount != 0)
+			{
+				if (itr != insert_itr)
+					std::swap((*(insert_itr)), (*itr));
+				++insert_itr;
+			}
+		}
+		dsw.resize(insert_itr - dsw.begin());
+	}
 	void UpdateUniformDS(
 		vk::Device& device,
 		vk::DescriptorSet& dset,
@@ -73,14 +76,40 @@ namespace idk::vkn
 	)
 	{
 		std::forward_list<vk::DescriptorBufferInfo> buffer_infos;
-		std::forward_list<vector<vk::DescriptorImageInfo>> image_infos;
+		vector<vector<vk::DescriptorImageInfo>> image_infos;
 		vector<vk::WriteDescriptorSet> descriptorWrite;
+		uint32_t max_binding = 0;
+		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
+		vk::DescriptorImageInfo default_img
+		{
+			def.Sampler(),def.ImageView(),vk::ImageLayout::eGeneral,
+		};
+
+		for (auto& binding : bindings)
+		{
+			max_binding = std::max(binding.binding + 1, max_binding);
+			if (max_binding > descriptorWrite.size())
+			{
+				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
+				image_infos.resize(max_binding);
+			}
+			auto& curr = descriptorWrite[binding.binding];
+			if (binding.IsImage())
+			{
+				image_infos[binding.binding].resize(binding.size,default_img);
+				curr.descriptorCount = binding.size;
+			}
+			curr.dstSet = dset;
+			curr.dstBinding = binding.binding;
+			curr.dstArrayElement = 0;
+		}
 		//TODO: Handle Other DSes as well
 		for (auto& binding : bindings)
 		{
-			DSUpdater updater{ buffer_infos,image_infos,binding,dset };
-			descriptorWrite.emplace_back(std::visit(updater, binding.ubuffer));
+			DSUpdater updater{ buffer_infos,image_infos,binding,dset,descriptorWrite[binding.binding] };
+			std::visit(updater, binding.ubuffer);
 		}
+		CondenseDSW(descriptorWrite);
 		device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
 	}
 
@@ -162,13 +191,22 @@ namespace idk::vkn
 		}
 		return result;
 	}
+	namespace detail
+	{
+	bool is_bound(PipelineThingy::set_bindings & existing_bindings, uint32_t binding_index, uint32_t array_index)
+	{
+		auto& bindings = existing_bindings.bindings;
+		auto itr = bindings.find(binding_index);
+		return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
+	}
+	}
 	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound)
 	{
 		auto info = GetUniform(uniform_name);
 		if (info)
 		{
 			auto itr = curr_bindings.find(info->set);
-			if (!skip_if_bound || itr == curr_bindings.end() || itr->second.bindings.size()<= info->binding||!itr->second.bindings[info->binding])
+			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second,info->binding,array_index))
 				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture));
 		}
 		return s_cast<bool>(info);

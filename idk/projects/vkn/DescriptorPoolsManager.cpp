@@ -50,6 +50,15 @@ namespace idk::vkn
 		d.resetDescriptorPool(*manager.pool, vk::DescriptorPoolResetFlags{}, vk::DispatchLoaderDefault{});
 		manager.size = 0;
 	}
+	void DescriptorPoolsManager::ResetManager(Manager2& manager)
+	{
+		vk::Device d = *view.Device();
+		d.resetDescriptorPool(*manager.pool, vk::DescriptorPoolResetFlags{}, vk::DispatchLoaderDefault{});
+		for (auto& cap : manager.cap)
+		{
+			cap.size = 0;
+		}
+	}
 
 	void DescriptorPoolsManager::Reset(vk::DescriptorPool& pool)
 	{
@@ -60,6 +69,11 @@ namespace idk::vkn
 			if (result != managers_.end())
 				ResetManager(*result);
 		}
+		for (auto& manager : managers2)
+		{
+			if (*manager.pool == pool)
+				ResetManager(manager);
+		}
 
 	}
 
@@ -67,9 +81,11 @@ namespace idk::vkn
 	{
 		for (auto& pair : managers)
 		{
-			for(auto&manager :pair.second)
+			for (auto& manager : pair.second)
 				ResetManager(manager);
 		}
+		for (auto& manager : managers2)
+			ResetManager(manager);
 	}
 
 	DescriptorPoolsManager::Manager2::Manager2(vk::Device device, const uint32_t(&capacities)[DescriptorTypeI::size()])

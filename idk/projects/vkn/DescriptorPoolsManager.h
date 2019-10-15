@@ -106,6 +106,7 @@ struct DescriptorPoolsManager
 	template<typename Policy = FirstFit>
 	bool CanGet(uint32_t pool, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
 	void ResetManager(Manager& manager);
+	void ResetManager(Manager2& manager);
 	void Reset(vk::DescriptorPool& pool);
 	void ResetAll();
 

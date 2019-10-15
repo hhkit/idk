@@ -100,13 +100,13 @@ namespace idk::vkn
 		auto vert_data = []()
 		{
 			//auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgvertex.vert".spv", FS_PERMISSIONS::READ, true);
-			return Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/dbgvertex.vert.spv").value();
+			return Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/dbgvertex.vert").value();
 		}();
 		auto frag_data = []()
 		{
 			//auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
 			//return stringify(stream);
-			return Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/dbgfragment.frag.spv").value();
+			return Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/dbgfragment.frag").value();
 		}();
 
 		config.frag_shader = frag_data;
