@@ -99,7 +99,7 @@ namespace idk {
         return RscHandle<Texture>();
     }
 
-    string IGE_ProjectWindow::unique_new_file_path(string_view name, string_view ext)
+    string IGE_ProjectWindow::unique_new_mount_path(string_view name, string_view ext)
     {
         string stripped_path{ current_dir.GetMountPath() };
         stripped_path += '/';
@@ -138,7 +138,7 @@ namespace idk {
                 }
                 if (ImGui::MenuItem("Material"))
                 {
-                    auto path = unique_new_file_path("NewMaterial", Material::ext);
+                    auto path = unique_new_mount_path("NewMaterial", Material::ext);
                     auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
                     if (res && *res)
                         Core::GetResourceManager().Save(*res);
@@ -206,7 +206,7 @@ namespace idk {
             if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
             {
                 Handle<GameObject> go = *reinterpret_cast<Handle<GameObject>*>(payload->Data);
-                PrefabUtility::SaveAndConnect(go, unique_new_file_path(go->Name().size() ? go->Name() : "NewPrefab", Prefab::ext));
+                PrefabUtility::SaveAndConnect(go, unique_new_mount_path(go->Name().size() ? go->Name() : "NewPrefab", Prefab::ext));
             }
             ImGui::EndDragDropTarget();
         }
@@ -366,20 +366,17 @@ namespace idk {
                         name = buf;
                         renaming_selected_asset = false;
 
-                        //fs::path old_path = selected_path.GetFullPath();
-                        //fs::path new_path = unique_new_file_path(name, selected_path.GetExtension())).GetFullPath();
-                        //fs::rename(old_path, new_path);
+                        fs::path old_path = selected_path.GetFullPath();
+                        fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(unique_new_mount_path(name, selected_path.GetExtension()));
+                        fs::rename(old_path, new_path);
 
-                        //// move meta file as well
-                        //old_path += ".meta";
-                        //if (fs::exists(old_path))
-                        //{
-                        //    new_path += ".meta";
-                        //    fs::rename(old_path, new_path);
-                        //}
-                        //auto new_path = unique_new_file_path(name, selected_path.GetExtension());
-                        //for (auto selected_handle : selected_assets)
-                        //    std::visit([sv=string_view(new_path)](auto h) { Core::GetResourceManager().Rename(h, sv); }, selected_handle);
+                        // move meta file as well
+                        old_path += ".meta";
+                        if (fs::exists(old_path))
+                        {
+                            new_path += ".meta";
+                            fs::rename(old_path, new_path);
+                        }
                     }
                     if (just_rename)
                     {
@@ -449,8 +446,12 @@ namespace idk {
                         {
                             PathHandle old_path_handle = *res_path;
                             fs::path old_path = old_path_handle.GetFullPath();
-                            fs::path new_path = path.GetFullPath();
-                            new_path /= old_path_handle.GetFileName();
+
+                            auto _curr_dir = current_dir;
+                            current_dir = path; // unique_new_mount_path uses current_dir
+                            fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(
+                                unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension()));
+
                             fs::rename(old_path, new_path);
 
                             // move meta file as well
@@ -460,6 +461,8 @@ namespace idk {
                                 new_path += ".meta";
                                 fs::rename(old_path, new_path);
                             }
+
+                            current_dir = _curr_dir;
                         }
                     }
                     auto get_res = Core::GetResourceManager().Get(path);
@@ -509,7 +512,7 @@ namespace idk {
                     {
                         string filename{ path.GetStem() };
                         filename += "_Inst";
-                        auto create_path = unique_new_file_path(filename, MaterialInstance::ext);
+                        auto create_path = unique_new_mount_path(filename, MaterialInstance::ext);
                         auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
                         if (res && *res)
                         {
@@ -526,6 +529,23 @@ namespace idk {
                     auto args = "/select,\"" + string(fs::path(path.GetFullPath()).make_preferred().string()) + '"';
                     ShellExecuteA(NULL, "open", "explorer.exe", args.c_str(), NULL, SW_SHOWNORMAL);
 #endif
+                    ImGui::Separator();
+                }
+
+                //if (ImGui::MenuItem("Rename"))
+                //{
+                //    just_rename = true;
+                //    renaming_selected_asset = true;
+                //}
+                if (ImGui::MenuItem("Delete"))
+                {
+                    fs::path full_path = path.GetFullPath();
+                    fs::path meta_path = full_path;
+                    meta_path += ".meta";
+
+                    if (fs::exists(meta_path))
+                        fs::remove(meta_path);
+                    fs::remove(full_path);
                 }
 
                 ImGui::EndPopup();
