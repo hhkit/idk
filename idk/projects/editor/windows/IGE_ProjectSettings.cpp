@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "IGE_ProjectSettings.h"
+#include <core/GameObject.h>
 #include <IncludeSystems.h>
 #include <editor/utils.h>
 #include <editor/imguidk.h>
@@ -238,6 +239,15 @@ namespace idk
                 ImGui::SameLine();
                 if (ImGui::Button("-", ImVec2(btn_width, 0)))
                 {
+                    // remove and shift tags in the scene
+                    for (auto& c : GameState::GetGameState().GetObjectsOfType<Tag>())
+                    {
+                        if (c.index == i + 1)
+                            c.GetGameObject()->RemoveComponent(c.GetHandle());
+                        else if (c.index > i + 1)
+                            --c.index;
+                    }
+
                     config.tags.erase(config.tags.begin() + i);
                     --i;
                     changed = true;
@@ -251,8 +261,6 @@ namespace idk
                 config.tags.push_back("NewTag");
                 changed = true;
             }
-
-            ImGui::TextWrapped("Warning: Removing tags does not untag game objects properly!");
         }
         ImGui::PopID();
 

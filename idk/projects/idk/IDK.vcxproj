@@ -235,6 +235,7 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="common\Tag.cpp" />
     <ClCompile Include="common\TagManager.cpp" />
     <ClCompile Include="debug\Log.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />

@@ -724,9 +724,15 @@
     <ClInclude Include="common\TagManager.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="script\MonoBehaviorEnvironment.h" />
-    <ClInclude Include="script\MonoWrapperEnviroment.h" />
-    <ClInclude Include="script\ValueBoxer.h" />
+    <ClInclude Include="script\MonoBehaviorEnvironment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoWrapperEnviroment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ValueBoxer.h">
+      <Filter>script</Filter>
+    </ClInclude>
     <ClInclude Include="debug\Log.h">
       <Filter>debug</Filter>
     </ClInclude>
@@ -1054,9 +1060,18 @@
     <ClCompile Include="common\TagManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
-    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
-    <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\MonoWrapperEnviroment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ValueBoxer.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Tag.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="debug\LogSystem.cpp">
       <Filter>debug</Filter>
     </ClCompile>

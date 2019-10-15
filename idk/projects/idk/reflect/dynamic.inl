@@ -78,15 +78,31 @@ namespace idk::reflect
 	template<typename T, typename>
 	dynamic& dynamic::operator=(T&& rhs)
 	{
-		if constexpr (is_variant_member_v<T, ReflectedTypes>)
-		{
-			type._context->variant_assign(_ptr->get(), rhs);
-		}
-		else
-		{
-			assert(is<T>());
-			type._context->copy_assign(_ptr->get(), &rhs);
-		}
+        if (is<T>())
+            type._context->copy_assign(_ptr->get(), &rhs);
+        else
+        {
+            if constexpr (std::is_same_v<std::decay_t<T>, string>)
+            {
+                if (type.is_basic_serializable())
+                {
+                    const auto dyn = type._context->string_construct(rhs);
+                    type._context->copy_assign(_ptr->get(), dyn._ptr->get());
+                }
+                else
+                {
+                    if constexpr (is_variant_member_v<T, ReflectedTypes>)
+                        type._context->variant_assign(_ptr->get(), rhs);
+                    else
+                        throw "Invalid assignment!";
+                }
+            }
+            else if constexpr (is_variant_member_v<T, ReflectedTypes>)
+                type._context->variant_assign(_ptr->get(), rhs);
+            else
+                throw "Invalid assignment!";
+        }
+
 		return *this;
 	}
 
