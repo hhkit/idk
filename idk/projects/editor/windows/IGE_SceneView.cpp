@@ -30,6 +30,8 @@ of the editor.
 #include <vkn/VknFramebuffer.h>
 #include <gfx/DebugRenderer.h>
 
+#include <phys/PhysicsSystem.h>
+
 #include <iostream>
 
 namespace idk {
@@ -114,6 +116,14 @@ namespace idk {
 
 			//Select gameobject here!
 			currRay = GenerateRayFromCurrentScreen();
+			vector<Handle<GameObject>> obj;
+			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
+			{
+				//Sort the obj by closest dist to point
+
+				//get the first obj
+				true;
+			}
 		}
 
 		//Right Mouse WASD control
@@ -276,12 +286,12 @@ namespace idk {
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-			tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * editor.scroll_multiplier);
+			tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
 
 		if (scroll > 0)
-			editor.scroll_multiplier *= editor.scroll_subtractive;
+			editor.scroll_multiplier += editor.scroll_subtractive;
 		else if (scroll < 0)
-			editor.scroll_multiplier *= editor.scroll_additive;
+			editor.scroll_multiplier += editor.scroll_additive;
 
 	}
 
@@ -405,8 +415,6 @@ namespace idk {
 		const auto pers_mtx = currCamera->ProjectionMatrix();
 		
 		vec2 ndcPos = GetMousePosInWindowNormalized();
-		//std::cout << ndcPos.x << ndcPos.y << "\n";
-
 
 		//-1 to 1 (ndc)
 		ndcPos -= vec2(0.5f,0.5f);
@@ -414,7 +422,7 @@ namespace idk {
 
 		ndcPos = vec2(ndcPos.x,-ndcPos.y);
 
-		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,-1,1);
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,0,1);
 		vfPos *= 1.f / vfPos.w;
 		vec4 wfPos = view_mtx.inverse() * vfPos;
 
