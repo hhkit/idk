@@ -139,7 +139,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
-		go->GetComponent<Transform>()->scale /= 100.0f;
+		//go->GetComponent<Transform>()->scale /= 100.0f;
 
 		auto model_resource = Core::GetResourceManager().Load(path);
 		string model_stem{ path.GetStem() };
