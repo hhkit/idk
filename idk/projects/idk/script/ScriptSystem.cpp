@@ -54,14 +54,14 @@ namespace idk::mono
 		//	if (fatal)
 		//		Log::Get().Flush();
 		//	}, nullptr);
-		//mono_jit_exec(domain, lib_assembly, 0, nullptr);
-		LoadGameScripts();
+
+		//LoadGameScripts();
 	}
 
 	void ScriptSystem::Shutdown()
 	{
-		UnloadGameScripts();
-		main_environment = nullptr;
+		//UnloadGameScripts();
+		//main_environment = nullptr;
 	}
 
 	ScriptSystem::ScriptSystem() = default;
@@ -100,7 +100,7 @@ namespace idk::mono
 
 	void ScriptSystem::RefreshGameScripts()
 	{
-		UnloadGameScripts();
-		LoadGameScripts();
+		//UnloadGameScripts();
+		//LoadGameScripts();
 	}
 }

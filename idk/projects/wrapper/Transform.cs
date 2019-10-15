@@ -10,9 +10,5 @@ namespace idk
             get => Bindings.TransformGetPosition(handle);
             set => Bindings.TransformSetPosition(handle, value);
         }
-        public Transform()
-        {
-            Console.WriteLine("tfm ctor");
-        }
     }
 }

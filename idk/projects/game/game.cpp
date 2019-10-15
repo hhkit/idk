@@ -93,7 +93,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
-	Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
+	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag", false);
