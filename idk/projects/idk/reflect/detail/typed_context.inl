@@ -59,6 +59,7 @@ namespace idk::reflect::detail
 		virtual ReflectedTypes get_mega_variant(void* obj) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
+		virtual dynamic string_construct(const string& str) const = 0;
 		virtual string to_string(void* obj) const = 0;
 		virtual uni_container to_container(void* obj) const = 0;
 		virtual enum_value to_enum_value(void* obj) const = 0;
@@ -80,6 +81,8 @@ namespace idk::reflect::detail
 				{
 					if (((args.type._context == this) && ...))
 						return copy_construct((args._ptr->get())...);
+                    if (is_basic_serializable && ((args.type == get_type<string>()) && ...))
+                        return string_construct(args.get<string>());
 				}
 
 				dynamic o;
@@ -188,6 +191,15 @@ namespace idk::reflect::detail
 			else
 				return T{ *static_cast<const T*>(obj) };
 		}
+
+        dynamic string_construct(const string& str) const override
+        {
+            str;
+            if constexpr (!is_basic_serializable_v<T>)
+                throw "Cannot string construct";
+            else
+                return std::move(*parse_text<T>(str));
+        }
 
         string to_string(void* obj) const override
         {

@@ -1054,6 +1054,7 @@
     <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
     <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
     <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="common\Tag.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
