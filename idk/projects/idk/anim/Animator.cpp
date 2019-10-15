@@ -4,6 +4,7 @@
 #include "common/Transform.h"
 #include "core/GameObject.h"
 #include "Animator.h"
+#include <math/arith.h>
 #include "scene/SceneManager.h"
 
 #include "math/matrix_decomposition.h"
@@ -170,10 +171,32 @@ namespace idk
 	{
 		if (anim_rsc)
 		{
-			_animation_table.emplace(anim_rsc->GetName(), _animations.size());
+			if (_animation_table.find(string{ anim_rsc->Name() }) != _animation_table.end())
+				return;
+
+			_animation_table.emplace(anim_rsc->Name(), _animations.size());
 			_animations.push_back(AnimationState{ anim_rsc });
 		}
 	}
+	void Animator::RemoveAnimation(string_view name)
+	{
+		auto found_clip = _animation_table.find(string{ name });
+		if (found_clip == _animation_table.end())
+			return;
+
+		if (_curr_animation == found_clip->second)
+			_curr_animation = -1;
+		if (_start_animation == found_clip->second)
+			_start_animation = -1;
+
+		_animations.erase(_animations.begin() + found_clip->second);
+		_animation_table.erase(found_clip);
+		
+		// Reorder the elements in the table
+		for (size_t i = 0; i < _animations.size(); ++i)
+			_animation_table[_animations[i].animation->Name().data()] = i;
+	}
+
 #pragma endregion
 
 #pragma region Editor Functionality
@@ -201,8 +224,8 @@ namespace idk
 	void Animator::RestoreBindPose()
 	{
 		// Need to revert back to the bind pose
-		const auto& bones = _skeleton->data();
-		for (size_t i = 0; i < bones.size(); ++i)
+		// const auto& bones = _skeleton->data();
+		for (size_t i = 0; i < _bind_pose.size(); ++i)
 		{
 			auto local_bind_pose = _bind_pose[i];
 			auto local_bind_pose_mat = local_bind_pose.recompose();
@@ -254,7 +277,9 @@ namespace idk
 			return;
 		}
 
-		_elapsed = offset;
+		_elapsed = _animations[index].animation->GetDuration() * offset;
+		if (offset > 1)
+			_elapsed = fmod(_elapsed, _animations[index].animation->GetDuration());
 		_curr_animation = s_cast<int>(index);
 		_is_playing = true;
 	}
@@ -269,6 +294,11 @@ namespace idk
 	{
 		_elapsed = 0.0f;
 		_is_stopping = true;
+	}
+
+	void Animator::Loop(bool to_loop)
+	{
+		_is_looping = to_loop;
 	}
 
 	bool Animator::HasState(string_view name) const

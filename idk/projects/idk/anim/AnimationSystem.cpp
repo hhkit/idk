@@ -67,9 +67,24 @@ namespace idk
 		const auto anim_state = animator.GetAnimationState(animator._curr_animation);
 		const auto anim = anim_state.animation;
 		const auto& skeleton = animator._skeleton->data();
+
+		if (animator._elapsed >= anim->GetDuration())
+		{
+			animator._elapsed -= anim->GetDuration();
+
+			// Stop here if the animation does not loop
+			if (!animator._is_looping)
+			{
+				animator._elapsed = 0.0f;
+				animator._is_playing = false;
+				return;
+			}
+		}
+
 		const float ticks = animator._elapsed * anim->GetFPS() * anim_state.speed;
-		const float num_ticks = anim->GetNumTicks();
-		const float time_in_ticks = fmod(ticks, num_ticks);
+		// const float num_ticks = anim->GetNumTicks();
+		// const float time_in_ticks = fmod(ticks, num_ticks);
+		_blend = animator._blend_factor;
 
 		// Loop through the skeleton
 		for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
@@ -83,7 +98,7 @@ namespace idk
 
 			matrix_decomposition<real> curr_pose = animator._bind_pose[bone_id];
 			// Interpolate function will fill in the curr_pose as needed. If there are no keys, it will keep it in bind pose.
-			InterpolateBone(*animated_bone, time_in_ticks, curr_pose);
+			InterpolateBone(*animated_bone, ticks, curr_pose);
 
 			// During GenerateTransforms in the Animator, it will use the child transforms to 
 			// generate the final transforms
@@ -104,8 +119,7 @@ namespace idk
 
 		// Compute the time
 		animator._elapsed += Core::GetRealDT().count();
-		if (animator._elapsed >= anim->GetDuration())
-			animator._elapsed -= anim->GetDuration();
+	
 	}
 
 	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)

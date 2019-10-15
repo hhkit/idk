@@ -496,7 +496,36 @@ namespace idk {
 		if (ImGui::CollapsingHeader("Animator", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
 		{
 			//Draw All your custom variables here.
-// Display the current animation
+
+			ImGui::Text("Animation Clips");
+			ImGui::Separator();
+			for (auto& anim : c_anim->_animations)
+			{
+				bool not_removed = true;
+				// Will change this to use something other than collapsing header. 
+				if(ImGui::CollapsingHeader(anim.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
+				{
+					ImGui::Indent(50);
+					ImGui::PushItemWidth(100);
+					ImGui::DragFloat("Speed", &anim.speed, 0.01f, 0.0f);
+					ImGui::PopItemWidth();
+					ImGui::Unindent(50);
+				}
+
+				if (!not_removed)
+				{
+					c_anim->RemoveAnimation(anim.animation->Name());
+					break;
+				}
+			}
+
+
+			RscHandle<anim::Animation> new_anim;
+			if (ImGuidk::InputResource("Add Animation Clip", &new_anim))
+			{
+				c_anim->AddAnimation(new_anim);
+			}
+			ImGui::NewLine();
 
 			if (ImGui::BeginCombo("Start State", c_anim->GetStateName(c_anim->_start_animation).c_str()))
 			{
@@ -504,8 +533,10 @@ namespace idk {
 				{
 					if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_start_animation == i))
 					{
-						c_anim->Stop();
+						// c_anim->Stop();
 						c_anim->_start_animation = s_cast<int>(i);
+						if (c_anim->_curr_animation < 0)
+							c_anim->_curr_animation = c_anim->_start_animation;
 					}
 				}
 				ImGui::EndCombo();
@@ -525,21 +556,44 @@ namespace idk {
 				}
 				ImGui::EndCombo();
 			}
-
-			if (ImGui::Checkbox("Preview", &c_anim->_preview_playback))
+			bool has_curr_anim = c_anim->_curr_animation >= 0;
+			if (has_curr_anim)
 			{
-				if (!c_anim->_preview_playback)
+				if (ImGui::Checkbox("Preview Current State", &c_anim->_preview_playback))
 				{
-					c_anim->_elapsed = 0.0f;
-					c_anim->RestoreBindPose();
+					if (!c_anim->_preview_playback)
+					{
+						c_anim->_elapsed = 0.0f;
+						c_anim->RestoreBindPose();
+					}
 				}
-			}			
+
+				ImGui::ProgressBar(
+					c_anim->_elapsed / c_anim->_animations[c_anim->_curr_animation].animation->GetDuration(),
+					ImVec2{ -1, 10 }, nullptr);
+			}
+			
+			// FOR TESTING 
+			ImGui::Text("TESTING");
+			ImGui::Separator();
 
 			if (ImGui::Button("Play"))
 			{
 				c_anim->Play(0);
 			}
 			ImGui::SameLine();
+			if (ImGui::Button("Play And Loop"))
+			{
+				c_anim->Play(0);
+				c_anim->Loop(true);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Play And No Loop"))
+			{
+				c_anim->Play(0);
+				c_anim->Loop(false);
+			}
+
 			if (ImGui::Button("Stop"))
 			{
 				c_anim->Stop();
@@ -550,8 +604,7 @@ namespace idk {
 				c_anim->Pause();
 			}
 
-			ImGui::DragFloat("Test Blend", &Core::GetSystem<AnimationSystem>()._blend, 0.01f, 0.0f, 1.0f);
-
+			ImGui::DragFloat("Test Blend", &c_anim->_blend_factor, 0.01f, 0.0f, 1.0f);
 		}
 
 		cursorPos2 = ImGui::GetCursorPos();
