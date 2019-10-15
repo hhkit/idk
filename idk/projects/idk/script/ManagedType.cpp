@@ -10,6 +10,11 @@ namespace idk::mono
 	{
 	}
 
+	MonoClass* ManagedType::Raw() const
+	{
+		return type;
+	}
+
 	bool ManagedType::CacheThunk(string_view method_name, int param_count)
 	{
 		auto method = FindMethod(method_name, param_count);

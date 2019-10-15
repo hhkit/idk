@@ -170,11 +170,14 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="script\ManagedType.h" />
+    <ClInclude Include="script\ValueBoxer.h" />
     <ClInclude Include="script\MonoBehavior.h" />
     <ClInclude Include="script\MonoBehaviorData.h" />
+    <ClInclude Include="script\MonoBehaviorEnvironment.h" />
     <ClInclude Include="script\MonoEnvironment.h" />
     <ClInclude Include="script\ManagedObj.h" />
     <ClInclude Include="script\ManagedThunk.h" />
+    <ClInclude Include="script\MonoWrapperEnviroment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
@@ -291,8 +294,11 @@
     <ClCompile Include="script\ManagedThunk.cpp" />
     <ClCompile Include="script\ManagedType.cpp" />
     <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
     <ClCompile Include="script\MonoEnvironment.cpp" />
+    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
     <ClCompile Include="script\ScriptSystem.cpp" />
+    <ClCompile Include="script\ValueBoxer.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />

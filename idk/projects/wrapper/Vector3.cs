@@ -1,28 +1,31 @@
-﻿namespace idk
+﻿using System.Runtime.InteropServices;
+
+namespace idk
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector3
     {
         public float x;
         public float y;
-        public float w;
+        public float z;
 
         // constructors
         public Vector3(Vector3 v)
         {
             x = v.x;
             y = v.y;
-            w = v.w;
+            z = v.z;
         }
-        public Vector3(float in_x, float in_y, float in_w = 0)
+        public Vector3(float in_x, float in_y, float in_z)
         {
             x = in_x;
             y = in_y;
-            w = in_w;
+            z = in_z;
         }
 
         // properties
         public float sqrMagnitude
-        { get { return x * x + y * y + w * w; } }
+        { get { return x * x + y * y + z * z; } }
         public float magnitude
         { get { return Mathf.Sqrt(sqrMagnitude);  } }
         public Vector3 normalized
@@ -31,14 +34,14 @@
         // member functions
         public bool Equals(Vector3 rhs)
         {
-            return x == rhs.x && y == rhs.y && w == rhs.w;
+            return x == rhs.x && y == rhs.y && z == rhs.z;
         }
         public Vector3 Normalize()
         {
             var mag = magnitude;
             x /= mag;
             y /= mag;
-            w /= mag;
+            z /= mag;
             return this;
         }
         public void Set(float newX, float newY)
@@ -61,7 +64,7 @@
         }
         public static double Dot(Vector3 lhs, Vector3 rhs)
         {
-            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.w * rhs.w;
+            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
         }
         public static Vector3 Lerp(Vector3 lhs, Vector3 rhs, float t)
         {
@@ -73,7 +76,7 @@
         }
         public static Vector3 Scale(Vector3 lhs, Vector3 rhs)
         {
-            return new Vector3(lhs.x * rhs.x, rhs.y * rhs.y);
+            return new Vector3(lhs.x * rhs.x, rhs.y * rhs.y, lhs.z * rhs.z);
         }
 
         public override bool Equals(object obj)
@@ -82,7 +85,7 @@
         }
         public override int GetHashCode()
         {
-            return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ w.GetHashCode();
+            return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ z.GetHashCode();
         }
 
         // operator overloads
@@ -94,7 +97,7 @@
                 {
                     case 0: return x;
                     case 1: return y;
-                    case 2: return w;
+                    case 2: return z;
                     default:
                         throw new System.IndexOutOfRangeException { };
                 }
@@ -105,7 +108,7 @@
                 {
                     case 0: x= value; break;
                     case 1: y= value; break;
-                    case 2: w= value; break;
+                    case 2: z= value; break;
                     default:
                         throw new System.IndexOutOfRangeException { };
                 }
@@ -115,7 +118,7 @@
         {
             return Mathf.Abs(lhs.x - rhs.x) < Mathf.Epsilon
                 && Mathf.Abs(lhs.y - rhs.y) < Mathf.Epsilon
-                && Mathf.Abs(lhs.w - rhs.w) < Mathf.Epsilon;
+                && Mathf.Abs(lhs.z - rhs.z) < Mathf.Epsilon;
         }
         public static bool operator !=(Vector3 lhs, Vector3 rhs)
         {
@@ -126,7 +129,7 @@
             var returnme = new Vector3(lhs);
             returnme.x += rhs.x;
             returnme.y += rhs.y;
-            returnme.w += rhs.w;
+            returnme.z += rhs.z;
             return returnme;
         }
         public static Vector3 operator - (Vector3 lhs, Vector3 rhs)
@@ -134,7 +137,7 @@
             var returnme = new Vector3(lhs);
             returnme.x -= rhs.x;
             returnme.y -= rhs.y;
-            returnme.w -= rhs.w;
+            returnme.z -= rhs.z;
             return returnme;
         }
         public static Vector3 operator - (Vector3 lhs)
@@ -147,7 +150,7 @@
             var returnme = new Vector3(lhs);
             returnme.x *= rhs;
             returnme.y *= rhs;
-            returnme.w *= rhs;
+            returnme.z *= rhs;
             return returnme;
         }
         public static Vector3 operator * (float lhs, Vector3 rhs)
@@ -159,7 +162,7 @@
             var returnme = new Vector3(lhs);
             returnme.x /= rhs;
             returnme.y /= rhs;
-            returnme.w /= rhs;
+            returnme.z /= rhs;
             return returnme;
         }
 

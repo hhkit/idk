@@ -11,12 +11,13 @@ namespace idk::mono
 {
 	class Behavior;
 	class MonoEnvironment;
+	class MonoBehaviorEnvironment;
 
 	class ScriptSystem
 		: public ISystem
 	{
 	public:
-		string path_to_game_dll = "/scripts/hydenseek.dll";
+		string path_to_game_dll = "/scripts/bin/Debug/TestAndSeek.dll";
 
 		ScriptSystem();
 		~ScriptSystem();
@@ -28,8 +29,7 @@ namespace idk::mono
 		void ScriptUpdateCoroutines(span<Behavior>);
 		void ScriptLateUpdate(span<Behavior>);
 
-		MonoAssembly* GetLibrary() const;
-		MonoEnvironment* Environment() const;
+		MonoEnvironment& Environment() const;
 
 		void RefreshGameScripts();
 
@@ -37,11 +37,10 @@ namespace idk::mono
 		span<Handle<Behavior>> GetMonoBehaviorsOfType(std::string_view type);
 	private:
 		friend class Behavior;
-		MonoDomain*   domain = nullptr;
-		MonoAssembly* lib_assembly = nullptr;
 
 		hash_table<string, std::deque<Handle<Behavior>>> behavior_handles;
-		unique_ptr<MonoEnvironment> environment;
+		unique_ptr<MonoEnvironment> main_environment;
+		unique_ptr<MonoBehaviorEnvironment> script_environment;
 
 		void LoadGameScripts();
 		void UnloadGameScripts();

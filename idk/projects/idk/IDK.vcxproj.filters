@@ -727,6 +727,9 @@
     <ClInclude Include="common\TagManager.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="script\MonoBehaviorEnvironment.h" />
+    <ClInclude Include="script\MonoWrapperEnviroment.h" />
+    <ClInclude Include="script\ValueBoxer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1048,6 +1051,9 @@
     <ClCompile Include="common\TagManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
+    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
+    <ClCompile Include="script\ValueBoxer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -12,7 +12,12 @@ namespace idk::mono
 	class ManagedType
 	{
 	public:
-		ManagedType(MonoClass* type);
+		explicit ManagedType(MonoClass* type);
+
+		MonoClass* Raw() const;
+
+		template<typename ... Args>
+		MonoObject* ConstructTemporary(Args&& ...);
 
 		template<typename ... Args> 
 		ManagedObject Construct(Args&&...);
@@ -24,4 +29,26 @@ namespace idk::mono
 
 		MonoMethod* FindMethod(string_view method_name, int param_count) const;
 	};
+
+	template<typename ...Args>
+	inline MonoObject* ManagedType::ConstructTemporary(Args&& ...)
+	{
+		const auto domain = mono_domain_get();
+		auto obj = mono_object_new(domain, type);
+
+		// construct 
+		if constexpr (sizeof...(Args) == 0)
+			mono_runtime_object_init(obj);
+		else
+		{
+			//GetMethod()
+		}
+		return obj;
+	}
+
+	template<typename ...Args>
+	inline ManagedObject ManagedType::Construct(Args&& ... args)
+	{
+		return ManagedObject(ConstructTemporary(std::forward<Args>...));
+	}
 }

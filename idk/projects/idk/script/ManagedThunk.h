@@ -4,9 +4,7 @@
 #include <utility>
 
 #include <mono/jit/jit.h>
-
-#include <script/MonoBehavior.h>
-#include <script/ManagedObj.h>
+#include <script/ValueBoxer.h>
 
 namespace idk::mono
 {
@@ -17,43 +15,19 @@ namespace idk::mono
 
 		template<typename Ret = MonoObject*, typename ... Args>
 		Ret Invoke(Args&& ...);
+
+		void* get() const { return thunk; }
 	private:
 		void* thunk;
-	};
-
-	template<typename T>
-	struct Boxer 
-	{
-		using type = std::decay_t<T>;
-		type operator()(T& obj) const { return obj; }
-	};
-
-	template<typename T>
-	struct Boxer<Handle<T>>
-	{
-		using type = uint64_t;
-		type operator()(const Handle<T>& obj) const { return obj.id; }
-	};
-
-	template<>
-	struct Boxer<Handle<mono::Behavior>>
-	{
-		using type = MonoObject*;
-		type operator()(const Handle<mono::Behavior>& obj) const { return obj->GetMonoObject();  };
-	};
-
-	template<> struct Boxer<ManagedObject>
-	{
-		using type = MonoObject *;
-		type operator()(const ManagedObject& obj) const noexcept { return obj.Fetch(); };
 	};
 
 	template<typename Ret, typename ...Args>
 	inline Ret ManagedThunk::Invoke(Args&& ... args)
 	{
-		using FuncType = MonoObject * (*)(typename Boxer < std::decay_t<Args> > ::type...);
+		using FuncType = Ret (*)(decltype(box(args))..., MonoException**);
 		const auto invoker = s_cast<FuncType>(thunk);
-		return invoker(Boxer<std::decay_t<Args>>{}(args)...);
+		MonoException* exc;
+		return invoker(box(args)..., &exc);
 	}
 
 	// c++ interface: void MonoBehavior.OnTriggerEnter(Handle<Collider>);

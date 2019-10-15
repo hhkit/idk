@@ -14,17 +14,20 @@
 
 #include <script/MonoBehavior.h>
 #include <script/MonoEnvironment.h>
+#include <script/MonoBehaviorEnvironment.h>
+#include <script/MonoWrapperEnviroment.h>
 
 namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
-		environment = std::make_unique<MonoEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
+		script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
+		script_environment->ScanTypes();
 	}
 
 	void ScriptSystem::UnloadGameScripts()
 	{
-		environment = nullptr;
+		script_environment = nullptr;
 	}
 
 	void ScriptSystem::Init()
@@ -39,30 +42,26 @@ namespace idk::mono
 			(exe_dir + "/mono/lib/").data(),
 			(exe_dir + "/mono/etc/").data()
 		);
-
-		domain = mono_jit_init("Master Domain");
-
-		lib_assembly = mono_domain_assembly_open(domain,
-			(exe_dir + "/idk.dll").data()); 
-		IDK_ASSERT_MSG(lib_assembly, "cannot load idk.dll");
-
-
 		mono_trace_set_print_handler([](const char* string, mono_bool is_stdout) {
 			std::cout << string;
 			});
+
+		main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
+		main_environment->ScanTypes();
 
 		//mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*) {
 		//	LOG(fmt::format("Domain: {}, Msg: {}", log_domain ? log_domain : "NULL", message));
 		//	if (fatal)
 		//		Log::Get().Flush();
 		//	}, nullptr);
-
-		mono_jit_exec(domain, lib_assembly, 0, nullptr);
-		// LoadGameScripts();
+		//mono_jit_exec(domain, lib_assembly, 0, nullptr);
+		LoadGameScripts();
 	}
 
 	void ScriptSystem::Shutdown()
 	{
+		UnloadGameScripts();
+		main_environment = nullptr;
 	}
 
 	ScriptSystem::ScriptSystem() = default;
@@ -71,26 +70,32 @@ namespace idk::mono
 	void ScriptSystem::ScriptStart(span<Behavior> behaviors)
 	{
 	}
+	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
+	{
+	}
+
 	void ScriptSystem::ScriptUpdate(span<Behavior> behaviors)
 	{
 	}
+
 	void ScriptSystem::ScriptUpdateCoroutines(span<Behavior> behaviors)
 	{
 		for (auto& elem : behaviors)
 			elem.UpdateCoroutines();
 	}
+
 	void ScriptSystem::ScriptLateUpdate(span<Behavior> behaviors)
 	{
 	}
-	MonoAssembly* ScriptSystem::GetLibrary() const
+
+	MonoEnvironment& ScriptSystem::Environment() const
 	{
-		return lib_assembly;
+		return *main_environment.get();
 	}
-	MonoEnvironment* ScriptSystem::Environment() const
+
+	void ScriptSystem::RefreshGameScripts()
 	{
-		return environment.get();
-	}
-	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
-	{
+		UnloadGameScripts();
+		LoadGameScripts();
 	}
 }

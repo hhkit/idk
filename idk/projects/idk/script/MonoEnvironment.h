@@ -3,6 +3,7 @@
 
 #include <mono/jit/jit.h>
 
+#include <script/ManagedType.h>
 #include <script/MonoBehaviorData.h>
 
 namespace idk::mono
@@ -11,16 +12,19 @@ namespace idk::mono
 	class MonoEnvironment
 	{
 	public:
-		MonoEnvironment(string_view full_path_to_game_dll);
+		MonoEnvironment() = default;
+		MonoImage*  Image() const noexcept;
+		MonoDomain* Domain() const noexcept;
+		opt<ManagedType> Type(string_view) const;
 
-		~MonoEnvironment();
-	private:
-		MonoDomain*   script_domain   {};
-		MonoAssembly* script_assembly {};
+		void ScanTypes();
 
-		hash_table<string, MonoBehaviorData> mono_behaviors;
+		virtual ~MonoEnvironment() = default;
+	protected:
+		MonoDomain*   _domain   {};
+		MonoAssembly* _assembly {};
 
-		void FindMonoBehaviors();
+		hash_table<string, ManagedType> _types;
 
 		MonoEnvironment(MonoEnvironment&&) noexcept = delete;
 		MonoEnvironment(const MonoEnvironment&) = delete;

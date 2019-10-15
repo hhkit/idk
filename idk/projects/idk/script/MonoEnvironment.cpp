@@ -14,35 +14,25 @@
 
 namespace idk::mono
 {
-	MonoEnvironment::MonoEnvironment(string_view path_to_game_dll)
+	MonoImage* MonoEnvironment::Image() const noexcept
 	{
-		char domain_name[] = "Script Domain";
-		script_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
-		script_assembly = mono_domain_assembly_open(script_domain, path_to_game_dll.data());
-
-		FindMonoBehaviors();
+		return mono_assembly_get_image(_assembly);
 	}
-
-	MonoEnvironment::~MonoEnvironment()
+	MonoDomain* MonoEnvironment::Domain() const noexcept
 	{
-		try
-		{
-			MonoObject* obj = nullptr;
-			mono_domain_try_unload(script_domain, &obj); // try things
-			IDK_ASSERT(obj == nullptr);
-		}
-		catch (...) {}
-
-		script_domain = nullptr;
-		script_assembly = nullptr;
+		return _domain;
 	}
-
-	void MonoEnvironment::FindMonoBehaviors()
+	opt<ManagedType> MonoEnvironment::Type(string_view name) const
 	{
-		auto script_image = mono_assembly_get_image(script_assembly);
-		auto lib_image = mono_assembly_get_image(Core::GetSystem<ScriptSystem>().GetLibrary());
+		auto itr = _types.find(string{ name });
+		if (itr != _types.end())
+			return itr->second;
 
-		auto monobehavior = mono_class_from_name(lib_image, "idk", "MonoBehavior");
+		return std::nullopt;
+	}
+	void MonoEnvironment::ScanTypes()
+	{
+		auto script_image = Image();
 
 		auto table = mono_image_get_table_info(script_image, MONO_TABLE_TYPEDEF);
 		const auto rows = mono_table_info_get_rows(table);
@@ -60,23 +50,7 @@ namespace idk::mono
 			if (class_name == std::string("<Module>") || class_ptr == nullptr)
 				continue;
 
-			const auto is_monobehavior = [&]() {
-				auto check_parent = class_ptr;
-				
-				do
-				{
-					if (check_parent == monobehavior)
-						return true;
-					check_parent = mono_class_get_parent(check_parent);
-				} while (check_parent);
-				return false;
-			}();
-
-			if (is_monobehavior)
-			{
-				auto& data = mono_behaviors[class_name];
-				data.klass = class_ptr;
-			}
+			_types.emplace(class_name, class_ptr);
 		}
 	}
 }
