@@ -3,6 +3,8 @@
 
 #include <editor/imguidk.h>
 #include <editor/utils.h>
+#include <editor/IDE.h>
+#include <editor/windows/IGE_MaterialEditor.h>
 #include <gfx/ShaderGraph.h>
 #include <prefab/PrefabUtility.h>
 #include <IncludeComponents.h>
@@ -37,18 +39,11 @@ namespace idk
             ImGui::Text(format_name(reflect::get_type<ResT>().name()).c_str());
             ImGui::Text(string(handle.guid()).c_str());
 
-            if constexpr (std::is_same_v<ResT, Prefab>)
-                DisplayAsset(h);
-
-            if constexpr (std::is_same_v<ResT, MaterialInstance>)
-                DisplayAsset(h);
-
-            if constexpr (std::is_same_v<ResT, Material>)
-                DisplayAsset(h);
-
+            DisplayAsset(h);
         }, handle);
     }
 
+    template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
     {
         auto& data = prefab->data[0];
@@ -174,6 +169,7 @@ namespace idk
         }
     }
 
+    template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
@@ -284,6 +280,7 @@ namespace idk
             material->Dirty();
     }
 
+    template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<Material> material)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
@@ -291,34 +288,26 @@ namespace idk
 
         auto graph = RscHandle<shadergraph::Graph>{ material };
 
-        //for (auto& [name, u] : material->uniforms)
-        //{
-        //    if (u.index() == index_in_variant_v<RscHandle<Texture>, UniformInstance>)
-        //        continue;
+        if (ImGui::Button("Open Material Editor"))
+            Core::GetSystem<IDE>().FindWindow<IGE_MaterialEditor>()->OpenGraph(graph);
+    }
 
-        //    auto y = ImGui::GetCursorPosY();
+    template<>
+    void IGE_InspectorWindow::DisplayAsset(RscHandle<Texture> texture)
+    {
+        void* id = texture->ID();
+        vec2 sz = ImGui::GetContentRegionAvail();
 
-        //    ImGui::SetCursorPosY(y + pad_y);
+        float aspect = texture->AspectRatio();
+        if (aspect > 1.0f)
+            sz.y = sz.x / aspect;
+        else if (aspect < 1.0f)
+            sz.x = sz.y / aspect;
+        else
+            sz = vec2{ ImMin(sz.x, sz.y), ImMin(sz.x, sz.y) };
 
-        //    ImGui::PushID(name.c_str());
-        //    ImGui::PushItemWidth(item_width);
-
-        //    auto label = graph->parameters[std::stoi(name.data() + sizeof("_ub0._u") - 1)].name.c_str();
-        //    switch (u.index())
-        //    {
-        //    case index_in_variant_v<float, UniformInstance>:
-        //        ImGui::Text(label);
-        //        ImGui::SetCursorPosY(y);
-        //        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-        //        ImGui::DragFloat("", &std::get<index_in_variant_v<float, UniformInstance>>(u), 0.01f);
-
-        //    default:
-        //        break;
-        //    }
-
-        //    ImGui::PopItemWidth();
-        //    ImGui::PopID();
-        //}
+        if (id)
+            ImGui::Image(id, sz);
     }
 
 }
