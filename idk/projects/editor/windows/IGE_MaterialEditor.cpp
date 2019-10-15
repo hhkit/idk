@@ -923,7 +923,7 @@ namespace idk
         ImGui::PopStyleVar();
 
         auto graph_name = Core::GetResourceManager().GetPath(_graph);
-        ImGui::Text(graph_name->data());
+        ImGui::Text(PathHandle(*graph_name).GetStem().data());
 
         if (ImGui::CollapsingHeader("Master", ImGuiTreeNodeFlags_DefaultOpen))
         {

@@ -51,9 +51,12 @@ namespace idk {
 		void MenuItem_PasteComponent();
 
         void DisplayAsset(GenericResourceHandle handle);
-        void DisplayAsset(RscHandle<Prefab> prefab);
-        void DisplayAsset(RscHandle<MaterialInstance> material);
-        void DisplayAsset(RscHandle<Material> material);
+
+        template<typename Res> void DisplayAsset(RscHandle<Res>) {}
+        template<> void DisplayAsset(RscHandle<Prefab> prefab);
+        template<> void DisplayAsset(RscHandle<MaterialInstance> material);
+        template<> void DisplayAsset(RscHandle<Material> material);
+        template<> void DisplayAsset(RscHandle<Texture> texture);
 
         bool displayVal(reflect::dynamic dyn);
 
