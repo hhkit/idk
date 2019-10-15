@@ -10,8 +10,8 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		void PhysicsTick							(span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
-		void DebugDrawColliders						(span<class Collider> colliders);
+		void PhysicsTick            (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
+		void DebugDrawColliders     (span<class Collider> colliders);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
 	private:
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
