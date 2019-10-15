@@ -1,11 +1,12 @@
 #include "stdafx.h"
-#include "TagSystem.h"
+#include "TagManager.h"
 #include <common/Tag.h>
+#include <core/GameObject.h>
 #include <iostream>
 
 namespace idk
 {
-    Handle<GameObject> TagSystem::Find(string_view tag)
+    Handle<GameObject> TagManager::Find(string_view tag) const
     {
         auto iter = _tags_to_indices.find(tag);
         if (iter == _tags_to_indices.end())
@@ -21,7 +22,7 @@ namespace idk
         return Handle<GameObject>();
     }
 
-    vector<Handle<GameObject>> TagSystem::FindAll(string_view tag)
+    vector<Handle<GameObject>> TagManager::FindAll(string_view tag) const
     {
         vector<Handle<GameObject>> vec;
 
@@ -39,14 +40,14 @@ namespace idk
         return vec;
     }
 
-    string_view TagSystem::GetTagFromIndex(tag_t index)
+    string_view TagManager::GetTagFromIndex(tag_t index) const
     {
         if (index > GetConfig().tags.size())
             return "";
         return GetConfig().tags[index - 1];
     }
 
-    TagSystem::tag_t TagSystem::GetIndexFromTag(string_view tag)
+    TagManager::tag_t TagManager::GetIndexFromTag(string_view tag) const
     {
         auto iter = _tags_to_indices.find(tag);
         if (iter == _tags_to_indices.end())
@@ -55,14 +56,19 @@ namespace idk
             return iter->second + 1;
     }
 
+    size_t TagManager::GetNumOfTags() const
+    {
+        return GetConfig().tags.size();
+    }
 
 
-    void TagSystem::ApplyConfig(Config& config)
+
+    void TagManager::ApplyConfig(Config& config)
     {
         if (config.tags.size() > max_tags)
         {
             config.tags.resize(max_tags);
-            std::cout << "[Warning] Cannot have more than " << max_tags << " tags. Tags will be truncated." << std::endl;
+            std::cout << "[Warning] Cannot have more than " << max_tags << " tags." << std::endl;
         }
 
         _tags_to_indices.clear();

@@ -199,9 +199,9 @@ namespace idk
     }
 
     template<>
-    void DisplayConfig<TagSystem>()
+    void DisplayConfig<TagManager>()
     {
-        auto& sys = Core::GetSystem<TagSystem>();
+        auto& sys = Core::GetSystem<TagManager>();
         auto config = sys.GetConfig();
 
         const float item_width = ImGui::GetWindowContentRegionWidth() * 0.6f;
@@ -218,7 +218,7 @@ namespace idk
             {
                 const float cursor_y = ImGui::GetCursorPosY();
                 ImGui::SetCursorPosY(cursor_y + pad_y);
-                ImGui::Text("User Tag %d", i + 1);
+                ImGui::Text("Tag %d", i + 1);
 
                 ImGui::SetCursorPosY(cursor_y);
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
@@ -251,6 +251,8 @@ namespace idk
                 config.tags.push_back("NewTag");
                 changed = true;
             }
+
+            ImGui::TextWrapped("Warning: Removing tags does not untag game objects properly!");
         }
         ImGui::PopID();
 
@@ -287,7 +289,7 @@ namespace idk
         switch (_selection)
         {
         case _tags_and_layers:
-            DisplayConfig<TagSystem>();
+            DisplayConfig<TagManager>();
             break;
         default:
             break;

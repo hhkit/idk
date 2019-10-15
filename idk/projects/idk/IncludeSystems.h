@@ -1,6 +1,6 @@
 #pragma once
 
-#include <common/TagSystem.h>
+#include <common/TagManager.h>
 
 #include <app/Application.h>
 #include <app/GamepadSystem.h>

@@ -3,6 +3,9 @@
 #include <serialize/serialize.h>
 #include <util/ioutils.h>
 #include <scene/SceneManager.h>
+#include <reflect/reflect.h>
+#include <core/ConfigurableSystem.h>
+#include <IncludeSystems.h>
 
 #include <fstream>
 #include <filesystem>
@@ -17,20 +20,11 @@ namespace idk
 
 	void ProjectManager::LateInit()
 	{
-		// initialize project
-		auto scene_stream = Core::GetSystem<FileSystem>().Open("/assets/scenes.idk", FS_PERMISSIONS::READ); 
-		if (scene_stream)
-			parse_text(stringify(scene_stream), Core::GetSystem<SceneManager>());
 	}
 
 	void ProjectManager::Shutdown()
 	{
 
-	}
-
-	void ProjectManager::SaveProject()
-	{
-		Core::GetSystem<FileSystem>().Open("/assets/scenes.idk", FS_PERMISSIONS::WRITE) << serialize_text(Core::GetSystem<SceneManager>());
 	}
 
     void ProjectManager::LoadProject(string_view full_path)
@@ -40,6 +34,7 @@ namespace idk
         auto& core_fs = Core::GetSystem<FileSystem>();
         fs::path path = full_path;
         IDK_ASSERT_MSG(fs::exists(path), "Project does not exist!");
+        _full_path = full_path;
 
         fs::path dir = path.parent_path();
         _project_dir = dir.string();
@@ -54,29 +49,80 @@ namespace idk
         fs::path configs = dir / "Config";
         if (!fs::exists(configs))
             fs::create_directory(configs);
-        core_fs.Mount(configs.string(), "/config");
+        core_fs.Mount(configs.string(), "/config", false);
 
-        fs::path recent_path = core_fs.GetAppDataDir();
-        recent_path /= "idk";
-        if (!fs::exists(recent_path))
-            fs::create_directory(recent_path);
-
-        recent_path /= ".recent";
-        std::ofstream recent_file{ recent_path };
-        recent_file << full_path;
+        LoadConfigs();
     }
 
-    string ProjectManager::GetRecentProjectPath() const
+    void ProjectManager::SaveProject()
     {
-        fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-        recent_path /= "idk";
-        recent_path /= ".recent";
-        if (!fs::exists(recent_path))
-            return "";
-        std::ifstream recent_file{ recent_path };
-        fs::path proj = stringify(recent_file);
-        if (!fs::exists(proj))
-            return "";
-        return proj.string();
+    }
+
+    template<typename T>
+    static void load_config_for()
+    {
+        if constexpr (is_configurable_system<T>::value)
+        {
+            string_view name = reflect::get_type<T>().name();
+            auto pos = name.rfind(':');
+            if (pos != string_view::npos)
+                name.remove_prefix(pos);
+            string path = "/config/";
+            path += name;
+            path += ".idconf";
+
+            typename T::Config config;
+            auto stream = Core::GetSystem<FileSystem>().Open(path, FS_PERMISSIONS::READ);
+            if (stream)
+            {
+                parse_text(stringify(stream), config);
+                Core::GetSystem<T>().SetConfig(config);
+            }
+        }
+    }
+
+    template<size_t... Is>
+    static void for_each_system_load_config(std::index_sequence<Is...>)
+    {
+        (load_config_for<std::tuple_element_t<Is, Systems>>(), ...);
+    }
+
+    void ProjectManager::LoadConfigs()
+    {
+        // initialize project
+        auto scene_stream = Core::GetSystem<FileSystem>().Open("/config/SceneManager.idconf", FS_PERMISSIONS::READ);
+        if (scene_stream)
+            parse_text(stringify(scene_stream), Core::GetSystem<SceneManager>());
+
+        for_each_system_load_config(std::make_index_sequence<std::tuple_size_v<Systems>>());
+    }
+
+    template<typename T>
+    static void save_config_for()
+    {
+        if constexpr (is_configurable_system<T>::value)
+        {
+            string_view name = reflect::get_type<T>().name();
+            auto pos = name.rfind(':');
+            if (pos != string_view::npos)
+                name.remove_prefix(pos);
+            string path = "/config/";
+            path += name;
+            path += ".idconf";
+
+            Core::GetSystem<FileSystem>().Open(path, FS_PERMISSIONS::WRITE) << serialize_text(Core::GetSystem<T>().GetConfig());
+        }
+    }
+
+    template<size_t... Is>
+    static void for_each_system_save_config(std::index_sequence<Is...>)
+    {
+        (save_config_for<std::tuple_element_t<Is, Systems>>(), ...);
+    }
+
+    void ProjectManager::SaveConfigs()
+    {
+        Core::GetSystem<FileSystem>().Open("/config/SceneManager.idconf", FS_PERMISSIONS::WRITE) << serialize_text(Core::GetSystem<SceneManager>());
+        for_each_system_save_config(std::make_index_sequence<std::tuple_size_v<Systems>>());
     }
 }

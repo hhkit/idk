@@ -5,12 +5,12 @@
 
 namespace idk
 {
-    struct TagSystemConfig
+    struct TagManagerConfig
     {
         vector<string> tags;
     };
 
-    class TagSystem : public ConfigurableSystem<TagSystemConfig>
+    class TagManager : public ConfigurableSystem<TagManagerConfig>
     {
     public:
         using tag_t = decltype(Tag::index);
@@ -19,10 +19,11 @@ namespace idk
         virtual void Init() {};
         virtual void Shutdown() {};
 
-        Handle<GameObject> Find(string_view tag);
-        vector<Handle<GameObject>> FindAll(string_view tag);
-        string_view GetTagFromIndex(tag_t index);
-        tag_t GetIndexFromTag(string_view tag);
+        Handle<GameObject> Find(string_view tag) const;
+        vector<Handle<GameObject>> FindAll(string_view tag) const;
+        string_view GetTagFromIndex(tag_t index) const;
+        tag_t GetIndexFromTag(string_view tag) const;
+        size_t GetNumOfTags() const;
 
     protected:
         virtual void ApplyConfig(Config& config);

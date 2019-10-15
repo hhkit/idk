@@ -11,13 +11,16 @@ namespace idk
 	public:
 		static constexpr string_view ext = ".idk";
 
-		void SaveProject();
         void LoadProject(string_view full_path);
-        string GetRecentProjectPath() const;
+		void SaveProject();
 
-        string_view GetProjectName() { return _project_name; }
-        string_view GetProjectDir() { return _project_dir; }
-        string_view GetAssetDir() { return _asset_dir; }
+        void LoadConfigs();
+        void SaveConfigs();
+
+        string_view GetProjectFullPath() const { return _full_path; }
+        string_view GetProjectName() const { return _project_name; }
+        string_view GetProjectDir() const { return _project_dir; }
+        string_view GetAssetDir() const { return _asset_dir; }
 
 	private:
         string _full_path;

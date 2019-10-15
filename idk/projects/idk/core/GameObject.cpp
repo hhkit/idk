@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include <common/Transform.h>
 #include <common/Name.h>
-#include <common/TagSystem.h>
+#include <common/TagManager.h>
 #include <common/Tag.h>
 
 namespace idk
@@ -88,7 +88,7 @@ namespace idk
     {
         const auto tag = GetComponent<class Tag>();
         if (tag)
-            return Core::GetSystem<TagSystem>().GetTagFromIndex(tag->index);
+            return Core::GetSystem<TagManager>().GetTagFromIndex(tag->index);
         else
             return "";
     }
@@ -102,7 +102,7 @@ namespace idk
         {
             if (!tag_c)
                 tag_c = AddComponent<class Tag>();
-            tag_c->index = Core::GetSystem<TagSystem>().GetIndexFromTag(tag);
+            tag_c->index = Core::GetSystem<TagManager>().GetIndexFromTag(tag);
         }
     }
 }

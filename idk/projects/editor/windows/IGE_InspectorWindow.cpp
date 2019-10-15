@@ -24,7 +24,7 @@ of the editor.
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/utils.h>
-#include <common/TagSystem.h>
+#include <common/TagManager.h>
 #include <anim/AnimationSystem.h>
 #include <app/Application.h>
 #include <ds/span.h>
@@ -276,12 +276,12 @@ namespace idk {
 		ImGui::Text("Tag");
 		ImGui::SameLine();
 
-        auto curr_tag = game_object->Tag();
+        const auto curr_tag = game_object->Tag();
         if (ImGui::BeginCombo("##tag", curr_tag.size() ? curr_tag.data() : "Untagged"))
         {
             if (ImGui::MenuItem("Untagged"))
                 game_object->Tag("");
-            for (const auto& tag : Core::GetSystem<TagSystem>().GetConfig().tags)
+            for (const auto& tag : Core::GetSystem<TagManager>().GetConfig().tags)
             {
                 if (ImGui::MenuItem(tag.data()))
                     game_object->Tag(tag);
@@ -289,7 +289,7 @@ namespace idk {
             ImGui::Separator();
             if (ImGui::MenuItem("Add Tag##_add_tag_"))
             {
-                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->FocusConfig<TagSystem>();
+                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->FocusConfig<TagManager>();
             }
             ImGui::EndCombo();
         }
@@ -487,7 +487,7 @@ namespace idk {
 						// Reset the animation
 						c_anim->_elapsed = 0.0f;
 						// Set the new current animation
-						c_anim->_curr_animation = i;
+						c_anim->_curr_animation = static_cast<int>(i);
 					}
 				}
 				ImGui::EndCombo();

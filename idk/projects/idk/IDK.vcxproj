@@ -179,7 +179,7 @@
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="common\Tag.h" />
-    <ClInclude Include="common\TagSystem.h" />
+    <ClInclude Include="common\TagManager.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestResourceFactory.h" />
@@ -230,7 +230,7 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
-    <ClCompile Include="common\TagSystem.cpp" />
+    <ClCompile Include="common\TagManager.cpp" />
     <ClCompile Include="debug\Logger.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
