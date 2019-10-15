@@ -40,7 +40,9 @@
     <ClInclude Include="app\GamepadEnums.h" />
     <ClInclude Include="core\ConfigurableSystem.h" />
     <ClInclude Include="debug\idk_assert.h" />
-    <ClInclude Include="debug\Logger.h" />
+    <ClInclude Include="debug\Log.h" />
+    <ClInclude Include="debug\LogSystem.h" />
+    <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
@@ -234,7 +236,8 @@
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="common\TagManager.cpp" />
-    <ClCompile Include="debug\Logger.cpp" />
+    <ClCompile Include="debug\Log.cpp" />
+    <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />

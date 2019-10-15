@@ -4,37 +4,32 @@
 #include <mutex>
 
 #include <core/ISystem.h>
+#include <debug/LogPools.h>
 #include <ds/circular_buffer.h>
-
-//#define LOG(msg, ...) Core::GetSystem<LogSystem>().LogMessage();
 
 namespace idk
 {
-	enum class LogPool
-	{
-		ANY,
-		SYS,
-		PHYS,
-		GFX,
-		GAME,
-		COUNT
-	};
 
 	class LogSystem
 		: public ISystem
 	{
 	public:
+
+		~LogSystem();
+
 		void LogMessage(LogPool pool, string_view message);
 		void FlushLog(LogPool pool);
 
 		template<typename Functor>
 		void Process(LogPool pool, Functor&& functor);
+
+		void PipeToCout(LogPool pool, bool pipe = false);
 	private:
 		struct Log
 		{
-			circular_buffer<string, 100> buffer {};
+			circular_buffer<string, 128> buffer {};
 			//atomic<bool> writing{ false };
-
+			atomic<bool> direct_to_cout{ false };
 			void Post(string_view msg);
 		};
 

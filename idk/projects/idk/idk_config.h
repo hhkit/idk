@@ -44,7 +44,8 @@ namespace idk
 	>;
 	
 	using Systems = std::tuple<
-		class Application
+			class LogSystem
+		,	class Application
 		,	class FileSystem
 		//,	class InputSystem
 		,	class GamepadSystem

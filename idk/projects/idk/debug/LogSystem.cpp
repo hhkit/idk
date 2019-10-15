@@ -1,13 +1,22 @@
 #include "stdafx.h"
-#include "Logger.h"
+#include "LogSystem.h"
+#include <iostream>
 
 namespace idk
 {
+	LogSystem::~LogSystem()
+	{
+		std::cerr.flush();
+	}
 	void LogSystem::LogMessage(LogPool pool, string_view message)
 	{
-		logs[s_cast<size_t>(pool)].Post(message);
+		auto& log = logs[s_cast<size_t>(pool)];
+		log.Post(message);
 		if (pool != LogPool::ANY)
 			logs.front().Post(message);
+
+		if (log.direct_to_cout)
+			std::cout << message;
 	}
 
 	void LogSystem::FlushLog(LogPool pool)
@@ -15,6 +24,11 @@ namespace idk
 		auto& buffer = logs[s_cast<size_t>(pool)].buffer;
 		auto tst = buffer.begin();
 		buffer.erase(buffer.begin(), buffer.end());
+	}
+
+	void LogSystem::PipeToCout(LogPool pool, bool pipe)
+	{
+		logs[s_cast<size_t>(pool)].direct_to_cout.store(pipe);
 	}
 
 	void LogSystem::Log::Post(string_view msg)

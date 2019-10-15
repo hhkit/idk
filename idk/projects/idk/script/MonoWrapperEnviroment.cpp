@@ -34,7 +34,7 @@ namespace idk::mono
 			void* args[] = { 0 };
 			mono_runtime_invoke(method, nullptr, args, nullptr);
 		}
-
+		ScanTypes();
 	}
 
 	MonoWrapperEnvironment::~MonoWrapperEnvironment()
