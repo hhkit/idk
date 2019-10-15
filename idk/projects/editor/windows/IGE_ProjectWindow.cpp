@@ -208,6 +208,7 @@ namespace idk {
                 Handle<GameObject> go = *reinterpret_cast<Handle<GameObject>*>(payload->Data);
                 PrefabUtility::SaveAndConnect(go, unique_new_file_path(go->Name().size() ? go->Name() : "NewPrefab", Prefab::ext));
             }
+            ImGui::EndDragDropTarget();
         }
         ImGui::SetCursorPos(cursor_pos);
 
@@ -365,6 +366,17 @@ namespace idk {
                         name = buf;
                         renaming_selected_asset = false;
 
+                        //fs::path old_path = selected_path.GetFullPath();
+                        //fs::path new_path = unique_new_file_path(name, selected_path.GetExtension())).GetFullPath();
+                        //fs::rename(old_path, new_path);
+
+                        //// move meta file as well
+                        //old_path += ".meta";
+                        //if (fs::exists(old_path))
+                        //{
+                        //    new_path += ".meta";
+                        //    fs::rename(old_path, new_path);
+                        //}
                         //auto new_path = unique_new_file_path(name, selected_path.GetExtension());
                         //for (auto selected_handle : selected_assets)
                         //    std::visit([sv=string_view(new_path)](auto h) { Core::GetResourceManager().Rename(h, sv); }, selected_handle);
@@ -420,10 +432,43 @@ namespace idk {
                     if (get_res && get_res->Count())
                     {
                         DragDrop::SetResourcePayload(*get_res);
-                        ImGui::Text("Drag to inspector button.");
                         ImGui::Text(path.GetMountPath().data());
                     }
                     ImGui::EndDragDropSource();
+                }
+            }
+            else
+            {
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+                    {
+                        const auto& vec = DragDrop::GetResourcePayloadData();
+                        auto res_path = std::visit([](auto h) { return Core::GetResourceManager().GetPath(h); }, vec[0]);
+                        if (res_path)
+                        {
+                            PathHandle old_path_handle = *res_path;
+                            fs::path old_path = old_path_handle.GetFullPath();
+                            fs::path new_path = path.GetFullPath();
+                            new_path /= old_path_handle.GetFileName();
+                            fs::rename(old_path, new_path);
+
+                            // move meta file as well
+                            old_path += ".meta";
+                            if (fs::exists(old_path))
+                            {
+                                new_path += ".meta";
+                                fs::rename(old_path, new_path);
+                            }
+                        }
+                    }
+                    auto get_res = Core::GetResourceManager().Get(path);
+                    if (get_res && get_res->Count())
+                    {
+                        DragDrop::SetResourcePayload(*get_res);
+                        ImGui::Text(path.GetMountPath().data());
+                    }
+                    ImGui::EndDragDropTarget();
                 }
             }
 

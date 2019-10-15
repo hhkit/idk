@@ -984,11 +984,15 @@ namespace idk
                         renaming = -1;
                         string new_name = genUniqueParamName(buf);
 
-                        { // replace name in graph's uniform table
-                            auto node = _graph->uniforms.extract(param.name);
+                        // replace name in graph's uniform table
+                        auto iter = _graph->uniforms.find(param.name);
+                        if (iter != _graph->uniforms.end())
+                        {
+                            auto node = _graph->uniforms.extract(iter);
                             node.key() = new_name;
                             _graph->uniforms.insert(std::move(node));
                         }
+
                         // replace name of all material instances with overriden uniform
                         for (auto& mat_inst : Core::GetResourceManager().GetAll<MaterialInstance>())
                         {
@@ -1079,7 +1083,7 @@ namespace idk
                 case ValueType::VEC2:
                 {
                     vec2 v = helpers::parse_vec2(param.default_value);
-                    if (ImGui::DragFloat3("", v.values, 0.01f))
+                    if (ImGui::DragFloat2("", v.values, 0.01f))
                         param.default_value = helpers::serialize_value(v);
                     if (ImGui::IsItemDeactivatedAfterEdit())
                         _graph->Compile();
