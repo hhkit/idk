@@ -10,6 +10,8 @@ namespace idk::mono
 		MonoWrapperEnvironment(string_view full_path_to_game_dll);
 		~MonoWrapperEnvironment();
 	private:
+		
+		void BindCoreFunctions();
 	};
 
 }

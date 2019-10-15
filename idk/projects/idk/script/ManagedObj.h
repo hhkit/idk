@@ -36,7 +36,7 @@ namespace idk::mono
 
 		if (field)
 		{
-			if constexpr(std::common_type<std::decay_t<T>>)
+			if constexpr(!std::is_class_v<std::decay_t<T>>)
 				mono_field_set_value(me, field, &obj);
 		}
 	}

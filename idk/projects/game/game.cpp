@@ -18,6 +18,9 @@
 #include <iostream>
 #include <editor/loading/OpenGLCubeMapLoader.h>
 
+#include <script/ScriptSystem.h>
+#include <script/MonoBehaviorEnvironment.h>
+
 #include <serialize/serialize.h>
 
 #include <gfx/CameraControls.h>
@@ -89,6 +92,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 	c->Setup();
+
+	Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
+
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag", false);
 

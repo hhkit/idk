@@ -30,6 +30,7 @@ namespace idk::mono
 		void ScriptLateUpdate(span<Behavior>);
 
 		MonoEnvironment& Environment() const;
+		MonoBehaviorEnvironment& ScriptEnvironment() const;
 
 		void RefreshGameScripts();
 

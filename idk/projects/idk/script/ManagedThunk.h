@@ -26,8 +26,10 @@ namespace idk::mono
 	{
 		using FuncType = Ret (*)(decltype(box(args))..., MonoException**);
 		const auto invoker = s_cast<FuncType>(thunk);
-		MonoException* exc;
-		return invoker(box(args)..., &exc);
+		MonoException* exc{};
+		auto retval = invoker(box(args)..., &exc);
+		IDK_ASSERT(exc == nullptr);
+		return retval;
 	}
 
 	// c++ interface: void MonoBehavior.OnTriggerEnter(Handle<Collider>);

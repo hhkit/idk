@@ -90,7 +90,12 @@ namespace idk::mono
 
 	MonoEnvironment& ScriptSystem::Environment() const
 	{
-		return *main_environment.get();
+		return *main_environment;
+	}
+
+	MonoBehaviorEnvironment& ScriptSystem::ScriptEnvironment() const
+	{
+		return *script_environment;
 	}
 
 	void ScriptSystem::RefreshGameScripts()

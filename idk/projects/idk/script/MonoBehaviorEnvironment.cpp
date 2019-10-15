@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "MonoBehaviorEnvironment.h"
+
+#include <iostream>
+
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/threads.h>
@@ -12,6 +15,8 @@
 #include <script/ManagedObj.h>
 #include <script/ScriptSystem.h>
 
+#include <core/GameObject.h>
+
 namespace idk::mono
 {
 	MonoBehaviorEnvironment::MonoBehaviorEnvironment(string_view full_path_to_game_dll)
@@ -22,7 +27,6 @@ namespace idk::mono
 		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
 
 		FindMonoBehaviors();
-		Execute();
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
 	{
@@ -69,9 +73,27 @@ namespace idk::mono
 			thunk.Invoke(obj);
 		}
 		{
-			test->CacheThunk("Thunderbolt", 1);
+			IDK_ASSERT(test->CacheThunk("Thunderbolt", 1));
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
 			thunk.Invoke(obj, vec3{ 8,9,10 });
+		}
+		{
+			IDK_ASSERT(test->CacheThunk("TestTransform", 1));
+			auto thunk = std::get<ManagedThunk>(test->GetMethod("TestTransform", 1));
+			std::cout << "invoke";
+			auto go = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			auto tfm = go->Transform();
+
+			auto& env = Core::GetSystem<ScriptSystem>().Environment();
+			auto tfm_class = env.Type("Transform");
+			auto tfm_obj = tfm_class->Construct();
+			tfm_obj.Assign("handle", tfm.id);
+
+			//auto method = tfm_class->GetMethod("YoloVan", 1);
+			//
+			//void* args[] = { tfm_obj.Fetch() };
+			//mono_runtime_invoke(std::get<MonoMethod*>(method), tfm_obj.Fetch(), args, nullptr);
+			thunk.Invoke(obj, tfm_obj);
 		}
 	}
 	void MonoBehaviorEnvironment::FindMonoBehaviors()
