@@ -1,6 +1,8 @@
 #include <stdafx.h>
 #include "collision_raycast.h"
 
+#include <iostream>
+
 namespace idk::phys
 {
 	namespace detail
@@ -177,74 +179,51 @@ namespace idk::phys
 	{
 		if (s.contains(lhs.origin))
 		{
-			raycast_success succ;
-			succ.origin_colliding = true;
-			succ.distance_to_collision = 0;
-			succ.point_of_collision = lhs.origin;
-			return succ;
+			//std::cout << "hit at origin" << "\n";
+			return raycast_success{true,lhs.origin,0};
 		}
 
-		auto disp_to_sphere = (s.center - lhs.origin);
+		auto disp_to_sphere = (lhs.origin - s.center);
 
-		//Calculating using quadratic equation formula
-
-		const real	a = dot(lhs.direction(), lhs.direction());
-		const real	b = 2.f * dot(disp_to_sphere, lhs.direction());
+		//Calculating using quadratic equation formula (but this is just a fast way to test if ray collides, not resolution)
+		const real	b = dot(disp_to_sphere, lhs.direction());
 		const real	c = dot(disp_to_sphere, disp_to_sphere) - s.radius_sq();
-		const real	discri = b * b - 4.f * a * c;
-		const real	sq_discri = sqrtf(discri);
-		real		t = 0.f;
+
+		if (c > 0.f && b > 0.f)
+		{
+			//No collision occurred
+			raycast_failure res;
+			//std::cout << "fail" << "\n";
+
+			res.nearest_point = lhs.origin;
+			res.nearest_distance = 0;
+			return res;
+		}
+
+		const real	discri = b * b - c;
 
 		if (discri < 0.f)
 		{
 			//No collision occurred
 			raycast_failure res;
-			
+			//std::cout << "fail" << "\n";
+
 			res.nearest_point = lhs.origin;
 			res.nearest_distance = 0;
 			return res;
 		}
-		
-		t = -b - sq_discri;
 
-		if (t > 0.f)
-		{
-			t /= (2.f * a);
-			//Initial pt collision
-			raycast_success res;
+		const real	sq_discri = sqrtf(abs(discri));
+		real t = -b - sq_discri;
 
-			vec3 poc = lhs.get_point_after(t);
+		//ray is in sphere
+		if (t < 0.f)
+			t = 0.f;
 
-			res.origin_colliding = false;
-			res.point_of_collision = poc;
-			res.distance_to_collision = lhs.origin.distance(poc);
+		//pt collision
+		//std::cout << "hit" << "\n";
+		const vec3 poc = lhs.get_point_after(t);
 
-			return res;
-		}
-
-		t = -b + sq_discri;
-		
-		if (t > 0.f)
-		{
-			t /= (2.f * a);
-			//Second pt collision
-			raycast_success res;
-
-			vec3 poc = lhs.get_point_after(t);
-			
-			res.origin_colliding = false;
-			res.point_of_collision = poc;
-			res.distance_to_collision = lhs.origin.distance(poc);
-
-			return res;
-		}
-			
-		//No collsion happened
-		raycast_failure res;
-		res.nearest_point = lhs.origin;
-		res.nearest_distance = 0;
-		res.perpendicular = s.center + s.radius*s.center;
-
-		return res;
+		return raycast_success{false,poc,lhs.origin.distance(poc) };
 	}
 }

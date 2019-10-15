@@ -26,6 +26,7 @@ namespace idk
 		// Engine Setters
 		void SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc);
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
+		void RemoveAnimation(string_view name);
 
 		// Editor Functionality
 		void SaveBindPose();
@@ -37,6 +38,7 @@ namespace idk
 		void Play(size_t index, float offset = 0.0f);
 		void Pause();
 		void Stop();
+		void Loop(bool to_loop);
 		// void Transistion(string_view animation_name);
 
 		// Script Getters
@@ -63,10 +65,11 @@ namespace idk
 		int		_start_animation = -1;
 		float	_start_animation_offset = 0.0f;
 		int		_curr_animation = -1;
-
+		float	_blend_factor = 0.0f;
 		// Animation Playback controls
 		bool	_is_playing = false;
 		bool	_is_stopping = false;
+		bool	_is_looping = true;
 
 		void clearGameObjects();
 

@@ -41,7 +41,6 @@ namespace idk::anim
 		//, public MetaTag<AnimationMeta>
 	{
 	public:
-		string_view GetName()		const { return _name; }
 		float		GetFPS()		const { return _fps; }
 		float		GetDuration()	const { return _duration; }
 		float		GetNumTicks()	const { return _num_ticks; }
@@ -50,12 +49,10 @@ namespace idk::anim
 		const hash_table<string, AnimatedBone>& data() { return _animated_bones; }
 
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
-		void SetName(string_view name) { _name = name; }
 
 		void AddAnimatedBone(const AnimatedBone& animated_bone);
 	private:
 		hash_table<string, AnimatedBone> _animated_bones;
-		string _name;
 
 		float _fps		 = 25.0f;
 		float _duration  = 0.0f;

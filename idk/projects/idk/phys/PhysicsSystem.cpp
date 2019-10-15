@@ -8,6 +8,7 @@
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
+#include <phys/raycasts/collision_raycast.h>
 #include <math/matrix_decomposition.h>
 
 namespace idk
@@ -131,21 +132,21 @@ namespace idk
 							const auto rshape = calc_shape(rhs, rrigidbody, rcollider);
 
 							// static collisions
-							if constexpr (std::is_same_v<LShape, box> && std::is_same_v<RShape, box>)
+							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, box>)
 								return phys::collide_box_box_discrete(
 									lshape, rshape);
 							else
-							if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, box>)
+							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, box>)
 								return -phys::collide_box_sphere_discrete(
 									rshape, lshape);
 							else
-							if constexpr (std::is_same_v<LShape, sphere> && std::is_same_v<RShape, sphere>)
+							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, sphere>)
 								return phys::collide_sphere_sphere_discrete(
-									lshape, rshape);
+										lshape, rshape);
 							else
-							if constexpr (std::is_same_v<LShape, box> && std::is_same_v<RShape, sphere>)
+							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, sphere>)
 								return phys::collide_box_sphere_discrete(
-									lshape, rshape);
+											lshape, rshape);
 							else
 								return phys::col_failure{};
 
@@ -267,6 +268,51 @@ namespace idk
 
 		for (auto& collider : colliders)
 			debug_draw(collider);
+	}
+
+	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList)
+	{
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+
+		// put shape into world space
+		constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+		{
+			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+		};
+		bool foundRes = false;
+		
+		for (auto& c : colliders)
+		{
+			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result
+			{
+				using RShape = std::decay_t<decltype(shape)>;
+
+				const auto rShape = calc_shape(shape, c);
+
+				if constexpr (std::is_same_v<RShape, sphere>)
+					return phys::collide_ray_sphere(
+						r, rShape);
+				else
+					if constexpr (std::is_same_v<RShape, box>)
+						return phys::collide_ray_aabb(
+							r, c.bounds());
+				else
+					return phys::raycast_failure{};
+			}, c.shape);
+
+			if (result)
+			{
+				//Success
+				collidedList.emplace_back(c.GetGameObject());
+				foundRes = true;
+			}
+			else
+			{
+				//Fail
+			}
+		}
+
+		return foundRes;
 	}
 
 

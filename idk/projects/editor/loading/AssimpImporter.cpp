@@ -121,11 +121,15 @@ namespace idk
 			for (auto& compiled_animation : importer_scene.compiled_clips)
 			{
 				const auto anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
-				anim_clip_handle->Name(compiled_animation.name);
+				if (importer_scene.has_animation && !importer_scene.has_skeleton)
+				{
+					anim_clip_handle->Name(path_to_resource.GetStem());
+				}
+				else
+					anim_clip_handle->Name(compiled_animation.name);
 
 				auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 				
-				anim_clip.SetName(compiled_animation.name);
 				anim_clip.SetSpeeds(compiled_animation.fps, compiled_animation.duration, compiled_animation.num_ticks);
 
 				for (auto& animated_bone : compiled_animation.animated_bones)
@@ -322,12 +326,18 @@ namespace idk
 					else
 						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
 				}
-				anim_clip_handle->Name(compiled_animation.name);
-
 				// Creating the animation resource
 				auto& anim_clip = anim_clip_handle.as<anim::Animation>();
 
-				anim_clip.SetName(compiled_animation.name);
+				if (importer_scene.has_animation && !importer_scene.has_skeleton)
+				{
+					anim_clip_handle->Name(path_to_resource.GetStem());
+				}
+				else
+				{
+					anim_clip_handle->Name(compiled_animation.name);
+				}
+
 				anim_clip.SetSpeeds(compiled_animation.fps, compiled_animation.duration, compiled_animation.num_ticks);
 
 				for (auto& animated_bone : compiled_animation.animated_bones)

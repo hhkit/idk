@@ -30,6 +30,10 @@ of the editor.
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#ifdef _WIN32 
+#include <shellapi.h>
+#endif
+
 namespace idk {
 
 	IGE_ProjectWindow::IGE_ProjectWindow()
@@ -52,30 +56,30 @@ namespace idk {
 
     void IGE_ProjectWindow::displayDir(PathHandle dir)
     {
-        for (const auto& path : dir.GetEntries())
-        {
-            if (!path.IsDir())
-                continue;
+        if (!dir.IsDir())
+            return;
 
-            bool selected = path == current_dir;
-            if (!dirContainsDir(path))
+        bool selected = dir == current_dir;
+        if (!dirContainsDir(dir))
+        {
+            auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
+            if (selected) flags |= ImGuiTreeNodeFlags_Selected;
+            ImGui::TreeNodeEx(dir.GetFileName().data(), flags);
+            if (ImGui::IsItemClicked())
+                current_dir = dir;
+        }
+        else
+        {
+            auto open = ImGui::TreeNodeEx(dir.GetFileName().data(),
+                                          ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
+                                          ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
+            if (ImGui::IsItemClicked())
+                current_dir = dir;
+            if (open)
             {
-                auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
-                if (selected) flags |= ImGuiTreeNodeFlags_Selected;
-                ImGui::TreeNodeEx(path.GetFileName().data(), flags);
-                if (ImGui::IsItemClicked())
-                    current_dir = path;
-            }
-            else
-            {
-                auto open = ImGui::TreeNodeEx(path.GetFileName().data(),
-                    ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
-                    ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
-                if (ImGui::IsItemClicked())
-                    current_dir = path;
-                displayDir(path);
-                if (open)
-                    ImGui::TreePop();
+                for (const auto& path : dir.GetEntries())
+                    displayDir(path);
+                ImGui::TreePop();
             }
         }
     }
@@ -174,20 +178,7 @@ namespace idk {
         ImGui::PopStyleVar();
 
         PathHandle assets_dir = "/assets";
-
-        {
-            bool selected = assets_dir == current_dir;
-            auto open = ImGui::TreeNodeEx("Assets",
-                            ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow |
-                            ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
-            if (ImGui::IsItemClicked())
-                current_dir = assets_dir;
-            if (open)
-            {
-                displayDir(assets_dir);
-                ImGui::TreePop();
-            }
-        }
+        displayDir(assets_dir);
 
 		ImGui::EndChild();
 
@@ -308,6 +299,7 @@ namespace idk {
                 }
                 else
                 {
+                    auto handle = getOrLoadFirstAsset(path);
                     RscHandle<Texture> tex = std::visit([](auto h)
                     {
                         using T = typename decltype(h)::Resource;
@@ -316,9 +308,19 @@ namespace idk {
                             return RscHandle<Texture>();
                         if constexpr (std::is_same_v<T, Texture>)
                             return h;
+                        else if constexpr (std::is_same_v<T, Material> || std::is_same_v<T, shadergraph::Graph>)
+                        {
+                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
+                            return material_icon;
+                        }
+                        else if constexpr (std::is_same_v<T, MaterialInstance>)
+                        {
+                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
+                            return material_icon;
+                        }
                         else
                             return RscHandle<Texture>();
-                    }, getOrLoadFirstAsset(path));
+                    }, handle);
 
                     if (tex)
                     {
@@ -328,8 +330,11 @@ namespace idk {
                             sz.y /= aspect;
                         else if (aspect < 1.0f)
                             sz.x /= aspect;
-                        tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
-                        selected_tint = ImVec4(1, 1, 1, 1);
+                        if (handle.resource_id() == BaseResourceID<Texture>)
+                        {
+                            tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
+                                selected_tint = ImVec4(1, 1, 1, 1);
+                        }
                     }
                 }
 
@@ -458,7 +463,7 @@ namespace idk {
                     if (ImGui::MenuItem("Create Material Instance"))
                     {
                         string filename{ path.GetStem() };
-                        filename += "_Instance";
+                        filename += "_Inst";
                         auto create_path = unique_new_file_path(filename, MaterialInstance::ext);
                         auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
                         if (res && *res)
@@ -467,7 +472,17 @@ namespace idk {
                             Core::GetResourceManager().Save(*res);
                         }
                     }
+                    ImGui::Separator();
                 }
+
+                if (ImGui::MenuItem("Show in Explorer"))
+                {
+#ifdef _WIN32 
+                    auto args = "/select,\"" + string(fs::path(path.GetFullPath()).make_preferred().string()) + '"';
+                    ShellExecuteA(NULL, "open", "explorer.exe", args.c_str(), NULL, SW_SHOWNORMAL);
+#endif
+                }
+
                 ImGui::EndPopup();
             }
 
@@ -493,7 +508,11 @@ namespace idk {
         ImGui::BeginChild("footer", ImVec2(0, line_height));
         ImGui::SetCursorPosX(2.0f);
         if (selected_path)
-            ImGui::Text(selected_path.GetMountPath().data());
+        {
+            string str = selected_path.GetMountPath().data() + 1;
+            str[0] = 'A';
+            ImGui::Text(str.c_str());
+        }
         ImGui::EndChild();
         ImGui::PopStyleColor();
 

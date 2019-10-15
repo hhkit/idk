@@ -60,16 +60,16 @@ namespace idk
 
 	bool sphere::contains(vec3 point) const
 	{
-		return center.distance_sq(point) - radius * radius < +epsilon;
+		return (center.distance_sq(point) - radius * radius) < +epsilon;
 	}
 
 	bool sphere::contains(const sphere& s) const
 	{
-		return center.distance_sq(s.center) - (radius - s.radius) < +epsilon;
+		return (center.distance_sq(s.center) - (radius - s.radius)) < +epsilon;
 	}
 
 	bool sphere::overlaps(const sphere& s) const
 	{
-		return center.distance_sq(s.center) - (radius + s.radius) * (radius + s.radius) < +epsilon;
+		return (center.distance_sq(s.center) - (radius + s.radius) * (radius + s.radius)) < +epsilon;
 	}
 }

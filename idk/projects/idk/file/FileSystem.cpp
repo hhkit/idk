@@ -309,18 +309,73 @@ namespace idk {
 				return FStreamWrapper{};
 			else
 			{
-				const auto& internal_file = createAndGetFile(mountPath);
+				auto& internal_file = createAndGetFile(mountPath);
 				
 				PathHandle handle{ internal_file._tree_index, true };
-				return handle.Open(perms, binary_stream);
+				FStreamWrapper fs;
+
+				if (!handle.CanOpen())
+					return fs;
+
+				internal_file.SetOpenMode(perms);
+				fs._file_key = internal_file._tree_index;
+
+				switch (perms)
+				{
+				case FS_PERMISSIONS::READ:
+					fs.open(internal_file._full_path,
+						binary_stream ? std::ios::in | std::ios::binary : std::ios::in);
+					break;
+
+				case FS_PERMISSIONS::WRITE:
+					fs.open(internal_file._full_path,
+						binary_stream ? std::ios::out | std::ios::binary : std::ios::out);
+					break;
+
+				case FS_PERMISSIONS::APPEND:
+					fs.open(internal_file._full_path,
+						binary_stream ? std::ios::app | std::ios::binary : std::ios::app);
+					break;
+
+				default:
+					return FStreamWrapper{};
+				}
+				return fs;
 			}
 		}
 		else
 		{
-			const auto& internal_file = getFile(file_index);
+			auto& internal_file = getFile(file_index);
 			PathHandle handle{internal_file._tree_index, true};
 
-			return handle.Open(perms, binary_stream);
+			FStreamWrapper fs;
+			if (!handle.CanOpen())
+				return fs;
+
+			internal_file.SetOpenMode(perms);
+			fs._file_key = internal_file._tree_index;
+
+			switch (perms)
+			{
+			case FS_PERMISSIONS::READ:
+				fs.open(internal_file._full_path,
+					binary_stream ? std::ios::in | std::ios::binary : std::ios::in);
+				break;
+
+			case FS_PERMISSIONS::WRITE:
+				fs.open(internal_file._full_path,
+					binary_stream ? std::ios::out | std::ios::binary : std::ios::out);
+				break;
+
+			case FS_PERMISSIONS::APPEND:
+				fs.open(internal_file._full_path,
+					binary_stream ? std::ios::app | std::ios::binary : std::ios::app);
+				break;
+
+			default:
+				return FStreamWrapper{};
+			}
+			return fs;
 		}
 	}
 
@@ -332,14 +387,65 @@ namespace idk {
 		return 0;
 	}
 
-	bool FileSystem::Rename(string_view mountPath, string_view new_name)
+	bool FileSystem::Rename(string_view mountPath, string_view new_file_name)
 	{
 		// Try getting the file
 		PathHandle handle = GetPath(mountPath);
-		if (handle)
-			return handle.Rename(new_name);
+		// Check Handle
+		if (handle.validateFull() == false)
+			return false;
 
-		return false;
+		auto& vfs = Core::GetSystem<FileSystem>();
+		if (handle._is_regular_file)
+		{
+			auto& internal_file = vfs.getFile(handle._key);
+			auto& parent_dir = vfs.getDir(internal_file._parent);
+
+			FS::path old_p{ internal_file._full_path };
+			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
+			try {
+				FS::rename(old_p, new_p);
+			}
+			catch (const FS::filesystem_error & e) {
+				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
+				return false;
+			}
+			auto res = parent_dir._files_map.find(internal_file._filename);
+			assert(res != parent_dir._files_map.end());
+			parent_dir._files_map.erase(res);
+
+			vfs.initFile(internal_file, parent_dir, new_p);
+			parent_dir._files_map.emplace(internal_file._filename, internal_file._tree_index);
+			return true;
+		}
+		else
+		{
+			// Rename the current dir first
+			auto& internal_dir = vfs.getDir(handle._key);
+			if (!internal_dir.IsValid())
+				return false;
+
+			auto& parent_dir = vfs.getDir(internal_dir._parent);
+
+			FS::path old_p{ internal_dir._full_path };
+			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
+			try {
+				FS::rename(old_p, new_p);
+			}
+			catch (const FS::filesystem_error & e) {
+				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
+				return false;
+			}
+			auto res = parent_dir._sub_dirs.find(internal_dir._filename);
+			assert(res != parent_dir._sub_dirs.end());
+			parent_dir._sub_dirs.erase(res);
+
+			vfs.initDir(internal_dir, parent_dir, new_p);
+			parent_dir._sub_dirs.emplace(internal_dir._filename, internal_dir._tree_index);
+			handle.renameDirUpdate();
+
+			return true;
+		}
 	}
 
 #pragma endregion Utility
