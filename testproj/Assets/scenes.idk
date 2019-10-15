@@ -1,7 +1,0 @@
-_active_scene: !<Scene> {guid: 37903fe4-38be-4d5b-b15b-3e9dad6d7da5}
-_scenes: 
-- build_index: 0
-  scene: !<Scene> {guid: 37903fe4-38be-4d5b-b15b-3e9dad6d7da5}
-- build_index: 1
-  scene: !<Scene> {guid: 35e52183-e12c-476b-904e-f1639f04d5b6}
-_startup_scene: !<Scene> {guid: 00000000-0000-0000-0000-000000000000}

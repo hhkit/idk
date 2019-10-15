@@ -228,20 +228,23 @@ REFLECT_BEGIN(idk::Handle<idk::GameObject>, "Handle<GameObject>")
 REFLECT_VARS(id)
 REFLECT_END()
 
+/*==========================================================================
+ * configs
+ *========================================================================*/
+
+REFLECT_BEGIN(idk::TagManager, "TagManager")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::TagManagerConfig, "TagManagerConfig")
+REFLECT_VARS(tags)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
 REFLECT_VARS(_scenes, _startup_scene, _active_scene)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")
 REFLECT_VARS(build_index, scene)
-REFLECT_END()
-
-/*==========================================================================
- * configs
- *========================================================================*/
-
-REFLECT_BEGIN(idk::TagSystemConfig, "TagSystemConfig")
-REFLECT_VARS(tags)
 REFLECT_END()
 
 /*==========================================================================

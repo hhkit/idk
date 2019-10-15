@@ -16,7 +16,7 @@ namespace idk
         {
             ImGui::SetWindowFocus(window_name);
             is_open = true;
-            if constexpr (std::is_same_v<T, TagSystem>)
+            if constexpr (std::is_same_v<T, TagManager>)
                 _selection = _tags_and_layers;
         }
 

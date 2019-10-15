@@ -37,6 +37,10 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
 #include <proj/ProjectManager.h>
+#include <util/ioutils.h>
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace idk
 {
@@ -46,22 +50,46 @@ namespace idk
 
 	void IDE::Init()
 	{
-        auto& proj_manager = Core::GetSystem<ProjectManager>();
-        const auto recent_proj = proj_manager.GetRecentProjectPath();
-        if (recent_proj.empty())
+        // project load
         {
-            const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
-            auto proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
-            while (!proj)
-                proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
-            proj_manager.LoadProject(*proj);
+            auto& proj_manager = Core::GetSystem<ProjectManager>();
+            const auto recent_proj = []() -> string
+            {
+                fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
+                recent_path /= "idk";
+                recent_path /= ".recent";
+                if (!fs::exists(recent_path))
+                    return "";
+                std::ifstream recent_file{ recent_path };
+                fs::path proj = stringify(recent_file);
+                if (!fs::exists(proj))
+                    return "";
+                return proj.string();
+            }();
+
+            if (recent_proj.empty())
+            {
+                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
+                auto proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+                while (!proj)
+                    proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+                proj_manager.LoadProject(*proj);
+            }
+            else
+                proj_manager.LoadProject(recent_proj);
+
+            fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
+            recent_path /= "idk";
+            if (!fs::exists(recent_path))
+                fs::create_directory(recent_path);
+            _editor_app_data = recent_path.string();
+
+            recent_path /= ".recent";
+            std::ofstream recent_file{ recent_path };
+            recent_file << proj_manager.GetProjectFullPath();
         }
-        else
-            proj_manager.LoadProject(recent_proj);
 
 
-
-		// do imgui stuff
 
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
@@ -80,10 +108,13 @@ namespace idk
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
 
+
 		//ImGui Initializations
 		_interface->Init();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
+        io.IniFilename = NULL;
+        ImGui::LoadIniSettingsFromDisk((_editor_app_data + "/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -169,6 +200,8 @@ namespace idk
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 16.0f, &config);
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 14.0f, &config);
 
+
+
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
 
@@ -217,6 +250,8 @@ namespace idk
 
 	void IDE::Shutdown()
 	{
+        ImGui::SaveIniSettingsToDisk((_editor_app_data + "/imgui.ini").c_str());
+        Core::GetSystem<ProjectManager>().SaveConfigs();
         ige_windows.clear();
 		_interface->Shutdown();
 		_interface.reset();

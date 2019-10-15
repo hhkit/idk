@@ -80,6 +80,7 @@ namespace idk
 		friend class CommandController;
 
 		unique_ptr<edt::I_Interface> _interface;
+        string _editor_app_data;
 
 		//GraphicsAPI gLibVer;
 		unique_ptr<IGE_MainWindow> ige_main_window		{};

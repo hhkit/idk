@@ -4,6 +4,12 @@
 
 namespace idk
 {
+    template<typename SystemT, typename = void>
+    struct is_configurable_system : std::false_type {};
+    template<typename SystemT>
+    struct is_configurable_system<SystemT, std::void_t<typename SystemT::Config>> : std::true_type {};
+
+
     template<typename ConfigT>
     class ConfigurableSystem : public ISystem
     {

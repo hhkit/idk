@@ -21,6 +21,7 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
 #include <common/Transform.h> //DockBuilderDockNode
+#include <common/TagManager.h>
 #include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
@@ -116,6 +117,14 @@ namespace idk {
 
 						Core::GetSystem<SceneManager>().SetActiveScene(hnd);
 						hnd->Load();
+
+                        // clear removed tags
+                        const auto num_tags = Core::GetSystem<TagManager>().GetNumOfTags();
+                        for (const auto& c : GameState::GetGameState().GetObjectsOfType<Tag>())
+                        {
+                            if (c.index > num_tags)
+                                c.GetGameObject()->RemoveComponent(c.GetHandle());
+                        }
 
 						//Clear IDE values
 						Core::GetSystem<IDE>().flag_skip_render = true;

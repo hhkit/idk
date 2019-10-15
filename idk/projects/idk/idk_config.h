@@ -59,7 +59,7 @@ namespace idk
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
-        ,   class TagSystem
+        ,   class TagManager
 	>;
 
 	using Resources = std::tuple<
@@ -92,6 +92,6 @@ namespace idk
     namespace natvis
     {
         constexpr auto FileSystemID = SystemID<FileSystem>;
-        constexpr auto TagSystemID = SystemID<TagSystem>;
+        constexpr auto TagManagerID = SystemID<TagManager>;
     }
 }
