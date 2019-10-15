@@ -29,9 +29,10 @@ namespace idk
 
     void ProjectManager::LoadProject(string_view full_path)
     {
-        // @TODO: unmount "/assets" if already mounted
-
         auto& core_fs = Core::GetSystem<FileSystem>();
+        core_fs.Dismount("/assets");
+        core_fs.Dismount("/config");
+
         fs::path path = full_path;
         IDK_ASSERT_MSG(fs::exists(path), "Project does not exist!");
         _full_path = full_path;
