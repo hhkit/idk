@@ -48,6 +48,7 @@ namespace idk {
 	private:
 		friend class IDE;
 		friend class CMD_DeleteGameObject;
+		friend class CMD_DeleteComponent;
 
 		//FlushCommand gathers all command call and this pollstack executes all at once at the end of IDE frame.
 		void FlushCommands();

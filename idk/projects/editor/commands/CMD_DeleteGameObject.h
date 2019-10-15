@@ -23,18 +23,9 @@ namespace idk {
 
 	private:
 
-		//This is for collecting deleted gameobjects and its children. Used for undo
-		struct RecursiveObjects {
-			Handle<GameObject>			parent_of_children	{}; //Only for children, used when undoing. The main deleted gameobject would have this as null.
-			vector<reflect::dynamic>	vector_of_components{}; //Contains components for the new gameobject
-			vector<RecursiveObjects>	children			{};
-		};
-
-		void RecursiveCollectObjects(Handle<GameObject> i,vector<RecursiveObjects>& vector_ref);
 		void RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot = false);
 
 		vector<RecursiveObjects>	gameobject_vector	{};
-
 		vector<ICommand*>			commands_affected	{}; //Stores a dumb pointer (This is to check if the unique pointer is still there)
 	};
 

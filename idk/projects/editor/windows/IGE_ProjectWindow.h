@@ -39,5 +39,6 @@ namespace idk
 
         void displayDir(PathHandle dir);
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);
+        string unique_new_file_path(string_view name, string_view ext);
 	};
 }

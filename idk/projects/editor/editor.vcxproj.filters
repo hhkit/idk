@@ -68,15 +68,6 @@
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="DragDropTypes.h" />
-    <ClInclude Include="loading\FBXLoaderHelpers.h">
-      <Filter>loader\fbx</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\VulkanFBXLoader.h">
-      <Filter>loader\fbx</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\OpenGLFBXLoader.h">
-      <Filter>loader\fbx</Filter>
-    </ClInclude>
     <ClInclude Include="commands\CMD_DeleteComponent.h">
       <Filter>commands</Filter>
     </ClInclude>
@@ -95,13 +86,37 @@
     <ClInclude Include="windows\IGE_ProfilerWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
-    <ClInclude Include="widgets\DragVec3.h">
-      <Filter>widgets</Filter>
-    </ClInclude>
     <ClInclude Include="widgets\DragQuat.h">
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="imguidk.h" />
+    <ClInclude Include="widgets\DragVec.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="imguidk.h" />
+    <ClInclude Include="loading\AssimpImporter.h">
+      <Filter>loader\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\AssimpImporter_helpers.h">
+      <Filter>loader\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\FBXLoaderHelpers.h">
+      <Filter>loader\assimp\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\OpenGLFBXLoader.h">
+      <Filter>loader\assimp\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="imguidk.h" />
+    <ClInclude Include="widgets\DragVec.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\VulkanFBXLoader.h">
+      <Filter>loader\assimp\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_ProjectSettings.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -153,15 +168,6 @@
     <ClCompile Include="widgets\InputResource.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
-    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
-      <Filter>loader\fbx</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\VulkanFBXLoader.cpp">
-      <Filter>loader\fbx</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
-      <Filter>loader\fbx</Filter>
-    </ClCompile>
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp">
       <Filter>commands</Filter>
@@ -175,15 +181,37 @@
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
-    <ClCompile Include="widgets\DragVec3.cpp">
-      <Filter>widgets</Filter>
-    </ClCompile>
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
     <ClCompile Include="widgets\DragQuat.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
+    <ClCompile Include="widgets\DragVec.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\AssimpImporter.cpp">
+      <Filter>loader\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\AssimpImporter_helpers.cpp">
+      <Filter>loader\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
+      <Filter>loader\assimp\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <Filter>loader\assimp\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\VulkanFBXLoader.cpp">
+      <Filter>loader\assimp\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ProjectSettings.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
@@ -204,8 +232,11 @@
     <Filter Include="widgets">
       <UniqueIdentifier>{2d26593e-7fd8-4e14-a1e4-cb20be5641c9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="loader\fbx">
+    <Filter Include="loader\assimp">
       <UniqueIdentifier>{5fa89918-20ca-42f5-b68e-d3370c6c6e57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader\assimp\legacy">
+      <UniqueIdentifier>{a523f331-efa6-40ea-baf4-8b8ae83a148c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

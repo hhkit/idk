@@ -6,9 +6,9 @@
 #include <stb/stb_image.h>
 
 //Resources
-#include <idk_opengl/resource/OpenGLTexture.h>
+#include <opengl/resource/OpenGLTexture.h>
 
-#include <idk_opengl/DDSData.h>
+#include <opengl/DDSData.h>
 
 namespace idk
 {

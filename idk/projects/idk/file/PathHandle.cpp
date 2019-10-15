@@ -120,97 +120,12 @@ namespace idk
 
 	FStreamWrapper PathHandle::Open(FS_PERMISSIONS perms, bool binary_stream)
 	{
-		FStreamWrapper fs;
-
-		if (!CanOpen())
-			return fs;
-
-		auto& vfs = Core::GetSystem<FileSystem>();
-		auto& internal_file = vfs.getFile(_key);
-
-		internal_file.SetOpenMode(perms);
-		fs._file_key = internal_file._tree_index;
-
-		switch (perms)
-		{
-		case FS_PERMISSIONS::READ:
-			fs.open(internal_file._full_path,
-				binary_stream ? std::ios::in | std::ios::binary : std::ios::in);
-			break;
-
-		case FS_PERMISSIONS::WRITE:
-			fs.open(internal_file._full_path,
-				binary_stream ? std::ios::out | std::ios::binary : std::ios::out);
-			break;
-
-		case FS_PERMISSIONS::APPEND:
-			fs.open(internal_file._full_path,
-				binary_stream ? std::ios::app | std::ios::binary : std::ios::app);
-			break;
-
-		default:
-			return FStreamWrapper{};
-		}
-		return fs;
+		return Core::GetSystem<FileSystem>().Open(GetMountPath(), perms, binary_stream);
 	}
-
 
 	bool PathHandle::Rename(string_view new_file_name)
 	{
-		// Check Handle
-		if (validateFull() == false)
-			return false;
-
-		auto& vfs = Core::GetSystem<FileSystem>();
-		if (_is_regular_file)
-		{
-			auto& internal_file = vfs.getFile(_key);
-			auto& parent_dir = vfs.getDir(internal_file._parent);
-
-			FS::path old_p{ internal_file._full_path };
-			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
-			try {
-				FS::rename(old_p, new_p);
-			}catch(const FS::filesystem_error& e){
-				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
-				return false;
-			}
-			auto res = parent_dir._files_map.find(internal_file._filename);
-			assert(res != parent_dir._files_map.end());
-			parent_dir._files_map.erase(res);
-
-			vfs.initFile(internal_file, parent_dir, new_p);
-			
-			return true;
-		}
-		else
-		{
-			// Rename the current dir first
-			auto& internal_dir = vfs.getDir(_key);
-			if (!internal_dir.IsValid())
-				return false;
-
-			auto& parent_dir = vfs.getDir(internal_dir._parent);
-
-			FS::path old_p{ internal_dir._full_path };
-			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
-			try {
-				FS::rename(old_p, new_p);
-			}
-			catch (const FS::filesystem_error& e) {
-				std::cout << "[PathHandle ERROR] Rename: " << e.what() << std::endl;
-				return false;
-			}
-			auto res = parent_dir._sub_dirs.find(internal_dir._filename);
-			assert(res != parent_dir._sub_dirs.end());
-			parent_dir._sub_dirs.erase(res);
-
-			vfs.initDir(internal_dir, parent_dir, new_p);
-
-			renameDirUpdate();
-			
-			return true;
-		}
+		return Core::GetSystem<FileSystem>().Rename(GetMountPath(), new_file_name);
 	}
 
 #pragma endregion Utility

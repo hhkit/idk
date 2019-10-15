@@ -17,6 +17,7 @@ namespace idk::yaml
 		bool new_block = true;
 		string_view::iterator p;
 		const string_view::iterator end;
+        parse_error error{};
 
 		_mode& mode() { return mode_stack.back(); }
 
@@ -421,7 +422,8 @@ namespace idk::yaml
 			{
                 if (indent > p.block_indents.back())
                 {
-                    throw "sibling indent mismatch?";
+                    p.error = parse_error::ill_formed;
+                    return;
                 }
                 else if (indent < p.block_indents.back())
                 {
@@ -455,7 +457,7 @@ namespace idk::yaml
 		p.new_block = true;
 	}
 
-	node load(string_view str)
+	load_result load(string_view str)
 	{
 		parser_state p{ str };
         p.block_indents.push_back(handle_indent(p));
@@ -476,9 +478,12 @@ namespace idk::yaml
             case ']': on_flow_close(p); continue;
             case '!': on_exclamation_mark(p); continue;
 
-            case '\t': throw "fuck your tabs and get out of here";
+            case '\t': return parse_error::has_tabs;
             default: { if (printable(*p)) p.token += *p; } break;
             }
+
+            if (p.error != parse_error{})
+                return p.error;
 
 			++p;
 		} 

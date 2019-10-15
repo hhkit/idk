@@ -5,13 +5,6 @@
 
 namespace idk
 {
-	template<typename T, template<typename ...> typename Template>
-	struct is_template;
-
-	template<typename T, template<typename ...> typename Template>
-	constexpr auto is_template_v = is_template<T, Template>::value;
-
-
 	template<typename Tuple, template<typename ...> typename Wrap>
 	struct tuple_wrap;
 
@@ -32,7 +25,7 @@ namespace idk
 	struct index_in_tuple;
 
 	template<typename FindMe, typename Tuple>
-	static constexpr auto index_in_tuple_v = index_in_tuple<FindMe, Tuple>::value;
+	constexpr auto index_in_tuple_v = index_in_tuple<FindMe, Tuple>::value;
 
 	template<typename T, typename ... Args>
 	constexpr auto tuple_construct(const std::tuple<Args...>&) noexcept;

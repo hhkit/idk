@@ -5,6 +5,17 @@
 namespace idk
 {
 
+    enum class parse_error : char
+    {
+        none = 0,
+        invalid_argument = 1,
+        ill_formed_yaml = 2,
+        result_out_of_range = 3,
+        type_cannot_be_parsed = 4
+    };
+
+
+
 	// forward decls
 	namespace reflect { class dynamic; class type; }
 	class Scene;
@@ -12,29 +23,29 @@ namespace idk
 
 
 	template<typename T>
-	string serialize_text(const T& obj);
+    string serialize_text(const T& obj);
 
 	template<>
-	string serialize_text(const reflect::dynamic& obj);
+    string serialize_text(const reflect::dynamic& obj);
 
 	template<> // serialize scene
-	string serialize_text(const Scene& scene);
+    string serialize_text(const Scene& scene);
 
 
 
     template<typename T>
-    T parse_text(const string& str);
+    monadic::result<T, parse_error> parse_text(string_view sv);
 
 	template<typename T>
-	void parse_text(const string& str, T& obj);
+    parse_error parse_text(string_view sv, T& obj);
 
     template<>
-    void parse_text(const string& str, reflect::dynamic& obj);
+    parse_error parse_text(string_view sv, reflect::dynamic& obj);
 
 	template<> // parse scene
-	void parse_text(const string& str, Scene& scene);
+    parse_error parse_text(string_view sv, Scene& scene);
 
-	reflect::dynamic parse_text(const string& str, reflect::type type);
+    monadic::result<reflect::dynamic, parse_error> parse_text(string_view sv, reflect::type type);
 
 }
 

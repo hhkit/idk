@@ -5,7 +5,7 @@
 #include <core/Core.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/VulkanDebugRenderer.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <win32/XInputSystem.h>
 #include <ReflectRegistration.h>
@@ -15,8 +15,11 @@
 #include <scene/SceneManager.h>
 #include <test/TestComponent.h>
 #include <math/euler_angles.h>
-
+#include <iostream>
 #include <editor/loading/OpenGLCubeMapLoader.h>
+
+#include <script/ScriptSystem.h>
+#include <script/MonoBehaviorEnvironment.h>
 
 #include <serialize/serialize.h>
 
@@ -151,27 +154,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
-	{
-		auto sys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-
-		c->AddSystem<IDE>();
-		win.OnScreenSizeChanged.Listen([sys](const ivec2&) { sys->Instance().OnResize(); });
-		gSys = &c->GetSystem<vkn::VulkanWin32GraphicsSystem>();
-	}
-	break;
-	case GraphicsAPI::OpenGL:
-		c->AddSystem<ogl::Win32GraphicsSystem>();
-		c->AddSystem<IDE>();
-
-		gSys = &c->GetSystem<ogl::Win32GraphicsSystem>();
+		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
+	case GraphicsAPI::OpenGL: 
+		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;
 	default:
 		break;
 	}
-	if (&c->GetSystem<IDE>())
-		gSys->editorExist = true;
+	c->AddSystem<IDE>();
 
-	auto scene = RscHandle<Scene>{};
+
 	c->Setup();
 	BasicScene();
 
@@ -183,11 +176,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	Core::GetResourceManager().Create<TestResource>("/assets/test/yolo.test");
 
-	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png");
+	auto minecraft_texture = *Core::GetResourceManager().Load<Texture>("/assets/textures/DebugTerrain.png", false);
 
 	auto scene = RscHandle<Scene>{};
 
 	float divByVal = 2.f;
+
+	// create editor camera
 	{
 		auto camera = scene->CreateGameObject();
 		Handle<Camera> camHandle = camera->AddComponent<Camera>();
@@ -199,17 +194,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		euler.z = deg{};
 		camera->Transform()->rotation = s_cast<quat>(euler);
 		camHandle->far_plane = 100.f;
-		//camHandle->LookAt(vec3(0, 0, 0));
 		camHandle->render_target = RscHandle<RenderTarget>{};
-		//camHandle->is_orthographic = true;
-		//camHandle->orthographic_size = 10.f;
-		//camHandle->render_target->AddAttachment(eDepth);
 		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 		if(gfx_api!=GraphicsAPI::Vulkan)
-			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm");
-		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
+			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
 
-		//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
 		if (&c->GetSystem<IDE>())
 		{
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
@@ -217,72 +206,67 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
+	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
 	mat_inst->uniforms["tex"] = minecraft_texture;
-    //auto test___ = mat_inst->GetUniformBlock("_UB1");
 
-	// Lambda for creating an animated object... Does not work atm.
-	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/Running.fbx" }) {
+	
+	auto create_anim_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos, PathHandle path = PathHandle{ "/assets/models/YY_model.fbx" }) {
 		auto go = scene->CreateGameObject();
 
 		go->Name(path.GetStem());
 		go->GetComponent<Transform>()->position = pos;
 		go->GetComponent<Transform>()->scale /= 100.0f;
+
+		auto model_resource = Core::GetResourceManager().Load(path);
+		string model_stem{ path.GetStem() };
 		auto animator = go->AddComponent<Animator>();
-
-		//Temp condition, since mesh loader isn't in for vulkan yet
-		
+		for (auto handle : model_resource->GetAll<Mesh>())
 		{
-			auto resources_running = Core::GetResourceManager().Load(path);
+			auto mesh_child_go = scene->CreateGameObject();
 
-			for (auto handle : resources_running->GetAll<Mesh>())
+			mesh_child_go->Name(handle->Name());
+			mesh_child_go->Transform()->parent = go;
+
+			auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
+			mesh_rend->mesh = handle;
+			mesh_rend->material_instance = mat_inst;
+		}
+
+		animator->SetSkeleton(model_resource->Get<anim::Skeleton>());
+
+		// Load other animations
+		PathHandle parent_dir{ path.GetParentMountPath() };
+		auto entries = parent_dir.GetEntries(FS_FILTERS::FILE | FS_FILTERS::EXT, ".fbx");
+		for (auto& file : entries)
+		{
+			string file_name{ file.GetFileName() };
+			
+			// Find all fbx files formatted like "model_name@anim_name.fbx"
+			if (file_name.find(model_stem + "@") != string::npos)
 			{
-				auto mesh_child_go = scene->CreateGameObject();
-
-				mesh_child_go->Name(handle->Name());
-				mesh_child_go->Transform()->parent = go;
-
-				auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
-				mesh_rend->mesh = handle;
-				mesh_rend->material_instance = mat_inst;
-			}
-
-			animator->SetSkeleton(resources_running->Get<anim::Skeleton>());
-
-			for (auto& anim : resources_running->GetAll<anim::Animation>())
-			{
-				animator->AddAnimation(anim);
+				std::cout << "Found animation file: " << file_name << "." << std::endl;
+				auto animation_resource = Core::GetResourceManager().Load(file);
+				for (auto& anim : animation_resource->GetAll<anim::Animation>())
+				{
+					std::cout << "Adding animation: " << anim->Name() << "." << std::endl;
+					animator->AddAnimation(anim);
+				}
+				
 			}
 		}
+		
 		return go;
 	};
-
-	/*
-	auto create_mesh_obj = [&scene, mat_inst, gfx_api, divByVal](vec3 pos = vec3{0,0,0}, PathHandle path = PathHandle{ "/assets/models/sphere.obj" }) {
-		auto go = scene->CreateGameObject();
-
-		go->Name(path.GetStem());
-		auto resource_bundle = Core::GetResourceManager().Load(path);
-		go->GetComponent<Transform>()->position = pos;
-		auto mesh_renderer = go->AddComponent<MeshRenderer>();
-		mesh_renderer->mesh = resource_bundle->Get<Mesh>();
-		mesh_renderer->material_instance = mat_inst;
-
-		assert(!resource_bundle->Get<anim::Skeleton>());
-		assert(!resource_bundle->Get<anim::Animation>());
-		return go;
-	};
-	*/
 
 
 	auto tmp_tex = minecraft_texture;
 	if (gfx_api == GraphicsAPI::Vulkan)
-		tmp_tex = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/texture.dds" });
+		tmp_tex = *Core::GetResourceManager().Load<Texture>("/assets/textures/texture.dds", false);
 
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 2,0,-2 });
+	create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
@@ -303,11 +287,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		return go;
 	};
-
-	//createtest_obj(vec3{ 0.5, 0, 0 });
-	//createtest_obj(vec3{ -0.5, 0, 0 });
-	//createtest_obj(vec3{ 0, 0.5, 0 });
-	//createtest_obj(vec3{ 0, -0.5, 0 });
+;
 	{
 		auto floor = scene->CreateGameObject();
 		floor->Name("floor");
@@ -318,51 +298,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		auto mesh_rend = floor->AddComponent<MeshRenderer>();
 		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
 		mesh_rend->material_instance = mat_inst;
-		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>(PathHandle{ "/assets/textures/Grass.jpg" });
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Name("wall");
-		wall->Transform()->position = vec3{ 5, 5, 0 };
-		wall->Transform()->scale = vec3{ 2, 10, 10 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Name("wall");
-		wall->Transform()->position = vec3{ -5, 5, 0 };
-		wall->Transform()->scale = vec3{ 2, 10, 10 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Name("wall");
-		wall->Transform()->position = vec3{ 0, 5, 5 };
-		wall->Transform()->scale = vec3{ 10, 10, 2 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	{
-		auto wall = scene->CreateGameObject();
-		wall->Name("wall");
-		wall->Transform()->position = vec3{ 0, 5, -5 };
-		wall->Transform()->scale = vec3{ 10, 10, 2 };
-		wall->AddComponent<Collider>()->shape = box{};
-	}
-	if(0)
-	{
-		auto light = scene->CreateGameObject();
-		light->Name("Point Light");
-		light->GetComponent<Transform>()->position = vec3{ -1.546f, 1.884f,-0.448f };
-		auto light_comp = light->AddComponent<Light>();
-		{
-			//auto light_map = Core::GetResourceManager().Create<RenderTarget>();
-			//light_comp->SetLightMap(light_map);
-		}
-		light_comp->light = PointLight{
-			real{1.f},
-			color{0.8f,0.f,0.f}
-		};
-		light->AddComponent<TestComponent>();
+		mesh_rend->material_instance->uniforms["tex"] = *Core::GetResourceManager().Load<Texture>("/assets/textures/Grass.jpg", false);
 	}
 
 	{
@@ -382,120 +318,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			};
 			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
 			auto m = light_map->GetMeta().textures[0]->GetMeta();
-			//m.internal_format = ColorFormat::DEPTH_COMPONENT;
-			//m.format = InputChannels::DEPTH_COMPONENT;
 			m.filter_mode = FilterMode::Nearest;
 			m.uv_mode = UVMode::ClampToBorder;
-			//light_map->GetMeta().textures[0]->Size(ivec2{ 1024,1024 });
 			light_map->GetMeta().textures[0]->SetMeta(m);
 			light_comp->SetLightMap(light_map);
 		}
 		light->AddComponent<TestComponent>();
 	}
-	if (0)
-	{
-		auto light = scene->CreateGameObject();
-		light->Name("SpotLight");
-		light->GetComponent<Transform>()->position = vec3{ 0,0,0.0f };
-		auto light_comp = light->AddComponent<Light>();
-		{
-			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
-			auto light_obj = SpotLight{};
-			//light_obj.inner_angle = rad{ 0.5f };
-			light_obj.attenuation_radius = 0.1f;
-			light_comp->light = light_obj;
-			light_comp->SetLightMap(light_map);
-		}
-		light->AddComponent<TestComponent>();
-	}
-	if (0)
-	{
-		auto light = scene->CreateGameObject();
-		light->Name("Point Light 2");
-		light->GetComponent<Transform>()->position = vec3{ 1.98,1.521,-1.431f };
-		auto light_comp = light->AddComponent<Light>();
-		light_comp->light = PointLight{
-			real{1.f},
-			color{1,1,1}
-		};
-		{
-			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
-			light_comp->SetLightMap(light_map);
-		}
-		light->AddComponent<TestComponent>();
-	}
-	/* physics resolution demonstration */
-#if 0
-	 {
-	 	auto seduceme = scene->CreateGameObject();
-	 	seduceme->GetComponent<Name>()->name = "seduceme";
-	 	seduceme->Transform()->position = vec3{ 0, 0.125, 0 };
-	 	//seduceme->Transform()->rotation = quat{ vec3{0,1,0}, deg{30} } *quat{ vec3{1,0,0},  deg{30} };
-	 	seduceme->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
-	 	seduceme->Transform()->scale = vec3{ 1.f / 4 };
-	 	seduceme->AddComponent<RigidBody>();
-	 	auto mesh_rend = seduceme->AddComponent<MeshRenderer>();
-	 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-	 	mesh_rend->material_instance = mat_inst;
-	 	seduceme->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	 }
-	 {
-	 	auto seducer = scene->CreateGameObject();
-	 	seducer->GetComponent<Name>()->name = "seducer";
-	 	seducer->Transform()->position = vec3{ -2, 0.125, 0 };
-	 	seducer->Transform()->scale = vec3{ 1.f / 4 };
-	 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{  2, 0, 0 };
-	 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
-	 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-	 	mesh_rend->material_instance = mat_inst;
-	 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	 }
-	 {
-	 	auto seducer = scene->CreateGameObject();
-	 	seducer->GetComponent<Name>()->name = "seducer";
-	 	seducer->Transform()->position = vec3{ 2, 0.125, 0 };
-	 	seducer->Transform()->scale = vec3{ 1.f / 4 };
-	 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
-	 	auto mesh_rend = seducer->AddComponent<MeshRenderer>(); 
-	 	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
-	 	mesh_rend->material_instance = mat_inst;
-	 	seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	 }
-	 
-	 {
-	 	auto seducer = scene->CreateGameObject();
-	 	seducer->GetComponent<Name>()->name = "seducer";
-	 	seducer->Transform()->position = vec3{ 1, 0.125, 0 };
-	 	seducer->Transform()->scale = vec3{ 1.f / 4 };
-	 	seducer->AddComponent<RigidBody>()->initial_velocity = vec3{ -2, 0, 0 };
-	 	auto mesh_rend = seducer->AddComponent<MeshRenderer>();
-	 	mesh_rend->mesh = Mesh::defaults[MeshType::Circle];
-	 	mesh_rend->material_instance = mat_inst;
-	 	//seducer->AddComponent<Collider>()->shape = sphere{ vec3{}, 1 };
-	 }
-	
-	if(0)
-	for (int i = 2; i < 5; ++ i)
-	{
-		auto seducemetoo = scene->CreateGameObject();
-		seducemetoo->GetComponent<Name>()->name = "seducemetoo";
-		seducemetoo->Transform()->position = vec3{ 0, i, 0 };
-		seducemetoo->Transform()->rotation = quat{ vec3{1,1,0}, deg{30} };
-		seducemetoo->Transform()->scale = vec3{ 1.f / 4 };
-		seducemetoo->AddComponent<RigidBody>();
-		seducemetoo->AddComponent<Collider>()->shape = box{};
-	}
+
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp", false).value()->Instantiate(*scene);
+    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp", false).value()->Instantiate(*scene);
 
 #endif
-
-    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
-    Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
-
-#endif
-
 	c->Run();
-	
-	auto retval = c->GetSystem<Windows>().GetReturnVal();
-	c.reset();
-	return retval;
+	return c->GetSystem<Windows>().GetReturnVal();
 }

@@ -19,14 +19,13 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 #include <imgui/imgui.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
-#include <idk_opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/system/OpenGLGraphicsSystem.h>
 #include <editor/Vulkan_ImGui_Interface.h>
 #include <editor/OpenGL_ImGui_Interface.h>
 #include <win32/WindowsApplication.h>
 #include <vkn/VulkanState.h>
-#include <idk_opengl/system/OpenGLState.h>
-#include <loading/OpenGLFBXLoader.h>
-#include <loading/VulkanFBXLoader.h>
+#include <opengl/system/OpenGLState.h>
+#include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
 #include <loading/OpenGLCubeMapLoader.h>
 #include <loading/OpenGLTextureLoader.h>
@@ -37,6 +36,11 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <imgui/ImGuizmo.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
+#include <proj/ProjectManager.h>
+#include <util/ioutils.h>
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace idk
 {
@@ -46,7 +50,46 @@ namespace idk
 
 	void IDE::Init()
 	{
-		// do imgui stuff
+        // project load
+        {
+            auto& proj_manager = Core::GetSystem<ProjectManager>();
+            const auto recent_proj = []() -> string
+            {
+                fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
+                recent_path /= "idk";
+                recent_path /= ".recent";
+                if (!fs::exists(recent_path))
+                    return "";
+                std::ifstream recent_file{ recent_path };
+                fs::path proj = stringify(recent_file);
+                if (!fs::exists(proj))
+                    return "";
+                return proj.string();
+            }();
+
+            if (recent_proj.empty())
+            {
+                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
+                auto proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+                while (!proj)
+                    proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+                proj_manager.LoadProject(*proj);
+            }
+            else
+                proj_manager.LoadProject(recent_proj);
+
+            fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
+            recent_path /= "idk";
+            if (!fs::exists(recent_path))
+                fs::create_directory(recent_path);
+            _editor_app_data = recent_path.string();
+
+            recent_path /= ".recent";
+            std::ofstream recent_file{ recent_path };
+            recent_file << proj_manager.GetProjectFullPath();
+        }
+
+
 
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
@@ -65,10 +108,13 @@ namespace idk
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
 
+
 		//ImGui Initializations
 		_interface->Init();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
+        io.IniFilename = NULL;
+        ImGui::LoadIniSettingsFromDisk((_editor_app_data + "/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -154,6 +200,8 @@ namespace idk
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 16.0f, &config);
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 14.0f, &config);
 
+
+
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
 
@@ -165,6 +213,7 @@ namespace idk
 		ADD_WINDOW(IGE_InspectorWindow);
 		ADD_WINDOW(IGE_MaterialEditor);
 		ADD_WINDOW(IGE_ProfilerWindow);
+		ADD_WINDOW(IGE_ProjectSettings);
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();
@@ -176,37 +225,33 @@ namespace idk
 
 	void IDE::LateInit()
 	{
-
-		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
+		if(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
 		{
-		case GraphicsAPI::OpenGL:
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterLoader<OpenGLFBXLoader>(".md5mesh");
 			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-			break;
-		case GraphicsAPI::Vulkan:
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".fbx");
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".obj");
-			Core::GetResourceManager().RegisterLoader<VulkanFBXLoader>(".md5mesh");
-			break;
-		default:
-			break;
 		}
+
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
 		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetScheduler().SetPauseState(EditorPause);
 
-		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::ALL))//| FS_FILTERS::RECURSE_DIRS))
-			Core::GetResourceManager().Load(elem, false);
+        for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
+        {
+            if (elem.GetExtension() != ".meta")
+                Core::GetResourceManager().Load(elem, false);
+        }
 	}
 
 	void IDE::Shutdown()
 	{
+        ImGui::SaveIniSettingsToDisk((_editor_app_data + "/imgui.ini").c_str());
+        Core::GetSystem<ProjectManager>().SaveConfigs();
         ige_windows.clear();
 		_interface->Shutdown();
 		_interface.reset();
@@ -292,5 +337,37 @@ namespace idk
 			camTransform->position += camTransform->Forward() * distanceFromObject;
 		}
 	}
+
+	void IDE::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
+	{
+
+		RecursiveObjects newObject{};
+		//Copy all components from this gameobject
+		for (auto& c : i->GetComponents())
+			newObject.vector_of_components.emplace_back((*c).copy());
+
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(i);
+
+		if (children) {
+
+			//If there is no children, it will stop
+			children->visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
+				(void)depth;
+
+				//Skip parent
+				if (handle == i)
+					return true;
+
+				RecursiveCollectObjects(handle, newObject.children); //Depth first recursive
+
+				return false;
+
+				});
+		}
+		vector_ref.push_back(newObject);
+	}
+
+
 
 }

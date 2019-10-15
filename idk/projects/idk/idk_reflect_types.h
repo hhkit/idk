@@ -19,7 +19,7 @@ namespace idk
 	class GameObject;
 	class Mesh;
     class Prefab;
-
+	struct AnimationState;
 	namespace anim
 	{
 		class Animation;
@@ -62,9 +62,13 @@ namespace idk::reflect
 
 		// graphics
 		, RscHandle<Mesh>
+		, RscHandle<Material>
 		, RscHandle<MaterialInstance>
+        , RscHandle<Texture>
 		, UniformInstance
+		, UniformInstanceValue
 		, hash_table<string, UniformInstance>
+		, hash_table<string, UniformInstanceValue>
 		, std::variant<color, RscHandle<CubeMap>> // camera clear
 		, PointLight
 		, DirectionalLight
@@ -80,8 +84,9 @@ namespace idk::reflect
 		// anim
 		, RscHandle<anim::Skeleton>
 		, RscHandle<anim::Animation>
+		//, idk::AnimationState
 		, vector<RscHandle<anim::Animation>>
-		// , vector<Handle<GameObject>>
+		// , vector<idk::AnimationState>
 		, matrix_decomposition<real>
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>

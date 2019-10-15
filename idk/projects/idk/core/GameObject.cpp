@@ -2,19 +2,18 @@
 #include "GameObject.h"
 #include <common/Transform.h>
 #include <common/Name.h>
+#include <common/TagManager.h>
+#include <common/Tag.h>
+
 namespace idk
 {
 	GenericHandle GameObject::AddComponent(reflect::type type)
 	{
-		auto comphandle = GameState::GetGameState().CreateComponent(GetHandle(), type);
-		_components.emplace_back(comphandle);
-		return comphandle;
+		return GameState::GetGameState().CreateComponent(GetHandle(), type);
 	}
 	GenericHandle GameObject::AddComponent(reflect::dynamic dyn)
 	{
-		auto comph = GameState::GetGameState().CreateComponent(GetHandle(), dyn);
-		_components.emplace_back(comph);
-		return comph;
+		return GameState::GetGameState().CreateComponent(GetHandle(), dyn);
 	}
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{
@@ -84,4 +83,26 @@ namespace idk
 	{
 		GetComponent<class Name>()->name = name;
 	}
+
+    string_view GameObject::Tag() const
+    {
+        const auto tag = GetComponent<class Tag>();
+        if (tag)
+            return Core::GetSystem<TagManager>().GetTagFromIndex(tag->index);
+        else
+            return "";
+    }
+
+    void GameObject::Tag(string_view tag)
+    {
+        auto tag_c = GetComponent<class Tag>();
+        if (tag.empty())
+            RemoveComponent(tag_c);
+        else
+        {
+            if (!tag_c)
+                tag_c = AddComponent<class Tag>();
+            tag_c->index = Core::GetSystem<TagManager>().GetIndexFromTag(tag);
+        }
+    }
 }

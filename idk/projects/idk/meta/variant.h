@@ -22,6 +22,6 @@ namespace idk
     struct index_in_variant;
 
     template<typename FindMe, typename Variant>
-    static constexpr auto index_in_variant_v = index_in_variant<FindMe, Variant>::value;
+    constexpr auto index_in_variant_v = index_in_variant<FindMe, Variant>::value;
 }
 #include "variant.inl"

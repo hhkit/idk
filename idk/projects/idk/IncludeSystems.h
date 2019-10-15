@@ -1,4 +1,7 @@
 #pragma once
+
+#include <common/TagManager.h>
+
 #include <app/Application.h>
 #include <app/GamepadSystem.h>
 #include <editor/IEditor.h>
@@ -13,7 +16,7 @@
 
 #include <res/ResourceManager.h>
 #include <scene/SceneManager.h>
-#include <scene/ProjectManager.h>
+#include <proj/ProjectManager.h>
 
 #include <script/ScriptSystem.h>
 

@@ -97,7 +97,7 @@ namespace idk::vkn
 			if (binding.IsImage())
 			{
 				image_infos[binding.binding].resize(binding.size,default_img);
-				curr.descriptorCount = binding.size;
+				curr.descriptorCount = static_cast<uint32_t>(binding.size);
 			}
 			curr.dstSet = dset;
 			curr.dstBinding = binding.binding;

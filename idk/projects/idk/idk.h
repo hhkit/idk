@@ -1,5 +1,6 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
+
 #include <array>
 #include <vector>
 #include <unordered_set>
@@ -17,8 +18,11 @@
 #include <stddef.h>
 #include <functional>
 
+#include <machine.h>
+
 #include <idk_config.h>
 #include <ds/span.h>
+#include <debug/idk_assert.h>
 #include <math/color.h>
 #include <math/constants.h>
 #include <math/arith.h>

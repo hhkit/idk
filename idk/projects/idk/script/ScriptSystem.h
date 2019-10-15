@@ -7,52 +7,51 @@
 #include <core/ISystem.h>
 #include <script/MonoBehaviorData.h>
 
-namespace idk
+namespace idk::mono
 {
-	class MonoBehavior;
+	class Behavior;
+	class MonoEnvironment;
+	class MonoBehaviorEnvironment;
 
 	class ScriptSystem
 		: public ISystem
 	{
 	public:
-		friend class MonoBehavior;
-		MonoDomain* domain = nullptr;
-		MonoDomain* script_domain = nullptr;
-		MonoAssembly* script_assembly = nullptr;
-		MonoAssembly* lib_assembly = nullptr;
+		string path_to_game_dll = "/scripts/bin/Debug/TestAndSeek.dll";
 
-		hash_table<string, MonoBehaviorData> mono_behaviors;
-		hash_table<string, std::deque<MonoBehavior*>> behavior_handles;
+		ScriptSystem();
+		~ScriptSystem();
 
-		void RegisterMonoBehavior(MonoBehavior*);
-		void DeregisterMonoBehavior(MonoBehavior*);
+		// for the sake of clarity, these update phases are done in sequence of declaration
+		void ScriptStart(span<Behavior>);
+		void ScriptFixedUpdate(span<Behavior>);
+		void ScriptUpdate(span<Behavior>);
+		void ScriptUpdateCoroutines(span<Behavior>);
+		void ScriptLateUpdate(span<Behavior>);
 
-		void FindMonoBehaviors();
-		void ClearMonoBehaviors();
-
-		void LoadGameScripts();
-		void UnloadGameScripts();
-		bool ImplementsInterface(MonoClass*, std::string_view);
-	public:
-		string path_to_game_dll = "";
-
-		void ScriptAwaken(span<MonoBehavior>);
-		void ScriptUpdate(span<MonoBehavior>);
-		void ScriptFixedUpdate(span<MonoBehavior>);
-
-		MonoBehaviorData* GetMonoBehaviorType(std::string_view);
-		const hash_table<string, MonoBehaviorData>& GetMonoBehaviorDataList();
-
-		MonoDomain* GetScriptDomain();
-		MonoImage* GetLibImage();
-		MonoClass* GetClassOfType(std::string_view type_name);
+		MonoEnvironment& Environment() const;
+		MonoBehaviorEnvironment& ScriptEnvironment() const;
 
 		void RefreshGameScripts();
 
-		MonoBehavior* GetMonoBehaviorInstance(std::string_view type);
-		span<MonoBehavior*> GetMonoBehaviorsOfType(std::string_view type);
+		Handle<Behavior>       GetMonoBehaviorInstance(std::string_view type);
+		span<Handle<Behavior>> GetMonoBehaviorsOfType(std::string_view type);
 	private:
+		friend class Behavior;
+
+		hash_table<string, std::deque<Handle<Behavior>>> behavior_handles;
+		unique_ptr<MonoEnvironment> main_environment;
+		unique_ptr<MonoBehaviorEnvironment> script_environment;
+
+		void LoadGameScripts();
+		void UnloadGameScripts();
+
 		void Init() override;
 		void Shutdown() override;
+
+		ScriptSystem(const ScriptSystem&) = delete;
+		ScriptSystem(ScriptSystem&&) noexcept = delete;
+		ScriptSystem& operator=(const ScriptSystem&) = delete;
+		ScriptSystem& operator=(ScriptSystem&&) noexcept = delete;
 	};
 }

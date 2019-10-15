@@ -12,83 +12,48 @@ namespace idk
 	{
 	}
 
-	void AnimationSystem::Update(span<Animator> controllers)
+	void AnimationSystem::Update(span<Animator> animators)
 	{
-		// float a = Core::GetDT().count();
-
-		for (auto& elem : controllers)
+		if (_was_paused)
 		{
-			const auto anim = elem.GetCurrentAnimation();
-			const auto& skeleton = elem._skeleton->data();
+			for (auto& elem : animators)
+			{
+				elem.Reset();
+				elem.SaveBindPose();
+				if (elem._curr_animation >= 0)
+					elem.Play(elem._curr_animation);
+			}
+			_was_paused = false;
+		}
+		for (auto& elem : animators)
+		{
+			const auto anim = elem.GetAnimationRsc(elem._curr_animation);
 			if (elem._is_playing && anim)
 			{
-				// Update the components here:
-				// 1) Loop through bones.
-				// 2) Check if current bone has animated node or not.
-				//		- YES: parent_transform = parent_transform * INTERPOLATED_transform.
-				//		- NO:  parent_transform = parent_transform * NODE_transform.
-				// 3) Concat the game object's current transform with the confirmed bone transform. Can subscript directly into game object
-				
+				AnimationPass(elem);
+			}
+		}
+		// Blend pass
+		// Mix pass
+	}
 
-				// We keep all the bone transforms first. Easier to refer to parent's transform, fewer mat mults.
-				
-				// Compute the time
-				elem._elapsed += Core::GetRealDT().count();
-				if (elem._elapsed >= anim->GetDuration())
-					elem._elapsed -= anim->GetDuration();
-				
-				const float ticks = elem._elapsed * anim->GetFPS();
-				const float num_ticks = anim->GetNumTicks();
-				const float time_in_ticks = fmod(ticks, num_ticks);
-
-				// Loop through the skeleton
-				for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
-				{
-					auto& curr_go = elem._child_objects[bone_id];
-					const auto& curr_bone = skeleton[bone_id];
-					const anim::EasyAnimNode* anim_node = anim->GetEasyAnimNode(curr_bone._name);
-
-					matrix_decomposition<real> curr_pose;
-					bool first = true;
-					if (anim_node != nullptr)
-					{
-						// For each channel starting from the front, we concatanate the transformations
-						for (auto& channel : anim_node->_channels)
-						{
-							// Concat the interpolated channels and the current pose.
-							const auto interp_pose = interpolateChannel(channel, time_in_ticks);
-							if (first)
-							{
-								curr_pose.position =	interp_pose.position;
-								curr_pose.rotation =	interp_pose.rotation;
-								curr_pose.scale =		interp_pose.scale;
-								first = false;
-								continue;
-							}
-							curr_pose.position = curr_pose.position + interp_pose.position;
-							curr_pose.rotation = curr_pose.rotation	* interp_pose.rotation;
-							curr_pose.scale =	 curr_pose.scale	+ interp_pose.scale;
-						}
-					}
-					else
-					{
-						// For now, bones and anim_nodes are 1-1.
-						assert(false);
-					}
-					
-					const auto& curr_local_bind_pose = elem._bind_pose[bone_id];
-					curr_pose.position =	curr_local_bind_pose.position	+ curr_pose.position;
-					curr_pose.rotation =	curr_local_bind_pose.rotation	* curr_pose.rotation;
-					curr_pose.scale =		curr_local_bind_pose.scale		+ curr_pose.scale;
-					// mat4 compose_curr_pose = curr_pose.recompose();
-
-					// During GenerateTransforms in the Animator, it will use the child transforms to 
-					// generate the final transforms
-					curr_go->Transform()->position = curr_pose.position;
-					curr_go->Transform()->rotation = curr_pose.rotation;
-					curr_go->Transform()->scale = curr_pose.scale;
-					
-				}
+	void AnimationSystem::UpdatePaused(span<Animator> animators)
+	{
+		if (!_was_paused)
+		{
+			for (auto& elem : animators)
+			{
+				elem.Reset();
+				elem.RestoreBindPose();
+			}
+			_was_paused = true;
+		}
+		for (auto& elem : animators)
+		{
+			const auto anim = elem.GetAnimationRsc(elem._curr_animation);
+			if (elem._preview_playback && anim)
+			{
+				AnimationPass(elem);
 			}
 		}
 	}
@@ -97,69 +62,122 @@ namespace idk
 	{
 	}
 
-	matrix_decomposition<real> AnimationSystem::interpolateChannel(const anim::Channel& channel, float time_in_ticks)
+	void AnimationSystem::AnimationPass(Animator& animator)
 	{
-		matrix_decomposition<real> interp_pose;
-		interp_pose.scale = channel._scale.size() == 0			? vec3{} : channel._scale[0]._val;
-		interp_pose.rotation = channel._rotation.size() == 0	? quat{} : channel._rotation[0]._val;
-		interp_pose.position = channel._translate.size() == 0	? vec3{} : channel._translate[0]._val;
+		const auto anim_state = animator.GetAnimationState(animator._curr_animation);
+		const auto anim = anim_state.animation;
+		const auto& skeleton = animator._skeleton->data();
 
-		// Scaling
-		if (channel._scale.size() > 1)
+		if (animator._elapsed >= anim->GetDuration())
 		{
-			const size_t start = find_key(channel._scale, time_in_ticks);
-			if (start + 1 >= channel._scale.size())
+			animator._elapsed -= anim->GetDuration();
+
+			// Stop here if the animation does not loop
+			if (!animator._is_looping)
 			{
-				interp_pose.scale = channel._scale[start]._val;
+				animator._elapsed = 0.0f;
+				animator._is_playing = false;
+				return;
+			}
+		}
+
+		const float ticks = animator._elapsed * anim->GetFPS() * anim_state.speed;
+		// const float num_ticks = anim->GetNumTicks();
+		// const float time_in_ticks = fmod(ticks, num_ticks);
+		_blend = animator._blend_factor;
+
+		// Loop through the skeleton
+		for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
+		{
+			const auto& curr_bone = skeleton[bone_id];
+			const anim::AnimatedBone* animated_bone = anim->GetAnimatedBone(curr_bone._name);
+
+			auto& curr_go = animator._child_objects[bone_id];
+			if (!curr_go || animated_bone == nullptr)
+				continue;
+
+			matrix_decomposition<real> curr_pose = animator._bind_pose[bone_id];
+			// Interpolate function will fill in the curr_pose as needed. If there are no keys, it will keep it in bind pose.
+			InterpolateBone(*animated_bone, ticks, curr_pose);
+
+			// During GenerateTransforms in the Animator, it will use the child transforms to 
+			// generate the final transforms
+			curr_go->Transform()->position = curr_pose.position;
+			curr_go->Transform()->rotation = curr_pose.rotation;
+			curr_go->Transform()->scale = curr_pose.scale;
+
+		}
+
+		// Check if the animator wants to stop after this update
+		if (animator._is_stopping == true)
+		{
+			animator._is_playing = false;
+			animator._preview_playback = false;
+			animator._is_stopping = false;
+			return;
+		}
+
+		// Compute the time
+		animator._elapsed += Core::GetRealDT().count();
+	
+	}
+
+	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)
+	{
+		// Scaling
+		if (animated_bone.scale_track.size() > 1)
+		{
+			const size_t start = find_key(animated_bone.scale_track, time_in_ticks);
+			if (start + 1 >= animated_bone.scale_track.size())
+			{
+				curr_pose.scale = animated_bone.scale_track[start].val;
 			}
 			else
 			{
-				const float dt = static_cast<float>(channel._scale[start + 1]._time - channel._scale[start]._time);
-				const float factor = (time_in_ticks - channel._scale[start]._time) / dt;
-				assert(factor >= 0.0f && factor <= 1.0f);
+				const float dt = static_cast<float>(animated_bone.scale_track[start + 1].time - animated_bone.scale_track[start].time);
+				const float factor = (time_in_ticks - animated_bone.scale_track[start].time) / dt;
+				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				interp_pose.scale = lerp(channel._scale[start]._val, channel._scale[start + 1]._val, factor);
+				curr_pose.scale = lerp(lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[start + 1].val, factor), curr_pose.scale, _blend);
 			}
 		}
 
 		// Translate
-		if (channel._translate.size() > 1)
+		if (animated_bone.translate_track.size() > 1)
 		{
-			const size_t start = find_key(channel._translate, time_in_ticks);
-			if (start + 1 >= channel._translate.size())
+			const size_t start = find_key(animated_bone.translate_track, time_in_ticks);
+			if (start + 1 >= animated_bone.translate_track.size())
 			{
-				interp_pose.position = channel._translate[start]._val;
+				curr_pose.position = animated_bone.translate_track[start].val;
 			}
 			else
 			{
-				const float dt = static_cast<float>(channel._translate[start + 1]._time - channel._translate[start]._time);
-				const float factor = (time_in_ticks - channel._translate[start]._time) / dt;
-				assert(factor >= 0.0f && factor <= 1.0f);
+				const float dt = static_cast<float>(animated_bone.translate_track[start + 1].time - animated_bone.translate_track[start].time);
+				const float factor = (time_in_ticks - animated_bone.translate_track[start].time) / dt;
+				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				interp_pose.position = lerp(channel._translate[start]._val, channel._translate[start + 1]._val, factor);
+				curr_pose.position = lerp(lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[start + 1].val, factor), curr_pose.position, _blend);
 			}
 		}
 
 		// Rotate
-		if (channel._rotation.size() > 1)
+		if (animated_bone.rotation_track.size() > 1)
 		{
-			const size_t start = find_key(channel._rotation, time_in_ticks);
-			if (start + 1 >= channel._rotation.size())
+			const size_t start = find_key(animated_bone.rotation_track, time_in_ticks);
+			if (start + 1 >= animated_bone.rotation_track.size())
 			{
-				interp_pose.rotation = channel._rotation[start]._val;
+				curr_pose.rotation = animated_bone.rotation_track[start].val;
 			}
 			else
 			{
-				const float dt = static_cast<float>(channel._rotation[start + 1]._time - channel._rotation[start]._time);
-				const float factor = (time_in_ticks - channel._rotation[start]._time) / dt;
-				assert(factor >= 0.0f && factor <= 1.0f);
+				const float dt = static_cast<float>(animated_bone.rotation_track[start + 1].time - animated_bone.rotation_track[start].time);
+				const float factor = (time_in_ticks - animated_bone.rotation_track[start].time) / dt;
+				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				interp_pose.rotation = slerp(channel._rotation[start]._val, channel._rotation[start + 1]._val, factor);
-				// rotation =  * rotation;
-				interp_pose.rotation.normalize();
+				curr_pose.rotation = slerp(slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor), curr_pose.rotation, _blend);
+				curr_pose.rotation.normalize();
 			}
 		}
-		
-		return interp_pose;
 	}
+
 }

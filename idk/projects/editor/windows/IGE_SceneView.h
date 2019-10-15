@@ -54,7 +54,9 @@ namespace idk {
 		const float default_pan_multiplier		= 0.1f; //When on focus, this resets the pan_multiplier
 
 		const float pan_multiplier_on_scroll	= 1.1f; //This is additive and clamped. When zooming out pan_multiplier*pan_multiplier_on_scroll, when zooming in pan_multiplier/pan_multiplier_on_scroll
-
+		
+		//Debug ray
+		ray currRay;
 
 
 		void UpdateWASDMouseControl();
@@ -68,6 +70,8 @@ namespace idk {
 		mat4 GenerateMat4FromGizmoMatrix();
 
 		bool is_being_modified = false;
+
+		ray GenerateRayFromCurrentScreen();
 	};
 
 

@@ -18,14 +18,21 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <app/Application.h>
 #include <editor/IDE.h>
+#include <editor/DragDropTypes.h>
+#include <core/GameObject.h>
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/MaterialInstance.h>
-#include <editor/DragDropTypes.h>
+#include <prefab/PrefabUtility.h>
+#include <prefab/Prefab.h>
 
 #include <iostream>
 #include <filesystem>
 namespace fs = std::filesystem;
+
+#ifdef _WIN32 
+#include <shellapi.h>
+#endif
 
 namespace idk {
 
@@ -49,30 +56,30 @@ namespace idk {
 
     void IGE_ProjectWindow::displayDir(PathHandle dir)
     {
-        for (const auto& path : dir.GetEntries())
-        {
-            if (!path.IsDir())
-                continue;
+        if (!dir.IsDir())
+            return;
 
-            bool selected = path == current_dir;
-            if (!dirContainsDir(path))
+        bool selected = dir == current_dir;
+        if (!dirContainsDir(dir))
+        {
+            auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
+            if (selected) flags |= ImGuiTreeNodeFlags_Selected;
+            ImGui::TreeNodeEx(dir.GetFileName().data(), flags);
+            if (ImGui::IsItemClicked())
+                current_dir = dir;
+        }
+        else
+        {
+            auto open = ImGui::TreeNodeEx(dir.GetFileName().data(),
+                                          ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
+                                          ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
+            if (ImGui::IsItemClicked())
+                current_dir = dir;
+            if (open)
             {
-                auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
-                if (selected) flags |= ImGuiTreeNodeFlags_Selected;
-                ImGui::TreeNodeEx(path.GetFileName().data(), flags);
-                if (ImGui::IsItemClicked())
-                    current_dir = path;
-            }
-            else
-            {
-                auto open = ImGui::TreeNodeEx(path.GetFileName().data(),
-                    ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
-                    ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
-                if (ImGui::IsItemClicked())
-                    current_dir = path;
-                displayDir(path);
-                if (open)
-                    ImGui::TreePop();
+                for (const auto& path : dir.GetEntries())
+                    displayDir(path);
+                ImGui::TreePop();
             }
         }
     }
@@ -92,6 +99,26 @@ namespace idk {
         return RscHandle<Texture>();
     }
 
+    string IGE_ProjectWindow::unique_new_file_path(string_view name, string_view ext)
+    {
+        string stripped_path{ current_dir.GetMountPath() };
+        stripped_path += '/';
+        stripped_path += name;
+
+        string path = stripped_path;
+        path += ext;
+
+        int i = 0;
+        while (PathHandle(path)) // already exists
+        {
+            path = stripped_path;
+            path += std::to_string(++i);
+            path += ext;
+        }
+
+        return path;
+    }
+
 	void IGE_ProjectWindow::Update()
 	{
         ImGui::PopStyleVar(2);
@@ -105,16 +132,13 @@ namespace idk {
             }
             if (ImGui::BeginPopup("create_menu"))
             {
+                if (ImGui::MenuItem("Folder"))
+                {
+                    //auto path = unique_new_file_path("NewFolder", "");
+                }
                 if (ImGui::MenuItem("Material"))
                 {
-                    auto path = string{ current_dir.GetMountPath() } + "/NewMaterial.mat";
-                    int i = 0;
-                    while (PathHandle(path)) // already exists
-                    {
-                        path = string{ current_dir.GetMountPath() } + "NewMaterial";
-                        path += std::to_string(++i);
-                        path += ".mat";
-                    }
+                    auto path = unique_new_file_path("NewMaterial", Material::ext);
                     auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
                     if (res && *res)
                         Core::GetResourceManager().Save(*res);
@@ -154,20 +178,7 @@ namespace idk {
         ImGui::PopStyleVar();
 
         PathHandle assets_dir = "/assets";
-
-        {
-            bool selected = assets_dir == current_dir;
-            auto open = ImGui::TreeNodeEx("Assets",
-                            ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow |
-                            ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
-            if (ImGui::IsItemClicked())
-                current_dir = assets_dir;
-            if (open)
-            {
-                displayDir(assets_dir);
-                ImGui::TreePop();
-            }
-        }
+        displayDir(assets_dir);
 
 		ImGui::EndChild();
 
@@ -187,6 +198,19 @@ namespace idk {
                           ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysUseWindowPadding);
         ImGui::PopStyleColor();
         ImGui::PopStyleVar();
+
+        auto cursor_pos = ImGui::GetCursorPos();
+        ImGui::Dummy(ImGui::GetContentRegionAvail());
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+            {
+                Handle<GameObject> go = *reinterpret_cast<Handle<GameObject>*>(payload->Data);
+                PrefabUtility::SaveAndConnect(go, unique_new_file_path(go->Name().size() ? go->Name() : "NewPrefab", Prefab::ext));
+            }
+        }
+        ImGui::SetCursorPos(cursor_pos);
+
 
         ImGui::BeginMenuBar();
         {
@@ -275,6 +299,7 @@ namespace idk {
                 }
                 else
                 {
+                    auto handle = getOrLoadFirstAsset(path);
                     RscHandle<Texture> tex = std::visit([](auto h)
                     {
                         using T = typename decltype(h)::Resource;
@@ -283,9 +308,19 @@ namespace idk {
                             return RscHandle<Texture>();
                         if constexpr (std::is_same_v<T, Texture>)
                             return h;
+                        else if constexpr (std::is_same_v<T, Material> || std::is_same_v<T, shadergraph::Graph>)
+                        {
+                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
+                            return material_icon;
+                        }
+                        else if constexpr (std::is_same_v<T, MaterialInstance>)
+                        {
+                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
+                            return material_icon;
+                        }
                         else
                             return RscHandle<Texture>();
-                    }, getOrLoadFirstAsset(path));
+                    }, handle);
 
                     if (tex)
                     {
@@ -295,8 +330,11 @@ namespace idk {
                             sz.y /= aspect;
                         else if (aspect < 1.0f)
                             sz.x /= aspect;
-                        tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
-                        selected_tint = ImVec4(1, 1, 1, 1);
+                        if (handle.resource_id() == BaseResourceID<Texture>)
+                        {
+                            tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
+                                selected_tint = ImVec4(1, 1, 1, 1);
+                        }
                     }
                 }
 
@@ -312,55 +350,51 @@ namespace idk {
                 // todo: open arrow for bundle
             }
 
+            static bool just_rename = false;
+            ImVec2 text_frame_sz{ icon_sz, ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2 };
+
             if (selected_path == path)
             {
                 static char buf[256];
-                static bool first_focus = false;
 
                 if (renaming_selected_asset)
                 {
                     ImGui::SetNextItemWidth(icon_sz);
-                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
                     if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         name = buf;
                         renaming_selected_asset = false;
 
-                        // dont work yet
-                        //string str{ selected_path.GetParentMountPath() };
-                        //str += '/';
-                        //str += name;
-                        //Core::GetResourceManager().Rename(selected_path, str);
+                        //auto new_path = unique_new_file_path(name, selected_path.GetExtension());
+                        //for (auto selected_handle : selected_assets)
+                        //    std::visit([sv=string_view(new_path)](auto h) { Core::GetResourceManager().Rename(h, sv); }, selected_handle);
                     }
-                    ImGui::PopStyleVar();
-                    if (first_focus)
+                    if (just_rename)
                     {
                         ImGui::SetKeyboardFocusHere(-1);
-                        first_focus = false;
+                        just_rename = false;
                     }
                     else if ((ImGui::IsItemDeactivated()))
                         renaming_selected_asset = false;
                 }
-                else if (!renaming_selected_asset)
+                else
                 {
-                    //auto cursor_y = ImGui::GetCursorPosY();
+                    auto cursor_y = ImGui::GetCursorPosY();
 
-                    //if (ImGui::InvisibleButton("rename_hitbox", ImVec2{ icon_sz, line_height }))
-                    //{
-                    //    renaming_selected_asset = true;
-                    //    first_focus = true;
-                    //    strcpy_s(buf, name.c_str());
-                    //}
-                    //else
-                    //{
-                        ImGui::GetWindowDrawList()->AddRectFilled(
-                            ImGui::GetCursorScreenPos(),
-                            ImGui::GetCursorScreenPos() + ImVec2(icon_sz, line_height),
-                            ImGui::GetColorU32(ImGuiCol_FrameBgHovered),
-                            line_height * 0.5f);
-                    //}
+                    ImGui::GetWindowDrawList()->AddRectFilled(
+                        ImGui::GetCursorScreenPos(),
+                        ImGui::GetCursorScreenPos() + text_frame_sz,
+                        ImGui::GetColorU32(ImGuiCol_FrameBgHovered),
+                        text_frame_sz.y * 0.5f);
 
-                    //ImGui::SetCursorPosY(cursor_y);
+                    if (ImGui::InvisibleButton("rename_hitbox", text_frame_sz))
+                    {
+                        renaming_selected_asset = true;
+                        just_rename = true;
+                        strcpy_s(buf, name.c_str());
+                    }
+
+                    ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
 
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
                     ImGui::Text(label.c_str());
@@ -368,6 +402,9 @@ namespace idk {
             }
             else // not selected
             {
+                auto cursor_y = ImGui::GetCursorPosY();
+                ImGui::Dummy(text_frame_sz);
+                ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
                 ImGui::Text(label.c_str());
             }
@@ -395,7 +432,7 @@ namespace idk {
                 clicked_path = path;
             }
 
-            if (clicked_path == path && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
+            if (!just_rename && clicked_path == path && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
             {
                 selected_path = path;
                 renaming_selected_asset = false;
@@ -425,14 +462,9 @@ namespace idk {
                 {
                     if (ImGui::MenuItem("Create Material Instance"))
                     {
-                        auto create_path = string{ current_dir.GetMountPath() } + "/NewMaterialInstance" + string{ MaterialInstance::ext };
-                        int i = 0;
-                        while (PathHandle(create_path)) // already exists
-                        {
-                            create_path = string{ current_dir.GetMountPath() } + "NewMaterialInstance";
-                            create_path += std::to_string(++i);
-                            create_path += MaterialInstance::ext;
-                        }
+                        string filename{ path.GetStem() };
+                        filename += "_Inst";
+                        auto create_path = unique_new_file_path(filename, MaterialInstance::ext);
                         auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
                         if (res && *res)
                         {
@@ -440,7 +472,17 @@ namespace idk {
                             Core::GetResourceManager().Save(*res);
                         }
                     }
+                    ImGui::Separator();
                 }
+
+                if (ImGui::MenuItem("Show in Explorer"))
+                {
+#ifdef _WIN32 
+                    auto args = "/select,\"" + string(fs::path(path.GetFullPath()).make_preferred().string()) + '"';
+                    ShellExecuteA(NULL, "open", "explorer.exe", args.c_str(), NULL, SW_SHOWNORMAL);
+#endif
+                }
+
                 ImGui::EndPopup();
             }
 
@@ -466,7 +508,11 @@ namespace idk {
         ImGui::BeginChild("footer", ImVec2(0, line_height));
         ImGui::SetCursorPosX(2.0f);
         if (selected_path)
-            ImGui::Text(selected_path.GetMountPath().data());
+        {
+            string str = selected_path.GetMountPath().data() + 1;
+            str[0] = 'A';
+            ImGui::Text(str.c_str());
+        }
         ImGui::EndChild();
         ImGui::PopStyleColor();
 

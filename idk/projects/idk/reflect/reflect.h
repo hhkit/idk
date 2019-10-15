@@ -124,6 +124,9 @@ namespace idk::reflect
 		// makes an rvalue copy of the held value.
 		dynamic copy() const;
 
+        // swaps the internal content of this dynamic with the given dynamic.
+        dynamic& swap(dynamic&& other);
+
 		// see reflect.inl for detailed comments
 		template<typename Visitor>
 		void visit(Visitor&& visitor) const;

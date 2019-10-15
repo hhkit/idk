@@ -60,11 +60,15 @@ namespace idk
         string text;
         if (handle)
         {
-            text = std::visit([](auto h)
+            text = std::visit([](auto h) -> string
             {
                 auto name = h->Name();
 				auto path = Core::GetResourceManager().GetPath(h);
-                return name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
+                if (!name.empty())
+                    return string{ name };
+                else if (path)
+                    return string{ PathHandle{ *path }.GetStem() };
+                return "";
             }, *handle);
         }
         if (text.empty())
@@ -72,7 +76,7 @@ namespace idk
 
         ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding,
             frame_bb.Max - style.FramePadding,
-            text.data() + text.rfind('/') + 1, 0, nullptr);
+            text.data(), 0, nullptr);
 
         if (label_size.x > 0)
             RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);

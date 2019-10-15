@@ -38,16 +38,19 @@ namespace idk
 			}
 		};
 
-		execute_pass(_always_update);
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
 
 		while (_accumulated_dt > _fixed_dt)
 		{
 			_accumulated_dt -= _fixed_dt;
-			execute_pass(_fixed_update);
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::Fixed)]);
 		}
 
-		execute_pass(_prerender_update);
-		execute_pass(_postrender_update);
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
+
+
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::PreRender)]);
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::Render)]);
 
 		_last_frame = _this_frame;
 	}
@@ -61,14 +64,7 @@ namespace idk
 	}
 	span<Scheduler::Pass> Scheduler::GetPasses(UpdatePhase phase)noexcept
 	{
-		switch (phase)
-		{
-		case UpdatePhase::Fixed:     return span<Pass>(_fixed_update);
-		default:
-		case UpdatePhase::Update:    return span<Pass>(_always_update);
-		case UpdatePhase::PreRender: return span<Pass>(_prerender_update);
-		case UpdatePhase::Render:    return span<Pass>(_postrender_update);
-		};
+		return span<Pass>(_passes[s_cast<size_t>(phase)]);
 	}
 	Scheduler::Pass::Pass(Lock read, Lock write, FnPtr call, string_view update_name)
 		: read_components{ read }, write_components{ write }, call{ call }, update_name{update_name}

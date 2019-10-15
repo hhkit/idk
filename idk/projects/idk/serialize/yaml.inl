@@ -52,10 +52,7 @@ namespace idk::yaml
     {
         if constexpr (is_basic_serializable_v<T>)
         {
-            if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
-                _value = std::to_string(arg);
-            else
-                _value = scalar_type(arg);
+            _value = serialize_text(arg);
             resolve_scalar(as_scalar());
         }
         else if constexpr (is_container_v<T>)
@@ -80,24 +77,26 @@ namespace idk::yaml
     }
 
     // get scalar as type T
-    template<typename T>
+    template<typename T, typename>
     decltype(auto) node::get() const
     {
-        if constexpr (is_basic_serializable_v<T>)
+        if (type() == type::null)
         {
-            if (type() == type::null)
-            {
-                if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
-                    return T(0);
-                else
-                    return T();
-            }
-            else if (type() == type::scalar)
-                return parse_text<T>(as_scalar());
-            throw "only works on scalars";
+            if constexpr (std::is_arithmetic_v<std::decay_t<T>>)
+                return static_cast<T>(0);
+            else
+                return T();
         }
-        else
-            throw "cannot convert scalar to T";
+        else if (type() == type::scalar)
+        {
+            auto res = parse_text<T>(as_scalar());
+            if (res)
+                return static_cast<T>(*res);
+            else
+                return static_cast<T>(0);
+        }
+
+        throw "only works on scalars";
     }
 
     // returns const& to scalar

@@ -222,7 +222,9 @@ void BeginCanvas(CanvasState* canvas)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGuiIO& io = ImGui::GetIO();
 
-    if (!ImGui::IsMouseDown(0) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow))
+	canvas->prev_offset = canvas->offset;
+	canvas->prev_zoom = canvas->zoom;
+    if (!ImGui::IsMouseDown(0) && ImGui::IsItemHovered())
     {
         if (ImGui::IsMouseDragging(1))
             canvas->offset += io.MouseDelta;
@@ -270,6 +272,7 @@ void EndCanvas()
     auto* canvas = gCanvas;
     auto* impl = canvas->_impl;
     const ImGuiStyle& style = ImGui::GetStyle();
+    canvas->prev_win_pos = ImGui::GetWindowPos();
 
     // Draw pending connection
     if (const ImGuiPayload* payload = ImGui::GetDragDropPayload())
@@ -626,6 +629,9 @@ bool Connection(void* input_node, const char* input_slot, void* output_node, con
 
     // Indent connection a bit into slot widget.
     float connection_indent = canvas->style.connection_indent * canvas->zoom;
+	auto win_pos = ImGui::GetWindowPos();
+	input_slot_pos = (input_slot_pos - canvas->prev_win_pos - canvas->prev_offset) / canvas->prev_zoom * canvas->zoom + win_pos + canvas->offset;
+	output_slot_pos = (output_slot_pos - canvas->prev_win_pos - canvas->prev_offset) / canvas->prev_zoom * canvas->zoom + win_pos + canvas->offset;
     input_slot_pos.x += connection_indent;
     output_slot_pos.x -= connection_indent;
 

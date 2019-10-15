@@ -35,12 +35,12 @@ namespace idk
 	template <typename T, size_t SZ>
 	void circular_buffer<T, SZ>::erase(iterator start_erase, iterator end_erase)
 	{
-		auto real_end = end();
+		iterator real_end = end();
 		while (end_erase != real_end)
 			* start_erase++ = std::move(*end_erase++);
 		_end = std::addressof(*start_erase);
 		while (start_erase != real_end)
-			std::destroy_at(--real_end);
+			std::destroy_at(std::addressof(*--real_end));
 	}
 
 	template<typename T, size_t SZ>

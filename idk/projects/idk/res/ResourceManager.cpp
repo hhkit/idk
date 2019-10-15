@@ -137,9 +137,6 @@ namespace idk
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
-		fs.Mount(exe_dir + "/assets", "/assets");
-		fs.SetAssetDir(exe_dir + "/assets");
-
         fs.Mount(exe_dir + "/engine_data", "/engine_data");
 	}
 
@@ -285,14 +282,9 @@ namespace idk
 
 			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
 			auto metastr = stringify(metastream);
-			try
-			{
-				return parse_text<MetaBundle>(metastr);
-			}
-			catch (...)
-			{
-				return std::nullopt;
-			}
+            if (auto res = parse_text<MetaBundle>(metastr))
+                return *res;
+            return std::nullopt;
 		}();
 
 		// reload the file

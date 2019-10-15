@@ -27,6 +27,8 @@ namespace idk::monadic
 	
 		// accessors
 		Result& value();
+		template<typename U, typename = std::enable_if_t<std::is_constructible_v<Result, U>>>
+		Result value_or(U&& result) const;
 		Error& error();
 		const Result& value() const;
 		const Error&  error() const;

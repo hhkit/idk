@@ -4,18 +4,10 @@
 
 namespace idk::anim
 {
-	AnimNode* Animation::GetAnimNode(string_view name)
+	AnimatedBone* Animation::GetAnimatedBone(string_view name)
 	{
-		auto res = _anim_node_table.find(name.data());
-		if (res == _anim_node_table.end())
-			return nullptr;
-		return &res->second;
-	}
-
-	EasyAnimNode* Animation::GetEasyAnimNode(string_view name)
-	{
-		auto res = _easy_anim_table.find(name.data());
-		if (res == _easy_anim_table.end())
+		auto res = _animated_bones.find(name.data());
+		if (res == _animated_bones.end())
 			return nullptr;
 		return &res->second;
 	}
@@ -27,49 +19,14 @@ namespace idk::anim
 		_num_ticks = num_ticks;
 	}
 
-	void Animation::AddAnimNode(const AnimNode& node)
+	void Animation::AddAnimatedBone(const AnimatedBone& animated_bone)
 	{
-		UNREFERENCED_PARAMETER(node);
-		// auto res = _anim_node_table.find(node._name);
-		// if (res == _anim_node_table.end())
-		// {
-		// 	_anim_nodes.emplace_back(node);
-		// 	_anim_node_table.emplace(_anim_nodes.back()._name, _anim_nodes.size() - 1);
-		// }
-	}
-	void Animation::AddEasyAnimNode(const EasyAnimNode& easy_node)
-	{
-		auto res = _anim_node_table.find(easy_node._name);
-		if (res == _anim_node_table.end())
+		auto res = _animated_bones.find(animated_bone.bone_name);
+		if (res == _animated_bones.end())
 		{
-			_easy_anim_table.emplace(easy_node._name, easy_node);
+			_animated_bones.emplace(animated_bone.bone_name, animated_bone);
 			
 		}
-	}
-
-	Channel& Channel::operator+=(const Channel& rhs)
-	{
-		rhs;
-		// If rhs channel is not animated, we just concat the _local_bind_pose
-		// if (!rhs._is_animated)
-		// {
-		// 	_local_bind_pose = _local_bind_pose * rhs._local_bind_pose;
-		// 	return *this;
-		// }
-		// 
-		// if (!_is_animated)
-		// {
-		// 	_translate = rhs._translate;
-		// 	_rotation = rhs._rotation;
-		// 	_scale = rhs._scale;
-		// 	_is_animated = true;
-		// 	return *this;
-		// }
-		// 
-		// auto set_test = [](auto lhs, auto rhs) { return lhs._time == rhs._time; };
-		// std::set < Key<vec3>, decltype(set_test)> test{_translate.begin(), _translate.end()};
-
-		return *this;
 	}
 }
 

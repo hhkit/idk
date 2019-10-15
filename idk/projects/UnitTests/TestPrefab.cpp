@@ -118,9 +118,9 @@ TEST(Prefab, TestPrefabRevert)
     PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[0], "scale");
     PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[1], "name");
     // add some completely bullshit property overrides
-    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "Transform", "scrimbux" });
-    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "MissingNo", "scrimbux" });
-    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 1, "Transform", "scrimbux" });
+    //go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "Transform", "scrimbux" });
+    //go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "MissingNo", "scrimbux" });
+    //go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 1, "Transform", "scrimbux" });
 
     auto t0 = go->GetComponent<Transform>();
     EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f));

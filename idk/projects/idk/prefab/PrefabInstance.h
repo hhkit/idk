@@ -14,6 +14,6 @@ namespace idk
     public:
         RscHandle<Prefab> prefab;
         vector<PropertyOverride> overrides;
-        vector<Handle<GameObject>> objects;
+        int object_index;
     };
 }

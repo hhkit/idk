@@ -16,14 +16,16 @@ namespace idk
 		void Update(span<Animator>);
 		void UpdatePaused(span<Animator>);
 		virtual void Shutdown() override;
-
+		float _blend = 0.0f;
 	private:
+		
+		bool _was_paused = true;
 		template<typename T>
 		size_t find_key(const vector<T>& vec, float ticks)
 		{
 			for (unsigned i = 0; i < vec.size(); ++i)
 			{
-				if (ticks < static_cast<float>(vec[i]._time))
+				if (ticks < static_cast<float>(vec[i].time))
 				{
 					return i - 1;
 				}
@@ -33,6 +35,7 @@ namespace idk
 			return vec.size() - 1;
 		}
 
-		matrix_decomposition<real> interpolateChannel(const anim::Channel& channel, float time_in_ticks);
+		void AnimationPass(Animator& animators);
+		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 	};
 }

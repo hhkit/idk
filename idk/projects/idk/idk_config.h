@@ -3,6 +3,7 @@
 namespace idk
 {
 	namespace anim { class Skeleton; class Animation; }
+	namespace mono { class ScriptSystem; class Behavior; }
 	namespace shadergraph { class Graph; }
 
 	constexpr auto MaxScene = 0x82; // 130 scenes allowed
@@ -12,6 +13,8 @@ namespace idk
 	using Components = std::tuple<
 		class Transform
 		, class Name
+        , class Tag
+
 		/// EDITOR
 		,   class PrefabInstance
 
@@ -30,7 +33,7 @@ namespace idk
 		,	class Animator
 
 		/// SCRIPTING
-		,	class MonoBehavior
+		,	class mono::Behavior
 
 		/// AUDIO
 		,	class AudioSource
@@ -45,7 +48,7 @@ namespace idk
 		,	class FileSystem
 		//,	class InputSystem
 		,	class GamepadSystem
-		,	class ScriptSystem
+		,	class mono::ScriptSystem
 		,	class PhysicsSystem
 		,	class GraphicsSystem
 		,   class DebugRenderer
@@ -56,6 +59,7 @@ namespace idk
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
+        ,   class TagManager
 	>;
 
 	using Resources = std::tuple<
@@ -86,4 +90,9 @@ namespace idk
 	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
 	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
 
+    namespace natvis
+    {
+        constexpr auto FileSystemID = SystemID<FileSystem>;
+        constexpr auto TagManagerID = SystemID<TagManager>;
+    }
 }

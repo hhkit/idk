@@ -16,11 +16,12 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <app/Application.h>
-#include <scene/ProjectManager.h>
+#include <proj/ProjectManager.h>
 #include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
 #include <common/Transform.h> //DockBuilderDockNode
+#include <common/TagManager.h>
 #include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
 #include <IDE.h>
@@ -102,7 +103,8 @@ namespace idk {
 
 			if (ImGui::MenuItem("Open Scene", "CTRL+O")) {
 				std::cout << "Open Scene\n";
-				if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext))
+
+                if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 				{
 					auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 					auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
@@ -115,6 +117,14 @@ namespace idk {
 
 						Core::GetSystem<SceneManager>().SetActiveScene(hnd);
 						hnd->Load();
+
+                        // clear removed tags
+                        const auto num_tags = Core::GetSystem<TagManager>().GetNumOfTags();
+                        for (const auto& c : GameState::GetGameState().GetObjectsOfType<Tag>())
+                        {
+                            if (c.index > num_tags)
+                                c.GetGameObject()->RemoveComponent(c.GetHandle());
+                        }
 
 						//Clear IDE values
 						Core::GetSystem<IDE>().flag_skip_render = true;
@@ -137,7 +147,7 @@ namespace idk {
 						return string{ *path };
 					else
 					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext, DialogOptions::Save);
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
 						if (dialog_result)
 							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 						else 
@@ -168,7 +178,7 @@ namespace idk {
 						return string{ *path };
 					else
 					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog(Scene::ext, DialogOptions::Save);
+						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
 						if (dialog_result)
 							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
 						else
@@ -223,15 +233,23 @@ namespace idk {
 
 			} //Do something if pressed
 			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false)) {
+				IDE& editor = Core::GetSystem<IDE>();
+				editor.copied_gameobjects.clear();
+				for (auto& i : editor.selected_gameObjects) {
+					vector<RecursiveObjects> newObject{};
+					editor.RecursiveCollectObjects(i, newObject);
+					editor.copied_gameobjects.push_back(std::move(newObject));
+				}
 
-
-
-			} //Do something if pressed
+			} 
 			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
+				IDE& editor = Core::GetSystem<IDE>();
+				for (auto& i : editor.copied_gameobjects) {
+					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
+				}
 
 
-
-			} //Do something if pressed
+			}
 
 			ImGui::Separator();
 			if (ImGui::MenuItem("Duplicate", "CTRL+D", nullptr, false)) {
@@ -498,7 +516,7 @@ namespace idk {
 	void IGE_MainWindow::PollShortcutInput()
 	{
 
-		if (ImGui::IsAnyItemActive()) {
+		if (ImGui::IsAnyItemActive()) { //Do not do any shortcuts when inputs are active! EG: Editing texts!
 			return;
 		}
 		IDE& editor = Core::GetSystem<IDE>();
@@ -507,15 +525,33 @@ namespace idk {
 
 		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
 
-			//CTRL + Z (Careful, this clashes with CTRL +Z in ImGui::InputText() FIX TODO
+			//CTRL + Z
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
 				commandController.UndoCommand();
 			}
 
-			//CTRL + Y (Careful, this clashes with CTRL + Y in ImGui::InputText() FIX TODO
+			//CTRL + Y
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
 				commandController.RedoCommand();
 			}
+
+			//CTRL + C
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				editor.copied_gameobjects.clear();
+				for (auto& i : editor.selected_gameObjects) {
+					vector<RecursiveObjects> newObject{};
+					editor.RecursiveCollectObjects(i, newObject);
+					editor.copied_gameobjects.push_back(std::move(newObject));
+				}
+			}
+
+			//CTRL + V
+			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				for (auto& i : editor.copied_gameobjects) {
+					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject,i));
+				}
+			}
+
 
 			//QWER = Move, Translate, Rotate, Scale (refer to ASCII Table)
 			//Q = Move

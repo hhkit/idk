@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationState.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
     <ClInclude Include="anim\BoneComponent.h" />
@@ -37,6 +38,10 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="app\GamepadEnums.h" />
+    <ClInclude Include="core\ConfigurableSystem.h" />
+    <ClInclude Include="debug\idk_assert.h" />
+    <ClInclude Include="debug\Logger.h" />
+    <ClInclude Include="machine.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
     <ClInclude Include="gfx\Framebuffer.h" />
     <ClInclude Include="PauseConfigurations.h" />
@@ -72,7 +77,7 @@
     <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceLoader.h" />
-    <ClInclude Include="scene\ProjectManager.h" />
+    <ClInclude Include="proj\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />
@@ -166,11 +171,20 @@
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="script\ManagedType.h" />
+    <ClInclude Include="script\ValueBoxer.h" />
     <ClInclude Include="script\MonoBehavior.h" />
     <ClInclude Include="script\MonoBehaviorData.h" />
+    <ClInclude Include="script\MonoBehaviorEnvironment.h" />
+    <ClInclude Include="script\MonoEnvironment.h" />
+    <ClInclude Include="script\ManagedObj.h" />
+    <ClInclude Include="script\ManagedThunk.h" />
+    <ClInclude Include="script\MonoWrapperEnviroment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
+    <ClInclude Include="common\Tag.h" />
+    <ClInclude Include="common\TagManager.h" />
     <ClInclude Include="test\TestComponent.h" />
     <ClInclude Include="test\TestResource.h" />
     <ClInclude Include="test\TestResourceFactory.h" />
@@ -221,6 +235,8 @@
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
     <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="common\TagManager.cpp" />
+    <ClCompile Include="debug\Logger.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
@@ -254,7 +270,7 @@
     <ClCompile Include="res\Guid.cpp" />
     <ClCompile Include="res\MetaBundle.cpp" />
     <ClCompile Include="res\ResourceBundle.cpp" />
-    <ClCompile Include="scene\ProjectManager.cpp" />
+    <ClCompile Include="proj\ProjectManager.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
@@ -281,13 +297,19 @@
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
+    <ClCompile Include="script\ManagedObj.cpp" />
+    <ClCompile Include="script\ManagedThunk.cpp" />
+    <ClCompile Include="script\ManagedType.cpp" />
     <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
+    <ClCompile Include="script\MonoEnvironment.cpp" />
+    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
     <ClCompile Include="script\ScriptSystem.cpp" />
+    <ClCompile Include="script\ValueBoxer.cpp" />
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
-    <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />
@@ -383,6 +405,7 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\filesystem.natvis" />
     <Natvis Include="_natvis\yaml.natvis" />
     <Natvis Include="_natvis\ds.natvis" />
     <Natvis Include="_natvis\guid.natvis" />
@@ -514,7 +537,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fmodL_vc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmodL_vc.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -561,7 +584,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fmod_vc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

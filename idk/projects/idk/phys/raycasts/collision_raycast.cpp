@@ -1,6 +1,8 @@
 #include <stdafx.h>
 #include "collision_raycast.h"
 
+#include <iostream>
+
 namespace idk::phys
 {
 	namespace detail
@@ -172,5 +174,56 @@ namespace idk::phys
 		auto result = detail::collide_ray_aabb_face<&vec3::x>(lhs, box);
 
 		return result;
+	}
+	raycast_result collide_ray_sphere(const ray& lhs, const sphere& s)
+	{
+		if (s.contains(lhs.origin))
+		{
+			//std::cout << "hit at origin" << "\n";
+			return raycast_success{true,lhs.origin,0};
+		}
+
+		auto disp_to_sphere = (lhs.origin - s.center);
+
+		//Calculating using quadratic equation formula (but this is just a fast way to test if ray collides, not resolution)
+		const real	b = dot(disp_to_sphere, lhs.direction());
+		const real	c = dot(disp_to_sphere, disp_to_sphere) - s.radius_sq();
+
+		if (c > 0.f && b > 0.f)
+		{
+			//No collision occurred
+			raycast_failure res;
+			//std::cout << "fail" << "\n";
+
+			res.nearest_point = lhs.origin;
+			res.nearest_distance = 0;
+			return res;
+		}
+
+		const real	discri = b * b - c;
+
+		if (discri < 0.f)
+		{
+			//No collision occurred
+			raycast_failure res;
+			//std::cout << "fail" << "\n";
+
+			res.nearest_point = lhs.origin;
+			res.nearest_distance = 0;
+			return res;
+		}
+
+		const real	sq_discri = sqrtf(abs(discri));
+		real t = -b - sq_discri;
+
+		//ray is in sphere
+		if (t < 0.f)
+			t = 0.f;
+
+		//pt collision
+		//std::cout << "hit" << "\n";
+		const vec3 poc = lhs.get_point_after(t);
+
+		return raycast_success{false,poc,lhs.origin.distance(poc) };
 	}
 }

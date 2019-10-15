@@ -219,7 +219,7 @@ namespace idk::shadergraph
 
 
 
-	static UniformInstance to_uniform_instance(const Parameter& param)
+	static UniformInstanceValue to_uniform_instance_value(const Parameter& param)
 	{
 		switch (param.type)
 		{
@@ -279,7 +279,7 @@ namespace idk::shadergraph
 
             for (const auto& [uniform_name, guid_str] : state.non_param_textures)
             {
-                uniforms.emplace(uniform_name, RscHandle<Texture>(Guid(guid_str)));
+                hidden_uniforms.emplace_back(UniformInstance{ uniform_name, RscHandle<Texture>(Guid(guid_str)) });
             }
 
             for (size_t i = 0; i < uniform_blocks.size(); ++i)
@@ -306,10 +306,12 @@ namespace idk::shadergraph
                     continue;
 
                 if (uniform_type == ValueType::SAMPLER2D)
-                    uniforms.emplace(uniform_name, to_uniform_instance(parameters[param_index]));
+                    uniforms.emplace(parameters[param_index].name,
+                                     UniformInstance{ uniform_name, to_uniform_instance_value(parameters[param_index]) });
                 else
-				    uniforms.emplace("_ub" + std::to_string(uniform_type) + '.' + uniform_name,
-                                                    to_uniform_instance(parameters[param_index]));
+				    uniforms.emplace(parameters[param_index].name,
+                                     UniformInstance{ "_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+                                                      to_uniform_instance_value(parameters[param_index]) });
 			}
         }
 

@@ -4,6 +4,7 @@
 
 #include "DirectoryWatcher.h"
 #include "PathHandle.h"
+#include <ds/result.h>
 
 namespace idk
 {
@@ -37,22 +38,19 @@ namespace idk
 		string_view GetSolutionDir	()	const noexcept { return _sol_dir; }
 		string_view GetAppDataDir	()	const noexcept { return _app_data_dir; }
 		string_view GetExeDir		()	const noexcept { return _exe_dir; }
-		string_view GetAssetDir		()	const noexcept { return _asset_dir; }
 		
 		// File changes
 		// =====================================================================================================
 		vector<PathHandle>  QueryFileChangesAll			()								const;
 		vector<PathHandle>  QueryFileChangesByExt		(string_view ext)				const;
 		vector<PathHandle>  QueryFileChangesByChange	(FS_CHANGE_STATUS change)		const;
-
-		// Some setters
-		// =====================================================================================================
-		void		SetAssetDir(string_view dir) { _asset_dir = dir; }
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
 		// =====================================================================================================
-		void Mount(string_view fullPath, string_view mountPath, bool watch = true);
-		void Dismount(const string& mountPath);	// TODO!
+		
+		bool Mount(string_view fullPath, string_view mountPath, bool watch = true);
+		bool Dismount(string_view mountPath);
+		void DismountAll();
 
 		// Open files
 		// =====================================================================================================
@@ -80,7 +78,6 @@ namespace idk
 		string _sol_dir;
 		string _app_data_dir;
 		string _exe_dir;
-		string _asset_dir;
 
 		file_system_detail::fs_file		_empty_file;
 		file_system_detail::fs_dir		_empty_dir;
@@ -111,6 +108,7 @@ namespace idk
 		file_system_detail::fs_key		requestFileSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_key		requestDirSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_file&	createAndGetFile		(string_view mountPath);
+		void							dismountMount			(file_system_detail::fs_mount& mount);
 
 		vector<string>					tokenizePath			(string_view fullPath)					const;
 		int								validateMountPath		(string_view mountPath)					const;

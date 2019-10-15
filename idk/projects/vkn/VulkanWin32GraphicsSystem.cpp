@@ -7,6 +7,7 @@
 #include <vkn/VulkanMesh.h>
 #include <vkn/VulkanDebugRenderer.h>
 #include <core/Core.h>
+#include <editor/IEditor.h>
 
 #include <vkn/VulkanPipeline.h>
 #include <gfx/pipeline_config.h>
@@ -73,7 +74,7 @@ namespace idk::vkn
 			frame.Init(&instance_->View(), *instance_->View().Commandpool());
 			frame.SetPipelineManager(*_pm);
 		}
-		instance_->imguiEnabled = editorExist;
+		instance_->imguiEnabled = s_cast<bool>(&Core::GetSystem<IEditor>());
 		TestFunc();
 	}
 	/*

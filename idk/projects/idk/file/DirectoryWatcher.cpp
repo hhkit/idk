@@ -15,7 +15,7 @@ namespace idk
 		// Initialize watch handles
 		mountSubDir._watch_handle[0] = FindFirstChangeNotificationA(
 			mountSubDir._full_path.c_str(),
-			FALSE,
+			TRUE,
 			FILE_NOTIFY_CHANGE_DIR_NAME);
 
 		if (mountSubDir._watch_handle[0] == INVALID_HANDLE_VALUE)
@@ -26,7 +26,7 @@ namespace idk
 
 		mountSubDir._watch_handle[1] = FindFirstChangeNotificationA(
 			mountSubDir._full_path.c_str(),
-			FALSE,
+			TRUE,
 			FILE_NOTIFY_CHANGE_FILE_NAME);
 
 		if (mountSubDir._watch_handle[1] == INVALID_HANDLE_VALUE)
@@ -37,7 +37,7 @@ namespace idk
 
 		mountSubDir._watch_handle[2] = FindFirstChangeNotificationA(
 			mountSubDir._full_path.c_str(),
-			FALSE,
+			TRUE,
 			FILE_NOTIFY_CHANGE_LAST_WRITE);
 
 		if (mountSubDir._watch_handle[2] == INVALID_HANDLE_VALUE)
@@ -50,7 +50,8 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::UpdateWatchedDir(const fs_mount& mount, fs_dir& dir)
 	{
 		UNREFERENCED_PARAMETER(mount);
-
+		if (dir._change_status != FS_CHANGE_STATUS::NO_CHANGE || !dir.IsValid())
+			return;
 		// false = returns when any one of the handles signal
 		// 0     = No waiting, function immediately returns
 		dir._status = WaitForMultipleObjects(3, dir._watch_handle, false, 0);
@@ -99,7 +100,11 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::RefreshDir(file_system_detail::fs_dir& mountDir)
 	{
+		auto& vfs = Core::GetSystem<FileSystem>();
 		FS::path path{ mountDir._full_path };
+		// Do nothing if the directory doesnt exists
+		if(!FS::exists(path))
+				return;
 		
 		auto num_files = s_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
 			static_cast<bool (*)(const FS::path&)>(FS::is_regular_file)));
@@ -121,11 +126,21 @@ namespace idk
 			checkFilesRenamed(mountDir);
 		}
 
+		for (auto dir_index : mountDir._sub_dirs)
+		{
+			auto& internal_dir = vfs.getDir(dir_index.second);
+			RefreshDir(internal_dir);
+		}
 	}
 
 	void file_system_detail::DirectoryWatcher::RefreshTree(file_system_detail::fs_dir& mountDir)
 	{
+		auto& vfs = Core::GetSystem<FileSystem>();
 		FS::path path{ mountDir._full_path };
+		// Do nothing if the directory doesnt exists
+		if (!FS::exists(path))
+			return;
+
 		FS::directory_iterator dir{ path };
 
 		const auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
@@ -148,18 +163,21 @@ namespace idk
 		//If neither, it means that files were renamed/replaced
 		else
 		{
-			std::cout << "DIRECTORY RENAMED NOT DONE YET!!!" << std::endl;
-			// checkDirRenamed(mountDir);
+			// std::cout << "DIRECTORY RENAMED NOT DONE YET!!!" << std::endl;
+			checkDirRenamed(mountDir);
+		}
+
+		for (auto dir_index : mountDir._sub_dirs)
+		{
+			auto& internal_dir = vfs.getDir(dir_index.second);
+			RefreshTree(internal_dir);
 		}
 	}
 
 	void file_system_detail::DirectoryWatcher::ResolveAllChanges()
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		// Check if there are even mounts. If this hits, something is terribly wrong...
-		if (vfs._mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
-
+		
 		// Resolve changed files
 		for (auto& file_index : changed_files)
 		{
@@ -254,7 +272,7 @@ namespace idk
 				const auto& f = vfs.getFile(key);
 				std::cout << "[FILE SYSTEM] File Created: " << "\n"
 							 "\t Path: " << f._full_path << "\n" << std::endl;
-				break;
+				// break;
 			}
 		}
 	}
@@ -295,18 +313,20 @@ namespace idk
 				// Now we need to find the corresponding internal fs_file that was renamed
 				// One of the fs_file inside the dir does not exists anymore due to being renamed.
 				auto& vfs = Core::GetSystem<FileSystem>();
+				// vector<std::pair<fs_key, FS::path>> renamed_files;
 				for (auto& internal_file_index : mountDir._files_map)
 				{
 					auto& internal_file = vfs.getFile(internal_file_index.second);
 					if (!vfs.ExistsFull(internal_file._full_path))
 					{
 						string prev_path = internal_file._full_path;
+						// renamed_files.emplace_back(std::make_pair( internal_file_index, tmp ));
 						fileRename(mountDir, internal_file, tmp);
 						
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 									 "\t Prev Path: " << prev_path << "\n"
 									 "\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
-						return;
+						break;
 					}
 				}
 			}
@@ -349,7 +369,7 @@ namespace idk
 				internal_file._change_status = FS_CHANGE_STATUS::WRITTEN;
 
 				changed_files.push_back(internal_file._tree_index);
-				return;
+				// return;
 			}
 		}
 		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
@@ -371,10 +391,6 @@ namespace idk
 			auto result = mountDir._sub_dirs.find(dir_name);
 			if (result == mountDir._sub_dirs.end())
 			{
-				// Check if there are even mounts. If this hits, something is terribly wrong...
-				if (vfs._mounts.empty())
-					throw("Something is terribly wrong. No mounts found.");
-
 				// Create the new dir
 				const auto key = dirCreate(mountDir, tmp);
 
@@ -383,7 +399,7 @@ namespace idk
 							 "\t Path: " << d._full_path << "\n" << std::endl;
 							
 				recurseAndAdd(d);
-				break;
+				// break;
 			}
 		}
 	}
@@ -436,7 +452,9 @@ namespace idk
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 							"\t Prev Path: " << prev_path << "\n"
 							"\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
-						return;
+
+						recurseAndRename(internal_dir);
+						break;
 					}
 				}
 			}
@@ -451,10 +469,6 @@ namespace idk
 			FS::path tmp{ file.path() };
 			if (!FS::is_regular_file(tmp))
 			{
-				// Check if there are even mounts. If this hits, something is terribly wrong...
-				if (vfs._mounts.empty())
-					throw("Something is terribly wrong. No mounts found.");
-
 				// Create the new dir
 				const auto key = dirCreate(mountDir, tmp);
 
@@ -529,14 +543,13 @@ namespace idk
 	file_system_detail::fs_key file_system_detail::DirectoryWatcher::fileCreate(file_system_detail::fs_dir& mountDir, const FS::path& p)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		// Check if there are even mounts. If this hits, something is terribly wrong...
-		if (vfs._mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
-
+		
 		// Request a slot from mounts
 		const fs_key slot = vfs.requestFileSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
 		fs_file& f = vfs.getFile(slot);
 		vfs.initFile(f, mountDir, p);
+		mountDir._files_map.emplace(f._filename, f._tree_index);
+
 		f._change_status = FS_CHANGE_STATUS::CREATED;
 
 		changed_files.push_back(f._tree_index);
@@ -558,10 +571,17 @@ namespace idk
 		changed_files.push_back(file._tree_index);
 	}
 
-	void file_system_detail::DirectoryWatcher::fileRename(file_system_detail::fs_dir& dir, file_system_detail::fs_file& file, const std::filesystem::path& p, FS_CHANGE_STATUS status)
+	void file_system_detail::DirectoryWatcher::fileRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_file& file, const std::filesystem::path& p, FS_CHANGE_STATUS status)
 	{
 		// This is the file that was renamed.
-		Core::GetSystem<FileSystem>().initFile(file, dir, p);
+		// Remove myself from the table first.
+		auto res = mountDir._files_map.find(file._filename);
+		assert(res != mountDir._files_map.end());
+		mountDir._files_map.erase(res);
+
+		Core::GetSystem<FileSystem>().initFile(file, mountDir, p);
+		mountDir._files_map.emplace(file._filename, file._tree_index);
+
 		file._change_status = status;
 
 		changed_files.push_back(file._tree_index);
@@ -574,11 +594,13 @@ namespace idk
 		const fs_key slot = vfs.requestDirSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
 		fs_dir& d = vfs.getDir(slot);
 		vfs.initDir(d, mountDir, p);
+		mountDir._sub_dirs.emplace(d._filename, d._tree_index);
+
 		d._change_status = FS_CHANGE_STATUS::CREATED;
 
 		changed_dirs.push_back(d._tree_index);
 
-		WatchDirectory(d);
+		// WatchDirectory(d);
 
 		return d._tree_index;
 	}
@@ -593,8 +615,15 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_dir& dir, const std::filesystem::path& p, FS_CHANGE_STATUS status)
 	{
-		// This is the file that was renamed.
+		// This is the dir that was renamed.
+		// Remove myself from the table first.
+		auto res = mountDir._sub_dirs.find(dir._filename);
+		assert(res != mountDir._sub_dirs.end());
+		mountDir._sub_dirs.erase(res);
+
 		Core::GetSystem<FileSystem>().initDir(dir, mountDir, p);
+		mountDir._sub_dirs.emplace(dir._filename, dir._tree_index);
+
 		dir._change_status = status;
 
 		changed_dirs.push_back(dir._tree_index);

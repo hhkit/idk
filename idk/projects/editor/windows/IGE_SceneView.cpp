@@ -14,20 +14,25 @@ of the editor.
 
 
 #include "pch.h"
+#include <imgui/ImGuizmo.h>
 #include <editor/windows/IGE_SceneView.h>
+#include <editor/commands/CommandList.h>
+#include <editor/DragDropTypes.h>
+#include <IDE.h>
 #include <app/Application.h>
+#include <core/GameObject.h>
 #include <common/Transform.h> //transform
 #include <gfx/Camera.h> //camera
-#include <core/GameObject.h>
 #include <gfx/RenderTarget.h>
-#include <iostream>
-#include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
-#include <imgui/ImGuizmo.h>
-#include <editor/commands/CommandList.h>
-#include <IDE.h>
+#include <prefab/PrefabUtility.h>
+#include <math/euler_angles.h>
+#include <vkn/VknFramebuffer.h>
+#include <gfx/DebugRenderer.h>
 
-#include <vkn/VknRenderTarget.h>
+#include <phys/PhysicsSystem.h>
+
+#include <iostream>
 
 namespace idk {
 
@@ -77,7 +82,29 @@ namespace idk {
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-			ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+		ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
+            {
+                auto res_payload = DragDrop::GetResourcePayloadData();
+
+                for (auto& h : res_payload)
+                {
+                    if (h.resource_id() != BaseResourceID<Prefab>)
+                        continue;
+                    if (!payload->IsDelivery())
+                        continue;
+
+                    auto go = PrefabUtility::Instantiate(h.AsHandle<Prefab>(), *Core::GetSystem<SceneManager>().GetActiveScene());
+                    Handle<Camera> cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+                    go->Transform()->position = cam->currentPosition() + cam->GetGameObject()->Transform()->Forward();
+                    break;
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
 
 		ImVec2 v = ImGui::GetWindowPos();
 
@@ -89,6 +116,15 @@ namespace idk {
 			//std::cout << "MousePosInWindow: " << GetMousePosInWindowNormalized().x << "," << GetMousePosInWindowNormalized().y << "\n";
 
 			//Select gameobject here!
+			currRay = GenerateRayFromCurrentScreen();
+			vector<Handle<GameObject>> obj;
+			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
+			{
+				//Sort the obj by closest dist to point
+
+				//get the first obj
+				true;
+			}
 		}
 
 		//Right Mouse WASD control
@@ -121,6 +157,8 @@ namespace idk {
 			UpdatePanMouseControl();
 
 		}
+
+		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0,0.8f,0,1 }, Core::GetDT());
 
 		UpdateScrollMouseControl();
 
@@ -207,6 +245,9 @@ namespace idk {
 
 		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
 
+		//TEST
+			
+
 		//MOUSE YAW
 		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
 		//MOUSE PITCH
@@ -246,12 +287,12 @@ namespace idk {
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-			tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 120 }) * editor.scroll_multiplier);
+			tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
 
 		if (scroll > 0)
-			editor.scroll_multiplier *= editor.scroll_subtractive;
+			editor.scroll_multiplier += editor.scroll_subtractive;
 		else if (scroll < 0)
-			editor.scroll_multiplier *= editor.scroll_additive;
+			editor.scroll_multiplier += editor.scroll_additive;
 
 	}
 
@@ -361,6 +402,40 @@ namespace idk {
 			}
 		}
 		return dumper;
+	}
+
+	ray IGE_SceneView::GenerateRayFromCurrentScreen()
+	{
+		//auto& app_sys = Core::GetSystem<Application>();
+		IDE& editor = Core::GetSystem<IDE>();
+
+		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+
+		const auto view_mtx = currCamera->ViewMatrix();
+		const auto pers_mtx = currCamera->ProjectionMatrix();
+		
+		vec2 ndcPos = GetMousePosInWindowNormalized();
+
+		//-1 to 1 (ndc)
+		ndcPos -= vec2(0.5f,0.5f);
+		ndcPos /= 0.5f;
+
+		ndcPos = vec2(ndcPos.x,-ndcPos.y);
+
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,0,1);
+		vfPos *= 1.f / vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
+
+		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
+		vbPos *= 1.f/vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
+
+		ray newRay;
+		newRay.origin = wfPos;
+		newRay.velocity = (wbPos - wfPos);
+
+		return newRay;
 	}
 
 }

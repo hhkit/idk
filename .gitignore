@@ -346,14 +346,8 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 /idk/engine
-/idk/testbin
-/idk/testbuild
 /idk/build/tests
 /idk/build/win32
 imgui.ini
-*.gen.frag
-/idk/assets/shader/10b6e1eb-694f-4509-b636-f22fca6f6b02.pfrag
 idk/dep/lib/SPIRV-Tools-optd.lib
-/idk/assets/materials/test.mat
-/idk/assets/models/Pickup.obj
-/idk/assets/models/Character.obj
+/testproj/test dismount

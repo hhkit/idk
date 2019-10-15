@@ -27,7 +27,7 @@ namespace idk
 	}
 	vec3 Transform::Forward() const
 	{
-		return vec3{ GlobalMatrix()[2].get_normalized() };
+		return -vec3{ GlobalMatrix()[2].get_normalized() };
 	}
 
 	vec3 Transform::Right() const

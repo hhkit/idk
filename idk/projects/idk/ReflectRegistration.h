@@ -4,8 +4,10 @@
 #include <core/Core.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
+#include <IncludeSystems.h>
 #include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
+#include <anim/AnimationState.h>
 #include <math/matrix_decomposition.h>
 
 /* 
@@ -88,7 +90,15 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Scene>, "<Scene>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::Prefab>, "<Prefab>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RscHandle<class idk::Texture>, "<Texture>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
@@ -164,6 +174,10 @@ REFLECT_BEGIN(idk::Material, "Material")
 REFLECT_VARS(_shader_program, uniforms)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::UniformInstance, "UniformInstance")
+REFLECT_VARS(name, value)
+REFLECT_END()
+
 REFLECT_ENUM(idk::BlendMode, "BlendMode")
 REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
 REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
@@ -185,7 +199,7 @@ REFLECT_VARS(data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
-REFLECT_VARS(object_index, component_name, property_path)
+REFLECT_VARS(component_name, property_path)
 REFLECT_END()
 
 // shader graph:
@@ -214,6 +228,17 @@ REFLECT_BEGIN(idk::Handle<idk::GameObject>, "Handle<GameObject>")
 REFLECT_VARS(id)
 REFLECT_END()
 
+/*==========================================================================
+ * configs
+ *========================================================================*/
+
+REFLECT_BEGIN(idk::TagManager, "TagManager")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::TagManagerConfig, "TagManagerConfig")
+REFLECT_VARS(tags)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
 REFLECT_VARS(_scenes, _startup_scene, _active_scene)
 REFLECT_END()
@@ -232,6 +257,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Name, "Name")
 REFLECT_VARS(name)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Tag, "Tag")
+REFLECT_VARS(index)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
@@ -281,15 +310,19 @@ REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radiu
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
-REFLECT_VARS(prefab, overrides, objects)
+REFLECT_VARS(prefab, overrides, object_index)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::AnimationState, "AnimationState")
+REFLECT_VARS(animation, speed)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(_skeleton, _animation_table, _animations, _child_objects)
+REFLECT_VARS(_skeleton, _animation_table, _start_animation, _start_animation_offset)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

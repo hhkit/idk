@@ -195,10 +195,13 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="loading\AssimpImporter.h" />
+    <ClInclude Include="loading\AssimpImporter_helpers.h" />
     <ClInclude Include="widgets\DragQuat.h" />
-    <ClInclude Include="widgets\DragVec3.h" />
+    <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
+    <ClInclude Include="windows\IGE_ProjectSettings.h" />
     <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
     <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="loading\OpenGLCubeMapLoader.h" />
@@ -216,12 +219,28 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
     <ClInclude Include="ImGui_Interface.h" />
-    <ClInclude Include="loading\FBXLoaderHelpers.h" />
-    <ClInclude Include="loading\OpenGLFBXLoader.h" />
-    <ClInclude Include="loading\VulkanFBXLoader.h" />
+    <ClInclude Include="loading\FBXLoaderHelpers.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
+    </ClInclude>
+    <ClInclude Include="loading\OpenGLFBXLoader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
+    </ClInclude>
+    <ClInclude Include="loading\VulkanFBXLoader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
+    </ClInclude>
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
@@ -235,13 +254,18 @@
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="loading\AssimpImporter.cpp" />
+    <ClCompile Include="loading\AssimpImporter_helpers.cpp" />
     <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
+    <ClCompile Include="utils.cpp" />
     <ClCompile Include="widgets\DragQuat.cpp" />
-    <ClCompile Include="widgets\DragVec3.cpp" />
+    <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
+    <ClCompile Include="windows\IGE_ProjectSettings.cpp" />
     <ClCompile Include="windows\IGE_ShadowMapWindow.cpp" />
     <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
@@ -252,9 +276,24 @@
     <ClCompile Include="windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="ImGui_Interface.cpp" />
-    <ClCompile Include="loading\FBXLoaderHelpers.cpp" />
-    <ClCompile Include="loading\OpenGLFBXLoader.cpp" />
-    <ClCompile Include="loading\VulkanFBXLoader.cpp" />
+    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
+    </ClCompile>
+    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
+    </ClCompile>
+    <ClCompile Include="loading\VulkanFBXLoader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
+    </ClCompile>
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

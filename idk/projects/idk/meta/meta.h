@@ -3,6 +3,13 @@
 
 namespace idk
 {
+    template<typename T, template<typename ...> typename Template>
+    struct is_template;
+
+    template<typename T, template<typename ...> typename Template>
+    constexpr auto is_template_v = is_template<T, Template>::value;
+
+
 	template<typename Seq1, typename Seq2>
 	struct index_sequence_cat;
 

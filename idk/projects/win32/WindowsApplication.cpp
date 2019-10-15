@@ -145,18 +145,23 @@ namespace idk::win
 			std::cout << "[File System] Unable to get solution directory." << std::endl;
 		return string{ buffer };
 	}
-	opt<string> Windows::OpenFileDialog(string_view extension, DialogOptions dialog)
+	opt<string> Windows::OpenFileDialog(const DialogOptions& dialog)
 	{
-		extension;
-		OPENFILENAME ofn;       // common dialog box structure
-		TCHAR szFile[260];       // buffer for file name
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260];       // buffer for file name
 		HWND hwnd{};              // owner window
 
-		std::wstring init = [&]()
-		{ 
-			auto exe_dir = GetExecutableDir();
-			return std::wstring{ exe_dir.begin(), exe_dir.end() };
-		}();
+        string filter{ dialog.filter_name };
+        filter += " (*";
+        filter += dialog.extension;
+        filter += ")";
+
+        filter += '\0';
+        filter += '*';
+        filter += dialog.extension;
+        filter += '\0';
+
+		auto init = GetExecutableDir();
 
 		// Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(ofn));
@@ -165,9 +170,9 @@ namespace idk::win
 		ofn.lpstrFile = szFile;
 		// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
 		// use the contents of szFile to initialize itself.
-		ofn.lpstrFile[0] = L'\0';
+		ofn.lpstrFile[0] = '\0';
 		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = L"Scene (.ids)\0*.ids\0All\0*.*\0";
+		ofn.lpstrFilter = filter.c_str();
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;
@@ -175,26 +180,18 @@ namespace idk::win
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 		// Display the Open dialog box. 
-		switch (dialog)
+		switch (dialog.type)
 		{
-		case DialogOptions::Save:
-			if (GetSaveFileName(&ofn) == TRUE)
+		case DialogType::Save:
+			if (GetSaveFileNameA(&ofn) == TRUE)
 			{
-				auto filename = std::wstring{ ofn.lpstrFile };
-				using convert_type = std::codecvt_utf8<wchar_t>;
-				std::wstring_convert<convert_type, wchar_t> converter;
-
-				return converter.to_bytes(filename);
+                return ofn.lpstrFile;
 			}
 			break;
-		case DialogOptions::Open:
-			if (GetOpenFileName(&ofn) == TRUE)
+		case DialogType::Open:
+			if (GetOpenFileNameA(&ofn) == TRUE)
 			{
-				auto filename = std::wstring{ ofn.lpstrFile };
-				using convert_type = std::codecvt_utf8<wchar_t>;
-				std::wstring_convert<convert_type, wchar_t> converter;
-
-				return converter.to_bytes(filename);
+                return ofn.lpstrFile;
 			}
 		}
 		return std::nullopt;

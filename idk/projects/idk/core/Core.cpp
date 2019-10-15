@@ -55,37 +55,47 @@ namespace idk
 		if (_setup == false)
 			Setup();
 
-		auto editor = &GetSystem<IEditor>();
+		using mono::ScriptSystem;
+		auto* editor = &GetSystem<IEditor>();
+
 		// setup loop
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&Application::PollEvents,            "Poll OS Events");
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&GamepadSystem::Update,              "Update gamepad states");
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&FileSystem::Update,                 "Check for file changes");
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&AudioSystem::Update,                "Update listeners and sources");
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&AnimationSystem::Update,            "Animate animators");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::DestroyObjects,       "Destroy Objects");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::BuildSceneGraph,      "Build scene graph");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed> (&TestSystem::TestSpan,               "Test system until scripts are up");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed> (&PhysicsSystem::PhysicsTick,         "Physics Update")
-			.IfPausedThen(&PhysicsSystem::DebugDrawColliders);
+		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
+
+		_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
+		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,                 "Test system until scripts are up");
+		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
+			                                      .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
+		
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&FileSystem::Update,                   "Check for file changes");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AudioSystem::Update,                  "Update listeners and sources");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
+												  .IfPausedThen(&AnimationSystem::UpdatePaused);
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 
 		if (editor)
 		{
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::WatchDirectory,    "Watch files");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&IEditor::EditorUpdate,              "Editor Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::DestroyObjects,       "Destroy Objects Again");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&SceneManager::BuildSceneGraph,      "Build scene graph");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyMetadata, "Save dirty resources");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Update>(&ResourceManager::SaveDirtyFiles,    "Save dirty files");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchDirectory,      "Watch files");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&IEditor::EditorUpdate,                "Editor Update");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects Again");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
 		}
 
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&GraphicsSystem::PrepareLights      , "Prepare Lights");
-		_scheduler->SchedulePass      <UpdatePhase::Update>(&GraphicsSystem::BufferGraphicsState,"Buffer graphics objects");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights,        "Prepare Lights");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::BufferGraphicsState,  "Buffer graphics objects");
 
-		_scheduler->SchedulePass      <UpdatePhase::Render>(&GraphicsSystem::Prerender,          "Prerender");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Render>(&GraphicsSystem::RenderRenderBuffer, "Render Render Buffer");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Render>(&DebugRenderer::GraphicsTick,        "Update durations of debug draw");
-		_scheduler->ScheduleFencedPass<UpdatePhase::Render>(&IEditor::EditorDraw,                "Editor Draw");
-		_scheduler->SchedulePass      <UpdatePhase::Render>(&GraphicsSystem::SwapBuffer,         "Swap the buffers");
+		_scheduler->SchedulePass      <UpdatePhase::Render>    (&GraphicsSystem::Prerender,            "Prerender");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Render>    (&GraphicsSystem::RenderRenderBuffer,   "Render Render Buffer");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Render>    (&DebugRenderer::GraphicsTick,          "Update durations of debug draw");
+		_scheduler->ScheduleFencedPass<UpdatePhase::Render>    (&IEditor::EditorDraw,                  "Editor Draw");
+		_scheduler->SchedulePass      <UpdatePhase::Render>    (&GraphicsSystem::SwapBuffer,           "Swap the buffers");
 	
 		// main loop
 		_scheduler->Setup();

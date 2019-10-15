@@ -1128,9 +1128,13 @@ void ImGui::ProgressBar(float fraction, const ImVec2& size_arg, const char* over
     const ImVec2 fill_br = ImVec2(ImLerp(bb.Min.x, bb.Max.x, fraction), bb.Max.y);
     RenderRectFilledRangeH(window->DrawList, bb, GetColorU32(ImGuiCol_PlotHistogram), 0.0f, fraction, style.FrameRounding);
 
-    // Default displaying the fraction as percentage string, but user can override it
+	// @Joseph added this. If NULL, we don't display overlay
+	if (overlay == NULL)
+		return;
+
+    // Default displaying the fraction as percentage string, but user can override it(@Joseph changed this to 'p' for default percentage.
     char overlay_buf[32];
-    if (!overlay)
+    if (overlay[0] == 'p')
     {
         ImFormatString(overlay_buf, IM_ARRAYSIZE(overlay_buf), "%.0f%%", fraction*100+0.01f);
         overlay = overlay_buf;
