@@ -91,7 +91,7 @@ namespace idk::file_system_detail
 		fs_key _tree_index;
 
 		// For file watching
-		HANDLE	_dir_handle     {};
+		// HANDLE	_dir_handle     {};
 		HANDLE	_watch_handle[3]{};
 		DWORD	_status         {};
 
@@ -130,7 +130,7 @@ namespace idk::file_system_detail
 
 		int8_t				_mount_index;
 		bool				_watching = true;
-
+		bool				_is_valid = true;
 		size_t AddDepth();
 		// fs_key RequestFileSlot(int8_t depth);
 	};
