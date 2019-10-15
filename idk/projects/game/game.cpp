@@ -39,6 +39,80 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 	return result;
 }
 
+void BasicScene()
+{
+	using namespace idk;
+	auto scene = RscHandle<Scene>{};
+	auto light = scene->CreateGameObject();
+	light->Name("SpotLight");
+	light->GetComponent<Transform>()->position = vec3{ 0,3,0.0f };
+	light->GetComponent<Transform>()->rotation = quat{ vec3{1, 0, 0}, deg{-90} };
+	auto light_comp = light->AddComponent<Light>();
+	{
+		auto light_map = Core::GetResourceManager().Create<RenderTarget>();
+		auto light_obj = SpotLight{};
+		//light_obj.inner_angle = rad{ 0.5f };
+		light_obj.attenuation_radius = 0.1f;
+		light_comp->light = light_obj;
+		light_comp->SetLightMap(light_map);
+	}
+
+
+	auto go = scene->CreateGameObject();
+	go->Name("test");
+	go->GetComponent<Transform>()->position = vec3{ 0,1,0 };
+	go->Transform()->rotation *= quat{ vec3{1, 0, 0}, deg{-90} };
+	go->GetComponent<Transform>()->scale = vec3{ 1 / 5.f };
+	//go->GetComponent<Transform>()->rotation *= quat{ vec3{0, 0, 1}, deg{90} };
+	auto mesh_rend = go->AddComponent<MeshRenderer>();
+	//Core::GetResourceManager().LoadFile(PathHandle{ "/assets/audio/music/25secClosing_IZHA.wav" });
+
+	//Temp condition, since mesh loader isn't in for vulkan yet
+	//if (gfx_api != GraphicsAPI::Vulkan)
+	//mesh_rend->mesh = Core::GetResourceManager().LoadFile(PathHandle{ "/assets/models/boblampclean.md5mesh" })[0].As<Mesh>();
+	mesh_rend->mesh = Mesh::defaults[MeshType::Sphere];
+
+	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat").value();
+	mesh_rend->material_instance = mat_inst;
+	{
+		auto floor = scene->CreateGameObject();
+		floor->Name("floor");
+		floor->Transform()->position = vec3{ 0, -1, 0 };
+		//floor->Transform()->rotation = quat{ vec3{0,1,0}, deg{45} };
+		floor->Transform()->scale = vec3{ 10, 2, 10 };
+		floor->AddComponent<Collider>()->shape = box{};
+		auto mesh_rend = floor->AddComponent<MeshRenderer>();
+		mesh_rend->mesh = Mesh::defaults[MeshType::Plane];
+		mesh_rend->material_instance = mat_inst;
+	}
+
+	{
+		auto camera = scene->CreateGameObject();
+		Handle<Camera> camHandle = camera->AddComponent<Camera>();
+		camera->GetComponent<Name>()->name = "Camera 1";
+		camera->Transform()->position = vec3{ -1.937, 0.707, 4.437 };
+		euler_angles euler;
+		euler.x = deg{ 1 };
+		euler.y = deg{ -24 };
+		euler.z = deg{};
+		camera->Transform()->rotation = s_cast<quat>(euler);
+		camHandle->far_plane = 100.f;
+		//camHandle->LookAt(vec3(0, 0, 0));
+		camHandle->render_target = RscHandle<RenderTarget>{};
+		//camHandle->is_orthographic = true;
+		//camHandle->orthographic_size = 10.f;
+		//camHandle->render_target->AddAttachment(eDepth);
+		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
+		//auto mesh_rend = camera->AddComponent<MeshRenderer>();
+
+		//Core::GetSystem<TestSystem>()->SetMainCamera(camHand);
+		if (&Core::GetSystem<IDE>())
+		{
+			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
+		}
+	}
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -97,7 +171,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	if (&c->GetSystem<IDE>())
 		gSys->editorExist = true;
 
+	auto scene = RscHandle<Scene>{};
 	c->Setup();
+	BasicScene();
+
+
+#if 0
+
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag");
 
@@ -411,7 +491,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
     Core::GetResourceManager().Load<Prefab>("/assets/prefabs/testprefab2.idp").value()->Instantiate(*scene);
 
-
+#endif
 
 	c->Run();
 	
