@@ -4,6 +4,7 @@
 
 #include "DirectoryWatcher.h"
 #include "PathHandle.h"
+#include <ds/result.h>
 
 namespace idk
 {
@@ -46,8 +47,10 @@ namespace idk
 		
 		// Mounting/dismounting. Mounting adds a virtual path that u can use in all filesystem calls.
 		// =====================================================================================================
-		void Mount(string_view fullPath, string_view mountPath, bool watch = true);
-		void Dismount(const string& mountPath);	// TODO!
+		
+		bool Mount(string_view fullPath, string_view mountPath, bool watch = true);
+		bool Dismount(string_view mountPath);
+		void DismountAll();
 
 		// Open files
 		// =====================================================================================================
@@ -105,6 +108,7 @@ namespace idk
 		file_system_detail::fs_key		requestFileSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_key		requestDirSlot			(file_system_detail::fs_mount& mount, int8_t depth);
 		file_system_detail::fs_file&	createAndGetFile		(string_view mountPath);
+		void							dismountMount			(file_system_detail::fs_mount& mount);
 
 		vector<string>					tokenizePath			(string_view fullPath)					const;
 		int								validateMountPath		(string_view mountPath)					const;

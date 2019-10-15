@@ -9,11 +9,12 @@
 #include <app/Application.h>
 namespace FS = std::filesystem;
 
-
 namespace idk {
 #pragma region ISystem Stuff
 	void FileSystem::Init()
 	{
+		_empty_file.SetValid(false);
+		_empty_dir.SetValid(false);
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
@@ -22,7 +23,6 @@ namespace idk {
 		_exe_dir = FS::path{ _exe_dir }.generic_string();
 		_sol_dir = FS::path{ _sol_dir }.generic_string();
 		_app_data_dir = FS::path{ _app_data_dir }.generic_string();
-		
 	}
 
 	void FileSystem::Update()
@@ -33,7 +33,7 @@ namespace idk {
 		// For every mount that is watched
 		for (auto& mount : _mounts)
 		{
-			if (mount._watching)
+			if (mount._is_valid && mount._watching)
 			{
 				// For every depth
 				//for (auto& collated : mount._path_tree)
@@ -71,7 +71,7 @@ namespace idk {
 		{
 			// Check if there are even mounts. If this hits, something is terribly wrong...
 			if (_mounts.empty())
-				throw("Something is terribly wrong. No mounts found.");
+				return string{};
 
 			// If the end_pos is the end of the string, it means there is only one dir and that is the mount dir
 			if (end_pos == string::npos)
@@ -122,6 +122,8 @@ namespace idk {
 		{
 			for (auto& mount : _mounts)
 			{
+				if (!mount._is_valid)
+					continue;
 				string parent_path_str = fs_parent_path.generic_string();
 				// Check if the full path matches the full path of the mount
 				if (mount._full_path == parent_path_str)
@@ -220,8 +222,9 @@ namespace idk {
 #pragma endregion File Changes
 	
 #pragma region Utility
-	void FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)
+	bool FileSystem::Mount(string_view fullPath, string_view mountPath, bool watch)
 	{
+		
 		const size_t curr_mount_index = _mounts.size();
 		
 		string full_path{ fullPath.data() };
@@ -229,29 +232,70 @@ namespace idk {
 
 		if (_mount_table.find(mount_path) != _mount_table.end())
 		{
-			throw(FS_ERROR_CODE::FILESYSTEM_DUPLICATE, "Mount alr exists!");
+			std::cout << "[File System] Trying to mount path:" << mountPath << " but mount alr exists!";
+			return false;
 		}
 
 		// All mountPaths must begin with '/'
 		if (mountPath[0] != '/')
-			throw(FS_ERROR_CODE::FILESYSTEM_BAD_ARGUMENT, "Mount Path needs to start with '/'.");
+		{
+			std::cout << "[File System] Trying to mount path:" << mountPath << " but mount path needs to start with '/'";
+			return false;
+		}
 
-		if(mountPath.back() == '/' || mountPath.back() == '\\')
-			throw(FS_ERROR_CODE::FILESYSTEM_BAD_ARGUMENT, "Mount Path must only contain one '/' or '\\'");
+		if (mountPath.back() == '/' || mountPath.back() == '\\')
+		{
+			std::cout << "[File System] Trying to mount path:" << mountPath << " but mount path must only contain one '/' or '\\'";
+			return false;
+		}
 
 		if (full_path.back() == '/' || full_path.back() == '\\')
 			full_path.pop_back();
 
 		if (!ExistsFull(fullPath))
 		{
-			std::cout << "[FILE SYSTEM] Bad path given to Mount function" << std::endl;
-			return;
+			std::cout << "[File System] Trying to mount path:" << fullPath << " but full path does not exists.";
+			return false;
 		}
 
 		_mount_table.emplace(mount_path, _mounts.size());
 		_mounts.push_back(file_system_detail::fs_mount{});
 
 		initMount(curr_mount_index, full_path, mount_path, watch);
+
+		return true;
+	}
+
+	bool FileSystem::Dismount(string_view mountPath)
+	{
+		string mount_path{ mountPath.data() };
+
+		if (mount_path[0] != '/')
+			return false;
+
+		const auto end_pos = mount_path.find_first_of('/', 1);
+
+		string mount_key = mount_path.substr(0, end_pos);
+		auto mount_index = _mount_table.find(mount_key);
+		if (mount_index == _mount_table.end())
+			return false;
+		
+		auto& mount = _mounts[mount_index->second];
+		dismountMount(mount);
+		_mount_table.erase(mount_index);
+		return true;
+	}
+
+	void FileSystem::DismountAll()
+	{
+		for (auto& mount_key : _mount_table)
+		{
+			dismountMount(_mounts[mount_key.second]);
+		}
+
+		_mount_table.clear();
+		
+		// _mounts.clear();
 	}
 
 	FStreamWrapper FileSystem::Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream)
@@ -291,16 +335,11 @@ namespace idk {
 	bool FileSystem::Rename(string_view mountPath, string_view new_name)
 	{
 		// Try getting the file
-		PathHandle handle = GetFile(mountPath);
+		PathHandle handle = GetPath(mountPath);
 		if (handle)
 			return handle.Rename(new_name);
 
-		// Try getting the directory
-		handle = GetDir(mountPath);
-		if (handle)
-			return handle.Rename(new_name);
-
-		throw(FS_ERROR_CODE::FILESYSTEM_NOT_FOUND, "[FILE SYSTEM] mountPath cannot be found.");
+		return false;
 	}
 
 #pragma endregion Utility
@@ -309,7 +348,6 @@ namespace idk {
 
 	void FileSystem::initMount(size_t index, string_view fullPath, string_view mountPath, bool watch)
 	{
-
 		FS::path curr_path{ fullPath };
 		
 		FS::directory_iterator dir{ curr_path };
@@ -355,11 +393,6 @@ namespace idk {
 
 		f.SetValid(true);
 		f.SetOpenMode(FS_PERMISSIONS::NONE);
-
-		// auto in_table = p_dir._files_map.find(f._filename);
-		// Add it in if it doesnt exists
-		// if(in_table == p_dir._files_map.end())
-			
 	}
 
 	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p)
@@ -372,12 +405,6 @@ namespace idk {
 		d._parent		= p_dir._tree_index;
 
 		d.SetValid(true);
-
-		// auto in_table = p_dir._sub_dirs.find(d._filename);
-		// Add it in if it doesnt exists
-		//if (in_table == p_dir._sub_dirs.end())
-		//	p_dir._sub_dirs.emplace(d._filename, d._tree_index);
-		// p_dir._sub_dirs.emplace(d._filename, d._tree_index);
 	}
 
 #pragma endregion Helper Inits
@@ -388,40 +415,55 @@ namespace idk {
 	{
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
+			return _empty_file;
 		if (!node.IsValid())
 			return _empty_file;
-		return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
+		if (node._mount_id < _mounts.size() && _mounts[node._mount_id]._is_valid &&
+			node._depth < _mounts[node._mount_id]._path_tree.size() &&
+			node._index < _mounts[node._mount_id]._path_tree[node._depth]._files.size())
+			return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
+		return _empty_file;
 	}
 
 	file_system_detail::fs_dir& FileSystem::getDir(const file_system_detail::fs_key& node)
 	{
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
+			return _empty_dir;
 		if (!node.IsValid())
 			return _empty_dir;
-		return _mounts[node._mount_id]._path_tree[node._depth]._dirs[node._index];
+		if (node._mount_id < _mounts.size() && _mounts[node._mount_id]._is_valid &&
+			node._depth < _mounts[node._mount_id]._path_tree.size() &&
+			node._index < _mounts[node._mount_id]._path_tree[node._depth]._dirs.size())
+			return _mounts[node._mount_id]._path_tree[node._depth]._dirs[node._index];
+		return _empty_dir;
 	}
 
 	const file_system_detail::fs_file& FileSystem::getFile(const file_system_detail::fs_key& node) const
 	{
-		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
+			return _empty_file;
 		if (!node.IsValid())
 			return _empty_file;
-		return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
+		if (node._mount_id < _mounts.size() && _mounts[node._mount_id]._is_valid &&
+			node._depth < _mounts[node._mount_id]._path_tree.size() &&
+			node._index < _mounts[node._mount_id]._path_tree[node._depth]._files.size())
+			return _mounts[node._mount_id]._path_tree[node._depth]._files[node._index];
+		return _empty_file;
 	}
 
 	const file_system_detail::fs_dir& FileSystem::getDir(const file_system_detail::fs_key& node) const
 	{
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
+			return _empty_dir;
 		if (!node.IsValid())
 			return _empty_dir;
-		return _mounts[node._mount_id]._path_tree[node._depth]._dirs[node._index];
+		if (node._mount_id < _mounts.size() && _mounts[node._mount_id]._is_valid &&
+			node._depth < _mounts[node._mount_id]._path_tree.size() &&
+			node._index < _mounts[node._mount_id]._path_tree[node._depth]._dirs.size())
+			return _mounts[node._mount_id]._path_tree[node._depth]._dirs[node._index];
+		return _empty_dir;
 	}
 
 	file_system_detail::fs_key FileSystem::getFile(string_view mountPath) const
@@ -437,9 +479,10 @@ namespace idk {
 
 		// Check if there are mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
+			return empty_node;
 
 		auto& mount = _mounts[mount_index];
+		
 		auto tokenized_path = tokenizePath(mountPath);
 
 		// The parent directory of the file is one depth higher and we -1 again because we don't count the file token.
@@ -486,9 +529,10 @@ namespace idk {
 
 		// Check if there are even mounts. If this hits, something is terribly wrong...
 		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
+			return empty_node;
 
 		auto& mount = _mounts[mount_index];
+
 		auto tokenized_path = tokenizePath(mountPath);
 
 		if (tokenized_path.back().empty())
@@ -636,6 +680,9 @@ namespace idk {
 
 	file_system_detail::fs_key FileSystem::requestDirSlot(file_system_detail::fs_mount& mount, int8_t depth)
 	{
+		if (!mount._is_valid)
+			return file_system_detail::fs_key{};
+
 		auto check_free_index = std::find_if(mount._path_tree[depth]._dirs.begin(),
 			mount._path_tree[depth]._dirs.end(),
 			[](const file_system_detail::fs_dir& d) noexcept
@@ -679,17 +726,26 @@ namespace idk {
 
 		FS::path p{ full_path };
 
-		// Request a slot from mounts
-		// Check if there are even mounts. If this hits, something is terribly wrong...
-		if (_mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
-
 		// initializing the fs_file
 		const auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
 		auto& f = getFile(slot);
 		initFile(f, dir, p);
 		dir._files_map.emplace(f._filename, f._tree_index);
 		return f;
+	}
+
+	void FileSystem::dismountMount(file_system_detail::fs_mount& mount)
+	{
+		FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle[0]);
+		FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle[1]);
+		FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle[2]);
+
+		mount._path_tree.clear();
+		mount._full_path.clear();
+		mount._mount_path.clear();
+		mount._is_valid = false;
+		mount._watching = false;
+		mount._mount_index = -1;
 	}
 
 #pragma endregion Helper Auxiliary

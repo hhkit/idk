@@ -350,3 +350,4 @@ MigrationBackup/
 /idk/build/win32
 imgui.ini
 idk/dep/lib/SPIRV-Tools-optd.lib
+/testproj/test dismount

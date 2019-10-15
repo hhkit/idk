@@ -177,10 +177,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::ResolveAllChanges()
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		// Check if there are even mounts. If this hits, something is terribly wrong...
-		if (vfs._mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
-
+		
 		// Resolve changed files
 		for (auto& file_index : changed_files)
 		{
@@ -316,18 +313,20 @@ namespace idk
 				// Now we need to find the corresponding internal fs_file that was renamed
 				// One of the fs_file inside the dir does not exists anymore due to being renamed.
 				auto& vfs = Core::GetSystem<FileSystem>();
+				// vector<std::pair<fs_key, FS::path>> renamed_files;
 				for (auto& internal_file_index : mountDir._files_map)
 				{
 					auto& internal_file = vfs.getFile(internal_file_index.second);
 					if (!vfs.ExistsFull(internal_file._full_path))
 					{
 						string prev_path = internal_file._full_path;
+						// renamed_files.emplace_back(std::make_pair( internal_file_index, tmp ));
 						fileRename(mountDir, internal_file, tmp);
 						
 						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
 									 "\t Prev Path: " << prev_path << "\n"
 									 "\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
-						// return;
+						break;
 					}
 				}
 			}
@@ -392,10 +391,6 @@ namespace idk
 			auto result = mountDir._sub_dirs.find(dir_name);
 			if (result == mountDir._sub_dirs.end())
 			{
-				// Check if there are even mounts. If this hits, something is terribly wrong...
-				if (vfs._mounts.empty())
-					throw("Something is terribly wrong. No mounts found.");
-
 				// Create the new dir
 				const auto key = dirCreate(mountDir, tmp);
 
@@ -459,7 +454,7 @@ namespace idk
 							"\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
 
 						recurseAndRename(internal_dir);
-						// return;
+						break;
 					}
 				}
 			}
@@ -474,10 +469,6 @@ namespace idk
 			FS::path tmp{ file.path() };
 			if (!FS::is_regular_file(tmp))
 			{
-				// Check if there are even mounts. If this hits, something is terribly wrong...
-				if (vfs._mounts.empty())
-					throw("Something is terribly wrong. No mounts found.");
-
 				// Create the new dir
 				const auto key = dirCreate(mountDir, tmp);
 
@@ -552,10 +543,7 @@ namespace idk
 	file_system_detail::fs_key file_system_detail::DirectoryWatcher::fileCreate(file_system_detail::fs_dir& mountDir, const FS::path& p)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		// Check if there are even mounts. If this hits, something is terribly wrong...
-		if (vfs._mounts.empty())
-			throw("Something is terribly wrong. No mounts found.");
-
+		
 		// Request a slot from mounts
 		const fs_key slot = vfs.requestFileSlot(vfs._mounts[mountDir._tree_index._mount_id], mountDir._tree_index._depth + 1);
 		fs_file& f = vfs.getFile(slot);

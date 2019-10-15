@@ -41,7 +41,7 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <imgui/imgui_internal.h> //InputTextEx
 #include <iostream>
-
+#define JOSEPH_TEST_BECAUSE_UNIT_TEST_IS_FKED 0
 
 namespace idk {
 
@@ -409,9 +409,42 @@ namespace idk {
             TransformModifiedCheck();
 
             ImGui::PopItemWidth();
+#if JOSEPH_TEST_BECAUSE_UNIT_TEST_IS_FKED
+			auto& vfs = Core::GetSystem<FileSystem>();
 
+			static string mount_path;
+			static string full_path = "C:/Users/Joseph/Desktop/GIT/idk/testproj/test dismount";
+			ImGui::InputText("Full Path", &full_path);
+			ImGui::InputText("Mount Path", &mount_path);
 
+			if (ImGui::Button("Mount"))
+			{
+				vfs.Mount(full_path, mount_path);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Dismount"))
+			{
+				vfs.Dismount(mount_path);
+			}
+			ImGui::NewLine();
 
+			static string get_handle;
+			static PathHandle handle;
+			ImGui::InputText("Get Handle", &get_handle);
+			ImGui::SameLine();
+			ImGui::TextColored(handle ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "HANDLE VALID");
+			if (ImGui::Button("Get PathHandle"))
+			{
+				handle = vfs.GetFile(get_handle);
+			}
+			
+			ImGui::NewLine();
+			if (ImGui::Button("Write"))
+			{
+				if(handle)
+					handle.Open(FS_PERMISSIONS::WRITE) << "HAHAHA" << std::endl;
+			}
+#endif
 			if (hasChanged) {
 				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
 					mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();

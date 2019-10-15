@@ -28,6 +28,7 @@ of the editor.
 #include <prefab/PrefabUtility.h>
 #include <math/euler_angles.h>
 #include <vkn/VknFramebuffer.h>
+#include <gfx/DebugRenderer.h>
 
 #include <iostream>
 
@@ -112,6 +113,7 @@ namespace idk {
 			//std::cout << "MousePosInWindow: " << GetMousePosInWindowNormalized().x << "," << GetMousePosInWindowNormalized().y << "\n";
 
 			//Select gameobject here!
+			currRay = GenerateRayFromCurrentScreen();
 		}
 
 		//Right Mouse WASD control
@@ -144,6 +146,8 @@ namespace idk {
 			UpdatePanMouseControl();
 
 		}
+
+		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0,0.8f,0,1 }, Core::GetDT());
 
 		UpdateScrollMouseControl();
 
@@ -229,6 +233,9 @@ namespace idk {
 		vec2 delta = ImGui::GetMouseDragDelta(1,0.1f);
 
 		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
+
+		//TEST
+			
 
 		//MOUSE YAW
 		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
@@ -398,9 +405,17 @@ namespace idk {
 		const auto pers_mtx = currCamera->ProjectionMatrix();
 		
 		vec2 ndcPos = GetMousePosInWindowNormalized();
+		//std::cout << ndcPos.x << ndcPos.y << "\n";
 
-		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,0,1);
-		vfPos *= 1.f/vfPos.w;
+
+		//-1 to 1 (ndc)
+		ndcPos -= vec2(0.5f,0.5f);
+		ndcPos /= 0.5f;
+
+		ndcPos = vec2(ndcPos.x,-ndcPos.y);
+
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,-1,1);
+		vfPos *= 1.f / vfPos.w;
 		vec4 wfPos = view_mtx.inverse() * vfPos;
 
 		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
@@ -408,9 +423,8 @@ namespace idk {
 		vec4 wbPos = view_mtx.inverse() * vbPos;
 
 		ray newRay;
-
 		newRay.origin = wfPos;
-		newRay.velocity = wbPos-wfPos;
+		newRay.velocity = (wbPos - wfPos);
 
 		return newRay;
 	}
