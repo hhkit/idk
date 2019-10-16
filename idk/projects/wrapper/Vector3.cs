@@ -60,13 +60,19 @@ namespace idk
             else
                 return v;
         }
-        public static double Distance(Vector3 lhs, Vector3 rhs)
+        public static float Distance(Vector3 lhs, Vector3 rhs)
         {
             return (lhs-rhs).magnitude;
         }
-        public static double Dot(Vector3 lhs, Vector3 rhs)
+        public static float Dot(Vector3 lhs, Vector3 rhs)
         {
             return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+        }
+        public static Vector3 Cross(Vector3 lhs, Vector3 rhs)
+        {
+            return new Vector3(lhs.x * rhs.y - lhs.y * rhs.x,
+                             - lhs.x * rhs.z + lhs.z * rhs.x,
+                             + lhs.y * rhs.z - lhs.z * rhs.y);
         }
         public static Vector3 Lerp(Vector3 lhs, Vector3 rhs, float t)
         {
