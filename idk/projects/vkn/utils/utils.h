@@ -40,26 +40,31 @@ namespace idk::vkn::meta
 	template<typename Enum, typename Tuple = void>
 	struct enum_info
 	{
-		static Enum map(size_t index)
-		{
-			static auto& test = to_array<Tuple>::value();
-			return test[index];
-		}
-		static constexpr size_t size()
-		{
-			return PackSize<Tuple>::value;
-		}
-		template<Enum e>
-		static constexpr uint32_t map()
-		{
-			return IndexInPack<Enum, e, Tuple>::value;
-		}
-		template<uint32_t n>
-		static constexpr Enum map()
-		{
-			return Get<static_cast<size_t>(n), Tuple>::value();
-		}
+		static Enum map(size_t index);
+
+		static constexpr size_t size();
+
+	template<Enum e>
+		static constexpr uint32_t map();
+
+	template<uint32_t n>
+		static constexpr Enum map();
 	};
+
+	template<typename >
+	struct always_true :std::true_type {};
+	template<typename ...>
+	struct always_true_va :std::true_type {};
+
+	template<size_t N, template<typename T> typename cond = always_true>
+	struct TupleFuncForward
+	{
+		template<typename Tuple, typename Fn, typename ...Args>
+		inline static void invoke(Tuple& tuple, Fn&& func, Args&& ...args);
+	};
+
+	template<template<typename... >typename SFINAE, typename ...Tz>
+	struct SfinaeBool;
 }
 namespace std
 {
