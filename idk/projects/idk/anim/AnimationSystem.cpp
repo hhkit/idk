@@ -28,7 +28,7 @@ namespace idk
 		for (auto& elem : animators)
 		{
 			const auto anim = elem.GetAnimationRsc(elem._curr_animation);
-			if (elem._is_playing && anim)
+			if ((elem._is_playing || elem._is_stopping) && anim)
 			{
 				AnimationPass(elem);
 			}

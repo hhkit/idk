@@ -13,13 +13,12 @@
 #include <scene/SceneManager.h>
 #include <phys/Collider.h>
 #include <math/matrix_decomposition.h>
-
+#include <anim/AnimationState.h>
 namespace idk
 {
 	class GameObject;
 	class Mesh;
     class Prefab;
-	struct AnimationState;
 	namespace anim
 	{
 		class Animation;
@@ -84,9 +83,9 @@ namespace idk::reflect
 		// anim
 		, RscHandle<anim::Skeleton>
 		, RscHandle<anim::Animation>
-		//, idk::AnimationState
+		, AnimationState
+		, vector<AnimationState>
 		, vector<RscHandle<anim::Animation>>
-		// , vector<idk::AnimationState>
 		, matrix_decomposition<real>
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>

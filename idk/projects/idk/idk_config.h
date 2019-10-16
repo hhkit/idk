@@ -53,13 +53,14 @@ namespace idk
 		,	class GraphicsSystem
 		,   class DebugRenderer
 		,	class AudioSystem
-		,	class ResourceManager
+		
 		,	class ProjectManager
 		,	class SceneManager
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
         ,   class TagManager
+		, class ResourceManager
 	>;
 
 	using Resources = std::tuple<
