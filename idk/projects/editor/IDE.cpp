@@ -334,7 +334,7 @@ namespace idk
 			camTransform->position = finalCamPos;
 			focused_vector = finalCamPos;
 			scroll_multiplier = default_scroll_multiplier;
-			camTransform->position += camTransform->Forward() * distanceFromObject;
+			camTransform->position -= camTransform->Forward() * distanceFromObject;
 		}
 	}
 

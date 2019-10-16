@@ -8,5 +8,9 @@ namespace idk
     {
     public:
         uint8_t index;
+
+        Tag() = default;
+        explicit Tag(string_view str);
+        explicit operator string() const;
     };
 };

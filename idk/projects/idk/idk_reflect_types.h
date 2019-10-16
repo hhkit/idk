@@ -59,6 +59,7 @@ namespace idk::reflect
 
 		// projects
 		, vector<SceneManager::SceneBlock>
+        , array<string, 32>
 
 		// graphics
 		, RscHandle<Mesh>

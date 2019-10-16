@@ -1,6 +1,7 @@
 #pragma once
 
 #include <common/TagManager.h>
+#include <common/LayerManager.h>
 
 #include <app/Application.h>
 #include <app/GamepadSystem.h>

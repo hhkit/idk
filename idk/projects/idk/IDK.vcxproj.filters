@@ -614,9 +614,6 @@
     <ClInclude Include="res\MetaBundle.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MaterialFactory.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\ShaderTemplateLoader.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -708,9 +705,6 @@
     <ClInclude Include="gfx\IShaderProgramFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="core\ConfigurableSystem.h">
-      <Filter>core\systems</Filter>
-    </ClInclude>
     <ClInclude Include="script\MonoEnvironment.h">
       <Filter>script</Filter>
     </ClInclude>
@@ -733,9 +727,27 @@
     <ClInclude Include="common\TagManager.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="script\MonoBehaviorEnvironment.h" />
-    <ClInclude Include="script\MonoWrapperEnviroment.h" />
-    <ClInclude Include="script\ValueBoxer.h" />
+    <ClInclude Include="script\MonoBehaviorEnvironment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoWrapperEnviroment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ValueBoxer.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="common\LayerManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Layer.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1057,14 +1069,20 @@
     <ClCompile Include="common\TagManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
-    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
-    <ClCompile Include="script\ValueBoxer.cpp" />
-    <ClCompile Include="gfx\Framebuffer.cpp">
-      <Filter>gfx</Filter>
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp">
+      <Filter>script</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\LightTypes.cpp">
-      <Filter>gfx\light</Filter>
+    <ClCompile Include="script\MonoWrapperEnviroment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ValueBoxer.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Tag.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\LayerManager.cpp">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

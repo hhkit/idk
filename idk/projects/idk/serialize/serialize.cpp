@@ -188,12 +188,12 @@ namespace idk
 
 			if constexpr (std::is_arithmetic_v<K>)
 				return f(key, arg, stack);
-			else if constexpr (is_basic_serializable_v<K>)
+			else if constexpr (is_basic_serializable_v<K> || std::is_same_v<std::decay_t<K>, const char*>)
 				return f(serialize_text(key), arg, stack);
 			else if constexpr (std::is_same_v<K, reflect::type>) // variant element
 				return f(string{ key.name() }, arg, stack);
 			else
-				throw "wtf is this key??";
+				throw "wtf is this key??", arg;
 		});
 
 		return node;

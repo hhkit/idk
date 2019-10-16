@@ -36,9 +36,11 @@ namespace idk
         PathHandle clicked_path;
         PathHandle selected_path;
         vector<GenericResourceHandle> selected_assets;
+        bool renaming_selected_asset = false;
+        bool just_rename = false;
 
         void displayDir(PathHandle dir);
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);
-        string unique_new_file_path(string_view name, string_view ext);
+        string unique_new_mount_path(string_view name, string_view ext);
 	};
 }
