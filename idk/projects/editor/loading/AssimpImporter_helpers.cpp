@@ -169,7 +169,7 @@ namespace idk::ai_helpers
 			if (bone_node == scene.bone_table.end())
 			{
 				// Error handling
-				string error_string = "[Warning] None aiBone node"  + node_name + " found in bone hierarchy.";
+				string error_string = "[Warning] No aiBone node "  + node_name + " found in bone hierarchy.";
 				if (curr_node.node->mMeshes != nullptr)
 					error_string += " Meshes that are parented to bones are not supported yet.";
 				else
@@ -189,7 +189,7 @@ namespace idk::ai_helpers
 				// Initialize child local/global pose
 				ai_child_local_bind_pose = to_aiMat4(node_transform);
 				ai_child_world_bind_pose = global_inverse;
-				ai_child_world_bind_pose.Inverse();
+				// ai_child_world_bind_pose.Inverse();
 
 				// Initialize global inverse in bone
 				new_bone._global_inverse_bind_pose = to_mat4(global_inverse);
@@ -206,7 +206,7 @@ namespace idk::ai_helpers
 			}
 
 			// World
-			aiDecomposeMatrix(&ai_child_world_bind_pose, &child_world_scale, &child_world_rot, &child_world_pos);
+			// aiDecomposeMatrix(&ai_child_world_bind_pose, &child_world_scale, &child_world_rot, &child_world_pos);
 
 			// local
 			aiDecomposeMatrix(&ai_child_local_bind_pose, &child_local_scale, &child_local_rot, &child_local_pos);
@@ -225,6 +225,14 @@ namespace idk::ai_helpers
 			{
 				bone_queue.push_back(BoneTreeNode{ curr_node.node->mChildren[i], static_cast<int>(final_skeleton.size() - 1), mat4{} });
 			}
+		}
+
+		for (auto& bone : scene.final_skeleton)
+		{
+			bone._global_inverse_bind_pose[3] *= 0.01f;
+			bone._global_inverse_bind_pose[3].w = 1.0f;
+
+			bone._local_bind_pose.position *= 0.01f;
 		}
 	}
 
@@ -303,15 +311,17 @@ namespace idk::ai_helpers
 
 			// Initialize global inverse in bone
 			new_bone._global_inverse_bind_pose = to_mat4(global_inverse);
+			new_bone._global_inverse_bind_pose[3] /= 100.0f;
+			new_bone._global_inverse_bind_pose[3].w = 1.0f;
 
 			// World
-			aiDecomposeMatrix(&ai_child_world_bind_pose, &child_world_scale, &child_world_rot, &child_world_pos);
+			// aiDecomposeMatrix(&ai_child_world_bind_pose, &child_world_scale, &child_world_rot, &child_world_pos);
 
 			// local
 			aiDecomposeMatrix(&ai_child_local_bind_pose, &child_local_scale, &child_local_rot, &child_local_pos);
 
 			// Setting local bind pose of both the new bone and the aiNode
-			new_bone._local_bind_pose.position = to_vec3(child_local_pos);
+			new_bone._local_bind_pose.position = to_vec3(child_local_pos) / 100.0f;
 			new_bone._local_bind_pose.rotation = to_quat(child_local_rot);
 			new_bone._local_bind_pose.scale = to_vec3(child_local_scale);
 
@@ -324,6 +334,14 @@ namespace idk::ai_helpers
 			{
 				bone_queue.push_back(BoneTreeNode{ curr_node.node->mChildren[i], static_cast<int>(skinless_skeleton.size() - 1), mat4{} });
 			}
+		}
+
+		for (auto& bone : scene.skinless_skeleton)
+		{
+			bone._global_inverse_bind_pose[3] *= 0.01f;
+			bone._global_inverse_bind_pose[3].w = 1.0f;
+
+			bone._local_bind_pose.position *= 0.01f;
 		}
 	}
 #pragma endregion
@@ -458,7 +476,7 @@ namespace idk::ai_helpers
 		for (size_t i = 0; i < anim_channel->mNumPositionKeys; ++i)
 		{
 			auto& pos_key = anim_channel->mPositionKeys[i];
-			anim_bone.translate_track.emplace_back(to_vec3(pos_key.mValue), s_cast<float>(pos_key.mTime));
+			anim_bone.translate_track.emplace_back(to_vec3(pos_key.mValue) * 0.01f, s_cast<float>(pos_key.mTime));
 		}
 	}
 
@@ -658,7 +676,7 @@ namespace idk::ai_helpers
 		for (size_t i = 0; i < anim_channel->mNumPositionKeys; ++i)
 		{
 			auto& pos_key = anim_channel->mPositionKeys[i];
-			anim_bone.translate_track.emplace_back(to_vec3(pos_key.mValue), s_cast<float>(pos_key.mTime));
+			anim_bone.translate_track.emplace_back(to_vec3(pos_key.mValue) * 0.01f, s_cast<float>(pos_key.mTime));
 		}
 
 		for (size_t i = 0; i < anim_channel->mNumRotationKeys; ++i)
@@ -706,7 +724,7 @@ namespace idk::ai_helpers
 				bi_tangent = ai_mesh->mBitangents[k];
 			}
 
-			vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z }
+			vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z } * 0.01f
 										 ,vec3{ normal.x, normal.y, normal.z }
 										 ,vec2{ text.x, text.y }
 										 ,vec3{ tangent.x, tangent.y, tangent.z }
@@ -810,7 +828,7 @@ namespace idk::ai_helpers
 				bi_tangent = ai_mesh->mBitangents[k];
 			}
 
-			positions.emplace_back(vec3{ pos.x, pos.y, pos.z });
+			positions.emplace_back(vec3{ pos.x, pos.y, pos.z } * 0.01f);
 			normals.emplace_back(vec3{ normal.x, normal.y, normal.z });
 			uvs.emplace_back(vec2{ text.x, text.y });
 			tangents.emplace_back(vec3{ tangent.x, tangent.y, tangent.z });
@@ -962,7 +980,7 @@ namespace idk::ai_helpers
 #pragma region Comparison Helpers
 	bool flt_equal(float a, float b)
 	{
-		return abs(a - b) < epsilon;
+		return abs(a - b) < idk::constants::epsilon<float>();
 	}
 	bool vec3_equal(const vec3& lhs, const vec3& rhs)
 	{
@@ -1023,7 +1041,8 @@ namespace idk::ai_helpers
 		// Normalize all weights
 		auto sum_weights = weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3];
 		weights_out /= sum_weights;
-		assert(abs(1.0f - (weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3])) < epsilon);
+		sum_weights = (weights_out[0] + weights_out[1] + weights_out[2] + weights_out[3]);
+		//assert(abs(1.0f - sum_weights) < idk::constants::epsilon<float>());
 	}
 
 	void Vertex::AddBoneData(int id, float weight)

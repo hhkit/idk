@@ -165,21 +165,35 @@ namespace idk::phys
 			succ.origin_colliding      = true;
 			succ.distance_to_collision = 0;
 			succ.point_of_collision    = lhs.origin;
+
+			std::cout << "box::collide at origin" << "\n";
 			return succ;
+
 		}
 
-		auto disp_to_box = (box.center() - lhs.origin);
+		auto disp_to_box = (lhs.origin - box.center());
 		const auto extents = box.extents();
 
 		auto result = detail::collide_ray_aabb_face<&vec3::x>(lhs, box);
 
+		if (!result)
+		{
+			result = detail::collide_ray_aabb_face<&vec3::y>(lhs, box);
+
+			if(!result)
+				result = detail::collide_ray_aabb_face<&vec3::z>(lhs, box);
+		}
+		if(result)
+			std::cout << "box::collided" << "\n";
+		else
+			std::cout << "box::uncollided" << "\n";
 		return result;
 	}
 	raycast_result collide_ray_sphere(const ray& lhs, const sphere& s)
 	{
 		if (s.contains(lhs.origin))
 		{
-			//std::cout << "hit at origin" << "\n";
+			std::cout << "sphere::hit at origin" << "\n";
 			return raycast_success{true,lhs.origin,0};
 		}
 
@@ -193,7 +207,7 @@ namespace idk::phys
 		{
 			//No collision occurred
 			raycast_failure res;
-			//std::cout << "fail" << "\n";
+			std::cout << "sphere::fail" << "\n";
 
 			res.nearest_point = lhs.origin;
 			res.nearest_distance = 0;
@@ -206,7 +220,7 @@ namespace idk::phys
 		{
 			//No collision occurred
 			raycast_failure res;
-			//std::cout << "fail" << "\n";
+			std::cout << "sphere::fail" << "\n";
 
 			res.nearest_point = lhs.origin;
 			res.nearest_distance = 0;
@@ -221,7 +235,7 @@ namespace idk::phys
 			t = 0.f;
 
 		//pt collision
-		//std::cout << "hit" << "\n";
+		std::cout << "sphere::hit" << "\n";
 		const vec3 poc = lhs.get_point_after(t);
 
 		return raycast_success{false,poc,lhs.origin.distance(poc) };
