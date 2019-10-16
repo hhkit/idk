@@ -26,6 +26,7 @@ namespace idk::mono
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
 		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
 
+		ScanTypes();
 		FindMonoBehaviors();
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()

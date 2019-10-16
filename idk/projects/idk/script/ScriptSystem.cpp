@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "ScriptSystem.h"
 
-#include <iostream>
-
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/threads.h>
 #include <mono/metadata/debug-helpers.h>
@@ -43,19 +41,25 @@ namespace idk::mono
 			(exe_dir + "/mono/etc/").data()
 		);
 		mono_trace_set_print_handler([](const char* string, mono_bool is_stdout) {
-			std::cout << string;
+			LOG_TO(LogPool::GAME, string);
 			});
 
 		main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
 		main_environment->ScanTypes();
 
-		//mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*) {
-		//	LOG(fmt::format("Domain: {}, Msg: {}", log_domain ? log_domain : "NULL", message));
-		//	if (fatal)
-		//		Log::Get().Flush();
-		//	}, nullptr);
+		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*) 
+		{
+			if (fatal)
+			{
+				LOG_TO(LogPool::FATAL, "Fatal Game Error");
+				LOG_TO(LogPool::FATAL, message);
+			}
+			else
+				LOG_TO(LogPool::GAME, message);
+		}
+		, nullptr);
 
-		//LoadGameScripts();
+		LoadGameScripts();
 	}
 
 	void ScriptSystem::Shutdown()

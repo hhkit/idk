@@ -73,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	
     auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
-    c->AddSystem<win::XInputSystem>();
+    //c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;
@@ -90,10 +90,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	c->AddSystem<IDE>();
 
-
 	c->Setup();
 
-	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
+	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
+	Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag", false);

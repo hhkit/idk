@@ -5,6 +5,17 @@
 
 namespace idk
 {
+	vec3 RigidBody::position() const
+	{
+		return GetGameObject()->Transform()->GlobalPosition();
+	}
+	void RigidBody::position(const vec3& new_pos)
+	{
+		auto curr_pos = GetGameObject()->Transform()->GlobalPosition();
+		auto vel = curr_pos - _prev_pos;
+		_prev_pos = new_pos - vel;
+		GetGameObject()->Transform()->GlobalPosition(new_pos);
+	}
 	real RigidBody::mass() const
 	{
 		return 1 / inv_mass;
@@ -34,6 +45,13 @@ namespace idk
 		auto added = newtons * inv_mass;
 		_accum_accel += added;
 		return added;
+	}
+	void RigidBody::TeleportBy(const vec3& translation)
+	{
+		auto& tfm = *GetGameObject()->Transform();
+
+		_prev_pos += translation;
+		tfm.GlobalPosition(tfm.GlobalPosition() + translation);
 	}
 	const mat4& RigidBody::PredictedTransform() const
 	{

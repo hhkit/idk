@@ -684,9 +684,6 @@
     <ClInclude Include="debug\idk_assert.h">
       <Filter>debug</Filter>
     </ClInclude>
-    <ClInclude Include="debug\Logger.h">
-      <Filter>debug</Filter>
-    </ClInclude>
     <ClInclude Include="common\Tag.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -743,6 +740,15 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="script\MonoBinder.h" />
+    <ClInclude Include="debug\Log.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogPools.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogSystem.h">
+      <Filter>debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1043,9 +1049,6 @@
     <ClCompile Include="gfx\LightTypes.cpp">
       <Filter>gfx\light</Filter>
     </ClCompile>
-    <ClCompile Include="debug\Logger.cpp">
-      <Filter>debug</Filter>
-    </ClCompile>
     <ClCompile Include="script\ManagedObj.cpp">
       <Filter>script</Filter>
     </ClCompile>
@@ -1078,6 +1081,12 @@
     </ClCompile>
     <ClCompile Include="common\LayerManager.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\LogSystem.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\Log.cpp">
+      <Filter>debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

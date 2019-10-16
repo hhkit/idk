@@ -243,6 +243,16 @@ namespace idk
 		
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
 			Load(elem);
+
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
+		{
+			auto bundle = Get(PathHandle{ elem });
+			if (bundle)
+			{
+				for (auto& resource : bundle->GetAll())
+					std::visit([&](auto& res_handle) {Release(res_handle); }, resource);
+			}
+		}
 	}
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
