@@ -15,6 +15,7 @@ namespace idk {
 	{
 		_empty_file.SetValid(false);
 		_empty_dir.SetValid(false);
+
 		// Get the base directory. This is where the prog is run from.
 		_exe_dir = Core::GetSystem<Application>().GetExecutableDir();
 		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
@@ -33,18 +34,10 @@ namespace idk {
 		// For every mount that is watched
 		for (auto& mount : _mounts)
 		{
+			// We only watch top level directory: mount directory
 			if (mount._is_valid && mount._watching)
 			{
-				// For every depth
-				//for (auto& collated : mount._path_tree)
-				{
-					// For every dir in the current depth
-					//for (auto& dir : collated._dirs)
-					{
-						
-						_directory_watcher.UpdateWatchedDir(mount, mount._path_tree[0]._dirs[0]);
-					}
-				}
+				_directory_watcher.UpdateWatchedDir(mount._path_tree[0]._dirs[0]);
 			}
 		}
 	}
@@ -842,9 +835,9 @@ namespace idk {
 
 	void FileSystem::dismountMount(file_system_detail::fs_mount& mount)
 	{
-		FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle[0]);
-		FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle[1]);
-		FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle[2]);
+		// Stop watching directory
+		if(mount._watching)
+			FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle);
 
 		mount._path_tree.clear();
 		mount._full_path.clear();
@@ -907,25 +900,6 @@ namespace idk {
 			}
 		}
 	}
-
-	// void FileSystem::recurseSubDirExtensions(vector<PathHandle>& vec_handles, const file_system_detail::fs_dir& subDir, string_view extension) const
-	// {
-	// 	for (auto& file_index : subDir._files_map)
-	// 	{
-	// 		auto& internal_file = getFile(file_index.second);
-	// 		if (internal_file._extension == extension)
-	// 		{
-	// 			PathHandle h{ internal_file._tree_index, true };
-	// 			vec_handles.emplace_back(h);
-	// 		}
-	// 	}
-	// 
-	// 	for (auto& dir_index : subDir._sub_dirs)
-	// 	{
-	// 		auto& internal_dir = getDir(dir_index.second);
-	// 		recurseSubDirExtensions(vec_handles, internal_dir, extension);
-	// 	}
-	// }
 
 #pragma endregion Helper Recurse
 
