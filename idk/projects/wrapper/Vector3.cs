@@ -44,12 +44,14 @@ namespace idk
             z /= mag;
             return this;
         }
-        public void Set(float newX, float newY)
+        /*
+        public void Set(float newX, float newY, float newZ)
         {
             x = newX;
             y = newY;
+            z = newZ;
         }
-
+        */
         // static methods
         public static Vector3 ClampMagnitude(Vector3 v, float maxLength)
         {

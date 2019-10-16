@@ -27,6 +27,7 @@ namespace idk
 		template<typename T> bool      HasComponent() const;
 
 		// generic
+		GenericHandle AddComponent(string_view);
 		GenericHandle AddComponent(reflect::type);
 		GenericHandle AddComponent(reflect::dynamic);
 		GenericHandle GetComponent(reflect::type);

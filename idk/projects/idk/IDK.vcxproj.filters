@@ -736,6 +736,7 @@
     <ClInclude Include="script\ValueBoxer.h">
       <Filter>script</Filter>
     </ClInclude>
+    <ClInclude Include="script\MonoBinder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

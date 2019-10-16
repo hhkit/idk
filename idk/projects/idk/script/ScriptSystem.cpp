@@ -60,8 +60,8 @@ namespace idk::mono
 
 	void ScriptSystem::Shutdown()
 	{
-		//UnloadGameScripts();
-		//main_environment = nullptr;
+		UnloadGameScripts();
+		main_environment = nullptr;
 	}
 
 	ScriptSystem::ScriptSystem() = default;
@@ -100,7 +100,7 @@ namespace idk::mono
 
 	void ScriptSystem::RefreshGameScripts()
 	{
-		//UnloadGameScripts();
-		//LoadGameScripts();
+		UnloadGameScripts();
+		LoadGameScripts();
 	}
 }
