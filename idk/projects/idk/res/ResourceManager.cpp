@@ -148,6 +148,7 @@ namespace idk
 			func(this);
 		for (auto& func : defaults_table)
 			func(this);
+		SaveDirtyMetadata();
 	}
 
 	void ResourceManager::Shutdown()
@@ -213,7 +214,7 @@ namespace idk
 								return false;
 						}, elem);
 				}
-
+			// if (path.find("YY_model.fbx") != string::npos) __debugbreak();
 			if (dirty)
 			{
 				// save the .meta file
@@ -228,8 +229,8 @@ namespace idk
 								handle->_dirtymeta = false;
 						}, elem);
 				}
-
-				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << serialize_text(m);
+				auto test = serialize_text(m);
+				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << test;
 				resource.is_new = false;
 			}
 		}

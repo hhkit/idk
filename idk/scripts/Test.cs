@@ -23,6 +23,10 @@ namespace TestAndSeek
         {
             System.Console.WriteLine("TestTransform");
             Thunderbolt(t.position);
+            t.position = new Vector3(5, 7, 1);
+            Thunderbolt(t.position);
+            t.position.Normalize();
+            Thunderbolt(t.position);
         }
 
         public static void Main(string[] args)

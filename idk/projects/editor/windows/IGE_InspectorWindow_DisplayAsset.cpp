@@ -4,6 +4,7 @@
 #include <editor/imguidk.h>
 #include <editor/utils.h>
 #include <editor/IDE.h>
+#include <editor/imguidk.h>
 #include <editor/windows/IGE_MaterialEditor.h>
 #include <gfx/ShaderGraph.h>
 #include <prefab/PrefabUtility.h>
@@ -200,9 +201,7 @@ namespace idk
 
             if (!has_override)
             {
-                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_TitleBg));
+                ImGuidk::PushDisabled();
             }
 
             ImGui::Text(name.c_str());
@@ -268,8 +267,7 @@ namespace idk
 
             if (!has_override)
             {
-                ImGui::PopItemFlag();
-                ImGui::PopStyleColor(2);
+                ImGuidk::PopDisabled();
             }
 
             ImGui::PopItemWidth();

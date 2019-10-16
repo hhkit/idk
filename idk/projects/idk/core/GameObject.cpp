@@ -4,9 +4,14 @@
 #include <common/Name.h>
 #include <common/TagManager.h>
 #include <common/Tag.h>
+#include <common/Layer.h>
 
 namespace idk
 {
+	GenericHandle GameObject::AddComponent(string_view sv)
+	{
+		return AddComponent(reflect::get_type(sv));
+	}
 	GenericHandle GameObject::AddComponent(reflect::type type)
 	{
 		return GameState::GetGameState().CreateComponent(GetHandle(), type);
@@ -86,11 +91,9 @@ namespace idk
 
     string_view GameObject::Tag() const
     {
-        const auto tag = GetComponent<class Tag>();
-        if (tag)
+        if (const auto tag = GetComponent<class Tag>())
             return Core::GetSystem<TagManager>().GetTagFromIndex(tag->index);
-        else
-            return "";
+        return "";
     }
 
     void GameObject::Tag(string_view tag)
@@ -104,5 +107,17 @@ namespace idk
                 tag_c = AddComponent<class Tag>();
             tag_c->index = Core::GetSystem<TagManager>().GetIndexFromTag(tag);
         }
+    }
+
+    uint8_t GameObject::Layer() const
+    {
+        if (const auto layer = GetComponent<class Layer>())
+            return layer->index;
+        return 0;
+    }
+
+    void GameObject::Layer(uint8_t layer)
+    {
+        AddComponent<class Layer>()->index = layer;
     }
 }

@@ -36,6 +36,8 @@ namespace idk
         PathHandle clicked_path;
         PathHandle selected_path;
         vector<GenericResourceHandle> selected_assets;
+        bool renaming_selected_asset = false;
+        bool just_rename = false;
 
         void displayDir(PathHandle dir);
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);

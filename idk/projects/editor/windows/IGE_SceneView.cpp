@@ -234,8 +234,8 @@ namespace idk {
 		//WASD MOVEMENT
 		if (app_sys.GetKey(Key::A))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Right();
 		if (app_sys.GetKey(Key::D))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Right();
-		if (app_sys.GetKey(Key::S))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Forward();
-		if (app_sys.GetKey(Key::W))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::S))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Forward();
+		if (app_sys.GetKey(Key::W))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Forward();
 		//VERTICAL MOVEMENT							  
 		if (app_sys.GetKey(Key::Q))	tfm->position += -finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
@@ -255,8 +255,6 @@ namespace idk {
 
 
 		ImGui::ResetMouseDragDelta(1);
-
-
 	}
 
 	void IGE_SceneView::UpdatePanMouseControl()
@@ -286,7 +284,7 @@ namespace idk {
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-			tfm->GlobalPosition(tfm->GlobalPosition() - tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
+			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
 
 		if (scroll > 0)
 			editor.scroll_multiplier += editor.scroll_subtractive;

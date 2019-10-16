@@ -36,6 +36,8 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="common\Layer.h" />
+    <ClInclude Include="common\LayerManager.h" />
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="app\GamepadEnums.h" />
     <ClInclude Include="core\ConfigurableSystem.h" />
@@ -172,6 +174,7 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="script\ManagedType.h" />
+    <ClInclude Include="script\MonoBinder.h" />
     <ClInclude Include="script\ValueBoxer.h" />
     <ClInclude Include="script\MonoBehavior.h" />
     <ClInclude Include="script\MonoBehaviorData.h" />
@@ -234,6 +237,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="common\LayerManager.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="common\Tag.cpp" />
     <ClCompile Include="common\TagManager.cpp" />

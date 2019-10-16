@@ -25,6 +25,7 @@ of the editor.
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/utils.h>
 #include <common/TagManager.h>
+#include <common/LayerManager.h>
 #include <anim/AnimationSystem.h>
 #include <app/Application.h>
 #include <ds/span.h>
@@ -118,7 +119,8 @@ namespace idk {
 				if (component == c_transform ||
 					component.is_type<PrefabInstance>() ||
 					component.is_type<Name>() ||
-					component.is_type<Tag>()
+					component.is_type<Tag>() ||
+					component.is_type<Layer>()
                     )
 					continue;
 
@@ -232,11 +234,14 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
 	{
+        const float left_offset = 32.0f;
+
 		//The c_name is to just get the first gameobject
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
 
+        ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Name").x);
 		ImGui::Text("Name");
 		ImGui::SameLine();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
@@ -273,9 +278,11 @@ namespace idk {
 			ImGui::TextDisabled("Multiple gameobjects selected");
 
 
+        ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Tag").x);
 		ImGui::Text("Tag");
 		ImGui::SameLine();
 
+        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::GetCursorPosX());
         const auto curr_tag = game_object->Tag();
         if (ImGui::BeginCombo("##tag", curr_tag.size() ? curr_tag.data() : "Untagged"))
         {
@@ -293,6 +300,36 @@ namespace idk {
             }
             ImGui::EndCombo();
         }
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        ImGui::Text("Layer");
+        ImGui::SameLine();
+
+        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetCursorPosX());
+        const auto curr_layer = game_object->Layer();
+        const auto layer_name = Core::GetSystem<LayerManager>().LayerIndexToName(curr_layer);
+        if (ImGui::BeginCombo("##layer", layer_name.data()))
+        {
+            const auto& layers = Core::GetSystem<LayerManager>().GetConfig().layers;
+            for (LayerManager::layer_t i = 0; i < LayerManager::num_layers; ++i)
+            {
+                if (layers[i].empty())
+                    continue;
+                string label = serialize_text(i);
+                label += ": ";
+                label += layers[i];
+                if (ImGui::MenuItem(label.c_str()))
+                    game_object->Layer(i);
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Add Layer##_add_layer_"))
+            {
+                Core::GetSystem<IDE>().FindWindow<IGE_ProjectSettings>()->FocusConfig<TagManager>();
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopItemWidth();
 	}
 
     void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)

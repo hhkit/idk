@@ -134,7 +134,11 @@ namespace idk {
             {
                 if (ImGui::MenuItem("Folder"))
                 {
-                    //auto path = unique_new_file_path("NewFolder", "");
+                    auto folder_path = unique_new_mount_path("NewFolder", "");
+                    fs::create_directory(Core::GetSystem<FileSystem>().GetFullPath(folder_path));
+                    selected_path = folder_path;
+                    renaming_selected_asset = true;
+                    just_rename = true;
                 }
                 if (ImGui::MenuItem("Material"))
                 {
@@ -260,8 +264,6 @@ namespace idk {
         ImGui::SetCursorPosX(spacing.x);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing.y);
 
-        static bool renaming_selected_asset = false;
-
         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
         int col = 0;
@@ -351,7 +353,6 @@ namespace idk {
                 // todo: open arrow for bundle
             }
 
-            static bool just_rename = false;
             ImVec2 text_frame_sz{ icon_sz, ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2 };
 
             if (selected_path == path)

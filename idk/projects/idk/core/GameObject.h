@@ -27,6 +27,7 @@ namespace idk
 		template<typename T> bool      HasComponent() const;
 
 		// generic
+		GenericHandle AddComponent(string_view);
 		GenericHandle AddComponent(reflect::type);
 		GenericHandle AddComponent(reflect::dynamic);
 		GenericHandle GetComponent(reflect::type);
@@ -49,6 +50,8 @@ namespace idk
 		void Name(string_view name);
         string_view Tag() const;
         void Tag(string_view tag);
+        uint8_t Layer() const;
+        void Layer(uint8_t layer);
 		
 		
 	private:

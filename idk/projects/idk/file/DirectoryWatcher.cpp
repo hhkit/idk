@@ -5,86 +5,66 @@
 
 #include <iostream>
 #include <filesystem>
+#include <chrono>
+#include <utility>
 
 namespace FS = std::filesystem;
+using namespace std::chrono_literals;
 
 namespace idk
 {
-	void file_system_detail::DirectoryWatcher::WatchDirectory(fs_dir& mountSubDir)
+	void file_system_detail::DirectoryWatcher::WatchDirectory(fs_dir& mountDir)
 	{
 		// Initialize watch handles
-		mountSubDir._watch_handle[0] = FindFirstChangeNotificationA(
-			mountSubDir._full_path.c_str(),
-			TRUE,
-			FILE_NOTIFY_CHANGE_DIR_NAME);
+		mountDir._watch_handle = FindFirstChangeNotificationA(
+										mountDir._full_path.c_str(),		// full path of mount
+										TRUE,								// Watch sub trees
+										FILE_NOTIFY_CHANGE_DIR_NAME |		// Directory create/delete/rename
+										FILE_NOTIFY_CHANGE_FILE_NAME |		// File create/delete/rename
+										FILE_NOTIFY_CHANGE_LAST_WRITE);		// File write
 
-		if (mountSubDir._watch_handle[0] == INVALID_HANDLE_VALUE)
+		if (mountDir._watch_handle == INVALID_HANDLE_VALUE)
 		{
-			std::cout << "\n ERROR: FindFirstChangeNotification FOLDER failed.\n"
-				<< mountSubDir._full_path << std::endl;
-		}
-
-		mountSubDir._watch_handle[1] = FindFirstChangeNotificationA(
-			mountSubDir._full_path.c_str(),
-			TRUE,
-			FILE_NOTIFY_CHANGE_FILE_NAME);
-
-		if (mountSubDir._watch_handle[1] == INVALID_HANDLE_VALUE)
-		{
-			std::cout << "\n ERROR: FindFirstChangeNotification FILE failed.\n"
-				<< mountSubDir._full_path << std::endl;
-		}
-
-		mountSubDir._watch_handle[2] = FindFirstChangeNotificationA(
-			mountSubDir._full_path.c_str(),
-			TRUE,
-			FILE_NOTIFY_CHANGE_LAST_WRITE);
-
-		if (mountSubDir._watch_handle[2] == INVALID_HANDLE_VALUE)
-		{
-			std::cout << "\n ERROR: FindFirstChangeNotification FILE failed.\n"
-				<< mountSubDir._full_path << std::endl;
+			std::cout << "[Directory Watcher] ERROR: Unable to watch directory: \n" <<
+						 "Path: " << mountDir._full_path << std::endl;
 		}
 	}
 
-	void file_system_detail::DirectoryWatcher::UpdateWatchedDir(const fs_mount& mount, fs_dir& dir)
+	void file_system_detail::DirectoryWatcher::UpdateWatchedDir(fs_dir& dir)
 	{
-		UNREFERENCED_PARAMETER(mount);
-		if (dir._change_status != FS_CHANGE_STATUS::NO_CHANGE || !dir.IsValid())
+		if (!dir.IsValid())
 			return;
-		// false = returns when any one of the handles signal
-		// 0     = No waiting, function immediately returns
-		dir._status = WaitForMultipleObjects(3, dir._watch_handle, false, 0);
+
+		// Wait for file/dir changes
+		dir._status = WaitForSingleObject(dir._watch_handle, 0);
 
 		switch (dir._status)
 		{
 		case WAIT_OBJECT_0:
 		{
-			// Directory Created/Deleted/Renamed/Replaced
-			RefreshTree(dir);
+			print_log.clear();
+			// Check all paths to see if there are changes. Possible to have no changes.
+			CheckAllPathChanges(dir);
 
-			if (FindNextChangeNotification(dir._watch_handle[0]) == FALSE) {
-				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
+			// Print logs if there are path changes.
+			if (changed_dirs.size() > 0 || changed_files.size() > 0)
+			{
+				std::cout << "=========================================================================================================\n";
+				std::cout << "[Directory Watcher] Path changes detected in: " << dir._mount_path << ".\n";
+				std::cout << "=========================================================================================================\n" << std::endl;
+
+				std::cout << print_log << std::endl;
+
+				std::cout << "=========================================================================================================" << std::endl;
+				std::cout << "Total Directories Changed: " << changed_dirs.size() << "." << std::endl;
+				std::cout << "Total Files Changed: " << changed_files.size() << "." << std::endl;
+				std::cout << "Total Paths Changed: " << changed_dirs.size() + changed_files.size() << "." << std::endl;
+				std::cout << "=========================================================================================================\n" << std::endl;
 			}
-			break;
-		}
-		case WAIT_OBJECT_0 + 1:
-		{
-			// File Created/Deleted/Renamed/Replaced
-			RefreshDir(dir);
 
-			if (FindNextChangeNotification(dir._watch_handle[1]) == FALSE) {
-				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
-			}
-			break;
-		}
-		case WAIT_OBJECT_0 + 2:
-		{
-			// File was written to recently
-			checkFilesWritten(dir);
-
-			if (FindNextChangeNotification(dir._watch_handle[2]) == FALSE) {
-				std::printf("\n ERROR: FindNextChangeNotification function failed.\n");
+			if (FindNextChangeNotification(dir._watch_handle) == FALSE) 
+			{
+				std::cout << "[Directory Watcher] ERROR: FindNextChangeNotification failed." << std::endl;
 			}
 			break;
 		}
@@ -98,79 +78,76 @@ namespace idk
 		}
 	}
 
-	void file_system_detail::DirectoryWatcher::RefreshDir(file_system_detail::fs_dir& mountDir)
+	void file_system_detail::DirectoryWatcher::CheckAllPathChanges(file_system_detail::fs_dir& dir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		FS::path path{ mountDir._full_path };
-		// Do nothing if the directory doesnt exists
-		if(!FS::exists(path))
-				return;
-		
-		auto num_files = s_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
-			static_cast<bool (*)(const FS::path&)>(FS::is_regular_file)));
-
-		// Files were created
-		if (num_files > mountDir._files_map.size())
-		{
-			checkFilesCreated(mountDir);
-		}
-		// Files were deleted
-		else if (num_files < mountDir._files_map.size())
-		{
-			checkFilesDeleted(mountDir);
-		}
-		//If number of files are the same, it means that files were renamed/replaced
-		else
-		{
-			// In the case of replacement of files, we actually want to send a file written to notification
-			checkFilesRenamed(mountDir);
-		}
-
-		for (auto dir_index : mountDir._sub_dirs)
-		{
-			auto& internal_dir = vfs.getDir(dir_index.second);
-			RefreshDir(internal_dir);
-		}
-	}
-
-	void file_system_detail::DirectoryWatcher::RefreshTree(file_system_detail::fs_dir& mountDir)
-	{
-		auto& vfs = Core::GetSystem<FileSystem>();
-		FS::path path{ mountDir._full_path };
+		FS::path path{ dir._full_path };
 		// Do nothing if the directory doesnt exists
 		if (!FS::exists(path))
 			return;
 
-		FS::directory_iterator dir{ path };
+		CheckFileChanges(dir);
+		CheckDirChanges(dir);
 
-		const auto num_files = static_cast<size_t>(std::count_if(FS::directory_iterator{ path }, FS::directory_iterator{},
-							[](const FS::path& p) -> bool
-							{
-								return !FS::is_regular_file(p);
-							}));
-
-		// Files were created
-		if (num_files > mountDir._sub_dirs.size())
+		for (auto& sub_dir_index : dir._sub_dirs)
 		{
-			checkDirCreated(mountDir);
+			auto& sub_dir = vfs.getDir(sub_dir_index.second);
+
+			// We don't want to check directories that were just created or deleted
+			if (sub_dir._change_status == FS_CHANGE_STATUS::DELETED || sub_dir._change_status == FS_CHANGE_STATUS::CREATED)
+				continue;
+
+			CheckAllPathChanges(sub_dir);
+		}
+	}
+
+	void file_system_detail::DirectoryWatcher::CheckFileChanges(file_system_detail::fs_dir& dir)
+	{
+		auto num_files = s_cast<size_t>(std::count_if(FS::directory_iterator{ dir._full_path }, FS::directory_iterator{},
+			static_cast<bool (*)(const FS::path&)>(FS::is_regular_file)));
+
+		// Checking for file changes.
+		if (num_files > dir._files_map.size())
+		{
+			checkFilesCreated(dir);
 		}
 		// Files were deleted
-		else if (num_files < mountDir._sub_dirs.size())
+		else if (num_files < dir._files_map.size())
 		{
-			checkDirDeleted(mountDir);
-			
+			checkFilesDeleted(dir);
 		}
-		//If neither, it means that files were renamed/replaced
+		//If number of files are the same, it means that files were renamed/replaced
 		else
 		{
-			// std::cout << "DIRECTORY RENAMED NOT DONE YET!!!" << std::endl;
-			checkDirRenamed(mountDir);
+			// We need to check if files were renamed as well as written.
+			checkFilesRenamed(dir);
+			checkFilesWritten(dir);
 		}
+	}
 
-		for (auto dir_index : mountDir._sub_dirs)
+	void file_system_detail::DirectoryWatcher::CheckDirChanges(file_system_detail::fs_dir& dir)
+	{
+		const auto num_dirs = static_cast<size_t>(std::count_if(FS::directory_iterator{ dir._full_path }, FS::directory_iterator{},
+			[](const FS::path& p) -> bool
+			{
+				return !FS::is_regular_file(p);
+			}));
+
+		// Dirs were created
+		if (num_dirs > dir._sub_dirs.size())
 		{
-			auto& internal_dir = vfs.getDir(dir_index.second);
-			RefreshTree(internal_dir);
+			checkDirCreated(dir);
+		}
+		// Dirs were deleted
+		else if (num_dirs < dir._sub_dirs.size())
+		{
+			checkDirDeleted(dir);
+
+		}
+		// If neither, it means that dirs were renamed
+		else
+		{
+			checkDirRenamed(dir);
 		}
 	}
 
@@ -270,9 +247,8 @@ namespace idk
 				const auto key = fileCreate(mountDir, tmp);
 
 				const auto& f = vfs.getFile(key);
-				std::cout << "[FILE SYSTEM] File Created: " << "\n"
-							 "\t Path: " << f._full_path << "\n" << std::endl;
-				// break;
+				print_log += "[File Created]\n";
+				print_log += "Path: " + f._mount_path + "\n\n";
 			}
 		}
 	}
@@ -286,9 +262,9 @@ namespace idk
 			if (!vfs.ExistsFull(internal_file._full_path))
 			{
 				fileDelete(internal_file);
-				
-				std::cout << "[FILE SYSTEM] File Deleted: " << "\n"
-							 "\t Path: " << internal_file._full_path << "\n" << std::endl;
+
+				print_log += "[File Deleted]\n";
+				print_log += "Path: " + internal_file._mount_path + "\n\n";
 			}
 		}
 
@@ -319,13 +295,14 @@ namespace idk
 					auto& internal_file = vfs.getFile(internal_file_index.second);
 					if (!vfs.ExistsFull(internal_file._full_path))
 					{
-						string prev_path = internal_file._full_path;
+						string prev_path = internal_file._mount_path;
 						// renamed_files.emplace_back(std::make_pair( internal_file_index, tmp ));
 						fileRename(mountDir, internal_file, tmp);
 						
-						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
-									 "\t Prev Path: " << prev_path << "\n"
-									 "\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
+						print_log += "[File Renamed]\n";
+						print_log += "Before:" + prev_path + "\n";
+						print_log += "After: " + internal_file._mount_path + "\n\n";
+						
 						break;
 					}
 				}
@@ -335,11 +312,12 @@ namespace idk
 		// std::cout << "[FILE SYSTEM] Cannot find renamed file. Looking for replaced file." << std::endl;
 		// If we cannot find the corresponding file or if the directory looks exactly the same, 
 		// it means that a file has been replaced. In which case, we want to check for write.
-		checkFilesWritten(mountDir);
+		// checkFilesWritten(mountDir);
 	}
 
 	void file_system_detail::DirectoryWatcher::checkFilesWritten(file_system_detail::fs_dir& dir)
 	{
+		auto& vfs = Core::GetSystem<FileSystem>();
 		for (auto& file : FS::directory_iterator(dir._full_path))
 		{
 			const auto current_file_last_write_time = FS::last_write_time(file);
@@ -355,23 +333,29 @@ namespace idk
 			if (result == dir._files_map.end())
 			{
 				// This means that we either entered into here erronously or some other bug.
-				std::cout << "[FILE SYSTEM] FILE_NOTIFY_CHANGE_LAST_WRITTEN WAS IGNORED." << std::endl;
+				print_log += "[Directory Watcher] Error encountered in checkFileWrite.\n";
+				print_log += "File: " + filename + " does not exists.\n\n";
 				break;
 			}
 
-			auto& internal_file = Core::GetSystem<FileSystem>().getFile(result->second);
+			auto& internal_file = vfs.getFile(result->second);
 			if (current_file_last_write_time != internal_file._time)
 			{
-				std::cout << "[FILE SYSTEM] File Written To: " << "\n"
-					"\t Path: " << internal_file._full_path << "\n" << std::endl;
-
 				internal_file._time = current_file_last_write_time;
 				internal_file._change_status = FS_CHANGE_STATUS::WRITTEN;
 
-				changed_files.push_back(internal_file._tree_index);
-				// return;
+				print_log += "[File Written]\n";
+				print_log += "Path:" + internal_file._mount_path + "\n\n";
+
+				changed_files.push_back(internal_file._tree_index);	
 			}
 		}
+
+		// for (auto& dir_index : dir._sub_dirs)
+		// {
+		// 	auto& internal_dir = vfs.getDir(dir_index.second);
+		// 	checkFilesWritten(internal_dir);
+		// }
 		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
 	}
 
@@ -395,11 +379,10 @@ namespace idk
 				const auto key = dirCreate(mountDir, tmp);
 
 				auto& d = vfs.getDir(key);
-				std::cout << "[FILE SYSTEM] Dir Created: " << "\n"
-							 "\t Path: " << d._full_path << "\n" << std::endl;
+				print_log += "[Directory Created]\n";
+				print_log += "Path: " + d._mount_path + "\n\n";
 							
 				recurseAndAdd(d);
-				// break;
 			}
 		}
 	}
@@ -414,8 +397,8 @@ namespace idk
 			{
 				
 				dirDelete(internal_dir);
-				std::cout <<	"[FILE SYSTEM] Dir Deleted: " << "\n"
-								"\t Path: " << internal_dir._full_path << "\n" << std::endl;
+				print_log += "[Directory Deleted]\n";
+				print_log += "Path: " + internal_dir._mount_path + "\n\n";
 
 				recurseAndDelete(internal_dir);
 			}
@@ -446,12 +429,12 @@ namespace idk
 					auto& internal_dir = vfs.getDir(internal_dir_index.second);
 					if (!vfs.ExistsFull(internal_dir._full_path))
 					{
-						string prev_path = internal_dir._full_path;
+						string prev_path = internal_dir._mount_path;
 						dirRename(mountDir, internal_dir, tmp);
 
-						std::cout << "[FILE SYSTEM] File Renamed: " << "\n"
-							"\t Prev Path: " << prev_path << "\n"
-							"\t Curr Path: " << tmp.generic_string() << "\n" << std::endl;
+						print_log += "[Directory Renamed]\n";
+						print_log += "Before:" + prev_path + "\n";
+						print_log += "After: " + internal_dir._mount_path + "\n\n";
 
 						recurseAndRename(internal_dir);
 						break;
@@ -473,9 +456,8 @@ namespace idk
 				const auto key = dirCreate(mountDir, tmp);
 
 				auto& d = vfs.getDir(key);
-				std::cout << "[FILE SYSTEM] Dir Created (Recursed): " << "\n"
-							 "\t Path: " << d._full_path << "\n" << std::endl;
-							 
+				print_log += "[Directory Created] (recursed)\n";
+				print_log += "Path: " + d._mount_path + "\n\n";
 				recurseAndAdd(d);
 			}
 			else
@@ -484,8 +466,8 @@ namespace idk
 				const auto key = fileCreate(mountDir, tmp);
 
 				const auto& f = vfs.getFile(key);
-				std::cout << "[FILE SYSTEM] File Created (From dir created notification): " << "\n"
-							 "\t Path: " << f._full_path << "\n" << std::endl;					 
+				print_log += "[File Created] (recursed)\n";
+				print_log += "Path: " + f._mount_path + "\n\n";
 			}
 		}
 	}
@@ -498,8 +480,8 @@ namespace idk
 			auto& internal_file = vfs.getFile(file.second);
 			fileDelete(internal_file);
 
-			std::cout << "[FILE SYSTEM] File Deleted (from dir deleted notication): " << "\n"
-						 "\t Path: " << internal_file._full_path << "\n" << std::endl;
+			print_log += "[File Deleted] (recursed)\n";
+			print_log += "Path: " + internal_file._mount_path + "\n\n";
 		}
 
 		for (auto& dir : mountDir._sub_dirs)
@@ -507,8 +489,8 @@ namespace idk
 			auto& internal_dir = vfs.getDir(dir.second);
 			dirDelete(internal_dir);
 
-			std::cout << "[FILE SYSTEM] Dir Deleted (recursed): " << "\n"
-						 "\t Path: " << internal_dir._full_path << "\n" << std::endl;
+			print_log += "[Directory Deleted] (recursed)\n";
+			print_log += "Path: " + internal_dir._mount_path + "\n\n";
 
 			recurseAndDelete(internal_dir);
 		}
@@ -522,9 +504,14 @@ namespace idk
 			auto& internal_file = vfs.getFile(file_index.second);
 			string append = '/' + internal_file._filename;
 
+			string prev_path = internal_file._mount_path;
 			internal_file._full_path = dir._full_path + append;
 			internal_file._rel_path = dir._rel_path + append;
 			internal_file._mount_path = dir._mount_path + append;
+
+			print_log += "[File Renamed] (recursed)\n";
+			print_log += "Before:" + prev_path + "\n";
+			print_log += "After: " + internal_file._mount_path + "\n\n";
 		}
 
 		for (auto& dir_index : dir._sub_dirs)
@@ -532,9 +519,14 @@ namespace idk
 			auto& internal_dir = vfs.getDir(dir_index.second);
 			string append = '/' + internal_dir._filename;
 
+			string prev_path = internal_dir._mount_path;
 			internal_dir._full_path = dir._full_path + append;
 			internal_dir._rel_path = dir._rel_path + append;
 			internal_dir._mount_path = dir._mount_path + append;
+
+			print_log += "[Directory Renamed] (recursed)\n";
+			print_log += "Before:" + prev_path + "\n";
+			print_log += "After: " + internal_dir._mount_path + "\n\n";
 
 			recurseAndRename(internal_dir);
 		}
@@ -571,7 +563,7 @@ namespace idk
 		changed_files.push_back(file._tree_index);
 	}
 
-	void file_system_detail::DirectoryWatcher::fileRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_file& file, const std::filesystem::path& p, FS_CHANGE_STATUS status)
+	void file_system_detail::DirectoryWatcher::fileRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_file& file, const std::filesystem::path& p)
 	{
 		// This is the file that was renamed.
 		// Remove myself from the table first.
@@ -582,7 +574,7 @@ namespace idk
 		Core::GetSystem<FileSystem>().initFile(file, mountDir, p);
 		mountDir._files_map.emplace(file._filename, file._tree_index);
 
-		file._change_status = status;
+		file._change_status = FS_CHANGE_STATUS::RENAMED;
 
 		changed_files.push_back(file._tree_index);
 	}
@@ -600,8 +592,6 @@ namespace idk
 
 		changed_dirs.push_back(d._tree_index);
 
-		// WatchDirectory(d);
-
 		return d._tree_index;
 	}
 
@@ -613,7 +603,7 @@ namespace idk
 		changed_dirs.push_back(dir._tree_index);
 	}
 
-	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_dir& dir, const std::filesystem::path& p, FS_CHANGE_STATUS status)
+	void file_system_detail::DirectoryWatcher::dirRename(file_system_detail::fs_dir& mountDir, file_system_detail::fs_dir& dir, const std::filesystem::path& p)
 	{
 		// This is the dir that was renamed.
 		// Remove myself from the table first.
@@ -624,7 +614,7 @@ namespace idk
 		Core::GetSystem<FileSystem>().initDir(dir, mountDir, p);
 		mountDir._sub_dirs.emplace(dir._filename, dir._tree_index);
 
-		dir._change_status = status;
+		dir._change_status = FS_CHANGE_STATUS::RENAMED;
 
 		changed_dirs.push_back(dir._tree_index);
 	}

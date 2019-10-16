@@ -984,13 +984,14 @@ namespace idk
                         renaming = -1;
                         string new_name = genUniqueParamName(buf);
 
-                        // replace name in graph's uniform table
-                        auto iter = _graph->uniforms.find(param.name);
-                        if (iter != _graph->uniforms.end())
-                        {
-                            auto node = _graph->uniforms.extract(iter);
-                            node.key() = new_name;
-                            _graph->uniforms.insert(std::move(node));
+                        { // replace name in graph's uniform table
+                            auto iter = _graph->uniforms.find(param.name);
+                            if (iter != _graph->uniforms.end())
+                            {
+                                auto node = _graph->uniforms.extract(iter);
+                                node.key() = new_name;
+                                _graph->uniforms.insert(std::move(node));
+                            }
                         }
 
                         // replace name of all material instances with overriden uniform
