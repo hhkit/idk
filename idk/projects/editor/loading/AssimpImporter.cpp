@@ -166,7 +166,7 @@ namespace idk
 				const auto mesh_child = scene->CreateGameObject();
 				mesh_child->Name(handle->Name());
 				mesh_child->Transform()->SetParent(prefab_root);
-				const auto mesh_renderer = mesh_child->AddComponent<MeshRenderer>();
+				const auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
 				mesh_renderer->mesh = RscHandle<Mesh>{ handle };
 			}
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.
@@ -373,7 +373,7 @@ namespace idk
 				const auto mesh_child = scene->CreateGameObject();
 				mesh_child->Name(handle->Name());
 				mesh_child->Transform()->SetParent(prefab_root);
-				const auto mesh_renderer = mesh_child->AddComponent<MeshRenderer>();
+				const auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
 				mesh_renderer->mesh = RscHandle<Mesh>{ handle };
 			}
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.

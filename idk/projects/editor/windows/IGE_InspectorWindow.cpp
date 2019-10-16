@@ -513,7 +513,7 @@ namespace idk {
 				for (Handle<GameObject> i : editor.selected_gameObjects) {
 					i->GetComponent<Transform>()->position	= vec3{ };
 					i->GetComponent<Transform>()->rotation	= quat{ };
-					i->GetComponent<Transform>()->scale		= vec3{ };
+					i->GetComponent<Transform>()->scale		= vec3{1,1,1};
 				}
 			}
 			MenuItem_CopyComponent(c_transform);

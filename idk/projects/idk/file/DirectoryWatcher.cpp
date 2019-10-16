@@ -350,13 +350,6 @@ namespace idk
 				changed_files.push_back(internal_file._tree_index);	
 			}
 		}
-
-		// for (auto& dir_index : dir._sub_dirs)
-		// {
-		// 	auto& internal_dir = vfs.getDir(dir_index.second);
-		// 	checkFilesWritten(internal_dir);
-		// }
-		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
 	}
 
 	void file_system_detail::DirectoryWatcher::checkDirCreated(file_system_detail::fs_dir& mountDir)
