@@ -70,13 +70,17 @@ namespace idk
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
-			AnimatedRenderObject ro = elem.GenerateRenderObject();
-			// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
-			const auto parent = elem.GetGameObject()->Parent();
-			const auto animator = parent->GetComponent<Animator>();
-			ro.skeleton_index = skeleton_indices[animator];
-			ro.config = mesh_render_config;
-			result.skinned_mesh_render.emplace_back(std::move(ro));
+
+			if (elem.IsActiveAndEnabled())
+			{
+				AnimatedRenderObject ro = elem.GenerateRenderObject();
+				// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
+				const auto parent = elem.GetGameObject()->Parent();
+				const auto animator = parent->GetComponent<Animator>();
+				ro.skeleton_index = skeleton_indices[animator];
+				ro.config = mesh_render_config;
+				result.skinned_mesh_render.emplace_back(std::move(ro));
+			}
 		}
 
 		for (auto& camera : cameras)

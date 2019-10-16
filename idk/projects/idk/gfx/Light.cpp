@@ -4,6 +4,11 @@
 #include <common/Transform.h>
 #include <math/matrix_transforms.h>
 
+#include<iostream>
+std::ostream& operator<<(std::ostream& out, const idk::vec3& v)
+{
+	return out << "{" << v.x << ", " << v.y << ", " << v.z << " }";
+}
 namespace idk
 {
 	struct LightCameraView
@@ -11,9 +16,9 @@ namespace idk
 		const Light* light;
 		mat4 operator()(const SpotLight& )
 		{
-			auto trf = light->GetGameObject()->Transform();
-			vec3 v_pos = trf->GlobalPosition();
-			vec3 v_dir = trf->Forward();
+			const auto trf = light->GetGameObject()->Transform();
+			const vec3 v_pos = trf->GlobalPosition();
+			const vec3 v_dir = trf->Forward();
 			return look_at(v_pos, v_pos + v_dir, trf->Up()).inverse();
 		}
 		mat4 LookAt(vec3 pos, vec3 target_point,vec3 up)

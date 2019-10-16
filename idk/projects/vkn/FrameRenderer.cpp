@@ -173,6 +173,7 @@ namespace idk::vkn
 	};
 	void BindCameraStuff(PipelineThingy& the_interface, const CameraData& cam)
 	{
+		//map back into z: (0,1)
 		mat4 projection_trf = mat4{ 1,0,0,0,
 							0,1,0,0,
 							0,0,0.5f,0.5f,
@@ -205,12 +206,13 @@ namespace idk::vkn
 		
 		the_interface.SetRef(ubo_manager);
 		
-		const CameraData& cam = state.camera;
+		CameraData cam = state.camera;
 		auto light_block = PrepareLightBlock(cam, *state.lights);
 
 		mat4 view_trf = cam.view_matrix;
+		//if (cam.is_shadow)
+		//	cam.view_matrix = translate(vec3{ 0.5f,0.5f,0.0f }) * (mat4{ scale(vec3(0.5f, 0.5f, 0)) } *cam.view_matrix);
 		mat4 pbr_trf = view_trf.inverse();
-		//map back into z: (0,1)
 		the_interface.BindShader(ShaderStage::Vertex,state.mesh_vtx);
 		BindCameraStuff(the_interface, cam);
 
@@ -1088,6 +1090,7 @@ namespace idk::vkn
 
 				auto config = *obj.config;
 				config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
+				config.screen_size = sz;
 				auto& pipeline = GetPipeline(config, shaders);
 				pipeline.Bind(cmd_buffer,view);
 				prev_pipeline = &pipeline;
