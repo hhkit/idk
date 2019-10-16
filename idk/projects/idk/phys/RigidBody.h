@@ -33,6 +33,7 @@ namespace idk
 		void sleeping(bool new_bool);
 
 		vec3 AddForce(const vec3& newtons);
+		void TeleportBy(const vec3& translation);
 
 		const mat4& PredictedTransform() const;
 	private:

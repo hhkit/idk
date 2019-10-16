@@ -47,20 +47,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bindings.cs" />
-    <Compile Include="Component.cs" />
-    <Compile Include="Coroutine.cs" />
-    <Compile Include="GameObject.cs" />
-    <Compile Include="IDK.cs" />
-    <Compile Include="IObject.cs" />
-    <Compile Include="Mathf.cs" />
-    <Compile Include="MonoBehavior.cs" />
+    <Compile Include="Core\Bindings.cs" />
+    <Compile Include="Core\Component.cs" />
+    <Compile Include="Behavior\Coroutine.cs" />
+    <Compile Include="Core\GameObject.cs" />
+    <Compile Include="Core\IDK.cs" />
+    <Compile Include="Core\IObject.cs" />
+    <Compile Include="Math\Mathf.cs" />
+    <Compile Include="Behavior\MonoBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Time.cs" />
-    <Compile Include="Transform.cs" />
-    <Compile Include="Vector3.cs" />
-    <Compile Include="WaitForSeconds.cs" />
-    <Compile Include="YieldInstruction.cs" />
+    <Compile Include="Components\RigidBody.cs" />
+    <Compile Include="Core\Time.cs" />
+    <Compile Include="Components\Transform.cs" />
+    <Compile Include="Math\Vector3.cs" />
+    <Compile Include="Behavior\WaitForSeconds.cs" />
+    <Compile Include="Behavior\YieldInstruction.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -86,6 +86,16 @@ namespace idk::mono
 			}
 		));
 
+		// component
+		Bind("idk.Bindings::ComponentGetGameObject", decay(
+			[](GenericHandle go) -> uint64_t
+		{
+			IDK_ASSERT_MSG(false, "TODO: BIND THIS PROPERLY");
+			return go.id;
+		}
+		));
+
+
 		// transform
 
 		Bind("idk.Bindings::TransformGetPosition", decay(
@@ -112,7 +122,66 @@ namespace idk::mono
 				h->GlobalScale(v);
 			}));
 
-		
+		// RigidBody
+		Bind("idk.Bindings::RigidBodyGetMass", decay(
+			[](Handle < RigidBody> rb) ->float
+		{
+			return rb->mass();
+		}));
+
+		Bind("idk.Bindings::RigidBodySetMass", decay(
+			[](Handle<RigidBody> rb, float val)
+		{
+			rb->mass(val);
+		}
+		));
+
+		Bind("idk.Bindings::RigidBodyGetVelocity", decay(
+			[](Handle < RigidBody> rb) -> vec3
+		{
+			return rb->velocity();
+		}));
+
+		Bind("idk.Bindings::RigidBodySetVelocity", decay(
+			[](Handle<RigidBody> rb, vec3 val)
+		{
+			rb->velocity(val);
+		}
+		));
+
+		Bind("idk.Bindings::RigidBodyGetUseGravity", decay(
+			[](Handle < RigidBody> rb) -> bool
+		{
+			return rb->use_gravity;
+		}));
+
+		Bind("idk.Bindings::RigidBodySetUseGravity", decay(
+			[](Handle<RigidBody> rb, bool val)
+		{
+			rb->use_gravity = val;
+		}
+		));
+
+		Bind("idk.Bindings::RigidBodySleep", decay(
+			[](Handle<RigidBody> rb)
+		{
+			rb->sleep_next_frame = true;
+		}
+		));
+
+		Bind("idk.Bindings::RigidBodyTeleport", decay(
+			[](Handle<RigidBody> rb, vec3 val)
+		{
+			rb->TeleportBy(val);
+		}
+		));
+
+		Bind("idk.Bindings::RigidBodyAddForce", decay(
+			[](Handle<RigidBody> rb, vec3 val)
+		{
+			rb->AddForce(val);
+		}
+		));
 		//BindGetter("idk.Bindings::TransformGetPosition", &Transform::GlobalPosition);
 	}
 }

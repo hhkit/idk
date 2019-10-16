@@ -26,6 +26,7 @@ namespace idk
                 return component;
             }
             else
+                // else try to find corresponding monobehavior
                 return null;
         }
 
@@ -40,6 +41,7 @@ namespace idk
                 return component;
             }
             else
+                // else try to find corresponding monobehavior
                 return null;
         }
 

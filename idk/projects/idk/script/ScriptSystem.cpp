@@ -59,7 +59,7 @@ namespace idk::mono
 		}
 		, nullptr);
 
-		//LoadGameScripts();
+		LoadGameScripts();
 	}
 
 	void ScriptSystem::Shutdown()
