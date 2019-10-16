@@ -340,6 +340,11 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::checkFilesWritten(file_system_detail::fs_dir& dir)
 	{
+		FS::path curr_dir_path{ dir._full_path };
+		if (!FS::exists(curr_dir_path))
+			return;
+
+		auto& vfs = Core::GetSystem<FileSystem>();
 		for (auto& file : FS::directory_iterator(dir._full_path))
 		{
 			const auto current_file_last_write_time = FS::last_write_time(file);
@@ -359,7 +364,7 @@ namespace idk
 				break;
 			}
 
-			auto& internal_file = Core::GetSystem<FileSystem>().getFile(result->second);
+			auto& internal_file = vfs.getFile(result->second);
 			if (current_file_last_write_time != internal_file._time)
 			{
 				std::cout << "[FILE SYSTEM] File Written To: " << "\n"
@@ -371,6 +376,11 @@ namespace idk
 				changed_files.push_back(internal_file._tree_index);
 				// return;
 			}
+		}
+		for (auto& dir_index : dir._sub_dirs)
+		{
+			auto& internal_dir = vfs.getDir(dir_index.second);
+			checkFilesWritten(internal_dir);
 		}
 		// std::cout << "[FILE SYSTEM] Cannot find file write change." << std::endl;
 	}
