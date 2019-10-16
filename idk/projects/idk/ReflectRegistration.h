@@ -270,6 +270,10 @@ REFLECT_BEGIN(idk::Tag, "Tag")
 REFLECT_VARS(index)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::Layer, "Layer")
+REFLECT_VARS(index)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()

@@ -254,6 +254,7 @@
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="imguidk.cpp" />
     <ClCompile Include="loading\AssimpImporter.cpp" />
     <ClCompile Include="loading\AssimpImporter_helpers.cpp" />
     <ClCompile Include="loading\GraphFactory.cpp" />

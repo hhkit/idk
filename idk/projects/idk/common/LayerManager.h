@@ -15,6 +15,7 @@ namespace idk
     public:
         using layer_t = decltype(Layer::index);
         constexpr static size_t num_layers = std::tuple_size_v<decltype(LayerManagerConfig::layers)>;
+        constexpr static size_t num_builtin_layers = 3;
         constexpr static layer_t layer_default = 0;
         constexpr static layer_t layer_ignore_raycast = 1;
         constexpr static layer_t layer_ui = 2;

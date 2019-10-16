@@ -119,7 +119,8 @@ namespace idk {
 				if (component == c_transform ||
 					component.is_type<PrefabInstance>() ||
 					component.is_type<Name>() ||
-					component.is_type<Tag>()
+					component.is_type<Tag>() ||
+					component.is_type<Layer>()
                     )
 					continue;
 
@@ -307,7 +308,8 @@ namespace idk {
 
         ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetCursorPosX());
         const auto curr_layer = game_object->Layer();
-        if (ImGui::BeginCombo("##layer", Core::GetSystem<LayerManager>().LayerIndexToName(curr_layer).data()))
+        const auto layer_name = Core::GetSystem<LayerManager>().LayerIndexToName(curr_layer);
+        if (ImGui::BeginCombo("##layer", layer_name.data()))
         {
             const auto& layers = Core::GetSystem<LayerManager>().GetConfig().layers;
             for (LayerManager::layer_t i = 0; i < LayerManager::num_layers; ++i)

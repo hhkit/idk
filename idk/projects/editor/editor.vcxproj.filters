@@ -212,6 +212,7 @@
       <Filter>windows</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="imguidk.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

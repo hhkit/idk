@@ -5,7 +5,9 @@ namespace idk
 {
     string_view LayerManager::LayerIndexToName(layer_t layer) const
     {
-        return layer >= num_layers ? "" : GetConfig().layers[layer];
+        if (layer >= num_layers)
+            return "";
+        return GetConfig().layers[layer];
     }
 
     LayerManager::layer_t LayerManager::NameToLayerIndex(string_view layer_name) const
