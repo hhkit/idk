@@ -164,6 +164,25 @@ namespace idk::detail
 				}()...
 			};
 		}
+
+		constexpr static auto GenGetGameObjectTable()
+		{
+			return std::array<Handle<GameObject>(*)(const GenericHandle&), 1 + ComponentCount>
+			{
+				[](const GenericHandle& handle) -> Handle<GameObject>
+				{
+					if constexpr (std::is_same_v<Ts, GameObject>)
+						return handle_cast<GameObject>(handle);
+					else
+					{
+						if (const auto real_handle = handle_cast<Ts>(handle))
+							return real_handle->GetGameObject();
+						else
+							return {};
+					}
+				} ...
+			};
+		}
 	};
 
 	using TableGen = TableGenerator<Handleables>;
@@ -179,12 +198,6 @@ namespace idk
 	{
 		assert(_instance == nullptr);
 		name_to_id_map       = detail::TableGen::GenTypeLUT();
-		create_dynamic_jt    = detail::TableGen::GenCreateDynamicJt();
-		create_type_jt       = detail::TableGen::GenCreateTypeJt();
-		create_handles_jt    = detail::TableGen::GenCreateJt();
-		destroy_handles_jt   = detail::TableGen::GenDestructionJt();
-		validate_handles_jt  = detail::TableGen::GenValidateJt();
-		queue_for_destroy_jt = detail::TableGen::GenQueueForDestructionJt();
 		_instance = this;
 	}
 
@@ -212,24 +225,29 @@ namespace idk
 	}
 	bool GameState::CreateObject(const GenericHandle& handle)
 	{
+		constexpr auto create_handles_jt = detail::TableGen::GenCreateJt();
 		return s_cast<bool>(create_handles_jt[handle.type](*this, handle));
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::type type)
 	{
 		const auto id = GetTypeID(type);
+		constexpr auto create_type_jt = detail::TableGen::GenCreateTypeJt();
 		return id <= ComponentCount ? create_type_jt[id](*this, handle) : GenericHandle{};
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::dynamic dyn)
 	{
 		const auto id = GetTypeID(dyn.type);
+		constexpr auto create_dynamic_jt = detail::TableGen::GenCreateDynamicJt();
 		return id <= ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
 	}
 	bool GameState::ValidateHandle(const GenericHandle& handle)
 	{
+		constexpr auto validate_handles_jt = detail::TableGen::GenValidateJt();
 		return validate_handles_jt[handle.type](*this, handle);
 	}
 	void GameState::DestroyObject(const GenericHandle& handle)
 	{
+		constexpr auto queue_for_destroy_jt = detail::TableGen::GenQueueForDestructionJt();
 		if (handle)
 		{
 			queue_for_destroy_jt[handle.type](*this, handle);
@@ -249,9 +267,15 @@ namespace idk
 	}
 	void GameState::DestroyQueue()
 	{
+		constexpr auto destroy_handles_jt = detail::TableGen::GenDestructionJt();
 		for (auto& elem : _destruction_queue)
 			destroy_handles_jt[elem.type](*this, elem);
 		_destruction_queue.clear();
+	}
+	Handle<GameObject> GameState::GetGameObject(const GenericHandle& handle)
+	{
+		constexpr auto get_go_jt = detail::TableGen::GenGetGameObjectTable();
+		return get_go_jt[handle.type](handle);
 	}
 	uint8_t GameState::GetTypeID(const reflect::type& type)
 	{

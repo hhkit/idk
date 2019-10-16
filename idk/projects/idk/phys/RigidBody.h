@@ -25,6 +25,9 @@ namespace idk
 		real sleep_threshold  { +epsilon };
 		bool sleep_next_frame { true     };
 
+		vec3 position() const; 
+		void position(const vec3& new_pos); //teleport
+
 		real mass() const;
 		void mass(real);
 		vec3 velocity() const;

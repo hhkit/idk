@@ -3,10 +3,8 @@
 namespace idk
 {
     public class GameObject
-        : IObject
+        : Object
     {
-        internal ulong handle = 0;
-
         public bool activeSelf { get => Bindings.GameObjectActiveSelf(handle); }
         public bool activeInHierarchy { get => Bindings.GameObjectGetActiveInHierarchy(handle); }
         public Transform transform { get { return GetComponent<Transform>(); } }
@@ -49,7 +47,6 @@ namespace idk
         {
             Bindings.GameObjectSetActive(handle, new_active);
         }
-
 
     }
 }

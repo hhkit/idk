@@ -5,6 +5,17 @@
 
 namespace idk
 {
+	vec3 RigidBody::position() const
+	{
+		return GetGameObject()->Transform()->GlobalPosition();
+	}
+	void RigidBody::position(const vec3& new_pos)
+	{
+		auto curr_pos = GetGameObject()->Transform()->GlobalPosition();
+		auto vel = curr_pos - _prev_pos;
+		_prev_pos = new_pos - vel;
+		GetGameObject()->Transform()->GlobalPosition(new_pos);
+	}
 	real RigidBody::mass() const
 	{
 		return 1 / inv_mass;

@@ -1,10 +1,8 @@
 ﻿namespace idk
 {
     public class Component
-        : IObject
+        : Object
     {
-        internal ulong handle = 0;
-
         public GameObject gameObject
         {
             get => new GameObject(Bindings.ComponentGetGameObject(handle));

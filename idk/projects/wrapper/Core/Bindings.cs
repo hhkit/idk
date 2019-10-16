@@ -5,6 +5,15 @@ namespace idk
 {
     internal class Bindings
     {
+        /*
+         * Object
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ObjectValidate(ulong handle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ObjectDestroy(ulong handle);
+
         /**
          * Game Object
          */
@@ -60,6 +69,12 @@ namespace idk
         public extern static void RigidBodySetVelocity(ulong id, Vector3 val);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 RigidBodyGetPosition(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RigidBodySetPosition(ulong id, Vector3 val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool RigidBodyGetUseGravity(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -73,5 +88,21 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RigidBodyAddForce(ulong id, Vector3 force);
+
+        /*
+         * Collider
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetEnabled(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ColliderGetEnabled(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetTrigger(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ColliderGetTrigger(ulong id);
+
     }
 }

@@ -47,12 +47,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Collider.cs" />
     <Compile Include="Core\Bindings.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Behavior\Coroutine.cs" />
     <Compile Include="Core\GameObject.cs" />
     <Compile Include="Core\IDK.cs" />
-    <Compile Include="Core\IObject.cs" />
+    <Compile Include="Core\Object.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Behavior\MonoBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

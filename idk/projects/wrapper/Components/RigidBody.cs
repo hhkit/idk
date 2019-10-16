@@ -14,6 +14,12 @@
             set => Bindings.RigidBodySetVelocity(handle, value);
         }
 
+        public Vector3 position
+        {
+            get => Bindings.RigidBodyGetPosition(handle);
+            set => Bindings.RigidBodySetPosition(handle, value);
+        }
+
         // returns true because we don't have angular velocity ;3
         public bool freezeRotation
         {
