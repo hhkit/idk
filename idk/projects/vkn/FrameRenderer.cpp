@@ -261,6 +261,7 @@ namespace idk::vkn
 			auto& state = State();
 			cam = state.camera;
 			light_block = PrepareLightBlock(cam, *state.lights);
+			view_trf = cam.view_matrix;
 			pbr_trf = view_trf.inverse();
 		}
 
@@ -277,7 +278,7 @@ namespace idk::vkn
 				{
 					auto hdepth_tex = sm_uni->GetDepthBuffer();
 					auto& depth_tex = hdepth_tex.as<VknTexture>();
-					the_interface.BindSampler("shadow_maps", i++, depth_tex, true);
+					the_interface.BindSampler("shadow_maps", i++, depth_tex);
 				}
 			}
 		}
