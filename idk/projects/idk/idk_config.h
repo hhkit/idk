@@ -14,6 +14,7 @@ namespace idk
 		class Transform
 		, class Name
         , class Tag
+        , class Layer
 
 		/// EDITOR
 		,   class PrefabInstance
@@ -60,7 +61,9 @@ namespace idk
 		,   class TestSystem
 		,	class AnimationSystem
         ,   class TagManager
+		, class LayerManager
 		, class ResourceManager
+        
 	>;
 
 	using Resources = std::tuple<

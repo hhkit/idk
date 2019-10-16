@@ -3,6 +3,7 @@
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <common/Tag.h>
+#include <common/Layer.h>
 
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>

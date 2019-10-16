@@ -239,6 +239,13 @@ REFLECT_BEGIN(idk::TagManagerConfig, "TagManagerConfig")
 REFLECT_VARS(tags)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::LayerManager, "LayerManager")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::LayerManagerConfig, "LayerManagerConfig")
+REFLECT_VARS(layers)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
 REFLECT_VARS(_scenes, _startup_scene, _active_scene)
 REFLECT_END()

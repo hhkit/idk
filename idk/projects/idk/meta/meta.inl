@@ -89,8 +89,10 @@ namespace idk
 
 
 
-    // true if is integral/floating point, or is constructible to string
+    // true if is integral/floating point, or is constructible from and to string, or is macro enum
     template<typename T>
     struct is_basic_serializable : std::disjunction<
-        std::is_arithmetic<std::decay_t<T>>, std::is_constructible<string, T>> {};
+        std::is_arithmetic<std::decay_t<T>>,
+        is_macro_enum<std::decay_t<T>>,
+        std::conjunction<std::is_constructible<string, T>, std::is_constructible<std::decay_t<T>, string>>> {};
 }
