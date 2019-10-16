@@ -14,6 +14,7 @@
 #include <IncludeSystems.h>
 
 #include <script/ValueBoxer.h>
+#include <script/MonoBinder.h>
 
 namespace idk::mono
 {
@@ -42,18 +43,76 @@ namespace idk::mono
 		mono_jit_cleanup(_domain);
 	}
 
-	template<typename T>
-	decltype(auto) decay(T&& arg)
-	{
-		return +arg;
-	}
 
 	void MonoWrapperEnvironment::BindCoreFunctions()
 	{
-		mono_add_internal_call("idk.Bindings::TransformGetPosition", decay([](Handle<Transform> id)
+		constexpr auto Bind = mono_add_internal_call;
+
+		// game object
+
+		Bind("idk.Bindings::GameObjectAddEngineComponent", decay(
+			[](Handle<GameObject> go, const char* component) -> GenericHandle
 			{
-				return id->GlobalPosition();
+				return go->AddComponent(string_view{ component });
+			}
+		));
+
+
+		Bind("idk.Bindings::GameObjectGetEngineComponent", decay(
+			[](Handle<GameObject> go, const char* component) -> GenericHandle
+			{
+				return go->GetComponent(component);
+			}
+		));
+
+		Bind("idk.Bindings::GameObjectGetActiveInHierarchy", decay(
+			[](Handle<GameObject> go) -> bool
+			{
+				return go->ActiveInHierarchy();
+			}
+		));
+
+		Bind("idk.Bindings::GameObjectActiveSelf", decay(
+			[](Handle<GameObject> go) -> bool
+			{
+				return go->ActiveSelf();
+			}
+		));
+
+		Bind("idk.Bindings::GameObjectSetActive", decay(
+			[](Handle<GameObject> go, bool set) -> void
+			{
+				return go->SetActive(set);
+			}
+		));
+
+		// transform
+
+		Bind("idk.Bindings::TransformGetPosition", decay(
+			[](Handle<Transform> h) -> vec3
+			{ 
+				return h->GlobalPosition();
 			}));
+
+		Bind("idk.Bindings::TransformSetPosition", decay(
+			[](Handle<Transform> h, vec3 v)
+			{
+				h->GlobalPosition(v);
+			}));
+
+		Bind("idk.Bindings::TransformGetScale", decay(
+			[](Handle<Transform> h) -> vec3
+			{
+				return h->GlobalScale();
+			}));
+
+		Bind("idk.Bindings::TransformSetScale", decay(
+			[](Handle<Transform> h, vec3 v)
+			{
+				h->GlobalScale(v);
+			}));
+
 		
+		//BindGetter("idk.Bindings::TransformGetPosition", &Transform::GlobalPosition);
 	}
 }

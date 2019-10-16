@@ -1,8 +1,8 @@
 #pragma once
-#include <anim/Animation.h>
-
+#include <res/ResourceHandle.h>
 namespace idk
 {
+	namespace anim { class Animation; }
 	struct AnimationState
 	{
 		RscHandle<anim::Animation> animation{};

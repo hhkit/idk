@@ -742,6 +742,7 @@
     <ClInclude Include="common\Layer.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="script\MonoBinder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
