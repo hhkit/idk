@@ -10,6 +10,7 @@
 #include <phys/collision_detection/collision_box_sphere.h>
 #include <phys/raycasts/collision_raycast.h>
 #include <math/matrix_decomposition.h>
+#include <iostream>
 
 namespace idk
 {
@@ -281,6 +282,7 @@ namespace idk
 		};
 		bool foundRes = false;
 		
+		std::cout << "\n";
 		for (auto& c : colliders)
 		{
 			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result

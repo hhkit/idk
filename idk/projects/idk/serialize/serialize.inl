@@ -25,6 +25,8 @@ namespace idk
 
             return string(buf, res.ptr);
         }
+        else if constexpr (std::is_same_v<std::decay_t<T>, const char*>)
+            return string(obj);
         else if constexpr (is_basic_serializable_v<T>)
             return string(obj);
         else if constexpr (std::is_enum_v<std::decay_t<T>>)

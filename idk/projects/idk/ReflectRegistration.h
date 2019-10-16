@@ -239,6 +239,13 @@ REFLECT_BEGIN(idk::TagManagerConfig, "TagManagerConfig")
 REFLECT_VARS(tags)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::LayerManager, "LayerManager")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::LayerManagerConfig, "LayerManagerConfig")
+REFLECT_VARS(layers)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
 REFLECT_VARS(_scenes, _startup_scene, _active_scene)
 REFLECT_END()
@@ -322,7 +329,7 @@ REFLECT_VARS(animation, speed)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(_skeleton, _animation_table, _start_animation, _start_animation_offset)
+REFLECT_VARS(_skeleton, _animations, _start_animation, _start_animation_offset)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

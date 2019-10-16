@@ -204,7 +204,7 @@ namespace idk::reflect::detail
         string to_string(void* obj) const override
         {
             obj;
-            if constexpr (is_basic_serializable_v<T>)
+            if constexpr (is_basic_serializable_v<T> || std::is_same_v<T, const char*>)
                 return serialize_text(*static_cast<T*>(obj));
             else
                 throw "not serializable!";
