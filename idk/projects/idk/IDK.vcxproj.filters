@@ -614,9 +614,6 @@
     <ClInclude Include="res\MetaBundle.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MaterialFactory.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\ShaderTemplateLoader.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
@@ -702,9 +699,6 @@
     <ClInclude Include="gfx\IShaderProgramFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="core\ConfigurableSystem.h">
-      <Filter>core\systems</Filter>
-    </ClInclude>
     <ClInclude Include="script\MonoEnvironment.h">
       <Filter>script</Filter>
     </ClInclude>
@@ -735,6 +729,18 @@
     </ClInclude>
     <ClInclude Include="script\ValueBoxer.h">
       <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="common\LayerManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Layer.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1067,6 +1073,9 @@
       <Filter>script</Filter>
     </ClCompile>
     <ClCompile Include="common\Tag.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\LayerManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
