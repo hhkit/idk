@@ -63,6 +63,7 @@
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Behavior\WaitForSeconds.cs" />
     <Compile Include="Behavior\YieldInstruction.cs" />
+    <Compile Include="Quaternion.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
