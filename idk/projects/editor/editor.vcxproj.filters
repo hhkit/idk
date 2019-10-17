@@ -117,6 +117,9 @@
       <Filter>windows</Filter>
     </ClInclude>
     <ClInclude Include="utils.h" />
+    <ClInclude Include="windows\IGE_Console.h">
+      <Filter>windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -213,6 +216,9 @@
     </ClCompile>
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="imguidk.cpp" />
+    <ClCompile Include="windows\IGE_Console.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
