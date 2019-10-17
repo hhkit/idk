@@ -1,6 +1,9 @@
 #pragma once
-#include <core/Component.h>
+
 #include <mono/jit/jit.h>
+
+#include <core/Component.h>
+#include <script/ManagedObj.h>
 
 namespace idk::mono
 {
@@ -10,38 +13,28 @@ namespace idk::mono
 		: public Component<Behavior>
 	{
 	public:
-		Behavior();
-		Behavior(Behavior&& rhs);
-		Behavior& operator=(Behavior&& rhs);
-		~Behavior();
+		bool enabled = true;
 
-		const std::string& RescueMonoObject();
-		void RestoreMonoObject();
+		string_view RescueMonoObject();
+		void        RestoreMonoObject();
 
-		void EmplaceBehavior(string_view type);
+		MonoObject* EmplaceBehavior(string_view type);
+		MonoObject* GetObject();
 		void DisposeMonoObject();
 
 		void SerializeFromString(string_view type, string_view serialized);
-		MonoObject* GetMonoObject();
-		MonoBehaviorData* GetData();
 
-		//void EditorUpdate() override;
-		//void DebugDraw() override;
-		//void Start() override;
-		//void Update() override;
+		void Awake();
+		void Start();
+		void FixedUpdate();
+		void Update();
 		//void Stop() override;
 
 		void UpdateCoroutines();
 	private:
-		friend class MonoSystem;
-
-		MonoObject*                      _obj {}; // c# object
-		MonoBehaviorData*               _data {}; // data to idk metadata for type
-		hash_table<string, MonoMethod*> _methods;
-		string                          _type;
-		string                          _serialized;
-
-		bool initialized                      {};
-		uint32_t _gc_handle                   {};
+		ManagedObject _obj;
+		string        _serialized;
+		bool          _awake{};
+		bool          _started{};
 	};
 }

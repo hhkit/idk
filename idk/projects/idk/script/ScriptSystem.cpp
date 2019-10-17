@@ -73,13 +73,26 @@ namespace idk::mono
 
 	void ScriptSystem::ScriptStart(span<Behavior> behaviors)
 	{
+		for (auto& elem : behaviors)
+			if (elem.enabled)
+				elem.Awake();
+
+		for (auto& elem : behaviors)
+			if (elem.enabled)
+				elem.Start();
 	}
 	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
 	{
+		for (auto& elem : behaviors)
+			if (elem.enabled)
+				elem.FixedUpdate();
 	}
 
 	void ScriptSystem::ScriptUpdate(span<Behavior> behaviors)
 	{
+		for (auto& elem : behaviors)
+			if (elem.enabled)
+				elem.Update();
 	}
 
 	void ScriptSystem::ScriptUpdateCoroutines(span<Behavior> behaviors)

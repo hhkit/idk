@@ -1,32 +1,92 @@
 #include "stdafx.h"
 #include "MonoBehavior.h"
-
+#include <script/ScriptSystem.h>
+#include <script/MonoBehaviorEnvironment.h>
 namespace idk::mono
 {
-	//const std::string& Behavior::RescueMonoObject()
-	//{
-	//	// TODO: insert return statement here
-	//}
+	string_view Behavior::RescueMonoObject()
+	{
+		return _serialized;
+	}
 
-	Behavior::Behavior()
+	void Behavior::RestoreMonoObject()
 	{
 	}
 
-	Behavior::Behavior(Behavior&&)
+	MonoObject* Behavior::EmplaceBehavior(string_view type)
 	{
+		auto monotype = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(type);
+		if (monotype)
+		{
+			_obj = monotype->Construct();
+			_obj.Assign("handle", GetHandle().id);
+			_awake = false;
+			_started = false;
+			return _obj.Fetch();
+		}
+		return nullptr;
 	}
 
-	Behavior& Behavior::operator=(Behavior&&)
+	MonoObject* Behavior::GetObject()
 	{
-		return *this;;
+		return _obj.Fetch();
 	}
 
-	Behavior::~Behavior()
+	void Behavior::DisposeMonoObject()
 	{
+		_obj = {};
+	}
+
+	void Behavior::Awake()
+	{
+		if (!_awake && _obj)
+		{
+			_awake = true;
+			auto method = _obj.Type()->GetMethod("Awake");
+			if (method.index() == 0)
+				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+		}
+	}
+
+	void Behavior::Start()
+	{
+		if (!_started && _obj)
+		{
+			_started = true;
+			auto method = _obj.Type()->GetMethod("Start");
+			if (method.index() == 0)
+				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+		}
+	}
+
+	void Behavior::FixedUpdate()
+	{
+		if (enabled && _obj)
+		{
+			auto method = _obj.Type()->GetMethod("FixedUpdate");
+			if (method.index() == 0)
+				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+		}
+	}
+
+	void Behavior::Update()
+	{
+		if (enabled && _obj)
+		{
+			auto method = _obj.Type()->GetMethod("Update");
+			if (method.index() == 0)
+				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+		}
 	}
 
 	void Behavior::UpdateCoroutines()
 	{
+		if (enabled && _obj)
+		{
+			auto method = _obj.Type()->GetMethod("UpdateCoroutines");
+			if (method.index() == 0)
+				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+		}
 	}
 
 }

@@ -15,7 +15,7 @@ namespace idk::mono
 		MonoEnvironment() = default;
 		MonoImage*  Image() const noexcept;
 		MonoDomain* Domain() const noexcept;
-		opt<ManagedType> Type(string_view) const;
+		const ManagedType* Type(string_view) const;
 
 		void ScanTypes();
 

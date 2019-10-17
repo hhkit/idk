@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ManagedObj.h"
 
+#include <script/ScriptSystem.h>
+#include <script/MonoBehaviorEnvironment.h>
 namespace idk::mono
 {
 	ManagedObject::ManagedObject(MonoObject* obj)
@@ -58,6 +60,21 @@ namespace idk::mono
 	MonoObject* ManagedObject::Fetch() const noexcept
 	{
 		return mono_gchandle_get_target(_gc_handle);
+	}
+	ManagedObject::operator bool() const
+	{
+		return _gc_handle;
+	}
+	const ManagedType* ManagedObject::Type() noexcept
+	{
+		if (_type == nullptr)
+		{
+			if (_gc_handle == 0)
+				return nullptr;
+
+			_type = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(mono_class_get_name(mono_object_get_class(Fetch())));
+		}
+		return _type;
 	}
 	MonoClassField* ManagedObject::Field(string_view fieldname)
 	{

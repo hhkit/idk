@@ -17,10 +17,10 @@ namespace idk::mono
 		MonoClass* Raw() const;
 
 		template<typename ... Args>
-		MonoObject* ConstructTemporary(Args&& ...);
+		MonoObject* ConstructTemporary(Args&& ...) const;
 
 		template<typename ... Args> 
-		ManagedObject Construct(Args&&...);
+		ManagedObject Construct(Args&&...) const;
 		bool CacheThunk(string_view method_name, int param_count = 0);
 		std::variant <ManagedThunk, MonoMethod*, std::nullopt_t> GetMethod(string_view method_name, int param_count = 0) const;
 	private:
@@ -31,7 +31,7 @@ namespace idk::mono
 	};
 
 	template<typename ...Args>
-	inline MonoObject* ManagedType::ConstructTemporary(Args&& ...)
+	inline MonoObject* ManagedType::ConstructTemporary(Args&& ...) const
 	{
 		const auto domain = mono_domain_get();
 		auto obj = mono_object_new(domain, type);
@@ -47,8 +47,10 @@ namespace idk::mono
 	}
 
 	template<typename ...Args>
-	inline ManagedObject ManagedType::Construct(Args&& ... args)
+	inline ManagedObject ManagedType::Construct(Args&& ... args) const
 	{
-		return ManagedObject(ConstructTemporary(std::forward<Args>...));
+		auto retval = ManagedObject(ConstructTemporary(std::forward<Args>...));
+		retval._type = this;
+		return retval;
 	}
 }
