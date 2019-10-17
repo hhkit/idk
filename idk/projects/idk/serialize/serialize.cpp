@@ -554,11 +554,25 @@ namespace idk
 
 			for (++iter; iter != elem.end(); ++iter)
 			{
-				const auto type = reflect::get_type(iter->tag());
-				reflect::dynamic obj{ *handle->AddComponent(type) };
+				const reflect::type type = reflect::get_type(iter->tag());
+                reflect::dynamic obj = type.create();
                 const auto res2 = parse_yaml(*iter, obj);
                 if (res2 != parse_error::none)
                     err = res2;
+
+                if (type.is<Transform>())
+                {
+                    auto& trans = *handle->GetComponent<Transform>();
+                    auto& new_trans = obj.get<Transform>();
+                    trans.position = new_trans.position;
+                    trans.rotation = new_trans.rotation;
+                    trans.scale = new_trans.scale;
+                    trans.parent = new_trans.parent;
+                }
+                else if (type.is<Name>())
+                    handle->GetComponent<Name>()->name = obj.get<Name>().name;
+                else
+                    handle->AddComponent(obj);
 			}
 		}
 
