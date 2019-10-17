@@ -107,7 +107,9 @@ namespace idk {
 
 		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-		if (ImGui::IsMouseClicked(0)) {
+
+		//Raycast Selection
+		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing()) {
 
 			//Use this function to get
 			//std::cout << "MousePosInWindow: " << GetMousePosInWindowNormalized().x << "," << GetMousePosInWindowNormalized().y << "\n";
@@ -134,14 +136,16 @@ namespace idk {
 
 
 				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Or select Deselect that particular handle
-
-					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) {
+					bool hasSelected = false;
+					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
 						if (closestGameObject == selected_gameObjects[counter]) {
 							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+							hasSelected = true;
 							break;
 						}
 					}
-					selected_gameObjects.push_back(closestGameObject);
+					if (!hasSelected)
+						selected_gameObjects.insert(selected_gameObjects.begin(),closestGameObject);
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
 
 				}
@@ -152,9 +156,6 @@ namespace idk {
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
 				}
 
-				if (ImGui::IsMouseDoubleClicked(0)) {
-					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
-				}
 
 			}
 		}
@@ -349,59 +350,41 @@ namespace idk {
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
 		if (editor.selected_gameObjects.size()) {
-			if (editor.selected_gameObjects.size() == 1) {
-				Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>();
-				if (gameObjectTransform) {
+			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>(); 
+			if (gameObjectTransform) {
 
-					if (!ImGuizmo::IsUsing()) {
-						auto matrix = gameObjectTransform->GlobalMatrix();
-						const float* temp = matrix.data();
-						for (int i = 0; i < 16; ++i) {
-							gizmo_matrix[i] = temp[i];
-						}
-
-						//std::cout << "Save variable\n";
+				if (!ImGuizmo::IsUsing()) {
+					auto matrix = gameObjectTransform->GlobalMatrix(); //Use the first object as Gizmo Control
+					const float* temp = matrix.data();
+					for (int i = 0; i < 16; ++i) {
+						gizmo_matrix[i] = temp[i];
 					}
-
-					switch (editor.gizmo_operation) {
-					default:
-					case GizmoOperation_Null:
-
-						break;
-
-					case GizmoOperation_Translate:
-						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, NULL);
-						if (ImGuizmo::IsUsing()) {
-							is_being_modified = true;
-							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
-						}
-						break;
-
-					case GizmoOperation_Rotate:
-						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, NULL);
-						if (ImGuizmo::IsUsing()) {
-							is_being_modified = true;
-							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
-						}
-						break;
-
-					case GizmoOperation_Scale:
-						ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, NULL);
-						if (ImGuizmo::IsUsing()) {
-							is_being_modified = true;
-							gameObjectTransform->GlobalMatrix(GenerateMat4FromGizmoMatrix()); //Assign new variables
-						}
-						break;
-					}
-
-
-
-
 				}
+
+				switch (editor.gizmo_operation) {
+				default:
+				case GizmoOperation_Null:
+
+					break;
+
+				case GizmoOperation_Translate:
+					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, NULL);
+					ImGuizmoManipulateUpdate(gameObjectTransform);
+					break;
+
+				case GizmoOperation_Rotate:
+					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, NULL);
+					ImGuizmoManipulateUpdate(gameObjectTransform);
+					break;
+
+				case GizmoOperation_Scale:
+					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, NULL);
+					ImGuizmoManipulateUpdate(gameObjectTransform);
+					break;
+				}
+
 			}
-			else {
-				//For multiple objects
-			}
+		
 
 			if (is_being_modified) {
 				if (!ImGuizmo::IsUsing()) {
@@ -421,9 +404,23 @@ namespace idk {
 		}
 	}
 
+	void IGE_SceneView::ImGuizmoManipulateUpdate(Handle<Transform>& gameObjectTransform)
+	{
+		if (ImGuizmo::IsUsing()) {
+			is_being_modified = true;
+			mat4 difference = GenerateMat4FromGizmoMatrix() - gameObjectTransform->GlobalMatrix();
+			IDE& editor = Core::GetSystem<IDE>();
+			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
+				Handle<Transform> iTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
+				mat4 newMatrix = iTransform->GlobalMatrix() + difference;
+				iTransform->GlobalMatrix(newMatrix); //Assign new variables
+			}
+		}
+	}
+
 	mat4 IGE_SceneView::GenerateMat4FromGizmoMatrix()
 	{
-		mat4 dumper{};
+		mat4 dumper{}; //Using like this --> mat4 dumper{gizmo_matrix} does not yield the same result!
 		int i = 0;
 		for (int row = 0; row < 4; ++row) {
 			for (int col = 0; col < 4; ++col) {

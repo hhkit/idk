@@ -65,6 +65,9 @@ namespace idk {
 
 		void UpdateGizmoControl();
 
+		void ImGuizmoManipulateUpdate(Handle<Transform>& originalTransform); //Call after ImGuizmo::Manipulate
+
+
 		float gizmo_matrix[16]{};
 
 		mat4 GenerateMat4FromGizmoMatrix();
