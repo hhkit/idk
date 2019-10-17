@@ -4,7 +4,7 @@
 
 namespace idk::anim
 {
-	struct Bone
+	struct BoneData
 	{
 		string _name;
 		int  _parent = 0;
@@ -20,20 +20,20 @@ namespace idk::anim
 		
 
 		Skeleton() = default;
-		Skeleton(const vector<Bone>& bones, const hash_table<string, size_t>& bone_table);
+		Skeleton(const vector<BoneData>& bones, const hash_table<string, size_t>& bone_table);
 
 		const mat4& GetGlobalInverse() const { return _global_inverse; }
 		vector<std::pair<string_view, mat4>> GetBindPose() const;
-		const Bone* GetBone(string_view name) const;
-		const vector<Bone>& data() const { return _bones; }
+		const BoneData* GetBone(string_view name) const;
+		const vector<BoneData>& data() const { return _bones; }
 
-		void AddBone(string_view name, Bone b);
+		void AddBone(string_view name, BoneData b);
 		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat; }
 		
 	private:
 		mat4 _global_inverse;
 
 		hash_table<string, size_t> _bone_table;
-		vector<Bone> _bones;
+		vector<BoneData> _bones;
 	};
 }

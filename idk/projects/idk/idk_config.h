@@ -32,7 +32,7 @@ namespace idk
 
 		/// ANIMATION
 		,	class Animator
-
+		,	struct Bone
 		/// SCRIPTING
 		,	class mono::Behavior
 

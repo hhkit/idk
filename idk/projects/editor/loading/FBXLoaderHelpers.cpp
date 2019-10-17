@@ -215,7 +215,7 @@
 //			// If curr_node is a bone, we push it into bones_out with parent being curr_node's parent.
 //			// We also push the bone into the bones_table. This is so we can easily find a bone by name. The index should be bones_out.size().
 //			// The parent of all these children should be bones_out.size() - 1.
-//			anim::Bone b{};
+//			anim::BoneData b{};
 //			b._name = curr_node.assimp_node->_name;
 //			b._parent = curr_node.parent;
 //

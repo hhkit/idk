@@ -246,7 +246,15 @@ namespace idk
 				for (auto& resource : bundle->GetAll())
 					std::visit([&](auto& res_handle) {Release(res_handle); }, resource);
 			}
+
+			// Remove from loaded files if its there
+			auto itr = _loaded_files.find(elem.GetMountPath().data());
+			if (itr != _loaded_files.end())
+			{
+				_loaded_files.erase(itr);
+			}
 		}
+
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
 			Load(elem);
 		

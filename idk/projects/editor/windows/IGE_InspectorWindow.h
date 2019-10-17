@@ -44,6 +44,7 @@ namespace idk {
         void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayTransformComponent(Handle<Transform>& c_transform);		   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayBoneComponent(Handle<Bone>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayOtherComponent(GenericHandle& component);				   //If multiple objects are selected, this will only display the first gameObject.
 
 		void MenuItem_RemoveComponent(GenericHandle i);

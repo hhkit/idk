@@ -56,7 +56,7 @@
 //		fbx_loader_detail::BoneSet bone_set;
 //		fbx_loader_detail::MeshSet mesh_set;
 //		hash_table<string, size_t> bones_table;
-//		vector<anim::Bone> bones;
+//		vector<anim::BoneData> bones;
 //
 //		// Initializing the bone_set
 //		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
@@ -244,7 +244,7 @@
 //		fbx_loader_detail::BoneSet bone_set;
 //		fbx_loader_detail::MeshSet mesh_set;
 //		hash_table<string, size_t> bones_table;
-//		vector<anim::Bone> bones;
+//		vector<anim::BoneData> bones;
 //
 //		// Initializing the bone_set
 //		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
