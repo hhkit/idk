@@ -7,19 +7,19 @@ namespace idk::natvis
     constexpr auto TagManagerID = SystemID<TagManager>;
 
     constexpr auto GameObjectID = 0;
-    constexpr auto TransformID           = ComponentID<Transform          >;
-    constexpr auto NameID                = ComponentID<Name               >;
-    constexpr auto TagID                 = ComponentID<Tag                >;
-    constexpr auto LayerID               = ComponentID<Layer              >;
-    constexpr auto PrefabInstanceID      = ComponentID<PrefabInstance     >;
-    constexpr auto RigidBodyID           = ComponentID<RigidBody          >;
-    constexpr auto ColliderID            = ComponentID<Collider           >;
-    constexpr auto MeshRendererID        = ComponentID<MeshRenderer       >;
-    constexpr auto CameraID              = ComponentID<Camera             >;
-    constexpr auto SkinnedMeshRendererID = ComponentID<SkinnedMeshRenderer>;
-    constexpr auto LightID               = ComponentID<Light              >;
-    constexpr auto AnimatorID            = ComponentID<Animator           >;
-    constexpr auto monoBehaviorID        = ComponentID<mono::Behavior     >;
-    constexpr auto AudioSourceID         = ComponentID<AudioSource        >;
-    constexpr auto AudioListenerID       = ComponentID<AudioListener      >;
+    constexpr auto TransformID           = ComponentID<Transform          > + 1;
+    constexpr auto NameID                = ComponentID<Name               > + 1;
+    constexpr auto TagID                 = ComponentID<Tag                > + 1;
+    constexpr auto LayerID               = ComponentID<Layer              > + 1;
+    constexpr auto PrefabInstanceID      = ComponentID<PrefabInstance     > + 1;
+    constexpr auto RigidBodyID           = ComponentID<RigidBody          > + 1;
+    constexpr auto ColliderID            = ComponentID<Collider           > + 1;
+    constexpr auto MeshRendererID        = ComponentID<MeshRenderer       > + 1;
+    constexpr auto CameraID              = ComponentID<Camera             > + 1;
+    constexpr auto SkinnedMeshRendererID = ComponentID<SkinnedMeshRenderer> + 1;
+    constexpr auto LightID               = ComponentID<Light              > + 1;
+    constexpr auto AnimatorID            = ComponentID<Animator           > + 1;
+    constexpr auto monoBehaviorID        = ComponentID<mono::Behavior     > + 1;
+    constexpr auto AudioSourceID         = ComponentID<AudioSource        > + 1;
+    constexpr auto AudioListenerID       = ComponentID<AudioListener      > + 1;
 }
