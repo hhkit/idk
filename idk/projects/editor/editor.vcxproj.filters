@@ -100,18 +100,9 @@
     <ClInclude Include="loading\AssimpImporter_helpers.h">
       <Filter>loader\assimp</Filter>
     </ClInclude>
-    <ClInclude Include="loading\FBXLoaderHelpers.h">
-      <Filter>loader\assimp\legacy</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\OpenGLFBXLoader.h">
-      <Filter>loader\assimp\legacy</Filter>
-    </ClInclude>
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="widgets\DragVec.h">
       <Filter>widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\VulkanFBXLoader.h">
-      <Filter>loader\assimp\legacy</Filter>
     </ClInclude>
     <ClInclude Include="windows\IGE_ProjectSettings.h">
       <Filter>windows</Filter>
@@ -198,15 +189,6 @@
     </ClCompile>
     <ClCompile Include="loading\AssimpImporter_helpers.cpp">
       <Filter>loader\assimp</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
-      <Filter>loader\assimp\legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
-      <Filter>loader\assimp\legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\VulkanFBXLoader.cpp">
-      <Filter>loader\assimp\legacy</Filter>
     </ClCompile>
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp">
       <Filter>windows</Filter>

@@ -185,6 +185,8 @@
     <ClInclude Include="script\ManagedThunk.h" />
     <ClInclude Include="script\MonoWrapperEnviroment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="serialize\binary.h" />
+    <ClInclude Include="serialize\parse_error.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="common\Tag.h" />
@@ -197,7 +199,7 @@
     <ClInclude Include="ds\zip.h" />
     <ClInclude Include="reflect\detail\pretty_function.h" />
     <ClInclude Include="reflect\detail\constructor_entry.h" />
-    <ClInclude Include="serialize\serialize.h" />
+    <ClInclude Include="serialize\text.h" />
     <ClInclude Include="math\shapes\aabb.h" />
     <ClInclude Include="math\shapes\capsule.h" />
     <ClInclude Include="math\shapes\box.h" />
@@ -308,6 +310,11 @@
     <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
     <ClCompile Include="script\ScriptSystem.cpp" />
     <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="serialize\binary.cpp" />
+    <ClCompile Include="serialize\text_serialize.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
@@ -335,7 +342,7 @@
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
-    <ClCompile Include="serialize\serialize.cpp">
+    <ClCompile Include="serialize\text_parse.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -402,7 +409,8 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
-    <None Include="serialize\serialize.inl" />
+    <None Include="serialize\binary.inl" />
+    <None Include="serialize\text.inl" />
     <None Include="serialize\yaml.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>

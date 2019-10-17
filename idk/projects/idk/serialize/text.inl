@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialize.h"
+#include "text.h"
 #include <charconv>
 
 namespace idk

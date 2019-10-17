@@ -1,5 +1,5 @@
 #pragma once
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 namespace idk
 {
 	template<typename Meta>

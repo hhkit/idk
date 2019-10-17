@@ -2,7 +2,7 @@
 #include "PrefabUtility.h"
 
 #include <ds/small_string.h>
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>

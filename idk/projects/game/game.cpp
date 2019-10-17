@@ -21,7 +21,7 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 
 #include <gfx/CameraControls.h>
 

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ProjectManager.h"
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <util/ioutils.h>
 #include <scene/SceneManager.h>
 #include <reflect/reflect.h>
