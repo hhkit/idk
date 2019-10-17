@@ -19,8 +19,10 @@ namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
-		script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
-		script_environment->ScanTypes();
+		if (Core::GetSystem<FileSystem>().Exists(path_to_game_dll))
+			script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
+		else
+			LOG_TO(LogPool::FATAL, "Could not detect game dll!");
 	}
 
 	void ScriptSystem::UnloadGameScripts()
