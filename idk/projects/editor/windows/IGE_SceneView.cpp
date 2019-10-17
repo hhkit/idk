@@ -22,11 +22,9 @@ of the editor.
 #include <app/Application.h>
 #include <core/GameObject.h>
 #include <common/Transform.h> //transform
-#include <gfx/Camera.h> //camera
 #include <gfx/RenderTarget.h>
 #include <gfx/GraphicsSystem.h>
 #include <prefab/PrefabUtility.h>
-#include <math/euler_angles.h>
 #include <vkn/VknFramebuffer.h>
 #include <gfx/DebugRenderer.h>
 
@@ -120,9 +118,44 @@ namespace idk {
 			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
 			{
 				//Sort the obj by closest dist to point
-
 				//get the first obj
-				true;
+				auto& editor = Core::GetSystem<IDE>();
+				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
+				Handle<GameObject> closestGameObject = obj.front();
+				auto cameraPos = editor.currentCamera().current_camera->currentPosition();
+				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
+				for (auto& iObject : obj) {
+					float comparingDistance = cameraPos.distance(iObject->GetComponent<Transform>()->position);
+					if (comparingDistance < distanceToCamera) {
+						closestGameObject = iObject;
+						distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Replace
+					}
+				}
+
+
+				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Or select Deselect that particular handle
+
+					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) {
+						if (closestGameObject == selected_gameObjects[counter]) {
+							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+							break;
+						}
+					}
+					selected_gameObjects.push_back(closestGameObject);
+					Core::GetSystem<IDE>().RefreshSelectedMatrix();
+
+				}
+				else {
+					//Select as normal
+					selected_gameObjects.clear();
+					selected_gameObjects.push_back(closestGameObject);
+					Core::GetSystem<IDE>().RefreshSelectedMatrix();
+				}
+
+				if (ImGui::IsMouseDoubleClicked(0)) {
+					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				}
+
 			}
 		}
 
