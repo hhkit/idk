@@ -290,6 +290,8 @@ namespace idk
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }
+
+        prefab_handle->Name(go->Name());
     }
 
     RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go)
