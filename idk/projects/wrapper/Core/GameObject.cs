@@ -29,9 +29,9 @@ namespace idk
         }
 
         public T GetComponent<T>() where T : Component, new() 
-        {
-            var comp_handle = Bindings.GameObjectGetEngineComponent(handle, typeof(T).Name);
-
+        {   
+            ulong comp_handle = Bindings.GameObjectGetEngineComponent(handle, typeof(T).Name);
+            
             if (comp_handle != 0)
             {
                 T component = new T();
@@ -41,12 +41,10 @@ namespace idk
             else
                 // else try to find corresponding monobehavior
                 return null;
+
         }
 
         public void SetActive(bool new_active)
-        {
-            Bindings.GameObjectSetActive(handle, new_active);
-        }
-
+            => Bindings.GameObjectSetActive(handle, new_active);
     }
 }

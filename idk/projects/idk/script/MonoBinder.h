@@ -5,22 +5,17 @@
 
 namespace idk
 {
+	template<typename Ret, typename ... Args>
+	auto to_cdecl(Ret(*func)(Args...))
+	{
+		using Func = Ret(*)(Args...);
+		return s_cast<Func>(func);
+	}
+
 	template<typename T>
 	decltype(auto) decay(T&& arg)
 	{
-		return +arg;
-	}
-
-	template<typename Type, typename Mem>
-	void BindGetter(string_view symbol, Mem (Type::* mem_fn)() const)
-	{
-		if constexpr (ComponentID<Type> != ComponentCount)
-		{
-			mono_add_internal_call(symbol, decay([](Handle<Type> h) -> std::decay_t<Mem>
-				{
-					return std::invoke(mem_fn, *h);
-				}));
-		}
+		return to_cdecl(+arg);
 	}
 
 

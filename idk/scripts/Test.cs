@@ -17,6 +17,7 @@ namespace TestAndSeek
         public override void Update()
         {
             System.Console.WriteLine("Poop.");
+            //transform.position = transform.position + Vector3.up * 0.016f;
         }
 
         public void TestTransform(Transform t)
@@ -27,6 +28,9 @@ namespace TestAndSeek
             Thunderbolt(t.position);
             t.position.Normalize();
             Thunderbolt(t.position);
+            t.gameObject.SetActive(false);
+            t.gameObject.transform.position = new Vector3(5, 4, 3);
+            Thunderbolt(t.gameObject.transform.position);
         }
 
         public static void Main(string[] args)

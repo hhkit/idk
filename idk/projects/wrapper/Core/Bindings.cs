@@ -53,6 +53,21 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TransformSetScale(ulong id, Vector3 val);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Quaternion TransformGetRotation(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TransformSetRotation(ulong id, Quaternion val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 TransformForward(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 TransformUp(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 TransformRight(ulong id);
+
         /*
          * RigidBody
          */

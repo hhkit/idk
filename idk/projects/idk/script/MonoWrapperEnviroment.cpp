@@ -65,17 +65,23 @@ namespace idk::mono
 		// game object
 
 		Bind("idk.Bindings::GameObjectAddEngineComponent", decay(
-			[](Handle<GameObject> go, const char* component) -> GenericHandle
+			[](Handle<GameObject> go, MonoString* component) -> uint64_t
 			{
-				return go->AddComponent(string_view{ component });
+				auto* s = mono_string_to_utf8(component);
+				auto retval = go->AddComponent(string_view{ s }).id;
+				mono_free(s);
+				return retval;
 			}
 		));
 
-
+//		Bind("idk.Bindings::GameObjectGetEngineComponent", &poop);
 		Bind("idk.Bindings::GameObjectGetEngineComponent", decay(
-			[](Handle<GameObject> go, const char* component) -> GenericHandle
+			[](Handle<GameObject> go, MonoString* component) -> uint64_t // note: return value optimization
 			{
-				return go->GetComponent(component);
+				auto* s = mono_string_to_utf8(component);
+				auto retval = go->GetComponent(string_view{ s }).id;
+				mono_free(s);
+				return retval;
 			}
 		));
 
@@ -135,9 +141,39 @@ namespace idk::mono
 				h->GlobalScale(v);
 			}));
 
+		Bind("idk.Bindings::TransformGetRotation", decay(
+			[](Handle<Transform> h) -> quat
+			{
+				return h->GlobalRotation();
+			}));
+
+		Bind("idk.Bindings::TransformSetRotation", decay(
+			[](Handle<Transform> h, quat v)
+			{
+				h->GlobalRotation(v);
+			}));
+
+		Bind("idk.Bindings::TransformForward", decay(
+			[](Handle<Transform> h) -> vec3
+			{
+				return h->Forward();
+			}));
+
+		Bind("idk.Bindings::TransformUp", decay(
+			[](Handle<Transform> h) -> vec3
+			{
+				return h->Up();
+			}));
+
+		Bind("idk.Bindings::TransformRight", decay(
+			[](Handle<Transform> h) -> vec3
+			{
+				return h->Right();
+			}));
+
 		// RigidBody
 		Bind("idk.Bindings::RigidBodyGetMass", decay(
-			[](Handle < RigidBody> rb) ->float
+			[](Handle<RigidBody> rb) ->float
 		{
 			return rb->mass();
 		}));
