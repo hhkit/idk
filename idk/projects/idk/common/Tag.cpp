@@ -9,8 +9,6 @@ namespace idk
     Tag::Tag(string_view str)
     {
         index = Core::GetSystem<TagManager>().GetIndexFromTag(str);
-        if (index == 0)
-            GetGameObject()->RemoveComponent(GetHandle());
     }
 
     Tag::operator string() const
