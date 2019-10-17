@@ -238,12 +238,6 @@ namespace idk
 
 	void ResourceManager::WatchDirectory()
 	{
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-			Load(elem);
-		
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			Load(elem);
-
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
 		{
 			auto bundle = Get(PathHandle{ elem });
@@ -253,6 +247,11 @@ namespace idk
 					std::visit([&](auto& res_handle) {Release(res_handle); }, resource);
 			}
 		}
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
+			Load(elem);
+		
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+			Load(elem);
 	}
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
