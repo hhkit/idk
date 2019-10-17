@@ -158,7 +158,7 @@ namespace idk
 
 			auto c_bone = obj->AddComponent<Bone>();
 			c_bone->_bone_name = curr_bone._name;
-			c_bone->_bone_index = i;
+			c_bone->_bone_index = s_cast<int>(i);
 
 			if (curr_bone._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[curr_bone._parent], false);
@@ -327,6 +327,8 @@ namespace idk
 		_curr_animation = _start_animation;
 	}
 
+	
+
 #pragma endregion
 
 	void Animator::clearGameObjects()
@@ -340,5 +342,32 @@ namespace idk
 		_child_objects.clear();
 	}
 
-	
+	void Animator::on_parse()
+	{
+		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(GetHandle().scene);
+		auto* sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(GetGameObject());
+
+		if (_skeleton)
+		{
+			size_t num_bones = _skeleton->data().size();
+			_bind_pose.resize(num_bones);
+			_child_objects.resize(num_bones);
+			_pre_global_transforms.resize(num_bones);
+			_final_bone_transforms.resize(num_bones);
+		}
+		
+		auto& child_objects = _child_objects;
+		const auto initialize_children =
+			[&child_objects](Handle<GameObject> c_go, int)
+			{
+				auto c_bone = c_go->GetComponent<Bone>();
+				if (c_bone)
+				{
+					child_objects[c_bone->_bone_index];
+				}
+			};
+
+		sg->visit(initialize_children);
+		SaveBindPose();
+	}
 }
