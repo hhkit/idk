@@ -761,30 +761,46 @@ namespace idk {
 			if (!editor.copied_component.valid())
 				return;
 
-			for (auto& i : editor.selected_gameObjects) {
-				GenericHandle componentToMod = i->GetComponent(editor.copied_component.type);
+			bool isTransformValuesEdited = false;
+			editor.RefreshSelectedMatrix();
+
+			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
+				auto& gameObject = editor.selected_gameObjects[i];
+
+				GenericHandle componentToMod = gameObject->GetComponent(editor.copied_component.type);
 				if (componentToMod) { //Name cannot be pasted as there is no button to copy
 					//replace values
-					if (componentToMod == i->GetComponent<Transform>()) {
-						//If transform, only modify values
-						std::cout << "Modify transform values\n";
+					if (componentToMod == gameObject->GetComponent<Transform>()) {
+						isTransformValuesEdited = true;
+						vector<mat4>& originalMatrix = editor.selected_matrix;
+						
+						Handle<Transform> copiedTransform = handle_cast<Transform>(editor.copied_component.get<GenericHandle>());
+						Handle<Transform> gameObjectTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
+						if (copiedTransform->parent)
+							gameObjectTransform->LocalMatrix(copiedTransform->LocalMatrix()); 
+						else 
+							gameObjectTransform->GlobalMatrix(copiedTransform->GlobalMatrix()); //If the parent of the copied gameobject component is deleted, use Global instead
 
-
-
+						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
 
 					}
 					else {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, compName));
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, editor.copied_component)); //Remember commands are flushed at end of each update!
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component)); //Remember commands are flushed at end of each update!
 					}
 				}
 				else {
 					//Add component
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, editor.copied_component));
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component));
 				}
 			}
+
+			if (isTransformValuesEdited)
+				//Refresh the new matrix values
+				editor.RefreshSelectedMatrix();
 		}
 	}
 

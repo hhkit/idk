@@ -49,6 +49,9 @@ namespace idk
 		// Script Setters
 		void SetEntryState(string_view name, float offset = 0.0f);
 
+		// Serialization
+		void on_parse();
+
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> _skeleton;
 
