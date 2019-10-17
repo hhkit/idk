@@ -46,6 +46,7 @@
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />

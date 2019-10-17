@@ -749,6 +749,9 @@
     <ClInclude Include="debug\LogSystem.h">
       <Filter>debug</Filter>
     </ClInclude>
+    <ClInclude Include="natvis_ids.h">
+      <Filter>_natvis</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

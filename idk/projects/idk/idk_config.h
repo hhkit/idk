@@ -93,10 +93,4 @@ namespace idk
 	constexpr auto ComponentCount = std::tuple_size_v<Components>;
 	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
 	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
-
-    namespace natvis
-    {
-        constexpr auto FileSystemID = SystemID<FileSystem>;
-        constexpr auto TagManagerID = SystemID<TagManager>;
-    }
 }

@@ -30,6 +30,8 @@
 
 #include <shellapi.h>//CommandLineToArgv
 
+#include <natvis_ids.h>
+
 #define USE_RENDER_DOC
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
