@@ -1,6 +1,7 @@
 #include "stdafx.h" 
 #include <iostream>
 #include <idk.h>
+#include <anim/Bone.h>
 #include "common/Transform.h"
 #include "core/GameObject.h"
 #include "Animator.h"
@@ -114,7 +115,7 @@ namespace idk
 				{
 					_pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
-				const auto test = decompose(_pre_global_transforms[i]);
+				//const auto test = decompose(_pre_global_transforms[i]);
 				_final_bone_transforms[i] = _pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 			}
 		}
@@ -150,12 +151,14 @@ namespace idk
 			// auto transform = curr_bone._global_inverse_bind_pose.inverse();
 
 			// mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
-
+			obj->Name(curr_bone._name);
 			obj->GetComponent<Transform>()->position = curr_bone._local_bind_pose.position;
 			obj->GetComponent<Transform>()->rotation = curr_bone._local_bind_pose.rotation;
 			obj->GetComponent<Transform>()->scale = curr_bone._local_bind_pose.scale;
 
-			obj->Name(curr_bone._name);
+			auto c_bone = obj->AddComponent<Bone>();
+			c_bone->_bone_name = curr_bone._name;
+			c_bone->_bone_index = i;
 
 			if (curr_bone._parent >= 0)
 				obj->GetComponent<Transform>()->SetParent(_child_objects[curr_bone._parent], false);

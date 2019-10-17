@@ -332,6 +332,10 @@ REFLECT_BEGIN(idk::AnimationState, "AnimationState")
 REFLECT_VARS(animation, speed)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::Bone, "Bone")
+REFLECT_VARS(_bone_name, _bone_index)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::Animator, "Animator")
 REFLECT_VARS(_skeleton, _animations, _start_animation, _start_animation_offset)
 REFLECT_END()

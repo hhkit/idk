@@ -632,9 +632,6 @@
     <ClInclude Include="res\GenericResourceHandle_detail.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="anim\BoneComponent.h">
-      <Filter>anim</Filter>
-    </ClInclude>
     <ClInclude Include="res\EasyFactory.h">
       <Filter>res</Filter>
     </ClInclude>
@@ -751,6 +748,9 @@
     </ClInclude>
     <ClInclude Include="natvis_ids.h">
       <Filter>_natvis</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Bone.h">
+      <Filter>anim</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1040,9 +1040,6 @@
     <ClCompile Include="anim\Animator.cpp">
       <Filter>anim</Filter>
     </ClCompile>
-    <ClCompile Include="anim\BoneComponent.cpp">
-      <Filter>anim</Filter>
-    </ClCompile>
     <ClCompile Include="script\MonoBehavior.cpp">
       <Filter>script</Filter>
     </ClCompile>
@@ -1090,6 +1087,9 @@
     </ClCompile>
     <ClCompile Include="debug\Log.cpp">
       <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Bone.cpp">
+      <Filter>anim</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

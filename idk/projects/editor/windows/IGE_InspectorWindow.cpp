@@ -131,6 +131,13 @@ namespace idk {
                     continue;
                 }
 
+				if (component.is_type<Bone>())
+				{
+					Handle<Bone> c_bone = gos[0]->GetComponent<Bone>();
+					DisplayBoneComponent(c_bone);
+					continue;
+				}
+
                 //COMPONENT DISPLAY
                 DisplayOtherComponent(component);
             }
@@ -664,6 +671,22 @@ namespace idk {
 			MenuItem_CopyComponent(c_anim);
 			MenuItem_PasteComponent();
 			ImGui::EndPopup();
+		}
+	}
+
+	void IGE_InspectorWindow::DisplayBoneComponent(Handle<Bone>& c_bone)
+	{
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+
+		if (ImGui::CollapsingHeader("Bone", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
+		{
+			//Draw All your custom variables here.
+			ImGui::Text("Bone Name: ");
+			ImGui::SameLine();
+			ImGui::Text(c_bone->_bone_name.c_str());
+			ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+			
 		}
 	}
 

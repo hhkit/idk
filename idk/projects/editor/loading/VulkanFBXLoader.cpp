@@ -61,7 +61,7 @@
 //		fbx_loader_detail::BoneSet bone_set;
 //		fbx_loader_detail::MeshSet mesh_set;
 //		hash_table<string, size_t> bones_table;
-//		vector<anim::Bone> bones;
+//		vector<anim::BoneData> bones;
 //
 //		vector<vec3	>	positions;
 //		vector<vec3	>	normals;
@@ -332,7 +332,7 @@
 //		fbx_loader_detail::BoneSet bone_set;
 //		fbx_loader_detail::MeshSet mesh_set;
 //		hash_table<string, size_t> bones_table;
-//		vector<anim::Bone> bones;
+//		vector<anim::BoneData> bones;
 //
 //		vector<vec3	>	positions;
 //		vector<vec3	>	normals;

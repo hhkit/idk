@@ -3,12 +3,12 @@
 #include "math/matrix_transforms.h"
 namespace idk::anim
 {
-	Skeleton::Skeleton(const vector<Bone>& bones, const hash_table<string, size_t>& bone_table)
+	Skeleton::Skeleton(const vector<BoneData>& bones, const hash_table<string, size_t>& bone_table)
 		:_bones{ bones }, _bone_table{ bone_table }
 	{
 	}
 
-	const Bone* Skeleton::GetBone(string_view name) const
+	const BoneData* Skeleton::GetBone(string_view name) const
 	{
 		auto res = _bone_table.find(name.data());
 		if (res == _bone_table.end())
@@ -17,7 +17,7 @@ namespace idk::anim
 		return &_bones[res->second];
 	}
 
-	void Skeleton::AddBone(string_view name, Bone b)
+	void Skeleton::AddBone(string_view name, BoneData b)
 	{
 		auto res = _bone_table.find(name.data());
 		if (res == _bone_table.end())
