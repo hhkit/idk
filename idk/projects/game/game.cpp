@@ -160,7 +160,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			mesh_rend->material_instance = mat_inst;
 		}
 
-		animator->SetSkeleton(model_resource->Get<anim::Skeleton>());
+		animator->_skeleton = model_resource->Get<anim::Skeleton>();
+		Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
 		// Load other animations
 		PathHandle parent_dir{ path.GetParentMountPath() };
@@ -194,7 +195,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	//create_anim_obj(vec3{ 0,0,0 });
+	create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {

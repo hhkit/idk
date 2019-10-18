@@ -21,16 +21,13 @@ namespace idk
 		RscHandle<anim::Animation> GetAnimationRsc(string_view name) const;
 		RscHandle<anim::Animation> GetAnimationRsc(int id) const;
 
-		const vector<mat4>& GenerateTransforms();
+		const vector<mat4>& BoneTransforms();
 		
 		// Engine Setters
-		void SetSkeleton(RscHandle<anim::Skeleton> skeleton_rsc);
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
 		void RemoveAnimation(string_view name);
 
 		// Editor Functionality
-		void SaveBindPose();
-		void RestoreBindPose();
 		void Reset();
 
 		// Script Functions
@@ -60,32 +57,31 @@ namespace idk
 
 		bool _preview_playback = false;
 
-		friend class AnimationSystem;
-
-		float	_elapsed = 0.0f;
-
 		// Animation States
 		int		_start_animation = -1;
 		float	_start_animation_offset = 0.0f;
 		int		_curr_animation = -1;
 		float	_blend_factor = 0.0f;
+
 		// Animation Playback controls
 		bool	_is_playing = false;
 		bool	_is_stopping = false;
 		bool	_is_looping = true;
 
-		void clearGameObjects();
+		float	_elapsed = 0.0f;
 
 		// Precomputation step
 		vector<mat4> _pre_global_transforms{ mat4{} };
 		// This is what we send to the graphics system.
 		vector<mat4> _final_bone_transforms{ mat4{} };
+		
+	private:
+		friend class AnimationSystem;
 
 		// AnimationSystem will update all local transforms for the child objects
 		vector<Handle<GameObject>> _child_objects;
 		vector<matrix_decomposition<real>> _bind_pose;
 
-	private:
 		static constexpr AnimationState empty_state{};
 	};
 }

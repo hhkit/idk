@@ -200,7 +200,7 @@ namespace idk::ai_helpers
 	aiMatrix4x4 to_aiMat4(const mat4& mat);
 
 	// Comparisons
-	bool flt_equal(float a, float b);
+	bool flt_equal(float a, float b, float eps = 0.0001f);
 	bool vec3_equal(const vec3& lhs, const vec3& rhs);
 	bool vec4_equal(const vec4& lhs, const vec4& rhs);
 	bool quat_equal(const quat& lhs, const quat& rhs);
