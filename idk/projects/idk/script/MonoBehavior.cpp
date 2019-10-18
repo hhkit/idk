@@ -83,7 +83,9 @@ namespace idk::mono
 	{
 		if (enabled && _obj)
 		{
-			auto method = _obj.Type()->GetMethod("UpdateCoroutines");
+			auto t = Core::GetSystem<ScriptSystem>().Environment().Type("MonoBehavior");
+			
+			auto method = t->GetMethod("UpdateCoroutines");
 			if (method.index() == 0)
 				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
 		}

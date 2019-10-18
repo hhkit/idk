@@ -3,6 +3,7 @@
 
 #include <idk.h>
 #include <core/ObjectPool.h>
+#include <event/Signal.h>
 
 namespace idk
 {
@@ -32,6 +33,14 @@ namespace idk::detail
 		{
 			return *s_cast<ObjectPool<T>*>(pools[index_in_tuple_v<T, Tuple>].get());
 		}
+
+		template<typename T>
+		struct handleable_signal
+		{
+			using type = Signal<Handle<T>>;
+		};
+
+		using SignalTuple = std::tuple<Signal<Handle<Ts>>...>;
 	};
 
 	using ObjectPools = ObjectPoolHelper<Handleables>;
