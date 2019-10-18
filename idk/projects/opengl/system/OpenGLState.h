@@ -32,6 +32,7 @@ namespace idk::ogl
 			FDebug,
 			FSkyBox,
 			FShadow,
+			FPicking,
 			FMax
 		};
 

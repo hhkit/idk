@@ -122,6 +122,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camera->Transform()->rotation = s_cast<quat>(euler);
 		camHandle->far_plane = 100.f;
 		camHandle->render_target = RscHandle<RenderTarget>{};
+		camHandle->is_scene_camera = true;
 		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
@@ -247,6 +248,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			auto m = light_map->GetMeta().textures[0]->GetMeta();
 			m.filter_mode = FilterMode::Nearest;
 			m.uv_mode = UVMode::ClampToBorder;
+			m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			//m.format = InputChannels::DEPTH_COMPONENT;
 			light_map->GetMeta().textures[0]->SetMeta(m);
 			light_comp->SetLightMap(light_map);
 		}

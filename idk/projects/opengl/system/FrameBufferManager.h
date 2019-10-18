@@ -20,9 +20,12 @@ namespace idk::ogl
 		~FrameBufferManager();
 
 		void SetRenderTarget(const RscHandle<OpenGLCubemap>& target, bool for_convolution = false);
+		void SetRenderTarget(RscHandle<FrameBuffer> target, vector<OpenGLTexture> additionalCustomAttachmentList);
 		void SetRenderTarget(RscHandle<OpenGLTexture> target);
 		void SetRenderTarget(RscHandle<FrameBuffer> target);
 		void ResetFramebuffer();
+
+		RscHandle<OpenGLTexture> cBufferPickingTexture;
 	private:
 		GLuint _fbo_id = 0;
 		//GLuint _rbo_id = 0;

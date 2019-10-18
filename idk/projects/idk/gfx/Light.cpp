@@ -150,6 +150,8 @@ namespace idk
 	CameraData Light::GenerateCameraData() const
 	{
 		return CameraData{
+			GetGameObject(),
+			false,
 			0xFFFFFFF,
 			std::visit(LightCameraView{ this },light),
 			std::visit(LightCameraProj{ },light),

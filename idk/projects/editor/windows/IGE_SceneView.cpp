@@ -167,7 +167,7 @@ namespace idk {
 				MoveMouseToWindow();
 				GetCursorPos(&prevMouseScreenPos);
 				GetCursorPos(&currMouseScreenPos);
-				//ImGui::ResetMouseDragDelta(1);
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
 			}
@@ -183,7 +183,7 @@ namespace idk {
 				MoveMouseToWindow();
 				GetCursorPos(&prevMouseScreenPos);
 				GetCursorPos(&currMouseScreenPos);
-
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
 			}
@@ -263,7 +263,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdateWASDMouseControl()
 	{
-		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		auto& app_sys = Core::GetSystem<Application>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
@@ -309,7 +309,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
-		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
 		//vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
 		GetCursorPos(&currMouseScreenPos);
@@ -328,8 +328,8 @@ namespace idk {
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier* editor.scroll_multiplier; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_multiplier; //Amount to move in localx axis
+		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_multiplier* 0.5f; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_multiplier* 0.5f; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
 
@@ -352,9 +352,9 @@ namespace idk {
 			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
 
 		if (scroll > 0)
-			editor.scroll_multiplier -= editor.scroll_subtractive;
+			editor.DecreaseScrollPower();
 		else if (scroll < 0)
-			editor.scroll_multiplier += editor.scroll_additive;
+			editor.IncreaseScrollPower();
 
 	}
 
@@ -441,7 +441,7 @@ namespace idk {
 		RECT rect = { NULL };
 		GetWindowRect(Core::GetSystem<Windows>().GetWindowHandle(), &rect);
 		int x = static_cast<int>(rect.left);
-		int y = static_cast<int>(rect.top)+20;
+		int y = static_cast<int>(rect.top)+20; //offset of window header
 		
 		x += static_cast<int>(round(ImGui::GetWindowPos().x)		);
 		y += static_cast<int>(round(ImGui::GetWindowPos().y)		);
