@@ -84,6 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
+		break;
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;
@@ -192,7 +193,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 0,0,0 });
+	//create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
