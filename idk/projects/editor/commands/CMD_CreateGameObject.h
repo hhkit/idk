@@ -12,7 +12,7 @@
 
 namespace idk {
 
-	class CMD_CreateGameObject : public ICommand { //serialize/deserialize use serialize.h
+	class CMD_CreateGameObject : public ICommand { //serialize/deserialize use text.h
 	public:
 		CMD_CreateGameObject(Handle<GameObject> parenting_gameobject); //Create empty on parented
 		CMD_CreateGameObject(vector<RecursiveObjects> copied_object = {}); //Create empty, if use_copy is true, will use IDE::copied_gameobject to generate gameobject

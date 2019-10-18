@@ -1,6 +1,7 @@
 #pragma once
 
 #include "yaml.h"
+#include <serialize/text.h>
 
 namespace idk::yaml
 {

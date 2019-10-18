@@ -119,7 +119,8 @@ namespace idk {
 				if (component == c_transform ||
 					component.is_type<PrefabInstance>() ||
 					component.is_type<Name>() ||
-					component.is_type<Tag>()
+					component.is_type<Tag>() ||
+					component.is_type<Layer>()
                     )
 					continue;
 
@@ -129,6 +130,13 @@ namespace idk {
                     DisplayAnimatorComponent(c_anim);
                     continue;
                 }
+
+				if (component.is_type<Bone>())
+				{
+					Handle<Bone> c_bone = gos[0]->GetComponent<Bone>();
+					DisplayBoneComponent(c_bone);
+					continue;
+				}
 
                 //COMPONENT DISPLAY
                 DisplayOtherComponent(component);
@@ -307,7 +315,8 @@ namespace idk {
 
         ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetCursorPosX());
         const auto curr_layer = game_object->Layer();
-        if (ImGui::BeginCombo("##layer", Core::GetSystem<LayerManager>().LayerIndexToName(curr_layer).data()))
+        const auto layer_name = Core::GetSystem<LayerManager>().LayerIndexToName(curr_layer);
+        if (ImGui::BeginCombo("##layer", layer_name.data()))
         {
             const auto& layers = Core::GetSystem<LayerManager>().GetConfig().layers;
             for (LayerManager::layer_t i = 0; i < LayerManager::num_layers; ++i)
@@ -511,7 +520,7 @@ namespace idk {
 				for (Handle<GameObject> i : editor.selected_gameObjects) {
 					i->GetComponent<Transform>()->position	= vec3{ };
 					i->GetComponent<Transform>()->rotation	= quat{ };
-					i->GetComponent<Transform>()->scale		= vec3{ };
+					i->GetComponent<Transform>()->scale		= vec3{1,1,1};
 				}
 			}
 			MenuItem_CopyComponent(c_transform);
@@ -665,6 +674,22 @@ namespace idk {
 		}
 	}
 
+	void IGE_InspectorWindow::DisplayBoneComponent(Handle<Bone>& c_bone)
+	{
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+
+		if (ImGui::CollapsingHeader("Bone", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
+		{
+			//Draw All your custom variables here.
+			ImGui::Text("Bone Name: ");
+			ImGui::SameLine();
+			ImGui::Text(c_bone->_bone_name.c_str());
+			ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+			
+		}
+	}
+
 	void IGE_InspectorWindow::DisplayOtherComponent(GenericHandle& component)
 	{
 		//COMPONENT DISPLAY
@@ -736,30 +761,46 @@ namespace idk {
 			if (!editor.copied_component.valid())
 				return;
 
-			for (auto& i : editor.selected_gameObjects) {
-				GenericHandle componentToMod = i->GetComponent(editor.copied_component.type);
+			bool isTransformValuesEdited = false;
+			editor.RefreshSelectedMatrix();
+
+			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
+				auto& gameObject = editor.selected_gameObjects[i];
+
+				GenericHandle componentToMod = gameObject->GetComponent(editor.copied_component.type);
 				if (componentToMod) { //Name cannot be pasted as there is no button to copy
 					//replace values
-					if (componentToMod == i->GetComponent<Transform>()) {
-						//If transform, only modify values
-						std::cout << "Modify transform values\n";
+					if (componentToMod == gameObject->GetComponent<Transform>()) {
+						isTransformValuesEdited = true;
+						vector<mat4>& originalMatrix = editor.selected_matrix;
+						
+						Handle<Transform> copiedTransform = handle_cast<Transform>(editor.copied_component.get<GenericHandle>());
+						Handle<Transform> gameObjectTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
+						if (copiedTransform->parent)
+							gameObjectTransform->LocalMatrix(copiedTransform->LocalMatrix()); 
+						else 
+							gameObjectTransform->GlobalMatrix(copiedTransform->GlobalMatrix()); //If the parent of the copied gameobject component is deleted, use Global instead
 
-
-
+						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
 
 					}
 					else {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, i, compName));
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, editor.copied_component)); //Remember commands are flushed at end of each update!
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component)); //Remember commands are flushed at end of each update!
 					}
 				}
 				else {
 					//Add component
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, editor.copied_component));
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component));
 				}
 			}
+
+			if (isTransformValuesEdited)
+				//Refresh the new matrix values
+				editor.RefreshSelectedMatrix();
 		}
 	}
 

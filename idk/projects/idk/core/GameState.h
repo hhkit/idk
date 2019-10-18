@@ -32,6 +32,7 @@ namespace idk
 		void DestroyObject(const GenericHandle&);
 		void DestroyObject(const Handle<GameObject>&);
 		void DestroyQueue();
+		Handle<GameObject> GetGameObject(const GenericHandle& handle);
 
 		uint8_t GetTypeID(const reflect::type&);
 
@@ -62,13 +63,6 @@ namespace idk
 	
 		detail::ObjectPools_t _objects;
 		vector<GenericHandle> _destruction_queue;
-
-		static inline CreateTypeJT    create_type_jt;
-		static inline CreateDynamicJT create_dynamic_jt;
-		static inline CreateJT        create_handles_jt;
-		static inline DestroyJT       destroy_handles_jt;
-		static inline ValidateJT      validate_handles_jt;
-		static inline QueueForDestructionJT queue_for_destroy_jt;
 
 		static inline TypeIDLUT name_to_id_map{};
 

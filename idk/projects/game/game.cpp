@@ -21,7 +21,7 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 
 #include <gfx/CameraControls.h>
 
@@ -29,6 +29,8 @@
 #include <renderdoc/renderdoc_app.h>
 
 #include <shellapi.h>//CommandLineToArgv
+
+#include <natvis_ids.h>
 
 #define USE_RENDER_DOC
 
@@ -147,7 +149,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	
     auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
-    c->AddSystem<win::XInputSystem>();
+    //c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;
@@ -156,6 +158,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
+		break;
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;
@@ -164,11 +167,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	c->AddSystem<IDE>();
 
-
 	c->Setup();
 	BasicScene();
 
 
+	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
+	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 #if 0
 
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
@@ -266,7 +270,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 0,0,0 });
+	//create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {

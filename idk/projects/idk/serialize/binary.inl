@@ -1,10 +1,10 @@
 #pragma once
 
-
-#include <core/Component.h>
-
+#include "binary.h"
 
 namespace idk
 {
+
+
 
 }

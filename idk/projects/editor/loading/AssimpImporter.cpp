@@ -8,6 +8,7 @@
 #include <scene/sceneManager.h>
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
+#include <prefab/Prefab.h>
 #include <prefab/PrefabUtility.h>
 #include <gfx/ShaderGraph.h>
 #include <common/Transform.h>
@@ -104,11 +105,12 @@ namespace idk
 		if (importer_scene.has_skeleton)
 		{
 			skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
-			skeleton_handle->Name(importer_scene.final_skeleton[0]._name);
+			//skeleton_handle->Name(importer_scene.final_skeleton[0]._name);
 
-			auto& skeleton = skeleton_handle.as<anim::Skeleton>();
+			auto& skeleton = *skeleton_handle;
 
 			skeleton = anim::Skeleton{ importer_scene.final_skeleton, importer_scene.final_skeleton_table };
+			skeleton.Name(importer_scene.final_skeleton[0]._name);
 
 			ret_val.Add(skeleton_handle);
 		}
@@ -121,15 +123,17 @@ namespace idk
 			for (auto& compiled_animation : importer_scene.compiled_clips)
 			{
 				const auto anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
+				string name;
 				if (importer_scene.has_animation && !importer_scene.has_skeleton)
 				{
-					anim_clip_handle->Name(path_to_resource.GetStem());
+					name = path_to_resource.GetStem();
 				}
 				else
-					anim_clip_handle->Name(compiled_animation.name);
+					name = compiled_animation.name;
 
-				auto& anim_clip = anim_clip_handle.as<anim::Animation>();
-				
+				auto& anim_clip = *anim_clip_handle;
+				anim_clip.Name(name);
+
 				anim_clip.SetSpeeds(compiled_animation.fps, compiled_animation.duration, compiled_animation.num_ticks);
 
 				for (auto& animated_bone : compiled_animation.animated_bones)
@@ -168,9 +172,9 @@ namespace idk
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.
 			// Need to revisit this as I feel this is the wrong way to do this.
 			const auto animator = prefab_root->AddComponent<Animator>();
-
+			
 			animator->SetSkeleton(skeleton_handle);
-
+			
 			for (auto& anim : animation_handles)
 				animator->AddAnimation(anim);
 		}
@@ -200,6 +204,7 @@ namespace idk
 			IDK_ASSERT_MSG(false, "[AssimpImporter] Joseph needs to be kicked from the team.");
 		}
 		const auto prefab_handle = PrefabUtility::Create(prefab_root);
+		prefab_handle->Name(path_to_resource.GetStem());
 		ret_val.Add(prefab_handle);
 		scene->DestroyGameObject(prefab_root);
 		return ret_val;
@@ -301,11 +306,10 @@ namespace idk
 				else
 					skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>();
 			}
-			skeleton_handle->Name(importer_scene.final_skeleton[0]._name);
+			auto& skeleton = *skeleton_handle;
 
-			// Actually creating the skeleton
-			auto& skeleton = skeleton_handle.as<anim::Skeleton>();
 			skeleton = anim::Skeleton{ importer_scene.final_skeleton, importer_scene.final_skeleton_table };
+			skeleton.Name(importer_scene.final_skeleton[0]._name);
 
 			ret_val.Add(skeleton_handle);
 		}
@@ -326,17 +330,16 @@ namespace idk
 					else
 						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
 				}
-				// Creating the animation resource
-				auto& anim_clip = anim_clip_handle.as<anim::Animation>();
-
+				string name;
 				if (importer_scene.has_animation && !importer_scene.has_skeleton)
 				{
-					anim_clip_handle->Name(path_to_resource.GetStem());
+					name = path_to_resource.GetStem();
 				}
 				else
-				{
-					anim_clip_handle->Name(compiled_animation.name);
-				}
+					name = compiled_animation.name;
+
+				auto& anim_clip = *anim_clip_handle;
+				anim_clip.Name(name);
 
 				anim_clip.SetSpeeds(compiled_animation.fps, compiled_animation.duration, compiled_animation.num_ticks);
 
@@ -405,6 +408,7 @@ namespace idk
 		}
 		
 		const auto prefab_handle = PrefabUtility::Create(prefab_root);
+		prefab_handle->Name(path_to_resource.GetStem());
 		ret_val.Add(prefab_handle);
 		scene->DestroyGameObject(prefab_root);
 		return ret_val;

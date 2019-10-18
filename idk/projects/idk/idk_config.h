@@ -32,7 +32,7 @@ namespace idk
 
 		/// ANIMATION
 		,	class Animator
-
+		,	struct Bone
 		/// SCRIPTING
 		,	class mono::Behavior
 
@@ -45,7 +45,8 @@ namespace idk
 	>;
 	
 	using Systems = std::tuple<
-		class Application
+			class LogSystem
+		,	class Application
 		,	class FileSystem
 		//,	class InputSystem
 		,	class GamepadSystem
@@ -54,14 +55,16 @@ namespace idk
 		,	class GraphicsSystem
 		,   class DebugRenderer
 		,	class AudioSystem
-		,	class ResourceManager
+		
 		,	class ProjectManager
 		,	class SceneManager
 		,	class IEditor
 		,   class TestSystem
 		,	class AnimationSystem
         ,   class TagManager
-        ,   class LayerManager
+		, class LayerManager
+		, class ResourceManager
+        
 	>;
 
 	using Resources = std::tuple<
@@ -91,10 +94,4 @@ namespace idk
 	constexpr auto ComponentCount = std::tuple_size_v<Components>;
 	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
 	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
-
-    namespace natvis
-    {
-        constexpr auto FileSystemID = SystemID<FileSystem>;
-        constexpr auto TagManagerID = SystemID<TagManager>;
-    }
 }

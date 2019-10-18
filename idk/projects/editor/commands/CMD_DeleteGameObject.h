@@ -13,7 +13,7 @@
 namespace idk {
 
 
-	class CMD_DeleteGameObject : public ICommand { //serialize/deserialize use serialize.h
+	class CMD_DeleteGameObject : public ICommand { //serialize/deserialize use text.h
 	public:
 		CMD_DeleteGameObject(Handle<GameObject> gameObject);
 

@@ -1,20 +1,11 @@
 #pragma once
 
 #include <idk.h>
+#include <ds/result.h>
+#include <serialize/parse_error.h>
 
 namespace idk
 {
-
-    enum class parse_error : char
-    {
-        none = 0,
-        invalid_argument = 1,
-        ill_formed_yaml = 2,
-        result_out_of_range = 3,
-        type_cannot_be_parsed = 4
-    };
-
-
 
 	// forward decls
 	namespace reflect { class dynamic; class type; }
@@ -49,4 +40,4 @@ namespace idk
 
 }
 
-#include "serialize.inl"
+#include "text.inl"

@@ -135,10 +135,10 @@ namespace idk::ai_helpers
 		hash_table<string, aiBone*> bone_table;
 
 		hash_table<string, size_t> final_skeleton_table;
-		vector<anim::Bone> final_skeleton;
+		vector<anim::BoneData> final_skeleton;
 
 		hash_table<string, size_t> skinless_skeleton_table;
-		vector<anim::Bone> skinless_skeleton;
+		vector<anim::BoneData> skinless_skeleton;
 
 		// =================================================  Animation
 		vector<aiAnimation*> ai_anim_clips;

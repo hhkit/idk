@@ -306,6 +306,8 @@
         intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
+  - !Layer 
+    index: 4
 - !42949738496 
   - active: 1
   - !Transform 
@@ -331,3 +333,5 @@
         r: 1
     shadow_bias: 1e-04
   - !Tag futanari
+  - !Layer 
+    index: 3

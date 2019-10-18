@@ -1,13 +1,12 @@
 #pragma once
 #ifdef _DEBUG
-#include <cstdio>
+#include <debug/Log.h>
 #define IDK_ASSERT(COND)                                                              \
 {                                                                                     \
 	if (!(COND))                                                                      \
 	{                                                                                 \
-		fprintf(stderr, "Assertion failed in file " __FILE__ ", line %d\n", __LINE__);\
-		fprintf(stderr, "Condition was: " #COND "\n");                                \
-		fflush(stderr);                                                               \
+		LOG_TO(LogPool::FATAL, "Assertion failed!\n");                                \
+		LOG_TO(LogPool::FATAL, "Condition was: " #COND "\n");                         \
 		throw;                                                                        \
 	}                                                                                 \
 }
@@ -16,10 +15,9 @@
 {                                                                                     \
 	if (!(COND))                                                                      \
 	{                                                                                 \
-		fprintf(stderr, "Message: " MSG);                                             \
-		fprintf(stderr, "Assertion failed in file " __FILE__ ", line %d\n", __LINE__);\
-		fprintf(stderr, "Condition was: " #COND "\n");                                \
-		fflush(stderr);                                                               \
+		LOG_TO(LogPool::FATAL, "Message: " MSG "\n");                                 \
+		LOG_TO(LogPool::FATAL, "Assertion failed!\n");                                \
+		LOG_TO(LogPool::FATAL, "Condition was: " #COND "\n");                         \
 		throw;                                                                        \
 	}                                                                                 \
 }

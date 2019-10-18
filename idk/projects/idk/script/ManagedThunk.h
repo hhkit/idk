@@ -11,6 +11,7 @@ namespace idk::mono
 	class ManagedThunk
 	{
 	public:
+		ManagedThunk() = default;
 		ManagedThunk(MonoMethod* method);
 
 		template<typename Ret = MonoObject*, typename ... Args>
@@ -18,7 +19,7 @@ namespace idk::mono
 
 		void* get() const { return thunk; }
 	private:
-		void* thunk;
+		void* thunk{};
 	};
 
 	template<typename Ret, typename ...Args>

@@ -12,7 +12,7 @@
 
 namespace idk {
 
-	class CMD_AddComponent : public ICommand { //serialize/deserialize use serialize.h
+	class CMD_AddComponent : public ICommand { //serialize/deserialize use text.h
 	public:
 		CMD_AddComponent(Handle<GameObject> gameObject, string component);
 		CMD_AddComponent(Handle<GameObject> gameObject, const reflect::dynamic& component);

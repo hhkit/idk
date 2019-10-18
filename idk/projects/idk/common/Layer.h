@@ -7,6 +7,6 @@ namespace idk
     class Layer : public Component<Layer>
     {
     public:
-        int8_t index;
+        char index;
     };
 };

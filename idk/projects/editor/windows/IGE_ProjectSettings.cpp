@@ -4,6 +4,7 @@
 #include <IncludeSystems.h>
 #include <editor/utils.h>
 #include <editor/imguidk.h>
+#include <imgui/imgui_internal.h>
 
 namespace idk
 {
@@ -270,6 +271,59 @@ namespace idk
             sys.SetConfig(config);
     }
 
+    template<>
+    void DisplayConfig<LayerManager>()
+    {
+        auto& sys = Core::GetSystem<LayerManager>();
+        auto config = sys.GetConfig();
+
+        const float item_width = ImGui::GetWindowContentRegionWidth() * 0.6f;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+        bool changed = false;
+
+        ImGui::PushItemWidth(item_width);
+
+        ImGui::PushID("layers");
+        if (ImGui::TreeNodeEx("Layers", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen))
+        {
+            for (int i = 0; i < config.layers.size(); ++i)
+            {
+                if (i < LayerManager::num_builtin_layers)
+                    ImGuidk::PushDisabled();
+
+                const float cursor_y = ImGui::GetCursorPosY();
+                ImGui::SetCursorPosY(cursor_y + pad_y);
+                ImGui::Text(i < LayerManager::num_builtin_layers ? "Builtin Layer %d" : "User Layer %d", i);
+
+                ImGui::SetCursorPosY(cursor_y);
+                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+
+                ImGui::PushID(i);
+
+                char buf[32];
+                strcpy_s(buf, config.layers[i].data());
+
+                ImGui::InputText("", buf, 32);
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    config.layers[i] = buf;
+                    changed = true;
+                }
+
+                ImGui::PopID();
+
+                if (i < LayerManager::num_builtin_layers)
+                    ImGuidk::PopDisabled();
+            }
+        }
+        ImGui::PopID();
+
+        ImGui::PopItemWidth();
+
+        if (changed)
+            sys.SetConfig(config);
+    }
+
 
 
     static const char* config_labels[]
@@ -298,6 +352,7 @@ namespace idk
         {
         case _tags_and_layers:
             DisplayConfig<TagManager>();
+            DisplayConfig<LayerManager>();
             break;
         default:
             break;

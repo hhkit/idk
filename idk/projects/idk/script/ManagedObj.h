@@ -8,6 +8,7 @@ namespace idk::mono
 	class ManagedObject
 	{
 	public:
+		ManagedObject() noexcept = default;
 		ManagedObject(MonoObject* obj);
 		ManagedObject(const ManagedObject&);
 		ManagedObject(ManagedObject&&) noexcept;
@@ -21,11 +22,17 @@ namespace idk::mono
 		template<typename T>
 		T Get(string_view field);
 		MonoObject* Fetch() const noexcept;
+
+		explicit operator bool() const;
+
+		const ManagedType* Type() noexcept;
 	private:
 		uint32_t _gc_handle{};
-		ManagedType* _type{};
+		const ManagedType* _type{};
 
 		MonoClassField* Field(string_view field);
+
+		friend class ManagedType;
 	};
 
 	template<typename T>
@@ -36,8 +43,11 @@ namespace idk::mono
 
 		if (field)
 		{
-			if constexpr(!std::is_class_v<std::decay_t<T>>)
-				mono_field_set_value(me, field, &obj);
+			if constexpr (!std::is_class_v<std::decay_t<T>>)
+			{
+				auto val = obj;
+				mono_field_set_value(me, field, &val);
+			}
 		}
 	}
 

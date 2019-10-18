@@ -83,34 +83,42 @@ namespace idk
         string _editor_app_data;
 
 		//GraphicsAPI gLibVer;
-		unique_ptr<IGE_MainWindow> ige_main_window		{};
-		//vector <unique_ptr<IGE_IWindow>> ige_windows	{};
+		//Editor Windows
+		unique_ptr<IGE_MainWindow>			ige_main_window		{};
+		vector<unique_ptr<IGE_IWindow>>		ige_windows			{};
+		hash_table<size_t, IGE_IWindow*>	windows_by_type		{};
+
+		CommandController command_controller			{}; //For editor commands
 
 		bool bool_demo_window					 { false };
-		CommandController command_controller			{};
 
-		vector<Handle<GameObject>> selected_gameObjects {};
-		vector<mat4>			   selected_matrix		{}; //For selected_gameObjects
-		void RefreshSelectedMatrix();
+        bool closing			= false;
+		bool flag_skip_render	= false;
 
-		vector<unique_ptr<IGE_IWindow>> ige_windows	    {};
-		hash_table<size_t, IGE_IWindow*> windows_by_type{};
-
-        bool closing = false;
-
-		GizmoOperation gizmo_operation = GizmoOperation_Translate;
-		MODE gizmo_mode = MODE::LOCAL; //World is might not work properly for scaling for now.
-
+		//For Gizmo controls
+		GizmoOperation	gizmo_operation = GizmoOperation_Translate;
+		MODE			gizmo_mode		= MODE::LOCAL; //World is might not work properly for scaling for now.
 
 		void FocusOnSelectedGameObjects();
+
 		vec3 focused_vector{}; //Updated everytime FocusOnSelectedGameObjects is called. For Scroll Vector WIP
-		float scroll_multiplier					= 1.0f;
-		const float default_scroll_multiplier	= 1.0f;			//When on focus, this resets the scroll_multiplier
-		const float scroll_additive				= 1.05f;		//Amount of multiplication when scrolling farther
-		const float scroll_subtractive			= 0.85f;		//Amount of multiplication when scrolling nearer
 
-		bool flag_skip_render					= false;
+		//Scrolling
+		float		scroll_multiplier			= 2.0f;			//AFfects pan and scrolling intensity
+		const float default_scroll_multiplier	= 2.0f;			//When on focus, this resets the scroll_multiplier
+		const float scroll_additive				= 0.90f;		//Amount of multiplication when scrolling farther.This adds to scroll_multiplier
+		const float scroll_subtractive			= 0.2f;			//Amount of multiplication when scrolling nearer .This adds to scroll_multiplier
+		const float scroll_max					= 10.0f;
+		const float scroll_min					= 0.1f;
+		void IncreaseScrollPower();
+		void DecreaseScrollPower();
 
+		//For selecting and displaying in inspector.
+		vector<Handle<GameObject>> selected_gameObjects{};
+		vector<mat4>			   selected_matrix{}; //For selected_gameObjects
+		void RefreshSelectedMatrix();
+
+		//For copy commands
 		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
 		vector<vector<RecursiveObjects>> copied_gameobjects	{}; //A vector of data containing gameobject data.
 		reflect::dynamic				 copied_component	{};

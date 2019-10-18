@@ -23,7 +23,7 @@
     <ClInclude Include="anim\AnimationState.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
-    <ClInclude Include="anim\BoneComponent.h" />
+    <ClInclude Include="anim\Bone.h" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
@@ -42,8 +42,11 @@
     <ClInclude Include="app\GamepadEnums.h" />
     <ClInclude Include="core\ConfigurableSystem.h" />
     <ClInclude Include="debug\idk_assert.h" />
-    <ClInclude Include="debug\Logger.h" />
+    <ClInclude Include="debug\Log.h" />
+    <ClInclude Include="debug\LogSystem.h" />
+    <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
     <ClInclude Include="gfx\Framebuffer.h" />
     <ClInclude Include="PauseConfigurations.h" />
@@ -174,6 +177,7 @@
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="script\ManagedType.h" />
+    <ClInclude Include="script\MonoBinder.h" />
     <ClInclude Include="script\ValueBoxer.h" />
     <ClInclude Include="script\MonoBehavior.h" />
     <ClInclude Include="script\MonoBehaviorData.h" />
@@ -183,6 +187,8 @@
     <ClInclude Include="script\ManagedThunk.h" />
     <ClInclude Include="script\MonoWrapperEnviroment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="serialize\binary.h" />
+    <ClInclude Include="serialize\parse_error.h" />
     <ClInclude Include="serialize\yaml.h" />
     <ClInclude Include="gfx\ShaderGraph_helpers.h" />
     <ClInclude Include="common\Tag.h" />
@@ -195,7 +201,7 @@
     <ClInclude Include="ds\zip.h" />
     <ClInclude Include="reflect\detail\pretty_function.h" />
     <ClInclude Include="reflect\detail\constructor_entry.h" />
-    <ClInclude Include="serialize\serialize.h" />
+    <ClInclude Include="serialize\text.h" />
     <ClInclude Include="math\shapes\aabb.h" />
     <ClInclude Include="math\shapes\capsule.h" />
     <ClInclude Include="math\shapes\box.h" />
@@ -227,7 +233,7 @@
     <ClCompile Include="anim\Animation.cpp" />
     <ClCompile Include="anim\Animator.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
-    <ClCompile Include="anim\BoneComponent.cpp" />
+    <ClCompile Include="anim\Bone.cpp" />
     <ClCompile Include="anim\Skeleton.cpp" />
     <ClCompile Include="anim\SkeletonFactory.cpp" />
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />
@@ -240,7 +246,8 @@
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="common\Tag.cpp" />
     <ClCompile Include="common\TagManager.cpp" />
-    <ClCompile Include="debug\Logger.cpp" />
+    <ClCompile Include="debug\Log.cpp" />
+    <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
@@ -310,6 +317,11 @@
     <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
     <ClCompile Include="script\ScriptSystem.cpp" />
     <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="serialize\binary.cpp" />
+    <ClCompile Include="serialize\text_serialize.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
@@ -337,7 +349,7 @@
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
-    <ClCompile Include="serialize\serialize.cpp">
+    <ClCompile Include="serialize\text_parse.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -404,7 +416,8 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
-    <None Include="serialize\serialize.inl" />
+    <None Include="serialize\binary.inl" />
+    <None Include="serialize\text.inl" />
     <None Include="serialize\yaml.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>

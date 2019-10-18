@@ -10,9 +10,9 @@ namespace idk::mono
 		MonoBehaviorEnvironment(string_view full_path_to_game_dll);
 		~MonoBehaviorEnvironment();
 		void Execute();
-		opt<ManagedType> GetBehaviorMetadata(string_view name);
+		ManagedType* GetBehaviorMetadata(string_view name);
 	private:
-		hash_table<string, ManagedType> mono_behaviors;
+		hash_table<string, ManagedType*> mono_behaviors;
 		void FindMonoBehaviors();
 	};
 }

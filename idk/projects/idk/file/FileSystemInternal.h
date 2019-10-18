@@ -92,7 +92,7 @@ namespace idk::file_system_detail
 
 		// For file watching
 		// HANDLE	_dir_handle     {};
-		HANDLE	_watch_handle[3]{};
+		HANDLE	_watch_handle	{};
 		DWORD	_status         {};
 
 		FS_CHANGE_STATUS _change_status = FS_CHANGE_STATUS::NO_CHANGE;

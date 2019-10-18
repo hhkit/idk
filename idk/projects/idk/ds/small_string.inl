@@ -499,7 +499,6 @@ namespace idk
 		{
 			traits_type::assign(rep.longer.ptr[rep.longer.size], c);
 			rep.longer.ptr[++rep.longer.size] = '\0';
-			++rep.longer.size;
 		}
 	}
 

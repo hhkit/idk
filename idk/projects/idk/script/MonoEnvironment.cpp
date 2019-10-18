@@ -22,13 +22,13 @@ namespace idk::mono
 	{
 		return _domain;
 	}
-	opt<ManagedType> MonoEnvironment::Type(string_view name) const
+	const ManagedType* MonoEnvironment::Type(string_view name) const
 	{
 		auto itr = _types.find(string{ name });
 		if (itr != _types.end())
-			return itr->second;
+			return &itr->second;
 
-		return std::nullopt;
+		return nullptr;
 	}
 	void MonoEnvironment::ScanTypes()
 	{

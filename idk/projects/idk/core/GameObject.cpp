@@ -8,6 +8,10 @@
 
 namespace idk
 {
+	GenericHandle GameObject::AddComponent(string_view sv)
+	{
+		return AddComponent(reflect::get_type(sv));
+	}
 	GenericHandle GameObject::AddComponent(reflect::type type)
 	{
 		return GameState::GetGameState().CreateComponent(GetHandle(), type);

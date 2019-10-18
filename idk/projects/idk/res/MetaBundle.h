@@ -20,7 +20,7 @@ namespace idk
 	};
 }
 
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <reflect/reflect.h>
 namespace idk
 {

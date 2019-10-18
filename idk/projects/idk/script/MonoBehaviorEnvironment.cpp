@@ -14,6 +14,7 @@
 
 #include <script/ManagedObj.h>
 #include <script/ScriptSystem.h>
+#include <script/MonoBehavior.h>
 
 #include <core/GameObject.h>
 
@@ -26,6 +27,7 @@ namespace idk::mono
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
 		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
 
+		ScanTypes();
 		FindMonoBehaviors();
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
@@ -41,32 +43,41 @@ namespace idk::mono
 		_domain = nullptr;
 		_assembly = nullptr;
 	}
-	opt<ManagedType> MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
+	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
 	{
 		auto itr = mono_behaviors.find(string{ name });
 		if (itr != mono_behaviors.end())
 			return itr->second;
 		else
-			return std::nullopt;
+			return nullptr;
 	}
 	void MonoBehaviorEnvironment::Execute()
 	{
-		auto test = GetBehaviorMetadata("Test");
-		auto obj = test->Construct();
-		{
-			auto update = test->GetMethod("Update");
+		auto go = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+		auto tfm = go->Transform();
 
-			void* args[] = { 0 };
-			MonoObject* exception{};
-			auto fetch = obj.Fetch();
-			mono_runtime_invoke(std::get<MonoMethod*>(update), fetch, args, &exception);
-		}
-		{
-			auto thunderbolt = test->GetMethod("Thunderbolt", 1);
-			vec3 v{ 2,3,4 };
-			void* args[] = { &v, 0 };
-			mono_runtime_invoke(std::get<MonoMethod*>(thunderbolt), obj.Fetch(), args, nullptr);
-		}
+		auto& env = Core::GetSystem<ScriptSystem>().Environment();
+		auto tfm_class = env.Type("Transform");
+		auto tfm_obj = tfm_class->Construct();
+		tfm_obj.Assign("handle", tfm.id);
+		auto mb = go->AddComponent<mono::Behavior>();
+		
+		auto* obj = mb->EmplaceBehavior("Test");
+		auto test = GetBehaviorMetadata("Test");
+
+		//{
+		//	auto update = test->GetMethod("Update");
+		//
+		//	void* args[] = { 0 };
+		//	MonoObject* exception{};
+		//	mono_runtime_invoke(std::get<MonoMethod*>(update), obj, args, &exception);
+		//}
+		//{
+		//	auto thunderbolt = test->GetMethod("Thunderbolt", 1);
+		//	vec3 v{ 2,3,4 };
+		//	void* args[] = { &v, 0 };
+		//	mono_runtime_invoke(std::get<MonoMethod*>(thunderbolt), obj, args, nullptr);
+		//}
 		{
 			test->CacheThunk("Update", 0);
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("Update", 0));
@@ -80,19 +91,6 @@ namespace idk::mono
 		{
 			IDK_ASSERT(test->CacheThunk("TestTransform", 1));
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("TestTransform", 1));
-			std::cout << "invoke";
-			auto go = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-			auto tfm = go->Transform();
-
-			auto& env = Core::GetSystem<ScriptSystem>().Environment();
-			auto tfm_class = env.Type("Transform");
-			auto tfm_obj = tfm_class->Construct();
-			tfm_obj.Assign("handle", tfm.id);
-
-			//auto method = tfm_class->GetMethod("YoloVan", 1);
-			//
-			//void* args[] = { tfm_obj.Fetch() };
-			//mono_runtime_invoke(std::get<MonoMethod*>(method), tfm_obj.Fetch(), args, nullptr);
 			thunk.Invoke(obj, tfm_obj);
 		}
 	}
@@ -133,7 +131,26 @@ namespace idk::mono
 
 			if (is_monobehavior)
 			{
-				mono_behaviors.emplace(class_name, ManagedType{ class_ptr });
+				auto itr = _types.find(class_name);
+
+				IDK_ASSERT(itr != _types.end());
+				auto& type = itr->second;
+
+				LOG_TO(LogPool::GAME, string{ "Investigating " } +class_name);
+				constexpr auto find_method = [](ManagedType& type, string_view fn_name)
+				{
+					auto res = type.CacheThunk(fn_name);
+					if (res)
+						LOG_TO(LogPool::GAME, string{ "Found function " } +string{ fn_name });
+				};
+
+				find_method(type, "Awake");
+				find_method(type, "Start");
+				find_method(type, "FixedUpdate");
+				find_method(type, "Update");
+				find_method(type, "UpdateCoroutines");
+
+				mono_behaviors.emplace(class_name, &type);
 			}
 		}
 	}

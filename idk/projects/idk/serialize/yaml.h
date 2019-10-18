@@ -1,7 +1,7 @@
 #pragma once
 
 #include <idk.h>
-#include <serialize/serialize.h>
+#include <serialize/parse_error.h>
 
 // serializer/parser for a small subset of yaml.
 // only supports: blocks, flows (only single line tested), and local primary tags
@@ -10,16 +10,7 @@ namespace idk::yaml
 {
     class node;
 
-    enum class parse_error : char
-    {
-        none = 0,
-        ill_formed = 1,
-        has_tabs = 2
-    };
-
-    using load_result = monadic::result<node, parse_error>;
-
-    load_result load(string_view str);
+    monadic::result<node, parse_error> load(string_view str);
     string dump(const node& node);
 
     using null_type = std::monostate;

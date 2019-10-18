@@ -2,7 +2,7 @@
 #include "PrefabUtility.h"
 
 #include <ds/small_string.h>
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <file/FileSystem.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
@@ -16,6 +16,24 @@ namespace idk
 
     namespace helpers
     {
+
+        static void add_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
+        {
+            if (prefab_comp.is<Transform>())
+            {
+                auto& t_prefab = prefab_comp.get<Transform>();
+                auto& t_ori = *go->GetComponent<Transform>();
+                t_ori.position = t_prefab.position;
+                t_ori.rotation = t_prefab.rotation;
+                t_ori.scale = t_prefab.scale;
+                t_ori.parent = t_prefab.parent;
+            }
+            else if (prefab_comp.is<Name>())
+                go->Name(prefab_comp.get<Name>().name);
+            else
+                go->AddComponent(prefab_comp);
+        }
+
         static reflect::dynamic resolve_property_path(const reflect::dynamic& obj, string_view path)
         {
             size_t offset = 0;
@@ -197,7 +215,7 @@ namespace idk
         const auto& prefab_data = prefab->data;
         auto i = 0;
         for (const auto& d : prefab_data[i].components)
-            handle->AddComponent(d);
+            helpers::add_component(handle, d);
         auto prefab_inst = handle->AddComponent<PrefabInstance>();
         prefab_inst->prefab = prefab;
         prefab_inst->object_index = i;
@@ -209,7 +227,7 @@ namespace idk
             game_objects.push_back(child_handle);
 
             for (const auto& d : prefab_data[i].components)
-                child_handle->AddComponent(d);
+                helpers::add_component(child_handle, d);
             child_handle->Transform()->parent = game_objects[prefab_data[i].parent_index];
 
             prefab_inst = child_handle->AddComponent<PrefabInstance>();
@@ -270,7 +288,11 @@ namespace idk
         {
             auto curr_par = stack.back();
             stack.pop_back();
-            stack += nodes[curr_par];
+            {
+                size_t i = nodes[curr_par].size();
+                while (i--) // add in reverse order because we take elems from back
+                    stack += nodes[curr_par][i];
+            }
             game_objects += curr_par;
 
             for (auto child_index : nodes[curr_par])
@@ -290,6 +312,8 @@ namespace idk
                 child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }
+
+        prefab_handle->Name(go->Name());
     }
 
     RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go)

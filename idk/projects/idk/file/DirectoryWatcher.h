@@ -7,19 +7,22 @@ namespace idk::file_system_detail
 	{
 	public:
 		void WatchDirectory(fs_dir& dir);
-		void UpdateWatchedDir(const fs_mount& mount, fs_dir& dir);
-
-		void RefreshDir(file_system_detail::fs_dir& dir);
-		void RefreshTree(file_system_detail::fs_dir& dir);
+		void UpdateWatchedDir(fs_dir& dir);
 
 		// Calling this will also clear all the changed files.
 		void ResolveAllChanges();
 
 		friend class FileSystem;
 	private:
-
+		
 		vector<fs_key> changed_files;
 		vector<fs_key> changed_dirs;
+
+		string print_log;
+
+		void CheckAllPathChanges(file_system_detail::fs_dir& dir);
+		void CheckFileChanges(file_system_detail::fs_dir& dir);
+		void CheckDirChanges(file_system_detail::fs_dir& dir);
 
 		void checkFilesCreated	(file_system_detail::fs_dir& dir);
 		void checkFilesDeleted	(file_system_detail::fs_dir& dir);
@@ -33,15 +36,14 @@ namespace idk::file_system_detail
 		void recurseAndAdd		(file_system_detail::fs_dir& dir);
 		void recurseAndDelete	(file_system_detail::fs_dir& dir);
 		void recurseAndRename	(file_system_detail::fs_dir& dir);
-		// fs_file& addInternalFile(string_view full_path);
 
 		file_system_detail::fs_key	fileCreate(file_system_detail::fs_dir& dir, const std::filesystem::path& p);
 		void						fileDelete(file_system_detail::fs_file& file);
-		void						fileRename(file_system_detail::fs_dir& dir, file_system_detail::fs_file& file, const std::filesystem::path& p, FS_CHANGE_STATUS status = FS_CHANGE_STATUS::RENAMED);
+		void						fileRename(file_system_detail::fs_dir& dir, file_system_detail::fs_file& file, const std::filesystem::path& p);
 
 		file_system_detail::fs_key	dirCreate(file_system_detail::fs_dir& dir, const std::filesystem::path& p);
 		void						dirDelete(file_system_detail::fs_dir& dir);
-		void						dirRename(file_system_detail::fs_dir& Mountdir, file_system_detail::fs_dir& dir, const std::filesystem::path& p, FS_CHANGE_STATUS status = FS_CHANGE_STATUS::RENAMED);
+		void						dirRename(file_system_detail::fs_dir& Mountdir, file_system_detail::fs_dir& dir, const std::filesystem::path& p);
 	};
 	
 }

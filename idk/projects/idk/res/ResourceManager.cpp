@@ -5,7 +5,7 @@
 #include <ds/ranged_for.h>
 #include <file/FileSystem.h>
 #include <res/MetaBundle.h>
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <util/ioutils.h>
 #include <res/SaveableResourceLoader.h>
 
@@ -148,6 +148,7 @@ namespace idk
 			func(this);
 		for (auto& func : defaults_table)
 			func(this);
+		SaveDirtyMetadata();
 	}
 
 	void ResourceManager::Shutdown()
@@ -213,7 +214,7 @@ namespace idk
 								return false;
 						}, elem);
 				}
-
+			// if (path.find("YY_model.fbx") != string::npos) __debugbreak();
 			if (dirty)
 			{
 				// save the .meta file
@@ -228,8 +229,8 @@ namespace idk
 								handle->_dirtymeta = false;
 						}, elem);
 				}
-
-				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << serialize_text(m);
+				auto test = serialize_text(m);
+				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << test;
 				resource.is_new = false;
 			}
 		}
@@ -237,6 +238,23 @@ namespace idk
 
 	void ResourceManager::WatchDirectory()
 	{
+		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
+		{
+			auto bundle = Get(PathHandle{ elem });
+			if (bundle)
+			{
+				for (auto& resource : bundle->GetAll())
+					std::visit([&](auto& res_handle) {Release(res_handle); }, resource);
+			}
+
+			// Remove from loaded files if its there
+			auto itr = _loaded_files.find(elem.GetMountPath().data());
+			if (itr != _loaded_files.end())
+			{
+				_loaded_files.erase(itr);
+			}
+		}
+
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
 			Load(elem);
 		

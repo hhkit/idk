@@ -3,7 +3,7 @@
 #include <core/Core.h>
 #include <res/MetaBundle.h>
 #include <res/ResourceManager.h>
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <util/ioutils.h>
 
 namespace idk

@@ -122,7 +122,7 @@ namespace idk::ai_helpers
 			return;
 
 		std::deque<BoneTreeNode> bone_queue;
-		vector<anim::Bone>& final_skeleton = scene.final_skeleton;
+		vector<anim::BoneData>& final_skeleton = scene.final_skeleton;
 		auto& final_skeleton_table = scene.final_skeleton_table;
 
 		// Optionally check for pivots here
@@ -146,7 +146,7 @@ namespace idk::ai_helpers
 				continue;
 			}
 
-			anim::Bone new_bone;
+			anim::BoneData new_bone;
 			new_bone._name = curr_node.node->mName.data;
 			new_bone._parent = curr_node.parent;
 
@@ -253,7 +253,7 @@ namespace idk::ai_helpers
 
 	
 		std::deque<BoneTreeNode> bone_queue;
-		vector<anim::Bone>& skinless_skeleton = scene.skinless_skeleton;
+		vector<anim::BoneData>& skinless_skeleton = scene.skinless_skeleton;
 		auto& skinless_skeleton_table = scene.skinless_skeleton_table;
 
 		// Optionally check for pivots here
@@ -277,7 +277,7 @@ namespace idk::ai_helpers
 				continue;
 			}
 
-			anim::Bone new_bone;
+			anim::BoneData new_bone;
 			new_bone._name = curr_node.node->mName.data;
 			new_bone._parent = curr_node.parent;
 

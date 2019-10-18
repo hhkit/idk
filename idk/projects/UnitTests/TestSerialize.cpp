@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <ReflectRegistration.h>
 #include <res/Guid.h>
 #include <scene/SceneManager.h>

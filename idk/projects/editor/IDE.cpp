@@ -214,6 +214,7 @@ namespace idk
 		ADD_WINDOW(IGE_MaterialEditor);
 		ADD_WINDOW(IGE_ProfilerWindow);
 		ADD_WINDOW(IGE_ProjectSettings);
+		ADD_WINDOW(IGE_Console);
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();
@@ -336,6 +337,19 @@ namespace idk
 			scroll_multiplier = default_scroll_multiplier;
 			camTransform->position -= camTransform->Forward() * distanceFromObject;
 		}
+	}
+
+	void IDE::IncreaseScrollPower()
+	{
+		scroll_multiplier += scroll_additive;
+		scroll_multiplier = scroll_multiplier > scroll_max ? scroll_max : scroll_multiplier;
+
+	}
+
+	void IDE::DecreaseScrollPower()
+	{
+		scroll_multiplier -= scroll_subtractive;
+		scroll_multiplier = scroll_multiplier < scroll_min ? scroll_min : scroll_multiplier;
 	}
 
 	void IDE::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
