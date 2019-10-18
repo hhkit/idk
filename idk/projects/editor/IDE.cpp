@@ -339,6 +339,19 @@ namespace idk
 		}
 	}
 
+	void IDE::IncreaseScrollPower()
+	{
+		scroll_multiplier += scroll_additive;
+		scroll_multiplier = scroll_multiplier > scroll_max ? scroll_max : scroll_multiplier;
+
+	}
+
+	void IDE::DecreaseScrollPower()
+	{
+		scroll_multiplier -= scroll_subtractive;
+		scroll_multiplier = scroll_multiplier < scroll_min ? scroll_min : scroll_multiplier;
+	}
+
 	void IDE::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
 	{
 
