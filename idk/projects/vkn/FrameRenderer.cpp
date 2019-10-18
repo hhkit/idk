@@ -203,9 +203,9 @@ namespace idk::vkn
 	{
 		virtual void Bind([[maybe_unused]]PipelineThingy& the_interface) {}
 		virtual void Bind([[maybe_unused]]PipelineThingy& the_interface, [[maybe_unused]] const  RenderObject& dc) {}
-		void Bind(PipelineThingy& the_interface, AnimatedRenderObject& dc)
+		void Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
 		{
-			Bind(the_interface, s_cast<RenderObject&>(dc));
+			Bind(the_interface, s_cast<const RenderObject&>(dc));
 			BindAni(the_interface, dc);
 		}
 		virtual void BindAni([[maybe_unused]] PipelineThingy& the_interface, [[maybe_unused]] const AnimatedRenderObject& dc) {}

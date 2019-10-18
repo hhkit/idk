@@ -77,13 +77,14 @@ namespace idk::vkn::hlp
 	) : device{ d },
 		type{ mem_type },
 		chunk_size{ chunkSize }{}
-	Memories::Memory& Memories::Add()
+	Memories::Memory& Memories::Add(size_t min)
 	{
+		auto sz = std::max(chunk_size, min);
 		memories.emplace_back(device.allocateMemoryUnique(
 			vk::MemoryAllocateInfo{
-				Track(chunk_size),type
+				Track(sz),type
 			}, nullptr, vk::DispatchLoaderDefault{}
-		), chunk_size);
+		), sz);
 
 		return memories.back();
 	}

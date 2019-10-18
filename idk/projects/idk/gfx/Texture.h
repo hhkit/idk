@@ -24,18 +24,18 @@ namespace idk
 		RGBAF_16,
 		RGBAF_32,
 		BGRA_8,
-		SRGB ,
-		SRGBA,
 		DEPTH_COMPONENT,
 		DXT1,
 		DXT3,
 		DXT5,
 		DXT1_A,
-		SRGB_DXT1 ,
-		SRGB_DXT3 ,
-		SRGB_DXT5 ,
-		SRGBA_DXT1
-	);
+		SRGB ,      
+		SRGBA,	    
+		SRGB_DXT1 ,	
+		SRGB_DXT3 ,	
+		SRGB_DXT5 ,	
+		SRGBA_DXT1  
+	); //TODO remove the SRGB from this list
 	inline bool IsSrgb(ColorFormat cf)
 	{
 		return
@@ -70,10 +70,12 @@ namespace idk
 
     struct TextureMeta
     {
-        ColorFormat internal_format = ColorFormat::RGBF_32;
+        ColorFormat internal_format = ColorFormat::RGBA_8; //Format in GPU
         UVMode      uv_mode = UVMode::Repeat;
-		InputChannels format = InputChannels::RGBA;
+		InputChannels format = InputChannels::RGBA;   //Remove, loader determines this
 		FilterMode  filter_mode = FilterMode::Linear;
+		bool is_srgb   {true};
+		bool compressed{true};
     };
 
 	class Texture

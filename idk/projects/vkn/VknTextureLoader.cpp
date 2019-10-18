@@ -735,6 +735,15 @@ namespace idk::vkn
 			result = itr->second;
 		return result;
 	}
+	vk::Format ToSrgb(vk::Format f)
+	{
+		static const auto map = hlp::ReverseMap(UnSrgbMap());
+		vk::Format result = f;
+		auto itr = map.find(f);
+		if (itr != map.end())
+			result = itr->second;
+		return result;
+	}
 
 	vk::Format MapFormat(TextureFormat tf)
 	{

@@ -299,7 +299,9 @@
     <ClCompile Include="RenderStateV2.cpp">
       <Filter>render\objects</Filter>
     </ClCompile>
-    <ClCompile Include="PipelineThingy.cpp" />
+    <ClCompile Include="PipelineThingy.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
