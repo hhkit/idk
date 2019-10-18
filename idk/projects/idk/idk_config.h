@@ -53,17 +53,17 @@ namespace idk
 		,	class mono::ScriptSystem
 		,	class PhysicsSystem
 		,	class GraphicsSystem
+		,	class AnimationSystem
 		,   class DebugRenderer
 		,	class AudioSystem
 		
 		,	class ProjectManager
 		,	class SceneManager
+		,	class TagManager
+		,	class LayerManager
+		,	class ResourceManager
 		,	class IEditor
 		,   class TestSystem
-		,	class AnimationSystem
-        ,   class TagManager
-		, class LayerManager
-		, class ResourceManager
         
 	>;
 
