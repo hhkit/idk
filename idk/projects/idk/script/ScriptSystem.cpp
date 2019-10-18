@@ -46,9 +46,11 @@ namespace idk::mono
 			LOG_TO(LogPool::GAME, string);
 			});
 
-		main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
-		main_environment->ScanTypes();
-
+        if (Core::GetSystem<FileSystem>().Exists(exe_dir + "/idk.dll"))
+        {
+            main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
+            main_environment->ScanTypes();
+        }
 		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*) 
 		{
 			if (fatal)

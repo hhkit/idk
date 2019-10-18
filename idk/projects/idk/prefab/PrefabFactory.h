@@ -8,11 +8,4 @@
 namespace idk
 {
 	using PrefabFactory = EasyFactory<Prefab>;
-
-	class PrefabLoader
-		: public IFileLoader
-	{
-		ResourceBundle LoadFile(PathHandle filepath) override;
-		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
-	};
 }

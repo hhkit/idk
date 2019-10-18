@@ -19,21 +19,18 @@
 #include <file/FileSystem.h>
 #include <common/Transform.h>	
 #include <core/Core.h>
-#include <iostream>	
-#include <filesystem> //Using this until our filesystem is up	
+#include "TestApplication.h"
 
 TEST(Audio, AudioSystemClassTest)
 {
 	using namespace idk;
 	Core c;
+    c.AddSystem<TestApplication>();
 	auto& test = c.GetSystem<AudioSystem>();
-	try {
-		c.Setup();
-	}
-	catch (EXCEPTION_AudioSystem i) {
-		std::cout << i.exceptionDetails << std::endl;
-		EXPECT_TRUE(false);
-	}
+    EXPECT_NO_THROW(c.Setup());
+
+    c.GetSystem<FileSystem>().Mount(TEST_DATA_PATH, "/assets");
+
 	std::cout << "Getting all available sound drivers... "<< std::endl;
 
 	auto i = test.GetAllSoundDriverData();
@@ -51,22 +48,11 @@ TEST(Audio, AudioSystemClassTest)
 		std::cout << "  SPEAKERMODE: " << test.FMOD_SPEAKERMODE_TO_C_STR(j.speakerMode) << std::endl;
 		std::cout << "  SPEAKERMODECHANNELS: " << j.speakerModeChannels << std::endl;
 		std::cout << "  SYSTEMRATE: " << j.systemRate << std::endl << std::endl;
-
 	}
 
-	
-	string path1 = std::filesystem::current_path().generic_string();
-	std::cout << "Current Working Directory: " << path1;
-	std::cout << "\n";
-	path1.append("\\SampleSounds\\My Delirium - Ladyhawke (Lyrics).mp3"); 
+	std::cout << "Searching for \\audio\\My Delirium - Ladyhawke (Lyrics).mp3 in directory...\n";
 
-	string path2 = std::filesystem::current_path().generic_string();
-	path2.append("\\SampleSounds\\25secClosing_IZHA");
-	path2.append(".wav");
-
-	std::cout << "Searching for \\SampleSounds\\My Delirium - Ladyhawke (Lyrics).mp3 in directory...\n";
-
-	RscHandle<AudioClip> audioPtr1 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path2));
+	RscHandle<AudioClip> audioPtr1 = *Core::GetResourceManager().Load<AudioClip>("/assets/audio/My Delirium - Ladyhawke (Lyrics).mp3");
 
 	if (!audioPtr1) { //Check if null is given
 		std::cout << "Audio path not found, skipping test...\n";
@@ -90,8 +76,8 @@ TEST(Audio, AudioSystemClassTest)
 	}
 
 
-	RscHandle<AudioClip> audioPtr2 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path1));
-	RscHandle<AudioClip> audioPtr3 = *Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(path2));
+    RscHandle<AudioClip> audioPtr2 = audioPtr1;
+	RscHandle<AudioClip> audioPtr3 = *Core::GetResourceManager().Load<AudioClip>("/assets/audio/25secClosing_IZHA.wav");
 
 	std::cout << "Playing first sound in default SFX group...\n";
 

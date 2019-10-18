@@ -5,6 +5,7 @@
 #include <common/Transform.h>
 #include <scene/SceneFactory.h>
 #include <scene/SceneManager.h>
+#include "TestApplication.h"
 
 TEST(GameState, TestGameState)
 {
@@ -45,12 +46,13 @@ TEST(GameState, TestHandles)
 
 TEST(GameState, TestScene)
 {
-	using namespace idk;
-	Core c;
-	c.Setup();
-	auto scene0 = Core::GetSystem<SceneManager>().CreateScene();
-	auto scene1 = Core::GetSystem<SceneManager>().CreateScene();
-	auto scene2 = Core::GetSystem<SceneManager>().CreateScene();
+    using namespace idk;
+    Core core;
+    core.AddSystem<TestApplication>();
+    core.Setup();
+    auto scene0 = Core::GetSystem<SceneManager>().CreateScene(); scene0->Load();
+	auto scene1 = Core::GetSystem<SceneManager>().CreateScene(); scene1->Load();
+	auto scene2 = Core::GetSystem<SceneManager>().CreateScene(); scene2->Load();
 	EXPECT_TRUE(scene0);
 	EXPECT_TRUE(scene1);
 	

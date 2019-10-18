@@ -13,6 +13,7 @@
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
+#include "TestApplication.h"
 
 namespace FS = std::filesystem;
 
@@ -22,45 +23,38 @@ static const idk::string READ_DATA{ "0123456789\nqwerty" };
 using namespace idk;\
 Core c;\
 FileSystem& vfs = Core::GetSystem<FileSystem>();\
-vfs.Init();\
-const string EXE_DIR = vfs.GetExeDir().data();\
-std::filesystem::remove_all(string{ EXE_DIR + "/FS_UnitTests/" }.c_str());\
-FS::create_directories(EXE_DIR + "/FS_UnitTests/depth_1/depth_2");\
-FS::create_directories(EXE_DIR + "/FS_UnitTests/multiple_dir_1");\
-FS::create_directories(EXE_DIR + "/FS_UnitTests/depth_1/multiple_dir_2");\
+c.AddSystem<TestApplication>();\
+c.Setup();\
+std::filesystem::remove_all(string{ TEST_DATA_PATH "/FS_UnitTests/" }.c_str());\
+FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/depth_1/depth_2");\
+FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/multiple_dir_1");\
+FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/depth_1/multiple_dir_2");\
 {\
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/test_d0.txt", std::ios::out};\
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/depth_1/test_d1.txt", std::ios::out};\
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/depth_1/depth_2/test_d2.txt", std::ios::out};\
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_d0.txt", std::ios::out};\
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/test_d1.txt", std::ios::out};\
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/depth_2/test_d2.txt", std::ios::out};\
 \
-	std::ofstream r{ EXE_DIR + "/FS_UnitTests/test_read.txt", std::ios::out};\
+	std::ofstream r{ TEST_DATA_PATH "/FS_UnitTests/test_read.txt", std::ios::out};\
 	r << READ_DATA;\
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/test_write.txt", std::ios::out};\
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_write.txt", std::ios::out};\
 \
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/multiple_dir_1/test_d1.txt", std::ios::out};\
-	std::ofstream{ EXE_DIR + "/FS_UnitTests/depth_1/multiple_dir_2/test_d2.txt", std::ios::out};\
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/multiple_dir_1/test_d1.txt", std::ios::out};\
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/multiple_dir_2/test_d2.txt", std::ios::out};\
 };\
-vfs.Mount( EXE_DIR + "/FS_UnitTests/", "/FS_UnitTests");\
+vfs.Mount(TEST_DATA_PATH "/FS_UnitTests/", "/FS_UnitTests");\
 vfs.Update();
 
 TEST(FileSystem, TestMount)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
 	// Duplicate mount not supported yet
-	bool test_mount_dup = false;
-	try
-	{
-		vfs.Mount(EXE_DIR + "FS_UnitTests/", "/FS_UnitTests");
-	}
-	catch (...)
-	{
-		test_mount_dup = true;
-	}
-	EXPECT_TRUE(test_mount_dup);
+    EXPECT_FALSE(vfs.Mount(TEST_DATA_PATH "FS_UnitTests/", "/FS_UnitTests"));
 
 	// Should not work but should not crash too.
-	auto bad_file = vfs.GetFile("/blah/haha.txt");
+    PathHandle bad_file;
+    EXPECT_NO_THROW(bad_file = vfs.GetFile("/blah/haha.txt"));
 	PathHandle ph{ "/FS_UnitTests" };
+	EXPECT_FALSE(bad_file);
 	EXPECT_TRUE(ph);
 
 	vfs.DumpMounts();
@@ -121,7 +115,7 @@ void TestCreateWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	// Create the test_watch file
-	std::ofstream{ string{vfs.GetExeDir()} +"/FS_UnitTests/test_watch.txt", std::ios::out };
+	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_watch.txt", std::ios::out };
 
 	// Checking if querying is correct
 	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::CREATED));
@@ -132,14 +126,14 @@ void TestWriteWatch(idk::FileSystem& vfs)
 {
 	using namespace idk;
 	vfs.Update();
-	auto time_stamp = FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt");
+	auto time_stamp = FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt");
 	// Write to the file
 	{
-		std::ofstream of{ string{vfs.GetExeDir()} + "/FS_UnitTests/test_watch.txt", std::ios::out };
+		std::ofstream of{ TEST_DATA_PATH "/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test Write" << std::endl;
 		of.close();
 	}
-	EXPECT_TRUE(time_stamp != FS::last_write_time(string{ vfs.GetExeDir() } +"/FS_UnitTests/test_watch.txt"));
+	EXPECT_TRUE(time_stamp != FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
 	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
 	WatchClearCheck(vfs);
@@ -150,7 +144,7 @@ void TestDeleteWatch(idk::FileSystem& vfs)
 	using namespace idk;
 	vfs.Update();
 
-	string remove_file = string{ vfs.GetExeDir() } + "/FS_UnitTests/test_write.txt";
+	string remove_file = TEST_DATA_PATH "/FS_UnitTests/test_write.txt";
 	EXPECT_TRUE(remove(remove_file.c_str()) == 0);
 
 	// Checking if querying is correct
@@ -200,9 +194,9 @@ TEST(FileSystem, TestPathHandle)
 		auto depth2_handle = vfs.GetFile("/FS_UnitTests/depth_1/depth_2/test_d2.txt");
 		EXPECT_TRUE(depth0_handle && depth1_handle && depth2_handle);
 		
-		EXPECT_TRUE(depth0_handle.GetFullPath() == EXE_DIR + "/FS_UnitTests\\test_d0.txt");
-		EXPECT_TRUE(depth1_handle.GetFullPath() == EXE_DIR + "/FS_UnitTests\\depth_1\\test_d1.txt");
-		EXPECT_TRUE(depth2_handle.GetFullPath() == EXE_DIR + "/FS_UnitTests\\depth_1\\depth_2\\test_d2.txt");
+		EXPECT_EQ(FS::path(depth0_handle.GetFullPath()), TEST_DATA_PATH "/FS_UnitTests\\test_d0.txt");
+        EXPECT_EQ(FS::path(depth1_handle.GetFullPath()), TEST_DATA_PATH "/FS_UnitTests\\depth_1\\test_d1.txt");
+        EXPECT_EQ(FS::path(depth2_handle.GetFullPath()), TEST_DATA_PATH "/FS_UnitTests\\depth_1\\depth_2\\test_d2.txt");
 	}
 
 	// Get file with same file name but different dir
@@ -235,7 +229,7 @@ TEST(FileSystem, TestPathHandleInvalidate)
 	vfs.Update();
 
 	// Delete the above file
-	auto res = remove(string{ EXE_DIR + "/FS_UnitTests/invalidate1.txt" }.c_str());
+	auto res = remove(string{ TEST_DATA_PATH "/FS_UnitTests/invalidate1.txt" }.c_str());
 
 	// After this update, file_handle1 is now under delete status
 	vfs.Update();
@@ -268,8 +262,8 @@ TEST(FileSystem, TestPathHandleInvalidate)
 	EXPECT_TRUE(file_handle1.SameKeyAs(file_handle3));
 
 	// Delete all files created
-	remove(string{ EXE_DIR + "/FS_UnitTests/invalidate2.txt" }.c_str());
-	remove(string{ EXE_DIR + "/FS_UnitTests/invalidate3.txt" }.c_str());
+	remove(string{ TEST_DATA_PATH "/FS_UnitTests/invalidate2.txt" }.c_str());
+	remove(string{ TEST_DATA_PATH "/FS_UnitTests/invalidate3.txt" }.c_str());
 }
 
 TEST(FileSystem, TestFileOpen)
@@ -444,17 +438,13 @@ TEST(FileSystem, TestGetPaths)
 TEST(FileSystem, TestConvertToVirtual)
 {
 	INIT_FILESYSTEM_UNIT_TEST();
-
-	auto path = vfs.ConvertFullToVirtual("C:/Users/joseph.cheng/Desktop/GIT/idk/idk/bin/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
+	auto full_path = vfs.GetFullPath("/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
+	EXPECT_EQ(vfs.ConvertFullToVirtual(full_path), "/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
 }
 
 
 TEST(FileSystem, CleanUp)
 {
-	using namespace idk;
-	Core c;
-	FileSystem& vfs = Core::GetSystem<FileSystem>();
-	vfs.Init();
-	const string EXE_DIR = vfs.GetExeDir().data();
-	std::filesystem::remove_all(idk::string{ EXE_DIR + "/FS_UnitTests/" }.c_str());
+    INIT_FILESYSTEM_UNIT_TEST();
+	std::filesystem::remove_all(vfs.GetFullPath("/FS_UnitTests/"));
 }
