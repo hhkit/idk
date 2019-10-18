@@ -15,6 +15,7 @@ namespace idk
 	RenderObject MeshRenderer::GenerateRenderObject() const
 	{
 		return RenderObject{
+			GetGameObject(),
 			mesh,
 			material_instance,
 

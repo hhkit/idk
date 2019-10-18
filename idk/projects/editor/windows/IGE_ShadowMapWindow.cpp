@@ -102,6 +102,8 @@ namespace idk {
 			ImGui::NewLine();
 		}
 
+		//ImGui::Image(, size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
+
 		vector<RenderObject> rdata;
 		gfx_sys.RenderObjData(rdata);
 

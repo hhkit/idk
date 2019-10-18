@@ -92,17 +92,20 @@ namespace idk::ogl
 		else
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
-			TextureMeta mm = target->GetMeta();
-			if (mm.internal_format != ColorFormat::RGBAF_16)
-			{
-				mm.internal_format = ColorFormat::RGBAF_16;
-				target->SetMeta(mm);
-			}
+			//TextureMeta mm = target->GetMeta();
+			//if (mm.internal_format != ColorFormat::RGBAF_16)
+			//{
+			//	mm.internal_format = ColorFormat::RGBAF_16;
+			//	target->SetMeta(mm);
+			//}
 			target->Bind();
 
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
 			const GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			if(target->GetMeta().internal_format == ColorFormat::RUI_32)
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+			else
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			glDrawBuffers(1, buffers);
 		}
 
@@ -133,6 +136,44 @@ namespace idk::ogl
 			meta.textures[i].as<OpenGLTexture>().Bind();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+		}
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
+		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
+
+		CheckFBStatus();
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void FrameBufferManager::SetRenderTarget(RscHandle<FrameBuffer> target, vector<OpenGLTexture> additionalCustomAttachmentList)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
+
+		auto& meta = target->GetMeta();
+		glViewport(0, 0, meta.size.x, meta.size.y);
+
+
+		// set texture targets
+		vector<GLenum> buffers;
+		//auto& yolo = *meta.textures[0];
+		for (int i = 0; i < meta.textures.size(); ++i)
+		{
+			TextureMeta mm = meta.textures[i].as<OpenGLTexture>().GetMeta();
+			if (mm.internal_format != ColorFormat::RGBAF_16)
+			{
+				mm.internal_format = ColorFormat::RGBAF_16;
+				meta.textures[i].as<OpenGLTexture>().SetMeta(mm);
+			}
+			meta.textures[i].as<OpenGLTexture>().Bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
+			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+		}
+
+		for (int i = 0, iterator = i+ meta.textures.size()-1; i < additionalCustomAttachmentList.size(); ++i,++iterator)
+		{
+			additionalCustomAttachmentList[i].Bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + iterator, s_cast<GLuint>(r_cast<intptr_t>(additionalCustomAttachmentList[i].ID())), 0);
+			buffers.push_back(GL_COLOR_ATTACHMENT0 + iterator);
 		}
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
 		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());

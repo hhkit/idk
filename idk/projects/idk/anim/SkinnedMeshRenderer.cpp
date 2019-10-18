@@ -14,6 +14,7 @@ namespace idk
 	AnimatedRenderObject SkinnedMeshRenderer::GenerateRenderObject() const
 	{
 		return AnimatedRenderObject{
+			GetGameObject(),
 			mesh,
 			material_instance,
 
