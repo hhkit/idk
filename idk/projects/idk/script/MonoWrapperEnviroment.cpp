@@ -36,6 +36,10 @@ namespace idk::mono
 			mono_runtime_invoke(method, nullptr, args, nullptr);
 		}
 		ScanTypes();
+
+		auto mb_itr = _types.find("MonoBehavior");
+		IDK_ASSERT_MSG(mb_itr != _types.end(), "cannot find idk.MonoBehavior");
+		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache method");
 	}
 
 	MonoWrapperEnvironment::~MonoWrapperEnvironment()
