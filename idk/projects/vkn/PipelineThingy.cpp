@@ -145,7 +145,7 @@ namespace idk::vkn
 				auto& [set, layout] = *l_itr;
 				auto b_itr = curr_bindings.find(set);
 				if (b_itr != curr_bindings.end())
-					b_itr->second.SetLayout(*layout);
+					curr_bindings.erase(b_itr);
 
 			}
 			shader_changed = true;
@@ -158,6 +158,7 @@ namespace idk::vkn
 		auto& out_shader = shaders[static_cast<size_t>(stage)];
 		if (!out_shader || shader != out_shader)
 		{
+			UnbindShader(stage);
 			auto& mod = shader.as<ShaderModule>();
 			//Update existing bindings
 			for (auto l_itr = mod.LayoutsBegin(); l_itr != mod.LayoutsEnd(); ++l_itr)
@@ -170,6 +171,10 @@ namespace idk::vkn
 					b_itr = curr_bindings.find(set);
 				}
 				b_itr->second.SetLayout(*layout);
+			}
+			for (auto& set : curr_bindings)
+			{
+				set.second.dirty = true;
 			}
 			shaders[static_cast<size_t>(stage)] = shader;
 			shader_changed = true;
@@ -235,6 +240,7 @@ namespace idk::vkn
 		}
 		auto& p_ro = draw_calls.emplace_back(ProcessedRO{ &ro,std::move(sets),next_config,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
 		p_ro.rebind_shaders = shader_changed;
+		shader_changed = false;
 	}
 	void PipelineThingy::GenerateDS(DescriptorsManager& d_manager)
 	{
@@ -258,7 +264,7 @@ namespace idk::vkn
 					return layout;
 					//bindings.front().layout;
 				}(bindings);
-				auto& ds = dsl[layout].GetNext();
+				auto& ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
 				UpdateUniformDS(device, ds, bindings);
 				p_ro.descriptor_sets[set]=ds;
