@@ -45,6 +45,10 @@ namespace idk
 		// Emit the signal with the given data, to all the listeners.
 		template<typename ... Args>
 		void Fire(Args&&... args);
+
+		template<typename Func>
+		SlotId operator+=(Func&& f) { return Listen(std::forward<Func>(f)); }
+		void   operator-=(SlotId id) { Unlisten(id); }
 	private:
 		hash_table<SlotId, Fn> _slots;
 		SlotId _next_id = 0;

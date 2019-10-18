@@ -124,7 +124,7 @@ namespace idk::detail
 			return array<bool(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle) -> bool
 				{
-					auto real_handle = handle_cast<GameObject>(handle);
+					auto real_handle = handle_cast<Ts>(handle);
 					if (!gs.QueuedForDestruction(real_handle))
 					{
 						if constexpr (std::is_same_v<Ts, GameObject>)
