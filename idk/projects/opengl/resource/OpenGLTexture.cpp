@@ -37,6 +37,7 @@ namespace idk::ogl
 		{
 			switch (f)
 			{
+			case ColorFormat::RUI_32: return GL_R32UI;
 			case ColorFormat::RG_8: return GL_RG;
 			case ColorFormat::RGF_16: return GL_RG16F;
 			case ColorFormat::RGB_8:  return GL_RGB8;

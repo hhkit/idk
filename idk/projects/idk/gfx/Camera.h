@@ -31,6 +31,7 @@ namespace idk
 		real orthographic_size = 1.f;
 
 		bool overlay_debug_draw = true;
+		bool is_scene_camera = false;
 
 		std::variant<color, RscHandle<CubeMap>> clear;
 

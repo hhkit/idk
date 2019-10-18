@@ -5,7 +5,7 @@
 #include <common/Transform.h>
 #include <res/MetaBundle.h>
 #include <scene/SceneFactory.h>
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <util/ioutils.h>
 
 #include <iostream>

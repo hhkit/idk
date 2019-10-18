@@ -11,7 +11,7 @@
 #include <scene/SceneManager.h>
 #include <common/Name.h>
 #include <common/Transform.h>
-#include <serialize/serialize.h> //Serialize/Deserialize
+#include <serialize/text.h> //Serialize/Deserialize
 #include <IDE.h>				 //IDE
 
 namespace idk {

@@ -200,6 +200,7 @@
     <ClInclude Include="widgets\DragQuat.h" />
     <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
+    <ClInclude Include="windows\IGE_Console.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
     <ClInclude Include="windows\IGE_ProjectSettings.h" />
     <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
@@ -219,24 +220,6 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
     <ClInclude Include="ImGui_Interface.h" />
-    <ClInclude Include="loading\FBXLoaderHelpers.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="loading\OpenGLFBXLoader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="loading\VulkanFBXLoader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </ClInclude>
     <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Vulkan_ImGui_Interface.h" />
@@ -264,6 +247,7 @@
     <ClCompile Include="widgets\DragQuat.cpp" />
     <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
+    <ClCompile Include="windows\IGE_Console.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
     <ClCompile Include="windows\IGE_ProjectSettings.cpp" />
@@ -277,24 +261,6 @@
     <ClCompile Include="windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />
     <ClCompile Include="ImGui_Interface.cpp" />
-    <ClCompile Include="loading\FBXLoaderHelpers.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="loading\OpenGLFBXLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="loading\VulkanFBXLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </ClCompile>
     <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

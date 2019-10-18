@@ -422,7 +422,7 @@ namespace idk::yaml
 			{
                 if (indent > p.block_indents.back())
                 {
-                    p.error = parse_error::ill_formed;
+                    p.error = parse_error::yaml_ill_formed;
                     return;
                 }
                 else if (indent < p.block_indents.back())
@@ -457,7 +457,7 @@ namespace idk::yaml
 		p.new_block = true;
 	}
 
-	load_result load(string_view str)
+    monadic::result<node, parse_error> load(string_view str)
 	{
 		parser_state p{ str };
         p.block_indents.push_back(handle_indent(p));
@@ -478,7 +478,7 @@ namespace idk::yaml
             case ']': on_flow_close(p); continue;
             case '!': on_exclamation_mark(p); continue;
 
-            case '\t': return parse_error::has_tabs;
+            case '\t': return parse_error::yaml_contains_tabs;
             default: { if (printable(*p)) p.token += *p; } break;
             }
 

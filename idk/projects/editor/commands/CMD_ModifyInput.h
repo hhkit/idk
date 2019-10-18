@@ -13,7 +13,7 @@
 namespace idk {
 	template <typename T>
 	class CMD_ModifyInput 
-		: public ICommand { //serialize/deserialize use serialize.h
+		: public ICommand { //serialize/deserialize use text.h
 	public:
 		CMD_ModifyInput(GenericHandle componentAffected, T* dataPtr, const T& dataModified);
 

@@ -5,7 +5,7 @@
 #include <ds/ranged_for.h>
 #include <file/FileSystem.h>
 #include <res/MetaBundle.h>
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <util/ioutils.h>
 #include <res/SaveableResourceLoader.h>
 

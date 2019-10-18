@@ -21,7 +21,7 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 
 #include <gfx/CameraControls.h>
 
@@ -84,6 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
+		break;
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;
@@ -121,6 +122,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camera->Transform()->rotation = s_cast<quat>(euler);
 		camHandle->far_plane = 100.f;
 		camHandle->render_target = RscHandle<RenderTarget>{};
+		camHandle->is_scene_camera = true;
 		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
@@ -192,7 +194,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	create_anim_obj(vec3{ 0,0,0 });
+	//create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
@@ -246,6 +248,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			auto m = light_map->GetMeta().textures[0]->GetMeta();
 			m.filter_mode = FilterMode::Nearest;
 			m.uv_mode = UVMode::ClampToBorder;
+			m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			//m.format = InputChannels::DEPTH_COMPONENT;
 			light_map->GetMeta().textures[0]->SetMeta(m);
 			light_comp->SetLightMap(light_map);
 		}

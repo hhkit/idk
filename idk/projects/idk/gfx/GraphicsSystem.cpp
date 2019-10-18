@@ -5,6 +5,9 @@
 #include <anim/Animator.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
+
+#include <gfx/CameraControls.h>
+
 namespace idk
 {
 	void GraphicsSystem::PrepareLights(span<Light> lights)
@@ -75,12 +78,17 @@ namespace idk
 		}
 
 		for (auto& camera : cameras)
+		{
+			if(camera.is_scene_camera)
+				result.curr_scene_camera = camera.GenerateCameraData();
 			result.camera.emplace_back(camera.GenerateCameraData());
+		}
 
 		for (auto& elem : mesh_renderers)
 			if (elem.IsActiveAndEnabled())
 				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
 
+		
 		SubmitBuffers(std::move(result));
 	}
 

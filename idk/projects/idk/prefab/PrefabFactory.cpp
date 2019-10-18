@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PrefabFactory.h"
-#include <serialize/serialize.h>
+#include <serialize/text.h>
 #include <sstream>
 
 namespace idk

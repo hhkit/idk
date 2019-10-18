@@ -50,10 +50,7 @@ namespace idk {
 		const float cam_vel_shift_multiplier	= 4.f;
 
 
-		float pan_multiplier					= 0.01f;
-		const float default_pan_multiplier		= 0.1f; //When on focus, this resets the pan_multiplier
-
-		const float pan_multiplier_on_scroll	= 1.1f; //This is additive and clamped. When zooming out pan_multiplier*pan_multiplier_on_scroll, when zooming in pan_multiplier/pan_multiplier_on_scroll
+		const float pan_multiplier				= 0.01f;
 		
 		//Debug ray
 		ray currRay;
@@ -65,6 +62,11 @@ namespace idk {
 
 		void UpdateGizmoControl();
 
+		void MoveMouseToWindow(); //Moves the mouse to the middle of the sceneView
+
+		void ImGuizmoManipulateUpdate(Handle<Transform>& originalTransform); //Call after ImGuizmo::Manipulate
+
+
 		float gizmo_matrix[16]{};
 
 		mat4 GenerateMat4FromGizmoMatrix();
@@ -72,6 +74,10 @@ namespace idk {
 		bool is_being_modified = false;
 
 		ray GenerateRayFromCurrentScreen();
+
+		POINT prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+		POINT currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+
 	};
 
 

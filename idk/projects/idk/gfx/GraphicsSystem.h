@@ -54,6 +54,8 @@ namespace idk
 			vector<RenderObject> mesh_render;
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;
+
+			CameraData  curr_scene_camera;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

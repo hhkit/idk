@@ -263,9 +263,6 @@
     <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="serialize\serialize.h">
-      <Filter>serialize</Filter>
-    </ClInclude>
     <ClInclude Include="file\FileSystem.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -617,7 +614,6 @@
     <ClInclude Include="gfx\ShaderTemplateLoader.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\MaterialFactory.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="anim\Animator.h">
       <Filter>anim</Filter>
@@ -705,7 +701,6 @@
     <ClInclude Include="script\ManagedType.h">
       <Filter>script</Filter>
     </ClInclude>
-    <ClInclude Include="core\ConfigurableSystem.h" />
     <ClInclude Include="anim\AnimationState.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -751,6 +746,21 @@
     </ClInclude>
     <ClInclude Include="anim\Bone.h">
       <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\binary.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\parse_error.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\text.h">
+      <Filter>serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -802,9 +812,6 @@
     </ClCompile>
     <ClCompile Include="res\ResourceManager.cpp">
       <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="serialize\serialize.cpp">
-      <Filter>serialize</Filter>
     </ClCompile>
     <ClCompile Include="file\FileSystemInternal.cpp">
       <Filter>file</Filter>
@@ -1091,6 +1098,15 @@
     <ClCompile Include="anim\Bone.cpp">
       <Filter>anim</Filter>
     </ClCompile>
+    <ClCompile Include="serialize\binary.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\text_serialize.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\text_parse.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1186,9 +1202,6 @@
     <None Include="reflect\uni_container.inl">
       <Filter>reflect</Filter>
     </None>
-    <None Include="serialize\serialize.inl">
-      <Filter>serialize</Filter>
-    </None>
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
     </None>
@@ -1266,6 +1279,12 @@
     </None>
     <None Include="res\ResourceUtils.inl">
       <Filter>res</Filter>
+    </None>
+    <None Include="serialize\binary.inl">
+      <Filter>serialize</Filter>
+    </None>
+    <None Include="serialize\text.inl">
+      <Filter>serialize</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
