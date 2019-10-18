@@ -363,7 +363,7 @@ namespace idk
 				auto c_bone = c_go->GetComponent<Bone>();
 				if (c_bone)
 				{
-					child_objects[c_bone->_bone_index];
+					child_objects[c_bone->_bone_index] = c_go;
 				}
 			};
 

@@ -412,6 +412,7 @@ namespace idk::ogl
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();
 		fb_man.ResetFramebuffer();
+		//glBindVertexArray(0);
 	}
 
 	void OpenGLState::ComputeBRDF(const RscHandle<ogl::Program>& handle)
@@ -435,6 +436,7 @@ namespace idk::ogl
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();
 		fb_man.ResetFramebuffer();
+		//glBindVertexArray(0);
 	}
 
 }
