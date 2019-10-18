@@ -27,6 +27,7 @@ of the editor.
 #include <prefab/PrefabUtility.h>
 #include <vkn/VknFramebuffer.h>
 #include <gfx/DebugRenderer.h>
+#include <win32/WindowsApplication.h>
 
 #include <phys/PhysicsSystem.h>
 
@@ -163,6 +164,10 @@ namespace idk {
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
+				MoveMouseToWindow();
+				GetCursorPos(&prevMouseScreenPos);
+				GetCursorPos(&currMouseScreenPos);
+				//ImGui::ResetMouseDragDelta(1);
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
 			}
@@ -175,6 +180,10 @@ namespace idk {
 		//Middle Mouse Pan control
 		if (ImGui::IsMouseDown(2)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
+				MoveMouseToWindow();
+				GetCursorPos(&prevMouseScreenPos);
+				GetCursorPos(&currMouseScreenPos);
+
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
 			}
@@ -254,9 +263,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdateWASDMouseControl()
 	{
-
-		//Copied from _interface.Inputs().Update()
-
+		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 		auto& app_sys = Core::GetSystem<Application>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
@@ -274,27 +281,47 @@ namespace idk {
 		if (app_sys.GetKey(Key::Q))	tfm->position += -finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
-		vec2 delta = ImGui::GetMouseDragDelta(1,0.1f);
+		//Mouse Controls
+
+		GetCursorPos(&currMouseScreenPos);
+		//int drag_X{};
+		//int drag_Y{};
+		//drag_X = currPos.x - prevPos.x;
+		//drag_Y = currPos.y - prevPos.y;
+		//std::cout << "Drag:" << drag_X << "," << drag_Y << std::endl;
+
+		vec2 delta{};// = ImGui::GetMouseDragDelta(1, 0.1f);
+		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x);
+		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y);
+		//ImGui::ResetMouseDragDelta(1);
 
 		//Order of multiplication Z*Y*X (ROLL*YAW*PITCH)
-
-		//TEST
-			
 
 		//MOUSE YAW
 		tfm->rotation = (quat{ vec3{0,1,0}, deg{90 * delta.x * -yaw_rotation_multiplier	} *Core::GetDT().count() } *tfm->rotation).normalize(); //Global Rotation
 		//MOUSE PITCH
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
+		MoveMouseToWindow();
 
-
-		ImGui::ResetMouseDragDelta(1);
+		GetCursorPos(&prevMouseScreenPos);
 	}
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
-		vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 
+		//vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
+		GetCursorPos(&currMouseScreenPos);
+		//int drag_X{};
+		//int drag_Y{};
+		//drag_X = currPos.x - prevPos.x;
+		//drag_Y = currPos.y - prevPos.y;
+		//std::cout << "Drag:" << drag_X << "," << drag_Y << std::endl;
+
+		vec2 delta{};
+		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x);
+		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y);
 		//auto& app_sys = Core::GetSystem<Application>();
 		IDE& editor = Core::GetSystem<IDE>();
 
@@ -306,7 +333,11 @@ namespace idk {
 		tfm->position += localY;
 		tfm->position += localX;
 
-		ImGui::ResetMouseDragDelta(2);
+		//ImGui::ResetMouseDragDelta(2);
+
+		MoveMouseToWindow();
+
+		GetCursorPos(&prevMouseScreenPos);
 
 	}
 
@@ -321,7 +352,7 @@ namespace idk {
 			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
 
 		if (scroll > 0)
-			editor.scroll_multiplier += editor.scroll_subtractive;
+			editor.scroll_multiplier -= editor.scroll_subtractive;
 		else if (scroll < 0)
 			editor.scroll_multiplier += editor.scroll_additive;
 
@@ -402,6 +433,22 @@ namespace idk {
 
 
 		}
+	}
+
+	void IGE_SceneView::MoveMouseToWindow()
+	{
+
+		RECT rect = { NULL };
+		GetWindowRect(Core::GetSystem<Windows>().GetWindowHandle(), &rect);
+		int x = static_cast<int>(rect.left);
+		int y = static_cast<int>(rect.top)+20;
+		
+		x += static_cast<int>(round(ImGui::GetWindowPos().x)		);
+		y += static_cast<int>(round(ImGui::GetWindowPos().y)		);
+		x += static_cast<int>(round(ImGui::GetWindowSize().x * 0.5f));
+		y += static_cast<int>(round(ImGui::GetWindowSize().y * 0.5f));
+		SetCursorPos(x, y);
+
 	}
 
 	void IGE_SceneView::ImGuizmoManipulateUpdate(Handle<Transform>& gameObjectTransform)

@@ -106,8 +106,8 @@ namespace idk
 		vec3 focused_vector{}; //Updated everytime FocusOnSelectedGameObjects is called. For Scroll Vector WIP
 		float scroll_multiplier					= 1.0f;
 		const float default_scroll_multiplier	= 1.0f;			//When on focus, this resets the scroll_multiplier
-		const float scroll_additive				= 1.05f;		//Amount of multiplication when scrolling farther
-		const float scroll_subtractive			= 0.85f;		//Amount of multiplication when scrolling nearer
+		const float scroll_additive				= 0.90f;		//Amount of multiplication when scrolling farther.This adds to scroll_multiplier
+		const float scroll_subtractive			= 0.85f;		//Amount of multiplication when scrolling nearer .This adds to scroll_multiplier
 
 		bool flag_skip_render					= false;
 

@@ -65,6 +65,8 @@ namespace idk {
 
 		void UpdateGizmoControl();
 
+		void MoveMouseToWindow(); //Moves the mouse to the middle of the sceneView
+
 		void ImGuizmoManipulateUpdate(Handle<Transform>& originalTransform); //Call after ImGuizmo::Manipulate
 
 
@@ -75,6 +77,10 @@ namespace idk {
 		bool is_being_modified = false;
 
 		ray GenerateRayFromCurrentScreen();
+
+		POINT prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+		POINT currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+
 	};
 
 
