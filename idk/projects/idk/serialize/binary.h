@@ -16,9 +16,6 @@ namespace idk
     template<typename T>
     string serialize_binary(const T& obj);
 
-    template<>
-    string serialize_binary(const reflect::dynamic& obj);
-
     template<> // serialize scene
     string serialize_binary(const Scene& scene);
 
@@ -29,9 +26,6 @@ namespace idk
 
     template<typename T>
     parse_error parse_binary(string_view sv, T& obj);
-
-    template<>
-    parse_error parse_binary(string_view sv, reflect::dynamic& obj);
 
     template<> // parse scene
     parse_error parse_binary(string_view sv, Scene& scene);

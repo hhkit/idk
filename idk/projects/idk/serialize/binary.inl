@@ -6,6 +6,7 @@ namespace idk
 {
     namespace detail
     {
+        template<bool IsBigEndian>
         struct binary_serializer
         {
             string output;
@@ -17,8 +18,18 @@ namespace idk
                 {
                     if constexpr (sizeof(T) == 1)
                         output += obj;
-                    else // handle endianness?
-                        output += string_view(reinterpret_cast<const char*>(&obj), sizeof(obj));
+                    else // handle endianness
+                    {
+                        if constexpr (IsBigEndian) // reverse
+                        {
+                            const char* end = reinterpret_cast<const char*>(&obj) - 1;
+                            const char* begin = end + sizeof(obj);
+                            while (begin != end)
+                                output += *begin--;
+                        }
+                        else
+                            output += string_view(reinterpret_cast<const char*>(&obj), sizeof(obj));
+                    }
                 }
                 else if constexpr (std::is_same_v<std::decay_t<T>, string> || std::is_same_v<std::decay_t<T>, string_view>)
                 {
@@ -63,11 +74,15 @@ namespace idk
                 }
                 else
                     *this << reflect::dynamic{ obj };
-            }
+            } // operator>>
+        }; // struct binary_serializer
 
-            template<>
-            void operator<<(const reflect::dynamic& obj);
-        };
+        template<>
+        template<>
+        void detail::binary_serializer<true>::operator<<(const reflect::dynamic& obj);
+        template<>
+        template<>
+        void detail::binary_serializer<false>::operator<<(const reflect::dynamic& obj);
 
 
 
@@ -76,6 +91,8 @@ namespace idk
         template <typename T>
         struct has_resize<T, std::void_t<decltype(std::declval<T>().clear())>> : std::true_type {};
 
+
+        template<bool IsBigEndian>
         struct binary_parser
         {
             const char* begin;
@@ -89,10 +106,18 @@ namespace idk
                 {
                     if constexpr (sizeof(T) == 1)
                         obj = *reinterpret_cast<const T*>(begin++);
-                    else // handle endianness?
+                    else // handle endianness
                     {
-                        std::copy(begin, begin + sizeof(obj), reinterpret_cast<char*>(&obj));
-                        begin += sizeof(obj);
+                        if constexpr (IsBigEndian) // reverse
+                        {
+                            std::reverse_copy(begin, begin + sizeof(obj), reinterpret_cast<char*>(&obj));
+                            begin += sizeof(obj);
+                        }
+                        else
+                        {
+                            std::copy(begin, begin + sizeof(obj), reinterpret_cast<char*>(&obj));
+                            begin += sizeof(obj);
+                        }
                     }
                 }
                 else if constexpr (std::is_same_v<std::decay_t<T>, string>)
@@ -159,11 +184,15 @@ namespace idk
 
                 if (begin > end)
                     error = parse_error::binary_ill_formed;
-            }
+            } // operator>>
+        }; // struct binary_parser
 
-            template<>
-            void operator>>(reflect::dynamic& obj);
-        };
+        template<>
+        template<>
+        void detail::binary_parser<true>::operator>>(reflect::dynamic& obj);
+        template<>
+        template<>
+        void detail::binary_parser<false>::operator>>(reflect::dynamic& obj);
     }
 
 
@@ -171,9 +200,19 @@ namespace idk
     template<typename T>
     string serialize_binary(const T& obj)
     {
-        detail::binary_serializer s;
-        s << obj;
-        return s.output;
+        uint32_t num = 1;
+        if (*(char*)&num == 1) // little endian
+        {
+            detail::binary_serializer<false> s;
+            s << obj;
+            return s.output;
+        }
+        else // big endian
+        {
+            detail::binary_serializer<true> s;
+            s << obj;
+            return s.output;
+        }
     }
 
     template<typename T>
@@ -189,9 +228,19 @@ namespace idk
     template<typename T>
     parse_error parse_binary(string_view sv, T& obj)
     {
-        detail::binary_parser p{ sv.data(), sv.data() + sv.size() };
-        p >> obj;
-        return p.error;
+        uint32_t num = 1;
+        if (*(char*)&num == 1) // little endian
+        {
+            detail::binary_parser<false> p{ sv.data(), sv.data() + sv.size() };
+            p >> obj;
+            return p.error;
+        }
+        else // big endian
+        {
+            detail::binary_parser<true> p{ sv.data(), sv.data() + sv.size() };
+            p >> obj;
+            return p.error;
+        }
     }
 
 }
