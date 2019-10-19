@@ -16,10 +16,18 @@ namespace idk
 		void Update(span<Animator>);
 		void UpdatePaused(span<Animator>);
 		virtual void Shutdown() override;
-		float _blend = 0.0f;
+		
+		// Helper functions
+		void GenerateSkeletonTree(Animator& animator);
+		void SaveBindPose(Animator& animator);
+		void RestoreBindPose(Animator& animator);
+		void HardReset(Animator& animator);
+
 	private:
 		
 		bool _was_paused = true;
+		float _blend = 0.0f;
+
 		template<typename T>
 		size_t find_key(const vector<T>& vec, float ticks)
 		{
@@ -35,7 +43,11 @@ namespace idk
 			return vec.size() - 1;
 		}
 
+		// Animation passes: Animate -> Blend -> Finalize
 		void AnimationPass(Animator& animators);
+		void FinalPass(Animator& animators);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
+
+		
 	};
 }

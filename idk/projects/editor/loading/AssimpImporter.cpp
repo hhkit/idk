@@ -7,6 +7,7 @@
 //* // tmp include
 #include <scene/sceneManager.h>
 #include <file/FileSystem.h>
+#include <anim/AnimationSystem.h>
 #include <core/GameObject.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabUtility.h>
@@ -172,8 +173,8 @@ namespace idk
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.
 			// Need to revisit this as I feel this is the wrong way to do this.
 			const auto animator = prefab_root->AddComponent<Animator>();
-			
-			animator->SetSkeleton(skeleton_handle);
+			animator->_skeleton = skeleton_handle;
+			Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 			
 			for (auto& anim : animation_handles)
 				animator->AddAnimation(anim);
@@ -379,8 +380,8 @@ namespace idk
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.
 			// Need to revisit this as I feel this is the wrong way to do this.
 			const auto animator = prefab_root->AddComponent<Animator>();
-
-			animator->SetSkeleton(skeleton_handle);
+			animator->_skeleton = skeleton_handle;
+			Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
 			for (auto& anim : animation_handles)
 				animator->AddAnimation(anim);

@@ -61,7 +61,7 @@ namespace idk
 		{
 			skeleton_indices.emplace(elem.GetHandle(), i++);
 			result.skeleton_transforms.emplace_back(
-				SkeletonTransforms{ std::move(elem.GenerateTransforms()) } // generate this from the skeletons
+				SkeletonTransforms{ std::move(elem.BoneTransforms()) } // generate this from the skeletons
 				//SkeletonTransforms{ vector<mat4>{3} }
 			);
 		}
