@@ -2,9 +2,10 @@
 {
     class Mathf
     {
-        public static float PI { get { return 3.1415927f; } }
-
+        public static float PI { get { return 3.14159265358979f; } }
         public static float Epsilon { get { return 1e-6f; } }
+        public static float DegToRad { get { return PI / 180; } }
+        public static float RadToDeg { get { return 180 / PI; } }
 
         public static float Abs(float val)
         {
@@ -39,6 +40,10 @@
         public static float Asin(float val)
         {
             return (float)System.Math.Asin(val);
+        }
+        public static float Acos(float val)
+        {
+            return (float)System.Math.Acos(val);
         }
     }
 }
