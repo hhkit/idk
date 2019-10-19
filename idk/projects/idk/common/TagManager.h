@@ -16,7 +16,7 @@ namespace idk
         using tag_t = decltype(Tag::index);
         constexpr static size_t max_tags = std::numeric_limits<tag_t>::max();
 
-        virtual void Init() {};
+        virtual void Init();
         virtual void Shutdown() {};
 
         Handle<GameObject> Find(string_view tag) const;
