@@ -20,7 +20,7 @@
 #include <vkn/VknTexture.h>
 #include <vkn/VulkanHashes.h>
 
-
+#include <vkn/PipelineBinders.inl>
 
 namespace idk::vkn
 {
@@ -100,303 +100,45 @@ namespace idk::vkn
 		auto& bindings = collated_bindings[info.set];
 		bindings.emplace_back(info.binding, buffer, offset, 0, info.size);
 	}
-
-
-	struct FrameRenderer::VertexUniformConfig
+	struct GraphicsStateInterface
 	{
-		RscHandle<ShaderProgram> _shader;
-		//template<typename T= FrameRenderer>
-		struct Ref
+		RscHandle<ShaderProgram>             mesh_vtx;
+		RscHandle<ShaderProgram>             skinned_mesh_vtx;
+		const vector<const RenderObject*>*         mesh_render;
+		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
+		GraphicsStateInterface() = default;
+		GraphicsStateInterface(const GraphicsState& state)
 		{
-			using CollatedLayouts_t = DsBindingCount;
-			CollatedLayouts_t& collated_layouts;
-			UboManager& ubo_manager;
-			Ref(CollatedLayouts_t* cl = nullptr, UboManager* u = nullptr) :collated_layouts{ *cl }, ubo_manager{ *u }{}
-		};
-		Ref ref;
-		void SetRef(
-			DsBindingCount& collated_layouts,
-			//set, bindings
-			UboManager& ubo_manager)
+			mesh_vtx = state.mesh_vtx;
+			mesh_render = &state.mesh_render;
+			skinned_mesh_vtx = state.skinned_mesh_vtx;
+			skinned_mesh_render = &state.skinned_mesh_render;
+		}
+		GraphicsStateInterface(const PreRenderData& state)
 		{
-			new (&ref) Ref{ &collated_layouts,&ubo_manager };
-		}
-		ShaderModule& Shader()const
-		{
-			return _shader.as<ShaderModule>();
-		}
-		RscHandle<ShaderModule> ShaderHandle()const
-		{
-			return RscHandle<ShaderModule>{_shader};
-		}
-		//struct ExBindingInfo
-		//{
-		//	ProcessedRO::BindingInfo info;
-		//	vk::DescriptorSetLayout layout;
-		//	operator ProcessedRO::BindingInfo& ()
-		//	{
-		//		return info;
-		//	}
-		//	ExBindingInfo(const ProcessedRO::BindingInfo& i, vk::DescriptorSetLayout l) : info{i},layout{l}
-		//	{
-		//	}
-		//};
-
-		vector<std::pair<uint32_t, ProcessedRO::BindingInfo>> binding_infos;//set, binding_info
-		template<typename T>
-		void RegisterBindingInfo(const string& name, const T& data)
-		{
-			auto& shader = Shader();
-			auto& uni_info = shader.GetLayout(name);
-			binding_infos.emplace_back(uni_info.set, CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
-		}
-		template<typename Tracker>
-		void BindRegistered(collated_bindings_t& collated_bindings,Tracker&& tracker)
-		{
-			for (auto& info : binding_infos)
-			{
-				collated_bindings[info.first].emplace_back(info.second);
-				tracker(info.second.layout, ref.collated_layouts);
-			}
-		}
-		template<typename T, typename Tracker>
-		void BindOnce(collated_bindings_t& collated_bindings, const string& name, const T& data, Tracker tracker)
-		{
-			auto& shader = Shader();
-			auto& uni_info = shader.GetLayout(name);
-			collated_bindings[uni_info.set].emplace_back(CreateBindingInfo(uni_info, data, ref.collated_layouts, ref.ubo_manager));
-			tracker(uni_info.layout,ref.collated_layouts);
-		}
-		VertexUniformConfig()
-		{
-		}
-	};
-	void BindCameraStuff(PipelineThingy& the_interface, const CameraData& cam)
-	{
-		//map back into z: (0,1)
-		mat4 projection_trf = mat4{ 1,0,0,0,
-							0,1,0,0,
-							0,0,0.5f,0.5f,
-							0,0,0,1
-		}*cam.projection_matrix;//map back into z: (0,1)
-		the_interface.BindUniformBuffer("CameraBlock", 0, projection_trf);
-	}
-
-	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights)
-	{
-		vector<BaseLightData> tmp_light(lights.size());
-		for (size_t i = 0; i < tmp_light.size(); ++i)
-		{
-			auto& light = tmp_light[i] = (lights)[i];
-			light.v_pos = cam.view_matrix * vec4{ light.v_pos,1 };
-			light.v_dir = (cam.view_matrix * vec4{ light.v_dir,0 }).get_normalized();
-		}
-
-		string light_block;
-		uint32_t len = s_cast<uint32_t>(tmp_light.size());
-		light_block += string{ reinterpret_cast<const char*>(&len),sizeof(len) };
-		light_block += string(16 - sizeof(len), '\0');
-		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
-		return light_block;
-	}
-	struct StandardBindings
-	{
-		virtual void Bind([[maybe_unused]]PipelineThingy& the_interface) {}
-		virtual void Bind([[maybe_unused]]PipelineThingy& the_interface, [[maybe_unused]] const  RenderObject& dc) {}
-		void Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
-		{
-			Bind(the_interface, s_cast<const RenderObject&>(dc));
-			BindAni(the_interface, dc);
-		}
-		virtual void BindAni([[maybe_unused]] PipelineThingy& the_interface, [[maybe_unused]] const AnimatedRenderObject& dc) {}
-	};
-
-	struct StandardVertexBindings : StandardBindings
-	{
-		const GraphicsState* _state;
-		const GraphicsState& State() {return *_state;}
-		mat4 view_trf, proj_trf;
-		void SetState(const GraphicsState& vstate) {
-			_state = &vstate;
-			auto& state = State();
-			auto& cam = state.camera;
-			view_trf = cam.view_matrix;
-			proj_trf = cam.projection_matrix;
-		}
-
-		void Bind(PipelineThingy& the_interface)override
-		{
-			auto& state = State();
-			auto& cam = state.camera;
-			BindCameraStuff(the_interface, cam);
-		}
-		void Bind(PipelineThingy& the_interface, const RenderObject& dc)override
-		{
-			mat4 obj_trf = view_trf * dc.transform;
-			mat4 obj_ivt = obj_trf.inverse().transpose();
-			vector<mat4> mat4_block{ obj_trf,obj_ivt };
-			the_interface.BindUniformBuffer("ObjectMat4Block", 0, mat4_block);
-		}
-		void Bind(PipelineThingy& the_interface, const  AnimatedRenderObject& dc)
-		{
-			Bind(the_interface, s_cast<const RenderObject&>(dc));
-			BindAni(the_interface, dc);
-		}
-		virtual void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
-		{
-			auto& state = State();
-			the_interface.BindUniformBuffer("BoneMat4Block", 0, state.GetSkeletonTransforms()[dc.skeleton_index].bones_transforms);
-		}
-
-	};
-	struct PbrFwdBindings : StandardBindings
-	{
-		const GraphicsState* _state;
-		CameraData cam;
-		const GraphicsState& State() { return *_state; }
-		string light_block;
-		mat4 view_trf, pbr_trf, proj_trf;
-		void SetState(const GraphicsState& vstate) {
-			_state = &vstate;
-			auto& state = State();
-			cam = state.camera;
-			light_block = PrepareLightBlock(cam, *state.lights);
-			view_trf = cam.view_matrix;
-			pbr_trf = view_trf.inverse();
-		}
-
-		virtual void Bind(PipelineThingy& the_interface, const RenderObject& dc)
-		{
-			auto& state = State();
-			the_interface.BindUniformBuffer("LightBlock", 0, light_block, true);//skip if pbr is already bound(not per instance)
-			the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
-			uint32_t i = 0;
-			//Bind the shadow maps
-			for (auto& shadow_map : state.active_lights)
-			{
-				auto& sm_uni = shadow_map->light_map;
-				{
-					auto hdepth_tex = sm_uni->GetDepthBuffer();
-					auto& depth_tex = hdepth_tex.as<VknTexture>();
-					the_interface.BindSampler("shadow_maps", i++, depth_tex);
-				}
-			}
+			mesh_vtx = state.mesh_vtx;
+			mesh_render = &state.mesh_render;
+			skinned_mesh_vtx = state.skinned_mesh_vtx;
+			skinned_mesh_render = &state.skinned_mesh_render;
 		}
 	};
 
-	struct StandardMaterialFragBindings : StandardBindings
+
+	PipelineThingy ProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager,StandardBindings binders)
 	{
-		//Assumes that the material is valid.
-		void Bind(PipelineThingy& the_interface, const  RenderObject& dc)override
-		{
-			auto& mat_inst = *dc.material_instance;
-			auto& mat = *mat_inst.material;
-			the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
-		}
+		auto& mesh_vtx            = state.mesh_vtx;
+		auto& mesh_render         = *state.mesh_render;
+		auto& skinned_mesh_vtx    = state.skinned_mesh_vtx;
+		auto& skinned_mesh_render = *state.skinned_mesh_render;
 
-	};
-	struct StandardMaterialBindings : StandardBindings
-	{
-		const GraphicsState* _state;
-		const GraphicsState& State() { return *_state; }
-		void SetState(const GraphicsState& vstate) {
-			_state = &vstate;
-			auto& state = State();
-		}
-
-		//Assumes that the material is valid.
-		virtual void Bind(PipelineThingy& the_interface, const  RenderObject& dc)
-		{
-			//Bind the material uniforms
-			{
-				auto& mat_inst = *dc.material_instance;
-				auto& mat = *mat_inst.material;
-				auto mat_cache = mat_inst.get_cache();
-				for (auto itr = mat_cache.uniforms.begin(); itr != mat_cache.uniforms.end(); ++itr)
-				{
-					if (mat_cache.IsUniformBlock(itr))
-					{
-						the_interface.BindUniformBuffer(itr->first, 0, mat_cache.GetUniformBlock(itr));
-					}
-					else if (mat_cache.IsImageBlock(itr))
-					{
-						auto img_block = mat_cache.GetImageBlock(itr);
-						uint32_t i = 0;
-						for (auto& img : img_block)
-						{
-							the_interface.BindSampler(itr->first.substr(0, itr->first.find_first_of('[')), i++, img.as<VknTexture>());
-						}
-					}
-				}
-			}
-		}
-
-		virtual void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
-		{
-		}
-
-	};
-	namespace detail
-	{
-		template<template<typename,typename...>typename cond,typename ...FArgs>
-		struct for_each_binder_impl
-		{
-			template<typename T>
-			using cond2 = cond<T,FArgs...>;
-			template<typename T>
-			using cond_bool =meta::SfinaeBool<cond2, T>;
-		};
-		
-	}
-	template<typename ...Args>
-	struct CombinedBindings :StandardBindings
-	{
-		std::tuple<Args...> binders;
-		template<template<typename...>typename cond = meta::always_true_va , typename Fn, typename ...FArgs >
-		void for_each_binder(Fn&& f, FArgs& ...args)
-		{
-			meta::for_each_tuple_element<typename detail::for_each_binder_impl<cond,FArgs...>::cond_bool>(binders,
-				[](auto& binder, auto& func, auto& ...args) 
-				{
-					func(binder, args...);
-				}
-			, f, args...);
-		}
-		void Bind(PipelineThingy& the_interface) override
-		{
-			meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface)
-				{
-					binder.Bind(the_interface); 
-				}, the_interface);
-		}
-		void Bind(PipelineThingy& the_interface, const RenderObject& dc) override
-		{
-			meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface, auto& dc) {
-				binder.Bind(the_interface,dc);
-				}, the_interface,dc);
-		}
-		void BindAni(PipelineThingy& the_interface, const  AnimatedRenderObject& dc) override
-		{
-			meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface, auto& dc) {
-				binder.BindAni(the_interface, dc);
-				}, the_interface, dc);
-		}
-	};
-
-	using PbrFwdMaterialBinding = CombinedBindings<StandardVertexBindings,StandardMaterialFragBindings, PbrFwdBindings, StandardMaterialBindings>;
-	using ShadowBinding = CombinedBindings<StandardVertexBindings>;
-
-
-	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager,StandardBindings* binder)
-	{
-		auto& binders = *binder;
+		//auto& binders = *binder;
 		PipelineThingy the_interface{};
 		the_interface.SetRef(ubo_manager);
 
-		the_interface.BindShader(ShaderStage::Vertex, state.mesh_vtx);
+		the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
 		binders.Bind(the_interface);
 		{
-			const vector<const RenderObject*>& draw_calls = state.mesh_render;
+			const vector<const RenderObject*>& draw_calls = mesh_render;
 			for (auto& ptr_dc : draw_calls)
 			{
 				auto& dc = *ptr_dc;
@@ -411,8 +153,8 @@ namespace idk::vkn
 		}
 
 		{
-			const vector<const AnimatedRenderObject*>& draw_calls = state.skinned_mesh_render;
-			the_interface.BindShader(ShaderStage::Vertex, state.skinned_mesh_vtx);
+			const vector<const AnimatedRenderObject*>& draw_calls = skinned_mesh_render;
+			the_interface.BindShader(ShaderStage::Vertex, skinned_mesh_vtx);
 			binders.Bind(the_interface);
 			for (auto& ptr_dc : draw_calls)
 			{
@@ -440,13 +182,13 @@ namespace idk::vkn
 		{
 			ShadowBinding binders;
 			binders.for_each_binder([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
-			return vkn::ProcessRoUniforms(state, ubo_manager, &binders);
+			return vkn::ProcessRoUniforms(state, ubo_manager, binders);
 		}
 		else
 		{
 			PbrFwdMaterialBinding binders;
 			binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
-			return vkn::ProcessRoUniforms(state,ubo_manager,&binders);
+			return vkn::ProcessRoUniforms(state,ubo_manager,binders);
 
 		}
 
@@ -495,6 +237,26 @@ namespace idk::vkn
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
 		_pipeline_manager = &manager;
+	}
+	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
+	{
+		auto& lights = *state.shared_gfx_state->lights;
+		//Do the shadow pass here.
+		for (auto light_idx : state.active_lights)
+		{
+			auto& light = lights[light_idx];
+			auto cam = CameraData{s_cast<int>(0xFFFFFFFF),light.v,light.p,light.light_map};
+			RenderStateV2* rs=nullptr; //TODO actually allocate a render state.
+			ShadowBinding shadow_binding;
+			shadow_binding.for_each_binder<has_setstate>(
+				[](auto& binder, const mat4& view, const mat4& proj, const vector<SkeletonTransforms>& skel) 
+				{
+					binder.SetState(view, proj, skel);
+				}, 
+				light.v, light.p, 
+				state.skeleton_transforms);
+			vkn::ProcessRoUniforms(state, rs->ubo_manager,shadow_binding);
+		}
 	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
@@ -755,7 +517,7 @@ namespace idk::vkn
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
-		auto& processed_ro = the_interface.draw_calls;
+		auto& processed_ro = the_interface.DrawCalls();
 		rs.FlagRendered();
 		for (auto& p_ro : processed_ro)
 		{

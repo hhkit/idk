@@ -224,6 +224,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
+    <ClInclude Include="PipelineBinders.h" />
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
@@ -281,6 +282,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="PipelineBinders.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
     <ClCompile Include="PipelineThingy.cpp" />
     <ClCompile Include="ProcessedRO.cpp" />
@@ -331,6 +333,7 @@ call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
     <None Include="DescriptorPoolsManager.inl">
       <FileType>CppHeader</FileType>
     </None>
+    <None Include="PipelineBinders.inl" />
     <None Include="UboManager.inl" />
     <None Include="utils\utils.inl" />
     <None Include="VulkanState.inl" />

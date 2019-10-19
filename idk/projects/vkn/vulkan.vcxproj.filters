@@ -168,6 +168,9 @@
     <ClInclude Include="VulkanHashes.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineBinders.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -302,6 +305,9 @@
     <ClCompile Include="PipelineThingy.cpp">
       <Filter>render\objects</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineBinders.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -356,6 +362,9 @@
     </None>
     <None Include="utils\utils.inl">
       <Filter>utils</Filter>
+    </None>
+    <None Include="PipelineBinders.inl">
+      <Filter>render\objects</Filter>
     </None>
   </ItemGroup>
 </Project>

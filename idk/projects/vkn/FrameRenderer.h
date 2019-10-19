@@ -18,6 +18,7 @@ namespace idk
 }
 namespace idk::vkn
 {
+	struct PreRenderData;
 
 	struct GraphicsState;
 	class PipelineManager;
@@ -29,7 +30,9 @@ namespace idk::vkn
 		void Init(VulkanView* view, vk::CommandPool cmd_pool);
 
 		void SetPipelineManager(PipelineManager& manager);
+		void PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index);
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
+		void PostRenderGraphicsStates(const vector<GraphicsState>& state, uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 	private:
 		struct VertexUniformConfig;

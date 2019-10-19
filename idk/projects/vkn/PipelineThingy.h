@@ -17,20 +17,9 @@ namespace idk::vkn
 	template<vk::DescriptorType type>
 	static constexpr size_t desc_type_index = desc_type_info::map<type>();
 
-	void UpdateUniformDS(
-		vk::Device& device,
-		vk::DescriptorSet& dset,
-		vector<ProcessedRO::BindingInfo> bindings
-	);
-	struct PipelineThingy
+	class PipelineThingy
 	{
-		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
-		vector<ProcessedRO> draw_calls;
-
-		shared_ptr<pipeline_config> prev_config;
-
-		bool shader_changed = false;
-
+	public:
 		using set_t = uint32_t;
 		using binding_t = uint32_t;
 		struct set_bindings
@@ -114,21 +103,7 @@ namespace idk::vkn
 				return std::move(result);
 			}
 		};
-
-		hash_table<set_t, set_bindings> curr_bindings;
-		struct Ref
-		{
-			CollatedLayouts_t collated_layouts;
-			UboManager& ubo_manager;
-			Ref(
-				UboManager* u = nullptr
-			)
-				:ubo_manager{ *u }
-			{}
-		};
-		Ref ref;
-
-		PipelineThingy() {}
+		
 		void SetRef(
 			//set, bindings
 			UboManager& ubo_manager
@@ -146,8 +121,38 @@ namespace idk::vkn
 		void FinalizeDrawCall(const RenderObject& ro);
 
 		void GenerateDS(DescriptorsManager& d_manager);
+
+		const vector<ProcessedRO>& DrawCalls()const
+		{
+			return draw_calls;
+		}
+
+	private:
+		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
+		vector<ProcessedRO> draw_calls;
+
+		shared_ptr<pipeline_config> prev_config;
+
+		bool shader_changed = false;
+		hash_table<set_t, set_bindings> curr_bindings;
+		struct Ref
+		{
+			CollatedLayouts_t collated_layouts;
+			UboManager& ubo_manager;
+			Ref(
+				UboManager* u = nullptr
+			)
+				:ubo_manager{ *u }
+			{}
+		};
+		Ref ref;
 	};
 
+	void UpdateUniformDS(
+		vk::Device& device,
+		vk::DescriptorSet& dset,
+		vector<ProcessedRO::BindingInfo> bindings
+	);
 
 	template<typename T>
 	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const T& val, UboManager& ubo_manager)
