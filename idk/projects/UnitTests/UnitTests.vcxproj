@@ -48,6 +48,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClCompile Include="TestGeometry.cpp" />
+    <ClCompile Include="TestSerializeBinary.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />

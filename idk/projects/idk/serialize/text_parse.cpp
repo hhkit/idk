@@ -302,7 +302,8 @@ namespace idk
 			}
 		}); // visit
 
-        obj.on_parse();
+        if (err == parse_error::none)
+            obj.on_parse();
         return err;
 	}
 
