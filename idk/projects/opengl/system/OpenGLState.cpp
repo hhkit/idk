@@ -6,6 +6,7 @@
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLTexture.h>
 #include <opengl/resource/FrameBuffer.h>
+#include <gfx/FrameBuffer.h>
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
@@ -143,7 +144,7 @@ namespace idk::ogl
 
 				if (light.light_map)
 				{
-					const auto t = light.light_map->GetDepthBuffer();
+					const auto t = light.light_map->DepthAttachment().buffer;
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
@@ -221,7 +222,7 @@ namespace idk::ogl
 			if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				fb_man.SetRenderTarget(RscHandle<OpenGLTexture>{elem.light_map->GetDepthBuffer()});
+				fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLTexture>>(elem.light_map->DepthAttachment().buffer));
 
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);

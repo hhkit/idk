@@ -78,27 +78,27 @@ namespace idk
 		, light);
 	}
 
-	RscHandle<RenderTarget>& Light::GetLightMap()
+	RscHandle<FrameBuffer>& Light::GetLightMap()
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant) ->RscHandle<RenderTarget> &
+			std::visit([&](auto& light_variant) ->RscHandle<FrameBuffer> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	const RscHandle<RenderTarget>& Light::GetLightMap() const
+	const RscHandle<FrameBuffer>& Light::GetLightMap() const
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant)-> const RscHandle<RenderTarget> &
+			std::visit([&](auto& light_variant)-> const RscHandle<FrameBuffer> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	void Light::SetLightMap(const RscHandle<RenderTarget>& light_map)
+	void Light::SetLightMap(const RscHandle<FrameBuffer>& light_map)
 	{
 		GetLightMap() = light_map;
 	}
@@ -152,6 +152,7 @@ namespace idk
 
 		return retval;
 	}
+	/*
 	CameraData Light::GenerateCameraData() const
 	{
 		return CameraData{
@@ -168,4 +169,5 @@ namespace idk
 			vec4{1,1,1,1}
 		};
 	}
+	*/
 }

@@ -14,11 +14,11 @@ namespace idk
 		real  attenuation_radius { 1.f } ;
 		bool  use_inv_sq_atten   { true };
 
-		RscHandle<RenderTarget> light_map;
+		RscHandle<FrameBuffer> light_map;
 
 		const void* unique_id()const noexcept;
 
-		RscHandle<RenderTarget> InitShadowMap();
+		RscHandle<FrameBuffer> InitShadowMap();
 		//PointLight();
 		//PointLight(
 		//	real  intensity         ={ 1.f },
@@ -40,8 +40,8 @@ namespace idk
 		real  width         { 5.0f };
 		real  height        { 5.0f };
 
-		RscHandle<RenderTarget> light_map;
-		RscHandle<RenderTarget> InitShadowMap();
+		RscHandle<FrameBuffer> light_map;
+		RscHandle<FrameBuffer> InitShadowMap();
 		const void* unique_id()const noexcept;
 		//DirectionalLight(
 		//	real  intensity={ .5f },
@@ -64,8 +64,8 @@ namespace idk
 		real  attenuation_radius { 1.f };
 		bool  use_inv_sq_atten   { true };
 
-		RscHandle<RenderTarget> light_map;
-		RscHandle<RenderTarget> InitShadowMap();
+		RscHandle<FrameBuffer> light_map;
+		RscHandle<FrameBuffer> InitShadowMap();
 		const void* unique_id()const noexcept;
 		//SpotLight();
 		//SpotLight(

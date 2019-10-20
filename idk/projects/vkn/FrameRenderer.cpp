@@ -313,17 +313,17 @@ namespace idk::vkn
 
 		//auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
-		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
-		std::optional<vec4> clear_col;
-		vk::ClearValue v[]{
-			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
-			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
-		};
+		
+		vector<vk::ClearValue> clear_value(clear_colors.size());
+		for (size_t i = 0; i < clear_value.size(); ++i)
+		{
+			clear_value[i] = vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_colors[i]) };
+		}
 
 		vk::RenderPassBeginInfo rpbi
 		{
 			rp, frame_buffer,
-			render_area,hlp::arr_count(v),std::data(v)
+			render_area,hlp::arr_count(clear_value),std::data(clear_value)
 		};
 
 
@@ -378,7 +378,7 @@ namespace idk::vkn
 
 	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
-		auto cam = CameraData{ s_cast<int>(0xFFFFFFFF),light.v,light.p,light.light_map };
+		auto cam = CameraData{ s_cast<int>(0xFFFFFFFF),light.v,light.p};
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -398,14 +398,14 @@ namespace idk::vkn
 
 
 		cmd_buffer.begin(begin_info, dispatcher);
-		auto sz = light.light_map->GetDepthBuffer()->Size();
+		auto sz = light.light_map->DepthAttachment().buffer->Size();
 		vk::Rect2D render_area
 		{
 			vk::Offset2D{},
 			vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)} 
 		};
-		auto& rt = light.light_map.as<VknRenderTarget>();
-		vk::Framebuffer fb = rt.Buffer();
+		auto& rt = light.light_map.as<VknFrameBuffer>();
+		vk::Framebuffer fb = rt.GetFramebuffer();
 		vk::RenderPass  rp = rt.GetRenderPass ();
 		rt.PrepareDraw(cmd_buffer);
 		vector<vec4> clear_colors

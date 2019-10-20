@@ -297,6 +297,7 @@
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
+    <ClCompile Include="VknFrameBuffer.cpp" />
     <ClCompile Include="VknFramebufferFactory.cpp" />
     <ClCompile Include="VknRenderTarget.cpp" />
     <ClCompile Include="VknRenderTargetFactory.cpp" />

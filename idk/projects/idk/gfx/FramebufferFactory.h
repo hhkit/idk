@@ -10,8 +10,19 @@ namespace idk
 		LoadOp  load_op = LoadOp::eClear;
 		StoreOp store_op = StoreOp::eStore;
 		ColorFormat internal_format = ColorFormat::RGBAF_32;
-		InputChannels format = InputChannels::RGBA;
 		FilterMode  filter_mode = FilterMode::Linear;
+		AttachmentInfo() = default;
+		AttachmentInfo(
+			LoadOp  load_op_,
+			StoreOp store_op_,
+			ColorFormat internal_format_,
+			FilterMode  filter_mode_
+		) :
+			load_op{ load_op_ },
+			store_op{ store_op_ },
+			internal_format{ internal_format_ },
+			filter_mode{ filter_mode_ }
+		{};
 	};
 	struct FrameBufferInfo
 	{
@@ -30,10 +41,20 @@ namespace idk
 		{
 			info.attachments.emplace_back(att_info);
 		}
+		void SetDepthAttachment(AttachmentInfo att_info)
+		{
+			info.depth_attachment = (att_info);
+
+		}
+		void ClearDepthAttachment()
+		{
+			info.depth_attachment = {};
+		}
 		FrameBufferInfo End()
 		{
 			FrameBufferInfo tmp = std::move(info);
 			info.attachments.clear();
+			info.depth_attachment = {};
 			info.size = ivec2{};
 			return std::move(tmp);
 		}
@@ -43,13 +64,9 @@ namespace idk
 
 	struct FrameBufferFactory : ResourceFactory<FrameBuffer>
 	{
-		std::unique_ptr<FrameBuffer> Create() override
-		{
-			return std::make_unique<FrameBuffer>();
-		}
 		RscHandle<FrameBuffer> Create(const FrameBufferInfo& info)
 		{
-			auto handle = Core::GetResourceManager().LoaderEmplaceResource<FrameBuffer>();
+			auto handle = Core::GetResourceManager().Create<FrameBuffer>();
 			Update(info, handle);
 			return handle;
 		}
@@ -57,15 +74,16 @@ namespace idk
 		{
 			auto& fb = *h_fb;
 			Reset(fb);
+			fb.size = info.size;
 			for (auto& attachment_info : info.attachments)
 			{
 				auto& attachment_ptr = fb.attachments.emplace_back();
-				CreateAttachment(AttachmentType::eColor,attachment_info, info.size, attachment_ptr);
+				CreateAttachment(AttachmentType::eColor,attachment_info, fb.size , attachment_ptr);
 			}
 			if (info.depth_attachment)
-				CreateAttachment(AttachmentType::eDepth, *info.depth_attachment, info.size, h_fb->depth_attachment);
+				CreateAttachment(AttachmentType::eDepth, *info.depth_attachment, fb.size, h_fb->depth_attachment);
 			if (info.stencil_attachment)
-				CreateAttachment(AttachmentType::eStencil, *info.stencil_attachment, info.size, h_fb->stencil_attachment);
+				CreateAttachment(AttachmentType::eStencil, *info.stencil_attachment, fb.size, h_fb->stencil_attachment);
 			Finalize(fb);
 		}
 	protected:

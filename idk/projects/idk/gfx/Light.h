@@ -26,7 +26,7 @@ namespace idk
 	{
 		alignas(16) mat4  v {};							  //
 		alignas(16) mat4  p{};							  //
-		RscHandle<RenderTarget> light_map;				  //
+		RscHandle<FrameBuffer> light_map;				  //
 	};
 
 	class Light
@@ -38,12 +38,12 @@ namespace idk
 		bool         casts_shadows { true };
 
 		void InitShadowMap();
-		RscHandle<RenderTarget>& GetLightMap();
-		const RscHandle<RenderTarget>& GetLightMap()const;
-		void SetLightMap(const RscHandle<RenderTarget>& light_map);
+		RscHandle<FrameBuffer>& GetLightMap();
+		const RscHandle<FrameBuffer>& GetLightMap()const;
+		void SetLightMap(const RscHandle<FrameBuffer>& light_map);
 
 		LightData GenerateLightData() const;
-		CameraData GenerateCameraData() const;
+		//CameraData GenerateCameraData() const;
 	};
 }
 #pragma warning(pop )

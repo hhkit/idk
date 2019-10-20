@@ -53,7 +53,7 @@ namespace idk
 		result.lights.reserve(lights.size());
 		for (auto& elem : lights)
 		{
-			result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
+			//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
 			result.lights.emplace_back(elem.GenerateLightData());
 		}
 

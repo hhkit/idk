@@ -184,6 +184,7 @@ namespace idk::vkn
 							, vk::ImageLayout::eUndefined
 							, vk::ImageLayout::eGeneral
 				};
+				attachments_desc.emplace_back(depth_attachment_desc);
 				pdepth_ref = &depth_attachment_ref;
 			}
 
@@ -223,7 +224,7 @@ namespace idk::vkn
 			vk::RenderPassCreateInfo renderPassInfo
 			{
 				vk::RenderPassCreateFlags{}
-				,hlp::arr_count(attachments_desc),std::data(attachments_desc)
+				,hlp::arr_count(attachments_desc),(hlp::arr_count(attachments_desc)) ? std::data(attachments_desc):nullptr
 				,1,&subpass
 				,1,&dependency
 			};
@@ -246,12 +247,24 @@ namespace idk::vkn
 		}
 		Pimpl() : allocator{*View().Device(), View().PDevice()}
 		{
-
+			fence = View().Device()->createFenceUnique(vk::FenceCreateInfo{});
 		}
 	};
 
 	VknFrameBufferFactory::VknFrameBufferFactory(): _pimpl{std::make_unique<Pimpl>()}
 	{
+	}
+
+	unique_ptr<FrameBuffer> VknFrameBufferFactory::Create()
+	{
+		return std::make_unique<VknFrameBuffer>();
+	}
+
+	unique_ptr<FrameBuffer> VknFrameBufferFactory::GenerateDefaultResource()
+	{
+		auto fb = std::make_unique<VknFrameBuffer>();
+		//TODO actually create a default framebuffer and use it here
+		return fb;
 	}
 
 	void VknFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
@@ -264,7 +277,7 @@ namespace idk::vkn
 		};
 		auto& allocator = _pimpl->allocator;
 		auto fence = *_pimpl->fence;
-		auto ptr =std::make_unique<VknAttachment>();
+		out =std::make_unique<VknAttachment>();
 		out->load_op = info.load_op;
 		out->store_op = info.store_op;
 
@@ -275,7 +288,7 @@ namespace idk::vkn
 		opt.internal_format = info.internal_format;
 		opt.filter_mode = info.filter_mode;
 		loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
-		out = std::move(ptr);
+		out->buffer = tex;
 	}
 	void VknFrameBufferFactory::PreReset(FrameBuffer& framebuffer)
 	{
@@ -284,7 +297,7 @@ namespace idk::vkn
 	{
 		VknFrameBuffer& fb = static_cast<VknFrameBuffer&>(h_fb);
 		VulkanView& vknView = View();
-		vector<vk::ImageView> image_views(fb.NumAttachments()+1);
+		vector<vk::ImageView> image_views(fb.NumAttachments());
 		uint32_t i = 0;
 		for (auto& col_attachment : fb.attachments)
 		{
@@ -308,6 +321,6 @@ namespace idk::vkn
 		framebufferInfo.height = s_cast<uint32_t>(fb.size.y);
 		framebufferInfo.layers = 1;
 
-		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()));
+		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()), _pimpl->GetRenderPass(rp_type, fb));
 	}
 }

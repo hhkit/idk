@@ -6,6 +6,8 @@ namespace idk::vkn
 	{
 	public:
 		VknFrameBufferFactory();
+		unique_ptr<FrameBuffer> Create()override;	// generate default resource - the fallback resource if a handle fails
+		unique_ptr<FrameBuffer> GenerateDefaultResource()override;	// generate default resource - the fallback resource if a handle fails
 	private:
 		struct Pimpl;
 		unique_ptr<Pimpl> _pimpl;

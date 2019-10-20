@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GraphicsState.h"
 #include <gfx/RenderTarget.h>
+#include <gfx/Framebuffer.h>
 namespace idk::vkn
 {
 	const LightData* GraphicsState::ActiveLight(size_t light_index) const
@@ -43,12 +44,12 @@ namespace idk::vkn
 			active_lights.emplace_back(i);
 			if (light.index == 0)//point
 			{
-				//shadow_maps_2d  .emplace_back(def_2d);
+				shadow_maps_2d  .emplace_back(def_2d);
 				//shadow_maps_cube.emplace_back(light.light_map->GetDepthBuffer());
 			}
 			else
 			{
-				shadow_maps_2d.emplace_back(light.light_map->GetDepthBuffer());
+				shadow_maps_2d.emplace_back(s_cast<RscHandle<Texture>>(light.light_map->DepthAttachment()));
 				shadow_maps_cube.emplace_back(def_cube);
 			}
 			++i;

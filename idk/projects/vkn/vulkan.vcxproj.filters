@@ -308,6 +308,7 @@
     <ClCompile Include="PipelineBinders.cpp">
       <Filter>render\objects</Filter>
     </ClCompile>
+    <ClCompile Include="VknFrameBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

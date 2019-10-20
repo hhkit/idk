@@ -110,6 +110,8 @@ namespace idk::vkn
 
 		auto ptr = &texture;
 		auto&& [image, alloc, aspect] = vkn::LoadTexture(allocator, load_fence, load_info,in_info);
+		ptr->Size(ivec2{load_info.width,load_info.height});
+		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->image = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
@@ -401,7 +403,7 @@ namespace idk::vkn
 		imageInfo.arrayLayers = 1;
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
-		imageInfo.initialLayout = (in_info)?vk::ImageLayout::eUndefined:load_info.layout;
+		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 		imageInfo.usage = image_usage;// vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
 		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
 		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
@@ -412,6 +414,10 @@ namespace idk::vkn
 		
 		const vk::ImageAspectFlagBits img_aspect = load_info.aspect;
 		result.aspect = img_aspect;
+		vk::UniqueImage blit_src_img;
+		hlp::UniqueAlloc blit_img_alloc;
+		vk::UniqueBuffer staging_buffer;
+		vk::UniqueDeviceMemory staging_memory;
 		if (in_info)
 		{
 
@@ -431,8 +437,6 @@ namespace idk::vkn
 			vk::ImageLayout layout = vk::ImageLayout::eGeneral;
 			vk::ImageLayout next_layout = vk::ImageLayout::eTransferDstOptimal;
 
-			vk::UniqueImage blit_src_img;
-			hlp::UniqueAlloc blit_img_alloc;
 			vk::Image copy_dest = *image;
 			if (internal_format != format)
 			{
@@ -507,11 +511,12 @@ namespace idk::vkn
 
 				cmd_buffer.copyBufferToImage(*stagingBuffer, copy_dest, vk::ImageLayout::eTransferDstOptimal, copy_regions, vk::DispatchLoaderDefault{});
 
+				staging_buffer = std::move(stagingBuffer);
+				staging_memory = std::move(stagingMemory);
 				//TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, copy_dest);
 				;
 			}
 
-			device.resetFences(fence);
 
 			if (internal_format != format)
 			{
@@ -521,12 +526,17 @@ namespace idk::vkn
 			}
 			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect);
 
-			hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
-			uint64_t wait_for_milli_seconds = 1;
-			[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
-			//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
-			while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
+	
+		}else
+		{
+			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
 		}
+		device.resetFences(fence);
+		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
+		uint64_t wait_for_milli_seconds = 1;
+		[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
+		//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+		while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
 		result.first = std::move(image);
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };

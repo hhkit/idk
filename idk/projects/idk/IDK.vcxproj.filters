@@ -1113,6 +1113,9 @@
     <ClCompile Include="serialize\text_parse.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\Framebuffer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "LightTypes.h"
 #include <gfx/RenderTarget.h>
+#include <gfx/FramebufferFactory.h>
 //#include "LightTypes.h"
 namespace idk
 {
@@ -131,38 +132,53 @@ bool NeedShadowMapImpl(T& light)
 bool NeedShadowMap(const PointLight&light){return NeedShadowMapImpl(light);};
 bool NeedShadowMap(const SpotLight&light){return NeedShadowMapImpl(light);};
 bool NeedShadowMap(const DirectionalLight&light){return NeedShadowMapImpl(light);};
-RscHandle<RenderTarget> idk::PointLight::InitShadowMap()
+RscHandle<FrameBuffer> PointLight::InitShadowMap()
 {
+	FrameBufferBuilder builder;
+	builder.Begin(ivec2{ 512,512 });
+	builder.SetDepthAttachment(
+		AttachmentInfo
+		{
+			LoadOp::eClear,
+			StoreOp::eStore,
+			idk::ColorFormat::DEPTH_COMPONENT,
+			FilterMode::_enum::Linear
+		}
+	);
 	//TODO turn it into a cube map
-	auto &shadow_map =light_map= Core::GetResourceManager().Create<RenderTarget>();
-	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
-	m.internal_format = ColorFormat::DEPTH_COMPONENT;
-	auto meta = shadow_map->GetMeta();
-	meta.size = ivec2{512,512};
-	shadow_map->GetMeta().textures[0]->SetMeta(m);
-	//shadow_map->SetMeta(meta);
+	auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
 	return shadow_map;
 }
-RscHandle<RenderTarget> DirectionalLight::InitShadowMap()
+RscHandle<FrameBuffer> DirectionalLight::InitShadowMap()
 {
-	auto& shadow_map = light_map = Core::GetResourceManager().Create<RenderTarget>();
-	auto m = shadow_map->GetMeta().textures[0]->GetMeta();
-	m.internal_format = ColorFormat::DEPTH_COMPONENT;
-	auto meta = shadow_map->GetMeta();
-	meta.size = ivec2{ 512,512 };
-	shadow_map->GetMeta().textures[0]->SetMeta(m);
-	//shadow_map->SetMeta(meta);
+	FrameBufferBuilder builder;
+	builder.Begin(ivec2{ 512,512 });
+	builder.SetDepthAttachment(
+		AttachmentInfo
+		{
+			LoadOp::eClear,
+			StoreOp::eStore,
+			idk::ColorFormat::DEPTH_COMPONENT,
+			FilterMode::_enum::Linear
+		}
+	);
+	auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
 	return shadow_map;
 }
-RscHandle<RenderTarget> SpotLight::InitShadowMap()
+RscHandle<FrameBuffer> SpotLight::InitShadowMap()
 {
-	auto& shadow_map = light_map = Core::GetResourceManager().Create<RenderTarget>();
-	//auto m = shadow_map->GetMeta().textures[0]->GetMeta();
-	//m.internal_format = ColorFormat::DEPTH_COMPONENT;
-	auto meta = shadow_map->GetMeta();
-	meta.size = ivec2{ 512,512 };
-	//shadow_map->GetMeta().textures[0]->SetMeta(m);
-	shadow_map->SetMeta(meta);
+	FrameBufferBuilder builder;
+	builder.Begin(ivec2{ 512,512 });
+	builder.SetDepthAttachment(
+		AttachmentInfo
+		{
+			LoadOp::eClear,
+			StoreOp::eStore,
+			idk::ColorFormat::DEPTH_COMPONENT,
+			FilterMode::_enum::Linear
+		}
+	);
+	auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
 	return shadow_map;
 }
 }
