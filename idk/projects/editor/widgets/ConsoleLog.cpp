@@ -15,7 +15,7 @@ Wrapper for printing into IGE_Console.
 
 #include "pch.h"
 #include <widgets/ConsoleLog.h>
-#include <windows/IGE_Console.h>
+#include <editor/windows/IGE_Console.h>
 #include <IDE.h>
 
 namespace idk::console

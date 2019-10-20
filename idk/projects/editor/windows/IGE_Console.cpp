@@ -13,7 +13,6 @@ Logs logs into a log.
 
 #include "pch.h"
 #include <editor/windows/IGE_Console.h>
-#include <widgets/ConsoleLog.h>
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 
 namespace idk
@@ -72,14 +71,6 @@ namespace idk
 			display_errors = !display_errors;
 		}
 		ImGui::PopStyleColor();
-
-		//if (ImGui::Button("Test Message")) {
-		//	static int i = 1;
-		//	
-		//	console::Log_Message(console::ComposeMessage("Hello!\nI am\nNo:%d", i++));
-		//	console::Log_Warning("This is a warning.");
-		//	console::Log_Error("This is an error.");
-		//}
 
 		ImGui::EndMenuBar();
 
@@ -166,11 +157,6 @@ namespace idk
 		if (!textFilter.PassFilter(message.text.c_str()))
 			return;
 
-		//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
-		//ImGui::PushID(&message);
-		//ImVec2 messageWindowSize = { ImGui::GetWindowContentRegionWidth(), ImGui::GetTextLineHeightWithSpacing() * 3.0f };
-		//ImGuiWindowFlags_ childFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing;
-		//ImGui::BeginChild("msg", messageWindowSize, true, childFlags);
 		switch (message.type) {
 		case ConsoleMessageType_Message:
 			ImGui::PushStyleColor(ImGuiCol_Text, message_header_color);
@@ -206,9 +192,6 @@ namespace idk
 		ImGui::PopStyleColor();
 		
 		ImGui::Separator();
-		//ImGui::EndChild();
-		//ImGui::PopStyleVar();
-		//ImGui::PopID();
 
 	}
 

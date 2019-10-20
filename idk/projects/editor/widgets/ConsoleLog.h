@@ -16,7 +16,6 @@ Wrapper for printing into IGE_Console.
 #pragma once
 
 #include <idk.h>
-#include <editor/windows/IGE_Console.h>
 
 namespace idk
 {
