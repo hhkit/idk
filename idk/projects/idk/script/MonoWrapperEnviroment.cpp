@@ -335,7 +335,7 @@ namespace idk::mono
         Bind("idk.Bindings::ResourceValidate", decay(
             [](Guid guid, MonoString* type) -> bool
         {
-            // make validate jumptable...
+            // TODO: make validate jumptable...
             auto* s = mono_string_to_utf8(type);
             auto hash = string_hash(s);
             mono_free(s);
@@ -346,13 +346,28 @@ namespace idk::mono
             }
         }
         ));
+        Bind("idk.Bindings::ResourceGetName", decay(
+            [](Guid guid, MonoString* type) -> MonoString*
+        {
+            // TODO: make get jumptable...
+            auto* s = mono_string_to_utf8(type);
+            auto hash = string_hash(s);
+            mono_free(s);
+            switch (hash)
+            {
+                case reflect::typehash<MaterialInstance>() :
+                    return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<MaterialInstance>(guid).Name().data());
+                default: return mono_string_empty(mono_domain_get());
+            }
+        }
+        ));
 
         // MaterialInstance
         Bind("idk.Bindings::MaterialInstanceGetFloat", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> float
         {
             auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
+            if (!handle) { mono_free(s); return 0; }
             auto res = handle->GetUniform(s);
             mono_free(s);
             return res ? std::get<float>(*res) : 0;
@@ -362,7 +377,7 @@ namespace idk::mono
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec2
         {
             auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
+            if (!handle) { mono_free(s); return vec2(); }
             auto res = handle->GetUniform(s);
             mono_free(s);
             return res ? std::get<vec2>(*res) : vec2(0, 0);
@@ -372,7 +387,7 @@ namespace idk::mono
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec3
         {
             auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
+            if (!handle) { mono_free(s); return vec3(); }
             auto res = handle->GetUniform(s);
             mono_free(s);
             return res ? std::get<vec3>(*res) : vec3(0, 0, 0);
@@ -382,7 +397,7 @@ namespace idk::mono
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec4
         {
             auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
+            if (!handle) { mono_free(s); return vec4(); }
             auto res = handle->GetUniform(s);
             mono_free(s);
             return res ? std::get<vec4>(*res) : vec4(0, 0, 0, 0);
@@ -392,7 +407,7 @@ namespace idk::mono
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> Guid
         {
             auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
+            if (!handle) { mono_free(s); return Guid(); }
             auto res = handle->GetUniform(s);
             mono_free(s);
             return res ? std::get<RscHandle<Texture>>(*res).guid : Guid();

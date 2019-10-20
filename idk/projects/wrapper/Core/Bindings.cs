@@ -145,6 +145,8 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ResourceValidate(System.Guid guid, string type);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string ResourceGetName(System.Guid guid, string type);
 
         /*
          * MaterialInstance

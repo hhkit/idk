@@ -137,8 +137,6 @@ namespace idk {
                     auto folder_path = unique_new_mount_path("NewFolder", "");
                     fs::create_directory(Core::GetSystem<FileSystem>().GetFullPath(folder_path));
                     selected_path = folder_path;
-                    renaming_selected_asset = true;
-                    just_rename = true;
                 }
                 if (ImGui::MenuItem("Material"))
                 {

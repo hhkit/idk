@@ -4,6 +4,8 @@
     {
         internal System.Guid guid;
 
+        public string name { get => Bindings.ResourceGetName(guid, GetType().Name); }
+
         public static implicit operator bool(Resource o)
         {
             return o == null ? false : Bindings.ResourceValidate(o.guid, o.GetType().Name);
@@ -26,7 +28,7 @@
 
         public override bool Equals(object obj)
         {
-            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            if ((obj == null) || !GetType().Equals(obj.GetType()))
             {
                 return false;
             }
