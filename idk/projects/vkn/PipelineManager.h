@@ -16,12 +16,14 @@ namespace idk::vkn
 		void View(VulkanView& view);
 		VulkanView& View();
 		//Assumes that shader programs are the only differing thing.
-		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules,uint32_t frame_index);
+		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<vk::RenderPass> render_pass = {},bool has_depth_stencil=false);
 		void CheckForUpdates(uint32_t frame_index);
 	private:
 		struct PipelineObject
 		{
-			pipeline_config config;
+			pipeline_config config{};
+			std::optional<vk::RenderPass> rp{};
+			bool has_depth_stencil = false;
 			vector<RscHandle<ShaderProgram>> shader_handles;
 			VulkanPipeline pipeline;
 			VulkanPipeline back_pipeline;
@@ -49,6 +51,10 @@ namespace idk::vkn
 					if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
 						config.vert_shader = module;
 				}
+				if (rp)
+					pipeline.SetRenderPass(*rp, has_depth_stencil);
+				else
+					pipeline.ClearRenderPass();
 				pipeline.Create(config, view);
 			}
 			void Swap()

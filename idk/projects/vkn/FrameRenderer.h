@@ -15,11 +15,11 @@
 namespace idk
 {
 	struct RenderObject;
+	struct LightData;
 }
 namespace idk::vkn
 {
 	struct PreRenderData;
-
 	struct GraphicsState;
 	class PipelineManager;
 	using PipelineHandle_t =uint32_t;
@@ -60,11 +60,14 @@ namespace idk::vkn
 			FrameRenderer* _renderer;
 		};
 
-		void GrowStates(size_t new_min_size);
+		void GrowStates(vector<RenderStateV2>& states, size_t new_min_size);
 
 		PipelineThingy ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs);
+
+		void PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+
 		VulkanView& View()const { return *_view; }
 		vk::RenderPass GetRenderPass(const GraphicsState& state, VulkanView& view);
 		
@@ -76,12 +79,14 @@ namespace idk::vkn
 		uint32_t _current_frame_index;
 
 		VulkanView*                            _view                       {};
-		RscHandle<ShaderProgram>               _shadow_shader_module{};
+		RscHandle<ShaderProgram>               _shadow_shader_module       {};
 		PipelineManager*                       _pipeline_manager           {};
 		vector<RenderStateV2>                  _states                     {};
+		vector<RenderStateV2>                  _pre_states                 {};
 		const vector<GraphicsState>*           _gfx_states                 {};
 		vector<vk::UniqueCommandBuffer>        _state_cmd_buffers          {};
 		vector<std::unique_ptr<IRenderThread>> _render_threads             {};
+		vk::UniqueSemaphore                    _pre_render_complete        {};
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};

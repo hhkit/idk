@@ -121,9 +121,7 @@ xcopy  /i /d /c /y /s "$(SolutionDir)editor_data" "$(OutDir)editor_data"
 if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
 if not exist "$(OutDir)scripts" mklink /J "$(OutDir)scripts" "$(SolutionDir)scripts"
-if %errorlevel% NEQ 0 exit /b %errorlevel%
-call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
-</Command>
+if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <Outputs>$(OutDir)shaders\changed.chg</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
@@ -193,9 +191,7 @@ xcopy  /i /d /c /y /s "$(SolutionDir)editor_data" "$(OutDir)editor_data"
 if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
 if not exist "$(OutDir)scripts" mklink /J "$(OutDir)scripts" "$(SolutionDir)scripts"
-if %errorlevel% NEQ 0 exit /b %errorlevel%
-call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
-</Command>
+if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <Outputs>$(OutDir)shaders\changed.chg</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>

@@ -43,7 +43,7 @@ namespace idk::vkn
 					if (pool)
 					{
 						//TODO compute num_ds with layout's number of descriptors
-						std::vector<vk::DescriptorSetLayout> layouts{ num_ds, layout };
+						vector<vk::DescriptorSetLayout> layouts{ num_ds, layout };
 						vk::DescriptorSetAllocateInfo allocInfo
 						{
 							*pool

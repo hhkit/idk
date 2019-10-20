@@ -124,17 +124,16 @@
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <CustomBuildStep>
-      <Command>call $(SolutionDir)tools\compile.bat
-if %errorlevel% NEQ 0 exit /b %errorlevel%
-echo aaa
-call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
-</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>test.aa</Outputs>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>%(Inputs)</Inputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -201,17 +200,16 @@ call $(SolutionDir)copy.bat  $(SolutionDir)shaders $(OutDir)shaders spv
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <CustomBuildStep>
-      <Command>call $(SolutionDir)tools\compile.bat
-if %errorlevel% NEQ 0 exit /b %errorlevel%
-call $(SolutionDir)copy.bat  $(ProjectDir)shaders $(OutDir)shaders spv
-</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>
       </Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>%(Inputs)</Inputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>

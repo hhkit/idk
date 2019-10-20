@@ -26,7 +26,7 @@ namespace idk::vkn
 		return LessChain(lhs.guid.Data1, rhs.guid.Data1, lhs.guid.Data2, rhs.guid.Data2, lhs.guid.Data3, rhs.guid.Data3, lhs.guid.Data4, rhs.guid.Data4);
 			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
 	}
-	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules,uint32_t frame_index)
+	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<vk::RenderPass> render_pass, bool has_depth_stencil)
 	{
 		std::optional<handle_t> prev{};
 		bool is_diff = prog_to_pipe2.empty();
@@ -36,13 +36,26 @@ namespace idk::vkn
 		{
 			arr[i] = i;
 			for (size_t j = 0; j < i; ++j)
-				if (Less(modules[arr[i]] , modules[arr[j]]))
+				if (Less(modules[arr[i]], modules[arr[j]]))
 					std::swap(arr[i], arr[j]);
 		}
 		for (size_t i = 0; i < modules.size(); ++i)
 		{
 			combi += modules[arr[i]].guid.operator idk::string();
 		}
+
+		vk::RenderPass rp = View().BasicRenderPass(config.render_pass_type);
+		if (render_pass)
+			rp = *render_pass;
+		string_view str{ r_cast<const char*>(&rp),sizeof(rp) };
+		combi += str; //Add renderpass as a part of the unique id.
+		ivec2 viewport_size{}, viewport_offset{};
+		if (config.viewport_size)
+			viewport_size = *config.viewport_size;
+		if (config.viewport_offset)
+			viewport_offset = *config.viewport_offset;
+		combi += string_view{ r_cast<const char*>(&viewport_offset), sizeof(viewport_offset) };
+		combi += string_view{ r_cast<const char*>(&viewport_size), sizeof(viewport_size)};
 		auto itr = prog_to_pipe2.find(combi);
 		if (itr != prog_to_pipe2.end())
 		{
@@ -55,7 +68,7 @@ namespace idk::vkn
 		
 		if (is_diff)
 		{
-			PipelineObject obj{ config,modules };
+			PipelineObject obj{ config,render_pass,has_depth_stencil,modules };
 			obj.Create(View(),frame_index);
 
 			//TODO threadsafe lock here

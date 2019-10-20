@@ -19,7 +19,7 @@ struct DescriptorPoolsManager
 		vk::UniqueDescriptorPool pool;
 		struct alloc_info
 		{
-			uint32_t size, capacity;
+			uint32_t size{}, capacity{};
 		};
 		alloc_info cap[DescriptorTypeI::size()];
 		Manager2(vk::Device device, const uint32_t (&capacities)[DescriptorTypeI::size()]);

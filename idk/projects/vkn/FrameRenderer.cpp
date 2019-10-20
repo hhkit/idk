@@ -11,6 +11,7 @@
 #include <math/matrix_transforms.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
+#include <vkn/VknFrameBuffer.h>
 #include <vkn/VknRenderTarget.h>
 #include <gfx/Light.h>
 
@@ -124,7 +125,7 @@ namespace idk::vkn
 	};
 
 
-	PipelineThingy ProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager,StandardBindings binders)
+	PipelineThingy ProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager,StandardBindings& binders)
 	{
 		auto& mesh_vtx            = state.mesh_vtx;
 		auto& mesh_render         = *state.mesh_render;
@@ -223,7 +224,7 @@ namespace idk::vkn
 			_transition_buffer = std::move(t_buffers[0]);
 		}
 
-		GrowStates(num_concurrent_states);
+		GrowStates(_states,num_concurrent_states);
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
@@ -231,8 +232,7 @@ namespace idk::vkn
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}
-
-
+		_pre_render_complete = device.createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -241,29 +241,193 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
+		auto total_pre_states = lights.size();
+		GrowStates(_pre_states, total_pre_states);
+		for (auto& state : _pre_states)
+		{
+			state.Reset();
+		}
+		size_t curr_state = 0;
 		//Do the shadow pass here.
 		for (auto light_idx : state.active_lights)
 		{
 			auto& light = lights[light_idx];
-			auto cam = CameraData{s_cast<int>(0xFFFFFFFF),light.v,light.p,light.light_map};
-			RenderStateV2* rs=nullptr; //TODO actually allocate a render state.
-			ShadowBinding shadow_binding;
-			shadow_binding.for_each_binder<has_setstate>(
-				[](auto& binder, const mat4& view, const mat4& proj, const vector<SkeletonTransforms>& skel) 
-				{
-					binder.SetState(view, proj, skel);
-				}, 
-				light.v, light.p, 
-				state.skeleton_transforms);
-			vkn::ProcessRoUniforms(state, rs->ubo_manager,shadow_binding);
+			auto& rs = _pre_states[curr_state++];
+			PreRenderShadow(light, state, rs, frame_index);
+		}
+		//TODO: Submit the command buffers
+
+		vector<vk::CommandBuffer> buffers{};
+		for (auto& state : _pre_states)
+		{
+			if (state.has_commands)
+				buffers.emplace_back(state.cmd_buffer);
+		}
+
+		auto& current_signal = View().CurrPresentationSignals();
+
+		//auto& waitSemaphores = *current_signal.image_available;
+		//vk::Semaphore readySemaphores = {};///* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		//hash_set<vk::Semaphore> ready_semaphores;
+		//for (auto& state : gfx_states)
+		//{
+		//	auto semaphore = state.camera.render_target.as<VknRenderTarget>().ReadySignal();
+		//	if (semaphore)
+		//		ready_semaphores.emplace(semaphore);
+		//}
+		//Temp, get rid of this once the other parts no longer depend on render_finished
+		//ready_semaphores.emplace(readySemaphores);
+		vector<vk::Semaphore> arr_ready_sem{*_pre_render_complete};
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
+
+		vk::SubmitInfo submit_info
+		{
+			0
+			,nullptr
+			,waitStages
+			,hlp::arr_count(buffers),std::data(buffers)
+			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
+		};
+
+		auto queue = View().GraphicsQueue();
+		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
+	}
+	VulkanView& View();
+	void RenderPipelineThingy(
+		PipelineThingy&     the_interface    ,
+		PipelineManager&    pipeline_manager ,
+		vk::CommandBuffer   cmd_buffer       , 
+		const vector<vec4>& clear_colors     ,
+		vk::Framebuffer     frame_buffer     ,
+		vk::RenderPass      rp               ,
+		bool                has_depth_stencil,
+		vk::Rect2D          render_area      ,
+		vk::Rect2D          viewport         ,
+		uint32_t            frame_index      
+		)
+	{
+		VulkanPipeline* prev_pipeline = nullptr;
+		vector<RscHandle<ShaderProgram>> shaders;
+
+		std::array<float, 4> a{};
+
+		//auto& cd = std::get<vec4>(state.camera.clear_data);
+		//TODO grab the appropriate framebuffer and begin renderpass
+		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+		std::optional<vec4> clear_col;
+		vk::ClearValue v[]{
+			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
+			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
+		};
+
+		vk::RenderPassBeginInfo rpbi
+		{
+			rp, frame_buffer,
+			render_area,hlp::arr_count(v),std::data(v)
+		};
+
+
+		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+
+		auto& processed_ro = the_interface.DrawCalls();
+		for (auto& p_ro : processed_ro)
+		{
+			auto& obj = p_ro.Object();
+			if (p_ro.rebind_shaders)
+			{
+				shaders.resize(0);
+				if (p_ro.frag_shader)
+					shaders.emplace_back(*p_ro.frag_shader);
+				if (p_ro.vertex_shader)
+					shaders.emplace_back(*p_ro.vertex_shader);
+				if (p_ro.geom_shader)
+					shaders.emplace_back(*p_ro.geom_shader);
+
+				auto config = *obj.config;
+				config.viewport_offset = ivec2{ s_cast<uint32_t>(viewport.offset.x),s_cast<uint32_t>(viewport.offset.y) };
+				config.viewport_size = ivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
+				auto& pipeline = pipeline_manager.GetPipeline(config,shaders,frame_index,rp,has_depth_stencil);
+				pipeline.Bind(cmd_buffer, View());
+				prev_pipeline = &pipeline;
+			}
+			auto& pipeline = *prev_pipeline;
+			//TODO Grab everything and render them
+			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
+			auto& mesh = obj.mesh.as<VulkanMesh>();
+			for (auto& [set, ds] : p_ro.descriptor_sets)
+			{
+				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+			}
+
+			auto& renderer_req = *obj.renderer_req;
+
+			for (auto&& [attrib, location] : renderer_req.requirements)
+			{
+				auto& attrib_buffer = mesh.Get(attrib);
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+			}
+
+			auto& oidx = mesh.GetIndexBuffer();
+			if (oidx)
+			{
+				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+			}
 		}
 	}
+
+	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
+	{
+		auto cam = CameraData{ s_cast<int>(0xFFFFFFFF),light.v,light.p,light.light_map };
+		ShadowBinding shadow_binding;
+		shadow_binding.for_each_binder<has_setstate>(
+			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+			{
+				binder.SetState(cam, skel);
+			},
+			cam,
+				*state.skeleton_transforms);
+		auto the_interface = vkn::ProcessRoUniforms(state, rs.ubo_manager, shadow_binding);
+		the_interface.GenerateDS(rs.dpools);
+
+		auto& view = View();
+		//auto& swapchain = view.Swapchain();
+		auto dispatcher = vk::DispatchLoaderDefault{};
+		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+
+
+		cmd_buffer.begin(begin_info, dispatcher);
+		auto sz = light.light_map->GetDepthBuffer()->Size();
+		vk::Rect2D render_area
+		{
+			vk::Offset2D{},
+			vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)} 
+		};
+		auto& rt = light.light_map.as<VknRenderTarget>();
+		vk::Framebuffer fb = rt.Buffer();
+		vk::RenderPass  rp = rt.GetRenderPass ();
+		rt.PrepareDraw(cmd_buffer);
+		vector<vec4> clear_colors
+		{
+			vec4{1}
+		};
+		if (the_interface.DrawCalls().size())
+			rs.FlagRendered();
+		RenderPipelineThingy(the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area,render_area,frame_index);
+
+		rs.ubo_manager.UpdateAllBuffers();
+		cmd_buffer.endRenderPass();
+		cmd_buffer.end();
+
+	}
+
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;
-		GrowStates(gfx_states.size());
+		GrowStates(_states,gfx_states.size());
 		size_t num_concurrent = curr_frame._render_threads.size();
 		auto& pri_buffer = curr_frame._pri_buffer;
 		auto& transition_buffer = curr_frame._transition_buffer;
@@ -339,7 +503,8 @@ namespace idk::vkn
 		buffers.emplace_back(*pri_buffer);
 		auto& current_signal = View().CurrPresentationSignals();
 
-		auto& waitSemaphores = *current_signal.image_available;
+		vector<vk::Semaphore> waitSemaphores{ *current_signal.image_available, *_pre_render_complete };
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands,vk::PipelineStageFlagBits::eAllCommands };
 		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
 		hash_set<vk::Semaphore> ready_semaphores;
 		for (auto& state : gfx_states)
@@ -352,7 +517,6 @@ namespace idk::vkn
 		ready_semaphores.emplace(readySemaphores);
 		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
 		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
-		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
 		//std::vector<vk::CommandBuffer> cmd_buffers;
 		//for (auto& state : curr_frame.states)
@@ -362,8 +526,8 @@ namespace idk::vkn
 		//cmd_buffers.emplace_back(*pri_buffer);
 		vk::SubmitInfo submit_info
 		{
-			1
-			,&waitSemaphores
+			hlp::arr_count(waitSemaphores)
+			,std::data(waitSemaphores)
 			,waitStages
 			,hlp::arr_count(buffers),std::data(buffers)
 			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
@@ -378,18 +542,18 @@ namespace idk::vkn
 	{
 		return _states[0].signal;
 	}
-	void FrameRenderer::GrowStates(size_t new_min_size)
+	void FrameRenderer::GrowStates(vector<RenderStateV2>& states, size_t new_min_size)
 	{
 		auto cmd_pool = *View().Commandpool();
 		auto device = *View().Device();
-		if (new_min_size > _states.size())
+		if (new_min_size > states.size())
 		{
-			auto diff = s_cast<uint32_t>(new_min_size - _states.size());
+			auto diff = s_cast<uint32_t>(new_min_size - states.size());
 			auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, diff }, vk::DispatchLoaderDefault{});
 			for (auto i = diff; i-- > 0;)
 			{
 				auto& buffer = buffers[i];
-				_states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
+				states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
 				_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}
@@ -441,7 +605,6 @@ namespace idk::vkn
 			
 		}
 	}
-
 	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView&)
 	{
 		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
@@ -534,7 +697,7 @@ namespace idk::vkn
 
 				auto config = *obj.config;
 				config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
-				config.screen_size = sz;
+				config.viewport_size = sz;
 				auto& pipeline = GetPipeline(config, shaders);
 				pipeline.Bind(cmd_buffer,view);
 				prev_pipeline = &pipeline;
