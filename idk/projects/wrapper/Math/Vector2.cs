@@ -9,21 +9,13 @@ namespace idk
         public float y;
 
         // constructors
-        public Vector2(Vector2 v)
+        public Vector2(float x, float y)
         {
-            x = v.x;
-            y = v.y;
+            this.x = x;
+            this.y = y;
         }
-        public Vector2(Vector3 v)
-        {
-            x = v.x;
-            y = v.y;
-        }
-        public Vector2(float in_x, float in_y)
-        {
-            x = in_x;
-            y = in_y;
-        }
+        public static implicit operator Vector2(Vector3 v) { return new Vector2(v.x, v.y); }
+        public static implicit operator Vector2(Vector4 v) { return new Vector2(v.x, v.y); }
 
         // properties
         public float sqrMagnitude
@@ -123,28 +115,28 @@ namespace idk
         }
         public static Vector2 operator + (Vector2 lhs, Vector2 rhs)
         {
-            var returnme = new Vector2(lhs);
+            var returnme = lhs;
             returnme.x += rhs.x;
             returnme.y += rhs.y;
             return returnme;
         }
         public static Vector2 operator - (Vector2 lhs, Vector2 rhs)
         {
-            var returnme = new Vector2(lhs);
+            var returnme = lhs;
             returnme.x -= rhs.x;
             returnme.y -= rhs.y;
             return returnme;
         }
         public static Vector2 operator - (Vector2 lhs)
         {
-            var returnme = new Vector2(lhs);
+            var returnme = lhs;
             returnme.x = -returnme.x;
             returnme.y = -returnme.y;
             return returnme;
         }
         public static Vector2 operator * (Vector2 lhs, float rhs)
         {
-            var returnme = new Vector2(lhs);
+            var returnme = lhs;
             returnme.x *= rhs;
             returnme.y *= rhs;
             return returnme;
@@ -155,7 +147,7 @@ namespace idk
         }
         public static Vector2 operator / (Vector2 lhs, float rhs)
         {
-            var returnme = new Vector2(lhs);
+            var returnme = lhs;
             returnme.x /= rhs;
             returnme.y /= rhs;
             return returnme;

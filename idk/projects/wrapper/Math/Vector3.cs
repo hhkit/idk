@@ -10,18 +10,14 @@ namespace idk
         public float z;
 
         // constructors
-        public Vector3(Vector3 v)
+        public Vector3(float x, float y, float z = 0)
         {
-            x = v.x;
-            y = v.y;
-            z = v.z;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
-        public Vector3(float in_x, float in_y, float in_z)
-        {
-            x = in_x;
-            y = in_y;
-            z = in_z;
-        }
+        public static implicit operator Vector3(Vector2 v) { return new Vector3(v.x, v.y, 0); }
+        public static implicit operator Vector3(Vector4 v) { return new Vector3(v.x, v.y, v.z); }
 
         // properties
         public float sqrMagnitude
@@ -132,7 +128,7 @@ namespace idk
         }
         public static Vector3 operator + (Vector3 lhs, Vector3 rhs)
         {
-            var returnme = new Vector3(lhs);
+            var returnme = lhs;
             returnme.x += rhs.x;
             returnme.y += rhs.y;
             returnme.z += rhs.z;
@@ -140,7 +136,7 @@ namespace idk
         }
         public static Vector3 operator - (Vector3 lhs, Vector3 rhs)
         {
-            var returnme = new Vector3(lhs);
+            var returnme = lhs;
             returnme.x -= rhs.x;
             returnme.y -= rhs.y;
             returnme.z -= rhs.z;
@@ -148,12 +144,15 @@ namespace idk
         }
         public static Vector3 operator - (Vector3 lhs)
         {
-            var returnme = new Vector3(lhs);
-            return returnme *= -1;
+            var returnme = lhs;
+            returnme.x = -returnme.x;
+            returnme.y = -returnme.y;
+            returnme.z = -returnme.z;
+            return returnme;
         }
         public static Vector3 operator * (Vector3 lhs, float rhs)
         {
-            var returnme = new Vector3(lhs);
+            var returnme = lhs;
             returnme.x *= rhs;
             returnme.y *= rhs;
             returnme.z *= rhs;
@@ -165,7 +164,7 @@ namespace idk
         }
         public static Vector3 operator / (Vector3 lhs, float rhs)
         {
-            var returnme = new Vector3(lhs);
+            var returnme = lhs;
             returnme.x /= rhs;
             returnme.y /= rhs;
             returnme.z /= rhs;

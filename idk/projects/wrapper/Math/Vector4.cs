@@ -11,9 +11,6 @@ namespace idk
         public float w;
 
         // constructors
-        public Vector4(Vector4 v) : this(v.x, v.y, v.z, v.w) { }
-        public Vector4(Vector3 v) : this(v.x, v.y, v.z) { }
-        public Vector4(Vector2 v) : this(v.x, v.y) { }
         public Vector4(float x, float y, float z = 0, float w = 0)
         {
             this.x = x;
@@ -21,6 +18,8 @@ namespace idk
             this.z = z;
             this.w = w;
         }
+        public static implicit operator Vector4(Vector2 v) { return new Vector4(v.x, v.y, 0, 0); }
+        public static implicit operator Vector4(Vector3 v) { return new Vector4(v.x, v.y, v.z, 0); }
 
         // properties
         public float sqrMagnitude
@@ -128,7 +127,7 @@ namespace idk
         }
         public static Vector4 operator + (Vector4 lhs, Vector4 rhs)
         {
-            var returnme = new Vector4(lhs);
+            var returnme = lhs;
             returnme.x += rhs.x;
             returnme.y += rhs.y;
             returnme.z += rhs.z;
@@ -137,7 +136,7 @@ namespace idk
         }
         public static Vector4 operator - (Vector4 lhs, Vector4 rhs)
         {
-            var returnme = new Vector4(lhs);
+            var returnme = lhs;
             returnme.x -= rhs.x;
             returnme.y -= rhs.y;
             returnme.z -= rhs.z;
@@ -146,7 +145,7 @@ namespace idk
         }
         public static Vector4 operator - (Vector4 lhs)
         {
-            var returnme = new Vector4(lhs);
+            var returnme = lhs;
             returnme.x = -returnme.x;
             returnme.y = -returnme.y;
             returnme.z = -returnme.z;
@@ -155,7 +154,7 @@ namespace idk
         }
         public static Vector4 operator * (Vector4 lhs, float rhs)
         {
-            var returnme = new Vector4(lhs);
+            var returnme = lhs;
             returnme.x *= rhs;
             returnme.y *= rhs;
             returnme.z *= rhs;
@@ -168,7 +167,7 @@ namespace idk
         }
         public static Vector4 operator / (Vector4 lhs, float rhs)
         {
-            var returnme = new Vector4(lhs);
+            var returnme = lhs;
             returnme.x /= rhs;
             returnme.y /= rhs;
             returnme.z /= rhs;
