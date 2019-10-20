@@ -36,22 +36,20 @@ namespace idk
         {
             return x == rhs.x && y == rhs.y && z == rhs.z;
         }
-        public Vector3 Normalize()
+        public void Normalize()
         {
             var mag = magnitude;
             x /= mag;
             y /= mag;
             z /= mag;
-            return this;
         }
-        /*
-        public void Set(float newX, float newY, float newZ)
+        public void Set(float x, float y, float z)
         {
-            x = newX;
-            y = newY;
-            z = newZ;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
-        */
+
         // static methods
         public static Vector3 ClampMagnitude(Vector3 v, float maxLength)
         {

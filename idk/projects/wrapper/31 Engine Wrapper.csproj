@@ -58,6 +58,8 @@
     <Compile Include="Core\Object.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Behavior\MonoBehavior.cs" />
+    <Compile Include="Math\Vector2.cs" />
+    <Compile Include="Math\Vector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Components\RigidBody.cs" />
     <Compile Include="Core\Time.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Resources\MaterialInstance.cs" />
     <Compile Include="Resources\Resource.cs" />
+    <Compile Include="Resources\Texture.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

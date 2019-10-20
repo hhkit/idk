@@ -67,6 +67,18 @@ namespace idk
 		}
 		return result;
 	}
+    void MaterialInstance::SetUniform(const string& name, UniformInstanceValue value)
+    {
+        if (!material)
+            return;
+        auto& mat = *material;
+        auto iter = mat.uniforms.find(name);
+        if (iter != mat.uniforms.end())
+        {
+            if (iter->second.value.index() == value.index())
+                uniforms[name] = value;
+        }
+    }
 	bool MaterialInstance::IsUniformBlock(string_view name) const
 	{
 		return name.starts_with("_UB");

@@ -294,7 +294,7 @@ namespace idk
         }
         public override int GetHashCode()
         {
-            return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ (z.GetHashCode() ^ w.GetHashCode() << 2);
+            return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ (z.GetHashCode() ^ w.GetHashCode() << 2) << 2;
         }
 
         // operator overloads

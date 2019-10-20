@@ -151,5 +151,24 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float MaterialInstanceGetFloat(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 MaterialInstanceGetVector2(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 MaterialInstanceGetVector3(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector4 MaterialInstanceGetVector4(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid MaterialInstanceGetTexture(System.Guid guid, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetFloat(System.Guid guid, string name, float value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetVector2(System.Guid guid, string name, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetVector3(System.Guid guid, string name, Vector3 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetVector4(System.Guid guid, string name, Vector4 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetTexture(System.Guid guid, string name, Guid tex);
     }
 }

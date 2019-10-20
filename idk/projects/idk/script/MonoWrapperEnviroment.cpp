@@ -349,14 +349,99 @@ namespace idk::mono
 
         // MaterialInstance
         Bind("idk.Bindings::MaterialInstanceGetFloat", decay(
-            [](Guid guid, MonoString* name) -> float
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> float
         {
             auto* s = mono_string_to_utf8(name);
-            auto res = Core::GetResourceManager().Get<MaterialInstance>(guid).GetUniform(s);
+            if (!handle) { mono_free(s); return; }
+            auto res = handle->GetUniform(s);
             mono_free(s);
-            if (res)
-                return std::get<float>(*res);
-            return 0;
+            return res ? std::get<float>(*res) : 0;
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetVector2", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec2
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<vec2>(*res) : vec2(0, 0);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetVector3", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec3
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<vec3>(*res) : vec3(0, 0, 0);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetVector4", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec4
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<vec4>(*res) : vec4(0, 0, 0, 0);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetTexture", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> Guid
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<RscHandle<Texture>>(*res).guid : Guid();
+        }
+        ));
+
+        Bind("idk.Bindings::MaterialInstanceSetFloat", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, float value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetVector2", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, vec2 value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetVector3", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, vec3 value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetVector4", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, vec4 value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetTexture", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, RscHandle<Texture> tex) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, tex);
+            mono_free(s);
         }
         ));
 
