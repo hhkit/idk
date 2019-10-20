@@ -259,6 +259,7 @@
     scale: {x: 0.5, y: 0.5, z: 0.5}
   - !Name 
     name: pbrball10-10
+  - !Tag futanari
   - !Collider 
     enabled: 1
     is_trigger: 0
@@ -332,6 +333,5 @@
         g: 1
         r: 1
     shadow_bias: 1e-04
-  - !Tag futanari
   - !Layer 
     index: 3

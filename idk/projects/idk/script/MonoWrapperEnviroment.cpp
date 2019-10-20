@@ -110,6 +110,49 @@ namespace idk::mono
 			}
 		));
 
+        Bind("idk.Bindings::GameObjectGetName", decay(
+            [](Handle<GameObject> go) -> MonoString*
+        {
+            return mono_string_new(mono_domain_get(), go->Name().data());
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectSetName", decay(
+            [](Handle<GameObject> go, MonoString* name) -> void
+        {
+            char* s = mono_string_to_utf8(name);
+            go->Name(s);
+            mono_free(s);
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectGetTag", decay(
+            [](Handle<GameObject> go) -> MonoString*
+        {
+            return mono_string_new(mono_domain_get(), go->Tag().data());
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectSetTag", decay(
+            [](Handle<GameObject> go, MonoString* tag) -> void
+        {
+            char* s = mono_string_to_utf8(tag);
+            go->Tag(s);
+            mono_free(s);
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectFindWithTag", decay(
+            [](MonoString* tag) -> uint64_t
+        {
+            char* s = mono_string_to_utf8(tag);
+            auto ret = Core::GetSystem<TagManager>().Find(s);
+            mono_free(s);
+            return ret.id;
+        }
+        ));
+
+
 		// component
 		Bind("idk.Bindings::ComponentGetGameObject", decay(
 			[](GenericHandle go) -> uint64_t
@@ -274,5 +317,48 @@ namespace idk::mono
 			return col->is_trigger;
 		}
 		));
+
+        // Renderer
+        Bind("idk.Bindings::RendererGetMaterialInstance", decay(
+            [](GenericHandle renderer) -> Guid
+        {
+            switch (renderer.type)
+            {
+            case index_in_tuple_v<MeshRenderer, Handleables>: return handle_cast<MeshRenderer>(renderer)->material_instance.guid;
+            case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->material_instance.guid;
+            default: return {};
+            }
+        }
+        ));
+
+        // Resource
+        Bind("idk.Bindings::ResourceValidate", decay(
+            [](Guid guid, MonoString* type) -> bool
+        {
+            // make validate jumptable...
+            auto* s = mono_string_to_utf8(type);
+            auto hash = string_hash(s);
+            mono_free(s);
+            switch (hash)
+            {
+            case reflect::typehash<MaterialInstance>() : return Core::GetResourceManager().Validate<MaterialInstance>(guid);
+            default: return false;
+            }
+        }
+        ));
+
+        // MaterialInstance
+        Bind("idk.Bindings::MaterialInstanceGetFloat", decay(
+            [](Guid guid, MonoString* name) -> float
+        {
+            auto* s = mono_string_to_utf8(name);
+            auto res = Core::GetResourceManager().Get<MaterialInstance>(guid).GetUniform(s);
+            mono_free(s);
+            if (res)
+                return std::get<float>(*res);
+            return 0;
+        }
+        ));
+
 	}
 }
