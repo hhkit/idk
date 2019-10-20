@@ -160,24 +160,28 @@ namespace idk::vkn
 		{
 			UnbindShader(stage);
 			auto& mod = shader.as<ShaderModule>();
-			//Update existing bindings
-			for (auto l_itr = mod.LayoutsBegin(); l_itr != mod.LayoutsEnd(); ++l_itr)
-			{
-				auto& [set, layout] = *l_itr;
-				auto b_itr = curr_bindings.find(set);
-				if (b_itr == curr_bindings.end())
+			if(mod)
+			{ 
+				//Update existing bindings
+				for (auto l_itr = mod.LayoutsBegin(); l_itr != mod.LayoutsEnd(); ++l_itr)
 				{
-					curr_bindings[set];
-					b_itr = curr_bindings.find(set);
+					auto& [set, layout] = *l_itr;
+					auto b_itr = curr_bindings.find(set);
+					if (b_itr == curr_bindings.end())
+					{
+						curr_bindings[set];
+						b_itr = curr_bindings.find(set);
+					}
+					b_itr->second.SetLayout(*layout);
 				}
-				b_itr->second.SetLayout(*layout);
+				for (auto& set : curr_bindings)
+				{
+					set.second.dirty = true;
+				}
+				shaders[static_cast<size_t>(stage)] = shader;
+				shader_changed = true;
+
 			}
-			for (auto& set : curr_bindings)
-			{
-				set.second.dirty = true;
-			}
-			shaders[static_cast<size_t>(stage)] = shader;
-			shader_changed = true;
 		}
 	}
 	std::optional<UboInfo> PipelineThingy::GetUniform(const string& uniform_name) const
@@ -188,7 +192,7 @@ namespace idk::vkn
 			if (ohshader)
 			{
 				auto& shader = ohshader->as<ShaderModule>();
-				if (shader.HasLayout(uniform_name))
+				if (shader && shader.HasLayout(uniform_name))
 				{
 					result = shader.GetLayout(uniform_name);
 					break;
