@@ -356,6 +356,7 @@ namespace idk
 	{
 
 		RecursiveObjects newObject{};
+		newObject.original_handle = i;
 		//Copy all components from this gameobject
 		for (auto& c : i->GetComponents())
 			newObject.vector_of_components.emplace_back((*c).copy());
