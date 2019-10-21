@@ -56,6 +56,7 @@ namespace idk::mono
 			find_class = mono_class_get_parent(find_class);
 		}
 
-		return mono_class_get_method_from_name(find_class, method_name.data(), param_count);
+		//return mono_class_get_method_from_name(find_class, method_name.data(), param_count);
+		return nullptr;
 	}
 }

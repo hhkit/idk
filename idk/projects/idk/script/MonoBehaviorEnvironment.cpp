@@ -92,34 +92,18 @@ namespace idk::mono
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
 			thunk.Invoke(obj, vec3{ 8,9,10 });
 		}
-		{
-			auto method = test->GetMethod("Serialize");
-			IDK_ASSERT(method.index() != 2);
-
-			if (method.index() == 1)
-			{
-				LOG_TO(LogPool::GAME, "TRY");
-				void* args[] = { 0 };
-				auto mono_method = std::get<MonoMethod*>(method);
-				MonoObject* exc{};
-				auto invoke_val = mono_runtime_invoke(mono_method, obj, args, &exc);
-				if (exc)
-				{
-					LOG_TO(LogPool::FATAL, "EXCEPTION THROWN??");
-					mono_print_unhandled_exception(exc);
-				}
-				else
-				{
-					auto result_obj = unbox(reinterpret_cast<MonoString*>(invoke_val));
-					std::cout << result_obj.get();
-				}
-				LOG_TO(LogPool::FATAL, "THIS");
-			}
-		}
+		
 		{
 			IDK_ASSERT(test->CacheThunk("TestTransform", 1));
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("TestTransform", 1));
 			thunk.Invoke(obj, tfm_obj);
+		}
+		{
+			ManagedObject managed{ obj };
+			int depth{ };
+			managed.VisitImpl([](auto&& key, auto&& val, int) { std::cout << "YOLO:" << key << ":" << val << "\n"; val += 5; }, depth);
+			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
+			thunk.Invoke(obj, vec3{ 8,9,10 });
 		}
 
 	}

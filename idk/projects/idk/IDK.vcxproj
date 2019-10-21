@@ -410,6 +410,7 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
+    <None Include="script\ManagedObj.inl" />
     <None Include="serialize\binary.inl" />
     <None Include="serialize\text.inl" />
     <None Include="serialize\yaml.inl" />

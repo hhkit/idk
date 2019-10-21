@@ -22,14 +22,14 @@ namespace idk::mono
 			_obj.Assign("handle", GetHandle().id);
 			_awake = false;
 			_started = false;
-			return _obj.Fetch();
+			return _obj.Raw();
 		}
 		return nullptr;
 	}
 
 	MonoObject* Behavior::GetObject()
 	{
-		return _obj.Fetch();
+		return _obj.Raw();
 	}
 
 	void Behavior::DisposeMonoObject()
@@ -44,7 +44,7 @@ namespace idk::mono
 			_awake = true;
 			auto method = _obj.Type()->GetMethod("Awake");
 			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
 
@@ -55,7 +55,7 @@ namespace idk::mono
 			_started = true;
 			auto method = _obj.Type()->GetMethod("Start");
 			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
 
@@ -65,7 +65,7 @@ namespace idk::mono
 		{
 			auto method = _obj.Type()->GetMethod("FixedUpdate");
 			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
 
@@ -75,7 +75,7 @@ namespace idk::mono
 		{
 			auto method = _obj.Type()->GetMethod("Update");
 			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
 
@@ -87,7 +87,7 @@ namespace idk::mono
 			
 			auto method = t->GetMethod("UpdateCoroutines");
 			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Fetch());
+				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
 

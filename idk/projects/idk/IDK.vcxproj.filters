@@ -1285,6 +1285,7 @@
     <None Include="serialize\text.inl">
       <Filter>serialize</Filter>
     </None>
+    <None Include="script\ManagedObj.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

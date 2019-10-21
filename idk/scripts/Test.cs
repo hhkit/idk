@@ -17,6 +17,7 @@ namespace TestAndSeek
         {
             System.Console.WriteLine("pikachu use");
             System.Console.WriteLine("thunderbolt {0} {1} {2}", v.x, v.y, v.z);
+            System.Console.WriteLine("and takedown {0}", i);
         }
         public override void Update()
         {
