@@ -107,6 +107,8 @@ namespace idk
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
+        if (shadergraph::NodeTemplate::GetTable().empty())
+            shadergraph::NodeTemplate::LoadTable("/editor_data/nodes");
 
 
 		//ImGui Initializations

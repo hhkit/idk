@@ -56,6 +56,7 @@ namespace idk::shadergraph
         string code;
 
         static NodeTemplate Parse(string_view filename);
+        static void LoadTable(string_view dir);
         static const table& GetTable();
 
         size_t GetSlotIndex(string_view name) const;
