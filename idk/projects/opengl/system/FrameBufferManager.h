@@ -25,6 +25,8 @@ namespace idk::ogl
 		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target);
 		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target);
 		void ResetFramebuffer();
+
+		RscHandle<OpenGLTexture> cBufferPickingTexture;
 	private:
 		GLuint _fbo_id = 0;
 		//GLuint _rbo_id = 0;

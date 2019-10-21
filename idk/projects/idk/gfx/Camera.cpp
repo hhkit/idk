@@ -60,6 +60,8 @@ namespace idk
 	CameraData Camera::GenerateCameraData() const
 	{	
 		return CameraData{
+			GetGameObject(),
+			is_scene_camera,
 			0xFFFFFFF,
 			ViewMatrix(),
 			ProjectionMatrix(),

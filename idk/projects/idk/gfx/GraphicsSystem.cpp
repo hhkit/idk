@@ -5,6 +5,9 @@
 #include <anim/Animator.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
+
+//#include <gfx/CameraControls.h>
+
 namespace idk
 {
 	void GraphicsSystem::PrepareLights(span<Light> lights)
@@ -63,7 +66,7 @@ namespace idk
 		{
 			skeleton_indices.emplace(elem.GetHandle(), i++);
 			result.skeleton_transforms.emplace_back(
-				SkeletonTransforms{ std::move(elem.GenerateTransforms()) } // generate this from the skeletons
+				SkeletonTransforms{ std::move(elem.BoneTransforms()) } // generate this from the skeletons
 				//SkeletonTransforms{ vector<mat4>{3} }
 			);
 		}
@@ -84,7 +87,11 @@ namespace idk
 		}
 
 		for (auto& camera : cameras)
+		{
+			if(camera.is_scene_camera)
+				result.curr_scene_camera = camera.GenerateCameraData();
 			result.camera.emplace_back(camera.GenerateCameraData());
+		}
 
 		for (auto& elem : mesh_renderers)
 			if (elem.IsActiveAndEnabled())

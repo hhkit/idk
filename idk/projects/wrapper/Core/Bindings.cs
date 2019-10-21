@@ -32,6 +32,21 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong GameObjectGetEngineComponent(ulong gamehandle, string component);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string GameObjectGetName(ulong gamehandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GameObjectSetName(ulong gamehandle, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string GameObjectGetTag(ulong gamehandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GameObjectSetTag(ulong gamehandle, string tag);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong GameObjectFindWithTag(string tag);
+
         /*
          * Component
          */
@@ -119,5 +134,43 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ColliderGetTrigger(ulong id);
 
+        /*
+         * Renderer
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid RendererGetMaterialInstance(ulong id);
+
+        /*
+         * Resource
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ResourceValidate(System.Guid guid, string type);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string ResourceGetName(System.Guid guid, string type);
+
+        /*
+         * MaterialInstance
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float MaterialInstanceGetFloat(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 MaterialInstanceGetVector2(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 MaterialInstanceGetVector3(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector4 MaterialInstanceGetVector4(System.Guid guid, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid MaterialInstanceGetTexture(System.Guid guid, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetFloat(System.Guid guid, string name, float value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetVector2(System.Guid guid, string name, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetVector3(System.Guid guid, string name, Vector3 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetVector4(System.Guid guid, string name, Vector4 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MaterialInstanceSetTexture(System.Guid guid, string name, Guid tex);
     }
 }

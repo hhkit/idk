@@ -9,6 +9,7 @@ namespace idk
         result_out_of_range,
         type_cannot_be_parsed,
         yaml_ill_formed,
-        yaml_contains_tabs
+        yaml_contains_tabs,
+        binary_ill_formed
     };
 }

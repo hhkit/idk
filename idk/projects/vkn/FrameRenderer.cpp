@@ -378,7 +378,7 @@ namespace idk::vkn
 
 	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
-		auto cam = CameraData{ s_cast<int>(0xFFFFFFFF),light.v,light.p};
+		auto cam = CameraData{ GenericHandle {},false, s_cast<int>(0xFFFFFFFF),light.v,light.p };
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)

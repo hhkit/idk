@@ -24,6 +24,17 @@ namespace idk
 	{
 		std::cout << "Init System\n";
 		Core::GetResourceManager().RegisterFactory<TestResourceFactory>();
+
+		//GameState::GetGameState().OnObjectCreate<GameObject>() += 
+		//	[](Handle<GameObject> h)
+		//	{
+		//		std::cout << "created: " << h.id << '\n';
+		//	};
+		//GameState::GetGameState().OnObjectDestroy<GameObject>() +=
+		//	[](Handle<GameObject> h)
+		//{
+		//	std::cout << "destroyed: " << h.id << '\n';
+		//};
 	}
 
 	void TestSystem::TestSpan(span<TestComponent> comps)

@@ -885,9 +885,6 @@
     <ClCompile Include="prefab\Prefab.cpp">
       <Filter>prefab</Filter>
     </ClCompile>
-    <ClCompile Include="prefab\PrefabFactory.cpp">
-      <Filter>prefab</Filter>
-    </ClCompile>
     <ClCompile Include="prefab\PrefabUtility.cpp">
       <Filter>prefab</Filter>
     </ClCompile>

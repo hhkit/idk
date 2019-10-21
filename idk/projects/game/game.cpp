@@ -171,7 +171,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
 	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
-#if 0
+#if 1
 
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag");
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag");
@@ -197,6 +197,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		camera->Transform()->rotation = s_cast<quat>(euler);
 		camHandle->far_plane = 100.f;
 		camHandle->render_target = RscHandle<RenderTarget>{};
+		camHandle->is_scene_camera = true;
 		camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 		if(gfx_api!=GraphicsAPI::Vulkan)
 			camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
@@ -234,7 +235,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			mesh_rend->material_instance = mat_inst;
 		}
 
-		animator->SetSkeleton(model_resource->Get<anim::Skeleton>());
+		animator->_skeleton = model_resource->Get<anim::Skeleton>();
+		Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
 		// Load other animations
 		PathHandle parent_dir{ path.GetParentMountPath() };
@@ -268,7 +270,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	constexpr auto col = ivec3{ 1,0,0 };
 
 	// @Joseph: Uncomment this when testing.
-	//create_anim_obj(vec3{ 0,0,0 });
+	create_anim_obj(vec3{ 0,0,0 });
 	//create_mesh_obj();	// Create just a mesh object
 
 	auto createtest_obj = [&scene, mat_inst, gfx_api, divByVal, tmp_tex](vec3 pos) {
@@ -318,12 +320,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				real{1.f},
 				color{1,1,1}
 			};
-			auto light_map = Core::GetResourceManager().Create<RenderTarget>();
-			auto m = light_map->GetMeta().textures[0]->GetMeta();
-			m.filter_mode = FilterMode::Nearest;
-			m.uv_mode = UVMode::ClampToBorder;
-			light_map->GetMeta().textures[0]->SetMeta(m);
-			light_comp->SetLightMap(light_map);
+			//auto light_map = Core::GetResourceManager().Create<RenderTarget>();
+			//auto m = light_map->GetMeta().textures[0]->GetMeta();
+			//m.filter_mode = FilterMode::Nearest;
+			//m.uv_mode = UVMode::ClampToBorder;
+			//m.internal_format = ColorFormat::DEPTH_COMPONENT;
+			////m.format = InputChannels::DEPTH_COMPONENT;
+			//light_map->GetMeta().textures[0]->SetMeta(m);
+			//light_comp->SetLightMap(light_map);
 		}
 		light->AddComponent<TestComponent>();
 	}

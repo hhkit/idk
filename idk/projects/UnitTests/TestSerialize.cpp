@@ -5,6 +5,7 @@
 #include <scene/SceneManager.h>
 #include <util/enum.h>
 #include <serialize/yaml.h>
+#include "TestApplication.h"
 
 using namespace idk;
 
@@ -95,7 +96,7 @@ TEST(Serialize, TestSerializeBasic)
 	vec3 v{ 1.0f, 2.0f, 3.0f };
 	auto str = serialize_text(v);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), "{x: 1.000000, y: 2.000000, z: 3.000000}");
+	EXPECT_STREQ(str.c_str(), "{x: 1, y: 2, z: 3}");
 
 	serialize_this obj = {
 		Guid{"e82bf459-faca-4c70-a8e9-dd35597575ef"},
@@ -103,7 +104,7 @@ TEST(Serialize, TestSerializeBasic)
 	};
 	str = serialize_text(obj);
 	std::cout << str;
-	EXPECT_STREQ(str.c_str(), "guid: e82bf459-faca-4c70-a8e9-dd35597575ef\nvec: \n  x: 5.000000\n  y: 6.000000\n  z: 7.000000\n  w: 8.000000\nf: 69\n");
+	EXPECT_STREQ(str.c_str(), "f: 69\nguid: e82bf459-faca-4c70-a8e9-dd35597575ef\nvec: \n  w: 8\n  x: 5\n  y: 6\n  z: 7\n");
 
 	// roundtrip
 	auto obj2 = *parse_text<serialize_this>(str);
@@ -208,10 +209,10 @@ static uint64_t parent_1_id = 0;
 
 TEST(Serialize, TestSerializeScene)
 {
-	Core core;
-	auto& fs = Core::GetSystem<FileSystem>();
-	core.Setup();
-	auto scene = Core::GetSystem<SceneManager>().CreateScene();
+    Core core;
+    core.AddSystem<TestApplication>();
+    core.Setup();
+    auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
 	auto o0 = scene->CreateGameObject();
 	auto t0 = o0->GetComponent<Transform>();
@@ -234,10 +235,10 @@ TEST(Serialize, TestSerializeScene)
 
 TEST(Serialize, TestParseScene)
 {
-	Core core;
-	auto& fs = Core::GetSystem<FileSystem>();
-	core.Setup();
-	auto scene = Core::GetSystem<SceneManager>().CreateScene();
+    Core core;
+    core.AddSystem<TestApplication>();
+    core.Setup();
+    auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
 	parse_text(serialized_scene_0, *scene);
 

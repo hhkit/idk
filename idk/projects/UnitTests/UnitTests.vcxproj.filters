@@ -36,9 +36,11 @@
     <ClCompile Include="TestSaveableResource.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestGeometry.cpp" />
+    <ClCompile Include="TestSerializeBinary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="TestApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

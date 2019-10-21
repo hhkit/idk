@@ -51,10 +51,10 @@ namespace idk {
 
 	string FileSystem::GetFullPath(string_view mountPath) const
 	{
-		string mount_path{ mountPath.data() };
-
-		if (mount_path[0] != '/')
+		if (mountPath.empty() || mountPath[0] != '/')
 			return string{};
+
+        string mount_path{ mountPath.data() };
 
 		const auto end_pos = mount_path.find_first_of('/', 1);
 		
@@ -293,6 +293,9 @@ namespace idk {
 
 	FStreamWrapper FileSystem::Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream)
 	{
+        if (mountPath.empty())
+            return FStreamWrapper{};
+
 		const auto file_index = getFile(mountPath);
 		// If we cannot find the file and user only wants to read, return an empty stream
 		// Else, we should create the file and return the stream for the user to write to

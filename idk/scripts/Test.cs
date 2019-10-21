@@ -31,6 +31,10 @@ namespace TestAndSeek
             t.gameObject.SetActive(false);
             t.gameObject.transform.position = new Vector3(5, 4, 3);
             Thunderbolt(t.gameObject.transform.position);
+
+            var go = GameObject.FindWithTag("futanari");
+            var metallic = go.GetComponent<MeshRenderer>().materialInstance.GetFloat("Metallic");
+            System.Console.WriteLine("{0} tagged futanari, metallic value {1}", go.name, metallic);
         }
 
         public static void Main(string[] args)

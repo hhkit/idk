@@ -58,6 +58,8 @@ namespace idk
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;
 
+			CameraData  curr_scene_camera;
+
 			RscHandle<ShaderProgram> mesh_vtx;
 			RscHandle<ShaderProgram> skinned_mesh_vtx;
 		};

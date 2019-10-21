@@ -42,6 +42,9 @@ namespace idk::ogl
 
 	void OpenGLMesh::Bind(const renderer_reqs& locations)
 	{
+
+		for (GLuint i = 0; i < vtx::Attrib::count; ++i)
+			glDisableVertexAttribArray(i);
 		for (auto& elem : _buffers)
 			elem.BindForDraw(locations);
 	}

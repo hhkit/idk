@@ -48,7 +48,7 @@ namespace idk::detail
 
 		constexpr static auto GenCreateTypeJt()
 		{
-			return GameState::CreateTypeJT{
+			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const Handle<GameObject>& go) -> GenericHandle
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
@@ -75,7 +75,7 @@ namespace idk::detail
 
 		constexpr static auto GenCreateDynamicJt()
 		{
-			return GameState::CreateDynamicJT{
+			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&, const reflect::dynamic&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const Handle<GameObject>& go, const reflect::dynamic& dyn) -> GenericHandle
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
@@ -102,7 +102,7 @@ namespace idk::detail
 
 		constexpr static auto GenCreateJt()
 		{
-			return GameState::CreateJT{
+			return array<GenericHandle(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle) -> GenericHandle
 				{
 					return gs.CreateObject(handle_cast<Ts>(handle));
@@ -111,7 +111,7 @@ namespace idk::detail
 		}
 		constexpr static auto GenValidateJt()
 		{
-			return GameState::ValidateJT{
+			return array<bool(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle) -> bool
 				{
 					return gs.ValidateHandle(handle_cast<Ts>(handle));
@@ -121,17 +121,30 @@ namespace idk::detail
 
 		constexpr static auto GenQueueForDestructionJt()
 		{
-			return GameState::DestroyJT{
-				[](GameState& gs, const GenericHandle& handle)
+			return array<bool(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
+				[](GameState& gs, const GenericHandle& handle) -> bool
 				{
-					gs.QueueForDestruction(*handle_cast<Ts>(handle));
+					auto real_handle = handle_cast<Ts>(handle);
+					if (!gs.QueuedForDestruction(real_handle))
+					{
+						if constexpr (std::is_same_v<Ts, GameObject>)
+						{
+							for (auto& elem : real_handle->GetComponents())
+								gs.DestroyObject(elem);
+						}
+
+						gs.QueueForDestruction(*handle_cast<Ts>(handle));
+						return true;
+					}
+					
+					return false;
 				} ...
 			};
 		}
 
 		constexpr static auto GenDestructionJt()
 		{
-			return GameState::DestroyJT{
+			return array<void(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle)
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
@@ -181,6 +194,28 @@ namespace idk::detail
 							return {};
 					}
 				} ...
+			};
+		}
+
+		constexpr static auto GenObjectCreatedSignalTable()
+		{
+			return std::array<void (*)(GameState*, const GenericHandle&), 1 + ComponentCount>
+			{
+				[](GameState* gs, const GenericHandle& rhs) -> void
+				{
+					gs->OnObjectCreate<Ts>().Fire(handle_cast<Ts>(rhs));
+				}...
+			};
+		}
+
+		constexpr static auto GenObjecDestroyedSignalTable()
+		{
+			return std::array<void (*)(GameState*, const GenericHandle&), 1 + ComponentCount>
+			{
+				[](GameState* gs, const GenericHandle& rhs) -> void
+				{
+					gs->OnObjectDestroy<Ts>().Fire(handle_cast<Ts>(rhs));
+				}...
 			};
 		}
 	};
@@ -250,27 +285,37 @@ namespace idk
 		constexpr auto queue_for_destroy_jt = detail::TableGen::GenQueueForDestructionJt();
 		if (handle)
 		{
-			queue_for_destroy_jt[handle.type](*this, handle);
-			_destruction_queue.emplace_back(handle);
+			if (queue_for_destroy_jt[handle.type](*this, handle))
+				_destruction_queue.emplace_back(handle);
 		}
 	}
-	void GameState::DestroyObject(const Handle<GameObject>& handle)
-	{
-		if (handle)
-		{
-			for (auto& elem : handle->GetComponents())
-				DestroyObject(elem);
-			handle->_queued_for_destruction = true;
-			_destruction_queue.emplace_back(handle);
-		}
 
+	void GameState::FlushCreationQueue()
+	{
+		constexpr auto created_handles = detail::TableGen::GenObjectCreatedSignalTable();
+		
+		while (_creation_queue.size())
+		{
+			auto old_c_queue = std::move(_creation_queue);
+
+			for (auto& elem : old_c_queue)
+				created_handles[elem.type](this, elem);
+		}
 	}
 	void GameState::DestroyQueue()
 	{
+		constexpr auto destroy_handlesignal_jt = detail::TableGen::GenObjecDestroyedSignalTable();
 		constexpr auto destroy_handles_jt = detail::TableGen::GenDestructionJt();
-		for (auto& elem : _destruction_queue)
-			destroy_handles_jt[elem.type](*this, elem);
-		_destruction_queue.clear();
+		
+		while (_destruction_queue.size())
+		{
+			auto old_d_queue = std::move(_destruction_queue);
+
+			for (auto& elem : old_d_queue)
+				destroy_handlesignal_jt[elem.type](this, elem);
+			for (auto& elem : old_d_queue)
+				destroy_handles_jt[elem.type](*this, elem);
+		}
 	}
 	Handle<GameObject> GameState::GetGameObject(const GenericHandle& handle)
 	{

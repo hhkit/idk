@@ -696,6 +696,28 @@ namespace idk::ai_helpers
 	{
 		UNREFERENCED_PARAMETER(scene);
 		// Do all the keyframe optimizations here.
+		const auto vec3_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
+		{
+			return vec3_equal(lhs.val, rhs.val);
+		};
+
+		for (auto& anim_clip : scene.compiled_clips)
+		{
+			for (auto& anim_bone : anim_clip.animated_bones)
+			{
+				// Translation optimization
+				anim_bone.translate_track.erase(
+					std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), vec3_pred), anim_bone.translate_track.end());
+				if (anim_bone.translate_track.size() == 1)
+					anim_bone.translate_track.clear();
+
+				// Scale optimization
+				anim_bone.scale_track.erase(
+					std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), vec3_pred), anim_bone.scale_track.end());
+				if (anim_bone.scale_track.size() == 1)
+					anim_bone.scale_track.clear();
+			}
+		}
 	}
 #pragma endregion
 
@@ -978,9 +1000,9 @@ namespace idk::ai_helpers
 #pragma endregion 
 
 #pragma region Comparison Helpers
-	bool flt_equal(float a, float b)
+	bool flt_equal(float a, float b, float eps)
 	{
-		return abs(a - b) < idk::constants::epsilon<float>();
+		return abs(a - b) < eps;
 	}
 	bool vec3_equal(const vec3& lhs, const vec3& rhs)
 	{
@@ -997,10 +1019,10 @@ namespace idk::ai_helpers
 	}
 	bool quat_equal(const quat& lhs, const quat& rhs)
 	{
-		return	flt_equal(lhs[0], rhs[0]) && 
-				flt_equal(lhs[1], rhs[1]) &&
-				flt_equal(lhs[2], rhs[2]) &&
-				flt_equal(lhs[3], rhs[3]);
+		return	flt_equal(lhs[0], rhs[0], idk::constants::epsilon<float>()) &&
+				flt_equal(lhs[1], rhs[1], idk::constants::epsilon<float>()) &&
+				flt_equal(lhs[2], rhs[2], idk::constants::epsilon<float>()) &&
+				flt_equal(lhs[3], rhs[3], idk::constants::epsilon<float>());
 	}
 	bool mat4_equal(const mat4& lhs, const mat4& rhs)
 	{

@@ -18,6 +18,8 @@
 #include <gfx/CubeMap.h>
 #include <opengl/resource/OpenGLCubemap.h>
 
+#include <editor/IDE.h>
+
 void _check_gl_error(const char* file, int line) {
 	GLenum err(glGetError());
 
@@ -55,6 +57,7 @@ namespace idk::ogl
 		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/debug.frag");
 		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skybox.frag");
 		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/shadow.frag");
+		renderer_fragment_shaders[FPicking] = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/picking.frag");
 
 		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
 		brdf_texture->Bind();
@@ -62,6 +65,15 @@ namespace idk::ogl
 		m.internal_format = ColorFormat::RGF_16;
 		brdf_texture->SetMeta(m);
 		brdf_texture->Size(ivec2{ 512 });
+
+		fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
+		fb_man.cBufferPickingTexture->Bind();
+		auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
+		pickMeta.internal_format = ColorFormat::RUI_32;
+		pickMeta.format = InputChannels::RGBA;
+		fb_man.cBufferPickingTexture->SetMeta(pickMeta);
+		//fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
+		fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
 	}
 
 	struct MaterialVisitor
@@ -222,7 +234,7 @@ namespace idk::ogl
 			if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLTexture>>(elem.light_map->DepthAttachment().buffer));
+				fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
 
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);
@@ -264,6 +276,8 @@ namespace idk::ogl
 		}
 
 		glEnable(GL_DEPTH_TEST);
+
+		RscHandle<FrameBuffer> main_buffer;
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
 		{
@@ -277,6 +291,12 @@ namespace idk::ogl
 			}
 
 			{
+				//if (cam.obj_id == curr_object_buffer.curr_scene_camera.obj_id)
+				//{
+				//	main_buffer = RscHandle<OpenGLRenderTarget>{ cam.render_target };
+				//	fb_man.SetRenderTarget(main_buffer);
+				//}
+				//else
 				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target});
 			}
 			
@@ -368,6 +388,126 @@ namespace idk::ogl
 		}
 
 		fb_man.ResetFramebuffer();
+
+
+
+		//////////////////////////////////For PICKING/////////////////////////////////
+		// set main scene camera
+		
+		//vector<OpenGLTexture> addMainBuffer;
+		//addMainBuffer.emplace_back(cBufferPickingTexture);
+		{		
+			auto cam = curr_object_buffer.curr_scene_camera;
+			{
+				const auto inv_view_tfm = invert_rotation(cam.view_matrix);
+				// calculate lights for this camera
+				auto lights = curr_object_buffer.lights;
+				for (auto& elem : lights)
+				{
+					elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
+					elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
+				}
+
+				{
+					fb_man.SetRenderTarget(fb_man.cBufferPickingTexture);
+				}
+
+				// lock drawing buffer
+				pipeline.Use();
+				pipeline.PopAllPrograms();
+				glBindVertexArray(vao_id);
+
+				//std::visit([&]([[maybe_unused]] const auto& obj)
+				//{
+				//	if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
+				//	{
+				//		if (!obj)
+				//			return;
+				//		auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
+
+				//		//oglCubeMap.ID;
+
+				//		glDisable(GL_CULL_FACE);
+				//		glDepthMask(GL_FALSE);
+				//		pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
+				//		pipeline.PushProgram(renderer_fragment_shaders[FPicking]);
+
+				//		pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
+				//		pipeline.SetUniform("obj_index", cam.obj_id);
+
+				//		oglCubeMap.BindToUnit(0);
+				//		pipeline.SetUniform("sb", 0);
+				//		RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
+				//			{ {
+				//				std::make_pair(vtx::Attrib::Position, 0)
+				//			} });
+
+				//		glDepthMask(GL_TRUE);
+				//		glEnable(GL_CULL_FACE);
+				//	}
+				//	if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
+				//		glClearColor(obj.x, obj.y, obj.z, obj.w);
+				//}, cam.clear_data);
+
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);
+				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FPicking]);
+				// render debug
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+					for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
+					{
+						SetObjectUniforms(elem, cam.view_matrix);
+						pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+						pipeline.SetUniform("obj_index", cam.obj_id);
+
+						RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+					}
+
+				// per mesh render
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix, cam.view_matrix);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				for (auto& elem : curr_object_buffer.mesh_render)
+				{
+					// bind shader
+					const auto material = elem.material_instance->material;
+					pipeline.PushProgram(material->_shader_program);
+
+					// set probe
+					GLuint texture_units = 0;
+					SetPBRUniforms(cam, inv_view_tfm, texture_units);
+					SetLightUniforms(span<LightData>{lights}, texture_units);
+					SetMaterialUniforms(elem.material_instance, texture_units);
+					SetObjectUniforms(elem, cam.view_matrix);
+
+					pipeline.SetUniform("obj_index", elem.obj_id);
+
+					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+				}
+
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix, cam.view_matrix);
+				for (auto& elem : curr_object_buffer.skinned_mesh_render)
+				{
+					// bind shader
+					const auto material = elem.material_instance->material;
+					pipeline.PushProgram(material->_shader_program);
+
+					GLuint texture_units = 0;
+					SetPBRUniforms(cam, inv_view_tfm, texture_units);
+					SetLightUniforms(span<LightData>{lights}, texture_units);
+					SetSkeletons(elem.skeleton_index);
+					SetMaterialUniforms(elem.material_instance, texture_units);
+					SetObjectUniforms(elem, cam.view_matrix);
+
+					pipeline.SetUniform("obj_index", elem.obj_id);
+
+					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
+				}
+			}
+
+			fb_man.ResetFramebuffer();
+		}
+		
 	}
 
 	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)
@@ -413,6 +553,7 @@ namespace idk::ogl
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();
 		fb_man.ResetFramebuffer();
+		//glBindVertexArray(0);
 	}
 
 	void OpenGLState::ComputeBRDF(const RscHandle<ogl::Program>& handle)
@@ -436,6 +577,7 @@ namespace idk::ogl
 		glEnable(GL_CULL_FACE);
 		pipeline.PopAllPrograms();
 		fb_man.ResetFramebuffer();
+		//glBindVertexArray(0);
 	}
 
 }

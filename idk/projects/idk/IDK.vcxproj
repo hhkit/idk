@@ -301,7 +301,6 @@
     <ClCompile Include="phys\collision.cpp" />
     <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabData.cpp" />
-    <ClCompile Include="prefab\PrefabFactory.cpp" />
     <ClCompile Include="prefab\PrefabUtility.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
@@ -547,6 +546,7 @@
       <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -592,6 +592,7 @@
       <DisableSpecificWarnings>4201; 4505;4702</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

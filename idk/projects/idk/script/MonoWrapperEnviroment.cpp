@@ -36,6 +36,10 @@ namespace idk::mono
 			mono_runtime_invoke(method, nullptr, args, nullptr);
 		}
 		ScanTypes();
+
+		auto mb_itr = _types.find("MonoBehavior");
+		IDK_ASSERT_MSG(mb_itr != _types.end(), "cannot find idk.MonoBehavior");
+		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache method");
 	}
 
 	MonoWrapperEnvironment::~MonoWrapperEnvironment()
@@ -105,6 +109,49 @@ namespace idk::mono
 				go->SetActive(set);
 			}
 		));
+
+        Bind("idk.Bindings::GameObjectGetName", decay(
+            [](Handle<GameObject> go) -> MonoString*
+        {
+            return mono_string_new(mono_domain_get(), go->Name().data());
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectSetName", decay(
+            [](Handle<GameObject> go, MonoString* name) -> void
+        {
+            char* s = mono_string_to_utf8(name);
+            go->Name(s);
+            mono_free(s);
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectGetTag", decay(
+            [](Handle<GameObject> go) -> MonoString*
+        {
+            return mono_string_new(mono_domain_get(), go->Tag().data());
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectSetTag", decay(
+            [](Handle<GameObject> go, MonoString* tag) -> void
+        {
+            char* s = mono_string_to_utf8(tag);
+            go->Tag(s);
+            mono_free(s);
+        }
+        ));
+
+        Bind("idk.Bindings::GameObjectFindWithTag", decay(
+            [](MonoString* tag) -> uint64_t
+        {
+            char* s = mono_string_to_utf8(tag);
+            auto ret = Core::GetSystem<TagManager>().Find(s);
+            mono_free(s);
+            return ret.id;
+        }
+        ));
+
 
 		// component
 		Bind("idk.Bindings::ComponentGetGameObject", decay(
@@ -270,5 +317,148 @@ namespace idk::mono
 			return col->is_trigger;
 		}
 		));
+
+        // Renderer
+        Bind("idk.Bindings::RendererGetMaterialInstance", decay(
+            [](GenericHandle renderer) -> Guid
+        {
+            switch (renderer.type)
+            {
+            case index_in_tuple_v<MeshRenderer, Handleables>: return handle_cast<MeshRenderer>(renderer)->material_instance.guid;
+            case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->material_instance.guid;
+            default: return {};
+            }
+        }
+        ));
+
+        // Resource
+        Bind("idk.Bindings::ResourceValidate", decay(
+            [](Guid guid, MonoString* type) -> bool
+        {
+            // TODO: make validate jumptable...
+            auto* s = mono_string_to_utf8(type);
+            auto hash = string_hash(s);
+            mono_free(s);
+            switch (hash)
+            {
+            case reflect::typehash<MaterialInstance>() : return Core::GetResourceManager().Validate<MaterialInstance>(guid);
+            default: return false;
+            }
+        }
+        ));
+        Bind("idk.Bindings::ResourceGetName", decay(
+            [](Guid guid, MonoString* type) -> MonoString*
+        {
+            // TODO: make get jumptable...
+            auto* s = mono_string_to_utf8(type);
+            auto hash = string_hash(s);
+            mono_free(s);
+            switch (hash)
+            {
+                case reflect::typehash<MaterialInstance>() :
+                    return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<MaterialInstance>(guid).Name().data());
+                default: return mono_string_empty(mono_domain_get());
+            }
+        }
+        ));
+
+        // MaterialInstance
+        Bind("idk.Bindings::MaterialInstanceGetFloat", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> float
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return 0; }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<float>(*res) : 0;
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetVector2", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec2
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return vec2(); }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<vec2>(*res) : vec2(0, 0);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetVector3", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec3
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return vec3(); }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<vec3>(*res) : vec3(0, 0, 0);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetVector4", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec4
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return vec4(); }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<vec4>(*res) : vec4(0, 0, 0, 0);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceGetTexture", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name) -> Guid
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return Guid(); }
+            auto res = handle->GetUniform(s);
+            mono_free(s);
+            return res ? std::get<RscHandle<Texture>>(*res).guid : Guid();
+        }
+        ));
+
+        Bind("idk.Bindings::MaterialInstanceSetFloat", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, float value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetVector2", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, vec2 value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetVector3", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, vec3 value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetVector4", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, vec4 value) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, value);
+            mono_free(s);
+        }
+        ));
+        Bind("idk.Bindings::MaterialInstanceSetTexture", decay(
+            [](RscHandle<MaterialInstance> handle, MonoString* name, RscHandle<Texture> tex) -> void
+        {
+            auto* s = mono_string_to_utf8(name);
+            if (!handle) { mono_free(s); return; }
+            handle->SetUniform(s, tex);
+            mono_free(s);
+        }
+        ));
+
 	}
 }

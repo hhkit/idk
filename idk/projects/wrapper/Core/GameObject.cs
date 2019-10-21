@@ -8,6 +8,8 @@ namespace idk
         public bool activeSelf { get => Bindings.GameObjectActiveSelf(handle); }
         public bool activeInHierarchy { get => Bindings.GameObjectGetActiveInHierarchy(handle); }
         public Transform transform { get { return GetComponent<Transform>(); } }
+        public string name { get => Bindings.GameObjectGetName(handle); set => Bindings.GameObjectSetName(handle, value); }
+        public string tag { get => Bindings.GameObjectGetTag(handle); set => Bindings.GameObjectSetTag(handle, value); }
 
         internal GameObject(ulong in_handle)
         {
@@ -28,10 +30,10 @@ namespace idk
                 return null;
         }
 
-        public T GetComponent<T>() where T : Component, new() 
-        {   
+        public T GetComponent<T>() where T : Component, new()
+        {
             ulong comp_handle = Bindings.GameObjectGetEngineComponent(handle, typeof(T).Name);
-            
+
             if (comp_handle != 0)
             {
                 T component = new T();
@@ -46,5 +48,11 @@ namespace idk
 
         public void SetActive(bool new_active)
             => Bindings.GameObjectSetActive(handle, new_active);
+
+
+
+        // statics
+        public static GameObject FindWithTag(string tag)
+            => new GameObject(Bindings.GameObjectFindWithTag(tag));
     }
 }

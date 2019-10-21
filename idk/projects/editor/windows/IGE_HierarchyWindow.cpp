@@ -152,9 +152,11 @@ namespace idk {
 			if (!handle) //Ignore handle zero
 				return true;
 
-			if (!show_editor_objects && handle.scene == 0x80) // ignore eidtor
+			if (!show_editor_objects && handle.scene == 0x80) {// ignore editor
+				++selectedCounter; //counter here is for shift selecting
+
 				return true;
-			
+			}
 
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 
@@ -197,7 +199,7 @@ namespace idk {
 					ImGui::PopStyleColor();
                 if (is_prefab)
                     ImGui::PopStyleColor();
-				++selectedCounter; //Increment counter here
+				++selectedCounter; // counter here is for shift selecting
 				return true;
 			}
 			
@@ -205,7 +207,7 @@ namespace idk {
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
 
 			
-			++selectedCounter; //Increment counter here
+			++selectedCounter; //counter here is for shift selecting
 			
 
             if (isNameEmpty)

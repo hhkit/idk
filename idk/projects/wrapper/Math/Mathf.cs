@@ -2,13 +2,26 @@
 {
     class Mathf
     {
-        public static float PI { get { return 3.1415927f; } }
-
+        public static float PI { get { return 3.14159265358979f; } }
         public static float Epsilon { get { return 1e-6f; } }
+        public static float DegToRad { get { return PI / 180; } }
+        public static float RadToDeg { get { return 180 / PI; } }
 
         public static float Abs(float val)
         {
             return val > 0 ? val : -val;
+        }
+        public static float Floor(float val)
+        {
+            return (float)System.Math.Floor(val);
+        }
+        public static float Ceil(float val)
+        {
+            return (float)System.Math.Ceiling(val);
+        }
+        public static float Round(float val)
+        {
+            return (float)System.Math.Round(val);
         }
         public static float Sqrt(float val)
         {
@@ -39,6 +52,62 @@
         public static float Asin(float val)
         {
             return (float)System.Math.Asin(val);
+        }
+        public static float Acos(float val)
+        {
+            return (float)System.Math.Acos(val);
+        }
+        public static float Max(float a, float b)
+        {
+            return a > b ? a : b;
+        }
+        public static float Max(params float[] values)
+        {
+            for (int i = 1; i < values.Length; i++)
+            {
+                if (values[i] > values[0])
+                    values[0] = values[i];
+            }
+            return values[0];
+        }
+        public static float Min(float a, float b)
+        {
+            return a < b ? a : b;
+        }
+        public static float Min(params float[] values)
+        {
+            for (int i = 1; i < values.Length; i++)
+            {
+                if (values[i] < values[0])
+                    values[0] = values[i];
+            }
+            return values[0];
+        }
+        public static int Max(int a, int b)
+        {
+            return a > b ? a : b;
+        }
+        public static int Max(params int[] values)
+        {
+            for (int i = 1; i < values.Length; i++)
+            {
+                if (values[i] > values[0])
+                    values[0] = values[i];
+            }
+            return values[0];
+        }
+        public static int Min(int a, int b)
+        {
+            return a < b ? a : b;
+        }
+        public static int Min(params int[] values)
+        {
+            for (int i = 1; i < values.Length; i++)
+            {
+                if (values[i] < values[0])
+                    values[0] = values[i];
+            }
+            return values[0];
         }
     }
 }

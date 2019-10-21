@@ -2,7 +2,7 @@
 //@file		IGE_Console.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		17 OCT 2019
+//@date		20 OCT 2019
 //@brief	
 
 /*
@@ -26,10 +26,10 @@ namespace idk
 	};
 
 	struct ConsoleMessage {
-		//int id;
-		ConsoleMessageType_ type = ConsoleMessageType_Message;
-		string message{};
-		float rgb[3]	{ 1.0f,1.0f,1.0f };
+		//const time_point	time_created	= Clock::now();
+		ConsoleMessageType_ type			= ConsoleMessageType_Message;
+		string				text			= {};
+		vec4				color			= { 1.0f,1.0f,1.0f,1.0f };
 
 	};
 
@@ -41,23 +41,36 @@ namespace idk
 		virtual void BeginWindow() override;
 		virtual void Update() override;
 
-		void PushMessage(const string& message, float r = 1.0f,float g = 1.0f, float b = 1.0f);
-		void PushMessage(const char* message, float r = 1.0f,float g = 1.0f, float b = 1.0f);
-		void PushMessage(const ConsoleMessage&);
-		string ComposeMessage(const char* fmt, ...); //Same syntax as printf
+		void PushMessage(string_view message	, const vec4& color = { 1.0f,1.0f,1.0f,1.0f });
+		void PushWarning(string_view message	, const vec4& color = { 1.0f,1.0f,1.0f,1.0f });
+		void PushError	(string_view message	, const vec4& color = { 1.0f,1.0f,1.0f,1.0f });
+		void PushRaw	(string_view message	, ConsoleMessageType_ type, const vec4& color = { 1.0f,1.0f,1.0f,1.0f });
 
-		void ClearMessages();
 
 		bool display_messages	= true;
 		bool display_warnings	= true;
 		bool display_errors		= true;
+		//bool display_timestamp	= false;
 
 	private:
 		
 
 		vector<ConsoleMessage> messages;
+		int		num_of_messages			= 0;
+		int		num_of_warnings			= 0;
+		int		num_of_errors			= 0;
+		vec4	message_header_color	= { 1.0f,1.0f,1.0f,1.0f };
+		vec4	warning_header_color	= { 1.0f,1.0f,0.0f,1.0f };
+		vec4	error_header_color		= { 1.0f,0.0f,0.0f,1.0f };
 
-		void PrintMessage(const ConsoleMessage& message);
+		void PushConsoleMessage(ConsoleMessage&&); //Use std::move(lValue)
+		void PrintMessage(const ConsoleMessage& message,int msgNo);
+		void ClearMessages();
+
+		bool new_message_received		= false;
+		bool clear_messages_called		= false;
+		float start_text_posX			= 0;
+		ImGuiTextFilter textFilter{};
 
 	};
 }

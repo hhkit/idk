@@ -71,8 +71,9 @@ namespace idk
         // static methods
         public static float Angle(Quaternion a, Quaternion b)
         {
-            //Quaternion q = b * Inverse(a);
-            return 0;
+            Quaternion q = b * Inverse(a);
+            Normalize(q);
+            return 2 * Mathf.Acos(q.w) * Mathf.RadToDeg;
         }
 
         public static Quaternion AngleAxis(float angle, Vector3 axis)
@@ -241,19 +242,50 @@ namespace idk
             return q;
         }
 
-        public static Quaternion RotateTowards(Quaternion from, Quaternion to, Quaternion maxDegreesDelta)
+        public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDegreesDelta)
         {
-            return identity;
+            float angle = Angle(from, to);
+            return Slerp(from, to, maxDegreesDelta < angle ? maxDegreesDelta / angle : 1.0f);
         }
 
         public static Quaternion Slerp(Quaternion a, Quaternion b, float t)
         {
-            return identity;
+            return SlerpUnclamped(a, b, Mathf.Clamp01(t));
         }
 
         public static Quaternion SlerpUnclamped(Quaternion a, Quaternion b, float t)
         {
-            return identity;
+            Normalize(a);
+            Normalize(b);
+            float cos_theta = Dot(a, b);
+
+            // Shortest path
+            if (cos_theta < 0)
+		    {
+                cos_theta = -cos_theta;
+                b.w = -b.w;
+                b.x = -b.x;
+                b.y = -b.y;
+                b.z = -b.z;
+            }
+
+            // Divide by 0
+            if (1.0f - cos_theta > Mathf.Epsilon)
+            {
+                float ohm = Mathf.Acos(cos_theta);
+                float s_ohm = Mathf.Sin(ohm);
+
+                float scale_p = Mathf.Sin((1 - t) * ohm) / s_ohm;
+                float scale_q = Mathf.Sin(t * ohm) / s_ohm;
+
+                a.w = a.w * scale_p + b.w * scale_q;
+                a.x = a.x * scale_p + b.x * scale_q;
+                a.y = a.y * scale_p + b.y * scale_q;
+                a.z = a.z * scale_p + b.z * scale_q;
+                return a;
+            }
+            else
+                return Lerp(a, b, t);
         }
 
         public override bool Equals(object obj)
@@ -262,7 +294,7 @@ namespace idk
         }
         public override int GetHashCode()
         {
-            return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ z.GetHashCode();
+            return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ (z.GetHashCode() ^ w.GetHashCode() << 2) << 2;
         }
 
         // operator overloads
@@ -312,7 +344,9 @@ namespace idk
         }
         public static Vector3 operator *(Quaternion lhs, Vector3 rhs)
         {
-            return new Vector3();
+            Quaternion q = lhs * new Quaternion(rhs.x, rhs.y, rhs.z, 0);
+            q *= Inverse(lhs);
+            return new Vector3(q.x, q.y, q.z);
         }
 
         // easy statics

@@ -21,7 +21,6 @@ namespace idk {
 	CMD_DeleteGameObject::CMD_DeleteGameObject(Handle<GameObject> gameObject)
 	{
 		game_object_handle = gameObject;
-		
 
 	}
 
@@ -86,7 +85,7 @@ namespace idk {
 	{
 
 		for (RecursiveObjects& object : vector_ref) {
-			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(object.original_handle);
 			if (isRoot) {
 				game_object_handle = i;
 				isRoot = false;

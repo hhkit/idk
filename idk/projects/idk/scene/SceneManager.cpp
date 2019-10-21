@@ -134,6 +134,7 @@ namespace idk
 				GameState::GetGameState().DestroyObject(elem.GetHandle());
 		}
 		GameState::GetGameState().DestroyQueue();
+		GameState::GetGameState().FlushCreationQueue();
 	}
 
 	void SceneManager::BuildSceneGraph(span<const GameObject> objs)

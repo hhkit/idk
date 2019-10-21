@@ -608,7 +608,7 @@ namespace idk {
 					if (!c_anim->_preview_playback)
 					{
 						c_anim->_elapsed = 0.0f;
-						c_anim->RestoreBindPose();
+                        Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
 					}
 				}
 

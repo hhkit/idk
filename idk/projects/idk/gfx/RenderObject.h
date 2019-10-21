@@ -13,6 +13,8 @@ namespace idk
 
 	struct RenderObject
 	{
+		//id
+		GenericHandle obj_id{};
 		// resources
 		RscHandle<Mesh>  mesh;
 		RscHandle<MaterialInstance> material_instance;
@@ -48,6 +50,8 @@ namespace idk
 
 	struct CameraData
 	{
+		GenericHandle obj_id{};
+		bool is_scene_camera = false;
 		int  culling_flags = 0xFFFFFFFF;
 		mat4 view_matrix{};
 		mat4 projection_matrix{};

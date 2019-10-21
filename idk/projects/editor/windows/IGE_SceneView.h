@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		02 OCT 2019
+//@date		21 OCT 2019
 //@brief	
 
 /*
@@ -51,7 +51,19 @@ namespace idk {
 
 
 		const float pan_multiplier				= 0.01f;
-		
+
+		bool	display_grid						= false;
+		//void	DrawGridControl();
+
+		float	translate_snap_val[3]				= {0.0f,0.0f,0.0f};
+		float	rotate_snap_val						= 0;
+		float	scale_snap_val						= 0;
+		const vector<float> translate_snap_type		= { 0,0.5,1,5,10,50,100,500 };
+		const vector<float> rotate_snap_type		= { 0,1,5,15,30,45,90	};
+		const vector<float> scale_snap_type			= { 0,0.5f,0.25f,0.125f,0.0625f };
+
+		void DrawSnapControl();
+
 		//Debug ray
 		ray currRay;
 

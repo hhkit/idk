@@ -92,17 +92,20 @@ namespace idk::ogl
 		else
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
-			TextureMeta mm = target->GetMeta();
-			if (mm.internal_format != ColorFormat::RGBAF_16)
-			{
-				mm.internal_format = ColorFormat::RGBAF_16;
-				target->SetMeta(mm);
-			}
+			//TextureMeta mm = target->GetMeta();
+			//if (mm.internal_format != ColorFormat::RGBAF_16)
+			//{
+			//	mm.internal_format = ColorFormat::RGBAF_16;
+			//	target->SetMeta(mm);
+			//}
 			target->Bind();
 
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
 			const GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			if(target->GetMeta().internal_format == ColorFormat::RUI_32)
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+			else
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			glDrawBuffers(1, buffers);
 		}
 
@@ -192,6 +195,7 @@ namespace idk::ogl
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
+
 
 	void FrameBufferManager::ResetFramebuffer()
 	{

@@ -144,7 +144,7 @@ namespace idk
 		Core::GetResourceManager().RegisterFactory<EasyFactory<AudioClip>>();
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".wav");
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".ogg");
-		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mps");
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mp3");
 
 		// Create the FMOD Core System object.
 		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));

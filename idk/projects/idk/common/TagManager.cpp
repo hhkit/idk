@@ -6,6 +6,18 @@
 
 namespace idk
 {
+
+    void TagManager::Init()
+    {
+        GameState::GetGameState().OnObjectCreate<Tag>() += [](Handle<Tag> tag)
+        {
+            if (tag->index == 0)
+                tag->GetGameObject()->RemoveComponent(tag);
+        };
+    }
+
+
+
     Handle<GameObject> TagManager::Find(string_view tag) const
     {
         auto iter = _tags_to_indices.find(tag);

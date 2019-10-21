@@ -2,10 +2,13 @@
 #include <scene/SceneFactory.h>
 #include <prefab/PrefabUtility.h>
 #include <prefab/PrefabFactory.h>
-#include <IncludeComponents.h>
-#include <IncludeSystems.h>
-#include <IncludeResources.h>
+#include <prefab/PrefabInstance.h>
 #include <scene/SceneManager.h>
+#include <core/GameState.h>
+#include <core/GameObject.h>
+#include <common/Name.h>
+#include <common/Transform.h>
+#include "TestApplication.h"
 
 using namespace idk;
 
@@ -13,12 +16,14 @@ TEST(Prefab, TestPrefabSave)
 {
     Core core;
 	auto& fs = Core::GetSystem<FileSystem>();
+    core.AddSystem<TestApplication>();
 	core.Setup();
-	auto scene = Core::GetSystem<SceneManager>().CreateScene();
+    fs.Mount(TEST_DATA_PATH, "/assets");
+	auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
     auto go = scene->CreateGameObject();
     
-    go->GetComponent<Name>()->name = "stoopidguy";
+    go->GetComponent<Name>()->name = "this name should not be instantiated";
 
     auto t0 = go->GetComponent<Transform>();
     t0->position = vec3{ 1.0f, 2.0f, 3.0f };
@@ -32,30 +37,20 @@ TEST(Prefab, TestPrefabSave)
     t1->rotation = quat{ 13.0f, 14.0f, 15.0f, 16.0f };
 	child->Transform()->parent = go;
 
-    auto exe_dir = std::string{ fs.GetExeDir() };
-    // fs.Mount(exe_dir + "/assets", "/assets"); // resource manager already mounts
-    // fs.SetAssetDir(exe_dir + "/assets");		 // resource manager already mounts
-
-    fs.Open("/assets/prefabs/testprefab.idp", FS_PERMISSIONS::WRITE);
-    auto save_path = fs.GetFile("/assets/prefabs/testprefab.idp");
-
-    EXPECT_NO_THROW(PrefabUtility::Save(go, save_path.GetMountPath()));
-
-	core.Shutdown();
+    EXPECT_NO_THROW(PrefabUtility::Save(go, "/assets/prefabs/stoopidguy.idp"));
+    Core::GetResourceManager().SaveDirtyFiles();
 }
 
 TEST(Prefab, TestPrefabInstantiate)
 {
-	Core core;
+    Core core;
+    auto& fs = Core::GetSystem<FileSystem>();
+    core.AddSystem<TestApplication>();
+    core.Setup();
+    fs.Mount(TEST_DATA_PATH, "/assets");
+    auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
-    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-    core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
-
-	auto& fs = Core::GetSystem<FileSystem>();
-	core.Setup();
-	auto scene = Core::GetSystem<SceneManager>().CreateScene();
-
-    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
+    auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
 
     {
         auto& data = prefab->data;
@@ -66,7 +61,7 @@ TEST(Prefab, TestPrefabInstantiate)
         EXPECT_EQ(t0.rotation, quat(5.0f, 6.0f, 7.0f, 8.0f));
         EXPECT_EQ(data[0].parent_index, -1);
         EXPECT_EQ(data[0].components.size(), 2);
-        EXPECT_EQ(data[0].components[1].get<Name>().name, "stoopidguy");
+        EXPECT_EQ(data[0].components[1].get<Name>().name, "this name should not be instantiated");
 
         auto t1 = data[1].components[0].get<Transform>();
         EXPECT_EQ(t1.position, vec3(9.0f, 10.0f, 11.0f));
@@ -92,21 +87,18 @@ TEST(Prefab, TestPrefabInstantiate)
         EXPECT_EQ(t1->rotation, quat(13.0f, 14.0f, 15.0f, 16.0f));
         EXPECT_EQ(o1.Transform()->parent.id, o0.GetHandle().id);
     }
-	core.Shutdown();
 }
 
 TEST(Prefab, TestPrefabRevert)
 {
     Core core;
-    FileSystem& fs = core.GetSystem<FileSystem>();
-	core.Setup();
+    auto& fs = Core::GetSystem<FileSystem>();
+    core.AddSystem<TestApplication>();
+    core.Setup();
+    fs.Mount(TEST_DATA_PATH, "/assets");
+    auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
-	auto scene = Core::GetSystem<SceneManager>().CreateScene();
-
-	auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-	core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
-
-    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
+    auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
     auto go = PrefabUtility::Instantiate(prefab, *scene);
 
     vec3 ori_scale = go->GetComponent<Transform>()->scale;
@@ -118,9 +110,9 @@ TEST(Prefab, TestPrefabRevert)
     PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[0], "scale");
     PrefabUtility::RecordPrefabInstanceChange(go, go->GetComponents()[1], "name");
     // add some completely bullshit property overrides
-    //go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "Transform", "scrimbux" });
-    //go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 0, "MissingNo", "scrimbux" });
-    //go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ 1, "Transform", "scrimbux" });
+    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ "Transform", "scrimbux" });
+    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ "MissingNo", "scrimbux" });
+    go->GetComponent<PrefabInstance>()->overrides.emplace_back(PropertyOverride{ "Transform", "scrimbux" });
 
     auto t0 = go->GetComponent<Transform>();
     EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f));
@@ -131,21 +123,18 @@ TEST(Prefab, TestPrefabRevert)
     EXPECT_EQ(t0->position, vec3(69.0f, 69.0f, 69.0f)) << "Position and rotation should not be reverted.";
     EXPECT_EQ(t0->scale, ori_scale);
     EXPECT_EQ(go->GetComponent<Name>()->name, "changed_name") << "Name should not be reverted.";
-	core.Shutdown();
 }
 
 TEST(Prefab, TestPrefabPropagate)
 {
     Core core;
-    FileSystem& fs = core.GetSystem<FileSystem>();
-	core.Setup();
+    auto& fs = Core::GetSystem<FileSystem>();
+    core.AddSystem<TestApplication>();
+    core.Setup();
+    fs.Mount(TEST_DATA_PATH, "/assets");
+    auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
-	auto scene = Core::GetSystem<SceneManager>().CreateScene();
-
-    auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-    core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
-
-    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
+    auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
     auto go0 = PrefabUtility::Instantiate(prefab, *scene);
     auto go1 = PrefabUtility::Instantiate(prefab, *scene);
     auto go2 = PrefabUtility::Instantiate(prefab, *scene);
@@ -179,15 +168,13 @@ TEST(Prefab, TestPrefabPropagate)
 TEST(Prefab, TestPrefabApply)
 {
     Core core;
-    FileSystem& fs = core.GetSystem<FileSystem>();
+    auto& fs = Core::GetSystem<FileSystem>();
+    core.AddSystem<TestApplication>();
     core.Setup();
+    fs.Mount(TEST_DATA_PATH, "/assets");
+    auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
-    auto scene = Core::GetSystem<SceneManager>().CreateScene();
-
-	auto& pf = core.GetResourceManager().RegisterFactory<PrefabFactory>();
-	core.GetResourceManager().RegisterLoader<PrefabLoader>(".idp");
-
-    auto& prefab = *core.GetResourceManager().Load<Prefab>(fs.GetFile("/assets/prefabs/testprefab.idp"));
+    auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
     auto go0 = PrefabUtility::Instantiate(prefab, *scene);
     auto go1 = PrefabUtility::Instantiate(prefab, *scene);
     auto go2 = PrefabUtility::Instantiate(prefab, *scene);
@@ -198,6 +185,8 @@ TEST(Prefab, TestPrefabApply)
     go0->GetComponent<Transform>()->position = vec3(69.0f, 69.0f, 69.0f);
     go0->GetComponent<Transform>()->scale = vec3(69.0f, 69.0f, 69.0f);
     go0->GetComponent<Name>()->name = string("changed_name");
+
+    Core::GetSystem<SceneManager>().BuildSceneGraph(GameState::GetGameState().GetObjectsOfType<const GameObject>());
 
     PrefabUtility::RecordPrefabInstanceChange(go0, go0->GetComponents()[0], "position");
     PrefabUtility::RecordPrefabInstanceChange(go0, go0->GetComponents()[0], "scale");
