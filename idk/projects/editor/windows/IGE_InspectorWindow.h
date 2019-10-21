@@ -39,13 +39,17 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         vector<string> _curr_property_stack;
 
-        void DisplayGameObjects(vector<Handle<GameObject>> gos);			   //If multiple objects are selected, this will only display the first gameObject.
-		void DisplayGameObjectHeader(Handle<GameObject> game_object);	       //If multiple objects are selected, this will only display the first gameObject.
-        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);   //If multiple objects are selected, this will only display the first gameObject.
-		void DisplayTransformComponent(Handle<Transform>& c_transform);		   //If multiple objects are selected, this will only display the first gameObject.
-		void DisplayAnimatorComponent(Handle<Animator>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
-		void DisplayBoneComponent(Handle<Bone>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
-		void DisplayOtherComponent(GenericHandle& component);				   //If multiple objects are selected, this will only display the first gameObject.
+        //If multiple objects are selected, this will only display the first gameObject.
+        void DisplayGameObjects(vector<Handle<GameObject>> gos);			
+		void DisplayGameObjectHeader(Handle<GameObject> game_object);	    
+        void DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab);
+
+        //If multiple objects are selected, this will only display the first gameObject.
+        void DisplayComponent(GenericHandle& component);
+        template<typename T> void DisplayComponentInner(T component) { displayVal(component); }
+        template<> void DisplayComponentInner(Handle<Transform> c_transform);
+        template<> void DisplayComponentInner(Handle<Animator> c_anim);	
+        template<> void DisplayComponentInner(Handle<Bone> c_anim);		
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);
