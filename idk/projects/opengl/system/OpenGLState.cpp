@@ -277,7 +277,7 @@ namespace idk::ogl
 			}
 
 			{
-				fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target});
 			}
 			
 			// lock drawing buffer

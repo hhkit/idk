@@ -45,9 +45,12 @@ namespace idk
 	public:
 		vector<unique_ptr<Attachment>> attachments{};
 		unique_ptr<Attachment> depth_attachment{}, stencil_attachment{};
+		bool HasDepthAttachment()const { return s_cast<bool>(depth_attachment); }
 		const Attachment& DepthAttachment()const { return *depth_attachment; }
-		const Attachment& Attachment(size_t index)const { return *attachments[index]; }
+		const Attachment& GetAttachment(size_t index)const { return *attachments[index]; }
+		size_t NumColorAttachments()const {return attachments.size();}
 		size_t NumAttachments()const;
+		ivec2 Size()const { return size; };
 		ivec2 size{};
 	};
 

@@ -1,19 +1,29 @@
 #pragma once
 #include <gfx/RenderTarget.h>
 #include <glad/glad.h>
+#include <gfx/Framebuffer.h>
 namespace idk::ogl
 {
-	class FrameBuffer
+	class OpenGLRenderTarget
 		: public RenderTarget
 	{
 	public:
-		FrameBuffer();
-		~FrameBuffer();
+		OpenGLRenderTarget();
+		~OpenGLRenderTarget();
 
 		void OnMetaUpdate(const Metadata& newmeta) override;
 
 		GLuint DepthBuffer() const;
 	private:
 		GLuint depthbuffer = 0;
+	};
+
+	struct OpenGLAttachment :Attachment {};
+
+	class OpenGLFrameBuffer
+		: public FrameBuffer
+	{
+	public:
+	private:
 	};
 }

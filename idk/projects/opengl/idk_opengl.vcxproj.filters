@@ -27,19 +27,31 @@
     <ClInclude Include="system\OpenGLState.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="resource\OpenGLTexture.h" />
     <ClInclude Include="system\FrameBufferManager.h">
       <Filter>program</Filter>
     </ClInclude>
-    <ClInclude Include="resource\FrameBuffer.h" />
-    <ClInclude Include="resource\FrameBufferFactory.h" />
-    <ClInclude Include="resource\OpenGLTextureFactory.h" />
-    <ClInclude Include="resource\OpenGLCubemap.h" />
     <ClInclude Include="program\GLSLLoader.h" />
     <ClInclude Include="system\TextureManager.h" />
     <ClInclude Include="program\ProgramFactory.h" />
-    <ClInclude Include="resource\OpenGLCubemapFactory.h" />
     <ClInclude Include="DDSData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLCubemap.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLCubemapFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTexture.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\FrameBufferFactory.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\FrameBuffer.h">
       <Filter>resource</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,16 +80,28 @@
     </ClCompile>
     <ClCompile Include="glad_wgl.c" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="resource\OpenGLTexture.cpp" />
     <ClCompile Include="system\FrameBufferManager.cpp" />
-    <ClCompile Include="resource\FrameBuffer.cpp" />
-    <ClCompile Include="resource\FrameBufferFactory.cpp" />
-    <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
-    <ClCompile Include="resource\OpenGLCubemap.cpp" />
-    <ClCompile Include="resource\OpenGLCubemapFactory.cpp" />
     <ClCompile Include="program\GLSLLoader.cpp" />
     <ClCompile Include="system\TextureManager.cpp" />
     <ClCompile Include="program\ProgramFactory.cpp" />
+    <ClCompile Include="resource\OpenGLCubemap.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLCubemapFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTexture.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\FrameBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\FrameBufferFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

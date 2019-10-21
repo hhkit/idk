@@ -295,7 +295,6 @@
     <ClCompile Include="VknRenderTargetFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
-    <ClCompile Include="VknFramebufferFactory.cpp" />
     <ClCompile Include="ProcessedRO.cpp">
       <Filter>render\objects</Filter>
     </ClCompile>
@@ -308,7 +307,12 @@
     <ClCompile Include="PipelineBinders.cpp">
       <Filter>render\objects</Filter>
     </ClCompile>
-    <ClCompile Include="VknFrameBuffer.cpp" />
+    <ClCompile Include="VknFrameBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFramebufferFactory.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
