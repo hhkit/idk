@@ -120,7 +120,8 @@ namespace idk {
 			//Select gameobject here!
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
-			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
+			vector<phys::raycast_result> rayList;
+			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj, rayList))
 			{
 				//Sort the obj by closest dist to point
 				//get the first obj

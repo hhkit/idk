@@ -8,7 +8,6 @@
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
-#include <phys/raycasts/collision_raycast.h>
 #include <math/matrix_decomposition.h>
 #include <iostream>
 
@@ -271,7 +270,7 @@ namespace idk
 			debug_draw(collider);
 	}
 
-	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList)
+	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList,vector<phys::raycast_result>& ray_resultList)
 	{
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 
