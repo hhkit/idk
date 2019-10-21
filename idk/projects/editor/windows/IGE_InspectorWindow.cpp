@@ -206,8 +206,6 @@ namespace idk {
             ImGui::OpenPopup("AddComp");
         }
 
-        ImGui::EndChild();
-
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
@@ -240,6 +238,8 @@ namespace idk {
             }
             ImGui::EndPopup();
         }
+
+        ImGui::EndChild();
     }
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
