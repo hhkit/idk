@@ -7,7 +7,7 @@
 #include <IncludeSystems.h>
 #include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
-#include <anim/AnimationState.h>
+#include <anim/AnimationLayer.h>
 #include <math/matrix_decomposition.h>
 
 /* 
@@ -328,8 +328,14 @@ REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
+REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
+
+REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
+REFLECT_VARS(name, default_state, default_offset, default_weight, bone_mask, blend_type)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
-REFLECT_VARS(animation, speed)
+REFLECT_VARS(name, animation, enabled, loop, speed)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")
@@ -337,7 +343,7 @@ REFLECT_VARS(_bone_name, _bone_index)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(_skeleton, _animations, _start_animation, _start_animation_offset)
+REFLECT_VARS(skeleton, animation_table, layer_table, layers)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

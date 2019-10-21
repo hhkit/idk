@@ -762,6 +762,9 @@
     <ClInclude Include="serialize\text.h">
       <Filter>serialize</Filter>
     </ClInclude>
+    <ClInclude Include="anim\AnimationLayer.h">
+      <Filter>anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1103,6 +1106,9 @@
     </ClCompile>
     <ClCompile Include="serialize\text_parse.cpp">
       <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationLayer.cpp">
+      <Filter>anim</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

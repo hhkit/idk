@@ -173,7 +173,7 @@ namespace idk
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.
 			// Need to revisit this as I feel this is the wrong way to do this.
 			const auto animator = prefab_root->AddComponent<Animator>();
-			animator->_skeleton = skeleton_handle;
+			animator->skeleton = skeleton_handle;
 			Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 			
 			for (auto& anim : animation_handles)
@@ -380,7 +380,7 @@ namespace idk
 			// Add an animator component to the prefab so that the skinned mesh renderer can draw.
 			// Need to revisit this as I feel this is the wrong way to do this.
 			const auto animator = prefab_root->AddComponent<Animator>();
-			animator->_skeleton = skeleton_handle;
+			animator->skeleton = skeleton_handle;
 			Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
 			for (auto& anim : animation_handles)
