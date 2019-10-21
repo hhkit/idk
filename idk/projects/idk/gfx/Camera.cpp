@@ -33,20 +33,50 @@ namespace idk
 		return GetGameObject()->Transform()->Forward();
 	}
 
+	Frustum Camera::getFrustum() const
+	{
+		return Frustum(ProjectionMatrix()*ViewMatrix());
+	}
+
+	mat4 Camera::getTightOrthoProjection() const
+	{
+		Frustum frustum{ ProjectionMatrix() * ViewMatrix() };
+
+		/*const auto tfm = GetGameObject()->Transform();
+		vec3 front = tfm->Forward();
+		vec3 right = front.cross(vec3(0,0,1)).normalize();
+		vec3 newUp = front.cross(right).normalize();*/
+		mat4 rotMat = ViewMatrix();
+
+		array<vec3,8> frustumVert;
+
+		vec3 minV, maxV;
+		minV = maxV = rotMat * vec4(frustum.vertices[0], 0);
+		unsigned i = 0;
+		for (auto& elem : frustumVert)
+		{
+			elem = rotMat * vec4(frustum.vertices[i],0);
+			
+			minV.x = std::min(minV.x, elem.x);
+			minV.y = std::min(minV.y, elem.y);
+			minV.z = std::min(minV.z, elem.z);
+			maxV.x = std::max(maxV.x, elem.x);
+			maxV.y = std::max(maxV.y, elem.y);
+			maxV.z = std::max(maxV.z, elem.z);
+		}
+
+		vec3 extent = (maxV - minV) * 0.5f;
+		
+
+		return ortho(-extent.x, extent.y, -extent.y, extent.y, -extent.z, extent.z);
+	}
+
 	mat4 Camera::ViewMatrix() const
 	{
 		auto mat = GetGameObject()->Transform()->GlobalMatrix();
 		const auto tfm = GetGameObject()->Transform();
 		auto retval = orthonormalize(mat);
 		retval[3] = mat[3];
-
-		/*vec3 upvector = tfm->Up();
-		vec3 rightvector = tfm->Right();
-		vec3 forwardvector = tfm->Forward();
-
-		mat4 findMat = retval.inverse();
-
-		mat4 matrix = mat.transpose();*/
 
 		return retval.inverse();
 	}

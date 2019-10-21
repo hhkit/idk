@@ -46,6 +46,7 @@
     <ClInclude Include="debug\Log.h" />
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="debug\LogPools.h" />
+    <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="PauseConfigurations.h" />
@@ -250,6 +251,7 @@
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\LightTypes.cpp" />
