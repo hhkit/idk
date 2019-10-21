@@ -615,7 +615,18 @@ namespace idk {
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
         if (_prefab_inst)
+        {
             _prefab_curr_component = component;
+            _prefab_curr_component_nth = -1;
+            const span comps = _prefab_inst->GetGameObject()->GetComponents();
+            for (const auto& c : comps)
+            {
+                if (c.type == component.type)
+                    ++_prefab_curr_component_nth;
+                if (c == component)
+                    break;
+            }
+        }
 
         ImGui::PushID("__component_header");
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
@@ -788,6 +799,11 @@ namespace idk {
                 throw "Unhandled case";
             else
             {
+                string keyName = format_name(key);
+
+                if (keyName == "Guid" || keyName == "Enabled")
+                    return false;
+
                 _curr_property_stack.push_back(key);
 
                 string curr_prop_path;
@@ -798,18 +814,14 @@ namespace idk {
                 }
                 curr_prop_path.pop_back();
 
-                string keyName = format_name(key);
-
-                if (keyName == "Guid" || keyName == "Enabled")
-                    return false;
-
                 bool has_override = false;
                 if (_prefab_inst)
                 {
                     for (const auto& ov : _prefab_inst->overrides)
                     {
                         if (ov.component_name == (*_prefab_curr_component).type.name() &&
-                            ov.property_path == curr_prop_path)
+                            ov.property_path == curr_prop_path &&
+                            ov.component_nth == _prefab_curr_component_nth)
                         {
                             has_override = true;
                             break;
@@ -946,12 +958,12 @@ namespace idk {
                 {
                     if (ImGui::MenuItem("Apply Property"))
                     {
-                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
                         PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                     }
                     if (ImGui::MenuItem("Revert Property"))
                     {
-                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
                         PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
                     }
                     ImGui::EndPopup();

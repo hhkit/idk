@@ -50,7 +50,7 @@ namespace idk
         auto& data = prefab->data[0];
 
         auto name = reflect::get_type<Transform>().name();
-        auto trans = data.FindComponent(name);
+        auto trans = data.FindComponent(name, 0);
         if (trans.valid())
         {
             ImGui::PushID(0);
@@ -84,7 +84,7 @@ namespace idk
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
                 if (ImGuidk::DragVec3("##2", &c.scale))
                 {
-                    PrefabUtility::PropagatePropertyToInstances(prefab, 0, name, "scale");
+                    PrefabUtility::PropagatePropertyToInstances(prefab, 0, name, "scale", 0);
                     prefab->Dirty();
                 }
 

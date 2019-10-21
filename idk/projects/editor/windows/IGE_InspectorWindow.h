@@ -37,6 +37,7 @@ namespace idk {
 
         Handle<PrefabInstance> _prefab_inst;
         GenericHandle _prefab_curr_component;
+        int _prefab_curr_component_nth;
         vector<string> _curr_property_stack;
 
         //If multiple objects are selected, this will only display the first gameObject.
