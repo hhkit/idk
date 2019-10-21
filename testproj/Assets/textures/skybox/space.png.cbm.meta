@@ -1,5 +1,5 @@
 metadatas: 
-- guid: 4461f47a-62fc-4176-bcec-69c1e5747298
-  metadata: '{internal_format: !CMColorFormat RGBF_32, uv_mode: !CMUVMode Clamp}'
+- guid: b600f93d-dede-44d3-b623-20fac997897d
+  metadata: '{internal_format: !CMColorFormat RGBAF_16, uv_mode: !CMUVMode Clamp}'
   name: ""
-  t_hash: 86328866315637336
+  t_hash: idk::CubeMap

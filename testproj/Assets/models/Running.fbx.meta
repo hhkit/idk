@@ -1,17 +1,17 @@
 metadatas: 
-- guid: a5af9120-129e-4960-84a9-26500e6e5fec
+- guid: 8ee21841-ff0d-4003-8040-5ec8157cdff1
   metadata: ""
   name: Running
-  t_hash: 17875543692026336741
-- guid: 050b7320-e65b-4c3d-82dc-ae4765344489
+  t_hash: Prefab
+- guid: 01c630a6-78cf-46c8-9685-b4642f2e2a2f
   metadata: ""
   name: Houdini_Character_OBJ:Eyebrows_low1
-  t_hash: 326446362706798958
-- guid: 4263aa9b-8cf3-4ceb-ae09-6c041719bdc3
+  t_hash: idk::Mesh
+- guid: dc0bee51-b8f5-43f6-8d20-9d68653b43d2
   metadata: ""
   name: Take 001
-  t_hash: 7153150125844154484
-- guid: 4eebf79a-2766-4842-b7e9-e9316d3891aa
+  t_hash: idk::anim::Animation
+- guid: fbab6917-9aef-4ffa-9958-21565a89c1d2
   metadata: ""
   name: mixamorig:Hips_root_
-  t_hash: 9925753886702286037
+  t_hash: idk::anim::Skeleton
