@@ -19,6 +19,7 @@ namespace idk::mono
 		// properties
 		MonoObject*        Raw() const noexcept;
 		const ManagedType* Type() noexcept;
+		string_view        TypeName() const;
 
 		// mutators
 		void Assign(string_view field, MonoObject* obj);
@@ -29,11 +30,11 @@ namespace idk::mono
 
 		explicit operator bool() const;
 
-		template<typename T>
-		void Visit(T&& functor);
+		template<typename T> void Visit(T&& functor);
+		template<typename T> void Visit(T&& functor) const;
 
-		template<typename T>
-		void VisitImpl(T&& functor, int& depth_change);
+		template<typename T> void VisitImpl(T&& functor, int& depth_change);
+		template<typename T> void VisitImpl(T&& functor, int& depth_change) const;
 	private:
 		uint32_t _gc_handle{};
 		const ManagedType* _type{};

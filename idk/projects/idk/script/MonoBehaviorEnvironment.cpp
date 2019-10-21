@@ -110,6 +110,8 @@ namespace idk::mono
 				}, depth);
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
 			thunk.Invoke(obj, vec3{ 8,9,10 });
+
+			std::cout << "SERIALIZED TEST:" << serialize_text(*mb);
 		}
 
 	}

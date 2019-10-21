@@ -76,6 +76,10 @@ namespace idk::mono
 		}
 		return _type;
 	}
+	string_view ManagedObject::TypeName() const
+	{
+		return mono_class_get_name(mono_object_get_class(Raw()));
+	}
 	MonoClassField* ManagedObject::Field(string_view fieldname)
 	{
 		auto me = Raw();

@@ -13,6 +13,11 @@ namespace idk::mono
 	{
 	}
 
+	string_view Behavior::TypeName() const
+	{
+		return _obj.TypeName();
+	}
+
 	MonoObject* Behavior::EmplaceBehavior(string_view type)
 	{
 		auto monotype = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(type);
@@ -25,11 +30,6 @@ namespace idk::mono
 			return _obj.Raw();
 		}
 		return nullptr;
-	}
-
-	MonoObject* Behavior::GetObject()
-	{
-		return _obj.Raw();
 	}
 
 	void Behavior::DisposeMonoObject()

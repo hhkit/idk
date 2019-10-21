@@ -45,6 +45,7 @@ namespace idk {
 		void DisplayTransformComponent(Handle<Transform>& c_transform);		   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayAnimatorComponent(Handle<Animator>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
 		void DisplayBoneComponent(Handle<Bone>& c_anim);			   //If multiple objects are selected, this will only display the first gameObject.
+		void DisplayMonoBehavior(Handle<mono::Behavior>& mono_behavior);
 		void DisplayOtherComponent(GenericHandle& component);				   //If multiple objects are selected, this will only display the first gameObject.
 
 		void MenuItem_RemoveComponent(GenericHandle i);

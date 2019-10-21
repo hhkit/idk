@@ -124,6 +124,13 @@ namespace idk {
                     )
 					continue;
 
+				if (component.is_type<mono::Behavior>())
+				{
+					auto c_mb = gos[0]->GetComponent<mono::Behavior>();
+					DisplayMonoBehavior(c_mb);
+					continue;
+				}
+
                 if (component.is_type<Animator>())
                 {
                     Handle<Animator> c_anim = gos[0]->GetComponent<Animator>();
@@ -687,6 +694,21 @@ namespace idk {
 			ImGui::Text(c_bone->_bone_name.c_str());
 			ImGui::Text("Bone Index: %d", c_bone->_bone_index);
 			
+		}
+	}
+
+	void IGE_InspectorWindow::DisplayMonoBehavior(Handle<mono::Behavior>& mono_behavior)
+	{
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 cursorPos2{};
+
+		if (ImGui::CollapsingHeader(mono_behavior->TypeName().data(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
+		{
+			auto& obj = mono_behavior->GetObject();
+			obj.Visit([&](auto&& key, auto&& val, int)
+				{
+					displayVal(val);
+				});
 		}
 	}
 

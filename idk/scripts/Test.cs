@@ -22,7 +22,7 @@ namespace TestAndSeek
         public override void Update()
         {
             //System.Console.WriteLine("Poop.");
-            transform.position = transform.position + Vector3.up * 0.016f;
+            transform.position = transform.position + Vector3.up * f * 0.016f;
         }
 
         public void TestTransform(Transform t)
