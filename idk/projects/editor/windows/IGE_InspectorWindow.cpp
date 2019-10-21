@@ -42,7 +42,6 @@ of the editor.
 #include <imgui/imgui_stl.h>
 #include <imgui/imgui_internal.h> //InputTextEx
 #include <iostream>
-#define JOSEPH_TEST_BECAUSE_UNIT_TEST_IS_FKED 0
 
 namespace idk {
 
@@ -69,13 +68,14 @@ namespace idk {
     void IGE_InspectorWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{150.0f,100.0f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	}
 
 
 
 	void IGE_InspectorWindow::Update()
 	{
-		ImGui::PopStyleVar(1);
+		ImGui::PopStyleVar(2);
 
 		IDE& editor = Core::GetSystem<IDE>();
 
@@ -94,10 +94,18 @@ namespace idk {
     {
         const size_t gameObjectsCount = gos.size();
 
-        //DISPLAY
-        if (gameObjectsCount == 1)
+        if (gameObjectsCount == 0)
+            return;
+
+        // HEADER
         {
-			DisplayGameObjectHeader(gos[0]);
+            ImGui::GetWindowDrawList()->ChannelsSplit(2);
+            ImGui::GetWindowDrawList()->ChannelsSetCurrent(1);
+
+            ImGui::BeginGroup();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+
+            DisplayGameObjectHeader(gos[0]);
 
             if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
@@ -106,11 +114,28 @@ namespace idk {
                     DisplayPrefabInstanceControls(_prefab_inst);
             }
 
-            Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
-            if (c_transform) {
-                DisplayTransformComponent(c_transform);
-            }
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
+            ImGui::Dummy(ImVec2(ImGui::GetWindowContentRegionWidth(), 4.0f));
+            ImGui::EndGroup();
 
+            ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
+            ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_PopupBg));
+            ImGui::GetWindowDrawList()->ChannelsMerge();
+
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
+            ImGui::Separator();
+        }
+
+        // COMPONENTS
+
+        ImGui::BeginChild("_inspector_inner");
+        Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
+        if (c_transform) {
+            DisplayComponent(c_transform);
+        }
+
+        if (gameObjectsCount == 1)
+        {
             //Display remaining components here
             auto componentSpan = gos[0]->GetComponents();
             for (auto& component : componentSpan) {
@@ -124,50 +149,23 @@ namespace idk {
                     )
 					continue;
 
-				if (component.is_type<mono::Behavior>())
-				{
-					auto c_mb = gos[0]->GetComponent<mono::Behavior>();
-					DisplayMonoBehavior(c_mb);
-					continue;
-				}
-
-                if (component.is_type<Animator>())
-                {
-                    Handle<Animator> c_anim = gos[0]->GetComponent<Animator>();
-                    DisplayAnimatorComponent(c_anim);
-                    continue;
-                }
-
-				if (component.is_type<Bone>())
-				{
-					Handle<Bone> c_bone = gos[0]->GetComponent<Bone>();
-					DisplayBoneComponent(c_bone);
-					continue;
-				}
-
                 //COMPONENT DISPLAY
-                DisplayOtherComponent(component);
+                DisplayComponent(component);
             }
         }
         else if (gameObjectsCount > 1)
         {
-            //Just show all components, Name and Transform first
-            //First gameobject takes priority. By default, name and transform will always be shown.
-			DisplayGameObjectHeader(gos[0]);
-            Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
-            if (c_transform) {
-                DisplayTransformComponent(c_transform);
-            }
-
-
             //Just show similar components, based on first object
             span<GenericHandle> componentSpan = gos[0]->GetComponents();
             hash_set<string, std::hash<string>, std::equal_to<string>> similarComponentNames;
             for (GenericHandle component : componentSpan) {
-				if (component.is_type<Name>())
+				if (component.is_type<Name>() ||
+                    component.is_type<Transform>() ||
+                    component.is_type<Layer>() ||
+                    component.is_type<Tag>() ||
+                    component.is_type<PrefabInstance>()
+                    )
 					continue;
-                if (component == c_transform)
-                    continue;
                 similarComponentNames.insert(string((*component).type.name()));
             }
 
@@ -197,20 +195,18 @@ namespace idk {
             //At this point we are sure that these components have these names
             for (string i : similarComponentNames) {
                 GenericHandle component = gos[0]->GetComponent(i);
-                DisplayOtherComponent(component);
+                DisplayComponent(component);
                 //ImGui::Text(i.c_str());
             }
-
         }
 
         //Add Component Button
-        if (gameObjectsCount) {
-            ImGui::Separator();
-            ImGui::SetCursorPosX(window_size.x * 0.25f);
-            if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
-                ImGui::OpenPopup("AddComp");
-            }
+        ImGui::SetCursorPosX(window_size.x * 0.25f);
+        if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
+            ImGui::OpenPopup("AddComp");
         }
+
+        ImGui::EndChild();
 
 
 
@@ -248,16 +244,19 @@ namespace idk {
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
 	{
-        const float left_offset = 32.0f;
+        const float left_offset = 40.0f;
 
 		//The c_name is to just get the first gameobject
 		static string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
 
-        ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Name").x);
-		ImGui::Text("Name");
+        ImGui::SetCursorPosX(left_offset - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y * 2);
+        bool is_active = game_object->ActiveSelf();
+        if (ImGui::Checkbox("##Active", &is_active))
+            game_object->SetActive(is_active);
 		ImGui::SameLine();
+        ImGui::PushItemWidth(-8.0f);
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
 			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
@@ -272,6 +271,7 @@ namespace idk {
 			}
 
 		}
+        ImGui::PopItemWidth();
 
 
 		if (ImGui::IsItemClicked()) {
@@ -281,15 +281,20 @@ namespace idk {
 			stringBuf = game_object->Name();
 		}
 
+        ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("ID").x);
+        ImGuidk::PushDisabled();
+        ImGui::Text("ID");
+        ImGui::SameLine();
 		string idName = std::to_string(game_object.id);
 		if (editor.selected_gameObjects.size() == 1)
-			ImGui::Text("ID: %s (scene: %d, index: %d, gen: %d)", 
+			ImGui::Text("%s (scene: %d, index: %d, gen: %d)", 
 				idName.data(), 
 				s_cast<int>(game_object.scene),
 				s_cast<int>(game_object.index),
 				s_cast<int>(game_object.gen));
 		else
 			ImGui::TextDisabled("Multiple gameobjects selected");
+        ImGuidk::PopDisabled();
 
 
         ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Tag").x);
@@ -320,7 +325,7 @@ namespace idk {
         ImGui::Text("Layer");
         ImGui::SameLine();
 
-        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetCursorPosX());
+        ImGui::PushItemWidth(-8.0f);
         const auto curr_layer = game_object->Layer();
         const auto layer_name = Core::GetSystem<LayerManager>().LayerIndexToName(curr_layer);
         if (ImGui::BeginCombo("##layer", layer_name.data()))
@@ -348,7 +353,10 @@ namespace idk {
 
     void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
     {
-        ImGui::Text("Prefab: ");
+        const float left_offset = 40.0f;
+
+        ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Prefab").x);
+        ImGui::Text("Prefab");
         ImGui::SameLine();
         auto path = *Core::GetResourceManager().GetPath(c_prefab->prefab);
         ImGui::Text(path.data() + path.rfind('/') + 1);
@@ -365,357 +373,236 @@ namespace idk {
         }
     }
 
-	void IGE_InspectorWindow::DisplayTransformComponent(Handle<Transform>& c_transform)
+    template<>
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<Transform> c_transform)
 	{
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
 		IDE& editor = Core::GetSystem<IDE>();
-        ImGui::PushID("Transform");
 
-		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
-		{
-			vector<mat4>& originalMatrix = editor.selected_matrix;
-			//This is dumped if no items are changed.
-			//if (!isBeingModified) {
-			//	originalMatrix.clear();
-			//	for (Handle<GameObject> i : editor.selected_gameObjects) {
-			//		originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
-			//	}
-			//}
+		vector<mat4>& originalMatrix = editor.selected_matrix;
+		//This is dumped if no items are changed.
+		//if (!isBeingModified) {
+		//	originalMatrix.clear();
+		//	for (Handle<GameObject> i : editor.selected_gameObjects) {
+		//		originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+		//	}
+		//}
 
 
-            auto& c = *c_transform;
+        auto& c = *c_transform;
 
-            const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
-            const float pad_y = ImGui::GetStyle().FramePadding.y;
+        const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
 
-            ImGui::PushItemWidth(item_width);
+        ImGui::PushItemWidth(-4.0f);
 
-            auto y = ImGui::GetCursorPosY();
-            ImGui::SetCursorPosY(y + pad_y);
-            ImGui::Text("Position");
-            ImGui::SetCursorPosY(y);
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-            auto origin = c.position;
-            if (ImGuidk::DragVec3("##0", &c.position))
+        auto y = ImGui::GetCursorPosY();
+        ImGui::SetCursorPosY(y + pad_y);
+        ImGui::Text("Position");
+        ImGui::SetCursorPosY(y);
+        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+        auto origin = c.position;
+        if (ImGuidk::DragVec3("##0", &c.position))
+        {
+            for (Handle<GameObject> i : editor.selected_gameObjects)
             {
-                for (Handle<GameObject> i : editor.selected_gameObjects)
+                i->GetComponent<Transform>()->position = c.position;
+            }
+        }
+        TransformModifiedCheck();
+
+        y = ImGui::GetCursorPosY();
+        ImGui::SetCursorPosY(y + pad_y);
+        ImGui::Text("Rotation");
+        ImGui::SetCursorPosY(y);
+        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+        if (ImGuidk::DragQuat("##1", &c.rotation))
+        {
+            for (Handle<GameObject> i : editor.selected_gameObjects)
+            {
+                i->GetComponent<Transform>()->rotation = c.rotation;
+            }
+        }
+        TransformModifiedCheck();
+
+        bool has_scale_override = false;
+        if (_prefab_inst)
+        {
+            for (const auto& ov : _prefab_inst->overrides)
+            {
+                if (ov.component_name == reflect::get_type<Transform>().name() &&
+                    ov.property_path == "scale")
                 {
-                    i->GetComponent<Transform>()->position = c.position;
+                    has_scale_override = true;
+                    break;
                 }
             }
-            TransformModifiedCheck();
+        }
+        if (has_scale_override)
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
 
-            y = ImGui::GetCursorPosY();
-            ImGui::SetCursorPosY(y + pad_y);
-            ImGui::Text("Rotation");
-            ImGui::SetCursorPosY(y);
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-            if (ImGuidk::DragQuat("##1", &c.rotation))
+        y = ImGui::GetCursorPosY();
+        ImGui::SetCursorPosY(y + pad_y);
+        ImGui::Text("Scale");
+        ImGui::SetCursorPosY(y);
+        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+
+        if (has_scale_override)
+            ImGui::PopStyleColor();
+
+        if (ImGuidk::DragVec3("##2", &c.scale))
+        {
+            for (Handle<GameObject> i : editor.selected_gameObjects)
             {
-                for (Handle<GameObject> i : editor.selected_gameObjects)
-                {
-                    i->GetComponent<Transform>()->rotation = c.rotation;
-                }
+                i->GetComponent<Transform>()->scale = c.scale;
             }
-            TransformModifiedCheck();
-
-            bool has_scale_override = false;
             if (_prefab_inst)
             {
-                for (const auto& ov : _prefab_inst->overrides)
-                {
-                    if (ov.component_name == reflect::get_type<Transform>().name() &&
-                        ov.property_path == "scale")
-                    {
-                        has_scale_override = true;
-                        break;
-                    }
-                }
+                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "scale");
             }
-            if (has_scale_override)
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
+        TransformModifiedCheck();
 
-            y = ImGui::GetCursorPosY();
-            ImGui::SetCursorPosY(y + pad_y);
-            ImGui::Text("Scale");
-            ImGui::SetCursorPosY(y);
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+        ImGui::PopItemWidth();
 
-            if (has_scale_override)
-                ImGui::PopStyleColor();
-
-            if (ImGuidk::DragVec3("##2", &c.scale))
-            {
-                for (Handle<GameObject> i : editor.selected_gameObjects)
-                {
-                    i->GetComponent<Transform>()->scale = c.scale;
-                }
-                if (_prefab_inst)
-                {
-                    PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "scale");
-                }
-            }
-            TransformModifiedCheck();
-
-            ImGui::PopItemWidth();
-#if JOSEPH_TEST_BECAUSE_UNIT_TEST_IS_FKED
-			auto& vfs = Core::GetSystem<FileSystem>();
-
-			static string mount_path;
-			static string full_path = "C:/Users/Joseph/Desktop/GIT/idk/testproj/test dismount";
-			ImGui::InputText("Full Path", &full_path);
-			ImGui::InputText("Mount Path", &mount_path);
-
-			if (ImGui::Button("Mount"))
-			{
-				vfs.Mount(full_path, mount_path);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Dismount"))
-			{
-				vfs.Dismount(mount_path);
-			}
-			ImGui::NewLine();
-
-			static string get_handle;
-			static PathHandle handle;
-			ImGui::InputText("Get Handle", &get_handle);
-			ImGui::SameLine();
-			ImGui::TextColored(handle ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "HANDLE VALID");
-			if (ImGui::Button("Get PathHandle"))
-			{
-				handle = vfs.GetFile(get_handle);
-			}
-			
-			ImGui::NewLine();
-			if (ImGui::Button("Write"))
-			{
-				if(handle)
-					handle.Open(FS_PERMISSIONS::WRITE) << "HAHAHA" << std::endl;
-			}
-#endif
-			if (hasChanged) {
-				for (int i = 0; i < editor.selected_gameObjects.size();++i) {
-					mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+		if (hasChanged) {
+			for (int i = 0; i < editor.selected_gameObjects.size();++i) {
+				mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
 					
-				}
-				//Refresh the new matrix values
-				editor.RefreshSelectedMatrix();
-				hasChanged		= false;
-				//isBeingModified = false;
 			}
+			//Refresh the new matrix values
+			editor.RefreshSelectedMatrix();
+			hasChanged		= false;
+			//isBeingModified = false;
 		}
-
-        ImGui::PopID();
-
-		cursorPos2 = ImGui::GetCursorPos();
-		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth()-10);
-		if (ImGui::Button("...")) {
-			ImGui::OpenPopup("AdditionalOptions");
-
-		}
-
-		ImGui::SetCursorPos(cursorPos2);
-
-
-		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
-			if (ImGui::MenuItem("Reset")) {
-				for (Handle<GameObject> i : editor.selected_gameObjects) {
-					i->GetComponent<Transform>()->position	= vec3{ };
-					i->GetComponent<Transform>()->rotation	= quat{ };
-					i->GetComponent<Transform>()->scale		= vec3{1,1,1};
-				}
-			}
-			MenuItem_CopyComponent(c_transform);
-			MenuItem_PasteComponent();
-			ImGui::Separator();
-			ImGui::EndPopup();
-		}
-
-
 	}
 
-	void IGE_InspectorWindow::DisplayAnimatorComponent(Handle<Animator>& c_anim)
+    template<>
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<Animator> c_anim)
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
 
-		if (ImGui::CollapsingHeader("Animator", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
+		//Draw All your custom variables here.
+
+		ImGui::Text("Animation Clips");
+		ImGui::Separator();
+		for (auto& anim : c_anim->animation_table)
 		{
-			//Draw All your custom variables here.
-
-			ImGui::Text("Animation Clips");
-			ImGui::Separator();
-			for (auto& anim : c_anim->_animations)
+			bool not_removed = true;
+			// Will change this to use something other than collapsing header. 
+			if(ImGui::CollapsingHeader(anim.second.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
 			{
-				bool not_removed = true;
-				// Will change this to use something other than collapsing header. 
-				if(ImGui::CollapsingHeader(anim.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
-				{
-					ImGui::Indent(50);
-					ImGui::PushItemWidth(100);
-					ImGui::DragFloat("Speed", &anim.speed, 0.01f, 0.0f);
-					ImGui::PopItemWidth();
-					ImGui::Unindent(50);
-				}
+				ImGui::Indent(50);
+				ImGui::PushItemWidth(100);
+				ImGui::DragFloat("Speed", &anim.second.speed, 0.01f, 0.0f);
+				ImGui::PopItemWidth();
+				ImGui::Checkbox("Loop", &anim.second.loop);
+				ImGui::Unindent(50);
+			}
 
-				if (!not_removed)
+			if (!not_removed)
+			{
+				c_anim->RemoveAnimation(anim.second.name);
+				break;
+			}
+		}
+
+
+		RscHandle<anim::Animation> new_anim;
+		if (ImGuidk::InputResource("Add Animation Clip", &new_anim))
+		{
+			c_anim->AddAnimation(new_anim);
+		}
+		ImGui::NewLine();
+
+		if (ImGui::BeginCombo("Default State", c_anim->GetAnimationState(c_anim->layers[0].default_state).name.c_str()))
+		{
+			for (auto& anim : c_anim->animation_table)
+			{
+				string_view curr_name = anim.second.name;
+				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
 				{
-					c_anim->RemoveAnimation(anim.animation->Name());
-					break;
+					// c_anim->Stop();
+					c_anim->layers[0].default_state = curr_name;
+					if (c_anim->layers[0].curr_state == string{})
+						c_anim->layers[0].curr_state = curr_name;
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::BeginCombo("Current State", c_anim->GetAnimationState(c_anim->layers[0].curr_state).name.c_str()))
+		{
+			for (auto& anim : c_anim->animation_table)
+			{
+				string_view curr_name = anim.second.name;
+				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].curr_state == curr_name))
+				{
+					// Reset the animation
+					c_anim->layers[0].normalized_time = 0.0f;
+					// Set the new current animation
+					c_anim->layers[0].curr_state = curr_name;
+				}
+			}
+			ImGui::EndCombo();
+		}
+		bool has_curr_anim = c_anim->layers[0].curr_state != string{};
+		if (has_curr_anim)
+		{
+			if (ImGui::Checkbox("Preview Current State", &c_anim->layers[0].preview_playback))
+			{
+				if (!c_anim->layers[0].preview_playback)
+				{
+					c_anim->layers[0].normalized_time = 0.0f;
+                    Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
 				}
 			}
 
-
-			RscHandle<anim::Animation> new_anim;
-			if (ImGuidk::InputResource("Add Animation Clip", &new_anim))
-			{
-				c_anim->AddAnimation(new_anim);
-			}
-			ImGui::NewLine();
-
-			if (ImGui::BeginCombo("Start State", c_anim->GetStateName(c_anim->_start_animation).c_str()))
-			{
-				for (size_t i = 0; i < c_anim->_animations.size(); ++i)
-				{
-					if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_start_animation == i))
-					{
-						// c_anim->Stop();
-						c_anim->_start_animation = s_cast<int>(i);
-						if (c_anim->_curr_animation < 0)
-							c_anim->_curr_animation = c_anim->_start_animation;
-					}
-				}
-				ImGui::EndCombo();
-			}
-
-			if (ImGui::BeginCombo("Current State", c_anim->GetStateName(c_anim->_curr_animation).c_str()))
-			{
-				for (size_t i = 0; i < c_anim->_animations.size(); ++i)
-				{
-					if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_curr_animation == i))
-					{
-						// Reset the animation
-						c_anim->_elapsed = 0.0f;
-						// Set the new current animation
-						c_anim->_curr_animation = static_cast<int>(i);
-					}
-				}
-				ImGui::EndCombo();
-			}
-			bool has_curr_anim = c_anim->_curr_animation >= 0;
-			if (has_curr_anim)
-			{
-				if (ImGui::Checkbox("Preview Current State", &c_anim->_preview_playback))
-				{
-					if (!c_anim->_preview_playback)
-					{
-						c_anim->_elapsed = 0.0f;
-                        Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
-					}
-				}
-
-				ImGui::ProgressBar(
-					c_anim->_elapsed / c_anim->_animations[c_anim->_curr_animation].animation->GetDuration(),
-					ImVec2{ -1, 10 }, nullptr);
-			}
+			ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
+		}
 			
-			// FOR TESTING 
-			ImGui::Text("TESTING");
-			ImGui::Separator();
+		// FOR TESTING 
+		ImGui::Text("TESTING");
+		ImGui::Separator();
 
-			if (ImGui::Button("Play"))
-			{
-				c_anim->Play(0);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Play And Loop"))
-			{
-				c_anim->Play(0);
-				c_anim->Loop(true);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Play And No Loop"))
-			{
-				c_anim->Play(0);
-				c_anim->Loop(false);
-			}
+	    if (ImGui::Button("Play"))
+	    {
+		    if(!c_anim->animation_table.empty())
+			    c_anim->Play(c_anim->animation_table.begin()->second.name);
+	    }
+	    ImGui::SameLine();
+	    if (ImGui::Button("Stop"))
+	    {
+		    c_anim->Stop();
+	    }
+	    ImGui::SameLine();
+	    if (ImGui::Button("Pause"))
+	    {
+		    c_anim->Pause();
+	    }
 
-			if (ImGui::Button("Stop"))
-			{
-				c_anim->Stop();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Pause"))
-			{
-				c_anim->Pause();
-			}
-
-			ImGui::DragFloat("Test Blend", &c_anim->_blend_factor, 0.01f, 0.0f, 1.0f);
-		}
-
-		cursorPos2 = ImGui::GetCursorPos();
-		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 10);
-		if (ImGui::Button("...")) {
-			ImGui::OpenPopup("AdditionalOptions");
-
-		}
-
-		ImGui::SetCursorPos(cursorPos2);
-
-
-		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
-			if (ImGui::MenuItem("Reset")) {
-
-			}
-			ImGui::Separator();
-			MenuItem_RemoveComponent(c_anim);
-			MenuItem_CopyComponent(c_anim);
-			MenuItem_PasteComponent();
-			ImGui::EndPopup();
-		}
+        ImGui::DragFloat("Test Blend", &c_anim->layers[0].blend_time, 0.01f, 0.0f, 1.0f);
 	}
 
-	void IGE_InspectorWindow::DisplayBoneComponent(Handle<Bone>& c_bone)
+    template<>
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<Bone> c_bone)
 	{
-		ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImVec2 cursorPos2{};
-
-		if (ImGui::CollapsingHeader("Bone", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
-		{
-			//Draw All your custom variables here.
-			ImGui::Text("Bone Name: ");
-			ImGui::SameLine();
-			ImGui::Text(c_bone->_bone_name.c_str());
-			ImGui::Text("Bone Index: %d", c_bone->_bone_index);
-			
-		}
+		//Draw All your custom variables here.
+		ImGui::Text("Bone Name: ");
+		ImGui::SameLine();
+		ImGui::Text(c_bone->_bone_name.c_str());
+		ImGui::Text("Bone Index: %d", c_bone->_bone_index);
 	}
 
-	void IGE_InspectorWindow::DisplayMonoBehavior(Handle<mono::Behavior>& mono_behavior)
-	{
-		ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImVec2 cursorPos2{};
-
-		if (ImGui::CollapsingHeader(mono_behavior->TypeName().data(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
-		{
-			auto& obj = mono_behavior->GetObject();
-			obj.Visit([&](auto&& key, auto&& val, int)
-				{
-					displayVal(val);
-				});
-		}
-	}
-
-	void IGE_InspectorWindow::DisplayOtherComponent(GenericHandle& component)
+	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
 	{
 		//COMPONENT DISPLAY
-		ImGui::PushID(static_cast<int>(component.id));
+        ImGui::PushID(component.type);
+        ImGui::PushID(component.index);
 		const auto componentName = (*component).type.name();
 		string displayingComponent{ componentName };
 		const string fluffText{ "idk::" };
@@ -730,33 +617,85 @@ namespace idk {
         if (_prefab_inst)
             _prefab_curr_component = component;
 
-		if (ImGui::CollapsingHeader(displayingComponent.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
-		{
-			displayVal(*component);
-		}
+        ImGui::PushID("__component_header");
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        bool open_header = ImGui::TreeNodeEx("",
+            ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
+            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+        ImGui::PopStyleVar();
+
+        ImGui::SameLine();
+        if (auto f = (*component).get_property("enabled"); f.value.valid())
+        {
+            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
+            ImGui::Checkbox("##enabled", &f.value.get<bool>());
+            ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+        }
+        else
+            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + ImGui::GetStyle().ItemInnerSpacing.x +
+                /* checkbox width: */ ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2);
+
+        ImGuidk::PushFont(FontType::Bold);
+        ImGui::Text(displayingComponent.c_str());
+        ImGui::PopFont();
 
 		cursorPos2 = ImGui::GetCursorPos();
+        ImGui::SameLine();
 		ImGui::SetCursorPos(cursorPos);
-		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 10);
-		if (ImGui::Button("...")) {
-			ImGui::OpenPopup("AdditionalOptions");
+		ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - ImGui::CalcTextSize("...").x - ImGui::GetStyle().FramePadding.x * 2);
 
-		}
+        ImGui::PushStyleColor(ImGuiCol_Button, 0);
+		if (ImGui::Button("..."))
+			ImGui::OpenPopup("AdditionalOptions");
+        ImGui::PopStyleColor();
 
 		ImGui::SetCursorPos(cursorPos2);
 
 		if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None)) {
 			if (ImGui::MenuItem("Reset")) {
-
+                if (component.is_type<Transform>())
+                {
+                    auto t = handle_cast<Transform>(component);
+                    t->position = vec3(0, 0, 0);
+                    t->rotation = quat();
+                    t->scale = vec3(1.0f, 1.0f, 1.0f);
+                }
+                else
+                {
+                    auto dyn = *component;
+                    for (size_t i = 0; i < dyn.type.count(); ++i)
+                    {
+                        auto prop = dyn.get_property(i);
+                        prop.value = prop.value.type.create();
+                    }
+                }
 			}
 			ImGui::Separator();
-			MenuItem_RemoveComponent(component);
+            if (!component.is_type<Transform>())
+			    MenuItem_RemoveComponent(component);
 			MenuItem_CopyComponent(component);
 			MenuItem_PasteComponent();
 			ImGui::EndPopup();
 		}
 
-		ImGui::PopID();
+        if (open_header)
+        {
+            if (component.is_type<Transform>())
+                DisplayComponentInner(handle_cast<Transform>(component));
+            else if (component.is_type<Bone>())
+                DisplayComponentInner(handle_cast<Bone>(component));
+            else if (component.is_type<Animator>())
+                DisplayComponentInner(handle_cast<Animator>(component));
+            else
+                displayVal(*component);
+            ImGui::TreePop();
+        }
+
+        ImGui::PopID();
+        ImGui::PopID();
+        ImGui::PopID();
+
+        ImGui::Separator();
 	}
 
 	void IGE_InspectorWindow::MenuItem_RemoveComponent(GenericHandle i)
@@ -861,7 +800,7 @@ namespace idk {
 
                 string keyName = format_name(key);
 
-                if (keyName == "Guid")
+                if (keyName == "Guid" || keyName == "Enabled")
                     return false;
 
                 bool has_override = false;
@@ -893,7 +832,7 @@ namespace idk {
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
                 ImGui::PushID(keyName.c_str());
-                ImGui::PushItemWidth(item_width);
+                ImGui::PushItemWidth(-4.0f);
 
                 bool recurse = false;
                 bool changed = false;

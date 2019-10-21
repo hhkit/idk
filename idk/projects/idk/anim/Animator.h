@@ -4,6 +4,7 @@
 #include <anim/Skeleton.h>
 #include <anim/Animation.h>
 #include <anim/AnimationState.h>
+#include <anim/AnimationLayer.h>
 
 namespace idk
 {
@@ -11,15 +12,12 @@ namespace idk
 		:public Component<Animator> 
 	{
 	public:
+		// Contructor
+		Animator();
+
 		// Engine Getters
-		int GetAnimationIndex(string_view name) const;
-		string GetStateName(int id) const;
-
 		const AnimationState& GetAnimationState(string_view name) const;
-		const AnimationState& GetAnimationState(int id) const;
-
 		RscHandle<anim::Animation> GetAnimationRsc(string_view name) const;
-		RscHandle<anim::Animation> GetAnimationRsc(int id) const;
 
 		const vector<mat4>& BoneTransforms();
 		
@@ -32,16 +30,14 @@ namespace idk
 
 		// Script Functions
 		void Play(string_view animation_name, float offset = 0.0f);
-		void Play(size_t index, float offset = 0.0f);
 		void Pause();
 		void Stop();
-		void Loop(bool to_loop);
 		// void Transistion(string_view animation_name);
 
 		// Script Getters
 		bool HasState(string_view name) const;
 		bool IsPlaying(string_view name) const;
-		string GetEntryState() const;
+		string GetDefaultState() const;
 
 		// Script Setters
 		void SetEntryState(string_view name, float offset = 0.0f);
@@ -50,30 +46,17 @@ namespace idk
 		void on_parse();
 
 		// ======================= Public Variables ========================
-		RscHandle<anim::Skeleton> _skeleton;
+		RscHandle<anim::Skeleton> skeleton;
 
-		hash_table<string, size_t> _animation_table;
-		vector<AnimationState> _animations;
+		hash_table<string, AnimationState> animation_table;
 
-		bool _preview_playback = false;
-
-		// Animation States
-		int		_start_animation = -1;
-		float	_start_animation_offset = 0.0f;
-		int		_curr_animation = -1;
-		float	_blend_factor = 0.0f;
-
-		// Animation Playback controls
-		bool	_is_playing = false;
-		bool	_is_stopping = false;
-		bool	_is_looping = true;
-
-		float	_elapsed = 0.0f;
+		hash_table<string, size_t> layer_table{};
+		vector<AnimationLayer> layers{};
 
 		// Precomputation step
-		vector<mat4> _pre_global_transforms{ mat4{} };
+		vector<mat4> pre_global_transforms{ mat4{} };
 		// This is what we send to the graphics system.
-		vector<mat4> _final_bone_transforms{ mat4{} };
+		vector<mat4> final_bone_transforms{ mat4{} };
 		
 	private:
 		friend class AnimationSystem;
@@ -82,6 +65,6 @@ namespace idk
 		vector<Handle<GameObject>> _child_objects;
 		vector<matrix_decomposition<real>> _bind_pose;
 
-		static constexpr AnimationState empty_state{};
+		inline static const AnimationState null_state{};
 	};
 }

@@ -13,7 +13,7 @@
 #include <scene/SceneManager.h>
 #include <phys/Collider.h>
 #include <math/matrix_decomposition.h>
-#include <anim/AnimationState.h>
+#include <anim/AnimationLayer.h>
 namespace idk
 {
 	class GameObject;
@@ -85,12 +85,15 @@ namespace idk::reflect
 		, RscHandle<anim::Skeleton>
 		, RscHandle<anim::Animation>
 		, AnimationState
-		, vector<AnimationState>
-		, vector<RscHandle<anim::Animation>>
+		, hash_table<string, AnimationState>
+		, AnimationLayer
+		, hash_table<string, size_t>
+		, vector<AnimationLayer>
+		, std::array<bool, 100>
 		, matrix_decomposition<real>
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>
-		, hash_table<string, size_t>
+		
 		
 		// resources
 		, vector<SerializedMeta>

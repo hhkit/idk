@@ -5,8 +5,19 @@
 #include <editor/widgets/DragVec.h>
 #include <editor/widgets/DragQuat.h>
 
-namespace idk::ImGuidk
+namespace idk
 {
-    void PushDisabled();
-    void PopDisabled();
+    enum class FontType
+    {
+        Default = 0,
+        Smaller,
+        Bold,
+    };
+
+    namespace ImGuidk
+    {
+        void PushDisabled();
+        void PopDisabled();
+        void PushFont(FontType font);
+    }
 }
