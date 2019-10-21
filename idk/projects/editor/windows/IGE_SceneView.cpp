@@ -1,8 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////////////
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		02 OCT 2019
+//@date		21 OCT 2019
 //@brief	
 
 /*
@@ -22,12 +22,14 @@ of the editor.
 #include <app/Application.h>
 #include <core/GameObject.h>
 #include <common/Transform.h> //transform
+#include <gfx/MeshRenderer.h>
 #include <gfx/RenderTarget.h>
 #include <gfx/GraphicsSystem.h>
 #include <prefab/PrefabUtility.h>
 #include <vkn/VknFramebuffer.h>
 #include <gfx/DebugRenderer.h>
 #include <win32/WindowsApplication.h>
+#include <sstream> //sstream
 
 #include <phys/PhysicsSystem.h>
 
@@ -202,6 +204,7 @@ namespace idk {
 
 		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0,0.8f,0,1 }, Core::GetDT());
 
+
 		UpdateScrollMouseControl();
 
 		UpdateGizmoControl();
@@ -228,7 +231,8 @@ namespace idk {
 		if (forward.z > 0)
 			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
 
-
+		DrawSnapControl();
+		//DrawGridControl();
 	}
 
 	void IGE_SceneView::SetTexture(void* textureToRender)
@@ -259,6 +263,89 @@ namespace idk {
 		i.x = i.x != 0.0f ? i.x / v.x : 0.0f;
 		i.y = i.y != 0.0f ? i.y / v.y : 0.0f;
 		return i;
+	}
+
+	//void IGE_SceneView::DrawGridControl()
+	//{
+	//	ray newRay{};
+	//	newRay.velocity.x = 100;
+	//	Core::GetSystem<DebugRenderer>().Draw(newRay, color{ 1.0f,1.0f,1.0f,1 }, Core::GetDT());
+	//}
+
+	void IGE_SceneView::DrawSnapControl()
+	{
+		auto originalCursorPos = ImGui::GetCursorPos();
+		auto windowWidth = ImGui::GetWindowContentRegionWidth();
+		ImGui::SetCursorPos(ImVec2{ windowWidth - 250,30 });
+		std::stringstream translateTxt	{};
+		std::stringstream rotateTxt		{};
+		std::stringstream scaleTxt		{};
+		translateTxt	<< "T[" << translate_snap_val[0]<<"]";
+		rotateTxt		<< "R[" << rotate_snap_val		<<"]";
+		scaleTxt		<< "S[" << scale_snap_val		<<"]";
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+		ImGui::Text("Snapping:");
+		ImGui::SameLine();
+		if (ImGui::Button(translateTxt.str().c_str(),ImVec2(55,0))) {
+			ImGui::OpenPopup("TranslateSnap");
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(rotateTxt.str().c_str(), ImVec2(55, 0))) {
+			ImGui::OpenPopup("RotateSnap");
+
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(scaleTxt.str().c_str(), ImVec2(55, 0))) {
+			ImGui::OpenPopup("ScaleSnap");
+		}
+
+		ImGui::PopStyleVar(2);
+
+		if (ImGui::BeginPopup("TranslateSnap")) {
+			for (const auto& i : translate_snap_type) {
+				std::stringstream txt{};
+				txt << i;
+				if (ImGui::RadioButton(txt.str().c_str(), translate_snap_val[0] == i)) {
+					translate_snap_val[0] = translate_snap_val[1] = translate_snap_val[2] = i;
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopup("RotateSnap")) {
+			for (const auto& i : rotate_snap_type) {
+				std::stringstream txt{};
+				txt << i;
+				if (ImGui::RadioButton(txt.str().c_str(), rotate_snap_val == i)) {
+					rotate_snap_val = i;
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopup("ScaleSnap")) {
+
+			for (const auto& i : scale_snap_type) {
+				std::stringstream txt{};
+				txt << i;
+				if (ImGui::RadioButton(txt.str().c_str(), scale_snap_val == i)) {
+					scale_snap_val = i;
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+
+		ImGui::SetCursorPos(originalCursorPos);
 	}
 
 	void IGE_SceneView::UpdateWASDMouseControl()
@@ -361,17 +448,16 @@ namespace idk {
 	void IGE_SceneView::UpdateGizmoControl()
 	{
 		//Getting camera datas
-		IDE& editor = Core::GetSystem<IDE>();
-		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
-		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		const auto view_mtx = currCamera->ViewMatrix();
-		const float* viewMatrix = view_mtx.data();
-		const auto pers_mtx = currCamera->ProjectionMatrix();
-		const float* projectionMatrix = pers_mtx.data();
+		IDE&				editor			 = Core::GetSystem<IDE>();
+		CameraControls&		main_camera		 = editor._interface->Inputs()->main_camera;
+		Handle<Camera>		currCamera		 = main_camera.current_camera;
+		Handle<Transform>	tfm				 = currCamera->GetGameObject()->GetComponent<Transform>();
+		const auto			view_mtx		 = currCamera->ViewMatrix();
+		const float*		viewMatrix		 = view_mtx.data();
+		const auto			pers_mtx		 = currCamera->ProjectionMatrix();
+		const float*		projectionMatrix = pers_mtx.data();
 
 		//Setting up draw area
-		//ImGuiIO& io = ImGui::GetIO();
 
         ImVec2 winPos = vec2{ ImGui::GetWindowPos() } + ImGui::GetWindowContentRegionMin() + draw_rect_offset;
 		ImGuizmo::SetRect(winPos.x, winPos.y, draw_rect_size.x, draw_rect_size.y); //The scene view size
@@ -382,6 +468,8 @@ namespace idk {
 
 		if (editor.selected_gameObjects.size()) {
 			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>(); 
+
+
 			if (gameObjectTransform) {
 
 				if (!ImGuizmo::IsUsing()) {
@@ -399,17 +487,17 @@ namespace idk {
 					break;
 
 				case GizmoOperation_Translate:
-					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, NULL);
+					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, &translate_snap_val[0]);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
 
 				case GizmoOperation_Rotate:
-					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, NULL);
+					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, &rotate_snap_val);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
 
 				case GizmoOperation_Scale:
-					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, NULL);
+					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, &scale_snap_val);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
 				}
