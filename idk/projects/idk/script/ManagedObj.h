@@ -29,6 +29,8 @@ namespace idk::mono
 
 		explicit operator bool() const;
 
+		template<typename T>
+		void Visit(T&& functor);
 
 		template<typename T>
 		void VisitImpl(T&& functor, int& depth_change);
