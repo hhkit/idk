@@ -160,7 +160,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			mesh_rend->material_instance = mat_inst;
 		}
 
-		animator->_skeleton = model_resource->Get<anim::Skeleton>();
+		animator->skeleton = model_resource->Get<anim::Skeleton>();
 		Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
 		// Load other animations

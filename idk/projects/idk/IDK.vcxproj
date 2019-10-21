@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
@@ -229,6 +230,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim\Animation.cpp" />
+    <ClCompile Include="anim\AnimationLayer.cpp" />
     <ClCompile Include="anim\Animator.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
     <ClCompile Include="anim\Bone.cpp" />

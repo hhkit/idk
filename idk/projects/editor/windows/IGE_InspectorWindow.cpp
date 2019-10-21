@@ -490,22 +490,23 @@ namespace idk {
 
 		ImGui::Text("Animation Clips");
 		ImGui::Separator();
-		for (auto& anim : c_anim->_animations)
+		for (auto& anim : c_anim->animation_table)
 		{
 			bool not_removed = true;
 			// Will change this to use something other than collapsing header. 
-			if(ImGui::CollapsingHeader(anim.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
+			if(ImGui::CollapsingHeader(anim.second.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
 			{
 				ImGui::Indent(50);
 				ImGui::PushItemWidth(100);
-				ImGui::DragFloat("Speed", &anim.speed, 0.01f, 0.0f);
+				ImGui::DragFloat("Speed", &anim.second.speed, 0.01f, 0.0f);
 				ImGui::PopItemWidth();
+				ImGui::Checkbox("Loop", &anim.second.loop);
 				ImGui::Unindent(50);
 			}
 
 			if (!not_removed)
 			{
-				c_anim->RemoveAnimation(anim.animation->Name());
+				c_anim->RemoveAnimation(anim.second.name);
 				break;
 			}
 		}
@@ -518,84 +519,73 @@ namespace idk {
 		}
 		ImGui::NewLine();
 
-		if (ImGui::BeginCombo("Start State", c_anim->GetStateName(c_anim->_start_animation).c_str()))
+		if (ImGui::BeginCombo("Default State", c_anim->GetAnimationState(c_anim->layers[0].default_state).name.c_str()))
 		{
-			for (size_t i = 0; i < c_anim->_animations.size(); ++i)
+			for (auto& anim : c_anim->animation_table)
 			{
-				if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_start_animation == i))
+				string_view curr_name = anim.second.name;
+				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
 				{
 					// c_anim->Stop();
-					c_anim->_start_animation = s_cast<int>(i);
-					if (c_anim->_curr_animation < 0)
-						c_anim->_curr_animation = c_anim->_start_animation;
+					c_anim->layers[0].default_state = curr_name;
+					if (c_anim->layers[0].curr_state == string{})
+						c_anim->layers[0].curr_state = curr_name;
 				}
 			}
 			ImGui::EndCombo();
 		}
 
-		if (ImGui::BeginCombo("Current State", c_anim->GetStateName(c_anim->_curr_animation).c_str()))
+		if (ImGui::BeginCombo("Current State", c_anim->GetAnimationState(c_anim->layers[0].curr_state).name.c_str()))
 		{
-			for (size_t i = 0; i < c_anim->_animations.size(); ++i)
+			for (auto& anim : c_anim->animation_table)
 			{
-				if (ImGui::Selectable(c_anim->_animations[i].animation->Name().data(), c_anim->_curr_animation == i))
+				string_view curr_name = anim.second.name;
+				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].curr_state == curr_name))
 				{
 					// Reset the animation
-					c_anim->_elapsed = 0.0f;
+					c_anim->layers[0].normalized_time = 0.0f;
 					// Set the new current animation
-					c_anim->_curr_animation = static_cast<int>(i);
+					c_anim->layers[0].curr_state = curr_name;
 				}
 			}
 			ImGui::EndCombo();
 		}
-		bool has_curr_anim = c_anim->_curr_animation >= 0;
+		bool has_curr_anim = c_anim->layers[0].curr_state != string{};
 		if (has_curr_anim)
 		{
-			if (ImGui::Checkbox("Preview Current State", &c_anim->_preview_playback))
+			if (ImGui::Checkbox("Preview Current State", &c_anim->layers[0].preview_playback))
 			{
-				if (!c_anim->_preview_playback)
+				if (!c_anim->layers[0].preview_playback)
 				{
-					c_anim->_elapsed = 0.0f;
+					c_anim->layers[0].normalized_time = 0.0f;
                     Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
 				}
 			}
 
-			ImGui::ProgressBar(
-				c_anim->_elapsed / c_anim->_animations[c_anim->_curr_animation].animation->GetDuration(),
-				ImVec2{ -1, 10 }, nullptr);
+			ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
 		}
 			
 		// FOR TESTING 
 		ImGui::Text("TESTING");
 		ImGui::Separator();
 
-		if (ImGui::Button("Play"))
-		{
-			c_anim->Play(0);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Play And Loop"))
-		{
-			c_anim->Play(0);
-			c_anim->Loop(true);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Play And No Loop"))
-		{
-			c_anim->Play(0);
-			c_anim->Loop(false);
-		}
+	    if (ImGui::Button("Play"))
+	    {
+		    if(!c_anim->animation_table.empty())
+			    c_anim->Play(c_anim->animation_table.begin()->second.name);
+	    }
+	    ImGui::SameLine();
+	    if (ImGui::Button("Stop"))
+	    {
+		    c_anim->Stop();
+	    }
+	    ImGui::SameLine();
+	    if (ImGui::Button("Pause"))
+	    {
+		    c_anim->Pause();
+	    }
 
-		if (ImGui::Button("Stop"))
-		{
-			c_anim->Stop();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Pause"))
-		{
-			c_anim->Pause();
-		}
-
-		ImGui::DragFloat("Test Blend", &c_anim->_blend_factor, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Test Blend", &c_anim->layers[0].blend_time, 0.01f, 0.0f, 1.0f);
 	}
 
     template<>
