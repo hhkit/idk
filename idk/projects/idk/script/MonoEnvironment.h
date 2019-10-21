@@ -17,6 +17,7 @@ namespace idk::mono
 		MonoDomain* Domain() const noexcept;
 		const ManagedType* Type(string_view) const;
 
+		virtual void Init() {};
 		void ScanTypes();
 
 		virtual ~MonoEnvironment() = default;

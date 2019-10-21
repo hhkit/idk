@@ -5,6 +5,10 @@ namespace TestAndSeek
     public class Test 
         : MonoBehavior
     {
+        public int i;
+        public float f;
+        public GameObject go;
+
         public Test()
         {
             System.Console.WriteLine("Oh no");

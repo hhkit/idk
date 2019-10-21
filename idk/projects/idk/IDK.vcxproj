@@ -183,8 +183,9 @@
     <ClInclude Include="script\MonoEnvironment.h" />
     <ClInclude Include="script\ManagedObj.h" />
     <ClInclude Include="script\ManagedThunk.h" />
-    <ClInclude Include="script\MonoWrapperEnviroment.h" />
+    <ClInclude Include="script\MonoWrapperEnvironment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="script\ValueUnboxer.h" />
     <ClInclude Include="serialize\binary.h" />
     <ClInclude Include="serialize\parse_error.h" />
     <ClInclude Include="serialize\yaml.h" />
@@ -306,9 +307,10 @@
     <ClCompile Include="script\MonoBehavior.cpp" />
     <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
     <ClCompile Include="script\MonoEnvironment.cpp" />
-    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
+    <ClCompile Include="script\MonoWrapperEnvironment.cpp" />
     <ClCompile Include="script\ScriptSystem.cpp" />
     <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="script\ValueUnboxer.cpp" />
     <ClCompile Include="serialize\binary.cpp" />
     <ClCompile Include="serialize\text_serialize.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>

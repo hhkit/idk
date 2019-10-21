@@ -95,6 +95,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
+	Core::GetSystem<LogSystem>().PipeToCout(LogPool::FATAL, true);
 	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
 	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
