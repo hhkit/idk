@@ -1,4 +1,0 @@
-->vec4,vec3
-RGBA,RGB,$Color
-{0} = vec4({2});
-{1} = vec4({2}).xyz;

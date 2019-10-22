@@ -15,6 +15,7 @@ This window displays the editor window where you can select and modify gameobjec
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
 #include <imgui/imgui.h>
+#include <phys/PhysicsSystem.h>
 
 namespace idk {
 	class IGE_SceneView :
@@ -64,6 +65,8 @@ namespace idk {
 
 		void DrawSnapControl();
 
+
+		std::pair<Handle<GameObject>, phys::raycast_result> GetClosestGameObjectFromCamera(vector<Handle<GameObject>>& refVector, vector<phys::raycast_result>& rayResult);
 		//Debug ray
 		ray currRay;
 

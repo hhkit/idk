@@ -1,6 +1,0 @@
-float,float->float
-vec2,float->vec2
-vec3,float->vec3
-vec4,float->vec4
-In,Steps,Out
-{2} = floor({0} / (1 / {1})) * (1 / {1});

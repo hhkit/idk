@@ -16,7 +16,7 @@ namespace idk
 	}
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{
-		const mat4 tfm = translate(oriented_box.center) * mat4 { scale(oriented_box.extents / 2)* oriented_box.axes };
+		const mat4 tfm = translate(oriented_box.center) * mat4 { scale(oriented_box.extents)* oriented_box.axes };
 		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
 	}
 
@@ -43,7 +43,7 @@ namespace idk
 
 	void DebugRenderer::Draw(const sphere& sphere, const color& c, seconds duration, bool depth_test)
 	{
-		const mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius }) };
+		const mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius * 2 }) };
 		Draw(Mesh::defaults[MeshType::Sphere], tfm, c, duration, depth_test);
 	}
 

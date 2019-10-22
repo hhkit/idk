@@ -13,14 +13,14 @@ namespace idk
 			case BlendMode::Opaque:
 				switch (meta.model)
 				{
-				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
 				}
 			case BlendMode::Masked:
 				switch (meta.model)
 				{
-				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/assets/shader/pbr_forward.tmpt");
+				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
 				}
 			}
 		}

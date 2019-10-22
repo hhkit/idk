@@ -199,7 +199,7 @@ REFLECT_VARS(data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
-REFLECT_VARS(component_name, property_path)
+REFLECT_VARS(component_name, property_path, component_nth)
 REFLECT_END()
 
 // shader graph:

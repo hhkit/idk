@@ -74,11 +74,13 @@ namespace idk::shadergraph
         return { signatures, names, oss.str() };
     }
 
-    static NodeTemplate::table _init_table()
-    {
-        NodeTemplate::table t;
 
-        const auto nodes_dir = Core::GetSystem<FileSystem>().GetFullPath("/engine_data/nodes");
+
+    static NodeTemplate::table t{};
+    void NodeTemplate::LoadTable(string_view dir)
+    {
+        t.clear();
+        const auto nodes_dir = Core::GetSystem<FileSystem>().GetFullPath(dir);
         for (auto& file : fs::recursive_directory_iterator(nodes_dir))
         {
             if (file.is_directory())
@@ -90,12 +92,9 @@ namespace idk::shadergraph
 
             t.emplace(fs::relative(path, nodes_dir).replace_extension().string(), node);
         }
-
-        return t;
     }
     const NodeTemplate::table& NodeTemplate::GetTable()
     {
-        static table t = _init_table();
         return t;
     }
 

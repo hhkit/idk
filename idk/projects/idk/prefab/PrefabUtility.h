@@ -27,7 +27,7 @@ namespace idk
         static void PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab);
 
         // propagate specific property
-        static void PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path);
+        static void PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path, int component_nth);
 
         // add component and propagate
         static void AddComponentToPrefab(RscHandle<Prefab> prefab, int object_index, reflect::dynamic component);
@@ -48,7 +48,7 @@ namespace idk
         static void RevertPrefabInstance(Handle<GameObject> instance_root);
 
 		static void ApplyAddedComponent(Handle<GameObject> target, GenericHandle component);
-        static void ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index);
+        static void ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_nth);
 		static void ApplyPropertyOverride(Handle<GameObject> target, const PropertyOverride& override);
 		static void ApplyPrefabInstance(Handle<GameObject> instance_root);
     };

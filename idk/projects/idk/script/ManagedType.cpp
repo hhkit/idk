@@ -2,6 +2,7 @@
 #include "ManagedType.h"
 
 #include <script/ScriptSystem.h>
+#include <script/MonoWrapperEnvironment.h>
 
 namespace idk::mono
 {
@@ -43,6 +44,19 @@ namespace idk::mono
 	}
 	MonoMethod* ManagedType::FindMethod(string_view method_name, int param_count) const
 	{
-		return mono_class_get_method_from_name(type, method_name.data(), param_count);
+		auto find_class = type;
+		auto obj_type = Core::GetSystem<ScriptSystem>().Environment().Type("Object");
+		IDK_ASSERT(obj_type);
+		auto obj = obj_type->Raw();
+		while (find_class != obj)
+		{
+			auto retval = mono_class_get_method_from_name(find_class, method_name.data(), param_count);
+			if (retval)
+				return retval;
+			find_class = mono_class_get_parent(find_class);
+		}
+
+		//return mono_class_get_method_from_name(find_class, method_name.data(), param_count);
+		return nullptr;
 	}
 }

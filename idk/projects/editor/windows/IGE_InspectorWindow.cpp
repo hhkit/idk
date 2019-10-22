@@ -603,7 +603,11 @@ namespace idk {
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);
         ImGui::PushID(component.index);
-		const auto componentName = (*component).type.name();
+		const auto componentName = [&]()
+		{
+			auto type = (*component).type;
+			return type.is<mono::Behavior>() ? handle_cast<mono::Behavior>(component)->TypeName() : type.name();
+		}();
 		string displayingComponent{ componentName };
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
@@ -615,7 +619,18 @@ namespace idk {
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
         if (_prefab_inst)
+        {
             _prefab_curr_component = component;
+            _prefab_curr_component_nth = -1;
+            const span comps = _prefab_inst->GetGameObject()->GetComponents();
+            for (const auto& c : comps)
+            {
+                if (c.type == component.type)
+                    ++_prefab_curr_component_nth;
+                if (c == component)
+                    break;
+            }
+        }
 
         ImGui::PushID("__component_header");
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
@@ -774,7 +789,7 @@ namespace idk {
 
         bool outer_changed = false;
 
-        dyn.visit([&](auto&& key, auto&& val, int /*depth_change*/) { //Displays all the members for that variable
+        const auto generic_visitor = [&](auto&& key, auto&& val, int /*depth_change*/) { //Displays all the members for that variable
 
             using K = std::decay_t<decltype(key)>;
             using T = std::decay_t<decltype(val)>;
@@ -785,9 +800,14 @@ namespace idk {
             if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
                 return true;
             else if constexpr (!std::is_same_v<K, const char*>)
-                throw "Unhandled case";
+                throw "unhandled case";
             else
             {
+                string keyName = format_name(key);
+
+                if (keyName == "Guid" || keyName == "Enabled")
+                    return false;
+
                 _curr_property_stack.push_back(key);
 
                 string curr_prop_path;
@@ -798,18 +818,14 @@ namespace idk {
                 }
                 curr_prop_path.pop_back();
 
-                string keyName = format_name(key);
-
-                if (keyName == "Guid" || keyName == "Enabled")
-                    return false;
-
                 bool has_override = false;
                 if (_prefab_inst)
                 {
                     for (const auto& ov : _prefab_inst->overrides)
                     {
                         if (ov.component_name == (*_prefab_curr_component).type.name() &&
-                            ov.property_path == curr_prop_path)
+                            ov.property_path == curr_prop_path &&
+                            ov.component_nth == _prefab_curr_component_nth)
                         {
                             has_override = true;
                             break;
@@ -946,12 +962,12 @@ namespace idk {
                 {
                     if (ImGui::MenuItem("Apply Property"))
                     {
-                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
                         PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                     }
                     if (ImGui::MenuItem("Revert Property"))
                     {
-                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path };
+                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
                         PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
                     }
                     ImGui::EndPopup();
@@ -968,7 +984,12 @@ namespace idk {
                 return recurse;
             }
 
-        });
+		};
+
+		if (dyn.is<mono::Behavior>())
+			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
+		else
+			dyn.visit(generic_visitor);
 
         return outer_changed;
     }

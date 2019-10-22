@@ -49,9 +49,6 @@ namespace idk
 	{
 		return span<const SceneBlock>(_scenes);
 	}
-	void SceneManager::Shutdown()
-	{
-	}
 
 	RscHandle<Scene> SceneManager::CreateScene()
 	{
@@ -99,6 +96,18 @@ namespace idk
 			_active_scene->Load();
 
 		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(uint8_t(0x81));
+	}
+
+	void SceneManager::EarlyShutdown()
+	{
+		for (auto& elem : GameState::GetGameState().GetObjectsOfType<GameObject>())
+			GameState::GetGameState().DestroyObject(elem.GetHandle());
+
+		GameState::GetGameState().DestroyQueue();
+	}
+
+	void SceneManager::Shutdown()
+	{
 	}
 
 	RscHandle<Scene> SceneManager::GetActiveScene()

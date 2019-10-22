@@ -15,7 +15,7 @@ namespace idk::mono
 			rhs._gc_handle ?
 			[](const ManagedObject& rhs) -> uint32_t
 			{
-				const auto fetch = rhs.Fetch();
+				const auto fetch = rhs.Raw();
 				return fetch ? mono_gchandle_new(fetch, false) : 0;
 			}(rhs)
 			: 0
@@ -29,7 +29,7 @@ namespace idk::mono
 	}
 	ManagedObject& ManagedObject::operator=(const ManagedObject& rhs) 
 	{
-		const auto fetch = rhs.Fetch();
+		const auto fetch = rhs.Raw();
 		const auto new_gc = fetch ? mono_gchandle_new(fetch, false) : 0;
 
 		if (_gc_handle)
@@ -51,13 +51,13 @@ namespace idk::mono
 
 	void ManagedObject::Assign(string_view fieldname, MonoObject* obj)
 	{
-		auto me = Fetch();
+		auto me = Raw();
 		auto field = Field(fieldname);
 		if (field)
 			mono_field_set_value(me, field, obj);
 	}
 
-	MonoObject* ManagedObject::Fetch() const noexcept
+	MonoObject* ManagedObject::Raw() const noexcept
 	{
 		return mono_gchandle_get_target(_gc_handle);
 	}
@@ -72,13 +72,17 @@ namespace idk::mono
 			if (_gc_handle == 0)
 				return nullptr;
 
-			_type = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(mono_class_get_name(mono_object_get_class(Fetch())));
+			_type = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(mono_class_get_name(mono_object_get_class(Raw())));
 		}
 		return _type;
 	}
+	string_view ManagedObject::TypeName() const
+	{
+		return mono_class_get_name(mono_object_get_class(Raw()));
+	}
 	MonoClassField* ManagedObject::Field(string_view fieldname)
 	{
-		auto me = Fetch();
+		auto me = Raw();
 		auto klass = mono_object_get_class(me);
 		return mono_class_get_field_from_name(klass, fieldname.data());
 	}

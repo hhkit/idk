@@ -15,16 +15,15 @@ of the editor.
 
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
-#include <app/Application.h>
-#include <proj/ProjectManager.h>
-#include <scene/SceneManager.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
 #include <editor/commands/CommandList.h> //DockBuilderDockNode
 #include <common/Transform.h> //DockBuilderDockNode
 #include <common/TagManager.h>
 #include <gfx/Camera.h> //DockBuilderDockNode
 #include <iostream>
+#include <app/Keys.h>
 #include <IDE.h>
+#include <editor/SceneManagement.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
@@ -94,109 +93,21 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("File")) {
 
-			if (ImGui::MenuItem("New Scene", "CTRL+N")) {
-				Core::GetSystem<SceneManager>().SetActiveScene(Core::GetSystem<SceneManager>().CreateScene());
-				Core::GetSystem<SceneManager>().GetActiveScene()->Load();
-			}
+			if (ImGui::MenuItem("New Scene", "CTRL+N"))
+				NewScene();
 
-
-
-			if (ImGui::MenuItem("Open Scene", "CTRL+O")) {
-				std::cout << "Open Scene\n";
-
-                if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
-				{
-					auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-					auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
-					auto hnd = *scene_res;
-					auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-					if (hnd != active_scene)
-					{
-						if (active_scene)
-							active_scene->Unload();
-
-						Core::GetSystem<SceneManager>().SetActiveScene(hnd);
-						hnd->Load();
-
-                        // clear removed tags
-                        const auto num_tags = Core::GetSystem<TagManager>().GetNumOfTags();
-                        for (const auto& c : GameState::GetGameState().GetObjectsOfType<Tag>())
-                        {
-                            if (c.index > num_tags)
-                                c.GetGameObject()->RemoveComponent(c.GetHandle());
-                        }
-
-						//Clear IDE values
-						Core::GetSystem<IDE>().flag_skip_render = true;
-						Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
-						Core::GetSystem<IDE>().selected_gameObjects.clear();
-						Core::GetSystem<IDE>().selected_matrix.clear();
-					}
-				}
-
-			} //Do something if pressed
+			if (ImGui::MenuItem("Open Scene", "CTRL+O"))
+				OpenScene();
 
 			ImGui::Separator();
 
 			if (ImGui::MenuItem("Save", "CTRL+S")) 
-			{
-				auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-				auto path = [&]() -> opt<string>
-				{
-					if (auto path = Core::GetResourceManager().GetPath(curr_scene))
-						return string{ *path };
-					else
-					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
-						if (dialog_result)
-							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-						else 
-							return std::nullopt;
-					}
-				}();
-
-				if (path)
-				{
-					auto& p = *path;
-					if (p.find(Scene::ext) == std::string::npos)
-						p += Scene::ext;
-
-					Core::GetResourceManager().Rename(curr_scene, p);
-					Core::GetResourceManager().Save(curr_scene);
-					Core::GetSystem<ProjectManager>().SaveProject();
-				}
-			} //Do something if pressed
+				SaveScene();
 
 
 
 			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) 
-			{
-				auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-				auto path = [&]() -> opt<string>
-				{
-					if (auto path = Core::GetResourceManager().GetPath(curr_scene))
-						return string{ *path };
-					else
-					{
-						auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
-						if (dialog_result)
-							return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-						else
-							return std::nullopt;
-					}
-				}();
-
-				if (path)
-				{
-					auto& p = *path;
-					if (p.find(Scene::ext) == std::string::npos)
-						p += Scene::ext;
-
-					Core::GetResourceManager().Rename(curr_scene, p);
-					Core::GetResourceManager().Save(curr_scene);
-					Core::GetSystem<ProjectManager>().SaveProject();
-				}
-			} //Do something if pressed
+				SaveSceneAs();
 
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", "ALT+F4")) {
@@ -464,23 +375,47 @@ namespace idk {
 
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
-        if (ImGui::Button("Play", toolButtonSize))
-        {
-            Core::GetScheduler().SetPauseState(UnpauseAll);
-        }
-        ImGui::SameLine(0, 0);
-        if (ImGui::Button("Pause", toolButtonSize))
-        {
-            Core::GetScheduler().SetPauseState(EditorPause);
-        }
-        ImGui::SameLine(0, 0);
-        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-        ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
-        if (ImGui::Button("Stop", toolButtonSize))
-        {
-        }
-        ImGui::PopStyleColor();
-        ImGui::PopItemFlag();
+		if (Core::GetSystem<IDE>().game_running == false)
+		{
+			if (ImGui::Button("Play", toolButtonSize))
+			{
+				SaveScene();
+				Core::GetScheduler().SetPauseState(UnpauseAll);
+				Core::GetSystem<IDE>().game_running = true;
+				Core::GetSystem<IDE>().game_frozen = false;
+			}
+		}
+		else
+		{
+			//ImGui::SameLine(0, 0);
+			if (Core::GetSystem<IDE>().game_frozen == false)
+			{
+				if (ImGui::Button("Pause", toolButtonSize))
+				{
+					Core::GetScheduler().SetPauseState(EditorPause);
+					Core::GetSystem<IDE>().game_frozen = true;
+				}
+			}
+			else
+			{
+				if (ImGui::Button("Unpause", toolButtonSize))
+				{
+					Core::GetScheduler().SetPauseState(UnpauseAll); 
+					Core::GetSystem<IDE>().game_frozen = false;
+				}
+			}
+			ImGui::SameLine(0, 0);
+			//ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			//ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
+			if (ImGui::Button("Stop", toolButtonSize))
+			{
+				ResetScene();
+				Core::GetScheduler().SetPauseState(EditorPause);
+				Core::GetSystem<IDE>().game_running = false;
+			}
+		}
+        //ImGui::PopStyleColor();
+        //ImGui::PopItemFlag();
 
 
 

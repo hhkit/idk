@@ -16,7 +16,7 @@ namespace idk
 			logs.front().Post(message);
 
 		if (log.direct_to_cout)
-			std::cout << message;
+			std::cout << message << '\n';
 	}
 
 	void LogSystem::FlushLog(LogPool pool)

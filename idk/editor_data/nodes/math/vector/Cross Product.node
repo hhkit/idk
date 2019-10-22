@@ -1,0 +1,3 @@
+vec3,vec3->vec3
+A,B,Out
+{2} = cross({0},{1});

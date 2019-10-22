@@ -17,29 +17,34 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include "pch.h"
 #include <IDE.h>
 
+#include <filesystem>
+
+// dependencies
 #include <imgui/imgui.h>
+#include <imgui/ImGuizmo.h>
+
+// project management and setup
+#include <proj/ProjectManager.h>
+#include <common/TagManager.h>
+#include <PauseConfigurations.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
-#include <editor/Vulkan_ImGui_Interface.h>
-#include <editor/OpenGL_ImGui_Interface.h>
-#include <win32/WindowsApplication.h>
-#include <vkn/VulkanState.h>
-#include <opengl/system/OpenGLState.h>
+
+// resource importing
+#include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
 #include <loading/OpenGLCubeMapLoader.h>
 #include <loading/OpenGLTextureLoader.h>
+
+// editor setup
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
-#include <res/EasyFactory.h>
-#include <imgui/ImGuizmo.h>
-#include <core/Scheduler.h>
-#include <PauseConfigurations.h>
-#include <proj/ProjectManager.h>
+
+// util
 #include <util/ioutils.h>
 
-#include <filesystem>
 namespace fs = std::filesystem;
 
 namespace idk
@@ -89,8 +94,6 @@ namespace idk
             recent_file << proj_manager.GetProjectFullPath();
         }
 
-
-
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::OpenGL:
@@ -102,11 +105,14 @@ namespace idk
 		default:
 			break;
 		}
+
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
         Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
+        if (shadergraph::NodeTemplate::GetTable().empty())
+            shadergraph::NodeTemplate::LoadTable("/editor_data/nodes");
 
 
 		//ImGui Initializations
@@ -252,6 +258,8 @@ namespace idk
             if (elem.GetExtension() != ".meta")
                 Core::GetResourceManager().Load(elem, false);
         }
+
+		SetupEditorScene();
 	}
 
 	void IDE::Shutdown()
@@ -308,12 +316,49 @@ namespace idk
 		return _interface->Inputs()->main_camera;
 	}
 
+	void IDE::ClearScene()
+	{
+		// clear removed tags
+		const auto num_tags = Core::GetSystem<TagManager>().GetNumOfTags();
+		for (const auto& c : GameState::GetGameState().GetObjectsOfType<Tag>())
+		{
+			if (c.index > num_tags)
+				c.GetGameObject()->RemoveComponent(c.GetHandle());
+		}
+
+		//Clear IDE values
+		Core::GetSystem<IDE>().flag_skip_render = true;
+		Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
+		Core::GetSystem<IDE>().selected_gameObjects.clear();
+		Core::GetSystem<IDE>().selected_matrix.clear();
+	}
+
 	void IDE::RefreshSelectedMatrix()
 	{
 		//Refresh the new matrix values
 		selected_matrix.clear();
 		for (const auto& i : selected_gameObjects) {
 			selected_matrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+		}
+	}
+
+	void IDE::SetupEditorScene()
+	{
+		// create editor camera
+		RscHandle<Scene> scene{};
+		{
+			auto camera = scene->CreateGameObject();
+			Handle<Camera> camHandle = camera->AddComponent<Camera>();
+			camera->GetComponent<Name>()->name = "Camera 1";
+			camera->Transform()->position = vec3{ 0, 0, 5 };
+			camHandle->far_plane = 100.f;
+			camHandle->render_target = RscHandle<RenderTarget>{};
+			camHandle->is_scene_camera = true;
+			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
+			if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
+				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
+
+			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		}
 	}
 

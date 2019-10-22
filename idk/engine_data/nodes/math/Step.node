@@ -1,9 +1,0 @@
-float,float->float
-vec2,vec2->vec2
-vec3,vec3->vec3
-vec4,vec4->vec4
-float,vec2->vec2
-float,vec3->vec3
-float,vec4->vec4
-Edge,In,Out
-{2} = step({0},{1});

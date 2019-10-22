@@ -24,6 +24,7 @@ namespace idk
 		// exact
 		template<typename T> Handle<T> AddComponent();
 		template<typename T> Handle<T> GetComponent() const;
+		template<typename T> span<const Handle<T>> GetComponents() const;
 		template<typename T> bool      HasComponent() const;
 
 		// generic
@@ -55,19 +56,24 @@ namespace idk
 		
 		
 	private:
+		struct component_range
+		{
+			char begin{}, count{};
+		};
+
 		vector<GenericHandle> _components;
+		array<component_range, ComponentCount> _component_ranges;
 		bool _active = true;
 
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;
 
+		template<typename Component> void RegisterComponent(Handle<Component> component);
+		template<typename Component> void DeregisterComponent(Handle<Component> component);
+
 		friend class GameState;
-
-		template<typename T>
-		friend struct detail::ObjectPoolHelper;
-
-		template<typename T>
-		friend struct detail::TableGenerator;
+		template<typename T> friend struct detail::ObjectPoolHelper;
+		template<typename T> friend struct detail::TableGenerator;
 	};
 }
 
