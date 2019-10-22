@@ -10,7 +10,7 @@ if (klass == MONO_CLASS)                                        \
 {                                                               \
 	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
 	auto new_val = old_val;								        \
-	functor(field_name, new_val, depth);				        \
+	functor(field_name.data(), new_val, depth);				        \
 														        \
 	if (old_val != new_val)								        \
 		mono_field_set_value(Raw(), field, &new_val);	        \
@@ -21,7 +21,7 @@ if (klass == MONO_CLASS)                                        \
 if (klass == MONO_CLASS)                                              \
 {                                                                     \
 	auto old_val = *s_cast<const REAL_TYPE*>(mono_object_unbox(obj)); \
-	functor(field_name, old_val, depth);				              \
+	functor(field_name.data(), old_val, depth);				              \
 	continue;                                                         \
 }
 
@@ -68,7 +68,7 @@ namespace idk::mono
 				auto old_val = string{ unboxed.get() };
 				auto new_val = old_val;
 
-				functor(field_name, new_val, depth);
+				functor(field_name.data(), new_val, depth);
 				if (old_val != new_val)
 					mono_field_set_value(Raw(), field, mono_string_new(mono_domain_get(), new_val.data()));
 
@@ -76,11 +76,11 @@ namespace idk::mono
 			}
 
 			auto& envi = Core::GetSystem<ScriptSystem>().Environment();
-
+			
 			MONO_BASE_TYPE(vec2, envi.Type("Vector2")->Raw());
 			MONO_BASE_TYPE(vec3, envi.Type("Vector3")->Raw());
 			MONO_BASE_TYPE(vec4, envi.Type("Vector4")->Raw());
-
+			
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE(Guid, mono_class_from_name(csharpcore, "System", "Guid"));
 		}
@@ -113,7 +113,7 @@ namespace idk::mono
 				auto unboxed = unbox((MonoString*)obj);
 				auto old_val = string{ unboxed.get() };
 
-				functor(field_name, old_val, depth);
+				functor(field_name.data(), old_val, depth);
 
 				continue;
 			}
