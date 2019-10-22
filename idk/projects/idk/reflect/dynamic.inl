@@ -137,7 +137,7 @@ namespace idk::reflect
 	void dynamic::visit(Visitor&& visitor) const
 	{
 		int depth = 0;
-		int last_visit_depth = 0;
+		int last_visit_depth = -1;
 		detail::visit(_ptr->get(), type, std::forward<Visitor>(visitor), depth, last_visit_depth);
 	}
 

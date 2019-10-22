@@ -137,7 +137,7 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_STREQ(visited_values[13].get<string>().c_str(), obj.hashtable.begin()->second.c_str());
 	EXPECT_STREQ(visited_values[14].get<string>().c_str(), (++obj.hashtable.begin())->second.c_str());
 
-	EXPECT_EQ(depth_changes[0], 0);
+	EXPECT_EQ(depth_changes[0], 1);
 	EXPECT_EQ(depth_changes[1], 1);
 	EXPECT_EQ(depth_changes[2], 0);
 	EXPECT_EQ(depth_changes[3], 0);

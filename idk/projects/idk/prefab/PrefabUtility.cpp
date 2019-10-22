@@ -63,16 +63,21 @@ namespace idk
                     end = path.size();
                 const string_view token(path.data() + offset, end - offset);
 
-                if (curr.valid() && curr.type.is_container())
+                if (curr.valid())
                 {
-                    auto cont = curr.to_container();
-                    if (cont.value_type.is_template<std::pair>())
+                    if (curr.type.is_container())
                     {
-                        auto key_type = cont.value_type.create().unpack()[0].type;
-                        curr.swap(cont[*parse_text(string(token), key_type)]);
+                        auto cont = curr.to_container();
+                        if (cont.value_type.is_template<std::pair>())
+                        {
+                            auto key_type = cont.value_type.create().unpack()[0].type;
+                            curr.swap(cont[*parse_text(string(token), key_type)]);
+                        }
+                        else
+                            curr.swap(cont[*parse_text<size_t>(string(token))]);
                     }
-                    else
-                        curr.swap(cont[*parse_text<size_t>(string(token))]);
+                    else if (curr.type.is_template<std::variant>())
+                        curr.swap(curr.get_variant_value().get_property(token).value);
                 }
                 else
                     curr.swap(obj.get_property(token).value);
@@ -703,12 +708,15 @@ namespace idk
             for (auto c : obj_component_handles)
                 obj_components.push_back(*c);
 
-            for (size_t j = 0; j < prefab_component_ptrs.size(); ++j)
+            for (size_t i = 0; i < prefab_component_ptrs.size(); ++i)
             {
-                if (prefab_component_ptrs[j]->type == obj_components[j].type)
+                for (size_t j = 0; j < obj_components.size(); ++j)
                 {
-                    prefab_component_ptrs[j] = nullptr;
-                    obj_component_handles[j] = GenericHandle();
+                    if (prefab_component_ptrs[i] && prefab_component_ptrs[i]->type == obj_components[j].type)
+                    {
+                        prefab_component_ptrs[i] = nullptr;
+                        obj_component_handles[j] = GenericHandle();
+                    }
                 }
             }
 
