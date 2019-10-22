@@ -25,6 +25,7 @@ namespace idk::ai_helpers
 		}
 
 		return scene.ai_scene != nullptr;
+		scene.file_ext = path_to_resource.GetExtension();
 	}
 
 	void CompileMeshes(Scene& scene, aiNode* node)
@@ -696,9 +697,14 @@ namespace idk::ai_helpers
 	{
 		UNREFERENCED_PARAMETER(scene);
 		// Do all the keyframe optimizations here.
-		const auto vec3_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
+		const auto trans_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
 		{
 			return vec3_equal(lhs.val, rhs.val);
+		};
+
+		const auto scale_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
+		{
+			return vec3_equal(lhs.val, rhs.val, 0.01f);
 		};
 
 		for (auto& anim_clip : scene.compiled_clips)
@@ -707,13 +713,13 @@ namespace idk::ai_helpers
 			{
 				// Translation optimization
 				anim_bone.translate_track.erase(
-					std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), vec3_pred), anim_bone.translate_track.end());
+					std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), trans_pred), anim_bone.translate_track.end());
 				if (anim_bone.translate_track.size() == 1)
 					anim_bone.translate_track.clear();
 
 				// Scale optimization
 				anim_bone.scale_track.erase(
-					std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), vec3_pred), anim_bone.scale_track.end());
+					std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), scale_pred), anim_bone.scale_track.end());
 				if (anim_bone.scale_track.size() == 1)
 					anim_bone.scale_track.clear();
 			}
@@ -732,6 +738,8 @@ namespace idk::ai_helpers
 		vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
 		indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
 
+		const float normalize_scale = scene.file_ext == ".fbx" ? 0.01f : 1.0f;
+
 		// Initialize vertices
 		const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
 		for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
@@ -746,7 +754,7 @@ namespace idk::ai_helpers
 				bi_tangent = ai_mesh->mBitangents[k];
 			}
 
-			vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z } * 0.01f
+			vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z } *normalize_scale
 										 ,vec3{ normal.x, normal.y, normal.z }
 										 ,vec2{ text.x, text.y }
 										 ,vec3{ tangent.x, tangent.y, tangent.z }
@@ -836,6 +844,8 @@ namespace idk::ai_helpers
 
 		indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
 
+		const float normalize_scale = scene.file_ext == ".fbx" ? 0.01f : 1.0f;
+
 		// Initialize vertices
 		const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
 		for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
@@ -850,7 +860,7 @@ namespace idk::ai_helpers
 				bi_tangent = ai_mesh->mBitangents[k];
 			}
 
-			positions.emplace_back(vec3{ pos.x, pos.y, pos.z } * 0.01f);
+			positions.emplace_back(vec3{ pos.x, pos.y, pos.z } * normalize_scale);
 			normals.emplace_back(vec3{ normal.x, normal.y, normal.z });
 			uvs.emplace_back(vec2{ text.x, text.y });
 			tangents.emplace_back(vec3{ tangent.x, tangent.y, tangent.z });
@@ -1004,11 +1014,11 @@ namespace idk::ai_helpers
 	{
 		return abs(a - b) < eps;
 	}
-	bool vec3_equal(const vec3& lhs, const vec3& rhs)
+	bool vec3_equal(const vec3& lhs, const vec3& rhs, float eps)
 	{
-		return	flt_equal(lhs[0], rhs[0]) && 
-				flt_equal(lhs[1], rhs[1]) &&
-				flt_equal(lhs[2], rhs[2]);
+		return	flt_equal(lhs[0], rhs[0], eps) && 
+				flt_equal(lhs[1], rhs[1], eps) &&
+				flt_equal(lhs[2], rhs[2], eps);
 	}
 	bool vec4_equal(const vec4& lhs, const vec4& rhs)
 	{
