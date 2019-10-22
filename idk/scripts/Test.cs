@@ -5,6 +5,10 @@ namespace TestAndSeek
     public class Test 
         : MonoBehavior
     {
+        public int i;
+        public float f;
+        public GameObject go;
+
         public Test()
         {
             System.Console.WriteLine("Oh no");
@@ -13,11 +17,12 @@ namespace TestAndSeek
         {
             System.Console.WriteLine("pikachu use");
             System.Console.WriteLine("thunderbolt {0} {1} {2}", v.x, v.y, v.z);
+            System.Console.WriteLine("and takedown {0}", i);
         }
         public override void Update()
         {
             //System.Console.WriteLine("Poop.");
-            transform.position = transform.position + Vector3.up * 0.016f;
+            transform.position = transform.position + Vector3.up * f * 0.016f;
         }
 
         public void TestTransform(Transform t)

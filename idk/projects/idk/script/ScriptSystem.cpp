@@ -13,14 +13,17 @@
 #include <script/MonoBehavior.h>
 #include <script/MonoEnvironment.h>
 #include <script/MonoBehaviorEnvironment.h>
-#include <script/MonoWrapperEnviroment.h>
+#include <script/MonoWrapperEnvironment.h>
 
 namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
 		if (Core::GetSystem<FileSystem>().Exists(path_to_game_dll))
+		{
 			script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
+			script_environment->Init();
+		}
 		else
 			LOG_TO(LogPool::FATAL, "Could not detect game dll!");
 	}
@@ -49,7 +52,7 @@ namespace idk::mono
         if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
         {
             main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
-            main_environment->ScanTypes();
+			main_environment->Init();
         }
 		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*) 
 		{

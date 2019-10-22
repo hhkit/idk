@@ -7,6 +7,8 @@
 #include <core/GameObject.h>
 #include <scene/Scene.h>
 
+#include <script/MonoBehavior.h>
+
 namespace idk
 {
 
@@ -219,5 +221,19 @@ namespace idk
 
         return yaml::dump(node);
     }
+
+	template<>
+	string serialize_text(const mono::Behavior& behavior)
+	{
+		yaml::node node;
+		yaml::node& mono_data = node.emplace_back();
+		mono_data.tag(behavior.TypeName());
+
+		behavior.GetObject().Visit([&](auto&& key, auto&& value, int)
+			{
+				mono_data.emplace_back(serialize_text(value)).tag(key);
+			});
+		return yaml::dump(node);
+	}
 
 }

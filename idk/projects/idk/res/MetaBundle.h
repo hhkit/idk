@@ -40,7 +40,7 @@ namespace idk
 	{
 		for (auto& elem : metadatas)
 		{
-			if (elem.t_hash == string{ reflect::get_type<T>().name() })
+			if (elem.t_hash == reflect::get_type<T>().name())
 				return &elem;
 		}
 		return nullptr;

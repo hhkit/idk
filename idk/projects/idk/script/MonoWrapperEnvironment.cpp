@@ -20,13 +20,14 @@ namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)
 	{
-
 		_domain = mono_jit_init("MasterDomain");
 		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
-
 		BindCoreFunctions();
-
 		IDK_ASSERT_MSG(_assembly, "cannot load idk.dll");
+	}
+
+	void MonoWrapperEnvironment::Init()
+	{
 
 		{
 			auto img = mono_assembly_get_image(_assembly);
@@ -50,6 +51,7 @@ namespace idk::mono
 
 	void MonoWrapperEnvironment::BindCoreFunctions()
 	{
+
 		constexpr auto Bind = mono_add_internal_call;
 		// handleable
 		Bind("idk.Bindings::ObjectValidate", decay(
