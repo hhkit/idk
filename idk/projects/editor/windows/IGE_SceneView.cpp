@@ -528,7 +528,7 @@ namespace idk {
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
 		if (editor.selected_gameObjects.size()) {
-			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>(); 
+			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->Transform(); 
 
 
 			if (gameObjectTransform) {

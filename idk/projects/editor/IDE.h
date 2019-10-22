@@ -62,6 +62,8 @@ namespace idk
 
 		CameraControls& currentCamera();
 
+		void ClearScene();
+
         template <typename T> // move into .inl if there are more template fns
         T* FindWindow()
         {
@@ -82,7 +84,11 @@ namespace idk
 		unique_ptr<edt::I_Interface> _interface;
         string _editor_app_data;
 
-		//GraphicsAPI gLibVer;
+		// Editor Scene
+		bool game_running = false;
+		bool game_frozen = true;
+		void SetupEditorScene();
+
 		//Editor Windows
 		unique_ptr<IGE_MainWindow>			ige_main_window		{};
 		vector<unique_ptr<IGE_IWindow>>		ige_windows			{};

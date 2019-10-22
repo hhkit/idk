@@ -1,0 +1,32 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -2.317815, y: 0.755237, z: 0}
+    rotation: 
+      w: 1
+      x: -0
+      y: -0
+      z: -0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: pbrball00-00
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    restitution: 1
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !sphere 
+      center: {x: 0, y: 0, z: 0}
+      radius: 0.5
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    receive_shadows: 1
+  parent_index: -1

@@ -235,8 +235,10 @@ namespace idk::ogl
 
 			// project uvs
 			for (auto& elem : icosahedron)
+			{
 				elem.uv = spherical_projection(elem.pos);
-
+				elem.pos /= 2; // normalize
+			}
 			const auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -252,7 +254,7 @@ namespace idk::ogl
 		{	/* create cube mesh */
 			const auto box_mesh = Mesh::defaults[MeshType::Box];
 			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(box_mesh.guid);
-			constexpr auto sz = 1.f;
+			constexpr auto sz = .5f;
 			std::vector<Vertex> vertices{
 				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
 				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,0, 1} },  // front
@@ -338,7 +340,11 @@ namespace idk::ogl
 				}
 			}
 
+			for (auto& elem : vertices)
+				elem.pos /= 2;
+
 			mesh_handle->SetDrawMode(GL_LINES);
+
 
 			mesh_handle->AddBuffer(
 				OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
@@ -354,7 +360,7 @@ namespace idk::ogl
 		{	/* create plane mesh */
 			const auto plane_mesh = Mesh::defaults[MeshType::Plane];
 			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(plane_mesh.guid);
-			constexpr auto sz = 1.f;
+			constexpr auto sz = .5f;
 			//constexpr auto numberOfTri = 16;
 			//real angle = (2.f * pi) / numberOfTri;
 
