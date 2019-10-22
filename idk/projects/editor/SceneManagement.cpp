@@ -25,13 +25,13 @@ namespace idk
 			auto light = active_scene->CreateGameObject();
 			light->Name("Directional Light");
 			light->Transform()->rotation = quat{ vec3{1,0,0}, deg{-90} };
-			light->AddComponent<Light>()->light = DirectionalLight{ .light_color = {0.25, 0.25, 0.25} };
+			light->AddComponent<Light>()->light = DirectionalLight{};
 		}
-		{
-			auto camera = active_scene->CreateGameObject();
-			camera->Name("Camera");
-			camera->AddComponent<Camera>();
-		}
+		//{
+		//	auto camera = active_scene->CreateGameObject();
+		//	camera->Name("Camera");
+		//	camera->AddComponent<Camera>();
+		//}
 
 		Core::GetSystem<IDE>().ClearScene();
 	}

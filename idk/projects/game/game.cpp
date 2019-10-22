@@ -96,6 +96,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
 
+	/*
 	auto scene = RscHandle<Scene>{};
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
@@ -146,7 +147,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// @Joseph: Uncomment this when testing.
 	create_anim_obj(vec3{ 0,0,0 });
-
+	*/
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

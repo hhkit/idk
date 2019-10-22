@@ -14,6 +14,7 @@ namespace idk
 
         // create prefab from given game object, does not save it.
         static RscHandle<Prefab> Create(Handle<GameObject> go);
+		static RscHandle<Prefab> Create(Handle<GameObject> go, Guid guid);
 
         // save given game object into a prefab, writes into save_path.
         static RscHandle<Prefab> Save(Handle<GameObject> go, string_view save_path);

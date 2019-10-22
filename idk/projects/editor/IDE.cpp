@@ -241,6 +241,7 @@ namespace idk
 		{
 			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
+			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
 			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
@@ -356,7 +357,7 @@ namespace idk
 			camHandle->is_scene_camera = true;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/assets/textures/skybox/space.png.cbm", false);
+				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		}

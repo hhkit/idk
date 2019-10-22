@@ -15,8 +15,11 @@ namespace idk
 
 		const SerializedMeta* FetchMeta(string_view name) const;
 
-		template<typename T, typename = sfinae<has_tag_v<T, MetaTag>>>
+		template<typename T>
 		const SerializedMeta* FetchMeta() const;
+
+		template<typename T>
+		const SerializedMeta* FetchMeta(string_view name) const;
 	};
 }
 
@@ -35,12 +38,23 @@ namespace idk
 				metadatas.emplace_back(SerializedMeta{ h.guid, string{h->Name()}, string{reflect::get_type<T>().name()} });
 		}
 	}
-	template<typename T, typename>
+	template<typename T>
 	const SerializedMeta* MetaBundle::FetchMeta() const
 	{
 		for (auto& elem : metadatas)
 		{
 			if (elem.t_hash == reflect::get_type<T>().name())
+				return &elem;
+		}
+		return nullptr;
+	}
+
+	template<typename T>
+	const SerializedMeta* MetaBundle::FetchMeta(string_view name) const
+	{
+		for (auto& elem : metadatas)
+		{
+			if (elem.t_hash == reflect::get_type<T>().name() && elem.name == name)
 				return &elem;
 		}
 		return nullptr;

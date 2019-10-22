@@ -96,6 +96,7 @@ namespace idk
 			_active_scene->Load();
 
 		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(uint8_t(0x81));
+		_prefab_scene->Load();
 	}
 
 	void SceneManager::EarlyShutdown()

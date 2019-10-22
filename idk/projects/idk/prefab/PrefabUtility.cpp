@@ -351,6 +351,13 @@ namespace idk
         return handle;
     }
 
+	RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go, Guid guid)
+	{
+		auto handle = Core::GetResourceManager().LoaderCreateResource<Prefab>(guid);
+		_create(go, handle);
+		return handle;
+	}
+
 	RscHandle<Prefab> PrefabUtility::Save(Handle<GameObject> go, string_view save_path)
     {
         auto handle = [save_path]() {

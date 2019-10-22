@@ -1,0 +1,5 @@
+metadatas: 
+- guid: cf38b4ac-a2d5-457a-998d-6a11bd0a490d
+  metadata: '{internal_format: !ColorFormat RGBF_32, uv_mode: !UVMode Repeat}'
+  name: ""
+  t_hash: idk::Texture
