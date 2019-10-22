@@ -29,7 +29,23 @@ namespace idk
 
     void ProjectManager::LoadProject(string_view full_path)
     {
+        if (full_path == _full_path)
+            return;
+
+        // free all assets
         auto& core_fs = Core::GetSystem<FileSystem>();
+        for (auto path : core_fs.GetEntries("/assets", FS_FILTERS::RECURSE_DIRS | FS_FILTERS::FILE))
+        {
+            if (path.GetExtension() == ".meta")
+                continue;
+
+            auto res = Core::GetResourceManager().Get(path);
+            if (res)
+            {
+                for (const auto& handle : res->GetAll())
+                    std::visit([](auto h) { Core::GetResourceManager().Release(h); }, handle);
+            }
+        }
         core_fs.Dismount("/assets");
         core_fs.Dismount("/config");
 
