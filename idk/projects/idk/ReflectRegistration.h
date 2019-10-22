@@ -254,6 +254,13 @@ REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")
 REFLECT_VARS(build_index, scene)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::mono::ScriptSystemConfig, "ScriptConfig")
+REFLECT_VARS(path_to_game_dll)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::mono::ScriptSystem, "ScriptSystem")
+REFLECT_END()
+
 /*==========================================================================
  * components
  *========================================================================*/

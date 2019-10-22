@@ -113,7 +113,6 @@ namespace idk::mono
 
 			std::cout << "SERIALIZED TEST:" << serialize_text(*mb);
 		}
-
 	}
 	void MonoBehaviorEnvironment::FindMonoBehaviors()
 	{

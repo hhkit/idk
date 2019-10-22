@@ -10,6 +10,8 @@
 #include <mono/utils/mono-logger.h>
 #include <mono/jit/jit.h>
 
+#include <proj/ProjectManager.h>
+
 #include <script/MonoBehavior.h>
 #include <script/MonoEnvironment.h>
 #include <script/MonoBehaviorEnvironment.h>
@@ -19,9 +21,9 @@ namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
-		if (Core::GetSystem<FileSystem>().Exists(path_to_game_dll))
+		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
-			script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(path_to_game_dll));
+			script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(GetConfig().path_to_game_dll));
 			script_environment->Init();
 		}
 		else
@@ -35,11 +37,6 @@ namespace idk::mono
 
 	void ScriptSystem::Init()
 	{
-		Core::GetSystem<FileSystem>().Mount(
-			string{ Core::GetSystem<FileSystem>().GetExeDir() } + "/scripts",
-			"/scripts", 
-			true);
-
 		auto exe_dir = string{ Core::GetSystem<FileSystem>().GetExeDir() };
 		mono_set_dirs(
 			(exe_dir + "/mono/lib/").data(),
@@ -49,22 +46,30 @@ namespace idk::mono
 			LOG_TO(LogPool::GAME, string);
 			});
 
-        if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
-        {
-            main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
-			main_environment->Init();
-        }
-		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*) 
+		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
 		{
-			if (fatal)
-			{
-				LOG_TO(LogPool::FATAL, "Fatal Game Error");
-				LOG_TO(LogPool::FATAL, message);
-			}
-			else
-				LOG_TO(LogPool::GAME, message);
+			main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
+			main_environment->Init();
 		}
+		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*)
+			{
+				if (fatal)
+				{
+					LOG_TO(LogPool::FATAL, "Fatal Game Error");
+					LOG_TO(LogPool::FATAL, message);
+				}
+				else
+					LOG_TO(LogPool::GAME, message);
+			}
 		, nullptr);
+	}
+
+	void ScriptSystem::LateInit()
+	{
+		Core::GetSystem<FileSystem>().Mount(
+			string{ Core::GetSystem<ProjectManager>().GetProjectDir() } + "/Scripts",
+			"/scripts",
+			true);
 
 		LoadGameScripts();
 	}
@@ -75,7 +80,15 @@ namespace idk::mono
 		main_environment = nullptr;
 	}
 
+	void ScriptSystem::ApplyConfig(Config& config)
+	{
+	}
+
 	ScriptSystem::ScriptSystem() = default;
+	ScriptSystem::ScriptSystem(const ScriptSystem&)
+	{
+		IDK_ASSERT(false);
+	}
 	ScriptSystem::~ScriptSystem() = default;
 
 	void ScriptSystem::ScriptStart(span<Behavior> behaviors)

@@ -28,7 +28,6 @@ namespace idk::mono
 
 	void MonoWrapperEnvironment::Init()
 	{
-
 		{
 			auto img = mono_assembly_get_image(_assembly);
 			auto klass = mono_class_from_name(img, "idk", "IDK");

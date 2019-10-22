@@ -160,10 +160,18 @@ namespace idk
 				return GenUniqueName<Res>(); // gen unique name
 		}();
 
-		auto stream = Core::template GetSystem<FileSystem>().Open( filepath, FS_PERMISSIONS::WRITE);
-		stream << serialize_text(*saveme);
+		try
+		{
+			auto ser = serialize_text(*saveme);
+			auto stream = Core::template GetSystem<FileSystem>().Open(filepath, FS_PERMISSIONS::WRITE);
+			stream << ser;
 
-		return saveme;
+			return saveme;
+		}
+		catch (...)
+		{
+			return ResourceSaveError::ResourceFailedToSave;
+		}
 	}
 
 	template<typename Res>

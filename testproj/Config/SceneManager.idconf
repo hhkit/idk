@@ -1,4 +1,4 @@
-_active_scene: !<Scene> {guid: e466e5e4-bdd9-4b5a-bab0-11918220bab0}
+_active_scene: !<Scene> {guid: a1292971-71c1-45ef-8654-c74213822fb9}
 _scenes: 
 - build_index: 0
   scene: !<Scene> {guid: 37903fe4-38be-4d5b-b15b-3e9dad6d7da5}

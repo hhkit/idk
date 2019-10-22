@@ -37,7 +37,7 @@ namespace idk
 
 	enum class ResourceSaveError : char
 	{
-		ResourceNotSaveable,
+		ResourceFailedToSave,
 		ResourceNotLoaded,
 		ResourceNotReflected,
 	};

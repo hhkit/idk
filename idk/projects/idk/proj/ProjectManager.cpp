@@ -73,12 +73,15 @@ namespace idk
             path += ".idconf";
 
             typename T::Config config;
-            auto stream = Core::GetSystem<FileSystem>().Open(path, FS_PERMISSIONS::READ);
-            if (stream)
-            {
-                parse_text(stringify(stream), config);
-                Core::GetSystem<T>().SetConfig(config);
-            }
+			if (PathHandle{ path })
+			{
+				auto stream = Core::GetSystem<FileSystem>().Open(path, FS_PERMISSIONS::READ);
+				if (stream)
+				{
+					if (parse_text(stringify(stream), config) == parse_error::none)
+						Core::GetSystem<T>().SetConfig(config);
+				}
+			}
         }
     }
 
