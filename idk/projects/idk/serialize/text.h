@@ -22,6 +22,8 @@ namespace idk
 	template<> // serialize scene
     string serialize_text(const Scene& scene);
 
+	template<>
+	string serialize_text(const mono::Behavior& behavior);
 
 
     template<typename T>
@@ -35,6 +37,9 @@ namespace idk
 
 	template<> // parse scene
     parse_error parse_text(string_view sv, Scene& scene);
+
+	template<>
+	parse_error parse_text(string_view sv, mono::Behavior& behavior);
 
     monadic::result<reflect::dynamic, parse_error> parse_text(string_view sv, reflect::type type);
 

@@ -374,4 +374,9 @@ namespace idk
 
         return err;
 	}
+	template<>
+	parse_error parse_text(string_view sv, mono::Behavior& behavior)
+	{
+		return parse_error();
+	}
 }

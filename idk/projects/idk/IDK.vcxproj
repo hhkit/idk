@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
@@ -45,6 +46,7 @@
     <ClInclude Include="debug\Log.h" />
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="debug\LogPools.h" />
+    <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
@@ -185,8 +187,9 @@
     <ClInclude Include="script\MonoEnvironment.h" />
     <ClInclude Include="script\ManagedObj.h" />
     <ClInclude Include="script\ManagedThunk.h" />
-    <ClInclude Include="script\MonoWrapperEnviroment.h" />
+    <ClInclude Include="script\MonoWrapperEnvironment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="script\ValueUnboxer.h" />
     <ClInclude Include="serialize\binary.h" />
     <ClInclude Include="serialize\parse_error.h" />
     <ClInclude Include="serialize\yaml.h" />
@@ -231,6 +234,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim\Animation.cpp" />
+    <ClCompile Include="anim\AnimationLayer.cpp" />
     <ClCompile Include="anim\Animator.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
     <ClCompile Include="anim\Bone.cpp" />
@@ -250,6 +254,7 @@
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
@@ -313,9 +318,10 @@
     <ClCompile Include="script\MonoBehavior.cpp" />
     <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
     <ClCompile Include="script\MonoEnvironment.cpp" />
-    <ClCompile Include="script\MonoWrapperEnviroment.cpp" />
+    <ClCompile Include="script\MonoWrapperEnvironment.cpp" />
     <ClCompile Include="script\ScriptSystem.cpp" />
     <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="script\ValueUnboxer.cpp" />
     <ClCompile Include="serialize\binary.cpp" />
     <ClCompile Include="serialize\text_serialize.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -415,6 +421,7 @@
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
+    <None Include="script\ManagedObj.inl" />
     <None Include="serialize\binary.inl" />
     <None Include="serialize\text.inl" />
     <None Include="serialize\yaml.inl" />

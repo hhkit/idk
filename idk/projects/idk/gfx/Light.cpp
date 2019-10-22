@@ -49,7 +49,22 @@ namespace idk
 			vec3 v_pos = trf->GlobalPosition();
 			vec3 v_dir = trf->Forward();
 			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
-			return look_at(v_pos, v_pos + vec3(v_dir.x, v_dir.y, v_dir.z), trf->Up());
+			return look_at(v_pos, v_pos - vec3(v_dir.x, v_dir.y, v_dir.z), trf->Up()).inverse();
+
+			//auto mat = light->GetGameObject()->Transform()->GlobalMatrix();
+			//const auto tfm = light->GetGameObject()->Transform();
+			//auto retval = orthonormalize(mat);
+			//retval[3] = mat[3];
+
+			/*vec3 upvector = tfm->Up();
+			vec3 rightvector = tfm->Right();
+			vec3 forwardvector = tfm->Forward();
+
+			mat4 findMat = retval.inverse();
+
+			mat4 matrix = mat.transpose();*/
+
+			//return retval.inverse();
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
@@ -62,7 +77,7 @@ namespace idk
 		}
 		mat4 operator()(const DirectionalLight& dirLight)
 		{
-			return ortho(-dirLight.width, dirLight.width, -dirLight.height, dirLight.height, 0.1f, 100.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+			return ortho(-dirLight.width, dirLight.width, -dirLight.height, dirLight.height, 0.1f, 100.f);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }

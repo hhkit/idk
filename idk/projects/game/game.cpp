@@ -155,7 +155,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 	case GraphicsAPI::Vulkan:
 		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
 		break;
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
@@ -169,6 +168,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	BasicScene();
 
 
+	Core::GetSystem<LogSystem>().PipeToCout(LogPool::FATAL, true);
 	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
 	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 #if 1
@@ -235,7 +235,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			mesh_rend->material_instance = mat_inst;
 		}
 
-		animator->_skeleton = model_resource->Get<anim::Skeleton>();
+		animator->skeleton = model_resource->Get<anim::Skeleton>();
 		Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
 		// Load other animations

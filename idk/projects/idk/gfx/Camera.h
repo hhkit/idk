@@ -2,14 +2,10 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <gfx/RenderObject.h>
+#include <gfx/CameraFrustum.h>
 
 namespace idk
 {
-	struct CamResult
-	{
-		vec3 result{};
-		bool dirty{};
-	};
 	class Camera
 		: public Component<Camera>
 	{
@@ -39,6 +35,10 @@ namespace idk
 
 		vec3	  currentPosition() const;
 		vec3	  currentDirection() const;
+
+		Frustum   getFrustum() const;
+
+		mat4      getTightOrthoProjection() const;
 
 		mat4	  ViewMatrix() const;
 		mat4	  ProjectionMatrix() const;

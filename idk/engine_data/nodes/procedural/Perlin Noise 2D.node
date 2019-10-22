@@ -1,3 +1,0 @@
-vec2->float
-UV,Out
-{1} = cnoise({0});

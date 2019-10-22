@@ -18,8 +18,12 @@ namespace idk::mono
 		string_view RescueMonoObject();
 		void        RestoreMonoObject();
 
+		string_view TypeName() const;
 		MonoObject* EmplaceBehavior(string_view type);
-		MonoObject* GetObject();
+
+		ManagedObject& GetObject() { return _obj; };
+		const ManagedObject& GetObject() const { return _obj; };
+
 		void DisposeMonoObject();
 
 		void SerializeFromString(string_view type, string_view serialized);

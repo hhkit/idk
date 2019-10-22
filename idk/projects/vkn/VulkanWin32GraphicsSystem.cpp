@@ -57,6 +57,7 @@ namespace idk::vkn
 	{
 		windows_ = &Core::GetSystem<win::Windows>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
+		windows_->OnScreenSizeChanged.Listen([this](const ivec2&) { Instance().OnResize(); });
 
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();

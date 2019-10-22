@@ -14,6 +14,7 @@ namespace idk
 		template<typename T, typename ... Args> T& AddSystem(Args&& ... args);
 		static seconds GetDT();
 		static seconds GetRealDT();
+		static GameState& GetGameState() { return _instance->_game_state; }
 		static Scheduler& GetScheduler();
 		static ResourceManager& GetResourceManager();
 		static void    Shutdown();

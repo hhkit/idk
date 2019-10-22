@@ -58,15 +58,16 @@ namespace idk::detail
 					}
 					else
 					{
+						auto& go_ref = *go;
 						if constexpr (Ts::Unique)
 						{
-							auto component = go->GetComponent<Ts>();
+							auto component = go_ref.GetComponent<Ts>();
 							if (component)
 								return component;
 						}
 						auto handle = gs.CreateObject<Ts>(go.scene);
 						handle->_gameObject = go;
-						go->_components.emplace_back(handle);
+						go_ref.RegisterComponent(handle);
 						return handle;
 					}
 				} ...
@@ -85,15 +86,16 @@ namespace idk::detail
 					}
 					else
 					{
+						auto& go_ref = *go;
 						if constexpr (Ts::Unique)
 						{
-							auto component = go->GetComponent<Ts>();
+							auto component = go_ref.GetComponent<Ts>();
 							if (component)
 								return component;
 						}
 						auto handle = gs.CreateObject<Ts>(go.scene, std::move(dyn.get<Ts>()));
 						handle->_gameObject = go;
-						go->_components.emplace_back(handle);
+						go_ref.RegisterComponent(handle);
 						return handle;
 					}
 				} ...
@@ -155,11 +157,8 @@ namespace idk::detail
 						{
 							const auto entity = real_handle->GetGameObject();
 							gs.DestroyObjectNow(real_handle);
-							assert(entity);
-							auto realent = std::addressof(*entity);
-							auto itr = std::find(realent->_components.begin(), realent->_components.end(), handle);
-							if (itr != realent->_components.end())
-								entity->_components.erase(itr);
+							IDK_ASSERT(entity);
+							entity->DeregisterComponent(real_handle);
 						}
 					}
 				} ...

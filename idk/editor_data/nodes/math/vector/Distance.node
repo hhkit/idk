@@ -1,0 +1,6 @@
+float,float->float
+vec2,vec2->float
+vec3,vec3->float
+vec4,vec4->float
+A,B,Out
+{2} = distance({0},{1});

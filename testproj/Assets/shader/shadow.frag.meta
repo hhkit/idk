@@ -1,2 +1,5 @@
-guids: [cd163539-2b05-4714-afdf-4e0732e6a4a2]
-resource_metas: [~]
+metadatas: 
+- guid: 0533be95-4793-4eb7-bac6-6032329c86c4
+  metadata: ""
+  name: ""
+  t_hash: idk::ShaderProgram

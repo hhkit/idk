@@ -107,6 +107,8 @@ namespace idk
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
+        if (shadergraph::NodeTemplate::GetTable().empty())
+            shadergraph::NodeTemplate::LoadTable("/editor_data/nodes");
 
 
 		//ImGui Initializations
@@ -118,7 +120,9 @@ namespace idk
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
-        style.FramePadding = ImVec2(4.0f, 1.0f);
+        style.FramePadding = ImVec2(4.0f, 0);
+        style.ItemSpacing = ImVec2(6.0f, 3.0f);
+        style.ItemSpacing = ImVec2(6.0f, 3.0f);
         style.WindowRounding = 0;
         style.TabRounding = 0;
         style.IndentSpacing = 14.0f;
@@ -126,6 +130,7 @@ namespace idk
         style.GrabRounding = 0;
         style.ChildRounding = 0;
         style.PopupRounding = 0;
+        style.FrameRounding = 1.0f;
         style.CurveTessellationTol = 0.5f;
 
         auto* colors = style.Colors;
@@ -197,8 +202,10 @@ namespace idk
         config.OversampleV = 3;
         config.RasterizerMultiply = 1.5f;
         auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
-        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 16.0f, &config);
-        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 14.0f, &config);
+        auto fontpathbold = fs.GetFullPath("/editor_data/fonts/SourceSansPro-SemiBold.ttf");
+        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 15.0f, &config); // Default
+        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
+        io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
 
 
 

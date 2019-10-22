@@ -139,6 +139,8 @@ namespace idk {
 		//Refer to TestSystemManager.cpp
 
 
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
+
 		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
 
 			if (depth > 0) {
@@ -184,36 +186,33 @@ namespace idk {
 			
 			const bool isNameEmpty = goName.empty();
             const bool is_prefab = bool(PrefabUtility::GetPrefabInstanceRoot(handle));
+            ImColor col = ImGui::GetColorU32(ImGuiCol_Text);
 			if (isNameEmpty) {
 				goName = "Unnamed (";
 				goName.append(std::to_string(handle.id));
 				goName.append(")");
 				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.0f, 0.0f, 0.9f));
+                col = ImVec4(0.9f, 0.0f, 0.0f, 0.9f);
 			}
-            if(is_prefab)
-                ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_PlotLinesHovered]);
+            if (is_prefab)
+                col = style.Colors[ImGuiCol_PlotLinesHovered];
+            if (!handle->ActiveInHierarchy())
+                col.Value.w = 0.5f;
+
+            ImGui::PushStyleColor(ImGuiCol_Text, col.Value);
 			
 			if (!textFilter.PassFilter(goName.c_str())) {
-				if (isNameEmpty)
-					ImGui::PopStyleColor();
-                if (is_prefab)
-                    ImGui::PopStyleColor();
+                ImGui::PopStyleColor();
 				++selectedCounter; // counter here is for shift selecting
 				return true;
 			}
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
+            ImGui::PopStyleColor();
 
 			
 			++selectedCounter; //counter here is for shift selecting
-			
-
-            if (isNameEmpty)
-                ImGui::PopStyleColor();
-            if (is_prefab)
-                ImGui::PopStyleColor();
 			
 			//Standard Click and ctrl click
 			if (ImGui::IsItemClicked(0)) {
@@ -315,6 +314,8 @@ namespace idk {
 			return true;
 
 		});
+
+        ImGui::PopStyleVar();
 
 		//Shift Select logic
 		if (isShiftSelectCalled) {

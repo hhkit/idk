@@ -16,4 +16,8 @@ namespace idk::ImGuidk
         ImGui::PopItemFlag();
         ImGui::PopStyleColor(2);
     }
+    void PushFont(FontType font)
+    {
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[static_cast<int>(font)]);
+    }
 }

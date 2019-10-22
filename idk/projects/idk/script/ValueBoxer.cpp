@@ -9,7 +9,7 @@ namespace idk::mono
 {
 	MonoObject* box(const ManagedObject& obj)
 	{
-		return obj.Fetch();
+		return obj.Raw();
 	}
 
 	MonoObject* box(MonoObject* obj)

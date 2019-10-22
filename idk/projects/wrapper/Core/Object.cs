@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace idk
 {
@@ -44,5 +46,23 @@ namespace idk
 
         public static void Destroy(Object o)
             => Bindings.ObjectDestroy(o.handle);
+
+        public virtual string Serialize()
+        {
+            var type = GetType();
+            var fields = type.GetFields();
+            Console.WriteLine("Reflecting {0} fields", fields.Length);
+            foreach (var field in fields)
+            {
+                Console.WriteLine("{0}: {1}", field.Name, field.GetValue(this));
+            }
+            return "";
+        }
+
+        public virtual void Deserialize(string input)
+        {
+            var xmlSerializer = new XmlSerializer(GetType());
+            xmlSerializer.Deserialize(new StringReader(input));
+        }
     }
 }

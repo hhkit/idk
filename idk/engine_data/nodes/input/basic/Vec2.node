@@ -1,3 +1,0 @@
-float,float->vec2
-X,Y,Out
-{2} = vec2({0},{1});

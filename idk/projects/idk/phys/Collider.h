@@ -9,7 +9,7 @@
 namespace idk
 {
 	class Collider
-		: public Component<Collider>
+		: public Component<Collider, false>
 	{
 	public:
 		using Shapes = variant<box, sphere, capsule>;
