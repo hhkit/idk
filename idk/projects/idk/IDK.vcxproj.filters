@@ -116,6 +116,9 @@
     <Filter Include="debug">
       <UniqueIdentifier>{2eea3a1f-43c1-42ef-b2cd-443933fd8622}</UniqueIdentifier>
     </Filter>
+    <Filter Include="proj">
+      <UniqueIdentifier>{1142d1c7-1839-4bbc-999f-17503782be59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -710,9 +713,6 @@
     <ClInclude Include="anim\AnimationState.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="proj\ProjectManager.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="common\TagManager.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -774,6 +774,9 @@
     </ClInclude>
     <ClInclude Include="gfx\CameraFrustum.h">
       <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="proj\ProjectManager.h">
+      <Filter>proj</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1078,9 +1081,6 @@
     <ClCompile Include="script\MonoEnvironment.cpp">
       <Filter>script</Filter>
     </ClCompile>
-    <ClCompile Include="proj\ProjectManager.cpp">
-      <Filter>scene</Filter>
-    </ClCompile>
     <ClCompile Include="common\TagManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -1123,6 +1123,9 @@
     </ClCompile>
     <ClCompile Include="gfx\CameraFrustum.cpp">
       <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="proj\ProjectManager.cpp">
+      <Filter>proj</Filter>
     </ClCompile>
     <ClCompile Include="gfx\Framebuffer.cpp">
       <Filter>gfx</Filter>

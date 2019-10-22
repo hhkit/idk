@@ -99,14 +99,14 @@ namespace idk::vkn
 		idk::pipeline_config config;
 		auto vert_data = []()
 		{
-			//auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgvertex.vert".spv", FS_PERMISSIONS::READ, true);
-			return Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/dbgvertex.vert").value();
+			//auto stream = Core::GetSystem<FileSystem>().Open("/engine_data/shaders/dbgvertex.vert".spv", FS_PERMISSIONS::READ, true);
+			return Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/dbgvertex.vert.spv").value();
 		}();
 		auto frag_data = []()
 		{
-			//auto stream = Core::GetSystem<FileSystem>().Open("/assets/shader/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
+			//auto stream = Core::GetSystem<FileSystem>().Open("/engine_data/shaders/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
 			//return stringify(stream);
-			return Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/dbgfragment.frag").value();
+			return Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/dbgfragment.frag.spv").value();
 		}();
 
 		config.frag_shader = frag_data;

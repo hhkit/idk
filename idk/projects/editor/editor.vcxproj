@@ -197,6 +197,7 @@
     <ClInclude Include="commands\ICommand.h" />
     <ClInclude Include="loading\AssimpImporter.h" />
     <ClInclude Include="loading\AssimpImporter_helpers.h" />
+    <ClInclude Include="SceneManagement.h" />
     <ClInclude Include="widgets\ConsoleLog.h" />
     <ClInclude Include="widgets\DragQuat.h" />
     <ClInclude Include="widgets\DragVec.h" />
@@ -244,6 +245,7 @@
     <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="loading\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="loading\OpenGLTextureLoader.cpp" />
+    <ClCompile Include="SceneManagement.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="widgets\ConsoleLog.cpp" />
     <ClCompile Include="widgets\DragQuat.cpp" />

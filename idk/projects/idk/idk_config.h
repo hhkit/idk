@@ -45,26 +45,37 @@ namespace idk
 	>;
 	
 	using Systems = std::tuple<
+		// base
 			class LogSystem
 		,	class Application
+
+		// low level
 		,	class FileSystem
-		//,	class InputSystem
 		,	class GamepadSystem
+
+		// logic
 		,	class mono::ScriptSystem
 		,	class PhysicsSystem
-		,	class GraphicsSystem
 		,	class AnimationSystem
+
+		// gfx
+		,	class GraphicsSystem
 		,   class DebugRenderer
+		// audio
 		,	class AudioSystem
 		
+		// project settings
 		,	class ProjectManager
 		,	class SceneManager
-		,	class TagManager
+        ,   class TagManager
 		,	class LayerManager
+
+		// resource management
 		,	class ResourceManager
-		,	class IEditor
 		,   class TestSystem
-        
+
+		// editor
+		,	class IEditor
 	>;
 
 	using Resources = std::tuple<
@@ -81,7 +92,7 @@ namespace idk
 		,   class CubeMap
 		,	class ShaderProgram
 		,	class RenderTarget
-		,	class FrameBuffer
+		,   class FrameBuffer
 		,	anim::Animation
 		,	anim::Skeleton
 		//,	class Level

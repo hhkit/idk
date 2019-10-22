@@ -2,15 +2,19 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: -2.317815, y: 0.755237, z: 0}
+    position: {x: -2.317815, y: 0.755237, z: -0.7635392}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.5, y: 0.5, z: 0.5}
+    scale: {x: 1, y: 1, z: 1}
   - !Name 
     name: pbrball00-00
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: e68049f5-6fad-45e2-95f6-14a17b61303a}
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
@@ -22,26 +26,30 @@
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      radius: 0.5
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 37a2ba13-8b87-4163-84bf-2fecd60dfd20}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
-- !4295098368 
+- !4295163904 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: -1.061162, y: 0.72827, z: -0.108691}
+    position: {x: 246.2478, y: -76.2084, z: -82.026215}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.5, y: 0.5, z: 0.5}
+    scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: pbrball05-00
+    name: pbrball00-00
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: e68049f5-6fad-45e2-95f6-14a17b61303a}
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
@@ -53,26 +61,30 @@
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      radius: 0.5
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 37a2ba13-8b87-4163-84bf-2fecd60dfd20}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
-- !8590065664 
+- !8590131200 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.479355, y: 0.590792, z: -0.326576}
+    position: {x: -0.934628, y: 0.1590147, z: -4.9726295}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.5, y: 0.5, z: 0.5}
+    scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: pbrball10-00
+    name: pbrball00-00
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: e68049f5-6fad-45e2-95f6-14a17b61303a}
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
@@ -84,26 +96,30 @@
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      radius: 0.5
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 37a2ba13-8b87-4163-84bf-2fecd60dfd20}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
-- !12885032960 
+- !12885098496 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: -2.457264, y: 0.522017, z: 1.211417}
+    position: {x: 2.4291072, y: -0.48148465, z: -0.19957256}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.48, y: 0.48, z: 0.48}
+    scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: pbrball00-05
+    name: pbrball00-00
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: e68049f5-6fad-45e2-95f6-14a17b61303a}
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
@@ -115,26 +131,30 @@
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      radius: 0.5
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 37a2ba13-8b87-4163-84bf-2fecd60dfd20}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
-- !17180000256 
+- !17180065792 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: -1.196026, y: 0.608286, z: 1.510674}
+    position: {x: 1.1053524, y: -2.359245, z: -1.2872372}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.51, y: 0.51, z: 0.51}
+    scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: pbrball05-05
+    name: pbrball00-00
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: e68049f5-6fad-45e2-95f6-14a17b61303a}
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
@@ -146,26 +166,30 @@
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      radius: 0.5
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 37a2ba13-8b87-4163-84bf-2fecd60dfd20}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
-- !21474967552 
+- !21475033088 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.29835, y: 0.689072, z: 1.387628}
+    position: {x: 1.0509996, y: -1.1052697, z: -2.4258516}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.49, y: 0.49, z: 0.49}
+    scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: pbrball10-05
+    name: pbrball00-00
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: e68049f5-6fad-45e2-95f6-14a17b61303a}
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
@@ -177,106 +201,41 @@
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      radius: 0.5
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 37a2ba13-8b87-4163-84bf-2fecd60dfd20}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
-- !25769934848 
+- !25769869312 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: -2.554332, y: 0.715999, z: 2.547158}
+    position: {x: 0, y: -4.026695, z: 0}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 0.5, y: 0.5, z: 0.5}
+    scale: {x: 31.759085, y: 1, z: 20.596277}
   - !Name 
-    name: pbrball00-10
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    restitution: 1
-    use_gravity: 1
+    name: floor
   - !Collider 
     enabled: 1
     is_trigger: 0
-    shape: !sphere 
+    shape: !box 
+      axes: 
+        intern[0]: {x: 1, y: 0, z: 0}
+        intern[1]: {x: 0, y: 1, z: 0}
+        intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
-      radius: 1
+      extents: {x: 1, y: 1, z: 1}
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
     material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
-    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
-    receive_shadows: 1
-- !30064902144 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: -1.301655, y: 0.840006, z: 2.828502}
-    rotation: 
-      w: 1
-      x: -0
-      y: -0
-      z: -0
-    scale: {x: 0.49, y: 0.49, z: 0.49}
-  - !Name 
-    name: pbrball05-10
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    restitution: 1
-    use_gravity: 1
-  - !Collider 
-    enabled: 1
-    is_trigger: 0
-    shape: !sphere 
-      center: {x: 0, y: 0, z: 0}
-      radius: 1
-  - !MeshRenderer 
-    cast_shadows: 1
-    enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
-    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
-    receive_shadows: 1
-- !34359869440 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0.189561, y: 0.711679, z: 2.789898}
-    rotation: 
-      w: 1
-      x: -0
-      y: -0
-      z: -0
-    scale: {x: 0.5, y: 0.5, z: 0.5}
-  - !Name 
-    name: pbrball10-10
-  - !Tag futanari
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    restitution: 1
-    use_gravity: 1
-  - !Collider 
-    enabled: 1
-    is_trigger: 0
-    shape: !sphere 
-      center: {x: 0, y: 0, z: 0}
-      radius: 1
-  - !MeshRenderer 
-    cast_shadows: 1
-    enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
-    mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
+    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
 - !38654836736 
   - active: 1

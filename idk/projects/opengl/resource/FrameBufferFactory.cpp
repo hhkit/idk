@@ -75,7 +75,7 @@ namespace idk::ogl
 	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
 		out = std::make_unique<OpenGLAttachment>();
-		out->load_op = info.load_op;
+		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
 
 		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();

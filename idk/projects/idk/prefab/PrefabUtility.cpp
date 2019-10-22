@@ -554,7 +554,8 @@ namespace idk
         for (auto iter = prefab_inst.overrides.begin(); iter != prefab_inst.overrides.end(); ++iter)
         {
             if (iter->component_name == override.component_name &&
-                iter->property_path == override.property_path)
+                iter->property_path == override.property_path &&
+                iter->component_nth == override.component_nth)
             {
                 prefab_inst.overrides.erase(iter);
                 return;
