@@ -90,9 +90,6 @@ namespace idk
 		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		auto path = [&]() -> opt<string>
 		{
-			if (auto path = Core::GetResourceManager().GetPath(curr_scene))
-				return string{ *path };
-			else
 			{
 				auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
 				if (dialog_result)
