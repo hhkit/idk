@@ -50,13 +50,13 @@ namespace idk::vkn
 		config.buffer_descriptions.emplace_back(nml_desc);
 		string f, v;
 		{
-				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert.spv").value();
+				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert.spv").value();
 			config.vert_shader = vbuffer;
 
 		}
 		{
 			{
-				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/flat_color.frag.spv").value();
+				auto vbuffer = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/flat_color.frag.spv").value();
 				config.vert_shader = vbuffer;
 			}
 		}
@@ -139,7 +139,7 @@ namespace idk::vkn
 
 		{
 			//TODO figure this out
-			string filename = "/assets/shader/mesh.vert";
+			string filename = "/engine_data/shaders/mesh.vert";
 			_mesh_renderer_shader_module=LoadShader(filename, {
 						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
 						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
@@ -165,7 +165,7 @@ namespace idk::vkn
 		}
 		{
 			//TODO figure this out
-			string filename = "/assets/shader/skinned_mesh.vert";
+			string filename = "/engine_data/shaders/skinned_mesh.vert";
 			_skinned_mesh_shader_module = LoadShader(filename, {
 						//BufferDesc(0, 0, AttribFormat::eSVec3, sizeof(vec3), eVertex),
 						//BufferDesc(0, 1, AttribFormat::eSVec3, sizeof(vec3), eVertex),
@@ -190,7 +190,7 @@ namespace idk::vkn
 			//}
 		}
 		//{
-		//	string filename = "/assets/shader/shadow.frag";
+		//	string filename = "/engine_data/shaders/shadow.frag";
 		//	//auto actualfile = Core::GetSystem<FileSystem>().GetFile(filename);
 		//	//auto rsc = Core::GetResourceManager().GetFileResources(actualfile);
 		//	auto& shader_mod = _shadow_shader_module;

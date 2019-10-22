@@ -93,8 +93,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
 	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
-	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/brdf.frag", false);
-	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/pbr_convolute.frag", false);
+	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
+	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
 
 	auto scene = RscHandle<Scene>{};
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
