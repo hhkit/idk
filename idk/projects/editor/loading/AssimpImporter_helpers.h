@@ -152,6 +152,8 @@ namespace idk::ai_helpers
 		bool has_animation = false;
 
 		unsigned num_meshes = 0;
+
+		string file_ext{};
 	};
 
 	bool Import(Scene& scene, PathHandle handle);
@@ -200,8 +202,8 @@ namespace idk::ai_helpers
 	aiMatrix4x4 to_aiMat4(const mat4& mat);
 
 	// Comparisons
-	bool flt_equal(float a, float b, float eps = 0.0001f);
-	bool vec3_equal(const vec3& lhs, const vec3& rhs);
+	bool flt_equal(float a, float b, float eps = 0.001f);
+	bool vec3_equal(const vec3& lhs, const vec3& rhs, float eps = 0.001f);
 	bool vec4_equal(const vec4& lhs, const vec4& rhs);
 	bool quat_equal(const quat& lhs, const quat& rhs);
 	bool mat4_equal(const mat4& lhs, const mat4& rhs);
