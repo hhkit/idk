@@ -23,6 +23,7 @@ of the editor.
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_ProjectSettings.h>
+#include <editor/DragDropTypes.h>
 #include <editor/utils.h>
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
@@ -490,33 +491,48 @@ namespace idk {
 
 		ImGui::Text("Animation Clips");
 		ImGui::Separator();
-		for (auto& anim : c_anim->animation_table)
+		for (auto& curr_state : c_anim->animation_table)
 		{
 			bool not_removed = true;
 			// Will change this to use something other than collapsing header. 
-			if(ImGui::CollapsingHeader(anim.second.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
+			if(ImGui::CollapsingHeader(curr_state.first.data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
 			{
 				ImGui::Indent(50);
-				ImGui::PushItemWidth(100);
-				ImGui::DragFloat("Speed", &anim.second.speed, 0.01f, 0.0f);
-				ImGui::PopItemWidth();
-				ImGui::Checkbox("Loop", &anim.second.loop);
+				//ImGui::PushItemWidth(100);
+				
+				// ImGui::PopItemWidth();
+
+				if (curr_state.second.IsBlendTree())
+				{
+					ImGui::Text("Blend Tree");
+				}
+				else
+				{
+					ImGui::Text("Basic Animation: ");
+					ImGui::SameLine();
+					ImGui::Text(curr_state.first.c_str());
+					auto& state_data = *curr_state.second.GetBasicState();
+					ImGuidk::InputResource("Animation Clip", &state_data.motion);
+					ImGui::Checkbox("Loop", &curr_state.second.loop);
+				}
+				
 				ImGui::Unindent(50);
 			}
 
 			if (!not_removed)
 			{
-				c_anim->RemoveAnimation(anim.second.name);
+				c_anim->RemoveAnimation(curr_state.first);
 				break;
 			}
 		}
 
-
 		RscHandle<anim::Animation> new_anim;
-		if (ImGuidk::InputResource("Add Animation Clip", &new_anim))
+		
+		if (ImGuidk::InputResource("Add Animation State", &new_anim))
 		{
 			c_anim->AddAnimation(new_anim);
 		}
+
 		ImGui::NewLine();
 
 		if (ImGui::BeginCombo("Default State", c_anim->GetAnimationState(c_anim->layers[0].default_state).name.c_str()))

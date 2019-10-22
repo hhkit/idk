@@ -28,24 +28,10 @@ namespace idk
 		bool _was_paused = true;
 		float _blend = 0.0f;
 
-		template<typename T>
-		size_t find_key(const vector<T>& vec, float ticks)
-		{
-			for (unsigned i = 0; i < vec.size(); ++i)
-			{
-				if (ticks < static_cast<float>(vec[i].time))
-				{
-					return i - 1;
-				}
-			}
-			
-
-			return vec.size() - 1;
-		}
-
-		// Animation passes: Animate -> Blend -> Finalize
-		void AnimationPass(Animator& animators);
-		void FinalPass(Animator& animators);
+		// Animation passes: Animate -> Blend -> Layers(merging all layers) -> Finalize
+		void AnimationPass(Animator& animator, AnimationLayer& layer);
+		void LayersPass(Animator& animator);
+		void FinalPass(Animator& animator, AnimationLayer& layer);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 
 		

@@ -16,8 +16,9 @@ namespace idk
 		Animator();
 
 		// Engine Getters
+		AnimationState& GetAnimationState(string_view name);
 		const AnimationState& GetAnimationState(string_view name) const;
-		RscHandle<anim::Animation> GetAnimationRsc(string_view name) const;
+		// RscHandle<anim::Animation> GetAnimationRsc(string_view name) const;
 
 		const vector<mat4>& BoneTransforms();
 		
@@ -35,11 +36,19 @@ namespace idk
 		// void Transistion(string_view animation_name);
 
 		// Script Getters
+		int GetInt(string_view name) const;
+		bool GetBool(string_view name) const;
+		float GetFloat(string_view name) const;
+
 		bool HasState(string_view name) const;
 		bool IsPlaying(string_view name) const;
 		string GetDefaultState() const;
 
 		// Script Setters
+		bool SetInt(string_view name, int val);
+		bool SetBool(string_view name, bool val);
+		bool SetFloat(string_view name, float val);
+
 		void SetEntryState(string_view name, float offset = 0.0f);
 
 		// Serialization
@@ -47,12 +56,16 @@ namespace idk
 
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> skeleton;
-
 		hash_table<string, AnimationState> animation_table;
 
 		hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};
 
+		// Scripting variables
+		hash_table<string, int> int_vars;
+		hash_table<string, bool> bool_vars;
+		hash_table<string, float> float_vars;
+		
 		// Precomputation step
 		vector<mat4> pre_global_transforms{ mat4{} };
 		// This is what we send to the graphics system.
@@ -65,6 +78,6 @@ namespace idk
 		vector<Handle<GameObject>> _child_objects;
 		vector<matrix_decomposition<real>> _bind_pose;
 
-		inline static const AnimationState null_state{};
+		inline static AnimationState null_state{};
 	};
 }

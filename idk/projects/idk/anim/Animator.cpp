@@ -13,20 +13,20 @@
 
 namespace idk 
 {
-
 	Animator::Animator()
 	{
-		layer_table.emplace("Base Layer", 0);
+		// Initialize the base layer. Cannot be removed or edited (much).
 		AnimationLayer base_layer;
 		base_layer.name = "Base Layer";
 		std::fill(base_layer.bone_mask.begin(), base_layer.bone_mask.end(), true);
+		base_layer.curr_poses.resize(_child_objects.size());
+
+		layer_table.emplace("Base Layer", 0);
 		layers.push_back(base_layer);
 	}
 
 #pragma region Engine Getters/Setters
-
-
-	const AnimationState& Animator::GetAnimationState(string_view name) const
+	AnimationState& Animator::GetAnimationState(string_view name)
 	{
 		auto res = animation_table.find(name.data());
 		if (res != animation_table.end())
@@ -35,13 +35,13 @@ namespace idk
 		return null_state;
 	}
 
-	RscHandle<anim::Animation> Animator::GetAnimationRsc(string_view name) const
+	const AnimationState& Animator::GetAnimationState(string_view name) const
 	{
 		auto res = animation_table.find(name.data());
 		if (res != animation_table.end())
-			return res->second.animation;
+			return res->second;
 
-		return RscHandle<anim::Animation>{};
+		return null_state;
 	}
 
 	const vector<mat4>& Animator::BoneTransforms()
@@ -66,7 +66,9 @@ namespace idk
 				}
 				name += append;
 			}
-			animation_table.emplace(name, AnimationState{ name, anim_rsc, true });
+			AnimationState state{ name, true };
+			state.state_data = AnimationState::StateData{ BasicAnimationState{ anim_rsc } };
+			animation_table.emplace(name, state);
 		}
 		else
 		{
@@ -80,7 +82,7 @@ namespace idk
 				append = " " + std::to_string(count);
 			}
 			name += append;
-			animation_table.emplace(name, AnimationState{ name, anim_rsc, true });
+			animation_table.emplace(name, AnimationState{ name, true });
 		}
 	}
 
@@ -134,6 +136,24 @@ namespace idk
 		layers[0].Stop();
 	}
 
+	int Animator::GetInt(string_view name) const
+	{
+		UNREFERENCED_PARAMETER(name);
+		return false;
+	}
+
+	bool Animator::GetBool(string_view name) const
+	{
+		UNREFERENCED_PARAMETER(name);
+		return false;
+	}
+
+	float Animator::GetFloat(string_view name) const
+	{
+		UNREFERENCED_PARAMETER(name);
+		return false;
+	}
+
 	bool Animator::HasState(string_view name) const
 	{
 		return animation_table.find(string{ name }) != animation_table.end();
@@ -147,6 +167,27 @@ namespace idk
 	string Animator::GetDefaultState() const
 	{
 		return layers[0].default_state;
+	}
+
+	bool Animator::SetInt(string_view name, int val)
+	{
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(val);
+		return false;
+	}
+
+	bool Animator::SetBool(string_view name, bool val)
+	{
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(val);
+		return false;
+	}
+
+	bool Animator::SetFloat(string_view name, float val)
+	{
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(val);
+		return false;
 	}
 
 	void Animator::SetEntryState(string_view name, float offset)

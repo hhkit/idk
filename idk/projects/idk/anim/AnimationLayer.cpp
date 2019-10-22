@@ -10,7 +10,7 @@ namespace idk
 			return;
 
 		// cap at 1.0f
-		normalized_time = std::max(offset, 1.0f);
+		normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
 		curr_state = animation_name;
 	}
 

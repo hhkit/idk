@@ -6,6 +6,7 @@
 #include <anim/Bone.h>
 #include <math/arith.h>
 #include <math/matrix_transforms.h>
+#include <iostream>
 
 namespace idk
 {
@@ -33,13 +34,24 @@ namespace idk
 
 		for (auto& elem : animators)
 		{
-			const auto anim = elem.GetAnimationRsc(elem.layers[0].curr_state);
-			if ((elem.layers[0].is_playing || elem.layers[0].is_stopping) && anim)
+			// TODO: Loop over layers here
+			auto& anim_state = elem.GetAnimationState(elem.layers[0].curr_state);
+			if (!anim_state.enabled)
+				continue;
+
+			// We don't support blend trees yet
+			if (anim_state.IsBlendTree())
+				continue;
+
+			auto anim_data = anim_state.GetBasicState();
+			if ((elem.layers[0].is_playing || elem.layers[0].is_stopping) && anim_data->motion)
 			{
-				AnimationPass(elem);
-				FinalPass(elem);
+				AnimationPass(elem, elem.layers[0]);
+				LayersPass(elem);
+				FinalPass(elem, elem.layers[0]);
 			}
 		}
+		
 		// Blend pass
 		// Mix pass
 	}
@@ -57,13 +69,23 @@ namespace idk
 		}
 		for (auto& elem : animators)
 		{
-			const auto anim = elem.GetAnimationRsc(elem.layers[0].curr_state);
-			if (elem.layers[0].preview_playback && anim)
+			// TODO: Loop over layers here
+			auto& anim_state = elem.GetAnimationState(elem.layers[0].curr_state);
+			if (!anim_state.enabled)
+				continue;
+
+			// We don't support blend trees yet
+			if (anim_state.IsBlendTree())
+				continue;
+
+			auto anim_data = anim_state.GetBasicState();
+			if (elem.layers[0].preview_playback && anim_data->motion)
 			{
-				AnimationPass(elem);
+				AnimationPass(elem, elem.layers[0]);
+				LayersPass(elem);
 			}
 
-			FinalPass(elem);
+			FinalPass(elem, elem.layers[0]);
 		}
 	}
 
@@ -71,38 +93,44 @@ namespace idk
 	{
 	}
 
-	void AnimationSystem::AnimationPass(Animator& animator)
+	void AnimationSystem::AnimationPass(Animator& animator, AnimationLayer& layer)
 	{
-		const auto anim_state = animator.GetAnimationState(animator.layers[0].curr_state);
-		const auto anim = anim_state.animation;
+		auto anim_state = animator.GetAnimationState(layer.curr_state);
+		auto& basic_state = *anim_state.GetBasicState();
+		const auto& motion = basic_state.motion;
 		const auto& skeleton = animator.skeleton->data();
 
-		if (animator.layers[0].normalized_time >= 1.0f)
+		if (layer.normalized_time >= 1.0f)
 		{
-			animator.layers[0].normalized_time -= 1.0f;
+			layer.normalized_time -= 1.0f;
 
 			// Stop here if the animation does not loop
 			if (!anim_state.loop)
 			{
-				animator.layers[0].normalized_time = 0.0f;
-				animator.layers[0].is_playing = false;
+				//animator.layers[0].normalized_time = 0.0f;
+				layer.is_playing = false;
 				return;
 			}
 		}
 		
-		const float ticks = animator.layers[0].normalized_time * anim->GetNumTicks();
+		const float ticks = animator.layers[0].normalized_time * motion->GetNumTicks();
 		// const float num_ticks = anim->GetNumTicks();
 		// const float time_in_ticks = fmod(ticks, num_ticks);
-		_blend = animator.layers[0].blend_time;
+		_blend = 0.0f;// animator.layers[0].blend_time;
 
 		// Loop through the skeleton
 		for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
 		{
 			const auto& curr_bone = skeleton[bone_id];
-			const anim::AnimatedBone* animated_bone = anim->GetAnimatedBone(curr_bone._name);
+			const anim::AnimatedBone* animated_bone = motion->GetAnimatedBone(curr_bone._name);
 
 			auto& curr_go = animator._child_objects[bone_id];
 			if (!curr_go || animated_bone == nullptr)
+				continue;
+
+			// Check if this bone has any more weights to distribute
+			auto c_bone = curr_go->GetComponent<Bone>();
+			if (c_bone->weight_left < 0.001f)
 				continue;
 
 			matrix_decomposition<real> curr_pose = animator._bind_pose[bone_id];
@@ -111,10 +139,9 @@ namespace idk
 
 			// During GenerateTransforms in the Animator, it will use the child transforms to 
 			// generate the final transforms
-			curr_go->Transform()->position = curr_pose.position;
-			curr_go->Transform()->rotation = curr_pose.rotation;
-			curr_go->Transform()->scale = curr_pose.scale;
-
+			layer.curr_poses[bone_id].position = curr_pose.position;
+			layer.curr_poses[bone_id].rotation = curr_pose.rotation;
+			layer.curr_poses[bone_id].scale = curr_pose.scale;
 		}
 
 		// Check if the animator wants to stop after this update
@@ -127,46 +154,87 @@ namespace idk
 		}
 
 		// Compute the time
-		animator.layers[0].normalized_time += Core::GetRealDT().count() / anim->GetDuration() * anim_state.speed;
+		layer.normalized_time += Core::GetRealDT().count() / motion->GetDuration() * anim_state.speed;
 	
 	}
 
-	void AnimationSystem::FinalPass(Animator& animators)
+	void AnimationSystem::LayersPass(Animator& animator)
+	{
+		// TODO: Blend layer poses here
+		// Start looping from the top. 
+		// We compute the actual weight of each bone this layer applies by: weight_left * layer_weight
+		// We then subtract the actual weight from the bone's weight_left.
+		// This also means that when we interpolate the animation, each bone can have different weights.
+		// We then blend the animation against the bind pose and the store the resultant pose as our layer's current pose.
+		
+		// MERGE STEP:
+		// To merge two layers, we simply add the translations, multiply the rotations -> top to bottom
+		// If it is additive, we simply add/multiply the poses.
+		// If it is override, we check if the bone is done already or not.
+		// Could this be done in ANimationPass? 
+
+		for (size_t i = 0; i < animator._child_objects.size(); ++i)
+		{
+			auto& curr_go = animator._child_objects[i];
+			if (!curr_go)
+				continue;
+			curr_go->Transform()->position = animator.layers[0].curr_poses[i].position;
+			curr_go->Transform()->rotation = animator.layers[0].curr_poses[i].rotation;
+			curr_go->Transform()->scale = animator.layers[0].curr_poses[i].scale;
+		}
+		
+	}
+
+	void AnimationSystem::FinalPass(Animator& animator, AnimationLayer&)
 	{
 		// We grab the parent transform if its there, and multiply it with the child local.
 		// We save this result into pre_transforms and then multiply that by global inverse bind pose 
 		// and put it into final transforms.
-		const auto global_inverse = animators.skeleton->GetGlobalInverse();
-		const auto& skeleton = animators.skeleton->data();
+		const auto global_inverse = animator.skeleton->GetGlobalInverse();
+		const auto& skeleton = animator.skeleton->data();
+
+		// Don't do anything if the sizes dont match.
+		if (skeleton.size() != animator._child_objects.size())
+		{
+			std::cout << "[Animation System] Error: " << "Skeleton size of " << skeleton.size() << 
+				" and game object hierarchy of size " << animator._child_objects.size() << " don't match.\n";
+			animator.layers[0].is_playing = false;
+			return;
+		}
+		
+
 		if (global_inverse != mat4{})
 		{
-			for (size_t i = 0; i < animators._child_objects.size(); ++i)
+			for (size_t i = 0; i < animator._child_objects.size(); ++i)
 			{
 				auto& curr_bone = skeleton[i];
-				auto& curr_go = animators._child_objects[i];
+				auto& curr_go = animator._child_objects[i];
 
 				if (!curr_go)
 					continue;
+
 				const auto parent_index = skeleton[i]._parent;
 				if (parent_index >= 0)
 				{
-					const mat4& p_transform = animators.pre_global_transforms[parent_index];
-					animators.pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
+					const mat4& p_transform = animator.pre_global_transforms[parent_index];
+					animator.pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
 				}
 				else
 				{
-					animators.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
+					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
 
-				animators.final_bone_transforms[i] = global_inverse * animators.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+
+				curr_go->GetComponent<Bone>()->weight_left = 1.0f;
 			}
 		}
 		else
 		{
-			for (size_t i = 0; i < animators._child_objects.size(); ++i)
+			for (size_t i = 0; i < animator._child_objects.size(); ++i)
 			{
 				auto& curr_bone = skeleton[i];
-				auto& curr_go = animators._child_objects[i];
+				auto& curr_go = animator._child_objects[i];
 
 				if (!curr_go)
 					continue;
@@ -174,23 +242,24 @@ namespace idk
 				if (parent_index >= 0)
 				{
 					// If we have the parent, we push in the parent.global * child.local
-					const mat4& p_transform = animators.pre_global_transforms[parent_index];
+					const mat4& p_transform = animator.pre_global_transforms[parent_index];
 					const mat4& c_transform = curr_go->Transform()->LocalMatrix();
-					animators.pre_global_transforms[i] = p_transform * c_transform;
+					animator.pre_global_transforms[i] = p_transform * c_transform;
 				}
 				else
 				{
-					animators.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
+					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
 				//const auto test = decompose(_pre_global_transforms[i]);
-				animators.final_bone_transforms[i] = animators.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				curr_go->GetComponent<Bone>()->weight_left = 1.0f;
 			}
 		}
 	}
 
 	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)
 	{
-		const auto test = [&](const auto& vec, float ticks) -> size_t
+		const auto find_key = [&](const auto& vec, float ticks) -> size_t
 		{
 			for (unsigned i = 0; i < vec.size(); ++i)
 			{
@@ -206,7 +275,7 @@ namespace idk
 		// Scaling
 		if (animated_bone.scale_track.size() > 1)
 		{
-			const size_t start = test(animated_bone.scale_track, time_in_ticks);
+			const size_t start = find_key(animated_bone.scale_track, time_in_ticks);
 			if (start + 1 >= animated_bone.scale_track.size())
 			{
 				curr_pose.scale = animated_bone.scale_track[start].val;
@@ -224,7 +293,7 @@ namespace idk
 		// Translate
 		if (animated_bone.translate_track.size() > 1)
 		{
-			const size_t start = test(animated_bone.translate_track, time_in_ticks);
+			const size_t start = find_key(animated_bone.translate_track, time_in_ticks);
 			if (start + 1 >= animated_bone.translate_track.size())
 			{
 				curr_pose.position = animated_bone.translate_track[start].val;
@@ -242,7 +311,7 @@ namespace idk
 		// Rotate
 		if (animated_bone.rotation_track.size() > 1)
 		{
-			const size_t start = test(animated_bone.rotation_track, time_in_ticks);
+			const size_t start = find_key(animated_bone.rotation_track, time_in_ticks);
 			if (start + 1 >= animated_bone.rotation_track.size())
 			{
 				curr_pose.rotation = animated_bone.rotation_track[start].val;
@@ -277,6 +346,10 @@ namespace idk
 		animator._child_objects.resize(bones.size());
 		animator.pre_global_transforms.resize(bones.size());
 		animator.final_bone_transforms.resize(bones.size());
+		
+		// Resize all layers
+		for (auto& layer : animator.layers)
+			layer.curr_poses.resize(bones.size());
 
 		for (size_t i = 0; i < bones.size(); ++i)
 		{

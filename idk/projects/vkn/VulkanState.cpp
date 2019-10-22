@@ -23,8 +23,6 @@ size_t Track(size_t s);
 
 namespace idk
 {
-	template<typename T>
-	using set = std::set<T>;
 	template<typename Key,typename Val>
 	using map = std::map<Key,Val>;
 }

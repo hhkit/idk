@@ -30,6 +30,7 @@ namespace idk
 
 		string curr_state{}, blend_state{};
 		bool is_playing = false, is_stopping = false, preview_playback = false;
+		vector<matrix_decomposition<real>> curr_poses;
 
 		void Play(string_view animation_name, float offset);
 		// void BlendTo(string_view animation_name, float offset);
