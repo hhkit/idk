@@ -28,11 +28,12 @@ namespace idk
 		bool _was_paused = true;
 		float _blend = 0.0f;
 
-		// Animation passes: Animate -> Blend -> Layers(merging all layers) -> Finalize
-		void AnimationPass(Animator& animator, AnimationLayer& layer);
+		// Animation pass should be for a certain bone, in a certain layer.
+		BonePose AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		BonePose BlendPose(const BonePose& from, const BonePose& to, float delta);
-		void LayersPass(Animator& animator);
-		void FinalPass(Animator& animator, AnimationLayer& layer);
+		size_t LayersPass(Animator& animator);
+		void AdvanceLayers(Animator& animator);
+		void FinalPass(Animator& animator);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 
 		

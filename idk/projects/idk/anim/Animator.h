@@ -29,12 +29,28 @@ namespace idk
 
 		// Editor Functionality
 		void Reset();
+		void OnPreview();
 
 		// Script Functions
 		void Play(string_view animation_name, float offset = 0.0f);
+		void Play(string_view animation_name, string_view layer_name, float offset = 0.0f);
+		void Play(string_view animation_name, size_t layer_index, float offset = 0.0f);
+
+		// void Resume();
+		// void Resume(string_view layer_name);
+		// void Resume(size_t layer_index);
+
 		void Pause();
+		void Pause(string_view layer_name);
+		void Pause(int layer_index);
+
 		void Stop();
-		// void Transistion(string_view animation_name);
+		void Stop(string_view layer_name);
+		void Stop(int layer_index);
+
+		// void ResumeAllLayers();
+		void PauseAllLayers();
+		void StopAllLayers();
 
 		// Script Getters
 		int GetInt(string_view name) const;

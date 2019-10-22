@@ -19,8 +19,7 @@ namespace idk
 		AnimationLayer base_layer;
 		base_layer.name = "Base Layer";
 		std::fill(base_layer.bone_mask.begin(), base_layer.bone_mask.end(), true);
-		base_layer.curr_poses.resize(_child_objects.size());
-
+		
 		layer_table.emplace("Base Layer", 0);
 		layers.push_back(base_layer);
 	}
@@ -100,8 +99,7 @@ namespace idk
 		}
 		AnimationLayer new_layer{};
 		new_layer.name = name + append;
-		new_layer.curr_poses.resize(skeleton->data().size());
-		layer_table.emplace(name, layers.size());
+		layer_table.emplace(new_layer.name, layers.size());
 		layers.push_back(new_layer);
 	}
 
@@ -132,6 +130,25 @@ namespace idk
 			layer.Reset();
 	}
 
+	void Animator::OnPreview()
+	{
+		if (preview_playback)
+		{
+			for (size_t i = 0; i < layers.size(); ++i)
+			{
+				Play(layers[i].curr_state, i);
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < layers.size(); ++i)
+			{
+				layers[i].Reset();
+			}
+			Core::GetSystem<AnimationSystem>().RestoreBindPose(*this);
+		}
+	}
+
 #pragma endregion
 
 #pragma region Script Functions
@@ -147,17 +164,116 @@ namespace idk
 		layers[0].Play(animation_name, offset);
 	}
 
+
+	void Animator::Play(string_view animation_name, string_view layer_name, float offset)
+	{
+		bool valid = true;
+		auto layer_res = layer_table.find(layer_name.data());
+		if (layer_res == layer_table.end())
+		{
+			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		auto anim_res = animation_table.find(animation_name.data());
+		if (anim_res == animation_table.end())
+		{
+			std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		if(valid)
+			layers[layer_res->second].Play(animation_name, offset);
+	}
+
+	void Animator::Play(string_view animation_name, size_t layer_index, float offset)
+	{
+		bool valid = true;
+		if (s_cast<size_t>(layer_index) >= layers.size())
+		{
+			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		auto anim_res = animation_table.find(animation_name.data());
+		if (anim_res == animation_table.end())
+		{
+			std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		if (valid)
+			layers[layer_index].Play(animation_name, offset);
+	}
+
 	void Animator::Pause()
+	{
+		layers[0].Pause();
+		preview_playback = false;
+	}
+
+	void Animator::Pause(string_view layer_name)
+	{
+		auto layer_res = layer_table.find(layer_name.data());
+		if (layer_res == layer_table.end())
+		{
+			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_res->second].Pause();
+	}
+
+	void Animator::Pause(int layer_index)
+	{
+		if (s_cast<size_t>(layer_index) >= layers.size())
+		{
+			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_index].Pause();
+	}
+
+	void Animator::Stop()
+	{
+		layers[0].Stop();
+	}
+
+	void Animator::Stop(string_view layer_name)
+	{
+		auto layer_res = layer_table.find(layer_name.data());
+		if (layer_res == layer_table.end())
+		{
+			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_res->second].Stop();
+	}
+
+	void Animator::Stop(int layer_index)
+	{
+		if (s_cast<size_t>(layer_index) >= layers.size())
+		{
+			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_index].Stop();
+	}
+
+	void Animator::PauseAllLayers()
 	{
 		for (auto& layer : layers)
 		{
 			layer.Pause();
 		}
-		
+
 		preview_playback = false;
 	}
 
-	void Animator::Stop()
+	void Animator::StopAllLayers()
 	{
 		for (auto& layer : layers)
 		{

@@ -775,11 +775,11 @@
     <ClInclude Include="anim\AnimationUtils.h">
       <Filter>anim\utils</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationUtils.inl">
-      <Filter>anim\utils</Filter>
-    </ClInclude>
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationUtils.cpp">
+      <Filter>anim\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

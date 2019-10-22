@@ -26,7 +26,7 @@
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
     <ClInclude Include="anim\Bone.h" />
-    <ClInclude Include="anim\AnimationUtils.inl" />
+    <ClInclude Include="anim\AnimationUtils.cpp" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />

@@ -12,6 +12,40 @@ namespace idk
 {
 	void AnimationSystem::Init()
 	{
+		GameState::GetGameState().OnObjectCreate<Animator>() += [](Handle<Animator>)// animator)
+		{
+			// if (!animator)
+			// 	return;
+			// const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.scene);
+			// auto go = animator->GetGameObject();
+			// if (!go)
+			// 	return;
+			// 
+			// auto* sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(go);
+			// 
+			// if (animator->skeleton)
+			// {
+			// 	size_t num_bones = animator->skeleton->data().size();
+			// 	animator->_bind_pose.resize(num_bones);
+			// 	animator->_child_objects.resize(num_bones);
+			// 	animator->pre_global_transforms.resize(num_bones);
+			// 	animator->final_bone_transforms.resize(num_bones);
+			// }
+			// 
+			// auto& child_objects = animator->_child_objects;
+			// const auto initialize_children =
+			// 	[&child_objects](Handle<GameObject> c_go, int)
+			// {
+			// 	auto c_bone = c_go->GetComponent<Bone>();
+			// 	if (c_bone)
+			// 	{
+			// 		child_objects[c_bone->_bone_index] = c_go;
+			// 	}
+			// };
+			// 
+			// sg->visit(initialize_children);
+			// Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
+		};
 	}
 
 	void AnimationSystem::Update(span<Animator> animators)
@@ -25,35 +59,68 @@ namespace idk
 				for (auto& layer : elem.layers)
 				{
 					if (layer.curr_state != string{})
-						elem.Play(layer.curr_state);
+						layer.Play(layer.curr_state);
 				}
 				
 			}
 			_was_paused = false;
 		}
-
-		for (auto& elem : animators)
+		for (auto& animator : animators)
 		{
-			// TODO: Loop over layers here
-			auto& anim_state = elem.GetAnimationState(elem.layers[0].curr_state);
-			if (!anim_state.enabled)
-				continue;
+			// Update the layer logic first. 
+			const size_t num_layers_playing = LayersPass(animator);
 
-			// We don't support blend trees yet
-			if (anim_state.IsBlendTree())
-				continue;
-
-			auto anim_data = anim_state.GetBasicState();
-			if ((elem.layers[0].is_playing || elem.layers[0].is_stopping) && anim_data->motion)
+			// Don't bother doing the interpolation if there aren't any layers playing.
+			if (num_layers_playing == 0)
 			{
-				AnimationPass(elem, elem.layers[0]);
-				LayersPass(elem);
-				FinalPass(elem, elem.layers[0]);
+				FinalPass(animator);
+				continue;
 			}
-		}
-		
-		// Blend pass
-		// Mix pass
+
+			// Loop over all valid bones
+			//const auto& skeleton = animator.skeleton->data();
+			for (size_t child_index = 0; child_index < animator._child_objects.size(); ++child_index)
+			{
+				auto& child_go = animator._child_objects[child_index];
+				if (!child_go)
+					continue;
+
+				// Pass this child through all the layers to get the final transformation of the bone
+				// Find the last fully weighted bone layer
+				size_t start_layer = 0;
+				for (size_t k = 0; k < animator.layers.size(); ++k)
+				{
+					const auto& layer = animator.layers[k];
+					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+						start_layer = k;
+				}
+
+				// Initialize the final bone pose to the current layer
+				BonePose final_bone_pose = AnimationPass(animator, animator.layers[start_layer], child_index);
+				// From the start layer up, do the animation pass for each layer and blend
+				for (size_t layer_index = start_layer + 1; layer_index < animator.layers.size(); ++layer_index)
+				{
+					// Blend all animations from this layer to the next based on the layer weight
+					auto& curr_layer = animator.layers[layer_index];
+
+					if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+					{
+						// We do a blend from the curr layer to the final bone pose: 
+						// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
+						// This means we do Blend(curr_pose, layer_pose, 0.25);
+						BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
+						final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+					}
+				}
+
+				auto child_xform = child_go->GetComponent<Transform>();
+				child_xform->position = final_bone_pose.position;
+				child_xform->scale = final_bone_pose.scale;
+				child_xform->rotation = final_bone_pose.rotation;
+			}// end for each bone
+			AdvanceLayers(animator);
+			FinalPass(animator);
+		} // end for each animator
 	}
 
 	void AnimationSystem::UpdatePaused(span<Animator> animators)
@@ -67,97 +134,108 @@ namespace idk
 			}
 			_was_paused = true;
 		}
-		for (auto& elem : animators)
+		for (auto& animator : animators)
 		{
-			// TODO: Loop over layers here
-			for (auto& layer : elem.layers)
+			if (!animator.preview_playback)
 			{
-				auto& anim_state = elem.GetAnimationState(layer.curr_state);
-				if (!anim_state.enabled)
-					continue;
-
-				// We don't support blend trees yet
-				if (anim_state.IsBlendTree())
-					continue;
-
-				auto anim_data = anim_state.GetBasicState();
-				if (elem.preview_playback && anim_data->motion)
-				{
-					AnimationPass(elem, layer);
-				}
-				
+				FinalPass(animator);
+				continue;
 			}
-			if(elem.preview_playback)
-				LayersPass(elem);
-			FinalPass(elem, elem.layers[0]);
-		}
+
+			// Update the layer logic first. 
+			const size_t num_layers_playing = LayersPass(animator);
+
+			// Don't bother doing the interpolation if there aren't any layers playing.
+			if (num_layers_playing == 0)
+			{
+				FinalPass(animator);
+				continue;
+			}
+
+			// Loop over all valid bones
+			//const auto& skeleton = animator.skeleton->data();
+			for (size_t child_index = 0; child_index < animator._child_objects.size(); ++child_index)
+			{
+				auto& child_go = animator._child_objects[child_index];
+				if (!child_go)
+					continue;
+
+				// Pass this child through all the layers to get the final transformation of the bone
+				// Find the last fully weighted bone layer
+				size_t start_layer = 0;
+				for (size_t k = 0; k < animator.layers.size(); ++k)
+				{
+					const auto& layer = animator.layers[k];
+					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+						start_layer = k;
+				}
+
+				// Initialize the final bone pose to the current layer
+				BonePose final_bone_pose = AnimationPass(animator, animator.layers[start_layer], child_index);
+				// From the start layer up, do the animation pass for each layer and blend
+				for (size_t layer_index = start_layer + 1; layer_index < animator.layers.size(); ++layer_index)
+				{
+					// Blend all animations from this layer to the next based on the layer weight
+					auto& curr_layer = animator.layers[layer_index];
+
+					if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+					{
+						// We do a blend from the curr layer to the final bone pose: 
+						// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
+						// This means we do Blend(curr_pose, layer_pose, 0.25);
+						BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
+						final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+					}
+				}
+
+				auto child_xform = child_go->GetComponent<Transform>();
+				child_xform->position = final_bone_pose.position;
+				child_xform->scale = final_bone_pose.scale;
+				child_xform->rotation = final_bone_pose.rotation;
+				
+			} // end for each bone
+			AdvanceLayers(animator);
+			FinalPass(animator);
+		} // end for each animator
 	}
 
 	void AnimationSystem::Shutdown()
 	{
 	}
 
-	void AnimationSystem::AnimationPass(Animator& animator, AnimationLayer& layer)
+	AnimationSystem::BonePose AnimationSystem::AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index)
 	{
-		auto anim_state = animator.GetAnimationState(layer.curr_state);
-		auto& basic_state = *anim_state.GetBasicState();
-		const auto& motion = basic_state.motion;
-		const auto& skeleton = animator.skeleton->data();
-
-		if (layer.normalized_time >= 1.0f)
-		{
-			layer.normalized_time -= 1.0f;
-
-			// Stop here if the animation does not loop
-			if (!anim_state.loop)
-			{
-				//animator.layers[0].normalized_time = 0.0f;
-				layer.is_playing = false;
-				return;
-			}
-		}
+		BonePose result = animator._bind_pose[bone_index];
+		// We don't care if the layer is playing or not. We only concern ourselves with the state logic
+		// We return the bind pose if the layer isnt playing
 		
-		const float ticks = layer.normalized_time * motion->GetNumTicks();
-		// const float num_ticks = anim->GetNumTicks();
-		// const float time_in_ticks = fmod(ticks, num_ticks);
-		_blend = 0.0f;// animator.layers[0].blend_time;
+		// Check if the state is enabled
+		auto& anim_state = animator.GetAnimationState(layer.curr_state);
+		if (!anim_state.enabled)
+			return result;
 
-		// Loop through the skeleton
-		for (size_t bone_id = 0; bone_id < skeleton.size(); ++bone_id)
-		{
-			const auto& curr_bone = skeleton[bone_id];
-			const anim::AnimatedBone* animated_bone = motion->GetAnimatedBone(curr_bone._name);
+		// We don't support blend trees yet
+		if (anim_state.IsBlendTree())
+			return result;
 
-			auto& curr_go = animator._child_objects[bone_id];
-			if (!curr_go || animated_bone == nullptr)
-				continue;
+		auto& curr_go = animator._child_objects[bone_index];
+		if (!curr_go)
+			return result;
 
-			// Check if this bone has any more weights to distribute
-			auto c_bone = curr_go->GetComponent<Bone>();
-			if (c_bone->weight_left < 0.001f)
-				continue;
+		// Get the actual animation data
+		auto anim_data = anim_state.GetBasicState();
 
-			matrix_decomposition<real> curr_pose = animator._bind_pose[bone_id];
-			// Interpolate function will fill in the curr_pose as needed. If there are no keys, it will keep it in bind pose.
-			InterpolateBone(*animated_bone, ticks, curr_pose);
+		// Compute the number of ticks this loop given the normalized time. 
+		const float ticks = std::min(layer.normalized_time, 1.0f) * anim_data->motion->GetNumTicks();
 
-			// During GenerateTransforms in the Animator, it will use the child transforms to 
-			// generate the final transforms
-			layer.curr_poses[bone_id].position = curr_pose.position;
-			layer.curr_poses[bone_id].rotation = curr_pose.rotation;
-			layer.curr_poses[bone_id].scale = curr_pose.scale;
-		}
+		// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
+		const anim::AnimatedBone* animated_bone = anim_data->motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
+		 if(animated_bone == nullptr)
+			return result;
 
-		// Check if the animator wants to stop after this update
-		if (layer.is_stopping == true)
-		{
-			layer.is_playing = false;
-			layer.is_stopping = false;
-			return;
-		}
-
-		// Compute the time
-		layer.normalized_time += Core::GetRealDT().count() / motion->GetDuration() * anim_state.speed;
+		// Interpolate from the found keyframe to the next keyframe and store the result.
+		InterpolateBone(*animated_bone, ticks, result);
+		return result;
 	}
 
 	AnimationSystem::BonePose AnimationSystem::BlendPose(const BonePose& from, const BonePose& to, float delta)
@@ -170,61 +248,75 @@ namespace idk
 
 	}
 
-	void AnimationSystem::LayersPass(Animator& animator)
+	size_t AnimationSystem::LayersPass(Animator& animator)
 	{
-		// TODO: Blend layer poses here
-		// Start looping from the top. 
-		// For a layer that has a weight of 1 and additive, we mark all bones affected by that layer to be done. 
-		
-		// MERGE STEP:
-		// To merge two layers, we simply add the translations, multiply the rotations -> top to bottom
-		// If it is additive, we simply add/multiply the poses.
-		// If it is override, we check if the bone is done already or not.
-		// Could this be done in ANimationPass? 
-		
-
-		for (size_t i = 0; i < animator._child_objects.size(); ++i)
+		// We assume that the animator is playing here.
+		// Update the layer's logic. Handle advancing in time etc
+		size_t num_playing = 0;
+		for (auto& layer : animator.layers)
 		{
-			auto& curr_go = animator._child_objects[i];
-			if (!curr_go)
+			auto& anim_state = animator.GetAnimationState(layer.curr_state);
+			if (!anim_state.enabled)
 				continue;
 
-			BonePose final_bone_pose;
-			size_t start_layer = 0;
+			// We don't support blend trees yet
+			if (anim_state.IsBlendTree())
+				continue;
 
-			// Find the last fully weighted bone
-			for (size_t k = 0; k < animator.layers.size(); ++k)
+			if (!layer.is_playing)
+				continue;
+
+			if (layer.normalized_time >= 1.0f)
 			{
-				const auto& layer = animator.layers[k];
-				if (layer.bone_mask[i] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
-					start_layer = k;
-			}
-
-			// We get the bone pose for the start layer and blend upwards
-			final_bone_pose = animator.layers[start_layer].curr_poses[i];
-
-			for (size_t k = start_layer + 1; k < animator.layers.size(); ++k)
-			{
-				// Blend all animations from this layer to the next based on the layer weight
-				auto& curr_layer = animator.layers[k];
-				if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+				// Stop here if the animation does not loop
+				// We dont subtract normalized_time because the designers might check
+				// normalized_time >= 1.0f to check if an animation has ended
+				if (!anim_state.loop)
 				{
-					// We do a blend from the curr layer to the final bone pose: 
-					// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
-					// This means we do Blend(curr_pose, layer_pose, 0.25);
-					const auto& layer_pose = curr_layer.curr_poses[i];
-					final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+					//animator.layers[0].normalized_time = 0.0f;
+					layer.is_playing = false;
+					continue;
 				}
+
+				layer.normalized_time -= 1.0f;
 			}
 
-			curr_go->Transform()->position	= final_bone_pose.position;
-			curr_go->Transform()->rotation	= final_bone_pose.rotation;
-			curr_go->Transform()->scale		= final_bone_pose.scale;
+			// Check if the animator wants to stop after this update
+			if (layer.is_stopping == true)
+			{
+				layer.is_playing = false;
+				layer.is_stopping = false;
+				continue;
+			}
+			
+			++num_playing;
 		}
-		
+		return num_playing;
 	}
 
-	void AnimationSystem::FinalPass(Animator& animator, AnimationLayer&)
+	void AnimationSystem::AdvanceLayers(Animator& animator)
+	{
+		// Adavance all layers by DT only if they are playing
+		for (auto& layer : animator.layers)
+		{
+			if (!layer.is_playing)
+				continue;
+
+			auto& anim_state = animator.GetAnimationState(layer.curr_state);
+			if (!anim_state.enabled)
+				continue;
+
+			// We don't support blend trees yet
+			if (anim_state.IsBlendTree())
+				continue;
+
+			auto anim_data = anim_state.GetBasicState();
+
+			layer.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+		}
+	}
+
+	void AnimationSystem::FinalPass(Animator& animator)
 	{
 		// We grab the parent transform if its there, and multiply it with the child local.
 		// We save this result into pre_transforms and then multiply that by global inverse bind pose 
@@ -237,10 +329,10 @@ namespace idk
 		{
 			std::cout << "[Animation System] Error: " << "Skeleton size of " << skeleton.size() << 
 				" and game object hierarchy of size " << animator._child_objects.size() << " don't match.\n";
+
 			animator.layers[0].is_playing = false;
 			return;
 		}
-		
 
 		if (global_inverse != mat4{})
 		{
@@ -386,10 +478,7 @@ namespace idk
 		animator.pre_global_transforms.resize(bones.size());
 		animator.final_bone_transforms.resize(bones.size());
 		
-		// Resize all layers
-		for (auto& layer : animator.layers)
-			layer.curr_poses.resize(bones.size());
-
+		
 		for (size_t i = 0; i < bones.size(); ++i)
 		{
 			auto& curr_bone = bones[i];
@@ -461,7 +550,7 @@ namespace idk
 
 	void AnimationSystem::HardReset(Animator& animator)
 	{
-		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.GetHandle().scene);
+		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.GetGameObject().scene);
 
 		for (auto& obj : animator._child_objects)
 		{

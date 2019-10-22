@@ -21,4 +21,3 @@ namespace idk
 	// vector<float> gradient_band_interp();
 
 }
-#include "AnimationUtils.inl"
