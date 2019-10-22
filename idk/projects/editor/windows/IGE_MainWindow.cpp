@@ -27,6 +27,8 @@ of the editor.
 #include <editor/windows/IGE_WindowList.h>
 #include <core/Scheduler.h>
 #include <PauseConfigurations.h>
+#include <app/Application.h>
+#include <proj/ProjectManager.h>
 
 namespace idk {
 
@@ -92,6 +94,21 @@ namespace idk {
 	void IGE_MainWindow::DisplayFileMenu()
 	{
 		if (ImGui::BeginMenu("File")) {
+
+            if (ImGui::MenuItem("New Project"))
+            {
+                
+            }
+
+            if (ImGui::MenuItem("Open Project"))
+            {
+                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
+                auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
+                if (proj)
+                    Core::GetSystem<ProjectManager>().LoadProject(*proj);
+            }
+
+            ImGui::Separator();
 
 			if (ImGui::MenuItem("New Scene", "CTRL+N"))
 				NewScene();
