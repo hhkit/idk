@@ -33,11 +33,12 @@ namespace idk::vkn
 		void Shutdown() override;
 		//void BufferGraphicsState(span<class MeshRenderer>, span<const class Transform>, span<const class Parent>) override {};
 		GraphicsAPI GetAPI() override;
+		void Prerender()override;
 		void RenderRenderBuffer() override;
 		void SwapBuffer() override;
 		
 		VulkanState& Instance() { return *instance_; }
-
+		VulkanView&  View()const { return instance_->View();}
 
 		VulkanState& GetVulkanHandle();
 	private:

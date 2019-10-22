@@ -51,6 +51,8 @@
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="natvis_ids.h" />
+    <ClInclude Include="gfx\FramebufferFactory.h" />
+    <ClInclude Include="gfx\Framebuffer.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />
@@ -257,8 +259,11 @@
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
+    <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
-    <ClCompile Include="gfx\LightTypes.cpp" />
+    <ClCompile Include="gfx\LightTypes.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="gfx\MaterialFactory.cpp" />
     <ClCompile Include="gfx\MaterialInstance.cpp" />
     <ClCompile Include="gfx\MeshFactory.cpp" />
@@ -296,7 +301,9 @@
     <ClCompile Include="gfx\MeshRenderer.cpp" />
     <ClCompile Include="gfx\ShaderTemplate.cpp" />
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
-    <ClCompile Include="gfx\Texture.cpp" />
+    <ClCompile Include="gfx\Texture.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
     <ClCompile Include="phys\collision.cpp" />

@@ -670,6 +670,12 @@
     <ClInclude Include="app\GamepadEnums.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\Framebuffer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FramebufferFactory.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
     <ClInclude Include="machine.h" />
     <ClInclude Include="res\SaveableResourceLoader.h">
       <Filter>res</Filter>
@@ -1132,6 +1138,9 @@
     </ClCompile>
     <ClCompile Include="proj\ProjectManager.cpp">
       <Filter>proj</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Framebuffer.cpp">
+      <Filter>gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

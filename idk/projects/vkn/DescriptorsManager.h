@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <vkn/DescriptorPoolsManager.h>
 #include <vulkan/vulkan.hpp>
+#include <vkn/vulkan_enum_info.h>
 namespace idk::vkn
 {
 struct DescriptorSets
@@ -22,6 +23,8 @@ struct DescriptorsManager
 	//hash_table<vk::DescriptorSetLayout, DescriptorSetManager> ds_sets;
 	DescriptorsManager(VulkanView& view);
 	DescriptorSetLookup Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations);
+	//pair<num_ds,num_descriptors_per_type>
+	DescriptorSetLookup Allocate(const hash_table < vk::DescriptorSetLayout, std::pair<uint32_t,std::array<uint32_t, DescriptorTypeI::size()>>>& allocations);
 	void Reset();
 };
 }

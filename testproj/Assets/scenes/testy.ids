@@ -27,7 +27,7 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -1.3550395, z: 0}
+    position: {x: 0, y: -3.1891818, z: 0}
     rotation: 
       w: 1
       x: -0
@@ -51,7 +51,7 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 4e6cff72-ab0e-4073-9499-072a9899ab99}
+    material_instance: {guid: 24cd7391-54aa-4823-bb11-dbf80c6cd5ea}
     mesh: {guid: 1ade959c-5194-4653-8e81-09dfcdc81d22}
     receive_shadows: 1
 - !8590000896 
@@ -80,6 +80,6 @@
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1

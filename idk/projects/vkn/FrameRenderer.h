@@ -7,146 +7,22 @@
 #include <gfx/pipeline_config.h>
 #include <vkn/VknFrameBufferManager.h>
 
+#include <vkn/RenderStateV2.h>
+#include <vkn/ProcessedRO.h>
+
+#include <vkn/PipelineThingy.h>
+
 namespace idk
 {
 	struct RenderObject;
+	struct LightData;
 }
 namespace idk::vkn
 {
-	template<typename T, typename ...Args>
-	struct MatchIndex {
-		static uint32_t constexpr value() { return 0; }
-	};
-	template<typename T, typename Front, typename ...Args>
-	struct MatchIndex<T, Front, Args...>
-	{
-		static uint32_t constexpr value()
-		{
-			if constexpr (std::is_same_v<Front, T>)
-			{
-				return 0;
-			}
-			else
-			{
-				return MatchIndex<T, Args...>::value() + 1;
-			}
-		};
-	};
-
-	template<typename V,typename T>
-	struct IndexOf;
-	template<typename ...Args,typename T>
-	struct IndexOf< variant<Args...>,T>
-	{
-		static constexpr uint32_t value = MatchIndex<T, Args...>::value();
-	};
-
+	struct PreRenderData;
 	struct GraphicsState;
-	struct ProcessedRO
-	{
-		struct ImageBinding
-		{
-			vk::ImageView view;
-			vk::Sampler sampler;
-			vk::ImageLayout layout;
-		};
-			using image_t = ImageBinding;
-		struct BindingInfo
-		{
-			using data_t =variant<vk::Buffer, image_t>;
-			uint32_t binding;
-			data_t ubuffer;
-			uint32_t buffer_offset;
-			uint32_t arr_index;
-			size_t size;
-			vk::DescriptorSetLayout layout;
-
-			BindingInfo(
-				uint32_t binding_,
-				vk::Buffer& ubuffer_,
-				uint32_t buffer_offset_,
-				uint32_t arr_index_,
-				size_t size_,
-				vk::DescriptorSetLayout layout_
-			) :
-				binding{ binding_ },
-				ubuffer{ ubuffer_ },
-				buffer_offset{ buffer_offset_ },
-				arr_index{ arr_index_ },
-				size{ size_ },
-				layout{ layout_ }
-			{
-			}
-			BindingInfo(
-				uint32_t binding_,
-				image_t ubuffer_,
-				uint32_t buffer_offset_,
-				uint32_t arr_index_,
-				size_t size_,
-				vk::DescriptorSetLayout layout_
-			) :
-				binding{ binding_ },
-				ubuffer{ ubuffer_ },
-				buffer_offset{ buffer_offset_ },
-				arr_index{ arr_index_ },
-				size{ size_ },
-				layout{ layout_ }
-			{
-			}
-			std::optional<vk::Buffer> GetBuffer()const
-			{
-				std::optional<vk::Buffer> ret;
-				if (ubuffer.index() == IndexOf<data_t, vk::Buffer>::value)
-					ret = std::get<vk::Buffer>(ubuffer);
-				return ret;
-			}
-			std::optional<image_t> GetImage()const
-			{
-				using Type = image_t;
-				std::optional<Type> ret;
-				if (ubuffer.index() == IndexOf<data_t, Type>::value)
-					ret = std::get<Type>(ubuffer);
-				return ret;
-			}
-			vk::DescriptorSetLayout GetLayout()const
-			{
-				return layout;
-			}
-		};
-		const RenderObject& Object()const
-		{
-			return *itr;
-		}
-
-		//set, update_instr
-		const RenderObject* itr;
-		hash_table<uint32_t, vector<BindingInfo>> bindings;
-		shared_ptr<pipeline_config> config;
-
-		std::optional<RscHandle<ShaderProgram>> vertex_shader;
-		std::optional<RscHandle<ShaderProgram>> geom_shader;
-		std::optional<RscHandle<ShaderProgram>> frag_shader;
-	};
 	class PipelineManager;
-	struct RenderStateV2
-	{
-		vk::CommandBuffer cmd_buffer;
-		UboManager ubo_manager;//Should belong to each thread group.
-
-		PresentationSignals signal;
-		DescriptorsManager dpools;
-
-		bool has_commands = false;
-		void FlagRendered() { has_commands = true; }
-		void Reset();
-		RenderStateV2() = default;
-		RenderStateV2(const RenderStateV2&) = delete;
-		RenderStateV2(RenderStateV2&&) = default;
-	};
 	using PipelineHandle_t =uint32_t;
-	struct RenderFrameObject
-	{
-	};
 	class FrameRenderer
 	{
 	public:
@@ -154,7 +30,9 @@ namespace idk::vkn
 		void Init(VulkanView* view, vk::CommandPool cmd_pool);
 
 		void SetPipelineManager(PipelineManager& manager);
+		void PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index);
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
+		void PostRenderGraphicsStates(const vector<GraphicsState>& state, uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 	private:
 		struct VertexUniformConfig;
@@ -182,11 +60,14 @@ namespace idk::vkn
 			FrameRenderer* _renderer;
 		};
 
-		void GrowStates(size_t new_min_size);
+		void GrowStates(vector<RenderStateV2>& states, size_t new_min_size);
 
-		std::pair<vector<ProcessedRO>, DsBindingCount> ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
+		PipelineThingy ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs);
+
+		void PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+
 		VulkanView& View()const { return *_view; }
 		vk::RenderPass GetRenderPass(const GraphicsState& state, VulkanView& view);
 		
@@ -198,17 +79,17 @@ namespace idk::vkn
 		uint32_t _current_frame_index;
 
 		VulkanView*                            _view                       {};
-		RscHandle<ShaderProgram>               _mesh_renderer_shader_module{};
-		RscHandle<ShaderProgram>               _skinned_mesh_shader_module{};
-		RscHandle<ShaderProgram>               _shadow_shader_module{};
+		RscHandle<ShaderProgram>               _shadow_shader_module       {};
 		PipelineManager*                       _pipeline_manager           {};
 		vector<RenderStateV2>                  _states                     {};
+		vector<RenderStateV2>                  _pre_states                 {};
 		const vector<GraphicsState>*           _gfx_states                 {};
 		vector<vk::UniqueCommandBuffer>        _state_cmd_buffers          {};
 		vector<std::unique_ptr<IRenderThread>> _render_threads             {};
+		vk::UniqueSemaphore                    _pre_render_complete        {};
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
-		VknFrameBufferManager   fb_man{};
+		//VknFrameBufferManager   fb_man{};
 	};
 }

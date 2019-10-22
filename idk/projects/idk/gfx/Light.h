@@ -8,22 +8,25 @@
 
 namespace idk
 {
-	struct LightData
+	struct BaseLightData //Should match exactly with the version in the shader
 	{
-		int   index       = 0;                            //4 ->16
-		alignas(16) color light_color = color{1, 1, 1};	  //32
-		alignas(16) vec3  v_pos       = vec3{};			  //48
-		alignas(16) vec3  v_dir       = vec3{};			  //64
+		int   index = 0;                            //4 ->16
+		alignas(16) color light_color = color{ 1, 1, 1 };	  //32
+		alignas(16) vec3  v_pos = vec3{};			  //48
+		alignas(16) vec3  v_dir = vec3{};			  //64
 		real  cos_inner = 0;							  //68
 		real  cos_outer = 1;							  //72
-		real  falloff     = 1;							  //76
-		real  shadow_bias{epsilon};						  //80
-		real  intensity{1.f};							  //84
+		real  falloff = 1;							  //76
+		real  shadow_bias{ epsilon };						  //80
+		real  intensity{ 1.f };							  //84
 		int cast_shadow{ true };						  //88 ->96
 		alignas(16) mat4  vp {};						  //160
+	};
+	struct LightData :BaseLightData
+	{
 		alignas(16) mat4  v {};							  //
 		alignas(16) mat4  p{};							  //
-		RscHandle<RenderTarget> light_map;				  //
+		RscHandle<FrameBuffer> light_map;				  //
 	};
 
 	class Light
@@ -35,12 +38,12 @@ namespace idk
 		bool         casts_shadows { true };
 
 		void InitShadowMap();
-		RscHandle<RenderTarget>& GetLightMap();
-		const RscHandle<RenderTarget>& GetLightMap()const;
-		void SetLightMap(const RscHandle<RenderTarget>& light_map);
+		RscHandle<FrameBuffer>& GetLightMap();
+		const RscHandle<FrameBuffer>& GetLightMap()const;
+		void SetLightMap(const RscHandle<FrameBuffer>& light_map);
 
 		LightData GenerateLightData() const;
-		CameraData GenerateCameraData() const;
+		//CameraData GenerateCameraData() const;
 	};
 }
 #pragma warning(pop )

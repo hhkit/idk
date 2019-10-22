@@ -25,12 +25,13 @@ namespace idk::vkn::hlp
 		uint32_t type;
 		vector<Memory> memories;
 		size_t chunk_size{};
+		static constexpr size_t default_chunk_size = 1 << 26;
 		Memories(
 			vk::Device d,
 			uint32_t mem_type,
-			size_t chunkSize = 1 << 24 //16MB
+			size_t chunkSize = default_chunk_size //64MB (2048*2048*32)
 		);
-		Memory& Add();
+		Memory& Add(size_t min_size);
 		std::pair<uint32_t, size_t> Allocate(size_t size, size_t alignment)
 		{
 			std::optional<size_t> alloc_offset;
@@ -46,7 +47,7 @@ namespace idk::vkn::hlp
 			}
 			if (!alloc_offset)
 			{
-				auto& mem = Add();
+				auto& mem = Add(size);
 				alloc_offset = mem.Allocate(size,alignment);
 			}
 			return std::make_pair(index, *alloc_offset);

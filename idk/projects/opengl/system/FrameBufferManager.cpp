@@ -114,7 +114,7 @@ namespace idk::ogl
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<FrameBuffer> target)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
@@ -125,7 +125,8 @@ namespace idk::ogl
 		// set texture targets
 		vector<GLenum> buffers;
 		//auto& yolo = *meta.textures[0];
-		for (int i = 0; i < meta.textures.size(); ++i)
+		//for (int i = 0; i < std::size(meta.textures); ++i)
+		int i = 0;
 		{
 			TextureMeta mm = meta.textures[i].as<OpenGLTexture>().GetMeta();
 			if (mm.internal_format != ColorFormat::RGBAF_16)
@@ -137,51 +138,64 @@ namespace idk::ogl
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 		}
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
+		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[RenderTarget::kDepthIndex]->ID())), 0);
 		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
 
 		CheckFBStatus();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-
-	void FrameBufferManager::SetRenderTarget(RscHandle<FrameBuffer> target, vector<OpenGLTexture> additionalCustomAttachmentList)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target)
 	{
+		IDK_ASSERT_MSG(&*target,"Attempting to use a default framebuffer. Default framebuffer should not be used.");//make sure it's not null. 
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
-		auto& meta = target->GetMeta();
-		glViewport(0, 0, meta.size.x, meta.size.y);
+		auto size = target->Size();
+		glViewport(0, 0, size.x, size.y);
 
 
 		// set texture targets
 		vector<GLenum> buffers;
 		//auto& yolo = *meta.textures[0];
-		for (int i = 0; i < meta.textures.size(); ++i)
+
+		for (int i = 0; i < target->NumColorAttachments(); ++i)
 		{
-			TextureMeta mm = meta.textures[i].as<OpenGLTexture>().GetMeta();
+			auto& attachment = target->GetAttachment(i);
+			auto& tex = attachment.buffer.as<OpenGLTexture>();
+			TextureMeta mm = tex.GetMeta();
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
 				mm.internal_format = ColorFormat::RGBAF_16;
-				meta.textures[i].as<OpenGLTexture>().SetMeta(mm);
+				tex.SetMeta(mm);
 			}
-			meta.textures[i].as<OpenGLTexture>().Bind();
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
+			tex.Bind();
+			auto attachment_index = GL_COLOR_ATTACHMENT0 + i;
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment_index, s_cast<GLuint>(r_cast<intptr_t>(tex.ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 		}
-
-		for (int i = 0, iterator = i+ meta.textures.size()-1; i < additionalCustomAttachmentList.size(); ++i,++iterator)
+		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
+		if (target->HasDepthAttachment())
 		{
-			additionalCustomAttachmentList[i].Bind();
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + iterator, s_cast<GLuint>(r_cast<intptr_t>(additionalCustomAttachmentList[i].ID())), 0);
-			buffers.push_back(GL_COLOR_ATTACHMENT0 + iterator);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(target->DepthAttachment().buffer->ID())), 0);
 		}
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
-		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
+		if (!target->NumColorAttachments())
+		{
+			//GLint max_draw =0;
+			//glGetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw);
+			glFramebufferParameteri(_fbo_id, GL_FRAMEBUFFER_DEFAULT_WIDTH , target->Size().x);
+			glFramebufferParameteri(_fbo_id, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
+			glDrawBuffer(GL_NONE);
+		}else
+		{
+			glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
+		}
 
 		CheckFBStatus();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
+
 
 	void FrameBufferManager::ResetFramebuffer()
 	{

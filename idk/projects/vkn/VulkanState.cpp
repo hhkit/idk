@@ -14,7 +14,7 @@
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
 
-#include <vkn/VknFrameBuffer.h>
+#include <vkn/VknRenderTarget.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -898,7 +898,7 @@ namespace idk::vkn
 		createCommandBuffers();
 		createSemaphores();
 	}
-
+	void PrintFormatBlitCompatibility();
 	void VulkanState::InitVulkanEnvironment(window_info info)
 	{
 		m_window = info;
@@ -919,6 +919,7 @@ namespace idk::vkn
 
 		createCommandBuffers();
 		createSemaphores();
+		PrintFormatBlitCompatibility();
 	}
 
 	void VulkanState::NextFrame()
@@ -976,8 +977,8 @@ namespace idk::vkn
 			};
 			;
 			//Get default framebuffer
-			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknFrameBuffer>();
-			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknFrameBuffer>().Buffer();
+			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknRenderTarget>();
+			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknRenderTarget>().Buffer();
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{

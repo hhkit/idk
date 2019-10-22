@@ -66,15 +66,41 @@ namespace idk::vkn
 		}
 	};
 
+	using shadow_map_t = std::variant<RscHandle<Texture>, RscHandle<CubeMap>>;
+
+	struct SharedGraphicsState
+	{
+		const vector<LightData>* lights;
+		//vector<shadow_map_t> shadow_maps;
+
+		void Init(const vector<LightData>& light_data);
+
+		const vector<LightData>& Lights()const;
+		//vector<shadow_map_t>& ShadowMaps();
+		//const vector<shadow_map_t>& ShadowMaps()const;
+	};
+	
 	struct GraphicsState
 	{
+		SharedGraphicsState* shared_gfx_state =nullptr;
 		CameraData camera;
 		const vector<LightData>* lights;
-		vector<const LightData*> active_lights;
+		vector<size_t> active_lights;//indices to corresponding lights in shared_gfx_state
+		vector<RscHandle<Texture>> shadow_maps_2d  ;
+		vector<RscHandle<CubeMap>> shadow_maps_cube;
+
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
 
 		const vector<SkeletonTransforms>* skeleton_transforms;
+
+		// \param light_index
+		// the index of the light in shared_gfx_state
+		const LightData* ActiveLight(size_t light_index)const;
+		//std::optional<RscHandle<Texture>> Shadow2D(size_t light_index)const;
+		//std::optional<RscHandle<CubeMap>> ShadowCube(size_t light_index)const;
+		RscHandle<ShaderProgram> mesh_vtx;
+		RscHandle<ShaderProgram> skinned_mesh_vtx;
 
 		const vector<SkeletonTransforms>& GetSkeletonTransforms()const { return *skeleton_transforms; }
 
@@ -86,6 +112,19 @@ namespace idk::vkn
 	};
 
 
+	struct PreRenderData
+	{
+		SharedGraphicsState* shared_gfx_state;
+		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
+		vector<const RenderObject*> mesh_render;
+		vector<const AnimatedRenderObject*> skinned_mesh_render;
+
+		const vector<SkeletonTransforms>* skeleton_transforms;
+
+		RscHandle<ShaderProgram> mesh_vtx;
+		RscHandle<ShaderProgram> skinned_mesh_vtx;
+		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
+	};
 
 	//Doesn't seem feasible, but might make for some kind of reference in the future
 	//struct InstancedRO

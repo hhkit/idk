@@ -6,6 +6,10 @@
 
 namespace idk
 {
+	struct Viewport
+	{
+		vec2 min, max;//(0,1)
+	};
 	class Camera
 		: public Component<Camera>
 	{
@@ -32,6 +36,8 @@ namespace idk
 		std::variant<color, RscHandle<CubeMap>> clear;
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
+
+		Viewport viewport;
 
 		vec3	  currentPosition() const;
 		vec3	  currentDirection() const;

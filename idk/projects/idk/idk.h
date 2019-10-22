@@ -83,6 +83,9 @@ namespace idk
 	template<typename T>
 	using vector = std::vector<T>;
 
+	template<typename T>
+	using small_vector = std::vector<T>;//Can be replaced with small vector(if we *ever* get around to it)
+
 	template<typename T1, typename T2, typename Hasher = std::hash<T1>>
 	using hash_table = std::unordered_map<T1, T2, Hasher>;
 

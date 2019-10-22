@@ -52,6 +52,7 @@ namespace idk::ogl
 	void Win32GraphicsSystem::LateInit()
 	{
 		_opengl->GenResources();
+		GraphicsSystem::LateInit();
 	}
 
 	void Win32GraphicsSystem::Shutdown()
@@ -190,7 +191,8 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
 		Core::GetResourceManager().RegisterFactory<ProgramFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
-		Core::GetResourceManager().RegisterFactory<FrameBufferFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
 
 		// register extensions
 		Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);

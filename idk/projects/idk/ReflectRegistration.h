@@ -42,13 +42,29 @@ REFLECT_CTOR(float, float)
 REFLECT_VARS(x, y)
 REFLECT_END()
 
+
+REFLECT_BEGIN(idk::ivec2, "ivec2")
+REFLECT_CTOR(int, int)
+REFLECT_VARS(x, y)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::vec3, "vec3")
 REFLECT_CTOR(float, float, float)
 REFLECT_VARS(x, y, z)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::ivec3, "ivec3")
+REFLECT_CTOR(int, int, int)
+REFLECT_VARS(x, y, z)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::vec4, "vec4")
 REFLECT_CTOR(float, float, float, float)
+REFLECT_VARS(x, y, z, w)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ivec4, "ivec4")
+REFLECT_CTOR(int, int, int, int)
 REFLECT_VARS(x, y, z, w)
 REFLECT_END()
 
@@ -127,6 +143,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::ShaderProgram>, "<ShaderProgram>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::RenderTarget>, "<RenderTarget>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 /*==========================================================================
  * general resources
  *========================================================================*/
@@ -150,9 +170,10 @@ REFLECT_END()
 
 REFLECT_ENUM(idk::ColorFormat, "ColorFormat")
 REFLECT_ENUM(idk::UVMode, "UVMode")
+REFLECT_ENUM(idk::FilterMode, "FilterMode")
 
 REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
-REFLECT_VARS(uv_mode,internal_format)
+REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
 REFLECT_END()
 
 REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
@@ -356,6 +377,11 @@ REFLECT_BEGIN(idk::Animator, "Animator")
 REFLECT_VARS(skeleton, animation_table, layer_table, layers)
 REFLECT_END()
 
+
+REFLECT_BEGIN(idk::Viewport, "Viewport")
+REFLECT_VARS(min,max)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, clear)
+REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic, viewport,render_target)
 REFLECT_END()
