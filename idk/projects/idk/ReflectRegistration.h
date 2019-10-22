@@ -150,9 +150,10 @@ REFLECT_END()
 
 REFLECT_ENUM(idk::ColorFormat, "ColorFormat")
 REFLECT_ENUM(idk::UVMode, "UVMode")
+REFLECT_ENUM(idk::FilterMode, "FilterMode")
 
 REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
-REFLECT_VARS(uv_mode,internal_format)
+REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
 REFLECT_END()
 
 REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")

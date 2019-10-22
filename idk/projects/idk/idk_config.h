@@ -92,6 +92,7 @@ namespace idk
 		,   class CubeMap
 		,	class ShaderProgram
 		,	class RenderTarget
+		,   class FrameBuffer
 		,	anim::Animation
 		,	anim::Skeleton
 		//,	class Level

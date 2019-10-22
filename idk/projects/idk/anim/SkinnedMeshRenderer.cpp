@@ -23,13 +23,8 @@ namespace idk
 
 			cast_shadows,
 			receive_shadows,
-			   &GetRequiredAttributes()
-			 //{{0,vtx::Attrib::Position},
-			 //{1,vtx::Attrib::Normal},
-			 //{2,vtx::Attrib::UV},
-			 //{3,vtx::Attrib::Tangent},
-			 //{4,vtx::Attrib::BoneID},
-			 //{5,vtx::Attrib::BoneWeight}}
+			&GetRequiredAttributes(),
+
 		};
 	}
 	const renderer_reqs& SkinnedMeshRenderer::GetRequiredAttributes()

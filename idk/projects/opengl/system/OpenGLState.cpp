@@ -6,6 +6,7 @@
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLTexture.h>
 #include <opengl/resource/FrameBuffer.h>
+#include <gfx/FrameBuffer.h>
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
@@ -155,7 +156,7 @@ namespace idk::ogl
 
 				if (light.light_map)
 				{
-					const auto t = light.light_map->GetAttachment(AttachmentType::eDepth, 0);
+					const auto t = light.light_map->DepthAttachment().buffer;
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
@@ -233,7 +234,7 @@ namespace idk::ogl
 			if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				fb_man.SetRenderTarget(RscHandle<OpenGLTexture>{elem.light_map->GetAttachment(AttachmentType::eDepth, 0)});
+				fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
 
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);
@@ -290,13 +291,13 @@ namespace idk::ogl
 			}
 
 			{
-				if (cam.obj_id == curr_object_buffer.curr_scene_camera.obj_id)
-				{
-					main_buffer = RscHandle<FrameBuffer>{ cam.render_target };
-					fb_man.SetRenderTarget(main_buffer);
-				}
-				else
-					fb_man.SetRenderTarget(RscHandle<FrameBuffer>{cam.render_target});
+				//if (cam.obj_id == curr_object_buffer.curr_scene_camera.obj_id)
+				//{
+				//	main_buffer = RscHandle<OpenGLRenderTarget>{ cam.render_target };
+				//	fb_man.SetRenderTarget(main_buffer);
+				//}
+				//else
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target});
 			}
 			
 			// lock drawing buffer

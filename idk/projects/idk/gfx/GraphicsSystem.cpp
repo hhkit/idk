@@ -6,7 +6,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 
-#include <gfx/CameraControls.h>
+//#include <gfx/CameraControls.h>
 
 namespace idk
 {
@@ -19,15 +19,20 @@ namespace idk
 	}
 	void GraphicsSystem::BufferedLightData(vector<LightData>& out)
 	{
-		out = object_buffer[curr_draw_buffer].lights;
+		out = object_buffer.at(curr_draw_buffer).lights;
 	}
 	void GraphicsSystem::RenderObjData(vector<RenderObject>& out)
 	{
-		out = object_buffer[curr_draw_buffer].mesh_render;
+		out = object_buffer.at(curr_draw_buffer).mesh_render;
 	}
 	void GraphicsSystem::AnimatedRenderObjData(vector<AnimatedRenderObject>& out)
 	{
-		out = object_buffer[curr_draw_buffer].skinned_mesh_render;
+		out = object_buffer.at(curr_draw_buffer).skinned_mesh_render;
+	}
+
+	void GraphicsSystem::LateInit()
+	{
+		LoadShaders();
 	}
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
@@ -51,7 +56,7 @@ namespace idk
 		result.lights.reserve(lights.size());
 		for (auto& elem : lights)
 		{
-			result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
+			//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
 			result.lights.emplace_back(elem.GenerateLightData());
 		}
 
@@ -68,13 +73,17 @@ namespace idk
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
-			AnimatedRenderObject ro = elem.GenerateRenderObject();
-			// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
-			const auto parent = elem.GetGameObject()->Parent();
-			const auto animator = parent->GetComponent<Animator>();
-			ro.skeleton_index = skeleton_indices[animator];
-			ro.config = mesh_render_config;
-			result.skinned_mesh_render.emplace_back(std::move(ro));
+
+			if (elem.IsActiveAndEnabled())
+			{
+				AnimatedRenderObject ro = elem.GenerateRenderObject();
+				// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
+				const auto parent = elem.GetGameObject()->Parent();
+				const auto animator = parent->GetComponent<Animator>();
+				ro.skeleton_index = skeleton_indices[animator];
+				ro.config = mesh_render_config;
+				result.skinned_mesh_render.emplace_back(std::move(ro));
+			}
 		}
 
 		for (auto& camera : cameras)
@@ -88,8 +97,21 @@ namespace idk
 			if (elem.IsActiveAndEnabled())
 				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
 
-		
+		result.skinned_mesh_vtx = skinned_mesh_vtx;
+		result.mesh_vtx = mesh_vtx;
+
 		SubmitBuffers(std::move(result));
+	}
+
+	void GraphicsSystem::LoadShaders()
+	{
+		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert");
+		if(tmp)
+			mesh_vtx = *tmp;
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
+		if(tmp)
+			skinned_mesh_vtx = *tmp;
+		LoadShaderImpl();
 	}
 
 	void GraphicsSystem::SwapWritingBuffer()

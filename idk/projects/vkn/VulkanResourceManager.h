@@ -58,8 +58,9 @@ namespace idk::vkn
 		}
 		VulkanRsc& operator=(Base&& rhs)
 		{
-			*this = VulkanRsc{ std::move(rhs) };
-			return *this;
+			VulkanRsc tmp{ std::move(rhs) };
+			//std::swap(static_cast<Base&>(*this),static_cast<Base&>(tmp)) ;
+			return *this = std::move(tmp);
 		}
 
 		//void Destroy() override

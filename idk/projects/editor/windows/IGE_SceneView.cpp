@@ -67,7 +67,8 @@ namespace idk {
 		ImGui::PopStyleVar(3);
 
         ImVec2 imageSize = GetScreenSize();
-        auto screen_tex = RscHandle<RenderTarget>{}->GetMeta().textures[0];
+		auto& meta = RscHandle<RenderTarget>{}->GetMeta();
+        auto screen_tex = meta.textures[0];
         auto rendertex_aspect = screen_tex->AspectRatio();
         auto windowframe_aspect = imageSize.x / imageSize.y;
         if (rendertex_aspect > windowframe_aspect) // rendertex is horizontally longer

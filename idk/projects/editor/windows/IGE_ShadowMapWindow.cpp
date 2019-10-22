@@ -26,7 +26,7 @@ Derived using IDE_SceneView.cpp as a base/reference
 #include <imgui/ImGuizmo.h>
 #include <IDE.h>
 
-#include <vkn/VknFramebuffer.h>
+#include <vkn/VknFrameBuffer.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 
 namespace idk {
@@ -95,8 +95,8 @@ namespace idk {
 		{
 			//ImGui::RadioButton(light.name.c_str(), &index, i);
 			auto& rt = *light.data->light_map; 
-			auto& img = *rt.GetAttachment(AttachmentType::eDepth, 0);
-			vec2 size = vec2{ img.Size() };
+			auto& img = **rt.DepthAttachment();
+			const vec2 size = vec2{ img.Size() };
 			
 			ImGui::Image(img.ID(), size*(this->window_size.y*0.5f/size.y), ImVec2(0, 1), ImVec2(1, 0));
 			ImGui::NewLine();

@@ -11,5 +11,6 @@
 #include <gfx/Texture.h>
 #include <gfx/CubeMap.h>
 #include <gfx/RenderTarget.h>
+#include <gfx/Framebuffer.h>
 #include <test/TestResource.h>
 #include <prefab/Prefab.h>

@@ -77,7 +77,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 	case GraphicsAPI::Vulkan:
 		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-		win.OnScreenSizeChanged.Listen([gSys](const ivec2&) { s_cast<vkn::VulkanWin32GraphicsSystem*>(gSys)->Instance().OnResize(); });
 		break;
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();

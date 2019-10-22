@@ -146,6 +146,18 @@ namespace idk::vkn
 		}
 	}
 
+	void VulkanPipeline::SetRenderPass(vk::RenderPass rp, bool has_depth_stencil)
+	{
+		_render_pass = rp;
+		_has_depth_stencil = has_depth_stencil;
+	}
+
+	void VulkanPipeline::ClearRenderPass()
+	{
+		_render_pass.reset();
+		_has_depth_stencil = false;
+	}
+
 	std::optional<uint32_t> VulkanPipeline::GetBinding(uint32_t location) const
 	{
 		std::optional<uint32_t> result;
@@ -159,7 +171,8 @@ namespace idk::vkn
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
-		auto m_renderpass = GetRenderpass(config, vulkan);
+		auto m_renderpass = (_render_pass)?*_render_pass:GetRenderpass(config, vulkan);
+		_has_depth_stencil = (_render_pass) ? _has_depth_stencil :(config.render_pass_type != BasicRenderPasses::eRgbaColorOnly);
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
@@ -236,7 +249,7 @@ namespace idk::vkn
 			,&viewportState
 			,&rasterizer
 			,&multisampling
-			,(config.render_pass_type!=BasicRenderPasses::eRgbaColorOnly)?&dsci:nullptr
+			,(_has_depth_stencil)?&dsci:nullptr
 			,&colorBlending
 			,nullptr
 			,*m_pipelinelayout
@@ -390,11 +403,12 @@ namespace idk::vkn
 	vk::Viewport VulkanPipeline::GetViewport(const config_t& config, Vulkan_t& vulkan) const
 	{
 		auto sc = vulkan.Swapchain().extent;
-		ivec2 screen_size = (config.screen_size) ? *config.screen_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
+		ivec2 screen_offs = (config.viewport_offset) ? *config.viewport_offset : ivec2{ 0,0 };
+		ivec2 screen_size = (config.viewport_size) ? *config.viewport_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
 		return vk::Viewport
 		{
-			0.0f,0.0f, //x,y
-			(float)screen_size.x, (float)screen_size.y,
+			s_cast<float>(screen_offs.x), s_cast<float>(screen_offs.y), //x,y
+			s_cast<float>(screen_size.x), s_cast<float>(screen_size.y),
 			0.0f,1.0f // min/max depth
 		};
 	}
@@ -402,7 +416,7 @@ namespace idk::vkn
 	vk::Rect2D VulkanPipeline::GetScissor(const config_t& config, Vulkan_t& vulkan) const
 	{
 		auto sc = vulkan.Swapchain().extent;
-		ivec2 screen_size = (config.screen_size) ? *config.screen_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
+		ivec2 screen_size = (config.viewport_size) ? *config.viewport_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
 		return vk::Rect2D{
 			{ 0,0 },
 		{ s_cast<uint32_t>(screen_size.x), s_cast<uint32_t>(screen_size.y) }

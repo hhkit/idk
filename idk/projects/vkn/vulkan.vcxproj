@@ -132,7 +132,8 @@
       </Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>%(Inputs)</Inputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -207,7 +208,8 @@
       </Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>%(Inputs)</Inputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -220,7 +222,11 @@
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
+    <ClInclude Include="PipelineBinders.h" />
+    <ClInclude Include="PipelineThingy.h" />
+    <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderStateV2.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="utils\FrameObjects.h" />
@@ -233,10 +239,13 @@
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
+    <ClInclude Include="VknFrameBuffer.h" />
+    <ClInclude Include="VknFramebufferFactory.h" />
     <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VknTextureLoader.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
+    <ClInclude Include="VulkanHashes.h" />
     <ClInclude Include="VulkanPngLoader.h" />
     <ClInclude Include="VulkanResourceManager.h" />
     <ClInclude Include="VulkanShaderModuleFactory.h" />
@@ -245,8 +254,8 @@
     <ClInclude Include="vector_buffer.h" />
     <ClInclude Include="GfxConverters.h" />
     <ClInclude Include="BufferHelpers.h" />
-    <ClInclude Include="VknFrameBuffer.h" />
-    <ClInclude Include="VknFrameBufferFactory.h" />
+    <ClInclude Include="VknRenderTarget.h" />
+    <ClInclude Include="VknRenderTargetFactory.h" />
     <ClInclude Include="VknFrameBufferManager.h" />
     <ClInclude Include="VknTexture.h" />
     <ClInclude Include="VulkanDebugRenderer.h" />
@@ -260,6 +269,7 @@
     <ClInclude Include="VulkanTypeDescriptors.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
     <ClInclude Include="VulkanView.h" />
+    <ClInclude Include="vulkan_enum_info.h" />
     <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
@@ -270,9 +280,13 @@
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="PipelineBinders.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
+    <ClCompile Include="PipelineThingy.cpp" />
+    <ClCompile Include="ProcessedRO.cpp" />
     <ClCompile Include="RegisterVulkanFactories.cpp" />
     <ClCompile Include="RenderState.cpp" />
+    <ClCompile Include="RenderStateV2.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="UboManager.cpp" />
@@ -284,7 +298,9 @@
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
     <ClCompile Include="VknFrameBuffer.cpp" />
-    <ClCompile Include="VknFrameBufferFactory.cpp" />
+    <ClCompile Include="VknFramebufferFactory.cpp" />
+    <ClCompile Include="VknRenderTarget.cpp" />
+    <ClCompile Include="VknRenderTargetFactory.cpp" />
     <ClCompile Include="VknFrameBufferManager.cpp" />
     <ClCompile Include="VknImageData.cpp" />
     <ClCompile Include="VknMeshModder.cpp" />
@@ -316,6 +332,7 @@
     <None Include="DescriptorPoolsManager.inl">
       <FileType>CppHeader</FileType>
     </None>
+    <None Include="PipelineBinders.inl" />
     <None Include="UboManager.inl" />
     <None Include="utils\utils.inl" />
     <None Include="VulkanState.inl" />

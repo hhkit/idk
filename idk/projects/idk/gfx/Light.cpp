@@ -4,6 +4,11 @@
 #include <common/Transform.h>
 #include <math/matrix_transforms.h>
 
+#include<iostream>
+std::ostream& operator<<(std::ostream& out, const idk::vec3& v)
+{
+	return out << "{" << v.x << ", " << v.y << ", " << v.z << " }";
+}
 namespace idk
 {
 	struct LightCameraView
@@ -11,9 +16,9 @@ namespace idk
 		const Light* light;
 		mat4 operator()(const SpotLight& )
 		{
-			auto trf = light->GetGameObject()->Transform();
-			vec3 v_pos = trf->GlobalPosition();
-			vec3 v_dir = trf->Forward();
+			const auto trf = light->GetGameObject()->Transform();
+			const vec3 v_pos = trf->GlobalPosition();
+			const vec3 v_dir = trf->Forward();
 			return look_at(v_pos, v_pos + v_dir, trf->Up()).inverse();
 		}
 		mat4 LookAt(vec3 pos, vec3 target_point,vec3 up)
@@ -88,27 +93,27 @@ namespace idk
 		, light);
 	}
 
-	RscHandle<RenderTarget>& Light::GetLightMap()
+	RscHandle<FrameBuffer>& Light::GetLightMap()
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant) ->RscHandle<RenderTarget> &
+			std::visit([&](auto& light_variant) ->RscHandle<FrameBuffer> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	const RscHandle<RenderTarget>& Light::GetLightMap() const
+	const RscHandle<FrameBuffer>& Light::GetLightMap() const
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant)-> const RscHandle<RenderTarget> &
+			std::visit([&](auto& light_variant)-> const RscHandle<FrameBuffer> &
 				{
 					return light_variant.light_map;
 				}
 		, light);
 	}
-	void Light::SetLightMap(const RscHandle<RenderTarget>& light_map)
+	void Light::SetLightMap(const RscHandle<FrameBuffer>& light_map)
 	{
 		GetLightMap() = light_map;
 	}
@@ -162,6 +167,7 @@ namespace idk
 
 		return retval;
 	}
+	/*
 	CameraData Light::GenerateCameraData() const
 	{
 		return CameraData{
@@ -180,4 +186,5 @@ namespace idk
 			vec4{1,1,1,1}
 		};
 	}
+	*/
 }

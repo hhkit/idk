@@ -13,6 +13,8 @@ namespace idk::vkn
 	{
 		fence = View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlagBits::eSignaled });
 	}
+	vk::Format ToSrgb(vk::Format f);
+
 	ResourceBundle PngLoader::LoadFile(PathHandle handle, RscHandle<Texture> rtex, const TextureMeta* tm)
 	{
 		VknTexture& tex = rtex.as<VknTexture>();
@@ -24,10 +26,25 @@ namespace idk::vkn
 		int num_channels{};
 		auto tex_data = stbi_load_from_memory(r_cast<const stbi_uc*>(data.data()), s_cast<int>(data.size()), &size.x, &size.y, &num_channels, 4);
 		TextureLoader loader;
+		TextureOptions def{};
 		std::optional<TextureOptions> to{};
+		if (tm)
+			def = *(to = *tm);
+		TexCreateInfo tci;
+		tci.width = size.x;
+		tci.height = size.y;
+		tci.layout = vk::ImageLayout::eGeneral;
+		tci.mipmap_level = 0;
+		tci.sampled(true);
+		tci.aspect = vk::ImageAspectFlagBits::eColor;
+		tci.internal_format = MapFormat(def.internal_format);
+		if (def.is_srgb)
+			tci.internal_format = ToSrgb(tci.internal_format);
+		//TODO detect SRGB and load set format accordingly
+		InputTexInfo iti{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4),def.is_srgb?vk::Format::eR8G8B8A8Srgb: vk::Format::eR8G8B8A8Unorm };
 		if(tm)
 			to= *tm;
-		loader.LoadTexture(tex, TextureFormat::eRGBA32, to, string_view{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4) }, size, allocator, *fence);
+		loader.LoadTexture(tex, allocator, *fence,to, tci, iti);
 		stbi_image_free(tex_data);
 		return rtex;
 	}

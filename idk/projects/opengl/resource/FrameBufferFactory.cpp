@@ -7,22 +7,33 @@
 
 namespace idk::ogl
 {
-	unique_ptr<RenderTarget> FrameBufferFactory::GenerateDefaultResource()
+	unique_ptr<RenderTarget> OpenGLRenderTargetFactory::GenerateDefaultResource()
 	{
-		auto fb = std::make_unique<FrameBuffer>();
+		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto m = fb->GetMeta();
 		m.size = Core::GetSystem<Application>().GetScreenSize();
-		m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+		//m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kColorIndex] = tex;
+		tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kDepthIndex] = tex;
 		fb->SetMeta(m);
 		return fb;
 	}
 
-	unique_ptr<RenderTarget> FrameBufferFactory::Create()
+	unique_ptr<RenderTarget> OpenGLRenderTargetFactory::Create()
 	{
-		auto fb = std::make_unique<FrameBuffer>();
+		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto m = fb->GetMeta();
 		m.size = ivec2{ 512, 512 };
-		m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kColorIndex] = tex;
+		tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Size(m.size);
+		m.textures[RenderTarget::kDepthIndex] = tex;
 		fb->SetMeta(m);
 		return fb;
 	}
@@ -53,4 +64,24 @@ namespace idk::ogl
 		*/
 		return ResourceBundle{};
 	}
+	unique_ptr<FrameBuffer> OpenGLFrameBufferFactory::GenerateDefaultResource()
+	{
+		return unique_ptr<FrameBuffer>{};//it's gonna be null cause you shouldn't be using this.
+	}
+	unique_ptr<FrameBuffer> OpenGLFrameBufferFactory::Create()
+	{
+		return std::make_unique<OpenGLFrameBuffer>();
+	}
+	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
+	{
+		out = std::make_unique<OpenGLAttachment>();
+		out->load_op  = info.load_op;
+		out->store_op = info.store_op;
+
+		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
+		out->buffer = tex;
+	}
+	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}
+	void OpenGLFrameBufferFactory::Finalize(FrameBuffer& ) {}
 }

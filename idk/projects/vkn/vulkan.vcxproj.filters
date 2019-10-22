@@ -84,9 +84,6 @@
     <ClInclude Include="VknFrameBufferManager.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBuffer.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="VknImageData.h">
       <Filter>resource</Filter>
     </ClInclude>
@@ -123,9 +120,6 @@
     <ClInclude Include="RegisterVulkanFactories.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
-    <ClInclude Include="VknFrameBufferFactory.h">
-      <Filter>resource\Factories</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanMeshFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
@@ -146,6 +140,36 @@
     </ClInclude>
     <ClInclude Include="DDSLoader.h">
       <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTarget.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTargetFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFramebufferFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessedRO.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStateV2.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_enum_info.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineThingy.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanHashes.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineBinders.h">
+      <Filter>render\objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -193,9 +217,6 @@
       <Filter>render</Filter>
     </ClCompile>
     <ClCompile Include="VulkanMesh.cpp" />
-    <ClCompile Include="VknFrameBuffer.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="VknFrameBufferManager.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -247,9 +268,6 @@
     <ClCompile Include="RegisterVulkanFactories.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
-    <ClCompile Include="VknFrameBufferFactory.cpp">
-      <Filter>resource\Factories</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanMeshFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
@@ -270,6 +288,30 @@
     </ClCompile>
     <ClCompile Include="DDSLoader.cpp">
       <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknRenderTarget.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknRenderTargetFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessedRO.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderStateV2.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineThingy.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineBinders.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFrameBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFramebufferFactory.cpp">
+      <Filter>resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -303,6 +345,9 @@
     <Filter Include="resource\Loaders">
       <UniqueIdentifier>{6afb71d8-dab9-485a-9d2a-7e1b38225231}</UniqueIdentifier>
     </Filter>
+    <Filter Include="render\objects">
+      <UniqueIdentifier>{508115dd-c293-4bd2-87bf-81a317729a67}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="BufferHelpers.inl">
@@ -322,6 +367,9 @@
     </None>
     <None Include="utils\utils.inl">
       <Filter>utils</Filter>
+    </None>
+    <None Include="PipelineBinders.inl">
+      <Filter>render\objects</Filter>
     </None>
   </ItemGroup>
 </Project>

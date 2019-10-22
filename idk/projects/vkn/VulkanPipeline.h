@@ -13,6 +13,12 @@ namespace idk::vkn
 
 		vk::UniquePipelineLayout pipelinelayout{};
 		vk::UniquePipeline       pipeline{};
+		
+		//Do this before calling create, overrides config's render_pass_type
+		void SetRenderPass(vk::RenderPass rp, bool has_depth_stencil);
+		//If you're reusing VulkanPipeline and don't want the previous override of render_pass_type to carry over.
+		//Call before create.
+		void ClearRenderPass();
 
 		hash_table<uint32_t, vk::UniqueDescriptorSetLayout> owned_uniform_layouts{};
 		hash_table<uint32_t,vk::DescriptorSetLayout> uniform_layouts{};
@@ -29,6 +35,8 @@ namespace idk::vkn
 		//bool HasUniforms(const uniform_info& uni)const;
 		//void BindUniformDescriptions(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan, const uniform_info& uniform);
 	private:
+		std::optional<vk::RenderPass> _render_pass;
+		bool _has_depth_stencil = false;
 		//location to binding
 		hash_table<uint32_t, uint32_t> loc2bind;
 		vk::PolygonMode GetPolygonMode(const config_t& config)const;

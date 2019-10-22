@@ -9,7 +9,8 @@ namespace idk
 
 namespace idk::ogl
 {
-	class FrameBuffer;
+	class OpenGLRenderTarget;
+	class OpenGLFrameBuffer;
 
 	class FrameBufferManager
 	{
@@ -20,9 +21,9 @@ namespace idk::ogl
 		~FrameBufferManager();
 
 		void SetRenderTarget(const RscHandle<OpenGLCubemap>& target, bool for_convolution = false);
-		void SetRenderTarget(RscHandle<FrameBuffer> target, vector<OpenGLTexture> additionalCustomAttachmentList);
 		void SetRenderTarget(RscHandle<OpenGLTexture> target);
-		void SetRenderTarget(RscHandle<FrameBuffer> target);
+		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target);
+		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target);
 		void ResetFramebuffer();
 
 		RscHandle<OpenGLTexture> cBufferPickingTexture;

@@ -57,6 +57,7 @@ namespace idk::vkn
 	{
 		windows_ = &Core::GetSystem<win::Windows>();
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
+		windows_->OnScreenSizeChanged.Listen([this](const ivec2&) { Instance().OnResize(); });
 
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
@@ -65,6 +66,7 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
+		GraphicsSystem::LateInit();
 		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
 		_debug_renderer->Init();
 		_frame_renderers.resize(instance_->View().Swapchain().frame_objects.size());
@@ -126,19 +128,39 @@ namespace idk::vkn
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
 
-		auto copy_cams = curr_buffer.light_camera_data;
-		std::copy(curr_buffer.camera.begin(), curr_buffer.camera.end(), std::back_inserter(copy_cams));
-		std::swap(copy_cams, curr_buffer.camera);
+		//auto copy_cams = curr_buffer.light_camera_data;
+		//std::copy(curr_buffer.camera.begin(), curr_buffer.camera.end(), std::back_inserter(copy_cams));
+		//std::swap(copy_cams, curr_buffer.camera);
 
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
 
 		_debug_renderer->GrabDebugBuffer();
+
+		SharedGraphicsState shared_graphics_state;
+		auto& lights = curr_buffer.lights;
+		shared_graphics_state.Init(lights);
+
+		PreRenderData pre_render_data;
+		pre_render_data.shared_gfx_state = &shared_graphics_state;
+		pre_render_data.active_lights.resize(lights.size());
+
+		//TODO cull the unused lights
+		for (size_t i = 0; i < lights.size(); ++i)
+			pre_render_data.active_lights[i]=i;
+
+		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms);
+		pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
+		pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			auto& curr_cam = curr_buffer.camera[i];
 			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
+			curr_state.mesh_vtx = curr_buffer.mesh_vtx;
+			curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 			curr_state.dbg_render.resize(0);
+			curr_state.shared_gfx_state = &shared_graphics_state;
 			if (curr_cam.overlay_debug_draw)
 			{
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
@@ -152,7 +174,7 @@ namespace idk::vkn
 			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
 		// */
-
+		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
 	}
@@ -181,6 +203,9 @@ namespace idk::vkn
 	GraphicsAPI VulkanWin32GraphicsSystem::GetAPI()
 	{
 		return GraphicsAPI::Vulkan;
+	}
+	void VulkanWin32GraphicsSystem::Prerender()
+	{
 	}
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{

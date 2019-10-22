@@ -10,6 +10,64 @@ namespace idk::vkn
 	DescriptorsManager::DescriptorsManager(VulkanView& view) :pools{view}
 	{
 	}
+
+	DescriptorSetLookup DescriptorsManager::Allocate(const hash_table < vk::DescriptorSetLayout, std::pair<uint32_t,std::array<uint32_t, DescriptorTypeI::size()>>>& allocations)
+	{
+		hash_table<vk::DescriptorSetLayout, DescriptorSets> result;
+		auto& m_device = pools.view.Device();
+		auto& dispatcher = pools.view.Dispatcher();
+		vector<bool> allocated(allocations.size()*DescriptorTypeI::size(), false);
+		//hash_table<vk::DescriptorType, uint32_t> num_req;
+		bool req_more = false;
+		std::array<uint32_t, DescriptorTypeI::size()> num_req{};
+		do
+		{
+			req_more = false;
+			//num_req.clear();
+			uint32_t i = 0;
+			for(auto& n : num_req)
+				n = 0;//clear the previous iteration's numbers.
+
+			for (auto& [layout, alloc_info] : allocations)
+			{
+				auto& [num_ds, des] = alloc_info;
+				bool is_nonzero = false;
+				for (auto& n : des)
+				{
+					is_nonzero |= static_cast<bool>(n);
+				}
+				if (!allocated[i] && is_nonzero)
+				{
+					auto pool = pools.TryGet(des);
+					allocated[i] = static_cast<bool>(pool);
+					if (pool)
+					{
+						//TODO compute num_ds with layout's number of descriptors
+						vector<vk::DescriptorSetLayout> layouts{ num_ds, layout };
+						vk::DescriptorSetAllocateInfo allocInfo
+						{
+							*pool
+							,hlp::arr_count(layouts)
+							,std::data(layouts)
+						};
+						result[layout] = m_device->allocateDescriptorSets(allocInfo, dispatcher);
+					}
+					else
+					{
+						for (size_t index = 0; index < std::size(num_req); ++index)
+						{
+							num_req[index] += des[index];
+						}
+						req_more = true;
+					}
+				}
+				++i;
+			}
+			if(req_more)
+				pools.Add(num_req._Elems);
+		} while (req_more);
+		return result;
+	}
 	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)
 	{
 		hash_table<vk::DescriptorSetLayout, DescriptorSets> result;

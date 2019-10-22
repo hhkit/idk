@@ -35,14 +35,14 @@ namespace idk::vkn
 		vk::ShaderModule        Module()const { return *Current().module; }
 		void AttribDescriptions(vector<buffer_desc>&& attribs){ Current().attrib_descriptions = std::move(attribs); }
 		const vector<buffer_desc>& AttribDescriptions()const { return Current().attrib_descriptions; }
-		bool HasLayout(string uniform_name)const;
+		bool HasLayout(const string& uniform_name)const;
 		hash_table<string, UboInfo>::const_iterator InfoBegin()const;
 		hash_table<string, UboInfo>::const_iterator InfoEnd()const;
 
 		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator LayoutsBegin()const;
 		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator LayoutsEnd()const;
 		//UboInfo& GetLayout(string uniform_name);
-		const UboInfo& GetLayout(string uniform_name)const;
+		const UboInfo& GetLayout(const string& uniform_name)const;
 		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
 		bool HasUpdate()const override { return buf_obj.HasUpdate(); }
 		void UpdateCurrent(size_t index)override { buf_obj.UpdateCurrent(index); }
