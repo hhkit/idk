@@ -305,6 +305,53 @@ namespace idk
 			{
 				//Success
 				collidedList.emplace_back(c.GetGameObject());
+				ray_resultList.emplace_back(result);
+				foundRes = true;
+			}
+			else
+			{
+				//Fail
+			}
+		}
+
+		return foundRes;
+	}
+
+	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList)
+	{
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+
+		// put shape into world space
+		constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+		{
+			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+		};
+		bool foundRes = false;
+
+		std::cout << "\n";
+		for (auto& c : colliders)
+		{
+			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result
+				{
+					using RShape = std::decay_t<decltype(shape)>;
+
+					const auto rShape = calc_shape(shape, c);
+
+					if constexpr (std::is_same_v<RShape, sphere>)
+						return phys::collide_ray_sphere(
+							r, rShape);
+					else
+						if constexpr (std::is_same_v<RShape, box>)
+							return phys::collide_ray_aabb(
+								r, c.bounds());
+						else
+							return phys::raycast_failure{};
+				}, c.shape);
+
+			if (result)
+			{
+				//Success
+				collidedList.emplace_back(c.GetGameObject());
 				foundRes = true;
 			}
 			else

@@ -34,6 +34,23 @@ namespace idk
                 go->AddComponent(prefab_comp);
         }
 
+        static GenericHandle get_component(Handle<GameObject> go, string_view component_name, int component_nth)
+        {
+            if (component_nth == 0)
+                return go->GetComponent(component_name);
+            else if (component_nth > 0)
+            {
+                const span comps = go->GetComponents();
+                const auto tid = GameState::GetGameState().GetTypeID(reflect::get_type(component_name));
+                for (auto& c : comps)
+                {
+                    if (c.type == tid)
+                        return (&c)[component_nth];
+                }
+            }
+            return GenericHandle();
+        }
+
         static reflect::dynamic resolve_property_path(const reflect::dynamic& obj, string_view path)
         {
             size_t offset = 0;
@@ -86,12 +103,14 @@ namespace idk
             return false;
         }
 
-		static bool has_override(PrefabInstance& prefab_inst, string_view component_name, string_view property_path)
+		static bool has_override(PrefabInstance& prefab_inst, string_view component_name, string_view property_path, int component_nth)
 		{
 			for (auto& ov : prefab_inst.overrides)
 			{
-				if (ov.component_name == component_name)
+				if (ov.component_name != component_name)
 					continue;
+                if (ov.component_nth != component_nth)
+                    continue;
 
 				if (ov.property_path.size() == property_path.size())
 				{
@@ -122,14 +141,17 @@ namespace idk
             auto prefab = origin->prefab;
 			for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
 			{
-				if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin->GetGameObject())
-					continue;
+                if (prefab_inst.prefab != prefab ||
+                    prefab_inst.GetGameObject() == origin->GetGameObject() ||
+                    prefab_inst.object_index != origin->object_index)
+                    continue;
 
                 auto& comp = prefab->data[prefab_inst.object_index].components[component_index];
+                int component_nth = prefab->data[prefab_inst.object_index].GetComponentNth(component_index);
 				const auto component_name = comp.type.name();
-				if (!has_override(prefab_inst, component_name, property_path))
+				if (!has_override(prefab_inst, component_name, property_path, component_nth))
 				{
-					resolve_property_path(*prefab_inst.GetGameObject()->GetComponent(component_name), property_path) =
+					resolve_property_path(*helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth), property_path) =
 						resolve_property_path(comp, property_path);
 				}
 			}
@@ -140,18 +162,21 @@ namespace idk
             auto prefab = origin->prefab;
 			for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
 			{
-				if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin->GetGameObject())
+				if (prefab_inst.prefab != prefab ||
+                    prefab_inst.GetGameObject() == origin->GetGameObject() ||
+                    prefab_inst.object_index != origin->object_index)
 					continue;
 
 				prefab_inst.GetGameObject()->AddComponent(
                     prefab->data[prefab_inst.object_index].components[component_index]);
 			}
 		}
-        static void propagate_added_component(RscHandle<Prefab> prefab, int component_index)
+        static void propagate_added_component(RscHandle<Prefab> prefab, int object_index, int component_index)
         {
             for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
             {
-                if (prefab_inst.prefab != prefab)
+                if (prefab_inst.prefab != prefab ||
+                    prefab_inst.object_index != object_index)
                     continue;
 
                 prefab_inst.GetGameObject()->AddComponent(
@@ -159,45 +184,48 @@ namespace idk
             }
         }
 
-        static void propagate_removed_component(Handle<PrefabInstance> origin, string_view component_name, int component_add_index)
+        static void propagate_removed_component(Handle<PrefabInstance> origin, string_view component_name, int component_nth)
         {
             auto prefab = origin->prefab;
             for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
             {
-                if (prefab_inst.prefab != prefab || prefab_inst.GetGameObject() == origin->GetGameObject())
+                if (prefab_inst.prefab != prefab ||
+                    prefab_inst.GetGameObject() == origin->GetGameObject() ||
+                    prefab_inst.object_index != origin->object_index)
                     continue;
 
                 for (auto c : prefab_inst.GetGameObject()->GetComponents())
                 {
                     if ((*c).type.name() == component_name)
                     {
-                        if (component_add_index == 0)
+                        if (component_nth == 0)
                         {
                             prefab_inst.GetGameObject()->RemoveComponent(c);
                             break;
                         }
-                        --component_add_index;
+                        --component_nth;
                     }
                 }
             }
         }
-        static void propagate_removed_component(RscHandle<Prefab> prefab, string_view component_name, int component_add_index)
+        static void propagate_removed_component(RscHandle<Prefab> prefab, int object_index, string_view component_name, int component_nth)
         {
             for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
             {
-                if (prefab_inst.prefab != prefab)
+                if (prefab_inst.prefab != prefab ||
+                    prefab_inst.object_index != object_index)
                     continue;
 
                 for (auto c : prefab_inst.GetGameObject()->GetComponents())
                 {
                     if ((*c).type.name() == component_name)
                     {
-                        if (component_add_index == 0)
+                        if (component_nth == 0)
                         {
                             prefab_inst.GetGameObject()->RemoveComponent(c);
                             break;
                         }
-                        --component_add_index;
+                        --component_nth;
                     }
                 }
             }
@@ -323,6 +351,13 @@ namespace idk
         return handle;
     }
 
+	RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go, Guid guid)
+	{
+		auto handle = Core::GetResourceManager().LoaderCreateResource<Prefab>(guid);
+		_create(go, handle);
+		return handle;
+	}
+
 	RscHandle<Prefab> PrefabUtility::Save(Handle<GameObject> go, string_view save_path)
     {
         auto handle = [save_path]() {
@@ -375,7 +410,7 @@ namespace idk
             vector<reflect::dynamic> curr_ov_vals;
             for (auto& ov : prefab_inst.overrides)
             {
-                const auto comp_handle = go->GetComponent(ov.component_name);
+                const auto comp_handle = helpers::get_component(go, ov.component_name, ov.component_nth);
                 if (!comp_handle)
                     curr_ov_vals.emplace_back();
                 else
@@ -387,7 +422,7 @@ namespace idk
             vector<reflect::dynamic> default_ov_vals;
             for (auto& ov : helpers::default_overrides)
             {
-                const auto comp_handle = go->GetComponent(ov.component_name);
+                const auto comp_handle = helpers::get_component(go, ov.component_name, ov.component_nth);
                 if (!comp_handle)
                     default_ov_vals.emplace_back();
                 else
@@ -398,9 +433,11 @@ namespace idk
             }
 
             // replace prefab objects with instance objects
+            int counters[ComponentCount]{ 0 };
 			for (const auto& c : prefab_inst.prefab->data[prefab_inst.object_index].components)
 			{
-                if (const auto handle = go->GetComponent(c.type)) // if component exists
+                auto index = GameState::GetGameState().GetTypeID(c.type) - 1;
+                if (const auto handle = helpers::get_component(go, c.type.name(), counters[index]++)) // if component exists
                 {
                     // memberwise copy
                     auto dyn = *handle;
@@ -415,7 +452,7 @@ namespace idk
                 if (!curr_ov_vals[i].valid())
                     continue;
                 auto& ov = prefab_inst.overrides[i];
-                const auto comp_handle = go->GetComponent(ov.component_name);
+                const auto comp_handle = helpers::get_component(go, ov.component_name, ov.component_nth);
                 helpers::resolve_property_path(*comp_handle, ov.property_path) = curr_ov_vals[i];
             }
             for (int i = 0; i < helpers::num_default_overrides; ++i)
@@ -423,26 +460,26 @@ namespace idk
                 if (!default_ov_vals[i].valid())
                     continue;
                 auto& ov = helpers::default_overrides[i];
-                const auto comp_handle = go->GetComponent(ov.component_name);
+                const auto comp_handle = helpers::get_component(go, ov.component_name, ov.component_nth);
                 helpers::resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[i];
             }
         }
     }
 
-    void PrefabUtility::PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path)
+    void PrefabUtility::PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path, int component_nth)
     {
-        PropertyOverride prop_override{ string{component_name}, string{property_path} };
+        PropertyOverride prop_override{ string{component_name}, string{property_path}, component_nth };
         for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
         {
             if (prefab_inst.prefab != prefab)
                 continue;
-            if (helpers::has_override(prefab_inst, component_name, property_path))
+            if (helpers::has_override(prefab_inst, component_name, property_path, component_nth))
                 continue;
             if (helpers::is_default_override(prop_override))
                 continue;
 
-            helpers::resolve_property_path(*prefab_inst.GetGameObject()->GetComponent(component_name), property_path) =
-                helpers::resolve_property_path(prefab->data[object_index].FindComponent(component_name), property_path);
+            helpers::resolve_property_path(*helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth), property_path) =
+                helpers::resolve_property_path(prefab->data[object_index].FindComponent(component_name, component_nth), property_path);
         }
     }
 
@@ -450,7 +487,7 @@ namespace idk
     {
         auto& data = prefab->data[object_index].components;
         data.push_back(component);
-        helpers::propagate_added_component(prefab, static_cast<int>(data.size() - 1));
+        helpers::propagate_added_component(prefab, object_index, static_cast<int>(data.size() - 1));
     }
 
     void PrefabUtility::RemoveComponentFromPrefab(RscHandle<Prefab> prefab, int object_index, int component_index)
@@ -463,7 +500,7 @@ namespace idk
             if (data[i].type == type)
                 ++add_index;
         }
-        helpers::propagate_removed_component(prefab, type.name(), add_index);
+        helpers::propagate_removed_component(prefab, object_index, type.name(), add_index);
         data.erase(data.begin() + component_index);
     }
 
@@ -472,13 +509,20 @@ namespace idk
         auto prefab_inst = target->GetComponent<PrefabInstance>();
         assert(prefab_inst);
 
-        PropertyOverride override;
-        override.component_name = (*component).type.name();
-        override.property_path = property_path;
+        const span components = target->GetComponents();
+        int component_nth = -1;
+        for (const auto& c : components)
+        {
+            if (c.type == component.type)
+                ++component_nth;
+            if (c == component)
+                break;
+        }
+        PropertyOverride override{ string((*component).type.name()), string(property_path), component_nth };
 
         if (helpers::is_default_override(override))
             return;
-        if (helpers::has_override(*prefab_inst, override.component_name, property_path))
+        if (helpers::has_override(*prefab_inst, override.component_name, property_path, component_nth))
             return;
 
         prefab_inst->overrides.push_back(override);
@@ -492,7 +536,7 @@ namespace idk
         const Prefab& prefab = *prefab_inst.prefab;
         const Handle<GameObject> target = prefab_inst.GetGameObject();
 
-        const auto comp_handle = target->GetComponent(override.component_name);
+        const auto comp_handle = helpers::get_component(target, override.component_name, override.component_nth);
         if (!comp_handle)
             return;
 
@@ -501,7 +545,7 @@ namespace idk
             return;
 
         auto prop_prefab = helpers::resolve_property_path(
-            prefab.data[prefab_inst.object_index].FindComponent(override.component_name), override.property_path);
+            prefab.data[prefab_inst.object_index].FindComponent(override.component_name, override.component_nth), override.property_path);
         if (!prop_prefab.valid())
             return;
 
@@ -517,7 +561,8 @@ namespace idk
         for (auto iter = prefab_inst.overrides.begin(); iter != prefab_inst.overrides.end(); ++iter)
         {
             if (iter->component_name == override.component_name &&
-                iter->property_path == override.property_path)
+                iter->property_path == override.property_path &&
+                iter->component_nth == override.component_nth)
             {
                 prefab_inst.overrides.erase(iter);
                 return;
@@ -549,13 +594,13 @@ namespace idk
         prefab_inst->prefab->Dirty();
 	}
 
-    void PrefabUtility::ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_add_index)
+    void PrefabUtility::ApplyRemovedComponent(Handle<GameObject> target, string_view component_name, int component_nth)
     {
         assert(target->GetComponent<PrefabInstance>());
         auto prefab_inst = target->GetComponent<PrefabInstance>();
 
         auto& data = prefab_inst->prefab->data[prefab_inst->object_index].components;
-        auto index = component_add_index;
+        auto index = component_nth;
         for (auto iter = data.begin(); iter != data.end(); ++iter)
         {
             if (iter->type.name() == component_name)
@@ -569,7 +614,7 @@ namespace idk
             }
         }
 
-        helpers::propagate_removed_component(prefab_inst, component_name, component_add_index);
+        helpers::propagate_removed_component(prefab_inst, component_name, component_nth);
         prefab_inst->prefab->Dirty();
     }
 
@@ -581,13 +626,13 @@ namespace idk
 		Prefab& prefab = *target.prefab;
 
 		auto prop_prefab = helpers::resolve_property_path(
-			prefab.data[target.object_index].FindComponent(override.component_name), override.property_path);
+			prefab.data[target.object_index].FindComponent(override.component_name, override.component_nth), override.property_path);
 		if (!prop_prefab.valid())
 			return;
 
         const Handle<GameObject> go = target.GetGameObject();
 
-		const auto comp_handle = go->GetComponent(override.component_name);
+		const auto comp_handle = helpers::get_component(go, override.component_name, override.component_nth);
 		if (!comp_handle)
 			return;
 
@@ -608,14 +653,15 @@ namespace idk
 		for (auto iter = prefab_inst.overrides.begin(); iter != prefab_inst.overrides.end(); ++iter)
 		{
 			if (iter->component_name == override.component_name &&
-				iter->property_path == override.property_path)
+				iter->property_path == override.property_path &&
+				iter->component_nth == override.component_nth)
 			{
 				prefab_inst.overrides.erase(iter);
 				break;
 			}
 		}
 
-        const int c_index = prefab_inst.prefab->data[prefab_inst.object_index].GetComponentIndex(override.component_name);
+        const int c_index = prefab_inst.prefab->data[prefab_inst.object_index].GetComponentIndex(override.component_name, override.component_nth);
         helpers::propagate_property(prefab_inst_handle, c_index, override.property_path);
 
         prefab_inst.prefab->Dirty();
@@ -683,7 +729,7 @@ namespace idk
             for (auto & override : obj_prefab_inst->overrides)
             {
                 _apply_property_override(*obj_prefab_inst, override);
-                int c_index = prefab->data[obj_prefab_inst->object_index].GetComponentIndex(override.component_name);
+                int c_index = prefab->data[obj_prefab_inst->object_index].GetComponentIndex(override.component_name, override.component_nth);
                 helpers::propagate_property(obj_prefab_inst, c_index, override.property_path);
             }
             obj_prefab_inst->overrides.clear();

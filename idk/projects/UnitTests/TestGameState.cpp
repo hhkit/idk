@@ -27,6 +27,15 @@ TEST(GameState, TestHandles)
 	EXPECT_TRUE(gs.ActivateScene(0));
 	auto h = gs.CreateObject<GameObject>(0);
 	auto hTransform = h->AddComponent<Transform>();
+	h->AddComponent<Collider>();
+	h->AddComponent<Collider>();
+	auto removeme = h->AddComponent<Collider>();
+	EXPECT_EQ(h->GetComponents<Collider>().size(), 3);
+	h->RemoveComponent(removeme);
+	gs.DestroyQueue();
+	EXPECT_EQ(h->GetComponents<Collider>().size(), 2);
+	EXPECT_EQ(h->GetComponents<MeshRenderer>().size(), 0);
+
 	auto gh = GenericHandle{ h };
 	EXPECT_TRUE(h);
 	EXPECT_TRUE(&*h);

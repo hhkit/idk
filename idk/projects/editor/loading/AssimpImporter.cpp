@@ -157,7 +157,7 @@ namespace idk
 			return ret_val;
 		}
 
-		const auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto scene = Core::GetSystem<SceneManager>().GetPrefabScene();
 		const auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
 		if (importer_scene.has_meshes && importer_scene.has_skeleton)
@@ -254,7 +254,7 @@ namespace idk
 				{
 					RscHandle<ogl::OpenGLMesh> mesh_handle;
 					{
-						auto rsc_exists = meta_bundle.FetchMeta(elem->mName.data);
+						auto rsc_exists = meta_bundle.FetchMeta<Mesh>(elem->mName.data);
 						if (rsc_exists)
 							mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>(rsc_exists->guid);
 						else
@@ -274,7 +274,7 @@ namespace idk
 				{
 					RscHandle<vkn::VulkanMesh> mesh_handle;
 					{
-						auto rsc_exists = meta_bundle.FetchMeta(elem->mName.data);
+						auto rsc_exists = meta_bundle.FetchMeta<Mesh>(elem->mName.data);
 						if (rsc_exists)
 							mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<vkn::VulkanMesh>(rsc_exists->guid);
 						else
@@ -301,7 +301,7 @@ namespace idk
 			// initializing the handle
 			// RscHandle<anim::Skeleton> skeleton_handle;
 			{
-				auto search_res = meta_bundle.FetchMeta(importer_scene.final_skeleton[0]._name);
+				auto search_res = meta_bundle.FetchMeta<anim::Skeleton>(importer_scene.final_skeleton[0]._name);
 				if (search_res)
 					skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>(search_res->guid);
 				else
@@ -325,7 +325,7 @@ namespace idk
 				// Initialize the resource handle
 				RscHandle<anim::Animation> anim_clip_handle;
 				{
-					auto search_res = meta_bundle.FetchMeta(compiled_animation.name);
+					auto search_res = meta_bundle.FetchMeta<anim::Animation>(compiled_animation.name);
 					if (search_res)
 						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>(search_res->guid);
 					else
@@ -364,7 +364,7 @@ namespace idk
 			return ret_val;
 		}
 
-		const auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		const auto scene = Core::GetSystem<SceneManager>().GetPrefabScene();
 		const auto prefab_root = scene->CreateGameObject();
 		prefab_root->Name(path_to_resource.GetStem());
 		if (importer_scene.has_meshes && importer_scene.has_skeleton)
@@ -408,9 +408,14 @@ namespace idk
 			}
 		}
 		
-		const auto prefab_handle = PrefabUtility::Create(prefab_root);
-		prefab_handle->Name(path_to_resource.GetStem());
-		ret_val.Add(prefab_handle);
+		{
+			auto prefab_meta = meta_bundle.FetchMeta<Prefab>();
+			const auto prefab_handle = prefab_meta 
+				? PrefabUtility::Create(prefab_root, prefab_meta->guid) 
+				: PrefabUtility::Create(prefab_root);
+			prefab_handle->Name(path_to_resource.GetStem());
+			ret_val.Add(prefab_handle);
+		}
 		scene->DestroyGameObject(prefab_root);
 		return ret_val;
 	}

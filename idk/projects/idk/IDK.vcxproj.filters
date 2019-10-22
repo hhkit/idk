@@ -119,6 +119,9 @@
     <Filter Include="anim\utils">
       <UniqueIdentifier>{a0b9bd32-3f41-447e-8853-eb3f7c9586d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="proj">
+      <UniqueIdentifier>{1142d1c7-1839-4bbc-999f-17503782be59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -707,16 +710,10 @@
     <ClInclude Include="anim\AnimationState.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="proj\ProjectManager.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="common\TagManager.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="script\MonoBehaviorEnvironment.h">
-      <Filter>script</Filter>
-    </ClInclude>
-    <ClInclude Include="script\MonoWrapperEnviroment.h">
       <Filter>script</Filter>
     </ClInclude>
     <ClInclude Include="script\ValueBoxer.h">
@@ -765,6 +762,10 @@
     <ClInclude Include="serialize\text.h">
       <Filter>serialize</Filter>
     </ClInclude>
+    <ClInclude Include="script\MonoWrapperEnvironment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ValueUnboxer.h" />
     <ClInclude Include="anim\AnimationLayer.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -776,6 +777,9 @@
     </ClInclude>
     <ClInclude Include="anim\AnimationUtils.inl">
       <Filter>anim\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="proj\ProjectManager.h">
+      <Filter>proj</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1080,16 +1084,10 @@
     <ClCompile Include="script\MonoEnvironment.cpp">
       <Filter>script</Filter>
     </ClCompile>
-    <ClCompile Include="proj\ProjectManager.cpp">
-      <Filter>scene</Filter>
-    </ClCompile>
     <ClCompile Include="common\TagManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="script\MonoBehaviorEnvironment.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="script\MonoWrapperEnviroment.cpp">
       <Filter>script</Filter>
     </ClCompile>
     <ClCompile Include="script\ValueBoxer.cpp">
@@ -1119,6 +1117,10 @@
     <ClCompile Include="serialize\text_parse.cpp">
       <Filter>serialize</Filter>
     </ClCompile>
+    <ClCompile Include="script\MonoWrapperEnvironment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ValueUnboxer.cpp" />
     <ClCompile Include="anim\AnimationLayer.cpp">
       <Filter>anim</Filter>
     </ClCompile>
@@ -1127,6 +1129,9 @@
     </ClCompile>
     <ClCompile Include="anim\AnimationState.cpp">
       <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="proj\ProjectManager.cpp">
+      <Filter>proj</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1307,6 +1312,7 @@
     <None Include="serialize\text.inl">
       <Filter>serialize</Filter>
     </None>
+    <None Include="script\ManagedObj.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

@@ -199,7 +199,7 @@ REFLECT_VARS(data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
-REFLECT_VARS(component_name, property_path)
+REFLECT_VARS(component_name, property_path, component_nth)
 REFLECT_END()
 
 // shader graph:
@@ -252,6 +252,13 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager::SceneBlock, "SceneBlock")
 REFLECT_VARS(build_index, scene)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::mono::ScriptSystemConfig, "ScriptConfig")
+REFLECT_VARS(path_to_game_dll)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::mono::ScriptSystem, "ScriptSystem")
 REFLECT_END()
 
 /*==========================================================================

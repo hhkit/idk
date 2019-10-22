@@ -31,7 +31,6 @@ of the editor.
 #include <win32/WindowsApplication.h>
 #include <sstream> //sstream
 
-#include <phys/PhysicsSystem.h>
 
 #include <iostream>
 
@@ -86,6 +85,45 @@ namespace idk {
 
         if (ImGui::BeginDragDropTarget())
         {
+			//Draw where it is going to be created in at
+
+			Handle<Camera> cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+			vec3 objectFinalPos{};
+
+			currRay = GenerateRayFromCurrentScreen();
+			vector<Handle<GameObject>> objs;
+			vector<phys::raycast_result> rayList;
+
+			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, objs, rayList))
+			{
+				auto gameObjectRayPair = GetClosestGameObjectFromCamera(objs, rayList);
+				objectFinalPos = gameObjectRayPair.second->point_of_collision; //WIP, does not work with spheres proper
+			
+			}
+			else {
+				objectFinalPos = currRay.origin + currRay.direction() * 10;
+			}
+
+			ray pointingRay{};
+			pointingRay.origin = objectFinalPos; //z
+			pointingRay.origin.z -= 0.5f;
+			pointingRay.velocity.z = 1;
+			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 0.0f,0.0f,1.0f,0.5f }, Core::GetDT());
+			pointingRay.origin.z += 0.5f; //x
+			pointingRay.velocity.z = 0;
+			pointingRay.origin.x -= 0.5f;
+			pointingRay.velocity.x = 1;
+			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 1.0f,0.0f,0.0f,0.5f }, Core::GetDT());
+			pointingRay.origin.x += 0.5f; //y
+			pointingRay.velocity.x = 0;
+			pointingRay.origin.y -= 0.5f;
+			pointingRay.velocity.y = 1;
+			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 0.0f,1.0f,0.0f,0.5f }, Core::GetDT());
+
+
+
+
+
             if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
             {
                 auto res_payload = DragDrop::GetResourcePayloadData();
@@ -98,8 +136,7 @@ namespace idk {
                         continue;
 
                     auto go = PrefabUtility::Instantiate(h.AsHandle<Prefab>(), *Core::GetSystem<SceneManager>().GetActiveScene());
-                    Handle<Camera> cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
-                    go->Transform()->position = cam->currentPosition() + cam->GetGameObject()->Transform()->Forward();
+					go->Transform()->position = objectFinalPos;
                     break;
                 }
             }
@@ -120,8 +157,7 @@ namespace idk {
 			//Select gameobject here!
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
-			vector<phys::raycast_result> rayList;
-			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj, rayList))
+			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
 			{
 				//Sort the obj by closest dist to point
 				//get the first obj
@@ -349,6 +385,30 @@ namespace idk {
 		ImGui::SetCursorPos(originalCursorPos);
 	}
 
+	std::pair<Handle<GameObject>, phys::raycast_result> IGE_SceneView::GetClosestGameObjectFromCamera(vector<Handle<GameObject>>& refVector, vector<phys::raycast_result>& rayResult)
+	{
+		std::pair<Handle<GameObject>, phys::raycast_result> output{};
+		if (refVector.size() == 0)
+			return output;
+
+		IDE& editor = Core::GetSystem<IDE>();
+
+		int counter = 0;
+		auto cameraPos = editor.currentCamera().current_camera->currentPosition();
+		float distanceToCamera = refVector[counter]->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
+		for (int i = 0; i < refVector.size(); ++i) {
+			float comparingDistance = cameraPos.distance(refVector[i]->GetComponent<Transform>()->position);
+			if (comparingDistance < distanceToCamera) {
+				counter = i;
+				distanceToCamera = refVector[counter]->GetComponent<Transform>()->position.distance(cameraPos); //Replace
+			}
+		}
+		output.first = refVector[counter];
+		output.second = rayResult[counter];
+
+		return output;
+	}
+
 	void IGE_SceneView::UpdateWASDMouseControl()
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -468,7 +528,7 @@ namespace idk {
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
 		if (editor.selected_gameObjects.size()) {
-			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->GetComponent<Transform>(); 
+			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->Transform(); 
 
 
 			if (gameObjectTransform) {
@@ -570,7 +630,6 @@ namespace idk {
 	ray IGE_SceneView::GenerateRayFromCurrentScreen()
 	{
 		//auto& app_sys = Core::GetSystem<Application>();
-		IDE& editor = Core::GetSystem<IDE>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;

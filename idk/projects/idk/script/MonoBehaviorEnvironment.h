@@ -9,6 +9,7 @@ namespace idk::mono
 	public:
 		MonoBehaviorEnvironment(string_view full_path_to_game_dll);
 		~MonoBehaviorEnvironment();
+		void Init() override;
 		void Execute();
 		ManagedType* GetBehaviorMetadata(string_view name);
 	private:

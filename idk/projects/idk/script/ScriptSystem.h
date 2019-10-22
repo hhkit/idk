@@ -4,7 +4,7 @@
 #include <deque>
 #include <mono/jit/jit.h>
 
-#include <core/ISystem.h>
+#include <core/ConfigurableSystem.h>
 #include <script/MonoBehaviorData.h>
 
 namespace idk::mono
@@ -13,13 +13,17 @@ namespace idk::mono
 	class MonoEnvironment;
 	class MonoBehaviorEnvironment;
 
+	struct ScriptSystemConfig
+	{
+		string path_to_game_dll = "/scripts/bin/TestAndSeek.dll";
+	};
+
 	class ScriptSystem
-		: public ISystem
+		: public ConfigurableSystem<ScriptSystemConfig>
 	{
 	public:
-		string path_to_game_dll = "/scripts/bin/Debug/TestAndSeek.dll";
-
 		ScriptSystem();
+		ScriptSystem(const ScriptSystem&);
 		~ScriptSystem();
 
 		// for the sake of clarity, these update phases are done in sequence of declaration
@@ -32,6 +36,7 @@ namespace idk::mono
 		MonoEnvironment& Environment() const;
 		MonoBehaviorEnvironment& ScriptEnvironment() const;
 
+		void ApplyConfig(Config& config) override;
 		void RefreshGameScripts();
 
 		Handle<Behavior>       GetMonoBehaviorInstance(std::string_view type);
@@ -47,11 +52,7 @@ namespace idk::mono
 		void UnloadGameScripts();
 
 		void Init() override;
+		void LateInit() override;
 		void Shutdown() override;
-
-		ScriptSystem(const ScriptSystem&) = delete;
-		ScriptSystem(ScriptSystem&&) noexcept = delete;
-		ScriptSystem& operator=(const ScriptSystem&) = delete;
-		ScriptSystem& operator=(ScriptSystem&&) noexcept = delete;
 	};
 }

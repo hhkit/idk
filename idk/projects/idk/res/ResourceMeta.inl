@@ -18,7 +18,7 @@ namespace idk
 	template<typename Res, typename>
 	opt<typename Res::Metadata> SerializedMeta::GetMeta() const
 	{
-        if (t_hash == reflect::template typehash<Res>())
+        if (t_hash == reflect::template get_type<Res>().name())
         {
             auto res = parse_text<typename Res::Metadata>(metadata);
             if (res)

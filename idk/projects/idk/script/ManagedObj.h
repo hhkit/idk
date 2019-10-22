@@ -16,16 +16,25 @@ namespace idk::mono
 		ManagedObject& operator=(ManagedObject&&) noexcept;
 		~ManagedObject();
 
+		// properties
+		MonoObject*        Raw() const noexcept;
+		const ManagedType* Type() noexcept;
+		string_view        TypeName() const;
+
+		// mutators
 		void Assign(string_view field, MonoObject* obj);
 		template<typename T>
 		void Assign(string_view field, T& obj);
 		template<typename T>
 		T Get(string_view field);
-		MonoObject* Fetch() const noexcept;
 
 		explicit operator bool() const;
 
-		const ManagedType* Type() noexcept;
+		template<typename T> void Visit(T&& functor);
+		template<typename T> void Visit(T&& functor) const;
+
+		template<typename T> void VisitImpl(T&& functor, int& depth_change);
+		template<typename T> void VisitImpl(T&& functor, int& depth_change) const;
 	private:
 		uint32_t _gc_handle{};
 		const ManagedType* _type{};
@@ -38,7 +47,7 @@ namespace idk::mono
 	template<typename T>
 	inline void ManagedObject::Assign(string_view fieldname, T& obj)
 	{
-		auto me = Fetch();
+		auto me = Raw();
 		auto field = Field(fieldname);
 
 		if (field)
@@ -50,5 +59,6 @@ namespace idk::mono
 			}
 		}
 	}
-
 }
+
+#include "ManagedObj.inl"

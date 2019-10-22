@@ -15,6 +15,7 @@
 #include <script/ManagedObj.h>
 #include <script/ScriptSystem.h>
 #include <script/MonoBehavior.h>
+#include <script/ValueUnboxer.h>
 
 #include <core/GameObject.h>
 
@@ -28,7 +29,6 @@ namespace idk::mono
 		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
 
 		ScanTypes();
-		FindMonoBehaviors();
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
 	{
@@ -42,6 +42,10 @@ namespace idk::mono
 
 		_domain = nullptr;
 		_assembly = nullptr;
+	}
+	void MonoBehaviorEnvironment::Init()
+	{
+		FindMonoBehaviors();
 	}
 	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
 	{
@@ -88,10 +92,26 @@ namespace idk::mono
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
 			thunk.Invoke(obj, vec3{ 8,9,10 });
 		}
+		
 		{
 			IDK_ASSERT(test->CacheThunk("TestTransform", 1));
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("TestTransform", 1));
 			thunk.Invoke(obj, tfm_obj);
+		}
+		{
+			ManagedObject managed{ obj };
+			int depth{ };
+			managed.VisitImpl([](auto&& key, auto&& val, int) { 
+				using T = std::decay_t<decltype(val)>;
+				if constexpr (std::is_same_v<T, int>)
+					val += 5;
+				
+				std::cout << "YOLO:" << key << ":" << reflect::get_type<T>().name() << "\n"; 
+				}, depth);
+			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
+			thunk.Invoke(obj, vec3{ 8,9,10 });
+
+			std::cout << "SERIALIZED TEST:" << serialize_text(*mb);
 		}
 	}
 	void MonoBehaviorEnvironment::FindMonoBehaviors()
