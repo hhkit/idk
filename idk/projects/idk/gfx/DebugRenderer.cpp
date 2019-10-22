@@ -16,7 +16,7 @@ namespace idk
 	}
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{
-		const mat4 tfm = translate(oriented_box.center) * mat4 { scale(oriented_box.extents)* oriented_box.axes };
+		const mat4 tfm = translate(oriented_box.center) * mat4 { oriented_box.axes * scale(oriented_box.extents) };
 		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
 	}
 
