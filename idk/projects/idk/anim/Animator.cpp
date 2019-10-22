@@ -59,7 +59,7 @@ namespace idk
 			{
 				string append = " 0";
 				int count = 1;
-				while (animation_table.find(name + append) == animation_table.end())
+				while (animation_table.find(name + append) != animation_table.end())
 				{
 					// Generate a unique name
 					append = " " + std::to_string(count);
@@ -76,7 +76,7 @@ namespace idk
 			string append = "0";
 			// Check if name exists
 			int count = 1;
-			while (animation_table.find(name + append) == animation_table.end())
+			while (animation_table.find(name + append) != animation_table.end())
 			{
 				// Generate a unique name
 				append = " " + std::to_string(count);
@@ -84,6 +84,25 @@ namespace idk
 			name += append;
 			animation_table.emplace(name, AnimationState{ name, true });
 		}
+	}
+
+	void Animator::AddLayer()
+	{
+		
+		string name = "New Layer ";
+		string append = "0";
+		// Check if name exists
+		int count = 1;
+		while (layer_table.find(name + append) != layer_table.end())
+		{
+			// Generate a unique name
+			append = " " + std::to_string(count);
+		}
+		AnimationLayer new_layer{};
+		new_layer.name = name + append;
+		new_layer.curr_poses.resize(skeleton->data().size());
+		layer_table.emplace(name, layers.size());
+		layers.push_back(new_layer);
 	}
 
 	void Animator::RemoveAnimation(string_view name)
@@ -108,7 +127,9 @@ namespace idk
 #pragma region Editor Functionality
 	void Animator::Reset()
 	{
-		layers[0].Reset();
+		preview_playback = false;
+		for(auto& layer : layers)
+			layer.Reset();
 	}
 
 #pragma endregion
@@ -128,12 +149,21 @@ namespace idk
 
 	void Animator::Pause()
 	{
-		layers[0].Pause();
+		for (auto& layer : layers)
+		{
+			layer.Pause();
+		}
+		
+		preview_playback = false;
 	}
 
 	void Animator::Stop()
 	{
-		layers[0].Stop();
+		for (auto& layer : layers)
+		{
+			layer.Stop();
+		}
+		preview_playback = false;
 	}
 
 	int Animator::GetInt(string_view name) const

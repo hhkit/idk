@@ -29,7 +29,7 @@ namespace idk
 		float total_time = 0.0f;
 
 		string curr_state{}, blend_state{};
-		bool is_playing = false, is_stopping = false, preview_playback = false;
+		bool is_playing = false, is_stopping = false;
 		vector<matrix_decomposition<real>> curr_poses;
 
 		void Play(string_view animation_name, float offset);

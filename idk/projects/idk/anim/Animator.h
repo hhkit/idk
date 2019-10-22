@@ -24,6 +24,7 @@ namespace idk
 		
 		// Engine Setters
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
+		void AddLayer();
 		void RemoveAnimation(string_view name);
 
 		// Editor Functionality
@@ -70,14 +71,14 @@ namespace idk
 		vector<mat4> pre_global_transforms{ mat4{} };
 		// This is what we send to the graphics system.
 		vector<mat4> final_bone_transforms{ mat4{} };
-		
+		bool preview_playback = false;
 	private:
 		friend class AnimationSystem;
 
 		// AnimationSystem will update all local transforms for the child objects
 		vector<Handle<GameObject>> _child_objects;
 		vector<matrix_decomposition<real>> _bind_pose;
-
+		
 		inline static AnimationState null_state{};
 	};
 }

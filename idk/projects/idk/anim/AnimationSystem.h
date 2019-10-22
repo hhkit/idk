@@ -24,12 +24,13 @@ namespace idk
 		void HardReset(Animator& animator);
 
 	private:
-		
+		using BonePose = matrix_decomposition<real>;
 		bool _was_paused = true;
 		float _blend = 0.0f;
 
 		// Animation passes: Animate -> Blend -> Layers(merging all layers) -> Finalize
 		void AnimationPass(Animator& animator, AnimationLayer& layer);
+		BonePose BlendPose(const BonePose& from, const BonePose& to, float delta);
 		void LayersPass(Animator& animator);
 		void FinalPass(Animator& animator, AnimationLayer& layer);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);

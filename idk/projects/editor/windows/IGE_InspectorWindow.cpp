@@ -491,6 +491,83 @@ namespace idk {
 
 		ImGui::Text("Animation Clips");
 		ImGui::Separator();
+		for (auto& layer: c_anim->layers)
+		{
+			bool not_removed = true;
+			// Will change this to use something other than collapsing header. 
+			if (ImGui::CollapsingHeader(layer.name.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap))
+			{
+				ImGui::Indent(25);
+				//ImGui::PushItemWidth(100);
+					// ImGui::PopItemWidth();
+				static const char* layer_types[3] = { "Base", "Override", "Additive" };
+				if (ImGui::BeginCombo("Blending", layer_types[s_cast<size_t>(layer.blend_type)]))
+				{
+					for (size_t i = 0; i < 3; ++i)
+					{
+						if (ImGui::Selectable(layer_types[i]), i == s_cast<size_t>(layer.blend_type))
+						{
+							layer.blend_type = s_cast<AnimLayerBlend>(i);
+						}
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::NewLine();
+				if (c_anim->preview_playback)
+				{
+					ImGui::DragFloat("Weight", &layer.weight, 0.01f, 0.0f, 1.0f);
+				}
+				else
+				{
+					ImGui::DragFloat("Weight", &layer.default_weight, 0.01f, 0.0f, 1.0f);
+				}
+				
+				ImGui::NewLine();
+				if (ImGui::BeginCombo("Default State", c_anim->GetAnimationState(layer.default_state).name.c_str()))
+				{
+					for (auto& anim : c_anim->animation_table)
+					{
+						string_view curr_name = anim.second.name;
+						if (ImGui::Selectable(curr_name.data(), layer.default_state == curr_name))
+						{
+							// c_anim->Stop();
+							layer.default_state = curr_name;
+							if (layer.curr_state == string{})
+								layer.curr_state = curr_name;
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				if (ImGui::BeginCombo("Current State", c_anim->GetAnimationState(layer.curr_state).name.c_str()))
+				{
+					for (auto& anim : c_anim->animation_table)
+					{
+						string_view curr_name = anim.second.name;
+						if (ImGui::Selectable(curr_name.data(), layer.curr_state == curr_name))
+						{
+							// Reset the animation
+							layer.normalized_time = 0.0f;
+							// Set the new current animation
+							layer.curr_state = curr_name;
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				ImGui::NewLine();
+				ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
+				ImGui::NewLine();
+				ImGui::Unindent(25);
+			}
+		}
+		if(ImGui::Button("Add Animtion Layer"))
+		{
+			c_anim->AddLayer();
+		}
+
+		ImGui::Text("Animation Clips");
+		ImGui::Separator();
 		for (auto& curr_state : c_anim->animation_table)
 		{
 			bool not_removed = true;
@@ -498,10 +575,7 @@ namespace idk {
 			if(ImGui::CollapsingHeader(curr_state.first.data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
 			{
 				ImGui::Indent(50);
-				//ImGui::PushItemWidth(100);
 				
-				// ImGui::PopItemWidth();
-
 				if (curr_state.second.IsBlendTree())
 				{
 					ImGui::Text("Blend Tree");
@@ -534,53 +608,17 @@ namespace idk {
 		}
 
 		ImGui::NewLine();
-
-		if (ImGui::BeginCombo("Default State", c_anim->GetAnimationState(c_anim->layers[0].default_state).name.c_str()))
+		if (ImGui::Checkbox("Preview", &c_anim->preview_playback))
 		{
-			for (auto& anim : c_anim->animation_table)
+			if (!c_anim->preview_playback)
 			{
-				string_view curr_name = anim.second.name;
-				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
+				for (auto& layer : c_anim->layers)
 				{
-					// c_anim->Stop();
-					c_anim->layers[0].default_state = curr_name;
-					if (c_anim->layers[0].curr_state == string{})
-						c_anim->layers[0].curr_state = curr_name;
+					layer.normalized_time = 0.0f;
 				}
+				Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
 			}
-			ImGui::EndCombo();
 		}
-
-		if (ImGui::BeginCombo("Current State", c_anim->GetAnimationState(c_anim->layers[0].curr_state).name.c_str()))
-		{
-			for (auto& anim : c_anim->animation_table)
-			{
-				string_view curr_name = anim.second.name;
-				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].curr_state == curr_name))
-				{
-					// Reset the animation
-					c_anim->layers[0].normalized_time = 0.0f;
-					// Set the new current animation
-					c_anim->layers[0].curr_state = curr_name;
-				}
-			}
-			ImGui::EndCombo();
-		}
-		bool has_curr_anim = c_anim->layers[0].curr_state != string{};
-		if (has_curr_anim)
-		{
-			if (ImGui::Checkbox("Preview Current State", &c_anim->layers[0].preview_playback))
-			{
-				if (!c_anim->layers[0].preview_playback)
-				{
-					c_anim->layers[0].normalized_time = 0.0f;
-                    Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
-				}
-			}
-
-			ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
-		}
-			
 		// FOR TESTING 
 		ImGui::Text("TESTING");
 		ImGui::Separator();

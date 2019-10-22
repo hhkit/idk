@@ -70,21 +70,25 @@ namespace idk
 		for (auto& elem : animators)
 		{
 			// TODO: Loop over layers here
-			auto& anim_state = elem.GetAnimationState(elem.layers[0].curr_state);
-			if (!anim_state.enabled)
-				continue;
-
-			// We don't support blend trees yet
-			if (anim_state.IsBlendTree())
-				continue;
-
-			auto anim_data = anim_state.GetBasicState();
-			if (elem.layers[0].preview_playback && anim_data->motion)
+			for (auto& layer : elem.layers)
 			{
-				AnimationPass(elem, elem.layers[0]);
-				LayersPass(elem);
-			}
+				auto& anim_state = elem.GetAnimationState(layer.curr_state);
+				if (!anim_state.enabled)
+					continue;
 
+				// We don't support blend trees yet
+				if (anim_state.IsBlendTree())
+					continue;
+
+				auto anim_data = anim_state.GetBasicState();
+				if (elem.preview_playback && anim_data->motion)
+				{
+					AnimationPass(elem, layer);
+				}
+				
+			}
+			if(elem.preview_playback)
+				LayersPass(elem);
 			FinalPass(elem, elem.layers[0]);
 		}
 	}
@@ -113,7 +117,7 @@ namespace idk
 			}
 		}
 		
-		const float ticks = animator.layers[0].normalized_time * motion->GetNumTicks();
+		const float ticks = layer.normalized_time * motion->GetNumTicks();
 		// const float num_ticks = anim->GetNumTicks();
 		// const float time_in_ticks = fmod(ticks, num_ticks);
 		_blend = 0.0f;// animator.layers[0].blend_time;
@@ -145,42 +149,77 @@ namespace idk
 		}
 
 		// Check if the animator wants to stop after this update
-		if (animator.layers[0].is_stopping == true)
+		if (layer.is_stopping == true)
 		{
-			animator.layers[0].is_playing = false;
-			animator.layers[0].preview_playback = false;
-			animator.layers[0].is_stopping = false;
+			layer.is_playing = false;
+			layer.is_stopping = false;
 			return;
 		}
 
 		// Compute the time
 		layer.normalized_time += Core::GetRealDT().count() / motion->GetDuration() * anim_state.speed;
-	
+	}
+
+	AnimationSystem::BonePose AnimationSystem::BlendPose(const BonePose& from, const BonePose& to, float delta)
+	{
+		BonePose result;
+		result.position = lerp(from.position, to.position, delta);
+		result.rotation = slerp(from.rotation, to.rotation, delta);
+		result.scale = lerp(from.scale, to.scale, delta);
+		return result;
+
 	}
 
 	void AnimationSystem::LayersPass(Animator& animator)
 	{
 		// TODO: Blend layer poses here
 		// Start looping from the top. 
-		// We compute the actual weight of each bone this layer applies by: weight_left * layer_weight
-		// We then subtract the actual weight from the bone's weight_left.
-		// This also means that when we interpolate the animation, each bone can have different weights.
-		// We then blend the animation against the bind pose and the store the resultant pose as our layer's current pose.
+		// For a layer that has a weight of 1 and additive, we mark all bones affected by that layer to be done. 
 		
 		// MERGE STEP:
 		// To merge two layers, we simply add the translations, multiply the rotations -> top to bottom
 		// If it is additive, we simply add/multiply the poses.
 		// If it is override, we check if the bone is done already or not.
 		// Could this be done in ANimationPass? 
+		
 
 		for (size_t i = 0; i < animator._child_objects.size(); ++i)
 		{
 			auto& curr_go = animator._child_objects[i];
 			if (!curr_go)
 				continue;
-			curr_go->Transform()->position = animator.layers[0].curr_poses[i].position;
-			curr_go->Transform()->rotation = animator.layers[0].curr_poses[i].rotation;
-			curr_go->Transform()->scale = animator.layers[0].curr_poses[i].scale;
+
+			BonePose final_bone_pose;
+			size_t start_layer = 0;
+
+			// Find the last fully weighted bone
+			for (size_t k = 0; k < animator.layers.size(); ++k)
+			{
+				const auto& layer = animator.layers[k];
+				if (layer.bone_mask[i] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					start_layer = k;
+			}
+
+			// We get the bone pose for the start layer and blend upwards
+			final_bone_pose = animator.layers[start_layer].curr_poses[i];
+
+			for (size_t k = start_layer + 1; k < animator.layers.size(); ++k)
+			{
+				// Blend all animations from this layer to the next based on the layer weight
+				auto& curr_layer = animator.layers[k];
+				if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+				{
+					// We do a blend from the curr layer to the final bone pose: 
+					// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
+					// This means we do Blend(curr_pose, layer_pose, 0.25);
+					const auto& layer_pose = curr_layer.curr_poses[i];
+					final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+				}
+			}
+
+			curr_go->Transform()->position	= final_bone_pose.position;
+			curr_go->Transform()->rotation	= final_bone_pose.rotation;
+			curr_go->Transform()->scale		= final_bone_pose.scale;
 		}
 		
 	}
