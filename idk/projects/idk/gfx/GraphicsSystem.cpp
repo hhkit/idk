@@ -105,10 +105,10 @@ namespace idk
 
 	void GraphicsSystem::LoadShaders()
 	{
-		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/mesh.vert");
+		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
 		if(tmp)
 			mesh_vtx = *tmp;
-		tmp = Core::GetResourceManager().Load<ShaderProgram>("/assets/shader/skinned_mesh.vert");
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
 		if(tmp)
 			skinned_mesh_vtx = *tmp;
 		LoadShaderImpl();
