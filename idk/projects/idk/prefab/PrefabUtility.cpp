@@ -730,17 +730,17 @@ namespace idk
                 prefab_component_ptrs.push_back(&d);
             for (auto c : obj->GetComponents())
                 obj_component_handles.push_back(c);
-            for (auto c : obj_component_handles)
-                obj_components.push_back(*c);
 
             for (size_t i = 0; i < prefab_component_ptrs.size(); ++i)
             {
-                for (size_t j = 0; j < obj_components.size(); ++j)
+                const auto tid = GameState::GetGameState().GetTypeID(prefab_component_ptrs[i]->type);
+                for (size_t j = 0; j < obj_component_handles.size(); ++j)
                 {
-                    if (prefab_component_ptrs[i] && prefab_component_ptrs[i]->type == obj_components[j].type)
+                    if (tid == obj_component_handles[j].type)
                     {
                         prefab_component_ptrs[i] = nullptr;
                         obj_component_handles[j] = GenericHandle();
+                        break;
                     }
                 }
             }
@@ -761,11 +761,11 @@ namespace idk
                 if (prefab_component_ptrs[i])
                 {
                     ++remove_count;
-                    for (int j = i; j < prefab_component_ptrs.size() - remove_count - 1; ++j)
+                    for (int j = i; j < prefab_component_ptrs.size() - remove_count; ++j)
                         prefab_data.components[j].swap(prefab_data.components[j + 1]);
                 }
             }
-            prefab_data.components.erase(prefab_data.components.end() - remove_count - 1, prefab_data.components.end());
+            prefab_data.components.erase(prefab_data.components.end() - remove_count, prefab_data.components.end());
 
             // add after remove, because add can invalidate to-be-removed ptrs
             for (auto c : obj_component_handles)
