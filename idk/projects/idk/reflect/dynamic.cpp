@@ -36,6 +36,12 @@ namespace idk::reflect
         std::swap(const_cast<reflect::type&>(type), const_cast<reflect::type&>(other.type)); // saved!
         return *this;
     }
+    dynamic& dynamic::swap(dynamic& other)
+    {
+        std::swap(_ptr, other._ptr);
+        std::swap(const_cast<reflect::type&>(type), const_cast<reflect::type&>(other.type)); // saved!
+        return *this;
+    }
 
 	dynamic::property_iterator dynamic::begin() const
 	{
