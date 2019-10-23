@@ -17,6 +17,21 @@
 
 #include <glslang/public/ShaderLang.h>
 #include <vkn/TmpTest.h>
+
+bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
+{
+	using num_array_t = const uint64_t[2];
+	static_assert(sizeof(idk::Guid)== sizeof(num_array_t), "Guid size is not as expected, please update comparison op.");
+	auto& l = idk::r_cast<num_array_t&>(lhs);
+	auto& r = idk::r_cast<num_array_t&>(rhs);
+	return l[0] < r[0] || (l[0] == r[0] && l[1] < r[0]);
+}
+
+bool operator<(const idk::RscHandle<idk::RenderTarget>& lhs, const idk::RscHandle<idk::RenderTarget>& rhs)
+{
+	return lhs.guid < rhs.guid;
+}
+
 //static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 //	[[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 //	[[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -151,12 +166,18 @@ namespace idk::vkn
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms);
 		pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
 		pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
-
+		hash_set<RscHandle<RenderTarget>> render_targets;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			auto& curr_cam = curr_buffer.camera[i];
 			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
+			const auto itr = render_targets.find(curr_cam.render_target);
+			const bool new_rt = curr_state.clear_render_target = !(itr != render_targets.end());
+
+			if(new_rt)
+				render_targets.emplace(curr_cam.render_target);
+
 			curr_state.mesh_vtx = curr_buffer.mesh_vtx;
 			curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 			curr_state.dbg_render.resize(0);

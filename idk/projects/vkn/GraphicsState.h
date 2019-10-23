@@ -94,6 +94,8 @@ namespace idk::vkn
 
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
+		bool clear_render_target = false;
+
 		// \param light_index
 		// the index of the light in shared_gfx_state
 		const LightData* ActiveLight(size_t light_index)const;

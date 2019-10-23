@@ -47,6 +47,7 @@
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />

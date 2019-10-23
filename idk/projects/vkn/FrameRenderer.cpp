@@ -664,11 +664,16 @@ namespace idk::vkn
 		TransitionFrameBuffer(camera, cmd_buffer, view);
 
 		auto sz = camera.render_target->GetMeta().size;
+		vec2 offset = vec2{ sz }*camera.viewport.min;
+		vec2 size = vec2{ sz }*(camera.viewport.max-camera.viewport.min);
 		vk::Rect2D render_area
 		{
-			vk::Offset2D{},vk::Extent2D
+			vk::Offset2D
 			{
-				s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)
+				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.x)
+			},vk::Extent2D
+			{
+				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
 			}
 		};
 		vk::RenderPassBeginInfo rpbi
@@ -676,7 +681,7 @@ namespace idk::vkn
 			GetRenderPass(state,view), frame_buffer,
 			render_area,hlp::arr_count(v),std::data(v)
 		};
-
+		
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
@@ -697,7 +702,8 @@ namespace idk::vkn
 
 				auto config = *obj.config;
 				config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
-				config.viewport_size = sz;
+				config.viewport_offset = ivec2{ offset };
+				config.viewport_size = ivec2{ size };
 				auto& pipeline = GetPipeline(config, shaders);
 				pipeline.Bind(cmd_buffer,view);
 				prev_pipeline = &pipeline;
