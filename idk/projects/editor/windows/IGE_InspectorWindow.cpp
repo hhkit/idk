@@ -639,6 +639,9 @@ namespace idk {
             ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
         ImGui::PopStyleVar();
 
+        if (ImGui::IsMouseReleased(1) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+            ImGui::OpenPopup("AdditionalOptions");
+
         ImGui::SameLine();
         if (auto f = (*component).get_property("enabled"); f.value.valid())
         {
@@ -788,8 +791,9 @@ namespace idk {
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
         bool outer_changed = false;
+        vector<char> indent_stack;
 
-        const auto generic_visitor = [&](auto&& key, auto&& val, int /*depth_change*/) { //Displays all the members for that variable
+        const auto generic_visitor = [&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
 
             using K = std::decay_t<decltype(key)>;
             using T = std::decay_t<decltype(val)>;
@@ -798,21 +802,38 @@ namespace idk {
             const float currentHeight = ImGui::GetCursorPosY();
 
             if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
+            {
+                // add empty key so that can be popped properly
+                _curr_property_stack.push_back("");
+                indent_stack.push_back(0);
                 return true;
+            }
             else if constexpr (!std::is_same_v<K, const char*>)
                 throw "unhandled case";
             else
             {
                 string keyName = format_name(key);
 
-                if (keyName == "Guid" || keyName == "Enabled")
-                    return false;
-
+                while (depth_change++ <= 0)
+                {
+                    if (indent_stack.back())
+                        ImGui::Unindent();
+                    indent_stack.pop_back();
+                    _curr_property_stack.pop_back();
+                }
                 _curr_property_stack.push_back(key);
+
+                if (keyName == "Enabled")
+                {
+                    indent_stack.push_back(0);
+                    return false;
+                }
 
                 string curr_prop_path;
                 for (const auto& prop : _curr_property_stack)
                 {
+                    if (prop.empty())
+                        continue;
                     curr_prop_path += prop;
                     curr_prop_path += '/';
                 }
@@ -837,10 +858,17 @@ namespace idk {
 
                 ImGui::SetCursorPosY(currentHeight + pad_y);
                 if (has_override)
+                {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                ImGui::Text(keyName.c_str());
-                if (has_override)
+                    ImGui::Text(keyName.c_str());
                     ImGui::PopStyleColor();
+                    ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
+                    ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
+                                                              ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
+                                                              ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                }
+                else
+                    ImGui::Text(keyName.c_str());
 
                 keyName.insert(0, "##"); //For Imgui stuff
 
@@ -850,6 +878,7 @@ namespace idk {
                 ImGui::PushID(keyName.c_str());
                 ImGui::PushItemWidth(-4.0f);
 
+                bool indent = false;
                 bool recurse = false;
                 bool changed = false;
 				[[maybe_unused]] bool changed_and_deactivated = false;
@@ -949,9 +978,8 @@ namespace idk {
                 else
                 {
                     ImGui::NewLine();
-                    ImGui::Indent();
-                    displayVal(val);
-                    ImGui::Unindent();
+                    indent = true;
+                    recurse = true;
                     /*ImGui::SetCursorPosY(currentHeight + heightOffset);
                     ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
                 }
@@ -977,9 +1005,12 @@ namespace idk {
                 if (changed && _prefab_inst)
                     PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
 
-                _curr_property_stack.pop_back();
                 ImGui::PopItemWidth();
                 ImGui::PopID();
+
+                indent_stack.push_back(indent);
+                if (indent)
+                    ImGui::Indent();
 
                 return recurse;
             }
@@ -990,6 +1021,8 @@ namespace idk {
 			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
 		else
 			dyn.visit(generic_visitor);
+
+        _curr_property_stack.clear();
 
         return outer_changed;
     }

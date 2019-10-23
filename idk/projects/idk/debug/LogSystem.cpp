@@ -34,7 +34,7 @@ namespace idk
 	void LogSystem::Log::Post(string_view msg)
 	{
 		// lock
-		bool curr_gate = false;
+		// bool curr_gate = false;
 
 		//while (writing.compare_exchange_strong(curr_gate, true, std::memory_order_acquire)); 
 		buffer.emplace_back(string{ msg });

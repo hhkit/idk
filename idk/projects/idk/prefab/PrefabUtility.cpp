@@ -63,16 +63,21 @@ namespace idk
                     end = path.size();
                 const string_view token(path.data() + offset, end - offset);
 
-                if (curr.valid() && curr.type.is_container())
+                if (curr.valid())
                 {
-                    auto cont = curr.to_container();
-                    if (cont.value_type.is_template<std::pair>())
+                    if (curr.type.is_container())
                     {
-                        auto key_type = cont.value_type.create().unpack()[0].type;
-                        curr.swap(cont[*parse_text(string(token), key_type)]);
+                        auto cont = curr.to_container();
+                        if (cont.value_type.is_template<std::pair>())
+                        {
+                            auto key_type = cont.value_type.create().unpack()[0].type;
+                            curr.swap(cont[*parse_text(string(token), key_type)]);
+                        }
+                        else
+                            curr.swap(cont[*parse_text<size_t>(string(token))]);
                     }
-                    else
-                        curr.swap(cont[*parse_text<size_t>(string(token))]);
+                    else if (curr.type.is_template<std::variant>())
+                        curr.swap(curr.get_variant_value().get_property(token).value);
                 }
                 else
                     curr.swap(obj.get_property(token).value);
@@ -466,7 +471,8 @@ namespace idk
         }
     }
 
-    void PrefabUtility::PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index, string_view component_name, string_view property_path, int component_nth)
+    void PrefabUtility::PropagatePropertyToInstances(RscHandle<Prefab> prefab, int object_index,
+                                                     string_view component_name, string_view property_path, int component_nth)
     {
         PropertyOverride prop_override{ string{component_name}, string{property_path}, component_nth };
         for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
@@ -486,8 +492,20 @@ namespace idk
     void PrefabUtility::AddComponentToPrefab(RscHandle<Prefab> prefab, int object_index, reflect::dynamic component)
     {
         auto& data = prefab->data[object_index].components;
-        data.push_back(component);
-        helpers::propagate_added_component(prefab, object_index, static_cast<int>(data.size() - 1));
+        const auto tid = GameState::GetGameState().GetTypeID(component.type);
+
+        data.emplace_back();
+        size_t i = data.size() - 1;
+        for (; i > 0; --i)
+        {
+            if (GameState::GetGameState().GetTypeID(data[i - 1].type) <= tid)
+                break;
+            data[i - 1].swap(data[i]);
+        }
+        data[i].swap(component.copy());
+
+        helpers::propagate_added_component(prefab, object_index, static_cast<int>(i));
+        prefab->Dirty();
     }
 
     void PrefabUtility::RemoveComponentFromPrefab(RscHandle<Prefab> prefab, int object_index, int component_index)
@@ -502,6 +520,7 @@ namespace idk
         }
         helpers::propagate_removed_component(prefab, object_index, type.name(), add_index);
         data.erase(data.begin() + component_index);
+        prefab->Dirty();
     }
 
     void PrefabUtility::RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path)
@@ -587,9 +606,19 @@ namespace idk
         auto prefab_inst = target->GetComponent<PrefabInstance>();
 
         auto& data = prefab_inst->prefab->data[prefab_inst->object_index].components;
-        data.push_back((*component).copy());
+        const auto tid = component.type;
 
-		helpers::propagate_added_component(prefab_inst, static_cast<int>(data.size() - 1));
+        data.emplace_back();
+        size_t i = data.size() - 1;
+        for (; i > 0; --i)
+        {
+            if (GameState::GetGameState().GetTypeID(data[i - 1].type) <= tid)
+                break;
+            data[i - 1].swap(data[i]);
+        }
+        data[i].swap((*component).copy());
+
+		helpers::propagate_added_component(prefab_inst, static_cast<int>(i));
 
         prefab_inst->prefab->Dirty();
 	}
@@ -689,41 +718,60 @@ namespace idk
             if (obj_prefab_inst->prefab != prefab)
                 continue;
 
+            auto& prefab_data = prefab->data[obj_prefab_inst->object_index];
             vector<reflect::dynamic> obj_components;
             vector<GenericHandle> obj_component_handles;
             vector<reflect::dynamic*> prefab_component_ptrs;
             obj_components.reserve(obj->GetComponents().size());
             obj_component_handles.reserve(obj->GetComponents().size());
-            prefab_component_ptrs.reserve(prefab->data[obj_prefab_inst->object_index].components.size());
+            prefab_component_ptrs.reserve(prefab_data.components.size());
 
-            for (auto& d : prefab->data[obj_prefab_inst->object_index].components)
+            for (auto& d : prefab_data.components)
                 prefab_component_ptrs.push_back(&d);
             for (auto c : obj->GetComponents())
                 obj_component_handles.push_back(c);
-            for (auto c : obj_component_handles)
-                obj_components.push_back(*c);
 
-            for (size_t j = 0; j < prefab_component_ptrs.size(); ++j)
+            for (size_t i = 0; i < prefab_component_ptrs.size(); ++i)
             {
-                if (prefab_component_ptrs[j]->type == obj_components[j].type)
+                const auto tid = GameState::GetGameState().GetTypeID(prefab_component_ptrs[i]->type);
+                for (size_t j = 0; j < obj_component_handles.size(); ++j)
                 {
-                    prefab_component_ptrs[j] = nullptr;
-                    obj_component_handles[j] = GenericHandle();
+                    if (tid == obj_component_handles[j].type)
+                    {
+                        prefab_component_ptrs[i] = nullptr;
+                        obj_component_handles[j] = GenericHandle();
+                        break;
+                    }
                 }
             }
 
             // ptrs left in obj comp ptrs == added components
             // ptrs left in prefab comp ptrs == removed components
 
+            // propagate all removes then remove from prefab data
+            for (int i = 0; i < prefab_component_ptrs.size(); ++i)
+            {
+                if (prefab_component_ptrs[i])
+                    helpers::propagate_removed_component(
+                        obj_prefab_inst, prefab_component_ptrs[i]->type.name(), prefab_data.GetComponentNth(i));
+            }
+            int remove_count = 0; // naive impl, lazy to think
+            for (int i = prefab_component_ptrs.size() - 1; i >= 0; --i)
+            {
+                if (prefab_component_ptrs[i])
+                {
+                    ++remove_count;
+                    for (int j = i; j < prefab_component_ptrs.size() - remove_count; ++j)
+                        prefab_data.components[j].swap(prefab_data.components[j + 1]);
+                }
+            }
+            prefab_data.components.erase(prefab_data.components.end() - remove_count, prefab_data.components.end());
+
+            // add after remove, because add can invalidate to-be-removed ptrs
             for (auto c : obj_component_handles)
             {
                 if (c && !c.is_type<PrefabInstance>())
                     ApplyAddedComponent(obj, c);
-            }
-            for (const auto* d : prefab_component_ptrs)
-            {
-                if (d)
-                    ApplyRemovedComponent(obj, d->type.name(), 0);
             }
 
             for (auto & override : obj_prefab_inst->overrides)

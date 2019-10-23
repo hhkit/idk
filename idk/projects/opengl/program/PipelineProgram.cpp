@@ -17,7 +17,7 @@ namespace idk::ogl
 			infolog.resize(length + 1);
 
 			glGetProgramPipelineInfoLog(pipeline, length, &length, infolog.data());
-			std::cout << infolog << "\n";
+		//	std::cout << infolog << "\n";
 		}
 	}
 

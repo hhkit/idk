@@ -314,11 +314,11 @@ REFLECT_END()
 
 // PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
-REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, restitution)
+REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Collider, "Collider")
-REFLECT_VARS(enabled, shape, is_trigger)
+REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_friction)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::box, "box")

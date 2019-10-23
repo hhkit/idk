@@ -24,8 +24,8 @@ namespace idk::ai_helpers
 			scene.has_animation = scene.ai_scene->HasAnimations();
 		}
 
-		return scene.ai_scene != nullptr;
 		scene.file_ext = path_to_resource.GetExtension();
+		return scene.ai_scene != nullptr;
 	}
 
 	void CompileMeshes(Scene& scene, aiNode* node)

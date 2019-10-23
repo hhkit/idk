@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ScriptSystem.h"
 
+#include <filesystem>
+
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/threads.h>
 #include <mono/metadata/debug-helpers.h>
@@ -21,13 +23,26 @@ namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
+		path_to_used_dll = string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/" + std::filesystem::path{ GetConfig().path_to_game_dll }.stem().string() + ".dll";
+
 		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
-			script_environment = std::make_unique<MonoBehaviorEnvironment>(Core::GetSystem<FileSystem>().GetFullPath(GetConfig().path_to_game_dll));
-			script_environment->Init();
+			// copy dll to .exe location
+			auto src_file = Core::GetSystem<FileSystem>().Open(GetConfig().path_to_game_dll, FS_PERMISSIONS::READ, true);
+			std::ofstream dst_file;
+			dst_file.open(path_to_used_dll, std::ios::binary | std::ios::out);
+			dst_file << src_file.rdbuf();
 		}
 		else
 			LOG_TO(LogPool::FATAL, "Could not detect game dll!");
+
+		if (Core::GetSystem<FileSystem>().ExistsFull(path_to_used_dll))
+		{
+			script_environment = std::make_unique<MonoBehaviorEnvironment>(path_to_used_dll);
+			script_environment->Init();
+		}
+		else
+			LOG_TO(LogPool::FATAL, "Could not copy game dll!");
 	}
 
 	void ScriptSystem::UnloadGameScripts()

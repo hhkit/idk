@@ -40,14 +40,16 @@
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
     is_kinematic: 0
-    restitution: 1
     use_gravity: 1
   - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.4
     enabled: 1
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
       radius: 0.5
+    static_friction: 0.4
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
@@ -58,16 +60,18 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -4.323826, z: 0}
+    position: {x: 0, y: -4.804801, z: 0}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 4.5797877, y: 0.18509522, z: 5.918438}
+    scale: {x: 13.830959, y: 0.55898756, z: 17.873682}
   - !Name 
     name: somefloor
   - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.4
     enabled: 1
     is_trigger: 0
     shape: !box 
@@ -77,9 +81,51 @@
         intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
+    static_friction: 0.4
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
     material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
+- !17179935488 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.91879123
+      x: 0
+      y: -0.39474386
+      z: 0
+    scale: {x: 1, y: 1.32, z: 1}
+  - !Name 
+    name: thisismyfightsong
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.4
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      axes: 
+        intern[0]: {x: 1, y: 0, z: 0}
+        intern[1]: {x: 0, y: 1, z: 0}
+        intern[2]: {x: 0, y: 0, z: 1}
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+    static_friction: 0.4
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
+    receive_shadows: 1
+  - !Test 
+    f: 15
+    i: 0
+    movement: {x: 0, y: 0, z: 0}
