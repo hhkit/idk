@@ -152,6 +152,42 @@ namespace idk {
                 //COMPONENT DISPLAY
                 DisplayComponent(component);
             }
+
+            if (_prefab_inst)
+            {
+                vector<int> removed, added;
+                PrefabUtility::GetPrefabInstanceComponentDiff(gos[0], removed, added);
+                if (removed.size())
+                {
+                    auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
+                    ImGuidk::PushDisabled();
+                    ImGuidk::PushFont(FontType::Bold);
+                    for (int i : removed)
+                    {
+                        ImGui::PushID(i);
+                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
+
+                        if (ImGui::BeginPopupContextItem())
+                        {
+                            if (ImGui::MenuItem("Revert Removed Component"))
+                            {
+                                gos[0]->AddComponent(prefab_components[i]);
+                            }
+                            if (ImGui::MenuItem("Apply Removed Component"))
+                            {
+                                PrefabUtility::RemoveComponentFromPrefab(_prefab_inst->prefab, _prefab_inst->object_index, i);
+                            }
+                        }
+
+                        ImGui::SameLine(ImGui::GetStyle().IndentSpacing +
+                            ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + 1);
+                        ImGui::Text("%s (Removed)", prefab_components[i].type.name().data());
+                        ImGui::PopID();
+                    }
+                    ImGui::PopFont();
+                    ImGuidk::PopDisabled();
+                }
+            }
         }
         else if (gameObjectsCount > 1)
         {
