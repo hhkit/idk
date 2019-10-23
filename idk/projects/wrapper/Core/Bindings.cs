@@ -172,5 +172,17 @@ namespace idk
         public extern static void MaterialInstanceSetVector4(System.Guid guid, string name, Vector4 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void MaterialInstanceSetTexture(System.Guid guid, string name, Guid tex);
+
+        /*
+         * Input
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetKey(int key);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetKeyDown(int key);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetKeyUp(int key);
     }
 }

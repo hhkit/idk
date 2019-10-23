@@ -23,7 +23,10 @@ namespace TestAndSeek
         public override void Update()
         {
             //System.Console.WriteLine("Poop.");
-            transform.position = transform.position + movement * 0.016f;
+            if (Input.GetKey(KeyCode.W)) transform.position = transform.position + 0.016f * f * Vector3.forward;
+            if (Input.GetKey(KeyCode.S)) transform.position = transform.position + 0.016f * f * Vector3.back;
+            if (Input.GetKey(KeyCode.A)) transform.position = transform.position + 0.016f * f * Vector3.left;
+            if (Input.GetKey(KeyCode.D)) transform.position = transform.position + 0.016f * f * Vector3.right;
         }
 
         public void TestTransform(Transform t)

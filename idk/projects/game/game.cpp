@@ -90,7 +90,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	Core::GetSystem<LogSystem>().PipeToCout(LogPool::FATAL, true);
 	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
-	Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
+	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);

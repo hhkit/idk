@@ -461,5 +461,25 @@ namespace idk::mono
         }
         ));
 
+		// Input
+		Bind("idk.Bindings::InputGetKeyDown", decay(
+			[](int code) -> bool
+			{
+				return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
+			}
+		));
+		Bind("idk.Bindings::InputGetKeyUp", decay(
+			[](int code) -> bool
+			{
+				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
+			}
+		));
+		Bind("idk.Bindings::InputGetKey", decay(
+			[](int code) -> bool
+			{
+				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
+			}
+		));
+
 	}
 }

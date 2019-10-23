@@ -40,7 +40,7 @@
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
     is_kinematic: 0
-    restitution: 1
+    restitution: 0.5
     use_gravity: 1
   - !Collider 
     enabled: 1
@@ -95,8 +95,9 @@
       z: 0
     scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: somepunk
+    name: takeoutthelightsong
   - !Test 
+    f: 0
     i: 0
     movement: {x: 0, y: 0, z: 0}
 - !17179935488 
@@ -111,12 +112,12 @@
       z: 0
     scale: {x: 1, y: 1.32, z: 1}
   - !Name 
-    name: ""
+    name: thisismyfightsong
   - !RigidBody 
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
     is_kinematic: 0
-    restitution: 1
+    restitution: 0.2
     use_gravity: 1
   - !Collider 
     enabled: 1
@@ -135,69 +136,6 @@
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
   - !Test 
-    i: 0
-    movement: {x: 0, y: 0, z: 0}
-- !21474902784 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !Test 
-    i: 0
-    movement: {x: 0.41, y: 0, z: 0}
-- !25769870080 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !Test 
-    i: 0
-    movement: {x: 0, y: 0, z: 0}
-- !30064837376 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !Test 
-    i: 0
-    movement: {x: 0, y: 0, z: 0}
-- !34359804672 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !Test 
+    f: 0.1
     i: 0
     movement: {x: 0, y: 0, z: 0}

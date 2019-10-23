@@ -401,6 +401,9 @@ namespace idk {
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
 			}
+			ImGui::SameLine(0, 0);
+			if (ImGui::Button("Reload DLL", toolButtonSize))
+				HotReloadDLL();
 		}
 		else
 		{
@@ -429,9 +432,6 @@ namespace idk {
 			}
 		}
 
-		ImGui::SameLine(0, 0);
-		if (ImGui::Button("Reload DLL"))
-			HotReloadDLL();
 		
 		ImGui::PopStyleVar();
 
