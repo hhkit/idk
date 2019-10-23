@@ -1,5 +1,5 @@
 metadatas: 
 - guid: 6eafa0b1-fc68-43a6-b329-1a7eaf3a05cc
-  metadata: '{internal_format: !ColorFormat DXT5, uv_mode: !UVMode Repeat}'
+  metadata: "compressed: 1\nfilter_mode: !FilterMode Linear\ninternal_format: !ColorFormat DXT5\nis_srgb: 1\nuv_mode: !UVMode Repeat\n"
   name: ""
   t_hash: idk::Texture

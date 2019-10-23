@@ -639,6 +639,9 @@ namespace idk {
             ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
         ImGui::PopStyleVar();
 
+        if (ImGui::IsMouseReleased(1) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+            ImGui::OpenPopup("AdditionalOptions");
+
         ImGui::SameLine();
         if (auto f = (*component).get_property("enabled"); f.value.valid())
         {
@@ -855,10 +858,17 @@ namespace idk {
 
                 ImGui::SetCursorPosY(currentHeight + pad_y);
                 if (has_override)
+                {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                ImGui::Text(keyName.c_str());
-                if (has_override)
+                    ImGui::Text(keyName.c_str());
                     ImGui::PopStyleColor();
+                    ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
+                    ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
+                                                              ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
+                                                              ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                }
+                else
+                    ImGui::Text(keyName.c_str());
 
                 keyName.insert(0, "##"); //For Imgui stuff
 
