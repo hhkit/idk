@@ -40,14 +40,16 @@
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
     is_kinematic: 0
-    restitution: 0.5
     use_gravity: 1
   - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.4
     enabled: 1
     is_trigger: 0
     shape: !sphere 
       center: {x: 0, y: 0, z: 0}
       radius: 0.5
+    static_friction: 0.4
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
@@ -58,16 +60,18 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -4.323826, z: 0}
+    position: {x: 0, y: -4.804801, z: 0}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 4.5797877, y: 0.18509522, z: 5.918438}
+    scale: {x: 13.830959, y: 0.55898756, z: 17.873682}
   - !Name 
     name: somefloor
   - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.4
     enabled: 1
     is_trigger: 0
     shape: !box 
@@ -77,6 +81,7 @@
         intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
+    static_friction: 0.4
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
@@ -117,9 +122,10 @@
     initial_velocity: {x: 0, y: 0, z: 0}
     inv_mass: 1
     is_kinematic: 0
-    restitution: 0.2
     use_gravity: 1
   - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.4
     enabled: 1
     is_trigger: 0
     shape: !box 
@@ -129,6 +135,7 @@
         intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
+    static_friction: 0.4
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1
@@ -136,6 +143,6 @@
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
   - !Test 
-    f: 0.1
+    f: 1.5
     i: 0
     movement: {x: 0, y: 0, z: 0}

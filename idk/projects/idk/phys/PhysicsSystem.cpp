@@ -168,28 +168,28 @@ namespace idk
 
 			for (const auto& [pair, result] : collisions)
 			{
-				const auto& lcollider = pair.lhs;
-				const auto& rcollider = pair.rhs;
+				const auto& lcollider = *pair.lhs;
+				const auto& rcollider = *pair.rhs;
 
-				const auto lrigidbody = lcollider->_rigidbody;
-				const auto rrigidbody = rcollider->_rigidbody;
+				const auto lrigidbody = lcollider._rigidbody;
+				const auto rrigidbody = rcollider._rigidbody;
 
 				constexpr auto get_values =
-					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, real, RigidBody*>
+					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, RigidBody*>
 				{
 					if (rb)
 					{
 						auto& ref = *rb;
-						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.restitution, ref.inv_mass, &ref);
+						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.inv_mass, &ref);
 					}
 					else
 					{
-						return std::make_tuple(vec3{}, 1.f, 0.f, nullptr);
+						return std::make_tuple(vec3{}, 0.f, nullptr);
 					}
 				};
 
-				const auto [lvel, lrestitution, linv_mass, lrb_ptr] = get_values(lrigidbody);
-				const auto [rvel, rrestitution, rinv_mass, rrb_ptr] = get_values(rrigidbody);
+				const auto [lvel, linv_mass, lrb_ptr] = get_values(lrigidbody);
+				const auto [rvel, rinv_mass, rrb_ptr] = get_values(rrigidbody);
 
 				auto rel_v = rvel - lvel; // a is not moving
 				auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
@@ -197,25 +197,35 @@ namespace idk
 				if (contact_v < +epsilon)
 					continue;
 
-
-				auto restitution = std::min(lrestitution, rrestitution);
+				// determine collision distribution
+				auto restitution = std::min(lcollider.bounciness, rcollider.bounciness);
 				restitution = std::max(restitution - restitution_slop, 0.f);
+				IDK_ASSERT(result.penetration_depth > -epsilon);
 
-				assert(result.penetration_depth > -epsilon);
+				// determine friction disribution
 
 				{
 					const auto sum_inv_mass = linv_mass + rinv_mass;
-					const auto impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
-					const auto impulse = damping * impulse_scalar * result.normal_of_collision;
+					const auto collision_impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
+					const auto collision_impulse = damping * collision_impulse_scalar * result.normal_of_collision;
 
 					const auto penetration = std::max(result.penetration_depth - penetration_min_slop, 0.0f);
 					const auto correction_vector = penetration * penetration_max_slop * result.normal_of_collision;
+
+					const auto tangent = (rel_v - (rel_v.dot(result.normal_of_collision)) * result.normal_of_collision).normalize();
+					const auto frictional_impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
+					const auto mu = std::min(lcollider.static_friction, rcollider.static_friction);
+					const auto jtangential = -rel_v.dot(tangent) / sum_inv_mass;
+
+					const auto frictional_impulse = abs(jtangential) < frictional_impulse_scalar * mu
+						? frictional_impulse_scalar * tangent
+						: std::min(lcollider.dynamic_friction, rcollider.dynamic_friction) * frictional_impulse_scalar * tangent;
 
 					if (lrb_ptr)
 					{
 						auto& ref_rb = *lrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction_vector;
-						const auto new_vel = lvel + impulse * ref_rb.inv_mass;
+						const auto new_vel = lvel + (collision_impulse + frictional_impulse) * ref_rb.inv_mass;
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 
@@ -223,7 +233,7 @@ namespace idk
 					{
 						auto& ref_rb = *rrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;
-						const auto new_vel = rvel - impulse * ref_rb.inv_mass;
+						const auto new_vel = rvel - (collision_impulse + frictional_impulse) * ref_rb.inv_mass;
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 				}

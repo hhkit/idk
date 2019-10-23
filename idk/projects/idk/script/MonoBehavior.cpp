@@ -20,15 +20,16 @@ namespace idk::mono
 
 	MonoObject* Behavior::EmplaceBehavior(string_view type)
 	{
-		auto monotype = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(type);
-		if (monotype)
-		{
-			_obj = monotype->Construct();
-			_obj.Assign("handle", GetHandle().id);
-			_awake = false;
-			_started = false;
-			return _obj.Raw();
-		}
+		auto* env = &Core::GetSystem<ScriptSystem>().ScriptEnvironment();
+		if (env)
+			if (const auto monotype = env->Type(type))
+			{
+				_obj = monotype->Construct();
+				_obj.Assign("handle", GetHandle().id);
+				_awake = false;
+				_started = false;
+				return _obj.Raw();
+			}
 		return nullptr;
 	}
 

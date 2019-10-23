@@ -20,6 +20,10 @@ namespace idk
 		bool enabled        = true;
 		bool is_trigger     = false;
 
+		real bounciness       { 0.f };
+		real static_friction  { .4f };
+		real dynamic_friction { .4f };
+
 		aabb bounds() const;
 		void setup_predict();
 	private:
