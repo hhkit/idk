@@ -213,7 +213,7 @@ namespace idk
 					const auto correction_vector = penetration * penetration_max_slop * result.normal_of_collision;
 
 					const auto tangent = (rel_v - (rel_v.dot(result.normal_of_collision)) * result.normal_of_collision).normalize();
-					const auto frictional_impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
+					const auto frictional_impulse_scalar = (1.0f + restitution) * rel_v.dot(tangent) / sum_inv_mass;
 					const auto mu = (lcollider.static_friction + rcollider.static_friction) * .5f;
 					const auto jtangential = -rel_v.dot(tangent) / sum_inv_mass;
 
