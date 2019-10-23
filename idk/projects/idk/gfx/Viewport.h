@@ -5,6 +5,6 @@ namespace idk
 {
 	struct Viewport
 	{
-		vec2 min{ 0,0 }, max{ 1,1 };//(0,1)
+		vec2 position{ 0,0 }, size{ 1,1 };//(0,1)
 	};
 }

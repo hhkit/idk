@@ -382,7 +382,7 @@ REFLECT_END()
 
 
 REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(min,max)
+REFLECT_VARS(position,size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

@@ -22,6 +22,29 @@
 #include <vkn/VulkanHashes.h>
 
 #include <vkn/PipelineBinders.inl>
+namespace std
+{
+	template<typename T, unsigned N>
+	idk::tvec<T, N> min(const idk::tvec<T, N>& lhs, const idk::tvec<T, N>& rhs)
+	{
+		idk::tvec<T, N>result{};
+		for (auto i = N; i-- > 0;)
+		{
+			result[i] = (lhs[i] < rhs[i]) ? lhs[i] : rhs[i];
+		}
+		return result;
+	}
+	template<typename T, unsigned N>
+	idk::tvec<T, N> max(const idk::tvec<T, N>& lhs, const idk::tvec<T, N>& rhs)
+	{
+		idk::tvec<T, N>result{};
+		for (auto i = N; i-- > 0;)
+		{
+			result[i] = (lhs[i] > rhs[i]) ? lhs[i] : rhs[i];
+		}
+		return result;
+	}
+}
 
 namespace idk::vkn
 {
@@ -564,7 +587,9 @@ namespace idk::vkn
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		//TODO: figure out inheritance pipeline inheritance and inherit from dbg_pipeline for various viewport sizes
 		auto& pipeline = *state.dbg_pipeline;
+
 		//Preprocess MeshRender's uniforms
 		//auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
 		//rs.ubo_manager.UpdateAllBuffers();
@@ -620,7 +645,25 @@ namespace idk::vkn
 		vkn_fb.PrepareDraw(cmd_buffer);
 	}
 
+	//offset,size
+	std::pair<ivec2, ivec2> ComputeViewportExtents(const vec2& sz,const Viewport& vp)
+	{
+		std::pair<ivec2, ivec2> result;
+		auto& [offset, size] = result;
+		offset = ivec2{vec2{ sz }*vp.position           };
+		size =   ivec2{vec2{ sz }*(vp.size)};
+		offset = std::min(std::max(offset, ivec2{ 0 }), ivec2{ sz });
+		size = std::min(std::max(size, ivec2{ 1 }), ivec2{ sz }); //prevent the size of the viewport from being too small.
+		return result;
+	}
 
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size)
+	{
+		config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
+		config.viewport_offset = offset;
+		config.viewport_size = size ;
+		return config;
+	}
 
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
@@ -664,13 +707,12 @@ namespace idk::vkn
 		TransitionFrameBuffer(camera, cmd_buffer, view);
 
 		auto sz = camera.render_target->GetMeta().size;
-		vec2 offset = vec2{ sz }*camera.viewport.min;
-		vec2 size = vec2{ sz }*(camera.viewport.max-camera.viewport.min);
+		auto [offset, size] = ComputeViewportExtents(vec2{ sz }, camera.viewport);
 		vk::Rect2D render_area
 		{
 			vk::Offset2D
 			{
-				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.x)
+				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
 			},vk::Extent2D
 			{
 				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
@@ -700,10 +742,7 @@ namespace idk::vkn
 				if(p_ro.geom_shader)
 					shaders.emplace_back(*p_ro.geom_shader);
 
-				auto config = *obj.config;
-				config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
-				config.viewport_offset = ivec2{ offset };
-				config.viewport_size = ivec2{ size };
+				auto config = ConfigWithVP(*obj.config, camera, offset, size);
 				auto& pipeline = GetPipeline(config, shaders);
 				pipeline.Bind(cmd_buffer,view);
 				prev_pipeline = &pipeline;
