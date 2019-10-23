@@ -48,11 +48,5 @@ namespace idk
 
         public void SetActive(bool new_active)
             => Bindings.GameObjectSetActive(handle, new_active);
-
-
-
-        // statics
-        public static GameObject FindWithTag(string tag)
-            => new GameObject(Bindings.GameObjectFindWithTag(tag));
     }
 }

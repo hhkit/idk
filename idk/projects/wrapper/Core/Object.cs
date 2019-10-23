@@ -44,6 +44,13 @@ namespace idk
             return handle.GetHashCode() << 2;
         }
 
+        // statics
+        public static GameObject FindWithTag(string tag)
+        {
+            var id = Bindings.GameObjectFindWithTag(tag);
+            return id != 0 ? new GameObject(id) : null;
+        }
+
         public static void Destroy(Object o)
             => Bindings.ObjectDestroy(o.handle);
 

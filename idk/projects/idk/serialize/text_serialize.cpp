@@ -68,7 +68,11 @@ namespace idk
             return yaml::node();
         else if (obj.type.is_enum_type())
             return yaml::node(obj.to_enum_value().name());
-        else if (obj.type.count() == 0)
+        else if(obj.type.hash() == reflect::typehash<mono::Behavior>())
+		{
+			// ???/
+		} 
+		else if (obj.type.count() == 0)
         {
             if (obj.type.is_basic_serializable())
                 return yaml::node(obj.to_string());
@@ -84,7 +88,7 @@ namespace idk
                 ret.tag(held.type.name());
                 return ret;
             }
-            else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
+			else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
             {
                 auto& held = obj.get<reflect::dynamic>();
                 yaml::node ret = serialize_yaml(held);
@@ -181,21 +185,26 @@ namespace idk
             }
         };
 
-        obj.visit([&](auto&& key, auto&& arg, int depth_change)
-        {
-            using K = std::decay_t<decltype(key)>;
-            while (++depth_change <= 0)
-                stack.pop_back();
+		auto yaml_visitor = [&](auto&& key, auto&& arg, int depth_change)
+		{
+			using K = std::decay_t<decltype(key)>;
+			while (++depth_change <= 0)
+				stack.pop_back();
 
-            if constexpr (std::is_arithmetic_v<K>)
-                return f(key, arg, stack);
-            else if constexpr (is_basic_serializable_v<K> || std::is_same_v<std::decay_t<K>, const char*>)
-                return f(serialize_text(key), arg, stack);
-            else if constexpr (std::is_same_v<K, reflect::type>) // variant element
-                return f(string{ key.name() }, arg, stack);
-            else
-                throw "wtf is this key??", arg;
-        });
+			if constexpr (std::is_arithmetic_v<K>)
+				return f(key, arg, stack);
+			else if constexpr (is_basic_serializable_v<K> || std::is_same_v<std::decay_t<K>, const char*>)
+				return f(serialize_text(key), arg, stack);
+			else if constexpr (std::is_same_v<K, reflect::type>) // variant element
+				return f(string{ key.name() }, arg, stack);
+			else
+				throw "wtf is this key??", arg;
+		};
+
+		if (obj.is<mono::Behavior>())
+			obj.get<mono::Behavior>().GetObject().Visit(yaml_visitor);
+		else
+			obj.visit(yaml_visitor);
 
         return node;
     }
@@ -215,25 +224,29 @@ namespace idk
             yaml::node& elem = node.emplace_back();
             elem.tag(serialize_text(obj.GetHandle().id));
             elem.emplace_back(yaml::mapping_type{ { "active", yaml::node{obj.ActiveSelf()} } });
-            for (auto& handle : obj.GetComponents())
-                elem.emplace_back(serialize_yaml(*handle)).tag((*handle).type.name());
+			for (auto& handle : obj.GetComponents())
+			{
+				auto reflected = *handle;
+				auto component_typename = reflected.is<mono::Behavior>() ? reflected.get<mono::Behavior>().TypeName() : (*handle).type.name();
+				elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
+			}
         }
 
         return yaml::dump(node);
     }
 
-	template<>
-	string serialize_text(const mono::Behavior& behavior)
-	{
-		yaml::node node;
-		yaml::node& mono_data = node.emplace_back();
-		mono_data.tag(behavior.TypeName());
-
-		behavior.GetObject().Visit([&](auto&& key, auto&& value, int)
-			{
-				mono_data.emplace_back(serialize_text(value)).tag(key);
-			});
-		return yaml::dump(node);
-	}
+	//template<>
+	//string serialize_text(const mono::Behavior& behavior)
+	//{
+	//	yaml::node node;
+	//	yaml::node& mono_data = node.emplace_back();
+	//	mono_data.tag(behavior.TypeName());
+	//
+	//	behavior.GetObject().Visit([&](auto&& key, auto&& value, int)
+	//		{
+	//			mono_data.emplace_back(serialize_text(value)).tag(key);
+	//		});
+	//	return yaml::dump(node);
+	//}
 
 }

@@ -83,3 +83,70 @@
     material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
+- !12884968192 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: somepunk
+  - !Test 
+    movement: {x: 0, y: 0, z: 0}
+- !17179935488 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.91879123
+      x: 0
+      y: -0.39474386
+      z: 0
+    scale: {x: 1, y: 1.32, z: 1}
+  - !Name 
+    name: ""
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    restitution: 1
+    use_gravity: 1
+  - !Collider 
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      axes: 
+        intern[0]: {x: 1, y: 0, z: 0}
+        intern[1]: {x: 0, y: 1, z: 0}
+        intern[2]: {x: 0, y: 0, z: 1}
+      center: {x: 0, y: 0.34, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
+    receive_shadows: 1
+  - !Test 
+    movement: {x: 0, y: 0, z: 0}
+- !21474902784 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !Test 
+    movement: {x: 0.41, y: 0, z: 0}
