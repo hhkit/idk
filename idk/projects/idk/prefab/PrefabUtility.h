@@ -24,6 +24,8 @@ namespace idk
         // if the given game object is not part of a prefab instance, returns a null handle.
         static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);
 
+        static void GetPrefabInstanceComponentDiff(Handle<GameObject> target, vector<int>& out_removed, vector<int>& out_added);
+
 		// manually propagate ALL changes of a prefab.
         static void PropagatePrefabChangesToInstances(RscHandle<Prefab> prefab);
 
