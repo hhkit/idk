@@ -23,6 +23,7 @@ of the editor.
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/MaterialInstance.h>
+#include <gfx/RenderTarget.h>
 #include <prefab/PrefabUtility.h>
 #include <prefab/Prefab.h>
 
@@ -138,13 +139,20 @@ namespace idk {
                     fs::create_directory(Core::GetSystem<FileSystem>().GetFullPath(folder_path));
                     selected_path = folder_path;
                 }
-                if (ImGui::MenuItem("Material"))
-                {
-                    auto path = unique_new_mount_path("NewMaterial", Material::ext);
-                    auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
-                    if (res && *res)
-                        Core::GetResourceManager().Save(*res);
-                }
+				if (ImGui::MenuItem("Material"))
+				{
+					auto path = unique_new_mount_path("NewMaterial", Material::ext);
+					auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
+					if (res && *res)
+						Core::GetResourceManager().Save(*res);
+				}
+				if (ImGui::MenuItem("Render Target"))
+				{
+					auto path = unique_new_mount_path("RenderTarget", RenderTarget::ext);
+					auto res = Core::GetResourceManager().Create<RenderTarget>(path);
+					//if (res && *res)
+					//	Core::GetResourceManager().Save(*res);
+				}
                 ImGui::EndPopup();
             }
 
