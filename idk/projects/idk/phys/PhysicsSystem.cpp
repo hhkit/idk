@@ -198,7 +198,7 @@ namespace idk
 					continue;
 
 				// determine collision distribution
-				auto restitution = std::min(lcollider.bounciness, rcollider.bounciness);
+				auto restitution = (lcollider.bounciness, rcollider.bounciness) * .5f;
 				restitution = std::max(restitution - restitution_slop, 0.f);
 				IDK_ASSERT(result.penetration_depth > -epsilon);
 
@@ -214,12 +214,12 @@ namespace idk
 
 					const auto tangent = (rel_v - (rel_v.dot(result.normal_of_collision)) * result.normal_of_collision).normalize();
 					const auto frictional_impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
-					const auto mu = std::min(lcollider.static_friction, rcollider.static_friction);
+					const auto mu = (lcollider.static_friction + rcollider.static_friction) * .5f;
 					const auto jtangential = -rel_v.dot(tangent) / sum_inv_mass;
 
 					const auto frictional_impulse = abs(jtangential) < frictional_impulse_scalar * mu
 						? frictional_impulse_scalar * tangent
-						: std::min(lcollider.dynamic_friction, rcollider.dynamic_friction) * frictional_impulse_scalar * tangent;
+						: (lcollider.dynamic_friction, rcollider.dynamic_friction) * .5f * frictional_impulse_scalar * tangent;
 
 					if (lrb_ptr)
 					{

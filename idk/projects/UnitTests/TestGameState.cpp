@@ -3,6 +3,7 @@
 #include <core/GameState.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <phys/Collider.h>
 #include <scene/SceneFactory.h>
 #include <scene/SceneManager.h>
 #include "TestApplication.h"

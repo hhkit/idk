@@ -778,6 +778,7 @@
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collidable_shapes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -88,23 +88,6 @@
     material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
-- !12884968192 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: takeoutthelightsong
-  - !Test 
-    f: 0
-    i: 0
-    movement: {x: 0, y: 0, z: 0}
 - !17179935488 
   - active: 1
   - !Transform 
@@ -143,6 +126,6 @@
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
   - !Test 
-    f: 1.5
+    f: 15
     i: 0
     movement: {x: 0, y: 0, z: 0}

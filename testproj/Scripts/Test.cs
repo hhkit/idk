@@ -8,7 +8,8 @@ namespace TestAndSeek
         public int i;
         public float f;
         public Vector3 movement;
-        public GameObject go;
+
+        private RigidBody rb;
 
         public Test()
         {
@@ -20,13 +21,28 @@ namespace TestAndSeek
             System.Console.WriteLine("thunderbolt {0} {1} {2}", v.x, v.y, v.z);
            // System.Console.WriteLine("and takedown {0}", i);
         }
+
+        public override void Start()
+        {
+            rb = gameObject.GetComponent<RigidBody>();
+            if (rb)
+                System.Console.WriteLine("found rigidbody");
+        }
+        public override void FixedUpdate()
+        {
+            if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
+            if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
+            if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
+            if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+        }
         public override void Update()
         {
-            //System.Console.WriteLine("Poop.");
-            if (Input.GetKey(KeyCode.W)) transform.position = transform.position + 0.016f * f * Vector3.forward;
-            if (Input.GetKey(KeyCode.S)) transform.position = transform.position + 0.016f * f * Vector3.back;
-            if (Input.GetKey(KeyCode.A)) transform.position = transform.position + 0.016f * f * Vector3.left;
-            if (Input.GetKey(KeyCode.D)) transform.position = transform.position + 0.016f * f * Vector3.right;
+            System.Console.WriteLine("Poop.");
+            //if (rb)
+            //{
+            //    System.Console.WriteLine("Oops");
+            //    return;
+            //}
         }
 
         public void TestTransform(Transform t)
