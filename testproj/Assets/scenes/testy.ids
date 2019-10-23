@@ -97,6 +97,7 @@
   - !Name 
     name: somepunk
   - !Test 
+    i: 0
     movement: {x: 0, y: 0, z: 0}
 - !17179935488 
   - active: 1
@@ -125,7 +126,7 @@
         intern[0]: {x: 1, y: 0, z: 0}
         intern[1]: {x: 0, y: 1, z: 0}
         intern[2]: {x: 0, y: 0, z: 1}
-      center: {x: 0, y: 0.34, z: 0}
+      center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
   - !MeshRenderer 
     cast_shadows: 1
@@ -134,6 +135,7 @@
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
   - !Test 
+    i: 0
     movement: {x: 0, y: 0, z: 0}
 - !21474902784 
   - active: 1
@@ -149,4 +151,53 @@
   - !Name 
     name: ""
   - !Test 
+    i: 0
     movement: {x: 0.41, y: 0, z: 0}
+- !25769870080 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !Test 
+    i: 0
+    movement: {x: 0, y: 0, z: 0}
+- !30064837376 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !Test 
+    i: 0
+    movement: {x: 0, y: 0, z: 0}
+- !34359804672 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !Test 
+    i: 0
+    movement: {x: 0, y: 0, z: 0}

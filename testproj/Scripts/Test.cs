@@ -5,7 +5,8 @@ namespace TestAndSeek
     public class Test 
         : MonoBehavior
     {
-        //public int i;
+        public int i;
+        public float f;
         public Vector3 movement;
         public GameObject go;
 
