@@ -380,5 +380,5 @@ REFLECT_VARS(min,max)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic, viewport,render_target)
+REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic,overlay_debug_draw, viewport,render_target)
 REFLECT_END()
