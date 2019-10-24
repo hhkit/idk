@@ -80,9 +80,13 @@ namespace idk::ogl
 			auto& viewport = *oviewport;
 			auto&& [position, size] = ComputeViewportExtents(viewport.size, viewport);
 			glViewport((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
+			glScissor((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
 		}
 		else
+		{
 			glViewport(0, 0, target->Size().x, target->Size().y);
+			glScissor(0, 0, target->Size().x, target->Size().y);
+		}
 		if (target->GetMeta().internal_format == ColorFormat::DEPTH_COMPONENT)
 		{
 			//glBindRenderbuffer(GL_RENDERBUFFER, _rbo_id);
@@ -134,9 +138,13 @@ namespace idk::ogl
 			auto& viewport = *oviewport;
 			auto&& [position, size] = ComputeViewportExtents(vec2{ target->Size() }, viewport);
 			glViewport((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.y));
+			glScissor(position.x, position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.y));
 		}
 		else
-		glViewport(0, 0, meta.size.x, meta.size.y);
+		{
+			glViewport(0, 0, meta.size.x, meta.size.y);
+			glScissor(0, 0, meta.size.x, meta.size.y);
+		}
 		
 
 		// set texture targets
@@ -176,9 +184,14 @@ namespace idk::ogl
 			auto& viewport = *oviewport;
 			auto&& [position, size] = ComputeViewportExtents(viewport.size, viewport);
 			glViewport((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
+			glScissor((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
 		}
 		else
+		{
 			glViewport(0, 0, meta.size.x, meta.size.y);
+			glScissor(0, 0, meta.size.x, meta.size.y);
+
+		}
 
 
 		// set texture targets
