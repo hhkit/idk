@@ -14,6 +14,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <anim/AnimationSystem.h>
 #include <gfx/DebugRenderer.h>
+#include <particle/ParticleSystemUpdater.h>
 
 #include <phys/PhysicsSystem.h>
 

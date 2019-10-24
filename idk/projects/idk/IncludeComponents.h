@@ -13,6 +13,8 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/Light.h>
 
+#include <particle/ParticleSystem.h>
+
 #include <audio/AudioSource.h>
 #include <audio/AudioListener.h>
 
