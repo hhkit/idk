@@ -126,3 +126,29 @@
       i: 0
       jump_force: 250
       movement: {x: 0, y: 0, z: 0}
+- !17179935488 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -8.387413, y: -3.0207841, z: 0}
+    rotation: 
+      w: 1
+      x: -0
+      y: -0
+      z: -0
+    scale: {x: 5.0005207, y: 17.472687, z: 17.472687}
+  - !Name 
+    name: wall
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      axes: 
+        intern[0]: {x: 1, y: 0, z: 0}
+        intern[1]: {x: 0, y: 1, z: 0}
+        intern[2]: {x: 0, y: 0, z: 1}
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+    static_friction: 0

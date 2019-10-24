@@ -643,12 +643,11 @@ namespace idk {
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);
         ImGui::PushID(component.index);
-		const auto componentName = [&]()
+		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? handle_cast<mono::Behavior>(component)->TypeName() : type.name();
+			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + "(Script)" : string{ type.name() };
 		}();
-		string displayingComponent{ componentName };
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
 
@@ -1060,10 +1059,9 @@ namespace idk {
 
 		};
 
+		dyn.visit(generic_visitor);
 		if (dyn.is<mono::Behavior>())
 			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
-		else
-			dyn.visit(generic_visitor);
 
         _curr_property_stack.clear();
 
