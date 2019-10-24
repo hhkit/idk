@@ -385,9 +385,13 @@ namespace idk
 						auto itr = as_map.find("script_data");
 						IDK_ASSERT(itr != as_map.end());
 						auto [tag, val] = *itr;
-						mb_handle->EmplaceBehavior(val.tag());
-						auto dyn = reflect::dynamic{ mb_handle->GetObject() };
-						parse_yaml(val, dyn);
+						if (mb_handle->EmplaceBehavior(val.tag()))
+						{
+							auto dyn = reflect::dynamic{ mb_handle->GetObject() };
+							parse_yaml(val, dyn);
+						}
+						else
+							handle->RemoveComponent(mb_handle);
 					}
 				}
 			}
