@@ -1,6 +1,8 @@
 #pragma once
 #include <mono/jit/jit.h>
 
+#include <script/ValueVariant.h>
+
 namespace idk::mono
 {
 	class ManagedType;
@@ -20,6 +22,9 @@ namespace idk::mono
 		MonoObject*        Raw() const noexcept;
 		const ManagedType* Type() noexcept;
 		string_view        TypeName() const;
+
+		MonoValue          Value() const;
+		void               Value(span<const MonoValue>);
 
 		// mutators
 		void Assign(string_view field, MonoObject* obj);

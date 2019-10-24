@@ -782,6 +782,7 @@
     <ClInclude Include="gfx\Viewport.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
+    <ClInclude Include="script\ValueVariant.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

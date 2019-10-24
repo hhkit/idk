@@ -192,6 +192,7 @@
     <ClInclude Include="script\MonoWrapperEnvironment.h" />
     <ClInclude Include="script\ScriptSystem.h" />
     <ClInclude Include="script\ValueUnboxer.h" />
+    <ClInclude Include="script\ValueVariant.h" />
     <ClInclude Include="serialize\binary.h" />
     <ClInclude Include="serialize\parse_error.h" />
     <ClInclude Include="serialize\yaml.h" />

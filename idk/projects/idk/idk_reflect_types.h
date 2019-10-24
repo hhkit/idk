@@ -14,6 +14,8 @@
 #include <phys/collidable_shapes.h>
 #include <math/matrix_decomposition.h>
 #include <anim/AnimationLayer.h>
+#include <script/ValueVariant.h>
+
 namespace idk
 {
 	class GameObject;
@@ -94,6 +96,10 @@ namespace idk::reflect
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>
 		
+		// mono
+		, MonoValue
+		, MonoVariant
+		, vector<MonoValue>
 		
 		// resources
 		, vector<SerializedMeta>

@@ -14,9 +14,10 @@ namespace idk::mono
 	{
 	public:
 		bool enabled = true;
+		MonoValue behavior_values;
 
-		string_view RescueMonoObject();
-		void        RestoreMonoObject();
+		MonoValue& Retrieve();
+		void Submit();
 
 		string_view TypeName() const;
 		MonoObject* EmplaceBehavior(string_view type);
@@ -26,7 +27,7 @@ namespace idk::mono
 
 		void DisposeMonoObject();
 
-		void SerializeFromString(string_view type, string_view serialized);
+		void SerializeFromString(string_view type, string_view behavior_values);
 
 		void Awake();
 		void Start();

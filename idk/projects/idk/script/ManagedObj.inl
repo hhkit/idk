@@ -61,8 +61,14 @@ namespace idk::mono
 	inline void ManagedObject::VisitImpl(T&& functor, int& depth)
 	{
 		++depth;
+		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+		auto method_seeker = envi.Type("IDK")->GetMethod("Main", 1);
+
 		for (void* iter = nullptr; auto field = mono_class_get_fields(mono_object_get_class(Raw()), &iter);)
 		{
+			if (method_seeker.index() != 1 || !mono_method_can_access_field(std::get<MonoMethod*>(method_seeker), field))
+				continue;
+
 			auto field_name = string_view{ mono_field_get_name(field) };
 			
 			auto* klass = mono_class_from_mono_type(mono_field_get_type(field));
@@ -90,8 +96,6 @@ namespace idk::mono
 
 				continue;
 			}
-
-			auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 			
 			MONO_COMPLEX_TYPE(vec2, envi.Type("Vector2")->Raw());
 			MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());

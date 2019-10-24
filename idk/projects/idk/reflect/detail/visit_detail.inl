@@ -96,6 +96,16 @@ else VARIANT_CASE(1, 0)
 			else VARIANT_CASE(8, 7, 6, 5, 4, 3, 2, 1, 0)
 			else VARIANT_CASE(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 			else VARIANT_CASE(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+			else VARIANT_CASE(20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 			else throw "Unhandled case?";
 #undef VISIT_INDEX
 #undef VARIANT_CASE

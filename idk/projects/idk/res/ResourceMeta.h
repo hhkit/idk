@@ -6,7 +6,7 @@ namespace idk
 	// tags a resource with metadata of the type Meta
 	// when SetMeta is called, OnMetaUpdate is called first before the meta is set.
 	//   override for custom behavior
-	// the Meta is the data that will be serialized when the resource is saved
+	// the Meta is the data that will be behavior_values when the resource is saved
 	template<typename Meta>
 	struct MetaTag
 	{

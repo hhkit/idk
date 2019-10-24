@@ -1081,8 +1081,8 @@ namespace idk {
 		};
 
 		dyn.visit(generic_visitor);
-		if (dyn.is<mono::Behavior>())
-			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
+		//if (dyn.is<mono::Behavior>())
+		//	dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
 
         _curr_property_stack.clear();
 

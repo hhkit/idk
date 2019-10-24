@@ -4,13 +4,17 @@
 #include <script/MonoBehaviorEnvironment.h>
 namespace idk::mono
 {
-	string_view Behavior::RescueMonoObject()
+	MonoValue& Behavior::Retrieve()
 	{
-		return _serialized;
+		if (_obj)
+			behavior_values = _obj.Value();
+		return behavior_values;
 	}
 
-	void Behavior::RestoreMonoObject()
+	void Behavior::Submit()
 	{
+		if (EmplaceBehavior(behavior_values.name))
+			_obj.Value(span<const MonoValue>{ std::get<vector<MonoValue>>(behavior_values.data) });
 	}
 
 	string_view Behavior::TypeName() const

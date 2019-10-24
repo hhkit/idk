@@ -312,10 +312,6 @@ REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::mono::Behavior, "MonoBehavior")
-REFLECT_VARS(enabled)
-REFLECT_END()
-
 // PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
 REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity)
@@ -391,4 +387,14 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
 REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic,overlay_debug_draw, viewport,render_target)
+REFLECT_END()
+
+// SCRIPTING
+
+REFLECT_BEGIN(idk::mono::Behavior, "MonoBehavior")
+REFLECT_VARS(enabled, behavior_values)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MonoValue, "ScriptValue")
+REFLECT_VARS(name, data)
 REFLECT_END()

@@ -213,17 +213,6 @@ namespace idk
 				throw "wtf is this key??", arg;
 		};
 
-		if (obj.is<mono::ManagedObject>())
-		{
-			auto& managed_obj = obj.get<mono::ManagedObject>();
-			if (!managed_obj.Type())
-				return yaml::node();
-
-			managed_obj.Visit(yaml_visitor);
-			node.tag(managed_obj.TypeName());
-			return node;
-		}
-
 		obj.visit(yaml_visitor);
 		return node;
     }
@@ -248,14 +237,11 @@ namespace idk
 				if (handle.is_type<mono::Behavior>())
 				{
 					auto mb_handle = handle_cast<mono::Behavior>(handle);
-					elem.emplace_back(serialize_yaml(*mb_handle));
+					mb_handle->Retrieve();
 				}
-				else
-				{
-					auto reflected = *handle;
-					auto component_typename = reflected.type.name();
-					elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
-				}
+				auto reflected = *handle;
+				auto component_typename = reflected.type.name();
+				elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
 			}
         }
 

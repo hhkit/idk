@@ -380,18 +380,7 @@ namespace idk
 					if (new_component.is_type<mono::Behavior>())
 					{
 						auto mb_handle = handle_cast<mono::Behavior>(new_component);
-						
-						auto& as_map = node.as_mapping();
-						auto itr = as_map.find("script_data");
-						IDK_ASSERT(itr != as_map.end());
-						auto [tag, val] = *itr;
-						if (mb_handle->EmplaceBehavior(val.tag()))
-						{
-							auto dyn = reflect::dynamic{ mb_handle->GetObject() };
-							parse_yaml(val, dyn);
-						}
-						else
-							handle->RemoveComponent(mb_handle);
+						mb_handle->Submit();
 					}
 				}
 			}
