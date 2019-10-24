@@ -6,12 +6,12 @@ namespace idk
 {
     struct ParticleData
     {
-        unique_ptr<float[]> lifetimes;
-        unique_ptr<vec3[]> positions;
-        unique_ptr<float[]> rotations;
-        unique_ptr<float[]> sizes;
-        unique_ptr<vec3[]> velocities;
-        unique_ptr<color[]> colors;
+        vector<float> lifetimes;
+        vector<vec3> positions;
+        vector<float> rotations;
+        vector<float> sizes;
+        vector<vec3> velocities;
+        vector<color> colors;
 
         uint16_t num_total;
         uint16_t num_alive;
