@@ -220,8 +220,7 @@ namespace idk
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
 		{
-			//Do something
-			elem;
+			elem.UpdateAudioClips();
 		}
 
 		//Only one listener component will update FMODs listener
@@ -231,6 +230,7 @@ namespace idk
 		}
 		else {
 			//Do nothing or set Listener to 0,0,0
+
 		}
 
 		// Get Updates the core system by a tick

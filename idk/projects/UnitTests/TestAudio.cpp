@@ -137,8 +137,6 @@ TEST(Audio, AudioSystemClassTest)
 			}
 			if (elapsed.count() > 8 && !testCase6) {
 				std::cout << "Setting third music to loop and high pitched\n";
-				audioPtr3->SetIsLoop(true);
-				audioPtr3->SetPitch(2.0f);
 				audioPtr3->Play(); //Plays another audio
 
 				testCase6 = true;

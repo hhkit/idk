@@ -192,10 +192,6 @@ REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
-REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::Material, "Material")
 REFLECT_VARS(_shader_program, uniforms)
 REFLECT_END()
@@ -305,6 +301,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Layer, "Layer")
 REFLECT_VARS(index)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::AudioSource, "AudioSource")
+REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
