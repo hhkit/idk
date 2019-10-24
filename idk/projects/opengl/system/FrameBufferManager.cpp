@@ -71,9 +71,10 @@ namespace idk::ogl
 		CheckFBStatus();
 	}
 
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target, const std::optional<Viewport>& oviewport)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target, const std::optional<Viewport>& oviewport, bool clear)
 	{
-
+		glEnable(GL_SCISSOR_TEST);
+		GL_CHECK();
 		auto& meta = *target;
 		if (oviewport)
 		{
@@ -125,13 +126,19 @@ namespace idk::ogl
 
 
 		CheckFBStatus();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (clear)
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDisable(GL_SCISSOR_TEST);
+		GL_CHECK();
 
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& oviewport)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& oviewport,bool clear)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
+		glEnable(GL_SCISSOR_TEST);
+		GL_CHECK();
 		auto& meta = *target;
 		if (oviewport)
 		{
@@ -171,13 +178,18 @@ namespace idk::ogl
 
 		CheckFBStatus();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (clear)
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_SCISSOR_TEST);
+		GL_CHECK();
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target, const std::optional<Viewport>& oviewport)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target, const std::optional<Viewport>& oviewport, bool clear)
 	{
 		IDK_ASSERT_MSG(&*target,"Attempting to use a default framebuffer. Default framebuffer should not be used.");//make sure it's not null. 
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
+		glEnable(GL_SCISSOR_TEST);
+		//GL_CHECK();
 		auto& meta = *target;
 		if (oviewport)
 		{
@@ -193,6 +205,7 @@ namespace idk::ogl
 
 		}
 
+		//GL_CHECK();
 
 		// set texture targets
 		vector<GLenum> buffers;
@@ -218,21 +231,30 @@ namespace idk::ogl
 		{
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(target->DepthAttachment().buffer->ID())), 0);
 		}
+		GL_CHECK();
 		if (!target->NumColorAttachments())
 		{
 			//GLint max_draw =0;
 			//glGetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw);
-			glFramebufferParameteri(_fbo_id, GL_FRAMEBUFFER_DEFAULT_WIDTH , target->Size().x);
-			glFramebufferParameteri(_fbo_id, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
+			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH , target->Size().x);
+			GL_CHECK();
+			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
+			GL_CHECK();
 			glDrawBuffer(GL_NONE);
+			GL_CHECK();
 		}else
 		{
 			glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
 		}
 
+		//GL_CHECK();
 		CheckFBStatus();
+		//GL_CHECK();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if(clear)
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_SCISSOR_TEST);
+		//GL_CHECK();
 	}
 
 

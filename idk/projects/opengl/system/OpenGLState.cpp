@@ -308,7 +308,7 @@ namespace idk::ogl
 				//else
 				//auto position = ivec2{vec2{ cam.viewport.position } *vec2{ cam.render_target->Size() }};
 				//auto size =     ivec2{vec2{ cam.viewport.size     } *vec2{ cam.render_target->Size() }};
-				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target},cam.viewport);
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target},cam.viewport,cam.clear_data.index() != idk::index_in_variant_v<DontClear,decltype(cam.clear_data)>);
 			}
 			
 			// lock drawing buffer
