@@ -125,7 +125,9 @@
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
     receive_shadows: 1
-  - !Test 
-    f: 15
-    i: 0
-    movement: {x: 0, y: 0, z: 0}
+  - !MonoBehavior 
+    - enabled: 1
+    - !Test 
+      f: 15
+      i: 0
+      movement: {x: 0, y: 0, z: 0}

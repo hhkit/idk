@@ -312,6 +312,10 @@ REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::mono::Behavior, "MonoBehavior")
+REFLECT_VARS(enabled)
+REFLECT_END()
+
 // PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
 REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity)

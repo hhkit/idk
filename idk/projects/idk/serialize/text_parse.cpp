@@ -142,7 +142,7 @@ namespace idk
                     obj = dyn;
                 return res;
             }
-			else if (obj.type.hash() != reflect::typehash<mono::Behavior>())
+			else
                 return parse_error::type_cannot_be_parsed;
 		}
         else if (obj.type.is_basic_serializable())
@@ -303,8 +303,10 @@ namespace idk
 			}
 		};
 
-		if (obj.is<mono::Behavior>())
-			obj.get<mono::Behavior>().GetObject().Visit(generic_visitor);
+		if (obj.is<mono::ManagedObject>())
+		{
+			obj.get<mono::ManagedObject>().Visit(generic_visitor);
+		}
 		else
 			obj.visit(generic_visitor); // visit
 
@@ -357,34 +359,31 @@ namespace idk
 			for (++iter; iter != elem.end(); ++iter)
 			{
 				const reflect::type type = reflect::get_type(iter->tag());
-				if (type.valid())
-				{
-					reflect::dynamic obj = type.create();
-					const auto res2 = parse_yaml(*iter, obj);
-					if (res2 != parse_error::none)
-						err = res2;
+				reflect::dynamic obj = type.create();
+				const auto res2 = parse_yaml(*iter, obj);
+				if (res2 != parse_error::none)
+					err = res2;
 
-					if (type.is<Transform>())
-					{
-						auto& trans = *handle->GetComponent<Transform>();
-						auto& new_trans = obj.get<Transform>();
-						trans.position = new_trans.position;
-						trans.rotation = new_trans.rotation;
-						trans.scale = new_trans.scale;
-						trans.parent = new_trans.parent;
-					}
-					else if (type.is<Name>())
-						handle->GetComponent<Name>()->name = obj.get<Name>().name;
-					else
-						handle->AddComponent(obj);
+				if (type.is<Transform>())
+				{
+					auto& trans = *handle->GetComponent<Transform>();
+					auto& new_trans = obj.get<Transform>();
+					trans.position = new_trans.position;
+					trans.rotation = new_trans.rotation;
+					trans.scale = new_trans.scale;
+					trans.parent = new_trans.parent;
 				}
+				else if (type.is<Name>())
+					handle->GetComponent<Name>()->name = obj.get<Name>().name;
 				else
 				{
-					auto mb = handle->AddComponent<mono::Behavior>();
-					if (mb->EmplaceBehavior(iter->tag()))
+					const yaml::node& node = *iter;
+					auto new_component = handle->AddComponent(obj);
+					if (new_component.is_type<mono::Behavior>())
 					{
-						reflect::dynamic reflect = *mb;
-						parse_yaml(*iter, reflect);
+						auto mb_handle = handle_cast<mono::Behavior>(new_component);
+						mb_handle->EmplaceBehavior("Test");
+						mb_handle->GetObject();
 					}
 				}
 			}

@@ -62,44 +62,55 @@ namespace idk
         return node;
     }
 
+	static yaml::node serialize_yaml(const mono::Behavior& mono_behavior)
+	{
+		auto node = yaml::node();
+		node.emplace_back(serialize_yaml(reflect::dynamic{ mono_behavior }));
+		node.emplace_back(serialize_yaml(reflect::dynamic{ mono_behavior.GetObject() }));
+		node.tag(reflect::get_type<mono::Behavior>().name());
+		return node;
+	}
+
     static yaml::node serialize_yaml(const reflect::dynamic& obj)
     {
         if (!obj.valid())
             return yaml::node();
-        else if (obj.type.is_enum_type())
+        
+		if (obj.type.is_enum_type())
             return yaml::node(obj.to_enum_value().name());
-        else if(obj.type.hash() == reflect::typehash<mono::Behavior>())
+        
+		if (!obj.type.is<mono::ManagedObject>())
 		{
-			// ???/
-		} 
-		else if (obj.type.count() == 0)
-        {
-            if (obj.type.is_basic_serializable())
-                return yaml::node(obj.to_string());
-            else if (obj.type.is_container())
-            {
-                auto cont = obj.to_container();
-                return serialize_yaml(cont);
-            }
-            else if (obj.type.is_template<std::variant>())
-            {
-                auto held = obj.get_variant_value();
-                yaml::node ret = serialize_yaml(held);
-                ret.tag(held.type.name());
-                return ret;
-            }
-			else if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
-            {
-                auto& held = obj.get<reflect::dynamic>();
-                yaml::node ret = serialize_yaml(held);
-                ret.tag(held.type.name());
-                return ret;
-            }
-            else
-                throw "unhandled case?";
-        }
-        else if (obj.type.is_basic_serializable())
-            return yaml::node(obj.to_string());
+			if (obj.type.count() == 0)
+			{
+				if (obj.type.is_basic_serializable())
+					return yaml::node(obj.to_string());
+
+				if (obj.type.is_container())
+					return serialize_yaml(obj.to_container());
+
+				if (obj.type.is_template<std::variant>())
+				{
+					auto held = obj.get_variant_value();
+					yaml::node ret = serialize_yaml(held);
+					ret.tag(held.type.name());
+					return ret;
+				}
+
+				if (obj.type.hash() == reflect::typehash<reflect::dynamic>())
+				{
+					auto& held = obj.get<reflect::dynamic>();
+					yaml::node ret = serialize_yaml(held);
+					ret.tag(held.type.name());
+					return ret;
+				}
+
+				throw "unhandled case?";
+			}
+
+			if (obj.type.is_basic_serializable())
+				return yaml::node(obj.to_string());
+		}
 
         yaml::node node;
         vector<yaml::node*> stack{ &node };
@@ -201,12 +212,19 @@ namespace idk
 				throw "wtf is this key??", arg;
 		};
 
-		if (obj.is<mono::Behavior>())
-			obj.get<mono::Behavior>().GetObject().Visit(yaml_visitor);
-		else
-			obj.visit(yaml_visitor);
+		if (obj.is<mono::ManagedObject>())
+		{
+			auto& managed_obj = obj.get<mono::ManagedObject>();
+			if (!managed_obj.Type())
+				return yaml::node();
 
-        return node;
+			managed_obj.Visit(yaml_visitor);
+			node.tag(managed_obj.TypeName());
+			return node;
+		}
+
+		obj.visit(yaml_visitor);
+		return node;
     }
 
     template<>
@@ -226,9 +244,17 @@ namespace idk
             elem.emplace_back(yaml::mapping_type{ { "active", yaml::node{obj.ActiveSelf()} } });
 			for (auto& handle : obj.GetComponents())
 			{
-				auto reflected = *handle;
-				auto component_typename = reflected.is<mono::Behavior>() ? reflected.get<mono::Behavior>().TypeName() : (*handle).type.name();
-				elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
+				if (handle.is_type<mono::Behavior>())
+				{
+					auto mb_handle = handle_cast<mono::Behavior>(handle);
+					elem.emplace_back(serialize_yaml(*mb_handle));
+				}
+				else
+				{
+					auto reflected = *handle;
+					auto component_typename = reflected.type.name();
+					elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
+				}
 			}
         }
 
