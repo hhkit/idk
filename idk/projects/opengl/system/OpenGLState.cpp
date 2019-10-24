@@ -340,7 +340,7 @@ namespace idk::ogl
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+			if (cam.overlay_debug_draw && cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
 					SetObjectUniforms(elem, cam.view_matrix);

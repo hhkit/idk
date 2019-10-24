@@ -111,6 +111,7 @@ namespace idk::reflect
         , vector<PropertyOverride>
         , RscHandle<Prefab>
 
+		, RscHandle<RenderTarget>
 		, RscHandle<ShaderProgram>
         , shadergraph::ValueType
         , shadergraph::Slot

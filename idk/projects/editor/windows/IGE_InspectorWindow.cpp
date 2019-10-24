@@ -822,7 +822,7 @@ namespace idk {
 				editor.RefreshSelectedMatrix();
 		}
 	}
-
+	static void DoNothing() {}
 
 
     bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
@@ -853,7 +853,10 @@ namespace idk {
             else
             {
                 string keyName = format_name(key);
-
+				if (keyName == "min" || keyName == "Min")
+				{
+					DoNothing();
+				}
                 while (depth_change++ <= 0)
                 {
                     if (indent_stack.back())
@@ -915,7 +918,7 @@ namespace idk {
                 ImGui::SetCursorPosY(currentHeight);
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
-                ImGui::PushID(keyName.c_str());
+                ImGui::PushID(("##"+curr_prop_path).c_str());
                 ImGui::PushItemWidth(-4.0f);
 
                 bool indent = false;

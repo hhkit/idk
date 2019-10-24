@@ -10,6 +10,7 @@
 #include <anim/AnimationLayer.h>
 #include <math/matrix_decomposition.h>
 
+#include <gfx/RenderTarget.h>
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -174,6 +175,11 @@ REFLECT_ENUM(idk::FilterMode, "FilterMode")
 
 REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
+REFLECT_END()
+
+
+REFLECT_BEGIN(idk::RenderTarget::Metadata, "RenderTargetMeta")
+REFLECT_VARS(size, is_world_renderer, render_debug)
 REFLECT_END()
 
 REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
@@ -376,9 +382,9 @@ REFLECT_END()
 
 
 REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(min,max)
+REFLECT_VARS(position,size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic, viewport,render_target)
+REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic,overlay_debug_draw, viewport,render_target)
 REFLECT_END()

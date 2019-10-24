@@ -3,13 +3,9 @@
 #include <core/Component.h>
 #include <gfx/RenderObject.h>
 #include <gfx/CameraFrustum.h>
-
+#include <gfx/Viewport.h>
 namespace idk
 {
-	struct Viewport
-	{
-		vec2 min, max;//(0,1)
-	};
 	class Camera
 		: public Component<Camera>
 	{
