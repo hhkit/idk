@@ -17,13 +17,13 @@ namespace idk
 			if (!animator)
 				return;
 			
-			creation_queue.push_back(animator);
+			_creation_queue.push_back(animator);
 		};
 	}
 
 	void AnimationSystem::Update(span<Animator> animators)
 	{
-		CreateAnimatorsAndFlush();
+		InitializeAnimators();
 		if (_was_paused)
 		{
 			for (auto& elem : animators)
@@ -99,7 +99,7 @@ namespace idk
 
 	void AnimationSystem::UpdatePaused(span<Animator> animators)
 	{
-		CreateAnimatorsAndFlush();
+		InitializeAnimators();
 		if (!_was_paused)
 		{
 			for (auto& elem : animators)
@@ -434,13 +434,13 @@ namespace idk
 		}
 	}
 
-	void AnimationSystem::CreateAnimatorsAndFlush()
+	void AnimationSystem::InitializeAnimators()
 	{
 		// only remove from queue if the animator was created successfully
 		vector<Handle<Animator>> uncreated;
-		uncreated.reserve(creation_queue.size());
+		uncreated.reserve(_creation_queue.size());
 
-		for(auto& animator : creation_queue)
+		for(auto& animator : _creation_queue)
 		{
 			const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator->GetHandle().scene);
 			auto* sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(animator->GetGameObject());
@@ -481,7 +481,7 @@ namespace idk
 			}
 		}
 
-		creation_queue = std::move(uncreated);
+		_creation_queue = std::move(uncreated);
 	}
 
 	void AnimationSystem::GenerateSkeletonTree(Animator& animator)
