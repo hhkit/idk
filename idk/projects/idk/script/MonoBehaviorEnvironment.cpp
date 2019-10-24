@@ -55,6 +55,10 @@ namespace idk::mono
 		else
 			return nullptr;
 	}
+	span<const char* const> MonoBehaviorEnvironment::GetBehaviorList()
+	{
+		return span<const char* const>(name_list);
+	}
 	void MonoBehaviorEnvironment::Execute()
 	{
 		auto go = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
@@ -173,5 +177,9 @@ namespace idk::mono
 				mono_behaviors.emplace(class_name, &type);
 			}
 		}
+
+		name_list.clear();
+		for (auto [name, type] : mono_behaviors)
+			name_list.emplace_back(name.data());
 	}
 }

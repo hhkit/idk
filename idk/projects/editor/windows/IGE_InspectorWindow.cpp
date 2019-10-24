@@ -23,6 +23,7 @@ of the editor.
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_ProjectSettings.h>
+#include <editor/DragDropTypes.h>
 #include <editor/utils.h>
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
@@ -527,105 +528,196 @@ namespace idk {
 		ImVec2 cursorPos2{};
 
 		//Draw All your custom variables here.
+		const auto imgui_name = [&](string_view base, string_view added) -> string
+		{
+			return string{ base } + "##" + added.data();
+		};
 
 		ImGui::Text("Animation Clips");
 		ImGui::Separator();
-		for (auto& anim : c_anim->animation_table)
+		for (auto& layer: c_anim->layers)
 		{
 			bool not_removed = true;
 			// Will change this to use something other than collapsing header. 
-			if(ImGui::CollapsingHeader(anim.second.animation->Name().data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
+			if (ImGui::CollapsingHeader(layer.name.c_str()))
+			{
+				// ImGui::Indent(25);
+				//ImGui::PushItemWidth(100);
+					// ImGui::PopItemWidth();
+				ImGui::TextColored(layer.is_playing ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Is Playing");
+				ImGui::NewLine();
+				static const char* layer_types[3] = { "Base", "Override", "Additive" };
+				if (ImGui::BeginCombo(imgui_name("Blending", layer.name).c_str(), layer_types[s_cast<size_t>(layer.blend_type)]))
+				{
+					for (size_t i = 0; i < 3; ++i)
+					{
+						if (ImGui::Selectable(layer_types[i]), i == s_cast<size_t>(layer.blend_type))
+						{
+							layer.blend_type = s_cast<AnimLayerBlend>(i);
+						}
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::NewLine();
+				if (layer.is_playing)
+				{
+					ImGui::DragFloat(imgui_name("Weight", layer.name).c_str(), &layer.weight, 0.01f, 0.0f, 1.0f);
+				}
+				else
+				{
+					ImGui::DragFloat(imgui_name("Weight", layer.name).c_str(), &layer.default_weight, 0.01f, 0.0f, 1.0f);
+				}
+				
+				ImGui::NewLine();
+				if (ImGui::BeginCombo(imgui_name("Default State", layer.name).c_str(), c_anim->GetAnimationState(layer.default_state).name.c_str()))
+				{
+					for (auto& anim : c_anim->animation_table)
+					{
+						string_view curr_name = anim.second.name;
+						if (ImGui::Selectable(curr_name.data(), layer.default_state == curr_name))
+						{
+							// c_anim->Stop();
+							layer.default_state = curr_name;
+							if (layer.curr_state == string{})
+								layer.curr_state = curr_name;
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				if (ImGui::BeginCombo(imgui_name("Current State", layer.name).c_str(), c_anim->GetAnimationState(layer.curr_state).name.c_str()))
+				{
+					for (auto& anim : c_anim->animation_table)
+					{
+						string_view curr_name = anim.second.name;
+						if (ImGui::Selectable(curr_name.data(), layer.curr_state == curr_name))
+						{
+							// Reset the animation
+							layer.normalized_time = 0.0f;
+							// Set the new current animation
+							layer.curr_state = curr_name;
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				ImGui::NewLine();
+				ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
+				ImGui::NewLine();
+				//ImGui::Unindent(25);
+			}
+		}
+		if(ImGui::Button("Add Animtion Layer"))
+		{
+			c_anim->AddLayer();
+		}
+
+		ImGui::Text("Animation Clips");
+		ImGui::Separator();
+		for (auto& curr_state : c_anim->animation_table)
+		{
+			bool not_removed = true;
+			// Will change this to use something other than collapsing header. 
+			if(ImGui::CollapsingHeader(curr_state.first.data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
 			{
 				ImGui::Indent(50);
-				ImGui::PushItemWidth(100);
-				ImGui::DragFloat("Speed", &anim.second.speed, 0.01f, 0.0f);
-				ImGui::PopItemWidth();
-				ImGui::Checkbox("Loop", &anim.second.loop);
+				
+				if (curr_state.second.IsBlendTree())
+				{
+					ImGui::Text("Blend Tree");
+				}
+				else
+				{
+					ImGui::Text("Basic Animation: ");
+					ImGui::SameLine();
+					ImGui::Text(curr_state.first.c_str());
+					auto& state_data = *curr_state.second.GetBasicState();
+					ImGuidk::InputResource("Animation Clip", &state_data.motion);
+					ImGui::Checkbox("Loop", &curr_state.second.loop);
+				}
+				
 				ImGui::Unindent(50);
 			}
 
 			if (!not_removed)
 			{
-				c_anim->RemoveAnimation(anim.second.name);
+				c_anim->RemoveAnimation(curr_state.first);
 				break;
 			}
 		}
 
-
 		RscHandle<anim::Animation> new_anim;
-		if (ImGuidk::InputResource("Add Animation Clip", &new_anim))
+		
+		if (ImGuidk::InputResource("Add Animation State", &new_anim))
 		{
 			c_anim->AddAnimation(new_anim);
 		}
+
 		ImGui::NewLine();
-
-		if (ImGui::BeginCombo("Default State", c_anim->GetAnimationState(c_anim->layers[0].default_state).name.c_str()))
+		if (ImGui::Checkbox("Preview", &c_anim->preview_playback))
 		{
-			for (auto& anim : c_anim->animation_table)
-			{
-				string_view curr_name = anim.second.name;
-				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
-				{
-					// c_anim->Stop();
-					c_anim->layers[0].default_state = curr_name;
-					if (c_anim->layers[0].curr_state == string{})
-						c_anim->layers[0].curr_state = curr_name;
-				}
-			}
-			ImGui::EndCombo();
+			c_anim->OnPreview();
 		}
-
-		if (ImGui::BeginCombo("Current State", c_anim->GetAnimationState(c_anim->layers[0].curr_state).name.c_str()))
-		{
-			for (auto& anim : c_anim->animation_table)
-			{
-				string_view curr_name = anim.second.name;
-				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].curr_state == curr_name))
-				{
-					// Reset the animation
-					c_anim->layers[0].normalized_time = 0.0f;
-					// Set the new current animation
-					c_anim->layers[0].curr_state = curr_name;
-				}
-			}
-			ImGui::EndCombo();
-		}
-		bool has_curr_anim = c_anim->layers[0].curr_state != string{};
-		if (has_curr_anim)
-		{
-			if (ImGui::Checkbox("Preview Current State", &c_anim->layers[0].preview_playback))
-			{
-				if (!c_anim->layers[0].preview_playback)
-				{
-					c_anim->layers[0].normalized_time = 0.0f;
-                    Core::GetSystem<AnimationSystem>().RestoreBindPose(*c_anim);
-				}
-			}
-
-			ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
-		}
-			
 		// FOR TESTING 
 		ImGui::Text("TESTING");
 		ImGui::Separator();
 
+		static string anim_name, layer_name;
+		ImGui::InputText("Layer Name", &layer_name);
+		ImGui::InputText("Animation Name", &anim_name);
+		
 	    if (ImGui::Button("Play"))
 	    {
-		    if(!c_anim->animation_table.empty())
-			    c_anim->Play(c_anim->animation_table.begin()->second.name);
+			c_anim->Play(anim_name);
 	    }
 	    ImGui::SameLine();
-	    if (ImGui::Button("Stop"))
+		if (ImGui::Button("Play In Layer"))
+		{
+			c_anim->Play(anim_name, layer_name);
+		}
+
+		if (ImGui::Button("Stop"))
+		{
+			c_anim->Stop();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Stop In Layer"))
+		{
+			c_anim->Stop(layer_name);
+		}
+		ImGui::SameLine();
+	    if (ImGui::Button("Stop All"))
 	    {
-		    c_anim->Stop();
+		    c_anim->StopAllLayers();
 	    }
-	    ImGui::SameLine();
-	    if (ImGui::Button("Pause"))
+	    
+		if (ImGui::Button("Pause"))
+		{
+			c_anim->Pause();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Pause In Layer"))
+		{
+			c_anim->Pause(layer_name);
+		}
+
+	    if (ImGui::Button("Pause All"))
 	    {
-		    c_anim->Pause();
+		    c_anim->PauseAllLayers();
 	    }
 
-        ImGui::DragFloat("Test Blend", &c_anim->layers[0].blend_time, 0.01f, 0.0f, 1.0f);
+		if (ImGui::Button("TEST"))
+		{
+			c_anim->layers[0].default_state = "walk";
+			c_anim->layers[0].curr_state = "walk";
+			c_anim->AddLayer();
+
+			c_anim->layers[1].default_state = "idle";
+			c_anim->layers[1].curr_state = "idle";
+			c_anim->layers[1].default_weight = 0.0f;
+		}
+
+       
 	}
 
     template<>
@@ -643,12 +735,11 @@ namespace idk {
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);
         ImGui::PushID(component.index);
-		const auto componentName = [&]()
+		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? handle_cast<mono::Behavior>(component)->TypeName() : type.name();
+			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + "(Script)" : string{ type.name() };
 		}();
-		string displayingComponent{ componentName };
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
 
@@ -1060,10 +1151,9 @@ namespace idk {
 
 		};
 
+		dyn.visit(generic_visitor);
 		if (dyn.is<mono::Behavior>())
 			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
-		else
-			dyn.visit(generic_visitor);
 
         _curr_property_stack.clear();
 

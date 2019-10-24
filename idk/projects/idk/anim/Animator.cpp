@@ -13,20 +13,19 @@
 
 namespace idk 
 {
-
 	Animator::Animator()
 	{
-		layer_table.emplace("Base Layer", 0);
+		// Initialize the base layer. Cannot be removed or edited (much).
 		AnimationLayer base_layer;
 		base_layer.name = "Base Layer";
 		std::fill(base_layer.bone_mask.begin(), base_layer.bone_mask.end(), true);
+		
+		layer_table.emplace("Base Layer", 0);
 		layers.push_back(base_layer);
 	}
 
 #pragma region Engine Getters/Setters
-
-
-	const AnimationState& Animator::GetAnimationState(string_view name) const
+	AnimationState& Animator::GetAnimationState(string_view name)
 	{
 		auto res = animation_table.find(name.data());
 		if (res != animation_table.end())
@@ -35,13 +34,13 @@ namespace idk
 		return null_state;
 	}
 
-	RscHandle<anim::Animation> Animator::GetAnimationRsc(string_view name) const
+	const AnimationState& Animator::GetAnimationState(string_view name) const
 	{
 		auto res = animation_table.find(name.data());
 		if (res != animation_table.end())
-			return res->second.animation;
+			return res->second;
 
-		return RscHandle<anim::Animation>{};
+		return null_state;
 	}
 
 	const vector<mat4>& Animator::BoneTransforms()
@@ -59,14 +58,16 @@ namespace idk
 			{
 				string append = " 0";
 				int count = 1;
-				while (animation_table.find(name + append) == animation_table.end())
+				while (animation_table.find(name + append) != animation_table.end())
 				{
 					// Generate a unique name
 					append = " " + std::to_string(count);
 				}
 				name += append;
 			}
-			animation_table.emplace(name, AnimationState{ name, anim_rsc, true });
+			AnimationState state{ name, true };
+			state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
+			animation_table.emplace(name, state);
 		}
 		else
 		{
@@ -74,14 +75,32 @@ namespace idk
 			string append = "0";
 			// Check if name exists
 			int count = 1;
-			while (animation_table.find(name + append) == animation_table.end())
+			while (animation_table.find(name + append) != animation_table.end())
 			{
 				// Generate a unique name
 				append = " " + std::to_string(count);
 			}
 			name += append;
-			animation_table.emplace(name, AnimationState{ name, anim_rsc, true });
+			animation_table.emplace(name, AnimationState{ name, true });
 		}
+	}
+
+	void Animator::AddLayer()
+	{
+		
+		string name = "New Layer ";
+		string append = "0";
+		// Check if name exists
+		int count = 1;
+		while (layer_table.find(name + append) != layer_table.end())
+		{
+			// Generate a unique name
+			append = " " + std::to_string(count);
+		}
+		AnimationLayer new_layer{};
+		new_layer.name = name + append;
+		layer_table.emplace(new_layer.name, layers.size());
+		layers.push_back(new_layer);
 	}
 
 	void Animator::RemoveAnimation(string_view name)
@@ -106,7 +125,28 @@ namespace idk
 #pragma region Editor Functionality
 	void Animator::Reset()
 	{
-		layers[0].Reset();
+		preview_playback = false;
+		for(auto& layer : layers)
+			layer.Reset();
+	}
+
+	void Animator::OnPreview()
+	{
+		if (preview_playback)
+		{
+			for (size_t i = 0; i < layers.size(); ++i)
+			{
+				Play(layers[i].curr_state, i);
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < layers.size(); ++i)
+			{
+				layers[i].Reset();
+			}
+			Core::GetSystem<AnimationSystem>().RestoreBindPose(*this);
+		}
 	}
 
 #pragma endregion
@@ -124,14 +164,140 @@ namespace idk
 		layers[0].Play(animation_name, offset);
 	}
 
+
+	void Animator::Play(string_view animation_name, string_view layer_name, float offset)
+	{
+		bool valid = true;
+		auto layer_res = layer_table.find(layer_name.data());
+		if (layer_res == layer_table.end())
+		{
+			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		auto anim_res = animation_table.find(animation_name.data());
+		if (anim_res == animation_table.end())
+		{
+			std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		if(valid)
+			layers[layer_res->second].Play(animation_name, offset);
+	}
+
+	void Animator::Play(string_view animation_name, size_t layer_index, float offset)
+	{
+		bool valid = true;
+		if (s_cast<size_t>(layer_index) >= layers.size())
+		{
+			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		auto anim_res = animation_table.find(animation_name.data());
+		if (anim_res == animation_table.end())
+		{
+			std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
+			valid = false;
+		}
+
+		if (valid)
+			layers[layer_index].Play(animation_name, offset);
+	}
+
 	void Animator::Pause()
 	{
 		layers[0].Pause();
+		preview_playback = false;
+	}
+
+	void Animator::Pause(string_view layer_name)
+	{
+		auto layer_res = layer_table.find(layer_name.data());
+		if (layer_res == layer_table.end())
+		{
+			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_res->second].Pause();
+	}
+
+	void Animator::Pause(int layer_index)
+	{
+		if (s_cast<size_t>(layer_index) >= layers.size())
+		{
+			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_index].Pause();
 	}
 
 	void Animator::Stop()
 	{
 		layers[0].Stop();
+	}
+
+	void Animator::Stop(string_view layer_name)
+	{
+		auto layer_res = layer_table.find(layer_name.data());
+		if (layer_res == layer_table.end())
+		{
+			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_res->second].Stop();
+	}
+
+	void Animator::Stop(int layer_index)
+	{
+		if (s_cast<size_t>(layer_index) >= layers.size())
+		{
+			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
+			return;
+		}
+
+		layers[layer_index].Stop();
+	}
+
+	void Animator::PauseAllLayers()
+	{
+		for (auto& layer : layers)
+		{
+			layer.Pause();
+		}
+
+		preview_playback = false;
+	}
+
+	void Animator::StopAllLayers()
+	{
+		for (auto& layer : layers)
+		{
+			layer.Stop();
+		}
+		preview_playback = false;
+	}
+
+	int Animator::GetInt(string_view name) const
+	{
+		UNREFERENCED_PARAMETER(name);
+		return false;
+	}
+
+	bool Animator::GetBool(string_view name) const
+	{
+		UNREFERENCED_PARAMETER(name);
+		return false;
+	}
+
+	float Animator::GetFloat(string_view name) const
+	{
+		UNREFERENCED_PARAMETER(name);
+		return false;
 	}
 
 	bool Animator::HasState(string_view name) const
@@ -147,6 +313,27 @@ namespace idk
 	string Animator::GetDefaultState() const
 	{
 		return layers[0].default_state;
+	}
+
+	bool Animator::SetInt(string_view name, int val)
+	{
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(val);
+		return false;
+	}
+
+	bool Animator::SetBool(string_view name, bool val)
+	{
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(val);
+		return false;
+	}
+
+	bool Animator::SetFloat(string_view name, float val)
+	{
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(val);
+		return false;
 	}
 
 	void Animator::SetEntryState(string_view name, float offset)
@@ -190,5 +377,11 @@ namespace idk
 
 		sg->visit(initialize_children);
 		Core::GetSystem<AnimationSystem>().SaveBindPose(*this);
+
+		for (auto& layer : layers)
+		{
+			layer.curr_state = layer.default_state;
+			layer.weight = layer.default_weight;
+		}
 	}
 }

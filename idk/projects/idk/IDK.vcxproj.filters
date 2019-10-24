@@ -116,6 +116,9 @@
     <Filter Include="debug">
       <UniqueIdentifier>{2eea3a1f-43c1-42ef-b2cd-443933fd8622}</UniqueIdentifier>
     </Filter>
+    <Filter Include="anim\utils">
+      <UniqueIdentifier>{a0b9bd32-3f41-447e-8853-eb3f7c9586d1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="proj">
       <UniqueIdentifier>{1142d1c7-1839-4bbc-999f-17503782be59}</UniqueIdentifier>
     </Filter>
@@ -775,13 +778,20 @@
     <ClInclude Include="gfx\CameraFrustum.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
+    <ClInclude Include="anim\AnimationUtils.h">
+      <Filter>anim\utils</Filter>
+    </ClInclude>
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationUtils.cpp">
+      <Filter>anim\utils</Filter>
     </ClInclude>
     <ClInclude Include="phys\collidable_shapes.h" />
     <ClInclude Include="gfx\Viewport.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
+    <ClInclude Include="particle\ParticleSystem.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
   </ItemGroup>
   <ItemGroup>
@@ -1128,6 +1138,9 @@
     </ClCompile>
     <ClCompile Include="gfx\CameraFrustum.cpp">
       <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationState.cpp">
+      <Filter>anim</Filter>
     </ClCompile>
     <ClCompile Include="proj\ProjectManager.cpp">
       <Filter>proj</Filter>
