@@ -122,25 +122,7 @@
   - !MonoBehavior 
     enabled: 1
     script_data: !Test 
-      f: 0
+      f: 150
       i: 0
-      movement: {x: 0, y: 0, z: 0}
-- !17179935488 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !Test 
-      f: 0
-      i: 0
+      jump_force: 250
       movement: {x: 0, y: 0, z: 0}

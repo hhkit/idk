@@ -7,6 +7,7 @@ namespace TestAndSeek
     {
         public int i;
         public float f;
+        public float jump_force;
         public Vector3 movement;
 
         private RigidBody rb;
@@ -24,16 +25,20 @@ namespace TestAndSeek
 
         public override void Start()
         {
-            //rb = gameObject.GetComponent<RigidBody>();
+            rb = gameObject.GetComponent<RigidBody>();
             //if (rb)
             //    System.Console.WriteLine("found rigidbody");
         }
         public override void FixedUpdate()
         {
-            if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
-            if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
-            if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
-            if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+            if (rb)
+            {
+                if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
+                if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
+                if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
+                if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+                if (Input.GetKeyDown(KeyCode.Space)) rb.AddForce(jump_force * Vector3.up);
+            }
         }
         public override void Update()
         {
