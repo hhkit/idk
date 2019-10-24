@@ -84,12 +84,16 @@ namespace idk::reflect
 		// anim
 		, RscHandle<anim::Skeleton>
 		, RscHandle<anim::Animation>
+		, BasicAnimationState
+		, BlendTree
+		, std::variant<BasicAnimationState, BlendTree>
 		, AnimationState
 		, hash_table<string, AnimationState>
 		, AnimationLayer
 		, hash_table<string, size_t>
 		, vector<AnimationLayer>
 		, std::array<bool, 100>
+		, std::array<string, 2>
 		, matrix_decomposition<real>
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>

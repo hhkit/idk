@@ -19,8 +19,8 @@ namespace idk
 
 	struct BlendTree
 	{
-		set<BlendTreeMotion> motions{};
-		string params[2]{};
+		// set<BlendTreeMotion> motions{};
+		std::array<string, 2> params;
 
 		BlendTreeType blend_tree_type = BlendTreeType::BlendTree_1D;
 	};
@@ -33,8 +33,7 @@ namespace idk
 		bool loop = true;
 		float speed = 1.0f;
 
-		using StateData = variant<BasicAnimationState, BlendTree>;
-		StateData state_data;
+		variant<BasicAnimationState, BlendTree> state_data;
 
 		BasicAnimationState* GetBasicState();
 		BlendTree* GetBlendTree();

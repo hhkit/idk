@@ -9,6 +9,5 @@ namespace idk
 	{
 		string _bone_name;
 		int _bone_index = -1;
-		float weight_left = 1.0f;
 	};
 }

@@ -66,7 +66,7 @@ namespace idk
 				name += append;
 			}
 			AnimationState state{ name, true };
-			state.state_data = AnimationState::StateData{ BasicAnimationState{ anim_rsc } };
+			state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
 			animation_table.emplace(name, state);
 		}
 		else

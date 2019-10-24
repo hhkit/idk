@@ -376,7 +376,7 @@ REFLECT_VARS(name, default_state, default_offset, default_weight, bone_mask, ble
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
-REFLECT_VARS(name, enabled, loop, speed)
+REFLECT_VARS(name, enabled, loop, speed, state_data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")

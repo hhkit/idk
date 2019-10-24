@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "AnimationSystem.h"
 
+#include <core/GameState.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <anim/Bone.h>
@@ -332,7 +333,6 @@ namespace idk
 
 				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 
-				curr_go->GetComponent<Bone>()->weight_left = 1.0f;
 			}
 		}
 		else
@@ -358,7 +358,6 @@ namespace idk
 				}
 				//const auto test = decompose(_pre_global_transforms[i]);
 				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
-				curr_go->GetComponent<Bone>()->weight_left = 1.0f;
 			}
 		}
 	}
@@ -437,6 +436,12 @@ namespace idk
 	void AnimationSystem::InitializeAnimators()
 	{
 		// only remove from queue if the animator was created successfully
+		if (_creation_queue.empty())
+			return;
+
+		// Call the build scene graph update
+		Core::GetSystem<SceneManager>().BuildSceneGraph(GameState::GetGameState().GetObjectsOfType<const GameObject>());
+
 		vector<Handle<Animator>> uncreated;
 		uncreated.reserve(_creation_queue.size());
 
