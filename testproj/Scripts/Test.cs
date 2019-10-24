@@ -26,8 +26,8 @@ namespace TestAndSeek
         public override void Start()
         {
             rb = gameObject.GetComponent<RigidBody>();
-            //if (rb)
-            //    System.Console.WriteLine("found rigidbody");
+            if (rb)
+                System.Console.WriteLine("found rigidbody");
         }
         public override void FixedUpdate()
         {

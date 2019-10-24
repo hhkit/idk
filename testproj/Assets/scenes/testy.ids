@@ -122,7 +122,7 @@
   - !MonoBehavior 
     enabled: 1
     script_data: !Test 
-      f: 150
+      f: 50
       i: 0
       jump_force: 250
       movement: {x: 0, y: 0, z: 0}

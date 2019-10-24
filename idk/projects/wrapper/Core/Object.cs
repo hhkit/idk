@@ -10,8 +10,10 @@ namespace idk
 
         public static implicit operator bool(Object o)
         {
-            System.Console.WriteLine("POOP");
-            return o.Equals(null) ? false : Bindings.ObjectValidate(o.handle);
+            if ((object) o == null)
+                return false;
+
+            return Bindings.ObjectValidate(o.handle);
         }
 
         public static bool operator == (Object lhs, Object rhs)
@@ -27,7 +29,7 @@ namespace idk
             return !(lhs == rhs);
         }
 
-        public override bool Equals(object obj) 
+        public override bool Equals(object obj)
         {
             if ((obj == null) || !this.GetType().Equals(obj.GetType()))
             {
@@ -35,7 +37,7 @@ namespace idk
             }
             else
             {
-                Object o = (Object )obj;
+                Object o = (Object)obj;
                 return handle == o.handle;
             }
         }
