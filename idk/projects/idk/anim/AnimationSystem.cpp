@@ -12,44 +12,18 @@ namespace idk
 {
 	void AnimationSystem::Init()
 	{
-		GameState::GetGameState().OnObjectCreate<Animator>() += [](Handle<Animator>)// animator)
+		GameState::GetGameState().OnObjectCreate<Animator>() += [&](Handle<Animator> animator)
 		{
-			// if (!animator)
-			// 	return;
-			// const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.scene);
-			// auto go = animator->GetGameObject();
-			// if (!go)
-			// 	return;
-			// 
-			// auto* sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(go);
-			// 
-			// if (animator->skeleton)
-			// {
-			// 	size_t num_bones = animator->skeleton->data().size();
-			// 	animator->_bind_pose.resize(num_bones);
-			// 	animator->_child_objects.resize(num_bones);
-			// 	animator->pre_global_transforms.resize(num_bones);
-			// 	animator->final_bone_transforms.resize(num_bones);
-			// }
-			// 
-			// auto& child_objects = animator->_child_objects;
-			// const auto initialize_children =
-			// 	[&child_objects](Handle<GameObject> c_go, int)
-			// {
-			// 	auto c_bone = c_go->GetComponent<Bone>();
-			// 	if (c_bone)
-			// 	{
-			// 		child_objects[c_bone->_bone_index] = c_go;
-			// 	}
-			// };
-			// 
-			// sg->visit(initialize_children);
-			// Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
+			if (!animator)
+				return;
+			
+			creation_queue.push_back(animator);
 		};
 	}
 
 	void AnimationSystem::Update(span<Animator> animators)
 	{
+		CreateAnimatorsAndFlush();
 		if (_was_paused)
 		{
 			for (auto& elem : animators)
@@ -125,6 +99,7 @@ namespace idk
 
 	void AnimationSystem::UpdatePaused(span<Animator> animators)
 	{
+		CreateAnimatorsAndFlush();
 		if (!_was_paused)
 		{
 			for (auto& elem : animators)
@@ -457,6 +432,56 @@ namespace idk
 				curr_pose.rotation.normalize();
 			}
 		}
+	}
+
+	void AnimationSystem::CreateAnimatorsAndFlush()
+	{
+		// only remove from queue if the animator was created successfully
+		vector<Handle<Animator>> uncreated;
+		uncreated.reserve(creation_queue.size());
+
+		for(auto& animator : creation_queue)
+		{
+			const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator->GetHandle().scene);
+			auto* sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(animator->GetGameObject());
+
+			if (!sg)
+			{
+				uncreated.push_back(animator);
+				continue;
+			}
+
+			if (animator->skeleton)
+			{
+				size_t num_bones = animator->skeleton->data().size();
+				animator->_bind_pose.resize(num_bones);
+				animator->_child_objects.resize(num_bones);
+				animator->pre_global_transforms.resize(num_bones);
+				animator->final_bone_transforms.resize(num_bones);
+			}
+
+			auto& child_objects = animator->_child_objects;
+			const auto initialize_children =
+				[&child_objects](Handle<GameObject> c_go, int)
+			{
+				auto c_bone = c_go->GetComponent<Bone>();
+				if (c_bone)
+				{
+					child_objects[c_bone->_bone_index] = c_go;
+				}
+			};
+
+			sg->visit(initialize_children);
+			Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
+
+			for (auto& layer : animator->layers)
+			{
+				layer.curr_state = layer.default_state;
+				layer.weight = layer.default_weight;
+			}
+		}
+
+		creation_queue = std::move(uncreated);
 	}
 
 	void AnimationSystem::GenerateSkeletonTree(Animator& animator)

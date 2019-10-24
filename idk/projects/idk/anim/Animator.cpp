@@ -377,5 +377,11 @@ namespace idk
 
 		sg->visit(initialize_children);
 		Core::GetSystem<AnimationSystem>().SaveBindPose(*this);
+
+		for (auto& layer : layers)
+		{
+			layer.curr_state = layer.default_state;
+			layer.weight = layer.default_weight;
+		}
 	}
 }

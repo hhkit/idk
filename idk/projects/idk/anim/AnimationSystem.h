@@ -4,6 +4,7 @@
 #include <idk.h>
 
 #include "Animator.h"
+#include <queue>
 
 namespace idk
 {
@@ -36,6 +37,8 @@ namespace idk
 		void FinalPass(Animator& animator);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 
-		
+		void CreateAnimatorsAndFlush();
+
+		vector<Handle<Animator>> creation_queue;
 	};
 }
