@@ -15,10 +15,14 @@ namespace idk::vkn
 		return Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 	}
 
-	void VknRenderTarget::OnMetaUpdate(const Metadata& new_meta)
+	void VknRenderTarget::OnFinalize()
 	{
-		for (auto& elem : meta.textures)
-			Core::GetResourceManager().Free(elem);
+		for (auto& elem : Textures())
+		{
+			if (elem == RscHandle<Texture>{})
+				elem = RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<VknTexture>()};
+			Core::GetResourceManager().Release(elem);
+		}
 		//TODO get these from somewhere persistent.
 		auto& factory = Core::GetResourceManager().GetFactory<VknRenderTargetFactory>();
 		hlp::MemoryAllocator& alloc = factory.GetAllocator();
@@ -26,16 +30,15 @@ namespace idk::vkn
 
 		//Reload the textures with the new configuration.
 		TextureLoader loader;
-		
 
-		Core::GetResourceManager().Free(new_meta.textures[kColorIndex]);
-		Core::GetResourceManager().Free(new_meta.textures[kDepthIndex]);
-		auto color_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(new_meta.textures[kColorIndex].guid);
-		loader.LoadTexture(*color_tex, TextureFormat::eBGRA32, {}, nullptr, 0, new_meta.size, alloc, fence, true);
-		auto depth_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(new_meta.textures[kDepthIndex].guid);
-		loader.LoadTexture(*depth_tex, TextureFormat::eD16Unorm, {}, nullptr, 0, new_meta.size, alloc, fence, true);
 
-		{
+		//TODO store a framebuffer instead.
+		auto color_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetColorBuffer().guid);
+		loader.LoadTexture(*color_tex, TextureFormat::eBGRA32, {}, nullptr, 0, size, alloc, fence, true);
+		auto depth_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);
+		loader.LoadTexture(*depth_tex, TextureFormat::eD16Unorm, {}, nullptr, 0, size, alloc, fence, true);
+
+		{ 
 			VulkanView& vknView = View();
 			const vk::ImageView image_views[] = {color_tex->ImageView(),depth_tex->ImageView()};
 
@@ -43,11 +46,9 @@ namespace idk::vkn
 			framebufferInfo.renderPass = vknView.BasicRenderPass(rp_type);
 			framebufferInfo.attachmentCount = hlp::arr_count(image_views);
 			framebufferInfo.pAttachments = std::data(image_views);
-			framebufferInfo.width  = s_cast<uint32_t>(new_meta.size.x);
-			framebufferInfo.height = s_cast<uint32_t>(new_meta.size.y);
+			framebufferInfo.width  = s_cast<uint32_t>(size.x);
+			framebufferInfo.height = s_cast<uint32_t>(size.y);
 			framebufferInfo.layers = 1;
-
-			size = new_meta.size;
 
 			buffer = vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher());
 
@@ -61,13 +62,14 @@ namespace idk::vkn
 
 	void VknRenderTarget::PrepareDraw(vk::CommandBuffer& cmd_buffer)
 	{
-		TransitionTexture(cmd_buffer, vk::ImageLayout::eColorAttachmentOptimal       , meta.textures[kColorIndex].as<VknTexture>());
-		TransitionTexture(cmd_buffer, vk::ImageLayout::eDepthStencilAttachmentOptimal, meta.textures[kDepthIndex].as<VknTexture>());
+		TransitionTexture(cmd_buffer, vk::ImageLayout::eColorAttachmentOptimal       , GetColorBuffer().as<VknTexture>());
+		TransitionTexture(cmd_buffer, vk::ImageLayout::eDepthStencilAttachmentOptimal, GetDepthBuffer().as<VknTexture>());
 	}
 
-	vk::RenderPass VknRenderTarget::GetRenderPass() const
+	vk::RenderPass VknRenderTarget::GetRenderPass(bool clear_col , bool clear_depth ) const
 	{
-		return View().BasicRenderPass(rp_type);
+		
+		return View().BasicRenderPass(rp_type,clear_col,clear_depth);
 	}
 
 	vk::Framebuffer VknRenderTarget::Buffer()

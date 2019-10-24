@@ -116,7 +116,7 @@ namespace idk::vkn
 		bool						imguiEnabled{ true };
 
 #pragma region ("Render passes")
-		vk::RenderPass BasicRenderPass(BasicRenderPasses type)const;
+		vk::RenderPass BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth )const;
 		//vk::RenderPass RenderPass_RgbaColorOnly ()const;
 		//vk::RenderPass RenderPass_DepthOnly     ()const;
 		//vk::RenderPass RenderPass_RgbaColorDepth()const;
@@ -174,7 +174,7 @@ namespace idk::vkn
 
 
 		vk::UniqueRenderPass                 m_renderpass;
-		vk::UniqueRenderPass                 m_basic_renderpasses[BasicRenderPasses::eSizeBrp];
+		vk::UniqueRenderPass                 m_basic_renderpasses[1<<3][BasicRenderPasses::eSizeBrp];
 		vk::UniqueRenderPass                 m_crenderpass;
 
 

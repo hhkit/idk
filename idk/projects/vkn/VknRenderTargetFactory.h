@@ -1,10 +1,12 @@
 #pragma once
-#include <gfx/RenderTarget.h>
+#include <vkn/VknRenderTarget.h>
 #include <res/ResourceFactory.h>
 #include <vkn/MemoryAllocator.h>
 #include <vulkan/vulkan.hpp>
+#include <res/SaveableResourceLoader.h>
 namespace idk::vkn
 {
+
 	class VknRenderTargetFactory
 		: public ResourceFactory<RenderTarget>
 	{
@@ -22,11 +24,12 @@ namespace idk::vkn
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence			fence;
 	};
-
-	class VknFrameBufferLoader
-		: public IFileLoader
-	{
-	public:
-		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& m);
-	};
+	using VknFrameBufferLoader= SaveableResourceLoader<VknRenderTarget>;
+	//class VknFrameBufferLoader
+	//	: public SaveableResourceLoader<VknRenderTarget>
+	//{
+	//	using base_t = SaveableResourceLoader<VknRenderTarget>;
+	//public:
+	//	ResourceBundle LoadFile(PathHandle filepath) override;
+	//};
 }

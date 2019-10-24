@@ -792,6 +792,7 @@
       <Filter>gfx\camera</Filter>
     </ClInclude>
     <ClInclude Include="particle\ParticleSystem.h" />
+    <ClInclude Include="gfx\ViewportUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1147,6 +1148,7 @@
     <ClCompile Include="gfx\Framebuffer.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\ViewportUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

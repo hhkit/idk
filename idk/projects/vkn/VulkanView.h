@@ -47,7 +47,7 @@ namespace idk::vkn
 		PresentationSignals& GetCurrentSignals        ()const;
 		uint32_t				   CurrSemaphoreFrame ()const;
 		uint32_t				   AcquiredImageValue ()const;
-		vk::RenderPass             BasicRenderPass    (BasicRenderPasses type)const;
+		vk::RenderPass             BasicRenderPass    (BasicRenderPasses type, bool clear_col = true, bool clear_depth = true)const;
 		vk::Result&				AcquiredImageResult()const;
 		uint32_t				   MaxFrameInFlight()const;
 		uint32_t                   SwapchainImageCount()const;
