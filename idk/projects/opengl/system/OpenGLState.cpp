@@ -19,6 +19,7 @@
 #include <opengl/resource/OpenGLCubemap.h>
 
 #include <editor/IDE.h>
+#include <gfx/ViewportUtil.h>
 
 void _check_gl_error(const char* file, int line) {
 	GLenum err(glGetError());
@@ -105,6 +106,14 @@ namespace idk::ogl
 		auto& curr_draw_buffer = sys->curr_draw_buffer;
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
+
+		for (auto& cam : curr_object_buffer.camera)
+		{
+			auto& rt = *cam.render_target;
+			if (rt.NeedsFinalizing())
+				rt.Finalize();
+		}
+
 
 		assert(Core::GetSystem<GraphicsSystem>().brdf);
 		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
@@ -297,7 +306,9 @@ namespace idk::ogl
 				//	fb_man.SetRenderTarget(main_buffer);
 				//}
 				//else
-				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target});
+				//auto position = ivec2{vec2{ cam.viewport.position } *vec2{ cam.render_target->Size() }};
+				//auto size =     ivec2{vec2{ cam.viewport.size     } *vec2{ cam.render_target->Size() }};
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target},cam.viewport,cam.clear_data.index() != idk::index_in_variant_v<DontClear,decltype(cam.clear_data)>);
 			}
 			
 			// lock drawing buffer
@@ -340,7 +351,7 @@ namespace idk::ogl
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.overlay_debug_draw && cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+			if (cam.overlay_debug_draw && cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
 					SetObjectUniforms(elem, cam.view_matrix);
@@ -453,7 +464,7 @@ namespace idk::ogl
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FPicking]);
 				// render debug
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				if (cam.render_target->GetMeta().render_debug && cam.render_target->GetMeta().is_world_renderer)
+				if (cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
 					for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 					{
 						SetObjectUniforms(elem, cam.view_matrix);

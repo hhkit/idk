@@ -98,7 +98,7 @@ namespace idk
 			render_target,
 			overlay_debug_draw,
 			false,
-			std::visit([&](const auto& obj)->std::variant<vec4, RscHandle<CubeMap>> 
+			std::visit([&](const auto& obj)->CameraData::ClearData_t
 			{ 
 				using T = std::decay_t<decltype(obj)>;
 				if constexpr (std::is_same_v<T, color>)

@@ -9,9 +9,8 @@ namespace idk::ogl
 	{
 	public:
 		OpenGLRenderTarget();
-		~OpenGLRenderTarget();
 
-		void OnMetaUpdate(const Metadata& newmeta) override;
+		void OnFinalize() override;
 
 		GLuint DepthBuffer() const;
 	private:

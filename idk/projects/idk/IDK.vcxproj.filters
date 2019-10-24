@@ -795,6 +795,7 @@
     <ClInclude Include="particle\ParticleSystemModules.h" />
     <ClInclude Include="particle\ParticleData.h" />
     <ClInclude Include="particle\ParticleSystemUpdater.h" />
+    <ClInclude Include="gfx\ViewportUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1153,6 +1154,7 @@
     <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
+    <ClCompile Include="gfx\ViewportUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

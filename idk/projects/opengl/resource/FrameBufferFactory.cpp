@@ -10,31 +10,29 @@ namespace idk::ogl
 	unique_ptr<RenderTarget> OpenGLRenderTargetFactory::GenerateDefaultResource()
 	{
 		auto fb = std::make_unique<OpenGLRenderTarget>();
-		auto m = fb->GetMeta();
-		m.size = Core::GetSystem<Application>().GetScreenSize();
+		auto& m = *fb;
+		m.Size(Core::GetSystem<Application>().GetScreenSize());
 		//m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
 		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
-		m.textures[RenderTarget::kColorIndex] = tex;
+		m.SetColorBuffer(RscHandle<Texture>{tex});
 		tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
-		m.textures[RenderTarget::kDepthIndex] = tex;
-		fb->SetMeta(m);
+		m.SetDepthBuffer(RscHandle<Texture>{tex});
 		return fb;
 	}
 
 	unique_ptr<RenderTarget> OpenGLRenderTargetFactory::Create()
 	{
 		auto fb = std::make_unique<OpenGLRenderTarget>();
-		auto m = fb->GetMeta();
-		m.size = ivec2{ 512, 512 };
+		auto &m = *fb;
+		m.Size(ivec2{ 512, 512 });
 		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
-		m.textures[RenderTarget::kColorIndex] = tex;
+		m.SetColorBuffer(RscHandle<Texture>{tex});
 		tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
-		m.textures[RenderTarget::kDepthIndex] = tex;
-		fb->SetMeta(m);
+		m.SetDepthBuffer(RscHandle<Texture>{tex});
 		return fb;
 	}
 

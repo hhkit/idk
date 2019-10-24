@@ -22,34 +22,26 @@
 #include <vkn/VulkanHashes.h>
 
 #include <vkn/PipelineBinders.inl>
-namespace std
-{
-	template<typename T, unsigned N>
-	idk::tvec<T, N> min(const idk::tvec<T, N>& lhs, const idk::tvec<T, N>& rhs)
-	{
-		idk::tvec<T, N>result{};
-		for (auto i = N; i-- > 0;)
-		{
-			result[i] = (lhs[i] < rhs[i]) ? lhs[i] : rhs[i];
-		}
-		return result;
-	}
-	template<typename T, unsigned N>
-	idk::tvec<T, N> max(const idk::tvec<T, N>& lhs, const idk::tvec<T, N>& rhs)
-	{
-		idk::tvec<T, N>result{};
-		for (auto i = N; i-- > 0;)
-		{
-			result[i] = (lhs[i] > rhs[i]) ? lhs[i] : rhs[i];
-		}
-		return result;
-	}
-}
+
+#include <gfx/ViewportUtil.h>
 
 namespace idk::vkn
 {
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
 
+	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size)
+	{
+		vk::Viewport vp{ s_cast<float>(vp_pos.x),s_cast<float>(vp_pos.y),s_cast<float>(vp_size.x),s_cast<float>(vp_size.y),0,1 };
+		cmd_buffer.setViewport(0, vp);
+	}
+	auto ComputeVulkanViewport(const vec2& sz, const Viewport& vp)
+	{
+		auto pair = ComputeViewportExtents(sz, vp);
+		auto& [offset, size] = pair;
+
+		offset = ivec2{ (translate(ivec2{ 0,sz.y }) * tmat<int,3,3> { scale(ivec2{ 1,-1 }) }).transpose()* ivec3 { offset,1 } };//  -ivec2{ 0,size.y };
+		return pair;
+	}
 
 	template<typename T>
 	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, const T& val, FrameRenderer::DsBindingCount& collated_layouts, UboManager& ubo_manager)
@@ -371,6 +363,7 @@ namespace idk::vkn
 				config.viewport_size = ivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
 				auto& pipeline = pipeline_manager.GetPipeline(config,shaders,frame_index,rp,has_depth_stencil);
 				pipeline.Bind(cmd_buffer, View());
+				SetViewport(cmd_buffer, *config.viewport_offset, *config.viewport_size);
 				prev_pipeline = &pipeline;
 			}
 			auto& pipeline = *prev_pipeline;
@@ -583,7 +576,7 @@ namespace idk::vkn
 	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
-	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs)
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, ivec2 vp_size)
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
@@ -596,6 +589,7 @@ namespace idk::vkn
 		//auto alloced_dsets = rs.dpools.Allocate(layout_count);
 		rs.FlagRendered();
 		pipeline.Bind(cmd_buffer, *_view);
+		SetViewport(cmd_buffer, vp_pos, vp_size);
 		//Bind the uniforms
 		auto& layouts = pipeline.uniform_layouts;
 		uint32_t trf_set = 0;
@@ -635,7 +629,7 @@ namespace idk::vkn
 		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
 		//if (state.camera.is_shadow)
 		//	result = view.BasicRenderPass(BasicRenderPasses::eDepthOnly);
-		return state.camera.render_target.as<VknRenderTarget>().GetRenderPass();
+		return state.camera.render_target.as<VknRenderTarget>().GetRenderPass(state.clear_render_target && state.camera.clear_data.index() != meta::IndexOf <std::remove_const_t<decltype(state.camera.clear_data)>,DontClear>::value);
 	}
 
 
@@ -645,17 +639,6 @@ namespace idk::vkn
 		vkn_fb.PrepareDraw(cmd_buffer);
 	}
 
-	//offset,size
-	std::pair<ivec2, ivec2> ComputeViewportExtents(const vec2& sz,const Viewport& vp)
-	{
-		std::pair<ivec2, ivec2> result;
-		auto& [offset, size] = result;
-		offset = ivec2{vec2{ sz }*vp.position           };
-		size =   ivec2{vec2{ sz }*(vp.size)};
-		offset = std::min(std::max(offset, ivec2{ 0 }), ivec2{ sz });
-		size = std::min(std::max(size, ivec2{ 1 }), ivec2{ sz }); //prevent the size of the viewport from being too small.
-		return result;
-	}
 
 	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size)
 	{
@@ -706,8 +689,10 @@ namespace idk::vkn
 		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
 		TransitionFrameBuffer(camera, cmd_buffer, view);
 
-		auto sz = camera.render_target->GetMeta().size;
-		auto [offset, size] = ComputeViewportExtents(vec2{ sz }, camera.viewport);
+		auto sz = camera.render_target->Size();
+		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+		
+
 		vk::Rect2D render_area
 		{
 			vk::Offset2D
@@ -745,6 +730,7 @@ namespace idk::vkn
 				auto config = ConfigWithVP(*obj.config, camera, offset, size);
 				auto& pipeline = GetPipeline(config, shaders);
 				pipeline.Bind(cmd_buffer,view);
+				SetViewport(cmd_buffer, offset, size);
 				prev_pipeline = &pipeline;
 			}
 			auto& pipeline = *prev_pipeline;
@@ -772,7 +758,7 @@ namespace idk::vkn
 			}
 		}
 		if(camera.overlay_debug_draw)
-			RenderDebugStuff(state, rs);
+			RenderDebugStuff(state, rs,offset,size);
 		rs.ubo_manager.UpdateAllBuffers();
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
