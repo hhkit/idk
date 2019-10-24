@@ -160,12 +160,15 @@ namespace idk {
                 if (removed.size())
                 {
                     auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
-                    ImGuidk::PushDisabled();
+
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
                     ImGuidk::PushFont(FontType::Bold);
                     for (int i : removed)
                     {
                         ImGui::PushID(i);
-                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
+                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
+                                          ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
+                                          ImGuiTreeNodeFlags_SpanAllAvailWidth);
 
                         if (ImGui::BeginPopupContextItem())
                         {
@@ -177,6 +180,7 @@ namespace idk {
                             {
                                 PrefabUtility::RemoveComponentFromPrefab(_prefab_inst->prefab, _prefab_inst->object_index, i);
                             }
+                            ImGui::EndPopup();
                         }
 
                         ImGui::SameLine(ImGui::GetStyle().IndentSpacing +
@@ -185,7 +189,7 @@ namespace idk {
                         ImGui::PopID();
                     }
                     ImGui::PopFont();
-                    ImGuidk::PopDisabled();
+                    ImGui::PopStyleColor();
                 }
             }
         }
