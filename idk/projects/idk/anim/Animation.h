@@ -29,13 +29,6 @@ namespace idk::anim
 		vector<KeyFrame<quat>> rotation_track{};
 	};
 
-	struct EasyAnimNode
-	{
-		string _name;
-		bool _debug_assert = false;
-		vector<AnimatedBone> _channels;
-	};
-
 	class Animation 
 		: public Resource<Animation>
 		//, public MetaTag<AnimationMeta>
@@ -49,8 +42,8 @@ namespace idk::anim
 		const hash_table<string, AnimatedBone>& data() { return _animated_bones; }
 
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
-
 		void AddAnimatedBone(const AnimatedBone& animated_bone);
+
 	private:
 		hash_table<string, AnimatedBone> _animated_bones;
 

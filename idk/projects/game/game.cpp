@@ -95,7 +95,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
 
-	/*
+	
 	auto scene = RscHandle<Scene>{};
 	auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
 	mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
@@ -125,28 +125,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		animator->skeleton = model_resource->Get<anim::Skeleton>();
 		Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
 
-		// Load other animations
-		PathHandle parent_dir{ path.GetParentMountPath() };
-		auto entries = parent_dir.GetEntries(FS_FILTERS::FILE | FS_FILTERS::EXT, ".fbx");
-		for (auto& file : entries)
-		{
-			string file_name{ file.GetFileName() };
-			
-			// Find all fbx files formatted like "model_name@anim_name.fbx"
-			if (file_name.find(model_stem + "@") != string::npos)
-			{
-				auto animation_resource = Core::GetResourceManager().Load(file);
-				for (auto& anim : animation_resource->GetAll<anim::Animation>())
-					animator->AddAnimation(anim);	
-			}
-		}
+		auto animation_resource = Core::GetResourceManager().Load("/assets/models/test.fbx");
+		animator->AddAnimation(animation_resource->Get<anim::Animation>());
+		animation_resource = Core::GetResourceManager().Load("/assets/models/test2.fbx");
+		animator->AddAnimation(animation_resource->Get<anim::Animation>());
+		animation_resource = Core::GetResourceManager().Load("/assets/models/walk.fbx");
+		animator->AddAnimation(animation_resource->Get<anim::Animation>());
+		animation_resource = Core::GetResourceManager().Load("/assets/models/idle.fbx");
+		animator->AddAnimation(animation_resource->Get<anim::Animation>());
 		
 		return go;
 	};
 
 	// @Joseph: Uncomment this when testing.
 	create_anim_obj(vec3{ 0,0,0 });
-	*/
+	
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }
