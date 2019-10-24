@@ -24,8 +24,21 @@ namespace idk::vkn
 		hash_table<uint32_t,vk::DescriptorSetLayout> uniform_layouts{};
 
 		std::optional<uint32_t> GetBinding(uint32_t location)const;
+
+
+		struct Options
+		{
+			struct DerivativeInfo
+			{
+				vk::Pipeline base{};
+			};
+			std::optional<DerivativeInfo> derive_from{};
+			bool is_base_pipeline=false; //Can be derived from
+			vector<vk::DynamicState> dynamic_states{vk::DynamicState::eViewport };
+		};
+
 	
-	   void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan);
+		void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan, const Options& options = Options{});
 	   void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info,hash_table<uint32_t,vk::DescriptorSetLayout> slayout,Vulkan_t& vulkan);
 	   void Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits,vk::ShaderModule>> shader_modules, Vulkan_t& vulkan);
 	   void Create(config_t const& config, Vulkan_t& vulkan);
@@ -55,7 +68,7 @@ namespace idk::vkn
 		vk::PipelineMultisampleStateCreateInfo GetMultisampleInfo(const config_t& config)const;
 		vector<vk::PipelineColorBlendAttachmentState > GetColorBlendAttachments(const config_t& config)const;
 		std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
-		vector<vk::DynamicState> GetDynamicStates(const config_t& config)const;
+		vector<vk::DynamicState> GetDynamicStates(const config_t& config, const Options& options)const;
 		std::pair<vk::PipelineLayoutCreateInfo,vector< vk::DescriptorSetLayout>> GetLayoutInfo(const config_t& config)const;
 		vk::RenderPass GetRenderpass(const config_t& config, VulkanView& vulkan);
 

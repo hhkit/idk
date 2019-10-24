@@ -167,7 +167,7 @@ namespace idk::vkn
 		return result;
 	}
 
-	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan, const Options& options)
 	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
@@ -212,14 +212,14 @@ namespace idk::vkn
 		auto [colorBlending, cb_rsc] = GetColorBlendConfig(config);
 
 
-		//auto dynamicStates = GetDynamicStates(config);
-		//
-		//vk::PipelineDynamicStateCreateInfo dynamicState
-		//{
-		//	vk::PipelineDynamicStateCreateFlags{}
-		//	,ArrCount(dynamicStates)            //dynamicStateCount 
-		//	,std::data (dynamicStates)//pDynamicStates    
-		//};
+		auto dynamicStates = GetDynamicStates(config,options);
+		
+		vk::PipelineDynamicStateCreateInfo dynamicState
+		{
+			vk::PipelineDynamicStateCreateFlags{}
+			,hlp::arr_count(dynamicStates)            //dynamicStateCount 
+			,std::data (dynamicStates)//pDynamicStates    
+		};
 		//For uniforms
 
 		{
@@ -239,9 +239,20 @@ namespace idk::vkn
 			VK_FALSE,VK_FALSE,
 		};
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
+		vk::PipelineCreateFlags cr8_flags{};
+		vk::Pipeline base_pipeline{};
+		if (options.is_base_pipeline)
+			cr8_flags |= vk::PipelineCreateFlagBits::eAllowDerivatives;
+
+		if (options.derive_from)
+		{
+			cr8_flags |= vk::PipelineCreateFlagBits::eDerivative;
+			base_pipeline = options.derive_from->base;
+		}
+
 		vk::GraphicsPipelineCreateInfo pipelineInfo
 		{
-			vk::PipelineCreateFlags{}
+			cr8_flags
 			,hlp::arr_count(info),std::data(info)
 			,&vertexInputInfo
 			,&inputAssembly
@@ -251,9 +262,11 @@ namespace idk::vkn
 			,&multisampling
 			,(_has_depth_stencil)?&dsci:nullptr
 			,&colorBlending
-			,nullptr
+			,&dynamicState
 			,*m_pipelinelayout
 			,m_renderpass
+			,0
+			,base_pipeline
 			,0
 		};
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
@@ -501,13 +514,10 @@ namespace idk::vkn
 			}, std::move(colorBlendAttachments));
 	}
 
-	vector<vk::DynamicState> VulkanPipeline::GetDynamicStates([[maybe_unused]] const config_t& config) const
+	vector<vk::DynamicState> VulkanPipeline::GetDynamicStates([[maybe_unused]] const config_t& config, const Options& options) const
 	{
 		//TODO GFX PIPELINE: add dynamic state config into pipeline_config_t
-		return{
-			vk::DynamicState::eViewport,
-			vk::DynamicState::eLineWidth
-		};
+		return options.dynamic_states;
 	}
 	//TODO GFX PIPELINE: remove the config argument or add push constant configs into config
 	std::pair<vk::PipelineLayoutCreateInfo, vector< vk::DescriptorSetLayout>> VulkanPipeline::GetLayoutInfo([[maybe_unused]] const config_t& config) const

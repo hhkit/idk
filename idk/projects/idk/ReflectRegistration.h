@@ -177,9 +177,8 @@ REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
 REFLECT_END()
 
-
-REFLECT_BEGIN(idk::RenderTarget::Metadata, "RenderTargetMeta")
-REFLECT_VARS(size, is_world_renderer, render_debug)
+REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")
+REFLECT_VARS(size, is_world_renderer, render_debug,color_tex,depth_tex)
 REFLECT_END()
 
 REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
@@ -387,6 +386,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Viewport, "Viewport")
 REFLECT_VARS(position,size)
+REFLECT_END()
+
+
+REFLECT_BEGIN(idk::DontClear, "<Don't Clear>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

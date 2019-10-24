@@ -42,6 +42,26 @@ namespace idk
 
 namespace idk::vkn
 {
+	size_t ToClearColorBit(size_t i)
+	{
+		return (1&i) << 1;
+	}
+	size_t ToClearDepthBit(size_t i)
+	{
+		return (1 & i) << 0;
+	}
+	size_t GetRpClearIndex( bool clear_col, bool clear_depth)
+	{
+		return ToClearColorBit(clear_col)|ToClearDepthBit(clear_depth);
+	}
+	bool ClearColorBit(size_t i)
+	{
+		return i & ToClearColorBit(1);
+	}
+	bool ClearDepthBit(size_t i)
+	{
+		return i & ToClearDepthBit(1);
+	}
 
 	std::unordered_set<uint32_t> VulkanState::QueueFamilyIndices::unique_queues()const
 	{
@@ -570,7 +590,7 @@ namespace idk::vkn
 			0
 			,vk::ImageLayout::eColorAttachmentOptimal
 		};
-		vector< vk::AttachmentDescription> colorAttachments2[BasicRenderPasses::eSizeBrp];
+		vector< vk::AttachmentDescription> colorAttachments2[1<<3][BasicRenderPasses::eSizeBrp];
 		vector< vk::AttachmentReference> colorAttachmentRef2[BasicRenderPasses::eSizeBrp][AttachmentType::eSize];
 		
 		colorAttachmentRef2[BasicRenderPasses::eRgbaColorOnly][AttachmentType::eColor] = {
@@ -599,17 +619,30 @@ namespace idk::vkn
 			}
 		};
 
-		
-		colorAttachments2[BasicRenderPasses::eRgbaColorOnly]= {
-			colorAttachment
-		};
-		colorAttachments2[BasicRenderPasses::eRgbaColorDepth]={
-			colorAttachment,
-			depthAttachment
-		};
-		colorAttachments2[BasicRenderPasses::eDepthOnly]={
-			depthAttachment
-		};
+		for (uint8_t i = 0; i < 1 << 3; ++i)
+		{
+			auto& att = colorAttachments2[i][BasicRenderPasses::eRgbaColorOnly] = {
+				colorAttachment
+			};
+			att[0].loadOp = (ClearColorBit(i))? vk::AttachmentLoadOp::eClear:vk::AttachmentLoadOp::eLoad;
+		}
+
+		for (uint8_t i = 0; i < 1 << 3; ++i)
+		{
+			auto& atts =colorAttachments2[i][BasicRenderPasses::eRgbaColorDepth] = {
+				colorAttachment,
+				depthAttachment
+			};
+			atts[0].loadOp = (ClearColorBit(i)) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
+			atts[1].loadOp = (ClearDepthBit(i)) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
+		}
+		for (uint8_t i = 0; i < 1 << 3; ++i)
+		{
+			auto& att= colorAttachments2[i][BasicRenderPasses::eDepthOnly] = {
+				depthAttachment
+			};
+			att[0].loadOp = (ClearDepthBit(i)) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
+		}
 
 		vk::SubpassDescription subpass
 		{
@@ -696,15 +729,19 @@ namespace idk::vkn
 		rp_type = {};
 		for (auto& rpi : renderPassInfo2)
 		{
-
-			rpi=
-			vk::RenderPassCreateInfo{
-				vk::RenderPassCreateFlags{}
-				,hlp::arr_count(colorAttachments2[rp_type]),std::data(colorAttachments2[rp_type])
-				,1,&subpass2[rp_type]
-				,1,&dependency2[rp_type]
-			};
-			m_basic_renderpasses[rp_type++] = m_device->createRenderPassUnique(rpi, nullptr, dispatcher);
+			
+			for(uint8_t i = 0;i<1<<3;++i)
+			{
+				rpi=
+				vk::RenderPassCreateInfo{
+					vk::RenderPassCreateFlags{}
+					,hlp::arr_count(colorAttachments2[i][rp_type]),std::data(colorAttachments2[i][rp_type])
+					,1,&subpass2[rp_type]
+					,1,&dependency2[rp_type]
+				};
+				m_basic_renderpasses[i][rp_type] = m_device->createRenderPassUnique(rpi, nullptr, dispatcher);
+			}
+			++rp_type;
 		}
 		m_renderpass = m_device->createRenderPassUnique(renderPassInfo, nullptr, dispatcher);
 		renderPassInfo.pAttachments = &colorAttachment2;
@@ -871,9 +908,9 @@ namespace idk::vkn
 		return static_cast<ValHandler*>((pUserData) ? pUserData : &def)->processMsg(messageSeverity, messageType, pCallbackData);
 	}
 
-	vk::RenderPass VulkanState::BasicRenderPass(BasicRenderPasses type) const
+	vk::RenderPass VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
 	{
-		return *m_basic_renderpasses[type];
+		return *m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
 	}
 
 	void VulkanState::CleanupSwapChain() {

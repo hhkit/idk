@@ -18,22 +18,22 @@ namespace idk::vkn
 		VknRenderTarget& operator=(const VknRenderTarget&) = delete;
 		~VknRenderTarget() = default;
 
-		void OnMetaUpdate(const Metadata& newmeta) override;
 		void PrepareDraw(vk::CommandBuffer& cmd_buffer);
 
-		vk::RenderPass GetRenderPass()const;
+		vk::RenderPass GetRenderPass(bool clear_col=true,bool clear_depth =true)const;
 
 		vk::Framebuffer Buffer();
 
 		vk::Semaphore ReadySignal();
 
-		const ivec2& Size()const { return size; };
+		//const ivec2& Size()const { return size; };
 		BasicRenderPasses GetRenderPassType() { return rp_type; }
 	private:
+		void OnFinalize() override;
 		BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
 		UniqueSemaphore       ready_semaphore{};
 		UniqueFramebuffer     buffer{};
-		ivec2				  size{};
+		//ivec2				  size{};
 		bool				  uncreated{true};
 	};
 }
