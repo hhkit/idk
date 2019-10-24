@@ -33,11 +33,15 @@ namespace TestAndSeek
         {
             if (rb)
             {
-                if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
-                if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
-                if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
-                if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
-                if (Input.GetKeyDown(KeyCode.Space)) rb.AddForce(jump_force * Vector3.up);
+                System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
+                rb.AddForce(f * (Input.GetAxis(Axis.Horizontal) * Vector3.right + Input.GetAxis(Axis.Vertical) * Vector3.forward));
+
+                //if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
+                //if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
+                //if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
+                //if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButtonA))
+                    rb.AddForce(jump_force * Vector3.up);
             }
         }
 

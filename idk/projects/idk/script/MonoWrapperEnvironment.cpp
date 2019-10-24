@@ -465,19 +465,35 @@ namespace idk::mono
 		Bind("idk.Bindings::InputGetKeyDown", decay(
 			[](int code) -> bool
 			{
-				return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
+				if (code & 0xFFFF0000)
+					return Core::GetSystem<GamepadSystem>().GetButtonDown(0, s_cast<GamepadButton>(code >> 16));
+				else
+					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
 			}
 		));
 		Bind("idk.Bindings::InputGetKeyUp", decay(
 			[](int code) -> bool
 			{
+				if (code & 0xFFFF0000)
+					return Core::GetSystem<GamepadSystem>().GetButtonUp(0, s_cast<GamepadButton>(code >> 16));
+				else
 				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
 			}
 		));
 		Bind("idk.Bindings::InputGetKey", decay(
 			[](int code) -> bool
 			{
+				if (code & 0xFFFF0000)
+					return Core::GetSystem<GamepadSystem>().GetButton(0, s_cast<GamepadButton>(code >> 16));
+				else
 				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
+			}
+		));
+
+		Bind("idk.Bindings::InputGetAxis", decay(
+			[](char code, int axis) -> float
+			{
+				return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
 			}
 		));
 

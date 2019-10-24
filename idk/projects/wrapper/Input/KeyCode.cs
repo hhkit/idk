@@ -98,5 +98,21 @@
 		ControlRight = 0xA3,
 		AltLeft      = 0xA4,
 		AltRight     = 0xA5,
-	};
+
+        // gamepad buttons
+        DPadUp          = 0x0001 << 16,
+        DPadDown        = 0x0002 << 16,
+        DPadLeft        = 0x0004 << 16,
+        DPadRight       = 0x0008 << 16,
+        Start           = 0x0010 << 16,
+        Back            = 0x0020 << 16,
+        LeftStick	    = 0x0040 << 16,
+        RightStick	    = 0x0080 << 16,
+        LeftShoulder    = 0x0100 << 16,
+        RightShoulder   = 0x0200 << 16,
+        JoystickButtonA = 0x1000 << 16,
+        JoystickButtonB = 0x2000 << 16,
+        JoystickButtonX = 0x4000 << 16,
+        JoystickButtonY = 0x8000 << 16
+    };
 }

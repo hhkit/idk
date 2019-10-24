@@ -60,13 +60,13 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -4.804801, z: 0}
+    position: {x: 0, y: -7.7181067, z: 0}
     rotation: 
       w: 1
       x: -0
       y: -0
       z: -0
-    scale: {x: 13.830959, y: 0.55898756, z: 17.873682}
+    scale: {x: 119.08456, y: 4.812883, z: 153.8924}
   - !Name 
     name: somefloor
   - !Collider 
