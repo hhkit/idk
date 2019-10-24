@@ -401,10 +401,12 @@ namespace idk {
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
 			}
+			ImGui::SameLine(0, 0);
+			if (ImGui::Button("Reload DLL", toolButtonSize))
+				HotReloadDLL();
 		}
 		else
 		{
-			//ImGui::SameLine(0, 0);
 			if (Core::GetSystem<IDE>().game_frozen == false)
 			{
 				if (ImGui::Button("Pause", toolButtonSize))
@@ -422,8 +424,6 @@ namespace idk {
 				}
 			}
 			ImGui::SameLine(0, 0);
-			//ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			//ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
 			if (ImGui::Button("Stop", toolButtonSize))
 			{
 				ResetScene();
@@ -431,11 +431,8 @@ namespace idk {
 				Core::GetSystem<IDE>().game_running = false;
 			}
 		}
-        //ImGui::PopStyleColor();
-        //ImGui::PopItemFlag();
 
-
-
+		
 		ImGui::PopStyleVar();
 
 		ImGui::EndChild();

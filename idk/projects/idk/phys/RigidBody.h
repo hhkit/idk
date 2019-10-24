@@ -19,7 +19,6 @@ namespace idk
 
 		bool use_gravity  { true  };
 		bool is_kinematic { false };
-		real restitution  { 1.f   };
 
 		// sleeping
 		real sleep_threshold  { +epsilon };

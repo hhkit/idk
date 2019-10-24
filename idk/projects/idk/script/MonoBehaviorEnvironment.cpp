@@ -55,6 +55,10 @@ namespace idk::mono
 		else
 			return nullptr;
 	}
+	span<const char* const> MonoBehaviorEnvironment::GetBehaviorList()
+	{
+		return span<const char* const>(name_list);
+	}
 	void MonoBehaviorEnvironment::Execute()
 	{
 		auto go = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
@@ -101,17 +105,17 @@ namespace idk::mono
 		{
 			ManagedObject managed{ obj };
 			int depth{ };
-			managed.VisitImpl([](auto&& key, auto&& val, int) { 
-				using T = std::decay_t<decltype(val)>;
-				if constexpr (std::is_same_v<T, int>)
-					val += 5;
-				
-				std::cout << "YOLO:" << key << ":" << reflect::get_type<T>().name() << "\n"; 
-				}, depth);
+			//managed.VisitImpl([](auto&& key, auto&& val, int) { 
+			//	using T = std::decay_t<decltype(val)>;
+			//	if constexpr (std::is_same_v<T, int>)
+			//		val += 5;
+			//	
+			//	std::cout << "YOLO:" << key << ":" << reflect::get_type<T>().name() << "\n"; 
+			//	}, depth);
 			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
 			thunk.Invoke(obj, vec3{ 8,9,10 });
 
-			std::cout << "SERIALIZED TEST:" << serialize_text(*mb);
+			//std::cout << "SERIALIZED TEST:" << serialize_text(*mb);
 		}
 	}
 	void MonoBehaviorEnvironment::FindMonoBehaviors()
@@ -173,5 +177,9 @@ namespace idk::mono
 				mono_behaviors.emplace(class_name, &type);
 			}
 		}
+
+		name_list.clear();
+		for (auto [name, type] : mono_behaviors)
+			name_list.emplace_back(name.data());
 	}
 }

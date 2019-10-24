@@ -107,7 +107,8 @@ namespace idk
 					return obj;
 		
 			}, clear),
-			Mesh::defaults[MeshType::Box]
+			Mesh::defaults[MeshType::Box],
+			viewport
 		};
 	}
 	float Camera::AspectRatio() const

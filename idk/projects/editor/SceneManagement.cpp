@@ -10,6 +10,8 @@
 #include <scene/SceneManager.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
+#include <script/ScriptSystem.h>
+
 namespace idk
 {
 	void NewScene()
@@ -117,6 +119,17 @@ namespace idk
 			active_scene->Unload();
 			active_scene->Load();
 			Core::GetSystem<IDE>().ClearScene();
+		}
+	}
+
+	void HotReloadDLL()
+	{
+		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
+		{
+			SaveScene();
+			active_scene->Unload();
+			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
+			active_scene->Load();
 		}
 	}
 }

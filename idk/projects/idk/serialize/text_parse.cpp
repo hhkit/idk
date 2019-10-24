@@ -8,6 +8,7 @@
 #include <scene/Scene.h>
 #include <common/Transform.h>
 #include <common/Name.h>
+#include <script/MonoBehavior.h>
 
 namespace idk
 {
@@ -141,7 +142,7 @@ namespace idk
                     obj = dyn;
                 return res;
             }
-			else
+			else if (obj.type.hash() != reflect::typehash<mono::ManagedObject>())
                 return parse_error::type_cannot_be_parsed;
 		}
         else if (obj.type.is_basic_serializable())
@@ -152,8 +153,8 @@ namespace idk
 
 		vector<const yaml::node*> stack{ &node };
         parse_error err = parse_error::none;
-
-		obj.visit([&](auto&& key, auto&& arg, int depth_change)
+	
+		auto generic_visitor = [&](auto&& key, auto&& arg, int depth_change)
 		{
 			using K = std::decay_t<decltype(key)>;
 			using T = std::decay_t<decltype(arg)>;
@@ -300,7 +301,12 @@ namespace idk
 				err = parse_error::invalid_argument;
                 return false;
 			}
-		}); // visit
+		};
+
+		if (obj.is<mono::ManagedObject>())
+			obj.get<mono::ManagedObject>().Visit(generic_visitor);
+		else
+			obj.visit(generic_visitor); // visit
 
         if (err == parse_error::none)
             obj.on_parse();
@@ -351,32 +357,46 @@ namespace idk
 			for (++iter; iter != elem.end(); ++iter)
 			{
 				const reflect::type type = reflect::get_type(iter->tag());
-                reflect::dynamic obj = type.create();
-                const auto res2 = parse_yaml(*iter, obj);
-                if (res2 != parse_error::none)
-                    err = res2;
+				reflect::dynamic obj = type.create();
+				const auto res2 = parse_yaml(*iter, obj);
+				if (res2 != parse_error::none)
+					err = res2;
 
-                if (type.is<Transform>())
-                {
-                    auto& trans = *handle->GetComponent<Transform>();
-                    auto& new_trans = obj.get<Transform>();
-                    trans.position = new_trans.position;
-                    trans.rotation = new_trans.rotation;
-                    trans.scale = new_trans.scale;
-                    trans.parent = new_trans.parent;
-                }
-                else if (type.is<Name>())
-                    handle->GetComponent<Name>()->name = obj.get<Name>().name;
-                else
-                    handle->AddComponent(obj);
+				if (type.is<Transform>())
+				{
+					auto& trans = *handle->GetComponent<Transform>();
+					auto& new_trans = obj.get<Transform>();
+					trans.position = new_trans.position;
+					trans.rotation = new_trans.rotation;
+					trans.scale = new_trans.scale;
+					trans.parent = new_trans.parent;
+				}
+				else if (type.is<Name>())
+					handle->GetComponent<Name>()->name = obj.get<Name>().name;
+				else
+				{
+					const yaml::node& node = *iter;
+					auto new_component = handle->AddComponent(obj);
+					if (new_component.is_type<mono::Behavior>())
+					{
+						auto mb_handle = handle_cast<mono::Behavior>(new_component);
+						
+						auto& as_map = node.as_mapping();
+						auto itr = as_map.find("script_data");
+						IDK_ASSERT(itr != as_map.end());
+						auto [tag, val] = *itr;
+						if (mb_handle->EmplaceBehavior(val.tag()))
+						{
+							auto dyn = reflect::dynamic{ mb_handle->GetObject() };
+							parse_yaml(val, dyn);
+						}
+						else
+							handle->RemoveComponent(mb_handle);
+					}
+				}
 			}
 		}
 
         return err;
-	}
-	template<>
-	parse_error parse_text(string_view sv, mono::Behavior& behavior)
-	{
-		return parse_error();
 	}
 }

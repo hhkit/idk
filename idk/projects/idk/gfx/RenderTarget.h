@@ -8,7 +8,7 @@ namespace idk
 	struct RenderTargetMeta
 	{
 		ivec2 size {1024, 1024};
-		RscHandle<Texture> textures[2];
+		std::array<RscHandle<Texture>,2> textures;
 		bool is_world_renderer = true;
 		bool render_debug = true;
 		//RscHandle<Texture> depth_buffer;
@@ -30,7 +30,7 @@ namespace idk
 
 		virtual void Finalize() {}; //Finalizes the framebuffer
 		
-
+		static constexpr char ext[] = ".rtis";
 
 		virtual ~RenderTarget() = default;
 	protected:

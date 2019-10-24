@@ -11,7 +11,7 @@
 #include <math/shapes.h>
 #include <res/ResourceMeta.h>
 #include <scene/SceneManager.h>
-#include <phys/Collider.h>
+#include <phys/collidable_shapes.h>
 #include <math/matrix_decomposition.h>
 #include <anim/AnimationLayer.h>
 namespace idk
@@ -79,7 +79,7 @@ namespace idk::reflect
 		, box
 		, sphere
 		, capsule
-		, Collider::Shapes
+		, CollidableShapes
 
 		// anim
 		, RscHandle<anim::Skeleton>
@@ -111,6 +111,7 @@ namespace idk::reflect
         , vector<PropertyOverride>
         , RscHandle<Prefab>
 
+		, RscHandle<RenderTarget>
 		, RscHandle<ShaderProgram>
         , shadergraph::ValueType
         , shadergraph::Slot

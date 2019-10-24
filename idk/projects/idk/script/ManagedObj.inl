@@ -17,6 +17,22 @@ if (klass == MONO_CLASS)                                        \
 	continue;                                                   \
 }
 
+#define MONO_COMPLEX_TYPE(REAL_TYPE, MONO_CLASS)                \
+if (klass == MONO_CLASS)                                        \
+{                                                               \
+	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
+	auto new_val = old_val;								        \
+	if (functor(field_name.data(), new_val, depth))	            \
+	{                                                           \
+		auto reflect = reflect::dynamic{ new_val };             \
+		reflect.visit(functor);                  				\
+	}                                                           \
+														        \
+	if (old_val != new_val)								        \
+		mono_field_set_value(Raw(), field, &new_val);	        \
+	continue;                                                   \
+}
+
 #define MONO_BASE_TYPE_CONST(REAL_TYPE, MONO_CLASS)                   \
 if (klass == MONO_CLASS)                                              \
 {                                                                     \
@@ -77,9 +93,9 @@ namespace idk::mono
 
 			auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 			
-			MONO_BASE_TYPE(vec2, envi.Type("Vector2")->Raw());
-			MONO_BASE_TYPE(vec3, envi.Type("Vector3")->Raw());
-			MONO_BASE_TYPE(vec4, envi.Type("Vector4")->Raw());
+			MONO_COMPLEX_TYPE(vec2, envi.Type("Vector2")->Raw());
+			MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
+			MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
 			
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE(Guid, mono_class_from_name(csharpcore, "System", "Guid"));

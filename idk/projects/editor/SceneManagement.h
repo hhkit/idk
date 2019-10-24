@@ -7,4 +7,6 @@ namespace idk
 	void SaveScene();
 	void SaveSceneAs();
 	void ResetScene();
+
+	void HotReloadDLL();
 }

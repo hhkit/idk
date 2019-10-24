@@ -43,6 +43,7 @@ namespace idk::mono
 		span<Handle<Behavior>> GetMonoBehaviorsOfType(std::string_view type);
 	private:
 		friend class Behavior;
+		string path_to_used_dll;
 
 		hash_table<string, std::deque<Handle<Behavior>>> behavior_handles;
 		unique_ptr<MonoEnvironment> main_environment;

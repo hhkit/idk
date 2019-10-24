@@ -787,6 +787,10 @@
     <ClInclude Include="anim\AnimationUtils.cpp">
       <Filter>anim\utils</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collidable_shapes.h" />
+    <ClInclude Include="gfx\Viewport.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

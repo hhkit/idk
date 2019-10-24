@@ -10,6 +10,7 @@
 #include <anim/AnimationLayer.h>
 #include <math/matrix_decomposition.h>
 
+#include <gfx/RenderTarget.h>
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -176,6 +177,11 @@ REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
 REFLECT_END()
 
+
+REFLECT_BEGIN(idk::RenderTarget::Metadata, "RenderTargetMeta")
+REFLECT_VARS(size, is_world_renderer, render_debug)
+REFLECT_END()
+
 REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
 REFLECT_ENUM(idk::CMUVMode, "CMUVMode")
 
@@ -306,13 +312,17 @@ REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::mono::Behavior, "MonoBehavior")
+REFLECT_VARS(enabled)
+REFLECT_END()
+
 // PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
-REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, restitution)
+REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Collider, "Collider")
-REFLECT_VARS(enabled, shape, is_trigger)
+REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_friction)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::box, "box")
@@ -379,9 +389,9 @@ REFLECT_END()
 
 
 REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(min,max)
+REFLECT_VARS(position,size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic, viewport,render_target)
+REFLECT_VARS(enabled, near_plane, far_plane, clear,is_orthographic,overlay_debug_draw, viewport,render_target)
 REFLECT_END()

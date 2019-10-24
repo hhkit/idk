@@ -89,7 +89,7 @@ namespace idk
 	template<typename T1, typename T2, typename Hasher = std::hash<T1>>
 	using hash_table = std::unordered_map<T1, T2, Hasher>;
 
-	template<typename T, typename Hash = std::hash<T>, typename Equal = std::less<T>>
+	template<typename T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
 	using hash_set = std::unordered_set<T, Hash, Equal>;
 
 	template<typename T,typename Equal = std::less<T>>

@@ -153,6 +153,46 @@ namespace idk {
                 //COMPONENT DISPLAY
                 DisplayComponent(component);
             }
+
+            if (_prefab_inst)
+            {
+                vector<int> removed, added;
+                PrefabUtility::GetPrefabInstanceComponentDiff(gos[0], removed, added);
+                if (removed.size())
+                {
+                    auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
+
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+                    ImGuidk::PushFont(FontType::Bold);
+                    for (int i : removed)
+                    {
+                        ImGui::PushID(i);
+                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
+                                          ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
+                                          ImGuiTreeNodeFlags_SpanAllAvailWidth);
+
+                        if (ImGui::BeginPopupContextItem())
+                        {
+                            if (ImGui::MenuItem("Revert Removed Component"))
+                            {
+                                gos[0]->AddComponent(prefab_components[i]);
+                            }
+                            if (ImGui::MenuItem("Apply Removed Component"))
+                            {
+                                PrefabUtility::RemoveComponentFromPrefab(_prefab_inst->prefab, _prefab_inst->object_index, i);
+                            }
+                            ImGui::EndPopup();
+                        }
+
+                        ImGui::SameLine(ImGui::GetStyle().IndentSpacing +
+                            ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + 1);
+                        ImGui::Text("%s (Removed)", prefab_components[i].type.name().data());
+                        ImGui::PopID();
+                    }
+                    ImGui::PopFont();
+                    ImGui::PopStyleColor();
+                }
+            }
         }
         else if (gameObjectsCount > 1)
         {
@@ -695,12 +735,11 @@ namespace idk {
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);
         ImGui::PushID(component.index);
-		const auto componentName = [&]()
+		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? handle_cast<mono::Behavior>(component)->TypeName() : type.name();
+			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + "(Script)" : string{ type.name() };
 		}();
-		string displayingComponent{ componentName };
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
 
@@ -730,6 +769,9 @@ namespace idk {
             ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
             ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
         ImGui::PopStyleVar();
+
+        if (ImGui::IsMouseReleased(1) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+            ImGui::OpenPopup("AdditionalOptions");
 
         ImGui::SameLine();
         if (auto f = (*component).get_property("enabled"); f.value.valid())
@@ -871,7 +913,7 @@ namespace idk {
 				editor.RefreshSelectedMatrix();
 		}
 	}
-
+	static void DoNothing() {}
 
 
     bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
@@ -902,7 +944,10 @@ namespace idk {
             else
             {
                 string keyName = format_name(key);
-
+				if (keyName == "min" || keyName == "Min")
+				{
+					DoNothing();
+				}
                 while (depth_change++ <= 0)
                 {
                     if (indent_stack.back())
@@ -947,17 +992,24 @@ namespace idk {
 
                 ImGui::SetCursorPosY(currentHeight + pad_y);
                 if (has_override)
+                {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                ImGui::Text(keyName.c_str());
-                if (has_override)
+                    ImGui::Text(keyName.c_str());
                     ImGui::PopStyleColor();
+                    ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
+                    ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
+                                                              ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
+                                                              ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                }
+                else
+                    ImGui::Text(keyName.c_str());
 
                 keyName.insert(0, "##"); //For Imgui stuff
 
                 ImGui::SetCursorPosY(currentHeight);
                 ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
 
-                ImGui::PushID(keyName.c_str());
+                ImGui::PushID(("##"+curr_prop_path).c_str());
                 ImGui::PushItemWidth(-4.0f);
 
                 bool indent = false;
@@ -1099,10 +1151,9 @@ namespace idk {
 
 		};
 
+		dyn.visit(generic_visitor);
 		if (dyn.is<mono::Behavior>())
 			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
-		else
-			dyn.visit(generic_visitor);
 
         _curr_property_stack.clear();
 
