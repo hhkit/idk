@@ -142,7 +142,7 @@ namespace idk
                     obj = dyn;
                 return res;
             }
-			else
+			else if (obj.type.hash() != reflect::typehash<mono::ManagedObject>())
                 return parse_error::type_cannot_be_parsed;
 		}
         else if (obj.type.is_basic_serializable())
@@ -304,9 +304,7 @@ namespace idk
 		};
 
 		if (obj.is<mono::ManagedObject>())
-		{
 			obj.get<mono::ManagedObject>().Visit(generic_visitor);
-		}
 		else
 			obj.visit(generic_visitor); // visit
 
@@ -382,8 +380,14 @@ namespace idk
 					if (new_component.is_type<mono::Behavior>())
 					{
 						auto mb_handle = handle_cast<mono::Behavior>(new_component);
-						mb_handle->EmplaceBehavior("Test");
-						mb_handle->GetObject();
+						
+						auto& as_map = node.as_mapping();
+						auto itr = as_map.find("script_data");
+						IDK_ASSERT(itr != as_map.end());
+						auto [tag, val] = *itr;
+						mb_handle->EmplaceBehavior(val.tag());
+						auto dyn = reflect::dynamic{ mb_handle->GetObject() };
+						parse_yaml(val, dyn);
 					}
 				}
 			}

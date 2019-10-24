@@ -64,9 +64,10 @@ namespace idk
 
 	static yaml::node serialize_yaml(const mono::Behavior& mono_behavior)
 	{
-		auto node = yaml::node();
-		node.emplace_back(serialize_yaml(reflect::dynamic{ mono_behavior }));
-		node.emplace_back(serialize_yaml(reflect::dynamic{ mono_behavior.GetObject() }));
+		auto node = serialize_yaml(reflect::dynamic{ mono_behavior });
+		auto serialized_obj = serialize_yaml(reflect::dynamic{ mono_behavior.GetObject() });
+		serialized_obj.tag(mono_behavior.TypeName());
+		node.as_mapping()["script_data"] = serialized_obj;
 		node.tag(reflect::get_type<mono::Behavior>().name());
 		return node;
 	}
