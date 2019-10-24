@@ -10,7 +10,7 @@ namespace idk::mono
 	struct MonoBehaviorData;
 
 	class Behavior 
-		: public Component<Behavior>
+		: public Component<Behavior, false>
 	{
 	public:
 		bool enabled = true;

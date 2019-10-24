@@ -179,7 +179,7 @@ namespace idk::mono
 		}
 
 		name_list.clear();
-		for (auto [name, type] : mono_behaviors)
+		for (auto& [name, type] : mono_behaviors)
 			name_list.emplace_back(name.data());
 	}
 }

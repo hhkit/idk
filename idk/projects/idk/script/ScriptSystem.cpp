@@ -109,8 +109,7 @@ namespace idk::mono
 	void ScriptSystem::ScriptStart(span<Behavior> behaviors)
 	{
 		for (auto& elem : behaviors)
-			if (elem.enabled)
-				elem.Awake();
+			elem.Awake();
 
 		for (auto& elem : behaviors)
 			if (elem.enabled)
