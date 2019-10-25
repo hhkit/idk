@@ -26,7 +26,7 @@ namespace idk
 			eBrdfLut, //Brdf LookUp Table
 		};
 		using PbrTexVarsPack = meta::enum_pack< PbrTexVars,
-			PbrTexVars::eBrdfLut, //Brdf LookUp Table
+			PbrTexVars::eBrdfLut //Brdf LookUp Table
 		>;
 		using PbrTexVarsInfo = meta::enum_info < PbrTexVars, PbrTexVarsPack>;
 	
