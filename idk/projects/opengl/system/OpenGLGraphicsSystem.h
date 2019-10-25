@@ -5,6 +5,8 @@
 #include <event/Dispatcher.h>
 #include <opengl/resource/OpenGLCubemap.h>
 
+#include <opengl/PixelData.h>
+
 namespace idk::ogl
 {
 	class OpenGLState;
@@ -25,6 +27,8 @@ namespace idk::ogl
 		void SwapBuffer() override;
 
 		void EnqueueCubemapForConvolution(RscHandle<ogl::OpenGLCubemap>);
+
+		PixelData SelectObjViewport(const vec2& vp_pos);
 	private:
 		HDC   _windows_context;
 		HGLRC _opengl_context;
@@ -33,7 +37,6 @@ namespace idk::ogl
 		ivec2 _viewport_size;
 		RscHandle<ShaderProgram> prev_brdf;
 		Dispatcher<void(Win32GraphicsSystem*, RscHandle<ogl::OpenGLCubemap>)> cubemaps_to_convolute;
-
 
 		void CreateContext();
 		void InitOpenGL();

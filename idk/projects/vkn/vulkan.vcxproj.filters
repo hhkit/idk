@@ -171,6 +171,18 @@
     <ClInclude Include="PipelineBinders.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="VknCubeMapLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknCubemap.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCbmLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCubemapFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -312,6 +324,18 @@
     </ClCompile>
     <ClCompile Include="VknFramebufferFactory.cpp">
       <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknCubemap.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknCubeMapLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCbmLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCubemapFactory.cpp">
+      <Filter>resource\Factories</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

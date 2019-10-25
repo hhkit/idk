@@ -18,6 +18,8 @@
 #include <gfx/CubeMap.h>
 #include <opengl/resource/OpenGLCubemap.h>
 
+#include <gfx/FramebufferFactory.h>
+
 #include <editor/IDE.h>
 #include <gfx/ViewportUtil.h>
 
@@ -67,14 +69,37 @@ namespace idk::ogl
 		brdf_texture->SetMeta(m);
 		brdf_texture->Size(ivec2{ 512 });
 
-		fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
-		fb_man.cBufferPickingTexture->Bind();
-		auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
-		pickMeta.internal_format = ColorFormat::RUI_32;
-		pickMeta.format = InputChannels::RGBA;
-		fb_man.cBufferPickingTexture->SetMeta(pickMeta);
-		//fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
-		fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
+		//fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
+		//fb_man.cBufferPickingTexture->Bind();
+		//auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
+		//pickMeta.internal_format = ColorFormat::RUI_32;
+		//pickMeta.format = InputChannels::RGBA;
+		//fb_man.cBufferPickingTexture->SetMeta(pickMeta);
+		////fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
+		//fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
+
+		FrameBufferBuilder builder;
+		builder.Begin(ivec2{ 512,512 });
+		builder.AddAttachment(
+			AttachmentInfo
+			{
+				LoadOp::eClear,
+				StoreOp::eStore,
+				idk::ColorFormat::RGBF_32,
+				FilterMode::_enum::Linear
+			}
+		);
+		builder.SetDepthAttachment(
+			AttachmentInfo
+			{
+				LoadOp::eClear,
+				StoreOp::eStore,
+				idk::ColorFormat::DEPTH_COMPONENT,
+				FilterMode::_enum::Linear
+			}
+		);
+
+		fb_man.pickingBuffer = { Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End()).guid };
 	}
 
 	struct MaterialVisitor
@@ -420,7 +445,7 @@ namespace idk::ogl
 				}
 
 				{
-					fb_man.SetRenderTarget(fb_man.cBufferPickingTexture);
+					fb_man.SetRenderTarget(fb_man.pickingBuffer);
 				}
 
 				// lock drawing buffer
@@ -589,6 +614,19 @@ namespace idk::ogl
 		pipeline.PopAllPrograms();
 		fb_man.ResetFramebuffer();
 		//glBindVertexArray(0);
+	}
+
+	PixelData OpenGLState::PickData(const vec2& pos)
+	{
+		PixelData pd;
+		glReadPixels((GLint)pos.x, (GLint)pos.y, fb_man.pickingBuffer->size.x, fb_man.pickingBuffer->size.y, GL_RGB32F, GL_UNSIGNED_BYTE, &pd);
+
+		return std::move(pd);
+	}
+
+	void OpenGLState::IsPicking()
+	{
+		is_picking = true;
 	}
 
 }

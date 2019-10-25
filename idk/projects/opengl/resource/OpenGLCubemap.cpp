@@ -24,8 +24,8 @@ namespace idk::ogl
 		{
 			switch (f)
 			{
-			case CMColorFormat::sRGB_8:  return GL_RGB8;
-			case CMColorFormat::sRGBA_8: return GL_RGBA8;
+			case CMColorFormat::RGB_8:  return GL_RGB8;
+			case CMColorFormat::RGBA_8: return GL_RGBA8;
 			case CMColorFormat::RGBF_16: return GL_RGB16F;
 			case CMColorFormat::RGBF_32: return GL_RGB32F;
 			case CMColorFormat::RGBAF_16: return GL_RGBA16F;
