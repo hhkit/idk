@@ -322,15 +322,7 @@ namespace idk
 
 			for (auto& compiled_animation : importer_scene.compiled_clips)
 			{
-				// Initialize the resource handle
-				RscHandle<anim::Animation> anim_clip_handle;
-				{
-					auto search_res = meta_bundle.FetchMeta<anim::Animation>(compiled_animation.name);
-					if (search_res)
-						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>(search_res->guid);
-					else
-						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
-				}
+				// Initialize the name. Name will be the file name if there are no other resources besides the animation.
 				string name;
 				if (importer_scene.has_animation && !importer_scene.has_skeleton)
 				{
@@ -338,6 +330,16 @@ namespace idk
 				}
 				else
 					name = compiled_animation.name;
+
+				// Initialize the resource handle
+				RscHandle<anim::Animation> anim_clip_handle;
+				{
+					auto search_res = meta_bundle.FetchMeta<anim::Animation>(name);
+					if (search_res)
+						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>(search_res->guid);
+					else
+						anim_clip_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Animation>();
+				}
 
 				auto& anim_clip = *anim_clip_handle;
 				anim_clip.Name(name);
