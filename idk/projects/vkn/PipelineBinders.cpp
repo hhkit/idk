@@ -113,12 +113,76 @@ namespace idk::vkn
 		pbr_trf = view_trf.inverse();
 	}
 
+	template<typename T>
+	span<const T> get_span(const std::vector<T>& vec)
+	{
+		return span<const T>{vec.data(),vec.data()+vec.size()};
+	}
+
+	void PbrFwdBindings::LoadStuff(const GraphicsState& vstate)
+	{
+		vector<RscHandle<CubeMap>> cube_maps[PbrCubeMapVarsInfo::size()] = {};
+		//TODO: actually bind something.
+		//cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = 
+		AddCubeMaps(PbrCubeMapVars::eIrradiance, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eIrradiance)]));
+	}
+
+	void PbrFwdBindings::ResetCubeMaps(size_t reserve_size)
+	{
+		pbr_cube_maps.clear();
+		pbr_cube_maps.reserve(reserve_size);
+		pbr_cube_maps_ranges.clear();
+		pbr_cube_maps_ranges.resize(PbrCubeMapVarsInfo::size(), { 0,0 });
+	}
+
+	void PbrFwdBindings::AddCubeMaps(PbrCubeMapVars var, span<const RscHandle<CubeMap>> Cube_maps)
+	{
+		size_t start = pbr_cube_maps.size();
+		size_t end = pbr_cube_maps.size() + Cube_maps.size();
+		pbr_cube_maps.insert(pbr_cube_maps.end(), Cube_maps.begin(), Cube_maps.end());
+		pbr_cube_maps_ranges[PbrCubeMapVarsInfo::map(var)] = std::make_pair(start, end);
+	}
+
+	span<const RscHandle<CubeMap>> PbrFwdBindings::GetCubeMap(PbrCubeMapVars var) const
+	{
+		auto [start,end] = pbr_cube_maps_ranges[PbrCubeMapVarsInfo::map(var)];
+		span<const RscHandle<CubeMap>> result{ std::data(pbr_cube_maps)+start,std::data(pbr_cube_maps)+end};
+		return result;
+	}
+
+
+	void PbrFwdBindings::ResetTexVars(size_t reserve_size)
+	{
+		pbr_texs.clear();
+		pbr_texs.reserve(reserve_size);
+		pbr_texs_ranges.clear();
+		pbr_texs_ranges.resize(PbrTexVarsInfo::size(), { 0,0 });
+	}
+
+	void PbrFwdBindings::AddTexVars(PbrTexVars var, span<const RscHandle<Texture>> tex_vars)
+	{
+		size_t start = pbr_texs.size();
+		size_t end = pbr_texs.size() + tex_vars.size();
+		pbr_texs.insert(pbr_texs.end(), tex_vars.begin(), tex_vars.end());
+		pbr_texs_ranges[PbrTexVarsInfo::map(var)] = std::make_pair(start, end);
+	}
+
+	span<const RscHandle<Texture>> PbrFwdBindings::GetTexVars(PbrTexVars var) const
+	{
+		auto [start, end] = pbr_texs_ranges[PbrTexVarsInfo::map(var)];
+		span<const RscHandle<Texture>> result{ std::data(pbr_texs) + start,std::data(pbr_texs) + end };
+		return result;
+	}
+
+
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
 		auto& state = State();
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
 		uint32_t i = 0;
+
+
 		if (state.shadow_maps_2d.size() == 0)
 		{
 			//Make sure that it's there.

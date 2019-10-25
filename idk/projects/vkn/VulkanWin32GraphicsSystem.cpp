@@ -59,11 +59,6 @@ bool operator<(const idk::RscHandle<idk::RenderTarget>& lhs, const idk::RscHandl
 namespace idk::vkn
 {
 
-	struct SomeHackyThing
-	{
-		VulkanPipeline pipeline;
-	};
-	static SomeHackyThing thing;
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
 	}
