@@ -31,7 +31,6 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 // resource importing
-#include <gfx/RenderTarget.h>
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
@@ -39,6 +38,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/OpenGLTextureLoader.h>
 
 // editor setup
+#include <gfx/RenderTarget.h>
+#include <editor/SceneManagement.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
@@ -277,6 +278,23 @@ namespace idk
 	{
         if (closing)
             return;
+
+		// scene controls
+		auto& app = Core::GetSystem<Application>();
+		if (app.GetKey(Key::Control))
+		{
+			if(app.GetKeyDown(Key::S))
+			{
+				if (app.GetKey(Key::Shift))
+					SaveSceneAs();
+				else
+					SaveScene();
+			}
+			if (app.GetKeyDown(Key::N))
+				NewScene();
+			if (app.GetKeyDown(Key::O))
+				OpenScene();
+		}
 
 		_interface->ImGuiFrameBegin();
 		ImGuizmo::BeginFrame();

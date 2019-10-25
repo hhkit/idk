@@ -49,7 +49,12 @@ namespace idk
 
 	bool SceneManager::StartupScene(RscHandle<Scene> scene)
 	{
-		_startup_scene = scene;
+		if (scene)
+		{
+			_startup_scene = scene;
+			return true;
+		}
+		return false;
 	}
 
 	RscHandle<Scene> SceneManager::GetSceneByBuildIndex(unsigned char index) const

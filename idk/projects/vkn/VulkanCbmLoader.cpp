@@ -106,16 +106,10 @@ namespace idk::vkn
 		free(something);
 		return rtex;
 	}
-	ResourceBundle idk::vkn::CbmLoader::LoadFile(PathHandle handle)
-	{
-		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknCubemap>();
-		
-		return LoadFile(handle, RscHandle<CubeMap>{ tex });
-	}
 
-	ResourceBundle idk::vkn::CbmLoader::LoadFile(PathHandle handle, const MetaBundle& meta)
+	ResourceBundle CbmLoader::LoadFile(PathHandle handle, const MetaBundle& meta)
 	{
-		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknCubemap>(meta.metadatas[0].guid);
+		auto tex = meta.CreateResource<VknCubemap>();
 		return LoadFile(handle, RscHandle<CubeMap>{tex});
 	}
 
