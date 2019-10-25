@@ -47,8 +47,31 @@ namespace idk
 		void RenderObjData(vector<RenderObject>& out);
 		void AnimatedRenderObjData(vector<AnimatedRenderObject>& out);
 
+		size_t AddRenderRequest(
+			CameraData camera,
+			vector<RenderObject> mesh_render,
+			vector<AnimatedRenderObject> skinned_mesh_render,
+			vector<SkeletonTransforms> skeleton_transforms);
+
+		bool RenderRequestStatus(size_t index);
+
 		virtual GraphicsAPI GetAPI() = 0;
 	protected:
+		struct SpecialRenderBuffer
+		{
+			CameraData camera;
+			vector<RenderObject> mesh_render;
+			vector<AnimatedRenderObject> skinned_mesh_render;
+			vector<SkeletonTransforms> skeleton_transforms;
+			bool done_flag=false;
+
+			RscHandle<ShaderProgram> mesh_vtx;
+			RscHandle<ShaderProgram> skinned_mesh_vtx;
+		};
+
+		//Todo: change to a thing with a free list thing.
+		pool<SpecialRenderBuffer> render_requests;
+
 		struct RenderBuffer
 		{
 			vector<CameraData>   camera;
@@ -62,14 +85,6 @@ namespace idk
 
 			RscHandle<ShaderProgram> mesh_vtx;
 			RscHandle<ShaderProgram> skinned_mesh_vtx;
-		};
-		struct RenderPass
-		{
-			CameraData camera;
-			std::optional<RscHandle<ShaderProgram>> overriding_vtx;
-			std::optional<RscHandle<ShaderProgram>> overriding_geom;
-			std::optional<RscHandle<ShaderProgram>> overriding_frag;
-			//std::optional<RscHandle<FrameBuffer>>  output_buffer;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
