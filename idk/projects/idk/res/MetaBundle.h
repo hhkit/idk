@@ -22,6 +22,9 @@ namespace idk
 		const SerializedMeta* FetchMeta(string_view name) const;
 
 		explicit operator bool() const;
+
+		template<typename FullResType> RscHandle<FullResType> CreateResource() const;
+		template<typename FullResType> RscHandle<FullResType> CreateResource(string_view name) const;
 	};
 }
 
@@ -60,5 +63,19 @@ namespace idk
 				return &elem;
 		}
 		return nullptr;
+	}
+
+	template<typename FullResType>
+	inline RscHandle<FullResType> MetaBundle::CreateResource() const
+	{
+		auto m = FetchMeta<typename FullResType::BaseResource>();
+		return m ? Core::GetResourceManager().template LoaderEmplaceResource<FullResType>(m->guid) : Core::GetResourceManager().template LoaderEmplaceResource<FullResType>();
+	}
+
+	template<typename FullResType>
+	inline RscHandle<FullResType> MetaBundle::CreateResource(string_view name) const
+	{
+		auto m = FetchMeta<typename FullResType::BaseResource>(name);
+		return m ? Core::GetResourceManager().template LoaderEmplaceResource<FullResType>(m->guid) : Core::GetResourceManager().template LoaderEmplaceResource<FullResType>();
 	}
 }

@@ -21,17 +21,14 @@ namespace idk
 	template<typename Res>
 	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(PathHandle p, const MetaBundle& bundle)
 	{
-		auto meta = bundle.FetchMeta<Res>();
-
-		const auto res = meta 
-			? Core::GetResourceManager().LoaderEmplaceResource<Res>(meta->guid)
-			: Core::GetResourceManager().LoaderEmplaceResource<Res>();
+		const auto res = bundle.CreateResource<Res>();
 		auto stream = p.Open(FS_PERMISSIONS::READ);
 		parse_text(stringify(stream), *res);
 
 		if constexpr (has_tag_v<Res, MetaTag>)
 		{
-			auto real_meta = meta->GetMeta<Res>();
+			auto ser_meta = bundle.FetchMeta<Res>();
+			auto real_meta = ser_meta->GetMeta<Res>();
 			if (real_meta)
 				res->SetMeta(*real_meta);
 		}
