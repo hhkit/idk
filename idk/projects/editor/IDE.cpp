@@ -31,6 +31,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 // resource importing
+#include <gfx/RenderTarget.h>
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
@@ -345,15 +346,22 @@ namespace idk
 
 	void IDE::SetupEditorScene()
 	{
+		// create editor view
+		editor_view = Core::GetResourceManager().Create<RenderTarget>();
+		auto sz = editor_view->Size();
+		editor_view->Size(Core::GetSystem<Application>().GetScreenSize());
+		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));
+		editor_view->Name(std::to_string(sz.x) + "," + std::to_string(sz.y));
+		//editor_view->Size();
 		// create editor camera
 		RscHandle<Scene> scene{};
 		{
 			auto camera = scene->CreateGameObject();
 			Handle<Camera> camHandle = camera->AddComponent<Camera>();
-			camera->GetComponent<Name>()->name = "Camera 1";
+			camera->GetComponent<Name>()->name = "Editor Camera";
 			camera->Transform()->position = vec3{ 0, 0, 5 };
 			camHandle->far_plane = 100.f;
-			camHandle->render_target = RscHandle<RenderTarget>{};
+			camHandle->render_target = editor_view;
 			camHandle->is_scene_camera = true;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
