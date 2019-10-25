@@ -5,6 +5,8 @@
 #include <math/linear.h>
 #include "Vector_detail.h"
 #include "Vector_Dim.h"
+#undef min
+#undef max
 
 namespace idk
 {
@@ -74,6 +76,30 @@ namespace idk
 	auto abs(const tvec<T, D>& lhs)
 	{
 		return detail::Abs<std::make_index_sequence<D>>::abs(lhs);
+	}
+
+	using std::min;
+	using std::max;
+
+	template<typename T, unsigned N>
+	auto min(const idk::tvec<T, N>& lhs, const idk::tvec<T, N>& rhs)
+	{
+		idk::tvec<T, N>result{};
+		for (auto i = N; i-- > 0;)
+		{
+			result[i] = (lhs[i] < rhs[i]) ? lhs[i] : rhs[i];
+		}
+		return result;
+	}
+	template<typename T, unsigned N>
+	auto  max(const idk::tvec<T, N>& lhs, const idk::tvec<T, N>& rhs)
+	{
+		idk::tvec<T, N>result{};
+		for (auto i = N; i-- > 0;)
+		{
+			result[i] = (lhs[i] > rhs[i]) ? lhs[i] : rhs[i];
+		}
+		return result;
 	}
 
 	extern template struct tvec<float, 2>;

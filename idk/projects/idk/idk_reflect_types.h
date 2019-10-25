@@ -24,6 +24,9 @@ namespace idk
 		class Animation;
 		class Skeleton;
 	}
+
+	struct DontClear {};
+	using CameraClear_t =std::variant<DontClear, color, RscHandle<CubeMap>>;
 }
 
 namespace idk::reflect
@@ -69,7 +72,7 @@ namespace idk::reflect
 		, UniformInstanceValue
 		, hash_table<string, UniformInstance>
 		, hash_table<string, UniformInstanceValue>
-		, std::variant<color, RscHandle<CubeMap>> // camera clear
+		, CameraClear_t // camera clear
 		, PointLight
 		, DirectionalLight
 		, SpotLight

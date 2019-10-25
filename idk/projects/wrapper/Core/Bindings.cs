@@ -184,5 +184,8 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool InputGetKeyUp(int key);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float InputGetAxis(char index, int a);
     }
 }

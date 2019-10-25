@@ -35,6 +35,7 @@ of the editor.
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
+#include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
 
 #include <IncludeComponents.h>
@@ -247,6 +248,10 @@ namespace idk {
             ImGui::OpenPopup("AddComp");
         }
 
+		ImGui::SetCursorPosX(window_size.x * 0.25f);
+		if (ImGui::Button("Add Script", ImVec2{ window_size.x * 0.5f,0.0f })) {
+			ImGui::OpenPopup("AddScript");
+		}
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
@@ -257,7 +262,8 @@ namespace idk {
                     displayName == "Name" ||
 					displayName == "Tag" ||
 					displayName == "Layer" ||
-                    displayName == "PrefabInstance")
+                    displayName == "PrefabInstance" ||
+					displayName == "MonoBehavior")
                     continue;
 
                 //Comment/Uncomment this to remove text fluff 
@@ -279,6 +285,21 @@ namespace idk {
             }
             ImGui::EndPopup();
         }
+
+		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
+			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
+			if (script_env == nullptr)
+				ImGui::Text("Scripts not loaded!");
+
+			span componentNames = script_env->GetBehaviorList();
+			for (const char* name : componentNames) {
+				if (ImGui::MenuItem(name)) {
+					for (Handle<GameObject> i : gos)
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
+				}
+			}
+			ImGui::EndPopup();
+		}
 
         ImGui::EndChild();
     }

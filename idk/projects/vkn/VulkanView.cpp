@@ -113,9 +113,9 @@ namespace idk::vkn
 		{
 			return vulkan().rv;
 		}
-		vk::RenderPass VulkanView::BasicRenderPass(BasicRenderPasses type) const
+		vk::RenderPass VulkanView::BasicRenderPass(BasicRenderPasses type, bool clear_col, bool clear_depth ) const
 		{
-			return this->vulkan_->BasicRenderPass(type);
+			return this->vulkan_->BasicRenderPass(type,clear_col,clear_depth);
 		}
 		vk::Result& VulkanView::AcquiredImageResult() const
 		{

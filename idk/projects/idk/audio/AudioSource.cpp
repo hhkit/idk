@@ -10,7 +10,6 @@
 
 #include <stdafx.h> //Needed for every CPP. Precompiler
 #include <audio/AudioSource.h>
-#include <audio/AudioClip.h>
 #include <res/Resource.h>
 #include <file/FileSystem.h>
 
@@ -49,5 +48,32 @@ namespace idk
 		if (audio_clip_list.size() > index) { //Check if it is in array
 			audio_clip_list.erase(audio_clip_list.begin() + index);
 		}
+	}
+	void AudioSource::UpdateAudioClips()
+	{
+
+		for (int i = 0; i < audio_clip_list.size(); ++i) {
+			audio_clip_list[i]->UpdateChannel();
+			//Update volume
+			audio_clip_list[i]->UpdateVolume(volume);
+			//update pitch
+			audio_clip_list[i]->UpdatePitch(pitch);
+			//Update MinMax Distance
+			audio_clip_list[i]->UpdateMinMaxDistance(minDistance, maxDistance);
+			//Update FMODMODE
+			audio_clip_list[i]->UpdateFmodMode(ConvertSettingToFMOD_MODE());
+			//Update Position
+		}
+
+	}
+	FMOD_MODE AudioSource::ConvertSettingToFMOD_MODE()
+	{
+		FMOD_MODE output = FMOD_DEFAULT | FMOD_3D_LINEARROLLOFF;
+		output |= isLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
+		output |= is3Dsound ? FMOD_3D : FMOD_2D;
+		if (isUnique) {
+			output |= FMOD_UNIQUE;
+		}
+		return output;
 	}
 }

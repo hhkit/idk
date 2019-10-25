@@ -177,9 +177,8 @@ REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
 REFLECT_END()
 
-
-REFLECT_BEGIN(idk::RenderTarget::Metadata, "RenderTargetMeta")
-REFLECT_VARS(size, is_world_renderer, render_debug)
+REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")
+REFLECT_VARS(size, is_world_renderer, render_debug,color_tex,depth_tex)
 REFLECT_END()
 
 REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
@@ -191,10 +190,6 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::AudioClip::Metadata, "AudioMeta")
-REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Material, "Material")
@@ -308,6 +303,10 @@ REFLECT_BEGIN(idk::Layer, "Layer")
 REFLECT_VARS(index)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::AudioSource, "AudioSource")
+REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()
@@ -390,6 +389,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Viewport, "Viewport")
 REFLECT_VARS(position,size)
+REFLECT_END()
+
+
+REFLECT_BEGIN(idk::DontClear, "<Don't Clear>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

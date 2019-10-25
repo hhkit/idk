@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <opengl/resource/OpenGLCubemap.h>
 #include <opengl/resource/OpenGLTexture.h>
+#include <gfx/Viewport.h>
+
 namespace idk
 {
 	class RenderTarget;
@@ -22,9 +24,9 @@ namespace idk::ogl
 		~FrameBufferManager();
 
 		void SetRenderTarget(const RscHandle<OpenGLCubemap>& target, bool for_convolution = false);
-		void SetRenderTarget(RscHandle<OpenGLTexture> target);
-		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target);
-		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target);
+		void SetRenderTarget(RscHandle<OpenGLTexture> target     , const std::optional<Viewport>& viewport = std::nullopt, bool clear=true);
+		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& viewport = std::nullopt, bool clear=true);
+		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target , const std::optional<Viewport>& viewport = std::nullopt, bool clear=true);
 		void ResetFramebuffer();
 		
 		RscHandle<OpenGLTexture> cBufferPickingTexture;

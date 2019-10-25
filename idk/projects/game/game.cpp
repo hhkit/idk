@@ -69,7 +69,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 	
     auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
-    //c->AddSystem<win::XInputSystem>();
+    c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;

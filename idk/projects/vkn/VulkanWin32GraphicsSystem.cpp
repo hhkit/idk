@@ -18,6 +18,8 @@
 #include <glslang/public/ShaderLang.h>
 #include <vkn/TmpTest.h>
 
+#include <vkn/VknRenderTarget.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -167,15 +169,21 @@ namespace idk::vkn
 		pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
 		pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 		hash_set<RscHandle<RenderTarget>> render_targets;
+
+		auto IsDontClear = [](const CameraData& camera)
+		{
+			return camera.clear_data.index() == meta::IndexOf <std::remove_const_t<decltype(camera.clear_data)>, DontClear>::value;
+		};
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
 			auto& curr_cam = curr_buffer.camera[i];
 			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
-			const bool new_rt = curr_state.clear_render_target = !(itr != render_targets.end());
+			//const bool new_rt = 
+				curr_state.clear_render_target = !IsDontClear(curr_cam);
 
-			if(new_rt)
+			if(itr==render_targets.end())
 				render_targets.emplace(curr_cam.render_target);
 
 			curr_state.mesh_vtx = curr_buffer.mesh_vtx;
@@ -193,6 +201,12 @@ namespace idk::vkn
 				}
 			}
 			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
+		}
+
+		for (auto& prt : render_targets)
+		{
+			if (prt->NeedsFinalizing())
+				prt->Finalize();
 		}
 		// */
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender

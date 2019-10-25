@@ -104,6 +104,7 @@ namespace idk::ogl
 			prev_brdf = brdf;
 		}
 		cubemaps_to_convolute.invoke_all();
+		
 	}
 
 	void Win32GraphicsSystem::CreateContext()

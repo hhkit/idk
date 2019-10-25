@@ -37,9 +37,6 @@ namespace idk
 	{
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(_soundHandle, nullptr, false, &_soundChannel)); //Creates a channel for audio to use. Start as paused to edit stuff first.
-		SetPriority(priority);
-		SetVolume(meta.volume);
-		SetPitch(meta.pitch);
 		
 	}
 
@@ -72,121 +69,35 @@ namespace idk
 		return returnVal;
 	}
 
-	void AudioClip::SetVolume(float i)
+	void AudioClip::UpdateVolume(float i)
 	{
-		meta.volume = i;
-		UpdateChannel();
+
 		if (_soundChannel) {
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setVolume(meta.volume));
+			audioSystem.ParseFMOD_RESULT(_soundChannel->setVolume(i));
 		}
 
-		_dirtymeta = true;
-
 	}
 
-	float AudioClip::GetVolume() const
+	void AudioClip::UpdatePitch(float i)
 	{
-		return meta.volume;
-	}
 
-	void AudioClip::SetPitch(float i)
-	{
-		meta.pitch = i;
-		UpdateChannel();
 		if (_soundChannel) {
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setPitch(meta.pitch));
+			audioSystem.ParseFMOD_RESULT(_soundChannel->setPitch(i));
 		}
 
-		_dirtymeta = true;
-
 	}
 
-	float AudioClip::GetPitch() const
-	{
-		return meta.pitch;
-	}
 
-	void AudioClip::SetPriority(int i)
+	void AudioClip::UpdatePriority(int i)
 	{
-		priority = i;
-		UpdateChannel();
 		if (_soundChannel) {
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setPriority(priority));
+			audioSystem.ParseFMOD_RESULT(_soundChannel->setPriority(i));
 		}
 	}
 
-	int AudioClip::GetPriority() const
-	{
-		return priority;
-	}
-
-	void AudioClip::SetIsLoop(bool i)
-	{
-		meta.isLoop = i;
-		UpdateFmodMode();
-		_dirtymeta = true;
-
-	}
-
-	bool AudioClip::GetIsLoop() const
-	{
-		return meta.isLoop;
-	}
-
-	void AudioClip::SetIsUnique(bool i)
-	{
-		meta.isUnique = i;
-		UpdateFmodMode();
-		_dirtymeta = true;
-
-	}
-
-	bool AudioClip::GetIsUnique() const
-	{
-		return meta.isUnique;
-	}
-
-	void AudioClip::SetIs3DSound(bool i)
-	{
-		meta.is3Dsound = i;
-		UpdateFmodMode();
-		_dirtymeta = true;
-
-	}
-
-	bool AudioClip::GetIs3DSound() const
-	{
-		return meta.is3Dsound;
-	}
-
-	void AudioClip::SetMinDistance(float i)
-	{
-		meta.minDistance = i;
-		UpdateMinMaxDistance();
-		_dirtymeta = true;
-
-	}
-
-	float AudioClip::GetMinDistance() const
-	{
-		return meta.minDistance;
-	}
-
-	void AudioClip::SetMaxDistance(float i)
-	{
-		meta.maxDistance = i;
-		UpdateMinMaxDistance();
-		_dirtymeta = true;
-
-	}
-
-	float AudioClip::GetMaxDistance() const
-	{
-		return meta.maxDistance;
-	}
 
 	void AudioClip::UpdateChannel()
 	{
@@ -221,61 +132,23 @@ namespace idk
 		}
 	}
 
-	void AudioClip::UpdateFmodMode()
+	void AudioClip::UpdateFmodMode(FMOD_MODE fmodMode)
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		const FMOD_MODE fmodMode = ConvertSettingToFMOD_MODE();
 		audioSystem.ParseFMOD_RESULT(_soundHandle->setMode(fmodMode));
-
-		UpdateChannel();
 		if (_soundChannel) {
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setMode(fmodMode));
 		}
 	}
 
-	void AudioClip::UpdateMinMaxDistance()
+	void AudioClip::UpdateMinMaxDistance(float min, float max)
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		audioSystem.ParseFMOD_RESULT(_soundHandle->set3DMinMaxDistance(meta.minDistance, meta.maxDistance));
-
-		UpdateChannel();
+		audioSystem.ParseFMOD_RESULT(_soundHandle->set3DMinMaxDistance(min, max));
 		if (_soundChannel) {
-			audioSystem.ParseFMOD_RESULT(_soundChannel->set3DMinMaxDistance(meta.minDistance, meta.maxDistance));
-
+			audioSystem.ParseFMOD_RESULT(_soundChannel->set3DMinMaxDistance(min, max));
 		}
 	}
-
-	void AudioClip::OnMetaUpdate(const AudioMeta& newmeta)
-	{
-		UpdateChannel();
-		if (_soundChannel) {
-			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-
-			//Volume
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setVolume(newmeta.volume));
-
-			//Pitch
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setPitch(newmeta.pitch));
-
-
-			FMOD_MODE fmodMode = FMOD_DEFAULT | FMOD_3D_LINEARROLLOFF;
-			fmodMode |= newmeta.isLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
-			fmodMode |= newmeta.is3Dsound ? FMOD_3D : FMOD_2D;
-			if (newmeta.isUnique) {
-				fmodMode |= FMOD_UNIQUE;
-			}
-
-			//Mode
-			audioSystem.ParseFMOD_RESULT(_soundChannel->setMode(fmodMode));
-
-			//Min Max
-			audioSystem.ParseFMOD_RESULT(_soundChannel->set3DMinMaxDistance(newmeta.minDistance, newmeta.maxDistance));
-
-		}
-
-	}
-
-
 
 	void AudioClip::ReassignSoundGroup(SubSoundGroup newSndGrp)
 	{
@@ -313,14 +186,5 @@ namespace idk
 	{
 		return soundInfo;
 	}
-	FMOD_MODE AudioClip::ConvertSettingToFMOD_MODE()
-	{
-		FMOD_MODE output = FMOD_DEFAULT | FMOD_3D_LINEARROLLOFF;
-		output |= meta.isLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
-		output |= meta.is3Dsound ? FMOD_3D : FMOD_2D;
-		if (meta.isUnique) {
-			output |= FMOD_UNIQUE;
-		}
-		return output;
-	}
+
 }

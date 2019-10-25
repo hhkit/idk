@@ -32,6 +32,11 @@
             return val < min ? min :
                    val > max ? max : val;
         }
+        public static int Clamp(int val, int min, int max)
+        {
+            return val < min ? min :
+                   val > max ? max : val;
+        }
         public static float Clamp01(float val)
         {
             return val < 0 ? 0 :

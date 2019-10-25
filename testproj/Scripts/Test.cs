@@ -14,12 +14,12 @@ namespace TestAndSeek
 
         public Test()
         {
-            System.Console.WriteLine("Oh no");
+            System.Console.WriteLine("Test is constructed");
         }
         public void Thunderbolt(Vector3 v)
         {
-            System.Console.WriteLine("pikachu use");
-            System.Console.WriteLine("thunderbolt {0} {1} {2}", v.x, v.y, v.z);
+            System.Console.WriteLine("Pikachu, use");
+            System.Console.WriteLine("Thunderbolt! {0} {1} {2}", v.x, v.y, v.z);
            // System.Console.WriteLine("and takedown {0}", i);
         }
 
@@ -33,21 +33,16 @@ namespace TestAndSeek
         {
             if (rb)
             {
-                if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
-                if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
-                if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
-                if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
-                if (Input.GetKeyDown(KeyCode.Space)) rb.AddForce(jump_force * Vector3.up);
+                System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
+                rb.AddForce(f * (Input.GetAxis(Axis.Horizontal) * Vector3.right + Input.GetAxis(Axis.Vertical) * Vector3.forward));
+
+                //if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
+                //if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
+                //if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
+                //if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButtonA))
+                    rb.AddForce(jump_force * Vector3.up);
             }
-        }
-        public override void Update()
-        {
-            System.Console.WriteLine("Poop.");
-            //if (rb)
-            //{
-            //    System.Console.WriteLine("Oops");
-            //    return;
-            //}
         }
 
         public void TestTransform(Transform t)

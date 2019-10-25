@@ -1,35 +1,26 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
+#include <particle/ParticleSystemModules.h>
+#include <particle/ParticleData.h>
 
 namespace idk
 {
-    struct ParticleModule
-    {
-
-    };
-
-    struct MainModule : ParticleModule
-    {
-        float duration = 5.0f;
-    };
-
-    struct EmissionModule : ParticleModule
-    {
-
-    };
-
-    struct ParticleUpdater : ParticleModule
-    {
-
-    };
-
     class ParticleSystem
         : public Component<ParticleSystem>
     {
     public:
-        bool enabled{ true };
+        enum State { Stopped, Playing, Paused };
 
+        MainModule main;
+        EmissionModule emission;
 
+        ParticleData data;
+        char state = Stopped;
+        float time = 0;
+        float emitter_clock = 0;
+
+        void Step(float dt);
+        void Emit();
     };
 }

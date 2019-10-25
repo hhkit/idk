@@ -56,6 +56,7 @@
     <Compile Include="Core\GameObject.cs" />
     <Compile Include="Core\IDK.cs" />
     <Compile Include="Core\Object.cs" />
+    <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />
     <Compile Include="Math\Color.cs" />

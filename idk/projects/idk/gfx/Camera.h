@@ -6,6 +6,7 @@
 #include <gfx/Viewport.h>
 namespace idk
 {
+
 	class Camera
 		: public Component<Camera>
 	{
@@ -29,7 +30,7 @@ namespace idk
 		bool overlay_debug_draw = true;
 		bool is_scene_camera = false;
 
-		std::variant<color, RscHandle<CubeMap>> clear;
+		CameraClear_t clear;
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 

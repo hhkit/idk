@@ -184,6 +184,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="commands\CMD_AddBehavior.h" />
     <ClInclude Include="commands\CMD_DeleteComponent.h" />
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="widgets\DragQuat.h" />
     <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
+    <ClInclude Include="windows\IGE_AnimatorWindow.h" />
     <ClInclude Include="windows\IGE_Console.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
     <ClInclude Include="windows\IGE_ProjectSettings.h" />
@@ -228,6 +230,7 @@
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="commands\CMD_AddBehavior.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
     <ClInclude Include="commands\CMD_ModifyInput.inl">
@@ -251,6 +254,7 @@
     <ClCompile Include="widgets\DragQuat.cpp" />
     <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
+    <ClCompile Include="windows\IGE_AnimatorWindow.cpp" />
     <ClCompile Include="windows\IGE_Console.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
