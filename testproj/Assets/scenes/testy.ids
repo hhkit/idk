@@ -166,3 +166,55 @@
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
     static_friction: 0
+- !21474902784 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      axes: 
+        intern[0]: {x: 1, y: 0, z: 0}
+        intern[1]: {x: 0, y: 1, z: 0}
+        intern[2]: {x: 0, y: 0, z: 1}
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+    static_friction: 0.6
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !Test 
+      f: 50
+      i: 0
+      jump_force: 0
+      movement: {x: 0, y: 0, z: 0}
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !Test 
+      f: 0
+      i: 0
+      jump_force: 250
+      movement: {x: 0, y: 0, z: 0}
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !Test 
+      f: 0
+      i: 0
+      jump_force: 0
+      movement: {x: 0, y: 0, z: 0}

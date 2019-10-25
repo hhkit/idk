@@ -189,6 +189,7 @@
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="script\ManagedType.h" />
     <ClInclude Include="script\MonoBinder.h" />
+    <ClInclude Include="script\MonoFunctionInvoker.h" />
     <ClInclude Include="script\ValueBoxer.h" />
     <ClInclude Include="script\MonoBehavior.h" />
     <ClInclude Include="script\MonoBehaviorData.h" />

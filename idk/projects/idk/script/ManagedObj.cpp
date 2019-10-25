@@ -76,6 +76,12 @@ namespace idk::mono
 		}
 		return _type;
 	}
+	const ManagedType* ManagedObject::Type() const noexcept
+	{
+		if (_gc_handle == 0)
+			return nullptr;
+		return Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(mono_class_get_name(mono_object_get_class(Raw())));
+	}
 	string_view ManagedObject::TypeName() const
 	{
 		return mono_class_get_name(mono_object_get_class(Raw()));

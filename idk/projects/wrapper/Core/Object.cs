@@ -69,10 +69,9 @@ namespace idk
             return "";
         }
 
-        public virtual void Deserialize(string input)
+        public Object Clone()
         {
-            var xmlSerializer = new XmlSerializer(GetType());
-            xmlSerializer.Deserialize(new StringReader(input));
+            return (Object) MemberwiseClone();
         }
     }
 }

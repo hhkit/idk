@@ -2,17 +2,9 @@
 #include "MonoBehavior.h"
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
+#include <script/MonoFunctionInvoker.h>
 namespace idk::mono
 {
-	string_view Behavior::RescueMonoObject()
-	{
-		return _serialized;
-	}
-
-	void Behavior::RestoreMonoObject()
-	{
-	}
-
 	string_view Behavior::TypeName() const
 	{
 		return _obj.TypeName();
@@ -91,5 +83,38 @@ namespace idk::mono
 				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
+	/*
+	Behavior::Behavior(const Behavior& rhs)
+		: enabled{ rhs.enabled }
+		, _obj{}
+	{
+		if (const auto* type = rhs._obj.Type())
+		{
+			auto clone_method = type->GetMethod("Clone");
+			IDK_ASSERT(clone_method.index() != 2);
+			_obj = ManagedObject{ Invoke(clone_method, rhs._obj) };
+		}
+	}
+
+	Behavior& Behavior::operator=(const Behavior& rhs)
+	{
+		if (const auto* type = rhs._obj.Type())
+		{
+			auto clone_method = type->GetMethod("Clone");
+			auto new_obj = ManagedObject{ Invoke(clone_method, rhs._obj) };
+			DisposeMonoObject();
+			enabled = rhs.enabled;
+			_obj = new_obj;
+		}
+		else
+		{
+			DisposeMonoObject();
+			enabled = rhs.enabled;
+		}
+
+		return *this;
+		// TODO: insert return statement here
+	}
+	*/
 
 }
