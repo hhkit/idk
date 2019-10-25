@@ -4,6 +4,8 @@
 #include <opengl/resource/FrameBuffer.h>
 #include <opengl/resource/OpenGLTexture.h>
 
+#include <gfx/FramebufferFactory.h>
+
 #include <iostream>
 
 
@@ -195,7 +197,6 @@ namespace idk::ogl
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-
 
 	void FrameBufferManager::ResetFramebuffer()
 	{

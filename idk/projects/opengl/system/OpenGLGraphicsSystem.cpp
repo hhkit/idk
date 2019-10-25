@@ -83,6 +83,13 @@ namespace idk::ogl
 	{
 		cubemaps_to_convolute.enqueue(this, handle);
 	}
+	PixelData Win32GraphicsSystem::SelectObjViewport(const vec2& vp_pos)
+	{
+		//Set flag 
+		_opengl->IsPicking();
+		//get pixeldata
+		return _opengl->PickData(vp_pos);
+	}
 	OpenGLState& Win32GraphicsSystem::Instance()
 	{
 		// TODO: insert return statement here

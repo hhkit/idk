@@ -47,7 +47,7 @@ namespace idk
 			auto p = pp + fileExt[i] + ext.string();
 
 			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
-
+			
 			//assert(data);
 
 			const auto col_format = [&]() -> CMInputChannels

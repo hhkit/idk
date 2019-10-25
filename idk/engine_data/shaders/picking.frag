@@ -23,5 +23,5 @@ layout(location=0)out vec4 out_color;
 
 void main()
 {
-	out_color = vec4(float(obj_index),0,0,0);
+	out_color = vec4(float(obj_index),0,0,float(gl_PrimitiveID + 1));
 } 
