@@ -1013,6 +1013,8 @@ namespace idk::vkn
 				vk::ClearValue { vk::ClearColorValue{ std::array<float,4>{1.0f,1.0f,1.0f,1.0f} }}
 			};
 			;
+			if (RscHandle<RenderTarget>{}->NeedsFinalizing())
+				RscHandle<RenderTarget>{}->Finalize();
 			//Get default framebuffer
 			auto& vkn_fb = RscHandle<RenderTarget>{}.as<VknRenderTarget>();
 			auto frame_buffer = RscHandle<RenderTarget>{}.as<VknRenderTarget>().Buffer();
