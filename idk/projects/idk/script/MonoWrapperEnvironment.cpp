@@ -90,6 +90,33 @@ namespace idk::mono
 			}
 		));
 
+		Bind("idk.Bindings::GameObjectAddGameComponent", decay(
+			[](Handle<GameObject> go, MonoString* component) -> MonoObject*
+			{
+				auto s = unbox(component);
+				auto retval = go->AddComponent<mono::Behavior>();
+				if (retval->EmplaceBehavior(s.get()))
+					return retval->GetObject().Raw();
+				
+				go->RemoveComponent(retval);
+				return nullptr;
+			}
+		));
+
+		Bind("idk.Bindings::GameObjectGetGameComponent", decay(
+			[](Handle<GameObject> go, MonoString* component) -> MonoObject* // note: return value optimization
+			{
+				auto s = unbox(component);
+				for (auto& elem : go->GetComponents<mono::Behavior>())
+				{
+					if (elem->TypeName() == s.get())
+						return elem->GetObject().Raw();
+				}
+
+				return nullptr;
+			}
+		));
+
 		Bind("idk.Bindings::GameObjectGetActiveInHierarchy", decay(
 			[](Handle<GameObject> go) -> bool
 			{
@@ -234,9 +261,9 @@ namespace idk::mono
 		));
 
 		Bind("idk.Bindings::RigidBodyGetVelocity", decay(
-			[](Handle < RigidBody> rb) -> vec3
+			[](Handle<RigidBody> rb) -> vec3
 		{
-			return rb->velocity();
+			return rb->velocity() * Core::GetDT().count();
 		}));
 
 		Bind("idk.Bindings::RigidBodySetVelocity", decay(
@@ -497,5 +524,18 @@ namespace idk::mono
 			}
 		));
 
+		Bind("idk.Bindings::TimeGetFixedDelta", decay(
+			[]() -> float
+			{
+				return Core::GetDT().count();
+			}
+		));
+
+		Bind("idk.Bindings::TimeGetDelta", decay(
+			[]() -> float
+			{
+				return Core::GetRealDT().count();
+			}
+		));
 	}
 }

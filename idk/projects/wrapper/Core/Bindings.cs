@@ -33,6 +33,12 @@ namespace idk
         public extern static ulong GameObjectGetEngineComponent(ulong gamehandle, string component);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static MonoBehavior GameObjectAddGameComponent(ulong gamehandle, string component);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static MonoBehavior GameObjectGetGameComponent(ulong gamehandle, string component);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string GameObjectGetName(ulong gamehandle);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -187,5 +193,15 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float InputGetAxis(char index, int a);
+
+        /*
+         * Time
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetFixedDelta();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetDelta();
+
     }
 }

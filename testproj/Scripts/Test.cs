@@ -11,6 +11,7 @@ namespace TestAndSeek
         public Vector3 movement;
 
         private RigidBody rb;
+        private TestShou ts;
 
         public Test()
         {
@@ -26,11 +27,14 @@ namespace TestAndSeek
         public override void Start()
         {
             rb = gameObject.GetComponent<RigidBody>();
+            ts = gameObject.GetComponent<TestShou>();
             if (rb)
                 System.Console.WriteLine("found rigidbody");
         }
         public override void FixedUpdate()
         {
+            if (ts.i == 5) 
+                rb.AddForce(10f * Vector3.up);
             if (rb)
             {
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
@@ -42,6 +46,10 @@ namespace TestAndSeek
                 //if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
                 if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButtonA))
                     rb.AddForce(jump_force * Vector3.up);
+            }
+            if (ts)
+            {
+                ts.PrintI();
             }
         }
 
