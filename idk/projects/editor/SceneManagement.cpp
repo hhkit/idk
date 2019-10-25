@@ -105,8 +105,13 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			Core::GetResourceManager().Rename(curr_scene, p);
-			Core::GetResourceManager().Save(curr_scene);
+			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
+			if (res)
+			{
+				curr_scene->Unload();
+				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
+				Core::GetSystem<SceneManager>().GetActiveScene()->Load();
+			}
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}

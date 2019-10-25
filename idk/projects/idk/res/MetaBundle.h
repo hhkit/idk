@@ -20,6 +20,8 @@ namespace idk
 
 		template<typename T>
 		const SerializedMeta* FetchMeta(string_view name) const;
+
+		explicit operator bool() const;
 	};
 }
 

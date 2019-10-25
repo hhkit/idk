@@ -40,6 +40,7 @@ namespace idk
 		ResourceFailedToSave,
 		ResourceNotLoaded,
 		ResourceNotReflected,
+		TargetFilePathAlreadyExists,
 	};
 
 	enum class ResourceReleaseResult : char
@@ -90,10 +91,12 @@ namespace idk
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
 		template<typename Res>  LoadResult<Res>       Load    (PathHandle path, bool reload_resource = true);
 		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
+								void                  Unload  (PathHandle path);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
 								GeneralGetResult      Get     (PathHandle path);
 		template<typename Res>  vector<RscHandle<Res>>GetAll();
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
+		template<typename Res>  SaveResult<Res>       CopyTo  (RscHandle<Res> result, string_view new_mountpath);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
 		                        FileMoveResult        Rename(PathHandle old_path, string_view new_mount_path);
 		template<typename Res>  FileMoveResult        Rename(RscHandle<Res> resource, string_view new__mountpath);

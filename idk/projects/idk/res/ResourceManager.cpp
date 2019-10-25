@@ -293,28 +293,18 @@ namespace idk
 		// Meta handling
 		auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
 
-		auto meta_bundle = [&]() -> opt<MetaBundle>
-		{
-			if (!meta_path)
-				return std::nullopt;
-
+		auto meta_bundle = MetaBundle{};
+		{	// try to create meta
 			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
 			auto metastr = stringify(metastream);
-            if (auto res = parse_text<MetaBundle>(metastr))
-                return *res;
-            return std::nullopt;
-		}();
+			parse_text(metastr, meta_bundle);
+		}
 
 		// reload the file
-		auto bundle = [&]()
-		{
-			if (meta_bundle && meta_bundle->metadatas.size())
-				return loader->LoadFile(path, *meta_bundle);
-			else
-				return loader->LoadFile(path);
-		}();
+		auto bundle = loader->LoadFile(path, meta_bundle);
+
 		const auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
-		assert(success);
+		IDK_ASSERT(success);
 
 		itr->second.is_new = !s_cast<bool>(meta_bundle);
 
@@ -326,12 +316,16 @@ namespace idk
 					using Res = typename std::decay_t<decltype(handle)>::Resource;
 
 					auto* cb = GetControlBlock(handle);
-					assert(cb);
+					IDK_ASSERT(cb);
 					cb->path   = emplace_path;
 				}
 			, elem);
 
 		return bundle;
+	}
+
+	void ResourceManager::Unload(PathHandle path)
+	{
 	}
 
 	ResourceManager::GeneralGetResult ResourceManager::Get(PathHandle path)

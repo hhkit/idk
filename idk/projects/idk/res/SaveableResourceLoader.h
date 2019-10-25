@@ -11,7 +11,6 @@ namespace idk
 	public:
 		using Resource = Res;
 
-		ResourceBundle LoadFile(PathHandle p);
 		ResourceBundle LoadFile(PathHandle p, const MetaBundle& bundle);
 	};
 }

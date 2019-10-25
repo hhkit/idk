@@ -9,7 +9,6 @@ namespace idk
 	class IFileLoader
 	{
 	public:
-		virtual ResourceBundle LoadFile(PathHandle handle) = 0;
 		virtual ResourceBundle LoadFile(PathHandle handle, const MetaBundle& meta) = 0;
 		virtual ~IFileLoader() = default;
 	};

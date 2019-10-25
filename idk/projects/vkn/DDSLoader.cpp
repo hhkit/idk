@@ -14,16 +14,6 @@ namespace idk::vkn
 	{
 		load_fence = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
-	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource)
-	{
-		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
-		std::stringstream strm;
-		strm << file.rdbuf();
-		DdsFile dds{ strm.str() };
-		loader.LoadTexture(*tex, BlockTypeToTextureFormat(dds.File().GetBlockType()), {}, dds.Data(), dds.Dimensions(), allocator, *load_fence, false);
-		return tex;
-	}
 
 	hash_table<vk::Format, vk::Format> DecompressMap()
 	{
@@ -53,19 +43,28 @@ namespace idk::vkn
 		while (i > 0 && !((d >> i)>=4))--i; //Decrease mipmap count
 		return i;
 	}
-	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
+	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& bundle)
 	{
 		//auto&& tm = *path_to_meta.metadatas[0].GetMeta<Texture>();
 		//TODO map the format
 		//tm.internal_format;
 		//TODO send the format and repeat mode in
-		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(path_to_meta.metadatas[0].guid);
+		auto meta = bundle.FetchMeta<Texture>();
+		auto tex = meta 
+			? Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(meta->guid)
+			: Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
+
 		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
 		std::stringstream strm;
 		strm << file.rdbuf();
 		DdsFile dds{ strm.str() };
 		TextureOptions to;
-		to = *path_to_meta.metadatas[0].GetMeta<Texture>();
+		if (meta)
+		{
+			auto load = meta->GetMeta<Texture>();
+			if (load)
+				to = *load;
+		}
 
 		InputTexInfo iti;
 		iti.data = dds.Data().data();

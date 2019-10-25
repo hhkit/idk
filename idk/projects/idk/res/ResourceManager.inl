@@ -175,6 +175,28 @@ namespace idk
 	}
 
 	template<typename Res>
+	inline ResourceManager::SaveResult<Res> ResourceManager::CopyTo(RscHandle<Res> result, string_view new_mountpath)
+	{
+		if (Core::template GetSystem<FileSystem>().Exists(new_mountpath))
+			return ResourceSaveError::TargetFilePathAlreadyExists;
+
+		try
+		{
+			auto ser = serialize_text(*result);
+			{
+				auto stream = Core::template GetSystem<FileSystem>().Open(new_mountpath, FS_PERMISSIONS::WRITE);
+				stream << ser;
+			}
+			return Load<Res>(new_mountpath).value();
+		}
+		catch (...)
+		{
+			return ResourceSaveError::ResourceFailedToSave;
+		}
+
+	}
+
+	template<typename Res>
 	ResourceReleaseResult ResourceManager::Release(RscHandle<Res> path)
 	{
 		auto& table = GetTable<Res>();

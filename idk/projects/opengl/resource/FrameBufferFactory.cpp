@@ -36,32 +36,6 @@ namespace idk::ogl
 		return fb;
 	}
 
-	ResourceBundle FrameBufferLoader::LoadFile(PathHandle fh)
-	{
-		fh;
-		assert(false);
-		return ResourceBundle();
-	}
-	ResourceBundle FrameBufferLoader::LoadFile(PathHandle filepath, const MetaBundle& m)
-	{
-		filepath;
-		m;
-		assert(false);
-		/*
-		auto fb = std::make_unique<FrameBuffer>();
-
-		for (auto& elem : m.textures)
-		{
-			// ensure textures are created
-			Core::GetResourceManager().Free(elem);
-			Core::GetResourceManager().Emplace<OpenGLTexture>(elem.guid);
-		}
-		fb->SetMeta(m);
-
-		return fb;
-		*/
-		return ResourceBundle{};
-	}
 	unique_ptr<FrameBuffer> OpenGLFrameBufferFactory::GenerateDefaultResource()
 	{
 		return unique_ptr<FrameBuffer>{};//it's gonna be null cause you shouldn't be using this.

@@ -11,4 +11,8 @@ namespace idk
 
 		return nullptr;
 	}
+	MetaBundle::operator bool() const
+	{
+		return metadatas.size();
+	}
 }

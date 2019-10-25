@@ -16,12 +16,6 @@ namespace idk
 		return std::make_unique<Scene>();
 	}
 
-	ResourceBundle SceneLoader::LoadFile(PathHandle scene) noexcept
-	{
-		// scenes are never imported
-		assert(false); 
-		return ResourceBundle();
-	}
 	ResourceBundle SceneLoader::LoadFile(PathHandle, const MetaBundle& bundle)
 	{
 
