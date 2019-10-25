@@ -22,9 +22,11 @@
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />
+    <ClInclude Include="anim\AnimationUtils.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
     <ClInclude Include="anim\Bone.h" />
+    <ClInclude Include="anim\AnimationUtils.cpp" />
     <ClInclude Include="anim\Skeleton.h" />
     <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
@@ -48,10 +50,15 @@
     <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Viewport.h" />
+    <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
     <ClInclude Include="gfx\Framebuffer.h" />
+    <ClInclude Include="particle\ParticleData.h" />
+    <ClInclude Include="particle\ParticleSystem.h" />
+    <ClInclude Include="particle\ParticleSystemModules.h" />
+    <ClInclude Include="particle\ParticleSystemUpdater.h" />
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="ds\result.h" />
     <ClInclude Include="file\PathHandle.h" />
@@ -237,6 +244,7 @@
   <ItemGroup>
     <ClCompile Include="anim\Animation.cpp" />
     <ClCompile Include="anim\AnimationLayer.cpp" />
+    <ClCompile Include="anim\AnimationState.cpp" />
     <ClCompile Include="anim\Animator.cpp" />
     <ClCompile Include="anim\AnimationSystem.cpp" />
     <ClCompile Include="anim\Bone.cpp" />
@@ -272,10 +280,14 @@
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
     <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
     <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="particle\ParticleData.cpp" />
+    <ClCompile Include="particle\ParticleSystem.cpp" />
+    <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />

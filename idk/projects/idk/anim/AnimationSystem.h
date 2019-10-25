@@ -4,6 +4,7 @@
 #include <idk.h>
 
 #include "Animator.h"
+#include <queue>
 
 namespace idk
 {
@@ -24,30 +25,20 @@ namespace idk
 		void HardReset(Animator& animator);
 
 	private:
-		
+		using BonePose = matrix_decomposition<real>;
 		bool _was_paused = true;
 		float _blend = 0.0f;
 
-		template<typename T>
-		size_t find_key(const vector<T>& vec, float ticks)
-		{
-			for (unsigned i = 0; i < vec.size(); ++i)
-			{
-				if (ticks < static_cast<float>(vec[i].time))
-				{
-					return i - 1;
-				}
-			}
-			
-
-			return vec.size() - 1;
-		}
-
-		// Animation passes: Animate -> Blend -> Finalize
-		void AnimationPass(Animator& animators);
-		void FinalPass(Animator& animators);
+		// Animation pass should be for a certain bone, in a certain layer.
+		BonePose AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
+		BonePose BlendPose(const BonePose& from, const BonePose& to, float delta);
+		size_t LayersPass(Animator& animator);
+		void AdvanceLayers(Animator& animator);
+		void FinalPass(Animator& animator);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 
-		
+		void InitializeAnimators();
+
+		vector<Handle<Animator>> _creation_queue;
 	};
 }

@@ -30,9 +30,13 @@ namespace idk
 		,   class SkinnedMeshRenderer
 		,	class Light
 
+        /// PARTICLE
+        ,   class ParticleSystem
+
 		/// ANIMATION
 		,	class Animator
 		,	struct Bone
+
 		/// SCRIPTING
 		,	class mono::Behavior
 
@@ -57,6 +61,8 @@ namespace idk
 		,	class mono::ScriptSystem
 		,	class PhysicsSystem
 		,	class AnimationSystem
+
+        ,   class ParticleSystemUpdater
 
 		// gfx
 		,	class GraphicsSystem

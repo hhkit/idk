@@ -29,13 +29,13 @@ namespace idk
 		float total_time = 0.0f;
 
 		string curr_state{}, blend_state{};
-		bool is_playing = false, is_stopping = false, preview_playback = false;
+		bool is_playing = false, is_stopping = false;
 
-		void Play(string_view animation_name, float offset);
+		void Play(string_view animation_name, float offset = 0.0f);
 		// void BlendTo(string_view animation_name, float offset);
 		void Stop();
 		void Pause();
-
+		
 		bool IsPlaying(string_view name) const;
 
 		void Reset();

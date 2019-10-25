@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <unordered_set>
+#include <set>
 #include <unordered_map>
 #include <string>
 #include <string_view>
@@ -91,6 +92,8 @@ namespace idk
 	template<typename T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
 	using hash_set = std::unordered_set<T, Hash, Equal>;
 
+	template<typename T,typename Equal = std::equal_to<T>>
+	using set = std::set<T, Equal>;
 
 	using string = std::string;
 

@@ -29,9 +29,8 @@ namespace idk {
 
 		try
 		{
-			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), FMOD_DEFAULT, NULL, &(newSound->_soundHandle)));		//
 			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
-			newSound->UpdateMinMaxDistance();
 		}
 		catch (EXCEPTION_AudioSystem)
 		{
@@ -47,7 +46,6 @@ namespace idk {
 
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
 
-		newSound->_dirtymeta = true;
 		//Push to list for management.
 		//SoundList.push_back(newSound);
 
@@ -61,9 +59,8 @@ namespace idk {
 
 		try
 		{
-			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), newSound->ConvertSettingToFMOD_MODE(), NULL, &(newSound->_soundHandle)));		//
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), FMOD_DEFAULT, NULL, &(newSound->_soundHandle)));		//
 			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
-			newSound->UpdateMinMaxDistance();
 		}
 		catch (EXCEPTION_AudioSystem)
 		{
@@ -79,7 +76,6 @@ namespace idk {
 
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
 
-		newSound->_dirtymeta = true;
 		//Push to list for management.
 		//SoundList.push_back(newSound);
 

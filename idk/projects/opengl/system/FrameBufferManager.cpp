@@ -4,6 +4,9 @@
 #include <opengl/resource/FrameBuffer.h>
 #include <opengl/resource/OpenGLTexture.h>
 
+#include <gfx/Viewport.h>
+#include <gfx/ViewportUtil.h>
+
 #include <iostream>
 
 
@@ -68,11 +71,23 @@ namespace idk::ogl
 		CheckFBStatus();
 	}
 
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target, const std::optional<Viewport>& oviewport, bool clear)
 	{
-
-		const auto sz = target->Size();
-		glViewport(0, 0, sz.x, sz.y);
+		glEnable(GL_SCISSOR_TEST);
+		GL_CHECK();
+		auto& meta = *target;
+		if (oviewport)
+		{
+			auto& viewport = *oviewport;
+			auto&& [position, size] = ComputeViewportExtents(viewport.size, viewport);
+			glViewport((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
+			glScissor((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
+		}
+		else
+		{
+			glViewport(0, 0, target->Size().x, target->Size().y);
+			glScissor(0, 0, target->Size().x, target->Size().y);
+		}
 		if (target->GetMeta().internal_format == ColorFormat::DEPTH_COMPONENT)
 		{
 			//glBindRenderbuffer(GL_RENDERBUFFER, _rbo_id);
@@ -111,15 +126,32 @@ namespace idk::ogl
 
 
 		CheckFBStatus();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (clear)
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDisable(GL_SCISSOR_TEST);
+		GL_CHECK();
 
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& oviewport,bool clear)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
-		auto& meta = target->GetMeta();
-		glViewport(0, 0, meta.size.x, meta.size.y);
+		glEnable(GL_SCISSOR_TEST);
+		GL_CHECK();
+		auto& meta = *target;
+		if (oviewport)
+		{
+			auto& viewport = *oviewport;
+			auto&& [position, size] = ComputeViewportExtents(vec2{ target->Size() }, viewport);
+			glViewport((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.y));
+			glScissor(position.x, position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.y));
+		}
+		else
+		{
+			glViewport(0, 0, meta.size.x, meta.size.y);
+			glScissor(0, 0, meta.size.x, meta.size.y);
+		}
 		
 
 		// set texture targets
@@ -128,32 +160,52 @@ namespace idk::ogl
 		//for (int i = 0; i < std::size(meta.textures); ++i)
 		int i = 0;
 		{
-			TextureMeta mm = meta.textures[i].as<OpenGLTexture>().GetMeta();
+			auto tex = target->GetColorBuffer();
+			TextureMeta mm = tex->GetMeta();
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
 				mm.internal_format = ColorFormat::RGBAF_16;
-				meta.textures[i].as<OpenGLTexture>().SetMeta(mm);
+				tex.as<OpenGLTexture>().SetMeta(mm);
 			}
-			meta.textures[i].as<OpenGLTexture>().Bind();
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[i]->ID())), 0);
+			tex.as<OpenGLTexture>().Bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(tex->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 		}
 		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(meta.textures[RenderTarget::kDepthIndex]->ID())), 0);
+		auto& depth_buffer = *meta.GetDepthBuffer();
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(depth_buffer.ID())), 0);
 		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
 
 		CheckFBStatus();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (clear)
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_SCISSOR_TEST);
+		GL_CHECK();
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target, const std::optional<Viewport>& oviewport, bool clear)
 	{
 		IDK_ASSERT_MSG(&*target,"Attempting to use a default framebuffer. Default framebuffer should not be used.");//make sure it's not null. 
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
-		auto size = target->Size();
-		glViewport(0, 0, size.x, size.y);
+		glEnable(GL_SCISSOR_TEST);
+		//GL_CHECK();
+		auto& meta = *target;
+		if (oviewport)
+		{
+			auto& viewport = *oviewport;
+			auto&& [position, size] = ComputeViewportExtents(viewport.size, viewport);
+			glViewport((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
+			glScissor((position.x), position.y, s_cast<GLsizei>(size.x), s_cast<GLsizei>(size.x));
+		}
+		else
+		{
+			glViewport(0, 0, meta.size.x, meta.size.y);
+			glScissor(0, 0, meta.size.x, meta.size.y);
 
+		}
+
+		//GL_CHECK();
 
 		// set texture targets
 		vector<GLenum> buffers;
@@ -179,21 +231,30 @@ namespace idk::ogl
 		{
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(target->DepthAttachment().buffer->ID())), 0);
 		}
+		GL_CHECK();
 		if (!target->NumColorAttachments())
 		{
 			//GLint max_draw =0;
 			//glGetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw);
-			glFramebufferParameteri(_fbo_id, GL_FRAMEBUFFER_DEFAULT_WIDTH , target->Size().x);
-			glFramebufferParameteri(_fbo_id, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
+			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH , target->Size().x);
+			GL_CHECK();
+			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
+			GL_CHECK();
 			glDrawBuffer(GL_NONE);
+			GL_CHECK();
 		}else
 		{
 			glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
 		}
 
+		//GL_CHECK();
 		CheckFBStatus();
+		//GL_CHECK();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if(clear)
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_SCISSOR_TEST);
+		//GL_CHECK();
 	}
 
 

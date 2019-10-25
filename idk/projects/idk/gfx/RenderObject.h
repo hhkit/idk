@@ -51,6 +51,7 @@ namespace idk
 
 	struct CameraData
 	{
+		using ClearData_t =variant<DontClear, vec4, RscHandle<CubeMap>>;
 		GenericHandle obj_id{};
 		bool is_scene_camera = false;
 		int  culling_flags = 0xFFFFFFFF;
@@ -61,7 +62,7 @@ namespace idk
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
 		bool is_shadow = false;
-		variant<vec4, RscHandle<CubeMap>> clear_data;
+		ClearData_t clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		Viewport viewport;
 	};

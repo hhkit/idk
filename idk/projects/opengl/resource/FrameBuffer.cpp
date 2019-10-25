@@ -7,35 +7,36 @@ namespace idk::ogl
 {
 	OpenGLRenderTarget::OpenGLRenderTarget()
 	{
-		glGenRenderbuffers(1, &depthbuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, meta.size.x, meta.size.y);
+		//glGenRenderbuffers(1, &depthbuffer);
+		//glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	}
 
-	OpenGLRenderTarget::~OpenGLRenderTarget()
+	//OpenGLRenderTarget::~OpenGLRenderTarget()
+	//{
+	//	//for (auto& elem : textures)
+	//	//	Core::GetResourceManager().Free(elem);
+	//	//glDeleteRenderbuffers(1, &depthbuffer);
+	//}
+
+	void OpenGLRenderTarget::OnFinalize()
 	{
-		for (auto& elem : meta.textures)
-			Core::GetResourceManager().Free(elem);
-		glDeleteRenderbuffers(1, &depthbuffer);
-	}
-
-	void OpenGLRenderTarget::OnMetaUpdate(const Metadata& newmeta)
-	{
-		for (auto& elem : meta.textures)
+		for (auto& elem : Textures())
 			Core::GetResourceManager().Free(elem);
 
 
-		for (auto& elem : newmeta.textures)
+		for (auto& elem : Textures())
 		{
-			auto tex = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
-			tex->Size(newmeta.size);
+			auto tex = elem = (elem == RscHandle<Texture>{})? Core::GetResourceManager().Create<OpenGLTexture>():Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
+			tex->Size(size);
 		}
-		auto tex = newmeta.textures[kDepthIndex];
+		auto tex = Textures()[kDepthIndex];
 		auto tmeta = tex->GetMeta();
 		tmeta.internal_format = ColorFormat::DEPTH_COMPONENT;
 		tex->SetMeta(tmeta);
-		glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newmeta.size.x, newmeta.size.y);
+		depthbuffer = s_cast<GLuint>(r_cast<intptr_t>(tex->ID()));
+		//glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	}
 
 	GLuint OpenGLRenderTarget::DepthBuffer() const

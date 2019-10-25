@@ -25,13 +25,12 @@ namespace idk::vkn
 		auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>();
 
 		auto fb = std::make_unique<VknRenderTarget>();
-		auto m = fb->GetMeta();
+		auto &m = *fb;
 		m.size = Core::GetSystem<Application>().GetScreenSize();
 
-		m.textures[RenderTarget::kColorIndex] = ptr;
-		m.textures[RenderTarget::kDepthIndex] = depth_ptr;
-		//Render target will initialize itself onmetaupdate
-		fb->SetMeta(m);
+		m.SetColorBuffer(RscHandle<Texture>{ptr      });
+		m.SetDepthBuffer(RscHandle<Texture>{depth_ptr});
+
 		return fb;
 	}
 	unique_ptr<RenderTarget> VknRenderTargetFactory::Create()
@@ -42,23 +41,20 @@ namespace idk::vkn
 		auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>();
 
 		auto fb = std::make_unique<VknRenderTarget>();
-		auto m = fb->GetMeta();
-		m.size = Core::GetSystem<Application>().GetScreenSize();
-		m.textures[RenderTarget::kColorIndex] = ptr;
-		m.textures[RenderTarget::kDepthIndex] = depth_ptr;
-		//Render target will initialize itself onmetaupdate
-		fb->SetMeta(m);
+		
+		auto& m = *fb;
+		m.Size(ivec2{ Core::GetSystem<Application>().GetScreenSize() });
+		m.SetColorBuffer(RscHandle<Texture>{ptr      });
+		m.SetDepthBuffer(RscHandle<Texture>{depth_ptr});
 	
 		return fb;
 	}
 
-	ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle, const MetaBundle& bundle)
-	{
-		auto fb = Core::GetResourceManager().LoaderEmplaceResource<VknRenderTarget>(bundle.metadatas[0].guid);
-
-		auto m = bundle.FetchMeta<RenderTarget>()->GetMeta<RenderTarget>();
-		fb->SetMeta(*m);
-
-		return fb;
-	}
+	//ResourceBundle VknFrameBufferLoader::LoadFile(PathHandle path)
+	//{
+	//	auto loaded = base_t::LoadFile(path);
+	//	auto rt = loaded.Get<VknRenderTarget>();
+	//	rt->
+	//	return loaded;
+	//}
 }

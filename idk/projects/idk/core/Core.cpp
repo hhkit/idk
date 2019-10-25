@@ -75,6 +75,7 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
 												  .IfPausedThen(&AnimationSystem::UpdatePaused);
+        _scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
@@ -97,6 +98,7 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::Render>    (&DebugRenderer::GraphicsTick,          "Update durations of debug draw");
 		_scheduler->ScheduleFencedPass<UpdatePhase::Render>    (&IEditor::EditorDraw,                  "Editor Draw");
 		_scheduler->SchedulePass      <UpdatePhase::Render>    (&GraphicsSystem::SwapBuffer,           "Swap the buffers");
+		// _scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build final scene graph");
 	
 		// main loop
 		_scheduler->Setup();
