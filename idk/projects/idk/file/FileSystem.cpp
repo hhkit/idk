@@ -111,7 +111,7 @@ namespace idk {
 		FS::path fs_path (full_path);
 		string ret_path;
 		auto fs_parent_path = fs_path.parent_path();
-		while (FS::exists(fs_parent_path))
+		while (FS::exists(fs_parent_path) || fs_parent_path == fs_parent_path.root_directory())
 		{
 			for (auto& mount : _mounts)
 			{
