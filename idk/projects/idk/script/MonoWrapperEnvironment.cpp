@@ -90,6 +90,33 @@ namespace idk::mono
 			}
 		));
 
+		Bind("idk.Bindings::GameObjectAddGameComponent", decay(
+			[](Handle<GameObject> go, MonoString* component) -> MonoObject*
+			{
+				auto s = unbox(component);
+				auto retval = go->AddComponent<mono::Behavior>();
+				if (retval->EmplaceBehavior(s.get()))
+					return retval->GetObject().Raw();
+				
+				go->RemoveComponent(retval);
+				return nullptr;
+			}
+		));
+
+		Bind("idk.Bindings::GameObjectGetGameComponent", decay(
+			[](Handle<GameObject> go, MonoString* component) -> MonoObject* // note: return value optimization
+			{
+				auto s = unbox(component);
+				for (auto& elem : go->GetComponents<mono::Behavior>())
+				{
+					if (elem->TypeName() == s.get())
+						return elem->GetObject().Raw();
+				}
+
+				return nullptr;
+			}
+		));
+
 		Bind("idk.Bindings::GameObjectGetActiveInHierarchy", decay(
 			[](Handle<GameObject> go) -> bool
 			{
@@ -234,9 +261,9 @@ namespace idk::mono
 		));
 
 		Bind("idk.Bindings::RigidBodyGetVelocity", decay(
-			[](Handle < RigidBody> rb) -> vec3
+			[](Handle<RigidBody> rb) -> vec3
 		{
-			return rb->velocity();
+			return rb->velocity() * Core::GetDT().count();
 		}));
 
 		Bind("idk.Bindings::RigidBodySetVelocity", decay(
@@ -367,50 +394,45 @@ namespace idk::mono
         Bind("idk.Bindings::MaterialInstanceGetFloat", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> float
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return 0; }
-            auto res = handle->GetUniform(s);
-            mono_free(s);
+            auto s = unbox(name);
+            if (!handle) { return 0; }
+            auto res = handle->GetUniform(s.get());
             return res ? std::get<float>(*res) : 0;
         }
         ));
         Bind("idk.Bindings::MaterialInstanceGetVector2", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec2
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return vec2(); }
-            auto res = handle->GetUniform(s);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle) { return vec2{}; }
+			auto res = handle->GetUniform(s.get());
             return res ? std::get<vec2>(*res) : vec2(0, 0);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceGetVector3", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec3
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return vec3(); }
-            auto res = handle->GetUniform(s);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle) { return vec3{}; }
+			auto res = handle->GetUniform(s.get());
             return res ? std::get<vec3>(*res) : vec3(0, 0, 0);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceGetVector4", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec4
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return vec4(); }
-            auto res = handle->GetUniform(s);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle) { return vec4{}; }
+			auto res = handle->GetUniform(s.get());
             return res ? std::get<vec4>(*res) : vec4(0, 0, 0, 0);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceGetTexture", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name) -> Guid
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return Guid(); }
-            auto res = handle->GetUniform(s);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle) { return Guid{}; }
+			auto res = handle->GetUniform(s.get());
             return res ? std::get<RscHandle<Texture>>(*res).guid : Guid();
         }
         ));
@@ -418,46 +440,46 @@ namespace idk::mono
         Bind("idk.Bindings::MaterialInstanceSetFloat", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name, float value) -> void
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
-            handle->SetUniform(s, value);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle)
+				return;
+			handle->SetUniform(s.get(), value);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceSetVector2", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name, vec2 value) -> void
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
-            handle->SetUniform(s, value);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle)
+				return;
+			handle->SetUniform(s.get(), value);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceSetVector3", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name, vec3 value) -> void
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
-            handle->SetUniform(s, value);
-            mono_free(s);
+				auto s = unbox(name);
+				if (!handle)
+					return;
+				handle->SetUniform(s.get(), value);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceSetVector4", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name, vec4 value) -> void
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
-            handle->SetUniform(s, value);
-            mono_free(s);
+            auto s = unbox(name);
+            if (!handle) 
+				return;
+            handle->SetUniform(s.get(), value);
         }
         ));
         Bind("idk.Bindings::MaterialInstanceSetTexture", decay(
             [](RscHandle<MaterialInstance> handle, MonoString* name, RscHandle<Texture> tex) -> void
         {
-            auto* s = mono_string_to_utf8(name);
-            if (!handle) { mono_free(s); return; }
-            handle->SetUniform(s, tex);
-            mono_free(s);
+			auto s = unbox(name);
+			if (!handle)
+				return;
+			handle->SetUniform(s.get(), tex);
         }
         ));
 
@@ -497,5 +519,18 @@ namespace idk::mono
 			}
 		));
 
+		Bind("idk.Bindings::TimeGetFixedDelta", decay(
+			[]() -> float
+			{
+				return Core::GetDT().count();
+			}
+		));
+
+		Bind("idk.Bindings::TimeGetDelta", decay(
+			[]() -> float
+			{
+				return Core::GetRealDT().count();
+			}
+		));
 	}
 }

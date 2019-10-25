@@ -12,7 +12,6 @@ namespace idk::vkn
 	public:
 		PngLoader();
 		ResourceBundle LoadFile(PathHandle handle,RscHandle<Texture>,const TextureMeta* tm=nullptr) ;
-		ResourceBundle LoadFile(PathHandle handle) override;
 		ResourceBundle LoadFile(PathHandle handle, const MetaBundle& meta) override;
 	private:
 		hlp::MemoryAllocator allocator;

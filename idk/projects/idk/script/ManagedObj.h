@@ -19,6 +19,7 @@ namespace idk::mono
 		// properties
 		MonoObject*        Raw() const noexcept;
 		const ManagedType* Type() noexcept;
+		const ManagedType* Type() const noexcept;
 		string_view        TypeName() const;
 
 		// mutators

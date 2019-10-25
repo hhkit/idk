@@ -94,7 +94,6 @@ namespace idk::vkn
 	{
 	public:
 		DdsLoader();
-		ResourceBundle LoadFile(PathHandle path_to_resource) override;
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 	private:
 		vk::UniqueFence load_fence;

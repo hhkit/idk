@@ -18,10 +18,6 @@ namespace idk
 		return retval;
 	}
 
-	ResourceBundle MaterialLoader::LoadFile(PathHandle p)
-	{
-		return LoadFile(p, MetaBundle{});
-	}
 	ResourceBundle MaterialLoader::LoadFile(PathHandle p, const MetaBundle& m)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);

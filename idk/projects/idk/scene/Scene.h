@@ -31,8 +31,7 @@ namespace idk
 	{
 	public:
 		class iterator;
-		explicit Scene(uint8_t scene_id);
-		virtual ~Scene();
+		Scene(unsigned char index = 0);
 
 		Handle<GameObject> CreateGameObject(const Handle<GameObject>&);
 		Handle<GameObject> CreateGameObject();
@@ -71,6 +70,4 @@ namespace idk
 
 		friend Scene;
 	};
-
-	Scene GetScene(const GenericHandle&);
 }

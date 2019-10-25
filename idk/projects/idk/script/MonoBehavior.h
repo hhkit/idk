@@ -15,26 +15,22 @@ namespace idk::mono
 	public:
 		bool enabled = true;
 
-		string_view RescueMonoObject();
-		void        RestoreMonoObject();
-
 		string_view TypeName() const;
 		MonoObject* EmplaceBehavior(string_view type);
+		void DisposeMonoObject();
 
 		ManagedObject& GetObject() { return _obj; };
 		const ManagedObject& GetObject() const { return _obj; };
-
-		void DisposeMonoObject();
-
-		void SerializeFromString(string_view type, string_view serialized);
 
 		void Awake();
 		void Start();
 		void FixedUpdate();
 		void Update();
-		//void Stop() override;
-
 		void UpdateCoroutines();
+
+		Behavior() = default;
+		//Behavior(const Behavior&);
+		//Behavior& operator=(const Behavior&);
 	private:
 		ManagedObject _obj;
 		string        _serialized;

@@ -77,14 +77,14 @@ namespace idk
 												  .IfPausedThen(&AnimationSystem::UpdatePaused);
         _scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 
 		if (editor)
 		{
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchDirectory,      "Watch files");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&IEditor::EditorUpdate,                "Editor Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects Again");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects Again");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");

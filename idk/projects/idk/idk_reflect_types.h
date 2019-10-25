@@ -60,7 +60,6 @@ namespace idk::reflect
 		, Guid
 
 		// projects
-		, vector<SceneManager::SceneBlock>
         , array<string, 32>
 
 		// graphics

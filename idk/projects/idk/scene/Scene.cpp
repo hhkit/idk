@@ -6,15 +6,10 @@
 
 namespace idk
 {
-	Scene::Scene(uint8_t scene_id_)
-		: scene_id{ scene_id_ }
+	Scene::Scene(unsigned char index)
+		: scene_id{ index }
 	{
 	}
-
-	Scene::~Scene()
-	{
-	}
-
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)
 	{
 		return GameState::GetGameState().CreateObject<GameObject>(handle);
@@ -79,11 +74,6 @@ namespace idk
 	{
 		const auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		return iterator{scene_id, span.end(), span.end() };
-	}
-
-	Scene GetScene(const GenericHandle& handle)
-	{
-		return Scene{ handle.scene };
 	}
 
 	GameObject& Scene::iterator::operator*()

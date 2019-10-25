@@ -26,9 +26,13 @@ namespace idk
                 return component;
             }
             else
+            {
+                var component = Bindings.GameObjectAddGameComponent(handle, typeof(T).Name) as T;
                 // else try to find corresponding monobehavior
-                return null;
+                return component;
+            }
         }
+
 
         public T GetComponent<T>() where T : Component, new()
         {
@@ -41,8 +45,11 @@ namespace idk
                 return component;
             }
             else
+            {
+                var component = Bindings.GameObjectGetGameComponent(handle, typeof(T).Name) as T;
                 // else try to find corresponding monobehavior
-                return null;
+                return component;
+            }
 
         }
 

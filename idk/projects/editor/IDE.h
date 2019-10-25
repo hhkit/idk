@@ -37,6 +37,8 @@ namespace idk
 
 	class CameraControls;
 
+	class RenderTarget;
+
 	enum GizmoOperation {
 		GizmoOperation_Null = 0,
 		GizmoOperation_Translate,
@@ -71,6 +73,8 @@ namespace idk
             return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
         }
 
+		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
+
 	private:
 		friend class IGE_MainWindow;
 		friend class IGE_SceneView;
@@ -87,6 +91,7 @@ namespace idk
 		// Editor Scene
 		bool game_running = false;
 		bool game_frozen = true;
+		RscHandle<RenderTarget> editor_view;
 		void SetupEditorScene();
 
 		//Editor Windows

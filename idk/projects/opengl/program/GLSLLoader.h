@@ -9,7 +9,6 @@ namespace idk::ogl
 		: public IFileLoader
 	{
 	public:
-		ResourceBundle LoadFile(PathHandle filepath) override;
 		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle&) override;
 	};
 }
