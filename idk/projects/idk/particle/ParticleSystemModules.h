@@ -24,4 +24,10 @@ namespace idk
         bool enabled = true;
         float rate_over_time = 10.0f;
     };
+
+    struct RendererModule
+    {
+        bool enabled = true;
+        RscHandle<MaterialInstance> material;
+    };
 }

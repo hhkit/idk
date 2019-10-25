@@ -67,4 +67,13 @@ namespace idk
 		Viewport viewport;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
+
+    struct ParticleRenderData
+    {
+        vector<vec3> positions;
+        vector<float> rotations;
+        vector<float> sizes;
+        vector<color> colors;
+        RscHandle<MaterialInstance> material_instance;
+    };
 }

@@ -14,7 +14,11 @@ namespace idk
 			Tangent,
 			Bitangent,
 			BoneID,
-			BoneWeight
+			BoneWeight,
+            Color,
+            ParticlePosition,
+            ParticleRotation,
+            ParticleSize
 		)
 
 		enum Flags : int

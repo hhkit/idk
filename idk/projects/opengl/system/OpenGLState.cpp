@@ -54,6 +54,7 @@ namespace idk::ogl
 		renderer_vertex_shaders[NormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
 		renderer_vertex_shaders[SkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
+		renderer_vertex_shaders[Particle]    = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
 
 		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
 		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
@@ -396,6 +397,95 @@ namespace idk::ogl
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
+
+            BindVertexShader(renderer_vertex_shaders[VertexShaders::Particle], cam.projection_matrix, cam.view_matrix);
+            auto x = glGetError();
+            for (auto& elem : curr_object_buffer.particle_render_data)
+            {
+                // bind shader
+                const auto material = elem.material_instance->material;
+                pipeline.PushProgram(material->_shader_program);
+                auto x = glGetError();
+
+                RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
+                    renderer_reqs{ {
+                        { vtx::Attrib::Position, 0 },
+                    }
+                });
+
+                x = glGetError();
+
+                // The VBO containing the positions and sizes of the particles
+                GLuint bufs[4];
+                glGenBuffers(4, bufs);
+                x = glGetError();
+
+                glBindBuffer(GL_ARRAY_BUFFER, bufs[0]);
+                glBufferData(GL_ARRAY_BUFFER, elem.positions.size() * 3 * sizeof(GLfloat), elem.positions.data(), GL_STATIC_DRAW);
+                glEnableVertexAttribArray(1);
+                glVertexAttribPointer(
+                    1, // attribute. No particular reason for 0, but must match the layout in the shader.
+                    3, // size
+                    GL_FLOAT, // type
+                    GL_FALSE, // normalized?
+                    0, // stride
+                    (void*)0 // array buffer offset
+                );
+                x = glGetError();
+
+                // The VBO containing the colors of the particles
+                glBindBuffer(GL_ARRAY_BUFFER, bufs[1]);
+                glBufferData(GL_ARRAY_BUFFER, elem.rotations.size() * sizeof(GLfloat), elem.rotations.data(), GL_STATIC_DRAW);
+                glEnableVertexAttribArray(2);
+                glVertexAttribPointer(
+                    2, // attribute. No particular reason for 0, but must match the layout in the shader.
+                    1, // size
+                    GL_FLOAT, // type
+                    GL_FALSE, // normalized?
+                    0, // stride
+                    (void*)0 // array buffer offset
+                );
+                x = glGetError();
+
+                // The VBO containing the colors of the particles
+                glBindBuffer(GL_ARRAY_BUFFER, bufs[2]);
+                glBufferData(GL_ARRAY_BUFFER, elem.sizes.size() * sizeof(GLfloat), elem.sizes.data(), GL_STATIC_DRAW);
+                glEnableVertexAttribArray(3);
+                glVertexAttribPointer(
+                    3, // attribute. No particular reason for 0, but must match the layout in the shader.
+                    1, // size
+                    GL_FLOAT, // type
+                    GL_FALSE, // normalized?
+                    0, // stride
+                    (void*)0 // array buffer offset
+                );
+                x = glGetError();
+
+                // The VBO containing the colors of the particles
+                glBindBuffer(GL_ARRAY_BUFFER, bufs[3]);
+                glBufferData(GL_ARRAY_BUFFER, elem.colors.size() * sizeof(GLfloat), elem.colors.data(), GL_STATIC_DRAW);
+                glEnableVertexAttribArray(4);
+                glVertexAttribPointer(
+                    4, // attribute. No particular reason for 0, but must match the layout in the shader.
+                    4, // size
+                    GL_FLOAT, // type
+                    GL_FALSE, // normalized?
+                    0, // stride
+                    (void*)0 // array buffer offset
+                );
+                x = glGetError();
+
+                glVertexAttribDivisor(0, 0);
+                glVertexAttribDivisor(1, 1);
+                glVertexAttribDivisor(2, 1);
+                glVertexAttribDivisor(3, 1);
+                glVertexAttribDivisor(4, 1);
+                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, elem.positions.size());
+
+                x = glGetError();
+                glDeleteBuffers(4, bufs);
+                x = glGetError();
+            }
 		}
 
 		fb_man.ResetFramebuffer();

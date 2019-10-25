@@ -796,6 +796,9 @@
     <ClInclude Include="particle\ParticleData.h" />
     <ClInclude Include="particle\ParticleSystemUpdater.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
+    <ClInclude Include="gfx\Buffer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -25,6 +25,7 @@ namespace idk::ogl
 			NormalMesh,
 			SkinnedMesh,
 			SkyBox,
+            Particle,
 			Max
 		};
 		enum FragmentShaders

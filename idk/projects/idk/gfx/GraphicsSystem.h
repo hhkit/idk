@@ -6,6 +6,7 @@
 #include <gfx/pipeline_config.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
+#include <particle/ParticleData.h>
 
 namespace idk
 {
@@ -36,6 +37,7 @@ namespace idk
 			span<class MeshRenderer>,
 			span<Animator> animators,
 			span<SkinnedMeshRenderer> skinned_mesh_renderers,
+            span<class ParticleSystem>,
 			span<const class Transform>, 
 			span<const Camera> camera, 
 			span<const Light> lights);
@@ -57,6 +59,7 @@ namespace idk
 			vector<RenderObject> mesh_render;
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;
+            vector<ParticleRenderData> particle_render_data;
 
 			CameraData  curr_scene_camera;
 

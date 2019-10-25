@@ -5,6 +5,7 @@
 #include <anim/Animator.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
+#include <particle/ParticleSystem.h>
 
 //#include <gfx/CameraControls.h>
 
@@ -38,6 +39,7 @@ namespace idk
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
+        span<ParticleSystem> ps,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
 		span<const Light> lights)
@@ -96,6 +98,29 @@ namespace idk
 		for (auto& elem : mesh_renderers)
 			if (elem.IsActiveAndEnabled())
 				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
+
+        for (auto& elem : ps)
+        {
+            if (elem.renderer.enabled && elem.data.num_alive)
+            {
+                const auto sz = elem.data.num_alive;
+                auto& render_data = result.particle_render_data.emplace_back();
+
+                render_data.positions.reserve(sz);
+                render_data.positions.insert(render_data.positions.end(), elem.data.positions.begin(), elem.data.positions.begin() + sz);
+
+                render_data.rotations.reserve(sz);
+                render_data.rotations.insert(render_data.rotations.end(), elem.data.rotations.begin(), elem.data.rotations.begin() + sz);
+
+                render_data.sizes.reserve(sz);
+                render_data.sizes.insert(render_data.sizes.end(), elem.data.sizes.begin(), elem.data.sizes.begin() + sz);
+
+                render_data.colors.reserve(sz);
+                render_data.colors.insert(render_data.colors.end(), elem.data.colors.begin(), elem.data.colors.begin() + sz);
+
+                render_data.material_instance = elem.renderer.material;
+            }
+        }
 
 		result.skinned_mesh_vtx = skinned_mesh_vtx;
 		result.mesh_vtx = mesh_vtx;

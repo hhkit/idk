@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ParticleSystem.h"
+#include <gfx/RenderObject.h>
 
 namespace idk
 {

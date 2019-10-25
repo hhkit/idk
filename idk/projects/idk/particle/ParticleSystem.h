@@ -14,6 +14,7 @@ namespace idk
 
         MainModule main;
         EmissionModule emission;
+        RendererModule renderer;
 
         ParticleData data;
         char state = Stopped;
