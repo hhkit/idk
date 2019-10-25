@@ -364,7 +364,7 @@ namespace idk
 			camHandle->render_target = editor_view;
 			camHandle->is_scene_camera = true;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
-			if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
+			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;

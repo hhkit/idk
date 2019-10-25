@@ -13,13 +13,35 @@ namespace idk
 		);
 
 	ENUM(CMColorFormat, char,
-		sRGB_8,
-		sRGBA_8,
+		R_8,
+		R_16,
+		R_32F,
+		R_64F,
+		Rint_8,
+		Rint_16,
+		Rint_32,
+		Rint_64,
+		RG_8,
+		RGF_16,
+		RGB_8,
+		RGBA_8,
 		RGBF_16,
 		RGBF_32,
 		RGBAF_16,
 		RGBAF_32,
-		SRGB
+		BGRA_8,
+		RUI_32,
+		DEPTH_COMPONENT,
+		DXT1,
+		DXT3,
+		DXT5,
+		DXT1_A,
+		SRGB,
+		SRGBA,
+		SRGB_DXT1,
+		SRGB_DXT3,
+		SRGB_DXT5,
+		SRGBA_DXT1
 	)
 
 	ENUM(CMInputChannels, char
@@ -37,8 +59,10 @@ namespace idk
 
 	struct CubeMapMeta
 	{
-		CMUVMode      uv_mode = CMUVMode::Repeat;
+		CMUVMode      uv_mode = CMUVMode::Clamp;
 		CMColorFormat internal_format = CMColorFormat::RGBAF_16;
+		bool is_srgb{ true };
+		bool compressed{ true };
 	};
 
 	class CubeMap

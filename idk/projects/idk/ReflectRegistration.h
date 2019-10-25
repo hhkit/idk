@@ -366,13 +366,22 @@ REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
 REFLECT_ENUM(idk::AnimDataType, "AnimDataType")
 REFLECT_ENUM(idk::BlendTreeType, "BlendTreeType")
 
-REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
-REFLECT_VARS(name, default_state, default_offset, default_weight, bone_mask, blend_type)
+REFLECT_BEGIN(idk::BasicAnimationState, "BasicAnimationState")
+REFLECT_VARS(motion)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::BlendTree, "BlendTree")
+REFLECT_VARS(params, blend_tree_type)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
 REFLECT_VARS(name, enabled, loop, speed, state_data)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
+REFLECT_VARS(name, default_state, default_offset, default_weight, bone_mask, blend_type)
+REFLECT_END()
+
 
 REFLECT_BEGIN(idk::Bone, "Bone")
 REFLECT_VARS(_bone_name, _bone_index)

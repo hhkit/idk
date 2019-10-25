@@ -623,7 +623,7 @@ namespace idk {
 				}
 
 				ImGui::NewLine();
-				ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
+				ImGui::ProgressBar(layer.normalized_time, ImVec2{ -1, 10 }, nullptr);
 				ImGui::NewLine();
 				//ImGui::Unindent(25);
 			}
@@ -653,8 +653,8 @@ namespace idk {
 					ImGui::SameLine();
 					ImGui::Text(curr_state.first.c_str());
 					auto& state_data = *curr_state.second.GetBasicState();
-					ImGuidk::InputResource("Animation Clip", &state_data.motion);
-					ImGui::Checkbox("Loop", &curr_state.second.loop);
+					ImGuidk::InputResource(imgui_name("Animation Clip", curr_state.first).c_str(), &state_data.motion);
+					ImGui::Checkbox(imgui_name("Loop", curr_state.first).c_str(), &curr_state.second.loop);
 				}
 				
 				ImGui::Unindent(50);

@@ -16,6 +16,7 @@
 #include <vkn/VknRenderTargetFactory.h>
 #include <vkn/VulkanPngLoader.h>
 #include <vkn/VknFrameBufferFactory.h>
+#include <vkn/VulkanCbmLoader.h>
 namespace idk::vkn
 {
 
@@ -30,6 +31,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<VulkanTextureFactory>();
 	Core::GetResourceManager().RegisterFactory<VknRenderTargetFactory>();
 	Core::GetResourceManager().RegisterFactory<VknFrameBufferFactory>();
+	//Core::GetResourceManager().RegisterFactory<
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");
@@ -42,6 +44,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterLoader<VulkanSpvLoader>(".spv");
 	Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 	Core::GetResourceManager().RegisterLoader<DdsLoader>(".dds");
+	Core::GetResourceManager().RegisterLoader<CbmLoader>(".cbm");
 }
 
 }
