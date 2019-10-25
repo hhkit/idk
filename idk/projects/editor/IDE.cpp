@@ -351,7 +351,7 @@ namespace idk
 		auto sz = editor_view->Size();
 		editor_view->Size(Core::GetSystem<Application>().GetScreenSize());
 		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));
-		editor_view->Name(std::to_string(sz.x) + "," + std::to_string(sz.y));
+		editor_view->Name("Editor View");
 		//editor_view->Size();
 		// create editor camera
 		RscHandle<Scene> scene{};
