@@ -872,9 +872,14 @@ namespace idk {
 	{
 		if (ImGui::MenuItem("Remove Component")) {
 			IDE& editor = Core::GetSystem<IDE>();
-			for (Handle<GameObject> gameObject : editor.selected_gameObjects)
-				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
 
+			if (editor.selected_gameObjects.size() == 1) {
+				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, editor.selected_gameObjects[0], i));
+			}
+			else {
+				for (Handle<GameObject> gameObject : editor.selected_gameObjects)
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+			}
 		}
 	}
 
