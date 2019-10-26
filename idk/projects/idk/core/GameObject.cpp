@@ -20,6 +20,10 @@ namespace idk
 	{
 		return GameState::GetGameState().CreateComponent(GetHandle(), dyn);
 	}
+	GenericHandle GameObject::AddComponent(GenericHandle handle, reflect::dynamic dyn)
+	{
+		return GameState::GetGameState().CreateComponent(GetHandle(), handle, dyn);
+	}
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{
 		const auto tid = GameState::GetGameState().GetTypeID(type);

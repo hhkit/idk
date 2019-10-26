@@ -42,6 +42,7 @@ namespace idk
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
 
 	private:
+		friend class Scene;
 		void Init() override;
 		void LateInit() override;
 		void EarlyShutdown() override;

@@ -102,6 +102,34 @@ namespace idk::detail
 			};
 		}
 
+		constexpr static auto GenCreateDynamicHandleJt()
+		{
+			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&, GenericHandle, const reflect::dynamic&), detail::ObjectPools::TypeCount>{
+				[](GameState& gs, const Handle<GameObject>& go, GenericHandle h, const reflect::dynamic& dyn) -> GenericHandle
+				{
+					if constexpr (std::is_same_v<Ts, GameObject>)
+					{
+						(gs); (go); (dyn);
+						return GenericHandle{};
+					}
+					else
+					{
+						auto& go_ref = *go;
+						if constexpr (Ts::Unique)
+						{
+							auto component = go_ref.GetComponent<Ts>();
+							if (component)
+								return component;
+						}
+						auto handle = gs.CreateObject<Ts>(handle_cast<Ts>(h), dyn.get<Ts>());
+						handle->_gameObject = go;
+						go_ref.RegisterComponent(handle);
+						return handle;
+					}
+				} ...
+			};
+		}
+
 		constexpr static auto GenCreateJt()
 		{
 			return array<GenericHandle(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
@@ -273,6 +301,15 @@ namespace idk
 		const auto id = GetTypeID(dyn.type);
 		constexpr auto create_dynamic_jt = detail::TableGen::GenCreateDynamicJt();
 		return id <= ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
+	}
+	GenericHandle GameState::CreateComponent(const Handle<GameObject>& gameobject, GenericHandle component_handle, reflect::dynamic dyn)
+	{
+		const auto id = GetTypeID(dyn.type);
+		if (id != component_handle.id)
+			return GenericHandle{};
+
+		constexpr auto create_dynamic_handle_jt = detail::TableGen::GenCreateDynamicHandleJt();
+		return id <= ComponentCount ? create_dynamic_handle_jt[component_handle.type](*this, gameobject, component_handle, dyn) : GenericHandle{};
 	}
 	bool GameState::ValidateHandle(const GenericHandle& handle)
 	{
