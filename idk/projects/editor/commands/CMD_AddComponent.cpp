@@ -48,7 +48,7 @@ namespace idk {
 			}
 			else if (game_object_handle->GetComponent(reflect::get_type(component_name))) { //This is when the gameObjectHandle has a different component handle due to DeleteGameObjectCMD
 				game_object_handle->RemoveComponent(game_object_handle->GetComponent(reflect::get_type(component_name)));
-
+				return true;
 			}
 			else {
 				return false;
