@@ -227,6 +227,7 @@
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
     <ClInclude Include="RenderStateV2.h" />
+    <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="utils\FrameObjects.h" />
@@ -291,6 +292,7 @@
     <ClCompile Include="RegisterVulkanFactories.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="RenderStateV2.cpp" />
+    <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="UboManager.cpp" />

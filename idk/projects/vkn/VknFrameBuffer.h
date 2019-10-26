@@ -1,6 +1,7 @@
 #pragma once
 #include <gfx/Framebuffer.h>
 #include <vulkan/vulkan.hpp>
+#include <vkn/ManagedVulkanObjs.h>
 namespace idk::vkn
 {
 	struct VknAttachment : idk::Attachment
@@ -14,7 +15,7 @@ namespace idk::vkn
 		vk::RenderPass GetRenderPass()const { return _renderpass; }
 		void SetFramebuffer(vk::UniqueFramebuffer fb, vk::RenderPass rp) { _framebuffer = std::move(fb); _renderpass = rp; }
 	private:
-		vk::UniqueFramebuffer _framebuffer{};
+		UniqueFramebuffer _framebuffer{};
 		vk::RenderPass _renderpass{};
 	};
 }

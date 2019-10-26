@@ -146,6 +146,15 @@ namespace idk::vkn
 		}
 	}
 
+	vk::Pipeline VulkanPipeline::Pipeline() const { 
+		return *pipeline;
+	}
+
+	vk::PipelineLayout VulkanPipeline::PipelineLayout() const
+	{
+		return *pipelinelayout;
+	}
+
 	void VulkanPipeline::SetRenderPass(vk::RenderPass rp, bool has_depth_stencil)
 	{
 		_render_pass = rp;
@@ -232,11 +241,12 @@ namespace idk::vkn
 			uniform_layouts = std::move(layouts);
 		}
 		auto&& [pipelineLayoutInfo, pli_rsc] = GetLayoutInfo(config);;
+		
 		vk::PipelineDepthStencilStateCreateInfo dsci
 		{
 			vk::PipelineDepthStencilStateCreateFlags{},
-			VK_TRUE,VK_TRUE,vk::CompareOp::eLess,
-			VK_FALSE,VK_FALSE,
+			config.depth_test,config.depth_write,vk::CompareOp::eLess,
+			VK_FALSE,config.stencil_test,
 		};
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::PipelineCreateFlags cr8_flags{};
@@ -272,7 +282,7 @@ namespace idk::vkn
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
 		pipelinelayout = std::move(m_pipelinelayout);
 	}
-	void VulkanPipeline::Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shader_modules, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shader_modules, Vulkan_t& vulkan, const Options& options)
 	{
 		const char* entryPoint = "main";
 		vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo;
@@ -288,7 +298,7 @@ namespace idk::vkn
 				});
 
 		}		
-		Create(config, stageCreateInfo, vulkan);
+		Create(config, stageCreateInfo, vulkan,options);
 	}
 	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
 	{
@@ -445,7 +455,7 @@ namespace idk::vkn
 			, VK_FALSE //depthClampEnable VK_FALSE discards fragments that are beyond the depth range, VK_TRUE clamps it instead.
 			, VK_FALSE //If rasterizerDiscardEnable is set to VK_TRUE, then geometry never passes through the rasterizer stage. This basically disables any output to the framebuffer.
 			, GetPolygonMode(config) //Any other mode requires enabling a GPU feature
-			, vk::CullModeFlagBits::eNone
+			, static_cast<vk::CullModeFlags>(config.cull_face)
 			, vk::FrontFace::eClockwise
 			, VK_FALSE
 			, 0.0f

@@ -43,7 +43,12 @@ namespace idk
 		};
 		std::vector<bindings_t> bindings;
 	};
-
+	enum class CullFace
+	{
+		eNone = 0,
+		eFront = 1 << 0,
+		eBack  = 1 << 1,
+	};
 	struct pipeline_config
 	{
 		RscHandle<ShaderProgram> frag_shader{};
@@ -56,5 +61,9 @@ namespace idk
 		BasicRenderPasses render_pass_type = {};
 		//hash_table<uint32_t,uniform_layout_t> uniform_layouts; //Encapsulated in shader program.
 		bool restart_on_special_idx = false; //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
+		uint32_t cull_face = static_cast<uint32_t>(CullFace::eBack);
+		bool depth_test  =true;
+		bool depth_write = true;
+		bool stencil_test =true;
 	};
 }

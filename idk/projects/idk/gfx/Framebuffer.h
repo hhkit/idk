@@ -32,12 +32,21 @@ namespace idk
 		StoreOp store_op{};
 		LoadOp  stencil_load_op{};
 		StoreOp stencil_store_op{};
-
+		bool own_buffer = false;
 		RscHandle<Texture> buffer;
 		RscHandle<Texture> operator*()const { return buffer; }
 		operator RscHandle<Texture>()const { return buffer; }
 		const RscHandle<Texture>* operator->()const { return &buffer; }
-		virtual ~Attachment() = default;
+		Attachment() = default;
+		Attachment(const Attachment&) = delete;
+		Attachment(Attachment&& rhs) :own_buffer{ rhs.own_buffer }, buffer{ rhs.buffer }
+		{
+			rhs.own_buffer = false;
+			rhs.buffer = {};
+		}
+		Attachment& operator=(const Attachment&) = delete;
+		Attachment& operator=(Attachment&& ) = default;
+		virtual ~Attachment() { if (own_buffer)Core::GetResourceManager().Release(buffer); own_buffer = false; }
 	};
 
 	class FrameBuffer : public Resource<FrameBuffer>

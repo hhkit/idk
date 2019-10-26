@@ -47,6 +47,11 @@ namespace idk::vkn {
 		return r_cast<void*>(imageView->operator VkImageView());
 	}
 
+	void VknCubemap::SetConvoluted(const RscHandle<VknCubemap>& new_cubemap)
+	{
+		_convoluted = new_cubemap;
+	}
+
 	void VknCubemap::OnMetaUpdate(const CubeMapMeta&)
 	{
 
