@@ -319,48 +319,47 @@ namespace idk::ogl
 
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
-                glClearColor(0, 0, 0, 1.0f);
-				//if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
-				//{
-				//	if (!obj)
-				//		return;
-				//	auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
+				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
+				{
+					if (!obj)
+						return;
+					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
 
-				//	//oglCubeMap.ID;
+					//oglCubeMap.ID;
 
-				//	glDisable(GL_CULL_FACE);
-				//	glDepthMask(GL_FALSE);
-				//	pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
-				//	pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
+					glDisable(GL_CULL_FACE);
+					glDepthMask(GL_FALSE);
+					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
+					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
 
-				//	pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
+					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
 
-				//	oglCubeMap.BindToUnit(0);
-				//	pipeline.SetUniform("sb", 0);
-				//	RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
-				//		{ {
-				//			std::make_pair(vtx::Attrib::Position, 0)
-				//		} });
+					oglCubeMap.BindToUnit(0);
+					pipeline.SetUniform("sb", 0);
+					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
+						{ {
+							std::make_pair(vtx::Attrib::Position, 0)
+						} });
 
-				//	glDepthMask(GL_TRUE);
-				//	glEnable(GL_CULL_FACE);
-				//}
-				//if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
-				//	glClearColor(obj.x, obj.y, obj.z, obj.w);
+					glDepthMask(GL_TRUE);
+					glEnable(GL_CULL_FACE);
+				}
+				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
+					glClearColor(obj.x, obj.y, obj.z, obj.w);
 			}, cam.clear_data);
 
-			//BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);
-			//pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
-			//// render debug
-			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			//if (cam.overlay_debug_draw && cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
-			//	for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
-			//	{
-			//		SetObjectUniforms(elem, cam.view_matrix);
-			//		pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);
+			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
+			// render debug
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			if (cam.overlay_debug_draw && cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
+				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
+				{
+					SetObjectUniforms(elem, cam.view_matrix);
+					pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
-			//		RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
-			//	}
+					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+				}
 
 			// per mesh render
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix, cam.view_matrix);
@@ -382,31 +381,31 @@ namespace idk::ogl
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 			}
 
-			//BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix, cam.view_matrix);
-			//for (auto& elem : curr_object_buffer.skinned_mesh_render)
-			//{
-			//	// bind shader
-			//	const auto material = elem.material_instance->material;
-			//	pipeline.PushProgram(material->_shader_program);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix, cam.view_matrix);
+			for (auto& elem : curr_object_buffer.skinned_mesh_render)
+			{
+				// bind shader
+				const auto material = elem.material_instance->material;
+				pipeline.PushProgram(material->_shader_program);
 
-			//	GLuint texture_units = 0;
-			//	SetPBRUniforms     (cam, inv_view_tfm, texture_units);
-			//	SetLightUniforms   (span<LightData>{lights}, texture_units);
-			//	SetSkeletons       (elem.skeleton_index);
-			//	SetMaterialUniforms(elem.material_instance, texture_units);
-			//	SetObjectUniforms  (elem, cam.view_matrix);
+				GLuint texture_units = 0;
+				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
+				SetLightUniforms   (span<LightData>{lights}, texture_units);
+				SetSkeletons       (elem.skeleton_index);
+				SetMaterialUniforms(elem.material_instance, texture_units);
+				SetObjectUniforms  (elem, cam.view_matrix);
 
-			//	RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
-			//}
+				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
+			}
 
 
             static vector<OpenGLBuffer> bufs = []()
             {
                 vector<OpenGLBuffer> bufs;
-                unsigned int indices[]{ 0, 1, 3, 1, 2, 3 };
+                unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
                 bufs.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
                     .Bind().Buffer(indices, sizeof(int), 6);
-                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::Position, 0, 0 } } });
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticlePosition, 0, 0 } } });
                 bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticleRotation, 0, 0 } } });
                 bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticleSize, 0, 0 } } });
                 bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::Color, 0, 0 } } });
@@ -414,7 +413,6 @@ namespace idk::ogl
             }();
 
             BindVertexShader(renderer_vertex_shaders[VertexShaders::Particle], cam.projection_matrix, cam.view_matrix);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             auto x = glGetError();
             for (auto& elem : curr_object_buffer.particle_render_data)
             {
@@ -428,27 +426,26 @@ namespace idk::ogl
                         { vtx::Attrib::Position, 0 },
                     }
                 });
-
-                bufs[1].BindForDraw(renderer_reqs{ { {vtx::Attrib::Position, 1} } });
-                bufs[1].Buffer(elem.positions.data(), 3 * sizeof(GLfloat), elem.positions.size());
-                x = glGetError();
-
-                bufs[2].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleRotation, 2} } });
-                bufs[2].Buffer(elem.rotations.data(), sizeof(GLfloat), elem.rotations.size());
-                x = glGetError();
-
-                bufs[3].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleSize, 3} } });
-                bufs[3].Buffer(elem.sizes.data(), sizeof(GLfloat), elem.sizes.size());
-                x = glGetError();
-
-                bufs[4].BindForDraw(renderer_reqs{ { {vtx::Attrib::Color, 4} } });
-                bufs[4].Buffer(elem.colors.data(), 4 * sizeof(GLfloat), elem.colors.size());
-                x = glGetError();
-
                 glVertexAttribDivisor(0, 0);
+
+                bufs[1].Bind().Buffer(elem.positions.data(), 3 * sizeof(GLfloat), elem.positions.size());
+                bufs[1].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticlePosition, 1} } });
+                x = glGetError();
                 glVertexAttribDivisor(1, 1);
+
+                bufs[2].Bind().Buffer(elem.rotations.data(), sizeof(GLfloat), elem.rotations.size());
+                bufs[2].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleRotation, 2} } });
+                x = glGetError();
                 glVertexAttribDivisor(2, 1);
+
+                bufs[3].Bind().Buffer(elem.sizes.data(), sizeof(GLfloat), elem.sizes.size());
+                bufs[3].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleSize, 3} } });
+                x = glGetError();
                 glVertexAttribDivisor(3, 1);
+
+                bufs[4].Bind().Buffer(elem.colors.data(), 4 * sizeof(GLfloat), elem.colors.size());
+                bufs[4].BindForDraw(renderer_reqs{ { {vtx::Attrib::Color, 4} } });
+                x = glGetError();
                 glVertexAttribDivisor(4, 1);
 
                 bufs[0].Bind();

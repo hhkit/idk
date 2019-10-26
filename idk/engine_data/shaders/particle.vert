@@ -28,5 +28,5 @@ void main()
 	
 	vec3 cam_right  = vec3(PerCamera.view_transform[0][0], PerCamera.view_transform[1][0], PerCamera.view_transform[2][0]);
 	vec3 cam_up     = vec3(PerCamera.view_transform[0][1], PerCamera.view_transform[1][1], PerCamera.view_transform[2][1]);
-    gl_Position     = PerCamera.perspective_transform * PerCamera.view_transform * vec4(position, 1);
+    gl_Position     = PerCamera.perspective_transform * PerCamera.view_transform * vec4(center + cam_right * position.x + cam_up * position.y, 1.0);
 }

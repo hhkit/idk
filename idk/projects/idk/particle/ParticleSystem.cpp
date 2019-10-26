@@ -41,7 +41,7 @@ namespace idk
             }
         }
         for (uint16_t i = 0; i < data.num_alive; ++i)
-            data.positions[i] += data.velocities[i];
+            data.positions[i] += data.velocities[i] * dt;
     }
 
     void ParticleSystem::Emit()
