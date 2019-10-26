@@ -283,7 +283,7 @@ namespace idk::vkn
 		
 		auto preset = static_cast<bool>(info.buffer);
 		RscHandle<VknTexture> tex = (preset) ? RscHandle<VknTexture>{*info.buffer} : Core::GetResourceManager().Create<VknTexture>();
-		if(preset )
+		if(!preset )
 		{
 			TextureLoader loader;
 			TextureOptions opt;
@@ -292,7 +292,7 @@ namespace idk::vkn
 			opt.filter_mode = info.filter_mode;
 			loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
 		}
-		out->own_buffer = false;
+		out->own_buffer = !preset;
 		out->buffer = tex;
 	}
 	void VknFrameBufferFactory::PreReset(FrameBuffer& framebuffer)
