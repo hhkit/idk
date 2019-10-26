@@ -120,8 +120,11 @@ namespace idk
 		if(tmp)
 			mesh_vtx = *tmp;
 		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-		if(tmp)
+		if (tmp)
 			skinned_mesh_vtx = *tmp;
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag");
+		if (tmp)
+			convoluter = *tmp;
 		LoadShaderImpl();
 	}
 

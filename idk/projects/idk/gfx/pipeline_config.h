@@ -33,6 +33,10 @@ namespace idk
 		{
 			eVertex  ,
 			eFragment,
+			eGeometry,
+			eTessEval,
+			eTessCtrl,
+			eCompute ,
 		};
 		struct bindings_t
 		{

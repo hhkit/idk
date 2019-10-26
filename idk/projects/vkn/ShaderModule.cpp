@@ -18,6 +18,18 @@ namespace idk::vkn
 		case vk::ShaderStageFlagBits::eFragment:
 			result = uniform_layout_t::UniformStage::eFragment;
 			break;
+		case vk::ShaderStageFlagBits::eTessellationControl:
+			result = uniform_layout_t::UniformStage::eTessCtrl;
+			break;
+		case vk::ShaderStageFlagBits::eTessellationEvaluation:
+			result = uniform_layout_t::UniformStage::eTessEval;
+			break;
+		case vk::ShaderStageFlagBits::eGeometry:
+			result = uniform_layout_t::UniformStage::eGeometry;
+			break;
+		case vk::ShaderStageFlagBits::eCompute:
+			result = uniform_layout_t::UniformStage::eCompute;
+			break;
 		default:
 			throw std::runtime_error("Unexpected shader stage encountered.");
 			break;

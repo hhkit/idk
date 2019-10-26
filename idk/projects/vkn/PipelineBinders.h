@@ -73,6 +73,7 @@ namespace idk
 			string light_block;
 			mat4 view_trf, pbr_trf, proj_trf;
 
+			string                     pbr_cube_map_names[PbrCubeMapVarsInfo::size()];
 			vector<RscHandle<CubeMap>> pbr_cube_maps;
 			vector<RscHandle<Texture>> pbr_texs;
 

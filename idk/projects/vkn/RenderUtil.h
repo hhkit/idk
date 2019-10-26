@@ -10,14 +10,16 @@
 
 #include <vkn/PipelineThingy.h>
 #include <gfx/FramebufferFactory.h>
+#include <vkn/PipelineManager.h>
 namespace idk::vkn
 {
 	VulkanView& View();
 	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size);
 	struct CubemapConvoluter
 	{
-		
-		VulkanPipeline pipeline;
+		PipelineManager pipeline_manager;
+		VulkanPipeline* pipeline;
+		VulkanPipeline& Pipeline();
 		std::pair<uint32_t, vk::DescriptorSet> mat4blk;
 		std::pair<uint32_t,vk::DescriptorSet>  environment_probe;
 		renderer_reqs req;
@@ -32,8 +34,8 @@ namespace idk::vkn
 
 		PipelineThingy thingy{};
 
-		string ep_name = "environment_probe";
-		string m4_name = "ObjectMat4Block";
+		string EpName()const;
+		string M4Name()const;
 
 		RenderObject ro;
 		shared_ptr< pipeline_config> config_;
@@ -61,12 +63,14 @@ namespace idk::vkn
 		hash_table < RscHandle<CubeMap>, RscHandle<VknFrameBuffer>> cached;
 		hash_table   <RscHandle<CubeMap>,RscHandle<VknFrameBuffer>> unused;
 		RscHandle<VknFrameBuffer> NewFrameBuffer(RscHandle<CubeMap> dst);
-		void BeginQueue(vk::Fence fence);
+		void BeginQueue(UboManager& ubo_manager,std::optional<vk::Fence> fence);
 		//Returns false when it failes to queue the new instruction because the queue is full.
 		//End this queue with ProcessQueue before beginning again.
 		void QueueConvoluteCubeMap(RscHandle<CubeMap> src, RscHandle<CubeMap> dst);
-		void ProcessQueue(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Fence fence);
+		void ProcessQueue(vk::CommandBuffer cmd_buffer);
 
 		void ResetRsc();
+
+		CubemapConvoluter():ds_manager{View()}{}
 	};
 }
