@@ -39,7 +39,11 @@ namespace idk
 			vec3,  // Tangent
 			vec3,  // Bitangent
 			ivec4, // ID
-			vec4   // Weight
+			vec4,  // Weight
+			color, // Color
+			vec3,  // particle pos
+			float, // particle rot
+            float  // particle size
 		>;
 	}
 }
