@@ -37,6 +37,7 @@ namespace idk
 
 		_loaded = true;
 		GameState::GetGameState().ActivateScene(scene_id);
+		Core::GetSystem<SceneManager>()._scenes[scene_id] = GetHandle();
 
 		auto path = Core::GetResourceManager().GetPath(GetHandle());
 		if (!path)
@@ -52,6 +53,7 @@ namespace idk
 		if (!_loaded)
 			return SceneUnloadResult::Err_SceneAlreadyInactive;
 
+		Core::GetSystem<SceneManager>()._scenes[scene_id] = RscHandle<Scene>{};
 		GameState::GetGameState().DeactivateScene(scene_id);
 		_loaded = false;
 

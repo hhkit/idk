@@ -31,6 +31,7 @@ namespace idk
 		GenericHandle AddComponent(string_view);
 		GenericHandle AddComponent(reflect::type);
 		GenericHandle AddComponent(reflect::dynamic);
+		GenericHandle AddComponent(GenericHandle, reflect::dynamic);
 		GenericHandle GetComponent(reflect::type);
 		GenericHandle GetComponent(string_view);
 		void          RemoveComponent(GenericHandle);

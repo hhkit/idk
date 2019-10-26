@@ -28,6 +28,7 @@ namespace idk
 		bool CreateObject(const GenericHandle& handle);
 		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::type);
 		GenericHandle CreateComponent(const Handle<GameObject>&, reflect::dynamic);
+		GenericHandle CreateComponent(const Handle<GameObject>&, GenericHandle, reflect::dynamic);
 		bool ValidateHandle(const GenericHandle& handle);
 		void DestroyObject(const GenericHandle&);
 		void FlushCreationQueue();

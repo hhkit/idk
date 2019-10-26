@@ -751,6 +751,28 @@ namespace idk {
 		ImGui::Text("Bone Index: %d", c_bone->_bone_index);
 	}
 
+	template<>
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<AudioSource> c_audiosource)
+	{
+		//Draw All your custom variables here.
+		if (ImGui::Button("Add AudioClip")) {
+			//Add Audio
+		}
+		ImGui::Text("AudioClips");
+		ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth()-10, 200), true);
+		ImGui::Text("Audio1");
+		ImGui::SameLine();
+		ImGui::SmallButton("X");
+		ImGui::SameLine();
+		ImGui::ArrowButton("Play", ImGuiDir_Right);
+
+		ImGui::EndChild();
+
+		displayVal(*c_audiosource);
+
+
+	}
+
 	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
 	{
 		//COMPONENT DISPLAY
@@ -856,6 +878,9 @@ namespace idk {
                 DisplayComponentInner(handle_cast<Bone>(component));
             else if (component.is_type<Animator>())
                 DisplayComponentInner(handle_cast<Animator>(component));
+			else if (component.is_type<AudioSource>())
+				DisplayComponentInner(handle_cast<AudioSource>(component));
+
             else
                 displayVal(*component);
             ImGui::TreePop();
@@ -872,9 +897,14 @@ namespace idk {
 	{
 		if (ImGui::MenuItem("Remove Component")) {
 			IDE& editor = Core::GetSystem<IDE>();
-			for (Handle<GameObject> gameObject : editor.selected_gameObjects)
-				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
 
+			if (editor.selected_gameObjects.size() == 1) {
+				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, editor.selected_gameObjects[0], i));
+			}
+			else {
+				for (Handle<GameObject> gameObject : editor.selected_gameObjects)
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+			}
 		}
 	}
 
