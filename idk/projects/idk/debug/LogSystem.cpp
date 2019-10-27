@@ -7,8 +7,6 @@
 #include <file/FileSystem.h>
 namespace idk
 {
-	constexpr auto priority_cap = 512;
-
 	static auto curr_datetime()
 	{
 		using SystemClock = std::chrono::system_clock;
@@ -49,12 +47,11 @@ namespace idk
 		{
 			auto& loghandle = log_files[i];
 			auto& stream = loghandle.stream;
-			auto& prio = loghandle.priority;
 			loghandle.filepath = logroot + "_" + std::to_string(i) + "_" + string{ names[i] } + ".txt";
 			stream.open(loghandle.filepath);
 
 			LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
-				[&stream, &prio, start](LogLevel level, time_point time, string_view preface, string_view message)
+				[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
 			{
 				char buf[512];
 
@@ -62,10 +59,10 @@ namespace idk
 
 				switch (level)
 				{
-				case LogLevel::INFO:    strcpy_s(buf, "[INFO]  "); prio += 1; break;
-				case LogLevel::WARNING: strcpy_s(buf, "[WARN]  "); prio += 2; break;
-				case LogLevel::ERR:     strcpy_s(buf, "[ERROR] "); prio += 4; break;
-				case LogLevel::FATAL:   strcpy_s(buf, "[FATAL] "); prio += 8; break;
+				case LogLevel::INFO:    strcpy_s(buf, "[INFO]  "); break;
+				case LogLevel::WARNING: strcpy_s(buf, "[WARN]  "); break;
+				case LogLevel::ERR:     strcpy_s(buf, "[ERROR] "); break;
+				case LogLevel::FATAL:   strcpy_s(buf, "[FATAL] "); break;
 				}
 				moved = 8;
 
@@ -81,13 +78,6 @@ namespace idk
 				sprintf_s(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
 
 				stream << buf;
-
-				// probably need to handle this better but
-				if (prio > priority_cap)
-				{
-					stream << std::flush;
-					prio -= priority_cap;
-				}
 			}
 			);
 		}

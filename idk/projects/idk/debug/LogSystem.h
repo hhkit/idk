@@ -18,7 +18,6 @@ namespace idk
 		{
 			string filepath;
 			std::ofstream stream;
-			atomic<int> priority{ 0 };
 		};
 
 		void Init() override;
