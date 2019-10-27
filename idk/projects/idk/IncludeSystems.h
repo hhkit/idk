@@ -3,6 +3,8 @@
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
 
+#include <debug/LogSystem.h>
+
 #include <app/Application.h>
 #include <app/GamepadSystem.h>
 #include <editor/IEditor.h>

@@ -25,7 +25,7 @@ namespace idk
     {
 		window_flags = ImGuiWindowFlags_MenuBar;
 		LogSingleton::Get().SignalFor(LogPool::GAME).Listen(
-			[&](LogLevel level, string_view preface, string_view message)
+			[&](LogLevel level, time_point, string_view preface, string_view message)
 		{
 			switch (level)
 			{

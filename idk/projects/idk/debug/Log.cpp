@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Log.h"
-#include "LogSystem.h"
+#include "LogSingleton.h"
 
 namespace idk
 {

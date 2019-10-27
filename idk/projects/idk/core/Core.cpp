@@ -132,4 +132,8 @@ namespace idk
 	{
 		_instance->_running = false;
 	}
+	bool Core::IsRunning()
+	{
+		return _instance->_running;
+	}
 }

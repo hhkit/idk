@@ -1,52 +1,85 @@
 #include "stdafx.h"
 #include "LogSystem.h"
-#include <iostream>
-#include <cstdio>
+#include <algorithm>
+#include <iomanip>
+
+#include <core/Scheduler.h>
+#include <file/FileSystem.h>
 namespace idk
 {
-	LogSingleton::~LogSingleton()
+	static auto curr_datetime()
 	{
-		std::cerr.flush();
-	}
-	void LogSingleton::LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message)
-	{
-		auto& log = logs[s_cast<size_t>(pool)];
-
-		if (log.direct_to_cout || log.signal.ListenerCount() == 0)
-			std::cerr << message << '\n';
-
-		log.signal.Fire(level, preface, message);
-		if (pool != LogPool::ANY)
-			logs[s_cast<int>(LogPool::ANY)].signal.Fire(level, preface, message);
-	}
-	void LogSingleton::LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message, va_list args)
-	{
-		char buf [256];
-		auto& log = logs[s_cast<size_t>(pool)];
-		
-		vsprintf_s(buf, message.data(), args);
-
-		if (log.direct_to_cout || log.signal.ListenerCount() == 0)
-			std::cerr << buf << '\n';
-
-		log.signal.Fire(level, preface, buf);
-		if (pool != LogPool::ANY)
-			logs[s_cast<int>(LogPool::ANY)].signal.Fire(level, preface, message);
+		using SystemClock = std::chrono::system_clock;
+		const auto time = SystemClock::to_time_t(SystemClock::now());
+		char buf[64];
+		struct tm datetime{};
+		localtime_s(&datetime, &time);
+		sprintf_s(buf, "%.4d%.2d%.2d_%.2d%.2d%.2d", 1900 + datetime.tm_year, 1 + datetime.tm_mon, datetime.tm_mday, datetime.tm_hour, datetime.tm_min, datetime.tm_sec);
+		return string{ +buf };
 	}
 
-	void LogSingleton::PipeToCout(LogPool pool, bool pipe)
+	LogSystem::~LogSystem()
 	{
-		logs[s_cast<size_t>(pool)].direct_to_cout.store(pipe);
+		if (!Core::IsRunning())
+		{
+			for (auto& handle : log_files)
+			{
+				handle.stream.close();
+				std::remove(handle.filepath.data());
+			}
+		}
 	}
 
-	LogSingleton::LogSignal& LogSingleton::SignalFor(LogPool pool)
+	void LogSystem::Init()
 	{
-		return logs[s_cast<size_t>(pool)].signal;
-	}
+		auto logroot = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } + "/idk/" + curr_datetime();
+		auto start = Core::GetScheduler().GetProgramStart();
+		constexpr array<string_view, s_cast<size_t>(LogPool::COUNT)> names
+		{
+			"main",
+			"sys",
+			"phys",
+			"gfx",
+			"game",
+		};
 
-	LogSingleton& LogSingleton::Get()
-	{
-		static LogSingleton myers;
-		return myers;
+		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)
+		{
+			auto& loghandle = log_files[i];
+			auto& stream = loghandle.stream;
+			loghandle.filepath = logroot + "_" + std::to_string(i) + "_" + string{ names[i] } + ".txt";
+			stream.open(loghandle.filepath);
+
+			LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
+				[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
+			{
+				char buf[512];
+
+				unsigned moved = 0;
+
+				switch (level)
+				{
+				case LogLevel::INFO:    strcpy_s(buf, "[INFO]  "); break;
+				case LogLevel::WARNING: strcpy_s(buf, "[WARN]  "); break;
+				case LogLevel::ERR:     strcpy_s(buf, "[ERROR] "); break;
+				case LogLevel::FATAL:   strcpy_s(buf, "[FATAL] "); break;
+				}
+				moved = 8;
+
+				const auto time_since_start = time - start;
+
+				int h = duration_cast<std::chrono::hours>(time_since_start).count();
+				int m = duration_cast<std::chrono::minutes>(time_since_start).count() % 60;
+				int s = duration_cast<std::chrono::seconds>(time_since_start).count() % 60;
+				int ms = duration_cast<std::chrono::milliseconds>(time_since_start).count() % 100;
+
+				moved += sprintf_s(buf + moved, sizeof(buf) - moved, "%d:%.2d:%.2d.%.3d: ", h, m, s, ms);
+				moved += sprintf_s(buf + moved, sizeof(buf) - moved, preface.data());
+				sprintf_s(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
+
+				stream << buf;
+			}
+			);
+		}
 	}
 }
