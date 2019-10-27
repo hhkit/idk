@@ -43,12 +43,14 @@ namespace idk
 		void SetPauseState(PausedSystemConfig<Ts...>);
 		seconds GetDeltaTime()noexcept;
 		seconds GetRealDeltaTime()noexcept;
+		time_point GetProgramStart() noexcept;
 
 		span<Pass> GetPasses(UpdatePhase) noexcept;
 	private:
 		using Lock = std::bitset<ComponentCount>;
 		using FnPtr = function<bool()>;
 		Lock       _access{};
+		time_point _program_start;
 		time_point _last_frame;
 		time_point _this_frame;
 		seconds    _real_dt;

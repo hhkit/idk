@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
+#include <debug/LogSystem.h>
 #include <core/Core.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
@@ -88,8 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->Setup();
 
-	Core::GetSystem<LogSystem>().PipeToCout(LogPool::FATAL, true);
-	Core::GetSystem<LogSystem>().PipeToCout(LogPool::GAME, true);
+	LogSingleton::Get().PipeToCout(LogPool::GAME, true);
 	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);

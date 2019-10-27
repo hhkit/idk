@@ -13,6 +13,7 @@
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
 
+#include <debug/LogSystem.h>
 #include <script/ValueBoxer.h>
 #include <script/MonoBinder.h>
 
@@ -57,6 +58,18 @@ namespace idk::mono
 	{
 
 		constexpr auto Bind = mono_add_internal_call;
+
+		// bdebug
+		Bind("idk.Bindings::DebugLog", decay(
+			[](MonoString* preface, MonoString* message)
+		{
+			LogSingleton::Get().LogMessage(LogLevel::INFO,
+				LogPool::GAME,
+				unbox(preface).get(),
+				unbox(message).get()
+			);
+		}
+		));
 		// handleable
 		Bind("idk.Bindings::ObjectValidate", decay(
 			[](GenericHandle go) -> bool
