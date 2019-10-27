@@ -24,13 +24,18 @@ namespace idk
 		void RestoreBindPose(Animator& animator);
 		void HardReset(Animator& animator);
 
-	private:
 		using BonePose = matrix_decomposition<real>;
+	private:
+		
 		bool _was_paused = true;
 		float _blend = 0.0f;
 
-		// Animation pass should be for a certain bone, in a certain layer.
+		
+		BonePose ComputePose(Animator& animator, AnimationLayer& layer, AnimationLayerState& state, size_t bone_index);
+		//BonePose ComputeLastPose(Animator& animator, AnimationLayer& layer, AnimationLayerState& state, size_t bone_index);
+		//BonePose ComputeLayerPose(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		BonePose AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
+		// BonePose BlendingPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		BonePose BlendPose(const BonePose& from, const BonePose& to, float delta);
 		size_t LayersPass(Animator& animator);
 		void AdvanceLayers(Animator& animator);

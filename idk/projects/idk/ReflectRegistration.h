@@ -379,7 +379,7 @@ REFLECT_VARS(name, enabled, loop, speed, state_data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
-REFLECT_VARS(name, default_state, default_offset, default_weight, bone_mask, blend_type)
+REFLECT_VARS(name, default_state, default_weight, bone_mask, blend_type)
 REFLECT_END()
 
 

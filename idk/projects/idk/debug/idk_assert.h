@@ -5,8 +5,8 @@
 {                                                                                     \
 	if (!(COND))                                                                      \
 	{                                                                                 \
-		LOG_TO(LogPool::FATAL, "Assertion failed!\n");                                \
-		LOG_TO(LogPool::FATAL, "Condition was: " #COND "\n");                         \
+		LOG_CRASH_TO(LogPool::SYS, "Assertion failed!\n");                                \
+		LOG_CRASH_TO(LogPool::SYS, "Condition was: " #COND "\n");                         \
 		throw;                                                                        \
 	}                                                                                 \
 }
@@ -15,9 +15,9 @@
 {                                                                                     \
 	if (!(COND))                                                                      \
 	{                                                                                 \
-		LOG_TO(LogPool::FATAL, "Message: " MSG "\n");                                 \
-		LOG_TO(LogPool::FATAL, "Assertion failed!\n");                                \
-		LOG_TO(LogPool::FATAL, "Condition was: " #COND "\n");                         \
+		LOG_CRASH_TO(LogPool::SYS, "Message: " MSG "\n");                                 \
+		LOG_CRASH_TO(LogPool::SYS, "Assertion failed!\n");                                \
+		LOG_CRASH_TO(LogPool::SYS, "Condition was: " #COND "\n");                         \
 		throw;                                                                        \
 	}                                                                                 \
 }

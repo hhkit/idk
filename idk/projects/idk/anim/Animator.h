@@ -36,9 +36,11 @@ namespace idk
 		void Play(string_view animation_name, string_view layer_name, float offset = 0.0f);
 		void Play(string_view animation_name, size_t layer_index, float offset = 0.0f);
 
-		// void Resume();
-		// void Resume(string_view layer_name);
-		// void Resume(size_t layer_index);
+		void BlendTo(string_view animation_name, float time = 0.2f);
+
+		void Resume();
+		void Resume(string_view layer_name);
+		void Resume(size_t layer_index);
 
 		void Pause();
 		void Pause(string_view layer_name);

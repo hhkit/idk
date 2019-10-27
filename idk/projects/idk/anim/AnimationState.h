@@ -40,5 +40,12 @@ namespace idk
 		bool IsBlendTree() const;
 	};
 
+	struct AnimationLayerState
+	{
+		string name{};
+
+		bool is_playing = false, is_stopping = false;
+		float normalized_time = 0.0f;
+	};
 	
 }
