@@ -44,27 +44,30 @@ if (klass == MONO_CLASS)                                              \
 namespace idk::mono
 {
 	template<typename T>
-	void ManagedObject::Visit(T&& functor)
+	void ManagedObject::Visit(T&& functor, bool ignore_privacy)
 	{
 		auto depth = int{};
-		VisitImpl(std::forward<T>(functor), depth);
+		VisitImpl(std::forward<T>(functor), depth, ignore_privacy);
 	}
 
 	template<typename T>
-	void ManagedObject::Visit(T&& functor) const
+	void ManagedObject::Visit(T&& functor, bool ignore_privacy) const
 	{
 		auto depth = int{};
-		VisitImpl(std::forward<T>(functor), depth);
+		VisitImpl(std::forward<T>(functor), depth, ignore_privacy);
 	}
 
 	template<typename T>
-	inline void ManagedObject::VisitImpl(T&& functor, int& depth)
+	inline void ManagedObject::VisitImpl(T&& functor, int& depth, bool ignore_privacy)
 	{
 		++depth;
 		for (void* iter = nullptr; auto field = mono_class_get_fields(mono_object_get_class(Raw()), &iter);)
 		{
+			if (!ignore_privacy && Core::GetSystem<ScriptSystem>().Environment().IsPrivate(field))
+				continue;
+
 			auto field_name = string_view{ mono_field_get_name(field) };
-			
+
 			auto* klass = mono_class_from_mono_type(mono_field_get_type(field));
 			auto* obj = mono_field_get_value_object(mono_domain_get(), field, Raw());
 			MONO_BASE_TYPE(bool, mono_get_boolean_class());
@@ -104,11 +107,14 @@ namespace idk::mono
 	}
 
 	template<typename T>
-	inline void ManagedObject::VisitImpl(T&& functor, int& depth) const
+	inline void ManagedObject::VisitImpl(T&& functor, int& depth, bool ignore_privacy) const
 	{
 		++depth;
 		for (void* iter = nullptr; auto field = mono_class_get_fields(mono_object_get_class(Raw()), &iter);)
 		{
+			if (!ignore_privacy && Core::GetSystem<ScriptSystem>().Environment().IsPrivate(field))
+				continue;
+
 			auto field_name = string_view{ mono_field_get_name(field) };
 
 			auto* klass = mono_class_from_mono_type(mono_field_get_type(field));
