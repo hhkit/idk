@@ -697,6 +697,11 @@ namespace idk {
 			c_anim->Play(anim_name, layer_name);
 		}
 
+		if (ImGui::Button("Blend To"))
+		{
+			c_anim->BlendTo(anim_name);
+		}
+
 		if (ImGui::Button("Stop"))
 		{
 			c_anim->Stop();
