@@ -714,8 +714,13 @@ namespace idk::vkn
 				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
 					clear_col = clear_data;
 			}, state.camera.clear_data);
-		vk::ClearValue v[]{ 
-			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
+
+		vk::ClearValue clearColor = clear_col ?
+			 vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
+			:
+			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
+		vk::ClearValue v[]{
+			clearColor,
 			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
 		};
 		
@@ -746,6 +751,23 @@ namespace idk::vkn
 			GetRenderPass(state,view), frame_buffer,
 			render_area,hlp::arr_count(v),std::data(v)
 		};
+
+		std::optional<RscHandle<CubeMap>> sb_cm;
+		std::visit([&state, &sb_cm](auto clear_data)
+		{
+			if constexpr (std::is_same_v<decltype(clear_data), RscHandle<CubeMap>>)
+				sb_cm = clear_data;
+		}, state.camera.clear_data);
+
+		if (sb_cm)
+		{
+
+		}
+		/*vk::ClearValue v[]{
+			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
+			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
+		};*/
+		
 		
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);

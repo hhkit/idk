@@ -44,7 +44,7 @@ namespace idk::vkn
 
 		size_t strid = 0, t_size = 0;
 		size_t v_size = std::size(fileExt);
-		vector<stbi_uc*> loadList{ v_size };
+		array<char*, 6> loadList{ };
 		vector<size_t> strideList{ 0 };
 		strideList.resize(6);
 		for (int i = 0; i < v_size; ++i)
@@ -62,7 +62,7 @@ namespace idk::vkn
 
 			//loadList[i].size = size;
 			//loadList[i].n_chns = num_channels;
-			loadList[i] = tex_data;
+			loadList[i] = r_cast<char*>(tex_data);
 
 			strideList[i] = size.x * size.y * 4;
 			t_size += strideList[i];
@@ -87,22 +87,35 @@ namespace idk::vkn
 		//TODO detect SRGB and load set format accordingly
 
 		//Reassign the data to be held in one contigious memory
-		char* something = s_cast<char*>(malloc(t_size));
+		char* something = r_cast<char*>(malloc(t_size));
+		//char** arr_start = r_cast<char**>(malloc(sizeof(char*)*v_size));
+		//char* start = r_cast<char*>(malloc(strideList[0]));
+		//char* end = start;
 		size_t offset = 0;
 		for (int i = 0; i < v_size; ++i)
 		{
 			memcpy_s(something+offset,t_size-offset,loadList[i],strideList[i]);
 			offset += strideList[i];
+			//*(arr_start + i * sizeof(char*)) = end;
+			//memcpy_s(end, strideList[i], loadList[i], strideList[i]);
+			//end = r_cast<char*>(malloc(strideList[i]));
 		}
 
-		infoList = { r_cast<const char*>(something),t_size,strideList,def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
+		//infoList = { loadList.data(),loadList.size(),strideList,t_size,def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
+		infoList = { something,t_size,strideList,t_size,def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
 		if (tm)
 			to = *tm;
 		loader.LoadCubemap(tex, allocator, *fence, to, tci, infoList);
 		
+
+		//////WARNING I NEED TO FIX THIS LEAK IF IT WORKS
 		for(auto&elem: loadList)
 			stbi_image_free(elem);
-
+		/*for (int i = 0; i < v_size; ++i)
+		{
+			free(*(arr_start + i * sizeof(char)));
+		}
+		free(arr_start);*/
 		free(something);
 		return rtex;
 	}
