@@ -16,7 +16,7 @@ namespace idk
 
 	class RenderTarget
 		: public Resource<RenderTarget>
-		, public Saveable<RenderTarget, false_type>
+		, public virtual Saveable<RenderTarget, false_type>
 	{
 	public:
 		using Saveable_t = Saveable<RenderTarget, false_type>;
@@ -52,6 +52,7 @@ namespace idk
 		ivec2 size{ 1024, 1024 };
 		RscHandle<Texture> color_tex;
 		RscHandle<Texture> depth_tex;
+		inline const static string names[] = {"Color","Depth"};
 		bool is_world_renderer = true;
 		bool render_debug = true;
 		void Dirty(); // hide Saveable Dirty

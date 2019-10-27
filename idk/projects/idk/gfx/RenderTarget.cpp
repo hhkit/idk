@@ -27,6 +27,17 @@ namespace idk
 	{
 		OnFinalize();
 		_need_finalizing = false;
+		int i = 0;
+		if (!Name().size())
+		{
+			auto path = Core::GetResourceManager().GetPath(this->GetHandle());
+			if(path)
+				Name(*path);
+		}
+		for (auto& tex : this->Textures())
+		{
+			tex->Name(string{ Name() }+names[i++]+" Buffer");
+		}
 	}
 	RenderTarget::~RenderTarget()
 	{

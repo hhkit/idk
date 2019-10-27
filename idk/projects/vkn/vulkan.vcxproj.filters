@@ -186,6 +186,9 @@
     <ClInclude Include="RenderUtil.h">
       <Filter>render\utils</Filter>
     </ClInclude>
+    <ClInclude Include="VknRenderTargetLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -341,6 +344,7 @@
       <Filter>resource\Factories</Filter>
     </ClCompile>
     <ClCompile Include="RenderUtil.cpp" />
+    <ClCompile Include="VknRenderTargetLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

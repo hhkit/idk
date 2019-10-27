@@ -19,9 +19,8 @@ namespace idk
 	//}
 
 	template<typename Res>
-	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(PathHandle p, const MetaBundle& bundle)
+	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(RscHandle<Res> res,PathHandle p, const MetaBundle& bundle)
 	{
-		const auto res = bundle.CreateResource<Res>();
 		auto stream = p.Open(FS_PERMISSIONS::READ);
 		parse_text(stringify(stream), *res);
 
@@ -32,6 +31,25 @@ namespace idk
 			if (real_meta)
 				res->SetMeta(*real_meta);
 		}
+
+		return res;
+	}
+
+	template<typename Res>
+	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(PathHandle p, const MetaBundle& bundle)
+	{
+		const auto res = bundle.CreateResource<Res>();
+
+		LoadFile(res, p, bundle);
+
+		return res;
+	}
+	template<typename BaseRes, typename DerivedRes>
+	inline ResourceBundle EasySaveableResourceLoader<BaseRes, DerivedRes>::LoadFile(PathHandle p, const MetaBundle& bundle)
+	{
+		const auto res = bundle.CreateResource<DerivedRes>();
+
+		SaveableResourceLoader<BaseRes>::LoadFile(RscHandle<BaseRes>{res}, p, bundle);
 
 		return res;
 	}

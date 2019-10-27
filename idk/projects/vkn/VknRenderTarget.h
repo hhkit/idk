@@ -30,7 +30,7 @@ namespace idk::vkn
 		BasicRenderPasses GetRenderPassType() { return rp_type; }
 	private:
 		void OnFinalize() override;
-		BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
+		static constexpr BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
 		UniqueSemaphore       ready_semaphore{};
 		UniqueFramebuffer     buffer{};
 		//ivec2				  size{};

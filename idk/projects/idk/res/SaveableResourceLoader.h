@@ -11,6 +11,16 @@ namespace idk
 	public:
 		using Resource = Res;
 
+		static ResourceBundle LoadFile(RscHandle<Res> res,PathHandle p, const MetaBundle& bundle);
+		ResourceBundle LoadFile(PathHandle p, const MetaBundle& bundle);
+	};
+	template<typename BaseRes,typename DerivedRes>
+	class EasySaveableResourceLoader
+		: public IFileLoader
+	{
+	public:
+		using Resource = BaseRes;
+
 		ResourceBundle LoadFile(PathHandle p, const MetaBundle& bundle);
 	};
 }

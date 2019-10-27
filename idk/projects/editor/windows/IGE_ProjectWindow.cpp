@@ -150,8 +150,8 @@ namespace idk {
 				{
 					auto path = unique_new_mount_path("RenderTarget", RenderTarget::ext);
 					auto res = Core::GetResourceManager().Create<RenderTarget>(path);
-					//if (res && *res)
-					//	Core::GetResourceManager().Save(*res);
+					if (res && *res)
+						Core::GetResourceManager().Save(*res);
 				}
                 ImGui::EndPopup();
             }

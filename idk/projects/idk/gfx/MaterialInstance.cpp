@@ -178,7 +178,8 @@ namespace idk
 
 		if (material)
 		{
-			for (auto& [name, uni] : material->uniforms)
+			auto& mat = *material;
+			for (auto& [name, uni] : mat.uniforms)
 			{
 				if (IsUniformSubBlock(uni.name))
 				{
@@ -189,7 +190,7 @@ namespace idk
 				}
 				store.uniforms[uni.name] = uni.value;
 			}
-			for (auto& [name, uni] : material->hidden_uniforms)
+			for (auto& [name, uni] : mat.hidden_uniforms)
 			{
 				if (IsUniformSubBlock(name))
 				{
@@ -200,17 +201,24 @@ namespace idk
 				}
 				store.uniforms[name] = uni;
 			}
-		}
-		for (auto& [name,uni] : uniforms)
-		{
-			if (IsUniformSubBlock(name))
+			//No material, no uniforms
+			
+			for (auto& [var_name, uni] : uniforms)
 			{
-				char test[] = "_UBN";
-				const size_t N_index = sizeof("_UB") - 1;
-				test[N_index] = name[N_index];
-				store.uniforms[test];
+				auto itr = mat.uniforms.find(var_name);
+				if (itr != mat.uniforms.end())
+				{
+					auto& name = itr->second.name;
+					if (IsUniformSubBlock(name))
+					{
+						char test[] = "_UBN";
+						const size_t N_index = sizeof("_UB") - 1;
+						test[N_index] = name[N_index];
+						store.uniforms[test];
+					}
+					store.uniforms[name] = uni;
+				}
 			}
-			store.uniforms[name] = uni;
 		}
 		return store;
 	}
