@@ -14,8 +14,7 @@ namespace idk
 	{
 		// Serialized data - Default values
 		string name{};
-		string default_state{};
-		float default_offset = 0.0f;
+		string default_state;
 		float default_weight = 1.0f;
 
 		std::array<bool, 100> bone_mask{ false };
@@ -24,24 +23,21 @@ namespace idk
 		// Run time values
 		float weight = 1.0f;
 
-		float normalized_time = 0.0f;
-		float blend_time = 0.0f;
 		float blend_duration = 0.0f;
-		float blend_elapsed = 0.0f;
-		float total_time = 0.0f;
+		AnimationLayerState curr_state, blend_state;
 
-		string curr_state{}, blend_state{};
-		bool is_playing = false, is_stopping = false, is_blending = false;
+		bool blending_before_pause = false;
 		vector<matrix_decomposition<real>> prev_poses;
+		vector<matrix_decomposition<real>> blend_source;
 
 		void Play(string_view animation_name, float offset = 0.0f);
-		// void BlendTo(string_view animation_name, float offset);
+		void BlendTo(string_view anim_name, float blend_time = 0.2f);
 		void Stop();
 		void Pause();
 		void Resume();
-		void BlendTo(string_view anim_name, float blend_time = 0.2f);
 		
-		bool IsPlaying(string_view name) const;
+		
+		bool IsPlaying() const;
 
 		void Reset();
 	};

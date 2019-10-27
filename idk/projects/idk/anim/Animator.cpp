@@ -87,7 +87,6 @@ namespace idk
 
 	void Animator::AddLayer()
 	{
-		
 		string name = "New Layer ";
 		string append = "0";
 		// Check if name exists
@@ -97,9 +96,12 @@ namespace idk
 			// Generate a unique name
 			append = " " + std::to_string(count);
 		}
+
 		AnimationLayer new_layer{};
 		new_layer.name = name + append;
 		new_layer.prev_poses.resize(skeleton->data().size());
+		new_layer.blend_source.resize(skeleton->data().size());
+
 		layer_table.emplace(new_layer.name, layers.size());
 		layers.push_back(new_layer);
 	}
@@ -112,10 +114,10 @@ namespace idk
 
 		for (auto& layer : layers)
 		{
-			if (layer.curr_state == found_clip->second.name)
-				layer.curr_state = {};
+			if (layer.curr_state.name == found_clip->second.name)
+				layer.curr_state = AnimationLayerState{};
 			if (layer.default_state == found_clip->second.name)
-				layer.default_state = {};
+				layer.default_state = string{};
 		}
 
 		animation_table.erase(found_clip);
@@ -137,7 +139,7 @@ namespace idk
 		{
 			for (size_t i = 0; i < layers.size(); ++i)
 			{
-				Play(layers[i].curr_state, i);
+				Play(layers[i].curr_state.name, i);
 			}
 		}
 		else
@@ -341,9 +343,9 @@ namespace idk
 		return animation_table.find(string{ name }) != animation_table.end();
 	}
 
-	bool Animator::IsPlaying(string_view name) const
+	bool Animator::IsPlaying(string_view) const
 	{
-		return layers[0].IsPlaying(name);
+		return layers[0].IsPlaying();
 	}
 
 	string Animator::GetDefaultState() const
@@ -372,7 +374,7 @@ namespace idk
 		return false;
 	}
 
-	void Animator::SetEntryState(string_view name, float offset)
+	void Animator::SetEntryState(string_view name, float)
 	{
 		auto res = animation_table.find(name.data());
 		if (res == animation_table.end())
@@ -381,8 +383,6 @@ namespace idk
 		}
 
 		layers[0].default_state = name;
-		layers[0].default_offset = offset;
-
 	}
 #pragma endregion
 

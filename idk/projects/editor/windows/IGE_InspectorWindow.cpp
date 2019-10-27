@@ -565,7 +565,9 @@ namespace idk {
 				// ImGui::Indent(25);
 				//ImGui::PushItemWidth(100);
 					// ImGui::PopItemWidth();
-				ImGui::TextColored(layer.is_playing ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Is Playing");
+				ImGui::TextColored(layer.IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Layer: Playing");
+				ImGui::TextColored(layer.curr_state.is_playing ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "curr_state: Playing");
+				ImGui::TextColored(layer.blend_state.is_playing ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "blend_state: Playing");
 				ImGui::NewLine();
 				static const char* layer_types[3] = { "Base", "Override", "Additive" };
 				if (ImGui::BeginCombo(imgui_name("Blending", layer.name).c_str(), layer_types[s_cast<size_t>(layer.blend_type)]))
@@ -580,7 +582,7 @@ namespace idk {
 					ImGui::EndCombo();
 				}
 				ImGui::NewLine();
-				if (layer.is_playing)
+				if (layer.IsPlaying())
 				{
 					ImGui::DragFloat(imgui_name("Weight", layer.name).c_str(), &layer.weight, 0.01f, 0.0f, 1.0f);
 				}
@@ -599,31 +601,36 @@ namespace idk {
 						{
 							// c_anim->Stop();
 							layer.default_state = curr_name;
-							if (layer.curr_state == string{})
-								layer.curr_state = curr_name;
+							layer.curr_state.name = curr_name;
+								
 						}
 					}
 					ImGui::EndCombo();
 				}
 
-				if (ImGui::BeginCombo(imgui_name("Current State", layer.name).c_str(), c_anim->GetAnimationState(layer.curr_state).name.c_str()))
+				if (ImGui::BeginCombo(imgui_name("Current State", layer.name).c_str(), c_anim->GetAnimationState(layer.curr_state.name).name.c_str()))
 				{
 					for (auto& anim : c_anim->animation_table)
 					{
 						string_view curr_name = anim.second.name;
-						if (ImGui::Selectable(curr_name.data(), layer.curr_state == curr_name))
+						if (ImGui::Selectable(curr_name.data(), layer.curr_state.name == curr_name))
 						{
 							// Reset the animation
-							layer.normalized_time = 0.0f;
+							layer.curr_state.normalized_time = 0.0f;
 							// Set the new current animation
-							layer.curr_state = curr_name;
+							layer.curr_state.name = curr_name;
 						}
 					}
 					ImGui::EndCombo();
 				}
 
 				ImGui::NewLine();
-				ImGui::ProgressBar(layer.normalized_time, ImVec2{ -1, 10 }, nullptr);
+				ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 10 }, nullptr);
+				if (layer.blend_state.is_playing)
+					ImGui::ProgressBar(layer.blend_state.normalized_time / layer.blend_duration, ImVec2{ -1, 10 }, nullptr);
+				else
+					ImGui::ProgressBar(0.0f, ImVec2{ -1, 10 }, nullptr);
+
 				ImGui::NewLine();
 				//ImGui::Unindent(25);
 			}
@@ -735,11 +742,11 @@ namespace idk {
 		if (ImGui::Button("TEST"))
 		{
 			c_anim->layers[0].default_state = "walk";
-			c_anim->layers[0].curr_state = "walk";
+			c_anim->layers[0].curr_state.name = "walk";
 			c_anim->AddLayer();
 
 			c_anim->layers[1].default_state = "idle";
-			c_anim->layers[1].curr_state = "idle";
+			c_anim->layers[1].curr_state.name = "idle";
 			c_anim->layers[1].default_weight = 0.0f;
 		}
 

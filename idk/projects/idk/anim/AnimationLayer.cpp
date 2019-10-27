@@ -5,66 +5,79 @@ namespace idk
 {
 	void AnimationLayer::Play(string_view animation_name, float offset)
 	{
-		is_playing = true;
-		if (curr_state == animation_name)
-			return;
+		curr_state.is_playing = true;
 
 		// cap at 1.0f
-		normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
-		weight = default_weight;
-		curr_state = animation_name;
-		is_blending = false;
+		curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
+		if (curr_state.name == animation_name)
+			return;
+
+		
+		curr_state.name = animation_name;
+
+		// weight = default_weight;
+		blend_state = AnimationLayerState{};
+		blending_before_pause = false;
 	}
 
 	void AnimationLayer::Stop()
 	{
-		normalized_time = 0.0f;
-		total_time = 0.0f;
-		blend_time = 0.0f;
+		curr_state.normalized_time = 0.0f;
+		curr_state.is_stopping = true;
+
+		blend_state.normalized_time = 0.0f;
+		blend_state.is_stopping = true;
+
 		blend_duration = 0.0f;
-		blend_elapsed = 0.0f;
 		weight = default_weight;
-		is_stopping = true;
+		blending_before_pause = false;
 	}
 
 	void AnimationLayer::Pause()
 	{
-		is_playing = false;
+		curr_state.is_playing = false;
+		blending_before_pause = blend_state.is_playing;
+		blend_state.is_playing = false;
 	}
 
 	void AnimationLayer::Resume()
 	{
-		is_playing = true;
+		curr_state.is_playing	= false;
+		blend_state.is_playing	= blending_before_pause;
 	}
 
 	void AnimationLayer::BlendTo(string_view anim_name, float time)
 	{
-		blend_state = anim_name;
+		// Cannot blend to myself and cannot blend to the current state
+		if (curr_state.name == anim_name || blend_state.name == anim_name)
+		{
+			return;
+		}
+			
+		blend_state.name = anim_name;
+		blend_state.normalized_time = 0.0f;
+		blend_state.is_playing = true;
 		blend_duration = time;
-		blend_time = 0.0f;
-		blend_elapsed = 0.0f;
-		is_blending = true;
 	}
 
-	bool AnimationLayer::IsPlaying(string_view anim_name) const
+	bool AnimationLayer::IsPlaying() const
 	{
-		return is_playing && anim_name == curr_state;
+		return blend_state.is_playing || curr_state.is_playing;
 	}
 
 	void AnimationLayer::Reset()
 	{
-		normalized_time = 0.0f;
-		total_time = 0.0f;
-		blend_time = 0.0f;
-		blend_elapsed = 0.0f;
+		curr_state.name = default_state;
+		curr_state.is_playing = false;
+		curr_state.is_stopping = false;
+		curr_state.normalized_time = 0.0f;
+
+		blend_state = AnimationLayerState{};
+		blend_duration = 0.0f;
 		weight = default_weight;
 		
-		is_playing = false;
-		is_stopping = false;
-		is_blending = false;
-		// preview_playback = false;
 		
-		blend_state = string{};
-		curr_state = default_state;
+		blending_before_pause = false;
+		// preview_playback = false;
 	}
 }
