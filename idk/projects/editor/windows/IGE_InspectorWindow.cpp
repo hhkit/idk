@@ -602,7 +602,7 @@ namespace idk {
 							// c_anim->Stop();
 							layer.default_state = curr_name;
 							layer.curr_state.name = curr_name;
-								
+
 						}
 					}
 					ImGui::EndCombo();
@@ -766,17 +766,37 @@ namespace idk {
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<AudioSource> c_audiosource)
 	{
-		//Draw All your custom variables here.
+
 		if (ImGui::Button("Add AudioClip")) {
-			//Add Audio
+			c_audiosource->audio_clip_list.emplace_back(RscHandle<AudioClip>());
 		}
+
 		ImGui::Text("AudioClips");
 		ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth()-10, 200), true);
-		ImGui::Text("Audio1");
-		ImGui::SameLine();
-		ImGui::SmallButton("X");
-		ImGui::SameLine();
-		ImGui::ArrowButton("Play", ImGuiDir_Right);
+
+		for (auto i = 0; i < c_audiosource->audio_clip_list.size(); ++i) {
+			string txt = "[" + std::to_string(i) + "]";
+			if (ImGuidk::InputResource(txt.c_str(), &c_audiosource->audio_clip_list[i])) {
+				//Stop playing before switching sounds!
+			}
+			ImGui::SameLine();
+			if (ImGui::SmallButton("X")) {
+				c_audiosource->RemoveAudioClip(i);
+				break;
+			}
+
+			ImGui::SameLine();
+			if (c_audiosource->audio_clip_list[i]->GetIsPlaying()) {
+				if (ImGui::SmallButton("||")) {
+					c_audiosource->Stop(i);
+				}
+			}
+			else {
+				if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
+					c_audiosource->Play(i);
+				}
+			}
+		}
 
 		ImGui::EndChild();
 

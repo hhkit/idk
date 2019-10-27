@@ -36,8 +36,8 @@ namespace idk
 	void AudioClip::Play() //Needs to update volume, pitch, priority
 	{
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
-		audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(_soundHandle, nullptr, false, &_soundChannel)); //Creates a channel for audio to use. Start as paused to edit stuff first.
-		
+		if (_soundHandle)
+			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(_soundHandle, nullptr, false, &_soundChannel)); //Creates a channel for audio to use. Start as paused to edit stuff first.
 	}
 
 	void AudioClip::Stop()
@@ -69,9 +69,13 @@ namespace idk
 		return returnVal;
 	}
 
+	bool AudioClip::GetIsPlaying()
+	{
+		return isPlaying;
+	}
+
 	void AudioClip::UpdateVolume(float i)
 	{
-
 		if (_soundChannel) {
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setVolume(i));
@@ -84,6 +88,7 @@ namespace idk
 
 		if (_soundChannel) {
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+			i = i < 0 ? 0 : i;
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setPitch(i));
 		}
 
@@ -135,19 +140,21 @@ namespace idk
 	void AudioClip::UpdateFmodMode(FMOD_MODE fmodMode)
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		audioSystem.ParseFMOD_RESULT(_soundHandle->setMode(fmodMode));
-		if (_soundChannel) {
+		if (_soundHandle)
+			audioSystem.ParseFMOD_RESULT(_soundHandle->setMode(fmodMode));
+		if (_soundChannel)
 			audioSystem.ParseFMOD_RESULT(_soundChannel->setMode(fmodMode));
-		}
+	
 	}
 
 	void AudioClip::UpdateMinMaxDistance(float min, float max)
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		audioSystem.ParseFMOD_RESULT(_soundHandle->set3DMinMaxDistance(min, max));
-		if (_soundChannel) {
+		if (_soundHandle)
+			audioSystem.ParseFMOD_RESULT(_soundHandle->set3DMinMaxDistance(min, max));
+		if (_soundChannel)
 			audioSystem.ParseFMOD_RESULT(_soundChannel->set3DMinMaxDistance(min, max));
-		}
+	
 	}
 
 	void AudioClip::ReassignSoundGroup(SubSoundGroup newSndGrp)
