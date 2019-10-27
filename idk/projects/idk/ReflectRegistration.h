@@ -350,7 +350,7 @@ REFLECT_VARS(intensity, light_color, attenuation_radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
-REFLECT_VARS(intensity, light_color, width,height)
+REFLECT_VARS(intensity, light_color, width, height)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SpotLight, "SpotLight")
@@ -384,6 +384,29 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
 REFLECT_VARS(skeleton, animation_table, layer_table, layers)
+REFLECT_END()
+
+// Particle System
+REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
+REFLECT_VARS(main, emission, shape, renderer)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::MainModule, "MainModule")
+REFLECT_VARS(duration, looping, prewarm, max_particles,
+             start_delay, start_lifetime, start_speed, start_size, start_rotation, start_color,
+             gravity_modifier, in_world_space, play_on_awake)
+REFLECT_END();
+
+REFLECT_BEGIN(idk::EmissionModule, "EmissionModule")
+REFLECT_VARS(enabled, rate_over_time)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ShapeModule, "ShapeModule")
+REFLECT_VARS(enabled, radius, radius_thickness, randomize_direction)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RendererModule, "RendererModule")
+REFLECT_VARS(enabled, material)
 REFLECT_END()
 
 

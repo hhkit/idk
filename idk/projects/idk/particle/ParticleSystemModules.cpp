@@ -19,7 +19,7 @@ namespace idk
     {
         vec3 v = gen_dir(sys.rnd);
         auto& data = sys.data;
-        data.positions[i] = v * (radius - sys.rnd.rangef(0, radius_thickness));
+        data.positions[i] = v * (radius - sys.rnd.rangef(0, radius_thickness) * radius);
         data.velocities[i] = (randomize_direction ? lerp(v, gen_dir(sys.rnd), randomize_direction) : v) * sys.main.start_speed;
     }
 
