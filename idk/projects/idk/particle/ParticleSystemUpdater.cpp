@@ -30,8 +30,13 @@ namespace idk
         const float dt = Core::GetDT().count();
         for (auto& ps : span_ps)
         {
-            if (ps.state == ParticleSystem::Playing)
-                ps.origin = ps.GetGameObject()->GetComponent<Transform>()->GlobalPosition();
+            if (ps.state >= ParticleSystem::Playing)
+            {
+                auto srt = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+                ps.origin = srt.position;
+                ps.rotation = srt.rotation;
+                ps.scale = srt.scale;
+            }
             ps.Step(dt);
         }
     }
@@ -41,9 +46,12 @@ namespace idk
         const float dt = Core::GetDT().count();
         for (auto& ps : span_ps)
         {
-            if (ps.state == ParticleSystem::Playing)
+            if (ps.state >= ParticleSystem::Playing)
             {
-                ps.origin = ps.GetGameObject()->GetComponent<Transform>()->GlobalPosition();
+                auto srt = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+                ps.origin = srt.position;
+                ps.rotation = srt.rotation;
+                ps.scale = srt.scale;
                 ps.Step(dt);
             }
         }

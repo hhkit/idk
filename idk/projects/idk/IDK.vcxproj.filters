@@ -1158,6 +1158,7 @@
     <ClCompile Include="particle\ParticleSystem.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
+    <ClCompile Include="particle\ParticleSystemModules.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

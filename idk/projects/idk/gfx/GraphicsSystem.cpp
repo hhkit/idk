@@ -108,10 +108,13 @@ namespace idk
 
                 render_data.positions.reserve(sz);
                 render_data.positions.insert(render_data.positions.end(), elem.data.positions.begin(), elem.data.positions.begin() + sz);
+                for (auto& pos : render_data.positions)
+                    pos *= elem.scale;
                 if (!elem.main.in_world_space)
                 {
+                    mat3 rot{ elem.rotation };
                     for (auto& pos : render_data.positions)
-                        pos += elem.origin;
+                        pos = elem.origin + rot * pos;
                 }
 
                 render_data.rotations.reserve(sz);

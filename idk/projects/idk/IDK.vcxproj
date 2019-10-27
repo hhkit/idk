@@ -288,6 +288,7 @@
     <ClCompile Include="math\shapes\halfspace.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
+    <ClCompile Include="particle\ParticleSystemModules.cpp" />
     <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />

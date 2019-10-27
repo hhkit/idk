@@ -72,11 +72,17 @@ namespace idk
 
         auto i = data.num_alive++;
         data.lifetimes[i] = main.start_lifetime;
-        data.positions[i] = main.in_world_space ? origin : vec3(0, 0, 0);
+        data.positions[i] = vec3(0, 0, 0);
         data.rotations[i] = main.start_rotation;
         data.sizes[i] = main.start_size;
         data.velocities[i] = vec3(0, main.start_speed, 0);
         data.colors[i] = main.start_color;
+
+        if (shape.enabled)
+            shape.Generate(*this, i);
+
+        if (main.in_world_space)
+            data.positions[i] = origin + mat3(rotation) * data.positions[i];
     }
 
 }

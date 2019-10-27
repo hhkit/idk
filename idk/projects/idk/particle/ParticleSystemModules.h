@@ -5,6 +5,8 @@
 
 namespace idk
 {
+    class ParticleSystem;
+
     struct MainModule
     {
         float duration = 5.0f;
@@ -30,7 +32,14 @@ namespace idk
 
     struct ShapeModule
     {
+        bool enabled = true;
 
+        // sphere
+        float radius = 1.0f;
+        float radius_thickness = 1.0f;
+        float randomize_direction = 0;
+
+        void Generate(ParticleSystem& data, uint16_t i);
     };
 
     struct RendererModule
