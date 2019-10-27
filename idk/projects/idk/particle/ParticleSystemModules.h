@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math/color.h>
+#include <util/enum.h>
 
 namespace idk
 {
@@ -17,6 +18,8 @@ namespace idk
         float start_rotation = 0;
         color start_color{ 1.0f, 1.0f, 1.0f, 1.0f };
         float gravity_modifier = 0;
+        bool in_world_space = false;
+        bool play_on_awake = true;
     };
 
     struct EmissionModule
@@ -25,9 +28,16 @@ namespace idk
         float rate_over_time = 10.0f;
     };
 
+    struct ShapeModule
+    {
+
+    };
+
     struct RendererModule
     {
+        static constexpr Guid default_material_inst{ 0xbfa6c3e0, 0x9b52, 0x412b, 0xb3e7c85ee93190ca };
+
         bool enabled = true;
-        RscHandle<MaterialInstance> material;
+        RscHandle<MaterialInstance> material{ default_material_inst };
     };
 }

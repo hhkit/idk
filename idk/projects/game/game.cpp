@@ -95,16 +95,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
 	gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
 
-    auto particle_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.frag", false);
-    auto particle_mat = Core::GetResourceManager().Create<Material>();
-    particle_mat->_shader_program = particle_frag;
-    auto particle_mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-    particle_mat_inst->material = particle_mat;
-    particle_mat->_default_instance = particle_mat_inst;
-
     auto scene = RscHandle<Scene>{};
     auto go = scene->CreateGameObject();
-    go->AddComponent<ParticleSystem>()->renderer.material = particle_mat_inst;
+    go->AddComponent<ParticleSystem>();
 	
 	//auto scene = RscHandle<Scene>{};
 	//auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();

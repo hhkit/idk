@@ -75,7 +75,8 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
 												  .IfPausedThen(&AnimationSystem::UpdatePaused);
-        _scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems");
+        _scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems")
+												  .IfPausedThen(&ParticleSystemUpdater::EditorUpdate);
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");

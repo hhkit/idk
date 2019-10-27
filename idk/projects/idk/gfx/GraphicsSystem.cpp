@@ -108,6 +108,11 @@ namespace idk
 
                 render_data.positions.reserve(sz);
                 render_data.positions.insert(render_data.positions.end(), elem.data.positions.begin(), elem.data.positions.begin() + sz);
+                if (!elem.main.in_world_space)
+                {
+                    for (auto& pos : render_data.positions)
+                        pos += elem.origin;
+                }
 
                 render_data.rotations.reserve(sz);
                 render_data.rotations.insert(render_data.rotations.end(), elem.data.rotations.begin(), elem.data.rotations.begin() + sz);

@@ -75,9 +75,9 @@ namespace idk
             if (recent_proj.empty())
             {
                 const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
-                auto proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+                auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
                 while (!proj)
-                    proj = Core::GetSystem<Windows>().OpenFileDialog(dialog);
+                    proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
                 proj_manager.LoadProject(*proj);
             }
             else
@@ -98,6 +98,12 @@ namespace idk
 		{
 		case GraphicsAPI::OpenGL:
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
+            Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
+            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
+            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
+            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
+            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
+            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
@@ -106,8 +112,13 @@ namespace idk
 			break;
 		}
 
+        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
+        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
+        Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
+
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
-        Core::GetSystem<Windows>().OnClosed.Listen([&]() { closing = true; });
+        Core::GetSystem<Application>().OnClosed.Listen([&]() { closing = true; });
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
@@ -237,21 +248,6 @@ namespace idk
 
 	void IDE::LateInit()
 	{
-		if(Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
-		{
-			Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
-			Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-		}
-
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
-		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
-
 		Core::GetScheduler().SetPauseState(EditorPause);
 
         for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))

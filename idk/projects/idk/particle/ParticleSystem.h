@@ -10,17 +10,20 @@ namespace idk
         : public Component<ParticleSystem>
     {
     public:
-        enum State { Stopped, Playing, Paused };
+        enum State { Awake, Stopped, Playing, Paused };
 
         MainModule main;
         EmissionModule emission;
         RendererModule renderer;
 
         ParticleData data;
-        char state = Stopped;
         float time = 0;
         float emitter_clock = 0;
+        vec3 origin;
+        char state = Awake;
 
+        void Play();
+        void Stop();
         void Step(float dt);
         void Emit();
     };

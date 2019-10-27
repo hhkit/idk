@@ -419,38 +419,36 @@ namespace idk::ogl
                 // bind shader
                 const auto material = elem.material_instance->material;
                 pipeline.PushProgram(material->_shader_program);
-                auto x = glGetError();
+                GLuint texture_units = 0;
+                SetMaterialUniforms(elem.material_instance, texture_units);
 
                 RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
                     renderer_reqs{ {
                         { vtx::Attrib::Position, 0 },
+                        { vtx::Attrib::UV, 1 },
                     }
                 });
                 glVertexAttribDivisor(0, 0);
+                glVertexAttribDivisor(1, 0);
 
                 bufs[1].Bind().Buffer(elem.positions.data(), 3 * sizeof(GLfloat), elem.positions.size());
-                bufs[1].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticlePosition, 1} } });
-                x = glGetError();
-                glVertexAttribDivisor(1, 1);
-
-                bufs[2].Bind().Buffer(elem.rotations.data(), sizeof(GLfloat), elem.rotations.size());
-                bufs[2].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleRotation, 2} } });
-                x = glGetError();
+                bufs[1].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticlePosition, 2} } });
                 glVertexAttribDivisor(2, 1);
 
-                bufs[3].Bind().Buffer(elem.sizes.data(), sizeof(GLfloat), elem.sizes.size());
-                bufs[3].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleSize, 3} } });
-                x = glGetError();
+                bufs[2].Bind().Buffer(elem.rotations.data(), sizeof(GLfloat), elem.rotations.size());
+                bufs[2].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleRotation, 3} } });
                 glVertexAttribDivisor(3, 1);
 
-                bufs[4].Bind().Buffer(elem.colors.data(), 4 * sizeof(GLfloat), elem.colors.size());
-                bufs[4].BindForDraw(renderer_reqs{ { {vtx::Attrib::Color, 4} } });
-                x = glGetError();
+                bufs[3].Bind().Buffer(elem.sizes.data(), sizeof(GLfloat), elem.sizes.size());
+                bufs[3].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleSize, 4} } });
                 glVertexAttribDivisor(4, 1);
 
-                bufs[0].Bind();
+                bufs[4].Bind().Buffer(elem.colors.data(), 4 * sizeof(GLfloat), elem.colors.size());
+                bufs[4].BindForDraw(renderer_reqs{ { {vtx::Attrib::Color, 5} } });
+                glVertexAttribDivisor(5, 1);
+
+                bufs[0].Bind(); // index buffer
                 glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, elem.positions.size());
-                x = glGetError();
             }
 		}
 

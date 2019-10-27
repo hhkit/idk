@@ -6,15 +6,15 @@ namespace idk
 		: Data1{ 0 }, Data2{ 0 }, Data3{ 0 }, Data4{ 0,0,0,0,0,0,0,0 }
 	{}
 
-	constexpr Guid::Guid(unsigned int a, unsigned int b, unsigned int c, unsigned int d)
+	constexpr Guid::Guid(unsigned int a, unsigned short b, unsigned short c, unsigned long long d)
 		: Data1{ a }
-		, Data2{ unsigned short (b >> 2 & 0xFFFF) }
-		, Data3{ unsigned short (b      & 0xFFFF) }
+		, Data2{ b }
+		, Data3{ c }
 		, Data4{
-			(unsigned char) (c >> 24 & 0xFF)
-		,	(unsigned char) (c >> 16 & 0xFF)
-		,	(unsigned char) (c >>  8 & 0xFF)
-		,	(unsigned char) (c >>  0 & 0xFF)
+			(unsigned char) (d >> 56 & 0xFF)
+		,	(unsigned char) (d >> 48 & 0xFF)
+		,	(unsigned char) (d >> 40 & 0xFF)
+		,	(unsigned char) (d >> 32 & 0xFF)
 		,	(unsigned char) (d >> 24 & 0xFF)
 		,	(unsigned char) (d >> 16 & 0xFF)
 		,	(unsigned char) (d >>  8 & 0xFF)
