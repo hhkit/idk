@@ -1,4 +1,6 @@
 #pragma once
+#include <fstream>
+
 #include <idk.h>
 #include <core/ISystem.h>
 #include <debug/LogSingleton.h>
@@ -12,9 +14,16 @@ namespace idk
 	public:
 		~LogSystem();
 	private:
+		struct LogHandle
+		{
+			string filepath;
+			std::ofstream stream;
+			atomic<int> priority{ 0 };
+		};
+
 		void Init() override;
 		void Shutdown() override {}
 
-		array<std::fstream, s_cast<size_t>(LogPool::COUNT)> log_files;
+		array<LogHandle, s_cast<size_t>(LogPool::COUNT)> log_files;
 	};
 }

@@ -7,23 +7,34 @@
 #include <file/FileSystem.h>
 namespace idk
 {
-	static auto curr_date()
+	constexpr auto priority_cap = 512;
+
+	static auto curr_datetime()
 	{
 		using SystemClock = std::chrono::system_clock;
 		const auto time = SystemClock::to_time_t(SystemClock::now());
 		char buf[64];
-		ctime_s(+buf, 64, &time);
-		std::remove(std::begin(buf), std::end(buf), ' ');
+		struct tm datetime{};
+		localtime_s(&datetime, &time);
+		sprintf_s(buf, "%.4d%.2d%.2d_%.2d%.2d%.2d", 1900 + datetime.tm_year, 1 + datetime.tm_mon, datetime.tm_mday, datetime.tm_hour, datetime.tm_min, datetime.tm_sec);
 		return string{ +buf };
 	}
 
 	LogSystem::~LogSystem()
 	{
+		if (!Core::IsRunning())
+		{
+			for (auto& handle : log_files)
+			{
+				handle.stream.close();
+				std::remove(handle.filepath.data());
+			}
+		}
 	}
 
 	void LogSystem::Init()
 	{
-		auto logroot = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } + "/idk/" + curr_date();
+		auto logroot = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } + "/idk/" + curr_datetime();
 		auto start = Core::GetScheduler().GetProgramStart();
 		constexpr array<string_view, s_cast<size_t>(LogPool::COUNT)> names
 		{
@@ -36,23 +47,27 @@ namespace idk
 
 		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)
 		{
-			auto& stream = log_files[i];
-			stream.open(logroot + string{ names[i] } +".txt");
-			stream << std::setw(2);
+			auto& loghandle = log_files[i];
+			auto& stream = loghandle.stream;
+			auto& prio = loghandle.priority;
+			loghandle.filepath = logroot + "_" + std::to_string(i) + "_" + string{ names[i] } + ".txt";
+			stream.open(loghandle.filepath);
 
 			LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
-				[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
+				[&stream, &prio, start](LogLevel level, time_point time, string_view preface, string_view message)
 			{
 				char buf[512];
 
+				unsigned moved = 0;
+
 				switch (level)
 				{
-				case LogLevel::INFO:    strcpy_s(buf, "[LOG  ]"); break;
-				case LogLevel::WARNING: strcpy_s(buf, "[WARN ]"); break;
-				case LogLevel::ERR:     strcpy_s(buf, "[ERROR]"); break;
-				case LogLevel::FATAL:   strcpy_s(buf, "[FATAL]"); break;
+				case LogLevel::INFO:    strcpy_s(buf, "[INFO]  "); prio += 1; break;
+				case LogLevel::WARNING: strcpy_s(buf, "[WARN]  "); prio += 2; break;
+				case LogLevel::ERR:     strcpy_s(buf, "[ERROR] "); prio += 4; break;
+				case LogLevel::FATAL:   strcpy_s(buf, "[FATAL] "); prio += 8; break;
 				}
-				int moved = 7;
+				moved = 8;
 
 				const auto time_since_start = time - start;
 
@@ -61,11 +76,18 @@ namespace idk
 				int s = duration_cast<std::chrono::seconds>(time_since_start).count() % 60;
 				int ms = duration_cast<std::chrono::milliseconds>(time_since_start).count() % 100;
 
-				moved += sprintf_s(buf + moved, sizeof(buf) - moved, "%d:%.2d:%.2d.%.3d:", h, m, s, ms);
+				moved += sprintf_s(buf + moved, sizeof(buf) - moved, "%d:%.2d:%.2d.%.3d: ", h, m, s, ms);
 				moved += sprintf_s(buf + moved, sizeof(buf) - moved, preface.data());
-				sprintf_s(buf + moved, sizeof(buf) - moved, message.data());
+				sprintf_s(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
 
-				stream << buf << '\n';
+				stream << buf;
+
+				// probably need to handle this better but
+				if (prio > priority_cap)
+				{
+					stream << std::flush;
+					prio -= priority_cap;
+				}
 			}
 			);
 		}

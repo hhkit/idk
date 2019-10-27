@@ -18,6 +18,7 @@ namespace idk
 		static Scheduler& GetScheduler();
 		static ResourceManager& GetResourceManager();
 		static void    Shutdown();
+		static bool	   IsRunning();
 
 		Core();
 		~Core();
