@@ -280,14 +280,19 @@ namespace idk::vkn
 		out =std::make_unique<VknAttachment>();
 		out->load_op = info.load_op;
 		out->store_op = info.store_op;
-
-		RscHandle<VknTexture> tex = Core::GetResourceManager().Create<VknTexture>();
-		TextureLoader loader;
-		TextureOptions opt;
-		TexCreateInfo tci = cr8_funcs[type](size.x,size.y);
-		opt.internal_format = info.internal_format;
-		opt.filter_mode = info.filter_mode;
-		loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
+		
+		auto preset = static_cast<bool>(info.buffer);
+		RscHandle<VknTexture> tex = (preset) ? RscHandle<VknTexture>{*info.buffer} : Core::GetResourceManager().Create<VknTexture>();
+		if(!preset )
+		{
+			TextureLoader loader;
+			TextureOptions opt;
+			TexCreateInfo tci = cr8_funcs[type](size.x,size.y);
+			opt.internal_format = info.internal_format;
+			opt.filter_mode = info.filter_mode;
+			loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
+		}
+		out->own_buffer = !preset;
 		out->buffer = tex;
 	}
 	void VknFrameBufferFactory::PreReset(FrameBuffer& framebuffer)

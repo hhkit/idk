@@ -19,7 +19,6 @@ namespace idk::vkn
 		: public IFileLoader
 	{
 	public:
-		ResourceBundle LoadFile(PathHandle filepath) override;
 		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
 	};
 

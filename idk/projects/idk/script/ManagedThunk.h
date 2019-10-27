@@ -15,7 +15,7 @@ namespace idk::mono
 		ManagedThunk(MonoMethod* method);
 
 		template<typename Ret = MonoObject*, typename ... Args>
-		Ret Invoke(Args&& ...);
+		Ret Invoke(Args&& ...) const;
 
 		void* get() const { return thunk; }
 	private:
@@ -23,7 +23,7 @@ namespace idk::mono
 	};
 
 	template<typename Ret, typename ...Args>
-	inline Ret ManagedThunk::Invoke(Args&& ... args)
+	inline Ret ManagedThunk::Invoke(Args&& ... args) const
 	{
 		using FuncType = Ret (*)(decltype(box(args))..., MonoException**);
 		const auto invoker = s_cast<FuncType>(thunk);

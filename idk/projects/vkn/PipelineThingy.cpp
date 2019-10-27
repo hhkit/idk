@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "PipelineThingy.h"
 
+#include <vkn/VknCubemap.h>
 #include <gfx/RenderObject.h>
 #include <vkn/DescriptorsManager.h>
 #include <vkn/ShaderModule.h>
@@ -128,6 +129,23 @@ namespace idk::vkn
 		};
 		//);
 	}
+
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const VknCubemap& val)
+	{
+		//collated_layouts[obj_uni.layout][desc_type_index<vk::DescriptorType::eCombinedImageSampler>]++;
+		//collated_bindings[obj_uni.set].emplace_back(
+		return ProcessedRO::BindingInfo
+		{
+			obj_uni.binding,
+			ProcessedRO::ImageBinding{ val.ImageView(),*val.sampler,vk::ImageLayout::eGeneral },
+			0,
+			arr_index,
+			obj_uni.size,
+			obj_uni.layout
+		};
+		//);
+	}
+
 	void PipelineThingy::SetRef(UboManager& ubo_manager)
 	{
 		ref.~Ref();
@@ -217,6 +235,17 @@ namespace idk::vkn
 		{
 			auto itr = curr_bindings.find(info->set);
 			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second,info->binding,array_index))
+				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture));
+		}
+		return s_cast<bool>(info);
+	}
+	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound)
+	{
+		auto info = GetUniform(uniform_name);
+		if (info)
+		{
+			auto itr = curr_bindings.find(info->set);
+			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second, info->binding, array_index))
 				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture));
 		}
 		return s_cast<bool>(info);

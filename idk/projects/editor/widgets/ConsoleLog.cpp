@@ -24,19 +24,19 @@ namespace idk::console
 	void Log_Message(std::string_view message, const vec4& textColor)
 	{
 		auto* consolePtr = Core::GetSystem<IDE>().FindWindow<IGE_Console>();
-		consolePtr->PushMessage(message, textColor);
+		consolePtr->PushMessage("", message, textColor);
 	}
 
 	void Log_Warning(std::string_view message, const vec4& textColor)
 	{
 		auto* consolePtr = Core::GetSystem<IDE>().FindWindow<IGE_Console>();
-		consolePtr->PushWarning(message, textColor);
+		consolePtr->PushWarning("", message, textColor);
 	}
 
 	void Log_Error(std::string_view message, const vec4& textColor)
 	{
 		auto* consolePtr = Core::GetSystem<IDE>().FindWindow<IGE_Console>();
-		consolePtr->PushError(message, textColor);
+		consolePtr->PushError("", message, textColor);
 	}
 
 	string ComposeMessage(const char* fmt, ...)

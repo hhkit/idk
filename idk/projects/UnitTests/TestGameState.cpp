@@ -60,9 +60,9 @@ TEST(GameState, TestScene)
     Core core;
     core.AddSystem<TestApplication>();
     core.Setup();
-    auto scene0 = Core::GetSystem<SceneManager>().CreateScene(); scene0->Load();
-	auto scene1 = Core::GetSystem<SceneManager>().CreateScene(); scene1->Load();
-	auto scene2 = Core::GetSystem<SceneManager>().CreateScene(); scene2->Load();
+    auto scene0 = Core::GetResourceManager().Create<Scene>(); scene0->Load();
+	auto scene1 = Core::GetResourceManager().Create<Scene>(); scene1->Load();
+	auto scene2 = Core::GetResourceManager().Create<Scene>(); scene2->Load();
 	EXPECT_TRUE(scene0);
 	EXPECT_TRUE(scene1);
 	

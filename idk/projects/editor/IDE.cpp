@@ -38,6 +38,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/OpenGLTextureLoader.h>
 
 // editor setup
+#include <gfx/RenderTarget.h>
+#include <editor/SceneManagement.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
@@ -273,6 +275,23 @@ namespace idk
         if (closing)
             return;
 
+		// scene controls
+		auto& app = Core::GetSystem<Application>();
+		if (app.GetKey(Key::Control))
+		{
+			if(app.GetKeyDown(Key::S))
+			{
+				if (app.GetKey(Key::Shift))
+					SaveSceneAs();
+				else
+					SaveScene();
+			}
+			if (app.GetKeyDown(Key::N))
+				NewScene();
+			if (app.GetKeyDown(Key::O))
+				OpenScene();
+		}
+
 		_interface->ImGuiFrameBegin();
 		ImGuizmo::BeginFrame();
 
@@ -341,18 +360,25 @@ namespace idk
 
 	void IDE::SetupEditorScene()
 	{
+		// create editor view
+		editor_view = Core::GetResourceManager().Create<RenderTarget>();
+		auto sz = editor_view->Size();
+		editor_view->Size(Core::GetSystem<Application>().GetScreenSize());
+		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));
+		editor_view->Name("Editor View");
+		//editor_view->Size();
 		// create editor camera
 		RscHandle<Scene> scene{};
 		{
 			auto camera = scene->CreateGameObject();
 			Handle<Camera> camHandle = camera->AddComponent<Camera>();
-			camera->GetComponent<Name>()->name = "Camera 1";
+			camera->GetComponent<Name>()->name = "Editor Camera";
 			camera->Transform()->position = vec3{ 0, 0, 5 };
 			camHandle->far_plane = 100.f;
-			camHandle->render_target = RscHandle<RenderTarget>{};
+			camHandle->render_target = editor_view;
 			camHandle->is_scene_camera = true;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
-			if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
+			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;

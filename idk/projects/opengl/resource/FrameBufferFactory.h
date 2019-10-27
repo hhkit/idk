@@ -13,12 +13,6 @@ namespace idk::ogl
 		unique_ptr<RenderTarget> Create() override;
 	};
 
-	class FrameBufferLoader
-		: public IFileLoader
-	{
-		ResourceBundle LoadFile(PathHandle fh) override;
-		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& m) override;
-	};
 	class OpenGLFrameBufferFactory
 		: public FrameBufferFactory
 	{

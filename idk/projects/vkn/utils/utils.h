@@ -37,10 +37,15 @@ namespace idk::vkn::meta
 		}
 	};
 
+	template<typename Pack>
+	struct IsSequential;
+
 	template<typename Enum, typename Tuple = void>
 	struct enum_info
 	{
 		static Enum map(size_t index);
+		static size_t map(Enum index);
+		static std::optional<size_t> map_maybe(Enum index);
 
 		static constexpr size_t size();
 

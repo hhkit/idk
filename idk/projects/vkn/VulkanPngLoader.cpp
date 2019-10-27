@@ -48,16 +48,12 @@ namespace idk::vkn
 		stbi_image_free(tex_data);
 		return rtex;
 	}
-	ResourceBundle idk::vkn::PngLoader::LoadFile(PathHandle handle)
-	{
-		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-
-		return LoadFile(handle, RscHandle<Texture>{ tex });;
-	}
 
 	ResourceBundle idk::vkn::PngLoader::LoadFile(PathHandle handle, const MetaBundle& meta)
 	{
-		auto tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(meta.metadatas[0].guid);
+		auto m = meta.FetchMeta<Texture>();
+		auto tex = m ? Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(m->guid)
+			: Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
 		return LoadFile(handle, RscHandle<Texture>{tex});;
 	}
 

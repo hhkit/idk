@@ -70,6 +70,7 @@ namespace idk::vkn
 
 	struct SharedGraphicsState
 	{
+		RscHandle<Texture> BrdfLookupTable;
 		const vector<LightData>* lights;
 		//vector<shadow_map_t> shadow_maps;
 
@@ -117,6 +118,7 @@ namespace idk::vkn
 	struct PreRenderData
 	{
 		SharedGraphicsState* shared_gfx_state;
+		const vector<CameraData>* cameras;
 		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;

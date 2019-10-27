@@ -3,33 +3,33 @@
     public class Time
     {
         /// <summary>
-        ///     Time of the frame in seconds
+        ///     Frame time step
         /// </summary>
         public static float deltaTime
-        {
-            get { return 0; }
-        }
+        { get => Bindings.TimeGetDelta(); }
 
-        public static float fixedDeltaTime
-        {
-            get { return 0; }
-        }
         /// <summary>
-        ///     Time elapsed since program start in seconds
+        ///     Fixed timestep
         /// </summary>
-        public static float elapsedTime
-        {
-            get { return 0; }
-        }
+        public static float fixedDeltaTime
+        { get => Bindings.TimeGetFixedDelta(); }
 
-        public static float timeScale
-        {
-            get { return 0; }
-        }
-       
-        public static float unscaledTime
-        {
-            get { return 0; }
-        }
+        ///// <summary>
+        /////     Time elapsed since program start in seconds
+        ///// </summary>
+        //public static float elapsedTime
+        //{
+        //    get { return 0; }
+        //}
+        //
+        //public static float timeScale
+        //{
+        //    get { return 0; }
+        //}
+        //
+        //public static float unscaledTime
+        //{
+        //    get { return 0; }
+        //}
     }
 }

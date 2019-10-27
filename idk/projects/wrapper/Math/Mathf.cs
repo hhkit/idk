@@ -1,6 +1,6 @@
 ﻿namespace idk
 {
-    class Mathf
+    public class Mathf
     {
         public static float PI { get { return 3.14159265358979f; } }
         public static float Epsilon { get { return 1e-6f; } }
@@ -28,6 +28,11 @@
             return (float)System.Math.Sqrt(val);
         }
         public static float Clamp(float val, float min, float max)
+        {
+            return val < min ? min :
+                   val > max ? max : val;
+        }
+        public static int Clamp(int val, int min, int max)
         {
             return val < min ? min :
                    val > max ? max : val;

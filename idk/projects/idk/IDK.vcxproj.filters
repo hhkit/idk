@@ -799,6 +799,7 @@
     <ClInclude Include="gfx\Buffer.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="script\MonoFunctionInvoker.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

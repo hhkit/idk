@@ -35,6 +35,7 @@ of the editor.
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
+#include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
 
 #include <IncludeComponents.h>
@@ -247,6 +248,10 @@ namespace idk {
             ImGui::OpenPopup("AddComp");
         }
 
+		ImGui::SetCursorPosX(window_size.x * 0.25f);
+		if (ImGui::Button("Add Script", ImVec2{ window_size.x * 0.5f,0.0f })) {
+			ImGui::OpenPopup("AddScript");
+		}
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
@@ -257,7 +262,8 @@ namespace idk {
                     displayName == "Name" ||
 					displayName == "Tag" ||
 					displayName == "Layer" ||
-                    displayName == "PrefabInstance")
+                    displayName == "PrefabInstance" ||
+					displayName == "MonoBehavior")
                     continue;
 
                 //Comment/Uncomment this to remove text fluff 
@@ -279,6 +285,21 @@ namespace idk {
             }
             ImGui::EndPopup();
         }
+
+		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
+			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
+			if (script_env == nullptr)
+				ImGui::Text("Scripts not loaded!");
+
+			span componentNames = script_env->GetBehaviorList();
+			for (const char* name : componentNames) {
+				if (ImGui::MenuItem(name)) {
+					for (Handle<GameObject> i : gos)
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
+				}
+			}
+			ImGui::EndPopup();
+		}
 
         ImGui::EndChild();
     }
@@ -602,7 +623,7 @@ namespace idk {
 				}
 
 				ImGui::NewLine();
-				ImGui::ProgressBar(c_anim->layers[0].normalized_time, ImVec2{ -1, 10 }, nullptr);
+				ImGui::ProgressBar(layer.normalized_time, ImVec2{ -1, 10 }, nullptr);
 				ImGui::NewLine();
 				//ImGui::Unindent(25);
 			}
@@ -632,8 +653,8 @@ namespace idk {
 					ImGui::SameLine();
 					ImGui::Text(curr_state.first.c_str());
 					auto& state_data = *curr_state.second.GetBasicState();
-					ImGuidk::InputResource("Animation Clip", &state_data.motion);
-					ImGui::Checkbox("Loop", &curr_state.second.loop);
+					ImGuidk::InputResource(imgui_name("Animation Clip", curr_state.first).c_str(), &state_data.motion);
+					ImGui::Checkbox(imgui_name("Loop", curr_state.first).c_str(), &curr_state.second.loop);
 				}
 				
 				ImGui::Unindent(50);
@@ -728,6 +749,28 @@ namespace idk {
 		ImGui::SameLine();
 		ImGui::Text(c_bone->_bone_name.c_str());
 		ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+	}
+
+	template<>
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<AudioSource> c_audiosource)
+	{
+		//Draw All your custom variables here.
+		if (ImGui::Button("Add AudioClip")) {
+			//Add Audio
+		}
+		ImGui::Text("AudioClips");
+		ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth()-10, 200), true);
+		ImGui::Text("Audio1");
+		ImGui::SameLine();
+		ImGui::SmallButton("X");
+		ImGui::SameLine();
+		ImGui::ArrowButton("Play", ImGuiDir_Right);
+
+		ImGui::EndChild();
+
+		displayVal(*c_audiosource);
+
+
 	}
 
 	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
@@ -835,6 +878,9 @@ namespace idk {
                 DisplayComponentInner(handle_cast<Bone>(component));
             else if (component.is_type<Animator>())
                 DisplayComponentInner(handle_cast<Animator>(component));
+			else if (component.is_type<AudioSource>())
+				DisplayComponentInner(handle_cast<AudioSource>(component));
+
             else
                 displayVal(*component);
             ImGui::TreePop();
@@ -851,9 +897,14 @@ namespace idk {
 	{
 		if (ImGui::MenuItem("Remove Component")) {
 			IDE& editor = Core::GetSystem<IDE>();
-			for (Handle<GameObject> gameObject : editor.selected_gameObjects)
-				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
 
+			if (editor.selected_gameObjects.size() == 1) {
+				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, editor.selected_gameObjects[0], i));
+			}
+			else {
+				for (Handle<GameObject> gameObject : editor.selected_gameObjects)
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+			}
 		}
 	}
 

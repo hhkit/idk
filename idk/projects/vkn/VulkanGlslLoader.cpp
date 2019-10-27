@@ -32,24 +32,12 @@ namespace idk::vkn
 		//TODO actually get the file name
 		return string(path_to_resource.GetFullPath());
 	}
-	ResourceBundle VulkanGlslLoader::LoadFile(PathHandle path_to_resource)
-	{
-		auto program = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();
-		auto& filepath = path_to_resource;
-		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ);
-		string val = stringify(shader_stream);
-
-		auto shader_enum = GetShaderType(filepath.GetExtension());
-		auto spirv = GlslToSpirv::spirv(val, shader_enum);
-		if (spirv)
-			program->Load(shader_enum, {}, string_view{ r_cast<const char*>((*spirv).data()),hlp::buffer_size(*spirv) });
-
-		return std::move(program);
-	}
 
 	ResourceBundle VulkanGlslLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& meta)
 	{
-		auto program = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>(meta.metadatas[0].guid);
+		auto m = meta.FetchMeta<ShaderProgram>();
+		auto program = m ? Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>(m->guid)
+			: Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();
 		auto& filepath = path_to_resource;
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ);
 		string val = stringify(shader_stream);
@@ -79,16 +67,13 @@ namespace idk::vkn
 		program->Load(shader_enum, {}, val);
 		return program;
 	}
-
-	ResourceBundle VulkanSpvLoader::LoadFile(PathHandle path_to_resource)
-	{
-		auto program = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();
-		return LoadFile(path_to_resource,program);
-	}
-
+	
 	ResourceBundle VulkanSpvLoader::LoadFile(PathHandle handle, const MetaBundle& meta)
 	{
-		auto program = Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>(meta.metadatas[0].guid);
+		auto m = meta.FetchMeta<ShaderProgram>();
+		auto program = m
+			? Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>(m->guid)
+			: Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();
 		return LoadFile(handle, program);
 	}
 

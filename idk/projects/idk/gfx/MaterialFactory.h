@@ -17,7 +17,6 @@ namespace idk
 		: public IFileLoader
 	{
 	public:
-		ResourceBundle LoadFile(PathHandle p) override;
 		ResourceBundle LoadFile(PathHandle p, const MetaBundle& m) override;
 	};
 }

@@ -65,7 +65,6 @@ namespace idk::reflect
 		, Guid
 
 		// projects
-		, vector<SceneManager::SceneBlock>
         , array<string, 32>
 
 		// graphics
@@ -73,6 +72,7 @@ namespace idk::reflect
 		, RscHandle<Material>
 		, RscHandle<MaterialInstance>
         , RscHandle<Texture>
+		, RscHandle<CubeMap>
 		, UniformInstance
 		, UniformInstanceValue
 		, hash_table<string, UniformInstance>

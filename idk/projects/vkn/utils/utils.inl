@@ -134,7 +134,64 @@ namespace idk::vkn::meta
 
 			static constexpr bool value = std::is_same_v< decltype(func(std::declval<Tz>()...)), bool>;
 		};
+
+		template<typename Pack>
+		struct IsSequential : std::false_type
+		{
+		};
+
+		template<template<typename T, T ...> typename Pack, typename T, T...Args>
+		struct IsSequential<Pack<T, Args...>>
+		{
+			static constexpr bool value = std::is_same_v<std::integer_sequence<size_t, static_cast<size_t>(Args)...>, std::make_integer_sequence<size_t, sizeof...(Args)>>;
+		};
+
+		template<typename Pack1, typename Pack2>
+		struct MakeMap;
+
+
+		template<template<typename T1, T1...>typename Pack1, template<typename T2, T2...>typename Pack2, typename T1, typename T2, T1...Args1, T2...Args2>
+		struct MakeMap<Pack1<T1, Args1...>, Pack2<T2, Args2...>>
+		{
+			static const auto make()
+			{
+				return hash_table<T1, T2>{ {Args1, Args2}...};
+			}
+		};
+
+
+		template<typename Enum, typename Tuple, bool is_convertible>
+		struct MappedEnum
+		{
+			inline static const size_t map(Enum e) { return static_cast<size_t>(e); }
+			inline static const std::optional<size_t> map_maybe(Enum e) { return static_cast<size_t>(e); }
+		};
+
+		template<typename Enum, template<typename, Enum...>typename  Pack, Enum...Args>
+		struct MappedEnum<Enum,Pack<Enum,Args...>,false>
+		{
+			inline static size_t map(Enum e)
+			{
+				static const auto map = MakeMap<Pack<Enum, Args...>, std::make_index_sequence<sizeof...(Args)>>::make();
+				return map.find(e)->second;
+			}
+			inline static auto map_maybe(Enum e)
+			{
+				static const auto map = MakeMap<Pack<Enum, Args...>, std::make_index_sequence<sizeof...(Args)>>::make();
+				std::optional<size_t> result{};
+				auto itr = map.find(e);
+				if (itr != map.end())
+					result=itr->second;
+				return result;
+			}
+		};
+
+
+
 	}
+
+	template<typename Pack>
+	struct IsSequential : detail::IsSequential<Pack> {};
 	template<size_t N, template<typename T> typename cond>
 	template<typename Tuple, typename Fn, typename ...Args>
 	void TupleFuncForward<N, cond>::invoke(Tuple& tuple, Fn&& func, Args&& ...args)
@@ -152,6 +209,17 @@ namespace idk::vkn::meta
 	{
 		static auto& test = to_array<Tuple>::value();
 		return test[index];
+	}
+
+	template<typename Enum, typename Tuple>
+	size_t enum_info<Enum, Tuple>::map(Enum e)
+	{
+		return detail::MappedEnum<Enum, Tuple, IsSequential<Tuple>::value>::map(e);
+	}
+	template<typename Enum, typename Tuple>
+	std::optional<size_t> enum_info<Enum, Tuple>::map_maybe(Enum e)
+	{
+		return detail::MappedEnum<Enum, Tuple, IsSequential<Tuple>::value>::map_maybe(e);
 	}
 	template<typename Enum, typename Tuple>
 	constexpr size_t enum_info<Enum, Tuple>::size()

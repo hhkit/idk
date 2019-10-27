@@ -5,6 +5,8 @@
 #include <opengl/program/PipelineProgram.h>
 #include <opengl/system/FrameBufferManager.h>
 
+#include <opengl/PixelData.h>
+
 namespace idk::ogl
 {
 	class Win32GraphicsSystem;
@@ -18,6 +20,10 @@ namespace idk::ogl
 
 		void ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle);
 		void ComputeBRDF(const RscHandle<ogl::Program>&);
+
+		PixelData PickData(const vec2& pos);
+		void IsPicking();
+
 	private:
 		enum VertexShaders
 		{
@@ -46,5 +52,6 @@ namespace idk::ogl
 		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		//RscHandle<ShaderProgram> debug_fragment;
+		bool is_picking = false;
 	};
 }

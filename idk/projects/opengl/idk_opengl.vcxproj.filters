@@ -12,9 +12,6 @@
     <ClInclude Include="resource\OpenGLMesh.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="resource\OpenGLMeshFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="resource\OpenGLTypeDescriptors.h">
       <Filter>resource</Filter>
     </ClInclude>
@@ -39,20 +36,26 @@
     <ClInclude Include="resource\OpenGLCubemap.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="resource\OpenGLCubemapFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="resource\OpenGLTexture.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\OpenGLTextureFactory.h">
-      <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\FrameBufferFactory.h">
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="resource\FrameBuffer.h">
       <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\FrameBufferFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLCubemapFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMeshFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureFactory.h">
+      <Filter>resource\Factories</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -64,9 +67,6 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="resource\OpenGLMesh.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="resource\OpenGLMeshFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="program\PipelineProgram.cpp">
@@ -87,20 +87,23 @@
     <ClCompile Include="resource\OpenGLCubemap.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="resource\OpenGLCubemapFactory.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="resource\OpenGLTexture.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="resource\OpenGLTextureFactory.cpp">
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="resource\FrameBuffer.cpp">
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="resource\FrameBufferFactory.cpp">
-      <Filter>resource</Filter>
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLCubemapFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMeshFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureFactory.cpp">
+      <Filter>resource\Factories</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +115,12 @@
     </Filter>
     <Filter Include="program">
       <UniqueIdentifier>{22d6d055-167f-4e75-8ed2-a5b318137154}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Loaders">
+      <UniqueIdentifier>{55601676-ee9f-439f-a87a-415bde98c146}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Factories">
+      <UniqueIdentifier>{7a885676-83af-4b16-80a8-ca7386eb8f2a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

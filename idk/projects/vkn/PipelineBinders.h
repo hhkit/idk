@@ -2,13 +2,34 @@
 #include <idk.h>
 #include <vkn/utils/utils.inl>
 #include <gfx/Camera.h>
+#include <vkn/utils/utils.h>
 namespace idk
 {
+
 	struct RenderObject;
 	struct AnimatedRenderObject;
 
 	namespace vkn
 	{
+		enum class PbrCubeMapVars
+		{
+			eIrradiance,
+			eEnvironmentProbe,
+		};
+		using PbrCubeMapVarsPack = meta::enum_pack< PbrCubeMapVars,
+			PbrCubeMapVars::eIrradiance,
+			PbrCubeMapVars::eEnvironmentProbe
+		>;
+		using PbrCubeMapVarsInfo = meta::enum_info < PbrCubeMapVars, PbrCubeMapVarsPack>;
+		enum class PbrTexVars
+		{
+			eBrdfLut, //Brdf LookUp Table
+		};
+		using PbrTexVarsPack = meta::enum_pack< PbrTexVars,
+			PbrTexVars::eBrdfLut //Brdf LookUp Table
+		>;
+		using PbrTexVarsInfo = meta::enum_info < PbrTexVars, PbrTexVarsPack>;
+	
 		class  PipelineThingy;
 		struct GraphicsState;
 
@@ -51,7 +72,27 @@ namespace idk
 			const GraphicsState& State();
 			string light_block;
 			mat4 view_trf, pbr_trf, proj_trf;
+
+			string                     pbr_cube_map_names[PbrCubeMapVarsInfo::size()];
+			vector<RscHandle<CubeMap>> pbr_cube_maps;
+			vector<RscHandle<Texture>> pbr_texs;
+
+			vector<std::pair<size_t,size_t>> pbr_cube_maps_ranges;
+			vector<std::pair<size_t,size_t>> pbr_texs_ranges;
+
+			void LoadStuff(const GraphicsState& vstate);
+
+			void ResetCubeMaps(size_t reserve_size = 4);
+			void AddCubeMaps(PbrCubeMapVars var, span<const RscHandle<CubeMap>> Cube_maps);
+			span<const RscHandle<CubeMap>> GetCubeMap(PbrCubeMapVars var)const;
+
+			void ResetTexVars(size_t reserve_size = 4);
+			void AddTexVars(PbrTexVars var, span<const RscHandle<Texture>> Env_maps);
+			span<const RscHandle<Texture>> GetTexVars(PbrTexVars var)const;
+
+			
 			void SetState(const GraphicsState& vstate);
+
 
 			void Bind(PipelineThingy& the_interface, const RenderObject& dc)override;
 		};

@@ -8,12 +8,9 @@ namespace idk
 		: public IFileLoader
 	{
 	public:
-		ResourceBundle LoadFile(PathHandle path_to_resource) override;
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 
 	private:
-		ResourceBundle Load_stbi(PathHandle path_to_resource);
-		ResourceBundle Load_DDS(PathHandle path_to_resource);
 		ResourceBundle Load_stbi(PathHandle path_to_resource, const MetaBundle& path_to_meta);
 		ResourceBundle Load_DDS(PathHandle path_to_resource, const MetaBundle& path_to_meta);
 

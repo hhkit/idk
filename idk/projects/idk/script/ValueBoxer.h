@@ -13,7 +13,7 @@ namespace idk::mono
 	class ManagedObject;
 
 	template<typename T, typename = sfinae<!std::is_class_v<T>>>
-	std::decay_t<T> box(T & obj) { return box; }
+	std::decay_t<T> box(T & obj) { return obj; }
 
 	template<typename T>
 	uint64_t box(Handle<T> obj) { return obj.id; }

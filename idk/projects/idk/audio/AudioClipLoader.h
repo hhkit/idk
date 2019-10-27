@@ -17,7 +17,6 @@ namespace idk
 	{
 
 	public:
-		ResourceBundle LoadFile(PathHandle filepath) override;
 		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& metabundle) override;
 	};
 }

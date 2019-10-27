@@ -9,7 +9,6 @@ namespace idk
 		: public IFileLoader
 	{
 	public:
-		ResourceBundle LoadFile(PathHandle path_to_resource) override;
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 
 		// Keywords

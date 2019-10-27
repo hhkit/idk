@@ -20,40 +20,29 @@ namespace idk
 		using SceneGraph = SceneGraphBuilder::SceneGraph;
 		struct iterator;
 
-		struct SceneBlock
-		{
-			unsigned char          build_index{};
-			RscHandle<class Scene> scene;
-		};
-
-		vector<SceneBlock> _scenes;        // public for reflection to use, please don't touch
 		RscHandle<Scene>   _startup_scene; // public for reflection to use, please don't touch
 		RscHandle<Scene>   _active_scene;  // public for reflection to use, please don't touch
 
-
 		// accessors
 		RscHandle<Scene>       GetSceneByBuildIndex(unsigned char index) const;
-		span<const SceneBlock> GetScenes() const;
-
-		// modifiers
-		RscHandle<Scene>    CreateScene();
-
+		
 		// properties
 		RscHandle<Scene>    StartupScene() const;
 		// true if successfully set, false otherwise
 		bool                StartupScene(RscHandle<Scene> scene);
 
-		RscHandle<Scene> GetActiveScene();
-		RscHandle<Scene> GetPrefabScene();
+		RscHandle<Scene> GetActiveScene() const;
+		RscHandle<Scene> GetPrefabScene() const;
 		bool  SetActiveScene(RscHandle<Scene> s);
 
-		void DestroyObjects(span<GameObject> objs);
+		void DestroyQueuedObjects(span<GameObject> objs);
 
 		void BuildSceneGraph(span<const GameObject> objs);
 		SceneGraph& FetchSceneGraph();
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
 
 	private:
+		friend class Scene;
 		void Init() override;
 		void LateInit() override;
 		void EarlyShutdown() override;
@@ -62,5 +51,6 @@ namespace idk
 		GameState*         _gs { nullptr };
 		SceneGraphBuilder  _sg_builder;
 		RscHandle<Scene>   _prefab_scene;
+		array<RscHandle<Scene>, 0x82> _scenes;
 	};
 }

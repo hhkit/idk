@@ -34,7 +34,7 @@ namespace idk::mono
 			dst_file << src_file.rdbuf();
 		}
 		else
-			LOG_TO(LogPool::FATAL, "Could not detect game dll!");
+			LOG_CRASH("Could not detect game dll!");
 
 		if (Core::GetSystem<FileSystem>().ExistsFull(path_to_used_dll))
 		{
@@ -42,7 +42,7 @@ namespace idk::mono
 			script_environment->Init();
 		}
 		else
-			LOG_TO(LogPool::FATAL, "Could not copy game dll!");
+			LOG_CRASH("Could not copy game dll!");
 	}
 
 	void ScriptSystem::UnloadGameScripts()
@@ -70,8 +70,8 @@ namespace idk::mono
 			{
 				if (fatal)
 				{
-					LOG_TO(LogPool::FATAL, "Fatal Game Error");
-					LOG_TO(LogPool::FATAL, message);
+					LOG_TO(LogPool::GAME, "Fatal Game Error");
+					LOG_TO(LogPool::GAME, message);
 				}
 				else
 					LOG_TO(LogPool::GAME, message);
@@ -109,8 +109,7 @@ namespace idk::mono
 	void ScriptSystem::ScriptStart(span<Behavior> behaviors)
 	{
 		for (auto& elem : behaviors)
-			if (elem.enabled)
-				elem.Awake();
+			elem.Awake();
 
 		for (auto& elem : behaviors)
 			if (elem.enabled)
@@ -140,7 +139,7 @@ namespace idk::mono
 	{
 	}
 
-	MonoEnvironment& ScriptSystem::Environment() const
+	MonoWrapperEnvironment& ScriptSystem::Environment() const
 	{
 		return *main_environment;
 	}

@@ -31,6 +31,17 @@ namespace idk
 		out = object_buffer.at(curr_draw_buffer).skinned_mesh_render;
 	}
 
+	size_t GraphicsSystem::AddRenderRequest(CameraData camera, vector<RenderObject> mesh_render, vector<AnimatedRenderObject> skinned_mesh_render, vector<SkeletonTransforms> skeleton_transforms)
+	{
+		//Todo: Add shaders
+		return render_requests.emplace_back(SpecialRenderBuffer{ camera,mesh_render,skinned_mesh_render,skeleton_transforms,false });
+	}
+
+	bool GraphicsSystem::RenderRequestStatus(size_t index)
+	{
+		return render_requests[index].done_flag;
+	}
+
 	void GraphicsSystem::LateInit()
 	{
 		LoadShaders();
@@ -138,12 +149,15 @@ namespace idk
 
 	void GraphicsSystem::LoadShaders()
 	{
-		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
+		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert",false);
 		if(tmp)
 			mesh_vtx = *tmp;
-		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-		if(tmp)
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert", false);
+		if (tmp)
 			skinned_mesh_vtx = *tmp;
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
+		if (tmp)
+			convoluter = *tmp;
 		LoadShaderImpl();
 	}
 

@@ -20,6 +20,10 @@
 
 #include <vkn/VknRenderTarget.h>
 
+#include <vkn/VknCubeMapLoader.h>
+#include <vkn/VknTextureLoader.h>
+#include <vkn/VknFrameBufferFactory.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -58,12 +62,13 @@ bool operator<(const idk::RscHandle<idk::RenderTarget>& lhs, const idk::RscHandl
 
 namespace idk::vkn
 {
-
-	struct SomeHackyThing
+	struct VulkanWin32GraphicsSystem::Pimpl
 	{
-		VulkanPipeline pipeline;
+		std::unique_ptr<hlp::MemoryAllocator> allocator;
+		vk::UniqueFence fence;
+		RscHandle<Texture> BrdfLookupTable;
 	};
-	static SomeHackyThing thing;
+
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
 	}
@@ -80,6 +85,80 @@ namespace idk::vkn
 		_pm = std::make_unique<PipelineManager>();
 		_pm->View(instance_->View());
 
+		_pimpl = std::make_unique<Pimpl>();
+		_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());
+		_pimpl->fence = instance_->View().Device()->createFenceUnique({});
+	}
+	void VulkanWin32GraphicsSystem::RenderBRDF(RscHandle<ShaderProgram> prog)
+	{
+		auto& view = instance_->View();
+		;
+		vk::CommandBufferAllocateInfo ai
+		{
+			*view.Commandpool(),vk::CommandBufferLevel::ePrimary,1
+		};
+		auto ucmd_buffer = view.Device()->allocateCommandBuffersUnique(ai);
+		vk::CommandBuffer cmd_buffer = *ucmd_buffer.front();
+		auto brdf_texture = _pimpl->BrdfLookupTable;
+		pipeline_config brdf_config ;
+
+		auto shaders = {
+			*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert", false),
+			RscHandle<ShaderProgram>{prog}
+		};
+
+		auto& brdf_pipeline = _pm->GetPipeline(brdf_config, shaders, 0);
+		FrameBufferBuilder builder;
+		builder.Begin(brdf_texture->Size());
+		builder.AddAttachment(
+			AttachmentInfo
+			{
+				LoadOp::eDontCare,
+				StoreOp::eStore,
+				{},
+				{},
+				brdf_texture
+			}
+		);
+		auto fb = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());
+				
+		cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+		auto& vfb = fb.as<VknFrameBuffer>();
+		vk::RenderPassBeginInfo rpbi
+		{
+			vfb.GetRenderPass(),vfb.GetFramebuffer(),
+			vk::Rect2D
+			{
+				vk::Offset2D{},vk::Extent2D{s_cast<uint32_t>(vfb.Size().x),s_cast<uint32_t>(vfb.Size().y)}
+			},1,& vk::ClearValue{vk::ClearColorValue{}}
+		};
+			
+		cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
+		
+		VulkanMesh& mesh =  Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+		auto req = renderer_reqs{};
+		req.requirements = {
+			std::make_pair(vtx::Attrib::Position, 0),
+			std::make_pair(vtx::Attrib::UV, 1) };
+		for (auto&& [attrib, location] : req.requirements)
+		{
+			auto& attrib_buffer = mesh.Get(attrib);
+			cmd_buffer.bindVertexBuffers(*brdf_pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+		}
+
+		auto& oidx = mesh.GetIndexBuffer();
+		if (oidx)
+		{
+			cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
+			cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+		}
+		cmd_buffer.endRenderPass();
+		cmd_buffer.end();
+		
+		instance_->View().GraphicsQueue().submit(vk::SubmitInfo
+			{
+				0,nullptr,nullptr,1,&cmd_buffer
+			}, vk::Fence{});
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
@@ -93,7 +172,19 @@ namespace idk::vkn
 			frame.SetPipelineManager(*_pm);
 		}
 		instance_->imguiEnabled = s_cast<bool>(&Core::GetSystem<IEditor>());
-		TestFunc();
+
+		auto& brdf_texture =  _pimpl->BrdfLookupTable = Core::GetResourceManager().Create<Texture>();
+
+		auto m = brdf_texture->GetMeta();
+		m.internal_format = ColorFormat::RGF_16;
+		brdf_texture->SetMeta(m);
+		brdf_texture->Size(ivec2{ 512 });
+
+		TextureLoader loader;
+		TextureOptions options{ brdf_texture->GetMeta() };
+		TexCreateInfo info = ColorBufferTexInfo(brdf_texture->Size().x, brdf_texture->Size().y);
+		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
+		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
 	/*
 	vector<IBufferedObj*> GetBufferedResources(vector<GraphicsState>& states)
@@ -145,6 +236,7 @@ namespace idk::vkn
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
 
+
 		//auto copy_cams = curr_buffer.light_camera_data;
 		//std::copy(curr_buffer.camera.begin(), curr_buffer.camera.end(), std::back_inserter(copy_cams));
 		//std::swap(copy_cams, curr_buffer.camera);
@@ -156,10 +248,12 @@ namespace idk::vkn
 		SharedGraphicsState shared_graphics_state;
 		auto& lights = curr_buffer.lights;
 		shared_graphics_state.Init(lights);
+		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
 
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
 		pre_render_data.active_lights.resize(lights.size());
+		pre_render_data.cameras = &curr_buffer.camera;
 
 		//TODO cull the unused lights
 		for (size_t i = 0; i < lights.size(); ++i)
@@ -174,6 +268,31 @@ namespace idk::vkn
 		{
 			return camera.clear_data.index() == meta::IndexOf <std::remove_const_t<decltype(camera.clear_data)>, DontClear>::value;
 		};
+		for (auto& camera : curr_buffer.camera)
+		{
+			auto& pimpl = _pimpl;
+			std::visit([&](auto& clear)
+				{
+					if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
+					{
+						RscHandle<CubeMap> cubemap = clear;
+						VknCubemap& cm = cubemap.as<VknCubemap>();
+						RscHandle<VknCubemap> conv = cm.GetConvoluted();
+						if (RscHandle < VknCubemap>{} == conv)
+						{
+							conv = Core::GetResourceManager().Create<VknCubemap>();
+							conv->Size(cubemap->Size());
+							CubemapLoader loader;
+							CubemapOptions options{cm.GetMeta()};
+							CMCreateInfo info = CMColorBufferTexInfo(cubemap->Size().x, cubemap->Size().y);
+							info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
+							loader.LoadCubemap(conv.as<VknCubemap>(), *pimpl->allocator, *pimpl->fence, options, info, {});
+							cm.SetConvoluted(conv);
+						}
+					}
+				}, camera.clear_data);
+		}
+
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
@@ -228,6 +347,7 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		_pimpl.reset();
 		_debug_renderer->Shutdown();
 
 		this->_pm.reset();

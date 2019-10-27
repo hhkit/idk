@@ -1,50 +1,37 @@
 #pragma once
-#include <idk.h>
-
+#include <string_view>
+#include <atomic>
 #include <mutex>
-
-#include <core/ISystem.h>
+#include <event/Signal.h>
+#include <meta/casts.h>
 #include <debug/LogPools.h>
-#include <ds/circular_buffer.h>
 
 namespace idk
 {
-
-	class LogSystem
-		: public ISystem
+	using string_view = std::string_view;
+	class LogSingleton
 	{
 	public:
+		using PrefaceType = string_view;
+		using MessageType = string_view;
+		using LogSignal = Signal<LogLevel, PrefaceType, MessageType>;
 
-		~LogSystem();
+		~LogSingleton();
 
-		void LogMessage(LogPool pool, string_view message);
-		void FlushLog(LogPool pool);
-
-		template<typename Functor>
-		void Process(LogPool pool, Functor&& functor);
-
+		void LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message);
+		void LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message, va_list);
 		void PipeToCout(LogPool pool, bool pipe = false);
+
+		LogSignal& SignalFor(LogPool);
+
+		static LogSingleton& Get();
 	private:
 		struct Log
 		{
-			circular_buffer<string, 128> buffer {};
-			//atomic<bool> writing{ false };
-			atomic<bool> direct_to_cout{ false };
-			void Post(string_view msg);
+			LogSignal signal;
+			std::atomic<bool> direct_to_cout{ false };
 		};
 
-		array<Log, s_cast<size_t>(LogPool::COUNT)> logs;
-
-		void Init()     noexcept override {}
-		void Shutdown() noexcept override {}
+		array<Log, static_cast<size_t>(LogPool::COUNT)> logs;
 	};
-
-	template<typename Functor>
-	inline void LogSystem::Process(LogPool pool, Functor&& functor)
-	{
-		auto& buffer = logs[s_cast<size_t>(pool)].buffer;
-
-		for (auto& elem : buffer)
-			functor(elem);
-	}
 }

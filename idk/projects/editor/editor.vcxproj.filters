@@ -120,6 +120,9 @@
     <ClInclude Include="windows\IGE_AnimatorWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_AddBehavior.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -219,6 +222,7 @@
     <ClCompile Include="windows\IGE_AnimatorWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
+    <ClCompile Include="commands\CMD_AddBehavior.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

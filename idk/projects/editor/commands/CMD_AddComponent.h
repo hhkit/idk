@@ -5,7 +5,7 @@
 //@date		10 SEPT 2019
 //@brief	Adds components to gameobjects
 //////////////////////////////////////////////////////////////////////////////////
-
+#pragma once
 
 #include <editor/commands/ICommand.h>
 #include <core/GameObject.h>
@@ -21,7 +21,7 @@ namespace idk {
 
 		virtual bool undo() override;
 
-	private:
+	protected:
 
 		GenericHandle		new_component_handle	{};
 		const string		component_name			{};

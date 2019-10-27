@@ -15,7 +15,6 @@ namespace idk
 	class SceneLoader
 		: public IFileLoader
 	{
-		ResourceBundle LoadFile(PathHandle filepath) noexcept override;
 		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
 	};
 }

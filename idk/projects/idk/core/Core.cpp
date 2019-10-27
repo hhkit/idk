@@ -66,6 +66,7 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,                 "Test system until scripts are up");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
 			                                      .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
+		_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&PhysicsSystem::FirePhysicsEvents,     "Trigger and Collision Events");
 		
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
@@ -78,14 +79,14 @@ namespace idk
         _scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems")
 												  .IfPausedThen(&ParticleSystemUpdater::EditorUpdate);
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 
 		if (editor)
 		{
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchDirectory,      "Watch files");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&IEditor::EditorUpdate,                "Editor Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyObjects,         "Destroy Objects Again");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects Again");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");

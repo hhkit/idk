@@ -10,6 +10,7 @@
 #include <gfx/RenderObject.h>
 #include <gfx/MaterialInstance.h>
 
+#include <vkn/VknCubemap.h>
 
 #include <vkn/utils/utils.inl>
 
@@ -111,7 +112,83 @@ namespace idk::vkn
 		light_block = PrepareLightBlock(cam, *state.lights);
 		view_trf = cam.view_matrix;
 		pbr_trf = view_trf.inverse();
+		LoadStuff(vstate);
 	}
+
+	template<typename T>
+	span<const T> get_span(const std::vector<T>& vec)
+	{
+		return span<const T>{vec.data(),vec.data()+vec.size()};
+	}
+
+	void PbrFwdBindings::LoadStuff(const GraphicsState& vstate)
+	{
+		ResetCubeMaps();
+		pbr_cube_map_names[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = "irradiance_probe";
+		pbr_cube_map_names[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eEnvironmentProbe>()] = "environment_probe";
+
+
+		vector<RscHandle<CubeMap>> cube_maps[PbrCubeMapVarsInfo::size()] = {};
+		//TODO: actually bind something.
+		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = {
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			? RscHandle<CubeMap>{std::get<RscHandle<CubeMap>>(vstate.camera.clear_data).as<VknCubemap>().GetConvoluted() } : RscHandle <CubeMap>{}
+		};
+		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eEnvironmentProbe>()] = {
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			? std::get<RscHandle<CubeMap>>(vstate.camera.clear_data) : RscHandle < CubeMap>{}
+		};
+		AddCubeMaps(PbrCubeMapVars::eIrradiance, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eIrradiance)]));
+		AddCubeMaps(PbrCubeMapVars::eEnvironmentProbe, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eEnvironmentProbe)]));
+	}
+
+	void PbrFwdBindings::ResetCubeMaps(size_t reserve_size)
+	{
+		pbr_cube_maps.clear();
+		pbr_cube_maps.reserve(reserve_size);
+		pbr_cube_maps_ranges.clear();
+		pbr_cube_maps_ranges.resize(PbrCubeMapVarsInfo::size(), { 0,0 });
+	}
+
+	void PbrFwdBindings::AddCubeMaps(PbrCubeMapVars var, span<const RscHandle<CubeMap>> Cube_maps)
+	{
+		size_t start = pbr_cube_maps.size();
+		size_t end = pbr_cube_maps.size() + Cube_maps.size();
+		pbr_cube_maps.insert(pbr_cube_maps.end(), Cube_maps.begin(), Cube_maps.end());
+		pbr_cube_maps_ranges[PbrCubeMapVarsInfo::map(var)] = std::make_pair(start, end);
+	}
+
+	span<const RscHandle<CubeMap>> PbrFwdBindings::GetCubeMap(PbrCubeMapVars var) const
+	{
+		auto [start,end] = pbr_cube_maps_ranges[PbrCubeMapVarsInfo::map(var)];
+		span<const RscHandle<CubeMap>> result{ std::data(pbr_cube_maps)+start,std::data(pbr_cube_maps)+end};
+		return result;
+	}
+
+
+	void PbrFwdBindings::ResetTexVars(size_t reserve_size)
+	{
+		pbr_texs.clear();
+		pbr_texs.reserve(reserve_size);
+		pbr_texs_ranges.clear();
+		pbr_texs_ranges.resize(PbrTexVarsInfo::size(), { 0,0 });
+	}
+
+	void PbrFwdBindings::AddTexVars(PbrTexVars var, span<const RscHandle<Texture>> tex_vars)
+	{
+		size_t start = pbr_texs.size();
+		size_t end = pbr_texs.size() + tex_vars.size();
+		pbr_texs.insert(pbr_texs.end(), tex_vars.begin(), tex_vars.end());
+		pbr_texs_ranges[PbrTexVarsInfo::map(var)] = std::make_pair(start, end);
+	}
+
+	span<const RscHandle<Texture>> PbrFwdBindings::GetTexVars(PbrTexVars var) const
+	{
+		auto [start, end] = pbr_texs_ranges[PbrTexVarsInfo::map(var)];
+		span<const RscHandle<Texture>> result{ std::data(pbr_texs) + start,std::data(pbr_texs) + end };
+		return result;
+	}
+
 
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
@@ -119,6 +196,8 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
 		uint32_t i = 0;
+
+
 		if (state.shadow_maps_2d.size() == 0)
 		{
 			//Make sure that it's there.
@@ -137,6 +216,16 @@ namespace idk::vkn
 				}
 			}
 		}
+
+		for (size_t i = 0; i < std::size(pbr_cube_map_names); ++i)
+		{
+			uint32_t index = 0;
+			auto [start, end] = pbr_cube_maps_ranges[i];
+			auto cm_span = span<const RscHandle<CubeMap>>{ pbr_cube_maps.data()+start,pbr_cube_maps.data() + end};
+			for (auto& cm : cm_span)
+				the_interface.BindSampler(pbr_cube_map_names[i], index++, cm.as<VknCubemap>());
+		}
+
 		//TODO change to cubemap stuff
 		//Bind the shadow cube maps
 		//for (auto& shadow_map : state.shadow_maps_cube)

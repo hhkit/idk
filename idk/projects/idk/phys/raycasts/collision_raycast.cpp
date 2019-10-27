@@ -199,6 +199,8 @@ namespace idk::phys
 
 		auto disp_to_sphere = (lhs.origin - s.center);
 
+		//disp_to_sphere = disp_to_sphere.normalize();
+
 		//Calculating using quadratic equation formula (but this is just a fast way to test if ray collides, not resolution)
 		const real	b = dot(disp_to_sphere, lhs.direction());
 		const real	c = dot(disp_to_sphere, disp_to_sphere) - s.radius_sq();
@@ -214,7 +216,7 @@ namespace idk::phys
 			return res;
 		}
 
-		const real	discri = b * b - c;
+		const real discri = b * b - c;
 
 		if (discri < 0.f)
 		{
@@ -227,7 +229,7 @@ namespace idk::phys
 			return res;
 		}
 
-		const real	sq_discri = sqrtf(abs(discri));
+		const real	sq_discri = sqrtf(discri);
 		real t = -b - sq_discri;
 
 		//ray is in sphere
@@ -236,6 +238,7 @@ namespace idk::phys
 
 		//pt collision
 		std::cout << "sphere::hit" << "\n";
+		//const vec3 poc = lhs.origin - lhs.velocity * t;
 		const vec3 poc = lhs.get_point_after(t);
 
 		return raycast_success{false,poc,lhs.origin.distance(poc) };

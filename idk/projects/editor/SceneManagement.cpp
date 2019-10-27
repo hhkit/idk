@@ -18,7 +18,7 @@ namespace idk
 	{
 		if (Core::GetSystem<SceneManager>().GetActiveScene())
 			Core::GetSystem<SceneManager>().GetActiveScene()->Unload();
-		Core::GetSystem<SceneManager>().SetActiveScene(Core::GetSystem<SceneManager>().CreateScene());
+		Core::GetSystem<SceneManager>().SetActiveScene(Core::GetResourceManager().Create<Scene>());
 		auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		active_scene->Load();
 
@@ -92,13 +92,11 @@ namespace idk
 		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		auto path = [&]() -> opt<string>
 		{
-			{
-				auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
-				if (dialog_result)
-					return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-				else
-					return std::nullopt;
-			}
+			auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
+			if (dialog_result)
+				return Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
+			else
+				return std::nullopt;
 		}();
 
 		if (path)
@@ -107,8 +105,13 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			Core::GetResourceManager().Rename(curr_scene, p);
-			Core::GetResourceManager().Save(curr_scene);
+			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
+			if (res)
+			{
+				curr_scene->Unload();
+				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
+				Core::GetSystem<SceneManager>().GetActiveScene()->Load();
+			}
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}

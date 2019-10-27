@@ -34,6 +34,9 @@ namespace idk
 		// The function signature, which is: void Fn(Args...)
 		using Fn = function<void(Params...)>;
 
+
+		size_t ListenerCount() const { return _slots.size(); }
+
 		// Listens for this signal. Pass in a function of signature: void fn(Ts...)
 		// Returns a SlotId, unique only for this signal. Use it to unlisten.
 		template<typename Func>

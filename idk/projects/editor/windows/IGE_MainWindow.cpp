@@ -400,6 +400,7 @@ namespace idk {
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
+				Core::GetSystem<PhysicsSystem>().Reset();
 			}
 			ImGui::SameLine(0, 0);
 			if (ImGui::Button("Reload DLL", toolButtonSize))

@@ -227,6 +227,7 @@
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
     <ClInclude Include="RenderStateV2.h" />
+    <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="utils\FrameObjects.h" />
@@ -239,11 +240,15 @@
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
+    <ClInclude Include="VknCubemap.h" />
+    <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFrameBuffer.h" />
     <ClInclude Include="VknFramebufferFactory.h" />
     <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VknTextureLoader.h" />
+    <ClInclude Include="VulkanCbmLoader.h" />
+    <ClInclude Include="VulkanCubemapFactory.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanHashes.h" />
     <ClInclude Include="VulkanPngLoader.h" />
@@ -287,6 +292,7 @@
     <ClCompile Include="RegisterVulkanFactories.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="RenderStateV2.cpp" />
+    <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="UboManager.cpp" />
@@ -297,6 +303,8 @@
     <ClCompile Include="ValHandler.cpp" />
     <ClCompile Include="vector_buffer.cpp" />
     <ClCompile Include="GfxConverters.cpp" />
+    <ClCompile Include="VknCubemap.cpp" />
+    <ClCompile Include="VknCubeMapLoader.cpp" />
     <ClCompile Include="VknFrameBuffer.cpp" />
     <ClCompile Include="VknFramebufferFactory.cpp" />
     <ClCompile Include="VknRenderTarget.cpp" />
@@ -306,6 +314,8 @@
     <ClCompile Include="VknMeshModder.cpp" />
     <ClCompile Include="VknTexture.cpp" />
     <ClCompile Include="VknTextureLoader.cpp" />
+    <ClCompile Include="VulkanCbmLoader.cpp" />
+    <ClCompile Include="VulkanCubemapFactory.cpp" />
     <ClCompile Include="VulkanDebugRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

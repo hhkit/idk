@@ -12,75 +12,6 @@
 
 namespace idk
 {
-	RscHandle<Scene> SceneManager::StartupScene() const
-	{
-		return _startup_scene;
-	}
-
-	bool SceneManager::StartupScene(RscHandle<Scene> scene)
-	{
-		for (auto& elem : _scenes)
-		{
-			if (elem.scene == scene)
-			{
-				_startup_scene = scene;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	RscHandle<Scene> SceneManager::GetSceneByBuildIndex(unsigned char index) const
-	{
-		if (index == 0x81)
-			return _prefab_scene;
-
-		for (auto& elem : _scenes)
-		{
-			if (elem.build_index == index)
-				return elem.scene;
-		}
-		return RscHandle<Scene>{};
-	}
-
-	// fuck you C++
-	span<SceneManager::SceneBlock const> SceneManager::GetScenes() const
-	{
-		return span<const SceneBlock>(_scenes);
-	}
-
-	RscHandle<Scene> SceneManager::CreateScene()
-	{
-		unsigned char build_index = 0;
-		while (build_index < 0x80)
-		{
-			bool valid = true;
-			for (auto& elem : _scenes)
-			{
-				if (elem.build_index == build_index)
-				{
-					valid = false;
-					break;
-				}
-			}
-
-			if (valid)
-				break;
-			else
-				build_index++;
-		}
-
-		auto retval = Core::GetResourceManager().LoaderEmplaceResource<Scene>(build_index);
-		_scenes.emplace_back(
-			SceneBlock{ 
-				build_index, 
-				retval
-			});
-
-		return retval;
-	}
-
 	void SceneManager::Init()
 	{
 		Core::GetResourceManager().RegisterFactory<SceneFactory>();
@@ -111,12 +42,35 @@ namespace idk
 	{
 	}
 
-	RscHandle<Scene> SceneManager::GetActiveScene()
+	RscHandle<Scene> SceneManager::StartupScene() const
+	{
+		return _startup_scene;
+	}
+
+	bool SceneManager::StartupScene(RscHandle<Scene> scene)
+	{
+		if (scene)
+		{
+			_startup_scene = scene;
+			return true;
+		}
+		return false;
+	}
+
+	RscHandle<Scene> SceneManager::GetSceneByBuildIndex(unsigned char index) const
+	{
+		if (index == 0x81)
+			return _prefab_scene;
+
+		return _scenes[index];
+	}
+
+	RscHandle<Scene> SceneManager::GetActiveScene() const
 	{
 		return _active_scene;
 	}
 
-	RscHandle<Scene> SceneManager::GetPrefabScene()
+	RscHandle<Scene> SceneManager::GetPrefabScene() const
 	{
 		return _prefab_scene;
 	}
@@ -127,7 +81,7 @@ namespace idk
 		return true;
 	}
 
-	void SceneManager::DestroyObjects(span<GameObject> objs)
+	void SceneManager::DestroyQueuedObjects(span<GameObject> objs)
 	{
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
 			[](const auto& lhs, const auto& rhs)
