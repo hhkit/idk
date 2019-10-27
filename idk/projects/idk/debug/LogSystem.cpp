@@ -1,45 +1,52 @@
 #include "stdafx.h"
 #include "LogSystem.h"
 #include <iostream>
-
+#include <cstdio>
 namespace idk
 {
-	LogSystem::~LogSystem()
+	LogSingleton::~LogSingleton()
 	{
 		std::cerr.flush();
 	}
-	void LogSystem::LogMessage(LogPool pool, string_view message)
+	void LogSingleton::LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message)
 	{
 		auto& log = logs[s_cast<size_t>(pool)];
-		log.Post(message);
+
+		if (log.direct_to_cout || log.signal.ListenerCount() == 0)
+			std::cerr << message << '\n';
+
+		log.signal.Fire(level, preface, message);
 		if (pool != LogPool::ANY)
-			logs.front().Post(message);
-
-		if (log.direct_to_cout)
-			std::cout << message << '\n';
+			logs[s_cast<int>(LogPool::ANY)].signal.Fire(level, preface, message);
 	}
-
-	void LogSystem::FlushLog(LogPool pool)
+	void LogSingleton::LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message, va_list args)
 	{
-		auto& buffer = logs[s_cast<size_t>(pool)].buffer;
-		auto tst = buffer.begin();
-		buffer.erase(buffer.begin(), buffer.end());
+		char buf [256];
+		auto& log = logs[s_cast<size_t>(pool)];
+		
+		vsprintf_s(buf, message.data(), args);
+
+		if (log.direct_to_cout || log.signal.ListenerCount() == 0)
+			std::cerr << buf << '\n';
+
+		log.signal.Fire(level, preface, buf);
+		if (pool != LogPool::ANY)
+			logs[s_cast<int>(LogPool::ANY)].signal.Fire(level, preface, message);
 	}
 
-	void LogSystem::PipeToCout(LogPool pool, bool pipe)
+	void LogSingleton::PipeToCout(LogPool pool, bool pipe)
 	{
 		logs[s_cast<size_t>(pool)].direct_to_cout.store(pipe);
 	}
 
-	void LogSystem::Log::Post(string_view msg)
+	LogSingleton::LogSignal& LogSingleton::SignalFor(LogPool pool)
 	{
-		// lock
-		// bool curr_gate = false;
+		return logs[s_cast<size_t>(pool)].signal;
+	}
 
-		//while (writing.compare_exchange_strong(curr_gate, true, std::memory_order_acquire)); 
-		buffer.emplace_back(string{ msg });
-
-		// unlock
-		//writing.store(false);
+	LogSingleton& LogSingleton::Get()
+	{
+		static LogSingleton myers;
+		return myers;
 	}
 }

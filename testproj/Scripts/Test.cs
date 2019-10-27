@@ -15,13 +15,13 @@ namespace TestAndSeek
 
         public Test()
         {
-            System.Console.WriteLine("Test is constructed");
+            Debug.Log("Test is constructed");
         }
         public void Thunderbolt(Vector3 v)
         {
-            System.Console.WriteLine("Pikachu, use");
-            System.Console.WriteLine("Thunderbolt! {0} {1} {2}", v.x, v.y, v.z);
-           // System.Console.WriteLine("and takedown {0}", i);
+            Debug.Log("Pikachu, use");
+            //Debug.Log("Thunderbolt! {0} {1} {2}", v.x, v.y, v.z);
+            System.Console.WriteLine("and takedown {0}", i);
         }
 
         public override void Start()
@@ -29,7 +29,7 @@ namespace TestAndSeek
             rb = gameObject.GetComponent<RigidBody>();
             ts = gameObject.GetComponent<TestShou>();
             if (rb)
-                System.Console.WriteLine("found rigidbody");
+                Debug.Log("found rigidbody");
         }
 
         public override void OnTriggerEnter(Collider other)
@@ -43,6 +43,7 @@ namespace TestAndSeek
         {
             transform.rotation = Quaternion.Euler(0, 180 * Time.fixedDeltaTime, 0) * transform.rotation ;
             f += 5 * Time.fixedDeltaTime;
+            Debug.Log("STAY" + f);
         }
 
         public override void OnTriggerExit(Collider other)
@@ -59,10 +60,10 @@ namespace TestAndSeek
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
                 rb.AddForce(f * (Input.GetAxis(Axis.Horizontal) * Vector3.right + Input.GetAxis(Axis.Vertical) * Vector3.forward));
 
-                //if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
-                //if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
-                //if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
-                //if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+                if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
+                if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
+                if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
+                if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
                 if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButtonA))
                     rb.AddForce(jump_force * Vector3.up);
             }

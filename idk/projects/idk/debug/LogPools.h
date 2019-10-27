@@ -5,11 +5,18 @@ namespace idk
 	enum class LogPool
 	{
 		ANY,
-		FATAL,
 		SYS,
 		PHYS,
 		GFX,
 		GAME,
 		COUNT
+	};
+
+	enum class LogLevel
+	{
+		INFO,
+		WARNING,
+		ERR,
+		FATAL,
 	};
 }

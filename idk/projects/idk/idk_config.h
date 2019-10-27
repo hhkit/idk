@@ -50,8 +50,7 @@ namespace idk
 	
 	using Systems = std::tuple<
 		// base
-			class LogSystem
-		,	class Application
+			class Application
 
 		// low level
 		,	class FileSystem

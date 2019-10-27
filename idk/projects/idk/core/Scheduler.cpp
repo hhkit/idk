@@ -5,6 +5,7 @@ namespace idk
 {
 	Scheduler::Scheduler()
 	{
+		_program_start = Clock::now();
 		for (auto& elem : _systems_paused)
 			elem = false;
 	}
@@ -61,6 +62,10 @@ namespace idk
 	seconds Scheduler::GetRealDeltaTime()noexcept
 	{
 		return _real_dt;
+	}
+	time_point Scheduler::GetProgramStart() noexcept
+	{
+		return _program_start;
 	}
 	span<Scheduler::Pass> Scheduler::GetPasses(UpdatePhase phase)noexcept
 	{

@@ -12,6 +12,8 @@ Logs logs into a log.
 
 
 #include "pch.h"
+#include <core/Scheduler.h>
+#include <debug/LogSystem.h>
 #include <editor/windows/IGE_Console.h>
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 
@@ -19,9 +21,21 @@ namespace idk
 {
 
 	IGE_Console::IGE_Console()
-        : IGE_IWindow{ "Console", false, ImVec2(500.0f, 750.0f) }
+        : IGE_IWindow{ "Console", true, ImVec2(500.0f, 750.0f) }
     {
 		window_flags = ImGuiWindowFlags_MenuBar;
+		LogSingleton::Get().SignalFor(LogPool::GAME).Listen(
+			[&](LogLevel level, string_view preface, string_view message)
+		{
+			switch (level)
+			{
+			case LogLevel::INFO: PushMessage(preface, message); break;
+			case LogLevel::WARNING: PushWarning(preface, message); break;
+			case LogLevel::ERR: PushError(preface,message); break;
+			case LogLevel::FATAL: break;
+			}
+		}
+		);
     }
 
     void IGE_Console::BeginWindow()
@@ -80,8 +94,9 @@ namespace idk
 			return;
 		}
 
-		for (int i = 0; i < messages.size(); ++i) {
-			PrintMessage(messages[i],i);
+		{
+			for (auto& message : messages)
+				PrintMessage(message);
 		}
 
 		if (new_message_received) {
@@ -91,30 +106,32 @@ namespace idk
 
 	}
 
-	void IGE_Console::PushMessage(string_view message, const vec4& color)
+	void IGE_Console::PushMessage(string_view preface, string_view message, const vec4& color)
 	{
-		PushRaw(message, ConsoleMessageType_Message, color);
+		PushRaw(preface, message, ConsoleMessageType_Message, color);
 	}
 
-	void IGE_Console::PushWarning(string_view message, const vec4& color)
+	void IGE_Console::PushWarning(string_view preface, string_view message, const vec4& color)
 	{
-		PushRaw(message, ConsoleMessageType_Warning, color);
-
-	}
-
-	void IGE_Console::PushError(string_view message, const vec4& color)
-	{
-		PushRaw(message, ConsoleMessageType_Error, color);
+		PushRaw(preface, message, ConsoleMessageType_Warning, color);
 
 	}
 
-	void IGE_Console::PushRaw(string_view message, ConsoleMessageType_ type, const vec4& color)
+	void IGE_Console::PushError(string_view preface, string_view message, const vec4& color)
 	{
-		ConsoleMessage newMessage{};
-		newMessage.text = message;
-		newMessage.type = type;
-		newMessage.color = color;
-		PushConsoleMessage(std::move(newMessage));
+		PushRaw(preface, message, ConsoleMessageType_Error, color);
+
+	}
+
+	void IGE_Console::PushRaw(string_view preface, string_view message, ConsoleMessageType_ type, const vec4& color)
+	{
+		PushConsoleMessage(
+			ConsoleMessage{
+				.type = type,
+				.text = string{preface} +": " + string{message},
+				.color = color,
+				.time = Clock::now(),
+			});
 		new_message_received = true;
 	}
 
@@ -142,10 +159,10 @@ namespace idk
 
 		start_text_posX = 0;
 
-		messages.clear();
+		messages.erase(messages.begin(), messages.end());
 	}
 
-	void IGE_Console::PrintMessage(const ConsoleMessage& message,int msgNo)
+	void IGE_Console::PrintMessage(const ConsoleMessage& message)
 	{
 		if (!display_messages	&& message.type == ConsoleMessageType_Message)
 			return;
@@ -177,7 +194,15 @@ namespace idk
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(50.0f);
 
-		ImGui::TextUnformatted(string{ "[" + std::to_string(msgNo) + "]" }.c_str());
+		auto program_start = Core::GetScheduler().GetProgramStart();
+		auto time_dif = message.time - program_start;
+		auto ms = duration_cast<std::chrono::milliseconds>(time_dif).count() % 1000;
+		auto s = duration_cast<std::chrono::seconds>(time_dif).count() % 60;
+		auto m = duration_cast<std::chrono::minutes>(time_dif).count() % 60;
+		auto h = duration_cast<std::chrono::hours>(time_dif).count();
+		char buf[32];
+		sprintf_s(buf, "%d.%.2d.%.2lld.%.3lld", h, m, s, ms);
+		ImGui::TextUnformatted(buf);
 		ImGui::SameLine();
 
 		if (start_text_posX < ImGui::GetCursorPosX())
