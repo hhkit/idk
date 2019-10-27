@@ -33,12 +33,33 @@ namespace idk
         /// </summary>
         public virtual void LateUpdate() { }
 
-        //public virtual void OnCollisionEnter(Collision other) { };
-        //public virtual void OnCollisionStay(Collision other) { };
-        //public virtual void OnCollisionExit(Collision other) { };
-        //public virtual void OnTriggerEnter(Collider other) { };
-        //public virtual void OnTriggerStay(Collider other) { };
-        //public virtual void OnTriggerExit(Collider other) { };
+        public virtual void OnCollisionEnter(Collision other) { }
+        public virtual void OnCollisionStay(Collision other) { }
+        public virtual void OnCollisionExit(Collision other) { }
+
+        internal void RawTriggerEnter(ulong collider)
+        {
+            var col = new Collider();
+            col.handle = collider;
+            OnTriggerEnter(col);
+        }
+
+        internal void RawTriggerStay(ulong collider)
+        {
+            var col = new Collider();
+            col.handle = collider;
+            OnTriggerStay(col);
+        }
+        internal void RawTriggerExit(ulong collider)
+        {
+            var col = new Collider();
+            col.handle = collider;
+            OnTriggerExit(col);
+        }
+
+        public virtual void OnTriggerEnter(Collider other) { }
+        public virtual void OnTriggerStay(Collider other) { }
+        public virtual void OnTriggerExit(Collider other) { }
 
         /// <summary>
         /// Start a coroutine.

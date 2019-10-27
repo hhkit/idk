@@ -20,14 +20,15 @@ namespace idk::mono
 
 				if constexpr (std::is_same_v<MethodType, MonoMethod*>)
 				{
-					void* pass_args[] = { (unbox(args))..., 0 };
-					return mono_runtime_invoke(mono_func, box(invokee), pass_args, nullptr);
+				//	void* pass_args[] = { &args..., 0 };
+				//	return mono_runtime_invoke(mono_func, box(invokee), pass_args, nullptr);
+					return Ret{};
 				}
 				else
 				if constexpr (std::is_same_v<MethodType, ManagedThunk>)
 				{
 					const ManagedThunk& thunk = mono_func;
-					return thunk.Invoke(invokee, std::forward<Args>(args)...);
+					return thunk.Invoke(invokee, args...);
 				}
 				else
 					return Ret{};

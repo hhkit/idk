@@ -24,7 +24,14 @@ namespace idk::vkn
 	unique_ptr<CubeMap> VulkanCubemapFactory::GenerateDefaultResource()
 	{
 		//2x2 image Checkered
-		uint32_t rgba[] = { 0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF };
+		uint32_t rgba[] = {
+			0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF,
+			0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF,
+			0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF,
+			0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF,
+			0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF,
+			0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF,
+		};
 		
 		auto ptr = std::make_unique<VknCubemap>();
 		CubemapLoader loader;

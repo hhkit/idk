@@ -31,15 +31,20 @@ namespace idk::mono
 		{
 			auto img = mono_assembly_get_image(_assembly);
 			auto klass = mono_class_from_name(img, "idk", "IDK");
-			auto method = mono_class_get_method_from_name(klass, "Main", 1);
+			main = mono_class_get_method_from_name(klass, "Main", 1);
 			void* args[] = { 0 };
-			mono_runtime_invoke(method, nullptr, args, nullptr);
+			mono_runtime_invoke(main, nullptr, args, nullptr);
 		}
 		ScanTypes();
 
 		auto mb_itr = _types.find("MonoBehavior");
 		IDK_ASSERT_MSG(mb_itr != _types.end(), "cannot find idk.MonoBehavior");
 		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache method");
+	}
+
+	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
+	{
+		return !mono_method_can_access_field(main, field);
 	}
 
 	MonoWrapperEnvironment::~MonoWrapperEnvironment()
@@ -269,8 +274,7 @@ namespace idk::mono
 		Bind("idk.Bindings::RigidBodySetVelocity", decay(
 			[](Handle<RigidBody> rb, vec3 val)
 		{
-			rb->sleep_next_frame = true;
-			rb->initial_velocity = val;
+			rb->velocity(val);
 		}
 		));
 

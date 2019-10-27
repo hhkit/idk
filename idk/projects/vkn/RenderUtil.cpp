@@ -2,27 +2,31 @@
 #include "RenderUtil.h"
 namespace idk::vkn
 {
-
-void CubemapConvoluter::Init()
+	VulkanPipeline& CubemapConvoluter::Pipeline()
+	{
+		return *pipeline;
+	}
+	string CubemapConvoluter::EpName() const { return "environment_probe"; }
+	string CubemapConvoluter::M4Name() const { return "view_projection"; }
+	void CubemapConvoluter::Init()
 {
 	pipeline_config& config = *(config_ = std::make_shared<pipeline_config>());
 	config.depth_test = false;
 	config.depth_write = false;
 	config.render_pass_type = BasicRenderPasses::eRgbaColorOnly;
-	vert = RscHandle<ShaderModule>{ *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false) };
-	geom = RscHandle<ShaderModule>{ *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom", false) };
-	frag = RscHandle<ShaderModule>{ Core::GetSystem<GraphicsSystem>().convoluter };
+	auto hvert=*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false)   ,
+		 hgeom=*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom", false) ,
+		 hfrag=Core::GetSystem<GraphicsSystem>().convoluter ;
 
-	VulkanPipeline::Options opt
-	{
-	};
-	pipeline.Create(config,
-		{
-			{ vk::ShaderStageFlagBits::eVertex   ,  vert->Module() },
-		{ vk::ShaderStageFlagBits::eGeometry ,  geom->Module() },
-		{ vk::ShaderStageFlagBits::eFragment ,  frag->Module() }
-		},
-		View(), opt);
+
+	vert = RscHandle<ShaderModule>{ hvert };
+	geom = RscHandle<ShaderModule>{ hgeom };
+	frag = RscHandle<ShaderModule>{ hfrag };
+
+	pipeline_manager.View(View());
+
+	pipeline = &pipeline_manager.GetPipeline(config, { hvert,hgeom,hfrag }, 0);
+	
 
 	//RenderObject baka{};//dummy
 	//thingy.FinalizeDrawCall(baka);
@@ -53,7 +57,8 @@ void CubemapConvoluter::Init()
 RscHandle<VknFrameBuffer> CubemapConvoluter::NewFrameBuffer(RscHandle<CubeMap> dst)
 {
 	FrameBufferBuilder builder;
-	builder.Begin(dst->Size());
+	auto& cube_map = *dst;
+	builder.Begin(cube_map.Size());
 	idk::AttachmentInfo info{};
 	info.load_op = LoadOp::eClear;
 	info.store_op = StoreOp::eStore;
@@ -61,8 +66,11 @@ RscHandle<VknFrameBuffer> CubemapConvoluter::NewFrameBuffer(RscHandle<CubeMap> d
 	return RscHandle<VknFrameBuffer>{ Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End())};
 }
 
-void CubemapConvoluter::BeginQueue(vk::Fence fence)
+void CubemapConvoluter::BeginQueue(UboManager& ubo_manager, std::optional<vk::Fence >ofence)
 {
+	if (ofence)
+	{
+		auto& fence = *ofence;
 	auto fence_status = View().Device()->getFenceStatus(fence);
 	while (fence_status == vk::Result::eNotReady)
 	{
@@ -74,6 +82,8 @@ void CubemapConvoluter::BeginQueue(vk::Fence fence)
 		cached.erase(itr->first);
 		Core::GetResourceManager().Release(itr->second);
 	}
+
+	}
 	unused.clear();
 	//Mark everything as unused.
 	for (auto& [cube_map, frame_buffer] : cached)
@@ -84,6 +94,7 @@ void CubemapConvoluter::BeginQueue(vk::Fence fence)
 	static const auto perspective_matrix = perspective(deg{ 90 }, 1.f, 0.1f, 100.f);
 
 	ResetRsc();
+	thingy.SetRef(ubo_manager);
 
 	static const mat4 view_matrices[] =
 	{
@@ -110,7 +121,7 @@ void CubemapConvoluter::BeginQueue(vk::Fence fence)
 			view_matrices[i++],
 			view_matrices[i++],
 		};
-		thingy.BindUniformBuffer(m4_name, 0, mat4block);
+		thingy.BindUniformBuffer(M4Name(), 0, mat4block);
 	}
 }
 
@@ -131,11 +142,11 @@ void CubemapConvoluter::QueueConvoluteCubeMap(RscHandle<CubeMap> src, RscHandle<
 
 	frame_buffers.emplace_back(citr->second);
 
-	thingy.BindSampler(ep_name, 0, src.as<VknCubemap>());
+	thingy.BindSampler(EpName(), 0, src.as<VknCubemap>());
 	thingy.FinalizeDrawCall(ro);
 }
 
-void CubemapConvoluter::ProcessQueue(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Fence fence)
+void CubemapConvoluter::ProcessQueue(vk::CommandBuffer cmd_buffer)
 {
 	//if (pool.size() == pool.capacity())
 	//{
@@ -146,7 +157,8 @@ void CubemapConvoluter::ProcessQueue(vk::CommandBuffer cmd_buffer, vk::Queue que
 	//	pool.emplace_back(dst, NewFrameBuffer(dst));
 	//}
 	//auto frame_buffer = cached.find(dst)->second;
-	cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.Pipeline());
+	cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, Pipeline().Pipeline());
+	thingy.GenerateDS(ds_manager);
 	auto& p_ros = thingy.DrawCalls();
 
 	IDK_ASSERT(p_ros.size() == frame_buffers.size());
@@ -157,13 +169,14 @@ void CubemapConvoluter::ProcessQueue(vk::CommandBuffer cmd_buffer, vk::Queue que
 		auto& dst = frame_buffers[i];
 		//TODO bind mesh
 		auto size = dst->Size();
+		vk::ClearValue clear{ vk::ClearColorValue{} };
 		vk::RenderPassBeginInfo info
 		{
 			dst->GetRenderPass(),dst->GetFramebuffer(),
 			vk::Rect2D
 		{
 			vk::Offset2D{ 0,0 },vk::Extent2D{ s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y) }
-		}
+		},1,&clear
 		};
 		cmd_buffer.beginRenderPass(info, vk::SubpassContents::eInline);
 
@@ -175,7 +188,7 @@ void CubemapConvoluter::ProcessQueue(vk::CommandBuffer cmd_buffer, vk::Queue que
 
 		for (auto& [set, ds] : p_ro.descriptor_sets)
 		{
-			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.PipelineLayout(), set, ds, {});
+			cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Pipeline().PipelineLayout(), set, ds, {});
 		}
 
 		//cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.PipelineLayout(), mat4blk.first, mat4blk.second, {});
@@ -186,7 +199,7 @@ void CubemapConvoluter::ProcessQueue(vk::CommandBuffer cmd_buffer, vk::Queue que
 		for (auto&& [attrib, location] : req.requirements)
 		{
 			auto& attrib_buffer = mesh.Get(attrib);
-			cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+			cmd_buffer.bindVertexBuffers(*Pipeline().GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 		}
 
 		auto& oidx = mesh.GetIndexBuffer();
@@ -206,6 +219,7 @@ void CubemapConvoluter::ResetRsc()
 	thingy.~PipelineThingy();
 	new (&thingy) PipelineThingy{};
 	ds_manager.Reset();
+	frame_buffers.resize(0);
 }
 
 }

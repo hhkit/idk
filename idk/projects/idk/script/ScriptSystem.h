@@ -5,7 +5,8 @@
 #include <mono/jit/jit.h>
 
 #include <core/ConfigurableSystem.h>
-#include <script/MonoBehaviorData.h>
+#include <script/MonoWrapperEnvironment.h>
+#include <script/MonoBehaviorEnvironment.h>
 
 namespace idk::mono
 {
@@ -33,7 +34,7 @@ namespace idk::mono
 		void ScriptUpdateCoroutines(span<Behavior>);
 		void ScriptLateUpdate(span<Behavior>);
 
-		MonoEnvironment& Environment() const;
+		MonoWrapperEnvironment& Environment() const;
 		MonoBehaviorEnvironment& ScriptEnvironment() const;
 
 		void ApplyConfig(Config& config) override;
@@ -46,7 +47,7 @@ namespace idk::mono
 		string path_to_used_dll;
 
 		hash_table<string, std::deque<Handle<Behavior>>> behavior_handles;
-		unique_ptr<MonoEnvironment> main_environment;
+		unique_ptr<MonoWrapperEnvironment> main_environment;
 		unique_ptr<MonoBehaviorEnvironment> script_environment;
 
 		void LoadGameScripts();

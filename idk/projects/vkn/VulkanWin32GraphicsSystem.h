@@ -43,11 +43,16 @@ namespace idk::vkn
 		VulkanState& GetVulkanHandle();
 	private:
 		std::unique_ptr<VulkanState> instance_;
+		void RenderBRDF(RscHandle<ShaderProgram> prog);
+
 		vector<FrameRenderer> _frame_renderers;
 		std::unique_ptr<PipelineManager> _pm;
 		unique_ptr<VulkanDebugRenderer> _debug_renderer;
 		win::Windows* windows_;
 		template<typename T, typename D = vk::DispatchLoaderStatic>
 		using VkHandle = vk::UniqueHandle<T, D>;
+
+		struct Pimpl;
+		std::unique_ptr<Pimpl> _pimpl;
 	};
 }

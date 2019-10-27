@@ -52,6 +52,11 @@ namespace idk::vkn {
 		_convoluted = new_cubemap;
 	}
 
+	RscHandle<VknCubemap> VknCubemap::GetConvoluted() const
+	{
+		return _convoluted;
+	}
+
 	void VknCubemap::OnMetaUpdate(const CubeMapMeta&)
 	{
 

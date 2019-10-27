@@ -31,11 +31,11 @@ namespace idk::mono
 
 		explicit operator bool() const;
 
-		template<typename T> void Visit(T&& functor);
-		template<typename T> void Visit(T&& functor) const;
+		template<typename T> void Visit(T&& functor, bool ignore_privacy = false);
+		template<typename T> void Visit(T&& functor, bool ignore_privacy = false) const;
 
-		template<typename T> void VisitImpl(T&& functor, int& depth_change);
-		template<typename T> void VisitImpl(T&& functor, int& depth_change) const;
+		template<typename T> void VisitImpl(T&& functor, int& depth_change, bool ignore_privacy);
+		template<typename T> void VisitImpl(T&& functor, int& depth_change, bool ignore_privacy) const;
 	private:
 		uint32_t _gc_handle{};
 		const ManagedType* _type{};

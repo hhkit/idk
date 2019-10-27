@@ -36,7 +36,9 @@ namespace idk::vkn {
 		virtual void* ID() const;
 
 		void SetConvoluted(const RscHandle<VknCubemap>&);
+		RscHandle<VknCubemap> GetConvoluted()const;
 
+		bool is_convoluted = false;
 	private:
 		RscHandle<VknCubemap> _convoluted;
 		void OnMetaUpdate(const CubeMapMeta&);

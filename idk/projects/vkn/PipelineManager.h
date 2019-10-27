@@ -55,7 +55,7 @@ namespace idk::vkn
 					pipeline.SetRenderPass(*rp, has_depth_stencil);
 				else
 					pipeline.ClearRenderPass();
-				pipeline.Create(config, view);
+				pipeline.Create(config,shader_handles, view);
 			}
 			void Swap()
 			{

@@ -139,7 +139,7 @@ namespace idk::mono
 	{
 	}
 
-	MonoEnvironment& ScriptSystem::Environment() const
+	MonoWrapperEnvironment& ScriptSystem::Environment() const
 	{
 		return *main_environment;
 	}

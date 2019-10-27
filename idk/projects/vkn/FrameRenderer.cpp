@@ -24,7 +24,8 @@
 #include <vkn/PipelineBinders.inl>
 
 #include <gfx/ViewportUtil.h>
-
+#include <vkn/VknCubeMapLoader.h>
+#include <vkn/VulkanCbmLoader.h>
 namespace idk::vkn
 {
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
@@ -248,6 +249,7 @@ namespace idk::vkn
 			_render_threads.emplace_back(std::move(thread));
 		}
 		_pre_render_complete = device.createSemaphoreUnique(vk::SemaphoreCreateInfo{});
+		_convoluter.Init();
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -256,7 +258,8 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
-		auto total_pre_states = lights.size();
+		size_t num_conv_states = 1;
+		auto total_pre_states = lights.size() + num_conv_states;
 		GrowStates(_pre_states, total_pre_states);
 		for (auto& state : _pre_states)
 		{
@@ -273,6 +276,41 @@ namespace idk::vkn
 		//TODO: Submit the command buffers
 
 		vector<vk::CommandBuffer> buffers{};
+
+
+		auto& cameras = *state.cameras;
+		if (cameras.size())
+		{
+			auto& convolute_state = _pre_states[curr_state];
+
+			_convoluter.BeginQueue(convolute_state.ubo_manager,{});
+			for (auto& camera : cameras)
+			{
+				std::visit([&](auto& clear)
+					{
+						if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
+						{
+							RscHandle<CubeMap> cubemap = clear;
+							VknCubemap& cm = cubemap.as<VknCubemap>();
+							RscHandle<VknCubemap> conv = cm.GetConvoluted();
+							if (!conv->is_convoluted && conv != RscHandle<VknCubemap>{})
+							{	
+								_convoluter.QueueConvoluteCubeMap(RscHandle<CubeMap>{cubemap}, RscHandle<CubeMap>{conv});
+								conv->is_convoluted = true;
+							}
+						}
+					}, camera.clear_data);
+			}
+			auto cmd_buffer = convolute_state.cmd_buffer;
+			cmd_buffer.begin(vk::CommandBufferBeginInfo
+				{
+					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+				}
+			);
+			_convoluter.ProcessQueue(cmd_buffer);
+
+		}
+
 		for (auto& state : _pre_states)
 		{
 			if (state.has_commands)

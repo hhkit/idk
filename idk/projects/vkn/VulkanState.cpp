@@ -109,6 +109,8 @@ namespace idk::vkn
 			[](vk::PhysicalDeviceProperties const& , vk::PhysicalDeviceFeatures const& features)->float
 		{
 			//throw if this is a deal breaker.
+			if (!features.geometryShader)
+				throw "Unable to support geometry shaders";
 			return (features.geometryShader) ? 1.0f : 0.0f;
 		},
 			[](vk::PhysicalDeviceProperties const& , vk::PhysicalDeviceFeatures const& features)->float
@@ -423,6 +425,8 @@ namespace idk::vkn
 		vk::PhysicalDeviceFeatures pdevFeatures{};
 		pdevFeatures.setFillModeNonSolid(VK_TRUE);
 		pdevFeatures.setSamplerAnisotropy(VK_TRUE);
+		pdevFeatures.setGeometryShader(VK_TRUE);
+
 
 		auto valLayers = GetValidationLayers();
 		vk::PhysicalDeviceDescriptorIndexingFeaturesEXT aaaaaaaa{};

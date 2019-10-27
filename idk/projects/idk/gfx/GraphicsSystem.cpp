@@ -116,12 +116,15 @@ namespace idk
 
 	void GraphicsSystem::LoadShaders()
 	{
-		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
+		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert",false);
 		if(tmp)
 			mesh_vtx = *tmp;
-		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-		if(tmp)
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert", false);
+		if (tmp)
 			skinned_mesh_vtx = *tmp;
+		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
+		if (tmp)
+			convoluter = *tmp;
 		LoadShaderImpl();
 	}
 

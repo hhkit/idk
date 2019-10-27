@@ -171,6 +171,9 @@ namespace idk::mono
 				find_method(type, "Awake");
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");
+				type.CacheThunk("RawTriggerEnter", 1);
+				type.CacheThunk("RawTriggerStay", 1);
+				type.CacheThunk("RawTriggerExit", 1);
 				find_method(type, "Update");
 				find_method(type, "UpdateCoroutines");
 

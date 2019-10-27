@@ -334,7 +334,7 @@ namespace idk::vkn {
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = vcm::CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -535,6 +535,7 @@ namespace idk::vkn {
 		std::optional<vk::ImageSubresourceRange> range{};
 
 		vk::ImageCreateInfo imageInfo{};
+		imageInfo.flags = vk::ImageCreateFlagBits::eCubeCompatible;
 		imageInfo.imageType = vk::ImageType::e2D;
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
@@ -713,6 +714,7 @@ namespace idk::vkn {
 		std::optional<vk::ImageSubresourceRange> range{};
 
 		vk::ImageCreateInfo imageInfo{};
+		imageInfo.flags = vk::ImageCreateFlagBits::eCubeCompatible;
 		imageInfo.imageType = vk::ImageType::e2D;
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
@@ -754,7 +756,15 @@ namespace idk::vkn {
 		if ((format == vk::Format::eD16Unorm))
 			img_aspect = vk::ImageAspectFlagBits::eDepth;
 		result.aspect = img_aspect;
-		vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);
+
+
+		;
+
+
+		vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect, vk::ImageSubresourceRange
+			{
+				img_aspect,0,1,0,6
+			});
 		if (!is_render_target)
 		{
 			vector<vk::BufferImageCopy> bCopyRegions;
@@ -764,13 +774,13 @@ namespace idk::vkn {
 			{
 				//Copy data from buffer to image
 				vk::BufferImageCopy region{};
-				region.bufferOffset = 0;
+				region.bufferOffset = i*len/6;
 				region.bufferRowLength = 0;
 				region.bufferImageHeight = 0;
 
 				region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 				region.imageSubresource.mipLevel = 0;
-				region.imageSubresource.baseArrayLayer = 0;
+				region.imageSubresource.baseArrayLayer = i;
 				region.imageSubresource.layerCount = 1;
 
 				region.imageExtent = {
@@ -779,14 +789,17 @@ namespace idk::vkn {
 					1
 				};
 
-				region.imageOffset = offset;
+				region.imageOffset = 0;
 
 				bCopyRegions.emplace_back(region);
-				offset += len;
+				//offset += i;
 			}
 			cmd_buffer.copyBufferToImage(*stagingBuffer, *image, vk::ImageLayout::eTransferDstOptimal, bCopyRegions, vk::DispatchLoaderDefault{});
 
-			vcm::TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image);
+			vcm::TransitionImageLayout(cmd_buffer, src_flags, shader_flags, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, layout, *image, img_aspect,vk::ImageSubresourceRange
+				{
+					img_aspect,0,1,0,6
+				});
 			;
 		}
 
@@ -804,4 +817,16 @@ namespace idk::vkn {
 	}
 
 	
+	CMCreateInfo CMColorBufferTexInfo(uint32_t width, uint32_t height)
+	{
+		CMCreateInfo info{};
+		info.width = width;
+		info.height = height;
+		info.internal_format = vk::Format::eB8G8R8A8Unorm;
+		info.image_usage = vk::ImageUsageFlagBits::eColorAttachment;
+		info.aspect = vk::ImageAspectFlagBits::eColor;
+		info.sampled(true);
+		return info;
+	}
+
 };

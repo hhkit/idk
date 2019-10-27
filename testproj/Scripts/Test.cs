@@ -31,10 +31,29 @@ namespace TestAndSeek
             if (rb)
                 System.Console.WriteLine("found rigidbody");
         }
+
+        public override void OnTriggerEnter(Collider other)
+        {
+            //rb.AddForce(jump_force * Vector3.up);
+            f = 500;
+            //System.Console.WriteLine("ENTER");
+        }
+
+        public override void OnTriggerStay(Collider other)
+        {
+            transform.rotation = Quaternion.Euler(0, 180 * Time.fixedDeltaTime, 0) * transform.rotation ;
+            f += 5 * Time.fixedDeltaTime;
+        }
+
+        public override void OnTriggerExit(Collider other)
+        {
+            i += 1;
+        }
+
         public override void FixedUpdate()
         {
-            if (ts.i == 5) 
-                rb.AddForce(10f * Vector3.up);
+            //if (ts.i == 5) 
+            //    rb.AddForce(10f * Vector3.up);
             if (rb)
             {
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
