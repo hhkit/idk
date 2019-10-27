@@ -234,7 +234,7 @@ namespace idk
 			if (layer.curr_state.is_stopping)
 			{
 				layer.curr_state.normalized_time = 0.0f;
-				std::cout << "[Animator] Current animation (" + layer.curr_state.name + ") in layer (" + layer.name + ") doesn't exist." << std::endl;
+				LOG_TO(LogPool::GAME, "[Animator] Current animation (" + layer.curr_state.name + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 
 			layer.blend_source[bone_index] = result;
@@ -248,7 +248,7 @@ namespace idk
 			{
 				// layer.is_blending = false;
 				layer.blend_state.normalized_time = 0.0f;
-				std::cout << "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist." << std::endl;
+				LOG_TO(LogPool::GAME, "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{
@@ -261,75 +261,6 @@ namespace idk
 		layer.prev_poses[bone_index] = result;
 		return result;
 	}
-
-	//AnimationSystem::BonePose AnimationSystem::BlendingPass(Animator& animator, AnimationLayer& layer, size_t bone_index)
-	//{
-	//	// If a layer is not playing, we return the previous pose it was in 
-	//	if (!layer.IsPlaying())
-	//	{
-	//		return layer.prev_poses[bone_index];
-	//	}
-
-	//	BonePose curr_state_pose;
-	//	if (layer.curr_state.is_playing)
-	//	{
-	//		curr_state_pose = ComputePose(animator, layer, layer.curr_state, bone_index);
-	//	}
-	//	else
-	//	{
-	//		curr_state_pose = 
-	//	}
-
-	//	BonePose result = ComputePose(animator, layer, layer.blend_state, bone_index);
-	//	
-	//	// If after ComputePose blend_state is now not playing, we know that something went wrong.
-	//	if (!layer.blend_state.is_playing)
-	//	{
-	//		layer.is_blending = false;
-	//		layer.blend_duration = 0.0f;
-	//		layer.blend_state.normalized_time = 0.0f;
-	//	}
-
-	//	return result;
-
-	//	// Check if the state is enabled
-	//	auto& blend_state = animator.GetAnimationState(layer.blend_state);
-	//	if (!blend_state.enabled)
-	//	{
-	//		std::cout << "[Animator] Blended animation (" + layer.blend_state + ") doesn't exist." << std::endl;
-	//		layer.prev_poses[bone_index] = result;
-	//		layer.is_blending = false;
-	//		layer.blend_duration = 0.0f;
-	//		layer.blend_time = 0.0f;
-	//		return result;
-	//	}
-
-	//	// We don't support blend trees yet
-	//	if (blend_state.IsBlendTree())
-	//		return result;
-
-	//	auto& curr_go = animator._child_objects[bone_index];
-	//	if (!curr_go)
-	//		return result;
-
-	//	// Get the actual animation data
-	//	auto blend_data = blend_state.GetBasicState();
-
-	//	// Compute the number of ticks this loop given the normalized time. 
-	//	const float ticks = std::min(layer.blend_time, 1.0f) * blend_data->motion->GetNumTicks();
-
-	//	// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
-	//	const anim::AnimatedBone* animated_bone = blend_data->motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
-	//	if (animated_bone == nullptr)
-	//		return result;
-
-	//	// Interpolate from the found keyframe to the next keyframe and store the result.
-	//	InterpolateBone(*animated_bone, ticks, result);
-
-	//	IDK_ASSERT(abs(layer.blend_duration) > 0.0001);
-	//	const float blend_weight = layer.blend_time / layer.blend_duration;
-	//	return BlendPose(source, result, blend_weight);
-	//}
 
 	AnimationSystem::BonePose AnimationSystem::BlendPose(const BonePose& from, const BonePose& to, float delta)
 	{
