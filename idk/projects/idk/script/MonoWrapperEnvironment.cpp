@@ -44,7 +44,7 @@ namespace idk::mono
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
 	{
-		return mono_method_can_access_field(main, field);
+		return !mono_method_can_access_field(main, field);
 	}
 
 	MonoWrapperEnvironment::~MonoWrapperEnvironment()

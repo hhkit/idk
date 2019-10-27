@@ -14,6 +14,7 @@ namespace idk
 		void PhysicsTick            (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
 		void FirePhysicsEvents();
 		void DebugDrawColliders     (span<class Collider> colliders);
+		void Reset();
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList, vector<phys::raycast_result>& ray_resultList);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
 	private:

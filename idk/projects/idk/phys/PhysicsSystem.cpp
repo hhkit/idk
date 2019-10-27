@@ -8,6 +8,10 @@
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
+
+#include <script/MonoBehavior.h>
+#include <script/MonoFunctionInvoker.h>
+
 #include <math/matrix_decomposition.h>
 #include <iostream>
 
@@ -316,13 +320,18 @@ namespace idk
 			{
 				if (lhs->is_trigger || rhs->is_trigger)
 				{
-					// fire trigger
-					if (trigger_method == "OnTriggerEnter")
-						Core::GetSystem<DebugRenderer>().Draw(sphere{lhs->GetGameObject()->Transform()->GlobalPosition(), 1}, color{0,1,1});
-					if (trigger_method == "OnTriggerStay")
-						Core::GetSystem<DebugRenderer>().Draw(sphere{ lhs->GetGameObject()->Transform()->GlobalPosition(), 1 }, color{ 0,1,0 });
-					if (trigger_method == "OnTriggerExit")
-						Core::GetSystem<DebugRenderer>().Draw(sphere{ lhs->GetGameObject()->Transform()->GlobalPosition(), 1 }, color{ 1,1,0 });
+					// fire lhs events
+					for (auto& mb : lhs->GetGameObject()->GetComponents<mono::Behavior>())
+					{
+						auto obj_type = mb->GetObject().Type();
+						mono::Invoke(obj_type->GetMethod(trigger_method, 1), mb->GetObject(), rhs.id);
+					}
+					// fire rhs events
+					for (auto& mb : rhs->GetGameObject()->GetComponents<mono::Behavior>())
+					{
+						auto obj_type = mb->GetObject().Type();
+						mono::Invoke(obj_type->GetMethod(trigger_method, 1), mb->GetObject(), lhs.id);
+					}
 				}
 				else
 				{
@@ -333,9 +342,9 @@ namespace idk
 
 		};
 
-		FireEvent(col_enter, "OnTriggerEnter", "OnCollisionEnter");
-		FireEvent(col_stay, "OnTriggerStay", "OnCollisionStay");
-		FireEvent(col_exit, "OnTriggerExit", "OnCollisionExit");
+		FireEvent(col_enter, "RawTriggerEnter", "OnCollisionEnter");
+		FireEvent(col_stay, "RawTriggerStay", "OnCollisionStay");
+		FireEvent(col_exit, "RawTriggerExit", "OnCollisionExit");
 
 		previous_collisions = std::move(collisions);
 	}
@@ -359,6 +368,12 @@ namespace idk
 
 		for (auto& collider : colliders)
 			debug_draw(collider);
+	}
+
+	void PhysicsSystem::Reset()
+	{
+		previous_collisions.clear();
+		collisions.clear();
 	}
 
 	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList,vector<phys::raycast_result>& ray_resultList)
