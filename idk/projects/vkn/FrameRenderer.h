@@ -10,6 +10,7 @@
 #include <vkn/RenderStateV2.h>
 #include <vkn/ProcessedRO.h>
 
+#include <vkn/RenderUtil.h>
 #include <vkn/PipelineThingy.h>
 
 namespace idk
@@ -90,6 +91,8 @@ namespace idk::vkn
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
+		CubemapConvoluter _convoluter;
+
 		//VknFrameBufferManager   fb_man{};
 	};
 }

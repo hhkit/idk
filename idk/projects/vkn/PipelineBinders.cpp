@@ -10,6 +10,7 @@
 #include <gfx/RenderObject.h>
 #include <gfx/MaterialInstance.h>
 
+#include <vkn/VknCubemap.h>
 
 #include <vkn/utils/utils.inl>
 
@@ -111,6 +112,7 @@ namespace idk::vkn
 		light_block = PrepareLightBlock(cam, *state.lights);
 		view_trf = cam.view_matrix;
 		pbr_trf = view_trf.inverse();
+		LoadStuff(vstate);
 	}
 
 	template<typename T>
@@ -121,10 +123,23 @@ namespace idk::vkn
 
 	void PbrFwdBindings::LoadStuff(const GraphicsState& vstate)
 	{
+		ResetCubeMaps();
+		pbr_cube_map_names[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = "irradiance_probe";
+		pbr_cube_map_names[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eEnvironmentProbe>()] = "environment_probe";
+
+
 		vector<RscHandle<CubeMap>> cube_maps[PbrCubeMapVarsInfo::size()] = {};
 		//TODO: actually bind something.
-		//cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = 
+		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = {
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			? RscHandle<CubeMap>{std::get<RscHandle<CubeMap>>(vstate.camera.clear_data).as<VknCubemap>().GetConvoluted() } : RscHandle <CubeMap>{}
+		};
+		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eEnvironmentProbe>()] = {
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			? std::get<RscHandle<CubeMap>>(vstate.camera.clear_data) : RscHandle < CubeMap>{}
+		};
 		AddCubeMaps(PbrCubeMapVars::eIrradiance, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eIrradiance)]));
+		AddCubeMaps(PbrCubeMapVars::eEnvironmentProbe, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eEnvironmentProbe)]));
 	}
 
 	void PbrFwdBindings::ResetCubeMaps(size_t reserve_size)
@@ -201,6 +216,16 @@ namespace idk::vkn
 				}
 			}
 		}
+
+		for (size_t i = 0; i < std::size(pbr_cube_map_names); ++i)
+		{
+			uint32_t index = 0;
+			auto [start, end] = pbr_cube_maps_ranges[i];
+			auto cm_span = span<const RscHandle<CubeMap>>{ pbr_cube_maps.data()+start,pbr_cube_maps.data() + end};
+			for (auto& cm : cm_span)
+				the_interface.BindSampler(pbr_cube_map_names[i], index++, cm.as<VknCubemap>());
+		}
+
 		//TODO change to cubemap stuff
 		//Bind the shadow cube maps
 		//for (auto& shadow_map : state.shadow_maps_cube)

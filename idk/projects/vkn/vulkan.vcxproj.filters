@@ -183,6 +183,9 @@
     <ClInclude Include="VulkanCubemapFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
+    <ClInclude Include="RenderUtil.h">
+      <Filter>render\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -337,6 +340,7 @@
     <ClCompile Include="VulkanCubemapFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
+    <ClCompile Include="RenderUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -371,6 +375,9 @@
     </Filter>
     <Filter Include="render\objects">
       <UniqueIdentifier>{508115dd-c293-4bd2-87bf-81a317729a67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\utils">
+      <UniqueIdentifier>{7c9442b0-f1a5-4229-8ac8-c5bb04d05885}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

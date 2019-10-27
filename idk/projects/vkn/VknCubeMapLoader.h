@@ -74,7 +74,7 @@ namespace idk::vkn
 			image_usage = (will_sample) ? image_usage | vk::ImageUsageFlagBits::eSampled : (image_usage & ~vk::ImageUsageFlagBits::eSampled);
 		}
 	};
-	//CMCreateInfo ColorBufferTexInfo(uint32_t width, uint32_t height);
+	CMCreateInfo CMColorBufferTexInfo(uint32_t width, uint32_t height);
 	//CMCreateInfo DepthBufferTexInfo(uint32_t width, uint32_t height);
 	class CubemapLoader
 	{

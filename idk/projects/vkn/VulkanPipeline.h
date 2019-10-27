@@ -6,6 +6,7 @@
 
 namespace idk::vkn
 {
+	class ShaderModule;
 	struct VulkanPipeline
 	{
 		using Vulkan_t     = VulkanView;
@@ -13,6 +14,8 @@ namespace idk::vkn
 
 		vk::UniquePipelineLayout pipelinelayout{};
 		vk::UniquePipeline       pipeline{};
+		vk::Pipeline Pipeline()const;
+		vk::PipelineLayout PipelineLayout()const;
 		
 		//Do this before calling create, overrides config's render_pass_type
 		void SetRenderPass(vk::RenderPass rp, bool has_depth_stencil);
@@ -39,8 +42,9 @@ namespace idk::vkn
 
 	
 		void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan, const Options& options = Options{});
-	   void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info,hash_table<uint32_t,vk::DescriptorSetLayout> slayout,Vulkan_t& vulkan);
-	   void Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits,vk::ShaderModule>> shader_modules, Vulkan_t& vulkan);
+		void Create(config_t const& config, vector<RscHandle<ShaderProgram>> shaders,Vulkan_t& vulkan, const Options& options = Options{});
+		void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info,hash_table<uint32_t,vk::DescriptorSetLayout> slayout,Vulkan_t& vulkan, const Options& options = Options{});
+	   void Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits,vk::ShaderModule>> shader_modules, Vulkan_t& vulkan, const Options& options = Options{});
 	   void Create(config_t const& config, Vulkan_t& vulkan);
 		void Reset();
 		void Bind(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan)const;

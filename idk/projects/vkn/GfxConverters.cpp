@@ -109,7 +109,11 @@ namespace idk::vkn::hlp
 		const static hash_table< uniform_layout_t::UniformStage, vk::ShaderStageFlagBits> map
 		{
 			{ uniform_layout_t::eFragment,vk::ShaderStageFlagBits::eFragment },
-		{ uniform_layout_t::eVertex,vk::ShaderStageFlagBits::eVertex },
+			{ uniform_layout_t::eVertex,vk::ShaderStageFlagBits::eVertex },
+			{ uniform_layout_t::eTessCtrl,vk::ShaderStageFlagBits::eTessellationControl},
+			{ uniform_layout_t::eTessEval,vk::ShaderStageFlagBits::eTessellationEvaluation },
+			{ uniform_layout_t::eFragment,vk::ShaderStageFlagBits::eCompute },
+			{ uniform_layout_t::eGeometry,vk::ShaderStageFlagBits::eGeometry },
 		};
 		auto itr = map.find(stage);
 		assert(itr != map.end());

@@ -146,6 +146,15 @@ namespace idk::vkn
 		}
 	}
 
+	vk::Pipeline VulkanPipeline::Pipeline() const { 
+		return *pipeline;
+	}
+
+	vk::PipelineLayout VulkanPipeline::PipelineLayout() const
+	{
+		return *pipelinelayout;
+	}
+
 	void VulkanPipeline::SetRenderPass(vk::RenderPass rp, bool has_depth_stencil)
 	{
 		_render_pass = rp;
@@ -169,10 +178,50 @@ namespace idk::vkn
 
 	void VulkanPipeline::Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info, Vulkan_t& vulkan, const Options& options)
 	{
+		hash_table<uint32_t, vk::DescriptorSetLayout> layouts;
+		GetLayouts(config.frag_shader, layouts);
+		GetLayouts(config.vert_shader, layouts);
+		owned_uniform_layouts = FillEmptyLayouts(layouts, vulkan);
+		Create(config, info, std::move(layouts), vulkan,options);
+	}
+	void VulkanPipeline::Create(config_t const& config, vector<RscHandle<ShaderProgram>> shaders, Vulkan_t& vulkan, const Options& options)
+	{
+		config_t config2 = config;
+		hash_table<uint32_t, vk::DescriptorSetLayout> layouts;
+		for (auto& shader : shaders)
+			GetLayouts(shader, layouts);
+		owned_uniform_layouts = FillEmptyLayouts(layouts, vulkan);
+
+
+		const char* entryPoint = "main";
+		vector<vk::PipelineShaderStageCreateInfo> info;
+		for (auto& hshader : shaders)
+		{
+			auto shader = &hshader.as<ShaderModule>();
+			auto stage = shader->Stage();
+			auto module = shader->Module();
+			if (stage == vk::ShaderStageFlagBits::eVertex)
+				config2.vert_shader = hshader;
+			if (stage == vk::ShaderStageFlagBits::eFragment)
+				config2.frag_shader = hshader;
+			info.emplace_back(vk::PipelineShaderStageCreateInfo
+				{
+				vk::PipelineShaderStageCreateFlags{},
+				stage ,
+				module,
+				entryPoint,
+				nullptr
+				});
+
+		}
+		Create(config2, info, std::move(layouts), vulkan, options);
+	}
+	void VulkanPipeline::Create(const config_t& config, vector<vk::PipelineShaderStageCreateInfo> info, hash_table<uint32_t, vk::DescriptorSetLayout> slayout, Vulkan_t& vulkan, const Options& options)
+	{
 		auto& m_device = vulkan.Device();
 		auto& dispatcher = vulkan.Dispatcher();
-		auto m_renderpass = (_render_pass)?*_render_pass:GetRenderpass(config, vulkan);
-		_has_depth_stencil = (_render_pass) ? _has_depth_stencil :(config.render_pass_type != BasicRenderPasses::eRgbaColorOnly);
+		auto m_renderpass = (_render_pass) ? *_render_pass : GetRenderpass(config, vulkan);
+		_has_depth_stencil = (_render_pass) ? _has_depth_stencil : (config.render_pass_type != BasicRenderPasses::eRgbaColorOnly);
 
 		auto binding_desc = GetVtxBindingInfo(config);
 		auto attr_desc = GetVtxAttribInfo(config);
@@ -212,31 +261,26 @@ namespace idk::vkn
 		auto [colorBlending, cb_rsc] = GetColorBlendConfig(config);
 
 
-		auto dynamicStates = GetDynamicStates(config,options);
-		
+		auto dynamicStates = GetDynamicStates(config, options);
+
 		vk::PipelineDynamicStateCreateInfo dynamicState
 		{
 			vk::PipelineDynamicStateCreateFlags{}
 			,hlp::arr_count(dynamicStates)            //dynamicStateCount 
-			,std::data (dynamicStates)//pDynamicStates    
+			,std::data(dynamicStates)//pDynamicStates    
 		};
 		//For uniforms
 
 		{
-			hash_table<uint32_t, vk::DescriptorSetLayout> layouts;
-
-
-			GetLayouts(config.frag_shader, layouts);
-			GetLayouts(config.vert_shader, layouts);
-			owned_uniform_layouts= FillEmptyLayouts(layouts,vulkan);
-			uniform_layouts = std::move(layouts);
+			uniform_layouts = std::move(slayout);
 		}
 		auto&& [pipelineLayoutInfo, pli_rsc] = GetLayoutInfo(config);;
+
 		vk::PipelineDepthStencilStateCreateInfo dsci
 		{
 			vk::PipelineDepthStencilStateCreateFlags{},
-			VK_TRUE,VK_TRUE,vk::CompareOp::eLess,
-			VK_FALSE,VK_FALSE,
+			config.depth_test,config.depth_write,vk::CompareOp::eLess,
+			VK_FALSE,config.stencil_test,
 		};
 		auto m_pipelinelayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo, nullptr, dispatcher);
 		vk::PipelineCreateFlags cr8_flags{};
@@ -260,7 +304,7 @@ namespace idk::vkn
 			,&viewportState
 			,&rasterizer
 			,&multisampling
-			,(_has_depth_stencil)?&dsci:nullptr
+			,(_has_depth_stencil) ? &dsci : nullptr
 			,&colorBlending
 			,&dynamicState
 			,*m_pipelinelayout
@@ -272,7 +316,7 @@ namespace idk::vkn
 		pipeline = m_device->createGraphicsPipelineUnique({}, pipelineInfo, nullptr, dispatcher);
 		pipelinelayout = std::move(m_pipelinelayout);
 	}
-	void VulkanPipeline::Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shader_modules, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shader_modules, Vulkan_t& vulkan, const Options& options)
 	{
 		const char* entryPoint = "main";
 		vector<vk::PipelineShaderStageCreateInfo> stageCreateInfo;
@@ -288,7 +332,7 @@ namespace idk::vkn
 				});
 
 		}		
-		Create(config, stageCreateInfo, vulkan);
+		Create(config, stageCreateInfo, vulkan,options);
 	}
 	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
 	{
@@ -445,7 +489,7 @@ namespace idk::vkn
 			, VK_FALSE //depthClampEnable VK_FALSE discards fragments that are beyond the depth range, VK_TRUE clamps it instead.
 			, VK_FALSE //If rasterizerDiscardEnable is set to VK_TRUE, then geometry never passes through the rasterizer stage. This basically disables any output to the framebuffer.
 			, GetPolygonMode(config) //Any other mode requires enabling a GPU feature
-			, vk::CullModeFlagBits::eNone
+			, static_cast<vk::CullModeFlags>(config.cull_face)
 			, vk::FrontFace::eClockwise
 			, VK_FALSE
 			, 0.0f

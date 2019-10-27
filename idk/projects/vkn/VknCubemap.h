@@ -35,7 +35,12 @@ namespace idk::vkn {
 		void Size(ivec2 new_size) override;
 		virtual void* ID() const;
 
+		void SetConvoluted(const RscHandle<VknCubemap>&);
+		RscHandle<VknCubemap> GetConvoluted()const;
+
+		bool is_convoluted = false;
 	private:
+		RscHandle<VknCubemap> _convoluted;
 		void OnMetaUpdate(const CubeMapMeta&);
 		void UpdateUV(CMUVMode);
 

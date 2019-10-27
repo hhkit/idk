@@ -11,17 +11,20 @@ namespace idk
 		StoreOp store_op = StoreOp::eStore;
 		ColorFormat internal_format = ColorFormat::RGBAF_32;
 		FilterMode  filter_mode = FilterMode::Linear;
+		std::optional<RscHandle<Texture>> buffer;
 		AttachmentInfo() = default;
 		AttachmentInfo(
 			LoadOp  load_op_,
 			StoreOp store_op_,
 			ColorFormat internal_format_,
-			FilterMode  filter_mode_
+			FilterMode  filter_mode_,
+			std::optional<RscHandle<Texture>> buffer_=std::nullopt
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
 			internal_format{ internal_format_ },
-			filter_mode{ filter_mode_ }
+			filter_mode{ filter_mode_ },
+			buffer{ buffer_ }
 		{};
 	};
 	struct FrameBufferInfo

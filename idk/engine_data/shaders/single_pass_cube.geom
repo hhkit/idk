@@ -13,17 +13,20 @@ layout (location = 3) out VS_OUT
 	vec3 position;
 } gs_out;
 
-uniform BLOCK(view_projection)
+U_LAYOUT(0,0) uniform BLOCK(view_projection)
 {
 	mat4 perspective_mtx;
 	mat4 pv_matrices[6];
 } Mat4Blk;
 
+layout (location = 0) in gl_PerVertex
+{
+  vec4 gl_Position;
+} gl_in[];
+
 layout (location = 0) out gl_PerVertex
 {
   vec4 gl_Position;
-  float gl_PointSize;
-  float gl_ClipDistance[];
 };
 
 void main()

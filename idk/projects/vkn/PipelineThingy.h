@@ -10,6 +10,7 @@
 #include <vkn/VulkanHashes.h>
 namespace idk::vkn
 {
+	struct VknCubemap;
 	struct DescriptorsManager;
 	using desc_type_info = DescriptorTypeI;
 	//pair<num_ds,num_descriptors_per_type>
@@ -117,6 +118,7 @@ namespace idk::vkn
 		template<typename T>
 		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound = false);
 		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false);
 
 		void FinalizeDrawCall(const RenderObject& ro);
 
