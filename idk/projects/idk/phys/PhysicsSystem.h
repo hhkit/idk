@@ -12,6 +12,7 @@ namespace idk
 	{
 	public:
 		void PhysicsTick            (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
+		void FirePhysicsEvents();
 		void DebugDrawColliders     (span<class Collider> colliders);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList, vector<phys::raycast_result>& ray_resultList);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
@@ -19,7 +20,9 @@ namespace idk
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
 		struct pair_hasher   { size_t operator()(const CollisionPair&) const; };
 
-		hash_table<CollisionPair, phys::col_success, pair_hasher> collisions;
+		using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
+		CollisionList collisions;
+		CollisionList previous_collisions;
 		void Init() override;
 		void Shutdown() override;
 	};

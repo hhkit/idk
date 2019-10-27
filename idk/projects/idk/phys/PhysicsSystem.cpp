@@ -91,7 +91,7 @@ namespace idk
 
 		const auto CollideObjects = [&]()
 		{
-			collisions.clear();
+			CollisionList collisionframe;
 
 			const auto dt = Core::GetDT().count();
 			for (auto& elem : colliders)
@@ -119,6 +119,9 @@ namespace idk
 
 							// if both rbs are useless
 							if (!check_rb(lrigidbody) && !check_rb(rrigidbody))
+								return phys::col_failure{};
+
+							if (lcollider.GetGameObject() == rcollider.GetGameObject())
 								return phys::col_failure{};
 
 							if (!lcollider._broad_phase.overlaps(rcollider._broad_phase))
@@ -156,7 +159,7 @@ namespace idk
 					{
 						//debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
 						//debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						collisions.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.value());
+						collisionframe.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.value());
 					}
 					else
 					{
@@ -166,13 +169,17 @@ namespace idk
 				}
 			}
 
-			for (const auto& [pair, result] : collisions)
+			for (const auto& [pair, result] : collisionframe)
 			{
 				const auto& lcollider = *pair.lhs;
 				const auto& rcollider = *pair.rhs;
 
 				const auto lrigidbody = lcollider._rigidbody;
 				const auto rrigidbody = rcollider._rigidbody;
+
+				// triggers do not require resolution
+				if (lcollider.is_trigger || rcollider.is_trigger)
+					continue;
 
 				constexpr auto get_values =
 					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, RigidBody*>
@@ -238,6 +245,8 @@ namespace idk
 					}
 				}
 			}
+
+			collisions.merge(collisionframe);
 		};
 
 		const auto FinalizePositions = [&]()
@@ -252,11 +261,83 @@ namespace idk
 				debug_draw(collider);
 		};
 
+		collisions.clear();
+
 		ApplyGravity();
 		PredictTransform();
 		for (int i = 0; i < 4;++i)
 			CollideObjects();
 		FinalizePositions();
+	}
+
+	void PhysicsSystem::FirePhysicsEvents()
+	{
+		CollisionList all_collisions = [&]()
+		{
+			auto retval = previous_collisions;
+			auto clone = collisions;
+			retval.merge(clone);
+			return retval;
+		}();
+
+		using PairList = hash_set<CollisionPair, pair_hasher>;
+
+		auto sz = all_collisions.size();
+		PairList col_enter; col_enter.reserve(sz);
+		PairList col_stay;  col_stay.reserve(sz);
+		PairList col_exit;  col_exit.reserve(sz);
+		
+		auto& curr_collisions = collisions;
+
+		// find all entering
+		for (auto& [pair, collision] : all_collisions)
+		{
+			// find exiting
+			if (curr_collisions.find(pair) == curr_collisions.end())
+			{
+				col_exit.emplace(pair);
+				continue;
+			}
+
+			// find entering
+			if (previous_collisions.find(pair) == previous_collisions.end())
+			{
+				col_enter.emplace(pair);
+				continue;
+			}
+
+			col_stay.emplace(pair);
+		}
+		
+		// fire events
+		const auto FireEvent = [&](const PairList& list, string_view trigger_method, string_view collision_method)
+		{
+			for (auto& [lhs, rhs] : list)
+			{
+				if (lhs->is_trigger || rhs->is_trigger)
+				{
+					// fire trigger
+					if (trigger_method == "OnTriggerEnter")
+						Core::GetSystem<DebugRenderer>().Draw(sphere{lhs->GetGameObject()->Transform()->GlobalPosition(), 1}, color{0,1,1});
+					if (trigger_method == "OnTriggerStay")
+						Core::GetSystem<DebugRenderer>().Draw(sphere{ lhs->GetGameObject()->Transform()->GlobalPosition(), 1 }, color{ 0,1,0 });
+					if (trigger_method == "OnTriggerExit")
+						Core::GetSystem<DebugRenderer>().Draw(sphere{ lhs->GetGameObject()->Transform()->GlobalPosition(), 1 }, color{ 1,1,0 });
+				}
+				else
+				{
+					// fire collision
+					auto col = all_collisions.find(CollisionPair{ lhs, rhs });
+				}
+			}
+
+		};
+
+		FireEvent(col_enter, "OnTriggerEnter", "OnCollisionEnter");
+		FireEvent(col_stay, "OnTriggerStay", "OnCollisionStay");
+		FireEvent(col_exit, "OnTriggerExit", "OnCollisionExit");
+
+		previous_collisions = std::move(collisions);
 	}
 
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
