@@ -19,7 +19,7 @@ layout(location = 2) in VS_OUT
   vec3 uv;	
 } fs_in;
 
-uniform samplerCube sb;
+S_LAYOUT(3,1) uniform samplerCube sb;
 
 layout(location = 0) out vec4 FragColor;
 
