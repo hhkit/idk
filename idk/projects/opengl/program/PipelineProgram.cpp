@@ -3,7 +3,6 @@
 #include <opengl/program/Program.h>
 #include <opengl/resource/OpenGLTexture.h>
 #include <opengl/resource/OpenGLCubemap.h>
-#include <iostream>
 
 namespace idk::ogl
 {
@@ -17,7 +16,7 @@ namespace idk::ogl
 			infolog.resize(length + 1);
 
 			glGetProgramPipelineInfoLog(pipeline, length, &length, infolog.data());
-		//	std::cout << infolog << "\n";
+			LOG_ERROR_TO(LogPool::GFX, infolog);
 		}
 	}
 

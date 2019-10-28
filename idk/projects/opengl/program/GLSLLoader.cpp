@@ -8,6 +8,7 @@ namespace idk::ogl
 {
 	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)
 	{
+		LOG_TO(LogPool::GFX, "loading %s", filepath.GetMountPath().data());
 		const auto* meta = bundle.FetchMeta<Program>();
 		const auto program = meta ? Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>(meta->guid)
 			: Core::GetResourceManager().LoaderEmplaceResource<ogl::Program>();

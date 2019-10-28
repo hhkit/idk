@@ -27,7 +27,7 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -0.78, z: 1.81}
+    position: {x: 0.28607112, y: -0.78, z: 1.7256268}
     rotation: 
       w: 1
       x: 0
@@ -178,8 +178,31 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
-  - !MonoBehavior 
-    {enabled: 1, script_data: !AnimationTest ~}
+- !408021958656 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -0.7602204, y: 0.08813697, z: 4.401209}
+    rotation: 
+      w: 0.9963317
+      x: -0.0052168285
+      y: -0.08541574
+      z: -0.00044724008
+    scale: {x: 0.9999999, y: 0.9999999, z: 1}
+  - !Name 
+    name: Camera 1
+  - !Camera 
+    clear: !<CubeMap> {guid: b600f93d-dede-44d3-b623-20fac997897d}
+    depth: 0
+    enabled: 1
+    far_plane: 10
+    is_orthographic: 0
+    near_plane: 0.1
+    overlay_debug_draw: 0
+    render_target: {guid: 00000000-0000-0000-0000-000000000000}
+    viewport: !Viewport 
+      position: {x: 0, y: 0}
+      size: {x: 1, y: 1}
 - !8590000128 
   - active: 1
   - !Transform 

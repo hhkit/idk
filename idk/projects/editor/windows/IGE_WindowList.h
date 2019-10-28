@@ -16,6 +16,7 @@ Include all windows here
 
 
 #include <editor/windows/IGE_MainWindow.h>
+#include <editor/windows/IGE_GameView.h>
 #include <editor/windows/IGE_SceneView.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_ProfilerWindow.h>
@@ -24,4 +25,5 @@ Include all windows here
 #include <editor/windows/IGE_MaterialEditor.h>
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/windows/IGE_Console.h>
+#include <editor/windows/IGE_ProgrammerConsole.h>
 #include <editor/windows/IGE_AnimatorWindow.h>

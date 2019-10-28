@@ -74,7 +74,6 @@ namespace idk::mono
 		Bind("idk.Bindings::ObjectValidate", decay(
 			[](GenericHandle go) -> bool
 		{
-			LOG_TO(LogPool::GAME, "Checking %ld", go.id);
 			return GameState::GetGameState().ValidateHandle(go);
 		}
 		));
