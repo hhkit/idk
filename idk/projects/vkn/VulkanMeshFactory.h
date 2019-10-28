@@ -9,7 +9,7 @@
 namespace idk::vkn
 {
 	class MeshFactory
-		: public virtual IMeshFactory
+		: public IMeshFactory
 	{
 	public:
 		MeshFactory();

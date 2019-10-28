@@ -338,6 +338,116 @@ namespace idk::vkn
 		//After the map is created, pass in the remaining data as such
 	}
 
+	auto GenerateCircleInterleavedBuffers()
+	{
+		std::pair<vector<Vertex>, vector<uint16_t>> result;
+		auto& [vertices, indices] = result;
+		{	
+			constexpr auto sz = 1.f;
+			constexpr auto numberOfTri = 16;
+			const real angle = (2.f * pi) / numberOfTri;
+
+
+			for (int i = 0; i < numberOfTri; ++i)
+			{
+				vertices.emplace_back(Vertex{ vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)}, vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)} });
+
+				if (i < (numberOfTri - 1))
+				{
+					indices.emplace_back(i);
+					indices.emplace_back(i + 1);
+				}
+				else
+				{
+					indices.emplace_back(i);
+					indices.emplace_back(0);
+				}
+			}
+
+			for (auto& elem : vertices)
+				elem.pos /= 2;
+
+		}
+
+		return result;
+	}
+	auto GeneratePlaneInterleavedBuffers()
+	{
+
+			/* create plane mesh *//* create circle mesh */
+			constexpr auto sz = .5f;
+			//constexpr auto numberOfTri = 16;
+			//real angle = (2.f * pi) / numberOfTri;
+
+			std::vector<Vertex> vertices{
+				Vertex{ vec3{  sz,  +0.5,  sz}, vec3{0, 1,0}, vec2{0, 0} },  // front
+				Vertex{ vec3{  sz,  +0.5,  -sz}, vec3{0, 1,0}, vec2{0, 1} },  // front
+				Vertex{ vec3{-sz,   +0.5,  -sz},  vec3{0, 1,0}, vec2{1, 1} },  // front
+				Vertex{ vec3{-sz,   +0.5,  sz},  vec3{0, 1,0}, vec2{1, 0} },  // front
+			};
+
+			std::vector<uint16_t> indices{
+				0, 1, 3,
+				1, 2, 3
+			};
+			return std::make_pair(std::move(vertices), std::move(indices));
+	}
+	auto GenerateFSQInterleavedBuffers()
+	{
+			/* create FSQ mesh */
+			constexpr auto sz = 1.f;
+			//constexpr auto numberOfTri = 16;
+			//real angle = (2.f * pi) / numberOfTri;
+
+			std::vector<Vertex> vertices{
+				Vertex{ vec3{  sz, sz, 0}, vec3{0, 1,0}, vec2{1, 1} },  // front
+				Vertex{ vec3{  sz,-sz, 0}, vec3{0, 1,0}, vec2{1, 0} },  // front
+				Vertex{ vec3{-sz, -sz, 0},  vec3{0, 1,0}, vec2{0, 0} },  // front
+				Vertex{ vec3{-sz,  sz, 0},  vec3{0, 1,0}, vec2{0, 1} },  // front
+			};
+
+			std::vector<uint16_t> indices{
+				0, 3, 1,
+				1, 3, 2
+			};
+
+		return std::make_pair(std::move(vertices),std::move(indices));
+	}
+	auto GenerateTetrahedronInterleavedBuffers()
+	{
+			std::vector<Vertex> vertices
+			{
+				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
+				Vertex{vec3{ 1,  1, -1}, vec3{ 0,  1, -1}},
+				Vertex{vec3{-1,  1, -1}, vec3{ 0,  1, -1}},
+				Vertex{vec3{-1, -1, -1}, vec3{-1, -1, -1}},
+				Vertex{vec3{ 1, -1, -1}, vec3{ 1, -1, -1}},
+			};
+			std::vector<uint16_t> indices
+			{
+				0,1,2,
+				0,2,3,
+				0,3,4,
+				0,4,1
+			};
+		return std::make_pair(std::move(vertices),std::move(indices));
+
+	}
+	auto GenerateLineInterleavedBuffers()
+	{
+			std::vector<Vertex> vertices
+			{
+				Vertex{vec3{ 0, 0, 1}, vec3{ 0, 0, 1}},
+				Vertex{vec3{ 0, 0,-1}, vec3{ 0, 0,-1}},
+			};
+			std::vector<uint16_t> indices
+			{
+				0,1,
+			};
+		return std::make_pair(std::move(vertices),std::move(indices));
+
+	}
+
 	void MeshFactory::GenerateDefaultMeshes()
 	{
 		const auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(Mesh::defaults[MeshType::Sphere].guid);
@@ -477,6 +587,58 @@ namespace idk::vkn
 			mesh_modder.SetIndexBuffer16(*plane_handle, index_buffer, s_cast<uint32_t>(indices.size()));
 
 		}
+
+		vector<vec3> pos_buffer;//(interleaved_buffer.size;//());
+		vector<vec3> normal_buffer;//(interleaved_buffer.size;//());
+		vector<vec3> tangent_buffer;//(interleaved_buffer.size;//());
+		vector<vec2> uv_buffer;//(interleaved_buffer.size;//());
+
+
+
+		const auto circle_mesh = Mesh::defaults[MeshType::Circle];
+		auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(circle_mesh.guid);
+		auto pair = GenerateCircleInterleavedBuffers();
+		{
+			auto& [interleaved_buffer, indices] = pair;
+			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+		}
+
+		const auto plane_mesh = Mesh::defaults[MeshType::Plane];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(plane_mesh.guid);
+		pair = GeneratePlaneInterleavedBuffers();
+		{
+			auto& [interleaved_buffer, indices] = pair;
+			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+		}
+
+		const auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(fsq_mesh.guid);
+		pair = GenerateFSQInterleavedBuffers();
+		{
+			auto& [interleaved_buffer, indices] = pair;
+			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+		}
+
+		const auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(tet_mesh.guid);
+		pair = GenerateTetrahedronInterleavedBuffers();
+		{
+			auto& [interleaved_buffer, indices] = pair;
+			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+		}
+
+		const auto line_mesh = Mesh::defaults[MeshType::Line];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(line_mesh.guid);
+		pair = GenerateLineInterleavedBuffers();
+		{
+			auto& [interleaved_buffer, indices] = pair;
+			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+		}
 	}
 
 	vec3 compute_tangent(vec3 p0, vec3 p1, vec3 p2, vec2 uv0, vec2 uv1, vec2 uv2)
@@ -505,7 +667,7 @@ namespace idk::vkn
 		tangents.resize(0);//clear
 		tangents.resize(pos.size());
 
-		for (int i = 0; i < indices.size()-3; i+=3)
+		for (int i = 0; i+3 < indices.size(); i+=3)
 		{
 			auto i0 = indices[i], i1 = indices[i+1], i2 = indices[i+2];
 			vec3 tangent = compute_tangent(pos[i0], pos[i1], pos[i2], uv[i0], uv[i1], uv[i2]);

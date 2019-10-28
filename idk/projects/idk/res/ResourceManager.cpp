@@ -84,15 +84,17 @@ namespace idk
 					}...
 				};
 			}
-
+			template<typename R>
+			constexpr static void InitFactoryHC(ResourceManager* resource_man)
+			{
+				auto loader = &resource_man->GetFactoryRes<R>();
+				if (loader)
+					loader->Init();
+			}
 			constexpr static array<void(*)(ResourceManager*), sizeof...(Rs)> InitFactories()
 			{
 				return array<void(*)(ResourceManager*), sizeof...(Rs)>{
-					[](ResourceManager* resource_man)
-					{
-						if (auto loader = &resource_man->GetFactoryRes<Rs>())
-							loader->Init();
-					}...
+						&InitFactoryHC<Rs>...
 				};
 			}
 

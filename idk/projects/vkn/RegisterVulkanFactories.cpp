@@ -28,7 +28,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 	Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
 	Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
-	Core::GetResourceManager().RegisterFactory<MeshFactory>();
+	Core::GetResourceManager().RegisterFactory<vkn::MeshFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanShaderModuleFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanTextureFactory>();
 	Core::GetResourceManager().RegisterFactory<VknRenderTargetFactory>();
