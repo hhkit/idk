@@ -627,7 +627,7 @@ namespace idk::vkn {
 			vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, copy_dest, img_aspect, sub_range);
 			//if (!is_render_target)
 			{
-				uint32_t offset = 0;
+				size_t offset = 0;
 				//Copy data from buffer to image
 				vector< vk::BufferImageCopy> copy_regions(6*(load_info.mipmap_level + 1));
 				auto& stridelist = in_info->stride;

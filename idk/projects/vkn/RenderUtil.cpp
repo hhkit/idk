@@ -14,9 +14,9 @@ namespace idk::vkn
 	config.depth_test = false;
 	config.depth_write = false;
 	config.render_pass_type = BasicRenderPasses::eRgbaColorOnly;
-	auto hvert=*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false)   ,
-		 hgeom=*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom", false) ,
-		 hfrag=Core::GetSystem<GraphicsSystem>().convoluter ;
+	auto hvert= Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VPBRConvolute],
+		 hgeom= Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube],
+		 hfrag= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute];
 
 
 	vert = RscHandle<ShaderModule>{ hvert };

@@ -260,8 +260,10 @@ namespace idk::vkn
 			pre_render_data.active_lights[i]=i;
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms);
-		pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
-		pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+		//pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
+		//pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
+		pre_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 		hash_set<RscHandle<RenderTarget>> render_targets;
 
 		auto IsDontClear = [](const CameraData& camera)
@@ -305,8 +307,10 @@ namespace idk::vkn
 			if(itr==render_targets.end())
 				render_targets.emplace(curr_cam.render_target);
 
-			curr_state.mesh_vtx = curr_buffer.mesh_vtx;
-			curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+			//curr_state.mesh_vtx = curr_buffer.mesh_vtx;
+			//curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+			curr_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
+			curr_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
 			if (curr_cam.overlay_debug_draw)

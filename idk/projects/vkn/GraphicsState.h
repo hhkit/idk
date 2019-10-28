@@ -102,8 +102,10 @@ namespace idk::vkn
 		const LightData* ActiveLight(size_t light_index)const;
 		//std::optional<RscHandle<Texture>> Shadow2D(size_t light_index)const;
 		//std::optional<RscHandle<CubeMap>> ShadowCube(size_t light_index)const;
-		RscHandle<ShaderProgram> mesh_vtx;
-		RscHandle<ShaderProgram> skinned_mesh_vtx;
+		//RscHandle<ShaderProgram> mesh_vtx;
+		//RscHandle<ShaderProgram> skinned_mesh_vtx;
+		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 
 		const vector<SkeletonTransforms>& GetSkeletonTransforms()const { return *skeleton_transforms; }
 
@@ -125,8 +127,10 @@ namespace idk::vkn
 
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
-		RscHandle<ShaderProgram> mesh_vtx;
-		RscHandle<ShaderProgram> skinned_mesh_vtx;
+		//RscHandle<ShaderProgram> mesh_vtx;
+		//RscHandle<ShaderProgram> skinned_mesh_vtx;
+		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
 	};
 

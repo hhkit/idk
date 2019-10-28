@@ -52,10 +52,13 @@ namespace idk::ogl
 
 	void OpenGLState::GenResources()
 	{
-		renderer_vertex_shaders[Debug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
-		renderer_vertex_shaders[NormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[SkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-		renderer_vertex_shaders[SkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
+		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
+		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+
+		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
+		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
+		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
+		renderer_vertex_shaders[VSkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
 
 		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
 		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
@@ -131,6 +134,8 @@ namespace idk::ogl
 		auto& curr_draw_buffer = sys->curr_draw_buffer;
 		curr_draw_buffer = curr_write_buffer;
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
+		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
+		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
 
 		for (auto& cam : curr_object_buffer.camera)
 		{
@@ -140,8 +145,8 @@ namespace idk::ogl
 		}
 
 
-		assert(Core::GetSystem<GraphicsSystem>().brdf);
-		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().brdf});
+		assert(Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FBrdf]);
+		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FBrdf]});
 
 		const auto BindVertexShader = [this](RscHandle<ShaderProgram> vertex_shader, const mat4& projection_mtx, const mat4& view_mtx)
 		{
@@ -284,7 +289,7 @@ namespace idk::ogl
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], light_p_tfm, light_view_tfm);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], light_p_tfm, light_view_tfm);
 
 				for (auto& render_obj : curr_object_buffer.mesh_render)
 				{
@@ -293,7 +298,7 @@ namespace idk::ogl
 					RscHandle<OpenGLMesh>{render_obj.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], light_p_tfm, light_view_tfm);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], light_p_tfm, light_view_tfm);
 				for (auto& render_obj : curr_object_buffer.skinned_mesh_render)
 				{
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
@@ -353,7 +358,7 @@ namespace idk::ogl
 
 					glDisable(GL_CULL_FACE);
 					glDepthMask(GL_FALSE);
-					pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
+					pipeline.PushProgram(renderer_vertex_shaders[VSkyBox]);
 					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
 
 					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
@@ -372,7 +377,7 @@ namespace idk::ogl
 					glClearColor(obj.x, obj.y, obj.z, obj.w);
 			}, cam.clear_data);
 
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -386,7 +391,7 @@ namespace idk::ogl
 				}
 
 			// per mesh render
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix, cam.view_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			for (auto& elem : curr_object_buffer.mesh_render)
@@ -405,7 +410,7 @@ namespace idk::ogl
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 			}
 
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix, cam.view_matrix);
+			BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
@@ -485,7 +490,7 @@ namespace idk::ogl
 				//		glClearColor(obj.x, obj.y, obj.z, obj.w);
 				//}, cam.clear_data);
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FPicking]);
 				// render debug
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -500,7 +505,7 @@ namespace idk::ogl
 					}
 
 				// per mesh render
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::NormalMesh], cam.projection_matrix, cam.view_matrix);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				for (auto& elem : curr_object_buffer.mesh_render)
@@ -521,7 +526,7 @@ namespace idk::ogl
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::SkinnedMesh], cam.projection_matrix, cam.view_matrix);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
 					// bind shader
@@ -555,9 +560,9 @@ namespace idk::ogl
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false));
-		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom", false));
-		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().convoluter);
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VPBRConvolute]);
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube]);
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute]);
 
 		static const auto perspective_matrix = perspective(deg{ 90 }, 1.f, 0.1f, 100.f);
 		
@@ -600,7 +605,7 @@ namespace idk::ogl
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		pipeline.PushProgram(*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert", false));
+		pipeline.PushProgram(Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 		pipeline.PushProgram(RscHandle<ShaderProgram>{handle});
 
 		RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] }->BindAndDraw(

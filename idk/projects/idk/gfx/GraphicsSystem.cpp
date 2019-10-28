@@ -108,23 +108,31 @@ namespace idk
 			if (elem.IsActiveAndEnabled())
 				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
 
-		result.skinned_mesh_vtx = skinned_mesh_vtx;
-		result.mesh_vtx = mesh_vtx;
+		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];
+		result.renderer_vertex_shaders[VNormalMesh] = renderer_vertex_shaders[VNormalMesh];
 
 		SubmitBuffers(std::move(result));
 	}
 
 	void GraphicsSystem::LoadShaders()
 	{
-		auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert",false);
-		if(tmp)
-			mesh_vtx = *tmp;
-		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert", false);
-		if (tmp)
-			skinned_mesh_vtx = *tmp;
-		tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
-		if (tmp)
-			convoluter = *tmp;
+		///////////////////////Load vertex shaders
+		//renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert",false);
+		renderer_vertex_shaders[VNormalMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert",false);
+		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert", false);
+		renderer_vertex_shaders[VSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert", false);
+		renderer_vertex_shaders[VPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false);
+		renderer_vertex_shaders[VFsq] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert", false);
+
+		////////////////////Load fragment Shaders
+		//renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
+		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag", false);
+		renderer_fragment_shaders[FBrdf] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
+
+		////////////////////Load geometry Shaders
+		renderer_geometry_shaders[GSinglePassCube] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom", false);
+
 		LoadShaderImpl();
 	}
 
