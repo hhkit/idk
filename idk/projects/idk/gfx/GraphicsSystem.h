@@ -18,12 +18,41 @@ namespace idk
 		Default = OpenGL
 	};
 
+	enum VertexShaders
+	{
+		VDebug,
+		VNormalMesh,
+		VSkinnedMesh,
+		VSkyBox,
+		VPBRConvolute,
+		VFsq,
+		VMax
+	};
+	enum FragmentShaders
+	{
+		FDebug,
+		FSkyBox,
+		FShadow,
+		FPicking,
+		FPBRConvolute,
+		FBrdf,
+		FMax
+	};
+	enum GeometryShaders
+	{
+		GSinglePassCube,
+		GMax
+	};
+
 	class GraphicsSystem
 		: public ISystem
 	{
 	public:
-		RscHandle<ShaderProgram> brdf;
-		RscHandle<ShaderProgram> convoluter;
+		//RscHandle<ShaderProgram> brdf;
+		//RscHandle<ShaderProgram> convoluter;
+		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
 		
 		void Init() override = 0;
 		void LateInit()override;
@@ -84,8 +113,10 @@ namespace idk
 
 			CameraData  curr_scene_camera;
 
-			RscHandle<ShaderProgram> mesh_vtx;
-			RscHandle<ShaderProgram> skinned_mesh_vtx;
+			//RscHandle<ShaderProgram> mesh_vtx;
+			//RscHandle<ShaderProgram> skinned_mesh_vtx;
+			array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+			array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
@@ -93,14 +124,15 @@ namespace idk
 		unsigned               curr_draw_buffer  = 1;
 		bool                   write_buffer_dirty = false;
 
-		RscHandle<ShaderProgram> mesh_vtx         = {};
-		RscHandle<ShaderProgram> skinned_mesh_vtx = {};
+		//RscHandle<ShaderProgram> mesh_vtx         = {};
+		//RscHandle<ShaderProgram> skinned_mesh_vtx = {};
 
 		shared_ptr<pipeline_config> mesh_render_config{nullptr};
 
 		void LoadShaders();
 		virtual void LoadShaderImpl() {}
 	private:
+
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);
 

@@ -105,7 +105,7 @@ namespace idk::vkn {
 				0							   ,//baseMipLevel   
 				1							   ,//levelCount     
 				0							   ,//baseArrayLayer 
-				1							   	//layerCount     
+				6							   	//layerCount     
 			}
 			};
 			return device.createImageViewUnique(viewInfo);
@@ -164,13 +164,14 @@ namespace idk::vkn {
 			imageInfo.extent.height = static_cast<uint32_t>(height);
 			imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
 			imageInfo.mipLevels = mipmap_level + 1; //Currently no mipmapping
-			imageInfo.arrayLayers = 1;
+			imageInfo.arrayLayers = 6;
 			imageInfo.format = format; //Unsigned normalized so that it can still be interpreted as a float later
 			imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
 			imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 			imageInfo.usage = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;// vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
 			imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
 			imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
+			imageInfo.flags = vk::ImageCreateFlagBits::eCubeCompatible;
 
 			vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
 			auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
@@ -588,10 +589,31 @@ namespace idk::vkn {
 				copy_dest = *blit_src_img;
 				layout = vk::ImageLayout::eTransferSrcOptimal;
 			}
-			auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
+			auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, in_info->mem_size, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
 
 			if (in_info)
-				hlp::MapMemory(device, *stagingMemory, 0, in_info->data, num_bytes, vk::DispatchLoaderDefault{});
+			{
+				vk::MappedMemoryRange mmr
+				{
+					 *stagingMemory
+					,0
+					,num_bytes
+				};
+				//auto handle = device.mapMemory(memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
+				//memcpy_s(handle, mmr.size, src_start, mmr.size);
+				uint8_t* data = nullptr;
+				device.mapMemory(*stagingMemory, mmr.offset, in_info->mem_size, vk::MemoryMapFlags{}, (void**)&data, vk::DispatchLoaderDefault());
+				memcpy_s(data, mmr.size, in_info->data, mmr.size);
+				std::vector<decltype(mmr)> memory_ranges
+				{
+					mmr
+				};
+				//Not necessary rn since we set the HostCoherent bit 
+				//This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
+				//device.flushMappedMemoryRanges(memory_ranges, dispatcher);
+				device.unmapMemory(*stagingMemory);
+			
+			}
 			//if (is_render_target)
 			//{
 			//	src_flags |= vk::AccessFlagBits::eColorAttachmentRead;
@@ -605,7 +627,7 @@ namespace idk::vkn {
 			vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, copy_dest, img_aspect, sub_range);
 			//if (!is_render_target)
 			{
-				uint32_t offset = 0;
+				size_t offset = 0;
 				//Copy data from buffer to image
 				vector< vk::BufferImageCopy> copy_regions(6*(load_info.mipmap_level + 1));
 				auto& stridelist = in_info->stride;

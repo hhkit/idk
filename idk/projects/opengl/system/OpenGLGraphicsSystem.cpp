@@ -100,10 +100,10 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::Prerender()
 	{
-		if (prev_brdf != brdf)
+		if (prev_brdf != renderer_fragment_shaders[FBrdf])
 		{
-			_opengl->ComputeBRDF(RscHandle<ogl::Program>{brdf});
-			prev_brdf = brdf;
+			_opengl->ComputeBRDF(RscHandle<ogl::Program>{ renderer_fragment_shaders[FBrdf]});
+			prev_brdf = renderer_fragment_shaders[FBrdf];
 		}
 		cubemaps_to_convolute.invoke_all();
 		

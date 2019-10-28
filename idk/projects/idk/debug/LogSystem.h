@@ -1,37 +1,28 @@
 #pragma once
-#include <string_view>
-#include <atomic>
-#include <mutex>
-#include <event/Signal.h>
-#include <meta/casts.h>
-#include <debug/LogPools.h>
+#include <fstream>
+
+#include <idk.h>
+#include <core/ISystem.h>
+#include <debug/LogSingleton.h>
+#include <filesystem>
 
 namespace idk
 {
-	using string_view = std::string_view;
-	class LogSingleton
+	class LogSystem
+		: public ISystem
 	{
 	public:
-		using PrefaceType = string_view;
-		using MessageType = string_view;
-		using LogSignal = Signal<LogLevel, PrefaceType, MessageType>;
-
-		~LogSingleton();
-
-		void LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message);
-		void LogMessage(LogLevel level, LogPool pool, string_view preface, string_view message, va_list);
-		void PipeToCout(LogPool pool, bool pipe = false);
-
-		LogSignal& SignalFor(LogPool);
-
-		static LogSingleton& Get();
+		~LogSystem();
 	private:
-		struct Log
+		struct LogHandle
 		{
-			LogSignal signal;
-			std::atomic<bool> direct_to_cout{ false };
+			string filepath;
+			std::ofstream stream;
 		};
 
-		array<Log, static_cast<size_t>(LogPool::COUNT)> logs;
+		void Init() override;
+		void Shutdown() override {}
+
+		array<LogHandle, s_cast<size_t>(LogPool::COUNT)> log_files;
 	};
 }

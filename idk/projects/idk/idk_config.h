@@ -54,6 +54,7 @@ namespace idk
 
 		// low level
 		,	class FileSystem
+		,	class LogSystem
 		,	class GamepadSystem
 
 		// logic
