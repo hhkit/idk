@@ -160,12 +160,12 @@ namespace idk::mono
 				IDK_ASSERT(itr != _types.end());
 				auto& type = itr->second;
 
-				LOG_TO(LogPool::GAME, string{ "Investigating " } +class_name);
+				LOG_TO(LogPool::MONO, string{ "Investigating " } +class_name);
 				constexpr auto find_method = [](ManagedType& type, string_view fn_name)
 				{
 					auto res = type.CacheThunk(fn_name);
 					if (res)
-						LOG_TO(LogPool::GAME, string{ "Found function " } +string{ fn_name });
+						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
 
 				find_method(type, "Awake");

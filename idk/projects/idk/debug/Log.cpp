@@ -6,9 +6,11 @@ namespace idk
 {
 	void Log(LogLevel level, LogPool pool, std::string_view preface, std::string_view message, ...)
 	{
+		char buf[256];
 		va_list args;
 		va_start(args, message);
-		LogSingleton::Get().LogMessage(level, pool, preface, message, args);
+		vsprintf_s(buf, message.data(), args);
 		va_end(args);
+		LogSingleton::Get().LogMessage(level, pool, preface, buf);
 	}
 }

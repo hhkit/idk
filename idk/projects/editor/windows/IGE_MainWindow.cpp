@@ -593,7 +593,10 @@ namespace idk {
             ImGuiID left = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, X_RATIO / (1.0f - X_RATIO), nullptr, &main);
 
             auto& ide = Core::GetSystem<IDE>();
-            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_SceneView>()->window_name, main);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_GameView>()->window_name, main);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_SceneView>()->window_name, main);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_Console>()->window_name, bottom_left);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProgrammerConsole>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProjectWindow>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_HierarchyWindow>()->window_name, left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);
