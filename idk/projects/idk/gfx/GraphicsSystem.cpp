@@ -45,6 +45,11 @@ namespace idk
 	{
 		LoadShaders();
 	}
+	void GraphicsSystem::SortCameras()
+	{
+		Core::GetGameState().SortObjectsOfType<Camera>([](auto& lhs, auto& rhs) {return lhs.depth <= rhs.depth; });
+
+	}
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -96,7 +101,6 @@ namespace idk
 				result.skinned_mesh_render.emplace_back(std::move(ro));
 			}
 		}
-
 		for (auto& camera : cameras)
 		{
 			if(camera.is_scene_camera)

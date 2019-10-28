@@ -160,9 +160,10 @@ namespace idk::ogl
 		vector<GLenum> buffers;
 		//auto& yolo = *meta.textures[0];
 		//for (int i = 0; i < std::size(meta.textures); ++i)
+		auto tex = target->GetColorBuffer();
+		auto& tex_ = tex.as<OpenGLTexture>();
 		int i = 0;
 		{
-			auto tex = target->GetColorBuffer();
 			TextureMeta mm = tex->GetMeta();
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
@@ -170,12 +171,17 @@ namespace idk::ogl
 				tex.as<OpenGLTexture>().SetMeta(mm);
 			}
 			tex.as<OpenGLTexture>().Bind();
+			GL_CHECK();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(tex->ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+			GL_CHECK();
 		}
 		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
 		auto& depth_buffer = *meta.GetDepthBuffer();
+		GL_CHECK();
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(depth_buffer.ID())), 0);
+		GL_CHECK();
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
 
 		CheckFBStatus();

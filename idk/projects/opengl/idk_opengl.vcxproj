@@ -181,6 +181,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSData.h" />
+    <ClInclude Include="resource\OpenGLRenderTargetLoader.h" />
     <ClInclude Include="PixelData.h" />
     <ClInclude Include="program\ProgramFactory.h" />
     <ClInclude Include="resource\FrameBuffer.h" />

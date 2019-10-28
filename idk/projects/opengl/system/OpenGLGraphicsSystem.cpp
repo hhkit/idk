@@ -14,9 +14,11 @@
 #include <opengl/resource/FrameBufferFactory.h>
 #include <opengl/resource/OpenGLMeshFactory.h>
 #include <opengl/resource/OpenGLTextureFactory.h>
+#include <opengl/resource/OpenGLRenderTargetLoader.h>
 #include <opengl/program/GLSLLoader.h>
 #include <opengl/program/ProgramFactory.h>
 #include <opengl/system/OpenGLState.h>
+
 
 #include "OpenGLGraphicsSystem.h"
 
@@ -208,6 +210,7 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".geom");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
+		Core::GetResourceManager().RegisterLoader<OpenGLRenderTargetLoader>(RenderTarget::ext);
 		Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 	}
 

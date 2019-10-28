@@ -19,6 +19,7 @@ namespace idk::ogl
 		tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
 		m.SetDepthBuffer(RscHandle<Texture>{tex});
+		fb->Name("None");
 		return fb;
 	}
 

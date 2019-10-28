@@ -32,6 +32,7 @@ namespace idk
 		//struct RenderBuffer;
 
 		//Converts the Renderers and transforms stores the render data into a buffer
+		void SortCameras();
 		virtual void BufferGraphicsState(
 			span<class MeshRenderer>,
 			span<Animator> animators,
