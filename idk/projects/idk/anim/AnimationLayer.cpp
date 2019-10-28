@@ -48,15 +48,23 @@ namespace idk
 
 	void AnimationLayer::BlendTo(string_view anim_name, float time)
 	{
-		// Cannot blend to myself and cannot blend to the current state
-		if (curr_state.name == anim_name || blend_state.name == anim_name)
+		// Ignore calls to blend to the current blend state
+		if (blend_state.name == anim_name)
 		{
 			return;
+		}
+
+		// If i'm already blending and BlendTo was not called this frame, the blending was interuppted
+		if (blend_state.is_playing && !blend_this_frame)
+		{
+			blend_interrupt = true;
+			blend_source = prev_poses;
 		}
 			
 		blend_state.name = anim_name;
 		blend_state.normalized_time = 0.0f;
 		blend_state.is_playing = true;
+		blend_this_frame = true;
 		blend_duration = time;
 	}
 

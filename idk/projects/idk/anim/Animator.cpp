@@ -157,13 +157,6 @@ namespace idk
 #pragma region Script Functions
 	void Animator::Play(string_view animation_name, float offset)
 	{
-		//auto res = animation_table.find(animation_name.data());
-		//if (res == animation_table.end())
-		//{
-		//	std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
-		//	return;
-		//}
-
 		layers[0].Play(animation_name, offset);
 	}
 
@@ -178,15 +171,7 @@ namespace idk
 			return;
 		}
 
-		//auto anim_res = animation_table.find(animation_name.data());
-		//if (anim_res == animation_table.end())
-		//{
-		//	std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
-		//	valid = false;
-		//}
-
-		// if(valid)
-			layers[layer_res->second].Play(animation_name, offset);
+		layers[layer_res->second].Play(animation_name, offset);
 	}
 
 	void Animator::Play(string_view animation_name, size_t layer_index, float offset)
@@ -199,15 +184,7 @@ namespace idk
 			return;
 		}
 
-		//auto anim_res = animation_table.find(animation_name.data());
-		//if (anim_res == animation_table.end())
-		//{
-		//	std::cout << "[Animator] Played animation (" + string{ animation_name } +") doesn't exist." << std::endl;
-		//	valid = false;
-		//}
-
-		// if (valid)
-			layers[layer_index].Play(animation_name, offset);
+		layers[layer_index].Play(animation_name, offset);
 	}
 
 	void Animator::BlendTo(string_view animation_name, float time)

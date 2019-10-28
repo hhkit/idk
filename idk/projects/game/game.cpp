@@ -95,9 +95,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
 	//gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
 
-    auto scene = RscHandle<Scene>{};
-    auto go = scene->CreateGameObject();
-    go->AddComponent<ParticleSystem>();
+    // auto scene = RscHandle<Scene>{};
+    // auto go = scene->CreateGameObject();
+    // go->AddComponent<ParticleSystem>();
 	
 	//auto scene = RscHandle<Scene>{};
 	//auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();

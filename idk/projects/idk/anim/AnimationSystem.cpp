@@ -227,7 +227,7 @@ namespace idk
 		}
 		
 		BonePose result = animator._bind_pose[bone_index]; 
-		if (layer.curr_state.is_playing)
+		if (layer.curr_state.is_playing && !layer.blend_interrupt)
 		{
 			result = ComputePose(animator, layer, layer.curr_state, bone_index);
 			// If after ComputePose curr_state is now not playing, we know that something went wrong.
@@ -248,6 +248,7 @@ namespace idk
 			{
 				// layer.is_blending = false;
 				layer.blend_state.normalized_time = 0.0f;
+				layer.blend_interrupt = false;
 				LOG_TO(LogPool::GAME, "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
@@ -311,6 +312,9 @@ namespace idk
 					layer.curr_state = layer.blend_state;
 					layer.blend_state = AnimationLayerState{};
 					layer.blend_duration = 0.0f;
+
+					// Turn off blend interrupt the moment blending is over
+					layer.blend_interrupt = false;
 				}
 			}
 
@@ -368,6 +372,9 @@ namespace idk
 
 				layer.blend_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
 			}
+
+			// Always set this to false no matter what. This is a trigger so it should only be true for one frame.
+			layer.blend_this_frame = false;
 		}
 	}
 

@@ -27,6 +27,8 @@ namespace idk
 		AnimationLayerState curr_state, blend_state;
 
 		bool blending_before_pause = false;
+		bool blend_this_frame = false, blend_interrupt = false;
+
 		vector<matrix_decomposition<real>> prev_poses;
 		vector<matrix_decomposition<real>> blend_source;
 
