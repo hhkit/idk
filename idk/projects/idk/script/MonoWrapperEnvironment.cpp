@@ -387,18 +387,16 @@ namespace idk::mono
 		Bind("idk.Bindings::AnimatorPlay", decay(
 			[](Handle<Animator> animator, MonoString* name)
 			{
-				auto* s = mono_string_to_utf8(name);
-				animator->Play(s);
-				mono_free(s);
+				auto s = unbox(name);
+				animator->Play(s.get());
 			}
 		));
 
 		Bind("idk.Bindings::AnimatorCrossFade", decay(
 			[](Handle<Animator> animator, MonoString* name, float time = 0.2f)
 			{
-				auto* s = mono_string_to_utf8(name);
-				animator->BlendTo(s, time);
-				mono_free(s);
+				auto s = unbox(name);
+				animator->BlendTo(s.get(), time);
 			}
 		));
 
@@ -468,9 +466,8 @@ namespace idk::mono
 		Bind("idk.Bindings::AnimatorHasState", decay(
 			[](Handle<Animator> animator, MonoString* name) -> bool
 			{
-				auto* s = mono_string_to_utf8(name);
-				auto ret_val = animator->HasState(s);
-				mono_free(s);
+				auto s = unbox(name);
+				auto ret_val = animator->HasState(s.get());
 				return ret_val;
 			}
 		));
