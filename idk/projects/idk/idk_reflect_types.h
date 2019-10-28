@@ -110,7 +110,15 @@ namespace idk::reflect
         , MainModule
         , EmissionModule
         , ShapeModule
+        , VelocityOverLifetimeModule
+        , ColorOverLifetimeModule
+        , SizeOverLifetimeModule
+        , RotationOverLifetimeModule
         , RendererModule
+        , MinMax<float>
+        , MinMax<vec3>
+        , MinMax<color>
+        , MinMaxMode
 		
 		// resources
 		, vector<SerializedMeta>

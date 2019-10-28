@@ -31,12 +31,7 @@ namespace idk
         for (auto& ps : span_ps)
         {
             if (ps.state >= ParticleSystem::Playing)
-            {
-                auto srt = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
-                ps.origin = srt.position;
-                ps.rotation = srt.rotation;
-                ps.scale = srt.scale;
-            }
+                ps.transform = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
             ps.Step(dt);
         }
     }
@@ -48,10 +43,7 @@ namespace idk
         {
             if (ps.state >= ParticleSystem::Playing)
             {
-                auto srt = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
-                ps.origin = srt.position;
-                ps.rotation = srt.rotation;
-                ps.scale = srt.scale;
+                ps.transform = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
                 ps.Step(dt);
             }
         }

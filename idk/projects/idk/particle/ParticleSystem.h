@@ -16,15 +16,17 @@ namespace idk
         MainModule main;
         EmissionModule emission;
         ShapeModule shape;
+        VelocityOverLifetimeModule velocity_over_lifetime;
+        ColorOverLifetimeModule color_over_lifetime;
+        SizeOverLifetimeModule size_over_lifetime;
+        RotationOverLifetimeModule rotation_over_lifetime;
         RendererModule renderer;
 
         ParticleData data;
         random rnd;
         float time = 0;
         float emitter_clock = 0;
-        vec3 origin;
-        quat rotation;
-        vec3 scale;
+        matrix_decomposition<real> transform;
         char state = Awake;
 
         void Play();

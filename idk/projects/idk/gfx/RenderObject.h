@@ -71,7 +71,7 @@ namespace idk
     struct ParticleRenderData
     {
         vector<vec3> positions;
-        vector<float> rotations;
+        vector<rad> rotations;
         vector<float> sizes;
         vector<color> colors;
         RscHandle<MaterialInstance> material_instance;

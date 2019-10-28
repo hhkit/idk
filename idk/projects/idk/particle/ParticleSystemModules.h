@@ -2,6 +2,7 @@
 
 #include <math/color.h>
 #include <util/enum.h>
+#include <particle/MinMax.h>
 
 namespace idk
 {
@@ -17,7 +18,7 @@ namespace idk
         float start_lifetime = 5.0f;
         float start_speed = 5.0f;
         float start_size = 1.0f;
-        float start_rotation = 0;
+        rad start_rotation = rad{ 0 };
         color start_color{ 1.0f, 1.0f, 1.0f, 1.0f };
         float gravity_modifier = 0;
         bool in_world_space = false;
@@ -39,7 +40,39 @@ namespace idk
         float radius_thickness = 1.0f;
         float randomize_direction = 0;
 
-        void Generate(ParticleSystem& data, uint16_t i);
+        void Generate(ParticleSystem& system, uint16_t i);
+    };
+
+    struct VelocityOverLifetimeModule
+    {
+        bool enabled = false;
+        MinMax<vec3> linear{ vec3{ 0, 0, 0 }, vec3{ 0, 0, 0 } };
+
+        void Update(ParticleSystem& system);
+    };
+
+    struct ColorOverLifetimeModule
+    {
+        bool enabled = false;
+        MinMax<color> color{ idk::color{ 1.0f, 1.0f, 1.0f, 1.0f }, idk::color{ 1.0f, 1.0f, 1.0f, 1.0f } };
+
+        void Update(ParticleSystem& system);
+    };
+
+    struct SizeOverLifetimeModule
+    {
+        bool enabled = false;
+        MinMax<float> size{ 0, 1.0f, MinMaxMode::Linear };
+
+        void Update(ParticleSystem& system);
+    };
+
+    struct RotationOverLifetimeModule
+    {
+        bool enabled = false;
+        MinMax<rad> angular_velocity{ deg{ 45.0f }, deg{ 45.0f } };
+
+        void Update(ParticleSystem& system, float dt);
     };
 
     struct RendererModule

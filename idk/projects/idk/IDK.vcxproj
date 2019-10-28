@@ -54,6 +54,7 @@
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="particle\MinMax.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
     <ClInclude Include="gfx\Framebuffer.h" />
@@ -223,6 +224,7 @@
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="util\align.h" />
+    <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />
@@ -382,6 +384,7 @@
     <ClCompile Include="math\shapes\ray.cpp" />
     <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>

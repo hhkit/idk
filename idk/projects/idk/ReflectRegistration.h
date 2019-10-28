@@ -393,7 +393,7 @@ REFLECT_END()
 
 // Particle System
 REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
-REFLECT_VARS(main, emission, shape, renderer)
+REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::MainModule, "MainModule")
@@ -408,6 +408,28 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::ShapeModule, "ShapeModule")
 REFLECT_VARS(enabled, radius, radius_thickness, randomize_direction)
+REFLECT_END()
+
+REFLECT_ENUM(idk::MinMaxMode, "MinMaxMode")
+REFLECT_BEGIN(idk::MinMax<idk::vec3>, "MinMaxVec3") REFLECT_VARS(min, max, mode) REFLECT_END()
+REFLECT_BEGIN(idk::MinMax<idk::color>, "MinMaxColor") REFLECT_VARS(min, max, mode) REFLECT_END()
+REFLECT_BEGIN(idk::MinMax<idk::rad>, "MinMaxRad") REFLECT_VARS(min, max, mode) REFLECT_END()
+REFLECT_BEGIN(idk::MinMax<float>, "MinMaxFloat") REFLECT_VARS(min, max, mode) REFLECT_END()
+
+REFLECT_BEGIN(idk::VelocityOverLifetimeModule, "VelocityOverLifetimeModule")
+REFLECT_VARS(enabled, linear)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ColorOverLifetimeModule, "ColorOverLifetimeModule")
+REFLECT_VARS(enabled, color)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RotationOverLifetimeModule, "RotationOverLifetimeModule")
+REFLECT_VARS(enabled, angular_velocity)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::SizeOverLifetimeModule, "SizeOverLifetimeModule")
+REFLECT_VARS(enabled, size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::RendererModule, "RendererModule")

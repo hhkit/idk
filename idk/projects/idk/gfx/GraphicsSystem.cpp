@@ -118,24 +118,24 @@ namespace idk
                 auto& render_data = result.particle_render_data.emplace_back();
 
                 render_data.positions.reserve(sz);
-                render_data.positions.insert(render_data.positions.end(), elem.data.positions.begin(), elem.data.positions.begin() + sz);
+                render_data.positions.insert(render_data.positions.end(), elem.data.position.begin(), elem.data.position.begin() + sz);
                 for (auto& pos : render_data.positions)
-                    pos *= elem.scale;
+                    pos *= elem.transform.scale;
                 if (!elem.main.in_world_space)
                 {
-                    mat3 rot{ elem.rotation };
+                    mat3 rot{ elem.transform.rotation };
                     for (auto& pos : render_data.positions)
-                        pos = elem.origin + rot * pos;
+                        pos = elem.transform.position + rot * pos;
                 }
 
                 render_data.rotations.reserve(sz);
-                render_data.rotations.insert(render_data.rotations.end(), elem.data.rotations.begin(), elem.data.rotations.begin() + sz);
+                render_data.rotations.insert(render_data.rotations.end(), elem.data.rotation.begin(), elem.data.rotation.begin() + sz);
 
                 render_data.sizes.reserve(sz);
-                render_data.sizes.insert(render_data.sizes.end(), elem.data.sizes.begin(), elem.data.sizes.begin() + sz);
+                render_data.sizes.insert(render_data.sizes.end(), elem.data.size.begin(), elem.data.size.begin() + sz);
 
                 render_data.colors.reserve(sz);
-                render_data.colors.insert(render_data.colors.end(), elem.data.colors.begin(), elem.data.colors.begin() + sz);
+                render_data.colors.insert(render_data.colors.end(), elem.data.color.begin(), elem.data.color.begin() + sz);
 
                 render_data.material_instance = elem.renderer.material;
             }

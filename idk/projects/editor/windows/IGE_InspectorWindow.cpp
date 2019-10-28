@@ -1085,7 +1085,7 @@ namespace idk {
             //ALL THE TYPE STATEMENTS HERE
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)
             {
-                changed |= ImGui::DragFloat("", &val);
+                changed |= ImGui::DragFloat("", &val, 0.01f);
             }
             else if constexpr (std::is_same_v<T, int>)
             {
@@ -1113,10 +1113,11 @@ namespace idk {
             }
             else if constexpr (is_template_v<T, RscHandle>)
             {
-                if (ImGuidk::InputResource("", &val))
-                {
-                    changed = true;
-                }
+                changed |= ImGuidk::InputResource("", &val);
+            }
+            else if constexpr (is_macro_enum_v<T>)
+            {
+                changed |= ImGuidk::EnumCombo("", &val);
             }
             else if constexpr (is_template_v<T, std::variant>)
             {

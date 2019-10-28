@@ -824,6 +824,10 @@
     <ClInclude Include="script\MonoBinder.h">
       <Filter>script</Filter>
     </ClInclude>
+    <ClInclude Include="particle\MinMax.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="util\easing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1199,6 +1203,7 @@
     <ClCompile Include="script\ValueUnboxer.cpp">
       <Filter>script</Filter>
     </ClCompile>
+    <ClCompile Include="util\easing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
