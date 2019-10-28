@@ -54,11 +54,11 @@ namespace idk::ogl
 	{
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
-		renderer_vertex_shaders[Particle]    = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
 
 		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
+        renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
 
 		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
