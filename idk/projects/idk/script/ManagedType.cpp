@@ -11,6 +11,21 @@ namespace idk::mono
 	{
 	}
 
+	bool ManagedType::IsOrDerivedFrom(string_view findme) const
+	{
+		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+		auto terminate = envi.Type("Object")->Raw();
+		auto type = Raw();
+
+		while (type != terminate)
+		{
+			if (mono_class_get_name(type) == findme)
+				return true;
+			type = mono_class_get_parent(type);
+		}
+		return false;
+	}
+
 	MonoClass* ManagedType::Raw() const
 	{
 		return type;

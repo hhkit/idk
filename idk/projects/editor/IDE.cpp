@@ -96,6 +96,10 @@ namespace idk
             recent_file << proj_manager.GetProjectFullPath();
         }
 
+		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
+		{
+			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
+		});
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::OpenGL:

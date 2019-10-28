@@ -14,6 +14,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ObjectDestroy(ulong handle);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static MonoBehavior[] ObjectGetObjectsOfType(string type);
+
         /**
          * Game Object
          */
