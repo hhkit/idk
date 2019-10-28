@@ -119,9 +119,9 @@ namespace idk::vkn {
 			{
 				blitter[i] = vk::ImageBlit
 				{
-					vk::ImageSubresourceLayers{aspect,i,0,1},
+					vk::ImageSubresourceLayers{aspect,i,0,6},
 					std::array<vk::Offset3D,2>{vk::Offset3D{0,0,0},vk::Offset3D{s_cast<int32_t>(width >> i),s_cast<int32_t>(height >> i),z}},
-					vk::ImageSubresourceLayers{aspect,i,0,1},
+					vk::ImageSubresourceLayers{aspect,i,0,6},
 					std::array<vk::Offset3D,2>{vk::Offset3D{0,0,0},vk::Offset3D{s_cast<int32_t>(width >> i),s_cast<int32_t>(height >> i),z}},
 				};
 
@@ -377,7 +377,7 @@ namespace idk::vkn {
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = vcm::CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -556,19 +556,21 @@ namespace idk::vkn {
 
 		const vk::ImageAspectFlagBits img_aspect = load_info.aspect;
 		result.aspect = img_aspect;
-		vk::UniqueImage blit_src_img;
-		hlp::UniqueAlloc blit_img_alloc;
-		vk::UniqueBuffer staging_buffer;
-		vk::UniqueDeviceMemory staging_memory;
+		vk::UniqueImage blit_src_img{};
+		hlp::UniqueAlloc blit_img_alloc{};
+		vk::UniqueBuffer staging_buffer{};
+		vk::UniqueDeviceMemory staging_memory{};
+		
+		vk::ImageSubresourceRange sub_range;
+		sub_range.aspectMask = img_aspect;
+		sub_range.baseMipLevel = 0;
+		sub_range.levelCount = load_info.mipmap_level + 1;
+		sub_range.baseArrayLayer = 0;
+		sub_range.layerCount = 6;
+		
 		if (in_info)
 		{
 
-			vk::ImageSubresourceRange sub_range;
-			sub_range.aspectMask = img_aspect;
-			sub_range.baseMipLevel = 0;
-			sub_range.levelCount = load_info.mipmap_level + 1;
-			sub_range.baseArrayLayer = 0;
-			sub_range.layerCount = 1;
 
 			//TODO update this part so that we check the usage flags and set access flags accordingly.
 			vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
@@ -624,16 +626,18 @@ namespace idk::vkn {
 			//}
 			//if ((format == vk::Format::eD16Unorm))
 			//	img_aspect = vk::ImageAspectFlagBits::eDepth;
-			vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, copy_dest, img_aspect, sub_range);
+			vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, 
+				vk::ImageLayout::eUndefined, next_layout, copy_dest, img_aspect, sub_range
+			);
 			//if (!is_render_target)
 			{
 				size_t offset = 0;
 				//Copy data from buffer to image
-				vector< vk::BufferImageCopy> copy_regions(6*(load_info.mipmap_level + 1));
+				vector< vk::BufferImageCopy> copy_regions(load_info.mipmap_level + 1);
 				auto& stridelist = in_info->stride;
 				uint32_t ii = 0;
-				for (uint32_t f = 0; f < 6; ++f)
-				{
+				//for (uint32_t f = 0; f < 6; ++f)
+				{/*
 					{
 						vk::BufferImageCopy region{};
 						region.bufferRowLength = 0;
@@ -655,8 +659,8 @@ namespace idk::vkn {
 						++ii;
 						offset += stridelist[f];
 
-					}
-					for (uint32_t i = 1; i <= load_info.mipmap_level; ++i)
+					}*/
+					for (uint32_t i = 0; i <= load_info.mipmap_level; ++i)
 					{
 
 						vk::BufferImageCopy region{};
@@ -666,7 +670,7 @@ namespace idk::vkn {
 						region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 						region.imageSubresource.mipLevel = i;// std::max(load_info.mipmap_level, 1u) - 1;
 						region.imageSubresource.baseArrayLayer = 0;
-						region.imageSubresource.layerCount = 1;
+						region.imageSubresource.layerCount = 6;
 
 						region.imageOffset = { 0, 0, 0 };
 						region.imageExtent = {
@@ -677,7 +681,8 @@ namespace idk::vkn {
 						copy_regions[ii] = (region);
 						region.bufferOffset = 0;
 						++ii;
-						offset += stridelist[f];
+						for (uint32_t f = 0; f < 6; ++f)
+							offset += stridelist[f];
 					}
 				}
 				//vector<vk::BufferImageCopy>
@@ -697,13 +702,13 @@ namespace idk::vkn {
 				vcm::TransitionImageLayout(cmd_buffer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *image, img_aspect, sub_range);
 				vcm::BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, load_info.mipmap_level, width, height);
 			}
-			vcm::TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect);
+			vcm::TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect,sub_range);
 
 
 		}
 		else
 		{
-			vcm::TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, *image, img_aspect);
+			vcm::TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, *image, img_aspect,sub_range);
 		}
 		device.resetFences(fence);
 		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
@@ -783,7 +788,9 @@ namespace idk::vkn {
 		;
 
 
-		vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect, vk::ImageSubresourceRange
+		vcm::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, 
+			vk::ImageLayout::eUndefined, next_layout, *image, img_aspect, 
+			vk::ImageSubresourceRange
 			{
 				img_aspect,0,1,0,6
 			});
