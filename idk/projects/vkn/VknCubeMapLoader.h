@@ -51,12 +51,14 @@ namespace idk::vkn
 		const void* data{};
 		size_t len{};
 		vector<size_t> stride{0};
+		size_t mem_size{};
 		vk::Format format{};
 		InputCMInfo(
 			const void* d = nullptr,
 			size_t l = 0,
 			vector<size_t> s = { 0 },
-			vk::Format f = {}) noexcept :data{ d }, len{ l }, stride{s}, format{ f }{}
+			size_t ms = 0,
+			vk::Format f = {}) noexcept :data{ d }, len{ l }, stride{ s }, mem_size{ms},format{ f }{}
 	};
 	struct CMCreateInfo
 	{

@@ -51,6 +51,7 @@ namespace idk
 
 		void	SetIsPaused(bool i);
 		bool	GetIsPaused();
+		bool	GetIsPlaying();
 		void	UpdateVolume(float i);
 		void	UpdatePitch(float i);
 		void	UpdatePriority(int i);

@@ -24,3 +24,4 @@ Include all windows here
 #include <editor/windows/IGE_MaterialEditor.h>
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/windows/IGE_Console.h>
+#include <editor/windows/IGE_AnimatorWindow.h>

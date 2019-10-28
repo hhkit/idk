@@ -21,6 +21,8 @@ namespace idk
 	class AudioSource :public Component<AudioSource>{
 	public:
 
+		~AudioSource();
+
 		void Play(int index = 0);
 		void Stop(int index = 0);
 		void StopAll();
@@ -28,6 +30,7 @@ namespace idk
 		void AddAudioClip(string_view filePath); //Calls to add audio clip with path given
 		void RemoveAudioClip(int index = 0); //Calls to add audio clip with path given
 		
+		bool IsAnyAudioClipPlaying();
 		void UpdateAudioClips();
 		vector<RscHandle<AudioClip>> audio_clip_list;
 

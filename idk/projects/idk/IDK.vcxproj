@@ -46,8 +46,9 @@
     <ClInclude Include="core\ConfigurableSystem.h" />
     <ClInclude Include="debug\idk_assert.h" />
     <ClInclude Include="debug\Log.h" />
-    <ClInclude Include="debug\LogSystem.h" />
+    <ClInclude Include="debug\LogSingleton.h" />
     <ClInclude Include="debug\LogPools.h" />
+    <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Viewport.h" />
@@ -263,6 +264,7 @@
     <ClCompile Include="common\Tag.cpp" />
     <ClCompile Include="common\TagManager.cpp" />
     <ClCompile Include="debug\Log.cpp" />
+    <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraControls.cpp" />

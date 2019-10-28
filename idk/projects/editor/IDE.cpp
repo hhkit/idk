@@ -236,9 +236,11 @@ namespace idk
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);
 		ADD_WINDOW(IGE_MaterialEditor);
+		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);
 		ADD_WINDOW(IGE_ProjectSettings);
 		ADD_WINDOW(IGE_Console);
+		
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();

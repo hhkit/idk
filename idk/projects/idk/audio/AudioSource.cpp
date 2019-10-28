@@ -15,6 +15,11 @@
 
 namespace idk
 {
+	AudioSource::~AudioSource()
+	{
+		StopAll();
+
+	}
 	void AudioSource::Play(int index)
 	{
 		if (audio_clip_list.size() > index) { //Check if it is in array
@@ -39,15 +44,24 @@ namespace idk
 	{
 		auto audioPtr1 = Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(filePath));
 		if (audioPtr1)
-			audio_clip_list.push_back(*audioPtr1);
+			audio_clip_list.emplace_back(*audioPtr1);
 	}
 
 
 	void AudioSource::RemoveAudioClip(int index)
 	{
 		if (audio_clip_list.size() > index) { //Check if it is in array
+			audio_clip_list[index]->Stop(); //Stop first
 			audio_clip_list.erase(audio_clip_list.begin() + index);
 		}
+	}
+	bool AudioSource::IsAnyAudioClipPlaying()
+	{
+		for (int i = 0; i < audio_clip_list.size(); ++i) {
+			if (audio_clip_list[i]->GetIsPlaying())
+				return true;
+		}
+		return false;
 	}
 	void AudioSource::UpdateAudioClips()
 	{

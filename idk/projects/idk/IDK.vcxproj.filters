@@ -744,9 +744,6 @@
     <ClInclude Include="debug\LogPools.h">
       <Filter>debug</Filter>
     </ClInclude>
-    <ClInclude Include="debug\LogSystem.h">
-      <Filter>debug</Filter>
-    </ClInclude>
     <ClInclude Include="natvis_ids.h">
       <Filter>_natvis</Filter>
     </ClInclude>
@@ -800,6 +797,10 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="script\MonoFunctionInvoker.h" />
+    <ClInclude Include="debug\LogSingleton.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1118,9 +1119,6 @@
     <ClCompile Include="common\LayerManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="debug\LogSystem.cpp">
-      <Filter>debug</Filter>
-    </ClCompile>
     <ClCompile Include="debug\Log.cpp">
       <Filter>debug</Filter>
     </ClCompile>
@@ -1160,6 +1158,10 @@
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="particle\ParticleSystemModules.cpp" />
+    <ClCompile Include="debug\LogSingleton.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\LogSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
