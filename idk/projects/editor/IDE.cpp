@@ -230,19 +230,18 @@ namespace idk
 		ige_main_window = std::make_unique<IGE_MainWindow>();
 
 #define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
-		ADD_WINDOW(IGE_SceneView);
 		ADD_WINDOW(IGE_GameView);
+		ADD_WINDOW(IGE_SceneView);
 		ADD_WINDOW(IGE_ShadowMapWindow);
+		ADD_WINDOW(IGE_Console);
+		ADD_WINDOW(IGE_ProgrammerConsole);
 		ADD_WINDOW(IGE_ProjectWindow);
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);
 		ADD_WINDOW(IGE_MaterialEditor);
 		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);
-		ADD_WINDOW(IGE_ProjectSettings);
-		ADD_WINDOW(IGE_Console);
-		ADD_WINDOW(IGE_ProgrammerConsole);
-		
+		ADD_WINDOW(IGE_ProjectSettings);	
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();
