@@ -297,6 +297,7 @@ namespace idk::vkn
 							RscHandle<VknCubemap> conv = cm.GetConvoluted();
 							if (!conv->is_convoluted && conv != RscHandle<VknCubemap>{})
 							{	
+								convolute_state.FlagRendered();
 								_convoluter.QueueConvoluteCubeMap(RscHandle<CubeMap>{cubemap}, RscHandle<CubeMap>{conv});
 								conv->is_convoluted = true;
 							}
@@ -310,6 +311,7 @@ namespace idk::vkn
 				}
 			);
 			_convoluter.ProcessQueue(cmd_buffer);
+			cmd_buffer.end();
 
 		}
 

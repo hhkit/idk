@@ -39,9 +39,9 @@ namespace idk {
 		return *this;
 	}
 
-	void vkn::VknTexture::Size(ivec2 new_size)
+	ivec2 vkn::VknTexture::Size(ivec2 new_size)
 	{
-		Texture::Size(new_size);
+		return Texture::Size(new_size);
 
 		//ToDO update the size of texture
 	}

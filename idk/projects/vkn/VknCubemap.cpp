@@ -1,38 +1,45 @@
 #include "pch.h"
 #include "VknCubemap.h"
 namespace idk::vkn {
+	RscHandle<Texture> VknCubemap::Tex() const noexcept
+	{
+		return RscHandle<Texture>{texture};
+	}
 	VknCubemap::~VknCubemap()
 	{
+		Core::GetResourceManager().Release(texture);
 	}
 
 	VknCubemap::VknCubemap(VknCubemap&& rhs) noexcept
 		:CubeMap{ std::move(rhs) },
-		size{ std::move(rhs.size) },
-		sizeOnDevice{ std::move(rhs.sizeOnDevice) },
-		rawData{ std::move(rhs.rawData) },
-		path{ std::move(rhs.path) },
-		image{ std::move(rhs.image) },
-		format{ std::move(rhs.format) },
-		mem{ std::move(rhs.mem) },
-		imageView{ std::move(rhs.imageView) },
-		sampler{ std::move(rhs.sampler) }
+		texture{rhs.texture}
+		//size{ std::move(rhs.size) },
+		//sizeOnDevice{ std::move(rhs.sizeOnDevice) },
+		//rawData{ std::move(rhs.rawData) },
+		//path{ std::move(rhs.path) },
+		//image{ std::move(rhs.image) },
+		//format{ std::move(rhs.format) },
+		//mem{ std::move(rhs.mem) },
+		//imageView{ std::move(rhs.imageView) },
+		//sampler{ std::move(rhs.sampler) }
 	{
+		rhs.texture = RscHandle<VknTexture>{};
 	}
 
 	VknCubemap& VknCubemap::operator=(VknCubemap&& rhs) noexcept
 	{
 		// TODO: insert return statement here
 		CubeMap::operator=(std::move(rhs));
-
-		std::swap(size, rhs.size);
-		std::swap(sizeOnDevice, rhs.sizeOnDevice);
-		std::swap(rawData, rhs.rawData);
-		std::swap(path, rhs.path);
-		std::swap(image, rhs.image);
-		std::swap(format, rhs.format);
-		std::swap(mem, rhs.mem);
-		std::swap(imageView, rhs.imageView);
-		std::swap(sampler, rhs.sampler);
+		std::swap(texture, rhs.texture);
+		//std::swap(size, rhs.size);
+		//std::swap(sizeOnDevice, rhs.sizeOnDevice);
+		//std::swap(rawData, rhs.rawData);
+		//std::swap(path, rhs.path);
+		//std::swap(image, rhs.image);
+		//std::swap(format, rhs.format);
+		//std::swap(mem, rhs.mem);
+		//std::swap(imageView, rhs.imageView);
+		//std::swap(sampler, rhs.sampler);
 
 		return *this;
 	}
@@ -44,7 +51,7 @@ namespace idk::vkn {
 
 	void* VknCubemap::ID() const
 	{
-		return r_cast<void*>(imageView->operator VkImageView());
+		return texture->ID();
 	}
 
 	void VknCubemap::SetConvoluted(const RscHandle<VknCubemap>& new_cubemap)

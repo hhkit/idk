@@ -31,7 +31,7 @@ namespace idk::vkn
 			//PipelineObject() = default;
 			//PipelineObject(PipelineObject&&) noexcept= default;
 			//~PipelineObject() = default;
-			void Create(VulkanView& view, size_t fo_index)
+			void Create(VulkanView& view, [[maybe_unused]]size_t fo_index)
 			{
 				//TODO: set the pipeline's modules
 				vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
@@ -39,8 +39,8 @@ namespace idk::vkn
 				for (auto& module : shader_handles)
 				{
 					auto& mod = module.as<ShaderModule>();
-					if (mod.NeedUpdate())
-						mod.UpdateCurrent(fo_index);
+					//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
+					//	mod.UpdateCurrent(fo_index);
 					auto& desc = mod.AttribDescriptions();
 					for(auto& desc_set : desc)
 						config.buffer_descriptions.emplace_back(desc_set);

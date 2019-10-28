@@ -19,7 +19,7 @@ namespace idk::ogl
 		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB, ColorFormat internalFormat_in = ColorFormat::SRGB, const unsigned& mipmap_size =0, const float& imgSize=0.f);
 
 		using Texture::Size;
-		void Size(ivec2 new_size) override;
+		ivec2 Size(ivec2 new_size) override;
 		virtual void* ID() const override;
 		
 	private:

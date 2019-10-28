@@ -287,6 +287,11 @@ namespace idk::vkn
 	{
 		this->info->render_info[shape].emplace_back(debug_info::inst_data{ color, tfm });
 	}
+	void VulkanDebugRenderer::DrawShape(MeshType shape, const mat4& tfm, const color& color)
+	{
+		
+		this->info->render_info2[Mesh::defaults[shape]].emplace_back(debug_info::inst_data{ color, tfm });
+	}
 	const std::vector<vec3>& GetSquareFace(bool is_line_list)
 	{
 		static constexpr float a = 1.0f;
