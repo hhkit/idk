@@ -8,6 +8,8 @@ namespace idk
 		SYS,
 		PHYS,
 		GFX,
+		ANIM,
+		MONO,
 		GAME,
 		COUNT
 	};

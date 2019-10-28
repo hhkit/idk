@@ -14,7 +14,6 @@
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>
-#include <iostream>
 #include <gfx/CubeMap.h>
 #include <opengl/resource/OpenGLCubemap.h>
 
@@ -37,7 +36,7 @@ void _check_gl_error(const char* file, int line) {
 		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
 		}
 
-		std::cerr << "GL_" << error.c_str() << " - " << file << ":" << line << '\n';
+		LOG_ERROR_TO(idk::LogPool::GFX, "GL_%s-%s: %s", error.c_str(), file, line);
 		err = glGetError();
 	}
 }

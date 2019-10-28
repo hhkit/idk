@@ -74,7 +74,6 @@ namespace idk::mono
 		Bind("idk.Bindings::ObjectValidate", decay(
 			[](GenericHandle go) -> bool
 		{
-			LOG_TO(LogPool::GAME, "Checking %ld", go.id);
 			return GameState::GetGameState().ValidateHandle(go);
 		}
 		));
@@ -86,15 +85,34 @@ namespace idk::mono
 		}
 		));
 
+		Bind("idk.Bindings::ObjectGetObjectsOfType", decay(
+			[](MonoString* type) -> MonoArray*
+		{
+			auto s = unbox(type);
+			string_view type_name = s.get();
+
+			vector<Handle<mono::Behavior>> behaviors;
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<mono::Behavior>())
+				if (elem.GetObject().Type()->IsOrDerivedFrom(type_name))
+					behaviors.emplace_back(elem.GetHandle());
+
+			auto klass = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(type_name);
+
+			IDK_ASSERT(klass);
+			auto retval = mono_array_new(mono_domain_get(), klass->Raw(), behaviors.size());
+			for (int i = 0; i < behaviors.size(); ++i)
+				mono_array_setref(retval, i, behaviors[i]->GetObject().Raw());
+
+			return retval;
+		}
+		));
+
 		// game object
 
 		Bind("idk.Bindings::GameObjectAddEngineComponent", decay(
 			[](Handle<GameObject> go, MonoString* component) -> uint64_t
 			{
-				auto* s = mono_string_to_utf8(component);
-				auto retval = go->AddComponent(string_view{ s }).id;
-				mono_free(s);
-				return retval;
+				return go->AddComponent(string_view{ unbox(component).get() }).id;
 			}
 		));
 
@@ -102,10 +120,7 @@ namespace idk::mono
 		Bind("idk.Bindings::GameObjectGetEngineComponent", decay(
 			[](Handle<GameObject> go, MonoString* component) -> uint64_t // note: return value optimization
 			{
-				auto* s = mono_string_to_utf8(component);
-				auto retval = go->GetComponent(string_view{ s }).id;
-				mono_free(s);
-				return retval;
+				return go->GetComponent(string_view{ unbox(component).get() }).id;
 			}
 		));
 
@@ -126,17 +141,12 @@ namespace idk::mono
 			[](Handle<GameObject> go, MonoString* component) -> MonoObject* // note: return value optimization
 			{
 				auto s = unbox(component);
+				string_view findme = s.get();
 				auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 				for (auto& elem : go->GetComponents<mono::Behavior>())
 				{
-					string_view findme = s.get();
-					auto type = mono_object_get_class(elem->GetObject().Raw());
-					while (type != envi.Type("Object")->Raw())
-					{
-						if (mono_class_get_name(type) == findme)
-							return elem->GetObject().Raw();
-						type = mono_class_get_parent(type);
-					}
+					if (elem->GetObject().Type()->IsOrDerivedFrom(findme))
+						return elem->GetObject().Raw();
 				}
 
 				return nullptr;

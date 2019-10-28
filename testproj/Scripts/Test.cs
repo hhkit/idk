@@ -31,6 +31,12 @@ namespace TestAndSeek
             ts = gameObject.GetComponent<TestShou>();
             if (rb)
                 Debug.Log("found rigidbody");
+
+            foreach (var elem in FindObjectsOfType<TestShou>())
+            {
+                Debug.Log("I " + i + " am " + elem.i);
+                Destroy(elem.gameObject);
+            }
         }
 
         public override void OnTriggerEnter(Collider other)

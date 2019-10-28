@@ -14,6 +14,8 @@ namespace idk::mono
 	public:
 		explicit ManagedType(MonoClass* type);
 
+		bool IsOrDerivedFrom(string_view type_name) const;
+
 		MonoClass* Raw() const;
 
 		template<typename ... Args>

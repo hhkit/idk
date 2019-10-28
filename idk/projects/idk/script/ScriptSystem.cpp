@@ -58,7 +58,7 @@ namespace idk::mono
 			(exe_dir + "/mono/etc/").data()
 		);
 		mono_trace_set_print_handler([](const char* string, mono_bool is_stdout) {
-			LOG_TO(LogPool::GAME, string);
+			LOG_TO(LogPool::MONO, string);
 			});
 
 		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
@@ -70,11 +70,11 @@ namespace idk::mono
 			{
 				if (fatal)
 				{
-					LOG_TO(LogPool::GAME, "Fatal Game Error");
-					LOG_TO(LogPool::GAME, message);
+					LOG_TO(LogPool::MONO, "Fatal Game Error");
+					LOG_TO(LogPool::MONO, message);
 				}
 				else
-					LOG_TO(LogPool::GAME, message);
+					LOG_TO(LogPool::MONO, message);
 			}
 		, nullptr);
 	}

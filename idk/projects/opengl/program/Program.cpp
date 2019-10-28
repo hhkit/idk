@@ -2,7 +2,6 @@
 #include <core/Core.h>
 #include "Program.h"
 #include <gfx/IShaderProgramFactory.h>
-#include <iostream>
 
 constexpr auto replacer = R"(
 #ifdef OGL
@@ -55,13 +54,13 @@ namespace idk::ogl
 			{
 				glGetShaderInfoLog(_shader_id, 512, NULL, infoLog);
 
-				std::cout << get_shader(shader_type) << " compilation failed!\n";
-				std::cout << infoLog << "\n";
+				LOG_ERROR_TO(LogPool::GFX, "%s, compilation failed!", get_shader(shader_type).data());
+				LOG_ERROR_TO(LogPool::GFX, infoLog);
 			}
 
 			else
 			{
-				std::cout << get_shader(shader_type) << " compilation succeeded!\n";
+				LOG_TO(LogPool::GFX, "%s, compilation succeeded!", get_shader(shader_type).data());
 			}
 		}
 		_shader_flags |= [](GLenum shader_t)
@@ -142,12 +141,12 @@ namespace idk::ogl
 			{
 				glGetProgramInfoLog(_program_id, 512, NULL, infoLog);
 
-				std::cout << "Program link failed!\n";
-				std::cout << infoLog << "\n";
+				LOG_ERROR_TO(LogPool::GFX, "Program link failed!");
+				LOG_ERROR_TO(LogPool::GFX, infoLog);
 			}
 			else
 			{
-				std::cout << "Program link succeeded!\n";
+				LOG_TO(LogPool::GFX, "Program link succeeded!");
 				
 				//if (0)
 				{
@@ -157,23 +156,22 @@ namespace idk::ogl
 					for (GLint i = 0; i < uniform_count; ++i)
 					{
 						glGetActiveUniformName(_program_id, i, 256, nullptr, buf);
-						std::cout << "  uniform detected: " << buf << "\n";
-						std::cout << "  location: " << glGetUniformLocation(_program_id, buf) << "\n";
-						//std::cout << "  location: " << glGetUniformBlockIndex(_program_id, buf) << "\n";
+						LOG_TO(LogPool::GFX, "  uniform detected: %s", buf );
+						LOG_TO(LogPool::GFX, "  location: %d", glGetUniformLocation(_program_id, buf));
 					}
 
 					GLint numBlocks = 0;
 					glGetProgramInterfaceiv(_program_id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &numBlocks);
-					std::cout << "  blocks found: " << numBlocks << "\n";
+					LOG_TO(LogPool::GFX, "  blocks found: %d", numBlocks);
 
 					for (GLint i = 0; i < numBlocks; ++i)
 					{
 						GLint val = 0;
 						glGetActiveUniformBlockiv(_program_id, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &val);
-						std::cout << " uniforms in block " << i << ": " << val << "\n";
+						LOG_TO(LogPool::GFX, "  uniforms in block %d: %d", i, val);
+
 						for (GLint j = 0; j < val; ++j)
 						{
-
 						}
 					}
 				}

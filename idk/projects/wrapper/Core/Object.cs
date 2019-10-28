@@ -73,5 +73,16 @@ namespace idk
         {
             return (Object) MemberwiseClone();
         }
+
+        public static T[] FindObjectsOfType<T>() where T : MonoBehavior
+        {
+            return (T[]) Bindings.ObjectGetObjectsOfType(typeof(T).Name);
+        }
+
+        public static T FindObjectOfType<T>() where T : MonoBehavior
+        {
+            var search = FindObjectsOfType<T>();
+            return search.Length > 0 ? search[0] : null;
+        }
     }
 }
