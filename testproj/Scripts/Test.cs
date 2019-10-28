@@ -32,7 +32,7 @@ namespace TestAndSeek
             if (rb)
                 Debug.Log("found rigidbody");
 
-            foreach (var elem in GetObjectsOfType<TestShou>())
+            foreach (var elem in FindObjectsOfType<TestShou>())
             {
                 Debug.Log("I " + i + " am " + elem.i);
                 Destroy(elem.gameObject);
