@@ -89,6 +89,12 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 TransformRight(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong TransformGetParent(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TransformSetParent(ulong id, ulong parent, bool preserve_global);
+
         /*
          * RigidBody
          */
@@ -153,6 +159,12 @@ namespace idk
         public extern static bool ResourceValidate(System.Guid guid, string type);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string ResourceGetName(System.Guid guid, string type);
+
+        /*
+         * Prefab
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong PrefabInstantiate(System.Guid guid);
 
         /*
          * MaterialInstance

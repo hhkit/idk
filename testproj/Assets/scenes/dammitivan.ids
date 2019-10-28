@@ -104,8 +104,9 @@
     script_data: !Test 
       f: 0
       i: 0
-      jump_force: 0
+      jump_force: 165
       movement: {x: 0, y: 0, z: 0}
+      prefab: {guid: 9b994921-8483-4621-8ddc-db9bfdefe67b}
 - !12884967424 
   - active: 1
   - !Transform 

@@ -75,6 +75,7 @@
     <Compile Include="Behavior\YieldInstruction.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Resources\MaterialInstance.cs" />
+    <Compile Include="Resources\Prefab.cs" />
     <Compile Include="Resources\Resource.cs" />
     <Compile Include="Resources\Texture.cs" />
   </ItemGroup>
