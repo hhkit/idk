@@ -234,7 +234,7 @@ namespace idk
 			if (layer.curr_state.is_stopping)
 			{
 				layer.curr_state.normalized_time = 0.0f;
-				LOG_TO(LogPool::GAME, "[Animator] Current animation (" + layer.curr_state.name + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + layer.curr_state.name + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 
 			layer.blend_source[bone_index] = result;
@@ -249,7 +249,7 @@ namespace idk
 				// layer.is_blending = false;
 				layer.blend_state.normalized_time = 0.0f;
 				layer.blend_interrupt = false;
-				LOG_TO(LogPool::GAME, "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{
