@@ -975,230 +975,238 @@ namespace idk {
         bool outer_changed = false;
         vector<char> indent_stack;
 
+        const auto display_key_value = [&](const char* key, auto&& val, int depth_change)
+        {
+            using T = std::decay_t<decltype(val)>;
+
+            const float currentHeight = ImGui::GetCursorPosY();
+
+            string keyName = format_name(key);
+
+            while (depth_change++ <= 0)
+            {
+                if (indent_stack.back())
+                    ImGui::Unindent();
+                indent_stack.pop_back();
+                _curr_property_stack.pop_back();
+            }
+            _curr_property_stack.push_back(key);
+
+            if (keyName == "Enabled" && _curr_property_stack.size() == 1)
+            {
+                indent_stack.push_back(0);
+                return false;
+            }
+
+            string curr_prop_path;
+            for (const auto& prop : _curr_property_stack)
+            {
+                if (prop.empty())
+                    continue;
+                curr_prop_path += prop;
+                curr_prop_path += '/';
+            }
+            curr_prop_path.pop_back();
+
+            bool has_override = false;
+            if (_prefab_inst)
+            {
+                for (const auto& ov : _prefab_inst->overrides)
+                {
+                    if (ov.component_name == (*_prefab_curr_component).type.name() &&
+                        ov.property_path == curr_prop_path &&
+                        ov.component_nth == _prefab_curr_component_nth)
+                    {
+                        has_override = true;
+                        break;
+                    }
+                }
+            }
+
+            ImGui::BeginGroup();
+
+            ImGui::SetCursorPosY(currentHeight + pad_y);
+            if (has_override)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                ImGui::Text(keyName.c_str());
+                ImGui::PopStyleColor();
+                ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
+                ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
+                                                          ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
+                                                          ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+            }
+            else
+                ImGui::Text(keyName.c_str());
+
+            ImGui::SetCursorPosY(currentHeight);
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
+
+            ImGui::PushID(("##" + curr_prop_path).c_str());
+            ImGui::PushItemWidth(-4.0f);
+
+            bool indent = false;
+            bool recurse = false;
+            bool changed = false;
+            [[maybe_unused]] bool changed_and_deactivated = false;
+
+            //ALL THE TYPE STATEMENTS HERE
+            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)
+            {
+                changed |= ImGui::DragFloat("", &val);
+            }
+            else if constexpr (std::is_same_v<T, int>)
+            {
+                changed |= ImGui::DragInt("", &val);
+            }
+            else if constexpr (std::is_same_v<T, bool>)
+            {
+                changed |= ImGui::Checkbox("", &val);
+            }
+            else if constexpr (std::is_same_v<T, vec3>)
+            {
+                changed |= ImGuidk::DragVec3("", &val);
+            }
+            else if constexpr (std::is_same_v<T, quat>)
+            {
+                changed |= ImGuidk::DragQuat("", &val);
+            }
+            else if constexpr (std::is_same_v<T, color>)
+            {
+                changed |= ImGui::ColorEdit4("", val.data());
+            }
+            else if constexpr (std::is_same_v<T, rad>)
+            {
+                changed |= ImGui::SliderAngle("", val.data());
+            }
+            else if constexpr (is_template_v<T, RscHandle>)
+            {
+                if (ImGuidk::InputResource("", &val))
+                {
+                    changed = true;
+                }
+            }
+            else if constexpr (is_template_v<T, std::variant>)
+            {
+                const int curr_ind = s_cast<int>(val.index());
+                int new_ind = curr_ind;
+
+                constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+                using VarCombo = std::array<const char*, sz>;
+
+                static auto combo_items = []()-> VarCombo
+                {
+                    constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+                    static std::array<string, sz> tmp_arr;
+                    std::array<const char*, sz> retval{};
+
+                    auto sp = reflect::unpack_types<T>();
+
+                    for (size_t i = 0; i < sz; ++i)
+                    {
+                        tmp_arr[i] = format_name(sp[i].name());
+                        retval[i] = tmp_arr[i].data();
+                    }
+                    return retval;
+                }();
+
+                if (ImGui::Combo("", &new_ind, combo_items.data(), static_cast<int>(sz)))
+                {
+                    val = variant_construct<T>(new_ind);
+                    changed = true;
+                }
+
+                recurse = true;
+            }
+            else if constexpr (is_sequential_container_v<T>)
+            {
+                reflect::uni_container cont{ val };
+                ImGui::Button("+");
+                ImGui::Indent();
+                for (auto dyn : cont)
+                {
+                    displayVal(dyn);
+                }
+                ImGui::Unindent();
+            }
+            else if constexpr (is_associative_container_v<T>)
+            {
+                ImGui::Text("Associative Container");
+                /*reflect::uni_container cont{ val };
+                ImGui::Button("+");
+                ImGui::Indent();
+                for (auto dyn : cont)
+                {
+                    auto pair = dyn.unpack();
+                    displayVal(pair[0]);
+                }
+                ImGui::Unindent();*/
+            }
+            else
+            {
+                if (keyName.size())
+                {
+                    ImGui::NewLine();
+                    indent = true;
+                }
+                else
+                {
+                    ImGui::SetCursorPosX(0);
+                    ImGui::SetCursorPosY(currentHeight);
+                    ImGui::EndGroup();
+                    ImGui::PopItemWidth();
+                    ImGui::PopID();
+                    indent_stack.push_back(0);
+                    ImGui::SetCursorPosY(currentHeight);
+                    return true;
+                }
+                recurse = true;
+            }
+
+            ImGui::EndGroup();
+
+            if (has_override && ImGui::BeginPopupContextItem("__context"))
+            {
+                if (ImGui::MenuItem("Apply Property"))
+                {
+                    PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
+                    PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                }
+                if (ImGui::MenuItem("Revert Property"))
+                {
+                    PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
+                    PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                }
+                ImGui::EndPopup();
+            }
+
+            outer_changed |= changed;
+            if (changed && _prefab_inst)
+                PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
+
+            ImGui::PopItemWidth();
+            ImGui::PopID();
+
+            indent_stack.push_back(indent);
+            if (indent)
+                ImGui::Indent();
+
+            return recurse;
+        };
+
         const auto generic_visitor = [&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
 
             using K = std::decay_t<decltype(key)>;
-            using T = std::decay_t<decltype(val)>;
-
-            //reflect::dynamic dynaVal = val;
-            const float currentHeight = ImGui::GetCursorPosY();
 
             if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
             {
                 // add empty key so that can be popped properly
-                _curr_property_stack.push_back("");
-                indent_stack.push_back(0);
-                return true;
+                return display_key_value("", std::forward<decltype(val)>(val), depth_change);
             }
             else if constexpr (!std::is_same_v<K, const char*>)
                 throw "unhandled case";
             else
-            {
-                string keyName = format_name(key);
-				if (keyName == "min" || keyName == "Min")
-				{
-					DoNothing();
-				}
-                while (depth_change++ <= 0)
-                {
-                    if (indent_stack.back())
-                        ImGui::Unindent();
-                    indent_stack.pop_back();
-                    _curr_property_stack.pop_back();
-                }
-                _curr_property_stack.push_back(key);
-
-                if (keyName == "Enabled")
-                {
-                    indent_stack.push_back(0);
-                    return false;
-                }
-
-                string curr_prop_path;
-                for (const auto& prop : _curr_property_stack)
-                {
-                    if (prop.empty())
-                        continue;
-                    curr_prop_path += prop;
-                    curr_prop_path += '/';
-                }
-                curr_prop_path.pop_back();
-
-                bool has_override = false;
-                if (_prefab_inst)
-                {
-                    for (const auto& ov : _prefab_inst->overrides)
-                    {
-                        if (ov.component_name == (*_prefab_curr_component).type.name() &&
-                            ov.property_path == curr_prop_path &&
-                            ov.component_nth == _prefab_curr_component_nth)
-                        {
-                            has_override = true;
-                            break;
-                        }
-                    }
-                }
-
-                ImGui::BeginGroup();
-
-                ImGui::SetCursorPosY(currentHeight + pad_y);
-                if (has_override)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                    ImGui::Text(keyName.c_str());
-                    ImGui::PopStyleColor();
-                    ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
-                    ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
-                                                              ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
-                                                              ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                }
-                else
-                    ImGui::Text(keyName.c_str());
-
-                keyName.insert(0, "##"); //For Imgui stuff
-
-                ImGui::SetCursorPosY(currentHeight);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-
-                ImGui::PushID(("##"+curr_prop_path).c_str());
-                ImGui::PushItemWidth(-4.0f);
-
-                bool indent = false;
-                bool recurse = false;
-                bool changed = false;
-				[[maybe_unused]] bool changed_and_deactivated = false;
-
-                //ALL THE TYPE STATEMENTS HERE
-                if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)
-                {
-                    changed |= ImGui::DragFloat(keyName.c_str(), &val);
-                }
-                else if constexpr (std::is_same_v<T, int>)
-                {
-                    changed |= ImGui::DragInt(keyName.c_str(), &val);
-                }
-                else if constexpr (std::is_same_v<T, bool>)
-                {
-                    changed |= ImGui::Checkbox(keyName.c_str(), &val);
-                }
-                else if constexpr (std::is_same_v<T, vec3>)
-                {
-                    changed |= ImGuidk::DragVec3(keyName.c_str(), &val);
-                }
-                else if constexpr (std::is_same_v<T, quat>)
-                {
-                    changed |= ImGuidk::DragQuat(keyName.c_str(), &val);
-                }
-                else if constexpr (std::is_same_v<T, color>)
-                {
-                    changed |= ImGui::ColorEdit4(keyName.c_str(), val.data());
-                }
-                else if constexpr (std::is_same_v<T, rad>)
-                {
-                    changed |= ImGui::SliderAngle(keyName.c_str(), val.data());
-                }
-                else if constexpr (is_template_v<T, RscHandle>)
-                {
-                    if (ImGuidk::InputResource(keyName.c_str(), &val))
-                    {
-                        changed = true;
-                    }
-                }
-                else if constexpr (is_template_v<T, std::variant>)
-                {
-                    const int curr_ind = s_cast<int>(val.index());
-                    int new_ind = curr_ind;
-
-                    constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-                    using VarCombo = std::array<const char*, sz>;
-
-                    static auto combo_items = []()-> VarCombo
-                    {
-                        constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-                        static std::array<string, sz> tmp_arr;
-                        std::array<const char*, sz> retval{};
-
-                        auto sp = reflect::unpack_types<T>();
-
-                        for (size_t i = 0; i < sz; ++i)
-                        {
-                            tmp_arr[i] = format_name(sp[i].name());
-                            retval[i] = tmp_arr[i].data();
-                        }
-                        return retval;
-                    }();
-
-                    if (ImGui::Combo(keyName.data(), &new_ind, combo_items.data(), static_cast<int>(sz)))
-                    {
-                        val = variant_construct<T>(new_ind);
-                        changed = true;
-                    }
-
-                    recurse = true;
-                }
-                else if constexpr (is_sequential_container_v<T>)
-                {
-                    reflect::uni_container cont{ val };
-                    ImGui::Button("+");
-                    ImGui::Indent();
-                    for (auto dyn : cont)
-                    {
-                        displayVal(dyn);
-                    }
-                    ImGui::Unindent();
-                }
-                else if constexpr (is_associative_container_v<T>)
-                {
-                    ImGui::Text("Associative Container");
-                    /*reflect::uni_container cont{ val };
-                    ImGui::Button("+");
-                    ImGui::Indent();
-                    for (auto dyn : cont)
-                    {
-                        auto pair = dyn.unpack();
-                        displayVal(pair[0]);
-                    }
-                    ImGui::Unindent();*/
-                }
-                else
-                {
-                    ImGui::NewLine();
-                    indent = true;
-                    recurse = true;
-                    /*ImGui::SetCursorPosY(currentHeight + heightOffset);
-                    ImGui::TextDisabled("Member type not defined in IGE_InspectorWindow::Update");*/
-                }
-
-                ImGui::EndGroup();
-
-                if (has_override && ImGui::BeginPopupContextItem("__context"))
-                {
-                    if (ImGui::MenuItem("Apply Property"))
-                    {
-                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
-                        PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                    }
-                    if (ImGui::MenuItem("Revert Property"))
-                    {
-                        PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
-                        PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                    }
-                    ImGui::EndPopup();
-                }
-
-                outer_changed |= changed;
-                if (changed && _prefab_inst)
-                    PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
-
-                ImGui::PopItemWidth();
-                ImGui::PopID();
-
-                indent_stack.push_back(indent);
-                if (indent)
-                    ImGui::Indent();
-
-                return recurse;
-            }
+                return display_key_value(key, std::forward<decltype(val)>(val), depth_change);
 
 		};
 
