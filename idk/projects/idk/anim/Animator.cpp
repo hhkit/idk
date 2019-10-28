@@ -343,14 +343,34 @@ namespace idk
 		return animation_table.find(string{ name }) != animation_table.end();
 	}
 
-	bool Animator::IsPlaying(string_view) const
+	bool Animator::IsPlaying() const
 	{
 		return layers[0].IsPlaying();
 	}
 
-	string Animator::GetDefaultState() const
+	bool Animator::IsBlending() const
+	{
+		return layers[0].blend_state.is_playing;
+	}
+
+	bool Animator::HasCurrAnimEnded() const
+	{
+		return layers[0].curr_state.normalized_time >= 1.0f;
+	}
+
+	string Animator::DefaultStateName() const
 	{
 		return layers[0].default_state;
+	}
+
+	string Animator::CurrentStateName() const
+	{
+		return layers[0].curr_state.name;
+	}
+
+	string Animator::BlendStateName() const
+	{
+		return layers[0].blend_state.name;
 	}
 
 	bool Animator::SetInt(string_view name, int val)

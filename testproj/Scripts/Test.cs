@@ -9,7 +9,7 @@ namespace TestAndSeek
         public float f;
         public float jump_force;
         public Vector3 movement;
-
+        
         private RigidBody rb;
         private TestShou ts;
 
