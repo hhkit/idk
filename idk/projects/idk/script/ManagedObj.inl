@@ -14,6 +14,7 @@ if (klass == MONO_CLASS)                                        \
 														        \
 	if (old_val != new_val)								        \
 		mono_field_set_value(Raw(), field, &new_val);	        \
+	last_children = 0;                                          \
 	continue;                                                   \
 }
 
@@ -22,11 +23,14 @@ if (klass == MONO_CLASS)                                        \
 {                                                               \
 	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
 	auto new_val = old_val;								        \
-	if (functor(field_name.data(), new_val, depth))	            \
+	if (functor(field_name.data(), new_val, -last_children))	\
 	{                                                           \
+		last_children = 1;                                      \
 		auto reflect = reflect::dynamic{ new_val };             \
 		reflect.visit(functor);                  				\
 	}                                                           \
+	else                                                        \
+		last_children = 0;                                      \
 														        \
 	if (old_val != new_val)								        \
 		mono_field_set_value(Raw(), field, &new_val);	        \
@@ -61,6 +65,7 @@ namespace idk::mono
 	inline void ManagedObject::VisitImpl(T&& functor, int& depth, bool ignore_privacy)
 	{
 		++depth;
+		auto last_children = 0;
 		for (void* iter = nullptr; auto field = mono_class_get_fields(mono_object_get_class(Raw()), &iter);)
 		{
 			if (!ignore_privacy && Core::GetSystem<ScriptSystem>().Environment().IsPrivate(field))
@@ -100,6 +105,42 @@ namespace idk::mono
 			MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
 			MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
 			
+			{
+				auto resource_klass = envi.Type("Prefab");
+				if (klass == resource_klass->Raw())
+				{
+					auto id_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");
+					auto old_val = [&]()->RscHandle<Prefab>
+					{
+						if (obj == nullptr)
+							return RscHandle<Prefab>{};
+						else
+						{
+							return RscHandle<Prefab>{
+								*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))
+							};
+						}
+					}();
+					auto new_val = old_val;
+
+					if (functor(field_name.data(), new_val, -last_children))
+					{
+						last_children = 1;
+						auto reflect = reflect::dynamic{ new_val };
+						reflect.visit(functor);
+					}
+					else
+						last_children = 0;
+
+					if (new_val != old_val)
+					{
+						auto insert_val = resource_klass->ConstructTemporary();
+						mono_field_set_value(insert_val, id_field, &new_val.guid);
+						mono_field_set_value(Raw(), field, insert_val);
+					}
+					continue;
+				}
+			}
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE(Guid, mono_class_from_name(csharpcore, "System", "Guid"));
 		}

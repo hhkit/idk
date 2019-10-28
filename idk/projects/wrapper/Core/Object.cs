@@ -21,7 +21,7 @@ namespace idk
             if (lhs && rhs)
                 return lhs.handle == rhs.handle;
             else
-                return lhs.Equals(null) && rhs.Equals(null);
+                return (object)lhs == null && (object) rhs == null;
         }
 
         public static bool operator !=(Object lhs, Object rhs)

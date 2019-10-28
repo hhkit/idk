@@ -8,17 +8,20 @@
 
         public static implicit operator bool(Resource o)
         {
-            return o == null ? false : Bindings.ResourceValidate(o.guid, o.GetType().Name);
+            return (object) o == null ? false : Bindings.ResourceValidate(o.guid, o.GetType().Name);
         }
 
         public static bool operator ==(Resource lhs, Resource rhs)
         {
-            if (lhs.GetType() != rhs.GetType())
-                return false;
-            else if (lhs && rhs)
-                return lhs.guid == rhs.guid;
+            if (lhs && rhs)
+            {
+                if (lhs.GetType() != rhs.GetType())
+                    return false;
+                else
+                    return lhs.guid == rhs.guid;
+            }
             else
-                return lhs == null && rhs == null;
+                return (object)lhs == null && (object)rhs == null;
         }
 
         public static bool operator !=(Resource lhs, Resource rhs)
@@ -42,6 +45,11 @@
         public override int GetHashCode()
         {
             return guid.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return guid.ToString();
         }
     }
 }

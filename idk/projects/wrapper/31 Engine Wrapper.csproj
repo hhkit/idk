@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Animator.cs" />
     <Compile Include="Components\Collider.cs" />
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Behavior\YieldInstruction.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Resources\MaterialInstance.cs" />
+    <Compile Include="Resources\Prefab.cs" />
     <Compile Include="Resources\Resource.cs" />
     <Compile Include="Resources\Texture.cs" />
   </ItemGroup>

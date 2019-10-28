@@ -74,6 +74,7 @@ namespace idk::mono
 		Bind("idk.Bindings::ObjectValidate", decay(
 			[](GenericHandle go) -> bool
 		{
+			LOG_TO(LogPool::GAME, "Checking %ld", go.id);
 			return GameState::GetGameState().ValidateHandle(go);
 		}
 		));
@@ -125,10 +126,17 @@ namespace idk::mono
 			[](Handle<GameObject> go, MonoString* component) -> MonoObject* // note: return value optimization
 			{
 				auto s = unbox(component);
+				auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 				for (auto& elem : go->GetComponents<mono::Behavior>())
 				{
-					if (elem->TypeName() == s.get())
-						return elem->GetObject().Raw();
+					string_view findme = s.get();
+					auto type = mono_object_get_class(elem->GetObject().Raw());
+					while (type != envi.Type("Object")->Raw())
+					{
+						if (mono_class_get_name(type) == findme)
+							return elem->GetObject().Raw();
+						type = mono_class_get_parent(type);
+					}
 				}
 
 				return nullptr;
@@ -263,6 +271,18 @@ namespace idk::mono
 			{
 				return h->Right();
 			}));
+		
+		Bind("idk.Bindings::TransformGetParent", decay(
+			[](Handle<Transform> h) -> uint64_t
+			{
+				return h->parent.id;
+			}));
+
+		Bind("idk.Bindings::TransformSetParent", decay(
+			[](Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
+			{
+				h->SetParent(parent_gameobject, preserve_global);
+			}));
 
 		// RigidBody
 		Bind("idk.Bindings::RigidBodyGetMass", decay(
@@ -363,6 +383,95 @@ namespace idk::mono
 		}
 		));
 
+		// Animator
+		Bind("idk.Bindings::AnimatorPlay", decay(
+			[](Handle<Animator> animator, MonoString* name)
+			{
+				auto s = unbox(name);
+				animator->Play(s.get());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorCrossFade", decay(
+			[](Handle<Animator> animator, MonoString* name, float time = 0.2f)
+			{
+				auto s = unbox(name);
+				animator->BlendTo(s.get(), time);
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorPause", decay(
+			[](Handle<Animator> animator)
+			{
+				animator->Pause();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorResume", decay(
+			[](Handle<Animator> animator)
+			{
+				animator->Resume();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorStop", decay(
+			[](Handle<Animator> animator)
+			{
+				animator->Stop();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorDefaultStateName", decay(
+			[](Handle<Animator> animator) ->MonoString* 
+			{
+				return mono_string_new(mono_domain_get(), animator->DefaultStateName().c_str());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorCurrentStateName", decay(
+			[](Handle<Animator> animator) ->MonoString* 
+			{
+				return mono_string_new(mono_domain_get(), animator->CurrentStateName().c_str());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorBlendStateName", decay(
+			[](Handle<Animator> animator) ->MonoString*
+			{
+				return mono_string_new(mono_domain_get(), animator->BlendStateName().c_str());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorIsPlaying", decay(
+			[](Handle<Animator> animator) -> bool
+			{
+				return animator->IsPlaying();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorIsBlending", decay(
+			[](Handle<Animator> animator) -> bool
+			{
+				return animator->IsBlending();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorHasCurrAnimEnded", decay(
+			[](Handle<Animator> animator) -> bool
+			{
+				return animator->HasCurrAnimEnded();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorHasState", decay(
+			[](Handle<Animator> animator, MonoString* name) -> bool
+			{
+				auto s = unbox(name);
+				auto ret_val = animator->HasState(s.get());
+				return ret_val;
+			}
+		));
+
         // Renderer
         Bind("idk.Bindings::RendererGetMaterialInstance", decay(
             [](GenericHandle renderer) -> Guid
@@ -377,35 +486,56 @@ namespace idk::mono
         ));
 
         // Resource
+#define VALIDATE_RESOURCE(RES) case string_hash(#RES): return Core::GetResourceManager().Validate<RES>(guid);
         Bind("idk.Bindings::ResourceValidate", decay(
             [](Guid guid, MonoString* type) -> bool
         {
             // TODO: make validate jumptable...
-            auto* s = mono_string_to_utf8(type);
-            auto hash = string_hash(s);
-            mono_free(s);
+            auto s = unbox(type);
+            auto hash = string_hash(s.get());
+
+			LOG_TO(LogPool::GAME, string{ guid }.data());
             switch (hash)
             {
-            case reflect::typehash<MaterialInstance>() : return Core::GetResourceManager().Validate<MaterialInstance>(guid);
+				VALIDATE_RESOURCE(Material);
+				VALIDATE_RESOURCE(MaterialInstance);
+				VALIDATE_RESOURCE(Prefab);
             default: return false;
             }
         }
         ));
+#undef VALIDATE_RESOURCE
+
+#define NAME_OF_RESOURCE(RES) case string_hash(#RES): return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<RES>(guid).Name().data());
         Bind("idk.Bindings::ResourceGetName", decay(
             [](Guid guid, MonoString* type) -> MonoString*
         {
             // TODO: make get jumptable...
-            auto* s = mono_string_to_utf8(type);
-            auto hash = string_hash(s);
-            mono_free(s);
+			// TODO: research on perfect jumping
+            auto s = unbox(type);
+            auto hash = string_hash(s.get());
+
             switch (hash)
             {
-                case reflect::typehash<MaterialInstance>() :
-                    return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<MaterialInstance>(guid).Name().data());
+				NAME_OF_RESOURCE(Material);
+				NAME_OF_RESOURCE(MaterialInstance);
+				NAME_OF_RESOURCE(Prefab);
                 default: return mono_string_empty(mono_domain_get());
             }
         }
         ));
+#undef NAME_OF_RESOURCE
+
+		// Prefab
+		Bind("idk.Bindings::PrefabInstantiate", decay(
+			[](Guid guid) -> uint64_t
+			{
+				auto res = RscHandle<Prefab>{guid};
+				if (res)
+					return res->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene()).id;
+				return 0;
+			}
+		));
 
         // MaterialInstance
         Bind("idk.Bindings::MaterialInstanceGetFloat", decay(

@@ -27,91 +27,7 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -8.4597, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 87.788795, y: 0.6391275, z: 87.788795}
-  - !Name 
-    name: floor
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-    static_friction: 0.6
-- !8590000128 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 1
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-    static_friction: 0.6
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 1
-    shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1.21, z: 1}
-    static_friction: 0.6
-  - !MeshRenderer 
-    cast_shadows: 1
-    enabled: 1
-    material_instance: {guid: 24cd7391-54aa-4823-bb11-dbf80c6cd5ea}
-    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
-    receive_shadows: 1
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !Test 
-      f: 0
-      i: 0
-      jump_force: 165
-      movement: {x: 0, y: 0, z: 0}
-      prefab: {guid: 9b994921-8483-4621-8ddc-db9bfdefe67b}
-- !12884967424 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: -0.15576755, y: 0.25550926, z: 0.5}
+    position: {x: 0, y: -0.78, z: 1.81}
     rotation: 
       w: 1
       x: 0
@@ -262,10 +178,12 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
-- !17179934720 
+  - !MonoBehavior 
+    {enabled: 1, script_data: !AnimationTest ~}
+- !8590000128 
   - active: 1
   - !Transform 
-    parent: {id: 12884967424}
+    parent: {id: 4295032832}
     position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
@@ -277,15 +195,16 @@
     name: Default_guy_geo
   - !PrefabInstance 
     object_index: 1
-    overrides: []
+    overrides: 
+    - {component_name: SkinnedMeshRenderer, component_nth: 0, property_path: material_instance}
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !SkinnedMeshRenderer 
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 05ef14a7-4d84-421c-84e2-d730fc0a70e3}
     mesh: {guid: 79edcfc8-73cb-4200-a1b9-63a132f68c16}
-- !21474902016 
+- !12884967424 
   - active: 1
   - !Transform 
-    parent: {id: 12884967424}
+    parent: {id: 4295032832}
     position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
@@ -297,15 +216,16 @@
     name: Default_guy_geo- Copy
   - !PrefabInstance 
     object_index: 2
-    overrides: []
+    overrides: 
+    - {component_name: SkinnedMeshRenderer, component_nth: 0, property_path: material_instance}
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !SkinnedMeshRenderer 
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
     mesh: {guid: 679661c8-5509-4e5e-abe3-51e23bdb9a72}
-- !25769869312 
+- !17179934720 
   - active: 1
   - !Transform 
-    parent: {id: 12884967424}
+    parent: {id: 4295032832}
     position: {x: -0, y: 0, z: -0}
     rotation: 
       w: 1
@@ -321,10 +241,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 0, _bone_name: _root_jnt}
-- !30064836608 
+- !21474902016 
   - active: 1
   - !Transform 
-    parent: {id: 25769869312}
+    parent: {id: 17179934720}
     position: {x: 0, y: 1.0557932, z: -0.05847976}
     rotation: 
       w: 1
@@ -340,10 +260,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 1, _bone_name: COG_jnt}
-- !34359803904 
+- !25769869312 
   - active: 1
   - !Transform 
-    parent: {id: 30064836608}
+    parent: {id: 21474902016}
     position: {x: 0, y: -0.08897346, z: -0.014582495}
     rotation: 
       w: 1
@@ -359,10 +279,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 2, _bone_name: spine_1_jnt}
-- !38654771200 
+- !30064836608 
   - active: 1
   - !Transform 
-    parent: {id: 30064836608}
+    parent: {id: 21474902016}
     position: {x: 0, y: 0.40909305, z: -0.0145825045}
     rotation: 
       w: 1
@@ -378,10 +298,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 3, _bone_name: spine_top_jnt}
-- !42949738496 
+- !34359803904 
   - active: 1
   - !Transform 
-    parent: {id: 34359803904}
+    parent: {id: 25769869312}
     position: {x: 0, y: 0.093706965, z: 0}
     rotation: 
       w: 1
@@ -397,10 +317,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 4, _bone_name: spine_2_jnt}
-- !47244705792 
+- !38654771200 
   - active: 1
   - !Transform 
-    parent: {id: 34359803904}
+    parent: {id: 25769869312}
     position: {x: 0.105490156, y: -0.005836639, z: -0.008020592}
     rotation: 
       w: 0.7601743
@@ -416,10 +336,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 5, _bone_name: L_hip_jnt}
-- !51539673088 
+- !42949738496 
   - active: 1
   - !Transform 
-    parent: {id: 34359803904}
+    parent: {id: 25769869312}
     position: {x: -0.10549031, y: -0.005837021, z: -0.008020696}
     rotation: 
       w: 0.6476369
@@ -435,10 +355,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 6, _bone_name: R_hip_jnt}
-- !55834640384 
+- !47244705792 
   - active: 1
   - !Transform 
-    parent: {id: 38654771200}
+    parent: {id: 30064836608}
     position: {x: 0, y: 0.0869136, z: 0}
     rotation: 
       w: 1
@@ -454,10 +374,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 7, _bone_name: spine_3_jnt}
-- !60129607680 
+- !51539673088 
   - active: 1
   - !Transform 
-    parent: {id: 42949738496}
+    parent: {id: 34359803904}
     position: {x: 0, y: 0.08093071, z: 0}
     rotation: 
       w: 1
@@ -473,10 +393,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 10, _bone_name: spine_4_jnt}
-- !64424574976 
+- !55834640384 
   - active: 1
   - !Transform 
-    parent: {id: 47244705792}
+    parent: {id: 38654771200}
     position: {x: 0, y: 0.08308632, z: 0}
     rotation: 
       w: 1
@@ -492,10 +412,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 13, _bone_name: spine_5_jnt}
-- !68719542272 
+- !60129607680 
   - active: 1
   - !Transform 
-    parent: {id: 51539673088}
+    parent: {id: 42949738496}
     position: {x: 0, y: 0.07702972, z: 0}
     rotation: 
       w: 1
@@ -511,10 +431,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 16, _bone_name: spine_6_jnt}
-- !73014509568 
+- !64424574976 
   - active: 1
   - !Transform 
-    parent: {id: 55834640384}
+    parent: {id: 47244705792}
     position: {x: 0, y: 0.07639923, z: 0}
     rotation: 
       w: 1
@@ -530,10 +450,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 19, _bone_name: spine_7_jnt}
-- !77309476864 
+- !68719542272 
   - active: 1
   - !Transform 
-    parent: {id: 60129607680}
+    parent: {id: 51539673088}
     position: {x: 0, y: 0.08481582, z: -0.006604395}
     rotation: 
       w: 1
@@ -549,10 +469,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 20, _bone_name: neck_jnt}
-- !81604444160 
+- !73014509568 
   - active: 1
   - !Transform 
-    parent: {id: 60129607680}
+    parent: {id: 51539673088}
     position: {x: 0.07976936, y: -0.062455595, z: -0.06914661}
     rotation: 
       w: 1
@@ -568,10 +488,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 21, _bone_name: L_clavicle_jnt}
-- !85899411456 
+- !77309476864 
   - active: 1
   - !Transform 
-    parent: {id: 60129607680}
+    parent: {id: 51539673088}
     position: {x: -0.07976922, y: -0.062455136, z: -0.06914649}
     rotation: 
       w: -6.123234e-17
@@ -587,10 +507,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 22, _bone_name: R_clavicle_jnt}
-- !90194378752 
+- !81604444160 
   - active: 1
   - !Transform 
-    parent: {id: 64424574976}
+    parent: {id: 55834640384}
     position: {x: 0, y: 0.07332352, z: 0.006089601}
     rotation: 
       w: 1
@@ -606,10 +526,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 23, _bone_name: head_jnt}
-- !94489346048 
+- !85899411456 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0, y: 0.019859467, z: 0.04565459}
     rotation: 
       w: 1
@@ -625,10 +545,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 26, _bone_name: jaw_jnt}
-- !98784313344 
+- !90194378752 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0, y: -0.009446106, z: 0.13346317}
     rotation: 
       w: 1
@@ -644,10 +564,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 27, _bone_name: upper_lip_jnt}
-- !103079280640 
+- !94489346048 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.02798829, y: -0.01599884, z: 0.12548204}
     rotation: 
       w: 1
@@ -663,10 +583,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 28, _bone_name: L_lipcorner_jnt}
-- !107374247936 
+- !98784313344 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.02798829, y: -0.015998077, z: 0.12548204}
     rotation: 
       w: -6.123234e-17
@@ -682,10 +602,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 29, _bone_name: R_lipcorner_jnt}
-- !111669215232 
+- !103079280640 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.01615076, y: -0.007471008, z: 0.12728356}
     rotation: 
       w: 1
@@ -701,10 +621,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 30, _bone_name: L_upper_lip_jnt}
-- !115964182528 
+- !107374247936 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.01615077, y: -0.0074697873, z: 0.12728342}
     rotation: 
       w: -6.123234e-17
@@ -720,10 +640,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 31, _bone_name: R_upper_lip_jnt}
-- !120259149824 
+- !111669215232 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0, y: 0.06649444, z: 0.1246433}
     rotation: 
       w: 1
@@ -739,10 +659,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 32, _bone_name: centre_brow_jnt}
-- !124554117120 
+- !115964182528 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.017477179, y: 0.06817901, z: 0.11815858}
     rotation: 
       w: 1
@@ -758,10 +678,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 33, _bone_name: L_inner_brow_jnt}
-- !128849084416 
+- !120259149824 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.01747717, y: 0.06817841, z: 0.11815862}
     rotation: 
       w: -6.123234e-17
@@ -777,10 +697,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 34, _bone_name: R_inner_brow_jnt}
-- !133144051712 
+- !124554117120 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.049273018, y: 0.067126155, z: 0.11000332}
     rotation: 
       w: 1
@@ -796,10 +716,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 35, _bone_name: L_outer_brow_jnt}
-- !137439019008 
+- !128849084416 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.04927305, y: 0.06712692, z: 0.11000332}
     rotation: 
       w: -6.123234e-17
@@ -815,10 +735,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 36, _bone_name: R_outer_brow_jnt}
-- !141733986304 
+- !133144051712 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.03390152, y: 0.07170105, z: 0.12079421}
     rotation: 
       w: 1
@@ -834,10 +754,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 37, _bone_name: L_mid_brow_jnt}
-- !146028953600 
+- !137439019008 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.03390138, y: 0.07170044, z: 0.12079423}
     rotation: 
       w: -6.123234e-17
@@ -853,10 +773,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 38, _bone_name: R_mid_brow_jnt}
-- !150323920896 
+- !141733986304 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.031182041, y: 0.054698944, z: 0.101801224}
     rotation: 
       w: 1
@@ -872,10 +792,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 39, _bone_name: L_eye_jnt}
-- !154618888192 
+- !146028953600 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.03118195, y: 0.054700162, z: 0.10180123}
     rotation: 
       w: -6.123234e-17
@@ -891,10 +811,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 40, _bone_name: R_eye_jnt}
-- !158913855488 
+- !150323920896 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.031182041, y: 0.054698944, z: 0.101801224}
     rotation: 
       w: 1
@@ -910,10 +830,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 41, _bone_name: L_upper_lid_jnt}
-- !163208822784 
+- !154618888192 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.03118195, y: 0.054700162, z: 0.10180123}
     rotation: 
       w: -6.123234e-17
@@ -929,10 +849,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 42, _bone_name: R_upper_lid_jnt}
-- !167503790080 
+- !158913855488 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.031182041, y: 0.054698944, z: 0.101801224}
     rotation: 
       w: 1
@@ -948,10 +868,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 43, _bone_name: L_lower_lid_jnt}
-- !171798757376 
+- !163208822784 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.03118195, y: 0.054700162, z: 0.10180123}
     rotation: 
       w: -6.123234e-17
@@ -967,10 +887,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 44, _bone_name: R_lower_lid_jnt}
-- !176093724672 
+- !167503790080 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.03034564, y: 0.028953094, z: 0.110617995}
     rotation: 
       w: 1
@@ -986,10 +906,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 45, _bone_name: L_squint_jnt}
-- !180388691968 
+- !171798757376 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.03034564, y: 0.028953705, z: 0.110617846}
     rotation: 
       w: -6.123234e-17
@@ -1005,10 +925,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 46, _bone_name: R_squint_jnt}
-- !184683659264 
+- !176093724672 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.04834393, y: -0.015554199, z: 0.09119516}
     rotation: 
       w: 1
@@ -1024,10 +944,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 47, _bone_name: L_cheek_jnt}
-- !188978626560 
+- !180388691968 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.04834402, y: -0.015553131, z: 0.09119516}
     rotation: 
       w: -6.123234e-17
@@ -1043,10 +963,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 48, _bone_name: R_cheek_jnt}
-- !193273593856 
+- !184683659264 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: 0.00522802, y: 0.011644897, z: 0.13499033}
     rotation: 
       w: 1
@@ -1062,10 +982,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 49, _bone_name: L_nostril_jnt}
-- !197568561152 
+- !188978626560 
   - active: 1
   - !Transform 
-    parent: {id: 68719542272}
+    parent: {id: 60129607680}
     position: {x: -0.00522802, y: 0.011644134, z: 0.13499029}
     rotation: 
       w: -6.123234e-17
@@ -1081,10 +1001,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 50, _bone_name: R_nostril_jnt}
-- !201863528448 
+- !193273593856 
   - active: 1
   - !Transform 
-    parent: {id: 73014509568}
+    parent: {id: 64424574976}
     position: {x: 0, y: -0.046436615, z: 0.024663458}
     rotation: 
       w: 1
@@ -1100,10 +1020,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 53, _bone_name: tongue_base_jnt}
-- !206158495744 
+- !197568561152 
   - active: 1
   - !Transform 
-    parent: {id: 73014509568}
+    parent: {id: 64424574976}
     position: {x: 0, y: -0.04260849, z: 0.087029114}
     rotation: 
       w: 1
@@ -1119,10 +1039,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 54, _bone_name: lower_lip_jnt}
-- !210453463040 
+- !201863528448 
   - active: 1
   - !Transform 
-    parent: {id: 73014509568}
+    parent: {id: 64424574976}
     position: {x: 0.01615076, y: -0.042266235, z: 0.08162897}
     rotation: 
       w: 1
@@ -1138,10 +1058,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 55, _bone_name: L_lower_lip_jnt}
-- !214748430336 
+- !206158495744 
   - active: 1
   - !Transform 
-    parent: {id: 73014509568}
+    parent: {id: 64424574976}
     position: {x: -0.01615077, y: -0.04226761, z: 0.08162883}
     rotation: 
       w: -6.123234e-17
@@ -1157,10 +1077,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 56, _bone_name: R_lower_lip_jnt}
-- !219043397632 
+- !210453463040 
   - active: 1
   - !Transform 
-    parent: {id: 77309476864}
+    parent: {id: 68719542272}
     position: {x: 0, y: 0.007514648, z: 0.024085399}
     rotation: 
       w: 1
@@ -1176,10 +1096,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 59, _bone_name: tongue_mid_jnt}
-- !223338364928 
+- !214748430336 
   - active: 1
   - !Transform 
-    parent: {id: 81604444160}
+    parent: {id: 73014509568}
     position: {x: 0, y: 0.00038528442, z: 0.02023175}
     rotation: 
       w: 1
@@ -1195,10 +1115,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 70, _bone_name: tongue_tip_jnt}
-- !227633332224 
+- !219043397632 
   - active: 1
   - !Transform 
-    parent: {id: 206158495744}
+    parent: {id: 197568561152}
     position: {x: 0.11188444, y: 0.09754822, z: 0.030416382}
     rotation: 
       w: -0.024819866
@@ -1214,10 +1134,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 24, _bone_name: L_shoulder_jnt}
-- !231928299520 
+- !223338364928 
   - active: 1
   - !Transform 
-    parent: {id: 210453463040}
+    parent: {id: 201863528448}
     position: {x: 3.967285e-06, y: 0.22632919, z: 9.536743e-09}
     rotation: 
       w: 0.9941539
@@ -1233,10 +1153,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 51, _bone_name: L_elbow_jnt}
-- !236223266816 
+- !227633332224 
   - active: 1
   - !Transform 
-    parent: {id: 214748430336}
+    parent: {id: 206158495744}
     position: {x: 7.629394e-07, y: 0.24951832, z: 0}
     rotation: 
       w: 0.794733
@@ -1252,10 +1172,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 57, _bone_name: L_wrist_jnt}
-- !240518234112 
+- !231928299520 
   - active: 1
   - !Transform 
-    parent: {id: 219043397632}
+    parent: {id: 210453463040}
     position: {x: -1.9836425e-06, y: 5.340576e-07, z: 0.111532286}
     rotation: 
       w: 0.82624435
@@ -1271,10 +1191,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 60, _bone_name: L_pinky_base_jnt}
-- !244813201408 
+- !236223266816 
   - active: 1
   - !Transform 
-    parent: {id: 219043397632}
+    parent: {id: 210453463040}
     position: {x: 0.013454437, y: 0.018486977, z: 0.11276123}
     rotation: 
       w: 0.8300665
@@ -1290,10 +1210,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 61, _bone_name: L_ring_base_jnt}
-- !249108168704 
+- !240518234112 
   - active: 1
   - !Transform 
-    parent: {id: 219043397632}
+    parent: {id: 210453463040}
     position: {x: 0.024092712, y: 0.038772926, z: 0.10978775}
     rotation: 
       w: 0.8303359
@@ -1309,10 +1229,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 62, _bone_name: L_mid_base_jnt}
-- !253403136000 
+- !244813201408 
   - active: 1
   - !Transform 
-    parent: {id: 219043397632}
+    parent: {id: 210453463040}
     position: {x: 0.03546814, y: 0.060973663, z: 0.10157776}
     rotation: 
       w: 0.8273388
@@ -1328,10 +1248,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 63, _bone_name: L_index_base_jnt}
-- !257698103296 
+- !249108168704 
   - active: 1
   - !Transform 
-    parent: {id: 219043397632}
+    parent: {id: 210453463040}
     position: {x: 0.00062667846, y: 0.035623435, z: 0.03690689}
     rotation: 
       w: -0.0784043
@@ -1347,10 +1267,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 64, _bone_name: L_thumb_base_jnt}
-- !261993070592 
+- !253403136000 
   - active: 1
   - !Transform 
-    parent: {id: 223338364928}
+    parent: {id: 214748430336}
     position: {x: 4.7683713e-08, y: -7.629394e-07, z: 0.032626953}
     rotation: 
       w: 0.9964876
@@ -1366,10 +1286,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 71, _bone_name: L_pinky_mid_jnt}
-- !266288037888 
+- !257698103296 
   - active: 1
   - !Transform 
-    parent: {id: 227633332224}
+    parent: {id: 219043397632}
     position: {x: -2.8610229e-08, y: 1.5258789e-07, z: 0.019652098}
     rotation: 
       w: 0.9980432
@@ -1385,10 +1305,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 81, _bone_name: L_pinky_tip_jnt}
-- !270583005184 
+- !261993070592 
   - active: 1
   - !Transform 
-    parent: {id: 236223266816}
+    parent: {id: 227633332224}
     position: {x: 6.67572e-08, y: 0, z: 0.036372986}
     rotation: 
       w: 0.9841389
@@ -1404,10 +1324,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 72, _bone_name: L_ring_mid_jnt}
-- !274877972480 
+- !266288037888 
   - active: 1
   - !Transform 
-    parent: {id: 240518234112}
+    parent: {id: 231928299520}
     position: {x: -7.6293944e-08, y: -9.155273e-07, z: 0.028010882}
     rotation: 
       w: 0.9995103
@@ -1423,10 +1343,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 82, _bone_name: L_ring_tip_jnt}
-- !279172939776 
+- !270583005184 
   - active: 1
   - !Transform 
-    parent: {id: 249108168704}
+    parent: {id: 240518234112}
     position: {x: -9.536743e-09, y: -1.0681152e-06, z: 0.036426544}
     rotation: 
       w: 0.9849464
@@ -1442,10 +1362,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 73, _bone_name: L_mid_mid_jnt}
-- !283467907072 
+- !274877972480 
   - active: 1
   - !Transform 
-    parent: {id: 253403136000}
+    parent: {id: 244813201408}
     position: {x: 8.5830685e-08, y: 7.629394e-07, z: 0.02397478}
     rotation: 
       w: 0.9995348
@@ -1461,10 +1381,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 83, _bone_name: L_mid_tip_jnt}
-- !287762874368 
+- !279172939776 
   - active: 1
   - !Transform 
-    parent: {id: 261993070592}
+    parent: {id: 253403136000}
     position: {x: 6.67572e-08, y: 1.5258789e-07, z: 0.035489883}
     rotation: 
       w: 0.9970974
@@ -1480,10 +1400,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 74, _bone_name: L_index_mid_jnt}
-- !292057841664 
+- !283467907072 
   - active: 1
   - !Transform 
-    parent: {id: 266288037888}
+    parent: {id: 257698103296}
     position: {x: -2.8610229e-08, y: -3.0517577e-07, z: 0.023848418}
     rotation: 
       w: 0.9999207
@@ -1499,10 +1419,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 84, _bone_name: L_index_tip_jnt}
-- !296352808960 
+- !287762874368 
   - active: 1
   - !Transform 
-    parent: {id: 274877972480}
+    parent: {id: 266288037888}
     position: {x: -2.1362305e-06, y: -2.2888183e-07, z: 0.03501381}
     rotation: 
       w: 0.97530246
@@ -1518,10 +1438,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 75, _bone_name: L_thumb_mid_jnt}
-- !300647776256 
+- !292057841664 
   - active: 1
   - !Transform 
-    parent: {id: 279172939776}
+    parent: {id: 270583005184}
     position: {x: -1.9836425e-06, y: -5.340576e-07, z: 0.03633106}
     rotation: 
       w: 0.99937445
@@ -1537,10 +1457,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 85, _bone_name: L_thumb_tip_jnt}
-- !304942743552 
+- !296352808960 
   - active: 1
   - !Transform 
-    parent: {id: 287762874368}
+    parent: {id: 279172939776}
     position: {x: -0.11188451, y: -0.09754791, z: -0.030416269}
     rotation: 
       w: -0.024819866
@@ -1556,10 +1476,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 25, _bone_name: R_shoulder_jnt}
-- !309237710848 
+- !300647776256 
   - active: 1
   - !Transform 
-    parent: {id: 292057841664}
+    parent: {id: 283467907072}
     position: {x: -5.0354e-06, y: -0.22633016, z: 1.335144e-07}
     rotation: 
       w: 0.9941539
@@ -1575,10 +1495,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 52, _bone_name: R_elbow_jnt}
-- !313532678144 
+- !304942743552 
   - active: 1
   - !Transform 
-    parent: {id: 296352808960}
+    parent: {id: 287762874368}
     position: {x: -4.5776366e-07, y: -0.24951842, z: -1.5258789e-07}
     rotation: 
       w: 0.51167226
@@ -1594,10 +1514,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 58, _bone_name: R_wrist_jnt}
-- !317827645440 
+- !309237710848 
   - active: 1
   - !Transform 
-    parent: {id: 300647776256}
+    parent: {id: 292057841664}
     position: {x: 0.029904937, y: 0.009361724, z: -0.10703811}
     rotation: 
       w: 0.9975045
@@ -1613,10 +1533,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 65, _bone_name: R_pinky_base_jnt}
-- !322122612736 
+- !313532678144 
   - active: 1
   - !Transform 
-    parent: {id: 300647776256}
+    parent: {id: 292057841664}
     position: {x: 0.008654442, y: 0.014557037, z: -0.11380264}
     rotation: 
       w: 0.9996637
@@ -1632,10 +1552,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 66, _bone_name: R_ring_base_jnt}
-- !326417580032 
+- !317827645440 
   - active: 1
   - !Transform 
-    parent: {id: 300647776256}
+    parent: {id: 292057841664}
     position: {x: -0.014175663, y: 0.016113281, z: -0.116945796}
     rotation: 
       w: 0.9995856
@@ -1651,10 +1571,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 67, _bone_name: R_mid_base_jnt}
-- !330712547328 
+- !322122612736 
   - active: 1
   - !Transform 
-    parent: {id: 300647776256}
+    parent: {id: 292057841664}
     position: {x: -0.040382765, y: 0.017151946, z: -0.11562126}
     rotation: 
       w: 0.9999939
@@ -1670,10 +1590,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 68, _bone_name: R_index_base_jnt}
-- !335007514624 
+- !326417580032 
   - active: 1
   - !Transform 
-    parent: {id: 300647776256}
+    parent: {id: 292057841664}
     position: {x: -0.021587962, y: -0.0102761835, z: -0.045385282}
     rotation: 
       w: 0.3997672
@@ -1689,10 +1609,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 69, _bone_name: R_thumb_base_jnt}
-- !339302481920 
+- !330712547328 
   - active: 1
   - !Transform 
-    parent: {id: 304942743552}
+    parent: {id: 296352808960}
     position: {x: -1.6212464e-07, y: 2.2888182e-06, z: -0.032626837}
     rotation: 
       w: 0.9964876
@@ -1708,10 +1628,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 76, _bone_name: R_pinky_mid_jnt}
-- !343597449216 
+- !335007514624 
   - active: 1
   - !Transform 
-    parent: {id: 309237710848}
+    parent: {id: 300647776256}
     position: {x: 1.14440915e-07, y: -1.6784668e-06, z: -0.019652404}
     rotation: 
       w: 0.9980432
@@ -1727,10 +1647,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 86, _bone_name: R_pinky_tip_jnt}
-- !347892416512 
+- !339302481920 
   - active: 1
   - !Transform 
-    parent: {id: 317827645440}
+    parent: {id: 309237710848}
     position: {x: -1.4305114e-07, y: -9.155273e-07, z: -0.036373444}
     rotation: 
       w: 0.9841389
@@ -1746,10 +1666,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 77, _bone_name: R_ring_mid_jnt}
-- !352187383808 
+- !343597449216 
   - active: 1
   - !Transform 
-    parent: {id: 322122612736}
+    parent: {id: 313532678144}
     position: {x: 2.8610229e-08, y: 2.2888182e-06, z: -0.028010253}
     rotation: 
       w: 0.9995103
@@ -1765,10 +1685,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 87, _bone_name: R_ring_tip_jnt}
-- !356482351104 
+- !347892416512 
   - active: 1
   - !Transform 
-    parent: {id: 330712547328}
+    parent: {id: 322122612736}
     position: {x: -2.8610229e-08, y: 7.629394e-07, z: -0.03642479}
     rotation: 
       w: 0.9849464
@@ -1784,10 +1704,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 78, _bone_name: R_mid_mid_jnt}
-- !360777318400 
+- !352187383808 
   - active: 1
   - !Transform 
-    parent: {id: 335007514624}
+    parent: {id: 326417580032}
     position: {x: 1.04904174e-07, y: -6.1035155e-07, z: -0.023977412}
     rotation: 
       w: 0.9995348
@@ -1803,10 +1723,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 88, _bone_name: R_mid_tip_jnt}
-- !365072285696 
+- !356482351104 
   - active: 1
   - !Transform 
-    parent: {id: 343597449216}
+    parent: {id: 335007514624}
     position: {x: -1.14440915e-07, y: 9.155273e-07, z: -0.0354908}
     rotation: 
       w: 0.9970974
@@ -1822,10 +1742,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 79, _bone_name: R_index_mid_jnt}
-- !369367252992 
+- !360777318400 
   - active: 1
   - !Transform 
-    parent: {id: 347892416512}
+    parent: {id: 339302481920}
     position: {x: -1.6212464e-07, y: 3.0517577e-07, z: -0.023846893}
     rotation: 
       w: 0.9999207
@@ -1841,10 +1761,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 89, _bone_name: R_index_tip_jnt}
-- !373662220288 
+- !365072285696 
   - active: 1
   - !Transform 
-    parent: {id: 356482351104}
+    parent: {id: 347892416512}
     position: {x: 1.373291e-06, y: 1.4495849e-06, z: -0.035014305}
     rotation: 
       w: 0.97530246
@@ -1860,10 +1780,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 80, _bone_name: R_thumb_mid_jnt}
-- !377957187584 
+- !369367252992 
   - active: 1
   - !Transform 
-    parent: {id: 360777318400}
+    parent: {id: 352187383808}
     position: {x: 1.5258788e-06, y: -3.0517577e-07, z: -0.036331832}
     rotation: 
       w: 0.99937445
@@ -1879,10 +1799,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 90, _bone_name: R_thumb_tip_jnt}
-- !382252154880 
+- !373662220288 
   - active: 1
   - !Transform 
-    parent: {id: 369367252992}
+    parent: {id: 360777318400}
     position: {x: 8.5830685e-08, y: 2.5749205e-07, z: 0.45756084}
     rotation: 
       w: 0.13956045
@@ -1898,10 +1818,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 8, _bone_name: L_knee_jnt}
-- !386547122176 
+- !377957187584 
   - active: 1
   - !Transform 
-    parent: {id: 373662220288}
+    parent: {id: 365072285696}
     position: {x: 9.536743e-09, y: 1.2874602e-07, z: 0.41316974}
     rotation: 
       w: -0.07977224
@@ -1917,10 +1837,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 11, _bone_name: L_ankle_jnt}
-- !390842089472 
+- !382252154880 
   - active: 1
   - !Transform 
-    parent: {id: 377957187584}
+    parent: {id: 369367252992}
     position: {x: 4.7683713e-08, y: 6.136894e-06, z: 0.13581693}
     rotation: 
       w: 0.96792746
@@ -1936,10 +1856,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 14, _bone_name: L_ball_jnt}
-- !395137056768 
+- !386547122176 
   - active: 1
   - !Transform 
-    parent: {id: 382252154880}
+    parent: {id: 373662220288}
     position: {x: -0.011155453, y: -7.8969e-05, z: 0.090162255}
     rotation: 
       w: 0.99813634
@@ -1955,10 +1875,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 17, _bone_name: L_toe_jnt}
-- !399432024064 
+- !390842089472 
   - active: 1
   - !Transform 
-    parent: {id: 390842089472}
+    parent: {id: 382252154880}
     position: {x: 0, y: -5.483627e-07, z: -0.45755994}
     rotation: 
       w: 0.9797307
@@ -1974,10 +1894,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 9, _bone_name: R_knee_jnt}
-- !403726991360 
+- !395137056768 
   - active: 1
   - !Transform 
-    parent: {id: 395137056768}
+    parent: {id: 386547122176}
     position: {x: 4.7683713e-08, y: 1.9550323e-07, z: -0.41317013}
     rotation: 
       w: 0.84104055
@@ -1993,10 +1913,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 12, _bone_name: R_ankle_jnt}
-- !408021958656 
+- !399432024064 
   - active: 1
   - !Transform 
-    parent: {id: 399432024064}
+    parent: {id: 390842089472}
     position: {x: -2.8610229e-08, y: -6.1082837e-06, z: -0.13581714}
     rotation: 
       w: 0.96792746
@@ -2012,10 +1932,10 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 15, _bone_name: R_ball_jnt}
-- !412316925952 
+- !403726991360 
   - active: 1
   - !Transform 
-    parent: {id: 403726991360}
+    parent: {id: 395137056768}
     position: {x: 0.011155319, y: 7.896423e-05, z: -0.090162076}
     rotation: 
       w: 0.99813634

@@ -35,5 +35,20 @@
         {
             get => Bindings.TransformRight(handle);
         }
+
+        public Transform parent
+        {
+            get
+            {
+                var parent = Bindings.TransformGetParent(handle);
+                return parent != 0 ? new GameObject(parent).transform : null;
+            }
+        }
+
+        public void SetParent(Transform parent, bool preserve_global)
+        {
+            ulong parent_id = parent ? parent.gameObject.handle : 0;
+            Bindings.TransformSetParent(handle, parent_id, preserve_global);
+        }
     }
 }

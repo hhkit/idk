@@ -13,13 +13,17 @@ namespace idk::ogl
 
 	const static inline hash_table<vtx::Attrib, OpenGLType> OpenGLAttribs
 	{
-		std::make_pair(vtx::Attrib::Position,   OpenGLType{ GL_FLOAT, 3}),
-		std::make_pair(vtx::Attrib::Normal,     OpenGLType{ GL_FLOAT, 3}),
-		std::make_pair(vtx::Attrib::UV,         OpenGLType{ GL_FLOAT, 2}),
-		std::make_pair(vtx::Attrib::Tangent,    OpenGLType{ GL_FLOAT, 3}),
-		std::make_pair(vtx::Attrib::Bitangent,    OpenGLType{ GL_FLOAT, 3}),
-		std::make_pair(vtx::Attrib::BoneID,     OpenGLType{ GL_INT,   4}),
-		std::make_pair(vtx::Attrib::BoneWeight, OpenGLType{ GL_FLOAT, 4}),
+		std::make_pair(vtx::Attrib::Position,         OpenGLType{ GL_FLOAT, 3}),
+		std::make_pair(vtx::Attrib::Normal,           OpenGLType{ GL_FLOAT, 3}),
+		std::make_pair(vtx::Attrib::UV,               OpenGLType{ GL_FLOAT, 2}),
+		std::make_pair(vtx::Attrib::Tangent,          OpenGLType{ GL_FLOAT, 3}),
+		std::make_pair(vtx::Attrib::Bitangent,        OpenGLType{ GL_FLOAT, 3}),
+		std::make_pair(vtx::Attrib::BoneID,           OpenGLType{ GL_INT,   4}),
+		std::make_pair(vtx::Attrib::BoneWeight,       OpenGLType{ GL_FLOAT, 4}),
+		std::make_pair(vtx::Attrib::Color,            OpenGLType{ GL_FLOAT, 4}),
+		std::make_pair(vtx::Attrib::ParticlePosition, OpenGLType{ GL_FLOAT, 3}),
+		std::make_pair(vtx::Attrib::ParticleRotation, OpenGLType{ GL_FLOAT, 1}),
+		std::make_pair(vtx::Attrib::ParticleSize,     OpenGLType{ GL_FLOAT, 1}),
 	};
 
 	struct OpenGLDescriptor

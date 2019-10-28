@@ -9,6 +9,7 @@ namespace TestAndSeek
         public float f;
         public float jump_force;
         public Vector3 movement;
+        public Prefab prefab;
 
         private RigidBody rb;
         private TestShou ts;
@@ -34,9 +35,7 @@ namespace TestAndSeek
 
         public override void OnTriggerEnter(Collider other)
         {
-            //rb.AddForce(jump_force * Vector3.up);
             f = 500;
-            //System.Console.WriteLine("ENTER");
         }
 
         public override void OnTriggerStay(Collider other)
@@ -53,8 +52,6 @@ namespace TestAndSeek
 
         public override void FixedUpdate()
         {
-            //if (ts.i == 5) 
-            //    rb.AddForce(10f * Vector3.up);
             if (rb)
             {
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
@@ -64,6 +61,17 @@ namespace TestAndSeek
                 if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
                 if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
                 if (Input.GetKey(KeyCode.D)) rb.AddForce(f * Vector3.right);
+                if (Input.GetKeyDown(KeyCode.I))
+                {
+                    Debug.Log("Try instantiate");
+                    if (prefab)
+                    {
+                        Debug.Log("instantiating");
+                        prefab.Instantiate(transform.position + Vector3.up);
+                    }
+                    else
+                        Debug.Log("INSTANTIATION");
+                }
                 if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButtonA))
                     rb.AddForce(jump_force * Vector3.up);
             }
@@ -71,6 +79,12 @@ namespace TestAndSeek
             {
                 ts.PrintI();
             }
+        }
+
+        public override void Update()
+        {
+            if (prefab)
+                Debug.Log(prefab.ToString());
         }
 
         public void TestTransform(Transform t)
