@@ -383,6 +383,98 @@ namespace idk::mono
 		}
 		));
 
+		// Animator
+		Bind("idk.Bindings::AnimatorPlay", decay(
+			[](Handle<Animator> animator, MonoString* name)
+			{
+				auto* s = mono_string_to_utf8(name);
+				animator->Play(s);
+				mono_free(s);
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorCrossFade", decay(
+			[](Handle<Animator> animator, MonoString* name, float time = 0.2f)
+			{
+				auto* s = mono_string_to_utf8(name);
+				animator->BlendTo(s, time);
+				mono_free(s);
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorPause", decay(
+			[](Handle<Animator> animator)
+			{
+				animator->Pause();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorResume", decay(
+			[](Handle<Animator> animator)
+			{
+				animator->Resume();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorStop", decay(
+			[](Handle<Animator> animator)
+			{
+				animator->Stop();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorDefaultStateName", decay(
+			[](Handle<Animator> animator) ->MonoString* 
+			{
+				return mono_string_new(mono_domain_get(), animator->DefaultStateName().c_str());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorCurrentStateName", decay(
+			[](Handle<Animator> animator) ->MonoString* 
+			{
+				return mono_string_new(mono_domain_get(), animator->CurrentStateName().c_str());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorBlendStateName", decay(
+			[](Handle<Animator> animator) ->MonoString*
+			{
+				return mono_string_new(mono_domain_get(), animator->BlendStateName().c_str());
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorIsPlaying", decay(
+			[](Handle<Animator> animator) -> bool
+			{
+				return animator->IsPlaying();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorIsBlending", decay(
+			[](Handle<Animator> animator) -> bool
+			{
+				return animator->IsBlending();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorHasCurrAnimEnded", decay(
+			[](Handle<Animator> animator) -> bool
+			{
+				return animator->HasCurrAnimEnded();
+			}
+		));
+
+		Bind("idk.Bindings::AnimatorHasState", decay(
+			[](Handle<Animator> animator, MonoString* name) -> bool
+			{
+				auto* s = mono_string_to_utf8(name);
+				auto ret_val = animator->HasState(s);
+				mono_free(s);
+				return ret_val;
+			}
+		));
+
         // Renderer
         Bind("idk.Bindings::RendererGetMaterialInstance", decay(
             [](GenericHandle renderer) -> Guid

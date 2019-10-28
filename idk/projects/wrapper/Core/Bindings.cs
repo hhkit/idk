@@ -132,6 +132,46 @@ namespace idk
         public extern static void RigidBodyAddForce(ulong id, Vector3 force);
 
         /*
+         * Animator
+         */
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AnimatorPlay(ulong id, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AnimatorCrossFade(ulong id, string name, float time = 0.2f);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AnimatorPause(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AnimatorResume(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AnimatorStop(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string AnimatorDefaultStateName(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string AnimatorCurrentStateName(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string AnimatorBlendStateName(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorIsPlaying(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorIsBlending(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorHasCurrAnimEnded(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorHasState(ulong id, string name);
+
+        /*
          * Collider
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
