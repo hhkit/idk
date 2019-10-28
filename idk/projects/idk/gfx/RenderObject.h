@@ -54,7 +54,7 @@ namespace idk
 		using ClearData_t =variant<DontClear, vec4, RscHandle<CubeMap>>;
 		GenericHandle obj_id{};
 		bool is_scene_camera = false;
-		int  culling_flags = 0xFFFFFFFF;
+		unsigned  culling_flags = 0xFFFFFFFF;
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
 		RscHandle<RenderTarget> render_target{};

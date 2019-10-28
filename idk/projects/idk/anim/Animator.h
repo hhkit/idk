@@ -55,13 +55,20 @@ namespace idk
 		void StopAllLayers();
 
 		// Script Getters
+		string DefaultStateName() const;
+		string CurrentStateName() const;
+		string BlendStateName() const;
+
+		bool IsPlaying() const;
+		bool IsBlending() const;
+		bool HasCurrAnimEnded() const;
+		bool HasState(string_view name) const;
+		
 		int GetInt(string_view name) const;
 		bool GetBool(string_view name) const;
 		float GetFloat(string_view name) const;
 
-		bool HasState(string_view name) const;
-		bool IsPlaying(string_view name) const;
-		string GetDefaultState() const;
+		
 
 		// Script Setters
 		bool SetInt(string_view name, int val);

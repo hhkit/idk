@@ -17,8 +17,10 @@ namespace idk
         auto particle_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/default_particle.frag", false);
         auto particle_mat = Core::GetResourceManager().Create<Material>();
         particle_mat->_shader_program = particle_frag;
+        particle_mat->Name("Default Particle");
         auto particle_mat_inst = Core::GetResourceManager().LoaderCreateResource<MaterialInstance>(RendererModule::default_material_inst);
         particle_mat_inst->material = particle_mat;
+        particle_mat_inst->Name("Default Particle");
         particle_mat->_default_instance = particle_mat_inst;
 
         particle_mat_inst->material->hidden_uniforms.emplace_back(UniformInstance{ "_uTex[0]",

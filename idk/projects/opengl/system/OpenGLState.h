@@ -25,23 +25,6 @@ namespace idk::ogl
 		void IsPicking();
 
 	private:
-		enum VertexShaders
-		{
-			Debug,
-			NormalMesh,
-			SkinnedMesh,
-			SkyBox,
-            Particle,
-			Max
-		};
-		enum FragmentShaders
-		{
-			FDebug,
-			FSkyBox,
-			FShadow,
-			FPicking,
-			FMax
-		};
 
 		Win32GraphicsSystem* sys{};
 		// variables
@@ -49,8 +32,6 @@ namespace idk::ogl
 		FrameBufferManager       fb_man;
 		GLuint                   vao_id = 0;
 		RscHandle<OpenGLTexture> brdf_texture;
-		array<RscHandle<ShaderProgram>, VertexShaders::Max>   renderer_vertex_shaders;
-		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		//RscHandle<ShaderProgram> debug_fragment;
 		bool is_picking = false;
 	};

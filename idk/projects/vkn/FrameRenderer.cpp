@@ -119,23 +119,25 @@ namespace idk::vkn
 	}
 	struct GraphicsStateInterface
 	{
-		RscHandle<ShaderProgram>             mesh_vtx;
-		RscHandle<ShaderProgram>             skinned_mesh_vtx;
+		//RscHandle<ShaderProgram>             mesh_vtx;
+		//RscHandle<ShaderProgram>             skinned_mesh_vtx;
+		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		GraphicsStateInterface() = default;
 		GraphicsStateInterface(const GraphicsState& state)
 		{
-			mesh_vtx = state.mesh_vtx;
+			renderer_vertex_shaders = state.renderer_vertex_shaders;
+			renderer_fragment_shaders = state.renderer_fragment_shaders;
 			mesh_render = &state.mesh_render;
-			skinned_mesh_vtx = state.skinned_mesh_vtx;
 			skinned_mesh_render = &state.skinned_mesh_render;
 		}
 		GraphicsStateInterface(const PreRenderData& state)
 		{
-			mesh_vtx = state.mesh_vtx;
+			renderer_vertex_shaders = state.renderer_vertex_shaders;
+			renderer_fragment_shaders = state.renderer_fragment_shaders;
 			mesh_render = &state.mesh_render;
-			skinned_mesh_vtx = state.skinned_mesh_vtx;
 			skinned_mesh_render = &state.skinned_mesh_render;
 		}
 	};
@@ -143,9 +145,9 @@ namespace idk::vkn
 
 	PipelineThingy ProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager,StandardBindings& binders)
 	{
-		auto& mesh_vtx            = state.mesh_vtx;
+		auto& mesh_vtx            = state.renderer_vertex_shaders[VNormalMesh];
 		auto& mesh_render         = *state.mesh_render;
-		auto& skinned_mesh_vtx    = state.skinned_mesh_vtx;
+		auto& skinned_mesh_vtx    = state.renderer_vertex_shaders[VSkinnedMesh];
 		auto& skinned_mesh_render = *state.skinned_mesh_render;
 
 		//auto& binders = *binder;
@@ -432,7 +434,7 @@ namespace idk::vkn
 
 	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
-		auto cam = CameraData{ GenericHandle {},false, s_cast<int>(0xFFFFFFFF),light.v,light.p };
+		auto cam = CameraData{ GenericHandle {},false, 0xFFFFFFFF,light.v,light.p };
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -619,17 +621,17 @@ namespace idk::vkn
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		//TODO: figure out inheritance pipeline inheritance and inherit from dbg_pipeline for various viewport sizes
-		auto& pipeline = *state.dbg_pipeline;
+		auto& pipeline = state.dbg_pipeline;
 
 		//Preprocess MeshRender's uniforms
 		//auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
 		//rs.ubo_manager.UpdateAllBuffers();
 		//auto alloced_dsets = rs.dpools.Allocate(layout_count);
 		rs.FlagRendered();
-		pipeline.Bind(cmd_buffer, *_view);
+		pipeline->Bind(cmd_buffer, *_view);
 		SetViewport(cmd_buffer, vp_pos, vp_size);
 		//Bind the uniforms
-		auto& layouts = pipeline.uniform_layouts;
+		auto& layouts = pipeline->uniform_layouts;
 		uint32_t trf_set = 0;
 		auto itr = layouts.find(trf_set);
 		if (itr != layouts.end())
@@ -648,7 +650,7 @@ namespace idk::vkn
 					},
 					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
 				});
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, 0, ds, {});
+				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->pipelinelayout, 0, ds, {});
 			}
 		}
 
@@ -709,10 +711,13 @@ namespace idk::vkn
 		//TODO grab the appropriate framebuffer and begin renderpass
 		std::array<float, 4> depth_clear{1.0f,1.0f ,1.0f ,1.0f };
 		std::optional<vec4> clear_col;
-		std::visit([&state, &clear_col](auto clear_data)
+		std::optional<RscHandle<CubeMap>> sb_cm;
+		std::visit([&state, &clear_col,&sb_cm](auto clear_data)
 			{
 				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
 					clear_col = clear_data;
+				if constexpr (std::is_same_v<decltype(clear_data), RscHandle<CubeMap>>)
+					sb_cm = clear_data;
 			}, state.camera.clear_data);
 
 		vk::ClearValue clearColor = clear_col ?
@@ -750,27 +755,15 @@ namespace idk::vkn
 		{
 			GetRenderPass(state,view), frame_buffer,
 			render_area,hlp::arr_count(v),std::data(v)
-		};
+		};			
 
-		std::optional<RscHandle<CubeMap>> sb_cm;
-		std::visit([&state, &sb_cm](auto clear_data)
-		{
-			if constexpr (std::is_same_v<decltype(clear_data), RscHandle<CubeMap>>)
-				sb_cm = clear_data;
-		}, state.camera.clear_data);
+		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
+		//Skybox rendering
 		if (sb_cm)
 		{
 
 		}
-		/*vk::ClearValue v[]{
-			vk::ClearValue {vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) }},
-			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
-		};*/
-		
-		
-
-		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 
 		auto& processed_ro = the_interface.DrawCalls();
 		rs.FlagRendered();
