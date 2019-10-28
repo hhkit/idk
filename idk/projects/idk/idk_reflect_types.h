@@ -14,6 +14,8 @@
 #include <phys/collidable_shapes.h>
 #include <math/matrix_decomposition.h>
 #include <anim/AnimationLayer.h>
+#include <particle/ParticleSystemModules.h>
+
 namespace idk
 {
 	class GameObject;
@@ -40,6 +42,9 @@ namespace idk::reflect
 		, bool
 		, char
 		, unsigned char
+        , uint16_t
+        , short
+        , uint32_t
 		, int64_t
 		, uint64_t
 		, float
@@ -101,6 +106,19 @@ namespace idk::reflect
 		, vector<matrix_decomposition<real>>
 		, vector<mat4>
 		
+        // particle system
+        , MainModule
+        , EmissionModule
+        , ShapeModule
+        , VelocityOverLifetimeModule
+        , ColorOverLifetimeModule
+        , SizeOverLifetimeModule
+        , RotationOverLifetimeModule
+        , RendererModule
+        , MinMax<float>
+        , MinMax<vec3>
+        , MinMax<color>
+        , MinMaxMode
 		
 		// resources
 		, vector<SerializedMeta>

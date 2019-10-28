@@ -16,7 +16,7 @@ namespace idk
 
 		constexpr Guid() noexcept;
 		explicit  Guid(const std::string_view& str) noexcept;
-		constexpr Guid(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+		constexpr Guid(unsigned int a, unsigned short b, unsigned short c, unsigned long long d);
 		bool operator==(const Guid& other) const noexcept;
 
 		explicit operator string() const;
@@ -33,7 +33,6 @@ namespace idk
 			struct x32 { __int32 _; };
 		};
 	};
-
 }
 
 // Specialize std::hash

@@ -62,12 +62,15 @@ namespace idk
         {
             text = std::visit([](auto h) -> string
             {
-                auto name = h->Name();
-				auto path = Core::GetResourceManager().GetPath(h);
-                if (!name.empty())
-                    return string{ name };
-                else if (path)
-                    return string{ PathHandle{ *path }.GetStem() };
+                if (h)
+                {
+                    auto name = h->Name();
+                    auto path = Core::GetResourceManager().GetPath(h);
+                    if (!name.empty())
+                        return string{ name };
+                    else if (path)
+                        return string{ PathHandle{ *path }.GetStem() };
+                }
                 return "";
             }, *handle);
         }

@@ -3,6 +3,7 @@
 #include <core/Component.h>
 #include <particle/ParticleSystemModules.h>
 #include <particle/ParticleData.h>
+#include <math/random.h>
 
 namespace idk
 {
@@ -10,16 +11,26 @@ namespace idk
         : public Component<ParticleSystem>
     {
     public:
-        enum State { Stopped, Playing, Paused };
+        enum State { Awake, Stopped, Playing, Paused };
 
         MainModule main;
         EmissionModule emission;
+        ShapeModule shape;
+        VelocityOverLifetimeModule velocity_over_lifetime;
+        ColorOverLifetimeModule color_over_lifetime;
+        SizeOverLifetimeModule size_over_lifetime;
+        RotationOverLifetimeModule rotation_over_lifetime;
+        RendererModule renderer;
 
         ParticleData data;
-        char state = Stopped;
+        random rnd;
         float time = 0;
         float emitter_clock = 0;
+        matrix_decomposition<real> transform;
+        char state = Awake;
 
+        void Play();
+        void Stop();
         void Step(float dt);
         void Emit();
     };

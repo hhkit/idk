@@ -5,6 +5,7 @@
 #include <anim/Animator.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
+#include <particle/ParticleSystem.h>
 
 //#include <gfx/CameraControls.h>
 
@@ -49,6 +50,7 @@ namespace idk
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
+        span<ParticleSystem> ps,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
 		span<const Light> lights)
@@ -110,6 +112,37 @@ namespace idk
 
 		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];
 		result.renderer_vertex_shaders[VNormalMesh] = renderer_vertex_shaders[VNormalMesh];
+        for (auto& elem : ps)
+        {
+            if (elem.renderer.enabled && elem.data.num_alive)
+            {
+                const auto sz = elem.data.num_alive;
+                auto& render_data = result.particle_render_data.emplace_back();
+
+                render_data.positions.reserve(sz);
+                render_data.positions.insert(render_data.positions.end(), elem.data.position.begin(), elem.data.position.begin() + sz);
+                for (auto& pos : render_data.positions)
+                    pos *= elem.transform.scale;
+                if (!elem.main.in_world_space)
+                {
+                    mat3 rot{ elem.transform.rotation };
+                    for (auto& pos : render_data.positions)
+                        pos = elem.transform.position + rot * pos;
+                }
+
+                render_data.rotations.reserve(sz);
+                render_data.rotations.insert(render_data.rotations.end(), elem.data.rotation.begin(), elem.data.rotation.begin() + sz);
+
+                render_data.sizes.reserve(sz);
+                render_data.sizes.insert(render_data.sizes.end(), elem.data.size.begin(), elem.data.size.begin() + sz);
+
+                render_data.colors.reserve(sz);
+                render_data.colors.insert(render_data.colors.end(), elem.data.color.begin(), elem.data.color.begin() + sz);
+
+                render_data.material_instance = elem.renderer.material;
+            }
+        }
+
 
 		SubmitBuffers(std::move(result));
 	}

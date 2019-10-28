@@ -33,7 +33,7 @@ namespace idk
 
 	float random::gaussf(float mean, float x)
 	{
-		return mean + gaussf() * 3.0f / x;
+		return mean + gaussf() / 3.0f * x;
 	}
 
 

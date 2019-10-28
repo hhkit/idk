@@ -122,6 +122,9 @@
     <Filter Include="proj">
       <UniqueIdentifier>{1142d1c7-1839-4bbc-999f-17503782be59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="particle">
+      <UniqueIdentifier>{3479c263-d931-4a92-b791-425e7da842c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -737,7 +740,6 @@
     <ClInclude Include="common\Layer.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="script\MonoBinder.h" />
     <ClInclude Include="debug\Log.h">
       <Filter>debug</Filter>
     </ClInclude>
@@ -768,7 +770,6 @@
     <ClInclude Include="script\MonoWrapperEnvironment.h">
       <Filter>script</Filter>
     </ClInclude>
-    <ClInclude Include="script\ValueUnboxer.h" />
     <ClInclude Include="anim\AnimationLayer.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -784,20 +785,49 @@
     <ClInclude Include="anim\AnimationUtils.cpp">
       <Filter>anim\utils</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collidable_shapes.h" />
     <ClInclude Include="gfx\Viewport.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
-    <ClInclude Include="particle\ParticleSystem.h" />
-    <ClInclude Include="particle\ParticleSystemModules.h" />
-    <ClInclude Include="particle\ParticleData.h" />
-    <ClInclude Include="particle\ParticleSystemUpdater.h" />
-    <ClInclude Include="gfx\ViewportUtil.h" />
-    <ClInclude Include="script\MonoFunctionInvoker.h" />
+    <ClInclude Include="gfx\Buffer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
     <ClInclude Include="debug\LogSingleton.h">
       <Filter>debug</Filter>
     </ClInclude>
-    <ClInclude Include="debug\LogSystem.h" />
+    <ClInclude Include="phys\collidable_shapes.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogSystem.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleData.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleSystem.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleSystemModules.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleSystemUpdater.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ViewportUtil.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ValueUnboxer.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoFunctionInvoker.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoBinder.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\MinMax.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="util\easing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1134,7 +1164,6 @@
     <ClCompile Include="script\MonoWrapperEnvironment.cpp">
       <Filter>script</Filter>
     </ClCompile>
-    <ClCompile Include="script\ValueUnboxer.cpp" />
     <ClCompile Include="anim\AnimationLayer.cpp">
       <Filter>anim</Filter>
     </ClCompile>
@@ -1150,14 +1179,31 @@
     <ClCompile Include="gfx\Framebuffer.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
-    <ClCompile Include="particle\ParticleSystem.cpp" />
-    <ClCompile Include="particle\ParticleData.cpp" />
-    <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="debug\LogSingleton.cpp">
       <Filter>debug</Filter>
     </ClCompile>
-    <ClCompile Include="debug\LogSystem.cpp" />
+    <ClCompile Include="debug\LogSystem.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleData.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleSystem.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleSystemModules.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleSystemUpdater.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ViewportUtil.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ValueUnboxer.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="util\easing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1337,7 +1383,9 @@
     <None Include="serialize\text.inl">
       <Filter>serialize</Filter>
     </None>
-    <None Include="script\ManagedObj.inl" />
+    <None Include="script\ManagedObj.inl">
+      <Filter>script</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

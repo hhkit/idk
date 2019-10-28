@@ -49,10 +49,12 @@
     <ClInclude Include="debug\LogSingleton.h" />
     <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="debug\LogSystem.h" />
+    <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="particle\MinMax.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
     <ClInclude Include="gfx\Framebuffer.h" />
@@ -222,6 +224,7 @@
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="util\align.h" />
+    <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
     <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />
@@ -290,6 +293,7 @@
     <ClCompile Include="math\shapes\halfspace.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
+    <ClCompile Include="particle\ParticleSystemModules.cpp" />
     <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
@@ -380,6 +384,7 @@
     <ClCompile Include="math\shapes\ray.cpp" />
     <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>

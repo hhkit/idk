@@ -58,6 +58,7 @@ namespace idk::ogl
 		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
+        renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
 
 		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
@@ -247,17 +248,19 @@ namespace idk::ogl
 		const auto SetPBRUniforms = [this](CameraData& cam, const mat4& inv_view_tfm, GLuint& texture_units)
 		{
 			std::visit([&]([[maybe_unused]] const auto& obj)
+			{
+				using T = std::decay_t<decltype(obj)>;
+				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 				{
-					using T = std::decay_t<decltype(obj)>;
-					if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
-					{
-						const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
-						opengl_handle->BindConvolutedToUnit(texture_units);
-						pipeline.SetUniform("irradiance_probe", texture_units++);
-						opengl_handle->BindToUnit(texture_units);
-						pipeline.SetUniform("environment_probe", texture_units++);
-					}
-				}, cam.clear_data);
+                    if (!obj)
+                        return;
+					const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+					opengl_handle->BindConvolutedToUnit(texture_units);
+					pipeline.SetUniform("irradiance_probe", texture_units++);
+					opengl_handle->BindToUnit(texture_units);
+					pipeline.SetUniform("environment_probe", texture_units++);
+				}
+			}, cam.clear_data);
 
 			brdf_texture->BindToUnit(texture_units);
 			pipeline.SetUniform("brdfLUT", texture_units++);
@@ -426,6 +429,59 @@ namespace idk::ogl
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
+
+
+            static vector<OpenGLBuffer> bufs = []()
+            {
+                vector<OpenGLBuffer> bufs;
+                unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
+                bufs.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
+                    .Bind().Buffer(indices, sizeof(int), 6);
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticlePosition, 0, 0 } } });
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticleRotation, 0, 0 } } });
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticleSize, 0, 0 } } });
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::Color, 0, 0 } } });
+                return bufs;
+            }();
+
+            BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
+            auto x = glGetError();
+            for (auto& elem : curr_object_buffer.particle_render_data)
+            {
+                // bind shader
+                const auto material = elem.material_instance->material;
+                pipeline.PushProgram(material->_shader_program);
+                GLuint texture_units = 0;
+                SetMaterialUniforms(elem.material_instance, texture_units);
+
+                RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
+                    renderer_reqs{ {
+                        { vtx::Attrib::Position, 0 },
+                        { vtx::Attrib::UV, 1 },
+                    }
+                });
+                glVertexAttribDivisor(0, 0);
+                glVertexAttribDivisor(1, 0);
+
+                bufs[1].Bind().Buffer(elem.positions.data(), 3 * sizeof(GLfloat), elem.positions.size());
+                bufs[1].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticlePosition, 2} } });
+                glVertexAttribDivisor(2, 1);
+
+                bufs[2].Bind().Buffer(elem.rotations.data(), sizeof(GLfloat), elem.rotations.size());
+                bufs[2].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleRotation, 3} } });
+                glVertexAttribDivisor(3, 1);
+
+                bufs[3].Bind().Buffer(elem.sizes.data(), sizeof(GLfloat), elem.sizes.size());
+                bufs[3].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleSize, 4} } });
+                glVertexAttribDivisor(4, 1);
+
+                bufs[4].Bind().Buffer(elem.colors.data(), 4 * sizeof(GLfloat), elem.colors.size());
+                bufs[4].BindForDraw(renderer_reqs{ { {vtx::Attrib::Color, 5} } });
+                glVertexAttribDivisor(5, 1);
+
+                bufs[0].Bind(); // index buffer
+                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, elem.positions.size());
+            }
 		}
 
 		fb_man.ResetFramebuffer();
