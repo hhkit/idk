@@ -340,7 +340,8 @@ namespace idk::ogl
 			pipeline.Use();
 			pipeline.PopAllPrograms();
 			glBindVertexArray(vao_id);
-
+			
+				
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
 				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
@@ -368,8 +369,12 @@ namespace idk::ogl
 					glDepthMask(GL_TRUE);
 					glEnable(GL_CULL_FACE);
 				}
+				static_assert(idk::is_variant_member_v <color, decltype(CameraData::clear_data)>, "Expected color in variant");
 				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
-					glClearColor(obj.x, obj.y, obj.z, obj.w);
+				{
+					glClearColor(obj.r, obj.g, obj.b, obj.a);
+					glClear(GL_COLOR_BUFFER_BIT);
+				}
 			}, cam.clear_data);
 
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::Debug], cam.projection_matrix, cam.view_matrix);

@@ -100,10 +100,10 @@ namespace idk
 			false,
 			std::visit([&](const auto& obj)->CameraData::ClearData_t
 			{ 
-				using T = std::decay_t<decltype(obj)>;
-				if constexpr (std::is_same_v<T, color>)
-					return obj.as_vec4;
-				else
+				//using T = std::decay_t<decltype(obj)>;
+				//if constexpr (std::is_same_v<T, color>)
+				//	return obj.as_vec4;
+				//else
 					return obj;
 		
 			}, clear),
