@@ -24,8 +24,10 @@ namespace idk
 		
 		// Engine Setters
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
-		void AddLayer();
+		void RenameAnimation(string_view from, string_view to);
 		void RemoveAnimation(string_view name);
+		void AddLayer();
+		
 
 		// Editor Functionality
 		void Reset();

@@ -542,18 +542,18 @@ namespace idk {
 		}
 	}
 
+#define JOSEPH_TESTBED 0
     template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Animator> c_anim)
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
-
-		//Draw All your custom variables here.
 		const auto imgui_name = [&](string_view base, string_view added) -> string
 		{
-			return string{ base } + "##" + added.data();
+			return string{ base } +"##" + added.data();
 		};
 
+#if JOSEPH_TESTBED
 		ImGui::Text("Animation Clips");
 		ImGui::Separator();
 		for (auto& layer: c_anim->layers)
@@ -749,7 +749,112 @@ namespace idk {
 			c_anim->layers[1].curr_state.name = "idle";
 			c_anim->layers[1].default_weight = 0.0f;
 		}
+#else
+		ImGui::Text("Animation Clips");
+		ImGui::Separator();
+		ImGui::NewLine();
 
+		static string stringBuf{};
+		for (auto& curr_state : c_anim->animation_table)
+		{
+			bool not_removed = true;
+			
+			// Will change this to use something other than collapsing header. 
+			if (ImGui::CollapsingHeader(curr_state.first.data(), &not_removed, ImGuiTreeNodeFlags_AllowItemOverlap))
+			{
+				if (curr_state.second.IsBlendTree())
+				{
+					ImGui::Text("State Type: Blend Tree");
+				}
+				else
+				{
+					ImGui::Text("State Type: Basic Animation: ");
+					ImGui::SameLine();
+					ImGui::Text(curr_state.first.c_str());
+					auto& state_data = *curr_state.second.GetBasicState();
+					ImGuidk::InputResource(imgui_name("Animation Clip", curr_state.first).c_str(), &state_data.motion);
+					ImGui::Checkbox(imgui_name("Loop", curr_state.first).c_str(), &curr_state.second.loop);
+				}
+			}
+
+			if (!not_removed)
+			{
+				c_anim->RemoveAnimation(curr_state.first);
+				break;
+			}
+		}
+
+		ImGui::NewLine();
+		ImGui::TextColored(ImVec4{0,1,0,1}, "Drag Animation Clips Here!");
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
+			{
+				auto res_payload = DragDrop::GetResourcePayloadData();
+				GenericResourceHandle tmp{ RscHandle<anim::Animation>{} };
+				for (auto& h : res_payload)
+				{
+					if (h.resource_id() == tmp.resource_id())
+					{
+						if (payload->IsDelivery())
+						{
+							c_anim->AddAnimation(h.AsHandle<anim::Animation>());
+						}
+						break;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::NewLine();
+
+		if (ImGui::BeginCombo(imgui_name("Default State", c_anim->layers[0].name).c_str(), c_anim->GetAnimationState(c_anim->layers[0].default_state).name.c_str()))
+		{
+			for (auto& anim : c_anim->animation_table)
+			{
+				string_view curr_name = anim.second.name;
+				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
+				{
+					// c_anim->Stop();
+					c_anim->layers[0].default_state = curr_name;
+					c_anim->layers[0].curr_state.name = curr_name;
+
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::NewLine();
+		if (ImGui::Checkbox("Preview", &c_anim->preview_playback))
+		{
+			c_anim->OnPreview();
+		}
+
+		ImGui::NewLine();
+		ImGui::Text("Debug Info");
+		ImGui::Separator();
+		ImGui::NewLine();
+
+		ImGui::Text("Current State: "); 
+		ImGui::SameLine();
+		ImGui::Text(c_anim->layers[0].curr_state.name.c_str());
+
+		ImGui::TextColored(c_anim->IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Playing");
+		ImGui::ProgressBar(c_anim->layers[0].curr_state.normalized_time, ImVec2{ -1, 10 }, nullptr);
+		ImGui::NewLine();
+
+		ImGui::Text("Blending To State: ");
+		ImGui::SameLine();
+		ImGui::Text(c_anim->layers[0].blend_state.name.c_str());
+		ImGui::TextColored(c_anim->IsBlending() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Blending");
+		static ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f } ;
+		if (c_anim->layers[0].blend_state.is_playing)
+			ImGui::ProgressBar(c_anim->layers[0].blend_state.normalized_time / c_anim->layers[0].blend_duration, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
+		else
+			ImGui::ProgressBar(0.0f, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
+
+
+#endif
        
 	}
 
@@ -1019,8 +1124,8 @@ namespace idk {
             {
                 if (indent_stack.back())
                     ImGui::Unindent();
-                indent_stack.pop_back();
-                _curr_property_stack.pop_back();
+				if (!indent_stack.empty()) indent_stack.pop_back();
+                if(!_curr_property_stack.empty()) _curr_property_stack.pop_back();
             }
             _curr_property_stack.push_back(key);
 

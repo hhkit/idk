@@ -30,7 +30,7 @@ namespace idk
 			for (auto& elem : animators)
 			{
 				elem.Reset();
-				SaveBindPose(elem);
+				// SaveBindPose(elem);
 				for (auto& layer : elem.layers)
 				{
 					if (layer.curr_state.name != string{})
@@ -182,6 +182,7 @@ namespace idk
 
 	AnimationSystem::BonePose AnimationSystem::ComputePose(Animator& animator, AnimationLayer& layer, AnimationLayerState& state, size_t bone_index)
 	{
+		UNREFERENCED_PARAMETER(layer);
 		// Default result should be the bind pose
 		BonePose result = animator._bind_pose[bone_index];
 
@@ -654,10 +655,13 @@ namespace idk
 			return;
 
 		// Need to revert back to the bind pose
-		// const auto& bones = _skeleton->data();
-		for (size_t i = 0; i < animator._bind_pose.size(); ++i)
+		const auto& bones = animator.skeleton->data();
+		for (size_t i = 0; i < animator._child_objects.size(); ++i)
 		{
-			auto local_bind_pose = animator._bind_pose[i];
+			if (!animator._child_objects[i])
+				continue;
+
+			auto local_bind_pose = bones[i]._local_bind_pose;
 			auto local_bind_pose_mat = local_bind_pose.recompose();
 
 			animator._child_objects[i]->Transform()->position = local_bind_pose.position;

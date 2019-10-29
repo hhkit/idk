@@ -85,6 +85,13 @@ namespace idk
 		}
 	}
 
+	void Animator::RenameAnimation(string_view from, string_view to)
+	{
+		auto res = animation_table.find(from.data());
+		if (res == animation_table.end())
+			return;
+	}
+
 	void Animator::AddLayer()
 	{
 		string name = "New Layer ";

@@ -178,6 +178,8 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
+  - !MonoBehavior 
+    {enabled: 1, script_data: !AnimationTest ~}
 - !408021958656 
   - active: 1
   - !Transform 
@@ -203,43 +205,6 @@
     viewport: !Viewport 
       position: {x: 0, y: 0}
       size: {x: 1, y: 1}
-- !412316925952 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !Test 
-      f: 0
-      i: 0
-      jump_force: 0
-      movement: {x: 0, y: 0, z: 0}
-      prefab: {guid: 00000000-0000-0000-0000-000000000000}
-- !416611893248 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: ""
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !TestShou {i: 0}
 - !8590000128 
   - active: 1
   - !Transform 
