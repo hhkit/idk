@@ -32,6 +32,8 @@
 #include <math/matrix.h>
 #include <math/quaternion.h>
 
+#include <debug/Log.h>
+
 namespace idk
 {
 	// math

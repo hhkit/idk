@@ -91,7 +91,8 @@ namespace idk::vkn
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
-		CubemapConvoluter _convoluter;
+		CubemapRenderer _convoluter;
+		CubemapRenderer _skybox;
 
 		//VknFrameBufferManager   fb_man{};
 	};

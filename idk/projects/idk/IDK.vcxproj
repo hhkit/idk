@@ -44,6 +44,7 @@
     <ClInclude Include="common\Name.h" />
     <ClInclude Include="app\GamepadEnums.h" />
     <ClInclude Include="core\ConfigurableSystem.h" />
+    <ClInclude Include="core\NullHandleException.h" />
     <ClInclude Include="debug\idk_assert.h" />
     <ClInclude Include="debug\Log.h" />
     <ClInclude Include="debug\LogSingleton.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="IncludeSystems.h" />
     <ClInclude Include="script\ManagedType.h" />
     <ClInclude Include="script\MonoBinder.h" />
+    <ClInclude Include="script\MonoException.h" />
     <ClInclude Include="script\MonoFunctionInvoker.h" />
     <ClInclude Include="script\ValueBoxer.h" />
     <ClInclude Include="script\MonoBehavior.h" />
@@ -265,6 +267,7 @@
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="common\Tag.cpp" />
     <ClCompile Include="common\TagManager.cpp" />
+    <ClCompile Include="core\NullHandleException.cpp" />
     <ClCompile Include="debug\Log.cpp" />
     <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />

@@ -12,5 +12,15 @@
         {
             get => gameObject.transform;
         }
+
+        public string tag
+        {
+            get => gameObject.tag;
+        }
+
+        public T GetComponent<T>() where T : Component, new()
+        {
+            return gameObject.GetComponent<T>();
+        }
     }
 }

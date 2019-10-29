@@ -22,6 +22,7 @@
 #include <vkn/VulkanHashes.h>
 
 #include <vkn/PipelineBinders.inl>
+#include <vkn/VknCubemap.h>
 
 #include <gfx/ViewportUtil.h>
 #include <vkn/VknCubeMapLoader.h>
@@ -251,7 +252,11 @@ namespace idk::vkn
 			_render_threads.emplace_back(std::move(thread));
 		}
 		_pre_render_complete = device.createSemaphoreUnique(vk::SemaphoreCreateInfo{});
-		_convoluter.Init();
+		_convoluter.Init(
+			Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VPBRConvolute],
+			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube],
+			Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute]	
+		);
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -609,7 +614,7 @@ namespace idk::vkn
 			for (auto i = diff; i-- > 0;)
 			{
 				auto& buffer = buffers[i];
-				states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
+				states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
 				_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}
@@ -758,11 +763,36 @@ namespace idk::vkn
 		};			
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
-
-		//Skybox rendering
+		//////////////////Skybox rendering
 		if (sb_cm)
 		{
+			auto& vknCubeMap = sb_cm->as<VknCubemap>();
+			pipeline_config skybox_render_config;
+			DescriptorsManager skybox_ds_manager(view);
+			skybox_render_config.fill_type = FillType::eFill;
+			skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
+			auto config = ConfigWithVP(skybox_render_config,camera,offset,size);
+			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
+			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
+			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
+			config.depth_test = false;
+			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
 
+			//No idea if this is expensive....if really so I will try shift up to init
+			rs.skyboxRenderer.Init(
+				Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox],
+				{},
+				Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox],
+				&config,
+				*camera.CubeMapMesh
+			);
+			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * camera.view_matrix);
+			
+			/*cmd_buffer.begin(vk::CommandBufferBeginInfo
+				{
+					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+				});*/
+			rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
 		}
 
 		auto& processed_ro = the_interface.DrawCalls();

@@ -82,6 +82,7 @@ namespace idk
 		make_button(LogPool::ANIM, "Animation");
 		make_button(LogPool::MONO, "Mono");
 		make_button(LogPool::GAME, "Game");
+		make_button(LogPool::EDIT, "Editor");
 
 		ImGui::EndMenuBar();
 

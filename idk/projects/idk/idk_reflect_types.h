@@ -147,5 +147,7 @@ namespace idk::reflect
         , vector<shadergraph::Slot>
         , vector<shadergraph::Link>
         , vector<shadergraph::Parameter>
+
+		, vector<RscHandle<AudioClip>>
 	>;
 }
