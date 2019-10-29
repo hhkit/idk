@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <loading/OpenGLCubeMapLoader.h>
+#include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <gfx/GraphicsSystem.h>
 #include <res/MetaBundle.h>
 #include <filesystem>
