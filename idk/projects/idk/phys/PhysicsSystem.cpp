@@ -299,7 +299,8 @@ namespace idk
 			// find exiting
 			if (curr_collisions.find(pair) == curr_collisions.end())
 			{
-				col_exit.emplace(pair);
+				if (pair.lhs && pair.rhs)
+					col_exit.emplace(pair);
 				continue;
 			}
 

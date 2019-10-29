@@ -115,6 +115,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Mesh>, "<Mesh>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::AudioClip>, "<AudioClip>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Texture>, "<Texture>")
 REFLECT_VARS(guid)
 REFLECT_END()
@@ -130,7 +134,6 @@ REFLECT_END()
 REFLECT_BEGIN(idk::RscHandle<class idk::anim::Skeleton>, "<Skeleton>")
 REFLECT_VARS(guid)
 REFLECT_END()
-
 
 REFLECT_BEGIN(idk::RscHandle<class idk::CubeMap>, "<CubeMap>")
 REFLECT_VARS(guid)
@@ -300,7 +303,7 @@ REFLECT_VARS(index)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioSource, "AudioSource")
-REFLECT_VARS(volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
+REFLECT_VARS(audio_clip_list, volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
