@@ -46,6 +46,7 @@ namespace idk::ogl
 	void OpenGLState::Setup()
 	{
 		sys = &Core::GetSystem<Win32GraphicsSystem>();
+		glGenVertexArrays(1, &particle_vao_id);
 		glGenVertexArrays(1, &vao_id);
 	}
 
@@ -448,6 +449,7 @@ namespace idk::ogl
                 return bufs;
             }();
 
+			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
             auto x = glGetError();
             for (auto& elem : curr_object_buffer.particle_render_data)
