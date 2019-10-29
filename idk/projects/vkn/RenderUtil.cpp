@@ -62,6 +62,7 @@ RscHandle<VknFrameBuffer> CubemapConvoluter::NewFrameBuffer(RscHandle<CubeMap> d
 	idk::AttachmentInfo info{};
 	info.load_op = LoadOp::eClear;
 	info.store_op = StoreOp::eStore;
+	info.buffer = dst.as<VknCubemap>().Tex();
 	builder.AddAttachment(info);
 	return RscHandle<VknFrameBuffer>{ Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End())};
 }

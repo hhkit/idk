@@ -10,9 +10,9 @@ namespace idk
 	{
 		return _size;
 	}
-	void Texture::Size(ivec2 newsize)
+	ivec2 Texture::Size(ivec2 newsize)
 	{
-		_size = newsize;
+		return _size = newsize;
 	}
 	void Texture::ChangeMode()
 	{
