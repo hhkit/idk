@@ -68,12 +68,16 @@ namespace idk
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 
+    struct ParticleObj
+    {
+        vec3 position;
+        rad rotation;
+        float size;
+        color color;
+    };
     struct ParticleRenderData
     {
-        vector<vec3> positions;
-        vector<rad> rotations;
-        vector<float> sizes;
-        vector<color> colors;
+        vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
 }

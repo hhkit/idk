@@ -79,19 +79,20 @@ namespace idk
 		}
 
 		hash_table<Handle<Animator>, unsigned> skeleton_indices;
-		unsigned i{};
-		for (auto& elem : animators)
-		{
-			skeleton_indices.emplace(elem.GetHandle(), i++);
-			result.skeleton_transforms.emplace_back(
-				SkeletonTransforms{ std::move(elem.BoneTransforms()) } // generate this from the skeletons
-				//SkeletonTransforms{ vector<mat4>{3} }
-			);
-		}
+        {
+            unsigned i = 0;
+            for (auto& elem : animators)
+            {
+                skeleton_indices.emplace(elem.GetHandle(), i++);
+                result.skeleton_transforms.emplace_back(
+                    SkeletonTransforms{ std::move(elem.BoneTransforms()) } // generate this from the skeletons
+                    //SkeletonTransforms{ vector<mat4>{3} }
+                );
+            }
+        }
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
-
 			if (elem.IsActiveAndEnabled())
 			{
 				AnimatedRenderObject ro = elem.GenerateRenderObject();
@@ -103,6 +104,7 @@ namespace idk
 				result.skinned_mesh_render.emplace_back(std::move(ro));
 			}
 		}
+
 		for (auto& camera : cameras)
 		{
 			if(camera.is_scene_camera)
@@ -116,6 +118,8 @@ namespace idk
 
 		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];
 		result.renderer_vertex_shaders[VNormalMesh] = renderer_vertex_shaders[VNormalMesh];
+
+
         for (auto& elem : ps)
         {
             if (elem.renderer.enabled && elem.data.num_alive)
@@ -123,25 +127,23 @@ namespace idk
                 const auto sz = elem.data.num_alive;
                 auto& render_data = result.particle_render_data.emplace_back();
 
-                render_data.positions.reserve(sz);
-                render_data.positions.insert(render_data.positions.end(), elem.data.position.begin(), elem.data.position.begin() + sz);
-                for (auto& pos : render_data.positions)
-                    pos *= elem.transform.scale;
+                render_data.particles.resize(sz);
+
+                for (uint16_t i = 0; i < sz; ++i)
+                    render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
                 if (!elem.main.in_world_space)
                 {
                     mat3 rot{ elem.transform.rotation };
-                    for (auto& pos : render_data.positions)
-                        pos = elem.transform.position + rot * pos;
+                    for (auto& p : render_data.particles)
+                        p.position = elem.transform.position + rot * p.position;
                 }
 
-                render_data.rotations.reserve(sz);
-                render_data.rotations.insert(render_data.rotations.end(), elem.data.rotation.begin(), elem.data.rotation.begin() + sz);
-
-                render_data.sizes.reserve(sz);
-                render_data.sizes.insert(render_data.sizes.end(), elem.data.size.begin(), elem.data.size.begin() + sz);
-
-                render_data.colors.reserve(sz);
-                render_data.colors.insert(render_data.colors.end(), elem.data.color.begin(), elem.data.color.begin() + sz);
+                for (uint16_t i = 0; i < sz; ++i)
+                    render_data.particles[i].rotation = elem.data.rotation[i];
+                for (uint16_t i = 0; i < sz; ++i)
+                    render_data.particles[i].size = elem.data.size[i];
+                for (uint16_t i = 0; i < sz; ++i)
+                    render_data.particles[i].color = elem.data.color[i];
 
                 render_data.material_instance = elem.renderer.material;
             }

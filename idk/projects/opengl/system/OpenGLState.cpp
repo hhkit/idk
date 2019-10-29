@@ -447,18 +447,29 @@ namespace idk::ogl
                 unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
                 bufs.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
                     .Bind().Buffer(indices, sizeof(int), 6);
-                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticlePosition, 0, 0 } } });
-                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticleRotation, 0, 0 } } });
-                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::ParticleSize, 0, 0 } } });
-                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, { { vtx::Attrib::Color, 0, 0 } } });
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
+                    { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
+                    { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
+                    { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
+                    { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
+                } });
                 return bufs;
             }();
 
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
-            auto x = glGetError();
-            for (auto& elem : curr_object_buffer.particle_render_data)
+            vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
+            vec3 cam_pos = cam.view_matrix[3];
+            auto particle_render_data = curr_object_buffer.particle_render_data;
+            for (auto& elem : particle_render_data)
             {
+                std::sort(elem.particles.begin(), elem.particles.end(),
+                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) { return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
+
                 // bind shader
                 const auto material = elem.material_instance->material;
                 pipeline.PushProgram(material->_shader_program);
@@ -474,24 +485,20 @@ namespace idk::ogl
                 glVertexAttribDivisor(0, 0);
                 glVertexAttribDivisor(1, 0);
 
-                bufs[1].Bind().Buffer(elem.positions.data(), 3 * sizeof(GLfloat), elem.positions.size());
-                bufs[1].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticlePosition, 2} } });
+                bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
+                bufs[1].BindForDraw(renderer_reqs{ {
+                    {vtx::Attrib::ParticlePosition, 2},
+                    {vtx::Attrib::ParticleRotation, 3},
+                    {vtx::Attrib::ParticleSize, 4},
+                    {vtx::Attrib::Color, 5}
+                } });
                 glVertexAttribDivisor(2, 1);
-
-                bufs[2].Bind().Buffer(elem.rotations.data(), sizeof(GLfloat), elem.rotations.size());
-                bufs[2].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleRotation, 3} } });
                 glVertexAttribDivisor(3, 1);
-
-                bufs[3].Bind().Buffer(elem.sizes.data(), sizeof(GLfloat), elem.sizes.size());
-                bufs[3].BindForDraw(renderer_reqs{ { {vtx::Attrib::ParticleSize, 4} } });
                 glVertexAttribDivisor(4, 1);
-
-                bufs[4].Bind().Buffer(elem.colors.data(), 4 * sizeof(GLfloat), elem.colors.size());
-                bufs[4].BindForDraw(renderer_reqs{ { {vtx::Attrib::Color, 5} } });
                 glVertexAttribDivisor(5, 1);
 
                 bufs[0].Bind(); // index buffer
-                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, elem.positions.size());
+                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(elem.particles.size()));
             }
 		}
 
