@@ -744,6 +744,7 @@ namespace idk
             _node_order.erase(std::find(_node_order.begin(), _node_order.end(), guid));
             g.nodes.erase(guid);
         }
+        _nodes_to_delete.clear();
 
         ImNodes::BeginCanvas(&_canvas);
 
