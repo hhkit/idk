@@ -46,6 +46,7 @@ namespace idk::ogl
 	void OpenGLState::Setup()
 	{
 		sys = &Core::GetSystem<Win32GraphicsSystem>();
+		glGenVertexArrays(1, &particle_vao_id);
 		glGenVertexArrays(1, &vao_id);
 	}
 
@@ -272,7 +273,7 @@ namespace idk::ogl
 			if (elem.index == 0) // point light
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
 
-			if (elem.index == 1) // directional light
+			else if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
 				fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
@@ -314,6 +315,9 @@ namespace idk::ogl
 
 				fb_man.ResetFramebuffer();
 			}
+
+			else if (elem.index == 2) // spot light
+				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir }, elem.light_color);
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -450,6 +454,7 @@ namespace idk::ogl
                 return bufs;
             }();
 
+			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
             auto x = glGetError();
             for (auto& elem : curr_object_buffer.particle_render_data)

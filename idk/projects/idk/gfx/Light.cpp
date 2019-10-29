@@ -46,7 +46,7 @@ namespace idk
 		mat4 operator()(const DirectionalLight&)
 		{
 			auto trf = light->GetGameObject()->Transform();
-			vec3 v_pos = trf->GlobalPosition();
+			vec3 v_pos = vec3();
 			vec3 v_dir = trf->Forward();
 			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
 			return look_at(v_pos, v_pos - vec3(v_dir.x, v_dir.y, v_dir.z), trf->Up()).inverse();
@@ -138,7 +138,7 @@ namespace idk
 					const DirectionalLight& dir_light = light_variant;
 					retval.light_color = dir_light.light_color * dir_light.intensity;
 					const auto tfm = GetGameObject()->Transform();
-					retval.v_pos = vec3(0.f);
+					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
 					retval.intensity = dir_light.intensity;
 				}
@@ -147,8 +147,9 @@ namespace idk
 				{
 					const SpotLight& spotlight = light_variant;
 					retval.light_color = spotlight.light_color * spotlight.intensity;
-					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
-					retval.v_dir = GetGameObject()->Transform()->Forward();
+					const auto tfm = GetGameObject()->Transform();
+					retval.v_pos = tfm->GlobalPosition();
+					retval.v_dir = tfm->Forward();
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
 					retval.falloff = (spotlight.use_inv_sq_atten) ? spotlight.attenuation_radius : (1 / (spotlight.attenuation_radius * spotlight.attenuation_radius));

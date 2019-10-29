@@ -153,7 +153,7 @@ namespace idk
 	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator=(small_string&& other)
 	{
-		std::swap(*this, other);
+		std::swap(_rep, other._rep);
 		return *this;
 	}
 

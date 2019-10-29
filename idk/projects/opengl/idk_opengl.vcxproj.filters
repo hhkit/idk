@@ -60,6 +60,12 @@
     <ClInclude Include="resource\OpenGLRenderTargetLoader.h">
       <Filter>resource\Loaders</Filter>
     </ClInclude>
+    <ClInclude Include="resource\OpenGLCubeMapLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -107,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="resource\OpenGLTextureFactory.cpp">
       <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLCubeMapLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureLoader.cpp">
+      <Filter>resource\Loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

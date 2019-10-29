@@ -15,7 +15,10 @@ namespace TestAndSeek
         public void PlayOrBlend(string name)
         {
             if (blend_next)
-                anim.CrossFade(name, 1.0f);
+            {
+                Debug.Log("HHAA");
+                anim.CrossFade(name);
+            }
             else
                 anim.Play(name);
         }

@@ -31,6 +31,7 @@ namespace idk::ogl
 		PipelineProgram          pipeline;
 		FrameBufferManager       fb_man;
 		GLuint                   vao_id = 0;
+		GLuint                   particle_vao_id = 0;
 		RscHandle<OpenGLTexture> brdf_texture;
 		//RscHandle<ShaderProgram> debug_fragment;
 		bool is_picking = false;
