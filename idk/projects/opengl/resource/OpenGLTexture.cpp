@@ -156,11 +156,12 @@ namespace idk::ogl
 	}
 
 
-	void OpenGLTexture::Size(ivec2 new_size)
+	ivec2 OpenGLTexture::Size(ivec2 new_size)
 	{
 		Texture::Size(new_size);
 		if(!_isCompressedTexture)
 			Buffer(nullptr, _size);
+		return Texture::Size();
 	}
 
 	void* OpenGLTexture::ID() const

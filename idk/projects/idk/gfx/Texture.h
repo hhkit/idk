@@ -93,7 +93,7 @@ namespace idk
 		ivec2 Size() const;
 
 		// modifiers
-		virtual void Size(ivec2 newsize);
+		virtual ivec2 Size(ivec2 newsize);
 		virtual void ChangeMode();
 
 		// identifier for ImGUIImage

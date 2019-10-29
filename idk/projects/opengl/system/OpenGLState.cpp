@@ -384,7 +384,9 @@ namespace idk::ogl
 				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
 				{
 					glClearColor(obj.r, obj.g, obj.b, obj.a);
+					glEnable(GL_SCISSOR_TEST);
 					glClear(GL_COLOR_BUFFER_BIT);
+					glDisable(GL_SCISSOR_TEST);
 				}
 			}, cam.clear_data);
 

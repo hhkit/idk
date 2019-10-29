@@ -92,7 +92,8 @@ namespace idk
 		blend_duration = 0.0f;
 		weight = default_weight;
 		
-		
+		blend_this_frame = false;
+		blend_interrupt = false;
 		blending_before_pause = false;
 		// preview_playback = false;
 	}

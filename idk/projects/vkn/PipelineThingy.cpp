@@ -137,7 +137,7 @@ namespace idk::vkn
 		return ProcessedRO::BindingInfo
 		{
 			obj_uni.binding,
-			ProcessedRO::ImageBinding{ val.ImageView(),*val.sampler,vk::ImageLayout::eGeneral },
+			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),vk::ImageLayout::eGeneral },
 			0,
 			arr_index,
 			obj_uni.size,
