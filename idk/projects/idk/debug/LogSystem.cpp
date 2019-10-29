@@ -40,7 +40,10 @@ namespace idk
 			"sys",
 			"phys",
 			"gfx",
+			"anim",
+			"mono",
 			"game",
+			"edit",
 		};
 
 		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)

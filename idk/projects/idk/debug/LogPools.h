@@ -11,6 +11,7 @@ namespace idk
 		ANIM,
 		MONO,
 		GAME,
+		EDIT,
 		COUNT
 	};
 
