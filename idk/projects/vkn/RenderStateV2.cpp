@@ -6,6 +6,7 @@ namespace idk::vkn
 		cmd_buffer.reset({});
 		ubo_manager.Clear();
 		dpools.Reset();
+		skyboxRenderer.ResetRsc();
 		has_commands = false;
 	}
 }
