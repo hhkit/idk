@@ -138,7 +138,7 @@ namespace idk
 					const DirectionalLight& dir_light = light_variant;
 					retval.light_color = dir_light.light_color * dir_light.intensity;
 					const auto tfm = GetGameObject()->Transform();
-					retval.v_pos = tfm->GlobalPosition();
+					retval.v_pos = vec3(0.f);
 					retval.v_dir = tfm->Forward();
 					retval.intensity = dir_light.intensity;
 				}
