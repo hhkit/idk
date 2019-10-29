@@ -21,7 +21,7 @@ namespace idk
 
 	struct DirectionalLight
 	{
-		real  intensity     { .5f  };
+		real  intensity     { 1.f  };
 		color light_color   { 1.f  };
 		real  width         { 5.0f };
 		real  height        { 5.0f };

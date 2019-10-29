@@ -104,6 +104,11 @@ namespace idk
                     auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
                     table.emplace(str, handle_i);
                 }
+                if (MenuItem("None"))
+                {
+                    *handle = RscHandle<T>{};
+                    dropped = true;
+                }
                 for (auto& [name, handle_i] : table)
                 {
                     if (MenuItem(name.c_str()))
