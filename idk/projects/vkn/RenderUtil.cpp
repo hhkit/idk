@@ -70,20 +70,18 @@ namespace idk::vkn
 		ro.config = config_;
 	}
 
-	RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst)
-	{
-		FrameBufferBuilder builder;
-		auto& cube_map = *dst;
-		builder.Begin(cube_map.Size());
-		idk::AttachmentInfo info{};
-		info.load_op = LoadOp::eClear;
-		info.store_op = StoreOp::eStore;
-
-		//I think you meant this one right
-		info.buffer = RscHandle<Texture>();
-		builder.AddAttachment(info);
-		return RscHandle<VknFrameBuffer>{ Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End())};
-	}
+RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst)
+{
+	FrameBufferBuilder builder;
+	auto& cube_map = *dst;
+	builder.Begin(cube_map.Size());
+	idk::AttachmentInfo info{};
+	info.load_op = LoadOp::eClear;
+	info.store_op = StoreOp::eStore;
+	info.buffer = dst.as<VknCubemap>().Tex();
+	builder.AddAttachment(info);
+	return RscHandle<VknFrameBuffer>{ Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End())};
+}
 
 	void CubemapRenderer::BeginQueue(UboManager& ubo_manager, std::optional<vk::Fence >ofence)
 	{

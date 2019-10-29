@@ -325,9 +325,19 @@ namespace idk::vkn {
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
 
-		auto ptr = &texture;
+		if (texture.texture == RscHandle<VknTexture>{})
+		{
+			texture.texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
+		}
+		else if (!texture.texture)
+		{
+			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(texture.texture.guid);
+		}
+			
+
+		auto ptr = texture.texture;
 		auto&& [image, alloc, aspect] = vkn::LoadCubemap(allocator, load_fence, load_info, in_info);
-		ptr->Size(ivec2{ load_info.width,load_info.height });
+		texture.Size(ptr->Size(ivec2{ load_info.width,load_info.height }));
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->image = std::move(image);
@@ -361,6 +371,14 @@ namespace idk::vkn {
 	}
 	void CubemapLoader::LoadCubemap(VknCubemap& texture, CubemapFormat pixel_format, std::optional<CubemapOptions> ooptions, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
+
+		if (texture.texture == RscHandle<VknTexture>{})
+		{
+			texture.texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
+		}else if (!texture.texture)
+		{
+			Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(texture.texture.guid);
+		}
 		CubemapOptions options{};
 		if (ooptions)
 			options = *ooptions;
@@ -369,7 +387,7 @@ namespace idk::vkn {
 
 		//const void* rgba = rgba32;
 		auto format = vcm::MapFormat(pixel_format);
-		auto ptr = &texture;
+		auto ptr = texture.texture;
 		auto&& [image, alloc, aspect] = vkn::LoadCubemap(allocator, load_fence, rgba32, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
 		ptr->image = std::move(image);
@@ -399,7 +417,8 @@ namespace idk::vkn {
 
 		};
 		ptr->sampler = device.createSamplerUnique(sampler_info);
-		texture.Size(size);
+		;
+		texture.Size(texture.texture->Size(size));
 	}
 	void CubemapLoader::LoadCubemap(VknCubemap& texture, CubemapFormat input_pixel_format, std::optional<CubemapOptions> options, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
