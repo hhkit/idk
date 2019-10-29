@@ -53,15 +53,43 @@ namespace idk::mono
 		mono_jit_cleanup(_domain);
 	}
 
+	/*
+	template<typename T>
+	constexpr auto Bind(string_view label, T&& fn)
+	{
+		mono_add_internal_call(label.data(), decay(fn));
+	}
+	*/
+	
+	template<typename T>
+	struct default_val
+	{
+		static auto ret() { return T{}; }
+	};
+
+	template<>
+	struct default_val<void>
+	{
+		static void ret() {}
+	};
+
+#define BIND_START(LABEL, RET, ...)\
+	{ using Ret = RET;\
+	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{try
+
+#define BIND_END() \
+	catch(NullHandleException ex) \
+	{ \
+		LOG_TO(LogPool::GAME, "Null reference at %lld", ex.GetHandle().id);\
+		return default_val<Ret>::ret(); }\
+	}));}
 
 	void MonoWrapperEnvironment::BindCoreFunctions()
 	{
-
-		constexpr auto Bind = mono_add_internal_call;
+		//constexpr auto Bind = mono_add_internal_call;
 
 		// bdebug
-		Bind("idk.Bindings::DebugLog", decay(
-			[](MonoString* preface, MonoString* message)
+		BIND_START("idk.Bindings::DebugLog", void, MonoString * preface, MonoString * message)
 		{
 			LogSingleton::Get().LogMessage(LogLevel::INFO,
 				LogPool::GAME,
@@ -69,24 +97,23 @@ namespace idk::mono
 				unbox(message).get()
 			);
 		}
-		));
+		BIND_END();
+
 		// handleable
-		Bind("idk.Bindings::ObjectValidate", decay(
-			[](GenericHandle go) -> bool
+		BIND_START("idk.Bindings::ObjectValidate", bool, GenericHandle go)
 		{
 			return GameState::GetGameState().ValidateHandle(go);
 		}
-		));
-
-		Bind("idk.Bindings::ObjectDestroy", decay(
-			[](GenericHandle go)
+		BIND_END();
+		
+		BIND_START("idk.Bindings::ObjectDestroy", void, GenericHandle go)
 		{
 			GameState::GetGameState().DestroyObject(go);
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::ObjectGetObjectsOfType", decay(
-			[](MonoString* type) -> MonoArray*
+		
+		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* type)
 		{
 			auto s = unbox(type);
 			string_view type_name = s.get();
@@ -105,27 +132,23 @@ namespace idk::mono
 
 			return retval;
 		}
-		));
+		BIND_END();
 
 		// game object
 
-		Bind("idk.Bindings::GameObjectAddEngineComponent", decay(
-			[](Handle<GameObject> go, MonoString* component) -> uint64_t
+		BIND_START("idk.Bindings::GameObjectAddEngineComponent",uint64_t, Handle<GameObject> go, MonoString* component)
 			{
 				return go->AddComponent(string_view{ unbox(component).get() }).id;
 			}
-		));
+		BIND_END();
 
-//		Bind("idk.Bindings::GameObjectGetEngineComponent", &poop);
-		Bind("idk.Bindings::GameObjectGetEngineComponent", decay(
-			[](Handle<GameObject> go, MonoString* component) -> uint64_t // note: return value optimization
+		BIND_START("idk.Bindings::GameObjectGetEngineComponent",  uint64_t, Handle<GameObject> go, MonoString* component) // note: return value optimization
 			{
 				return go->GetComponent(string_view{ unbox(component).get() }).id;
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::GameObjectAddGameComponent", decay(
-			[](Handle<GameObject> go, MonoString* component) -> MonoObject*
+		BIND_START("idk.Bindings::GameObjectAddGameComponent",  MonoObject*, Handle<GameObject> go, MonoString* component)
 			{
 				auto s = unbox(component);
 				auto retval = go->AddComponent<mono::Behavior>();
@@ -135,10 +158,9 @@ namespace idk::mono
 				go->RemoveComponent(retval);
 				return nullptr;
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::GameObjectGetGameComponent", decay(
-			[](Handle<GameObject> go, MonoString* component) -> MonoObject* // note: return value optimization
+		BIND_START("idk.Bindings::GameObjectGetGameComponent",  MonoObject*, Handle<GameObject> go, MonoString* component) // note: return value optimization
 			{
 				auto s = unbox(component);
 				string_view findme = s.get();
@@ -151,354 +173,316 @@ namespace idk::mono
 
 				return nullptr;
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::GameObjectGetActiveInHierarchy", decay(
-			[](Handle<GameObject> go) -> bool
+		BIND_START("idk.Bindings::GameObjectGetActiveInHierarchy",  bool, Handle<GameObject> go)
 			{
 				return go->ActiveInHierarchy();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::GameObjectActiveSelf", decay(
-			[](Handle<GameObject> go) -> bool
+		BIND_START("idk.Bindings::GameObjectActiveSelf",  bool, Handle<GameObject> go)
 			{
 				return go->ActiveSelf();
 			}
-		));
-
-		Bind("idk.Bindings::GameObjectSetActive", decay(
-			[](Handle<GameObject> go, bool set) -> void
+		BIND_END();
+		
+		BIND_START("idk.Bindings::GameObjectSetActive",  void, Handle<GameObject> go, bool active)
 			{
-				go->SetActive(set);
+				go->SetActive(active);
 			}
-		));
+		BIND_END();
 
-        Bind("idk.Bindings::GameObjectGetName", decay(
-            [](Handle<GameObject> go) -> MonoString*
+		BIND_START("idk.Bindings::GameObjectSetActive",  void, Handle<GameObject> go, bool active)
+			{
+				go->SetActive(active);
+			}
+		BIND_END();
+		
+        BIND_START("idk.Bindings::GameObjectGetName",  MonoString*, Handle<GameObject> go) //wtf?
         {
             return mono_string_new(mono_domain_get(), go->Name().data());
         }
-        ));
-
-        Bind("idk.Bindings::GameObjectSetName", decay(
-            [](Handle<GameObject> go, MonoString* name) -> void
+        BIND_END();
+		
+        BIND_START("idk.Bindings::GameObjectSetName",  void, Handle<GameObject> go, MonoString* name)
         {
-            char* s = mono_string_to_utf8(name);
-            go->Name(s);
-            mono_free(s);
+            auto s = unbox(name);
+            go->Name(s.get());
         }
-        ));
+		BIND_END();
 
-        Bind("idk.Bindings::GameObjectGetTag", decay(
-            [](Handle<GameObject> go) -> MonoString*
+        BIND_START("idk.Bindings::GameObjectGetTag",  MonoString*, Handle<GameObject> go)
         {
             return mono_string_new(mono_domain_get(), go->Tag().data());
         }
-        ));
+		BIND_END();
 
-        Bind("idk.Bindings::GameObjectSetTag", decay(
-            [](Handle<GameObject> go, MonoString* tag) -> void
+        BIND_START("idk.Bindings::GameObjectSetTag",  void, Handle<GameObject> go, MonoString* tag)
         {
             char* s = mono_string_to_utf8(tag);
             go->Tag(s);
             mono_free(s);
         }
-        ));
+		BIND_END();
 
-        Bind("idk.Bindings::GameObjectFindWithTag", decay(
-            [](MonoString* tag) -> uint64_t
+        BIND_START("idk.Bindings::GameObjectFindWithTag",  uint64_t, MonoString* tag)
         {
             char* s = mono_string_to_utf8(tag);
             auto ret = Core::GetSystem<TagManager>().Find(s);
             mono_free(s);
             return ret.id;
         }
-        ));
+		BIND_END();
 
 
 		// component
-		Bind("idk.Bindings::ComponentGetGameObject", decay(
-			[](GenericHandle go) -> uint64_t
+		BIND_START("idk.Bindings::ComponentGetGameObject",  uint64_t, GenericHandle go)
 		{
 			return GameState::GetGameState().GetGameObject(go).id;
 		}
-		));
+		BIND_END();
 
 
 		// transform
 
-		Bind("idk.Bindings::TransformGetPosition", decay(
-			[](Handle<Transform> h) -> vec3
+		BIND_START("idk.Bindings::TransformGetPosition",  vec3, Handle<Transform> h)
 			{ 
 				return h->GlobalPosition();
-			}));
+			}
+		BIND_END();
 
-		Bind("idk.Bindings::TransformSetPosition", decay(
-			[](Handle<Transform> h, vec3 v)
+		BIND_START("idk.Bindings::TransformSetPosition",  void, Handle<Transform> h, vec3 v)
 			{
 				h->GlobalPosition(v);
-			}));
+			}
+		BIND_END();
 
-		Bind("idk.Bindings::TransformGetScale", decay(
-			[](Handle<Transform> h) -> vec3
+		BIND_START("idk.Bindings::TransformGetScale",  vec3, Handle<Transform> h)
 			{
 				return h->GlobalScale();
-			}));
+			}
+		BIND_END();
 
-		Bind("idk.Bindings::TransformSetScale", decay(
-			[](Handle<Transform> h, vec3 v)
+		BIND_START("idk.Bindings::TransformSetScale",  void, Handle<Transform> h, vec3 v)
 			{
 				h->GlobalScale(v);
-			}));
+			}
+		BIND_END();
 
-		Bind("idk.Bindings::TransformGetRotation", decay(
-			[](Handle<Transform> h) -> quat
+		BIND_START("idk.Bindings::TransformGetRotation",  quat, Handle<Transform> h)
 			{
 				return h->GlobalRotation();
-			}));
+			}
+		BIND_END();
 
-		Bind("idk.Bindings::TransformSetRotation", decay(
-			[](Handle<Transform> h, quat v)
+		BIND_START("idk.Bindings::TransformSetRotation",  void, Handle<Transform> h, quat v)
 			{
 				h->GlobalRotation(v);
-			}));
+			}
+		BIND_END();
 
-		Bind("idk.Bindings::TransformForward", decay(
-			[](Handle<Transform> h) -> vec3
+		BIND_START("idk.Bindings::TransformForward",  vec3, Handle<Transform> h)
 			{
 				return h->Forward();
-			}));
+			}BIND_END();
 
-		Bind("idk.Bindings::TransformUp", decay(
-			[](Handle<Transform> h) -> vec3
+		BIND_START("idk.Bindings::TransformUp",  vec3, Handle<Transform> h)
 			{
 				return h->Up();
-			}));
+			}BIND_END();
 
-		Bind("idk.Bindings::TransformRight", decay(
-			[](Handle<Transform> h) -> vec3
+		BIND_START("idk.Bindings::TransformRight",  vec3, Handle<Transform> h)
 			{
 				return h->Right();
-			}));
+			}BIND_END();
 		
-		Bind("idk.Bindings::TransformGetParent", decay(
-			[](Handle<Transform> h) -> uint64_t
+		BIND_START("idk.Bindings::TransformGetParent",  uint64_t, Handle<Transform> h)
 			{
 				return h->parent.id;
-			}));
+			}BIND_END();
 
-		Bind("idk.Bindings::TransformSetParent", decay(
-			[](Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
+		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
 			{
 				h->SetParent(parent_gameobject, preserve_global);
-			}));
+			}BIND_END();
 
 		// RigidBody
-		Bind("idk.Bindings::RigidBodyGetMass", decay(
-			[](Handle<RigidBody> rb) ->float
+		BIND_START("idk.Bindings::RigidBodyGetMass", float, Handle<RigidBody> rb)
 		{
 			return rb->mass();
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodySetMass", decay(
-			[](Handle<RigidBody> rb, float val)
+		BIND_START("idk.Bindings::RigidBodySetMass",  void, Handle<RigidBody> rb, float val)
 		{
 			rb->mass(val);
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::RigidBodyGetVelocity", decay(
-			[](Handle<RigidBody> rb) -> vec3
+		BIND_START("idk.Bindings::RigidBodyGetVelocity",  vec3, Handle<RigidBody> rb)
 		{
 			return rb->velocity() * Core::GetDT().count();
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodySetVelocity", decay(
-			[](Handle<RigidBody> rb, vec3 val)
+		BIND_START("idk.Bindings::RigidBodySetVelocity",  void, Handle<RigidBody> rb, vec3 val)
 		{
 			rb->velocity(val);
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::RigidBodyGetPosition", decay(
-			[](Handle < RigidBody> rb) -> vec3
+		BIND_START("idk.Bindings::RigidBodyGetPosition",  vec3, Handle < RigidBody> rb)
 		{
 			return rb->position();
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodySetPosition", decay(
-			[](Handle<RigidBody> rb, vec3 val)
+		BIND_START("idk.Bindings::RigidBodySetPosition",  void, Handle<RigidBody> rb, vec3 val)
 		{
 			rb->position(val);
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::RigidBodyGetUseGravity", decay(
-			[](Handle < RigidBody> rb) -> bool
+		BIND_START("idk.Bindings::RigidBodyGetUseGravity",  bool, Handle < RigidBody> rb)
 		{
 			return rb->use_gravity;
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodySetUseGravity", decay(
-			[](Handle<RigidBody> rb, bool val)
+		BIND_START("idk.Bindings::RigidBodySetUseGravity",  void, Handle<RigidBody> rb, bool val)
 		{
 			rb->use_gravity = val;
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodySleep", decay(
-			[](Handle<RigidBody> rb)
+		BIND_START("idk.Bindings::RigidBodySleep",  void, Handle<RigidBody> rb)
 		{
 			rb->sleep_next_frame = true;
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodyTeleport", decay(
-			[](Handle<RigidBody> rb, vec3 val)
+		BIND_START("idk.Bindings::RigidBodyTeleport",  void, Handle<RigidBody> rb, vec3 val)
 		{
 			rb->TeleportBy(val);
-		}));
+		}BIND_END();
 
-		Bind("idk.Bindings::RigidBodyAddForce", decay(
-			[](Handle<RigidBody> rb, vec3 val)
+		BIND_START("idk.Bindings::RigidBodyAddForce",  void, Handle<RigidBody> rb, vec3 val)
 		{
 			rb->AddForce(val);
-		}));
+		}BIND_END();
 		
 		// Collider
-		Bind("idk.Bindings::ColliderSetEnabled", decay(
-			[](Handle<Collider> col, bool val)
+		BIND_START("idk.Bindings::ColliderSetEnabled",  void, Handle<Collider> col, bool val)
 		{
 			col->enabled = val;
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::ColliderGetEnabled", decay(
-			[](Handle<Collider> col) ->bool
+		BIND_START("idk.Bindings::ColliderGetEnabled", bool, Handle<Collider> col)
 		{
 			return col->enabled;
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::ColliderSetTrigger", decay(
-			[](Handle<Collider> col, bool val)
+		BIND_START("idk.Bindings::ColliderSetTrigger",  void, Handle<Collider> col, bool val)
 		{
 			col->is_trigger = val;
 		}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::ColliderGetTrigger", decay(
-			[](Handle<Collider> col) ->bool
+		BIND_START("idk.Bindings::ColliderGetTrigger", bool, Handle<Collider> col)
 		{
 			return col->is_trigger;
 		}
-		));
+		BIND_END();
 
 		// Animator
-		Bind("idk.Bindings::AnimatorPlay", decay(
-			[](Handle<Animator> animator, MonoString* name)
+		BIND_START("idk.Bindings::AnimatorPlay",  void, Handle<Animator> animator, MonoString* name)
 			{
 				auto s = unbox(name);
 				animator->Play(s.get());
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorCrossFade", decay(
-			[](Handle<Animator> animator, MonoString* name, float time = 0.2f)
+		BIND_START("idk.Bindings::AnimatorCrossFade",  void, Handle<Animator> animator, MonoString* name, float time = 0.2f)
 			{
 				auto s = unbox(name);
 				animator->BlendTo(s.get(), time);
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorPause", decay(
-			[](Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorPause",  void, Handle<Animator> animator)
 			{
 				animator->Pause();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorResume", decay(
-			[](Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorResume",  void, Handle<Animator> animator)
 			{
 				animator->Resume();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorStop", decay(
-			[](Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorStop",  void, Handle<Animator> animator)
 			{
 				animator->Stop();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorDefaultStateName", decay(
-			[](Handle<Animator> animator) ->MonoString* 
+		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator)
 			{
 				return mono_string_new(mono_domain_get(), animator->DefaultStateName().c_str());
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorCurrentStateName", decay(
-			[](Handle<Animator> animator) ->MonoString* 
+		BIND_START("idk.Bindings::AnimatorCurrentStateName", MonoString*, Handle<Animator> animator)
 			{
 				return mono_string_new(mono_domain_get(), animator->CurrentStateName().c_str());
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorBlendStateName", decay(
-			[](Handle<Animator> animator) ->MonoString*
+		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator)
 			{
 				return mono_string_new(mono_domain_get(), animator->BlendStateName().c_str());
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorIsPlaying", decay(
-			[](Handle<Animator> animator) -> bool
+		BIND_START("idk.Bindings::AnimatorIsPlaying",  bool, Handle<Animator> animator)
 			{
 				return animator->IsPlaying();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorIsBlending", decay(
-			[](Handle<Animator> animator) -> bool
+		BIND_START("idk.Bindings::AnimatorIsBlending",  bool, Handle<Animator> animator)
 			{
 				return animator->IsBlending();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorHasCurrAnimEnded", decay(
-			[](Handle<Animator> animator) -> bool
+		BIND_START("idk.Bindings::AnimatorHasCurrAnimEnded",  bool, Handle<Animator> animator)
 			{
 				return animator->HasCurrAnimEnded();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::AnimatorHasState", decay(
-			[](Handle<Animator> animator, MonoString* name) -> bool
+		BIND_START("idk.Bindings::AnimatorHasState",  bool, Handle<Animator> animator, MonoString* name)
 			{
 				auto s = unbox(name);
 				auto ret_val = animator->HasState(s.get());
 				return ret_val;
 			}
-		));
+		BIND_END();
 
         // Renderer
-        Bind("idk.Bindings::RendererGetMaterialInstance", decay(
-            [](GenericHandle renderer) -> Guid
+        BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
             switch (renderer.type)
             {
             case index_in_tuple_v<MeshRenderer, Handleables>: return handle_cast<MeshRenderer>(renderer)->material_instance.guid;
-            case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->material_instance.guid;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->material_instance.guid;
             default: return {};
             }
         }
-        ));
+        BIND_END();
 
         // Resource
 #define VALIDATE_RESOURCE(RES) case string_hash(#RES): return Core::GetResourceManager().Validate<RES>(guid);
-        Bind("idk.Bindings::ResourceValidate", decay(
-            [](Guid guid, MonoString* type) -> bool
+        BIND_START("idk.Bindings::ResourceValidate",  bool, Guid guid, MonoString* type)
         {
             // TODO: make validate jumptable...
             auto s = unbox(type);
@@ -513,12 +497,11 @@ namespace idk::mono
             default: return false;
             }
         }
-        ));
+		BIND_END();
 #undef VALIDATE_RESOURCE
 
 #define NAME_OF_RESOURCE(RES) case string_hash(#RES): return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<RES>(guid).Name().data());
-        Bind("idk.Bindings::ResourceGetName", decay(
-            [](Guid guid, MonoString* type) -> MonoString*
+        BIND_START("idk.Bindings::ResourceGetName",  MonoString*, Guid guid, MonoString* type)
         {
             // TODO: make get jumptable...
 			// TODO: research on perfect jumping
@@ -533,161 +516,144 @@ namespace idk::mono
                 default: return mono_string_empty(mono_domain_get());
             }
         }
-        ));
+        BIND_END();
 #undef NAME_OF_RESOURCE
 
 		// Prefab
-		Bind("idk.Bindings::PrefabInstantiate", decay(
-			[](Guid guid) -> uint64_t
+		BIND_START("idk.Bindings::PrefabInstantiate",  uint64_t, Guid guid)
 			{
 				auto res = RscHandle<Prefab>{guid};
 				if (res)
 					return res->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene()).id;
 				return 0;
 			}
-		));
+		BIND_END();
 
         // MaterialInstance
-        Bind("idk.Bindings::MaterialInstanceGetFloat", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name) -> float
+        BIND_START("idk.Bindings::MaterialInstanceGetFloat",  float, RscHandle<MaterialInstance> handle, MonoString* name)
         {
             auto s = unbox(name);
             if (!handle) { return 0; }
             auto res = handle->GetUniform(s.get());
             return res ? std::get<float>(*res) : 0;
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceGetVector2", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec2
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetVector2",  vec2, RscHandle<MaterialInstance> handle, MonoString* name)
         {
 			auto s = unbox(name);
 			if (!handle) { return vec2{}; }
 			auto res = handle->GetUniform(s.get());
             return res ? std::get<vec2>(*res) : vec2(0, 0);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceGetVector3", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec3
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetVector3",  vec3, RscHandle<MaterialInstance> handle, MonoString* name)
         {
 			auto s = unbox(name);
 			if (!handle) { return vec3{}; }
 			auto res = handle->GetUniform(s.get());
             return res ? std::get<vec3>(*res) : vec3(0, 0, 0);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceGetVector4", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name) -> vec4
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetVector4",  vec4, RscHandle<MaterialInstance> handle, MonoString* name)
         {
 			auto s = unbox(name);
 			if (!handle) { return vec4{}; }
 			auto res = handle->GetUniform(s.get());
             return res ? std::get<vec4>(*res) : vec4(0, 0, 0, 0);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceGetTexture", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name) -> Guid
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetTexture",  Guid, RscHandle<MaterialInstance> handle, MonoString* name)
         {
 			auto s = unbox(name);
 			if (!handle) { return Guid{}; }
 			auto res = handle->GetUniform(s.get());
             return res ? std::get<RscHandle<Texture>>(*res).guid : Guid();
         }
-        ));
+		BIND_END();
 
-        Bind("idk.Bindings::MaterialInstanceSetFloat", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name, float value) -> void
+        BIND_START("idk.Bindings::MaterialInstanceSetFloat",  void, RscHandle<MaterialInstance> handle, MonoString* name, float value)
         {
 			auto s = unbox(name);
 			if (!handle)
 				return;
 			handle->SetUniform(s.get(), value);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceSetVector2", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name, vec2 value) -> void
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetVector2",  void, RscHandle<MaterialInstance> handle, MonoString* name, vec2 value)
         {
 			auto s = unbox(name);
 			if (!handle)
 				return;
 			handle->SetUniform(s.get(), value);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceSetVector3", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name, vec3 value) -> void
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetVector3",  void, RscHandle<MaterialInstance> handle, MonoString* name, vec3 value)
         {
 				auto s = unbox(name);
 				if (!handle)
 					return;
 				handle->SetUniform(s.get(), value);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceSetVector4", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name, vec4 value) -> void
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetVector4",  void, RscHandle<MaterialInstance> handle, MonoString* name, vec4 value)
         {
             auto s = unbox(name);
             if (!handle) 
 				return;
             handle->SetUniform(s.get(), value);
         }
-        ));
-        Bind("idk.Bindings::MaterialInstanceSetTexture", decay(
-            [](RscHandle<MaterialInstance> handle, MonoString* name, RscHandle<Texture> tex) -> void
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetTexture",  void, RscHandle<MaterialInstance> handle, MonoString* name, RscHandle<Texture> tex)
         {
 			auto s = unbox(name);
 			if (!handle)
 				return;
 			handle->SetUniform(s.get(), tex);
         }
-        ));
+		BIND_END();
 
 		// Input
-		Bind("idk.Bindings::InputGetKeyDown", decay(
-			[](int code) -> bool
+		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
 					return Core::GetSystem<GamepadSystem>().GetButtonDown(0, s_cast<GamepadButton>(code >> 16));
 				else
 					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
 			}
-		));
-		Bind("idk.Bindings::InputGetKeyUp", decay(
-			[](int code) -> bool
+		BIND_END();
+		BIND_START("idk.Bindings::InputGetKeyUp",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
 					return Core::GetSystem<GamepadSystem>().GetButtonUp(0, s_cast<GamepadButton>(code >> 16));
 				else
 				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
 			}
-		));
-		Bind("idk.Bindings::InputGetKey", decay(
-			[](int code) -> bool
+		BIND_END();
+		BIND_START("idk.Bindings::InputGetKey",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
 					return Core::GetSystem<GamepadSystem>().GetButton(0, s_cast<GamepadButton>(code >> 16));
 				else
 				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::InputGetAxis", decay(
-			[](char code, int axis) -> float
+		BIND_START("idk.Bindings::InputGetAxis",  float, char code, int axis)
 			{
 				return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::TimeGetFixedDelta", decay(
-			[]() -> float
+		BIND_START("idk.Bindings::TimeGetFixedDelta",  float)
 			{
 				return Core::GetDT().count();
 			}
-		));
+		BIND_END();
 
-		Bind("idk.Bindings::TimeGetDelta", decay(
-			[]() -> float
+		BIND_START("idk.Bindings::TimeGetDelta",  float)
 			{
 				return Core::GetRealDT().count();
 			}
-		));
+		BIND_END();
 	}
 }

@@ -828,6 +828,8 @@
       <Filter>particle</Filter>
     </ClInclude>
     <ClInclude Include="util\easing.h" />
+    <ClInclude Include="script\MonoException.h" />
+    <ClInclude Include="core\NullHandleException.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1204,6 +1206,7 @@
       <Filter>script</Filter>
     </ClCompile>
     <ClCompile Include="util\easing.cpp" />
+    <ClCompile Include="core\NullHandleException.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
