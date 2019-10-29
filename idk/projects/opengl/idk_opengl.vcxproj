@@ -181,6 +181,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSData.h" />
+    <ClInclude Include="resource\OpenGLCubeMapLoader.h" />
     <ClInclude Include="resource\OpenGLRenderTargetLoader.h" />
     <ClInclude Include="PixelData.h" />
     <ClInclude Include="program\ProgramFactory.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="resource\OpenGLCubemap.h" />
     <ClInclude Include="resource\OpenGLCubemapFactory.h" />
     <ClInclude Include="resource\OpenGLTextureFactory.h" />
+    <ClInclude Include="resource\OpenGLTextureLoader.h" />
     <ClInclude Include="system\FrameBufferManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="program\GLSLLoader.h" />
@@ -210,7 +212,9 @@
     <ClCompile Include="resource\FrameBufferFactory.cpp" />
     <ClCompile Include="resource\OpenGLCubemap.cpp" />
     <ClCompile Include="resource\OpenGLCubemapFactory.cpp" />
+    <ClCompile Include="resource\OpenGLCubeMapLoader.cpp" />
     <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
+    <ClCompile Include="resource\OpenGLTextureLoader.cpp" />
     <ClCompile Include="system\FrameBufferManager.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>

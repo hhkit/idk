@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <loading/OpenGLTextureLoader.h>
+#include <opengl/resource/OpenGLTextureLoader.h>
 #include <gfx/GraphicsSystem.h>
 #include <res/MetaBundle.h>
 //Dep

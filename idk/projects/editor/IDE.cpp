@@ -34,8 +34,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
-#include <loading/OpenGLCubeMapLoader.h>
-#include <loading/OpenGLTextureLoader.h>
+#include <opengl/resource/OpenGLCubeMapLoader.h>
+#include <opengl/resource/OpenGLTextureLoader.h>
 
 // editor setup
 #include <gfx/RenderTarget.h>
