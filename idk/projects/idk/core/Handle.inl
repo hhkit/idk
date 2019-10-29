@@ -2,7 +2,7 @@
 #pragma once
 #include "Handle.h"
 #include "GameState.h"
-
+#include <core/NullHandleException.h>
 namespace idk
 {
 	template<typename T>
@@ -45,7 +45,10 @@ namespace idk
 	template<typename T>
 	T* Handle<T>::operator->() const
 	{
-		return GameState::GetGameState().GetObject(*this);
+		auto retval = GameState::GetGameState().GetObject(*this);
+		if (!retval)
+			throw NullHandleException{*this};
+		return retval;
 	}
 
 	template <typename T>

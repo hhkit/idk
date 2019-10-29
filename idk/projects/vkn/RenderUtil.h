@@ -15,7 +15,7 @@ namespace idk::vkn
 {
 	VulkanView& View();
 	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size);
-	struct CubemapConvoluter
+	struct CubemapRenderer
 	{
 		PipelineManager pipeline_manager;
 		VulkanPipeline* pipeline;
@@ -40,7 +40,13 @@ namespace idk::vkn
 		RenderObject ro;
 		shared_ptr< pipeline_config> config_;
 
-		void Init();
+		void Init(
+			RscHandle<ShaderProgram> vert = {}, 
+			RscHandle<ShaderProgram> frag = {}, 
+			RscHandle<ShaderProgram> geom = {},
+			pipeline_config* pipline_conf = nullptr,
+			RscHandle<Mesh> mesh = {}
+			);
 		struct UniqueVknFrameBuffer
 		{
 			std::optional<RscHandle<VknFrameBuffer>> frame_buffer{};
@@ -64,13 +70,15 @@ namespace idk::vkn
 		hash_table   <RscHandle<CubeMap>,RscHandle<VknFrameBuffer>> unused;
 		RscHandle<VknFrameBuffer> NewFrameBuffer(RscHandle<CubeMap> dst);
 		void BeginQueue(UboManager& ubo_manager,std::optional<vk::Fence> fence);
+		void QueueSkyBox(UboManager& ubo_manager, std::optional<vk::Fence> fence, RscHandle<CubeMap> src, const mat4& m4);
 		//Returns false when it failes to queue the new instruction because the queue is full.
 		//End this queue with ProcessQueue before beginning again.
 		void QueueConvoluteCubeMap(RscHandle<CubeMap> src, RscHandle<CubeMap> dst);
 		void ProcessQueue(vk::CommandBuffer cmd_buffer);
+		void ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos = { 0,0 }, const ivec2& vp_size = {1,1});
 
 		void ResetRsc();
 
-		CubemapConvoluter():ds_manager{View()}{}
+		CubemapRenderer():ds_manager{View()}{}
 	};
 }
