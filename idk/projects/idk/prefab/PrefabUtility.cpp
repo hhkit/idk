@@ -323,8 +323,11 @@ namespace idk
             stack.pop_back();
             {
                 size_t i = nodes[curr_par].size();
-                while (i--) // add in reverse order because we take elems from back
-                    stack += nodes[curr_par][i];
+				decltype(stack) reversed;
+				reversed.reserve(i);
+				while (i--) // add in reverse order because we take elems from back
+					reversed += nodes[curr_par][i];
+				stack = reversed + stack;
             }
             game_objects += curr_par;
 

@@ -7,8 +7,6 @@ namespace idk
 	{
 		curr_state.is_playing = true;
 
-		// cap at 1.0f
-		curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
 		if (curr_state.name == animation_name)
 			return;
 
@@ -16,6 +14,8 @@ namespace idk
 		curr_state.name = animation_name;
 
 		// weight = default_weight;
+		// cap at 1.0f
+		curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
 		blend_state = AnimationLayerState{};
 		blending_before_pause = false;
 	}
@@ -55,17 +55,25 @@ namespace idk
 		}
 
 		// If i'm already blending and BlendTo was not called this frame, the blending was interuppted
-		if (blend_state.is_playing && !blend_this_frame)
+		if (blend_state.is_playing)
 		{
-			blend_interrupt = true;
-			blend_source = prev_poses;
+			if (!blend_this_frame)
+			{
+				blend_interrupt = true;
+				blend_source = prev_poses;
+			}
 		}
-			
+		// If i'm not blending and the current animation is the same as the requested blend state, we do nothing. 
+		else if (curr_state.name == anim_name)
+			return;
+
 		blend_state.name = anim_name;
 		blend_state.normalized_time = 0.0f;
 		blend_state.is_playing = true;
 		blend_this_frame = true;
 		blend_duration = time;
+			
+		
 	}
 
 	bool AnimationLayer::IsPlaying() const
