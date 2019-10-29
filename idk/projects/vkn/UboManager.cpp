@@ -127,8 +127,15 @@ namespace idk::vkn
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) {
 		Align();
 		uint32_t result = s_cast<uint32_t>(data.size()) - InitialOffset(data.data(),alignment);
-		len = SizeAlignmentOffset(len, sz_alignment);
-		data.append(r_cast<const char*>(data_), len);
+		auto aligned_len = SizeAlignmentOffset(len, sz_alignment);
+		//manually add to back.
+		//get the destination start
+		auto dst = data.data()+ data.size();
+		//make sure we can accomodate
+		data.resize(data.size() + aligned_len);
+		//copy to buffer.
+		memcpy_s(dst, aligned_len, data_, len);
+		//data.append(r_cast<const char*>(data_), len );
 		return result;
 	}
 
