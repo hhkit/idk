@@ -1,6 +1,7 @@
 #pragma once
 
 #include <util/easing.h>
+#include <util/enum.h>
 
 namespace idk
 {

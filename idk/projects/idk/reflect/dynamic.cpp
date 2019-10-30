@@ -13,10 +13,19 @@ namespace idk::reflect
 
 	dynamic& dynamic::operator=(const dynamic& rhs)
 	{
-		if (type == rhs.type)
-			type._context->copy_assign(_ptr->get(), rhs._ptr->get());
-		else
-			type._context->variant_assign(_ptr->get(), rhs.type._context->get_mega_variant(rhs._ptr->get()));
+        if (type == rhs.type)
+            type._context->copy_assign(_ptr->get(), rhs._ptr->get());
+        else if (rhs.type._context->in_mega_variant)
+            type._context->variant_assign(_ptr->get(), rhs.type._context->get_mega_variant(rhs._ptr->get()));
+        else if (type._context->in_mega_variant)
+        {
+            auto val = copy();
+            auto mega_var = type._context->get_mega_variant(val._ptr->get());
+            type._context->variant_assign(mega_var, rhs._ptr->get());
+            type._context->variant_assign(_ptr->get(), mega_var);
+        }
+        else
+            LOG_ERROR_TO(LogPool::SYS, "Dynamic assignment failed. (%s = %s)", string(type.name()).c_str(), string(rhs.type.name()).c_str());
 		return *this;
 	}
 
@@ -111,6 +120,11 @@ namespace idk::reflect
 	{
 		return type._context->get_variant_value(_ptr->get());
 	}
+
+    void dynamic::set_variant_value(const dynamic& val) const
+    {
+        type._context->set_variant_value(_ptr->get(), val);
+    }
 
     void dynamic::on_parse() const
     {

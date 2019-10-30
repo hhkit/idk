@@ -1,7 +1,9 @@
 #pragma once
 #include <idk.h>
+#include <anim/AnimationState.h>
+#include <math/matrix_decomposition.h>
 #include <util/enum.h>
-#include "AnimationState.h"
+
 namespace idk
 {
 	ENUM (AnimLayerBlend, char,

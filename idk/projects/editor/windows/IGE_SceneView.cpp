@@ -20,6 +20,7 @@ of the editor.
 #include <editor/DragDropTypes.h>
 #include <IDE.h>
 #include <app/Application.h>
+#include <scene/SceneManager.h>
 #include <core/GameObject.h>
 #include <common/Transform.h> //transform
 #include <gfx/MeshRenderer.h>

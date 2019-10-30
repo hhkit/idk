@@ -30,6 +30,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
+#include <scene/SceneManager.h>
+
 // resource importing
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>

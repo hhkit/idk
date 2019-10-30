@@ -42,11 +42,13 @@ namespace idk::reflect::detail
 		const bool is_container;
         const bool is_enum_type;
         const bool is_basic_serializable;
+        const bool in_mega_variant;
 
 		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash,
-                           bool is_container, bool is_enum_type, bool is_basic_serializable)
+                           bool is_container, bool is_enum_type, bool is_basic_serializable, bool in_mega_variant)
             : name{ name }, table{ table }, ctors{ ctors }, hash{ hash },
-              is_container{ is_container }, is_enum_type{ is_enum_type }, is_basic_serializable{ is_basic_serializable }
+              is_container{ is_container }, is_enum_type{ is_enum_type }, is_basic_serializable{ is_basic_serializable },
+              in_mega_variant{ in_mega_variant }
 		{}
 		virtual ~typed_context_base() = default;
 
@@ -56,6 +58,7 @@ namespace idk::reflect::detail
 
 		virtual void copy_assign(void* lhs, const void* rhs) const = 0;
 		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const = 0;
+		virtual void variant_assign(ReflectedTypes& lhs, const void* rhs) const = 0;
 		virtual ReflectedTypes get_mega_variant(void* obj) const = 0;
 		virtual dynamic default_construct() const = 0;
 		virtual dynamic copy_construct(void* obj) const = 0;
@@ -65,6 +68,7 @@ namespace idk::reflect::detail
 		virtual enum_value to_enum_value(void* obj) const = 0;
 		virtual vector<dynamic> unpack(void* obj) const = 0;
 		virtual dynamic get_variant_value(void* obj) const = 0;
+		virtual void set_variant_value(void* obj, const dynamic& val) const = 0;
         virtual void on_parse(void* obj) const = 0;
 
 		template<typename... Ts>
@@ -102,19 +106,25 @@ namespace idk::reflect::detail
     static void _assign(T1& lhs, T2& rhs)
     {
         (lhs); (rhs);
-        if constexpr (std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>)
-        {
+        if constexpr (std::is_arithmetic_v<std::decay_t<T1>> && std::is_arithmetic_v<std::decay_t<T2>>)
             lhs = static_cast<T1>(rhs);
-        }
         else if constexpr (std::is_convertible_v<T2, T1>)
         {
             if constexpr (std::is_assignable_v<T1, T2>)
                 lhs = rhs;
-            else
+            else if constexpr (std::is_assignable_v<T1, T1>)
                 lhs = T1(rhs);
+            else
+            {
+                LOG_CRASH_TO(LogPool::SYS, "Cannot assign lhs = rhs");
+                throw;
+            }
         }
         else
-            throw "Cannot assign lhs = rhs";
+        {
+            LOG_CRASH_TO(LogPool::SYS, "Cannot assign lhs = rhs");
+            throw;
+        }
     }
 
 	template<typename T>
@@ -122,7 +132,10 @@ namespace idk::reflect::detail
 	{
 		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors)
 			: typed_context_base(name, table, ctors, typehash<T>(),
-                                 is_sequential_container_v<T> || is_associative_container_v<T>, is_macro_enum_v<T>, is_basic_serializable_v<T>)
+                                 is_sequential_container_v<T> || is_associative_container_v<T>,
+                                 is_macro_enum_v<T>,
+                                 is_basic_serializable_v<T>,
+                                 is_variant_member_v<std::decay_t<T>, ReflectedTypes>)
 		{}
 		typed_context()
 			: typed_context(
@@ -158,12 +171,18 @@ namespace idk::reflect::detail
 
 		virtual void variant_assign(void* lhs, const ReflectedTypes& rhs) const override
 		{
-			std::visit([lhs](auto&& arg)
+			std::visit([&lhs](auto&& arg)
 			{
                 _assign(*static_cast<T*>(lhs), arg);
 			}, rhs);
 		}
-
+        virtual void variant_assign(ReflectedTypes& lhs, const void* rhs) const override
+        {
+            std::visit([&rhs](auto&& arg)
+            {
+                _assign(arg, *static_cast<const T*>(rhs));
+            }, lhs);
+        }
 		virtual ReflectedTypes get_mega_variant(void* obj) const override
 		{
 			obj;
@@ -250,22 +269,41 @@ namespace idk::reflect::detail
 		template<typename... Ts>
 		dynamic get_variant_value(variant<Ts...>& var) const
 		{
-#define VARIANT_INDEX(I) case I: return std::get<I>(var);
-#define VARIANT_CASE(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VARIANT_INDEX, __VA_ARGS__)) default: throw "Unhandled case?"; } }
-					 VARIANT_CASE(1, 0)
-				else VARIANT_CASE(2, 1, 0)
-				else VARIANT_CASE(3, 2, 1, 0)
-				else VARIANT_CASE(4, 3, 2, 1, 0)
-				else VARIANT_CASE(5, 4, 3, 2, 1, 0)
-				else VARIANT_CASE(6, 5, 4, 3, 2, 1, 0)
-				else VARIANT_CASE(7, 6, 5, 4, 3, 2, 1, 0)
-				else VARIANT_CASE(8, 7, 6, 5, 4, 3, 2, 1, 0)
-				else VARIANT_CASE(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
-				else VARIANT_CASE(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
-				else throw "Unhandled case?";
-#undef VISIT_INDEX
+#define VARIANT_CASE(I) case I: return std::get<I>(var);
+#define VARIANT_SWITCH(N, ...) if constexpr (sizeof...(Ts) == N) { switch (var.index()) { IDENTITY(FOREACH(VARIANT_CASE, __VA_ARGS__)) default: throw "Unhandled case?"; } }
+                 VARIANT_SWITCH(1, 0)
+            else VARIANT_SWITCH(2, 1, 0)
+            else VARIANT_SWITCH(3, 2, 1, 0)
+            else VARIANT_SWITCH(4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(7, 6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(8, 7, 6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+            else throw "Unhandled case?";
+#undef VARIANT_SWITCH
 #undef VARIANT_CASE
 		}
+        template<typename... Ts>
+        void set_variant_value(variant<Ts...>& var, const dynamic& val) const
+        {
+#define VARIANT_CASE(I) case typehash<std::variant_alternative_t<I, variant<Ts...>>>(): var = val.get<std::variant_alternative_t<I, variant<Ts...>>>(); return;
+#define VARIANT_SWITCH(N, ...) if constexpr (sizeof...(Ts) == N) { switch (val.type.hash()) { IDENTITY(FOREACH(VARIANT_CASE, __VA_ARGS__)) default: throw "Unhandled case?"; } }
+                 VARIANT_SWITCH(1, 0)
+            else VARIANT_SWITCH(2, 1, 0)
+            else VARIANT_SWITCH(3, 2, 1, 0)
+            else VARIANT_SWITCH(4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(7, 6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(8, 7, 6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+            else VARIANT_SWITCH(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+            else throw "Unhandled case?";
+#undef VARIANT_SWITCH
+#undef VARIANT_CASE
+        }
 
 		virtual dynamic get_variant_value(void* obj) const override
 		{
@@ -275,6 +313,14 @@ namespace idk::reflect::detail
 			else
 				throw "not a variant!";
 		}
+        virtual void set_variant_value(void* obj, const dynamic& val) const override
+        {
+            (obj); (val);
+            if constexpr (is_template_v<T, std::variant>)
+                set_variant_value(*static_cast<T*>(obj), val);
+            else
+                throw "not a variant!";
+        }
 
         virtual void on_parse(void* obj) const override
         {

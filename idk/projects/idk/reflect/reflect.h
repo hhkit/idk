@@ -159,6 +159,8 @@ namespace idk::reflect
 
 		// if this is a variant, gets the held variant value. check using type.is_template<std::variant>()
 		dynamic get_variant_value() const;
+        // if this is a variant, sets the held variant value. check using type.is_template<std::variant>()
+        void set_variant_value(const dynamic& val) const;
 
         // call on_parse if it exists. meant for serializers.
         void on_parse() const;

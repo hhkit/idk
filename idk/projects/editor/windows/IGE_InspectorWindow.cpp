@@ -1101,7 +1101,6 @@ namespace idk {
 				editor.RefreshSelectedMatrix();
 		}
 	}
-	static void DoNothing() {}
 
 
     bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)

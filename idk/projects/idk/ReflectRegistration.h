@@ -395,10 +395,6 @@ REFLECT_VARS(skeleton, animation_table, layer_table, layers)
 REFLECT_END()
 
 // Particle System
-REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
-REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::MainModule, "MainModule")
 REFLECT_VARS(duration, looping, prewarm, max_particles,
              start_delay, start_lifetime, start_speed, start_size, start_rotation, start_color,
@@ -437,6 +433,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::RendererModule, "RendererModule")
 REFLECT_VARS(enabled, material)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
+REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
 REFLECT_END()
 
 

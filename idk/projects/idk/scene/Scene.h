@@ -31,7 +31,7 @@ namespace idk
 	{
 	public:
 		class iterator;
-		Scene(unsigned char index = 0);
+		explicit Scene(unsigned char index = 0);
 
 		Handle<GameObject> CreateGameObject(const Handle<GameObject>&);
 		Handle<GameObject> CreateGameObject();
