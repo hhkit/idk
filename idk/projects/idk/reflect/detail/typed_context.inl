@@ -36,6 +36,7 @@ namespace idk::reflect::detail
 	struct typed_context_base
 	{
 		const string_view name;
+		const string_view fully_qualified_name;
 		const detail::table& table;
 		const span<constructor_entry_base* const> ctors;
 		const size_t hash;
@@ -44,9 +45,9 @@ namespace idk::reflect::detail
         const bool is_basic_serializable;
         const bool in_mega_variant;
 
-		typed_context_base(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash,
+		typed_context_base(string_view name, string_view fully_qualified_name, const detail::table& table, span<constructor_entry_base* const> ctors, size_t hash,
                            bool is_container, bool is_enum_type, bool is_basic_serializable, bool in_mega_variant)
-            : name{ name }, table{ table }, ctors{ ctors }, hash{ hash },
+            : name{ name }, fully_qualified_name{ fully_qualified_name }, table{ table }, ctors{ ctors }, hash{ hash },
               is_container{ is_container }, is_enum_type{ is_enum_type }, is_basic_serializable{ is_basic_serializable },
               in_mega_variant{ in_mega_variant }
 		{}
@@ -131,7 +132,7 @@ namespace idk::reflect::detail
 	struct typed_context : typed_context_base
 	{
 		typed_context(string_view name, const detail::table& table, span<constructor_entry_base* const> ctors)
-			: typed_context_base(name, table, ctors, typehash<T>(),
+			: typed_context_base(name, fully_qualified_nameof<T>(), table, ctors, typehash<T>(),
                                  is_sequential_container_v<T> || is_associative_container_v<T>,
                                  is_macro_enum_v<T>,
                                  is_basic_serializable_v<T>,

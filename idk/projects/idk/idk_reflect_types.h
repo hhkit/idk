@@ -61,9 +61,6 @@ namespace idk::reflect
 		, Handle<GameObject>
 		, Guid
 
-		// projects
-        , array<string, 32>
-
 		// graphics
 		, RscHandle<Mesh>
 		, RscHandle<Material>

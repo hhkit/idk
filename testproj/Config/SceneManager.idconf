@@ -1,2 +1,2 @@
-_active_scene: !<Scene> {guid: 969bfb43-aa71-4145-83c2-4acaee53f2c7}
-_startup_scene: !<Scene> {guid: 00000000-0000-0000-0000-000000000000}
+_active_scene: {guid: 969bfb43-aa71-4145-83c2-4acaee53f2c7}
+_startup_scene: {guid: 00000000-0000-0000-0000-000000000000}

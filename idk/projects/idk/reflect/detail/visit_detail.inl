@@ -12,8 +12,30 @@ namespace idk::reflect::detail
 	void visit(void* obj, type type, Visitor&& visitor, int& depth, int& last_depth)
 	{
 		const table& table = type._context->table;
-		if (table.m_Count == 0)
-			return;
+        if (table.m_Count == 0)
+        {
+            if (!type.is_basic_serializable() && type.is_container())
+            {
+                auto container = dynamic(type, obj).to_container();
+                if (container.size() == 0)
+                    return;
+                if (container.value_type.is_template<std::pair>()) // associative
+                {
+                    for (auto elem : container)
+                    {
+                        auto pair = elem.unpack();
+                        visit_key_value(std::move(pair[0]), std::move(pair[1]), std::forward<Visitor>(visitor), depth, last_depth);
+                    }
+                }
+                else
+                {
+                    size_t i = 0;
+                    for (auto elem : container) // note: i++ -> rvalue
+                        visit_key_value(i++, std::move(elem), std::forward<Visitor>(visitor), depth, last_depth);
+                }
+            }
+            return;
+        }
 
 		// adapted from EnumRecursive in properties.h#820
 		for (size_t i = 0; i < table.m_Count; ++i)
