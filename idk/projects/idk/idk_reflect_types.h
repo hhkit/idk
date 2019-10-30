@@ -90,8 +90,6 @@ namespace idk::reflect
 		, hash_table<string, AnimationState>
 		, hash_table<string, size_t>
 		, vector<AnimationLayer>
-		, std::array<bool, 100>
-		, std::array<string, 2>
 		, vector<mat4>
 		
         // particle system
