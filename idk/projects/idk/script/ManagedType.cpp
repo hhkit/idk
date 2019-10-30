@@ -57,6 +57,15 @@ namespace idk::mono
 
 		return std::nullopt;
 	}
+
+	monadic::result<ManagedThunk, std::nullopt_t> ManagedType::GetThunk(string_view method_name, int param_count) const
+	{
+		auto itr = thunks.find(string{ method_name });
+		if (itr != thunks.end())
+			return itr->second;
+		return std::nullopt;
+	}
+
 	MonoMethod* ManagedType::FindMethod(string_view method_name, int param_count) const
 	{
 		auto find_class = type;

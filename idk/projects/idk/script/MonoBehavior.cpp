@@ -35,9 +35,9 @@ namespace idk::mono
 		if (!_awake && _obj)
 		{
 			_awake = true;
-			auto method = _obj.Type()->GetMethod("Awake");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
+			auto method = _obj.Type()->GetThunk("Awake");
+			if (method)
+				method->Invoke(_obj.Raw());
 		}
 	}
 
@@ -46,9 +46,9 @@ namespace idk::mono
 		if (!_started && _obj)
 		{
 			_started = true;
-			auto method = _obj.Type()->GetMethod("Start");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
+			auto method = _obj.Type()->GetThunk("Start");
+			if (method)
+				method->Invoke(_obj.Raw());
 		}
 	}
 
@@ -56,9 +56,9 @@ namespace idk::mono
 	{
 		if (enabled && _obj)
 		{
-			auto method = _obj.Type()->GetMethod("FixedUpdate");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
+			auto method = _obj.Type()->GetThunk("FixedUpdate");
+			if (method)
+				method->Invoke(_obj.Raw());
 		}
 	}
 
@@ -66,9 +66,9 @@ namespace idk::mono
 	{
 		if (enabled && _obj)
 		{
-			auto method = _obj.Type()->GetMethod("Update");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
+			auto method = _obj.Type()->GetThunk("Update");
+			if (method)
+				method->Invoke(_obj.Raw());
 		}
 	}
 

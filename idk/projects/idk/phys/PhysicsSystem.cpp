@@ -325,13 +325,19 @@ namespace idk
 					for (auto& mb : lhs->GetGameObject()->GetComponents<mono::Behavior>())
 					{
 						auto obj_type = mb->GetObject().Type();
-						mono::Invoke(obj_type->GetMethod(trigger_method, 1), mb->GetObject(), rhs.id);
+						IDK_ASSERT(obj_type);
+						auto thunk = obj_type->GetThunk(trigger_method, 1);
+						if (thunk)
+							thunk->Invoke(mb->GetObject(), lhs.id);
 					}
 					// fire rhs events
 					for (auto& mb : rhs->GetGameObject()->GetComponents<mono::Behavior>())
 					{
 						auto obj_type = mb->GetObject().Type();
-						mono::Invoke(obj_type->GetMethod(trigger_method, 1), mb->GetObject(), lhs.id);
+						IDK_ASSERT(obj_type);
+						auto thunk = obj_type->GetThunk(trigger_method, 1);
+						if (thunk)
+							thunk->Invoke(mb->GetObject(), lhs.id);
 					}
 				}
 				else
