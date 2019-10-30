@@ -830,6 +830,9 @@
     <ClInclude Include="util\easing.h" />
     <ClInclude Include="script\MonoException.h" />
     <ClInclude Include="core\NullHandleException.h" />
+    <ClInclude Include="math\ritters.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1207,6 +1210,9 @@
     </ClCompile>
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="core\NullHandleException.cpp" />
+    <ClCompile Include="math\ritters.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
