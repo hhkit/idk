@@ -7,6 +7,11 @@
 
 #include <core/Handle.h>
 
+namespace idk
+{
+	struct ManagedCollision;
+}
+
 namespace idk::mono
 {
 	class Behavior;
@@ -24,4 +29,5 @@ namespace idk::mono
 	MonoObject* box(const ManagedObject& obj);
 	MonoObject* box(MonoObject* obj);
 	MonoObject* box(vec3& obj);
+	MonoObject* box(ManagedCollision& obj);
 }

@@ -23,4 +23,10 @@ namespace idk::mono
 			Core::GetSystem<ScriptSystem>().Environment().Type("Vector3")->Raw(), // todo: get boxed thing
 			&obj);
 	}
+	MonoObject* box(ManagedCollision& obj)
+	{
+		return mono_value_box(mono_domain_get(),
+			Core::GetSystem<ScriptSystem>().Environment().Type("Collision")->Raw(), // todo: get boxed thing
+			&obj);
+	}
 }

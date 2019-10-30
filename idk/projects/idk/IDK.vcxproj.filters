@@ -833,6 +833,9 @@
     <ClInclude Include="math\ritters.h">
       <Filter>math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collision_detection\ManagedCollision.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

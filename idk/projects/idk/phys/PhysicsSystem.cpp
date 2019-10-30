@@ -2,19 +2,19 @@
 #include "PhysicsSystem.h"
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <common/Layer.h>
 #include <gfx/DebugRenderer.h>
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
+#include <phys/collision_detection/ManagedCollision.h>
 
 #include <script/MonoBehavior.h>
 #include <script/MonoFunctionInvoker.h>
 
 #include <math/matrix_decomposition.h>
-#include <common/Layer.h>
-#include <iostream>
 
 namespace idk
 {
@@ -361,6 +361,46 @@ namespace idk
 				{
 					// fire collision
 					auto col = all_collisions.find(CollisionPair{ lhs, rhs });
+					IDK_ASSERT(col != all_collisions.end());
+
+
+					auto& result = col->second;
+					{
+						ManagedCollision right_collision
+						{
+							.collider_id = rhs.id, 
+							.normal = result.normal_of_collision, 
+							.contact_pt = result.point_of_collision
+						};
+
+						for (auto& mb : lhs->GetGameObject()->GetComponents<mono::Behavior>())
+						{
+							auto obj_type = mb->GetObject().Type();
+							IDK_ASSERT(obj_type);
+							auto thunk = obj_type->GetThunk(collision_method, 1);
+							if (thunk)
+								thunk->Invoke(mb->GetObject(), right_collision);
+						}
+					}
+
+					// fire rhs events
+					{
+						ManagedCollision left_collision
+						{
+							.collider_id = lhs.id,
+							.normal      = -result.normal_of_collision,
+							.contact_pt  = result.point_of_collision
+						};
+
+						for (auto& mb : rhs->GetGameObject()->GetComponents<mono::Behavior>())
+						{
+							auto obj_type = mb->GetObject().Type();
+							IDK_ASSERT(obj_type);
+							auto thunk = obj_type->GetThunk(collision_method, 1);
+							if (thunk)
+								thunk->Invoke(mb->GetObject(), left_collision);
+						}
+					}
 				}
 			}
 
