@@ -31,10 +31,56 @@ namespace idk
 		out = object_buffer.at(curr_draw_buffer).skinned_mesh_render;
 	}
 
+	void GraphicsSystem::PrepareSkeletonTransforms(const vector<Handle<Animator>>& animators, vector<SkeletonTransforms>& buffer_out, hash_table<Handle<Animator>, size_t>& index_table_out)
+	{
+		for (auto& animator : animators)
+		{
+			PrepareSkeletonTransform(*animator, buffer_out, index_table_out);
+		}
+	}
+
+	void GraphicsSystem::PrepareSkeletonTransform(const Animator& animator, vector<SkeletonTransforms>& buffer_out, hash_table<Handle<Animator>, size_t>& index_table_out)
+	{
+		index_table_out.emplace(animator.GetHandle(), buffer_out.size());
+		buffer_out.emplace_back(
+			SkeletonTransforms{ std::move(animator.BoneTransforms()) } // generate this from the skeletons
+			//SkeletonTransforms{ vector<mat4>{3} }
+		);
+	}
+
+	std::optional<AnimatedRenderObject> GraphicsSystem::GetAnimatedRenderObj(const SkinnedMeshRenderer& skinned_mesh_renderer, const hash_table<Handle<Animator>, size_t>& index_table)
+	{
+		if (!skinned_mesh_renderer.IsActiveAndEnabled())
+			return std::nullopt;
+		AnimatedRenderObject ro = skinned_mesh_renderer.GenerateRenderObject();
+		// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
+		const auto parent = skinned_mesh_renderer.GetGameObject()->Parent();
+		const auto animator = parent->GetComponent<Animator>();
+		if (!animator)
+			return std::nullopt;
+		
+		auto itr = index_table.find(animator);
+		if (itr == index_table.end())
+			return std::nullopt;
+
+		ro.skeleton_index = itr->second;
+		ro.config = mesh_render_config;
+		return ro;
+	}
+
+	std::optional<RenderObject> GraphicsSystem::GetRenderObj(const MeshRenderer& skinned_mesh_renderer)
+	{
+		if (!skinned_mesh_renderer.IsActiveAndEnabled())
+			return std::nullopt;
+		auto obj =skinned_mesh_renderer.GenerateRenderObject();
+		obj.config = mesh_render_config;
+		return obj;		
+	}
+
 	size_t GraphicsSystem::AddRenderRequest(CameraData camera, vector<RenderObject> mesh_render, vector<AnimatedRenderObject> skinned_mesh_render, vector<SkeletonTransforms> skeleton_transforms)
 	{
 		//Todo: Add shaders
-		return render_requests.emplace_back(SpecialRenderBuffer{ camera,mesh_render,skinned_mesh_render,skeleton_transforms,false });
+		return render_requests.emplace_back(SpecialRenderBuffer{ camera,std::move(mesh_render),std::move(skinned_mesh_render),std::move(skeleton_transforms),false });
 	}
 
 	bool GraphicsSystem::RenderRequestStatus(size_t index)
@@ -78,31 +124,16 @@ namespace idk
 			result.lights.emplace_back(elem.GenerateLightData());
 		}
 
-		hash_table<Handle<Animator>, unsigned> skeleton_indices;
-        {
-            unsigned i = 0;
-            for (auto& elem : animators)
-            {
-                skeleton_indices.emplace(elem.GetHandle(), i++);
-                result.skeleton_transforms.emplace_back(
-                    SkeletonTransforms{ std::move(elem.BoneTransforms()) } // generate this from the skeletons
-                    //SkeletonTransforms{ vector<mat4>{3} }
-                );
-            }
-        }
+		hash_table<Handle<Animator>, size_t> skeleton_indices;
+
+		for (auto& elem : animators)
+			PrepareSkeletonTransform(elem, result.skeleton_transforms, skeleton_indices);
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
-			if (elem.IsActiveAndEnabled())
-			{
-				AnimatedRenderObject ro = elem.GenerateRenderObject();
-				// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
-				const auto parent = elem.GetGameObject()->Parent();
-				const auto animator = parent->GetComponent<Animator>();
-				ro.skeleton_index = skeleton_indices[animator];
-				ro.config = mesh_render_config;
-				result.skinned_mesh_render.emplace_back(std::move(ro));
-			}
+			auto ro = GetAnimatedRenderObj(elem, skeleton_indices);
+			if (ro)
+				result.skinned_mesh_render.emplace_back(std::move(*ro));
 		}
 
 		for (auto& camera : cameras)
@@ -113,8 +144,11 @@ namespace idk
 		}
 
 		for (auto& elem : mesh_renderers)
-			if (elem.IsActiveAndEnabled())
-				result.mesh_render.emplace_back(elem.GenerateRenderObject()).config = mesh_render_config;
+		{
+			auto obj = GetRenderObj(elem);
+			if(obj)
+				result.mesh_render.emplace_back(std::move(*obj));
+		}
 
 		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];
 		result.renderer_vertex_shaders[VNormalMesh] = renderer_vertex_shaders[VNormalMesh];

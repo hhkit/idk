@@ -20,7 +20,7 @@ namespace idk
 		const AnimationState& GetAnimationState(string_view name) const;
 		// RscHandle<anim::Animation> GetAnimationRsc(string_view name) const;
 
-		const vector<mat4>& BoneTransforms();
+		const vector<mat4>& BoneTransforms()const;
 		
 		// Engine Setters
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);

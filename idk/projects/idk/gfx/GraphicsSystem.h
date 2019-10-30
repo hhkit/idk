@@ -79,6 +79,10 @@ namespace idk
 		void BufferedLightData(vector<LightData>& out);
 		void RenderObjData(vector<RenderObject>& out);
 		void AnimatedRenderObjData(vector<AnimatedRenderObject>& out);
+		void PrepareSkeletonTransforms(const vector<Handle<Animator>>& animators, vector<SkeletonTransforms>& buffer_out, hash_table<Handle<Animator>, size_t>& index_table_out);
+		void PrepareSkeletonTransform(const Animator& animator, vector<SkeletonTransforms>& buffer_out, hash_table<Handle<Animator>,size_t>& index_table_out);
+		std::optional<AnimatedRenderObject> GetAnimatedRenderObj(const SkinnedMeshRenderer& skinned_mesh_renderer, const hash_table<Handle<Animator>, size_t>& index_table);
+		std::optional<RenderObject> GetRenderObj(const MeshRenderer& skinned_mesh_renderer);
 
 		size_t AddRenderRequest(
 			CameraData camera,
