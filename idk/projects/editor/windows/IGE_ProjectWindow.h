@@ -38,9 +38,14 @@ namespace idk
         vector<GenericResourceHandle> selected_assets;
         bool renaming_selected_asset = false;
         bool just_rename = false;
+        float icon_size = 64.0f;
+        ImGuiTextFilter filter;
+
+        void draw_contents(const vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row);
 
         void displayDir(PathHandle dir);
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);
         string unique_new_mount_path(string_view name, string_view ext);
+        string unique_new_mount_path(string_view name, string_view ext, PathHandle dir);
 	};
 }
