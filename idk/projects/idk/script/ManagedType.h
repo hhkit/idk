@@ -3,6 +3,7 @@
 
 #include <mono/jit/jit.h>
 
+#include <ds/result.h>
 #include <script/ManagedThunk.h>
 
 namespace idk::mono
@@ -25,6 +26,7 @@ namespace idk::mono
 		ManagedObject Construct(Args&&...) const;
 		bool CacheThunk(string_view method_name, int param_count = 0);
 		std::variant <ManagedThunk, MonoMethod*, std::nullopt_t> GetMethod(string_view method_name, int param_count = 0) const;
+		opt<ManagedThunk> GetThunk(string_view method_name, int param_count = 0) const;
 	private:
 		MonoClass* type{};
 		hash_table<string, ManagedThunk> thunks;

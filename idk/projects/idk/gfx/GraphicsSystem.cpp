@@ -6,7 +6,8 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
-
+#include <gfx/DebugRenderer.h>
+#include <gfx/Mesh.h>
 //#include <gfx/CameraControls.h>
 
 namespace idk
@@ -146,8 +147,12 @@ namespace idk
 		for (auto& elem : mesh_renderers)
 		{
 			auto obj = GetRenderObj(elem);
-			if(obj)
-				result.mesh_render.emplace_back(std::move(*obj));
+			if (obj)
+			{
+				auto& render_obj = *obj;
+				Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
+				result.mesh_render.emplace_back(std::move(render_obj));
+			}
 		}
 
 		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];

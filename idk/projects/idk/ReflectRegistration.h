@@ -27,22 +27,28 @@
  *    REFLECT_ENUM(ENUM_TYPE, ALIAS) // only for macro-based enum using ENUM
  *
  *	notes:
- *	  - if REFLECT_VARS has errors, it might be due to
- *		the type not being included in idk_reflect_types.h
+ *	  - you don't have to include every type in idk_reflect_type,
+ *      just the ones you need type context during visit. However, you need
+ *      to register the dependent types BEFORE the dependees.
+ *      Eg. AnimationLayer before Animator
+ *    - you can also choose not to include container types in idk_reflect_type.
+ *      however, you will need to register it the same way
+ *      ie. REFLECT_BEGIN(container, name) REFLECT_END()
+ *      if the container type has commas, use using alias = type before registering.
 */
+
+REFLECT_BEGIN(idk::string, "string") REFLECT_END()
+REFLECT_BEGIN(float, "float") REFLECT_END()
+REFLECT_BEGIN(int, "int") REFLECT_END()
 
 /*==========================================================================
  * math
  *========================================================================*/
 
-REFLECT_BEGIN(float, "float") REFLECT_END()
-REFLECT_BEGIN(int, "int") REFLECT_END()
-
 REFLECT_BEGIN(idk::vec2, "vec2")
 REFLECT_CTOR(float, float)
 REFLECT_VARS(x, y)
 REFLECT_END()
-
 
 REFLECT_BEGIN(idk::ivec2, "ivec2")
 REFLECT_CTOR(int, int)
@@ -227,20 +233,25 @@ REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
 REFLECT_VARS(component_name, property_path, component_nth)
 REFLECT_END()
 
-// shader graph:
+// shader graph
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
+
 REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
 REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
 REFLECT_END()
+
 REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
 REFLECT_VARS(node_out, node_in, slot_out, slot_in)
 REFLECT_END()
+
 REFLECT_BEGIN(idk::shadergraph::Node, "ShaderGraphNode")
 REFLECT_VARS(name, guid, position, input_slots, output_slots, control_values)
 REFLECT_END()
+
 REFLECT_BEGIN(idk::shadergraph::Slot, "ShaderGraphSlot")
 REFLECT_VARS(type, value)
 REFLECT_END()
+
 REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
 REFLECT_VARS(name, type, default_value)
 REFLECT_END()
@@ -267,6 +278,10 @@ REFLECT_END()
 REFLECT_BEGIN(idk::LayerManager, "LayerManager")
 REFLECT_END()
 
+using LayerNameArray = std::array<idk::string, 32>;
+REFLECT_BEGIN(LayerNameArray, "LayerNameArray")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::LayerManagerConfig, "LayerManagerConfig")
 REFLECT_VARS(layers)
 REFLECT_END()
@@ -286,6 +301,7 @@ REFLECT_END()
  * components
  *========================================================================*/
 
+// COMMON
 REFLECT_BEGIN(idk::Transform, "Transform")
 REFLECT_VARS(scale, rotation, position, parent)
 REFLECT_END()
@@ -302,6 +318,7 @@ REFLECT_BEGIN(idk::Layer, "Layer")
 REFLECT_VARS(index)
 REFLECT_END()
 
+// AUDIO
 REFLECT_BEGIN(idk::AudioSource, "AudioSource")
 REFLECT_VARS(audio_clip_list, volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
@@ -310,6 +327,7 @@ REFLECT_BEGIN(idk::AudioListener, "AudioListener")
 REFLECT_VARS(is_active)
 REFLECT_END()
 
+// MONO
 REFLECT_BEGIN(idk::mono::Behavior, "MonoBehavior")
 REFLECT_VARS(enabled)
 REFLECT_END()
@@ -324,7 +342,7 @@ REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_fr
 REFLECT_END()
 
 REFLECT_BEGIN(idk::box, "box")
-REFLECT_VARS(center, extents, axes)
+REFLECT_VARS(center, extents, rotation)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::sphere, "sphere")
@@ -364,7 +382,19 @@ REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
-// Animation Enums
+// CAMERA
+REFLECT_BEGIN(idk::Viewport, "Viewport")
+REFLECT_VARS(position, size)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::DontClear, "<Don't Clear>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Camera, "Camera")
+REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, overlay_debug_draw, viewport, render_target)
+REFLECT_END()
+
+// ANIMATION
 REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
 REFLECT_ENUM(idk::AnimDataType, "AnimDataType")
 REFLECT_ENUM(idk::BlendTreeType, "BlendTreeType")
@@ -385,7 +415,6 @@ REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
 REFLECT_VARS(name, default_state, default_weight, bone_mask, blend_type)
 REFLECT_END()
 
-
 REFLECT_BEGIN(idk::Bone, "Bone")
 REFLECT_VARS(_bone_name, _bone_index)
 REFLECT_END()
@@ -394,11 +423,7 @@ REFLECT_BEGIN(idk::Animator, "Animator")
 REFLECT_VARS(skeleton, animation_table, layer_table, layers)
 REFLECT_END()
 
-// Particle System
-REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
-REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
-REFLECT_END()
-
+// PARTICLE SYSTEM
 REFLECT_BEGIN(idk::MainModule, "MainModule")
 REFLECT_VARS(duration, looping, prewarm, max_particles,
              start_delay, start_lifetime, start_speed, start_size, start_rotation, start_color,
@@ -439,15 +464,6 @@ REFLECT_BEGIN(idk::RendererModule, "RendererModule")
 REFLECT_VARS(enabled, material)
 REFLECT_END()
 
-
-REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(position,size)
-REFLECT_END()
-
-
-REFLECT_BEGIN(idk::DontClear, "<Don't Clear>")
-REFLECT_END()
-
-REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, depth,clear,is_orthographic,overlay_debug_draw, viewport,render_target)
+REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
+REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
 REFLECT_END()

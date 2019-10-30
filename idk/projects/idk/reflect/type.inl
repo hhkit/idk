@@ -22,7 +22,7 @@ namespace idk::reflect
 	template<template<typename...> typename Tpl> bool type::is_template() const
 	{
 		constexpr auto sv = fully_qualified_nameof<Tpl>();
-		return name().find(sv) == 0 && name()[sv.size()] == '<';
+		return fully_qualified_name().find(sv) == 0 && fully_qualified_name()[sv.size()] == '<';
 	}
 
 	// Checks if this type is a template type Tpl<typename, auto>
@@ -30,7 +30,7 @@ namespace idk::reflect
 	template<template<typename, auto> typename Tpl> bool type::is_template() const
 	{
 		constexpr auto sv = fully_qualified_nameof<Tpl>();
-		return name().find(sv) == 0 && name()[sv.size()] == '<';
+		return fully_qualified_name().find(sv) == 0 && fully_qualified_name()[sv.size()] == '<';
 	}
 
 	// Checks if this type is a template type Tpl<auto...>
@@ -38,7 +38,7 @@ namespace idk::reflect
 	template<template<auto...> typename Tpl> bool type::is_template() const
 	{
 		constexpr auto sv = fully_qualified_nameof<Tpl>();
-		return name().find(sv) == 0 && name()[sv.size()] == '<';
+		return fully_qualified_name().find(sv) == 0 && fully_qualified_name()[sv.size()] == '<';
 	}
 
 }

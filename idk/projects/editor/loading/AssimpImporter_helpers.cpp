@@ -5,6 +5,7 @@
 #include <deque>
 #include <iostream>
 #include <idk/file/FileSystem.h>
+#include <math/ritters.h>
 
 namespace idk::ai_helpers
 {
@@ -728,15 +729,16 @@ namespace idk::ai_helpers
 #pragma endregion
 
 #pragma region Building Meshes
-	void WriteToVertices(Scene& scene, const  aiMesh* ai_mesh, vector<ai_helpers::Vertex>& vertices, vector<unsigned>& indices)
+	void WriteToVertices(Scene& scene, const  aiMesh* ai_mesh, OpenGLMeshBuffers& mesh_buffers)
 	{
+		
 		// Clear the buffers
-		vertices.clear();
-		indices.clear();
+		mesh_buffers.vertices.clear();
+		mesh_buffers.indices.clear();
 
 		// Allocate space for the mesh data
-		vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
+		mesh_buffers.vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+		mesh_buffers.indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
 
 		const float normalize_scale = scene.file_ext == ".fbx" ? 0.01f : 1.0f;
 
@@ -754,23 +756,23 @@ namespace idk::ai_helpers
 				bi_tangent = ai_mesh->mBitangents[k];
 			}
 
-			vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z } *normalize_scale
-										 ,vec3{ normal.x, normal.y, normal.z }
-										 ,vec2{ text.x, text.y }
-										 ,vec3{ tangent.x, tangent.y, tangent.z }
-										 ,vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z } });
+			mesh_buffers.vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z } *normalize_scale
+														,vec3{ normal.x, normal.y, normal.z }
+														,vec2{ text.x, text.y }
+														,vec3{ tangent.x, tangent.y, tangent.z }
+														,vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z } });
 
 			// updateBounds(vertices.back().pos, min_pos, max_pos);
 		}
-
+		
 		// Initialize indices
 		for (size_t k = 0; k < ai_mesh->mNumFaces; k++)
 		{
 			const aiFace& face = ai_mesh->mFaces[k];
 			assert(face.mNumIndices == 3);
-			indices.push_back(face.mIndices[0]);
-			indices.push_back(face.mIndices[1]);
-			indices.push_back(face.mIndices[2]);
+			mesh_buffers.indices.push_back(face.mIndices[0]);
+			mesh_buffers.indices.push_back(face.mIndices[1]);
+			mesh_buffers.indices.push_back(face.mIndices[2]);
 		}
 
 		// Bone weights
@@ -786,14 +788,15 @@ namespace idk::ai_helpers
 				float weight = ai_bone->mWeights[j].mWeight;
 
 				unsigned vert_id = ai_bone->mWeights[j].mVertexId;
-				vertices[vert_id].AddBoneData(bone_index, weight);
+				mesh_buffers.vertices[vert_id].AddBoneData(bone_index, weight);
 			}
 		}
 	}
-	void BuildMeshOpenGL(Scene& scene, const vector<ai_helpers::Vertex>& vertices, vector<unsigned>& indices, RscHandle<ogl::OpenGLMesh>& mesh_handle)
+	void BuildMeshOpenGL(Scene& scene, OpenGLMeshBuffers& mesh_buffers, RscHandle<ogl::OpenGLMesh>& mesh_handle)
 	{
 		UNREFERENCED_PARAMETER(scene);
 		auto& mesh = *mesh_handle;
+
 		vector<ogl::OpenGLDescriptor> descriptor
 		{
 			ogl::OpenGLDescriptor{vtx::Attrib::Position,		sizeof(Vertex), offsetof(Vertex, pos) },
@@ -808,14 +811,27 @@ namespace idk::ai_helpers
 		mesh.AddBuffer(
 			ogl::OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 			.Bind()
-			.Buffer(vertices.data(), sizeof(Vertex), s_cast<GLsizei>(vertices.size()))
+			.Buffer(mesh_buffers.vertices.data(), sizeof(Vertex), s_cast<GLsizei>(mesh_buffers.vertices.size()))
 		);
 
 		mesh.AddBuffer(
 			ogl::OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
 			.Bind()
-			.Buffer(indices.data(), sizeof(int), s_cast<GLsizei>(indices.size()))
+			.Buffer(mesh_buffers.indices.data(), sizeof(int), s_cast<GLsizei>(mesh_buffers.indices.size()))
 		);
+
+		// Compute ritters here
+		vector<vec3> ritters_buffer;
+		ritters_buffer.resize(mesh_buffers.vertices.size());
+		std::transform(mesh_buffers.vertices.begin(), mesh_buffers.vertices.end(), ritters_buffer.begin(),
+			[](const Vertex& vtx)
+			{
+				return vtx.pos;
+			});
+
+		mesh_buffers.bounding_volume = ritters(span<vec3>{ritters_buffer});
+		mesh.bounding_volume = mesh_buffers.bounding_volume;
+
 	}
 
 	void WriteToBuffers(Scene& scene, const aiMesh* ai_mesh,
@@ -935,6 +951,8 @@ namespace idk::ai_helpers
 
 		mesh_modder.RegisterAttribs(*mesh_handle, attribs);
 		mesh_modder.SetIndexBuffer32(*mesh_handle, index_buffer, s_cast<uint32_t>(indices.size()));
+
+		// Compute ritters here
 	}
 
 #pragma endregion

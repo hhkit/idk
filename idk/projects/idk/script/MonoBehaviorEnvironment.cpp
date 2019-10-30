@@ -18,6 +18,7 @@
 #include <script/ValueUnboxer.h>
 
 #include <core/GameObject.h>
+#include <scene/SceneManager.h>
 
 namespace idk::mono
 {

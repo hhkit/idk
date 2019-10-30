@@ -29,7 +29,7 @@ namespace idk
             { Guid{0x5EACF9F1, 0x9036, 0x40DA, 0xA7356B51E5294654} }, // Plane
             { Guid{0x5D6C8AD5, 0x927D, 0x49F7, 0x9B619AE892A96A3F} }, // FSQ
 		};
-
+		sphere bounding_volume;
 		virtual int GetAttribs() const = 0;
 		virtual ~Mesh() = default;
 	};

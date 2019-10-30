@@ -8,8 +8,9 @@ namespace idk
 	{
 		vec3 center {};
 		vec3 extents{1};	// full extents
-		mat3 axes   {};
+		quat rotation {};
 
+		mat3           axes() const;
 		aabb           bounds() const;
 		vec3           half_extents() const;
 		array<vec3, 8> points() const;

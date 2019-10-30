@@ -4,6 +4,7 @@
 #include <common/Transform.h>
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
+#include <gfx/Mesh.h>
 
 namespace idk
 {
@@ -14,17 +15,22 @@ namespace idk
 
 	RenderObject MeshRenderer::GenerateRenderObject() const
 	{
+		//auto tfm = GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
 		return RenderObject{
-			GetGameObject(),
-			mesh,
-			material_instance,
+			.obj_id = GetGameObject(),
+			.mesh = mesh,
+			.material_instance = material_instance,
 
-			vec3{},
-			GetGameObject()->GetComponent<Transform>()->GlobalMatrix() ,
+			.velocity = vec3{},
+			.transform = GetGameObject()->GetComponent<Transform>()->GlobalMatrix(),
 
-			cast_shadows,
-			receive_shadows,
-			&GetRequiredAttributes()
+			.cast_shadows = cast_shadows,
+			.receive_shadows = receive_shadows,
+
+			//.bounding_volume = mesh->bounding_volume,
+
+			.renderer_req = &GetRequiredAttributes(),
+
 			//{
 			//	{0,vtx::Attrib::Position},
 			//	{1,vtx::Attrib::Normal},
