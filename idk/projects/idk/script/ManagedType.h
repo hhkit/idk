@@ -26,7 +26,7 @@ namespace idk::mono
 		ManagedObject Construct(Args&&...) const;
 		bool CacheThunk(string_view method_name, int param_count = 0);
 		std::variant <ManagedThunk, MonoMethod*, std::nullopt_t> GetMethod(string_view method_name, int param_count = 0) const;
-		monadic::result<ManagedThunk, std::nullopt_t> GetThunk(string_view method_name, int param_count = 0) const;
+		opt<ManagedThunk> GetThunk(string_view method_name, int param_count = 0) const;
 	private:
 		MonoClass* type{};
 		hash_table<string, ManagedThunk> thunks;

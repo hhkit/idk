@@ -324,7 +324,7 @@ REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_fr
 REFLECT_END()
 
 REFLECT_BEGIN(idk::box, "box")
-REFLECT_VARS(center, extents, axes)
+REFLECT_VARS(center, extents, rotation)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::sphere, "sphere")

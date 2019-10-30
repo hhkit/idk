@@ -58,7 +58,7 @@ namespace idk::mono
 		return std::nullopt;
 	}
 
-	monadic::result<ManagedThunk, std::nullopt_t> ManagedType::GetThunk(string_view method_name, int param_count) const
+	opt<ManagedThunk> ManagedType::GetThunk(string_view method_name, int param_count) const
 	{
 		auto itr = thunks.find(string{ method_name });
 		if (itr != thunks.end())
