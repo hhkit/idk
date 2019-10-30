@@ -8,7 +8,10 @@ namespace TestAndSeek
         public int i;
         public void PrintI()
         {
-            System.Console.WriteLine("Eye Eye captain: {0}", i);
+            Debug.Log("Eye Eye captain: " + i);
+            var t = GetComponentInChildren<Test>();
+            if (t)
+                Debug.Log("I can't hear you: " + t.i);
         }
     }
 }

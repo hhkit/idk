@@ -7,6 +7,8 @@
         public static float DegToRad { get { return PI / 180; } }
         public static float RadToDeg { get { return 180 / PI; } }
 
+        public const float Infinity = float.MaxValue;
+
         public static float Abs(float val)
         {
             return val > 0 ? val : -val;

@@ -10,6 +10,7 @@ namespace idk::mono
 		MonoWrapperEnvironment(string_view full_path_to_game_dll);
 		void Init() override;
 		bool IsPrivate(MonoClassField* field);
+		bool IsAbstract(MonoType* type);
 		~MonoWrapperEnvironment();
 	private:
 		MonoMethod* main = nullptr;

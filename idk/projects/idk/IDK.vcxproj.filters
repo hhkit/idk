@@ -1207,6 +1207,7 @@
     </ClCompile>
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="core\NullHandleException.cpp" />
+    <ClCompile Include="common\Layer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -178,9 +178,9 @@ namespace idk::mono
 				find_method(type, "Update");
 				find_method(type, "UpdateCoroutines");
 
-				if (type.Raw());
-				
-				mono_behaviors.emplace(class_name, &type);
+
+				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))
+					mono_behaviors.emplace(class_name, &type);
 			}
 		}
 

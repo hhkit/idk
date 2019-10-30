@@ -116,6 +116,18 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TransformSetParent(ulong id, ulong parent, bool preserve_global);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static GameObject[] TransformGetChildren(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TransformSetForward(ulong id, Vector3 fwd);
+
+        /*
+         * Physics
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ManagedRaycast PhysicsRaycast(Vector3 origin, Vector3 dir, float max_dist, int mask, bool hit_triggers);
+
         /*
          * RigidBody
          */
@@ -213,6 +225,11 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid RendererGetMaterialInstance(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool RendererGetActive(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RendererSetActive(ulong id, bool active);
         /*
          * Resource
          */

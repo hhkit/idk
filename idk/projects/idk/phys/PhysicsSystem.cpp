@@ -13,6 +13,7 @@
 #include <script/MonoFunctionInvoker.h>
 
 #include <math/matrix_decomposition.h>
+#include <common/Layer.h>
 #include <iostream>
 
 namespace idk
@@ -21,6 +22,11 @@ namespace idk
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
+
+	constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+	{
+		return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+	};
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
@@ -394,6 +400,50 @@ namespace idk
 		collisions.clear();
 	}
 
+	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, int layer_mask, bool hit_triggers)
+	{
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+		vector<RaycastHit> retval;
+
+		for (auto& c : colliders)
+		{
+			if (!(c.GetGameObject()->GetComponent<Layer>()->mask() & layer_mask))
+				continue;
+
+			if (c.is_trigger && hit_triggers == false)
+				continue;
+
+			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
+				{
+					using RShape = std::decay_t<decltype(shape)>;
+
+					const auto rShape = calc_shape(shape, c);
+
+					if constexpr (std::is_same_v<RShape, sphere>)
+						return phys::collide_ray_sphere(
+							r, rShape);
+					else
+						if constexpr (std::is_same_v<RShape, box>)
+							return phys::collide_ray_aabb(
+								r, c.bounds());
+						else
+							return phys::raycast_failure{};
+				}, c.shape);
+
+			if (result)
+				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
+		}
+
+		std::sort(retval.begin(), retval.end(), 
+			[](const RaycastHit& lhs, const RaycastHit& rhs) 
+			{ 
+				return lhs.raycast_succ.distance_to_collision < rhs.raycast_succ.distance_to_collision; 
+			}
+		);
+
+		return retval;
+	}
+
 	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList,vector<phys::raycast_result>& ray_resultList)
 	{
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
@@ -405,7 +455,6 @@ namespace idk
 		};
 		bool foundRes = false;
 		
-		std::cout << "\n";
 		for (auto& c : colliders)
 		{
 			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result
@@ -452,7 +501,6 @@ namespace idk
 		};
 		bool foundRes = false;
 
-		std::cout << "\n";
 		for (auto& c : colliders)
 		{
 			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result
