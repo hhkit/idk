@@ -14,16 +14,51 @@ namespace idk
 		auto copy = *this;
 		return copy *= tfm;
 	}
+	bool frustum::contains(const sphere& s) const
+	{
+		for (auto& side : sides)
+		{
+			const float dist_to_point = side.normal.dot(s.center) + side.dist;
+			if (dist_to_point > s.radius)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 	frustum camera_vp_to_frustum(const mat4& view_projection_matrix)
 	{
 		frustum result{};
 		std::array<vec4, FrustumSide::count> planes;
-		for (int i = 4; i--; ) planes[FrustumSide::Left][i]		= view_projection_matrix[i][3] + view_projection_matrix[i][0];
-		for (int i = 4; i--; ) planes[FrustumSide::Right][i]	= view_projection_matrix[i][3] - view_projection_matrix[i][0];
-		for (int i = 4; i--; ) planes[FrustumSide::Down][i]		= view_projection_matrix[i][3] + view_projection_matrix[i][1];
-		for (int i = 4; i--; ) planes[FrustumSide::Up][i]		= view_projection_matrix[i][3] - view_projection_matrix[i][1];
-		for (int i = 4; i--; ) planes[FrustumSide::Near][i]		= view_projection_matrix[i][3] + view_projection_matrix[i][2];
-		for (int i = 4; i--; ) planes[FrustumSide::Far][i]		= view_projection_matrix[i][3] - view_projection_matrix[i][2];
+		planes[FrustumSide::Left].x = -(view_projection_matrix[0][3] + view_projection_matrix[0][0]);
+		planes[FrustumSide::Left].y = -(view_projection_matrix[1][3] + view_projection_matrix[1][0]);
+		planes[FrustumSide::Left].z = -(view_projection_matrix[2][3] + view_projection_matrix[2][0]);
+		planes[FrustumSide::Left].w = -(view_projection_matrix[3][3] + view_projection_matrix[3][0]);
+
+		planes[FrustumSide::Right].x = -(view_projection_matrix[0][3] - view_projection_matrix[0][0]);
+		planes[FrustumSide::Right].y = -(view_projection_matrix[1][3] - view_projection_matrix[1][0]);
+		planes[FrustumSide::Right].z = -(view_projection_matrix[2][3] - view_projection_matrix[2][0]);
+		planes[FrustumSide::Right].w = -(view_projection_matrix[3][3] - view_projection_matrix[3][0]);
+
+		planes[FrustumSide::Down].x = -(view_projection_matrix[0][3] + view_projection_matrix[0][1]);
+		planes[FrustumSide::Down].y = -(view_projection_matrix[1][3] + view_projection_matrix[1][1]);
+		planes[FrustumSide::Down].z = -(view_projection_matrix[2][3] + view_projection_matrix[2][1]);
+		planes[FrustumSide::Down].w = -(view_projection_matrix[3][3] + view_projection_matrix[3][1]);
+
+		planes[FrustumSide::Up].x = -(view_projection_matrix[0][3] - view_projection_matrix[0][1]);
+		planes[FrustumSide::Up].y = -(view_projection_matrix[1][3] - view_projection_matrix[1][1]);
+		planes[FrustumSide::Up].z = -(view_projection_matrix[2][3] - view_projection_matrix[2][1]);
+		planes[FrustumSide::Up].w = -(view_projection_matrix[3][3] - view_projection_matrix[3][1]);
+
+		planes[FrustumSide::Near].x = -(view_projection_matrix[0][3] + view_projection_matrix[0][2]);
+		planes[FrustumSide::Near].y = -(view_projection_matrix[1][3] + view_projection_matrix[1][2]);
+		planes[FrustumSide::Near].z = -(view_projection_matrix[2][3] + view_projection_matrix[2][2]);
+		planes[FrustumSide::Near].w = -(view_projection_matrix[3][3] + view_projection_matrix[3][2]);
+
+		planes[FrustumSide::Far].x = -(view_projection_matrix[0][3] - view_projection_matrix[0][2]);
+		planes[FrustumSide::Far].y = -(view_projection_matrix[1][3] - view_projection_matrix[1][2]);
+		planes[FrustumSide::Far].z = -(view_projection_matrix[2][3] - view_projection_matrix[2][2]);
+		planes[FrustumSide::Far].w = -(view_projection_matrix[3][3] - view_projection_matrix[3][2]);
 
 		result.sides[FrustumSide::Left] = halfspace{ planes[FrustumSide::Left] };
 		result.sides[FrustumSide::Right] = halfspace{ planes[FrustumSide::Right] };

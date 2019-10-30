@@ -101,6 +101,8 @@ namespace idk
 		AnimatedRenderObject ro = skinned_mesh_renderer.GenerateRenderObject();
 		// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
 		const auto parent = skinned_mesh_renderer.GetGameObject()->Parent();
+		if (!parent)
+			return std::nullopt;
 		const auto animator = parent->GetComponent<Animator>();
 		if (!animator)
 			return std::nullopt;

@@ -321,7 +321,6 @@ namespace idk::ogl
 		}
 
 		glEnable(GL_DEPTH_TEST);
-		// bool first_cam = true;
 		RscHandle<FrameBuffer> main_buffer;
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
@@ -390,28 +389,6 @@ namespace idk::ogl
 				}
 			}, cam.clear_data);
 
-			// if (first_cam)
-			// 
-			// {
-			// 	auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
-			// 	vec3 offset{ 0.2f, 0,0 };
-			// 	for (auto& side : frust.sides)
-			// 	{
-			// 		box b;
-			// 		mat3 axes;
-			// 		axes[2] = side.normal.cross(vec3{ 0,1,0 }).get_normalized();
-			// 		axes[1] = side.normal.get_normalized();
-			// 		axes[0] = axes[2].cross(side.normal).get_normalized();
-			// 		b.axes = axes;
-			// 		b.extents = vec3{ 0.5f, 0.1f, 0.5f };
-			// 		b.center = vec3{ 0,0,0 } +offset;
-			// 		offset += offset;
-			// 		Core::GetSystem<DebugRenderer>().Draw(b);
-			// 	}
-			// 	first_cam = false;
-			// }
-			
-
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
@@ -428,12 +405,23 @@ namespace idk::ogl
 			// per mesh render
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			
-			
+
+			// If we only use proj_matrix, frustrum will be in view space.
+			// If we use proj * view, frustrum will be in model space
+			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
+
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
-				
-				
+				// Do culling here
+				sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
+
+				// We only draw if the frustrum contains the mesh
+				if (!frust.contains(transformed_bounds))
+				{
+					// LOG_TO(LogPool::GFX, "Culled Mesh");
+					continue;
+				}
+
 				// bind shader
 				const auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
