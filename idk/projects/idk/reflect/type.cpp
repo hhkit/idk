@@ -18,6 +18,11 @@ namespace idk::reflect
 		return _context->name;
 	}
 
+    string_view type::fully_qualified_name() const
+    {
+        return _context->fully_qualified_name;
+    }
+
 	size_t type::hash() const
 	{
 		return _context->hash;

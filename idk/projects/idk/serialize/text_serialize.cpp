@@ -178,8 +178,6 @@ namespace idk
             else if constexpr (std::is_same_v<T, reflect::dynamic>)
             {
                 yaml::node dyn_node = serialize_yaml(arg);
-                if (arg.valid() && !dyn_node.has_tag())
-                    dyn_node.tag(arg.type.name());
                 if constexpr (std::is_arithmetic_v<K>)
                     curr_node.emplace_back(dyn_node);
                 else

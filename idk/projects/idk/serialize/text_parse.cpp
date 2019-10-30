@@ -282,7 +282,7 @@ namespace idk
 				{
 					auto dyn = reflect::get_type(item_node.tag()).create();
                     err = parse_yaml(item_node, dyn);
-					reflect::dynamic{ arg } = dyn;
+                    reflect::dynamic{ arg }.set_variant_value(dyn);
 					return false;
 				}
                 else if constexpr (std::is_same_v<T, reflect::dynamic>) // arg not reflected in ReflectedTypes

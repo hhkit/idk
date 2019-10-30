@@ -7,6 +7,8 @@
 #include <anim/Bone.h>
 #include <math/arith.h>
 #include <math/matrix_transforms.h>
+#include <scene/SceneManager.h>
+
 #include <iostream>
 
 namespace idk
