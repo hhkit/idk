@@ -43,7 +43,7 @@ namespace idk
 		return null_state;
 	}
 
-	const vector<mat4>& Animator::BoneTransforms()
+	const vector<mat4>& Animator::BoneTransforms()const
 	{
 		return final_bone_transforms;
 	}

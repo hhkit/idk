@@ -4,8 +4,10 @@
 #include <gfx/debug_vtx_layout.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/Mesh.h>
-
-#include <math/shapes.h>
+namespace idk
+{
+	struct ray;
+}
 namespace idk::vkn
 {
 	enum DbgShape

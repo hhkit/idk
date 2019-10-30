@@ -54,7 +54,8 @@ namespace idk
 		if (importer_scene.has_meshes)
 		{
 			// For opengl
-			vector<ai_helpers::Vertex> vertices;
+			ai_helpers::OpenGLMeshBuffers ogl_mesh_buffers;
+			ai_helpers::VulkanMeshBuffers vulk_mesh_buffers;
 
 			// For vulkan
 			vector<vec3	>	positions;
@@ -82,11 +83,11 @@ namespace idk
 							mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>();
 					}
 					mesh_handle->Name(elem->mName.data);
-					
+
 					// Buffers are cleared when they enter this function
-					ai_helpers::WriteToVertices(importer_scene, elem, vertices, indices);
+					ai_helpers::WriteToVertices(importer_scene, elem, ogl_mesh_buffers);
 					// Building the opengl buffers and descriptors
-					ai_helpers::BuildMeshOpenGL(importer_scene, vertices, indices, mesh_handle);
+					ai_helpers::BuildMeshOpenGL(importer_scene, ogl_mesh_buffers, mesh_handle);
 
 					mesh_handles.emplace_back(mesh_handle);
 					ret_val.Add(mesh_handle);
