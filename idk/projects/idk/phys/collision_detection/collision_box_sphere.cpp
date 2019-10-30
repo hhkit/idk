@@ -6,7 +6,9 @@ namespace idk::phys
 	col_result collide_box_sphere_discrete(const box& lhs, const sphere& rhs)
 	{
 		// convert sphere into box space 
-		const auto circle_local_pos = lhs.axes.inverse() * (rhs.center - lhs.center);
+		const auto l_axes = lhs.axes();
+
+		const auto circle_local_pos = l_axes.inverse() * (rhs.center - lhs.center);
 		const auto half_extents = lhs.half_extents();
 
 		auto closest_pt = circle_local_pos;
@@ -25,7 +27,7 @@ namespace idk::phys
 		{
 			col_failure error;
 			error.perp_dist = normal_len;
-			error.separating_axis = lhs.axes * normal / normal_len;
+			error.separating_axis = l_axes * normal / normal_len;
 			return error;
 		}
 
@@ -97,7 +99,7 @@ namespace idk::phys
 
 		const auto penetration_depth = distance - intersection_dist;
 
-		normal = lhs.axes * normal; // put into world space
+		normal = l_axes * normal; // put into world space
 		result.normal_of_collision = -normal;
 		result.penetration_depth = abs(penetration_depth);
 		result.point_of_collision = rhs.center + result.normal_of_collision * (rhs.radius - penetration_depth / 2);

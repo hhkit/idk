@@ -84,6 +84,24 @@ namespace idk
         public extern static void TransformSetRotation(ulong id, Quaternion val);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 TransformGetLocalPosition(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TransformSetLocalPosition(ulong id, Vector3 val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 TransformGetLocalScale(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TransformSetLocalScale(ulong id, Vector3 val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Quaternion TransformGetLocalRotation(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TransformSetLocalRotation(ulong id, Quaternion val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 TransformForward(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

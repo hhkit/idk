@@ -25,7 +25,7 @@ namespace TestAndSeek
             System.Console.WriteLine("and takedown {0}", i);
         }
 
-        public override void Start()
+        void Start()
         {
             rb = gameObject.GetComponent<RigidBody>();
             ts = gameObject.GetComponent<TestShou>();
@@ -39,24 +39,24 @@ namespace TestAndSeek
             }
         }
 
-        public override void OnTriggerEnter(Collider other)
+        void OnTriggerEnter(Collider other)
         {
             f = 500;
         }
 
-        public override void OnTriggerStay(Collider other)
+        void OnTriggerStay(Collider other)
         {
             transform.rotation = Quaternion.Euler(0, 180 * Time.fixedDeltaTime, 0) * transform.rotation ;
             f += 5 * Time.fixedDeltaTime;
             Debug.Log("STAY" + f);
         }
 
-        public override void OnTriggerExit(Collider other)
+        void OnTriggerExit(Collider other)
         {
             i += 1;
         }
 
-        public override void FixedUpdate()
+        void FixedUpdate()
         {
             if (rb)
             {
@@ -87,7 +87,7 @@ namespace TestAndSeek
             }
         }
 
-        public override void Update()
+        void Update()
         {
             if (prefab)
                 Debug.Log(prefab.ToString());

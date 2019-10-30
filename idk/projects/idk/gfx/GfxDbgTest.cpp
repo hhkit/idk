@@ -75,7 +75,7 @@ namespace idk
 				box retval;
 				retval.center = (retval.center.x < 1) ? retval.center + vec3{ 0.005f,0,0 } : vec3{};
 				const rad t_angle = (angle.value < pi) ? angle + rad{ 0.001f } : rad{ 0 };
-				retval.axes = quat_cast<mat3>(quat{ vec3{1,0,0}, t_angle });
+				retval.rotation = quat{ vec3{1,0,0}, t_angle };
 				return retval;
 			}();
 
@@ -88,7 +88,7 @@ namespace idk
 				const vec3 diff2 = Normalized(-lookat_offset2);
 				const vec3 axis2 = Normalized(vec3{ 0,0,1 }.cross(diff2));
 				const auto angle2 = acos(diff2.z);
-				retval.axes = quat_cast<mat3>(quat{ axis2, angle2 });
+				retval.rotation = quat{ axis2, angle2 };
 
 				return retval;
 			}();
@@ -110,7 +110,7 @@ namespace idk
 						box retval;
 						retval.center = vec3{ -1.0f + chunk * i,0,0 };
 						retval.extents = vec3{ chunk,chunk,chunk };
-						retval.axes = quat_cast<mat3>(quat{ vec3{0,1,1},  rad{ pi * chunk * i } });
+						retval.rotation = quat{ vec3{0,1,1},  rad{ pi * chunk * i } };
 						return retval;
 					}();
 					
