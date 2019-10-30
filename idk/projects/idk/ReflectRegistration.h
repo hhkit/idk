@@ -233,6 +233,14 @@ REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
 REFLECT_VARS(component_name, property_path, component_nth)
 REFLECT_END()
 
+using ActiveStateArray = idk::array<bool, 100>;
+REFLECT_BEGIN(ActiveStateArray, "ActiveStateArray")
+REFLECT_END()
+
+using StringPair = idk::array<idk::string, 2>;
+REFLECT_BEGIN(StringPair, "StringPair")
+REFLECT_END();
+
 // shader graph
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 
@@ -255,6 +263,31 @@ REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
 REFLECT_VARS(name, type, default_value)
 REFLECT_END()
+/*
+using UniformInstanceTable = idk::hash_table<idk::string, idk::UniformInstance>;
+REFLECT_BEGIN(UniformInstanceTable, "UniformInstanceTable")
+REFLECT_END()
+
+using UniformInstanceValueTable = idk::hash_table<idk::string, idk::UniformInstanceValue>;
+REFLECT_BEGIN(UniformInstanceValueTable, "UniformInstanceValueTable")
+REFLECT_END()
+
+using ShaderGraphNodeTable = idk::hash_table<idk::Guid, idk::shadergraph::Node>;
+REFLECT_BEGIN(ShaderGraphNodeTable, "ShaderGraphNodeTable")
+REFLECT_END()
+
+using ShaderGraphSlotVector  =  idk::vector<idk::shadergraph::Slot>;
+REFLECT_BEGIN(ShaderGraphSlotVector, "ShaderGraphSlotVector")
+REFLECT_END()
+
+using ShaderGraphLinkVector = idk::vector<idk::shadergraph::Link>;
+REFLECT_BEGIN(ShaderGraphLinkVector, "ShaderGraphLinkVector")
+REFLECT_END()
+
+using ShaderGraphParamVector = idk::vector<idk::shadergraph::Parameter>;
+REFLECT_BEGIN(ShaderGraphParamVector, "ShaderGraphParamVector")
+REFLECT_END()
+*/
 
 /*==========================================================================
  * core
@@ -301,7 +334,7 @@ REFLECT_END()
  * components
  *========================================================================*/
 
-// COMMON
+ // COMMON
 REFLECT_BEGIN(idk::Transform, "Transform")
 REFLECT_VARS(scale, rotation, position, parent)
 REFLECT_END()

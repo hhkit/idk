@@ -55,6 +55,7 @@
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
     <ClInclude Include="math\ritters.h" />
     <ClInclude Include="particle\MinMax.h" />
     <ClInclude Include="natvis_ids.h" />
