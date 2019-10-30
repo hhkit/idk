@@ -63,10 +63,7 @@ namespace idk
             const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
             (discardme);
         }
-
-        if (meta)
-            mat->SetMeta(*meta->GetMeta<Material>());
-
+		
         mat->_default_instance = Core::GetResourceManager().LoaderEmplaceResource<MaterialInstance>(mat.guid);
         mat->_default_instance->material = mat;
 

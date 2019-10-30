@@ -928,7 +928,7 @@ namespace idk
 
         if (ImGui::CollapsingHeader("Master", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            auto meta = _graph->GetMeta();
+            auto& meta = *_graph;
             bool changed = false;
             changed = changed || ImGuidk::EnumCombo("Domain", &meta.domain);
             changed = changed || ImGuidk::EnumCombo("Blend", &meta.blend);

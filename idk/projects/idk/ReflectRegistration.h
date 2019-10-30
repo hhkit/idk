@@ -201,22 +201,18 @@ REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
 
+REFLECT_ENUM(idk::BlendMode, "BlendMode")
+REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
+REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
+
+
 REFLECT_BEGIN(idk::Material, "Material")
-REFLECT_VARS(_shader_program, uniforms)
+REFLECT_VARS(_shader_program, uniforms, domain, blend, model)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::UniformInstance, "UniformInstance")
 REFLECT_VARS(name, value)
 REFLECT_END()
-
-REFLECT_ENUM(idk::BlendMode, "BlendMode")
-REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
-REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
-
-REFLECT_BEGIN(idk::Material::Metadata, "MaterialMeta")
-REFLECT_VARS(domain, blend, model)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::MaterialInstance, "MaterialInstance")
 REFLECT_VARS(material, uniforms)
 REFLECT_END()

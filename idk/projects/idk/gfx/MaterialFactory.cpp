@@ -23,14 +23,14 @@ namespace idk
 		auto stream = p.Open(FS_PERMISSIONS::READ);
 		const auto mat = [&]()
 		{
-			auto meta = m.FetchMeta("material");
-			if (meta)
-			{
-				auto retval = Core::GetResourceManager().LoaderEmplaceResource<Material>(meta->guid);;
-				retval->SetMeta(*meta->GetMeta<Material>());;
-				return retval;
-			}
-			else
+			//auto meta = m.FetchMeta("material");
+			//if (meta)
+			//{
+			//	auto retval = Core::GetResourceManager().LoaderEmplaceResource<Material>(meta->guid);;
+			//	retval->SetMeta(*meta->GetMeta<Material>());;
+			//	return retval;
+			//}
+			//else
 			{
 				auto retval = Core::GetResourceManager().LoaderEmplaceResource<Material>();
 				retval->Name("material");

@@ -6,18 +6,18 @@ namespace idk
 {
 	RscHandle<ShaderTemplate> Material::GetTemplate() const
 	{
-		if (meta.domain == MaterialDomain::Surface)
+		if (domain == MaterialDomain::Surface)
 		{
-			switch (meta.blend)
+			switch (blend)
 			{
 			case BlendMode::Opaque:
-				switch (meta.model)
+				switch (model)
 				{
-				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_deferred.tmpt");
+				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_deferred.tmpt");
 				}
 			case BlendMode::Masked:
-				switch (meta.model)
+				switch (model)
 				{
 				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
 				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");

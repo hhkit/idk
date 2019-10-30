@@ -21,23 +21,20 @@ namespace idk
 		Unlit,
 		DefaultLit)
 
-	struct MaterialMeta
-	{
-		MaterialDomain domain = MaterialDomain::Surface;
-		BlendMode      blend  = BlendMode::Opaque;
-		ShadingModel   model  = ShadingModel::DefaultLit;
-	};
 
 	class Material
 		: public Resource<Material>
-		, public MetaTag<MaterialMeta>
 		, public Saveable<Material, false_type>
 	{
 	public:
-		RscHandle<ShaderProgram> _shader_program;
-		RscHandle<MaterialInstance> _default_instance;
-        hash_table<string, UniformInstance> uniforms;
-        vector<UniformInstance> hidden_uniforms;
+		RscHandle<ShaderProgram>            _shader_program  ;
+		RscHandle<MaterialInstance>         _default_instance;
+        hash_table<string, UniformInstance> uniforms         ;
+        vector<UniformInstance>             hidden_uniforms  ;
+
+		MaterialDomain domain = MaterialDomain::Surface ;
+		BlendMode      blend  = BlendMode::Opaque       ;
+		ShadingModel   model  = ShadingModel::DefaultLit;
 
 		RscHandle<ShaderTemplate> GetTemplate() const;
 		virtual ~Material();
