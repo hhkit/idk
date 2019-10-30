@@ -21,6 +21,24 @@
             set => Bindings.TransformSetScale(handle, value);
         }
 
+        public Vector3 localPosition
+        {
+            get => Bindings.TransformGetLocalPosition(handle);
+            set => Bindings.TransformSetLocalPosition(handle, value);
+        }
+
+        public Quaternion localRotation
+        {
+            get => Bindings.TransformGetLocalRotation(handle);
+            set => Bindings.TransformSetLocalRotation(handle, value);
+        }
+
+        public Vector3 localScale
+        {
+            get => Bindings.TransformGetLocalScale(handle);
+            set => Bindings.TransformSetLocalScale(handle, value);
+        }
+
         public Vector3 forward
         {
             get => Bindings.TransformForward(handle);

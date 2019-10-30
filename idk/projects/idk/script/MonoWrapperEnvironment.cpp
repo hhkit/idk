@@ -282,6 +282,42 @@ namespace idk::mono
 			}
 		BIND_END();
 
+		BIND_START("idk.Bindings::TransformGetLocalPosition", vec3, Handle<Transform> h)
+		{
+			return h->position;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalPosition", void, Handle<Transform> h, vec3 v)
+		{
+			h->position = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalScale", vec3, Handle<Transform> h)
+		{
+			return h->scale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalScale", void, Handle<Transform> h, vec3 v)
+		{
+			h->scale = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalRotation", quat, Handle<Transform> h)
+		{
+			return h->rotation;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalRotation", void, Handle<Transform> h, quat v)
+		{
+			h->rotation = v;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::TransformForward",  vec3, Handle<Transform> h)
 			{
 				return h->Forward();
