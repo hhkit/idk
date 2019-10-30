@@ -51,7 +51,7 @@ namespace idk
 
 	struct CameraData
 	{
-		using ClearData_t =CameraClear_t;//variant<DontClear, vec4, RscHandle<CubeMap>>;
+		using ClearData_t =CameraClear;//variant<DontClear, vec4, RscHandle<CubeMap>>;
 		GenericHandle obj_id{};
 		bool is_scene_camera = false;
 		unsigned  culling_flags = 0xFFFFFFFF;

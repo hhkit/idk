@@ -263,6 +263,38 @@
     viewport: 
       position: {x: 0, y: 0}
       size: {x: 1, y: 1}
+- !416611893248 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: -1.8351101, z: 0}
+    rotation: 
+      w: 0.89813006
+      x: 0
+      y: 0
+      z: -0.43972987
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: testy
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 0
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
 - !8590000128 
   - active: 1
   - !Transform 
@@ -330,13 +362,32 @@
     parent: {id: 65536}
     position: {x: 0, y: 0, z: 0}
     rotation: 
-      w: 0.7071067
-      x: 0.7071068
-      y: 0
-      z: 0
-    scale: {x: 1, y: 0.9999999, z: 2.06}
+      w: 0.5582573
+      x: 0.77905905
+      y: -0.27771544
+      z: 0.06549748
+    scale: {x: 1, y: 1.0000002, z: 2.0600002}
   - !Name 
     name: ""
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
   - !MeshRenderer 
     cast_shadows: 1
     enabled: 1

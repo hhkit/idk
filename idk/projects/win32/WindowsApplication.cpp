@@ -115,6 +115,13 @@ namespace idk::win
 	{
 		return _input_manager->GetChar();
 	}
+	
+	void Windows::SetTitle(string_view new_title)
+	{
+		std::wstring wide_str{ new_title.begin(), new_title.end() };
+		SetWindowText(hWnd, wide_str.data());
+	}
+
 	string Windows::GetExecutableDir()
 	{
 		char buffer[MAX_PATH] = { 0 };

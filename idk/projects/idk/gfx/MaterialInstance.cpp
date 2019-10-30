@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MaterialInstance.h"
+#include <gfx/ShaderGraph_data.h>
 #include <meta/variant.h>
 
 namespace idk

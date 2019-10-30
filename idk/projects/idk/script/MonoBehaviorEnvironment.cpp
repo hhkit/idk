@@ -175,6 +175,9 @@ namespace idk::mono
 				find_method(type, "OnTriggerEnter", 1);
 				find_method(type, "OnTriggerStay", 1);
 				find_method(type, "OnTriggerExit", 1);
+				find_method(type, "OnCollisionEnter", 1);
+				find_method(type, "OnCollisionStay", 1);
+				find_method(type, "OnCollisionExit", 1);
 				find_method(type, "Update");
 				find_method(type, "UpdateCoroutines");
 

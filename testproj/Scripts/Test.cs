@@ -108,6 +108,11 @@ namespace TestAndSeek
 
         }
 
+        public void OnCollisionEnter(Collision c)
+        {
+            Debug.Log("Collide with " + c.gameObject.name +" with normal " + c.normal.x + " " + c.normal.y + " " + c.normal.z);
+        }
+
         public void TestTransform(Transform t)
         {
             System.Console.WriteLine("TestTransform");

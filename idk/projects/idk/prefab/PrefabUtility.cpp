@@ -396,9 +396,11 @@ namespace idk
 
     Handle<GameObject> PrefabUtility::GetPrefabInstanceRoot(Handle<GameObject> go)
     {
+        if (!go->HasComponent<PrefabInstance>())
+            return Handle<GameObject>();
         while (go)
         {
-            if (go->HasComponent<PrefabInstance>())
+            if (const auto inst = go->GetComponent<PrefabInstance>(); inst && inst->object_index == 0)
                 return go;
             go = go->Parent();
         }
@@ -781,7 +783,7 @@ namespace idk
             for (int i = 0; i < removed.size(); ++i)
             {
                 const int swap_begin = removed[removed.size() - i - 1];
-                const int swap_end = prefab_data.components.size() - i;
+                const int swap_end = static_cast<int>(prefab_data.components.size() - i);
                 for (int j = swap_begin; j < swap_end - 1; ++j)
                     prefab_data.components[j].swap(prefab_data.components[j + 1]);
             }
