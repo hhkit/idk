@@ -19,6 +19,9 @@
 #include <vkn/vector_buffer.h>
 
 #include "VulkanDebugRenderer.h"
+
+#include <math/shapes/ray.h>
+
 namespace idk::vkn
 {
 	namespace glm
