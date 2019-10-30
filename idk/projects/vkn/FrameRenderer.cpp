@@ -193,6 +193,10 @@ namespace idk::vkn
 
 		return std::move(the_interface);
 	}
+	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders)
+	{
+		return ProcessRoUniforms(GraphicsStateInterface{ state }, ubo_manager, binders);
+	}
 	template<typename T,typename...Args>
 	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
 	//Possible Idea: Create a Pipeline object that tracks currently bound descriptor sets

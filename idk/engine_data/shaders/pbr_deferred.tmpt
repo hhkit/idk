@@ -11,13 +11,18 @@ layout(location =0)in VS_OUT
 //__MATERIAL_UNIFORMS__;
 
 // declare output buffers here
-layout(location = 0) out vec3 out_albedo;
-layout(location = 1) out float out_metallic;
-layout(location = 2) out float out_roughness;
-layout(location = 3) out float out_ambient_o;
+layout(location = 0) out vec4 out_albedo_amb_o;
+layout(location = 1) out vec4 out_uv_metallic_roughness;
+layout(location = 2) out vec3 out_view_pos;
+layout(location = 3) out vec3 out_normal;
+layout(location = 4) out vec3 out_tangent;
 
 void main()
 {
+	vec3  view_pos  = fs_in.position;
+	vec3  normal    = fs_in.normal;
+	vec3  tangent   = fs_in.tangent;
+
 	// local scope here, graph will assign to this 
 	vec3  albedo    = vec4(1.0, 0.0, 0.0, 1.0);
 	float metallic  = 0.5; 
@@ -25,9 +30,10 @@ void main()
 	float ambient_o = 0;
 
 	//__MATERIAL_CODE__;
-
-	out_albedo    = albedo;
-	out_metallic  = metallic; 
-	out_roughness = roughness;
-	out_ambient_o = ambient_o;
+	
+	out_albedo_amb_o = vec4(albedo,ambient_o);
+	out_uv_metallic_roughness = vec4(fs_in.uv,metallic,roughness);
+	out_view_pos = view_pos;
+	out_normal = normal;
+	out_tangent = tangent;
 }

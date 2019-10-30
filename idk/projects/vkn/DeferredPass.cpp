@@ -1,0 +1,278 @@
+#include "pch.h"
+#include "DeferredPass.h"
+#include <gfx/FramebufferFactory.h>
+
+#include <vkn/PipelineBinders.h>
+
+#include <vkn/VknRenderTarget.h>
+#include <vkn/GraphicsState.h>
+
+#include <vkn/utils/utils.h>
+#if 0
+namespace idk::vkn
+{
+	using EGBufferBinding = meta::enum_info<GBufferBinding, meta::enum_pack<GBufferBinding,
+		GBufferBinding::eAlbedoAmbOcc,
+		GBufferBinding::eUvMetallicRoughness,
+		GBufferBinding::eViewPos,
+		GBufferBinding::eNormal,
+		GBufferBinding::eTangent>>;
+
+	vk::Semaphore DeferredGBuffer::RenderCompleteSignal()
+	{
+		return *_render_complete;
+	}
+	void DeferredGBuffer::Init(ivec2 size)
+	{
+		if (!gbuffer || gbuffer->Size()!=size)
+		{
+			FrameBufferBuilder fbf;
+			fbf.Begin(size);
+			//GBufferBinding::eAlbedoAmbOcc
+			fbf.AddAttachment(idk::AttachmentInfo{
+				LoadOp::eClear,StoreOp::eStore,
+				ColorFormat::_enum::RGBAF_32,
+				FilterMode::_enum::Nearest
+				});
+			GBufferBinding::eNormal;
+			fbf.AddAttachment(idk::AttachmentInfo{
+				LoadOp::eClear,StoreOp::eStore,
+				ColorFormat::_enum::RGBAF_32,
+				FilterMode::_enum::Nearest
+				});
+			GBufferBinding::eTangent;
+			fbf.AddAttachment(idk::AttachmentInfo{
+				LoadOp::eClear,StoreOp::eStore,
+				ColorFormat::_enum::RGBAF_32,
+				FilterMode::_enum::Nearest
+				});
+			GBufferBinding::eUvMetallicRoughness;
+			fbf.AddAttachment(idk::AttachmentInfo{
+				LoadOp::eClear,StoreOp::eStore,
+				ColorFormat::_enum::RGBAF_32,
+				FilterMode::_enum::Nearest
+				});
+			GBufferBinding::eViewPos;
+			fbf.AddAttachment(idk::AttachmentInfo{
+				LoadOp::eClear,StoreOp::eStore,
+				ColorFormat::_enum::RGBAF_32,
+				FilterMode::_enum::Nearest
+				});
+			fbf.SetDepthAttachment(
+				idk::AttachmentInfo{
+					LoadOp::eClear,StoreOp::eStore,
+					ColorFormat::_enum::DEPTH_COMPONENT,
+					FilterMode::_enum::Nearest
+				});
+			auto new_buffer = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(fbf.End());
+			if (gbuffer)
+				Core::GetResourceManager().Release(gbuffer);
+			gbuffer = RscHandle<VknFrameBuffer>{ new_buffer };
+		
+			_render_complete = View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});
+		}
+	}
+	template<typename T, typename...Args>
+	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
+	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
+	std::pair<ivec2,ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp);
+
+	void DeferredPass::BindGBuffers(const GraphicsState& graphics_state, RenderStateV2& rs)
+	{
+		auto& gbuffer = GBuffer();
+		auto& view = View();
+		//auto& swapchain = view.Swapchain();
+		auto dispatcher = vk::DispatchLoaderDefault{};
+		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+		cmd_buffer.begin(begin_info, dispatcher);
+
+		DrawToGBuffers(cmd_buffer, graphics_state, rs);
+
+		auto& camera = graphics_state.camera;
+		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+		std::optional<color> clear_col;
+		std::optional<RscHandle<CubeMap>> sb_cm;
+		std::visit([&clear_col, &sb_cm](auto& clear_data)
+			{
+				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
+					clear_col = clear_data;
+				if constexpr (std::is_same_v<decltype(clear_data), RscHandle<CubeMap>>)
+					sb_cm = clear_data;
+			}, graphics_state.camera.clear_data);
+
+		auto& clear_data = graphics_state.camera.clear_data;
+		switch (clear_data.index())
+		{
+		case index_in_variant_v<color, CameraClear_t>:
+			clear_col = std::get<color>(clear_data);
+			break;
+		case index_in_variant_v<RscHandle<CubeMap>, CameraClear_t>:
+			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
+			break;
+		case index_in_variant_v<DontClear, CameraClear_t>:
+			//TODO: set dont clear settings.
+			break;
+		}
+
+
+
+
+		vk::ClearValue clearColor = clear_col ?
+			vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
+			:
+			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
+		vk::ClearValue v[]{
+			clearColor,
+			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
+		};
+
+		
+		//////////////////Skybox rendering
+		if (sb_cm)
+		{
+			auto& vknCubeMap = sb_cm->as<VknCubemap>();
+			pipeline_config skybox_render_config;
+			DescriptorsManager skybox_ds_manager(view);
+			skybox_render_config.fill_type = FillType::eFill;
+			skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
+			auto config = ConfigWithVP(skybox_render_config, camera, offset, size);
+			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
+			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
+			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
+			config.depth_test = false;
+			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
+
+			//No idea if this is expensive....if really so I will try shift up to init
+			rs.skyboxRenderer.Init(
+				Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox],
+				{},
+				Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox],
+				&config,
+				*camera.CubeMapMesh
+			);
+			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * camera.view_matrix);
+
+			/*cmd_buffer.begin(vk::CommandBufferBeginInfo
+				{
+					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+				});*/
+			rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
+		}
+
+		RenderGbufferToTarget(cmd_buffer,graphics_state,rs);
+
+		if (camera.overlay_debug_draw)
+			RenderDebugStuff(state, rs, offset, size);
+		rs.ubo_manager.UpdateAllBuffers();
+		cmd_buffer.endRenderPass();
+		cmd_buffer.end();
+	}
+	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
+	{
+		auto& view = View();
+		auto& gbuffer = GBuffer();
+		PbrFwdMaterialBinding binder;
+		binder.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) { binder.SetState(state); }, graphics_state);
+
+		//Preprocess MeshRender's uniforms
+		auto&& the_interface = ProcessRoUniforms(graphics_state, rs.ubo_manager, binder);
+		the_interface.GenerateDS(rs.dpools);
+
+		std::array<float, 4> a{};
+
+		//auto& cd = std::get<vec4>(state.camera.clear_data);
+		//TODO grab the appropriate framebuffer and begin renderpass
+
+		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
+
+		auto& camera = graphics_state.camera;
+		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
+		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
+		auto& g_buffer = *gbuffer.gbuffer;
+		auto frame_buffer = g_buffer.GetFramebuffer();
+		//TransitionFrameBuffer(camera, cmd_buffer, view);
+
+		auto sz = camera.render_target->Size();
+		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+
+		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+		std::array<float, 4> g_clear{ 0.0f,0.0f ,0.0f ,0.0f };
+
+		vk::ClearValue v[EGBufferBinding::size()+1]{};
+		for(auto& value : v)
+		{
+			value = vk::ClearValue{ g_clear };
+		};
+		v[EGBufferBinding::size()] =vk::ClearValue{ vk::ClearColorValue{ depth_clear } };
+
+		vk::Rect2D render_area
+		{
+			vk::Offset2D
+			{
+				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
+			},vk::Extent2D
+			{
+				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
+			}
+		};
+		vk::RenderPassBeginInfo rpbi
+		{
+			g_buffer.GetRenderPass(), frame_buffer,
+			render_area,hlp::arr_count(v),std::data(v)
+		};
+
+		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+
+		vector<RscHandle<ShaderProgram>> shaders;
+		VulkanPipeline* prev_pipeline = nullptr;
+		//Draw stuff into the gbuffers
+		auto& processed_ro = the_interface.DrawCalls();
+		rs.FlagRendered();
+		for (auto& p_ro : processed_ro)
+		{
+			auto& obj = p_ro.Object();
+			if (p_ro.rebind_shaders)
+			{
+				shaders.resize(0);
+				if (p_ro.frag_shader)
+					shaders.emplace_back(*p_ro.frag_shader);
+				if (p_ro.vertex_shader)
+					shaders.emplace_back(*p_ro.vertex_shader);
+				if (p_ro.geom_shader)
+					shaders.emplace_back(*p_ro.geom_shader);
+
+				auto config = ConfigWithVP(*obj.config, camera, offset, size);
+				auto& pipeline = GetPipeline(config, shaders);
+				pipeline.Bind(cmd_buffer, view);
+				SetViewport(cmd_buffer, offset, size);
+				prev_pipeline = &pipeline;
+			}
+			auto& pipeline = *prev_pipeline;
+			//TODO Grab everything and render them
+			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
+			auto& mesh = obj.mesh.as<VulkanMesh>();
+			for (auto& [set, ds] : p_ro.descriptor_sets)
+			{
+				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+			}
+
+			auto& renderer_req = *obj.renderer_req;
+
+			for (auto&& [attrib, location] : renderer_req.requirements)
+			{
+				auto& attrib_buffer = mesh.Get(attrib);
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+			}
+
+			auto& oidx = mesh.GetIndexBuffer();
+			if (oidx)
+			{
+				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+			}
+		}
+		cmd_buffer.endRenderPass();//End GBuffer pass
+	}
+}
+#endif

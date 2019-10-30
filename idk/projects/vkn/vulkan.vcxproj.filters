@@ -189,6 +189,9 @@
     <ClInclude Include="VknRenderTargetLoader.h">
       <Filter>resource\Loaders</Filter>
     </ClInclude>
+    <ClInclude Include="DeferredPass.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -345,6 +348,7 @@
     </ClCompile>
     <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="VknRenderTargetLoader.cpp" />
+    <ClCompile Include="DeferredPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

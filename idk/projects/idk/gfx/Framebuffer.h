@@ -60,6 +60,7 @@ namespace idk
 		size_t NumColorAttachments()const {return attachments.size();}
 		size_t NumAttachments()const;
 		ivec2 Size()const { return size; };
+		ivec2 Size(ivec2 new_size)const { return new_size=size; };
 		ivec2 size{};
 	};
 

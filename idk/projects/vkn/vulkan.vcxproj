@@ -218,6 +218,7 @@
   <ItemGroup>
     <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="DDSLoader.h" />
+    <ClInclude Include="DeferredPass.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="draw_call.h" />
@@ -283,6 +284,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSLoader.cpp" />
+    <ClCompile Include="DeferredPass.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="draw_call.cpp" />
