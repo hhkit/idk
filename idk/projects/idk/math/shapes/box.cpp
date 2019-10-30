@@ -42,10 +42,13 @@ namespace idk
 	}
 	box& box::operator*=(const mat4& transform)
 	{
-		auto tfm = transform * mat4{ scale(extents) * axes() };
-		extents  = vec3{ tfm[0].length(), tfm[1].length(), tfm[2].length() };
-		rotation = decompose_rotation_matrix(mat3{ tfm });
-		center  += tfm[3].xyz;
+		auto gen = mat4{ axes() * scale(extents) };
+		gen[3] = vec4{ center, 1 };
+		auto tfm = transform * gen;
+		auto decomp = decompose(tfm);
+		extents  = decomp.scale;
+		rotation = decomp.rotation;
+		center   = decomp.position;
 		return *this;
 	}
 	box box::operator*(const mat4& matrix) const
