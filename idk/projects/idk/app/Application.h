@@ -45,6 +45,7 @@ namespace idk
 		virtual bool  SetFullscreen(bool enable_fullscreen) = 0;
 		virtual bool  SetScreenSize(ivec2 target_size) = 0;
 		virtual ivec2 GetScreenSize() = 0 ;
+		virtual void SetTitle([[maybe_unused]] string_view new_title) {};
 
 		// file IO
 		virtual string GetExecutableDir() = 0;
