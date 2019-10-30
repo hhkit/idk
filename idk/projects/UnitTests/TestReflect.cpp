@@ -44,6 +44,8 @@ struct reflect_this
 	double blaze_it = 420.0;
 	hash_table<Guid, string> hashtable;
 };
+REFLECT_BEGIN(decltype(reflect_this::hashtable), "hash_table<Guid,string>")
+REFLECT_END()
 REFLECT_BEGIN(reflect_this, "reflect_this")
 REFLECT_VARS(vec, f, container, blaze_it, hashtable)
 REFLECT_END()

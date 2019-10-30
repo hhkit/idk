@@ -342,6 +342,3 @@ namespace idk::reflect
 #undef property_vend_cpp
 #undef property_friend
 #undef property_vtable
-
-REFLECT_BEGIN(idk::reflect::dynamic, "reflect::dynamic") REFLECT_END()
-REFLECT_BEGIN(idk::reflect::type, "reflect::type") REFLECT_END()

@@ -1,9 +1,12 @@
 #pragma once
+
 #include <idk.h>
 #include <core/Component.h>
 #include <gfx/RenderObject.h>
 #include <gfx/CameraFrustum.h>
 #include <gfx/Viewport.h>
+#include <gfx/CameraClear.h>
+
 namespace idk
 {
 
@@ -30,7 +33,7 @@ namespace idk
 		bool overlay_debug_draw = true;
 		bool is_scene_camera = false;
 
-		CameraClear_t clear;
+		CameraClear clear;
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 

@@ -51,6 +51,7 @@
     <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="gfx\Buffer.h" />
+    <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />

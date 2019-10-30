@@ -836,6 +836,7 @@
     <ClInclude Include="phys\collision_detection\ManagedCollision.h">
       <Filter>phys\collision</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\CameraClear.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
