@@ -12,6 +12,9 @@ namespace idk::vkn
 		eCube,
 		eSquare,
 		eEqTriangle,
+		eLine,
+		eTetrahedron,
+		eSphere,
 		eziCount
 	};
 	struct debug_info
@@ -38,6 +41,10 @@ namespace idk::vkn
 		void Shutdown();
 		void DrawShape(DbgShape shape, const mat4& tfm, const color& color);
 		void DrawShape(MeshType shape, const mat4& tfm, const color& color);
+		void Draw(const ray& ray, const color& color);
+		void Draw(const sphere& sphere, const color& color);
+		void Draw(const box& box, const color& color);
+		void Draw(const aabb& o_box, const color& color);
 		void Render(const mat4& view, const mat4& projection, GraphicsState& out);
 
 		const vector<DbgDrawCall>& DbgDrawCalls()const;

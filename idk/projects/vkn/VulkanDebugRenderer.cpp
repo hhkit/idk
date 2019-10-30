@@ -292,6 +292,30 @@ namespace idk::vkn
 		
 		this->info->render_info2[Mesh::defaults[shape]].emplace_back(debug_info::inst_data{ color, tfm });
 	}
+	void VulkanDebugRenderer::Draw(const ray& ray, const color& color)
+	{
+		const auto line_tfm = look_at(ray.origin + ray.velocity / 2, ray.origin + ray.velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.velocity.length() / 2 }) };
+		DrawShape(MeshType::Line, line_tfm, color);
+
+		const auto orient_tfm = orient(ray.velocity.get_normalized());
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient(ray.velocity.get_normalized())* scale(vec3{ 0.025f }) };
+		DrawShape(MeshType::Tetrahedron, arrow_tfm, color);
+	}
+	void VulkanDebugRenderer::Draw(const sphere& sphere, const color& color)
+	{
+		const mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius * 2 }) };
+		DrawShape(MeshType::Sphere, tfm, color);
+	}
+	void VulkanDebugRenderer::Draw(const box& box, const color& color)
+	{
+		const mat4 tfm = translate(box.center) * mat4 { box.axes* scale(box.extents) };
+		DrawShape(MeshType::Box, tfm, color);
+	}
+	void VulkanDebugRenderer::Draw(const aabb& box, const color& color)
+	{
+		const mat4 tfm = translate(box.center()) * mat4 { scale(box.extents()) };
+		DrawShape(MeshType::Box, tfm, color);
+	}
 	const std::vector<vec3>& GetSquareFace(bool is_line_list)
 	{
 		static constexpr float a = 1.0f;
