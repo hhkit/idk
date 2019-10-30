@@ -45,7 +45,7 @@ namespace idk
 		{
 			std::visit([&](const auto& shape)
 				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), c, dur);
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), collider.is_trigger ? color{0, 1, 1} : c, dur);
 				}, collider.shape);
 		};
 
@@ -315,6 +315,9 @@ namespace idk
 		}
 		
 		// fire events
+
+		const auto collider_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Collider");;
+
 		const auto FireEvent = [&](const PairList& list, string_view trigger_method, string_view collision_method)
 		{
 			for (auto& [lhs, rhs] : list)
@@ -325,13 +328,27 @@ namespace idk
 					for (auto& mb : lhs->GetGameObject()->GetComponents<mono::Behavior>())
 					{
 						auto obj_type = mb->GetObject().Type();
-						mono::Invoke(obj_type->GetMethod(trigger_method, 1), mb->GetObject(), rhs.id);
+						IDK_ASSERT(obj_type);
+						auto thunk = obj_type->GetThunk(trigger_method, 1);
+						if (thunk)
+						{
+							auto mono_obj = collider_type->Construct();
+							mono_obj.Assign("handle", rhs.id);
+							thunk->Invoke(mb->GetObject(), lhs.id, mono_obj);
+						}
 					}
 					// fire rhs events
 					for (auto& mb : rhs->GetGameObject()->GetComponents<mono::Behavior>())
 					{
 						auto obj_type = mb->GetObject().Type();
-						mono::Invoke(obj_type->GetMethod(trigger_method, 1), mb->GetObject(), lhs.id);
+						IDK_ASSERT(obj_type);
+						auto thunk = obj_type->GetThunk(trigger_method, 1);
+						if (thunk)
+						{
+							auto mono_obj = collider_type->Construct();
+							mono_obj.Assign("handle", lhs.id);
+							thunk->Invoke(mb->GetObject(), rhs.id, mono_obj);
+						}
 					}
 				}
 				else
@@ -343,9 +360,9 @@ namespace idk
 
 		};
 
-		FireEvent(col_enter, "RawTriggerEnter", "OnCollisionEnter");
-		FireEvent(col_stay, "RawTriggerStay", "OnCollisionStay");
-		FireEvent(col_exit, "RawTriggerExit", "OnCollisionExit");
+		FireEvent(col_enter, "OnTriggerEnter", "OnCollisionEnter");
+		FireEvent(col_stay, "OnTriggerStay", "OnCollisionStay");
+		FireEvent(col_exit, "OnTriggerExit", "OnCollisionExit");
 
 		previous_collisions = std::move(collisions);
 	}
@@ -363,7 +380,7 @@ namespace idk
 		{
 			std::visit([&](const auto& shape)
 				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), c, dur);
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), collider.is_trigger ? color{0,1,1} : c, dur);
 				}, collider.shape);
 		};
 

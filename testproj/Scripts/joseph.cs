@@ -22,7 +22,7 @@ namespace TestAndSeek
                 anim.Play(name);
         }
 
-        public override void Start()
+        void Start()
         {
             anim = gameObject.GetComponent<Animator>();
             
@@ -31,7 +31,7 @@ namespace TestAndSeek
         }
 
 
-        public override void FixedUpdate()
+        void FixedUpdate()
         {
             if (anim)
             {

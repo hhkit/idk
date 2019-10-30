@@ -6,6 +6,8 @@
 #include <gfx/RenderObject.h>
 #include <vkn/DescriptorsManager.h>
 #include <vkn/ShaderModule.h>
+#include <forward_list>
+
 namespace idk::vkn
 {
 	VulkanView& View();
