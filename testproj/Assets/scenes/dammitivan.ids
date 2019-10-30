@@ -77,10 +77,10 @@
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
       rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
+        w: 0.95294625
+        x: 0.2165041
+        y: -0.20690492
+        z: 0.04700765
     static_friction: 0.6
   - !Collider 
     bounciness: 0

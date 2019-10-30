@@ -19,7 +19,7 @@ namespace idk
 {
 	constexpr float restitution_slop = 0.01f;
 	constexpr float penetration_min_slop = 0.001f;
-	constexpr float penetration_max_slop = 0.9f;
+	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
@@ -334,7 +334,7 @@ namespace idk
 						{
 							auto mono_obj = collider_type->Construct();
 							mono_obj.Assign("handle", rhs.id);
-							thunk->Invoke(mb->GetObject(), lhs.id, mono_obj);
+							thunk->Invoke(mb->GetObject(), mono_obj.Raw());
 						}
 					}
 					// fire rhs events
@@ -347,7 +347,7 @@ namespace idk
 						{
 							auto mono_obj = collider_type->Construct();
 							mono_obj.Assign("handle", lhs.id);
-							thunk->Invoke(mb->GetObject(), rhs.id, mono_obj);
+							thunk->Invoke(mb->GetObject(), mono_obj.Raw());
 						}
 					}
 				}
