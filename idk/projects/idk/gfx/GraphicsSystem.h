@@ -45,6 +45,7 @@ namespace idk
 		GSinglePassCube,
 		GMax
 	};
+	struct RenderRequest;
 
 	class GraphicsSystem
 		: public ISystem
@@ -84,11 +85,7 @@ namespace idk
 		std::optional<AnimatedRenderObject> GetAnimatedRenderObj(const SkinnedMeshRenderer& skinned_mesh_renderer, const hash_table<Handle<Animator>, size_t>& index_table);
 		std::optional<RenderObject> GetRenderObj(const MeshRenderer& skinned_mesh_renderer);
 
-		size_t AddRenderRequest(
-			CameraData camera,
-			vector<RenderObject> mesh_render,
-			vector<AnimatedRenderObject> skinned_mesh_render,
-			vector<SkeletonTransforms> skeleton_transforms);
+		size_t AddRenderRequest(RenderRequest&& request);
 
 		bool RenderRequestStatus(size_t index);
 
@@ -101,7 +98,7 @@ namespace idk
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;
 			bool done_flag=false;
-
+			bool valid_flag = false;
 			RscHandle<ShaderProgram> mesh_vtx;
 			RscHandle<ShaderProgram> skinned_mesh_vtx;
 		};

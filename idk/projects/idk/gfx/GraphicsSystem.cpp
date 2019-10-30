@@ -10,8 +10,53 @@
 #include <gfx/Mesh.h>
 //#include <gfx/CameraControls.h>
 
+#include <atomic>
+
 namespace idk
 {
+	enum class RequestState
+	{
+		eInvalid,
+		eNeedRender,
+		eRendered
+	};
+
+	struct RenderRequest
+	{
+		CameraData camera;
+		vector<RenderObject> mesh_render;
+		vector<AnimatedRenderObject> skinned_mesh_render;
+		vector<SkeletonTransforms> skeleton_transforms;
+		std::atomic<RequestState> _state = RequestState::eInvalid;
+
+		void MarkRendered()
+		{
+			_state = RequestState::eRendered;
+		}
+
+		bool NeedsRendering()const
+		{
+			return _state == RequestState::eNeedRender;
+		}
+
+		bool Ready()const
+		{
+			return _state == RequestState::eRendered;
+		}
+		void Clear()
+		{
+			_state = RequestState::eInvalid;
+		}
+		void Set(RenderRequest&& req)
+		{
+			camera = std::move(req.camera);
+			mesh_render = std::move(req.mesh_render);
+			skinned_mesh_render = std::move(req.skinned_mesh_render);
+			skeleton_transforms = std::move(req.skeleton_transforms);
+			_state = RequestState::eNeedRender;
+		}
+
+	};
 	void GraphicsSystem::PrepareLights(span<Light> lights)
 	{
 		for (auto& light : lights)
@@ -78,8 +123,13 @@ namespace idk
 		return obj;		
 	}
 
-	size_t GraphicsSystem::AddRenderRequest(CameraData camera, vector<RenderObject> mesh_render, vector<AnimatedRenderObject> skinned_mesh_render, vector<SkeletonTransforms> skeleton_transforms)
+	size_t GraphicsSystem::AddRenderRequest(RenderRequest&& request)
 	{
+
+		CameraData& camera = request.camera;
+		vector<RenderObject>& mesh_render = request.mesh_render;
+			vector<AnimatedRenderObject>& skinned_mesh_render = request.skinned_mesh_render;
+		vector<SkeletonTransforms> &skeleton_transforms = request.skeleton_transforms;
 		//Todo: Add shaders
 		return render_requests.emplace_back(SpecialRenderBuffer{ camera,std::move(mesh_render),std::move(skinned_mesh_render),std::move(skeleton_transforms),false });
 	}
