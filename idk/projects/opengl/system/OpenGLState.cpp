@@ -137,6 +137,7 @@ namespace idk::ogl
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& font_render_data = curr_object_buffer.font_render_data;
 
 		for (auto& cam : curr_object_buffer.camera)
 		{
@@ -452,6 +453,11 @@ namespace idk::ogl
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
+
+			/*for (auto& elem : font_render_data)
+			{
+
+			}*/
 
 
             static vector<OpenGLBuffer> bufs = []()

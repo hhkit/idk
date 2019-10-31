@@ -55,6 +55,8 @@ namespace idk::reflect
         , RscHandle<Prefab>
 
         // variants
+		, RscHandle<FontAtlas>
+		, UniformInstance
 		, UniformInstanceValue
 		, CameraClear
 		, LightVariant

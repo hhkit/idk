@@ -181,7 +181,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSData.h" />
+    <ClInclude Include="OpenGLFontAtlasFactory.h" />
     <ClInclude Include="resource\OpenGLCubeMapLoader.h" />
+    <ClInclude Include="resource\OpenGLFontAtlas.h" />
+    <ClInclude Include="resource\OpenGLFontAtlasLoader.h" />
     <ClInclude Include="resource\OpenGLRenderTargetLoader.h" />
     <ClInclude Include="PixelData.h" />
     <ClInclude Include="program\ProgramFactory.h" />
@@ -213,6 +216,9 @@
     <ClCompile Include="resource\OpenGLCubemap.cpp" />
     <ClCompile Include="resource\OpenGLCubemapFactory.cpp" />
     <ClCompile Include="resource\OpenGLCubeMapLoader.cpp" />
+    <ClCompile Include="resource\OpenGLFontAtlas.cpp" />
+    <ClCompile Include="resource\OpenGLFontAtlasFactory.cpp" />
+    <ClCompile Include="resource\OpenGLFontAtlasLoader.cpp" />
     <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
     <ClCompile Include="resource\OpenGLTextureLoader.cpp" />
     <ClCompile Include="system\FrameBufferManager.cpp" />

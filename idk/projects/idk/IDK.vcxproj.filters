@@ -56,9 +56,6 @@
     <Filter Include="res">
       <UniqueIdentifier>{0bd97395-0815-4a82-a32b-3f8047af46ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="util">
-      <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
-    </Filter>
     <Filter Include="serialize">
       <UniqueIdentifier>{1edb08ba-9e8a-420f-aa06-8800e1ee860c}</UniqueIdentifier>
     </Filter>
@@ -121,6 +118,12 @@
     </Filter>
     <Filter Include="gfx\shadergraph">
       <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\Font">
+      <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\util">
+      <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -264,10 +267,10 @@
       <Filter>res</Filter>
     </ClInclude>
     <ClInclude Include="util\string_hash.h">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClInclude>
     <ClInclude Include="util\macro_utils.h">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClInclude>
     <ClInclude Include="file\FileSystem.h">
       <Filter>file</Filter>
@@ -291,7 +294,7 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="util\enum.h">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioListener.h">
       <Filter>audio</Filter>
@@ -360,7 +363,7 @@
       <Filter>math\interp</Filter>
     </ClInclude>
     <ClInclude Include="util\align.h">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClInclude>
     <ClInclude Include="gfx\gfx_data.h">
       <Filter>gfx</Filter>
@@ -513,7 +516,7 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="util\ioutils.h">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClInclude>
     <ClInclude Include="math\shapes.h">
       <Filter>math</Filter>
@@ -546,7 +549,7 @@
       <Filter>gfx\shadergraph</Filter>
     </ClInclude>
     <ClInclude Include="util\hash_combine.h">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CubeMap.h">
       <Filter>gfx</Filter>
@@ -840,6 +843,15 @@
     <ClInclude Include="core\NullHandleException.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\FontAtlas.h">
+      <Filter>gfx\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Font.h">
+      <Filter>gfx\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FontData.h">
+      <Filter>gfx\Font</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1009,7 +1021,7 @@
       <Filter>anim</Filter>
     </ClCompile>
     <ClCompile Include="util\ioutils.cpp">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </ClCompile>
     <ClCompile Include="anim\SkinnedMeshRenderer.cpp">
       <Filter>anim</Filter>
@@ -1227,6 +1239,13 @@
     <ClCompile Include="core\NullHandleException.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="util\easing.cpp" />
+    <ClCompile Include="gfx\FontAtlas.cpp">
+      <Filter>gfx\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Font.cpp">
+      <Filter>gfx\Font</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1314,7 +1333,7 @@
       <Filter>res</Filter>
     </None>
     <None Include="util\string_hash.inl">
-      <Filter>util</Filter>
+      <Filter>test\util</Filter>
     </None>
     <None Include="scene\Scene.inl">
       <Filter>scene</Filter>

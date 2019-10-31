@@ -6,6 +6,8 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
+#include <gfx/Font.h>
+
 #include <gfx/DebugRenderer.h>
 #include <gfx/Mesh.h>
 //#include <gfx/CameraControls.h>
@@ -155,6 +157,7 @@ namespace idk
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
+		span<Font> fonts,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
 		span<const Light> lights)
@@ -202,7 +205,7 @@ namespace idk
 			if (obj)
 			{
 				auto& render_obj = *obj;
-				Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
+				//Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
 				result.mesh_render.emplace_back(std::move(render_obj));
 			}
 		}
@@ -239,6 +242,12 @@ namespace idk
                 render_data.material_instance = elem.renderer.material;
             }
         }
+
+		for (auto& f : fonts)
+		{
+			auto& render_data = result.font_render_data.emplace_back();
+			render_data = f.fontData;
+		}
 
 
 		SubmitBuffers(std::move(result));
