@@ -29,7 +29,7 @@ namespace idk
 			OnSceneChange.Fire(_active_scene);
 		}
 
-		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(uint8_t(0x81));
+		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(Scene::prefab);
 		_prefab_scene->Load();
 	}
 
@@ -62,7 +62,7 @@ namespace idk
 
 	RscHandle<Scene> SceneManager::GetSceneByBuildIndex(unsigned char index) const
 	{
-		if (index == 0x81)
+		if (index == Scene::prefab)
 			return _prefab_scene;
 
 		return _scenes[index];

@@ -39,6 +39,8 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         int _prefab_curr_component_nth;
         vector<string> _curr_property_stack;
+        // spawn prefab instances in prefab scene so prefab assets can be displayed.
+        hash_table<RscHandle<Prefab>, Handle<GameObject>> _prefab_store;
 
         //If multiple objects are selected, this will only display the first gameObject.
         void DisplayGameObjects(vector<Handle<GameObject>> gos);			

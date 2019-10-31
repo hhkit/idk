@@ -113,7 +113,15 @@ namespace idk {
 
             DisplayGameObjectHeader(gos[0]);
 
-            if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
+            if (gos[0].scene == Scene::prefab)
+            {
+                if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
+                {
+                    if (prefab_inst->prefab)
+                        _prefab_inst = gos[0]->GetComponent<PrefabInstance>();
+                }
+            }
+            else if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
                 if (prefab_inst->object_index == 0)
                     DisplayPrefabInstanceControls(prefab_inst);
@@ -322,6 +330,8 @@ namespace idk {
             game_object->SetActive(is_active);
 		ImGui::SameLine();
         ImGui::PushItemWidth(-8.0f);
+        if (game_object.scene == Scene::prefab)
+            ImGuidk::PushDisabled();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
 			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
@@ -331,11 +341,12 @@ namespace idk {
 					outputString.append(std::to_string(i));
 					outputString.append(")");
 				}
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>, GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
-
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,
+                    GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
 			}
-
 		}
+        if (game_object.scene == Scene::prefab)
+            ImGuidk::PopDisabled();
         ImGui::PopItemWidth();
 
 

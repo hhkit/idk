@@ -6,8 +6,8 @@ namespace idk
 {
 	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()
 	{
-		auto retval = std::make_unique<Scene>((unsigned char) 0x80);
-		GameState::GetGameState().ActivateScene(0x80);
+		auto retval = std::make_unique<Scene>(Scene::editor);
+		GameState::GetGameState().ActivateScene(Scene::editor);
 		return retval;
 	}
 

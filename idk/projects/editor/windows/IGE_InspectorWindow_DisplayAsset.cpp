@@ -8,6 +8,7 @@
 #include <editor/windows/IGE_MaterialEditor.h>
 #include <gfx/ShaderGraph.h>
 #include <prefab/PrefabUtility.h>
+#include <scene/SceneManager.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <imgui/imgui_internal.h>
@@ -30,6 +31,13 @@ namespace idk
 
     void IGE_InspectorWindow::DisplayAsset(GenericResourceHandle handle)
     {
+        ImGui::GetWindowDrawList()->ChannelsSplit(2);
+        ImGui::GetWindowDrawList()->ChannelsSetCurrent(1);
+
+        ImGui::BeginGroup();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4.0f);
+
         ImGui::Text(get_asset_name(handle).c_str());
 
         std::visit([&](auto h)
@@ -40,6 +48,17 @@ namespace idk
             ImGui::Text(format_name(reflect::get_type<ResT>().name()).c_str());
             ImGui::Text(string(handle.guid()).c_str());
 
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
+            ImGui::Dummy(ImVec2(ImGui::GetWindowContentRegionWidth(), 4.0f));
+            ImGui::EndGroup();
+
+            ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
+            ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_PopupBg));
+            ImGui::GetWindowDrawList()->ChannelsMerge();
+
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
+            ImGui::Separator();
+
             DisplayAsset(h);
         }, handle);
     }
@@ -47,127 +66,13 @@ namespace idk
     template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
     {
-        auto& data = prefab->data[0];
-
-        auto name = reflect::get_type<Transform>().name();
-        auto trans = data.FindComponent(name, 0);
-        if (trans.valid())
-        {
-            ImGui::PushID(0);
-            if (ImGui::CollapsingHeader(name.data(), ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                auto& c = trans.get<Transform>();
-
-                const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
-                const float pad_y = ImGui::GetStyle().FramePadding.y;
-
-                ImGui::PushItemWidth(item_width);
-
-                auto y = ImGui::GetCursorPosY();
-                ImGui::SetCursorPosY(y + pad_y);
-                ImGui::Text("Position");
-                ImGui::SetCursorPosY(y);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-                ImGuidk::DragVec3("##0", &c.position);
-
-                y = ImGui::GetCursorPosY();
-                ImGui::SetCursorPosY(y + pad_y);
-                ImGui::Text("Rotation");
-                ImGui::SetCursorPosY(y);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-                ImGuidk::DragQuat("##1", &c.rotation);
-
-                y = ImGui::GetCursorPosY();
-                ImGui::SetCursorPosY(y + pad_y);
-                ImGui::Text("Scale");
-                ImGui::SetCursorPosY(y);
-                ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-                if (ImGuidk::DragVec3("##2", &c.scale))
-                {
-                    PrefabUtility::PropagatePropertyToInstances(prefab, 0, name, "scale", 0);
-                    prefab->Dirty();
-                }
-
-                ImGui::PopItemWidth();
-            }
-            ImGui::PopID();
-        }
-
-        auto& components = prefab->data[0].components;
-
-        int i = 0;
-        for (auto& c : components)
-        {
-            ++i;
-            if (c.type == reflect::get_type<Transform>() ||
-                c.type == reflect::get_type<Name>())
-                continue;
-
-            auto cursor_pos = ImGui::GetCursorPos();
-
-            ImGui::PushID(i);
-            if (ImGui::CollapsingHeader(c.type.name().data(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap))
-            {
-                if (displayVal(c))
-                {
-                    PrefabUtility::PropagatePrefabChangesToInstances(prefab);
-                    prefab->Dirty();
-                }
-            }
-
-            auto cursor_pos2 = ImGui::GetCursorPos();
-
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 10);
-            ImGui::SetCursorPosY(cursor_pos.y);
-            if (ImGui::Button("..."))
-            {
-                ImGui::OpenPopup("AdditionalOptions");
-            }
-
-            if (ImGui::BeginPopup("AdditionalOptions", ImGuiWindowFlags_None))
-            {
-                if (ImGui::MenuItem("Reset"))
-                {
-
-                }
-                ImGui::Separator();
-                if (ImGui::MenuItem("Remove Component"))
-                {
-                    PrefabUtility::RemoveComponentFromPrefab(prefab, 0, i - 1);
-                    prefab->Dirty();
-                }
-                ImGui::EndPopup();
-            }
-
-            ImGui::SetCursorPos(cursor_pos2);
-
-            ImGui::PopID();
-        }
-
-        ImGui::Separator();
-        ImGui::SetCursorPosX(window_size.x * 0.25f);
-        if (ImGui::Button("Add Component", ImVec2{ window_size.x * 0.5f, 0.0f }))
-            ImGui::OpenPopup("AddComp");
-
-        if (ImGui::BeginPopup("AddComp"))
-        {
-            for (const char* c_name : GameState::GetComponentNames())
-            {
-                string displayName = c_name;
-                if (displayName == "Transform" ||
-                    displayName == "Name" ||
-                    displayName == "Tag" ||
-                    displayName == "Layer" ||
-                    displayName == "PrefabInstance")
-                    continue;
-
-                if (ImGui::MenuItem(displayName.c_str()))
-                {
-                    PrefabUtility::AddComponentToPrefab(prefab, 0, reflect::get_type(c_name).create());
-                }
-            }
-            ImGui::EndPopup();
-        }
+        auto iter = _prefab_store.find(prefab);
+        if (iter == _prefab_store.end())
+            iter = _prefab_store.emplace(prefab, PrefabUtility::Instantiate(prefab, *Core::GetSystem<SceneManager>().GetPrefabScene())).first;
+        DisplayGameObjects({ iter->second });
+        if (iter->second->GetComponent<PrefabInstance>()->overrides.size() ||
+            iter->second->GetComponents().size() != prefab->data[0].components.size() + 1) // + 1 for prefab instance
+            PrefabUtility::ApplyPrefabInstance(iter->second);
     }
 
     template<>

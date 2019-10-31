@@ -52,6 +52,6 @@ namespace idk
 		GameState*         _gs { nullptr };
 		SceneGraphBuilder  _sg_builder;
 		RscHandle<Scene>   _prefab_scene;
-		array<RscHandle<Scene>, 0x82> _scenes;
+		array<RscHandle<Scene>, MaxScene> _scenes;
 	};
 }

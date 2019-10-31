@@ -8,7 +8,7 @@ data:
       x: 5
       y: 6
       z: 7
-    scale: {x: 4.9, y: 4, z: 4}
+    scale: {x: 9.75, y: 8.74, z: 4}
   - !Name 
     name: stoopidguy
   - !Collider 
@@ -17,7 +17,7 @@ data:
     enabled: 1
     is_trigger: 0
     shape: !sphere 
-      center: {x: 0, y: -0.84, z: 0}
+      center: {x: 0.9, y: -0.84, z: 0}
       radius: 0.5
     static_friction: 0.6
   - !Collider 
@@ -26,12 +26,13 @@ data:
     enabled: 1
     is_trigger: 0
     shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 0.53, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
     static_friction: 0.6
   - !MeshRenderer 
     cast_shadows: 1

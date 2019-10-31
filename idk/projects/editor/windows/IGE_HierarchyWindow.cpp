@@ -155,7 +155,7 @@ namespace idk {
 			if (!handle) //Ignore handle zero
 				return true;
 
-			if (!show_editor_objects && handle.scene == 0x80) {// ignore editor
+			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) { // ignore editor
 				++selectedCounter; //counter here is for shift selecting
 
 				return true;
