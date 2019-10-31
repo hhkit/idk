@@ -6,10 +6,10 @@ namespace idk
 {
 	struct capsule
 	{
-		real radius{};
-		real height{};
+		real radius{0.5f};
+		real height{2};
 		vec3 center;
-		vec3 dir; // taken to be "forward" or "z-axis"
+		vec3 dir{ 0,1,0 }; // Direction of capsule faces up
 
 		aabb bounds() const;
 
