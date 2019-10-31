@@ -296,8 +296,8 @@ namespace idk {
 
 	vec2 IGE_SceneView::GetMousePosInWindowNormalized()
 	{
-		vec2 i = GetMousePosInWindow();
-		vec2 v = GetScreenSize();
+		vec2 i = GetMousePosInWindow() - draw_rect_offset;
+        const vec2 v = draw_rect_size;
 
 		i.x = i.x != 0.0f ? i.x / v.x : 0.0f;
 		i.y = i.y != 0.0f ? i.y / v.y : 0.0f;
