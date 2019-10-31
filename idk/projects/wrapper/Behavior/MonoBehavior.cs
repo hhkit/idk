@@ -3,19 +3,26 @@ using System.Collections.Generic;
 
 namespace idk
 {
+    /// <summary>
+    /// MonoBehavior is the base class from which every IDK script derived.
+    /// When you use C#, you must explicitly derive from MonoBehavior.
+    /// </summary>
     public class MonoBehavior : Component
     {
         List<Coroutine> coroutines = new List<Coroutine>();
         List<Coroutine> new_coroutines = new List<Coroutine>();
 
-        /// public virtual void OnCollisionEnter(Collision other) { }
-        /// public virtual void OnCollisionStay(Collision other) { }
-        /// public virtual void OnCollisionExit(Collision other) { }
+        // public virtual void OnCollisionEnter(Collision other) { }
+        // public virtual void OnCollisionStay(Collision other) { }
+        // public virtual void OnCollisionExit(Collision other) { }
 
         /// <summary>
         /// Start a coroutine.
         /// </summary>
         /// <param name="enumerator">Return from IEnumerator function</param>
+        /// <example>
+        /// poop.
+        /// </example>
         /// <returns>Reference to the coroutine.</returns>
         public Coroutine StartCoroutine(IEnumerator enumerator)
         {
