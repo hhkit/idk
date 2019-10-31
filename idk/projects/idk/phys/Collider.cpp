@@ -6,6 +6,10 @@
 
 namespace idk
 {
+	bool Collider::is_enabled_and_active() const
+	{
+		return enabled && GetGameObject()->ActiveInHierarchy();
+	}
 	aabb Collider::bounds() const
 	{
 		return std::visit([&](const auto& shape) { return (shape * GetGameObject()->Transform()->GlobalMatrix()).bounds(); }, shape);

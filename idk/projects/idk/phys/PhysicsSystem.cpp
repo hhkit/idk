@@ -51,7 +51,8 @@ namespace idk
 		{
 			std::visit([&](const auto& shape)
 				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), collider.is_trigger ? color{0, 1, 1} : c, dur);
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), 
+						collider.is_enabled_and_active() ? collider.is_trigger ? color{ 0, 1, 1 } : c : color{0.5}, dur);
 				}, collider.shape);
 		};
 
@@ -99,6 +100,10 @@ namespace idk
 					old_mat[3].xyz = new_pos;
 					rigidbody._predicted_tfm = old_mat;
 				}
+				else
+				{
+					rigidbody._predicted_tfm = tfm->GlobalMatrix();
+				}
 			}
 		};
 
@@ -119,6 +124,9 @@ namespace idk
 				{
 					const auto& lcollider = colliders[i];
 					const auto& rcollider = colliders[j];
+
+					if (!(lcollider.is_enabled_and_active() && rcollider.is_enabled_and_active()))
+						continue;
 
 					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result
 						{
@@ -256,7 +264,7 @@ namespace idk
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 
-					if (rrb_ptr && !lrb_ptr->is_kinematic)
+					if (rrb_ptr && !rrb_ptr->is_kinematic)
 					{
 						auto& ref_rb = *rrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;

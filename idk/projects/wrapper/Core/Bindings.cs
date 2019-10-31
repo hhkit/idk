@@ -150,6 +150,12 @@ namespace idk
         public extern static void RigidBodySetPosition(ulong id, Vector3 val);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool RigidBodyGetIsKinematic(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RigidBodySetIsKinematic(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool RigidBodyGetUseGravity(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

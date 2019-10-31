@@ -64,15 +64,9 @@
             }
         }
 
-        public void SetParent(Transform parent, bool preserve_global)
-        {
-            ulong parent_id = parent ? parent.gameObject.handle : 0;
-            Bindings.TransformSetParent(handle, parent_id, preserve_global);
-        }
-
         public void SetParent(GameObject parent, bool preserve_global)
         {
-            ulong parent_id = parent.handle;
+            ulong parent_id = parent ? parent.handle : 0;
             Bindings.TransformSetParent(handle, parent_id, preserve_global);
         }
 
