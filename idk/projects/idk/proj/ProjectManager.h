@@ -10,6 +10,7 @@ namespace idk
 	{
 	public:
 		static constexpr string_view ext = ".idk";
+		Signal<> OnProjectSaved;
 
         void LoadProject(string_view full_path);
 		void SaveProject();

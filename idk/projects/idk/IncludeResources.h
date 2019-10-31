@@ -8,8 +8,10 @@
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderTemplate.h>
+#include <gfx/ShaderGraph.h>
 #include <gfx/Texture.h>
 #include <gfx/CubeMap.h>
+#include <gfx/FontAtlas.h>
 #include <gfx/RenderTarget.h>
 #include <gfx/Framebuffer.h>
 #include <test/TestResource.h>

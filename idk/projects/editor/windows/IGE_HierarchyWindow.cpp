@@ -23,6 +23,7 @@ of the editor.
 #include <core/GameObject.h>
 #include <common/Name.h>
 #include <common/Transform.h>
+#include <prefab/PrefabInstance.h>
 #include <gfx/Camera.h>
 #include <core/Core.h>
 #include <prefab/PrefabUtility.h>
@@ -185,17 +186,17 @@ namespace idk {
 				goName = c_name->name;
 			
 			const bool isNameEmpty = goName.empty();
-            const bool is_prefab = bool(PrefabUtility::GetPrefabInstanceRoot(handle));
+            const bool is_prefab = handle->HasComponent<PrefabInstance>();
             ImColor col = ImGui::GetColorU32(ImGuiCol_Text);
 			if (isNameEmpty) {
 				goName = "Unnamed (";
 				goName.append(std::to_string(handle.id));
 				goName.append(")");
 				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
-                col = ImVec4(0.9f, 0.0f, 0.0f, 0.9f);
+                col = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
 			}
             if (is_prefab)
-                col = style.Colors[ImGuiCol_PlotLinesHovered];
+                col = handle->GetComponent<PrefabInstance>()->prefab ? style.Colors[ImGuiCol_PlotLinesHovered] : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
             if (!handle->ActiveInHierarchy())
                 col.Value.w = 0.5f;
 

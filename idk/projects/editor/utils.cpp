@@ -5,6 +5,15 @@ namespace idk
 {
     string format_name(string_view name)
     {
+        if (name.empty())
+            return "";
+
+        if (name.front() == '<' && name.back() == '>')
+        {
+            name.remove_prefix(1);
+            name.remove_suffix(1);
+        }
+
         string str{ name };
         str[0] = (char)toupper(str[0]);
         for (int i = 0; i < str.size(); ++i)

@@ -89,7 +89,16 @@ namespace idk
 	{
 		auto res = animation_table.find(from.data());
 		if (res == animation_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
 			return;
+		}
+
+		AnimationState copy{ res->second };
+		copy.name = to;
+
+		animation_table.erase(res);
+		animation_table.emplace(to.data(), copy);
 	}
 
 	void Animator::AddLayer()

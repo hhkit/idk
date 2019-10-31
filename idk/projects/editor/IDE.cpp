@@ -255,6 +255,25 @@ namespace idk
 			i->Initialize();
 		}
 
+		Core::GetSystem<SceneManager>().OnSceneChange +=
+			[](RscHandle<Scene> active_scene)
+		{
+			if (auto path = Core::GetResourceManager().GetPath(active_scene))
+				Core::GetSystem<Application>().SetTitle(string{ "idk: " } +string{ *path });
+			else
+				Core::GetSystem<Application>().SetTitle(string{ " idk " });
+		};
+
+		Core::GetSystem<ProjectManager>().OnProjectSaved +=
+			[]()
+		{
+			auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+			if (auto path = Core::GetResourceManager().GetPath(active_scene))
+				Core::GetSystem<Application>().SetTitle(string{ "idk: " } +string{ *path });
+			else
+				Core::GetSystem<Application>().SetTitle(string{ " idk " });
+
+		};
 	}
 
 	void IDE::LateInit()
@@ -268,6 +287,7 @@ namespace idk
         }
 
 		SetupEditorScene();
+		
 	}
 
 	void IDE::Shutdown()

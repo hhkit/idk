@@ -160,8 +160,6 @@ namespace idk::ai_helpers
 	{
 		vector<ai_helpers::Vertex> vertices;
 		vector<unsigned> indices;
-
-		sphere bounding_volume;
 	};
 
 	struct VulkanMeshBuffers
@@ -174,8 +172,6 @@ namespace idk::ai_helpers
 		vector<ivec4>	bone_ids;
 		vector<vec4	>	bone_weights;
 		vector<unsigned> indices;
-
-		sphere bounding_volume;
 	};
 
 	bool Import(Scene& scene, PathHandle handle);
@@ -191,15 +187,12 @@ namespace idk::ai_helpers
 	// Should only be called after skeleton is built. If there is no skeleton, all meshes will have no bone weights
 
 	// Opengl mesh building
-	void WriteToVertices(Scene& scene, const aiMesh* mesh, OpenGLMeshBuffers& mesh_buffers);
-	void BuildMeshOpenGL(Scene& scene, OpenGLMeshBuffers& mesh_buffers, RscHandle<ogl::OpenGLMesh>& mesh_handle);
+	OpenGLMeshBuffers WriteToVertices(Scene& scene, const aiMesh* mesh);
+	void BuildMeshOpenGL(Scene& scene, const OpenGLMeshBuffers& mesh_buffers, const RscHandle<ogl::OpenGLMesh>& mesh_handle);
 
 	// Vulkan's cancer 
-	void WriteToBuffers(Scene& scene, const aiMesh* mesh,
-		vector<vec3>& positions, vector<vec3>& normals, vector<vec2>& uvs, vector<vec3>& tangents, vector<vec3>& bi_tangents, vector<ivec4>& bone_ids, vector<vec4>& bone_weights, vector<unsigned>& indices);
-
-	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, 
-		vector<vec3>& positions, vector<vec3>& normals, vector<vec2>& uvs, vector<vec3>& tangents, vector<vec3>& bi_tangents, vector<ivec4>& bone_ids, vector<vec4>& bone_weights, vector<unsigned>& indices);
+	VulkanMeshBuffers WriteToBuffers(Scene& scene, const aiMesh* mesh);
+	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, const VulkanMeshBuffers& mesh_buffers);
 
 	// Animation building. First compile all aiAnimations
 	void CompileAnimations(Scene& scene);

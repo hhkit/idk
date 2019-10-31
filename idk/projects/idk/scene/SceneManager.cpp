@@ -24,7 +24,10 @@ namespace idk
 			Core::GetResourceManager().Load(elem);
 		
 		if (_active_scene)
+		{
 			_active_scene->Load();
+			OnSceneChange.Fire(_active_scene);
+		}
 
 		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(uint8_t(0x81));
 		_prefab_scene->Load();
@@ -78,6 +81,7 @@ namespace idk
 	bool SceneManager::SetActiveScene(RscHandle<Scene> s)
 	{
 		_active_scene = s;
+		OnSceneChange.Fire(_active_scene);
 		return true;
 	}
 

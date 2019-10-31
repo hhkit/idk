@@ -17,7 +17,7 @@ namespace idk
 
 	bool halfspace::contains(const vec3& point) const
 	{
-		return point.dot(normal) > dist;
+		return point.dot(normal) + dist > 0.0f;
 	}
 
 	vec3 halfspace::origin_pt() const

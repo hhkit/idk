@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <res/Resource.h>
+#include <math/matrix_decomposition.h>
 
 namespace idk::anim
 {
