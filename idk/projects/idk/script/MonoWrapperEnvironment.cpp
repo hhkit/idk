@@ -8,6 +8,7 @@
 #include <mono/utils/mono-dl-fallback.h>
 #include <mono/metadata/mono-gc.h>
 #include <mono/utils/mono-logger.h>
+#include <mono/metadata/reflection.h>
 
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
@@ -46,6 +47,17 @@ namespace idk::mono
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
 	{
 		return !mono_method_can_access_field(main, field);
+	}
+
+	bool MonoWrapperEnvironment::IsAbstract(MonoType* type)
+	{
+		auto object_type = mono_type_get_object(mono_domain_get(), type);
+		auto img = mono_assembly_get_image(_assembly);
+		auto klass = mono_class_from_name(img, "idk", "IDK");
+		main = mono_class_get_method_from_name(klass, "TypeIsAbstract", 1);
+		void* args[] = { type, 0 };
+		auto retval = mono_runtime_invoke(main, nullptr, args, nullptr);
+		return *static_cast<bool*>(mono_object_unbox(retval));
 	}
 
 	MonoWrapperEnvironment::~MonoWrapperEnvironment()
@@ -282,36 +294,142 @@ namespace idk::mono
 			}
 		BIND_END();
 
+		BIND_START("idk.Bindings::TransformGetLocalPosition", vec3, Handle<Transform> h)
+		{
+			return h->position;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalPosition", void, Handle<Transform> h, vec3 v)
+		{
+			h->position = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalScale", vec3, Handle<Transform> h)
+		{
+			return h->scale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalScale", void, Handle<Transform> h, vec3 v)
+		{
+			h->scale = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalRotation", quat, Handle<Transform> h)
+		{
+			return h->rotation;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalRotation", void, Handle<Transform> h, quat v)
+		{
+			h->rotation = v;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::TransformForward",  vec3, Handle<Transform> h)
 			{
 				return h->Forward();
-			}BIND_END();
+			}
+		BIND_END();
 
 		BIND_START("idk.Bindings::TransformUp",  vec3, Handle<Transform> h)
 			{
 				return h->Up();
-			}BIND_END();
+			}
+		BIND_END();
 
 		BIND_START("idk.Bindings::TransformRight",  vec3, Handle<Transform> h)
 			{
 				return h->Right();
-			}BIND_END();
+			}
+		BIND_END();
 		
 		BIND_START("idk.Bindings::TransformGetParent",  uint64_t, Handle<Transform> h)
 			{
 				return h->parent.id;
-			}BIND_END();
+			}
+		BIND_END();
 
 		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
 			{
 				h->SetParent(parent_gameobject, preserve_global);
-			}BIND_END();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetChildren", MonoArray*, Handle<Transform> h)
+		{
+			auto sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(h->GetGameObject());
+
+			auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
+
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg->size() : 0);
+			if (sg)
+			{
+				auto sz = sg->size();
+				auto ptr = sg->begin();
+				for (int i = 0; i < sz; ++i)
+				{
+					auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
+					auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
+					void* args[] = { &ptr++->obj.id };
+					mono_runtime_invoke(method, mo, args, nullptr);
+					mono_array_setref(retval, i, mo);
+				}
+			}
+			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetForward", void, Handle<Transform> h, vec3 forward)
+		{
+			forward.normalize();
+
+			auto curr_fwd = h->Forward();
+			auto axis = curr_fwd.cross(forward);
+			auto length = axis.length();
+			if (length < 0.001f)
+				return;
+
+			auto angle = asin(length);
+			axis.normalize();
+
+			h->GlobalRotation(quat{axis, angle} * h->GlobalRotation());
+		}
+		BIND_END();
+
+		// physics
+		struct ManagedRaycast
+		{
+			bool valid;
+			uint64_t collider_id;
+			float distance;
+			vec3 normal;
+			vec3 point_of_collision;
+		};
+		BIND_START("idk.Bindings::PhysicsRaycast", ManagedRaycast, vec3 origin, vec3 direction, float max_dist, int mask, bool hit_triggers)
+		{
+			auto res = Core::GetSystem<PhysicsSystem>().Raycast(ray{ .origin = origin,.velocity = direction }, mask, hit_triggers);
+			if (res.size())
+			{
+				auto& first = res.front();
+				if (first.raycast_succ.distance_to_collision > max_dist)
+					return ManagedRaycast{ .valid = true,.collider_id = first.collider.id,.distance = first.raycast_succ.distance_to_collision,.point_of_collision = first.raycast_succ.point_of_collision };
+			}
+
+			return ManagedRaycast{ .valid = false };
+		}
+		BIND_END()
 
 		// RigidBody
 		BIND_START("idk.Bindings::RigidBodyGetMass", float, Handle<RigidBody> rb)
 		{
 			return rb->mass();
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodySetMass",  void, Handle<RigidBody> rb, float val)
 		{
@@ -322,7 +440,8 @@ namespace idk::mono
 		BIND_START("idk.Bindings::RigidBodyGetVelocity",  vec3, Handle<RigidBody> rb)
 		{
 			return rb->velocity() * Core::GetDT().count();
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodySetVelocity",  void, Handle<RigidBody> rb, vec3 val)
 		{
@@ -333,7 +452,8 @@ namespace idk::mono
 		BIND_START("idk.Bindings::RigidBodyGetPosition",  vec3, Handle < RigidBody> rb)
 		{
 			return rb->position();
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodySetPosition",  void, Handle<RigidBody> rb, vec3 val)
 		{
@@ -344,27 +464,32 @@ namespace idk::mono
 		BIND_START("idk.Bindings::RigidBodyGetUseGravity",  bool, Handle < RigidBody> rb)
 		{
 			return rb->use_gravity;
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodySetUseGravity",  void, Handle<RigidBody> rb, bool val)
 		{
 			rb->use_gravity = val;
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodySleep",  void, Handle<RigidBody> rb)
 		{
 			rb->sleep_next_frame = true;
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodyTeleport",  void, Handle<RigidBody> rb, vec3 val)
 		{
 			rb->TeleportBy(val);
-		}BIND_END();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RigidBodyAddForce",  void, Handle<RigidBody> rb, vec3 val)
 		{
 			rb->AddForce(val);
-		}BIND_END();
+		}
+		BIND_END();
 		
 		// Collider
 		BIND_START("idk.Bindings::ColliderSetEnabled",  void, Handle<Collider> col, bool val)
@@ -393,29 +518,29 @@ namespace idk::mono
 
 		// Animator
 		BIND_START("idk.Bindings::AnimatorPlay",  void, Handle<Animator> animator, MonoString* name)
-			{
-				auto s = unbox(name);
-				animator->Play(s.get());
-			}
+		{
+			auto s = unbox(name);
+			animator->Play(s.get());
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorCrossFade",  void, Handle<Animator> animator, MonoString* name, float time = 0.2f)
-			{
-				auto s = unbox(name);
-				animator->BlendTo(s.get(), time);
-			}
+		{
+			auto s = unbox(name);
+			animator->BlendTo(s.get(), time);
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorPause",  void, Handle<Animator> animator)
-			{
-				animator->Pause();
-			}
+		{
+			animator->Pause();
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorResume",  void, Handle<Animator> animator)
-			{
-				animator->Resume();
-			}
+		{
+			animator->Resume();
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorStop",  void, Handle<Animator> animator)
@@ -479,6 +604,28 @@ namespace idk::mono
             }
         }
         BIND_END();
+
+		BIND_START("idk.Bindings::RendererGetActive", bool, GenericHandle renderer)
+		{
+			switch (renderer.type)
+			{
+			case index_in_tuple_v<MeshRenderer, Handleables>: return handle_cast<MeshRenderer>(renderer)->enabled;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->enabled;
+			default: return {};
+			}
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RendererSetActive", void, GenericHandle renderer, bool set)
+		{
+			switch (renderer.type)
+			{
+			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->enabled = set;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->enabled = set;
+			default: return;
+			}
+		}
+		BIND_END();
 
         // Resource
 #define VALIDATE_RESOURCE(RES) case string_hash(#RES): return Core::GetResourceManager().Validate<RES>(guid);

@@ -156,6 +156,24 @@ namespace idk::ai_helpers
 		string file_ext{};
 	};
 
+	struct OpenGLMeshBuffers
+	{
+		vector<ai_helpers::Vertex> vertices;
+		vector<unsigned> indices;
+	};
+
+	struct VulkanMeshBuffers
+	{
+		vector<vec3	>	positions;
+		vector<vec3	>	normals;
+		vector<vec2	>	uvs;
+		vector<vec3	>	tangents;
+		vector<vec3	>	bi_tangents;
+		vector<ivec4>	bone_ids;
+		vector<vec4	>	bone_weights;
+		vector<unsigned> indices;
+	};
+
 	bool Import(Scene& scene, PathHandle handle);
 	// Fill in mesh_nodes and meshes.
 	void CompileMeshes(Scene& scene, aiNode* node);
@@ -169,15 +187,12 @@ namespace idk::ai_helpers
 	// Should only be called after skeleton is built. If there is no skeleton, all meshes will have no bone weights
 
 	// Opengl mesh building
-	void WriteToVertices(Scene& scene, const aiMesh* mesh, vector<ai_helpers::Vertex>& vertices, vector<unsigned>& indices);
-	void BuildMeshOpenGL(Scene& scene, const vector<ai_helpers::Vertex>& vertices, vector<unsigned>& indices, RscHandle<ogl::OpenGLMesh>& mesh_handle);
+	OpenGLMeshBuffers WriteToVertices(Scene& scene, const aiMesh* mesh);
+	void BuildMeshOpenGL(Scene& scene, const OpenGLMeshBuffers& mesh_buffers, const RscHandle<ogl::OpenGLMesh>& mesh_handle);
 
 	// Vulkan's cancer 
-	void WriteToBuffers(Scene& scene, const aiMesh* mesh,
-		vector<vec3>& positions, vector<vec3>& normals, vector<vec2>& uvs, vector<vec3>& tangents, vector<vec3>& bi_tangents, vector<ivec4>& bone_ids, vector<vec4>& bone_weights, vector<unsigned>& indices);
-
-	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, 
-		vector<vec3>& positions, vector<vec3>& normals, vector<vec2>& uvs, vector<vec3>& tangents, vector<vec3>& bi_tangents, vector<ivec4>& bone_ids, vector<vec4>& bone_weights, vector<unsigned>& indices);
+	VulkanMeshBuffers WriteToBuffers(Scene& scene, const aiMesh* mesh);
+	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, const VulkanMeshBuffers& mesh_buffers);
 
 	// Animation building. First compile all aiAnimations
 	void CompileAnimations(Scene& scene);

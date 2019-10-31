@@ -23,6 +23,9 @@
         r: 1
       width: 5
     shadow_bias: 1.1920929e-07
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !TestShou {i: 0}
 - !4295032832 
   - active: 1
   - !Transform 
@@ -40,6 +43,63 @@
     object_index: 0
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
+  - !ParticleSystem 
+    color_over_lifetime: 
+      color: 
+        max: 
+          a: 1
+          b: 1
+          g: 1
+          r: 1
+        min: 
+          a: 1
+          b: 1
+          g: 1
+          r: 1
+        mode: Constant
+      enabled: 0
+    emission: {enabled: 1, rate_over_time: 10}
+    main: 
+      duration: 5
+      gravity_modifier: 0
+      in_world_space: 0
+      looping: 1
+      max_particles: 1000
+      play_on_awake: 1
+      prewarm: 0
+      start_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      start_delay: 0
+      start_lifetime: 5
+      start_rotation: {value: 0}
+      start_size: 1
+      start_speed: 5
+    renderer: 
+      enabled: 1
+      material: {guid: bfa6c3e0-9b52-412b-b3e7-c85ee93190ca}
+    rotation_over_lifetime: 
+      angular_velocity: 
+        max: {value: 0.7853982}
+        min: {value: 0.7853982}
+        mode: Constant
+      enabled: 0
+    shape: 
+      enabled: 1
+      radius: 1
+      radius_thickness: 1
+      randomize_direction: 0
+    size_over_lifetime: 
+      enabled: 0
+      size: {max: 1, min: 0, mode: Linear}
+    velocity_over_lifetime: 
+      enabled: 0
+      linear: 
+        max: {x: 0, y: 0, z: 0}
+        min: {x: 0, y: 0, z: 0}
+        mode: Constant
   - !Animator 
     animation_table: 
       idle: 
@@ -72,7 +132,7 @@
           motion: {guid: afcdbeaa-e5e1-4a92-9360-abe7b85dde73}
     layer_table: {Base Layer: 0}
     layers: 
-    - blend_type: !AnimLayerBlend Override_Blend
+    - blend_type: Override_Blend
       bone_mask: 
       - 1
       - 1
@@ -178,8 +238,6 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
-  - !MonoBehavior 
-    {enabled: 1, script_data: !AnimationTest ~}
 - !408021958656 
   - active: 1
   - !Transform 
@@ -202,9 +260,41 @@
     near_plane: 0.1
     overlay_debug_draw: 0
     render_target: {guid: 00000000-0000-0000-0000-000000000000}
-    viewport: !Viewport 
+    viewport: 
       position: {x: 0, y: 0}
       size: {x: 1, y: 1}
+- !416611893248 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: -1.8351101, z: 0}
+    rotation: 
+      w: 0.89813006
+      x: 0
+      y: 0
+      z: -0.43972987
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: testy
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 0
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
 - !8590000128 
   - active: 1
   - !Transform 
@@ -266,6 +356,52 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 0, _bone_name: _root_jnt}
+- !412316925952 
+  - active: 1
+  - !Transform 
+    parent: {id: 65536}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.5582573
+      x: 0.77905905
+      y: -0.27771544
+      z: 0.06549748
+    scale: {x: 1, y: 1.0000002, z: 2.0600002}
+  - !Name 
+    name: ""
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
+    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
+    receive_shadows: 1
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !Test 
+      f: 0
+      i: 0
+      jump_force: 0
+      movement: {x: 0, y: 0, z: 0}
+      prefab: {guid: 00000000-0000-0000-0000-000000000000}
 - !21474902016 
   - active: 1
   - !Transform 

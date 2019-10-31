@@ -1,0 +1,48 @@
+- !65536 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.70710677
+      x: -0.70710677
+      y: -0
+      z: -0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Directional Light
+  - !Light 
+    casts_shadows: 1
+    light: !DirectionalLight 
+      height: 5
+      intensity: 1
+      light_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      width: 5
+    shadow_bias: 1.1920929e-07
+- !4295032832 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -0.19607556, y: 0.19930372, z: -5.196042}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: sphere
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: 9b994921-8483-4621-8ddc-db9bfdefe67b}
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: c3542b8c-7fd5-41fb-8c83-d59da5ec7a7f}
+    receive_shadows: 1

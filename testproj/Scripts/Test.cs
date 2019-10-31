@@ -25,7 +25,7 @@ namespace TestAndSeek
             System.Console.WriteLine("and takedown {0}", i);
         }
 
-        public override void Start()
+        void Start()
         {
             rb = gameObject.GetComponent<RigidBody>();
             ts = gameObject.GetComponent<TestShou>();
@@ -35,33 +35,34 @@ namespace TestAndSeek
             foreach (var elem in FindObjectsOfType<TestShou>())
             {
                 Debug.Log("I " + i + " am " + elem.i);
-                Destroy(elem.gameObject);
+                //Destroy(elem.gameObject);
             }
         }
 
-        public override void OnTriggerEnter(Collider other)
+        void OnTriggerEnter(Collider other)
         {
             f = 500;
         }
 
-        public override void OnTriggerStay(Collider other)
+        void OnTriggerStay(Collider other)
         {
             transform.rotation = Quaternion.Euler(0, 180 * Time.fixedDeltaTime, 0) * transform.rotation ;
             f += 5 * Time.fixedDeltaTime;
             Debug.Log("STAY" + f);
         }
 
-        public override void OnTriggerExit(Collider other)
+        void OnTriggerExit(Collider other)
         {
             i += 1;
         }
 
-        public override void FixedUpdate()
+        void FixedUpdate()
         {
             if (rb)
             {
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
                 rb.AddForce(f * (Input.GetAxis(Axis.Horizontal) * Vector3.right + Input.GetAxis(Axis.Vertical) * Vector3.forward));
+
 
                 if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
                 if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
@@ -87,10 +88,29 @@ namespace TestAndSeek
             }
         }
 
-        public override void Update()
+        void Update()
         {
+            //Debug.Log("Children" + transform.GetChildren().Length.ToString());
             if (prefab)
                 Debug.Log(prefab.ToString());
+
+            //if (Input.GetKeyDown(KeyCode.L))
+            //    GetComponentInParent<TestShou>().PrintI();
+
+            if (Input.GetKeyDown(KeyCode.R))
+                transform.forward = Quaternion.AngleAxis(-3.14f / 2, Vector3.up) * transform.forward;
+
+            if (Input.GetKey(KeyCode.Z))
+                transform.forward = Quaternion.AngleAxis(-3.14f / 6 * Time.deltaTime, Vector3.up) * transform.forward;
+
+            if (Input.GetKey(KeyCode.X))
+                transform.forward = Quaternion.AngleAxis(+3.14f / 6 * Time.deltaTime, Vector3.up) * transform.forward;
+
+        }
+
+        public void OnCollisionEnter(Collision c)
+        {
+            Debug.Log("Collide with " + c.gameObject.name +" with normal " + c.normal.x + " " + c.normal.y + " " + c.normal.z);
         }
 
         public void TestTransform(Transform t)

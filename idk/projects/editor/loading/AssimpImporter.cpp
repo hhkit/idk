@@ -53,21 +53,7 @@ namespace idk
 		// Building and adding all the meshes
 		if (importer_scene.has_meshes)
 		{
-			// For opengl
-			vector<ai_helpers::Vertex> vertices;
-
-			// For vulkan
-			vector<vec3	>	positions;
-			vector<vec3	>	normals;
-			vector<vec2	>	uvs;
-			vector<vec3	>	tangents;
-			vector<vec3	>	bi_tangents;
-			vector<ivec4>	bone_ids;
-			vector<vec4	>	bone_weights;
 			auto& mesh_modder = _data->_modder;
-
-			// For both
-			vector<unsigned> indices;
 
 			for (const auto& elem : importer_scene.meshes)
 			{
@@ -82,11 +68,11 @@ namespace idk
 							mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLMesh>();
 					}
 					mesh_handle->Name(elem->mName.data);
-					
+
 					// Buffers are cleared when they enter this function
-					ai_helpers::WriteToVertices(importer_scene, elem, vertices, indices);
+					auto mesh_data = ai_helpers::WriteToVertices(importer_scene, elem);
 					// Building the opengl buffers and descriptors
-					ai_helpers::BuildMeshOpenGL(importer_scene, vertices, indices, mesh_handle);
+					ai_helpers::BuildMeshOpenGL(importer_scene, mesh_data, mesh_handle);
 
 					mesh_handles.emplace_back(mesh_handle);
 					ret_val.Add(mesh_handle);
@@ -104,11 +90,9 @@ namespace idk
 					mesh_handle->Name(elem->mName.data);
 
 					// Collect the mesh data
-					ai_helpers::WriteToBuffers(importer_scene, elem,
-						positions, normals, uvs, tangents, bi_tangents, bone_ids, bone_weights, indices);
+					auto mesh_data = ai_helpers::WriteToBuffers(importer_scene, elem);
 					// Building the vulkan mesh data
-					ai_helpers::BuildMeshVulknan(importer_scene, mesh_modder, mesh_handle,
-						positions, normals, uvs, tangents, bi_tangents, bone_ids, bone_weights, indices);
+					ai_helpers::BuildMeshVulknan(importer_scene, mesh_modder, mesh_handle, mesh_data);
 
 					mesh_handles.emplace_back(mesh_handle);
 					ret_val.Add(mesh_handle);

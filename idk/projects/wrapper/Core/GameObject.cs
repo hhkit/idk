@@ -53,6 +53,39 @@ namespace idk
 
         }
 
+        public T GetComponentInChildren<T>() where T : Component, new()
+        {
+            var children = transform.GetChildren();
+            foreach (var child in children)
+            {
+                var comp = child.GetComponent<T>();
+                if (comp)
+                    return comp;
+            }
+
+            foreach (var child in children)
+            {
+                var comp = child.GetComponentInChildren<T>();
+                if (comp)
+                    return comp;
+            }
+
+            return null;
+        }
+
+        public T GetComponentInParent<T>() where T: Component, new()
+        {
+            var comp = GetComponent<T>();
+            if (comp)
+                return comp;
+
+            var parent = transform.parent;
+            if (parent)
+                return parent.GetComponent<T>();
+            else
+                return null;
+        }
+
         public void SetActive(bool new_active)
             => Bindings.GameObjectSetActive(handle, new_active);
     }

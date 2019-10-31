@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "PrefabData.h"
 #include <reflect/reflect.h>
 
 namespace idk

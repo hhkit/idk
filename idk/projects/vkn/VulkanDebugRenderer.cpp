@@ -19,6 +19,9 @@
 #include <vkn/vector_buffer.h>
 
 #include "VulkanDebugRenderer.h"
+
+#include <math/shapes/ray.h>
+
 namespace idk::vkn
 {
 	namespace glm
@@ -308,7 +311,7 @@ namespace idk::vkn
 	}
 	void VulkanDebugRenderer::Draw(const box& box, const color& color)
 	{
-		const mat4 tfm = translate(box.center) * mat4 { box.axes* scale(box.extents) };
+		const mat4 tfm = translate(box.center) * mat4 { box.axes() * scale(box.extents) };
 		DrawShape(MeshType::Box, tfm, color);
 	}
 	void VulkanDebugRenderer::Draw(const aabb& box, const color& color)

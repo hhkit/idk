@@ -42,12 +42,13 @@
     enabled: 1
     is_trigger: 0
     shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
     static_friction: 0.6
 - !8590000128 
   - active: 1
@@ -59,7 +60,7 @@
       x: 0
       y: 0
       z: 0
-    scale: {x: 1, y: 1, z: 1}
+    scale: {x: 1, y: 1.88, z: 1}
   - !Name 
     name: ""
   - !RigidBody 
@@ -73,12 +74,13 @@
     enabled: 1
     is_trigger: 0
     shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 0.95294625
+        x: 0.2165041
+        y: -0.20690492
+        z: 0.04700765
     static_friction: 0.6
   - !Collider 
     bounciness: 0
@@ -86,12 +88,13 @@
     enabled: 1
     is_trigger: 1
     shape: !box 
-      axes: 
-        intern[0]: {x: 1, y: 0, z: 0}
-        intern[1]: {x: 0, y: 1, z: 0}
-        intern[2]: {x: 0, y: 0, z: 1}
       center: {x: 0, y: 0, z: 0}
       extents: {x: 1, y: 1.21, z: 1}
+      rotation: 
+        w: 0.8849355
+        x: -0.11497883
+        y: -0.3125033
+        z: -0.32559288
     static_friction: 0.6
   - !MeshRenderer 
     cast_shadows: 1

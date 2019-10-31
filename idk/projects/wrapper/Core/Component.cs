@@ -22,5 +22,15 @@
         {
             return gameObject.GetComponent<T>();
         }
+
+        public T GetComponentInChildren<T>() where T : Component, new()
+        {
+            return gameObject.GetComponentInChildren<T>();
+        }
+
+        public T GetComponentInParent<T>() where T : Component, new()
+        {
+            return gameObject.GetComponentInParent<T>();
+        }
     }
 }

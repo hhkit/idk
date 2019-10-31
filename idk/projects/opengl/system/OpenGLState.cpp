@@ -16,7 +16,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/CubeMap.h>
 #include <opengl/resource/OpenGLCubemap.h>
-
+#include <math/shapes/frustum.h>
 #include <gfx/FramebufferFactory.h>
 
 #include <editor/IDE.h>
@@ -322,7 +322,6 @@ namespace idk::ogl
 		}
 
 		glEnable(GL_DEPTH_TEST);
-
 		RscHandle<FrameBuffer> main_buffer;
 		// range over cameras
 		for(auto cam: curr_object_buffer.camera)
@@ -408,8 +407,22 @@ namespace idk::ogl
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+			// If we only use proj_matrix, frustrum will be in view space.
+			// If we use proj * view, frustrum will be in model space
+			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
+
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
+				// Do culling here
+				sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
+
+				// We only draw if the frustrum contains the mesh
+				if (!frust.contains(transformed_bounds))
+				{
+					// LOG_TO(LogPool::GFX, "Culled Mesh");
+					continue;
+				}
+
 				// bind shader
 				const auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);

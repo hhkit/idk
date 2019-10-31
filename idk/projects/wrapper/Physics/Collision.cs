@@ -3,8 +3,8 @@
     public struct Collision
     {
         internal ulong colliderID;
-        internal Vector3 _impulse;
-        internal Vector3 _relativeVelocity;
+        internal Vector3 _normal;
+        internal Vector3 _point;
 
         public Collider collider { get 
             { 
@@ -13,9 +13,10 @@
                 return ret; 
             }
         }
-        public GameObject gameObject { get { return collider.gameObject; } }
-        public RigidBody rigidBody { get { return collider.attachedRigidbody; } }
-        public Vector3 relativeVelocity { get { return _relativeVelocity; } }
-        public Vector3 impulse { get { return _impulse; } }
+        public GameObject gameObject { get => collider.gameObject; } 
+        public RigidBody rigidBody { get => collider.attachedRigidbody; } 
+        public Transform transform { get => collider.transform; }
+        public Vector3 normal { get => _normal; } 
+        public Vector3 contactPoint { get => _point; }
     }
 }

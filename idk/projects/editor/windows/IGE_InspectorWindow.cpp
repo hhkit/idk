@@ -84,7 +84,11 @@ namespace idk {
         _prefab_inst = Handle<PrefabInstance>();
         if (_displayed_asset.guid())
         {
-            DisplayAsset(_displayed_asset);
+            const bool valid = std::visit([](auto h) { return bool(h); }, _displayed_asset);
+            if (valid)
+                DisplayAsset(_displayed_asset);
+            else
+                _displayed_asset = RscHandle<Texture>();
         }
         else
         {
@@ -111,9 +115,8 @@ namespace idk {
 
             if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
-                _prefab_inst = prefab_inst;
                 if (prefab_inst->object_index == 0)
-                    DisplayPrefabInstanceControls(_prefab_inst);
+                    DisplayPrefabInstanceControls(prefab_inst);
             }
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
@@ -416,8 +419,17 @@ namespace idk {
     void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
     {
         const float left_offset = 40.0f;
-
         ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Prefab").x);
+
+        if (!c_prefab->prefab)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+            ImGui::Text("Missing");
+            ImGui::PopStyleColor();
+            return;
+        }
+
+        _prefab_inst = c_prefab;
         ImGui::Text("Prefab");
         ImGui::SameLine();
         auto path = *Core::GetResourceManager().GetPath(c_prefab->prefab);
@@ -1101,7 +1113,6 @@ namespace idk {
 				editor.RefreshSelectedMatrix();
 		}
 	}
-	static void DoNothing() {}
 
 
     bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
@@ -1336,6 +1347,7 @@ namespace idk {
 
             using K = std::decay_t<decltype(key)>;
 
+            (depth_change);
             if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
             {
                 // add empty key so that can be popped properly

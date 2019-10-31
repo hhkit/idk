@@ -51,23 +51,25 @@ namespace idk::phys
 			return std::nullopt;
 		};
 
-		if (auto res = collide(span<const vec3>{lhs.axes.begin(), lhs.axes.end()})) // if fail
+		const auto l_axes = lhs.axes();
+		const auto r_axes = rhs.axes();
+		if (auto res = collide(span<const vec3>{l_axes.begin(), l_axes.end()})) // if fail
 			return *res;
 
-		if (auto res = collide(span<const vec3>{rhs.axes.begin(), rhs.axes.end()})) // if fail
+		if (auto res = collide(span<const vec3>{r_axes.begin(), r_axes.end()})) // if fail
 			return *res;
 
 		array<vec3, 9> cross_norms
 		{
-			lhs.axes[0].cross(rhs.axes[0]).normalize(),
-			lhs.axes[0].cross(rhs.axes[1]).normalize(),
-			lhs.axes[0].cross(rhs.axes[2]).normalize(),
-			lhs.axes[1].cross(rhs.axes[0]).normalize(),
-			lhs.axes[1].cross(rhs.axes[1]).normalize(),
-			lhs.axes[1].cross(rhs.axes[2]).normalize(),
-			lhs.axes[2].cross(rhs.axes[0]).normalize(),
-			lhs.axes[2].cross(rhs.axes[1]).normalize(),
-			lhs.axes[2].cross(rhs.axes[2]).normalize(),
+			l_axes[0].cross(r_axes[0]).normalize(),
+			l_axes[0].cross(r_axes[1]).normalize(),
+			l_axes[0].cross(r_axes[2]).normalize(),
+			l_axes[1].cross(r_axes[0]).normalize(),
+			l_axes[1].cross(r_axes[1]).normalize(),
+			l_axes[1].cross(r_axes[2]).normalize(),
+			l_axes[2].cross(r_axes[0]).normalize(),
+			l_axes[2].cross(r_axes[1]).normalize(),
+			l_axes[2].cross(r_axes[2]).normalize(),
 		};
 
 		if (auto res = collide(span<const vec3>{cross_norms}))

@@ -51,6 +51,7 @@
     <ClInclude Include="debug\LogPools.h" />
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="gfx\Buffer.h" />
+    <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Font.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
@@ -58,6 +59,8 @@
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
+    <ClInclude Include="math\ritters.h" />
     <ClInclude Include="particle\MinMax.h" />
     <ClInclude Include="natvis_ids.h" />
     <ClInclude Include="gfx\FramebufferFactory.h" />
@@ -266,6 +269,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />
     <ClCompile Include="common\Name.cpp" />
     <ClCompile Include="common\Tag.cpp" />
@@ -295,6 +299,7 @@
     <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
+    <ClCompile Include="math\ritters.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />

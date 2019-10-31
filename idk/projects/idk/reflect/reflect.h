@@ -59,6 +59,9 @@ namespace idk::reflect
 		// gets the alias if reflected, otherwise fully qualified type name ( fully_qualified_nameof<T>() )
 		string_view name() const;
 
+        // gets the fully qualified type name ( fully_qualified_nameof<T>() )
+        string_view fully_qualified_name() const;
+
 		// gets the hash of the type ( check against typehash<T>() )
 		size_t hash() const;
 
@@ -159,6 +162,8 @@ namespace idk::reflect
 
 		// if this is a variant, gets the held variant value. check using type.is_template<std::variant>()
 		dynamic get_variant_value() const;
+        // if this is a variant, sets the held variant value. check using type.is_template<std::variant>()
+        void set_variant_value(const dynamic& val) const;
 
         // call on_parse if it exists. meant for serializers.
         void on_parse() const;
@@ -337,7 +342,3 @@ namespace idk::reflect
 #undef property_vend_cpp
 #undef property_friend
 #undef property_vtable
-
-REFLECT_BEGIN(idk::string, "string") REFLECT_END()
-REFLECT_BEGIN(idk::reflect::dynamic, "reflect::dynamic") REFLECT_END()
-REFLECT_BEGIN(idk::reflect::type, "reflect::type") REFLECT_END()
