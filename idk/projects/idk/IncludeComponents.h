@@ -12,6 +12,7 @@
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/Light.h>
+#include <gfx/Font.h>
 
 #include <particle/ParticleSystem.h>
 

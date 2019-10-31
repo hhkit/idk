@@ -7,6 +7,7 @@
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
 #include <particle/ParticleData.h>
+#include <gfx/FontData.h>
 
 namespace idk
 {
@@ -69,6 +70,7 @@ namespace idk
 			span<Animator> animators,
 			span<SkinnedMeshRenderer> skinned_mesh_renderers,
             span<class ParticleSystem>,
+			span<class Font>,
 			span<const class Transform>, 
 			span<const Camera> camera, 
 			span<const Light> lights);
@@ -114,6 +116,7 @@ namespace idk
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;
             vector<ParticleRenderData> particle_render_data;
+			vector<FontData> font_render_data;
 
 			CameraData  curr_scene_camera;
 

@@ -73,6 +73,7 @@ namespace idk::reflect
 		, RscHandle<MaterialInstance>
         , RscHandle<Texture>
 		, RscHandle<CubeMap>
+		, RscHandle<FontAtlas>
 		, UniformInstance
 		, UniformInstanceValue
 		, hash_table<string, UniformInstance>

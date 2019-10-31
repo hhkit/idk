@@ -29,6 +29,7 @@ namespace idk
 		,   class Camera
 		,   class SkinnedMeshRenderer
 		,	class Light
+		,   class Font
 
         /// PARTICLE
         ,   class ParticleSystem
@@ -96,6 +97,7 @@ namespace idk
 		,	class MaterialInstance
 		,	class Texture
 		,   class CubeMap
+		,   class FontAtlas
 		,	class ShaderProgram
 		,	class RenderTarget
 		,   class FrameBuffer
