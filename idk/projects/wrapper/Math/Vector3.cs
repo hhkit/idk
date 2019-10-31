@@ -64,9 +64,9 @@ namespace idk
         }
         public static Vector3 Cross(Vector3 lhs, Vector3 rhs)
         {
-            return new Vector3(lhs.x * rhs.y - lhs.y * rhs.x,
-                             - lhs.x * rhs.z + lhs.z * rhs.x,
-                             + lhs.y * rhs.z - lhs.z * rhs.y);
+            return new Vector3(lhs[1] * rhs[2] - rhs[1] * lhs[2],
+                               lhs[2] * rhs[0] + rhs[2] * lhs[0],
+                               lhs[0] * rhs[1] - rhs[0] * lhs[1]);
         }
 
         public static Vector3 Reflect(Vector3 inDirection, Vector3 inNormal)
