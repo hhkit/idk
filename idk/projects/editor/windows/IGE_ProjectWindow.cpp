@@ -87,6 +87,9 @@ namespace idk {
 
     GenericResourceHandle IGE_ProjectWindow::getOrLoadFirstAsset(PathHandle path)
     {
+		if(!Core::GetResourceManager().IsExtensionSupported(path.GetExtension()))
+			return RscHandle<Texture>();
+
         auto get_res = Core::GetResourceManager().Get(path);
         if (get_res && get_res->Count())
             return get_res->GetAll()[0];
