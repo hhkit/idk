@@ -6,8 +6,14 @@ namespace idk
 {
     void ParticleSystem::Play()
     {
-        data.Allocate(main.max_particles);
+        if (state == Stopped || state == Awake)
+            data.Allocate(main.max_particles);
         state = Playing;
+    }
+
+    void ParticleSystem::Pause()
+    {
+        state = Paused;
     }
 
     void ParticleSystem::Stop()
@@ -15,6 +21,7 @@ namespace idk
         state = Stopped;
         time = 0;
         emitter_clock = 0;
+        data.num_alive = 0;
     }
 
     void ParticleSystem::Step(float dt)
@@ -32,8 +39,11 @@ namespace idk
         time += dt;
         if (time < main.start_delay)
             return;
-        if (!main.looping && time >= main.duration && data.num_alive == 0)
-            Stop();
+        if (!main.looping && time >= main.duration)
+        {
+            if (data.num_alive == 0)
+                Stop();
+        }
         else if (emission.enabled)
         {
             emitter_clock += dt * emission.rate_over_time;
@@ -65,8 +75,11 @@ namespace idk
 
     void ParticleSystem::Emit()
     {
-        if (data.num_alive == data.num_total)
+        if (data.num_alive == main.max_particles)
             return;
+
+        if (data.position.size() < main.max_particles)
+            data.Allocate(main.max_particles);
 
         auto i = data.num_alive++;
         data.lifetime[i] = main.start_lifetime;

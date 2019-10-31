@@ -923,8 +923,25 @@ namespace idk {
     template<>
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ParticleSystem> c_ps)
     {
-        if (ImGui::Button("Play"))
+        if (c_ps->state == ParticleSystem::Playing && ImGui::Button("Pause"))
+            c_ps->Pause();
+        else if (c_ps->state != ParticleSystem::Playing && ImGui::Button("Play"))
             c_ps->Play();
+        ImGui::SameLine();
+        if (ImGui::Button("Restart"))
+        {
+            c_ps->Stop();
+            c_ps->Play();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop"))
+            c_ps->Stop();
+
+        if (c_ps->state > ParticleSystem::Stopped)
+        {
+            ImGui::SameLine();
+            ImGui::Text("%.2fs", c_ps->time);
+        }
 
         ImGuidk::PushFont(FontType::Smaller);
 

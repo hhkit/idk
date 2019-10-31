@@ -29,7 +29,7 @@ namespace idk
 
     void ParticleSystemUpdater::Update(span<ParticleSystem> span_ps)
     {
-        const float dt = Core::GetDT().count();
+        const float dt = Core::GetRealDT().count();
         for (auto& ps : span_ps)
         {
             if (ps.state >= ParticleSystem::Playing)
@@ -40,7 +40,7 @@ namespace idk
 
     void ParticleSystemUpdater::EditorUpdate(span<class ParticleSystem> span_ps)
     {
-        const float dt = Core::GetDT().count();
+        const float dt = Core::GetRealDT().count();
         for (auto& ps : span_ps)
         {
             if (ps.state >= ParticleSystem::Playing)
