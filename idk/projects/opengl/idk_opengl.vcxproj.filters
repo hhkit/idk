@@ -72,7 +72,7 @@
     <ClInclude Include="resource\OpenGLFontAtlasLoader.h">
       <Filter>resource\Loaders</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLFontAtlasFactory.h">
+    <ClInclude Include="resource\OpenGLFontAtlasFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
   </ItemGroup>

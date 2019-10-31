@@ -181,9 +181,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSData.h" />
-    <ClInclude Include="OpenGLFontAtlasFactory.h" />
     <ClInclude Include="resource\OpenGLCubeMapLoader.h" />
     <ClInclude Include="resource\OpenGLFontAtlas.h" />
+    <ClInclude Include="resource\OpenGLFontAtlasFactory.h" />
     <ClInclude Include="resource\OpenGLFontAtlasLoader.h" />
     <ClInclude Include="resource\OpenGLRenderTargetLoader.h" />
     <ClInclude Include="PixelData.h" />

@@ -38,6 +38,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/GraphFactory.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
+#include <opengl/resource/OpenGLFontAtlasLoader.h>
 
 // editor setup
 #include <gfx/RenderTarget.h>
@@ -112,6 +113,7 @@ namespace idk
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
+			Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());

@@ -30,6 +30,16 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
+		for (auto& elem : colliders)
+			elem.find_rigidbody();
+
+		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
+			{
+				if (lhs.is_static() && !rhs.is_static())
+					return true;
+				return false;
+			});
+
 		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
 		{
@@ -107,25 +117,30 @@ namespace idk
 			}
 		};
 
+
 		const auto CollideObjects = [&]()
 		{
 			CollisionList collisionframe;
 
 			const auto dt = Core::GetDT().count();
 			for (auto& elem : colliders)
-			{
 				elem.setup_predict();
-				//Core::GetSystem<DebugRenderer>().Draw(elem._broad_phase, color{ 1,1,0 });
-			}
+
 
 			for (unsigned i = 0; i < colliders.size(); ++i)
 			{
+				const auto& lcollider = colliders[i];
+				if (!lcollider._enabled_this_frame)
+					continue;
+
 				for (unsigned j = i + 1; j < colliders.size(); ++j)
 				{
-					const auto& lcollider = colliders[i];
 					const auto& rcollider = colliders[j];
 
-					if (!(lcollider.is_enabled_and_active() && rcollider.is_enabled_and_active()))
+					if (!rcollider._enabled_this_frame)
+						continue;
+
+					if (lcollider._static_cache && rcollider._static_cache)
 						continue;
 
 					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result
@@ -152,8 +167,8 @@ namespace idk
 								return phys::col_failure{};
 							}
 
-							const auto lshape = calc_shape(lhs, lrigidbody, lcollider);
-							const auto rshape = calc_shape(rhs, rrigidbody, rcollider);
+							const auto lshape = lhs; //calc_shape(lhs, lrigidbody, lcollider);
+							const auto rshape = rhs; //calc_shape(rhs, rrigidbody, rcollider);
 
 							// static collisions
 							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, box>)
@@ -174,7 +189,7 @@ namespace idk
 							else
 								return phys::col_failure{};
 
-						}, lcollider.shape, rcollider.shape);
+						}, lcollider._predicted_shape, rcollider._predicted_shape);
 
 					if (collision)
 					{

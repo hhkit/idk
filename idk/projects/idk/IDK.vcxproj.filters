@@ -854,6 +854,9 @@
     <ClInclude Include="script\MonoException.h">
       <Filter>script</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\FontAtlasFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1244,6 +1247,9 @@
     </ClCompile>
     <ClCompile Include="gfx\Font.cpp">
       <Filter>gfx\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\FontAtlasFactory.cpp">
+      <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="util\easing.cpp">
       <Filter>util</Filter>

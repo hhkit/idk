@@ -10,6 +10,7 @@ namespace TestAndSeek
         public float jump_force;
         public Vector3 movement;
         public Prefab prefab;
+        public GameObject go;
 
         private RigidBody rb;
         private TestShou ts;
@@ -31,6 +32,9 @@ namespace TestAndSeek
             ts = gameObject.GetComponent<TestShou>();
             if (rb)
                 Debug.Log("found rigidbody");
+
+            if (go)
+                Debug.Log("found gameobject" + go.name);
 
             foreach (var elem in FindObjectsOfType<TestShou>())
             {

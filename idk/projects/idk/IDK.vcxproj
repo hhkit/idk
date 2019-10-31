@@ -55,6 +55,7 @@
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Font.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
+    <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
@@ -284,6 +285,7 @@
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\Font.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
+    <ClCompile Include="gfx\FontAtlasFactory.cpp" />
     <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\LightTypes.cpp">

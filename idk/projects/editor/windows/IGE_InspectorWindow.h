@@ -52,8 +52,9 @@ namespace idk {
         template<typename T> void DisplayComponentInner(Handle<T> component) { displayVal(*component); }
         template<> void DisplayComponentInner(Handle<Transform> c_transform);
         template<> void DisplayComponentInner(Handle<Animator> c_anim);	
-        template<> void DisplayComponentInner(Handle<Bone> c_bone);		
-        template<> void DisplayComponentInner(Handle<AudioSource> c_audio);		
+        template<> void DisplayComponentInner(Handle<Bone> c_anim);		
+        template<> void DisplayComponentInner(Handle<AudioSource> c_anim);	
+		template<> void DisplayComponentInner(Handle<Font> c_anim);	
         template<> void DisplayComponentInner(Handle<ParticleSystem> c_ps);
 
 		void MenuItem_RemoveComponent(GenericHandle i);
@@ -67,6 +68,7 @@ namespace idk {
         template<> void DisplayAsset(RscHandle<MaterialInstance> material);
         template<> void DisplayAsset(RscHandle<Material> material);
         template<> void DisplayAsset(RscHandle<Texture> texture);
+		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
 
         bool displayVal(reflect::dynamic dyn);
 
