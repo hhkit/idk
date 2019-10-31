@@ -30,6 +30,10 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
+		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
+			{
+				if (/* lhs is stat*/)
+			});
 		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
 		{
@@ -125,7 +129,7 @@ namespace idk
 					const auto& lcollider = colliders[i];
 					const auto& rcollider = colliders[j];
 
-					if (!(lcollider.is_enabled_and_active() && rcollider.is_enabled_and_active()))
+					if (!(lcollider._enabled_this_frame && rcollider._enabled_this_frame))
 						continue;
 
 					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result

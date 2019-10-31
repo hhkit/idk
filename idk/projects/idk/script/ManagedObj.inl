@@ -41,8 +41,76 @@ if (klass == MONO_CLASS)                                        \
 if (klass == MONO_CLASS)                                              \
 {                                                                     \
 	auto old_val = *s_cast<const REAL_TYPE*>(mono_object_unbox(obj)); \
-	functor(field_name.data(), old_val, depth);				              \
+	functor(field_name.data(), old_val, depth);				          \
 	continue;                                                         \
+}
+
+#define MONO_RESOURCE_TYPE(RES_TYPE)\
+{																													\
+	auto resource_klass = envi.Type(#RES_TYPE);																		\
+	if (klass == resource_klass->Raw()) 																			\
+	{																												\
+		auto id_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
+		auto old_val = [&]()->RscHandle<RES_TYPE>																	\
+		{																											\
+			if (obj == nullptr)																						\
+				return RscHandle<RES_TYPE>{};																		\
+			else																									\
+			{																										\
+				return RscHandle<RES_TYPE>{																			\
+					*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))\
+				};																									\
+			}																										\
+		}();																										\
+		auto new_val = old_val;																						\
+																													\
+		if (functor(field_name.data(), new_val, -last_children))													\
+		{																											\
+			last_children = 1;																						\
+			auto reflect = reflect::dynamic{ new_val };																\
+			reflect.visit(functor);																					\
+		}																											\
+		else																										\
+			last_children = 0;																						\
+																													\
+		if (new_val != old_val)																						\
+		{																											\
+			auto insert_val = resource_klass->ConstructTemporary();													\
+			mono_field_set_value(insert_val, id_field, &new_val.guid);												\
+			mono_field_set_value(Raw(), field, insert_val);															\
+		}																											\
+		continue;																									\
+	}																												\
+}
+#define MONO_RESOURCE_TYPE_CONST(RES_TYPE)\
+{																													\
+	auto resource_klass = envi.Type(#RES_TYPE);																		\
+	if (klass == resource_klass->Raw()) 																			\
+	{																												\
+		auto id_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
+		auto old_val = [&]()->RscHandle<RES_TYPE>																	\
+		{																											\
+			if (obj == nullptr)																						\
+				return RscHandle<RES_TYPE>{};																		\
+			else																									\
+			{																										\
+				return RscHandle<RES_TYPE>{																			\
+					*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))\
+				};																									\
+			}																										\
+		}();																										\
+		auto new_val = old_val;																						\
+																													\
+		if (functor(field_name.data(), new_val, -last_children))													\
+		{																											\
+			last_children = 1;																						\
+			auto reflect = reflect::dynamic{ new_val };																\
+			reflect.visit(functor);																					\
+		}																											\
+		else																										\
+			last_children = 0;																						\
+		continue;																									\
+	}																												\
 }
 
 namespace idk::mono
@@ -105,22 +173,26 @@ namespace idk::mono
 			MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
 			MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
 			
+			MONO_RESOURCE_TYPE(Prefab);
+
 			{
-				auto resource_klass = envi.Type("Prefab");
-				if (klass == resource_klass->Raw())
+				using H_Type = GameObject;
+				auto handle_klass = envi.Type("GameObject");
+				if (klass == handle_klass->Raw())
 				{
-					auto id_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");
-					auto old_val = [&]()->RscHandle<Prefab>
+					auto id_field = mono_class_get_field_from_name(handle_klass->Raw(), "handle");
+					auto old_val = [&]() -> Handle<H_Type>
 					{
 						if (obj == nullptr)
-							return RscHandle<Prefab>{};
+							return Handle<H_Type>{};
 						else
 						{
-							return RscHandle<Prefab>{
-								*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))
+							return Handle<H_Type>{
+								*s_cast<uint64_t*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))
 							};
 						}
 					}();
+
 					auto new_val = old_val;
 
 					if (functor(field_name.data(), new_val, -last_children))
@@ -134,13 +206,15 @@ namespace idk::mono
 
 					if (new_val != old_val)
 					{
-						auto insert_val = resource_klass->ConstructTemporary();
-						mono_field_set_value(insert_val, id_field, &new_val.guid);
+						auto insert_val = handle_klass->ConstructTemporary();
+						mono_field_set_value(insert_val, id_field, &new_val.id);
 						mono_field_set_value(Raw(), field, insert_val);
 					}
+
 					continue;
 				}
 			}
+
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE(Guid, mono_class_from_name(csharpcore, "System", "Guid"));
 		}
@@ -151,6 +225,7 @@ namespace idk::mono
 	inline void ManagedObject::VisitImpl(T&& functor, int& depth, bool ignore_privacy) const
 	{
 		++depth;
+		auto last_children = 0;
 		for (void* iter = nullptr; auto field = mono_class_get_fields(mono_object_get_class(Raw()), &iter);)
 		{
 			if (!ignore_privacy && Core::GetSystem<ScriptSystem>().Environment().IsPrivate(field))
@@ -186,6 +261,8 @@ namespace idk::mono
 			MONO_BASE_TYPE_CONST(vec2, envi.Type("Vector2")->Raw());
 			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
 			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
+
+			MONO_RESOURCE_TYPE_CONST(Prefab);
 
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE_CONST(Guid, mono_class_from_name(csharpcore, "System", "Guid"));

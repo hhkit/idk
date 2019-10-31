@@ -23,6 +23,8 @@ namespace idk
 		void setup_predict();
 	private:
 		Handle<class RigidBody> _rigidbody;
+		bool _enabled_this_frame = false;
+		bool _static = false;
 		aabb _broad_phase;
 		friend class PhysicsSystem;
 	};

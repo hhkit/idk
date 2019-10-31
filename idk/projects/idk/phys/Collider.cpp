@@ -26,6 +26,8 @@ namespace idk
 			}
 		}
 
+		_enabled_this_frame = is_enabled_and_active();
+		_static = !s_cast<bool>(_rigidbody);
 		if (_rigidbody)
 		{
 			_broad_phase = std::visit([&](const auto& shape) { return (shape * _rigidbody->PredictedTransform()).bounds(); }, shape);
