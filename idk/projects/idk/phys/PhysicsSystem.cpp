@@ -51,7 +51,8 @@ namespace idk
 		{
 			std::visit([&](const auto& shape)
 				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), collider.is_trigger ? color{0, 1, 1} : c, dur);
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), 
+						collider.is_enabled_and_active() ? collider.is_trigger ? color{ 0, 1, 1 } : c : color{0.5}, dur);
 				}, collider.shape);
 		};
 
@@ -123,6 +124,9 @@ namespace idk
 				{
 					const auto& lcollider = colliders[i];
 					const auto& rcollider = colliders[j];
+
+					if (!(lcollider.is_enabled_and_active() && rcollider.is_enabled_and_active()))
+						continue;
 
 					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result
 						{

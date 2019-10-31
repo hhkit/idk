@@ -18,6 +18,7 @@ namespace idk
 		real static_friction  { .6f };
 		real dynamic_friction { .6f };
 
+		bool is_enabled_and_active() const;
 		aabb bounds() const;
 		void setup_predict();
 	private:
