@@ -60,7 +60,8 @@ namespace idk {
 
 	struct FontAtlasMeta
 	{
-		FontUVMode      uv_mode = FontUVMode::Clamp;
+		string font_name = {};
+		FontUVMode      uv_mode = FontUVMode::ClampToBorder;
 		FontColorFormat internal_format = FontColorFormat::R_16;
 		FontInputChannels format = FontInputChannels::RED;   //Remove, loader determines this
 		FontFilterMode  filter_mode = FontFilterMode::Linear;
@@ -74,14 +75,19 @@ namespace idk {
 	{
 	public:
 		struct character_info {
-			real ax; // advance.x
-			real ay; // advance.y
+			
+			//advance
+			vec2 advance;
 
-			real bw; // bitmap.width;
-			real bh; // bitmap.rows;
+			//Size of glyph
+			
+			//x = width, y = rows
+			vec2 glyph_size;
 
-			real bl; // bitmap_left;
-			real bt; // bitmap_top;
+			//Bearing
+			
+			//x = left, y = top
+			vec2 bearing;
 
 			real tx; // x offset of glyph in texture coordinates
 		} c[128];

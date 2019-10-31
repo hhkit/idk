@@ -29,6 +29,7 @@ namespace idk
 		VSkyBox,
 		VPBRConvolute,
 		VFsq,
+		VFont,
 		VMax
 	};
 	enum FragmentShaders
@@ -39,6 +40,7 @@ namespace idk
 		FPicking,
 		FPBRConvolute,
 		FBrdf,
+		FFont,
 		FMax
 	};
 	enum GeometryShaders

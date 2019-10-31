@@ -6,7 +6,6 @@
 #include <gfx/FontData.h>
 
 namespace idk {
-	//struct FontData;
 	class Font
 		: public Component<Font>
 	{

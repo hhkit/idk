@@ -454,10 +454,10 @@ namespace idk::ogl
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
 
-			/*for (auto& elem : font_render_data)
+			for (auto& elem : font_render_data)
 			{
 
-			}*/
+			}
 
 
             static vector<OpenGLBuffer> bufs = []()
