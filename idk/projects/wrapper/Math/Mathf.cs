@@ -44,6 +44,18 @@
             return val < 0 ? 0 :
                    val > 1 ? 1 : val;
         }
+        public static float Lerp(float a, float b, float t)
+        {
+            return LerpUnclamped(a, b, t < 0 ? 0 : t > 1 ? 1 : t);
+        }
+        public static float LerpUnclamped(float a, float b, float t)
+        {
+            return (1 - t) * a + (t) * b;
+        }
+        public static float Pow(float f, float p)
+        {
+            return (float)System.Math.Pow(f, p);
+        }
         public static float Sin(float val)
         {
             return (float)System.Math.Sin(val);
