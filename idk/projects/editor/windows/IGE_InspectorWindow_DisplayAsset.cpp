@@ -35,8 +35,8 @@ namespace idk
         ImGui::GetWindowDrawList()->ChannelsSetCurrent(1);
 
         ImGui::BeginGroup();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+        ImGui::Indent(8.0f);
 
         ImGui::Text(get_asset_name(handle).c_str());
 
@@ -49,7 +49,9 @@ namespace idk
             ImGui::Text(string(handle.guid()).c_str());
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
-            ImGui::Dummy(ImVec2(ImGui::GetWindowContentRegionWidth(), 4.0f));
+            ImGui::Dummy(ImVec2(ImGui::GetWindowWidth(), 4.0f));
+
+            ImGui::Unindent();
             ImGui::EndGroup();
 
             ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
@@ -66,6 +68,7 @@ namespace idk
     template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
     {
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y + 2.0f);
         auto iter = _prefab_store.find(prefab);
         if (iter == _prefab_store.end())
             iter = _prefab_store.emplace(prefab, PrefabUtility::Instantiate(prefab, *Core::GetSystem<SceneManager>().GetPrefabScene())).first;
@@ -84,6 +87,11 @@ namespace idk
         auto graph = RscHandle<shadergraph::Graph>{ material->material };
         bool changed = false;
 
+        ImGui::Indent(8.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+        ImGui::BeginChild("child");
+        ImGui::PushItemWidth(-4.0f);
+
         for (auto& [name, u] : material->material->uniforms)
         {
             const auto y = ImGui::GetCursorPosY();
@@ -101,8 +109,6 @@ namespace idk
                     material->uniforms.erase(name);
             }
             ImGui::SameLine();
-
-            ImGui::PushItemWidth(item_width);
 
             if (!has_override)
             {
@@ -175,12 +181,15 @@ namespace idk
                 ImGuidk::PopDisabled();
             }
 
-            ImGui::PopItemWidth();
             ImGui::PopID();
         }
 
         if (changed)
             material->Dirty();
+
+        ImGui::PopItemWidth();
+        ImGui::EndChild();
+        ImGui::Unindent();
     }
 
     template<>
@@ -191,8 +200,15 @@ namespace idk
 
         auto graph = RscHandle<shadergraph::Graph>{ material };
 
+        ImGui::Indent(8.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+        ImGui::BeginChild("child");
+
         if (ImGui::Button("Open Material Editor"))
             Core::GetSystem<IDE>().FindWindow<IGE_MaterialEditor>()->OpenGraph(graph);
+
+        ImGui::EndChild();
+        ImGui::Unindent();
     }
 
     template<>

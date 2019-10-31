@@ -357,20 +357,23 @@ namespace idk {
 			stringBuf = game_object->Name();
 		}
 
-        ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("ID").x);
-        ImGuidk::PushDisabled();
-        ImGui::Text("ID");
-        ImGui::SameLine();
-		string idName = std::to_string(game_object.id);
-		if (editor.selected_gameObjects.size() == 1)
-			ImGui::Text("%s (scene: %d, index: %d, gen: %d)", 
-				idName.data(), 
-				s_cast<int>(game_object.scene),
-				s_cast<int>(game_object.index),
-				s_cast<int>(game_object.gen));
-		else
-			ImGui::TextDisabled("Multiple gameobjects selected");
-        ImGuidk::PopDisabled();
+        if (game_object.scene != Scene::prefab)
+        {
+            ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("ID").x);
+            ImGuidk::PushDisabled();
+            ImGui::Text("ID");
+            ImGui::SameLine();
+            string idName = std::to_string(game_object.id);
+            if (editor.selected_gameObjects.size() == 1)
+                ImGui::Text("%s (scene: %d, index: %d, gen: %d)",
+                    idName.data(),
+                    s_cast<int>(game_object.scene),
+                    s_cast<int>(game_object.index),
+                    s_cast<int>(game_object.gen));
+            else
+                ImGui::TextDisabled("Multiple gameobjects selected");
+            ImGuidk::PopDisabled();
+        }
 
 
         ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Tag").x);
