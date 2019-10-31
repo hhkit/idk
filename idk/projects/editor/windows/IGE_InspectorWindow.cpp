@@ -932,9 +932,73 @@ namespace idk {
 		ImGui::EndChild();
 
 		displayVal(*c_audiosource);
-
-
 	}
+
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<ParticleSystem> c_ps)
+    {
+        if (c_ps->state == ParticleSystem::Playing && ImGui::Button("Pause"))
+            c_ps->Pause();
+        else if (c_ps->state != ParticleSystem::Playing && ImGui::Button("Play"))
+            c_ps->Play();
+        ImGui::SameLine();
+        if (ImGui::Button("Restart"))
+        {
+            c_ps->Stop();
+            c_ps->Play();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop"))
+            c_ps->Stop();
+
+        if (c_ps->state > ParticleSystem::Stopped)
+        {
+            ImGui::SameLine();
+            ImGui::Text("%.2fs", c_ps->time);
+        }
+
+        ImGuidk::PushFont(FontType::Smaller);
+
+        _curr_property_stack.push_back("main");
+        displayVal(c_ps->main);
+        _curr_property_stack.pop_back();
+
+        const auto display = [&](const char* title, reflect::dynamic dyn)
+        {
+            ImGui::PushID(title);
+
+            const auto x = ImGui::GetCursorPosX();
+            ImGui::SetCursorPosX(x - 1.0f);
+
+            ImGui::GetCurrentWindow()->WorkRect.Max.x -= 5.0f; // hack
+            ImGui::PushStyleColor(ImGuiCol_Header, ImGui::GetColorU32(ImGuiCol_TitleBgActive));
+            const bool open = ImGui::CollapsingHeader(format_name(title).c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
+            ImGui::PopStyleColor();
+            ImGui::GetCurrentWindow()->WorkRect.Max.x += 5.0f; // hack
+
+            ImGui::SameLine(x + ImGui::GetStyle().ItemInnerSpacing.x);
+            ImGui::Checkbox("##enabled", &dyn.get_property("enabled").value.get<bool>());
+
+            if (open)
+            {
+                _curr_property_stack.push_back(title);
+                displayVal(std::move(dyn));
+                _curr_property_stack.pop_back();
+            }
+
+            ImGui::PopID();
+        };
+
+        display("emission", c_ps->emission);
+        display("shape", c_ps->shape);
+        display("velocity_over_lifetime", c_ps->velocity_over_lifetime);
+        display("color_over_lifetime", c_ps->color_over_lifetime);
+        display("size_over_lifetime", c_ps->size_over_lifetime);
+        display("rotation_over_lifetime", c_ps->rotation_over_lifetime);
+        display("renderer", c_ps->renderer);
+
+        ImGui::PopFont();
+    }
 
 	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
 	{
@@ -1035,17 +1099,7 @@ namespace idk {
 
         if (open_header)
         {
-            if (component.is_type<Transform>())
-                DisplayComponentInner(handle_cast<Transform>(component));
-            else if (component.is_type<Bone>())
-                DisplayComponentInner(handle_cast<Bone>(component));
-            else if (component.is_type<Animator>())
-                DisplayComponentInner(handle_cast<Animator>(component));
-			else if (component.is_type<AudioSource>())
-				DisplayComponentInner(handle_cast<AudioSource>(component));
-
-            else
-                displayVal(*component);
+            component.visit([&](auto h) { DisplayComponentInner(h); });
             ImGui::TreePop();
         }
 
@@ -1137,6 +1191,8 @@ namespace idk {
         bool outer_changed = false;
         vector<char> indent_stack;
 
+        auto prop_stack_copy = _curr_property_stack;
+
         const auto display_key_value = [&](const char* key, auto&& val, int depth_change)
         {
             using T = std::decay_t<decltype(val)>;
@@ -1154,7 +1210,7 @@ namespace idk {
             }
             _curr_property_stack.push_back(key);
 
-            if (keyName == "Enabled" && _curr_property_stack.size() == 1)
+            if (keyName == "Enabled")
             {
                 indent_stack.push_back(0);
                 return false;
@@ -1220,6 +1276,26 @@ namespace idk {
             else if constexpr (std::is_same_v<T, int>)
             {
                 changed |= ImGui::DragInt("", &val);
+            }
+            else if constexpr (std::is_same_v<T, uint32_t>)
+            {
+                changed |= ImGui::DragScalar("", ImGuiDataType_U32, &val, 1.0f);
+            }
+            else if constexpr (std::is_same_v<T, short>)
+            {
+                changed |= ImGui::DragScalar("", ImGuiDataType_S16, &val, 1.0f);
+            }
+            else if constexpr (std::is_same_v<T, uint16_t>)
+            {
+                changed |= ImGui::DragScalar("", ImGuiDataType_U16, &val, 1.0f);
+            }
+            else if constexpr (std::is_same_v<T, long long>)
+            {
+                changed |= ImGui::DragScalar("", ImGuiDataType_S64, &val, 1.0f);
+            }
+            else if constexpr (std::is_same_v<T, size_t>)
+            {
+                changed |= ImGui::DragScalar("", ImGuiDataType_U64, &val, 1.0f);
             }
             else if constexpr (std::is_same_v<T, bool>)
             {
@@ -1357,11 +1433,11 @@ namespace idk {
             return recurse;
         };
 
-        const auto generic_visitor = [&](auto&& key, auto&& val, int depth_change) { //Displays all the members for that variable
-
+        const auto generic_visitor = [&](auto&& key, auto&& val, int depth_change)
+        {
             using K = std::decay_t<decltype(key)>;
 
-            (depth_change);
+            (key); (val); (depth_change);
             if constexpr (std::is_same_v<K, reflect::type>) // from variant visit
             {
                 // add empty key so that can be popped properly
@@ -1371,14 +1447,18 @@ namespace idk {
                 throw "unhandled case";
             else
                 return display_key_value(key, std::forward<decltype(val)>(val), depth_change);
-
 		};
 
 		dyn.visit(generic_visitor);
 		if (dyn.is<mono::Behavior>())
 			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
 
-        _curr_property_stack.clear();
+        std::swap(prop_stack_copy, _curr_property_stack);
+        for (auto i : indent_stack)
+        {
+            if (i)
+                ImGui::Unindent();
+        }
 
         return outer_changed;
     }

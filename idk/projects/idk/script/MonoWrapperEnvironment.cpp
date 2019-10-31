@@ -473,6 +473,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::RigidBodyGetIsKinematic", bool, Handle < RigidBody> rb)
+		{
+			return rb->is_kinematic;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetIsKinematic", void, Handle<RigidBody> rb, bool val)
+		{
+			rb->is_kinematic= val;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::RigidBodySleep",  void, Handle<RigidBody> rb)
 		{
 			rb->sleep_next_frame = true;

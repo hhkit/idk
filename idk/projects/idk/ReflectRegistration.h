@@ -32,7 +32,8 @@
  *    - You can also choose not to include container types in idk_reflect_type.
  *      however, you will need to register it the same way
  *      ie. REFLECT_BEGIN(container, name) REFLECT_END()
- *      if the container type has commas, use using alias = type before registering.
+ *    - if the container type has commas, use using alias = type before registering,
+ *      or use decltype(type::member) instead of the container type
 */
 
 REFLECT_BEGIN(idk::reflect::dynamic, "dynamic") REFLECT_END()
@@ -214,12 +215,10 @@ REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
 
-using UniformInstanceTable = idk::hash_table<idk::string, idk::UniformInstance>;
-REFLECT_BEGIN(UniformInstanceTable, "hash_table<string,UniformInstance>")
+REFLECT_BEGIN(decltype(idk::Material::uniforms), "hash_table<string,UniformInstance>")
 REFLECT_END()
 
-using UniformInstanceValueTable = idk::hash_table<idk::string, idk::UniformInstanceValue>;
-REFLECT_BEGIN(UniformInstanceValueTable, "hash_table<string,UniformInstanceValue>")
+REFLECT_BEGIN(decltype(idk::MaterialInstance::uniforms), "hash_table<string,UniformInstanceValue>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Material, "Material")
@@ -271,8 +270,7 @@ REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
 REFLECT_VARS(name, type, default_value)
 REFLECT_END()
 
-using ShaderGraphNodeTable = idk::hash_table<idk::Guid, idk::shadergraph::Node>;
-REFLECT_BEGIN(ShaderGraphNodeTable, "hash_table<Guid,ShaderGraphNode>")
+REFLECT_BEGIN(decltype(idk::shadergraph::Graph::nodes), "hash_table<Guid,ShaderGraphNode>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::vector<idk::shadergraph::Slot>, "vector<ShaderGraphSlot>")
@@ -315,8 +313,7 @@ REFLECT_END()
 REFLECT_BEGIN(idk::LayerManager, "LayerManager")
 REFLECT_END()
 
-using LayerNameArray = std::array<idk::string, 32>;
-REFLECT_BEGIN(LayerNameArray, "array<string,32>")
+REFLECT_BEGIN(decltype(idk::LayerManagerConfig::layers), "array<string,32>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::LayerManagerConfig, "LayerManagerConfig")
@@ -437,12 +434,10 @@ REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, over
 REFLECT_END()
 
 // ANIMATION
-using ActiveStateArray = idk::array<bool, 100>;
-REFLECT_BEGIN(ActiveStateArray, "array<bool,100>")
+REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
 REFLECT_END()
 
-using StringPair = idk::array<idk::string, 2>;
-REFLECT_BEGIN(StringPair, "array<string,2>")
+REFLECT_BEGIN(decltype(idk::BlendTree::params), "array<string,2>")
 REFLECT_END();
 
 REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
@@ -469,12 +464,10 @@ REFLECT_BEGIN(idk::Bone, "Bone")
 REFLECT_VARS(_bone_name, _bone_index)
 REFLECT_END()
 
-using AnimationTable = idk::hash_table<idk::string, idk::AnimationState>;
-REFLECT_BEGIN(AnimationTable, "hash_table<string,AnimationState>")
+REFLECT_BEGIN(decltype(idk::Animator::animation_table), "hash_table<string,AnimationState>")
 REFLECT_END()
 
-using LayerTable = idk::hash_table<idk::string, size_t>;
-REFLECT_BEGIN(LayerTable, "hash_table<string,size_t>")
+REFLECT_BEGIN(decltype(idk::Animator::layer_table), "hash_table<string,size_t>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")

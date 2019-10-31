@@ -45,5 +45,6 @@ namespace idk
 		bool _sleeping = false;
 
 		friend class PhysicsSystem;
+		friend class Collider;
 	};
 }

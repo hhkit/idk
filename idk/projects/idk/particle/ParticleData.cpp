@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ParticleData.h"
+#include <math/arith.h>
 
 namespace idk
 {
@@ -14,9 +15,6 @@ namespace idk
         velocity_start.resize(max_size);
         velocity_delta.resize(max_size);
         color.resize(max_size);
-
-        num_total = max_size;
-        num_alive = 0;
     }
 
     void ParticleData::Kill(uint16_t i)

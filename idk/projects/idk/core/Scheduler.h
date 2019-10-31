@@ -21,7 +21,7 @@ namespace idk
 	};
 
 	template<typename ... Ts>
-	struct PausedSystemConfig {};
+    struct PausedSystemConfig {};
 
 	class Scheduler
 	{
