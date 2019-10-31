@@ -10,7 +10,7 @@
     </Expand>
   </Type>
 
-  <Type Name="idk::ObjectPool&lt; * &gt;">
+  <Type Name="idk::ObjectPool&lt;*&gt;">
     <Expand>
       <Item Name="[pool]">_pool</Item>
       <CustomListItems MaxItemsPerView="16">
@@ -41,10 +41,10 @@
 
 
 
-    <Type Name="idk::Handle&lt; * &gt;">
+    <Type Name="idk::Handle&lt;*&gt;">
     <DisplayString>[{"$T1"} id={id, h}]</DisplayString>
     <Expand>
-      <CustomListItems MaxItemsPerView="16">
+      <CustomListItems MaxItemsPerView="32">
         <Variable Name="_index" InitialValue="-1"/>
         <If Condition="
                        id != 0
