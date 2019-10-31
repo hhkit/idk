@@ -11,7 +11,9 @@ namespace idk
 		auto meta = metadatas.FetchMeta<ShaderTemplate>();
 		auto stream = path.Open(FS_PERMISSIONS::READ);
 		auto ser = stringify(stream);
-		return meta ? Core::GetResourceManager().LoaderEmplaceResource<ShaderTemplate>(metadatas.metadatas[0].guid, ser)
+		auto result = meta ? Core::GetResourceManager().LoaderEmplaceResource<ShaderTemplate>(metadatas.metadatas[0].guid, ser)
 			: Core::GetResourceManager().LoaderEmplaceResource<ShaderTemplate>(ser);
+		result->Name(path.GetFileName());
+		return result;
 	}
 }

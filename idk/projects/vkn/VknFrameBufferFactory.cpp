@@ -137,7 +137,7 @@ namespace idk::vkn
 			vk::AttachmentReference stencil_attachment_ref;
 
 			uint32_t i = 0;
-			for (uint32_t i=0; i<num_col;++i)
+			for (i=0; i<num_col;++i)
 			{
 				auto& col_attachment = col_attachments[i];
 				auto& vk_att = static_cast<const VknAttachment&>(*col_attachment);
@@ -288,6 +288,7 @@ namespace idk::vkn
 			TextureLoader loader;
 			TextureOptions opt;
 			TexCreateInfo tci = cr8_funcs[type](size.x,size.y);
+			tci.image_usage |= vk::ImageUsageFlagBits::eTransferSrc| vk::ImageUsageFlagBits::eTransferDst;
 			opt.internal_format = info.internal_format;
 			opt.filter_mode = info.filter_mode;
 			loader.LoadTexture(*tex, allocator, fence, opt, tci, {});

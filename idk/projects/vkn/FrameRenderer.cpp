@@ -27,6 +27,9 @@
 #include <gfx/ViewportUtil.h>
 #include <vkn/VknCubeMapLoader.h>
 #include <vkn/VulkanCbmLoader.h>
+
+#include <cstdint>
+
 namespace idk::vkn
 {
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
@@ -36,7 +39,7 @@ namespace idk::vkn
 		vk::Viewport vp{ s_cast<float>(vp_pos.x),s_cast<float>(vp_pos.y),s_cast<float>(vp_size.x),s_cast<float>(vp_size.y),0,1 };
 		cmd_buffer.setViewport(0, vp);
 	}
-	auto ComputeVulkanViewport(const vec2& sz, const Viewport& vp)
+	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;
@@ -699,40 +702,126 @@ namespace idk::vkn
 		return config;
 	}
 
+	void CopyDepthBuffer(vk::CommandBuffer cmd_buffer, vk::Image rtd, vk::Image gd)
+	{
+		//Transit RTD -> Transfer
+		vk::ImageMemoryBarrier depth
+		{
+			{},
+			vk::AccessFlagBits::eTransferWrite,
+			vk::ImageLayout::eGeneral,
+			vk::ImageLayout::eTransferDstOptimal,
+			*View().QueueFamily().graphics_family,
+			*View().QueueFamily().graphics_family,
+			rtd,
+			vk::ImageSubresourceRange
+			{
+				vk::ImageAspectFlagBits::eDepth,
+				0,1,0,1
+			}
+		};
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eBottomOfPipe, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, depth);
+
+		//Blit
+		//expect depth attachments to be the exact same size and format.
+		cmd_buffer.copyImage(
+			gd, vk::ImageLayout::eTransferSrcOptimal,
+			rtd, vk::ImageLayout::eTransferDstOptimal,
+			vk::ImageCopy
+			{
+				vk::ImageSubresourceLayers
+				{
+					vk::ImageAspectFlagBits::eDepth,
+					0u,0u,1u
+				},
+				vk::Offset3D{0,0,0},
+				vk::ImageSubresourceLayers
+				{
+					vk::ImageAspectFlagBits::eDepth,
+					0ui32,0ui32,1ui32
+				},
+				vk::Offset3D{0,0,0}
+			}
+		);
+
+
+		//Transit RTD -> General
+		std::array<vk::ImageMemoryBarrier, 2> return_barriers = { depth,depth };
+		std::swap(return_barriers[0].dstAccessMask, return_barriers[0].srcAccessMask);
+		std::swap(return_barriers[0].oldLayout, return_barriers[0].newLayout);
+		return_barriers[0].setDstAccessMask({});// vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+		return_barriers[0].setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+		//Transit GD  -> DepthAttachmentOptimal
+		return_barriers[1].setSrcAccessMask(vk::AccessFlagBits::eTransferRead);
+		return_barriers[1].setDstAccessMask({});
+		return_barriers[1].setOldLayout(vk::ImageLayout::eTransferSrcOptimal);
+		return_barriers[1].setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		return_barriers[1].setImage(gd);
+
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
+
+	}
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& view = View();
 		//auto& swapchain = view.Swapchain();
+		auto& camera = state.camera;
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 		VulkanPipeline* prev_pipeline = nullptr;
 		vector<RscHandle<ShaderProgram>> shaders;
-
-		//Preprocess MeshRender's uniforms
-		auto&& the_interface = ProcessRoUniforms(state, rs.ubo_manager);
-		the_interface.GenerateDS(rs.dpools);
+		auto& deferred_pass = rs.deferred_pass;
+		deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
+		deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
+		deferred_pass.Init(state.camera.render_target->Size());
+		deferred_pass.pipeline_manager(GetPipelineManager());
+		deferred_pass.frame_index(_current_frame_index);
 
 		cmd_buffer.begin(begin_info, dispatcher);
+
+		//Preprocess MeshRender's uniforms
+		deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
+		auto rtd = camera.render_target->GetDepthBuffer().as<VknTexture>().Image();
+		auto gd = deferred_pass.GBuffer().gbuffer->DepthAttachment().buffer.as<VknTexture>().Image();
+		
+		//cmd_buffer.blitImage(
+		//	deferred_pass.GBuffer().gbuffer->DepthAttachment().buffer.as<VknTexture>().Image(), vk::ImageLayout::eTransferSrcOptimal,
+		//	camera.render_target->GetDepthBuffer().as<VknTexture>().Image(), vk::ImageLayout::eTransferDstOptimal,
+		//	blit, vk::Filter::eNearest
+		//);
+
+
+		auto&& the_interface = rs.deferred_pass.ProcessDrawCalls(state, rs);//ProcessRoUniforms(state, rs.ubo_manager);
+		the_interface.GenerateDS(rs.dpools);
 		std::array<float, 4> a{};
 
 		//auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
-		std::array<float, 4> depth_clear{1.0f,1.0f ,1.0f ,1.0f };
-		std::optional<vec4> clear_col;
+		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+		std::optional<color> clear_col;
 		std::optional<RscHandle<CubeMap>> sb_cm;
-		std::visit([&state, &clear_col,&sb_cm](auto clear_data)
-			{
-				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
-					clear_col = clear_data;
-				if constexpr (std::is_same_v<decltype(clear_data), RscHandle<CubeMap>>)
-					sb_cm = clear_data;
-			}, state.camera.clear_data);
+
+		auto& clear_data = state.camera.clear_data;
+		switch (clear_data.index())
+		{
+		case index_in_variant_v<color, CameraClear_t>:
+			clear_col = std::get<color>(clear_data);
+			break;
+		case index_in_variant_v<RscHandle<CubeMap>, CameraClear_t>:
+			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
+			break;
+		case index_in_variant_v<DontClear, CameraClear_t>:
+			//TODO: set dont clear settings.
+			break;
+		}
+
 
 		vk::ClearValue clearColor = clear_col ?
-			 vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
+			vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
 			:
 			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
 		vk::ClearValue v[]{
@@ -742,7 +831,6 @@ namespace idk::vkn
 		
 		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
-		auto& camera = state.camera;
 		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
 		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
 		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
@@ -803,6 +891,7 @@ namespace idk::vkn
 
 		auto& processed_ro = the_interface.DrawCalls();
 		rs.FlagRendered();
+		bool first_time = true;
 		for (auto& p_ro : processed_ro)
 		{
 			auto& obj = p_ro.Object();
@@ -845,6 +934,11 @@ namespace idk::vkn
 				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
 				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 			}
+			if (first_time)
+			{
+				CopyDepthBuffer(cmd_buffer, rtd, gd);
+			}
+			first_time = false;
 		}
 		if(camera.overlay_debug_draw)
 			RenderDebugStuff(state, rs,offset,size);

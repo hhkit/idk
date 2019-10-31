@@ -9,6 +9,8 @@ const int eNormal              = 3         ;
 const int eTangent             = 4         ;
 const int eGBufferSize         = eTangent+1;
 
+S_LAYOUT(9, 0) uniform sampler2D gbuffers[eGBufferSize];
+
 U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
 	mat4 inverse_view_transform;
@@ -61,16 +63,16 @@ S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 const float PI = 3.1415926535;
 
-//Helper functions begin
-vec3 unpack_normal(vec3 normal_in)
+vec3 Normal()
 {
-	vec3 T = fs_in.tangent;
-	vec3 N = fs_in.normal;
-	vec3 B = cross(N, T);
-	mat3 TBN = mat3(T,B,N);
-	normal_in -= vec3(0.5);
-	return normalize(TBN * normal_in);
+	return normalize(texture(gbuffers[eNormal] ,fs_in.uv).rgb );
 }
+vec3 Tangent()
+{
+	return normalize(texture(gbuffers[eTangent] ,fs_in.uv).rgb);
+}
+
+
 
 vec3 fresnel(float cos_theta, vec3 f0)
 {
@@ -255,14 +257,13 @@ vec3 pbr(
 // forward shading only cares about color!
 layout(location = 0)out vec4 out_color;
 
-S_LAYOUT(5, 0) uniform sampler2D gbuffers[eGBufferSize];
 
 void main()
 {
 	// declare initial values here
-	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv);
-	vec3  normal    = normalize(texture(gbuffers[eNormal] ,fs_in.uv) );
-	vec3  tangent   = normalize(texture(gbuffers[eTangent] ,fs_in.uv));
+	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv).rgb;
+	vec3  normal    = Normal();
+	vec3  tangent   = Tangent();
 	vec4 uv_met_rou = texture(gbuffers[eUvMetallicRoughness] ,fs_in.uv);
 	vec4 alb_amb_occ= texture(gbuffers[eAlbedoAmbOcc] ,fs_in.uv);
 	vec2  uv        = uv_met_rou.xy;
@@ -321,6 +322,6 @@ void main()
 	vec3 color = light_accum + ambient;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2)); 
-	out_color = vec4(color,1);
+	out_color = vec4(fs_in.uv,0.5,1);
 	
 }

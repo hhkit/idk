@@ -38,6 +38,7 @@ namespace idk
 		FPicking,
 		FPBRConvolute,
 		FBrdf,
+		FDeferredPost,
 		FMax
 	};
 	enum GeometryShaders
@@ -88,6 +89,8 @@ namespace idk
 		size_t AddRenderRequest(RenderRequest&& request);
 
 		bool RenderRequestStatus(size_t index);
+
+		shared_ptr<pipeline_config> MeshRenderConfig()const { return mesh_render_config; }
 
 		virtual GraphicsAPI GetAPI() = 0;
 	protected:

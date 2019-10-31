@@ -9,8 +9,11 @@
 
 #include <vkn/utils/utils.h>
 
+#include <gfx/MeshRenderer.h>
 #include <vkn/PipelineBinders.h>
-#if 0
+#include <vkn/PipelineBinders.inl>
+#include <vkn/FrameRenderer.h>
+#if 1
 namespace idk::vkn
 {
 	using EGBufferBinding = meta::enum_info<GBufferBinding, meta::enum_pack<GBufferBinding,
@@ -20,38 +23,45 @@ namespace idk::vkn
 		GBufferBinding::eNormal,
 		GBufferBinding::eTangent>>;
 
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size);
+	template<typename T, typename...Args>
+	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
+	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
+	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp);
+
 	void GBufferBarrier(vk::CommandBuffer cmd_buffer, DeferredGBuffer& gbuffer)
 	{
-		vk::ImageMemoryBarrier barriers[EGBufferBinding::size() + 1];
+		constexpr auto num_buffers = 0;// EGBufferBinding::size();
+		std::array<vk::ImageMemoryBarrier, num_buffers + 1> barriers;
 
-		for (size_t i = 0; i < std::size(barriers); ++i)
-		{
-			auto& tex = gbuffer.gbuffer->GetAttachment(i).buffer.as<VknTexture>();
-			barriers[i] = vk::ImageMemoryBarrier
-			{
-				vk::AccessFlagBits::eColorAttachmentWrite,
-				vk::AccessFlagBits::eShaderRead,
-				vk::ImageLayout::eColorAttachmentOptimal,
-				vk::ImageLayout::eShaderReadOnlyOptimal,
-				*View().QueueFamily().graphics_family,
-				*View().QueueFamily().graphics_family,
-				tex.Image(),
-				vk::ImageSubresourceRange
-				{
-					tex.ImageAspects(),
-					0,1,
-					0,1,
-				}
-			};
-		}
+		//for (size_t i = 0; i < EGBufferBinding::size(); ++i)
+		//{
+		//	auto& tex = gbuffer.gbuffer->GetAttachment(i).buffer.as<VknTexture>();
+		//	barriers[i] = vk::ImageMemoryBarrier
+		//	{
+		//		vk::AccessFlagBits::eColorAttachmentWrite,
+		//		vk::AccessFlagBits::eShaderRead,
+		//		vk::ImageLayout::eColorAttachmentOptimal,
+		//		vk::ImageLayout::eShaderReadOnlyOptimal,
+		//		*View().QueueFamily().graphics_family,
+		//		*View().QueueFamily().graphics_family,
+		//		tex.Image(),
+		//		vk::ImageSubresourceRange
+		//		{
+		//			tex.ImageAspects(),
+		//			0,1,
+		//			0,1,
+		//		}
+		//	};
+		//}
 		auto& depth_tex = gbuffer.gbuffer->DepthAttachment().buffer.as<VknTexture>();
 		//depth
-		barriers[EGBufferBinding::size()] = vk::ImageMemoryBarrier
+		barriers[num_buffers] = vk::ImageMemoryBarrier
 		{
-			vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-			vk::AccessFlagBits::eDepthStencilAttachmentRead,
-			vk::ImageLayout::eColorAttachmentOptimal,
-			vk::ImageLayout::eShaderReadOnlyOptimal,
+			{},
+			vk::AccessFlagBits::eTransferRead,
+			vk::ImageLayout::eGeneral,
+			vk::ImageLayout::eTransferSrcOptimal,
 			*View().QueueFamily().graphics_family,
 			*View().QueueFamily().graphics_family,
 			depth_tex.Image(),
@@ -62,7 +72,7 @@ namespace idk::vkn
 				0,1,
 			}
 		};
-		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barriers, vk::DispatchLoaderDefault{});
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barriers, vk::DispatchLoaderDefault{});
 	}
 
 
@@ -120,15 +130,25 @@ namespace idk::vkn
 			_render_complete = View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 		}
 	}
-	template<typename T, typename...Args>
-	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
-	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
-	std::pair<ivec2,ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp);
 
-	PipelineThingy& DeferredPass::TheInterface()
+	void DeferredPass::Init(ivec2 size) 
 	{
-		return *the_interface;
+		const static renderer_reqs fsq_requirements = 
+		{
+			{
+				{vtx::Attrib::Position,0},
+				{vtx::Attrib::UV,1},
+			}
+		};
+		_gbuffer.Init(size); 
+		fsq_ro.mesh = Mesh::defaults[MeshType::FSQ];
+		fsq_ro.renderer_req = &fsq_requirements;
+		if (!fsq_ro.config)
+			fsq_ro.config = Core::GetSystem<GraphicsSystem>().MeshRenderConfig();
 	}
+#if 0
+
+	//Make sure to call this again if the framebuffer size changed.
 
 	void DeferredPass::BindGBuffers(const GraphicsState& graphics_state, RenderStateV2& rs)
 	{
@@ -143,35 +163,8 @@ namespace idk::vkn
 		DrawToGBuffers(cmd_buffer, graphics_state, rs);
 		
 		auto& camera = graphics_state.camera;
-		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
-		std::optional<color> clear_col;
-		std::optional<RscHandle<CubeMap>> sb_cm;
-
-		auto& clear_data = graphics_state.camera.clear_data;
-		switch (clear_data.index())
-		{
-		case index_in_variant_v<color, CameraClear_t>:
-			clear_col = std::get<color>(clear_data);
-			break;
-		case index_in_variant_v<RscHandle<CubeMap>, CameraClear_t>:
-			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
-			break;
-		case index_in_variant_v<DontClear, CameraClear_t>:
-			//TODO: set dont clear settings.
-			break;
-		}
 
 
-
-
-		vk::ClearValue clearColor = clear_col ?
-			vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
-			:
-			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
-		vk::ClearValue v[]{
-			clearColor,
-			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
-		};
 
 		
 		//////////////////Skybox rendering
@@ -214,7 +207,7 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
-
+#endif
 	struct DeferredPostBinder : StandardBindings
 	{
 		DeferredPass* deferred_pass;
@@ -222,10 +215,10 @@ namespace idk::vkn
 		{
 			deferred_pass = &pass;
 		}
-		void Bind(PipelineThingy& the_interface)
+		void Bind(PipelineThingy& the_interface) override
 		{
-			RscHandle<ShaderProgram> fsq_vert;
-			RscHandle<ShaderProgram> deferred_post_frag;
+			RscHandle<ShaderProgram> fsq_vert = deferred_pass->fullscreen_quad_vert;
+			RscHandle<ShaderProgram> deferred_post_frag = deferred_pass->deferred_post_frag;
 
 			the_interface.BindShader(ShaderStage::Vertex, fsq_vert);
 			the_interface.BindShader(ShaderStage::Fragment, deferred_post_frag);
@@ -233,6 +226,7 @@ namespace idk::vkn
 			for (uint32_t i = 0; i < EGBufferBinding::size(); ++i)
 				the_interface.BindSampler("gbuffers", i, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>());
 		}
+		void Bind(PipelineThingy& the_interface, const RenderObject&) override {}
 	};
 
 	using PbrDeferredPostBinding = CombinedBindings<DeferredPostBinder, PbrFwdBindings>;
@@ -242,21 +236,20 @@ namespace idk::vkn
 	{
 		//TODO: Prepare FSQ draw call + Forward Draw Calls
 		PipelineThingy the_interface{};
-		RenderObject fsq_ro;
 		the_interface.SetRef(rs.ubo_manager);
 		PbrDeferredPostBinding binding;
 		std::get<DeferredPostBinder>(binding.binders).SetDeferredPass(*this);
 		std::get<PbrFwdBindings>(binding.binders).SetState(graphics_state);
 		
 		binding.Bind(the_interface);
-		
+		binding.Bind(the_interface, fsq_ro);
 		//Draw Fullscreen Quad
 		the_interface.FinalizeDrawCall(fsq_ro);
 		//Insert Forward stuff here?
 
 		return the_interface;
 	}
-
+#if 0
 	void CoreRenderPass(const GraphicsState& graphics_state, RenderStateV2& rs)
 	{
 		DeferredPass* dp;
@@ -267,12 +260,77 @@ namespace idk::vkn
 		//... the rest of the stuff here.
 
 	}
+#endif
+	bool RenderProcessedDrawCalls(vk::CommandBuffer cmd_buffer,
+		const vector<ProcessedRO>& processed_ro,
+		const CameraData& camera,
+		PipelineManager& pipeline_manager,
+		uint32_t frame_index,
+		const vk::RenderPassBeginInfo& rpbi,
+		VknFrameBuffer& fb
+		)
+	{
+		auto offset = ivec2{ rpbi.renderArea.offset.x,rpbi.renderArea.offset.y };
+		auto size= ivec2{ s_cast<uint32_t>(rpbi.renderArea.extent.width),s_cast<uint32_t>(rpbi.renderArea.extent.height )};
+		auto& view = View();
+		vector<RscHandle<ShaderProgram>> shaders;
+		VulkanPipeline* prev_pipeline = nullptr;
+		//Draw stuff into the gbuffers
+		//auto& processed_ro = the_interface.DrawCalls();
+		bool rendered = false;
+		for (auto& p_ro : processed_ro)
+		{
+			rendered = true;
+			auto& obj = p_ro.Object();
+			if (p_ro.rebind_shaders)
+			{
+				shaders.resize(0);
+				if (p_ro.frag_shader)
+					shaders.emplace_back(*p_ro.frag_shader);
+				if (p_ro.vertex_shader)
+					shaders.emplace_back(*p_ro.vertex_shader);
+				if (p_ro.geom_shader)
+					shaders.emplace_back(*p_ro.geom_shader);
+				
+				auto config = ConfigWithVP(*obj.config, camera, offset, size);
+				config.attachment_configs.resize(fb.NumColorAttachments());
+				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rpbi.renderPass, true);
+				pipeline.Bind(cmd_buffer, view);
+				SetViewport(cmd_buffer, offset, size);
+				prev_pipeline = &pipeline;
+			}
+			auto& pipeline = *prev_pipeline;
+			//TODO Grab everything and render them
+			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
+			auto& mesh = obj.mesh.as<VulkanMesh>();
+			for (auto& [set, ds] : p_ro.descriptor_sets)
+			{
+				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+			}
 
+			auto& renderer_req = *obj.renderer_req;
+
+			for (auto&& [attrib, location] : renderer_req.requirements)
+			{
+				auto& attrib_buffer = mesh.Get(attrib);
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+			}
+
+			auto& oidx = mesh.GetIndexBuffer();
+			if (oidx)
+			{
+				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+			}
+		}
+		return rendered;
+	}
 
 	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
 	{
 		auto& view = View();
 		auto& gbuffer = GBuffer();
+		//Bind the material uniforms
 		PbrFwdMaterialBinding binder;
 		binder.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) { binder.SetState(state); }, graphics_state);
 
@@ -326,55 +384,8 @@ namespace idk::vkn
 		};
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-
-		vector<RscHandle<ShaderProgram>> shaders;
-		VulkanPipeline* prev_pipeline = nullptr;
-		//Draw stuff into the gbuffers
-		auto& processed_ro = the_interface.DrawCalls();
-		rs.FlagRendered();
-		for (auto& p_ro : processed_ro)
-		{
-			auto& obj = p_ro.Object();
-			if (p_ro.rebind_shaders)
-			{
-				shaders.resize(0);
-				if (p_ro.frag_shader)
-					shaders.emplace_back(*p_ro.frag_shader);
-				if (p_ro.vertex_shader)
-					shaders.emplace_back(*p_ro.vertex_shader);
-				if (p_ro.geom_shader)
-					shaders.emplace_back(*p_ro.geom_shader);
-
-				auto config = ConfigWithVP(*obj.config, camera, offset, size);
-				auto& pipeline = GetPipeline(config, shaders);
-				pipeline.Bind(cmd_buffer, view);
-				SetViewport(cmd_buffer, offset, size);
-				prev_pipeline = &pipeline;
-			}
-			auto& pipeline = *prev_pipeline;
-			//TODO Grab everything and render them
-			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-			auto& mesh = obj.mesh.as<VulkanMesh>();
-			for (auto& [set, ds] : p_ro.descriptor_sets)
-			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
-			}
-
-			auto& renderer_req = *obj.renderer_req;
-
-			for (auto&& [attrib, location] : renderer_req.requirements)
-			{
-				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
-			}
-
-			auto& oidx = mesh.GetIndexBuffer();
-			if (oidx)
-			{
-				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
-			}
-		}
+		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,g_buffer))
+			rs.FlagRendered();
 		cmd_buffer.endRenderPass();//End GBuffer pass
 		GBufferBarrier(cmd_buffer, gbuffer);
 	}

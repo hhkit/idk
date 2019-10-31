@@ -4,6 +4,7 @@
 #include <vkn/DescriptorsManager.h>
 #include <vkn/utils/PresentationSignals.h>
 #include <vkn/RenderUtil.h>
+#include <vkn/DeferredPass.h>
 namespace idk::vkn
 {
 struct RenderStateV2
@@ -16,6 +17,8 @@ struct RenderStateV2
 
 	//Cubemap renderer here
 	CubemapRenderer skyboxRenderer;
+
+	DeferredPass deferred_pass;
 
 	bool has_commands = false;
 	void FlagRendered() { has_commands = true; }

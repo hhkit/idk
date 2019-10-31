@@ -43,7 +43,7 @@ namespace idk::vkn
 		string val = stringify(shader_stream);
 
 		auto shader_enum = GetShaderType(filepath.GetExtension());
-		auto spirv = GlslToSpirv::spirv(val, shader_enum);
+		auto spirv = GlslToSpirv::spirv(val, shader_enum,path_to_resource.GetFileName());
 		if (spirv)
 			program->Load(shader_enum, {}, string_view{ r_cast<const char*>(spirv->data()),hlp::buffer_size(*spirv) });
 		return program;
