@@ -315,6 +315,7 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 	FillDefaultBufferDesc(extracted,descriptors);
 	back->stage = single_stage;
 	back->attrib_descriptions = std::move(descriptors);
+	NewlyLoaded(true);
 	buf_obj.WriteToBack(std::move(back));
 }
 void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code)

@@ -305,7 +305,7 @@ namespace idk::vkn
 			,&rasterizer
 			,&multisampling
 			,(_has_depth_stencil) ? &dsci : nullptr
-			,&colorBlending
+			,std::data(colorBlending)
 			,&dynamicState
 			,*m_pipelinelayout
 			,m_renderpass
@@ -408,14 +408,24 @@ namespace idk::vkn
 		auto vertModule = [](auto& config) ->std::optional<vk::ShaderModule> 
 		{
 			if (config.vert_shader)
-				return config.vert_shader.as<ShaderModule>().Module();
+			{
+				ShaderModule& mod = config.vert_shader.as<ShaderModule>();
+				if (!mod.HasCurrent())
+					mod.UpdateCurrent(0);
+				return mod.Module();
+			}
 			else
 				return std::nullopt;
 		}(config);
 		auto fragModule = [](auto& config) ->std::optional<vk::ShaderModule>
-		{ 
+		{
 			if (config.frag_shader)
-				return config.frag_shader.as<ShaderModule>().Module();
+			{
+				ShaderModule& mod = config.frag_shader.as<ShaderModule>();
+				if (!mod.HasCurrent())
+					mod.UpdateCurrent(0);
+				return mod.Module();
+			}
 			else
 				return std::nullopt;
 		}(config);//rsc.emplace_back(vulkan.CreateShaderModule(frag));
@@ -513,22 +523,89 @@ namespace idk::vkn
 		};
 	}
 
+	hash_table<BlendFactor, vk::BlendFactor> BlendFactorMap()
+	{
+		return hash_table<BlendFactor, vk::BlendFactor>
+		{
+		{BlendFactor::eZero                  ,vk::BlendFactor::eZero                  },// = VK_BLEND_FACTOR_ZERO,
+		{BlendFactor::eOne                   ,vk::BlendFactor::eOne                   },// = VK_BLEND_FACTOR_ONE,
+		{BlendFactor::eSrcColor              ,vk::BlendFactor::eSrcColor              },// = VK_BLEND_FACTOR_SRC_COLOR,
+		{BlendFactor::eOneMinusSrcColor      ,vk::BlendFactor::eOneMinusSrcColor      },// = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+		{BlendFactor::eDstColor              ,vk::BlendFactor::eDstColor              },// = VK_BLEND_FACTOR_DST_COLOR,
+		{BlendFactor::eOneMinusDstColor      ,vk::BlendFactor::eOneMinusDstColor      },// = VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+		{BlendFactor::eSrcAlpha              ,vk::BlendFactor::eSrcAlpha              },// = VK_BLEND_FACTOR_SRC_ALPHA,
+		{BlendFactor::eOneMinusSrcAlpha      ,vk::BlendFactor::eOneMinusSrcAlpha      },// = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+		{BlendFactor::eDstAlpha              ,vk::BlendFactor::eDstAlpha              },// = VK_BLEND_FACTOR_DST_ALPHA,
+		{BlendFactor::eOneMinusDstAlpha      ,vk::BlendFactor::eOneMinusDstAlpha      },// = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+		{BlendFactor::eConstantColor         ,vk::BlendFactor::eConstantColor         },// = VK_BLEND_FACTOR_CONSTANT_COLOR,
+		{BlendFactor::eOneMinusConstantColor ,vk::BlendFactor::eOneMinusConstantColor },// = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR,
+		{BlendFactor::eConstantAlpha         ,vk::BlendFactor::eConstantAlpha         },// = VK_BLEND_FACTOR_CONSTANT_ALPHA,
+		{BlendFactor::eOneMinusConstantAlpha ,vk::BlendFactor::eOneMinusConstantAlpha },// = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA,
+		{BlendFactor::eSrcAlphaSaturate      ,vk::BlendFactor::eSrcAlphaSaturate      },// = VK_BLEND_FACTOR_SRC_ALPHA_SATURATE,
+		{BlendFactor::eSrc1Color             ,vk::BlendFactor::eSrc1Color             },// = VK_BLEND_FACTOR_SRC1_COLOR,
+		{BlendFactor::eOneMinusSrc1Color     ,vk::BlendFactor::eOneMinusSrc1Color     },// = VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+		{BlendFactor::eSrc1Alpha             ,vk::BlendFactor::eSrc1Alpha             },// = VK_BLEND_FACTOR_SRC1_ALPHA,
+		{BlendFactor::eOneMinusSrc1Alpha     ,vk::BlendFactor::eOneMinusSrc1Alpha     },// = VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+		};
+	}
+
+	vk::BlendFactor MapBlendFactor(BlendFactor bf)
+	{
+		static const auto map = BlendFactorMap();
+		return map.find(bf)->second;
+	}
+	
+	hash_table<BlendOp, vk::BlendOp> BlendOpMap()
+	{
+		return hash_table<BlendOp, vk::BlendOp>
+		{
+		{BlendOp::eAdd                    ,vk::BlendOp::eAdd                    },// = VK_BLEND_OP_ADD,
+		{BlendOp::eSubtract               ,vk::BlendOp::eSubtract               },// = VK_BLEND_OP_SUBTRACT,
+		{BlendOp::eReverseSubtract        ,vk::BlendOp::eReverseSubtract        },// = VK_BLEND_OP_REVERSE_SUBTRACT,
+		{BlendOp::eMin                    ,vk::BlendOp::eMin                    },// = VK_BLEND_OP_MIN,
+		{BlendOp::eMax                    ,vk::BlendOp::eMax                    },// = VK_BLEND_OP_MAX,
+		};
+	}
+
+	vk::BlendOp MapBlendOp(BlendOp bf)
+	{
+		static const auto map = BlendOpMap();
+		return map.find(bf)->second;
+	}
+
+	vk::PipelineColorBlendAttachmentState GetColorBlendAttachment(const AttachmentBlendConfig& config)
+	{
+		return
+			vk::PipelineColorBlendAttachmentState
+			{
+				/*blendEnable         */config.blend_enable
+				/*srcColorBlendFactor */,MapBlendFactor(config.src_color_blend_factor)//optional
+				/*dstColorBlendFactor */,MapBlendFactor(config.dst_color_blend_factor)//optional
+				/*colorBlendOp        */,MapBlendOp(config.color_blend_op)            //optional
+				/*srcAlphaBlendFactor */,MapBlendFactor(config.src_alpha_blend_factor)//optional
+				/*dstAlphaBlendFactor */,MapBlendFactor(config.dst_alpha_blend_factor)//optional
+				/*alphaBlendOp        */,MapBlendOp(config.alpha_blend_op)            //optional
+				/*colorWriteMask      */,vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+			};
+
+	}
+
 	vector<vk::PipelineColorBlendAttachmentState> VulkanPipeline::GetColorBlendAttachments([[maybe_unused]] const config_t& config) const
 	{
 		//TODO GFX PIPELINE: add colorblending config into pipeline_config_t
-		return {
-			vk::PipelineColorBlendAttachmentState
+		auto& att_config = config.attachment_configs;
+		auto size = att_config.size();
+		vector<vk::PipelineColorBlendAttachmentState> result(size);
+		if(size)
+			for (size_t i = 0; i < size; ++i)
+			{
+				result[i] = GetColorBlendAttachment(att_config[i]);
+			}
+		else
 		{
-			/*blendEnable         */VK_FALSE
-			/*srcColorBlendFactor */,vk::BlendFactor::eOne	//optional
-			/*dstColorBlendFactor */,vk::BlendFactor::eZero	//optional
-			/*colorBlendOp        */,vk::BlendOp::eAdd		//optional
-			/*srcAlphaBlendFactor */,vk::BlendFactor::eOne	//optional
-			/*dstAlphaBlendFactor */,vk::BlendFactor::eZero	//optional
-			/*alphaBlendOp        */,vk::BlendOp::eAdd      //optional
-			/*colorWriteMask      */,vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+			result.emplace_back(GetColorBlendAttachment(AttachmentBlendConfig{}));
 		}
-		};
+		return result;
 
 		/*
 		//How the values are used are like this:
@@ -543,19 +620,22 @@ namespace idk::vkn
 		*/
 	}
 
-	std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState>> VulkanPipeline::GetColorBlendConfig(const config_t& config) const
+	std::pair<vector<vk::PipelineColorBlendStateCreateInfo>, vector<vk::PipelineColorBlendAttachmentState>> VulkanPipeline::GetColorBlendConfig(const config_t& config) const
 	{
 		//Per frame buffer
 		auto colorBlendAttachments = GetColorBlendAttachments(config);
-		return std::make_pair(vk::PipelineColorBlendStateCreateInfo
+		auto blend_states = vector<vk::PipelineColorBlendStateCreateInfo>{
+			vk::PipelineColorBlendStateCreateInfo
 			{
 				vk::PipelineColorBlendStateCreateFlags{}
 				,VK_FALSE                           //logicOpEnable   
-			,vk::LogicOp::eCopy	                //logicOp         
-			,hlp::arr_count(colorBlendAttachments)    //attachmentCount 
-			,std::data(colorBlendAttachments)     //pAttachments   
-			,{ 0.0,0.0f,0.0f,0.0f }
-			}, std::move(colorBlendAttachments));
+				,vk::LogicOp::eCopy	                //logicOp         
+				,hlp::arr_count(colorBlendAttachments)    //attachmentCount 
+				,std::data(colorBlendAttachments)     //pAttachments   
+				,{ 0.0,0.0f,0.0f,0.0f }
+			} 
+		};
+		return std::make_pair(std::move( blend_states), std::move(colorBlendAttachments));
 	}
 
 	vector<vk::DynamicState> VulkanPipeline::GetDynamicStates([[maybe_unused]] const config_t& config, const Options& options) const

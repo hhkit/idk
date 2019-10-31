@@ -71,7 +71,7 @@ namespace idk::vkn
 		vk::PipelineRasterizationStateCreateInfo GetRasterizerInfo(const config_t& config) const;
 		vk::PipelineMultisampleStateCreateInfo GetMultisampleInfo(const config_t& config)const;
 		vector<vk::PipelineColorBlendAttachmentState > GetColorBlendAttachments(const config_t& config)const;
-		std::pair<vk::PipelineColorBlendStateCreateInfo, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
+		std::pair<vector<vk::PipelineColorBlendStateCreateInfo>, vector<vk::PipelineColorBlendAttachmentState >> GetColorBlendConfig(const config_t& config)const;
 		vector<vk::DynamicState> GetDynamicStates(const config_t& config, const Options& options)const;
 		std::pair<vk::PipelineLayoutCreateInfo,vector< vk::DescriptorSetLayout>> GetLayoutInfo(const config_t& config)const;
 		vk::RenderPass GetRenderpass(const config_t& config, VulkanView& vulkan);

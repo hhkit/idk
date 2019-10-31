@@ -80,6 +80,9 @@ namespace idk::vkn
 	}
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
+		vector<decltype(pipelines)::iterator> pipelines_to_update;
+		pipelines_to_update.reserve(pipelines.size() * 2);
+
 		if (frame_index >= update_queue.size())
 		{
 			update_queue.resize(s_cast<size_t>(frame_index) + 1);
@@ -104,13 +107,31 @@ namespace idk::vkn
 					need_update = true;
 					module.UpdateCurrent(frame_index);
 				}
+				need_update |= module.NewlyLoaded();
 			}
 			if (need_update)
 			{
-				//Recreate pipeline in back_pipeline
-				pipelines[handle].Swap();
-				pipelines[handle].Create(View(),frame_index);
+				pipelines_to_update.emplace_back(itr);
 			}
 		}
+		for (auto itr : pipelines_to_update)
+		{
+			auto& po = *itr;
+			auto handle = itr.handle();
+			for (auto& shader : po.shader_handles)
+			{
+				auto& module = shader.as<ShaderModule>();
+				if (module.NeedUpdate())
+				{
+					module.UpdateCurrent(frame_index);
+				}
+			}
+			{
+				//Recreate pipeline in back_pipeline
+				pipelines[handle].Swap();
+				pipelines[handle].Create(View(), frame_index);
+			}
+		}
+		
 	}
 }

@@ -46,8 +46,11 @@ namespace idk::vkn
 		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
 		bool HasUpdate()const override { return buf_obj.HasUpdate(); }
 		void UpdateCurrent(size_t index)override { buf_obj.UpdateCurrent(index); }
-		
+		bool HasCurrent()const { return buf_obj.HasCurrent(); }
 		std::optional<uint32_t> GetBinding(uint32_t location)const { return buf_obj.Current().GetBinding(location); }
+
+		bool NewlyLoaded()const { return _newly_loaded_flag; }
+		void NewlyLoaded(bool val){ _newly_loaded_flag = val; }
 
 		ShaderModule() = default;
 		ShaderModule(const ShaderModule&) = default;
@@ -57,6 +60,7 @@ namespace idk::vkn
 		~ShaderModule();
 
 	private:
+		bool _newly_loaded_flag = false;
 		struct Data
 		{
 			vk::ShaderStageFlagBits stage;
