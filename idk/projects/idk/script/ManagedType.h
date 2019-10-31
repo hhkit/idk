@@ -29,6 +29,7 @@ namespace idk::mono
 		opt<ManagedThunk> GetThunk(string_view method_name, int param_count = 0) const;
 	private:
 		MonoClass* type{};
+		string name;
 		hash_table<string, ManagedThunk> thunks;
 
 		MonoMethod* FindMethod(string_view method_name, int param_count) const;

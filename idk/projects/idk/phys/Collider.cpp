@@ -12,7 +12,15 @@ namespace idk
 	}
 	void Collider::setup_predict()
 	{
-		_rigidbody = GetGameObject()->GetComponent<RigidBody>();
+		if (!_rigidbody)
+		{
+			auto search_go = GetGameObject();
+			while (search_go && !_rigidbody)
+			{
+				_rigidbody = search_go->GetComponent<RigidBody>();
+				search_go = search_go->Parent();
+			}
+		}
 
 		if (_rigidbody)
 		{

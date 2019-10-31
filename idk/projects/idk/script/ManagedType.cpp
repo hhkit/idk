@@ -7,7 +7,7 @@
 namespace idk::mono
 {
 	ManagedType::ManagedType(MonoClass* type)
-		: type{type}
+		: type{ type }, name{mono_class_get_name(type)}
 	{
 	}
 

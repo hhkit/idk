@@ -42,8 +42,13 @@ namespace idk
 	}
 	box& box::operator*=(const mat4& transform)
 	{
-		auto gen = mat4{ axes() * scale(extents) };
-		gen[3] = vec4{ center, 1 };
+		auto this_comp = matrix_decomposition<float>{};
+		this_comp.scale = extents;
+		this_comp.rotation = rotation;
+		this_comp.position = center;
+		auto gen = this_comp.recompose();
+		//auto gen = mat4{ axes() * scale(extents) };
+		//gen[3] = vec4{ center, 1 };
 		auto tfm = transform * gen;
 		auto decomp = decompose(tfm);
 		extents  = decomp.scale;

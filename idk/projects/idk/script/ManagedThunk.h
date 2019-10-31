@@ -29,7 +29,11 @@ namespace idk::mono
 		const auto invoker = s_cast<FuncType>(thunk);
 		MonoException* exc{};
 		auto retval = invoker(box(args)..., &exc);
-		IDK_ASSERT(exc == nullptr);
+		if (exc)
+		{
+			mono_print_unhandled_exception(r_cast<MonoObject*>(exc));
+			return Ret{};
+		}
 		return retval;
 	}
 
