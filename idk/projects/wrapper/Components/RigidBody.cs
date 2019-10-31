@@ -26,6 +26,12 @@
             get => true;
         }
 
+        public bool isKinematic
+        {
+            get => Bindings.RigidBodyGetIsKinematic(handle);
+            set => Bindings.RigidBodySetIsKinematic(handle, value);
+        }
+
         public bool useGravity
         {
             get => Bindings.RigidBodyGetUseGravity(handle);

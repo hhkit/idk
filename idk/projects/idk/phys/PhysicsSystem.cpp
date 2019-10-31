@@ -99,6 +99,10 @@ namespace idk
 					old_mat[3].xyz = new_pos;
 					rigidbody._predicted_tfm = old_mat;
 				}
+				else
+				{
+					rigidbody._predicted_tfm = tfm->GlobalMatrix();
+				}
 			}
 		};
 
@@ -256,7 +260,7 @@ namespace idk
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 
-					if (rrb_ptr && !lrb_ptr->is_kinematic)
+					if (rrb_ptr && !rrb_ptr->is_kinematic)
 					{
 						auto& ref_rb = *rrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;
