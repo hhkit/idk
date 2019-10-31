@@ -246,7 +246,7 @@ namespace idk
 		for (auto& f : fonts)
 		{
 			auto& render_data = result.font_render_data.emplace_back();
-			f.RenderText();
+			//f.RenderText();
 			render_data = f.fontData;
 		}
 

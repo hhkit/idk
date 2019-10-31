@@ -308,4 +308,22 @@ namespace idk
             ImGui::Image(id, sz);
     }
 
+	template<>
+	void IGE_InspectorWindow::DisplayAsset(RscHandle<FontAtlas> texture)
+	{
+		void* id = texture->ID();
+		vec2 sz = ImGui::GetContentRegionAvail();
+
+		float aspect = texture->AspectRatio();
+		if (aspect > 1.0f)
+			sz.y = sz.x / aspect;
+		else if (aspect < 1.0f)
+			sz.x = sz.y / aspect;
+		else
+			sz = vec2{ ImMin(sz.x, sz.y), ImMin(sz.x, sz.y) };
+
+		if (id)
+			ImGui::Image(id, sz);
+	}
+
 }

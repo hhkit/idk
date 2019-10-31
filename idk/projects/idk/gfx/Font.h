@@ -18,13 +18,12 @@ namespace idk {
 		real padding = 1.f;
 		color colour = {1.f,1.f,1.f,1.f};
 		int  fontSize = 48;
-		RscHandle<FontAtlas> textureAtlas;
+		RscHandle<FontAtlas> textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
 
 		string text;
 
 		FontData fontData;
 
-		Font() = default;
 		virtual void* ID() const { return 0; };
 
 		//Dtor

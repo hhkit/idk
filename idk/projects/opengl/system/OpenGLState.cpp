@@ -18,6 +18,8 @@
 #include <opengl/resource/OpenGLCubemap.h>
 #include <math/shapes/frustum.h>
 #include <gfx/FramebufferFactory.h>
+#include <gfx/FontAtlas.h>
+#include <opengl/resource/OpenGLFontAtlas.h>
 
 #include <editor/IDE.h>
 #include <gfx/ViewportUtil.h>
@@ -454,10 +456,38 @@ namespace idk::ogl
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
 
-			for (auto& elem : font_render_data)
-			{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			}
+			////////////////////////FONT///////////////////////
+			//pipeline.PushProgram(renderer_vertex_shaders[VFont]);
+			//pipeline.PushProgram(renderer_fragment_shaders[FFont]);
+
+			//pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+
+			//for (auto& elem : font_render_data)
+			//{
+			//	auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
+			//	/* Use the texture containing the atlas */
+			//	atlas.BindToUnit(0);
+			//	pipeline.SetUniform("tex", 0);
+
+			//	/* Set up the VBO for our vertex data */
+			//	glEnableVertexAttribArray(0);
+			//	glBindBuffer(GL_ARRAY_BUFFER, font_vao_id);
+			//	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+			//	SetObjectUniforms(elem, cam.view_matrix);
+			//	pipeline.SetUniform("PerFont.color", elem.color.as_vec3);
+			//	
+			//	//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+
+			//	/* Draw all the character on the screen in one go */
+			//	glBufferData(GL_ARRAY_BUFFER, sizeof(elem.coords), std::data(elem.coords), GL_DYNAMIC_DRAW);
+			//	glDrawArrays(GL_TRIANGLES, 0, elem.coords.size());
+
+			//	glDisableVertexAttribArray(0);
+			//}
 
 
             static vector<OpenGLBuffer> bufs = []()
@@ -476,8 +506,7 @@ namespace idk::ogl
             }();
 
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            
 
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
@@ -519,6 +548,9 @@ namespace idk::ogl
                 bufs[0].Bind(); // index buffer
                 glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(elem.particles.size()));
             }
+
+			glDisable(GL_BLEND);
+			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		fb_man.ResetFramebuffer();

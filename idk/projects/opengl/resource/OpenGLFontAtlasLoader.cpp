@@ -5,7 +5,7 @@
 #include <filesystem>
 
 //Dep
-#include <stb/stb_image.h>
+//#include <stb/stb_image.h>
 
 //Resources
 #include <gfx/FontAtlas.h>
@@ -15,10 +15,6 @@
 #include <iostream>
 
 namespace idk {
-	OpenGLFontAtlasLoader::OpenGLFontAtlasLoader()
-	{
-		
-	}
 	ResourceBundle OpenGLFontAtlasLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& metabundle)
 	{
 		if (FT_Init_FreeType(&ft))

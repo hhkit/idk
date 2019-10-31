@@ -22,7 +22,6 @@ U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 {
 	mat4 object_transform;
-	mat4 normal_transform;
 } ObjectMat4s;
 
 U_LAYOUT(8, 0) uniform BLOCK(FontBlock)

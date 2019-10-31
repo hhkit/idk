@@ -6,6 +6,10 @@
 
 namespace idk {
 
+	ENUM(FontDefault, int,
+		SourceSansPro
+	); // 
+
 	ENUM(FontColorFormat, char,
 		R_8,
 		R_16,
@@ -74,6 +78,11 @@ namespace idk {
 		, public MetaTag<FontAtlasMeta>
 	{
 	public:
+
+		static constexpr RscHandle<FontAtlas> defaults[FontDefault::count] =
+		{
+			{ Guid{0x382A438E, 0xADC8, 0x4283, 0xA8D0E339F7D34159} }, // SourceSansPro
+		};
 		struct character_info {
 			
 			//advance

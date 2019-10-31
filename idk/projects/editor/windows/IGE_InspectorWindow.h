@@ -51,7 +51,8 @@ namespace idk {
         template<> void DisplayComponentInner(Handle<Transform> c_transform);
         template<> void DisplayComponentInner(Handle<Animator> c_anim);	
         template<> void DisplayComponentInner(Handle<Bone> c_anim);		
-        template<> void DisplayComponentInner(Handle<AudioSource> c_anim);		
+        template<> void DisplayComponentInner(Handle<AudioSource> c_anim);	
+		template<> void DisplayComponentInner(Handle<Font> c_anim);
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);
@@ -64,6 +65,7 @@ namespace idk {
         template<> void DisplayAsset(RscHandle<MaterialInstance> material);
         template<> void DisplayAsset(RscHandle<Material> material);
         template<> void DisplayAsset(RscHandle<Texture> texture);
+		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
 
         bool displayVal(reflect::dynamic dyn);
 

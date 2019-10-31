@@ -837,9 +837,6 @@
     <ClInclude Include="gfx\CameraClear.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
-    <ClInclude Include="util\easing.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="core\NullHandleException.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -851,6 +848,10 @@
     </ClInclude>
     <ClInclude Include="gfx\FontData.h">
       <Filter>gfx\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="util\easing.h" />
+    <ClInclude Include="gfx\FontAtlasFactory.h">
+      <Filter>gfx\object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1230,9 +1231,6 @@
     <ClCompile Include="math\ritters.cpp">
       <Filter>math\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="util\easing.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="common\Layer.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -1245,6 +1243,10 @@
     </ClCompile>
     <ClCompile Include="gfx\Font.cpp">
       <Filter>gfx\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="util\easing.cpp" />
+    <ClCompile Include="gfx\FontAtlasFactory.cpp">
+      <Filter>gfx\object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

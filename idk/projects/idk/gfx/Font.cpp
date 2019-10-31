@@ -5,6 +5,11 @@
 
 namespace idk
 {
+	/*Font::Font()
+		:Component<Font>{},
+		textureAtlas{Core::GetResourceManager().Create<FontAtlas>()}
+	{
+	}*/
 	void Font::RenderText()
 	{
 
@@ -52,6 +57,7 @@ namespace idk
 		fontData.coords = coords;
 		fontData.color = colour;
 		fontData.fontAtlas = textureAtlas;
+		fontData.transform = obj_tfm->GlobalMatrix();
 		//glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);
 		//glDrawArrays(GL_TRIANGLES, 0, n);
 	}

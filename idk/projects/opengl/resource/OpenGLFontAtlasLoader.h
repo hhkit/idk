@@ -11,7 +11,6 @@ namespace idk {
 		: public IFileLoader
 	{
 	public:
-		OpenGLFontAtlasLoader();
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 
 	private:
