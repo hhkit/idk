@@ -276,6 +276,24 @@ namespace idk
 				Core::GetSystem<Application>().SetTitle(string{ " idk " });
 
 		};
+
+        FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked += [](GenericResourceHandle h)
+        {
+            if (h.index() == BaseResourceID<Scene>)
+            {
+                auto scene = h.AsHandle<Scene>();
+                auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+                if (scene != active_scene)
+                {
+                    if (active_scene)
+                        active_scene->Unload();
+                    Core::GetSystem<SceneManager>().SetActiveScene(scene);
+                    scene->Load();
+
+                    Core::GetSystem<IDE>().ClearScene();
+                }
+            }
+        };
 	}
 
 	void IDE::LateInit()
