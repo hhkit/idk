@@ -200,7 +200,7 @@ namespace idk
 			if (obj)
 			{
 				auto& render_obj = *obj;
-				Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
+				//Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
 				result.mesh_render.emplace_back(std::move(render_obj));
 			}
 		}

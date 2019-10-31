@@ -17,6 +17,10 @@ namespace idk
         /// </summary>
         /// <param name="enumerator">Return from IEnumerator function</param>
         /// <returns>Reference to the coroutine.</returns>
+        /// <example>
+        /// <code>
+        /// </code>
+        /// </example>
         public Coroutine StartCoroutine(IEnumerator enumerator)
         {
             var instr = enumerator.Current;
