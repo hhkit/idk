@@ -116,6 +116,7 @@
     </Link>
     <CustomBuildStep>
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
+if not exist "$(OutDir)docs" mklink /J "$(OutDir)docs" "$(SolutionDir)projects\wrapper\Docs\_site" 
 if not exist "$(OutDir)editor_data" mklink /J "$(OutDir)editor_data" "$(SolutionDir)editor_data" 
 if not exist "$(OutDir)engine_data" mklink /J "$(OutDir)engine_data" "$(SolutionDir)engine_data" 
 if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
@@ -186,6 +187,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     </Link>
     <CustomBuildStep>
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
+if not exist "$(OutDir)docs" mklink /J "$(OutDir)docs" "$(SolutionDir)projects\wrapper\Docs\_site" 
 if not exist "$(OutDir)editor_data" mklink /J "$(OutDir)editor_data" "$(SolutionDir)editor_data" 
 if not exist "$(OutDir)engine_data" mklink /J "$(OutDir)engine_data" "$(SolutionDir)engine_data" 
 if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"

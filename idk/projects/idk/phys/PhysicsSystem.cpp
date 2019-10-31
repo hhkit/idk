@@ -86,16 +86,19 @@ namespace idk
 					continue;
 				};
 
-				auto old_mat = tfm->GlobalMatrix();
-				const vec3 curr_pos = old_mat[3].xyz;
+				if (!rigidbody.is_kinematic)
+				{
+					auto old_mat = tfm->GlobalMatrix();
+					const vec3 curr_pos = old_mat[3].xyz;
 
-				// verlet integrate towards new position
-				//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-				auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-				rigidbody._accum_accel = vec3{};
-				rigidbody._prev_pos = curr_pos;
-				old_mat[3].xyz = new_pos;
-				rigidbody._predicted_tfm = old_mat;
+					// verlet integrate towards new position
+					//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+					auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+					rigidbody._accum_accel = vec3{};
+					rigidbody._prev_pos = curr_pos;
+					old_mat[3].xyz = new_pos;
+					rigidbody._predicted_tfm = old_mat;
+				}
 			}
 		};
 
@@ -191,17 +194,24 @@ namespace idk
 				if (lcollider.is_trigger || rcollider.is_trigger)
 					continue;
 
+				struct RigidBodyInfo
+				{
+					vec3 velocity = {};
+					real inv_mass = 0.f;
+					RigidBody* ref = nullptr;
+				};
+
 				constexpr auto get_values =
-					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, RigidBody*>
+					[](Handle<RigidBody> rb) -> RigidBodyInfo
 				{
 					if (rb)
 					{
 						auto& ref = *rb;
-						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.inv_mass, &ref);
+						return { ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.inv_mass, &ref };
 					}
 					else
 					{
-						return std::make_tuple(vec3{}, 0.f, nullptr);
+						return RigidBodyInfo{};
 					}
 				};
 
@@ -238,7 +248,7 @@ namespace idk
 						? frictional_impulse_scalar * tangent
 						: (lcollider.dynamic_friction, rcollider.dynamic_friction) * .5f * frictional_impulse_scalar * tangent;
 
-					if (lrb_ptr)
+					if (lrb_ptr && !lrb_ptr->is_kinematic)
 					{
 						auto& ref_rb = *lrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction_vector;
@@ -246,7 +256,7 @@ namespace idk
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 
-					if (rrb_ptr)
+					if (rrb_ptr && !lrb_ptr->is_kinematic)
 					{
 						auto& ref_rb = *rrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;
@@ -263,7 +273,11 @@ namespace idk
 		{
 			for (auto& rigidbody : rbs)
 			{
-				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
+				if (!rigidbody.is_kinematic)
+					rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
+				else
+					rigidbody._prev_pos = rigidbody.GetGameObject()->Transform()->GlobalPosition();
+
 				rigidbody.sleep_next_frame = false;
 			}
 
@@ -319,6 +333,7 @@ namespace idk
 
 			col_stay.emplace(pair);
 		}
+		previous_collisions = std::move(collisions);
 		
 		// fire events
 
@@ -410,7 +425,6 @@ namespace idk
 		FireEvent(col_stay, "OnTriggerStay", "OnCollisionStay");
 		FireEvent(col_exit, "OnTriggerExit", "OnCollisionExit");
 
-		previous_collisions = std::move(collisions);
 	}
 
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)

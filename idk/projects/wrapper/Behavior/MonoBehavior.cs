@@ -19,6 +19,19 @@ namespace idk
         /// <returns>Reference to the coroutine.</returns>
         /// <example>
         /// <code>
+        /// class Potato : MonoBehavior
+        /// {
+        ///     private IEnumerator MyCoroutine()
+        ///     {
+        ///         Debug.Log("Yolo");
+        ///         yield return new WaitForSeconds(5f);   
+        ///     }
+        ///     
+        ///     void Start()
+        ///     {
+        ///         StartCoroutine(MyCoroutine());
+        ///     }
+        /// }
         /// </code>
         /// </example>
         public Coroutine StartCoroutine(IEnumerator enumerator)
