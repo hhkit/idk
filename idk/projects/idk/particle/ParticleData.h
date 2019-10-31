@@ -15,7 +15,6 @@ namespace idk
         vector<vec3> velocity_delta;
         vector<color> color;
 
-        uint16_t num_total = 1000;
         uint16_t num_alive = 0;
 
         void Allocate(uint16_t max_size);

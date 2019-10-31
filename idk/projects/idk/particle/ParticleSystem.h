@@ -31,6 +31,7 @@ namespace idk
         char state = Awake;
 
         void Play();
+        void Pause();
         void Stop();
         void Step(float dt);
         void Emit();
