@@ -107,9 +107,7 @@
     script_data: !Test 
       f: 0
       i: 0
-      jump_force: 165
       movement: {x: 0, y: 0, z: 0}
-      prefab: {guid: 9b994921-8483-4621-8ddc-db9bfdefe67b}
 - !12884967424 
   - active: 1
   - !Transform 
@@ -128,38 +126,10 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Animator 
-    animation_table: 
-      idle: 
-        enabled: 1
-        loop: 1
-        name: idle
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
-      test: 
-        enabled: 1
-        loop: 1
-        name: test
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: 46dd799a-e4ce-4528-b0fb-63a4a2551212}
-      test2: 
-        enabled: 1
-        loop: 1
-        name: test2
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: 3b5dd648-6f6a-4f4e-9983-bd8515074cd7}
-      walk: 
-        enabled: 1
-        loop: 1
-        name: walk
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: afcdbeaa-e5e1-4a92-9360-abe7b85dde73}
-    layer_table: {Base Layer: 0}
+    animation_table: []
+    layer_table: []
     layers: 
-    - blend_type: !AnimLayerBlend Override_Blend
+    - blend_type: Override_Blend
       bone_mask: 
       - 1
       - 1
@@ -265,6 +235,76 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
+- !416611893248 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Particles
+  - !ParticleSystem 
+    color_over_lifetime: 
+      color: 
+        max: 
+          a: 1
+          b: 1
+          g: 1
+          r: 1
+        min: 
+          a: 1
+          b: 1
+          g: 1
+          r: 1
+        mode: Constant
+      enabled: 0
+    emission: {enabled: 1, rate_over_time: 10}
+    main: 
+      duration: 5
+      gravity_modifier: 0
+      in_world_space: 0
+      looping: 1
+      max_particles: 1000
+      play_on_awake: 1
+      prewarm: 0
+      start_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      start_delay: 0
+      start_lifetime: 5
+      start_rotation: {value: 0}
+      start_size: 1
+      start_speed: 5
+    renderer: 
+      enabled: 1
+      material: {guid: bfa6c3e0-9b52-412b-b3e7-c85ee93190ca}
+    rotation_over_lifetime: 
+      angular_velocity: 
+        max: {value: 0.7853982}
+        min: {value: 0.7853982}
+        mode: Constant
+      enabled: 0
+    shape: 
+      enabled: 1
+      radius: 1
+      radius_thickness: 1
+      randomize_direction: 0
+    size_over_lifetime: 
+      enabled: 0
+      size: {max: 1, min: 0, mode: Linear}
+    velocity_over_lifetime: 
+      enabled: 0
+      linear: 
+        max: {x: 0, y: 0, z: 0}
+        min: {x: 0, y: 0, z: 0}
+        mode: Constant
 - !17179934720 
   - active: 1
   - !Transform 

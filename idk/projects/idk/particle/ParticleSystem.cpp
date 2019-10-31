@@ -34,7 +34,7 @@ namespace idk
             return;
         if (!main.looping && time >= main.duration && data.num_alive == 0)
             Stop();
-        else
+        else if (emission.enabled)
         {
             emitter_clock += dt * emission.rate_over_time;
             int emit_count = static_cast<int>(emitter_clock);
