@@ -277,10 +277,11 @@ namespace idk::vkn
 		p_ro.rebind_shaders = shader_changed;
 		shader_changed = false;
 	}
-	void PipelineThingy::GenerateDS(DescriptorsManager& d_manager)
+	void PipelineThingy::GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers)
 	{
 		auto dsl = d_manager.Allocate(ref.collated_layouts);
-		ref.ubo_manager.UpdateAllBuffers();
+		if (update_ubo_buffers)
+			UpdateUboBuffers();
 		for (auto& p_ro : draw_calls)
 		{
 			for (auto& [set, bindings] : p_ro.bindings)
@@ -305,5 +306,9 @@ namespace idk::vkn
 				p_ro.descriptor_sets[set]=ds;
 			}
 		}
+	}
+	void PipelineThingy::UpdateUboBuffers()
+	{
+		ref.ubo_manager.UpdateAllBuffers();
 	}
 }

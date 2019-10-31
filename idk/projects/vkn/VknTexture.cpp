@@ -1,14 +1,18 @@
 #include "pch.h"
 #include "VknTexture.h"
 
-namespace idk {
-	vkn::VknTexture::~VknTexture()
+namespace idk::vkn {
+	vk::ImageAspectFlags VknTexture::ImageAspects()
+	{
+		return img_aspect;
+	}
+	VknTexture::~VknTexture()
 	{
 		//vknData.reset();
 		//mem.reset();
 	}
 
-	vkn::VknTexture::VknTexture(VknTexture&& rhs) noexcept
+	VknTexture::VknTexture(VknTexture&& rhs) noexcept
 		:Texture{ std::move(rhs) },
 		size{ std::move(rhs.size) },
 		sizeOnDevice{ std::move(rhs.sizeOnDevice) },
@@ -21,7 +25,7 @@ namespace idk {
 		sampler{ std::move(rhs.sampler) }
 	{}
 
-	vkn::VknTexture& idk::vkn::VknTexture::operator=(VknTexture&& rhs) noexcept
+	VknTexture& VknTexture::operator=(VknTexture&& rhs) noexcept
 	{
 		// TODO: insert return statement here
 		Texture::operator=(std::move(rhs));
@@ -39,32 +43,32 @@ namespace idk {
 		return *this;
 	}
 
-	ivec2 vkn::VknTexture::Size(ivec2 new_size)
+	ivec2 VknTexture::Size(ivec2 new_size)
 	{
 		return Texture::Size(new_size);
 
 		//ToDO update the size of texture
 	}
 
-	void* vkn::VknTexture::ID() const
+	void* VknTexture::ID() const
 	{
 		//Should be descriptor set 
 		return r_cast<void*>(imageView->operator VkImageView());
 	}
 
-	void vkn::VknTexture::OnMetaUpdate(const TextureMeta&)
+	void VknTexture::OnMetaUpdate(const TextureMeta&)
 	{
 
 		//Update meta "does nothing now"
 	}
 
-	void vkn::VknTexture::UpdateUV(UVMode)
+	void VknTexture::UpdateUV(UVMode)
 	{
 		//pdate uv
 	}
 
 
-	//idk::vkn::VknTexture::VknTexture(const VknTexture& rhs)
+	//idk::VknTexture::VknTexture(const VknTexture& rhs)
 	//	:Texture{std::move(rhs)},
 	//	size{rhs.size},
 	//	sizeOnDevice{rhs.sizeOnDevice},

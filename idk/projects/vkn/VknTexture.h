@@ -25,6 +25,7 @@ namespace idk::vkn {
 		vk::Sampler Sampler()const { return *sampler; }
 		vk::Image Image()const { return *image; }
 		vk::ImageView ImageView()const { return *imageView; }
+		vk::ImageAspectFlags ImageAspects();
 		VknTexture() = default;
 		~VknTexture();
 		//VknTexture(const VknTexture& rhs);

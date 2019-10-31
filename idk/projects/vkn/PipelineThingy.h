@@ -122,7 +122,9 @@ namespace idk::vkn
 
 		void FinalizeDrawCall(const RenderObject& ro);
 
-		void GenerateDS(DescriptorsManager& d_manager);
+		void GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers=true);
+
+		void UpdateUboBuffers();
 
 		const vector<ProcessedRO>& DrawCalls()const
 		{

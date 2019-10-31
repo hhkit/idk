@@ -29,6 +29,7 @@ namespace idk::vkn
 		};
 		void RenderGbufferToTarget(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
 		void BindGBuffers(const GraphicsState& graphics_state, RenderStateV2& rs);
+		PipelineThingy ProcessDrawCalls(const GraphicsState& graphics_state, RenderStateV2& rs);
 		void DrawToGBuffers(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
 	};
 

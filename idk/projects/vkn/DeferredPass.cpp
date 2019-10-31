@@ -8,6 +8,8 @@
 #include <vkn/GraphicsState.h>
 
 #include <vkn/utils/utils.h>
+
+#include <vkn/PipelineBinders.h>
 #if 0
 namespace idk::vkn
 {
@@ -17,6 +19,52 @@ namespace idk::vkn
 		GBufferBinding::eViewPos,
 		GBufferBinding::eNormal,
 		GBufferBinding::eTangent>>;
+
+	void GBufferBarrier(vk::CommandBuffer cmd_buffer, DeferredGBuffer& gbuffer)
+	{
+		vk::ImageMemoryBarrier barriers[EGBufferBinding::size() + 1];
+
+		for (size_t i = 0; i < std::size(barriers); ++i)
+		{
+			auto& tex = gbuffer.gbuffer->GetAttachment(i).buffer.as<VknTexture>();
+			barriers[i] = vk::ImageMemoryBarrier
+			{
+				vk::AccessFlagBits::eColorAttachmentWrite,
+				vk::AccessFlagBits::eShaderRead,
+				vk::ImageLayout::eColorAttachmentOptimal,
+				vk::ImageLayout::eShaderReadOnlyOptimal,
+				*View().QueueFamily().graphics_family,
+				*View().QueueFamily().graphics_family,
+				tex.Image(),
+				vk::ImageSubresourceRange
+				{
+					tex.ImageAspects(),
+					0,1,
+					0,1,
+				}
+			};
+		}
+		auto& depth_tex = gbuffer.gbuffer->DepthAttachment().buffer.as<VknTexture>();
+		//depth
+		barriers[EGBufferBinding::size()] = vk::ImageMemoryBarrier
+		{
+			vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+			vk::AccessFlagBits::eDepthStencilAttachmentRead,
+			vk::ImageLayout::eColorAttachmentOptimal,
+			vk::ImageLayout::eShaderReadOnlyOptimal,
+			*View().QueueFamily().graphics_family,
+			*View().QueueFamily().graphics_family,
+			depth_tex.Image(),
+			vk::ImageSubresourceRange
+			{
+				depth_tex.ImageAspects(),
+				0,1,
+				0,1,
+			}
+		};
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barriers, vk::DispatchLoaderDefault{});
+	}
+
 
 	vk::Semaphore DeferredGBuffer::RenderCompleteSignal()
 	{
@@ -77,6 +125,11 @@ namespace idk::vkn
 	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
 	std::pair<ivec2,ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp);
 
+	PipelineThingy& DeferredPass::TheInterface()
+	{
+		return *the_interface;
+	}
+
 	void DeferredPass::BindGBuffers(const GraphicsState& graphics_state, RenderStateV2& rs)
 	{
 		auto& gbuffer = GBuffer();
@@ -88,18 +141,11 @@ namespace idk::vkn
 		cmd_buffer.begin(begin_info, dispatcher);
 
 		DrawToGBuffers(cmd_buffer, graphics_state, rs);
-
+		
 		auto& camera = graphics_state.camera;
 		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
 		std::optional<color> clear_col;
 		std::optional<RscHandle<CubeMap>> sb_cm;
-		std::visit([&clear_col, &sb_cm](auto& clear_data)
-			{
-				if constexpr (std::is_same_v<decltype(clear_data), vec4>)
-					clear_col = clear_data;
-				if constexpr (std::is_same_v<decltype(clear_data), RscHandle<CubeMap>>)
-					sb_cm = clear_data;
-			}, graphics_state.camera.clear_data);
 
 		auto& clear_data = graphics_state.camera.clear_data;
 		switch (clear_data.index())
@@ -168,6 +214,61 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
+
+	struct DeferredPostBinder : StandardBindings
+	{
+		DeferredPass* deferred_pass;
+		void SetDeferredPass(DeferredPass& pass)
+		{
+			deferred_pass = &pass;
+		}
+		void Bind(PipelineThingy& the_interface)
+		{
+			RscHandle<ShaderProgram> fsq_vert;
+			RscHandle<ShaderProgram> deferred_post_frag;
+
+			the_interface.BindShader(ShaderStage::Vertex, fsq_vert);
+			the_interface.BindShader(ShaderStage::Fragment, deferred_post_frag);
+			auto& gbuffer_fb = deferred_pass->GBuffer().gbuffer;
+			for (uint32_t i = 0; i < EGBufferBinding::size(); ++i)
+				the_interface.BindSampler("gbuffers", i, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>());
+		}
+	};
+
+	using PbrDeferredPostBinding = CombinedBindings<DeferredPostBinder, PbrFwdBindings>;
+
+	//
+	PipelineThingy DeferredPass::ProcessDrawCalls(const GraphicsState& graphics_state, RenderStateV2& rs)
+	{
+		//TODO: Prepare FSQ draw call + Forward Draw Calls
+		PipelineThingy the_interface{};
+		RenderObject fsq_ro;
+		the_interface.SetRef(rs.ubo_manager);
+		PbrDeferredPostBinding binding;
+		std::get<DeferredPostBinder>(binding.binders).SetDeferredPass(*this);
+		std::get<PbrFwdBindings>(binding.binders).SetState(graphics_state);
+		
+		binding.Bind(the_interface);
+		
+		//Draw Fullscreen Quad
+		the_interface.FinalizeDrawCall(fsq_ro);
+		//Insert Forward stuff here?
+
+		return the_interface;
+	}
+
+	void CoreRenderPass(const GraphicsState& graphics_state, RenderStateV2& rs)
+	{
+		DeferredPass* dp;
+		rs.cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+		dp->DrawToGBuffers(rs.cmd_buffer, graphics_state, rs);
+		auto the_interface = dp->ProcessDrawCalls(graphics_state, rs);
+		the_interface.GenerateDS(rs.dpools);
+		//... the rest of the stuff here.
+
+	}
+
+
 	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
 	{
 		auto& view = View();
@@ -177,7 +278,9 @@ namespace idk::vkn
 
 		//Preprocess MeshRender's uniforms
 		auto&& the_interface = ProcessRoUniforms(graphics_state, rs.ubo_manager, binder);
-		the_interface.GenerateDS(rs.dpools);
+		the_interface.GenerateDS(rs.dpools,false);
+
+
 
 		std::array<float, 4> a{};
 
@@ -273,6 +376,7 @@ namespace idk::vkn
 			}
 		}
 		cmd_buffer.endRenderPass();//End GBuffer pass
+		GBufferBarrier(cmd_buffer, gbuffer);
 	}
 }
 #endif
