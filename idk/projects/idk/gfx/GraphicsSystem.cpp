@@ -168,6 +168,50 @@ namespace idk
 			mesh_render_config->fill_type = FillType::eFill;
 			mesh_render_config->prim_top = PrimitiveTopology::eTriangleList;
 		}
+
+		Core::GetGameState().SortObjectsOfType<MeshRenderer>(
+			[](const MeshRenderer& lhs, const MeshRenderer& rhs)
+			{
+				const auto l_mat_inst = lhs.material_instance;
+				const auto r_mat_inst = rhs.material_instance;
+				const auto l_mat = l_mat_inst->material;
+				const auto r_mat = r_mat_inst->material;
+				const auto l_mesh = lhs.mesh;
+				const auto r_mesh = rhs.mesh;
+
+				constexpr static auto guid_hasher = std::hash<Guid>{};
+
+
+				const auto l_mat_inst_hash = guid_hasher(lhs.material_instance.guid);
+				const auto r_mat_inst_hash = guid_hasher(rhs.material_instance.guid);
+				const auto l_mat_hash      = guid_hasher(l_mat_inst->material.guid);
+				const auto r_mat_hash      = guid_hasher(r_mat_inst->material.guid);
+				const auto l_mesh_hash     = guid_hasher(lhs.mesh.guid);
+				const auto r_mesh_hash     = guid_hasher(rhs.mesh.guid);
+
+				if (l_mat_hash < r_mat_hash)
+					return true;
+
+				if (l_mat_hash > r_mat_hash)
+					return false;
+
+				// hence the mats are the same
+
+				if (l_mat_inst_hash < r_mat_inst_hash)
+					return true;
+
+				if (l_mat_inst_hash > r_mat_inst_hash)
+					return false;
+
+				// hence the instances are the same
+
+				if (l_mesh_hash < r_mesh_hash)
+					return true;
+
+				return false;
+			}
+		);
+
 		// todo: scenegraph traversal
 		RenderBuffer result{};
 		result.camera.reserve(cameras.size());
