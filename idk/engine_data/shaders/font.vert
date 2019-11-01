@@ -43,7 +43,7 @@ layout(location = 0) out gl_PerVertex
 
 void main()
 {
-	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position.xyz, 1.0));
+	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position.xy,0.0, 1.0));
 	vs_out.uv       = position.zw;
 	vs_out.color    = PerFont.color;
     gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);

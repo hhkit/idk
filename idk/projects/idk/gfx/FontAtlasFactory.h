@@ -9,8 +9,8 @@ namespace idk
 		: public ResourceFactory<FontAtlas>
 	{
 	public:
-		//unique_ptr<FontAtlas> GenerateDefaultResource() override;
-		//unique_ptr<FontAtlas> Create() override;
+		unique_ptr<FontAtlas> GenerateDefaultResource() override;
+		unique_ptr<FontAtlas> Create() override;
 		void Init() override final; // force inheritors to create default font atlas
 		virtual void GenerateDefaultFontAtlas() = 0;
 	};

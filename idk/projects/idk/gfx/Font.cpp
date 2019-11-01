@@ -18,7 +18,6 @@ namespace idk
 
 		vector<FontPoint> coords;
 		coords.resize(6*strlen(text_data));
-		//array<point,6* strlen(text_data)>
 
 		int n = 0;
 		real x = obj_tfm->GlobalPosition().x + tracking;
@@ -34,7 +33,7 @@ namespace idk
 
 			char character = *p;
 			real x2 = x + c[character].bearing.x * sx;
-			real y2 = y - (c[character].glyph_size.y - c[*p].bearing.y) * sy;
+			real y2 = - y - c[character].glyph_size.y * sy;
 			real w = c[character].glyph_size.x * sx;
 			real h = c[character].glyph_size.y * sy;
 
@@ -46,18 +45,26 @@ namespace idk
 			if (!w || !h)
 				continue;
 
-			coords[n++] = { x2,     y2    , c[character].tx,                                            0 };
-			coords[n++] = { x2 + w, y2    , c[character].tx + c[character].glyph_size.x / atlas_width,   0 };
-			coords[n++] = { x2,     y2 - h, c[character].tx,                                          c[character].glyph_size.y / atlas_height }; //remember: each glyph occupies a different amount of vertical space
-			coords[n++] = { x2 + w, y2    , c[character].tx + c[character].glyph_size.x / atlas_width,   0 };
-			coords[n++] = { x2,     y2 - h, c[character].tx,                                          c[character].glyph_size.y / atlas_height };
-			coords[n++] = { x2 + w, y2 - h, c[character].tx + c[character].glyph_size.x / atlas_width,       c[character].glyph_size.y / atlas_height };
+			coords[n++] = { x2    , -y2    , c[character].tex_offset.x, c[character].tex_offset.y };
+
+			coords[n++] = { x2 + w, -y2    , c[character].tex_offset.x + c[character].glyph_size.x / atlas_width, c[character].tex_offset.y };
+
+			coords[n++] = { x2    , -y2 - h, c[character].tex_offset.x, c[character].tex_offset.y + c[character].glyph_size.y / atlas_height }; //remember: each glyph occupies a different amount of vertical space
+			
+			coords[n++] = { x2 + w, -y2 - h, c[character].tex_offset.x + c[character].glyph_size.x / atlas_width,  c[character].tex_offset.y + c[character].glyph_size.y / atlas_height };
+		
+			coords[n++] = { x2    , -y2 - h, c[character].tex_offset.x, c[character].tex_offset.y + c[character].glyph_size.y / atlas_height };
+			
+			coords[n++] = { x2 + w, -y2    , c[character].tex_offset.x + c[character].glyph_size.x / atlas_width,   c[character].tex_offset.y };
+
+			
 		}
 
 		fontData.coords = coords;
 		fontData.color = colour;
 		fontData.fontAtlas = textureAtlas;
 		fontData.transform = obj_tfm->GlobalMatrix();
+		fontData.n_size = n;
 		//glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);
 		//glDrawArrays(GL_TRIANGLES, 0, n);
 	}

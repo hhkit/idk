@@ -6,15 +6,16 @@
 
 namespace idk
 {
-	/*unique_ptr<FontAtlas> FontAtlasFactory::GenerateDefaultResource()
+	unique_ptr<FontAtlas> FontAtlasFactory::GenerateDefaultResource()
 	{
 	
 		return unique_ptr<FontAtlas>();
 	}
+	
 	unique_ptr<FontAtlas> FontAtlasFactory::Create()
 	{
 		return unique_ptr<FontAtlas>();
-	}*/
+	}
 	void FontAtlasFactory::Init()
 	{
 		GenerateDefaultFontAtlas();

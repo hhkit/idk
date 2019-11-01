@@ -211,6 +211,13 @@ REFLECT_BEGIN(idk::CubeMap::Metadata, "CubeMapMeta")
 REFLECT_VARS(uv_mode, internal_format)
 REFLECT_END()
 
+REFLECT_ENUM(idk::FontColorFormat, "FontColorFormat")
+REFLECT_ENUM(idk::FontUVMode, "FontUVMode")
+
+REFLECT_BEGIN(idk::FontAtlas::Metadata, "FontAtlasMeta")
+REFLECT_VARS(uv_mode, internal_format)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
@@ -419,6 +426,10 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Font, "Font")
+REFLECT_VARS(tracking, spacing, padding, colour, fontSize, textureAtlas, text)
 REFLECT_END()
 
 // CAMERA
