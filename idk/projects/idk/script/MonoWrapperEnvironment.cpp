@@ -605,6 +605,56 @@ namespace idk::mono
 			}
 		BIND_END();
 
+
+		//AudioSource
+		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)
+		{
+			audiosource->Play(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStop", void, Handle<AudioSource> audiosource, int index)
+		{
+			audiosource->Stop(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetVolume", float, Handle<AudioSource> audiosource)
+		{
+			return audiosource->volume;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetVolume", void, Handle<AudioSource> audiosource, float volume)
+		{
+			audiosource->volume = volume;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetPitch", float, Handle<AudioSource> audiosource)
+		{
+			return audiosource->pitch;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetPitch", void, Handle<AudioSource> audiosource, float pitch)
+		{
+			audiosource->pitch = pitch;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetLoop", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->isLoop;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetLoop", void, Handle<AudioSource> audiosource, bool loop)
+		{
+			audiosource->isLoop = loop;
+		}
+		BIND_END();
+
         // Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
