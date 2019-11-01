@@ -14,8 +14,10 @@ namespace idk::vkn
 		VulkanTextureFactory();
 		unique_ptr<Texture> GenerateDefaultResource() override;
 		unique_ptr<Texture> Create() override;
+		hlp::MemoryAllocator& GetAllocator();
+		vk::Fence GetFence()const;
 	private:
-		vk::UniqueFence fence;
-		hlp::MemoryAllocator allocator;
+		vk::UniqueFence _fence;
+		hlp::MemoryAllocator _allocator;
 	};
 }

@@ -7,6 +7,16 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/utils.h> //ReverseMap
 #include <iostream>
+namespace std
+{
+
+	template<>
+	struct hash<idk::FilterMode>
+	{
+		size_t operator()(idk::FilterMode mode)const { return static_cast<size_t>(mode); }
+	};
+}
+
 namespace idk::vkn
 {
 	struct TextureResult
@@ -60,9 +70,9 @@ namespace idk::vkn
 		vk::Filter mode = vk::Filter::eLinear;
 		static const hash_table<FilterMode, vk::Filter> map
 		{
-			{FilterMode::eNearest,vk::Filter::eNearest},
-			{FilterMode::eLinear ,vk::Filter::eLinear},
-			{FilterMode::eCubic  ,vk::Filter::eCubicIMG},
+			{FilterMode::Nearest,vk::Filter::eNearest},
+			{FilterMode::Linear ,vk::Filter::eLinear},
+			{FilterMode::Cubic  ,vk::Filter::eCubicIMG},
 		};
 		auto itr = map.find(filter_mode);
 		if (itr != map.end())

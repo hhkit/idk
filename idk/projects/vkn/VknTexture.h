@@ -32,6 +32,7 @@ namespace idk::vkn {
 		VknTexture(VknTexture&& rhs) noexcept;
 
 		VknTexture& operator=(VknTexture&&) noexcept;
+		using Texture::Size;
 		ivec2 Size(ivec2 new_size) override;
 		virtual void* ID() const;
 

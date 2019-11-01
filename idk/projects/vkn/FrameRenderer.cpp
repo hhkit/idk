@@ -788,15 +788,17 @@ namespace idk::vkn
 		auto rtd = camera.render_target->GetDepthBuffer().as<VknTexture>().Image();
 		auto gd = deferred_pass.GBuffer().gbuffer->DepthAttachment().buffer.as<VknTexture>().Image();
 		
-		//cmd_buffer.blitImage(
-		//	deferred_pass.GBuffer().gbuffer->DepthAttachment().buffer.as<VknTexture>().Image(), vk::ImageLayout::eTransferSrcOptimal,
-		//	camera.render_target->GetDepthBuffer().as<VknTexture>().Image(), vk::ImageLayout::eTransferDstOptimal,
-		//	blit, vk::Filter::eNearest
-		//);
+		
 
+		//TODO make ProcessRoUniforms only render forward pass stuff.
+		auto&& the_interface = //PipelineThingy{};/*
+			ProcessRoUniforms(state, rs.ubo_manager);
+		the_interface.GenerateDS(rs.dpools, false);//*/
+		the_interface.SetRef(rs.ubo_manager);
 
-		auto&& the_interface = rs.deferred_pass.ProcessDrawCalls(state, rs);//ProcessRoUniforms(state, rs.ubo_manager);
-		the_interface.GenerateDS(rs.dpools);
+		auto deferred_interface = rs.deferred_pass.ProcessDrawCalls(state, rs);
+		deferred_interface.GenerateDS(rs.dpools, false);
+		rs.ubo_manager.UpdateAllBuffers();
 		std::array<float, 4> a{};
 
 		//auto& cd = std::get<vec4>(state.camera.clear_data);
@@ -808,13 +810,13 @@ namespace idk::vkn
 		auto& clear_data = state.camera.clear_data;
 		switch (clear_data.index())
 		{
-		case index_in_variant_v<color, CameraClear_t>:
+		case index_in_variant_v<color, CameraData::ClearData_t>:
 			clear_col = std::get<color>(clear_data);
 			break;
-		case index_in_variant_v<RscHandle<CubeMap>, CameraClear_t>:
+		case index_in_variant_v<RscHandle<CubeMap>, CameraData::ClearData_t>:
 			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
 			break;
-		case index_in_variant_v<DontClear, CameraClear_t>:
+		case index_in_variant_v<DontClear, CameraData::ClearData_t>:
 			//TODO: set dont clear settings.
 			break;
 		}
@@ -855,7 +857,7 @@ namespace idk::vkn
 			GetRenderPass(state,view), frame_buffer,
 			render_area,hlp::arr_count(v),std::data(v)
 		};			
-
+		//Begin Clear Pass
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 		//////////////////Skybox rendering
 		if (sb_cm)
@@ -887,63 +889,80 @@ namespace idk::vkn
 					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
 				});*/
 			rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
-		}
 
-		auto& processed_ro = the_interface.DrawCalls();
+		}
+		cmd_buffer.endRenderPass();//beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
+		auto& rt = camera.render_target.as<VknRenderTarget>();
+
+		//Draw Deferred stuff
+		TransitionFrameBuffer(camera, cmd_buffer, view);
+		deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface, camera, rt, rs);
+
+		//Subsequent passes shouldn't clear the buffer any more.
+		rpbi.renderPass = View().BasicRenderPass(rt.GetRenderPassType(),false,false);
 		rs.FlagRendered();
-		bool first_time = true;
-		for (auto& p_ro : processed_ro)
+		
+		auto& processed_ro = the_interface.DrawCalls();
+		if (processed_ro.size()>0)
 		{
-			auto& obj = p_ro.Object();
-			if (p_ro.rebind_shaders)
-			{
-				shaders.resize(0);
-				if (p_ro.frag_shader)
-					shaders.emplace_back(*p_ro.frag_shader);
-				if(p_ro.vertex_shader)
-					shaders.emplace_back(*p_ro.vertex_shader);
-				if(p_ro.geom_shader)
-					shaders.emplace_back(*p_ro.geom_shader);
 
-				auto config = ConfigWithVP(*obj.config, camera, offset, size);
-				auto& pipeline = GetPipeline(config, shaders);
-				pipeline.Bind(cmd_buffer,view);
-				SetViewport(cmd_buffer, offset, size);
-				prev_pipeline = &pipeline;
-			}
-			auto& pipeline = *prev_pipeline;
-			//TODO Grab everything and render them
-			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-			auto& mesh = obj.mesh.as<VulkanMesh>();
-			for (auto& [set,ds] : p_ro.descriptor_sets)
+			TransitionFrameBuffer(camera, cmd_buffer, view);
+			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);;
+			bool first_time = true;
+			for (auto& p_ro : processed_ro)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
-			}
+				auto& obj = p_ro.Object();
+				if (p_ro.rebind_shaders)
+				{
+					shaders.resize(0);
+					if (p_ro.frag_shader)
+						shaders.emplace_back(*p_ro.frag_shader);
+					if(p_ro.vertex_shader)
+						shaders.emplace_back(*p_ro.vertex_shader);
+					if(p_ro.geom_shader)
+						shaders.emplace_back(*p_ro.geom_shader);
+
+					auto config = ConfigWithVP(*obj.config, camera, offset, size);
+					auto& pipeline = GetPipeline(config, shaders);
+					pipeline.Bind(cmd_buffer,view);
+					SetViewport(cmd_buffer, offset, size);
+					prev_pipeline = &pipeline;
+				}
+				auto& pipeline = *prev_pipeline;
+				//TODO Grab everything and render them
+				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
+				auto& mesh = obj.mesh.as<VulkanMesh>();
+				for (auto& [set,ds] : p_ro.descriptor_sets)
+				{
+					cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+				}
 			
-			auto& renderer_req = *obj.renderer_req;
+				auto& renderer_req = *obj.renderer_req;
 			
-			for (auto&& [attrib, location] : renderer_req.requirements)
-			{
-				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
-			}
+				for (auto&& [attrib, location] : renderer_req.requirements)
+				{
+					auto& attrib_buffer = mesh.Get(attrib);
+					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+				}
 			
-			auto& oidx = mesh.GetIndexBuffer();
-			if (oidx)
-			{
-				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+				auto& oidx = mesh.GetIndexBuffer();
+				if (oidx)
+				{
+					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
+					cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+				}
+				first_time = false;
 			}
-			if (first_time)
-			{
-				CopyDepthBuffer(cmd_buffer, rtd, gd);
-			}
-			first_time = false;
+			cmd_buffer.endRenderPass();
 		}
-		if(camera.overlay_debug_draw)
-			RenderDebugStuff(state, rs,offset,size);
+		if (camera.overlay_debug_draw)
+		{
+			TransitionFrameBuffer(camera, cmd_buffer, view);
+			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);;
+			RenderDebugStuff(state, rs, offset, size);
+			cmd_buffer.endRenderPass();
+		}
 		rs.ubo_manager.UpdateAllBuffers();
-		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 		Track(0);
 	}

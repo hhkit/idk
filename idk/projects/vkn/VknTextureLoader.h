@@ -3,10 +3,10 @@
 #include <vkn/MemoryAllocator.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/VknTexture.h>
+
 namespace idk::vkn
 {
 	struct VknTexture;
-
 
 
 	enum class TextureFormat
@@ -20,12 +20,12 @@ namespace idk::vkn
 		eBC4,
 		eBC5,
 	};
-	enum class FilterMode
-	{
-		eNearest,
-		eLinear,
-		eCubic
-	};
+	//enum class FilterMode
+	//{
+	//	eNearest,
+	//	eLinear,
+	//	eCubic
+	//};
 
 	enum class CompareOp
 	{

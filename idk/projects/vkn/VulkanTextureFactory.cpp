@@ -14,11 +14,11 @@ namespace idk::vkn
 
 
 
-	VulkanTextureFactory::VulkanTextureFactory(): allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
+	VulkanTextureFactory::VulkanTextureFactory(): _allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
 	{
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		
-		fence = view.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
+		_fence = view.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
 
 	unique_ptr<Texture> VulkanTextureFactory::GenerateDefaultResource()
@@ -28,11 +28,19 @@ namespace idk::vkn
 		
 		auto ptr = std::make_unique<VknTexture>();
 		TextureLoader loader;
-		loader.LoadTexture(*ptr, TextureFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, allocator, *fence);
+		loader.LoadTexture(*ptr, TextureFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, _allocator, *_fence);
 		return std::move(ptr);
 	}
 	unique_ptr<Texture> VulkanTextureFactory::Create()
 	{
 		return std::make_unique<VknTexture>();
+	}
+	hlp::MemoryAllocator& VulkanTextureFactory::GetAllocator()
+	{
+		return _allocator;
+	}
+	vk::Fence VulkanTextureFactory::GetFence() const
+	{
+		return *_fence;
 	}
 }

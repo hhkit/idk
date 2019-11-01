@@ -58,7 +58,8 @@ namespace idk
 
 	ENUM(FilterMode, char,
 		Linear,
-		Nearest
+		Nearest,
+		Cubic
 	);
 
     ENUM(InputChannels, char

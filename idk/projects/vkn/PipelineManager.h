@@ -39,6 +39,8 @@ namespace idk::vkn
 				for (auto& module : shader_handles)
 				{
 					auto& mod = module.as<ShaderModule>();
+					if (!mod.HasCurrent())
+						continue;
 					//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
 					//	mod.UpdateCurrent(fo_index);
 					auto& desc = mod.AttribDescriptions();

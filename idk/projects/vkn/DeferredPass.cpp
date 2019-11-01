@@ -13,6 +13,10 @@
 #include <vkn/PipelineBinders.h>
 #include <vkn/PipelineBinders.inl>
 #include <vkn/FrameRenderer.h>
+
+#include <vkn/VknTextureLoader.h>
+#include <vkn/VulkanTextureFactory.h>
+
 #if 1
 namespace idk::vkn
 {
@@ -140,7 +144,23 @@ namespace idk::vkn
 				{vtx::Attrib::UV,1},
 			}
 		};
-		_gbuffer.Init(size); 
+		_gbuffer.Init(size);
+/*
+		auto& rsm = Core::GetResourceManager();
+		if (!depth_sample_tex)
+			depth_sample_tex = rsm.Create<VknTexture>();
+		if (depth_sample_tex->Size() != size)
+		{
+			TextureLoader loader;
+			auto& tex_factory = Core::GetResourceManager().GetFactory<VulkanTextureFactory>();
+
+			TextureOptions tex_opt{};
+			tex_opt.internal_format = ColorFormat::_enum::DEPTH_COMPONENT;
+			tex_opt.is_srgb = false;
+			auto tex_info = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+			loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
+		}*/
+
 		fsq_ro.mesh = Mesh::defaults[MeshType::FSQ];
 		fsq_ro.renderer_req = &fsq_requirements;
 		if (!fsq_ro.config)
@@ -225,6 +245,7 @@ namespace idk::vkn
 			auto& gbuffer_fb = deferred_pass->GBuffer().gbuffer;
 			for (uint32_t i = 0; i < EGBufferBinding::size(); ++i)
 				the_interface.BindSampler("gbuffers", i, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>());
+			the_interface.BindSampler("gbuffers", EGBufferBinding::size(), gbuffer_fb->DepthAttachment().buffer.as<VknTexture>());
 		}
 		void Bind(PipelineThingy& the_interface, const RenderObject&) override {}
 	};
@@ -261,13 +282,86 @@ namespace idk::vkn
 
 	}
 #endif
+
+	void PostRenderCopy(vk::CommandBuffer cmd_buffer,ivec2 size, vk::Image render_target_depth, vk::Image gbuffer_depth)
+	{
+		//Transit RTD -> Transfer
+		vk::ImageMemoryBarrier depth
+		{
+			{},
+			vk::AccessFlagBits::eTransferWrite,
+			vk::ImageLayout::eGeneral,
+			vk::ImageLayout::eTransferDstOptimal,
+			*View().QueueFamily().graphics_family,
+			*View().QueueFamily().graphics_family,
+			render_target_depth,
+			vk::ImageSubresourceRange
+			{
+				vk::ImageAspectFlagBits::eDepth,
+				0,1,0,1
+			}
+		};
+		std::array<vk::ImageMemoryBarrier, 2> convert_barriers = { depth,depth };
+		convert_barriers[1].setDstAccessMask(vk::AccessFlagBits::eTransferRead);
+		convert_barriers[1].setNewLayout(vk::ImageLayout::eTransferSrcOptimal);
+		convert_barriers[1].setImage(gbuffer_depth);
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eBottomOfPipe, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, convert_barriers);
+
+		//Blit
+		//expect depth attachments to be the exact same size and format.
+		cmd_buffer.copyImage(
+			gbuffer_depth, vk::ImageLayout::eTransferSrcOptimal,
+			render_target_depth, vk::ImageLayout::eTransferDstOptimal,
+			vk::ImageCopy
+			{
+				vk::ImageSubresourceLayers
+				{
+					vk::ImageAspectFlagBits::eDepth,
+					0u,0u,1u
+				},
+				vk::Offset3D{0,0,0},
+				vk::ImageSubresourceLayers
+				{
+					vk::ImageAspectFlagBits::eDepth,
+					0ui32,0ui32,1ui32
+				},
+				vk::Offset3D{0,0,0},
+				vk::Extent3D{s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)}
+			}
+		);
+
+		//Transit RTD -> General
+		std::array<vk::ImageMemoryBarrier, 2> & return_barriers = convert_barriers;// { depth, depth };
+		std::swap(return_barriers[0].dstAccessMask, return_barriers[0].srcAccessMask);
+		std::swap(return_barriers[0].oldLayout, return_barriers[0].newLayout);
+		return_barriers[0].setDstAccessMask({});// vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+		return_barriers[0].setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+		//std::swap(return_barriers[2].dstAccessMask, return_barriers[2].srcAccessMask);
+		//std::swap(return_barriers[2].oldLayout, return_barriers[2].newLayout);
+		//return_barriers[2].setDstAccessMask({});// vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+		//return_barriers[2].setNewLayout(vk::ImageLayout::eGeneral);
+
+		//Transit GD  -> DepthAttachmentOptimal
+		return_barriers[1].setSrcAccessMask(vk::AccessFlagBits::eTransferRead);
+		return_barriers[1].setDstAccessMask({});
+		return_barriers[1].setOldLayout(vk::ImageLayout::eTransferSrcOptimal);
+		return_barriers[1].setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		return_barriers[1].setImage(gbuffer_depth);
+
+
+
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
+
+	}
+
 	bool RenderProcessedDrawCalls(vk::CommandBuffer cmd_buffer,
 		const vector<ProcessedRO>& processed_ro,
 		const CameraData& camera,
 		PipelineManager& pipeline_manager,
 		uint32_t frame_index,
 		const vk::RenderPassBeginInfo& rpbi,
-		VknFrameBuffer& fb
+		uint32_t num_attachments
 		)
 	{
 		auto offset = ivec2{ rpbi.renderArea.offset.x,rpbi.renderArea.offset.y };
@@ -293,7 +387,7 @@ namespace idk::vkn
 					shaders.emplace_back(*p_ro.geom_shader);
 				
 				auto config = ConfigWithVP(*obj.config, camera, offset, size);
-				config.attachment_configs.resize(fb.NumColorAttachments());
+				config.attachment_configs.resize(num_attachments);
 				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rpbi.renderPass, true);
 				pipeline.Bind(cmd_buffer, view);
 				SetViewport(cmd_buffer, offset, size);
@@ -384,10 +478,47 @@ namespace idk::vkn
 		};
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,g_buffer))
+		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,g_buffer.NumColorAttachments()))
 			rs.FlagRendered();
 		cmd_buffer.endRenderPass();//End GBuffer pass
-		GBufferBarrier(cmd_buffer, gbuffer);
+		//GBufferBarrier(cmd_buffer, gbuffer);
+	}
+	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, VknRenderTarget& rt, RenderStateV2& rs)
+	{
+		auto sz = camera.render_target->Size();
+		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+		vk::Rect2D render_area
+		{
+			vk::Offset2D
+			{
+				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
+			},vk::Extent2D
+			{
+				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
+			}
+		};
+		vk::ClearValue v[2]
+		{
+			vk::ClearColorValue{std::array<float,4>{0.0f,0.0f,0.0f,0.0f}},
+			vk::ClearDepthStencilValue{1,0},
+		};
+		vk::RenderPassBeginInfo rpbi
+		{
+			View().BasicRenderPass(rt.GetRenderPassType(),false,true), rt.Buffer(),
+			render_area,hlp::arr_count(v),std::data(v)
+		};
+
+		//Transit depth buffer to general for sampling
+		
+		//Begin Depthless RT renderpass
+		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+		//Draw FSQ
+		RenderProcessedDrawCalls(cmd_buffer, fsq_stuff.DrawCalls(), camera, pipeline_manager(), frame_index(),rpbi,1);
+		//End Depthless RT renderpass
+		cmd_buffer.endRenderPass();
+		//Copy depth buffer to render target's depth buffer
+		auto gbuffer_depth_img = GBuffer().gbuffer->DepthAttachment()->as<VknTexture>().Image();
+		PostRenderCopy(cmd_buffer, ivec2{ s_cast<int>(render_area.extent.width),s_cast<int>(render_area.extent.height) },rt.GetDepthBuffer().as<VknTexture>().Image(), gbuffer_depth_img);
 	}
 }
 #endif
