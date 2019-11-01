@@ -416,7 +416,7 @@ namespace idk::mono
 			if (res.size())
 			{
 				auto& first = res.front();
-				if (first.raycast_succ.distance_to_collision > max_dist)
+				if (first.raycast_succ.distance_to_collision < max_dist)
 					return ManagedRaycast{ .valid = true,.collider_id = first.collider.id,.distance = first.raycast_succ.distance_to_collision,.point_of_collision = first.raycast_succ.point_of_collision };
 			}
 
@@ -825,7 +825,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonDown(0, s_cast<GamepadButton>(code >> 16));
+					return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
 				else
 					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
 			}
@@ -833,7 +833,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::InputGetKeyUp",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonUp(0, s_cast<GamepadButton>(code >> 16));
+					return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
 				else
 				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
 			}
@@ -841,7 +841,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::InputGetKey",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButton(0, s_cast<GamepadButton>(code >> 16));
+					return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
 				else
 				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
 			}

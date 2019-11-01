@@ -1,0 +1,175 @@
+- !65536 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.70710677
+      x: -0.70710677
+      y: -0
+      z: -0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Directional Light
+  - !Light 
+    casts_shadows: 1
+    light: !DirectionalLight 
+      height: 5
+      intensity: 0.5
+      light_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      width: 5
+    shadow_bias: 1.1920929e-07
+- !4295032832 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: -2.5664325, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 11.1756, y: 0.14454843, z: 11.1756}
+  - !Name 
+    name: floor
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
+- !8590000128 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: raycaster
+  - !MonoBehavior 
+    {enabled: 1, script_data: !RaycastTest ~}
+- !12885032960 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -1.1948845, y: -1.4705983, z: 0.24488163}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: block_a
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: 8a3daf3f-8228-44c8-8fa1-503a2cb19215}
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
+- !17180000256 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 1.9531254, y: -2.2491663, z: -0.30265284}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: block_a
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: 8a3daf3f-8228-44c8-8fa1-503a2cb19215}
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
+- !21474902016 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -2.6647906, y: -1.1824138, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: block_a
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: 8a3daf3f-8228-44c8-8fa1-503a2cb19215}
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6

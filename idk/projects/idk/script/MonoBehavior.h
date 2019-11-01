@@ -14,13 +14,14 @@ namespace idk::mono
 	{
 	public:
 		bool enabled = true;
+		ManagedObject script_data;
 
 		string_view TypeName() const;
 		MonoObject* EmplaceBehavior(string_view type);
 		void DisposeMonoObject();
 
-		ManagedObject& GetObject() { return _obj; };
-		const ManagedObject& GetObject() const { return _obj; };
+		ManagedObject& GetObject() { return script_data; };
+		const ManagedObject& GetObject() const { return script_data; };
 
 		void Awake();
 		void Start();
@@ -29,13 +30,12 @@ namespace idk::mono
 		void UpdateCoroutines();
 
 		Behavior() = default;
-		Behavior(const Behavior&) = default;
+		Behavior(const Behavior&);
 		Behavior(Behavior&& rhs) = default;
-		Behavior& operator=(const Behavior&) = default;
+		Behavior& operator=(const Behavior&);
 		Behavior& operator=(Behavior&& rhs) = default;
 		~Behavior() = default;
 	private:
-		ManagedObject _obj;
 		string        _serialized;
 		bool          _awake{};
 		bool          _started{};

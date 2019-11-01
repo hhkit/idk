@@ -38,7 +38,7 @@ void _check_gl_error(const char* file, int line) {
 		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
 		}
 
-		LOG_ERROR_TO(idk::LogPool::GFX, "GL_%s-%s: %s", error.c_str(), file, line);
+		LOG_ERROR_TO(idk::LogPool::GFX, "GL_%s-%s: %d", error.c_str(), file, line);
 		err = glGetError();
 	}
 }
@@ -49,7 +49,17 @@ namespace idk::ogl
 	{
 		sys = &Core::GetSystem<Win32GraphicsSystem>();
 		glGenVertexArrays(1, &particle_vao_id);
-		glGenVertexArrays(1, &vao_id);
+		glGenVertexArrays(1, &font_vao_id);
+		glGenVertexArrays(1, &vao_id);	
+
+		glGenBuffers(1, &vbo_font_id);
+	}
+
+	OpenGLState::~OpenGLState()
+	{
+		glDeleteVertexArrays(1, &particle_vao_id);
+		glDeleteVertexArrays(1, &vao_id);
+		glDeleteVertexArrays(1, &font_vao_id);
 	}
 
 	void OpenGLState::GenResources()
@@ -455,40 +465,56 @@ namespace idk::ogl
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+
+			/* Set up the VBO for our vertex data */
+			glBindVertexArray(font_vao_id);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 			////////////////////////FONT///////////////////////
-			//pipeline.PushProgram(renderer_vertex_shaders[VFont]);
-			//pipeline.PushProgram(renderer_fragment_shaders[FFont]);
+			pipeline.PushProgram(renderer_vertex_shaders[VFont]);
+			pipeline.PushProgram(renderer_fragment_shaders[FFont]);
 
-			//pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+			glDisable(GL_CULL_FACE);
+			for (auto& elem : font_render_data)
+			{
+				if (elem.coords.size())
+				{
+					auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
 
-			//for (auto& elem : font_render_data)
-			//{
-			//	auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
-			//	/* Use the texture containing the atlas */
-			//	atlas.BindToUnit(0);
-			//	pipeline.SetUniform("tex", 0);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
+					/* Use the texture containing the atlas */
+					atlas.BindToUnit(0);
+					pipeline.SetUniform("tex", 0);
 
-			//	/* Set up the VBO for our vertex data */
-			//	glEnableVertexAttribArray(0);
-			//	glBindBuffer(GL_ARRAY_BUFFER, font_vao_id);
-			//	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+					SetObjectUniforms(elem, cam.view_matrix);
+					pipeline.SetUniform("PerFont.color", elem.color.as_vec4);
+					GL_CHECK();
 
-			//	SetObjectUniforms(elem, cam.view_matrix);
-			//	pipeline.SetUniform("PerFont.color", elem.color.as_vec3);
-			//	
-			//	//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+					//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
-			//	/* Draw all the character on the screen in one go */
-			//	glBufferData(GL_ARRAY_BUFFER, sizeof(elem.coords), std::data(elem.coords), GL_DYNAMIC_DRAW);
-			//	glDrawArrays(GL_TRIANGLES, 0, elem.coords.size());
+					/* Draw all the character on the screen in one go */
+				
+					glBufferData(GL_ARRAY_BUFFER, elem.coords.size() * sizeof(FontPoint), std::data(elem.coords), GL_DYNAMIC_DRAW);
+					//GL_CHECK();
+					glEnableVertexAttribArray(0);
+					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
+					//GL_CHECK();
+					glDrawArrays(GL_TRIANGLES, 0, elem.n_size);
 
-			//	glDisableVertexAttribArray(0);
-			//}
+					glDisableVertexAttribArray(0);
 
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}
+				GL_CHECK();
+			}
+			glEnable(GL_CULL_FACE);
+
+			glBindVertexArray(0);
 
             static vector<OpenGLBuffer> bufs = []()
             {
@@ -552,6 +578,7 @@ namespace idk::ogl
 			glDisable(GL_BLEND);
 			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
+		glBindVertexArray(0);
 
 		fb_man.ResetFramebuffer();
 

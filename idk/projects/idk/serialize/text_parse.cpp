@@ -84,7 +84,7 @@ namespace idk
 
 	static parse_error parse_yaml(const yaml::node& node, reflect::dynamic& obj)
 	{
-        if (node.is_null())
+        if (node.is_null() && !obj.type.is<mono::ManagedObject>())
             return parse_error::none;
 		if (!obj.valid())
 		{
@@ -304,7 +304,10 @@ namespace idk
 		};
 
 		if (obj.is<mono::ManagedObject>())
+		{
+			obj.get<mono::ManagedObject>() = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Type(node.tag())->Construct();
 			obj.get<mono::ManagedObject>().Visit(generic_visitor);
+		}
 		else
 			obj.visit(generic_visitor); // visit
 
@@ -357,6 +360,8 @@ namespace idk
 			for (++iter; iter != elem.end(); ++iter)
 			{
 				const reflect::type type = reflect::get_type(iter->tag());
+				if (iter->tag() == "MonoBehavior")
+					LOG("MONO BEHAVIOR");
 				reflect::dynamic obj = type.create();
 				const auto res2 = parse_yaml(*iter, obj);
 				if (res2 != parse_error::none)
@@ -377,6 +382,7 @@ namespace idk
 				{
 					const yaml::node& node = *iter;
 					auto new_component = handle->AddComponent(obj);
+					/*
 					if (new_component.is_type<mono::Behavior>())
 					{
 						auto mb_handle = handle_cast<mono::Behavior>(new_component);
@@ -393,6 +399,7 @@ namespace idk
 						else
 							handle->RemoveComponent(mb_handle);
 					}
+					*/
 				}
 			}
 		}

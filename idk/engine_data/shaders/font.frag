@@ -25,9 +25,7 @@ S_LAYOUT(3,0) uniform sampler2D tex;
 
 void main()
 {
-	//FragColor = vec4(gl_FragCoord.z);
-	
-	FragColor = vec4(1, 1, 1, texture2D(tex, vs_out.uv).r) * vs_out.color;
+	FragColor = vec4(1, 1, 1, texture(tex, vs_out.uv).r) * vs_out.color;
 	
 	if(FragColor.a< 0.001176)
 		discard;
