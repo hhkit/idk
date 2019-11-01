@@ -30,8 +30,13 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
-		for (auto& elem : colliders)
-			elem.find_rigidbody();
+        for (auto& elem : colliders)
+        {
+            elem.find_rigidbody();
+            if (elem._static_cache)
+                elem.setup_predict();
+            elem._enabled_this_frame = elem.is_enabled_and_active();
+        }
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
 			{
@@ -115,14 +120,17 @@ namespace idk
 			}
 		};
 
-
 		const auto CollideObjects = [&]()
 		{
 			CollisionList collisionframe;
 
 			const auto dt = Core::GetDT().count();
-			for (auto& elem : colliders)
-				elem.setup_predict();
+
+            for (auto& elem : colliders)
+            {
+                if (!elem._static_cache)
+                    elem.setup_predict();
+            }
 
 
 			for (unsigned i = 0; i < colliders.size(); ++i)
