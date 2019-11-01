@@ -26,7 +26,7 @@ namespace idk
         ParticleData data;
         random rnd;
         float time = 0;
-        float emitter_clock = 0;
+        float cycle_time = 0;
         matrix_decomposition<real> transform;
         char state = Awake;
 
@@ -34,6 +34,6 @@ namespace idk
         void Pause();
         void Stop();
         void Step(float dt);
-        void Emit();
+        void Emit(float age = 0);
     };
 }

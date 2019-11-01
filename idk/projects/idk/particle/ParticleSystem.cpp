@@ -10,6 +10,11 @@ namespace idk
         if (state == Stopped || state == Awake)
             data.Allocate(main.max_particles);
         state = Playing;
+
+        if (main.prewarm && time == 0)
+        {
+            Step(main.duration);
+        }
     }
 
     void ParticleSystem::Pause()
@@ -21,7 +26,10 @@ namespace idk
     {
         state = Stopped;
         time = 0;
-        emitter_clock = 0;
+        emission.clock = 0;
+        for (auto& burst : emission.bursts)
+            burst.cycle_counter = 0;
+        cycle_time = 0;
         data.num_alive = 0;
     }
 
@@ -34,10 +42,38 @@ namespace idk
             if (main.play_on_awake)
                 Play();
             else
+            {
                 state = Stopped;
+                return;
+            }
         }
 
+        const auto ForwardParticleAge = [&](float dur)
+        {
+            while (dur > 0)
+            {
+                constexpr auto max_timeslice = 1 / 30.0f;
+                const float timeslice = dur > max_timeslice ? max_timeslice : dur;
+                for (uint16_t i = 0; i < data.num_alive; ++i)
+                {
+                    data.age[i] += timeslice;
+                    if (data.age[i] >= data.lifetime[i])
+                    {
+                        data.Kill(i);
+                        continue;
+                    }
+                }
+                velocity_over_lifetime.Update(*this, timeslice);
+                rotation_over_lifetime.Update(*this, timeslice);
+                for (uint16_t i = 0; i < data.num_alive; ++i)
+                    data.position[i] += (data.velocity_start[i] + data.velocity_delta[i] +
+                        vec3(0, -9.81f, 0) * main.gravity_modifier * data.age[i]) * timeslice;
+                dur -= timeslice;
+            }
+        };
+
         time += dt;
+        cycle_time += dt;
         if (time < main.start_delay)
             return;
         if (!main.looping && time >= main.duration)
@@ -51,35 +87,27 @@ namespace idk
         }
         else if (emission.enabled)
         {
-            emitter_clock += dt * emission.rate_over_time;
-            int emit_count = static_cast<int>(emitter_clock);
-            emitter_clock -= emit_count;
-            while (emit_count-- > 0)
-                Emit();
-        }
-
-        for (uint16_t i = 0; i < data.num_alive; ++i)
-        {
-            data.age[i] += dt;
-            if (data.age[i] >= data.lifetime[i])
+            while (cycle_time >= main.duration)
+                cycle_time -= main.duration;
+            while (dt >= main.duration)
             {
-                data.Kill(i);
-                continue;
+                dt -= main.duration;
+                ForwardParticleAge(main.duration);
+                emission.Update(*this, main.duration);
             }
+
+            emission.Update(*this, dt);
         }
 
-        velocity_over_lifetime.Update(*this, dt);
+        ForwardParticleAge(dt);
         color_over_lifetime.Update(*this);
         size_over_lifetime.Update(*this);
-        rotation_over_lifetime.Update(*this, dt);
-
-        for (uint16_t i = 0; i < data.num_alive; ++i)
-            data.position[i] += (data.velocity_start[i] + data.velocity_delta[i] +
-                                 vec3(0, -9.81f, 0) * main.gravity_modifier * data.age[i]) * dt;
     }
 
-    void ParticleSystem::Emit()
+    void ParticleSystem::Emit(float age)
     {
+        if (age > main.start_lifetime)
+            return;
         if (data.num_alive == main.max_particles)
             return;
 
@@ -97,6 +125,18 @@ namespace idk
         data.color[i] = main.start_color;
 
         shape.Generate(*this, i);
+
+        while (age > 0)
+        {
+            constexpr auto timeslice = 1 / 30.0f;
+            float dt = age > timeslice ? timeslice : age;
+            data.age[i] += dt;
+            velocity_over_lifetime.Update(*this, dt, i);
+            rotation_over_lifetime.Update(*this, dt, i);
+            data.position[i] += (data.velocity_start[i] + data.velocity_delta[i] +
+                vec3(0, -9.81f, 0) * main.gravity_modifier * data.age[i]) * dt;
+            age -= dt;
+        }
 
         if (main.in_world_space)
             data.position[i] = transform.position + mat3(transform.rotation) * data.position[i];
