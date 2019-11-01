@@ -52,7 +52,7 @@ namespace idk {
 	{	//Delegate Constructor to set window size
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
-		window_flags = ImGuiWindowFlags_NoCollapse;
+        window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
 	}
 
     void IGE_InspectorWindow::Initialize()
@@ -79,7 +79,11 @@ namespace idk {
 	{
 		ImGui::PopStyleVar(2);
 
-		IDE& editor = Core::GetSystem<IDE>();
+        if (ImGui::BeginMenuBar())
+        {
+            ImGui::Checkbox("Debug", &_debug_mode);
+            ImGui::EndMenuBar();
+        }
 
         _prefab_inst = Handle<PrefabInstance>();
         if (_displayed_asset.guid())
@@ -92,7 +96,7 @@ namespace idk {
         }
         else
         {
-            DisplayGameObjects(editor.selected_gameObjects);
+            DisplayGameObjects(Core::GetSystem<IDE>().selected_gameObjects);
         }
 	}
 
@@ -1465,7 +1469,7 @@ namespace idk {
 
 		dyn.visit(generic_visitor);
 		if (dyn.is<mono::Behavior>())
-			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor);
+			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor, _debug_mode);
 
         std::swap(prop_stack_copy, _curr_property_stack);
         for (auto i : indent_stack)

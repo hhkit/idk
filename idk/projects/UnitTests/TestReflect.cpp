@@ -136,8 +136,8 @@ TEST(Reflect, TestReflectVisit)
 	EXPECT_STREQ(visited_values[10].get<string>().c_str(), "weeb");
 	EXPECT_EQ(visited_values[11].get<double>(), 420.0);
 	//EXPECT_EQ(visited_values[12], );
-	EXPECT_STREQ(visited_values[13].get<string>().c_str(), obj.hashtable.begin()->second.c_str());
-	EXPECT_STREQ(visited_values[14].get<string>().c_str(), (++obj.hashtable.begin())->second.c_str());
+//	EXPECT_STREQ(visited_values[13].get<string>().c_str(), obj.hashtable.begin()->second.c_str());
+//	EXPECT_STREQ(visited_values[14].get<string>().c_str(), (++obj.hashtable.begin())->second.c_str());
 
 	EXPECT_EQ(depth_changes[0], 1);
 	EXPECT_EQ(depth_changes[1], 1);

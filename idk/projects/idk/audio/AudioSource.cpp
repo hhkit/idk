@@ -35,7 +35,8 @@ namespace idk
 	void AudioSource::StopAll()
 	{
 		for (auto& i : audio_clip_list) {
-			i->Stop();
+			if (i)
+				i->Stop();
 		}
 
 	}
@@ -67,6 +68,7 @@ namespace idk
 	{
 
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
+			//Update Channel to check if it is still playing.
 			audio_clip_list[i]->UpdateChannel();
 			//Update volume
 			audio_clip_list[i]->UpdateVolume(volume);

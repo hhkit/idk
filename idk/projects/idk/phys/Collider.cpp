@@ -33,8 +33,6 @@ namespace idk
 	}
 	void Collider::setup_predict()
 	{
-		_enabled_this_frame = is_enabled_and_active();
-
 		if (_rigidbody)
 		{
 			_broad_phase = std::visit([&](const auto& shape) { return (shape * _rigidbody->PredictedTransform()).bounds(); }, shape);
