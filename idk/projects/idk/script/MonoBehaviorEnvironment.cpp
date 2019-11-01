@@ -169,6 +169,7 @@ namespace idk::mono
 						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
 
+				find_method(type, "Clone");
 				find_method(type, "Awake");
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");

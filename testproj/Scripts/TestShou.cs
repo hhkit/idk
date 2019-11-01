@@ -7,6 +7,7 @@ namespace TestAndSeek
     {
         public int playerIndex;
         public float f;
+        public Prefab p;
         RigidBody rb;
 
         public void PrintI()
@@ -25,7 +26,17 @@ namespace TestAndSeek
         void FixedUpdate()
         {
             System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(playerIndex, Axis.Horizontal), Input.GetAxis(playerIndex, Axis.Vertical));
-            rb.AddForce(f * (Input.GetAxis(playerIndex, Axis.Horizontal) * Vector3.right + Input.GetAxis(playerIndex, Axis.Vertical) * Vector3.forward));
+            if (rb)
+            {
+                Debug.Log("RB PRINT");
+                rb.AddForce(f * (Input.GetAxis(playerIndex, Axis.Horizontal) * Vector3.right + Input.GetAxis(playerIndex, Axis.Vertical) * Vector3.forward));
+            }
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.I) && p)
+                p.Instantiate(gameObject);
         }
     }
 }

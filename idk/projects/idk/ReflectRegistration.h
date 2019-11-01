@@ -365,8 +365,11 @@ REFLECT_VARS(is_active)
 REFLECT_END()
 
 // MONO
+REFLECT_BEGIN(idk::mono::ManagedObject, "ManagedObject")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::mono::Behavior, "MonoBehavior")
-REFLECT_VARS(enabled)
+REFLECT_VARS(enabled, script_data)
 REFLECT_END()
 
 // PHYSICS

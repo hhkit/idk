@@ -94,6 +94,11 @@ namespace idk::detail
 								return component;
 						}
 						auto handle = gs.CreateObject<Ts>(go.scene, dyn.get<Ts>());
+						if constexpr (std::is_same_v <Ts, mono::Behavior>)
+						{
+							Handle<mono::Behavior> m = handle;
+							m->script_data.Assign("handle", handle.id);
+						}
 						handle->_gameObject = go;
 						go_ref.RegisterComponent(handle);
 						return handle;

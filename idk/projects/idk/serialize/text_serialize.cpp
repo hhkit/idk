@@ -62,16 +62,6 @@ namespace idk
         return node;
     }
 
-	static yaml::node serialize_yaml(const mono::Behavior& mono_behavior)
-	{
-		auto node = serialize_yaml(reflect::dynamic{ mono_behavior });
-		auto serialized_obj = serialize_yaml(reflect::dynamic{ mono_behavior.GetObject() });
-		serialized_obj.tag(mono_behavior.TypeName());
-		node.as_mapping()["script_data"] = serialized_obj;
-		node.tag(reflect::get_type<mono::Behavior>().name());
-		return node;
-	}
-
     static yaml::node serialize_yaml(const reflect::dynamic& obj)
     {
         if (!obj.valid())
@@ -243,17 +233,10 @@ namespace idk
             elem.emplace_back(yaml::mapping_type{ { "active", yaml::node{obj.ActiveSelf()} } });
 			for (auto& handle : obj.GetComponents())
 			{
-				if (handle.is_type<mono::Behavior>())
-				{
-					auto mb_handle = handle_cast<mono::Behavior>(handle);
-					elem.emplace_back(serialize_yaml(*mb_handle));
-				}
-				else
-				{
-					auto reflected = *handle;
-					auto component_typename = reflected.type.name();
-					elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
-				}
+				auto reflected = *handle;
+				auto component_typename = reflected.type.name();
+				elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
+			
 			}
         }
 
