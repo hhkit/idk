@@ -167,69 +167,126 @@ namespace idk
         public static Quaternion LookRotation(Vector3 forward, Vector3 up)
         {
             // note: may be wrong
-
             Quaternion q;
-            Vector3 right = Vector3.Cross(up, forward);
+            Vector3 forward_n = forward;
+            Vector3 right = Vector3.Cross(up, forward_n).normalized;
+            
+            float m00 = right.x;
+            float m01 = right.y;
+            float m02 = right.z;
+            float m10 = up.x;
+            float m11 = up.y;
+            float m12 = up.z;
+            float m20 = forward_n.x;
+            float m21 = forward_n.y;
+            float m22 = forward_n.z;
+            // Debug.Log("X-Axis: " + right.x.ToString() + "," + right.y.ToString() + "," + right.z.ToString());// + "," + turnAngle.w.ToString());
+            // Debug.Log("Y-Axis: " + up.x.ToString() + "," + up.y.ToString() + "," + up.z.ToString());// + "," + turnAngle.w.ToString());
+            // Debug.Log("Z-Axis(forward): " + forward_n.x.ToString() + "," + forward_n.y.ToString() + "," + forward_n.z.ToString());// + "," + turnAngle.w.ToString());
+            float tr = m00 + m11 + m22;
 
-            float r00 = right.x;
-            float r01 = right.y;
-            float r02 = right.z;
-            float r10 = up.x;
-            float r11 = up.y;
-            float r12 = up.z;
-            float r20 = forward.x;
-            float r21 = forward.y;
-            float r22 = forward.z;
-
-            // from geometrictools
-            if (r22 <= 0)  // x^2 + y^2 >= z^2 + w^2
+            if (tr > 0.0f)
             {
-                float dif10 = r11 - r00;
-                float omr22 = 1.0f - r22;
-                if (dif10 <= 0)  // x^2 >= y^2
-                {
-                    float fourxsqr = omr22 - dif10;
-                    float inv4x = 0.5f / Mathf.Sqrt(fourxsqr);
-                    q.x = fourxsqr * inv4x;
-                    q.y = (r10 + r01) * inv4x;
-                    q.z = (r20 + r02) * inv4x;
-                    q.w = (r21 - r12) * inv4x;
-                }
-                else  // y^2 >= x^2
-                {
-                    float fourysqr = omr22 + dif10;
-                    float inv4y = 0.5f / Mathf.Sqrt(fourysqr);
-                    q.x = (r10 + r01) * inv4y;
-                    q.y = fourysqr * inv4y;
-                    q.z = (r20 + r02) * inv4y;
-                    q.w = (r21 - r12) * inv4y;
-                }
+                // Debug.Log("Case 1");
+                float S = Mathf.Sqrt(tr + 1.0f) * 2.0f; // S=4*qw 
+                q.w = 0.25f * S;
+                q.x = (m21 - m12) / S;
+                q.y = (m02 - m20) / S;
+                q.z = (m10 - m01) / S;
             }
-            else  // z^2 + w^2 >= x^2 + y^2
+            else if ((m00 > m11) & (m00 > m22))
             {
-                float sum10 = r11 + r00;
-                float opr22 = 1.0f + r22;
-                if (sum10 <= 0)  // z^2 >= w^2
-                {
-                    float fourzsqr = opr22 - sum10;
-                    float inv4z = 0.5f / Mathf.Sqrt(fourzsqr);
-                    q.x = (r20 + r02) * inv4z;
-                    q.y = (r21 + r12) * inv4z;
-                    q.z = fourzsqr * inv4z;
-                    q.w = (r10 - r01) * inv4z;
-                }
-                else  // w^2 >= z^2
-                {
-                    float fourwsqr = opr22 + sum10;
-                    float inv4w = 0.5f / Mathf.Sqrt(fourwsqr);
-                    q.x = (r21 - r12) * inv4w;
-                    q.y = (r02 - r20) * inv4w;
-                    q.z = (r10 - r01) * inv4w;
-                    q.w = fourwsqr * inv4w;
-                }
+                // Debug.Log("Case 2");
+                float S = Mathf.Sqrt(1.0f + m00 - m11 - m22) * 2.0f; // S=4*qx 
+                q.w = (m21 - m12) / S;
+                q.x = 0.25f * S;
+                q.y = (m01 + m10) / S;
+                q.z = (m02 + m20) / S;
             }
+            else if (m11 > m22)
+            {
+                // Debug.Log("Case 3");
+                float S = Mathf.Sqrt(1.0f + m11 - m00 - m22) * 2.0f; // S=4*qy
+                q.w = (m02 - m20) / S;
+                q.x = (m01 + m10) / S;
+                q.y = 0.25f * S;
+                q.z = (m12 + m21) / S;
+            }
+            else
+            {
+                // Debug.Log("Case 4");
+                float S = Mathf.Sqrt(1.0f + m22 - m00 - m11) * 2.0f; // S=4*qz   
+                q.w = (m10 - m01) / S;
+                q.x = (m02 + m20) / S;
+                q.y = (m12 + m21) / S;
+                q.z = 0.25f * S;
+            }
+            q.x = -q.x;
+            q.y = -q.y;
+            q.z = -q.z;
+            return q.normalized;
+            //Quaternion q;
+            //Vector3 right = Vector3.Cross(up, forward);
 
-            return q;
+            //float r00 = right.x;
+            //float r01 = right.y;
+            //float r02 = right.z;
+            //float r10 = up.x;
+            //float r11 = up.y;
+            //float r12 = up.z;
+            //float r20 = forward.x;
+            //float r21 = forward.y;
+            //float r22 = forward.z;
+
+            //// from geometrictools
+            //if (r22 <= 0)  // x^2 + y^2 >= z^2 + w^2
+            //{
+            //    float dif10 = r11 - r00;
+            //    float omr22 = 1.0f - r22;
+            //    if (dif10 <= 0)  // x^2 >= y^2
+            //    {
+            //        float fourxsqr = omr22 - dif10;
+            //        float inv4x = 0.5f / Mathf.Sqrt(fourxsqr);
+            //        q.x = fourxsqr * inv4x;
+            //        q.y = (r10 + r01) * inv4x;
+            //        q.z = (r20 + r02) * inv4x;
+            //        q.w = (r21 - r12) * inv4x;
+            //    }
+            //    else  // y^2 >= x^2
+            //    {
+            //        float fourysqr = omr22 + dif10;
+            //        float inv4y = 0.5f / Mathf.Sqrt(fourysqr);
+            //        q.x = (r10 + r01) * inv4y;
+            //        q.y = fourysqr * inv4y;
+            //        q.z = (r20 + r02) * inv4y;
+            //        q.w = (r21 - r12) * inv4y;
+            //    }
+            //}
+            //else  // z^2 + w^2 >= x^2 + y^2
+            //{
+            //    float sum10 = r11 + r00;
+            //    float opr22 = 1.0f + r22;
+            //    if (sum10 <= 0)  // z^2 >= w^2
+            //    {
+            //        float fourzsqr = opr22 - sum10;
+            //        float inv4z = 0.5f / Mathf.Sqrt(fourzsqr);
+            //        q.x = (r20 + r02) * inv4z;
+            //        q.y = (r21 + r12) * inv4z;
+            //        q.z = fourzsqr * inv4z;
+            //        q.w = (r10 - r01) * inv4z;
+            //    }
+            //    else  // w^2 >= z^2
+            //    {
+            //        float fourwsqr = opr22 + sum10;
+            //        float inv4w = 0.5f / Mathf.Sqrt(fourwsqr);
+            //        q.x = (r21 - r12) * inv4w;
+            //        q.y = (r02 - r20) * inv4w;
+            //        q.z = (r10 - r01) * inv4w;
+            //        q.w = fourwsqr * inv4w;
+            //    }
+            //}
+
+            //return q.normalized;
         }
 
         public static Quaternion Normalize(Quaternion q)

@@ -5,12 +5,8 @@
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
-#include <gfx/ShaderGraph.h>
 #include <res/MetaBundle.h>
-#include <anim/AnimationLayer.h>
-#include <math/matrix_decomposition.h>
 
-#include <gfx/RenderTarget.h>
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -27,19 +23,31 @@
  *    REFLECT_ENUM(ENUM_TYPE, ALIAS) // only for macro-based enum using ENUM
  *
  *	notes:
- *	  - you don't have to include every type in idk_reflect_type,
+ *    - !!! WARNING !!!
+ *      Please DO NOT USE SPACES for the alias, as yaml tags cannot have spaces.
+ *	  - You don't have to include every type in idk_reflect_type,
  *      just the ones you need type context during visit. However, you need
  *      to register the dependent types BEFORE the dependees.
- *      Eg. AnimationLayer before Animator
- *    - you can also choose not to include container types in idk_reflect_type.
+ *      eg. AnimationLayer before Animator
+ *    - You can also choose not to include container types in idk_reflect_type.
  *      however, you will need to register it the same way
  *      ie. REFLECT_BEGIN(container, name) REFLECT_END()
- *      if the container type has commas, use using alias = type before registering.
+ *    - if the container type has commas, use using alias = type before registering,
+ *      or use decltype(type::member) instead of the container type
 */
+
+REFLECT_BEGIN(idk::reflect::dynamic, "dynamic") REFLECT_END()
+REFLECT_BEGIN(idk::reflect::type, "type") REFLECT_END()
 
 REFLECT_BEGIN(idk::string, "string") REFLECT_END()
 REFLECT_BEGIN(float, "float") REFLECT_END()
 REFLECT_BEGIN(int, "int") REFLECT_END()
+
+// COMMON CONTAINERS
+REFLECT_BEGIN(idk::vector<idk::reflect::dynamic>, "vector<dynamic>")
+REFLECT_END()
+REFLECT_BEGIN(idk::vector<idk::string>, "vector<string>")
+REFLECT_END()
 
 /*==========================================================================
  * math
@@ -129,6 +137,10 @@ REFLECT_BEGIN(idk::RscHandle<class idk::Texture>, "<Texture>")
 REFLECT_VARS(guid)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::RscHandle<class idk::FontAtlas>, "<FontAtlas>")
+REFLECT_VARS(guid)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RscHandle<class idk::Material>, "<Material>")
 REFLECT_VARS(guid)
 REFLECT_END()
@@ -161,14 +173,16 @@ REFLECT_END()
  * general resources
  *========================================================================*/
 
-REFLECT_BEGIN(idk::SerializedMeta, "SerializedMetadata")
+REFLECT_BEGIN(idk::SerializedMeta, "SerializedMeta")
 REFLECT_VARS(guid, name, t_hash, metadata)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::SerializedMeta>, "vector<SerializedMeta>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::MetaBundle, "MetaBundle")
 REFLECT_VARS(metadatas)
 REFLECT_END()
-
 
 /*==========================================================================
  * specific resources
@@ -201,6 +215,12 @@ REFLECT_BEGIN(idk::TestResource, "TestResource")
 REFLECT_VARS(k, yolo)
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::Material::uniforms), "hash_table<string,UniformInstance>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::MaterialInstance::uniforms), "hash_table<string,UniformInstanceValue>")
+REFLECT_END()
+
 REFLECT_ENUM(idk::BlendMode, "BlendMode")
 REFLECT_ENUM(idk::MaterialDomain, "MaterialDomain")
 REFLECT_ENUM(idk::ShadingModel, "ShadingModel")
@@ -221,6 +241,8 @@ REFLECT_BEGIN(idk::PrefabData, "PrefabData")
 REFLECT_VARS(parent_index, components)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::vector<idk::PrefabData>, "vector<PrefabData>")
+REFLECT_END()
 REFLECT_BEGIN(idk::Prefab, "Prefab")
 REFLECT_VARS(data)
 REFLECT_END()
@@ -232,16 +254,8 @@ REFLECT_END()
 // shader graph
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 
-REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::shadergraph::Link, "ShaderGraphLink")
 REFLECT_VARS(node_out, node_in, slot_out, slot_in)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::shadergraph::Node, "ShaderGraphNode")
-REFLECT_VARS(name, guid, position, input_slots, output_slots, control_values)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::shadergraph::Slot, "ShaderGraphSlot")
@@ -251,6 +265,27 @@ REFLECT_END()
 REFLECT_BEGIN(idk::shadergraph::Parameter, "ShaderGraphParameter")
 REFLECT_VARS(name, type, default_value)
 REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::shadergraph::Graph::nodes), "hash_table<Guid,ShaderGraphNode>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::shadergraph::Slot>, "vector<ShaderGraphSlot>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::shadergraph::Link>, "vector<ShaderGraphLink>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::shadergraph::Parameter>, "vector<ShaderGraphParameter")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::shadergraph::Node, "ShaderGraphNode")
+REFLECT_VARS(name, guid, position, input_slots, output_slots, control_values)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
+REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
+REFLECT_END()
+
 
 /*==========================================================================
  * core
@@ -274,8 +309,7 @@ REFLECT_END()
 REFLECT_BEGIN(idk::LayerManager, "LayerManager")
 REFLECT_END()
 
-using LayerNameArray = std::array<idk::string, 32>;
-REFLECT_BEGIN(LayerNameArray, "LayerNameArray")
+REFLECT_BEGIN(decltype(idk::LayerManagerConfig::layers), "array<string,32>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::LayerManagerConfig, "LayerManagerConfig")
@@ -297,7 +331,7 @@ REFLECT_END()
  * components
  *========================================================================*/
 
-// COMMON
+ // COMMON
 REFLECT_BEGIN(idk::Transform, "Transform")
 REFLECT_VARS(scale, rotation, position, parent)
 REFLECT_END()
@@ -315,6 +349,9 @@ REFLECT_VARS(index)
 REFLECT_END()
 
 // AUDIO
+REFLECT_BEGIN(idk::vector<idk::RscHandle<idk::AudioClip>>, "vector<<AudioClip>>")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::AudioSource, "AudioSource")
 REFLECT_VARS(audio_clip_list, volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
@@ -370,6 +407,8 @@ REFLECT_BEGIN(idk::SpotLight, "SpotLight")
 REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::vector<idk::PropertyOverride>, "vector<PropertyOverride>")
+REFLECT_END()
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
 REFLECT_VARS(prefab, overrides, object_index)
 REFLECT_END()
@@ -383,7 +422,7 @@ REFLECT_BEGIN(idk::Viewport, "Viewport")
 REFLECT_VARS(position, size)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::DontClear, "<Don't Clear>")
+REFLECT_BEGIN(idk::DontClear, "<Don'tClear>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
@@ -391,6 +430,12 @@ REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, over
 REFLECT_END()
 
 // ANIMATION
+REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::BlendTree::params), "array<string,2>")
+REFLECT_END();
+
 REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
 REFLECT_ENUM(idk::AnimDataType, "AnimDataType")
 REFLECT_ENUM(idk::BlendTreeType, "BlendTreeType")
@@ -413,6 +458,15 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")
 REFLECT_VARS(_bone_name, _bone_index)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::animation_table), "hash_table<string,AnimationState>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::layer_table), "hash_table<string,size_t>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")

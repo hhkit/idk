@@ -242,19 +242,7 @@ namespace idk
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
 		{
-			auto bundle = Get(PathHandle{ elem });
-			if (bundle)
-			{
-				for (auto& resource : bundle->GetAll())
-					std::visit([&](auto& res_handle) {Release(res_handle); }, resource);
-			}
-
-			// Remove from loaded files if its there
-			auto itr = _loaded_files.find(elem.GetMountPath().data());
-			if (itr != _loaded_files.end())
-			{
-				_loaded_files.erase(itr);
-			}
+			Unload(PathHandle{ elem });
 		}
 
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
@@ -264,14 +252,28 @@ namespace idk
 			Load(elem);
 	}
 
+	bool ResourceManager::IsExtensionSupported(string_view ext)
+	{
+		auto itr = _file_loader.find(ext.data());
+		return itr != _file_loader.end();
+	}
+
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
+		if (!path)
+		{
+			LOG_WARNING_TO(LogPool::SYS, "Unmounted path.");
+			return ResourceLoadError::FileDoesNotExist;
+		}
+
 		auto* loader = GetLoader(path.GetExtension());
 		if (loader == nullptr)
+		{
+			LOG_WARNING_TO(LogPool::SYS, "Extension %s not registered. ", path.GetExtension().data());
 			return ResourceLoadError::ExtensionNotRegistered;
+		}
 
-		if (!path)
-			return ResourceLoadError::FileDoesNotExist;
+		LOG_TO(LogPool::SYS, "Loading %s. ", path.GetMountPath().data());
 
 		auto emplace_path = string{ path.GetMountPath() };
 
@@ -328,6 +330,20 @@ namespace idk
 
 	void ResourceManager::Unload(PathHandle path)
 	{
+		LOG_TO(LogPool::SYS, "Unloading %s. ", path.GetMountPath().data());
+		auto bundle = Get(path);
+		if (bundle)
+		{
+			for (auto& resource : bundle->GetAll())
+				std::visit([&](auto& res_handle) {Release(res_handle); }, resource);
+		}
+
+		// Remove from loaded files if its there
+		auto itr = _loaded_files.find(path.GetMountPath().data());
+		if (itr != _loaded_files.end())
+		{
+			_loaded_files.erase(itr);
+		}
 	}
 
 	ResourceManager::GeneralGetResult ResourceManager::Get(PathHandle path)

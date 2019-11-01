@@ -5,6 +5,6 @@
 namespace idk
 {
 	constexpr auto UnpauseAll  = PausedSystemConfig<>{};
-	constexpr auto EditorPause = PausedSystemConfig<PhysicsSystem, mono::ScriptSystem, AnimationSystem, ParticleSystem>{};
+	constexpr auto EditorPause = PausedSystemConfig<PhysicsSystem, mono::ScriptSystem, AnimationSystem, ParticleSystemUpdater>{};
 	constexpr auto GamePause   = PausedSystemConfig<PhysicsSystem, AnimationSystem>{};
 }

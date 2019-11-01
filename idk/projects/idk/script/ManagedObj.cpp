@@ -19,13 +19,15 @@ namespace idk::mono
 				return fetch ? mono_gchandle_new(fetch, false) : 0;
 			}(rhs)
 			: 0
-		}
+		},
+		_type {rhs._type}
 	{
 	}
 	ManagedObject::ManagedObject(ManagedObject&& rhs)noexcept
-		: _gc_handle{rhs._gc_handle}
+		: _gc_handle{rhs._gc_handle}, _type {rhs._type}
 	{
 		rhs._gc_handle = 0;
+		rhs._type = nullptr;
 	}
 	ManagedObject& ManagedObject::operator=(const ManagedObject& rhs) 
 	{
@@ -36,11 +38,13 @@ namespace idk::mono
 			mono_gchandle_free(_gc_handle);
 
 		_gc_handle = new_gc;
+		_type = rhs._type;
 		return *this;
 	}
 	ManagedObject& ManagedObject::operator=(ManagedObject&& rhs)noexcept
 	{
 		std::swap(_gc_handle, rhs._gc_handle);
+		std::swap(_type, rhs._type);
 		return *this;
 	}
 	ManagedObject::~ManagedObject()

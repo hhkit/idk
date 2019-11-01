@@ -2,6 +2,7 @@
 
 #include <idk.h>
 #include <core/Handle.h>
+#include <prefab/PropertyOverride.h>
 
 namespace idk
 {

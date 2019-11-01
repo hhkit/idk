@@ -123,6 +123,9 @@
     <ClInclude Include="windows\IGE_GameView.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\InputGameObject.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -216,12 +219,17 @@
     <ClCompile Include="windows\IGE_AnimatorWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
-    <ClCompile Include="commands\CMD_AddBehavior.cpp" />
     <ClCompile Include="windows\IGE_ProgrammerConsole.cpp">
       <Filter>windows</Filter>
     </ClCompile>
     <ClCompile Include="windows\IGE_GameView.cpp">
       <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_AddBehavior.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\InputGameObject.cpp">
+      <Filter>widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -114,7 +114,7 @@ namespace idk
 			if (jtr == end)
 				break;
 
-			while (jtr != beg && !functor(jtr[-1], jtr[0]))
+			while (jtr != beg && functor(jtr[0], jtr[-1]))
 			{
 #ifdef _DEBUG
 				++swapcount;

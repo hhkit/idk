@@ -10,6 +10,7 @@ namespace TestAndSeek
         public float jump_force;
         public Vector3 movement;
         public Prefab prefab;
+        public GameObject go;
 
         private RigidBody rb;
         private TestShou ts;
@@ -32,10 +33,13 @@ namespace TestAndSeek
             if (rb)
                 Debug.Log("found rigidbody");
 
+            if (go)
+                Debug.Log("found gameobject" + go.name);
+
             foreach (var elem in FindObjectsOfType<TestShou>())
             {
                 Debug.Log("I " + i + " am " + elem.i);
-                Destroy(elem.gameObject);
+                //Destroy(elem.gameObject);
             }
         }
 
@@ -63,6 +67,7 @@ namespace TestAndSeek
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
                 rb.AddForce(f * (Input.GetAxis(Axis.Horizontal) * Vector3.right + Input.GetAxis(Axis.Vertical) * Vector3.forward));
 
+
                 if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
                 if (Input.GetKey(KeyCode.S)) rb.AddForce(f * Vector3.back);
                 if (Input.GetKey(KeyCode.A)) rb.AddForce(f * Vector3.left);
@@ -89,8 +94,27 @@ namespace TestAndSeek
 
         void Update()
         {
+            //Debug.Log("Children" + transform.GetChildren().Length.ToString());
             if (prefab)
                 Debug.Log(prefab.ToString());
+
+            //if (Input.GetKeyDown(KeyCode.L))
+            //    GetComponentInParent<TestShou>().PrintI();
+
+            if (Input.GetKeyDown(KeyCode.R))
+                transform.forward = Quaternion.AngleAxis(-3.14f / 2, Vector3.up) * transform.forward;
+
+            if (Input.GetKey(KeyCode.Z))
+                transform.forward = Quaternion.AngleAxis(-3.14f / 6 * Time.deltaTime, Vector3.up) * transform.forward;
+
+            if (Input.GetKey(KeyCode.X))
+                transform.forward = Quaternion.AngleAxis(+3.14f / 6 * Time.deltaTime, Vector3.up) * transform.forward;
+
+        }
+
+        public void OnCollisionEnter(Collision c)
+        {
+            Debug.Log("Collide with " + c.gameObject.name +" with normal " + c.normal.x + " " + c.normal.y + " " + c.normal.z);
         }
 
         public void TestTransform(Transform t)

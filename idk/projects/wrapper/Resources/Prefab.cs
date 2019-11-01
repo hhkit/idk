@@ -8,7 +8,7 @@
             var ret = Bindings.PrefabInstantiate(guid);
             return ret != 0 ? new GameObject(ret) : null;
         }
-        public GameObject Instantiate(Transform parent, bool instantiateInWorldSpace = false)
+        public GameObject Instantiate(GameObject parent, bool instantiateInWorldSpace = false)
         {
             var ret = Instantiate();
             if (ret)

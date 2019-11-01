@@ -66,6 +66,15 @@
     <ClInclude Include="resource\OpenGLTextureLoader.h">
       <Filter>resource\Loaders</Filter>
     </ClInclude>
+    <ClInclude Include="resource\OpenGLFontAtlas.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLFontAtlasLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLFontAtlasFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -119,6 +128,15 @@
     </ClCompile>
     <ClCompile Include="resource\OpenGLTextureLoader.cpp">
       <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLFontAtlas.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLFontAtlasLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLFontAtlasFactory.cpp">
+      <Filter>resource\Factories</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

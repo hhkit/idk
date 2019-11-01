@@ -39,6 +39,8 @@ namespace idk {
         GenericHandle _prefab_curr_component;
         int _prefab_curr_component_nth;
         vector<string> _curr_property_stack;
+        // spawn prefab instances in prefab scene so prefab assets can be displayed.
+        hash_table<RscHandle<Prefab>, Handle<GameObject>> _prefab_store;
 
         //If multiple objects are selected, this will only display the first gameObject.
         void DisplayGameObjects(vector<Handle<GameObject>> gos);			
@@ -47,11 +49,13 @@ namespace idk {
 
         //If multiple objects are selected, this will only display the first gameObject.
         void DisplayComponent(GenericHandle& component);
-        template<typename T> void DisplayComponentInner(T component) { displayVal(component); }
+        template<typename T> void DisplayComponentInner(Handle<T> component) { displayVal(*component); }
         template<> void DisplayComponentInner(Handle<Transform> c_transform);
         template<> void DisplayComponentInner(Handle<Animator> c_anim);	
         template<> void DisplayComponentInner(Handle<Bone> c_anim);		
-        template<> void DisplayComponentInner(Handle<AudioSource> c_anim);		
+        template<> void DisplayComponentInner(Handle<AudioSource> c_anim);	
+		template<> void DisplayComponentInner(Handle<Font> c_anim);	
+        template<> void DisplayComponentInner(Handle<ParticleSystem> c_ps);
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);
@@ -64,6 +68,7 @@ namespace idk {
         template<> void DisplayAsset(RscHandle<MaterialInstance> material);
         template<> void DisplayAsset(RscHandle<Material> material);
         template<> void DisplayAsset(RscHandle<Texture> texture);
+		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
 
         bool displayVal(reflect::dynamic dyn);
 

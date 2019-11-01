@@ -83,6 +83,7 @@ namespace idk
 		template<typename Res> bool Free    (const RscHandle<Res>&);
 
 		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
+		bool									IsExtensionSupported(string_view ext);
 
 		template<typename Res> [[nodiscard]] span<Res> SpanOverNew();
 
@@ -97,10 +98,11 @@ namespace idk
 		template<typename Res>  vector<RscHandle<Res>>GetAll();
 		template<typename Res>  SaveResult<Res>       Save    (RscHandle<Res> result);
 		template<typename Res>  SaveResult<Res>       CopyTo  (RscHandle<Res> result, string_view new_mountpath);
+		template<typename Res>  SaveResult<Res>       MoveTo(string_view curr_mountpath, string_view new_mountpath);
 		template<typename Res>  ResourceReleaseResult Release (RscHandle<Res>);
 		                        FileMoveResult        Rename(PathHandle old_path, string_view new_mount_path);
 		template<typename Res>  FileMoveResult        Rename(RscHandle<Res> resource, string_view new__mountpath);
-
+		
 		/* FACTORIES - for registering resource factories */
 		template<typename Factory>                    Factory& GetFactory();
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);

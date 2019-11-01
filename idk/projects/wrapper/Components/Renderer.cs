@@ -14,5 +14,10 @@
             }
         }
 
+        public bool enabled
+        {
+            get => Bindings.RendererGetActive(handle);
+            set => Bindings.RendererSetActive(handle, value);
+        }
     }
 }

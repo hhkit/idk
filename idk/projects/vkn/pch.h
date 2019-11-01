@@ -16,6 +16,5 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
 #include <Core/Core.h>
-#include <reflect/reflect.h>
 #include <vkn/ManagedVulkanObjs.h>
 #endif //PCH_H

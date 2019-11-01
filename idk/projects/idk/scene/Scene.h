@@ -29,6 +29,10 @@ namespace idk
 		: public Resource<Scene>
 		, public Saveable<Scene, false_type>
 	{
+    public:
+        static constexpr uint8_t editor = 0x80;
+        static constexpr uint8_t prefab = 0x81;
+
 	public:
 		class iterator;
 		explicit Scene(unsigned char index = 0);

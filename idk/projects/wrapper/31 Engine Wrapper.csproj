@@ -9,9 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>idk</RootNamespace>
     <AssemblyName>idk</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\bin\idk.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -67,6 +70,9 @@
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="Physics\Collision.cs" />
+    <Compile Include="Physics\ManagedRaycast.cs" />
+    <Compile Include="Physics\Physics.cs" />
+    <Compile Include="Physics\RaycastHit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Components\RigidBody.cs" />
     <Compile Include="Core\Time.cs" />
@@ -80,10 +86,21 @@
     <Compile Include="Resources\Resource.cs" />
     <Compile Include="Resources\Texture.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="docfx.json" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\..\packages\docfx.console.2.47.0\build\docfx.console.targets" Condition="Exists('..\..\packages\docfx.console.2.47.0\build\docfx.console.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\docfx.console.2.47.0\build\docfx.console.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\docfx.console.2.47.0\build\docfx.console.targets'))" />
+  </Target>
 </Project>

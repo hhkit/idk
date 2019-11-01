@@ -5,4 +5,5 @@
 namespace idk
 {
 	sphere ritters(span<vec3> positions);
+	sphere ritters(span<const vec3> positions);
 }

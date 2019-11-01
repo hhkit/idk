@@ -7,6 +7,12 @@
 
 namespace idk
 {
+	struct RaycastHit
+	{
+		Handle<Collider> collider;
+		phys::raycast_success raycast_succ;
+	};
+
 	class PhysicsSystem
 		: public ISystem
 	{
@@ -15,6 +21,8 @@ namespace idk
 		void FirePhysicsEvents();
 		void DebugDrawColliders     (span<class Collider> colliders);
 		void Reset();
+
+		vector<RaycastHit> Raycast(const ray& r, int layer_mask, bool hit_triggers = false);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList, vector<phys::raycast_result>& ray_resultList);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
 	private:

@@ -43,6 +43,9 @@ namespace idk
 		template<typename T> 
 		bool is_type() const noexcept;
 
+        template<typename Visitor>
+        decltype(auto) visit(Visitor&& visitor) const;
+
 		reflect::dynamic operator*() const;
 		explicit operator bool() const;
 		bool operator<(const GenericHandle&) const;

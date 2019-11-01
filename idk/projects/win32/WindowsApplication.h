@@ -40,6 +40,8 @@ namespace idk::win
 		// windows
 		bool SetFullscreen(bool) override { return false; }
 		bool SetScreenSize(ivec2) override { return false; }
+		void SetTitle(string_view new_title) override;
+
 		void Shutdown() override {}
 		string GetExecutableDir() override;
 		string GetAppData() override ;

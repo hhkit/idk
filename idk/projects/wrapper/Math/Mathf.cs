@@ -7,6 +7,8 @@
         public static float DegToRad { get { return PI / 180; } }
         public static float RadToDeg { get { return 180 / PI; } }
 
+        public const float Infinity = float.MaxValue;
+
         public static float Abs(float val)
         {
             return val > 0 ? val : -val;
@@ -41,6 +43,18 @@
         {
             return val < 0 ? 0 :
                    val > 1 ? 1 : val;
+        }
+        public static float Lerp(float a, float b, float t)
+        {
+            return LerpUnclamped(a, b, t < 0 ? 0 : t > 1 ? 1 : t);
+        }
+        public static float LerpUnclamped(float a, float b, float t)
+        {
+            return (1 - t) * a + (t) * b;
+        }
+        public static float Pow(float f, float p)
+        {
+            return (float)System.Math.Pow(f, p);
         }
         public static float Sin(float val)
         {

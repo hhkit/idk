@@ -162,9 +162,9 @@ namespace idk::mono
 				auto& type = itr->second;
 
 				LOG_TO(LogPool::MONO, string{ "Investigating " } +class_name);
-				constexpr auto find_method = [](ManagedType& type, string_view fn_name)
+				constexpr auto find_method = [](ManagedType& type, string_view fn_name, int param_count = 0)
 				{
-					auto res = type.CacheThunk(fn_name);
+					auto res = type.CacheThunk(fn_name, param_count);
 					if (res)
 						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
@@ -172,13 +172,18 @@ namespace idk::mono
 				find_method(type, "Awake");
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");
-				type.CacheThunk("RawTriggerEnter", 1);
-				type.CacheThunk("RawTriggerStay", 1);
-				type.CacheThunk("RawTriggerExit", 1);
+				find_method(type, "OnTriggerEnter", 1);
+				find_method(type, "OnTriggerStay", 1);
+				find_method(type, "OnTriggerExit", 1);
+				find_method(type, "OnCollisionEnter", 1);
+				find_method(type, "OnCollisionStay", 1);
+				find_method(type, "OnCollisionExit", 1);
 				find_method(type, "Update");
 				find_method(type, "UpdateCoroutines");
 
-				mono_behaviors.emplace(class_name, &type);
+
+				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))
+					mono_behaviors.emplace(class_name, &type);
 			}
 		}
 

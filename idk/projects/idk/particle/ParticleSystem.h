@@ -3,6 +3,7 @@
 #include <core/Component.h>
 #include <particle/ParticleSystemModules.h>
 #include <particle/ParticleData.h>
+#include <math/matrix_decomposition.h>
 #include <math/random.h>
 
 namespace idk
@@ -30,6 +31,7 @@ namespace idk
         char state = Awake;
 
         void Play();
+        void Pause();
         void Stop();
         void Step(float dt);
         void Emit();

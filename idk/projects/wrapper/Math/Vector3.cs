@@ -64,10 +64,26 @@ namespace idk
         }
         public static Vector3 Cross(Vector3 lhs, Vector3 rhs)
         {
-            return new Vector3(lhs.x * rhs.y - lhs.y * rhs.x,
-                             - lhs.x * rhs.z + lhs.z * rhs.x,
-                             + lhs.y * rhs.z - lhs.z * rhs.y);
+            return new Vector3(lhs[1] * rhs[2] - rhs[1] * lhs[2],
+                               lhs[2] * rhs[0] + rhs[2] * lhs[0],
+                               lhs[0] * rhs[1] - rhs[0] * lhs[1]);
         }
+
+        public static Vector3 Reflect(Vector3 inDirection, Vector3 inNormal)
+        {
+            return inDirection - 2.0f * Dot(inDirection, inNormal) * inNormal;
+        }
+
+        public static Vector3 Refract(Vector3 inDirection, Vector3 inNormal, float eta)
+        {
+            float norm_dot_dir = Dot(inDirection, inNormal);
+            float k = 1.0f - eta * eta * (1.0f - norm_dot_dir * norm_dot_dir);
+            Vector3 ret_val = new Vector3( 0, 0, 0 );
+            if (k >= 0.0f)
+               ret_val = eta * inDirection - (eta * norm_dot_dir + Mathf.Sqrt(k)) * inNormal; 
+            return ret_val;
+        }
+
         public static Vector3 Lerp(Vector3 lhs, Vector3 rhs, float t)
         {
             return LerpUnclamped(lhs, rhs, t < 0 ? 0 : t > 1 ? 1 : t);

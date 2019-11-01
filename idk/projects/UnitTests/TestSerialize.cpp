@@ -129,6 +129,8 @@ struct serialize_this_bs
 	hash_table<Guid, string> hashtable;
 	char end = '2';
 };
+REFLECT_BEGIN(decltype(serialize_this_bs::hashtable), "hash_table<Guid,string>")
+REFLECT_END()
 REFLECT_BEGIN(serialize_this_bs, "serialize_this_bs")
 REFLECT_VARS(start, string_vec, mid, hashtable, end)
 REFLECT_END()

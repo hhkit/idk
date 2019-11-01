@@ -6,8 +6,8 @@
 namespace idk
 {
 	ENUM(FrustumSide, char,
-		Right,
 		Left,
+		Right,
 		Up,
 		Down,
 		Far,
@@ -20,6 +20,8 @@ namespace idk
 
 		frustum& operator*=(const mat4& tfm);
 		frustum  operator*(const mat4& tfm) const;
+
+		bool contains(const sphere& s) const;
 	};
 
 	frustum camera_vp_to_frustum(const mat4& view_projection_matrix);

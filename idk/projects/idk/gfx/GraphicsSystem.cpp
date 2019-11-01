@@ -6,6 +6,8 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
+#include <gfx/Font.h>
+
 #include <gfx/DebugRenderer.h>
 #include <gfx/Mesh.h>
 //#include <gfx/CameraControls.h>
@@ -101,6 +103,8 @@ namespace idk
 		AnimatedRenderObject ro = skinned_mesh_renderer.GenerateRenderObject();
 		// @Joseph: GET PARENT IN THE FUTURE WHEN EACH MESH GO HAS ITS OWN SKINNED MESH RENDERER
 		const auto parent = skinned_mesh_renderer.GetGameObject()->Parent();
+		if (!parent)
+			return std::nullopt;
 		const auto animator = parent->GetComponent<Animator>();
 		if (!animator)
 			return std::nullopt;
@@ -153,6 +157,7 @@ namespace idk
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
+		span<Font> fonts,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
 		span<const Light> lights)
@@ -200,7 +205,7 @@ namespace idk
 			if (obj)
 			{
 				auto& render_obj = *obj;
-				Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
+				//Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
 				result.mesh_render.emplace_back(std::move(render_obj));
 			}
 		}
@@ -238,6 +243,13 @@ namespace idk
             }
         }
 
+		for (auto& f : fonts)
+		{
+			auto& render_data = result.font_render_data.emplace_back();
+			//f.RenderText();
+			render_data = f.fontData;
+		}
+
 
 		SubmitBuffers(std::move(result));
 	}
@@ -251,12 +263,14 @@ namespace idk
 		renderer_vertex_shaders[VSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert", false);
 		renderer_vertex_shaders[VPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false);
 		renderer_vertex_shaders[VFsq] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert", false);
+		renderer_vertex_shaders[VFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.vert", false);
 
 		////////////////////Load fragment Shaders
 		//renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
 		renderer_fragment_shaders[FPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
 		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag", false);
 		renderer_fragment_shaders[FBrdf] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
+		renderer_fragment_shaders[FFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.frag", false);
 		renderer_fragment_shaders[FDeferredPost] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post.frag", false);
 
 		////////////////////Load geometry Shaders

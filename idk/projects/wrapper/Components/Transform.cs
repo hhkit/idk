@@ -42,6 +42,7 @@
         public Vector3 forward
         {
             get => Bindings.TransformForward(handle);
+            set => Bindings.TransformSetForward(handle, value);
         }
 
         public Vector3 up 
@@ -54,19 +55,24 @@
             get => Bindings.TransformRight(handle);
         }
 
-        public Transform parent
+        public GameObject parent
         {
             get
             {
                 var parent = Bindings.TransformGetParent(handle);
-                return parent != 0 ? new GameObject(parent).transform : null;
+                return parent != 0 ? new GameObject(parent) : null;
             }
         }
 
-        public void SetParent(Transform parent, bool preserve_global)
+        public void SetParent(GameObject parent, bool preserve_global)
         {
-            ulong parent_id = parent ? parent.gameObject.handle : 0;
+            ulong parent_id = parent ? parent.handle : 0;
             Bindings.TransformSetParent(handle, parent_id, preserve_global);
+        }
+
+        public GameObject[] GetChildren()
+        {
+            return Bindings.TransformGetChildren(handle);
         }
     }
 }

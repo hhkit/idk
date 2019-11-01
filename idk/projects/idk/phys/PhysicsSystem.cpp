@@ -2,28 +2,47 @@
 #include "PhysicsSystem.h"
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <common/Layer.h>
 #include <gfx/DebugRenderer.h>
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
+#include <phys/collision_detection/ManagedCollision.h>
 
 #include <script/MonoBehavior.h>
 #include <script/MonoFunctionInvoker.h>
 
 #include <math/matrix_decomposition.h>
-#include <iostream>
 
 namespace idk
 {
 	constexpr float restitution_slop = 0.01f;
 	constexpr float penetration_min_slop = 0.001f;
-	constexpr float penetration_max_slop = 0.9f;
+	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
+
+	constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+	{
+		return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+	};
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
+        for (auto& elem : colliders)
+        {
+            elem.find_rigidbody();
+            if (elem._static_cache)
+                elem.setup_predict();
+            elem._enabled_this_frame = elem.is_enabled_and_active();
+        }
+
+		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
+			{
+				return lhs._static_cache < rhs._static_cache;
+			});
+
 		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
 		{
@@ -45,7 +64,8 @@ namespace idk
 		{
 			std::visit([&](const auto& shape)
 				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), collider.is_trigger ? color{0, 1, 1} : c, dur);
+					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), 
+						collider.is_enabled_and_active() ? collider.is_trigger ? color{ 0, 1, 1 } : c : color{0.5}, dur);
 				}, collider.shape);
 		};
 
@@ -80,16 +100,23 @@ namespace idk
 					continue;
 				};
 
-				auto old_mat = tfm->GlobalMatrix();
-				const vec3 curr_pos = old_mat[3].xyz;
+				if (!rigidbody.is_kinematic)
+				{
+					auto old_mat = tfm->GlobalMatrix();
+					const vec3 curr_pos = old_mat[3].xyz;
 
-				// verlet integrate towards new position
-				//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-				auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-				rigidbody._accum_accel = vec3{};
-				rigidbody._prev_pos = curr_pos;
-				old_mat[3].xyz = new_pos;
-				rigidbody._predicted_tfm = old_mat;
+					// verlet integrate towards new position
+					//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+					auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+					rigidbody._accum_accel = vec3{};
+					rigidbody._prev_pos = curr_pos;
+					old_mat[3].xyz = new_pos;
+					rigidbody._predicted_tfm = old_mat;
+				}
+				else
+				{
+					rigidbody._predicted_tfm = tfm->GlobalMatrix();
+				}
 			}
 		};
 
@@ -98,18 +125,29 @@ namespace idk
 			CollisionList collisionframe;
 
 			const auto dt = Core::GetDT().count();
-			for (auto& elem : colliders)
-			{
-				elem.setup_predict();
-				//Core::GetSystem<DebugRenderer>().Draw(elem._broad_phase, color{ 1,1,0 });
-			}
+
+            for (auto& elem : colliders)
+            {
+                if (!elem._static_cache)
+                    elem.setup_predict();
+            }
+
 
 			for (unsigned i = 0; i < colliders.size(); ++i)
 			{
+				const auto& lcollider = colliders[i];
+				if (!lcollider._enabled_this_frame)
+					continue;
+
+				if (lcollider._static_cache)
+					break;
+
 				for (unsigned j = i + 1; j < colliders.size(); ++j)
 				{
-					const auto& lcollider = colliders[i];
 					const auto& rcollider = colliders[j];
+
+					if (!rcollider._enabled_this_frame)
+						continue;
 
 					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result
 						{
@@ -135,8 +173,8 @@ namespace idk
 								return phys::col_failure{};
 							}
 
-							const auto lshape = calc_shape(lhs, lrigidbody, lcollider);
-							const auto rshape = calc_shape(rhs, rrigidbody, rcollider);
+							const auto lshape = lhs; //calc_shape(lhs, lrigidbody, lcollider);
+							const auto rshape = rhs; //calc_shape(rhs, rrigidbody, rcollider);
 
 							// static collisions
 							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, box>)
@@ -157,7 +195,7 @@ namespace idk
 							else
 								return phys::col_failure{};
 
-						}, lcollider.shape, rcollider.shape);
+						}, lcollider._predicted_shape, rcollider._predicted_shape);
 
 					if (collision)
 					{
@@ -185,17 +223,24 @@ namespace idk
 				if (lcollider.is_trigger || rcollider.is_trigger)
 					continue;
 
+				struct RigidBodyInfo
+				{
+					vec3 velocity = {};
+					real inv_mass = 0.f;
+					RigidBody* ref = nullptr;
+				};
+
 				constexpr auto get_values =
-					[](Handle<RigidBody> rb) -> std::tuple<vec3, real, RigidBody*>
+					[](Handle<RigidBody> rb) -> RigidBodyInfo
 				{
 					if (rb)
 					{
 						auto& ref = *rb;
-						return std::make_tuple(ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.inv_mass, &ref);
+						return { ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.inv_mass, &ref };
 					}
 					else
 					{
-						return std::make_tuple(vec3{}, 0.f, nullptr);
+						return RigidBodyInfo{};
 					}
 				};
 
@@ -232,7 +277,7 @@ namespace idk
 						? frictional_impulse_scalar * tangent
 						: (lcollider.dynamic_friction, rcollider.dynamic_friction) * .5f * frictional_impulse_scalar * tangent;
 
-					if (lrb_ptr)
+					if (lrb_ptr && !lrb_ptr->is_kinematic)
 					{
 						auto& ref_rb = *lrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction_vector;
@@ -240,7 +285,7 @@ namespace idk
 						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
 					}
 
-					if (rrb_ptr)
+					if (rrb_ptr && !rrb_ptr->is_kinematic)
 					{
 						auto& ref_rb = *rrb_ptr;
 						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;
@@ -257,7 +302,11 @@ namespace idk
 		{
 			for (auto& rigidbody : rbs)
 			{
-				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
+				if (!rigidbody.is_kinematic)
+					rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
+				else
+					rigidbody._prev_pos = rigidbody.GetGameObject()->Transform()->GlobalPosition();
+
 				rigidbody.sleep_next_frame = false;
 			}
 
@@ -313,6 +362,7 @@ namespace idk
 
 			col_stay.emplace(pair);
 		}
+		previous_collisions = std::move(collisions);
 		
 		// fire events
 
@@ -334,7 +384,7 @@ namespace idk
 						{
 							auto mono_obj = collider_type->Construct();
 							mono_obj.Assign("handle", rhs.id);
-							thunk->Invoke(mb->GetObject(), lhs.id, mono_obj);
+							thunk->Invoke(mb->GetObject(), mono_obj.Raw());
 						}
 					}
 					// fire rhs events
@@ -347,7 +397,7 @@ namespace idk
 						{
 							auto mono_obj = collider_type->Construct();
 							mono_obj.Assign("handle", lhs.id);
-							thunk->Invoke(mb->GetObject(), rhs.id, mono_obj);
+							thunk->Invoke(mb->GetObject(), mono_obj.Raw());
 						}
 					}
 				}
@@ -355,6 +405,46 @@ namespace idk
 				{
 					// fire collision
 					auto col = all_collisions.find(CollisionPair{ lhs, rhs });
+					IDK_ASSERT(col != all_collisions.end());
+
+
+					auto& result = col->second;
+					{
+						ManagedCollision right_collision
+						{
+							.collider_id = rhs.id, 
+							.normal = result.normal_of_collision, 
+							.contact_pt = result.point_of_collision
+						};
+
+						for (auto& mb : lhs->GetGameObject()->GetComponents<mono::Behavior>())
+						{
+							auto obj_type = mb->GetObject().Type();
+							IDK_ASSERT(obj_type);
+							auto thunk = obj_type->GetThunk(collision_method, 1);
+							if (thunk)
+								thunk->Invoke(mb->GetObject(), right_collision);
+						}
+					}
+
+					// fire rhs events
+					{
+						ManagedCollision left_collision
+						{
+							.collider_id = lhs.id,
+							.normal      = -result.normal_of_collision,
+							.contact_pt  = result.point_of_collision
+						};
+
+						for (auto& mb : rhs->GetGameObject()->GetComponents<mono::Behavior>())
+						{
+							auto obj_type = mb->GetObject().Type();
+							IDK_ASSERT(obj_type);
+							auto thunk = obj_type->GetThunk(collision_method, 1);
+							if (thunk)
+								thunk->Invoke(mb->GetObject(), left_collision);
+						}
+					}
 				}
 			}
 
@@ -364,7 +454,6 @@ namespace idk
 		FireEvent(col_stay, "OnTriggerStay", "OnCollisionStay");
 		FireEvent(col_exit, "OnTriggerExit", "OnCollisionExit");
 
-		previous_collisions = std::move(collisions);
 	}
 
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
@@ -394,6 +483,50 @@ namespace idk
 		collisions.clear();
 	}
 
+	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, int layer_mask, bool hit_triggers)
+	{
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+		vector<RaycastHit> retval;
+
+		for (auto& c : colliders)
+		{
+			if (!(c.GetGameObject()->GetComponent<Layer>()->mask() & layer_mask))
+				continue;
+
+			if (c.is_trigger && hit_triggers == false)
+				continue;
+
+			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
+				{
+					using RShape = std::decay_t<decltype(shape)>;
+
+					const auto rShape = calc_shape(shape, c);
+
+					if constexpr (std::is_same_v<RShape, sphere>)
+						return phys::collide_ray_sphere(
+							r, rShape);
+					else
+						if constexpr (std::is_same_v<RShape, box>)
+							return phys::collide_ray_aabb(
+								r, c.bounds());
+						else
+							return phys::raycast_failure{};
+				}, c.shape);
+
+			if (result)
+				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
+		}
+
+		std::sort(retval.begin(), retval.end(), 
+			[](const RaycastHit& lhs, const RaycastHit& rhs) 
+			{ 
+				return lhs.raycast_succ.distance_to_collision < rhs.raycast_succ.distance_to_collision; 
+			}
+		);
+
+		return retval;
+	}
+
 	bool PhysicsSystem::RayCastAllObj(const ray& r, vector<Handle<GameObject>>& collidedList,vector<phys::raycast_result>& ray_resultList)
 	{
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
@@ -405,7 +538,6 @@ namespace idk
 		};
 		bool foundRes = false;
 		
-		std::cout << "\n";
 		for (auto& c : colliders)
 		{
 			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result
@@ -452,7 +584,6 @@ namespace idk
 		};
 		bool foundRes = false;
 
-		std::cout << "\n";
 		for (auto& c : colliders)
 		{
 			const auto result = std::visit([&](const auto& shape) -> phys::raycast_result

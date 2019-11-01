@@ -3,50 +3,29 @@
 #include "idk.h"
 #include <core/Handle.h>
 #include <res/ResourceHandle.h>
-#include <res/ResourceMeta.h>
-#include <particle/MinMax.h>
 #include <gfx/UniformInstance.h>
-#include <gfx/ShaderGraph_data.h>
 #include <gfx/LightTypes.h>
-#include <anim/AnimationLayer.h>
+#include <gfx/CameraClear.h>
+#include <anim/AnimationState.h>
 #include <phys/collidable_shapes.h>
-#include <prefab/PrefabData.h>
-#include <prefab/PropertyOverride.h>
-
-namespace idk
-{
-	class GameObject;
-	class Mesh;
-    class Prefab;
-	namespace anim
-	{
-		class Animation;
-		class Skeleton;
-	}
-
-	struct DontClear {};
-	using CameraClear_t =std::variant<DontClear, color, RscHandle<CubeMap>>;
-}
+#include <particle/MinMax.h>
 
 namespace idk::reflect
 {
-
 	// add reflected types here... only have to add
-	// types that are used in other reflected types
-	// ie. don't have to add "top-level" reflected types
+	// types that you want the context of in visit.
 	using ReflectedTypes = variant<
-		int
-		, bool
+		bool
 		, char
 		, unsigned char
-        , uint16_t
         , short
+        , uint16_t
+		, int
         , uint32_t
 		, int64_t
 		, uint64_t
 		, float
 		, double
-		, string
 
 		, vec2
 		, vec3
@@ -57,11 +36,13 @@ namespace idk::reflect
 		, color
         , rad
 
-		// game objects
-		, Handle<GameObject>
-		, Guid
+        , string
+        , Guid
 
-		// graphics
+        // handles
+		, Handle<GameObject>
+
+		// resource handles
 		, RscHandle<Mesh>
 		, RscHandle<Material>
 		, RscHandle<MaterialInstance>
@@ -69,50 +50,25 @@ namespace idk::reflect
 		, RscHandle<CubeMap>
         , RscHandle<RenderTarget>
         , RscHandle<ShaderProgram>
-		, UniformInstanceValue
-		, hash_table<string, UniformInstance>
-		, hash_table<string, UniformInstanceValue>
-		, CameraClear_t // camera clear
-		, LightVariant
-        // shadergraph
-        , hash_table<Guid, shadergraph::Node>
-        , vector<shadergraph::Slot>
-        , vector<shadergraph::Link>
-        , vector<shadergraph::Parameter>
+        , RscHandle<anim::Skeleton>
+        , RscHandle<anim::Animation>
+        , RscHandle<Prefab>
 
-		// physics
+        // variants
+		, RscHandle<FontAtlas>
+		, UniformInstance
+		, UniformInstanceValue
+		, CameraClear
+		, LightVariant
+        , variant<BasicAnimationState, BlendTree>
 		, CollidableShapes
 
-		// anim
-		, RscHandle<anim::Skeleton>
-		, RscHandle<anim::Animation>
-		, std::variant<BasicAnimationState, BlendTree>
-		, hash_table<string, AnimationState>
-		, hash_table<string, size_t>
-		, vector<AnimationLayer>
-		, std::array<bool, 100>
-		, std::array<string, 2>
-		, vector<mat4>
-		
-        // particle system
+        // macro enums
+        , MinMaxMode
+
+        // others
         , MinMax<float>
         , MinMax<vec3>
         , MinMax<color>
-		
-		// resources
-		, vector<SerializedMeta>
-		, vector<string>
-		, vector<Guid>
-		, hash_table<Guid, string>
-        , vector<reflect::dynamic>
-        , vector<Handle<GameObject>>
-
-		// prefabs
-        , vector<PrefabData>
-        , vector<PropertyOverride>
-        , RscHandle<Prefab>
-
-        // audio
-		, vector<RscHandle<AudioClip>>
 	>;
 }

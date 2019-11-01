@@ -38,6 +38,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <loading/GraphFactory.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
+#include <opengl/resource/OpenGLFontAtlasLoader.h>
 
 // editor setup
 #include <gfx/RenderTarget.h>
@@ -112,6 +113,7 @@ namespace idk
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
+			Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
@@ -255,6 +257,43 @@ namespace idk
 			i->Initialize();
 		}
 
+		Core::GetSystem<SceneManager>().OnSceneChange +=
+			[](RscHandle<Scene> active_scene)
+		{
+			if (auto path = Core::GetResourceManager().GetPath(active_scene))
+				Core::GetSystem<Application>().SetTitle(string{ "idk: " } +string{ *path });
+			else
+				Core::GetSystem<Application>().SetTitle(string{ " idk " });
+		};
+
+		Core::GetSystem<ProjectManager>().OnProjectSaved +=
+			[]()
+		{
+			auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+			if (auto path = Core::GetResourceManager().GetPath(active_scene))
+				Core::GetSystem<Application>().SetTitle(string{ "idk: " } +string{ *path });
+			else
+				Core::GetSystem<Application>().SetTitle(string{ " idk " });
+
+		};
+
+        FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked += [](GenericResourceHandle h)
+        {
+            if (h.index() == BaseResourceID<Scene>)
+            {
+                auto scene = h.AsHandle<Scene>();
+                auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+                if (scene != active_scene)
+                {
+                    if (active_scene)
+                        active_scene->Unload();
+                    Core::GetSystem<SceneManager>().SetActiveScene(scene);
+                    scene->Load();
+
+                    Core::GetSystem<IDE>().ClearScene();
+                }
+            }
+        };
 	}
 
 	void IDE::LateInit()
@@ -268,6 +307,7 @@ namespace idk
         }
 
 		SetupEditorScene();
+		
 	}
 
 	void IDE::Shutdown()

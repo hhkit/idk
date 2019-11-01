@@ -87,6 +87,9 @@ namespace idk {
 
     GenericResourceHandle IGE_ProjectWindow::getOrLoadFirstAsset(PathHandle path)
     {
+		if(!Core::GetResourceManager().IsExtensionSupported(path.GetExtension()))
+			return RscHandle<Texture>();
+
         auto get_res = Core::GetResourceManager().Get(path);
         if (get_res && get_res->Count())
             return get_res->GetAll()[0];
@@ -102,7 +105,11 @@ namespace idk {
 
     string IGE_ProjectWindow::unique_new_mount_path(string_view name, string_view ext)
     {
-        string stripped_path{ current_dir.GetMountPath() };
+        return unique_new_mount_path(name, ext, current_dir);
+    }
+    string IGE_ProjectWindow::unique_new_mount_path(string_view name, string_view ext, PathHandle dir)
+    {
+        string stripped_path{ dir.GetMountPath() };
         stripped_path += '/';
         stripped_path += name;
 
@@ -148,7 +155,7 @@ namespace idk {
 				}
 				if (ImGui::MenuItem("Render Target"))
 				{
-					auto path = unique_new_mount_path("RenderTarget", RenderTarget::ext);
+					auto path = unique_new_mount_path("NewRenderTarget", RenderTarget::ext);
 					auto res = Core::GetResourceManager().Create<RenderTarget>(path);
 					if (res && *res)
 						Core::GetResourceManager().Save(*res);
@@ -160,10 +167,7 @@ namespace idk {
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
             auto w = std::fminf(250.0f, window_size.x - ImGui::GetCursorPosX() - 50.0f);
             ImGui::SetCursorPosX(window_size.x - w - 50.0f);
-            if (ImGui::InputTextEx("##ToolBarSearchBar", NULL, searchBarChar, 512, ImVec2{ w, ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None))
-            {
-                //Do something
-            }
+            filter.Draw("##_search", w);
             ImGui::PopStyleVar();
         }
         ImGui::EndMenuBar();
@@ -259,21 +263,52 @@ namespace idk {
         }
         
         const auto content_region = ImGui::GetContentRegionAvail();
-        const float icon_sz = 64.0f;
         auto spacing = ImGui::GetStyle().ItemSpacing;
-        const int icons_per_row = static_cast<int>((content_region.x - spacing.x) / (icon_sz + spacing.x));
+        const int icons_per_row = static_cast<int>((content_region.x - spacing.x) / (icon_size + spacing.x));
 
         // if more icons than what can fit in a row, justify it
         if (icons_per_row < current_dir.GetEntries().size())
-            spacing.x = (content_region.x - icons_per_row * icon_sz) / (icons_per_row + 1);
+            spacing.x = (content_region.x - icons_per_row * icon_size) / (icons_per_row + 1);
 
         ImGui::SetCursorPosX(spacing.x);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + spacing.y);
 
         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
+        if (filter.IsActive())
+        {
+            auto vec = current_dir.GetEntries(FS_FILTERS::RECURSE_DIRS | FS_FILTERS::DIR | FS_FILTERS::FILE);
+            vec.erase(std::remove_if(vec.begin(), vec.end(),
+                [&filter = filter](PathHandle p) { return !filter.PassFilter(p.GetFileName().data()); }), vec.end());
+            draw_contents(vec, spacing, icons_per_row);
+        }
+        else
+            draw_contents(current_dir.GetEntries(), spacing, icons_per_row);
+
+        ImGui::PopFont();
+
+		ImGui::EndChild();
+
+        // footer
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, menu_bar_col);
+        ImGui::BeginChild("footer", ImVec2(0, line_height));
+        ImGui::SetCursorPosX(2.0f);
+        if (selected_path)
+        {
+            string str = selected_path.GetMountPath().data() + 1;
+            str[0] = 'A';
+            ImGui::Text(str.c_str());
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+
+
+	}
+
+    void IGE_ProjectWindow::draw_contents(const vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row)
+    {
         int col = 0;
-        for (const auto& path : current_dir.GetEntries())
+        for (const auto& path : paths)
         {
             const auto ext = path.GetExtension();
             if (ext == ".meta")
@@ -284,7 +319,7 @@ namespace idk {
             string name{ stem };
             auto label = name;
             auto label_sz = ImGui::CalcTextSize(label.c_str());
-            while (label_sz.x > icon_sz)
+            while (label_sz.x > icon_size)
             {
                 // hello world => hello w...
                 label.pop_back(); label.pop_back(); label.pop_back(); label.pop_back();
@@ -297,7 +332,7 @@ namespace idk {
 
             { // preview image / icon
                 void* id = 0;
-                vec2 sz{ icon_sz, icon_sz };
+                vec2 sz{ icon_size, icon_size };
                 ImVec4 tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
                 ImVec4 selected_tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered);
 
@@ -348,18 +383,18 @@ namespace idk {
                 }
 
                 auto cursorpos = ImGui::GetCursorPos();
-                auto offset = (ImVec2(icon_sz, icon_sz) - sz) * 0.5f;
+                auto offset = (ImVec2(icon_size, icon_size) - sz) * 0.5f;
                 ImGui::SetCursorPos(cursorpos + offset);
                 if (id)
                     ImGui::Image(id, sz, ImVec2(0, 0), ImVec2(1, 1), selected_path == path ? selected_tint : tint);
                 else
                     ImGui::InvisibleButton("preview", sz);
-                ImGui::SetCursorPos(cursorpos + ImVec2(0, icon_sz + ImGui::GetStyle().ItemSpacing.y));
+                ImGui::SetCursorPos(cursorpos + ImVec2(0, icon_size + ImGui::GetStyle().ItemSpacing.y));
 
                 // todo: open arrow for bundle
             }
 
-            ImVec2 text_frame_sz{ icon_sz, ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2 };
+            ImVec2 text_frame_sz{ icon_size, ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2 };
 
             if (selected_path == path)
             {
@@ -367,7 +402,7 @@ namespace idk {
 
                 if (renaming_selected_asset)
                 {
-                    ImGui::SetNextItemWidth(icon_sz);
+                    ImGui::SetNextItemWidth(icon_size);
                     if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         name = buf;
@@ -412,7 +447,7 @@ namespace idk {
 
                     ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
 
-                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_size - label_sz.x) * 0.5f); // center text
                     ImGui::Text(label.c_str());
                 }
             }
@@ -421,7 +456,7 @@ namespace idk {
                 auto cursor_y = ImGui::GetCursorPosY();
                 ImGui::Dummy(text_frame_sz);
                 ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_sz - label_sz.x) * 0.5f); // center text
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (icon_size - label_sz.x) * 0.5f); // center text
                 ImGui::Text(label.c_str());
             }
 
@@ -454,11 +489,8 @@ namespace idk {
                             PathHandle old_path_handle = *res_path;
                             fs::path old_path = old_path_handle.GetFullPath();
 
-                            auto _curr_dir = current_dir;
-                            current_dir = path; // unique_new_mount_path uses current_dir
                             fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(
-                                unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension()));
-
+                                unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension(), path));
                             fs::rename(old_path, new_path);
 
                             // move meta file as well
@@ -468,8 +500,6 @@ namespace idk {
                                 new_path += ".meta";
                                 fs::rename(old_path, new_path);
                             }
-
-                            current_dir = _curr_dir;
                         }
                     }
                     auto get_res = Core::GetResourceManager().Get(path);
@@ -506,12 +536,15 @@ namespace idk {
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && !renaming_selected_asset)
             {
                 if (path.IsDir())
+                {
                     current_dir = path;
+                    filter.Clear();
+                }
                 else
                     OnAssetDoubleClicked.Fire(selected_assets[0]);
             }
 
-            if(ImGui::BeginPopupContextItem(path.GetMountPath().data()))
+            if (ImGui::BeginPopupContextItem(path.GetMountPath().data()))
             {
                 if (path.GetExtension() == shadergraph::Graph::ext)
                 {
@@ -570,25 +603,6 @@ namespace idk {
             }
 
         } // for each paths in dir
-
-        ImGui::PopFont();
-
-		ImGui::EndChild();
-
-        // footer
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, menu_bar_col);
-        ImGui::BeginChild("footer", ImVec2(0, line_height));
-        ImGui::SetCursorPosX(2.0f);
-        if (selected_path)
-        {
-            string str = selected_path.GetMountPath().data() + 1;
-            str[0] = 'A';
-            ImGui::Text(str.c_str());
-        }
-        ImGui::EndChild();
-        ImGui::PopStyleColor();
-
-
-	}
+    }
 
 }

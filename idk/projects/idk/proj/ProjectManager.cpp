@@ -73,6 +73,7 @@ namespace idk
 
     void ProjectManager::SaveProject()
     {
+		OnProjectSaved.Fire();
     }
 
     template<typename T>

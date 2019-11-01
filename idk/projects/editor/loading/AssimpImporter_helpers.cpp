@@ -104,7 +104,7 @@ namespace idk::ai_helpers
 		// Find the skeleton root
 		if (scene.has_skeleton)
 		{
-			scene.bone_root = FindFirstNodeContains("_root_", scene.ai_scene->mRootNode);
+			scene.bone_root = FindFirstNodeContains(AssimpImporter::root_bone_keyword , scene.ai_scene->mRootNode);
 			assert(scene.bone_root != scene.ai_scene->mRootNode);
 			assert(scene.bone_root != nullptr);
 		}
@@ -729,13 +729,10 @@ namespace idk::ai_helpers
 #pragma endregion
 
 #pragma region Building Meshes
-	void WriteToVertices(Scene& scene, const  aiMesh* ai_mesh, OpenGLMeshBuffers& mesh_buffers)
+	OpenGLMeshBuffers WriteToVertices(Scene& scene, const  aiMesh* ai_mesh)
 	{
+		OpenGLMeshBuffers mesh_buffers;
 		
-		// Clear the buffers
-		mesh_buffers.vertices.clear();
-		mesh_buffers.indices.clear();
-
 		// Allocate space for the mesh data
 		mesh_buffers.vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
 		mesh_buffers.indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
@@ -791,8 +788,10 @@ namespace idk::ai_helpers
 				mesh_buffers.vertices[vert_id].AddBoneData(bone_index, weight);
 			}
 		}
+
+		return mesh_buffers;
 	}
-	void BuildMeshOpenGL(Scene& scene, OpenGLMeshBuffers& mesh_buffers, RscHandle<ogl::OpenGLMesh>& mesh_handle)
+	void BuildMeshOpenGL(Scene& scene, const OpenGLMeshBuffers& mesh_buffers, const  RscHandle<ogl::OpenGLMesh>& mesh_handle)
 	{
 		UNREFERENCED_PARAMETER(scene);
 		auto& mesh = *mesh_handle;
@@ -829,36 +828,28 @@ namespace idk::ai_helpers
 				return vtx.pos;
 			});
 
-		mesh_buffers.bounding_volume = ritters(span<vec3>{ritters_buffer});
-		mesh.bounding_volume = mesh_buffers.bounding_volume;
+		sphere bound_volume = ritters(span<vec3>{ritters_buffer});
+		mesh.bounding_volume = bound_volume;
 
 	}
 
-	void WriteToBuffers(Scene& scene, const aiMesh* ai_mesh,
-		vector<vec3>& positions, vector<vec3>& normals, vector<vec2>& uvs, vector<vec3>& tangents, vector<vec3>& bi_tangents, vector<ivec4>& bone_ids, vector<vec4>& bone_weights, vector<unsigned>& indices)
+	VulkanMeshBuffers WriteToBuffers(Scene& scene, const aiMesh* ai_mesh)
 	{
+		VulkanMeshBuffers mesh_buffers;
 		// Clear the buffers
-		positions.clear();
-		normals.clear();
-		uvs.clear();
-		tangents.clear();
-		bi_tangents.clear();
-		bone_ids.clear();
-		bone_weights.clear();
-		indices.clear();
-
+		
 		// Allocating space in the buffers
-		positions.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		normals.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		uvs.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		bi_tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+		mesh_buffers.positions.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+		mesh_buffers.normals.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+		mesh_buffers.uvs.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+		mesh_buffers.tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+		mesh_buffers.bi_tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
 
 		// Bone weights are resized because we need to do subscript directly
-		bone_ids.resize(s_cast<size_t>(ai_mesh->mNumVertices), ivec4{ 0,0,0,0 });
-		bone_weights.resize(s_cast<size_t>(ai_mesh->mNumVertices), vec4{ 0,0,0,0 });
+		mesh_buffers.bone_ids.resize(s_cast<size_t>(ai_mesh->mNumVertices), ivec4{ 0,0,0,0 });
+		mesh_buffers.bone_weights.resize(s_cast<size_t>(ai_mesh->mNumVertices), vec4{ 0,0,0,0 });
 
-		indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
+		mesh_buffers.indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
 
 		const float normalize_scale = scene.file_ext == ".fbx" ? 0.01f : 1.0f;
 
@@ -876,11 +867,11 @@ namespace idk::ai_helpers
 				bi_tangent = ai_mesh->mBitangents[k];
 			}
 
-			positions.emplace_back(vec3{ pos.x, pos.y, pos.z } * normalize_scale);
-			normals.emplace_back(vec3{ normal.x, normal.y, normal.z });
-			uvs.emplace_back(vec2{ text.x, text.y });
-			tangents.emplace_back(vec3{ tangent.x, tangent.y, tangent.z });
-			bi_tangents.emplace_back(vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z });
+			mesh_buffers.positions.emplace_back(vec3{ pos.x, pos.y, pos.z } * normalize_scale);
+			mesh_buffers.normals.emplace_back(vec3{ normal.x, normal.y, normal.z });
+			mesh_buffers.uvs.emplace_back(vec2{ text.x, text.y });
+			mesh_buffers.tangents.emplace_back(vec3{ tangent.x, tangent.y, tangent.z });
+			mesh_buffers.bi_tangents.emplace_back(vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z });
 			// updateBounds(vertices.back().pos, min_pos, max_pos);
 		}
 
@@ -889,9 +880,9 @@ namespace idk::ai_helpers
 		{
 			const aiFace& face = ai_mesh->mFaces[k];
 			assert(face.mNumIndices == 3);
-			indices.push_back(face.mIndices[0]);
-			indices.push_back(face.mIndices[1]);
-			indices.push_back(face.mIndices[2]);
+			mesh_buffers.indices.push_back(face.mIndices[0]);
+			mesh_buffers.indices.push_back(face.mIndices[1]);
+			mesh_buffers.indices.push_back(face.mIndices[2]);
 		}
 
 		// Bone weights
@@ -906,53 +897,58 @@ namespace idk::ai_helpers
 			{
 				const float weight = ai_bone->mWeights[j].mWeight;
 				const unsigned vert_id = ai_bone->mWeights[j].mVertexId;
-				ai_helpers::AddBoneData(bone_index, weight, bone_ids[vert_id], bone_weights[vert_id]);
+				ai_helpers::AddBoneData(bone_index, weight, mesh_buffers.bone_ids[vert_id], mesh_buffers.bone_weights[vert_id]);
 			}
 		}
+		return mesh_buffers;
 	}
-	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle,
-		vector<vec3>& positions, vector<vec3>& normals, vector<vec2>& uvs, vector<vec3>& tangents, vector<vec3>& bi_tangents, vector<ivec4>& bone_ids, vector<vec4>& bone_weights, vector<unsigned>& indices)
+	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, const VulkanMeshBuffers& mesh_buffers)
 	{
 		UNREFERENCED_PARAMETER(scene);
 		hash_table<attrib_index, std::pair<std::shared_ptr<MeshBuffer::Managed>, offset_t>> attribs;
 		{
-			auto& buffer = positions;
+			auto& buffer = mesh_buffers.positions;
 			//Use CreateData to create the buffer, then store the result with the offset.
 			//Since it's a shared ptr, you may share the result of CreateData with multiple attrib buffers
 			attribs[vkn::attrib_index::Position] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		{
-			auto& buffer = normals;
+			auto& buffer = mesh_buffers.normals;
 			attribs[attrib_index::Normal] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		{
-			auto& buffer = uvs;
+			auto& buffer = mesh_buffers.uvs;
 			attribs[attrib_index::UV] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		{
-			auto& buffer = tangents;
+			auto& buffer = mesh_buffers.tangents;
 			attribs[attrib_index::Tangent] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		{
-			auto& buffer = bi_tangents;
+			auto& buffer = mesh_buffers.bi_tangents;
 			attribs[attrib_index::Bitangent] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		{
-			auto& buffer = bone_ids;
+			auto& buffer = mesh_buffers.bone_ids;
 			attribs[attrib_index::BoneID] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 		{
-			auto& buffer = bone_weights;
+			auto& buffer = mesh_buffers.bone_weights;
 			attribs[attrib_index::BoneWeight] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
 		}
 
-		auto& buffer = indices;
+		auto& buffer = mesh_buffers.indices;
 		auto index_buffer = mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) });
 
 		mesh_modder.RegisterAttribs(*mesh_handle, attribs);
-		mesh_modder.SetIndexBuffer32(*mesh_handle, index_buffer, s_cast<uint32_t>(indices.size()));
+		mesh_modder.SetIndexBuffer32(*mesh_handle, index_buffer, s_cast<uint32_t>(mesh_buffers.indices.size()));
 
+		
 		// Compute ritters here
+		span<const vec3> pos{ mesh_buffers.positions };
+		sphere bound_volume = ritters(pos);
+		auto& mesh = *mesh_handle;
+		mesh.bounding_volume = bound_volume;
 	}
 
 #pragma endregion
