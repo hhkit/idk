@@ -765,7 +765,7 @@ namespace idk::vkn
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
-		bool is_deferred = true;
+		bool is_deferred = false;
 
 		auto& view = View();
 		//auto& swapchain = view.Swapchain();
