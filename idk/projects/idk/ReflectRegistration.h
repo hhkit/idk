@@ -481,11 +481,18 @@ REFLECT_END()
 REFLECT_BEGIN(idk::MainModule, "MainModule")
 REFLECT_VARS(duration, looping, prewarm, max_particles,
              start_delay, start_lifetime, start_speed, start_size, start_rotation, start_color,
-             gravity_modifier, in_world_space, play_on_awake)
+             gravity_modifier, in_world_space, play_on_awake, destroy_on_finish)
 REFLECT_END();
 
+REFLECT_BEGIN(idk::EmissionModule::Burst, "EmissionBurst")
+REFLECT_VARS(time, count, cycles, interval, probability)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::EmissionModule::Burst>, "vector<EmissionBurst>")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::EmissionModule, "EmissionModule")
-REFLECT_VARS(enabled, rate_over_time)
+REFLECT_VARS(enabled, rate_over_time, bursts)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::ShapeModule, "ShapeModule")
@@ -499,7 +506,7 @@ REFLECT_BEGIN(idk::MinMax<idk::rad>, "MinMaxRad") REFLECT_VARS(min, max, mode) R
 REFLECT_BEGIN(idk::MinMax<float>, "MinMaxFloat") REFLECT_VARS(min, max, mode) REFLECT_END()
 
 REFLECT_BEGIN(idk::VelocityOverLifetimeModule, "VelocityOverLifetimeModule")
-REFLECT_VARS(enabled, linear)
+REFLECT_VARS(enabled, linear, orbital, offset, radial)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::ColorOverLifetimeModule, "ColorOverLifetimeModule")

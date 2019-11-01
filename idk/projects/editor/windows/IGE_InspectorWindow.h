@@ -33,6 +33,15 @@ namespace idk {
 
 
 	private:
+
+        constexpr static float item_width_ratio = 0.6f;
+
+        bool _debug_mode = false;
+
+        //For when transforms are edited
+        bool			hasChanged = false;
+        void			TransformModifiedCheck();
+
         GenericResourceHandle _displayed_asset{ RscHandle<Texture>() }; // if false, show gameobject(s)
 
         Handle<PrefabInstance> _prefab_inst;
@@ -71,12 +80,6 @@ namespace idk {
 		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
 
         bool displayVal(reflect::dynamic dyn);
-
-        constexpr static float item_width_ratio = 0.6f;
-
-		//For when transforms are edited
-		bool			hasChanged = false; 
-		void			TransformModifiedCheck();
 
 	};
 

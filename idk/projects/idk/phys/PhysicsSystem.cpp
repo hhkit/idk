@@ -39,11 +39,9 @@ namespace idk
         }
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
-			{
-				if (lhs.is_static() && !rhs.is_static())
-					return true;
-				return false;
-			});
+		{
+            return lhs._static_cache < rhs._static_cache;
+		});
 
 		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool

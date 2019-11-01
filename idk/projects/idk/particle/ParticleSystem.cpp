@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ParticleSystem.h"
+#include <core/GameObject.h>
 #include <gfx/RenderObject.h>
 
 namespace idk
@@ -42,7 +43,11 @@ namespace idk
         if (!main.looping && time >= main.duration)
         {
             if (data.num_alive == 0)
+            {
                 Stop();
+                if (main.destroy_on_finish)
+                    GameState::GetGameState().DestroyObject(GetGameObject());
+            }
         }
         else if (emission.enabled)
         {
@@ -63,7 +68,7 @@ namespace idk
             }
         }
 
-        velocity_over_lifetime.Update(*this);
+        velocity_over_lifetime.Update(*this, dt);
         color_over_lifetime.Update(*this);
         size_over_lifetime.Update(*this);
         rotation_over_lifetime.Update(*this, dt);
