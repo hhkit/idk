@@ -416,7 +416,7 @@ namespace idk::mono
 			if (res.size())
 			{
 				auto& first = res.front();
-				if (first.raycast_succ.distance_to_collision > max_dist)
+				if (first.raycast_succ.distance_to_collision < max_dist)
 					return ManagedRaycast{ .valid = true,.collider_id = first.collider.id,.distance = first.raycast_succ.distance_to_collision,.point_of_collision = first.raycast_succ.point_of_collision };
 			}
 

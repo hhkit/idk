@@ -485,13 +485,19 @@ namespace idk
 
 	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, int layer_mask, bool hit_triggers)
 	{
+		Core::GetSystem<DebugRenderer>().Draw(r, color{1,1,0});
+
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 		vector<RaycastHit> retval;
 
 		for (auto& c : colliders)
 		{
-			if (!(c.GetGameObject()->GetComponent<Layer>()->mask() & layer_mask))
-				continue;
+			{
+				auto layer = c.GetGameObject()->GetComponent<Layer>();
+				auto mask = layer ? layer->mask() : 1 << 0;
+				if (!(mask & layer_mask))
+					continue;
+			}
 
 			if (c.is_trigger && hit_triggers == false)
 				continue;
