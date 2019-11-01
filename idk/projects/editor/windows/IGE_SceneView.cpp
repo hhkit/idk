@@ -240,11 +240,14 @@ namespace idk {
 			UpdatePanMouseControl();
 
 		}
+		else {
+			UpdateScrollMouseControl(); //Enable mouse control only if no WASD or Pan is in effect
+
+		}
 
 		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0,0.8f,0,1 }, Core::GetDT());
 
 
-		UpdateScrollMouseControl();
 
 		UpdateGizmoControl();
 
@@ -415,6 +418,18 @@ namespace idk {
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		auto& app_sys = Core::GetSystem<Application>();
+
+		auto scroll = app_sys.GetMouseScroll().y;
+		IDE& editor = Core::GetSystem<IDE>();
+
+		if (scroll > 0) {
+			cam_vel += cam_vel_additive;
+		}
+		else if (scroll < 0) {
+			cam_vel = (cam_vel - cam_vel_additive) < min_cam_vel ? min_cam_vel : (cam_vel - cam_vel_additive);
+		}
+
+
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;

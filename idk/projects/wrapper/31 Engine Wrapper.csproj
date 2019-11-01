@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\Animator.cs" />
+    <Compile Include="Components\AudioSource.cs" />
     <Compile Include="Components\Collider.cs" />
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />

@@ -39,9 +39,9 @@ namespace idk
         }
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
-			{
-				return lhs._static_cache < rhs._static_cache;
-			});
+		{
+            return lhs._static_cache < rhs._static_cache;
+		});
 
 		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool

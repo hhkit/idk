@@ -23,12 +23,23 @@ namespace idk
         float gravity_modifier = 0;
         bool in_world_space = false;
         bool play_on_awake = true;
+        bool destroy_on_finish = false;
     };
 
     struct EmissionModule
     {
+        struct Burst
+        {
+            float time = 0;
+            int count = 30;
+            int cycles = 1;
+            float interval = 0.01f;
+            float probability = 1.0f;
+        };
+
         bool enabled = true;
         float rate_over_time = 10.0f;
+        vector<Burst> bursts;
     };
 
     struct ShapeModule
@@ -47,8 +58,11 @@ namespace idk
     {
         bool enabled = false;
         MinMax<vec3> linear{ vec3{ 0, 0, 0 }, vec3{ 0, 0, 0 } };
+        MinMax<vec3> orbital{ vec3{ 0, 0, 0 }, vec3{ 0, 0, 0 } };
+        MinMax<vec3> offset{ vec3{ 0, 0, 0 }, vec3{ 0, 0, 0 } };
+        MinMax<float> radial{ 0, 0 };
 
-        void Update(ParticleSystem& system);
+        void Update(ParticleSystem& system, float dt);
     };
 
     struct ColorOverLifetimeModule

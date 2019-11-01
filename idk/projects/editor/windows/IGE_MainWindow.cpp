@@ -396,7 +396,7 @@ namespace idk {
 		{
 			if (ImGui::Button("Play", toolButtonSize))
 			{
-				SaveScene();
+				SaveSceneTemporarily();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
@@ -427,7 +427,7 @@ namespace idk {
 			ImGui::SameLine(0, 0);
 			if (ImGui::Button("Stop", toolButtonSize))
 			{
-				ResetScene();
+				RestoreFromTemporaryScene();
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 			}
@@ -435,6 +435,10 @@ namespace idk {
 
 		
 		ImGui::PopStyleVar();
+
+        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
+            ImGui::CalcTextSize("Debug Draw").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
+        ImGui::Checkbox("Debug Draw", &Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera->overlay_debug_draw);
 
 		ImGui::EndChild();
 

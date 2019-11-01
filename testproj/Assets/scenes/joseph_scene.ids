@@ -24,8 +24,24 @@
       width: 5
     shadow_bias: 1.1920929e-07
   - !MonoBehavior 
+    {enabled: 1, script_data: !AnimationTest ~}
+  - !MonoBehavior 
     enabled: 1
-    script_data: !TestShou {i: 0}
+    script_data: !TestyTesty 
+      f: 0
+      go: {id: 0}
+      i: 0
+      i2: 0
+      jump_force: 0
+      movement: {x: 0, y: 0, z: 0}
+      prefab: {guid: 00000000-0000-0000-0000-000000000000}
+      yolo: 0
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !TestShou 
+      f: 0
+      p: {guid: 00000000-0000-0000-0000-000000000000}
+      playerIndex: 0
 - !4295032832 
   - active: 1
   - !Transform 
@@ -101,36 +117,8 @@
         min: {x: 0, y: 0, z: 0}
         mode: Constant
   - !Animator 
-    animation_table: 
-      idle: 
-        enabled: 1
-        loop: 1
-        name: idle
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
-      test: 
-        enabled: 1
-        loop: 1
-        name: test
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: 46dd799a-e4ce-4528-b0fb-63a4a2551212}
-      test2: 
-        enabled: 1
-        loop: 1
-        name: test2
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: 3b5dd648-6f6a-4f4e-9983-bd8515074cd7}
-      walk: 
-        enabled: 1
-        loop: 1
-        name: walk
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: afcdbeaa-e5e1-4a92-9360-abe7b85dde73}
-    layer_table: {Base Layer: 0}
+    animation_table: []
+    layer_table: []
     layers: 
     - blend_type: Override_Blend
       bone_mask: 
@@ -398,7 +386,9 @@
     enabled: 1
     script_data: !Test 
       f: 0
+      go: {id: 0}
       i: 0
+      i2: 0
       jump_force: 0
       movement: {x: 0, y: 0, z: 0}
       prefab: {guid: 00000000-0000-0000-0000-000000000000}

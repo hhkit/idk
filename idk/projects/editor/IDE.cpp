@@ -97,6 +97,11 @@ namespace idk
             recent_path /= ".recent";
             std::ofstream recent_file{ recent_path };
             recent_file << proj_manager.GetProjectFullPath();
+
+			auto tmp_path = _editor_app_data + "/tmp";
+			if (!fs::exists(tmp_path))
+				fs::create_directory(tmp_path);
+			Core::GetSystem<FileSystem>().Mount(tmp_path, "/tmp", false);
         }
 
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
@@ -286,9 +291,9 @@ namespace idk
                 if (scene != active_scene)
                 {
                     if (active_scene)
-                        active_scene->Unload();
+                        active_scene->Deactivate();
                     Core::GetSystem<SceneManager>().SetActiveScene(scene);
-                    scene->Load();
+                    scene->LoadFromResourcePath();
 
                     Core::GetSystem<IDE>().ClearScene();
                 }
@@ -396,6 +401,11 @@ namespace idk
 		Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
 		Core::GetSystem<IDE>().selected_gameObjects.clear();
 		Core::GetSystem<IDE>().selected_matrix.clear();
+	}
+
+	string_view IDE::GetTmpSceneMountPath() const
+	{
+		return "/tmp/tmp_scene.ids";
 	}
 
 	void IDE::RefreshSelectedMatrix()

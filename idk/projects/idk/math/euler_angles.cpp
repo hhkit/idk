@@ -16,7 +16,7 @@ namespace idk
 		z = rad(atan2(q.w * q.z + q.x * q.y, 0.5f - (q.y * q.y + q.z * q.z)));
 	}
 
-	euler_angles::operator quat()
+	euler_angles::operator quat() const
 	{
 		const real cx = cosf(x.value * 0.5f);
 		const real sx = sinf(x.value * 0.5f);
@@ -33,5 +33,22 @@ namespace idk
 			cz * cy * cx + sz * sy * sx
 		};
 	}
+
+    euler_angles::operator mat3() const
+    {
+        const real cx = cosf(x.value);
+        const real sx = sinf(x.value);
+        const real cy = cosf(y.value);
+        const real sy = sinf(y.value);
+        const real cz = cosf(z.value);
+        const real sz = sinf(z.value);
+
+        return mat3 // row order
+        {
+            cy * cz, cz * sx * sy - cx * sz, cx * cz * sy + sx * sz,
+            cy * sz, cx * cz + sx * sy * sz, -cz * sx + cx * sy * sz,
+            -sy, cy * sx, cx * cy
+        };
+    }
 
 }

@@ -605,6 +605,56 @@ namespace idk::mono
 			}
 		BIND_END();
 
+
+		//AudioSource
+		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)
+		{
+			audiosource->Play(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStop", void, Handle<AudioSource> audiosource, int index)
+		{
+			audiosource->Stop(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetVolume", float, Handle<AudioSource> audiosource)
+		{
+			return audiosource->volume;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetVolume", void, Handle<AudioSource> audiosource, float volume)
+		{
+			audiosource->volume = volume;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetPitch", float, Handle<AudioSource> audiosource)
+		{
+			return audiosource->pitch;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetPitch", void, Handle<AudioSource> audiosource, float pitch)
+		{
+			audiosource->pitch = pitch;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetLoop", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->isLoop;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetLoop", void, Handle<AudioSource> audiosource, bool loop)
+		{
+			audiosource->isLoop = loop;
+		}
+		BIND_END();
+
         // Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
@@ -775,7 +825,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonDown(0, s_cast<GamepadButton>(code >> 16));
+					return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
 				else
 					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
 			}
@@ -783,7 +833,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::InputGetKeyUp",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonUp(0, s_cast<GamepadButton>(code >> 16));
+					return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
 				else
 				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
 			}
@@ -791,7 +841,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::InputGetKey",  bool, int code)
 			{
 				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButton(0, s_cast<GamepadButton>(code >> 16));
+					return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
 				else
 				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
 			}

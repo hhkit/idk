@@ -18,6 +18,8 @@
 #include <opengl/program/GLSLLoader.h>
 #include <opengl/program/ProgramFactory.h>
 #include <opengl/system/OpenGLState.h>
+#include <opengl/resource/OpenGLFontAtlasFactory.h>
+#include <opengl/resource/OpenGLFontAtlasLoader.h>
 
 
 #include "OpenGLGraphicsSystem.h"
@@ -203,6 +205,7 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
 		Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLFontAtlasFactory>();
 
 		// register extensions
 		Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
@@ -212,6 +215,7 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
 		Core::GetResourceManager().RegisterLoader<OpenGLRenderTargetLoader>(RenderTarget::ext);
 		Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
+		//Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 	}
 
 	void Win32GraphicsSystem::ConvoluteCubeMap(RscHandle<ogl::OpenGLCubemap> handle)

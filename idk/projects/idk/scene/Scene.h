@@ -42,8 +42,9 @@ namespace idk
 		void               DestroyGameObject(const Handle<GameObject>&);
 
 		bool              Loaded();
-		SceneLoadResult   Load();
-		SceneUnloadResult Unload();
+		SceneLoadResult   LoadFromResourcePath();
+		SceneLoadResult   Activate();
+		SceneUnloadResult Deactivate();
 
 		iterator begin() const;
 		iterator end() const;

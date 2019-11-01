@@ -6,7 +6,9 @@ namespace idk
 	bool OpenScene();
 	void SaveScene();
 	void SaveSceneAs();
-	void ResetScene();
+
+	void SaveSceneTemporarily();
+	void RestoreFromTemporaryScene();
 
 	void HotReloadDLL();
 }
