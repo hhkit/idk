@@ -31,14 +31,11 @@ namespace idk
 		return _loaded;
 	}
 
-	SceneLoadResult Scene::Load()
+	SceneLoadResult Scene::LoadFromResourcePath()
 	{
-		if (_loaded)
-			return SceneLoadResult::Err_SceneAlreadyActive;
-
-		_loaded = true;
-		GameState::GetGameState().ActivateScene(scene_id);
-		Core::GetSystem<SceneManager>()._scenes[scene_id] = GetHandle();
+		auto res = Activate();
+		if (res != SceneLoadResult::Ok)
+			return res;
 
 		auto path = Core::GetResourceManager().GetPath(GetHandle());
 		if (!path)
@@ -49,7 +46,18 @@ namespace idk
 		return SceneLoadResult::Ok;
 	}
 
-	SceneUnloadResult Scene::Unload()
+	SceneLoadResult Scene::Activate()
+	{
+		if (_loaded)
+			return SceneLoadResult::Err_SceneAlreadyActive;
+
+		_loaded = true;
+		GameState::GetGameState().ActivateScene(scene_id);
+		Core::GetSystem<SceneManager>()._scenes[scene_id] = GetHandle();
+		return SceneLoadResult::Ok;
+	}
+
+	SceneUnloadResult Scene::Deactivate()
 	{
 		if (!_loaded)
 			return SceneUnloadResult::Err_SceneAlreadyInactive;

@@ -396,7 +396,7 @@ namespace idk {
 		{
 			if (ImGui::Button("Play", toolButtonSize))
 			{
-				SaveScene();
+				SaveSceneTemporarily();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
@@ -427,7 +427,7 @@ namespace idk {
 			ImGui::SameLine(0, 0);
 			if (ImGui::Button("Stop", toolButtonSize))
 			{
-				ResetScene();
+				RestoreFromTemporaryScene();
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 			}

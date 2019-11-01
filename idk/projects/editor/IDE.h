@@ -54,6 +54,7 @@ namespace idk
 	class IDE : public IEditor
 	{
 	public:
+		
 		IDE();
 
 		void Init() override;
@@ -65,6 +66,7 @@ namespace idk
 		CameraControls& currentCamera();
 
 		void ClearScene();
+		string_view GetTmpSceneMountPath() const;
 
         template <typename T> // move into .inl if there are more template fns
         T* FindWindow()

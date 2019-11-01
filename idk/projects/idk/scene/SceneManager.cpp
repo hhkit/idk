@@ -25,12 +25,12 @@ namespace idk
 		
 		if (_active_scene)
 		{
-			_active_scene->Load();
+			_active_scene->LoadFromResourcePath();
 			OnSceneChange.Fire(_active_scene);
 		}
 
 		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(Scene::prefab);
-		_prefab_scene->Load();
+		_prefab_scene->Activate();
 	}
 
 	void SceneManager::EarlyShutdown()

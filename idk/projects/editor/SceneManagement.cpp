@@ -12,15 +12,17 @@
 #include <gfx/Light.h>
 #include <script/ScriptSystem.h>
 
+#include <util/ioutils.h>
+
 namespace idk
 {
 	void NewScene()
 	{
 		if (Core::GetSystem<SceneManager>().GetActiveScene())
-			Core::GetSystem<SceneManager>().GetActiveScene()->Unload();
+			Core::GetSystem<SceneManager>().GetActiveScene()->Deactivate();
 		Core::GetSystem<SceneManager>().SetActiveScene(Core::GetResourceManager().Create<Scene>());
 		auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-		active_scene->Load();
+		active_scene->LoadFromResourcePath();
 
 		// create default scene objects
 		{
@@ -48,10 +50,10 @@ namespace idk
 			if (hnd != active_scene)
 			{
 				if (active_scene)
-					active_scene->Unload();
+					active_scene->Deactivate();
 
 				Core::GetSystem<SceneManager>().SetActiveScene(hnd);
-				hnd->Load();
+				hnd->LoadFromResourcePath();
 
 				Core::GetSystem<IDE>().ClearScene();
 				return true;
@@ -108,19 +110,32 @@ namespace idk
 			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
 			if (res)
 			{
-				curr_scene->Unload();
+				curr_scene->Deactivate();
 				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
-				Core::GetSystem<SceneManager>().GetActiveScene()->Load();
+				Core::GetSystem<SceneManager>().GetActiveScene()->LoadFromResourcePath();
 			}
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
-	void ResetScene()
+
+	void SaveSceneTemporarily()
 	{
 		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
 		{
-			active_scene->Unload();
-			active_scene->Load();
+			auto stream = Core::GetSystem<FileSystem>().Open(Core::GetSystem<IDE>().GetTmpSceneMountPath(), FS_PERMISSIONS::WRITE);
+			stream << serialize_text(*active_scene);
+		}
+	}
+
+	void RestoreFromTemporaryScene()
+	{
+		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
+		{
+			active_scene->Deactivate();
+			active_scene->Activate();
+			auto stream = Core::GetSystem<FileSystem>().Open(Core::GetSystem<IDE>().GetTmpSceneMountPath(), FS_PERMISSIONS::READ);
+			auto deser = stringify(stream);
+			parse_text(deser, *active_scene);
 			Core::GetSystem<IDE>().ClearScene();
 		}
 	}
@@ -130,17 +145,17 @@ namespace idk
 		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
 		{
 			const auto prefab_scene =Core::GetSystem<SceneManager>().GetPrefabScene();
-			SaveScene();
-			active_scene->Unload();
-			prefab_scene->Unload();
+			SaveSceneTemporarily();
+			active_scene->Deactivate();
+			prefab_scene->Deactivate();
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
 					Core::GetResourceManager().Unload(path);
 
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 
-			active_scene->Load();
-			prefab_scene->Load();
+			RestoreFromTemporaryScene();
+			prefab_scene->LoadFromResourcePath();
 
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
