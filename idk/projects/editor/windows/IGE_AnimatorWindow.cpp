@@ -12,7 +12,7 @@ namespace idk
 	void IGE_AnimatorWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 150.0f,150.0f });
-
+		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	}
 	void IGE_AnimatorWindow::Update()

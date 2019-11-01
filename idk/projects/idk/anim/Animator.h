@@ -24,7 +24,7 @@ namespace idk
 		
 		// Engine Setters
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
-		void RenameAnimation(string_view from, string_view to);
+		bool RenameAnimation(string_view from, string_view to);
 		void RemoveAnimation(string_view name);
 		void AddLayer();
 		
@@ -85,6 +85,7 @@ namespace idk
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> skeleton;
 		hash_table<string, AnimationState> animation_table;
+		vector<string> animation_display_order;
 
 		hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};

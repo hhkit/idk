@@ -188,9 +188,9 @@ namespace idk
 		// Default result should be the bind pose
 		BonePose result = animator._bind_pose[bone_index];
 
-		// Check if the state is enabled
+		// Check if the state is valid
 		auto& anim_state = animator.GetAnimationState(state.name);
-		if (!anim_state.enabled)
+		if (!anim_state.valid)
 		{
 			state.is_stopping = true;
 			return result;
@@ -289,7 +289,7 @@ namespace idk
 			if (layer.curr_state.normalized_time >= 1.0f)
 			{
 				auto& anim_state = animator.GetAnimationState(layer.curr_state.name);
-				if (!anim_state.enabled)
+				if (!anim_state.valid)
 					continue;
 
 				// We don't support blend trees yet
@@ -349,7 +349,7 @@ namespace idk
 			if (layer.curr_state.is_playing)
 			{
 				auto& anim_state = animator.GetAnimationState(layer.curr_state.name);
-				if (!anim_state.enabled)
+				if (!anim_state.valid)
 					continue;
 
 				// We don't support blend trees yet
@@ -364,7 +364,7 @@ namespace idk
 			if (layer.blend_state.is_playing)
 			{
 				auto& anim_state = animator.GetAnimationState(layer.blend_state.name);
-				if (!anim_state.enabled)
+				if (!anim_state.valid)
 					continue;
 
 				// We don't support blend trees yet

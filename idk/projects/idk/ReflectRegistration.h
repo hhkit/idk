@@ -463,7 +463,7 @@ REFLECT_VARS(params, blend_tree_type)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
-REFLECT_VARS(name, enabled, loop, speed, state_data)
+REFLECT_VARS(name, valid, loop, speed, state_data)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
@@ -484,7 +484,7 @@ REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(skeleton, animation_table, layer_table, layers)
+REFLECT_VARS(skeleton, animation_table, animation_display_order, layer_table, layers)
 REFLECT_END()
 
 // PARTICLE SYSTEM

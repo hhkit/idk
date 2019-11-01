@@ -68,6 +68,7 @@ namespace idk
 			AnimationState state{ name, true };
 			state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
 			animation_table.emplace(name, state);
+			animation_display_order.emplace_back(name);
 		}
 		else
 		{
@@ -82,23 +83,56 @@ namespace idk
 			}
 			name += append;
 			animation_table.emplace(name, AnimationState{ name, true });
+			animation_display_order.emplace_back(name);
 		}
 	}
 
-	void Animator::RenameAnimation(string_view from, string_view to)
+	bool Animator::RenameAnimation(string_view from, string_view to)
 	{
-		auto res = animation_table.find(from.data());
+		string from_str{ from };
+		string to_str{ to };
+		auto res = animation_table.find(from_str);
 		if (res == animation_table.end())
 		{
 			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
-			return;
+			return false;
+		}
+
+		auto found_dest = animation_table.find(to_str);
+		if (found_dest != animation_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
+			return false;
 		}
 
 		AnimationState copy{ res->second };
-		copy.name = to;
+		copy.name = to_str;
 
 		animation_table.erase(res);
-		animation_table.emplace(to.data(), copy);
+		animation_table.emplace(to_str, copy);
+
+		// find the corresponding string in the display order and rename it.
+		for (auto& it : animation_display_order)
+		{
+			if (it == from_str)
+			{
+				it = to_str;
+				break;
+			}
+		}
+				
+		for (auto& layer : layers)
+		{
+			if (layer.default_state == from_str)
+			{
+				layer.default_state = to_str;
+				layer.curr_state.name = to_str;
+			}
+			if (layer.curr_state.name == from_str)
+				layer.curr_state.name = to_str;
+		}
+
+		return true;
 	}
 
 	void Animator::AddLayer()
@@ -124,7 +158,8 @@ namespace idk
 
 	void Animator::RemoveAnimation(string_view name)
 	{
-		auto found_clip = animation_table.find(string{ name });
+		string name_str{ name };
+		auto found_clip = animation_table.find(name_str);
 		if (found_clip == animation_table.end())
 			return;
 
@@ -136,6 +171,15 @@ namespace idk
 				layer.default_state = string{};
 		}
 
+		auto end_it = animation_display_order.end();
+		for (auto it = animation_display_order.begin(); it != end_it; ++it)
+		{
+			if (*it == name_str)
+			{
+				animation_display_order.erase(it);
+				break;
+			}
+		}
 		animation_table.erase(found_clip);
 	}
 

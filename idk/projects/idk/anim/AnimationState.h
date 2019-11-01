@@ -29,7 +29,7 @@ namespace idk
 	{
 		string name{};
 		
-		bool enabled = false;
+		bool valid = false;
 		bool loop = true;
 		float speed = 1.0f;
 
