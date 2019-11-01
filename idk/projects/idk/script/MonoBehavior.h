@@ -29,9 +29,9 @@ namespace idk::mono
 		void UpdateCoroutines();
 
 		Behavior() = default;
-		Behavior(const Behavior&);
+		Behavior(const Behavior&) = default;
 		Behavior(Behavior&& rhs) = default;
-		Behavior& operator=(const Behavior&);
+		Behavior& operator=(const Behavior&) = default;
 		Behavior& operator=(Behavior&& rhs) = default;
 		~Behavior() = default;
 	private:
