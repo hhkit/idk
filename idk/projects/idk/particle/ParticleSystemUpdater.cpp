@@ -46,7 +46,9 @@ namespace idk
             if (ps.state >= ParticleSystem::Playing)
             {
                 ps.transform = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+                ps.main.destroy_on_finish = false;
                 ps.Step(dt);
+                ps.main.destroy_on_finish = true;
             }
         }
     }
