@@ -11,6 +11,7 @@ namespace TestAndSeek
         public Vector3 movement;
         public Prefab prefab;
         public GameObject go;
+        public int i2;
 
         private RigidBody rb;
         private TestShou ts;
@@ -38,7 +39,7 @@ namespace TestAndSeek
 
             foreach (var elem in FindObjectsOfType<TestShou>())
             {
-                Debug.Log("I " + i + " am " + elem.i);
+                Debug.Log("I found a TestShou with player index " + elem.playerIndex);
                 //Destroy(elem.gameObject);
             }
         }

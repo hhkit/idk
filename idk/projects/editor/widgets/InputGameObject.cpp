@@ -44,7 +44,7 @@ namespace idk::ImGuidk
         ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, col, false);
 
         string text;
-        if (handle)
+        if (*handle)
             text = (*handle)->Name();
         if (text.empty())
             text = "None";

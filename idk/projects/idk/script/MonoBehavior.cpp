@@ -83,7 +83,7 @@ namespace idk::mono
 				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
-	/*
+	
 	Behavior::Behavior(const Behavior& rhs)
 		: enabled{ rhs.enabled }
 		, _obj{}
@@ -93,6 +93,7 @@ namespace idk::mono
 			auto clone_method = type->GetMethod("Clone");
 			IDK_ASSERT(clone_method.index() != 2);
 			_obj = ManagedObject{ Invoke(clone_method, rhs._obj) };
+			IDK_ASSERT(_obj.Raw());
 		}
 	}
 
@@ -102,9 +103,9 @@ namespace idk::mono
 		{
 			auto clone_method = type->GetMethod("Clone");
 			auto new_obj = ManagedObject{ Invoke(clone_method, rhs._obj) };
-			DisposeMonoObject();
 			enabled = rhs.enabled;
 			_obj = new_obj;
+			IDK_ASSERT(_obj.Raw());
 		}
 		else
 		{
@@ -114,5 +115,5 @@ namespace idk::mono
 
 		return *this;
 	}
-	*/
+	
 }

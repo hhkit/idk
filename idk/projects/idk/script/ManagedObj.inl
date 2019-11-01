@@ -222,14 +222,16 @@ namespace idk::mono
 							auto reflect = reflect::dynamic{ new_val };
 							reflect.visit(functor);
 						}
-						last_children = 1;
+						last_children = 0;
 
 						if (new_val != old_val)
 						{
 							if (new_val.id)
 							{
-								auto insert_val = handle_klass->ConstructTemporary();
-								mono_field_set_value(insert_val, handle_field, &new_val.id);
+								auto insert_val = mono_object_new(mono_domain_get(), handle_klass->Raw());
+								auto ctor = mono_class_get_method_from_name(handle_klass->Raw(), ".ctor", 1);
+								void* args[] = { &new_val.id };
+								mono_runtime_invoke(ctor, insert_val, args, nullptr);
 								mono_field_set_value(Raw(), field, insert_val);
 							}
 							else

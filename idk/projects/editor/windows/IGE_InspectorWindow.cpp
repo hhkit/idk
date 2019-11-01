@@ -1335,6 +1335,10 @@ namespace idk {
             {
                 changed |= ImGuidk::InputResource("", &val);
             }
+			else if constexpr (std::is_same_v<T, Handle<GameObject>>)
+			{
+				changed |= ImGuidk::InputGameObject("", &val);
+			}
             else if constexpr (is_macro_enum_v<T>)
             {
                 changed |= ImGuidk::EnumCombo("", &val);
