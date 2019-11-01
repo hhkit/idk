@@ -26,9 +26,11 @@ namespace idk::reflect::detail
 	{
 #if !defined(_MSC_VER) || _MSC_VER >= 1920
 		sv.remove_prefix(sv.find("pretty_function<") + sizeof("pretty_function<") - 1);
-		if (sv.find("class") != std::string_view::npos)
+        const auto class_pos = sv.find("class");
+        const auto struct_pos = sv.find("struct");
+		if (class_pos < struct_pos && class_pos != std::string_view::npos)
 			sv.remove_prefix(sv.find("class") + sizeof("class"));
-		else if (sv.find("struct") != std::string_view::npos)
+		else if (struct_pos < class_pos && struct_pos != std::string_view::npos)
 			sv.remove_prefix(sv.find("struct") + sizeof("struct"));
 		sv.remove_suffix(sizeof(">(void)") - 1);
 
