@@ -79,7 +79,10 @@ namespace idk {
         template<> void DisplayAsset(RscHandle<Texture> texture);
 		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
 
-        bool displayVal(reflect::dynamic dyn);
+        // when curr property is key, draws using CustomDrawFn
+        using CustomDrawFn = bool(*)(const reflect::dynamic& dyn);
+        using InjectDrawTable = hash_table<string_view, CustomDrawFn>;
+        bool displayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
 
 	};
 
