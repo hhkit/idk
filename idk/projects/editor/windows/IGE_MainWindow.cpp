@@ -436,6 +436,10 @@ namespace idk {
 		
 		ImGui::PopStyleVar();
 
+        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
+            ImGui::CalcTextSize("Debug Draw").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
+        ImGui::Checkbox("Debug Draw", &Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera->overlay_debug_draw);
+
 		ImGui::EndChild();
 
 	}

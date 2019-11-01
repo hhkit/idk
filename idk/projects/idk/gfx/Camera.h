@@ -30,7 +30,7 @@ namespace idk
 		bool is_orthographic = false;
 		real orthographic_size = 1.f;
 
-		bool overlay_debug_draw = true;
+		bool overlay_debug_draw = false;
 		bool is_scene_camera = false;
 
 		CameraClear clear;

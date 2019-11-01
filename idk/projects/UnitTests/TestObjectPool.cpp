@@ -90,45 +90,49 @@ TEST(ObjectPool, TestObjectDefrag)
 	auto obj4 = op.Create(0);
 	auto obj5 = op.Create(0);
 
+
+	auto print_handle = [](GenericHandle id)
+	{
+		std::cout << "{ s:" << (int) id.scene << " g:" << (int) id.gen << " i:" << (int)id.index << " t:" << (int)id.type << " }";
+	};
+
 	auto print_all = [&]()
 	{
-		std::cout << "handles: ";
-		std::cout << obj1.id << ' ';
-		std::cout << obj2.id << ' ';
-		std::cout << obj3.id << ' ';
-		std::cout << obj4.id << ' ';
-		std::cout << obj5.id << '\n';
-		std::cout << "objs: ";
-		std::cout << op.Get(obj1)->GetHandle().id << ' ';
-		std::cout << op.Get(obj2)->GetHandle().id << ' ';
-		std::cout << op.Get(obj3)->GetHandle().id << ' ';
-		std::cout << op.Get(obj4)->GetHandle().id << ' ';
-		std::cout << op.Get(obj5)->GetHandle().id << '\n';
+		for (auto& elem : op.GetSpan())
+			print_handle(elem.GetHandle());
+		std::cout << "\n";
 	};
 
 	for (auto& elem : op.GetSpan())
 		std::cout << elem.GetHandle().id << ' ';
+
+	op.Destroy(obj2);
+	op.Destroy(obj3);
+	op.Create(0);
+	op.Create(0);
 	std::cout << '\n';
-	print_all();
 	// reverse
-	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().id > rhs.GetHandle().id; }) << '\n';
+	print_all();
+	std::cout << "test sort\n";
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen > rhs.GetHandle().gen; }) << '\n';
+	print_all();
+	std::cout << "test stability\n";
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen > rhs.GetHandle().gen; }) << '\n';
+	print_all();
 
-	for (auto& elem : op.GetSpan())
-		std::cout << elem.GetHandle().id << ' ';
+
+	op.Destroy(obj2);
+	op.Destroy(obj3);
+	op.Create(0);
+	op.Create(0);
+
 	std::cout << '\n';
 	print_all();
 
-	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().id > rhs.GetHandle().id; }) << '\n';
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen > rhs.GetHandle().gen; }) << '\n';
 
-	for (auto& elem : op.GetSpan())
-		std::cout << elem.GetHandle().id << ' ';
-	std::cout << '\n';
 	print_all();
-
-	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().id < rhs.GetHandle().id; }) << '\n';
-
-	for (auto& elem : op.GetSpan())
-		std::cout << elem.GetHandle().id << ' ';
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen < rhs.GetHandle().gen; }) << '\n';
 	std::cout << '\n';
 	print_all();
 }

@@ -39,11 +39,9 @@ namespace idk
         }
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
-			{
-				if (lhs.is_static() && !rhs.is_static())
-					return true;
-				return false;
-			});
+		{
+            return lhs._static_cache < rhs._static_cache;
+		});
 
 		// helper functions
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
@@ -141,14 +139,14 @@ namespace idk
 				if (!lcollider._enabled_this_frame)
 					continue;
 
+				if (lcollider._static_cache)
+					break;
+
 				for (unsigned j = i + 1; j < colliders.size(); ++j)
 				{
 					const auto& rcollider = colliders[j];
 
 					if (!rcollider._enabled_this_frame)
-						continue;
-
-					if (lcollider._static_cache && rcollider._static_cache)
 						continue;
 
 					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result
