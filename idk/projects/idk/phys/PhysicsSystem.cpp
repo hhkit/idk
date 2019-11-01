@@ -35,9 +35,7 @@ namespace idk
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
 			{
-				if (lhs.is_static() && !rhs.is_static())
-					return true;
-				return false;
+				return lhs.is_static() < rhs.is_static();
 			});
 
 		// helper functions

@@ -83,7 +83,7 @@ namespace idk::mono
 				std::get<ManagedThunk>(method).Invoke(_obj.Raw());
 		}
 	}
-	/*
+	
 	Behavior::Behavior(const Behavior& rhs)
 		: enabled{ rhs.enabled }
 		, _obj{}
@@ -113,8 +113,5 @@ namespace idk::mono
 		}
 
 		return *this;
-		// TODO: insert return statement here
 	}
-	*/
-
 }

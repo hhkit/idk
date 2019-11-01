@@ -29,8 +29,11 @@ namespace idk::mono
 		void UpdateCoroutines();
 
 		Behavior() = default;
-		//Behavior(const Behavior&);
-		//Behavior& operator=(const Behavior&);
+		Behavior(const Behavior&);
+		Behavior(Behavior&& rhs) = default;
+		Behavior& operator=(const Behavior&);
+		Behavior& operator=(Behavior&& rhs) = default;
+		~Behavior() = default;
 	private:
 		ManagedObject _obj;
 		string        _serialized;

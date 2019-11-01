@@ -50,7 +50,7 @@ if (klass == MONO_CLASS)                                              \
 	auto resource_klass = envi.Type(#RES_TYPE);																		\
 	if (klass == resource_klass->Raw()) 																			\
 	{																												\
-		auto id_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
+		auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
 		auto old_val = [&]()->RscHandle<RES_TYPE>																	\
 		{																											\
 			if (obj == nullptr)																						\
@@ -58,7 +58,7 @@ if (klass == MONO_CLASS)                                              \
 			else																									\
 			{																										\
 				return RscHandle<RES_TYPE>{																			\
-					*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))\
+					*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), handle_field, obj)))\
 				};																									\
 			}																										\
 		}();																										\
@@ -76,7 +76,7 @@ if (klass == MONO_CLASS)                                              \
 		if (new_val != old_val)																						\
 		{																											\
 			auto insert_val = resource_klass->ConstructTemporary();													\
-			mono_field_set_value(insert_val, id_field, &new_val.guid);												\
+			mono_field_set_value(insert_val, handle_field, &new_val.guid);												\
 			mono_field_set_value(Raw(), field, insert_val);															\
 		}																											\
 		continue;																									\
@@ -87,7 +87,7 @@ if (klass == MONO_CLASS)                                              \
 	auto resource_klass = envi.Type(#RES_TYPE);																		\
 	if (klass == resource_klass->Raw()) 																			\
 	{																												\
-		auto id_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
+		auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
 		auto old_val = [&]()->RscHandle<RES_TYPE>																	\
 		{																											\
 			if (obj == nullptr)																						\
@@ -95,7 +95,7 @@ if (klass == MONO_CLASS)                                              \
 			else																									\
 			{																										\
 				return RscHandle<RES_TYPE>{																			\
-					*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))\
+					*s_cast<Guid*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), handle_field, obj)))\
 				};																									\
 			}																										\
 		}();																										\
@@ -180,7 +180,7 @@ namespace idk::mono
 				auto handle_klass = envi.Type("GameObject");
 				if (klass == handle_klass->Raw())
 				{
-					auto id_field = mono_class_get_field_from_name(handle_klass->Raw(), "handle");
+					auto handle_field = mono_class_get_field_from_name(handle_klass->Raw(), "handle");
 					auto old_val = [&]() -> Handle<H_Type>
 					{
 						if (obj == nullptr)
@@ -188,7 +188,7 @@ namespace idk::mono
 						else
 						{
 							return Handle<H_Type>{
-								*s_cast<uint64_t*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), id_field, obj)))
+								*s_cast<uint64_t*>(mono_object_unbox(mono_field_get_value_object(mono_domain_get(), handle_field, obj)))
 							};
 						}
 					}();
@@ -206,9 +206,14 @@ namespace idk::mono
 
 					if (new_val != old_val)
 					{
-						auto insert_val = handle_klass->ConstructTemporary();
-						mono_field_set_value(insert_val, id_field, &new_val.id);
-						mono_field_set_value(Raw(), field, insert_val);
+						if (new_val)
+						{
+							auto insert_val = handle_klass->ConstructTemporary();
+							mono_field_set_value(insert_val, handle_field, &new_val.id);
+							mono_field_set_value(Raw(), field, insert_val);
+						}
+						else
+							mono_field_set_value(Raw(), field, nullptr);
 					}
 
 					continue;

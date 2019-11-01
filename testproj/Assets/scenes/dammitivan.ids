@@ -106,8 +106,11 @@
     enabled: 1
     script_data: !Test 
       f: 0
+      go: {id: 0}
       i: 0
+      jump_force: 0
       movement: {x: 0, y: 0, z: 0}
+      prefab: {guid: 00000000-0000-0000-0000-000000000000}
 - !12884967424 
   - active: 1
   - !Transform 

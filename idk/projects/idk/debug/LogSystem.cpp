@@ -22,10 +22,12 @@ namespace idk
 	{
 		if (!Core::IsRunning())
 		{
+			int i = 0;
 			for (auto& handle : log_files)
 			{
 				handle.stream.close();
 				std::remove(handle.filepath.data());
+				LogSingleton::Get().SignalFor(s_cast<LogPool>(i++)) -= handle.signal_id;
 			}
 		}
 	}
@@ -52,8 +54,8 @@ namespace idk
 			auto& stream = loghandle.stream;
 			loghandle.filepath = logroot + "_" + std::to_string(i) + "_" + string{ names[i] } + ".txt";
 			stream.open(loghandle.filepath);
-
-			LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
+			if (stream)
+			loghandle.signal_id = LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
 				[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
 			{
 				char buf[512];
