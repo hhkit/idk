@@ -2,11 +2,16 @@
 #include "pch.h"
 #include <res/FileLoader.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H 
+#include <opengl/resource/OpenGLFontAtlas.h>
+
 
 namespace idk {
 	
+	namespace ogl {
+		ResourceBundle GenerateFontAtlas(PathHandle path_to_resource, RscHandle<OpenGLFontAtlas> font_handle);
+		unique_ptr<FontAtlas> GenerateFontAtlas(PathHandle path_to_resource);
+	}
+
 	class OpenGLFontAtlasLoader
 		: public IFileLoader
 	{
@@ -14,7 +19,5 @@ namespace idk {
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 
 	private:
-
-		FT_Library ft;
 	};
 }

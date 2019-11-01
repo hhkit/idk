@@ -15,5 +15,6 @@ namespace idk {
 		RscHandle<FontAtlas> fontAtlas;
 		//RscHandle<Mesh> fontMesh;
 		mat4 transform;
+		int n_size{0};
 	};
 }

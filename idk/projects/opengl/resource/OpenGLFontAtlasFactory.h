@@ -1,5 +1,4 @@
 #pragma once
-#include <opengl/resource/OpenGLFontAtlas.h>
 #include <res/ResourceFactory.h>
 #include <gfx/FontAtlasFactory.h>
 

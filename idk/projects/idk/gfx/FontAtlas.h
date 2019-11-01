@@ -88,17 +88,15 @@ namespace idk {
 			//advance
 			vec2 advance;
 
-			//Size of glyph
-			
+			//Size of glyph	
 			//x = width, y = rows
 			vec2 glyph_size;
 
-			//Bearing
-			
+			//Bearing		
 			//x = left, y = top
 			vec2 bearing;
 
-			real tx; // x offset of glyph in texture coordinates
+			vec2 tex_offset; // x offset of glyph in texture coordinates
 		} c[128];
 
 		FontAtlas() = default;

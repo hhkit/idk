@@ -23,18 +23,3 @@
         r: 1
       width: 5
     shadow_bias: 1.1920929e-07
-- !8590000128 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: -2.879212, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 7.42, y: 0.5163647, z: 7.42}
-  - !Name 
-    name: floor
-  - !MonoBehavior 
-    {enabled: 1, script_data: !AnimationTest ~}

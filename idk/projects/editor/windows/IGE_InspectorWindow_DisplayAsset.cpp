@@ -45,7 +45,7 @@ namespace idk
             using ResT = typename decltype(h)::Resource;
             auto path = Core::GetResourceManager().GetPath(h);
 
-            ImGui::Text(format_name(reflect::get_type<ResT>().name()).c_str());
+            ImGui::Text(format_name(reflect::get_type<decltype(h)>().name()).c_str());
             ImGui::Text(string(handle.guid()).c_str());
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
