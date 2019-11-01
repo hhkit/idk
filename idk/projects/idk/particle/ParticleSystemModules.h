@@ -35,11 +35,17 @@ namespace idk
             int cycles = 1;
             float interval = 0.01f;
             float probability = 1.0f;
+
+            int cycle_counter = 0;
+            float clock = 0;
         };
 
         bool enabled = true;
         float rate_over_time = 10.0f;
         vector<Burst> bursts;
+        float clock = 0;
+
+        void Update(ParticleSystem& system, float dt);
     };
 
     struct ShapeModule
@@ -63,6 +69,7 @@ namespace idk
         MinMax<float> radial{ 0, 0 };
 
         void Update(ParticleSystem& system, float dt);
+        void Update(ParticleSystem& system, float dt, int i);
     };
 
     struct ColorOverLifetimeModule
@@ -87,6 +94,7 @@ namespace idk
         MinMax<rad> angular_velocity{ deg{ 45.0f }, deg{ 45.0f } };
 
         void Update(ParticleSystem& system, float dt);
+        void Update(ParticleSystem& system, float dt, int i);
     };
 
     struct RendererModule
