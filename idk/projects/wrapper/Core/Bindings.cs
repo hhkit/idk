@@ -210,6 +210,36 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorHasState(ulong id, string name);
 
+
+
+        /*
+         * AudioSource
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourcePlay(ulong id, int index = 0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceStop(ulong id, int index = 0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSourceGetVolume(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceSetVolume(ulong id, float volume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSourceGetPitch(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceSetPitch(ulong id, float pitch);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSourceGetLoop(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceSetLoop(ulong id, bool loop);
+
+
         /*
          * Collider
          */
