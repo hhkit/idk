@@ -765,6 +765,8 @@ namespace idk::vkn
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
+		bool is_deferred = true;
+
 		auto& view = View();
 		//auto& swapchain = view.Swapchain();
 		auto& camera = state.camera;
@@ -772,38 +774,45 @@ namespace idk::vkn
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
+		cmd_buffer.begin(begin_info, dispatcher);
+
 		VulkanPipeline* prev_pipeline = nullptr;
 		vector<RscHandle<ShaderProgram>> shaders;
 		auto& deferred_pass = rs.deferred_pass;
-		deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
-		deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
-		deferred_pass.Init(state.camera.render_target->Size());
-		deferred_pass.pipeline_manager(GetPipelineManager());
-		deferred_pass.frame_index(_current_frame_index);
+		if (is_deferred)
+		{
 
-		cmd_buffer.begin(begin_info, dispatcher);
+			deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
+			deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
+			deferred_pass.Init(state.camera.render_target->Size());
+			deferred_pass.pipeline_manager(GetPipelineManager());
+			deferred_pass.frame_index(_current_frame_index);
+			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
 
-		//Preprocess MeshRender's uniforms
-		deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
+		}
+
 		auto rtd = camera.render_target->GetDepthBuffer().as<VknTexture>().Image();
 		auto gd = deferred_pass.GBuffer().gbuffer->DepthAttachment().buffer.as<VknTexture>().Image();
 		
 		
 
+		//Preprocess MeshRender's uniforms
 		//TODO make ProcessRoUniforms only render forward pass stuff.
-		auto&& the_interface = //PipelineThingy{};/*
+		auto&& the_interface = (is_deferred)?PipelineThingy{}:
 			ProcessRoUniforms(state, rs.ubo_manager);
-		the_interface.GenerateDS(rs.dpools, false);//*/
+		if(!is_deferred)
+			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
 
-		auto deferred_interface = rs.deferred_pass.ProcessDrawCalls(state, rs);
-		deferred_interface.GenerateDS(rs.dpools, false);
-		rs.ubo_manager.UpdateAllBuffers();
+		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
+		if(is_deferred)
+			deferred_interface.GenerateDS(rs.dpools, false);
+		//rs.ubo_manager.UpdateAllBuffers();
 		std::array<float, 4> a{};
 
 		//auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
-		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+		float depth_clear = 1.0f;
 		std::optional<color> clear_col;
 		std::optional<RscHandle<CubeMap>> sb_cm;
 
@@ -828,7 +837,7 @@ namespace idk::vkn
 			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
 		vk::ClearValue v[]{
 			clearColor,
-			vk::ClearValue {vk::ClearColorValue{ depth_clear }}
+			vk::ClearDepthStencilValue{ 1.0f}
 		};
 		
 		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
@@ -872,6 +881,7 @@ namespace idk::vkn
 			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
 			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
 			config.depth_test = false;
+			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
 
 			//No idea if this is expensive....if really so I will try shift up to init
@@ -895,20 +905,25 @@ namespace idk::vkn
 		auto& rt = camera.render_target.as<VknRenderTarget>();
 
 		//Draw Deferred stuff
-		TransitionFrameBuffer(camera, cmd_buffer, view);
-		deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface, camera, rt, rs);
-
+		if (is_deferred)
+		{
+			TransitionFrameBuffer(camera, cmd_buffer, view);
+			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface, camera, rt, rs);
+		}
 		//Subsequent passes shouldn't clear the buffer any more.
 		rpbi.renderPass = View().BasicRenderPass(rt.GetRenderPassType(),false,false);
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
-		if (processed_ro.size()>0)
+		bool still_rendering = (processed_ro.size() > 0) || camera.overlay_debug_draw;
+		if (still_rendering)
 		{
-
 			TransitionFrameBuffer(camera, cmd_buffer, view);
 			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);;
-			bool first_time = true;
+		}
+
+		if (processed_ro.size()>0)
+		{
 			for (auto& p_ro : processed_ro)
 			{
 				auto& obj = p_ro.Object();
@@ -951,15 +966,14 @@ namespace idk::vkn
 					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
 					cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
 				}
-				first_time = false;
 			}
-			cmd_buffer.endRenderPass();
 		}
 		if (camera.overlay_debug_draw)
 		{
-			TransitionFrameBuffer(camera, cmd_buffer, view);
-			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);;
 			RenderDebugStuff(state, rs, offset, size);
+		}
+		if (still_rendering)
+		{
 			cmd_buffer.endRenderPass();
 		}
 		rs.ubo_manager.UpdateAllBuffers();

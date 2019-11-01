@@ -25,7 +25,8 @@ namespace idk
 		auto mb_handle = handle_cast<mono::Behavior>(new_component_handle);
 		mb_handle->EmplaceBehavior(behavior_name);
 		if (saved_string.size())
-			parse_text(saved_string, mb_handle->GetObject());
+			IDK_ASSERT(parse_text(saved_string, mb_handle->GetObject())==parse_error::none);
+		return true;
 	}
 	bool CMD_AddBehavior::undo()
 	{
