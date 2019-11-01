@@ -44,9 +44,10 @@ namespace idk
                     }
                 }
 
-                if (burst.cycle_counter >= burst.cycles)
+                auto remain = system.main.duration - (burst.time + burst.interval * burst.cycles - burst.interval);
+                if (burst.cycle_counter >= burst.cycles && burst.clock >= remain)
                 {
-                    burst.clock -= system.main.duration - (burst.time + burst.interval * burst.cycles - burst.interval);
+                    burst.clock -= remain;
                     burst.cycle_counter = 0;
                     continue;
                 }

@@ -28,7 +28,10 @@ namespace idk
         time = 0;
         emission.clock = 0;
         for (auto& burst : emission.bursts)
+        {
             burst.cycle_counter = 0;
+            burst.clock = 0;
+        }
         cycle_time = 0;
         data.num_alive = 0;
     }

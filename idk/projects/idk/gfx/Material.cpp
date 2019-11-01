@@ -13,8 +13,8 @@ namespace idk
 			case BlendMode::Opaque:
 				switch (model)
 				{
-				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_deferred.tmpt");
-				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_deferred.tmpt");
+				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
 				}
 			case BlendMode::Masked:
 				switch (model)

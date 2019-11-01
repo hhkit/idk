@@ -1016,7 +1016,7 @@ namespace idk {
         displayVal(c_ps->main);
         _curr_property_stack.pop_back();
 
-        const auto display = [&](const char* title, reflect::dynamic dyn)
+        const auto display = [&](const char* title, reflect::dynamic dyn, InjectDrawTable* inject = nullptr)
         {
             ImGui::PushID(title);
 
@@ -1035,14 +1035,67 @@ namespace idk {
             if (open)
             {
                 _curr_property_stack.push_back(title);
-                displayVal(std::move(dyn));
+                displayVal(std::move(dyn), inject);
                 _curr_property_stack.pop_back();
             }
 
             ImGui::PopID();
         };
 
-        display("emission", c_ps->emission);
+        static Handle<ParticleSystem> _static_ps_handle{};
+        _static_ps_handle = c_ps;
+        const auto draw_bursts = [](const reflect::dynamic& val) -> bool
+        {
+            bool changed = false;
+            auto& bursts = val.get<vector<EmissionModule::Burst>>();
+            if (ImGui::Button("+"))
+            {
+                bursts.emplace_back();
+                changed = true;
+            }
+            if (bursts.size())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("-"))
+                {
+                    bursts.pop_back();
+                    changed = true;
+                }
+            }
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+            const auto w = ImGui::CalcItemWidth();
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + w * 0.1f - ImGui::CalcTextSize("Time").x * 0.5f);
+            ImGui::Text("Time");
+            ImGui::SameLine(w * 0.3f - ImGui::CalcTextSize("Count").x * 0.5f);
+            ImGui::Text("Count");
+            ImGui::SameLine(w * 0.5f - ImGui::CalcTextSize("Cycles").x * 0.5f);
+            ImGui::Text("Cycles");
+            ImGui::SameLine(w * 0.7f - ImGui::CalcTextSize("Interval").x * 0.5f);
+            ImGui::Text("Interval");
+            ImGui::SameLine(w * 0.9f - ImGui::CalcTextSize("Probability").x * 0.5f);
+            ImGui::Text("Probability");
+
+            ImGui::PushItemWidth(w * 0.2f);
+            for(int i = 0; i < bursts.size(); ++i)
+            {
+                auto& burst = bursts[i];
+                ImGui::PushID(i);
+                changed |= ImGui::DragFloat("##time", &burst.time, 0.01f, 0, _static_ps_handle->main.duration);
+                ImGui::SameLine(); changed |= ImGui::DragInt("##count", &burst.count, 1.0f, 1, _static_ps_handle->main.max_particles);
+                ImGui::SameLine(); changed |= ImGui::DragInt("##cycles", &burst.cycles, 1.0f, 1, 32);
+                ImGui::SameLine(); changed |= ImGui::DragFloat("##interval", &burst.interval, 0.01f, 0, _static_ps_handle->main.duration);
+                ImGui::SameLine(); changed |= ImGui::DragFloat("##probability", &burst.probability, 0.01f, 0, 1.0f);
+                ImGui::PopID();
+            }
+            ImGui::PopItemWidth();
+            ImGui::PopStyleVar();
+
+            return false;
+        };
+        InjectDrawTable inject{ { "emission/bursts", CustomDrawFn(draw_bursts) } };
+
+        display("emission", c_ps->emission, &inject);
         display("shape", c_ps->shape);
         display("velocity_over_lifetime", c_ps->velocity_over_lifetime);
         display("color_over_lifetime", c_ps->color_over_lifetime);
@@ -1236,7 +1289,8 @@ namespace idk {
 	}
 
 
-    bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn)
+    // when curr property is key, draws using CustomDrawFn
+    bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
@@ -1322,141 +1376,153 @@ namespace idk {
             [[maybe_unused]] bool changed_and_deactivated = false;
 
             //ALL THE TYPE STATEMENTS HERE
-            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)
+            bool draw_injected = false;
+            if (inject_draw_table)
             {
-                changed |= ImGui::DragFloat("", &val, 0.01f);
-            }
-            else if constexpr (std::is_same_v<T, int>)
-            {
-                changed |= ImGui::DragInt("", &val);
-            }
-            else if constexpr (std::is_same_v<T, uint32_t>)
-            {
-                changed |= ImGui::DragScalar("", ImGuiDataType_U32, &val, 1.0f);
-            }
-            else if constexpr (std::is_same_v<T, short>)
-            {
-                changed |= ImGui::DragScalar("", ImGuiDataType_S16, &val, 1.0f);
-            }
-            else if constexpr (std::is_same_v<T, uint16_t>)
-            {
-                changed |= ImGui::DragScalar("", ImGuiDataType_U16, &val, 1.0f);
-            }
-            else if constexpr (std::is_same_v<T, long long>)
-            {
-                changed |= ImGui::DragScalar("", ImGuiDataType_S64, &val, 1.0f);
-            }
-            else if constexpr (std::is_same_v<T, size_t>)
-            {
-                changed |= ImGui::DragScalar("", ImGuiDataType_U64, &val, 1.0f);
-            }
-            else if constexpr (std::is_same_v<T, bool>)
-            {
-                changed |= ImGui::Checkbox("", &val);
-            }
-            else if constexpr (std::is_same_v<T, vec3>)
-            {
-                changed |= ImGuidk::DragVec3("", &val);
-            }
-            else if constexpr (std::is_same_v<T, quat>)
-            {
-                changed |= ImGuidk::DragQuat("", &val);
-            }
-            else if constexpr (std::is_same_v<T, color>)
-            {
-                changed |= ImGui::ColorEdit4("", val.data());
-            }
-            else if constexpr (std::is_same_v<T, rad>)
-            {
-                changed |= ImGui::SliderAngle("", val.data());
-            }
-            else if constexpr (is_template_v<T, RscHandle>)
-            {
-                changed |= ImGuidk::InputResource("", &val);
-            }
-			else if constexpr (std::is_same_v<T, Handle<GameObject>>)
-			{
-				changed |= ImGuidk::InputGameObject("", &val);
-			}
-            else if constexpr (is_macro_enum_v<T>)
-            {
-                changed |= ImGuidk::EnumCombo("", &val);
-            }
-            else if constexpr (is_template_v<T, std::variant>)
-            {
-                const int curr_ind = s_cast<int>(val.index());
-                int new_ind = curr_ind;
-
-                constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-                using VarCombo = std::array<const char*, sz>;
-
-                static auto combo_items = []()-> VarCombo
+                if (const auto iter = inject_draw_table->find(curr_prop_path); iter != inject_draw_table->end())
                 {
+                    changed |= iter->second(val);
+                    draw_injected = true;
+                }
+            }
+            if (!draw_injected)
+            {
+                if constexpr (std::is_same_v<T, float> || std::is_same_v<T, real>)
+                {
+                    changed |= ImGui::DragFloat("", &val, 0.01f);
+                }
+                else if constexpr (std::is_same_v<T, int>)
+                {
+                    changed |= ImGui::DragInt("", &val);
+                }
+                else if constexpr (std::is_same_v<T, uint32_t>)
+                {
+                    changed |= ImGui::DragScalar("", ImGuiDataType_U32, &val, 1.0f);
+                }
+                else if constexpr (std::is_same_v<T, short>)
+                {
+                    changed |= ImGui::DragScalar("", ImGuiDataType_S16, &val, 1.0f);
+                }
+                else if constexpr (std::is_same_v<T, uint16_t>)
+                {
+                    changed |= ImGui::DragScalar("", ImGuiDataType_U16, &val, 1.0f);
+                }
+                else if constexpr (std::is_same_v<T, long long>)
+                {
+                    changed |= ImGui::DragScalar("", ImGuiDataType_S64, &val, 1.0f);
+                }
+                else if constexpr (std::is_same_v<T, size_t>)
+                {
+                    changed |= ImGui::DragScalar("", ImGuiDataType_U64, &val, 1.0f);
+                }
+                else if constexpr (std::is_same_v<T, bool>)
+                {
+                    changed |= ImGui::Checkbox("", &val);
+                }
+                else if constexpr (std::is_same_v<T, vec3>)
+                {
+                    changed |= ImGuidk::DragVec3("", &val);
+                }
+                else if constexpr (std::is_same_v<T, quat>)
+                {
+                    changed |= ImGuidk::DragQuat("", &val);
+                }
+                else if constexpr (std::is_same_v<T, color>)
+                {
+                    changed |= ImGui::ColorEdit4("", val.data());
+                }
+                else if constexpr (std::is_same_v<T, rad>)
+                {
+                    changed |= ImGui::SliderAngle("", val.data());
+                }
+                else if constexpr (is_template_v<T, RscHandle>)
+                {
+                    changed |= ImGuidk::InputResource("", &val);
+                }
+                else if constexpr (std::is_same_v<T, Handle<GameObject>>)
+                {
+                    changed |= ImGuidk::InputGameObject("", &val);
+                }
+                else if constexpr (is_macro_enum_v<T>)
+                {
+                    changed |= ImGuidk::EnumCombo("", &val);
+                }
+                else if constexpr (is_template_v<T, std::variant>)
+                {
+                    const int curr_ind = s_cast<int>(val.index());
+                    int new_ind = curr_ind;
+
                     constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
-                    static std::array<string, sz> tmp_arr;
-                    std::array<const char*, sz> retval{};
+                    using VarCombo = std::array<const char*, sz>;
 
-                    auto sp = reflect::unpack_types<T>();
-
-                    for (size_t i = 0; i < sz; ++i)
+                    static auto combo_items = []()-> VarCombo
                     {
-                        tmp_arr[i] = format_name(sp[i].name());
-                        retval[i] = tmp_arr[i].data();
+                        constexpr auto sz = reflect::detail::pack_size<T>::value; // THE FUUU?
+                        static std::array<string, sz> tmp_arr;
+                        std::array<const char*, sz> retval{};
+
+                        auto sp = reflect::unpack_types<T>();
+
+                        for (size_t i = 0; i < sz; ++i)
+                        {
+                            tmp_arr[i] = format_name(sp[i].name());
+                            retval[i] = tmp_arr[i].data();
+                        }
+                        return retval;
+                    }();
+
+                    if (ImGui::Combo("", &new_ind, combo_items.data(), static_cast<int>(sz)))
+                    {
+                        val = variant_construct<T>(new_ind);
+                        changed = true;
                     }
-                    return retval;
-                }();
 
-                if (ImGui::Combo("", &new_ind, combo_items.data(), static_cast<int>(sz)))
-                {
-                    val = variant_construct<T>(new_ind);
-                    changed = true;
+                    recurse = true;
                 }
-
-                recurse = true;
-            }
-            else if constexpr (is_sequential_container_v<T>)
-            {
-                reflect::uni_container cont{ val };
-                ImGui::Button("+");
-                ImGui::Indent();
-                for (auto dyn : cont)
+                else if constexpr (is_sequential_container_v<T>)
                 {
-                    displayVal(dyn);
+                    reflect::uni_container cont{ val };
+                    ImGui::Button("+");
+                    ImGui::Indent();
+                    for (auto dyn : cont)
+                    {
+                        displayVal(dyn);
+                    }
+                    ImGui::Unindent();
                 }
-                ImGui::Unindent();
-            }
-            else if constexpr (is_associative_container_v<T>)
-            {
-                ImGui::Text("Associative Container");
-                /*reflect::uni_container cont{ val };
-                ImGui::Button("+");
-                ImGui::Indent();
-                for (auto dyn : cont)
+                else if constexpr (is_associative_container_v<T>)
                 {
-                    auto pair = dyn.unpack();
-                    displayVal(pair[0]);
-                }
-                ImGui::Unindent();*/
-            }
-            else
-            {
-                if (keyName.size())
-                {
-                    ImGui::NewLine();
-                    indent = true;
+                    ImGui::Text("Associative Container");
+                    /*reflect::uni_container cont{ val };
+                    ImGui::Button("+");
+                    ImGui::Indent();
+                    for (auto dyn : cont)
+                    {
+                        auto pair = dyn.unpack();
+                        displayVal(pair[0]);
+                    }
+                    ImGui::Unindent();*/
                 }
                 else
                 {
-                    ImGui::SetCursorPosX(0);
-                    ImGui::SetCursorPosY(currentHeight);
-                    ImGui::EndGroup();
-                    ImGui::PopItemWidth();
-                    ImGui::PopID();
-                    indent_stack.push_back(0);
-                    ImGui::SetCursorPosY(currentHeight);
-                    return true;
+                    if (keyName.size())
+                    {
+                        ImGui::NewLine();
+                        indent = true;
+                    }
+                    else
+                    {
+                        ImGui::SetCursorPosX(0);
+                        ImGui::SetCursorPosY(currentHeight);
+                        ImGui::EndGroup();
+                        ImGui::PopItemWidth();
+                        ImGui::PopID();
+                        indent_stack.push_back(0);
+                        ImGui::SetCursorPosY(currentHeight);
+                        return true;
+                    }
+                    recurse = true;
                 }
-                recurse = true;
             }
 
             ImGui::EndGroup();
