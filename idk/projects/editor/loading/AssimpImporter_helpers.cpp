@@ -53,6 +53,19 @@ namespace idk::ai_helpers
 			
 		}
 
+		vector<aiNode*> test_vec;
+		std::function<void(aiNode * node)> func;
+		func = [&test_vec , &func](aiNode* node)
+		{
+			if (node->mNumMeshes)
+				test_vec.push_back(node);
+
+			for (size_t i = 0; i < node->mNumChildren; ++i)
+				func(node->mChildren[i]);
+
+		};
+		func(scene.ai_scene->mRootNode);
+		test_vec;
 		
 		// Keep for now. Might need to account for scaled meshes in the future
 		// for (size_t i = 0; i < node->mNumMeshes; ++i)
@@ -117,7 +130,7 @@ namespace idk::ai_helpers
 		{
 			aiNode* node = nullptr;
 			int parent = -1;
-			mat4 compiled_transform;
+			mat4 parent_local_transform;
 		};
 
 		if (!scene.has_skeleton)
@@ -135,14 +148,13 @@ namespace idk::ai_helpers
 			bone_queue.pop_front();
 			string node_name = curr_node.node->mName.data;
 
-			const mat4 node_transform = curr_node.compiled_transform * to_mat4(curr_node.node->mTransformation);
-
+			const mat4 local_transform = curr_node.parent_local_transform * to_mat4(curr_node.node->mTransformation);
 			// Ignore all $assimp$ nodes in the final skeleton. We also ignore user specified excluded nodes. Everything else we will consider it a bone.
 			if (node_name.find(AssimpPrefix) != string::npos || node_name.find(AssimpImporter::bone_exclude_keyword) != string::npos)
 			{
 				for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
 				{
-					bone_queue.push_front(BoneTreeNode{ curr_node.node->mChildren[i], curr_node.parent, node_transform });
+					bone_queue.push_front(BoneTreeNode{ curr_node.node->mChildren[i], curr_node.parent, local_transform });
 				}
 
 				continue;
@@ -178,7 +190,7 @@ namespace idk::ai_helpers
 					error_string += " Using compiled transform as local pose.";
 				PrintError(error_string);
 
-				aiMatrix4x4 global_inverse = curr_node.node->mTransformation;
+				aiMatrix4x4 global_inverse = to_aiMat4(local_transform);
 				global_inverse.Inverse();
 
 				// Multiply the parent's inverse if its there
@@ -189,7 +201,7 @@ namespace idk::ai_helpers
 				}
 
 				// Initialize child local/global pose
-				ai_child_local_bind_pose = to_aiMat4(node_transform);
+				ai_child_local_bind_pose = to_aiMat4(local_transform);
 				ai_child_world_bind_pose = global_inverse;
 				// ai_child_world_bind_pose.Inverse();
 
@@ -225,7 +237,7 @@ namespace idk::ai_helpers
 
 			for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
 			{
-				bone_queue.push_back(BoneTreeNode{ curr_node.node->mChildren[i], static_cast<int>(final_skeleton.size() - 1), mat4{} });
+				bone_queue.push_back(BoneTreeNode{ curr_node.node->mChildren[i], static_cast<int>(final_skeleton.size() - 1), mat4{}, });
 			}
 		}
 
