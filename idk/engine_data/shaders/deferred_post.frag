@@ -2,12 +2,13 @@
 
 #define MAX_LIGHTS 8
 
-const int eAlbedoAmbOcc        = 0         ;
-const int eUvMetallicRoughness = 1         ;
-const int eViewPos             = 2         ;
-const int eNormal              = 3         ;
-const int eTangent             = 4         ;
-const int eGBufferSize         = eTangent+1;
+const int eAlbedoAmbOcc        = 0       ;
+const int eUvMetallicRoughness = 1       ;
+const int eViewPos             = 2       ;
+const int eNormal              = 3       ;
+const int eTangent             = 4       ;
+const int eDepth               = 5       ;
+const int eGBufferSize         = eDepth+1;
 
 S_LAYOUT(9, 0) uniform sampler2D gbuffers[eGBufferSize];
 
@@ -33,7 +34,6 @@ struct Light
 {
     int   type; // 0 for point, 1 for dir, 2 for spot
 	vec3  color;
-	
 	vec3  v_pos;
 	vec3  v_dir;
 	
@@ -260,7 +260,10 @@ layout(location = 0)out vec4 out_color;
 
 void main()
 {
+
 	// declare initial values here
+	if(texture(gbuffers[eDepth],fs_in.uv).r==1)
+		discard;
 	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv).rgb*2-1;
 	vec3  normal    = Normal();
 	vec3  tangent   = Tangent();
