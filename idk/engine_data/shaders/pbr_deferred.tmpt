@@ -1,6 +1,6 @@
 #version 460
 
-layout(location =0)in VS_OUT
+layout(location =1)in VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -53,11 +53,12 @@ void main()
 	
 	vec3 view_dir = -normalize(view_pos);
 
+
 	//__MATERIAL_CODE__;
-	
 	out_albedo_amb_o = vec4(albedo,ambient_o);
 	out_uv_metallic_roughness = vec4(fs_in.uv,metallic,roughness);
-	out_view_pos = view_pos;
+	out_view_pos = fs_in.position*0.5 +0.5;
 	out_normal = normal;
 	out_tangent = tangent;
+	
 }

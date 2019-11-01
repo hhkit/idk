@@ -22,7 +22,7 @@ S_LAYOUT(6,1) uniform samplerCube irradiance_probe;
 S_LAYOUT(6,2) uniform samplerCube environment_probe;
 S_LAYOUT(6,3) uniform sampler2D   brdfLUT;  
 
-layout(location=1) in VS_OUT
+layout(location=2) in VS_OUT
 {
   vec2 uv;
 } fs_in;
@@ -261,7 +261,7 @@ layout(location = 0)out vec4 out_color;
 void main()
 {
 	// declare initial values here
-	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv).rgb;
+	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv).rgb*2-1;
 	vec3  normal    = Normal();
 	vec3  tangent   = Tangent();
 	vec4 uv_met_rou = texture(gbuffers[eUvMetallicRoughness] ,fs_in.uv);
@@ -287,19 +287,19 @@ void main()
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr(i, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
-		
-		if (LightBlk.lights[i].type == 1)
-		{
-			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= vec3(1 - ShadowCalculation(i,(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
-			//vvvp = LightBlk.lights[i].vp;
-		}
-		if (LightBlk.lights[i].type == 2)
-		{
-			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= (vec3(1-ShadowCalculation(i,LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
-		}
-		
+		//
+		//if (LightBlk.lights[i].type == 1)
+		//{
+		//	if(LightBlk.lights[i].cast_shadow!=0)
+		//		result *= vec3(1 - ShadowCalculation(i,(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
+		//	//vvvp = LightBlk.lights[i].vp;
+		//}
+		//if (LightBlk.lights[i].type == 2)
+		//{
+		//	if(LightBlk.lights[i].cast_shadow!=0)
+		//		result *= (vec3(1-ShadowCalculation(i,LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
+		//}
+		//
 		light_accum += result;
 	}
 	vec3 F = mix(vec3(0.04), albedo, metallic);
@@ -322,6 +322,6 @@ void main()
 	vec3 color = light_accum + ambient;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2)); 
-	out_color = vec4(fs_in.uv,0.5,1);
+	out_color = vec4(color,1);
 	
 }
