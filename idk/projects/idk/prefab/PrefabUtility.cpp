@@ -444,7 +444,7 @@ namespace idk
             if (prefab_component_ptrs[i])
                 out_removed.push_back(i);
         }
-        for (int i = 0; i < prefab_component_ptrs.size(); ++i)
+        for (int i = 0; i < obj_component_handles.size(); ++i)
         {
             if (obj_component_handles[i] && !obj_component_handles[i].is_type<PrefabInstance>())
                 out_added.push_back(i);

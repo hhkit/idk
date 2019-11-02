@@ -1,47 +1,3 @@
-- !65536 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 0.70710677
-      x: -0.70710677
-      y: -0
-      z: -0
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: Directional Light
-  - !Light 
-    casts_shadows: 1
-    light: !DirectionalLight 
-      height: 5
-      intensity: 0.5
-      light_color: 
-        a: 1
-        b: 1
-        g: 1
-        r: 1
-      width: 5
-    shadow_bias: 1.1920929e-07
-  - !MonoBehavior 
-    {enabled: 1, script_data: !AnimationTest ~}
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !TestyTesty 
-      f: 0
-      go: {id: 0}
-      i: 0
-      i2: 0
-      jump_force: 0
-      movement: {x: 0, y: 0, z: 0}
-      prefab: {guid: 00000000-0000-0000-0000-000000000000}
-      yolo: 0
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !TestShou 
-      f: 0
-      p: {guid: 00000000-0000-0000-0000-000000000000}
-      playerIndex: 0
 - !4295032832 
   - active: 1
   - !Transform 
@@ -74,8 +30,12 @@
           r: 1
         mode: Constant
       enabled: 0
-    emission: {enabled: 1, rate_over_time: 10}
+    emission: 
+      bursts: []
+      enabled: 1
+      rate_over_time: 10
     main: 
+      destroy_on_finish: 0
       duration: 5
       gravity_modifier: 0
       in_world_space: 0
@@ -116,9 +76,18 @@
         max: {x: 0, y: 0, z: 0}
         min: {x: 0, y: 0, z: 0}
         mode: Constant
+      offset: 
+        max: {x: 0, y: 0, z: 0}
+        min: {x: 0, y: 0, z: 0}
+        mode: Constant
+      orbital: 
+        max: {x: 0, y: 0, z: 0}
+        min: {x: 0, y: 0, z: 0}
+        mode: Constant
+      radial: {max: 0, min: 0, mode: Constant}
   - !Animator 
-    animation_table: []
-    layer_table: []
+    animation_table: {}
+    layer_table: {}
     layers: 
     - blend_type: Override_Blend
       bone_mask: 
@@ -226,6 +195,8 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
+  - !MonoBehavior 
+    {enabled: 1, script_data: !AnimationTest ~}
 - !408021958656 
   - active: 1
   - !Transform 
@@ -251,38 +222,6 @@
     viewport: 
       position: {x: 0, y: 0}
       size: {x: 1, y: 1}
-- !416611893248 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: -1.8351101, z: 0}
-    rotation: 
-      w: 0.89813006
-      x: 0
-      y: 0
-      z: -0.43972987
-    scale: {x: 1, y: 1, z: 1}
-  - !Name 
-    name: testy
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 0
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-      rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
-    static_friction: 0.6
 - !8590000128 
   - active: 1
   - !Transform 
@@ -344,54 +283,6 @@
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
     {_bone_index: 0, _bone_name: _root_jnt}
-- !412316925952 
-  - active: 1
-  - !Transform 
-    parent: {id: 65536}
-    position: {x: 0, y: 0, z: 0}
-    rotation: 
-      w: 0.5582573
-      x: 0.77905905
-      y: -0.27771544
-      z: 0.06549748
-    scale: {x: 1, y: 1.0000002, z: 2.0600002}
-  - !Name 
-    name: ""
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 1
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-      rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
-    static_friction: 0.6
-  - !MeshRenderer 
-    cast_shadows: 1
-    enabled: 1
-    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
-    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
-    receive_shadows: 1
-  - !MonoBehavior 
-    enabled: 1
-    script_data: !Test 
-      f: 0
-      go: {id: 0}
-      i: 0
-      i2: 0
-      jump_force: 0
-      movement: {x: 0, y: 0, z: 0}
-      prefab: {guid: 00000000-0000-0000-0000-000000000000}
 - !21474902016 
   - active: 1
   - !Transform 
