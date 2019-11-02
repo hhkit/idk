@@ -448,8 +448,9 @@ namespace idk::vkn
 		auto frame_buffer = g_buffer.GetFramebuffer();
 		//TransitionFrameBuffer(camera, cmd_buffer, view);
 
-		auto sz = camera.render_target->Size();
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+		auto sz = g_buffer.Size();
+		Viewport viewport{};
+		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
 
 		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
 		std::array<float, 4> g_clear{ 0.0f,0.0f ,0.0f ,0.0f };

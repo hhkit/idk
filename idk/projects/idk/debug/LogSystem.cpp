@@ -58,7 +58,7 @@ namespace idk
 			loghandle.signal_id = LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
 				[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
 			{
-				char buf[512];
+				char buf[log_buffer_size*2];
 
 				unsigned moved = 0;
 

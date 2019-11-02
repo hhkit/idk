@@ -8,6 +8,14 @@ namespace idk::vkn
 	{
 		return *pipeline;
 	}
+	PipelineManager& CubemapRenderer::pipeline_manager()const
+	{
+		return *_pipeline_manager;
+	}
+	PipelineManager& CubemapRenderer::pipeline_manager(PipelineManager& mgr)
+	{
+		return *(_pipeline_manager = &mgr);
+	}
 	string CubemapRenderer::EpName() const { return "environment_probe"; }
 	string CubemapRenderer::M4Name() const { return "view_projection"; }
 	void CubemapRenderer::Init(RscHandle<ShaderProgram> v, RscHandle<ShaderProgram> f, RscHandle<ShaderProgram> g, pipeline_config* pipline_conf, RscHandle<Mesh> mesh)
@@ -22,7 +30,9 @@ namespace idk::vkn
 			config.render_pass_type = BasicRenderPasses::eRgbaColorOnly;
 		}
 		auto hvert = v, hgeom = g, hfrag = f;
-		vector<RscHandle<ShaderProgram>> prog;
+		//vector<RscHandle<ShaderProgram>> prog;
+		prog.clear();
+		prog.reserve(3);
 		if (hvert)
 		{
 			vert = RscHandle<ShaderModule>{ hvert };
@@ -38,10 +48,6 @@ namespace idk::vkn
 			frag = RscHandle<ShaderModule>{ hfrag };
 			prog.emplace_back(hfrag);
 		}
-		pipeline_manager.View(View());
-
-
-		pipeline = &pipeline_manager.GetPipeline(config, prog, 0);
 	
 
 		//RenderObject baka{};//dummy
@@ -87,6 +93,8 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 	void CubemapRenderer::BeginQueue(UboManager& ubo_manager, std::optional<vk::Fence >ofence)
 	{
+		pipeline_manager().View(View());
+		pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
 		if (ofence)
 		{
 			auto& fence = *ofence;
@@ -151,6 +159,7 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 	//For skybox
 	void CubemapRenderer::QueueSkyBox(UboManager& ubo_manager, std::optional<vk::Fence >ofence, RscHandle<CubeMap> src, const mat4& vp_trnsform)
 	{
+		pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
 		if (ofence)
 		{
 			auto& fence = *ofence;
@@ -327,7 +336,9 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 			for (auto&& [attrib, location] : req.requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(*Pipeline().GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+				auto binding = Pipeline().GetBinding(location);
+				if(binding)
+					cmd_buffer.bindVertexBuffers(*binding, *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 			}
 
 			auto& oidx = mesh.GetIndexBuffer();

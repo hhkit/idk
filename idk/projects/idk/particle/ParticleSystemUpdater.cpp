@@ -15,7 +15,7 @@ namespace idk
     void ParticleSystemUpdater::LateInit()
     {
         auto particle_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/default_particle.frag", false);
-        auto particle_mat = Core::GetResourceManager().Create<Material>();
+        auto particle_mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0xcfa6c3e0, 0x9b52, 0x412b, 0xb3e7c85ee93190ca });
         particle_mat->_shader_program = particle_frag;
         particle_mat->Name("Default Particle");
         auto particle_mat_inst = Core::GetResourceManager().LoaderCreateResource<MaterialInstance>(RendererModule::default_material_inst);
@@ -23,7 +23,7 @@ namespace idk
         particle_mat_inst->Name("Default Particle");
         particle_mat->_default_instance = particle_mat_inst;
 
-        particle_mat_inst->material->hidden_uniforms.emplace_back(UniformInstance{ "_uTex[0]",
+        particle_mat->uniforms.emplace("Texture", UniformInstance{ "_uTex[0]",
             *Core::GetResourceManager().Load<Texture>("/engine_data/textures/default_particle.png", false) });
     }
 

@@ -127,6 +127,16 @@ namespace idk
 		return obj;		
 	}
 
+	bool GraphicsSystem::is_deferred() const
+	{
+		return _is_deferred;
+	}
+
+	bool GraphicsSystem::is_deferred(bool enable)
+	{
+		return _is_deferred = enable;
+	}
+
 	size_t GraphicsSystem::AddRenderRequest(RenderRequest&& request)
 	{
 
@@ -149,7 +159,7 @@ namespace idk
 	}
 	void GraphicsSystem::SortCameras()
 	{
-		Core::GetGameState().SortObjectsOfType<Camera>([](auto& lhs, auto& rhs) {return lhs.depth <= rhs.depth; });
+		Core::GetGameState().SortObjectsOfType<Camera>([](auto& lhs, auto& rhs) {return lhs.depth < rhs.depth; });
 
 	}
 	void GraphicsSystem::BufferGraphicsState(

@@ -153,6 +153,13 @@ namespace idk {
 					if (res && *res)
 						Core::GetResourceManager().Save(*res);
 				}
+                if (ImGui::MenuItem("Material Instance"))
+                {
+                    auto path = unique_new_mount_path("NewMaterialInst", MaterialInstance::ext);
+                    auto res = Core::GetResourceManager().Create<MaterialInstance>(path);
+                    if (res && *res)
+                        Core::GetResourceManager().Save(*res);
+                }
 				if (ImGui::MenuItem("Render Target"))
 				{
 					auto path = unique_new_mount_path("NewRenderTarget", RenderTarget::ext);
