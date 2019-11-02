@@ -18,32 +18,25 @@ namespace idk
             Color,
             ParticlePosition,
             ParticleRotation,
-            ParticleSize
+            ParticleSize,
+			ModelViewTransform,
+			ModelViewNormalTransform
 		)
 
-		enum Flags : int
-		{
-			Pos		= 1 << Attrib::Position,
-			Norm	= 1 << Attrib::Normal,
-			Uv		= 1 << Attrib::UV,
-			Tan		= 1 << Attrib::Tangent,
-			Bitan	= 1 << Attrib::Bitangent,
-			BoneId	= 1 << Attrib::BoneID,
-			BoneWt  = 1 << Attrib::BoneWeight,
-		};
-
 		using NativeType = std::tuple<
-			vec3,  // Position
-			vec3,  // Normal
-			vec2,  // UV
-			vec3,  // Tangent
-			vec3,  // Bitangent
-			ivec4, // ID
-			vec4,  // Weight
-			color, // Color
-			vec3,  // particle pos
-			float, // particle rot
-            float  // particle size
+			vec3  // Position
+		,	vec3  // Normal
+		,	vec2  // UV
+		,	vec3  // Tangent
+		,	vec3  // Bitangent
+		,	ivec4 // ID
+		,	vec4  // Weight
+		,	color // Color
+		,	vec3  // particle pos
+		,	float // particle rot
+        ,   float // particle size
+		,   mat4  // modelview matrix
+		,	mat4  // modelview normal matrix
 		>;
 	}
 }
@@ -62,9 +55,10 @@ namespace std
 
 namespace idk
 {
-	struct renderer_reqs
+	struct renderer_attributes
 	{
 		using Location = int;
-		hash_table<vtx::Attrib, Location> requirements;
+		hash_table<vtx::Attrib, Location> mesh_attributes;
+		hash_table<vtx::Attrib, Location> instanced_attributes;
 	};
 }

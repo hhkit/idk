@@ -135,7 +135,7 @@ namespace idk::ogl
 		GL_CHECK();
 
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& oviewport,bool clear)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& oviewport)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
@@ -186,8 +186,6 @@ namespace idk::ogl
 
 		CheckFBStatus();
 
-		if (clear)
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_SCISSOR_TEST);
 		GL_CHECK();
 	}

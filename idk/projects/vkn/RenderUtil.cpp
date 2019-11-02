@@ -61,7 +61,7 @@ namespace idk::vkn
 		//Create environment probe
 		//environment_probe;
 
-		req.requirements = {
+		req.mesh_attributes = {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal, 1),
 			std::make_pair(vtx::Attrib::UV, 2) };
@@ -269,7 +269,7 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 			auto& mesh = p_ro.Object().mesh.as<VulkanMesh>();
 
-			for (auto&& [attrib, location] : req.requirements)
+			for (auto&& [attrib, location] : req.mesh_attributes)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
 				cmd_buffer.bindVertexBuffers(*Pipeline().GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
@@ -324,7 +324,7 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 			auto& mesh = p_ro.Object().mesh.as<VulkanMesh>();
 
-			for (auto&& [attrib, location] : req.requirements)
+			for (auto&& [attrib, location] : req.mesh_attributes)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
 				cmd_buffer.bindVertexBuffers(*Pipeline().GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});

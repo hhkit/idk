@@ -25,6 +25,6 @@ namespace idk
 		bool IsActiveAndEnabled() const;
 		AnimatedRenderObject GenerateRenderObject() const;
 
-		static const renderer_reqs& GetRequiredAttributes();
+		static const renderer_attributes& GetRequiredAttributes();
 	};
 }

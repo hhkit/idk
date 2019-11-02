@@ -20,17 +20,13 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
 layout (location = 3) in vec3 tangent;
+layout (location = 4) in mat4 object_transform;
+layout (location = 8) in mat4 normal_transform;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
 	mat4 perspective_transform;
 } PerCamera;
-
-U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
-{
-	mat4 object_transform;
-	mat4 normal_transform;
-} ObjectMat4s;
 
 layout(location = 1) out VS_OUT
 {
@@ -48,9 +44,9 @@ layout(location = 0) out gl_PerVertex
 
 void main()
 {
-	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position, 1.0));
-	vs_out.normal   = vec3(ObjectMat4s.normal_transform * vec4(normal, 0.0));
-	vs_out.tangent  = vec3(ObjectMat4s.normal_transform * vec4(tangent, 0.0));
+	vs_out.position = vec3(object_transform * vec4(position, 1.0));
+	vs_out.normal   = vec3(normal_transform * vec4(normal, 0.0));
+	vs_out.tangent  = vec3(normal_transform * vec4(tangent, 0.0));
 	vs_out.uv       = uv;
     gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
 }

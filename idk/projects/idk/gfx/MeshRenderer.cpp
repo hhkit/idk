@@ -40,9 +40,9 @@ namespace idk
 		};
 	}
 
-	const renderer_reqs& MeshRenderer::GetRequiredAttributes()
+	const renderer_attributes& MeshRenderer::GetRequiredAttributes()
 	{
-		static renderer_reqs r
+		static renderer_attributes r
 		{ {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal,   1),

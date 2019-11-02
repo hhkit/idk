@@ -26,9 +26,10 @@ namespace idk::ogl
 		void   SetDrawMode(GLenum);
 		int    GetAttribs() const override;
 
-		void   Bind(const renderer_reqs& locations);
+		void   Bind(const renderer_attributes& locations);
 		void   Draw();
-		void   BindAndDraw(const renderer_reqs& locations);
+		void   DrawInstanced(size_t instances);
+		void   BindAndDraw(const renderer_attributes& locations);
 		template<typename T>
 		void   BindAndDraw() { BindAndDraw(T::GetRequiredAttributes()); }
 		void   Reset();

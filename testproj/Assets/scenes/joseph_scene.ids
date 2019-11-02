@@ -74,8 +74,12 @@
           r: 1
         mode: Constant
       enabled: 0
-    emission: {enabled: 1, rate_over_time: 10}
+    emission: 
+      bursts: []
+      enabled: 1
+      rate_over_time: 10
     main: 
+      destroy_on_finish: 0
       duration: 5
       gravity_modifier: 0
       in_world_space: 0
@@ -116,9 +120,18 @@
         max: {x: 0, y: 0, z: 0}
         min: {x: 0, y: 0, z: 0}
         mode: Constant
+      offset: 
+        max: {x: 0, y: 0, z: 0}
+        min: {x: 0, y: 0, z: 0}
+        mode: Constant
+      orbital: 
+        max: {x: 0, y: 0, z: 0}
+        min: {x: 0, y: 0, z: 0}
+        mode: Constant
+      radial: {max: 0, min: 0, mode: Constant}
   - !Animator 
-    animation_table: []
-    layer_table: []
+    animation_table: {}
+    layer_table: {}
     layers: 
     - blend_type: Override_Blend
       bone_mask: 
@@ -250,7 +263,7 @@
     render_target: {guid: 00000000-0000-0000-0000-000000000000}
     viewport: 
       position: {x: 0, y: 0}
-      size: {x: 1, y: 1}
+      size: {x: 0.5, y: 0.5}
 - !416611893248 
   - active: 1
   - !Transform 
@@ -283,6 +296,31 @@
         y: 0
         z: 0
     static_friction: 0.6
+- !420906860544 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0.64950967, y: 1.1464548, z: 1.9837766}
+    rotation: 
+      w: 0.8809153
+      x: -0.2501875
+      y: 0.38645566
+      z: 0.109756686
+    scale: {x: 0.99999994, y: 1, z: 1.0000002}
+  - !Name 
+    name: Camera 2
+  - !Camera 
+    clear: !<CubeMap> {guid: b600f93d-dede-44d3-b623-20fac997897d}
+    depth: 0
+    enabled: 1
+    far_plane: 10
+    is_orthographic: 0
+    near_plane: 0.1
+    overlay_debug_draw: 0
+    render_target: {guid: 00000000-0000-0000-0000-000000000000}
+    viewport: 
+      position: {x: 0.5, y: 0.5}
+      size: {x: 0.5, y: 0.5}
 - !8590000128 
   - active: 1
   - !Transform 

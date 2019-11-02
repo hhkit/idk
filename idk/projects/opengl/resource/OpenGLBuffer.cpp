@@ -39,7 +39,7 @@ namespace idk::ogl
 		return *this;
 	}
 
-	OpenGLBuffer& OpenGLBuffer::BindForDraw(const renderer_reqs& locations)
+	OpenGLBuffer& OpenGLBuffer::BindForDraw(const renderer_attributes& locations)
 	{
 
 #pragma warning(disable:4312)
@@ -49,8 +49,8 @@ namespace idk::ogl
 			const auto find_type = OpenGLAttribs.find(elem.attrib);
 			assert(find_type != OpenGLAttribs.end());
 
-			const auto find_loc = locations.requirements.find(elem.attrib);
-			if (find_loc != locations.requirements.end())
+			const auto find_loc = locations.mesh_attributes.find(elem.attrib);
+			if (find_loc != locations.mesh_attributes.end())
 			{
 				auto loc = find_loc->second;
 				if (find_type->second.type == GL_FLOAT)
@@ -70,7 +70,7 @@ namespace idk::ogl
 						elem.stride,
 						r_cast<void*>(elem.offset)
 					);
-
+				glVertexAttribDivisor(loc, 0);
 				glEnableVertexAttribArray(loc);
 			}
 		}

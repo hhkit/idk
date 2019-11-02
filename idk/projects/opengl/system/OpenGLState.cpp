@@ -53,10 +53,17 @@ namespace idk::ogl
 		glGenVertexArrays(1, &vao_id);	
 
 		glGenBuffers(1, &vbo_font_id);
+
+		glGenBuffers(1, &mesh_batch_object_transform_fbo);
+		glGenBuffers(1, &mesh_batch_normal_transform_fbo);
 	}
 
 	OpenGLState::~OpenGLState()
 	{
+		glDeleteBuffers(1, &mesh_batch_normal_transform_fbo);
+		glDeleteBuffers(1, &mesh_batch_object_transform_fbo);
+		glDeleteBuffers(1, &vbo_font_id);
+
 		glDeleteVertexArrays(1, &particle_vao_id);
 		glDeleteVertexArrays(1, &vao_id);
 		glDeleteVertexArrays(1, &font_vao_id);
@@ -158,18 +165,18 @@ namespace idk::ogl
 				rt.Finalize();
 		}
 
+		vector<mat4> object_transforms;
+		vector<mat4> normal_transforms;
+
+		RscHandle<ShaderProgram> curr_vtx_shader;
+		RscHandle<Material> curr_material;
+		RscHandle<MaterialInstance> curr_material_instance;
+		RscHandle<Mesh> curr_mesh;
 
 		assert(Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FBrdf]);
 		ComputeBRDF(RscHandle<Program>{Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FBrdf]});
 
-		const auto BindVertexShader = [this](RscHandle<ShaderProgram> vertex_shader, const mat4& projection_mtx, const mat4& view_mtx)
-		{
-			pipeline.PushProgram(vertex_shader);
-			pipeline.SetUniform("PerCamera.perspective_transform", projection_mtx);
-			pipeline.SetUniform("PerCamera.view_transform", view_mtx);
-		};
-
-		const auto SetObjectUniforms = [this](const auto& render_obj, const mat4& view_matrix)
+		const auto SetObjectUniforms = [&](const auto& render_obj, const mat4& view_matrix)
 		{
 			const auto obj_tfm = view_matrix * render_obj.transform;
 			pipeline.SetUniform("ObjectMat4s.object_transform", obj_tfm);
@@ -177,7 +184,7 @@ namespace idk::ogl
 			pipeline.SetUniform("ObjectMat4s.model_transform", render_obj.transform);
 		};
 
-		const auto SetSkeletons = [this, &curr_object_buffer](int skeleton_index)
+		const auto SetSkeletons = [&](int skeleton_index)
 		{
 			auto& skeleton = curr_object_buffer.skeleton_transforms[skeleton_index];
 			for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
@@ -188,7 +195,7 @@ namespace idk::ogl
 			}
 		};
 
-		const auto SetLightUniforms = [this](span<LightData> lights, GLuint& texture_units)
+		const auto SetLightUniforms = [&](span<LightData> lights, GLuint& texture_units)
 		{
 			// shader uniforms
 			pipeline.SetUniform("LightBlk.light_count", (int)lights.size());
@@ -219,46 +226,50 @@ namespace idk::ogl
 			}
 		};
 
-		const auto SetMaterialUniforms = [this](RscHandle<MaterialInstance> material_instance, GLuint& texture_units)
+		const auto SetMaterialUniforms = [&](RscHandle<MaterialInstance> material_instance, GLuint& texture_units)
 		{
-			for (auto& [name, uniform] : material_instance->material->uniforms)
+			if (curr_material_instance != material_instance)
 			{
-                auto val = *material_instance->GetUniform(name);
-				std::visit([this, &texture_units, id = uniform.name](auto& elem)
-                {
-					using T = std::decay_t<decltype(elem)>;
-					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+				for (auto& [name, uniform] : material_instance->material->uniforms)
+				{
+					auto val = *material_instance->GetUniform(name);
+					std::visit([this, &texture_units, id = uniform.name](auto& elem)
 					{
-						const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-						texture->BindToUnit(texture_units);
-						pipeline.SetUniform(id, texture_units);
+						using T = std::decay_t<decltype(elem)>;
+						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+						{
+							const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+							texture->BindToUnit(texture_units);
+							pipeline.SetUniform(id, texture_units);
 
-						++texture_units;
-					}
-					else
-						pipeline.SetUniform(id, elem);
-				}, val);
-			}
-			for (auto& uniform : material_instance->material->hidden_uniforms)
-			{
-				std::visit([this, &texture_units, id = uniform.name](auto& elem)
-                {
-					using T = std::decay_t<decltype(elem)>;
-					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+							++texture_units;
+						}
+						else
+							pipeline.SetUniform(id, elem);
+					}, val);
+				}
+				for (auto& uniform : material_instance->material->hidden_uniforms)
+				{
+					std::visit([this, &texture_units, id = uniform.name](auto& elem)
 					{
-						const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-						texture->BindToUnit(texture_units);
-						pipeline.SetUniform(id, texture_units);
+						using T = std::decay_t<decltype(elem)>;
+						if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+						{
+							const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+							texture->BindToUnit(texture_units);
+							pipeline.SetUniform(id, texture_units);
 
-						++texture_units;
-					}
-					else
-						pipeline.SetUniform(id, elem);
-				}, uniform.value);
+							++texture_units;
+						}
+						else
+							pipeline.SetUniform(id, elem);
+					}, uniform.value);
+				}
+				curr_material_instance = material_instance;
 			}
 		};
 
-		const auto SetPBRUniforms = [this](CameraData& cam, const mat4& inv_view_tfm, GLuint& texture_units)
+		const auto SetPBRUniforms = [&](CameraData& cam, const mat4& inv_view_tfm, GLuint& texture_units)
 		{
 			std::visit([&]([[maybe_unused]] const auto& obj)
 			{
@@ -305,7 +316,7 @@ namespace idk::ogl
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], light_p_tfm, light_view_tfm);
+				PushVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh]);
 
 				for (auto& render_obj : curr_object_buffer.mesh_render)
 				{
@@ -314,7 +325,7 @@ namespace idk::ogl
 					RscHandle<OpenGLMesh>{render_obj.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], light_p_tfm, light_view_tfm);
+				PushVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh]);
 				for (auto& render_obj : curr_object_buffer.skinned_mesh_render)
 				{
 					pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FShadow]);
@@ -339,70 +350,17 @@ namespace idk::ogl
 		for(auto cam: curr_object_buffer.camera)
 		{
 			const auto inv_view_tfm = invert_rotation(cam.view_matrix);
-			// calculate lights for this camera
-			auto lights = curr_object_buffer.lights;
-			for (auto& elem : lights)
-			{
-				elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
-				elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
-			}
-
-			{
-				//if (cam.obj_id == curr_object_buffer.curr_scene_camera.obj_id)
-				//{
-				//	main_buffer = RscHandle<OpenGLRenderTarget>{ cam.render_target };
-				//	fb_man.SetRenderTarget(main_buffer);
-				//}
-				//else
-				//auto position = ivec2{vec2{ cam.viewport.position } *vec2{ cam.render_target->Size() }};
-				//auto size =     ivec2{vec2{ cam.viewport.size     } *vec2{ cam.render_target->Size() }};
-				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target},cam.viewport,cam.clear_data.index() != idk::index_in_variant_v<DontClear,decltype(cam.clear_data)>);
-			}
 			
+			SetCamera(cam);
+			SetLights(curr_object_buffer.lights);
+			auto& lights = curr_state.lights;
 			// lock drawing buffer
 			pipeline.Use();
 			pipeline.PopAllPrograms();
-			glBindVertexArray(vao_id);
-			
-				
-			std::visit([&]([[maybe_unused]] const auto& obj)
-			{
-				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
-				{
-					if (!obj)
-						return;
-					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
 
-					//oglCubeMap.ID;
+			glBindVertexArray(vao_id);	
 
-					glDisable(GL_CULL_FACE);
-					glDepthMask(GL_FALSE);
-					pipeline.PushProgram(renderer_vertex_shaders[VSkyBox]);
-					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
-
-					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
-
-					oglCubeMap.BindToUnit(0);
-					pipeline.SetUniform("sb", 0);
-					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
-						{ {
-							std::make_pair(vtx::Attrib::Position, 0)
-						} });
-
-					glDepthMask(GL_TRUE);
-					glEnable(GL_CULL_FACE);
-				}
-				static_assert(idk::is_variant_member_v <color, decltype(CameraData::clear_data)>, "Expected color in variant");
-				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
-				{
-					glClearColor(obj.r, obj.g, obj.b, obj.a);
-					glEnable(GL_SCISSOR_TEST);
-					glClear(GL_COLOR_BUFFER_BIT);
-					glDisable(GL_SCISSOR_TEST);
-				}
-			}, cam.clear_data);
-
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
+			PushVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], MeshRenderer::GetRequiredAttributes());
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -416,7 +374,7 @@ namespace idk::ogl
 				}
 
 			// per mesh render
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
+			PushVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh]);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			// If we only use proj_matrix, frustrum will be in view space.
@@ -430,31 +388,95 @@ namespace idk::ogl
 
 				// We only draw if the frustrum contains the mesh
 				if (!frust.contains(transformed_bounds))
-				{
-					// LOG_TO(LogPool::GFX, "Culled Mesh");
 					continue;
-				}
 
 				// bind shader
 				const auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
+				if (curr_material != material)
+				{
+					pipeline.PushProgram(material->_shader_program);
+					curr_material = material;
+				}
 
 				// set probe
 				GLuint texture_units = 0;
 				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
 				SetLightUniforms   (span<LightData>{lights}, texture_units);
 				SetMaterialUniforms(elem.material_instance, texture_units);
-				SetObjectUniforms  (elem, cam.view_matrix);
 
-				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+				//RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+
+				PushObjectTransform(elem.transform);
+				if (curr_mesh != elem.mesh)
+				{
+					// flush old mesh
+					if (curr_mesh)
+					{
+						normal_transforms.resize(object_transforms.size());
+						std::transform(object_transforms.begin(), object_transforms.end(), normal_transforms.begin(), [&](const mat4& object_tfm) -> mat4
+							{
+								return object_tfm.inverse().transpose();
+							});
+
+						constexpr auto attrib_ptr_mat = [](int target)
+						{
+							for (int i = 0; i < 4; i++) {
+								glEnableVertexAttribArray(target + i);
+								glVertexAttribPointer(target + i, 4, GL_FLOAT, false, sizeof(mat4), (void*) (sizeof(vec4) * i));
+								glVertexAttribDivisor(target + i, 1);
+							}
+						};
+
+						glBindBuffer(GL_ARRAY_BUFFER, mesh_batch_object_transform_fbo);
+						glBufferData(GL_ARRAY_BUFFER, object_transforms.size() * sizeof(mat4), std::data(object_transforms), GL_DYNAMIC_DRAW);
+						attrib_ptr_mat(4);
+
+						glBindBuffer(GL_ARRAY_BUFFER, mesh_batch_normal_transform_fbo);
+						glBufferData(GL_ARRAY_BUFFER, normal_transforms.size() * sizeof(mat4), std::data(normal_transforms), GL_DYNAMIC_DRAW);
+						attrib_ptr_mat(8);
+
+						RscHandle<OpenGLMesh>{curr_mesh}->DrawInstanced(object_transforms.size());
+						glVertexAttribDivisor(4, 0);
+						glVertexAttribDivisor(5, 0);
+						glVertexAttribDivisor(6, 0);
+						glVertexAttribDivisor(7, 0);
+						glVertexAttribDivisor(8, 0);
+						glVertexAttribDivisor(9, 0);
+						glVertexAttribDivisor(10, 0);
+						glVertexAttribDivisor(11, 0);
+
+						object_transforms.clear();
+						normal_transforms.clear();
+						glDisableVertexArrayAttrib(vao_id, 4);
+						glDisableVertexArrayAttrib(vao_id, 5);
+						glDisableVertexArrayAttrib(vao_id, 6);
+						glDisableVertexArrayAttrib(vao_id, 7);
+						glDisableVertexArrayAttrib(vao_id, 8);
+						glDisableVertexArrayAttrib(vao_id, 9);
+						glDisableVertexArrayAttrib(vao_id, 10);
+						glDisableVertexArrayAttrib(vao_id, 11);
+					}
+
+					// bind new mesh
+					RscHandle<OpenGLMesh>{ elem.mesh }->Bind(MeshRenderer::GetRequiredAttributes());
+					curr_mesh = elem.mesh;
+				}
 			}
+			
+			// flush old mesh
+			if (curr_mesh)
+				FlushBuffers();
 
-			BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
+			PushVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], SkinnedMeshRenderer::GetRequiredAttributes());
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
 				// bind shader
 				const auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
+				if (curr_material != material)
+				{
+					pipeline.PushProgram(material->_shader_program);
+					curr_material = material;
+				}
 
 				GLuint texture_units = 0;
 				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
@@ -462,7 +484,6 @@ namespace idk::ogl
 				SetSkeletons       (elem.skeleton_index);
 				SetMaterialUniforms(elem.material_instance, texture_units);
 				SetObjectUniforms  (elem, cam.view_matrix);
-
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
@@ -475,7 +496,7 @@ namespace idk::ogl
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			////////////////////////FONT///////////////////////
-			pipeline.PushProgram(renderer_vertex_shaders[VFont]);
+			PushVertexShader(renderer_vertex_shaders[VFont]);
 			pipeline.PushProgram(renderer_fragment_shaders[FFont]);
 
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
@@ -535,7 +556,7 @@ namespace idk::ogl
             
 
 			glBindVertexArray(particle_vao_id);
-            BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
+            PushVertexShader(renderer_vertex_shaders[VertexShaders::VParticle]);
             vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
             vec3 cam_pos = cam.view_matrix[3];
             auto particle_render_data = curr_object_buffer.particle_render_data;
@@ -551,7 +572,7 @@ namespace idk::ogl
                 SetMaterialUniforms(elem.material_instance, texture_units);
 
                 RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
-                    renderer_reqs{ {
+                    renderer_attributes{ {
                         { vtx::Attrib::Position, 0 },
                         { vtx::Attrib::UV, 1 },
                     }
@@ -560,7 +581,7 @@ namespace idk::ogl
                 glVertexAttribDivisor(1, 0);
 
                 bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
-                bufs[1].BindForDraw(renderer_reqs{ {
+                bufs[1].BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
@@ -589,6 +610,7 @@ namespace idk::ogl
 		
 		//vector<OpenGLTexture> addMainBuffer;
 		//addMainBuffer.emplace_back(cBufferPickingTexture);
+		if (0)
 		{		
 			auto cam = curr_object_buffer.curr_scene_camera;
 			{
@@ -610,39 +632,7 @@ namespace idk::ogl
 				pipeline.PopAllPrograms();
 				glBindVertexArray(vao_id);
 
-				//std::visit([&]([[maybe_unused]] const auto& obj)
-				//{
-				//	if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
-				//	{
-				//		if (!obj)
-				//			return;
-				//		auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
-
-				//		//oglCubeMap.ID;
-
-				//		glDisable(GL_CULL_FACE);
-				//		glDepthMask(GL_FALSE);
-				//		pipeline.PushProgram(renderer_vertex_shaders[SkyBox]);
-				//		pipeline.PushProgram(renderer_fragment_shaders[FPicking]);
-
-				//		pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
-				//		pipeline.SetUniform("obj_index", cam.obj_id);
-
-				//		oglCubeMap.BindToUnit(0);
-				//		pipeline.SetUniform("sb", 0);
-				//		RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
-				//			{ {
-				//				std::make_pair(vtx::Attrib::Position, 0)
-				//			} });
-
-				//		glDepthMask(GL_TRUE);
-				//		glEnable(GL_CULL_FACE);
-				//	}
-				//	if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
-				//		glClearColor(obj.x, obj.y, obj.z, obj.w);
-				//}, cam.clear_data);
-
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
+				PushVertexShader(renderer_vertex_shaders[VertexShaders::VDebug]);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FPicking]);
 				// render debug
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -657,7 +647,7 @@ namespace idk::ogl
 					}
 
 				// per mesh render
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
+				PushVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh]);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				for (auto& elem : curr_object_buffer.mesh_render)
@@ -678,7 +668,7 @@ namespace idk::ogl
 					RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
 				}
 
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
+				PushVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh]);
 				for (auto& elem : curr_object_buffer.skinned_mesh_render)
 				{
 					// bind shader
@@ -784,6 +774,160 @@ namespace idk::ogl
 	void OpenGLState::IsPicking()
 	{
 		is_picking = true;
+	}
+
+	void OpenGLState::SetCamera(const CameraData& cam)
+	{
+		fb_man.SetRenderTarget(
+			RscHandle<OpenGLRenderTarget>{cam.render_target},
+			cam.viewport
+		);
+
+		// clear
+		std::visit([&]([[maybe_unused]] const auto& obj)
+			{
+				static_assert(idk::is_variant_member_v <color, decltype(CameraData::clear_data)>, "Expected color in variant");
+
+				using T = std::decay_t<decltype(obj)>;
+
+				glEnable(GL_SCISSOR_TEST);
+				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+				{
+					if (!obj)
+						return;
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					glDisable(GL_CULL_FACE);
+					glDepthMask(GL_FALSE);
+
+					pipeline.PushProgram(sys->renderer_vertex_shaders[VSkyBox]);
+					pipeline.PushProgram(sys->renderer_fragment_shaders[FSkyBox]);
+
+					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
+
+					obj.as<OpenGLCubemap>().BindToUnit(0);
+					pipeline.SetUniform("sb", 0);
+
+					RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::Box]}
+					->BindAndDraw(renderer_attributes
+						{ {
+							std::make_pair(vtx::Attrib::Position, 0)
+						} });
+
+					glDepthMask(GL_TRUE);
+					glEnable(GL_CULL_FACE);
+				}
+
+				if constexpr (std::is_same_v<T, color>)
+				{
+					glClearColor(obj.r, obj.g, obj.b, obj.a);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				}
+
+				if constexpr (std::is_same_v<T, DepthOnly>)
+					glClear(GL_DEPTH_BUFFER_BIT);
+
+				glDisable(GL_SCISSOR_TEST);
+			}, cam.clear_data);
+
+		curr_state.camera_frustum = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
+		curr_state.camera_data = cam;
+	}
+
+	void OpenGLState::SetLights(const vector<LightData>& original_data)
+	{
+		curr_state.lights.resize(original_data.size());
+		std::copy(original_data.begin(), original_data.end(), curr_state.lights.begin());
+		for (auto& elem : curr_state.lights)
+		{
+			elem.v_pos = vec3{ curr_state.camera_data.view_matrix * vec4{ elem.v_pos, 1 } };
+			elem.v_dir = vec3{ curr_state.camera_data.view_matrix * vec4{ elem.v_dir , 0 } };
+		}
+	}
+
+	bool OpenGLState::PushVertexShader(RscHandle<ShaderProgram> vtx_shader, const renderer_attributes& attribs)
+	{
+		if (curr_state.vtx_shader != vtx_shader)
+		{
+			pipeline.PushProgram(vtx_shader);
+			pipeline.SetUniform("PerCamera.perspective_transform", curr_state.camera_data.projection_matrix);
+			pipeline.SetUniform("PerCamera.view_transform", curr_state.camera_data.view_matrix);
+			curr_state.renderer_attribs = attribs;
+			curr_state.vtx_shader = vtx_shader;
+			return true;
+		}
+		return false;
+	}
+
+	bool OpenGLState::PushMaterial(RscHandle<Material> vertex_shader)
+	{
+		return false;
+	}
+
+	bool OpenGLState::PushMesh(RscHandle<Mesh> mesh)
+	{
+		if (mesh != curr_state.mesh)
+		{
+			RscHandle<OpenGLMesh>{mesh}->Bind(curr_state.renderer_attribs);
+			curr_state.mesh = mesh;
+		}
+		return false;
+	}
+
+	void OpenGLState::PushObjectTransform(const mat4& mat)
+	{
+		renderer_buffer.model_view_transforms.emplace_back(curr_state.camera_data.view_matrix * mat);
+	}
+
+	void OpenGLState::FlushBuffers()
+	{
+		auto& object_transforms = renderer_buffer.model_view_transforms;
+		auto& normal_transforms = renderer_buffer.normal_transforms;
+
+		renderer_buffer.normal_transforms.resize(renderer_buffer.model_view_transforms.size());
+		std::transform(object_transforms.begin(), object_transforms.end(), normal_transforms.begin(), [&](const mat4& object_tfm) -> mat4
+			{
+				return object_tfm.inverse().transpose();
+			});
+
+		constexpr auto attrib_ptr_mat = [](int target)
+		{
+			for (int i = 0; i < 4; i++) {
+				glEnableVertexAttribArray(target + i);
+				glVertexAttribPointer(target + i, 4, GL_FLOAT, false, sizeof(mat4), (void*)(sizeof(vec4) * i));
+				glVertexAttribDivisor(target + i, 1);
+			}
+		};
+
+		glBindBuffer(GL_ARRAY_BUFFER, mesh_batch_object_transform_fbo);
+		glBufferData(GL_ARRAY_BUFFER, object_transforms.size() * sizeof(mat4), std::data(object_transforms), GL_DYNAMIC_DRAW);
+		attrib_ptr_mat(4);
+
+		glBindBuffer(GL_ARRAY_BUFFER, mesh_batch_normal_transform_fbo);
+		glBufferData(GL_ARRAY_BUFFER, normal_transforms.size() * sizeof(mat4), std::data(normal_transforms), GL_DYNAMIC_DRAW);
+		attrib_ptr_mat(8);
+
+		RscHandle<OpenGLMesh>{curr_state.mesh}->DrawInstanced(object_transforms.size());
+
+		glVertexAttribDivisor(4, 0);
+		glVertexAttribDivisor(5, 0);
+		glVertexAttribDivisor(6, 0);
+		glVertexAttribDivisor(7, 0);
+		glVertexAttribDivisor(8, 0);
+		glVertexAttribDivisor(9, 0);
+		glVertexAttribDivisor(10, 0);
+		glVertexAttribDivisor(11, 0);
+
+		glDisableVertexArrayAttrib(vao_id, 4);
+		glDisableVertexArrayAttrib(vao_id, 5);
+		glDisableVertexArrayAttrib(vao_id, 6);
+		glDisableVertexArrayAttrib(vao_id, 7);
+		glDisableVertexArrayAttrib(vao_id, 8);
+		glDisableVertexArrayAttrib(vao_id, 9);
+		glDisableVertexArrayAttrib(vao_id, 10);
+		glDisableVertexArrayAttrib(vao_id, 11);
+
+		object_transforms.clear();
+		normal_transforms.clear();
 	}
 
 }
