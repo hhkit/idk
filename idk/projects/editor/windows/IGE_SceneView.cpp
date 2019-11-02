@@ -200,6 +200,9 @@ namespace idk {
 
 
 			}
+			// If raycast hits nothing, we should clear the selected objects
+			else 
+				Core::GetSystem<IDE>().selected_gameObjects.clear();
 		}
 
 		//Right Mouse WASD control

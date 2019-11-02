@@ -228,68 +228,6 @@ namespace idk
             q.y = -q.y;
             q.z = -q.z;
             return q.normalized;
-            //Quaternion q;
-            //Vector3 right = Vector3.Cross(up, forward);
-
-            //float r00 = right.x;
-            //float r01 = right.y;
-            //float r02 = right.z;
-            //float r10 = up.x;
-            //float r11 = up.y;
-            //float r12 = up.z;
-            //float r20 = forward.x;
-            //float r21 = forward.y;
-            //float r22 = forward.z;
-
-            //// from geometrictools
-            //if (r22 <= 0)  // x^2 + y^2 >= z^2 + w^2
-            //{
-            //    float dif10 = r11 - r00;
-            //    float omr22 = 1.0f - r22;
-            //    if (dif10 <= 0)  // x^2 >= y^2
-            //    {
-            //        float fourxsqr = omr22 - dif10;
-            //        float inv4x = 0.5f / Mathf.Sqrt(fourxsqr);
-            //        q.x = fourxsqr * inv4x;
-            //        q.y = (r10 + r01) * inv4x;
-            //        q.z = (r20 + r02) * inv4x;
-            //        q.w = (r21 - r12) * inv4x;
-            //    }
-            //    else  // y^2 >= x^2
-            //    {
-            //        float fourysqr = omr22 + dif10;
-            //        float inv4y = 0.5f / Mathf.Sqrt(fourysqr);
-            //        q.x = (r10 + r01) * inv4y;
-            //        q.y = fourysqr * inv4y;
-            //        q.z = (r20 + r02) * inv4y;
-            //        q.w = (r21 - r12) * inv4y;
-            //    }
-            //}
-            //else  // z^2 + w^2 >= x^2 + y^2
-            //{
-            //    float sum10 = r11 + r00;
-            //    float opr22 = 1.0f + r22;
-            //    if (sum10 <= 0)  // z^2 >= w^2
-            //    {
-            //        float fourzsqr = opr22 - sum10;
-            //        float inv4z = 0.5f / Mathf.Sqrt(fourzsqr);
-            //        q.x = (r20 + r02) * inv4z;
-            //        q.y = (r21 + r12) * inv4z;
-            //        q.z = fourzsqr * inv4z;
-            //        q.w = (r10 - r01) * inv4z;
-            //    }
-            //    else  // w^2 >= z^2
-            //    {
-            //        float fourwsqr = opr22 + sum10;
-            //        float inv4w = 0.5f / Mathf.Sqrt(fourwsqr);
-            //        q.x = (r21 - r12) * inv4w;
-            //        q.y = (r02 - r20) * inv4w;
-            //        q.z = (r10 - r01) * inv4w;
-            //        q.w = fourwsqr * inv4w;
-            //    }
-            //}
-
-            //return q.normalized;
         }
 
         public static Quaternion Normalize(Quaternion q)

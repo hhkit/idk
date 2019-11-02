@@ -207,6 +207,13 @@ namespace idk
 		// Get the actual animation data
 		auto anim_data = anim_state.GetBasicState();
 
+		// We don't support blend trees yet
+		if (!anim_data->motion)
+		{
+			state.is_stopping = true;
+			return result;
+		}
+
 		// Compute the number of ticks this loop given the normalized time. 
 		const float ticks = std::min(state.normalized_time, 1.0f) * anim_data->motion->GetNumTicks();
 
@@ -324,6 +331,7 @@ namespace idk
 			// Check if the animator wants to stop after this update
 			if (layer.curr_state.is_stopping == true)
 			{
+				layer.curr_state.normalized_time = 0.0f;
 				layer.curr_state.is_playing = false;
 				layer.curr_state.is_stopping = false;
 			}
@@ -581,6 +589,7 @@ namespace idk
 				for (auto& anim : animator->animation_table)
 				{
 					animator->animation_display_order.emplace_back(anim.first);
+					anim.second.valid = true;
 				}
 			}
 

@@ -1,3 +1,30 @@
+- !65536 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
 - !4295032832 
   - active: 1
   - !Transform 
@@ -86,7 +113,15 @@
         mode: Constant
       radial: {max: 0, min: 0, mode: Constant}
   - !Animator 
-    animation_table: {}
+    animation_display_order: [idle]
+    animation_table: 
+      idle: 
+        loop: 1
+        name: idle
+        speed: 0.48
+        state_data: !BasicAnimationState 
+          motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
+        valid: 1
     layer_table: {}
     layers: 
     - blend_type: Override_Blend

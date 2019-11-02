@@ -780,77 +780,113 @@ namespace idk {
 			c_anim->layers[1].default_weight = 0.0f;
 		}
 #else
-		ImGui::Text("Animation Clips");
-		ImGui::Separator();
 		ImGui::NewLine();
-
 		auto state_window_flags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
 		auto state_window_width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
 		constexpr float state_window_height = 130.0f;
-
-		for (auto& curr_state_key : c_anim->animation_display_order)
+		if (c_anim->animation_display_order.empty())
 		{
-			// Check if we can actually find the state
-			auto found_state = c_anim->animation_table.find(curr_state_key);
-			IDK_ASSERT(found_state != c_anim->animation_table.end());
-			auto& curr_state = *found_state;
-
-			bool renamed = false;
-			bool to_remove = false;
-
-			// Will change this to use something other than collapsing header. 
-			
-			ImGui::Text("Name: ");
-			// ImGui::PushID(c_anim.id);
-			ImGui::PushItemWidth(150.0f);
-			ImGui::SameLine();
-			renamed = ImGui::InputText(("##name" + curr_state.first).c_str(), &curr_state.second.name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
-			ImGui::PopItemWidth();
-			// ImGui::PopID();
-
-			if (ImGui::IsItemDeactivatedAfterEdit() && !renamed)
-				curr_state.second.name = curr_state.first;
-			
-			if (ImGui::BeginChild(("##window" + curr_state.first).c_str(), ImVec2{ state_window_width, state_window_height }, true, state_window_flags))
+			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "Start by adding an animation state!");
+		}
+		else
+		{
+			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
+			if (ImGui::CollapsingHeader("Animation States", ImGuiTreeNodeFlags_AllowItemOverlap))
 			{
-				if (curr_state.second.IsBlendTree())
+				ImGui::Indent(5.0f);
+				for (auto& curr_state_key : c_anim->animation_display_order)
 				{
-					ImGui::Text("State Type: Blend Tree");
-				}
-				else
-				{
-					ImGui::Text("State Type: Basic Animation");		
-					auto& state_data = *curr_state.second.GetBasicState();
-					ImGuidk::InputResource(imgui_name("Animation Clip", curr_state.first).c_str(), &state_data.motion);
-					ImGui::DragFloat(imgui_name("Speed", curr_state.first).c_str(), &curr_state.second.speed, 0.01f);
-					ImGui::Checkbox(imgui_name("Loop", curr_state.first).c_str(), &curr_state.second.loop);
+					// Check if we can actually find the state
+					auto found_state = c_anim->animation_table.find(curr_state_key);
+					IDK_ASSERT(found_state != c_anim->animation_table.end());
+					auto& curr_state = *found_state;
+
+					bool renamed = false;
+					bool to_remove = false;
+
+					// Will change this to use something other than collapsing header. 
+					if (!curr_state.second.valid)
+						ImGuidk::PushDisabled();
+
+					ImGui::Text("Animation State: ");
+					ImGui::PushItemWidth(150.0f);
+					ImGui::SameLine();
+					renamed = ImGui::InputText(("##Animation State" + curr_state.first).c_str(), &curr_state.second.name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
+					ImGui::PopItemWidth();
+
+					if (ImGui::IsItemDeactivatedAfterEdit() && !renamed)
+						curr_state.second.name = curr_state.first;
+
+					if (ImGui::BeginChild(("##window" + curr_state.first).c_str(), ImVec2{ state_window_width, state_window_height }, true, state_window_flags))
+					{
+						if (curr_state.second.IsBlendTree())
+						{
+							ImGui::Text("State Type: Blend Tree");
+						}
+						else
+						{
+							const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
+							const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
+							{
+								colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
+								ImGui::SameLine();
+								ImGui::SetCursorPosX(drag_pos);
+							};
+
+							auto& state_data = *curr_state.second.GetBasicState();
+							ImGui::Text("State Type: Basic Animation");
+							const bool has_valid_clip = s_cast<bool>(state_data.motion);
+							display_name_align("Clip", !has_valid_clip);
+							ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &state_data.motion);
+
+							if (!has_valid_clip)
+								ImGuidk::PushDisabled();
+							display_name_align("Speed");
+							ImGui::DragFloat(("##speed" + curr_state.first).c_str(), &curr_state.second.speed, 0.01f);
+
+							display_name_align("Loop");
+							ImGui::Checkbox(("##loop" + curr_state.first).c_str(), &curr_state.second.loop);
+							ImGui::NewLine();
+
+							if (!has_valid_clip)
+								ImGuidk::PopDisabled();
+
+							if (ImGui::Button(imgui_name("Delete State", curr_state.first).c_str()))
+								to_remove = true;
+						}
+
+					}
+					ImGui::EndChild();
 					ImGui::NewLine();
-					if (ImGui::Button(imgui_name("Delete State", curr_state.first).c_str()))
-						to_remove = true;
-				}
-				
-			}
-			ImGui::EndChild();
-			ImGui::NewLine();
-			if (to_remove)
-			{
-				c_anim->RemoveAnimation(curr_state.first);
-			}
+					if (!curr_state.second.valid)
+						ImGuidk::PopDisabled();
 
-			if (renamed)
-			{
-				bool success = c_anim->RenameAnimation(curr_state.first, curr_state.second.name);
-				if (!success)
-					curr_state.second.name = curr_state.first;
-				LOG_TO(LogPool::SYS, "RENMAED");
-				break;
+					if (to_remove)
+					{
+						c_anim->RemoveAnimation(curr_state.first);
+						break;
+					}
+
+					if (renamed)
+					{
+						bool success = c_anim->RenameAnimation(curr_state.first, curr_state.second.name);
+						if (!success)
+							curr_state.second.name = curr_state.first;
+						break;
+					}
+				}
+				ImGui::Unindent(5.0f);
 			}
 		}
 
-		if (ImGui::Button("Add Animation State"))
+		
+		
+		const ImVec2 add_animation_button_size{ 150.0f, 30.0f};
+		if (ImGui::Button("Add Animation State", add_animation_button_size))
 		{
 			c_anim->AddAnimation(RscHandle<anim::Animation>{});
 		}
+		
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
@@ -871,9 +907,25 @@ namespace idk {
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::Text("Dragging an animation file to this button works too!");
+			ImGui::EndTooltip();
+		}
+		
 		ImGui::NewLine();
 
-		if (ImGui::BeginCombo(imgui_name("Default State", c_anim->layers[0].name).c_str(), c_anim->layers[0].default_state.c_str()))
+		auto found_default = c_anim->animation_table.find(c_anim->layers[0].default_state);
+		if(found_default == c_anim->animation_table.end() || !found_default->second.valid)
+			ImGui::TextColored(ImVec4{1,0,0,1}, "Default State");
+		else
+			ImGui::Text("Default State");
+
+		ImGui::SameLine();
+		ImGui::PushItemWidth(150.0f);
+		if (ImGui::BeginCombo(imgui_name("##def state", c_anim->layers[0].name).c_str(), c_anim->layers[0].default_state.c_str()))
 		{
 			for (auto& anim : c_anim->animation_table)
 			{
@@ -883,42 +935,44 @@ namespace idk {
 					// c_anim->Stop();
 					c_anim->layers[0].default_state = curr_name;
 					c_anim->layers[0].curr_state.name = curr_name;
-
 				}
 			}
 			ImGui::EndCombo();
 		}
-
-		ImGui::NewLine();
-		if (ImGui::Checkbox("Preview", &c_anim->preview_playback))
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		ImGui::Text("Preview"); ImGui::SameLine();
+		if (ImGui::Checkbox(imgui_name("##preview", c_anim->layers[0].name).c_str(), &c_anim->preview_playback))
 		{
 			c_anim->OnPreview();
 		}
-
-		ImGui::NewLine();
-		ImGui::Text("Debug Info");
-		ImGui::Separator();
 		ImGui::NewLine();
 
-		ImGui::Text("Current State: "); 
+		const auto data_pos_x = ImGui::CalcTextSize("Blending To: ").x + ImGui::GetCursorPosX();
+		const ImVec4 playing_text__col = c_anim->IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
+		ImGui::TextColored(playing_text__col, "Playing: ");
 		ImGui::SameLine();
-		ImGui::Text(c_anim->layers[0].curr_state.name.c_str());
 
-		ImGui::TextColored(c_anim->IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Playing");
+		ImGui::SetCursorPosX(data_pos_x);
+		string display_name = c_anim->layers[0].curr_state.name;
+		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), c_anim->layers[0].curr_state.normalized_time);
 		ImGui::ProgressBar(c_anim->layers[0].curr_state.normalized_time, ImVec2{ -1, 10 }, nullptr);
-		ImGui::NewLine();
 
-		ImGui::Text("Blending To State: ");
+		const ImVec4 blend_col = c_anim->IsBlending() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
+		ImGui::TextColored(blend_col, "Blending To: ");
+		display_name = c_anim->layers[0].blend_state.name;
 		ImGui::SameLine();
-		ImGui::Text(c_anim->layers[0].blend_state.name.c_str());
-		ImGui::TextColored(c_anim->IsBlending() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 }, "Blending");
-		static ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f } ;
+
+		ImGui::SetCursorPosX(data_pos_x);
+		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), c_anim->layers[0].blend_state.normalized_time);
+		static ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
 		if (c_anim->layers[0].blend_state.is_playing)
 			ImGui::ProgressBar(c_anim->layers[0].blend_state.normalized_time / c_anim->layers[0].blend_duration, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
 		else
 			ImGui::ProgressBar(0.0f, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
 
-
+		ImGui::NewLine();
+		
 #endif
        
 	}
