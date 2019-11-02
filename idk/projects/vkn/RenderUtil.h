@@ -17,9 +17,10 @@ namespace idk::vkn
 	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size);
 	struct CubemapRenderer
 	{
-		PipelineManager pipeline_manager;
 		VulkanPipeline* pipeline;
 		VulkanPipeline& Pipeline();
+		PipelineManager& pipeline_manager()const;
+		PipelineManager& pipeline_manager(PipelineManager&);
 		std::pair<uint32_t, vk::DescriptorSet> mat4blk;
 		std::pair<uint32_t,vk::DescriptorSet>  environment_probe;
 		renderer_reqs req;
@@ -27,6 +28,7 @@ namespace idk::vkn
 		RscHandle<ShaderModule> vert;
 		RscHandle<ShaderModule> geom;
 		RscHandle<ShaderModule> frag;
+		vector<RscHandle<ShaderProgram>> prog;
 
 		vector<RscHandle<VknFrameBuffer>> frame_buffers; //should match ROs in thingy
 
@@ -80,5 +82,7 @@ namespace idk::vkn
 		void ResetRsc();
 
 		CubemapRenderer():ds_manager{View()}{}
+	private:
+		PipelineManager* _pipeline_manager;
 	};
 }

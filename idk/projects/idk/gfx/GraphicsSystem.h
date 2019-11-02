@@ -90,6 +90,9 @@ namespace idk
 		std::optional<AnimatedRenderObject> GetAnimatedRenderObj(const SkinnedMeshRenderer& skinned_mesh_renderer, const hash_table<Handle<Animator>, size_t>& index_table);
 		std::optional<RenderObject> GetRenderObj(const MeshRenderer& skinned_mesh_renderer);
 
+		bool is_deferred()const;
+		bool is_deferred(bool enable);
+
 		size_t AddRenderRequest(RenderRequest&& request);
 
 		bool RenderRequestStatus(size_t index);
@@ -148,6 +151,6 @@ namespace idk
 
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);
-
+		bool _is_deferred = false;
 	};
 }

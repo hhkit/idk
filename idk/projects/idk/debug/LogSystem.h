@@ -13,6 +13,7 @@ namespace idk
 	{
 	public:
 		~LogSystem();
+		static constexpr size_t log_buffer_size = 2048;
 	private:
 		struct LogHandle
 		{
