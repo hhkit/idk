@@ -38,7 +38,12 @@ namespace idk::vkn
 				}
 				if (!allocated[i] && is_nonzero)
 				{
-					auto pool = pools.TryGet(des);
+					auto des_copy = des;
+					for (auto& d : des_copy)
+					{
+						d *= num_ds;
+					}
+					auto pool = pools.TryGet(des_copy);
 					allocated[i] = static_cast<bool>(pool);
 					if (pool)
 					{
@@ -56,7 +61,7 @@ namespace idk::vkn
 					{
 						for (size_t index = 0; index < std::size(num_req); ++index)
 						{
-							num_req[index] += des[index];
+							num_req[index] += des_copy[index];
 						}
 						req_more = true;
 					}
