@@ -267,8 +267,8 @@ namespace idk::vkn
 		_convoluter.pipeline_manager(*_pipeline_manager);
 		_convoluter.Init(
 			Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VPBRConvolute],
-			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube],
-			Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute]	
+			Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute],
+			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube]
 		);
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)

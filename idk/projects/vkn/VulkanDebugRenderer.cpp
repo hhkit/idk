@@ -24,10 +24,6 @@
 
 namespace idk::vkn
 {
-	namespace glm
-	{
-		mat4 lookAt(vec3 const& eye, vec3 const& center, vec3 const& up);
-	}
 
 	const std::vector<vec3>& GetSquareFace(bool is_line_list = false);
 	template<typename V, typename F>
@@ -247,7 +243,7 @@ namespace idk::vkn
 		{
 			//if (elem.mesh == Mesh::defaults[MeshType::Box])
 			{
-				DrawShape(DbgShape::eCube, elem.transform, elem.color);
+				DrawShape(MeshType::Box, elem.transform, elem.color);
 			}
 		}
 		for (auto& [shape, buffer] : info->render_info)
