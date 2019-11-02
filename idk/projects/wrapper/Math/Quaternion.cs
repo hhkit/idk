@@ -32,14 +32,14 @@ namespace idk
             get
             {
                 Vector3 v;
-                v.x = Mathf.Atan2(w * x + y * z, 0.5f - (x * x + y * y));
+                v.x = Mathf.Atan2(w * x + y * z, 0.5f - (x * x + y * y)) * Mathf.RadToDeg;
 
                 float t2 = 2.0f * (w * y - z * x);
                 if (Mathf.Abs(t2) >= 1.0f) // gimbal
-                    v.y = (t2 < 0 ? -Mathf.PI : Mathf.PI) * 0.5f * t2;
+                    v.y = (t2 < 0 ? -Mathf.PI : Mathf.PI) * 0.5f * t2 * Mathf.RadToDeg;
                 else
                     v.y = Mathf.Asin(t2);
-                v.z = Mathf.Atan2(w * z + x * y, 0.5f - (y * y + z * z));
+                v.z = Mathf.Atan2(w * z + x * y, 0.5f - (y * y + z * z)) * Mathf.RadToDeg;
 
                 return v;
             }
