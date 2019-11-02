@@ -479,7 +479,7 @@ namespace idk::ogl
 			pipeline.PushProgram(renderer_fragment_shaders[FFont]);
 
 			pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
-			glDisable(GL_CULL_FACE);
+			//glDisable(GL_CULL_FACE);
 			for (auto& elem : font_render_data)
 			{
 				if (elem.coords.size())
@@ -512,7 +512,7 @@ namespace idk::ogl
 				}
 				GL_CHECK();
 			}
-			glEnable(GL_CULL_FACE);
+			//glEnable(GL_CULL_FACE);
 
 			glBindVertexArray(0);
 

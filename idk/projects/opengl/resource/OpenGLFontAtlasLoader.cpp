@@ -89,6 +89,7 @@ namespace idk {
 
 				mw += g->bitmap.width + 1;
 				mh = std::max(mh, g->bitmap.rows);
+				//mh = g->bitmap.rows;
 			}
 
 			/* you might as well save this value as it is needed later on */
@@ -144,6 +145,7 @@ namespace idk {
 				font_handle->c[i].tex_offset.y = y / (float)h;
 
 				mh = std::max(mh, g->bitmap.rows);
+				//mh = g->bitmap.rows;
 				x += g->bitmap.width + 1;
 
 

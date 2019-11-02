@@ -14,7 +14,7 @@ namespace idk {
 		real lineSpacing = 0.1f;
 		//ASCII STARTOFFSET
 		real tracking = 1.f;
-		real spacing = 0;
+		real spacing = 10.f;
 		real padding = 1.f;
 		color colour = {1.f,1.f,1.f,1.f};
 		int  fontSize = 48;

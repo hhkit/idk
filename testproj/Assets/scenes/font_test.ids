@@ -67,7 +67,7 @@
       r: 1
     fontSize: 48
     padding: 1
-    spacing: 0
-    text: HAPPY NEW YEAR.
+    spacing: 10
+    text: "HAPPY NEW YEAR.\nhihihihihihi"
     textureAtlas: {guid: 382a438e-adc8-4283-a8d0-e339f7d34159}
     tracking: 1

@@ -990,15 +990,22 @@ namespace idk {
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
 	{
-		//Draw All your custom variables here.
-		/*ImGui::Text("Text: ");
-		ImGui::SameLine();*/
-		ImGui::Text("Spacing: ");
-		//ImGui::SameLine();
-		ImGui::Text("Track: ");
+		ImGui::Text("Text:       ");
+		ImGui::SameLine();
+		ImGui::InputTextMultiline("##InputText", &c_font->text);
 
-		ImGui::InputText("Text :",&c_font->text);
-		//ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+		ImGui::Text("Spacing: ");
+		ImGui::SameLine();
+		ImGui::DragFloat("##fontspacing", &c_font->spacing);
+
+		ImGui::Text("Track:     ");
+		ImGui::SameLine();
+		ImGui::DragFloat("##fonttrack", &c_font->tracking);
+
+		ImGui::Text("Color:     ");
+		ImGui::SameLine();
+		ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
+
 	}
 
 	template<>
