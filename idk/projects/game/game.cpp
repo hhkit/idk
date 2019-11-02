@@ -84,12 +84,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		break;
 	default:
 		break;
+	
 	}
+	gSys->is_deferred(HasArg(L"--deferred", command_lines, num_args));
+
 	c->AddSystem<IDE>();
 
 	c->Setup();
 
-	LogSingleton::Get().PipeToCout(LogPool::GAME, true);
+	//LogSingleton::Get().PipeToCout(LogPool::GAME, true);
 	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
 
 	//gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);

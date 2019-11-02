@@ -39,12 +39,17 @@ namespace idk::vkn
 		vk::Viewport vp{ s_cast<float>(vp_pos.x),s_cast<float>(vp_pos.y),s_cast<float>(vp_size.x),s_cast<float>(vp_size.y),0,1 };
 		cmd_buffer.setViewport(0, vp);
 	}
+	void SetScissor(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size)
+	{
+		vk::Rect2D vp{ vk::Offset2D{vp_pos.x,vp_pos.y},vk::Extent2D{s_cast<uint32_t>(vp_size.x),s_cast<uint32_t>(vp_size.y)} };
+		cmd_buffer.setScissor(0, vp);
+	}
 	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;
-
-		offset = ivec2{ (translate(ivec2{ 0,sz.y }) * tmat<int,3,3> { scale(ivec2{ 1,-1 }) }).transpose()* ivec3 { offset,1 } };//  -ivec2{ 0,size.y };
+		//offset.y = sz.y - offset.y - size.y;
+		//offset = ivec2{ (translate(ivec2{ 0,sz.y }) * tmat<int,3,3> { scale(ivec2{ 1,-1 }) }).transpose()* ivec3 { offset,1 } };//  -ivec2{ 0,size.y };
 		return pair;
 	}
 
@@ -259,6 +264,7 @@ namespace idk::vkn
 			_render_threads.emplace_back(std::move(thread));
 		}
 		_pre_render_complete = device.createSemaphoreUnique(vk::SemaphoreCreateInfo{});
+		_convoluter.pipeline_manager(*_pipeline_manager);
 		_convoluter.Init(
 			Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VPBRConvolute],
 			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube],
@@ -296,7 +302,7 @@ namespace idk::vkn
 		if (cameras.size())
 		{
 			auto& convolute_state = _pre_states[curr_state];
-
+			_convoluter.pipeline_manager(*_pipeline_manager);
 			_convoluter.BeginQueue(convolute_state.ubo_manager,{});
 			for (auto& camera : cameras)
 			{
@@ -765,11 +771,14 @@ namespace idk::vkn
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
-		bool is_deferred = false;
+		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
 
 		auto& view = View();
 		//auto& swapchain = view.Swapchain();
 		auto& camera = state.camera;
+		auto sz = camera.render_target->Size();
+		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
@@ -784,17 +793,12 @@ namespace idk::vkn
 
 			deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
 			deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
-			deferred_pass.Init(state.camera.render_target->Size());
+			deferred_pass.Init(size);
 			deferred_pass.pipeline_manager(GetPipelineManager());
 			deferred_pass.frame_index(_current_frame_index);
 			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
-
 		}
-
-		auto rtd = camera.render_target->GetDepthBuffer().as<VknTexture>().Image();
-		auto gd = deferred_pass.GBuffer().gbuffer->DepthAttachment().buffer.as<VknTexture>().Image();
-		
-		
+				
 
 		//Preprocess MeshRender's uniforms
 		//TODO make ProcessRoUniforms only render forward pass stuff.
@@ -847,8 +851,6 @@ namespace idk::vkn
 		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
 		TransitionFrameBuffer(camera, cmd_buffer, view);
 
-		auto sz = camera.render_target->Size();
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
 		
 
 		vk::Rect2D render_area
@@ -868,6 +870,8 @@ namespace idk::vkn
 		};			
 		//Begin Clear Pass
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
+		SetViewport(cmd_buffer, offset, size);
+		SetScissor(cmd_buffer,  offset, size);
 		//////////////////Skybox rendering
 		if (sb_cm)
 		{
@@ -885,14 +889,15 @@ namespace idk::vkn
 			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
 
 			//No idea if this is expensive....if really so I will try shift up to init
+			rs.skyboxRenderer.pipeline_manager(*_pipeline_manager);
 			rs.skyboxRenderer.Init(
 				Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox],
-				{},
 				Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox],
+				{},
 				&config,
 				*camera.CubeMapMesh
 			);
-			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * camera.view_matrix);
+			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, * sb_cm, camera.projection_matrix* mat4{ mat3{camera.view_matrix} });
 			
 			/*cmd_buffer.begin(vk::CommandBufferBeginInfo
 				{
