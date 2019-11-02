@@ -79,12 +79,11 @@ namespace idk
     }
 
     template<>
-    void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material)
+    void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material_inst)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
-        auto graph = RscHandle<shadergraph::Graph>{ material->material };
         bool changed = false;
 
         ImGui::Indent(8.0f);
@@ -92,7 +91,11 @@ namespace idk
         ImGui::BeginChild("child");
         ImGui::PushItemWidth(-4.0f);
 
-        for (auto& [name, u] : material->material->uniforms)
+        ImGui::Text("Base Material");
+        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - item_width);
+        changed |= ImGuidk::InputResource("##_base_mat", &material_inst->material);
+
+        for (auto& [name, u] : material_inst->material->uniforms)
         {
             const auto y = ImGui::GetCursorPosY();
 
@@ -100,13 +103,13 @@ namespace idk
 
             ImGui::PushID(name.c_str());
 
-            bool has_override = material->uniforms.find(name) != material->uniforms.end();
+            bool has_override = material_inst->uniforms.find(name) != material_inst->uniforms.end();
             if (ImGui::Checkbox("##override", &has_override))
             {
                 if (has_override)
-                    material->uniforms[name] = material->material->uniforms[name].value;
+                    material_inst->uniforms[name] = material_inst->material->uniforms[name].value;
                 else
-                    material->uniforms.erase(name);
+                    material_inst->uniforms.erase(name);
             }
             ImGui::SameLine();
 
@@ -123,50 +126,50 @@ namespace idk
             {
             case index_in_variant_v<float, UniformInstanceValue>:
             {
-                auto val = std::get<index_in_variant_v<float, UniformInstanceValue>>(*material->GetUniform(name));
+                auto val = std::get<index_in_variant_v<float, UniformInstanceValue>>(*material_inst->GetUniform(name));
                 if (ImGui::DragFloat("", &val, 0.01f))
                 {
-                    material->uniforms[name] = val;
+                    material_inst->uniforms[name] = val;
                     changed = true;
                 }
                 break;
             }
             case index_in_variant_v<vec2, UniformInstanceValue>:
             {
-                auto val = std::get<index_in_variant_v<vec2, UniformInstanceValue>>(*material->GetUniform(name));
+                auto val = std::get<index_in_variant_v<vec2, UniformInstanceValue>>(*material_inst->GetUniform(name));
                 if (ImGuidk::DragVec2("", &val, 0.01f))
                 {
-                    material->uniforms[name] = val;
+                    material_inst->uniforms[name] = val;
                     changed = true;
                 }
                 break;
             }
             case index_in_variant_v<vec3, UniformInstanceValue>:
             {
-                auto val = std::get<index_in_variant_v<vec3, UniformInstanceValue>>(*material->GetUniform(name));
+                auto val = std::get<index_in_variant_v<vec3, UniformInstanceValue>>(*material_inst->GetUniform(name));
                 if (ImGuidk::DragVec3("", &val, 0.01f))
                 {
-                    material->uniforms[name] = val;
+                    material_inst->uniforms[name] = val;
                     changed = true;
                 }
                 break;
             }
             case index_in_variant_v<vec4, UniformInstanceValue>:
             {
-                auto val = std::get<index_in_variant_v<vec4, UniformInstanceValue>>(*material->GetUniform(name));
+                auto val = std::get<index_in_variant_v<vec4, UniformInstanceValue>>(*material_inst->GetUniform(name));
                 if (ImGui::DragFloat4("", val.data(), 0.01f))
                 {
-                    material->uniforms[name] = val;
+                    material_inst->uniforms[name] = val;
                     changed = true;
                 }
                 break;
             }
             case index_in_variant_v<RscHandle<Texture>, UniformInstanceValue>:
             {
-                auto val = std::get<index_in_variant_v<RscHandle<Texture>, UniformInstanceValue>>(*material->GetUniform(name));
+                auto val = std::get<index_in_variant_v<RscHandle<Texture>, UniformInstanceValue>>(*material_inst->GetUniform(name));
                 if (ImGuidk::InputResource("", &val))
                 {
-                    material->uniforms[name] = val;
+                    material_inst->uniforms[name] = val;
                     changed = true;
                 }
                 break;
@@ -185,7 +188,7 @@ namespace idk
         }
 
         if (changed)
-            material->Dirty();
+            material_inst->Dirty();
 
         ImGui::PopItemWidth();
         ImGui::EndChild();
@@ -199,6 +202,8 @@ namespace idk
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
         auto graph = RscHandle<shadergraph::Graph>{ material };
+        if (!graph)
+            return;
 
         ImGui::Indent(8.0f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
