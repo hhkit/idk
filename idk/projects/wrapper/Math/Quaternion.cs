@@ -45,12 +45,15 @@ namespace idk
             }
             set
             {
-                float cx = Mathf.Cos(value.x * 0.5f);
-		        float sx = Mathf.Sin(value.x * 0.5f);
-		        float cy = Mathf.Cos(value.y * 0.5f);
-		        float sy = Mathf.Sin(value.y * 0.5f);
-		        float cz = Mathf.Cos(value.z * 0.5f);
-		        float sz = Mathf.Sin(value.z * 0.5f);
+                float deg_x = Mathf.DegToRad * value.x * 0.5f;
+                float deg_y = Mathf.DegToRad * value.y * 0.5f;
+                float deg_z = Mathf.DegToRad * value.z * 0.5f;
+                float cx = Mathf.Cos(deg_x);
+		        float sx = Mathf.Sin(deg_x);
+		        float cy = Mathf.Cos(deg_y);
+		        float sy = Mathf.Sin(deg_y);
+		        float cz = Mathf.Cos(deg_z);
+		        float sz = Mathf.Sin(deg_z);
 
 			    x = cz * cy * sx - sz * sy * cx;
 			    y = sz * cy * sx + cz * sy * cx;
