@@ -66,6 +66,7 @@ namespace idk::vkn
 	{
 		std::unique_ptr<hlp::MemoryAllocator> allocator;
 		vk::UniqueFence fence;
+		bool rendered_brdf = false;
 		RscHandle<Texture> BrdfLookupTable;
 	};
 
@@ -132,7 +133,7 @@ namespace idk::vkn
 				vk::Offset2D{},vk::Extent2D{s_cast<uint32_t>(vfb.Size().x),s_cast<uint32_t>(vfb.Size().y)}
 			},1,& vk::ClearValue{vk::ClearColorValue{}}
 		};
-			
+		brdf_texture->Name("Brdf");
 		cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
 		
 		VulkanMesh& mesh =  Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
@@ -140,6 +141,10 @@ namespace idk::vkn
 		req.requirements = {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::UV, 1) };
+
+		brdf_pipeline.Bind(cmd_buffer, View());
+		cmd_buffer.setViewport(0, vk::Viewport{ 0,0,s_cast<float>(brdf_texture->Size().x),s_cast<float>(brdf_texture->Size().y),0.0f,1.0f });
+
 		for (auto&& [attrib, location] : req.requirements)
 		{
 			auto& attrib_buffer = mesh.Get(attrib);
@@ -154,11 +159,15 @@ namespace idk::vkn
 		}
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
+		auto device = *View().Device();
+		vk::UniqueFence fence = device.createFenceUnique(vk::FenceCreateInfo{});
 		
 		instance_->View().GraphicsQueue().submit(vk::SubmitInfo
 			{
 				0,nullptr,nullptr,1,&cmd_buffer
-			}, vk::Fence{});
+			}, *fence);
+		while (device.getFenceStatus(*fence) == vk::Result::eNotReady);
+		_pimpl->rendered_brdf = true;
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
@@ -365,6 +374,9 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Prerender()
 	{
+		if(instance_->View().CurrFrame()==1)
+			if (!_pimpl->rendered_brdf)
+				RenderBRDF(renderer_fragment_shaders[FBrdf]);
 	}
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{

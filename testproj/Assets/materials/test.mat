@@ -10,10 +10,6 @@ links:
   slot_out: 0
 - node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
   node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
-  slot_in: 1
-  slot_out: 4
-- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
-  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
   slot_in: 2
   slot_out: 5
 - node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
@@ -88,6 +84,10 @@ links:
   node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
   slot_in: 0
   slot_out: 3
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 1
+  slot_out: 4
 master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
 nodes: 
   2d67e13d-4f70-472f-83e8-f57ddc178edb: 
@@ -103,7 +103,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    position: {x: -294.951355, y: 108.926598}
+    position: {x: -294.95135, y: 108.9266}
   2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6: 
     control_values: 1.000000,0.999990,0.999990,1.000000|
     guid: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
@@ -112,7 +112,7 @@ nodes:
     output_slots: 
     - {type: VEC4, value: ""}
     - {type: VEC3, value: ""}
-    position: {x: 458.527191, y: -16.500626}
+    position: {x: 458.5272, y: -16.500626}
   30eda6ea-765f-45e8-a622-c9c3a3b7d971: 
     control_values: ""
     guid: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
@@ -126,7 +126,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    position: {x: -260.884094, y: 866.056274}
+    position: {x: -260.8841, y: 866.0563}
   4b79717e-f2ae-4127-9155-df7473dc63f9: 
     control_values: ""
     guid: 4b79717e-f2ae-4127-9155-df7473dc63f9
@@ -137,7 +137,7 @@ nodes:
     name: input\basic\Vec3
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: -53.870853, y: 157.406952}
+    position: {x: -53.870853, y: 157.40695}
   505ed4b1-2730-401d-9963-141112ed8a51: 
     control_values: ""
     guid: 505ed4b1-2730-401d-9963-141112ed8a51
@@ -145,7 +145,7 @@ nodes:
     name: $1
     output_slots: 
     - {type: SAMPLER2D, value: ""}
-    position: {x: -483.309570, y: 93.899925}
+    position: {x: -483.30957, y: 93.899925}
   53bbc36e-5863-4a99-a091-93f5aef049dc: 
     control_values: ""
     guid: 53bbc36e-5863-4a99-a091-93f5aef049dc
@@ -156,7 +156,7 @@ nodes:
     name: input\basic\Vec3
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 7.711819, y: -65.149010}
+    position: {x: 7.711819, y: -65.14901}
   7b47c039-a436-4ee7-82de-ce3b7758ff84: 
     control_values: ""
     guid: 7b47c039-a436-4ee7-82de-ce3b7758ff84
@@ -170,7 +170,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    position: {x: -250.039520, y: 349.387726}
+    position: {x: -250.03952, y: 349.38773}
   857596d2-d3c0-43cf-95bb-02a9c9799c0a: 
     control_values: ""
     guid: 857596d2-d3c0-43cf-95bb-02a9c9799c0a
@@ -178,7 +178,7 @@ nodes:
     name: $0
     output_slots: 
     - {type: SAMPLER2D, value: ""}
-    position: {x: -466.972748, y: -126.306313}
+    position: {x: -466.97275, y: -126.30631}
   8c49899c-678c-4a61-98c9-3ba8abd616f7: 
     control_values: ""
     guid: 8c49899c-678c-4a61-98c9-3ba8abd616f7
@@ -186,7 +186,7 @@ nodes:
     name: input\Texture Coordinates
     output_slots: 
     - {type: VEC2, value: ""}
-    position: {x: -1003.878418, y: 239.207489}
+    position: {x: -1003.8784, y: 239.20749}
   8d9815fd-e275-402e-b903-c855d9f1e902: 
     control_values: ""
     guid: 8d9815fd-e275-402e-b903-c855d9f1e902
@@ -194,7 +194,7 @@ nodes:
     name: $2
     output_slots: 
     - {type: SAMPLER2D, value: ""}
-    position: {x: -442.604584, y: 822.257507}
+    position: {x: -442.60458, y: 822.2575}
   98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc: 
     control_values: ""
     guid: 98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc
@@ -202,7 +202,7 @@ nodes:
     name: input\Vertex Normal
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 307.308777, y: 137.826645}
+    position: {x: 307.30878, y: 137.82664}
   99e9f376-1e36-40ee-aaed-f1b22ed73ad6: 
     control_values: ""
     guid: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
@@ -216,7 +216,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    position: {x: -296.393433, y: -132.475342}
+    position: {x: -296.39343, y: -132.47534}
   c1df0434-862e-43f7-86f8-e9f22427f609: 
     control_values: ""
     guid: c1df0434-862e-43f7-86f8-e9f22427f609
@@ -224,7 +224,7 @@ nodes:
     name: $3
     output_slots: 
     - {type: SAMPLER2D, value: ""}
-    position: {x: -402.461151, y: 564.586609}
+    position: {x: -402.46115, y: 564.5866}
   cea7d69a-a98d-4c41-9e2f-54240890c5db: 
     control_values: ""
     guid: cea7d69a-a98d-4c41-9e2f-54240890c5db
@@ -238,7 +238,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    position: {x: -244.349976, y: 608.992554}
+    position: {x: -244.34998, y: 608.99255}
   d5084548-0ebd-44fb-b98c-94bd0951100a: 
     control_values: ""
     guid: d5084548-0ebd-44fb-b98c-94bd0951100a
@@ -250,7 +250,7 @@ nodes:
     - {type: FLOAT, value: ""}
     name: master\PBR
     output_slots: []
-    position: {x: 724.700867, y: 224.665176}
+    position: {x: 724.70087, y: 224.66518}
   e149b4ec-f809-4059-93cb-a0f7d3aeb0b5: 
     control_values: ""
     guid: e149b4ec-f809-4059-93cb-a0f7d3aeb0b5
@@ -259,7 +259,7 @@ nodes:
     name: input\Unpack Normal
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 228.752975, y: 259.676697}
+    position: {x: 228.75298, y: 259.6767}
   efe470eb-07a5-49b8-9e72-bcab56fc470f: 
     control_values: ""
     guid: efe470eb-07a5-49b8-9e72-bcab56fc470f
@@ -267,9 +267,9 @@ nodes:
     name: $4
     output_slots: 
     - {type: SAMPLER2D, value: ""}
-    position: {x: -456.006897, y: 318.553314}
+    position: {x: -456.0069, y: 318.5533}
 parameters: 
-- {default_value: 1704ca64-2ab1-4f6d-a270-a24aa089debb, name: Albedo, type: SAMPLER2D}
+- {default_value: d94f27d0-3c4b-4391-ad38-b1e055c87755, name: Brdf, type: SAMPLER2D}
 - {default_value: 2f8f9f51-13ff-44d3-99bf-81132e173997, name: Normal, type: SAMPLER2D}
 - {default_value: def78e12-bc1a-44e5-b91c-fc26851b2f46, name: AmbientO, type: SAMPLER2D}
 - {default_value: b4f021af-768b-4b6a-9497-52f3ca44cddc, name: Roughness, type: SAMPLER2D}

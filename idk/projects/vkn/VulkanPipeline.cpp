@@ -648,8 +648,8 @@ namespace idk::vkn
 	{
 		vector<vk::DescriptorSetLayout> layouts;
 		uint32_t max = 0;
-		for (auto& pair : uniform_layouts) { max = std::max(pair.first, max); }
-		max += 1;
+		for (auto& pair : uniform_layouts) { max = std::max(pair.first+1, max); }
+		//max += 1;
 		layouts.resize(max);
 		for (auto& [index, info] : uniform_layouts)
 		{

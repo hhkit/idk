@@ -94,12 +94,14 @@ namespace idk::vkn
 			auto& buffer = _buffers[buffer_idx];
 			auto initial_offset = InitialOffset(buffer.data.data(), _alignment);
 
-			auto dst_size= block.size - buffer.offset;
-			auto src_size= buffer.data.size()- initial_offset;
 
-			IDK_ASSERT(src_size <= dst_size);
-			if(buffer.data.size())
-				hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data)+initial_offset,dst_size,view.Dispatcher() );
+			if (buffer.data.size())
+			{
+				auto dst_size = block.size - buffer.offset;
+				auto src_size = buffer.data.size() - initial_offset;
+				IDK_ASSERT(src_size <= dst_size);
+				hlp::MapMemory(*view.Device(), *memory, buffer.offset, std::data(buffer.data) + initial_offset, dst_size, view.Dispatcher());
+			}
 		}
 	}
 
