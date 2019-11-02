@@ -18,6 +18,7 @@ namespace idk::vkn
 		//Assumes that shader programs are the only differing thing.
 		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<vk::RenderPass> render_pass = {},bool has_depth_stencil=false);
 		void CheckForUpdates(uint32_t frame_index);
+		void RemovePipeline(VulkanPipeline* pipeline);
 	private:
 		struct PipelineObject
 		{

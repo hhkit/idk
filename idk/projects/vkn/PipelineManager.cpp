@@ -78,6 +78,47 @@ namespace idk::vkn
 		}
 		return pipelines.get(*prev).pipeline;
 	}
+	void PipelineManager::RemovePipeline(VulkanPipeline* pipeline)
+	{
+		size_t index = 0;
+		for (auto& po : pipelines)
+		{
+			if (&po.pipeline == pipeline)
+			{
+				for (auto& shader : po.shader_handles)
+				{
+					prog_to_pipe.erase(shader);
+				}
+				vector<const string*> keys;
+				for (auto& [str, handle] : prog_to_pipe2)
+				{
+					if (handle == index)
+					{
+						keys.emplace_back(&str);
+					}
+				}
+				for (auto& key : keys)
+				{
+					prog_to_pipe2.erase(*key);
+				}
+				pipelines.free(index);
+				for (auto& queue : update_queue)
+				{
+					for (auto itr = queue.begin(); queue.end() != itr; ++itr)
+					{
+						if (*itr == index)
+						{
+							queue.erase(itr);
+							break;
+						}
+					}
+				}
+				break;
+			}
+			++index;
+		}
+
+	}
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
 		vector<decltype(pipelines)::iterator> pipelines_to_update;
