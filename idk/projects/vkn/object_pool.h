@@ -79,10 +79,17 @@ public:
 	void free(handle_t freeing)
 	{
 		auto& back = objects.back();
-		if (alloced.find(freeing) == alloced.end())
+		auto free_itr = alloced.find(freeing);
+		if (free_itr == alloced.end())
 			throw std::runtime_error("Attempting to free a handle that wasn't allocated.");
-		std::swap(alloced[back.first], alloced[freeing]);
-		std::swap(objects[alloced[back]], objects[alloced[freeing]]);
+		auto back_itr = alloced.find(back.first);
+		std::swap(back_itr->second, free_itr->second);
+		
+		auto& obj_new_back = objects[back_itr->second];
+		auto& obj_new_free = objects[free_itr->second];
+		std::swap(obj_new_back, obj_new_free);
+		freed.emplace(freeing);
+		alloced.erase(free_itr);
 		objects.pop_back();
 	}
 

@@ -167,6 +167,7 @@ namespace idk::vkn
 				0,nullptr,nullptr,1,&cmd_buffer
 			}, *fence);
 		while (device.getFenceStatus(*fence) == vk::Result::eNotReady);
+		_pm->RemovePipeline(&brdf_pipeline);
 		_pimpl->rendered_brdf = true;
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
