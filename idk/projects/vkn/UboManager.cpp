@@ -89,11 +89,17 @@ namespace idk::vkn
 	{
 		for (auto& [buffer_idx,memory_idx] : _allocation_table)
 		{
-			auto& memory = _memory_blocks[memory_idx].memory;
+			auto& block = _memory_blocks[memory_idx];
+			auto& memory = block.memory;
 			auto& buffer = _buffers[buffer_idx];
 			auto initial_offset = InitialOffset(buffer.data.data(), _alignment);
+
+			auto dst_size= block.size - buffer.offset;
+			auto src_size= buffer.data.size()- initial_offset;
+
+			IDK_ASSERT(src_size <= dst_size);
 			if(buffer.data.size())
-				hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data)+initial_offset,buffer.data.size()-initial_offset,view.Dispatcher() );
+				hlp::MapMemory(*view.Device(),*memory,buffer.offset,std::data(buffer.data)+initial_offset,dst_size,view.Dispatcher() );
 		}
 	}
 
@@ -111,7 +117,9 @@ namespace idk::vkn
 	}
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{
-		return data.capacity() >= len +AlignmentOffset() + SizeAlignmentOffset(data.size(),sz_alignment);
+		return data.capacity() >= 
+			data.size() + AlignmentOffset() +
+			SizeAlignmentOffset(len,sz_alignment);
 	}
 
 	size_t UboManager::DataPair::AlignmentOffset() const
@@ -132,7 +140,10 @@ namespace idk::vkn
 		//get the destination start
 		auto dst = data.data()+ data.size();
 		//make sure we can accomodate
+		auto capacity = data.capacity();
 		data.resize(data.size() + aligned_len);
+		if(capacity != data.capacity())
+			throw std::runtime_error{ "resizing our fixed size buffer." };
 		//copy to buffer.
 		memcpy_s(dst, aligned_len, data_, len);
 		//data.append(r_cast<const char*>(data_), len );

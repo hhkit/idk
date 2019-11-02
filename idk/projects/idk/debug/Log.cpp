@@ -2,11 +2,13 @@
 #include "Log.h"
 #include "LogSingleton.h"
 
+#include "LogSystem.h"
+
 namespace idk
 {
 	void Log(LogLevel level, LogPool pool, std::string_view preface, std::string_view message, ...)
 	{
-		char buf[256];
+		char buf[LogSystem::log_buffer_size];
 		size_t printed_size = {};
 		{
 			va_list args;

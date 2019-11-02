@@ -1187,7 +1187,14 @@ namespace idk {
 			IDE& editor = Core::GetSystem<IDE>();
 
 			if (editor.selected_gameObjects.size() == 1) {
-				Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, editor.selected_gameObjects[0], i));
+                Handle<GameObject> go = i.visit([](auto h)
+                {
+                    if constexpr (!std::is_same_v<decltype(h), Handle<GameObject>>)
+                        return h->GetGameObject();
+                    else
+                        return Handle<GameObject>();
+                });
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
 			}
 			else {
 				for (Handle<GameObject> gameObject : editor.selected_gameObjects)
