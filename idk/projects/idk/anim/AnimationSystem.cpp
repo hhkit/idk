@@ -574,6 +574,16 @@ namespace idk
 			sg->visit(initialize_children);
 			Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
 
+			// This is here so that previously serialized animator components will still be able to display 
+			// the animation clips even if animation_display_order is not inside
+			if (animator->animation_display_order.empty() && !animator->animation_table.empty())
+			{
+				for (auto& anim : animator->animation_table)
+				{
+					animator->animation_display_order.emplace_back(anim.first);
+				}
+			}
+
 			for (auto& layer : animator->layers)
 			{
 				layer.prev_poses.resize(animator->skeleton->data().size());
