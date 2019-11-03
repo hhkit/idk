@@ -66,7 +66,10 @@ namespace idk
         {
             get
             {
-                float s = 1 / Mathf.Sqrt(x * x + y * y + z * z + w * w);
+                float sr = Mathf.Sqrt(x * x + y * y + z * z + w * w);
+                if (sr < 0.0001f)
+                    return Quaternion.identity;
+                float s = 1 / sr;
                 return new Quaternion(x * s, y * s, z * s, w * s);
             }
         }
@@ -82,7 +85,7 @@ namespace idk
         public static Quaternion AngleAxis(float angle, Vector3 axis)
         {
             Quaternion q;
-            axis.Normalize();
+            Vector3.Normalize(axis);
             float sin = Mathf.Sin(angle * 0.5f * Mathf.DegToRad);
             q.w = Mathf.Cos(angle * 0.5f * Mathf.DegToRad);
             q.x = sin * axis.x;
@@ -116,8 +119,8 @@ namespace idk
 
         public static Quaternion FromToRotation(Vector3 from, Vector3 to)
         {
-            from.Normalize();
-            to.Normalize();
+            Vector3.Normalize(from);
+            Vector3.Normalize(to);
 
             float d = Vector3.Dot(from, to);
             if (d >= 0)
@@ -235,11 +238,7 @@ namespace idk
 
         public static Quaternion Normalize(Quaternion q)
         {
-            float s = 1 / Mathf.Sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
-            q.x *= s;
-            q.y *= s;
-            q.z *= s;
-            q.w *= s;
+            q = q.normalized;
             return q;
         }
 

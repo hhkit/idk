@@ -25,19 +25,31 @@ namespace idk
         public float magnitude
         { get { return Mathf.Sqrt(sqrMagnitude);  } }
         public Vector3 normalized
-        { get { return this / magnitude; } }
+        {
+            get
+            {
+                Vector3 retval = this;
+                var mag = magnitude;
+                if (mag < 0.001f)
+                {
+                    return Vector3.zero;
+                }
+                retval.x /= mag;
+                retval.y /= mag;
+                retval.z /= mag;
+                return retval;
+            }
+        }
         
         // member functions
         public bool Equals(Vector3 rhs)
         {
             return x == rhs.x && y == rhs.y && z == rhs.z;
         }
-        public void Normalize()
+        public static Vector3 Normalize(Vector3 v)
         {
-            var mag = magnitude;
-            x /= mag;
-            y /= mag;
-            z /= mag;
+            v = v.normalized;
+            return v;
         }
         public void Set(float x, float y, float z)
         {
