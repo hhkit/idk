@@ -28,6 +28,7 @@ namespace idk::ogl
 
 		void   Bind(const renderer_reqs& locations);
 		void   Draw();
+		void   DrawInstanced(size_t instances);
 		void   BindAndDraw(const renderer_reqs& locations);
 		template<typename T>
 		void   BindAndDraw() { BindAndDraw(T::GetRequiredAttributes()); }
