@@ -396,6 +396,11 @@ namespace idk {
 		{
 			if (ImGui::Button("Play", toolButtonSize))
 			{
+				IDE& editor = Core::GetSystem<IDE>();
+				for (auto& i : editor.ige_windows)
+					if (i->window_name != "Game")
+						i->is_open = false;
+				editor.currentCamera().current_camera->enabled = false;
 				SaveSceneTemporarily();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;

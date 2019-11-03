@@ -11,6 +11,8 @@ namespace idk::ogl
 		Shader() = default;
 		Shader(GLenum shader_type, string_view shader_code);
 		~Shader();
+		
+		GLuint ID() const { return _shader_id; }
 
 		Shader(Shader&&) noexcept;
 		Shader& operator=(Shader&&) noexcept;

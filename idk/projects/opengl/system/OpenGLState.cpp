@@ -435,6 +435,11 @@ namespace idk::ogl
 			// If we use proj * view, frustrum will be in model space
 			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
 
+			curr_mat = {};
+			curr_mat_inst = {};
+			curr_mesh = {};
+			material_texture_uniforms = 0;
+
 			for (auto& elem : curr_object_buffer.mesh_render)
 			{
 				// Do culling here

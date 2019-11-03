@@ -77,7 +77,7 @@ namespace idk
 		}
 		mat4 operator()(const DirectionalLight& dirLight)
 		{
-			return ortho(-dirLight.width, dirLight.width, -dirLight.height, dirLight.height, 0.1f, 100.f);
+			return ortho(dirLight.left, dirLight.right, dirLight.bottom, dirLight.top, dirLight.near, dirLight.far);
 		}
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }

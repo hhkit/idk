@@ -526,7 +526,7 @@ namespace idk
 		std::sort(retval.begin(), retval.end(), 
 			[](const RaycastHit& lhs, const RaycastHit& rhs) 
 			{ 
-				return lhs.raycast_succ.distance_to_collision < rhs.raycast_succ.distance_to_collision; 
+				return abs(lhs.raycast_succ.distance_to_collision) < abs(rhs.raycast_succ.distance_to_collision); 
 			}
 		);
 
