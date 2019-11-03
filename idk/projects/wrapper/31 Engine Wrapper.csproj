@@ -58,10 +58,11 @@
     <Compile Include="Core\Bindings.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Behavior\Coroutine.cs" />
-    <Compile Include="Core\Debug.cs" />
+    <Compile Include="Debug\Debug.cs" />
     <Compile Include="Core\GameObject.cs" />
     <Compile Include="Core\IDK.cs" />
     <Compile Include="Core\Object.cs" />
+    <Compile Include="Debug\NullRef.cs" />
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />

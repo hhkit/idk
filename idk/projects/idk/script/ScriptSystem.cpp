@@ -61,11 +61,6 @@ namespace idk::mono
 			LOG_TO(LogPool::MONO, string);
 			});
 
-		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
-		{
-			main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
-			main_environment->Init();
-		}
 		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*)
 			{
 				if (fatal)
@@ -77,6 +72,11 @@ namespace idk::mono
 					LOG_TO(LogPool::MONO, message);
 			}
 		, nullptr);
+		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
+		{
+			main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
+			main_environment->Init();
+		}
 	}
 
 	void ScriptSystem::LateInit()
