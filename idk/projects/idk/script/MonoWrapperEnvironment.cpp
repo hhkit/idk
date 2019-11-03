@@ -386,16 +386,29 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetForward", void, Handle<Transform> h, vec3 forward)
 		{
-			forward.normalize();
-
 			auto curr_fwd = h->Forward();
-			auto axis = curr_fwd.cross(forward);
-			auto length = axis.length();
-			if (length < 0.001f)
+			const float new_f_len = forward.length();
+			forward /= new_f_len;
+			const float new_f_dot_curr = forward.dot(curr_fwd);
+
+			// If dot prod returns us the square of the length, we know they are the same vector.
+			// In which case, we just return and dont apply any rotation
+			if (fabs(new_f_dot_curr - 1.0f) < 0.001f)
 				return;
 
-			auto angle = asin(length);
-			axis.normalize();
+			// if the two vectors are inversed
+			if (fabs(new_f_dot_curr - (-1.0f)) < 0.001f)
+			{
+				auto up = h->Up();
+				h->GlobalRotation(quat{ up, deg{180} } *h->GlobalRotation());
+				return;
+			}
+
+			auto axis = curr_fwd.cross(forward);
+			auto axis_len = axis.length();
+
+			auto angle = acos(new_f_dot_curr);
+			axis /= axis_len;
 
 			h->GlobalRotation(quat{axis, angle} * h->GlobalRotation());
 		}

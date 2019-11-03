@@ -83,8 +83,8 @@ namespace idk
         {
             Quaternion q;
             axis.Normalize();
-            float sin = Mathf.Sin(angle * 0.5f);
-            q.w = Mathf.Cos(angle * 0.5f);
+            float sin = Mathf.Sin(angle * 0.5f * Mathf.DegToRad);
+            q.w = Mathf.Cos(angle * 0.5f * Mathf.DegToRad);
             q.x = sin * axis.x;
             q.y = sin * axis.y;
             q.z = sin * axis.z;
@@ -98,12 +98,15 @@ namespace idk
 
         public static Quaternion Euler(float x, float y, float z)
         {
-            float cx = Mathf.Cos(x * 0.5f);
-            float sx = Mathf.Sin(x * 0.5f);
-            float cy = Mathf.Cos(y * 0.5f);
-            float sy = Mathf.Sin(y * 0.5f);
-            float cz = Mathf.Cos(z * 0.5f);
-            float sz = Mathf.Sin(z * 0.5f);
+            float deg_x = Mathf.DegToRad * x * 0.5f;
+            float deg_y = Mathf.DegToRad * y * 0.5f;
+            float deg_z = Mathf.DegToRad * z * 0.5f;
+            float cx = Mathf.Cos(deg_x);
+            float sx = Mathf.Sin(deg_x);
+            float cy = Mathf.Cos(deg_y);
+            float sy = Mathf.Sin(deg_y);
+            float cz = Mathf.Cos(deg_z);
+            float sz = Mathf.Sin(deg_z);
 
             return new Quaternion(cz * cy * sx - sz * sy * cx,
                                   sz * cy * sx + cz * sy * cx,
