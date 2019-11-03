@@ -80,6 +80,11 @@ namespace idk
             return x.GetHashCode() ^ y.GetHashCode() << 2;
         }
 
+        public override string ToString()
+        {
+            return "(" + x.ToString() + ", " + y.ToString() + ")";
+        }
+
         // operator overloads
         public float this[int key]
         {

@@ -106,6 +106,11 @@ namespace idk
             return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ z.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+        }
+
         // operator overloads
         public float this[int key]
         {
@@ -204,5 +209,6 @@ namespace idk
         { get { return new Vector3(1, 1, 1); } }
         public static Vector3 zero
         { get { return new Vector3(0, 0, 0); } }
+
     }
 }

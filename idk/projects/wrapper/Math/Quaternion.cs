@@ -298,6 +298,11 @@ namespace idk
             return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ (z.GetHashCode() ^ w.GetHashCode() << 2) << 2;
         }
 
+        public override string ToString()
+        {
+            return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+        }
+
         // operator overloads
         public float this[int key]
         {
