@@ -35,8 +35,16 @@ namespace idk::ogl
 		GLuint                   particle_vao_id = 0;
 		GLuint                   font_vao_id = 0;
 		GLuint					 vbo_font_id = 0;
+
+		GLuint object_vbo_id = 0;
+		GLuint normal_vbo_id = 0;
+		vector<mat4> object_transform;
+		vector<mat4> normal_transform;
+
 		RscHandle<OpenGLTexture> brdf_texture;
 		//RscHandle<ShaderProgram> debug_fragment;
 		bool is_picking = false;
+
+		void FlushObjectTransforms();
 	};
 }

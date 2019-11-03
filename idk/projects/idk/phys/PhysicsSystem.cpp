@@ -35,7 +35,7 @@ namespace idk
             elem.find_rigidbody();
             if (elem._static_cache)
                 elem.setup_predict();
-            elem._enabled_this_frame = elem.is_enabled_and_active();
+            elem._enabled_this_frame = elem.is_enabled_and_active() && elem.GetHandle().scene != Scene::prefab;
         }
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)

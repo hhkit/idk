@@ -53,6 +53,8 @@ namespace idk::ogl
 		glGenVertexArrays(1, &vao_id);	
 
 		glGenBuffers(1, &vbo_font_id);
+		glGenBuffers(1, &object_vbo_id);
+		glGenBuffers(1, &normal_vbo_id);
 	}
 
 	OpenGLState::~OpenGLState()
@@ -60,6 +62,10 @@ namespace idk::ogl
 		glDeleteVertexArrays(1, &particle_vao_id);
 		glDeleteVertexArrays(1, &vao_id);
 		glDeleteVertexArrays(1, &font_vao_id);
+
+		glDeleteBuffers(1, &vbo_font_id);
+		glDeleteBuffers(1, &object_vbo_id);
+		glDeleteBuffers(1, &normal_vbo_id);
 	}
 
 	void OpenGLState::GenResources()
@@ -348,15 +354,53 @@ namespace idk::ogl
 			}
 
 			{
-				//if (cam.obj_id == curr_object_buffer.curr_scene_camera.obj_id)
-				//{
-				//	main_buffer = RscHandle<OpenGLRenderTarget>{ cam.render_target };
-				//	fb_man.SetRenderTarget(main_buffer);
-				//}
-				//else
-				//auto position = ivec2{vec2{ cam.viewport.position } *vec2{ cam.render_target->Size() }};
-				//auto size =     ivec2{vec2{ cam.viewport.size     } *vec2{ cam.render_target->Size() }};
-				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target},cam.viewport,cam.clear_data.index() != idk::index_in_variant_v<DontClear,decltype(cam.clear_data)>);
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{cam.render_target},cam.viewport);
+
+				// clear
+				std::visit([&]([[maybe_unused]] const auto& obj)
+				{
+					static_assert(idk::is_variant_member_v <color, decltype(CameraData::clear_data)>, "Expected color in variant");
+					using T = std::decay_t<decltype(obj)>;
+
+					glEnable(GL_SCISSOR_TEST);
+
+					if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+					{
+						if (!obj)
+							return;
+						auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
+						glClear(GL_DEPTH_BUFFER_BIT);
+
+						pipeline.PushProgram(renderer_vertex_shaders[VSkyBox]);
+						pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
+						pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
+
+
+						glDisable(GL_CULL_FACE);
+						glDepthMask(GL_FALSE);
+						oglCubeMap.BindToUnit(0);
+						pipeline.SetUniform("sb", 0);
+						RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
+							{ {
+								std::make_pair(vtx::Attrib::Position, 0)
+							} });
+						glDepthMask(GL_TRUE);
+						glEnable(GL_CULL_FACE);
+					}
+
+					if constexpr (std::is_same_v<T, color>)
+					{
+						glClearColor(obj.r, obj.g, obj.b, obj.a);
+						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					}
+
+					if constexpr (std::is_same_v<T, DepthOnly>)
+					{
+						glClear(GL_DEPTH_BUFFER_BIT);
+					}
+
+					glDisable(GL_SCISSOR_TEST);
+				}, cam.clear_data);
 			}
 			
 			// lock drawing buffer
@@ -365,42 +409,7 @@ namespace idk::ogl
 			glBindVertexArray(vao_id);
 			
 				
-			std::visit([&]([[maybe_unused]] const auto& obj)
-			{
-				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, RscHandle<CubeMap>>)
-				{
-					if (!obj)
-						return;
-					auto& oglCubeMap = std::get<RscHandle<CubeMap>>(cam.clear_data).as<OpenGLCubemap>();
-
-					//oglCubeMap.ID;
-
-					glDisable(GL_CULL_FACE);
-					glDepthMask(GL_FALSE);
-					pipeline.PushProgram(renderer_vertex_shaders[VSkyBox]);
-					pipeline.PushProgram(renderer_fragment_shaders[FSkyBox]);
-
-					pipeline.SetUniform("PerCamera.pv_transform", cam.projection_matrix * mat4(mat3(cam.view_matrix)));
-
-					oglCubeMap.BindToUnit(0);
-					pipeline.SetUniform("sb", 0);
-					RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
-						{ {
-							std::make_pair(vtx::Attrib::Position, 0)
-						} });
-
-					glDepthMask(GL_TRUE);
-					glEnable(GL_CULL_FACE);
-				}
-				static_assert(idk::is_variant_member_v <color, decltype(CameraData::clear_data)>, "Expected color in variant");
-				if constexpr (std::is_same_v<std::decay_t<decltype(obj)>, color>)
-				{
-					glClearColor(obj.r, obj.g, obj.b, obj.a);
-					glEnable(GL_SCISSOR_TEST);
-					glClear(GL_COLOR_BUFFER_BIT);
-					glDisable(GL_SCISSOR_TEST);
-				}
-			}, cam.clear_data);
+			
 
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);

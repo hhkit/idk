@@ -241,6 +241,8 @@ namespace idk
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
+			if (elem.GetHandle().scene == Scene::prefab)
+				continue;
 			auto ro = GetAnimatedRenderObj(elem, skeleton_indices);
 			if (ro)
 				result.skinned_mesh_render.emplace_back(std::move(*ro));
@@ -248,6 +250,9 @@ namespace idk
 
 		for (auto& camera : cameras)
 		{
+			if (camera.GetHandle().scene == Scene::prefab)
+				continue;
+
 			if(camera.is_scene_camera)
 				result.curr_scene_camera = camera.GenerateCameraData();
 			result.camera.emplace_back(camera.GenerateCameraData());
@@ -255,6 +260,9 @@ namespace idk
 
 		for (auto& elem : mesh_renderers)
 		{
+			if (elem.GetHandle().scene == Scene::prefab)
+				continue;
+
 			auto obj = GetRenderObj(elem);
 			if (obj)
 			{
