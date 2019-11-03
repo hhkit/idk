@@ -47,7 +47,7 @@ namespace idk
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
 		{
 			if (h_rb)
-				return !h_rb->sleeping();
+				return !h_rb->sleeping() && h_rb.scene != Scene::prefab;
 			else
 				return false;
 		};
