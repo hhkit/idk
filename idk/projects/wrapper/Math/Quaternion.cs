@@ -66,7 +66,10 @@ namespace idk
         {
             get
             {
-                float s = 1 / Mathf.Sqrt(x * x + y * y + z * z + w * w);
+                float sr = Mathf.Sqrt(x * x + y * y + z * z + w * w);
+                if (sr < 0.0001f)
+                    return Quaternion.identity;
+                float s = 1 / sr;
                 return new Quaternion(x * s, y * s, z * s, w * s);
             }
         }
@@ -82,9 +85,9 @@ namespace idk
         public static Quaternion AngleAxis(float angle, Vector3 axis)
         {
             Quaternion q;
-            axis.Normalize();
-            float sin = Mathf.Sin(angle * 0.5f);
-            q.w = Mathf.Cos(angle * 0.5f);
+            Vector3.Normalize(axis);
+            float sin = Mathf.Sin(angle * 0.5f * Mathf.DegToRad);
+            q.w = Mathf.Cos(angle * 0.5f * Mathf.DegToRad);
             q.x = sin * axis.x;
             q.y = sin * axis.y;
             q.z = sin * axis.z;
@@ -98,12 +101,15 @@ namespace idk
 
         public static Quaternion Euler(float x, float y, float z)
         {
-            float cx = Mathf.Cos(x * 0.5f);
-            float sx = Mathf.Sin(x * 0.5f);
-            float cy = Mathf.Cos(y * 0.5f);
-            float sy = Mathf.Sin(y * 0.5f);
-            float cz = Mathf.Cos(z * 0.5f);
-            float sz = Mathf.Sin(z * 0.5f);
+            float deg_x = Mathf.DegToRad * x * 0.5f;
+            float deg_y = Mathf.DegToRad * y * 0.5f;
+            float deg_z = Mathf.DegToRad * z * 0.5f;
+            float cx = Mathf.Cos(deg_x);
+            float sx = Mathf.Sin(deg_x);
+            float cy = Mathf.Cos(deg_y);
+            float sy = Mathf.Sin(deg_y);
+            float cz = Mathf.Cos(deg_z);
+            float sz = Mathf.Sin(deg_z);
 
             return new Quaternion(cz * cy * sx - sz * sy * cx,
                                   sz * cy * sx + cz * sy * cx,
@@ -113,8 +119,8 @@ namespace idk
 
         public static Quaternion FromToRotation(Vector3 from, Vector3 to)
         {
-            from.Normalize();
-            to.Normalize();
+            Vector3.Normalize(from);
+            Vector3.Normalize(to);
 
             float d = Vector3.Dot(from, to);
             if (d >= 0)
@@ -232,11 +238,7 @@ namespace idk
 
         public static Quaternion Normalize(Quaternion q)
         {
-            float s = 1 / Mathf.Sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
-            q.x *= s;
-            q.y *= s;
-            q.z *= s;
-            q.w *= s;
+            q = q.normalized;
             return q;
         }
 
@@ -293,6 +295,11 @@ namespace idk
         public override int GetHashCode()
         {
             return (x.GetHashCode() ^ y.GetHashCode() << 2) ^ (z.GetHashCode() ^ w.GetHashCode() << 2) << 2;
+        }
+
+        public override string ToString()
+        {
+            return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
 
         // operator overloads

@@ -27,21 +27,35 @@ namespace idk
         public float magnitude
         { get { return Mathf.Sqrt(sqrMagnitude);  } }
         public Vector4 normalized
-        { get { return this / magnitude; } }
-        
+        {
+            get
+            {
+                Vector4 retval = this;
+                var mag = magnitude;
+                if (mag < 0.001f)
+                {
+                    return Vector4.zero;
+                }
+                retval.x /= mag;
+                retval.y /= mag;
+                retval.z /= mag;
+                retval.w /= mag;
+
+                return retval;
+            }
+        }
+
         // member functions
         public bool Equals(Vector4 rhs)
         {
             return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
         }
-        public void Normalize()
+        public static Vector4 Normalize(Vector4 v)
         {
-            var mag = magnitude;
-            x /= mag;
-            y /= mag;
-            z /= mag;
-            w /= mag;
+            v = v.normalized;
+            return v;
         }
+
         public void Set(float x, float y, float z, float w)
         {
             this.x = x;

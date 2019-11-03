@@ -394,16 +394,29 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetForward", void, Handle<Transform> h, vec3 forward)
 		{
-			forward.normalize();
-
 			auto curr_fwd = h->Forward();
-			auto axis = curr_fwd.cross(forward);
-			auto length = axis.length();
-			if (length < 0.001f)
+			const float new_f_len = forward.length();
+			forward /= new_f_len;
+			const float new_f_dot_curr = forward.dot(curr_fwd);
+
+			// If dot prod returns us the square of the length, we know they are the same vector.
+			// In which case, we just return and dont apply any rotation
+			if (fabs(new_f_dot_curr - 1.0f) < 0.001f)
 				return;
 
-			auto angle = asin(length);
-			axis.normalize();
+			// if the two vectors are inversed
+			if (fabs(new_f_dot_curr - (-1.0f)) < 0.001f)
+			{
+				auto up = h->Up();
+				h->GlobalRotation(quat{ up, deg{180} } *h->GlobalRotation());
+				return;
+			}
+
+			auto axis = curr_fwd.cross(forward);
+			auto axis_len = axis.length();
+
+			auto angle = acos(new_f_dot_curr);
+			axis /= axis_len;
 
 			h->GlobalRotation(quat{axis, angle} * h->GlobalRotation());
 		}
@@ -615,15 +628,28 @@ namespace idk::mono
 
 
 		//AudioSource
+		//----------------------------------------------------------------------------------------------------
 		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)
 		{
 			audiosource->Play(index);
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSourcePlayAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->PlayAll();
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::AudioSourceStop", void, Handle<AudioSource> audiosource, int index)
 		{
 			audiosource->Stop(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStopAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->StopAll();
 		}
 		BIND_END();
 
@@ -663,7 +689,26 @@ namespace idk::mono
 		}
 		BIND_END();
 
-        // Renderer
+		BIND_START("idk.Bindings::AudioSourceSize", int, Handle<AudioSource> audiosource)
+		{
+			return audiosource->audio_clip_list.size();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAudioClipPlaying", bool, Handle<AudioSource> audiosource, int index)
+		{
+			return audiosource->IsAudioClipPlaying(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAnyAudioClipPlaying", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->IsAnyAudioClipPlaying();
+		}
+		BIND_END();
+		//----------------------------------------------------------------------------------------------------
+
+		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
             switch (renderer.type)

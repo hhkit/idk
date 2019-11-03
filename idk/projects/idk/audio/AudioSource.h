@@ -24,12 +24,14 @@ namespace idk
 		~AudioSource();
 
 		void Play(int index = 0);
+		void PlayAll();
 		void Stop(int index = 0);
 		void StopAll();
 
 		void AddAudioClip(string_view filePath); //Calls to add audio clip with path given
 		void RemoveAudioClip(int index = 0); //Calls to add audio clip with path given
 		
+		bool IsAudioClipPlaying(int index);
 		bool IsAnyAudioClipPlaying();
 		void UpdateAudioClips();
 		vector<RscHandle<AudioClip>> audio_clip_list;

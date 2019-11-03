@@ -219,7 +219,13 @@ namespace idk
         public extern static void AudioSourcePlay(ulong id, int index = 0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourcePlayAll(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSourceStop(ulong id, int index = 0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceStopAll(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float AudioSourceGetVolume(ulong id);
@@ -239,6 +245,14 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSourceSetLoop(ulong id, bool loop);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int AudioSourceSize(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSourceIsAudioClipPlaying(ulong id, int index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSourceIsAnyAudioClipPlaying(ulong id);
 
         /*
          * Collider
