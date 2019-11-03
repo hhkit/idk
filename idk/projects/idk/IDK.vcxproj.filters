@@ -1254,6 +1254,7 @@
     <ClCompile Include="util\easing.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\FramebufferFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

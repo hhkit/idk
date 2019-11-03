@@ -325,7 +325,7 @@ namespace idk::vkn
 		framebufferInfo.pAttachments = std::data(image_views);
 		framebufferInfo.width  = s_cast<uint32_t>(fb.size.x);
 		framebufferInfo.height = s_cast<uint32_t>(fb.size.y);
-		framebufferInfo.layers = 1;
+		framebufferInfo.layers = fb.NumLayers();
 
 		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()), _pimpl->GetRenderPass(rp_type, fb));
 	}

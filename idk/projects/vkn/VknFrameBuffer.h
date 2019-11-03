@@ -10,6 +10,7 @@ namespace idk::vkn
 	class VknFrameBuffer: public FrameBuffer
 	{
 	public:
+		uint32_t NumLayers()const { return static_cast<uint32_t>(FrameBuffer::NumLayers()); }
 		void PrepareDraw(vk::CommandBuffer cmd_buffer);
 		vk::Framebuffer GetFramebuffer()const { return *_framebuffer; }
 		vk::RenderPass GetRenderPass()const { return _renderpass; }

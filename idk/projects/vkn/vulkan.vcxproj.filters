@@ -331,9 +331,6 @@
     <ClCompile Include="VknFrameBuffer.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="VknFramebufferFactory.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
     <ClCompile Include="VknCubemap.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -347,8 +344,13 @@
       <Filter>resource\Factories</Filter>
     </ClCompile>
     <ClCompile Include="RenderUtil.cpp" />
-    <ClCompile Include="VknRenderTargetLoader.cpp" />
     <ClCompile Include="DeferredPass.cpp" />
+    <ClCompile Include="VknRenderTargetLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFramebufferFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

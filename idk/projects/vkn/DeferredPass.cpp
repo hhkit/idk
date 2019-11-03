@@ -245,9 +245,8 @@ namespace idk::vkn
 			auto& gbuffer_fb = deferred_pass->GBuffer().gbuffer;
 			for (uint32_t i = 0; i < EGBufferBinding::size(); ++i)
 				the_interface.BindSampler("gbuffers", i, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>());
-			the_interface.BindSampler("gbuffers", EGBufferBinding::size(), gbuffer_fb->DepthAttachment().buffer.as<VknTexture>());
+			the_interface.BindSampler("gbuffers", static_cast<uint32_t>(EGBufferBinding::size()), gbuffer_fb->DepthAttachment().buffer.as<VknTexture>());
 		}
-		void Bind(PipelineThingy& the_interface, const RenderObject&) override {}
 	};
 
 	using PbrDeferredPostBinding = CombinedBindings<DeferredPostBinder, PbrFwdBindings>;
@@ -443,7 +442,6 @@ namespace idk::vkn
 
 		auto& camera = graphics_state.camera;
 		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
 		auto& g_buffer = *gbuffer.gbuffer;
 		auto frame_buffer = g_buffer.GetFramebuffer();
 		//TransitionFrameBuffer(camera, cmd_buffer, view);
@@ -479,7 +477,7 @@ namespace idk::vkn
 		};
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,g_buffer.NumColorAttachments()))
+		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,static_cast<uint32_t>(g_buffer.NumColorAttachments())))
 			rs.FlagRendered();
 		cmd_buffer.endRenderPass();//End GBuffer pass
 		//GBufferBarrier(cmd_buffer, gbuffer);

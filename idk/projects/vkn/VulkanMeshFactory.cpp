@@ -93,7 +93,7 @@ namespace idk::vkn
 			// Now calculate the indices
 			// Icohedrop is made up of 3 rows, top, middle and bottom.
 			// Calculate indices for top row
-			for (unsigned i = 1; i < 9; i += 2)
+			for (uint16_t i = 1; i < 9; i += 2)
 			{
 				icosahedronIndices.push_back(0);
 				icosahedronIndices.push_back(i);
@@ -348,7 +348,7 @@ namespace idk::vkn
 			const real angle = (2.f * pi) / numberOfTri;
 
 
-			for (int i = 0; i < numberOfTri; ++i)
+			for (uint16_t i = 0; i < numberOfTri; ++i)
 			{
 				vertices.emplace_back(Vertex{ vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)}, vec3{  sz * sinf(angle * i),  0,  sz * cosf(angle * i)} });
 

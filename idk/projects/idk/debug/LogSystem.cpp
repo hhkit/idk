@@ -83,6 +83,8 @@ namespace idk
 				sprintf_s(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
 
 				stream << buf;
+				if (level == LogLevel::FATAL)
+					stream << std::flush;
 			}
 			);
 		}
