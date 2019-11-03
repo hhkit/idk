@@ -26,6 +26,13 @@ namespace idk
 			audio_clip_list[index]->Play();
 		}
 	}
+	void AudioSource::PlayAll()
+	{
+		for (auto& i : audio_clip_list) {
+			if (i)
+				i->Play();
+		}
+	}
 	void AudioSource::Stop(int index)
 	{
 		if (audio_clip_list.size() > index) { //Check if it is in array
@@ -55,6 +62,10 @@ namespace idk
 			audio_clip_list[index]->Stop(); //Stop first
 			audio_clip_list.erase(audio_clip_list.begin() + index);
 		}
+	}
+	bool AudioSource::IsAudioClipPlaying(int index)
+	{
+		return audio_clip_list[index]->GetIsPlaying();
 	}
 	bool AudioSource::IsAnyAudioClipPlaying()
 	{

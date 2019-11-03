@@ -628,15 +628,28 @@ namespace idk::mono
 
 
 		//AudioSource
+		//----------------------------------------------------------------------------------------------------
 		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)
 		{
 			audiosource->Play(index);
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSourcePlayAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->PlayAll();
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::AudioSourceStop", void, Handle<AudioSource> audiosource, int index)
 		{
 			audiosource->Stop(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStopAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->StopAll();
 		}
 		BIND_END();
 
@@ -676,7 +689,26 @@ namespace idk::mono
 		}
 		BIND_END();
 
-        // Renderer
+		BIND_START("idk.Bindings::AudioSourceSize", int, Handle<AudioSource> audiosource)
+		{
+			return audiosource->audio_clip_list.size();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAudioClipPlaying", bool, Handle<AudioSource> audiosource, int index)
+		{
+			return audiosource->IsAudioClipPlaying(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAnyAudioClipPlaying", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->IsAnyAudioClipPlaying();
+		}
+		BIND_END();
+		//----------------------------------------------------------------------------------------------------
+
+		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
             switch (renderer.type)
