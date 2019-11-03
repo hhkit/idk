@@ -85,6 +85,13 @@ namespace idk::mono
 		static void ret() {}
 	};
 
+	MonoException* make_nullref_exception()
+	{
+		auto exc_type = Core::GetSystem<ScriptSystem>().Environment().Type("NullRef");
+		IDK_ASSERT(exc_type);
+		return (MonoException*) exc_type->ConstructTemporary();
+	}
+
 #define BIND_START(LABEL, RET, ...)\
 	{ using Ret = RET;\
 	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{try
@@ -93,6 +100,7 @@ namespace idk::mono
 	catch(NullHandleException ex) \
 	{ \
 		LOG_TO(LogPool::GAME, "Null reference at %lld", ex.GetHandle().id);\
+		mono_raise_exception(make_nullref_exception());\
 		return default_val<Ret>::ret(); }\
 	}));}
 

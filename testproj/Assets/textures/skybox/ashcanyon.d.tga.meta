@@ -1,0 +1,5 @@
+metadatas: 
+- guid: e47c6afa-6fdb-46c3-8d16-3d85a8de4bfc
+  metadata: "compressed: 1\nfilter_mode: Linear\ninternal_format: RGBA_8\nis_srgb: 1\nuv_mode: Repeat\n"
+  name: ""
+  t_hash: idk::Texture

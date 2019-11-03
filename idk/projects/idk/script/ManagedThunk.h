@@ -31,6 +31,10 @@ namespace idk::mono
 		auto retval = invoker(box(args)..., &exc);
 		if (exc)
 		{
+			auto idk = Core::GetSystem<ScriptSystem>().Environment().Type("IDK");
+			auto method = std::get<1>(idk->GetMethod("PrintException", 1));
+			void* args[] = { exc, 0 };
+			mono_runtime_invoke(method, nullptr, args, nullptr);
 			mono_print_unhandled_exception(r_cast<MonoObject*>(exc));
 			return Ret{};
 		}
