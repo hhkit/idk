@@ -164,6 +164,10 @@ namespace idk::ai_helpers
 			new_bone._name = curr_node.node->mName.data;
 			new_bone._parent = curr_node.parent;
 
+			// Pre/Post rotations
+			new_bone.pre_rotation = GetPreRotations(curr_node.node);
+			new_bone.post_rotation = GetPostRotations(curr_node.node);
+			
 			// World
 			aiMatrix4x4		ai_child_world_bind_pose;// = initMat4(curr_node.assimp_node->_global_inverse_bind_pose).Inverse();
 			aiVector3D		child_world_pos;
@@ -513,74 +517,74 @@ namespace idk::ai_helpers
 				return;
 		}
 
-		aiNode* node = scene.bone_root->FindNode(anim_channel->mNodeName.data);
-		
-		// Need to find all the chained rotations first
-		aiMatrix4x4 pre_rotation;
-		aiIdentityMatrix4(&pre_rotation);
-		aiMatrix4x4 post_rotation;
-		aiIdentityMatrix4(&post_rotation);
-
-		// Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
-
-		// Find all the pre transformations. 
-		// From the base node, traverse up and check for the pre rotations
-		{
-			aiNode* parent = node->mParent;
-			for (int i = 0; i < PreRotationMax; ++i)
-			{
-				if (parent->mName.data == anim_bone.bone_name + AssimpPrefix + PreRotateSuffix[i])
-				{
-					pre_rotation = pre_rotation * parent->mTransformation;
-					parent = parent->mParent;
-				}
-			}
-		}
-		// Find all post transforms.
-		{
-			aiNode* child = node->mChildren[0];
-			for (int i = 0; i < PostRotationMax; ++i)
-			{
-				if (child->mName.data == anim_bone.bone_name + AssimpPrefix + PostRotateSuffix[i])
-				{
-					post_rotation = post_rotation * child->mTransformation;
-					child = child->mChildren[0];
-				}
-			}
-		}
-
-		// Pre rotate decompose
-		aiVector3D pre_pos;
-		aiQuaternion pre_rot;
-		aiVector3D pre_scale;
-		aiDecomposeMatrix(&pre_rotation, &pre_scale, &pre_rot, &pre_pos);
-
-		// Post rotate decompose
-		aiVector3D post_pos;
-		aiQuaternion post_rot;
-		aiVector3D post_scale;
-		aiDecomposeMatrix(&post_rotation, &post_scale, &post_rot, &post_pos);
-
-		quat pre_quat = to_quat(pre_rot);
-		quat post_quat = to_quat(post_rot);
-
-		// Error handling : Scale and pos should not be affected.
-		if (!pre_scale.Equal(aiVector3D{ 1,1,1 }) || !post_scale.Equal(aiVector3D{ 1,1,1 }))
-		{
-			PrintError("[Warning] Pre rotation has scale for " + anim_bone.bone_name);
-		}
-
-		if (!pre_pos.Equal(aiVector3D{}) || !post_pos.Equal(aiVector3D{ }))
-		{
-			PrintError("[Warning] Post rotation has translation for " + anim_bone.bone_name);
-		}
+		// aiNode* node = scene.bone_root->FindNode(anim_channel->mNodeName.data);
+		// 
+		// // Need to find all the chained rotations first
+		// aiMatrix4x4 pre_rotation;
+		// aiIdentityMatrix4(&pre_rotation);
+		// aiMatrix4x4 post_rotation;
+		// aiIdentityMatrix4(&post_rotation);
+		// 
+		// // Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
+		// 
+		// // Find all the pre transformations. 
+		// // From the base node, traverse up and check for the pre rotations
+		// {
+		// 	aiNode* parent = node->mParent;
+		// 	for (int i = 0; i < PreRotationMax; ++i)
+		// 	{
+		// 		if (parent->mName.data == anim_bone.bone_name + AssimpPrefix + PreRotateSuffix[i])
+		// 		{
+		// 			pre_rotation = pre_rotation * parent->mTransformation;
+		// 			parent = parent->mParent;
+		// 		}
+		// 	}
+		// }
+		// // Find all post transforms.
+		// {
+		// 	aiNode* child = node->mChildren[0];
+		// 	for (int i = 0; i < PostRotationMax; ++i)
+		// 	{
+		// 		if (child->mName.data == anim_bone.bone_name + AssimpPrefix + PostRotateSuffix[i])
+		// 		{
+		// 			post_rotation = post_rotation * child->mTransformation;
+		// 			child = child->mChildren[0];
+		// 		}
+		// 	}
+		// }
+		// 
+		// // Pre rotate decompose
+		// aiVector3D pre_pos;
+		// aiQuaternion pre_rot;
+		// aiVector3D pre_scale;
+		// aiDecomposeMatrix(&pre_rotation, &pre_scale, &pre_rot, &pre_pos);
+		// 
+		// // Post rotate decompose
+		// aiVector3D post_pos;
+		// aiQuaternion post_rot;
+		// aiVector3D post_scale;
+		// aiDecomposeMatrix(&post_rotation, &post_scale, &post_rot, &post_pos);
+		// 
+		// quat pre_quat = to_quat(pre_rot);
+		// quat post_quat = to_quat(post_rot);
+		// 
+		// // Error handling : Scale and pos should not be affected.
+		// if (!pre_scale.Equal(aiVector3D{ 1,1,1 }) || !post_scale.Equal(aiVector3D{ 1,1,1 }))
+		// {
+		// 	PrintError("[Warning] Pre rotation has scale for " + anim_bone.bone_name);
+		// }
+		// 
+		// if (!pre_pos.Equal(aiVector3D{}) || !post_pos.Equal(aiVector3D{ }))
+		// {
+		// 	PrintError("[Warning] Post rotation has translation for " + anim_bone.bone_name);
+		// }
 
 		for (size_t i = 0; i < anim_channel->mNumRotationKeys; ++i)
 		{
 			aiQuatKey& rot_key = anim_channel->mRotationKeys[i];
 			quat rot_val = to_quat(rot_key.mValue);
 
-			rot_val = pre_quat * rot_val * post_quat;
+			//rot_val = pre_quat * rot_val * post_quat;
 			anim_bone.rotation_track.emplace_back(rot_val, s_cast<float>(rot_key.mTime));
 		}
 	}
@@ -990,6 +994,130 @@ namespace idk::ai_helpers
 	void DumpNodes(aiNode* node)
 	{
 		UNREFERENCED_PARAMETER(node);
+	}
+
+	quat GetPreRotations(const aiNode* node)
+	{
+		// Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
+
+		// Find all the pre transformations. 
+		// From the base node, traverse up and check for the pre rotations
+		// Need to find all the chained rotations first
+		string node_name = node->mName.data;
+		const aiNode* start_node = node;
+		while (start_node->mParent)
+		{
+			string parent_name = start_node->mParent->mName.data;
+			if (parent_name.find(node_name) == string::npos)
+				break;
+			start_node = start_node->mParent;
+		}
+
+		aiMatrix4x4 pre_rotation;
+		aiIdentityMatrix4(&pre_rotation);
+		int curr_pre_rot_index = 0;
+		while (start_node != node)
+		{
+			// Check if start_node matches any of the pre rotations.
+			for (int i = curr_pre_rot_index; i < PreRotationMax; ++i)
+			{
+				if (start_node->mName.data == node_name + AssimpPrefix + PreRotateSuffix[i])
+				{
+					// Set the starting point of the next pre rotation check
+					pre_rotation = pre_rotation * start_node->mTransformation;
+					curr_pre_rot_index = i + 1;
+					break;
+				}
+			}
+
+			if (curr_pre_rot_index >= PreRotationMax) 
+				break;
+			start_node = start_node->mChildren[0];
+		}
+
+		// Pre rotate decompose
+		aiVector3D pre_pos;
+		aiQuaternion pre_rot;
+		aiVector3D pre_scale;
+		aiDecomposeMatrix(&pre_rotation, &pre_scale, &pre_rot, &pre_pos);
+
+		quat pre_quat = to_quat(pre_rot);
+
+		// Error handling : Scale and pos should not be affected.
+		if (!pre_scale.Equal(aiVector3D{ 1,1,1 }))
+		{
+			PrintError("[Warning] Pre rotation has scale for " + node_name);
+		}
+
+		if (!pre_pos.Equal(aiVector3D{}))
+		{
+			PrintError("[Warning] Post rotation has translation for " + node_name);
+		}
+
+		return pre_quat;
+	}
+
+	quat GetPostRotations(const aiNode* node)
+	{
+		// Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
+
+		// Find all the pre transformations. 
+		// From the base node, traverse up and check for the pre rotations
+		// Need to find all the chained rotations first
+		string node_name = node->mName.data;
+		const aiNode* start_node = node;
+		while (start_node->mParent)
+		{
+			string parent_name = start_node->mParent->mName.data;
+			if (parent_name.find(node_name) == string::npos)
+				break;
+			start_node = start_node->mParent;
+		}
+
+		aiMatrix4x4 post_rotation;
+		aiIdentityMatrix4(&post_rotation);
+		int curr_post_rot_index = 0;
+		while (start_node != node)
+		{
+			// Check if start_node matches any of the pre rotations.
+			for (int i = curr_post_rot_index; i < PostRotationMax; ++i)
+			{
+				if (start_node->mName.data == node_name + AssimpPrefix + PostRotateSuffix[i])
+				{
+					// Set the starting point of the next pre rotation check
+					post_rotation = post_rotation * start_node->mTransformation;
+					curr_post_rot_index = i + 1;
+					break;
+				}
+			}
+
+			// If there are no more post rotations to check for we jsut break
+			if (curr_post_rot_index >= PostRotationMax)
+				break;
+			start_node = start_node->mChildren[0];
+		}
+
+		// Post rotate decompose
+		aiVector3D post_pos;
+		aiQuaternion post_rot;
+		aiVector3D post_scale;
+		aiDecomposeMatrix(&post_rotation, &post_scale, &post_rot, &post_pos);
+
+		
+		quat post_quat = to_quat(post_rot);
+
+		// Error handling : Scale and pos should not be affected.
+		if (!post_scale.Equal(aiVector3D{ 1,1,1 }))
+		{
+			PrintError("[Warning] Post rotation has scale for " + node_name);
+		}
+
+		if (!post_pos.Equal(aiVector3D{ }))
+		{
+			PrintError("[Warning] Post rotation has translation for " + node_name);
+		}
+
+		return post_quat;
 	}
 
 #pragma region Conversion Helpers

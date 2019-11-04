@@ -783,7 +783,7 @@ namespace idk {
 		ImGui::NewLine();
 		auto state_window_flags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
 		auto state_window_width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-		constexpr float state_window_height = 200.0f;
+		constexpr float state_window_height = 400.0f;
 		if (c_anim->animation_display_order.empty())
 		{
 			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "Start by adding an animation state!");

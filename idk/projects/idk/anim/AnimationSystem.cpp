@@ -56,7 +56,7 @@ namespace idk
 			}
 
 			// Loop over all valid bones
-			//const auto& skeleton = animator.skeleton->data();
+			const auto& skeleton = animator.skeleton->data();
 			for (size_t child_index = 0; child_index < animator._child_objects.size(); ++child_index)
 			{
 				auto& child_go = animator._child_objects[child_index];
@@ -94,7 +94,7 @@ namespace idk
 				auto child_xform = child_go->GetComponent<Transform>();
 				child_xform->position = final_bone_pose.position;
 				child_xform->scale = final_bone_pose.scale;
-				child_xform->rotation = final_bone_pose.rotation;
+				child_xform->rotation = skeleton[child_index].pre_rotation * final_bone_pose.rotation * skeleton[child_index].post_rotation;
 			}// end for each bone
 			AdvanceLayers(animator);
 			FinalPass(animator);
@@ -132,7 +132,7 @@ namespace idk
 			}
 
 			// Loop over all valid bones
-			//const auto& skeleton = animator.skeleton->data();
+			const auto& skeleton = animator.skeleton->data();
 			for (size_t child_index = 0; child_index < animator._child_objects.size(); ++child_index)
 			{
 				auto& child_go = animator._child_objects[child_index];
@@ -171,7 +171,7 @@ namespace idk
 				auto child_xform = child_go->GetComponent<Transform>();
 				child_xform->position = final_bone_pose.position;
 				child_xform->scale = final_bone_pose.scale;
-				child_xform->rotation = final_bone_pose.rotation;
+				child_xform->rotation = skeleton[child_index].pre_rotation * final_bone_pose.rotation * skeleton[child_index].post_rotation;
 
 			} // end for each bone
 			AdvanceLayers(animator);
@@ -333,7 +333,7 @@ namespace idk
 			else
 			{
 				result.position = curr_pose.position * blend_motion.weight;
-				result.rotation = slerp(animator._bind_pose[bone_index].rotation, curr_pose.rotation, blend_motion.weight);
+				result.rotation = slerp(quat{}, curr_pose.rotation, blend_motion.weight);
 				result.scale	= curr_pose.scale * blend_motion.weight;
 			}
 			first_applied = true;

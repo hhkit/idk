@@ -10,7 +10,7 @@ namespace idk::anim
 		string _name;
 		int  _parent = 0;
 		mat4 _global_inverse_bind_pose;
-		quat _bone_pivot;
+		quat pre_rotation, post_rotation;
 		matrix_decomposition<real> _local_bind_pose;
 	};
 

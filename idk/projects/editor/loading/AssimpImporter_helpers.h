@@ -209,6 +209,9 @@ namespace idk::ai_helpers
 	void AddBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out);
 	void DumpNodes(aiNode* node);
 
+	quat GetPreRotations(const aiNode* node);
+	quat GetPostRotations(const aiNode* node);
+
 	// Conversion
 	vec3 to_vec3(const aiVector3D& ai_vec);
 	quat to_quat(const aiQuaternion& ai_quat);
