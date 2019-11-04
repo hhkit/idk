@@ -13,6 +13,11 @@ namespace idk
 		return aabb{ center - half_extent, center + half_extent };
 	}
 
+	bool capsule::is_sphere() const
+	{
+		return height < (2*radius);
+	}
+
 	capsule& capsule::operator*=(const mat4& tfm)
 	{
 		center = tfm * vec4{ center, 1 };

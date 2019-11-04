@@ -857,6 +857,9 @@
     <ClInclude Include="gfx\FontAtlasFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1253,6 +1256,9 @@
     </ClCompile>
     <ClCompile Include="util\easing.cpp">
       <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule.cpp">
+      <Filter>phys\collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
