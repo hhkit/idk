@@ -75,6 +75,13 @@ namespace idk
 		
 	}
 
+	void DebugRenderer::Draw(const vec3& start, const vec3& end, const color& c, seconds duration, bool depth_test)
+	{
+		const vec3 velocity = end - start;
+		const auto line_tfm = look_at(start + velocity / 2, start + velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ velocity.length() / 2 }) };
+		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
+	}
+
 	void DebugRenderer::Draw(const sphere& sphere, const color& c, seconds duration, bool depth_test)
 	{
 		const mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius * 2 }) };

@@ -36,9 +36,8 @@ namespace idk::phys
 			try {
 				collisionRes.value();
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
+				Core::GetSystem<DebugRenderer>().Draw(lhs.center, lhs.center + collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
 
-				ray makeShiftRay{ lhs.center ,collisionRes.value().normal_of_collision };
-				Core::GetSystem<DebugRenderer>().Draw(makeShiftRay, color{ 0,0,1,1 });
 			}
 			catch (...) {
 			}
@@ -67,9 +66,7 @@ namespace idk::phys
 				collisionRes.value();
 				//printf("Bot Cap Collision Success!\n");
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-				
-				ray makeShiftRay{ bot_line_point ,collisionRes.value().normal_of_collision };
-				Core::GetSystem<DebugRenderer>().Draw(makeShiftRay, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(bot_line_point, bot_line_point+ collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
 			}
 			catch (...) {
 				//printf("Bot Cap Collision Failed!\n");
@@ -83,9 +80,7 @@ namespace idk::phys
 				collisionRes.value();
 				//printf("Top Cap Collision Success!\n");
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-
-				ray makeShiftRay{ top_line_point ,collisionRes.value().normal_of_collision };
-				Core::GetSystem<DebugRenderer>().Draw(makeShiftRay, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(top_line_point, top_line_point + collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
 
 			}
 			catch (...) {
@@ -106,9 +101,7 @@ namespace idk::phys
 				collisionRes.value();
 				//printf("Mid Cap Collision Success!\n");
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-
-				ray makeShiftRay{ normal_point ,collisionRes.value().normal_of_collision };
-				Core::GetSystem<DebugRenderer>().Draw(makeShiftRay, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(normal_point, normal_point + collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
 
 			}
 			catch (...) {
