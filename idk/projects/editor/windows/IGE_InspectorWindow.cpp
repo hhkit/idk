@@ -783,7 +783,7 @@ namespace idk {
 		ImGui::NewLine();
 		auto state_window_flags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
 		auto state_window_width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-		constexpr float state_window_height = 130.0f;
+		constexpr float state_window_height = 200.0f;
 		if (c_anim->animation_display_order.empty())
 		{
 			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "Start by adding an animation state!");
@@ -809,19 +809,55 @@ namespace idk {
 						ImGuidk::PushDisabled();
 
 					ImGui::Text("Animation State: ");
-					ImGui::PushItemWidth(150.0f);
+					ImGui::PushItemWidth(200.0f);
 					ImGui::SameLine();
 					renamed = ImGui::InputText(("##Animation State" + curr_state.first).c_str(), &curr_state.second.name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
 					ImGui::PopItemWidth();
 
 					if (ImGui::IsItemDeactivatedAfterEdit() && !renamed)
 						curr_state.second.name = curr_state.first;
+					
+					if (!curr_state.second.IsBlendTree())
+					{
+						ImGui::SameLine();
+						if (ImGui::Button("Convert to Blend Tree"))
+						{
+							variant<BasicAnimationState, BlendTree> new_state{ BlendTree{} };
+							curr_state.second.state_data = new_state;
+						}
+					}
 
 					if (ImGui::BeginChild(("##window" + curr_state.first).c_str(), ImVec2{ state_window_width, state_window_height }, true, state_window_flags))
 					{
 						if (curr_state.second.IsBlendTree())
 						{
 							ImGui::Text("State Type: Blend Tree");
+							auto& state_data = *curr_state.second.GetBlendTree();
+							for (size_t i = 0; i < state_data.motions.size(); ++i)
+							{
+								ImGui::PushID(i);
+								auto& blend_tree_motion = state_data.motions[i];
+								ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &blend_tree_motion.motion);
+								ImGui::InputFloat(("##threshold" + curr_state.first).c_str(), &blend_tree_motion.thresholds[0]);
+								ImGui::Text("Weight: %.2f", state_data.motions[i].weight);
+								ImGui::PopID();
+							}
+
+							RscHandle<anim::Animation> tmp{};
+							if (ImGuidk::InputResource(imgui_name("Add Motion Field", curr_state.first).c_str(), &tmp))
+							{
+								BlendTreeMotion new_motion{ };
+								new_motion.motion = tmp;
+								state_data.motions.push_back(new_motion);
+
+								std::sort(state_data.motions.begin(), state_data.motions.end(), 
+									[](const BlendTreeMotion& lhs, const BlendTreeMotion& rhs) 
+									{ 
+										return lhs.thresholds[0] < rhs.thresholds[0]; 
+									});
+							}
+
+							ImGui::DragFloat("TESTTTT", &state_data.def_data[0], 0.01f);
 						}
 						else
 						{

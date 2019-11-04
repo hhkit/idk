@@ -14,20 +14,24 @@
   - !Light 
     casts_shadows: 1
     light: !DirectionalLight 
-      height: 5
+      bottom: -5
+      far: 5
       intensity: 1
+      left: -5
       light_color: 
         a: 1
         b: 1
         g: 1
         r: 1
-      width: 5
+      near: -5
+      right: 5
+      top: 5
     shadow_bias: 1.1920929e-07
 - !4295098368 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.14901097, y: -0.97684836, z: -5.1527705}
+    position: {x: 0.14901097, y: -0.97684836, z: 0}
     rotation: 
       w: 1
       x: 0
@@ -41,8 +45,23 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Animator 
-    animation_display_order: []
-    animation_table: {}
+    animation_display_order: [New State 0]
+    animation_table: 
+      New State 0: 
+        loop: 1
+        name: New State 0
+        speed: 1
+        state_data: !BlendTree 
+          blend_tree_type: BlendTree_1D
+          motions: 
+          - motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
+            speed: 1
+            thresholds: [0, 0]
+          - motion: {guid: afcdbeaa-e5e1-4a92-9360-abe7b85dde73}
+            speed: 1
+            thresholds: [1, 0]
+          params: [', ', ""]
+        valid: 1
     layer_table: {Base Layer: 0}
     layers: 
     - blend_type: Override_Blend
@@ -147,7 +166,7 @@
       - 1
       - 1
       - 1
-      default_state: ""
+      default_state: New State 0
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}

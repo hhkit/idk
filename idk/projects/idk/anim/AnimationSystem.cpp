@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AnimationSystem.h"
+#include "AnimationUtils.h"
 
 #include <core/GameState.h>
 #include <core/GameObject.h>
@@ -19,7 +20,7 @@ namespace idk
 		{
 			if (!animator)
 				return;
-			
+
 			_creation_queue.push_back(animator);
 		};
 	}
@@ -38,7 +39,7 @@ namespace idk
 					if (layer.curr_state.name != string{})
 						layer.Play(layer.curr_state.name);
 				}
-				
+
 			}
 			_was_paused = false;
 		}
@@ -171,7 +172,7 @@ namespace idk
 				child_xform->position = final_bone_pose.position;
 				child_xform->scale = final_bone_pose.scale;
 				child_xform->rotation = final_bone_pose.rotation;
-				
+
 			} // end for each bone
 			AdvanceLayers(animator);
 			FinalPass(animator);
@@ -196,18 +197,16 @@ namespace idk
 			return result;
 		}
 
-		// We don't support blend trees yet
-		if (anim_state.IsBlendTree())
-			return result;
-
 		auto& curr_go = animator._child_objects[bone_index];
 		if (!curr_go)
 			return result;
 
+		if (anim_state.IsBlendTree())
+			return ComputeBlendTreePose(animator, layer, state, bone_index);
+
 		// Get the actual animation data
 		auto anim_data = anim_state.GetBasicState();
 
-		// We don't support blend trees yet
 		if (!anim_data->motion)
 		{
 			state.is_stopping = true;
@@ -225,6 +224,122 @@ namespace idk
 		// Interpolate from the found keyframe to the next keyframe and store the result.
 		InterpolateBone(*animated_bone, ticks, result);
 
+		return result;
+	}
+
+	AnimationSystem::BonePose AnimationSystem::ComputeBlendTreePose(Animator& animator, AnimationLayer& layer, AnimationLayerState& state, size_t bone_index)
+	{
+		UNREFERENCED_PARAMETER(layer);
+		// Default result should be the bind pose
+		BonePose result = animator._bind_pose[bone_index];
+
+		// Check if the state is valid
+		auto& anim_state = animator.GetAnimationState(state.name);
+		if (!anim_state.valid)
+		{
+			state.is_stopping = true;
+			return result;
+		}
+
+		auto& curr_go = animator._child_objects[bone_index];
+		if (!curr_go)
+			return result;
+
+		// Get the actual animation data
+		auto anim_data = anim_state.GetBlendTree();
+
+		// We dont supp more than 1D blend trees yet
+		if (anim_data->blend_tree_type != anim::BlendTreeType::BlendTree_1D)
+			return result;
+
+
+		auto& motions = anim_data->motions;
+		float curr_val = anim_data->def_data[0];
+		auto res = animator.float_vars.find(anim_data->params[0]);
+		if (res != animator.float_vars.end())
+			curr_val = res->second;
+
+		// First compute the weights
+		if (!anim_data->weights_cached)
+		{
+			float sum = 0.0f;
+			
+			size_t motions_sz = motions.size();
+			if (motions_sz < 1)
+			{
+				for (size_t i = 0; i < motions_sz; ++i)
+				{
+					motions[i].weight = 1.0f;
+				}
+			}
+			else
+			{
+				for (size_t i = 0; i < motions_sz; ++i)
+				{
+
+					const float curr_threshold = motions[i].thresholds[0];
+					float prev_threshold = curr_threshold;
+					float next_threshold = curr_threshold;
+
+					if (i != 0)
+						prev_threshold = motions[i - 1].thresholds[0];
+
+					if (i + 1 < motions_sz)
+						next_threshold = motions[i + 1].thresholds[0];
+
+					motions[i].weight = idk::anim::piecewise_linear(prev_threshold, curr_threshold, next_threshold, curr_val);
+
+					sum += motions[i].weight;
+				}
+
+				// Normalize the weights
+				for (auto& blend_motion : anim_data->motions)
+					blend_motion.weight /= sum;
+			}
+			anim_data->weights_cached = true;
+		}
+		
+		bool first_applied = false;
+		// Interpolate each of the animation motions based on the weights
+		for (auto& blend_motion : motions)
+		{
+			// Ignore all blend motions without valid clip
+			if (!blend_motion.motion)
+			{
+				continue;
+			}
+
+			// Compute the number of ticks this loop given the normalized time. 
+			const float ticks = std::min(state.normalized_time, 1.0f) * blend_motion.motion->GetNumTicks();
+
+			BonePose curr_pose = animator._bind_pose[bone_index];
+
+			// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
+			const anim::AnimatedBone* animated_bone = blend_motion.motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
+			if (animated_bone != nullptr)
+			{
+				// Interpolate from the found keyframe to the next keyframe and store the result.
+				InterpolateBone(*animated_bone, ticks, curr_pose);
+			}
+
+			// If the a bone pose was applied to result alr, we want to add to the result and not just blend FROM the result
+			if (first_applied)
+			{
+				// Apply additive animation to the result
+				result.position += curr_pose.position * blend_motion.weight;
+				result.rotation = slerp(quat{}, curr_pose.rotation, blend_motion.weight) * result.rotation;
+				result.scale	+= curr_pose.scale * blend_motion.weight;
+			}
+			else
+			{
+				result.position = curr_pose.position * blend_motion.weight;
+				result.rotation = slerp(animator._bind_pose[bone_index].rotation, curr_pose.rotation, blend_motion.weight);
+				result.scale	= curr_pose.scale * blend_motion.weight;
+			}
+			first_applied = true;
+		}
+
+		result.rotation.normalize();
 		return result;
 	}
 
@@ -299,18 +414,13 @@ namespace idk
 				if (!anim_state.valid)
 					continue;
 
-				// We don't support blend trees yet
-				if (anim_state.IsBlendTree())
-					continue;
-
 				// Stop here if the animation does not loop
 				// We dont subtract normalized_time because the designers might check
 				// normalized_time >= 1.0f to check if an animation has ended
 				if (!anim_state.loop)
-				{
 					layer.curr_state.is_playing = false;
-				}
-				layer.curr_state.normalized_time -= 1.0f;
+				else
+					layer.curr_state.normalized_time -= 1.0f;
 			}
 
 			if (layer.blend_state.is_playing)
@@ -362,11 +472,13 @@ namespace idk
 
 				// We don't support blend trees yet
 				if (anim_state.IsBlendTree())
-					continue;
-
-				auto anim_data = anim_state.GetBasicState();
-
-				layer.curr_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					AdvanceBlendTree(layer.curr_state, anim_state);
+				else
+				{
+					auto anim_data = anim_state.GetBasicState();
+					layer.curr_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+				}
+				
 			}
 
 			if (layer.blend_state.is_playing)
@@ -377,16 +489,32 @@ namespace idk
 
 				// We don't support blend trees yet
 				if (anim_state.IsBlendTree())
-					continue;
-
-				auto anim_data = anim_state.GetBasicState();
-
-				layer.blend_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					AdvanceBlendTree(layer.blend_state, anim_state);
+				else
+				{
+					auto anim_data = anim_state.GetBasicState();
+					layer.blend_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+				}
 			}
 
 			// Always set this to false no matter what. This is a trigger so it should only be true for one frame.
 			layer.blend_this_frame = false;
 		}
+	}
+
+	void AnimationSystem::AdvanceBlendTree(AnimationLayerState& layer_state, AnimationState& anim_state) const
+	{
+		auto anim_data = anim_state.GetBlendTree();
+		float time_inc = 0.0f;
+		anim_data->weights_cached = false;
+		const float dt = Core::GetRealDT().count();
+		for (auto& blendtree_motion : anim_data->motions)
+		{
+			const float curr_inc = dt / blendtree_motion.motion->GetDuration() * blendtree_motion.speed;
+			time_inc += curr_inc * blendtree_motion.weight;
+		}
+
+		layer_state.normalized_time += time_inc;
 	}
 
 	void AnimationSystem::FinalPass(Animator& animator)
@@ -494,7 +622,7 @@ namespace idk
 				const float factor = (time_in_ticks - animated_bone.scale_track[start].time) / dt;
 				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose.scale = lerp(lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[start + 1].val, factor), curr_pose.scale, _blend);
+				curr_pose.scale = lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[start + 1].val, factor);
 			}
 		}
 
@@ -512,7 +640,7 @@ namespace idk
 				const float factor = (time_in_ticks - animated_bone.translate_track[start].time) / dt;
 				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose.position = lerp(lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[start + 1].val, factor), curr_pose.position, _blend);
+				curr_pose.position = lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[start + 1].val, factor);
 			}
 		}
 
@@ -530,7 +658,7 @@ namespace idk
 				const float factor = (time_in_ticks - animated_bone.rotation_track[start].time) / dt;
 				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-				curr_pose.rotation = slerp(slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor), curr_pose.rotation, _blend);
+				curr_pose.rotation = slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor);
 				curr_pose.rotation.normalize();
 			}
 		}
