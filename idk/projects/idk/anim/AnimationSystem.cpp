@@ -188,6 +188,7 @@ namespace idk
 		UNREFERENCED_PARAMETER(layer);
 		// Default result should be the bind pose
 		BonePose result = animator._bind_pose[bone_index];
+		result.rotation = quat{};
 
 		// Check if the state is valid
 		auto& anim_state = animator.GetAnimationState(state.name);
@@ -232,6 +233,7 @@ namespace idk
 		UNREFERENCED_PARAMETER(layer);
 		// Default result should be the bind pose
 		BonePose result = animator._bind_pose[bone_index];
+		result.rotation = quat{};
 
 		// Check if the state is valid
 		auto& anim_state = animator.GetAnimationState(state.name);
