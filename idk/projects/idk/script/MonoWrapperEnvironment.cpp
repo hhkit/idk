@@ -874,6 +874,31 @@ namespace idk::mono
         }
 		BIND_END();
 
+		// lights
+		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
+		{
+			return h->GetColor();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetColor", void, Handle<Light> h,color c)
+		{
+			h->SetColor(c);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetIntensity", real, Handle<Light> h)
+		{
+			return h->GetLightIntensity();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetIntensity", void, Handle<Light> h, real i)
+		{
+			h->SetLightIntensity(i);
+		}
+		BIND_END();
+
 		// Input
 		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
 			{

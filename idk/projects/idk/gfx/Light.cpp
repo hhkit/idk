@@ -46,7 +46,7 @@ namespace idk
 		mat4 operator()(const DirectionalLight&)
 		{
 			auto trf = light->GetGameObject()->Transform();
-			vec3 v_pos = vec3();
+			vec3 v_pos = vec3(0,0,0);
 			vec3 v_dir = trf->Forward();
 			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
 			return look_at(v_pos, v_pos - vec3(v_dir.x, v_dir.y, v_dir.z), trf->Up()).inverse();
@@ -168,24 +168,125 @@ namespace idk
 
 		return retval;
 	}
-	/*
-	CameraData Light::GenerateCameraData() const
+
+	
+
+	//LightData Light::GenerateLightData() const
+	//{
+	//	LightData retval;
+	//	retval.index = (int)light.index();
+	//	std::visit([&](auto& light_variant)
+	//	{
+	//		using T = std::decay_t<decltype(light_variant)>;
+	//		if constexpr (std::is_same_v<T, PointLight>)
+	//		{
+	//			const PointLight& point_light = light_variant;
+	//			retval.light_color = point_light.light_color * point_light.intensity;
+	//			retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
+	//			retval.intensity = point_light.intensity;
+	//			//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
+	//		}
+
+	//		if constexpr (std::is_same_v<T, DirectionalLight>)
+	//		{
+	//			const DirectionalLight& dir_light = light_variant;
+	//			retval.light_color = dir_light.light_color * dir_light.intensity;
+	//			const auto tfm = GetGameObject()->Transform();
+	//			retval.v_pos = tfm->GlobalPosition();
+	//			retval.v_dir = tfm->Forward();
+	//			retval.intensity = dir_light.intensity;
+	//		}
+
+	//		if constexpr (std::is_same_v<T, SpotLight>)
+	//		{
+	//			const SpotLight& spotlight = light_variant;
+	//			retval.light_color = spotlight.light_color * spotlight.intensity;
+	//			const auto tfm = GetGameObject()->Transform();
+	//			retval.v_pos = tfm->GlobalPosition();
+	//			retval.v_dir = tfm->Forward();
+	//			retval.cos_inner = cos(spotlight.inner_angle);
+	//			retval.cos_outer = cos(spotlight.outer_angle);
+	//			retval.falloff = (spotlight.use_inv_sq_atten) ? spotlight.attenuation_radius : (1 / (spotlight.attenuation_radius * spotlight.attenuation_radius));
+
+	//			retval.intensity = spotlight.intensity;
+	//			//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
+	//		}
+	//		retval.shadow_bias = shadow_bias;
+	//		retval.v = LightCameraView{ this }(light_variant);
+	//		retval.p = LightCameraProj{}(light_variant);
+	//		retval.vp = retval.p * retval.v;
+	//		retval.light_map = light_variant.light_map;
+	//		retval.cast_shadow = casts_shadows;
+	//	}
+	//	, light);
+
+	//	return retval;
+	//}
+
+	void Light::SetLightData(const LightData& ld)
 	{
-		return CameraData{
-			GetGameObject(),
-			false,
-			0xFFFFFFF,
-			std::visit(LightCameraView{ this },light),
-			std::visit(LightCameraProj{ },light),
-			std::visit([&](auto& light_variant)
+		std::visit([&,ld](auto& light_variant)
+		{
+			using T = std::decay_t<decltype(light_variant)>;
+			if constexpr (std::is_same_v<T, PointLight>)
 			{
-				return light_variant.light_map;
+				//const PointLight& point_light = light_variant;
+				light_variant.light_color = ld.light_color;
+				light_variant.intensity = ld.intensity;
+				//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 			}
-		, light),
-			false,
-			true,
-			vec4{1,1,1,1}
-		};
+
+			if constexpr (std::is_same_v<T, DirectionalLight>)
+			{
+				//const DirectionalLight& dir_light = light_variant;
+				light_variant.light_color = ld.light_color;
+				light_variant.intensity = ld.intensity;
+			}
+
+			if constexpr (std::is_same_v<T, SpotLight>)
+			{
+				//const SpotLight& spotlight = light_variant;
+				light_variant.light_color = ld.light_color;
+				light_variant.intensity = ld.intensity;
+				//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
+			}
+		}
+		, light);
 	}
-	*/
+	color Light::GetColor() const
+	{
+		std::visit([&](auto& light_variant)
+		{
+			return light_variant.light_color;
+		}
+		, light);
+
+		return color{};
+	}
+	void Light::SetColor(const color& c)
+	{
+		std::visit([&](auto& light_variant)
+		{
+			light_variant.light_color = c;
+		}
+		, light);
+	}
+	real Light::GetLightIntensity() const
+	{
+		std::visit([&](auto& light_variant)
+		{
+			return light_variant.intensity;
+		}
+		, light);
+
+		return 0.f;
+	}
+	void Light::SetLightIntensity(const real& i)
+	{
+		std::visit([&](auto& light_variant)
+		{
+			light_variant.intensity = i;
+		}
+		, light);
+	}
 }
