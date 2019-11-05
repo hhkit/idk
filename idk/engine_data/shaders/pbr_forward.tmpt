@@ -114,9 +114,16 @@ float GeometrySmith(vec3 normal, vec3 view, vec3 light, float roughness)
 	return ggx1 * ggx2;
 }
 
+//vec2 sampleOffsetDirections[8] = vec2[]
+//(
+//   vec3( 1,  1), vec3( 1, -1), vec3(-1, -1), vec3(-1,  1), 
+//   vec3( 1,  0), vec3(-1,  0), vec3( 0,  1), vec3( 0, -1)
+//);   
+
 float computePCF(int iter, vec2 tc, vec2 texelSize, float tc_z, float bias, float curDepth, int x)
 {
 	//float z_depth = tc_z/tc.w;
+	
 	vec4 sampleShadow = texture(shadow_maps[iter],  tc.xy + vec2(x,-1) * texelSize);
 	vec4 sampleShadow1 = texture(shadow_maps[iter], tc.xy + vec2(x,0) * texelSize );
 	vec4 sampleShadow2 = texture(shadow_maps[iter], tc.xy + vec2(x,1) * texelSize );
@@ -210,7 +217,7 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 			texelSize = 1.f/texelSize;
 			float tc_z = projCoords.z - bias;
 			
-			for(int x = -1; x <= 1; ++x)
+			for(int x = -2; x <= 2; ++x)
 			{		
 				avgDepth += computePCF(iter,projCoords.xy, texelSize,tc_z,bias,curDepth,x);
 				avgDepth -= computeStratifiedPoisson(iter,projCoords.xy,texelSize, tc_z, bias,x);
@@ -218,7 +225,7 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 
 			
 			//divide by 9 values
-			avgDepth /= 9.0f;
+			avgDepth /= 15.0f;
 			
 			return avgDepth;
 		}
