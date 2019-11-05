@@ -13,7 +13,8 @@ namespace idk
 
 		aabb bounds() const;
 
-		bool is_sphere() const;		//When the height is smaller than the diameter of the top and bottom cap, this is true.
+		bool is_sphere() const;							//When the height is smaller than the diameter of the top and bottom cap, this is true.
+		std::pair<vec3,vec3> get_line_points() const;	//Gets the two points that define the medial axis. Its basically the two points without the caps. If the two spheres are touching/overlapping, the two vecs are the same.
 
 		capsule& operator*=(const mat4& tfm);
 		capsule  operator*(const mat4& tfm) const;
