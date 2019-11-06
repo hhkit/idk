@@ -186,12 +186,7 @@ namespace idk::ogl
 		const auto SetSkeletons = [this, &curr_object_buffer](int skeleton_index)
 		{
 			auto& skeleton = curr_object_buffer.skeleton_transforms[skeleton_index];
-			for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
-			{
-				auto& transform = skeleton.bones_transforms[i];
-				string bone_transform_blk = "BoneMat4s.bone_transform[" + std::to_string(i) + "]";
-				pipeline.SetUniform(bone_transform_blk, transform);
-			}
+			pipeline.SetUniform("BoneMat4s.bone_transform", skeleton.bones_transforms);
 		};
 
 		const auto SetLightUniforms = [this](span<LightData> lights, GLuint& texture_units)
