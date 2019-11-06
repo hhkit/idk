@@ -16,6 +16,17 @@
 
 #include <meta/comparator.inl>
 
+
+static inline bool operator<(const idk::Guid& lhs, const idk::Guid& rhs) noexcept
+{
+	return lhs.operator idk::string() < rhs.operator idk::string();
+}
+template<typename Rsc>
+static inline bool operator<(const idk::RscHandle<Rsc>& lhs, const idk::RscHandle<Rsc>& rhs) noexcept
+{
+	return lhs.guid < rhs.guid;
+}
+
 namespace idk
 {
 	enum class RequestState
@@ -176,7 +187,6 @@ namespace idk
 			ro.receive_shadows,
 			ro.renderer_req,
 			ro.config,
-			ro.instanced_data,
 		};
 	}
 
