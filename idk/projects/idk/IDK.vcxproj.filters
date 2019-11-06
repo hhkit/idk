@@ -860,6 +860,7 @@
     <ClInclude Include="phys\collision_detection\collision_capsule.h">
       <Filter>phys\collision</Filter>
     </ClInclude>
+    <ClInclude Include="meta\comparator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1442,6 +1443,7 @@
     <None Include="script\ManagedObj.inl">
       <Filter>script</Filter>
     </None>
+    <None Include="meta\comparator.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
