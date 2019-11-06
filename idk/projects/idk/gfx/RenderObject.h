@@ -37,6 +37,46 @@ namespace idk
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
 	};
+	template<typename InstancedData>
+	struct GenericInstancedRenderObjects
+	{
+		//id
+		GenericHandle obj_id{};
+		// resources
+		RscHandle<Mesh>  mesh{};
+		RscHandle<MaterialInstance> material_instance{};
+		//	hash_table<string, hash_table<string,UniformInstance>> uniforms;
+
+		// lighting
+		bool cast_shadows{};
+		bool receive_shadows{};
+
+		// culling
+		//sphere bounding_volume;
+
+		//binding,attrib
+		const renderer_reqs* renderer_req{};
+		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
+		shared_ptr<pipeline_config> config{};
+
+		// transform
+		vector<InstancedData> instanced_data{};
+	};
+
+
+	struct InstancedData
+	{
+		vec3 velocity  {};
+		mat4 transforms{};
+	};
+	struct AnimatedInstancedData :InstancedData
+	{
+		unsigned skeleton_index{};
+	};
+
+	using InstRenderObjects=GenericInstancedRenderObjects<InstancedData>;
+	using InstAnimatedRenderObjects=GenericInstancedRenderObjects<AnimatedInstancedData>;
+
 
 	struct SkeletonTransforms
 	{
