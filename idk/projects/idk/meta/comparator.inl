@@ -21,17 +21,6 @@ namespace idk
 		template<typename ptr>
 		using ptr_mem_info_class = typename ptr_mem_info<ptr>::class_t;
 
-		template<typename Ptr, Ptr ptr>
-		struct PtrMem
-		{
-			using T = ptr_mem_info_type <Ptr>;
-			using C = ptr_mem_info_class<Ptr>;
-			constexpr static Ptr pointer = ptr;
-			static const T& get(const C& obj) noexcept
-			{
-				return (obj.*pointer);
-			}
-		};
 
 		struct poss
 		{
@@ -64,10 +53,21 @@ namespace idk
 		}
 
 	}
+	template<typename Ptr, Ptr ptr>
+	struct PtrMem
+	{
+		using T = detail::ptr_mem_info_type <Ptr>;
+		using C = detail::ptr_mem_info_class<Ptr>;
+		constexpr static Ptr pointer = ptr;
+		static const T& get(const C& obj) noexcept
+		{
+			return (obj.*pointer);
+		}
+	};
 
 	template<typename T, typename...Args>
 	bool ordered_comparator<T, Args...>::operator()(const T& lhs, const T& rhs)const noexcept
 	{
-		return detail::or_together(compare<Args>(lhs, rhs)...);
+		return detail::or_together(detail::compare<Args>(lhs, rhs)...);
 	}
 }
