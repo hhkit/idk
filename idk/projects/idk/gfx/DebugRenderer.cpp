@@ -23,43 +23,43 @@ namespace idk
 	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
 	{
 		//T * R * S
-		vec3 rightVec = capsule.dir;
-		float i = -rightVec.x;
-		rightVec.x = rightVec.y;
-		rightVec.y = i;
+		vec3 rightVec = vec3{ 0,1,0 }.cross(capsule.dir); //Using up as a reference
+
+		if (rightVec.length_sq() == 0 ||  abs(rightVec.length_sq()) <= epsilon)
+			rightVec = vec3{ 1,0,0 }.cross(capsule.dir); //Use front as a reference instead if cannot build cross product with up
 		rightVec.normalize();
-		vec3 frontVec = capsule.dir;
-		i = -frontVec.y;
-		frontVec.y = frontVec.z;
-		frontVec.z = i;
+		const vec3 frontVec = capsule.dir.cross(rightVec).get_normalized();
 
 		float minSpherePoint = ((capsule.height * 0.5f) - capsule.radius);
 		minSpherePoint = minSpherePoint < 0 ? 0 : minSpherePoint;
-		const auto capsule_sphere_top_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { scale(vec3(capsule.radius*2)) };
-		const auto capsule_sphere_bot_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_top_tfm  = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{capsule.dir,rightVec,frontVec  } * scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_topB_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ frontVec,capsule.dir,rightVec } * scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_topC_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ rightVec,frontVec,capsule.dir } * scale(vec3(capsule.radius*2)) };
 
-		const vec3 ptOrigin			= capsule.center - (capsule.dir.get_normalized()* capsule.height*0.5f);
+		const auto capsule_sphere_bot_tfm  = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{capsule.dir,rightVec,frontVec  } * scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_botB_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ frontVec,capsule.dir,rightVec } * scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_botC_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ rightVec,frontVec,capsule.dir } * scale(vec3(capsule.radius*2)) };
+
+		const vec3 ptOrigin			= capsule.center - (capsule.dir.get_normalized()* capsule.height*0.5f); //Bottom of sphere
 		const vec3 ptVelocity		= capsule.dir.get_normalized() * capsule.height;
-		const vec3 ptRightOrigin	= ptOrigin + rightVec * capsule.radius;
-		const vec3 ptLeftOrigin		= ptOrigin - rightVec * capsule.radius;
-		const vec3 ptFrontOrigin	= ptOrigin + frontVec * capsule.radius;
-		const vec3 ptBackOrigin		= ptOrigin - frontVec * capsule.radius;
-		float sideVelocity = ptVelocity.length() * 0.5f - capsule.radius  < 0 ? 0 : ptVelocity.length() * 0.5f - capsule.radius ;
+		const float sideVelocity	= capsule.height * 0.5f - capsule.radius  < 0 ? 0 : capsule.height * 0.5f - capsule.radius ; //For the sides
+		const vec3 sidePt			= capsule.center - capsule.dir.get_normalized() * sideVelocity;
+		const vec3 ptRightOrigin	= sidePt + rightVec * capsule.radius;
+		const vec3 ptLeftOrigin		= sidePt - rightVec * capsule.radius;
+		const vec3 ptFrontOrigin	= sidePt + frontVec * capsule.radius;
+		const vec3 ptBackOrigin		= sidePt - frontVec * capsule.radius;
 
-		const auto capsule_mid_line_tfm		= look_at(ptOrigin		+ ptVelocity * 0.5f, ptOrigin		+ ptVelocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ptVelocity.length() * 0.5f }) };
-		const auto capsule_right_line_tfm	= look_at(ptRightOrigin + ptVelocity * 0.5f, ptRightOrigin	+ ptVelocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ sideVelocity }) };
-		const auto capsule_left_line_tfm	= look_at(ptLeftOrigin	+ ptVelocity * 0.5f, ptLeftOrigin	+ ptVelocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ sideVelocity }) };
-		const auto capsule_front_line_tfm	= look_at(ptFrontOrigin + ptVelocity * 0.5f, ptFrontOrigin	+ ptVelocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ sideVelocity }) };
-		const auto capsule_back_line_tfm	= look_at(ptBackOrigin	+ ptVelocity * 0.5f, ptBackOrigin	+ ptVelocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ sideVelocity }) };
-		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_top_tfm, c, duration, depth_test);
-		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_bot_tfm, c, duration, depth_test);
-		Draw(Mesh::defaults[MeshType::Sphere], capsule_sphere_top_tfm, c, duration, depth_test);   //Gets wonky when rotated
-		Draw(Mesh::defaults[MeshType::Sphere], capsule_sphere_bot_tfm, c, duration, depth_test);   //Gets wonky when rotated
-		Draw(Mesh::defaults[MeshType::Line], capsule_mid_line_tfm, c, duration, depth_test);
-		Draw(Mesh::defaults[MeshType::Line], capsule_right_line_tfm, c, duration, depth_test);	   //Gets wonky when rotated
-		Draw(Mesh::defaults[MeshType::Line], capsule_left_line_tfm, c, duration, depth_test);	   //Gets wonky when rotated
-		Draw(Mesh::defaults[MeshType::Line], capsule_front_line_tfm, c, duration, depth_test);	   //Gets wonky when rotated
-		Draw(Mesh::defaults[MeshType::Line], capsule_back_line_tfm, c, duration, depth_test);	   //Gets wonky when rotated
+		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_top_tfm , c, duration, depth_test);
+		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_topB_tfm, c, duration, depth_test);
+		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_topC_tfm, c, duration, depth_test);  
+		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_bot_tfm , c, duration, depth_test);  
+		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_botB_tfm, c, duration, depth_test);  
+		Draw(Mesh::defaults[MeshType::Circle], capsule_sphere_botC_tfm, c, duration, depth_test);  
+		Draw(ptOrigin		, ptOrigin		+  ptVelocity									 , c, duration, depth_test);	//Mid
+		Draw(ptRightOrigin	, ptRightOrigin	+ capsule.dir.get_normalized() * sideVelocity * 2, c, duration, depth_test);	//Sides
+		Draw(ptLeftOrigin	, ptLeftOrigin	+ capsule.dir.get_normalized() * sideVelocity * 2, c, duration, depth_test);	//Sides
+		Draw(ptFrontOrigin	, ptFrontOrigin	+ capsule.dir.get_normalized() * sideVelocity * 2, c, duration, depth_test);	//Sides
+		Draw(ptBackOrigin	, ptBackOrigin	+ capsule.dir.get_normalized() * sideVelocity * 2, c, duration, depth_test);	//Sides
 
 	}
 
