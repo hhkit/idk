@@ -266,7 +266,6 @@ namespace idk
 		src.clear();
 		std::swap(dst, src);
 	}
-	struct Transform
 
 
 	void GraphicsSystem::BufferGraphicsState(
