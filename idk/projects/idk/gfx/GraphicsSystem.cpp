@@ -16,10 +16,22 @@
 
 #include <meta/comparator.inl>
 
+struct guid_64
+{
+	uint64_t mem1;
+	uint64_t mem2;
+};
+using guid_comparator = idk::ordered_comparator<guid_64, idk::PtrMem<decltype(&guid_64::mem1), & guid_64::mem1>, idk::PtrMem<decltype(&guid_64::mem2), & guid_64::mem2>>;
 
+union guid_u {
+	idk::Guid guid;
+	guid_64 data;
+};
 static inline bool operator<(const idk::Guid& lhs, const idk::Guid& rhs) noexcept
 {
-	return lhs.operator idk::string() < rhs.operator idk::string();
+	guid_u lmap{ lhs },rmap{ rhs };
+
+	return guid_comparator{}(lmap.data,rmap.data);
 }
 template<typename Rsc>
 static inline bool operator<(const idk::RscHandle<Rsc>& lhs, const idk::RscHandle<Rsc>& rhs) noexcept
