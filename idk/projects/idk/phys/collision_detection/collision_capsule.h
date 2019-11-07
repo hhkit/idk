@@ -19,6 +19,7 @@ Collisions with capsule
 
 namespace idk::phys
 {
-	//col_result collide_capsule_box_discrete(const capsule& lhs, const box& rhs);
+	col_result collide_capsule_box_discrete(const capsule& lhs, const box& rhs);
+	col_result collide_capsule_capsule_discrete(const capsule& lhs, const capsule& rhs);
 	col_result collide_capsule_sphere_discrete(const capsule& lhs, const sphere& rhs);
 }

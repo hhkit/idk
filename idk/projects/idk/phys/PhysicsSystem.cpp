@@ -194,13 +194,25 @@ namespace idk
 								return phys::collide_box_sphere_discrete(
 											lshape, rshape);
 							else
-								if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, sphere>)
-									return phys::collide_capsule_sphere_discrete(
-										lshape, rshape);
+							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, sphere>)
+								return phys::collide_capsule_sphere_discrete(
+									lshape, rshape);
 							else
 							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, capsule>)
 								return phys::collide_capsule_sphere_discrete(
 									rshape, lshape);
+							else
+							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, box>)
+								return phys::collide_capsule_box_discrete(
+									lshape, rshape);
+							else
+							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, capsule>)
+								return phys::collide_capsule_box_discrete(
+									rshape, lshape);
+							else
+							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, capsule>)
+								return phys::collide_capsule_capsule_discrete(
+									lshape, rshape);
 							else
 								return phys::col_failure{};
 

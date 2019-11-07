@@ -129,6 +129,9 @@ namespace idk
 
 			CameraData  curr_scene_camera;
 
+			vector<InstRenderObjects> instanced_mesh_render;
+			vector<InstAnimatedRenderObjects> instanced_skinned_mesh_render;
+
 			//RscHandle<ShaderProgram> mesh_vtx;
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
 			array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;

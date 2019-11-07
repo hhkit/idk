@@ -4,6 +4,7 @@
 #include <app/Application.h>
 #include <opengl/resource/OpenGLTexture.h>
 #include <opengl/resource/FrameBuffer.h>
+#include <opengl/resource/OpenGLCubemap.h>
 
 namespace idk::ogl
 {
@@ -51,9 +52,17 @@ namespace idk::ogl
 		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
 
-		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
-		out->buffer = tex;
+		if (type == AttachmentType::eDepth)
+		{
+			RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
+			tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
+			out->buffer = tex;
+		}
+		else if(type == AttachmentType::eDepth3D)
+		{
+			RscHandle<OpenGLCubemap> tex = Core::GetResourceManager().Create<OpenGLCubemap>();
+			out->buffer = tex->Tex();
+		}
 	}
 	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}
 	void OpenGLFrameBufferFactory::Finalize(FrameBuffer& ) {}

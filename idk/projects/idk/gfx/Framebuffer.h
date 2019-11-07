@@ -18,6 +18,7 @@ namespace idk
 		eColor,
 		eDepth,
 		eStencil,
+		eDepth3D,
 		eSizeAT
 	};
 
@@ -59,9 +60,12 @@ namespace idk
 		const Attachment& GetAttachment(size_t index)const { return *attachments[index]; }
 		size_t NumColorAttachments()const {return attachments.size();}
 		size_t NumAttachments()const;
+		size_t NumLayers()const;
 		ivec2 Size()const { return size; };
 		ivec2 Size(ivec2 new_size)const { return new_size=size; };
+
 		ivec2 size{};
+		size_t num_layers{};
 	};
 
 }

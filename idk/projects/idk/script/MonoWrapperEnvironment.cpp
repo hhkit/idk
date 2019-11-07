@@ -706,6 +706,13 @@ namespace idk::mono
 			return audiosource->IsAnyAudioClipPlaying();
 		}
 		BIND_END();
+
+		BIND_START("idk.Bindings::FindAudio", int, Handle<AudioSource> audiosource, MonoString* name)
+		{
+			auto s = unbox(name);
+			return audiosource->FindAudio(s.get());
+		}
+		BIND_END();
 		//----------------------------------------------------------------------------------------------------
 
 		// Renderer
@@ -735,8 +742,8 @@ namespace idk::mono
 		{
 			switch (renderer.type)
 			{
-			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->enabled = set;
-			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->enabled = set;
+            case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->enabled = set; return;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->enabled = set; return;
 			default: return;
 			}
 		}
@@ -872,6 +879,31 @@ namespace idk::mono
 				return;
 			handle->SetUniform(s.get(), tex);
         }
+		BIND_END();
+
+		// lights
+		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
+		{
+			return h->GetColor();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetColor", void, Handle<Light> h,color c)
+		{
+			h->SetColor(c);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetIntensity", real, Handle<Light> h)
+		{
+			return h->GetLightIntensity();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetIntensity", void, Handle<Light> h, real i)
+		{
+			h->SetLightIntensity(i);
+		}
 		BIND_END();
 
 		// Input

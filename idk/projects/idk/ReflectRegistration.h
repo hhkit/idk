@@ -393,7 +393,7 @@ REFLECT_VARS(center, radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::capsule, "capsule")
-REFLECT_VARS(center, radius, height)
+REFLECT_VARS(center, radius, height, dir)
 REFLECT_END()
 
 // GRAPHICS

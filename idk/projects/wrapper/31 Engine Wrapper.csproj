@@ -9,11 +9,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>idk</RootNamespace>
     <AssemblyName>idk</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,6 +54,7 @@
     <Compile Include="Components\Animator.cs" />
     <Compile Include="Components\AudioSource.cs" />
     <Compile Include="Components\Collider.cs" />
+    <Compile Include="Components\Light.cs" />
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
     <Compile Include="Core\Bindings.cs" />

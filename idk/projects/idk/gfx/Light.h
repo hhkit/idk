@@ -43,6 +43,13 @@ namespace idk
 		void SetLightMap(const RscHandle<FrameBuffer>& light_map);
 
 		LightData GenerateLightData() const;
+		void SetLightData(const LightData& ld);
+
+		color GetColor()const;
+		void SetColor(const color& c);
+
+		real GetLightIntensity()const;
+		void SetLightIntensity(const real& i);
 		//CameraData GenerateCameraData() const;
 	};
 }

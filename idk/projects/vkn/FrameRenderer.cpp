@@ -210,13 +210,6 @@ namespace idk::vkn
 	//Possible Idea: Create a Pipeline object that tracks currently bound descriptor sets
 	PipelineThingy FrameRenderer::ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager)
 	{
-		if (state.camera.is_shadow)
-		{
-			ShadowBinding binders;
-			binders.for_each_binder([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
-			return vkn::ProcessRoUniforms(state, ubo_manager, binders);
-		}
-		else
 		{
 			PbrFwdMaterialBinding binders;
 			binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
@@ -281,9 +274,9 @@ namespace idk::vkn
 		size_t num_conv_states = 1;
 		auto total_pre_states = lights.size() + num_conv_states;
 		GrowStates(_pre_states, total_pre_states);
-		for (auto& state : _pre_states)
+		for (auto& pre_state : _pre_states)
 		{
-			state.Reset();
+			pre_state.Reset();
 		}
 		size_t curr_state = 0;
 		//Do the shadow pass here.
@@ -299,7 +292,7 @@ namespace idk::vkn
 
 
 		auto& cameras = *state.cameras;
-		if (cameras.size())
+		if (cameras.size()==0)
 		{
 			auto& convolute_state = _pre_states[curr_state];
 			_convoluter.pipeline_manager(*_pipeline_manager);
@@ -333,10 +326,10 @@ namespace idk::vkn
 
 		}
 
-		for (auto& state : _pre_states)
+		for (auto& pre_state : _pre_states)
 		{
-			if (state.has_commands)
-				buffers.emplace_back(state.cmd_buffer);
+			if (pre_state.has_commands)
+				buffers.emplace_back(pre_state.cmd_buffer);
 		}
 
 		auto& current_signal = View().CurrPresentationSignals();
@@ -847,7 +840,6 @@ namespace idk::vkn
 		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
 		
 		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto& vkn_fb = camera.render_target.as<VknRenderTarget>();
 		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
 		TransitionFrameBuffer(camera, cmd_buffer, view);
 
@@ -875,7 +867,6 @@ namespace idk::vkn
 		//////////////////Skybox rendering
 		if (sb_cm)
 		{
-			auto& vknCubeMap = sb_cm->as<VknCubemap>();
 			pipeline_config skybox_render_config;
 			DescriptorsManager skybox_ds_manager(view);
 			skybox_render_config.fill_type = FillType::eFill;

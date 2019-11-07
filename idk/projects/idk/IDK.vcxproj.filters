@@ -857,6 +857,10 @@
     <ClInclude Include="phys\collision_detection\collision_capsule.h">
       <Filter>phys\collision</Filter>
     </ClInclude>
+    <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1260,6 +1264,7 @@
     <ClCompile Include="anim\AnimationUtils.cpp">
       <Filter>anim\utils</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\FramebufferFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1442,6 +1447,7 @@
     <None Include="script\ManagedObj.inl">
       <Filter>script</Filter>
     </None>
+    <None Include="meta\comparator.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

@@ -254,6 +254,25 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AudioSourceIsAnyAudioClipPlaying(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int FindAudio(ulong id, string name);
+
+        /*
+        * Light
+        */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color LightGetColor(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetColor(ulong id, Color c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetIntensity(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetIntensity(ulong id, float i);
+
+
         /*
          * Collider
          */

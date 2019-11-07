@@ -1026,20 +1026,36 @@ namespace idk {
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
 	{
-		ImGui::Text("Text:       ");
-		ImGui::SameLine();
+		const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
+		const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
+		{
+			colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(drag_pos);
+		};
+
+
+		ImGui::Text("State Type: Font Type");
+		const bool has_valid_atlas = s_cast<bool>(c_font->textureAtlas);
+		display_name_align("Atlas", !has_valid_atlas);
+		ImGuidk::InputResource(("##atlas" + string(c_font->textureAtlas->Name().data())).c_str(), &c_font->textureAtlas);
+		
+		display_name_align("Text");
 		ImGui::InputTextMultiline("##InputText", &c_font->text);
 
-		ImGui::Text("Spacing: ");
-		ImGui::SameLine();
+		display_name_align("Font Size");
+		if (ImGui::DragInt("##fontsize", &c_font->fontSize))
+		{
+			c_font->UpdateFontSize();
+		}
+
+		display_name_align("Spacing");
 		ImGui::DragFloat("##fontspacing", &c_font->spacing);
 
-		ImGui::Text("Track:     ");
-		ImGui::SameLine();
+		display_name_align("Track");
 		ImGui::DragFloat("##fonttrack", &c_font->tracking);
 
-		ImGui::Text("Color:     ");
-		ImGui::SameLine();
+		display_name_align("Color");
 		ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
 
 	}
@@ -1081,7 +1097,66 @@ namespace idk {
 
 		ImGui::EndChild();
 
-		displayVal(*c_audiosource);
+
+		//I dont know how to modify displayVal such that it doesnt display vector<RscHandle<AudioClip>> ;_;
+		const float widthSpace = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+
+		ImGui::Text("Volume");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->volume);
+		ImGui::DragFloat("", &c_audiosource->volume, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Pitch");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->pitch);
+		ImGui::DragFloat("", &c_audiosource->pitch, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Min Distance");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->minDistance);
+		ImGui::DragFloat("", &c_audiosource->minDistance, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Max Distance");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->maxDistance);
+		ImGui::DragFloat("", &c_audiosource->maxDistance, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Max Distance");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->maxDistance);
+		ImGui::DragFloat("", &c_audiosource->maxDistance, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Is 3D Sound");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->is3Dsound);
+		ImGui::Checkbox("", &c_audiosource->is3Dsound);
+		ImGui::PopID();
+
+		ImGui::Text("Is Unique");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->isUnique);
+		ImGui::Checkbox("", &c_audiosource->isUnique);
+		ImGui::PopID();
+
+		ImGui::Text("Is Loop");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->isLoop);
+		ImGui::Checkbox("", &c_audiosource->isLoop);
+		ImGui::PopID();
+
 	}
 
     template<>
@@ -1141,7 +1216,7 @@ namespace idk {
 
         static Handle<ParticleSystem> _static_ps_handle{};
         _static_ps_handle = c_ps;
-        const auto draw_bursts = [](const reflect::dynamic& val) -> bool
+        constexpr auto draw_bursts = [](const reflect::dynamic& val) -> bool
         {
             bool changed = false;
             auto& bursts = val.get<vector<EmissionModule::Burst>>();
@@ -1188,7 +1263,7 @@ namespace idk {
             ImGui::PopItemWidth();
             ImGui::PopStyleVar();
 
-            return false;
+            return changed;
         };
         InjectDrawTable inject{ { "emission/bursts", CustomDrawFn(draw_bursts) } };
 

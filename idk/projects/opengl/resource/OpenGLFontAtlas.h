@@ -1,6 +1,7 @@
 #pragma once
 #include <gfx/FontAtlas.h>
 #include <glad/glad.h>
+#include <opengl/resource/OpenGLTexture.h>
 
 namespace idk::ogl
 {
@@ -21,6 +22,10 @@ namespace idk::ogl
 		using FontAtlas::Size;
 		void Size(ivec2 new_size) override;
 		virtual void* ID() const override;
+
+		RscHandle<Texture> Tex()const noexcept;
+
+		RscHandle<OpenGLTexture> texture;
 
 	private:
 		GLuint _id = 0;

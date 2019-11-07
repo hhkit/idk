@@ -186,12 +186,7 @@ namespace idk::ogl
 		const auto SetSkeletons = [this, &curr_object_buffer](int skeleton_index)
 		{
 			auto& skeleton = curr_object_buffer.skeleton_transforms[skeleton_index];
-			for (unsigned i = 0; i < skeleton.bones_transforms.size(); ++i)
-			{
-				auto& transform = skeleton.bones_transforms[i];
-				string bone_transform_blk = "BoneMat4s.bone_transform[" + std::to_string(i) + "]";
-				pipeline.SetUniform(bone_transform_blk, transform);
-			}
+			pipeline.SetUniform("BoneMat4s.bone_transform", skeleton.bones_transforms);
 		};
 
 		const auto SetLightUniforms = [this](span<LightData> lights, GLuint& texture_units)
@@ -285,6 +280,13 @@ namespace idk::ogl
 			pipeline.SetUniform("brdfLUT", texture_units++);
 			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 		};
+
+		/*static const mat4 biasMatrix(
+			0.5, 0.0, 0.0, 0.0,
+			0.0, 0.5, 0.0, 0.0,
+			0.0, 0.0, 0.5, 0.0,
+			0.5, 0.5, 0.5, 1.0
+		);*/
 
 		for (const auto& elem : curr_object_buffer.lights)
 		{
@@ -470,22 +472,42 @@ namespace idk::ogl
 			
 			FlushObjectTransforms();
 
+			curr_mat = {};
+			curr_mat_inst = {};
+			curr_mesh = {};
+			material_texture_uniforms = 0;
+
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
+				// Do culling here
+				//sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
+
+				// We only draw if the frustrum contains the mesh
+				//if (!frust.contains(transformed_bounds))
+				//	continue;
+
 				// bind shader
 				const auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
 
+				//PushMaterialInstance(elem.material_instance);
+				//SetSkeletons(elem.skeleton_index);
+				//PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
+				//PushObjectTransform(elem.transform);
+
 				GLuint texture_units = 0;
 				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
 				SetLightUniforms   (span<LightData>{lights}, texture_units);
-				SetSkeletons       (elem.skeleton_index);
+				SetSkeletons(elem.skeleton_index);
 				SetMaterialUniforms(elem.material_instance, texture_units);
 				SetObjectUniforms  (elem, cam.view_matrix);
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
 			}
+
+			//FlushObjectTransforms();
+
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);

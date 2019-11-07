@@ -71,5 +71,8 @@ namespace idk
         //Are any audioclip in this audiosource playing?
         public bool IsAnyAudioClipPlaying()
             => Bindings.AudioSourceIsAnyAudioClipPlaying(handle);
+
+        public int FindAudio(string name)
+            => Bindings.FindAudio(handle, name);
     }
 }

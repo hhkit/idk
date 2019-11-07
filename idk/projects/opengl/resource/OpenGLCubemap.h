@@ -2,6 +2,8 @@
 #include <gfx/CubeMap.h>
 #include <glad/glad.h>
 
+#include <opengl/resource/OpenGLTexture.h>
+
 namespace idk::ogl
 {
 	class OpenGLCubemap
@@ -22,6 +24,12 @@ namespace idk::ogl
 		void Size(ivec2 new_size) override;
 		virtual void* ID() const override;
 		span<const GLuint> ConvolutedID() const;
+
+		RscHandle<Texture> Tex()const noexcept;
+		/*span<const RscHandle<Texture>> ConvolutedTex() const;*/
+
+		RscHandle<OpenGLTexture> texture;
+		RscHandle<OpenGLTexture> convoluted_texture[2];
 	private:
 		GLuint _id = 0;
 		GLuint _convoluted_id[2]{};

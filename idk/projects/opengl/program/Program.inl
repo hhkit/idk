@@ -21,6 +21,11 @@ namespace idk::ogl
 		if constexpr (std::is_same_v<T, mat3>)   glProgramUniformMatrix3fv(_program_id, loc, 1, GL_FALSE, obj.data());
 		if constexpr (std::is_same_v<T, mat4>)   glProgramUniformMatrix4fv(_program_id, loc, 1, GL_FALSE, obj.data());
 
+        if constexpr (is_template_v<T, std::vector>)
+        {
+            if constexpr (std::is_same_v<T::value_type, mat4>)   glProgramUniformMatrix4fv(_program_id, loc, s_cast<GLsizei>(obj.size()), GL_FALSE, r_cast<const GLfloat*>(obj.data()));
+        }
+
 		return true;
 	}
 }

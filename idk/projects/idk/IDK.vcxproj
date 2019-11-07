@@ -56,9 +56,11 @@
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
     <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
     <ClInclude Include="math\ritters.h" />
@@ -288,6 +290,7 @@
     <ClCompile Include="gfx\FontAtlas.cpp" />
     <ClCompile Include="gfx\FontAtlasFactory.cpp" />
     <ClCompile Include="gfx\Framebuffer.cpp" />
+    <ClCompile Include="gfx\FramebufferFactory.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\LightTypes.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
@@ -423,6 +426,7 @@
     <None Include="math\comparable.inl" />
     <None Include="math\linear.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="meta\comparator.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
     <None Include="meta\variant.inl" />
