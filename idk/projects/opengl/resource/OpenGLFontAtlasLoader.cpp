@@ -65,6 +65,7 @@ namespace idk {
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
 				return font_handle;
 			}
+			font_handle->reload_path = path_to_resource;
 
 			FT_GlyphSlot g = face->glyph;
 			unsigned w = 0;
@@ -197,6 +198,7 @@ namespace idk {
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
 				return font_handle;
 			}
+			font_handle->reload_path = path_to_resource;
 
 			FT_GlyphSlot g = face->glyph;
 			unsigned w = 0;

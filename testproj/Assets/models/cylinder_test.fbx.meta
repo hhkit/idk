@@ -1,0 +1,13 @@
+metadatas: 
+- guid: 5ff20129-18aa-4b0e-853c-8e672ae6b9b7
+  metadata: ""
+  name: cylinder_test
+  t_hash: Prefab
+- guid: 04ac080e-452d-43e2-be77-54ccccdb14ed
+  metadata: ""
+  name: pCylinder1
+  t_hash: idk::Mesh
+- guid: 559bb0f0-d6f5-467b-9c87-373c2aa485e7
+  metadata: ""
+  name: joint1_root_
+  t_hash: idk::anim::Skeleton

@@ -18,6 +18,7 @@ namespace idk
 		eColor,
 		eDepth,
 		eStencil,
+		eDepth3D,
 		eSizeAT
 	};
 

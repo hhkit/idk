@@ -782,9 +782,6 @@
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
     </ClInclude>
-    <ClInclude Include="anim\AnimationUtils.cpp">
-      <Filter>anim\utils</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Viewport.h">
       <Filter>gfx\camera</Filter>
     </ClInclude>
@@ -861,6 +858,9 @@
       <Filter>phys\collision</Filter>
     </ClInclude>
     <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1260,6 +1260,9 @@
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp">
       <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationUtils.cpp">
+      <Filter>anim\utils</Filter>
     </ClCompile>
     <ClCompile Include="gfx\FramebufferFactory.cpp" />
   </ItemGroup>
