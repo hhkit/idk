@@ -118,6 +118,7 @@ namespace idk::vkn
 				StoreOp::eStore,
 				{},
 				{},
+				false,
 				brdf_texture
 			}
 		);

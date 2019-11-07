@@ -60,9 +60,18 @@ namespace idk::ogl
 		*/
 
 	}
+	RscHandle<Texture> OpenGLCubemap::Tex() const noexcept
+	{
+		return RscHandle<Texture>{texture};
+	}
+	/*span<const RscHandle<Texture>> OpenGLCubemap::ConvolutedTex() const
+	{
+		return span<const RscHandle<Texture>>(convoluted_texture);
+	}*/
 	OpenGLCubemap::OpenGLCubemap()
 	{
 		glGenTextures(1, &_id);
+		*texture = OpenGLTexture{ _id, _size};
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -83,7 +92,9 @@ namespace idk::ogl
 		//Core::GetResourceManager().GetFactory<ShaderProgramFactory>().Create();
 
 		// generate convoluted cubemap
+		//unsigned int x = 0;
 		glGenTextures(2, _convoluted_id);
+		
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _convoluted_id[0]);
 		for (int i = 0; i < 6; ++i)
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -98,9 +109,14 @@ namespace idk::ogl
 	}
 
 	OpenGLCubemap::OpenGLCubemap(OpenGLCubemap&& rhs)
-		: CubeMap{ std::move(rhs) }, _id{ rhs._id }
+		: CubeMap{ std::move(rhs) }
+		, _id{ rhs._id }
+		, texture{rhs.texture}
+		, convoluted_texture{*std::data(rhs.convoluted_texture)}
+		, _convoluted_id{*std::data(rhs._convoluted_id)}
 	{
 		rhs._id = 0;
+		rhs.texture = RscHandle<OpenGLTexture>{};
 	}
 
 	OpenGLCubemap& OpenGLCubemap::operator=(OpenGLCubemap&& rhs)
@@ -108,12 +124,16 @@ namespace idk::ogl
 		// TODO: insert return statement here
 		CubeMap::operator=(std::move(rhs));
 		std::swap(_id, rhs._id);
+		std::swap(texture, rhs.texture);
+		std::swap(convoluted_texture, rhs.convoluted_texture);
+		std::swap(_convoluted_id, rhs._convoluted_id);
 		return *this;
 	}
 
 	OpenGLCubemap::~OpenGLCubemap()
 	{
 		glDeleteTextures(1, &_id);
+		glDeleteTextures(2, _convoluted_id);
 	}
 
 	void OpenGLCubemap::Bind()

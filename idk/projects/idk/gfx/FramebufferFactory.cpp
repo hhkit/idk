@@ -20,7 +20,12 @@ namespace idk
 			CreateAttachment(AttachmentType::eColor, attachment_info, fb.size, attachment_ptr);
 		}
 		if (info.depth_attachment)
-			CreateAttachment(AttachmentType::eDepth, *info.depth_attachment, fb.size, h_fb->depth_attachment);
+		{
+			if(info.depth_attachment->isCubeMap)
+				CreateAttachment(AttachmentType::eDepth3D, *info.depth_attachment, fb.size, h_fb->depth_attachment);
+			else
+				CreateAttachment(AttachmentType::eDepth, *info.depth_attachment, fb.size, h_fb->depth_attachment);
+		}
 		if (info.stencil_attachment)
 			CreateAttachment(AttachmentType::eStencil, *info.stencil_attachment, fb.size, h_fb->stencil_attachment);
 		Finalize(fb);

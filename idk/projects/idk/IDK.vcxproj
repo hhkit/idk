@@ -57,6 +57,7 @@
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="gfx\Viewport.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />

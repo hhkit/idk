@@ -861,6 +861,9 @@
       <Filter>phys\collision</Filter>
     </ClInclude>
     <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

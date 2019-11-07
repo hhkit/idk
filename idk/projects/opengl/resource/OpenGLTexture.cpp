@@ -68,7 +68,6 @@ namespace idk::ogl
 			}
 		}
 	}
-
 	OpenGLTexture::OpenGLTexture()
 	{
 		glGenTextures(1, &_id);
@@ -96,6 +95,12 @@ namespace idk::ogl
 			UpdateUV(meta.uv_mode);
 			Buffer(nullptr, _size);
 		}
+	}
+
+	OpenGLTexture::OpenGLTexture(const GLuint& id, const ivec2& size)
+	{
+		_id = id;
+		_size = size;
 	}
 
 	OpenGLTexture::OpenGLTexture(OpenGLTexture&& rhs)
@@ -134,7 +139,7 @@ namespace idk::ogl
 		glBindTexture(GL_TEXTURE_2D, _id);
 		if (internalFormat == ColorFormat::DEPTH_COMPONENT)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(internalFormat), size.x, size.y, 0, detail::ToGLinputChannels(InputChannels::DEPTH_COMPONENT), GL_UNSIGNED_BYTE, data); // oh no
+			glTexImage2D(GL_TEXTURE_2D, 0, detail::ToGLColor(internalFormat), size.x, size.y, 0, detail::ToGLinputChannels(InputChannels::DEPTH_COMPONENT), GL_FLOAT, data); // oh no
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 		else if(_isCompressedTexture)
