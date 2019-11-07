@@ -128,6 +128,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
