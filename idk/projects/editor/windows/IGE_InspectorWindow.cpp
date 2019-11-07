@@ -1449,7 +1449,7 @@ namespace idk {
                         return retval;
                     }();
 
-                    if (ImGui::Combo("", &new_ind, combo_items.data(), static_cast<int>(sz)))
+                    if (ImGui::Combo("##variant", &new_ind, combo_items.data(), static_cast<int>(sz)))
                     {
                         val = variant_construct<T>(new_ind);
                         changed = true;
