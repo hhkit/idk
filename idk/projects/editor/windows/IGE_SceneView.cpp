@@ -307,8 +307,8 @@ namespace idk {
 		vec2 i = GetMousePosInWindow() - draw_rect_offset;
         const vec2 v = draw_rect_size;
 
-		i.x = i.x != 0.0f ? i.x / v.x : 0.0f;
-		i.y = i.y != 0.0f ? i.y / v.y : 0.0f;
+		i.x = v.x != 0.0f ? i.x / v.x : 0.0f;
+		i.y = v.y != 0.0f ? i.y / v.y : 0.0f;
 		return i;
 	}
 
@@ -655,32 +655,9 @@ namespace idk {
 		//auto& app_sys = Core::GetSystem<Application>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
+		//Handle<Camera> currCamera = main_camera.current_camera;
 
-		const auto view_mtx = currCamera->ViewMatrix();
-		const auto pers_mtx = currCamera->ProjectionMatrix();
-		
-		vec2 ndcPos = GetMousePosInWindowNormalized();
-
-		//-1 to 1 (ndc)
-		ndcPos -= vec2(0.5f,0.5f);
-		ndcPos /= 0.5f;
-
-		ndcPos = vec2(ndcPos.x,-ndcPos.y);
-
-		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,0,1);
-		vfPos *= 1.f / vfPos.w;
-		vec4 wfPos = view_mtx.inverse() * vfPos;
-
-		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
-		vbPos *= 1.f/vbPos.w;
-		vec4 wbPos = view_mtx.inverse() * vbPos;
-
-		ray newRay;
-		newRay.origin = wfPos;
-		newRay.velocity = (wbPos - wfPos);
-
-		return newRay;
+		return main_camera.WindowsPointToRay(GetMousePosInWindowNormalized());
 	}
 
 }
