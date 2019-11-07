@@ -506,7 +506,7 @@ namespace idk {
 		}
 		catch (const FS::filesystem_error& e)
 		{
-			LOG_WARNING_TO(LogPool::SYS, "Unable to get last write time");
+			LOG_WARNING_TO(LogPool::SYS, e.what());
 		}
 	}
 

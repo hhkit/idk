@@ -157,14 +157,16 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-
-					if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+					if (curr_layer.bone_mask[child_index] == true)
 					{
-						// We do a blend from the curr layer to the final bone pose: 
-						// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
-						// This means we do Blend(curr_pose, layer_pose, 0.25);
-						BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
-						final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+						{
+							// We do a blend from the curr layer to the final bone pose: 
+							// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
+							// This means we do Blend(curr_pose, layer_pose, 0.25);
+							BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
+							final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+						}
 					}
 				}
 

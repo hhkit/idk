@@ -500,6 +500,7 @@ namespace idk::ai_helpers
 
 	void CompileRotateChannel(Scene& scene, anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
 	{
+		UNREFERENCED_PARAMETER(scene);
 		// Error handling: There should not be any keys in the position or scale section
 		if (anim_channel->mNumPositionKeys > 1)
 			LogWarning(std::to_string(anim_channel->mNumPositionKeys) +
