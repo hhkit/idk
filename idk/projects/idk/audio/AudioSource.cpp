@@ -48,11 +48,15 @@ namespace idk
 
 	}
 
-	void AudioSource::AddAudioClip(string_view filePath)
+	int AudioSource::AddAudioClip(string_view filePath)
 	{
-		auto audioPtr1 = Core::GetResourceManager().Load<AudioClip>(Core::GetSystem<FileSystem>().GetFile(filePath));
-		if (audioPtr1)
+		auto audioPtr1 = Core::GetResourceManager().Load<AudioClip>(PathHandle(filePath));
+		if (audioPtr1) {
 			audio_clip_list.emplace_back(*audioPtr1);
+			return audio_clip_list.size() - 1;
+		}
+		else
+			return -1;
 	}
 
 

@@ -106,6 +106,8 @@ namespace idk
 
 	void AudioClip::UpdateChannel()
 	{
+
+		//printf("Has soundChannel: %p\n", (void*)_soundChannel);
 		if (_soundChannel) { //check if it is a nullptr or not
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			FMOD::Sound* check;

@@ -28,7 +28,7 @@ namespace idk
 		void Stop(int index = 0);
 		void StopAll();
 
-		void AddAudioClip(string_view filePath); //Calls to add audio clip with path given
+		int AddAudioClip(string_view filePath); //Calls to add audio clip with path given. Returns true if filepath succeeds
 		void RemoveAudioClip(int index = 0); //Calls to add audio clip with path given
 		
 		bool IsAudioClipPlaying(int index);

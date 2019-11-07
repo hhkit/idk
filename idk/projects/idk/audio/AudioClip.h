@@ -59,7 +59,7 @@ namespace idk
 
 		void	ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
 
-		AudioClipInfo GetAudioClipInfo();	//Returns a readonly information of the sound. Dont use
+		AudioClipInfo GetAudioClipInfo();	//Returns a readonly information of the sound.
 		string GetName();
 
 	private:
@@ -69,7 +69,7 @@ namespace idk
 		FMOD::Sound*	_soundHandle	{ nullptr };	//A handle to FMOD_Sound object. It contains some sound info data as well, but it is wrapped to the AudioClipInfo on CreateSound.
 		FMOD::Channel*	_soundChannel	{ nullptr };	//Whenever a sound is played, this pointer becomes valid
 
-		AudioClipInfo soundInfo  {}; //Ususable
+		AudioClipInfo soundInfo  {}; //Updated by AudioClipLoader
 
 		float	frequency	{ 44100.0f };	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
 		bool	isPlaying	{ false };	//Is the audio currently playing? If the audio is paused, it is still considered playing!
