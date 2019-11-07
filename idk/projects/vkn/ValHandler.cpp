@@ -15,7 +15,7 @@ namespace idk::vkn
 		LOG_TO(LogPool::GFX, "%s validation layer: %s\n", prefix, pCallbackData->pMessage);// << pCallbackData->pMessage << "\n";
 #endif
 		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
- 			DoNothing(), DebugBreak();
+ 			DoNothing();
 		return VK_FALSE;
 	}
 

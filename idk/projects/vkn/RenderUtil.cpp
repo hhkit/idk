@@ -208,7 +208,7 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 			};
 			thingy.BindUniformBuffer("CameraBlock", 0, mat4block);
 
-			thingy.BindSampler("sb", 0, src.as<VknCubemap>().GetConvoluted().as<VknCubemap>());
+			thingy.BindSampler("sb", 0, src.as<VknCubemap>());
 			thingy.FinalizeDrawCall(ro);
 		}
 	}
