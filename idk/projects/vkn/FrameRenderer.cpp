@@ -292,7 +292,7 @@ namespace idk::vkn
 
 
 		auto& cameras = *state.cameras;
-		if (cameras.size()&&false)
+		if (cameras.size()==0)
 		{
 			auto& convolute_state = _pre_states[curr_state];
 			_convoluter.pipeline_manager(*_pipeline_manager);
