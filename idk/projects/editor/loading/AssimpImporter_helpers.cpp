@@ -43,7 +43,7 @@ namespace idk::ai_helpers
 			}
 			else
 			{
-				PrintError(string{ "[Warning] Mesh " } + curr_mesh->mName.data + " referenced more than once. Appending \"- Copy\".)");
+				LogWarning(string{ "Mesh " } + curr_mesh->mName.data + " referenced more than once. Appending \"- Copy\".)");
 				aiString new_name = { curr_mesh->mName };
 				new_name.Append("- Copy");
 				curr_mesh->mName = new_name;
@@ -53,19 +53,19 @@ namespace idk::ai_helpers
 			
 		}
 
-		vector<aiNode*> test_vec;
-		std::function<void(aiNode * node)> func;
-		func = [&test_vec , &func](aiNode* node)
-		{
-			if (node->mNumMeshes)
-				test_vec.push_back(node);
-
-			for (size_t i = 0; i < node->mNumChildren; ++i)
-				func(node->mChildren[i]);
-
-		};
-		func(scene.ai_scene->mRootNode);
-		test_vec;
+		// vector<aiNode*> test_vec;
+		// std::function<void(aiNode * node)> func;
+		// func = [&test_vec , &func](aiNode* node)
+		// {
+		// 	if (node->mNumMeshes)
+		// 		test_vec.push_back(node);
+		// 
+		// 	for (size_t i = 0; i < node->mNumChildren; ++i)
+		// 		func(node->mChildren[i]);
+		// 
+		// };
+		// func(scene.ai_scene->mRootNode);
+		// test_vec;
 		
 		// Keep for now. Might need to account for scaled meshes in the future
 		// for (size_t i = 0; i < node->mNumMeshes; ++i)
@@ -74,7 +74,7 @@ namespace idk::ai_helpers
 		// 	aiMesh* curr_mesh = scene.ai_scene->mMeshes[mesh_index];
 		// 
 		// 	if (scene.mesh_table.find(curr_mesh->mName.data) != scene.mesh_table.end())
-		// 		PrintError(string{ "[Warning] Mesh " } + curr_mesh->mName.data + " referenced more than once.");
+		// 		PrintError(string{ "Mesh " } + curr_mesh->mName.data + " referenced more than once.");
 		// 	else
 		// 		scene.mesh_table.emplace(curr_mesh->mName.data, curr_mesh);
 		// 
@@ -118,8 +118,8 @@ namespace idk::ai_helpers
 		if (scene.has_skeleton)
 		{
 			scene.bone_root = FindFirstNodeContains(AssimpImporter::root_bone_keyword , scene.ai_scene->mRootNode);
-			assert(scene.bone_root != scene.ai_scene->mRootNode);
-			assert(scene.bone_root != nullptr);
+			if(scene.bone_root == nullptr || scene.bone_root == scene.ai_scene->mRootNode)
+				LogWarning(string{ "Unable to find skeleton root bone. Make sure root of skeleton contains keyword: " } + AssimpImporter::root_bone_keyword);
 		}
 	}
 
@@ -164,6 +164,10 @@ namespace idk::ai_helpers
 			new_bone._name = curr_node.node->mName.data;
 			new_bone._parent = curr_node.parent;
 
+			// Pre/Post rotations
+			new_bone.pre_rotation = GetPreRotations(curr_node.node);
+			new_bone.post_rotation = GetPostRotations(curr_node.node);
+			
 			// World
 			aiMatrix4x4		ai_child_world_bind_pose;// = initMat4(curr_node.assimp_node->_global_inverse_bind_pose).Inverse();
 			aiVector3D		child_world_pos;
@@ -183,12 +187,12 @@ namespace idk::ai_helpers
 			if (bone_node == scene.bone_table.end())
 			{
 				// Error handling
-				string error_string = "[Warning] No aiBone node "  + node_name + " found in bone hierarchy.";
+				string error_string = "No aiBone node "  + node_name + " found in bone hierarchy.";
 				if (curr_node.node->mMeshes != nullptr)
 					error_string += " Meshes that are parented to bones are not supported yet.";
 				else
 					error_string += " Using compiled transform as local pose.";
-				PrintError(error_string);
+				LogWarning(error_string);
 
 				aiMatrix4x4 global_inverse = to_aiMat4(local_transform);
 				global_inverse.Inverse();
@@ -253,9 +257,9 @@ namespace idk::ai_helpers
 	void BuildSkinlessSkeleton(Scene& scene)
 	{
 		// Search for the root bone
-		scene.bone_root = FindFirstNodeContains("_root_", scene.ai_scene->mRootNode);
-		assert(scene.bone_root != scene.ai_scene->mRootNode);
-		assert(scene.bone_root != nullptr);
+		scene.bone_root = FindFirstNodeContains(AssimpImporter::root_bone_keyword, scene.ai_scene->mRootNode);
+		if (scene.bone_root == nullptr || scene.bone_root == scene.ai_scene->mRootNode)
+			LogWarning(string{ "Unable to find skeleton root bone. Make sure root of skeleton contains keyword: " } +AssimpImporter::root_bone_keyword);
 
 		// Compile the pivotless bone tree
 		struct BoneTreeNode
@@ -369,7 +373,9 @@ namespace idk::ai_helpers
 
 		// We create a skinless skeleton if the scene has animations but no mesh
 		if (scene.ai_scene->HasAnimations() && !scene.has_skeleton)
+		{
 			BuildSkinlessSkeleton(scene);
+		}
 
 		for (size_t i = 0; i < scene.ai_scene->mNumAnimations; ++i)
 		{
@@ -401,7 +407,7 @@ namespace idk::ai_helpers
 					else // Error
 					{
 						string error_string = "[Error] Unrecognized Channel Node " + channel_bone_name + " found. Skipping this channel.";
-						PrintError(error_string);
+						LogWarning(error_string);
 						continue;
 					}
 
@@ -449,10 +455,8 @@ namespace idk::ai_helpers
 					CompileBoneChannel(scene, animated_bone, ai_channel);
 					break;
 				case None:
-					assert(false);
 					break;
 				default:
-					assert(false);
 					break;
 				}
 
@@ -470,14 +474,14 @@ namespace idk::ai_helpers
 		UNREFERENCED_PARAMETER(scene);
 		// Error handling: There should not be any keys in the scale or rotate section
 		if (anim_channel->mNumRotationKeys > 1)
-			PrintError(string{ "[Warning]" } + std::to_string(anim_channel->mNumRotationKeys) + 
+			LogWarning(std::to_string(anim_channel->mNumRotationKeys) + 
 				" Rotation keys detected inside a translation channel(" + anim_channel->mNodeName.data + "). Ignoring these keys.");
 		if (anim_channel->mNumScalingKeys > 1)
-			PrintError(string{ "[Warning]" } + std::to_string(anim_channel->mNumScalingKeys) +
+			LogWarning(std::to_string(anim_channel->mNumScalingKeys) +
 				" Scaling keys detected inside a translation channel(" + anim_channel->mNodeName.data + "). Ignoring these keys.");
 		if (!anim_bone.translate_track.empty())
 		{
-			PrintError(string{ "[Warning]" } +
+			LogWarning( +
 				"Animated bone " + anim_bone.bone_name + " has more than 1 channel that has translation keys. Ignoring the one with fewer keys.");
 
 			// Don't put in the keys if the current track has more keys that this channel
@@ -498,89 +502,88 @@ namespace idk::ai_helpers
 	{
 		// Error handling: There should not be any keys in the position or scale section
 		if (anim_channel->mNumPositionKeys > 1)
-			PrintError(string{ "[Warning]" } +std::to_string(anim_channel->mNumPositionKeys) +
+			LogWarning(std::to_string(anim_channel->mNumPositionKeys) +
 				" Position keys detected inside a translation channel(" + anim_channel->mNodeName.data + "). Ignoring these keys.");
 		if (anim_channel->mNumScalingKeys > 1)
-			PrintError(string{ "[Warning]" } +std::to_string(anim_channel->mNumScalingKeys) +
+			LogWarning(std::to_string(anim_channel->mNumScalingKeys) +
 				" Scaling keys detected inside a translation channel(" + anim_channel->mNodeName.data + "). Ignoring these keys.");
 		if (!anim_bone.rotation_track.empty())
 		{
-			PrintError(string{ "[Warning]" } +
-				"Animated bone " + anim_bone.bone_name + " has more than 1 channel that has rotation keys. Ignoring the one with fewer keys.");
+			LogWarning("Animated bone " + anim_bone.bone_name + " has more than 1 channel that has rotation keys. Ignoring the one with fewer keys.");
 
 			// Don't put in the keys if the current track has more keys that this channel
 			if (anim_bone.rotation_track.size() > anim_channel->mNumRotationKeys)
 				return;
 		}
 
-		aiNode* node = scene.bone_root->FindNode(anim_channel->mNodeName.data);
-		
-		// Need to find all the chained rotations first
-		aiMatrix4x4 pre_rotation;
-		aiIdentityMatrix4(&pre_rotation);
-		aiMatrix4x4 post_rotation;
-		aiIdentityMatrix4(&post_rotation);
-
-		// Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
-
-		// Find all the pre transformations. 
-		// From the base node, traverse up and check for the pre rotations
-		{
-			aiNode* parent = node->mParent;
-			for (int i = 0; i < PreRotationMax; ++i)
-			{
-				if (parent->mName.data == anim_bone.bone_name + AssimpPrefix + PreRotateSuffix[i])
-				{
-					pre_rotation = pre_rotation * parent->mTransformation;
-					parent = parent->mParent;
-				}
-			}
-		}
-		// Find all post transforms.
-		{
-			aiNode* child = node->mChildren[0];
-			for (int i = 0; i < PostRotationMax; ++i)
-			{
-				if (child->mName.data == anim_bone.bone_name + AssimpPrefix + PostRotateSuffix[i])
-				{
-					post_rotation = post_rotation * child->mTransformation;
-					child = child->mChildren[0];
-				}
-			}
-		}
-
-		// Pre rotate decompose
-		aiVector3D pre_pos;
-		aiQuaternion pre_rot;
-		aiVector3D pre_scale;
-		aiDecomposeMatrix(&pre_rotation, &pre_scale, &pre_rot, &pre_pos);
-
-		// Post rotate decompose
-		aiVector3D post_pos;
-		aiQuaternion post_rot;
-		aiVector3D post_scale;
-		aiDecomposeMatrix(&post_rotation, &post_scale, &post_rot, &post_pos);
-
-		quat pre_quat = to_quat(pre_rot);
-		quat post_quat = to_quat(post_rot);
-
-		// Error handling : Scale and pos should not be affected.
-		if (!pre_scale.Equal(aiVector3D{ 1,1,1 }) || !post_scale.Equal(aiVector3D{ 1,1,1 }))
-		{
-			PrintError("[Warning] Pre rotation has scale for " + anim_bone.bone_name);
-		}
-
-		if (!pre_pos.Equal(aiVector3D{}) || !post_pos.Equal(aiVector3D{ }))
-		{
-			PrintError("[Warning] Post rotation has translation for " + anim_bone.bone_name);
-		}
+		// aiNode* node = scene.bone_root->FindNode(anim_channel->mNodeName.data);
+		// 
+		// // Need to find all the chained rotations first
+		// aiMatrix4x4 pre_rotation;
+		// aiIdentityMatrix4(&pre_rotation);
+		// aiMatrix4x4 post_rotation;
+		// aiIdentityMatrix4(&post_rotation);
+		// 
+		// // Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
+		// 
+		// // Find all the pre transformations. 
+		// // From the base node, traverse up and check for the pre rotations
+		// {
+		// 	aiNode* parent = node->mParent;
+		// 	for (int i = 0; i < PreRotationMax; ++i)
+		// 	{
+		// 		if (parent->mName.data == anim_bone.bone_name + AssimpPrefix + PreRotateSuffix[i])
+		// 		{
+		// 			pre_rotation = pre_rotation * parent->mTransformation;
+		// 			parent = parent->mParent;
+		// 		}
+		// 	}
+		// }
+		// // Find all post transforms.
+		// {
+		// 	aiNode* child = node->mChildren[0];
+		// 	for (int i = 0; i < PostRotationMax; ++i)
+		// 	{
+		// 		if (child->mName.data == anim_bone.bone_name + AssimpPrefix + PostRotateSuffix[i])
+		// 		{
+		// 			post_rotation = post_rotation * child->mTransformation;
+		// 			child = child->mChildren[0];
+		// 		}
+		// 	}
+		// }
+		// 
+		// // Pre rotate decompose
+		// aiVector3D pre_pos;
+		// aiQuaternion pre_rot;
+		// aiVector3D pre_scale;
+		// aiDecomposeMatrix(&pre_rotation, &pre_scale, &pre_rot, &pre_pos);
+		// 
+		// // Post rotate decompose
+		// aiVector3D post_pos;
+		// aiQuaternion post_rot;
+		// aiVector3D post_scale;
+		// aiDecomposeMatrix(&post_rotation, &post_scale, &post_rot, &post_pos);
+		// 
+		// quat pre_quat = to_quat(pre_rot);
+		// quat post_quat = to_quat(post_rot);
+		// 
+		// // Error handling : Scale and pos should not be affected.
+		// if (!pre_scale.Equal(aiVector3D{ 1,1,1 }) || !post_scale.Equal(aiVector3D{ 1,1,1 }))
+		// {
+		// 	PrintError("Pre rotation has scale for " + anim_bone.bone_name);
+		// }
+		// 
+		// if (!pre_pos.Equal(aiVector3D{}) || !post_pos.Equal(aiVector3D{ }))
+		// {
+		// 	PrintError("Post rotation has translation for " + anim_bone.bone_name);
+		// }
 
 		for (size_t i = 0; i < anim_channel->mNumRotationKeys; ++i)
 		{
 			aiQuatKey& rot_key = anim_channel->mRotationKeys[i];
 			quat rot_val = to_quat(rot_key.mValue);
 
-			rot_val = pre_quat * rot_val * post_quat;
+			//rot_val = pre_quat * rot_val * post_quat;
 			anim_bone.rotation_track.emplace_back(rot_val, s_cast<float>(rot_key.mTime));
 		}
 	}
@@ -589,15 +592,14 @@ namespace idk::ai_helpers
 	{
 		// Error handling: There should not be any keys in the position or scale section
 		if (anim_channel->mNumPositionKeys > 1)
-			PrintError(string{ "[Warning]" } + std::to_string(anim_channel->mNumPositionKeys) +
+			LogWarning(std::to_string(anim_channel->mNumPositionKeys) +
 				" Position keys detected inside a translation channel(" + anim_channel->mNodeName.data + "). Ignoring these keys.");
 		if (anim_channel->mNumRotationKeys > 1)
-			PrintError(string{ "[Warning]" } + std::to_string(anim_channel->mNumRotationKeys) +
+			LogWarning(std::to_string(anim_channel->mNumRotationKeys) +
 				" Rotation keys detected inside a translation channel(" + anim_channel->mNodeName.data + "). Ignoring these keys.");
 		if (!anim_bone.scale_track.empty())
 		{
-			PrintError(string{ "[Warning]" } +
-				"Animated bone " + anim_bone.bone_name + " has more than 1 channel that has scaling keys. Ignoring the one with fewer keys.");
+			LogWarning("Animated bone " + anim_bone.bone_name + " has more than 1 channel that has scaling keys. Ignoring the one with fewer keys.");
 
 			// Don't put in the keys if the current track has more keys that this channel
 			if (anim_bone.scale_track.size() > anim_channel->mNumScalingKeys)
@@ -641,12 +643,12 @@ namespace idk::ai_helpers
 			// Error handling: Scale and pos should not be affected.
 			if (!rot.Equal(aiQuaternion{}))
 			{
-				PrintError("[Warning] Result of scale key with pre scale has rotation factors.");
+				LogWarning("Result of scale key with pre scale has rotation factors.");
 			}
 
 			if (!pos.Equal(aiVector3D{}))
 			{
-				PrintError("[Warning] Result of scale key with pre/post rotation has translation factors.");
+				LogWarning("Result of scale key with pre/post rotation has translation factors.");
 			}
 
 			anim_bone.scale_track.emplace_back(to_vec3(scale), s_cast<float>(scale_key.mTime));
@@ -658,8 +660,7 @@ namespace idk::ai_helpers
 		UNREFERENCED_PARAMETER(scene);
 		if (!anim_bone.scale_track.empty())
 		{
-			PrintError(string{ "[Warning]" } +
-				"Animated bone " + anim_bone.bone_name + " has more than 1 channel that has scaling keys. Ignoring the one with fewer keys.");
+			LogWarning("Animated bone " + anim_bone.bone_name + " has more than 1 channel that has scaling keys. Ignoring the one with fewer keys.");
 
 			// Don't put in the keys if the current track has more keys that this channel
 			if (anim_bone.scale_track.size() > anim_channel->mNumScalingKeys)
@@ -668,8 +669,7 @@ namespace idk::ai_helpers
 
 		if (!anim_bone.rotation_track.empty())
 		{
-			PrintError(string{ "[Warning]" } +
-				"Animated bone " + anim_bone.bone_name + " has more than 1 channel that has rotation keys. Ignoring the one with fewer keys.");
+			LogWarning("Animated bone " + anim_bone.bone_name + " has more than 1 channel that has rotation keys. Ignoring the one with fewer keys.");
 
 			// Don't put in the keys if the current track has more keys that this channel
 			if (anim_bone.rotation_track.size() > anim_channel->mNumRotationKeys)
@@ -678,8 +678,7 @@ namespace idk::ai_helpers
 
 		if (!anim_bone.translate_track.empty())
 		{
-			PrintError(string{ "[Warning]" } +
-				"Animated bone " + anim_bone.bone_name + " has more than 1 channel that has translation keys. Ignoring the one with fewer keys.");
+			LogWarning("Animated bone " + anim_bone.bone_name + " has more than 1 channel that has translation keys. Ignoring the one with fewer keys.");
 
 			// Don't put in the keys if the current track has more keys that this channel
 			if (anim_bone.translate_track.size() > anim_channel->mNumPositionKeys)
@@ -966,9 +965,9 @@ namespace idk::ai_helpers
 #pragma endregion
 
 	// Utility functions
-	void PrintError(string_view error)
+	void LogWarning(const string& error)
 	{
-		std::cout << error << std::endl;
+		LOG_WARNING_TO(LogPool::ANIM, error);
 	}
 
 	aiNode* FindFirstNodeContains(string name, aiNode* node)
@@ -990,6 +989,130 @@ namespace idk::ai_helpers
 	void DumpNodes(aiNode* node)
 	{
 		UNREFERENCED_PARAMETER(node);
+	}
+
+	quat GetPreRotations(const aiNode* node)
+	{
+		// Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
+
+		// Find all the pre transformations. 
+		// From the base node, traverse up and check for the pre rotations
+		// Need to find all the chained rotations first
+		string node_name = node->mName.data;
+		const aiNode* start_node = node;
+		while (start_node->mParent)
+		{
+			string parent_name = start_node->mParent->mName.data;
+			if (parent_name.find(node_name) == string::npos)
+				break;
+			start_node = start_node->mParent;
+		}
+
+		aiMatrix4x4 pre_rotation;
+		aiIdentityMatrix4(&pre_rotation);
+		int curr_pre_rot_index = 0;
+		while (start_node != node)
+		{
+			// Check if start_node matches any of the pre rotations.
+			for (int i = curr_pre_rot_index; i < PreRotationMax; ++i)
+			{
+				if (start_node->mName.data == node_name + AssimpPrefix + PreRotateSuffix[i])
+				{
+					// Set the starting point of the next pre rotation check
+					pre_rotation = pre_rotation * start_node->mTransformation;
+					curr_pre_rot_index = i + 1;
+					break;
+				}
+			}
+
+			if (curr_pre_rot_index >= PreRotationMax) 
+				break;
+			start_node = start_node->mChildren[0];
+		}
+
+		// Pre rotate decompose
+		aiVector3D pre_pos;
+		aiQuaternion pre_rot;
+		aiVector3D pre_scale;
+		aiDecomposeMatrix(&pre_rotation, &pre_scale, &pre_rot, &pre_pos);
+
+		quat pre_quat = to_quat(pre_rot);
+
+		// Error handling : Scale and pos should not be affected.
+		if (!pre_scale.Equal(aiVector3D{ 1,1,1 }))
+		{
+			LogWarning("Pre rotation has scale for " + node_name);
+		}
+
+		if (!pre_pos.Equal(aiVector3D{}))
+		{
+			LogWarning("Post rotation has translation for " + node_name);
+		}
+
+		return pre_quat;
+	}
+
+	quat GetPostRotations(const aiNode* node)
+	{
+		// Rotation Order: OFFSET_ROT * PIVOT_ROT *  PRE_ROT * !!ROTATION(KEYFRAME)!! * POST_ROT * PIVOT_INV_ROT 
+
+		// Find all the pre transformations. 
+		// From the base node, traverse up and check for the pre rotations
+		// Need to find all the chained rotations first
+		string node_name = node->mName.data;
+		const aiNode* start_node = node;
+		while (start_node->mParent)
+		{
+			string parent_name = start_node->mParent->mName.data;
+			if (parent_name.find(node_name) == string::npos)
+				break;
+			start_node = start_node->mParent;
+		}
+
+		aiMatrix4x4 post_rotation;
+		aiIdentityMatrix4(&post_rotation);
+		int curr_post_rot_index = 0;
+		while (start_node != node)
+		{
+			// Check if start_node matches any of the pre rotations.
+			for (int i = curr_post_rot_index; i < PostRotationMax; ++i)
+			{
+				if (start_node->mName.data == node_name + AssimpPrefix + PostRotateSuffix[i])
+				{
+					// Set the starting point of the next pre rotation check
+					post_rotation = post_rotation * start_node->mTransformation;
+					curr_post_rot_index = i + 1;
+					break;
+				}
+			}
+
+			// If there are no more post rotations to check for we jsut break
+			if (curr_post_rot_index >= PostRotationMax)
+				break;
+			start_node = start_node->mChildren[0];
+		}
+
+		// Post rotate decompose
+		aiVector3D post_pos;
+		aiQuaternion post_rot;
+		aiVector3D post_scale;
+		aiDecomposeMatrix(&post_rotation, &post_scale, &post_rot, &post_pos);
+
+		
+		quat post_quat = to_quat(post_rot);
+
+		// Error handling : Scale and pos should not be affected.
+		if (!post_scale.Equal(aiVector3D{ 1,1,1 }))
+		{
+			LogWarning("Post rotation has scale for " + node_name);
+		}
+
+		if (!post_pos.Equal(aiVector3D{ }))
+		{
+			LogWarning("Post rotation has translation for " + node_name);
+		}
+
+		return post_quat;
 	}
 
 #pragma region Conversion Helpers

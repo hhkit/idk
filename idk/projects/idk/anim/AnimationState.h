@@ -12,17 +12,23 @@ namespace idk
 
 	struct BlendTreeMotion
 	{
-		string name{};
 		RscHandle<anim::Animation> motion{};
-		float data[2];
+		std::array< float, 2> thresholds{0.0f, 0.0f};
+
+		float speed = 1.0f;
+
+		float weight = 1.0f;
 	};
 
 	struct BlendTree
 	{
-		// set<BlendTreeMotion> motions{};
+		vector<BlendTreeMotion> motions;
 		std::array<string, 2> params;
 
-		BlendTreeType blend_tree_type = BlendTreeType::BlendTree_1D;
+		anim::BlendTreeType blend_tree_type = anim::BlendTreeType::BlendTree_1D;
+		bool weights_cached = false;
+
+		float def_data[2];
 	};
 
 	struct AnimationState
