@@ -430,7 +430,7 @@ namespace idk::vkn
 
 			auto& renderer_req = *obj.renderer_req;
 
-			for (auto&& [attrib, location] : renderer_req.requirements)
+			for (auto&& [attrib, location] : renderer_req.mesh_requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
 				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
@@ -950,7 +950,7 @@ namespace idk::vkn
 			
 				auto& renderer_req = *obj.renderer_req;
 			
-				for (auto&& [attrib, location] : renderer_req.requirements)
+				for (auto&& [attrib, location] : renderer_req.mesh_requirements)
 				{
 					auto& attrib_buffer = mesh.Get(attrib);
 					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});

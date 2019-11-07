@@ -23,7 +23,7 @@ namespace idk::vkn
 		PipelineManager& pipeline_manager(PipelineManager&);
 		std::pair<uint32_t, vk::DescriptorSet> mat4blk;
 		std::pair<uint32_t,vk::DescriptorSet>  environment_probe;
-		renderer_reqs req;
+		renderer_attributes req;
 		RscHandle<Mesh> h_mesh;
 		RscHandle<ShaderModule> vert;
 		RscHandle<ShaderModule> geom;

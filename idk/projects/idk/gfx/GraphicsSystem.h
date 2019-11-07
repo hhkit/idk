@@ -154,6 +154,7 @@ namespace idk
 
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);
+		RenderBuffer& GetWriteBuffer();
 		bool _is_deferred = false;
 	};
 }

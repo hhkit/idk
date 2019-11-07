@@ -139,15 +139,15 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
 		
 		VulkanMesh& mesh =  Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
-		auto req = renderer_reqs{};
-		req.requirements = {
+		auto req = renderer_attributes{};
+		req.mesh_requirements = {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::UV, 1) };
 
 		brdf_pipeline.Bind(cmd_buffer, View());
 		cmd_buffer.setViewport(0, vk::Viewport{ 0,0,s_cast<float>(brdf_texture->Size().x),s_cast<float>(brdf_texture->Size().y),0.0f,1.0f });
 
-		for (auto&& [attrib, location] : req.requirements)
+		for (auto&& [attrib, location] : req.mesh_requirements)
 		{
 			auto& attrib_buffer = mesh.Get(attrib);
 			cmd_buffer.bindVertexBuffers(*brdf_pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});

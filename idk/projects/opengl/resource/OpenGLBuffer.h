@@ -23,7 +23,7 @@ namespace idk::ogl
 		GLsizei count() const;
 
 		OpenGLBuffer& Bind();
-		OpenGLBuffer& BindForDraw(const renderer_reqs& locations);
+		OpenGLBuffer& BindForDraw(const renderer_attributes& locations);
 		OpenGLBuffer& Buffer(const void* data, size_t stride, GLsizei count);
 
 		OpenGLBuffer& operator=(OpenGLBuffer&& buf);

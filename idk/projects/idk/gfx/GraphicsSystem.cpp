@@ -235,6 +235,12 @@ namespace idk
 				inst_itr->instanced_data.emplace_back(AnimatedInstancedData{ itr->velocity,itr->transform,itr->skeleton_index });
 		}
 	}
+	template<typename Vec>
+	void ClearSwap(Vec& dst, Vec& src)
+	{
+		src.clear();
+		std::swap(dst, src);
+	}
 
 
 	void GraphicsSystem::BufferGraphicsState(
@@ -308,10 +314,25 @@ namespace idk
 			PtrMem<decltype(&AnimatedRenderObject::skeleton_index), &AnimatedRenderObject::skeleton_index>
 		>;
 
-		
+		auto reset_render_buffer = [](RenderBuffer& rb)
+		{
+			RenderBuffer tmp{};
+			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
+			ClearSwap(rb.camera                       ,tmp.camera                        );//clear then swap the stuff back into rb
+			ClearSwap(rb.font_render_data             ,tmp.font_render_data              );//clear then swap the stuff back into rb
+			ClearSwap(rb.instanced_mesh_render        ,tmp.instanced_mesh_render         );//clear then swap the stuff back into rb
+			ClearSwap(rb.instanced_skinned_mesh_render,tmp.instanced_skinned_mesh_render );//clear then swap the stuff back into rb
+			ClearSwap(rb.lights                       ,tmp.lights                        );//clear then swap the stuff back into rb
+			ClearSwap(rb.light_camera_data            ,tmp.light_camera_data             );//clear then swap the stuff back into rb
+			ClearSwap(rb.mesh_render                  ,tmp.mesh_render                   );//clear then swap the stuff back into rb
+			ClearSwap(rb.skinned_mesh_render          ,tmp.skinned_mesh_render           );//clear then swap the stuff back into rb
+			ClearSwap(rb.particle_render_data         ,tmp.particle_render_data          );//clear then swap the stuff back into rb
+			ClearSwap(rb.skeleton_transforms          ,tmp.skeleton_transforms           );//clear then swap the stuff back into rb
+		};
 
 		// todo: scenegraph traversal
-		RenderBuffer result{};
+		RenderBuffer& result=GetWriteBuffer();
+		reset_render_buffer(result); //change to this method to reduce reallocation count.
 		result.camera.reserve(cameras.size());
 
 		// memcpy the lights until there is a smarter implementation
@@ -413,7 +434,8 @@ namespace idk
 		}
 
 
-		SubmitBuffers(std::move(result));
+		//SubmitBuffers(std::move(result));
+		SwapWritingBuffer();
 	}
 
 	void GraphicsSystem::LoadShaders()
@@ -452,6 +474,12 @@ namespace idk
 	{
 		object_buffer[curr_write_buffer] = std::move(buffer);
 		SwapWritingBuffer();
+	}
+
+	GraphicsSystem::RenderBuffer& GraphicsSystem::GetWriteBuffer()
+	{
+		// TODO: insert return statement here
+		return object_buffer[curr_write_buffer];
 	}
 
 	//GraphicsSystem::TempLight::TempLight(const Light& l, GraphicsSystem& sys) :light{ l }

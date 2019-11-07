@@ -25,7 +25,8 @@ layout (location = 8) in mat4 normal_transform;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
-	mat4 perspective_transform;
+	mat4 view_perspective_transform;
+	mat4 view;
 } PerCamera;
 
 U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)

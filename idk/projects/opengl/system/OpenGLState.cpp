@@ -384,7 +384,7 @@ namespace idk::ogl
 						glDepthMask(GL_FALSE);
 						oglCubeMap.BindToUnit(0);
 						pipeline.SetUniform("sb", 0);
-						RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
+						RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_attributes
 							{ {
 								std::make_pair(vtx::Attrib::Position, 0)
 							} });
@@ -594,7 +594,7 @@ namespace idk::ogl
                 SetMaterialUniforms(elem.material_instance, texture_units);
 
                 RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
-                    renderer_reqs{ {
+                    renderer_attributes{ {
                         { vtx::Attrib::Position, 0 },
                         { vtx::Attrib::UV, 1 },
                     }
@@ -603,7 +603,7 @@ namespace idk::ogl
                 glVertexAttribDivisor(1, 0);
 
                 bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
-                bufs[1].BindForDraw(renderer_reqs{ {
+                bufs[1].BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
