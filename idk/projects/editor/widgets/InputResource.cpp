@@ -86,10 +86,10 @@ namespace idk
 
         if (IsItemClicked())
         {
-            OpenPopup("selector");
+            OpenPopup(label);
             SetNextWindowPos(frame_bb.GetBL());
         }
-        if (BeginPopup("selector"))
+        if (BeginPopup(label))
         {
             std::visit([&](auto h)
             {

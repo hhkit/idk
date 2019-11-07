@@ -1164,7 +1164,7 @@ namespace idk {
 
         static Handle<ParticleSystem> _static_ps_handle{};
         _static_ps_handle = c_ps;
-        const auto draw_bursts = [](const reflect::dynamic& val) -> bool
+        constexpr auto draw_bursts = [](const reflect::dynamic& val) -> bool
         {
             bool changed = false;
             auto& bursts = val.get<vector<EmissionModule::Burst>>();
@@ -1211,7 +1211,7 @@ namespace idk {
             ImGui::PopItemWidth();
             ImGui::PopStyleVar();
 
-            return false;
+            return changed;
         };
         InjectDrawTable inject{ { "emission/bursts", CustomDrawFn(draw_bursts) } };
 
