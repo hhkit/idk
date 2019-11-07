@@ -227,7 +227,8 @@ namespace idk
 					oprev = itr;
 				}
 				//Keep track of the number of instances to be render for this frustum
-				instanced_data.emplace_back(InstancedData{ itr->velocity,camera.view_matrix*itr->transform });
+					auto tfm = camera.view_matrix * itr->transform;
+				instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
 				inst_itr->num_instances++;
 			}
 		}
@@ -265,6 +266,7 @@ namespace idk
 		src.clear();
 		std::swap(dst, src);
 	}
+	struct Transform
 
 
 	void GraphicsSystem::BufferGraphicsState(

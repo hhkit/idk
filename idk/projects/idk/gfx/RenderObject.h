@@ -66,8 +66,9 @@ namespace idk
 
 	struct InstancedData
 	{
-		vec3 velocity  {};
+		//vec3 velocity  {};
 		mat4 transforms{};
+		mat4 normal_transforms{};
 	};
 	struct AnimatedInstancedData :InstancedData
 	{

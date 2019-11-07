@@ -59,6 +59,7 @@ namespace idk::ogl
 		CameraData curr_cam;
 		span<LightData> curr_lights;
 
+		void BindMaterial(const RscHandle<Material>& mat);
 		void PushMaterial(const RscHandle<Material>& mat);
 		void BindMaterialInstance(const RscHandle<MaterialInstance>& mat_inst);
 		void PushMaterialInstance(const RscHandle<MaterialInstance>& mat_inst);
@@ -66,7 +67,7 @@ namespace idk::ogl
 		void PushObjectTransform(const mat4& tfm);
 		void FlushObjectTransforms();
 		void UpdateInstancedBuffers(const void* data, size_t num_bytes);
-		void UseInstancedBuffers();
+		void UseInstancedBuffers(size_t starting_instance);
 		
 	};
 }
