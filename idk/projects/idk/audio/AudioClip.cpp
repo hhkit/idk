@@ -194,4 +194,16 @@ namespace idk
 		return soundInfo;
 	}
 
+	string AudioClip::GetName()
+	{
+		if (_soundHandle) { //Convert all char to string. send string.
+			const int charLen = 512;
+			char name[charLen];
+			_soundHandle->getName(name, charLen);
+			return string(name);
+
+		}
+		return string();
+	}
+
 }
