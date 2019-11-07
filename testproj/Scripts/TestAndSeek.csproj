@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TestAndSeek</RootNamespace>
     <AssemblyName>TestAndSeek</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -50,6 +50,7 @@
     <Compile Include="RaycastTest.cs" />
     <Compile Include="Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestSetForward.cs" />
     <Compile Include="TestShou.cs" />
     <Compile Include="TestyTesty.cs" />
   </ItemGroup>

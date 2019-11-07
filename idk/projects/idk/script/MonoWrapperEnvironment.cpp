@@ -85,6 +85,13 @@ namespace idk::mono
 		static void ret() {}
 	};
 
+	MonoException* make_nullref_exception()
+	{
+		auto exc_type = Core::GetSystem<ScriptSystem>().Environment().Type("NullRef");
+		IDK_ASSERT(exc_type);
+		return (MonoException*) exc_type->ConstructTemporary();
+	}
+
 #define BIND_START(LABEL, RET, ...)\
 	{ using Ret = RET;\
 	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{try
@@ -93,6 +100,7 @@ namespace idk::mono
 	catch(NullHandleException ex) \
 	{ \
 		LOG_TO(LogPool::GAME, "Null reference at %lld", ex.GetHandle().id);\
+		mono_raise_exception(make_nullref_exception());\
 		return default_val<Ret>::ret(); }\
 	}));}
 
@@ -386,16 +394,29 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetForward", void, Handle<Transform> h, vec3 forward)
 		{
-			forward.normalize();
-
 			auto curr_fwd = h->Forward();
-			auto axis = curr_fwd.cross(forward);
-			auto length = axis.length();
-			if (length < 0.001f)
+			const float new_f_len = forward.length();
+			forward /= new_f_len;
+			const float new_f_dot_curr = forward.dot(curr_fwd);
+
+			// If dot prod returns us the square of the length, we know they are the same vector.
+			// In which case, we just return and dont apply any rotation
+			if (fabs(new_f_dot_curr - 1.0f) < 0.001f)
 				return;
 
-			auto angle = asin(length);
-			axis.normalize();
+			// if the two vectors are inversed
+			if (fabs(new_f_dot_curr - (-1.0f)) < 0.001f)
+			{
+				auto up = h->Up();
+				h->GlobalRotation(quat{ up, deg{180} } *h->GlobalRotation());
+				return;
+			}
+
+			auto axis = curr_fwd.cross(forward);
+			auto axis_len = axis.length();
+
+			auto angle = acos(new_f_dot_curr);
+			axis /= axis_len;
 
 			h->GlobalRotation(quat{axis, angle} * h->GlobalRotation());
 		}
@@ -607,15 +628,28 @@ namespace idk::mono
 
 
 		//AudioSource
+		//----------------------------------------------------------------------------------------------------
 		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)
 		{
 			audiosource->Play(index);
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSourcePlayAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->PlayAll();
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::AudioSourceStop", void, Handle<AudioSource> audiosource, int index)
 		{
 			audiosource->Stop(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStopAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->StopAll();
 		}
 		BIND_END();
 
@@ -655,7 +689,26 @@ namespace idk::mono
 		}
 		BIND_END();
 
-        // Renderer
+		BIND_START("idk.Bindings::AudioSourceSize", int, Handle<AudioSource> audiosource)
+		{
+			return audiosource->audio_clip_list.size();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAudioClipPlaying", bool, Handle<AudioSource> audiosource, int index)
+		{
+			return audiosource->IsAudioClipPlaying(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAnyAudioClipPlaying", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->IsAnyAudioClipPlaying();
+		}
+		BIND_END();
+		//----------------------------------------------------------------------------------------------------
+
+		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
             switch (renderer.type)
@@ -682,8 +735,8 @@ namespace idk::mono
 		{
 			switch (renderer.type)
 			{
-			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->enabled = set;
-			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->enabled = set;
+            case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->enabled = set; return;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->enabled = set; return;
 			default: return;
 			}
 		}
@@ -819,6 +872,31 @@ namespace idk::mono
 				return;
 			handle->SetUniform(s.get(), tex);
         }
+		BIND_END();
+
+		// lights
+		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
+		{
+			return h->GetColor();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetColor", void, Handle<Light> h,color c)
+		{
+			h->SetColor(c);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetIntensity", real, Handle<Light> h)
+		{
+			return h->GetLightIntensity();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetIntensity", void, Handle<Light> h, real i)
+		{
+			h->SetLightIntensity(i);
+		}
 		BIND_END();
 
 		// Input

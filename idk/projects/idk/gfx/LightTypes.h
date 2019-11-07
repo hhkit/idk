@@ -2,6 +2,9 @@
 #include <idk.h>
 #include <res/ResourceHandle.h>
 
+#undef near
+#undef far
+
 namespace idk
 {
 	class FrameBuffer;
@@ -23,8 +26,12 @@ namespace idk
 	{
 		real  intensity     { 1.f  };
 		color light_color   { 1.f  };
-		real  width         { 5.0f };
-		real  height        { 5.0f };
+		real  left          { -5.0f };
+		real  right         { +5.0f };
+		real  bottom        { -5.0f };
+		real  top           { +5.0f };
+		real  near          { -5.0f };
+		real  far           { +5.0f };
 
 		RscHandle<FrameBuffer> light_map;
 		RscHandle<FrameBuffer> InitShadowMap();

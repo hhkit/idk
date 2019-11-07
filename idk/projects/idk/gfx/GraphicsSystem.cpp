@@ -14,6 +14,19 @@
 
 #include <atomic>
 
+#include <meta/comparator.inl>
+
+
+static inline bool operator<(const idk::Guid& lhs, const idk::Guid& rhs) noexcept
+{
+	return lhs.operator idk::string() < rhs.operator idk::string();
+}
+template<typename Rsc>
+static inline bool operator<(const idk::RscHandle<Rsc>& lhs, const idk::RscHandle<Rsc>& rhs) noexcept
+{
+	return lhs.guid < rhs.guid;
+}
+
 namespace idk
 {
 	enum class RequestState
@@ -113,7 +126,7 @@ namespace idk
 		if (itr == index_table.end())
 			return std::nullopt;
 
-		ro.skeleton_index = itr->second;
+		ro.skeleton_index = static_cast<unsigned>(itr->second);
 		ro.config = mesh_render_config;
 		return ro;
 	}
@@ -162,6 +175,56 @@ namespace idk
 		Core::GetGameState().SortObjectsOfType<Camera>([](auto& lhs, auto& rhs) {return lhs.depth < rhs.depth; });
 
 	}
+
+	template<typename IRO>
+	IRO CreateIROInfo(const RenderObject& ro)
+	{
+		return IRO{
+			ro.obj_id,
+			ro.mesh,
+			ro.material_instance,
+			ro.cast_shadows,
+			ro.receive_shadows,
+			ro.renderer_req,
+			ro.config,
+		};
+	}
+
+	void BatchRenderObjects(const vector<RenderObject>& ro, vector<InstRenderObjects>& inst)
+	{
+		std::optional<decltype(ro.begin())> oprev{};
+		InstRenderObjects* inst_itr{};
+		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
+		{
+			if (!oprev || ![](auto& itr, auto& prev) {
+				return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
+				}(itr, *oprev))
+			{
+				inst_itr = &inst.emplace_back(CreateIROInfo<InstRenderObjects>(*itr));
+				oprev = itr;
+			}
+			inst_itr->instanced_data.emplace_back(InstancedData{ itr->velocity,itr->transform });
+		}
+	}
+
+	void BatchAnimatedRenderObjects(const vector<AnimatedRenderObject>& ro, vector<InstAnimatedRenderObjects>& inst)
+	{
+		std::optional<decltype(ro.begin())> oprev{};
+		InstAnimatedRenderObjects* inst_itr{};
+		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
+		{
+			if (!oprev || ![](auto& itr, auto& prev) {
+				return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
+				}(itr, *oprev))
+			{
+				inst_itr = &inst.emplace_back(CreateIROInfo<InstAnimatedRenderObjects>(*itr));
+				oprev = itr;
+			}
+				inst_itr->instanced_data.emplace_back(AnimatedInstancedData{ itr->velocity,itr->transform,itr->skeleton_index });
+		}
+	}
+
+
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -222,6 +285,19 @@ namespace idk
 			}
 		);
 
+
+		using ro_inst_comp = ordered_comparator<RenderObject,
+			PtrMem<decltype(&RenderObject::material_instance), & RenderObject::material_instance>,
+			PtrMem<decltype(&RenderObject::mesh), & RenderObject::mesh>
+		>;
+		using aro_inst_comp = ordered_comparator<AnimatedRenderObject,
+			PtrMem<decltype(&RenderObject::material_instance), & RenderObject::material_instance>,
+			PtrMem<decltype(&RenderObject::mesh), & RenderObject::mesh>,
+			PtrMem<decltype(&AnimatedRenderObject::skeleton_index), &AnimatedRenderObject::skeleton_index>
+		>;
+
+		
+
 		// todo: scenegraph traversal
 		RenderBuffer result{};
 		result.camera.reserve(cameras.size());
@@ -241,6 +317,8 @@ namespace idk
 
 		for (auto& elem : skinned_mesh_renderers)
 		{
+			if (elem.GetHandle().scene == Scene::prefab)
+				continue;
 			auto ro = GetAnimatedRenderObj(elem, skeleton_indices);
 			if (ro)
 				result.skinned_mesh_render.emplace_back(std::move(*ro));
@@ -248,6 +326,9 @@ namespace idk
 
 		for (auto& camera : cameras)
 		{
+			if (camera.GetHandle().scene == Scene::prefab)
+				continue;
+
 			if(camera.is_scene_camera)
 				result.curr_scene_camera = camera.GenerateCameraData();
 			result.camera.emplace_back(camera.GenerateCameraData());
@@ -255,6 +336,9 @@ namespace idk
 
 		for (auto& elem : mesh_renderers)
 		{
+			if (elem.GetHandle().scene == Scene::prefab)
+				continue;
+
 			auto obj = GetRenderObj(elem);
 			if (obj)
 			{
@@ -263,6 +347,7 @@ namespace idk
 				result.mesh_render.emplace_back(std::move(render_obj));
 			}
 		}
+
 
 		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];
 		result.renderer_vertex_shaders[VNormalMesh] = renderer_vertex_shaders[VNormalMesh];
@@ -296,6 +381,15 @@ namespace idk
                 render_data.material_instance = elem.renderer.material;
             }
         }
+
+
+		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
+		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
+
+		BatchRenderObjects(result.mesh_render, result.instanced_mesh_render);
+		BatchAnimatedRenderObjects(result.skinned_mesh_render, result.instanced_skinned_mesh_render);
+
+
 
 		for (auto& f : fonts)
 		{

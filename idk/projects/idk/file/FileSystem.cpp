@@ -496,11 +496,18 @@ namespace idk {
 		f._stem			= p.stem().generic_string();
 		f._mount_path	= p_dir._mount_path + "/" + f._filename;
 		f._extension	= p.extension().generic_string();
-		f._time			= FS::last_write_time(p);
-		f._parent		= p_dir._tree_index;
+		f._parent = p_dir._tree_index;
 
 		f.SetValid(true);
 		f.SetOpenMode(FS_PERMISSIONS::NONE);
+
+		try {
+			f._time = FS::last_write_time(p);
+		}
+		catch (const FS::filesystem_error& e)
+		{
+			LOG_WARNING_TO(LogPool::SYS, "Unable to get last write time");
+		}
 	}
 
 	void FileSystem::initDir(file_system_detail::fs_dir& d, file_system_detail::fs_dir& p_dir, const std::filesystem::path& p)

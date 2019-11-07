@@ -54,11 +54,13 @@ namespace idk::ogl
 	void OpenGLMesh::Draw()
 	{
 		_element_array_object.Bind();
-		// for (auto& entry : _mesh_entries)
-		// {
-		// 	glDrawElements( _draw_mode, static_cast<GLsizei>(entry._num_index), GL_UNSIGNED_INT, (void*)(sizeof(unsigned) * entry._base_index));
-		// }
 		glDrawElements(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0);
+	}
+
+	void OpenGLMesh::DrawInstanced(size_t instances)
+	{
+		_element_array_object.Bind();
+		glDrawElementsInstanced(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0, instances);
 	}
 
 	void OpenGLMesh::BindAndDraw(const renderer_reqs& locations)

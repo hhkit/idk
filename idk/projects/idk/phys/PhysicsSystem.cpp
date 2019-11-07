@@ -9,6 +9,7 @@
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
+#include <phys/collision_detection/collision_capsule.h>
 #include <phys/collision_detection/ManagedCollision.h>
 
 #include <script/MonoBehavior.h>
@@ -35,8 +36,8 @@ namespace idk
             elem.find_rigidbody();
             if (elem._static_cache)
                 elem.setup_predict();
-            elem._enabled_this_frame = elem.is_enabled_and_active();
-        }
+			elem._enabled_this_frame = elem.is_enabled_and_active() && elem.GetHandle().scene != Scene::prefab;
+		}
 
 		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
 		{
@@ -47,7 +48,7 @@ namespace idk
 		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
 		{
 			if (h_rb)
-				return !h_rb->sleeping();
+				return !h_rb->sleeping() && h_rb.scene != Scene::prefab;
 			else
 				return false;
 		};
@@ -192,6 +193,26 @@ namespace idk
 							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, sphere>)
 								return phys::collide_box_sphere_discrete(
 											lshape, rshape);
+							else
+							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, sphere>)
+								return phys::collide_capsule_sphere_discrete(
+									lshape, rshape);
+							else
+							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, capsule>)
+								return phys::collide_capsule_sphere_discrete(
+									rshape, lshape);
+							else
+							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, box>)
+								return phys::collide_capsule_box_discrete(
+									lshape, rshape);
+							else
+							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, capsule>)
+								return phys::collide_capsule_box_discrete(
+									rshape, lshape);
+							else
+							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, capsule>)
+								return phys::collide_capsule_capsule_discrete(
+									lshape, rshape);
 							else
 								return phys::col_failure{};
 
@@ -526,7 +547,7 @@ namespace idk
 		std::sort(retval.begin(), retval.end(), 
 			[](const RaycastHit& lhs, const RaycastHit& rhs) 
 			{ 
-				return lhs.raycast_succ.distance_to_collision < rhs.raycast_succ.distance_to_collision; 
+				return abs(lhs.raycast_succ.distance_to_collision) < abs(rhs.raycast_succ.distance_to_collision);
 			}
 		);
 

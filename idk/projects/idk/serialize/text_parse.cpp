@@ -164,6 +164,9 @@ namespace idk
 			if constexpr (std::is_same_v<K, const char*>)
 			{
 				auto& curr_node = *stack.back();
+				if (!curr_node.is_mapping())
+					return false;
+
 				auto iter = curr_node.as_mapping().find(key);
 				if (iter == curr_node.as_mapping().end())
 					return false;
@@ -360,8 +363,6 @@ namespace idk
 			for (++iter; iter != elem.end(); ++iter)
 			{
 				const reflect::type type = reflect::get_type(iter->tag());
-				if (iter->tag() == "MonoBehavior")
-					LOG("MONO BEHAVIOR");
 				reflect::dynamic obj = type.create();
 				const auto res2 = parse_yaml(*iter, obj);
 				if (res2 != parse_error::none)

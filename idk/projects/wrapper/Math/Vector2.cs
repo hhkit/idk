@@ -23,18 +23,31 @@ namespace idk
         public float magnitude
         { get { return Mathf.Sqrt(sqrMagnitude);  } }
         public Vector2 normalized
-        { get { return this / magnitude; } }
-        
+        {
+            get
+            {
+                Vector3 retval = this;
+                var mag = magnitude;
+                if (mag < 0.001f)
+                {
+                    return Vector3.zero;
+                }
+                retval.x /= mag;
+                retval.y /= mag;
+                
+                return retval;
+            }
+        }
+
         // member functions
         public bool Equals(Vector2 rhs)
         {
             return x == rhs.x && y == rhs.y;
         }
-        public void Normalize()
+        public static Vector3 Normalize(Vector2 v)
         {
-            var mag = magnitude;
-            x /= mag;
-            y /= mag;
+            v = v.normalized;
+            return v;
         }
         public void Set(float x, float y)
         {
@@ -78,6 +91,11 @@ namespace idk
         public override int GetHashCode()
         {
             return x.GetHashCode() ^ y.GetHashCode() << 2;
+        }
+
+        public override string ToString()
+        {
+            return "(" + x.ToString() + ", " + y.ToString() + ")";
         }
 
         // operator overloads

@@ -1045,7 +1045,66 @@ namespace idk {
 
 		ImGui::EndChild();
 
-		displayVal(*c_audiosource);
+
+		//I dont know how to modify displayVal such that it doesnt display vector<RscHandle<AudioClip>> ;_;
+		const float widthSpace = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+
+		ImGui::Text("Volume");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->volume);
+		ImGui::DragFloat("", &c_audiosource->volume, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Pitch");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->pitch);
+		ImGui::DragFloat("", &c_audiosource->pitch, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Min Distance");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->minDistance);
+		ImGui::DragFloat("", &c_audiosource->minDistance, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Max Distance");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->maxDistance);
+		ImGui::DragFloat("", &c_audiosource->maxDistance, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Max Distance");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->maxDistance);
+		ImGui::DragFloat("", &c_audiosource->maxDistance, 0.01f);
+		ImGui::PopID();
+
+		ImGui::Text("Is 3D Sound");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->is3Dsound);
+		ImGui::Checkbox("", &c_audiosource->is3Dsound);
+		ImGui::PopID();
+
+		ImGui::Text("Is Unique");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->isUnique);
+		ImGui::Checkbox("", &c_audiosource->isUnique);
+		ImGui::PopID();
+
+		ImGui::Text("Is Loop");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(widthSpace);
+		ImGui::PushID(&c_audiosource->isLoop);
+		ImGui::Checkbox("", &c_audiosource->isLoop);
+		ImGui::PopID();
+
 	}
 
     template<>

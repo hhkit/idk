@@ -393,7 +393,7 @@ REFLECT_VARS(center, radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::capsule, "capsule")
-REFLECT_VARS(center, radius, height)
+REFLECT_VARS(center, radius, height, dir)
 REFLECT_END()
 
 // GRAPHICS
@@ -410,7 +410,7 @@ REFLECT_VARS(intensity, light_color, attenuation_radius)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
-REFLECT_VARS(intensity, light_color, width, height)
+REFLECT_VARS(intensity, light_color, left, right, bottom, top, near, far)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SpotLight, "SpotLight")

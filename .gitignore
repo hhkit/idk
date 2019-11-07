@@ -352,3 +352,5 @@ imgui.ini
 idk/dep/lib/SPIRV-Tools-optd.lib
 /testproj/test dismount
 /idk/projects/wrapper/log.txt
+/idk/build/launcher
+/idk/launcher

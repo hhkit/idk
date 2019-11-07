@@ -70,7 +70,7 @@ namespace idk::ogl
 						elem.stride,
 						r_cast<void*>(elem.offset)
 					);
-
+				glVertexAttribDivisor(loc, 0);
 				glEnableVertexAttribArray(loc);
 			}
 		}

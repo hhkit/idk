@@ -13,6 +13,23 @@ namespace idk
 		return aabb{ center - half_extent, center + half_extent };
 	}
 
+	bool capsule::is_sphere() const
+	{
+		return height < (2*radius);
+	}
+
+	std::pair<vec3, vec3> capsule::get_line_points() const
+	{
+		const float final_height = (height * 0.5f - radius);
+		if (final_height <= 0)
+			return std::pair<vec3, vec3>(center, center);
+		else {
+			const vec3 length = (dir.get_normalized() * final_height);
+			return std::pair<vec3, vec3> { center + length,center - length };
+		}
+
+	}
+
 	capsule& capsule::operator*=(const mat4& tfm)
 	{
 		center = tfm * vec4{ center, 1 };

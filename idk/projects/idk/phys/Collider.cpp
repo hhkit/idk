@@ -8,15 +8,15 @@ namespace idk
 {
 	void Collider::find_rigidbody()
 	{
-		if (!_rigidbody)
-		{
+		//if (!_rigidbody)
+		//{
 			auto search_go = GetGameObject();
 			while (search_go && !_rigidbody)
 			{
 				_rigidbody = search_go->GetComponent<RigidBody>();
 				search_go = search_go->Parent();
 			}
-		}
+		//}
 		_static_cache = !_rigidbody;
 	}
 	bool Collider::is_static() const

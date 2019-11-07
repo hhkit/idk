@@ -6,9 +6,10 @@ namespace idk
 	template <typename T>
 	struct span
 	{
-		T* _begin;
-		T* _end;
+		T* _begin = nullptr;
+		T* _end = nullptr;
 
+		constexpr span() noexcept = default;
 		constexpr span(T* begin, T* end) noexcept;
 		template <typename Container, typename = std::enable_if_t<!std::is_same_v<Container, span>>>
 		constexpr explicit span(Container& c) noexcept;

@@ -857,6 +857,10 @@
     <ClInclude Include="gfx\FontAtlasFactory.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\comparator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1254,6 +1258,9 @@
     <ClCompile Include="util\easing.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
     <ClCompile Include="gfx\FramebufferFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -1437,6 +1444,7 @@
     <None Include="script\ManagedObj.inl">
       <Filter>script</Filter>
     </None>
+    <None Include="meta\comparator.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

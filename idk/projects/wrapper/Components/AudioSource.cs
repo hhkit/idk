@@ -48,8 +48,28 @@ namespace idk
         public void Play(int index = 0)
             => Bindings.AudioSourcePlay(handle, index);
 
+        //Plays all audioclip in the audiosource.
+        public void PlayAll()
+            => Bindings.AudioSourcePlayAll(handle);
+
         //Plays an audioclip in the audiosource. If index is out of range, no sound will stop.
         public void Stop(int index = 0)
             => Bindings.AudioSourceStop(handle, index);
+
+        //Stop all audioclip in the audiosource.
+        public void StopAll()
+            => Bindings.AudioSourceStopAll(handle);
+
+        //Gets the number of audioclips in audiosource.
+        public int Size()
+            => Bindings.AudioSourceSize(handle);
+
+        //Is the audioclip playing?
+        public bool IsAudioClipPlaying(int index)
+            => Bindings.AudioSourceIsAudioClipPlaying(handle, index);
+
+        //Are any audioclip in this audiosource playing?
+        public bool IsAnyAudioClipPlaying()
+            => Bindings.AudioSourceIsAnyAudioClipPlaying(handle);
     }
 }

@@ -16,7 +16,7 @@ layout(location = 1) in VS_OUT
 {
   vec3 position;
 } ;
-layout(location=0)in vec4 gl_FragCoord;
+//layout(location=0)in vec4 gl_FragCoord;
 
 layout(location = 0) out vec4 FragColor;
 
