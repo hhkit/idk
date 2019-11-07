@@ -79,6 +79,8 @@ namespace idk
 	{
 
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
+			if (!audio_clip_list[i])
+				continue;
 			//Update Channel to check if it is still playing.
 			audio_clip_list[i]->UpdateChannel();
 			//Update volume
@@ -92,6 +94,15 @@ namespace idk
 			//Update Position
 		}
 
+	}
+	int AudioSource::FindAudio(string_view name)
+	{
+		for (int i = 0; i < audio_clip_list.size(); ++i) {
+			const auto stringName = audio_clip_list[i]->GetName();
+			if (stringName == name)
+				return i;
+		}
+		return -1;
 	}
 	FMOD_MODE AudioSource::ConvertSettingToFMOD_MODE()
 	{

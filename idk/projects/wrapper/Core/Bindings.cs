@@ -254,6 +254,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AudioSourceIsAnyAudioClipPlaying(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int FindAudio(ulong id, string name);
+
         /*
         * Light
         */

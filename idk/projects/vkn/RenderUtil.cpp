@@ -25,6 +25,7 @@ namespace idk::vkn
 			config = { *pipline_conf }; //Attempt using default copy ctor to copy the external configs
 		else
 		{
+			config.cull_face = static_cast<uint32_t>(CullFace::eNone);
 			config.depth_test = false;
 			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorOnly;
@@ -76,6 +77,12 @@ namespace idk::vkn
 
 		ro.mesh = h_mesh;
 		ro.config = config_;
+		static renderer_reqs single_pass_cube = { {
+			{vtx::Attrib::Position,0}
+		}
+		};
+		ro.renderer_req = &single_pass_cube;
+		;
 	}
 
 RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst)
@@ -195,7 +202,6 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 		if (frag)
 			thingy.BindShader(ShaderStage::Fragment, RscHandle<ShaderProgram>{frag});
 		{
-			int i = 0;
 			mat4 mat4block[] =
 			{
 				vp_trnsform
@@ -226,6 +232,23 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 		thingy.BindSampler(EpName(), 0, src.as<VknCubemap>());
 		thingy.FinalizeDrawCall(ro);
+	}
+
+	void CubemapRenderer::QueueRenderToCubeMap(RscHandle<CubeMap> dst)//WIP
+	{
+		auto uitr = unused.find(dst);
+		if (uitr != unused.end())
+			unused.erase(uitr);
+
+		auto citr = cached.find(dst);
+		if (citr == cached.end())
+		{
+			citr = cached.emplace(dst, NewFrameBuffer(dst)).first;
+		}
+
+		frame_buffers.emplace_back(citr->second);
+		RenderImpl();
+		//thingy.FinalizeDrawCall(ro);
 	}
 
 	void CubemapRenderer::ProcessQueue(vk::CommandBuffer cmd_buffer)
@@ -281,7 +304,9 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 			for (auto&& [attrib, location] : req.requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(*Pipeline().GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+				auto binding = Pipeline().GetBinding(location);
+				if(binding)
+					cmd_buffer.bindVertexBuffers(*binding, *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 			}
 
 			auto& oidx = mesh.GetIndexBuffer();
@@ -359,6 +384,11 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 		new (&thingy) PipelineThingy{};
 		ds_manager.Reset();
 		frame_buffers.resize(0);
+	}
+
+	void CubemapRenderer::RenderImpl()
+	{
+		//WIP
 	}
 
 }

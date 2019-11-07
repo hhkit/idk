@@ -76,12 +76,18 @@ namespace idk::vkn
 		//Returns false when it failes to queue the new instruction because the queue is full.
 		//End this queue with ProcessQueue before beginning again.
 		void QueueConvoluteCubeMap(RscHandle<CubeMap> src, RscHandle<CubeMap> dst);
+
+		void QueueRenderToCubeMap(RscHandle<CubeMap> dst);//WIP
+
 		void ProcessQueue(vk::CommandBuffer cmd_buffer);
 		void ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos = { 0,0 }, const ivec2& vp_size = {1,1});
 
 		void ResetRsc();
 
 		CubemapRenderer():ds_manager{View()}{}
+	protected:
+		virtual void RenderImpl(); //WIP
+
 	private:
 		PipelineManager* _pipeline_manager;
 	};

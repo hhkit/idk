@@ -34,6 +34,7 @@ namespace idk
 		bool IsAudioClipPlaying(int index);
 		bool IsAnyAudioClipPlaying();
 		void UpdateAudioClips();
+		int  FindAudio(string_view name);
 		vector<RscHandle<AudioClip>> audio_clip_list;
 
 		//All the Audio data is inside AudioClip

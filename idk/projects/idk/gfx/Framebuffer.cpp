@@ -10,4 +10,8 @@ namespace idk
 		i = (stencil_attachment) ? i + 1 : i;//Probably gotta merge depth and stencil
 		return i;
 	}
+	size_t FrameBuffer::NumLayers()const
+	{
+		return num_layers;
+	}
 }

@@ -485,7 +485,7 @@ namespace idk::vkn {
 		case vk::Format::eBc1RgbaSrgbBlock:
 		case vk::Format::eBc4UnormBlock:
 		case vk::Format::eBc4SnormBlock:
-			result = block_width * block_width * 8 * 6;
+			result = block_width * block_height * 8 * 6;
 			break;
 		case vk::Format::eBc2UnormBlock:
 		case vk::Format::eBc2SrgbBlock:
@@ -493,7 +493,7 @@ namespace idk::vkn {
 		case vk::Format::eBc3SrgbBlock:
 		case vk::Format::eBc5UnormBlock:
 		case vk::Format::eBc5SnormBlock:
-			result = block_width * block_width * 16 * 6;
+			result = block_width * block_height * 16 * 6;
 			break;
 		}
 		return result;
@@ -816,7 +816,6 @@ namespace idk::vkn {
 		if (!is_render_target)
 		{
 			vector<vk::BufferImageCopy> bCopyRegions;
-			uint32_t offset = 0;
 
 			for (unsigned i = 0; i < 6; ++i)
 			{

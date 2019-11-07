@@ -125,13 +125,14 @@ namespace idk::vkn
 				
 		cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 		auto& vfb = fb.as<VknFrameBuffer>();
+		auto clear_val = vk::ClearValue{ vk::ClearColorValue{} };
 		vk::RenderPassBeginInfo rpbi
 		{
 			vfb.GetRenderPass(),vfb.GetFramebuffer(),
 			vk::Rect2D
 			{
 				vk::Offset2D{},vk::Extent2D{s_cast<uint32_t>(vfb.Size().x),s_cast<uint32_t>(vfb.Size().y)}
-			},1,& vk::ClearValue{vk::ClearColorValue{}}
+			},1,&clear_val
 		};
 		brdf_texture->Name("Brdf");
 		cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
@@ -238,6 +239,9 @@ namespace idk::vkn
 	*/
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		try
+		{
+
 		auto& curr_signal = instance_->View().CurrPresentationSignals();
 		instance_->AcquireFrame(*curr_signal.image_available);
 		auto curr_index = instance_->View().CurrFrame();
@@ -345,9 +349,18 @@ namespace idk::vkn
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
+
+		}
+		catch (vk::SystemError& err)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
+			throw;
+		}
 	}
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
+		try
+		{
 		//using namespace std::chrono_literals;
 		//static std::optional<std::chrono::time_point<std::chrono::high_resolution_clock>> last_time{};
 		//
@@ -358,6 +371,12 @@ namespace idk::vkn
 		//}
 		//last_time = std::chrono::high_resolution_clock::now();
 		instance_->PresentFrame2();
+		}
+		catch (vk::SystemError& err)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
+			throw;
+		}
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{

@@ -33,14 +33,14 @@ namespace idk::vkn
 
 
 		//TODO store a framebuffer instead.
-		auto color_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetColorBuffer().guid);
-		loader.LoadTexture(*color_tex, TextureFormat::eBGRA32, {}, nullptr, 0, size, alloc, fence, true);
-		auto depth_tex = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);
-		loader.LoadTexture(*depth_tex, TextureFormat::eD16Unorm, {}, nullptr, 0, size, alloc, fence, true);
+		auto color_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetColorBuffer().guid);
+		loader.LoadTexture(*color_texture, TextureFormat::eBGRA32, {}, nullptr, 0, size, alloc, fence, true);
+		auto depth_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);
+		loader.LoadTexture(*depth_texture, TextureFormat::eD16Unorm, {}, nullptr, 0, size, alloc, fence, true);
 
 		{ 
 			VulkanView& vknView = View();
-			const vk::ImageView image_views[] = {color_tex->ImageView(),depth_tex->ImageView()};
+			const vk::ImageView image_views[] = {color_texture->ImageView(),depth_texture->ImageView()};
 
 			vk::FramebufferCreateInfo framebufferInfo = {};
 			framebufferInfo.renderPass = vknView.BasicRenderPass(rp_type);

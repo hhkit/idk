@@ -1261,6 +1261,7 @@
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp">
       <Filter>phys\collision</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\FramebufferFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

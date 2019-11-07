@@ -9,9 +9,11 @@ namespace idk::vkn
 		const char* prefix = "";
 		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			prefix = "Err: ";
-		LOG_TO(LogPool::GFX, "%s validation layer: %s\n", prefix, pCallbackData->pMessage);// << pCallbackData->pMessage << "\n";
+#if DEBUG
 		hlp::cerr() << prefix << "validation layer: " << pCallbackData->pMessage << std::endl;
-
+#else
+		LOG_TO(LogPool::GFX, "%s validation layer: %s\n", prefix, pCallbackData->pMessage);// << pCallbackData->pMessage << "\n";
+#endif
 		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
  			DoNothing();
 		return VK_FALSE;

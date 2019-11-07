@@ -706,6 +706,13 @@ namespace idk::mono
 			return audiosource->IsAnyAudioClipPlaying();
 		}
 		BIND_END();
+
+		BIND_START("idk.Bindings::FindAudio", int, Handle<AudioSource> audiosource, MonoString* name)
+		{
+			auto s = unbox(name);
+			return audiosource->FindAudio(s.get());
+		}
+		BIND_END();
 		//----------------------------------------------------------------------------------------------------
 
 		// Renderer
