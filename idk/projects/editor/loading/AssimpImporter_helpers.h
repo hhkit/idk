@@ -204,7 +204,7 @@ namespace idk::ai_helpers
 	void CompileBoneChannel(Scene& scene, anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
 
 	// Utility functions
-	void PrintError(string_view error);
+	void LogWarning(const string& error);
 	aiNode* FindFirstNodeContains(string name, aiNode* node);
 	void AddBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out);
 	void DumpNodes(aiNode* node);
