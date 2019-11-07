@@ -68,6 +68,7 @@ namespace idk::ogl {
 	OpenGLFontAtlas::OpenGLFontAtlas()
 	{
 		glGenTextures(1, &_id);
+		//*texture = OpenGLTexture{ _id, _size };
 		glBindTexture(GL_TEXTURE_2D, _id);
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -79,6 +80,7 @@ namespace idk::ogl {
 	OpenGLFontAtlas::OpenGLFontAtlas(const bool& compressed)
 	{
 		glGenTextures(1, &_id);
+		//*texture = OpenGLTexture{ _id, _size };
 		glBindTexture(GL_TEXTURE_2D, _id);
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -97,7 +99,10 @@ namespace idk::ogl {
 	}
 
 	OpenGLFontAtlas::OpenGLFontAtlas(OpenGLFontAtlas&& rhs)
-		: FontAtlas{ std::move(rhs) }, _id{ rhs._id }, _isCompressedTexture{ rhs._isCompressedTexture }
+		: FontAtlas{ std::move(rhs) }, 
+		_id{ rhs._id }, 
+		_isCompressedTexture{ rhs._isCompressedTexture },
+		texture{ rhs.texture }
 	{
 		rhs._id = 0;
 	}
@@ -108,6 +113,7 @@ namespace idk::ogl {
 		FontAtlas::operator=(std::move(rhs));
 		std::swap(_id, rhs._id);
 		std::swap(_isCompressedTexture, rhs._isCompressedTexture);
+		std::swap(texture, rhs.texture);
 		return *this;
 	}
 
@@ -203,4 +209,8 @@ namespace idk::ogl {
 		GL_CHECK();
 	}
 
+	RscHandle<Texture> OpenGLFontAtlas::Tex() const noexcept
+	{
+		return RscHandle<Texture>{texture};
+	}
 }

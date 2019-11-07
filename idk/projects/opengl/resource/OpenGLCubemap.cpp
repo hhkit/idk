@@ -60,14 +60,7 @@ namespace idk::ogl
 		*/
 
 	}
-	RscHandle<Texture> OpenGLCubemap::Tex() const noexcept
-	{
-		return RscHandle<Texture>{texture};
-	}
-	/*span<const RscHandle<Texture>> OpenGLCubemap::ConvolutedTex() const
-	{
-		return span<const RscHandle<Texture>>(convoluted_texture);
-	}*/
+	
 	OpenGLCubemap::OpenGLCubemap()
 	{
 		glGenTextures(1, &_id);
@@ -195,6 +188,11 @@ namespace idk::ogl
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, detail::GLUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, detail::GLUVMode(uv_mode));
 		GL_CHECK();
+	}
+
+	RscHandle<Texture> OpenGLCubemap::Tex() const noexcept
+	{
+		return RscHandle<Texture>{texture};
 	}
 
 };

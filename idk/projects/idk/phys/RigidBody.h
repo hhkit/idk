@@ -37,12 +37,11 @@ namespace idk
 		vec3 AddForce(const vec3& newtons);
 		void TeleportBy(const vec3& translation);
 
-		const mat4& PredictedTransform() const;
 	private:
-		mat4 _predicted_tfm;
 		vec3 _accum_accel{};
 		vec3 _prev_pos;
 		bool _sleeping = false;
+        mat4 _pred_tfm{};
 
 		friend class PhysicsSystem;
 		friend class Collider;

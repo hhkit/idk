@@ -94,7 +94,7 @@ namespace idk {
 
 		POINT prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
 		POINT currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
-
+		
 	};
 
 

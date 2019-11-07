@@ -53,8 +53,8 @@ namespace idk
 		_prev_pos += translation;
 		tfm.GlobalPosition(tfm.GlobalPosition() + translation);
 	}
-	const mat4& RigidBody::PredictedTransform() const
+	/*const mat4& RigidBody::PredictedTransform() const
 	{
 		return _predicted_tfm;
-	}
+	}*/
 }

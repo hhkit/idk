@@ -20,6 +20,7 @@ namespace idk
 	{
 		GenerateDefaultFontAtlas();
 
+		/*
 		auto i = 0;
 		for (auto& elem : FontAtlas::defaults)
 		{
@@ -28,5 +29,6 @@ namespace idk
 			elem->Name(string{ "Default" } +string{ FontDefault{ i }.to_string() });
 			++i;
 		}
+		*/
 	}
 }
