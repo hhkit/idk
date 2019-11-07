@@ -24,63 +24,63 @@ namespace idk
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
 
-	constexpr auto calc_shape = [](const auto& shape, const Collider& col)
-	{
-		return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-	};
+    constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+    {
+        return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+    };
+
+    struct ColliderInfo
+    {
+        Collider& collider;
+        aabb broad_phase;
+        CollidableShapes predicted_shape;
+    };
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
+        vector<ColliderInfo> static_info;
+        vector<ColliderInfo> dynamic_info;
+
+        static_info.reserve(colliders.size() - rbs.size());
+
         for (auto& elem : colliders)
         {
+            elem._active_cache = elem.is_enabled_and_active();
+            if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
+                continue;
+
             elem.find_rigidbody();
             if (elem._static_cache)
-                elem.setup_predict();
-			elem._enabled_this_frame = elem.is_enabled_and_active() && elem.GetHandle().scene != Scene::prefab;
+            {
+                static_info.emplace_back(
+                    std::visit([&elem](const auto& shape) -> ColliderInfo {
+                        auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
+                        return ColliderInfo{ elem, pred_shape.bounds(), pred_shape };
+                    }, elem.shape)
+                );
+            }
+            else
+                dynamic_info.emplace_back(ColliderInfo{ elem });
 		}
 
-		Core::GetGameState().SortObjectsOfType<Collider>([](const Collider& lhs, const Collider& rhs)
-		{
-            return lhs._static_cache < rhs._static_cache;
-		});
-
-		// helper functions
-		constexpr auto check_rb = [](Handle<RigidBody> h_rb) -> bool
-		{
-			if (h_rb)
-				return !h_rb->sleeping() && h_rb.scene != Scene::prefab;
-			else
-				return false;
-		};
-		// put shape into world space
-		constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
-		{
-			if (rb)
-				return shape * rb->PredictedTransform();
-			else
-				return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-		};
-
-		constexpr auto debug_draw = [calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
+		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
-				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), 
-						collider.is_enabled_and_active() ? collider.is_trigger ? color{ 0, 1, 1 } : c : color{0.5}, dur);
-				}, collider.shape);
+			{
+				Core::GetSystem<DebugRenderer>().Draw(shape, c, dur);
+			}, pred_shape);
 		};
 
 
 		// phases
 		const auto ApplyGravity = [&]()
 		{
-			for (auto& elem : rbs)
+			for (auto& rb : rbs)
 			{
-				if (elem.sleeping())
+				if (rb.sleeping())
 					continue;
-
-				if (elem.use_gravity && !elem.is_kinematic)
-					elem.AddForce(vec3{ 0, -9.81, 0 });
+				if (rb.use_gravity && !rb.is_kinematic)
+                    rb.AddForce(vec3{ 0, -9.81, 0 });
 			}
 		};
 
@@ -92,153 +92,155 @@ namespace idk
 			for (auto& rigidbody : rbs)
 			{
 				const auto tfm = rigidbody.GetGameObject()->Transform();
+                rigidbody._pred_tfm = tfm->GlobalMatrix();
 
-				if (rigidbody.sleeping())
+                if (rigidbody.sleeping())
+                {
+                    rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz - rigidbody.initial_velocity * dt;
+                    rigidbody.initial_velocity = vec3{};
+                }
+                else if (!rigidbody.is_kinematic)
 				{
-					rigidbody._prev_pos = tfm->GlobalPosition() - rigidbody.initial_velocity * dt;
-					rigidbody._predicted_tfm = tfm->GlobalMatrix();
-					rigidbody.initial_velocity = vec3{};
-					continue;
-				};
-
-				if (!rigidbody.is_kinematic)
-				{
-					auto old_mat = tfm->GlobalMatrix();
-					const vec3 curr_pos = old_mat[3].xyz;
+					const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
 
 					// verlet integrate towards new position
 					//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
 					auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
 					rigidbody._accum_accel = vec3{};
 					rigidbody._prev_pos = curr_pos;
-					old_mat[3].xyz = new_pos;
-					rigidbody._predicted_tfm = old_mat;
-				}
-				else
-				{
-					rigidbody._predicted_tfm = tfm->GlobalMatrix();
+                    rigidbody._pred_tfm[3].xyz = new_pos;
 				}
 			}
 		};
 
+        constexpr auto CollideShapes = [](const auto& lshape, const auto& rshape) -> phys::col_result
+	    {
+		    using LShape = std::decay_t<decltype(lshape)>;
+		    using RShape = std::decay_t<decltype(rshape)>;
+
+		    // static collisions
+		    if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, box>)
+			    return phys::collide_box_box_discrete(
+				    lshape, rshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, box>)
+			    return -phys::collide_box_sphere_discrete(
+				    rshape, lshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, sphere>)
+			    return phys::collide_sphere_sphere_discrete(
+				    lshape, rshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, sphere>)
+			    return phys::collide_box_sphere_discrete(
+				    lshape, rshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, sphere>)
+			    return phys::collide_capsule_sphere_discrete(
+				    lshape, rshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, capsule>)
+			    return phys::collide_capsule_sphere_discrete(
+				    rshape, lshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, box>)
+			    return phys::collide_capsule_box_discrete(
+				    lshape, rshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, capsule>)
+			    return phys::collide_capsule_box_discrete(
+				    rshape, lshape);
+		    else
+		    if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, capsule>)
+			    return phys::collide_capsule_capsule_discrete(
+				    lshape, rshape);
+		    else
+			    return phys::col_failure{};
+	    };
+
 		const auto CollideObjects = [&]()
 		{
-			CollisionList collisionframe;
+            struct CollisionInfo
+            {
+                size_t i;
+                size_t j;
+                phys::col_success res;
+            };
+			vector<CollisionInfo> collision_frame;
+            collision_frame.reserve(dynamic_info.size()); //guess
+            size_t dynamic_vs_dynamic_count = 0;
 
 			const auto dt = Core::GetDT().count();
 
-            for (auto& elem : colliders)
+            // setup predict for dynamic objects
+            for (auto& info : dynamic_info)
             {
-                if (!elem._static_cache)
-                    elem.setup_predict();
+                info.predicted_shape = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, info.collider.shape);
+                info.broad_phase = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.collider.shape);
+                const auto& vel = info.collider._rigidbody->velocity();
+                info.broad_phase.grow(vel);
+                info.broad_phase.grow(-vel);
             }
 
+            // O(N^2) collision check
+            // all objects confirmed to be active (but may be sleeping)
 
-			for (unsigned i = 0; i < colliders.size(); ++i)
+            // dynamic vs dynamic
+            for (unsigned i = 0; i < dynamic_info.size(); ++i)
+            {
+                for (unsigned j = i + 1; j < dynamic_info.size(); ++j)
+                {
+                    const auto& lrigidbody = *dynamic_info[i].collider._rigidbody;
+                    const auto& rrigidbody = *dynamic_info[j].collider._rigidbody;
+
+                    if (lrigidbody.GetHandle() == rrigidbody.GetHandle())
+                        continue;
+                    if (lrigidbody.sleeping() && rrigidbody.sleeping())
+                        continue;
+                    if (!dynamic_info[i].broad_phase.overlaps(dynamic_info[j].broad_phase))
+                        continue;
+
+                    const auto collision = std::visit(CollideShapes, dynamic_info[i].predicted_shape, dynamic_info[j].predicted_shape);
+                    if (collision)
+                    {
+                        collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+                        collisions.emplace(CollisionPair{ dynamic_info[i].collider.GetHandle(), dynamic_info[j].collider.GetHandle() }, collision.value());
+                        ++dynamic_vs_dynamic_count;
+                    }
+                }
+            }
+            // dynamic vs static
+            for (unsigned i = 0; i < dynamic_info.size(); ++i)
+            {
+                for (unsigned j = 0; j < static_info.size(); ++j)
+                {
+                    const auto& lrigidbody = *dynamic_info[i].collider._rigidbody;
+
+                    if (lrigidbody.sleeping())
+                        continue;
+                    if (!dynamic_info[i].broad_phase.overlaps(static_info[j].broad_phase))
+                        continue;
+
+                    const auto collision = std::visit(CollideShapes, dynamic_info[i].predicted_shape, static_info[j].predicted_shape);
+                    if (collision)
+                    {
+                        collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+                        collisions.emplace(CollisionPair{ dynamic_info[i].collider.GetHandle(), static_info[j].collider.GetHandle() }, collision.value());
+                    }
+                }
+            }
+
+			for (const auto& [i, j, result] : collision_frame)
 			{
-				const auto& lcollider = colliders[i];
-				if (!lcollider._enabled_this_frame)
-					continue;
+                const bool dyn_vs_dyn = dynamic_vs_dynamic_count > 0;
+                if (dyn_vs_dyn)
+                    --dynamic_vs_dynamic_count;
 
-				if (lcollider._static_cache)
-					break;
+				const auto& lcollider = dynamic_info[i].collider;
+				const auto& rcollider = dyn_vs_dyn ? dynamic_info[j].collider : static_info[j].collider;
 
-				for (unsigned j = i + 1; j < colliders.size(); ++j)
-				{
-					const auto& rcollider = colliders[j];
-
-					if (!rcollider._enabled_this_frame)
-						continue;
-
-					const auto collision = std::visit([&](const auto& lhs, const auto& rhs) -> phys::col_result
-						{
-							using LShape = std::decay_t<decltype(lhs)>;
-							using RShape = std::decay_t<decltype(rhs)>;
-
-
-							// get rigidbodies
-							const auto lrigidbody = lcollider._rigidbody;
-							const auto rrigidbody = rcollider._rigidbody;
-
-							// if both rbs are useless
-							if (!check_rb(lrigidbody) && !check_rb(rrigidbody))
-								return phys::col_failure{};
-
-							if (lcollider.GetGameObject() == rcollider.GetGameObject())
-								return phys::col_failure{};
-
-							if (!lcollider._broad_phase.overlaps(rcollider._broad_phase))
-							{
-								//Core::GetSystem<DebugRenderer>().Draw(lcollider._broad_phase, color{ 1,0,1 });
-								//Core::GetSystem<DebugRenderer>().Draw(rcollider._broad_phase, color{ 1,0,1 });
-								return phys::col_failure{};
-							}
-
-							const auto lshape = lhs; //calc_shape(lhs, lrigidbody, lcollider);
-							const auto rshape = rhs; //calc_shape(rhs, rrigidbody, rcollider);
-
-							// static collisions
-							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, box>)
-								return phys::collide_box_box_discrete(
-									lshape, rshape);
-							else
-							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, box>)
-								return -phys::collide_box_sphere_discrete(
-									rshape, lshape);
-							else
-							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, sphere>)
-								return phys::collide_sphere_sphere_discrete(
-										lshape, rshape);
-							else
-							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, sphere>)
-								return phys::collide_box_sphere_discrete(
-											lshape, rshape);
-							else
-							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, sphere>)
-								return phys::collide_capsule_sphere_discrete(
-									lshape, rshape);
-							else
-							if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, capsule>)
-								return phys::collide_capsule_sphere_discrete(
-									rshape, lshape);
-							else
-							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, box>)
-								return phys::collide_capsule_box_discrete(
-									lshape, rshape);
-							else
-							if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, capsule>)
-								return phys::collide_capsule_box_discrete(
-									rshape, lshape);
-							else
-							if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, capsule>)
-								return phys::collide_capsule_capsule_discrete(
-									lshape, rshape);
-							else
-								return phys::col_failure{};
-
-						}, lcollider._predicted_shape, rcollider._predicted_shape);
-
-					if (collision)
-					{
-						//debug_draw(lcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						//debug_draw(rcollider, color{ 0,1,0 }, seconds{ 0.5 });
-						collisionframe.emplace(CollisionPair{ lcollider.GetHandle(), rcollider.GetHandle() }, collision.value());
-					}
-					else
-					{
-						//debug_draw(lcollider, color{ 1,0, 0 });
-						//debug_draw(rcollider, color{ 1,0, 0 });
-					}
-				}
-			}
-
-			for (const auto& [pair, result] : collisionframe)
-			{
-				const auto& lcollider = *pair.lhs;
-				const auto& rcollider = *pair.rhs;
-
-				const auto lrigidbody = lcollider._rigidbody;
-				const auto rrigidbody = rcollider._rigidbody;
+				auto lrigidbody = lcollider._rigidbody;
+				auto rrigidbody = rcollider._rigidbody;
 
 				// triggers do not require resolution
 				if (lcollider.is_trigger || rcollider.is_trigger)
@@ -251,22 +253,10 @@ namespace idk
 					RigidBody* ref = nullptr;
 				};
 
-				constexpr auto get_values =
-					[](Handle<RigidBody> rb) -> RigidBodyInfo
-				{
-					if (rb)
-					{
-						auto& ref = *rb;
-						return { ref.PredictedTransform()[3].xyz - ref._prev_pos, ref.inv_mass, &ref };
-					}
-					else
-					{
-						return RigidBodyInfo{};
-					}
-				};
-
-				const auto [lvel, linv_mass, lrb_ptr] = get_values(lrigidbody);
-				const auto [rvel, rinv_mass, rrb_ptr] = get_values(rrigidbody);
+				const auto [lvel, linv_mass, lrb_ptr] =
+                    RigidBodyInfo{ lrigidbody->_pred_tfm[3].xyz - lrigidbody->_prev_pos, lrigidbody->inv_mass, &*lrigidbody };
+                const auto [rvel, rinv_mass, rrb_ptr] = dyn_vs_dyn ?
+                    RigidBodyInfo{ rrigidbody->_pred_tfm[3].xyz - rrigidbody->_prev_pos, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
 
 				auto rel_v = rvel - lvel; // a is not moving
 				auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
@@ -300,39 +290,49 @@ namespace idk
 
 					if (lrb_ptr && !lrb_ptr->is_kinematic)
 					{
-						auto& ref_rb = *lrb_ptr;
-						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz + correction_vector;
-						const auto new_vel = lvel + (collision_impulse + frictional_impulse) * ref_rb.inv_mass;
-						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+                        auto& predicted_pos = lrb_ptr->_pred_tfm[3].xyz;
+						predicted_pos = predicted_pos + correction_vector;
+						const auto new_vel = lvel + (collision_impulse + frictional_impulse) * lrb_ptr->inv_mass;
+                        lrb_ptr->_prev_pos = predicted_pos - new_vel;
 					}
 
 					if (rrb_ptr && !rrb_ptr->is_kinematic)
 					{
-						auto& ref_rb = *rrb_ptr;
-						ref_rb._predicted_tfm[3].xyz = ref_rb._predicted_tfm[3].xyz - correction_vector;
-						const auto new_vel = rvel - (collision_impulse + frictional_impulse) * ref_rb.inv_mass;
-						ref_rb._prev_pos = ref_rb._predicted_tfm[3].xyz - new_vel;
+                        auto& predicted_pos = rrb_ptr->_pred_tfm[3].xyz;
+                        predicted_pos = predicted_pos - correction_vector;
+						const auto new_vel = rvel - (collision_impulse + frictional_impulse) * rrb_ptr->inv_mass;
+                        rrb_ptr->_prev_pos = predicted_pos - new_vel;
 					}
 				}
 			}
-
-			collisions.merge(collisionframe);
 		};
 
 		const auto FinalizePositions = [&]()
 		{
-			for (auto& rigidbody : rbs)
-			{
-				if (!rigidbody.is_kinematic)
-					rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._predicted_tfm);
-				else
-					rigidbody._prev_pos = rigidbody.GetGameObject()->Transform()->GlobalPosition();
+            for (const auto& elem : dynamic_info)
+            {
+                auto& rigidbody = *elem.collider._rigidbody;
+                if (!rigidbody.is_kinematic)
+                    rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
+                else
+                    rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz;
+                rigidbody.sleep_next_frame = false;
+            }
 
-				rigidbody.sleep_next_frame = false;
-			}
-
-			for (auto& collider : colliders)
-				debug_draw(collider);
+            for (const auto& elem : static_info)
+                debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+            for (const auto& elem : dynamic_info)
+                debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+            for (auto& elem : colliders)
+            {
+                if (!elem._active_cache)
+                {
+                    std::visit([&](const auto& shape)
+                    {
+                        debug_draw(calc_shape(shape, elem), color{ 0.5 });
+                    }, elem.shape);
+                }
+            }
 		};
 
 		collisions.clear();
@@ -480,18 +480,12 @@ namespace idk
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
 	{
 		// put shape into world space
-		constexpr auto calc_shape = [](const auto& shape, Handle<RigidBody> rb, const Collider& col)
-		{
-			rb;
-			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-		};
-
-		constexpr auto debug_draw = [calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
+		constexpr auto debug_draw = [calc_shape = calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
-				{
-					Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider.GetGameObject()->GetComponent<RigidBody>(), collider), collider.is_trigger ? color{0,1,1} : c, dur);
-				}, collider.shape);
+			{
+				Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider), collider.is_trigger ? color{0,1,1} : c, dur);
+			}, collider.shape);
 		};
 
 		for (auto& collider : colliders)
