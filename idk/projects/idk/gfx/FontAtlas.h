@@ -56,6 +56,8 @@ namespace idk {
 		// modifiers
 		virtual void Size(ivec2 newsize);
 
+		PathHandle reload_path{};
+
 	protected:
 		//Size for each texture in the cubemap
 		ivec2 _size{};
