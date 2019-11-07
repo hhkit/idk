@@ -37,7 +37,7 @@ namespace idk
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
 	};
-	template<typename InstancedData>
+	//template<typename InstancedData>
 	struct GenericInstancedRenderObjects
 	{
 		//id
@@ -60,7 +60,7 @@ namespace idk
 		shared_ptr<pipeline_config> config{};
 
 		// transform
-		vector<InstancedData> instanced_data{};
+		size_t instanced_index{}, num_instances{};
 	};
 
 
@@ -74,8 +74,8 @@ namespace idk
 		unsigned skeleton_index{};
 	};
 
-	using InstRenderObjects=GenericInstancedRenderObjects<InstancedData>;
-	using InstAnimatedRenderObjects=GenericInstancedRenderObjects<AnimatedInstancedData>;
+	using InstRenderObjects        =GenericInstancedRenderObjects;//<InstancedData>;
+	using InstAnimatedRenderObjects=GenericInstancedRenderObjects;//<AnimatedInstancedData>;
 
 
 	struct SkeletonTransforms

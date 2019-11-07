@@ -16,6 +16,8 @@
 
 #include <meta/comparator.inl>
 
+#include <math/shapes/frustum.h>
+
 struct guid_64
 {
 	uint64_t mem1;
@@ -188,10 +190,10 @@ namespace idk
 
 	}
 
-	template<typename IRO>
-	IRO CreateIROInfo(const RenderObject& ro)
+	
+	GenericInstancedRenderObjects CreateIROInfo(const RenderObject& ro)
 	{
-		return IRO{
+		return GenericInstancedRenderObjects{
 			ro.obj_id,
 			ro.mesh,
 			ro.material_instance,
@@ -201,42 +203,64 @@ namespace idk
 			ro.config,
 		};
 	}
-
-	void BatchRenderObjects(const vector<RenderObject>& ro, vector<InstRenderObjects>& inst)
+	//returns indices to the start and one past the end
+	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data)
 	{
+
+		const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
+		//Keep track of the batches culled by this frustum
+		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
 		std::optional<decltype(ro.begin())> oprev{};
 		InstRenderObjects* inst_itr{};
 		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
 		{
-			if (!oprev || ![](auto& itr, auto& prev) {
-				return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
-				}(itr, *oprev))
+			const auto bv = itr->mesh->bounding_volume* itr->transform;
+			if (frust.contains(bv))
 			{
-				inst_itr = &inst.emplace_back(CreateIROInfo<InstRenderObjects>(*itr));
-				oprev = itr;
-			}
-			inst_itr->instanced_data.emplace_back(InstancedData{ itr->velocity,itr->transform });
-		}
-	}
+				if (!oprev || ![](auto& itr, auto& prev) {
+					return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
+					}(itr, *oprev))
+				{
 
-	void BatchAnimatedRenderObjects(const vector<AnimatedRenderObject>& ro, vector<InstAnimatedRenderObjects>& inst)
+					inst_itr = &inst.emplace_back(CreateIROInfo(*itr));
+					inst_itr->instanced_index = instanced_data.size();
+					oprev = itr;
+				}
+				//Keep track of the number of instances to be render for this frustum
+				instanced_data.emplace_back(InstancedData{ itr->velocity,camera.view_matrix*itr->transform });
+				inst_itr->num_instances++;
+			}
+		}
+		result.second = inst.size();
+		return result;
+	}
+	/* disabled until we're ready to instance animated render objects too.
+	std::pair<size_t, size_t>  CullAndBatchAnimatedRenderObjects(const frustum& frust, const vector<AnimatedRenderObject>& ro, vector<InstAnimatedRenderObjects>& inst)
 	{
+		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
 		std::optional<decltype(ro.begin())> oprev{};
 		InstAnimatedRenderObjects* inst_itr{};
 		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
 		{
-			if (!oprev || ![](auto& itr, auto& prev) {
-				return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
-				}(itr, *oprev))
+			auto bv = itr->mesh->bounding_volume * itr->transform;
+			if (frust.contains(bv))
 			{
-				inst_itr = &inst.emplace_back(CreateIROInfo<InstAnimatedRenderObjects>(*itr));
-				oprev = itr;
+				if (!oprev || ![](auto& itr, auto& prev) {
+					return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
+					}(itr, *oprev))
+				{
+					inst_itr = &inst.emplace_back(CreateIROInfo<InstAnimatedRenderObjects>(*itr));
+					oprev = itr;
+				}
+					inst_itr->instanced_data.emplace_back(AnimatedInstancedData{ itr->velocity,itr->transform,itr->skeleton_index });
 			}
-				inst_itr->instanced_data.emplace_back(AnimatedInstancedData{ itr->velocity,itr->transform,itr->skeleton_index });
 		}
+		result.second = inst.size();
+		return result;
 	}
+	*/
 	template<typename Vec>
-	void ClearSwap(Vec& dst, Vec& src)
+	void ClearSwap(Vec& dst, Vec& src) noexcept
 	{
 		src.clear();
 		std::swap(dst, src);
@@ -318,21 +342,24 @@ namespace idk
 		{
 			RenderBuffer tmp{};
 			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
-			ClearSwap(rb.camera                       ,tmp.camera                        );//clear then swap the stuff back into rb
-			ClearSwap(rb.font_render_data             ,tmp.font_render_data              );//clear then swap the stuff back into rb
-			ClearSwap(rb.instanced_mesh_render        ,tmp.instanced_mesh_render         );//clear then swap the stuff back into rb
-			ClearSwap(rb.instanced_skinned_mesh_render,tmp.instanced_skinned_mesh_render );//clear then swap the stuff back into rb
-			ClearSwap(rb.lights                       ,tmp.lights                        );//clear then swap the stuff back into rb
-			ClearSwap(rb.light_camera_data            ,tmp.light_camera_data             );//clear then swap the stuff back into rb
-			ClearSwap(rb.mesh_render                  ,tmp.mesh_render                   );//clear then swap the stuff back into rb
-			ClearSwap(rb.skinned_mesh_render          ,tmp.skinned_mesh_render           );//clear then swap the stuff back into rb
-			ClearSwap(rb.particle_render_data         ,tmp.particle_render_data          );//clear then swap the stuff back into rb
-			ClearSwap(rb.skeleton_transforms          ,tmp.skeleton_transforms           );//clear then swap the stuff back into rb
+			ClearSwap(rb.camera                         ,tmp.camera                         );//clear then swap the stuff back into rb
+			ClearSwap(rb.font_render_data               ,tmp.font_render_data               );//clear then swap the stuff back into rb
+			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
+			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
+			ClearSwap(rb.inst_mesh_render_buffer        ,tmp.inst_mesh_render_buffer        );//clear then swap the stuff back into rb
+			//ClearSwap(rb.inst_skinned_mesh_render_buffer,tmp.inst_skinned_mesh_render_buffer);//clear then swap the stuff back into rb
+			ClearSwap(rb.lights                         ,tmp.lights                         );//clear then swap the stuff back into rb
+			ClearSwap(rb.light_camera_data              ,tmp.light_camera_data              );//clear then swap the stuff back into rb
+			ClearSwap(rb.mesh_render                    ,tmp.mesh_render                    );//clear then swap the stuff back into rb
+			ClearSwap(rb.skinned_mesh_render            ,tmp.skinned_mesh_render            );//clear then swap the stuff back into rb
+			ClearSwap(rb.particle_render_data           ,tmp.particle_render_data           );//clear then swap the stuff back into rb
+			ClearSwap(rb.skeleton_transforms            ,tmp.skeleton_transforms            );//clear then swap the stuff back into rb
 		};
 
 		// todo: scenegraph traversal
 		RenderBuffer& result=GetWriteBuffer();
-		reset_render_buffer(result); //change to this method to reduce reallocation count.
+		result = RenderBuffer{};
+		//reset_render_buffer(result); //change to this method to reduce reallocation count.
 		result.camera.reserve(cameras.size());
 
 		// memcpy the lights until there is a smarter implementation
@@ -364,7 +391,8 @@ namespace idk
 
 			if(camera.is_scene_camera)
 				result.curr_scene_camera = camera.GenerateCameraData();
-			result.camera.emplace_back(camera.GenerateCameraData());
+			if(camera.enabled)
+				result.camera.emplace_back(camera.GenerateCameraData());
 		}
 
 		for (auto& elem : mesh_renderers)
@@ -419,8 +447,21 @@ namespace idk
 		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
 		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
 
-		BatchRenderObjects(result.mesh_render, result.instanced_mesh_render);
-		BatchAnimatedRenderObjects(result.skinned_mesh_render, result.instanced_skinned_mesh_render);
+		for (auto& camera : result.camera)
+		{
+			RenderRange range{ camera };
+			{
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render,result.inst_mesh_render_buffer);
+				range.inst_mesh_render_begin = start_index;
+				range.inst_mesh_render_end = end_index;
+			}
+			result.culled_render_range.emplace_back(range);
+			//{
+			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
+			//	range.inst_mesh_render_begin = start_index;
+			//	range.inst_mesh_render_end = end_index;
+			//}
+		}
 
 
 

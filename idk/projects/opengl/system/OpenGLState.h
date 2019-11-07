@@ -44,6 +44,7 @@ namespace idk::ogl
 
 		GLuint object_vbo_id = 0;
 		GLuint normal_vbo_id = 0;
+		size_t num_inst_bytes;
 		vector<mat4> object_transforms;
 		vector<mat4> normal_transforms;
 
@@ -59,9 +60,13 @@ namespace idk::ogl
 		span<LightData> curr_lights;
 
 		void PushMaterial(const RscHandle<Material>& mat);
+		void BindMaterialInstance(const RscHandle<MaterialInstance>& mat_inst);
 		void PushMaterialInstance(const RscHandle<MaterialInstance>& mat_inst);
 		void PushMesh(const RscHandle<OpenGLMesh>& mesh);
 		void PushObjectTransform(const mat4& tfm);
 		void FlushObjectTransforms();
+		void UpdateInstancedBuffers(const void* data, size_t num_bytes);
+		void UseInstancedBuffers();
+		
 	};
 }
