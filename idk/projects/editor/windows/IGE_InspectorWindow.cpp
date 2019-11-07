@@ -876,13 +876,15 @@ namespace idk {
 				//Stop playing before switching sounds!
 			}
 			ImGui::SameLine();
+			ImGui::PushID(i);
 			if (ImGui::SmallButton("X")) {
 				c_audiosource->RemoveAudioClip(i);
+				ImGui::PopID();
 				break;
 			}
 
 			ImGui::SameLine();
-			if (c_audiosource->audio_clip_list[i]->GetIsPlaying()) {
+			if (c_audiosource->IsAudioClipPlaying(i)) {
 				if (ImGui::SmallButton("||")) {
 					c_audiosource->Stop(i);
 				}
@@ -892,6 +894,8 @@ namespace idk {
 					c_audiosource->Play(i);
 				}
 			}
+			ImGui::PopID();
+
 		}
 
 		ImGui::EndChild();
