@@ -406,8 +406,8 @@ namespace idk
 		for (auto& f : fonts)
 		{
 			auto& render_data = result.font_render_data.emplace_back();
-			if (!f.textureAtlas)
-				f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
+			//if (!f.textureAtlas)
+				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
 			f.RenderText();
 			render_data = f.fontData;
 		}
