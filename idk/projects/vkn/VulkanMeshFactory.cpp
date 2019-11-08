@@ -171,7 +171,7 @@ namespace idk::vkn
 				}
 			};
 
-			const auto addSubVert = [](std::vector<Vertex>& vertices, hash_table<vec3, uint16_t, compareVec>& shared, const vec3& pos) -> unsigned
+			const auto addSubVert = [](std::vector<Vertex>& vertices, hash_table<vec3, uint16_t, compareVec>& shared, const vec3& pos) -> uint16_t
 			{
 				// Get the index IF this vertex is unique and we pushed it into the vertices vector
 				auto index = static_cast<uint16_t>(vertices.size());

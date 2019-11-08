@@ -196,24 +196,27 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
 
-
-		if (state.shadow_maps_2d.size() == 0)
 		{
-			//Make sure that it's there.
-			auto& tex = RscHandle<Texture>{}.as<VknTexture>();
-			the_interface.BindSampler("shadow_maps", 0, tex);
-		}
-		else
-		{
-			//Bind the shadow maps
-			for (auto& shadow_map : state.shadow_maps_2d)
+			uint32_t i = 0;
+			if (state.shadow_maps_2d.size() == 0)
 			{
-				auto& sm_uni = shadow_map;
+				//Make sure that it's there.
+				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
+				the_interface.BindSampler("shadow_maps", 0, tex);
+			}
+			else
+			{
+				//Bind the shadow maps
+				for (auto& shadow_map : state.shadow_maps_2d)
 				{
-					auto& depth_tex = sm_uni.as<VknTexture>();
-					the_interface.BindSampler("shadow_maps", i++, depth_tex);
+					auto& sm_uni = shadow_map;
+					{
+						auto& depth_tex = sm_uni.as<VknTexture>();
+						the_interface.BindSampler("shadow_maps", i++, depth_tex);
+					}
 				}
 			}
+
 		}
 
 		for (size_t i = 0; i < std::size(pbr_cube_map_names); ++i)
