@@ -209,14 +209,13 @@ namespace idk {
 		if (ImGui::IsMouseDown(1)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
-				
+				cachedMouseScreenPos = currMouseScreenPos;
 				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
 			}
 		}
 		else {
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			is_controlling_WASDcam = false;
 		}
 
@@ -226,14 +225,13 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
 				// GetCursorPos(&prevMouseScreenPos);
-				
-				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				cachedMouseScreenPos = currMouseScreenPos;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
 			}
 		}
 		else {
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			is_controlling_Pancam = false;
 		}
 
@@ -420,7 +418,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdateWASDMouseControl()
 	{
-		ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		auto& app_sys = Core::GetSystem<Application>();
 
 		auto scroll = app_sys.GetMouseScroll().y;
@@ -451,8 +449,6 @@ namespace idk {
 		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
 		//Mouse Controls
-
-		GetCursorPos(&currMouseScreenPos);
 		//int drag_X{};
 		//int drag_Y{};
 		//drag_X = currPos.x - prevPos.x;
@@ -472,16 +468,16 @@ namespace idk {
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
 		// MoveMouseToWindow();
-
-		GetCursorPos(&prevMouseScreenPos);
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
 	}
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
-		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
 		//vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
-		GetCursorPos(&currMouseScreenPos);
+		// GetCursorPos(&currMouseScreenPos);
 		//int drag_X{};
 		//int drag_Y{};
 		//drag_X = currPos.x - prevPos.x;
@@ -507,8 +503,8 @@ namespace idk {
 
 		// MoveMouseToWindow();
 
-		GetCursorPos(&prevMouseScreenPos);
-
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
 	}
 
 	void IGE_SceneView::UpdateScrollMouseControl()
