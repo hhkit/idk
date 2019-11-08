@@ -105,7 +105,7 @@ namespace idk::mono
 		}
 		{
 			ManagedObject managed{ obj };
-			int depth{ };
+			
 			//managed.VisitImpl([](auto&& key, auto&& val, int) { 
 			//	using T = std::decay_t<decltype(val)>;
 			//	if constexpr (std::is_same_v<T, int>)

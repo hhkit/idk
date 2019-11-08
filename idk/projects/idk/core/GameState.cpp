@@ -114,7 +114,7 @@ namespace idk::detail
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
 					{
-						(gs); (go); (dyn);
+						(h);  (gs); (go); (dyn);
 						return GenericHandle{};
 					}
 					else

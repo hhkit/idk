@@ -48,7 +48,7 @@ namespace idk
         if constexpr (std::is_void_v<R>)
             std::visit(visitor, detail::GenericHandleVisitHelper::lut[type](*this));
         else
-            return std::forward<R>(std::visit(visitor, detail::GenericHandleVisitHelper::lut[type](*this)));
+            return std::visit(visitor, detail::GenericHandleVisitHelper::lut[type](*this));
     }
 
 	template<typename T>

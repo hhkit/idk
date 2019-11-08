@@ -691,7 +691,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AudioSourceSize", int, Handle<AudioSource> audiosource)
 		{
-			return audiosource->audio_clip_list.size();
+			return static_cast<int>(audiosource->audio_clip_list.size());
 		}
 		BIND_END();
 

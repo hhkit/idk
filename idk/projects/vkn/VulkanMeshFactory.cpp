@@ -355,7 +355,7 @@ namespace idk::vkn
 				if (i < (numberOfTri - 1))
 				{
 					indices.emplace_back(i);
-					indices.emplace_back(i + 1);
+					indices.emplace_back(static_cast<uint16_t>(i + 1));
 				}
 				else
 				{
