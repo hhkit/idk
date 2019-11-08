@@ -265,6 +265,14 @@ namespace idk
 
 	void AudioSystem::Shutdown()
 	{
+		int numChannelsPlaying{};
+		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numChannelsPlaying));
+		for (int i = 0; i < numChannelsPlaying; ++i) {
+			FMOD::Channel* channelPtr;
+			ParseFMOD_RESULT(_Core_System->getChannel(i, &channelPtr));
+			ParseFMOD_RESULT(channelPtr->stop());
+		}
+			
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
 		ParseFMOD_RESULT(_soundGroup_MUSIC	  ->release()); 
 		ParseFMOD_RESULT(_soundGroup_SFX	  ->release()); 

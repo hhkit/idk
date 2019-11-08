@@ -2,7 +2,7 @@
 //@file		AudioSource.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		18 AUG 2019
+//@date		08 NOV 2019
 //@brief	A GameObject Component that holds AudioClips to play sounds. REFER TO PUSH ID: 6e680f1d FOR BACKUP
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -31,11 +31,11 @@ namespace idk
 				return;
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 			//Temporarily set the mode of the _soundHandle before returning back to original, so that the channel carries it
-			FMOD_MODE tempMode;
-			audio_clip_list[index]->_soundHandle->getMode(&tempMode);
-			audio_clip_list[index]->_soundHandle->setMode(ConvertSettingToFMOD_MODE());
+			//FMOD_MODE tempMode;
+			//audio_clip_list[index]->_soundHandle->getMode(&tempMode);
+			//audio_clip_list[index]->_soundHandle->setMode(ConvertSettingToFMOD_MODE());
 			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[index]->_soundHandle, nullptr, false, &audio_clip_channels[index])); //Creates a channel for audio to use. Start as paused to edit stuff first.
-			audio_clip_list[index]->_soundHandle->setMode(tempMode);
+			//audio_clip_list[index]->_soundHandle->setMode(tempMode);
 		}
 	}
 	void AudioSource::PlayAll()
@@ -45,10 +45,10 @@ namespace idk
 
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
 			FMOD_MODE tempMode;
-			audio_clip_list[i]->_soundHandle->getMode(&tempMode);
+			//audio_clip_list[i]->_soundHandle->getMode(&tempMode);
 			audio_clip_list[i]->_soundHandle->setMode(currentMode);
 			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[i]->_soundHandle, nullptr, false, &audio_clip_channels[i])); //Creates a channel for audio to use. Start as paused to edit stuff first.
-			audio_clip_list[i]->_soundHandle->setMode(tempMode);
+			//audio_clip_list[i]->_soundHandle->setMode(tempMode);
 		}
 	}
 	void AudioSource::Stop(int index)
@@ -56,7 +56,10 @@ namespace idk
 		if (audio_clip_list.size() > index) { //Check if it is in array
 			if (audio_clip_channels[index] != nullptr) {
 				AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-				audioSystem.ParseFMOD_RESULT(audio_clip_channels[index]->stop()); //Creates a channel for audio to use. Start as paused to edit stuff first.
+				bool checkIsPlaying = false;	//An invalid channel can still return an isplaying, use this to stop!
+				audioSystem.ParseFMOD_RESULT(audio_clip_channels[index]->isPlaying(&checkIsPlaying));
+				if (checkIsPlaying)
+					audioSystem.ParseFMOD_RESULT(audio_clip_channels[index]->stop()); //Creates a channel for audio to use. Start as paused to edit stuff first.
 				audio_clip_channels[index] = nullptr;
 			}
 		}
@@ -67,7 +70,11 @@ namespace idk
 
 		for (int i = 0; i < audio_clip_channels.size(); ++i) {
 			if (audio_clip_channels[i] != nullptr) {
-				audioSystem.ParseFMOD_RESULT(audio_clip_channels[i]->stop());
+				bool checkIsPlaying = false;	//An invalid channel can still return an isplaying, use this to stop!
+				try {
+					audioSystem.ParseFMOD_RESULT(audio_clip_channels[i]->stop());
+				}
+				catch (...) {}//FMOD_ERR_INVALID_HANDLE will appear here. 
 				audio_clip_channels[i] = nullptr;
 			}
 		}
@@ -120,6 +127,7 @@ namespace idk
 	}
 	void AudioSource::UpdateAudioClips()
 	{
+		FMOD_MODE mode = ConvertSettingToFMOD_MODE();
 		if (audio_clip_list.size() != audio_clip_channels.size())
 			audio_clip_channels.resize(audio_clip_list.size(), nullptr);
 
@@ -142,6 +150,8 @@ namespace idk
 			pitch = pitch < 0 ? 0 : pitch;
 			FMOD_RES(audio_clip_channels[i]->setPitch(pitch));
 			FMOD_RES(audio_clip_channels[i]->set3DMinMaxDistance(minDistance, maxDistance));
+			FMOD_RES(audio_clip_channels[i]->setMode(mode));
+
 			//Update Priority
 			//Update Position
 		}

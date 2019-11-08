@@ -200,20 +200,25 @@ namespace idk {
 
 			}
 			// If raycast hits nothing, we should clear the selected objects
-			else 
+			else
+			{
 				Core::GetSystem<IDE>().selected_gameObjects.clear();
+
+			}
 		}
 
 		GetCursorPos(&currMouseScreenPos);
+
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
-				
+
 				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
-			}
+			}	
 		}
 		else {
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
@@ -226,8 +231,9 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
 				// GetCursorPos(&prevMouseScreenPos);
-				
+
 				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
 			}
@@ -240,11 +246,12 @@ namespace idk {
 		if (is_controlling_WASDcam) {
 			UpdateWASDMouseControl();
 		}
-		else if (is_controlling_Pancam) {
+		
+		if (is_controlling_Pancam) {
 			UpdatePanMouseControl();
-
 		}
-		else {
+		
+		if(!is_controlling_Pancam && !is_controlling_WASDcam){
 			UpdateScrollMouseControl(); //Enable mouse control only if no WASD or Pan is in effect
 		}
 		prevMouseScreenPos = currMouseScreenPos;
@@ -498,8 +505,8 @@ namespace idk {
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_multiplier* 0.5f; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_multiplier* 0.5f; //Amount to move in localx axis
+		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_max* 0.5f; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_max* 0.5f; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
 
@@ -519,12 +526,11 @@ namespace idk {
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
+			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (float(scroll) / (1200.f)) * editor.scroll_max);
 
-		if (scroll > 0)
-			editor.DecreaseScrollPower();
-		else if (scroll < 0)
-			editor.IncreaseScrollPower();
+		//std::cout << scroll << "\n";
+		//else
+			//editor.scroll_multiplier = 2.f;
 
 	}
 
