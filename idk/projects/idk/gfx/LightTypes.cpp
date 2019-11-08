@@ -41,8 +41,7 @@ namespace idk
 				LoadOp::eClear,
 				StoreOp::eStore,
 				idk::ColorFormat::DEPTH_COMPONENT,
-				FilterMode::_enum::Linear,
-				true
+				FilterMode::_enum::Linear
 			}
 		);
 		//TODO turn it into a cube map
