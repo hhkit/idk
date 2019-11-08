@@ -62,62 +62,6 @@ namespace idk::mono
 	}
 	void MonoBehaviorEnvironment::Execute()
 	{
-		auto go = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-		auto tfm = go->Transform();
-
-		auto& env = Core::GetSystem<ScriptSystem>().Environment();
-		auto tfm_class = env.Type("Transform");
-		auto tfm_obj = tfm_class->Construct();
-		tfm_obj.Assign("handle", tfm.id);
-		auto mb = go->AddComponent<mono::Behavior>();
-		
-		auto* obj = mb->EmplaceBehavior("Test");
-		auto test = GetBehaviorMetadata("Test");
-
-		//{
-		//	auto update = test->GetMethod("Update");
-		//
-		//	void* args[] = { 0 };
-		//	MonoObject* exception{};
-		//	mono_runtime_invoke(std::get<MonoMethod*>(update), obj, args, &exception);
-		//}
-		//{
-		//	auto thunderbolt = test->GetMethod("Thunderbolt", 1);
-		//	vec3 v{ 2,3,4 };
-		//	void* args[] = { &v, 0 };
-		//	mono_runtime_invoke(std::get<MonoMethod*>(thunderbolt), obj, args, nullptr);
-		//}
-		{
-			test->CacheThunk("Update", 0);
-			auto thunk = std::get<ManagedThunk>(test->GetMethod("Update", 0));
-			thunk.Invoke(obj);
-		}
-		{
-			IDK_ASSERT(test->CacheThunk("Thunderbolt", 1));
-			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
-			thunk.Invoke(obj, vec3{ 8,9,10 });
-		}
-		
-		{
-			IDK_ASSERT(test->CacheThunk("TestTransform", 1));
-			auto thunk = std::get<ManagedThunk>(test->GetMethod("TestTransform", 1));
-			thunk.Invoke(obj, tfm_obj);
-		}
-		{
-			ManagedObject managed{ obj };
-			
-			//managed.VisitImpl([](auto&& key, auto&& val, int) { 
-			//	using T = std::decay_t<decltype(val)>;
-			//	if constexpr (std::is_same_v<T, int>)
-			//		val += 5;
-			//	
-			//	std::cout << "YOLO:" << key << ":" << reflect::get_type<T>().name() << "\n"; 
-			//	}, depth);
-			auto thunk = std::get<ManagedThunk>(test->GetMethod("Thunderbolt", 1));
-			thunk.Invoke(obj, vec3{ 8,9,10 });
-
-			//std::cout << "SERIALIZED TEST:" << serialize_text(*mb);
-		}
 	}
 	void MonoBehaviorEnvironment::FindMonoBehaviors()
 	{
