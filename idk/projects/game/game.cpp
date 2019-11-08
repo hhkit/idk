@@ -69,7 +69,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto c = std::make_unique<Core>();
 	
-    auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+    c->AddSystem<Windows>(hInstance, nCmdShow);
     c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;

@@ -23,6 +23,6 @@
 }
 
 #else
-#define IDK_ASSERT(COND) {(COND);}
-#define IDK_ASSERT_MSG(COND, MSG) {(COND);}
+#define IDK_ASSERT(COND) {(void)(COND);}
+#define IDK_ASSERT_MSG(COND, MSG) {(void)(COND);}
 #endif
