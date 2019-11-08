@@ -547,10 +547,10 @@ namespace idk
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 
 		// put shape into world space
-		constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+		/*constexpr auto calc_shape = [](const auto& shape, const Collider& col)
 		{
 			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-		};
+		};*/
 		bool foundRes = false;
 		
 		for (auto& c : colliders)
@@ -593,10 +593,10 @@ namespace idk
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 
 		// put shape into world space
-		constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+		/*constexpr auto calc_shape = [](const auto& shape, const Collider& col)
 		{
 			return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-		};
+		};*/
 		bool foundRes = false;
 
 		for (auto& c : colliders)
