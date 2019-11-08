@@ -229,14 +229,16 @@ namespace idk
 
 
     template<>
-    string serialize_binary(const Scene& scene)
+    string serialize_binary(const Scene& )
     {
+		//TODO @MAL
         return string();
     }
 
     template<>
-    parse_error parse_binary(string_view sv, Scene& scene)
+    parse_error parse_binary(string_view , Scene& )
     {
+		//TODO @MAL
         return parse_error();
     }
 
