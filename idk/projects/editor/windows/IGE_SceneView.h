@@ -48,7 +48,7 @@ namespace idk {
 		const float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
 		const float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
 		float cam_vel							= 1.f;
-		const float cam_vel_additive			= 0.1f;
+		const float cam_vel_additive			= 0.5f;
 		const float min_cam_vel					= 0.1f;
 		const float cam_vel_shift_multiplier	= 4.f;
 

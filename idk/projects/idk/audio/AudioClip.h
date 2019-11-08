@@ -2,7 +2,7 @@
 //@file		AudioClip.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		25 OCT 2019
+//@date		08 NOV 2019
 //@brief	A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource, which is a component that holds settings to the sound
 //////////////////////////////////////////////////////////////////////////////////
 

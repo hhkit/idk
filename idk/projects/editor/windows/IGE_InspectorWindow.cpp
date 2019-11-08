@@ -862,103 +862,61 @@ namespace idk {
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<AudioSource> c_audiosource)
 	{
+		static Handle<AudioSource> static_audiosource{};
+		static_audiosource = c_audiosource;
+		constexpr auto draw_audio_list = [](const reflect::dynamic& dyn) -> bool
+		{
+			bool changed = false;
 
-		if (ImGui::Button("Add AudioClip")) {
-			c_audiosource->audio_clip_list.emplace_back(RscHandle<AudioClip>());
-		}
-
-		ImGui::Text("AudioClips");
-		ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth()-10, 200), true);
-
-		for (auto i = 0; i < c_audiosource->audio_clip_list.size(); ++i) {
-			string txt = "[" + std::to_string(i) + "]";
-			if (ImGuidk::InputResource(txt.c_str(), &c_audiosource->audio_clip_list[i])) {
-				//Stop playing before switching sounds!
+			auto& audio_clip_list = dyn.get<vector<RscHandle<AudioClip>>>();
+			if (ImGui::Button("Add AudioClip")) {
+				audio_clip_list.emplace_back(RscHandle<AudioClip>());
+				changed = true;
 			}
-			ImGui::SameLine();
-			ImGui::PushID(i);
-			if (ImGui::SmallButton("X")) {
-				c_audiosource->RemoveAudioClip(i);
+
+			ImGui::Text("AudioClips");
+			ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
+
+			for (auto i = 0; i < audio_clip_list.size(); ++i) {
+				string txt = "[" + std::to_string(i) + "]";
+				if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
+					//Stop playing before switching sounds!
+					changed = true;
+				}
+				ImGui::SameLine();
+				ImGui::PushID(i);
+				if (ImGui::SmallButton("X")) {
+					static_audiosource->RemoveAudioClip(i);
+					ImGui::PopID();
+					changed = true;
+					break;
+				}
+
+				ImGui::SameLine();
+				if (static_audiosource->IsAudioClipPlaying(i)) {
+					if (ImGui::SmallButton("||")) {
+						static_audiosource->Stop(i);
+					}
+				}
+				else {
+					if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
+						static_audiosource->Play(i);
+					}
+				}
 				ImGui::PopID();
-				break;
+
 			}
 
-			ImGui::SameLine();
-			if (c_audiosource->IsAudioClipPlaying(i)) {
-				if (ImGui::SmallButton("||")) {
-					c_audiosource->Stop(i);
-				}
-			}
-			else {
-				if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
-					c_audiosource->Play(i);
-				}
-			}
-			ImGui::PopID();
+			ImGui::EndChild();
 
-		}
+			return changed;
+		};
 
-		ImGui::EndChild();
+		InjectDrawTable table{
+			{ "audio_clip_list", draw_audio_list }
+		};
 
-
-		//I dont know how to modify displayVal such that it doesnt display vector<RscHandle<AudioClip>> ;_;
-		const float widthSpace = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowContentRegionWidth() * item_width_ratio;
-
-		ImGui::Text("Volume");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->volume);
-		ImGui::DragFloat("", &c_audiosource->volume, 0.01f);
-		ImGui::PopID();
-
-		ImGui::Text("Pitch");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->pitch);
-		ImGui::DragFloat("", &c_audiosource->pitch, 0.01f);
-		ImGui::PopID();
-
-		ImGui::Text("Min Distance");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->minDistance);
-		ImGui::DragFloat("", &c_audiosource->minDistance, 0.01f);
-		ImGui::PopID();
-
-		ImGui::Text("Max Distance");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->maxDistance);
-		ImGui::DragFloat("", &c_audiosource->maxDistance, 0.01f);
-		ImGui::PopID();
-
-		ImGui::Text("Max Distance");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->maxDistance);
-		ImGui::DragFloat("", &c_audiosource->maxDistance, 0.01f);
-		ImGui::PopID();
-
-		ImGui::Text("Is 3D Sound");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->is3Dsound);
-		ImGui::Checkbox("", &c_audiosource->is3Dsound);
-		ImGui::PopID();
-
-		ImGui::Text("Is Unique");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->isUnique);
-		ImGui::Checkbox("", &c_audiosource->isUnique);
-		ImGui::PopID();
-
-		ImGui::Text("Is Loop");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(widthSpace);
-		ImGui::PushID(&c_audiosource->isLoop);
-		ImGui::Checkbox("", &c_audiosource->isLoop);
-		ImGui::PopID();
+		displayVal(*c_audiosource, &table);
 
 	}
 
