@@ -62,7 +62,7 @@ namespace idk::vkn
 			size_t limit_offset = 0;
 			do {
 				auto limit_len = std::min(len-limit_offset, limit);
-				cmd_buffer.updateBuffer(*_buffer, limit_offset+offset, hlp::make_array_proxy(static_cast<uint32_t>(limit_len), data), vk::DispatchLoaderDefault{});
+				cmd_buffer.updateBuffer(*_buffer, limit_offset+offset, hlp::make_array_proxy(static_cast<uint32_t>(limit_len), data+limit_offset), vk::DispatchLoaderDefault{});
 				limit_offset += limit_len;
 			} while (limit_offset<len);
 		}
