@@ -137,8 +137,7 @@ namespace idk {
                     if (!payload->IsDelivery())
                         continue;
 
-                    auto go = PrefabUtility::Instantiate(h.AsHandle<Prefab>(), *Core::GetSystem<SceneManager>().GetActiveScene());
-					go->Transform()->position = objectFinalPos;
+                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
                     break;
                 }
             }
