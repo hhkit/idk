@@ -12,10 +12,11 @@ namespace idk::vkn::hlp
 		vector_buffer(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes);
 
 		// accessor
-		vk::Buffer& buffer() { return *_buffer; }
+		vk::Buffer buffer()const { return *_buffer; }
 
 		// modifiers
 		void resize(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes, bool force_downsize = false);
+		void resize(size_t num_bytes, bool force_downsize = false);
 		void update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& buffer, const unsigned char * data); 
 		
 		template<typename T>

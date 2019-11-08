@@ -55,6 +55,13 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		struct RenderRange
+		{
+			CameraData camera;
+			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
+			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
+		};
+
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
@@ -115,13 +122,6 @@ namespace idk
 
 		//Todo: change to a thing with a free list thing.
 		pool<SpecialRenderBuffer> render_requests;
-
-		struct RenderRange
-		{
-			CameraData camera;
-			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
-			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
-		};
 
 		struct RenderBuffer
 		{

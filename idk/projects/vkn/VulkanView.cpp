@@ -78,7 +78,7 @@ namespace idk::vkn
 		vk::UniqueRenderPass& VulkanView::Renderpass()const { return vulkan().m_renderpass; }
 		vk::UniqueCommandPool& VulkanView::Commandpool()const { return vulkan().m_commandpool; }
 
-		vk::Buffer& VulkanView::CurrMasterVtxBuffer() const
+		vk::Buffer VulkanView::CurrMasterVtxBuffer() const
 		{
 			return impl_->CurrentRenderState().MasterBuffer().host_buffer.buffer();
 		}

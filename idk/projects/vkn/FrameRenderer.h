@@ -13,6 +13,8 @@
 #include <vkn/RenderUtil.h>
 #include <vkn/PipelineThingy.h>
 
+#include <vkn/GraphicsState.h>
+
 namespace idk
 {
 	struct RenderObject;
@@ -35,6 +37,7 @@ namespace idk::vkn
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
 		void PostRenderGraphicsStates(const vector<GraphicsState>& state, uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
+		SharedGraphicsState shared_graphics_state;
 	private:
 		struct VertexUniformConfig;
 		using ProcessedRO=vkn::ProcessedRO;
@@ -93,6 +96,7 @@ namespace idk::vkn
 		vk::UniqueCommandBuffer _transition_buffer{};
 		CubemapRenderer _convoluter;
 		CubemapRenderer _skybox;
+
 
 		//VknFrameBufferManager   fb_man{};
 	};

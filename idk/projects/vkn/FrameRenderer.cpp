@@ -28,6 +28,8 @@
 #include <vkn/VknCubeMapLoader.h>
 #include <vkn/VulkanCbmLoader.h>
 
+#include <vkn/vector_buffer.h>
+
 #include <cstdint>
 
 namespace idk::vkn
@@ -134,6 +136,8 @@ namespace idk::vkn
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
+		const vector<InstRenderObjects>* inst_ro;
+		std::optional<GraphicsSystem::RenderRange> range;
 		GraphicsStateInterface() = default;
 		GraphicsStateInterface(const GraphicsState& state)
 		{
@@ -141,6 +145,8 @@ namespace idk::vkn
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
 			mesh_render = &state.mesh_render;
 			skinned_mesh_render = &state.skinned_mesh_render;
+			inst_ro = state.shared_gfx_state->instanced_ros;
+			range = state.range;
 		}
 		GraphicsStateInterface(const PreRenderData& state)
 		{
@@ -148,6 +154,7 @@ namespace idk::vkn
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
 			mesh_render = &state.mesh_render;
 			skinned_mesh_render = &state.skinned_mesh_render;
+			inst_ro = state.shared_gfx_state->instanced_ros;
 		}
 	};
 
@@ -166,18 +173,25 @@ namespace idk::vkn
 		the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
 		binders.Bind(the_interface);
 		{
-			const vector<const RenderObject*>& draw_calls = mesh_render;
-			for (auto& ptr_dc : draw_calls)
+			auto range_opt = state.range;
+			if (!range_opt)
+				range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
+			
+			auto& inst_draw_range = *range_opt;
+			for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
+				end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
+				itr != end; ++itr
+				)
 			{
-				auto& dc = *ptr_dc;
+				auto& dc = *itr;
 				auto& mat_inst = *dc.material_instance;
 				if (mat_inst.material)
 				{
 					binders.Bind(the_interface, dc);
 
-					the_interface.FinalizeDrawCall(dc);
+					the_interface.FinalizeDrawCall(dc,dc.num_instances,dc.instanced_index);
 				}
-			}//End of draw_call loop
+			}
 		}
 
 		{
@@ -272,13 +286,44 @@ namespace idk::vkn
 	{
 		auto& lights = *state.shared_gfx_state->lights;
 		size_t num_conv_states = 1;
-		auto total_pre_states = lights.size() + num_conv_states;
+		size_t num_instanced_buffer_state = 1;
+		auto total_pre_states = lights.size() + num_conv_states+ num_instanced_buffer_state;
 		GrowStates(_pre_states, total_pre_states);
 		for (auto& pre_state : _pre_states)
 		{
 			pre_state.Reset();
 		}
 		size_t curr_state = 0;
+		std::optional<vk::Semaphore> copy_semaphore{};
+		{
+
+			auto copy_state_ind = curr_state++;
+			auto& copy_state = _pre_states[copy_state_ind];
+
+			auto& instanced_data = *state.inst_mesh_buffer;
+			
+			copy_semaphore = *copy_state.signal.render_finished;
+
+			auto cmd_buffer = copy_state.cmd_buffer;
+			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+			state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
+			state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
+			cmd_buffer.end();
+			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
+
+			vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eTransfer };
+			vk::SubmitInfo submit_info
+			{
+				0
+				,nullptr
+				,waitStages
+				,1,&copy_state.cmd_buffer
+				,1,&*copy_semaphore
+			};
+
+			auto queue = View().GraphicsQueue();
+			queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
+		}
 		//Do the shadow pass here.
 		for (auto light_idx : state.active_lights)
 		{
@@ -345,13 +390,18 @@ namespace idk::vkn
 		//}
 		//Temp, get rid of this once the other parts no longer depend on render_finished
 		//ready_semaphores.emplace(readySemaphores);
-		vector<vk::Semaphore> arr_ready_sem{*_pre_render_complete};
+		vector<vk::Semaphore> arr_ready_sem{ *_pre_render_complete };
+		vector<vk::Semaphore> arr_wait_sem {};
+		if (copy_semaphore)
+			arr_wait_sem.emplace_back(*copy_semaphore);
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
+
+
+		
 
 		vk::SubmitInfo submit_info
 		{
-			0
-			,nullptr
+			hlp::arr_count(arr_wait_sem) ,std::data(arr_wait_sem)
 			,waitStages
 			,hlp::arr_count(buffers),std::data(buffers)
 			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
@@ -362,15 +412,16 @@ namespace idk::vkn
 	}
 	VulkanView& View();
 	void RenderPipelineThingy(
-		PipelineThingy&     the_interface    ,
-		PipelineManager&    pipeline_manager ,
-		vk::CommandBuffer   cmd_buffer       , 
-		const vector<vec4>& clear_colors     ,
-		vk::Framebuffer     frame_buffer     ,
-		vk::RenderPass      rp               ,
-		bool                has_depth_stencil,
-		vk::Rect2D          render_area      ,
-		vk::Rect2D          viewport         ,
+		const SharedGraphicsState& shared_state,
+		PipelineThingy&     the_interface      ,
+		PipelineManager&    pipeline_manager   ,
+		vk::CommandBuffer   cmd_buffer         , 
+		const vector<vec4>& clear_colors       ,
+		vk::Framebuffer     frame_buffer       ,
+		vk::RenderPass      rp                 ,
+		bool                has_depth_stencil  ,
+		vk::Rect2D          render_area        ,
+		vk::Rect2D          viewport           ,
 		uint32_t            frame_index      
 		)
 	{
@@ -414,6 +465,17 @@ namespace idk::vkn
 				auto config = *obj.config;
 				config.viewport_offset = ivec2{ s_cast<uint32_t>(viewport.offset.x),s_cast<uint32_t>(viewport.offset.y) };
 				config.viewport_size = ivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
+
+				if (p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh])
+					config.buffer_descriptions.emplace_back(
+						buffer_desc
+						{
+							buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
+							{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
+							 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
+							 }
+						}
+				);
 				auto& pipeline = pipeline_manager.GetPipeline(config,shaders,frame_index,rp,has_depth_stencil);
 				pipeline.Bind(cmd_buffer, View());
 				SetViewport(cmd_buffer, *config.viewport_offset, *config.viewport_size);
@@ -436,6 +498,8 @@ namespace idk::vkn
 				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 			}
 
+			uint32_t obj_trf_loc = 4;
+			cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), shared_state.inst_mesh_render_buffer.buffer(), { 0 }, vk::DispatchLoaderDefault{});
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
 			{
@@ -483,7 +547,7 @@ namespace idk::vkn
 		};
 		if (the_interface.DrawCalls().size())
 			rs.FlagRendered();
-		RenderPipelineThingy(the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area,render_area,frame_index);
+		RenderPipelineThingy(*state.shared_gfx_state,the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area,render_area,frame_index);
 
 		rs.ubo_manager.UpdateAllBuffers();
 		cmd_buffer.endRenderPass();
@@ -761,6 +825,10 @@ namespace idk::vkn
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
+	void VBO_Test()
+	{
+
+	}
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
@@ -934,6 +1002,16 @@ namespace idk::vkn
 						shaders.emplace_back(*p_ro.geom_shader);
 
 					auto config = ConfigWithVP(*obj.config, camera, offset, size);
+					if (p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh])
+						config.buffer_descriptions.emplace_back(
+							buffer_desc
+							{
+								buffer_desc::binding_info{ std::nullopt,sizeof(mat4)*2,VertexRate::eInstance},
+								{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
+								 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
+								 }
+							}
+						);
 					auto& pipeline = GetPipeline(config, shaders);
 					pipeline.Bind(cmd_buffer,view);
 					SetViewport(cmd_buffer, offset, size);
@@ -955,12 +1033,14 @@ namespace idk::vkn
 					auto& attrib_buffer = mesh.Get(attrib);
 					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 				}
+				uint32_t obj_trf_loc = 4;
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), state.shared_gfx_state->inst_mesh_render_buffer.buffer(), {0},vk::DispatchLoaderDefault{});
 			
 				auto& oidx = mesh.GetIndexBuffer();
 				if (oidx)
 				{
 					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-					cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+					cmd_buffer.drawIndexed(mesh.IndexCount(), p_ro.num_instances, 0, 0, p_ro.inst_offset, vk::DispatchLoaderDefault{});
 				}
 			}
 		}

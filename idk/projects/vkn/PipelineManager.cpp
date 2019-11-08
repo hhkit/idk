@@ -69,6 +69,7 @@ namespace idk::vkn
 		if (is_diff)
 		{
 			PipelineObject obj{ config,render_pass,has_depth_stencil,modules };
+			obj.StoreBufferDescOverrides();
 			obj.Create(View(),frame_index);
 
 			//TODO threadsafe lock here
@@ -174,5 +175,87 @@ namespace idk::vkn
 			}
 		}
 		
+	}
+
+	//PipelineObject() = default;
+	//PipelineObject(PipelineObject&&) noexcept= default;
+	//~PipelineObject() = default;
+
+	void PipelineManager::PipelineObject::StoreBufferDescOverrides()
+	{
+		buffer_desc_overrides = config.buffer_descriptions;
+		size_t i = 0;
+		for (auto& desc : buffer_desc_overrides)
+		{
+			for (auto& attr : desc.attributes)
+			{
+				override_attr_mapping[attr.location] = i;
+			}
+			++i;
+		}
+	}
+
+	void PipelineManager::PipelineObject::ApplyBufferDescOverrides()
+	{
+		vector<size_t> binding_removal_indices;
+		auto& config_bdesc = config.buffer_descriptions;
+		size_t i = 0;
+		for (auto& cbd : config_bdesc)
+		{
+			for (auto& attr : cbd.attributes)
+			{
+				auto itr = override_attr_mapping.find(attr.location);
+				if (itr != override_attr_mapping.end())
+				{
+					binding_removal_indices.emplace_back(i);
+				}
+			}
+			++i;
+		}
+		std::sort(binding_removal_indices.begin(), binding_removal_indices.end());
+		std::unique(binding_removal_indices.begin(), binding_removal_indices.end());
+		//erase from behind to avoid invalidating indices
+		for (auto itr = binding_removal_indices.rbegin(); itr < binding_removal_indices.rend(); ++itr)
+		{
+			auto index = *itr;
+			config_bdesc.erase(config_bdesc.begin());
+		}
+		config_bdesc.insert(config_bdesc.end(), buffer_desc_overrides.begin(), buffer_desc_overrides.end());
+
+	}
+
+	void PipelineManager::PipelineObject::Create(VulkanView& view, size_t fo_index)
+	{
+		//TODO: set the pipeline's modules
+		vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
+		auto old_desc = config.buffer_descriptions;
+		config.buffer_descriptions.clear();
+		for (auto& module : shader_handles)
+		{
+			auto& mod = module.as<ShaderModule>();
+			if (!mod.HasCurrent())
+				continue;
+			//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
+			//	mod.UpdateCurrent(fo_index);
+			auto& desc = mod.AttribDescriptions();
+			for (auto& desc_set : desc)
+				config.buffer_descriptions.emplace_back(desc_set);
+			//shaders.emplace_back(mod.Stage(), mod.Module());
+			if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
+				config.frag_shader = module;
+
+			if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
+				config.vert_shader = module;
+		}
+		ApplyBufferDescOverrides();
+		if (rp)
+			pipeline.SetRenderPass(*rp, has_depth_stencil);
+		else
+			pipeline.ClearRenderPass();
+		pipeline.Create(config, shader_handles, view);
+	}
+	void PipelineManager::PipelineObject::Swap()
+	{
+		std::swap(pipeline, back_pipeline);
 	}
 }

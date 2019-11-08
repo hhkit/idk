@@ -145,7 +145,6 @@ namespace idk::ogl
 		}
 	};
 
-#pragma optimize("",off)
 
 	void OpenGLState::RenderDrawBuffer()
 	{

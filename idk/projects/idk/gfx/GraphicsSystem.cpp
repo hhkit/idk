@@ -197,6 +197,8 @@ namespace idk
 			ro.obj_id,
 			ro.mesh,
 			ro.material_instance,
+			{},
+			{},
 			ro.cast_shadows,
 			ro.receive_shadows,
 			ro.renderer_req,

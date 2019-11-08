@@ -260,9 +260,10 @@ namespace idk::vkn
 
 		_debug_renderer->GrabDebugBuffer();
 
-		SharedGraphicsState shared_graphics_state;
+		SharedGraphicsState& shared_graphics_state=curr_frame.shared_graphics_state;
+		shared_graphics_state.Reset();
 		auto& lights = curr_buffer.lights;
-		shared_graphics_state.Init(lights);
+		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
 		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
 
 		PreRenderData pre_render_data;
@@ -274,7 +275,7 @@ namespace idk::vkn
 		for (size_t i = 0; i < lights.size(); ++i)
 			pre_render_data.active_lights[i]=i;
 
-		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms);
+		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		//pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
 		//pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
@@ -313,8 +314,9 @@ namespace idk::vkn
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
-			auto& curr_cam = curr_buffer.camera[i];
-			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
+			auto& curr_range = curr_buffer.culled_render_range[i];
+			auto& curr_cam = curr_range.camera;
+			curr_state.Init(curr_range, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
 			//const bool new_rt = 
 				curr_state.clear_render_target = !IsDontClear(curr_cam);
