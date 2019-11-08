@@ -1130,7 +1130,7 @@ namespace idk
             }
 
             if (to_del)
-                removeParam(to_del);
+                removeParam(to_del - 1);
 
             ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * 0.5f -
                 (ImGui::CalcTextSize("Add Parameter").x + ImGui::GetStyle().FramePadding.x * 2) * 0.5f);
