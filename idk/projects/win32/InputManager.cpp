@@ -29,7 +29,7 @@ namespace idk::win
 
 	void InputManager::SetMouseScroll(const ivec2& scroll)
 	{
-		_curr_mouse_scroll += scroll;
+		_curr_mouse_scroll = scroll;
 	}
 
 	ivec2 InputManager::GetMouseScroll() const
