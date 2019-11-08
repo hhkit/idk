@@ -360,7 +360,7 @@ namespace idk::vkn
 				else
 				{
 					indices.emplace_back(i);
-					indices.emplace_back(0);
+					indices.emplace_back(0ui16);
 				}
 			}
 

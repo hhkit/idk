@@ -561,17 +561,17 @@ namespace idk::ogl
 
             static vector<OpenGLBuffer> bufs = []()
             {
-                vector<OpenGLBuffer> bufs;
+                vector<OpenGLBuffer> bufs_;
                 unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
-                bufs.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
+                bufs_.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
                     .Bind().Buffer(indices, sizeof(int), 6);
-                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
+                bufs_.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
                     { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
                     { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
                     { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
                     { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
                 } });
-                return bufs;
+                return bufs_;
             }();
 
 
