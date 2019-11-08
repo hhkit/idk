@@ -44,7 +44,7 @@ namespace idk
 		FMOD_MODE currentMode = ConvertSettingToFMOD_MODE();
 
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
-			FMOD_MODE tempMode;
+			//FMOD_MODE tempMode;
 			//audio_clip_list[i]->_soundHandle->getMode(&tempMode);
 			audio_clip_list[i]->_soundHandle->setMode(currentMode);
 			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[i]->_soundHandle, nullptr, false, &audio_clip_channels[i])); //Creates a channel for audio to use. Start as paused to edit stuff first.
@@ -70,7 +70,7 @@ namespace idk
 
 		for (int i = 0; i < audio_clip_channels.size(); ++i) {
 			if (audio_clip_channels[i] != nullptr) {
-				bool checkIsPlaying = false;	//An invalid channel can still return an isplaying, use this to stop!
+				//bool checkIsPlaying = false;	//An invalid channel can still return an isplaying, use this to stop!
 				try {
 					audioSystem.ParseFMOD_RESULT(audio_clip_channels[i]->stop());
 				}
@@ -87,7 +87,7 @@ namespace idk
 		if (audioPtr1) {
 			audio_clip_list.emplace_back(*audioPtr1);
 			audio_clip_channels.push_back(nullptr);
-			return audio_clip_list.size() - 1;
+			return static_cast<int>(audio_clip_list.size() - 1);
 		}
 		else
 			return -1;
