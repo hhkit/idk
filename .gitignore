@@ -354,3 +354,5 @@ idk/dep/lib/SPIRV-Tools-optd.lib
 /idk/projects/wrapper/log.txt
 /idk/build/launcher
 /idk/launcher
+/idk/compiler
+/idk/build/compiler

@@ -257,6 +257,8 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int FindAudio(ulong id, string name);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int AddAudioClip(ulong id, string name);
         /*
         * Light
         */

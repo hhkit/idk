@@ -48,6 +48,8 @@ namespace idk
 		auto ext = cubemap.extension();
 
 		cubemap_handle->Bind();
+
+
 		for (int i = 0; i < std::size(fileExt); ++i)
 		{
 			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();

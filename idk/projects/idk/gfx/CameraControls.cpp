@@ -183,64 +183,96 @@ namespace idk {
 	{
 	}
 
-	Ray CameraControls::ViewportPointToRay(const vec3& vp_pos)
+	ray CameraControls::WindowsPointToRay(const vec3& vp_pos)
 	{
-		//Current 
-		//auto vec = GetGameObject()->Transform()->GlobalPosition();
+		vec2 ndcPos = vp_pos;
 
-		//Viewport(0,1) to screen space (NDC)(-1,1) first 
-		const vec2 screen_pos = { (2.f * vp_pos.x - 1.f) * current_camera->render_target->AspectRatio(), 1.f - 2.f * vp_pos.y };
+		const auto view_mtx = current_camera->ViewMatrix();
+		const auto pers_mtx = current_camera->ProjectionMatrix();
 
+		//-1 to 1 (ndc)
+		ndcPos -= vec2(0.5f, 0.5f);
+		ndcPos /= 0.5f;
 
-		//screen space back to 4d clip space 
-        const vec4 clip_pos = { screen_pos.x,screen_pos.y, -1.f,1.f };
+		ndcPos = vec2(ndcPos.x, -ndcPos.y);
 
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 0, 1);
+		vfPos *= 1.f / vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
 
-		//Inversing pos from clip space to view space on the near plane
-		vec4 viewpoint_pos = current_camera->ProjectionMatrix().inverse() * clip_pos;
+		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
+		vbPos *= 1.f / vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
 
-		viewpoint_pos.y = -1.f;
-		viewpoint_pos.z = 0.f;
+		ray newRay;
+		newRay.origin = wfPos;
+		newRay.velocity = (wbPos - wfPos);
 
-		//Now getting the world position of the point
-		vec3 world_pos = (current_camera->ViewMatrix().inverse() * viewpoint_pos).xyz;
-		world_pos = world_pos.normalize();
-
-
-		//References for this method (http://antongerdelan.net/opengl/raycasting.html)
-
-
-		return Ray{ current_camera->currentDirection(),world_pos };
+		return newRay;
 	}
 
-	Ray CameraControls::ViewportPointToRay(const vec2& vp_pos)
+	ray CameraControls::WindowsPointToRay(const vec2& vp_pos)
 	{
-		//Current 
-		//auto vec = GetGameObject()->Transform()->GlobalPosition();
+		vec2 ndcPos = vp_pos;
 
-		//Viewport(0,1) to screen space (NDC)(-1,1) first 
-        const vec2 screen_pos = { (2.f * vp_pos.x - 1.f) * current_camera->render_target->AspectRatio(), 1.f - 2.f * vp_pos.y };
+		const auto view_mtx = current_camera->ViewMatrix();
+		const auto pers_mtx = current_camera->ProjectionMatrix();
 
+		//-1 to 1 (ndc)
+		ndcPos -= vec2(0.5f, 0.5f);
+		ndcPos /= 0.5f;
 
-		//screen space back to 4d clip space 
-        const vec4 clip_pos = { screen_pos.x,screen_pos.y, -1.f,1.f };
+		ndcPos = vec2(ndcPos.x, -ndcPos.y);
 
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 0, 1);
+		vfPos *= 1.f / vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
 
-		//Inversing pos from clip space to view space on the near plane
-		vec4 viewpoint_pos = current_camera->ProjectionMatrix().inverse() * clip_pos;
+		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
+		vbPos *= 1.f / vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
 
-		viewpoint_pos.y = -1.f;
-		viewpoint_pos.z = 0.f;
+		ray newRay;
+		newRay.origin = wfPos;
+		newRay.velocity = (wbPos - wfPos);
 
-		//Now getting the world position of the point
-		vec3 world_pos = (current_camera->ViewMatrix().inverse() * viewpoint_pos).xyz;
-		world_pos = world_pos.normalize();
+		return newRay;
+	}
+	vec2 CameraControls::WindowsToNDC(const vec2& pos)
+	{
+		vec2 ndcPos = pos;
+		ndcPos -= vec2(0.5f, 0.5f);
+		ndcPos /= 0.5f;
 
+		return vec2(ndcPos.x, -ndcPos.y);
+	}
+	vec3 CameraControls::NDCToNearPointInWorld(const vec2& pos)
+	{
+		const auto view_mtx = current_camera->ViewMatrix();
+		const auto pers_mtx = current_camera->ProjectionMatrix();
 
-		//References for this method (http://antongerdelan.net/opengl/raycasting.html)
+		//-1 to 1 (ndc)
+		vec2 ndcPos = pos;
 
+		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 0, 1);
+		vfPos *= 1.f / vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
 
-		return { current_camera->currentDirection(),world_pos };
+		return wfPos;
+	}
+	vec3 CameraControls::NDCToFarPointInWorld(const vec2& pos)
+	{
+		const auto view_mtx = current_camera->ViewMatrix();
+		const auto pers_mtx = current_camera->ProjectionMatrix();
+
+		//-1 to 1 (ndc)
+		vec2 ndcPos = pos;
+
+		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
+		vbPos *= 1.f / vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
+
+		return wbPos;
 	}
 
 	vec3 CameraControls::convertMouseCoord(const vec2& screenCoord)

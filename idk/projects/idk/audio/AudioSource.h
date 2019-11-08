@@ -2,7 +2,7 @@
 //@file		AudioSource.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		18 AUG 2019
+//@date		08 NOV 2019
 //@brief	A GameObject Component that holds AudioClips to play sounds.
 /*
 			Starts off as no audio clip
@@ -28,14 +28,17 @@ namespace idk
 		void Stop(int index = 0);
 		void StopAll();
 
-		void AddAudioClip(string_view filePath); //Calls to add audio clip with path given
+		int AddAudioClip(string_view filePath); //Calls to add audio clip with path given. Returns true if filepath succeeds
 		void RemoveAudioClip(int index = 0); //Calls to add audio clip with path given
-		
+		//bool IsAudioPaused(int index)
 		bool IsAudioClipPlaying(int index);
 		bool IsAnyAudioClipPlaying();
 		void UpdateAudioClips();
 		int  FindAudio(string_view name);
+
+
 		vector<RscHandle<AudioClip>> audio_clip_list;
+		vector<FMOD::Channel*>		 audio_clip_channels;	//This is tightly updated with the list, like a pair
 
 		//All the Audio data is inside AudioClip
 
@@ -46,6 +49,7 @@ namespace idk
 		bool			is3Dsound	{ true };	//Does this sound follow the the gameobject position?
 		bool			isUnique	{ true };	//When I call play, does it duplicate? Or replay the sound again?
 		bool			isLoop		{ false };	//Does this audio loop?
+		//ADD PRIORITY HERE?
 		SubSoundGroup	soundGroup	{ SubSoundGroup::SubSoundGroup_SFX };
 
 
@@ -53,7 +57,7 @@ namespace idk
 		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
 
 
-
+		void FMOD_RES(FMOD_RESULT e); //Throws string on fail
 	};
 
 }

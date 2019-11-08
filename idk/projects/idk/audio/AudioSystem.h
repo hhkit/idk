@@ -110,6 +110,7 @@ namespace idk
 
 	private:
 		friend class AudioClip;
+		friend class AudioSource;
 		friend class AudioClipLoader;
 
 

@@ -2,7 +2,7 @@
 //@file		AudioClip.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		25 OCT 2019
+//@date		08 NOV 2019
 //@brief	A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource, which is a component that holds settings to the sound
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -41,39 +41,20 @@ namespace idk
 		AudioClip();
 		~AudioClip();
 
-		void	Play(); //If audio is not unique, it will duplicate another sound to play. Else, it will stop and replay a new sound. By default, will stop current sound and replay.
-		void	Stop();
+		void			ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
 
-		void UpdateChannel(); //Updates the channel to null if it is not playing. It's important to update the channel before doing anything to it.
+		AudioClipInfo	GetAudioClipInfo();	//Returns a readonly information of the sound.
+		string			GetName();
 
-		//UpdateChannel first before calling all these
-		void UpdateFmodMode(FMOD_MODE mode);
-
-		void	SetIsPaused(bool i);
-		bool	GetIsPaused();
-		bool	GetIsPlaying();
-		void	UpdateVolume(float i);
-		void	UpdatePitch(float i);
-		void	UpdatePriority(int i);
-		void	UpdateMinMaxDistance(float min, float max);
-
-		void	ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
-
-		AudioClipInfo GetAudioClipInfo();	//Returns a readonly information of the sound. Dont use
-		string GetName();
-
+		FMOD::Sound*	_soundHandle	{ nullptr };	//A handle to FMOD_Sound object. It contains some sound info data as well, but it is wrapped to the AudioClipInfo on CreateSound.
 	private:
 		friend class AudioSystem;			//The AudioSystem will have access to AudioClip's variables
 		friend class AudioClipLoader;		//The AudioClipLoader will have access to AudioClip's variables
 
-		FMOD::Sound*	_soundHandle	{ nullptr };	//A handle to FMOD_Sound object. It contains some sound info data as well, but it is wrapped to the AudioClipInfo on CreateSound.
-		FMOD::Channel*	_soundChannel	{ nullptr };	//Whenever a sound is played, this pointer becomes valid
-
-		AudioClipInfo soundInfo  {}; //Ususable
+		AudioClipInfo soundInfo  {}; //Updated by AudioClipLoader
 
 		float	frequency	{ 44100.0f };	//Playback frequency. default = 44100	 					 //These are not saved, rather it is controlled by which SoundGroup it is at. 
-		bool	isPlaying	{ false };	//Is the audio currently playing? If the audio is paused, it is still considered playing!
-		int		priority	{ 128 };	//0 (most important) to 256 (least important) default = 128	 //These are not saved, rather it is controlled by which SoundGroup it is at. 
+		int		priority	{ 128 };	//0 (most important) to 256 (least important) default = 128		 //These are not saved, rather it is controlled by which SoundGroup it is at. 
 
 	};
 

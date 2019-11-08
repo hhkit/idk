@@ -317,6 +317,7 @@ namespace idk
 			const float ticks = std::min(state.normalized_time, 1.0f) * blend_motion.motion->GetNumTicks();
 
 			BonePose curr_pose = animator._bind_pose[bone_index];
+			curr_pose.rotation = quat{};
 
 			// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
 			const anim::AnimatedBone* animated_bone = blend_motion.motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
@@ -355,7 +356,9 @@ namespace idk
 			return layer.prev_poses[bone_index];
 		}
 		
-		BonePose result = animator._bind_pose[bone_index]; 
+		BonePose result = animator._bind_pose[bone_index];
+		result.rotation = quat{};
+
 		if (layer.curr_state.is_playing && !layer.blend_interrupt)
 		{
 			result = ComputePose(animator, layer, layer.curr_state, bone_index);
@@ -452,9 +455,11 @@ namespace idk
 
 			if (layer.blend_state.is_stopping == true)
 			{
+				layer.blend_state = AnimationLayerState{};
 				layer.blend_duration = 0.0f;
-				layer.blend_state.is_playing = false;
-				layer.blend_state.is_stopping = false;
+
+				// Turn off blend interrupt the moment blending is over
+				layer.blend_interrupt = false;
 			}
 			
 			++num_playing;

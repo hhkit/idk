@@ -713,6 +713,13 @@ namespace idk::mono
 			return audiosource->FindAudio(s.get());
 		}
 		BIND_END();
+
+		BIND_START("idk.Bindings::AddAudioClip", int, Handle<AudioSource> audiosource, MonoString* name)
+		{
+			auto s = unbox(name);
+			return audiosource->AddAudioClip(s.get());
+		}
+		BIND_END();
 		//----------------------------------------------------------------------------------------------------
 
 		// Renderer

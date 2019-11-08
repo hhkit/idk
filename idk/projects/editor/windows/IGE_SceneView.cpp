@@ -137,8 +137,7 @@ namespace idk {
                     if (!payload->IsDelivery())
                         continue;
 
-                    auto go = PrefabUtility::Instantiate(h.AsHandle<Prefab>(), *Core::GetSystem<SceneManager>().GetActiveScene());
-					go->Transform()->position = objectFinalPos;
+                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
                     break;
                 }
             }
@@ -201,23 +200,27 @@ namespace idk {
 
 			}
 			// If raycast hits nothing, we should clear the selected objects
-			else 
+			else
+			{
 				Core::GetSystem<IDE>().selected_gameObjects.clear();
+
+			}
 		}
 
 		GetCursorPos(&currMouseScreenPos);
+
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
-				
+
+				cachedMouseScreenPos = currMouseScreenPos;
 				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
-			}
+			}	
 		}
 		else {
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			is_controlling_WASDcam = false;
 		}
 
@@ -227,14 +230,13 @@ namespace idk {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
 				// GetCursorPos(&prevMouseScreenPos);
-				
-				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				cachedMouseScreenPos = currMouseScreenPos;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_Pancam = true;
 			}
 		}
 		else {
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			is_controlling_Pancam = false;
 		}
 
@@ -307,8 +309,8 @@ namespace idk {
 		vec2 i = GetMousePosInWindow() - draw_rect_offset;
         const vec2 v = draw_rect_size;
 
-		i.x = i.x != 0.0f ? i.x / v.x : 0.0f;
-		i.y = i.y != 0.0f ? i.y / v.y : 0.0f;
+		i.x = v.x != 0.0f ? i.x / v.x : 0.0f;
+		i.y = v.y != 0.0f ? i.y / v.y : 0.0f;
 		return i;
 	}
 
@@ -421,7 +423,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdateWASDMouseControl()
 	{
-		ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		auto& app_sys = Core::GetSystem<Application>();
 
 		auto scroll = app_sys.GetMouseScroll().y;
@@ -452,8 +454,6 @@ namespace idk {
 		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
 		//Mouse Controls
-
-		GetCursorPos(&currMouseScreenPos);
 		//int drag_X{};
 		//int drag_Y{};
 		//drag_X = currPos.x - prevPos.x;
@@ -473,16 +473,16 @@ namespace idk {
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
 		// MoveMouseToWindow();
-
-		GetCursorPos(&prevMouseScreenPos);
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
 	}
 
 	void IGE_SceneView::UpdatePanMouseControl()
 	{
-		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
 		//vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
-		GetCursorPos(&currMouseScreenPos);
+		// GetCursorPos(&currMouseScreenPos);
 		//int drag_X{};
 		//int drag_Y{};
 		//drag_X = currPos.x - prevPos.x;
@@ -499,8 +499,8 @@ namespace idk {
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_multiplier* 0.5f; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_multiplier* 0.5f; //Amount to move in localx axis
+		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_max* 0.5f; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_max* 0.5f; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
 
@@ -508,8 +508,8 @@ namespace idk {
 
 		// MoveMouseToWindow();
 
-		GetCursorPos(&prevMouseScreenPos);
-
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
 	}
 
 	void IGE_SceneView::UpdateScrollMouseControl()
@@ -520,12 +520,11 @@ namespace idk {
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (scroll / float{ 12000 }) * editor.scroll_multiplier);
+			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (float(scroll) / (1200.f)) * editor.scroll_max);
 
-		if (scroll > 0)
-			editor.DecreaseScrollPower();
-		else if (scroll < 0)
-			editor.IncreaseScrollPower();
+		//std::cout << scroll << "\n";
+		//else
+			//editor.scroll_multiplier = 2.f;
 
 	}
 
@@ -655,32 +654,9 @@ namespace idk {
 		//auto& app_sys = Core::GetSystem<Application>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
+		//Handle<Camera> currCamera = main_camera.current_camera;
 
-		const auto view_mtx = currCamera->ViewMatrix();
-		const auto pers_mtx = currCamera->ProjectionMatrix();
-		
-		vec2 ndcPos = GetMousePosInWindowNormalized();
-
-		//-1 to 1 (ndc)
-		ndcPos -= vec2(0.5f,0.5f);
-		ndcPos /= 0.5f;
-
-		ndcPos = vec2(ndcPos.x,-ndcPos.y);
-
-		vec4 vfPos = pers_mtx.inverse() * vec4(ndcPos.x,ndcPos.y,0,1);
-		vfPos *= 1.f / vfPos.w;
-		vec4 wfPos = view_mtx.inverse() * vfPos;
-
-		vec4 vbPos = pers_mtx.inverse() * vec4(ndcPos.x, ndcPos.y, 1, 1);
-		vbPos *= 1.f/vbPos.w;
-		vec4 wbPos = view_mtx.inverse() * vbPos;
-
-		ray newRay;
-		newRay.origin = wfPos;
-		newRay.velocity = (wbPos - wfPos);
-
-		return newRay;
+		return main_camera.WindowsPointToRay(GetMousePosInWindowNormalized());
 	}
 
 }

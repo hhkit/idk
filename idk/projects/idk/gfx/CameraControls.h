@@ -1,18 +1,18 @@
 #pragma once
 
+#include "phys/raycasts/collision_raycast.h"
+
 namespace idk {
-	struct Ray
-	{
-		vec3 direction{};
-		vec3 origin{};
-	};
 	class CameraControls {
 	public:
 		CameraControls() = default;
 		CameraControls(Handle<Camera>);
 		~CameraControls() = default;
-		Ray			ViewportPointToRay(const vec3& pos);
-		Ray			ViewportPointToRay(const vec2& pos);
+		ray			WindowsPointToRay(const vec3& pos);
+		ray			WindowsPointToRay(const vec2& pos);
+		vec2		WindowsToNDC(const vec2& pos);
+		vec3		NDCToNearPointInWorld(const vec2& pos);
+		vec3		NDCToFarPointInWorld(const vec2& pos);
 
 		//Rotation
 		void		RotateCamera(const vec2& screenpos);

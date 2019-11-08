@@ -126,6 +126,9 @@
     <ClInclude Include="widgets\InputGameObject.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_InstantiatePrefab.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -230,6 +233,9 @@
     </ClCompile>
     <ClCompile Include="widgets\InputGameObject.cpp">
       <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_InstantiatePrefab.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -33,7 +33,7 @@ namespace idk {
 
 		try
 		{
-			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), FMOD_DEFAULT, NULL, &(newSound->_soundHandle)));		//
+			audioSystem.ParseFMOD_RESULT(CoreSystem->createSound(filePath.GetFullPath().data(), FMOD_DEFAULT | FMOD_3D, NULL, &(newSound->_soundHandle)));		//
 			newSound->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_SFX);
 		}
 		catch (EXCEPTION_AudioSystem)

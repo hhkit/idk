@@ -22,7 +22,7 @@ namespace idk
 		bool is_static() const;
 		bool is_enabled_and_active() const;
 		aabb bounds() const;
-		void setup_predict();
+
 	private:
 		Handle<class RigidBody> _rigidbody;
 		bool _static_cache = false;
