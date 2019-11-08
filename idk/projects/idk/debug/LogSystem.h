@@ -19,7 +19,7 @@ namespace idk
 		{
 			string filepath;
 			std::ofstream stream;
-			unsigned int signal_id;
+			SignalBase::SlotId signal_id;
 		};
 
 		void Init() override;

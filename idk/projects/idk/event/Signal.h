@@ -22,6 +22,7 @@ namespace idk
 	class SignalBase
 	{
 	public:
+		using SlotId = unsigned;
 		virtual ~SignalBase() {}
 	};
 
@@ -30,7 +31,6 @@ namespace idk
 	class Signal : public SignalBase
 	{
 	public:
-		using SlotId = unsigned;
 		// The function signature, which is: void Fn(Args...)
 		using Fn = function<void(Params...)>;
 

@@ -46,9 +46,9 @@ namespace idk::vkn
 	}
 
 
-	void StandardBindings::Bind(PipelineThingy& the_interface) {}
+	void StandardBindings::Bind(PipelineThingy& ) {}
 
-	void StandardBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc) {}
+	void StandardBindings::Bind(PipelineThingy& , const RenderObject& ) {}
 
 	void StandardBindings::Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
 	{
@@ -56,7 +56,7 @@ namespace idk::vkn
 		BindAni(the_interface, dc);
 	}
 
-	void StandardBindings::BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc) {}
+	void StandardBindings::BindAni(PipelineThingy& , const AnimatedRenderObject& ) {}
 
 	//const GraphicsState& StandardVertexBindings::State() { return *_state; }
 
@@ -190,31 +190,33 @@ namespace idk::vkn
 	}
 
 
-	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
+	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
 		auto& state = State();
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
-		uint32_t i = 0;
 
-
-		if (state.shadow_maps_2d.size() == 0)
 		{
-			//Make sure that it's there.
-			auto& tex = RscHandle<Texture>{}.as<VknTexture>();
-			the_interface.BindSampler("shadow_maps", 0, tex);
-		}
-		else
-		{
-			//Bind the shadow maps
-			for (auto& shadow_map : state.shadow_maps_2d)
+			uint32_t i = 0;
+			if (state.shadow_maps_2d.size() == 0)
 			{
-				auto& sm_uni = shadow_map;
+				//Make sure that it's there.
+				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
+				the_interface.BindSampler("shadow_maps", 0, tex);
+			}
+			else
+			{
+				//Bind the shadow maps
+				for (auto& shadow_map : state.shadow_maps_2d)
 				{
-					auto& depth_tex = sm_uni.as<VknTexture>();
-					the_interface.BindSampler("shadow_maps", i++, depth_tex);
+					auto& sm_uni = shadow_map;
+					{
+						auto& depth_tex = sm_uni.as<VknTexture>();
+						the_interface.BindSampler("shadow_maps", i++, depth_tex);
+					}
 				}
 			}
+
 		}
 
 		for (size_t i = 0; i < std::size(pbr_cube_map_names); ++i)
@@ -250,7 +252,7 @@ namespace idk::vkn
 
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
-		auto& state = State();
+		State();
 	}
 
 	//Assumes that the material is valid.
@@ -260,7 +262,7 @@ namespace idk::vkn
 		//Bind the material uniforms
 		{
 			auto& mat_inst = *dc.material_instance;
-			auto& mat = *mat_inst.material;
+			[[maybe_unused]]auto& mat = *mat_inst.material;
 			auto mat_cache = mat_inst.get_cache();
 			for (auto itr = mat_cache.uniforms.begin(); itr != mat_cache.uniforms.end(); ++itr)
 			{

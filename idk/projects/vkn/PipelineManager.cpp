@@ -137,7 +137,6 @@ namespace idk::vkn
 
 		for (auto itr = pipelines.begin(); itr != pipelines.end(); ++itr)
 		{
-			auto handle = itr.handle();
 			auto& po = *itr;
 			bool need_update = false;
 			for (auto& shader : po.shader_handles)

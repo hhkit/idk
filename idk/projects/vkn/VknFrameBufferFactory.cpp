@@ -161,7 +161,6 @@ namespace idk::vkn
 				};
 			}
 			vk::AttachmentReference* pdepth_ref = nullptr;
-			vk::AttachmentReference* pstencil_ref = nullptr;
 			//for (auto& depth_attachment : depth_attachments)
 			if (fb.depth_attachment)
 			{
@@ -233,7 +232,6 @@ namespace idk::vkn
 		//Gets or the appropriate renderpass, initalizes if not-present.
 		vk::RenderPass GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
 		{
-			const vector<unique_ptr<Attachment>>& col_attachments = fb.attachments;
 			auto itr = render_passes.find(rp_type);
 			if (itr == render_passes.end())
 			{
@@ -296,7 +294,7 @@ namespace idk::vkn
 		out->own_buffer = !preset;
 		out->buffer = tex;
 	}
-	void VknFrameBufferFactory::PreReset(FrameBuffer& framebuffer)
+	void VknFrameBufferFactory::PreReset(FrameBuffer& )
 	{
 	}
 	void VknFrameBufferFactory::Finalize(FrameBuffer& h_fb)

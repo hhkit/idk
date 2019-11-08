@@ -421,7 +421,6 @@ namespace idk::vkn
 
 	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
 	{
-		auto& view = View();
 		auto& gbuffer = GBuffer();
 		//Bind the material uniforms
 		PbrFwdMaterialBinding binder;
@@ -482,7 +481,7 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();//End GBuffer pass
 		//GBufferBarrier(cmd_buffer, gbuffer);
 	}
-	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, VknRenderTarget& rt, RenderStateV2& rs)
+	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, VknRenderTarget& rt, [[maybe_unused]]RenderStateV2& rs)
 	{
 		auto sz = camera.render_target->Size();
 		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);

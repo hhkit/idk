@@ -2,6 +2,7 @@
 #include "LogSingleton.h"
 #include <iostream>
 #include <cstdio>
+#include "LogSystem.h"
 namespace idk
 {
 	LogSingleton::~LogSingleton()
@@ -25,10 +26,12 @@ namespace idk
 	{
 		auto now = Clock::now();
 		auto& log = logs[s_cast<size_t>(pool)];
+		char print_buffer[LogSystem::log_buffer_size] = {};
 		
+		vsnprintf_s(print_buffer, sizeof(print_buffer),_TRUNCATE,message.data(), args);
 
 		if (log.direct_to_cout || log.signal.ListenerCount() == 0)
-			std::cerr << message << '\n';
+			std::cerr << print_buffer << '\n';
 
 		log.signal.Fire(level, now, preface, message);
 		if (pool != LogPool::ANY)
