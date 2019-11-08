@@ -187,6 +187,7 @@
     <ClInclude Include="commands\CMD_AddBehavior.h" />
     <ClInclude Include="commands\CMD_DeleteComponent.h" />
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
+    <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
     <ClInclude Include="DragDropTypes.h" />
@@ -237,6 +238,7 @@
     <ClInclude Include="commands\CMD_ModifyInput.inl">
       <FileType>Document</FileType>
     </ClInclude>
+    <ClCompile Include="commands\CMD_InstantiatePrefab.cpp" />
     <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="EditorInputs.cpp" />
