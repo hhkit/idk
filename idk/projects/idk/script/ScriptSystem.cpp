@@ -57,11 +57,11 @@ namespace idk::mono
 			(exe_dir + "/mono/lib/").data(),
 			(exe_dir + "/mono/etc/").data()
 		);
-		mono_trace_set_print_handler([](const char* string, mono_bool is_stdout) {
+		mono_trace_set_print_handler([](const char* string, [[maybe_unused]] mono_bool is_stdout) {
 			LOG_TO(LogPool::MONO, string);
 			});
 
-		mono_trace_set_log_handler([](const char* log_domain, const char* log_level, const char* message, mono_bool fatal, void*)
+		mono_trace_set_log_handler([]([[maybe_unused]] const char* log_domain, [[maybe_unused]] const char* log_level, const char* message, mono_bool fatal, void*)
 			{
 				if (fatal)
 				{
@@ -95,7 +95,7 @@ namespace idk::mono
 		main_environment = nullptr;
 	}
 
-	void ScriptSystem::ApplyConfig(Config& config)
+	void ScriptSystem::ApplyConfig([[maybe_unused]] Config& config)
 	{
 	}
 
@@ -135,7 +135,7 @@ namespace idk::mono
 			elem.UpdateCoroutines();
 	}
 
-	void ScriptSystem::ScriptLateUpdate(span<Behavior> behaviors)
+	void ScriptSystem::ScriptLateUpdate([[maybe_unused]] span<Behavior> behaviors)
 	{
 	}
 

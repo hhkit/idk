@@ -15,13 +15,13 @@ namespace idk::mono
 	{
 		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 		auto terminate = envi.Type("Object")->Raw();
-		auto type = Raw();
+		auto klass = Raw();
 
-		while (type != terminate)
+		while (klass != terminate)
 		{
-			if (mono_class_get_name(type) == findme)
+			if (mono_class_get_name(klass) == findme)
 				return true;
-			type = mono_class_get_parent(type);
+			klass = mono_class_get_parent(klass);
 		}
 		return false;
 	}
@@ -58,7 +58,7 @@ namespace idk::mono
 		return std::nullopt;
 	}
 
-	opt<ManagedThunk> ManagedType::GetThunk(string_view method_name, int param_count) const
+	opt<ManagedThunk> ManagedType::GetThunk(string_view method_name,[[maybe_unused]] int param_count) const
 	{
 		auto itr = thunks.find(string{ method_name });
 		if (itr != thunks.end())
