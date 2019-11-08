@@ -972,18 +972,8 @@ namespace idk::ogl
 	namespace detail
 	{
 
-		void UpdateInstancedBuffer(unsigned loc,GLuint normal_vbo_id, const void* buffer,size_t initial_offset, size_t num_bytes, size_t stride)
+		void UpdateInstancedBuffer(GLuint normal_vbo_id, const void* buffer,size_t num_bytes)
 		{
-			constexpr auto BindMat = [](unsigned loc,size_t stride,size_t initial_offset)
-			{
-				for (unsigned i = 0; i < 4; ++i)
-				{
-					glEnableVertexAttribArray(loc + i);
-					glVertexAttribPointer(loc + i, 4, GL_FLOAT, GL_FALSE, stride, (void*)(initial_offset + sizeof(vec4) * i));
-					glVertexAttribDivisor(loc + i, 1);
-				}
-			};
-
 			// bind to vertex loc
 
 			glBindBuffer(GL_ARRAY_BUFFER, normal_vbo_id);
@@ -991,10 +981,10 @@ namespace idk::ogl
 			//BindMat(loc, stride, initial_offset);
 		}
 
-		void UpdateInstancedBuffers(unsigned mv_loc, unsigned nrm_loc,GLuint object_vbo_id, GLuint normal_vbo_id, const void* buffer, size_t num_bytes, size_t stride)
+		void UpdateInstancedBuffers(GLuint object_vbo_id, GLuint normal_vbo_id, const void* buffer, size_t num_bytes)
 		{
-			UpdateInstancedBuffer(mv_loc , object_vbo_id, buffer, 0           ,num_bytes, stride);
-			UpdateInstancedBuffer(nrm_loc, normal_vbo_id, buffer, sizeof(mat4),num_bytes, stride);
+			UpdateInstancedBuffer(object_vbo_id, buffer, num_bytes);
+			UpdateInstancedBuffer(normal_vbo_id, buffer, num_bytes);
 		}
 		void UseInstancedBuffer(GLuint object_vbo_id, GLuint normal_vbo_id)
 		{
@@ -1041,7 +1031,7 @@ namespace idk::ogl
 	{
 		constexpr auto BindMat = [](unsigned loc,size_t starting_instance,size_t offset=0)
 		{
-			size_t stride = sizeof(mat4) * 2;
+			GLsizei stride = sizeof(mat4) * 2;
 			for (unsigned i = 0; i < 4; ++i)
 			{
 				glEnableVertexAttribArray(loc + i);
@@ -1057,7 +1047,7 @@ namespace idk::ogl
 
 	void OpenGLState::UpdateInstancedBuffers(const void* data, size_t num_bytes)
 	{
-		detail::UpdateInstancedBuffers(4, 8, object_vbo_id, normal_vbo_id, data, num_bytes, sizeof(mat4) * 2);
+		detail::UpdateInstancedBuffers(object_vbo_id, normal_vbo_id, data, num_bytes);
 		num_inst_bytes = num_bytes;
 	}
 

@@ -162,7 +162,6 @@ namespace idk::vkn
 	PipelineThingy ProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager,StandardBindings& binders)
 	{
 		auto& mesh_vtx            = state.renderer_vertex_shaders[VNormalMesh];
-		auto& mesh_render         = *state.mesh_render;
 		auto& skinned_mesh_vtx    = state.renderer_vertex_shaders[VSkinnedMesh];
 		auto& skinned_mesh_render = *state.skinned_mesh_render;
 
@@ -1044,7 +1043,7 @@ namespace idk::vkn
 				if (oidx)
 				{
 					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-					cmd_buffer.drawIndexed(mesh.IndexCount(), p_ro.num_instances, 0, 0, p_ro.inst_offset, vk::DispatchLoaderDefault{});
+					cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
 		}

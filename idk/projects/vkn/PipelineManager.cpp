@@ -212,18 +212,21 @@ namespace idk::vkn
 			++i;
 		}
 		std::sort(binding_removal_indices.begin(), binding_removal_indices.end());
-		std::unique(binding_removal_indices.begin(), binding_removal_indices.end());
+		{
+			auto end_itr = std::unique(binding_removal_indices.begin(), binding_removal_indices.end());
+			binding_removal_indices.resize(end_itr - binding_removal_indices.begin());
+		}
 		//erase from behind to avoid invalidating indices
 		for (auto itr = binding_removal_indices.rbegin(); itr < binding_removal_indices.rend(); ++itr)
 		{
 			auto index = *itr;
-			config_bdesc.erase(config_bdesc.begin());
+			config_bdesc.erase(config_bdesc.begin()+index);
 		}
 		config_bdesc.insert(config_bdesc.end(), buffer_desc_overrides.begin(), buffer_desc_overrides.end());
 
 	}
 
-	void PipelineManager::PipelineObject::Create(VulkanView& view, size_t fo_index)
+	void PipelineManager::PipelineObject::Create(VulkanView& view,[[maybe_unused]] size_t fo_index)
 	{
 		//TODO: set the pipeline's modules
 		vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
