@@ -52,7 +52,7 @@ namespace idk::ogl
 		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
 
-		if (type == AttachmentType::eDepth)
+		/*if (type == AttachmentType::eDepth)
 		{
 			RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
 			tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
@@ -61,8 +61,16 @@ namespace idk::ogl
 		else if(type == AttachmentType::eDepth3D)
 		{
 			RscHandle<OpenGLCubemap> tex = Core::GetResourceManager().Create<OpenGLCubemap>();
+			for (int i = 0; i < 6; ++i)
+			{
+				tex->Buffer(i,nullptr, size, CMInputChannels::RGB, info.internal_format);
+			}
 			out->buffer = tex->Tex();
-		}
+		}*/
+
+		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
+		tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
+		out->buffer = tex;
 	}
 	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}
 	void OpenGLFrameBufferFactory::Finalize(FrameBuffer& ) {}
