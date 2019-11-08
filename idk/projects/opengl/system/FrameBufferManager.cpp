@@ -161,6 +161,7 @@ namespace idk::ogl
 		//for (int i = 0; i < std::size(meta.textures); ++i)
 		auto tex = target->GetColorBuffer();
 		auto& tex_ = tex.as<OpenGLTexture>();
+		tex_;
 		int i = 0;
 		{
 			TextureMeta mm = tex_.GetMeta();
