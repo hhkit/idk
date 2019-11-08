@@ -168,7 +168,6 @@ namespace idk
             };
 			vector<CollisionInfo> collision_frame;
             collision_frame.reserve(dynamic_info.size()); //guess
-            size_t dynamic_vs_dynamic_count = 0;
 
 			const auto dt = Core::GetDT().count();
 
