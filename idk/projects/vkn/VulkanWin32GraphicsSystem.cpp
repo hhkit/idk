@@ -139,15 +139,15 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
 		
 		VulkanMesh& mesh =  Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
-		auto req = renderer_reqs{};
-		req.requirements = {
+		auto req = renderer_attributes{};
+		req.mesh_requirements = {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::UV, 1) };
 
 		brdf_pipeline.Bind(cmd_buffer, View());
 		cmd_buffer.setViewport(0, vk::Viewport{ 0,0,s_cast<float>(brdf_texture->Size().x),s_cast<float>(brdf_texture->Size().y),0.0f,1.0f });
 
-		for (auto&& [attrib, location] : req.requirements)
+		for (auto&& [attrib, location] : req.mesh_requirements)
 		{
 			auto& attrib_buffer = mesh.Get(attrib);
 			cmd_buffer.bindVertexBuffers(*brdf_pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
@@ -260,9 +260,10 @@ namespace idk::vkn
 
 		_debug_renderer->GrabDebugBuffer();
 
-		SharedGraphicsState shared_graphics_state;
+		SharedGraphicsState& shared_graphics_state=curr_frame.shared_graphics_state;
+		shared_graphics_state.Reset();
 		auto& lights = curr_buffer.lights;
-		shared_graphics_state.Init(lights);
+		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
 		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
 
 		PreRenderData pre_render_data;
@@ -274,7 +275,7 @@ namespace idk::vkn
 		for (size_t i = 0; i < lights.size(); ++i)
 			pre_render_data.active_lights[i]=i;
 
-		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms);
+		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		//pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
 		//pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
@@ -313,8 +314,9 @@ namespace idk::vkn
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
-			auto& curr_cam = curr_buffer.camera[i];
-			curr_state.Init(curr_cam, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
+			auto& curr_range = curr_buffer.culled_render_range[i];
+			auto& curr_cam = curr_range.camera;
+			curr_state.Init(curr_range, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
 			//const bool new_rt = 
 				curr_state.clear_render_target = !IsDontClear(curr_cam);

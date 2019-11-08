@@ -277,6 +277,12 @@ namespace idk::vkn
 		p_ro.rebind_shaders = shader_changed;
 		shader_changed = false;
 	}
+	void PipelineThingy::FinalizeDrawCall(const RenderObject& ro, size_t num_inst, size_t inst_offset)
+	{
+		FinalizeDrawCall(ro);
+		draw_calls.back().num_instances = num_inst;
+		draw_calls.back().inst_offset = inst_offset;
+	}
 	void PipelineThingy::GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers)
 	{
 		auto dsl = d_manager.Allocate(ref.collated_layouts);

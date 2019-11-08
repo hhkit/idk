@@ -55,6 +55,13 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		struct RenderRange
+		{
+			CameraData camera;
+			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
+			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
+		};
+
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
@@ -130,7 +137,12 @@ namespace idk
 			CameraData  curr_scene_camera;
 
 			vector<InstRenderObjects> instanced_mesh_render;
-			vector<InstAnimatedRenderObjects> instanced_skinned_mesh_render;
+			//vector<InstAnimatedRenderObjects> instanced_skinned_mesh_render;
+
+			vector<InstancedData> inst_mesh_render_buffer;
+			//vector<AnimatedInstancedData> inst_skinned_mesh_render_buffer;
+
+			vector<RenderRange> culled_render_range;
 
 			//RscHandle<ShaderProgram> mesh_vtx;
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
@@ -154,6 +166,7 @@ namespace idk
 
 		void SwapWritingBuffer();
 		void SubmitBuffers(RenderBuffer&& buffer);
+		RenderBuffer& GetWriteBuffer();
 		bool _is_deferred = false;
 	};
 }

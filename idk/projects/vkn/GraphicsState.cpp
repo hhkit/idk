@@ -28,9 +28,10 @@ namespace idk::vkn
 	//{
 	//	return GetShadow< RscHandle<CubeMap>>(shared_gfx_state, light_index);
 	//}
-	void GraphicsState::Init(const CameraData& data, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
+	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
 {
-	camera = data;
+	camera = data.camera;
+	range = data;
 	lights = &lights_data;
 	mesh_render.clear();
 	skinned_mesh_render.clear();
@@ -74,10 +75,17 @@ void GraphicsState::CullAndAdd(const vector<RenderObject>& render_objects, const
 	}
 }
 
-void SharedGraphicsState::Init(const vector<LightData>& light_data)
+void SharedGraphicsState::Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro)
 {
 	lights = &light_data;
+	instanced_ros = &iro;
 	//shadow_maps.resize(light_data.size());
+}
+
+void SharedGraphicsState::Reset()
+{
+	lights=nullptr;
+	instanced_ros = nullptr;
 }
 
 const vector<LightData>& SharedGraphicsState::Lights() const
@@ -95,7 +103,7 @@ const vector<shadow_map_t>& SharedGraphicsState::ShadowMaps() const
 	return shadow_maps;
 }
 */
-void PreRenderData::Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
+void PreRenderData::Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms, const vector<InstancedData>& inst_mesh_render_buffer)
 {
 	mesh_render.clear();
 	skinned_mesh_render.clear();
@@ -111,6 +119,8 @@ void PreRenderData::Init(const vector<RenderObject>& render_objects, const vecto
 		skinned_mesh_render.emplace_back(&ro);
 	}
 	skeleton_transforms = &s_transforms;
+
+	inst_mesh_buffer = &inst_mesh_render_buffer;
 }
 
 }

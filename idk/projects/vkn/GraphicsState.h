@@ -2,7 +2,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Light.h>
 #include <vkn/VulkanPipeline.h>
-
+#include <vkn/vector_buffer.h>
 namespace idk::vkn
 {
 	struct buffer_info
@@ -72,9 +72,13 @@ namespace idk::vkn
 	{
 		RscHandle<Texture> BrdfLookupTable;
 		const vector<LightData>* lights;
+		hlp::vector_buffer inst_mesh_render_buffer;
+		const vector<InstRenderObjects>* instanced_ros;
 		//vector<shadow_map_t> shadow_maps;
 
-		void Init(const vector<LightData>& light_data);
+		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
+
+		void Reset();
 
 		const vector<LightData>& Lights()const;
 		//vector<shadow_map_t>& ShadowMaps();
@@ -84,7 +88,8 @@ namespace idk::vkn
 	struct GraphicsState
 	{
 		SharedGraphicsState* shared_gfx_state =nullptr;
-		CameraData camera;
+		CameraData camera; 
+		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
 		vector<size_t> active_lights;//indices to corresponding lights in shared_gfx_state
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
@@ -92,6 +97,11 @@ namespace idk::vkn
 
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
+
+		const vector<InstRenderObjects>* inst_mesh_render;
+
+
+
 
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
@@ -112,7 +122,7 @@ namespace idk::vkn
 		vector<const DbgDrawCall*> dbg_render;
 		const VulkanPipeline* dbg_pipeline;
 
-		void Init(const CameraData& data, const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
+		void Init(const GraphicsSystem::RenderRange& data, const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
 		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects);
 	};
 
@@ -124,14 +134,14 @@ namespace idk::vkn
 		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
-
+		const vector<InstancedData>* inst_mesh_buffer;
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
-		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
+		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms, const vector<InstancedData>& inst_mesh_render_buffer);
 	};
 
 	//Doesn't seem feasible, but might make for some kind of reference in the future

@@ -137,7 +137,7 @@ namespace idk::vkn
 
 	void DeferredPass::Init(ivec2 size) 
 	{
-		const static renderer_reqs fsq_requirements = 
+		const static renderer_attributes fsq_requirements = 
 		{
 			{
 				{vtx::Attrib::Position,0},
@@ -403,7 +403,7 @@ namespace idk::vkn
 
 			auto& renderer_req = *obj.renderer_req;
 
-			for (auto&& [attrib, location] : renderer_req.requirements)
+			for (auto&& [attrib, location] : renderer_req.mesh_requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
 				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});

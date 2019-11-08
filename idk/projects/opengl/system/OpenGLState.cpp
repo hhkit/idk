@@ -344,9 +344,14 @@ namespace idk::ogl
 
 		glEnable(GL_DEPTH_TEST);
 		RscHandle<FrameBuffer> main_buffer;
+
+		auto& inst_buffer = curr_object_buffer.inst_mesh_render_buffer;
+		UpdateInstancedBuffers(std::data(inst_buffer), inst_buffer.size() * sizeof(inst_buffer[0]));
+
 		// range over cameras
-		for(auto cam: curr_object_buffer.camera)
+		for(auto range: curr_object_buffer.culled_render_range)
 		{
+			auto& cam = range.camera;
 			const auto inv_view_tfm = invert_rotation(cam.view_matrix);
 			// calculate lights for this camera
 			auto lights = curr_object_buffer.lights;
@@ -384,7 +389,7 @@ namespace idk::ogl
 						glDepthMask(GL_FALSE);
 						oglCubeMap.BindToUnit(0);
 						pipeline.SetUniform("sb", 0);
-						RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_reqs
+						RscHandle<OpenGLMesh>{*cam.CubeMapMesh}->BindAndDraw(renderer_attributes
 							{ {
 								std::make_pair(vtx::Attrib::Position, 0)
 							} });
@@ -441,36 +446,69 @@ namespace idk::ogl
 			curr_mat_inst = {};
 			curr_mesh = {};
 			material_texture_uniforms = 0;
-
-			for (auto& elem : curr_object_buffer.mesh_render)
 			{
-				// Do culling here
-				sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
+				auto ptr = std::data(curr_object_buffer.instanced_mesh_render);
+				if (range.inst_mesh_render_begin != range.inst_mesh_render_end)
+				{
 
-				// We only draw if the frustrum contains the mesh
-				if (!frust.contains(transformed_bounds))
-					continue;
+					for (auto itr = ptr + range.inst_mesh_render_begin,
+						end = ptr + range.inst_mesh_render_end
+						; itr != end; ++itr)
+					{
+						auto& elem = *itr;
+						auto mesh = RscHandle<OpenGLMesh>{ elem.mesh };
+						if (curr_mat_inst != elem.material_instance)
+						{
+							curr_mat_inst = elem.material_instance;
+							if (curr_mat != curr_mat_inst->material)
+							{
+								curr_mat = curr_mat_inst->material;
+								BindMaterial(curr_mat);
+								pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
+							}
+							BindMaterialInstance(curr_mat_inst);	   
 
-				/*
-				// bind shader
-				const auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
-
-				// set probe
-				GLuint texture_units = 0;
-				//SetPBRUniforms     (cam, inv_view_tfm, texture_units);
-				//SetLightUniforms   (span<LightData>{lights}, texture_units);
-				//SetMaterialUniforms(elem.material_instance, texture_units);
-				//SetObjectUniforms  (elem, cam.view_matrix);
-				//
-				//RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
-				*/
-				PushMaterialInstance(elem.material_instance);
-				PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
-				PushObjectTransform(elem.transform);
+						}
+						if (curr_mesh != mesh)
+						{
+							curr_mesh = mesh;
+							mesh->Bind(MeshRenderer::GetRequiredAttributes());
+						}
+						UseInstancedBuffers(elem.instanced_index);
+						mesh->DrawInstanced(elem.num_instances);
+					}
+				}
 			}
-			
-			FlushObjectTransforms();
+			//
+			//for (auto& elem : curr_object_buffer.mesh_render)
+			//{
+			//	// Do culling here
+			//	sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
+			//
+			//	// We only draw if the frustrum contains the mesh
+			//	if (!frust.contains(transformed_bounds))
+			//		continue;
+			//
+			//	/*
+			//	// bind shader
+			//	const auto material = elem.material_instance->material;
+			//	pipeline.PushProgram(material->_shader_program);
+			//
+			//	// set probe
+			//	GLuint texture_units = 0;
+			//	//SetPBRUniforms     (cam, inv_view_tfm, texture_units);
+			//	//SetLightUniforms   (span<LightData>{lights}, texture_units);
+			//	//SetMaterialUniforms(elem.material_instance, texture_units);
+			//	//SetObjectUniforms  (elem, cam.view_matrix);
+			//	//
+			//	//RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
+			//	*/
+			//	PushMaterialInstance(elem.material_instance);
+			//	PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
+			//	PushObjectTransform(elem.transform);
+			//}
+			//
+			//FlushObjectTransforms();
 
 			curr_mat = {};
 			curr_mat_inst = {};
@@ -594,7 +632,7 @@ namespace idk::ogl
                 SetMaterialUniforms(elem.material_instance, texture_units);
 
                 RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
-                    renderer_reqs{ {
+                    renderer_attributes{ {
                         { vtx::Attrib::Position, 0 },
                         { vtx::Attrib::UV, 1 },
                     }
@@ -603,7 +641,7 @@ namespace idk::ogl
                 glVertexAttribDivisor(1, 0);
 
                 bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
-                bufs[1].BindForDraw(renderer_reqs{ {
+                bufs[1].BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
@@ -797,67 +835,113 @@ namespace idk::ogl
 		is_picking = true;
 	}
 
+	void OpenGLState::BindMaterial(const RscHandle<Material>& mat)
+	{
+		pipeline.PushProgram(mat->_shader_program);
+		curr_mat = mat;
+		curr_mat_inst = {};
+
+		material_texture_uniforms = 0;
+
+		auto inv_view_tfm = curr_cam.view_matrix.inverse();
+
+		// bind pbr uniforms
+		std::visit([&]([[maybe_unused]] const auto& obj)
+			{
+				using T = std::decay_t<decltype(obj)>;
+				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
+				{
+					if (!obj)
+						return;
+					const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
+					opengl_handle->BindConvolutedToUnit(material_texture_uniforms);
+					pipeline.SetUniform("irradiance_probe", material_texture_uniforms++);
+					opengl_handle->BindToUnit(material_texture_uniforms);
+					pipeline.SetUniform("environment_probe", material_texture_uniforms++);
+				}
+			}, curr_cam.clear_data);
+
+		brdf_texture->BindToUnit(material_texture_uniforms);
+		pipeline.SetUniform("brdfLUT", material_texture_uniforms++);
+		pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
+
+		pipeline.SetUniform("LightBlk.light_count", (int)curr_lights.size());
+
+		for (unsigned i = 0; i < curr_lights.size(); ++i)
+		{
+			auto& light = curr_lights[i];
+			string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
+			pipeline.SetUniform(lightblk + "type", light.index);
+			pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
+			pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
+			pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
+			pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
+			pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
+			pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
+			pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
+			pipeline.SetUniform(lightblk + "intensity", light.intensity);
+
+			if (light.light_map)
+			{
+				const auto t = light.light_map->DepthAttachment().buffer;
+				t.as<OpenGLTexture>().BindToUnit(material_texture_uniforms);
+
+				pipeline.SetUniform(lightblk + "vp", light.vp);
+				(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", material_texture_uniforms));
+				material_texture_uniforms++;
+			}
+		}
+	}
+
 	void OpenGLState::PushMaterial(const RscHandle<Material>& mat)
 	{
 		if (curr_mat != mat)
 		{
 			FlushObjectTransforms();
-
-			pipeline.PushProgram(mat->_shader_program);
-			curr_mat = mat;
-			curr_mat_inst = {};
-
-			material_texture_uniforms = 0;
-
-			auto inv_view_tfm = curr_cam.view_matrix.inverse();
-
-			// bind pbr uniforms
-			std::visit([&]([[maybe_unused]] const auto& obj)
-				{
-					using T = std::decay_t<decltype(obj)>;
-					if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
-					{
-						if (!obj)
-							return;
-						const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
-						opengl_handle->BindConvolutedToUnit(material_texture_uniforms);
-						pipeline.SetUniform("irradiance_probe", material_texture_uniforms++);
-						opengl_handle->BindToUnit(material_texture_uniforms);
-						pipeline.SetUniform("environment_probe", material_texture_uniforms++);
-					}
-				}, curr_cam.clear_data);
-
-			brdf_texture->BindToUnit(material_texture_uniforms);
-			pipeline.SetUniform("brdfLUT", material_texture_uniforms++);
-			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
-
-			pipeline.SetUniform("LightBlk.light_count", (int)curr_lights.size());
-
-			for (unsigned i = 0; i < curr_lights.size(); ++i)
-			{
-				auto& light = curr_lights[i];
-				string lightblk = "LightBlk.lights[" + std::to_string(i) + "].";
-				pipeline.SetUniform(lightblk + "type", light.index);
-				pipeline.SetUniform(lightblk + "color", light.light_color.as_vec3);
-				pipeline.SetUniform(lightblk + "v_pos", light.v_pos);
-				pipeline.SetUniform(lightblk + "v_dir", light.v_dir);
-				pipeline.SetUniform(lightblk + "cos_inner", light.cos_inner);
-				pipeline.SetUniform(lightblk + "cos_outer", light.cos_outer);
-				pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
-				pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
-				pipeline.SetUniform(lightblk + "intensity", light.intensity);
-
-				if (light.light_map)
-				{
-					const auto t = light.light_map->DepthAttachment().buffer;
-					t.as<OpenGLTexture>().BindToUnit(material_texture_uniforms);
-
-					pipeline.SetUniform(lightblk + "vp", light.vp);
-					(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", material_texture_uniforms));
-					material_texture_uniforms++;
-				}
-			}
+			BindMaterial(mat);
 		}
+	}
+
+	void OpenGLState::BindMaterialInstance(const RscHandle<MaterialInstance>& mat_inst)
+	{
+		auto instance_texture_units = material_texture_uniforms;
+		for (auto& [name, uniform] : mat_inst->material->uniforms)
+		{
+			auto val = *mat_inst->GetUniform(name);
+			std::visit([this, &instance_texture_units, id = uniform.name](auto& elem)
+			{
+				using T = std::decay_t<decltype(elem)>;
+				if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+				{
+					const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+					texture->BindToUnit(instance_texture_units);
+					pipeline.SetUniform(id, instance_texture_units);
+
+					++instance_texture_units;
+				}
+				else
+					pipeline.SetUniform(id, elem);
+			}, val);
+		}
+		for (auto& uniform : mat_inst->material->hidden_uniforms)
+		{
+			std::visit([this, &instance_texture_units, id = uniform.name](auto& elem)
+			{
+				using T = std::decay_t<decltype(elem)>;
+				if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+				{
+					const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+					texture->BindToUnit(instance_texture_units);
+					pipeline.SetUniform(id, instance_texture_units);
+
+					++instance_texture_units;
+				}
+				else
+					pipeline.SetUniform(id, elem);
+			}, uniform.value);
+		}
+
+		curr_mat_inst = mat_inst;
 	}
 
 	void OpenGLState::PushMaterialInstance(const RscHandle<MaterialInstance>& mat_inst)
@@ -865,47 +949,8 @@ namespace idk::ogl
 		if (curr_mat_inst != mat_inst)
 		{
 			FlushObjectTransforms();
-
 			PushMaterial(mat_inst->material);
-
-			auto instance_texture_units = material_texture_uniforms;
-			for (auto& [name, uniform] : mat_inst->material->uniforms)
-			{
-				auto val = *mat_inst->GetUniform(name);
-				std::visit([this, &instance_texture_units, id = uniform.name](auto& elem)
-				{
-					using T = std::decay_t<decltype(elem)>;
-					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-					{
-						const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-						texture->BindToUnit(instance_texture_units);
-						pipeline.SetUniform(id, instance_texture_units);
-
-						++instance_texture_units;
-					}
-					else
-						pipeline.SetUniform(id, elem);
-				}, val);
-			}
-			for (auto& uniform : mat_inst->material->hidden_uniforms)
-			{
-				std::visit([this, &instance_texture_units, id = uniform.name](auto& elem)
-				{
-					using T = std::decay_t<decltype(elem)>;
-					if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-					{
-						const auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-						texture->BindToUnit(instance_texture_units);
-						pipeline.SetUniform(id, instance_texture_units);
-
-						++instance_texture_units;
-					}
-					else
-						pipeline.SetUniform(id, elem);
-				}, uniform.value);
-			}
-
-			curr_mat_inst = mat_inst;
+			BindMaterialInstance(mat_inst);
 		}
 	}
 
@@ -923,6 +968,41 @@ namespace idk::ogl
 	void OpenGLState::PushObjectTransform(const mat4& tfm)
 	{
 		object_transforms.emplace_back(curr_cam.view_matrix * tfm);
+	}
+	namespace detail
+	{
+
+		void UpdateInstancedBuffer(unsigned loc,GLuint normal_vbo_id, const void* buffer,size_t initial_offset, size_t num_bytes, size_t stride)
+		{
+			constexpr auto BindMat = [](unsigned loc,size_t stride,size_t initial_offset)
+			{
+				for (unsigned i = 0; i < 4; ++i)
+				{
+					glEnableVertexAttribArray(loc + i);
+					glVertexAttribPointer(loc + i, 4, GL_FLOAT, GL_FALSE, stride, (void*)(initial_offset + sizeof(vec4) * i));
+					glVertexAttribDivisor(loc + i, 1);
+				}
+			};
+
+			// bind to vertex loc
+
+			glBindBuffer(GL_ARRAY_BUFFER, normal_vbo_id);
+			glBufferData(GL_ARRAY_BUFFER, num_bytes, buffer, GL_DYNAMIC_DRAW);
+			//BindMat(loc, stride, initial_offset);
+		}
+
+		void UpdateInstancedBuffers(unsigned mv_loc, unsigned nrm_loc,GLuint object_vbo_id, GLuint normal_vbo_id, const void* buffer, size_t num_bytes, size_t stride)
+		{
+			UpdateInstancedBuffer(mv_loc , object_vbo_id, buffer, 0           ,num_bytes, stride);
+			UpdateInstancedBuffer(nrm_loc, normal_vbo_id, buffer, sizeof(mat4),num_bytes, stride);
+		}
+		void UseInstancedBuffer(GLuint object_vbo_id, GLuint normal_vbo_id)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, object_vbo_id);
+			glBindBuffer(GL_ARRAY_BUFFER, normal_vbo_id);
+		}
+
+
 	}
 
 	void OpenGLState::FlushObjectTransforms()
@@ -956,6 +1036,29 @@ namespace idk::ogl
 
 		curr_mesh->DrawInstanced(object_transforms.size());
 		object_transforms.clear();
+	}
+	void OpenGLState::UseInstancedBuffers(size_t starting_instance)
+	{
+		constexpr auto BindMat = [](unsigned loc,size_t starting_instance,size_t offset=0)
+		{
+			size_t stride = sizeof(mat4) * 2;
+			for (unsigned i = 0; i < 4; ++i)
+			{
+				glEnableVertexAttribArray(loc + i);
+				glVertexAttribPointer(loc + i, 4, GL_FLOAT, GL_FALSE, stride, (void*)(starting_instance*stride+offset + sizeof(vec4) * i));
+				glVertexAttribDivisor(loc + i, 1);
+			}
+		};
+		glBindBuffer(GL_ARRAY_BUFFER, object_vbo_id);
+		BindMat(4, starting_instance,0);
+		glBindBuffer(GL_ARRAY_BUFFER, normal_vbo_id);
+		BindMat(8,starting_instance,sizeof(mat4));
+	}
+
+	void OpenGLState::UpdateInstancedBuffers(const void* data, size_t num_bytes)
+	{
+		detail::UpdateInstancedBuffers(4, 8, object_vbo_id, normal_vbo_id, data, num_bytes, sizeof(mat4) * 2);
+		num_inst_bytes = num_bytes;
 	}
 
 }

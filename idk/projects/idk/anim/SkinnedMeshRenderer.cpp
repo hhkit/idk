@@ -27,9 +27,9 @@ namespace idk
 
 		};
 	}
-	const renderer_reqs& SkinnedMeshRenderer::GetRequiredAttributes()
+	const renderer_attributes& SkinnedMeshRenderer::GetRequiredAttributes()
 	{
-		static renderer_reqs r
+		static renderer_attributes r
 		{ {
 			std::make_pair(vtx::Attrib::Position,	0),
 			std::make_pair(vtx::Attrib::Normal,		1),
