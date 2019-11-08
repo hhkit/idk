@@ -31,20 +31,4 @@ namespace idk
 	{
 		return std::visit([&](const auto& shape) { return (shape * GetGameObject()->Transform()->GlobalMatrix()).bounds(); }, shape);
 	}
-	void Collider::setup_predict()
-	{
-		//if (_rigidbody)
-		//{
-		//	_broad_phase = std::visit([&](const auto& shape) { return (shape * _rigidbody->PredictedTransform()).bounds(); }, shape);
-		//	_broad_phase.grow(_rigidbody->velocity());
-		//	_broad_phase.grow(-_rigidbody->velocity());
-
-		//	_predicted_shape = std::visit([&](const auto shape)->CollidableShapes { return shape * _rigidbody->PredictedTransform(); }, shape);
-		//}
-		//else
-		//{
-		//	_broad_phase = bounds();
-		//	_predicted_shape = std::visit([&](const auto shape)->CollidableShapes { return shape * GetGameObject()->Transform()->GlobalMatrix(); }, shape);
-		//}
-	}
 }

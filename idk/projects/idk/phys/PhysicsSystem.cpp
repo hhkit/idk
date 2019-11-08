@@ -29,15 +29,15 @@ namespace idk
         return shape * col.GetGameObject()->Transform()->GlobalMatrix();
     };
 
-    struct ColliderInfo
-    {
-        Collider& collider;
-        aabb broad_phase;
-        CollidableShapes predicted_shape;
-    };
-
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
+        struct ColliderInfo
+        {
+            Collider& collider;
+            aabb broad_phase;
+            CollidableShapes predicted_shape;
+        };
+
         vector<ColliderInfo> static_info;
         vector<ColliderInfo> dynamic_info;
 
@@ -162,8 +162,8 @@ namespace idk
 		{
             struct CollisionInfo
             {
-                size_t i;
-                size_t j;
+                const ColliderInfo& a;
+                const ColliderInfo& b;
                 phys::col_success res;
             };
 			vector<CollisionInfo> collision_frame;
@@ -186,58 +186,53 @@ namespace idk
             // all objects confirmed to be active (but may be sleeping)
 
             // dynamic vs dynamic
-            for (unsigned i = 0; i < dynamic_info.size(); ++i)
+            for (const auto& i : dynamic_info)
             {
-                for (unsigned j = i + 1; j < dynamic_info.size(); ++j)
+                for (const auto& j : dynamic_info)
                 {
-                    const auto& lrigidbody = *dynamic_info[i].collider._rigidbody;
-                    const auto& rrigidbody = *dynamic_info[j].collider._rigidbody;
+                    const auto& lrigidbody = *i.collider._rigidbody;
+                    const auto& rrigidbody = *j.collider._rigidbody;
 
                     if (lrigidbody.GetHandle() == rrigidbody.GetHandle())
                         continue;
                     if (lrigidbody.sleeping() && rrigidbody.sleeping())
                         continue;
-                    if (!dynamic_info[i].broad_phase.overlaps(dynamic_info[j].broad_phase))
+                    if (!i.broad_phase.overlaps(j.broad_phase))
                         continue;
 
-                    const auto collision = std::visit(CollideShapes, dynamic_info[i].predicted_shape, dynamic_info[j].predicted_shape);
+                    const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
                     if (collision)
                     {
                         collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-                        collisions.emplace(CollisionPair{ dynamic_info[i].collider.GetHandle(), dynamic_info[j].collider.GetHandle() }, collision.value());
-                        ++dynamic_vs_dynamic_count;
+                        collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
                     }
                 }
             }
             // dynamic vs static
-            for (unsigned i = 0; i < dynamic_info.size(); ++i)
+            for (const auto& i : dynamic_info)
             {
-                for (unsigned j = 0; j < static_info.size(); ++j)
+                for (const auto& j : static_info)
                 {
-                    const auto& lrigidbody = *dynamic_info[i].collider._rigidbody;
+                    const auto& lrigidbody = *i.collider._rigidbody;
 
                     if (lrigidbody.sleeping())
                         continue;
-                    if (!dynamic_info[i].broad_phase.overlaps(static_info[j].broad_phase))
+                    if (!i.broad_phase.overlaps(j.broad_phase))
                         continue;
 
-                    const auto collision = std::visit(CollideShapes, dynamic_info[i].predicted_shape, static_info[j].predicted_shape);
+                    const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
                     if (collision)
                     {
                         collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-                        collisions.emplace(CollisionPair{ dynamic_info[i].collider.GetHandle(), static_info[j].collider.GetHandle() }, collision.value());
+                        collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
                     }
                 }
             }
 
 			for (const auto& [i, j, result] : collision_frame)
 			{
-                const bool dyn_vs_dyn = dynamic_vs_dynamic_count > 0;
-                if (dyn_vs_dyn)
-                    --dynamic_vs_dynamic_count;
-
-				const auto& lcollider = dynamic_info[i].collider;
-				const auto& rcollider = dyn_vs_dyn ? dynamic_info[j].collider : static_info[j].collider;
+				const auto& lcollider = i.collider;
+				const auto& rcollider = j.collider;
 
 				auto lrigidbody = lcollider._rigidbody;
 				auto rrigidbody = rcollider._rigidbody;
@@ -255,7 +250,7 @@ namespace idk
 
 				const auto [lvel, linv_mass, lrb_ptr] =
                     RigidBodyInfo{ lrigidbody->_pred_tfm[3].xyz - lrigidbody->_prev_pos, lrigidbody->inv_mass, &*lrigidbody };
-                const auto [rvel, rinv_mass, rrb_ptr] = dyn_vs_dyn ?
+                const auto [rvel, rinv_mass, rrb_ptr] = rrigidbody ?
                     RigidBodyInfo{ rrigidbody->_pred_tfm[3].xyz - rrigidbody->_prev_pos, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
 
 				auto rel_v = rvel - lvel; // a is not moving
