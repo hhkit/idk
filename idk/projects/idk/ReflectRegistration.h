@@ -258,6 +258,34 @@ REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
 REFLECT_VARS(component_name, property_path, component_nth)
 REFLECT_END()
 
+
+REFLECT_BEGIN(idk::anim::KeyFrame<idk::vec3>, "KeyFrame<vec3>")
+REFLECT_VARS(val, time)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::KeyFrame<idk::quat>, "KeyFrame<quat>")
+REFLECT_VARS(val, time)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::anim::KeyFrame<idk::vec3>>, "vector<KeyFrame<vec3>>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::anim::KeyFrame<idk::quat>>, "vector<KeyFrame<quat>>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::AnimatedBone, "AnimatedBone")
+REFLECT_VARS(bone_name, translate_track)
+REFLECT_END()
+
+
+REFLECT_BEGIN(decltype(idk::anim::Animation::_animated_bones), "hash_table<string, AnimatedBone>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::Animation, "Animation")
+REFLECT_VARS(_animated_bones, _fps, _duration, _num_ticks)
+REFLECT_END()
+
+
 // shader graph
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 
