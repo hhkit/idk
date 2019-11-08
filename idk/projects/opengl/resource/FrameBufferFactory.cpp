@@ -46,7 +46,7 @@ namespace idk::ogl
 	{
 		return std::make_unique<OpenGLFrameBuffer>();
 	}
-	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
+	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType , const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
 		out = std::make_unique<OpenGLAttachment>();
 		out->load_op  = info.load_op;

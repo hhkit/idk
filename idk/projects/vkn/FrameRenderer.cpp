@@ -332,7 +332,6 @@ namespace idk::vkn
 				buffers.emplace_back(pre_state.cmd_buffer);
 		}
 
-		auto& current_signal = View().CurrPresentationSignals();
 
 		//auto& waitSemaphores = *current_signal.image_available;
 		//vk::Semaphore readySemaphores = {};///* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
@@ -459,7 +458,6 @@ namespace idk::vkn
 		auto the_interface = vkn::ProcessRoUniforms(state, rs.ubo_manager, shadow_binding);
 		the_interface.GenerateDS(rs.dpools);
 
-		auto& view = View();
 		//auto& swapchain = view.Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
@@ -809,7 +807,6 @@ namespace idk::vkn
 
 		//auto& cd = std::get<vec4>(state.camera.clear_data);
 		//TODO grab the appropriate framebuffer and begin renderpass
-		float depth_clear = 1.0f;
 		std::optional<color> clear_col;
 		std::optional<RscHandle<CubeMap>> sb_cm;
 

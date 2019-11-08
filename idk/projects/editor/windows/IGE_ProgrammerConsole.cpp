@@ -114,7 +114,7 @@ namespace idk
 //		if (!textFilter.PassFilter(message.text.c_str()))
 //			return;
 
-		ImGui::PushStyleColor(ImGuiCol_Text, vec4{0.8});
+		ImGui::PushStyleColor(ImGuiCol_Text, vec4{0.8f});
 		ImGui::TextUnformatted(message.preface.data());
 		ImGui::PopStyleColor();
 

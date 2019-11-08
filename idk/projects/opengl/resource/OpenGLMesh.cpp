@@ -60,7 +60,7 @@ namespace idk::ogl
 	void OpenGLMesh::DrawInstanced(size_t instances)
 	{
 		_element_array_object.Bind();
-		glDrawElementsInstanced(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0, instances);
+		glDrawElementsInstanced(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instances));
 	}
 
 	void OpenGLMesh::BindAndDraw(const renderer_reqs& locations)

@@ -77,7 +77,6 @@ namespace idk::ogl
 	{
 		glEnable(GL_SCISSOR_TEST);
 		GL_CHECK();
-		auto& meta = *target;
 		if (oviewport)
 		{
 			auto& viewport = *oviewport;
@@ -164,15 +163,15 @@ namespace idk::ogl
 		auto& tex_ = tex.as<OpenGLTexture>();
 		int i = 0;
 		{
-			TextureMeta mm = tex->GetMeta();
+			TextureMeta mm = tex_.GetMeta();
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
 				mm.internal_format = ColorFormat::RGBAF_16;
 				tex.as<OpenGLTexture>().SetMeta(mm);
 			}
-			tex.as<OpenGLTexture>().Bind();
+			tex_.Bind();
 			GL_CHECK();
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(tex->ID())), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(tex_.ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 			GL_CHECK();
 		}
