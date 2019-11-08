@@ -70,8 +70,6 @@ namespace idk
 		bool GetBool(string_view name) const;
 		float GetFloat(string_view name) const;
 
-		
-
 		// Script Setters
 		bool SetInt(string_view name, int val);
 		bool SetBool(string_view name, bool val);

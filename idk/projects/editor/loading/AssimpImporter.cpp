@@ -35,12 +35,17 @@ namespace idk
 	ResourceBundle AssimpImporter::LoadFile(PathHandle path_to_resource, const MetaBundle& meta_bundle)
 	{
 		ResourceBundle ret_val;
-
+		
 		ai_helpers::Scene importer_scene;
 		const bool success = ai_helpers::Import(importer_scene, path_to_resource);
-		IDK_ASSERT_MSG(success, "[AssimpImporter] Assimp failed to load file.");
+		
 		if (!success)
+		{
+			LOG_ERROR_TO(LogPool::ANIM, string{ "Importing " } + path_to_resource.GetFileName().data() + " result: FAILED");
 			return ret_val;
+		}
+
+		LOG_TO(LogPool::ANIM, string{ "Importing " } + path_to_resource.GetFileName().data() + " result: SUCCESS");
 
 		vector<RscHandle<Mesh>> mesh_handles;
 		RscHandle<anim::Skeleton> skeleton_handle;
@@ -168,6 +173,7 @@ namespace idk
 		// Check if this is a pure animation file. If it is, we don't even bother creating the prefab.
 		if (importer_scene.has_animation && !importer_scene.has_skeleton)
 		{
+			LOG_TO(LogPool::ANIM, string{ "No mesh but animations were found. Saving as pure animation file.\n" });
 			return ret_val;
 		}
 
@@ -222,6 +228,8 @@ namespace idk
 				: PrefabUtility::Create(prefab_root);
 			prefab_handle->Name(path_to_resource.GetStem());
 			ret_val.Add(prefab_handle);
+
+			LOG_TO(LogPool::ANIM, string{ "Saving meshes and animations as prefab.\n" });
 		}
 		scene->DestroyGameObject(prefab_root);
 		return ret_val;

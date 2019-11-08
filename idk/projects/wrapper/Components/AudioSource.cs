@@ -72,7 +72,12 @@ namespace idk
         public bool IsAnyAudioClipPlaying()
             => Bindings.AudioSourceIsAnyAudioClipPlaying(handle);
 
+        //Finds if the audioclip's name is inside the audiosource. Returns -1 if fails. Else returns the first index of the audiosource.
         public int FindAudio(string name)
             => Bindings.FindAudio(handle, name);
+
+        //Adds an audioclip to the audiosource, given the name. Returns the index of the new audio. Returns -1 on fail.
+        public int AddAudioClip(string name)
+            => Bindings.AddAudioClip(handle, name);
     }
 }

@@ -472,26 +472,36 @@ REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, over
 REFLECT_END()
 
 // ANIMATION
-REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
-REFLECT_END()
-
-REFLECT_BEGIN(decltype(idk::BlendTree::params), "array<string,2>")
-REFLECT_END();
-
 REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
-REFLECT_ENUM(idk::AnimDataType, "AnimDataType")
-REFLECT_ENUM(idk::BlendTreeType, "BlendTreeType")
+REFLECT_ENUM(idk::anim::AnimDataType, "AnimDataType")
+REFLECT_ENUM(idk::anim::BlendTreeType, "BlendTreeType")
 
 REFLECT_BEGIN(idk::BasicAnimationState, "BasicAnimationState")
 REFLECT_VARS(motion)
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::BlendTreeMotion::thresholds), "array<float,2>")
+REFLECT_END();
+
+REFLECT_BEGIN(idk::BlendTreeMotion, "BlendTreeMotion")
+REFLECT_VARS(motion, thresholds, speed)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::BlendTree::motions), "vector<BlendTreeMotion>")
+REFLECT_END();
+
+REFLECT_BEGIN(decltype(idk::BlendTree::params), "array<string,2>")
+REFLECT_END();
+
 REFLECT_BEGIN(idk::BlendTree, "BlendTree")
-REFLECT_VARS(params, blend_tree_type)
+REFLECT_VARS(motions, params, blend_tree_type)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
 REFLECT_VARS(name, valid, loop, speed, state_data)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")

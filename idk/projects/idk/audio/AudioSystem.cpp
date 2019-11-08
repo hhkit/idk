@@ -150,7 +150,7 @@ namespace idk
 		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));
 
 		// Initializes FMOD Core
-		ParseFMOD_RESULT(_Core_System->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
+		ParseFMOD_RESULT(_Core_System->init(512, FMOD_INIT_NORMAL, 0)); //1024 = number of channels that can be played on
 		
 		//Channel Group Setup
 		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_MUSIC",		&_soundGroup_MUSIC		));

@@ -30,5 +30,8 @@ namespace idk {
 		virtual ~Font() = default;
 
 		void RenderText();
+
+		//A useless function
+		void UpdateFontSize();
 	};
 }
