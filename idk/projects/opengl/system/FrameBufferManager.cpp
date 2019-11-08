@@ -78,6 +78,7 @@ namespace idk::ogl
 		glEnable(GL_SCISSOR_TEST);
 		GL_CHECK();
 		auto& meta = *target;
+		meta;
 		if (oviewport)
 		{
 			auto& viewport = *oviewport;
@@ -162,6 +163,7 @@ namespace idk::ogl
 		//for (int i = 0; i < std::size(meta.textures); ++i)
 		auto tex = target->GetColorBuffer();
 		auto& tex_ = tex.as<OpenGLTexture>();
+		tex_;
 		int i = 0;
 		{
 			TextureMeta mm = tex->GetMeta();

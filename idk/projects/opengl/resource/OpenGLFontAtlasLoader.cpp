@@ -133,14 +133,14 @@ namespace idk {
 
 				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, g->bitmap.width, g->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
 
-				font_handle->c[i].advance.x = g->advance.x >> 6;
-				font_handle->c[i].advance.y = g->advance.y >> 6;
+				font_handle->c[i].advance.x = s_cast<float>(g->advance.x >> 6);
+				font_handle->c[i].advance.y = s_cast<float>(g->advance.y >> 6);
 
-				font_handle->c[i].glyph_size.x = g->bitmap.width;
-				font_handle->c[i].glyph_size.y = g->bitmap.rows;
+				font_handle->c[i].glyph_size.x = (float)g->bitmap.width;
+				font_handle->c[i].glyph_size.y = (float)g->bitmap.rows;
 
-				font_handle->c[i].bearing.x = g->bitmap_left;
-				font_handle->c[i].bearing.y = g->bitmap_top;
+				font_handle->c[i].bearing.x = (float)g->bitmap_left;
+				font_handle->c[i].bearing.y = (float)g->bitmap_top;
 
 				font_handle->c[i].tex_offset.x = x / (float)w;
 				font_handle->c[i].tex_offset.y = y / (float)h;
@@ -265,14 +265,14 @@ namespace idk {
 
 				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, g->bitmap.width, g->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
 
-				font_handle->c[i].advance.x = g->advance.x >> 6;
-				font_handle->c[i].advance.y = g->advance.y >> 6;
+				font_handle->c[i].advance.x = s_cast<float>(g->advance.x >> 6);
+				font_handle->c[i].advance.y = s_cast<float>(g->advance.y >> 6);
+											  
+				font_handle->c[i].glyph_size.x = (float)g->bitmap.width;
+				font_handle->c[i].glyph_size.y = (float)g->bitmap.rows;
 
-				font_handle->c[i].glyph_size.x = g->bitmap.width;
-				font_handle->c[i].glyph_size.y = g->bitmap.rows;
-
-				font_handle->c[i].bearing.x = g->bitmap_left;
-				font_handle->c[i].bearing.y = g->bitmap_top;
+				font_handle->c[i].bearing.x = (float)g->bitmap_left;
+				font_handle->c[i].bearing.y = (float)g->bitmap_top;
 
 				font_handle->c[i].tex_offset.x = x / (float)w;
 				font_handle->c[i].tex_offset.y = y / (float)h;
