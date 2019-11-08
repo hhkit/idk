@@ -637,7 +637,7 @@ namespace idk {
 							auto& state_data = *curr_state.second.GetBlendTree();
 							for (size_t i = 0; i < state_data.motions.size(); ++i)
 							{
-								ImGui::PushID(i);
+								ImGui::PushID((int)i);
 								auto& blend_tree_motion = state_data.motions[i];
 								ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &blend_tree_motion.motion);
 								ImGui::InputFloat(("##threshold" + curr_state.first).c_str(), &blend_tree_motion.thresholds[0]);
