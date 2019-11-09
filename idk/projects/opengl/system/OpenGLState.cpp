@@ -442,9 +442,9 @@ namespace idk::ogl
 			// If we use proj * view, frustrum will be in model space
 			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
 
-			curr_mat = {};
-			curr_mat_inst = {};
-			curr_mesh = {};
+			auto c_mat = curr_mat = {};
+			auto c_mat_inst = curr_mat_inst = {};
+			auto c_mesh = curr_mesh = {};
 			material_texture_uniforms = 0;
 			{
 				auto ptr = std::data(curr_object_buffer.instanced_mesh_render);
@@ -457,21 +457,21 @@ namespace idk::ogl
 					{
 						auto& elem = *itr;
 						auto mesh = RscHandle<OpenGLMesh>{ elem.mesh };
-						if (curr_mat_inst != elem.material_instance)
+						if (c_mat_inst != elem.material_instance)
 						{
-							curr_mat_inst = elem.material_instance;
-							if (curr_mat != curr_mat_inst->material)
+							c_mat_inst = elem.material_instance;
+							if (c_mat != c_mat_inst->material)
 							{
-								curr_mat = curr_mat_inst->material;
-								BindMaterial(curr_mat);
+								c_mat = c_mat_inst->material;
+								BindMaterial(c_mat);
 								pipeline.SetUniform("PerCamera.perspective_transform", cam.projection_matrix);
 							}
-							BindMaterialInstance(curr_mat_inst);	   
+							BindMaterialInstance(c_mat_inst);	   
 
 						}
-						if (curr_mesh != mesh)
+						if (c_mesh != mesh)
 						{
-							curr_mesh = mesh;
+							c_mesh = mesh;
 							mesh->Bind(MeshRenderer::GetRequiredAttributes());
 						}
 						UseInstancedBuffers(elem.instanced_index);
@@ -599,17 +599,17 @@ namespace idk::ogl
 
             static vector<OpenGLBuffer> bufs = []()
             {
-                vector<OpenGLBuffer> bufs_;
+                vector<OpenGLBuffer> bufs;
                 unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
-                bufs_.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
+                bufs.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
                     .Bind().Buffer(indices, sizeof(int), 6);
-                bufs_.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
+                bufs.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
                     { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
                     { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
                     { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
                     { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
                 } });
-                return bufs_;
+                return bufs;
             }();
 
 
