@@ -33,49 +33,50 @@ namespace idk
 		//sphere bounding_volume;
 		
 		//binding,attrib
-		const renderer_reqs* renderer_req;
+		const renderer_attributes* renderer_req;
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
 	};
-	template<typename InstancedData>
-	struct GenericInstancedRenderObjects
+	//template<typename InstancedData>
+	struct GenericInstancedRenderObjects :RenderObject
 	{
-		//id
-		GenericHandle obj_id{};
-		// resources
-		RscHandle<Mesh>  mesh{};
-		RscHandle<MaterialInstance> material_instance{};
-		//	hash_table<string, hash_table<string,UniformInstance>> uniforms;
-
-		// lighting
-		bool cast_shadows{};
-		bool receive_shadows{};
-
-		// culling
-		//sphere bounding_volume;
-
-		//binding,attrib
-		const renderer_reqs* renderer_req{};
-		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
-		shared_ptr<pipeline_config> config{};
+		////id
+		//GenericHandle obj_id{};
+		//// resources
+		//RscHandle<Mesh>  mesh{};
+		//RscHandle<MaterialInstance> material_instance{};
+		////	hash_table<string, hash_table<string,UniformInstance>> uniforms;
+		//
+		//// lighting
+		//bool cast_shadows{};
+		//bool receive_shadows{};
+		//
+		//// culling
+		////sphere bounding_volume;
+		//
+		////binding,attrib
+		//const renderer_attributes* renderer_req{};
+		////hash_table<uint32_t, vtx::Attrib> attrib_bindings;
+		//shared_ptr<pipeline_config> config{};
 
 		// transform
-		vector<InstancedData> instanced_data{};
+		size_t instanced_index{}, num_instances{};
 	};
 
 
 	struct InstancedData
 	{
-		vec3 velocity  {};
+		//vec3 velocity  {};
 		mat4 transforms{};
+		mat4 normal_transforms{};
 	};
 	struct AnimatedInstancedData :InstancedData
 	{
 		unsigned skeleton_index{};
 	};
 
-	using InstRenderObjects=GenericInstancedRenderObjects<InstancedData>;
-	using InstAnimatedRenderObjects=GenericInstancedRenderObjects<AnimatedInstancedData>;
+	using InstRenderObjects        =GenericInstancedRenderObjects;//<InstancedData>;
+	using InstAnimatedRenderObjects=GenericInstancedRenderObjects;//<AnimatedInstancedData>;
 
 
 	struct SkeletonTransforms

@@ -427,7 +427,7 @@ namespace idk {
 		auto& app_sys = Core::GetSystem<Application>();
 
 		auto scroll = app_sys.GetMouseScroll().y;
-		IDE& editor = Core::GetSystem<IDE>();
+		//IDE& editor = Core::GetSystem<IDE>();
 
 		if (scroll > 0) {
 			cam_vel += cam_vel_additive;

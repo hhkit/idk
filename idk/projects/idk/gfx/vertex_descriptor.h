@@ -20,6 +20,10 @@ namespace idk
             ParticleRotation,
             ParticleSize
 		)
+		ENUM(InstAttrib,int,
+			ModelTransform,
+			Normaltransform
+			)
 
 		enum Flags : int
 		{
@@ -58,13 +62,23 @@ namespace std
 			return std::hash<idk::vtx::Attrib::UnderlyingType>{}(static_cast<idk::vtx::Attrib::UnderlyingType>(attrib));
 		}
 	};
+	template<>
+	struct hash<idk::vtx::InstAttrib>
+	{
+		using T = idk::vtx::InstAttrib;
+		size_t operator()(const T& attrib) const noexcept
+		{
+			return std::hash<T::UnderlyingType>{}(static_cast<T::UnderlyingType>(attrib));
+		}
+	};
 }
 
 namespace idk
 {
-	struct renderer_reqs
+	struct renderer_attributes
 	{
 		using Location = int;
-		hash_table<vtx::Attrib, Location> requirements;
+		hash_table<vtx::Attrib    , Location> mesh_requirements;
+		hash_table<vtx::InstAttrib, Location> instanced_requirements;
 	};
 }

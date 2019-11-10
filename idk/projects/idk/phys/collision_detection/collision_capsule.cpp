@@ -24,6 +24,15 @@ namespace idk::phys
 	{
 		//Use OOB(Object Oriented Bounding)
 		//printf("BoxCollisionTest!\n");
+
+		(void)rhs;
+		(void)lhs;
+
+
+
+
+
+
 		return col_failure();
 	}
 
@@ -77,7 +86,7 @@ namespace idk::phys
 
 
 		}
-		else {	//Not parallel, they skew
+		else {	//Not parallel, they skew TODO FIX! IT DOES NOT WORK
 			const vec3 connecting_vector = line_points_B.second- line_points_A.second;
 			auto determinant_A = mat3{ connecting_vector ,B_unit_vector ,cross_vector }.determinant();
 			auto determinant_B = mat3{ connecting_vector ,A_unit_vector ,cross_vector }.determinant();

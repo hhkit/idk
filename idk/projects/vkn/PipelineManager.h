@@ -29,41 +29,18 @@ namespace idk::vkn
 			VulkanPipeline pipeline;
 			VulkanPipeline back_pipeline;
 
+			vector<buffer_desc> buffer_desc_overrides;
+			hash_table<uint32_t, size_t> override_attr_mapping;
+
+			void StoreBufferDescOverrides();
+
+			void ApplyBufferDescOverrides();
+
 			//PipelineObject() = default;
 			//PipelineObject(PipelineObject&&) noexcept= default;
 			//~PipelineObject() = default;
-			void Create(VulkanView& view, [[maybe_unused]]size_t fo_index)
-			{
-				//TODO: set the pipeline's modules
-				vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
-				config.buffer_descriptions.clear();
-				for (auto& module : shader_handles)
-				{
-					auto& mod = module.as<ShaderModule>();
-					if (!mod.HasCurrent())
-						continue;
-					//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
-					//	mod.UpdateCurrent(fo_index);
-					auto& desc = mod.AttribDescriptions();
-					for(auto& desc_set : desc)
-						config.buffer_descriptions.emplace_back(desc_set);
-					//shaders.emplace_back(mod.Stage(), mod.Module());
-					if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
-						config.frag_shader = module;
-
-					if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
-						config.vert_shader = module;
-				}
-				if (rp)
-					pipeline.SetRenderPass(*rp, has_depth_stencil);
-				else
-					pipeline.ClearRenderPass();
-				pipeline.Create(config,shader_handles, view);
-			}
-			void Swap()
-			{
-				std::swap(pipeline, back_pipeline);
-			}
+			void Create(VulkanView& view, [[maybe_unused]] size_t fo_index);
+			void Swap();
 		};
 		container_t pipelines;
 

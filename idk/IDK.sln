@@ -55,6 +55,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "41 Game Launcher", "project
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "42 Asset Compiler", "projects\asset_compiler\asset_compiler.vcxproj", "{591AF41C-046A-457C-B648-4774D53B04C2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1} = {05C249B6-D75D-4E2E-B9F4-F3EC5E10C9F1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

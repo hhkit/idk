@@ -171,7 +171,7 @@ namespace idk::vkn
 				}
 			};
 
-			const auto addSubVert = [](std::vector<Vertex>& vertices, hash_table<vec3, uint16_t, compareVec>& shared, const vec3& pos) -> unsigned
+			const auto addSubVert = [](std::vector<Vertex>& vertices, hash_table<vec3, uint16_t, compareVec>& shared, const vec3& pos) -> uint16_t
 			{
 				// Get the index IF this vertex is unique and we pushed it into the vertices vector
 				auto index = static_cast<uint16_t>(vertices.size());
@@ -208,9 +208,9 @@ namespace idk::vkn
 					// Subdivide every face once
 					for (unsigned j = 0; j < tmpIndices.size();)
 					{
-						const unsigned v1Index = tmpIndices[j++];
-						const unsigned v2Index = tmpIndices[j++];
-						const unsigned v3Index = tmpIndices[j++];
+						const uint16_t v1Index = tmpIndices[j++];
+						const uint16_t v2Index = tmpIndices[j++];
+						const uint16_t v3Index = tmpIndices[j++];
 
 						const vec3 v1 = vertices[v1Index].pos;
 						const vec3 v2 = vertices[v2Index].pos;
@@ -221,15 +221,15 @@ namespace idk::vkn
 						// addSubVert will check if the vertex is unique or not using the sharedIndices set.
 						// v1 -> v2
 						const vec3 hv1 = (v1 + v2).normalize();
-						const unsigned hv1Index = addSubVert(vertices, sharedIndices, hv1);
+						const uint16_t hv1Index = addSubVert(vertices, sharedIndices, hv1);
 
 						// v2 -> v3
 						const vec3 hv2 = (v2 + v3).normalize();
-						const unsigned hv2Index = addSubVert(vertices, sharedIndices, hv2);
+						const uint16_t hv2Index = addSubVert(vertices, sharedIndices, hv2);
 
 						// v3 -> v1
 						const vec3 hv3 = (v3 + v1).normalize();
-						const unsigned hv3Index = addSubVert(vertices, sharedIndices, hv3);
+						const uint16_t hv3Index = addSubVert(vertices, sharedIndices, hv3);
 
 						// New Indices. Every triangle will subdivide into 4 new triangles.
 						indices.push_back(v1Index);
@@ -355,12 +355,12 @@ namespace idk::vkn
 				if (i < (numberOfTri - 1))
 				{
 					indices.emplace_back(i);
-					indices.emplace_back(i + 1);
+					indices.emplace_back(static_cast<uint16_t>(i + 1));
 				}
 				else
 				{
 					indices.emplace_back(i);
-					indices.emplace_back(0);
+					indices.emplace_back(0ui16);
 				}
 			}
 

@@ -110,11 +110,11 @@ namespace idk::detail
 		constexpr static auto GenCreateDynamicHandleJt()
 		{
 			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&, GenericHandle, const reflect::dynamic&), detail::ObjectPools::TypeCount>{
-				[](GameState& gs, const Handle<GameObject>& go, GenericHandle h, const reflect::dynamic& dyn) -> GenericHandle
+				[](GameState& gs, const Handle<GameObject>& go, [[maybe_unused]] GenericHandle h, const reflect::dynamic& dyn) -> GenericHandle
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
 					{
-						(gs); (go); (dyn);
+						(h);  (gs); (go); (dyn);
 						return GenericHandle{};
 					}
 					else

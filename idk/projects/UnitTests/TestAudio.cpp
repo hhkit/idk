@@ -82,7 +82,7 @@ TEST(Audio, AudioSystemClassTest)
 	std::cout << "Playing first sound in default SFX group...\n";
 
 
-	audioPtr1->Play();
+	//audioPtr1->Play();
 	time_point timeStartTest = Clock::now();
 	seconds elapsed = time_point::clock::now() - timeStartTest;
 
@@ -117,27 +117,27 @@ TEST(Audio, AudioSystemClassTest)
 				std::cout << "Playing second sound to MUSIC group\n";
 				audioPtr2->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_MUSIC);
 
-				audioPtr2->Play();
+				//audioPtr2->Play();
 				testCase3 = true;
 			}
 			if (elapsed.count() > 5 && !testCase4) {
 				std::cout << "Stopping first music\n";
 
-				audioPtr1->Stop();
+				//audioPtr1->Stop();
 				testCase4 = true;
 			}
 
 			if (elapsed.count() > 6 && !testCase5) {
 				std::cout << "Playing another misc music and stopping second music\n";
 
-				audioPtr3->Play();
-				audioPtr2->Stop();
+				//audioPtr3->Play();
+				//audioPtr2->Stop();
 
 				testCase5 = true;
 			}
 			if (elapsed.count() > 8 && !testCase6) {
 				std::cout << "Setting third music to loop and high pitched\n";
-				audioPtr3->Play(); //Plays another audio
+				//audioPtr3->Play(); //Plays another audio
 
 				testCase6 = true;
 			}

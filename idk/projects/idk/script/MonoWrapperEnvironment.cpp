@@ -51,7 +51,6 @@ namespace idk::mono
 
 	bool MonoWrapperEnvironment::IsAbstract(MonoType* type)
 	{
-		auto object_type = mono_type_get_object(mono_domain_get(), type);
 		auto img = mono_assembly_get_image(_assembly);
 		auto klass = mono_class_from_name(img, "idk", "IDK");
 		main = mono_class_get_method_from_name(klass, "TypeIsAbstract", 1);
@@ -184,7 +183,6 @@ namespace idk::mono
 			{
 				auto s = unbox(component);
 				string_view findme = s.get();
-				auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 				for (auto& elem : go->GetComponents<mono::Behavior>())
 				{
 					if (elem->GetObject().Type()->IsOrDerivedFrom(findme))
@@ -691,7 +689,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AudioSourceSize", int, Handle<AudioSource> audiosource)
 		{
-			return audiosource->audio_clip_list.size();
+			return static_cast<int>(audiosource->audio_clip_list.size());
 		}
 		BIND_END();
 

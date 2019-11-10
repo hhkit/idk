@@ -292,7 +292,7 @@ namespace idk::vkn
 			case vk::Format::eBc1RgbaSrgbBlock :
 			case vk::Format::eBc4UnormBlock    :
 			case vk::Format::eBc4SnormBlock    :
-				result = block_width * block_width * 8;
+				result = block_width * block_height * 8;
 			break;
 			case vk::Format::eBc2UnormBlock:
 			case vk::Format::eBc2SrgbBlock :
@@ -300,7 +300,7 @@ namespace idk::vkn
 			case vk::Format::eBc3SrgbBlock :
             case vk::Format::eBc5UnormBlock: 
             case vk::Format::eBc5SnormBlock:
-			result = block_width * block_width * 16;
+			result = block_width * block_height * 16;
 			break;
 		}
 		return result;
@@ -389,7 +389,7 @@ namespace idk::vkn
 		uint32_t width = load_info.width, height = load_info.height;
 
 		vk::ImageUsageFlags image_usage = load_info.image_usage;//(format == vk::Format::eD16Unorm) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
-		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
+		//vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 
 		if (!in_info) { //If data isn't given.
 			len = ComputeTextureLength(width, height, format);

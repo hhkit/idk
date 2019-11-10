@@ -68,7 +68,7 @@ namespace idk::vkn
 		//Create environment probe
 		//environment_probe;
 
-		req.requirements = {
+		req.mesh_requirements = {
 			std::make_pair(vtx::Attrib::Position, 0),
 			std::make_pair(vtx::Attrib::Normal, 1),
 			std::make_pair(vtx::Attrib::UV, 2) };
@@ -77,7 +77,7 @@ namespace idk::vkn
 
 		ro.mesh = h_mesh;
 		ro.config = config_;
-		static renderer_reqs single_pass_cube = { {
+		static renderer_attributes single_pass_cube = { {
 			{vtx::Attrib::Position,0}
 		}
 		};
@@ -301,7 +301,7 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 			auto& mesh = p_ro.Object().mesh.as<VulkanMesh>();
 
-			for (auto&& [attrib, location] : req.requirements)
+			for (auto&& [attrib, location] : req.mesh_requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
 				auto binding = Pipeline().GetBinding(location);
@@ -358,7 +358,7 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 			auto& mesh = p_ro.Object().mesh.as<VulkanMesh>();
 
-			for (auto&& [attrib, location] : req.requirements)
+			for (auto&& [attrib, location] : req.mesh_requirements)
 			{
 				auto& attrib_buffer = mesh.Get(attrib);
 				auto binding = Pipeline().GetBinding(location);

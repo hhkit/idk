@@ -121,6 +121,7 @@ namespace idk::vkn
 		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false);
 
 		void FinalizeDrawCall(const RenderObject& ro);
+		void FinalizeDrawCall(const RenderObject& ro,size_t num_inst,size_t inst_offset);
 
 		void GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers=true);
 

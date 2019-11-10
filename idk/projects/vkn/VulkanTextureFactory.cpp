@@ -24,7 +24,7 @@ namespace idk::vkn
 	unique_ptr<Texture> VulkanTextureFactory::GenerateDefaultResource()
 	{
 		//2x2 image Checkered
-		uint32_t rgba[] = { 0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF };
+		uint32_t rgba[] = {0,0,0,0};// { 0xFFFFFFFF, 0xFF000000, 0xFF000000, 0xFFFFFFFF };
 		
 		auto ptr = std::make_unique<VknTexture>();
 		TextureLoader loader;

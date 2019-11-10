@@ -125,7 +125,7 @@ namespace idk
 		glProgramUniform1i(program_id, glGetUniformLocation(program_id, "flashmebaby"), 0);
 
 		auto mesh = RscHandle<ogl::OpenGLMesh>{ Mesh::defaults[MeshType::FSQ] };
-		mesh->Bind(renderer_reqs
+		mesh->Bind(renderer_attributes
 			{ {
 				{vtx::Attrib::Position, 0},
 				{vtx::Attrib::UV, 1},

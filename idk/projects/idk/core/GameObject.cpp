@@ -20,9 +20,9 @@ namespace idk
 	{
 		return GameState::GetGameState().CreateComponent(GetHandle(), dyn);
 	}
-	GenericHandle GameObject::AddComponent(GenericHandle handle, reflect::dynamic dyn)
+	GenericHandle GameObject::AddComponent(GenericHandle component_handle, reflect::dynamic dyn)
 	{
-		return GameState::GetGameState().CreateComponent(GetHandle(), handle, dyn);
+		return GameState::GetGameState().CreateComponent(GetHandle(), component_handle, dyn);
 	}
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{

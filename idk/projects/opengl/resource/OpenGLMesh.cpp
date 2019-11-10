@@ -40,7 +40,7 @@ namespace idk::ogl
 		return retval;
 	}
 
-	void OpenGLMesh::Bind(const renderer_reqs& locations)
+	void OpenGLMesh::Bind(const renderer_attributes& locations)
 	{
 
 		for (GLuint i = 0; i < vtx::Attrib::count; ++i)
@@ -60,10 +60,10 @@ namespace idk::ogl
 	void OpenGLMesh::DrawInstanced(size_t instances)
 	{
 		_element_array_object.Bind();
-		glDrawElementsInstanced(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0, instances);
+		glDrawElementsInstanced(_draw_mode, _element_array_object.count(), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instances));
 	}
 
-	void OpenGLMesh::BindAndDraw(const renderer_reqs& locations)
+	void OpenGLMesh::BindAndDraw(const renderer_attributes& locations)
 	{
 		Bind(locations);
 		Draw();

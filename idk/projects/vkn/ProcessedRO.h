@@ -90,5 +90,7 @@ namespace idk::vkn
 		//set, ds
 		hash_table<uint32_t,vk::DescriptorSet> descriptor_sets;
 		bool rebind_shaders = false;
+		size_t num_instances = 1;
+		size_t inst_offset   = 0;
 	};
 }

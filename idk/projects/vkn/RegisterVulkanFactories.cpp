@@ -43,6 +43,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".png");
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpg");
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpeg");
+	Core::GetResourceManager().RegisterLoader<PngLoader>(".tga");
 	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".vert");
 	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".frag");
 	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".geom");
