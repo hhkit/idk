@@ -35,17 +35,19 @@ namespace idk
 	ResourceBundle AssimpImporter::LoadFile(PathHandle path_to_resource, const MetaBundle& meta_bundle)
 	{
 		ResourceBundle ret_val;
-		
+		string err_msg;
 		ai_helpers::Scene importer_scene;
 		const bool success = ai_helpers::Import(importer_scene, path_to_resource);
 		
-		if (!success)
+		if (!success || importer_scene.ai_scene == nullptr)
 		{
-			LOG_ERROR_TO(LogPool::ANIM, string{ "Importing " } + path_to_resource.GetFileName().data() + " result: FAILED");
+			err_msg = string{ "Importing " } +path_to_resource.GetFileName().data() + " result: FAILED";
+			LOG_ERROR_TO(LogPool::ANIM, err_msg);
 			return ret_val;
 		}
 
-		LOG_TO(LogPool::ANIM, string{ "Importing " } + path_to_resource.GetFileName().data() + " result: SUCCESS");
+		err_msg = string{ "Importing " } +path_to_resource.GetFileName().data() + " result: SUCCESS";
+		LOG_TO(LogPool::ANIM, err_msg);
 
 		vector<RscHandle<Mesh>> mesh_handles;
 		RscHandle<anim::Skeleton> skeleton_handle;
@@ -173,7 +175,8 @@ namespace idk
 		// Check if this is a pure animation file. If it is, we don't even bother creating the prefab.
 		if (importer_scene.has_animation && !importer_scene.has_skeleton)
 		{
-			LOG_TO(LogPool::ANIM, string{ "No mesh but animations were found. Saving as pure animation file.\n" });
+			err_msg = "No mesh but animations were found. Saving as pure animation file.\n";
+			LOG_TO(LogPool::ANIM, err_msg);
 			return ret_val;
 		}
 
@@ -205,7 +208,7 @@ namespace idk
 			if (importer_scene.num_meshes == 1)
 			{
 				// Just attach the mesh to the prefab itself
-				auto mesh_renderer = prefab_root->AddComponent<MeshRenderer>();
+				const auto mesh_renderer = prefab_root->AddComponent<MeshRenderer>();
 				mesh_renderer->mesh = mesh_handles[0];
 			}
 			else

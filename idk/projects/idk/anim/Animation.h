@@ -40,12 +40,12 @@ namespace idk::anim
 		float _duration = 0.0f;
 		float _num_ticks = 0.0f;
 
-		float		GetFPS()		const { return _fps; }
-		float		GetDuration()	const { return _duration; }
-		float		GetNumTicks()	const { return _num_ticks; }
+		float		GetFPS()		const noexcept { return _fps; }
+		float		GetDuration()	const noexcept { return _duration; }
+		float		GetNumTicks()	const noexcept { return _num_ticks; }
 
 		AnimatedBone* GetAnimatedBone(string_view name);
-		const hash_table<string, AnimatedBone>& data() { return _animated_bones; }
+		const hash_table<string, AnimatedBone>& data() noexcept { return _animated_bones; }
 
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
 		void AddAnimatedBone(const AnimatedBone& animated_bone);
