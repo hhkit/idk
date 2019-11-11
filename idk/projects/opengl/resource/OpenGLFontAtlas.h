@@ -17,7 +17,7 @@ namespace idk::ogl
 
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
-		void Buffer(void* data, ivec2 size, FontInputChannels format_in = FontInputChannels::RGB, FontColorFormat internalFormat_in = FontColorFormat::SRGB, const unsigned& mipmap_size = 0, const float& imgSize = 0.f);
+		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB, ColorFormat internalFormat_in = ColorFormat::SRGB, const unsigned& mipmap_size = 0, const float& imgSize = 0.f);
 
 		using FontAtlas::Size;
 		void Size(ivec2 new_size) override;
@@ -31,7 +31,7 @@ namespace idk::ogl
 		GLuint _id = 0;
 		bool _isCompressedTexture{ false };
 		void OnMetaUpdate(const FontAtlasMeta&);
-		void UpdateUV(FontUVMode);
-		void UpdateFilter(FontFilterMode, const bool& isMipMap = false);
+		void UpdateUV(UVMode);
+		void UpdateFilter(FilterMode, const bool& isMipMap = false);
 	};
 }

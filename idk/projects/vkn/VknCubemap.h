@@ -33,7 +33,7 @@ namespace idk::vkn {
 	private:
 		RscHandle<VknCubemap> _convoluted;
 		void OnMetaUpdate(const CubeMapMeta&);
-		void UpdateUV(CMUVMode);
+		void UpdateUV(UVMode);
 
 	};
 };

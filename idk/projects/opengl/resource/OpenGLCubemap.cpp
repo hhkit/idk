@@ -5,61 +5,10 @@
 #include <core/Core.h>
 #include <res/ResourceManager.h>
 
+#include <opengl/resource/OpenGLTextureRenderMeta.h>
+
 namespace idk::ogl
 {
-	namespace detail
-	{
-		auto GLUVMode(CMUVMode uv_mode) -> GLenum
-		{
-			switch (uv_mode)
-			{
-			case CMUVMode::Repeat:       return GL_REPEAT;
-			case CMUVMode::Clamp:        return GL_CLAMP_TO_EDGE;
-			case CMUVMode::MirrorRepeat: return GL_MIRRORED_REPEAT;
-			default: return 0;
-			}
-		}
-
-		auto ToGLColor(CMColorFormat f)-> GLenum
-		{
-			switch (f)
-			{
-			case CMColorFormat::RGB_8:  return GL_RGB8;
-			case CMColorFormat::RGBA_8: return GL_RGBA8;
-			case CMColorFormat::RGBF_16: return GL_RGB16F;
-			case CMColorFormat::RGBF_32: return GL_RGB32F;
-			case CMColorFormat::RGBAF_16: return GL_RGBA16F;
-			case CMColorFormat::RGBAF_32: return GL_RGBA32F;
-			case CMColorFormat::SRGB:   return GL_SRGB;
-			default: return 0;
-			}
-		}
-
-		auto ToGLinputChannels(CMInputChannels i)-> GLint
-		{
-			switch (i)
-			{
-			case CMInputChannels::RED:  return GL_RED;
-			case CMInputChannels::RG:   return GL_RG;
-			case CMInputChannels::RGB:  return GL_RGB;
-			case CMInputChannels::RGBA: return GL_RGBA;
-			default: return 0;
-			}
-		}
-
-
-		/*
-		
-			Texture target	Orientation
-			0	GL_TEXTURE_CUBE_MAP_POSITIVE_X	Right
-			1	GL_TEXTURE_CUBE_MAP_NEGATIVE_X	Left
-			2	GL_TEXTURE_CUBE_MAP_POSITIVE_Y	Top
-			3	GL_TEXTURE_CUBE_MAP_NEGATIVE_Y	Bottom
-			4	GL_TEXTURE_CUBE_MAP_POSITIVE_Z	Back
-			5	GL_TEXTURE_CUBE_MAP_NEGATIVE_Z	Front
-		*/
-
-	}
 	
 	OpenGLCubemap::OpenGLCubemap()
 	{
@@ -75,7 +24,7 @@ namespace idk::ogl
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
 
-		meta.uv_mode = CMUVMode::Clamp;
+		meta.uv_mode = UVMode::Clamp;
 		UpdateUV(meta.uv_mode);
 		
 		for (unsigned int i = 0; i < 6; i++)
@@ -148,13 +97,13 @@ namespace idk::ogl
 		//GL_CHECK();
 	}
 
-	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, CMInputChannels format, CMColorFormat colorFormat)
+	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, InputChannels format, ColorFormat colorFormat)
 	{
 		format;
 
 		_size = size;
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ToGLColor(colorFormat), size.x, size.y, 0, detail::ToGLinputChannels(format), GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ogl_GraphicsFormat::ToColor(colorFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(format), GL_UNSIGNED_BYTE, data);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		GL_CHECK();
@@ -182,11 +131,11 @@ namespace idk::ogl
 	{
 		UpdateUV(tex_meta.uv_mode);
 	}
-	void OpenGLCubemap::UpdateUV(CMUVMode uv_mode)
+	void OpenGLCubemap::UpdateUV(UVMode uv_mode)
 	{
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, detail::GLUVMode(uv_mode));
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, detail::GLUVMode(uv_mode));
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, detail::GLUVMode(uv_mode));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
 		GL_CHECK();
 	}
 

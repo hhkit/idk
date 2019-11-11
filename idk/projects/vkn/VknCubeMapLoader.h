@@ -88,7 +88,7 @@ namespace idk::vkn
 	};
 	namespace vcm {
 		vk::Format    MapFormat(CubemapFormat tf);
-		vk::Format    MapFormat(CMColorFormat tf);
+		vk::Format    MapFormat(ColorFormat tf);
 		CubemapFormat MapFormat(vk::Format    tf);
 		vk::Format    UnSrgb(vk::Format);
 	};

@@ -70,7 +70,7 @@ namespace idk::vkn {
 		//Update meta "does nothing now"
 	}
 
-	void VknCubemap::UpdateUV(CMUVMode)
+	void VknCubemap::UpdateUV(UVMode)
 	{
 		//pdate uv
 	}

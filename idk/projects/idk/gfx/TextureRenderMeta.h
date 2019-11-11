@@ -75,108 +75,19 @@ namespace idk{
 		PosZ, NegZ
 	);
 
-	ENUM(CMColorFormat, char,
-		R_8,
-		R_16,
-		R_32F,
-		R_64F,
-		Rint_8,
-		Rint_16,
-		Rint_32,
-		Rint_64,
-		RG_8,
-		RGF_16,
-		RGB_8,
-		RGBA_8,
-		RGBF_16,
-		RGBF_32,
-		RGBAF_16,
-		RGBAF_32,
-		BGRA_8,
-		RUI_32,
-		DEPTH_COMPONENT,
-		DXT1,
-		DXT3,
-		DXT5,
-		DXT1_A,
-		SRGB,
-		SRGBA,
-		SRGB_DXT1,
-		SRGB_DXT3,
-		SRGB_DXT5,
-		SRGBA_DXT1
-	);
-	
-
-	ENUM(CMUVMode, char,
-		Repeat,
-		MirrorRepeat,
-		Clamp,
-		ClampToBorder
-	);
-
-	ENUM(CMInputChannels, char
-		, RED
-		, RG
-		, RGB
-		, RGBA
-	);
+	class GraphicsFormat {
+	public:
+		//GraphicsFormat() = default;
+		virtual ~GraphicsFormat() = default;
+		virtual unsigned ToUVMode(const UVMode& uv) = 0;
+		virtual unsigned ToColor(const ColorFormat& c) = 0;
+		virtual int ToInputChannels(const InputChannels& ic) = 0;
+		virtual unsigned ToFilter(const FilterMode& f) = 0;
+	};
 
 
 	ENUM(FontDefault, int,
 		SourceSansPro
 	); // 
-
-	ENUM(FontColorFormat, char,
-		R_8,
-		R_16,
-		R_32F,
-		R_64F,
-		Rint_8,
-		Rint_16,
-		Rint_32,
-		Rint_64,
-		RG_8,
-		RGF_16,
-		RGB_8,
-		RGBA_8,
-		RGBF_16,
-		RGBF_32,
-		RGBAF_16,
-		RGBAF_32,
-		BGRA_8,
-		RUI_32,
-		DEPTH_COMPONENT,
-		DXT1,
-		DXT3,
-		DXT5,
-		DXT1_A,
-		SRGB,
-		SRGBA,
-		SRGB_DXT1,
-		SRGB_DXT3,
-		SRGB_DXT5,
-		SRGBA_DXT1
-	);
-
-	ENUM(FontFilterMode, char,
-		Linear,
-		Nearest
-	);
-
-	ENUM(FontInputChannels, char
-		, RED
-		, RG
-		, RGB
-		, RGBA
-		, DEPTH_COMPONENT
-	);
-
-	ENUM(FontUVMode, char,
-		Repeat,
-		MirrorRepeat,
-		Clamp,
-		ClampToBorder
-	);
 
 }

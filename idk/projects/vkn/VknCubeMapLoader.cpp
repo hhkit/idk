@@ -38,11 +38,11 @@ namespace idk::vkn {
 	{
 		auto repeat_mode = options.uv_mode;
 		vk::SamplerAddressMode mode = vk::SamplerAddressMode::eClampToEdge;
-		static const hash_table<CMUVMode::_enum, vk::SamplerAddressMode> map
+		static const hash_table<UVMode::_enum, vk::SamplerAddressMode> map
 		{
-			{CMUVMode::_enum::Clamp,vk::SamplerAddressMode::eClampToBorder},
-			{CMUVMode::_enum::Repeat,vk::SamplerAddressMode::eRepeat},
-			{CMUVMode::_enum::MirrorRepeat,vk::SamplerAddressMode::eMirroredRepeat},
+			{UVMode::_enum::Clamp,vk::SamplerAddressMode::eClampToBorder},
+			{UVMode::_enum::Repeat,vk::SamplerAddressMode::eRepeat},
+			{UVMode::_enum::MirrorRepeat,vk::SamplerAddressMode::eMirroredRepeat},
 		};
 		auto itr = map.find(repeat_mode);
 		if (itr != map.end())
@@ -196,38 +196,38 @@ namespace idk::vkn {
 
 		}
 
-		hash_table<CMColorFormat::_enum, vk::Format> CFormatMap()
+		hash_table<ColorFormat::_enum, vk::Format> CFormatMap()
 		{
-			return hash_table<CMColorFormat::_enum, vk::Format>
+			return hash_table<ColorFormat::_enum, vk::Format>
 			{
-				{ CMColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD16Unorm},
-				{ CMColorFormat::_enum::R_8, vk::Format::eR8Unorm },
-				{ CMColorFormat::_enum::R_16, vk::Format::eR16Unorm },
-				{ CMColorFormat::_enum::R_32F, vk::Format::eR32Sfloat },
-				{ CMColorFormat::_enum::R_64F, vk::Format::eR64Sfloat },
-				{ CMColorFormat::_enum::Rint_8, vk::Format::eR8Uint },
-				{ CMColorFormat::_enum::Rint_16, vk::Format::eR16Uint },
-				{ CMColorFormat::_enum::Rint_32, vk::Format::eR32Uint },
-				{ CMColorFormat::_enum::Rint_64, vk::Format::eR64Uint },
-				{ CMColorFormat::_enum::RG_8, vk::Format::eR8G8Unorm },
-				{ CMColorFormat::_enum::RGF_16, vk::Format::eR16G16Sfloat },
-				{ CMColorFormat::_enum::RGB_8, vk::Format::eR8G8B8Unorm },
-				{ CMColorFormat::_enum::RGBF_16, vk::Format::eR16G16B16Sfloat },
-				{ CMColorFormat::_enum::RGBF_32, vk::Format::eR32G32B32Sfloat },
-				{ CMColorFormat::_enum::RGBA_8, vk::Format::eR8G8B8A8Unorm },
-				{ CMColorFormat::_enum::RGBAF_16, vk::Format::eR16G16B16A16Sfloat },
-				{ CMColorFormat::_enum::RGBAF_32, vk::Format::eR32G32B32A32Sfloat },
-				{ CMColorFormat::_enum::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
-				{ CMColorFormat::_enum::SRGB ,   vk::Format::eR8G8B8Srgb },
-				{ CMColorFormat::_enum::SRGBA,   vk::Format::eR8G8B8A8Srgb },
-				{ CMColorFormat::_enum::DXT1,vk::Format::eBc1RgbUnormBlock },
-				{ CMColorFormat::_enum::DXT3,vk::Format::eBc2UnormBlock },
-				{ CMColorFormat::_enum::DXT5,vk::Format::eBc3UnormBlock },
-				{ CMColorFormat::_enum::DXT1_A,vk::Format::eBc1RgbaUnormBlock },
-				{ CMColorFormat::_enum::SRGB_DXT1,vk::Format::eBc1RgbSrgbBlock },
-				{ CMColorFormat::_enum::SRGB_DXT3,vk::Format::eBc2SrgbBlock },
-				{ CMColorFormat::_enum::SRGB_DXT5,vk::Format::eBc3SrgbBlock },
-				{ CMColorFormat::_enum::SRGBA_DXT1,vk::Format::eBc1RgbaSrgbBlock },
+				{ ColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD16Unorm},
+				{ ColorFormat::_enum::R_8, vk::Format::eR8Unorm },
+				{ ColorFormat::_enum::R_16, vk::Format::eR16Unorm },
+				{ ColorFormat::_enum::R_32F, vk::Format::eR32Sfloat },
+				{ ColorFormat::_enum::R_64F, vk::Format::eR64Sfloat },
+				{ ColorFormat::_enum::Rint_8, vk::Format::eR8Uint },
+				{ ColorFormat::_enum::Rint_16, vk::Format::eR16Uint },
+				{ ColorFormat::_enum::Rint_32, vk::Format::eR32Uint },
+				{ ColorFormat::_enum::Rint_64, vk::Format::eR64Uint },
+				{ ColorFormat::_enum::RG_8, vk::Format::eR8G8Unorm },
+				{ ColorFormat::_enum::RGF_16, vk::Format::eR16G16Sfloat },
+				{ ColorFormat::_enum::RGB_8, vk::Format::eR8G8B8Unorm },
+				{ ColorFormat::_enum::RGBF_16, vk::Format::eR16G16B16Sfloat },
+				{ ColorFormat::_enum::RGBF_32, vk::Format::eR32G32B32Sfloat },
+				{ ColorFormat::_enum::RGBA_8, vk::Format::eR8G8B8A8Unorm },
+				{ ColorFormat::_enum::RGBAF_16, vk::Format::eR16G16B16A16Sfloat },
+				{ ColorFormat::_enum::RGBAF_32, vk::Format::eR32G32B32A32Sfloat },
+				{ ColorFormat::_enum::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
+				{ ColorFormat::_enum::SRGB ,   vk::Format::eR8G8B8Srgb },
+				{ ColorFormat::_enum::SRGBA,   vk::Format::eR8G8B8A8Srgb },
+				{ ColorFormat::_enum::DXT1,vk::Format::eBc1RgbUnormBlock },
+				{ ColorFormat::_enum::DXT3,vk::Format::eBc2UnormBlock },
+				{ ColorFormat::_enum::DXT5,vk::Format::eBc3UnormBlock },
+				{ ColorFormat::_enum::DXT1_A,vk::Format::eBc1RgbaUnormBlock },
+				{ ColorFormat::_enum::SRGB_DXT1,vk::Format::eBc1RgbSrgbBlock },
+				{ ColorFormat::_enum::SRGB_DXT3,vk::Format::eBc2SrgbBlock },
+				{ ColorFormat::_enum::SRGB_DXT5,vk::Format::eBc3SrgbBlock },
+				{ ColorFormat::_enum::SRGBA_DXT1,vk::Format::eBc1RgbaSrgbBlock },
 			};
 
 		}
@@ -238,7 +238,7 @@ namespace idk::vkn {
 			auto pdevice = View().PDevice();
 			for (auto& [ecf, format] : map)
 			{
-				CMColorFormat cf = ecf;
+				ColorFormat cf = ecf;
 				auto prop = pdevice.getFormatProperties(format);
 
 				std::cout << cf.to_string() << std::endl;
@@ -297,7 +297,7 @@ namespace idk::vkn {
 			static const auto map = FormatMap();
 			return map.find(tf)->second;
 		}
-		vk::Format MapFormat(CMColorFormat tf)
+		vk::Format MapFormat(ColorFormat tf)
 		{
 			static const auto map = CFormatMap();
 			return map.find(tf)->second;

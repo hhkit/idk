@@ -9,10 +9,10 @@ namespace idk {
 	struct FontAtlasMeta
 	{
 		string font_name = {};
-		FontUVMode      uv_mode = FontUVMode::ClampToBorder;
-		FontColorFormat internal_format = FontColorFormat::R_16;
-		FontInputChannels format = FontInputChannels::RED;   //Remove, loader determines this
-		FontFilterMode  filter_mode = FontFilterMode::Linear;
+		UVMode      uv_mode = UVMode::ClampToBorder;
+		ColorFormat internal_format = ColorFormat::R_16;
+		InputChannels format = InputChannels::RED;   //Remove, loader determines this
+		FilterMode  filter_mode = FilterMode::Linear;
 		bool is_srgb{ true };
 		int  fontSize = 48;
 	};

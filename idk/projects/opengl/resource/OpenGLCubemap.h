@@ -18,7 +18,7 @@ namespace idk::ogl
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
 		void BindConvolutedToUnit(GLuint texture_unit = 0);
-		void Buffer(unsigned int face_value, void* data, ivec2 size, CMInputChannels inputchn = CMInputChannels::RGB, CMColorFormat cFormat = CMColorFormat::RGBAF_16);
+		void Buffer(unsigned int face_value, void* data, ivec2 size, InputChannels inputchn = InputChannels::RGB, ColorFormat cFormat = ColorFormat::RGBAF_16);
 
 		using CubeMap::Size;
 		void Size(ivec2 new_size) override;
@@ -34,6 +34,6 @@ namespace idk::ogl
 		GLuint _id = 0;
 		GLuint _convoluted_id[2]{};
 		void OnMetaUpdate(const CubeMapMeta&) override;
-		void UpdateUV(CMUVMode);
+		void UpdateUV(UVMode);
 	};
 }

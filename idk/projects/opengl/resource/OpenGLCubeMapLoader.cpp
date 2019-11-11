@@ -59,14 +59,14 @@ namespace idk
 
 			//assert(data);
 
-			const auto col_format = [&]() -> CMInputChannels
+			const auto col_format = [&]() -> InputChannels
 			{	switch (channels)
 			{
 			default:
-			case 1: return CMInputChannels::RED;
-			case 2: return CMInputChannels::RG;
-			case 3: return CMInputChannels::RGB;
-			case 4: return CMInputChannels::RGBA;
+			case 1: return InputChannels::RED;
+			case 2: return InputChannels::RG;
+			case 3: return InputChannels::RGB;
+			case 4: return InputChannels::RGBA;
 			}
 			}();
 

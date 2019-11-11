@@ -75,6 +75,9 @@
     <ClInclude Include="resource\OpenGLFontAtlasFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureRenderMeta.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -137,6 +140,9 @@
     </ClCompile>
     <ClCompile Include="resource\OpenGLFontAtlasFactory.cpp">
       <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureRenderMeta.cpp">
+      <Filter>resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -204,15 +204,15 @@ REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")
 REFLECT_VARS(size, is_world_renderer, render_debug,color_tex,depth_tex)
 REFLECT_END()
 
-REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
-REFLECT_ENUM(idk::CMUVMode, "CMUVMode")
+//REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")
+//REFLECT_ENUM(idk::CMUVMode, "CMUVMode")
 
 REFLECT_BEGIN(idk::CubeMap::Metadata, "CubeMapMeta")
 REFLECT_VARS(uv_mode, internal_format)
 REFLECT_END()
 
-REFLECT_ENUM(idk::FontColorFormat, "FontColorFormat")
-REFLECT_ENUM(idk::FontUVMode, "FontUVMode")
+//REFLECT_ENUM(idk::FontColorFormat, "FontColorFormat")
+//REFLECT_ENUM(idk::FontUVMode, "FontUVMode")
 
 REFLECT_BEGIN(idk::FontAtlas::Metadata, "FontAtlasMeta")
 REFLECT_VARS(uv_mode, internal_format)

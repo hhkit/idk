@@ -8,8 +8,8 @@ namespace idk
 {
 	struct CubeMapMeta
 	{
-		CMUVMode      uv_mode = CMUVMode::Clamp;
-		CMColorFormat internal_format = CMColorFormat::RGBAF_16;
+		UVMode      uv_mode = UVMode::Clamp;
+		ColorFormat internal_format = ColorFormat::RGBAF_16;
 		bool is_srgb{ true };
 		bool compressed{ true };
 	};

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -194,6 +194,7 @@
     <ClInclude Include="resource\OpenGLCubemapFactory.h" />
     <ClInclude Include="resource\OpenGLTextureFactory.h" />
     <ClInclude Include="resource\OpenGLTextureLoader.h" />
+    <ClInclude Include="resource\OpenGLTextureRenderMeta.h" />
     <ClInclude Include="system\FrameBufferManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="program\GLSLLoader.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="resource\OpenGLFontAtlasLoader.cpp" />
     <ClCompile Include="resource\OpenGLTextureFactory.cpp" />
     <ClCompile Include="resource\OpenGLTextureLoader.cpp" />
+    <ClCompile Include="resource\OpenGLTextureRenderMeta.cpp" />
     <ClCompile Include="system\FrameBufferManager.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>

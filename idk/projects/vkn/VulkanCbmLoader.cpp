@@ -16,6 +16,7 @@ namespace idk::vkn
 	}
 	vk::Format ToSrgb(vk::Format f);
 
+	//To do:dds cubemap
 	ResourceBundle CbmLoader::LoadFile(PathHandle handle, RscHandle<CubeMap> rtex, const CubeMapMeta* tm)
 	{
 		VknCubemap& tex = rtex.as<VknCubemap>();
@@ -42,7 +43,7 @@ namespace idk::vkn
 			stbi_uc* data;
 		};
 
-		size_t t_size = 0;
+		size_t strid = 0, t_size = 0;
 		size_t v_size = std::size(fileExt);
 		array<char*, 6> loadList{ };
 		vector<size_t> strideList{ 0 };

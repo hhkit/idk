@@ -22,6 +22,8 @@ namespace idk
 			coords.resize(6 * strlen(text_data));
 
 			int n = 0;
+
+			//Raster position, need to convert to world position
 			real x = obj_tfm->GlobalPosition().x, newLine_x = x;
 			real y = obj_tfm->GlobalPosition().y;
 			const real atlas_width = s_cast<real>(textureAtlas->Size().x);
