@@ -68,8 +68,6 @@ StyleCopReport.xml
 *_p.c
 *_h.h
 *.ilk
-*.meta
-*.obj
 *.iobj
 *.pch
 *.pdb
@@ -348,7 +346,13 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 /idk/engine
-/idk/testbin
-/idk/testbuild
 /idk/build/tests
 /idk/build/win32
+imgui.ini
+idk/dep/lib/SPIRV-Tools-optd.lib
+/testproj/test dismount
+/idk/projects/wrapper/log.txt
+/idk/build/launcher
+/idk/launcher
+/idk/compiler
+/idk/build/compiler

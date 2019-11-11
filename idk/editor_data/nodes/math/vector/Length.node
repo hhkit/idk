@@ -1,0 +1,6 @@
+float->float
+vec2->float
+vec3->float
+vec4->float
+In,Out
+{1} = length({0});

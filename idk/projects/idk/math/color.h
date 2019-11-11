@@ -4,38 +4,42 @@
 namespace idk
 {
 	struct color
+		: linear<color, float>
 	{
 		union
 		{
+			float values[4];
 			struct { float r, g, b, a; };
-			math::vector<float, 3> as_vec3;
-			math::vector<float, 4> as_vec4;
+			tvec<float, 3> as_vec3;
+			tvec<float, 4> as_vec4;
 		};
 
-		constexpr color(void) noexcept : r{}, g{}, b{}, a{ 1.f } {}
+		constexpr color(void) noexcept;
+		constexpr explicit color(float fill) noexcept;
 		constexpr color(float r, float g, float b, float a = float{ 1 }) noexcept;
-		constexpr explicit color(const math::vector<float, 3>&) noexcept;
-		constexpr explicit color(const math::vector<float, 4>&) noexcept;
+		constexpr explicit color(const tvec<float, 3>&) noexcept;
+		constexpr explicit color(const tvec<float, 4>&) noexcept;
 
 		// accessors
-		float& operator[](size_t);
-		const float& operator[](size_t) const;
+		constexpr float& operator[](size_t) noexcept;
+		constexpr const float& operator[](size_t) const noexcept;
 
 		// iterator
-		float*       begin();
-		const float* begin() const;
-		float*       end();
-		const float* end() const;
-		float*       data();
-		const float* data() const;
+		constexpr float*       begin() noexcept;
+		constexpr const float* begin() const noexcept;
+		constexpr float*       end() noexcept;
+		constexpr const float* end() const noexcept;
+		constexpr float*       data() noexcept;
+		constexpr const float* data() const noexcept;
 
 		// operator overloads
-		color& operator+=(const color&);
-		color& operator*=(const color&);
-		color& operator*=(float);
+		constexpr color& operator+=(const color&) noexcept;
+		constexpr color& operator*=(const color&) noexcept;
+		constexpr color& operator*=(float) noexcept;
 
 		// conversion operators
-		constexpr explicit operator math::vector<float,3>() const noexcept;
-		constexpr explicit operator math::vector<float,4>() const noexcept;
+		constexpr explicit operator tvec<float,3>() const noexcept;
+		constexpr explicit operator tvec<float,4>() const noexcept;
 	};
 }
+#include "color.inl"

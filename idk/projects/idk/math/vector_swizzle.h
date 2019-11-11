@@ -4,7 +4,7 @@
 #include <ds/range.h>
 #include <ds/zip.h>
 
-namespace idk::math::detail
+namespace idk::detail
 {
 	template<template <typename T, unsigned Sz> typename tvector, typename T, unsigned ... Indexes>
 	class swizzle

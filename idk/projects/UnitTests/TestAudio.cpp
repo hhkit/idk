@@ -8,29 +8,29 @@
 
 
 #include "pch.h" // gtest.h
+#include <reflect/reflect.h>
 #include "FMOD/core/fmod.hpp" //FMOD Core
 #include "FMOD/core/fmod_errors.h" //ErrorString
 #include <scene/Scene.h>
+#include <core/GameObject.h>	
 #include <audio/AudioSystem.h>	
 #include <audio/AudioClip.h>	
+#include <audio/AudioListener.h>
+#include <file/FileSystem.h>
+#include <common/Transform.h>	
 #include <core/Core.h>
-#include <iostream>	
-#include <filesystem> //Using this until our filesystem is up	
-
+#include "TestApplication.h"
 
 TEST(Audio, AudioSystemClassTest)
 {
 	using namespace idk;
 	Core c;
-	AudioSystem& test = Core::GetSystem<AudioSystem>();
-	c.Setup();
-	try { 
-		test.Init(); 
-	}
-	catch (EXCEPTION_AudioSystem i) {
-		std::cout << i.exceptionDetails << std::endl;
-		EXPECT_TRUE(false);
-	}
+    c.AddSystem<TestApplication>();
+	auto& test = c.GetSystem<AudioSystem>();
+    EXPECT_NO_THROW(c.Setup());
+
+    c.GetSystem<FileSystem>().Mount(TEST_DATA_PATH, "/assets");
+
 	std::cout << "Getting all available sound drivers... "<< std::endl;
 
 	auto i = test.GetAllSoundDriverData();
@@ -48,28 +48,17 @@ TEST(Audio, AudioSystemClassTest)
 		std::cout << "  SPEAKERMODE: " << test.FMOD_SPEAKERMODE_TO_C_STR(j.speakerMode) << std::endl;
 		std::cout << "  SPEAKERMODECHANNELS: " << j.speakerModeChannels << std::endl;
 		std::cout << "  SYSTEMRATE: " << j.systemRate << std::endl << std::endl;
-
 	}
 
-	
-	string path1 = std::filesystem::current_path().string();
-	std::cout << "Current Working Directory: " << path1;
-	std::cout << "\n";
-	path1.append("\\SampleSounds\\My Delirium - Ladyhawke (Lyrics).mp3"); 
+	std::cout << "Searching for \\audio\\My Delirium - Ladyhawke (Lyrics).mp3 in directory...\n";
 
-	string path2 = std::filesystem::current_path().string();
-	path2.append("\\SampleSounds\\25secClosing_IZHA");
-	path2.append(".wav");
-
-	std::cout << "Searching for \\SampleSounds\\My Delirium - Ladyhawke (Lyrics).mp3 in directory...\n";
-
-	RscHandle<AudioClip> audioPtr1 = Core::GetResourceManager().Create<AudioClip>(path2);
+	RscHandle<AudioClip> audioPtr1 = *Core::GetResourceManager().Load<AudioClip>("/assets/audio/My Delirium - Ladyhawke (Lyrics).mp3");
 
 	if (!audioPtr1) { //Check if null is given
 		std::cout << "Audio path not found, skipping test...\n";
 
 		try {
-			test.Shutdown();
+			c.Shutdown();
 		}
 		catch (EXCEPTION_AudioSystem i) {
 			std::cout << "//////////////////////////////////////\n";
@@ -87,13 +76,13 @@ TEST(Audio, AudioSystemClassTest)
 	}
 
 
-	RscHandle<AudioClip> audioPtr2 = Core::GetResourceManager().Create<AudioClip>(path1);
-	RscHandle<AudioClip> audioPtr3 = Core::GetResourceManager().Create<AudioClip>(path2);
+    RscHandle<AudioClip> audioPtr2 = audioPtr1;
+	RscHandle<AudioClip> audioPtr3 = *Core::GetResourceManager().Load<AudioClip>("/assets/audio/25secClosing_IZHA.wav");
 
 	std::cout << "Playing first sound in default SFX group...\n";
 
 
-	audioPtr1->Play();
+	//audioPtr1->Play();
 	time_point timeStartTest = Clock::now();
 	seconds elapsed = time_point::clock::now() - timeStartTest;
 
@@ -102,43 +91,55 @@ TEST(Audio, AudioSystemClassTest)
 	bool testCase3 = false;
 	bool testCase4 = false;
 	bool testCase5 = false;
+	bool testCase6 = false;
 
 
 
-	while (elapsed.count() < 8) { //
+	while (elapsed.count() < 10) { //
 		try {
-			test.Update();
+			test.UpdateTestCaseOnly();
 			elapsed = time_point::clock::now() - timeStartTest;
-			if (elapsed.count() > 2 && !testCase1) {
-				std::cout << "Setting SFX group to volume 0.5\n";
-				test.SetChannel_SFX_Volume(0.5f);
-				testCase1 = true;
-			}
-			if (elapsed.count() > 3 && !testCase2) {
-				std::cout << "Setting Master group to volume 0.5\n";
-				test.SetChannel_MASTER_Volume(0.5f);
-				testCase2 = true;
-			}
+			
+
+
+			//if (elapsed.count() > 2 && !testCase1) {
+			//	std::cout << "Setting SFX group to volume 0.5\n";
+			//	test.SetChannel_SFX_Volume(0.5f);
+			//	testCase1 = true;
+			//}
+			//if (elapsed.count() > 3 && !testCase2) {
+			//	std::cout << "Setting Master group to volume 0.5\n";
+			//	test.SetChannel_MASTER_Volume(0.5f);
+			//	testCase2 = true;
+			//}
 
 			if (elapsed.count() > 4 && !testCase3) {
 				std::cout << "Playing second sound to MUSIC group\n";
-				audioPtr2->ReassignSoundGroup(AudioClip::SubSoundGroup_MUSIC);
+				audioPtr2->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_MUSIC);
 
-				audioPtr2->Play();
+				//audioPtr2->Play();
 				testCase3 = true;
 			}
 			if (elapsed.count() > 5 && !testCase4) {
 				std::cout << "Stopping first music\n";
 
-				audioPtr1->Stop();
+				//audioPtr1->Stop();
 				testCase4 = true;
 			}
 
 			if (elapsed.count() > 6 && !testCase5) {
-				std::cout << "Playing another misc music\n";
-				audioPtr3->Play();
-			
+				std::cout << "Playing another misc music and stopping second music\n";
+
+				//audioPtr3->Play();
+				//audioPtr2->Stop();
+
 				testCase5 = true;
+			}
+			if (elapsed.count() > 8 && !testCase6) {
+				std::cout << "Setting third music to loop and high pitched\n";
+				//audioPtr3->Play(); //Plays another audio
+
+				testCase6 = true;
 			}
 
 		}
@@ -149,7 +150,7 @@ TEST(Audio, AudioSystemClassTest)
 		}
 	}
 	try {
-		test.Shutdown();
+		c.Shutdown();
 	}
 	catch (EXCEPTION_AudioSystem i) {
 		std::cout << i.exceptionDetails << std::endl;
@@ -157,4 +158,3 @@ TEST(Audio, AudioSystemClassTest)
 	}
 	// Cleanup
 }
-

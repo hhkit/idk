@@ -1,30 +1,16 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include <scene/SceneManager.h>
 #include <core/GameObject.h>
+#include <util/ioutils.h>
+#include <res/ResourceBundle.h>
 
 namespace idk
 {
-	Scene::Scene(uint8_t scene_id_)
-		: scene_id{ scene_id_ }
+	Scene::Scene(unsigned char index)
+		: scene_id{ index }
 	{
-		if (scene_id == MaxScene)
-		{
-			for (uint8_t i = 0; i < MaxScene; ++i)
-			{
-				if (GameState::GetGameState().ActivateScene(i))
-				{
-					scene_id = i;
-					break;
-				}
-			}
-		}
 	}
-
-	Scene::~Scene()
-	{
-		GameState::GetGameState().DectivateScene(scene_id);
-	}
-
 	Handle<GameObject> Scene::CreateGameObject(const Handle<GameObject>& handle)
 	{
 		return GameState::GetGameState().CreateObject<GameObject>(handle);
@@ -40,11 +26,54 @@ namespace idk
 		GameState::GetGameState().DestroyObject(go);
 	}
 
+	bool Scene::Loaded()
+	{
+		return _loaded;
+	}
+
+	SceneLoadResult Scene::LoadFromResourcePath()
+	{
+		auto res = Activate();
+		if (res != SceneLoadResult::Ok)
+			return res;
+
+		auto path = Core::GetResourceManager().GetPath(GetHandle());
+		if (!path)
+			return SceneLoadResult::Err_ScenePathNotFound;
+
+		auto stream = Core::GetSystem<FileSystem>().Open(*path, FS_PERMISSIONS::READ);
+		parse_text(stringify(stream), *this);
+		return SceneLoadResult::Ok;
+	}
+
+	SceneLoadResult Scene::Activate()
+	{
+		if (_loaded)
+			return SceneLoadResult::Err_SceneAlreadyActive;
+
+		_loaded = true;
+		GameState::GetGameState().ActivateScene(scene_id);
+		Core::GetSystem<SceneManager>()._scenes[scene_id] = GetHandle();
+		return SceneLoadResult::Ok;
+	}
+
+	SceneUnloadResult Scene::Deactivate()
+	{
+		if (!_loaded)
+			return SceneUnloadResult::Err_SceneAlreadyInactive;
+
+		Core::GetSystem<SceneManager>()._scenes[scene_id] = RscHandle<Scene>{};
+		GameState::GetGameState().DeactivateScene(scene_id);
+		_loaded = false;
+
+		return SceneUnloadResult::Ok;
+	}
+
 	Scene::iterator Scene::begin() const
 	{
-		auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
+		const auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		auto beg = span.begin();
-		auto etr = span.end();
+		const auto etr = span.end();
 
 		while (beg != etr && beg->GetHandle().scene != scene_id)
 			++beg; 
@@ -54,13 +83,8 @@ namespace idk
 
 	Scene::iterator Scene::end() const
 	{
-		auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
+		const auto span = GameState::GetGameState().GetObjectsOfType<GameObject>();
 		return iterator{scene_id, span.end(), span.end() };
-	}
-
-	Scene GetScene(const GenericHandle& handle)
-	{
-		return Scene{ handle.scene };
 	}
 
 	GameObject& Scene::iterator::operator*()

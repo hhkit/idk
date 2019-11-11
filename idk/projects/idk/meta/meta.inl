@@ -17,30 +17,6 @@ namespace idk
 
 
 
-	template<typename ... Ts, template<typename ...> typename Wrap>
-	struct tuple_wrap<std::tuple<Ts...>, Wrap>
-	{
-		using type = std::tuple<Wrap<Ts>...>;
-	};
-
-	template<typename FindMe>
-	struct index_in_tuple < FindMe, std::tuple<>>
-	{
-		static constexpr uint8_t value = 0;
-	};
-
-	template<typename FindMe, typename ... Ts>
-	struct index_in_tuple < FindMe, std::tuple<FindMe, Ts...>>
-	{
-		static constexpr uint8_t value = 0;
-	};
-
-	template<typename FindMe, typename First, typename ... Ts>
-	struct index_in_tuple < FindMe, std::tuple<First, Ts...>>
-	{
-		static constexpr uint8_t value = index_in_tuple<FindMe, std::tuple<Ts...>>::value + 1;
-	};
-
 	template<typename T, T ... Indexes1, T ... Indexes2>
 	struct index_sequence_cat<std::index_sequence<Indexes1...>, std::index_sequence<Indexes2...>>
 	{
@@ -73,7 +49,7 @@ namespace idk
 	)>> : std::true_type {};
 
 	template<typename T, typename = void>
-	struct is_sequential_container : std::false_type {};
+	struct is_sequential_container : std::is_array<std::decay_t<T>> {};
 
 	template<typename T>
 	struct is_sequential_container<T, std::void_t<decltype(
@@ -85,8 +61,13 @@ namespace idk
 
 	template<typename T>
 	struct is_associative_container<T, std::void_t<decltype(
-		std::declval<T&>().insert(std::declval<std::decay_t<T>::value_type>())
+		std::declval<T&>().insert(std::declval<typename std::decay_t<T>::value_type>())
 	)>> : is_iterable<T> {};
+
+
+	template<typename T>
+	struct is_container : std::disjunction<is_associative_container<T>, is_sequential_container<T>> {};
+
 
 	template<typename T, typename = void>
 	struct is_macro_enum : std::false_type {};
@@ -97,4 +78,21 @@ namespace idk
 		std::decay_t<T>::names[0],
 		std::decay_t<T>::values[0]
 	)>> : std::is_enum<typename std::decay_t<T>::_enum> {};
+
+
+
+	template<typename T, typename VariantT>
+	struct is_variant_member;
+
+	template<typename T, typename... Ts>
+	struct is_variant_member<T, std::variant<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
+
+
+
+    // true if is integral/floating point, or is constructible from and to string, or is macro enum
+    template<typename T>
+    struct is_basic_serializable : std::disjunction<
+        std::is_arithmetic<std::decay_t<T>>,
+        is_macro_enum<std::decay_t<T>>,
+        std::conjunction<std::is_constructible<string, T>, std::is_constructible<std::decay_t<T>, string>>> {};
 }

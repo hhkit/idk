@@ -2,8 +2,11 @@
 #include <idk.h>
 #include <idk_config.h>
 #include <core/ISystem.h>
+#include <scene/SceneGraphBuilder.h>
 namespace idk
 {
+	class Scene;
+
 	enum class LoadSceneMode
 	{
 		Single,
@@ -14,18 +17,41 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		void Init() override;
-		void Shutdown() override;
+		using SceneGraph = SceneGraphBuilder::SceneGraph;
+		struct iterator;
+		Signal<RscHandle<Scene>> OnSceneChange;
 
-		RscHandle<Scene> CreateScene(string_view name = "");
-		RscHandle<Scene> LoadScene(uint8_t scene_id, LoadSceneMode = LoadSceneMode::Single);
-		//Scene LoadScene(string_view path_to_scene, LoadSceneMode = LoadSceneMode::Single);
-		RscHandle<Scene> GetActiveScene();
+		RscHandle<Scene>   _startup_scene; // public for reflection to use, please don't touch
+		RscHandle<Scene>   _active_scene;  // public for reflection to use, please don't touch
+
+		// accessors
+		RscHandle<Scene>       GetSceneByBuildIndex(unsigned char index) const;
+		
+		// properties
+		RscHandle<Scene>    StartupScene() const;
+		// true if successfully set, false otherwise
+		bool                StartupScene(RscHandle<Scene> scene);
+
+		RscHandle<Scene> GetActiveScene() const;
+		RscHandle<Scene> GetPrefabScene() const;
 		bool  SetActiveScene(RscHandle<Scene> s);
 
-		string_view GetSceneName();
+		void DestroyQueuedObjects(span<GameObject> objs);
+
+		void BuildSceneGraph(span<const GameObject> objs);
+		SceneGraph& FetchSceneGraph();
+		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
+
 	private:
-		GameState* _gs = nullptr;
-		RscHandle<Scene> _active_scene;
+		friend class Scene;
+		void Init() override;
+		void LateInit() override;
+		void EarlyShutdown() override;
+		void Shutdown() override;
+
+		GameState*         _gs { nullptr };
+		SceneGraphBuilder  _sg_builder;
+		RscHandle<Scene>   _prefab_scene;
+		array<RscHandle<Scene>, MaxScene> _scenes;
 	};
 }

@@ -8,6 +8,7 @@ namespace idk::reflect
 	struct dynamic::base
 	{
 		virtual void* get() const = 0;
+		virtual dynamic copy() const = 0;
 		virtual ~base() {}
 	};
 
@@ -25,6 +26,33 @@ namespace idk::reflect
 		void* get() const override
 		{
 			return const_cast<void*>(static_cast<const void*>(&obj));
+		}
+
+		dynamic copy() const override
+		{
+            if constexpr (!std::is_copy_constructible_v<std::decay_t<T>>)
+                throw "object is not copy constructible!";
+            else
+    			return dynamic(static_cast<std::decay_t<T>>(obj));
+		}
+	};
+
+	struct dynamic::voidptr : dynamic::base
+	{
+		void* obj;
+
+		voidptr(void* obj)
+			: obj{ obj }
+		{}
+
+		void* get() const override
+		{
+			return obj;
+		}
+
+		dynamic copy() const override
+		{
+			return dynamic(std::move(obj));
 		}
 	};
 
@@ -47,11 +75,34 @@ namespace idk::reflect
 		: type{ get_type<T>() }, _ptr{ std::make_shared<derived<T>>(std::forward<T>(obj)) }
 	{}
 
-	template<typename T>
-	dynamic& dynamic::operator=(const T& rhs)
+	template<typename T, typename>
+	dynamic& dynamic::operator=(T&& rhs)
 	{
-		assert(is<std::decay_t<T>>());
-		type._context->copy_assign(_ptr->get(), &rhs);
+        if (is<T>())
+            type._context->copy_assign(_ptr->get(), &rhs);
+        else
+        {
+            if constexpr (std::is_same_v<std::decay_t<T>, string>)
+            {
+                if (type.is_basic_serializable())
+                {
+                    const auto dyn = type._context->string_construct(rhs);
+                    type._context->copy_assign(_ptr->get(), dyn._ptr->get());
+                }
+                else
+                {
+                    if constexpr (is_variant_member_v<T, ReflectedTypes>)
+                        type._context->variant_assign(_ptr->get(), rhs);
+                    else
+                        throw "Invalid assignment!";
+                }
+            }
+            else if constexpr (is_variant_member_v<T, ReflectedTypes>)
+                type._context->variant_assign(_ptr->get(), rhs);
+            else
+                throw "Invalid assignment!";
+        }
+
 		return *this;
 	}
 
@@ -75,6 +126,7 @@ namespace idk::reflect
 	//     name of property (const char*), or
 	//     container key when visiting container elements ( K = std::decay_t<decltype(key)> )
 	//     for sequential containers, it will be size_t. for associative, it will be type K
+	//     for held object of variants, it will be the held type (as a reflect::type)
 	// value:
 	//     the value, use T = std::decay_t<decltype(value)> to get the type
 	// depth_change: (int)
@@ -85,7 +137,8 @@ namespace idk::reflect
 	void dynamic::visit(Visitor&& visitor) const
 	{
 		int depth = 0;
-		detail::visit(_ptr->get(), type, std::forward<Visitor>(visitor), depth);
+		int last_visit_depth = -1;
+		detail::visit(_ptr->get(), type, std::forward<Visitor>(visitor), depth, last_visit_depth);
 	}
 
 }

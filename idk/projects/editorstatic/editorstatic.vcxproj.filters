@@ -16,6 +16,31 @@
     <ClCompile Include="imgui\ImGUIImpl_Win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_vulkan.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGradient.cpp">
+      <Filter>imguiGizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo.cpp">
+      <Filter>imguiGizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImSequencer.cpp">
+      <Filter>imguiGizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImCurveEdit.cpp">
+      <Filter>imguiGizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imnodes\ImNodes.cpp" />
+    <ClCompile Include="imgui\imgui_stl.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorPoolManager.cpp">
+      <Filter>VulkanUtils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\ImGUIImpl_Win32.h">
@@ -39,10 +64,46 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_vulkan.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImCurveEdit.h">
+      <Filter>imguiGizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGradient.h">
+      <Filter>imguiGizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo.h">
+      <Filter>imguiGizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImSequencer.h">
+      <Filter>imguiGizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imnodes\ImNodes.h" />
+    <ClInclude Include="imgui\imgui_stl.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorPoolManager.h">
+      <Filter>VulkanUtils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">
       <UniqueIdentifier>{11fd57bc-7b5d-4dad-9196-66c3ad475ec5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imguiGizmo">
+      <UniqueIdentifier>{7acbf845-8108-46c1-b9a1-158bac393bb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="VulkanUtils">
+      <UniqueIdentifier>{c119d2fe-00f8-4aa2-b7c1-fbce07b59bce}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DescriptorPoolManager.inl">
+      <Filter>VulkanUtils</Filter>
+    </None>
   </ItemGroup>
 </Project>

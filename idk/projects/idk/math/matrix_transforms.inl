@@ -2,27 +2,28 @@
 #include <ds/range.h>
 #include <ds/zip.h>
 #include "matrix_transforms.h"
+#include <idk.h>
 
 namespace idk
 {
 	template<typename T>
-	T identity()
+	constexpr T identity()
 	{
 		return T();
 	}
 	template<typename T, unsigned D>
-	math::matrix<T, D, D> scale(const math::vector<T, D>& rhs)
+	constexpr tmat<T, D, D> scale(const tvec<T, D>& rhs)
 	{
-		math::matrix<T, D, D> retval;
+		tmat<T, D, D> retval;
 		for (auto [row, scale, n] : zip(retval, rhs, range<D>()))
 			row[n] = scale;
 		return retval;
 	}
 
 	template<typename T>
-	math::matrix<T, 3, 3> rotate(const math::vector<T, 3> & axis, math::radian<T> angle)
+	tmat<T, 3, 3> rotate(const tvec<T, 3> & axis, trad<T> angle)
 	{
-		using ret_t = math::matrix<T, 3, 3>;
+		using ret_t = tmat<T, 3, 3>;
 		const auto n = axis.get_normalized();
 		const auto c = cos(angle);
 		const auto s = sin(angle);
@@ -45,23 +46,23 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
-	math::matrix<T, D + 1, D + 1> translate(const math::vector<T, D> & translate_vec)
+	constexpr tmat<T, D + 1, D + 1> translate(const tvec<T, D> & translate_vec)
 	{
-		auto retval = math::matrix<T, D + 1, D + 1>();
-		retval[D] = math::vector<T, D + 1>{ translate_vec, 1.f };
+		auto retval = tmat<T, D + 1, D + 1>();
+		retval[D] = tvec<T, D + 1>{ translate_vec, 1.f };
 		return retval;
 	}
 
 	template<typename T>
-	math::matrix<T, 4, 4> perspective(math::radian<T> fov, T a, T n, T f)
+	tmat<T, 4, 4> perspective(trad<T> fov, T a, T n, T f)
 	{
-		auto t = tan(fov / 2);
+		const auto t = tan(fov / 2);
 
 		constexpr auto _2 = s_cast<T>(2);
 		constexpr auto _1 = s_cast<T>(1);
 		constexpr auto _0 = s_cast<T>(0);
 
-		return math::matrix<T, 4, 4>{
+		return tmat<T, 4, 4>{
 			_1 / (t*a), _0  , _0                , _0                     ,
 			_0        , _1/t, _0                , _0                     ,
 			_0        , _0  , -(f + n) / (f - n), - (_2 * f  * n) / (f-n),
@@ -69,44 +70,52 @@ namespace idk
 		};
 	}
 	template<typename T>
-	math::matrix<T, 4, 4> perspective(math::degree<T> fov, T aspect_ratio, T n, T f)
+	tmat<T, 4, 4> perspective(tdeg<T> fov, T aspect_ratio, T n, T f)
 	{
-		return perspective(math::radian<T>{fov}, aspect_ratio, n, f);
+		return perspective(trad<T>{fov}, aspect_ratio, n, f);
 	}
 	template<typename T>
-	math::matrix<T, 4, 4> ortho(T l, T r, T b, T t, T n, T f)
+	constexpr tmat<T, 4, 4> ortho(T l, T r, T b, T t, T n, T f)
 	{
 		constexpr auto _2 = s_cast<T>(2);
 		constexpr auto _1 = s_cast<T>(1);
 		constexpr auto _0 = s_cast<T>(0);
 
-		using vec_t = math::vector<T, 4>;
+		using vec_t = tvec<T, 4>;
 		const vec_t tvec = {-(r+l)/(r-l), -(t + b) / (t - b), -(f + n) / (f - n), _1 };
 
-		return math::matrix<T, 4, 4>(
+		return tmat<T, 4, 4>(
 			vec_t{_2 / (r-l), _0, _0, _0},
-			vec_t{_0, 2 / (t-b), _0, _0},
-			vec_t{_0, _0, 2 / (f-n), _0},
+			vec_t{_0, _2 / (t-b), _0, _0},
+			vec_t{_0, _0, _2 / (f-n), _0},
 			tvec
 		);
 	}
 	template<typename T>
-	math::matrix<T, 4, 4> look_at(const math::vector<T, 3> & eye, const math::vector<T, 3> & object, const math::vector<T, 3> & global_up)
+	constexpr tmat<T, 4, 4> look_at(const tvec<T, 3> & eye, const tvec<T, 3> & object, const tvec<T, 3> & global_up)
 	{
-		auto target = (eye - object).normalize();
-		auto right  = global_up.cross(target).normalize();
-		auto up     = target.cross(global_up);
+		const auto target = (eye - object).normalize();
+		const auto right  = global_up.cross(target).normalize();
+		const auto up     = target.cross(right).normalize();
 
-		return math::matrix<T, 4, 4>{
+		return tmat<T, 4, 4>{
 			vec4{ right,  0 }, 
 			vec4{ up,     0 }, 
-			vec4{ target, 0 }, 
+			vec4{ target, 0 },
 			vec4{ eye,    1 }
 		};
 	}
 
+	template<typename T>
+	tmat<T, 3, 3> orient(const tvec<T, 3> & z_prime)
+	{
+		const auto axis = tvec<T, 3>{0, 0, 1}.cross(z_prime);
+		const auto angle = asin(axis.length());
+		return rotate(axis, angle);
+	}
+
 	template<typename T, unsigned D>
-	math::matrix<T, D, D> orthonormalize(const math::matrix<T, D, D>& m)
+	constexpr tmat<T, D, D> orthonormalize(const tmat<T, D, D>& m)
 	{
 		auto retval = m;
 		for (auto i : range<D>())
@@ -118,6 +127,14 @@ namespace idk
 			}
 			retval[i].normalize();
 		}
+		return retval;
+	}
+	template<typename T>
+	constexpr tmat<T, 4, 4> invert_rotation(const tmat<T, 4, 4>& m)
+	{
+		auto retval = m.transpose();
+		retval[0][3] = retval[1][3] = retval[2][3] = 0;
+		retval[3] = vec4{-m[0].dot(m[3]), -m[1].dot(m[3]), -m[2].dot(m[3]), 1};
 		return retval;
 	}
 }

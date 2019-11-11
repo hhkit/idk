@@ -69,3 +69,70 @@ TEST(ObjectPool, TestObjectPooling)
 	GenericHandle generich;
 	*generich;
 }
+
+TEST(ObjectPool, TestObjectDefrag)
+{
+	using namespace idk;
+	pool<int> p;
+
+	for (int i = 0; i < 1000; ++i)
+		p.emplace_back();
+
+	for (int i = 0; i < 1000; ++i)
+		p.pop_back();
+
+	ObjectPool<class GameObject> op;
+	op.ActivateScene(0);
+
+	auto obj1 = op.Create(0);
+	auto obj2 = op.Create(0);
+	auto obj3 = op.Create(0);
+	auto obj4 = op.Create(0);
+	auto obj5 = op.Create(0);
+
+
+	auto print_handle = [](GenericHandle id)
+	{
+		std::cout << "{ s:" << (int) id.scene << " g:" << (int) id.gen << " i:" << (int)id.index << " t:" << (int)id.type << " }";
+	};
+
+	auto print_all = [&]()
+	{
+		for (auto& elem : op.GetSpan())
+			print_handle(elem.GetHandle());
+		std::cout << "\n";
+	};
+
+	for (auto& elem : op.GetSpan())
+		std::cout << elem.GetHandle().id << ' ';
+
+	op.Destroy(obj2);
+	op.Destroy(obj3);
+	op.Create(0);
+	op.Create(0);
+	std::cout << '\n';
+	// reverse
+	print_all();
+	std::cout << "test sort\n";
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen > rhs.GetHandle().gen; }) << '\n';
+	print_all();
+	std::cout << "test stability\n";
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen > rhs.GetHandle().gen; }) << '\n';
+	print_all();
+
+
+	op.Destroy(obj2);
+	op.Destroy(obj3);
+	op.Create(0);
+	op.Create(0);
+
+	std::cout << '\n';
+	print_all();
+
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen > rhs.GetHandle().gen; }) << '\n';
+
+	print_all();
+	std::cout << "swaps: " << op.Defrag([](const GameObject& lhs, const GameObject& rhs) {return lhs.GetHandle().gen < rhs.GetHandle().gen; }) << '\n';
+	std::cout << '\n';
+	print_all();
+}

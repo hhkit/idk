@@ -24,6 +24,7 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
     <ProjectName>50 Unit Testing</ProjectName>
   </PropertyGroup>
@@ -46,7 +47,13 @@
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClCompile Include="TestGeometry.cpp" />
+    <ClCompile Include="TestSerializeBinary.cpp" />
+    <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestAudio.cpp" />
+    <ClCompile Include="TestDualSet.cpp" />
+    <ClCompile Include="TestPrefab.cpp" />
+    <ClCompile Include="TestSaveableResource.cpp" />
     <ClCompile Include="TestSmallString.cpp" />
     <ClCompile Include="TestFileSystem.cpp" />
     <ClCompile Include="TestReflect.cpp" />
@@ -55,6 +62,7 @@
     <ClCompile Include="TestSystemManager.cpp">
       <FileType>CppCode</FileType>
     </ClCompile>
+    <ClInclude Include="TestApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SpeedTest.cpp" />
@@ -66,6 +74,7 @@
     <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
     <ClCompile Include="TestQuaternion.cpp" />
+    <ClCompile Include="TestTree.cpp" />
     <ClCompile Include="TestVector.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -108,17 +117,25 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <CustomBuildStep>
+      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>x</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -140,19 +157,27 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <CustomBuildStep>
+      <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>x</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

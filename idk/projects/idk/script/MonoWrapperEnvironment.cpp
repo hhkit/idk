@@ -1,0 +1,958 @@
+#include "stdafx.h"
+#include "MonoWrapperEnvironment.h"
+#include <mono/jit/jit.h>
+#include <mono/metadata/assembly.h>
+#include <mono/metadata/threads.h>
+#include <mono/metadata/debug-helpers.h>
+#include <mono/metadata/sgen-bridge.h>
+#include <mono/utils/mono-dl-fallback.h>
+#include <mono/metadata/mono-gc.h>
+#include <mono/utils/mono-logger.h>
+#include <mono/metadata/reflection.h>
+
+#include <IncludeComponents.h>
+#include <IncludeResources.h>
+#include <IncludeSystems.h>
+
+#include <debug/LogSystem.h>
+#include <script/ValueBoxer.h>
+#include <script/MonoBinder.h>
+
+namespace idk::mono
+{
+	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)
+	{
+		_domain = mono_jit_init("MasterDomain");
+		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		BindCoreFunctions();
+		IDK_ASSERT_MSG(_assembly, "cannot load idk.dll");
+	}
+
+	void MonoWrapperEnvironment::Init()
+	{
+		{
+			auto img = mono_assembly_get_image(_assembly);
+			auto klass = mono_class_from_name(img, "idk", "IDK");
+			main = mono_class_get_method_from_name(klass, "Main", 1);
+			void* args[] = { 0 };
+			mono_runtime_invoke(main, nullptr, args, nullptr);
+		}
+		ScanTypes();
+
+		auto mb_itr = _types.find("MonoBehavior");
+		IDK_ASSERT_MSG(mb_itr != _types.end(), "cannot find idk.MonoBehavior");
+		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache method");
+	}
+
+	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
+	{
+		return !mono_method_can_access_field(main, field);
+	}
+
+	bool MonoWrapperEnvironment::IsAbstract(MonoType* type)
+	{
+		auto img = mono_assembly_get_image(_assembly);
+		auto klass = mono_class_from_name(img, "idk", "IDK");
+		main = mono_class_get_method_from_name(klass, "TypeIsAbstract", 1);
+		void* args[] = { type, 0 };
+		auto retval = mono_runtime_invoke(main, nullptr, args, nullptr);
+		return *static_cast<bool*>(mono_object_unbox(retval));
+	}
+
+	MonoWrapperEnvironment::~MonoWrapperEnvironment()
+	{
+		mono_jit_cleanup(_domain);
+	}
+
+	/*
+	template<typename T>
+	constexpr auto Bind(string_view label, T&& fn)
+	{
+		mono_add_internal_call(label.data(), decay(fn));
+	}
+	*/
+	
+	template<typename T>
+	struct default_val
+	{
+		static auto ret() { return T{}; }
+	};
+
+	template<>
+	struct default_val<void>
+	{
+		static void ret() {}
+	};
+
+	MonoException* make_nullref_exception()
+	{
+		auto exc_type = Core::GetSystem<ScriptSystem>().Environment().Type("NullRef");
+		IDK_ASSERT(exc_type);
+		return (MonoException*) exc_type->ConstructTemporary();
+	}
+
+#define BIND_START(LABEL, RET, ...)\
+	{ using Ret = RET;\
+	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{try
+
+#define BIND_END() \
+	catch(NullHandleException ex) \
+	{ \
+		LOG_TO(LogPool::GAME, "Null reference at %lld", ex.GetHandle().id);\
+		mono_raise_exception(make_nullref_exception());\
+		return default_val<Ret>::ret(); }\
+	}));}
+
+	void MonoWrapperEnvironment::BindCoreFunctions()
+	{
+		//constexpr auto Bind = mono_add_internal_call;
+
+		// bdebug
+		BIND_START("idk.Bindings::DebugLog", void, MonoString * preface, MonoString * message)
+		{
+			LogSingleton::Get().LogMessage(LogLevel::INFO,
+				LogPool::GAME,
+				unbox(preface).get(),
+				unbox(message).get()
+			);
+		}
+		BIND_END();
+
+		// handleable
+		BIND_START("idk.Bindings::ObjectValidate", bool, GenericHandle go)
+		{
+			return GameState::GetGameState().ValidateHandle(go);
+		}
+		BIND_END();
+		
+		BIND_START("idk.Bindings::ObjectDestroy", void, GenericHandle go)
+		{
+			GameState::GetGameState().DestroyObject(go);
+		}
+		BIND_END();
+
+		
+		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* type)
+		{
+			auto s = unbox(type);
+			string_view type_name = s.get();
+
+			vector<Handle<mono::Behavior>> behaviors;
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<mono::Behavior>())
+				if (elem.GetObject().Type()->IsOrDerivedFrom(type_name))
+					behaviors.emplace_back(elem.GetHandle());
+
+			auto klass = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(type_name);
+
+			IDK_ASSERT(klass);
+			auto retval = mono_array_new(mono_domain_get(), klass->Raw(), behaviors.size());
+			for (int i = 0; i < behaviors.size(); ++i)
+				mono_array_setref(retval, i, behaviors[i]->GetObject().Raw());
+
+			return retval;
+		}
+		BIND_END();
+
+		// game object
+
+		BIND_START("idk.Bindings::GameObjectAddEngineComponent",uint64_t, Handle<GameObject> go, MonoString* component)
+			{
+				return go->AddComponent(string_view{ unbox(component).get() }).id;
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectGetEngineComponent",  uint64_t, Handle<GameObject> go, MonoString* component) // note: return value optimization
+			{
+				return go->GetComponent(string_view{ unbox(component).get() }).id;
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectAddGameComponent",  MonoObject*, Handle<GameObject> go, MonoString* component)
+			{
+				auto s = unbox(component);
+				auto retval = go->AddComponent<mono::Behavior>();
+				if (retval->EmplaceBehavior(s.get()))
+					return retval->GetObject().Raw();
+				
+				go->RemoveComponent(retval);
+				return nullptr;
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectGetGameComponent",  MonoObject*, Handle<GameObject> go, MonoString* component) // note: return value optimization
+			{
+				auto s = unbox(component);
+				string_view findme = s.get();
+				for (auto& elem : go->GetComponents<mono::Behavior>())
+				{
+					if (elem->GetObject().Type()->IsOrDerivedFrom(findme))
+						return elem->GetObject().Raw();
+				}
+
+				return nullptr;
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectGetActiveInHierarchy",  bool, Handle<GameObject> go)
+			{
+				return go->ActiveInHierarchy();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectActiveSelf",  bool, Handle<GameObject> go)
+			{
+				return go->ActiveSelf();
+			}
+		BIND_END();
+		
+		BIND_START("idk.Bindings::GameObjectSetActive",  void, Handle<GameObject> go, bool active)
+			{
+				go->SetActive(active);
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectSetActive",  void, Handle<GameObject> go, bool active)
+			{
+				go->SetActive(active);
+			}
+		BIND_END();
+		
+        BIND_START("idk.Bindings::GameObjectGetName",  MonoString*, Handle<GameObject> go) //wtf?
+        {
+            return mono_string_new(mono_domain_get(), go->Name().data());
+        }
+        BIND_END();
+		
+        BIND_START("idk.Bindings::GameObjectSetName",  void, Handle<GameObject> go, MonoString* name)
+        {
+            auto s = unbox(name);
+            go->Name(s.get());
+        }
+		BIND_END();
+
+        BIND_START("idk.Bindings::GameObjectGetTag",  MonoString*, Handle<GameObject> go)
+        {
+            return mono_string_new(mono_domain_get(), go->Tag().data());
+        }
+		BIND_END();
+
+        BIND_START("idk.Bindings::GameObjectSetTag",  void, Handle<GameObject> go, MonoString* tag)
+        {
+            char* s = mono_string_to_utf8(tag);
+            go->Tag(s);
+            mono_free(s);
+        }
+		BIND_END();
+
+        BIND_START("idk.Bindings::GameObjectFindWithTag",  uint64_t, MonoString* tag)
+        {
+            char* s = mono_string_to_utf8(tag);
+            auto ret = Core::GetSystem<TagManager>().Find(s);
+            mono_free(s);
+            return ret.id;
+        }
+		BIND_END();
+
+
+		// component
+		BIND_START("idk.Bindings::ComponentGetGameObject",  uint64_t, GenericHandle go)
+		{
+			return GameState::GetGameState().GetGameObject(go).id;
+		}
+		BIND_END();
+
+
+		// transform
+
+		BIND_START("idk.Bindings::TransformGetPosition",  vec3, Handle<Transform> h)
+			{ 
+				return h->GlobalPosition();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetPosition",  void, Handle<Transform> h, vec3 v)
+			{
+				h->GlobalPosition(v);
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetScale",  vec3, Handle<Transform> h)
+			{
+				return h->GlobalScale();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetScale",  void, Handle<Transform> h, vec3 v)
+			{
+				h->GlobalScale(v);
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetRotation",  quat, Handle<Transform> h)
+			{
+				return h->GlobalRotation();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetRotation",  void, Handle<Transform> h, quat v)
+			{
+				h->GlobalRotation(v);
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalPosition", vec3, Handle<Transform> h)
+		{
+			return h->position;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalPosition", void, Handle<Transform> h, vec3 v)
+		{
+			h->position = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalScale", vec3, Handle<Transform> h)
+		{
+			return h->scale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalScale", void, Handle<Transform> h, vec3 v)
+		{
+			h->scale = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetLocalRotation", quat, Handle<Transform> h)
+		{
+			return h->rotation;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetLocalRotation", void, Handle<Transform> h, quat v)
+		{
+			h->rotation = v;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformForward",  vec3, Handle<Transform> h)
+			{
+				return h->Forward();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformUp",  vec3, Handle<Transform> h)
+			{
+				return h->Up();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformRight",  vec3, Handle<Transform> h)
+			{
+				return h->Right();
+			}
+		BIND_END();
+		
+		BIND_START("idk.Bindings::TransformGetParent",  uint64_t, Handle<Transform> h)
+			{
+				return h->parent.id;
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
+			{
+				h->SetParent(parent_gameobject, preserve_global);
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformGetChildren", MonoArray*, Handle<Transform> h)
+		{
+			auto sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(h->GetGameObject());
+
+			auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
+
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg->size() : 0);
+			if (sg)
+			{
+				auto sz = sg->size();
+				auto ptr = sg->begin();
+				for (int i = 0; i < sz; ++i)
+				{
+					auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
+					auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
+					void* args[] = { &ptr++->obj.id };
+					mono_runtime_invoke(method, mo, args, nullptr);
+					mono_array_setref(retval, i, mo);
+				}
+			}
+			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TransformSetForward", void, Handle<Transform> h, vec3 forward)
+		{
+			auto curr_fwd = h->Forward();
+			const float new_f_len = forward.length();
+			forward /= new_f_len;
+			const float new_f_dot_curr = forward.dot(curr_fwd);
+
+			// If dot prod returns us the square of the length, we know they are the same vector.
+			// In which case, we just return and dont apply any rotation
+			if (fabs(new_f_dot_curr - 1.0f) < 0.001f)
+				return;
+
+			// if the two vectors are inversed
+			if (fabs(new_f_dot_curr - (-1.0f)) < 0.001f)
+			{
+				auto up = h->Up();
+				h->GlobalRotation(quat{ up, deg{180} } *h->GlobalRotation());
+				return;
+			}
+
+			auto axis = curr_fwd.cross(forward);
+			auto axis_len = axis.length();
+
+			auto angle = acos(new_f_dot_curr);
+			axis /= axis_len;
+
+			h->GlobalRotation(quat{axis, angle} * h->GlobalRotation());
+		}
+		BIND_END();
+
+		// physics
+		struct ManagedRaycast
+		{
+			bool valid;
+			uint64_t collider_id;
+			float distance;
+			vec3 normal;
+			vec3 point_of_collision;
+		};
+		BIND_START("idk.Bindings::PhysicsRaycast", ManagedRaycast, vec3 origin, vec3 direction, float max_dist, int mask, bool hit_triggers)
+		{
+			auto res = Core::GetSystem<PhysicsSystem>().Raycast(ray{ .origin = origin,.velocity = direction }, mask, hit_triggers);
+			if (res.size())
+			{
+				auto& first = res.front();
+				if (first.raycast_succ.distance_to_collision < max_dist)
+					return ManagedRaycast{ .valid = true,.collider_id = first.collider.id,.distance = first.raycast_succ.distance_to_collision,.point_of_collision = first.raycast_succ.point_of_collision };
+			}
+
+			return ManagedRaycast{ .valid = false };
+		}
+		BIND_END()
+
+		// RigidBody
+		BIND_START("idk.Bindings::RigidBodyGetMass", float, Handle<RigidBody> rb)
+		{
+			return rb->mass();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetMass",  void, Handle<RigidBody> rb, float val)
+		{
+			rb->mass(val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodyGetVelocity",  vec3, Handle<RigidBody> rb)
+		{
+			return rb->velocity() * Core::GetDT().count();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetVelocity",  void, Handle<RigidBody> rb, vec3 val)
+		{
+			rb->velocity(val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodyGetPosition",  vec3, Handle < RigidBody> rb)
+		{
+			return rb->position();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetPosition",  void, Handle<RigidBody> rb, vec3 val)
+		{
+			rb->position(val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodyGetUseGravity",  bool, Handle < RigidBody> rb)
+		{
+			return rb->use_gravity;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetUseGravity",  void, Handle<RigidBody> rb, bool val)
+		{
+			rb->use_gravity = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodyGetIsKinematic", bool, Handle < RigidBody> rb)
+		{
+			return rb->is_kinematic;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetIsKinematic", void, Handle<RigidBody> rb, bool val)
+		{
+			rb->is_kinematic= val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySleep",  void, Handle<RigidBody> rb)
+		{
+			rb->sleep_next_frame = true;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodyTeleport",  void, Handle<RigidBody> rb, vec3 val)
+		{
+			rb->TeleportBy(val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodyAddForce",  void, Handle<RigidBody> rb, vec3 val)
+		{
+			rb->AddForce(val);
+		}
+		BIND_END();
+		
+		// Collider
+		BIND_START("idk.Bindings::ColliderSetEnabled",  void, Handle<Collider> col, bool val)
+		{
+			col->enabled = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetEnabled", bool, Handle<Collider> col)
+		{
+			return col->enabled;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSetTrigger",  void, Handle<Collider> col, bool val)
+		{
+			col->is_trigger = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetTrigger", bool, Handle<Collider> col)
+		{
+			return col->is_trigger;
+		}
+		BIND_END();
+
+		// Animator
+		BIND_START("idk.Bindings::AnimatorPlay",  void, Handle<Animator> animator, MonoString* name)
+		{
+			auto s = unbox(name);
+			animator->Play(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorCrossFade",  void, Handle<Animator> animator, MonoString* name, float time = 0.2f)
+		{
+			auto s = unbox(name);
+			animator->BlendTo(s.get(), time);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorPause",  void, Handle<Animator> animator)
+		{
+			animator->Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorResume",  void, Handle<Animator> animator)
+		{
+			animator->Resume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorStop",  void, Handle<Animator> animator)
+			{
+				animator->Stop();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator)
+			{
+				return mono_string_new(mono_domain_get(), animator->DefaultStateName().c_str());
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorCurrentStateName", MonoString*, Handle<Animator> animator)
+			{
+				return mono_string_new(mono_domain_get(), animator->CurrentStateName().c_str());
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator)
+			{
+				return mono_string_new(mono_domain_get(), animator->BlendStateName().c_str());
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorIsPlaying",  bool, Handle<Animator> animator)
+			{
+				return animator->IsPlaying();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorIsBlending",  bool, Handle<Animator> animator)
+			{
+				return animator->IsBlending();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorHasCurrAnimEnded",  bool, Handle<Animator> animator)
+			{
+				return animator->HasCurrAnimEnded();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorHasState",  bool, Handle<Animator> animator, MonoString* name)
+			{
+				auto s = unbox(name);
+				auto ret_val = animator->HasState(s.get());
+				return ret_val;
+			}
+		BIND_END();
+
+
+		//AudioSource
+		//----------------------------------------------------------------------------------------------------
+		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)
+		{
+			audiosource->Play(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourcePlayAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->PlayAll();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStop", void, Handle<AudioSource> audiosource, int index)
+		{
+			audiosource->Stop(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceStopAll", void, Handle<AudioSource> audiosource)
+		{
+			audiosource->StopAll();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetVolume", float, Handle<AudioSource> audiosource)
+		{
+			return audiosource->volume;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetVolume", void, Handle<AudioSource> audiosource, float volume)
+		{
+			audiosource->volume = volume;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetPitch", float, Handle<AudioSource> audiosource)
+		{
+			return audiosource->pitch;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetPitch", void, Handle<AudioSource> audiosource, float pitch)
+		{
+			audiosource->pitch = pitch;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceGetLoop", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->isLoop;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSetLoop", void, Handle<AudioSource> audiosource, bool loop)
+		{
+			audiosource->isLoop = loop;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceSize", int, Handle<AudioSource> audiosource)
+		{
+			return static_cast<int>(audiosource->audio_clip_list.size());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAudioClipPlaying", bool, Handle<AudioSource> audiosource, int index)
+		{
+			return audiosource->IsAudioClipPlaying(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceIsAnyAudioClipPlaying", bool, Handle<AudioSource> audiosource)
+		{
+			return audiosource->IsAnyAudioClipPlaying();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::FindAudio", int, Handle<AudioSource> audiosource, MonoString* name)
+		{
+			auto s = unbox(name);
+			return audiosource->FindAudio(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AddAudioClip", int, Handle<AudioSource> audiosource, MonoString* name)
+		{
+			auto s = unbox(name);
+			return audiosource->AddAudioClip(s.get());
+		}
+		BIND_END();
+		//----------------------------------------------------------------------------------------------------
+
+		// Renderer
+        BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
+        {
+            switch (renderer.type)
+            {
+            case index_in_tuple_v<MeshRenderer, Handleables>: return handle_cast<MeshRenderer>(renderer)->material_instance.guid;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->material_instance.guid;
+            default: return {};
+            }
+        }
+        BIND_END();
+
+		BIND_START("idk.Bindings::RendererGetActive", bool, GenericHandle renderer)
+		{
+			switch (renderer.type)
+			{
+			case index_in_tuple_v<MeshRenderer, Handleables>: return handle_cast<MeshRenderer>(renderer)->enabled;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: return handle_cast<SkinnedMeshRenderer>(renderer)->enabled;
+			default: return {};
+			}
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RendererSetActive", void, GenericHandle renderer, bool set)
+		{
+			switch (renderer.type)
+			{
+            case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->enabled = set; return;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->enabled = set; return;
+			default: return;
+			}
+		}
+		BIND_END();
+
+        // Resource
+#define VALIDATE_RESOURCE(RES) case string_hash(#RES): return Core::GetResourceManager().Validate<RES>(guid);
+        BIND_START("idk.Bindings::ResourceValidate",  bool, Guid guid, MonoString* type)
+        {
+            // TODO: make validate jumptable...
+            auto s = unbox(type);
+            auto hash = string_hash(s.get());
+
+			LOG_TO(LogPool::GAME, string{ guid }.data());
+            switch (hash)
+            {
+				VALIDATE_RESOURCE(Material);
+				VALIDATE_RESOURCE(MaterialInstance);
+				VALIDATE_RESOURCE(Prefab);
+            default: return false;
+            }
+        }
+		BIND_END();
+#undef VALIDATE_RESOURCE
+
+#define NAME_OF_RESOURCE(RES) case string_hash(#RES): return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<RES>(guid).Name().data());
+        BIND_START("idk.Bindings::ResourceGetName",  MonoString*, Guid guid, MonoString* type)
+        {
+            // TODO: make get jumptable...
+			// TODO: research on perfect jumping
+            auto s = unbox(type);
+            auto hash = string_hash(s.get());
+
+            switch (hash)
+            {
+				NAME_OF_RESOURCE(Material);
+				NAME_OF_RESOURCE(MaterialInstance);
+				NAME_OF_RESOURCE(Prefab);
+                default: return mono_string_empty(mono_domain_get());
+            }
+        }
+        BIND_END();
+#undef NAME_OF_RESOURCE
+
+		// Prefab
+		BIND_START("idk.Bindings::PrefabInstantiate",  uint64_t, Guid guid)
+			{
+				auto res = RscHandle<Prefab>{guid};
+				if (res)
+					return res->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene()).id;
+				return 0;
+			}
+		BIND_END();
+
+        // MaterialInstance
+        BIND_START("idk.Bindings::MaterialInstanceGetFloat",  float, RscHandle<MaterialInstance> handle, MonoString* name)
+        {
+            auto s = unbox(name);
+            if (!handle) { return 0; }
+            auto res = handle->GetUniform(s.get());
+            return res ? std::get<float>(*res) : 0;
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetVector2",  vec2, RscHandle<MaterialInstance> handle, MonoString* name)
+        {
+			auto s = unbox(name);
+			if (!handle) { return vec2{}; }
+			auto res = handle->GetUniform(s.get());
+            return res ? std::get<vec2>(*res) : vec2(0, 0);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetVector3",  vec3, RscHandle<MaterialInstance> handle, MonoString* name)
+        {
+			auto s = unbox(name);
+			if (!handle) { return vec3{}; }
+			auto res = handle->GetUniform(s.get());
+            return res ? std::get<vec3>(*res) : vec3(0, 0, 0);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetVector4",  vec4, RscHandle<MaterialInstance> handle, MonoString* name)
+        {
+			auto s = unbox(name);
+			if (!handle) { return vec4{}; }
+			auto res = handle->GetUniform(s.get());
+            return res ? std::get<vec4>(*res) : vec4(0, 0, 0, 0);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceGetTexture",  Guid, RscHandle<MaterialInstance> handle, MonoString* name)
+        {
+			auto s = unbox(name);
+			if (!handle) { return Guid{}; }
+			auto res = handle->GetUniform(s.get());
+            return res ? std::get<RscHandle<Texture>>(*res).guid : Guid();
+        }
+		BIND_END();
+
+        BIND_START("idk.Bindings::MaterialInstanceSetFloat",  void, RscHandle<MaterialInstance> handle, MonoString* name, float value)
+        {
+			auto s = unbox(name);
+			if (!handle)
+				return;
+			handle->SetUniform(s.get(), value);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetVector2",  void, RscHandle<MaterialInstance> handle, MonoString* name, vec2 value)
+        {
+			auto s = unbox(name);
+			if (!handle)
+				return;
+			handle->SetUniform(s.get(), value);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetVector3",  void, RscHandle<MaterialInstance> handle, MonoString* name, vec3 value)
+        {
+				auto s = unbox(name);
+				if (!handle)
+					return;
+				handle->SetUniform(s.get(), value);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetVector4",  void, RscHandle<MaterialInstance> handle, MonoString* name, vec4 value)
+        {
+            auto s = unbox(name);
+            if (!handle) 
+				return;
+            handle->SetUniform(s.get(), value);
+        }
+		BIND_END();
+        BIND_START("idk.Bindings::MaterialInstanceSetTexture",  void, RscHandle<MaterialInstance> handle, MonoString* name, RscHandle<Texture> tex)
+        {
+			auto s = unbox(name);
+			if (!handle)
+				return;
+			handle->SetUniform(s.get(), tex);
+        }
+		BIND_END();
+
+		// lights
+		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
+		{
+			return h->GetColor();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetColor", void, Handle<Light> h,color c)
+		{
+			h->SetColor(c);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetIntensity", real, Handle<Light> h)
+		{
+			return h->GetLightIntensity();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetIntensity", void, Handle<Light> h, real i)
+		{
+			h->SetLightIntensity(i);
+		}
+		BIND_END();
+
+		// Input
+		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
+			{
+				if (code & 0xFFFF0000)
+					return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+				else
+					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
+			}
+		BIND_END();
+		BIND_START("idk.Bindings::InputGetKeyUp",  bool, int code)
+			{
+				if (code & 0xFFFF0000)
+					return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+				else
+				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
+			}
+		BIND_END();
+		BIND_START("idk.Bindings::InputGetKey",  bool, int code)
+			{
+				if (code & 0xFFFF0000)
+					return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+				else
+				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::InputGetAxis",  float, char code, int axis)
+			{
+				return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetFixedDelta",  float)
+			{
+				return Core::GetDT().count();
+			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetDelta",  float)
+			{
+				return Core::GetRealDT().count();
+			}
+		BIND_END();
+	}
+}

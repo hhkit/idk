@@ -17,7 +17,7 @@ namespace idk
 {
 	//A data structure to hold only information of a sound. This is updated when CreateSound is called. When released, this is reset.
 	struct AudioClipInfo {
-		AudioClipInfo()
+		AudioClipInfo() noexcept
 			: filePath{}, name{}, type{ FMOD_SOUND_TYPE_UNKNOWN }, format{ FMOD_SOUND_FORMAT_NONE }, channels{ 0 }, bits{ 0 }, length{ 0 }
 		{}
 

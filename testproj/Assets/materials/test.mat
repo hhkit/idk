@@ -1,0 +1,276 @@
+_shader_program: {guid: 262da2c5-eebe-4dcb-bb89-acc1576f71a8}
+links: 
+- node_in: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  node_out: 857596d2-d3c0-43cf-95bb-02a9c9799c0a
+  slot_in: 0
+  slot_out: 0
+- node_in: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+  slot_in: 1
+  slot_out: 0
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 2
+  slot_out: 5
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 0
+  slot_out: 3
+- node_in: 2d67e13d-4f70-472f-83e8-f57ddc178edb
+  node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+  slot_in: 1
+  slot_out: 0
+- node_in: 2d67e13d-4f70-472f-83e8-f57ddc178edb
+  node_out: 505ed4b1-2730-401d-9963-141112ed8a51
+  slot_in: 0
+  slot_out: 0
+- node_in: 4b79717e-f2ae-4127-9155-df7473dc63f9
+  node_out: 2d67e13d-4f70-472f-83e8-f57ddc178edb
+  slot_in: 0
+  slot_out: 3
+- node_in: 4b79717e-f2ae-4127-9155-df7473dc63f9
+  node_out: 2d67e13d-4f70-472f-83e8-f57ddc178edb
+  slot_in: 1
+  slot_out: 4
+- node_in: 4b79717e-f2ae-4127-9155-df7473dc63f9
+  node_out: 2d67e13d-4f70-472f-83e8-f57ddc178edb
+  slot_in: 2
+  slot_out: 5
+- node_in: e149b4ec-f809-4059-93cb-a0f7d3aeb0b5
+  node_out: 4b79717e-f2ae-4127-9155-df7473dc63f9
+  slot_in: 0
+  slot_out: 3
+- node_in: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
+  node_out: 8d9815fd-e275-402e-b903-c855d9f1e902
+  slot_in: 0
+  slot_out: 0
+- node_in: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
+  node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+  slot_in: 1
+  slot_out: 0
+- node_in: cea7d69a-a98d-4c41-9e2f-54240890c5db
+  node_out: c1df0434-862e-43f7-86f8-e9f22427f609
+  slot_in: 0
+  slot_out: 0
+- node_in: cea7d69a-a98d-4c41-9e2f-54240890c5db
+  node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+  slot_in: 1
+  slot_out: 0
+- node_in: 7b47c039-a436-4ee7-82de-ce3b7758ff84
+  node_out: efe470eb-07a5-49b8-9e72-bcab56fc470f
+  slot_in: 0
+  slot_out: 0
+- node_in: 7b47c039-a436-4ee7-82de-ce3b7758ff84
+  node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+  slot_in: 1
+  slot_out: 0
+- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  node_out: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
+  slot_in: 4
+  slot_out: 3
+- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  slot_in: 0
+  slot_out: 3
+- node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+  slot_in: 1
+  slot_out: 4
+- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
+  node_out: 1ec37a89-4780-4966-ae2c-a20c435e7c94
+  slot_in: 1
+  slot_out: 0
+master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
+nodes: 
+  1ec37a89-4780-4966-ae2c-a20c435e7c94: 
+    control_values: ""
+    guid: 1ec37a89-4780-4966-ae2c-a20c435e7c94
+    input_slots: []
+    name: input\Vertex Normal
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 342, y: 205}
+  2d67e13d-4f70-472f-83e8-f57ddc178edb: 
+    control_values: ""
+    guid: 2d67e13d-4f70-472f-83e8-f57ddc178edb
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: ""}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: -294.95135, y: 108.9266}
+  2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6: 
+    control_values: 1.000000,0.999990,0.999990,1.000000|
+    guid: 2d9785ff-aa50-4b88-b8ef-78b4dca7d7c6
+    input_slots: []
+    name: input\basic\Color
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: VEC3, value: ""}
+    position: {x: 458.5272, y: -16.500626}
+  30eda6ea-765f-45e8-a622-c9c3a3b7d971: 
+    control_values: ""
+    guid: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: '0,0'}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: -260.8841, y: 866.0563}
+  4b79717e-f2ae-4127-9155-df7473dc63f9: 
+    control_values: ""
+    guid: 4b79717e-f2ae-4127-9155-df7473dc63f9
+    input_slots: 
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    name: input\basic\Vec3
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: -53.870853, y: 157.40695}
+  505ed4b1-2730-401d-9963-141112ed8a51: 
+    control_values: ""
+    guid: 505ed4b1-2730-401d-9963-141112ed8a51
+    input_slots: []
+    name: $1
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: -483.30957, y: 93.899925}
+  53bbc36e-5863-4a99-a091-93f5aef049dc: 
+    control_values: ""
+    guid: 53bbc36e-5863-4a99-a091-93f5aef049dc
+    input_slots: 
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    name: input\basic\Vec3
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 7.711819, y: -65.14901}
+  7b47c039-a436-4ee7-82de-ce3b7758ff84: 
+    control_values: ""
+    guid: 7b47c039-a436-4ee7-82de-ce3b7758ff84
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: ""}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: -250.03952, y: 349.38773}
+  857596d2-d3c0-43cf-95bb-02a9c9799c0a: 
+    control_values: ""
+    guid: 857596d2-d3c0-43cf-95bb-02a9c9799c0a
+    input_slots: []
+    name: $0
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: -466.97275, y: -126.30631}
+  8c49899c-678c-4a61-98c9-3ba8abd616f7: 
+    control_values: ""
+    guid: 8c49899c-678c-4a61-98c9-3ba8abd616f7
+    input_slots: []
+    name: input\Texture Coordinates
+    output_slots: 
+    - {type: VEC2, value: ""}
+    position: {x: -1003.8784, y: 239.20749}
+  8d9815fd-e275-402e-b903-c855d9f1e902: 
+    control_values: ""
+    guid: 8d9815fd-e275-402e-b903-c855d9f1e902
+    input_slots: []
+    name: $2
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: -442.60458, y: 822.2575}
+  98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc: 
+    control_values: ""
+    guid: 98ef75a1-02e8-4c1f-8457-71a6b3b2f2dc
+    input_slots: []
+    name: input\Vertex Normal
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 307.30878, y: 137.82664}
+  99e9f376-1e36-40ee-aaed-f1b22ed73ad6: 
+    control_values: ""
+    guid: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: ""}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: -296.39343, y: -132.47534}
+  c1df0434-862e-43f7-86f8-e9f22427f609: 
+    control_values: ""
+    guid: c1df0434-862e-43f7-86f8-e9f22427f609
+    input_slots: []
+    name: $3
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: -402.46115, y: 564.5866}
+  cea7d69a-a98d-4c41-9e2f-54240890c5db: 
+    control_values: ""
+    guid: cea7d69a-a98d-4c41-9e2f-54240890c5db
+    input_slots: 
+    - {type: SAMPLER2D, value: ""}
+    - {type: VEC2, value: ""}
+    name: input\Texture Sampler 2D
+    output_slots: 
+    - {type: VEC4, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    position: {x: -244.34998, y: 608.99255}
+  d5084548-0ebd-44fb-b98c-94bd0951100a: 
+    control_values: ""
+    guid: d5084548-0ebd-44fb-b98c-94bd0951100a
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: ""}
+    name: master\PBR
+    output_slots: []
+    position: {x: 724.70087, y: 224.66518}
+  e149b4ec-f809-4059-93cb-a0f7d3aeb0b5: 
+    control_values: ""
+    guid: e149b4ec-f809-4059-93cb-a0f7d3aeb0b5
+    input_slots: 
+    - {type: VEC3, value: ""}
+    name: input\Unpack Normal
+    output_slots: 
+    - {type: VEC3, value: ""}
+    position: {x: 228.75298, y: 259.6767}
+  efe470eb-07a5-49b8-9e72-bcab56fc470f: 
+    control_values: ""
+    guid: efe470eb-07a5-49b8-9e72-bcab56fc470f
+    input_slots: []
+    name: $4
+    output_slots: 
+    - {type: SAMPLER2D, value: ""}
+    position: {x: -456.0069, y: 318.5533}
+parameters: 
+- {default_value: 6ce29032-2226-437f-a37c-1881ef327716, name: Brdf, type: SAMPLER2D}
+- {default_value: 2f8f9f51-13ff-44d3-99bf-81132e173997, name: Normal, type: SAMPLER2D}
+- {default_value: def78e12-bc1a-44e5-b91c-fc26851b2f46, name: AmbientO, type: SAMPLER2D}
+- {default_value: b4f021af-768b-4b6a-9497-52f3ca44cddc, name: Roughness, type: SAMPLER2D}
+- {default_value: 3bfad1d0-ccbd-4f1b-81c1-d9f56bc9e30d, name: Metallic, type: SAMPLER2D}

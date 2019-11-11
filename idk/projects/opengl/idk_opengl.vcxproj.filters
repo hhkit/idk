@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="resource\OpenGLBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="system\OpenGLGraphicsSystem.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMesh.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="program\PipelineProgram.h">
+      <Filter>program</Filter>
+    </ClInclude>
+    <ClInclude Include="program\Program.h">
+      <Filter>program</Filter>
+    </ClInclude>
+    <ClInclude Include="system\OpenGLState.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="system\FrameBufferManager.h">
+      <Filter>program</Filter>
+    </ClInclude>
+    <ClInclude Include="program\GLSLLoader.h" />
+    <ClInclude Include="system\TextureManager.h" />
+    <ClInclude Include="program\ProgramFactory.h" />
+    <ClInclude Include="DDSData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLCubemap.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTexture.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\FrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\FrameBufferFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLCubemapFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLMeshFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLRenderTargetLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLCubeMapLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLFontAtlas.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLFontAtlasLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLFontAtlasFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\OpenGLTextureRenderMeta.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="resource\OpenGLBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="system\OpenGLGraphicsSystem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMesh.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="program\PipelineProgram.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
+    <ClCompile Include="program\Program.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
+    <ClCompile Include="system\OpenGLState.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="glad_wgl.c" />
+    <ClCompile Include="glad.c" />
+    <ClCompile Include="system\FrameBufferManager.cpp" />
+    <ClCompile Include="program\GLSLLoader.cpp" />
+    <ClCompile Include="system\TextureManager.cpp" />
+    <ClCompile Include="program\ProgramFactory.cpp" />
+    <ClCompile Include="resource\OpenGLCubemap.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTexture.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\FrameBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\FrameBufferFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLCubemapFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLMeshFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLCubeMapLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLFontAtlas.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLFontAtlasLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLFontAtlasFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\OpenGLTextureRenderMeta.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="system">
+      <UniqueIdentifier>{57144429-01c8-4ed9-b697-1de21d2c0305}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{f023b664-fbb6-4998-8a1f-53fd96fa029b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="program">
+      <UniqueIdentifier>{22d6d055-167f-4e75-8ed2-a5b318137154}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Loaders">
+      <UniqueIdentifier>{55601676-ee9f-439f-a87a-415bde98c146}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Factories">
+      <UniqueIdentifier>{7a885676-83af-4b16-80a8-ca7386eb8f2a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="program\Program.inl">
+      <Filter>program</Filter>
+    </None>
+    <None Include="program\PipelineProgram.inl">
+      <Filter>program</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -10,9 +10,9 @@
     </Expand>
   </Type>
 
-  <Type Name="idk::ObjectPool&lt; * &gt;">
+  <Type Name="idk::ObjectPool&lt;*&gt;">
     <Expand>
-      <Item Name="[size]">sceneCounter</Item>
+      <Item Name="[pool]">_pool</Item>
       <CustomListItems MaxItemsPerView="16">
         <Variable Name="sceneCounter" InitialValue="0"/>
         <Loop>
@@ -24,11 +24,27 @@
       </CustomListItems>
     </Expand>
   </Type>
-  
-  <Type Name="idk::Handle&lt; * &gt;">
-    <DisplayString>[{"$T1"} id={id, h}]</DisplayString>
+
+  <Type Name="idk::ObjectPool&lt;*&gt;::Map">
     <Expand>
       <CustomListItems MaxItemsPerView="16">
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <If Condition="i != slots.size() &amp;&amp; slots[i].index != 4294967295">
+            <Item Name="[{i}]">slots[i]</Item>
+          </If>
+          <Exec>i += 1</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+
+
+    <Type Name="idk::Handle&lt;*&gt;">
+    <DisplayString>[{"$T1"} id={id, h}]</DisplayString>
+    <Expand>
+      <CustomListItems MaxItemsPerView="32">
         <Variable Name="_index" InitialValue="-1"/>
         <If Condition="
                        id != 0
@@ -53,9 +69,22 @@
   <Type Name="idk::GenericHandle">
     <Expand>
       <CustomListItems MaxItemsPerView="16">
-        <If Condition="type == 0"><Item Name="[GameObject]">*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item></If>
-        <If Condition="type == 1"><Item Name="[Transform]" >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item></If>
-        <If Condition="type == 2"><Item Name="[Parent]"    >*((idk::Handle&lt;idk::Parent&gt;*)(&amp;id))</Item></If>
+        <Item Name="[GameObject]"          Condition="type == idk::natvis::GameObjectID"         >*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item>
+        <Item Name="[Transform]"           Condition="type == idk::natvis::TransformID"          >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item>
+        <Item Name="[Name]"                Condition="type == idk::natvis::NameID"               >*((idk::Handle&lt;idk::Name&gt;*)(&amp;id))</Item>
+        <Item Name="[Tag]"                 Condition="type == idk::natvis::TagID"                >*((idk::Handle&lt;idk::Tag&gt;*)(&amp;id))</Item>
+        <Item Name="[Layer]"               Condition="type == idk::natvis::LayerID"              >*((idk::Handle&lt;idk::Layer&gt;*)(&amp;id))</Item>
+        <Item Name="[PrefabInstance]"      Condition="type == idk::natvis::PrefabInstanceID"     >*((idk::Handle&lt;idk::PrefabInstance&gt;*)(&amp;id))</Item>
+        <Item Name="[RigidBody]"           Condition="type == idk::natvis::RigidBodyID"          >*((idk::Handle&lt;idk::RigidBody&gt;*)(&amp;id))</Item>
+        <Item Name="[Collider]"            Condition="type == idk::natvis::ColliderID"           >*((idk::Handle&lt;idk::Collider&gt;*)(&amp;id))</Item>
+        <Item Name="[MeshRenderer]"        Condition="type == idk::natvis::MeshRendererID"       >*((idk::Handle&lt;idk::MeshRenderer&gt;*)(&amp;id))</Item>
+        <Item Name="[Camera]"              Condition="type == idk::natvis::CameraID"             >*((idk::Handle&lt;idk::Camera&gt;*)(&amp;id))</Item>
+        <Item Name="[SkinnedMeshRenderer]" Condition="type == idk::natvis::SkinnedMeshRendererID">*((idk::Handle&lt;idk::SkinnedMeshRenderer&gt;*)(&amp;id))</Item>
+        <Item Name="[Light]"               Condition="type == idk::natvis::LightID"              >*((idk::Handle&lt;idk::Light&gt;*)(&amp;id))</Item>
+        <Item Name="[Animator]"            Condition="type == idk::natvis::AnimatorID"           >*((idk::Handle&lt;idk::Animator&gt;*)(&amp;id))</Item>
+        <Item Name="[mono::Behavior]"      Condition="type == idk::natvis::monoBehaviorID"       >*((idk::Handle&lt;idk::mono::Behavior&gt;*)(&amp;id))</Item>
+        <Item Name="[AudioSource]"         Condition="type == idk::natvis::AudioSourceID"        >*((idk::Handle&lt;idk::AudioSource&gt;*)(&amp;id))</Item>
+        <Item Name="[AudioListener]"       Condition="type == idk::natvis::AudioListenerID"      >*((idk::Handle&lt;idk::AudioListener&gt;*)(&amp;id))</Item>
       </CustomListItems>
     </Expand>
   </Type>

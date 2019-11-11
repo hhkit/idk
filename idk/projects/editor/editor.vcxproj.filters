@@ -4,26 +4,264 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
-    <ClInclude Include="editor\commands\CommandController.h">
-      <Filter>editor\commands</Filter>
+    <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="ImGui_Interface.h" />
+    <ClInclude Include="OpenGL_ImGui_Interface.h" />
+    <ClInclude Include="EditorInputs.h">
+      <Filter>controls</Filter>
     </ClInclude>
-    <ClInclude Include="editor\commands\ICommand.h">
-      <Filter>editor\commands</Filter>
+    <ClInclude Include="commands\CMD_AddComponent.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_CreateGameObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CommandController.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CommandList.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\ICommand.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_HierarchyWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_InspectorWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_IWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_MainWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_ProjectWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_SceneView.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_WindowList.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_DeleteGameObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_MaterialEditor.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_ModifyInput.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_ModifyInput.inl">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\InputResource.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="DragDropTypes.h" />
+    <ClInclude Include="commands\CMD_DeleteComponent.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\GraphFactory.h">
+      <Filter>loader</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\EnumCombo.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_TransformGameObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_ShadowMapWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_ProfilerWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\DragQuat.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="imguidk.h" />
+    <ClInclude Include="widgets\DragVec.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="imguidk.h" />
+    <ClInclude Include="loading\AssimpImporter.h">
+      <Filter>loader\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="loading\AssimpImporter_helpers.h">
+      <Filter>loader\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="imguidk.h" />
+    <ClInclude Include="widgets\DragVec.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_ProjectSettings.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="windows\IGE_Console.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\ConsoleLog.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManagement.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_AnimatorWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_AddBehavior.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_ProgrammerConsole.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_GameView.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\InputGameObject.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_InstantiatePrefab.h">
+      <Filter>commands</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
-    <ClCompile Include="editor\commands\CommandController.cpp">
-      <Filter>editor\commands</Filter>
+    <ClCompile Include="ImGui_Interface.cpp" />
+    <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
+    <ClCompile Include="EditorInputs.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_AddComponent.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_CreateGameObject.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CommandController.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_HierarchyWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_InspectorWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_IWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_MainWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ProjectWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_SceneView.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_DeleteGameObject.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_MaterialEditor.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\InputResource.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="DragDropTypes.cpp" />
+    <ClCompile Include="commands\CMD_DeleteComponent.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\GraphFactory.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_TransformGameObject.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ShadowMapWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ProfilerWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\DragQuat.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\DragVec.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\AssimpImporter.cpp">
+      <Filter>loader\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="loading\AssimpImporter_helpers.cpp">
+      <Filter>loader\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ProjectSettings.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="imguidk.cpp" />
+    <ClCompile Include="windows\IGE_Console.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\ConsoleLog.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManagement.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_AnimatorWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_ProgrammerConsole.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_GameView.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_AddBehavior.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\InputGameObject.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_InstantiatePrefab.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="editor">
-      <UniqueIdentifier>{15e5ab8b-1ae5-478d-8810-84f9c5347669}</UniqueIdentifier>
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
+    <Filter Include="loader">
+      <UniqueIdentifier>{6736b34e-82f1-486c-a938-0e50208db3da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="editor\commands">
+    <Filter Include="controls">
+      <UniqueIdentifier>{39054dc7-3aac-467b-99ab-170c8f7698c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="commands">
       <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows">
+      <UniqueIdentifier>{b8f020c5-d088-49f8-841d-626fcb8a63d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="widgets">
+      <UniqueIdentifier>{2d26593e-7fd8-4e14-a1e4-cb20be5641c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader\assimp">
+      <UniqueIdentifier>{5fa89918-20ca-42f5-b68e-d3370c6c6e57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader\assimp\legacy">
+      <UniqueIdentifier>{a523f331-efa6-40ea-baf4-8b8ae83a148c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

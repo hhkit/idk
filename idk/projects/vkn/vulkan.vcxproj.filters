@@ -1,0 +1,416 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="VulkanWin32GraphicsSystem.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="VulkanState.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="GfxConverters.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderState.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDebugRenderer.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanView.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanPipeline.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferHelpers.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_buffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="draw_call.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="UboManager.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorPoolsManager.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorsManager.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_state_fwd.h">
+      <Filter>fwd</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMesh.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTypeDescriptors.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="ValHandler.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameRenderer.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineManager.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderModule.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="object_pool.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GlslToSpirv.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsState.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTexture.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBufferManager.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknImageData.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknMeshModder.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferedObj.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanResourceManager.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagedVulkanObjs.h">
+      <Filter>resource\Managed</Filter>
+    </ClInclude>
+    <ClInclude Include="TmpTest.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\PresentationSignals.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\TriBuffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SwapchainInfo.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\FrameObjects.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RegisterVulkanFactories.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMeshFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanShaderModuleFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTextureFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanPngLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanGlslLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTarget.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFrameBuffer.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTargetFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFramebufferFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessedRO.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStateV2.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_enum_info.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineThingy.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanHashes.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineBinders.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="VknCubeMapLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknCubemap.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCbmLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCubemapFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderUtil.h">
+      <Filter>render\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VknRenderTargetLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredPass.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="VulkanWin32GraphicsSystem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="GfxConverters.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderState.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDebugRenderer.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanView.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanPipeline.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferHelpers.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanState.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_buffer.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="UboManager.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorPoolsManager.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorsManager.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_call.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp" />
+    <ClCompile Include="VknFrameBufferManager.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameRenderer.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderModule.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineManager.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GlslToSpirv.cpp" />
+    <ClCompile Include="VknTexture.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryAllocator.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VknImageData.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsState.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="ValHandler.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanResourceManager.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknMeshModder.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GlslToSpirv.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\PresentationSignals.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\TriBuffer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\SwapchainInfo.cpp" />
+    <ClCompile Include="RegisterVulkanFactories.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMeshFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanShaderModuleFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTextureFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanPngLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanGlslLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTextureLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknRenderTarget.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknRenderTargetFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessedRO.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderStateV2.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineThingy.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineBinders.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFrameBuffer.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknCubemap.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknCubeMapLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCbmLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCubemapFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderUtil.cpp" />
+    <ClCompile Include="DeferredPass.cpp" />
+    <ClCompile Include="VknRenderTargetLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFramebufferFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="system">
+      <UniqueIdentifier>{ae16a2ac-34ab-44fe-88cf-fbbb70a7cb46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="buffer">
+      <UniqueIdentifier>{93364066-fc1f-4a19-8df1-752682cc0020}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render">
+      <UniqueIdentifier>{388fea0d-f4b9-4998-af46-7eb7b5cc96ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="descriptor_sets">
+      <UniqueIdentifier>{6fd09be6-26fb-4c35-91ec-c05d9b99c0c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fwd">
+      <UniqueIdentifier>{855c816b-63e0-4efa-9da1-75521cd0c075}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{5229d71f-e8fc-4257-80e2-cac5241884d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Managed">
+      <UniqueIdentifier>{d43b231f-683a-4f8d-8713-63f27c363028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Factories">
+      <UniqueIdentifier>{6e07ef8c-3935-4cb2-a274-1e4e221cedde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Loaders">
+      <UniqueIdentifier>{6afb71d8-dab9-485a-9d2a-7e1b38225231}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\objects">
+      <UniqueIdentifier>{508115dd-c293-4bd2-87bf-81a317729a67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\utils">
+      <UniqueIdentifier>{7c9442b0-f1a5-4229-8ac8-c5bb04d05885}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BufferHelpers.inl">
+      <Filter>utils</Filter>
+    </None>
+    <None Include="VulkanState.inl">
+      <Filter>system</Filter>
+    </None>
+    <None Include="UboManager.inl">
+      <Filter>buffer</Filter>
+    </None>
+    <None Include="DescriptorPoolsManager.inl">
+      <Filter>descriptor_sets</Filter>
+    </None>
+    <None Include="BufferedObj.inl">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="utils\utils.inl">
+      <Filter>utils</Filter>
+    </None>
+    <None Include="PipelineBinders.inl">
+      <Filter>render\objects</Filter>
+    </None>
+  </ItemGroup>
+</Project>

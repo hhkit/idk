@@ -2,6 +2,8 @@
 #include <utility>
 #include "casts.h"
 
+#pragma warning(disable:4312)
+
 namespace idk
 {
 	template<typename T, typename U>

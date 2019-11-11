@@ -1,0 +1,5 @@
+metadatas: 
+- guid: 94a79ba8-676f-4e14-bef2-423e1deddbe0
+  metadata: '{internal_format: RGBAF_16, uv_mode: Clamp}'
+  name: ""
+  t_hash: idk::CubeMap

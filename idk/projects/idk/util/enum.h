@@ -37,17 +37,16 @@ struct name																							\
 	constexpr static UnderlyingType values[] { IDENTITY(IGNORE_ASSIGN(__VA_ARGS__)) };				\
 	constexpr static idk::string_view names[] { IDENTITY(TRIM(__VA_ARGS__)) };						\
 																									\
-	name() = delete;																				\
+	name() = default;																				\
 	constexpr name(_enum val)																		\
 		: value{ val }																				\
 	{																								\
 		static_assert(std::is_integral_v<UnderlyingType> && !std::is_unsigned_v<UnderlyingType>);	\
 	}																								\
-	template<typename IntegralT>																	\
+	template<typename IntegralT, typename = std::enable_if_t<std::is_integral_v<IntegralT>>>		\
 	constexpr name(IntegralT val)																	\
 		: value { static_cast<UnderlyingType>(val) }												\
 	{																								\
-		static_assert(std::is_integral_v<IntegralT>);												\
 	}																								\
 	constexpr operator _enum() const { return (_enum)value; }										\
 	explicit operator string() const { return idk::string(to_string()); }							\
@@ -74,5 +73,4 @@ struct name																							\
 																									\
 private:																							\
 	UnderlyingType value;																			\
-	template<typename> friend struct ::property::opin::def;											\
-};																									\
+};

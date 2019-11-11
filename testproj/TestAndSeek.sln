@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.62
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAndSeek", "scripts\TestAndSeek.csproj", "{4B7C88AD-68E9-4D93-A807-A5F55F313C0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4B7C88AD-68E9-4D93-A807-A5F55F313C0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B7C88AD-68E9-4D93-A807-A5F55F313C0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1EB8F7E7-CE59-4CEF-A8CF-C2421BB30774}
+	EndGlobalSection
+EndGlobal

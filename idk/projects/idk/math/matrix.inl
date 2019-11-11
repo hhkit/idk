@@ -8,61 +8,61 @@
 #include <ds/range.h>
 #include <ds/zip.h>
 
-namespace idk::math
+namespace idk
 {
 	namespace detail
 	{
 		template<typename T, unsigned R, unsigned C, size_t ... Indexes>
-		vector<T, R> MatrixVectorMult(const matrix<T, R, C>& lhs, const vector<T, C>& rhs, std::index_sequence<Indexes...>)
+		tvec<T, R> MatrixVectorMult(const tmat<T, R, C>& lhs, const tvec<T, C>& rhs, std::index_sequence<Indexes...>)
 		{
 			return ((lhs[Indexes] * rhs[Indexes]) + ...);
 		}
 
 		template<typename T, unsigned O, unsigned M, unsigned I, size_t ... Indexes>
-		matrix<T, O, I> MatrixMatrixMult(const matrix<T, O, M>& lhs, const matrix<T, M, I>& rhs, std::index_sequence<Indexes...>)
+		tmat<T, O, I> MatrixMatrixMult(const tmat<T, O, M>& lhs, const tmat<T, M, I>& rhs, std::index_sequence<Indexes...>)
 		{
-			return matrix<T, O, I>{ (lhs * rhs[Indexes]) ...};
+			return tmat<T, O, I>{ (lhs * rhs[Indexes]) ...};
 		}
 
 		template<size_t TransposeMe, typename T, unsigned R, unsigned C, size_t ... RowIndexes>
-		auto MatrixTransposeRow(const matrix<T, R, C>& transposeme,
+		auto MatrixTransposeRow(const tmat<T, R, C>& transposeme,
 			std::index_sequence<RowIndexes...>)
 		{
-			return vector<T, C>{
-				(transposeme[TransposeMe][RowIndexes]) ...
+			return tvec<T, C>{
+				(transposeme[RowIndexes][TransposeMe]) ...
 			};
 		}
 
 		template<typename T, unsigned R, unsigned C, size_t ... RowIndexes>
-		matrix<T, C, R> MatrixTranspose(const matrix<T, R, C>& transposeme, 
+		tmat<T, C, R> MatrixTranspose(const tmat<T, R, C>& transposeme, 
 			std::index_sequence<RowIndexes...>)
 		{
-			return matrix<T, C, R> {
+			return tmat<T, C, R> {
 					(MatrixTransposeRow<RowIndexes>(transposeme, std::make_index_sequence<C>{})) ...
 				};
 		}
 
 		template<unsigned Col, typename T, unsigned R, unsigned C, 
 			unsigned ... RowIndexes>
-		vector<T, C> VectorOnRow(const std::array<T, R* C>& values, std::index_sequence<RowIndexes...>)
+		tvec<T, C> VectorOnRow(const std::array<T, R* C>& values, std::index_sequence<RowIndexes...>)
 		{
-			return vector<T, C>{
+			return tvec<T, C>{
 				(values[R * RowIndexes + Col]) ...
 			};
 		}
 
 		template<typename T, unsigned R, unsigned C, 
 			size_t ... ColIndexes>
-		matrix<T, R, C> MatrixFromRowMajor(const std::array<T, R*C> &values, std::index_sequence<ColIndexes...>)
+		tmat<T, R, C> MatrixFromRowMajor(const std::array<T, R*C> &values, std::index_sequence<ColIndexes...>)
 		{
-			return matrix<T, R, C>{
+			return tmat<T, R, C>{
 				(VectorOnRow<ColIndexes, T, R, C>(values, std::make_index_sequence<R>{})) ...
 			};
 		}
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C>::matrix()
+	tmat<T, R, C>::tmat()
 		: intern{}
 	{
 		if constexpr (R <= C)
@@ -76,28 +76,45 @@ namespace idk::math
 	
 	template<typename T, unsigned R, unsigned C>
 	template<typename ...U, typename>
-	matrix<T, R, C>::matrix(const vector<U, R>& ...vectors)
+	tmat<T, R, C>::tmat(const tvec<U, R>& ...vectors)
 		: intern{vectors...}
 	{
 	}
 
 	template<typename T, unsigned R, unsigned C>
 	template<typename ...U, typename>
-	matrix<T, R, C>::matrix(U ... values)
-		: matrix{ detail::MatrixFromRowMajor<T,R,C>(std::array<T, R*C>{static_cast<T>(values)...}, std::make_index_sequence<C>{}) }
+	tmat<T, R, C>::tmat(U ... values)
+		: tmat{ detail::MatrixFromRowMajor<T,R,C>(std::array<T, R*C>{static_cast<T>(values)...}, std::make_index_sequence<C>{}) }
 	{
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	inline matrix<T, R, C>::matrix(const matrix<T, R - 1, C - 1>& mtx)
-		: matrix{}
+	inline tmat<T, R, C>::tmat(T* ptr)
+	{
+		auto writr = data();
+		const auto etr = ptr + R * C;
+		while (ptr != etr)
+			*writr = *ptr++;
+	}
+
+	template<typename T, unsigned R, unsigned C>
+	inline tmat<T, R, C>::tmat(const tmat<T, R - 1, C - 1>& mtx)
+		: tmat{}
 	{
 		for (auto& elem : range<C - 1>())
 			intern[elem] = column_t{ mtx[elem], 0.f };
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	T matrix<T, R, C>::determinant() const
+	inline tmat<T, R, C>::tmat(const tmat<T, R + 1, C + 1> & mtx)
+		: tmat{}
+	{
+		for (auto& elem : range<C>())
+			intern[elem] = column_t{ mtx[elem] };
+	}
+
+	template<typename T, unsigned R, unsigned C>
+	T tmat<T, R, C>::determinant() const
 	{
 		static_assert(R == C, "determinant can only be called on square matrices");
 		//static_assert(R < 4,  "we haven't developed determinants beyond this dimension");
@@ -126,21 +143,21 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	inline matrix<T, C, R> matrix<T, R, C>::transpose() const
+	inline tmat<T, C, R> tmat<T, R, C>::transpose() const
 	{
 		return detail::MatrixTranspose(*this, std::make_index_sequence<R>{});
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	inline matrix<T, C, R> matrix<T, R, C>::inverse() const
+	inline tmat<T, C, R> tmat<T, R, C>::inverse() const
 	{
 		static_assert(R == C, "inverse is only callable on square matrices");
 
 		if constexpr (R == 1)
-			return matrix{ 1.f } / determinant();
+			return tmat{ 1.f } / determinant();
 		else
 		if constexpr (R == 2)
-			return matrix{
+			return tmat{
 				 intern[1][1],	-intern[1][0],
 				-intern[0][1],	 intern[0][0]
 			};
@@ -152,7 +169,7 @@ namespace idk::math
 			auto& d = m[0][1]; auto& e = m[1][1]; auto& f = m[2][1];
 			auto& g = m[0][2]; auto& h = m[1][2]; auto& i = m[2][2];
 
-			return matrix{
+			return tmat{
 				  (e * i - f * h), - (b * i - c * h),   (b * f - c * e),
 				- (d * i - f * g),   (a * i - c * g), - (a * f - c * d),
 				  (d * h - e * g), - (a * h - b * g),   (a * e - b * d)
@@ -183,50 +200,48 @@ namespace idk::math
 			T s17 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
 			T s18 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
 
-			matrix<T, C, R> inverse;
-			inverse[0][0] = +(m[1][1] * s00 - m[1][2] * s01 + m[1][3] * s02);
-			inverse[0][1] = -(m[1][0] * s00 - m[1][2] * s03 + m[1][3] * s04);
-			inverse[0][2] = +(m[1][0] * s01 - m[1][1] * s03 + m[1][3] * s05);
-			inverse[0][3] = -(m[1][0] * s02 - m[1][1] * s04 + m[1][2] * s05);
+			tmat<T, C, R> retval;
+			retval[0][0] = +(m[1][1] * s00 - m[1][2] * s01 + m[1][3] * s02);
+			retval[1][0] = -(m[1][0] * s00 - m[1][2] * s03 + m[1][3] * s04);
+			retval[2][0] = +(m[1][0] * s01 - m[1][1] * s03 + m[1][3] * s05);
+			retval[3][0] = -(m[1][0] * s02 - m[1][1] * s04 + m[1][2] * s05);
 
-			inverse[1][0] = -(m[0][1] * s00 - m[0][2] * s01 + m[0][3] * s02);
-			inverse[1][1] = +(m[0][0] * s00 - m[0][2] * s03 + m[0][3] * s04);
-			inverse[1][2] = -(m[0][0] * s01 - m[0][1] * s03 + m[0][3] * s05);
-			inverse[1][3] = +(m[0][0] * s02 - m[0][1] * s04 + m[0][2] * s05);
+			retval[0][1] = -(m[0][1] * s00 - m[0][2] * s01 + m[0][3] * s02);
+			retval[1][1] = +(m[0][0] * s00 - m[0][2] * s03 + m[0][3] * s04);
+			retval[2][1] = -(m[0][0] * s01 - m[0][1] * s03 + m[0][3] * s05);
+			retval[3][1] = +(m[0][0] * s02 - m[0][1] * s04 + m[0][2] * s05);
 
-			inverse[2][0] = +(m[0][1] * s06 - m[0][2] * s07 + m[0][3] * s08);
-			inverse[2][1] = -(m[0][0] * s06 - m[0][2] * s09 + m[0][3] * s10);
-			inverse[2][2] = +(m[0][0] * s11 - m[0][1] * s09 + m[0][3] * s12);
-			inverse[2][3] = -(m[0][0] * s08 - m[0][1] * s10 + m[0][2] * s12);
+			retval[0][2] = +(m[0][1] * s06 - m[0][2] * s07 + m[0][3] * s08);
+			retval[1][2] = -(m[0][0] * s06 - m[0][2] * s09 + m[0][3] * s10);
+			retval[2][2] = +(m[0][0] * s11 - m[0][1] * s09 + m[0][3] * s12);
+			retval[3][2] = -(m[0][0] * s08 - m[0][1] * s10 + m[0][2] * s12);
 
-			inverse[3][0] = -(m[0][1] * s13 - m[0][2] * s14 + m[0][3] * s15);
-			inverse[3][1] = +(m[0][0] * s13 - m[0][2] * s16 + m[0][3] * s17);
-			inverse[3][2] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
-			inverse[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
+			retval[0][3] = -(m[0][1] * s13 - m[0][2] * s14 + m[0][3] * s15);
+			retval[1][3] = +(m[0][0] * s13 - m[0][2] * s16 + m[0][3] * s17);
+			retval[2][3] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
+			retval[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
 
-			float det =   m[0][0] * inverse[0][0]
-						+ m[0][1] * inverse[0][1]
-						+ m[0][2] * inverse[0][2]
-						+ m[0][3] * inverse[0][3];
+			const auto det =   m[0][0] * retval[0][0]
+						+ m[0][1] * retval[1][0]
+						+ m[0][2] * retval[2][0]
+						+ m[0][3] * retval[3][0];
 
 			// not invertible
-			if (fabs(det) <= constants::epsilon<float>())
-				return matrix<T, C, R>();
+			if (fabs(det) <= constants::epsilon<T>())
+				return tmat<T, C, R>();
 
-			for (int i = 0; i < R; ++i)
-				for(int k = 0; k < C; ++k)
-					inverse[i][k] /= det;
+			retval /= det;
 
-			return inverse;
+			return retval;
 		}
 		else
-		return matrix<T, C, R>();
+		return tmat<T, C, R>();
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, C - 1, R - 1> matrix<T, R, C>::cofactor(unsigned r, unsigned c) const
+	tmat<T, C - 1, R - 1> tmat<T, R, C>::cofactor(unsigned r, unsigned c) const
 	{
-		auto retval = matrix<T, C-1, R-1>{};
+		auto retval = tmat<T, C-1, R-1>{};
 
 		for (unsigned i_track = 0, i_write = 0; i_track < R; ++i_track)
 		{
@@ -248,59 +263,59 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	typename matrix<T, R, C>::column_t* matrix<T, R, C>::begin()
+	typename tmat<T, R, C>::column_t* tmat<T, R, C>::begin()
 	{
-		return std::begin(intern);
+		return std::data(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	const typename matrix<T, R, C>::column_t* matrix<T, R, C>::begin() const
+	const typename tmat<T, R, C>::column_t* tmat<T, R, C>::begin() const
 	{
-		return std::begin(intern);
+		return std::data(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	typename matrix<T, R, C>::column_t* matrix<T, R, C>::end()
+	typename tmat<T, R, C>::column_t* tmat<T, R, C>::end()
 	{
-		return std::end(intern);
+		return std::data(intern) + std::size(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	const typename matrix<T, R, C>::column_t* matrix<T, R, C>::end() const
+	const typename tmat<T, R, C>::column_t* tmat<T, R, C>::end() const
 	{
-		return std::end(intern);
+		return std::data(intern) + std::size(intern);
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	T* matrix<T, R, C>::data()
+	T* tmat<T, R, C>::data()
 	{
-		return intern->data();
+		return intern[0].data();
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	const T* matrix<T, R, C>::data() const
+	const T* tmat<T, R, C>::data() const
 	{
-		return intern->data();
+		return intern[0].data();
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	typename matrix<T, R, C>::column_t& matrix<T,R,C>::operator[](size_t index)
-	{
-		return intern[index];
-	}
-
-	template<typename T, unsigned R, unsigned C>
-	const typename matrix<T, R, C>::column_t& matrix<T, R, C>::operator[](size_t index) const
+	typename tmat<T, R, C>::column_t& tmat<T,R,C>::operator[](size_t index)
 	{
 		return intern[index];
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C>& matrix<T, R, C>::operator+=(const matrix& rhs)
+	const typename tmat<T, R, C>::column_t& tmat<T, R, C>::operator[](size_t index) const
+	{
+		return intern[index];
+	}
+
+	template<typename T, unsigned R, unsigned C>
+	tmat<T, R, C>& tmat<T, R, C>::operator+=(const tmat& rhs)
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
-		auto etr = this->end();
+		const auto* etr = this->end();
 
 		while (ltr != etr)
 			*ltr++ += *rtr++;
@@ -309,34 +324,34 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C> matrix<T, R, C>::operator+(const matrix& rhs) const
+	tmat<T, R, C> tmat<T, R, C>::operator+(const tmat& rhs) const
 	{
 		auto copy = *this;
 		return copy += rhs;
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C>& matrix<T, R, C>::operator-=(const matrix& rhs)
+	tmat<T, R, C>& tmat<T, R, C>::operator-=(const tmat& rhs)
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
-		auto etr = this->end();
+		const auto* etr = this->end();
 
 		while (ltr != etr)
-			* ltr++ -= *rtr++;
+			*ltr++ -= *rtr++;
 
 		return *this;
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C> matrix<T, R, C>::operator-(const matrix& rhs) const
+	tmat<T, R, C> tmat<T, R, C>::operator-(const tmat& rhs) const
 	{
 		auto copy = *this;
 		return copy -= rhs;
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C>& matrix<T, R, C>::operator*=(const T& val)
+	tmat<T, R, C>& tmat<T, R, C>::operator*=(const T& val)
 	{
 		for (auto& elem : *this)
 			elem *= val;
@@ -345,7 +360,7 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C> matrix<T, R, C>::operator*(const T& val) const
+	tmat<T, R, C> tmat<T, R, C>::operator*(const T& val) const
 	{
 		auto copy = *this;
 		return copy *= val;
@@ -353,7 +368,7 @@ namespace idk::math
 
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C>& matrix<T, R, C>::operator/=(const T& val)
+	tmat<T, R, C>& tmat<T, R, C>::operator/=(const T& val)
 	{
 		for (auto& elem : *this)
 			elem /= val;
@@ -362,14 +377,14 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C> matrix<T, R, C>::operator/(const T& val) const
+	tmat<T, R, C> tmat<T, R, C>::operator/(const T& val) const
 	{
 		auto copy = *this;
 		return copy /= val;
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	bool matrix<T, R, C>::operator==(const matrix& rhs) const
+	bool tmat<T, R, C>::operator==(const tmat& rhs) const
 	{
 		auto ltr = this->begin();
 		auto rtr = rhs.begin();
@@ -383,26 +398,31 @@ namespace idk::math
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	bool matrix<T, R, C>::operator!=(const matrix& rhs) const
+	bool tmat<T, R, C>::operator!=(const tmat& rhs) const
 	{
 		return !operator==(rhs);
 	}
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T, R, C> operator*(const T& coeff, const matrix<T, R, C>& m)
+	tmat<T, R, C> operator*(const T& coeff, const tmat<T, R, C>& m)
 	{
 		return m * coeff;
 	}
-
+#ifdef _DEBUG
+#pragma optimize("",on)
+#endif
 	template<typename T, unsigned R, unsigned C>
-	vector<T, R> operator*(const matrix<T, R, C>& lhs, const vector<T, C>& rhs)
+	tvec<T, R> operator*(const tmat<T, R, C>& lhs, const tvec<T, C>& rhs)
 	{
 		return detail::MatrixVectorMult(lhs, rhs, std::make_index_sequence<C>{});
 	}
 
 	template<typename T, unsigned O, unsigned M, unsigned I>
-	matrix<T, O, I> operator*(const matrix<T, O, M>& lhs, const matrix<T, M, I>& rhs)
+	tmat<T, O, I> operator*(const tmat<T, O, M>& lhs, const tmat<T, M, I>& rhs)
 	{
 		return detail::MatrixMatrixMult(lhs, rhs, std::make_index_sequence<I>{});
 	}
+#ifdef _DEBUG
+#pragma optimize("",off)
+#endif
 }

@@ -4,9 +4,6 @@
     <Filter Include="math">
       <UniqueIdentifier>{53e7f8f8-6df9-4b02-a9e3-304987e31f2a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gfx">
-      <UniqueIdentifier>{80273e76-a09c-4086-9f9f-99345a0eed46}</UniqueIdentifier>
-    </Filter>
     <Filter Include="phys">
       <UniqueIdentifier>{34a13a27-ba70-439e-aaf7-b6bf4f887d62}</UniqueIdentifier>
     </Filter>
@@ -59,23 +56,74 @@
     <Filter Include="res">
       <UniqueIdentifier>{0bd97395-0815-4a82-a32b-3f8047af46ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="util">
-      <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
-    </Filter>
     <Filter Include="serialize">
       <UniqueIdentifier>{1edb08ba-9e8a-420f-aa06-8800e1ee860c}</UniqueIdentifier>
     </Filter>
     <Filter Include="file">
       <UniqueIdentifier>{f2473f67-3de9-4860-9834-dbb2b1f6c894}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shapes">
-      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\scene">
-      <UniqueIdentifier>{ef6ed219-6b06-437d-bf5f-a85f74a19f89}</UniqueIdentifier>
-    </Filter>
     <Filter Include="scene">
       <UniqueIdentifier>{08f522a2-1b53-4a51-a302-0433f32e7f80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{148836fd-f730-4b91-b802-ac1fb0c2f6c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\interp">
+      <UniqueIdentifier>{c78cfeac-2107-48ce-841f-4eabae9d7857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="reflect\detail">
+      <UniqueIdentifier>{53f59ace-a5cc-4e27-8aea-bb3b8f0abbd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="prefab">
+      <UniqueIdentifier>{ee5f83d5-e8dd-4fa8-b5a9-e37be0d0bf14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="anim">
+      <UniqueIdentifier>{cfa80d33-f180-41f7-b0fe-108ffbff19c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="anim\res/factories">
+      <UniqueIdentifier>{18746da9-2d25-47bc-a326-d1fab351109e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\shapes">
+      <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="phys\collision">
+      <UniqueIdentifier>{a443cd4d-0b4b-4ed3-97e1-29444c85c072}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{0ea81c08-6894-4f4d-92fb-1d23678faa9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{2eea3a1f-43c1-42ef-b2cd-443933fd8622}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="anim\utils">
+      <UniqueIdentifier>{a0b9bd32-3f41-447e-8853-eb3f7c9586d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="proj">
+      <UniqueIdentifier>{1142d1c7-1839-4bbc-999f-17503782be59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="particle">
+      <UniqueIdentifier>{3479c263-d931-4a92-b791-425e7da842c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx">
+      <UniqueIdentifier>{80273e76-a09c-4086-9f9f-99345a0eed46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\camera">
+      <UniqueIdentifier>{0d1b9113-c907-43df-b410-c093c7174929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\object">
+      <UniqueIdentifier>{d25200eb-6b2c-4974-ab2d-f1f2adee7057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\light">
+      <UniqueIdentifier>{b10c8175-8919-495a-97ef-274c5cdf9337}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\shadergraph">
+      <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\Font">
+      <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -117,9 +165,6 @@
     </ClInclude>
     <ClInclude Include="idk.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="common\Parent.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="core\Handle.h">
       <Filter>core\handles</Filter>
     </ClInclude>
@@ -194,13 +239,7 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="idk_reflect_types.h" />
-    <ClInclude Include="reflect\constructor_entry.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="reflect\reflect.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
-    <ClInclude Include="reflect\typed_context.inl">
       <Filter>reflect</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioSystem.h">
@@ -230,17 +269,8 @@
     <ClInclude Include="util\string_hash.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="reflect\pretty_function.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
     <ClInclude Include="util\macro_utils.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="reflect\ReflectRegistration.h">
-      <Filter>reflect</Filter>
-    </ClInclude>
-    <ClInclude Include="serialize\serialize.h">
-      <Filter>serialize</Filter>
     </ClInclude>
     <ClInclude Include="file\FileSystem.h">
       <Filter>file</Filter>
@@ -254,9 +284,6 @@
     <ClInclude Include="math\color.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="shape\aabb.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
     <ClInclude Include="scene\SceneFactory.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -266,49 +293,14 @@
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="audio\AudioClipFactory.h">
-      <Filter>audio</Filter>
-    </ClInclude>
     <ClInclude Include="util\enum.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="file\FileHandle.h">
-      <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioListener.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Mesh.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
     <ClInclude Include="audio\AudioSource.h">
       <Filter>audio</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\vertex_descriptor.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\Material.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="anim\BoneRenderer.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="IncludeResources.h">
-      <Filter>res</Filter>
-    </ClInclude>
-    <ClInclude Include="IncludeComponents.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="IncludeSystems.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="res\ResourceMeta.h" />
-    <ClInclude Include="gfx\RenderObject.h" />
-    <ClInclude Include="gfx\MeshRenderer.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\MaterialInstance.h">
-      <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="phys\RigidBody.h">
       <Filter>phys</Filter>
@@ -316,34 +308,559 @@
     <ClInclude Include="phys\Collider.h">
       <Filter>phys</Filter>
     </ClInclude>
-    <ClInclude Include="shape\sphere.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\ray.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\capsule.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shape\box.h">
-      <Filter>shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="math\interp\Spline.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="ds\compressed_pair.h">
       <Filter>ds</Filter>
     </ClInclude>
     <ClInclude Include="ds\small_string.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="event\Signal.h" />
     <ClInclude Include="test\TestSystem.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix_decomposition.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestComponent.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="math\comparable.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceMeta.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="event\Signal.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderObject.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Material.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialInstance.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Mesh.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Camera.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\vertex_descriptor.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\tuple.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\dual_set.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="math\euler_angles.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\interp\Spline.h">
+      <Filter>math\interp</Filter>
+    </ClInclude>
+    <ClInclude Include="util\align.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\gfx_data.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\DebugRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\debug_vtx_layout.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\buffer_desc.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\pipeline_config.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\uniform_info.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\GfxDbgTest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="math\random.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileResources_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\tag.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestResource.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshRenderer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ComponentTags.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeComponents.h" />
+    <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="IncludeResources.h" />
+    <ClInclude Include="file\FileSystemIncludes.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\constructor_entry.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\typed_context.inl">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\typeinfo.h">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\meta_manager.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\table_storage.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\typed_context.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\visit_detail.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\detail\pretty_function.h">
+      <Filter>reflect\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabFactory.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\Prefab.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PropertyOverride.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabData.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabInstance.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="prefab\PrefabUtility.h">
+      <Filter>prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\circular_buffer.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Texture.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTarget.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplate.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderProgram.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\SkinnedMeshRenderer.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplateFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Light.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\LightTypes.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Name.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\yaml.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\slow_tree.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\SkeletonFactory.h">
+      <Filter>anim\res/factories</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Animation.h">
+      <Filter>anim\res/factories</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Skeleton.h">
+      <Filter>anim\res/factories</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\slow_tree.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CameraControls.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneGraphBuilder.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationSystem.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestResourceFactory.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="util\ioutils.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\aabb.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\box.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\capsule.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\ray.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\sphere.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\linear.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\PhysicsSystem.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph_data.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="util\hash_combine.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CubeMap.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="file\PathHandle.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MeshFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_box.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_box_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\raycasts\collision_raycast.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_result.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\result.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\halfspace.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="math\shapes\frustum.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioClipLoader.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderGraph_helpers.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="res\EasyFactory.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\GenericResourceHandle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\GenericResourceHandle_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\variant.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceBundle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceUtils.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\SaveableResource.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\MetaBundle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderTemplateLoader.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="PauseConfigurations.h" />
+    <ClInclude Include="anim\Animator.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectRegistration.h" />
+    <ClInclude Include="app\GamepadSystem.h">
       <Filter>app</Filter>
     </ClInclude>
-    <ClInclude Include="test\TestComponent.h" />
-    <ClInclude Include="gfx\Camera.h" />
-    <ClInclude Include="math\matrix_decomposition.h" />
+    <ClInclude Include="res\GenericResourceHandle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\GenericResourceHandle_detail.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\EasyFactory.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\FileLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\BasicRenderPasses.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CubeMap.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\MetaBundle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoBehavior.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoBehaviorData.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceBundle.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ScriptSystem.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\variant.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\UniformInstance.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="app\GamepadEnums.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Framebuffer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FramebufferFactory.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="machine.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\IShaderProgramFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\idk_assert.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Tag.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="res\SaveableResourceLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\projector_functions.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\IShaderProgramFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoEnvironment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ManagedObj.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ManagedThunk.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ManagedType.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationState.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="common\TagManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoBehaviorEnvironment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ValueBoxer.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="common\LayerManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Layer.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\Log.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogPools.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="natvis_ids.h">
+      <Filter>_natvis</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\Bone.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ConfigurableSystem.h">
+      <Filter>core\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\MaterialFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\binary.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\parse_error.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="serialize\text.h">
+      <Filter>serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoWrapperEnvironment.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationLayer.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CameraFrustum.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationUtils.h">
+      <Filter>anim\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="proj\ProjectManager.h">
+      <Filter>proj</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Viewport.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Buffer.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogSingleton.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collidable_shapes.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="debug\LogSystem.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleData.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleSystem.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleSystemModules.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\ParticleSystemUpdater.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ViewportUtil.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ValueUnboxer.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoFunctionInvoker.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoBinder.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="particle\MinMax.h">
+      <Filter>particle</Filter>
+    </ClInclude>
+    <ClInclude Include="math\ritters.h">
+      <Filter>math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\ManagedCollision.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CameraClear.h">
+      <Filter>gfx\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="core\NullHandleException.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FontAtlas.h">
+      <Filter>gfx\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Font.h">
+      <Filter>gfx\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FontData.h">
+      <Filter>gfx\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="util\easing.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="script\MonoException.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FontAtlasFactory.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -364,9 +881,6 @@
     </ClCompile>
     <ClCompile Include="core\SystemManager.cpp">
       <Filter>core\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="core\Component.cpp">
-      <Filter>core\data</Filter>
     </ClCompile>
     <ClCompile Include="core\GameObject.cpp">
       <Filter>core\data</Filter>
@@ -398,9 +912,6 @@
     <ClCompile Include="res\ResourceManager.cpp">
       <Filter>res</Filter>
     </ClCompile>
-    <ClCompile Include="serialize\serialize.cpp">
-      <Filter>serialize</Filter>
-    </ClCompile>
     <ClCompile Include="file\FileSystemInternal.cpp">
       <Filter>file</Filter>
     </ClCompile>
@@ -409,12 +920,6 @@
     </ClCompile>
     <ClCompile Include="file\DirectoryWatcher.cpp">
       <Filter>file</Filter>
-    </ClCompile>
-    <ClCompile Include="shape\aabb.cpp">
-      <Filter>shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="math\color.cpp">
-      <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="scene\SceneFactory.cpp">
       <Filter>scene</Filter>
@@ -428,17 +933,11 @@
     <ClCompile Include="reflect\uni_container.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
-    <ClCompile Include="audio\AudioClipFactory.cpp">
-      <Filter>audio</Filter>
-    </ClCompile>
     <ClCompile Include="reflect\enum_type.cpp">
       <Filter>reflect</Filter>
     </ClCompile>
     <ClCompile Include="reflect\enum_value.cpp">
       <Filter>reflect</Filter>
-    </ClCompile>
-    <ClCompile Include="file\FileHandle.cpp">
-      <Filter>file</Filter>
     </ClCompile>
     <ClCompile Include="audio\AudioListener.cpp">
       <Filter>audio</Filter>
@@ -446,19 +945,326 @@
     <ClCompile Include="audio\AudioSource.cpp">
       <Filter>audio</Filter>
     </ClCompile>
+    <ClCompile Include="test\TestSystem.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Camera.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="math\euler_angles.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\DebugRenderer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\buffer_desc.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="math\random.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
     <ClCompile Include="gfx\MeshRenderer.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="shape\sphere.cpp">
-      <Filter>shapes</Filter>
+    <ClCompile Include="gfx\MeshRenderer.cpp">
+      <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="shape\ray.cpp">
-      <Filter>shapes</Filter>
+    <ClCompile Include="gfx\GfxDbgTest.cpp">
+      <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="test\TestSystem.cpp">
-      <Filter>app</Filter>
+    <ClCompile Include="gfx\GraphicsSystem.cpp">
+      <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\Camera.cpp" />
+    <ClCompile Include="prefab\Prefab.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabUtility.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Texture.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\RenderTarget.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplate.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Material.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Name.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_load.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Animation.cpp">
+      <Filter>anim\res/factories</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Skeleton.cpp">
+      <Filter>anim\res/factories</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\SkeletonFactory.cpp">
+      <Filter>anim\res/factories</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\CameraControls.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabData.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneGraphBuilder.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationSystem.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="util\ioutils.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\SkinnedMeshRenderer.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\aabb.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\ray.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\sphere.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml_dump.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\box.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\capsule.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\Collider.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\PhysicsSystem.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\RigidBody.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Light.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph_data.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\CubeMap.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="file\PathHandle.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="res\Guid.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_box.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\raycasts\collision_raycast.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_result.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\frustum.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="math\shapes\halfspace.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MeshFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioClipLoader.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="res\GenericResourceHandle.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\ResourceBundle.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\MetaBundle.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MaterialFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\MaterialInstance.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\projector_functions.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderProgram.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Animator.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="script\MonoBehavior.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ScriptSystem.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\LightTypes.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ManagedObj.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ManagedThunk.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ManagedType.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\MonoEnvironment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="common\TagManager.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ValueBoxer.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Tag.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\LayerManager.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\Log.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\Bone.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\binary.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\text_serialize.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize\text_parse.cpp">
+      <Filter>serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="script\MonoWrapperEnvironment.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationLayer.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\CameraFrustum.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationState.cpp">
+      <Filter>anim</Filter>
+    </ClCompile>
+    <ClCompile Include="proj\ProjectManager.cpp">
+      <Filter>proj</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Framebuffer.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\LogSingleton.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\LogSystem.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleData.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleSystem.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleSystemModules.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle\ParticleSystemUpdater.cpp">
+      <Filter>particle</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ViewportUtil.cpp">
+      <Filter>gfx\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ValueUnboxer.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="math\ritters.cpp">
+      <Filter>math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Layer.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="core\NullHandleException.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="util\easing.cpp" />
+    <ClCompile Include="gfx\FontAtlas.cpp">
+      <Filter>gfx\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Font.cpp">
+      <Filter>gfx\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\FontAtlasFactory.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="util\easing.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="anim\AnimationUtils.cpp">
+      <Filter>anim\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\FramebufferFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -530,9 +1336,6 @@
     <None Include="ds\zip.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="reflect\constructor_entry.inl">
-      <Filter>reflect</Filter>
-    </None>
     <None Include="reflect\dynamic.inl">
       <Filter>reflect</Filter>
     </None>
@@ -557,9 +1360,6 @@
     <None Include="reflect\uni_container.inl">
       <Filter>reflect</Filter>
     </None>
-    <None Include="serialize\serialize.inl">
-      <Filter>serialize</Filter>
-    </None>
     <None Include="reflect\enum_type.inl">
       <Filter>reflect</Filter>
     </None>
@@ -569,8 +1369,85 @@
     <None Include="ds\small_string.inl">
       <Filter>ds</Filter>
     </None>
-    <None Include="event\Signal.inl" />
-    <None Include="math\matrix_decomposition.inl" />
+    <None Include="math\matrix_decomposition.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="math\comparable.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="event\Signal.inl">
+      <Filter>event</Filter>
+    </None>
+    <None Include="meta\tuple.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="math\color.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="ds\dual_set.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="meta\tag.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="res\ResourceMeta.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="reflect\detail\constructor_entry.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\meta_manager.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\table_storage.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="reflect\detail\visit_detail.inl">
+      <Filter>reflect\detail</Filter>
+    </None>
+    <None Include="ds\circular_buffer.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="serialize\yaml.inl">
+      <Filter>serialize</Filter>
+    </None>
+    <None Include="ds\slow_tree.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="math\linear.inl">
+      <Filter>math</Filter>
+    </None>
+    <None Include="res\Guid.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="phys\raycasts\collision_raycast.inl">
+      <Filter>phys\collision</Filter>
+    </None>
+    <None Include="ds\result.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="meta\variant.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="res\SaveableResourceLoader.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceBundle.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\ResourceUtils.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="serialize\binary.inl">
+      <Filter>serialize</Filter>
+    </None>
+    <None Include="serialize\text.inl">
+      <Filter>serialize</Filter>
+    </None>
+    <None Include="script\ManagedObj.inl">
+      <Filter>script</Filter>
+    </None>
+    <None Include="meta\comparator.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
@@ -589,6 +1466,18 @@
       <Filter>_natvis</Filter>
     </Natvis>
     <Natvis Include="_natvis\guid.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\reflect.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\ds.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\yaml.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
+    <Natvis Include="_natvis\filesystem.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
   </ItemGroup>

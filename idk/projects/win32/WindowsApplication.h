@@ -6,6 +6,8 @@
 #include <idk.h>
 #include <app/Application.h>
 
+
+
 #define MAX_LOADSTRING 100
 
 // Forward declarations of functions included in this code module:
@@ -24,8 +26,13 @@ namespace idk::win
 		void PollEvents() override;
 		int GetReturnVal();
 		void Init() override {}
-		vec2 GetMouseScreenPos() override { return vec2{}; }
-		vec2 GetMouseScreenDel() override { return vec2{}; }
+		ivec2 GetScreenSize() override;
+		vec2 GetMouseScreenPos() override; 
+		vec2 GetMouseScreenDel() override;
+		ivec2 GetMousePixelPos() override;
+		ivec2 GetMousePixelDel() override;
+		ivec2 GetMouseScroll() override;
+
 		bool GetKeyDown(Key) override;
 		bool GetKey(Key) override;
 		bool GetKeyUp(Key) override;
@@ -33,8 +40,15 @@ namespace idk::win
 		// windows
 		bool SetFullscreen(bool) override { return false; }
 		bool SetScreenSize(ivec2) override { return false; }
-		void SwapBuffers() override {}
+		void SetTitle(string_view new_title) override;
+
 		void Shutdown() override {}
+		string GetExecutableDir() override;
+		string GetAppData() override ;
+		string GetCurrentWorkingDir() override;
+		opt<string> OpenFileDialog(const DialogOptions& dialog) override;
+
+		void PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func);
 
 		HINSTANCE GetInstance();
 		HWND      GetWindowHandle();
@@ -44,6 +58,11 @@ namespace idk::win
 		HACCEL    hAccelTable;
 		WCHAR     szWindowClass[MAX_LOADSTRING]{L"idk"};
 		int       retval;
+		ivec2	  screenpos;
+		ivec2     old_screenpos;
+		ivec2	  screendel;
+		vec2	  ndc_screendel;
+
 		static inline Windows* instance = nullptr;
 
 		unique_ptr<InputManager> _input_manager;
@@ -52,7 +71,13 @@ namespace idk::win
 		BOOL InitInstance(int nCmdShow);
 		LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+		void grabScreenCoordinates(LPARAM lParam);
+
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
+
+		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
+
+		bool _dragging{false};
 	};
 }
 

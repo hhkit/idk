@@ -4,6 +4,7 @@
 
 namespace idk
 {
+	class Scheduler;
 	class ResourceManager;
 
 	class Core
@@ -13,20 +14,24 @@ namespace idk
 		template<typename T, typename ... Args> T& AddSystem(Args&& ... args);
 		static seconds GetDT();
 		static seconds GetRealDT();
+		static GameState& GetGameState() { return _instance->_game_state; }
+		static Scheduler& GetScheduler();
 		static ResourceManager& GetResourceManager();
 		static void    Shutdown();
+		static bool	   IsRunning();
 
 		Core();
 		~Core();
 		void Setup();
 		void Run();
 	private:
-		GameState                   _game_state;
-		SystemManager               _system_manager;
-		unique_ptr<class Scheduler> _scheduler;
-		atomic<bool>                _running;
-		static inline Core*         _instance = nullptr;
-		bool                        _setup = false;
+		GameState             _game_state;
+		SystemManager         _system_manager;
+		unique_ptr<Scheduler> _scheduler;
+		atomic<bool>          _running;
+		static inline Core*   _instance = nullptr;
+		bool                  _setup = false;
+		bool                  _shutdown = false;
 	};
 }
 #include "Core.inl"

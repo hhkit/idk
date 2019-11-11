@@ -46,9 +46,9 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenCreateTypeJt()
+		constexpr static auto GenCreateTypeJt()
 		{
-			return GameState::CreateTypeJT{
+			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const Handle<GameObject>& go) -> GenericHandle
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
@@ -58,17 +58,25 @@ namespace idk::detail
 					}
 					else
 					{
+						auto& go_ref = *go;
+						if constexpr (Ts::Unique)
+						{
+							auto component = go_ref.GetComponent<Ts>();
+							if (component)
+								return component;
+						}
 						auto handle = gs.CreateObject<Ts>(go.scene);
 						handle->_gameObject = go;
+						go_ref.RegisterComponent(handle);
 						return handle;
 					}
 				} ...
 			};
 		}
 
-		static auto GenCreateDynamicJt()
+		constexpr static auto GenCreateDynamicJt()
 		{
-			return GameState::CreateDynamicJT{
+			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&, const reflect::dynamic&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const Handle<GameObject>& go, const reflect::dynamic& dyn) -> GenericHandle
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
@@ -78,26 +86,67 @@ namespace idk::detail
 					}
 					else
 					{
+						auto& go_ref = *go;
+						if constexpr (Ts::Unique)
+						{
+							auto component = go_ref.GetComponent<Ts>();
+							if (component)
+								return component;
+						}
 						auto handle = gs.CreateObject<Ts>(go.scene, dyn.get<Ts>());
+						if constexpr (std::is_same_v <Ts, mono::Behavior>)
+						{
+							Handle<mono::Behavior> m = handle;
+							m->script_data.Assign("handle", handle.id);
+						}
 						handle->_gameObject = go;
+						go_ref.RegisterComponent(handle);
 						return handle;
 					}
 				} ...
 			};
 		}
 
-		static auto GenCreateJt()
+		constexpr static auto GenCreateDynamicHandleJt()
 		{
-			return GameState::CreateJT{
+			return array<GenericHandle(*)(GameState&, const Handle<GameObject>&, GenericHandle, const reflect::dynamic&), detail::ObjectPools::TypeCount>{
+				[](GameState& gs, const Handle<GameObject>& go, [[maybe_unused]] GenericHandle h, const reflect::dynamic& dyn) -> GenericHandle
+				{
+					if constexpr (std::is_same_v<Ts, GameObject>)
+					{
+						(h);  (gs); (go); (dyn);
+						return GenericHandle{};
+					}
+					else
+					{
+						auto& go_ref = *go;
+						if constexpr (Ts::Unique)
+						{
+							auto component = go_ref.GetComponent<Ts>();
+							if (component)
+								return component;
+						}
+						auto handle = gs.CreateObject<Ts>(handle_cast<Ts>(h), dyn.get<Ts>());
+						handle->_gameObject = go;
+						go_ref.RegisterComponent(handle);
+						return handle;
+					}
+				} ...
+			};
+		}
+
+		constexpr static auto GenCreateJt()
+		{
+			return array<GenericHandle(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle) -> GenericHandle
 				{
 					return gs.CreateObject(handle_cast<Ts>(handle));
 				} ...
 			};
 		}
-		static auto GenValidateJt()
+		constexpr static auto GenValidateJt()
 		{
-			return GameState::ValidateJT{
+			return array<bool(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle) -> bool
 				{
 					return gs.ValidateHandle(handle_cast<Ts>(handle));
@@ -105,28 +154,100 @@ namespace idk::detail
 			};
 		}
 
-		static auto GenDestructionJt()
+		constexpr static auto GenQueueForDestructionJt()
 		{
-			return GameState::DestroyJT{
+			return array<bool(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
+				[](GameState& gs, const GenericHandle& handle) -> bool
+				{
+					auto real_handle = handle_cast<Ts>(handle);
+					if (!gs.QueuedForDestruction(real_handle))
+					{
+						if constexpr (std::is_same_v<Ts, GameObject>)
+						{
+							for (auto& elem : real_handle->GetComponents())
+								gs.DestroyObject(elem);
+						}
+
+						gs.QueueForDestruction(*handle_cast<Ts>(handle));
+						return true;
+					}
+					
+					return false;
+				} ...
+			};
+		}
+
+		constexpr static auto GenDestructionJt()
+		{
+			return array<void(*)(GameState&, const GenericHandle&), detail::ObjectPools::TypeCount>{
 				[](GameState& gs, const GenericHandle& handle)
 				{
 					if constexpr (std::is_same_v<Ts, GameObject>)
 						gs.DestroyObjectNow(handle_cast<Ts>(handle));
 					else
 					{
-						auto real_handle = handle_cast<Ts>(handle);
-						if (real_handle)
+						if (const auto real_handle = handle_cast<Ts>(handle))
 						{
-							auto entity = real_handle->GetGameObject();
+							const auto entity = real_handle->GetGameObject();
 							gs.DestroyObjectNow(real_handle);
-							assert(entity);
-							auto realent = std::addressof(*entity);
-							auto itr = std::find(realent->_components.begin(), realent->_components.end(), handle);
-							if (itr != realent->_components.end())
-								entity->_components.erase(itr);
+							IDK_ASSERT(entity);
+							entity->DeregisterComponent(real_handle);
 						}
 					}
 				} ...
+			};
+		}
+
+		static auto GenComponentNameTable()
+		{
+			return std::array<const char*, 1 + ComponentCount>
+			{
+				[]() -> const char*
+				{
+					static string retval{ reflect::get_type<Ts>().name() };
+					return retval.data();
+				}()...
+			};
+		}
+
+		constexpr static auto GenGetGameObjectTable()
+		{
+			return std::array<Handle<GameObject>(*)(const GenericHandle&), 1 + ComponentCount>
+			{
+				[](const GenericHandle& handle) -> Handle<GameObject>
+				{
+					if constexpr (std::is_same_v<Ts, GameObject>)
+						return handle_cast<GameObject>(handle);
+					else
+					{
+						if (const auto real_handle = handle_cast<Ts>(handle))
+							return real_handle->GetGameObject();
+						else
+							return {};
+					}
+				} ...
+			};
+		}
+
+		constexpr static auto GenObjectCreatedSignalTable()
+		{
+			return std::array<void (*)(GameState*, const GenericHandle&), 1 + ComponentCount>
+			{
+				[](GameState* gs, const GenericHandle& rhs) -> void
+				{
+					gs->OnObjectCreate<Ts>().Fire(handle_cast<Ts>(rhs));
+				}...
+			};
+		}
+
+		constexpr static auto GenObjecDestroyedSignalTable()
+		{
+			return std::array<void (*)(GameState*, const GenericHandle&), 1 + ComponentCount>
+			{
+				[](GameState* gs, const GenericHandle& rhs) -> void
+				{
+					gs->OnObjectDestroy<Ts>().Fire(handle_cast<Ts>(rhs));
+				}...
 			};
 		}
 	};
@@ -143,12 +264,7 @@ namespace idk
 		: _objects{detail::TableGen::Instantiate()}
 	{
 		assert(_instance == nullptr);
-		name_to_id_map      = detail::TableGen::GenTypeLUT();
-		create_dynamic_jt   = detail::TableGen::GenCreateDynamicJt();
-		create_type_jt      = detail::TableGen::GenCreateTypeJt();
-		create_handles_jt   = detail::TableGen::GenCreateJt();
-		destroy_handles_jt  = detail::TableGen::GenDestructionJt();
-		validate_handles_jt = detail::TableGen::GenValidateJt();
+		name_to_id_map       = detail::TableGen::GenTypeLUT();
 		_instance = this;
 	}
 
@@ -162,64 +278,104 @@ namespace idk
 	{
 		return detail::TableGen::ActivateScene(_objects, scene);
 	}
-	bool GameState::DectivateScene(uint8_t scene)
+	bool GameState::DeactivateScene(uint8_t scene)
 	{
 		return detail::TableGen::DeactivateScene(_objects, scene);
 	}
-	bool GameState::DectivateScene(Scene scene)
+	bool GameState::DeactivateScene(Scene scene)
 	{
-		return DectivateScene(scene.scene_id);
+		return DeactivateScene(scene.scene_id);
 	}
-	bool GameState::ValidateScene(Scene scene)
+	bool GameState::ValidateScene(const Scene& scene)
 	{
 		return static_cast<ObjectPool<GameObject>*>(std::get<0>(_objects).get())->ValidateScene(scene.scene_id);
 	}
 	bool GameState::CreateObject(const GenericHandle& handle)
 	{
-		return create_handles_jt[handle.type](*this, handle);
+		constexpr auto create_handles_jt = detail::TableGen::GenCreateJt();
+		return s_cast<bool>(create_handles_jt[handle.type](*this, handle));
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::type type)
 	{
-		auto id = GetTypeID(type);
+		const auto id = GetTypeID(type);
+		constexpr auto create_type_jt = detail::TableGen::GenCreateTypeJt();
 		return id <= ComponentCount ? create_type_jt[id](*this, handle) : GenericHandle{};
 	}
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& handle, reflect::dynamic dyn)
 	{
-		auto id = GetTypeID(dyn.type);
+		const auto id = GetTypeID(dyn.type);
+		constexpr auto create_dynamic_jt = detail::TableGen::GenCreateDynamicJt();
 		return id <= ComponentCount ? create_dynamic_jt[GetTypeID(dyn.type)](*this, handle, dyn) : GenericHandle{};
+	}
+	GenericHandle GameState::CreateComponent(const Handle<GameObject>& gameobject, GenericHandle component_handle, reflect::dynamic dyn)
+	{
+		const auto id = GetTypeID(dyn.type);
+		if (id != component_handle.id)
+			return GenericHandle{};
+
+		constexpr auto create_dynamic_handle_jt = detail::TableGen::GenCreateDynamicHandleJt();
+		return id <= ComponentCount ? create_dynamic_handle_jt[component_handle.type](*this, gameobject, component_handle, dyn) : GenericHandle{};
 	}
 	bool GameState::ValidateHandle(const GenericHandle& handle)
 	{
+		constexpr auto validate_handles_jt = detail::TableGen::GenValidateJt();
 		return validate_handles_jt[handle.type](*this, handle);
 	}
 	void GameState::DestroyObject(const GenericHandle& handle)
 	{
-		if (handle)
-			_destruction_queue.emplace_back(handle);
-	}
-	void GameState::DestroyObject(const Handle<GameObject>& handle)
-	{
+		constexpr auto queue_for_destroy_jt = detail::TableGen::GenQueueForDestructionJt();
 		if (handle)
 		{
-			for (auto& elem : handle->GetComponents())
-				DestroyObject(elem);
-			_destruction_queue.emplace_back(handle);
+			if (queue_for_destroy_jt[handle.type](*this, handle))
+				_destruction_queue.emplace_back(handle);
 		}
+	}
 
+	void GameState::FlushCreationQueue()
+	{
+		constexpr auto created_handles = detail::TableGen::GenObjectCreatedSignalTable();
+		
+		while (_creation_queue.size())
+		{
+			auto old_c_queue = std::move(_creation_queue);
+
+			for (auto& elem : old_c_queue)
+				created_handles[elem.type](this, elem);
+		}
 	}
 	void GameState::DestroyQueue()
 	{
-		for (auto& elem : _destruction_queue)
-			destroy_handles_jt[elem.type](*this, elem);
-		_destruction_queue.clear();
+		constexpr auto destroy_handlesignal_jt = detail::TableGen::GenObjecDestroyedSignalTable();
+		constexpr auto destroy_handles_jt = detail::TableGen::GenDestructionJt();
+		
+		while (_destruction_queue.size())
+		{
+			auto old_d_queue = std::move(_destruction_queue);
+
+			for (auto& elem : old_d_queue)
+				destroy_handlesignal_jt[elem.type](this, elem);
+			for (auto& elem : old_d_queue)
+				destroy_handles_jt[elem.type](*this, elem);
+		}
+	}
+	Handle<GameObject> GameState::GetGameObject(const GenericHandle& handle)
+	{
+		constexpr auto get_go_jt = detail::TableGen::GenGetGameObjectTable();
+		return get_go_jt[handle.type](handle);
 	}
 	uint8_t GameState::GetTypeID(const reflect::type& type)
 	{
-		auto itr = name_to_id_map.find(type.name());
+		auto itr = type.valid() ? name_to_id_map.find(type.name()) : name_to_id_map.end();
 		return itr != name_to_id_map.end() ? itr->second : std::numeric_limits<uint8_t>::max();
 	}
 	GameState& GameState::GetGameState()
 	{
 		return *_instance;
+	}
+
+	span<const char*> GameState::GetComponentNames()
+	{
+		static auto arr = detail::TableGen::GenComponentNameTable();
+		return span<const char*>(&arr[1], std::data( arr) + std::size(arr));
 	}
 }

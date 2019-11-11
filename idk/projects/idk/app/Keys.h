@@ -1,8 +1,7 @@
 #pragma once
-#include <util/enum.h>
+
 namespace idk
 {
-	using CharKey = decltype('A');
 	// keys go here
 	enum class Key : unsigned char
 	{

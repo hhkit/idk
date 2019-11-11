@@ -15,7 +15,7 @@ namespace idk
 		template<typename ... Ts>
 		struct GenericHandle_helper < std::tuple<Ts...> >
 		{
-			static auto GenerateDerefLUT()
+			constexpr static auto GenerateDerefLUT()
 			{
 				using Fn = reflect::dynamic(*)(const GenericHandle & h);
 
@@ -54,11 +54,15 @@ namespace idk
 	{
 		return GameState::GetGameState().ValidateHandle(*this);
 	}
-	bool GenericHandle::operator==(const GenericHandle& rhs)
+	bool GenericHandle::operator<(const GenericHandle& rhs) const
+	{
+		return id < rhs.id;
+	}
+	bool GenericHandle::operator==(const GenericHandle& rhs) const
 	{
 		return id == rhs.id;
 	}
-	bool GenericHandle::operator!=(const GenericHandle& rhs)
+	bool GenericHandle::operator!=(const GenericHandle& rhs) const
 	{
 		return id != rhs.id;
 	}

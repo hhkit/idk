@@ -8,9 +8,13 @@ namespace idk
 		: public ResourceFactory<Scene>
 	{
 	public:
-		unique_ptr<Scene> Create();
-		unique_ptr<Scene> Create(string_view filepath);
-		unique_ptr<Scene> Create(string_view filepath, const ResourceMeta&);
-	private:
+		unique_ptr<Scene> GenerateDefaultResource() override;
+		unique_ptr<Scene> Create() noexcept override;
+	};
+
+	class SceneLoader
+		: public IFileLoader
+	{
+		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
 	};
 }

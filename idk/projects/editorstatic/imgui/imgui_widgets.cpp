@@ -1128,9 +1128,13 @@ void ImGui::ProgressBar(float fraction, const ImVec2& size_arg, const char* over
     const ImVec2 fill_br = ImVec2(ImLerp(bb.Min.x, bb.Max.x, fraction), bb.Max.y);
     RenderRectFilledRangeH(window->DrawList, bb, GetColorU32(ImGuiCol_PlotHistogram), 0.0f, fraction, style.FrameRounding);
 
-    // Default displaying the fraction as percentage string, but user can override it
+	// @Joseph added this. If NULL, we don't display overlay
+	if (overlay == NULL)
+		return;
+
+    // Default displaying the fraction as percentage string, but user can override it(@Joseph changed this to 'p' for default percentage.
     char overlay_buf[32];
-    if (!overlay)
+    if (overlay[0] == 'p')
     {
         ImFormatString(overlay_buf, IM_ARRAYSIZE(overlay_buf), "%.0f%%", fraction*100+0.01f);
         overlay = overlay_buf;
@@ -1139,6 +1143,46 @@ void ImGui::ProgressBar(float fraction, const ImVec2& size_arg, const char* over
     ImVec2 overlay_size = CalcTextSize(overlay, NULL);
     if (overlay_size.x > 0.0f)
         RenderTextClipped(ImVec2(ImClamp(fill_br.x + style.ItemSpacing.x, bb.Min.x, bb.Max.x - overlay_size.x - style.ItemInnerSpacing.x), bb.Min.y), bb.Max, overlay, NULL, &overlay_size, ImVec2(0.0f,0.5f), &bb);
+}
+
+void ImGui::ProgressBar(float fraction, const ImVec4& color, const ImVec2& size_arg, const char* overlay)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+
+	ImVec2 pos = window->DC.CursorPos;
+	ImVec2 size = CalcItemSize(size_arg, CalcItemWidth(), g.FontSize + style.FramePadding.y * 2.0f);
+	ImRect bb(pos, pos + size);
+	ItemSize(size, style.FramePadding.y);
+	if (!ItemAdd(bb, 0))
+		return;
+
+	// Render
+	fraction = ImSaturate(fraction);
+	RenderFrame(bb.Min, bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
+	bb.Expand(ImVec2(-style.FrameBorderSize, -style.FrameBorderSize));
+	const ImVec2 fill_br = ImVec2(ImLerp(bb.Min.x, bb.Max.x, fraction), bb.Max.y);
+	RenderRectFilledRangeH(window->DrawList, bb, ColorConvertFloat4ToU32(color), 0.0f, fraction, style.FrameRounding);
+
+	// @Joseph added this. If NULL, we don't display overlay
+	if (overlay == NULL)
+		return;
+
+	// Default displaying the fraction as percentage string, but user can override it(@Joseph changed this to 'p' for default percentage.
+	char overlay_buf[32];
+	if (overlay[0] == 'p')
+	{
+		ImFormatString(overlay_buf, IM_ARRAYSIZE(overlay_buf), "%.0f%%", fraction * 100 + 0.01f);
+		overlay = overlay_buf;
+	}
+
+	ImVec2 overlay_size = CalcTextSize(overlay, NULL);
+	if (overlay_size.x > 0.0f)
+		RenderTextClipped(ImVec2(ImClamp(fill_br.x + style.ItemSpacing.x, bb.Min.x, bb.Max.x - overlay_size.x - style.ItemInnerSpacing.x), bb.Min.y), bb.Max, overlay, NULL, &overlay_size, ImVec2(0.0f, 0.5f), &bb);
 }
 
 void ImGui::Bullet()
@@ -5169,7 +5213,7 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
 
     // For regular tree nodes, we arbitrary allow to click past 2 worth of ItemSpacing
     // (Ideally we'd want to add a flag for the user to specify if we want the hit test to be done up to the right side of the content or not)
-    const ImRect interact_bb = display_frame ? frame_bb : ImRect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + text_width + style.ItemSpacing.x*2, frame_bb.Max.y);
+    const ImRect interact_bb = display_frame || (flags & ImGuiTreeNodeFlags_SpanAllAvailWidth) ? frame_bb : ImRect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + text_width + style.ItemSpacing.x*2, frame_bb.Max.y);
     bool is_open = TreeNodeBehaviorIsOpen(id, flags);
     bool is_leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
 

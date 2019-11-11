@@ -2,9 +2,15 @@
 
 #include <idk_reflect_types.h>
 #include <meta/meta.h>
-#include <reflect/pretty_function.h>
-#include <reflect/constructor_entry.h>
 #include <util/string_hash.h>
+#include <util/macro_utils.h>
+
+#include <reflect/typeinfo.h>
+#include <reflect/detail/constructor_entry.h>
+#include <reflect/detail/meta_manager.h>
+#include <reflect/detail/table_storage.h>
+#include <reflect/detail/typed_context.h>
+#include <reflect/detail/visit_detail.h>
 
 // required settings for LIONant/properties
 namespace property::settings
@@ -26,56 +32,19 @@ namespace idk::reflect
 	//    ^^^ forward decls, but also bookmarks
 
 
-	// get full qualified type name of T (decayed).
-	// eg. vec3& => idk::math::vector<float, 3>
-	// NOTE: if comparing types, use typehash<T>() !!!
-	template<typename T> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<std::decay_t<T>>(); }
-	template<template<typename... > typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
-	template<template<typename, auto> typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
-	template<template<auto... > typename Tpl> constexpr string_view fully_qualified_nameof() { return detail::pretty_function_name<Tpl>(); }
-
-	// gets hash of type T (decayed).
-	// use this against type.hash()
-	template<typename T> constexpr size_t typehash() { return idk::string_hash(fully_qualified_nameof<T>()); }
-
 	// get type info with name
 	type get_type(string_view name);
 
 	// get type info of T
 	template<typename T> type get_type();
 
-	// see reflect.inl for detailed comments
+    // get span of types of packed T, such as tuple or variant
+    // usage example: reflect::unpack_types< variant<int, float, vec3> >()
+    template<typename T, typename> span<type> unpack_types();
+
+	// see reflect.inl for detailed comments (just hover)
 	template<typename T, typename Visitor>
 	void visit(T& obj, Visitor&& visitor);
-
-
-
-	namespace detail
-	{
-		using table = ::property::table;
-		template<typename T> using type_definition = ::property::opin::def<T>;
-
-		struct meta
-		{
-			hash_table<string_view, struct typed_context_base*> names_to_contexts;
-			hash_table<size_t, struct typed_context_base*> hashes_to_contexts;
-			static meta& instance() { static meta s; return s; }
-		};
-
-		template<typename T, bool HasTypeDefinition> struct register_type { register_type(); };
-
-		template<typename T> struct class_holder {};
-		template<typename ClassT, typename... Ts> struct table_storage;
-
-		struct typed_context_base;
-		template<typename T> struct typed_context;
-
-		template<typename Visitor>
-		void visit(void* obj, type type, Visitor&& visitor, int& depth);
-		template<typename K, typename V, typename Visitor>
-		void visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
-	}
-
 
 
 	// type class, contains info about reflected type.
@@ -90,10 +59,13 @@ namespace idk::reflect
 		// gets the alias if reflected, otherwise fully qualified type name ( fully_qualified_nameof<T>() )
 		string_view name() const;
 
+        // gets the fully qualified type name ( fully_qualified_nameof<T>() )
+        string_view fully_qualified_name() const;
+
 		// gets the hash of the type ( check against typehash<T>() )
 		size_t hash() const;
 
-		// should always be true for now (since get_type has assert)
+		// whether the type is valid
 		bool valid() const;
 
 		// number of properties
@@ -107,6 +79,9 @@ namespace idk::reflect
 
 		// is it a smart enum type defined with the macro ENUM?
 		bool is_enum_type() const;
+
+        // is it an arithmetic type or is convertible to string?
+        bool is_basic_serializable() const;
 
 		// Checks if this type is a template type Tpl<typename...>
 		template<template<typename...> typename Tpl> bool is_template() const;
@@ -127,7 +102,7 @@ namespace idk::reflect
 		friend struct detail::typed_context_base;
 		friend type get_type(string_view name);
 		template<typename T> friend type get_type();
-		template<typename Visitor> friend void detail::visit(void* obj, type type, Visitor&& visitor, int& depth);
+		template<typename Visitor> friend void detail::visit(void*, type, Visitor&&, int&, int&);
 	};
 
 
@@ -149,6 +124,14 @@ namespace idk::reflect
 		template<typename T> T& get() const;
 		bool valid() const;
 
+		// makes an rvalue copy of the held value.
+		dynamic copy() const;
+
+        // swaps the internal content of this dynamic with the given dynamic.
+        dynamic& swap(dynamic&& other);
+        // swaps the internal content of this dynamic with the given dynamic.
+        dynamic& swap(dynamic& other);
+
 		// see reflect.inl for detailed comments
 		template<typename Visitor>
 		void visit(Visitor&& visitor) const;
@@ -162,38 +145,54 @@ namespace idk::reflect
 		// get property with index (arg index in REFLECT_VARS)
 		property get_property(size_t index) const;
 
+        // convert to a string. for arithmetic types, calls to_string().
+        // for types that are convertible to string, calls string(obj).
+        // check using type.is_basic_serializable()
+        string to_string() const;
+
 		// convert to unified container. check using type.is_container()
 		uni_container to_container() const;
 
 		// convert to a smart enum value. check using type.is_enum_type()
+        // note that modifying the enum_value will not modify this object.
 		enum_value to_enum_value() const;
 
 		// unpacks a tuple
 		vector<dynamic> unpack() const;
 
-		template<typename T>
-		dynamic& operator=(const T& rhs);
+		// if this is a variant, gets the held variant value. check using type.is_template<std::variant>()
+		dynamic get_variant_value() const;
+        // if this is a variant, sets the held variant value. check using type.is_template<std::variant>()
+        void set_variant_value(const dynamic& val) const;
+
+        // call on_parse if it exists. meant for serializers.
+        void on_parse() const;
+
+		template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, dynamic>>>
+		dynamic& operator=(T&& rhs);
 		dynamic& operator=(const dynamic& rhs);
 
 	private:
 		struct base;
 		template<typename T> struct derived;
+		struct voidptr;
 
 		shared_ptr<base> _ptr;
 		dynamic(reflect::type type, void* obj);
 
 		friend struct detail::typed_context_base;
-		template<typename Visitor> friend void detail::visit(void* obj, reflect::type type, Visitor&& visitor, int& depth);
-		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&& key, V&& val, Visitor&& visitor, int& depth, int& curr_depth);
+		template<typename Visitor> friend void detail::visit(void*, reflect::type, Visitor&&, int&, int&);
+		template<typename K, typename V, typename Visitor> friend void detail::visit_key_value(K&&, V&&, Visitor&&, int&, int&);
 	};
+
 
 
 
 	// represents a reflected type property.
 	struct property
 	{
-		const string_view name;
-		const dynamic value;
+		string_view name;
+		dynamic value;
 	};
 
 
@@ -224,6 +223,9 @@ namespace idk::reflect
 
 		// clears the container. throws if container doesn't support clear.
 		void clear();
+
+        dynamic operator[](size_t index);
+        dynamic operator[](const dynamic& key);
 
 	private:
 		struct base;
@@ -319,11 +321,10 @@ namespace idk::reflect
 #define REFLECT_CTOR(...)						idk::reflect::detail::constructor_entry<t_self, __VA_ARGS__>{},
 #define REFLECT_FRIEND							template<typename> friend struct property::opin::def;
 
-#include <util/macro_utils.h>
 #define X_REFLECT_VARS_SINGLE(VAR)				REFLECT_VAR(VAR),
 #define REFLECT_VARS(...)						IDENTITY(FOREACH(X_REFLECT_VARS_SINGLE, __VA_ARGS__))
 
-#define REFLECT_ENUM(ENUM_TYPE, ALIAS)			REFLECT_BEGIN(ENUM_TYPE, ALIAS) REFLECT_VARS(value) REFLECT_CTOR(ENUM_TYPE::_enum) REFLECT_CTOR(int8_t) REFLECT_CTOR(int16_t) REFLECT_CTOR(int32_t) REFLECT_CTOR(int64_t) REFLECT_END()
+#define REFLECT_ENUM(ENUM_TYPE, ALIAS)			REFLECT_BEGIN(ENUM_TYPE, ALIAS) REFLECT_CTOR(ENUM_TYPE::_enum) REFLECT_CTOR(int8_t) REFLECT_CTOR(int16_t) REFLECT_CTOR(int32_t) REFLECT_CTOR(int64_t) REFLECT_END()
 
 #undef property_var
 #undef property_var_fnbegin

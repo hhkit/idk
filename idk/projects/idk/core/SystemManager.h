@@ -20,6 +20,7 @@ namespace idk
 
 		void InitSystems();
 		void LateInitSystems();
+		void EarlyShutdownSystems();
 		void ShutdownSystems();
 	private:
 		using SystemPtr = shared_ptr<ISystem>;

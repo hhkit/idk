@@ -115,20 +115,19 @@ Variables:
 
 #pragma once
 #include "stdafx.h" //Needed for every CPP. Precompiler
-
 #include <audio/AudioSystem.h> //AudioSystem
 #include <audio/AudioClip.h> //AudioClip
-#include <audio/AudioClipFactory.h> //AudioClipFactory
+#include <audio/AudioClipLoader.h> //AudioClipLoader
+#include <audio/AudioSource.h> //AudioClipFactory
+#include <audio/AudioListener.h> //AudioClipFactory
+
+#include <res/EasyFactory.h>
 
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString
 
-#include <iostream> //cout
-#include <iomanip> //put_time
-#include <ctime> //
 #include <sstream> //ostringstream
-#include <filesystem> //filesystem
 
 namespace idk
 {
@@ -142,13 +141,16 @@ namespace idk
 
 	void AudioSystem::Init()
 	{
-		Core::GetResourceManager().RegisterFactory<AudioClipFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<AudioClip>>();
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".wav");
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".ogg");
+		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mp3");
 
 		// Create the FMOD Core System object.
 		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));
 
 		// Initializes FMOD Core
-		ParseFMOD_RESULT(_Core_System->init(512, FMOD_INIT_NORMAL, 0)); //512 = number of channels that can be played on
+		ParseFMOD_RESULT(_Core_System->init(512, FMOD_INIT_NORMAL, 0)); //1024 = number of channels that can be played on
 		
 		//Channel Group Setup
 		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_MUSIC",		&_soundGroup_MUSIC		));
@@ -213,16 +215,64 @@ namespace idk
 
 	}
 
-	void AudioSystem::Update()
+	void AudioSystem::Update(span<AudioSource> audio_sources)
 	{
-		//Update all the audioClips here too!
+		//Update all the audio source here too!
+		for (auto& elem : audio_sources)
+		{
+			elem.UpdateAudioClips();
+		}
 
+		//Only one listener component will update FMODs listener
+		//THIS is also important when in editor mode! Listener should be at the editor camera's view
+		if (_mainListener) {
+			_mainListener->UpdateListenerPosition();
+		}
+		else {
+			//Do nothing or set Listener to 0,0,0
+
+		}
 
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
 	}
+	void AudioSystem::UpdateTestCaseOnly()
+	{
+		//Only one listener component will update FMODs listener
+		//THIS is also important when in editor mode! Listener should be at the editor camera's view
+		if (_mainListener) {
+			_mainListener->UpdateListenerPosition();
+		}
+		else {
+			//Do nothing or set Listener to 0,0,0
+		}
+
+		// Get Updates the core system by a tick
+		ParseFMOD_RESULT(_Core_System->update());
+
+	}
+	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
+	{
+		//Zero denotes the listener id. Since there is only one listener, this is always zero.
+		FMOD_VECTOR fmodPos			{ pos.x,pos.y,pos.z };
+		FMOD_VECTOR fmodVel			{ vel.x,vel.y,vel.z };
+		FMOD_VECTOR fmodForwardVec	{ forwardVec.x,forwardVec.y,forwardVec.z };
+		FMOD_VECTOR fmodUpVec		{ upVec.x,upVec.y,upVec.z };
+
+		//NOTES: Forward is axisZ+, Up is axisY+
+		ParseFMOD_RESULT(_Core_System->set3DListenerAttributes(0, &fmodPos, &fmodVel, &fmodForwardVec, &fmodUpVec));
+	}
+
 	void AudioSystem::Shutdown()
 	{
+		int numChannelsPlaying{};
+		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numChannelsPlaying));
+		for (int i = 0; i < numChannelsPlaying; ++i) {
+			FMOD::Channel* channelPtr;
+			ParseFMOD_RESULT(_Core_System->getChannel(i, &channelPtr));
+			ParseFMOD_RESULT(channelPtr->stop());
+		}
+			
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
 		ParseFMOD_RESULT(_soundGroup_MUSIC	  ->release()); 
 		ParseFMOD_RESULT(_soundGroup_SFX	  ->release()); 
@@ -296,6 +346,11 @@ namespace idk
 			//Do nothing if out of bounds
 			return;
 		}
+	}
+
+	void AudioSystem::SetMainAudioListener(Handle<AudioListener> listenerComponent)
+	{
+		_mainListener = listenerComponent;
 	}
 
 	float AudioSystem::GetCPUPercentUsage()

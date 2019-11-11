@@ -1,47 +1,127 @@
 #include "stdafx.h"
 #include "GameObject.h"
-#include <common/Parent.h>
+#include <common/Transform.h>
+#include <common/Name.h>
+#include <common/TagManager.h>
+#include <common/Tag.h>
+#include <common/Layer.h>
 
 namespace idk
 {
+	GenericHandle GameObject::AddComponent(string_view sv)
+	{
+		return AddComponent(reflect::get_type(sv));
+	}
 	GenericHandle GameObject::AddComponent(reflect::type type)
 	{
-		auto comphandle = GameState::GetGameState().CreateComponent(GetHandle(), type);
-		_components.emplace_back(comphandle);
-		return comphandle;
+		return GameState::GetGameState().CreateComponent(GetHandle(), type);
 	}
 	GenericHandle GameObject::AddComponent(reflect::dynamic dyn)
 	{
-		auto comph = GameState::GetGameState().CreateComponent(GetHandle(), dyn);
-		_components.emplace_back(comph);
-		return comph;
+		return GameState::GetGameState().CreateComponent(GetHandle(), dyn);
 	}
-	span<GenericHandle> GameObject::GetComponents()
+	GenericHandle GameObject::AddComponent(GenericHandle component_handle, reflect::dynamic dyn)
 	{
-		return span<GenericHandle>(_components.begin()._Ptr, _components.end()._Ptr);
+		return GameState::GetGameState().CreateComponent(GetHandle(), component_handle, dyn);
 	}
-	void GameObject::SetActive(bool active)
+	GenericHandle GameObject::GetComponent(reflect::type type)
+	{
+		const auto tid = GameState::GetGameState().GetTypeID(type);
+
+		for (auto& elem : _components)
+			if (elem.type == tid)
+				return elem;
+
+		return GenericHandle{};
+	}
+	GenericHandle GameObject::GetComponent(string_view sv)
+	{
+		return GetComponent(reflect::get_type(sv));
+	}
+	void GameObject::RemoveComponent(GenericHandle h)
+	{
+		GameState::GetGameState().DestroyObject(h);
+	}
+	span<GenericHandle> GameObject::GetComponents() noexcept
+	{
+		return span<GenericHandle>(_components);
+	}
+	void GameObject::SetActive(bool active) noexcept
 	{
 		_active = active;
 	}
-	bool GameObject::ActiveSelf() const
+	bool GameObject::ActiveSelf() const noexcept
 	{
 		return _active;
 	}
 	bool GameObject::ActiveInHierarchy() const
 	{
-		auto hParentComponent = GetComponent<class Parent>();
-		auto hParent = hParentComponent ? hParentComponent->parent : Handle<GameObject>{};
+		const auto hParent = Transform()->parent;
 		return ActiveSelf() && (hParent ? hParent->ActiveInHierarchy() : true);
 	}
 
-	Handle<class Transform> GameObject::Transform()
+	Handle<class Transform> GameObject::Transform() const
 	{
 		return GetComponent<class Transform>();
 	}
-	Handle<class GameObject> GameObject::ParentObject()
+	Handle<class GameObject> GameObject::Parent() const
 	{
-		auto hParentComponent = GetComponent<class Parent>();
-		return hParentComponent ? hParentComponent->parent : Handle<class GameObject>{};
+		return Transform()->parent;
 	}
+
+	bool GameObject::HierarchyIsQueuedForDestruction() const
+	{
+		return IsQueuedForDestruction() || ParentIsQueuedForDestruction();
+	}
+
+	bool GameObject::ParentIsQueuedForDestruction() const
+	{
+		const auto parent = Parent();
+		if (parent)
+			return parent->HierarchyIsQueuedForDestruction();
+		else
+			return false;
+	}
+
+	string_view GameObject::Name() const
+	{
+		return GetComponent<class Name>()->name;
+	}
+
+	void GameObject::Name(string_view name)
+	{
+		GetComponent<class Name>()->name = name;
+	}
+
+    string_view GameObject::Tag() const
+    {
+        if (const auto tag = GetComponent<class Tag>())
+            return Core::GetSystem<TagManager>().GetTagFromIndex(tag->index);
+        return "";
+    }
+
+    void GameObject::Tag(string_view tag)
+    {
+        auto tag_c = GetComponent<class Tag>();
+        if (tag.empty())
+            RemoveComponent(tag_c);
+        else
+        {
+            if (!tag_c)
+                tag_c = AddComponent<class Tag>();
+            tag_c->index = Core::GetSystem<TagManager>().GetIndexFromTag(tag);
+        }
+    }
+
+    uint8_t GameObject::Layer() const
+    {
+        if (const auto layer = GetComponent<class Layer>())
+            return layer->index;
+        return 0;
+    }
+
+    void GameObject::Layer(uint8_t layer)
+    {
+        AddComponent<class Layer>()->index = layer;
+    }
 }

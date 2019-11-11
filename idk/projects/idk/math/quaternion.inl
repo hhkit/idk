@@ -2,7 +2,7 @@
 #include <utility>
 #include "quaternion.h"
 
-namespace idk::math
+namespace idk
 {
 	template<typename T>
 	inline quaternion<T>::quaternion()
@@ -15,17 +15,20 @@ namespace idk::math
 	{
 	}
 	template<typename T>
-	inline quaternion<T>::quaternion(const vector<T, 3> & axis, radian<T> angle)
+	inline quaternion<T>::quaternion(const tvec<T, 3> & axis, trad<T> angle)
 	{
-		auto h = angle / 2;
-
-		auto s = sin(h);
-		auto c = cos(h);
-
-		auto n = s * axis.get_normalized();
+		const auto h = angle / 2;
+		const auto s = sin(h);
+		const auto c = cos(h);
+		const auto n = s * axis.get_normalized();
 
 		this->xyz = n;
 		w = c;
+	}
+	template<typename T>
+	inline T quaternion<T>::dot(const quaternion& rhs) const
+	{
+		return this->Base::dot(rhs);
 	}
 	template<typename T>
 	quaternion<T> quaternion<T>::inverse() const
@@ -33,70 +36,85 @@ namespace idk::math
 		return quaternion{ -x, -y, -z, w };
 	}
 	template<typename T>
+	quaternion<T> quaternion<T>::get_normalized() const
+	{
+		auto copy = *this;
+		return copy.normalize();
+	}
+	template<typename T>
+	quaternion<T>& quaternion<T>::normalize()
+	{
+		return static_cast<quaternion<T>&>(Base::normalize());
+	}
+	template<typename T>
 	quaternion<T>& quaternion<T>::operator*=(const quaternion& rhs)
 	{
 		return *this = (*this * rhs);
 	}
 	template<typename T>
-	quaternion<T> quaternion<T>::operator*(const quaternion& rhs) const
+	quaternion<T> quaternion<T>::operator*(const quaternion& r) const
 	{
 		auto copy = *this;
-		const auto plus = T{ 1.0 };
-		const auto minus = T{ -1.0 };
-		copy.x = (this->wxyz * rhs.wxyz).dot(Base{ plus, minus, minus, minus });
-		copy.y = (this->wxyz * rhs.xwzy).dot(Base{ plus, plus, plus, minus });
-		copy.z = (this->wxyz * rhs.yzwx).dot(Base{ plus, minus, plus, plus });
-		copy.w = (this->wxyz * rhs.zyxw).dot(Base{ plus, plus, minus, plus });
+		//const auto plus = T{ 1.0 };
+		//const auto minus = T{ -1.0 };
+		//copy.w = (this->wxyz * r.wxyz).dot(Base{ plus, minus, minus, minus });
+		//copy.x = (this->wxyz * r.xwzy).dot(Base{ plus, plus, plus, minus });
+		//copy.y = (this->wxyz * r.yzwx).dot(Base{ plus, minus, plus, plus });
+		//copy.z = (this->wxyz * r.zyxw).dot(Base{ plus, plus, minus, plus });
+		copy.w = w * r.w - x * r.x - y * r.y - z * r.z;
+		copy.x = w * r.x + x * r.w + y * r.z - z * r.y;
+		copy.y = w * r.y - x * r.z + y * r.w + z * r.x;
+		copy.z = w * r.z + x * r.y - y * r.x + z * r.w;
 		return copy;
 	}
 
 	template<typename T>
-	inline quaternion<T>::operator matrix<T, 4, 4>() const
+	inline quaternion<T>::operator tmat<T, 4, 4>() const
 	{
-		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>
-	inline quaternion<T>::operator matrix<T, 4, 4>()
+	inline quaternion<T>::operator tmat<T, 4, 4>()
 	{
-		return matrix<T, 4, 4>{operator matrix<T, 3, 3>()};
+		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>
-	quaternion<T>::operator matrix<T, 3, 3>() const
+	quaternion<T>::operator tmat<T, 3, 3>() const
 	{
 		auto copy = *this;
-		return copy.operator matrix<T, 3, 3>();
+		return copy.operator tmat<T, 3, 3>();
 	}
 
 	template<typename T>
-	quaternion<T>::operator matrix<T, 3, 3>()
+	quaternion<T>::operator tmat<T, 3, 3>()
 	{
 		this->normalize();
-		return matrix<T, 3, 3>
+		return tmat<T, 3, 3>
 		{
 			1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
 				2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
-				2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (y * y + z * z)
+				2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)
 		};
 	}
 }
 namespace idk
 {
 	template<typename M, typename T>
-	auto quat_cast(math::quaternion<T>& q)
+	auto quat_cast(quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(math::quaternion<T>&& q)
+	auto quat_cast(quaternion<T>&& q)
 	{
 		return s_cast<M>(q);
 	}
 
 	template<typename M, typename T>
-	auto quat_cast(const math::quaternion<T>& q)
+	auto quat_cast(const quaternion<T>& q)
 	{
 		return s_cast<M>(q);
 	}

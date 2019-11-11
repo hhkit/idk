@@ -96,6 +96,52 @@ namespace idk
 	}
 
 	template<typename T>
+	template<typename SortFn>
+	unsigned ObjectPool<T>::Defrag(SortFn&& functor)
+	{
+#ifdef _DEBUG
+		unsigned swapcount{};
+#endif
+		const auto beg = _pool.begin();
+		const auto end = _pool.end();
+		auto itr = beg;
+
+		while (itr != end)
+		{
+			++itr;
+			auto* jtr = itr;
+
+			if (jtr == end)
+				break;
+
+			while (jtr != beg && functor(jtr[0], jtr[-1]))
+			{
+#ifdef _DEBUG
+				++swapcount;
+#endif
+				// swap jtr[-1] and jtr[0]
+				auto& rhs = jtr[0];
+				auto& lhs = jtr[-1];
+				const auto rhandle = rhs.handle;
+				const auto lhandle = lhs.handle;
+				auto& rslot = _scenes[rhandle.scene].slots[rhandle.index];
+				auto& lslot = _scenes[lhandle.scene].slots[lhandle.index];
+
+				std::swap(rslot.index, lslot.index);
+				std::swap(rhs, lhs);
+
+				--jtr;
+			}
+		}
+
+#ifdef _DEBUG
+		return swapcount;
+#else
+		return 0;
+#endif
+	}
+
+	template<typename T>
 	inline bool ObjectPool<T>::Destroy(const Handle& handle)
 	{
 		if (Validate(handle) == false)
@@ -104,7 +150,7 @@ namespace idk
 		auto& scene = _scenes[handle.scene];
 
 		auto& pool_end = _pool.back();
-		auto  end_handle = pool_end.handle;
+		const auto end_handle = pool_end.handle;
 		auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
 		auto& destroy_slot = scene.slots[handle.index];
 
@@ -149,7 +195,7 @@ namespace idk
 			{
 				// destroy
 				auto& pool_end = _pool.back();
-				auto  end_handle = pool_end.handle;
+				const auto end_handle = pool_end.handle;
 				auto& end_slot = _scenes[end_handle.scene].slots[end_handle.index];
 				auto& destroyme = _pool[elem.index];
 				end_slot.index = elem.index;

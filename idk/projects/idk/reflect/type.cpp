@@ -18,6 +18,11 @@ namespace idk::reflect
 		return _context->name;
 	}
 
+    string_view type::fully_qualified_name() const
+    {
+        return _context->fully_qualified_name;
+    }
+
 	size_t type::hash() const
 	{
 		return _context->hash;
@@ -37,6 +42,11 @@ namespace idk::reflect
 	{
 		return _context->is_enum_type;
 	}
+
+    bool type::is_basic_serializable() const
+    {
+        return _context->is_basic_serializable;
+    }
 
 	enum_type type::as_enum_type() const
 	{

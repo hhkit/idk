@@ -1,6 +1,14 @@
 #include "pch.h"
 
 #include <iostream>
+#include <direct.h>
+#include <tchar.h>
+#include <Shlwapi.h>
+#include <ShlObj.h>
+#include <stdio.h>  
+#include <locale>
+#include <codecvt>
+#include <commdlg.h>
 
 #include <core/Core.h>
 
@@ -50,12 +58,47 @@ namespace idk::win
 			}
 		}
 
-		retval = (int)msg.wParam;
 	}
 	int Windows::GetReturnVal()
 	{
 		return retval;
 	}
+	ivec2 Windows::GetScreenSize() 
+	{
+		RECT rect;
+		if (!GetClientRect(hWnd, &rect))
+			return ivec2{};
+		return ivec2((rect.right - rect.left), (rect.bottom - rect.top));
+	}
+	vec2 Windows::GetMouseScreenPos()
+	{
+		ivec2 sSize = GetScreenSize();
+		return vec2{ 
+			static_cast<float>(screenpos.x) / static_cast<float>(sSize.x),
+			static_cast<float>(screenpos.y) / static_cast<float>(sSize.y) };
+	}
+	vec2 Windows::GetMouseScreenDel()
+	{
+		//ivec2 sSize = GetScreenSize();
+		return ndc_screendel;
+	}
+	ivec2 Windows::GetMousePixelPos()
+	{
+		return screenpos;
+	}
+	ivec2 Windows::GetMousePixelDel()
+	{
+		return screendel;
+	}
+	ivec2 Windows::GetMouseScroll()
+	{
+		return _input_manager->GetMouseScroll();
+	}
+	void Windows::PushWinProcEvent(std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> func)
+	{
+		winProcList.push_back(func); 
+	}
+
 	bool Windows::GetKeyDown(Key key)
 	{
 		return _input_manager->GetKeyDown(static_cast<int>(key));
@@ -72,10 +115,101 @@ namespace idk::win
 	{
 		return _input_manager->GetChar();
 	}
+	
+	void Windows::SetTitle(string_view new_title)
+	{
+		std::wstring wide_str{ new_title.begin(), new_title.end() };
+		SetWindowText(hWnd, wide_str.data());
+	}
+
+	string Windows::GetExecutableDir()
+	{
+		char buffer[MAX_PATH] = { 0 };
+
+		// Get the program directory
+		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+		if (bytes == 0)
+			std::cout << "[File System] Unable to get program directory." << std::endl;
+		auto exe_dir = string{ buffer };
+		auto pos = exe_dir.find_last_of("\\");
+		return exe_dir.substr(0, pos);
+	}
+	string Windows::GetAppData()
+	{
+		char* env_buff;
+		size_t len;
+		auto err = _dupenv_s(&env_buff, &len, "appdata");
+		if (err)
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		auto appdata = string{ env_buff ? env_buff : "" };
+		free(env_buff);
+		return appdata;
+	}
+	string Windows::GetCurrentWorkingDir()
+	{
+		char buffer[MAX_PATH] = { 0 };
+		if (!_getcwd(buffer, sizeof(buffer)))
+			std::cout << "[File System] Unable to get solution directory." << std::endl;
+		return string{ buffer };
+	}
+	opt<string> Windows::OpenFileDialog(const DialogOptions& dialog)
+	{
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260];       // buffer for file name
+		HWND hwnd{};              // owner window
+
+        string filter{ dialog.filter_name };
+        filter += " (*";
+        filter += dialog.extension;
+        filter += ")";
+
+        filter += '\0';
+        filter += '*';
+        filter += dialog.extension;
+        filter += '\0';
+
+		auto init = GetExecutableDir();
+
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hwnd;
+		ofn.lpstrFile = szFile;
+		// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
+		// use the contents of szFile to initialize itself.
+		ofn.lpstrFile[0] = '\0';
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = filter.c_str();
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = init.data();
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+		// Display the Open dialog box. 
+		switch (dialog.type)
+		{
+		case DialogType::Save:
+			if (GetSaveFileNameA(&ofn) == TRUE)
+			{
+                return ofn.lpstrFile;
+			}
+			break;
+		case DialogType::Open:
+			if (GetOpenFileNameA(&ofn) == TRUE)
+			{
+                return ofn.lpstrFile;
+			}
+		}
+		return std::nullopt;
+	}
 	LRESULT Windows::WndProc(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (_hWnd != hWnd)
 			return DefWindowProc(_hWnd, message, wParam, lParam);
+
+		for (auto& elem : winProcList)
+			elem(_hWnd, message, wParam, lParam);
 
 		switch (message)
 		{
@@ -90,19 +224,85 @@ namespace idk::win
 		case WM_CHAR:
 			_input_manager->SetChar((char)wParam);
 			break;
+		case WM_MBUTTONDOWN:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseDown((int)Key::MButton);
+
+			break;
+		case WM_LBUTTONDOWN:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseDown((int)Key::LButton);
+
+			break;
+		case WM_RBUTTONDOWN:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseDown((int)Key::RButton);
+
+			break;
+		case WM_LBUTTONUP:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseDown((int)Key::LButton);
+
+			break;
+		case WM_RBUTTONUP:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseUp((int)Key::RButton);
+			break;
+		case WM_MBUTTONUP:
+			grabScreenCoordinates(lParam);
+
+			_input_manager->SetMouseUp((int)Key::MButton);
+			break;
+		case WM_MOUSEMOVE:
+			grabScreenCoordinates(lParam);
+			break;
+		case WM_MOUSEWHEEL:
+			_input_manager->SetMouseScroll(ivec2{ 0, GET_WHEEL_DELTA_WPARAM(wParam) });
+			break;
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);
 			break;
+		case WM_NCCREATE:
+		{
+			auto ptr = reinterpret_cast<CREATESTRUCTW*&>(lParam);
+			OnScreenSizeChanged.Fire(ivec2{ ptr->cx, ptr->cy });
+		}
+		break;
+		case WM_SIZE:
+			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
+			break;
 		case WM_DESTROY:
+            OnClosed.Fire();
 			PostQuitMessage(0);
 			break;
 		case WM_NCDESTROY:
 			Core::Shutdown();
 			break;
+		case WM_QUIT:
+			retval = (int)wParam;
+			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		return 0;
+	}
+
+	void Windows::grabScreenCoordinates(LPARAM lParam)
+	{
+		old_screenpos = screenpos;
+		screenpos.x = LOWORD(lParam);
+		screenpos.y = HIWORD(lParam);
+		
+		
+		vec2 sSize = vec2{ GetScreenSize() };
+		ndc_screendel = vec2{ screenpos.x, screenpos.y } / sSize - vec2{ old_screenpos.x, old_screenpos.y } / sSize;
+
+		screendel = screenpos - old_screenpos;
 	}
 
 	HINSTANCE Windows::GetInstance()

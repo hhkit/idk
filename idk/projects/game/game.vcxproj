@@ -45,6 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -52,6 +53,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,7 +78,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)build\game\$(Configuration)\</IntDir>
     <TargetName>gameD</TargetName>
-    <LibraryPath>$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(SolutionDir)dep\lib\;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -88,7 +90,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)build\game\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(SolutionDir)dep\lib\;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <TargetName>game</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -102,19 +104,26 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);coreD.lib;win32D.lib;vulkanD.lib;idk_openglD.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);coreD.lib;win32D.lib;vulkanD.lib;idk_openglD.lib;editorD.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 /ignore:4075 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <CustomBuildStep>
-      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>x</Outputs>
+      <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
+if not exist "$(OutDir)docs" mklink /J "$(OutDir)docs" "$(SolutionDir)projects\wrapper\Docs\_site" 
+if not exist "$(OutDir)editor_data" mklink /J "$(OutDir)editor_data" "$(SolutionDir)editor_data" 
+if not exist "$(OutDir)engine_data" mklink /J "$(OutDir)engine_data" "$(SolutionDir)engine_data" 
+if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
+if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
+if not exist "$(OutDir)scripts" mklink /J "$(OutDir)scripts" "$(SolutionDir)scripts"
+if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
+      <Outputs>$(OutDir)shaders\changed.chg</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -164,21 +173,28 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);core.lib;win32.lib;vulkan.lib;idk_opengl.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);core.lib;win32.lib;vulkan.lib;idk_opengl.lib;editor.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 /ignore:4075 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <CustomBuildStep>
-      <Command>if not exist "$(OutDir)assets" mklink /J "$(OutDir)assets" "$(SolutionDir)assets"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>x</Outputs>
+      <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
+if not exist "$(OutDir)docs" mklink /J "$(OutDir)docs" "$(SolutionDir)projects\wrapper\Docs\_site" 
+if not exist "$(OutDir)editor_data" mklink /J "$(OutDir)editor_data" "$(SolutionDir)editor_data" 
+if not exist "$(OutDir)engine_data" mklink /J "$(OutDir)engine_data" "$(SolutionDir)engine_data" 
+if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
+if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
+if not exist "$(OutDir)scripts" mklink /J "$(OutDir)scripts" "$(SolutionDir)scripts"
+if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
+      <Outputs>$(OutDir)shaders\changed.chg</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -186,7 +202,10 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="game.cpp" />
+    <ClCompile Include="game.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

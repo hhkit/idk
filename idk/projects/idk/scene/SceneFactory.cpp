@@ -1,20 +1,27 @@
 #include "stdafx.h"
 #include "SceneFactory.h"
+#include <res/MetaBundle.h>
 
 namespace idk
 {
-	unique_ptr<Scene> SceneFactory::Create()
+	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()
+	{
+		auto retval = std::make_unique<Scene>(Scene::editor);
+		GameState::GetGameState().ActivateScene(Scene::editor);
+		return retval;
+	}
+
+	unique_ptr<Scene> SceneFactory::Create() noexcept
 	{
 		return std::make_unique<Scene>();
 	}
 
-	unique_ptr<Scene> SceneFactory::Create(string_view)
+	ResourceBundle SceneLoader::LoadFile(PathHandle, const MetaBundle& bundle)
 	{
-		return unique_ptr<Scene>();
-	}
 
-	unique_ptr<Scene> SceneFactory::Create(string_view, const ResourceMeta&)
-	{
-		return unique_ptr<Scene>();
+		const auto meta = bundle.FetchMeta<Scene>();
+		return meta
+			? Core::GetResourceManager().LoaderEmplaceResource<Scene>(meta->guid) 
+			: Core::GetResourceManager().LoaderEmplaceResource<Scene>();
 	}
 }

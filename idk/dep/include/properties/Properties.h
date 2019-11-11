@@ -586,30 +586,38 @@ namespace property
         constexpr static auto InsertEntries(  const std::array<property::table_action_entry, entry_count_v>& ActionEntry
                                             , const std::array<table_entry, entry_count_v>&                  UserEntry  ) noexcept
         {
-            std::array< map_entry, map_size_v> Map{ std::pair{nullptr, 0} };
-
-            auto const pEnd = &Map.data()[ map_size_v ];
-            for( std::size_t i=0; i<UserEntry.size(); ++i )
+            if constexpr (map_size_v == 0)
             {
-                auto&       U       = UserEntry[i];
-                auto const  Hash    = U.m_NameHash;
-                auto        pPair   = &Map[ Hash % map_size_v ];
-                do
-                {
-                    if( pPair->first == nullptr )
-                    {
-                        pPair->first  = &ActionEntry[i];
-                        pPair->second = Hash; 
-                        break;
-                    }
-
-                    // Check for duplicates, if this happens please change the property name (bad luck)
-                    assert( pPair->second != U.m_NameHash );
-                    ++pPair;
-                    if ( pPair == pEnd ) pPair = Map.data();
-                } while ( true );
+                (ActionEntry); (UserEntry);
+                return std::array<map_entry, map_size_v>{};
             }
-            return Map;
+            else
+            {
+                std::array< map_entry, map_size_v> Map{ std::pair{nullptr, 0} };
+
+                auto const pEnd = &Map.data()[map_size_v];
+                for (std::size_t i = 0; i < UserEntry.size(); ++i)
+                {
+                    auto& U = UserEntry[i];
+                    auto const  Hash = U.m_NameHash;
+                    auto        pPair = &Map[Hash % map_size_v];
+                    do
+                    {
+                        if (pPair->first == nullptr)
+                        {
+                            pPair->first = &ActionEntry[i];
+                            pPair->second = Hash;
+                            break;
+                        }
+
+                        // Check for duplicates, if this happens please change the property name (bad luck)
+                        assert(pPair->second != U.m_NameHash);
+                        ++pPair;
+                        if (pPair == pEnd) pPair = Map.data();
+                    } while (true);
+                }
+                return Map;
+            }
         }
 
         template< typename T, std::size_t N >
@@ -635,10 +643,10 @@ namespace property
     //--------------------------------------------------------------------------------------------
     template< typename T > constexpr    bool            isValidTable    ( void  ) noexcept { return is_defined_v<property::opin::def<std::decay_t<T>>> ? true : std::is_base_of_v< property::base, std::decay_t<T>>; }
     template< typename T > constexpr    const table&    getTableByType  ( void  ) noexcept { return property::opin::def<std::decay_t<T>>::m_Table;  }
-    template< typename T > constexpr    const table&    getTable        ( T&& A ) noexcept
+    template< typename T > constexpr    const table&    getTable        ( [[maybe_unused]]T&& A ) noexcept
     { 
         // If it does not compiled most likely is becasue it can not find the property table for the given type.
-
+        
              if constexpr ( std::is_base_of_v< property::base, std::decay_t<T> > ) return A.getPropertyVTable();
         else if constexpr ( is_defined_v<property::opin::def<std::decay_t<T>>>   ) return property::opin::def<std::decay_t<T>>::m_Table;
     }
@@ -767,7 +775,7 @@ namespace property
 
     // deal with regular properties such int and such
     template< typename T_VAR, std::size_t N > constexpr
-    std::enable_if_t<is_variant_member<T_VAR, data>::value, property::setup_entry>
+    std::enable_if_t<is_variant_member<std::decay_t<T_VAR>, data>::value, property::setup_entry>
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {
         using var = std::decay_t<T_VAR>;
@@ -777,7 +785,7 @@ namespace property
     // deal with atomic but property::table base properties
     template< typename T_VAR, std::size_t N > constexpr
     std::enable_if_t< isValidTable<std::decay_t<T_VAR>>() &&
-		!is_variant_member<T_VAR, data>::value // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		!is_variant_member<std::decay_t<T_VAR>, data>::value // !!! modified by mal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		, property::setup_entry >
     PropertyVar( const char( &pName )[ N ], std::size_t Offset ) noexcept 
     {
@@ -870,7 +878,7 @@ namespace property
                         if constexpr ( T_DISPLAY ) if ( Index == lists_iterator_ends_v )
                         {
                             // Deal with a new scope let the user know
-                            CallBack( { &NameString[ 0 ], static_cast<std::size_t>( StrAdded + StringIndex - 1 ) }, {}, Table, EntryIndex, Flags | flags::details::IS_SCOPE );
+                            CallBack( { &NameString[ 0 ], static_cast<std::size_t>( StrAdded ) + StringIndex - 1 }, {}, Table, EntryIndex, Flags | flags::details::IS_SCOPE );
                         }
 
                         EnumRecursive<T_DISPLAY>( NewTable, pNewBase, NameString, StringIndex + StrAdded, CallBack );
@@ -1368,7 +1376,7 @@ namespace property
         if ( Table.m_NameHash != Pack.m_lPath[ iCurrentPath++ ].m_Key )
             return false;
 
-        int   Ret = property::details::UnpackRecursive( Table, pClassInstance, const_cast<pack&>( Pack ), iCurrentEntry, iCurrentPath );
+        const int Ret = property::details::UnpackRecursive( Table, pClassInstance, const_cast<pack&>( Pack ), iCurrentEntry, iCurrentPath );
         assert( Ret == 0 );
         return true;
     }

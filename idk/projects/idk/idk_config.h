@@ -1,17 +1,23 @@
 #pragma once
-
+#include <meta/tuple.h>
 namespace idk
 {
-	constexpr auto MaxScene = 8;
+	namespace anim { class Skeleton; class Animation; }
+	namespace mono { class ScriptSystem; class Behavior; }
+	namespace shadergraph { class Graph; }
+
+	constexpr auto MaxScene = 0x82; // 130 scenes allowed
 
 	/// NEVER CHANGE THIS TUPLE WITHOUT ASKING THE TECH LEAD
 	/// YOU WILL BREAK ALL SERIALIZATION
 	using Components = std::tuple<
 		class Transform
-		, class Parent
+		, class Name
+        , class Tag
+        , class Layer
 
 		/// EDITOR
-		//, class Prefab
+		,   class PrefabInstance
 
 		/// PHYSICS
 		,	class RigidBody
@@ -21,53 +27,90 @@ namespace idk
 		/// GRAPHICS
 		,	class MeshRenderer
 		,   class Camera
-		//,   class SkinnedMeshRenderer
-		//, class Light
+		,   class SkinnedMeshRenderer
+		,	class Light
+		,   class Font
+
+        /// PARTICLE
+        ,   class ParticleSystem
 
 		/// ANIMATION
-		//,	class Animator
+		,	class Animator
+		,	struct Bone
 
 		/// SCRIPTING
-		//,	class MonoBehavior
+		,	class mono::Behavior
 
 		/// AUDIO
 		,	class AudioSource
 		,	class AudioListener
-		//,	class AudioSource
-		//, class AudioListener
 
-		, class TestComponent
+		/// IVAN BEING STUPID
+		,	class TestComponent
 	>;
-	static constexpr auto ComponentCount = std::tuple_size_v<Components>;
-
+	
 	using Systems = std::tuple<
-		class Application
+		// base
+			class Application
+
+		// low level
 		,	class FileSystem
-		//,	class InputSystem
-		//,	class ScriptSystem
-		//,	class PhysicsSystem
+		,	class LogSystem
+		,	class GamepadSystem
+
+		// logic
+		,	class mono::ScriptSystem
+		,	class PhysicsSystem
+		,	class AnimationSystem
+
+        ,   class ParticleSystemUpdater
+
+		// gfx
 		,	class GraphicsSystem
+		,   class DebugRenderer
+		// audio
 		,	class AudioSystem
-		,	class ResourceManager
+		
+		// project settings
+		,	class ProjectManager
 		,	class SceneManager
-		,	class IEditor
+        ,   class TagManager
+		,	class LayerManager
+
+		// resource management
+		,	class ResourceManager
 		,   class TestSystem
+
+		// editor
+		,	class IEditor
 	>;
 
 	using Resources = std::tuple<
-		class Scene
+			class Scene
 		,	class TestResource
 		,   class AudioClip
-		//,	class Texture
 		//,	class Font
-		//, class Skeleton
+		,	class Prefab
+		,	class ShaderTemplate
 		,	class Mesh
 		,   class Material
-		//,	class Animation
+		,	class MaterialInstance
+		,	class Texture
+		,   class CubeMap
+		,   class FontAtlas
+		,	class ShaderProgram
+		,	class RenderTarget
+		,   class FrameBuffer
+		,	anim::Animation
+		,	anim::Skeleton
 		//,	class Level
 	>;
 
-	constexpr auto SystemCount = std::tuple_size_v<Systems>;
-	constexpr auto ResourceCount = std::tuple_size_v<Resources>;
+	template<typename Component> constexpr auto ComponentID = index_in_tuple_v<Component, Components>;
+	template<typename System>    constexpr auto SystemID    = index_in_tuple_v<System, Systems>;
+	template<typename Resource>  constexpr auto ResourceID  = index_in_tuple_v<Resource, Resources>;
 
+	constexpr auto ComponentCount = std::tuple_size_v<Components>;
+	constexpr auto SystemCount    = std::tuple_size_v<Systems>;
+	constexpr auto ResourceCount  = std::tuple_size_v<Resources>;
 }

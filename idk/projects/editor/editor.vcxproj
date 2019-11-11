@@ -45,6 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -52,6 +53,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,6 +78,8 @@
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\editor\$(Configuration)\</IntDir>
     <TargetName>editor</TargetName>
+    <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -85,6 +89,8 @@
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\editor\$(Configuration)\</IntDir>
     <TargetName>editorD</TargetName>
+    <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -102,7 +108,10 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)projects\editor\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>vulkan.lib;win32.lib;core.lib</AdditionalUsingDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,7 +120,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)engine\;$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mt.lib;editorstatic.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -140,14 +150,18 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)projects\editor\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\;$(SolutionDir)dep\include\;$(SolutionDir)projects\editorstatic\</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>vulkanD.lib;win32D.lib;coreD.lib</AdditionalUsingDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)engine\;$(SolutionDir)dep\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mt.lib;editorstaticD.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,21 +184,103 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="editor\commands\CommandController.h" />
-    <ClInclude Include="editor\commands\ICommand.h" />
+    <ClInclude Include="commands\CMD_AddBehavior.h" />
+    <ClInclude Include="commands\CMD_DeleteComponent.h" />
+    <ClInclude Include="commands\CMD_DeleteGameObject.h" />
+    <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
+    <ClInclude Include="commands\CMD_ModifyInput.h" />
+    <ClInclude Include="commands\CMD_TransformGameObject.h" />
+    <ClInclude Include="DragDropTypes.h" />
+    <ClInclude Include="EditorInputs.h" />
+    <ClInclude Include="commands\CMD_AddComponent.h" />
+    <ClInclude Include="commands\CMD_CreateGameObject.h" />
+    <ClInclude Include="commands\CommandController.h" />
+    <ClInclude Include="commands\CommandList.h" />
+    <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="loading\AssimpImporter.h" />
+    <ClInclude Include="loading\AssimpImporter_helpers.h" />
+    <ClInclude Include="SceneManagement.h" />
+    <ClInclude Include="widgets\ConsoleLog.h" />
+    <ClInclude Include="widgets\DragQuat.h" />
+    <ClInclude Include="widgets\DragVec.h" />
+    <ClInclude Include="imguidk.h" />
+    <ClInclude Include="widgets\InputGameObject.h" />
+    <ClInclude Include="windows\IGE_AnimatorWindow.h" />
+    <ClInclude Include="windows\IGE_Console.h" />
+    <ClInclude Include="windows\IGE_GameView.h" />
+    <ClInclude Include="windows\IGE_ProfilerWindow.h" />
+    <ClInclude Include="windows\IGE_ProgrammerConsole.h" />
+    <ClInclude Include="windows\IGE_ProjectSettings.h" />
+    <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
+    <ClInclude Include="loading\GraphFactory.h" />
+    <ClInclude Include="widgets\EnumCombo.h" />
+    <ClInclude Include="widgets\InputResource.h" />
+    <ClInclude Include="windows\IGE_MaterialEditor.h" />
+    <ClInclude Include="windows\IGE_HierarchyWindow.h" />
+    <ClInclude Include="windows\IGE_InspectorWindow.h" />
+    <ClInclude Include="windows\IGE_IWindow.h" />
+    <ClInclude Include="windows\IGE_MainWindow.h" />
+    <ClInclude Include="windows\IGE_ProjectWindow.h" />
+    <ClInclude Include="windows\IGE_SceneView.h" />
+    <ClInclude Include="windows\IGE_WindowList.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
+    <ClInclude Include="ImGui_Interface.h" />
+    <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="editor\commands\CommandController.cpp" />
+    <ClCompile Include="commands\CMD_AddBehavior.cpp" />
+    <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
+    <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
+    <ClInclude Include="commands\CMD_ModifyInput.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+    <ClCompile Include="commands\CMD_InstantiatePrefab.cpp" />
+    <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
+    <ClCompile Include="DragDropTypes.cpp" />
+    <ClCompile Include="EditorInputs.cpp" />
+    <ClCompile Include="commands\CMD_AddComponent.cpp" />
+    <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
+    <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="imguidk.cpp" />
+    <ClCompile Include="loading\AssimpImporter.cpp" />
+    <ClCompile Include="loading\AssimpImporter_helpers.cpp" />
+    <ClCompile Include="loading\GraphFactory.cpp" />
+    <ClCompile Include="SceneManagement.cpp" />
+    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="widgets\ConsoleLog.cpp" />
+    <ClCompile Include="widgets\DragQuat.cpp" />
+    <ClCompile Include="widgets\DragVec.cpp" />
+    <ClCompile Include="widgets\InputGameObject.cpp" />
+    <ClCompile Include="widgets\InputResource.cpp" />
+    <ClCompile Include="windows\IGE_AnimatorWindow.cpp" />
+    <ClCompile Include="windows\IGE_Console.cpp" />
+    <ClCompile Include="windows\IGE_GameView.cpp" />
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
+    <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
+    <ClCompile Include="windows\IGE_ProgrammerConsole.cpp" />
+    <ClCompile Include="windows\IGE_ProjectSettings.cpp" />
+    <ClCompile Include="windows\IGE_ShadowMapWindow.cpp" />
+    <ClCompile Include="windows\IGE_HierarchyWindow.cpp" />
+    <ClCompile Include="windows\IGE_InspectorWindow.cpp" />
+    <ClCompile Include="windows\IGE_IWindow.cpp" />
+    <ClCompile Include="windows\IGE_MainWindow.cpp" />
+    <ClCompile Include="windows\IGE_MaterialEditor.cpp" />
+    <ClCompile Include="windows\IGE_ProjectWindow.cpp" />
+    <ClCompile Include="windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />
+    <ClCompile Include="ImGui_Interface.cpp" />
+    <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

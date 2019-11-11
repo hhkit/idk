@@ -1,89 +1,102 @@
 #pragma once
+#include <math/comparable.h>
 
-namespace idk::math
+namespace idk
 {
 	// forward declaration
-	template <typename T> struct radian;
-	template <typename T> struct degree;
+	template <typename T> struct trad;
+	template <typename T> struct tdeg;
 
 	template <typename T>
-	struct radian
+	struct trad : comparable<trad<T>>
 	{
 		T value;
 
-		explicit radian(T val = T{});
-		explicit radian(const degree<T>&);
-		explicit operator degree<T>() const;
+		constexpr explicit trad(T val = T{}) noexcept;
+		constexpr explicit trad(const tdeg<T>&) noexcept;
 
-		bool abs_comp(const radian&) const;
+		constexpr trad& normalize();        // normalize to (-pi, pi]
+		constexpr trad  normalized() const; // normalize to (-pi, pi]
 
 		T*       data();
 		const T* data() const;
 
 		// operator overloads
-		radian& operator+=(const radian&);
-		radian& operator-=(const radian&);
-		radian& operator*=(const T&);
-		radian& operator/=(const T&);
+		constexpr explicit operator tdeg<T>() const;
+		constexpr explicit operator T() const;
 
-		radian operator+(const radian&) const;
-		radian operator-(const radian&) const;
-		radian operator*(const T&) const;
-		radian operator/(const T&) const;
-		T      operator/(const radian&) const;
+		constexpr trad& operator+=(const trad&);
+		constexpr trad& operator-=(const trad&);
+		constexpr trad& operator*=(const T&);
+		constexpr trad& operator/=(const T&);
 
-		bool operator==(const radian&) const;
-		bool operator!=(const radian&) const;
+		constexpr trad operator+(const trad&) const;
+		constexpr trad operator-(const trad&) const;
+		constexpr trad operator-() const;
+		constexpr trad operator*(const T&) const;
+		constexpr trad operator/(const T&) const;
+		constexpr T      operator/(const trad&) const;
+
+		constexpr bool operator<(const trad&) const;
+
+		constexpr bool operator==(const trad&) const;
+		constexpr bool operator!=(const trad&) const;
 	};
 
 	template<typename T>
-	radian<T> operator*(const T&, const radian<T>&);
+	constexpr trad<T> operator*(const T&, const trad<T>&);
 
 	template<typename T>
-	struct degree
+	struct tdeg : comparable<tdeg<T>>
 	{
 		T value;
 
-		explicit degree(T val = T{});
-		explicit degree(const radian<T>&);
-		operator radian<T>() const;
+		constexpr explicit tdeg(T val = T{}) noexcept;
+		constexpr explicit tdeg(const trad<T>&) noexcept;
 
-		bool abs_comp(const degree&) const;
+		constexpr tdeg& normalize();        // normalize to (-180, 180]
+		constexpr tdeg  normalized() const; // normalize to (-180, 180]
 
 		T*       data();
 		const T* data() const;
 
-		degree& operator+=(const degree&);
-		degree& operator-=(const degree&);
-		degree& operator*=(const T&);
-		degree& operator/=(const T&);
+		constexpr operator trad<T>() const;
+		constexpr explicit operator T() const;
 
-		degree operator+(const degree&) const;
-		degree operator-(const degree&) const;
-		degree operator*(const T&) const;
-		degree operator/(const T&) const;
-		T      operator/(const degree&) const;
+		constexpr tdeg& operator+=(const tdeg&);
+		constexpr tdeg& operator-=(const tdeg&);
+		constexpr tdeg& operator*=(const T&);
+		constexpr tdeg& operator/=(const T&);
 
-		bool operator==(const degree&) const;
-		bool operator!=(const degree&) const;
+		constexpr tdeg operator+(const tdeg&) const;
+		constexpr tdeg operator-(const tdeg&) const;
+		constexpr tdeg operator-() const;
+		constexpr tdeg operator*(const T&) const;
+		constexpr tdeg operator/(const T&) const;
+		constexpr T      operator/(const tdeg&) const;
+
+		constexpr bool operator<(const tdeg&) const;
+
+		constexpr bool operator==(const tdeg&) const;
+		constexpr bool operator!=(const tdeg&) const;
 	};
 
 	template<typename T>
-	degree<T> operator*(const T&, const degree<T>&);
+	constexpr tdeg<T> operator*(const T&, const tdeg<T>&);
 }
 
 namespace idk
 {
-	template<typename T> auto cos(const math::radian<T>& r);
-	template<typename T> auto sin(const math::radian<T>& r);
-	template<typename T> auto tan(const math::radian<T>& r);
-	template<typename T> auto cos(const math::degree<T>& d);
-	template<typename T> auto sin(const math::degree<T>& d);
-	template<typename T> auto tan(const math::degree<T>& d);
-	template<typename T> math::radian<T> acos(const T& frac);
-	template<typename T> math::radian<T> asin(const T& frac);
-	template<typename T> math::radian<T> atan(const T& frac);
-	template<typename T> math::radian<T> atan(const T& y, const T& x);
+	template<typename T> auto cos(const trad<T>& r);
+	template<typename T> auto sin(const trad<T>& r);
+	template<typename T> auto tan(const trad<T>& r);
+	template<typename T> auto cos(const tdeg<T>& d);
+	template<typename T> auto sin(const tdeg<T>& d);
+	template<typename T> auto tan(const tdeg<T>& d);
+	template<typename T> trad<T> acos(const T& frac);
+	template<typename T> trad<T> asin(const T& frac);
+	template<typename T> trad<T> atan(const T& frac);
+	template<typename T> trad<T> atan(const T& y, const T& x);
 }
 
 #include "angle.inl"

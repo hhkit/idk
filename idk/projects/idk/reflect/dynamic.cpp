@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include <reflect/reflect.h>
-
+#include <res/MetaBundle.h>
 namespace idk::reflect
 {
 	dynamic::dynamic(reflect::type type, void* obj)
-		: type{ type }, _ptr{ std::make_shared<derived<void*>>(std::forward<void*>(obj)) }
+		: type{ type }, _ptr{ std::make_shared<voidptr>(obj) }
 	{}
 
 	dynamic::dynamic()
@@ -13,8 +13,19 @@ namespace idk::reflect
 
 	dynamic& dynamic::operator=(const dynamic& rhs)
 	{
-		assert(rhs.type == type);
-		type._context->copy_assign(_ptr->get(), rhs._ptr->get());
+        if (type == rhs.type)
+            type._context->copy_assign(_ptr->get(), rhs._ptr->get());
+        else if (rhs.type._context->in_mega_variant)
+            type._context->variant_assign(_ptr->get(), rhs.type._context->get_mega_variant(rhs._ptr->get()));
+        else if (type._context->in_mega_variant)
+        {
+            auto val = copy();
+            auto mega_var = type._context->get_mega_variant(val._ptr->get());
+            type._context->variant_assign(mega_var, rhs._ptr->get());
+            type._context->variant_assign(_ptr->get(), mega_var);
+        }
+        else
+            LOG_ERROR_TO(LogPool::SYS, "Dynamic assignment failed. (%s = %s)", string(type.name()).c_str(), string(rhs.type.name()).c_str());
 		return *this;
 	}
 
@@ -22,6 +33,24 @@ namespace idk::reflect
 	{
 		return type.valid();
 	}
+
+	dynamic dynamic::copy() const
+	{
+		return _ptr->copy();
+	}
+
+    dynamic& dynamic::swap(dynamic&& other)
+    {
+        std::swap(_ptr, other._ptr);
+        std::swap(const_cast<reflect::type&>(type), const_cast<reflect::type&>(other.type)); // saved!
+        return *this;
+    }
+    dynamic& dynamic::swap(dynamic& other)
+    {
+        std::swap(_ptr, other._ptr);
+        std::swap(const_cast<reflect::type&>(type), const_cast<reflect::type&>(other.type)); // saved!
+        return *this;
+    }
 
 	dynamic::property_iterator dynamic::begin() const
 	{
@@ -41,7 +70,8 @@ namespace idk::reflect
 			if (table.m_pEntry[i].m_pName == name)
 				return get_property(i);
 		}
-		throw "Property not found!";
+
+        return { "", dynamic() };
 	}
 
 	property dynamic::get_property(size_t index) const
@@ -49,7 +79,7 @@ namespace idk::reflect
 		assert(index <= type._context->table.m_Count);
 
 		auto& entry = type._context->table.m_pActionEntries[index];
-		const char* name;
+        const char* name = "";
 		dynamic val;
 
 		std::visit([&](auto&& fn_getset) {
@@ -58,7 +88,7 @@ namespace idk::reflect
 			using T = ::property::vartype_from_functiongetset<fn_getset_t>;
 			void* offsetted = ::property::details::HandleBasePointer(_ptr->get(), entry.m_Offset);
 			T& value = *reinterpret_cast<T*>(offsetted);
-			new (&val) dynamic{ value };
+			val.swap(value);
 			name = type._context->table.m_pEntry[index].m_pName;
 
 		}, entry.m_FunctionTypeGetSet);
@@ -66,7 +96,12 @@ namespace idk::reflect
 		return { name, val };
 	}
 
-	uni_container dynamic::to_container() const
+    string dynamic::to_string() const
+    {
+        return type._context->to_string(_ptr->get());
+    }
+
+    uni_container dynamic::to_container() const
 	{
 		return type._context->to_container(_ptr->get());
 	}
@@ -80,6 +115,21 @@ namespace idk::reflect
 	{
 		return type._context->unpack(_ptr->get());
 	}
+
+	dynamic dynamic::get_variant_value() const
+	{
+		return type._context->get_variant_value(_ptr->get());
+	}
+
+    void dynamic::set_variant_value(const dynamic& val) const
+    {
+        type._context->set_variant_value(_ptr->get(), val);
+    }
+
+    void dynamic::on_parse() const
+    {
+        return type._context->on_parse(_ptr->get());
+    }
 
 
 

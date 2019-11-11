@@ -24,36 +24,57 @@ namespace idk
 		// exact
 		template<typename T> Handle<T> AddComponent();
 		template<typename T> Handle<T> GetComponent() const;
+		template<typename T> span<const Handle<T>> GetComponents() const;
 		template<typename T> bool      HasComponent() const;
-		template<typename T> bool      RemoveComponent(const Handle<T>&);
 
 		// generic
+		GenericHandle AddComponent(string_view);
 		GenericHandle AddComponent(reflect::type);
 		GenericHandle AddComponent(reflect::dynamic);
+		GenericHandle AddComponent(GenericHandle, reflect::dynamic);
+		GenericHandle GetComponent(reflect::type);
+		GenericHandle GetComponent(string_view);
+		void          RemoveComponent(GenericHandle);
 
-		span<GenericHandle> GetComponents();
+		span<GenericHandle> GetComponents() noexcept;
 		// active flags
-		void SetActive(bool);
-		bool ActiveSelf() const;
+		void SetActive(bool) noexcept;
+		bool ActiveSelf() const noexcept;
 		bool ActiveInHierarchy() const;
 
 		// components
-		Handle<class Transform> Transform();
-		Handle<class GameObject> ParentObject();
+		Handle<class Transform> Transform() const;
+		Handle<class GameObject> Parent() const;
+		bool HierarchyIsQueuedForDestruction() const;
+		bool ParentIsQueuedForDestruction() const;
+
+		string_view Name() const;
+		void Name(string_view name);
+        string_view Tag() const;
+        void Tag(string_view tag);
+        uint8_t Layer() const;
+        void Layer(uint8_t layer);
+		
+		
 	private:
+		struct component_range
+		{
+			char begin{}, count{};
+		};
+
 		vector<GenericHandle> _components;
+		array<component_range, ComponentCount> _component_ranges;
 		bool _active = true;
 
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;
 
+		template<typename Component> void RegisterComponent(Handle<Component> component);
+		template<typename Component> void DeregisterComponent(Handle<Component> component);
+
 		friend class GameState;
-
-		template<typename T>
-		friend struct detail::ObjectPoolHelper;
-
-		template<typename T>
-		friend struct detail::TableGenerator;
+		template<typename T> friend struct detail::ObjectPoolHelper;
+		template<typename T> friend struct detail::TableGenerator;
 	};
 }
 

@@ -19,30 +19,146 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="anim\Animation.h" />
+    <ClInclude Include="anim\AnimationLayer.h" />
+    <ClInclude Include="anim\AnimationState.h" />
+    <ClInclude Include="anim\AnimationUtils.h" />
+    <ClInclude Include="anim\Animator.h" />
+    <ClInclude Include="anim\AnimationSystem.h" />
+    <ClInclude Include="anim\Bone.h" />
+    <ClInclude Include="anim\Skeleton.h" />
+    <ClInclude Include="anim\SkeletonFactory.h" />
     <ClInclude Include="app\Application.h" />
+    <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="audio\AudioListener.h" />
-    <ClInclude Include="audio\AudioClipFactory.h" />
+    <ClInclude Include="audio\AudioClipLoader.h" />
     <ClInclude Include="audio\AudioClip.h" />
     <ClInclude Include="audio\AudioClipInfo.h" />
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
-    <ClInclude Include="anim\BoneRenderer.h" />
+    <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="common\Layer.h" />
+    <ClInclude Include="common\LayerManager.h" />
+    <ClInclude Include="common\Name.h" />
+    <ClInclude Include="app\GamepadEnums.h" />
+    <ClInclude Include="core\ConfigurableSystem.h" />
+    <ClInclude Include="core\NullHandleException.h" />
+    <ClInclude Include="debug\idk_assert.h" />
+    <ClInclude Include="debug\Log.h" />
+    <ClInclude Include="debug\LogSingleton.h" />
+    <ClInclude Include="debug\LogPools.h" />
+    <ClInclude Include="debug\LogSystem.h" />
+    <ClInclude Include="gfx\Buffer.h" />
+    <ClInclude Include="gfx\CameraClear.h" />
+    <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\Font.h" />
+    <ClInclude Include="gfx\FontAtlas.h" />
+    <ClInclude Include="gfx\FontAtlasFactory.h" />
+    <ClInclude Include="gfx\FontData.h" />
+    <ClInclude Include="gfx\TextureRenderMeta.h" />
+    <ClInclude Include="gfx\Viewport.h" />
+    <ClInclude Include="gfx\ViewportUtil.h" />
+    <ClInclude Include="machine.h" />
+    <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule.h" />
+    <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
+    <ClInclude Include="math\ritters.h" />
+    <ClInclude Include="particle\MinMax.h" />
+    <ClInclude Include="natvis_ids.h" />
+    <ClInclude Include="gfx\FramebufferFactory.h" />
+    <ClInclude Include="gfx\Framebuffer.h" />
+    <ClInclude Include="particle\ParticleData.h" />
+    <ClInclude Include="particle\ParticleSystem.h" />
+    <ClInclude Include="particle\ParticleSystemModules.h" />
+    <ClInclude Include="particle\ParticleSystemUpdater.h" />
+    <ClInclude Include="PauseConfigurations.h" />
+    <ClInclude Include="ds\result.h" />
+    <ClInclude Include="file\PathHandle.h" />
+    <ClInclude Include="gfx\BasicRenderPasses.h" />
+    <ClInclude Include="gfx\CubeMap.h" />
+    <ClInclude Include="gfx\IShaderProgramFactory.h" />
+    <ClInclude Include="gfx\MaterialFactory.h" />
+    <ClInclude Include="gfx\MeshFactory.h" />
+    <ClInclude Include="gfx\projector_functions.h" />
+    <ClInclude Include="gfx\ShaderGraph.h" />
+    <ClInclude Include="gfx\ShaderGraph_data.h" />
+    <ClInclude Include="gfx\ShaderTemplateLoader.h" />
+    <ClInclude Include="gfx\UniformInstance.h" />
+    <ClInclude Include="math\linear.h" />
+    <ClInclude Include="math\shapes.h" />
+    <ClInclude Include="math\shapes\frustum.h" />
+    <ClInclude Include="math\shapes\halfspace.h" />
+    <ClInclude Include="meta\variant.h" />
+    <ClInclude Include="phys\collidable_shapes.h" />
+    <ClInclude Include="phys\collision_detection\collision_box.h" />
+    <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
+    <ClInclude Include="phys\raycasts\collision_raycast.h" />
+    <ClInclude Include="phys\collision_result.h" />
+    <ClInclude Include="phys\collision_detection\collision_sphere.h" />
+    <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="res\EasyFactory.h" />
+    <ClInclude Include="res\FileLoader.h" />
+    <ClInclude Include="res\GenericResourceHandle.h" />
+    <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="res\MetaBundle.h" />
+    <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\ResourceUtils.h" />
+    <ClInclude Include="res\SaveableResource.h" />
+    <ClInclude Include="res\SaveableResourceLoader.h" />
+    <ClInclude Include="proj\ProjectManager.h" />
+    <ClInclude Include="scene\SceneGraphBuilder.h" />
+    <ClInclude Include="core\ComponentTags.h" />
+    <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
+    <ClInclude Include="ds\dual_set.h" />
+    <ClInclude Include="ds\slow_tree.h" />
     <ClInclude Include="ds\small_string.h" />
     <ClInclude Include="event\Signal.h" />
-    <ClInclude Include="file\FileHandle.h" />
+    <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
+    <ClInclude Include="gfx\CameraControls.h" />
+    <ClInclude Include="gfx\Light.h" />
+    <ClInclude Include="gfx\LightTypes.h" />
+    <ClInclude Include="gfx\RenderTarget.h" />
     <ClInclude Include="gfx\MaterialInstance.h" />
+    <ClInclude Include="gfx\GfxDbgTest.h" />
     <ClInclude Include="gfx\MeshRenderer.h" />
     <ClInclude Include="gfx\RenderObject.h" />
+    <ClInclude Include="gfx\ShaderTemplate.h" />
+    <ClInclude Include="gfx\ShaderTemplateFactory.h" />
+    <ClInclude Include="gfx\Texture.h" />
+    <ClInclude Include="gfx\ShaderProgram.h" />
     <ClInclude Include="gfx\vertex_descriptor.h" />
     <ClInclude Include="gfx\Mesh.h" />
+    <ClInclude Include="gfx\buffer_desc.h" />
+    <ClInclude Include="gfx\DebugRenderer.h" />
+    <ClInclude Include="gfx\debug_vtx_layout.h" />
+    <ClInclude Include="gfx\pipeline_config.h" />
+    <ClInclude Include="gfx\uniform_info.h" />
     <ClInclude Include="gfx\Material.h" />
+    <ClInclude Include="math\comparable.h" />
+    <ClInclude Include="math\euler_angles.h" />
     <ClInclude Include="math\interp\Spline.h" />
     <ClInclude Include="math\matrix_decomposition.h" />
+    <ClInclude Include="math\random.h" />
+    <ClInclude Include="meta\tag.h" />
+    <ClInclude Include="meta\tuple.h" />
     <ClInclude Include="phys\Collider.h" />
+    <ClInclude Include="phys\collision.h" />
     <ClInclude Include="phys\RigidBody.h" />
+    <ClInclude Include="prefab\PrefabData.h" />
+    <ClInclude Include="prefab\Prefab.h" />
+    <ClInclude Include="prefab\PrefabFactory.h" />
+    <ClInclude Include="prefab\PrefabInstance.h" />
+    <ClInclude Include="prefab\PrefabUtility.h" />
+    <ClInclude Include="prefab\PropertyOverride.h" />
+    <ClInclude Include="reflect\detail\meta_manager.h" />
+    <ClInclude Include="reflect\detail\table_storage.h" />
+    <ClInclude Include="reflect\detail\typed_context.h" />
+    <ClInclude Include="reflect\detail\visit_detail.h" />
+    <ClInclude Include="reflect\typeinfo.h" />
+    <ClInclude Include="res\FileResources_detail.h" />
     <ClInclude Include="res\ResourceMeta.h" />
     <ClInclude Include="scene\SceneFactory.h" />
     <ClInclude Include="scene\SceneManager.h" />
@@ -60,6 +176,7 @@
     <ClInclude Include="file\DirectoryWatcher.h" />
     <ClInclude Include="file\FileSystem.h" />
     <ClInclude Include="file\FileSystemInternal.h" />
+    <ClInclude Include="gfx\gfx_data.h" />
     <ClInclude Include="gfx\GraphicsSystem.h" />
     <ClInclude Include="idk_config.h" />
     <ClInclude Include="core\ObjectPool.h" />
@@ -80,27 +197,52 @@
     <ClInclude Include="math\vector_detail.h" />
     <ClInclude Include="math\vector_dim.h" />
     <ClInclude Include="math\vector_swizzle.h" />
-    <ClInclude Include="common\Parent.h" />
     <ClInclude Include="core\GameState_detail.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="IncludeSystems.h" />
+    <ClInclude Include="script\ManagedType.h" />
+    <ClInclude Include="script\MonoBinder.h" />
+    <ClInclude Include="script\MonoException.h" />
+    <ClInclude Include="script\MonoFunctionInvoker.h" />
+    <ClInclude Include="script\ValueBoxer.h" />
+    <ClInclude Include="script\MonoBehavior.h" />
+    <ClInclude Include="script\MonoBehaviorData.h" />
+    <ClInclude Include="script\MonoBehaviorEnvironment.h" />
+    <ClInclude Include="script\MonoEnvironment.h" />
+    <ClInclude Include="script\ManagedObj.h" />
+    <ClInclude Include="script\ManagedThunk.h" />
+    <ClInclude Include="script\MonoWrapperEnvironment.h" />
+    <ClInclude Include="script\ScriptSystem.h" />
+    <ClInclude Include="script\ValueUnboxer.h" />
+    <ClInclude Include="serialize\binary.h" />
+    <ClInclude Include="serialize\parse_error.h" />
+    <ClInclude Include="serialize\yaml.h" />
+    <ClInclude Include="gfx\ShaderGraph_helpers.h" />
+    <ClInclude Include="common\Tag.h" />
+    <ClInclude Include="common\TagManager.h" />
     <ClInclude Include="test\TestComponent.h" />
+    <ClInclude Include="test\TestResource.h" />
+    <ClInclude Include="test\TestResourceFactory.h" />
     <ClInclude Include="test\TestSystem.h" />
     <ClInclude Include="ds\range.h" />
     <ClInclude Include="ds\zip.h" />
-    <ClInclude Include="reflect\pretty_function.h" />
-    <ClInclude Include="reflect\constructor_entry.h" />
-    <ClInclude Include="serialize\serialize.h" />
-    <ClInclude Include="shape\aabb.h" />
-    <ClInclude Include="shape\capsule.h" />
-    <ClInclude Include="shape\box.h" />
-    <ClInclude Include="shape\ray.h" />
-    <ClInclude Include="shape\sphere.h" />
+    <ClInclude Include="reflect\detail\pretty_function.h" />
+    <ClInclude Include="reflect\detail\constructor_entry.h" />
+    <ClInclude Include="serialize\text.h" />
+    <ClInclude Include="math\shapes\aabb.h" />
+    <ClInclude Include="math\shapes\capsule.h" />
+    <ClInclude Include="math\shapes\box.h" />
+    <ClInclude Include="math\shapes\ray.h" />
+    <ClInclude Include="math\shapes\sphere.h" />
+    <ClInclude Include="util\align.h" />
+    <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
+    <ClInclude Include="util\hash_combine.h" />
+    <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
-    <ClInclude Include="reflect\ReflectRegistration.h" />
-    <ClInclude Include="reflect\typed_context.inl" />
+    <ClInclude Include="ReflectRegistration.h" />
+    <ClInclude Include="reflect\detail\typed_context.inl" />
     <ClInclude Include="res\Guid.h" />
     <ClInclude Include="res\Resource.h" />
     <ClInclude Include="res\ResourceFactory.h" />
@@ -116,22 +258,120 @@
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="audio\AudioClipFactory.cpp" />
+    <ClCompile Include="anim\Animation.cpp" />
+    <ClCompile Include="anim\AnimationLayer.cpp" />
+    <ClCompile Include="anim\AnimationState.cpp" />
+    <ClCompile Include="anim\AnimationUtils.cpp" />
+    <ClCompile Include="anim\Animator.cpp" />
+    <ClCompile Include="anim\AnimationSystem.cpp" />
+    <ClCompile Include="anim\Bone.cpp" />
+    <ClCompile Include="anim\Skeleton.cpp" />
+    <ClCompile Include="anim\SkeletonFactory.cpp" />
+    <ClCompile Include="anim\SkinnedMeshRenderer.cpp" />
+    <ClCompile Include="audio\AudioClipLoader.cpp" />
     <ClCompile Include="audio\AudioClip.cpp" />
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
-    <ClCompile Include="file\FileHandle.cpp" />
+    <ClCompile Include="common\Layer.cpp" />
+    <ClCompile Include="common\LayerManager.cpp" />
+    <ClCompile Include="common\Name.cpp" />
+    <ClCompile Include="common\Tag.cpp" />
+    <ClCompile Include="common\TagManager.cpp" />
+    <ClCompile Include="core\NullHandleException.cpp" />
+    <ClCompile Include="debug\Log.cpp" />
+    <ClCompile Include="debug\LogSingleton.cpp" />
+    <ClCompile Include="debug\LogSystem.cpp" />
+    <ClCompile Include="file\PathHandle.cpp" />
+    <ClCompile Include="gfx\CameraControls.cpp" />
+    <ClCompile Include="gfx\CameraFrustum.cpp" />
+    <ClCompile Include="gfx\CubeMap.cpp" />
+    <ClCompile Include="gfx\Font.cpp" />
+    <ClCompile Include="gfx\FontAtlas.cpp" />
+    <ClCompile Include="gfx\FontAtlasFactory.cpp" />
+    <ClCompile Include="gfx\Framebuffer.cpp" />
+    <ClCompile Include="gfx\FramebufferFactory.cpp" />
+    <ClCompile Include="gfx\Light.cpp" />
+    <ClCompile Include="gfx\LightTypes.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
+    <ClCompile Include="gfx\MaterialFactory.cpp" />
+    <ClCompile Include="gfx\MaterialInstance.cpp" />
+    <ClCompile Include="gfx\MeshFactory.cpp" />
+    <ClCompile Include="gfx\projector_functions.cpp" />
+    <ClCompile Include="gfx\ShaderGraph.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_data.cpp" />
+    <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
+    <ClCompile Include="gfx\ShaderProgram.cpp" />
+    <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\ViewportUtil.cpp" />
+    <ClCompile Include="math\ritters.cpp" />
+    <ClCompile Include="math\shapes\box.cpp" />
+    <ClCompile Include="math\shapes\capsule.cpp" />
+    <ClCompile Include="math\shapes\frustum.cpp" />
+    <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="particle\ParticleData.cpp" />
+    <ClCompile Include="particle\ParticleSystem.cpp" />
+    <ClCompile Include="particle\ParticleSystemModules.cpp" />
+    <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
+    <ClCompile Include="phys\Collider.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_box.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule.cpp" />
+    <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
+    <ClCompile Include="phys\collision_result.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
+    <ClCompile Include="phys\PhysicsSystem.cpp" />
+    <ClCompile Include="phys\RigidBody.cpp" />
+    <ClCompile Include="res\GenericResourceHandle.cpp" />
+    <ClCompile Include="res\Guid.cpp" />
+    <ClCompile Include="res\MetaBundle.cpp" />
+    <ClCompile Include="res\ResourceBundle.cpp" />
+    <ClCompile Include="proj\ProjectManager.cpp" />
+    <ClCompile Include="scene\SceneGraphBuilder.cpp" />
+    <ClCompile Include="gfx\Material.cpp" />
+    <ClCompile Include="gfx\RenderTarget.cpp" />
+    <ClCompile Include="gfx\GfxDbgTest.cpp" />
+    <ClCompile Include="gfx\buffer_desc.cpp" />
+    <ClCompile Include="gfx\DebugRenderer.cpp" />
     <ClCompile Include="gfx\Camera.cpp" />
+    <ClCompile Include="gfx\GraphicsSystem.cpp" />
     <ClCompile Include="gfx\MeshRenderer.cpp" />
+    <ClCompile Include="gfx\ShaderTemplate.cpp" />
+    <ClCompile Include="gfx\ShaderTemplateFactory.cpp" />
+    <ClCompile Include="gfx\Texture.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
+    <ClCompile Include="math\euler_angles.cpp" />
+    <ClCompile Include="math\random.cpp" />
+    <ClCompile Include="phys\collision.cpp" />
+    <ClCompile Include="prefab\Prefab.cpp" />
+    <ClCompile Include="prefab\PrefabData.cpp" />
+    <ClCompile Include="prefab\PrefabUtility.cpp" />
     <ClCompile Include="reflect\enum_value.cpp" />
     <ClCompile Include="reflect\uni_container.cpp" />
     <ClCompile Include="scene\SceneFactory.cpp" />
     <ClCompile Include="scene\SceneManager.cpp" />
     <ClCompile Include="core\Scheduler.cpp" />
+    <ClCompile Include="script\ManagedObj.cpp" />
+    <ClCompile Include="script\ManagedThunk.cpp" />
+    <ClCompile Include="script\ManagedType.cpp" />
+    <ClCompile Include="script\MonoBehavior.cpp" />
+    <ClCompile Include="script\MonoBehaviorEnvironment.cpp" />
+    <ClCompile Include="script\MonoEnvironment.cpp" />
+    <ClCompile Include="script\MonoWrapperEnvironment.cpp" />
+    <ClCompile Include="script\ScriptSystem.cpp" />
+    <ClCompile Include="script\ValueBoxer.cpp" />
+    <ClCompile Include="script\ValueUnboxer.cpp" />
+    <ClCompile Include="serialize\binary.cpp" />
+    <ClCompile Include="serialize\text_serialize.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="serialize\yaml.cpp" />
+    <ClCompile Include="serialize\yaml_dump.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
-    <ClCompile Include="core\Component.cpp" />
     <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="core\GameObject.cpp" />
     <ClCompile Include="core\GameState.cpp" />
@@ -141,7 +381,6 @@
     <ClCompile Include="file\DirectoryWatcher.cpp" />
     <ClCompile Include="file\FileSystem.cpp" />
     <ClCompile Include="file\FileSystemInternal.cpp" />
-    <ClCompile Include="math\color.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\quaternion.cpp" />
     <ClCompile Include="math\vector.cpp" />
@@ -149,15 +388,24 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="reflect\dynamic.cpp" />
+    <ClCompile Include="reflect\dynamic.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
-    <ClCompile Include="serialize\serialize.cpp" />
-    <ClCompile Include="shape\aabb.cpp" />
+    <ClCompile Include="serialize\text_parse.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="math\shapes\aabb.cpp" />
     <ClCompile Include="reflect\enum_type.cpp" />
-    <ClCompile Include="shape\ray.cpp" />
-    <ClCompile Include="shape\sphere.cpp" />
+    <ClCompile Include="math\shapes\ray.cpp" />
+    <ClCompile Include="math\shapes\sphere.cpp" />
+    <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="util\easing.cpp" />
+    <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\Scheduler.inl" />
@@ -166,13 +414,33 @@
     <None Include="core\GameState.inl" />
     <None Include="core\Handle.inl" />
     <None Include="core\ObjectPool.inl" />
+    <None Include="ds\circular_buffer.inl" />
     <None Include="ds\compressed_pair.inl" />
+    <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />
+    <None Include="ds\result.inl" />
+    <None Include="ds\slow_tree.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
+    <None Include="math\color.inl" />
+    <None Include="math\comparable.inl" />
+    <None Include="math\linear.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="meta\comparator.inl" />
+    <None Include="meta\tag.inl" />
+    <None Include="meta\tuple.inl" />
+    <None Include="meta\variant.inl" />
+    <None Include="phys\raycasts\collision_raycast.inl" />
+    <None Include="reflect\detail\meta_manager.inl" />
+    <None Include="reflect\detail\table_storage.inl" />
+    <None Include="reflect\detail\visit_detail.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
+    <None Include="res\Guid.inl" />
+    <None Include="res\ResourceBundle.inl" />
+    <None Include="res\ResourceMeta.inl" />
+    <None Include="res\ResourceUtils.inl" />
+    <None Include="res\SaveableResourceLoader.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />
@@ -190,20 +458,27 @@
     <None Include="ds\range.inl" />
     <None Include="ds\span.inl" />
     <None Include="ds\zip.inl" />
-    <None Include="reflect\constructor_entry.inl" />
+    <None Include="reflect\detail\constructor_entry.inl" />
     <None Include="reflect\dynamic.inl" />
     <None Include="reflect\reflect.inl" />
     <None Include="reflect\type.inl" />
     <None Include="res\ResourceHandle.inl" />
     <None Include="res\ResourceManager.inl" />
-    <None Include="serialize\serialize.inl" />
+    <None Include="script\ManagedObj.inl" />
+    <None Include="serialize\binary.inl" />
+    <None Include="serialize\text.inl" />
+    <None Include="serialize\yaml.inl" />
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\filesystem.natvis" />
+    <Natvis Include="_natvis\yaml.natvis" />
+    <Natvis Include="_natvis\ds.natvis" />
     <Natvis Include="_natvis\guid.natvis" />
     <Natvis Include="_natvis\objectpool.natvis" />
     <Natvis Include="_natvis\angle.natvis" />
     <Natvis Include="_natvis\matrix.natvis" />
+    <Natvis Include="_natvis\reflect.natvis" />
     <Natvis Include="_natvis\scene.natvis" />
     <Natvis Include="_natvis\vector.natvis" />
   </ItemGroup>
@@ -234,6 +509,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -241,6 +517,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -273,6 +550,8 @@
     <TargetName>coreD</TargetName>
     <TargetExt>.lib</TargetExt>
     <SourcePath>$(VC_SourcePath);</SourcePath>
+    <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -286,6 +565,8 @@
     <TargetExt>.lib</TargetExt>
     <TargetName>core</TargetName>
     <SourcePath>$(VC_SourcePath);</SourcePath>
+    <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -314,6 +595,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -321,7 +604,8 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fmodL_vc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;freetype.lib;fmodL_vc.lib;</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -355,8 +639,10 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4201; 4505</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4201; 4505;4702</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -366,7 +652,8 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fmod_vc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;freetype.lib;fmod_vc.lib;</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

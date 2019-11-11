@@ -1,0 +1,27 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 1, y: 2, z: 3}
+    rotation: 
+      w: 8
+      x: 5
+      y: 6
+      z: 7
+    scale: {x: 4, y: 4, z: 4}
+  - !Name 
+    name: this name should not be instantiated
+  parent_index: -1
+- components: 
+  - !Transform 
+    parent: {id: 98304}
+    position: {x: 9, y: 10, z: 11}
+    rotation: 
+      w: 16
+      x: 13
+      y: 14
+      z: 15
+    scale: {x: 12, y: 12, z: 12}
+  - !Name 
+    name: ""
+  parent_index: 0

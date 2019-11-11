@@ -5,6 +5,9 @@
 #undef max
 #undef min
 
+#undef min
+#undef max
+
 namespace idk
 {
 	template<typename CharT, typename Traits, typename Allocator>
@@ -108,6 +111,7 @@ namespace idk
 	template<typename InputIt>
 	small_string<CharT, Traits, Allocator>::small_string(InputIt first, InputIt last, const Allocator& alloc)
 		: small_string(alloc)
+        : small_string(alloc)
 	{
 		const size_type len = last - first;
 		auto& rep = _rep.first();
@@ -167,7 +171,7 @@ namespace idk
 	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator=(small_string&& other)
 	{
-		std::swap(*this, other);
+		std::swap(_rep, other._rep);
 		return *this;
 	}
 
@@ -632,7 +636,6 @@ namespace idk
 		{
 			traits_type::assign(rep.longer.ptr[rep.longer.size], c);
 			rep.longer.ptr[++rep.longer.size] = '\0';
-			++rep.longer.size;
 		}
 	}
 
@@ -856,7 +859,7 @@ namespace idk
 		len |= len >> 4;
 		len |= len >> 8;
 		len |= len >> 16;
-		return len / sizeof(CharT);
+		return len;
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>

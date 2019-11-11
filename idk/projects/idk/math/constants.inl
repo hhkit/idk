@@ -3,7 +3,7 @@
 
 #include "constants.h"
 
-namespace idk::math::constants
+namespace idk::constants
 {
 	template<>
 	constexpr float pi<float>()
@@ -32,12 +32,12 @@ namespace idk::math::constants
 	template<typename T>
 	constexpr T epsilon()
 	{
-		if constexpr (std::is_same_v<T, float>)
-			return 0.001f;
-		else if constexpr (std::is_same_v<T, double>)
-			return 0.0000001;
-		else // integral type
-			return T{};
+		// if constexpr (std::is_same_v<T, float>)
+		// 	return 
+		// else if constexpr (std::is_same_v<T, double>)
+		// 	return 0.0000001;
+		// else // integral type
+			return std::numeric_limits<T>::epsilon();;
 	}
 
 }

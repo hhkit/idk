@@ -3,6 +3,7 @@
 #include <string>
 
 #include <idk.h>
+#include <math/comparable.h>
 #include <meta/meta.h>
 #include "Handleables.h"
 
@@ -17,6 +18,7 @@ namespace idk::reflect
 namespace idk
 {
 	struct GenericHandle
+		: comparable<GenericHandle>
 	{
 		using type_t  = uint8_t;
 		using scene_t = uint8_t;
@@ -34,17 +36,21 @@ namespace idk
 			uint64_t id = 0;
 		};
 
-		GenericHandle() = default;
+		GenericHandle() : id{} {};
 		explicit GenericHandle(uint64_t id);
 		GenericHandle(uint8_t  type, uint8_t  scene, uint16_t gen, uint32_t index);
 
 		template<typename T> 
-		bool is_type() const;
+		bool is_type() const noexcept;
+
+        template<typename Visitor>
+        decltype(auto) visit(Visitor&& visitor) const;
 
 		reflect::dynamic operator*() const;
-		operator bool() const;
-		bool operator==(const GenericHandle&);
-		bool operator!=(const GenericHandle&);
+		explicit operator bool() const;
+		bool operator<(const GenericHandle&) const;
+		bool operator==(const GenericHandle&) const;
+		bool operator!=(const GenericHandle&) const;
 	};
 
 	template<typename T>
@@ -74,12 +80,16 @@ namespace idk
 	class Handleable
 	{
 	public:
-		const Handle<T>& GetHandle() { return handle; }
+		const Handle<T>& GetHandle() const noexcept { return handle; }
+		bool IsQueuedForDestruction() const noexcept { return _queued_for_destruction; }
 	protected:
 		Handleable() = default;
 	private:
 		Handle<T> handle;
+		bool      _queued_for_destruction = false;
+
 		friend class ObjectPool<T>;
+		friend class GameState;
 	};
 }
 
@@ -90,7 +100,7 @@ namespace std
 	{
 		size_t operator()(const idk::Handle<T>& id) const noexcept
 		{
-			return std::hash<idk::u64>{}(id.id);
+			return std::hash<size_t>{}(id.id);
 		}
 	};
 }

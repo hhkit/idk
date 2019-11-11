@@ -4,6 +4,31 @@
 
 namespace idk::reflect
 {
+    template<typename T, typename = void>
+    struct has_push_back : std::false_type {};
+    template<typename T>
+    struct has_push_back<T, std::void_t<decltype(std::declval<T>().push_back(std::declval<T::value_type>()))>>
+        : std::true_type {};
+
+    template<typename T, typename = void>
+    struct has_insert : std::false_type {};
+    template<typename T>
+    struct has_insert<T, std::void_t<decltype(std::declval<T>().insert(std::declval<T::value_type>()))>>
+        : std::true_type {};
+
+    template<typename T, typename = void>
+    struct has_clear : std::false_type {};
+    template<typename T>
+    struct has_clear<T, std::void_t<decltype(std::declval<T>().clear())>>
+        : std::true_type {};
+
+    template<typename T, typename K, typename = void>
+    struct has_subscript : std::false_type {};
+    template<typename T, typename K>
+    struct has_subscript<T, K, std::void_t<decltype(std::declval<T>()[std::declval<K>()])>>
+        : std::true_type {};
+
+
 
 	template<typename T, typename>
 	uni_container::uni_container(T&& obj)
@@ -42,6 +67,8 @@ namespace idk::reflect
 		virtual void add(const dynamic&) = 0;
 		virtual void clear() = 0;
 		virtual size_t size() = 0;
+        virtual dynamic subscript(size_t index) = 0;
+        virtual dynamic subscript(const dynamic& key) = 0;
 		virtual ~base() {}
 	};
 
@@ -83,17 +110,27 @@ namespace idk::reflect
 
 		void add(const dynamic& obj) override
 		{
-			if constexpr (std::is_same_v<decltype(has_push_back<DecayedT>(0)), std::true_type>)
-				container.push_back(obj.get<DecayedT::value_type>());
-			else if constexpr (std::is_same_v<decltype(has_insert<DecayedT>(0)), std::true_type>)
-				container.insert(obj.get<DecayedT::value_type>());
+            if constexpr (has_push_back<DecayedT>::value)
+            {
+                if constexpr (std::is_same_v<DecayedT::value_type, dynamic>)
+                    container.push_back(obj);
+                else
+                    container.push_back(obj.get<DecayedT::value_type>());
+            }
+            else if constexpr (has_insert<DecayedT>::value)
+            {
+                if constexpr (std::is_same_v<DecayedT::value_type, dynamic>)
+                    container.insert(obj);
+                else
+                    container.insert(obj.get<DecayedT::value_type>());
+            }
 			else
 				throw "no add method found"; // impl more add methods
 		}
 
 		void clear() override
 		{
-			if constexpr (std::is_same_v<decltype(has_clear<DecayedT>(0)), std::true_type>)
+			if constexpr (has_clear<DecayedT>::value)
 				container.clear();
 			else
 				throw "no clear method found";
@@ -104,20 +141,21 @@ namespace idk::reflect
 			return container.size();
 		}
 
-	private:
-		template<typename C, typename = decltype(std::declval<C>().push_back(std::declval<C::value_type>()))>
-		constexpr std::true_type has_push_back(int) {}
-		template<typename C>
-		constexpr std::false_type has_push_back(...) {}
+        virtual dynamic subscript(size_t index)
+        {
+            index;
+            if constexpr (is_sequential_container_v<DecayedT> && has_subscript<DecayedT, size_t>::value)
+                return container[index];
+            else
+                throw "cannot subscript with size_t";
+        }
 
-		template<typename C, typename = decltype(std::declval<C>().insert(std::declval<C::value_type>()))>
-		constexpr std::true_type has_insert(int) {}
-		template<typename C>
-		constexpr std::false_type has_insert(...) {}
-
-		template<typename C, typename = decltype(std::declval<C>().clear())>
-		constexpr std::true_type has_clear(int) {}
-		template<typename C>
-		constexpr std::false_type has_clear(...) {}
+        virtual dynamic subscript(const dynamic& key)
+        {
+            if constexpr (is_associative_container_v<T>)
+                return container[key.get<DecayedT::key_type>()];
+            else
+                return subscript(key.get<size_t>());
+        }
 	};
 }

@@ -1,0 +1,17 @@
+metadatas: 
+- guid: 9040f786-edad-480f-987a-477b1bf42d22
+  metadata: ""
+  name: Running
+  t_hash: Prefab
+- guid: d28fb09a-36e4-4d53-8acd-804432aac149
+  metadata: ""
+  name: Houdini_Character_OBJ:Eyebrows_low1
+  t_hash: idk::Mesh
+- guid: 5015b98a-9779-4cfe-ae14-b7343d51d52e
+  metadata: ""
+  name: Take 001
+  t_hash: idk::anim::Animation
+- guid: 47e47b79-ee22-40b5-89c3-6d40e700eb37
+  metadata: ""
+  name: mixamorig:Hips_root_
+  t_hash: idk::anim::Skeleton

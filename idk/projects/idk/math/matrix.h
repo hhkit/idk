@@ -3,40 +3,48 @@
 
 #include "Vector.h"
 
-namespace idk::math
+namespace idk
 {
+	struct col_major {};
+
 	// matrix is column order
 	template<typename T, unsigned R, unsigned C>
-	struct matrix
+	struct tmat
 	{
-		using column_t = vector<T, R>;
+		using column_t = tvec<T, R>;
 		column_t intern[C]{};
 
 		// constructors
-		matrix();
+		tmat();
 		
 		// column-major constructor
 		template<typename ... U,
 			typename = std::enable_if_t<(std::is_same_v<U, T> && ...)>
 		>
-		explicit matrix(const vector<U, R>& ... vectors);
+		explicit tmat(const tvec<U, R>& ... vectors);
 
 		// row-major constructor
 		template<typename ... U,
 			typename = std::enable_if_t<(sizeof...(U) == R * C) && ((std::is_arithmetic_v<U>) && ...)>
 		>
-		explicit matrix(U ... values);
+		explicit tmat(U ... values);
+
+		// col major ptr constructor
+		explicit tmat(T* ptr);
 
 		// upcast constructor
-		explicit matrix(const matrix<T, R - 1, C - 1>&);
+		explicit tmat(const tmat<T, R - 1, C - 1>&);
+
+		// downcast constructor
+		explicit tmat(const tmat<T, R + 1, C + 1>&);
 
 		// common functions
 		T                determinant() const;
-		matrix<T, C, R>  transpose() const;
-		matrix<T, C, R>  inverse() const;
+		tmat<T, C, R>  transpose() const;
+		tmat<T, C, R>  inverse() const;
 
 		// utility
-		matrix<T, C-1, R-1> cofactor(unsigned r, unsigned c) const;
+		tmat<T, C-1, R-1> cofactor(unsigned r, unsigned c) const;
 		//matrix&             gauss_jordan();
 
 		// accessors
@@ -46,38 +54,39 @@ namespace idk::math
 		const column_t* end() const;
 		T*              data();
 		const T*        data() const;
+		unsigned        size()const { return R * C; }
 		column_t&       operator[](size_t index);
 		const column_t& operator[](size_t index) const;
 
 		// operator overloads
-		matrix&         operator+=(const matrix& rhs);
-		matrix          operator+(const matrix& rhs) const;
-		matrix&         operator-=(const matrix& rhs);
-		matrix          operator-(const matrix& rhs) const;
-		matrix&         operator*=(const T& val);
-		matrix          operator*(const T& val) const;
-		matrix&         operator/=(const T& val);
-		matrix          operator/(const T& val) const;
-		bool            operator==(const matrix&) const;
-		bool            operator!=(const matrix&) const;
+		tmat&         operator+=(const tmat& rhs);
+		tmat          operator+(const tmat& rhs) const;
+		tmat&         operator-=(const tmat& rhs);
+		tmat          operator-(const tmat& rhs) const;
+		tmat&         operator*=(const T& val);
+		tmat          operator*(const T& val) const;
+		tmat&         operator/=(const T& val);
+		tmat          operator/(const T& val) const;
+		bool            operator==(const tmat&) const;
+		bool            operator!=(const tmat&) const;
 	};
 
 	template<typename T, unsigned R, unsigned C>
-	matrix<T,R,C> operator*(const T& coeff, const matrix<T, R, C>&);
+	tmat<T,R,C> operator*(const T& coeff, const tmat<T, R, C>&);
 
 	template<typename T, unsigned R, unsigned C>
-	vector<T, R> operator*(const matrix<T, R, C>& lhs, const vector<T, C>& rhs);
+	tvec<T, R> operator*(const tmat<T, R, C>& lhs, const tvec<T, C>& rhs);
 
 	template<typename T, unsigned O, unsigned M, unsigned I>
-	matrix<T, O, I> operator*(const matrix<T, O, M>& lhs, const matrix<T, M, I>& rhs);
+	tmat<T, O, I> operator*(const tmat<T, O, M>& lhs, const tmat<T, M, I>& rhs);
 
 	// explicit instantiations to save on compile time
-	extern template struct matrix<float, 3, 3>;
-	extern template struct matrix<float, 4, 4>;
-	extern template vector<float, 3>    operator*(const matrix<float, 3, 3>&, const vector<float, 3>&);
-	extern template vector<float, 4>    operator*(const matrix<float, 4, 4>&, const vector<float, 4>&);
-	extern template matrix<float, 3, 3> operator*(const matrix<float, 3, 3> & lhs, const matrix<float, 3, 3> & rhs);
-	extern template matrix<float, 4, 4> operator*(const matrix<float, 4, 4> & lhs, const matrix<float, 4, 4> & rhs);
+	extern template struct tmat<float, 3, 3>;
+	extern template struct tmat<float, 4, 4>;
+	extern template tvec<float, 3>    operator*(const tmat<float, 3, 3>&, const tvec<float, 3>&);
+	extern template tvec<float, 4>    operator*(const tmat<float, 4, 4>&, const tvec<float, 4>&);
+	extern template tmat<float, 3, 3> operator*(const tmat<float, 3, 3> & lhs, const tmat<float, 3, 3> & rhs);
+	extern template tmat<float, 4, 4> operator*(const tmat<float, 4, 4> & lhs, const tmat<float, 4, 4> & rhs);
 }
 
 #include "Matrix.inl"

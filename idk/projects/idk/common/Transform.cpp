@@ -1,12 +1,45 @@
 #include "stdafx.h"
 #include "Transform.h"
 #include <core/GameObject.h>
-#include <common/Parent.h>
 #include <math/matrix_transforms.h>
 #include <math/matrix_decomposition.h>
 
 namespace idk
 {
+	void Transform::SetParent(Handle<class GameObject> new_parent, bool preserve_global)
+	{
+		if (preserve_global)
+		{
+			auto curr_global = GlobalMatrix();
+			const auto new_local = [&]() {
+				if (new_parent)
+					return curr_global * new_parent->Transform()->GlobalMatrix().inverse();
+				else
+					return curr_global;
+			}();
+
+			const auto decomp = decompose(new_local);
+			position = decomp.position;
+			rotation = decomp.rotation;
+			scale = decomp.scale;
+		}
+		parent = new_parent;
+	}
+	vec3 Transform::Forward() const
+	{
+		return -vec3{ GlobalMatrix()[2].get_normalized() };
+	}
+
+	vec3 Transform::Right() const
+	{
+		return vec3{ GlobalMatrix()[0].get_normalized() };
+	}
+	
+	vec3 Transform::Up() const
+	{
+		return vec3{ GlobalMatrix()[1].get_normalized() };
+	}
+
 	mat4 Transform::LocalMatrix() const
 	{
 		return translate(position) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
@@ -14,26 +47,32 @@ namespace idk
 
 	mat4 Transform::GlobalMatrix() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (parent)
-			return LocalMatrix() * parent->Transform()->GlobalMatrix();
+			return parent->Transform()->GlobalMatrix() * LocalMatrix();
 		else
 			return LocalMatrix();
 	}
 
+	void Transform::LocalMatrix(const mat4& m)
+	{
+		const auto decomp = decompose(m);
+		position = decomp.position;
+		rotation = decomp.rotation;
+		scale    = decomp.scale;
+	}
+
 	void Transform::GlobalMatrix(const mat4& m)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 		{
-			auto decomp = decompose(m);
+			const auto decomp = decompose(m);
 			position = decomp.position;
 			rotation = decomp.rotation;
 			scale    = decomp.scale;
 		}
 		else
 		{
-			auto decomp = decompose(parent->Transform()->GlobalMatrix().inverse() * m);
+			const auto decomp = decompose(parent->Transform()->GlobalMatrix().inverse() * m);
 			position = decomp.position;
 			rotation = decomp.rotation;
 			scale    = decomp.scale;
@@ -42,7 +81,6 @@ namespace idk
 
 	vec3 Transform::GlobalPosition() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			return position;
 		else
@@ -51,7 +89,6 @@ namespace idk
 
 	quat Transform::GlobalRotation() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			return rotation;
 		else
@@ -60,7 +97,6 @@ namespace idk
 
 	vec3 Transform::GlobalScale() const
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			return scale;
 		else
@@ -71,55 +107,53 @@ namespace idk
 		}
 	}
 
+	unsigned Transform::Depth() const
+	{
+		return parent ? parent->Transform()->Depth() + 1 : 0;
+	}
+
 	void Transform::GlobalPosition(vec3 pos)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			position = pos;
 		else
 		{
-			auto curr_global = GlobalMatrix();
+			const auto curr_global = GlobalMatrix();
 			auto decomp = decompose(GlobalMatrix());
 			decomp.position = pos;
-			auto new_global = decomp.recompose();
-			
-			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
-
+			const auto new_global = decomp.recompose();
+			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
 			position = decompose(parent_inv * new_global).position;
 		}
 	}
 
 	void Transform::GlobalRotation(quat rot)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			rotation = rot;
 		else
 		{
-			auto curr_global = GlobalMatrix();
+			const auto curr_global = GlobalMatrix();
 			auto decomp = decompose(GlobalMatrix());
 			decomp.rotation = rot;
-			auto new_global = decomp.recompose();
-
-			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
-
-			position = decompose(parent_inv * new_global).rotation;
+			const auto new_global = decomp.recompose();
+			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
+			rotation = decompose(parent_inv * new_global).rotation;
 		}
 	}
 
 	void Transform::GlobalScale(vec3 scl)
 	{
-		auto parent = GetGameObject()->ParentObject();
 		if (!parent)
 			scale = scl;
 		else
 		{
-			auto curr_global = GlobalMatrix();
+			const auto curr_global = GlobalMatrix();
 			auto decomp = decompose(GlobalMatrix());
 			decomp.scale = scl;
-			auto new_global = decomp.recompose();
+			const auto new_global = decomp.recompose();
 
-			auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
+			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
 			position = decompose(parent_inv * new_global).scale;
 		}
 	}

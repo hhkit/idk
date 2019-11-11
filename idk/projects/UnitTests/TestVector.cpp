@@ -17,6 +17,49 @@ TEST(Math, VectorConstruction) {
 	);
 }
 
+template<typename vec>
+void TestNormalized()
+{
+	bool res;
+	float len = vec{ 0.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ 5.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ 99.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ 0.015f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ idk::constants::epsilon<float>() }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+
+	len = vec{ -0.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -5.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -99.5f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -0.015f }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+	len = vec{ -idk::constants::epsilon<float>() }.get_normalized().length();
+	res = abs(len - 1) <= idk::constants::epsilon<float>();
+	EXPECT_TRUE(res);
+}
+
+TEST(Math, VectorGettors) {
+	TestNormalized < idk::vec2>();
+	TestNormalized < idk::vec3>();
+	TestNormalized < idk::vec4>();
+
+}
+
 TEST(Math, VectorAccess) {
 	EXPECT_TRUE((idk::vec2{ 1.f, 2.f }.x == idk::vec2{ 1.f, 2.f } [0] ));
 	EXPECT_TRUE((idk::vec2{ 1.f, 2.f }.y == idk::vec2{ 1.f, 2.f } [1] ));
@@ -33,17 +76,19 @@ TEST(Math, VectorMagnitudeNormalize)
 	std::default_random_engine generator;
 	std::uniform_real_distribution<float> dist(-100.f, 100.f);
 
+	&idk::tvec<float, 3>::operator*;
+
 	for (int i = 0; i < 1000; ++i)
 	{
 		auto f = dist(generator);
 		EXPECT_LT(
-			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec2{ dist(generator), dist(generator) }.normalize().length() - 1.f), 1e-6f//idk::constants::epsilon<float>()
 		);
 		EXPECT_LT(
-			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec3{ dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), 1e-6f//idk::constants::epsilon<float>()
 		);
 		EXPECT_LT(
-			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), idk::math::constants::epsilon<float>()
+			abs(idk::vec4{ dist(generator), dist(generator), dist(generator), dist(generator) }.normalize().length() - 1.f), 1e-6f//idk::constants::epsilon<float>()
 		);
 	}
 }

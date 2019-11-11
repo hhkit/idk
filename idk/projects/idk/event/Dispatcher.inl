@@ -45,7 +45,7 @@ namespace idk
 	template<typename Ret, typename ... Params, typename Functor>
 	size_t Dispatcher<Ret(Params...), Functor>::clear()
 	{
-		auto retval = stored_parameters.size();
+		const auto retval = stored_parameters.size();
 		stored_parameters.clear();
 
 		return retval;
