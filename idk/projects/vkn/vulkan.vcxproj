@@ -221,6 +221,7 @@
     <ClInclude Include="DeferredPass.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
+    <ClInclude Include="DescriptorUpdateData.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
@@ -288,6 +289,7 @@
     <ClCompile Include="DeferredPass.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
+    <ClCompile Include="DescriptorUpdateData.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />

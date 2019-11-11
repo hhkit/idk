@@ -73,7 +73,6 @@ namespace idk::vkn
 	DescriptorsManager::DescriptorsManager(VulkanView& view) :pools{view}
 	{
 	}
-#pragma optimize("",off)
 	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations)
 	{
 		DescriptorSetLookup result;
@@ -123,7 +122,6 @@ namespace idk::vkn
 		Grow(conv);
 	}
 
-#pragma optimize("",off)
 	void DescriptorsManager::Grow(const hash_table<vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations)
 	{
 		//Redo.
@@ -153,8 +151,8 @@ namespace idk::vkn
 			auto num_ds = req.first;
 			if (itr == free_dses.end() || itr->second.num_available() < num_ds)
 			{
-
-				auto pool = pools.TryGet(req.second*req.first);
+				auto diff = (itr != free_dses.end()) ? num_ds - itr->second.num_available() : num_ds;
+				auto pool = pools.TryGet(req.second* diff);
 				//TODO compute num_ds with layout's number of descriptors
 				if (pool)
 					layouts[*pool].insert(num_ds, layout);
@@ -331,7 +329,7 @@ namespace idk::vkn
 	{
 		return sets[curr_index++];
 	}
-#pragma optimize("",off)
+
 	std::optional<DescriptorSets> DescriptorSets::GetRange(uint32_t num)
 	{
 		std::optional<DescriptorSets> result{};

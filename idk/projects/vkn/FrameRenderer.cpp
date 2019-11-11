@@ -32,6 +32,8 @@
 
 #include <cstdint>
 
+#include <vkn/DescriptorUpdateData.h>
+
 namespace idk::vkn
 {
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
@@ -713,6 +715,7 @@ namespace idk::vkn
 		auto itr = layouts.find(trf_set);
 		if (itr != layouts.end())
 		{
+			DescriptorUpdateData dud;
 			auto ds_layout = itr->second;
 			auto allocated =rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, {vk::DescriptorType::eUniformBuffer,2}}});
 			auto aitr = allocated.find(ds_layout);
@@ -726,9 +729,11 @@ namespace idk::vkn
 						0,view_buffer,vb_offset,0,sizeof(mat4),itr->second
 					},
 					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
-				});
+				},dud
+				);
 				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->pipelinelayout, 0, ds, {});
 			}
+			dud.SendUpdates();
 		}
 
 		const DbgDrawCall* prev = nullptr;

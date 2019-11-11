@@ -192,6 +192,10 @@
     <ClInclude Include="DeferredPass.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPassManager.h" />
+    <ClInclude Include="DescriptorUpdateData.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -351,6 +355,7 @@
     <ClCompile Include="VknFramebufferFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
+    <ClCompile Include="DescriptorUpdateData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
