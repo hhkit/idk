@@ -230,6 +230,7 @@
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderStateV2.h" />
     <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="SpinLock.h" />

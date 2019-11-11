@@ -7,9 +7,184 @@
 
 namespace idk::vkn
 {
+
+#pragma region allocation helpers
+	struct AllocationTracker
+	{
+		using DsCountArray = std::array<uint32_t, DescriptorTypeI::size()>;
+		bool req = false;
+		DsCountArray  allocation_queue;
+
+		void QueueForAllocation(const DsCountArray& alloc_request)
+		{
+			for (size_t i = 0; i < std::size(allocation_queue); ++i)
+			{
+				allocation_queue[i] += alloc_request[i];
+			}
+			req = true;
+		}
+
+		void QueueForAllocation(const std::pair<vk::DescriptorType, uint32_t>& alloc_request)
+		{
+			DsCountArray arr{};
+			arr[DescriptorTypeI::map(alloc_request.first)] = alloc_request.second;
+			QueueForAllocation(arr);
+		}
+		void AllocatePools(DescriptorPoolsManager& pools)
+		{
+			if (req)
+				pools.Add(allocation_queue._Elems);
+		}
+	};
+
+	struct LayoutAllocationInfo
+	{
+		vector<vk::DescriptorSetLayout> layouts;
+		vector<std::pair<size_t, size_t>> ranges;
+		void insert(uint32_t num, vk::DescriptorSetLayout layout)
+		{
+			ranges.emplace_back(layouts.size(), layouts.size() + num);
+			layouts.insert(layouts.end(), num, layout);
+		}
+	};
+
+#pragma endregion
+
+
+	DescriptorsManager::DsCountArray operator*(const DescriptorsManager::DsCountArray& lhs, uint32_t scalar)
+	{
+		auto result = lhs;
+		for (auto& count : result)
+		{
+			count *= scalar;
+		}
+		return result;
+	}
+	DescriptorsManager::DsCountArray operator*(uint32_t scalar, const DescriptorsManager::DsCountArray& lhs)
+	{
+		auto result = lhs;
+		for (auto& count : result)
+		{
+			count *= scalar;
+		}
+		return result;
+	}
+
 	DescriptorsManager::DescriptorsManager(VulkanView& view) :pools{view}
 	{
 	}
+#pragma optimize("",off)
+	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations)
+	{
+		DescriptorSetLookup result;
+		//Checks to see if the there are enough pre-allocated DSes, if not, allocate from pool.
+		Grow(allocations);
+		for (auto& [layout, reqs] : allocations)
+		{
+			auto itr = free_dses.find(layout);
+			auto opt = itr->second.GetRange(reqs.first);
+			//Grow should have ensured that we have the capacity.
+			IDK_ASSERT(opt);
+			if (opt)
+				result[layout] = std::move(*opt);
+			else throw "AAAA";
+		}
+		return result;
+	}
+
+
+	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)
+	{
+		DescriptorSetLookup result;
+		//Checks to see if the there are enough pre-allocated DSes, if not, allocate from pool.
+		Grow(allocations);
+		for (auto& [layout, reqs] : allocations)
+		{
+			auto itr = free_dses.find(layout);
+			auto opt = itr->second.GetRange(reqs.second);
+			//Grow should have ensured that we have the capacity.
+			IDK_ASSERT(opt);
+			result[layout] = *opt;
+		}
+		return result;
+	}
+
+
+	void DescriptorsManager::Grow(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)
+	{
+		using pair_t =std::pair<uint32_t, DsCountArray>;
+		hash_table<vk::DescriptorSetLayout, pair_t> conv{};
+		for (auto& [layout, req] : allocations)
+		{
+			DsCountArray arr{};
+			arr[DescriptorTypeI::map(req.first)] = 1;
+			conv[layout] = pair_t{req.second,arr};
+		}
+		Grow(conv);
+	}
+
+#pragma optimize("",off)
+	void DescriptorsManager::Grow(const hash_table<vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations)
+	{
+		//Redo.
+		AllocationTracker tracker{};
+		auto& m_device = pools.view.Device();
+		auto& dispatcher = pools.view.Dispatcher();
+		//Figure how many new allocations we need to make
+		for (auto& [layout, req] : allocations)
+		{
+			auto itr = free_dses.find(layout);
+			auto num_ds = req.first;
+			if (itr == free_dses.end()||itr->second.num_available() < num_ds)
+			{
+				auto diff = num_ds;
+				tracker.QueueForAllocation(req.second*diff);
+			}
+		}
+		//Allocate the pools required.
+		tracker.AllocatePools(pools);
+
+		bool failed = false;
+		hash_table<vk::DescriptorPool, LayoutAllocationInfo> layouts{};
+		//Prepare the request
+		for (auto& [layout, req] : allocations)
+		{
+			auto itr = free_dses.find(layout);
+			auto num_ds = req.first;
+			if (itr == free_dses.end() || itr->second.num_available() < num_ds)
+			{
+
+				auto pool = pools.TryGet(req.second*req.first);
+				//TODO compute num_ds with layout's number of descriptors
+				if (pool)
+					layouts[*pool].insert(num_ds, layout);
+				else
+					failed = true;
+			}
+		}
+		for (auto& [pool, alloc_info] : layouts)
+		{
+			//Request all at once.
+			vk::DescriptorSetAllocateInfo allocInfo
+			{
+				pool
+				,hlp::arr_count(alloc_info.layouts)
+				,std::data(alloc_info.layouts)
+			};
+			//This call was apparently expensive?
+			auto alloc_chunk = m_device->allocateDescriptorSets(allocInfo, dispatcher);
+			for (auto& range : alloc_info.ranges)
+			{
+				auto layout = alloc_info.layouts[range.first];
+				auto& curr_vec = free_dses[layout].sets;
+				//Insert the new descriptor sets into the respective free list
+				curr_vec.insert(curr_vec.end(), alloc_chunk.begin() + range.first, alloc_chunk.begin() + range.second);
+			}
+		}
+	}
+
+	/*
+
 
 	DescriptorSetLookup DescriptorsManager::Allocate(const hash_table < vk::DescriptorSetLayout, std::pair<uint32_t,std::array<uint32_t, DescriptorTypeI::size()>>>& allocations)
 	{
@@ -73,6 +248,7 @@ namespace idk::vkn
 		} while (req_more);
 		return result;
 	}
+
 	DescriptorSetLookup  DescriptorsManager::Allocate(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)
 	{
 		hash_table<vk::DescriptorSetLayout, DescriptorSets> result;
@@ -131,10 +307,14 @@ namespace idk::vkn
 		} while (num_req.size());
 		return result;
 	}
-
+	*/
 	void DescriptorsManager::Reset()
 	{
-		pools.ResetAll();
+		for (auto& dss : free_dses)
+		{
+			dss.second.curr_index = 0;
+		}
+		//pools.ResetAll();
 	}
 
 	uint32_t DescriptorSets::size() const
@@ -142,9 +322,28 @@ namespace idk::vkn
 		return s_cast<uint32_t>(sets.size());
 	}
 
+	uint32_t DescriptorSets::num_available() const
+	{
+		return size()-curr_index;
+	}
+
 	vk::DescriptorSet& DescriptorSets::GetNext()
 	{
 		return sets[curr_index++];
+	}
+#pragma optimize("",off)
+	std::optional<DescriptorSets> DescriptorSets::GetRange(uint32_t num)
+	{
+		std::optional<DescriptorSets> result{};
+		if (num + curr_index <= size())
+		{
+			auto curr_itr = sets.begin() + curr_index;
+			result = DescriptorSets{};
+			auto& set = result->sets;
+			set.insert(set.end(),curr_itr, curr_itr + num);
+			curr_index += num;
+		}
+		return result;
 	}
 
 	vector<vk::DescriptorSet>& DescriptorSets::operator=(vector<vk::DescriptorSet>&& rhs)
