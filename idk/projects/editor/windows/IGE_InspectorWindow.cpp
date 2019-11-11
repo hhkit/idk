@@ -45,6 +45,8 @@ of the editor.
 #include <imgui/imgui_internal.h> //InputTextEx
 #include <iostream>
 
+#include <gfx/GraphicsSystem.h>
+
 namespace idk {
 
 	IGE_InspectorWindow::IGE_InspectorWindow()
@@ -825,38 +827,41 @@ namespace idk {
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
 	{
-		const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-		const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
+		//Just a check to prevent vulkan from crashing because vulkan got no font yet
+		if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
 		{
-			colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(drag_pos);
-		};
+			const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
+			const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
+			{
+				colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(drag_pos);
+			};
 
 
-		ImGui::Text("State Type: Font Type");
-		const bool has_valid_atlas = s_cast<bool>(c_font->textureAtlas);
-		display_name_align("Atlas", !has_valid_atlas);
-		ImGuidk::InputResource(("##atlas" + string(c_font->textureAtlas->Name().data())).c_str(), &c_font->textureAtlas);
-		
-		display_name_align("Text");
-		ImGui::InputTextMultiline("##InputText", &c_font->text);
+			ImGui::Text("State Type: Font Type");
+			const bool has_valid_atlas = s_cast<bool>(c_font->textureAtlas);
+			display_name_align("Atlas", !has_valid_atlas);
+			ImGuidk::InputResource(("##atlas" + string(c_font->textureAtlas->Name().data())).c_str(), &c_font->textureAtlas);
 
-		display_name_align("Font Size");
-		if (ImGui::DragInt("##fontsize", &c_font->fontSize))
-		{
-			c_font->UpdateFontSize();
+			display_name_align("Text");
+			ImGui::InputTextMultiline("##InputText", &c_font->text);
+
+			display_name_align("Font Size");
+			if (ImGui::DragInt("##fontsize", &c_font->fontSize))
+			{
+				c_font->UpdateFontSize();
+			}
+
+			display_name_align("Spacing");
+			ImGui::DragFloat("##fontspacing", &c_font->spacing);
+
+			display_name_align("Track");
+			ImGui::DragFloat("##fonttrack", &c_font->tracking);
+
+			display_name_align("Color");
+			ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
 		}
-
-		display_name_align("Spacing");
-		ImGui::DragFloat("##fontspacing", &c_font->spacing);
-
-		display_name_align("Track");
-		ImGui::DragFloat("##fonttrack", &c_font->tracking);
-
-		display_name_align("Color");
-		ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
-
 	}
 
 	template<>
