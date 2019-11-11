@@ -10,7 +10,7 @@ const int eTangent             = 4       ;
 const int eDepth               = 5       ;
 const int eGBufferSize         = eDepth+1;
 
-S_LAYOUT(9, 0) uniform sampler2D gbuffers[eGBufferSize];
+S_LAYOUT(2, 0) uniform sampler2D gbuffers[eGBufferSize];
 
 U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
