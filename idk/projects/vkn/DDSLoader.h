@@ -58,7 +58,7 @@ namespace idk::vkn
 	struct DdsFile
 	{
 		DdsFile() =default;
-		DdsFile(string file) :_memory{ std::move(file) }, _view{ *_memory }, file{ r_cast<const DdsFileInternal*>(_view.data()) }{}
+		DdsFile(std::string file) :_memory{ std::move(file) }, _view{ *_memory }, file{ r_cast<const DdsFileInternal*>(_view.data()) }{}
 		DdsFile(string_view file)noexcept :_view{ file }, file{ r_cast<const DdsFileInternal*>(_view.data()) }{}
 
 		DdsFile(const DdsFile& file) = default;
@@ -84,7 +84,7 @@ namespace idk::vkn
 		const DdsFileInternal& File()const { return *file; }
 		ivec2 Dimensions()const { return ivec2{ file->header.width, file->header.height }; }
 	private:
-		std::optional<string> _memory;
+		std::optional<std::string> _memory;
 		string_view _view;
 		const DdsFileInternal* file;
 	};

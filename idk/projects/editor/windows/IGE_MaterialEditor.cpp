@@ -172,7 +172,7 @@ namespace idk
         if (slot.value.empty())
             return;
 
-        auto id = string(node.guid) + std::to_string(input_slot_index);
+        auto id = string(node.guid) + serialize_text(input_slot_index);
 
         switch (slot.type)
         {
@@ -571,11 +571,11 @@ namespace idk
         for (auto& tpl : NodeTemplate::GetTable())
         {
             node_item* curr = &root;
-            fs::path path = tpl.first;
+            fs::path path = tpl.first.sv();
 
             for (auto& part : path)
             {
-                auto iter = std::find_if(curr->items.begin(), curr->items.end(), [&](node_item& item) { return item.name == part; });
+                auto iter = std::find_if(curr->items.begin(), curr->items.end(), [&](node_item& item) { return item.name.sv() == part; });
                 if (iter != curr->items.end())
                     curr = &*iter;
                 else
@@ -907,7 +907,7 @@ namespace idk
                             [&new_name](const Parameter& p) { return p.name == new_name; }) != params.end())
         {
             new_name = base;
-            new_name += std::to_string(++i);
+            new_name += serialize_text(++i);
         }
         return new_name;
     }

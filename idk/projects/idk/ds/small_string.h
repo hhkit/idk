@@ -106,6 +106,7 @@ namespace idk
 		void push_back(CharT c);
 		void pop_back();
 		small_string& insert(size_type index, const CharT* cstr);
+		small_string& insert(size_type index, size_type count, CharT c);
 		small_string& erase(size_type index, size_type count = npos);
 		iterator      erase(iterator position);
 		iterator      erase(iterator first, iterator last);
@@ -114,6 +115,10 @@ namespace idk
 		small_string& append(const CharT* cstr);
 		small_string& append(const small_string& str);
 		small_string& append(const std::basic_string_view<CharT, Traits>& sv);
+        small_string& replace(size_type position, size_type count, const CharT* cstr, size_type count2);
+        small_string& replace(size_type position, size_type count, const CharT* cstr);
+        small_string& replace(size_type position, size_type count, view_type sv);
+        small_string& replace(size_type position, size_type count, size_type count2, CharT c);
 		void resize(size_type count, CharT c = CharT{});
 
 		// conversions
@@ -139,6 +144,7 @@ namespace idk
 		bool _is_sso() const;
 		size_type _calc_capacity(size_type len) const;
 		void _grow(size_type added_len); // grow to accomodate added len
+        void _set_size(size_type sz);
 
 		// compress allocator, since it's most likely size 0
 		compressed_pair<_rep, allocator_type> _rep;

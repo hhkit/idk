@@ -326,7 +326,7 @@ namespace idk {
         const float left_offset = 40.0f;
 
 		//The c_name is to just get the first gameobject
-		static string stringBuf{};
+		static std::string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
 
@@ -344,7 +344,7 @@ namespace idk {
 				string outputString = stringBuf;
 				if (i > 0) {
 					outputString.append(" (");
-					outputString.append(std::to_string(i));
+					outputString.append(serialize_text(i));
 					outputString.append(")");
 				}
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,

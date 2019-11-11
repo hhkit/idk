@@ -52,8 +52,8 @@ namespace idk
 
 		for (int i = 0; i < std::size(fileExt); ++i)
 		{
-			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
-			auto p = pp + fileExt[i] + ext.string();
+			string pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
+			auto p = pp + fileExt[i] + string(ext.string());
 
 			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
 

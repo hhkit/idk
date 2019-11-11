@@ -23,7 +23,8 @@ namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
-		path_to_used_dll = string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/" + std::filesystem::path{ GetConfig().path_to_game_dll }.stem().string() + ".dll";
+		path_to_used_dll = string{ Core::GetSystem<FileSystem>().GetExeDir() } + "/" +
+            string(std::filesystem::path{ GetConfig().path_to_game_dll.sv() }.stem().string()) + ".dll";
 
 		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{

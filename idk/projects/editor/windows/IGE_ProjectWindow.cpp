@@ -120,7 +120,7 @@ namespace idk {
         while (PathHandle(path)) // already exists
         {
             path = stripped_path;
-            path += std::to_string(++i);
+            path += serialize_text(++i);
             path += ext;
         }
 
@@ -247,7 +247,7 @@ namespace idk {
                 int count = 0;
                 for (const auto& part : fs::relative(current_dir.GetFullPath(), assets_dir.GetFullPath()))
                 {
-                    auto str = part.string();
+                    string str = part.string();
                     concat += '/';
                     concat += str;
 
