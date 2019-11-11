@@ -364,16 +364,7 @@ namespace idk::vkn
 	{
 		try
 		{
-		//using namespace std::chrono_literals;
-		//static std::optional<std::chrono::time_point<std::chrono::high_resolution_clock>> last_time{};
-		//
-		//if (last_time)
-		//{
-		//	;
-		//	while ((std::chrono::high_resolution_clock::now() - *last_time) < (1000ms / 60));
-		//}
-		//last_time = std::chrono::high_resolution_clock::now();
-		instance_->PresentFrame2();
+			instance_->PresentFrame2();
 		}
 		catch (vk::SystemError& err)
 		{

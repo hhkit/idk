@@ -350,7 +350,7 @@ namespace idk::vkn
 
 
 
-		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
+		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
 
@@ -360,7 +360,8 @@ namespace idk::vkn
 		PipelineManager& pipeline_manager,
 		uint32_t frame_index,
 		const vk::RenderPassBeginInfo& rpbi,
-		uint32_t num_attachments
+		uint32_t num_attachments,
+		const GraphicsState* state = nullptr
 		)
 	{
 		auto offset = ivec2{ rpbi.renderArea.offset.x,rpbi.renderArea.offset.y };
@@ -375,6 +376,8 @@ namespace idk::vkn
 		{
 			rendered = true;
 			auto& obj = p_ro.Object();
+
+			bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 			if (p_ro.rebind_shaders)
 			{
 				shaders.resize(0);
@@ -387,6 +390,16 @@ namespace idk::vkn
 				
 				auto config = ConfigWithVP(*obj.config, camera, offset, size);
 				config.attachment_configs.resize(num_attachments);
+				if (is_mesh_renderer)
+					config.buffer_descriptions.emplace_back(
+						buffer_desc
+						{
+							buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
+							{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
+							 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
+							 }
+						}
+				);
 				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rpbi.renderPass, true);
 				pipeline.Bind(cmd_buffer, view);
 				SetViewport(cmd_buffer, offset, size);
@@ -409,11 +422,16 @@ namespace idk::vkn
 				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
 			}
 
+			if (state&&is_mesh_renderer)
+			{
+				uint32_t obj_trf_loc = 4;
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), state->shared_gfx_state->inst_mesh_render_buffer.buffer(), { 0 }, vk::DispatchLoaderDefault{});
+			}
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
 			{
 				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), p_ro.num_instances, 0, 0, p_ro.inst_offset, vk::DispatchLoaderDefault{});
 			}
 		}
 		return rendered;
@@ -476,11 +494,12 @@ namespace idk::vkn
 		};
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,static_cast<uint32_t>(g_buffer.NumColorAttachments())))
+		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
 			rs.FlagRendered();
 		cmd_buffer.endRenderPass();//End GBuffer pass
 		//GBufferBarrier(cmd_buffer, gbuffer);
 	}
+
 	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, VknRenderTarget& rt, [[maybe_unused]]RenderStateV2& rs)
 	{
 		auto sz = camera.render_target->Size();
