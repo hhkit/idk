@@ -205,6 +205,7 @@
     <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="widgets\InputGameObject.h" />
+    <ClInclude Include="widgets\VerticalText.h" />
     <ClInclude Include="windows\IGE_AnimatorWindow.h" />
     <ClInclude Include="windows\IGE_Console.h" />
     <ClInclude Include="windows\IGE_GameView.h" />
@@ -256,6 +257,7 @@
     <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputGameObject.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />
+    <ClCompile Include="widgets\VerticalText.cpp" />
     <ClCompile Include="windows\IGE_AnimatorWindow.cpp" />
     <ClCompile Include="windows\IGE_Console.cpp" />
     <ClCompile Include="windows\IGE_GameView.cpp" />

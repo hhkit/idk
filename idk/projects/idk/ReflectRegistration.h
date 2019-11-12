@@ -362,6 +362,16 @@ REFLECT_END()
 REFLECT_BEGIN(idk::mono::ScriptSystem, "ScriptSystem")
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::PhysicsConfig::matrix), "PhysicsLayerMatrix")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PhysicsConfig, "PhysicsConfig")
+REFLECT_VARS(matrix)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PhysicsSystem, "PhysicsSystem")
+REFLECT_END()
+
 /*==========================================================================
  * components
  *========================================================================*/

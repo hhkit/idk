@@ -5,6 +5,7 @@
 #include <editor/widgets/EnumCombo.h>
 #include <editor/widgets/DragVec.h>
 #include <editor/widgets/DragQuat.h>
+#include <editor/widgets/VerticalText.h>
 
 namespace idk
 {

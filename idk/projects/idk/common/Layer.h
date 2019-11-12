@@ -7,7 +7,7 @@ namespace idk
     class Layer : public Component<Layer>
     {
     public:
-		using LayerMask = int;
+		using LayerMask = uint32_t;
         char index;
 
 		LayerMask mask() const;

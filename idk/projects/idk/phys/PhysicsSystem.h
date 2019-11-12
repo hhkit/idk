@@ -1,9 +1,10 @@
 #pragma once
 #include <compare>
 #include <idk.h>
-#include <core/ISystem.h>
+#include <core/ConfigurableSystem.h>
 #include <phys/collision_result.h>
 #include <phys/raycasts/collision_raycast.h>
+#include <common/LayerManager.h>
 
 namespace idk
 {
@@ -13,8 +14,13 @@ namespace idk
 		phys::raycast_success raycast_succ;
 	};
 
+    struct PhysicsConfig
+    {
+        std::array<Layer::LayerMask, LayerManager::num_layers> matrix = { 0xFFFFFFFF };
+    };
+
 	class PhysicsSystem
-		: public ISystem
+		: public ConfigurableSystem<PhysicsConfig>
 	{
 	public:
 		void PhysicsTick            (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
@@ -34,5 +40,6 @@ namespace idk
 		CollisionList previous_collisions;
 		void Init() override;
 		void Shutdown() override;
+        void ApplyConfig(Config&) override {}
 	};
 }
