@@ -130,7 +130,7 @@ namespace idk
 					retval.light_color = point_light.light_color * point_light.intensity;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
 					retval.intensity = point_light.intensity;
-					retval.falloff = point_light.attenuation_radius;
+					retval.falloff = (point_light.use_inv_sq_atten) ? point_light.attenuation_radius : (1.f / (point_light.attenuation_radius * point_light.attenuation_radius));
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 
@@ -153,7 +153,7 @@ namespace idk
 					retval.v_dir = tfm->Forward();
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
-					retval.falloff = (spotlight.use_inv_sq_atten) ? spotlight.attenuation_radius : (1 / (spotlight.attenuation_radius * spotlight.attenuation_radius));
+					retval.falloff = (spotlight.use_inv_sq_atten) ? spotlight.attenuation_radius : (1.f / (spotlight.attenuation_radius * spotlight.attenuation_radius));
 					
 					retval.intensity = spotlight.intensity;
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });

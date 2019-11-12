@@ -434,7 +434,7 @@ REFLECT_VARS(light, shadow_bias, casts_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PointLight, "PointLight")
-REFLECT_VARS(intensity, light_color, attenuation_radius)
+REFLECT_VARS(intensity, light_color, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
