@@ -4,10 +4,11 @@
 
 namespace idk
 {
+    using LayerMask = uint32_t;
+
     class Layer : public Component<Layer>
     {
     public:
-		using LayerMask = uint32_t;
         char index;
 
 		LayerMask mask() const;

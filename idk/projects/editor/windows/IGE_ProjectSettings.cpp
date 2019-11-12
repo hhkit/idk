@@ -177,6 +177,7 @@ namespace idk
         const float base_x = ImGui::GetCursorPosX();
         const float base_y = ImGui::GetCursorPosY();
         const float spacing_x = ImGui::GetStyle().ItemInnerSpacing.x;
+        size_t counter = 0;
         for (size_t i = 0; i < LayerManager::num_layers; ++i)
         {
             const size_t layer_index = LayerManager::num_layers - i - 1;
@@ -186,7 +187,7 @@ namespace idk
                 continue;
 
             ImGui::SetCursorPosX(base_x + max_label_size.x + spacing_x + ImGui::GetStyle().FramePadding.y +
-                (ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + spacing_x) * i);
+                (ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + spacing_x) * counter++);
             ImGui::SetCursorPosY(base_y + max_label_size.x - ImGui::CalcTextSize(layer.c_str()).x);
             ImGuidk::VerticalText(layer.c_str());
         }

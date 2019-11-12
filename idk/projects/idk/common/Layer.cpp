@@ -3,7 +3,7 @@
 
 namespace idk
 {
-	Layer::LayerMask Layer::mask() const
+	LayerMask Layer::mask() const
 	{
 		return 1 << index;
 	}

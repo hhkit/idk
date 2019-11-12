@@ -16,7 +16,12 @@ namespace idk
 
     struct PhysicsConfig
     {
-        std::array<Layer::LayerMask, LayerManager::num_layers> matrix = { 0xFFFFFFFF };
+        std::array<LayerMask, LayerManager::num_layers> matrix;
+        PhysicsConfig() { matrix.fill(0xffffffff); }
+        PhysicsConfig(const PhysicsConfig&) = default;
+        PhysicsConfig(PhysicsConfig&&) = default;
+        PhysicsConfig& operator=(const PhysicsConfig&) = default;
+        PhysicsConfig& operator=(PhysicsConfig&&) = default;
     };
 
 	class PhysicsSystem
@@ -28,9 +33,12 @@ namespace idk
 		void DebugDrawColliders     (span<class Collider> colliders);
 		void Reset();
 
-		vector<RaycastHit> Raycast(const ray& r, int layer_mask, bool hit_triggers = false);
+		vector<RaycastHit> Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers = false);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList, vector<phys::raycast_result>& ray_resultList);
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
+
+        bool AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const;
+
 	private:
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
 		struct pair_hasher   { size_t operator()(const CollisionPair&) const; };
