@@ -130,6 +130,7 @@ namespace idk
 					retval.light_color = point_light.light_color * point_light.intensity;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
 					retval.intensity = point_light.intensity;
+					retval.falloff = point_light.attenuation_radius;
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 

@@ -207,6 +207,7 @@ namespace idk::ogl
 				pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
 				pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
 				pipeline.SetUniform(lightblk + "intensity", light.intensity);
+				pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
 				if (light.light_map)
 				{
@@ -419,7 +420,27 @@ namespace idk::ogl
 			glBindVertexArray(vao_id);
 			
 				
-			
+			/*auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);*/
+
+			//vec3 offset{ 0.2f,0,0 };
+			//for (auto& side : frust.sides)
+			//{
+			//	box b;
+			//	/*mat3 a;
+			//	aabb a;
+			//	a[2] = side.normal.cross(vec3{ 0,1,0 }).get_normalized();
+			//	a[1] = side.normal.get_normalized();
+			//	a[0] = a[2].cross(side.normal).get_normalized();*/
+			//	//b.axes() = mat3{a};
+			//	b.extents = vec3{ 0.5f, 0.1f, 0.5f };
+			//	b.center = vec3{ 0,0,0 } +offset;
+			//	offset += offset;
+			//	Core::GetSystem<DebugRenderer>().Draw(b);
+			//}
+
+			//auto aabb = camera_vp_to_bounding_box(cam.projection_matrix * cam.view_matrix);
+
+			//Core::GetSystem<DebugRenderer>().Draw(aabb, color(1.f, 0.f, 0.5f, 1.f));
 
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
@@ -440,7 +461,6 @@ namespace idk::ogl
 
 			// If we only use proj_matrix, frustrum will be in view space.
 			// If we use proj * view, frustrum will be in model space
-			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
 
 			auto c_mat = curr_mat = {};
 			auto c_mat_inst = curr_mat_inst = {};
