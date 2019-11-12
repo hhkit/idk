@@ -33,9 +33,100 @@
 #include <cstdint>
 
 #include <vkn/DescriptorUpdateData.h>
+#include <thread>
 
 namespace idk::vkn
 {
+	class RenderThread
+	{
+	public:
+		void Start()
+		{
+			_running = true;
+		}
+		void Set(const GraphicsState& state, RenderStateV2& rs)
+		{
+			_state = &state;
+			_rs = &rs;
+			_is_complete = false;
+			_start = true;
+		}
+#pragma optimize("",off)
+		void Render() 
+		{
+			if (_start)
+			{
+				_start = false;
+				_renderer->RenderGraphicsState(*_state, *_rs);
+			}
+			_is_complete = true;
+			
+		}
+		bool HasJob()const noexcept
+		{
+			return _start;
+		}
+		bool Complete()const noexcept
+		{
+			return _is_complete;
+		}
+		bool Running()const noexcept
+		{
+			return _running;
+		}
+		FrameRenderer* _renderer;
+		void Stop()
+		{
+			_running = false;
+		}
+		~RenderThread()
+		{
+			Stop();
+		}
+	private:
+		bool _running = true;
+		bool _is_complete=false;
+		bool _start = false;
+		const GraphicsState* _state = {};
+		RenderStateV2* _rs = {};
+
+	};
+	class FrameRenderer::ThreadedRender : public FrameRenderer::IRenderThread
+	{
+	public:
+		static void ThreadRun(RenderThread* thread)
+		{
+			while (thread->Running())
+			{
+				if (thread->HasJob())
+					thread->Render();
+				std::this_thread::yield();
+			}
+		}
+		void Init(FrameRenderer* renderer)
+		{
+			thread._renderer = renderer;
+			my_thread = std::thread(ThreadRun,&thread);
+		}
+		void Render(const GraphicsState& state, RenderStateV2& rs)override
+		{
+			thread.Set(state, rs);
+		}
+		void Join() override
+		{
+			while (!thread.Complete());
+		}
+		~ThreadedRender()
+		{
+			thread.Stop();
+			if (my_thread.joinable())
+				my_thread.join();
+		}
+	private:
+		std::thread my_thread;
+		RenderThread thread;
+	};
+
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
 
 	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size)
@@ -253,7 +344,7 @@ namespace idk::vkn
 		_view = view;
 		//Do only the stuff per frame
 		uint32_t num_fo = 1;
-		uint32_t num_concurrent_states = 1;
+		uint32_t num_concurrent_states = 4;
 
 		_cmd_pool = cmd_pool;
 		auto device = *View().Device();
@@ -268,7 +359,7 @@ namespace idk::vkn
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
-			auto thread = std::make_unique<NonThreadedRender>();
+			auto thread = std::make_unique<ThreadedRender>();
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}

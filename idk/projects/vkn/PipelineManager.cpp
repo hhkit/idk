@@ -175,7 +175,7 @@ namespace idk::vkn
 				pipelines[handle].Create(View(), frame_index);
 			}
 		}
-		
+		pipelines.reserve(100 + pipelines.size() * 2);
 	}
 
 	//PipelineObject() = default;
