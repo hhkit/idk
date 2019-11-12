@@ -187,11 +187,10 @@ namespace idk::vkn
 	{
 		std::vector<const char*> layers
 		{
-#ifndef WX_VAL_VULK
 			"VK_LAYER_KHRONOS_validation"
-#endif
 		};
-		return layers;
+		
+		return (enable_validation) ? layers : decltype(layers){};
 	}
 
 	std::vector<const char*> VulkanState::GetExtensions(vk::Optional<const std::string>)
@@ -359,19 +358,14 @@ namespace idk::vkn
 			hlp::arr_count(extensions),
 			extensions.data()
 		);
-#ifndef WX_VAL_VULK
-		auto debugInfo = populateDebugMessengerCreateInfo();
-		instInfo.pNext = &debugInfo;
-#endif
-		instInfo.pNext = nullptr;
 		try
 		{
+			auto debugInfo = populateDebugMessengerCreateInfo();
+			instInfo.pNext = (enable_validation)?&debugInfo:nullptr;
 			*instance = vk::createInstance(instInfo, nullptr, dispatcher);
 			dyn_dispatcher.init(*instance, vkGetInstanceProcAddr);
-#ifndef WX_VAL_VULK
-
-			m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
-#endif
+			if(enable_validation)
+				m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
 			//if (result != vk::Result::eSuccess)
 			//{
 			//	std::cout << "FAILED TO CREATE" << std::endl;

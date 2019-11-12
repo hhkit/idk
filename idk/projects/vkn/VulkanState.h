@@ -128,7 +128,10 @@ namespace idk::vkn
 		vk::Format					format;
 		vk::SurfaceFormatKHR        surfaceFormat;
 
+		void EnableValidation() { enable_validation = true; }
+
 	private:
+		bool enable_validation = false;
 		// type aliases
 		friend class VulkanView;
 		template<typename T>

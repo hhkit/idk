@@ -338,7 +338,6 @@ namespace idk::vkn
 		auto dsl = d_manager.Allocate(ref.collated_layouts);
 		if (update_ubo_buffers)
 			UpdateUboBuffers();
-		DescriptorUpdateData dud{};
 		for (auto& p_ro : draw_calls)
 		{
 			for (auto& [set, bindings] : p_ro.bindings)
@@ -368,6 +367,11 @@ namespace idk::vkn
 	void PipelineThingy::UpdateUboBuffers()
 	{
 		ref.ubo_manager.UpdateAllBuffers();
+	}
+	//reserves an extra size chunk
+	void PipelineThingy::reserve(size_t size)
+	{
+		draw_calls.reserve(draw_calls.size()+size);
 	}
 	void PipelineThingy::set_bindings::SetLayout(vk::DescriptorSetLayout new_layout, bool clear_bindings)
 	{

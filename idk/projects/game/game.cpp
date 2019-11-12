@@ -77,8 +77,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
-		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-		break;
+		{
+			auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+			gSys = &sys;
+			if (HasArg(L"--validation", command_lines, num_args))
+				sys.Instance().EnableValidation();
+			break;
+		}
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;

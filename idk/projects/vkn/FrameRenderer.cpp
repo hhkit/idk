@@ -172,6 +172,7 @@ namespace idk::vkn
 		the_interface.SetRef(ubo_manager);
 
 		the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
+		the_interface.reserve(state.mesh_render->size() + state.skinned_mesh_render->size());
 		binders.Bind(the_interface);
 		{
 			auto range_opt = state.range;

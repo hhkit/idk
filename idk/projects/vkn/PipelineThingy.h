@@ -8,6 +8,7 @@
 #include <vkn/UboManager.h>
 #include <vkn/ShaderModule.h> //UboInfo
 #include <vkn/VulkanHashes.h>
+#include <vkn/DescriptorUpdateData.h>
 namespace idk::vkn
 {
 	struct DescriptorUpdateData;
@@ -61,8 +62,11 @@ namespace idk::vkn
 		{
 			return draw_calls;
 		}
+		//reserves an extra size chunk
+		void reserve(size_t size);
 
 	private:
+		DescriptorUpdateData dud{};
 		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
 		vector<ProcessedRO> draw_calls;
 
