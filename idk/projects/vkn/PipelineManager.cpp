@@ -166,6 +166,8 @@ namespace idk::vkn
 				{
 					module.UpdateCurrent(frame_index);
 				}
+
+				module.NewlyLoaded(false);
 			}
 			{
 				//Recreate pipeline in back_pipeline
