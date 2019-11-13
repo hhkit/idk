@@ -235,6 +235,7 @@
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
     <ClInclude Include="ui\Canvas.h" />
+    <ClInclude Include="ui\Image.h" />
     <ClInclude Include="ui\RectTransform.h" />
     <ClInclude Include="ui\UISystem.h" />
     <ClInclude Include="util\align.h" />

@@ -586,3 +586,11 @@ REFLECT_END()
 REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
 REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
 REFLECT_END()
+
+// UI
+REFLECT_BEGIN(idk::Canvas, "Canvas")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RectTransform, "RectTransform")
+REFLECT_VARS(anchor_min, anchor_max, offset_min, offset_max, pivot)
+REFLECT_END()

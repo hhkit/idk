@@ -866,6 +866,7 @@
     <ClInclude Include="math\rect.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="ui\Image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
