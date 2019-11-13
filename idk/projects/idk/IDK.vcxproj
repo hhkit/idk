@@ -62,6 +62,8 @@
     <ClInclude Include="machine.h" />
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />
     <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
     <ClInclude Include="math\ritters.h" />
     <ClInclude Include="particle\MinMax.h" />
@@ -321,6 +323,8 @@
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp" />
     <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />

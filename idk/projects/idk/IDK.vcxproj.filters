@@ -866,6 +866,12 @@
     <ClInclude Include="math\rect.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule_box.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1273,6 +1279,12 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="ui\UISystem.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
