@@ -10,6 +10,8 @@
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
 #include <phys/collision_detection/collision_capsule.h>
+#include <phys/collision_detection/collision_capsule_box.h>
+#include <phys/collision_detection/collision_capsule_sphere.h>
 #include <phys/collision_detection/ManagedCollision.h>
 
 #include <script/MonoBehavior.h>
