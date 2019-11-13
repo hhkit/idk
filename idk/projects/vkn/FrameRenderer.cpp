@@ -51,7 +51,6 @@ namespace idk::vkn
 			_is_complete = false;
 			_start = true;
 		}
-#pragma optimize("",off)
 		void Render() 
 		{
 			if (_start)
@@ -100,7 +99,7 @@ namespace idk::vkn
 			{
 				if (thread->HasJob())
 					thread->Render();
-				std::this_thread::yield();
+				//std::this_thread::yield();
 			}
 		}
 		void Init(FrameRenderer* renderer)
@@ -397,7 +396,7 @@ namespace idk::vkn
 			
 			copy_semaphore = *copy_state.signal.render_finished;
 
-			auto cmd_buffer = copy_state.cmd_buffer;
+			auto cmd_buffer = copy_state.CommandBuffer();
 			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 			state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
 			state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
@@ -410,7 +409,7 @@ namespace idk::vkn
 				0
 				,nullptr
 				,waitStages
-				,1,&copy_state.cmd_buffer
+				,1,&copy_state.CommandBuffer()
 				,1,&*copy_semaphore
 			};
 
@@ -453,7 +452,7 @@ namespace idk::vkn
 						}
 					}, camera.clear_data);
 			}
-			auto cmd_buffer = convolute_state.cmd_buffer;
+			auto cmd_buffer = convolute_state.CommandBuffer();
 			cmd_buffer.begin(vk::CommandBufferBeginInfo
 				{
 					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -467,7 +466,7 @@ namespace idk::vkn
 		for (auto& pre_state : _pre_states)
 		{
 			if (pre_state.has_commands)
-				buffers.emplace_back(pre_state.cmd_buffer);
+				buffers.emplace_back(pre_state.CommandBuffer());
 		}
 
 
@@ -620,7 +619,7 @@ namespace idk::vkn
 
 		//auto& swapchain = view.Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 
@@ -655,7 +654,7 @@ namespace idk::vkn
 		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;
 		GrowStates(_states,gfx_states.size());
-		size_t num_concurrent = curr_frame._render_threads.size();
+		size_t num_concurrent = 4;// curr_frame._render_threads.size();
 		auto& pri_buffer = curr_frame._pri_buffer;
 		auto& transition_buffer = curr_frame._transition_buffer;
 		auto queue = View().GraphicsQueue();
@@ -665,22 +664,27 @@ namespace idk::vkn
 			state.Reset();
 		}
 		bool rendered = false;
-		for (size_t i = 0; i + num_concurrent <= gfx_states.size(); i += num_concurrent)
 		{
-			//Spawn/Assign to the threads
-			for (size_t j = 0; j < num_concurrent; ++j) {
-				auto& state = gfx_states[i + j];
-				auto& rs = _states[i + j];
-				_render_threads[j]->Render(state, rs);
-				rendered = true;
-				//TODO submit command buffer here and signal the framebuffer's stuff.
-				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
-				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
-				//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
-			}
-			//Wait here
-			for (auto& thread : _render_threads) {
-				thread->Join();
+			;
+			for (size_t i = 0; i  <= gfx_states.size(); i += num_concurrent)
+			{
+				auto curr_concurrent = std::min(num_concurrent,gfx_states.size()-i);
+				//Spawn/Assign to the threads
+				for (size_t j = 0; j < curr_concurrent; ++j) {
+					auto& state = gfx_states[i + j];
+					auto& rs = _states[i + j];
+					_render_threads[j]->Render(state, rs);
+					rendered = true;
+					//TODO submit command buffer here and signal the framebuffer's stuff.
+					//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
+					//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
+					//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
+				}
+				//Wait here
+				for (size_t j = 0; j < curr_concurrent;++j) {
+					auto& thread = _render_threads[j];
+;					thread->Join();
+				}
 			}
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
@@ -689,7 +693,7 @@ namespace idk::vkn
 		for (auto& state : curr_frame._states)
 		{
 			if (state.has_commands)
-				buffers.emplace_back(state.cmd_buffer);
+				buffers.emplace_back(state.CommandBuffer());
 		}
 		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
 		//if(buffers.size())
@@ -771,17 +775,17 @@ namespace idk::vkn
 	}
 	void FrameRenderer::GrowStates(vector<RenderStateV2>& states, size_t new_min_size)
 	{
-		auto cmd_pool = *View().Commandpool();
 		auto device = *View().Device();
 		if (new_min_size > states.size())
 		{
 			auto diff = s_cast<uint32_t>(new_min_size - states.size());
-			auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, diff }, vk::DispatchLoaderDefault{});
 			for (auto i = diff; i-- > 0;)
 			{
-				auto& buffer = buffers[i];
-				states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
-				_state_cmd_buffers.emplace_back(std::move(buffer));
+				auto cmd_pool = View().vulkan().CreateGfxCommandPool();
+				auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ *cmd_pool,vk::CommandBufferLevel::ePrimary, 1}, vk::DispatchLoaderDefault{});
+				auto& buffer = buffers[0];
+				states.emplace_back(RenderStateV2{std::move(cmd_pool), std::move(buffer),UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
+				//_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}
 	}
@@ -790,7 +794,7 @@ namespace idk::vkn
 	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, ivec2 vp_size)
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		//TODO: figure out inheritance pipeline inheritance and inherit from dbg_pipeline for various viewport sizes
 		auto& pipeline = state.dbg_pipeline;
 
@@ -938,7 +942,7 @@ namespace idk::vkn
 		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
 
 		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 		cmd_buffer.begin(begin_info, dispatcher);

@@ -68,13 +68,16 @@ namespace idk::vkn
 		
 		if (is_diff)
 		{
+			bool curr_expected_val=false;
 			PipelineObject obj{ config,render_pass,has_depth_stencil,modules };
 			obj.StoreBufferDescOverrides();
 			obj.Create(View(),frame_index);
 
 			//TODO threadsafe lock here
+			while (!creating.compare_exchange_weak(curr_expected_val, true));
 			auto handle = pipelines.add(std::move(obj));
 			prog_to_pipe2.emplace(combi,handle);
+			creating.store(false);
 			prev = handle;
 		}
 		return pipelines.get(*prev).pipeline;

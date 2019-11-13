@@ -193,8 +193,8 @@ namespace idk::vkn
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
 		auto& state = State();
-		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
-		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("LightBlock", 0, light_block,true);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
 		{
 			uint32_t i = 0;
@@ -202,7 +202,7 @@ namespace idk::vkn
 			{
 				//Make sure that it's there.
 				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
-				the_interface.BindSampler("shadow_maps", 0, tex);
+				the_interface.BindSampler("shadow_maps", 0, tex,true);
 			}
 			else
 			{
@@ -212,7 +212,7 @@ namespace idk::vkn
 					auto& sm_uni = shadow_map;
 					{
 						auto& depth_tex = sm_uni.as<VknTexture>();
-						the_interface.BindSampler("shadow_maps", i++, depth_tex);
+						the_interface.BindSampler("shadow_maps", i++, depth_tex, true);
 					}
 				}
 			}

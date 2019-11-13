@@ -242,7 +242,7 @@ namespace idk::vkn
 						curr_bindings[set];
 						b_itr = curr_bindings.find(set);
 					}
-					b_itr->second.SetLayout(*layout);
+					b_itr->second.SetLayout(*layout,layout.entry_counts);
 				}
 				for (auto& set : curr_bindings)
 				{
@@ -373,12 +373,13 @@ namespace idk::vkn
 	{
 		draw_calls.reserve(draw_calls.size()+size);
 	}
-	void PipelineThingy::set_bindings::SetLayout(vk::DescriptorSetLayout new_layout, bool clear_bindings)
+	void PipelineThingy::set_bindings::SetLayout(vk::DescriptorSetLayout new_layout, const DsCountArray& total_descriptors, bool clear_bindings)
 	{
 		//If the layouts are different, the bindings are not compatible, clear it.
 		//or we just want the bindings to be cleared, so clear it.
 		if (new_layout != layout || clear_bindings)
 		{
+			total_desc = total_descriptors;
 			bindings.clear();
 		}
 		layout = new_layout;
@@ -402,7 +403,8 @@ namespace idk::vkn
 		monadic::result< vector<ProcessedRO::BindingInfo>, string> result{};
 
 		string err_msg;
-		vector<ProcessedRO::BindingInfo> set_bindings;
+		vector<ProcessedRO::BindingInfo>& set_bindings = scratch_out;
+		set_bindings.clear();
 		uint32_t type_count[DescriptorTypeI::size()] = {};
 		bool failed = false;
 		if (dirty)
@@ -438,9 +440,9 @@ namespace idk::vkn
 			{
 				auto& cl = collated_layouts[layout];
 				cl.first++;
-				for (size_t i = 0; i < std::size(type_count); ++i)
+				for (size_t i = 0; i < std::size(total_desc); ++i)
 				{
-					cl.second[i] = type_count[i];
+					cl.second[i] = total_desc[i];
 				}
 				result = std::move(set_bindings);
 				dirty = false;

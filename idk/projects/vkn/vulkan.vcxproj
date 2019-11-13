@@ -219,6 +219,7 @@
     <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DeferredPass.h" />
+    <ClInclude Include="DescriptorCountArray.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="DescriptorUpdateData.h" />

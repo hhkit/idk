@@ -909,6 +909,16 @@ namespace idk::vkn
 		return *m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
 	}
 
+	vk::UniqueCommandPool VulkanState::CreateGfxCommandPool()
+	{
+		vk::CommandPoolCreateInfo info
+		{
+			vk::CommandPoolCreateFlags{vk::CommandPoolCreateFlagBits::eResetCommandBuffer}
+			,*this->m_queue_family.graphics_family
+		};
+		return m_device->createCommandPoolUnique(info, nullptr, dispatcher);
+	}
+
 	void VulkanState::CleanupSwapChain() {
 
 		m_renderpass.reset();

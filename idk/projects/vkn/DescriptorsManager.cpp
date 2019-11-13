@@ -3,6 +3,7 @@
 #include <vkn/BufferHelpers.h>
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
+#include <vkn/DescriptorCountArray.h>
 //hash_table<vk::DescriptorSetLayout, DescriptorSetManager> ds_sets;
 
 namespace idk::vkn
@@ -50,25 +51,6 @@ namespace idk::vkn
 
 #pragma endregion
 
-
-	DescriptorsManager::DsCountArray operator*(const DescriptorsManager::DsCountArray& lhs, uint32_t scalar)
-	{
-		auto result = lhs;
-		for (auto& count : result)
-		{
-			count *= scalar;
-		}
-		return result;
-	}
-	DescriptorsManager::DsCountArray operator*(uint32_t scalar, const DescriptorsManager::DsCountArray& lhs)
-	{
-		auto result = lhs;
-		for (auto& count : result)
-		{
-			count *= scalar;
-		}
-		return result;
-	}
 
 	DescriptorsManager::DescriptorsManager(VulkanView& view) :pools{view}
 	{
@@ -121,7 +103,7 @@ namespace idk::vkn
 		}
 		Grow(conv);
 	}
-
+#pragma optimize("",off)
 	void DescriptorsManager::Grow(const hash_table<vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations)
 	{
 		//Redo.
@@ -153,9 +135,13 @@ namespace idk::vkn
 			{
 				auto diff = (itr != free_dses.end()) ? num_ds - itr->second.num_available() : num_ds;
 				auto pool = pools.TryGet(req.second* diff);
+				
 				//TODO compute num_ds with layout's number of descriptors
 				if (pool)
-					layouts[*pool].insert(num_ds, layout);
+				{
+					auto dbg_size = layouts[*pool].layouts.size();
+					layouts[*pool].insert(diff, layout);
+				}
 				else
 					failed = true;
 			}

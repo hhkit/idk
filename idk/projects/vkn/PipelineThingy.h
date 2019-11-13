@@ -9,6 +9,7 @@
 #include <vkn/ShaderModule.h> //UboInfo
 #include <vkn/VulkanHashes.h>
 #include <vkn/DescriptorUpdateData.h>
+#include <vkn/DescriptorCountArray.h>
 namespace idk::vkn
 {
 	struct DescriptorUpdateData;
@@ -16,7 +17,7 @@ namespace idk::vkn
 	struct DescriptorsManager;
 	using desc_type_info = DescriptorTypeI;
 	//pair<num_ds,num_descriptors_per_type>
-	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, std::array<uint32_t, DescriptorTypeI::size()>>>;
+	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>;
 	template<vk::DescriptorType type>
 	static constexpr size_t desc_type_index = desc_type_info::map<type>();
 
@@ -29,8 +30,12 @@ namespace idk::vkn
 		{
 			vk::DescriptorSetLayout layout;
 			hash_table<uint32_t,vector<std::optional<ProcessedRO::BindingInfo>>>  bindings;
+			DsCountArray total_desc;
 			bool dirty = false;
-			void SetLayout(vk::DescriptorSetLayout new_layout, bool clear_bindings = false);
+
+			vector<ProcessedRO::BindingInfo> scratch_out;
+
+			void SetLayout(vk::DescriptorSetLayout new_layout,const DsCountArray& total_descriptors, bool clear_bindings = false);
 			void Bind(ProcessedRO::BindingInfo info);
 			void Unbind(uint32_t binding);
 			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts);
@@ -105,7 +110,7 @@ namespace idk::vkn
 			trf_buffer,
 			trf_offset,
 			arr_index,
-			obj_uni.size,
+			hlp::buffer_size(val),
 			obj_uni.layout
 		};
 		//);

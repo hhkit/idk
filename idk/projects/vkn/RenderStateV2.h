@@ -9,7 +9,9 @@ namespace idk::vkn
 {
 struct RenderStateV2
 {
-	vk::CommandBuffer cmd_buffer;
+	vk::UniqueCommandPool cmd_pool;
+	vk::UniqueCommandBuffer cmd_buffer;
+	const vk::CommandBuffer& CommandBuffer()const;
 	UboManager ubo_manager;//Should belong to each thread group.
 
 	PresentationSignals signal;

@@ -196,6 +196,9 @@
     <ClInclude Include="DescriptorUpdateData.h">
       <Filter>descriptor_sets</Filter>
     </ClInclude>
+    <ClInclude Include="DescriptorCountArray.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
