@@ -17,6 +17,8 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanTextureFactory.h>
 
+#include <vkn/VknTextureRenderMeta.h>
+
 #if 1
 namespace idk::vkn
 {
@@ -431,7 +433,7 @@ namespace idk::vkn
 			if (oidx)
 			{
 				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), p_ro.num_instances, 0, 0, p_ro.inst_offset, vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), (uint32_t)p_ro.num_instances, 0, 0, (uint32_t)p_ro.inst_offset, vk::DispatchLoaderDefault{});
 			}
 		}
 		return rendered;

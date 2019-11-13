@@ -72,6 +72,8 @@ namespace idk::ogl
 	{
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
+		renderer_geometry_shaders;
 
 		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
@@ -155,6 +157,7 @@ namespace idk::ogl
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
 		for (auto& cam : curr_object_buffer.camera)
@@ -215,7 +218,7 @@ namespace idk::ogl
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
-					(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
+					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
 					texture_units++;
 				}
 			}
@@ -293,8 +296,45 @@ namespace idk::ogl
 		{
 			pipeline.Use();
 			if (elem.index == 0) // point light
+			{
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
+				//fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
 
+				//glClearColor(1.f, 1.f, 1.f, 1.f);
+				//glClearDepth(1.f);
+				//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				//glEnable(GL_DEPTH_TEST);
+				//glDepthFunc(GL_LESS);
+
+				//glCullFace(GL_FRONT); //Fix for peterpanning
+
+				////const auto& light_view_tfm = elem.v;
+
+				////////////////////////////////////Calculate light view transform//////////////////////////////////////
+				//vector<mat4> matList;
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(-1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 1.f, 0.f), vec3(0.f, 0.f, 1.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, -1.f, 0.f), vec3(0.f, 0.f, -1.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 0.f, 1.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 0.f, -1.f), vec3(0.f, -1.f, 0.f)).inverse());
+
+
+				////////////WIP////////
+
+
+				////auto& size = s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map)->size;
+				////const auto& light_p_tfm = elem.p;
+
+				//pipeline.PopAllPrograms();
+
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				//pipeline.PushProgram(renderer_geometry_shaders[GSinglePassCube]);
+
+				//BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], light_p_tfm, light_view_tfm);
+
+			}
 			else if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
@@ -309,7 +349,7 @@ namespace idk::ogl
 				glCullFace(GL_FRONT); //Fix for peterpanning
 
 				const auto& light_view_tfm = elem.v;
-				const auto& light_p_tfm = elem.p; //near and far is currently hardcoded
+				const auto& light_p_tfm = elem.p;
 				pipeline.PopAllPrograms();
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
