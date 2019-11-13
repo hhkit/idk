@@ -5,7 +5,7 @@
 #include <gfx/vertex_descriptor.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/CubeMap.h>
-#include <gfx/Viewport.h>
+#include <math/rect.h>
 
 namespace idk
 {
@@ -105,7 +105,7 @@ namespace idk
 		bool is_shadow = false;
 		ClearData_t clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
-		Viewport viewport;
+		rect viewport;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 

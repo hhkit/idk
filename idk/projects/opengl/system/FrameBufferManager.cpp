@@ -4,7 +4,6 @@
 #include <opengl/resource/FrameBuffer.h>
 #include <opengl/resource/OpenGLTexture.h>
 
-#include <gfx/Viewport.h>
 #include <gfx/ViewportUtil.h>
 
 #include <gfx/FramebufferFactory.h>
@@ -73,7 +72,7 @@ namespace idk::ogl
 		CheckFBStatus();
 	}
 
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target, const std::optional<Viewport>& oviewport, bool clear)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLTexture> target, const std::optional<rect>& oviewport, bool clear)
 	{
 		glEnable(GL_SCISSOR_TEST);
 		GL_CHECK();
@@ -134,7 +133,7 @@ namespace idk::ogl
 		GL_CHECK();
 
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& oviewport)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<rect>& oviewport)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 
@@ -189,7 +188,7 @@ namespace idk::ogl
 		glDisable(GL_SCISSOR_TEST);
 		GL_CHECK();
 	}
-	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target, const std::optional<Viewport>& oviewport, bool clear)
+	void FrameBufferManager::SetRenderTarget(RscHandle<OpenGLFrameBuffer> target, const std::optional<rect>& oviewport, bool clear)
 	{
 		IDK_ASSERT_MSG(&*target,"Attempting to use a default framebuffer. Default framebuffer should not be used.");//make sure it's not null. 
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);

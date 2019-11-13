@@ -109,6 +109,10 @@ REFLECT_CTOR(float)
 REFLECT_VARS(value)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::rect, "rect")
+REFLECT_VARS(position, size)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::matrix_decomposition<idk::real>, "matrix_decomposition")
 REFLECT_VARS(position, rotation, scale)
 REFLECT_END()
@@ -470,10 +474,6 @@ REFLECT_VARS(tracking, spacing, padding, colour, fontSize, textureAtlas, text)
 REFLECT_END()
 
 // CAMERA
-REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(position, size)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::DontClear, "<Don'tClear>")
 REFLECT_END()
 

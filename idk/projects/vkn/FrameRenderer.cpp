@@ -46,7 +46,7 @@ namespace idk::vkn
 		vk::Rect2D vp{ vk::Offset2D{vp_pos.x,vp_pos.y},vk::Extent2D{s_cast<uint32_t>(vp_size.x),s_cast<uint32_t>(vp_size.y)} };
 		cmd_buffer.setScissor(0, vp);
 	}
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp)
+	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;

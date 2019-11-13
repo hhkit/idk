@@ -57,7 +57,7 @@
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
-    <ClInclude Include="gfx\Viewport.h" />
+    <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="meta\comparator.h" />
@@ -234,6 +234,9 @@
     <ClInclude Include="math\shapes\box.h" />
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
+    <ClInclude Include="ui\Canvas.h" />
+    <ClInclude Include="ui\RectTransform.h" />
+    <ClInclude Include="ui\UISystem.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
@@ -404,6 +407,7 @@
     <ClCompile Include="math\shapes\ray.cpp" />
     <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="ui\UISystem.cpp" />
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>

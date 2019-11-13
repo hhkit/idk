@@ -4,8 +4,8 @@
 #include <core/Component.h>
 #include <gfx/RenderObject.h>
 #include <gfx/CameraFrustum.h>
-#include <gfx/Viewport.h>
 #include <gfx/CameraClear.h>
+#include <math/rect.h>
 
 namespace idk
 {
@@ -34,10 +34,9 @@ namespace idk
 		bool is_scene_camera = false;
 
 		CameraClear clear;
+		rect viewport;
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
-
-		Viewport viewport;
 
 		vec3	  currentPosition() const;
 		vec3	  currentDirection() const;

@@ -9,6 +9,7 @@
 #include <anim/AnimationState.h>
 #include <phys/collidable_shapes.h>
 #include <particle/MinMax.h>
+#include <math/rect.h>
 
 namespace idk::reflect
 {
@@ -35,6 +36,7 @@ namespace idk::reflect
 		, mat4
 		, color
         , rad
+        , rect
 
         , string
         , Guid

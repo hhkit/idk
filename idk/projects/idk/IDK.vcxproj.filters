@@ -782,9 +782,6 @@
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Viewport.h">
-      <Filter>gfx\camera</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Buffer.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -862,6 +859,12 @@
     </ClInclude>
     <ClInclude Include="meta\comparator.h">
       <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\UISystem.h" />
+    <ClInclude Include="ui\Canvas.h" />
+    <ClInclude Include="ui\RectTransform.h" />
+    <ClInclude Include="math\rect.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1269,6 +1272,7 @@
     <ClCompile Include="gfx\FramebufferFactory.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="ui\UISystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
