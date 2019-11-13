@@ -46,8 +46,9 @@ namespace idk::ogl
 	{
 		return std::make_unique<OpenGLFrameBuffer>();
 	}
-	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType , const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
+	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
+		type;
 		out = std::make_unique<OpenGLAttachment>();
 		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
@@ -63,7 +64,7 @@ namespace idk::ogl
 			RscHandle<OpenGLCubemap> tex = Core::GetResourceManager().Create<OpenGLCubemap>();
 			for (int i = 0; i < 6; ++i)
 			{
-				tex->Buffer(i,nullptr, size, CMInputChannels::RGB, info.internal_format);
+				tex->Buffer(i,nullptr, size, InputChannels::RGB, info.internal_format);
 			}
 			out->buffer = tex->Tex();
 		}*/

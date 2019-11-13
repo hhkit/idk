@@ -34,10 +34,12 @@ namespace idk::ogl
 		}
 	}
 
-	OpenGLTexture::OpenGLTexture(const GLuint& id, const ivec2& size)
+	OpenGLTexture::OpenGLTexture(const GLuint& id, const ivec2& size, FilterMode fm, UVMode uv)
 	{
 		_id = id;
 		_size = size;
+		UpdateFilter(fm);
+		UpdateUV(uv);
 	}
 
 	OpenGLTexture::OpenGLTexture(OpenGLTexture&& rhs)

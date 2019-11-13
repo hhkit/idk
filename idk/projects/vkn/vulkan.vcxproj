@@ -246,12 +246,15 @@
     <ClInclude Include="utils\TriBuffer.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
+    <ClInclude Include="VknFontAtlas.h" />
+    <ClInclude Include="VknFontAtlasLoader.h" />
     <ClInclude Include="VknFrameBuffer.h" />
     <ClInclude Include="VknFramebufferFactory.h" />
     <ClInclude Include="VknImageData.h" />
     <ClInclude Include="VknMeshModder.h" />
     <ClInclude Include="VknRenderTargetLoader.h" />
     <ClInclude Include="VknTextureLoader.h" />
+    <ClInclude Include="VknTextureRenderMeta.h" />
     <ClInclude Include="VulkanCbmLoader.h" />
     <ClInclude Include="VulkanCubemapFactory.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
@@ -276,6 +279,7 @@
     <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
     <ClInclude Include="VulkanTextureFactory.h" />
+    <ClInclude Include="VulkanTtfLoader.h" />
     <ClInclude Include="VulkanTypeDescriptors.h" />
     <ClInclude Include="VulkanWin32GraphicsSystem.h" />
     <ClInclude Include="VulkanView.h" />
@@ -301,6 +305,8 @@
     <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="VknTextureRenderMeta.cpp" />
+    <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />
     <ClCompile Include="utils\PresentationSignals.cpp" />
@@ -311,6 +317,8 @@
     <ClCompile Include="GfxConverters.cpp" />
     <ClCompile Include="VknCubemap.cpp" />
     <ClCompile Include="VknCubeMapLoader.cpp" />
+    <ClCompile Include="VknFontAtlas.cpp" />
+    <ClCompile Include="VknFontAtlasLoader.cpp" />
     <ClCompile Include="VknFrameBuffer.cpp" />
     <ClCompile Include="VknFramebufferFactory.cpp" />
     <ClCompile Include="VknRenderTarget.cpp" />
