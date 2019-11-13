@@ -14,14 +14,18 @@
   - !Light 
     casts_shadows: 1
     light: !DirectionalLight 
-      height: 5
+      bottom: -5
+      far: 5
       intensity: 1
+      left: -5
       light_color: 
         a: 1
         b: 1
         g: 1
         r: 1
-      width: 5
+      near: -5
+      right: 5
+      top: 5
     shadow_bias: 1.1920929e-07
 - !4295098368 
   - active: 1
@@ -41,11 +45,29 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Animator 
-    animation_display_order: []
-    animation_table: {}
     layer_table: {Base Layer: 0}
     layers: 
-    - blend_type: Override_Blend
+    - anim_state_table: {New State: 1, idle: 2}
+      anim_states: 
+      - loop: 1
+        name: ""
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        valid: 0
+      - loop: 1
+        name: New State
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        valid: 1
+      - loop: 1
+        name: idle
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
+        valid: 1
+      blend_type: Override_Blend
       bone_mask: 
       - 1
       - 1
@@ -147,7 +169,7 @@
       - 1
       - 1
       - 1
-      default_state: ""
+      default_index: 2
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}

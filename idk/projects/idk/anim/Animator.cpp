@@ -25,23 +25,6 @@ namespace idk
 	}
 
 #pragma region Engine Getters/Setters
-	AnimationState& Animator::GetAnimationState(string_view name)
-	{
-		auto res = animation_table.find(name.data());
-		if (res != animation_table.end())
-			return res->second;
-
-		return null_state;
-	}
-
-	const AnimationState& Animator::GetAnimationState(string_view name) const
-	{
-		auto res = animation_table.find(name.data());
-		if (res != animation_table.end())
-			return res->second;
-
-		return null_state;
-	}
 
 	const vector<mat4>& Animator::BoneTransforms()const
 	{
@@ -50,89 +33,17 @@ namespace idk
 
 	void Animator::AddAnimation(RscHandle<anim::Animation> anim_rsc)
 	{
-		if (anim_rsc)
-		{
-			string name = anim_rsc->Name().data();
-			// Check if name exists
-			if (animation_table.find(name) != animation_table.end())
-			{
-				string append = " 0";
-				int count = 1;
-				while (animation_table.find(name + append) != animation_table.end())
-				{
-					// Generate a unique name
-					append = " " + std::to_string(count);
-				}
-				name += append;
-			}
-			AnimationState state{ name, true };
-			state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
-			animation_table.emplace(name, state);
-			animation_display_order.emplace_back(name);
-		}
-		else
-		{
-			string name = "New State ";
-			string append = "0";
-			// Check if name exists
-			int count = 1;
-			while (animation_table.find(name + append) != animation_table.end())
-			{
-				// Generate a unique name
-				append = " " + std::to_string(count);
-			}
-			name += append;
-			animation_table.emplace(name, AnimationState{ name, true });
-			animation_display_order.emplace_back(name);
-		}
+		layers[0].AddAnimation(anim_rsc);
 	}
 
 	bool Animator::RenameAnimation(string_view from, string_view to)
 	{
-		string from_str{ from };
-		string to_str{ to };
-		auto res = animation_table.find(from_str);
-		if (res == animation_table.end())
-		{
-			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
-			return false;
-		}
+		return layers[0].RenameAnimation(from, to);
+	}
 
-		auto found_dest = animation_table.find(to_str);
-		if (found_dest != animation_table.end())
-		{
-			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
-			return false;
-		}
-
-		AnimationState copy{ res->second };
-		copy.name = to_str;
-
-		animation_table.erase(res);
-		animation_table.emplace(to_str, copy);
-
-		// find the corresponding string in the display order and rename it.
-		for (auto& it : animation_display_order)
-		{
-			if (it == from_str)
-			{
-				it = to_str;
-				break;
-			}
-		}
-				
-		for (auto& layer : layers)
-		{
-			if (layer.default_state == from_str)
-			{
-				layer.default_state = to_str;
-				layer.curr_state.name = to_str;
-			}
-			if (layer.curr_state.name == from_str)
-				layer.curr_state.name = to_str;
-		}
-
-		return true;
+	void Animator::RemoveAnimation(string_view name)
+	{
+		layers[0].RemoveAnimation(name);
 	}
 
 	void Animator::AddLayer()
@@ -156,33 +67,6 @@ namespace idk
 		layers.push_back(new_layer);
 	}
 
-	void Animator::RemoveAnimation(string_view name)
-	{
-		string name_str{ name };
-		auto found_clip = animation_table.find(name_str);
-		if (found_clip == animation_table.end())
-			return;
-
-		for (auto& layer : layers)
-		{
-			if (layer.curr_state.name == found_clip->second.name)
-				layer.curr_state = AnimationLayerState{};
-			if (layer.default_state == found_clip->second.name)
-				layer.default_state = string{};
-		}
-
-		auto end_it = animation_display_order.end();
-		for (auto it = animation_display_order.begin(); it != end_it; ++it)
-		{
-			if (*it == name_str)
-			{
-				animation_display_order.erase(it);
-				break;
-			}
-		}
-		animation_table.erase(found_clip);
-	}
-
 #pragma endregion
 
 #pragma region Editor Functionality
@@ -199,14 +83,14 @@ namespace idk
 		{
 			for (size_t i = 0; i < layers.size(); ++i)
 			{
-				Play(layers[i].curr_state.name, i);
+				layers[i].Play(layers[i].curr_state.index);
 			}
 		}
 		else
 		{
 			for (size_t i = 0; i < layers.size(); ++i)
 			{
-				layers[i].Reset();
+				layers[i].ResetToDefault();
 			}
 			Core::GetSystem<AnimationSystem>().RestoreBindPose(*this);
 		}
@@ -377,7 +261,7 @@ namespace idk
 
 	bool Animator::HasState(string_view name) const
 	{
-		return animation_table.find(string{ name }) != animation_table.end();
+		return layers[0].HasState(name);
 	}
 
 	bool Animator::IsPlaying() const
@@ -387,27 +271,27 @@ namespace idk
 
 	bool Animator::IsBlending() const
 	{
-		return layers[0].blend_state.is_playing;
+		return layers[0].IsBlending();
 	}
 
 	bool Animator::HasCurrAnimEnded() const
 	{
-		return layers[0].curr_state.normalized_time >= 1.0f;
+		return layers[0].HasCurrAnimEnded();
 	}
 
 	string Animator::DefaultStateName() const
 	{
-		return layers[0].default_state;
+		return layers[0].DefaultStateName();
 	}
 
 	string Animator::CurrentStateName() const
 	{
-		return layers[0].curr_state.name;
+		return layers[0].CurrentStateName();
 	}
 
 	string Animator::BlendStateName() const
 	{
-		return layers[0].blend_state.name;
+		return layers[0].BlendStateName();
 	}
 
 	bool Animator::SetInt(string_view name, int val)
@@ -431,15 +315,15 @@ namespace idk
 		return false;
 	}
 
-	void Animator::SetEntryState(string_view name, float)
+	void Animator::SetEntryState(string_view , float)
 	{
-		auto res = animation_table.find(name.data());
-		if (res == animation_table.end())
-		{
-			return;
-		}
-
-		layers[0].default_state = name;
+		// auto res = animation_table.find(name.data());
+		// if (res == animation_table.end())
+		// {
+		// 	return;
+		// }
+		// 
+		// layers[0].default_index = name;
 	}
 #pragma endregion
 
@@ -475,7 +359,7 @@ namespace idk
 		// 
 		// for (auto& layer : layers)
 		// {
-		// 	layer.curr_state = layer.default_state;
+		// 	layer.playing_index = layer.default_index;
 		// 	layer.weight = layer.default_weight;
 		// }
 	}

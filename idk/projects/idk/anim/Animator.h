@@ -82,8 +82,6 @@ namespace idk
 
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> skeleton;
-		hash_table<string, AnimationState> animation_table;
-		vector<string> animation_display_order;
 
 		hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};

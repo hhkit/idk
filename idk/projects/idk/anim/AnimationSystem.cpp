@@ -36,8 +36,8 @@ namespace idk
 				// SaveBindPose(elem);
 				for (auto& layer : elem.layers)
 				{
-					if (layer.curr_state.name != string{})
-						layer.Play(layer.curr_state.name);
+					if (layer.curr_state.index != 0)
+						layer.Play(layer.curr_state.index);
 				}
 
 			}
@@ -193,7 +193,7 @@ namespace idk
 		result.rotation = quat{};
 
 		// Check if the state is valid
-		auto& anim_state = animator.GetAnimationState(state.name);
+		auto& anim_state = layer.GetAnimationState(state.index);
 		if (!anim_state.valid)
 		{
 			state.is_stopping = true;
@@ -238,7 +238,7 @@ namespace idk
 		result.rotation = quat{};
 
 		// Check if the state is valid
-		auto& anim_state = animator.GetAnimationState(state.name);
+		auto& anim_state = layer.GetAnimationState(state.index);
 		if (!anim_state.valid)
 		{
 			state.is_stopping = true;
@@ -351,6 +351,9 @@ namespace idk
 	AnimationSystem::BonePose AnimationSystem::AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index)
 	{
 		// If a layer is not playing, we return the previous pose it was in 
+		const auto curr_index = layer.curr_state.index;
+		const auto blend_index = layer.blend_state.index;
+
 		if (!layer.IsPlaying())
 		{
 			return layer.prev_poses[bone_index];
@@ -366,7 +369,7 @@ namespace idk
 			if (layer.curr_state.is_stopping)
 			{
 				layer.curr_state.normalized_time = 0.0f;
-				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + layer.curr_state.name + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + std::to_string(curr_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 
 			layer.blend_source[bone_index] = result;
@@ -381,7 +384,7 @@ namespace idk
 				// layer.is_blending = false;
 				layer.blend_state.normalized_time = 0.0f;
 				layer.blend_interrupt = false;
-				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + std::to_string(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{
@@ -417,7 +420,7 @@ namespace idk
 			// Check both the blend state and the curr state
 			if (layer.curr_state.normalized_time >= 1.0f)
 			{
-				auto& anim_state = animator.GetAnimationState(layer.curr_state.name);
+				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
 				if (!anim_state.valid)
 					continue;
 
@@ -475,7 +478,7 @@ namespace idk
 			// Check both the blend state and the curr state
 			if (layer.curr_state.is_playing)
 			{
-				auto& anim_state = animator.GetAnimationState(layer.curr_state.name);
+				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
 				if (!anim_state.valid)
 					continue;
 
@@ -492,7 +495,7 @@ namespace idk
 
 			if (layer.blend_state.is_playing)
 			{
-				auto& anim_state = animator.GetAnimationState(layer.blend_state.name);
+				auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
 				if (!anim_state.valid)
 					continue;
 
@@ -721,20 +724,20 @@ namespace idk
 
 			// This is here so that previously serialized animator components will still be able to display 
 			// the animation clips even if animation_display_order is not inside
-			if (animator->animation_display_order.empty() && !animator->animation_table.empty())
-			{
-				for (auto& anim : animator->animation_table)
-				{
-					animator->animation_display_order.emplace_back(anim.first);
-					anim.second.valid = true;
-				}
-			}
+			// if (animator->animation_display_order.empty() && !animator->animation_table.empty())
+			// {
+			// 	for (auto& anim : animator->animation_table)
+			// 	{
+			// 		animator->animation_display_order.emplace_back(anim.first);
+			// 		anim.second.valid = true;
+			// 	}
+			// }
 
 			for (auto& layer : animator->layers)
 			{
 				layer.prev_poses.resize(animator->skeleton->data().size());
 				layer.blend_source.resize(animator->skeleton->data().size());
-				layer.curr_state.name = layer.default_state;
+				layer.curr_state.index = layer.default_index;
 				layer.weight = layer.default_weight;
 			}
 		}

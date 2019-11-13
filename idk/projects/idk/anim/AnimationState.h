@@ -48,10 +48,13 @@ namespace idk
 
 	struct AnimationLayerState
 	{
-		string name{};
+		// string name{};
+		size_t index = 0;
 
 		bool is_playing = false, is_stopping = false;
 		float normalized_time = 0.0f;
+
+		void Reset();
 	};
 	
 }
