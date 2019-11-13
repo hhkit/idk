@@ -74,7 +74,7 @@ namespace idk::vkn
 			obj.Create(View(),frame_index);
 
 			//TODO threadsafe lock here
-			while (!creating.compare_exchange_weak(curr_expected_val, true));
+			while (!creating.compare_exchange_strong(curr_expected_val, true));
 			auto handle = pipelines.add(std::move(obj));
 			prog_to_pipe2.emplace(combi,handle);
 			creating.store(false);

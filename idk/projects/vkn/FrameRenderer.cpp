@@ -34,9 +34,36 @@
 
 #include <vkn/DescriptorUpdateData.h>
 #include <thread>
-
+#include <mutex>
 namespace idk::vkn
 {
+	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
+	class Semaphore {
+	public:
+		Semaphore(int count_ = 0)
+			: count(count_)
+		{
+		}
+
+		inline void notify() {
+			std::unique_lock<std::mutex> lock(mtx);
+			count++;
+			//notify the waiting thread
+			cv.notify_one();
+		}
+		inline void wait() {
+			std::unique_lock<std::mutex> lock(mtx);
+			while (count == 0) {
+				//wait on the mutex until notify is called
+				cv.wait(lock);
+			}
+			count--;
+		}
+	private:
+		std::mutex mtx;
+		std::condition_variable cv;
+		int count;
+	};
 	class RenderThread
 	{
 	public:
@@ -50,6 +77,17 @@ namespace idk::vkn
 			_rs = &rs;
 			_is_complete = false;
 			_start = true;
+			job_semaphore.notify();
+		}
+		void Run()
+		{
+
+			while (Running())
+			{
+				job_semaphore.wait();//will wake up when either running == false or hasjob. 
+				if(HasJob())//Don't render if there's no job.
+					Render();
+			}
 		}
 		void Render() 
 		{
@@ -77,12 +115,14 @@ namespace idk::vkn
 		void Stop()
 		{
 			_running = false;
+			job_semaphore.notify(); //wake the guy so that he can terminate.
 		}
 		~RenderThread()
 		{
 			Stop();
 		}
 	private:
+		Semaphore job_semaphore{0};
 		bool _running = true;
 		bool _is_complete=false;
 		bool _start = false;
@@ -95,12 +135,7 @@ namespace idk::vkn
 	public:
 		static void ThreadRun(RenderThread* thread)
 		{
-			while (thread->Running())
-			{
-				if (thread->HasJob())
-					thread->Render();
-				//std::this_thread::yield();
-			}
+			thread->Run();
 		}
 		void Init(FrameRenderer* renderer)
 		{
