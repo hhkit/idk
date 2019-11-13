@@ -863,6 +863,7 @@
     <ClInclude Include="meta\comparator.h">
       <Filter>meta</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\CompiledTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

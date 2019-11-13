@@ -192,6 +192,11 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="asset_compiler.cpp" />
+    <ClCompile Include="CompilerCore.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CompilerCore.h" />
+    <ClInclude Include="IAssetLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

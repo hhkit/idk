@@ -12,7 +12,7 @@
 	Usage: 
 	- arg[0] is executable name
 	- arg[1] is input file
-	- arg[2] is output file
+	- arg[2] is output directory
 */
 int main(int argc, const char* argv[])
 {
