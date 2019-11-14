@@ -226,20 +226,27 @@ void BeginCanvas(CanvasState* canvas)
 	canvas->prev_zoom = canvas->zoom;
     if (!ImGui::IsMouseDown(0) && ImGui::IsItemHovered())
     {
-        if (ImGui::IsMouseDragging(1))
+        if (ImGui::IsMouseDragging(canvas->drag_button))
             canvas->offset += io.MouseDelta;
 
-        if (io.KeyShift && !io.KeyCtrl)
-            canvas->offset.x += io.MouseWheel * 16.0f;
+		if (canvas->scroll_to_move)
+		{
+			if (io.KeyShift && !io.KeyCtrl)
+				canvas->offset.x += io.MouseWheel * 16.0f;
 
-        if (!io.KeyShift && !io.KeyCtrl)
-            canvas->offset.y += io.MouseWheel * 16.0f;
+			if (!io.KeyShift && !io.KeyCtrl)
+				canvas->offset.y += io.MouseWheel * 16.0f;
+		}
 
-        if (!io.KeyShift && io.KeyCtrl)
+		// Added by Joseph 11/14/2019:
+		// If we dont require control to be held to zoom, don't bother checking ctrl key
+        if (!io.KeyShift && (canvas->no_ctrl_to_zoom || io.KeyCtrl))
         {
             if (io.MouseWheel != 0)
                 canvas->zoom = ImClamp(canvas->zoom + io.MouseWheel * canvas->zoom / 16.f, 0.3f, 3.f);
-            canvas->offset += ImGui::GetMouseDragDelta();
+
+			if(canvas->drag_zoom)
+				canvas->offset += ImGui::GetMouseDragDelta();
         }
     }
 

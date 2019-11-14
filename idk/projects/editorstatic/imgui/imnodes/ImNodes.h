@@ -63,6 +63,10 @@ struct IMGUI_API CanvasState
     ImVec2 prev_offset{};
     /// Colors used to style elements of this canvas.
     ImColor colors[StyleColor::ColMax];
+	int drag_button = 1;			// Added by Joseph 11/14/2019: Button to control dragging the canvas
+	bool no_ctrl_to_zoom = false;	// Added by Joseph 11/14/2019: By default, only check for zoom if control is held
+	bool drag_zoom = true;			// Added by Joseph 11/14/2019: Left click and drag zooms in by default. (Also depends on control being held or not).
+	bool scroll_to_move = true;		// Added by Joseph 11/14/2019: By default, scrolling will move the canvas up down/left right.
     /// Style parameters
     struct
     {
