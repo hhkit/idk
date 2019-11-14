@@ -20,7 +20,7 @@ namespace idk::vkn
 		void CheckForUpdates(uint32_t frame_index);
 		void RemovePipeline(VulkanPipeline* pipeline);
 	private:
-		std::atomic_bool creating = false;
+		//std::atomic_bool creating = false;
 		struct PipelineObject
 		{
 			pipeline_config config{};

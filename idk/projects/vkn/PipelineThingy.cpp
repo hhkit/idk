@@ -359,7 +359,7 @@ namespace idk::vkn
 				auto& ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
 				UpdateUniformDS(device, ds, bindings,dud);
-				p_ro.descriptor_sets[set]=ds;
+				p_ro.SetDescriptorSet(set,ds);
 			}
 		}
 		dud.SendUpdates();

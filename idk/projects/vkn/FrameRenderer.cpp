@@ -35,6 +35,8 @@
 #include <vkn/DescriptorUpdateData.h>
 #include <thread>
 #include <mutex>
+#include <queue>
+
 namespace idk::vkn
 {
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -64,6 +66,53 @@ namespace idk::vkn
 		std::condition_variable cv;
 		int count;
 	};
+	/*
+	template<typename job_t>
+	struct job_queue
+	{
+		using container_t = std::list<job_t>;
+		using iterator_t = typename container_t::iterator;
+		container_t container;
+		iterator_t begin, end;
+		std::mutex fml;
+		job_queue() :begin{ container.begin() }, end{ container.end() }{}
+		void push(job_t job)
+		{
+			fml.lock();
+			if (container.end() == end)
+			{
+				container.push_back(std::move(job));
+				end = container.end();
+				if (begin == container.end())
+					begin = container.begin();
+			}
+			else
+				new (&(*end++)) job_t{ std::move(job) };
+			if (begin == container.end())
+			{
+				begin = end;
+				--begin;
+			}
+			fml.unlock();
+		}
+		job_t pop()
+		{
+			fml.lock();
+			job_t result = std::move(*begin);
+			begin->~job_t();
+			++begin;
+			fml.unlock();
+			return result;
+		}
+		bool empty()const
+		{
+			return begin == end;
+		}
+		void reset()
+		{
+			begin = end = container.begin();
+		}
+	};*/
 	class RenderThread
 	{
 	public:
@@ -71,12 +120,13 @@ namespace idk::vkn
 		{
 			_running = true;
 		}
-		void Set(const GraphicsState& state, RenderStateV2& rs)
+		void Add(const GraphicsState& state, RenderStateV2& rs)
 		{
-			_state = &state;
-			_rs = &rs;
+			job_lock.lock();
+			jobs.push(JobData{ &state ,&rs });
+			job_lock.unlock();
 			_is_complete = false;
-			_start = true;
+			job_count++;
 			job_semaphore.notify();
 		}
 		void Run()
@@ -84,29 +134,33 @@ namespace idk::vkn
 
 			while (Running())
 			{
-				job_semaphore.wait();//will wake up when either running == false or hasjob. 
-				if(HasJob())//Don't render if there's no job.
-					Render();
+				//job_semaphore.wait();//will wake up when either running == false or hasjob. 
+				//if(HasJob())//Don't render if there's no job.
+				Render();
 			}
 		}
 		void Render() 
 		{
-			if (_start)
+			while (!jobs.empty()&&Running())
 			{
-				_renderer->RenderGraphicsState(*_state, *_rs);
-				_start = false;
+				job_lock.lock();
+				auto job = jobs.front();
+				jobs.pop();
+				job_lock.unlock();
+				auto& rs = *job._rs;
+				auto& state = *job._state;
+				_renderer->RenderGraphicsState(state, rs);
+				job_count--;
 			}
-			_is_complete = true;
-			
 		}
 		bool HasJob()const noexcept
 		{
-			return _start;
+			return !jobs.empty();
 		}
 #pragma optimize("",off)
 		bool Complete()const noexcept
 		{
-			return _is_complete;
+			return job_count==0;
 		}
 		bool Running()const noexcept
 		{
@@ -124,13 +178,20 @@ namespace idk::vkn
 		}
 	private:
 		Semaphore job_semaphore{0};
+		std::atomic_uint32_t job_count = {};
 		bool _running = true;
 		bool _is_complete=false;
 		bool _start = false;
-		const GraphicsState* _state = {};
-		RenderStateV2* _rs = {};
-
+		struct JobData
+		{
+			const GraphicsState* _state = {};
+			RenderStateV2* _rs = {};
+		};
+		using job_list_t = std::queue<JobData>;
+		std::mutex job_lock;
+		job_list_t jobs;
 	};
+
 	class FrameRenderer::ThreadedRender : public FrameRenderer::IRenderThread
 	{
 	public:
@@ -145,7 +206,7 @@ namespace idk::vkn
 		}
 		void Render(const GraphicsState& state, RenderStateV2& rs)override
 		{
-			thread.Set(state, rs);
+			thread.Add(state, rs);
 		}
 #pragma optimize("",off)
 		void Join() override
@@ -395,7 +456,7 @@ namespace idk::vkn
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
-			auto thread = std::make_unique<ThreadedRender>();
+			auto thread = std::make_unique<NonThreadedRender>();
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}
@@ -605,7 +666,7 @@ namespace idk::vkn
 							 }
 						}
 				);
-				auto& pipeline = pipeline_manager.GetPipeline(config,shaders,frame_index,rp,has_depth_stencil);
+				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rp, has_depth_stencil);
 				pipeline.Bind(cmd_buffer, View());
 				SetViewport(cmd_buffer, *config.viewport_offset, *config.viewport_size);
 				prev_pipeline = &pipeline;
@@ -614,9 +675,17 @@ namespace idk::vkn
 			//TODO Grab everything and render them
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			auto& mesh = obj.mesh.as<VulkanMesh>();
-			for (auto& [set, ds] : p_ro.descriptor_sets)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+				uint32_t set = 0;
+				for (auto& ods : p_ro.descriptor_sets)
+				{
+					if (ods)
+					{
+						auto& ds = *ods;
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+					}
+					++set;
+				}
 			}
 
 			auto& renderer_req = *obj.renderer_req;
@@ -717,11 +786,12 @@ namespace idk::vkn
 					//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
 					//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
 				}
-				//Wait here
-				for (size_t j = 0; j < curr_concurrent;++j) {
-					auto& thread = _render_threads[j];
-;					thread->Join();
-				}
+			}
+
+			//Wait here
+			for (size_t j = 0; j < _render_threads.size(); ++j) {
+				auto& thread = _render_threads[j];
+				thread->Join();
 			}
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
@@ -1159,11 +1229,18 @@ namespace idk::vkn
 				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 				auto& mesh = obj.mesh.as<VulkanMesh>();
-				for (auto& [set,ds] : p_ro.descriptor_sets)
 				{
-					cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+					uint32_t set = 0;
+					for (auto& ods : p_ro.descriptor_sets)
+					{
+						if (ods)
+						{
+							auto& ds = *ods;
+							cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+						}
+						++set;
+					}
 				}
-			
 				auto& renderer_req = *obj.renderer_req;
 			
 				for (auto&& [attrib, location] : renderer_req.mesh_requirements)

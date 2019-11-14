@@ -409,11 +409,18 @@ namespace idk::vkn
 			//TODO Grab everything and render them
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			auto& mesh = obj.mesh.as<VulkanMesh>();
-			for (auto& [set, ds] : p_ro.descriptor_sets)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+				uint32_t set = 0;
+				for (auto& ods : p_ro.descriptor_sets)
+				{
+					if (ods)
+					{
+						auto& ds = *ods;
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+					}
+					++set;
+				}
 			}
-
 			auto& renderer_req = *obj.renderer_req;
 
 			for (auto&& [attrib, location] : renderer_req.mesh_requirements)

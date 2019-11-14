@@ -40,49 +40,46 @@ namespace idk
 	//writer biased
 	struct rw_lock_wb
 	{
-		void read_begin()
+		using lock_t =std::unique_lock<std::mutex>;
+		auto read_begin()
 		{
-			mu.lock();
+			lock_t lock{ mu };
 			while (writer_waiting)
 			{
-				std::unique_lock<std::mutex> lock{ mu };
 				cond.wait(lock);
 			}
 			readers_waiting++;
+			return std::move(lock);
 		}
-		void read_end()
+		void read_end(lock_t& lock)
 		{
 			--readers_waiting;
 			while (readers_waiting > 0)
 			{
-				std::unique_lock<std::mutex> lock{ mu };
 				cond.wait(lock);
 			}
 			cond.notify_one();
-			mu.unlock();
+			lock.unlock();
 		}
-		void write_begin()
+		auto write_begin()
 		{
-			mu.lock();
+			lock_t lock{ mu };
 			while(writer_waiting)
 			{
-				std::unique_lock<std::mutex> lock{ mu };
 				cond.wait(lock);
 			}
+			return std::move(lock);
 		}
-		void write_end()
+		void write_end(lock_t& lock)
 		{
 			writer_waiting = true;
 			while (readers_waiting>0)
 			{
-
-				std::unique_lock<std::mutex> lock{ mu };
 				cond.wait(lock);
-
 			}
 			writer_waiting = false;
 			cond.notify_all();
-			mu.unlock();
+			lock.unlock();
 		}
 
 		std::mutex mu = {};

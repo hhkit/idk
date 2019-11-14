@@ -71,8 +71,29 @@ namespace idk::vkn
 		{
 			return *itr;
 		}
+		const std::optional<vk::DescriptorSet>& GetDescriptorSet(uint32_t set)const;
+		void SetDescriptorSet(uint32_t set, vk::DescriptorSet ds);
 
-		ProcessedRO() = default;
+		//ProcessedRO(
+
+		//	//set, update_instr
+		//	const RenderObject* itr = nullptr,
+		//	hash_table<uint32_t, vector<BindingInfo>> bindings = {},
+		//	shared_ptr<pipeline_config> config = {},
+
+		//	std::optional<RscHandle<ShaderProgram>> vertex_shader={},
+		//	std::optional<RscHandle<ShaderProgram>> geom_shader  ={},
+		//	std::optional<RscHandle<ShaderProgram>> frag_shader  ={},
+
+		//	//set, ds
+		//	vector<std::optional<vk::DescriptorSet>> descriptor_sets = {},
+		//	bool rebind_shaders = false                                  ,
+		//	size_t num_instances = 1                                     ,
+		//	size_t inst_offset = 0                                       
+		//);
+
+
+		ProcessedRO()=default;
 		ProcessedRO(ProcessedRO&&)noexcept = default;
 		ProcessedRO& operator=(ProcessedRO&&)noexcept = default;
 		ProcessedRO(const ProcessedRO&) = default;
@@ -88,7 +109,7 @@ namespace idk::vkn
 		std::optional<RscHandle<ShaderProgram>> frag_shader;
 
 		//set, ds
-		hash_table<uint32_t,vk::DescriptorSet> descriptor_sets;
+		vector<std::optional<vk::DescriptorSet>> descriptor_sets = vector<std::optional<vk::DescriptorSet>>( 8 );
 		bool rebind_shaders = false;
 		size_t num_instances = 1;
 		size_t inst_offset   = 0;
