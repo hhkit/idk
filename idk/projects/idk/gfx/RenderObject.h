@@ -121,4 +121,24 @@ namespace idk
         vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
+
+    struct ImageData
+    {
+        RscHandle<Texture> texture;
+        color color;
+    };
+    struct TextData
+    {
+        vector<FontPoint> coords;
+        color color;
+        RscHandle<FontAtlas> atlas;
+        int n_size;
+    };
+    struct UIRenderObject
+    {
+        mat4 transform;
+        rect rect;
+        variant<ImageData, TextData> data;
+    };
+
 }

@@ -7,6 +7,9 @@
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
 #include <gfx/Font.h>
+#include <ui/Image.h>
+#include <ui/RectTransform.h>
+#include <common/Transform.h>
 
 #include <gfx/DebugRenderer.h>
 #include <gfx/Mesh.h>
@@ -276,6 +279,7 @@ namespace idk
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
 		span<Font> fonts,
+        span<Image> images,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
 		span<const Light> lights)
@@ -476,6 +480,15 @@ namespace idk
 			f.RenderText();
 			render_data = f.fontData;
 		}
+
+
+        for (auto& im : images)
+        {
+            auto& render_data = result.ui_render.emplace_back();
+            render_data.rect = im.GetGameObject()->GetComponent<RectTransform>()->RectInCanvas();
+            render_data.transform = im.GetGameObject()->Transform()->GlobalMatrix();
+            render_data.data = ImageData{ im.texture };
+        }
 
 
 		//SubmitBuffers(std::move(result));

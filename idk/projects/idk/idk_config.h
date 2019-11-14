@@ -30,6 +30,7 @@ namespace idk
 		,   class SkinnedMeshRenderer
 		,	class Light
 		,   class Font
+		,   class Image
 
         /// PARTICLE
         ,   class ParticleSystem

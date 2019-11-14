@@ -17,5 +17,7 @@ namespace idk
         // transform position: anchored position
 
         rect rect; // computed local rect
+
+        idk::rect RectInCanvas() const;
     };
 }

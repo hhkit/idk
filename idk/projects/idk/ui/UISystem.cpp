@@ -12,8 +12,8 @@ namespace idk
 
     void UISystem::Update(span<class Canvas> canvases)
     {
-        for (auto& c : canvases)
-            ComputeCanvasHierarchyRects(c.GetHandle());
+        //for (auto& c : canvases)
+        //    ComputeCanvasHierarchyRects(c.GetHandle());
     }
 
     void UISystem::ComputeCanvasHierarchyRects(Handle<Canvas> canvas)
