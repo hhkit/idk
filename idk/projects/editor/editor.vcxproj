@@ -202,6 +202,7 @@
     <ClInclude Include="SceneManagement.h" />
     <ClInclude Include="widgets\ConsoleLog.h" />
     <ClInclude Include="widgets\DragQuat.h" />
+    <ClInclude Include="widgets\DragRect.h" />
     <ClInclude Include="widgets\DragVec.h" />
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="widgets\InputGameObject.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="widgets\ConsoleLog.cpp" />
     <ClCompile Include="widgets\DragQuat.cpp" />
+    <ClCompile Include="widgets\DragRect.cpp" />
     <ClCompile Include="widgets\DragVec.cpp" />
     <ClCompile Include="widgets\InputGameObject.cpp" />
     <ClCompile Include="widgets\InputResource.cpp" />

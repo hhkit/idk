@@ -132,6 +132,9 @@
     <ClInclude Include="widgets\VerticalText.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\DragRect.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -243,6 +246,7 @@
     <ClCompile Include="widgets\VerticalText.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
+    <ClCompile Include="widgets\DragRect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

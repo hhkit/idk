@@ -1372,6 +1372,10 @@ namespace idk {
                 {
                     changed |= ImGuidk::DragQuat("", &val);
                 }
+                else if constexpr (std::is_same_v<T, rect>)
+                {
+                    changed |= ImGuidk::DragRect("", &val);
+                }
                 else if constexpr (std::is_same_v<T, color>)
                 {
                     changed |= ImGui::ColorEdit4("", val.data());
