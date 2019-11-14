@@ -115,7 +115,7 @@ namespace idk::phys
 		else {
 			makeshiftSphere = { pair_points.first, lhs.radius };
 
-			auto collisionResult = collide_box_sphere_discrete(rhs, makeshiftSphere);
+			collisionResult = collide_box_sphere_discrete(rhs, makeshiftSphere);
 			if (collisionResult)
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
 		}

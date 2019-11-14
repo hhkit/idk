@@ -531,8 +531,12 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_aabb(
 								r, c.bounds());
-						else
-							return phys::raycast_failure{};
+					else
+						if constexpr (std::is_same_v<RShape, capsule>)
+							return phys::collide_ray_capsule(
+								r, shape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
@@ -575,6 +579,10 @@ namespace idk
 					if constexpr (std::is_same_v<RShape, box>)
 						return phys::collide_ray_aabb(
 							r, c.bounds());
+				else
+					if constexpr (std::is_same_v<RShape, capsule>)
+						return phys::collide_ray_capsule(
+							r, shape);
 				else
 					return phys::raycast_failure{};
 			}, c.shape);
@@ -621,8 +629,12 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_aabb(
 								r, c.bounds());
-						else
-							return phys::raycast_failure{};
+					else
+						if constexpr (std::is_same_v<RShape, capsule>)
+							return phys::collide_ray_capsule(
+								r, shape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
