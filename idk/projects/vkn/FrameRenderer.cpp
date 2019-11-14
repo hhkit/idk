@@ -93,8 +93,8 @@ namespace idk::vkn
 		{
 			if (_start)
 			{
-				_start = false;
 				_renderer->RenderGraphicsState(*_state, *_rs);
+				_start = false;
 			}
 			_is_complete = true;
 			
@@ -103,6 +103,7 @@ namespace idk::vkn
 		{
 			return _start;
 		}
+#pragma optimize("",off)
 		bool Complete()const noexcept
 		{
 			return _is_complete;
@@ -146,6 +147,7 @@ namespace idk::vkn
 		{
 			thread.Set(state, rs);
 		}
+#pragma optimize("",off)
 		void Join() override
 		{
 			while (!thread.Complete());
@@ -378,7 +380,7 @@ namespace idk::vkn
 		_view = view;
 		//Do only the stuff per frame
 		uint32_t num_fo = 1;
-		uint32_t num_concurrent_states = 4;
+		uint32_t num_concurrent_states = 1;
 
 		_cmd_pool = cmd_pool;
 		auto device = *View().Device();
@@ -689,7 +691,7 @@ namespace idk::vkn
 		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;
 		GrowStates(_states,gfx_states.size());
-		size_t num_concurrent = 4;// curr_frame._render_threads.size();
+		size_t num_concurrent = curr_frame._render_threads.size();
 		auto& pri_buffer = curr_frame._pri_buffer;
 		auto& transition_buffer = curr_frame._transition_buffer;
 		auto queue = View().GraphicsQueue();
@@ -701,7 +703,7 @@ namespace idk::vkn
 		bool rendered = false;
 		{
 			;
-			for (size_t i = 0; i  <= gfx_states.size(); i += num_concurrent)
+			for (size_t i = 0; i  < gfx_states.size(); i += num_concurrent)
 			{
 				auto curr_concurrent = std::min(num_concurrent,gfx_states.size()-i);
 				//Spawn/Assign to the threads
