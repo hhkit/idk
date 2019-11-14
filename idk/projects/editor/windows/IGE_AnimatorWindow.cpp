@@ -98,7 +98,24 @@ namespace idk
 	void IGE_AnimatorWindow::drawCanvas()
 	{
 		ImGui::BeginChild("Canvas", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		auto window_pos = ImGui::GetWindowPos();
+
+		ImGui::SetWindowFontScale(1.0f);
+		if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered())
+		{
+			ImGui::OpenPopup("nodes_context_menu");
+		}
+		if (ImGui::IsPopupOpen("nodes_context_menu"))
+			ImGui::SetNextWindowSizeConstraints(ImVec2{ 200, 320 }, ImVec2{ 200, 320 });
+		if (ImGui::BeginPopup("nodes_context_menu"))
+		{
+			canvasContextMenu();
+			ImGui::EndPopup();
+		}
+
+
 		ImNodes::BeginCanvas(&_canvas);
+
 
 		ImNodes::EndCanvas();
 		ImGui::EndChild();
@@ -160,5 +177,10 @@ namespace idk
 		{
 			ImGui::EndTabItem();
 		}
+	}
+	void IGE_AnimatorWindow::canvasContextMenu()
+	{
+
+		ImGui::CloseCurrentPopup();
 	}
 }

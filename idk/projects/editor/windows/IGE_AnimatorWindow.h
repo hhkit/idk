@@ -38,6 +38,8 @@ namespace idk {
 		void drawLayersTab();
 		void drawParamsTab();
 
+		void canvasContextMenu();
+
 		
 	};
 }
