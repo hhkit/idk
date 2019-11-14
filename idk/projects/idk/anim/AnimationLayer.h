@@ -7,7 +7,6 @@
 namespace idk
 {
 	ENUM (AnimLayerBlend, char,
-		Base_Blend,
 		Override_Blend,
 		Additive_Blend
 	);

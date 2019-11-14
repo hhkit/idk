@@ -511,7 +511,7 @@ REFLECT_VARS(motions, params, blend_tree_type)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
-REFLECT_VARS(name, valid, loop, speed, state_data)
+REFLECT_VARS(name, valid, loop, speed, state_data, node_position)
 REFLECT_END()
 
 // Animation Layer serialization

@@ -38,6 +38,7 @@ namespace idk
 		bool valid = false;
 		bool loop = true;
 		float speed = 1.0f;
+		vec3 node_position{};
 
 		variant<BasicAnimationState, BlendTree> state_data;
 
