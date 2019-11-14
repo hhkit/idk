@@ -1,12 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="asset_compiler.cpp" />
     <ClCompile Include="CompilerCore.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="DDSCompiler.cpp">
+      <Filter>compilers</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureCompiler.cpp">
+      <Filter>compilers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompilerCore.h" />
-    <ClInclude Include="IAssetLoader.h" />
+    <ClInclude Include="DDSCompiler.h">
+      <Filter>compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureCompiler.h">
+      <Filter>compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="CompilerList.h" />
+    <ClInclude Include="IAssetLoader.h">
+      <Filter>compilers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="compilers">

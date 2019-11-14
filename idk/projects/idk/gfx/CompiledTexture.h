@@ -11,7 +11,7 @@ namespace idk
 		ivec2        size;
 		bool         is_srgb;
 
-		vector<char> pixel_buffer;
+		vector<unsigned char> pixel_buffer;
 	};
 
 	struct CompiledBuffer
@@ -30,7 +30,7 @@ namespace idk
 
 	// Animation resource
 
-	struct CubeMap
+	struct CompiledCubeMap
 	{
 		array<CompiledTexture, 6> textures;
 	};

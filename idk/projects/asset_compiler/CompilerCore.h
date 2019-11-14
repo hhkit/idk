@@ -11,7 +11,7 @@ namespace idk
 		CompilerCore();
 
 		template<typename T, typename ... Args>
-		T& RegisterCompiler(string_view ext, Args&& ...);
+		void RegisterCompiler(string_view ext, Args&& ...);
 
 		void Compile(string_view full_path);
 	private:
@@ -19,7 +19,7 @@ namespace idk
 	};
 
 	template<typename T, typename ...Args>
-	T& CompilerCore::RegisterCompiler(string_view ext, Args&& ...args)
+	void CompilerCore::RegisterCompiler(string_view ext, Args&& ...args)
 	{
 		_loaders.emplace(ext, std::make_unique<T>(std::forward<Args>(args)...));
 	}

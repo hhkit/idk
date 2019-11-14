@@ -1,8 +1,12 @@
+#include <idk.h>
+#include <core/Core.h>
 #include "CompilerCore.h"
 
 #include <filesystem>
 #include <serialize/binary.h>
 #include <util/ioutils.h>
+#include <idk_config.h>
+#include <res/ResourceHandle.h>
 
 #include "IAssetLoader.h"
 
@@ -10,6 +14,9 @@ namespace fs = std::filesystem;
 
 namespace idk
 {
+	CompilerCore::CompilerCore()
+	{
+	}
 	void CompilerCore::Compile(string_view full_path)
 	{
 		auto pathify = fs::path{ full_path };
@@ -46,9 +53,10 @@ namespace idk
 				{
 					// if you're here, you're trying to get compiled so only binary here
 					std::ofstream resource_stream{ string{guid} +".idm" };
-					binary_resource.visit([&](const auto& elem)
+					binary_resource.visit([&](const auto&, const auto& elem, int) -> bool
 					{
 						resource_stream << serialize_binary(elem);
+						return false;
 					});
 				}
 			}

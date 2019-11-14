@@ -7,6 +7,8 @@
 #include <IncludeSystems.h>
 #include <res/MetaBundle.h>
 
+#include <gfx/CompiledTexture.h>
+
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -198,6 +200,13 @@ REFLECT_ENUM(idk::FilterMode, "FilterMode")
 
 REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
 REFLECT_VARS(uv_mode,internal_format,filter_mode, is_srgb, compressed)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<unsigned char>, "Buffer")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::CompiledTexture, "CompiledTexture")
+REFLECT_VARS(internal_format, uv_mode, filter_mode, size, is_srgb, pixel_buffer)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")

@@ -108,6 +108,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,11 +154,13 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>core.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>coreD.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
@@ -191,12 +194,17 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="asset_compiler.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="CompilerCore.cpp" />
+    <ClCompile Include="DDSCompiler.cpp" />
+    <ClCompile Include="TextureCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompilerCore.h" />
+    <ClInclude Include="CompilerList.h" />
+    <ClInclude Include="DDSCompiler.h" />
     <ClInclude Include="IAssetLoader.h" />
+    <ClInclude Include="TextureCompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

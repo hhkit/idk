@@ -8,6 +8,10 @@
 #include <serialize/binary.h>
 #include <ReflectRegistration.h>
 #include <util/ioutils.h>
+
+#include "CompilerCore.h"
+#include "CompilerList.h"
+
 /*
 	Usage: 
 	- arg[0] is executable name
@@ -22,29 +26,16 @@ int main(int argc, const char* argv[])
 	{
 		std::cout << "Proper usage:\n";
 		std::cout << "   compiler.exe: [input_file] [output_file]\n";
+		return -1;
 	}
-	else
-	{
-		anim::Animation a;
-		a.AddAnimatedBone(anim::AnimatedBone{ "nani", {
-			{vec3{}, 0.5f}
-		}});
-		a.SetSpeeds(30.f, 1.f, 10.f);
-		{
-			std::ofstream ostr;
-			ostr.open(argv[2], std::ios::binary);
-			ostr << serialize_binary(a);
-		}
-		{
-			anim::Animation b;
-			std::ifstream istr(argv[2], std::ios::binary);
 
-			auto str = stringify(istr);
-			parse_binary(str, b);
+	CompilerCore c;
+	c.RegisterCompiler<DDSCompiler>(".dds");
+	c.RegisterCompiler<TextureCompiler>(".tga");
 
-			
-		}
-	}
+	c.Compile(argv[1]);
+
+	return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
