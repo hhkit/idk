@@ -246,7 +246,9 @@
     <ClCompile Include="widgets\VerticalText.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
-    <ClCompile Include="widgets\DragRect.cpp" />
+    <ClCompile Include="widgets\DragRect.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

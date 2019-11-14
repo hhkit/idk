@@ -1364,6 +1364,10 @@ namespace idk {
                 {
                     changed |= ImGui::Checkbox("", &val);
                 }
+                else if constexpr (std::is_same_v<T, vec2>)
+                {
+                    changed |= ImGuidk::DragVec2("", &val);
+                }
                 else if constexpr (std::is_same_v<T, vec3>)
                 {
                     changed |= ImGuidk::DragVec3("", &val);
