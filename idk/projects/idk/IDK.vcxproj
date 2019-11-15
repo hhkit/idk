@@ -412,6 +412,7 @@
     <ClCompile Include="math\shapes\ray.cpp" />
     <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="ui\RectTransform.cpp" />
     <ClCompile Include="ui\UISystem.cpp" />
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />

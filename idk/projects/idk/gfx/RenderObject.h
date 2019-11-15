@@ -6,6 +6,7 @@
 #include <gfx/pipeline_config.h>
 #include <gfx/CubeMap.h>
 #include <math/rect.h>
+#include <gfx/FontData.h>
 
 namespace idk
 {
