@@ -9,9 +9,11 @@ namespace idk::vkn
 	{
 		vk::Buffer buffer{};
 		uint32_t offset{};
+		hlp::vector_buffer* vb;
+		string_view data;
 
 		buffer_info() = default;
-		buffer_info(vk::Buffer buf,uint32_t off) :buffer{buf},offset{off}
+		buffer_info(vk::Buffer buf, uint32_t off, hlp::vector_buffer* v = nullptr, string_view d = {}) :buffer{ buf }, offset{ off }, vb{ v },data{d}
 		{
 		}
 		bool operator==(const buffer_info& bi)const { return buffer == bi.buffer && offset == bi.offset; }
@@ -47,15 +49,20 @@ namespace idk::vkn
 				auto& buffers = *pbuffers;
 				for (auto& [binding, buffer] : buffers)
 				{
+
+					if (buffer.vb)
+						buffer.vb->update(0, buffer.data.size(), cmd_buffer, r_cast<const unsigned char*>(buffer.data.data()));
 					cmd_buffer.bindVertexBuffers(binding,buffer.buffer,buffer.offset);
 				}
 			}
 			auto& buffers = mesh_buffer[DbgBufferType::ePerInst];
 			for (auto& [binding, buffer] : buffers)
 			{
+
+				if (buffer.vb)
+					buffer.vb->update(0, buffer.data.size(), cmd_buffer, r_cast<const unsigned char*>(buffer.data.data()));
 				cmd_buffer.bindVertexBuffers(binding, buffer.buffer, buffer.offset);
 			}
-
 		}
 		void Draw(vk::CommandBuffer cmd_buffer)const
 		{
@@ -84,26 +91,44 @@ namespace idk::vkn
 		//vector<shadow_map_t>& ShadowMaps();
 		//const vector<shadow_map_t>& ShadowMaps()const;
 	};
+
 	
-	struct GraphicsState
+	struct ProcessedMaterial
 	{
-		SharedGraphicsState* shared_gfx_state =nullptr;
+		using data_block_t = string;
+		using offset_t = size_t;
+		using texture_table_t =hash_table<string, span<RscHandle<Texture>>>;
+		using uniform_table_t =hash_table<string, string_view>;
+		texture_table_t tex_table;
+		uniform_table_t ubo_table;
+		data_block_t data_block;
+		vector<RscHandle<Texture>> texture_block;
+		RscHandle<ShaderProgram> shader;
+
+		ProcessedMaterial() = default;
+		ProcessedMaterial(RscHandle<MaterialInstance> inst);
+	};
+
+	struct CoreGraphicsState
+	{
+		SharedGraphicsState* shared_gfx_state;
+		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
+		vector<const RenderObject*> mesh_render;
+		vector<const AnimatedRenderObject*> skinned_mesh_render;
+		hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> material_instances;
+		const vector<SkeletonTransforms>* skeleton_transforms;
+
+
+		void ProcessMaterialInstances();
+	};
+
+	struct GraphicsState : CoreGraphicsState
+	{
 		CameraData camera; 
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
-		vector<size_t> active_lights;//indices to corresponding lights in shared_gfx_state
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
 		vector<RscHandle<CubeMap>> shadow_maps_cube;
-
-		vector<const RenderObject*> mesh_render;
-		vector<const AnimatedRenderObject*> skinned_mesh_render;
-
-		const vector<InstRenderObjects>* inst_mesh_render;
-
-
-
-
-		const vector<SkeletonTransforms>* skeleton_transforms;
 
 		bool clear_render_target = false;
 
@@ -127,16 +152,10 @@ namespace idk::vkn
 	};
 
 
-	struct PreRenderData
+	struct PreRenderData :CoreGraphicsState
 	{
-		SharedGraphicsState* shared_gfx_state;
 		const vector<CameraData>* cameras;
-		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
-		vector<const RenderObject*> mesh_render;
-		vector<const AnimatedRenderObject*> skinned_mesh_render;
 		const vector<InstancedData>* inst_mesh_buffer;
-		const vector<SkeletonTransforms>* skeleton_transforms;
-
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;

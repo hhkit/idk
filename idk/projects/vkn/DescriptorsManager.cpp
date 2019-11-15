@@ -103,7 +103,7 @@ namespace idk::vkn
 		}
 		Grow(conv);
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void DescriptorsManager::Grow(const hash_table<vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations)
 	{
 		//Redo.
@@ -139,7 +139,6 @@ namespace idk::vkn
 				//TODO compute num_ds with layout's number of descriptors
 				if (pool)
 				{
-					auto dbg_size = layouts[*pool].layouts.size();
 					layouts[*pool].insert(diff, layout);
 				}
 				else

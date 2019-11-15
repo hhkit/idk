@@ -22,8 +22,11 @@
 
 #include <math/shapes/ray.h>
 
+
 namespace idk::vkn
 {
+	
+	
 
 	const std::vector<vec3>& GetSquareFace(bool is_line_list = false);
 	template<typename V, typename F>
@@ -67,17 +70,16 @@ namespace idk::vkn
 		hash_table<DbgShape, vbo> shape_buffers{};
 		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
 
-		vector<DbgDrawCall> render_buffer;
+		vk::UniqueSemaphore buffer_ready;
+
+		DbgDrawCall        render_buffer[EnumInfo::DbgShapeI::size()];
+		hlp::vector_buffer inst_buffer  [EnumInfo::DbgShapeI::size()];
+		string             inst_data    [EnumInfo::DbgShapeI::size()];
 
 		hlp::MemoryAllocator allocator;
-		hlp::bbucket_list vert_buffer;
-		hlp::bbucket_list inst_buffer;
 
 		pimpl(VulkanView& deets) :detail{ deets }
 		, allocator{ *deets.Device(),deets.PDevice() }
-		, vert_buffer{ deets.PDevice(),*deets.Device(), allocator }
-		, inst_buffer{ deets.PDevice(),*deets.Device(), allocator }
-
 		{};
 	};
 
@@ -141,6 +143,8 @@ namespace idk::vkn
 		impl = std::make_unique<pimpl>(system.View());
 		impl->pipeline.Create(config, impl->detail);
 
+		impl->buffer_ready = system.View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{ vk::SemaphoreCreateFlags{} });
+
 		impl->shape_buffers = idk::hash_table<DbgShape, vbo>
 		{
 			{DbgShape::eCube   ,
@@ -196,6 +200,7 @@ namespace idk::vkn
 
 	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj, GraphicsState& )
 	{
+		/*
 		auto& detail = impl->detail;
 		auto& pipeline = impl->pipeline;
 		draw_call dc;
@@ -203,13 +208,21 @@ namespace idk::vkn
 		auto extent = detail.Swapchain().extent;
 		dc.uniforms.emplace_back(0, 0, view);
 		dc.uniforms.emplace_back(0, 1, proj);
+		size_t total_size = 0;
+		for ([[maybe_unused]] auto& [shape, buffer] : info->render_info)
+		{
+			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, 0,);
+			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, total_size, vk::Buffer{});
+			total_size += hlp::buffer_size<uint32_t>(buffer);
+		}
 		for (auto& [shape, buffer] : info->render_info)
 		{
 			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
 			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 
 			//Bind vtx buffers
-			auto instance_buffer = detail.AddToMasterBuffer(std::data(buffer), hlp::buffer_size<uint32_t>(buffer));
+			auto instance_buffer = impl->inst_buffer.resize();
+			detail.AddToMasterBuffer(std::data(buffer), );
 			auto vertex_buffer = detail.AddToMasterBuffer(s_cast<const void*>(std::data(shape_buffer_proxy)), hlp::buffer_size<uint32_t>(shape_buffer_proxy));
 			dc.instance_count = hlp::arr_count(buffer);
 			dc.vertex_count = hlp::arr_count(shape_buffer);
@@ -219,9 +232,11 @@ namespace idk::vkn
 			detail.CurrRenderState().AddDrawCall(dc);
 		}
 		info->render_info.clear();
+		info->render_info2.clear();
+		*/
 	}
 
-	const vector<DbgDrawCall>& VulkanDebugRenderer::DbgDrawCalls() const
+	const DbgDrawCall (&VulkanDebugRenderer::DbgDrawCalls()const)[EnumInfo::DbgShapeI::size()]
 	{
 		// TODO: insert return statement here
 		return impl->render_buffer;
@@ -232,26 +247,55 @@ namespace idk::vkn
 		// TODO: insert return statement here
 		return impl->pipeline;
 	}
+	RscHandle<Mesh> ShapeToMesh(DbgShape shape)
+	{
+		return Mesh::defaults[MeshType::Box];
+	}
 
 	void VulkanDebugRenderer::GrabDebugBuffer()
 	{
 		info->render_info.clear();
-		impl->render_buffer.clear();
-		impl->vert_buffer.clear();
-		impl->inst_buffer.clear();
+		info->render_info2.clear();
+		for (auto& dc : impl->render_buffer)
+		{
+			dc.~DbgDrawCall();
+			new (&dc) DbgDrawCall();
+		}
+		//impl->vert_buffer.clear();
+		//impl->inst_buffer.clear();
 		for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 		{
 			//if (elem.mesh == Mesh::defaults[MeshType::Box])
 			{
-				DrawShape(MeshType::Box, elem.transform, elem.color);
+				DrawShape(DbgShape::eCube, elem.transform, elem.color);
 			}
 		}
+		//auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(*impl->detail.Device(), *impl->detail.Commandpool());
+		//auto cmd_buffer = *ucmd_buffer;
 		for (auto& [shape, buffer] : info->render_info)
 		{
 			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
 			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 
+			const auto shape_index = EnumInfo::DbgShapeI::map(shape);
+
+			auto& dcall = impl->render_buffer[shape_index];
+			RscHandle<Mesh> mesh = ShapeToMesh(shape);
+
 			//Bind vtx buffers
+			auto& inst_v_buffer = impl->inst_buffer[shape_index];
+			auto num_inst_bytes = hlp::buffer_size<uint32_t>(buffer);
+			inst_v_buffer.resize(num_inst_bytes);
+			//inst_v_buffer.update<debug_info::inst_data>(0, buffer, cmd_buffer);
+
+			dcall.num_instances = buffer.size();
+			dcall.RegisterBuffer(DbgBufferType::ePerInst, dbg_vert_layout::instance_binding, buffer_info{ inst_v_buffer.buffer(),0, &inst_v_buffer,string_view{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)} });
+			auto& pos_buffer = mesh.as<VulkanMesh>().Get(attrib_index::Position);
+			auto& idx_buffer = *mesh.as<VulkanMesh>().GetIndexBuffer();
+			dcall.RegisterBuffer(DbgBufferType::ePerVtx, dbg_vert_layout::instance_binding, buffer_info{ *pos_buffer.buffer(),s_cast<uint32_t>(pos_buffer.offset)});
+			dcall.index_buffer = buffer_info{*idx_buffer.buffer(),s_cast<uint32_t>(idx_buffer.offset)};
+			dcall.num_indices = mesh.as<VulkanMesh>().IndexCount();
+/*
 			size_t num_inst_chunk = impl->inst_buffer.chunk_size()/sizeof(buffer[0]);
 			size_t num_elems= buffer.size();
 			uint32_t inst_binding = dbg_vert_layout::instance_binding;
@@ -274,10 +318,11 @@ namespace idk::vkn
 				dcall.num_vertices = hlp::arr_count(shape_buffer);
 				dcall.RegisterBuffer(DbgBufferType::ePerInst, inst_binding, buffer_info{ instance_buffer,ib_offset });
 				dcall.RegisterBuffer(DbgBufferType::ePerVtx, vert_binding, buffer_info{ vertex_buffer,vb_offset });
-			}			
+			}			*/
 		}
-		impl->inst_buffer.update_buffers();
-		impl->vert_buffer.update_buffers();
+		//hlp::EndSingleTimeCbufferCmd(cmd_buffer, impl->detail.GraphicsQueue(), false, {}, {}, *impl->buffer_ready);
+		//impl->inst_buffer.update_buffers();
+		//impl->vert_buffer.update_buffers();
 	}
 
 	VulkanDebugRenderer::~VulkanDebugRenderer() = default;

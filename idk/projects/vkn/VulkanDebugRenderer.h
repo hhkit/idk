@@ -4,6 +4,8 @@
 #include <gfx/debug_vtx_layout.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/Mesh.h>
+
+#include <vkn/utils/utils.h>
 namespace idk
 {
 	struct ray;
@@ -12,15 +14,27 @@ namespace idk::vkn
 {
 	enum DbgShape
 	{
-		eziPreBegin,
 		eCube,
 		eSquare,
 		eEqTriangle,
 		eLine,
 		eTetrahedron,
-		eSphere,
-		eziCount
+		eSphere
 	};
+	namespace EnumInfo
+	{
+
+		using DbgShapePack = meta::enum_pack<DbgShape,
+			DbgShape::eCube,
+			DbgShape::eSquare,
+			DbgShape::eEqTriangle,
+			DbgShape::eLine,
+			DbgShape::eTetrahedron,
+			DbgShape::eSphere
+		>;
+		using DbgShapeI = meta::enum_info < DbgShape, DbgShapePack>;
+
+	}
 	struct debug_info
 	{
 		struct inst_data
@@ -51,7 +65,7 @@ namespace idk::vkn
 		void Draw(const aabb& o_box, const color& color);
 		void Render(const mat4& view, const mat4& projection, GraphicsState& out);
 
-		const vector<DbgDrawCall>& DbgDrawCalls()const;
+		const DbgDrawCall (&DbgDrawCalls()const)[EnumInfo::DbgShapeI::size()];
 		const VulkanPipeline& GetPipeline()const;
 		void GrabDebugBuffer();
 	private:

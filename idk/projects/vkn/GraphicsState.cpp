@@ -60,6 +60,30 @@ namespace idk::vkn
 	CullAndAdd(render_objects, skinned_render_objects);
 }
 
+	void CoreGraphicsState::ProcessMaterialInstances()
+	{
+		auto AddMatInst = [](auto& material_instances, const RenderObject* p_ro)
+		{
+			auto mat_inst = p_ro->material_instance;
+			if (material_instances.find(mat_inst) == material_instances.end())
+			{
+				material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
+			}
+		};
+		for (auto& p_ro : mesh_render)
+		{
+			AddMatInst(material_instances, p_ro);
+		}
+		for (auto& p_ro : skinned_mesh_render)
+		{
+			AddMatInst(material_instances, p_ro);
+		}
+		for (auto& p_ro : *shared_gfx_state->instanced_ros)
+		{
+			AddMatInst(material_instances, &p_ro);
+		}
+	}
+
 void GraphicsState::CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)
 {
 	//TODO actuall cull
@@ -121,6 +145,57 @@ void PreRenderData::Init(const vector<RenderObject>& render_objects, const vecto
 	skeleton_transforms = &s_transforms;
 
 	inst_mesh_buffer = &inst_mesh_render_buffer;
+}
+
+ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
+{
+	{
+		auto& mat_inst = *inst;
+		[[maybe_unused]] auto& mat = *mat_inst.material;
+		auto mat_cache = mat_inst.get_cache();
+		using offset_t =size_t;
+		hash_table<string, std::pair<offset_t, size_t>> ubo_stored;
+		ubo_stored.reserve(mat_cache.uniforms.size());
+		hash_table<string, std::pair<offset_t, size_t>> tex_stored;
+		tex_stored.reserve(mat_cache.uniforms.size());
+		for (auto itr = mat_cache.uniforms.begin(); itr != mat_cache.uniforms.end(); ++itr)
+		{
+			if (mat_cache.IsUniformBlock(itr))
+			{
+				auto block = mat_cache.GetUniformBlock(itr);
+				offset_t offset = data_block.size();
+				size_t size = block.size();
+				//Add to block
+				data_block.append(block.data(), size);
+				//store offset and stuff ( don't store ptrs due to invalidation)
+				ubo_stored[itr->first]={ offset,size };
+			}
+			else if (mat_cache.IsImageBlock(itr))
+			{
+				auto block = mat_cache.GetImageBlock(itr);
+				offset_t offset = texture_block.size();
+				size_t size = block.size();
+				//Add to block
+				texture_block.insert(texture_block.end(),block.begin(),block.end());
+				auto name = itr->first.substr(0, itr->first.find_first_of('['));
+				//store offset and stuff ( don't store ptrs due to invalidation)
+				tex_stored[name] = { offset,size };
+			}
+		}
+		for (auto& [name, block_range] : ubo_stored)
+		{
+			auto& [offset, size] = block_range;
+			auto ptr = data_block.data();
+			ubo_table[name] = string_view(ptr + offset, size);
+		}
+		for (auto& [name, block_range] : tex_stored)
+		{
+			auto& [offset, size] = block_range;
+			auto ptr = texture_block.data();
+			tex_table[name] = span<RscHandle<Texture>>{ ptr + offset,ptr + size };
+		}
+		shader = mat._shader_program;
+	}
 }
 
 }

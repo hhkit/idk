@@ -330,11 +330,12 @@ namespace idk::vkn
 			curr_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
+			curr_state.ProcessMaterialInstances();
 			if (curr_cam.overlay_debug_draw)
 			{
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
 				//TODO Add cull step
-				curr_state.dbg_render.reserve(_debug_renderer->DbgDrawCalls().size());
+				curr_state.dbg_render.reserve(std::size(_debug_renderer->DbgDrawCalls()));
 				for (auto& dbgcall : _debug_renderer->DbgDrawCalls())
 				{
 					curr_state.dbg_render.emplace_back(&dbgcall);
