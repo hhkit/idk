@@ -657,33 +657,19 @@ namespace idk::ogl
 
 			glBindVertexArray(0);
 
-            static vector<OpenGLBuffer> bufs = []()
-            {
-                vector<OpenGLBuffer> bufs_;
-                unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
-                bufs_.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
-                    .Bind().Buffer(indices, sizeof(int), 6);
-                bufs_.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
-                    { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
-                    { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
-                    { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
-                    { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
-                } });
-                return bufs_;
-            }();
-
-
-            
-
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
-            vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
-            vec3 cam_pos = cam.view_matrix[3];
+            const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
+            const vec3 cam_pos = cam.view_matrix[3];
             auto particle_render_data = curr_object_buffer.particle_render_data;
+
+            const RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+
             for (auto& elem : particle_render_data)
             {
                 std::sort(elem.particles.begin(), elem.particles.end(),
-                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) { return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
+                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) {
+                        return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
 
                 // bind shader
                 const auto material = elem.material_instance->material;
@@ -691,7 +677,7 @@ namespace idk::ogl
                 GLuint texture_units = 0;
                 SetMaterialUniforms(elem.material_instance, texture_units);
 
-                RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
+                fsq->Bind(
                     renderer_attributes{ {
                         { vtx::Attrib::Position, 0 },
                         { vtx::Attrib::UV, 1 },
@@ -700,8 +686,8 @@ namespace idk::ogl
                 glVertexAttribDivisor(0, 0);
                 glVertexAttribDivisor(1, 0);
 
-                bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
-                bufs[1].BindForDraw(renderer_attributes{ {
+                particle_buf.Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
+                particle_buf.BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
@@ -712,8 +698,7 @@ namespace idk::ogl
                 glVertexAttribDivisor(4, 1);
                 glVertexAttribDivisor(5, 1);
 
-                bufs[0].Bind(); // index buffer
-                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(elem.particles.size()));
+                fsq->DrawInstanced(elem.particles.size());
             }
 
 			glDisable(GL_BLEND);

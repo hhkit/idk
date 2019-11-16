@@ -169,6 +169,7 @@ namespace idk::phys
 	//Given a bunch of points, give two points closest to origin
 	std::pair<vec3,vec3> GJKAlgorithm(const vector<vec3> points) {
 		(void)points;
+        return {};
 	}
 
 }
