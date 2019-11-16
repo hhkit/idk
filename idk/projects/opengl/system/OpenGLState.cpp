@@ -686,13 +686,14 @@ namespace idk::ogl
                 glVertexAttribDivisor(0, 0);
                 glVertexAttribDivisor(1, 0);
 
-                particle_buf.Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
                 particle_buf.BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
                     {vtx::Attrib::Color, 5}
                 } });
+                particle_buf.Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
+
                 glVertexAttribDivisor(2, 1);
                 glVertexAttribDivisor(3, 1);
                 glVertexAttribDivisor(4, 1);
@@ -702,8 +703,9 @@ namespace idk::ogl
             }
 
 			glDisable(GL_BLEND);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
+
+		} // for each culled camera
+
 		glBindVertexArray(0);
 
 		fb_man.ResetFramebuffer();
