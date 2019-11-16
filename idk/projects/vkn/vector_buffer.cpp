@@ -36,7 +36,7 @@ namespace idk::vkn
 
 				auto [buf, mem] = hlp::CreateAllocBindBuffer(
 					pdevice, device, _capacity,
-					vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+					vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc,
 					vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible,
 					vk::DispatchLoaderDefault{}
 				);
