@@ -72,10 +72,12 @@ namespace idk::vkn
 
 		vk::UniqueSemaphore buffer_ready;
 
+		using update_pair_t =std::pair<hlp::vector_buffer*, string_view>;
+
 		DbgDrawCall        render_buffer[EnumInfo::DbgShapeI::size()];
 		hlp::vector_buffer inst_buffer  [EnumInfo::DbgShapeI::size()];
 		string             inst_data    [EnumInfo::DbgShapeI::size()];
-
+		update_pair_t      update_view  [EnumInfo::DbgShapeI::size()];
 		hlp::MemoryAllocator allocator;
 
 		pimpl(VulkanView& deets) :detail{ deets }
@@ -101,13 +103,13 @@ namespace idk::vkn
 		auto vert_data = []()
 		{
 			//auto stream = Core::GetSystem<FileSystem>().Open("/engine_data/shaders/dbgvertex.vert".spv", FS_PERMISSIONS::READ, true);
-			return Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/dbgvertex.vert.spv").value();
+			return Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/dbgvertex.vert").value();
 		}();
 		auto frag_data = []()
 		{
 			//auto stream = Core::GetSystem<FileSystem>().Open("/engine_data/shaders/dbgfragment.frag.spv", FS_PERMISSIONS::READ, true);
 			//return stringify(stream);
-			return Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/dbgfragment.frag.spv").value();
+			return Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/dbgfragment.frag").value();
 		}();
 
 		config.frag_shader = frag_data;
@@ -129,8 +131,8 @@ namespace idk::vkn
 			buffer_desc{
 				binding_info{1,sizeof(idk::debug_instance),idk::VertexRate::eInstance},
 				{
-					 attribute_info{ idk::AttribFormat::eSVec3,0, offsetof(idk::debug_instance,color) }
-					,attribute_info{ idk::AttribFormat::eMat4 ,1, offsetof(idk::debug_instance,model) }
+					 attribute_info{ idk::AttribFormat::eSVec3,0, offsetof(debug_info::inst_data,col) }
+					,attribute_info{ idk::AttribFormat::eMat4 ,1, offsetof(debug_info::inst_data,transform) }
 				}
 			});
 		config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
@@ -236,6 +238,11 @@ namespace idk::vkn
 		*/
 	}
 
+	std::pair<hlp::vector_buffer*, string_view>(&VulkanDebugRenderer::BufferUpdateInfo())[EnumInfo::DbgShapeI::size()]
+	{
+		return impl->update_view;
+	}
+
 	const DbgDrawCall (&VulkanDebugRenderer::DbgDrawCalls()const)[EnumInfo::DbgShapeI::size()]
 	{
 		// TODO: insert return statement here
@@ -286,16 +293,18 @@ namespace idk::vkn
 			auto& inst_v_buffer = impl->inst_buffer[shape_index];
 			auto num_inst_bytes = hlp::buffer_size<uint32_t>(buffer);
 			inst_v_buffer.resize(num_inst_bytes);
+			impl->update_view[shape_index] = { &inst_v_buffer,string_view{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)} };
 			//inst_v_buffer.update<debug_info::inst_data>(0, buffer, cmd_buffer);
 
 			dcall.num_instances = buffer.size();
-			dcall.RegisterBuffer(DbgBufferType::ePerInst, dbg_vert_layout::instance_binding, buffer_info{ inst_v_buffer.buffer(),0, &inst_v_buffer,string_view{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)} });
+			dcall.RegisterBuffer(DbgBufferType::ePerInst, dbg_vert_layout::instance_binding, buffer_info{ inst_v_buffer.buffer(),0 });
 			auto& pos_buffer = mesh.as<VulkanMesh>().Get(attrib_index::Position);
 			auto& idx_buffer = *mesh.as<VulkanMesh>().GetIndexBuffer();
-			dcall.RegisterBuffer(DbgBufferType::ePerVtx, dbg_vert_layout::instance_binding, buffer_info{ *pos_buffer.buffer(),s_cast<uint32_t>(pos_buffer.offset)});
+			dcall.RegisterBuffer(DbgBufferType::ePerVtx, dbg_vert_layout::vertex_binding, buffer_info{ *pos_buffer.buffer(),s_cast<uint32_t>(pos_buffer.offset)});
 			dcall.index_buffer = buffer_info{*idx_buffer.buffer(),s_cast<uint32_t>(idx_buffer.offset)};
 			dcall.num_indices = mesh.as<VulkanMesh>().IndexCount();
 /*
+
 			size_t num_inst_chunk = impl->inst_buffer.chunk_size()/sizeof(buffer[0]);
 			size_t num_elems= buffer.size();
 			uint32_t inst_binding = dbg_vert_layout::instance_binding;

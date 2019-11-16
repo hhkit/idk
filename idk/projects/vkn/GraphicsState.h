@@ -9,11 +9,9 @@ namespace idk::vkn
 	{
 		vk::Buffer buffer{};
 		uint32_t offset{};
-		hlp::vector_buffer* vb;
-		string_view data;
 
 		buffer_info() = default;
-		buffer_info(vk::Buffer buf, uint32_t off, hlp::vector_buffer* v = nullptr, string_view d = {}) :buffer{ buf }, offset{ off }, vb{ v },data{d}
+		buffer_info(vk::Buffer buf, uint32_t off) :buffer{ buf }, offset{ off }
 		{
 		}
 		bool operator==(const buffer_info& bi)const { return buffer == bi.buffer && offset == bi.offset; }
@@ -24,6 +22,13 @@ namespace idk::vkn
 		ePerVtx=0,
 		ePerInst,
 		eSize
+	};
+
+	struct BufferUpdateInst
+	{
+		hlp::vector_buffer* buffer{};
+		string_view data{};
+		uint32_t offset{};
 	};
 
 	struct DbgDrawCall
@@ -49,25 +54,23 @@ namespace idk::vkn
 				auto& buffers = *pbuffers;
 				for (auto& [binding, buffer] : buffers)
 				{
-
-					if (buffer.vb)
-						buffer.vb->update(0, buffer.data.size(), cmd_buffer, r_cast<const unsigned char*>(buffer.data.data()));
 					cmd_buffer.bindVertexBuffers(binding,buffer.buffer,buffer.offset);
 				}
 			}
 			auto& buffers = mesh_buffer[DbgBufferType::ePerInst];
 			for (auto& [binding, buffer] : buffers)
 			{
-
-				if (buffer.vb)
-					buffer.vb->update(0, buffer.data.size(), cmd_buffer, r_cast<const unsigned char*>(buffer.data.data()));
 				cmd_buffer.bindVertexBuffers(binding, buffer.buffer, buffer.offset);
 			}
 		}
 		void Draw(vk::CommandBuffer cmd_buffer)const
 		{
+			
 			if (num_indices)
+			{
+				cmd_buffer.bindIndexBuffer(index_buffer.buffer, index_buffer.offset, vk::IndexType::eUint16);
 				cmd_buffer.drawIndexed(num_indices, num_instances, index_buffer.offset, 0, 0);
+			}
 			else
 				cmd_buffer.draw(num_vertices,num_instances, 0, 0);
 		}
@@ -77,6 +80,7 @@ namespace idk::vkn
 
 	struct SharedGraphicsState
 	{
+		vector<BufferUpdateInst> update_instructions;
 		RscHandle<Texture> BrdfLookupTable;
 		const vector<LightData>* lights;
 		hlp::vector_buffer inst_mesh_render_buffer;

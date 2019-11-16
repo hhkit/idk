@@ -110,6 +110,7 @@ void SharedGraphicsState::Reset()
 {
 	lights=nullptr;
 	instanced_ros = nullptr;
+	update_instructions.resize(0);
 }
 
 const vector<LightData>& SharedGraphicsState::Lights() const

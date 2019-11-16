@@ -310,7 +310,7 @@ namespace idk::vkn
 					}
 				}, camera.clear_data);
 		}
-
+		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
@@ -333,17 +333,26 @@ namespace idk::vkn
 			curr_state.ProcessMaterialInstances();
 			if (curr_cam.overlay_debug_draw)
 			{
+				will_draw_debug = true;
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
 				//TODO Add cull step
 				curr_state.dbg_render.reserve(std::size(_debug_renderer->DbgDrawCalls()));
 				for (auto& dbgcall : _debug_renderer->DbgDrawCalls())
 				{
-					curr_state.dbg_render.emplace_back(&dbgcall);
+					if(dbgcall.num_instances)
+						curr_state.dbg_render.emplace_back(&dbgcall);
 				}
 			}
 			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
+		if (will_draw_debug)
+		{
+			for (auto& [buffer, data] : _debug_renderer->BufferUpdateInfo())
+			{
+				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
 
+			}
+		}
 		for (auto& prt : render_targets)
 		{
 			if (prt->NeedsFinalizing())

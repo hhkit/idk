@@ -498,6 +498,13 @@ namespace idk::vkn
 			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 			state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
 			state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
+			for (auto& [buffer, data,offset] : state.shared_gfx_state->update_instructions)
+			{
+				if (data.size())
+				{
+					buffer->update(offset,s_cast<uint32_t>(data.size()),cmd_buffer,std::data(data));
+				}
+			}
 			cmd_buffer.end();
 			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
 
@@ -934,20 +941,33 @@ namespace idk::vkn
 					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
 				},dud
 				);
+				dud.SendUpdates();
 				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->pipelinelayout, 0, ds, {});
 			}
-			dud.SendUpdates();
 		}
-
+		
 		const DbgDrawCall* prev = nullptr;
 		for (auto& p_dc : state.dbg_render)
 		{
+			
 			auto& dc = *p_dc;
 			dc.Bind(cmd_buffer,prev);
+			//cmd_buffer.bindVertexBuffers(0,
+			//	{
+			//		 *mesh.Get(attrib_index::Position).buffer(),//dc.mesh_buffer[DbgBufferType::ePerVtx].find(0)->second.buffer,
+			//		dc.mesh_buffer[DbgBufferType::ePerInst].find(1)->second.buffer
+			//	},
+			//	{
+			//		0,0
+			//	}
+			//	);
+			//cmd_buffer.bindIndexBuffer(dc.index_buffer.buffer, 0, vk::IndexType::eUint16);
+			//cmd_buffer.drawIndexed(mesh.IndexCount(), dc.nu, 0, 0, 0);
 			dc.Draw(cmd_buffer);
 			prev = p_dc;
 			
 		}
+		
 	}
 	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView&)
 	{

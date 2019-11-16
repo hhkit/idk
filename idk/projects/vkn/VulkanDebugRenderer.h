@@ -65,6 +65,8 @@ namespace idk::vkn
 		void Draw(const aabb& o_box, const color& color);
 		void Render(const mat4& view, const mat4& projection, GraphicsState& out);
 
+		std::pair<hlp::vector_buffer*, string_view> (&BufferUpdateInfo())[EnumInfo::DbgShapeI::size()];
+
 		const DbgDrawCall (&DbgDrawCalls()const)[EnumInfo::DbgShapeI::size()];
 		const VulkanPipeline& GetPipeline()const;
 		void GrabDebugBuffer();
