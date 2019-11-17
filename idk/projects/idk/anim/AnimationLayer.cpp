@@ -251,6 +251,8 @@ namespace idk
 		}
 	}
 
+	
+
 	bool AnimationLayer::IsPlaying() const
 	{
 		return blend_state.is_playing || curr_state.is_playing;

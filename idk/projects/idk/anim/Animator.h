@@ -23,18 +23,19 @@ namespace idk
 		const vector<mat4>& BoneTransforms()const;
 		
 		// Engine Setters
-		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
-		bool RenameAnimation(string_view from, string_view to);
-		void RemoveAnimation(string_view name);
-
 		void AddLayer();
 		bool RenameLayer(string_view from, string_view to);
 		void RemoveLayer(string_view name);
 		void RemoveLayer(size_t index);
 
+		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
+		bool RenameAnimation(string_view from, string_view to);
+		void RemoveAnimation(string_view name);
+
 		// Editor Functionality
 		void Reset();
 		void OnPreview();
+		
 
 		// Script Functions
 		void Play(string_view animation_name, float offset = 0.0f);
@@ -58,7 +59,7 @@ namespace idk
 		// void ResumeAllLayers();
 		void PauseAllLayers();
 		void StopAllLayers();
-
+		
 		// Script Getters
 		string DefaultStateName() const;
 		string CurrentStateName() const;
@@ -68,15 +69,19 @@ namespace idk
 		bool IsBlending() const;
 		bool HasCurrAnimEnded() const;
 		bool HasState(string_view name) const;
-		
+
 		int GetInt(string_view name) const;
-		bool GetBool(string_view name) const;
 		float GetFloat(string_view name) const;
+		bool GetBool(string_view name) const;
+		bool GetTrigger(string_view name) const;
 
 		// Script Setters
-		bool SetInt(string_view name, int val);
-		bool SetBool(string_view name, bool val);
-		bool SetFloat(string_view name, float val);
+		bool SetInt(string_view name, int val, bool set = false);
+		bool SetFloat(string_view name, float val, bool set = false);
+		bool SetBool(string_view name, bool val, bool set = false);
+		bool SetTrigger(string_view name, bool val, bool set = false);
+
+		void ResetTriggers();
 
 		void SetEntryState(string_view name, float offset = 0.0f);
 
@@ -91,8 +96,9 @@ namespace idk
 
 		// Scripting variables
 		hash_table<string, int> int_vars;
-		hash_table<string, bool> bool_vars;
 		hash_table<string, float> float_vars;
+		hash_table<string, bool> bool_vars;
+		hash_table<string, bool> trigger_vars;
 		
 		// Precomputation step
 		vector<mat4> pre_global_transforms{ mat4{} };

@@ -29,7 +29,8 @@ namespace idk {
 		AnimatorDisplayMode _display_mode;
 		size_t _selected_layer = 0;
 		size_t _selected_state = 0;
-		size_t _selected_transition = 0;
+		int _selected_transition = -1;
+		bool _show_transition = false;
 		// The current animator component being displayed
 		Handle<Animator> _curr_animator_component;
 

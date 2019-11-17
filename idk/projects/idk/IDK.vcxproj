@@ -23,6 +23,7 @@
     <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />
     <ClInclude Include="anim\AnimationTransition.h" />
+    <ClInclude Include="anim\AnimationTypes.h" />
     <ClInclude Include="anim\AnimationUtils.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
@@ -409,6 +410,7 @@
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="anim\Animator_detail.inl" />
     <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />
     <None Include="core\GameObject.inl" />

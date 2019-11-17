@@ -314,22 +314,170 @@ namespace idk
 		preview_playback = false;
 	}
 
-	int Animator::GetInt(string_view name) const
+	void Animator::ResetTriggers()
 	{
-		UNREFERENCED_PARAMETER(name);
-		return false;
+		for (auto& trigger : trigger_vars)
+			trigger.second = false;
 	}
 
-	bool Animator::GetBool(string_view name) const
+	int Animator::GetInt(string_view name) const
 	{
-		UNREFERENCED_PARAMETER(name);
-		return false;
+		auto res = int_vars.find(name.data());
+		if (res != int_vars.end())
+			return res->second;
+
+		return 0;
 	}
 
 	float Animator::GetFloat(string_view name) const
 	{
-		UNREFERENCED_PARAMETER(name);
+		auto res = float_vars.find(name.data());
+		if (res != float_vars.end())
+			return res->second;
+
+		return 0.0f;
+	}
+
+	bool Animator::GetBool(string_view name) const
+	{
+		auto res = bool_vars.find(name.data());
+		if (res != bool_vars.end())
+			return res->second;
+
 		return false;
+	}
+
+	bool Animator::GetTrigger(string_view name) const
+	{
+		auto res = trigger_vars.find(name.data());
+		if (res != trigger_vars.end())
+			return res->second;
+
+		return false;
+	}
+
+	bool Animator::SetInt(string_view name, int val, bool set)
+	{
+		auto res = int_vars.find(name.data());
+		bool found = false;
+
+		if (set)
+		{
+			string name_str{ name };
+			int count = -1;
+			while (res != int_vars.end())
+			{
+				++count;
+				res = int_vars.find(name_str + std::to_string(count));
+			}
+
+			if (count >= 0)
+				name_str += std::to_string(count);
+
+			int_vars.emplace(name_str, val);
+			found = true;
+		}
+
+		if (res != int_vars.end())
+		{
+			res->second = val;
+			found = true;
+		}
+
+		return found;
+	}
+
+	bool Animator::SetFloat(string_view name, float val, bool set)
+	{
+		auto res = float_vars.find(name.data());
+		bool found = false;
+
+		if (set)
+		{
+			string name_str{ name };
+			int count = -1;
+			while (res != float_vars.end())
+			{
+				++count;
+				res = float_vars.find(name_str + std::to_string(count));
+			}
+
+			if (count >= 0)
+				name_str += std::to_string(count);
+
+			float_vars.emplace(name_str, val);
+			found = true;
+		}
+
+		if (res != float_vars.end())
+		{
+			res->second = val;
+			found = true;
+		}
+
+		return found;
+	}
+
+	bool Animator::SetBool(string_view name, bool val, bool set)
+	{
+		auto res = bool_vars.find(name.data());
+		bool found = false;
+
+		if (set)
+		{
+			string name_str{ name };
+			int count = -1;
+			while (res != bool_vars.end())
+			{
+				++count;
+				res = bool_vars.find(name_str + std::to_string(count));
+			}
+
+			if (count >= 0)
+				name_str += std::to_string(count);
+
+			bool_vars.emplace(name_str, val);
+			found = true;
+		}
+
+		if (res != bool_vars.end())
+		{
+			res->second = val;
+			found = true;
+		} 
+		
+		return found;
+	}
+
+	bool Animator::SetTrigger(string_view name, bool val, bool set)
+	{
+		auto res = trigger_vars.find(name.data());
+		bool found = false;
+
+		if (set)
+		{
+			string name_str{ name };
+			int count = -1;
+			while (res != trigger_vars.end())
+			{
+				++count;
+				res = trigger_vars.find(name_str + std::to_string(count));
+			}
+
+			if (count >= 0)
+				name_str += std::to_string(count);
+
+			trigger_vars.emplace(name_str, val);
+			found = true;
+		}
+
+		if (res != trigger_vars.end())
+		{
+			res->second = val;
+			found = true;
+		}
+
+		return found;
 	}
 
 	bool Animator::HasState(string_view name) const
@@ -367,26 +515,6 @@ namespace idk
 		return layers[0].BlendStateName();
 	}
 
-	bool Animator::SetInt(string_view name, int val)
-	{
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(val);
-		return false;
-	}
-
-	bool Animator::SetBool(string_view name, bool val)
-	{
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(val);
-		return false;
-	}
-
-	bool Animator::SetFloat(string_view name, float val)
-	{
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(val);
-		return false;
-	}
 
 	void Animator::SetEntryState(string_view , float)
 	{

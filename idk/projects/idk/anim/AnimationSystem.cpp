@@ -407,6 +407,82 @@ namespace idk
 		return result;
 	}
 
+	void AnimationSystem::EvaluateTransitions(Animator& animator, AnimationLayer& layer)
+	{
+		auto& curr_state = layer.curr_state;
+		// Only evaluate curr state if it is playing
+		if (curr_state.is_playing)
+		{
+			auto& anim_state = layer.GetAnimationState(curr_state.index);
+			if (!anim_state.valid)
+				return;
+
+			for (size_t i = 0; i < anim_state.transitions.size(); ++i)
+			{
+				auto& curr_transition = anim_state.transitions[i];
+
+				bool transit = false;
+				// Evaluate exit time first
+				if (curr_transition.has_exit_time)
+				{
+					if (curr_transition.exit_time <= 1.0f)
+						transit = curr_state.elapsed_time >= curr_transition.exit_time;
+					else
+						transit = curr_state.elapsed_time >= curr_transition.exit_time;
+				}
+
+				if (transit == false)
+					continue;
+
+				for (auto& cond : curr_transition.conditions)
+				{
+					switch (cond.type)
+					{
+					case anim::AnimDataType::INT:
+					{
+						int param = animator.GetInt(cond.param_name);
+						transit &= anim::condition_ops_int[cond.op_index](param, cond.val_i);
+						break;
+					}
+					case anim::AnimDataType::FLOAT:
+					{
+						float param = animator.GetFloat(cond.param_name);
+						transit &= anim::condition_ops_float[cond.op_index](param, cond.val_f);
+						break;
+					}
+					case anim::AnimDataType::BOOL:
+					{
+						bool param = animator.GetBool(cond.param_name);
+						transit &= anim::condition_ops_bool[cond.op_index](param, cond.val_t);
+						break;
+					}
+					case anim::AnimDataType::TRIGGER:
+					{
+						bool param = animator.GetBool(cond.param_name);
+						transit &= anim::condition_ops_bool[cond.op_index](param, cond.val_t);
+						break;
+					}
+					case anim::AnimDataType::NONE:
+					{
+						break;
+					}
+					} // end switch
+
+					if (transit == false)
+						break;
+				}
+
+				if (transit == true)
+				{
+					layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
+					if (layer.blend_state.is_playing)
+						layer.blend_state.normalized_time = curr_transition.transition_offset;
+					break;
+				}
+			}
+		}
+	}
+
 	size_t AnimationSystem::LayersPass(Animator& animator)
 	{
 		// We assume that the animator is playing here.
@@ -416,6 +492,10 @@ namespace idk
 		{
 			if (!layer.IsPlaying())
 				continue;
+
+
+			// Evaluate transitions before anything happens
+			EvaluateTransitions(animator, layer);
 
 			// Check both the blend state and the curr state
 			if (layer.curr_state.normalized_time >= 1.0f)
@@ -428,7 +508,10 @@ namespace idk
 				// We dont subtract normalized_time because the designers might check
 				// normalized_time >= 1.0f to check if an animation has ended
 				if (!anim_state.loop)
+				{
 					layer.curr_state.is_playing = false;
+					layer.curr_state.normalized_time = 1.0f;
+				}
 				else
 					layer.curr_state.normalized_time -= 1.0f;
 			}
@@ -611,6 +694,8 @@ namespace idk
 				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
 			}
 		}
+
+		animator.ResetTriggers();
 	}
 
 	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)

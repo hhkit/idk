@@ -5,11 +5,13 @@
 namespace idk
 {
 	
+	
 	struct AnimationCondition
 	{
 		string param_name;
 		anim::AnimDataType type = anim::AnimDataType::NONE;
-
+		
+		anim::ConditionIndex op_index = 0;
 		float val_f;
 		int val_i;
 		bool val_b;

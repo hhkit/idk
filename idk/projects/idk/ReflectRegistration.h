@@ -486,6 +486,7 @@ REFLECT_END()
 // Enums
 REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
 REFLECT_ENUM(idk::anim::AnimDataType, "AnimDataType")
+REFLECT_ENUM(idk::anim::ConditionIndex, "ConditionIndex")
 REFLECT_ENUM(idk::anim::BlendTreeType, "BlendTreeType")
 
 // Animation States reflection
@@ -511,7 +512,7 @@ REFLECT_VARS(motions, params, blend_tree_type)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationCondition, "AnimationCondition")
-REFLECT_VARS(param_name, type, val_f, val_i, val_b, val_t)
+REFLECT_VARS(param_name, type, op_index, val_f, val_i, val_b, val_t)
 REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::AnimationTransition::conditions), "vector<AnimationCondition>")

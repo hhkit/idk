@@ -61,8 +61,6 @@ namespace idk
 		bool RenameAnimation(string_view from, string_view to);
 		void RemoveAnimation(string_view name);
 
-		
-
 		bool IsPlaying() const;
 		bool IsBlending() const;
 		bool HasCurrAnimEnded() const;
