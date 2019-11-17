@@ -131,6 +131,7 @@ namespace idk::vkn
 	{
 		const vector<CameraData>* cameras;
 		const vector<InstancedData>* inst_mesh_buffer;
+		const vector<GraphicsSystem::LightRenderRange>* shadow_ranges;
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;

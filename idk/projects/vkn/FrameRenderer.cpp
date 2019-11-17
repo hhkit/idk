@@ -327,7 +327,7 @@ namespace idk::vkn
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		const vector<InstRenderObjects>* inst_ro;
-		std::optional<GraphicsSystem::RenderRange> range;
+		std::variant<GraphicsSystem::RenderRange, GraphicsSystem::LightRenderRange> range;
 		GraphicsStateInterface() = default;
 		GraphicsStateInterface(const GraphicsState& state)
 		{
@@ -363,25 +363,27 @@ namespace idk::vkn
 		the_interface.reserve(state.mesh_render->size() + state.skinned_mesh_render->size());
 		binders.Bind(the_interface);
 		{
-			auto range_opt = state.range;
-			if (!range_opt)
-				range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
+			//auto range_opt = state.range;
+			//if (!range_opt)
+			//	range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
 			
-			auto& inst_draw_range = *range_opt;
-			for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
-				end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
-				itr != end; ++itr
-				)
-			{
-				auto& dc = *itr;
-				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material)
+			//auto& inst_draw_range = *range_opt;
+			std::visit([&](auto& inst_draw_range) {
+				for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
+					end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
+					itr != end; ++itr
+					)
 				{
-					binders.Bind(the_interface, dc);
+					auto& dc = *itr;
+					auto& mat_inst = *dc.material_instance;
+					if (mat_inst.material)
+					{
+						binders.Bind(the_interface, dc);
 
-					the_interface.FinalizeDrawCall(dc,dc.num_instances,dc.instanced_index);
+						the_interface.FinalizeDrawCall(dc, dc.num_instances, dc.instanced_index);
+					}
 				}
-			}
+			},state.range);
 		}
 
 		{
@@ -524,9 +526,8 @@ namespace idk::vkn
 		//Do the shadow pass here.
 		for (auto light_idx : state.active_lights)
 		{
-			auto& light = lights[light_idx];
 			auto& rs = _pre_states[curr_state++];
-			PreRenderShadow(light, state, rs, frame_index);
+			PreRenderShadow(light_idx, state, rs, frame_index);
 		}
 		//TODO: Submit the command buffers
 
@@ -711,13 +712,14 @@ namespace idk::vkn
 			if (oidx)
 			{
 				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 			}
 		}
 	}
 
-	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
+	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
+		const LightData& light = state.shared_gfx_state->Lights()[light_index];
 		auto cam = CameraData{ GenericHandle {},false, 0xFFFFFFFF,light.v,light.p };
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
@@ -727,7 +729,9 @@ namespace idk::vkn
 			},
 			cam,
 				*state.skeleton_transforms);
-		auto the_interface = vkn::ProcessRoUniforms(state, rs.ubo_manager, shadow_binding);
+		GraphicsStateInterface gsi = { state };
+		gsi.range = (*state.shadow_ranges)[light_index];
+		auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 		the_interface.GenerateDS(rs.dpools);
 
 		//auto& swapchain = view.Swapchain();
