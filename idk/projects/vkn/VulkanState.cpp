@@ -1336,7 +1336,16 @@ namespace idk::vkn
 
 	VulkanState::~VulkanState()
 	{
+		m_graphics_queue.waitIdle();
+		m_present_queue.waitIdle();
 		m_device->waitIdle();
+
+		for (auto& ucmd : m_pri_commandbuffers)
+			ucmd->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
+		for (auto& ucmd : m_present_trf_commandbuffers)
+			ucmd->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
+		for( auto& ucmd : m_blitz_commandbuffers)
+			ucmd->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
 	}
 
 	VulkanResourceManager& VulkanState::ResourceManager()

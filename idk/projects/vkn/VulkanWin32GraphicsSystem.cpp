@@ -384,6 +384,7 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		instance_->View().Device()->waitIdle();
 		_pimpl.reset();
 		_debug_renderer->Shutdown();
 
