@@ -91,22 +91,12 @@ namespace idk
 	{	
 		return CameraData{
 			GetGameObject(),
-			is_scene_camera,
 			0xFFFFFFF,
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,
-			overlay_debug_draw,
 			false,
-			std::visit([&](const auto& obj)->CameraData::ClearData_t
-			{ 
-				//using T = std::decay_t<decltype(obj)>;
-				//if constexpr (std::is_same_v<T, color>)
-				//	return obj.as_vec4;
-				//else
-					return obj;
-		
-			}, clear),
+			clear,
 			Mesh::defaults[MeshType::Box],
 			viewport
 		};

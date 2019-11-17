@@ -14,13 +14,18 @@ namespace idk::ogl
 		auto& m = *fb;
 		m.Size(Core::GetSystem<Application>().GetScreenSize());
 		//m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
+
 		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
 		m.SetColorBuffer(RscHandle<Texture>{tex});
+
 		tex = Core::GetResourceManager().Create<OpenGLTexture>();
 		tex->Size(m.size);
 		m.SetDepthBuffer(RscHandle<Texture>{tex});
-		fb->Name("None");
+
+		fb->Name("Game View");
+        m.render_debug = false;
+
 		return fb;
 	}
 

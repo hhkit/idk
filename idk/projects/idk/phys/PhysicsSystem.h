@@ -30,7 +30,8 @@ namespace idk
 	public:
 		void PhysicsTick            (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
 		void FirePhysicsEvents();
-		void DebugDrawColliders     (span<class Collider> colliders);
+		void DrawCollider           (const Collider& collider) const;
+		void DebugDrawColliders     (span<Collider> colliders);
 		void Reset();
 
 		vector<RaycastHit> Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers = false);
@@ -38,6 +39,8 @@ namespace idk
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
 
         bool AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const;
+
+        bool debug_draw_colliders = false;
 
 	private:
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };

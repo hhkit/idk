@@ -486,7 +486,7 @@ namespace idk::ogl
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.overlay_debug_draw && cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
+			if (cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
 					SetObjectUniforms(elem, cam.view_matrix);
@@ -719,7 +719,7 @@ namespace idk::ogl
 		//addMainBuffer.emplace_back(cBufferPickingTexture);
 		if(0)
 		{		
-			auto cam = curr_object_buffer.curr_scene_camera;
+			auto cam = curr_object_buffer.camera[curr_object_buffer.curr_scene_camera_index];
 			{
 				const auto inv_view_tfm = invert_rotation(cam.view_matrix);
 				// calculate lights for this camera

@@ -136,7 +136,7 @@ namespace idk
 			vector<FontData> font_render_data;
 			vector<UIRenderObject> ui_render;
 
-			CameraData  curr_scene_camera;
+			size_t curr_scene_camera_index;
 
 			vector<InstRenderObjects> instanced_mesh_render;
 			//vector<InstAnimatedRenderObjects> instanced_skinned_mesh_render;

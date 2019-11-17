@@ -43,7 +43,8 @@ namespace idk {
 		// because it would be confusing to have two docking targets within each others.
 		window_flags = ImGuiWindowFlags_NoCollapse
 					 | ImGuiWindowFlags_NoScrollWithMouse
-					 | ImGuiWindowFlags_NoScrollbar;
+					 | ImGuiWindowFlags_NoScrollbar
+                     | ImGuiWindowFlags_MenuBar;
 
 		//size_condition_flags = ImGuiCond_Always;
 		//pos_condition_flags = ImGuiCond_Always;
@@ -67,6 +68,16 @@ namespace idk {
 	{
 		ImGui::PopStyleVar(3);
 
+        if (ImGui::BeginMenuBar())
+        {
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() -
+                                 ImGui::CalcTextSize("Gizmos").x - ImGui::GetStyle().FramePadding.y * 2 -
+                                 ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
+
+            ImGui::Checkbox("Gizmos", &Core::GetSystem<IDE>().GetEditorRenderTarget()->render_debug);
+            ImGui::EndMenuBar();
+        }
+        
         ImVec2 imageSize = GetScreenSize();
 		auto meta = Core::GetSystem<IDE>().GetEditorRenderTarget();
         auto screen_tex = meta->GetColorBuffer();
@@ -79,7 +90,7 @@ namespace idk {
         draw_rect_size = imageSize;
 
         draw_rect_offset = (GetScreenSize() - imageSize) * 0.5f;
-        ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + draw_rect_offset);
+        ImGui::SetCursorPos(vec2(0, ImGui::GetFrameHeight()) + draw_rect_offset);
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
@@ -291,8 +302,8 @@ namespace idk {
 
 	vec2 IGE_SceneView::GetScreenSize()
 	{
-        return vec2{ ImGui::GetWindowContentRegionMax() } - ImGui::GetWindowContentRegionMin();
-        // vec2{ ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
+        //return vec2{ ImGui::GetWindowContentRegionMax() } - ImGui::GetWindowContentRegionMin();
+        return vec2{ ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
 	}
 
 	vec2 IGE_SceneView::GetMousePosInWindow()

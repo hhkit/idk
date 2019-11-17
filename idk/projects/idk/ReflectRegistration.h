@@ -474,11 +474,13 @@ REFLECT_VARS(tracking, spacing, padding, colour, fontSize, textureAtlas, text)
 REFLECT_END()
 
 // CAMERA
-REFLECT_BEGIN(idk::DontClear, "<Don'tClear>")
+REFLECT_BEGIN(idk::DontClear, "Don'tClear")
+REFLECT_END()
+REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, overlay_debug_draw, viewport, render_target)
+REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, viewport, render_target)
 REFLECT_END()
 
 // ANIMATION

@@ -396,9 +396,12 @@ namespace idk
 			if (camera.GetHandle().scene == Scene::prefab)
 				continue;
 
-			if(camera.is_scene_camera)
-				result.curr_scene_camera = camera.GenerateCameraData();
-			if(camera.enabled)
+            if (camera.GetHandle().scene == Scene::editor)
+            {
+                result.curr_scene_camera_index = result.camera.size();
+                result.camera.emplace_back(camera.GenerateCameraData());
+            }
+			else if (camera.enabled)
 				result.camera.emplace_back(camera.GenerateCameraData());
 		}
 
