@@ -26,8 +26,11 @@ namespace idk
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
 		bool RenameAnimation(string_view from, string_view to);
 		void RemoveAnimation(string_view name);
+
 		void AddLayer();
-		
+		bool RenameLayer(string_view from, string_view to);
+		void RemoveLayer(string_view name);
+		void RemoveLayer(size_t index);
 
 		// Editor Functionality
 		void Reset();

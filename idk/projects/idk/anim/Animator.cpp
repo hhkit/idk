@@ -67,6 +67,73 @@ namespace idk
 		layers.push_back(new_layer);
 	}
 
+	bool Animator::RenameLayer(string_view from, string_view to)
+	{
+		string from_str{ from };
+		string to_str{ to };
+		auto res = layer_table.find(from_str);
+		if (res == layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
+			return false;
+		}
+
+		auto found_dest = layer_table.find(to_str);
+		if (found_dest != layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
+			return false;
+		}
+
+
+		auto copy = res->second;
+
+		layer_table.erase(res);
+		layer_table.emplace(to_str, copy);
+
+		layers[copy].name = to_str;
+
+		return true;
+	}
+
+	void Animator::RemoveLayer(string_view name)
+	{
+		auto res = layer_table.find(name.data());
+		if (res == layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
+			return;
+		}
+
+		if (res->second >= layers.size())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
+			return;
+		}
+
+		layer_table.erase(res);
+		layers.erase(layers.begin() + res->second);
+	}
+
+	void Animator::RemoveLayer(size_t index)
+	{
+		if(index >= layers.size())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + std::to_string(index) + ".");
+			return;
+		}
+
+		auto res = layer_table.find(layers[index].name.data());
+		if (res == layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + layers[index].name.data() + ".");
+			return;
+		}
+
+		layer_table.erase(res);
+		layers.erase(layers.begin() + index);
+	}
+
 #pragma endregion
 
 #pragma region Editor Functionality

@@ -124,4 +124,6 @@ IMGUI_API bool IsSlotCurveHovered();
 /// Returns `true` when new slot is being created and current slot can be connected. Call between `Begin*Slot()` and `EndSlot()`.
 IMGUI_API bool IsConnectingCompatibleSlot();
 
+IMGUI_API float GetDistanceToLineSquared(const ImVec2& point, const ImVec2& a, const ImVec2& b);
+
 }   // namespace ImNodes

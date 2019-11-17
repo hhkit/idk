@@ -51,18 +51,21 @@
       anim_states: 
       - loop: 1
         name: ""
+        node_position: {x: 0, y: 0}
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: 00000000-0000-0000-0000-000000000000}
         valid: 0
       - loop: 1
         name: New State
+        node_position: {x: 0, y: 0}
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: 00000000-0000-0000-0000-000000000000}
         valid: 1
       - loop: 1
         name: idle
+        node_position: {x: 10, y: 10}
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}

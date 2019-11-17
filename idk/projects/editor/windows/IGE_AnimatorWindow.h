@@ -18,6 +18,7 @@ namespace idk {
 		enum AnimatorDisplayMode
 		{
 			None = 0,
+			Layer,
 			Transition,
 			State,
 			BlendTree,
@@ -41,7 +42,8 @@ namespace idk {
 		void drawLayersTab();
 		void drawParamsTab();
 
-		void canvasContextMenu();
+		bool canvasContextMenu();
+		bool drawConnection(ImVec2 p1, ImVec2 p2);
 
 		void resetSelection();
 		
