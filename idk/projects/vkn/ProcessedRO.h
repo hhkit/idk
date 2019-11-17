@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.hpp>
 #include <vkn/utils/utils.h>
 #include <gfx/pipeline_config.h>
+#include <meta/stl_hack.h>
+
 namespace idk
 {
 	struct RenderObject;
@@ -67,38 +69,6 @@ namespace idk::vkn
 			bool IsImage()const;
 			vk::DescriptorSetLayout GetLayout()const;
 		};
-		const RenderObject& Object()const
-		{
-			return *itr;
-		}
-		const std::optional<vk::DescriptorSet>& GetDescriptorSet(uint32_t set)const;
-		void SetDescriptorSet(uint32_t set, vk::DescriptorSet ds);
-
-		//ProcessedRO(
-
-		//	//set, update_instr
-		//	const RenderObject* itr = nullptr,
-		//	hash_table<uint32_t, vector<BindingInfo>> bindings = {},
-		//	shared_ptr<pipeline_config> config = {},
-
-		//	std::optional<RscHandle<ShaderProgram>> vertex_shader={},
-		//	std::optional<RscHandle<ShaderProgram>> geom_shader  ={},
-		//	std::optional<RscHandle<ShaderProgram>> frag_shader  ={},
-
-		//	//set, ds
-		//	vector<std::optional<vk::DescriptorSet>> descriptor_sets = {},
-		//	bool rebind_shaders = false                                  ,
-		//	size_t num_instances = 1                                     ,
-		//	size_t inst_offset = 0                                       
-		//);
-
-
-		ProcessedRO()=default;
-		ProcessedRO(ProcessedRO&&)noexcept = default;
-		ProcessedRO& operator=(ProcessedRO&&)noexcept = default;
-		ProcessedRO(const ProcessedRO&) = default;
-		ProcessedRO& operator=(const ProcessedRO&) = default;
-
 		//set, update_instr
 		const RenderObject* itr=nullptr;
 		hash_table<uint32_t, vector<BindingInfo>> bindings; //Deprecate this
@@ -113,5 +83,37 @@ namespace idk::vkn
 		bool rebind_shaders = false;
 		size_t num_instances = 1;
 		size_t inst_offset   = 0;
+		/*
+		ProcessedRO(
+			//set, update_instr
+			const RenderObject* itr_                                 = nullptr,
+			hash_table<uint32_t, vector<BindingInfo>> bindings_      = {}, //Deprecate this
+			shared_ptr<pipeline_config> config_                      = {},
+
+			std::optional<RscHandle<ShaderProgram>> vertex_shader_   = {},
+			std::optional<RscHandle<ShaderProgram>> geom_shader_     = {},
+			std::optional<RscHandle<ShaderProgram>> frag_shader_     = {},
+
+			//set, ds
+			vector<std::optional<vk::DescriptorSet>> descriptor_sets = vector<std::optional<vk::DescriptorSet>>(8),
+			bool rebind_shaders_                                     = false,
+			size_t num_instances_                                    = 1,
+			size_t inst_offset_                                      = 0,
+		) = default;
+
+		*/
+		//ProcessedRO() = default;
+		//ProcessedRO(ProcessedRO&&)noexcept = default;
+		//ProcessedRO& operator=(ProcessedRO&&)noexcept = default;
+		//ProcessedRO(const ProcessedRO&) = default;
+		//ProcessedRO& operator=(const ProcessedRO&) = default;
+
+		const RenderObject& Object()const
+		{
+			return *itr;
+		}
+		const std::optional<vk::DescriptorSet>& GetDescriptorSet(uint32_t set)const;
+		void SetDescriptorSet(uint32_t set, vk::DescriptorSet ds);
 	};
 }
+MARK_NON_COPY_CTORABLE(idk::vkn::ProcessedRO)

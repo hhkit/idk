@@ -34,46 +34,17 @@ namespace idk::vkn
 	struct DbgDrawCall
 	{
 		//set 0 = vtx, set 1 = instance
-		hash_table<uint32_t, buffer_info> mesh_buffer[s_cast<uint32_t>(DbgBufferType::eSize)]; //may be simplified
+		hash_table<uint32_t, buffer_info> mesh_buffer; //may be simplified
 		buffer_info index_buffer;
 		uint32_t num_indices   {};
 		uint32_t num_instances {};
 		uint32_t num_vertices  {};
 
-		void RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info)
-		{
-			mesh_buffer[s_cast<uint32_t>(type)][binding] = info;
-		}
-		void SetNum(uint32_t num_inst, uint32_t num_vert) { num_instances = num_inst; num_vert = num_vertices; }
+		void RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info);
+		void SetNum(uint32_t num_inst, uint32_t num_vert);
 
-		void Bind(vk::CommandBuffer cmd_buffer,const DbgDrawCall* prev)const
-		{
-			auto* pbuffers = &mesh_buffer[DbgBufferType::ePerVtx];
-			if (!prev || prev->mesh_buffer[DbgBufferType::ePerVtx] != *pbuffers)
-			{
-				auto& buffers = *pbuffers;
-				for (auto& [binding, buffer] : buffers)
-				{
-					cmd_buffer.bindVertexBuffers(binding,buffer.buffer,buffer.offset);
-				}
-			}
-			auto& buffers = mesh_buffer[DbgBufferType::ePerInst];
-			for (auto& [binding, buffer] : buffers)
-			{
-				cmd_buffer.bindVertexBuffers(binding, buffer.buffer, buffer.offset);
-			}
-		}
-		void Draw(vk::CommandBuffer cmd_buffer)const
-		{
-			
-			if (num_indices)
-			{
-				cmd_buffer.bindIndexBuffer(index_buffer.buffer, index_buffer.offset, vk::IndexType::eUint16);
-				cmd_buffer.drawIndexed(num_indices, num_instances, index_buffer.offset, 0, 0);
-			}
-			else
-				cmd_buffer.draw(num_vertices,num_instances, 0, 0);
-		}
+		void Bind(vk::CommandBuffer cmd_buffer)const;
+		void Draw(vk::CommandBuffer cmd_buffer)const;
 	};
 
 	using shadow_map_t = std::variant<RscHandle<Texture>, RscHandle<CubeMap>>;

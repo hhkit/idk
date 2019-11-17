@@ -6,6 +6,7 @@
 #include <gfx/Mesh.h>
 
 #include <vkn/utils/utils.h>
+#include <IncludeComponents.h>
 namespace idk
 {
 	struct ray;
@@ -51,6 +52,9 @@ namespace idk::vkn
 	class VulkanDebugRenderer
 	{
 	public:
+		using buffer_update_info_t=vector<std::pair<hlp::vector_buffer*, string_view>>;
+		using debug_draw_calls_t  =hash_table<RscHandle<Mesh>,DbgDrawCall>;
+		;
 		VulkanDebugRenderer();
 		~VulkanDebugRenderer();
 
@@ -59,15 +63,16 @@ namespace idk::vkn
 		void Shutdown();
 		void DrawShape(DbgShape shape, const mat4& tfm, const color& color);
 		void DrawShape(MeshType shape, const mat4& tfm, const color& color);
+		void DrawShape(RscHandle<Mesh> shape, const mat4& tfm, const color& color);
 		void Draw(const ray& ray, const color& color);
 		void Draw(const sphere& sphere, const color& color);
 		void Draw(const box& box, const color& color);
 		void Draw(const aabb& o_box, const color& color);
 		void Render(const mat4& view, const mat4& projection, GraphicsState& out);
 
-		std::pair<hlp::vector_buffer*, string_view> (&BufferUpdateInfo())[EnumInfo::DbgShapeI::size()];
+		const buffer_update_info_t &BufferUpdateInfo();
 
-		const DbgDrawCall (&DbgDrawCalls()const)[EnumInfo::DbgShapeI::size()];
+		const debug_draw_calls_t &DbgDrawCalls()const;
 		const VulkanPipeline& GetPipeline()const;
 		void GrabDebugBuffer();
 	private:

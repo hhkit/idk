@@ -64,6 +64,15 @@ namespace idk::vkn
 
 	struct VulkanDebugRenderer::pimpl
 	{
+		using update_pair_t =std::pair<hlp::vector_buffer*, string_view>;
+
+		struct DrawCallInfo
+		{
+			hlp::vector_buffer inst_buffer;
+			string             inst_data;
+			bool valid = false;
+		};
+
 		VulkanView& detail;
 		VulkanPipeline pipeline{};
 		//uniform_info uniforms{};
@@ -72,12 +81,12 @@ namespace idk::vkn
 
 		vk::UniqueSemaphore buffer_ready;
 
-		using update_pair_t =std::pair<hlp::vector_buffer*, string_view>;
+		uint32_t curr_frame = 0;
 
-		DbgDrawCall        render_buffer[EnumInfo::DbgShapeI::size()];
-		hlp::vector_buffer inst_buffer  [EnumInfo::DbgShapeI::size()];
-		string             inst_data    [EnumInfo::DbgShapeI::size()];
-		update_pair_t      update_view  [EnumInfo::DbgShapeI::size()];
+		//DbgDrawCall        render_buffer[EnumInfo::DbgShapeI::size()];
+		debug_draw_calls_t render_buffer;
+		hash_table<RscHandle<Mesh>, DrawCallInfo> buffer_data[2];
+		buffer_update_info_t update_view;
 		hlp::MemoryAllocator allocator;
 
 		pimpl(VulkanView& deets) :detail{ deets }
@@ -238,12 +247,12 @@ namespace idk::vkn
 		*/
 	}
 
-	std::pair<hlp::vector_buffer*, string_view>(&VulkanDebugRenderer::BufferUpdateInfo())[EnumInfo::DbgShapeI::size()]
+	const VulkanDebugRenderer::buffer_update_info_t &VulkanDebugRenderer::BufferUpdateInfo()
 	{
 		return impl->update_view;
 	}
 
-	const DbgDrawCall (&VulkanDebugRenderer::DbgDrawCalls()const)[EnumInfo::DbgShapeI::size()]
+	const VulkanDebugRenderer::debug_draw_calls_t &VulkanDebugRenderer::DbgDrawCalls()const
 	{
 		// TODO: insert return statement here
 		return impl->render_buffer;
@@ -254,16 +263,18 @@ namespace idk::vkn
 		// TODO: insert return statement here
 		return impl->pipeline;
 	}
-	RscHandle<Mesh> ShapeToMesh(DbgShape shape)
-	{
-		return Mesh::defaults[MeshType::Box];
-	}
+	//RscHandle<Mesh> ShapeToMesh(DbgShape shape)
+	//{
+	//	return Mesh::defaults[MeshType::Box];
+	//}
 
 	void VulkanDebugRenderer::GrabDebugBuffer()
 	{
+		impl->curr_frame = (impl->curr_frame +1)% 2;
 		info->render_info.clear();
 		info->render_info2.clear();
-		for (auto& dc : impl->render_buffer)
+		impl->update_view.clear();
+		for (auto& [mesh,dc] : impl->render_buffer)
 		{
 			dc.~DbgDrawCall();
 			new (&dc) DbgDrawCall();
@@ -274,29 +285,31 @@ namespace idk::vkn
 		{
 			//if (elem.mesh == Mesh::defaults[MeshType::Box])
 			{
-				DrawShape(DbgShape::eCube, elem.transform, elem.color);
+				DrawShape(elem.mesh, elem.transform, elem.color);
 			}
 		}
 		//auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(*impl->detail.Device(), *impl->detail.Commandpool());
 		//auto cmd_buffer = *ucmd_buffer;
-		for (auto& [shape, buffer] : info->render_info)
+		for (auto& [mesh, inst_data] : info->render_info2)
 		{
-			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
-			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
+			//auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
+			//auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 
-			const auto shape_index = EnumInfo::DbgShapeI::map(shape);
+			//const auto shape_index = EnumInfo::DbgShapeI::map(shape);
 
-			auto& dcall = impl->render_buffer[shape_index];
-			RscHandle<Mesh> mesh = ShapeToMesh(shape);
+			auto& dcall = impl->render_buffer[mesh];
+			//RscHandle<Mesh> mesh = ShapeToMesh(shape);
 
 			//Bind vtx buffers
-			auto& inst_v_buffer = impl->inst_buffer[shape_index];
-			auto num_inst_bytes = hlp::buffer_size<uint32_t>(buffer);
+			auto& buffer_data = impl->buffer_data[impl->curr_frame][mesh];
+			auto& inst_v_buffer = buffer_data.inst_buffer;
+			auto& data = buffer_data.inst_data = std::string{ r_cast<const char*>(inst_data.data()),hlp::buffer_size(inst_data) };
+			auto num_inst_bytes = hlp::buffer_size<uint32_t>(data);
 			inst_v_buffer.resize(num_inst_bytes);
-			impl->update_view[shape_index] = { &inst_v_buffer,string_view{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)} };
-			//inst_v_buffer.update<debug_info::inst_data>(0, buffer, cmd_buffer);
+			impl->update_view.emplace_back(std::make_pair(&inst_v_buffer,string_view{r_cast<const char*>(data.data()),hlp::buffer_size(data)} ));
+			//inst_v_buffer.update<debug_info::inst_data>(0, data, cmd_buffer);
 
-			dcall.num_instances = buffer.size();
+			dcall.num_instances = hlp::arr_count(inst_data);
 			dcall.RegisterBuffer(DbgBufferType::ePerInst, dbg_vert_layout::instance_binding, buffer_info{ inst_v_buffer.buffer(),0 });
 			auto& pos_buffer = mesh.as<VulkanMesh>().Get(attrib_index::Position);
 			auto& idx_buffer = *mesh.as<VulkanMesh>().GetIndexBuffer();
@@ -344,6 +357,11 @@ namespace idk::vkn
 	{
 		
 		this->info->render_info2[Mesh::defaults[shape]].emplace_back(debug_info::inst_data{ color, tfm });
+	}
+	void VulkanDebugRenderer::DrawShape(RscHandle<Mesh> shape, const mat4& tfm, const color& color)
+	{
+		this->info->render_info2[shape].emplace_back(debug_info::inst_data{ color, tfm });
+
 	}
 	void VulkanDebugRenderer::Draw(const ray& ray, const color& color)
 	{

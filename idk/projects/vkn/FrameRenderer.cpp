@@ -946,12 +946,11 @@ namespace idk::vkn
 			}
 		}
 		
-		const DbgDrawCall* prev = nullptr;
 		for (auto& p_dc : state.dbg_render)
 		{
 			
 			auto& dc = *p_dc;
-			dc.Bind(cmd_buffer,prev);
+			dc.Bind(cmd_buffer);
 			//cmd_buffer.bindVertexBuffers(0,
 			//	{
 			//		 *mesh.Get(attrib_index::Position).buffer(),//dc.mesh_buffer[DbgBufferType::ePerVtx].find(0)->second.buffer,
@@ -964,7 +963,6 @@ namespace idk::vkn
 			//cmd_buffer.bindIndexBuffer(dc.index_buffer.buffer, 0, vk::IndexType::eUint16);
 			//cmd_buffer.drawIndexed(mesh.IndexCount(), dc.nu, 0, 0, 0);
 			dc.Draw(cmd_buffer);
-			prev = p_dc;
 			
 		}
 		

@@ -199,4 +199,40 @@ ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 	}
 }
 
+void DbgDrawCall::RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info)
+{
+	mesh_buffer[binding] = info;
+}
+
+void DbgDrawCall::SetNum(uint32_t num_inst, uint32_t num_vert) { num_instances = num_inst; num_vert = num_vertices; }
+
+void DbgDrawCall::Bind(vk::CommandBuffer cmd_buffer) const
+{
+	/*auto& buffers = mesh_buffer.find(DbgBufferType::ePerVtx)->second;
+	if (!prev || !(prev->mesh_buffer.find(DbgBufferType::ePerVtx)->second == buffers))
+	{
+	for (auto& [binding, buffer] : buffers)
+	{
+	cmd_buffer.bindVertexBuffers(binding,buffer.buffer,buffer.offset);
+	}
+	}*/
+	auto& buffers = mesh_buffer;
+	for (auto& [binding, buffer] : buffers)
+	{
+		cmd_buffer.bindVertexBuffers(binding, buffer.buffer, buffer.offset);
+	}
+}
+
+void DbgDrawCall::Draw(vk::CommandBuffer cmd_buffer) const
+{
+
+	if (num_indices)
+	{
+		cmd_buffer.bindIndexBuffer(index_buffer.buffer, index_buffer.offset, vk::IndexType::eUint16);
+		cmd_buffer.drawIndexed(num_indices, num_instances, index_buffer.offset, 0, 0);
+	}
+	else
+		cmd_buffer.draw(num_vertices, num_instances, 0, 0);
+}
+
 }

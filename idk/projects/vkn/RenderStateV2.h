@@ -5,13 +5,14 @@
 #include <vkn/utils/PresentationSignals.h>
 #include <vkn/RenderUtil.h>
 #include <vkn/DeferredPass.h>
+#include <meta/stl_hack.h>
+
 namespace idk::vkn
 {
 struct RenderStateV2
 {
 	vk::UniqueCommandPool cmd_pool;
 	vk::UniqueCommandBuffer cmd_buffer;
-	const vk::CommandBuffer& CommandBuffer()const;
 	UboManager ubo_manager;//Should belong to each thread group.
 
 	PresentationSignals signal;
@@ -25,8 +26,8 @@ struct RenderStateV2
 	bool has_commands = false;
 	void FlagRendered() { has_commands = true; }
 	void Reset();
-	RenderStateV2() = default;
-	RenderStateV2(const RenderStateV2&) = delete;
-	RenderStateV2(RenderStateV2&&) = default;
+
+	const vk::CommandBuffer& CommandBuffer()const;
 };
 }
+MARK_NON_COPY_CTORABLE(idk::vkn::RenderStateV2)

@@ -337,7 +337,7 @@ namespace idk::vkn
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
 				//TODO Add cull step
 				curr_state.dbg_render.reserve(std::size(_debug_renderer->DbgDrawCalls()));
-				for (auto& dbgcall : _debug_renderer->DbgDrawCalls())
+				for (auto& [mesh,dbgcall] : _debug_renderer->DbgDrawCalls())
 				{
 					if(dbgcall.num_instances)
 						curr_state.dbg_render.emplace_back(&dbgcall);
