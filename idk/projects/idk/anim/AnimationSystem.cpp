@@ -440,7 +440,7 @@ namespace idk
 				if (delta >= 1.0f)
 				{
 					layer.curr_state = layer.blend_state;
-					layer.blend_state = AnimationLayerState{};
+					layer.blend_state.Reset();
 					layer.blend_duration = 0.0f;
 
 					// Turn off blend interrupt the moment blending is over
@@ -451,14 +451,17 @@ namespace idk
 			// Check if the animator wants to stop after this update
 			if (layer.curr_state.is_stopping == true)
 			{
-				layer.curr_state.normalized_time = 0.0f;
+				const size_t curr_index = layer.curr_state.index;
+				layer.curr_state.Reset();
+				layer.curr_state.index = curr_index;
+				/*layer.curr_state.normalized_time = 0.0f;
 				layer.curr_state.is_playing = false;
-				layer.curr_state.is_stopping = false;
+				layer.curr_state.is_stopping = false;*/
 			}
 
 			if (layer.blend_state.is_stopping == true)
 			{
-				layer.blend_state = AnimationLayerState{};
+				layer.blend_state.Reset();
 				layer.blend_duration = 0.0f;
 
 				// Turn off blend interrupt the moment blending is over
@@ -488,7 +491,9 @@ namespace idk
 				else
 				{
 					auto anim_data = anim_state.GetBasicState();
-					layer.curr_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					const float inc = Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					layer.curr_state.normalized_time += inc;
+					layer.curr_state.elapsed_time += inc;
 				}
 				
 			}
@@ -505,7 +510,9 @@ namespace idk
 				else
 				{
 					auto anim_data = anim_state.GetBasicState();
-					layer.blend_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					const float inc = Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					layer.blend_state.normalized_time += inc;
+					layer.blend_state.elapsed_time += inc;
 				}
 			}
 
@@ -526,6 +533,7 @@ namespace idk
 			time_inc += curr_inc * blendtree_motion.weight;
 		}
 
+		layer_state.elapsed_time += time_inc;
 		layer_state.normalized_time += time_inc;
 	}
 

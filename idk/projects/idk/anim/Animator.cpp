@@ -134,7 +134,13 @@ namespace idk
 	void Animator::BlendTo(string_view animation_name, float time)
 	{
 		// Cap blend duration to 1.0f
-		layers[0].BlendTo(animation_name, std::min(time, 1.0f));
+		time = std::min(abs(time), 1.0f);
+
+		// If time is 0.0, we just call play cos its the same.
+		if(time < 0.00001f)
+			layers[0].Play(animation_name);
+		else
+			layers[0].BlendTo(animation_name, time);
 	}
 
 	void Animator::Resume()

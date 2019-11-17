@@ -39,6 +39,12 @@ namespace idk
 
 	void AnimationLayer::BlendTo(size_t index, float blend_time)
 	{
+		if (blend_time < 0.00001f)
+		{
+			Play(index);
+			return;
+		}
+
 		if (index >= anim_states.size())
 		{
 			LOG_CRASH_TO(LogPool::ANIM, "Animation States table is messed up. Somehow we are accessing out of bounds.");

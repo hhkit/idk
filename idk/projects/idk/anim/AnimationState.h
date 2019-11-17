@@ -1,6 +1,6 @@
 #pragma once
 #include <res/ResourceHandle.h>
-#include "AnimationUtils.h"
+#include "AnimationTransition.h"
 namespace idk
 {
 	namespace anim { class Animation; }
@@ -41,9 +41,11 @@ namespace idk
 		vec3 node_position{};
 
 		variant<BasicAnimationState, BlendTree> state_data;
+		vector<AnimationTransition> transitions;
 
 		BasicAnimationState* GetBasicState();
 		BlendTree* GetBlendTree();
+		void AddTransition(size_t from, size_t to);
 		bool IsBlendTree() const;
 	};
 
@@ -54,7 +56,7 @@ namespace idk
 
 		bool is_playing = false, is_stopping = false;
 		float normalized_time = 0.0f;
-
+		float elapsed_time = 0.0f;
 		void Reset();
 	};
 	

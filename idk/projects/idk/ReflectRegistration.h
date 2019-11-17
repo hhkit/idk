@@ -510,8 +510,22 @@ REFLECT_BEGIN(idk::BlendTree, "BlendTree")
 REFLECT_VARS(motions, params, blend_tree_type)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::AnimationCondition, "AnimationCondition")
+REFLECT_VARS(param_name, type, val_f, val_i, val_b, val_t)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::AnimationTransition::conditions), "vector<AnimationCondition>")
+REFLECT_END();
+
+REFLECT_BEGIN(idk::AnimationTransition, "AnimationTransition")
+REFLECT_VARS(transition_from_index, transition_to_index, has_exit_time, transition_offset, transition_duration, conditions)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::AnimationState::transitions), "vector<AnimationTransition>")
+REFLECT_END();
+
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")
-REFLECT_VARS(name, valid, loop, speed, state_data, node_position)
+REFLECT_VARS(name, valid, loop, speed, state_data, node_position, transitions)
 REFLECT_END()
 
 // Animation Layer serialization

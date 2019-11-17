@@ -26,12 +26,14 @@ namespace idk {
 
 		ImNodes::CanvasState _canvas;
 		AnimatorDisplayMode _display_mode;
-		size_t _selected_layer_index = 0;
-		int _selected_state = -1;
+		size_t _selected_layer = 0;
+		size_t _selected_state = 0;
+		size_t _selected_transition = 0;
 		// The current animator component being displayed
 		Handle<Animator> _curr_animator_component;
 
 		void drawLeftCol();
+		
 		void drawCanvas();
 		void drawBlendTreeCanvas();
 		void drawAnimatorInspector();

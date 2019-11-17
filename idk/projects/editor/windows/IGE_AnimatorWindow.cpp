@@ -2,6 +2,7 @@
 #include <core/Core.h>
 #include <anim/AnimationUtils.h>
 
+#include "imguidk.h"
 #include "IGE_AnimatorWindow.h"
 #include "IGE_InspectorWindow.h"
 #include "IDE.h"
@@ -111,6 +112,144 @@ namespace idk
 		ImGui::EndChild();
 	}
 
+	void IGE_AnimatorWindow::drawAnimatorInspector()
+	{
+		if (_curr_animator_component)
+		{
+			auto& curr_layer = _curr_animator_component->layers[_selected_layer];
+			auto& curr_state = curr_layer.anim_states[_selected_state];
+
+			switch (_display_mode)
+			{
+			case AnimatorDisplayMode::State:
+			{
+				static char buf[50];
+				constexpr float transition_max_indent = 50.0f;
+				if (_selected_state == 0)
+					break;
+
+				
+				auto& state_data = *curr_state.GetBasicState();
+
+				ImGui::PushID(_selected_state);
+				strcpy_s(buf, curr_state.name.data());
+				
+				ImGui::Text("State Type: Basic Animation");
+				if (ImGui::InputText("##name", buf, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					curr_layer.RenameAnimation(curr_state.name, buf);
+				}
+
+				const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
+				const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
+				{
+					colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
+					ImGui::SameLine();
+					ImGui::SetCursorPosX(drag_pos);
+				};
+
+				const bool has_valid_clip = s_cast<bool>(state_data.motion);
+				display_name_align("Clip", !has_valid_clip);
+				ImGuidk::InputResource("##clip", &state_data.motion);
+
+				if (!has_valid_clip)
+					ImGuidk::PushDisabled();
+				display_name_align("Speed");
+				ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
+
+				display_name_align("Loop");
+				ImGui::Checkbox("##loop", &curr_state.loop);
+				ImGui::NewLine();
+
+				for (size_t i = 0 ; i < curr_state.transitions.size(); ++i)
+				{
+					auto& transition = curr_state.transitions[i];
+					bool selected = _selected_transition == i;
+					string transition_from = curr_layer.GetAnimationState(transition.transition_from_index).name;
+					string transition_to = curr_layer.GetAnimationState(transition.transition_to_index).name;
+					string transition_title = transition_from + " ==> " + transition_to;
+
+					ImGui::Selectable(transition_title.data(), &selected);
+					if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+					{
+						_display_mode = AnimatorDisplayMode::Transition;
+						_selected_transition = i;
+					}
+				}
+				if (ImGui::Button("New Transition"))
+				{
+					curr_state.AddTransition(_selected_state, 0);
+				}
+				ImGui::NewLine();
+				ImGui::Separator();
+				ImGui::NewLine();
+				ImGui::PopID();
+				// break;
+			}
+			case AnimatorDisplayMode::Transition:
+			{
+				ImGui::PushID(_selected_transition);
+				auto& curr_transition = curr_state.transitions[_selected_transition];
+				auto& transition_to_state = curr_layer.anim_states[curr_transition.transition_to_index];
+				ImGui::Text("Transition To: ");
+				ImGui::SameLine();
+				if (ImGui::BeginCombo("##transition_to", transition_to_state.name.data()))
+				{
+					for (size_t i = 0; i < curr_layer.anim_states.size(); ++i)
+					{
+						auto& s = curr_layer.anim_states[i];
+						bool selected = i == curr_transition.transition_to_index;
+						if (ImGui::Selectable(s.name.data(), selected))
+						{
+							curr_transition.transition_to_index = i;
+						}
+					}
+					
+					ImGui::EndCombo();
+				}
+
+				if (!transition_to_state.valid)
+					ImGuidk::PushDisabled();
+				ImGui::Text("Has Exit Time");
+				ImGui::SameLine();
+				ImGui::Checkbox("##has_exit_time", &curr_transition.has_exit_time);
+
+				// Exit time must be positive
+				ImGui::Text("Exit Time");
+				ImGui::SameLine();
+				if (ImGui::InputFloat("##exit_time", &curr_transition.exit_time))
+					max(curr_transition.exit_time, 0.0f);
+				ImGui::NewLine();
+
+				ImGui::Text("Transition Duration");
+				ImGui::SameLine();
+				if(ImGui::InputFloat("##transition_dur", &curr_transition.transition_duration))
+					max(curr_transition.transition_duration, 0.0f);
+				ImGui::Text("Transition Offset");
+				ImGui::SameLine();
+				if (ImGui::InputFloat("##transition_offset", &curr_transition.transition_offset))
+					max(curr_transition.transition_offset, 0.0f);
+
+				if (!transition_to_state.valid)
+					ImGuidk::PopDisabled();
+
+				ImGui::NewLine();
+				ImGui::Separator();
+				ImGui::NewLine();
+				ImGui::PopID();
+				break;
+			}
+			// case AnimatorDisplayMode::BlendTree:
+			// {
+			// 
+			// 	break;
+			// }
+			case AnimatorDisplayMode::None:
+				break;
+			}
+		}
+	}
+
 	void IGE_AnimatorWindow::drawLayersTab()
 	{
 		static char buf[50];
@@ -148,13 +287,13 @@ namespace idk
 					ImGui::PushID(i);
 					
 					auto prev_cursor_pos = ImGui::GetCursorPos();
-					const bool selected = i == _selected_layer_index;
+					const bool selected = i == _selected_layer;
 					ImGui::PushStyleColor(ImGuiCol_Header, selectable_bg_col);
 					ImGui::PushStyleColor(ImGuiCol_HeaderActive, selectable_active_col);
 					ImGui::PushStyleColor(ImGuiCol_HeaderHovered, selectable_hovered_col);
 					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, selected);
 					if (ImGui::Selectable("##layer_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2{ 0, 100 }))
-						_selected_layer_index = i;
+						_selected_layer = i;
 					ImGui::PopItemFlag();
 					ImGui::PopStyleColor(3);
 					auto new_cursor_pos = ImGui::GetCursorPos();
@@ -270,13 +409,13 @@ namespace idk
 		{
 			if (ImGui::Selectable("Create State"))
 			{
-				_curr_animator_component->layers[_selected_layer_index].AddAnimation(RscHandle<anim::Animation>{});
+				_curr_animator_component->layers[_selected_layer].AddAnimation(RscHandle<anim::Animation>{});
 				ImGui::CloseCurrentPopup();
 			}
 
 			if (ImGui::Selectable("Create Blend Tree"))
 			{
-				_curr_animator_component->layers[_selected_layer_index].AddAnimation(RscHandle<anim::Animation>{});
+				_curr_animator_component->layers[_selected_layer].AddAnimation(RscHandle<anim::Animation>{});
 				// auto& new_anim = _curr_animator_component->layers[_selected_layer_index].anim_states.back();
 				// new_anim.state_data = 
 				ImGui::CloseCurrentPopup();
@@ -288,7 +427,7 @@ namespace idk
 	void IGE_AnimatorWindow::resetSelection()
 	{
 		_display_mode = None;
-		_selected_layer_index = 0;
+		_selected_layer = 0;
 		_selected_state = -1;
 	}
 }

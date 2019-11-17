@@ -863,6 +863,9 @@
     <ClInclude Include="meta\comparator.h">
       <Filter>meta</Filter>
     </ClInclude>
+    <ClInclude Include="anim\AnimationTransition.h">
+      <Filter>anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
