@@ -104,6 +104,7 @@
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
     <ClInclude Include="res\MetaBundle.h" />
     <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\ResourceExt.h" />
     <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceLoader.h" />

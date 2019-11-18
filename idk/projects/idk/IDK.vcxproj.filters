@@ -864,6 +864,7 @@
       <Filter>meta</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CompiledTexture.h" />
+    <ClInclude Include="res\ResourceExt.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
