@@ -29,7 +29,8 @@ namespace idk
 	//	Signal<>      OnWindowed;
 		// app
 		virtual void PollEvents() = 0;
-
+		virtual void Exec(string_view path, span<const char*> argv, bool wait = false) { (path), (argv), (wait); };
+		
 		// movement
 		virtual vec2 GetMouseScreenPos() = 0;
 		virtual vec2 GetMouseScreenDel() = 0;

@@ -132,6 +132,7 @@
     <ClInclude Include="widgets\VerticalText.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="compiler\IDEAssetImporter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -243,6 +244,7 @@
     <ClCompile Include="widgets\VerticalText.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
+    <ClCompile Include="compiler\IDEAssetImporter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

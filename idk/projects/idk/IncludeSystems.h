@@ -18,6 +18,7 @@
 
 #include <phys/PhysicsSystem.h>
 
+#include <res/compiler/AssetImporter.h>
 #include <res/ResourceManager.h>
 #include <scene/SceneManager.h>
 #include <proj/ProjectManager.h>

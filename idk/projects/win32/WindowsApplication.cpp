@@ -8,6 +8,7 @@
 #include <stdio.h>  
 #include <locale>
 #include <codecvt>
+#include <process.h>
 #include <commdlg.h>
 
 #include <core/Core.h>
@@ -59,6 +60,17 @@ namespace idk::win
 		}
 
 	}
+
+	void Windows::Exec(string_view path, span<const char*> argv, bool wait)
+	{
+		vector<const char*> args{path.data()};
+		for (auto& elem : argv)
+			args.emplace_back(elem);
+		args.emplace_back(nullptr);
+
+		_spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+	}
+
 	int Windows::GetReturnVal()
 	{
 		return retval;

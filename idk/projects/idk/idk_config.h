@@ -79,6 +79,7 @@ namespace idk
 
 		// resource management
 		,	class ResourceManager
+		,	class AssetImporter
 		,   class TestSystem
 
 		// editor

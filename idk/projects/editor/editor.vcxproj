@@ -190,6 +190,7 @@
     <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
+    <ClInclude Include="compiler\IDEAssetImporter.h" />
     <ClInclude Include="DragDropTypes.h" />
     <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="commands\CMD_AddComponent.h" />
@@ -241,6 +242,7 @@
     </ClInclude>
     <ClCompile Include="commands\CMD_InstantiatePrefab.cpp" />
     <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
+    <ClCompile Include="compiler\IDEAssetImporter.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
