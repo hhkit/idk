@@ -12,7 +12,7 @@ namespace idk
 {
 	
 	IGE_AnimatorWindow::IGE_AnimatorWindow()
-		:IGE_IWindow{ "Animator##IGE_AnimatorWindow",true, ImVec2{ 800,300 }, ImVec2{ 0,0 } } 
+		:IGE_IWindow{ "Animator##IGE_AnimatorWindow",true, ImVec2{ 900,600 }, ImVec2{ 0,0 } } 
 	{		
 		// window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;;
 	}
