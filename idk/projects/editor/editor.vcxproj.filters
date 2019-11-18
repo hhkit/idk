@@ -135,6 +135,9 @@
     <ClInclude Include="widgets\DragRect.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_CallCommandAgain.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -248,6 +251,9 @@
     </ClCompile>
     <ClCompile Include="widgets\DragRect.cpp">
       <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_CallCommandAgain.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

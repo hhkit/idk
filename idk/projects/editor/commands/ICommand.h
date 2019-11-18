@@ -29,19 +29,21 @@ namespace idk {
 	class ICommand {
 	public:
 		//Disables Copy or Move constructor
-		ICommand() noexcept = default;
-		ICommand(const ICommand& disabled) = delete;
-		ICommand(ICommand&& disabled) = delete;
-		ICommand& operator=(const ICommand& disabled) = delete;
-		ICommand& operator=(ICommand&& disabled) = delete;
-		virtual bool execute() = 0;						//Return true if the command works. When it is true, it will add to the undo stack
+		ICommand() noexcept								= default;
+		ICommand(const ICommand& disabled)				= delete;
+		ICommand(ICommand&& disabled)					= delete;
+		ICommand& operator=(const ICommand& disabled)	= delete;
+		ICommand& operator=(ICommand&& disabled)		= delete;
 
+		virtual bool execute() = 0;						//Return true if the command works. When it is true, it will add to the undo stack
 		virtual bool undo() = 0;						//Return true if the command works. When it is true, it will add to the redo stack
-		virtual ~ICommand() noexcept = default;					// virtual needs default destructor
+
+		virtual ~ICommand() noexcept = default;			// virtual needs default destructor
 	protected:
+
 		friend class CMD_DeleteGameObject;
 
-		Handle<GameObject>	game_object_handle		{};	//This is used in most commands
+		Handle<GameObject>	game_object_handle		{};	//This is used in most commands. This is required by DeleteGameObject command as it checks and modifies this handle when calling undo.
 
 	};
 }

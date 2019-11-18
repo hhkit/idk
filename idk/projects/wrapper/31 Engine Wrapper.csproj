@@ -69,9 +69,12 @@
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />
+    <Compile Include="Math\Box.cs" />
     <Compile Include="Math\Color.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Behavior\MonoBehavior.cs" />
+    <Compile Include="Math\Shape.cs" />
+    <Compile Include="Math\Sphere.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="Physics\Collision.cs" />
