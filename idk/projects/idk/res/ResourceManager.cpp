@@ -239,18 +239,19 @@ namespace idk
 		}
 	}
 
-	void ResourceManager::WatchDirectory()
+	void ResourceManager::WatchBuildDirectory()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
-		{
-			Unload(PathHandle{ elem });
-		}
+			if (elem.GetMountPath().find("/build") != std::string_view::npos)
+				Unload(PathHandle{ elem });
 
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-			Load(elem);
+			if (elem.GetMountPath().find("/build") != std::string_view::npos)
+				Load(elem);
 		
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			Load(elem);
+			if (elem.GetMountPath().find("/build") != std::string_view::npos)
+				Load(elem);
 	}
 
 	bool ResourceManager::IsExtensionSupported(string_view ext)

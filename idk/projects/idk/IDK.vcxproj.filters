@@ -867,6 +867,7 @@
     <ClInclude Include="res\ResourceExt.h" />
     <ClInclude Include="res\CompiledAssets.h" />
     <ClInclude Include="res\compiler\AssetImporter.h" />
+    <ClInclude Include="res\compiler\CompiledAssetLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

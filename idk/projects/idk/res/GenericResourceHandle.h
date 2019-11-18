@@ -15,6 +15,7 @@ namespace idk
 
 		template<typename T, typename = sfinae<index_in_tuple_v<T, Resources> == ResourceCount>> // inherited handles
 		GenericResourceHandle(RscHandle<T> handle);
+		GenericResourceHandle(Guid guid, string typehash);
 
 		Guid   guid() const;
 		size_t resource_id() const;

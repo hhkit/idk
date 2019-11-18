@@ -84,7 +84,7 @@ namespace idk
 
 		if (editor)
 		{
-		//_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchDirectory,      "Watch files");
+		//_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchBuildDirectory,      "Watch files");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&AssetImporter::CheckImportDirectory,  "Watch for new files");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&IEditor::EditorUpdate,                "Editor Update");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects Again");

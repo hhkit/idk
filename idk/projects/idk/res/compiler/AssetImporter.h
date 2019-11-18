@@ -7,7 +7,7 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		virtual void CheckImportDirectory();
+		virtual void CheckImportDirectory() = 0;
 		virtual ResourceBundle GetFile(string_view) = 0;
 	};
 }
