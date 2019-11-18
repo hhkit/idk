@@ -81,42 +81,29 @@ namespace idk::vkn
 		tci.mipmap_level = 0;
 		tci.sampled(true);
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
-		tci.internal_format = vcm::MapFormat(def.internal_format);
+		tci.internal_format = MapFormat(def.internal_format);
 		if (def.is_srgb)
 			tci.internal_format = ToSrgb(tci.internal_format);
 		InputCMInfo infoList;
-		//TODO detect SRGB and load set format accordingly
 
 		//Reassign the data to be held in one contigious memory
 		char* something = r_cast<char*>(malloc(t_size));
-		//char** arr_start = r_cast<char**>(malloc(sizeof(char*)*v_size));
-		//char* start = r_cast<char*>(malloc(strideList[0]));
-		//char* end = start;
 		size_t offset = 0;
 		for (int i = 0; i < v_size; ++i)
 		{
 			memcpy_s(something+offset,t_size-offset,loadList[i],strideList[i]);
 			offset += strideList[i];
-			//*(arr_start + i * sizeof(char*)) = end;
-			//memcpy_s(end, strideList[i], loadList[i], strideList[i]);
-			//end = r_cast<char*>(malloc(strideList[i]));
 		}
 
-		//infoList = { loadList.data(),loadList.size(),strideList,t_size,def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
 		infoList = { something,t_size,strideList,t_size,def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
 		if (tm)
 			to = *tm;
 		loader.LoadCubemap(tex, allocator, *fence, to, tci, infoList);
 		
-
-		//////WARNING I NEED TO FIX THIS LEAK IF IT WORKS
+		//Free all allocated mem for loading
 		for(auto&elem: loadList)
 			stbi_image_free(elem);
-		/*for (int i = 0; i < v_size; ++i)
-		{
-			free(*(arr_start + i * sizeof(char)));
-		}
-		free(arr_start);*/
+
 		free(something);
 		return rtex;
 	}

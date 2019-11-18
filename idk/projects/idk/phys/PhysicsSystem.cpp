@@ -10,6 +10,8 @@
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
 #include <phys/collision_detection/collision_capsule.h>
+#include <phys/collision_detection/collision_capsule_box.h>
+#include <phys/collision_detection/collision_capsule_sphere.h>
 #include <phys/collision_detection/ManagedCollision.h>
 
 #include <script/MonoBehavior.h>
@@ -36,6 +38,7 @@ namespace idk
             Collider& collider;
             aabb broad_phase;
             CollidableShapes predicted_shape;
+            LayerManager::layer_t layer;
         };
 
         vector<ColliderInfo> static_info;
@@ -55,12 +58,12 @@ namespace idk
                 static_info.emplace_back(
                     std::visit([&elem](const auto& shape) -> ColliderInfo {
                         auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-                        return ColliderInfo{ elem, pred_shape.bounds(), pred_shape };
+                        return ColliderInfo{ elem, pred_shape.bounds(), pred_shape, elem.GetGameObject()->Layer() };
                     }, elem.shape)
                 );
             }
             else
-                dynamic_info.emplace_back(ColliderInfo{ elem });
+                dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
 		}
 
 		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
@@ -196,6 +199,8 @@ namespace idk
                         continue;
                     if (lrigidbody.sleeping() && rrigidbody.sleeping())
                         continue;
+                    if (!AreLayersCollidable(i.layer, j.layer))
+                        continue;
                     if (!i.broad_phase.overlaps(j.broad_phase))
                         continue;
 
@@ -215,6 +220,8 @@ namespace idk
                     const auto& lrigidbody = *i.collider._rigidbody;
 
                     if (lrigidbody.sleeping())
+                        continue;
+                    if (!AreLayersCollidable(i.layer, j.layer))
                         continue;
                     if (!i.broad_phase.overlaps(j.broad_phase))
                         continue;
@@ -312,21 +319,6 @@ namespace idk
                     rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz;
                 rigidbody.sleep_next_frame = false;
             }
-
-            for (const auto& elem : static_info)
-                debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
-            for (const auto& elem : dynamic_info)
-                debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
-            for (auto& elem : colliders)
-            {
-                if (!elem._active_cache)
-                {
-                    std::visit([&](const auto& shape)
-                    {
-                        debug_draw(calc_shape(shape, elem), color{ 0.5 });
-                    }, elem.shape);
-                }
-            }
 		};
 
 		collisions.clear();
@@ -336,6 +328,24 @@ namespace idk
 		for (int i = 0; i < 4;++i)
 			CollideObjects();
 		FinalizePositions();
+
+        if (!debug_draw_colliders)
+            return;
+
+        for (const auto& elem : static_info)
+            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+        for (const auto& elem : dynamic_info)
+            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+        for (auto& elem : colliders)
+        {
+            if (!elem._active_cache)
+            {
+                std::visit([&](const auto& shape)
+                {
+                    debug_draw(calc_shape(shape, elem), color{ 0.5 });
+                }, elem.shape);
+            }
+        }
 	}
 
 	void PhysicsSystem::FirePhysicsEvents()
@@ -471,19 +481,21 @@ namespace idk
 
 	}
 
+    void PhysicsSystem::DrawCollider(const Collider& collider) const
+    {
+        std::visit([&](const auto& shape)
+        {
+            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider),
+                collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }, Core::GetDT());
+        }, collider.shape);
+    }
+
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
 	{
-		// put shape into world space
-		constexpr auto debug_draw = [calc_shape = calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
-		{
-			std::visit([&](const auto& shape)
-			{
-				Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider), collider.is_trigger ? color{0,1,1} : c, dur);
-			}, collider.shape);
-		};
-
+        if (!debug_draw_colliders)
+            return;
 		for (auto& collider : colliders)
-			debug_draw(collider);
+            DrawCollider(collider);
 	}
 
 	void PhysicsSystem::Reset()
@@ -492,7 +504,7 @@ namespace idk
 		collisions.clear();
 	}
 
-	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, int layer_mask, bool hit_triggers)
+	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers)
 	{
 		Core::GetSystem<DebugRenderer>().Draw(r, color{1,1,0});
 
@@ -524,8 +536,12 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_aabb(
 								r, c.bounds());
-						else
-							return phys::raycast_failure{};
+					else
+						if constexpr (std::is_same_v<RShape, capsule>)
+							return phys::collide_ray_capsule(
+								r, shape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
@@ -568,6 +584,10 @@ namespace idk
 					if constexpr (std::is_same_v<RShape, box>)
 						return phys::collide_ray_aabb(
 							r, c.bounds());
+				else
+					if constexpr (std::is_same_v<RShape, capsule>)
+						return phys::collide_ray_capsule(
+							r, shape);
 				else
 					return phys::raycast_failure{};
 			}, c.shape);
@@ -614,8 +634,12 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_aabb(
 								r, c.bounds());
-						else
-							return phys::raycast_failure{};
+					else
+						if constexpr (std::is_same_v<RShape, capsule>)
+							return phys::collide_ray_capsule(
+								r, shape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
@@ -632,6 +656,11 @@ namespace idk
 
 		return foundRes;
 	}
+
+    bool PhysicsSystem::AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const
+    {
+        return GetConfig().matrix[a] & (1 << b);
+    }
 
 
 	void PhysicsSystem::Init()

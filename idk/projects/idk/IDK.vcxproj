@@ -57,13 +57,15 @@
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
-    <ClInclude Include="gfx\Viewport.h" />
+    <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />
     <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
     <ClInclude Include="math\ritters.h" />
     <ClInclude Include="particle\MinMax.h" />
@@ -236,6 +238,10 @@
     <ClInclude Include="math\shapes\box.h" />
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
+    <ClInclude Include="ui\Canvas.h" />
+    <ClInclude Include="ui\Image.h" />
+    <ClInclude Include="ui\RectTransform.h" />
+    <ClInclude Include="ui\UISystem.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
@@ -320,6 +326,8 @@
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp" />
     <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
@@ -406,6 +414,8 @@
     <ClCompile Include="math\shapes\ray.cpp" />
     <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="ui\RectTransform.cpp" />
+    <ClCompile Include="ui\UISystem.cpp" />
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>

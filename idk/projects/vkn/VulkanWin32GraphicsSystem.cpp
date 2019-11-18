@@ -332,7 +332,7 @@ namespace idk::vkn
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
 			curr_state.ProcessMaterialInstances();
-			if (curr_cam.overlay_debug_draw)
+			if (curr_cam.render_target->RenderDebug())
 			{
 				will_draw_debug = true;
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();

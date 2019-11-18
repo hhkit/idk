@@ -240,9 +240,7 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 	}
 	//return 0;
 	//return 0;
-}
-
-vec3 pbr(
+}vec3 pbr(
 	int i
 ,	vec3  view_pos
 ,	vec3  normal
@@ -283,9 +281,9 @@ vec3 pbr(
 		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),0.5),1);
         spotlight_effect = (acos(cos_alpha)>acos(cos_phi))?0:spotlight_effect;
 	}
-	if (light.type != 1) atten = (1/light.falloff)/(dist*dist);
+	if (light.type != 1) atten = (1.f/light.falloff)/(dist*dist);
 	
-	atten = min(max(atten, 1),10);
+	atten = min(max(atten, 0),1);
 	
 	vec3 radiance = light.color.rgb * atten * spotlight_effect;
 	

@@ -150,11 +150,88 @@ namespace idk
             sys.SetConfig(config);
     }
 
+    template<>
+    void DisplayConfig<PhysicsSystem>()
+    {
+        const auto& layers = Core::GetSystem<LayerManager>().GetConfig().layers;
+
+        auto& sys = Core::GetSystem<PhysicsSystem>();
+        auto config = sys.GetConfig();
+
+        bool changed = false;
+
+        ImVec2 max_label_size{};
+        for(const auto& layer : layers)
+        {
+            if (layer.empty())
+                continue;
+            
+            ImVec2 sz = ImGui::CalcTextSize(layer.c_str());
+            if (sz.x > max_label_size.x) max_label_size.x = sz.x;
+            if (sz.y > max_label_size.y) max_label_size.y = sz.y;
+        }
+
+        ImGui::Text("Collision Matrix");
+        ImGui::Indent();
+
+        const float base_x = ImGui::GetCursorPosX();
+        const float base_y = ImGui::GetCursorPosY();
+        const float spacing_x = ImGui::GetStyle().ItemInnerSpacing.x;
+        size_t counter = 0;
+        for (size_t i = 0; i < LayerManager::num_layers; ++i)
+        {
+            const size_t layer_index = LayerManager::num_layers - i - 1;
+            const auto& layer = layers[layer_index];
+
+            if (layer.empty())
+                continue;
+
+            ImGui::SetCursorPosX(base_x + max_label_size.x + spacing_x + ImGui::GetStyle().FramePadding.y +
+                (ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + spacing_x) * counter++);
+            ImGui::SetCursorPosY(base_y + max_label_size.x - ImGui::CalcTextSize(layer.c_str()).x);
+            ImGuidk::VerticalText(layer.c_str());
+        }
+        for (size_t i = 0; i < LayerManager::num_layers; ++i)
+        {
+            const auto& layer = layers[i];
+            if (layer.empty())
+                continue;
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + max_label_size.x - ImGui::CalcTextSize(layer.c_str()).x);
+            ImGui::Text(layer.c_str());
+
+            for (size_t j = i; j < LayerManager::num_layers; ++j)
+            {
+                size_t layer_index = LayerManager::num_layers - j + i - 1;
+                if (layers[layer_index].empty())
+                    continue;
+
+                ImGui::SameLine(0, spacing_x);
+                bool checked = config.matrix[i] & (1 << layer_index);
+                if (ImGui::Checkbox(("##matrix" + std::to_string(i * LayerManager::num_layers + j)).c_str(), &checked))
+                {
+                    config.matrix[i] = config.matrix[i] & ~(1 << layer_index) | (checked << layer_index);
+                    config.matrix[layer_index] = config.matrix[layer_index] & ~(1 << i) | (checked << i);
+                    changed = true;
+                }
+            }
+        }
+
+        ImGui::Unindent();
+
+        if (changed)
+        {
+            sys.SetConfig(config);
+        }
+    }
 
 
     static const char* config_labels[]
     {
-        "Tags and Layers"
+        "Tags and Layers",
+        "Scenes",
+        "Scripts",
+        "Physics"
     };
     void IGE_ProjectSettings::Update()
     {
@@ -179,6 +256,15 @@ namespace idk
         case _tags_and_layers:
             DisplayConfig<TagManager>();
             DisplayConfig<LayerManager>();
+            break;
+        case _scene:
+            DisplayConfig<SceneManager>();
+            break;
+        case _script:
+            DisplayConfig<mono::ScriptSystem>();
+            break;
+        case _physics:
+            DisplayConfig<PhysicsSystem>();
             break;
         default:
             break;

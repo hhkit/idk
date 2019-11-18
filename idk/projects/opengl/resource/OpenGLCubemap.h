@@ -26,7 +26,6 @@ namespace idk::ogl
 		span<const GLuint> ConvolutedID() const;
 
 		RscHandle<Texture> Tex()const noexcept;
-		/*span<const RscHandle<Texture>> ConvolutedTex() const;*/
 
 		RscHandle<OpenGLTexture> texture;
 		RscHandle<OpenGLTexture> convoluted_texture[2];

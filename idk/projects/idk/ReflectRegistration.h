@@ -109,6 +109,10 @@ REFLECT_CTOR(float)
 REFLECT_VARS(value)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::rect, "rect")
+REFLECT_VARS(position, size)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::matrix_decomposition<idk::real>, "matrix_decomposition")
 REFLECT_VARS(position, rotation, scale)
 REFLECT_END()
@@ -362,6 +366,16 @@ REFLECT_END()
 REFLECT_BEGIN(idk::mono::ScriptSystem, "ScriptSystem")
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::PhysicsConfig::matrix), "PhysicsLayerMatrix")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PhysicsConfig, "PhysicsConfig")
+REFLECT_VARS(matrix)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PhysicsSystem, "PhysicsSystem")
+REFLECT_END()
+
 /*==========================================================================
  * components
  *========================================================================*/
@@ -434,7 +448,7 @@ REFLECT_VARS(light, shadow_bias, casts_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PointLight, "PointLight")
-REFLECT_VARS(intensity, light_color, attenuation_radius)
+REFLECT_VARS(intensity, light_color, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
@@ -460,15 +474,13 @@ REFLECT_VARS(tracking, spacing, padding, colour, fontSize, textureAtlas, text)
 REFLECT_END()
 
 // CAMERA
-REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(position, size)
+REFLECT_BEGIN(idk::DontClear, "Don'tClear")
 REFLECT_END()
-
-REFLECT_BEGIN(idk::DontClear, "<Don'tClear>")
+REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, overlay_debug_draw, viewport, render_target)
+REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, viewport, render_target)
 REFLECT_END()
 
 // ANIMATION
@@ -575,4 +587,12 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
 REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
+REFLECT_END()
+
+// UI
+REFLECT_BEGIN(idk::Canvas, "Canvas")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::RectTransform, "RectTransform")
+REFLECT_VARS(anchor_min, anchor_max, offset_min, offset_max, pivot)
 REFLECT_END()

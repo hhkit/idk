@@ -121,7 +121,6 @@ namespace idk::vkn
 
 	*/
 	void UpdateUniformDS(
-		vk::Device& device,
 		vk::DescriptorSet& dset,
 		vector<ProcessedRO::BindingInfo> bindings,
 		DescriptorUpdateData& out
@@ -358,7 +357,7 @@ namespace idk::vkn
 				}(bindings);
 				auto& ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
-				UpdateUniformDS(device, ds, bindings,dud);
+				UpdateUniformDS( ds, bindings,dud);
 				p_ro.SetDescriptorSet(set,ds);
 			}
 		}

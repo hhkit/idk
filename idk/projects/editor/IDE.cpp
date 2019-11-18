@@ -350,6 +350,12 @@ namespace idk
 		ImGuizmo::BeginFrame();
 
 
+        for (const auto go : selected_gameObjects)
+        {
+            if (const auto col = go->GetComponent<Collider>())
+                Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
+        }
+
 
 		ige_main_window->DrawWindow();
 
@@ -363,14 +369,10 @@ namespace idk
 
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
+		
 
 
-		//_interface->Inputs()->Update(); //Moved to SceneView.cpp
-		//_interface->ImGuiFrameUpdate();
-		
-		
 		_interface->ImGuiFrameEnd();
-
 
 		command_controller.FlushCommands();
 	}
@@ -435,7 +437,6 @@ namespace idk
 			camera->Transform()->position = vec3{ 0, 0, 5 };
 			camHandle->far_plane = 100.f;
 			camHandle->render_target = editor_view;
-			camHandle->is_scene_camera = true;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);

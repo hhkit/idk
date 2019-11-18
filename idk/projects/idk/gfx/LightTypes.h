@@ -13,8 +13,11 @@ namespace idk
 	{
 		real  intensity          { 1.f } ;
 		color light_color        { 1.f } ;
+		rad   fov				 {90.f};
 		real  attenuation_radius { 1.f } ;
-		bool  use_inv_sq_atten   { true };
+		real  near{ -5.0f };
+		real  far{ +5.0f };
+		bool  use_inv_sq_atten{ true };
 
 		RscHandle<FrameBuffer> light_map;
 

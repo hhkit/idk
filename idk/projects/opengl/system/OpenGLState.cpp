@@ -72,6 +72,8 @@ namespace idk::ogl
 	{
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
+		renderer_geometry_shaders;
 
 		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
@@ -155,6 +157,7 @@ namespace idk::ogl
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
 		for (auto& cam : curr_object_buffer.camera)
@@ -207,6 +210,7 @@ namespace idk::ogl
 				pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
 				pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
 				pipeline.SetUniform(lightblk + "intensity", light.intensity);
+				pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
 				if (light.light_map)
 				{
@@ -214,7 +218,7 @@ namespace idk::ogl
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
-					(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
+					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
 					texture_units++;
 				}
 			}
@@ -292,8 +296,45 @@ namespace idk::ogl
 		{
 			pipeline.Use();
 			if (elem.index == 0) // point light
+			{
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
+				//fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
 
+				//glClearColor(1.f, 1.f, 1.f, 1.f);
+				//glClearDepth(1.f);
+				//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				//glEnable(GL_DEPTH_TEST);
+				//glDepthFunc(GL_LESS);
+
+				//glCullFace(GL_FRONT); //Fix for peterpanning
+
+				////const auto& light_view_tfm = elem.v;
+
+				////////////////////////////////////Calculate light view transform//////////////////////////////////////
+				//vector<mat4> matList;
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(-1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 1.f, 0.f), vec3(0.f, 0.f, 1.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, -1.f, 0.f), vec3(0.f, 0.f, -1.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 0.f, 1.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 0.f, -1.f), vec3(0.f, -1.f, 0.f)).inverse());
+
+
+				////////////WIP////////
+
+
+				////auto& size = s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map)->size;
+				////const auto& light_p_tfm = elem.p;
+
+				//pipeline.PopAllPrograms();
+
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				//pipeline.PushProgram(renderer_geometry_shaders[GSinglePassCube]);
+
+				//BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], light_p_tfm, light_view_tfm);
+
+			}
 			else if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
@@ -308,7 +349,7 @@ namespace idk::ogl
 				glCullFace(GL_FRONT); //Fix for peterpanning
 
 				const auto& light_view_tfm = elem.v;
-				const auto& light_p_tfm = elem.p; //near and far is currently hardcoded
+				const auto& light_p_tfm = elem.p;
 				pipeline.PopAllPrograms();
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -419,13 +460,33 @@ namespace idk::ogl
 			glBindVertexArray(vao_id);
 			
 				
-			
+			/*auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);*/
+
+			//vec3 offset{ 0.2f,0,0 };
+			//for (auto& side : frust.sides)
+			//{
+			//	box b;
+			//	/*mat3 a;
+			//	aabb a;
+			//	a[2] = side.normal.cross(vec3{ 0,1,0 }).get_normalized();
+			//	a[1] = side.normal.get_normalized();
+			//	a[0] = a[2].cross(side.normal).get_normalized();*/
+			//	//b.axes() = mat3{a};
+			//	b.extents = vec3{ 0.5f, 0.1f, 0.5f };
+			//	b.center = vec3{ 0,0,0 } +offset;
+			//	offset += offset;
+			//	Core::GetSystem<DebugRenderer>().Draw(b);
+			//}
+
+			//auto aabb = camera_vp_to_bounding_box(cam.projection_matrix * cam.view_matrix);
+
+			//Core::GetSystem<DebugRenderer>().Draw(aabb, color(1.f, 0.f, 0.5f, 1.f));
 
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.overlay_debug_draw && cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
+			if (cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
 					SetObjectUniforms(elem, cam.view_matrix);
@@ -440,7 +501,6 @@ namespace idk::ogl
 
 			// If we only use proj_matrix, frustrum will be in view space.
 			// If we use proj * view, frustrum will be in model space
-			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
 
 			auto c_mat = curr_mat = {};
 			auto c_mat_inst = curr_mat_inst = {};
@@ -597,33 +657,19 @@ namespace idk::ogl
 
 			glBindVertexArray(0);
 
-            static vector<OpenGLBuffer> bufs = []()
-            {
-                vector<OpenGLBuffer> bufs_;
-                unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
-                bufs_.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
-                    .Bind().Buffer(indices, sizeof(int), 6);
-                bufs_.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
-                    { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
-                    { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
-                    { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
-                    { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
-                } });
-                return bufs_;
-            }();
-
-
-            
-
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
-            vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
-            vec3 cam_pos = cam.view_matrix[3];
+            const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
+            const vec3 cam_pos = cam.view_matrix[3];
             auto particle_render_data = curr_object_buffer.particle_render_data;
+
+            const RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+
             for (auto& elem : particle_render_data)
             {
                 std::sort(elem.particles.begin(), elem.particles.end(),
-                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) { return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
+                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) {
+                        return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
 
                 // bind shader
                 const auto material = elem.material_instance->material;
@@ -631,7 +677,7 @@ namespace idk::ogl
                 GLuint texture_units = 0;
                 SetMaterialUniforms(elem.material_instance, texture_units);
 
-                RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
+                fsq->Bind(
                     renderer_attributes{ {
                         { vtx::Attrib::Position, 0 },
                         { vtx::Attrib::UV, 1 },
@@ -640,25 +686,26 @@ namespace idk::ogl
                 glVertexAttribDivisor(0, 0);
                 glVertexAttribDivisor(1, 0);
 
-                bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
-                bufs[1].BindForDraw(renderer_attributes{ {
+                particle_buf.BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
                     {vtx::Attrib::Color, 5}
                 } });
+                particle_buf.Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
+
                 glVertexAttribDivisor(2, 1);
                 glVertexAttribDivisor(3, 1);
                 glVertexAttribDivisor(4, 1);
                 glVertexAttribDivisor(5, 1);
 
-                bufs[0].Bind(); // index buffer
-                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(elem.particles.size()));
+                fsq->DrawInstanced(elem.particles.size());
             }
 
 			glDisable(GL_BLEND);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
+
+		} // for each culled camera
+
 		glBindVertexArray(0);
 
 		fb_man.ResetFramebuffer();
@@ -672,7 +719,7 @@ namespace idk::ogl
 		//addMainBuffer.emplace_back(cBufferPickingTexture);
 		if(0)
 		{		
-			auto cam = curr_object_buffer.curr_scene_camera;
+			auto cam = curr_object_buffer.camera[curr_object_buffer.curr_scene_camera_index];
 			{
 				const auto inv_view_tfm = invert_rotation(cam.view_matrix);
 				// calculate lights for this camera

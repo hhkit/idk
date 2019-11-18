@@ -14,6 +14,10 @@
 #include <gfx/Light.h>
 #include <gfx/Font.h>
 
+#include <ui/Canvas.h>
+#include <ui/RectTransform.h>
+#include <ui/Image.h>
+
 #include <particle/ParticleSystem.h>
 
 #include <audio/AudioSource.h>

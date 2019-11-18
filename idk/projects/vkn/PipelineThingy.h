@@ -93,7 +93,6 @@ namespace idk::vkn
 	};
 
 	void UpdateUniformDS(
-		vk::Device& device,
 		vk::DescriptorSet& dset,
 		vector<ProcessedRO::BindingInfo> bindings,
 		DescriptorUpdateData& ds_update_data

@@ -5,7 +5,8 @@
 #include <gfx/vertex_descriptor.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/CubeMap.h>
-#include <gfx/Viewport.h>
+#include <math/rect.h>
+#include <gfx/FontData.h>
 
 namespace idk
 {
@@ -92,20 +93,17 @@ namespace idk
 
 	struct CameraData
 	{
-		using ClearData_t =CameraClear;//variant<DontClear, vec4, RscHandle<CubeMap>>;
 		GenericHandle obj_id{};
-		bool is_scene_camera = false;
 		unsigned  culling_flags = 0xFFFFFFFF;
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
 		RscHandle<RenderTarget> render_target{};
-		bool overlay_debug_draw{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
 		bool is_shadow = false;
-		ClearData_t clear_data;
+        CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
-		Viewport viewport;
+		rect viewport;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 
@@ -121,4 +119,24 @@ namespace idk
         vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
+
+    struct ImageData
+    {
+        RscHandle<Texture> texture;
+        color color;
+    };
+    struct TextData
+    {
+        vector<FontPoint> coords;
+        color color;
+        RscHandle<FontAtlas> atlas;
+        int n_size;
+    };
+    struct UIRenderObject
+    {
+        mat4 transform;
+        rect rect;
+        variant<ImageData, TextData> data;
+    };
+
 }

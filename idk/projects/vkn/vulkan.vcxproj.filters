@@ -192,6 +192,18 @@
     <ClInclude Include="DeferredPass.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="VknFontAtlas.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFontAtlasLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTtfLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureRenderMeta.h">
+      <Filter>resource</Filter>
+    </ClInclude>
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="DescriptorUpdateData.h">
       <Filter>descriptor_sets</Filter>
@@ -357,6 +369,18 @@
     </ClCompile>
     <ClCompile Include="VknFramebufferFactory.cpp">
       <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFontAtlas.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFontAtlasLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTtfLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTextureRenderMeta.cpp">
+      <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="DescriptorUpdateData.cpp" />
   </ItemGroup>
