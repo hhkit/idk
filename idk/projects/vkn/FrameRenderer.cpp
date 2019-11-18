@@ -1055,9 +1055,11 @@ namespace idk::vkn
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
+#pragma optimize("",off)
 	void VBO_Test()
 	{
-
+		static int a = 0;
+		a++;
 	}
 
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
@@ -1098,7 +1100,8 @@ namespace idk::vkn
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
-
+		if (camera.is_scene_camera)
+			VBO_Test();
 		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
 		if(is_deferred)
 			deferred_interface.GenerateDS(rs.dpools, false);

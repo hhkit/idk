@@ -656,7 +656,7 @@ namespace idk::vkn
 	{
 		return hash_table<TextureFormat, vk::Format>
 		{
-			{TextureFormat::eD16Unorm, vk::Format::eD16Unorm},
+			{TextureFormat::eD16Unorm, vk::Format::eD32Sfloat},
 			{TextureFormat::eRGBA32, vk::Format::eR8G8B8A8Unorm},
 			{ TextureFormat::eBGRA32, vk::Format::eB8G8R8A8Unorm },
 			{ TextureFormat::eBC1,vk::Format::eBc1RgbaSrgbBlock },//Auto srgb
@@ -673,7 +673,7 @@ namespace idk::vkn
 	{
 		return hash_table<ColorFormat::_enum, vk::Format>
 		{
-			{ ColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD16Unorm},
+			{ ColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD32Sfloat},
 			{ ColorFormat::_enum::R_8, vk::Format::eR8Unorm },
 			{ ColorFormat::_enum::R_16, vk::Format::eR16Unorm },
 			{ ColorFormat::_enum::R_32F, vk::Format::eR32Sfloat },
