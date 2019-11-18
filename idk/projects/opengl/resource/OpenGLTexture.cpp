@@ -15,6 +15,13 @@ namespace idk::ogl
 		Buffer(nullptr, _size);
 	}
 
+	OpenGLTexture::OpenGLTexture(const CompiledTexture& compiled)
+	{
+		glGenTextures(1, &_id);
+		glBindTexture(GL_TEXTURE_2D, _id);
+
+	}
+
 	OpenGLTexture::OpenGLTexture(const bool& compressed)
 	{
 		glGenTextures(1, &_id);

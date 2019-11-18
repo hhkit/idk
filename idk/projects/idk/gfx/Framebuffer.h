@@ -47,7 +47,7 @@ namespace idk
 		}
 		Attachment& operator=(const Attachment&) = delete;
 		Attachment& operator=(Attachment&& ) = default;
-		virtual ~Attachment() { if (own_buffer)Core::GetResourceManager().Release(buffer); own_buffer = false; }
+		virtual ~Attachment() { /*if (own_buffer)Core::GetResourceManager().Release(buffer); own_buffer = false;*/ }
 	};
 
 	class FrameBuffer : public Resource<FrameBuffer>
