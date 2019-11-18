@@ -278,8 +278,8 @@ float ShadowCalculation(int iter, vec3 lightDir , vec3 normal,vec4 fPosInLS)
 		float cos_alpha= dot(normalize((frag_to_light)),normalize(light_dir));
 	    float cos_phi  = light.cos_outer;
 	    float cos_theta  = light.cos_inner;
-		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),0.5),1);
-        spotlight_effect = (acos(cos_alpha)>acos(cos_phi))?0:spotlight_effect;
+		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),1),1);
+        spotlight_effect = (cos_alpha<cos_phi)?0:spotlight_effect;
 	}
 	if (light.type != 1) atten = (1.f/light.falloff)/(dist*dist);
 	
