@@ -9,5 +9,6 @@ namespace idk
     {
     public:
         RscHandle<Texture> texture;
+        RscHandle<MaterialInstance> material;
     };
 }

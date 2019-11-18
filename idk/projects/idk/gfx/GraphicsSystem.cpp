@@ -9,7 +9,9 @@
 #include <gfx/Font.h>
 #include <ui/Image.h>
 #include <ui/RectTransform.h>
+#include <ui/Canvas.h>
 #include <common/Transform.h>
+#include <app/Application.h>
 
 #include <gfx/DebugRenderer.h>
 #include <gfx/Mesh.h>
@@ -484,12 +486,17 @@ namespace idk
 			render_data = f.fontData;
 		}
 
-
         for (auto& im : images)
         {
-            auto& render_data = result.ui_render.emplace_back();
-            render_data.rect = im.GetGameObject()->GetComponent<RectTransform>()->RectInCanvas();
-            render_data.transform = im.GetGameObject()->Transform()->GlobalMatrix();
+            const auto& go = *im.GetGameObject();
+            const auto& rt = *go.GetComponent<RectTransform>();
+            
+            auto& render_data = result.ui_render_per_cam[rt.FindCanvas()->target_camera.index].emplace_back();
+            const auto rect = rt.RectInCanvas();
+            rect.size / vec2(Core::GetSystem<Application>().GetScreenSize());
+
+            render_data.transform = go.Transform()->GlobalMatrix();
+            render_data.material = im.material;
             render_data.data = ImageData{ im.texture };
         }
 
@@ -508,6 +515,7 @@ namespace idk
 		renderer_vertex_shaders[VPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false);
 		renderer_vertex_shaders[VFsq] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert", false);
 		renderer_vertex_shaders[VFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.vert", false);
+		renderer_vertex_shaders[VUi] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.vert", false);
 
 		////////////////////Load fragment Shaders
 		//renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");

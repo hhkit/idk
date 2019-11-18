@@ -8,7 +8,10 @@ namespace idk
     class UISystem : public ISystem
     {
     public:
+        constexpr static Guid default_material_inst{ 0x90da4f5c, 0x0453, 0x4e77, 0xbb3fb506c067d085 };
+
         virtual void Init() override {};
+        virtual void LateInit() override;
         virtual void Shutdown() override {};
         virtual void Update(span<class Canvas>);
 

@@ -657,6 +657,10 @@ namespace idk::ogl
 
 			glBindVertexArray(0);
 
+
+
+            // PARTICLE SYSTEM DRAW
+
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
             const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
@@ -701,6 +705,35 @@ namespace idk::ogl
 
                 fsq->DrawInstanced(elem.particles.size());
             }
+
+            glBindVertexArray(font_vao_id);
+
+
+
+            // UI DRAW
+
+            auto ui_render_data = curr_object_buffer.ui_render_per_cam[cam.obj_id.index];
+            for (auto& elem : ui_render_data)
+            {
+                std::visit([&](const auto& data)
+                {
+                    if constexpr(std::is_same_v<decltype(data), ImageData>)
+                    {
+                        // bind shader
+                        pipeline.PushProgram(elem.material->material->_shader_program);
+                        pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+                        pipeline.SetUniform("PerUI.color", elem.color);
+                        pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+                        fsq->BindAndDraw(
+                            renderer_attributes{ {
+                                { vtx::Attrib::Position, 0 },
+                                { vtx::Attrib::UV, 1 },
+                            } }
+                        );
+                    }
+                }, elem.data);
+            }
+
 
 			glDisable(GL_BLEND);
 

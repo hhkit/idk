@@ -6,9 +6,21 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
+#include <gfx/MaterialInstance.h>
 
 namespace idk
 {
+    void UISystem::LateInit()
+    {
+        auto frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.frag", false);
+        auto mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0x90da4f5c, 0x0453, 0x4e77, 0xbb3fb506c067d085 });
+        mat->_shader_program = frag;
+        mat->Name("Default UI");
+        auto inst = Core::GetResourceManager().LoaderCreateResource<MaterialInstance>(UISystem::default_material_inst);
+        inst->material = mat;
+        inst->Name("Default UI");
+        mat->_default_instance = inst;
+    }
 
     void UISystem::Update(span<class Canvas> canvases)
     {

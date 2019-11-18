@@ -123,19 +123,19 @@ namespace idk
     struct ImageData
     {
         RscHandle<Texture> texture;
-        color color;
     };
     struct TextData
     {
         vector<FontPoint> coords;
-        color color;
         RscHandle<FontAtlas> atlas;
         int n_size;
     };
     struct UIRenderObject
     {
         mat4 transform;
+        color color;
         rect rect;
+        RscHandle<MaterialInstance> material;
         variant<ImageData, TextData> data;
     };
 

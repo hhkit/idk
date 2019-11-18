@@ -31,4 +31,16 @@ namespace idk
         }
     }
 
+    Handle<Canvas> RectTransform::FindCanvas() const
+    {
+        auto parent = GetGameObject()->Parent();
+        while (parent)
+        {
+            if (const auto canvas = parent->GetComponent<Canvas>())
+                return canvas;
+            parent = GetGameObject()->Parent();
+        }
+        return {};
+    }
+
 }

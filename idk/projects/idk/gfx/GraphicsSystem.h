@@ -30,6 +30,7 @@ namespace idk
 		VPBRConvolute,
 		VFsq,
 		VFont,
+        VUi,
 		VMax
 	};
 	enum FragmentShaders
@@ -134,7 +135,7 @@ namespace idk
 			vector<SkeletonTransforms> skeleton_transforms;
             vector<ParticleRenderData> particle_render_data;
 			vector<FontData> font_render_data;
-			vector<UIRenderObject> ui_render;
+			hash_table<GenericHandle::index_t, vector<UIRenderObject>> ui_render_per_cam;
 
 			size_t curr_scene_camera_index;
 

@@ -19,5 +19,6 @@ namespace idk
         rect rect; // computed local rect
 
         idk::rect RectInCanvas() const;
+        Handle<class Canvas> FindCanvas() const;
     };
 }
