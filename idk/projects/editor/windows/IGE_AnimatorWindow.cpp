@@ -14,7 +14,7 @@ namespace idk
 	IGE_AnimatorWindow::IGE_AnimatorWindow()
 		:IGE_IWindow{ "Animator##IGE_AnimatorWindow",true, ImVec2{ 800,300 }, ImVec2{ 0,0 } } 
 	{		
-		window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;;
+		// window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;;
 	}
 	void IGE_AnimatorWindow::BeginWindow()
 	{
@@ -30,6 +30,26 @@ namespace idk
 		_canvas.scroll_to_move = false;
 		_canvas.no_ctrl_to_zoom = true;
 		_canvas.drag_zoom = false;
+
+		_blend_prog_col = ImVec4{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
+		_layer_selectable_display_size = ImVec2{ 0, 100 };
+		_state_selectable_display_size = ImVec2{ 0, 40 };
+		_selectable_offset = ImVec2{ 0, 5 };
+
+		_selectable_bg_col = ImVec4{ ImGui::GetStyleColorVec4(ImGuiCol_Header).x,
+									ImGui::GetStyleColorVec4(ImGuiCol_Header).y,
+									ImGui::GetStyleColorVec4(ImGuiCol_Header).z,
+									ImGui::GetStyleColorVec4(ImGuiCol_Header).w * 0.3f };
+		_selectable_active_col = ImVec4{ ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).x,
+										ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).y,
+										ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).z,
+										ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).w * 0.3f };
+		_selectable_hovered_col = ImVec4{ ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).x,
+											ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).y,
+											ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).z,
+											ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).w * 0.3f };
+		
+
 	}
 	void IGE_AnimatorWindow::Update()
 	{
@@ -52,16 +72,17 @@ namespace idk
 				resetSelection();
 			_curr_animator_component = curr_obj_comp;
 		}
-		
+
+		// float window_size = ImGui::GetWindowWidth();
 		ImGui::Columns(3);
 		if (ImGui::IsWindowAppearing())
-			ImGui::SetColumnWidth(-1, 200);
+			ImGui::SetColumnWidth(-1, window_size.x * 0.25f);
 		
 		drawLeftCol();
 		ImGui::NextColumn();
 
 		if (ImGui::IsWindowAppearing())
-			ImGui::SetColumnWidth(-1, 400);
+			ImGui::SetColumnWidth(-1, window_size.x * 0.375f);
 
 		drawCanvas();
 
@@ -74,6 +95,14 @@ namespace idk
 	IGE_AnimatorWindow::~IGE_AnimatorWindow()
 	{
 	}
+
+	void IGE_AnimatorWindow::separator()
+	{
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImVec2 p = ImGui::GetCursorScreenPos();
+		draw_list->AddLine(ImVec2(p.x - 9999, p.y), ImVec2(p.x + 9999, p.y), ImGui::GetColorU32(ImGuiCol_Border));
+	}
+
 	void IGE_AnimatorWindow::drawLeftCol()
 	{
 		// ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
@@ -86,13 +115,13 @@ namespace idk
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor();
 
-		auto tab_flags = ImGuiTabBarFlags_NoCloseWithMiddleMouseButton | ImGuiTabBarFlags_FittingPolicyScroll;
+		auto tab_flags = ImGuiTabBarFlags_NoCloseWithMiddleMouseButton;
 		if(ImGui::BeginTabBar("Layers & Params", tab_flags))
 		{
 			
 			drawLayersTab();
 			drawParamsTab();
-
+			
 			ImGui::EndTabBar();
 		};
 
@@ -101,57 +130,66 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::drawCanvas()
 	{
-		ImGui::BeginChild("Canvas", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-		auto window_pos = ImGui::GetWindowPos();
-		if (canvasContextMenu())
+		ImGui::BeginChild("Canvas", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+		auto tab_flags = ImGuiTabBarFlags_NoCloseWithMiddleMouseButton;
+		if (ImGui::BeginTabBar("States & Bone Mask", tab_flags))
 		{
-			// New state was created, need to set the positions
-			auto& new_state = _curr_animator_component->layers[_selected_layer].anim_states.back();
-			new_state.node_position = (ImGui::GetWindowPos() - window_pos - _canvas.offset) / _canvas.zoom;
-		}
-		
-
-		// ImGui::ShowDemoWindow();
-		ImNodes::BeginCanvas(&_canvas);
-		
-		if (_curr_animator_component)
-		{
-			// drawConnection(window_pos + _curr_animator_component->layers[0].anim_states[1].node_position, _curr_animator_component->layers[0].anim_states[2].node_position);
-			auto& layer = _curr_animator_component->layers[_selected_layer];
-
-			for (size_t i = 1; i < layer.anim_states.size(); ++i)
-			{
-				auto& state = layer.anim_states[i];
-				bool selected_state = _selected_state == i;
-				bool was_selected = selected_state;
-				if (ImNodes::BeginNode(&state, reinterpret_cast<ImVec2*>(&state.node_position), &selected_state))
-				{
-					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x * 0.5f);
-					ImGui::Text(state.name.c_str());
-					ImGui::NewLine();
-					// ImGui::DragFloat2("Node Pos", &state.node_position[0], 0.01f);
-					float prog_bar = 0.0f;
-					if (layer.curr_state.index == i)
-						prog_bar = layer.curr_state.normalized_time;
-					else if (layer.blend_state.index == i)
-						prog_bar = layer.blend_state.normalized_time;
-					ImGui::ProgressBar(prog_bar, ImVec2(100, 3), nullptr);
-
-				}
-				ImNodes::EndNode();
-
-				if (!was_selected && selected_state)
-				{
-					_selected_state = i;
-					_show_transition = false;
-					_display_mode = AnimatorDisplayMode::State;
-				}
-
-				
-			}
-		}
-		ImNodes::EndCanvas();
+			drawStatesTab();
+			
+			ImGui::EndTabBar();
+		};
 		ImGui::EndChild();
+		//ImGui::BeginChild("Canvas", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		//auto window_pos = ImGui::GetWindowPos();
+		//if (canvasContextMenu())
+		//{
+		//	// New state was created, need to set the positions
+		//	auto& new_state = _curr_animator_component->layers[_selected_layer].anim_states.back();
+		//	new_state.node_position = (ImGui::GetWindowPos() - window_pos - _canvas.offset) / _canvas.zoom;
+		//}
+		//
+
+		//// ImGui::ShowDemoWindow();
+		//ImNodes::BeginCanvas(&_canvas);
+		//
+		//if (_curr_animator_component)
+		//{
+		//	// drawConnection(window_pos + _curr_animator_component->layers[0].anim_states[1].node_position, _curr_animator_component->layers[0].anim_states[2].node_position);
+		//	auto& layer = _curr_animator_component->layers[_selected_layer];
+
+		//	for (size_t i = 1; i < layer.anim_states.size(); ++i)
+		//	{
+		//		auto& state = layer.anim_states[i];
+		//		bool selected_state = _selected_state == i;
+		//		bool was_selected = selected_state;
+		//		if (ImNodes::BeginNode(&state, reinterpret_cast<ImVec2*>(&state.node_position), &selected_state))
+		//		{
+		//			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x * 0.5f);
+		//			ImGui::Text(state.name.c_str());
+		//			ImGui::NewLine();
+		//			// ImGui::DragFloat2("Node Pos", &state.node_position[0], 0.01f);
+		//			float prog_bar = 0.0f;
+		//			if (layer.curr_state.index == i)
+		//				prog_bar = layer.curr_state.normalized_time;
+		//			else if (layer.blend_state.index == i)
+		//				prog_bar = layer.blend_state.normalized_time;
+		//			ImGui::ProgressBar(prog_bar, ImVec2(100, 3), nullptr);
+
+		//		}
+		//		ImNodes::EndNode();
+
+		//		if (!was_selected && selected_state)
+		//		{
+		//			_selected_state = i;
+		//			_show_transition = false;
+		//			_display_mode = AnimatorDisplayMode::State;
+		//		}
+
+		//		
+		//	}
+		//}
+		//ImNodes::EndCanvas();
+		//ImGui::EndChild();
 	}
 
 	void IGE_AnimatorWindow::drawAnimatorInspector()
@@ -161,12 +199,6 @@ namespace idk
 			static char buf[50];
 			auto& curr_layer = _curr_animator_component->layers[_selected_layer];
 			auto& curr_state = curr_layer.anim_states[_selected_state];
-			const auto my_separator = []()
-			{
-				ImDrawList* draw_list = ImGui::GetWindowDrawList();
-				ImVec2 p = ImGui::GetCursorScreenPos();
-				draw_list->AddLine(ImVec2(p.x - 9999, p.y), ImVec2(p.x + 9999, p.y), ImGui::GetColorU32(ImGuiCol_Border));
-			};
 
 			const auto display_transition = [&]()
 			{
@@ -219,7 +251,7 @@ namespace idk
 					ImGuidk::PopDisabled();
 
 				ImGui::NewLine();
-				my_separator();
+				separator();
 				ImGui::NewLine();
 				ImGui::PopID();
 			};
@@ -237,45 +269,42 @@ namespace idk
 				ImGui::PushID(_selected_state);
 				strcpy_s(buf, curr_state.name.data());
 				
-				ImGui::Text("State Type: Basic Animation");
+				ImGui::Text("Animation State");
+				float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Animation State").x);
+				float item_width = width_avail * 0.8f;
+				float offset = ImGui::CalcTextSize("Animation State").x + width_avail - item_width;
+
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
 				if (ImGui::InputText("##name", buf, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
 				{
 					curr_layer.RenameAnimation(curr_state.name, buf);
 				}
-
-				// const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-				// const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
-				// {
-				// 	colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-				// 	ImGui::SameLine();
-				// 	ImGui::SetCursorPosX(drag_pos);
-				// };
+				ImGui::PopItemWidth();
 
 				const bool has_valid_clip = s_cast<bool>(state_data.motion);
 				!has_valid_clip ? ImGui::TextColored(ImVec4{ 1,0,0,1 }, "Clip") : ImGui::Text("Clip");
-				ImGui::SameLine();
-				ImGuidk::InputResource("##clip", &state_data.motion);
 
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
+				ImGuidk::InputResource("##clip", &state_data.motion);
+				ImGui::PopItemWidth();
 				if (!has_valid_clip)
 					ImGuidk::PushDisabled();
+
 				ImGui::Text("Speed");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
 				ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
+				ImGui::PopItemWidth();
 
 				ImGui::Text("Loop");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
 				ImGui::Checkbox("##loop", &curr_state.loop);
 				ImGui::NewLine();
-				
-				
-				
+				separator();
+
 				ImGui::Text("Transitions");
-				// ImGui::SameLine();
-
-				ImVec2 button_pos = ImGui::GetCursorPos();
-				
-				
-
 				ImGui::PushItemWidth(-1);
 				auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
 				bg_col.w = bg_col.w * 0.4f;
@@ -316,21 +345,12 @@ namespace idk
 				{
 					curr_state.AddTransition(_selected_state, 0);
 				}
-				// ImVec2 next_pos = ImGui::GetCursorPos();
-				// 
-				// ImGui::SameLine();
-				// float button_sz = ImGui::CalcTextSize("+").x;
-				// button_sz += ImGui::GetStyle().FramePadding.x * 2;
-				// 
-				// curr_pos.x = ImGui::GetCursorPosX() - button_sz * 2;
-				// ImGui::SetCursorPos(curr_pos);
-				// 
-				// ImGui::SetCursorPos(next_pos);
 				
 				if (!has_valid_clip)
 					ImGuidk::PopDisabled();
+
 				ImGui::NewLine();
-				my_separator();
+				separator();
 				ImGui::NewLine();
 				ImGui::PopID();
 
@@ -367,26 +387,6 @@ namespace idk
 		static bool just_rename = false;
 		static int rename_index = -1;
 		
-
-		static const float variable_offset = 20.0f;
-		static const ImVec2 selectable_offset{ 0, 5 };
-		static const ImVec2 layer_display_size{ 0, 100 };
-		
-		static const ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
-
-		static const ImVec4 selectable_bg_col = ImVec4{ ImGui::GetStyleColorVec4(ImGuiCol_Header).x, 
-														ImGui::GetStyleColorVec4(ImGuiCol_Header).y, 
-														ImGui::GetStyleColorVec4(ImGuiCol_Header).z, 
-														ImGui::GetStyleColorVec4(ImGuiCol_Header).w * 0.3f };
-		static const ImVec4 selectable_active_col = ImVec4{ ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).x,
-															ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).y, 
-															ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).z, 
-															ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive).w * 0.3f };
-		static const ImVec4 selectable_hovered_col = ImVec4{	ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).x,
-																ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).y,
-																ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).z,
-																ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered).w * 0.3f };
-		
 		if (ImGui::BeginTabItem("Layers", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
 		{
 			if (_curr_animator_component)
@@ -400,24 +400,24 @@ namespace idk
 					
 					auto prev_cursor_pos = ImGui::GetCursorPos();
 					const bool selected = i == _selected_layer;
-					ImGui::PushStyleColor(ImGuiCol_Header, selectable_bg_col);
-					ImGui::PushStyleColor(ImGuiCol_HeaderActive, selectable_active_col);
+					ImGui::PushStyleColor(ImGuiCol_Header, _selectable_bg_col);
+					ImGui::PushStyleColor(ImGuiCol_HeaderActive, _selectable_active_col);
 					if(selected)
-						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, selectable_bg_col);
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
 					else
-						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, selectable_hovered_col);
-					if (ImGui::Selectable("##layer_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2{ 0, 100 }))
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
+					if (ImGui::Selectable("##layer_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, _layer_selectable_display_size))
 					{
 						resetSelection();
 						_selected_layer = i;
 						_display_mode = AnimatorDisplayMode::Layer;
 					}
 					ImGui::PopStyleColor(3);
+					separator();
 					auto new_cursor_pos = ImGui::GetCursorPos();
-
+					ImGui::Indent(ImGui::GetStyle().FramePadding.x);
 					// Draw layer variables
-					ImGui::SetCursorPos(prev_cursor_pos + selectable_offset);
-					ImGui::Indent(10);
+					ImGui::SetCursorPos(prev_cursor_pos + _selectable_offset);
 					if (rename_index == i)
 					{
 						if (ImGui::InputText("##rename", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
@@ -445,7 +445,13 @@ namespace idk
 					}
 
 					ImGui::Text("Blending");
-					ImGui::SameLine(0.0f, variable_offset);
+					
+					const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Blending").x);
+					const float item_width = width_avail * 0.8f;
+					const float offset = ImGui::CalcTextSize("Blending").x + width_avail - item_width;
+
+					ImGui::SameLine(offset);
+					ImGui::PushItemWidth(item_width);
 					if (ImGui::BeginCombo("##layer_blend_mode", layer.blend_type.to_string().data()))
 					{
 						if (ImGui::Selectable("Override", layer.blend_type == AnimLayerBlend::Override_Blend))
@@ -454,27 +460,32 @@ namespace idk
 							layer.blend_type = AnimLayerBlend::Override_Blend;
 						ImGui::EndCombo();
 					}
+					ImGui::PopItemWidth();
 
 					ImGui::Text("Weight");
-					ImGui::SameLine(0.0f, variable_offset);
+					ImGui::SameLine(offset);
+					ImGui::PushItemWidth(item_width);
 					if (layer.IsPlaying())
 						ImGui::DragFloat("##def weight", &layer.weight, 0.01f, 0.0f, 1.0f, "%.2f");
 					else
 						ImGui::DragFloat("##def weight", &layer.default_weight, 0.01f, 0.0f, 1.0f, "%.2f");
+					ImGui::PopItemWidth();
 
 					ImGui::NewLine();
+					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x * 2, 3);
 					if (layer.IsPlaying())
-						ImGui::ProgressBar(layer.weight, ImVec4{ 0.5, 0.5, 0.5, 1.0 }, ImVec2(-1, 3), nullptr);
+						ImGui::ProgressBar(layer.weight, ImVec4{ 0.5, 0.5, 0.5, 1.0 }, prog_size, nullptr);
 					else
 						ImGui::ProgressBar(layer.default_weight, ImVec4{ 0.5, 0.5, 0.5, 1.0 }, ImVec2(-1, 3), nullptr);
-
-					ImGui::Unindent();
+					
+					ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
 					ImGui::SetCursorPos(new_cursor_pos);
 					
 					ImGui::PopID();
-					ImGui::Separator();
+					
 				}
 
+				ImGui::NewLine();
 				if (ImGui::Button("Add Layer"))
 				{
 					_curr_animator_component->AddLayer();
@@ -499,8 +510,169 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::drawParamsTab()
 	{
+
 		if (ImGui::BeginTabItem("Parameters", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
 		{
+			if (_curr_animator_component)
+			{
+				auto& int_vars = _curr_animator_component->int_vars;
+				auto& float_vars = _curr_animator_component->float_vars;
+				auto& bool_vars = _curr_animator_component->bool_vars;
+				auto& trigger_vars = _curr_animator_component->trigger_vars;
+
+				const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Add").x);
+				const float item_width = width_avail * 0.8f;
+				const float offset = ImGui::CalcTextSize("Blending").x + width_avail - item_width;
+
+				ImGui::Text("Float");
+				ImGui::SameLine(5);
+				if (ImGui::Button("+"))
+				{
+					_curr_animator_component->SetFloat("New Float", 0.0f, true);
+				}
+				separator();
+
+				for (size_t i = 0; i < int_vars.size(); ++i)
+				{
+					// ImGui::InputText("##float_name");
+				}
+				
+				ImGui::NewLine();
+
+				ImGui::Text("Int");
+				ImGui::SameLine(5);
+				if (ImGui::Button("+"))
+				{
+					_curr_animator_component->SetInt("New Float", 0, true);
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("+"))
+				{
+					_curr_animator_component->SetInt("New Float", 0, true);
+				}
+				separator();
+				ImGui::NewLine();
+
+				ImGui::Text("Bool");
+				ImGui::SameLine(5);
+				if (ImGui::Button("+"))
+				{
+					_curr_animator_component->SetBool("New Bool", false, true);
+				}
+				separator();
+				ImGui::NewLine();
+
+				ImGui::Text("Trigger");
+				ImGui::SameLine(5);
+				if (ImGui::Button("+"))
+				{
+					_curr_animator_component->SetTrigger("New Trigger", false, true);
+				}
+				separator();
+				ImGui::NewLine();
+			}
+			
+			ImGui::EndTabItem();
+		}
+	}
+	void IGE_AnimatorWindow::drawStatesTab()
+	{
+		static char buf[50];
+		static bool just_rename = false;
+		static int rename_index = -1;
+
+		static const ImVec2 selectable_offset{ 0, 5 };
+
+		if (ImGui::BeginTabItem("States", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
+		{
+			if (_curr_animator_component)
+			{
+				auto& curr_layer = _curr_animator_component->layers[_selected_layer];
+				for (int i = 1; i < curr_layer.anim_states.size(); ++i)
+				{
+					auto& state = curr_layer.anim_states[i];
+					strcpy_s(buf, state.name.data());
+					ImGui::PushID(i);
+
+					auto prev_cursor_pos = ImGui::GetCursorPos();
+					const bool selected = i == _selected_state;
+					ImGui::PushStyleColor(ImGuiCol_Header, _selectable_bg_col);
+					ImGui::PushStyleColor(ImGuiCol_HeaderActive, _selectable_active_col);
+					if (selected)
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
+					else
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
+					if (ImGui::Selectable("##state_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, _state_selectable_display_size))
+					{
+						const size_t curr_selected_layer = _selected_layer;
+						resetSelection();
+						_selected_layer = curr_selected_layer;
+						_selected_state = i;
+						_display_mode = AnimatorDisplayMode::State;
+					}
+					ImGui::PopStyleColor(3);
+					separator();
+					auto new_cursor_pos = ImGui::GetCursorPos();
+
+					// Draw layer variables
+					ImGui::SetCursorPos(prev_cursor_pos + selectable_offset);
+					ImGui::Indent(ImGui::GetStyle().FramePadding.x);
+					if (rename_index == i)
+					{
+						if (ImGui::InputText("##rename_state", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
+						{
+							curr_layer.RenameAnimation(state.name, buf);
+							rename_index = -1;
+						}
+						if (just_rename)
+						{
+							ImGui::SetKeyboardFocusHere(-1);
+							just_rename = false;
+						}
+						else if (ImGui::IsItemDeactivated())
+							rename_index = -1;
+					}
+					else
+					{
+						ImGui::Text(buf);
+						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+						{
+							rename_index = i;
+							just_rename = true;
+						}
+					}
+
+					float prog_bar = 0.0f;
+					if (curr_layer.curr_state.index == i)
+						prog_bar = curr_layer.curr_state.normalized_time;
+					else if (curr_layer.blend_state.index == i)
+						prog_bar = curr_layer.blend_state.normalized_time;
+
+					ImGui::ProgressBar(prog_bar, ImVec2(-1, 3), nullptr);
+					ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
+					ImGui::SetCursorPos(new_cursor_pos);
+
+					ImGui::PopID();
+					
+				}
+
+				ImGui::NewLine();
+				if (ImGui::Button("Add State"))
+				{
+					curr_layer.AddAnimation(RscHandle<anim::Animation>{});
+				}
+				ImGui::SameLine();
+
+				const bool can_remove = _selected_state != 0 && curr_layer.anim_states.size() > 1;
+				if (!can_remove)
+					ImGuidk::PushDisabled();
+				if (ImGui::Button("Delete State"))
+				{
+					curr_layer.RemoveAnimation(_selected_state);
+				}
+				if (!can_remove)
+					ImGuidk::PopDisabled();
+			}
 			ImGui::EndTabItem();
 		}
 	}
@@ -536,43 +708,43 @@ namespace idk
 		}
 		return result;
 	}
-	bool IGE_AnimatorWindow::drawConnection(ImVec2 p1, ImVec2 p2)
-	{
-		static ImVec2 triangle_a{}, triangle_b, triangle_c;
-		vec2 v1 = p2 - p1;
-		vec2 v1_norm = v1.get_normalized();
-		vec2 mid_point = p1 + (v1 / 2.0f);
+	//bool IGE_AnimatorWindow::drawConnection(ImVec2 p1, ImVec2 p2)
+	//{
+	//	static ImVec2 triangle_a{}, triangle_b, triangle_c;
+	//	vec2 v1 = p2 - p1;
+	//	vec2 v1_norm = v1.get_normalized();
+	//	vec2 mid_point = p1 + (v1 / 2.0f);
 
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		const ImGuiStyle& style = ImGui::GetStyle();
-		float connection_indent = _canvas.style.connection_indent * _canvas.zoom;
-		auto win_pos = ImGui::GetWindowPos();
-		// p1 = (p1 - _canvas.prev_win_pos - _canvas.prev_offset) / _canvas.prev_zoom * _canvas.zoom + win_pos + _canvas.offset;
-		// p2 = (p2 - _canvas.prev_win_pos - _canvas.prev_offset) / _canvas.prev_zoom * _canvas.zoom + win_pos + _canvas.offset;
-		// p1.x += connection_indent;
-		// p2.x -= connection_indent;
+	//	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	//	const ImGuiStyle& style = ImGui::GetStyle();
+	//	float connection_indent = _canvas.style.connection_indent * _canvas.zoom;
+	//	auto win_pos = ImGui::GetWindowPos();
+	//	// p1 = (p1 - _canvas.prev_win_pos - _canvas.prev_offset) / _canvas.prev_zoom * _canvas.zoom + win_pos + _canvas.offset;
+	//	// p2 = (p2 - _canvas.prev_win_pos - _canvas.prev_offset) / _canvas.prev_zoom * _canvas.zoom + win_pos + _canvas.offset;
+	//	// p1.x += connection_indent;
+	//	// p2.x -= connection_indent;
 
-		float thickness = 10.0f;// _canvas.style.curve_thickness* _canvas.zoom;
-		
-		draw_list->AddLine(p1 + win_pos, p2 + win_pos, _canvas.colors[ImNodes::ColConnection]);
-		
-		
-		float min_square_distance = FLT_MAX;
-		for (int i = 0; i < draw_list->_Path.size() - 1; i++)
-		{
-			min_square_distance = min(min_square_distance,
-				ImNodes::GetDistanceToLineSquared(ImGui::GetMousePos(), draw_list->_Path[i], draw_list->_Path[i + 1]));
-		}
+	//	float thickness = 10.0f;// _canvas.style.curve_thickness* _canvas.zoom;
+	//	
+	//	draw_list->AddLine(p1 + win_pos, p2 + win_pos, _canvas.colors[ImNodes::ColConnection]);
+	//	
+	//	
+	//	float min_square_distance = FLT_MAX;
+	//	for (int i = 0; i < draw_list->_Path.size() - 1; i++)
+	//	{
+	//		min_square_distance = min(min_square_distance,
+	//			ImNodes::GetDistanceToLineSquared(ImGui::GetMousePos(), draw_list->_Path[i], draw_list->_Path[i + 1]));
+	//	}
 
-		// Draw curve, change when it is hovered
-		bool is_close = min_square_distance <= thickness * thickness && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
-		
-		// draw_list->PathStroke(ImColor{ 1,0,0,1 }, false , thickness);
+	//	// Draw curve, change when it is hovered
+	//	bool is_close = min_square_distance <= thickness * thickness && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+	//	
+	//	// draw_list->PathStroke(ImColor{ 1,0,0,1 }, false , thickness);
 
-		
+	//	
 
-		return is_close;
-	}
+	//	return is_close;
+	//}
 
 	void IGE_AnimatorWindow::resetSelection()
 	{
@@ -580,5 +752,6 @@ namespace idk
 		_selected_layer = 0;
 		_selected_state = 0;
 		_selected_transition = -1;
+		_show_transition = false;
 	}
 }

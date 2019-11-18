@@ -261,7 +261,7 @@ namespace idk
 		float curr_val = anim_data->def_data[0];
 		auto res = animator.float_vars.find(anim_data->params[0]);
 		if (res != animator.float_vars.end())
-			curr_val = res->second;
+			curr_val = res->second.val;
 
 		// First compute the weights
 		if (!anim_data->weights_cached)
@@ -815,24 +815,13 @@ namespace idk
 			sg->visit(initialize_children);
 			Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
 
-			// This is here so that previously serialized animator components will still be able to display 
-			// the animation clips even if animation_display_order is not inside
-			// if (animator->animation_display_order.empty() && !animator->animation_table.empty())
-			// {
-			// 	for (auto& anim : animator->animation_table)
-			// 	{
-			// 		animator->animation_display_order.emplace_back(anim.first);
-			// 		anim.second.valid = true;
-			// 	}
-			// }
-
 			for (auto& layer : animator->layers)
 			{
 				layer.prev_poses.resize(animator->skeleton->data().size());
 				layer.blend_source.resize(animator->skeleton->data().size());
-				layer.curr_state.index = layer.default_index;
-				layer.weight = layer.default_weight;
 			}
+
+			animator->ResetToDefault();
 		}
 
 		_creation_queue = std::move(uncreated);

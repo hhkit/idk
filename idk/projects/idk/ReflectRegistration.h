@@ -511,6 +511,7 @@ REFLECT_BEGIN(idk::BlendTree, "BlendTree")
 REFLECT_VARS(motions, params, blend_tree_type)
 REFLECT_END()
 
+// Animation conditions and transitions
 REFLECT_BEGIN(idk::AnimationCondition, "AnimationCondition")
 REFLECT_VARS(param_name, type, op_index, val_f, val_i, val_b, val_t)
 REFLECT_END()
@@ -542,13 +543,34 @@ REFLECT_END()
 REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
 REFLECT_VARS(name, default_index, default_weight, anim_states, anim_state_table, bone_mask, blend_type)
 REFLECT_END()
+// Animation parameters
+REFLECT_BEGIN(idk::anim::AnimationParam<int>, "AnimationParam<int>")
+REFLECT_VARS(name, def_val, val)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::AnimationParam<float>, "AnimationParam<float>")
+REFLECT_VARS(name, def_val, val)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::AnimationParam<bool>, "AnimationParam<bool>")
+REFLECT_VARS(name, def_val, val)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::int_vars), "hash_table<string,AnimationParam<int>>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::float_vars), "hash_table<string,AnimationParam<float>>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::bool_vars), "hash_table<string,AnimationParam<bool>>")
+REFLECT_END()
 
 // Animator serialization
 REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(skeleton, layer_table, layers)
+REFLECT_VARS(skeleton, layer_table, layers, int_vars, float_vars, bool_vars, trigger_vars)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")

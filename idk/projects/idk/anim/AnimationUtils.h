@@ -2,6 +2,8 @@
 #include <idk.h>
 #include <algorithm>
 #include <util/enum.h>
+#include "AnimationTypes.h"
+
 namespace idk::anim
 {
 	ENUM(AnimDataType, char,

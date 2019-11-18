@@ -55,7 +55,7 @@ namespace idk
 		while (layer_table.find(name + append) != layer_table.end())
 		{
 			// Generate a unique name
-			append = " " + std::to_string(count);
+			append = " " + std::to_string(count++);
 		}
 
 		AnimationLayer new_layer{};
@@ -142,6 +142,38 @@ namespace idk
 		preview_playback = false;
 		for(auto& layer : layers)
 			layer.Reset();
+
+		for (auto& p : int_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : float_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : bool_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : trigger_vars)
+			p.second.ResetToDefault();
+	}
+
+	void Animator::ResetToDefault()
+	{
+		for (size_t i = 0; i < layers.size(); ++i)
+		{
+			layers[i].ResetToDefault();
+		}
+
+		for (auto& p : int_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : float_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : bool_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : trigger_vars)
+			p.second.ResetToDefault();
 	}
 
 	void Animator::OnPreview()
@@ -155,10 +187,7 @@ namespace idk
 		}
 		else
 		{
-			for (size_t i = 0; i < layers.size(); ++i)
-			{
-				layers[i].ResetToDefault();
-			}
+			ResetToDefault();
 			Core::GetSystem<AnimationSystem>().RestoreBindPose(*this);
 		}
 	}
@@ -317,14 +346,14 @@ namespace idk
 	void Animator::ResetTriggers()
 	{
 		for (auto& trigger : trigger_vars)
-			trigger.second = false;
+			trigger.second.val = false;
 	}
 
 	int Animator::GetInt(string_view name) const
 	{
 		auto res = int_vars.find(name.data());
 		if (res != int_vars.end())
-			return res->second;
+			return res->second.val;
 
 		return 0;
 	}
@@ -333,7 +362,7 @@ namespace idk
 	{
 		auto res = float_vars.find(name.data());
 		if (res != float_vars.end())
-			return res->second;
+			return res->second.val;
 
 		return 0.0f;
 	}
@@ -342,7 +371,7 @@ namespace idk
 	{
 		auto res = bool_vars.find(name.data());
 		if (res != bool_vars.end())
-			return res->second;
+			return res->second.val;
 
 		return false;
 	}
@@ -351,129 +380,154 @@ namespace idk
 	{
 		auto res = trigger_vars.find(name.data());
 		if (res != trigger_vars.end())
-			return res->second;
+			return res->second.val;
 
 		return false;
 	}
 
-	bool Animator::SetInt(string_view name, int val, bool set)
+	bool Animator::SetInt(string_view name, int val, bool set, bool def_val)
 	{
 		auto res = int_vars.find(name.data());
 		bool found = false;
 
 		if (set)
 		{
-			string name_str{ name };
+			anim::AnimationParam<int> param;
+			param.name = name.data();
 			int count = -1;
 			while (res != int_vars.end())
 			{
 				++count;
-				res = int_vars.find(name_str + std::to_string(count));
+				res = int_vars.find(param.name + std::to_string(count));
 			}
 
 			if (count >= 0)
-				name_str += std::to_string(count);
+				param.name += std::to_string(count);
 
-			int_vars.emplace(name_str, val);
-			found = true;
+			param.def_val = val;
+			param.val = val;
+
+			int_vars.emplace(param.name, param);
 		}
-
-		if (res != int_vars.end())
+		else if (res != int_vars.end())
 		{
-			res->second = val;
+			if (def_val)
+				res->second.def_val = val;
+
+			res->second.val = val;
 			found = true;
 		}
 
 		return found;
 	}
 
-	bool Animator::SetFloat(string_view name, float val, bool set)
+	bool Animator::SetFloat(string_view name, float val, bool set, bool def_val)
 	{
 		auto res = float_vars.find(name.data());
 		bool found = false;
 
 		if (set)
 		{
-			string name_str{ name };
+			anim::AnimationParam<float> param;
+			param.name = name.data();
+
 			int count = -1;
 			while (res != float_vars.end())
 			{
 				++count;
-				res = float_vars.find(name_str + std::to_string(count));
+				res = float_vars.find(param.name + std::to_string(count));
 			}
 
 			if (count >= 0)
-				name_str += std::to_string(count);
+				param.name += std::to_string(count);
+			
+			param.def_val = val;
+			param.val = val;
 
-			float_vars.emplace(name_str, val);
-			found = true;
+			float_vars.emplace(param.name, param);
 		}
-
-		if (res != float_vars.end())
+		else if (res != float_vars.end())
 		{
-			res->second = val;
+			if(def_val)
+				res->second.def_val = val;
+
+			res->second.val = val;
 			found = true;
 		}
 
 		return found;
 	}
 
-	bool Animator::SetBool(string_view name, bool val, bool set)
+	bool Animator::SetBool(string_view name, bool val, bool set, bool def_val)
 	{
 		auto res = bool_vars.find(name.data());
 		bool found = false;
 
 		if (set)
 		{
-			string name_str{ name };
+			anim::AnimationParam<bool> param;
+			param.name = name.data();
+
 			int count = -1;
 			while (res != bool_vars.end())
 			{
 				++count;
-				res = bool_vars.find(name_str + std::to_string(count));
+				res = bool_vars.find(param.name + std::to_string(count));
 			}
 
 			if (count >= 0)
-				name_str += std::to_string(count);
+				param.name += std::to_string(count);
 
-			bool_vars.emplace(name_str, val);
+			param.def_val = val;
+			param.val = val;
+
+			bool_vars.emplace(param.name, param);
 			found = true;
 		}
-
-		if (res != bool_vars.end())
+		else if (res != bool_vars.end())
 		{
-			res->second = val;
+			if (def_val)
+				res->second.def_val = val;
+
+			res->second.val = val;
 			found = true;
 		} 
 		
 		return found;
 	}
 
-	bool Animator::SetTrigger(string_view name, bool val, bool set)
+	bool Animator::SetTrigger(string_view name, bool val, bool set, bool def_val)
 	{
 		auto res = trigger_vars.find(name.data());
 		bool found = false;
 
 		if (set)
 		{
-			string name_str{ name };
+			anim::AnimationParam<bool> param;
+			param.name = name.data();
+
 			int count = -1;
 			while (res != trigger_vars.end())
 			{
 				++count;
-				res = trigger_vars.find(name_str + std::to_string(count));
+				res = trigger_vars.find(param.name + std::to_string(count));
 			}
 
 			if (count >= 0)
-				name_str += std::to_string(count);
+				param.name += std::to_string(count);
 
-			trigger_vars.emplace(name_str, val);
+			param.def_val = val;
+			param.val = val;
+
+			trigger_vars.emplace(param.name, param);
 			found = true;
 		}
-
-		if (res != trigger_vars.end())
+		else if (res != trigger_vars.end())
 		{
-			res->second = val;
+			if (def_val)
+				res->second.def_val = val;
+
+			res->second.val = val;
 			found = true;
 		}
 

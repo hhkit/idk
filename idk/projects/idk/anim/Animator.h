@@ -5,6 +5,7 @@
 #include <anim/Animation.h>
 #include <anim/AnimationState.h>
 #include <anim/AnimationLayer.h>
+#include <anim/AnimationUtils.h>
 
 namespace idk
 {
@@ -34,6 +35,7 @@ namespace idk
 
 		// Editor Functionality
 		void Reset();
+		void ResetToDefault();
 		void OnPreview();
 		
 
@@ -76,10 +78,10 @@ namespace idk
 		bool GetTrigger(string_view name) const;
 
 		// Script Setters
-		bool SetInt(string_view name, int val, bool set = false);
-		bool SetFloat(string_view name, float val, bool set = false);
-		bool SetBool(string_view name, bool val, bool set = false);
-		bool SetTrigger(string_view name, bool val, bool set = false);
+		bool SetInt(string_view name, int val, bool set = false, bool def_val = false);
+		bool SetFloat(string_view name, float val, bool set = false, bool def_val = false);
+		bool SetBool(string_view name, bool val, bool set = false, bool def_val = false);
+		bool SetTrigger(string_view name, bool val, bool set = false, bool def_val = false);
 
 		void ResetTriggers();
 
@@ -95,10 +97,10 @@ namespace idk
 		vector<AnimationLayer> layers{};
 
 		// Scripting variables
-		hash_table<string, int> int_vars;
-		hash_table<string, float> float_vars;
-		hash_table<string, bool> bool_vars;
-		hash_table<string, bool> trigger_vars;
+		hash_table<string, anim::AnimationParam<int>> int_vars;
+		hash_table<string, anim::AnimationParam<float>> float_vars;
+		hash_table<string, anim::AnimationParam<bool>> bool_vars;
+		hash_table<string, anim::AnimationParam<bool>> trigger_vars;
 		
 		// Precomputation step
 		vector<mat4> pre_global_transforms{ mat4{} };

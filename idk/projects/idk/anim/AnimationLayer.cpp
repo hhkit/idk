@@ -186,7 +186,7 @@ namespace idk
 			while (anim_state_table.find(anim_name + append) != anim_state_table.end())
 			{
 				// Generate a unique name
-				append = " " + std::to_string(count);
+				append = " " + std::to_string(count++);
 			}
 			anim_name += append;
 		}
@@ -229,7 +229,7 @@ namespace idk
 	{
 		string name_str{ anim_name };
 		const auto found_clip = anim_state_table.find(anim_name.data());
-		if (found_clip == anim_state_table.end())
+		if (found_clip == anim_state_table.end() || found_clip->second >= anim_states.size())
 			return;
 
 		if (default_index == found_clip->second)
@@ -238,9 +238,9 @@ namespace idk
 			curr_state.Reset();
 		if (blend_state.index == found_clip->second)
 			ResetToDefault();
-		
-		anim_states.erase(anim_states.begin() + found_clip->second);
+
 		anim_state_table.erase(found_clip);
+		anim_states.erase(anim_states.begin() + found_clip->second);
 
 		const size_t num_states = anim_states.size();
 		for (size_t i = 1; i < num_states; ++i)
@@ -251,7 +251,11 @@ namespace idk
 		}
 	}
 
-	
+	void AnimationLayer::RemoveAnimation(size_t index)
+	{
+		auto state = anim_states.begin() + index;
+		RemoveAnimation(state->name);
+	}
 
 	bool AnimationLayer::IsPlaying() const
 	{
