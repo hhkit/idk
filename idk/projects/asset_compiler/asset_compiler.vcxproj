@@ -194,6 +194,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="IAssetLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="CompilerCore.cpp" />
     <ClCompile Include="DDSCompiler.cpp" />

@@ -2,7 +2,7 @@
 
 #include <idk.h>
 #include <res/Resource.h>
-
+#include <res/ResourceExt.h>
 namespace idk::anim
 {
 	struct AnimationMeta
@@ -50,5 +50,6 @@ namespace idk::anim
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
 		void AddAnimatedBone(const AnimatedBone& animated_bone);
 
+		EXTENSION(".idanim");
 	};
 }

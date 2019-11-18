@@ -14,7 +14,7 @@
 
 namespace idk
 {
-	AssetBundle DDSCompiler::LoadAsset(string_view full_path, const MetaBundle& bundle)
+	opt<AssetBundle> DDSCompiler::LoadAsset(string_view full_path, const MetaBundle& bundle)
 	{
 		auto binary_data = [&]() -> string
 		{
@@ -43,9 +43,6 @@ namespace idk
 		t.filter_mode = t_meta.filter_mode;
 		t.pixel_buffer.insert(t.pixel_buffer.end(), binary_data.begin(), binary_data.end());
 
-		AssetBundle asset_bundle;
-		asset_bundle.metabundle = updated_meta_bundle;
-		asset_bundle.assets.emplace(t_guid, reflect::dynamic{ t }.copy());
-		return asset_bundle;
+		return AssetBundle{ updated_meta_bundle, { {t_guid, std::move(t)} } };
 	}
 }

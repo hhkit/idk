@@ -5,7 +5,7 @@
 
 namespace idk
 {
-	AssetBundle TextureCompiler::LoadAsset(string_view full_path, const MetaBundle& bundle)
+	opt<AssetBundle> TextureCompiler::LoadAsset(string_view full_path, const MetaBundle& bundle)
 	{
 		constexpr auto wrap = [](string_view str) -> string
 		{
@@ -23,6 +23,6 @@ namespace idk
 		if (retval == 0)
 			return DDSCompiler::LoadAsset(out_path, bundle);
 
-		return AssetBundle{};
+		return {};
 	}
 }

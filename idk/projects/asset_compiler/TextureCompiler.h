@@ -8,6 +8,6 @@ namespace idk
 		: public DDSCompiler
 	{
 	public:
-		AssetBundle LoadAsset(string_view full_path, const MetaBundle& bundle) override;
+		opt<AssetBundle> LoadAsset(string_view full_path, const MetaBundle& bundle) override;
 	};
 }

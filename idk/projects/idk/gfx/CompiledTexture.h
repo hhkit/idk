@@ -27,7 +27,6 @@ namespace idk
 	struct CompiledMesh
 	{
 		vector<CompiledBuffer> buffers;
-
 		EXTENSION(".idmsh");
 	};
 

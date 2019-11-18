@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <res/Resource.h>
+#include <res/ResourceExt.h>
 #include <math/matrix_decomposition.h>
 
 namespace idk::anim
@@ -18,8 +19,6 @@ namespace idk::anim
 		: public Resource<Skeleton>
 	{
 	public:
-		
-
 		Skeleton() = default;
 		Skeleton(const vector<BoneData>& bones, const hash_table<string, size_t>& bone_table);
 
@@ -30,7 +29,8 @@ namespace idk::anim
 
 		void AddBone(string_view name, BoneData b);
 		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat; }
-		
+
+		EXTENSION(".idsktn");
 	private:
 		mat4 _global_inverse;
 

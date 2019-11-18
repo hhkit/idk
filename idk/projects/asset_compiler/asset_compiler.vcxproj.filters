@@ -9,6 +9,9 @@
     <ClCompile Include="TextureCompiler.cpp">
       <Filter>compilers</Filter>
     </ClCompile>
+    <ClCompile Include="IAssetLoader.cpp">
+      <Filter>compilers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompilerCore.h" />
