@@ -161,6 +161,12 @@ namespace idk
 			static char buf[50];
 			auto& curr_layer = _curr_animator_component->layers[_selected_layer];
 			auto& curr_state = curr_layer.anim_states[_selected_state];
+			const auto my_separator = []()
+			{
+				ImDrawList* draw_list = ImGui::GetWindowDrawList();
+				ImVec2 p = ImGui::GetCursorScreenPos();
+				draw_list->AddLine(ImVec2(p.x - 9999, p.y), ImVec2(p.x + 9999, p.y), ImGui::GetColorU32(ImGuiCol_Border));
+			};
 
 			const auto display_transition = [&]()
 			{
@@ -213,14 +219,15 @@ namespace idk
 					ImGuidk::PopDisabled();
 
 				ImGui::NewLine();
-				ImGui::Separator();
+				my_separator();
 				ImGui::NewLine();
 				ImGui::PopID();
 			};
-
+			
 			const auto display_state = [&]()
 			{
 				constexpr float transition_max_indent = 50.0f;
+				
 				if (_selected_state == 0)
 					return;
 
@@ -229,7 +236,7 @@ namespace idk
 
 				ImGui::PushID(_selected_state);
 				strcpy_s(buf, curr_state.name.data());
-
+				
 				ImGui::Text("State Type: Basic Animation");
 				if (ImGui::InputText("##name", buf, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
 				{
@@ -259,37 +266,71 @@ namespace idk
 				ImGui::SameLine();
 				ImGui::Checkbox("##loop", &curr_state.loop);
 				ImGui::NewLine();
+				
+				
+				
+				ImGui::Text("Transitions");
+				// ImGui::SameLine();
 
-				if (!has_valid_clip)
-					ImGuidk::PopDisabled();
+				ImVec2 button_pos = ImGui::GetCursorPos();
+				
+				
 
-				for (size_t i = 0; i < curr_state.transitions.size(); ++i)
+				ImGui::PushItemWidth(-1);
+				auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
+				bg_col.w = bg_col.w * 0.4f;
+				ImGui::PushStyleColor(ImGuiCol_FrameBg, bg_col);
+				const bool is_open = ImGui::ListBoxHeader("##transitions", curr_state.transitions.size(), 5);
+				ImGui::PopStyleColor();
+				if (is_open)
 				{
-					auto& transition = curr_state.transitions[i];
-					bool selected = _selected_transition == i;
-					string transition_from = curr_layer.GetAnimationState(transition.transition_from_index).name;
-					string transition_to = curr_layer.GetAnimationState(transition.transition_to_index).name;
-					string transition_title = transition_from + " ==> " + transition_to;
-
-					
-					if (ImGui::Selectable(transition_title.data(), &selected))
+					for (size_t i = 0; i < curr_state.transitions.size(); ++i)
 					{
-						_show_transition = true;
-						_selected_transition = i;
+						ImGui::PushID(i);
+						auto& transition = curr_state.transitions[i];
+						bool selected = _selected_transition == i;
+						string transition_from = curr_layer.GetAnimationState(transition.transition_from_index).name;
+						string transition_to = curr_layer.GetAnimationState(transition.transition_to_index).name;
+						string transition_title = transition_from + "\t->\t" + transition_to;
+
+
+						if (ImGui::Selectable(transition_title.data(), &selected))
+						{
+							_show_transition = true;
+							_selected_transition = i;
+						}
+
+						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+						{
+							_display_mode = AnimatorDisplayMode::Transition;
+							_selected_transition = i;
+						}
+						ImGui::PopID();
 					}
 
-					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-					{
-						_display_mode = AnimatorDisplayMode::Transition;
-						_selected_transition = i;
-					}
+					ImGui::ListBoxFooter();
 				}
-				if (ImGui::Button("New Transition"))
+				ImGui::PopItemWidth();
+				
+				if (ImGui::Button("+"))
 				{
 					curr_state.AddTransition(_selected_state, 0);
 				}
+				// ImVec2 next_pos = ImGui::GetCursorPos();
+				// 
+				// ImGui::SameLine();
+				// float button_sz = ImGui::CalcTextSize("+").x;
+				// button_sz += ImGui::GetStyle().FramePadding.x * 2;
+				// 
+				// curr_pos.x = ImGui::GetCursorPosX() - button_sz * 2;
+				// ImGui::SetCursorPos(curr_pos);
+				// 
+				// ImGui::SetCursorPos(next_pos);
+				
+				if (!has_valid_clip)
+					ImGuidk::PopDisabled();
 				ImGui::NewLine();
-				ImGui::Separator();
+				my_separator();
 				ImGui::NewLine();
 				ImGui::PopID();
 
@@ -367,6 +408,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, selectable_hovered_col);
 					if (ImGui::Selectable("##layer_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2{ 0, 100 }))
 					{
+						resetSelection();
 						_selected_layer = i;
 						_display_mode = AnimatorDisplayMode::Layer;
 					}

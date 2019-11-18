@@ -55,20 +55,29 @@
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: []
         valid: 0
       - loop: 1
         name: New State
-        node_position: {x: 0, y: 0}
+        node_position: {x: 81, y: 85}
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: []
         valid: 1
       - loop: 1
         name: idle
-        node_position: {x: 10, y: 10}
+        node_position: {x: 145, y: 139}
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
+        transitions: 
+        - conditions: []
+          has_exit_time: 1
+          transition_duration: 0
+          transition_from_index: 2
+          transition_offset: 0
+          transition_to_index: 0
         valid: 1
       blend_type: Override_Blend
       bone_mask: 
