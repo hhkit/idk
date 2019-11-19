@@ -88,12 +88,6 @@
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="imguidk.h" />
-    <ClInclude Include="loading\AssimpImporter.h">
-      <Filter>loader\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="loading\AssimpImporter_helpers.h">
-      <Filter>loader\assimp</Filter>
-    </ClInclude>
     <ClInclude Include="imguidk.h" />
     <ClInclude Include="widgets\DragVec.h">
       <Filter>widgets</Filter>
@@ -199,12 +193,6 @@
     </ClCompile>
     <ClCompile Include="widgets\DragVec.cpp">
       <Filter>widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\AssimpImporter.cpp">
-      <Filter>loader\assimp</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\AssimpImporter_helpers.cpp">
-      <Filter>loader\assimp</Filter>
     </ClCompile>
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp">
       <Filter>windows</Filter>

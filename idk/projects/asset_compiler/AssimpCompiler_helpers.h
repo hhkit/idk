@@ -3,6 +3,10 @@
 
 #undef min
 #undef max
+// std::filesystem
+#include <filesystem>
+namespace fs = std::filesystem;
+
 // Assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -27,7 +31,7 @@ namespace idk::ai_helpers
 
 #pragma region Helper Structs
 
-	struct CompiledAnimation
+	struct AnimationData
 	{
 		string name;
 		aiAnimation* ai_animation;
@@ -39,8 +43,10 @@ namespace idk::ai_helpers
 		float duration = 0.0f;
 	};
 
-	struct CompiledMeshBuffer
+	struct MeshData
 	{
+		string name;
+
 		vector<vec3	>	positions;
 		vector<vec3	>	normals;
 		vector<vec2	>	uvs;
@@ -86,21 +92,22 @@ namespace idk::ai_helpers
 
 		PreScaleMax
 	};
-	static string AssimpPrefix = "_$AssimpFbx$_";
-	static string PreRotateSuffix[PreRotationMax]
+
+	static constexpr string_view AssimpPrefix = "_$AssimpFbx$_";
+	static constexpr string_view PreRotateSuffix[]
 	{
 		"RotationOffset",
 		"RotationPivot",
 		"PreRotation"
 	};
 
-	static string PostRotateSuffix[PostRotationMax]
+	static constexpr string_view PostRotateSuffix[]
 	{
 		"PostRotation",
 		"RotationPivotInverse"
 	};
 
-	static string PreScaleSuffix[PreScaleMax]
+	static constexpr string_view PreScaleSuffix[]
 	{
 		"ScalingOffset",
 		"ScalingPivot"
@@ -110,8 +117,10 @@ namespace idk::ai_helpers
 
 	struct Scene
 	{
+		// =================================================  Assimp importing
 		Assimp::Importer importer;
 		const aiScene* ai_scene = nullptr;
+		string file_ext{};
 
 		// =================================================  Meshes
 		hash_table<string, aiMesh*> mesh_table;
@@ -130,8 +139,7 @@ namespace idk::ai_helpers
 
 		// =================================================  Animation
 		vector<aiAnimation*> ai_anim_clips;
-		vector<CompiledAnimation> compiled_clips;
-
+		vector<AnimationData> compiled_clips;
 
 		// =================================================  Checks
 		bool has_meshes = false;
@@ -141,42 +149,31 @@ namespace idk::ai_helpers
 
 		unsigned num_meshes = 0;
 
-		string file_ext{};
+		// =================================================  Statics
+		static constexpr string_view root_bone_keyword = "_root_";
+		static constexpr string_view bone_exclude_keyword = "_bn_exclude_";
 
-		bool Import(PathHandle handle);
+		bool Import(const fs::path& fs_path);
 
 		void CollectMeshes(aiNode* node);
-		CompiledMeshBuffer WriteToVertices(const aiMesh* mesh);
-		CompiledMesh CompileMesh(const CompiledMeshBuffer& mesh_buffers);
+		vector<MeshData> BuildMeshBuffers() const;
+		CompiledMesh CompileMesh(const MeshData& mesh_buffers) const;
 
 		void CollectBones();
 		void BuildSkeleton();
 		void BuildSkinlessSkeleton();	// Only call this if there is animation but no meshes
-		void CompileSkeleton();
+		anim::Skeleton CompileSkeleton() const;
 		
 		// Animation building. First compile all aiAnimations
-		void CompileAnimations();
-		void BuildAnimations();
+		vector<AnimationData> CollectAndBuildAnimations();
+		void BuildAnimation(AnimationData& anim_data) const;
+		vector<anim::Animation> CompileAnimations();
 		
-		void BuildTranslateChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
-		void BuildRotateChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
-		void BuildScaleChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
-		void BuildBoneChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
+		void BuildTranslateChannel	(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
+		void BuildRotateChannel		(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
+		void BuildScaleChannel		(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
+		void BuildBoneChannel		(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel);
 	};
-
-	
-	// Fill in mesh_nodes and meshes.
-	
-	
-
-	// Should only be called after skeleton is built. If there is no skeleton, all meshes will have no bone weights
-
-	// Opengl mesh building
-	
-
-	// Vulkan's cancer 
-	VulkanMeshBuffers WriteToBuffers(Scene& scene, const aiMesh* mesh);
-	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, const VulkanMeshBuffers& mesh_buffers);
 
 	// Utility functions
 	void LogWarning(const string& error);
