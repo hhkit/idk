@@ -28,14 +28,22 @@ namespace idk
 	{
 		const auto full_path = Core::GetSystem<FileSystem>().GetFullPath("/build");
 		if (filepath.GetExtension() == ".meta")
-			LoadMeta(filepath);
-		else
 		{
-			if (filepath.GetMountPath().find("/assets") != std::string_view::npos)
-			{
-				array<const char*, 2> args = { filepath.GetFullPath().data(), full_path.data() };
-				Core::GetSystem<Application>().Exec("tools/compiler/idc.exe", span<const char*>(args));
-			}
+			LoadMeta(filepath);
+			return;
+		}
+			
+		const auto itr = importers.find(filepath.GetExtension());
+		if (itr != importers.end())
+		{
+			// import and return
+			return;
+		}
+
+		if (filepath.GetMountPath().find("/assets") != std::string_view::npos)
+		{
+			array<const char*, 2> args = { filepath.GetFullPath().data(), full_path.data() };
+			Core::GetSystem<Application>().Exec("tools/compiler/idc.exe", span<const char*>(args));
 		}
 	}
 

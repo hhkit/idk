@@ -201,23 +201,22 @@ namespace idk::ogl
 	{
 		// register factories
 		Core::GetResourceManager().RegisterFactory<MaterialFactory>();
-		//Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
-		//Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
+		Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
+		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<OpenGLMesh, CompiledMesh>>();
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<anim::Skeleton, anim::Skeleton>>();
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<anim::Animation, anim::Animation>>();
-		//Core::GetResourceManager().RegisterFactory<ProgramFactory>();
+		Core::GetResourceManager().RegisterFactory<ProgramFactory>();
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<OpenGLTexture, CompiledTexture>>();
 		//Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
 		//Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
 		//Core::GetResourceManager().RegisterFactory<OpenGLFontAtlasFactory>();
 
 		// register extensions
+		Core::GetResourceManager().RegisterExtension<ShaderProgram>(".vert");
+		Core::GetResourceManager().RegisterExtension<ShaderProgram>(".geom");
+		Core::GetResourceManager().RegisterExtension<ShaderProgram>(".frag");
 		//Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
-		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".vert");
-		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".geom");
-		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
-		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
 		//Core::GetResourceManager().RegisterLoader<OpenGLRenderTargetLoader>(RenderTarget::ext);
 		//Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 		//Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");

@@ -94,6 +94,11 @@ namespace idk
 				LoadResource(file);
 	}
 
+	bool ResourceManager::IsExtensionSupported(string_view ext)
+	{
+		return _extension_lut.find(ext) != _extension_lut.end();
+	}
+
 	void ResourceManager::Init()
 	{
 		instance = this;

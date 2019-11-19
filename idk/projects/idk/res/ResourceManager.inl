@@ -53,22 +53,46 @@ namespace idk
 	template<typename Res>
 	RscHandle<Res> ResourceManager::Create()
 	{
+		return Create<Res>(Guid::Make());
+
+	}
+
+	template<typename Res>
+	inline RscHandle<Res> ResourceManager::Create(Guid guid)
+	{
 		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
 
 		auto& table = GetTable<Res>();
-		const auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
+		const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
 
 		auto& control_block = itr->second;
 		// attempt to put on another thread
 		{
 			control_block.resource = factory.Create();
-			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{itr->first};
-			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
+			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ itr->first };
 		}
 
 		return RscHandle<Res>(itr->first);
+	}
 
+	template<typename Res>
+	inline RscHandle<Res> ResourceManager::Create(PathHandle h)
+	{
+		auto& factory = GetFactoryRes<Res>();
+		assert(&factory);
+
+		auto guid = Guid{ h.GetStem() };
+		auto& table = GetTable<Res>();
+		const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
+
+		auto& control_block = itr->second;
+		// attempt to put on another thread
+		{
+			control_block.resource = factory.Create(h);
+			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ itr->first };
+		}
+		return RscHandle<Res>(itr->first);
 	}
 
 	template<typename Factory>

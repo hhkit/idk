@@ -52,3 +52,15 @@ namespace idk
 		return reinterpret_cast<const RscHandle<T>&>(std::get<BaseResourceID<T>>(*this));
 	}
 }
+
+namespace std
+{
+	template<>
+	struct hash<idk::GenericResourceHandle>
+	{
+		size_t operator()(const idk::GenericResourceHandle& handle) const
+		{
+			return std::hash<idk::Guid>{}(handle.guid()) << 6 ^ std::hash<size_t>{}(handle.resource_id()) >> 2;
+		}
+	};
+}

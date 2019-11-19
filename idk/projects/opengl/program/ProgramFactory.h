@@ -11,5 +11,6 @@ namespace idk::ogl
 
 		unique_ptr<ShaderProgram> GenerateDefaultResource() override;
 		unique_ptr<ShaderProgram> Create()                  override;
+		unique_ptr<ShaderProgram> Create(PathHandle h)      override;
 	};
 }

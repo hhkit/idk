@@ -9,8 +9,15 @@ namespace idk
 	public:
 		void CheckImportDirectory() override;
 		ResourceBundle GetFile(string_view mount_path) override;
+
+		template<typename Importer>
+		void RegisterCustomImporter(string_view ext);
 	private:
-		hash_table<string, ResourceBundle> bundles;
+		using MountPath = string;
+
+		hash_table<MountPath, ResourceBundle> bundles;
+		hash_table<GenericResourceHandle, string> backpath;
+		hash_table<string_view, unique_ptr<class Importer>> importers;
 
 		void ImportFile(PathHandle filepath);
 		void LoadMeta(PathHandle meta_mount_path);

@@ -32,6 +32,8 @@ namespace idk
 		template<typename Res> bool           Validate(const RscHandle<Res>&);
 		template<typename Res> Res&           Get     (const RscHandle<Res>&);
 		template<typename Res> RscHandle<Res> Create();
+		template<typename Res> RscHandle<Res> Create(Guid guid);
+		template<typename Res> RscHandle<Res> Create(PathHandle h);
 		template<typename Res> bool           Free(const RscHandle<Res>&);
 
 		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
@@ -47,12 +49,11 @@ namespace idk
 	private:
 		static inline ResourceManager* instance = nullptr;
 
-		template<typename R> struct ResourceControlBlock;
-
 		using Extension  = string;
 		using GenericPtr = shared_ptr<void>;
 
-		template<typename R> using ResourceStorage = hash_table<Guid, ResourceControlBlock<R>>;
+		template<typename R> struct ResourceControlBlock;
+		template<typename R> using  ResourceStorage = hash_table<Guid, ResourceControlBlock<R>>;
 
 		hash_table<string_view, size_t>  _extension_lut; // maps extensions to resource IDs
 
@@ -63,7 +64,6 @@ namespace idk
 		array<GenericPtr, ResourceCount> _created_signals;    // shared_ptr<Signal<RscHandle<Res>>
 		array<GenericPtr, ResourceCount> _destroying_signals; // shared_ptr<Signal<RscHandle<Res>>
 
-		
 		void Init()     override;
 		void LateInit() override;
 		void Shutdown() override;
