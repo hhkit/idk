@@ -87,7 +87,6 @@
     <ClInclude Include="gfx\projector_functions.h" />
     <ClInclude Include="gfx\ShaderGraph.h" />
     <ClInclude Include="gfx\ShaderGraph_data.h" />
-    <ClInclude Include="gfx\ShaderTemplateLoader.h" />
     <ClInclude Include="gfx\UniformInstance.h" />
     <ClInclude Include="math\linear.h" />
     <ClInclude Include="math\shapes.h" />
@@ -112,7 +111,6 @@
     <ClInclude Include="res\ResourceExt.h" />
     <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
-    <ClInclude Include="res\SaveableResourceLoader.h" />
     <ClInclude Include="proj\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
@@ -314,7 +312,6 @@
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
     <ClCompile Include="gfx\ShaderProgram.cpp" />
-    <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\ritters.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
@@ -455,7 +452,6 @@
     <None Include="res\ResourceBundle.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="res\ResourceUtils.inl" />
-    <None Include="res\SaveableResourceLoader.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

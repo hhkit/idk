@@ -623,9 +623,6 @@
     <ClInclude Include="res\MetaBundle.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ShaderTemplateLoader.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="PauseConfigurations.h" />
     <ClInclude Include="anim\Animator.h">
       <Filter>anim</Filter>
@@ -683,9 +680,6 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="machine.h" />
-    <ClInclude Include="res\SaveableResourceLoader.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\projector_functions.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -1165,9 +1159,6 @@
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\ShaderTemplateLoader.cpp">
-      <Filter>gfx\object</Filter>
-    </ClCompile>
     <ClCompile Include="gfx\ShaderProgram.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
@@ -1473,9 +1464,6 @@
     </None>
     <None Include="meta\variant.inl">
       <Filter>meta</Filter>
-    </None>
-    <None Include="res\SaveableResourceLoader.inl">
-      <Filter>res</Filter>
     </None>
     <None Include="res\ResourceBundle.inl">
       <Filter>res</Filter>

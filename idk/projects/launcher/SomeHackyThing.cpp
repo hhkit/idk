@@ -14,7 +14,6 @@
 
 // resource importing
 #include <res/EasyFactory.h>
-#include <loading/AssimpImporter.h>
 #include <loading/GraphFactory.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTexture.h>

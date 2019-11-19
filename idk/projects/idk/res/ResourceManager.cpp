@@ -7,7 +7,6 @@
 #include <res/MetaBundle.h>
 #include <serialize/text.h>
 #include <util/ioutils.h>
-#include <res/SaveableResourceLoader.h>
 
 #include <IncludeResources.h>
 
