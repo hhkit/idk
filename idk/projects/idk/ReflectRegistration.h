@@ -591,6 +591,7 @@ REFLECT_END()
 
 // UI
 REFLECT_BEGIN(idk::Canvas, "Canvas")
+REFLECT_VARS(render_target)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::RectTransform, "RectTransform")

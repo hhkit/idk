@@ -712,27 +712,27 @@ namespace idk::ogl
 
             // UI DRAW
 
-            auto ui_render_data = curr_object_buffer.ui_render_per_cam[cam.obj_id.index];
-            for (auto& elem : ui_render_data)
-            {
-                std::visit([&](const auto& data)
-                {
-                    if constexpr(std::is_same_v<decltype(data), ImageData>)
-                    {
-                        // bind shader
-                        pipeline.PushProgram(elem.material->material->_shader_program);
-                        pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
-                        pipeline.SetUniform("PerUI.color", elem.color);
-                        pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
-                        fsq->BindAndDraw(
-                            renderer_attributes{ {
-                                { vtx::Attrib::Position, 0 },
-                                { vtx::Attrib::UV, 1 },
-                            } }
-                        );
-                    }
-                }, elem.data);
-            }
+            //auto ui_render_data = curr_object_buffer.ui_render_per_cam[cam.obj_id.index];
+            //for (auto& elem : ui_render_data)
+            //{
+            //    std::visit([&](const auto& data)
+            //    {
+            //        if constexpr(std::is_same_v<decltype(data), ImageData>)
+            //        {
+            //            // bind shader
+            //            pipeline.PushProgram(elem.material->material->_shader_program);
+            //            pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+            //            pipeline.SetUniform("PerUI.color", elem.color);
+            //            pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+            //            fsq->BindAndDraw(
+            //                renderer_attributes{ {
+            //                    { vtx::Attrib::Position, 0 },
+            //                    { vtx::Attrib::UV, 1 },
+            //                } }
+            //            );
+            //        }
+            //    }, elem.data);
+            //}
 
 
 			glDisable(GL_BLEND);

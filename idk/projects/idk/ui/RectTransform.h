@@ -9,14 +9,14 @@ namespace idk
         : public Component<RectTransform>
     {
     public:
-        vec2 anchor_min;
-        vec2 anchor_max;
-        vec2 offset_min;
-        vec2 offset_max;
-        vec2 pivot;
+        vec2 anchor_min{ 0, 0 };
+        vec2 anchor_max{ 1.0f, 1.0f };
+        vec2 offset_min{ 0, 0 };
+        vec2 offset_max{ 0, 0 };
+        vec2 pivot{ 0.5f, 0.5f };
         // transform position: anchored position
 
-        rect rect; // computed local rect
+        rect global_rect; // computed, relative to parent pivot
 
         idk::rect RectInCanvas() const;
         Handle<class Canvas> FindCanvas() const;

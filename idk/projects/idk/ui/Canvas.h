@@ -8,6 +8,6 @@ namespace idk
         : public Component<Canvas>
     {
     public:
-        Handle<class Camera> target_camera;
+        RscHandle<RenderTarget> render_target;
     };
 }

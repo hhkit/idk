@@ -7,6 +7,8 @@
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
 #include <gfx/MaterialInstance.h>
+#include <gfx/Camera.h>
+#include <gfx/RenderTarget.h>
 
 namespace idk
 {
@@ -24,18 +26,20 @@ namespace idk
 
     void UISystem::Update(span<class Canvas> canvases)
     {
-        //for (auto& c : canvases)
-        //    ComputeCanvasHierarchyRects(c.GetHandle());
+        for (auto& c : canvases)
+            ComputeCanvasHierarchyRects(c.GetHandle());
     }
 
     void UISystem::ComputeCanvasHierarchyRects(Handle<Canvas> canvas)
     {
-        // assuming overlay space
-        ivec2 screen_size = Core::GetSystem<Application>().GetScreenSize();
+        // assuming screen space
+        ivec2 screen_size = canvas->render_target->Size();
 
+        // 1424 * 810
         auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas->GetGameObject());
 
-        canvas->GetGameObject()->GetComponent<RectTransform>()->rect = rect{ vec2{0,0}, vec2{screen_size} };
+        canvas->GetGameObject()->GetComponent<RectTransform>()->global_rect = rect{ vec2{0,0}, vec2{screen_size} };
+
         tree->visit([canvas](Handle<GameObject> child, int)
         {
             if (child->HasComponent<Canvas>())
@@ -48,20 +52,25 @@ namespace idk
                     return false;
                 }
             }
-            if (const auto parent = child->Parent())
-            {
-                const rect& parent_rect = parent->GetComponent<RectTransform>()->rect;
-                const auto rect_transform_handle = child->GetComponent<RectTransform>();
-                if (!rect_transform_handle)
-                    return false;
-                auto& rect_transform = *rect_transform_handle;
-                const auto& transform = *child->Transform();
+            const auto parent = child->Parent();
 
-                vec2 min = parent_rect.size * rect_transform.anchor_min + rect_transform.offset_min;
-                vec2 max = parent_rect.size * rect_transform.anchor_max + rect_transform.offset_max;
-                rect_transform.rect.position = rect_transform.offset_min;
-                rect_transform.rect.size = max - min;
-            }
+            const auto& parent_rect_transform = *parent->GetComponent<RectTransform>();
+            const rect& parent_rect = parent_rect_transform.global_rect;
+            vec2 parent_pivot = parent_rect.position + parent_rect_transform.pivot * parent_rect.size;
+
+            const auto rect_transform_handle = child->GetComponent<RectTransform>();
+            if (!rect_transform_handle)
+                return false;
+
+            auto& rect_transform = *rect_transform_handle;
+            const auto& transform = *child->Transform();
+
+            vec2 min = parent_rect.size * rect_transform.anchor_min + rect_transform.offset_min;
+            vec2 max = parent_rect.size * rect_transform.anchor_max + rect_transform.offset_max;
+            rect_transform.global_rect.position = rect_transform.offset_min - parent_pivot;
+            rect_transform.global_rect.size = max - min;
+
+            return true;
         });
     }
 

@@ -491,7 +491,7 @@ namespace idk
             const auto& go = *im.GetGameObject();
             const auto& rt = *go.GetComponent<RectTransform>();
             
-            auto& render_data = result.ui_render_per_cam[rt.FindCanvas()->target_camera.index].emplace_back();
+            auto& render_data = result.ui_render.emplace_back();
             const auto rect = rt.RectInCanvas();
             rect.size / vec2(Core::GetSystem<Application>().GetScreenSize());
 
