@@ -498,13 +498,16 @@ namespace idk::vkn
 
 			auto cmd_buffer = copy_state.CommandBuffer();
 			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
-			state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
-			state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
-			for (auto& [buffer, data,offset] : state.shared_gfx_state->update_instructions)
+			if (instanced_data.size())
 			{
-				if (data.size())
+				state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
+				state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
+				for (auto& [buffer, data,offset] : state.shared_gfx_state->update_instructions)
 				{
-					buffer->update(offset,s_cast<uint32_t>(data.size()),cmd_buffer,std::data(data));
+					if (data.size())
+					{
+						buffer->update(offset,s_cast<uint32_t>(data.size()),cmd_buffer,std::data(data));
+					}
 				}
 			}
 			cmd_buffer.end();

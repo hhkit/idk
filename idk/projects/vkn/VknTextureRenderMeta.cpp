@@ -7,6 +7,7 @@
 
 namespace idk::vkn {
 
+
 	hash_table<TextureFormat, vk::Format> FormatMap()
 	{
 		return hash_table<TextureFormat, vk::Format>
@@ -131,32 +132,186 @@ namespace idk::vkn {
 		return mode;
 	}
 
-	void PrintFormatBlitCompatibility()
+
+	struct BlitCompatibility
 	{
+		using tiling_info =BlitCompatFlags;
+		hash_table<vk::Format, tiling_info > tiling;
+		
+		void RegisterTiling(vk::Format format, tiling_info tile);
+		bool HasCompatibleTiling(vk::Format format, BlitCompatUsageMasks usage)const;
+		bool IsCompatible(vk::Format format, BlitCompatFlags mask)const;
+		vector<std::pair<vk::Format, vk::ImageTiling>> GetCompatible(BlitCompatUsageMasks usage)const;
+	};
+
+	BlitCompatibility& GetBlitComp()
+	{
+		static BlitCompatibility comp;
+		return comp;
+	}
+
+
+	bool BlitCompatible(vk::Format format, BlitCompatUsageMasks usage)
+	{
+		return GetBlitComp().HasCompatibleTiling(format,usage);
+	}
+	template<typename T>
+	T other(T lhs, T rhs, T val)
+	{
+		return (lhs == val) ? rhs : lhs;
+	}
+
+	std::optional<vk::ImageTiling> GetNearestTiling(vk::Format format, BlitCompatTileMasks tiling,BlitCompatUsageMasks usage)
+	{
+		auto curr_tiling = tiling == BlitCompatTileMasks::eOptimal ? vk::ImageTiling::eOptimal: vk::ImageTiling::eLinear;
+		if (GetBlitComp().HasCompatibleTiling(format,usage))
+		{
+			return GetBlitComp().IsCompatible(format, tiling&usage) ? curr_tiling : other(vk::ImageTiling::eOptimal,vk::ImageTiling::eLinear,curr_tiling);
+		}
+		return {};
+	}
+
+	std::optional<vk::Format> NearestBlittableFormat(vk::Format format, BlitCompatUsageMasks usage)
+	{
+		//Idk how to do the other ver, so this is just a hack.
+		vk::Format preferred_list[] =
+		{
+			vk::Format::eR32G32B32A32Sfloat,
+			vk::Format::eR8G8B8A8Unorm,
+			vk::Format::eR8G8B8A8Srgb,
+		};
+
+
+		auto& compat = GetBlitComp();
+		if (!compat.HasCompatibleTiling(format, usage))
+		{
+			auto formats = compat.GetCompatible(usage);
+			std::pair<uint32_t, std::optional<vk::Format>> best{};
+
+			//This is a stupid hack because we have no way to get any properties about the VK format.
+			for (auto& nformat : preferred_list)
+			{
+				if (compat.HasCompatibleTiling(nformat, usage))
+				{
+					best.second = nformat;
+					break;
+				}
+			}
+
+			//for (auto& [nformat, tiling] : formats)
+			//{
+			//	uint32_t score =
+			//		(SameChannels(format,nformat) << 3)
+			//		|
+			//		(SameSrgb(format, nformat)<<5)
+			//		|
+			//		(SamePrecision(format, nformat)<<0);
+			//	if (best.first < score)
+			//	{
+			//		best = {score,nformat};
+			//	}
+			//}
+			return best.second;
+		}
+		return format;
+	}
+	void RegisterFormatBlitCompatibility()
+	{
+		auto& comp = GetBlitComp();
 		auto map = CFormatMap();
 		auto pdevice = View().PDevice();
+		std::stringstream ss;
+		for (auto& [ecf, format] : map)
+		{
+			ColorFormat cf = ecf;
+			auto prop = pdevice.getFormatProperties(format);
+			BlitCompatFlags flags{};
+			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
+				flags |= CompatMask(vkn::BlitCompatTileMasks::eLinear, vkn::BlitCompatUsageMasks::eDst);
+
+			if (prop.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
+				flags |= CompatMask(vkn::BlitCompatTileMasks::eOptimal, vkn::BlitCompatUsageMasks::eDst);
+
+			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
+				flags |= CompatMask(vkn::BlitCompatTileMasks::eLinear, vkn::BlitCompatUsageMasks::eSrc);
+
+			if (prop.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
+				flags |= CompatMask(vkn::BlitCompatTileMasks::eOptimal, vkn::BlitCompatUsageMasks::eSrc);
+			comp.RegisterTiling(format, flags);
+		}
+	}
+	void PrintFormatBlitCompatibility()
+	{
+		RegisterFormatBlitCompatibility();
+		auto map = CFormatMap();
+		auto pdevice = View().PDevice();
+		std::stringstream ss;
 		for (auto& [ecf, format] : map)
 		{
 			ColorFormat cf = ecf;
 			auto prop = pdevice.getFormatProperties(format);
 
-			std::cout << cf.to_string() << std::endl;
+			ss << cf.to_string() << std::endl;
 			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
-				std::cout << "\tLinear tiling has eBlitDst\n";
+				ss << "\tLinear tiling has eBlitDst\n";
 			else
-				std::cout << "\tLinear tiling does not have eBlitDst\n";
+				ss << "\tLinear tiling does not have eBlitDst\n";
+			LOG_TO(LogPool::GFX, "%s", ss.str().c_str());
+			std::stringstream{}.swap(ss);
 			if (prop.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
-				std::cout << "\toptimal tiling has eBlitDst\n";
+				ss << "\toptimal tiling has eBlitDst\n";
 			else
-				std::cout << "\toptimal tiling does not have eBlitDst\n";
+				ss << "\toptimal tiling does not have eBlitDst\n";
+			LOG_TO(LogPool::GFX, "%s", ss.str().c_str());
+			std::stringstream{}.swap(ss);
 			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
-				std::cout << "\tLinear tiling has eBlitSrc\n";
+				ss << "\tLinear tiling has eBlitSrc\n";
 			else
-				std::cout << "\tLinear tiling does not have eBlitSrc\n";
+				ss << "\tLinear tiling does not have eBlitSrc\n";
+			LOG_TO(LogPool::GFX, "%s", ss.str().c_str());
+			std::stringstream{}.swap(ss);
 			if (prop.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
-				std::cout << "\toptimal tiling has eBlitSrc\n";
+				ss << "\toptimal tiling has eBlitSrc\n";
 			else
-				std::cout << "\toptimal tiling does not have eBlitSrc\n";
+				ss << "\toptimal tiling does not have eBlitSrc\n";
+			LOG_TO(LogPool::GFX, "%s", ss.str().c_str());
+			std::stringstream{}.swap(ss);
 		}
+	}
+	void BlitCompatibility::RegisterTiling(vk::Format format, tiling_info tile)
+	{
+		tiling[format] = tile;
+	}
+	bool BlitCompatibility::HasCompatibleTiling(vk::Format format, BlitCompatUsageMasks usage) const
+	{
+		auto itr = tiling.find(format);
+		return (itr != tiling.end()) && (itr->second & s_cast<BlitCompatFlags>(s_cast<uint32_t>(usage)));
+	}
+
+	bool BlitCompatibility::IsCompatible(vk::Format format, BlitCompatFlags mask) const
+	{
+		auto titr = tiling.find(format);
+		if (titr != tiling.end())
+		{
+			return static_cast<bool>((titr->second & mask));
+		}
+		return false;
+	}
+	vector<std::pair<vk::Format, vk::ImageTiling>> BlitCompatibility::GetCompatible(BlitCompatUsageMasks usage) const
+	{
+		vector<std::pair<vk::Format, vk::ImageTiling>> result{};
+		for (auto& [format, info] : tiling)
+		{
+			auto masked = info & usage;
+			if (masked & BlitCompatTileMasks::eLinear)
+			{
+				result.emplace_back(format, vk::ImageTiling::eLinear);
+			}
+			if (masked & BlitCompatTileMasks::eOptimal)
+			{
+				result.emplace_back(format, vk::ImageTiling::eOptimal);
+			}
+		}
+		return result;
 	}
 }

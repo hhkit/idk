@@ -234,7 +234,7 @@ namespace idk::vkn
 	{
 		std::optional<vk::SurfaceFormatKHR> result;
 		for (const auto& availableFormat : availableFormats) {
-			if (availableFormat.format == vk::Format::eB8G8R8A8Unorm && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+			if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 				result = availableFormat;
 				break;
 			}

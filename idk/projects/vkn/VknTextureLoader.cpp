@@ -86,6 +86,9 @@ namespace idk::vkn
 	{
 		TextureOptions options{};
 		auto format = load_info.internal_format;
+		//auto nformat = NearestBlittableFormat(format, BlitCompatUsageMasks::eDst);
+		//if (nformat)
+		//	format = *nformat;
 
 		if (ooptions)
 		{
@@ -287,7 +290,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.internal_format = vk::Format::eB8G8R8A8Unorm;
+		info.internal_format = vk::Format::eB8G8R8A8Srgb;
 		info.image_usage = vk::ImageUsageFlagBits::eColorAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eColor;
 		info.sampled(true);

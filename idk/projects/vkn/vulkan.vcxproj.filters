@@ -211,6 +211,7 @@
     <ClInclude Include="DescriptorCountArray.h">
       <Filter>descriptor_sets</Filter>
     </ClInclude>
+    <ClInclude Include="utils\Flags.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
