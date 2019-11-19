@@ -111,8 +111,8 @@ namespace idk
 			return;
 		}
 
-		layer_table.erase(res);
 		layers.erase(layers.begin() + res->second);
+		layer_table.erase(res);
 	}
 
 	void Animator::RemoveLayer(size_t index)

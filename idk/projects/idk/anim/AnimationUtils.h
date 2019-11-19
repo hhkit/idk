@@ -30,7 +30,7 @@ namespace idk::anim
 	);
 
 	template<typename T>
-	using ConditionOp = std::function<bool(const T&, const T&)>;//bool (*)(const T&, const T&);
+	using ConditionOp = bool (*)(const T&, const T&);
 
 	inline const static ConditionOp<int> condition_ops_int[4] =
 	{

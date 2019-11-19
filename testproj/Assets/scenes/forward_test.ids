@@ -27,11 +27,11 @@
       right: 5
       top: 5
     shadow_bias: 1.1920929e-07
-- !4295098368 
+- !4295032832 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.14901097, y: -0.97684836, z: -5.1527705}
+    position: {x: -4.732148, y: -0.4429466, z: -4.053983}
     rotation: 
       w: 1
       x: 0
@@ -45,9 +45,12 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Animator 
+    bool_vars: {}
+    float_vars: {}
+    int_vars: {}
     layer_table: {Base Layer: 0}
     layers: 
-    - anim_state_table: {New State: 1, idle: 2}
+    - anim_state_table: {idle: 1, walk: 2}
       anim_states: 
       - loop: 1
         name: ""
@@ -55,29 +58,59 @@
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: 00000000-0000-0000-0000-000000000000}
-        transitions: []
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
         valid: 0
       - loop: 1
-        name: New State
-        node_position: {x: 81, y: 85}
-        speed: 1
-        state_data: !BasicAnimationState 
-          motion: {guid: 00000000-0000-0000-0000-000000000000}
-        transitions: []
-        valid: 1
-      - loop: 1
         name: idle
-        node_position: {x: 145, y: 139}
+        node_position: {x: 0, y: 0}
         speed: 1
         state_data: !BasicAnimationState 
           motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
         transitions: 
         - conditions: []
+          exit_time: 0.8
           has_exit_time: 1
-          transition_duration: 0
-          transition_from_index: 2
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
           transition_offset: 0
           transition_to_index: 0
+          valid: 0
+        valid: 1
+      - loop: 1
+        name: walk
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: afcdbeaa-e5e1-4a92-9360-abe7b85dde73}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        - conditions: []
+          exit_time: 0.75
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 2
+          transition_from_index: 2
+          transition_offset: 0.5
+          transition_to_index: 1
+          valid: 1
         valid: 1
       blend_type: Override_Blend
       bone_mask: 
@@ -185,12 +218,11 @@
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
-  - !MonoBehavior 
-    {enabled: 1, script_data: !TestSetForward ~}
+    trigger_vars: {}
 - !8590000128 
   - active: 1
   - !Transform 
-    parent: {id: 4295098368}
+    parent: {id: 4295032832}
     position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
@@ -210,7 +242,7 @@
 - !12884967424 
   - active: 1
   - !Transform 
-    parent: {id: 4295098368}
+    parent: {id: 4295032832}
     position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
@@ -230,7 +262,7 @@
 - !17179934720 
   - active: 1
   - !Transform 
-    parent: {id: 4295098368}
+    parent: {id: 4295032832}
     position: {x: -0, y: 0, z: -0}
     rotation: 
       w: 1

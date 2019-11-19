@@ -33,7 +33,7 @@ namespace idk
 
 		_blend_prog_col = ImVec4{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
 		_layer_selectable_display_size = ImVec2{ 0, 100 };
-		_state_selectable_display_size = ImVec2{ 0, 40 };
+		_state_selectable_display_size = ImVec2{ 0, ImGui::GetFontSize() + 3.0f + ImGui::GetStyle().FramePadding.y * 4 };
 		_selectable_offset = ImVec2{ 0, 5 };
 
 		_selectable_bg_col = ImVec4{ ImGui::GetStyleColorVec4(ImGuiCol_Header).x,
@@ -98,9 +98,7 @@ namespace idk
 
 	void IGE_AnimatorWindow::separator()
 	{
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		ImVec2 p = ImGui::GetCursorScreenPos();
-		draw_list->AddLine(ImVec2(p.x - 9999, p.y), ImVec2(p.x + 9999, p.y), ImGui::GetColorU32(ImGuiCol_Border));
+		ImGui::Separator(false);
 	}
 
 	void IGE_AnimatorWindow::drawLeftCol()
@@ -202,14 +200,23 @@ namespace idk
 
 			const auto display_transition = [&]()
 			{
-				if (_selected_transition < 0)
+				if (_selected_transition == 0)
 					return;
 
 				ImGui::PushID(_selected_transition);
-				auto& curr_transition = curr_state.transitions[_selected_transition];
+				auto& curr_transition = curr_state.GetTransition(_selected_transition);
+				if (!curr_transition.valid)
+					return;
+
 				auto& transition_to_state = curr_layer.anim_states[curr_transition.transition_to_index];
+
+				float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Transition Duration").x);
+				float item_width = width_avail * 0.8f;
+				float offset = ImGui::GetContentRegionAvailWidth() - item_width;
+
 				ImGui::Text("Transition To: ");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
 				if (ImGui::BeginCombo("##transition_to", transition_to_state.name.data()))
 				{
 					for (size_t i = 0; i < curr_layer.anim_states.size(); ++i)
@@ -224,28 +231,36 @@ namespace idk
 
 					ImGui::EndCombo();
 				}
+				ImGui::PopItemWidth();
 
 				if (!transition_to_state.valid)
 					ImGuidk::PushDisabled();
 				ImGui::Text("Has Exit Time");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
 				ImGui::Checkbox("##has_exit_time", &curr_transition.has_exit_time);
 
 				// Exit time must be positive
 				ImGui::Text("Exit Time");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
 				if (ImGui::InputFloat("##exit_time", &curr_transition.exit_time))
 					curr_transition.exit_time = max(curr_transition.exit_time, 0.0f);
+				ImGui::PopItemWidth();
 				ImGui::NewLine();
 
 				ImGui::Text("Transition Duration");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
 				if (ImGui::InputFloat("##transition_dur", &curr_transition.transition_duration))
 					curr_transition.transition_duration = max(curr_transition.transition_duration, 0.0f);
+				ImGui::PopItemWidth();
+
 				ImGui::Text("Transition Offset");
-				ImGui::SameLine();
+				ImGui::SameLine(offset);
+				ImGui::PushItemWidth(item_width);
 				if (ImGui::InputFloat("##transition_offset", &curr_transition.transition_offset))
 					curr_transition.transition_offset = max(curr_transition.transition_offset, 0.0f);
+				ImGui::PopItemWidth();
 
 				if (!transition_to_state.valid)
 					ImGuidk::PopDisabled();
@@ -268,11 +283,12 @@ namespace idk
 
 				ImGui::PushID(_selected_state);
 				strcpy_s(buf, curr_state.name.data());
-				
-				ImGui::Text("Animation State");
+
 				float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Animation State").x);
 				float item_width = width_avail * 0.8f;
 				float offset = ImGui::CalcTextSize("Animation State").x + width_avail - item_width;
+
+				ImGui::Text("Animation State");
 
 				ImGui::SameLine(offset);
 				ImGui::PushItemWidth(item_width);
@@ -313,10 +329,12 @@ namespace idk
 				ImGui::PopStyleColor();
 				if (is_open)
 				{
-					for (size_t i = 0; i < curr_state.transitions.size(); ++i)
+					for (size_t i = 1; i < curr_state.transitions.size(); ++i)
 					{
 						ImGui::PushID(i);
-						auto& transition = curr_state.transitions[i];
+						auto& transition = curr_state.GetTransition(i);
+						if (!transition.valid)
+							break;
 						bool selected = _selected_transition == i;
 						string transition_from = curr_layer.GetAnimationState(transition.transition_from_index).name;
 						string transition_to = curr_layer.GetAnimationState(transition.transition_to_index).name;
@@ -580,14 +598,110 @@ namespace idk
 		static char buf[50];
 		static bool just_rename = false;
 		static int rename_index = -1;
+		
+		static const ImVec2 selectable_offset{ 0, ImGui::GetStyle().FramePadding.y };
+		static const ImVec2 selectable_size{ 0, ImGui::GetFrameHeightWithSpacing() + 3.0f + ImGui::GetStyle().FramePadding.y * 4 };
 
-		static const ImVec2 selectable_offset{ 0, 5 };
+		const auto display_transitions_drop_down = [&](size_t state_index)
+		{
+			auto& layer = _curr_animator_component->layers[_selected_layer];
+			auto& state = layer.GetAnimationState(state_index);
+			if (!state.valid)
+				return;
+
+			if (state.display_transitions_drop_down)
+			{
+				for (size_t transition_index = 1; transition_index < state.transitions.size(); ++transition_index)
+				{
+					auto& curr_transition = state.GetTransition(transition_index);
+					if (!curr_transition.valid)
+						continue;
+
+					// Use pointer value as ID
+					ImGui::PushID(r_cast<size_t>(&curr_transition));
+
+					// ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_FramePadding;
+					const bool selected = (state_index == _selected_state) && (_selected_transition == transition_index);
+					// if (selected)
+					// 	flags |= ImGuiTreeNodeFlags_Selected;
+
+					// Display tree node
+					string transition_from = layer.GetAnimationState(curr_transition.transition_from_index).name;
+					string transition_to = layer.GetAnimationState(curr_transition.transition_to_index).name;
+					string transition_title = transition_from + "\t->\t" + transition_to;
+
+					ImGui::Indent();
+
+					ImGui::BeginGroup();
+
+					auto prev_cursor_pos = ImGui::GetCursorPos();
+					ImGui::PushStyleColor(ImGuiCol_Header, _selectable_bg_col);
+					ImGui::PushStyleColor(ImGuiCol_HeaderActive, _selectable_active_col);
+					if (selected)
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
+					else
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
+					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_PressedOnClick, selectable_size))
+					{
+						LOG("SELECTABLE");
+						_show_transition = true;
+						_display_mode = AnimatorDisplayMode::State;
+							
+						_selected_state = state_index;
+						_selected_transition = transition_index;
+					}
+					
+					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+					{
+						LOG("DOUBLE CLICK");
+						
+						_show_transition = false;
+						_display_mode = AnimatorDisplayMode::Transition;
+					}
+
+
+					ImGui::PopStyleColor(3);
+					separator();
+					auto new_cursor_pos = ImGui::GetCursorPos();
+					ImGui::SetCursorPos(prev_cursor_pos + selectable_offset);
+					
+
+					ImGui::Text(transition_title.data());
+					ImGui::ProgressBar(0.0f, ImVec2(-1, 3), nullptr);
+
+					ImGui::EndGroup();
+					ImGui::Unindent();
+					ImGui::SetCursorPos(new_cursor_pos);
+					
+					ImGui::PopID();
+				}
+			}
+		};
 
 		if (ImGui::BeginTabItem("States", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
 		{
 			if (_curr_animator_component)
 			{
 				auto& curr_layer = _curr_animator_component->layers[_selected_layer];
+
+				if (ImGui::Button("Add State"))
+				{
+					curr_layer.AddAnimation(RscHandle<anim::Animation>{});
+				}
+				ImGui::SameLine();
+
+				const bool can_remove = _selected_state != 0 && curr_layer.anim_states.size() > 1;
+				if (!can_remove)
+					ImGuidk::PushDisabled();
+				if (ImGui::Button("Delete State"))
+				{
+					curr_layer.RemoveAnimation(_selected_state);
+				}
+				if (!can_remove)
+					ImGuidk::PopDisabled();
+
+				separator();
+
 				for (int i = 1; i < curr_layer.anim_states.size(); ++i)
 				{
 					auto& state = curr_layer.anim_states[i];
@@ -602,7 +716,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
 					else
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
-					if (ImGui::Selectable("##state_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, _state_selectable_display_size))
+					if (ImGui::Selectable("##state_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, selectable_size))
 					{
 						const size_t curr_selected_layer = _selected_layer;
 						resetSelection();
@@ -641,6 +755,13 @@ namespace idk
 							just_rename = true;
 						}
 					}
+					const float align_checkbox = ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Transition").x - ImGui::GetFrameHeight() - (ImGui::GetStyle().FramePadding.x * 2);
+					std::max(align_checkbox, 0.0f);
+					ImGui::SameLine(align_checkbox);
+					ImGui::Text("Transition");
+					ImGui::SameLine();
+					ImGui::Checkbox("##transition_drop_down", &state.display_transitions_drop_down);
+					
 
 					float prog_bar = 0.0f;
 					if (curr_layer.curr_state.index == i)
@@ -652,26 +773,13 @@ namespace idk
 					ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
 					ImGui::SetCursorPos(new_cursor_pos);
 
+					display_transitions_drop_down(i);
 					ImGui::PopID();
 					
 				}
 
 				ImGui::NewLine();
-				if (ImGui::Button("Add State"))
-				{
-					curr_layer.AddAnimation(RscHandle<anim::Animation>{});
-				}
-				ImGui::SameLine();
-
-				const bool can_remove = _selected_state != 0 && curr_layer.anim_states.size() > 1;
-				if (!can_remove)
-					ImGuidk::PushDisabled();
-				if (ImGui::Button("Delete State"))
-				{
-					curr_layer.RemoveAnimation(_selected_state);
-				}
-				if (!can_remove)
-					ImGuidk::PopDisabled();
+				
 			}
 			ImGui::EndTabItem();
 		}
@@ -751,7 +859,7 @@ namespace idk
 		_display_mode = None;
 		_selected_layer = 0;
 		_selected_state = 0;
-		_selected_transition = -1;
+		_selected_transition = 0;
 		_show_transition = false;
 	}
 }

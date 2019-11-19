@@ -29,7 +29,7 @@ namespace idk
 		// Controls blending to different states in run-time
 		float blend_duration = 0.0f;
 		bool playing_before_pause = false, blending_before_pause = false;
-		bool blend_this_frame = false, blend_interrupt = false;
+		bool blend_interruptible = false, blend_this_frame = false, blend_interrupt = false;
 
 		// Caching
 		vector<matrix_decomposition<real>> prev_poses;
@@ -38,10 +38,10 @@ namespace idk
 		hash_table<string, size_t> anim_state_table;
 		vector<AnimationState> anim_states{ AnimationState{} };
 
-		void Play(size_t index, float offset = 0.0f);
-		void Play(string_view animation_name, float offset = 0.0f);
-		void BlendTo(size_t index, float blend_time = 0.2f);
-		void BlendTo(string_view anim_name, float blend_time = 0.2f);
+		bool Play(size_t index, float offset = 0.0f);
+		bool Play(string_view animation_name, float offset = 0.0f);
+		bool BlendTo(size_t index, float blend_time = 0.2f);
+		bool BlendTo(string_view anim_name, float blend_time = 0.2f);
 		void Stop();
 		void Pause();
 		void Resume();
@@ -68,6 +68,7 @@ namespace idk
 		bool HasState(string_view name) const;
 		
 		void Reset();
+		void ResetBlend();
 		void ResetToDefault();
 	};
 }

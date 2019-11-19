@@ -4,26 +4,27 @@
 
 namespace idk
 {
-	void AnimationLayer::Play(size_t index, float offset)
+	bool AnimationLayer::Play(size_t index, float offset)
 	{
 		// Reset the blend/interrupt state and the playing state
 		Reset();
 		if (index >= anim_states.size())
 		{
 			LOG_CRASH_TO(LogPool::ANIM, "Animation States table is messed up. Somehow we are accessing out of bounds.");
-			return;
+			return false;
 		}
 
 		curr_state.is_playing = true;
 		if (curr_state.index == index)
-			return;
+			return false;
 
 		curr_state.index = index;
 		// cap at 1.0f
 		curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
+		return true;
 	}
 
-	void AnimationLayer::Play(string_view animation_name, float offset)
+	bool AnimationLayer::Play(string_view animation_name, float offset)
 	{
 		// Reset the blend/interrupt state and the playing state
 		Reset();
@@ -31,30 +32,32 @@ namespace idk
 		const auto found_anim = anim_state_table.find(animation_name.data());
 		if (found_anim == anim_state_table.end())
 		{
-			return;
+			return false;
 		}
 
-		Play(found_anim->second, offset);
+		return Play(found_anim->second, offset);
 	}
 
-	void AnimationLayer::BlendTo(size_t index, float blend_time)
+	bool AnimationLayer::BlendTo(size_t index, float blend_time)
 	{
+		if (IsBlending() && !blend_interruptible)
+			return false;
+
 		if (blend_time < 0.00001f)
 		{
-			Play(index);
-			return;
+			return Play(index);
 		}
 
 		if (index >= anim_states.size())
 		{
 			LOG_CRASH_TO(LogPool::ANIM, "Animation States table is messed up. Somehow we are accessing out of bounds.");
-			return;
+			return false;
 		}
 
 		// Ignore calls to blend to the current blend state
 		if (blend_state.index == index)
 		{
-			return;
+			return false;
 		}
 
 		// If i'm already blending and BlendTo was not called this frame, the blending was interuppted
@@ -68,16 +71,18 @@ namespace idk
 		}
 		// If i'm not blending and the current animation is the same as the requested blend state, we do nothing. 
 		else if (curr_state.index == index)
-			return;
+			return false;
 
 		blend_state.index = index;
 		blend_state.normalized_time = 0.0f;
 		blend_state.is_playing = true;
 		blend_this_frame = true;
 		blend_duration = blend_time;
+		blend_interruptible = false;
+		return true;
 	}
 
-	void AnimationLayer::BlendTo(string_view anim_name, float blend_time)
+	bool AnimationLayer::BlendTo(string_view anim_name, float blend_time)
 	{
 		auto found_anim = anim_state_table.find(anim_name.data());
 		if (found_anim == anim_state_table.end())
@@ -88,10 +93,10 @@ namespace idk
 			blend_interrupt = false;
 
 			LOG_WARNING_TO(LogPool::ANIM, "Unable to find animation state (" + string{ anim_name } +") to blend to.");
-			return;
+			return false;
 		}
 
-		BlendTo(found_anim->second, blend_time);
+		return BlendTo(found_anim->second, blend_time);
 		
 	}
 
@@ -239,8 +244,9 @@ namespace idk
 		if (blend_state.index == found_clip->second)
 			ResetToDefault();
 
+		const size_t removed_index = found_clip->second;
+		anim_states.erase(anim_states.begin() + removed_index);
 		anim_state_table.erase(found_clip);
-		anim_states.erase(anim_states.begin() + found_clip->second);
 
 		const size_t num_states = anim_states.size();
 		for (size_t i = 1; i < num_states; ++i)
@@ -248,6 +254,16 @@ namespace idk
 			auto& anim_state = anim_states[i];
 			const auto found = anim_state_table.find(anim_state.name);
 			found->second = i;
+
+			// Check all transitions for the removed index
+			for (size_t k = 1; k < anim_state.transitions.size(); ++k)
+			{
+				auto& curr_transition = anim_state.transitions[k];
+
+				// Set the transition to index to 0 if the state it is supposed to transition to is the one removed.
+				if (curr_transition.transition_to_index == removed_index)
+					curr_transition.transition_to_index = 0;
+			}
 		}
 	}
 
@@ -288,6 +304,10 @@ namespace idk
 	void AnimationLayer::Reset()
 	{
 		curr_state.Reset();
+		ResetBlend();
+	}
+	void AnimationLayer::ResetBlend()
+	{
 		blend_state.Reset();
 
 		blend_duration = 0.0f;
@@ -296,5 +316,6 @@ namespace idk
 		blend_interrupt = false;
 		playing_before_pause = false;
 		blending_before_pause = false;
+		blend_interruptible = false;
 	}
 }

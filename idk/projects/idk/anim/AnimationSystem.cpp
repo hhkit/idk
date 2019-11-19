@@ -383,13 +383,15 @@ namespace idk
 			{
 				// layer.is_blending = false;
 				layer.blend_state.normalized_time = 0.0f;
+				layer.blend_state.elapsed_time = 0.0f;
 				layer.blend_interrupt = false;
+				layer.blend_interruptible = false;
 				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + std::to_string(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{
 				IDK_ASSERT(abs(layer.blend_duration) > 0.0001);
-				const float blend_weight = layer.blend_state.normalized_time / layer.blend_duration;
+				const float blend_weight = layer.blend_state.elapsed_time / layer.blend_duration;
 				result = BlendPose(layer.blend_source[bone_index], blend_state_result, blend_weight);
 			}
 		}
@@ -411,26 +413,34 @@ namespace idk
 	{
 		auto& curr_state = layer.curr_state;
 		// Only evaluate curr state if it is playing
+		
 		if (curr_state.is_playing)
 		{
 			auto& anim_state = layer.GetAnimationState(curr_state.index);
 			if (!anim_state.valid)
 				return;
 
-			for (size_t i = 0; i < anim_state.transitions.size(); ++i)
+			// if we are in a transition and cannot be interrupted, we do not evaluate conditions/exit time
+			if (layer.IsBlending() && !layer.blend_interruptible)
+				return;
+			
+			for (size_t i = 1; i < anim_state.transitions.size(); ++i)
 			{
-				auto& curr_transition = anim_state.transitions[i];
+				// Skip invalid transitions
+				auto& curr_transition = anim_state.GetTransition(i);
+				if (!curr_transition.valid)
+					continue;
 
 				bool transit = false;
 				// Evaluate exit time first
 				if (curr_transition.has_exit_time)
 				{
 					if (curr_transition.exit_time <= 1.0f)
-						transit = curr_state.elapsed_time >= curr_transition.exit_time;
+						transit = curr_state.normalized_time >= curr_transition.exit_time;
 					else
 						transit = curr_state.elapsed_time >= curr_transition.exit_time;
 				}
-
+				
 				if (transit == false)
 					continue;
 
@@ -474,9 +484,13 @@ namespace idk
 
 				if (transit == true)
 				{
-					layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
-					if (layer.blend_state.is_playing)
+					const bool blend_to_succeeded = layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
+					if (blend_to_succeeded && layer.blend_state.is_playing)
+					{
+						LOG("TRANSITION HIT");
 						layer.blend_state.normalized_time = curr_transition.transition_offset;
+						layer.blend_interruptible = curr_transition.interruptible;
+					}
 					break;
 				}
 			}
@@ -518,16 +532,23 @@ namespace idk
 
 			if (layer.blend_state.is_playing)
 			{
+				// Note: Blend states always loop
+				if (layer.blend_state.normalized_time >= 1.0f)
+				{
+					auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
+					if (!anim_state.valid)
+						continue;
+
+					layer.blend_state.normalized_time -= 1.0f;
+				}
+
 				// Check if the blending is over
-				float delta = layer.blend_state.normalized_time / layer.blend_duration;
+				float delta = layer.blend_state.elapsed_time / layer.blend_duration;
 				if (delta >= 1.0f)
 				{
+					LOG("RESET HIT");
 					layer.curr_state = layer.blend_state;
-					layer.blend_state.Reset();
-					layer.blend_duration = 0.0f;
-
-					// Turn off blend interrupt the moment blending is over
-					layer.blend_interrupt = false;
+					layer.ResetBlend();
 				}
 			}
 
@@ -544,11 +565,7 @@ namespace idk
 
 			if (layer.blend_state.is_stopping == true)
 			{
-				layer.blend_state.Reset();
-				layer.blend_duration = 0.0f;
-
-				// Turn off blend interrupt the moment blending is over
-				layer.blend_interrupt = false;
+				layer.ResetBlend();
 			}
 			
 			++num_playing;

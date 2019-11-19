@@ -520,7 +520,7 @@ REFLECT_BEGIN(decltype(idk::AnimationTransition::conditions), "vector<AnimationC
 REFLECT_END();
 
 REFLECT_BEGIN(idk::AnimationTransition, "AnimationTransition")
-REFLECT_VARS(transition_from_index, transition_to_index, has_exit_time, transition_offset, transition_duration, conditions)
+REFLECT_VARS(valid, transition_from_index, transition_to_index, interruptible, has_exit_time, exit_time, transition_offset, transition_duration, conditions)
 REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::AnimationState::transitions), "vector<AnimationTransition>")

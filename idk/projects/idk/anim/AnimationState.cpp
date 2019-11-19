@@ -16,6 +16,13 @@ namespace idk {
 		new_transition.transition_to_index = to;
 		transitions.push_back(new_transition);
 	}
+	AnimationTransition& AnimationState::GetTransition(size_t index)
+	{
+		if (index >= transitions.size())
+			return transitions[0];
+
+		return transitions[index];
+	}
 	bool AnimationState::IsBlendTree() const
 	{
 		return std::get_if<BlendTree>(&state_data) != nullptr;

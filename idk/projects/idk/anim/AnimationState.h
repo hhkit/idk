@@ -33,19 +33,25 @@ namespace idk
 
 	struct AnimationState
 	{
+		// Serializables
 		string name{};
 		
 		bool valid = false;
 		bool loop = true;
 		float speed = 1.0f;
-		vec2 node_position{};
 
 		variant<BasicAnimationState, BlendTree> state_data;
-		vector<AnimationTransition> transitions;
+		vector<AnimationTransition> transitions{ AnimationTransition{ false} };
 
+		// Editor saved values
+		bool display_transitions_drop_down = false;
+		vec2 node_position{};
+
+		// Functions
 		BasicAnimationState* GetBasicState();
 		BlendTree* GetBlendTree();
 		void AddTransition(size_t from, size_t to);
+		AnimationTransition& GetTransition(size_t index);
 		bool IsBlendTree() const;
 	};
 
