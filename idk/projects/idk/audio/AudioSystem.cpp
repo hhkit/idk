@@ -141,7 +141,7 @@ namespace idk
 
 	void AudioSystem::Init()
 	{
-		Core::GetResourceManager().RegisterFactory<EasyFactory<AudioClip>>();
+		Core::GetResourceManager().RegisterFactory<AudioClipFactory>();
 		Core::GetResourceManager().RegisterExtension<AudioClip>(".wav");
 		Core::GetResourceManager().RegisterExtension<AudioClip>(".ogg");
 		Core::GetResourceManager().RegisterExtension<AudioClip>(".mp3");

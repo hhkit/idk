@@ -75,16 +75,16 @@ namespace idk::ogl
 		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		renderer_geometry_shaders;
 
-		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
-		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-        renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
-		renderer_vertex_shaders[VSkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
-
-		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
-		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
-		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/shadow.frag");
-		renderer_fragment_shaders[FPicking] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/picking.frag");
+		renderer_vertex_shaders[VDebug]       = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert", false);
+		renderer_vertex_shaders[VNormalMesh]  = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert", false);
+		renderer_vertex_shaders[VSkinnedMesh] = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert", false);
+        renderer_vertex_shaders[VParticle]    = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert", false);
+		renderer_vertex_shaders[VSkyBox]      = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert", false);
+										    
+		renderer_fragment_shaders[FDebug]   = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag", false);
+		renderer_fragment_shaders[FSkyBox]  = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag", false);
+		renderer_fragment_shaders[FShadow]  = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/shadow.frag", false);
+		renderer_fragment_shaders[FPicking] = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/picking.frag", false);
 
 		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
 		brdf_texture->Bind();

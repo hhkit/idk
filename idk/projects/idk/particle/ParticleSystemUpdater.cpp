@@ -24,7 +24,7 @@ namespace idk
         particle_mat->_default_instance = particle_mat_inst;
 
         particle_mat->uniforms.emplace("Texture", UniformInstance{ "_uTex[0]",
-            *Core::GetResourceManager().Load<Texture>("/engine_data/textures/default_particle.png", false) });
+            Core::GetResourceManager().Load<Texture>("/engine_data/textures/default_particle.png", false) });
     }
 
     void ParticleSystemUpdater::Update(span<ParticleSystem> span_ps)

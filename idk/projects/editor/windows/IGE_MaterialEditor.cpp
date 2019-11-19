@@ -996,7 +996,7 @@ namespace idk
                         }
 
                         // replace name of all material instances with overriden uniform
-                        for (auto& mat_inst : Core::GetResourceManager().GetAll<MaterialInstance>())
+                        for (auto& mat_inst : Core::GetSystem<EditorAssetImporter>().GetAll<MaterialInstance>())
                         {
                             if (mat_inst->material.guid == _graph.guid)
                             {

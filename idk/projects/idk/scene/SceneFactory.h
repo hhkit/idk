@@ -10,11 +10,6 @@ namespace idk
 	public:
 		unique_ptr<Scene> GenerateDefaultResource() override;
 		unique_ptr<Scene> Create() noexcept override;
-	};
-
-	class SceneLoader
-		: public IFileLoader
-	{
-		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& bundle) override;
+		unique_ptr<Scene> Create(PathHandle h) noexcept override;
 	};
 }

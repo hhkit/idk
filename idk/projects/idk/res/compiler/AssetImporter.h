@@ -9,16 +9,23 @@ namespace idk
 	public:
 		virtual void CheckImportDirectory() = 0;
 		virtual ResourceBundle Get(PathHandle path) = 0;
-		template<typename T> ResourceBundle::ResourceSpan<T> GetAll(string_view mount_path);
+		template<typename T> RscHandle<T> Get(PathHandle mount_path);
+		template<typename T> ResourceBundle::ResourceSpan<T> GetAll(PathHandle mount_path);
 	};
 
 	template<typename T>
-	ResourceBundle::ResourceSpan<T> AssetImporter::GetAll(string_view mount_path)
+	RscHandle<T> AssetImporter::Get(PathHandle mount_path)
 	{
-		auto itr = bundles.find(mount_path);
-		if (itr != bundles.end())
-			return itr->second.GetAll<T>();
+		auto span = Get(mount_path).GetAll<T>();
+		if (span.size())
+			return *span.begin();
+		else
+			return {};
+	}
 
-		return {};
+	template<typename T>
+	ResourceBundle::ResourceSpan<T> AssetImporter::GetAll(PathHandle mount_path)
+	{
+		return Get(mount_path).GetAll<T>();
 	}
 }

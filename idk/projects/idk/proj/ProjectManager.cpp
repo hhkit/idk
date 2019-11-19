@@ -43,7 +43,7 @@ namespace idk
 
             auto res = Core::GetSystem<AssetImporter>().Get(path);
             for (const auto& handle : res.GetAll())
-                std::visit([](auto h) { Core::GetResourceManager().Free(h); }, handle);
+                std::visit([](auto h) { Core::GetResourceManager().Destroy(h); }, handle);
         }
         core_fs.Dismount("/assets");
         core_fs.Dismount("/config");

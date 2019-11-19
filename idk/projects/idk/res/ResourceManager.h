@@ -10,7 +10,6 @@
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
 #include <res/ResourceUtils.h>
-#include <res/FileLoader.h>
 #include <meta/meta.h>
 #include <meta/tag.h>
 
@@ -34,7 +33,7 @@ namespace idk
 		template<typename Res> RscHandle<Res> Create();
 		template<typename Res> RscHandle<Res> Create(Guid guid);
 		template<typename Res> RscHandle<Res> Load(PathHandle h, bool reload = true);
-		template<typename Res> bool           Free(const RscHandle<Res>&);
+		template<typename Res> bool           Destroy(const RscHandle<Res>&);
 
 		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
 		bool									IsExtensionSupported(string_view ext);

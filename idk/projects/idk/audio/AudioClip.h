@@ -49,7 +49,7 @@ namespace idk
 		FMOD::Sound*	_soundHandle	{ nullptr };	//A handle to FMOD_Sound object. It contains some sound info data as well, but it is wrapped to the AudioClipInfo on CreateSound.
 	private:
 		friend class AudioSystem;			//The AudioSystem will have access to AudioClip's variables
-		friend class AudioClipLoader;		//The AudioClipLoader will have access to AudioClip's variables
+		friend class AudioClipFactory;		//The AudioClipLoader will have access to AudioClip's variables
 
 		AudioClipInfo soundInfo  {}; //Updated by AudioClipLoader
 

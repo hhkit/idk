@@ -67,19 +67,19 @@ namespace idk
 		}
 
 
-		Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
-		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
-		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
-		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
-		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
-		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-		Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
+		//Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
+		//Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
+		//Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
+		//Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
+		//Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
+		//Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
+		//Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
-		Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
-		Core::GetResourceManager().RegisterFactory<GraphFactory>();
+		//Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+		//Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
+		//Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
+		//Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
+		//Core::GetResourceManager().RegisterFactory<GraphFactory>();
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		fs.Mount(string{ fs.GetExeDir() } +"/editor_data", "/editor_data", false);

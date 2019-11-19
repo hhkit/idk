@@ -239,7 +239,7 @@ namespace idk::ogl
 				elem.uv = spherical_projection(elem.pos);
 				elem.pos /= 2; // normalize
 			}
-			const auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
+			const auto sphere_mesh = Core::GetResourceManager().Create<OpenGLMesh>(Mesh::defaults[MeshType::Sphere].guid);
 
 			sphere_mesh->AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
 				.Bind()
@@ -253,7 +253,7 @@ namespace idk::ogl
 
 		{	/* create cube mesh */
 			const auto box_mesh = Mesh::defaults[MeshType::Box];
-			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(box_mesh.guid);
+			const auto mesh_handle = Core::GetResourceManager().Create<OpenGLMesh>(box_mesh.guid);
 			constexpr auto sz = .5f;
 			std::vector<Vertex> vertices{
 				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
@@ -316,7 +316,7 @@ namespace idk::ogl
 
 		{	/* create circle mesh */
 			const auto circle_mesh = Mesh::defaults[MeshType::Circle];
-			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(circle_mesh.guid);
+			const auto mesh_handle = Core::GetResourceManager().Create<OpenGLMesh>(circle_mesh.guid);
 			constexpr auto sz = 1.f;
 			constexpr auto numberOfTri = 16;
 			const real angle = (2.f * pi) / numberOfTri;
@@ -359,7 +359,7 @@ namespace idk::ogl
 
 		{	/* create plane mesh */
 			const auto plane_mesh = Mesh::defaults[MeshType::Plane];
-			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(plane_mesh.guid);
+			const auto mesh_handle = Core::GetResourceManager().Create<OpenGLMesh>(plane_mesh.guid);
 			constexpr auto sz = .5f;
 			//constexpr auto numberOfTri = 16;
 			//real angle = (2.f * pi) / numberOfTri;
@@ -388,7 +388,7 @@ namespace idk::ogl
 		}
 		{	/* create FSQ mesh */
 			const auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
-			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(fsq_mesh.guid);
+			const auto mesh_handle = Core::GetResourceManager().Create<OpenGLMesh>(fsq_mesh.guid);
 			constexpr auto sz = 1.f;
 			//constexpr auto numberOfTri = 16;
 			//real angle = (2.f * pi) / numberOfTri;
@@ -418,7 +418,7 @@ namespace idk::ogl
 
 		{	/* create tetrahedral mesh */
 			const auto tet_mesh = Mesh::defaults[MeshType::Tetrahedron];
-			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(tet_mesh.guid);
+			const auto mesh_handle = Core::GetResourceManager().Create<OpenGLMesh>(tet_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0,  0,  1}, vec3{ 0,  0,  1}},
@@ -448,7 +448,7 @@ namespace idk::ogl
 
 		{	/* create line mesh */
 			const auto line_mesh = Mesh::defaults[MeshType::Line];
-			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<OpenGLMesh>(line_mesh.guid);
+			const auto mesh_handle = Core::GetResourceManager().Create<OpenGLMesh>(line_mesh.guid);
 			std::vector<Vertex> vertices
 			{
 				Vertex{vec3{ 0, 0, 1}, vec3{ 0, 0, 1}},

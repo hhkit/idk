@@ -2,6 +2,7 @@
 #include "InputResource.h"
 #include <imgui/imgui_internal.h>
 #include <editor/DragDropTypes.h>
+#include <editor/compiler/IDEAssetImporter.h>
 #include <IncludeResources.h>
 #include <map>
 
@@ -94,13 +95,13 @@ namespace idk
             std::visit([&](auto h)
             {
                 using T = typename decltype(h)::Resource;
-                auto all_handles = Core::GetResourceManager().GetAll<T>();
+                auto all_handles = Core::GetSystem<EditorAssetImporter>().GetAll<T>();
                 std::map<string, RscHandle<T>> table;
 
                 for (auto handle_i : all_handles)
                 {
                     auto name = handle_i->Name();
-                    auto path = Core::GetResourceManager().GetPath(handle_i);
+                    auto path = Core::GetSystem<EditorAssetImporter>().GetPath(handle_i);
                     auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
                     table.emplace(str, handle_i);
                 }

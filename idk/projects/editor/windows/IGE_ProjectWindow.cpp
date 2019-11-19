@@ -19,6 +19,7 @@ of the editor.
 #include <app/Application.h>
 #include <editor/IDE.h>
 #include <editor/DragDropTypes.h>
+#include <editor/compiler/IDEAssetImporter.h>
 #include <core/GameObject.h>
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
@@ -90,16 +91,17 @@ namespace idk {
 		if(!Core::GetResourceManager().IsExtensionSupported(path.GetExtension()))
 			return RscHandle<Texture>();
 
-        auto get_res = Core::GetResourceManager().Get(path);
-        if (get_res && get_res->Count())
-            return get_res->GetAll()[0];
-        else if (!get_res)
+        auto get_res = Core::GetSystem<AssetImporter>().Get(path);
+        if (get_res.Count())
+            return get_res.GetAll()[0];
+        else
+			/*
         {
             auto load_res = Core::GetResourceManager().Load(path);
             if (load_res && load_res->Count())
                 return load_res->GetAll()[0];
         }
-        
+        */
         return RscHandle<Texture>();
     }
 
@@ -150,22 +152,22 @@ namespace idk {
 				{
 					auto path = unique_new_mount_path("NewMaterial", Material::ext);
 					auto res = Core::GetResourceManager().Load<shadergraph::Graph>(path);
-					if (res && *res)
-						Core::GetResourceManager().Save(*res);
+					if (res)
+						Core::GetSystem<EditorAssetImporter>().Save(res);
 				}
                 if (ImGui::MenuItem("Material Instance"))
                 {
                     auto path = unique_new_mount_path("NewMaterialInst", MaterialInstance::ext);
                     auto res = Core::GetResourceManager().Load<MaterialInstance>(path);
-                    if (res && *res)
-                        Core::GetResourceManager().Save(*res);
+					if (res)
+						Core::GetSystem<EditorAssetImporter>().Save(res);
                 }
 				if (ImGui::MenuItem("Render Target"))
 				{
 					auto path = unique_new_mount_path("NewRenderTarget", RenderTarget::ext);
 					auto res = Core::GetResourceManager().Load<RenderTarget>(path);
-					if (res && *res)
-						Core::GetResourceManager().Save(*res);
+					if (res)
+						Core::GetSystem<EditorAssetImporter>().Save(res);
 				}
                 ImGui::EndPopup();
             }
@@ -345,7 +347,7 @@ namespace idk {
 
                 if (path.IsDir())
                 {
-                    static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
+                    static auto folder_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
                     id = folder_icon->ID();
                 }
                 else
@@ -361,12 +363,12 @@ namespace idk {
                             return h;
                         else if constexpr (std::is_same_v<T, Material> || std::is_same_v<T, shadergraph::Graph>)
                         {
-                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
+                            static auto material_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
                             return material_icon;
                         }
                         else if constexpr (std::is_same_v<T, MaterialInstance>)
                         {
-                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
+                            static auto material_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
                             return material_icon;
                         }
                         else
@@ -474,10 +476,10 @@ namespace idk {
             {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    auto get_res = Core::GetResourceManager().Get(path);
-                    if (get_res && get_res->Count())
+                    auto get_res = Core::GetSystem<EditorAssetImporter>().Get(path);
+                    if (get_res.Count())
                     {
-                        DragDrop::SetResourcePayload(*get_res);
+                        DragDrop::SetResourcePayload(get_res);
                         ImGui::Text(path.GetMountPath().data());
                     }
                     ImGui::EndDragDropSource();
@@ -509,10 +511,10 @@ namespace idk {
                             }
                         }
                     }
-                    auto get_res = Core::GetResourceManager().Get(path);
-                    if (get_res && get_res->Count())
+                    auto get_res = Core::GetSystem<EditorAssetImporter>().Get(path);
+                    if (get_res.Count())
                     {
-                        DragDrop::SetResourcePayload(*get_res);
+                        DragDrop::SetResourcePayload(get_res);
                         ImGui::Text(path.GetMountPath().data());
                     }
                     ImGui::EndDragDropTarget();
@@ -530,11 +532,11 @@ namespace idk {
                 renaming_selected_asset = false;
                 if (!path.IsDir())
                 {
-                    auto get_res = Core::GetResourceManager().Get(path);
-                    if (get_res && get_res->Count())
+                    auto get_res = Core::GetSystem<EditorAssetImporter>().Get(path);
+                    if (get_res.Count())
                     {
                         selected_assets.clear();
-                        for (auto h : get_res->GetAll())
+                        for (auto h : get_res.GetAll())
                             selected_assets.push_back(h);
                         OnAssetsSelected.Fire(span<GenericResourceHandle>(selected_assets));
                     }
@@ -561,10 +563,10 @@ namespace idk {
                         filename += "_Inst";
                         auto create_path = unique_new_mount_path(filename, MaterialInstance::ext);
                         auto res = Core::GetResourceManager().Load<MaterialInstance>(create_path);
-                        if (res && *res)
+                        if (res)
                         {
-                            res.value()->material = *Core::GetResourceManager().Get<Material>(path);
-                            Core::GetResourceManager().Save(*res);
+                            res->material = Core::GetSystem<EditorAssetImporter>().Get<Material>(path);
+							Core::GetSystem<EditorAssetImporter>().Save(res);
                         }
                     }
                     ImGui::Separator();

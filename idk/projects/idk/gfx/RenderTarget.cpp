@@ -42,7 +42,7 @@ namespace idk
 	RenderTarget::~RenderTarget()
 	{
 		for (auto& tex : Textures())
-			Core::GetResourceManager().Free(tex);
+			Core::GetResourceManager().Destroy(tex);
 	}
 	//Override and hide Saveable Dirty
 	void RenderTarget::Dirty() 

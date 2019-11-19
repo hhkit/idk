@@ -105,7 +105,6 @@
     <ClInclude Include="res\compiler\AssetImporter.h" />
     <ClInclude Include="res\compiler\CompiledAssetLoader.h" />
     <ClInclude Include="res\EasyFactory.h" />
-    <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
     <ClInclude Include="res\MetaBundle.h" />

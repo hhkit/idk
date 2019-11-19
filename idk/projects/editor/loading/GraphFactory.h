@@ -12,12 +12,4 @@ namespace idk
 		unique_ptr<Material> Create() override;
 		unique_ptr<Material> Create(PathHandle p) override;
 	};
-
-	class GraphLoader
-		: public IFileLoader
-	{
-	public:
-		ResourceBundle LoadFile(PathHandle p);
-		ResourceBundle LoadFile(PathHandle p, const MetaBundle& m);
-	};
 }

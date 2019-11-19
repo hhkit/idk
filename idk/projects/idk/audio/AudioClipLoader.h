@@ -8,15 +8,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include <res/FileLoader.h>
+#include <res/ResourceFactory.h>
+#include <res/EasyFactory.h>
 #include <audio/AudioClip.h>
 namespace idk
 {
-	class AudioClipLoader
-		: public IFileLoader
+	class AudioClipFactory
+		: public EasyFactory<AudioClip>
 	{
-
 	public:
-		ResourceBundle LoadFile(PathHandle filepath, const MetaBundle& metabundle) override;
+		unique_ptr<AudioClip> Create(PathHandle h) override;
 	};
 }

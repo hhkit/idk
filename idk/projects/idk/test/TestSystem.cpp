@@ -69,7 +69,7 @@ namespace idk
 		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
 			if (file.GetExtension() == ".tmpt")
 			{
-				for (auto& elem : Core::GetSystem<AssetImporter>().GetAll<shadergraph::Graph>())
+				for (auto& elem : Core::GetSystem<AssetImporter>().GetAll<shadergraph::Graph>(file))
 					elem->Compile();
 			}
 

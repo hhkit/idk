@@ -21,13 +21,9 @@
 
 
 namespace idk {
-	ResourceBundle AudioClipLoader::LoadFile(PathHandle filePath, const MetaBundle& metabundle)
+	unique_ptr<AudioClip> AudioClipFactory::Create(PathHandle filePath)
 	{
-		const auto meta = metabundle.FetchMeta<AudioClip>();
-
-		const auto newSound = meta 
-			? Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(meta->guid)
-			: Core::GetResourceManager().LoaderEmplaceResource<AudioClip>(); //Uses standard new alloc. Might need to change.
+		auto newSound = std::make_unique<AudioClip>(); //Uses standard new alloc. Might need to change.
 		auto& audioSystem = Core::GetSystem<AudioSystem>();
 		auto* CoreSystem = audioSystem._Core_System;
 
@@ -38,7 +34,7 @@ namespace idk {
 		}
 		catch (EXCEPTION_AudioSystem)
 		{
-			return ResourceBundle{};
+			return {};
 		}
 
 		//Retrieving Data Info for storage. This is a wrapper to store to the AudioClip for miscellaneous access.
@@ -50,8 +46,6 @@ namespace idk {
 
 		audioSystem.ParseFMOD_RESULT(newSound->_soundHandle->getFormat(&newSound->soundInfo.type, &newSound->soundInfo.format, &newSound->soundInfo.channels, &newSound->soundInfo.bits));
 
-		//Push to list for management.
-		//SoundList.push_back(newSound);
 
 		return newSound;
 	}

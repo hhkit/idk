@@ -168,7 +168,7 @@ namespace idk::ai_helpers
 		return ret_val;
 	}
 
-	vector<CompiledMesh> Scene::CompileMesh() const
+	CompiledMesh Scene::CompileMesh(const MeshData& mesh_buffers) const
 	{
 		auto mesh_data{ BuildMeshBuffers() };
 		vector<CompiledMesh> ret_val;

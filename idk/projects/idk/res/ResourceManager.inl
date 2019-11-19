@@ -27,7 +27,7 @@ namespace idk
 	}
 
 	template<typename Res>
-	inline bool ResourceManager::Free(const RscHandle<Res>& handle)
+	inline bool ResourceManager::Destroy(const RscHandle<Res>& handle)
 	{
 		auto& table = GetTable<Res>();
 		const auto itr = table.find(handle.guid);

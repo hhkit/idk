@@ -16,12 +16,8 @@ namespace idk
 		return std::make_unique<Scene>();
 	}
 
-	ResourceBundle SceneLoader::LoadFile(PathHandle, const MetaBundle& bundle)
+	unique_ptr<Scene> SceneFactory::Create(PathHandle h) noexcept
 	{
-
-		const auto meta = bundle.FetchMeta<Scene>();
-		return meta
-			? Core::GetResourceManager().LoaderEmplaceResource<Scene>(meta->guid) 
-			: Core::GetResourceManager().LoaderEmplaceResource<Scene>();
+		return std::make_unique<Scene>();
 	}
 }

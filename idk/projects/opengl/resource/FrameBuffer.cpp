@@ -22,7 +22,7 @@ namespace idk::ogl
 	void OpenGLRenderTarget::OnFinalize()
 	{
 		for (auto& elem : Textures())
-			Core::GetResourceManager().Free(elem);
+			Core::GetResourceManager().Destroy(elem);
 
 
 		for (auto& elem : Textures())

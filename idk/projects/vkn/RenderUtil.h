@@ -63,7 +63,7 @@ namespace idk::vkn
 			~UniqueVknFrameBuffer()
 			{
 				if (frame_buffer)
-					Core::GetResourceManager().Release(*frame_buffer);
+					Core::GetResourceManager().Destroy(*frame_buffer);
 			}
 		};
 

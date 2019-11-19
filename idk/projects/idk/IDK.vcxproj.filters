@@ -602,9 +602,6 @@
     <ClInclude Include="res\EasyFactory.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="res\FileLoader.h">
-      <Filter>res</Filter>
-    </ClInclude>
     <ClInclude Include="res\GenericResourceHandle.h">
       <Filter>res</Filter>
     </ClInclude>

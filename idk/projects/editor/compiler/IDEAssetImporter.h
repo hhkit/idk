@@ -15,9 +15,8 @@ namespace idk
 		void ExportCustomFiles();
 
 		/* FILE GET */
+		using AssetImporter::Get;
 		ResourceBundle Get(PathHandle path) override;
-		ResourceBundle Get(string_view mount_path) override;
-		template<typename T> RscHandle<T> Get(string_view mount_path);
 
 		/* FILE OPS */
 		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>> 

@@ -8,6 +8,8 @@
 #include <common/Transform.h>
 #include <IDE.h>
 #include <scene/SceneManager.h>
+#include <res/compiler/AssetImporter.h>
+#include <editor/compiler/IDEAssetImporter.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
 #include <script/ScriptSystem.h>
@@ -44,7 +46,7 @@ namespace idk
 		if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 		{
 			auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-			auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
+			auto scene_res = Core::GetSystem<AssetImporter>().Get<Scene>(virtual_path);
 			auto hnd = *scene_res;
 			auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 			if (hnd != active_scene)
@@ -84,8 +86,8 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			Core::GetResourceManager().Rename(curr_scene, p);
-			Core::GetResourceManager().Save(curr_scene);
+			Core::GetSystem<EditorAssetImporter>().Rename(curr_scene, p);
+			Core::GetSystem<EditorAssetImporter>().Save(curr_scene);
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
@@ -107,7 +109,7 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
+			auto res = Core::GetSystem<EditorAssetImporter>().CopyTo(curr_scene, p);
 			if (res)
 			{
 				curr_scene->Deactivate();
